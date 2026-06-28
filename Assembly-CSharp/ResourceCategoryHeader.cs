@@ -94,8 +94,9 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IPoin
 			{
 				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
 			}
+			return;
 		}
-		else if (!this.IsOpen)
+		if (!this.IsOpen)
 		{
 			if (play_sound)
 			{
@@ -132,23 +133,24 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IPoin
 		{
 			list = WorldInventory.Instance.GetPickupables(this.ResourceCategoryTag);
 		}
-		if (list != null)
+		if (list == null)
 		{
-			for (int i = 0; i < list.Count; i++)
+			return;
+		}
+		for (int i = 0; i < list.Count; i++)
+		{
+			if (!(list[i] == null))
 			{
-				if (!(list[i] == null))
+				KAnimControllerBase component = list[i].GetComponent<KAnimControllerBase>();
+				if (!(component == null))
 				{
-					KAnimControllerBase component = list[i].GetComponent<KAnimControllerBase>();
-					if (!(component == null))
+					if (is_hovering)
 					{
-						if (is_hovering)
-						{
-							component.HighlightColour = this.highlightColour;
-						}
-						else
-						{
-							component.HighlightColour = Color.black;
-						}
+						component.HighlightColour = this.highlightColour;
+					}
+					else
+					{
+						component.HighlightColour = Color.black;
 					}
 				}
 			}
@@ -257,7 +259,7 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IPoin
 
 	public Tag ResourceCategoryTag;
 
-	public bool IsOpen = false;
+	public bool IsOpen;
 
 	public ImageToggleState expandArrow;
 
@@ -271,9 +273,9 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IPoin
 
 	public Color TextColor_NonInteractable;
 
-	private string quantityString = null;
+	private string quantityString;
 
-	private float currentQuantity = 0f;
+	private float currentQuantity;
 
 	private ToolTip tooltip;
 
@@ -294,7 +296,7 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IPoin
 
 	public ResourceCategoryHeader.MeasureUnit measure;
 
-	private bool anyDiscovered = false;
+	private bool anyDiscovered;
 
 	public enum MeasureUnit
 	{

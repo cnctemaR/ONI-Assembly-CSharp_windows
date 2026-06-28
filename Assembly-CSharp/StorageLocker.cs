@@ -35,14 +35,16 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 	private void OnCopySettings(object data)
 	{
 		GameObject gameObject = (GameObject)data;
-		if (!(gameObject == null))
+		if (gameObject == null)
 		{
-			StorageLocker component = gameObject.GetComponent<StorageLocker>();
-			if (!(component == null))
-			{
-				this.UserMaxCapacity = component.UserMaxCapacity;
-			}
+			return;
 		}
+		StorageLocker component = gameObject.GetComponent<StorageLocker>();
+		if (component == null)
+		{
+			return;
+		}
+		this.UserMaxCapacity = component.UserMaxCapacity;
 	}
 
 	public float UserMaxCapacity

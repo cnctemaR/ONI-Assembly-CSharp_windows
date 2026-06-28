@@ -12,7 +12,7 @@ public class LineLayer : GraphLayer
 	public void NewLine(Vector2[] points, string ID = "")
 	{
 		GameObject gameObject = Util.KInstantiateUI(this.prefab_line, this.line_container, true);
-		if (ID == "")
+		if (ID == string.Empty)
 		{
 			ID = this.lines.Count.ToString();
 		}

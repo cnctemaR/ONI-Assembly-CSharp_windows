@@ -62,48 +62,49 @@ public class Diggable : Workable
 
 	private void OnSolidChanged(object data)
 	{
-		if (!(this == null) && !(base.gameObject == null))
+		if (this == null || base.gameObject == null)
 		{
-			if (this.unstableEntry != null)
-			{
-				this.unstableEntry.Release();
-			}
-			int num = Grid.PosToCell(this);
-			int num2 = -1;
-			this.UpdateColor(this.isReachable);
-			bool flag = false;
-			if (!Grid.Solid[num])
-			{
-				num2 = Diggable.GetUnstableCellAbove(num);
-				if (num2 == -1)
-				{
-					flag = true;
-				}
-				else
-				{
-					base.StartCoroutine("PeriodicUnstableFallingRecheck");
-				}
-			}
-			else if (Grid.Foundation[num])
+			return;
+		}
+		if (this.unstableEntry != null)
+		{
+			this.unstableEntry.Release();
+		}
+		int num = Grid.PosToCell(this);
+		int num2 = -1;
+		this.UpdateColor(this.isReachable);
+		bool flag = false;
+		if (!Grid.Solid[num])
+		{
+			num2 = Diggable.GetUnstableCellAbove(num);
+			if (num2 == -1)
 			{
 				flag = true;
 			}
-			if (flag)
+			else
 			{
-				if (base.worker != null)
-				{
-					base.Trigger(963113026, base.worker.gameObject);
-				}
-				Util.KDestroyGameObject(base.gameObject);
+				base.StartCoroutine("PeriodicUnstableFallingRecheck");
 			}
-			else if (num2 != -1)
+		}
+		else if (Grid.Foundation[num])
+		{
+			flag = true;
+		}
+		if (flag)
+		{
+			if (base.worker != null)
 			{
-				Extents extents = default(Extents);
-				Grid.CellToXY(num, out extents.x, out extents.y);
-				extents.width = 1;
-				extents.height = (num2 - num + Grid.WidthInCells - 1) / Grid.WidthInCells + 1;
-				this.unstableEntry = GameScenePartitioner.Instance.Add("Diggable.OnSolidChanged", base.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
+				base.Trigger(963113026, base.worker.gameObject);
 			}
+			Util.KDestroyGameObject(base.gameObject);
+		}
+		else if (num2 != -1)
+		{
+			Extents extents = default(Extents);
+			Grid.CellToXY(num, out extents.x, out extents.y);
+			extents.width = 1;
+			extents.height = (num2 - num + Grid.WidthInCells - 1) / Grid.WidthInCells + 1;
+			this.unstableEntry = GameScenePartitioner.Instance.Add("Diggable.OnSolidChanged", base.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		}
 	}
 
@@ -124,23 +125,18 @@ public class Diggable : Workable
 	{
 		int num = Grid.PosToCell(this);
 		float num2 = (float)Grid.Element[num].hardness;
-		bool flag;
 		if (num2 == 255f)
 		{
-			flag = false;
+			return false;
 		}
-		else
-		{
-			Element element = ElementLoader.FindElementByHash(SimHashes.Ice);
-			float num3 = num2 / (float)element.hardness;
-			float num4 = Mathf.Min(Grid.Cell[num].mass, 400f) / 400f;
-			float num5 = 4f * num4;
-			float num6 = num5 + num3 * num5;
-			float num7 = dt / num6;
-			WorldDamage.Instance.ApplyDamage(num, num7, -1, -1);
-			flag = false;
-		}
-		return flag;
+		Element element = ElementLoader.FindElementByHash(SimHashes.Ice);
+		float num3 = num2 / (float)element.hardness;
+		float num4 = Mathf.Min(Grid.Cell[num].mass, 400f) / 400f;
+		float num5 = 4f * num4;
+		float num6 = num5 + num3 * num5;
+		float num7 = dt / num6;
+		WorldDamage.Instance.ApplyDamage(num, num7, -1, -1);
+		return false;
 	}
 
 	public override Workable.AnimInfo GetAnim(Worker worker)
@@ -153,30 +149,20 @@ public class Diggable : Workable
 	public static Diggable GetDiggable(int cell)
 	{
 		GameObject gameObject = Grid.Objects[cell, 7];
-		Diggable diggable;
 		if (gameObject != null)
 		{
-			diggable = gameObject.GetComponent<Diggable>();
+			return gameObject.GetComponent<Diggable>();
 		}
-		else
-		{
-			diggable = null;
-		}
-		return diggable;
+		return null;
 	}
 
 	public static bool IsDiggable(int cell)
 	{
-		bool flag;
 		if (Grid.Solid[cell])
 		{
-			flag = !Grid.Foundation[cell];
+			return !Grid.Foundation[cell];
 		}
-		else
-		{
-			flag = Diggable.GetUnstableCellAbove(cell) != Grid.InvalidCell;
-		}
-		return flag;
+		return Diggable.GetUnstableCellAbove(cell) != Grid.InvalidCell;
 	}
 
 	private static int GetUnstableCellAbove(int cell)
@@ -184,40 +170,35 @@ public class Diggable : Workable
 		Vector2I vector2I = Grid.CellToXY(cell);
 		UnstableGroundManager component = World.Instance.GetComponent<UnstableGroundManager>();
 		List<int> cellsContainingFallingAbove = component.GetCellsContainingFallingAbove(vector2I);
-		int num;
 		if (cellsContainingFallingAbove.Contains(cell))
 		{
-			num = cell;
+			return cell;
 		}
-		else
+		int num = Grid.CellAbove(cell);
+		while (Grid.IsValidCell(num))
 		{
-			int num2 = Grid.CellAbove(cell);
-			while (Grid.IsValidCell(num2))
+			if (Grid.Foundation[num])
 			{
-				if (Grid.Foundation[num2])
-				{
-					return Grid.InvalidCell;
-				}
-				if (Grid.Solid[num2])
-				{
-					if (Grid.Element[num2].IsUnstable)
-					{
-						return num2;
-					}
-					return Grid.InvalidCell;
-				}
-				else
-				{
-					if (cellsContainingFallingAbove.Contains(num2))
-					{
-						return num2;
-					}
-					num2 = Grid.CellAbove(num2);
-				}
+				return Grid.InvalidCell;
 			}
-			num = Grid.InvalidCell;
+			if (Grid.Solid[num])
+			{
+				if (Grid.Element[num].IsUnstable)
+				{
+					return num;
+				}
+				return Grid.InvalidCell;
+			}
+			else
+			{
+				if (cellsContainingFallingAbove.Contains(num))
+				{
+					return num;
+				}
+				num = Grid.CellAbove(num);
+			}
 		}
-		return num;
+		return Grid.InvalidCell;
 	}
 
 	public static bool RequiresTool(Element e)
@@ -238,21 +219,22 @@ public class Diggable : Workable
 		}
 		Material material = this.childRenderer.material;
 		this.isReachable = (bool)data;
-		if (!(material.color == Game.Instance.uiColours.Dig.invalidLocation))
+		if (material.color == Game.Instance.uiColours.Dig.invalidLocation)
 		{
-			this.UpdateColor(this.isReachable);
-			if (this.isReachable)
+			return;
+		}
+		this.UpdateColor(this.isReachable);
+		if (this.isReachable)
+		{
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.DigUnreachable, false);
+		}
+		else
+		{
+			this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.DigUnreachable, this);
+			GameScheduler.Instance.Schedule("Locomotion Tutorial", 2f, delegate(object obj)
 			{
-				this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.DigUnreachable, false);
-			}
-			else
-			{
-				this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.DigUnreachable, this);
-				GameScheduler.Instance.Schedule("Locomotion Tutorial", 2f, delegate(object obj)
-				{
-					Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Locomotion);
-				}, null, null);
-			}
+				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Locomotion);
+			}, null, null);
 		}
 	}
 
@@ -264,8 +246,9 @@ public class Diggable : Workable
 			if (Diggable.RequiresTool(Grid.Element[Grid.PosToCell(base.gameObject)]) || Diggable.Undiggable(Grid.Element[Grid.PosToCell(base.gameObject)]))
 			{
 				material.color = Game.Instance.uiColours.Dig.invalidLocation;
+				return;
 			}
-			else if (Grid.Element[Grid.PosToCell(base.gameObject)].hardness >= 150)
+			if (Grid.Element[Grid.PosToCell(base.gameObject)].hardness >= 150)
 			{
 				if (reachable)
 				{

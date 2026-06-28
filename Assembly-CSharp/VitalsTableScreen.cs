@@ -35,7 +35,7 @@ public class VitalsTableScreen : TableScreen
 		}
 		else if (widgetRow.isDefault)
 		{
-			componentInChildren.text = "";
+			componentInChildren.text = string.Empty;
 		}
 		else
 		{
@@ -52,20 +52,15 @@ public class VitalsTableScreen : TableScreen
 	{
 		float value = Db.Get().Amounts.Stress.Lookup(a).value;
 		float value2 = Db.Get().Amounts.Stress.Lookup(b).value;
-		int num;
 		if (value > value2)
 		{
-			num = -1;
+			return -1;
 		}
-		else if (value < value2)
+		if (value < value2)
 		{
-			num = 1;
+			return 1;
 		}
-		else
-		{
-			num = 0;
-		}
-		return num;
+		return 0;
 	}
 
 	protected void on_tooltip_stress(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
@@ -119,7 +114,7 @@ public class VitalsTableScreen : TableScreen
 		}
 		else if (widgetRow.isDefault)
 		{
-			componentInChildren.text = "";
+			componentInChildren.text = string.Empty;
 		}
 		else
 		{
@@ -136,20 +131,15 @@ public class VitalsTableScreen : TableScreen
 	{
 		float value = Db.Get().Amounts.HitPoints.Lookup(a).value;
 		float value2 = Db.Get().Amounts.HitPoints.Lookup(b).value;
-		int num;
 		if (value > value2)
 		{
-			num = -1;
+			return -1;
 		}
-		else if (value < value2)
+		if (value < value2)
 		{
-			num = 1;
+			return 1;
 		}
-		else
-		{
-			num = 0;
-		}
-		return num;
+		return 0;
 	}
 
 	protected void on_tooltip_health(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
@@ -203,7 +193,7 @@ public class VitalsTableScreen : TableScreen
 		}
 		else if (widgetRow.isDefault)
 		{
-			componentInChildren.text = "";
+			componentInChildren.text = string.Empty;
 		}
 		else
 		{
@@ -214,10 +204,9 @@ public class VitalsTableScreen : TableScreen
 	private string get_value_immunity_label(MinionIdentity minion, GameObject widget_go)
 	{
 		Diseases diseases = minion.GetComponent<MinionModifiers>().diseases;
-		string text2;
 		if (diseases.IsInfected())
 		{
-			string text = "";
+			string text = string.Empty;
 			if (diseases.Count > 1)
 			{
 				float num = 0f;
@@ -238,33 +227,24 @@ public class VitalsTableScreen : TableScreen
 					text += string.Format(UI.VITALSSCREEN.IMMUNITY_DISEASE, diseaseInstance2.modifier.Name, GameUtil.GetFormattedCycles(diseaseInstance2.GetInfectedTimeRemaining(), "F1"));
 				}
 			}
-			text2 = text;
+			return text;
 		}
-		else
-		{
-			text2 = Db.Get().Amounts.ImmuneLevel.Lookup(minion).GetValueString();
-		}
-		return text2;
+		return Db.Get().Amounts.ImmuneLevel.Lookup(minion).GetValueString();
 	}
 
 	private int compare_rows_immunity(MinionIdentity a, MinionIdentity b)
 	{
 		float value = Db.Get().Amounts.ImmuneLevel.Lookup(a).value;
 		float value2 = Db.Get().Amounts.ImmuneLevel.Lookup(b).value;
-		int num;
 		if (value > value2)
 		{
-			num = -1;
+			return -1;
 		}
-		else if (value < value2)
+		if (value < value2)
 		{
-			num = 1;
+			return 1;
 		}
-		else
-		{
-			num = 0;
-		}
-		return num;
+		return 0;
 	}
 
 	protected void on_tooltip_immunity(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
@@ -332,7 +312,7 @@ public class VitalsTableScreen : TableScreen
 		}
 		else if (widgetRow.isDefault)
 		{
-			componentInChildren.text = "";
+			componentInChildren.text = string.Empty;
 		}
 		else
 		{
@@ -349,20 +329,15 @@ public class VitalsTableScreen : TableScreen
 	{
 		float value = Db.Get().Amounts.Calories.Lookup(a).value;
 		float value2 = Db.Get().Amounts.Calories.Lookup(b).value;
-		int num;
 		if (value > value2)
 		{
-			num = -1;
+			return -1;
 		}
-		else if (value < value2)
+		if (value < value2)
 		{
-			num = 1;
+			return 1;
 		}
-		else
-		{
-			num = 0;
-		}
-		return num;
+		return 0;
 	}
 
 	protected void on_tooltip_fullness(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
@@ -436,7 +411,7 @@ public class VitalsTableScreen : TableScreen
 		}
 		else if (widgetRow.isDefault)
 		{
-			componentInChildren.text = "";
+			componentInChildren.text = string.Empty;
 		}
 		else
 		{
@@ -453,20 +428,15 @@ public class VitalsTableScreen : TableScreen
 	{
 		float rationsAteToday = a.GetSMI<RationMonitor.Instance>().GetRationsAteToday();
 		float rationsAteToday2 = b.GetSMI<RationMonitor.Instance>().GetRationsAteToday();
-		int num;
 		if (rationsAteToday > rationsAteToday2)
 		{
-			num = -1;
+			return -1;
 		}
-		else if (rationsAteToday < rationsAteToday2)
+		if (rationsAteToday < rationsAteToday2)
 		{
-			num = 1;
+			return 1;
 		}
-		else
-		{
-			num = 0;
-		}
-		return num;
+		return 0;
 	}
 
 	protected void on_tooltip_eaten_today(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)

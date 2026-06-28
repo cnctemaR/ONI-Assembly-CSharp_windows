@@ -42,7 +42,7 @@ public class PrickleFlowerConfig : IEntityConfig
 		int num2 = 0;
 		List<Tag> list = new List<Tag> { GameTags.CropSeed };
 		text = global::STRINGS.CREATURES.SPECIES.PRICKLEFLOWER.DOMESTICATEDDESC;
-		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text3, text2, kanimFile, "object", num2, list, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 2, text, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "");
+		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text3, text2, kanimFile, "object", num2, list, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 2, text, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, string.Empty);
 		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "PrickleFlower_preview", Assets.GetAnim("bristleblossom_kanim"), "place", 1, 2);
 		SoundEventVolumeCache.instance.AddVolume("bristleblossom_kanim", "PrickleFlower_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("bristleblossom_kanim", "PrickleFlower_grow", NOISE_POLLUTION.CREATURES.TIER3);

@@ -66,18 +66,13 @@ public class HandleVector<T>
 
 	public virtual T Release(HandleVector<T>.Handle handle)
 	{
-		T t;
 		if (!handle.IsValid())
 		{
-			t = default(T);
+			return default(T);
 		}
-		else
-		{
-			this.freeHandles.Push(handle);
-			T t2 = this.items[handle.index];
-			this.items[handle.index] = default(T);
-			t = t2;
-		}
+		this.freeHandles.Push(handle);
+		T t = this.items[handle.index];
+		this.items[handle.index] = default(T);
 		return t;
 	}
 
@@ -110,20 +105,15 @@ public class HandleVector<T>
 
 		public int CompareTo(HandleVector<T>.Handle obj)
 		{
-			int num;
 			if (this.index < obj.index)
 			{
-				num = -1;
+				return -1;
 			}
-			else if (this.index > obj.index)
+			if (this.index > obj.index)
 			{
-				num = 1;
+				return 1;
 			}
-			else
-			{
-				num = 0;
-			}
-			return num;
+			return 0;
 		}
 
 		public override bool Equals(object obj)

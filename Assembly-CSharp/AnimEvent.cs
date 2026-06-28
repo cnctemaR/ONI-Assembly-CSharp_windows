@@ -10,7 +10,7 @@ public class AnimEvent
 
 	public AnimEvent(string file, string name, int frame)
 	{
-		this.file = ((!(file == "")) ? file : null);
+		this.file = ((!(file == string.Empty)) ? file : null);
 		if (this.file != null)
 		{
 			this.fileHash = new KAnimHashedString(this.file);
@@ -30,22 +30,20 @@ public class AnimEvent
 
 	public void Play(AnimEventManager.EventPlayerData behaviour)
 	{
-		if (!this.IsFilteredOut(behaviour))
+		if (this.IsFilteredOut(behaviour))
 		{
-			if (behaviour.previousFrame < behaviour.currentFrame)
+			return;
+		}
+		if (behaviour.previousFrame < behaviour.currentFrame)
+		{
+			if (behaviour.previousFrame < this.frame && behaviour.currentFrame >= this.frame)
 			{
-				if (behaviour.previousFrame < this.frame && behaviour.currentFrame >= this.frame)
-				{
-					this.OnPlay(behaviour);
-				}
+				this.OnPlay(behaviour);
 			}
-			else if (behaviour.previousFrame > behaviour.currentFrame)
-			{
-				if (behaviour.previousFrame < this.frame || this.frame <= behaviour.currentFrame)
-				{
-					this.OnPlay(behaviour);
-				}
-			}
+		}
+		else if (behaviour.previousFrame > behaviour.currentFrame && (behaviour.previousFrame < this.frame || this.frame <= behaviour.currentFrame))
+		{
+			this.OnPlay(behaviour);
 		}
 	}
 

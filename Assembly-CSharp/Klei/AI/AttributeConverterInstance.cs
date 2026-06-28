@@ -33,18 +33,12 @@ namespace Klei.AI
 			{
 				text = GameUtil.GetFormattedSimple(num, GameUtil.TimeSlice.None, null);
 			}
-			string text3;
 			if (text != null)
 			{
 				text = GameUtil.AddPositiveSign(text, num > 0f);
-				string text2 = string.Format(this.converter.description, text);
-				text3 = text2;
+				return string.Format(this.converter.description, text);
 			}
-			else
-			{
-				text3 = null;
-			}
-			return text3;
+			return null;
 		}
 
 		public AttributeConverter converter;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using FMOD.Studio;
 using STRINGS;
@@ -61,14 +60,13 @@ public class PlanScreen : KIconToggleMenu
 			int num = 0;
 			this.tagCategoryMap = new Dictionary<Tag, PlanScreen.PlanCategory>();
 			this.tagOrderMap = new Dictionary<Tag, int>();
-			global::System.Diagnostics.Debug.Assert(global::TUNING.BUILDINGS.PLANORDER.Length < 12, "Insufficient keys to cover root plan menu", "Max of 12 keys supported but TUNING.BUILDINGS.PLANORDER has " + global::TUNING.BUILDINGS.PLANORDER.Length);
 			for (int i = 0; i < global::TUNING.BUILDINGS.PLANORDER.Length; i++)
 			{
 				PlanScreen.PlanInfo planInfo = global::TUNING.BUILDINGS.PLANORDER[i];
 				global::Action action = global::Action.Plan1 + i;
 				string text = this.iconNameMap[planInfo.category];
 				string text2 = planInfo.category.ToString().ToUpper();
-				KIconToggleMenu.ToggleInfo toggleInfo = new KIconToggleMenu.ToggleInfo(Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2 + ".NAME"), text, planInfo.category, action, Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2 + ".TOOLTIP"), "");
+				KIconToggleMenu.ToggleInfo toggleInfo = new KIconToggleMenu.ToggleInfo(Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2 + ".NAME"), text, planInfo.category, action, Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2 + ".TOOLTIP"), string.Empty);
 				list.Add(toggleInfo);
 				PlanScreen.PopulateOrderInfo(planInfo.category, planInfo.data, this.tagCategoryMap, this.tagOrderMap, ref num);
 			}
@@ -135,116 +133,116 @@ public class PlanScreen : KIconToggleMenu
 		if (button_go == null)
 		{
 			Output.LogWithObj(base.gameObject, new object[] { "Button gameObject is null" });
+			return;
 		}
-		else if (button_go == this.selectedBuildingGameObject)
+		if (button_go == this.selectedBuildingGameObject)
 		{
 			this.CloseRecipe(true);
+			return;
 		}
-		else
-		{
-			this.ignoreToolChangeMessages++;
-			this.selectedBuildingGameObject = button_go;
-			this.currentlySelectedToggle = button_go.GetComponent<KToggle>();
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
-			this.productInfoScreen.ClearProduct(false);
-			ToolMenu.Instance.ClearSelection();
-			PrebuildTool.Instance.Activate(def, this.BuildableState(def));
-			this.productInfoScreen.Show(true);
-			this.productInfoScreen.ConfigureScreen(def);
-			this.ignoreToolChangeMessages--;
-		}
+		this.ignoreToolChangeMessages++;
+		this.selectedBuildingGameObject = button_go;
+		this.currentlySelectedToggle = button_go.GetComponent<KToggle>();
+		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
+		this.productInfoScreen.ClearProduct(false);
+		ToolMenu.Instance.ClearSelection();
+		PrebuildTool.Instance.Activate(def, this.BuildableState(def));
+		this.productInfoScreen.Show(true);
+		this.productInfoScreen.ConfigureScreen(def);
+		this.ignoreToolChangeMessages--;
 	}
 
 	private void GetBuildableStates(bool force_update)
 	{
-		if (Assets.BuildingDefs != null && Assets.BuildingDefs.Length != 0)
+		if (Assets.BuildingDefs == null || Assets.BuildingDefs.Length == 0)
 		{
-			if (this.timeSinceNotificationPing < this.specialNotificationEmbellishDelay)
+			return;
+		}
+		if (this.timeSinceNotificationPing < this.specialNotificationEmbellishDelay)
+		{
+			this.timeSinceNotificationPing += Time.unscaledDeltaTime;
+		}
+		if (this.timeSinceNotificationPing >= this.notificationPingExpire)
+		{
+			this.notificationPingCount = 0;
+		}
+		int num = 10;
+		if (force_update)
+		{
+			num = Assets.BuildingDefs.Length;
+			this.buildable_state_update_idx = 0;
+		}
+		List<PlanScreen.PlanCategory> list = new List<PlanScreen.PlanCategory>();
+		for (int i = 0; i < num; i++)
+		{
+			this.buildable_state_update_idx = (this.buildable_state_update_idx + 1) % Assets.BuildingDefs.Length;
+			BuildingDef buildingDef = Assets.BuildingDefs[this.buildable_state_update_idx];
+			if (!buildingDef.Deprecated)
 			{
-				this.timeSinceNotificationPing += Time.unscaledDeltaTime;
-			}
-			if (this.timeSinceNotificationPing >= this.notificationPingExpire)
-			{
-				this.notificationPingCount = 0;
-			}
-			int num = 10;
-			if (force_update)
-			{
-				num = Assets.BuildingDefs.Length;
-				this.buildable_state_update_idx = 0;
-			}
-			List<PlanScreen.PlanCategory> list = new List<PlanScreen.PlanCategory>();
-			for (int i = 0; i < num; i++)
-			{
-				this.buildable_state_update_idx = (this.buildable_state_update_idx + 1) % Assets.BuildingDefs.Length;
-				BuildingDef buildingDef = Assets.BuildingDefs[this.buildable_state_update_idx];
-				if (!buildingDef.Deprecated)
+				PlanScreen.PlanCategory planCategory;
+				if (this.tagCategoryMap.TryGetValue(buildingDef.Tag, out planCategory))
 				{
-					PlanScreen.PlanCategory planCategory;
-					if (this.tagCategoryMap.TryGetValue(buildingDef.Tag, out planCategory))
+					PlanScreen.RequirementsState requirementsState = PlanScreen.RequirementsState.Complete;
+					if (!DebugHandler.InstantBuildMode)
 					{
-						PlanScreen.RequirementsState requirementsState = PlanScreen.RequirementsState.Complete;
-						if (!DebugHandler.InstantBuildMode)
+						if (!Db.Get().TechItems.IsTechItemComplete(buildingDef.PrefabID))
 						{
-							if (!Db.Get().TechItems.IsTechItemComplete(buildingDef.PrefabID))
-							{
-								requirementsState = PlanScreen.RequirementsState.Tech;
-							}
-							else if (!ProductInfoScreen.MaterialsMet(buildingDef.CraftRecipe))
-							{
-								requirementsState = PlanScreen.RequirementsState.Materials;
-							}
+							requirementsState = PlanScreen.RequirementsState.Tech;
 						}
-						if (!this.buildableDefs.ContainsKey(buildingDef))
+						else if (!ProductInfoScreen.MaterialsMet(buildingDef.CraftRecipe))
 						{
-							this.buildableDefs.Add(buildingDef, requirementsState);
+							requirementsState = PlanScreen.RequirementsState.Materials;
 						}
-						else if (this.buildableDefs[buildingDef] != requirementsState)
+					}
+					if (!this.buildableDefs.ContainsKey(buildingDef))
+					{
+						this.buildableDefs.Add(buildingDef, requirementsState);
+					}
+					else if (this.buildableDefs[buildingDef] != requirementsState)
+					{
+						this.buildableDefs[buildingDef] = requirementsState;
+						if (this.productInfoScreen.currentDef == buildingDef)
 						{
-							this.buildableDefs[buildingDef] = requirementsState;
-							if (this.productInfoScreen.currentDef == buildingDef)
+							this.ignoreToolChangeMessages++;
+							this.productInfoScreen.ClearProduct(false);
+							this.productInfoScreen.Show(true);
+							this.productInfoScreen.ConfigureScreen(buildingDef);
+							this.ignoreToolChangeMessages--;
+						}
+						if (requirementsState == PlanScreen.RequirementsState.Complete)
+						{
+							foreach (KIconToggleMenu.ToggleInfo toggleInfo in this.toggleInfo)
 							{
-								this.ignoreToolChangeMessages++;
-								this.productInfoScreen.ClearProduct(false);
-								this.productInfoScreen.Show(true);
-								this.productInfoScreen.ConfigureScreen(buildingDef);
-								this.ignoreToolChangeMessages--;
-							}
-							if (requirementsState == PlanScreen.RequirementsState.Complete)
-							{
-								foreach (KIconToggleMenu.ToggleInfo toggleInfo in this.toggleInfo)
+								PlanScreen.PlanCategory planCategory2 = (PlanScreen.PlanCategory)toggleInfo.userData;
+								if (planCategory2 == planCategory)
 								{
-									PlanScreen.PlanCategory planCategory2 = (PlanScreen.PlanCategory)toggleInfo.userData;
-									if (planCategory2 == planCategory)
+									string text = "NotificationPing";
+									Animator component = toggleInfo.toggle.GetComponent<Animator>();
+									if (!component.GetCurrentAnimatorStateInfo(0).IsTag(text) && !list.Contains(planCategory))
 									{
-										string text = "NotificationPing";
-										Animator component = toggleInfo.toggle.GetComponent<Animator>();
-										if (!component.GetCurrentAnimatorStateInfo(0).IsTag(text) && !list.Contains(planCategory))
+										list.Add(planCategory);
+										toggleInfo.toggle.gameObject.GetComponent<Animator>().Play(text);
+										if (KTime.Instance.UnscaledGameTime - this.initTime > 1.5f)
 										{
-											list.Add(planCategory);
-											toggleInfo.toggle.gameObject.GetComponent<Animator>().Play(text);
-											if (KTime.Instance.UnscaledGameTime - this.initTime > 1.5f)
+											if (this.timeSinceNotificationPing >= this.specialNotificationEmbellishDelay)
 											{
-												if (this.timeSinceNotificationPing >= this.specialNotificationEmbellishDelay)
+												string sound = GlobalAssets.GetSound("NewBuildable_Embellishment", false);
+												if (sound != null)
 												{
-													string sound = GlobalAssets.GetSound("NewBuildable_Embellishment", false);
-													if (sound != null)
-													{
-														FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, SoundListenerController.Instance.transform.position);
-														SoundEvent.EndOneShot(eventInstance);
-													}
-												}
-												string sound2 = GlobalAssets.GetSound("NewBuildable", false);
-												if (sound2 != null)
-												{
-													FMOD.Studio.EventInstance eventInstance2 = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.position);
-													eventInstance2.setParameterValue("playCount", (float)this.notificationPingCount);
-													SoundEvent.EndOneShot(eventInstance2);
+													EventInstance eventInstance = SoundEvent.BeginOneShot(sound, SoundListenerController.Instance.transform.position);
+													SoundEvent.EndOneShot(eventInstance);
 												}
 											}
-											this.timeSinceNotificationPing = 0f;
-											this.notificationPingCount++;
+											string sound2 = GlobalAssets.GetSound("NewBuildable", false);
+											if (sound2 != null)
+											{
+												EventInstance eventInstance2 = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.position);
+												eventInstance2.setParameterValue("playCount", (float)this.notificationPingCount);
+												SoundEvent.EndOneShot(eventInstance2);
+											}
 										}
+										this.timeSinceNotificationPing = 0f;
+										this.notificationPingCount++;
 									}
 								}
 							}
@@ -365,7 +363,7 @@ public class PlanScreen : KIconToggleMenu
 			this.ClearButtons();
 			this.buildingGroupsRoot.gameObject.SetActive(false);
 		});
-		this.PlanCategoryLabel.text = "";
+		this.PlanCategoryLabel.text = string.Empty;
 	}
 
 	private void OnClickCategory(KIconToggleMenu.ToggleInfo toggle_info)
@@ -375,27 +373,25 @@ public class PlanScreen : KIconToggleMenu
 		{
 			this.CloseCategoryPanel(false);
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
+			return;
+		}
+		PlanScreen.PlanCategory planCategory = (PlanScreen.PlanCategory)toggle_info.userData;
+		if (this.activeCategoryInfo == toggle_info)
+		{
+			this.CloseCategoryPanel(true);
 		}
 		else
 		{
-			PlanScreen.PlanCategory planCategory = (PlanScreen.PlanCategory)toggle_info.userData;
-			if (this.activeCategoryInfo == toggle_info)
-			{
-				this.CloseCategoryPanel(true);
-			}
-			else
-			{
-				this.ClearButtons();
-				this.buildingGroupsRoot.gameObject.SetActive(true);
-				this.activeCategoryInfo = toggle_info;
-				UISounds.PlaySound(UISounds.Sound.ClickObject);
-				this.BuildButtonList(planCategory, this.GroupsTransform.gameObject);
-				this.PlanCategoryLabel.text = this.activeCategoryInfo.text.ToUpper();
-				this.buildingGroupsRoot.GetComponent<ExpandRevealUIContent>().Expand(null);
-			}
-			this.ConfigurePanelSize();
-			this.SetScrollPoint(0f);
+			this.ClearButtons();
+			this.buildingGroupsRoot.gameObject.SetActive(true);
+			this.activeCategoryInfo = toggle_info;
+			UISounds.PlaySound(UISounds.Sound.ClickObject);
+			this.BuildButtonList(planCategory, this.GroupsTransform.gameObject);
+			this.PlanCategoryLabel.text = this.activeCategoryInfo.text.ToUpper();
+			this.buildingGroupsRoot.GetComponent<ExpandRevealUIContent>().Expand(null);
 		}
+		this.ConfigurePanelSize();
+		this.SetScrollPoint(0f);
 	}
 
 	private void UpdateBuildingButtonList(KIconToggleMenu.ToggleInfo toggle_info)
@@ -412,20 +408,17 @@ public class PlanScreen : KIconToggleMenu
 			}
 		}
 		int num = 2;
-		if (ktoggle != null)
+		if (ktoggle != null && this.ActiveToggles.Count != 0)
 		{
-			if (this.ActiveToggles.Count != 0)
+			ktoggle.gameObject.GetComponent<PlanCategoryNotifications>().ToggleAttention(false);
+			for (int i = 0; i < num; i++)
 			{
-				ktoggle.gameObject.GetComponent<PlanCategoryNotifications>().ToggleAttention(false);
-				for (int i = 0; i < num; i++)
+				if (this.building_button_refresh_idx >= this.ActiveToggles.Count)
 				{
-					if (this.building_button_refresh_idx >= this.ActiveToggles.Count)
-					{
-						this.building_button_refresh_idx = 0;
-					}
-					this.RefreshBuildingButton(this.ActiveToggles.ElementAt<KeyValuePair<BuildingDef, KToggle>>(this.building_button_refresh_idx).Key, this.ActiveToggles.ElementAt<KeyValuePair<BuildingDef, KToggle>>(this.building_button_refresh_idx).Value);
-					this.building_button_refresh_idx++;
+					this.building_button_refresh_idx = 0;
 				}
+				this.RefreshBuildingButton(this.ActiveToggles.ElementAt<KeyValuePair<BuildingDef, KToggle>>(this.building_button_refresh_idx).Key, this.ActiveToggles.ElementAt<KeyValuePair<BuildingDef, KToggle>>(this.building_button_refresh_idx).Value);
+				this.building_button_refresh_idx++;
 			}
 		}
 		if (this.productInfoScreen.gameObject.activeSelf)
@@ -503,106 +496,109 @@ public class PlanScreen : KIconToggleMenu
 
 	public void RefreshBuildingButton(BuildingDef def, KToggle toggle)
 	{
-		if (!(toggle == null))
+		if (toggle == null)
 		{
-			TechItem techItem = Db.Get().TechItems.TryGet(def.PrefabID);
-			bool flag = DebugHandler.InstantBuildMode || techItem == null || techItem.IsComplete();
-			bool flag2 = flag || techItem == null || techItem.parentTech.ArePrerequisitesComplete();
-			if (toggle.gameObject.activeSelf != flag2)
+			return;
+		}
+		TechItem techItem = Db.Get().TechItems.TryGet(def.PrefabID);
+		bool flag = DebugHandler.InstantBuildMode || techItem == null || techItem.IsComplete();
+		bool flag2 = flag || techItem == null || techItem.parentTech.ArePrerequisitesComplete();
+		if (toggle.gameObject.activeSelf != flag2)
+		{
+			toggle.gameObject.SetActive(flag2);
+			this.ConfigurePanelSize();
+			this.SetScrollPoint(0f);
+		}
+		if (!toggle.gameObject.activeInHierarchy)
+		{
+			return;
+		}
+		if (toggle.bgImage == null)
+		{
+			return;
+		}
+		Image image = toggle.bgImage.GetComponentsInChildren<Image>()[1];
+		Sprite uisprite = def.GetUISprite("ui");
+		if (uisprite == null)
+		{
+			uisprite = this.defaultBuildingIconSprite;
+		}
+		image.sprite = uisprite;
+		image.SetNativeSize();
+		image.rectTransform().sizeDelta /= 4f;
+		ToolTip component = toggle.gameObject.GetComponent<ToolTip>();
+		this.PositionTooltip(toggle, component);
+		component.ClearMultiStringTooltip();
+		string name = def.Name;
+		string effect = def.Effect;
+		component.AddMultiStringTooltip(name, this.buildingToolTipSettings.BuildButtonName);
+		component.AddMultiStringTooltip(effect, this.buildingToolTipSettings.BuildButtonDescription);
+		LocText componentInChildren = toggle.GetComponentInChildren<LocText>();
+		if (componentInChildren != null)
+		{
+			componentInChildren.text = def.Name;
+		}
+		int num = ((this.BuildableState(def) != PlanScreen.RequirementsState.Complete) ? 0 : 1);
+		ImageToggleState.State state;
+		if (toggle.gameObject == this.selectedBuildingGameObject && (this.BuildableState(def) == PlanScreen.RequirementsState.Complete || DebugHandler.InstantBuildMode))
+		{
+			state = ImageToggleState.State.Active;
+		}
+		else
+		{
+			state = ((this.BuildableState(def) != PlanScreen.RequirementsState.Complete && !DebugHandler.InstantBuildMode) ? ImageToggleState.State.Disabled : ImageToggleState.State.Inactive);
+		}
+		if (toggle.gameObject == this.selectedBuildingGameObject && state == ImageToggleState.State.Disabled)
+		{
+			state = ImageToggleState.State.DisabledActive;
+		}
+		else if (state == ImageToggleState.State.Disabled)
+		{
+			state = ImageToggleState.State.Disabled;
+		}
+		toggle.GetComponent<ImageToggleState>().SetState(state);
+		Material material = ((this.BuildableState(def) != PlanScreen.RequirementsState.Complete && !DebugHandler.InstantBuildMode) ? this.desaturatedUIMaterial : this.defaultUIMaterial);
+		if (image.material != material)
+		{
+			image.material = material;
+			if (material == this.desaturatedUIMaterial)
 			{
-				toggle.gameObject.SetActive(flag2);
-				this.ConfigurePanelSize();
-				this.SetScrollPoint(0f);
-			}
-			if (toggle.gameObject.activeInHierarchy)
-			{
-				if (!(toggle.bgImage == null))
+				if (flag)
 				{
-					Image image = toggle.bgImage.GetComponentsInChildren<Image>()[1];
-					Sprite uisprite = def.GetUISprite("ui");
-					if (uisprite == null)
-					{
-						uisprite = this.defaultBuildingIconSprite;
-					}
-					image.sprite = uisprite;
-					image.SetNativeSize();
-					image.rectTransform().sizeDelta /= 4f;
-					ToolTip component = toggle.gameObject.GetComponent<ToolTip>();
-					this.PositionTooltip(toggle, component);
-					component.ClearMultiStringTooltip();
-					string name = def.Name;
-					string effect = def.Effect;
-					component.AddMultiStringTooltip(name, this.buildingToolTipSettings.BuildButtonName);
-					component.AddMultiStringTooltip(effect, this.buildingToolTipSettings.BuildButtonDescription);
-					LocText componentInChildren = toggle.GetComponentInChildren<LocText>();
-					if (componentInChildren != null)
-					{
-						componentInChildren.text = def.Name;
-					}
-					int num = ((this.BuildableState(def) != PlanScreen.RequirementsState.Complete) ? 0 : 1);
-					ImageToggleState.State state;
-					if (toggle.gameObject == this.selectedBuildingGameObject && (this.BuildableState(def) == PlanScreen.RequirementsState.Complete || DebugHandler.InstantBuildMode))
-					{
-						state = ImageToggleState.State.Active;
-					}
-					else
-					{
-						state = ((this.BuildableState(def) != PlanScreen.RequirementsState.Complete && !DebugHandler.InstantBuildMode) ? ImageToggleState.State.Disabled : ImageToggleState.State.Inactive);
-					}
-					if (toggle.gameObject == this.selectedBuildingGameObject && state == ImageToggleState.State.Disabled)
-					{
-						state = ImageToggleState.State.DisabledActive;
-					}
-					else if (state == ImageToggleState.State.Disabled)
-					{
-						state = ImageToggleState.State.Disabled;
-					}
-					toggle.GetComponent<ImageToggleState>().SetState(state);
-					Material material = ((this.BuildableState(def) != PlanScreen.RequirementsState.Complete && !DebugHandler.InstantBuildMode) ? this.desaturatedUIMaterial : this.defaultUIMaterial);
-					if (image.material != material)
-					{
-						image.material = material;
-						if (material == this.desaturatedUIMaterial)
-						{
-							if (flag)
-							{
-								image.color = new Color(1f, 1f, 1f, 0.6f);
-							}
-							else
-							{
-								image.color = new Color(1f, 1f, 1f, 0.15f);
-							}
-						}
-						else
-						{
-							image.color = Color.white;
-						}
-					}
-					Image fgImage = toggle.gameObject.GetComponent<KToggle>().fgImage;
-					fgImage.gameObject.SetActive(false);
-					if (!flag)
-					{
-						fgImage.sprite = this.Overlay_NeedTech;
-						fgImage.gameObject.SetActive(true);
-						string text = string.Format(UI.PRODUCTINFO_REQUIRESRESEARCHDESC, techItem.parentTech.Name);
-						component.AddMultiStringTooltip("\n", this.buildingToolTipSettings.ResearchRequirement);
-						component.AddMultiStringTooltip(text, this.buildingToolTipSettings.ResearchRequirement);
-					}
-					else if (this.BuildableState(def) != PlanScreen.RequirementsState.Complete)
-					{
-						fgImage.gameObject.SetActive(false);
-						component.AddMultiStringTooltip("\n", this.buildingToolTipSettings.ResearchRequirement);
-						string text2 = UI.PRODUCTINFO_MISSINGRESOURCES_HOVER;
-						component.AddMultiStringTooltip(text2, this.buildingToolTipSettings.ResearchRequirement);
-						foreach (Recipe.Ingredient ingredient in def.CraftRecipe.Ingredients)
-						{
-							string text3 = string.Format("{0}{1}: {2}", "• ", ingredient.tag.ProperName(), GameUtil.GetFormattedMass(ingredient.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-							component.AddMultiStringTooltip(text3, this.buildingToolTipSettings.ResearchRequirement);
-						}
-						component.AddMultiStringTooltip("", this.buildingToolTipSettings.ResearchRequirement);
-					}
+					image.color = new Color(1f, 1f, 1f, 0.6f);
+				}
+				else
+				{
+					image.color = new Color(1f, 1f, 1f, 0.15f);
 				}
 			}
+			else
+			{
+				image.color = Color.white;
+			}
+		}
+		Image fgImage = toggle.gameObject.GetComponent<KToggle>().fgImage;
+		fgImage.gameObject.SetActive(false);
+		if (!flag)
+		{
+			fgImage.sprite = this.Overlay_NeedTech;
+			fgImage.gameObject.SetActive(true);
+			string text = string.Format(UI.PRODUCTINFO_REQUIRESRESEARCHDESC, techItem.parentTech.Name);
+			component.AddMultiStringTooltip("\n", this.buildingToolTipSettings.ResearchRequirement);
+			component.AddMultiStringTooltip(text, this.buildingToolTipSettings.ResearchRequirement);
+		}
+		else if (this.BuildableState(def) != PlanScreen.RequirementsState.Complete)
+		{
+			fgImage.gameObject.SetActive(false);
+			component.AddMultiStringTooltip("\n", this.buildingToolTipSettings.ResearchRequirement);
+			string text2 = UI.PRODUCTINFO_MISSINGRESOURCES_HOVER;
+			component.AddMultiStringTooltip(text2, this.buildingToolTipSettings.ResearchRequirement);
+			foreach (Recipe.Ingredient ingredient in def.CraftRecipe.Ingredients)
+			{
+				string text3 = string.Format("{0}{1}: {2}", "• ", ingredient.tag.ProperName(), GameUtil.GetFormattedMass(ingredient.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				component.AddMultiStringTooltip(text3, this.buildingToolTipSettings.ResearchRequirement);
+			}
+			component.AddMultiStringTooltip(string.Empty, this.buildingToolTipSettings.ResearchRequirement);
 		}
 	}
 
@@ -622,27 +618,26 @@ public class PlanScreen : KIconToggleMenu
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (!e.Consumed)
+		if (e.Consumed)
 		{
-			if (this.mouseOver && this.ConsumeMouseScroll)
-			{
-				if (e.TryConsume(global::Action.ZoomIn) || e.TryConsume(global::Action.ZoomOut))
-				{
-				}
-			}
-			if (this.toggles != null)
-			{
-				if (!e.Consumed && this.activeCategoryInfo != null && e.TryConsume(global::Action.Escape))
-				{
-					this.OnClickCategory(this.activeCategoryInfo);
-					SelectTool.Instance.Activate();
-					this.ClearSelection();
-				}
-				else if (!e.Consumed)
-				{
-					base.OnKeyDown(e);
-				}
-			}
+			return;
+		}
+		if (!this.mouseOver || !this.ConsumeMouseScroll || e.TryConsume(global::Action.ZoomIn) || e.TryConsume(global::Action.ZoomOut))
+		{
+		}
+		if (this.toggles == null)
+		{
+			return;
+		}
+		if (!e.Consumed && this.activeCategoryInfo != null && e.TryConsume(global::Action.Escape))
+		{
+			this.OnClickCategory(this.activeCategoryInfo);
+			SelectTool.Instance.Activate();
+			this.ClearSelection();
+		}
+		else if (!e.Consumed)
+		{
+			base.OnKeyDown(e);
 		}
 	}
 
@@ -726,17 +721,19 @@ public class PlanScreen : KIconToggleMenu
 
 	private void OnActiveToolChanged(object data)
 	{
-		if (data != null)
+		if (data == null)
 		{
-			if (this.ignoreToolChangeMessages <= 0)
-			{
-				Type type = data.GetType();
-				if (!typeof(BuildTool).IsAssignableFrom(type) && !typeof(PrebuildTool).IsAssignableFrom(type) && !typeof(BaseUtilityBuildTool).IsAssignableFrom(type))
-				{
-					this.CloseRecipe(false);
-					this.CloseCategoryPanel(false);
-				}
-			}
+			return;
+		}
+		if (this.ignoreToolChangeMessages > 0)
+		{
+			return;
+		}
+		Type type = data.GetType();
+		if (!typeof(BuildTool).IsAssignableFrom(type) && !typeof(PrebuildTool).IsAssignableFrom(type) && !typeof(BaseUtilityBuildTool).IsAssignableFrom(type))
+		{
+			this.CloseRecipe(false);
+			this.CloseCategoryPanel(false);
 		}
 	}
 
@@ -814,13 +811,13 @@ public class PlanScreen : KIconToggleMenu
 
 	private Dictionary<BuildingDef, KToggle> ActiveToggles = new Dictionary<BuildingDef, KToggle>();
 
-	private float timeSinceNotificationPing = 0f;
+	private float timeSinceNotificationPing;
 
 	private float notificationPingExpire = 0.5f;
 
 	private float specialNotificationEmbellishDelay = 8f;
 
-	private int notificationPingCount = 0;
+	private int notificationPingCount;
 
 	private GameObject selectedBuildingGameObject;
 
@@ -842,7 +839,7 @@ public class PlanScreen : KIconToggleMenu
 
 	public LocText PlanCategoryLabel;
 
-	private int ignoreToolChangeMessages = 0;
+	private int ignoreToolChangeMessages;
 
 	private Dictionary<Def, PlanScreen.RequirementsState> buildableDefs = new Dictionary<Def, PlanScreen.RequirementsState>();
 
@@ -855,9 +852,9 @@ public class PlanScreen : KIconToggleMenu
 
 	private Dictionary<Tag, int> tagOrderMap;
 
-	private int buildable_state_update_idx = 0;
+	private int buildable_state_update_idx;
 
-	private int building_button_refresh_idx = 0;
+	private int building_button_refresh_idx;
 
 	private float buildGrid_bg_width = 274f;
 

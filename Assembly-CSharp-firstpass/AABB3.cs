@@ -73,17 +73,12 @@ public struct AABB3
 
 	public override bool Equals(object obj)
 	{
-		bool flag;
 		if (obj == null)
 		{
-			flag = false;
+			return false;
 		}
-		else
-		{
-			AABB3 aabb = (AABB3)obj;
-			flag = this.min == aabb.min && this.max == aabb.max;
-		}
-		return flag;
+		AABB3 aabb = (AABB3)obj;
+		return this.min == aabb.min && this.max == aabb.max;
 	}
 
 	public override int GetHashCode()

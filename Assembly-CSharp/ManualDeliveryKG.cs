@@ -84,35 +84,34 @@ public class ManualDeliveryKG : KMonoBehaviour
 	[ContextMenu("UpdateDeliveryState")]
 	public void UpdateDeliveryState()
 	{
-		if (this.requestedItemTag.IsValid)
+		if (!this.requestedItemTag.IsValid)
 		{
-			if (!(this.storage == null))
-			{
-				if (!this.paused)
-				{
-					this.RequestDelivery();
-				}
-			}
+			return;
+		}
+		if (this.storage == null)
+		{
+			return;
+		}
+		if (!this.paused)
+		{
+			this.RequestDelivery();
 		}
 	}
 
 	private void RequestDelivery()
 	{
 		float fetchAmount = this.GetFetchAmount();
-		if (fetchAmount > 0f)
+		if (fetchAmount > 0f && (this.fetchList == null || this.fetchList.IsComplete))
 		{
-			if (this.fetchList == null || this.fetchList.IsComplete)
+			if (this.fetchList != null)
 			{
-				if (this.fetchList != null)
-				{
-					this.fetchList.Cancel("Request Delivery");
-				}
-				this.fetchList = new FetchList2(this.storage);
-				this.fetchList.ShowStatusItem = this.ShowStatusItem;
-				this.fetchList.MinimumAmount[this.requestedItemTag] = this.minimumMass;
-				this.fetchList.Add(new Tag[] { this.requestedItemTag }, null, fetchAmount, this.operationalRequirement);
-				this.fetchList.Submit(null, false);
+				this.fetchList.Cancel("Request Delivery");
 			}
+			this.fetchList = new FetchList2(this.storage);
+			this.fetchList.ShowStatusItem = this.ShowStatusItem;
+			this.fetchList.MinimumAmount[this.requestedItemTag] = this.minimumMass;
+			this.fetchList.Add(new Tag[] { this.requestedItemTag }, null, fetchAmount, this.operationalRequirement);
+			this.fetchList.Submit(null, false);
 		}
 	}
 
@@ -174,26 +173,27 @@ public class ManualDeliveryKG : KMonoBehaviour
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (this.allowPause)
+		if (!this.allowPause)
 		{
-			if (!this.paused)
-			{
-				UserMenu userMenu = this.userMenu;
-				string text = "action_move_to_storage";
-				string text2 = UI.USERMENUACTIONS.MANUAL_DELIVERY.NAME;
-				global::System.Action action = new global::System.Action(this.OnPause);
-				string text3 = UI.USERMENUACTIONS.MANUAL_DELIVERY.TOOLTIP;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
-			}
-			else
-			{
-				UserMenu userMenu2 = this.userMenu;
-				string text3 = "action_move_to_storage";
-				string text2 = UI.USERMENUACTIONS.MANUAL_DELIVERY.NAME_OFF;
-				global::System.Action action = new global::System.Action(this.OnResume);
-				string text = UI.USERMENUACTIONS.MANUAL_DELIVERY.TOOLTIP_OFF;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
-			}
+			return;
+		}
+		if (!this.paused)
+		{
+			UserMenu userMenu = this.userMenu;
+			string text = "action_move_to_storage";
+			string text2 = UI.USERMENUACTIONS.MANUAL_DELIVERY.NAME;
+			global::System.Action action = new global::System.Action(this.OnPause);
+			string text3 = UI.USERMENUACTIONS.MANUAL_DELIVERY.TOOLTIP;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+		}
+		else
+		{
+			UserMenu userMenu2 = this.userMenu;
+			string text3 = "action_move_to_storage";
+			string text2 = UI.USERMENUACTIONS.MANUAL_DELIVERY.NAME_OFF;
+			global::System.Action action = new global::System.Action(this.OnResume);
+			string text = UI.USERMENUACTIONS.MANUAL_DELIVERY.TOOLTIP_OFF;
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 	}
 
@@ -216,13 +216,13 @@ public class ManualDeliveryKG : KMonoBehaviour
 	public float minimumMass = 10f;
 
 	[SerializeField]
-	public FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.Operational;
+	public FetchOrder2.OperationalRequirement operationalRequirement;
 
 	[SerializeField]
-	public bool allowPause = false;
+	public bool allowPause;
 
 	[SerializeField]
-	private bool paused = false;
+	private bool paused;
 
 	[NonSerialized]
 	public bool ShowStatusItem = true;

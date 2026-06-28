@@ -131,7 +131,7 @@ namespace NodeEditorFramework
 
 		public NodeEditorState[] editorStates = new NodeEditorState[0];
 
-		public bool livesInScene = false;
+		public bool livesInScene;
 
 		public delegate void CompleteLoadCallback(string fileName, NodeCanvas canvas);
 	}

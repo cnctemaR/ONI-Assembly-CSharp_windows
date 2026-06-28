@@ -42,49 +42,32 @@ public class SelectorModuleNodeEditor : BaseNodeEditor
 
 	public override bool Calculate()
 	{
-		bool flag;
 		if (!base.allInputsReady())
 		{
-			flag = false;
+			return false;
 		}
-		else
+		IModule3D value = this.Inputs[0].GetValue<IModule3D>();
+		if (value == null)
 		{
-			IModule3D value = this.Inputs[0].GetValue<IModule3D>();
-			if (value == null)
-			{
-				flag = false;
-			}
-			else
-			{
-				IModule3D value2 = this.Inputs[1].GetValue<IModule3D>();
-				if (value2 == null)
-				{
-					flag = false;
-				}
-				else
-				{
-					IModule3D value3 = this.Inputs[2].GetValue<IModule3D>();
-					if (value3 == null)
-					{
-						flag = false;
-					}
-					else
-					{
-						IModule3D module3D = this.target.CreateModule(value, value3, value2);
-						if (module3D == null)
-						{
-							flag = false;
-						}
-						else
-						{
-							this.Outputs[0].SetValue<IModule3D>(module3D);
-							flag = true;
-						}
-					}
-				}
-			}
+			return false;
 		}
-		return flag;
+		IModule3D value2 = this.Inputs[1].GetValue<IModule3D>();
+		if (value2 == null)
+		{
+			return false;
+		}
+		IModule3D value3 = this.Inputs[2].GetValue<IModule3D>();
+		if (value3 == null)
+		{
+			return false;
+		}
+		IModule3D module3D = this.target.CreateModule(value, value3, value2);
+		if (module3D == null)
+		{
+			return false;
+		}
+		this.Outputs[0].SetValue<IModule3D>(module3D);
+		return true;
 	}
 
 	protected override void NodeGUI()

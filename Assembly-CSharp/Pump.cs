@@ -106,7 +106,7 @@ public class Pump : KMonoBehaviour
 
 	private const float OperationalUpdateInterval = 1f;
 
-	private float elapsedTime = 0f;
+	private float elapsedTime;
 
-	private bool pumpable = false;
+	private bool pumpable;
 }

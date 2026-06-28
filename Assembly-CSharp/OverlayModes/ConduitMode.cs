@@ -38,14 +38,15 @@ namespace OverlayModes
 
 		protected override void OnSaveLoadRootUnregistered(SaveLoadRoot item)
 		{
-			if (!(item == null) && !(item.gameObject == null))
+			if (item == null || item.gameObject == null)
 			{
-				if (this.layerTargets.Contains(item))
-				{
-					this.layerTargets.Remove(item);
-				}
-				this.partition.Remove(item);
+				return;
 			}
+			if (this.layerTargets.Contains(item))
+			{
+				this.layerTargets.Remove(item);
+			}
+			this.partition.Remove(item);
 		}
 
 		public override void Disable()

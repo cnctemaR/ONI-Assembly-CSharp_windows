@@ -13,12 +13,9 @@ public static class RenderUtil
 			{
 				foreach (Material material in component.materials)
 				{
-					if (material != null)
+					if (material != null && material.name.StartsWith(name))
 					{
-						if (material.name.StartsWith(name))
-						{
-							return material;
-						}
+						return material;
 					}
 				}
 			}

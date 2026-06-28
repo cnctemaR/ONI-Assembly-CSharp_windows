@@ -47,25 +47,20 @@ namespace ProcGen
 
 		public Node AddCenteralFeature(Tree node, Graph graph, TagSet newTags)
 		{
-			Node node2;
 			if (this.centralFeature == null)
 			{
-				node2 = null;
+				return null;
 			}
-			else
+			Node node2 = graph.AddNode(this.centralFeature.type);
+			node2.SetPosition(node.site.poly.Centroid());
+			Node node3 = node.AddSite(new Diagram.Site((uint)node2.node.Id, node2.position, 1f), Node.NodeType.Internal);
+			node3.tags = new TagSet(newTags);
+			node3.AddTag(new Tag(this.centralFeature.type));
+			node3.AddTag(WorldGenTags.Feature);
+			node3.AddTag(WorldGenTags.CenteralFeature);
+			for (int i = 0; i < this.centralFeature.tags.Count; i++)
 			{
-				Node node3 = graph.AddNode(this.centralFeature.type);
-				node3.SetPosition(node.site.poly.Centroid());
-				Node node4 = node.AddSite(new Diagram.Site((uint)node3.node.Id, node3.position, 1f), Node.NodeType.Internal);
-				node4.tags = new TagSet(newTags);
-				node4.AddTag(new Tag(this.centralFeature.type));
-				node4.AddTag(WorldGenTags.Feature);
-				node4.AddTag(WorldGenTags.CenteralFeature);
-				for (int i = 0; i < this.centralFeature.tags.Count; i++)
-				{
-					node4.AddTag(new Tag(this.centralFeature.tags[i]));
-				}
-				node2 = node3;
+				node3.AddTag(new Tag(this.centralFeature.tags[i]));
 			}
 			return node2;
 		}

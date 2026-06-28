@@ -43,27 +43,25 @@ public class UpdateManager : MonoBehaviour
 		if (this.skipNextUpdate)
 		{
 			this.skipNextUpdate = this.skipAllUpdates;
+			return;
 		}
-		else
+		foreach (UpdateManager.QueuedData queuedData in this.queuedAdded)
 		{
-			foreach (UpdateManager.QueuedData queuedData in this.queuedAdded)
+			queuedData.typeInfo.Add(queuedData.behaviour);
+		}
+		this.queuedAdded.Clear();
+		foreach (UpdateManager.QueuedData queuedData2 in this.queuedRemoved)
+		{
+			queuedData2.typeInfo.Remove(queuedData2.behaviour);
+		}
+		this.queuedRemoved.Clear();
+		if (!this.skipAllUpdates)
+		{
+			foreach (SimUpdateGroup simUpdateGroup in UpdateManager.UpdateGroups)
 			{
-				queuedData.typeInfo.Add(queuedData.behaviour);
+				simUpdateGroup.Update(dt);
 			}
-			this.queuedAdded.Clear();
-			foreach (UpdateManager.QueuedData queuedData2 in this.queuedRemoved)
-			{
-				queuedData2.typeInfo.Remove(queuedData2.behaviour);
-			}
-			this.queuedRemoved.Clear();
-			if (!this.skipAllUpdates)
-			{
-				foreach (SimUpdateGroup simUpdateGroup in UpdateManager.UpdateGroups)
-				{
-					simUpdateGroup.Update(dt);
-				}
-				KComponentSpawn.instance.comps.SimUpdate(dt);
-			}
+			KComponentSpawn.instance.comps.SimUpdate(dt);
 		}
 	}
 
@@ -108,13 +106,13 @@ public class UpdateManager : MonoBehaviour
 
 	public const float SecondsPerTick = 0.25f;
 
-	private bool skipNextUpdate = false;
+	private bool skipNextUpdate;
 
 	private static Dictionary<Type, SimUpdateTypeInfo> TypeInfos = new Dictionary<Type, SimUpdateTypeInfo>();
 
 	private static SimUpdateGroup[] UpdateGroups = null;
 
-	private bool skipAllUpdates = false;
+	private bool skipAllUpdates;
 
 	private List<UpdateManager.QueuedData> queuedAdded = new List<UpdateManager.QueuedData>();
 

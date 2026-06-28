@@ -42,6 +42,6 @@ namespace Klei
 
 		public bool showDemoTimer { get; private set; }
 
-		private static GenericGameSettings _instance = null;
+		private static GenericGameSettings _instance;
 	}
 }

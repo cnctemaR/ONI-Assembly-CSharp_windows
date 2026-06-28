@@ -19,7 +19,7 @@ public class InputBindingsScreen : KModalScreen
 
 	private string GetModifierString(Modifier modifiers)
 	{
-		string text = "";
+		string text = string.Empty;
 		IEnumerator enumerator = Enum.GetValues(typeof(Modifier)).GetEnumerator();
 		try
 		{
@@ -67,8 +67,7 @@ public class InputBindingsScreen : KModalScreen
 	private void CollectScreens()
 	{
 		this.screens.Clear();
-		int i = 0;
-		while (i < GameInputMapping.KeyBindings.Length)
+		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
 			BindingEntry bindingEntry = GameInputMapping.KeyBindings[i];
 			if (bindingEntry.mGroup != null && bindingEntry.mRebindable && !this.screens.Contains(bindingEntry.mGroup))
@@ -82,10 +81,6 @@ public class InputBindingsScreen : KModalScreen
 					this.screens.Add(bindingEntry.mGroup);
 				}
 			}
-			IL_00A4:
-			i++;
-			continue;
-			goto IL_00A4;
 		}
 	}
 
@@ -211,8 +206,9 @@ public class InputBindingsScreen : KModalScreen
 		if (this.waitingForKeyPress)
 		{
 			e.Consumed = true;
+			return;
 		}
-		else if (e.TryConsume(global::Action.Escape) || e.TryConsume(global::Action.MouseRight))
+		if (e.TryConsume(global::Action.Escape) || e.TryConsume(global::Action.MouseRight))
 		{
 			this.Deactivate();
 		}
@@ -261,8 +257,7 @@ public class InputBindingsScreen : KModalScreen
 	private int NumUnboundActions()
 	{
 		int num = 0;
-		int i = 0;
-		while (i < GameInputMapping.KeyBindings.Length)
+		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
 			BindingEntry bindingEntry = GameInputMapping.KeyBindings[i];
 			if (bindingEntry.mKeyCode == KKeyCode.None)
@@ -272,10 +267,6 @@ public class InputBindingsScreen : KModalScreen
 					num++;
 				}
 			}
-			IL_0041:
-			i++;
-			continue;
-			goto IL_0041;
 		}
 		return num;
 	}
@@ -393,11 +384,11 @@ public class InputBindingsScreen : KModalScreen
 
 	public KButton nextScreenButton;
 
-	private bool waitingForKeyPress = false;
+	private bool waitingForKeyPress;
 
 	private global::Action actionToRebind = global::Action.NumActions;
 
-	private KButton activeButton = null;
+	private KButton activeButton;
 
 	[SerializeField]
 	private LocText screenTitle;

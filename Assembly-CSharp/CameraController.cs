@@ -73,8 +73,8 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		CameraReferenceTexture cameraReferenceTexture = this.overlayCamera.gameObject.AddComponent<CameraReferenceTexture>();
 		cameraReferenceTexture.referenceCamera = this.baseCamera;
 		ColorCorrectionLookup component = this.overlayCamera.GetComponent<ColorCorrectionLookup>();
-		component.Convert(this.dayColourCube, "");
-		component.Convert2(this.nightColourCube, "");
+		component.Convert(this.dayColourCube, string.Empty);
+		component.Convert2(this.nightColourCube, string.Empty);
 		this.cameras.Add(this.overlayCamera);
 		this.lightBufferCamera = this.CopyCamera(this.overlayCamera, "Light Buffer");
 		this.lightBufferCamera.clearFlags = CameraClearFlags.Color;
@@ -132,75 +132,78 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public void OnKeyDown(KButtonEvent e)
 	{
-		if (!e.Consumed)
+		if (e.Consumed)
 		{
-			if (!this.DisableUserCameraControl)
-			{
-				if (e.TryConsume(global::Action.ZoomIn))
-				{
-					float num = this.targetOrthographicSize - this.zoomFactor * this.targetOrthographicSize;
-					this.targetOrthographicSize = Mathf.Max(num, this.minOrthographicSize);
-					this.overrideZoomSpeed = 0f;
-				}
-				else if (e.TryConsume(global::Action.ZoomOut))
-				{
-					float num2 = this.targetOrthographicSize + this.zoomFactor * this.targetOrthographicSize;
-					this.targetOrthographicSize = Mathf.Min(num2, (!DebugHandler.FreeCameraMode) ? this.maxOrthographicSize : this.maxOrthographicSizeDebug);
-					this.overrideZoomSpeed = 0f;
-				}
-				else if (e.TryConsume(global::Action.MouseMiddle) || e.IsAction(global::Action.MouseRight))
-				{
-					this.panning = true;
-					this.overrideZoomSpeed = 0f;
-				}
-				else if (e.TryConsume(global::Action.PanLeft))
-				{
-					this.panLeft = true;
-				}
-				else if (e.TryConsume(global::Action.PanRight))
-				{
-					this.panRight = true;
-				}
-				else if (e.TryConsume(global::Action.PanUp))
-				{
-					this.panUp = true;
-				}
-				else if (e.TryConsume(global::Action.PanDown))
-				{
-					this.panDown = true;
-				}
-			}
+			return;
+		}
+		if (this.DisableUserCameraControl)
+		{
+			return;
+		}
+		if (e.TryConsume(global::Action.ZoomIn))
+		{
+			float num = this.targetOrthographicSize - this.zoomFactor * this.targetOrthographicSize;
+			this.targetOrthographicSize = Mathf.Max(num, this.minOrthographicSize);
+			this.overrideZoomSpeed = 0f;
+		}
+		else if (e.TryConsume(global::Action.ZoomOut))
+		{
+			float num2 = this.targetOrthographicSize + this.zoomFactor * this.targetOrthographicSize;
+			this.targetOrthographicSize = Mathf.Min(num2, (!DebugHandler.FreeCameraMode) ? this.maxOrthographicSize : this.maxOrthographicSizeDebug);
+			this.overrideZoomSpeed = 0f;
+		}
+		else if (e.TryConsume(global::Action.MouseMiddle) || e.IsAction(global::Action.MouseRight))
+		{
+			this.panning = true;
+			this.overrideZoomSpeed = 0f;
+		}
+		else if (e.TryConsume(global::Action.PanLeft))
+		{
+			this.panLeft = true;
+		}
+		else if (e.TryConsume(global::Action.PanRight))
+		{
+			this.panRight = true;
+		}
+		else if (e.TryConsume(global::Action.PanUp))
+		{
+			this.panUp = true;
+		}
+		else if (e.TryConsume(global::Action.PanDown))
+		{
+			this.panDown = true;
 		}
 	}
 
 	public void OnKeyUp(KButtonEvent e)
 	{
-		if (!this.DisableUserCameraControl)
+		if (this.DisableUserCameraControl)
 		{
-			if (e.TryConsume(global::Action.MouseMiddle) || e.IsAction(global::Action.MouseRight))
-			{
-				this.panning = false;
-			}
-			else if (e.TryConsume(global::Action.CameraHome))
-			{
-				this.CameraGoHome(2f);
-			}
-			else if (e.TryConsume(global::Action.PanLeft))
-			{
-				this.panLeft = false;
-			}
-			else if (e.TryConsume(global::Action.PanRight))
-			{
-				this.panRight = false;
-			}
-			else if (e.TryConsume(global::Action.PanUp))
-			{
-				this.panUp = false;
-			}
-			else if (e.TryConsume(global::Action.PanDown))
-			{
-				this.panDown = false;
-			}
+			return;
+		}
+		if (e.TryConsume(global::Action.MouseMiddle) || e.IsAction(global::Action.MouseRight))
+		{
+			this.panning = false;
+		}
+		else if (e.TryConsume(global::Action.CameraHome))
+		{
+			this.CameraGoHome(2f);
+		}
+		else if (e.TryConsume(global::Action.PanLeft))
+		{
+			this.panLeft = false;
+		}
+		else if (e.TryConsume(global::Action.PanRight))
+		{
+			this.panRight = false;
+		}
+		else if (e.TryConsume(global::Action.PanUp))
+		{
+			this.panUp = false;
+		}
+		else if (e.TryConsume(global::Action.PanDown))
+		{
+			this.panDown = false;
 		}
 	}
 
@@ -366,7 +369,6 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	private Vector3 GetFollowPos()
 	{
-		Vector3 vector2;
 		if (this.followTarget != null)
 		{
 			Vector3 vector = this.followTarget.transform.position;
@@ -375,49 +377,48 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			{
 				vector = component.GetWorldPivot();
 			}
-			vector2 = vector;
+			return vector;
 		}
-		else
-		{
-			vector2 = Vector3.zero;
-		}
-		return vector2;
+		return Vector3.zero;
 	}
 
 	private void ConstrainToWorld()
 	{
-		if (!Game.Instance.IsLoading())
+		if (Game.Instance.IsLoading())
 		{
-			if (!DebugHandler.FreeCameraMode)
-			{
-				Camera main = Camera.main;
-				Ray ray = main.ViewportPointToRay(Vector3.zero);
-				Ray ray2 = main.ViewportPointToRay(Vector3.one);
-				float num = Mathf.Abs(ray.origin.z / ray.direction.z);
-				float num2 = Mathf.Abs(ray2.origin.z / ray2.direction.z);
-				Vector3 point = ray.GetPoint(num);
-				Vector3 point2 = ray2.GetPoint(num2);
-				if (point2.x - point.x <= Grid.WidthInMeters && point2.y - point.y <= Grid.HeightInMeters)
-				{
-					Vector3 vector = base.transform.position - ray.origin;
-					Vector3 vector2 = point;
-					vector2.x = Mathf.Max(0f, vector2.x);
-					vector2.y = Mathf.Max(0f, vector2.y);
-					ray.origin = vector2;
-					ray.direction = -ray.direction;
-					vector2 = ray.GetPoint(num);
-					base.transform.SetPosition(vector2 + vector);
-					vector = base.transform.position - ray2.origin;
-					vector2 = point2;
-					vector2.x = Mathf.Min(Grid.WidthInMeters, vector2.x);
-					vector2.y = Mathf.Min(Grid.HeightInMeters, vector2.y);
-					ray2.origin = vector2;
-					ray2.direction = -ray2.direction;
-					vector2 = ray2.GetPoint(num2);
-					base.transform.SetPosition(vector2 + vector);
-				}
-			}
+			return;
 		}
+		if (DebugHandler.FreeCameraMode)
+		{
+			return;
+		}
+		Camera main = Camera.main;
+		Ray ray = main.ViewportPointToRay(Vector3.zero);
+		Ray ray2 = main.ViewportPointToRay(Vector3.one);
+		float num = Mathf.Abs(ray.origin.z / ray.direction.z);
+		float num2 = Mathf.Abs(ray2.origin.z / ray2.direction.z);
+		Vector3 point = ray.GetPoint(num);
+		Vector3 point2 = ray2.GetPoint(num2);
+		if (point2.x - point.x > Grid.WidthInMeters || point2.y - point.y > Grid.HeightInMeters)
+		{
+			return;
+		}
+		Vector3 vector = base.transform.position - ray.origin;
+		Vector3 vector2 = point;
+		vector2.x = Mathf.Max(0f, vector2.x);
+		vector2.y = Mathf.Max(0f, vector2.y);
+		ray.origin = vector2;
+		ray.direction = -ray.direction;
+		vector2 = ray.GetPoint(num);
+		base.transform.SetPosition(vector2 + vector);
+		vector = base.transform.position - ray2.origin;
+		vector2 = point2;
+		vector2.x = Mathf.Min(Grid.WidthInMeters, vector2.x);
+		vector2.y = Mathf.Min(Grid.HeightInMeters, vector2.y);
+		ray2.origin = vector2;
+		ray2.direction = -ray2.direction;
+		vector2 = ray2.GetPoint(num2);
+		base.transform.SetPosition(vector2 + vector);
 	}
 
 	public void Save(BinaryWriter writer)
@@ -551,25 +552,27 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	public void SetFollowTarget(Transform follow_target)
 	{
 		this.ClearFollowTarget();
-		if (!(follow_target == null))
+		if (follow_target == null)
 		{
-			this.followTarget = follow_target;
-			this.SetOrthographicsSize(6f);
-			this.targetOrthographicSize = 6f;
-			Vector3 followPos = this.GetFollowPos();
-			this.followTargetPos = new Vector3(followPos.x, followPos.y, base.transform.position.z);
-			base.transform.position = this.followTargetPos;
-			this.followTarget.GetComponent<KMonoBehaviour>().Trigger(-1506069671, null);
+			return;
 		}
+		this.followTarget = follow_target;
+		this.SetOrthographicsSize(6f);
+		this.targetOrthographicSize = 6f;
+		Vector3 followPos = this.GetFollowPos();
+		this.followTargetPos = new Vector3(followPos.x, followPos.y, base.transform.position.z);
+		base.transform.position = this.followTargetPos;
+		this.followTarget.GetComponent<KMonoBehaviour>().Trigger(-1506069671, null);
 	}
 
 	public void ClearFollowTarget()
 	{
-		if (!(this.followTarget == null))
+		if (this.followTarget == null)
 		{
-			this.followTarget.GetComponent<KMonoBehaviour>().Trigger(-485480405, null);
-			this.followTarget = null;
+			return;
 		}
+		this.followTarget.GetComponent<KMonoBehaviour>().Trigger(-485480405, null);
+		this.followTarget = null;
 	}
 
 	public void UpdateFollowTarget()
@@ -626,7 +629,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	private float overrideZoomSpeed;
 
-	private bool panning = false;
+	private bool panning;
 
 	private Vector3 keyPanDelta;
 
@@ -634,13 +637,13 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	private Vector3 targetPos;
 
-	private bool panLeft = false;
+	private bool panLeft;
 
-	private bool panRight = false;
+	private bool panRight;
 
-	private bool panUp = false;
+	private bool panUp;
 
-	private bool panDown = false;
+	private bool panDown;
 
 	[NonSerialized]
 	public Camera baseCamera;

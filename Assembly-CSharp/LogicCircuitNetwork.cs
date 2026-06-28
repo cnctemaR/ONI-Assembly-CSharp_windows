@@ -96,32 +96,34 @@ public class LogicCircuitNetwork : UtilityNetwork
 
 	public void UpdateLogicValue()
 	{
-		if (!this.resetting)
+		if (this.resetting)
 		{
-			this.previousValue = this.outputValue;
-			this.outputValue = 0;
-			foreach (ILogicEventSender logicEventSender in this.senders)
-			{
-				int logicValue = logicEventSender.GetLogicValue();
-				this.outputValue |= logicValue;
-			}
+			return;
+		}
+		this.previousValue = this.outputValue;
+		this.outputValue = 0;
+		foreach (ILogicEventSender logicEventSender in this.senders)
+		{
+			int logicValue = logicEventSender.GetLogicValue();
+			this.outputValue |= logicValue;
 		}
 	}
 
 	public void SendLogicEvents(bool force_send)
 	{
-		if (!this.resetting)
+		if (this.resetting)
 		{
-			if (this.outputValue != this.previousValue || force_send)
+			return;
+		}
+		if (this.outputValue != this.previousValue || force_send)
+		{
+			foreach (ILogicEventReceiver logicEventReceiver in this.receivers)
 			{
-				foreach (ILogicEventReceiver logicEventReceiver in this.receivers)
-				{
-					logicEventReceiver.ReceiveLogicEvent(this.outputValue);
-				}
-				if (!force_send)
-				{
-					this.TriggerAudio((this.previousValue < 0) ? 0 : this.previousValue);
-				}
+				logicEventReceiver.ReceiveLogicEvent(this.outputValue);
+			}
+			if (!force_send)
+			{
+				this.TriggerAudio((this.previousValue < 0) ? 0 : this.previousValue);
 			}
 		}
 	}
@@ -197,5 +199,5 @@ public class LogicCircuitNetwork : UtilityNetwork
 
 	private int outputValue;
 
-	private bool resetting = false;
+	private bool resetting;
 }

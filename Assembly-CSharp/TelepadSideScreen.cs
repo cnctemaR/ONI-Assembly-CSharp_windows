@@ -20,18 +20,16 @@ public class TelepadSideScreen : SideScreenContent
 		if (component == null)
 		{
 			global::Debug.LogError("Target doesn't have a telepad associated with it.", null);
+			return;
+		}
+		this.targetTelepad = component;
+		if (this.targetTelepad != null)
+		{
+			base.gameObject.SetActive(false);
 		}
 		else
 		{
-			this.targetTelepad = component;
-			if (this.targetTelepad != null)
-			{
-				base.gameObject.SetActive(false);
-			}
-			else
-			{
-				base.gameObject.SetActive(true);
-			}
+			base.gameObject.SetActive(true);
 		}
 	}
 

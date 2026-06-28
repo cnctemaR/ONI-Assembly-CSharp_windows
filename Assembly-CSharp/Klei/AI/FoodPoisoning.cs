@@ -168,19 +168,20 @@ namespace Klei.AI
 					ChoreProvider chore_provider = this.go.GetComponent<ChoreProvider>();
 					this.vomitHandle = GameScheduler.Instance.Schedule("Vomit", 200f, delegate(object data)
 					{
-						if (!(chore_provider == null))
+						if (chore_provider == null)
 						{
-							if (!this.diseaseInstance.IsDoctored)
-							{
-								this.chore = new VomitChore(Db.Get().ChoreTypes.Vomit, chore_provider, Db.Get().DuplicantStatusItems.Vomiting, this.vomiting, delegate(Chore unused)
-								{
-									this.StartChore();
-								});
-							}
-							else
+							return;
+						}
+						if (!this.diseaseInstance.IsDoctored)
+						{
+							this.chore = new VomitChore(Db.Get().ChoreTypes.Vomit, chore_provider, Db.Get().DuplicantStatusItems.Vomiting, this.vomiting, delegate(Chore unused)
 							{
 								this.StartChore();
-							}
+							});
+						}
+						else
+						{
+							this.StartChore();
 						}
 					}, null, null);
 				}

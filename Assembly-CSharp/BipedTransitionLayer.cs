@@ -23,54 +23,55 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 	public override void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
 	{
 		base.BeginTransition(navigator, transition);
-		if (!this.isWalking)
+		if (this.isWalking)
 		{
-			int num = Grid.PosToCell(navigator);
-			float movementSpeedMultiplier = this.GetMovementSpeedMultiplier(navigator);
-			if (transition.x == 0 && transition.start == transition.end && (transition.start == NavType.Ladder || transition.start == NavType.Pole))
-			{
-				transition.speed = this.ladderSpeed * movementSpeedMultiplier;
-				GameObject gameObject = Grid.Objects[num, 1];
-				if (gameObject != null)
-				{
-					Ladder component = gameObject.GetComponent<Ladder>();
-					if (component != null)
-					{
-						float num2 = component.upwardsMovementSpeedMultiplier;
-						if (transition.y < 0)
-						{
-							num2 = component.downwardsMovementSpeedMultiplier;
-						}
-						transition.speed *= num2;
-						transition.animSpeed *= num2;
-					}
-				}
-			}
-			else
-			{
-				transition.speed = this.floorSpeed * movementSpeedMultiplier;
-			}
-			float num3 = movementSpeedMultiplier - 1f;
-			transition.animSpeed += transition.animSpeed * num3 / 2f;
-			if (transition.start == NavType.Floor && transition.end == NavType.Floor)
-			{
-				int num4 = Grid.CellBelow(num);
-				if (Grid.Foundation[num4])
-				{
-					GameObject gameObject2 = Grid.Objects[num4, 1];
-					if (gameObject2 != null)
-					{
-						SimCellOccupier component2 = gameObject2.GetComponent<SimCellOccupier>();
-						if (component2 != null)
-						{
-							transition.speed *= component2.movementSpeedMultiplier;
-							transition.animSpeed *= component2.movementSpeedMultiplier;
-						}
-					}
-				}
-			}
-			this.startTime = Time.time;
+			return;
 		}
+		int num = Grid.PosToCell(navigator);
+		float movementSpeedMultiplier = this.GetMovementSpeedMultiplier(navigator);
+		if (transition.x == 0 && transition.start == transition.end && (transition.start == NavType.Ladder || transition.start == NavType.Pole))
+		{
+			transition.speed = this.ladderSpeed * movementSpeedMultiplier;
+			GameObject gameObject = Grid.Objects[num, 1];
+			if (gameObject != null)
+			{
+				Ladder component = gameObject.GetComponent<Ladder>();
+				if (component != null)
+				{
+					float num2 = component.upwardsMovementSpeedMultiplier;
+					if (transition.y < 0)
+					{
+						num2 = component.downwardsMovementSpeedMultiplier;
+					}
+					transition.speed *= num2;
+					transition.animSpeed *= num2;
+				}
+			}
+		}
+		else
+		{
+			transition.speed = this.floorSpeed * movementSpeedMultiplier;
+		}
+		float num3 = movementSpeedMultiplier - 1f;
+		transition.animSpeed += transition.animSpeed * num3 / 2f;
+		if (transition.start == NavType.Floor && transition.end == NavType.Floor)
+		{
+			int num4 = Grid.CellBelow(num);
+			if (Grid.Foundation[num4])
+			{
+				GameObject gameObject2 = Grid.Objects[num4, 1];
+				if (gameObject2 != null)
+				{
+					SimCellOccupier component2 = gameObject2.GetComponent<SimCellOccupier>();
+					if (component2 != null)
+					{
+						transition.speed *= component2.movementSpeedMultiplier;
+						transition.animSpeed *= component2.movementSpeedMultiplier;
+					}
+				}
+			}
+		}
+		this.startTime = Time.time;
 	}
 
 	public override void EndTransition(Navigator navigator, Navigator.ActiveTransition transition)

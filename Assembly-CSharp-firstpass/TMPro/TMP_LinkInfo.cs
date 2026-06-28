@@ -29,16 +29,11 @@ namespace TMPro
 
 		public string GetLinkID()
 		{
-			string text;
 			if (this.textComponent == null)
 			{
-				text = string.Empty;
+				return string.Empty;
 			}
-			else
-			{
-				text = new string(this.linkID);
-			}
-			return text;
+			return new string(this.linkID);
 		}
 
 		public TMP_Text textComponent;

@@ -5,20 +5,23 @@ public class TileVisualizer
 {
 	private static void RefreshCellInternal(int cell, ObjectLayer tile_layer)
 	{
-		if (!Game.IsQuitting())
+		if (Game.IsQuitting())
 		{
-			if (Grid.IsValidCell(cell))
+			return;
+		}
+		if (!Grid.IsValidCell(cell))
+		{
+			return;
+		}
+		GameObject gameObject = Grid.Objects[cell, (int)tile_layer];
+		if (gameObject != null)
+		{
+			World.Instance.blockTileRenderer.Rebuild(tile_layer, cell);
+			KAnimGraphTileVisualizer componentInChildren = gameObject.GetComponentInChildren<KAnimGraphTileVisualizer>();
+			if (componentInChildren != null)
 			{
-				GameObject gameObject = Grid.Objects[cell, (int)tile_layer];
-				if (gameObject != null)
-				{
-					World.Instance.blockTileRenderer.Rebuild(tile_layer, cell);
-					KAnimGraphTileVisualizer componentInChildren = gameObject.GetComponentInChildren<KAnimGraphTileVisualizer>();
-					if (componentInChildren != null)
-					{
-						componentInChildren.Refresh();
-					}
-				}
+				componentInChildren.Refresh();
+				return;
 			}
 		}
 	}

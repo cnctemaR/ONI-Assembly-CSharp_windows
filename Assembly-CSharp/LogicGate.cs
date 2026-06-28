@@ -91,31 +91,32 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 
 	private void UpdateState(int new_value)
 	{
-		if (!this.cleaningUp)
+		if (this.cleaningUp)
 		{
-			int value = this.inputOne.Value;
-			int num = ((this.inputTwo == null) ? 0 : this.inputTwo.Value);
-			this.outputValue = 0;
-			switch (this.op)
-			{
-			case LogicGateBase.Op.And:
-				this.outputValue = value & num;
-				break;
-			case LogicGateBase.Op.Or:
-				this.outputValue = value | num;
-				break;
-			case LogicGateBase.Op.Not:
-				this.outputValue = ((value != 0) ? 0 : 1);
-				break;
-			case LogicGateBase.Op.Xor:
-				this.outputValue = value ^ num;
-				break;
-			case LogicGateBase.Op.CustomSingle:
-				this.outputValue = this.GetCustomValue(value, num);
-				break;
-			}
-			this.RefreshAnimation();
+			return;
 		}
+		int value = this.inputOne.Value;
+		int num = ((this.inputTwo == null) ? 0 : this.inputTwo.Value);
+		this.outputValue = 0;
+		switch (this.op)
+		{
+		case LogicGateBase.Op.And:
+			this.outputValue = value & num;
+			break;
+		case LogicGateBase.Op.Or:
+			this.outputValue = value | num;
+			break;
+		case LogicGateBase.Op.Not:
+			this.outputValue = ((value != 0) ? 0 : 1);
+			break;
+		case LogicGateBase.Op.Xor:
+			this.outputValue = value ^ num;
+			break;
+		case LogicGateBase.Op.CustomSingle:
+			this.outputValue = this.GetCustomValue(value, num);
+			break;
+		}
+		this.RefreshAnimation();
 	}
 
 	protected virtual int GetCustomValue(int val1, int val2)
@@ -145,22 +146,23 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 
 	protected void RefreshAnimation()
 	{
-		if (!this.cleaningUp)
+		if (this.cleaningUp)
 		{
-			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-			int outputCell = base.OutputCell;
-			if (!(Game.Instance.logicCircuitSystem.GetNetworkForCell(outputCell) is LogicCircuitNetwork))
-			{
-				component.Play("off", KAnim.PlayMode.Once, 1f, 0f);
-			}
-			else if (base.RequiresTwoInputs)
-			{
-				component.Play("on_" + (this.inputOne.Value + this.inputTwo.Value * 2 + this.outputValue * 4).ToString(), KAnim.PlayMode.Once, 1f, 0f);
-			}
-			else
-			{
-				component.Play("on_" + (this.inputOne.Value + this.outputValue * 4).ToString(), KAnim.PlayMode.Once, 1f, 0f);
-			}
+			return;
+		}
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		int outputCell = base.OutputCell;
+		if (!(Game.Instance.logicCircuitSystem.GetNetworkForCell(outputCell) is LogicCircuitNetwork))
+		{
+			component.Play("off", KAnim.PlayMode.Once, 1f, 0f);
+		}
+		else if (base.RequiresTwoInputs)
+		{
+			component.Play("on_" + (this.inputOne.Value + this.inputTwo.Value * 2 + this.outputValue * 4).ToString(), KAnim.PlayMode.Once, 1f, 0f);
+		}
+		else
+		{
+			component.Play("on_" + (this.inputOne.Value + this.outputValue * 4).ToString(), KAnim.PlayMode.Once, 1f, 0f);
 		}
 	}
 
@@ -170,9 +172,9 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 
 	private const bool IS_CIRCUIT_ENDPOINT = true;
 
-	private bool connected = false;
+	private bool connected;
 
-	protected bool cleaningUp = false;
+	protected bool cleaningUp;
 
 	[Serialize]
 	protected int outputValue;

@@ -44,16 +44,18 @@ public class MoveableLogicGateVisualizer : LogicGateBase
 
 	private void Update()
 	{
-		if (this.visChildren.Count > 0)
+		if (this.visChildren.Count <= 0)
 		{
-			int num = Grid.PosToCell(base.transform.position);
-			if (num != this.cell)
-			{
-				this.cell = num;
-				this.Unregister();
-				this.Register();
-			}
+			return;
 		}
+		int num = Grid.PosToCell(base.transform.position);
+		if (num == this.cell)
+		{
+			return;
+		}
+		this.cell = num;
+		this.Unregister();
+		this.Register();
 	}
 
 	private GameObject CreateUIElem(int cell, bool is_input)
@@ -67,30 +69,32 @@ public class MoveableLogicGateVisualizer : LogicGateBase
 
 	private void Register()
 	{
-		if (this.visChildren.Count <= 0)
+		if (this.visChildren.Count > 0)
 		{
-			base.enabled = true;
-			this.visChildren.Add(this.CreateUIElem(base.OutputCell, false));
-			this.visChildren.Add(this.CreateUIElem(base.InputCellOne, true));
-			if (base.RequiresTwoInputs)
-			{
-				this.visChildren.Add(this.CreateUIElem(base.InputCellTwo, true));
-			}
+			return;
+		}
+		base.enabled = true;
+		this.visChildren.Add(this.CreateUIElem(base.OutputCell, false));
+		this.visChildren.Add(this.CreateUIElem(base.InputCellOne, true));
+		if (base.RequiresTwoInputs)
+		{
+			this.visChildren.Add(this.CreateUIElem(base.InputCellTwo, true));
 		}
 	}
 
 	private void Unregister()
 	{
-		if (this.visChildren.Count > 0)
+		if (this.visChildren.Count <= 0)
 		{
-			base.enabled = false;
-			this.cell = -1;
-			foreach (GameObject gameObject in this.visChildren)
-			{
-				Util.KDestroyGameObject(gameObject);
-			}
-			this.visChildren.Clear();
+			return;
 		}
+		base.enabled = false;
+		this.cell = -1;
+		foreach (GameObject gameObject in this.visChildren)
+		{
+			Util.KDestroyGameObject(gameObject);
+		}
+		this.visChildren.Clear();
 	}
 
 	private int cell;

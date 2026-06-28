@@ -60,62 +60,49 @@ public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadable
 				bodyOfWater = WaterBodyProbe.Instance.FindBodyOfWater(base.gameObject);
 			}
 		}
-		BodyOfWater bodyOfWater2;
 		if (bodyOfWater == null)
 		{
-			bodyOfWater2 = null;
+			return null;
 		}
-		else
-		{
-			bodyOfWater.AddObjectToBody(base.gameObject);
-			bodyOfWater2 = bodyOfWater;
-		}
-		return bodyOfWater2;
+		bodyOfWater.AddObjectToBody(base.gameObject);
+		return bodyOfWater;
 	}
 
 	private FishingLure LookForLure()
 	{
 		BodyOfWater bodyOfWater = this.GetBodyOfWater();
-		FishingLure fishingLure;
 		if (bodyOfWater == null)
 		{
-			fishingLure = null;
+			return null;
 		}
-		else
+		List<FishingLure> list = new List<FishingLure>();
+		foreach (GameObject gameObject in bodyOfWater.containedObjects)
 		{
-			List<FishingLure> list = new List<FishingLure>();
-			foreach (GameObject gameObject in bodyOfWater.containedObjects)
+			if (gameObject != null)
 			{
-				if (gameObject != null)
+				FishingLure component = gameObject.GetComponent<FishingLure>();
+				if (component != null && component.isBeingWorked())
 				{
-					FishingLure component = gameObject.GetComponent<FishingLure>();
-					if (component != null && component.isBeingWorked())
-					{
-						list.Add(component);
-					}
+					list.Add(component);
 				}
 			}
-			float num = (float)(this.MaxAttractionDistance + 1);
-			FishingLure fishingLure2 = null;
-			foreach (FishingLure fishingLure3 in list)
+		}
+		float num = (float)(this.MaxAttractionDistance + 1);
+		FishingLure fishingLure = null;
+		foreach (FishingLure fishingLure2 in list)
+		{
+			float num2 = Vector3.Distance(fishingLure2.transform.position, base.transform.position);
+			if (fishingLure2.HookedObject == null && num2 < num)
 			{
-				float num2 = Vector3.Distance(fishingLure3.transform.position, base.transform.position);
-				if (fishingLure3.HookedObject == null && num2 < num)
-				{
-					num = num2;
-					fishingLure2 = fishingLure3;
-				}
-			}
-			if (fishingLure2 != null)
-			{
+				num = num2;
 				fishingLure = fishingLure2;
 			}
-			else
-			{
-				fishingLure = null;
-			}
 		}
-		return fishingLure;
+		if (fishingLure != null)
+		{
+			return fishingLure;
+		}
+		return null;
 	}
 
 	private void CleanUp()
@@ -282,12 +269,9 @@ public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadable
 			{
 				int num5 = Grid.PosToCell(smi.master.gameObject);
 				int num6 = Grid.CellBelow(num5);
-				if (!CreatureHelpers.isSwimmable(num5))
+				if (!CreatureHelpers.isSwimmable(num5) && Grid.Solid[num6])
 				{
-					if (Grid.Solid[num6])
-					{
-						smi.GoTo(this.alive.grounded);
-					}
+					smi.GoTo(this.alive.grounded);
 				}
 			});
 			this.alive.swimming.peacefully.idling.move.InitializeStates(this.alive.swimming.peacefully.idling.idle);

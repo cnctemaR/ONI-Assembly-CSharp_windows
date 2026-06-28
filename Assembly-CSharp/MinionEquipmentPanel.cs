@@ -37,10 +37,11 @@ public class MinionEquipmentPanel : KMonoBehaviour
 
 	public void Refresh(object data = null)
 	{
-		if (!(this.SelectedMinion == null))
+		if (this.SelectedMinion == null)
 		{
-			this.Build();
+			return;
 		}
+		this.Build();
 	}
 
 	protected override void OnCleanUp()
@@ -117,7 +118,7 @@ public class MinionEquipmentPanel : KMonoBehaviour
 
 	private string GetAssignedEffectsString(AssignableSlotInstance slot)
 	{
-		string text = "";
+		string text = string.Empty;
 		List<Descriptor> list = new List<Descriptor>();
 		list.AddRange(GameUtil.GetGameObjectEffects(slot.assignable.gameObject, false));
 		if (list.Count > 0)

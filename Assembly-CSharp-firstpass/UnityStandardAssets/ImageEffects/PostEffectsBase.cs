@@ -9,18 +9,17 @@ namespace UnityStandardAssets.ImageEffects
 	{
 		protected Material CheckShaderAndCreateMaterial(Shader s, Material m2Create)
 		{
-			Material material;
 			if (!s)
 			{
 				global::Debug.Log("Missing shader in " + this.ToString(), null);
 				base.enabled = false;
-				material = null;
+				return null;
 			}
-			else if (s.isSupported && m2Create && m2Create.shader == s)
+			if (s.isSupported && m2Create && m2Create.shader == s)
 			{
-				material = m2Create;
+				return m2Create;
 			}
-			else if (!s.isSupported)
+			if (!s.isSupported)
 			{
 				this.NotSupported();
 				global::Debug.Log(string.Concat(new string[]
@@ -31,54 +30,39 @@ namespace UnityStandardAssets.ImageEffects
 					this.ToString(),
 					" is not supported on this platform!"
 				}), null);
-				material = null;
+				return null;
 			}
-			else
+			m2Create = new Material(s);
+			m2Create.hideFlags = HideFlags.DontSave;
+			if (m2Create)
 			{
-				m2Create = new Material(s);
-				m2Create.hideFlags = HideFlags.DontSave;
-				if (m2Create)
-				{
-					material = m2Create;
-				}
-				else
-				{
-					material = null;
-				}
+				return m2Create;
 			}
-			return material;
+			return null;
 		}
 
 		protected Material CreateMaterial(Shader s, Material m2Create)
 		{
-			Material material;
 			if (!s)
 			{
 				global::Debug.Log("Missing shader in " + this.ToString(), null);
-				material = null;
+				return null;
 			}
-			else if (m2Create && m2Create.shader == s && s.isSupported)
+			if (m2Create && m2Create.shader == s && s.isSupported)
 			{
-				material = m2Create;
+				return m2Create;
 			}
-			else if (!s.isSupported)
+			if (!s.isSupported)
 			{
-				material = null;
+				return null;
 			}
-			else
+			m2Create = new Material(s);
+			m2Create.hideFlags = HideFlags.DontSave;
+			if (m2Create)
 			{
-				m2Create = new Material(s);
-				m2Create.hideFlags = HideFlags.DontSave;
-				if (m2Create)
-				{
-					material = m2Create;
-				}
-				else
-				{
-					material = null;
-				}
+				return m2Create;
 			}
-			return material;
+			return null;
 		}
 
 		private void OnEnable()
@@ -107,45 +91,35 @@ namespace UnityStandardAssets.ImageEffects
 			this.isSupported = true;
 			this.supportHDRTextures = SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf);
 			this.supportDX11 = SystemInfo.graphicsShaderLevel >= 50 && SystemInfo.supportsComputeShaders;
-			bool flag;
 			if (!SystemInfo.supportsImageEffects)
 			{
 				this.NotSupported();
-				flag = false;
+				return false;
 			}
-			else if (needDepth && !SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth))
+			if (needDepth && !SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth))
 			{
 				this.NotSupported();
-				flag = false;
+				return false;
 			}
-			else
+			if (needDepth)
 			{
-				if (needDepth)
-				{
-					base.GetComponent<Camera>().depthTextureMode |= DepthTextureMode.Depth;
-				}
-				flag = true;
+				base.GetComponent<Camera>().depthTextureMode |= DepthTextureMode.Depth;
 			}
-			return flag;
+			return true;
 		}
 
 		protected bool CheckSupport(bool needDepth, bool needHdr)
 		{
-			bool flag;
 			if (!this.CheckSupport(needDepth))
 			{
-				flag = false;
+				return false;
 			}
-			else if (needHdr && !this.supportHDRTextures)
+			if (needHdr && !this.supportHDRTextures)
 			{
 				this.NotSupported();
-				flag = false;
+				return false;
 			}
-			else
-			{
-				flag = true;
-			}
-			return flag;
+			return true;
 		}
 
 		public bool Dx11Support()
@@ -168,17 +142,12 @@ namespace UnityStandardAssets.ImageEffects
 				this.ToString(),
 				" is not part of the Unity 3.2+ effects suite anymore. For best performance and quality, please ensure you are using the latest Standard Assets Image Effects (Pro only) package."
 			}), null);
-			bool flag;
 			if (!s.isSupported)
 			{
 				this.NotSupported();
-				flag = false;
+				return false;
 			}
-			else
-			{
-				flag = false;
-			}
-			return flag;
+			return false;
 		}
 
 		protected void NotSupported()
@@ -264,7 +233,7 @@ namespace UnityStandardAssets.ImageEffects
 
 		protected bool supportHDRTextures = true;
 
-		protected bool supportDX11 = false;
+		protected bool supportDX11;
 
 		protected bool isSupported = true;
 	}

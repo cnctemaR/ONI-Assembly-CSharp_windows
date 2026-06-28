@@ -60,22 +60,19 @@ public class OxygenBreather : KMonoBehaviour
 		{
 			float num = this.airConsumptionRate.GetTotalValue() * dt;
 			bool flag = this.gasProvider.ConsumeGas(this, num);
-			if (flag)
+			if (flag && this.gasProvider.ShouldEmitCO2())
 			{
-				if (this.gasProvider.ShouldEmitCO2())
+				float num2 = num * this.O2toCO2conversion;
+				this.CO2Accumulator.Accumulate(num2);
+				this.accumulatedCO2 += num2;
+				if (this.accumulatedCO2 >= this.minCO2ToEmit)
 				{
-					float num2 = num * this.O2toCO2conversion;
-					this.CO2Accumulator.Accumulate(num2);
-					this.accumulatedCO2 += num2;
-					if (this.accumulatedCO2 >= this.minCO2ToEmit)
-					{
-						this.accumulatedCO2 -= this.minCO2ToEmit;
-						Vector3 position = base.transform.position;
-						position.x += ((!this.facing.GetFacing()) ? this.mouthOffset.x : (-this.mouthOffset.x));
-						position.y += this.mouthOffset.y;
-						position.z -= 0.5f;
-						CO2Manager.instance.SpawnBreath(position, this.minCO2ToEmit, this.temperature.value);
-					}
+					this.accumulatedCO2 -= this.minCO2ToEmit;
+					Vector3 position = base.transform.position;
+					position.x += ((!this.facing.GetFacing()) ? this.mouthOffset.x : (-this.mouthOffset.x));
+					position.y += this.mouthOffset.y;
+					position.z -= 0.5f;
+					CO2Manager.instance.SpawnBreath(position, this.minCO2ToEmit, this.temperature.value);
 				}
 			}
 			if (flag != this.hasAir)
@@ -144,18 +141,13 @@ public class OxygenBreather : KMonoBehaviour
 			offsets = this.breathableCells;
 		}
 		int mouthCellAtCell = this.GetMouthCellAtCell(cell, offsets);
-		SimHashes simHashes;
 		if (!Grid.IsValidCell(mouthCellAtCell))
 		{
-			simHashes = SimHashes.Vacuum;
+			return SimHashes.Vacuum;
 		}
-		else
-		{
-			Element element = Grid.Element[mouthCellAtCell];
-			bool flag = element.IsGas && element.HasTag(GameTags.Breathable) && Grid.Cell[mouthCellAtCell].mass > this.noOxygenThreshold;
-			simHashes = ((!flag) ? SimHashes.Vacuum : element.id);
-		}
-		return simHashes;
+		Element element = Grid.Element[mouthCellAtCell];
+		bool flag = element.IsGas && element.HasTag(GameTags.Breathable) && Grid.Cell[mouthCellAtCell].mass > this.noOxygenThreshold;
+		return (!flag) ? SimHashes.Vacuum : element.id;
 	}
 
 	public bool IsUnderLiquid

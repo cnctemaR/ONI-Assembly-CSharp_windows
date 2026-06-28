@@ -21,26 +21,19 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 	{
 		get
 		{
-			IUtilityNetworkMgr utilityNetworkMgr;
 			switch (this.connectionSource)
 			{
 			case KAnimGraphTileVisualizer.ConnectionSource.Gas:
-				utilityNetworkMgr = Game.Instance.gasConduitSystem;
-				break;
+				return Game.Instance.gasConduitSystem;
 			case KAnimGraphTileVisualizer.ConnectionSource.Liquid:
-				utilityNetworkMgr = Game.Instance.liquidConduitSystem;
-				break;
+				return Game.Instance.liquidConduitSystem;
 			case KAnimGraphTileVisualizer.ConnectionSource.Electrical:
-				utilityNetworkMgr = Game.Instance.electricalConduitSystem;
-				break;
+				return Game.Instance.electricalConduitSystem;
 			case KAnimGraphTileVisualizer.ConnectionSource.Logic:
-				utilityNetworkMgr = Game.Instance.logicCircuitSystem;
-				break;
+				return Game.Instance.logicCircuitSystem;
 			default:
-				utilityNetworkMgr = null;
-				break;
+				return null;
 			}
-			return utilityNetworkMgr;
 		}
 	}
 
@@ -69,23 +62,24 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 	[ContextMenu("Refresh")]
 	public void Refresh()
 	{
-		if (this.connectionManager != null && !this.skipRefresh)
+		if (this.connectionManager == null || this.skipRefresh)
 		{
-			int num = Grid.PosToCell(base.transform.position);
-			this.Connections = this.connectionManager.GetConnections(num, this.isPhysicalBuilding);
-			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-			if (component != null)
+			return;
+		}
+		int num = Grid.PosToCell(base.transform.position);
+		this.Connections = this.connectionManager.GetConnections(num, this.isPhysicalBuilding);
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		if (component != null)
+		{
+			string text = this.connectionManager.GetVisualizerString(num);
+			BuildingUnderConstruction component2 = base.GetComponent<BuildingUnderConstruction>();
+			if (component2 != null && component.HasAnimation(text + "_place"))
 			{
-				string text = this.connectionManager.GetVisualizerString(num);
-				BuildingUnderConstruction component2 = base.GetComponent<BuildingUnderConstruction>();
-				if (component2 != null && component.HasAnimation(text + "_place"))
-				{
-					text += "_place";
-				}
-				if (text != null && text != "")
-				{
-					component.Play(text, KAnim.PlayMode.Once, 1f, 0f);
-				}
+				text += "_place";
+			}
+			if (text != null && text != string.Empty)
+			{
+				component.Play(text, KAnim.PlayMode.Once, 1f, 0f);
 			}
 		}
 	}
@@ -179,18 +173,18 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 	}
 
 	[Serialize]
-	private UtilityConnections _connections = (UtilityConnections)0;
+	private UtilityConnections _connections;
 
 	public bool isPhysicalBuilding;
 
-	public bool skipCleanup = false;
+	public bool skipCleanup;
 
-	public bool skipRefresh = false;
+	public bool skipRefresh;
 
 	public KAnimGraphTileVisualizer.ConnectionSource connectionSource;
 
 	[NonSerialized]
-	public IUtilityNetworkMgr connectionManager = null;
+	public IUtilityNetworkMgr connectionManager;
 
 	public enum ConnectionSource
 	{

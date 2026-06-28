@@ -18,16 +18,11 @@ public class Operational : KMonoBehaviour
 
 	public bool IsOperationalType(Operational.Flag.Type type)
 	{
-		bool flag;
 		if (type == Operational.Flag.Type.Functional)
 		{
-			flag = this.IsFunctional;
+			return this.IsFunctional;
 		}
-		else
-		{
-			flag = this.IsOperational;
-		}
-		return flag;
+		return this.IsOperational;
 	}
 
 	public void SetFlag(Operational.Flag flag, bool value)

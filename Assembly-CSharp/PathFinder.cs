@@ -185,21 +185,15 @@ public class PathFinder
 						}
 						bool flag = query_id != cell.queryId;
 						bool flag2 = num3 < cell.cost;
-						if (flag || flag2)
+						if ((flag || flag2) && Grid.IsValidCell(num2))
 						{
-							if (Grid.IsValidCell(num2))
+							PathFinder.PotentialPath potentialPath = parent_potential;
+							potentialPath.cell = num2;
+							potentialPath.navType = links[num].endNavType;
+							if (abilities.CanTraverse(potentialPath, parent_potential.cell, num3, links[num].transitionId, num4) && (query == null || query.CanTraverse(num2, parent_potential.cell, num3, num4)))
 							{
-								PathFinder.PotentialPath potentialPath = parent_potential;
-								potentialPath.cell = num2;
-								potentialPath.navType = links[num].endNavType;
-								if (abilities.CanTraverse(potentialPath, parent_potential.cell, num3, links[num].transitionId, num4))
-								{
-									if (query == null || query.CanTraverse(num2, parent_potential.cell, num3, num4))
-									{
-										abilities.ApplyTraversalToPath(ref potentialPath, parent_potential.cell);
-										PathFinder.AddPotential(potentialPath, parent_potential.cell, parent_potential.navType, num3, num4, links[num].transitionId, ref next_potential_idx, potentials, query_id, path_grid, !flag && flag2, ref cell);
-									}
-								}
+								abilities.ApplyTraversalToPath(ref potentialPath, parent_potential.cell);
+								PathFinder.AddPotential(potentialPath, parent_potential.cell, parent_potential.navType, num3, num4, links[num].transitionId, ref next_potential_idx, potentials, query_id, path_grid, !flag && flag2, ref cell);
 							}
 						}
 					}

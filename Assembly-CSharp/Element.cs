@@ -89,24 +89,19 @@ public class Element : IComparable<Element>
 
 	public static string GetStateString(Element.State state)
 	{
-		string text;
 		if ((byte)(state & Element.State.Solid) == 3)
 		{
-			text = ELEMENTS.STATE.SOLID;
+			return ELEMENTS.STATE.SOLID;
 		}
-		else if ((byte)(state & Element.State.Solid) == 2)
+		if ((byte)(state & Element.State.Solid) == 2)
 		{
-			text = ELEMENTS.STATE.LIQUID;
+			return ELEMENTS.STATE.LIQUID;
 		}
-		else if ((byte)(state & Element.State.Solid) == 1)
+		if ((byte)(state & Element.State.Solid) == 1)
 		{
-			text = ELEMENTS.STATE.GAS;
+			return ELEMENTS.STATE.GAS;
 		}
-		else
-		{
-			text = ELEMENTS.STATE.VACUUM;
-		}
-		return text;
+		return ELEMENTS.STATE.VACUUM;
 	}
 
 	public string FullDescription(bool addHardnessColor = true)
@@ -130,7 +125,7 @@ public class Element : IComparable<Element>
 		if (this.oreTags.Length > 0 && !this.IsVacuum)
 		{
 			text += "\n\n";
-			string text2 = "";
+			string text2 = string.Empty;
 			for (int i = 0; i < this.oreTags.Length; i++)
 			{
 				Tag tag = new Tag(this.oreTags[i]);
@@ -169,23 +164,18 @@ public class Element : IComparable<Element>
 
 	public bool HasTag(Tag search_tag)
 	{
-		bool flag;
 		if (this.tag == search_tag)
 		{
-			flag = true;
+			return true;
 		}
-		else
+		for (int i = 0; i < this.oreTags.Length; i++)
 		{
-			for (int i = 0; i < this.oreTags.Length; i++)
+			if (this.oreTags[i] == search_tag)
 			{
-				if (this.oreTags[i] == search_tag)
-				{
-					return true;
-				}
+				return true;
 			}
-			flag = false;
 		}
-		return flag;
+		return false;
 	}
 
 	public Tag GetMaterialCategoryTag()
@@ -206,17 +196,17 @@ public class Element : IComparable<Element>
 
 	public float thermalConductivity = 1f;
 
-	public float electricalConductivity = 0f;
+	public float electricalConductivity;
 
 	public float molarMass = 1f;
 
 	public float strength;
 
-	public float flow = 0f;
+	public float flow;
 
-	public float maxCompression = 0f;
+	public float maxCompression;
 
-	public float viscosity = 0f;
+	public float viscosity;
 
 	public float minHorizontalLiquidFlow = float.PositiveInfinity;
 
@@ -232,7 +222,7 @@ public class Element : IComparable<Element>
 
 	public Element.State state;
 
-	public byte hardness = 0;
+	public byte hardness;
 
 	public float lowTemp;
 
@@ -248,7 +238,7 @@ public class Element : IComparable<Element>
 
 	public SimHashes highTempTransitionOreID = SimHashes.Vacuum;
 
-	public float highTempTransitionOreMassConversion = 0f;
+	public float highTempTransitionOreMassConversion;
 
 	public SimHashes sublimateId;
 
@@ -258,11 +248,11 @@ public class Element : IComparable<Element>
 
 	public Sim.PhysicsData defaultValues;
 
-	public float emitDistance = 0f;
+	public float emitDistance;
 
-	public int emitIntensity = 0;
+	public int emitIntensity;
 
-	public float transparency = 0f;
+	public float transparency;
 
 	public float toxicity;
 

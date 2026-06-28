@@ -24,13 +24,10 @@ public class AcousticDisturbance
 				if (num4 <= (float)num2)
 				{
 					int num5 = Grid.PosToCell(vector2);
-					if (AcousticDisturbance.cellsInRange.Contains(num5))
+					if (AcousticDisturbance.cellsInRange.Contains(num5) && minionIdentity.GetSMI<StaminaMonitor.Instance>().IsSleeping())
 					{
-						if (minionIdentity.GetSMI<StaminaMonitor.Instance>().IsSleeping())
-						{
-							minionIdentity.Trigger(-527751701, data);
-							minionIdentity.Trigger(1338475637, data);
-						}
+						minionIdentity.Trigger(-527751701, data);
+						minionIdentity.Trigger(1338475637, data);
 					}
 				}
 			}
@@ -74,39 +71,41 @@ public class AcousticDisturbance
 
 	private static void DetermineCellsInRadius(int cell, int depth, int max_depth, HashSet<int> cells_in_range)
 	{
-		if (Grid.IsValidCell(cell))
+		if (!Grid.IsValidCell(cell))
 		{
-			if (!Grid.Solid[cell])
+			return;
+		}
+		if (Grid.Solid[cell])
+		{
+			return;
+		}
+		cells_in_range.Add(cell);
+		if (depth < max_depth)
+		{
+			int num = depth + 1;
+			int num2 = Grid.CellBelow(cell);
+			int num3 = Grid.CellAbove(cell);
+			int num4 = cell - 1;
+			int num5 = cell + 1;
+			if (!Grid.Solid[num2] || !Grid.Solid[num4])
 			{
-				cells_in_range.Add(cell);
-				if (depth < max_depth)
-				{
-					int num = depth + 1;
-					int num2 = Grid.CellBelow(cell);
-					int num3 = Grid.CellAbove(cell);
-					int num4 = cell - 1;
-					int num5 = cell + 1;
-					if (!Grid.Solid[num2] || !Grid.Solid[num4])
-					{
-						AcousticDisturbance.DetermineCellsInRadius(num2 - 1, num, max_depth, AcousticDisturbance.cellsInRange);
-					}
-					AcousticDisturbance.DetermineCellsInRadius(num2, num, max_depth, AcousticDisturbance.cellsInRange);
-					if (!Grid.Solid[num2] || !Grid.Solid[num5])
-					{
-						AcousticDisturbance.DetermineCellsInRadius(num2 + 1, num, max_depth, AcousticDisturbance.cellsInRange);
-					}
-					AcousticDisturbance.DetermineCellsInRadius(Grid.CellLeft(cell), num, max_depth, AcousticDisturbance.cellsInRange);
-					AcousticDisturbance.DetermineCellsInRadius(Grid.CellRight(cell), num, max_depth, AcousticDisturbance.cellsInRange);
-					if (!Grid.Solid[num3] || !Grid.Solid[num4])
-					{
-						AcousticDisturbance.DetermineCellsInRadius(num3 - 1, num, max_depth, AcousticDisturbance.cellsInRange);
-					}
-					AcousticDisturbance.DetermineCellsInRadius(num3, num, max_depth, AcousticDisturbance.cellsInRange);
-					if (!Grid.Solid[num3] || !Grid.Solid[num5])
-					{
-						AcousticDisturbance.DetermineCellsInRadius(num3 + 1, num, max_depth, AcousticDisturbance.cellsInRange);
-					}
-				}
+				AcousticDisturbance.DetermineCellsInRadius(num2 - 1, num, max_depth, AcousticDisturbance.cellsInRange);
+			}
+			AcousticDisturbance.DetermineCellsInRadius(num2, num, max_depth, AcousticDisturbance.cellsInRange);
+			if (!Grid.Solid[num2] || !Grid.Solid[num5])
+			{
+				AcousticDisturbance.DetermineCellsInRadius(num2 + 1, num, max_depth, AcousticDisturbance.cellsInRange);
+			}
+			AcousticDisturbance.DetermineCellsInRadius(Grid.CellLeft(cell), num, max_depth, AcousticDisturbance.cellsInRange);
+			AcousticDisturbance.DetermineCellsInRadius(Grid.CellRight(cell), num, max_depth, AcousticDisturbance.cellsInRange);
+			if (!Grid.Solid[num3] || !Grid.Solid[num4])
+			{
+				AcousticDisturbance.DetermineCellsInRadius(num3 - 1, num, max_depth, AcousticDisturbance.cellsInRange);
+			}
+			AcousticDisturbance.DetermineCellsInRadius(num3, num, max_depth, AcousticDisturbance.cellsInRange);
+			if (!Grid.Solid[num3] || !Grid.Solid[num5])
+			{
+				AcousticDisturbance.DetermineCellsInRadius(num3 + 1, num, max_depth, AcousticDisturbance.cellsInRange);
 			}
 		}
 	}

@@ -13,21 +13,16 @@ public class CellCostQuery : PathFinderQuery
 
 	public override bool IsMatch(int cell, int parent_cell, int cost)
 	{
-		bool flag;
 		if (cost > this.maxCost)
 		{
-			flag = true;
+			return true;
 		}
-		else if (cell == this.targetCell)
+		if (cell == this.targetCell)
 		{
 			this.resultCost = cost;
-			flag = true;
+			return true;
 		}
-		else
-		{
-			flag = false;
-		}
-		return flag;
+		return false;
 	}
 
 	private int targetCell;

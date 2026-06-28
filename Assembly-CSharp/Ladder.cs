@@ -56,5 +56,5 @@ public class Ladder : KMonoBehaviour, IEffectDescriptor
 
 	public float downwardsMovementSpeedMultiplier = 1f;
 
-	public bool isPole = false;
+	public bool isPole;
 }

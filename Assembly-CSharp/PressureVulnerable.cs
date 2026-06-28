@@ -143,7 +143,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 	{
 		get
 		{
-			string text = "";
+			string text = string.Empty;
 			if (base.smi.IsInsideState(base.smi.sm.warningLow) || base.smi.IsInsideState(base.smi.sm.lethalLow))
 			{
 				text += Db.Get().CreatureStatusItems.AtmosphericPressureTooLow.resolveStringCallback(CREATURES.STATUSITEMS.ATMOSPHERICPRESSURETOOLOW.NAME, this);
@@ -203,7 +203,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		}
 		if (this.safe_atmospheres != null && this.safe_atmospheres.Count > 0)
 		{
-			string text = "";
+			string text = string.Empty;
 			foreach (Element element in this.safe_atmospheres)
 			{
 				text = text + "\n        • " + element.name;
@@ -263,7 +263,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 			}
 		}
 
-		public bool hasMaturity = false;
+		public bool hasMaturity;
 	}
 
 	public class States : GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable>

@@ -114,17 +114,18 @@ namespace NodeEditorFramework
 		[EventHandler(EventType.MouseDown, 110)]
 		private static void HandleNodeDraggingStart(NodeEditorInputInfo inputInfo)
 		{
-			if (GUIUtility.hotControl <= 0)
+			if (GUIUtility.hotControl > 0)
 			{
-				NodeEditorState editorState = inputInfo.editorState;
-				if (inputInfo.inputEvent.button == 0 && editorState.focusedNode != null && editorState.focusedNode == editorState.selectedNode && editorState.focusedNodeKnob == null)
-				{
-					editorState.dragNode = true;
-					editorState.dragStart = inputInfo.inputPos;
-					editorState.dragPos = editorState.focusedNode.rect.position;
-					editorState.dragOffset = Vector2.zero;
-					inputInfo.inputEvent.delta = Vector2.zero;
-				}
+				return;
+			}
+			NodeEditorState editorState = inputInfo.editorState;
+			if (inputInfo.inputEvent.button == 0 && editorState.focusedNode != null && editorState.focusedNode == editorState.selectedNode && editorState.focusedNodeKnob == null)
+			{
+				editorState.dragNode = true;
+				editorState.dragStart = inputInfo.inputPos;
+				editorState.dragPos = editorState.focusedNode.rect.position;
+				editorState.dragOffset = Vector2.zero;
+				inputInfo.inputEvent.delta = Vector2.zero;
 			}
 		}
 
@@ -158,15 +159,16 @@ namespace NodeEditorFramework
 		[EventHandler(EventType.MouseDown, 100)]
 		private static void HandleWindowPanningStart(NodeEditorInputInfo inputInfo)
 		{
-			if (GUIUtility.hotControl <= 0)
+			if (GUIUtility.hotControl > 0)
 			{
-				NodeEditorState editorState = inputInfo.editorState;
-				if ((inputInfo.inputEvent.button == 0 || inputInfo.inputEvent.button == 2) && editorState.focusedNode == null)
-				{
-					editorState.panWindow = true;
-					editorState.dragStart = inputInfo.inputPos;
-					editorState.dragOffset = Vector2.zero;
-				}
+				return;
+			}
+			NodeEditorState editorState = inputInfo.editorState;
+			if ((inputInfo.inputEvent.button == 0 || inputInfo.inputEvent.button == 2) && editorState.focusedNode == null)
+			{
+				editorState.panWindow = true;
+				editorState.dragStart = inputInfo.inputPos;
+				editorState.dragOffset = Vector2.zero;
 			}
 		}
 

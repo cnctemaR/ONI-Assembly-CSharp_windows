@@ -22,27 +22,19 @@ namespace Database
 
 		public TechItem AddTechItem(string id, string name, string description, Func<string, Sprite> getUISprite)
 		{
-			TechItem techItem;
 			if (base.TryGet(id) != null)
 			{
 				Output.LogWarning(new object[] { "Tried adding a tech item called", id, name, "but it was already added!" });
-				techItem = base.Get(id);
+				return base.Get(id);
 			}
-			else
+			Tech tech = this.LookupGroupForID(id);
+			if (tech == null)
 			{
-				Tech tech = this.LookupGroupForID(id);
-				if (tech == null)
-				{
-					techItem = null;
-				}
-				else
-				{
-					TechItem techItem2 = new TechItem(id, this, name, description, getUISprite, tech);
-					base.Add(techItem2);
-					tech.unlockedItems.Add(techItem2);
-					techItem = techItem2;
-				}
+				return null;
 			}
+			TechItem techItem = new TechItem(id, this, name, description, getUISprite, tech);
+			base.Add(techItem);
+			tech.unlockedItems.Add(techItem);
 			return techItem;
 		}
 

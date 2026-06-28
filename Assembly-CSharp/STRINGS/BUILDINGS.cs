@@ -75,13 +75,13 @@ namespace STRINGS
 
 				public static LocString DESC = "Smart batteries are designed to be integrated into logic systems and will become <style=\"logic\">Active</style> if they are charged above a user specified threshold";
 
-				public static LocString EFFECT = "";
+				public static LocString EFFECT = string.Empty;
 
 				public static LocString LOGIC_PORT_DESC = "<style=\"logic\">Active</style> if power level exceeds a threshold";
 
 				public static LocString SIDESCREEN_LOGIC_ACTIVE_THRESHOLD = "Logic Active Threshold";
 
-				public static LocString SIDESCREEN_LOGIC_ACTIVE_THRESHOLD_TOOLTIP = "";
+				public static LocString SIDESCREEN_LOGIC_ACTIVE_THRESHOLD_TOOLTIP = string.Empty;
 			}
 
 			public class BED
@@ -248,7 +248,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = "A strong door with a sophisticated genetic lock.";
 
-				public static LocString DESC = "";
+				public static LocString DESC = string.Empty;
 			}
 
 			public class POIDOORINTERNAL
@@ -257,7 +257,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = "A strong door with a sophisticated genetic lock.";
 
-				public static LocString DESC = "";
+				public static LocString DESC = string.Empty;
 			}
 
 			public class DOOR
@@ -1122,7 +1122,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Tile";
 
-				public static LocString DESC = "";
+				public static LocString DESC = string.Empty;
 
 				public static LocString EFFECT = "Used as floor and wall tile to build rooms.";
 			}
@@ -1209,7 +1209,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Anti Entropy Thermo-Nullifier";
 
-				public static LocString DESC = "";
+				public static LocString DESC = string.Empty;
 
 				public static LocString EFFECT = "A self-sustaining machine powered by what appears to be refined <style=\"solid\">Neutronium</style>.\n\nAbsorbs and neutralizes <style=\"heat\">Heat</style> energy when submersed in <style=\"gas\">Hydrogen</style>.";
 			}
@@ -1236,7 +1236,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "AND Gate";
 
-				public static LocString DESC = "";
+				public static LocString DESC = string.Empty;
 
 				public static LocString EFFECT = "Becomes <style=\"logic\">Active</style> when the systems connected to its Inputs are both <style=\"logic\">Active</style>.\n\nGoes into <style=\"logic\">Standby</style> when one or both Inputs are on <style=\"logic\">Standby</style>.";
 			}
@@ -1245,7 +1245,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "OR Gate";
 
-				public static LocString DESC = "";
+				public static LocString DESC = string.Empty;
 
 				public static LocString EFFECT = "Becomes <style=\"logic\">Active</style> if one or both of the systems connected to its Inputs are <style=\"logic\">Active</style>.\n\nGoes into <style=\"logic\">Standby</style> when neither Inputs are <style=\"logic\">Active</style>.";
 			}
@@ -1254,7 +1254,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "NOT Gate";
 
-				public static LocString DESC = "";
+				public static LocString DESC = string.Empty;
 
 				public static LocString EFFECT = "Becomes <style=\"logic\">Active</style> if the system connected to its Input is on <style=\"logic\">Standby</style>.\n\nGoes into <style=\"logic\">Standby</style> when its Input is <style=\"logic\">Active</style>.";
 			}
@@ -1263,7 +1263,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "XOR Gate";
 
-				public static LocString DESC = "";
+				public static LocString DESC = string.Empty;
 
 				public static LocString EFFECT = "Becomes <style=\"logic\">Active</style> if one of the systems connected to its Inputs is <style=\"logic\">Active</style>.\n\nGoes into <style=\"logic\">Standby</style> if both or neither Inputs are <style=\"logic\">Active</style>.";
 			}
@@ -1272,7 +1272,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "BUFFER Gate";
 
-				public static LocString DESC = "";
+				public static LocString DESC = string.Empty;
 
 				public static LocString EFFECT = "Becomes <style=\"logic\">Active</style> if the system connected to its Input is <style=\"logic\">Active</style>.\n\nStays <style=\"logic\">Active</style> for a short time after its Input enters <style=\"logic\">Standby</style>.";
 			}
@@ -1281,7 +1281,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "FILTER Gate";
 
-				public static LocString DESC = "";
+				public static LocString DESC = string.Empty;
 
 				public static LocString EFFECT = "Enters <style=\"logic\">Standby</style> if the system connected to its Input is also on <style=\"logic\">Standby</style>.\n\nStays in <style=\"logic\">Standby</style> for a short time after its Input becomes <style=\"logic\">Active</style>.";
 			}

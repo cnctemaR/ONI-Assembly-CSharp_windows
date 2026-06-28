@@ -9,15 +9,10 @@ public static class UnitsUtil
 
 	public static string GetUnitSuffix(Units unit)
 	{
-		string text;
 		if (unit != Units.Kelvin)
 		{
-			text = "";
+			return string.Empty;
 		}
-		else
-		{
-			text = "K";
-		}
-		return text;
+		return "K";
 	}
 }

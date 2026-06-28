@@ -43,72 +43,74 @@ public class DecorNeed : Need
 
 	private void Update()
 	{
-		if (!this.skipUpdate)
+		if (this.skipUpdate)
 		{
-			int num = Grid.PosToCell(base.gameObject);
-			if (Grid.IsValidCell(num))
+			return;
+		}
+		int num = Grid.PosToCell(base.gameObject);
+		if (!Grid.IsValidCell(num))
+		{
+			return;
+		}
+		float decorAtCell = GameUtil.GetDecorAtCell(num);
+		float num2 = 0f;
+		float num3 = 4.1666665f;
+		if (Mathf.Abs(decorAtCell - this.amount.value) > 0.1f)
+		{
+			if (decorAtCell > this.amount.value)
 			{
-				float decorAtCell = GameUtil.GetDecorAtCell(num);
-				float num2 = 0f;
-				float num3 = 4.1666665f;
-				if (Mathf.Abs(decorAtCell - this.amount.value) > 0.1f)
+				num2 = 3f * num3;
+			}
+			else if (decorAtCell < this.amount.value)
+			{
+				num2 = -num3;
+			}
+		}
+		else
+		{
+			this.amount.value = decorAtCell;
+		}
+		this.modifier.SetValue(num2);
+		bool flag = false;
+		float totalValue = this.expectationAttribute.GetTotalValue();
+		AttributeModifier attributeModifier;
+		if (this.amount.value <= 0f)
+		{
+			flag = true;
+			attributeModifier = this.decorStressPenalty;
+		}
+		else if (this.amount.value >= totalValue)
+		{
+			attributeModifier = this.decorStressBonus;
+		}
+		else
+		{
+			attributeModifier = this.decorStressNeutral;
+		}
+		if (this.currentStressModifier != attributeModifier)
+		{
+			Attributes attributes = this.GetAttributes();
+			if (this.currentStressModifier != null)
+			{
+				attributes.Remove(this.currentStressModifier);
+			}
+			if (attributeModifier != null)
+			{
+				attributes.Add(attributeModifier.Description, attributeModifier);
+			}
+			ThoughtGraph.Instance smi = this.GetSMI<ThoughtGraph.Instance>();
+			if (smi != null)
+			{
+				if (flag)
 				{
-					if (decorAtCell > this.amount.value)
-					{
-						num2 = 3f * num3;
-					}
-					else if (decorAtCell < this.amount.value)
-					{
-						num2 = -num3;
-					}
+					base.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.PoorDecor, this);
 				}
 				else
 				{
-					this.amount.value = decorAtCell;
-				}
-				this.modifier.SetValue(num2);
-				bool flag = false;
-				float totalValue = this.expectationAttribute.GetTotalValue();
-				AttributeModifier attributeModifier;
-				if (this.amount.value <= 0f)
-				{
-					flag = true;
-					attributeModifier = this.decorStressPenalty;
-				}
-				else if (this.amount.value >= totalValue)
-				{
-					attributeModifier = this.decorStressBonus;
-				}
-				else
-				{
-					attributeModifier = this.decorStressNeutral;
-				}
-				if (this.currentStressModifier != attributeModifier)
-				{
-					Attributes attributes = this.GetAttributes();
-					if (this.currentStressModifier != null)
-					{
-						attributes.Remove(this.currentStressModifier);
-					}
-					if (attributeModifier != null)
-					{
-						attributes.Add(attributeModifier.Description, attributeModifier);
-					}
-					ThoughtGraph.Instance smi = this.GetSMI<ThoughtGraph.Instance>();
-					if (smi != null)
-					{
-						if (flag)
-						{
-							base.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.PoorDecor, this);
-						}
-						else
-						{
-							base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.PoorDecor, false);
-						}
-					}
-					this.currentStressModifier = attributeModifier;
+					base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.PoorDecor, false);
 				}
 			}
+			this.currentStressModifier = attributeModifier;
 		}
 	}
 

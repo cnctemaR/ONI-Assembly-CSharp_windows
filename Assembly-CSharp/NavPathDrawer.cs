@@ -80,39 +80,43 @@ public class NavPathDrawer : KMonoBehaviour
 
 	private void DebugDrawSelectedNavigator()
 	{
-		if (DebugHandler.DebugPathFinding)
+		if (!DebugHandler.DebugPathFinding)
 		{
-			if (!(SelectTool.Instance == null))
+			return;
+		}
+		if (SelectTool.Instance == null)
+		{
+			return;
+		}
+		if (SelectTool.Instance.selected == null)
+		{
+			return;
+		}
+		Navigator component = SelectTool.Instance.selected.GetComponent<Navigator>();
+		if (component == null)
+		{
+			return;
+		}
+		int mouseCell = DebugHandler.GetMouseCell();
+		if (Grid.IsValidCell(mouseCell))
+		{
+			PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(Grid.PosToCell(component), component.CurrentNavType, component.flags);
+			PathFinder.Path path = default(PathFinder.Path);
+			PathFinder.UpdatePath(component.NavGrid, component.GetCurrentAbilities(), potentialPath, PathFinderQueries.cellOffsetQuery.Reset(mouseCell, Grid.DefaultOffset), ref path);
+			string text = string.Empty;
+			string text2 = text;
+			text = string.Concat(new object[]
 			{
-				if (!(SelectTool.Instance.selected == null))
-				{
-					Navigator component = SelectTool.Instance.selected.GetComponent<Navigator>();
-					if (!(component == null))
-					{
-						int mouseCell = DebugHandler.GetMouseCell();
-						if (Grid.IsValidCell(mouseCell))
-						{
-							PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(Grid.PosToCell(component), component.CurrentNavType, component.flags);
-							PathFinder.Path path = default(PathFinder.Path);
-							PathFinder.UpdatePath(component.NavGrid, component.GetCurrentAbilities(), potentialPath, PathFinderQueries.cellOffsetQuery.Reset(mouseCell, Grid.DefaultOffset), ref path);
-							string text = "";
-							string text2 = text;
-							text = string.Concat(new object[]
-							{
-								text2,
-								"Source: ",
-								Grid.PosToCell(component),
-								"\n"
-							});
-							text2 = text;
-							text = string.Concat(new object[] { text2, "Dest: ", mouseCell, "\n" });
-							text = text + "Cost: " + path.cost;
-							this.DrawPath(path, component.GetComponent<KAnimControllerBase>().GetPivotSymbolPosition(), Color.green);
-							DebugText.Instance.Draw(text, Grid.CellToPosCCC(mouseCell, Grid.SceneLayer.Move), Color.white);
-						}
-					}
-				}
-			}
+				text2,
+				"Source: ",
+				Grid.PosToCell(component),
+				"\n"
+			});
+			text2 = text;
+			text = string.Concat(new object[] { text2, "Dest: ", mouseCell, "\n" });
+			text = text + "Cost: " + path.cost;
+			this.DrawPath(path, component.GetComponent<KAnimControllerBase>().GetPivotSymbolPosition(), Color.green);
+			DebugText.Instance.Draw(text, Grid.CellToPosCCC(mouseCell, Grid.SceneLayer.Move), Color.white);
 		}
 	}
 

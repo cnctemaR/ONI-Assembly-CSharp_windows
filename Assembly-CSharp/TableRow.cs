@@ -17,18 +17,20 @@ public class TableRow : KMonoBehaviour
 
 	public void SelectMinion()
 	{
-		if (!(this.minion == null))
+		if (this.minion == null)
 		{
-			SelectTool.Instance.Select(this.minion.GetComponent<KSelectable>(), false);
+			return;
 		}
+		SelectTool.Instance.Select(this.minion.GetComponent<KSelectable>(), false);
 	}
 
 	public void SelectAndFocusMinion()
 	{
-		if (!(this.minion == null))
+		if (this.minion == null)
 		{
-			SelectTool.Instance.SelectAndFocus(this.minion.transform.position, this.minion.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
+			return;
 		}
+		SelectTool.Instance.SelectAndFocus(this.minion.transform.position, this.minion.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
 	}
 
 	public void ConfigureContent(MinionIdentity minion, Dictionary<string, TableColumn> columns)
@@ -81,17 +83,12 @@ public class TableRow : KMonoBehaviour
 
 	public GameObject GetWidget(TableColumn column)
 	{
-		GameObject gameObject;
 		if (this.widgets.ContainsKey(column) && this.widgets[column] != null)
 		{
-			gameObject = this.widgets[column];
+			return this.widgets[column];
 		}
-		else
-		{
-			global::Debug.LogWarning("Widget is null or row does not contain widget for column " + column, null);
-			gameObject = null;
-		}
-		return gameObject;
+		global::Debug.LogWarning("Widget is null or row does not contain widget for column " + column, null);
+		return null;
 	}
 
 	public MinionIdentity GetMinionIdentity()
@@ -119,7 +116,7 @@ public class TableRow : KMonoBehaviour
 
 	private Dictionary<TableColumn, GameObject> widgets = new Dictionary<TableColumn, GameObject>();
 
-	public bool isDefault = false;
+	public bool isDefault;
 
 	[MyCmpGet]
 	private HorizontalLayoutGroup HLG;

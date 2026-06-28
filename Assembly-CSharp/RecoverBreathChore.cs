@@ -51,14 +51,16 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 		public void RemoveSuitIfNecessary()
 		{
 			Equipment equipment = base.sm.recoverer.Get<Equipment>(base.smi);
-			if (!(equipment == null))
+			if (equipment == null)
 			{
-				Assignable assignable = equipment.GetAssignable(global::TUNING.EQUIPMENT.SUIT_SLOT);
-				if (!(assignable == null))
-				{
-					assignable.Unassign();
-				}
+				return;
 			}
+			Assignable assignable = equipment.GetAssignable(global::TUNING.EQUIPMENT.SUIT_SLOT);
+			if (assignable == null)
+			{
+				return;
+			}
+			assignable.Unassign();
 		}
 
 		public AttributeModifier recoveringbreath;

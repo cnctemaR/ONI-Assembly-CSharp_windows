@@ -30,11 +30,11 @@ public class BuildQueueButton : KMonoBehaviour
 	{
 		if (this.order != null)
 		{
-			string text = "";
-			bool flag = this.CheckMaterialAvailability(this.order, out text);
+			string empty = string.Empty;
+			bool flag = this.CheckMaterialAvailability(this.order, out empty);
 			if (this.materialsAvailable != flag)
 			{
-				this.SetAvailability(this.order.Result.ProperName(), flag, text);
+				this.SetAvailability(this.order.Result.ProperName(), flag, empty);
 			}
 		}
 	}
@@ -92,7 +92,7 @@ public class BuildQueueButton : KMonoBehaviour
 
 	private bool CheckMaterialAvailability(IBuildQueueOrder order, out string newTooltip)
 	{
-		newTooltip = "";
+		newTooltip = string.Empty;
 		Dictionary<Tag, float> dictionary = order.CheckMaterialRequirements();
 		bool flag = true;
 		foreach (KeyValuePair<Tag, float> keyValuePair in dictionary)
@@ -149,9 +149,9 @@ public class BuildQueueButton : KMonoBehaviour
 				this.BG.sprite = this.filledBG;
 				this.order = order;
 				this.infiniteImg.SetActive(order.Infinite);
-				string text = "";
-				bool flag = this.CheckMaterialAvailability(order, out text);
-				this.SetAvailability(order.Result.ProperName(), flag, text);
+				string empty = string.Empty;
+				bool flag = this.CheckMaterialAvailability(order, out empty);
+				this.SetAvailability(order.Result.ProperName(), flag, empty);
 			}
 			else
 			{

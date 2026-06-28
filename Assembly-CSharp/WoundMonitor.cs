@@ -130,12 +130,9 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 			}
 			string text = "hit";
 			AttackChore.StatesInstance smi = base.gameObject.GetSMI<AttackChore.StatesInstance>();
-			if (smi != null)
+			if (smi != null && smi.GetCurrentState() == smi.sm.attack)
 			{
-				if (smi.GetCurrentState() == smi.sm.attack)
-				{
-					text = smi.master.GetHitAnim();
-				}
+				text = smi.master.GetHitAnim();
 			}
 			if (this.worker.GetComponent<Navigator>().CurrentNavType == NavType.Ladder)
 			{

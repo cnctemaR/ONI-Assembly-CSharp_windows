@@ -37,31 +37,32 @@ public class NativeAnimBatchLoader : MonoBehaviour
 
 	private void LateUpdate()
 	{
-		if (!this.destroySelf)
+		if (this.destroySelf)
 		{
-			if (this.performUpdate)
-			{
-				KAnimBatchManager.Instance().UpdateActiveArea(new Vector2I(0, 0), new Vector2I(9999, 9999));
-				KAnimBatchManager.Instance().UpdateDirty(Time.frameCount);
-			}
-			if (this.performRender)
-			{
-				KAnimBatchManager.Instance().Render();
-			}
+			return;
+		}
+		if (this.performUpdate)
+		{
+			KAnimBatchManager.Instance().UpdateActiveArea(new Vector2I(0, 0), new Vector2I(9999, 9999));
+			KAnimBatchManager.Instance().UpdateDirty(Time.frameCount);
+		}
+		if (this.performRender)
+		{
+			KAnimBatchManager.Instance().Render();
 		}
 	}
 
-	public bool performTimeUpdate = false;
+	public bool performTimeUpdate;
 
-	public bool performUpdate = false;
+	public bool performUpdate;
 
-	public bool performRender = false;
+	public bool performRender;
 
-	public bool setTimeScale = false;
+	public bool setTimeScale;
 
-	public bool destroySelf = false;
+	public bool destroySelf;
 
-	public bool generateObjects = false;
+	public bool generateObjects;
 
 	public GameObject[] enableObjects;
 }

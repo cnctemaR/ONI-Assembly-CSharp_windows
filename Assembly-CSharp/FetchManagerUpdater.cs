@@ -80,56 +80,48 @@ public class FetchManagerUpdater
 
 	public static bool IsFetchablePickup(KPrefabID pickup_id, Storage source, float pickup_unreserved_amount, float pickup_min_unit, float maximum_requested, Tag[] tags, Tag[] required_tags, Tag[] forbid_tags, Storage destination)
 	{
-		bool flag;
 		if (pickup_id == null)
 		{
-			flag = false;
+			return false;
 		}
-		else
+		if (required_tags != null)
 		{
-			if (required_tags != null)
+			foreach (Tag tag in required_tags)
 			{
-				foreach (Tag tag in required_tags)
+				if (!pickup_id.HasTag(tag))
 				{
-					if (!pickup_id.HasTag(tag))
-					{
-						return false;
-					}
+					return false;
 				}
 			}
-			if (forbid_tags != null)
-			{
-				foreach (Tag tag2 in forbid_tags)
-				{
-					if (pickup_id.HasTag(tag2))
-					{
-						return false;
-					}
-				}
-			}
-			if (source != null)
-			{
-				if (destination.allowItemRemoval)
-				{
-					int num = 10;
-					if (destination.prioritizable != null)
-					{
-						num = destination.prioritizable.GetMasterPriority().priority_value;
-					}
-					int num2 = 10;
-					if (source.prioritizable != null)
-					{
-						num2 = source.prioritizable.GetMasterPriority().priority_value;
-					}
-					if (num <= num2)
-					{
-						return false;
-					}
-				}
-			}
-			flag = pickup_id.HasAnyTags(tags) && pickup_unreserved_amount > 0f;
 		}
-		return flag;
+		if (forbid_tags != null)
+		{
+			foreach (Tag tag2 in forbid_tags)
+			{
+				if (pickup_id.HasTag(tag2))
+				{
+					return false;
+				}
+			}
+		}
+		if (source != null && destination.allowItemRemoval)
+		{
+			int num = 10;
+			if (destination.prioritizable != null)
+			{
+				num = destination.prioritizable.GetMasterPriority().priority_value;
+			}
+			int num2 = 10;
+			if (source.prioritizable != null)
+			{
+				num2 = source.prioritizable.GetMasterPriority().priority_value;
+			}
+			if (num <= num2)
+			{
+				return false;
+			}
+		}
+		return pickup_id.HasAnyTags(tags) && pickup_unreserved_amount > 0f;
 	}
 
 	public static void FindFetchTarget(Worker worker, Storage destination, List<Pickupable> pickupables, Tag[] tags, Tag[] required_tags, Tag[] forbid_tags, float required_amount, ref Pickupable workable)
@@ -140,13 +132,10 @@ public class FetchManagerUpdater
 		{
 			FetchManagerUpdater.Pickup pickup = FetchManagerUpdater.Pickups[i];
 			bool flag = FetchManagerUpdater.IsFetchablePickup(pickup.PrefabID, pickup.Pickupable.storage, pickup.Pickupable.UnreservedAmount, pickup.Pickupable.MinTakeAmount, required_amount, tags, required_tags, forbid_tags, destination);
-			if (flag)
+			if (flag && (int)pickup.PathCost < num)
 			{
-				if ((int)pickup.PathCost < num)
-				{
-					workable = pickup.Pickupable;
-					num = (int)pickup.PathCost;
-				}
+				workable = pickup.Pickupable;
+				num = (int)pickup.PathCost;
 			}
 		}
 	}
@@ -185,27 +174,19 @@ public class FetchManagerUpdater
 		public int Compare(FetchManagerUpdater.Pickup a, FetchManagerUpdater.Pickup b)
 		{
 			int num = a.PrefabID.PrefabTag.CompareTo(b.PrefabID.PrefabTag);
-			int num2;
-			if (num == 0)
+			if (num != 0)
 			{
-				if (a.masterPriority != b.masterPriority)
-				{
-					num2 = a.masterPriority - b.masterPriority;
-				}
-				else if (a.PathCost != b.PathCost)
-				{
-					num2 = (int)(a.PathCost - b.PathCost);
-				}
-				else
-				{
-					num2 = a.freshness - b.freshness;
-				}
+				return num;
 			}
-			else
+			if (a.masterPriority != b.masterPriority)
 			{
-				num2 = num;
+				return a.masterPriority - b.masterPriority;
 			}
-			return num2;
+			if (a.PathCost != b.PathCost)
+			{
+				return (int)(a.PathCost - b.PathCost);
+			}
+			return a.freshness - b.freshness;
 		}
 	}
 }

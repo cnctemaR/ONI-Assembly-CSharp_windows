@@ -41,14 +41,16 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDesc
 	private void OnCopySettings(object data)
 	{
 		GameObject gameObject = (GameObject)data;
-		if (!(gameObject == null))
+		if (gameObject == null)
 		{
-			Refrigerator component = gameObject.GetComponent<Refrigerator>();
-			if (!(component == null))
-			{
-				this.UserMaxCapacity = component.UserMaxCapacity;
-			}
+			return;
 		}
+		Refrigerator component = gameObject.GetComponent<Refrigerator>();
+		if (component == null)
+		{
+			return;
+		}
+		this.UserMaxCapacity = component.UserMaxCapacity;
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)

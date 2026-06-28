@@ -92,7 +92,7 @@ internal class SteamDistributionPlatform : MonoBehaviour, DistributionPlatform.I
 		}
 	}
 
-	private SteamDistributionPlatform.SteamUser mLocalUser = null;
+	private SteamDistributionPlatform.SteamUser mLocalUser;
 
 	public class SteamUserId : DistributionPlatform.UserId
 	{

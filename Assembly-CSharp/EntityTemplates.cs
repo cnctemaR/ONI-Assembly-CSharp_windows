@@ -155,7 +155,7 @@ public class EntityTemplates
 		{
 			template.UpdateComponentRequirement<EntombVulnerable>(true);
 		}
-		if (onDeathDropCount > 0 && onDeathDropID != "")
+		if (onDeathDropCount > 0 && onDeathDropID != string.Empty)
 		{
 			string[] array = new string[onDeathDropCount];
 			for (int i = 0; i < array.Length; i++)

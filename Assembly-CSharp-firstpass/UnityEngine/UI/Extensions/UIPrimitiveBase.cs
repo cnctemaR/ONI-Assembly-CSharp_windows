@@ -50,23 +50,15 @@ namespace UnityEngine.UI.Extensions
 		{
 			get
 			{
-				Texture texture;
-				if (this.overrideSprite == null)
+				if (!(this.overrideSprite == null))
 				{
-					if (this.material != null && this.material.mainTexture != null)
-					{
-						texture = this.material.mainTexture;
-					}
-					else
-					{
-						texture = Graphic.s_WhiteTexture;
-					}
+					return this.overrideSprite.texture;
 				}
-				else
+				if (this.material != null && this.material.mainTexture != null)
 				{
-					texture = this.overrideSprite.texture;
+					return this.material.mainTexture;
 				}
-				return texture;
+				return Graphic.s_WhiteTexture;
 			}
 		}
 
@@ -122,16 +114,11 @@ namespace UnityEngine.UI.Extensions
 		{
 			get
 			{
-				float num;
 				if (this.overrideSprite == null)
 				{
-					num = 0f;
+					return 0f;
 				}
-				else
-				{
-					num = this.overrideSprite.rect.size.x / this.pixelsPerUnit;
-				}
-				return num;
+				return this.overrideSprite.rect.size.x / this.pixelsPerUnit;
 			}
 		}
 
@@ -155,16 +142,11 @@ namespace UnityEngine.UI.Extensions
 		{
 			get
 			{
-				float num;
 				if (this.overrideSprite == null)
 				{
-					num = 0f;
+					return 0f;
 				}
-				else
-				{
-					num = this.overrideSprite.rect.size.y / this.pixelsPerUnit;
-				}
-				return num;
+				return this.overrideSprite.rect.size.y / this.pixelsPerUnit;
 			}
 		}
 
@@ -186,40 +168,34 @@ namespace UnityEngine.UI.Extensions
 
 		public virtual bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
 		{
-			bool flag;
 			if (this.m_EventAlphaThreshold >= 1f)
 			{
-				flag = true;
+				return true;
 			}
-			else
+			Sprite overrideSprite = this.overrideSprite;
+			if (overrideSprite == null)
 			{
-				Sprite overrideSprite = this.overrideSprite;
-				if (overrideSprite == null)
-				{
-					flag = true;
-				}
-				else
-				{
-					Vector2 vector;
-					RectTransformUtility.ScreenPointToLocalPointInRectangle(base.rectTransform, screenPoint, eventCamera, out vector);
-					Rect pixelAdjustedRect = base.GetPixelAdjustedRect();
-					vector.x += base.rectTransform.pivot.x * pixelAdjustedRect.width;
-					vector.y += base.rectTransform.pivot.y * pixelAdjustedRect.height;
-					vector = this.MapCoordinate(vector, pixelAdjustedRect);
-					Rect textureRect = overrideSprite.textureRect;
-					Vector2 vector2 = new Vector2(vector.x / textureRect.width, vector.y / textureRect.height);
-					float num = Mathf.Lerp(textureRect.x, textureRect.xMax, vector2.x) / (float)overrideSprite.texture.width;
-					float num2 = Mathf.Lerp(textureRect.y, textureRect.yMax, vector2.y) / (float)overrideSprite.texture.height;
-					try
-					{
-						flag = overrideSprite.texture.GetPixelBilinear(num, num2).a >= this.m_EventAlphaThreshold;
-					}
-					catch (UnityException ex)
-					{
-						Debug.LogError("Using clickAlphaThreshold lower than 1 on Image whose sprite texture cannot be read. " + ex.Message + " Also make sure to disable sprite packing for this sprite.", this);
-						flag = true;
-					}
-				}
+				return true;
+			}
+			Vector2 vector;
+			RectTransformUtility.ScreenPointToLocalPointInRectangle(base.rectTransform, screenPoint, eventCamera, out vector);
+			Rect pixelAdjustedRect = base.GetPixelAdjustedRect();
+			vector.x += base.rectTransform.pivot.x * pixelAdjustedRect.width;
+			vector.y += base.rectTransform.pivot.y * pixelAdjustedRect.height;
+			vector = this.MapCoordinate(vector, pixelAdjustedRect);
+			Rect textureRect = overrideSprite.textureRect;
+			Vector2 vector2 = new Vector2(vector.x / textureRect.width, vector.y / textureRect.height);
+			float num = Mathf.Lerp(textureRect.x, textureRect.xMax, vector2.x) / (float)overrideSprite.texture.width;
+			float num2 = Mathf.Lerp(textureRect.y, textureRect.yMax, vector2.y) / (float)overrideSprite.texture.height;
+			bool flag;
+			try
+			{
+				flag = overrideSprite.texture.GetPixelBilinear(num, num2).a >= this.m_EventAlphaThreshold;
+			}
+			catch (UnityException ex)
+			{
+				Debug.LogError("Using clickAlphaThreshold lower than 1 on Image whose sprite texture cannot be read. " + ex.Message + " Also make sure to disable sprite packing for this sprite.", this);
+				flag = true;
 			}
 			return flag;
 		}

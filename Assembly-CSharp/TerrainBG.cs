@@ -73,30 +73,31 @@ public class TerrainBG : KMonoBehaviour
 
 	private void LateUpdate()
 	{
-		if (this.doDraw)
+		if (!this.doDraw)
 		{
-			this.backgroundMaterial.renderQueue = RenderQueues.Background;
-			for (int i = 0; i < Lighting.Instance.Settings.BackgroundLayers; i++)
-			{
-				if (i >= Lighting.Instance.Settings.BackgroundLayers - 1)
-				{
-					float num = (float)i / (float)(Lighting.Instance.Settings.BackgroundLayers - 1);
-					float num2 = Mathf.Lerp(1f, Lighting.Instance.Settings.BackgroundDarkening, num);
-					float num3 = Mathf.Lerp(1f, Lighting.Instance.Settings.BackgroundUVScale, num);
-					float num4 = 1f;
-					if (i == Lighting.Instance.Settings.BackgroundLayers - 1)
-					{
-						num4 = 0f;
-					}
-					MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
-					Vector3 vector = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Background));
-					materialPropertyBlock.SetVector("_BackWallParameters", new Vector4(num2, Lighting.Instance.Settings.BackgroundClip, num3, num4));
-					Graphics.DrawMesh(this.worldPlane, vector, Quaternion.identity, this.backgroundMaterial, this.layer, null, 0, materialPropertyBlock);
-				}
-			}
-			this.gasMaterial.renderQueue = RenderQueues.Gas;
-			Graphics.DrawMesh(this.gasPlane, Vector3.zero, Quaternion.identity, this.gasMaterial, this.layer, null, 0, null);
+			return;
 		}
+		this.backgroundMaterial.renderQueue = RenderQueues.Background;
+		for (int i = 0; i < Lighting.Instance.Settings.BackgroundLayers; i++)
+		{
+			if (i >= Lighting.Instance.Settings.BackgroundLayers - 1)
+			{
+				float num = (float)i / (float)(Lighting.Instance.Settings.BackgroundLayers - 1);
+				float num2 = Mathf.Lerp(1f, Lighting.Instance.Settings.BackgroundDarkening, num);
+				float num3 = Mathf.Lerp(1f, Lighting.Instance.Settings.BackgroundUVScale, num);
+				float num4 = 1f;
+				if (i == Lighting.Instance.Settings.BackgroundLayers - 1)
+				{
+					num4 = 0f;
+				}
+				MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
+				Vector3 vector = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Background));
+				materialPropertyBlock.SetVector("_BackWallParameters", new Vector4(num2, Lighting.Instance.Settings.BackgroundClip, num3, num4));
+				Graphics.DrawMesh(this.worldPlane, vector, Quaternion.identity, this.backgroundMaterial, this.layer, null, 0, materialPropertyBlock);
+			}
+		}
+		this.gasMaterial.renderQueue = RenderQueues.Gas;
+		Graphics.DrawMesh(this.gasPlane, Vector3.zero, Quaternion.identity, this.gasMaterial, this.layer, null, 0, null);
 	}
 
 	public Material backgroundMaterial;

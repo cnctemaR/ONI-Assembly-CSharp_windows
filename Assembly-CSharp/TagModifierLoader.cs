@@ -36,30 +36,20 @@ public class TagModifierLoader : KMonoBehaviour
 
 	public float GetDurabilityModifier(List<Tag> tags)
 	{
-		float num;
 		if (tags == null || tags.Count == 0)
 		{
-			num = 0f;
+			return 0f;
 		}
-		else
-		{
-			num = this.GetModifier(tags, this.durablityModifiers);
-		}
-		return num;
+		return this.GetModifier(tags, this.durablityModifiers);
 	}
 
 	public float GetBeautyModifier(List<Tag> tags)
 	{
-		float num;
 		if (tags == null || tags.Count == 0)
 		{
-			num = 0f;
+			return 0f;
 		}
-		else
-		{
-			num = this.GetModifier(tags, this.beautyModifiers);
-		}
-		return num;
+		return this.GetModifier(tags, this.beautyModifiers);
 	}
 
 	[SerializeField]

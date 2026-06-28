@@ -36,30 +36,28 @@ public class AutoDisinfectable : Workable
 
 	public void RefreshChore()
 	{
-		if (!KMonoBehaviour.isLoadingScene)
+		if (KMonoBehaviour.isLoadingScene)
 		{
-			if (!this.enableAutoDisinfect || !SaveGame.Instance.enableAutoDisinfect)
+			return;
+		}
+		if (!this.enableAutoDisinfect || !SaveGame.Instance.enableAutoDisinfect)
+		{
+			if (this.chore != null)
 			{
-				if (this.chore != null)
-				{
-					this.chore.Cancel("Autodisinfect Disabled");
-					this.chore = null;
-				}
+				this.chore.Cancel("Autodisinfect Disabled");
+				this.chore = null;
 			}
-			else if (this.chore == null || !(this.chore.driver != null))
+		}
+		else if (this.chore == null || !(this.chore.driver != null))
+		{
+			if (this.chore == null && this.primaryElement.DiseaseCount > SaveGame.Instance.minGermCountForDisinfect)
 			{
-				if (this.chore == null && this.primaryElement.DiseaseCount > SaveGame.Instance.minGermCountForDisinfect)
-				{
-					this.chore = new WorkChore<AutoDisinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
-				}
-				else if (this.primaryElement.DiseaseCount < SaveGame.Instance.minGermCountForDisinfect)
-				{
-					if (this.chore != null)
-					{
-						this.chore.Cancel("AutoDisinfectable.Update");
-						this.chore = null;
-					}
-				}
+				this.chore = new WorkChore<AutoDisinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			}
+			else if (this.primaryElement.DiseaseCount < SaveGame.Instance.minGermCountForDisinfect && this.chore != null)
+			{
+				this.chore.Cancel("AutoDisinfectable.Update");
+				this.chore = null;
 			}
 		}
 	}

@@ -66,20 +66,15 @@ namespace Klei.AI.DiseaseGrowthRules
 		{
 			int num = (int)(this.minCountPerKG * kg);
 			int num2 = (int)(this.maxCountPerKG * kg);
-			float num3;
 			if (count < num)
 			{
-				num3 = this.populationHalfLife;
+				return this.populationHalfLife;
 			}
-			else if (count < num2)
+			if (count < num2)
 			{
-				num3 = this.populationHalfLife;
+				return this.populationHalfLife;
 			}
-			else
-			{
-				num3 = this.overPopulationHalfLife;
-			}
-			return num3;
+			return this.overPopulationHalfLife;
 		}
 
 		public string name;

@@ -27,16 +27,11 @@ public class Toggleable : Workable
 	public IToggleHandler GetToggleHandlerForWorker(Worker worker)
 	{
 		int targetForWorker = this.GetTargetForWorker(worker);
-		IToggleHandler toggleHandler;
 		if (targetForWorker != -1)
 		{
-			toggleHandler = this.targets[targetForWorker].Key;
+			return this.targets[targetForWorker].Key;
 		}
-		else
-		{
-			toggleHandler = null;
-		}
-		return toggleHandler;
+		return null;
 	}
 
 	private int GetTargetForWorker(Worker worker)
@@ -80,16 +75,17 @@ public class Toggleable : Workable
 
 	public void Toggle(int targetIdx)
 	{
-		if (targetIdx < this.targets.Count)
+		if (targetIdx >= this.targets.Count)
 		{
-			if (this.targets[targetIdx].Value == null)
-			{
-				this.QueueToggle(targetIdx);
-			}
-			else
-			{
-				this.CancelToggle(targetIdx);
-			}
+			return;
+		}
+		if (this.targets[targetIdx].Value == null)
+		{
+			this.QueueToggle(targetIdx);
+		}
+		else
+		{
+			this.CancelToggle(targetIdx);
 		}
 	}
 

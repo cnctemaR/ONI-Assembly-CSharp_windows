@@ -34,7 +34,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		base.OnPrefabInit();
 		if (AccessControl.accessControlActive == null)
 		{
-			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
+			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
 		}
 		base.Subscribe(279163026, new Action<object>(this.OnControlStateChanged));
 	}
@@ -86,23 +86,15 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 	public AccessControl.Permission GetPermission(GameObject key)
 	{
 		Door.ControlState controlState = this.overrideAccess;
-		AccessControl.Permission permission;
-		if (controlState != Door.ControlState.Closed)
+		if (controlState == Door.ControlState.Closed)
 		{
-			if (controlState != Door.ControlState.Opened)
-			{
-				permission = this.GetSetPermission(key);
-			}
-			else
-			{
-				permission = AccessControl.Permission.Both;
-			}
+			return AccessControl.Permission.Neither;
 		}
-		else
+		if (controlState != Door.ControlState.Opened)
 		{
-			permission = AccessControl.Permission.Neither;
+			return this.GetSetPermission(key);
 		}
-		return permission;
+		return AccessControl.Permission.Both;
 	}
 
 	public AccessControl.Permission GetSetPermission(GameObject key)
@@ -150,12 +142,12 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 	private List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>> savedPermissions;
 
 	[Serialize]
-	private AccessControl.Permission _defaultPermission = AccessControl.Permission.Both;
+	private AccessControl.Permission _defaultPermission;
 
 	[Serialize]
 	public bool controlEnabled;
 
-	public Door.ControlState overrideAccess = Door.ControlState.Auto;
+	public Door.ControlState overrideAccess;
 
 	private static StatusItem accessControlActive;
 

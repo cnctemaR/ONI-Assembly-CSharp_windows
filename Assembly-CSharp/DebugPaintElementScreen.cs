@@ -143,11 +143,8 @@ public class DebugPaintElementScreen : KScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (this.blockInput)
+		if (!this.blockInput || e.TryConsume(global::Action.Plan1) || e.TryConsume(global::Action.Plan2) || e.TryConsume(global::Action.Plan3) || e.TryConsume(global::Action.Plan4) || e.TryConsume(global::Action.Plan5) || e.TryConsume(global::Action.Plan6) || e.TryConsume(global::Action.Plan7) || e.TryConsume(global::Action.Plan8) || e.TryConsume(global::Action.Plan9) || e.TryConsume(global::Action.Plan10) || e.TryConsume(global::Action.DebugToggle))
 		{
-			if (e.TryConsume(global::Action.Plan1) || e.TryConsume(global::Action.Plan2) || e.TryConsume(global::Action.Plan3) || e.TryConsume(global::Action.Plan4) || e.TryConsume(global::Action.Plan5) || e.TryConsume(global::Action.Plan6) || e.TryConsume(global::Action.Plan7) || e.TryConsume(global::Action.Plan8) || e.TryConsume(global::Action.Plan9) || e.TryConsume(global::Action.Plan10) || e.TryConsume(global::Action.DebugToggle))
-			{
-			}
 		}
 		base.OnKeyDown(e);
 	}
@@ -273,17 +270,17 @@ public class DebugPaintElementScreen : KScreen
 	public float temperature = -1f;
 
 	[NonSerialized]
-	public bool set_prevent_fow_reveal = false;
+	public bool set_prevent_fow_reveal;
 
 	[NonSerialized]
-	public bool set_allow_fow_reveal = false;
+	public bool set_allow_fow_reveal;
 
 	public byte diseaseIdx;
 
 	[NonSerialized]
-	public int diseaseCount = 0;
+	public int diseaseCount;
 
-	private bool blockInput = false;
+	private bool blockInput;
 
 	[Header("Popup Buttons")]
 	[SerializeField]

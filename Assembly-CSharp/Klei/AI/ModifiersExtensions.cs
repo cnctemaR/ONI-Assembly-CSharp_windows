@@ -13,16 +13,11 @@ namespace Klei.AI
 		public static Attributes GetAttributes(this GameObject go)
 		{
 			Modifiers component = go.GetComponent<Modifiers>();
-			Attributes attributes;
 			if (component != null)
 			{
-				attributes = component.attributes;
+				return component.attributes;
 			}
-			else
-			{
-				attributes = null;
-			}
-			return attributes;
+			return null;
 		}
 
 		public static Amounts GetAmounts(this KMonoBehaviour cmp)
@@ -33,16 +28,11 @@ namespace Klei.AI
 		public static Amounts GetAmounts(this GameObject go)
 		{
 			Modifiers component = go.GetComponent<Modifiers>();
-			Amounts amounts;
 			if (component != null)
 			{
-				amounts = component.amounts;
+				return component.amounts;
 			}
-			else
-			{
-				amounts = null;
-			}
-			return amounts;
+			return null;
 		}
 
 		public static Diseases GetDiseases(this KMonoBehaviour cmp)
@@ -53,16 +43,11 @@ namespace Klei.AI
 		public static Diseases GetDiseases(this GameObject go)
 		{
 			Modifiers component = go.GetComponent<Modifiers>();
-			Diseases diseases;
 			if (component != null)
 			{
-				diseases = component.diseases;
+				return component.diseases;
 			}
-			else
-			{
-				diseases = null;
-			}
-			return diseases;
+			return null;
 		}
 	}
 }

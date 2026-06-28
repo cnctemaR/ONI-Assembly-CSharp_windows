@@ -219,9 +219,9 @@ public class KPlayerPrefs : YamlIO<KPlayerPrefs>
 		}
 	}
 
-	private static KPlayerPrefs _instance = null;
+	private static KPlayerPrefs _instance;
 
 	public static readonly string FILENAME = "kplayerprefs.yaml";
 
-	private static string PATH = null;
+	private static string PATH;
 }

@@ -25,11 +25,12 @@ namespace TMPro
 
 		private void AddFontAssetInternal(TMP_FontAsset fontAsset)
 		{
-			if (!this.m_FontAssetReferenceLookup.ContainsKey(fontAsset.hashCode))
+			if (this.m_FontAssetReferenceLookup.ContainsKey(fontAsset.hashCode))
 			{
-				this.m_FontAssetReferenceLookup.Add(fontAsset.hashCode, fontAsset);
-				this.m_FontMaterialReferenceLookup.Add(fontAsset.materialHashCode, fontAsset.material);
+				return;
 			}
+			this.m_FontAssetReferenceLookup.Add(fontAsset.hashCode, fontAsset);
+			this.m_FontMaterialReferenceLookup.Add(fontAsset.materialHashCode, fontAsset.material);
 		}
 
 		public static void AddSpriteAsset(TMP_SpriteAsset spriteAsset)
@@ -39,11 +40,12 @@ namespace TMPro
 
 		private void AddSpriteAssetInternal(TMP_SpriteAsset spriteAsset)
 		{
-			if (!this.m_SpriteAssetReferenceLookup.ContainsKey(spriteAsset.hashCode))
+			if (this.m_SpriteAssetReferenceLookup.ContainsKey(spriteAsset.hashCode))
 			{
-				this.m_SpriteAssetReferenceLookup.Add(spriteAsset.hashCode, spriteAsset);
-				this.m_FontMaterialReferenceLookup.Add(spriteAsset.hashCode, spriteAsset.material);
+				return;
 			}
+			this.m_SpriteAssetReferenceLookup.Add(spriteAsset.hashCode, spriteAsset);
+			this.m_FontMaterialReferenceLookup.Add(spriteAsset.hashCode, spriteAsset.material);
 		}
 
 		public static void AddSpriteAsset(int hashCode, TMP_SpriteAsset spriteAsset)
@@ -53,14 +55,15 @@ namespace TMPro
 
 		private void AddSpriteAssetInternal(int hashCode, TMP_SpriteAsset spriteAsset)
 		{
-			if (!this.m_SpriteAssetReferenceLookup.ContainsKey(hashCode))
+			if (this.m_SpriteAssetReferenceLookup.ContainsKey(hashCode))
 			{
-				this.m_SpriteAssetReferenceLookup.Add(hashCode, spriteAsset);
-				this.m_FontMaterialReferenceLookup.Add(hashCode, spriteAsset.material);
-				if (spriteAsset.hashCode == 0)
-				{
-					spriteAsset.hashCode = hashCode;
-				}
+				return;
+			}
+			this.m_SpriteAssetReferenceLookup.Add(hashCode, spriteAsset);
+			this.m_FontMaterialReferenceLookup.Add(hashCode, spriteAsset.material);
+			if (spriteAsset.hashCode == 0)
+			{
+				spriteAsset.hashCode = hashCode;
 			}
 		}
 

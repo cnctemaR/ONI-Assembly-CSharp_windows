@@ -226,7 +226,7 @@ namespace NodeEditorFramework
 
 		private static List<NodeEditorCallbackReceiver> callbackReceiver;
 
-		public static global::System.Action OnEditorStartUp = null;
+		public static global::System.Action OnEditorStartUp;
 
 		public static Action<NodeCanvas> OnLoadCanvas;
 

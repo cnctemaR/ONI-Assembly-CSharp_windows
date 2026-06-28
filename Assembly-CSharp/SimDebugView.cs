@@ -69,23 +69,24 @@ public class SimDebugView : KMonoBehaviour
 
 	private void Update()
 	{
-		if (!(this.plane == null))
+		if (this.plane == null)
 		{
-			bool flag = this.mode != SimViewMode.None;
-			this.plane.SetActive(flag);
-			SimDebugViewCompositor.Instance.Toggle(this.mode != SimViewMode.None);
-			SimDebugViewCompositor.Instance.material.SetVector("_Thresholds0", new Vector4(0.1f, 0.2f, 0.3f, 0.4f));
-			SimDebugViewCompositor.Instance.material.SetVector("_Thresholds1", new Vector4(0.5f, 0.6f, 0.7f, 0.8f));
-			float num = 0f;
-			if (this.mode == SimViewMode.ThermalConductivity || this.mode == SimViewMode.TemperatureMap)
-			{
-				num = 1f;
-			}
-			SimDebugViewCompositor.Instance.material.SetVector("_ThresholdParameters", new Vector4(num, this.thresholdRange, this.thresholdOpacity, 0f));
-			if (flag)
-			{
-				this.UpdateData(this.tex, this.texBytes, this.mode, 192);
-			}
+			return;
+		}
+		bool flag = this.mode != SimViewMode.None;
+		this.plane.SetActive(flag);
+		SimDebugViewCompositor.Instance.Toggle(this.mode != SimViewMode.None);
+		SimDebugViewCompositor.Instance.material.SetVector("_Thresholds0", new Vector4(0.1f, 0.2f, 0.3f, 0.4f));
+		SimDebugViewCompositor.Instance.material.SetVector("_Thresholds1", new Vector4(0.5f, 0.6f, 0.7f, 0.8f));
+		float num = 0f;
+		if (this.mode == SimViewMode.ThermalConductivity || this.mode == SimViewMode.TemperatureMap)
+		{
+			num = 1f;
+		}
+		SimDebugViewCompositor.Instance.material.SetVector("_ThresholdParameters", new Vector4(num, this.thresholdRange, this.thresholdOpacity, 0f));
+		if (flag)
+		{
+			this.UpdateData(this.tex, this.texBytes, this.mode, 192);
 		}
 	}
 
@@ -98,20 +99,20 @@ public class SimDebugView : KMonoBehaviour
 				this.plane.GetComponent<Renderer>().sharedMaterial = this.diseaseMaterial;
 				this.plane.GetComponent<Renderer>().sharedMaterial.mainTexture = this.tex;
 				texture.filterMode = FilterMode.Bilinear;
-				goto IL_00F4;
+				goto IL_00F3;
 			}
 			if (viewMode != SimViewMode.Decor && viewMode != SimViewMode.OxygenMap)
 			{
 				this.plane.GetComponent<Renderer>().sharedMaterial = this.material;
 				this.plane.GetComponent<Renderer>().sharedMaterial.mainTexture = this.tex;
 				texture.filterMode = FilterMode.Point;
-				goto IL_00F4;
+				goto IL_00F3;
 			}
 		}
 		this.plane.GetComponent<Renderer>().sharedMaterial = this.material;
 		this.plane.GetComponent<Renderer>().sharedMaterial.mainTexture = this.tex;
 		texture.filterMode = FilterMode.Bilinear;
-		IL_00F4:
+		IL_00F3:
 		int num;
 		int num2;
 		int num3;
@@ -809,54 +810,49 @@ public class SimDebugView : KMonoBehaviour
 		Element element = Grid.Element[cell];
 		float mass = Grid.Cell[cell].mass;
 		float num = Grid.Temperature[cell];
-		Color color2;
 		if (float.IsNaN(mass) || float.IsNaN(num) || mass > 10000f || num > 10000f)
 		{
-			color2 = Color.red;
+			return Color.red;
 		}
-		else
+		if (element.IsVacuum)
 		{
-			if (element.IsVacuum)
+			if (num != 0f)
 			{
-				if (num != 0f)
-				{
-					color = Color.yellow;
-				}
-				else if (mass != 0f)
-				{
-					color = Color.blue;
-				}
-				else
-				{
-					color = Color.gray;
-				}
+				color = Color.yellow;
 			}
-			else if (num < 10f)
+			else if (mass != 0f)
 			{
-				color = Color.red;
+				color = Color.blue;
 			}
-			else if (Grid.Cell[cell].mass < 1f && Grid.Pressure[cell] < 1f)
+			else
 			{
-				color = Color.green;
+				color = Color.gray;
 			}
-			else if (num > element.highTemp + 3f && element.highTempTransition != null)
-			{
-				color = Color.magenta;
-			}
-			else if (num < element.lowTemp + 3f && element.lowTempTransition != null)
-			{
-				color = Color.cyan;
-			}
-			color2 = color;
 		}
-		return color2;
+		else if (num < 10f)
+		{
+			color = Color.red;
+		}
+		else if (Grid.Cell[cell].mass < 1f && Grid.Pressure[cell] < 1f)
+		{
+			color = Color.green;
+		}
+		else if (num > element.highTemp + 3f && element.highTempTransition != null)
+		{
+			color = Color.magenta;
+		}
+		else if (num < element.lowTemp + 3f && element.lowTempTransition != null)
+		{
+			color = Color.cyan;
+		}
+		return color;
 	}
 
 	public Material material;
 
 	public Material diseaseMaterial;
 
-	public bool hideFOW = false;
+	public bool hideFOW;
 
 	public const int colourSize = 4;
 
@@ -882,7 +878,7 @@ public class SimDebugView : KMonoBehaviour
 
 	public float maxPressureExpected = 201.3f;
 
-	public float minThermalConductivity = 0f;
+	public float minThermalConductivity;
 
 	public float maxThermalConductivity = 30f;
 

@@ -7,40 +7,43 @@ public class ShadowImage : ShadowRect
 	protected override void MatchRect()
 	{
 		base.MatchRect();
-		if (!(this.RectMain == null) && !(this.RectShadow == null))
+		if (this.RectMain == null || this.RectShadow == null)
 		{
-			if (this.shadowImage == null)
+			return;
+		}
+		if (this.shadowImage == null)
+		{
+			this.shadowImage = this.RectShadow.GetComponent<Image>();
+		}
+		if (this.mainImage == null)
+		{
+			this.mainImage = this.RectMain.GetComponent<Image>();
+		}
+		if (this.mainImage == null)
+		{
+			if (this.shadowImage != null)
 			{
-				this.shadowImage = this.RectShadow.GetComponent<Image>();
+				this.shadowImage.color = Color.clear;
 			}
-			if (this.mainImage == null)
+			return;
+		}
+		if (this.shadowImage == null)
+		{
+			return;
+		}
+		if (this.shadowImage.sprite != this.mainImage.sprite)
+		{
+			this.shadowImage.sprite = this.mainImage.sprite;
+		}
+		if (this.shadowImage.color != this.shadowColor)
+		{
+			if (this.shadowImage.sprite != null)
 			{
-				this.mainImage = this.RectMain.GetComponent<Image>();
+				this.shadowImage.color = this.shadowColor;
 			}
-			if (this.mainImage == null)
+			else
 			{
-				if (this.shadowImage != null)
-				{
-					this.shadowImage.color = Color.clear;
-				}
-			}
-			else if (!(this.shadowImage == null))
-			{
-				if (this.shadowImage.sprite != this.mainImage.sprite)
-				{
-					this.shadowImage.sprite = this.mainImage.sprite;
-				}
-				if (this.shadowImage.color != this.shadowColor)
-				{
-					if (this.shadowImage.sprite != null)
-					{
-						this.shadowImage.color = this.shadowColor;
-					}
-					else
-					{
-						this.shadowImage.color = Color.clear;
-					}
-				}
+				this.shadowImage.color = Color.clear;
 			}
 		}
 	}

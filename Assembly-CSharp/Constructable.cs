@@ -63,65 +63,63 @@ public class Constructable : Workable, ISaveLoadable
 				"Item Count: ",
 				this.storage.items.Count
 			});
+			return;
 		}
-		else
+		this.initialTemperature = Mathf.Clamp(num2 / num, 288.15f, 318.15f);
+		KAnimGraphTileVisualizer component2 = base.GetComponent<KAnimGraphTileVisualizer>();
+		UtilityConnections connections = ((!(component2 == null)) ? component2.Connections : ((UtilityConnections)0));
+		if (this.IsReplacementTile)
 		{
-			this.initialTemperature = Mathf.Clamp(num2 / num, 288.15f, 318.15f);
-			KAnimGraphTileVisualizer component2 = base.GetComponent<KAnimGraphTileVisualizer>();
-			UtilityConnections connections = ((!(component2 == null)) ? component2.Connections : ((UtilityConnections)0));
-			if (this.IsReplacementTile)
+			int num3 = Grid.PosToCell(base.transform.localPosition);
+			GameObject gameObject2 = Grid.Objects[num3, (int)this.building.Def.TileLayer];
+			if (gameObject2 != null)
 			{
-				int num3 = Grid.PosToCell(base.transform.localPosition);
-				GameObject gameObject2 = Grid.Objects[num3, (int)this.building.Def.TileLayer];
-				if (gameObject2 != null)
+				SimCellOccupier component3 = gameObject2.GetComponent<SimCellOccupier>();
+				if (component3 != null)
 				{
-					SimCellOccupier component3 = gameObject2.GetComponent<SimCellOccupier>();
-					if (component3 != null)
+					component3.DestroySelf(delegate
 					{
-						component3.DestroySelf(delegate
+						if (this != null && this.gameObject != null)
 						{
-							if (this != null && this.gameObject != null)
-							{
-								this.FinishConstruction(connections);
-							}
-						});
+							this.FinishConstruction(connections);
+						}
+					});
+				}
+				else
+				{
+					Conduit component4 = gameObject2.GetComponent<Conduit>();
+					if (component4 != null)
+					{
+						ConduitFlow flowManager = component4.GetFlowManager();
+						flowManager.MarkForReplacement(num3);
+					}
+					BuildingComplete component5 = gameObject2.GetComponent<BuildingComplete>();
+					if (component5 != null)
+					{
+						component5.onCleanUp += delegate
+						{
+							this.FinishConstruction(connections);
+						};
 					}
 					else
 					{
-						Conduit component4 = gameObject2.GetComponent<Conduit>();
-						if (component4 != null)
-						{
-							ConduitFlow flowManager = component4.GetFlowManager();
-							flowManager.MarkForReplacement(num3);
-						}
-						BuildingComplete component5 = gameObject2.GetComponent<BuildingComplete>();
-						if (component5 != null)
-						{
-							component5.onCleanUp += delegate
-							{
-								this.FinishConstruction(connections);
-							};
-						}
-						else
-						{
-							global::Debug.LogWarning("Why am I trying to replace a: " + gameObject2.name, null);
-							this.FinishConstruction(connections);
-						}
+						global::Debug.LogWarning("Why am I trying to replace a: " + gameObject2.name, null);
+						this.FinishConstruction(connections);
 					}
-					KAnimGraphTileVisualizer component6 = gameObject2.GetComponent<KAnimGraphTileVisualizer>();
-					if (component6 != null)
-					{
-						component6.skipCleanup = true;
-					}
-					gameObject2.DeleteObject();
 				}
+				KAnimGraphTileVisualizer component6 = gameObject2.GetComponent<KAnimGraphTileVisualizer>();
+				if (component6 != null)
+				{
+					component6.skipCleanup = true;
+				}
+				gameObject2.DeleteObject();
 			}
-			else
-			{
-				this.FinishConstruction(connections);
-			}
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Building, base.GetComponent<KSelectable>().GetName(), base.transform, 1.5f, false);
 		}
+		else
+		{
+			this.FinishConstruction(connections);
+		}
+		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Building, base.GetComponent<KSelectable>().GetName(), base.transform, 1.5f, false);
 	}
 
 	private void FinishConstruction(UtilityConnections connections)
@@ -144,15 +142,12 @@ public class Constructable : Workable, ISaveLoadable
 			component3.skipCleanup = true;
 		}
 		KSelectable component5 = base.GetComponent<KSelectable>();
-		if (component5 != null && component5.IsSelected)
+		if (component5 != null && component5.IsSelected && gameObject.GetComponent<KSelectable>() != null)
 		{
-			if (gameObject.GetComponent<KSelectable>() != null)
+			component5.Unselect();
+			if (PlayerController.Instance.ActiveTool.name == "SelectTool")
 			{
-				component5.Unselect();
-				if (PlayerController.Instance.ActiveTool.name == "SelectTool")
-				{
-					((SelectTool)PlayerController.Instance.ActiveTool).SelectNextFrame(gameObject.GetComponent<KSelectable>(), false);
-				}
+				((SelectTool)PlayerController.Instance.ActiveTool).SelectNextFrame(gameObject.GetComponent<KSelectable>(), false);
 			}
 		}
 		this.storage.ConsumeAllIgnoringDisease();
@@ -223,27 +218,24 @@ public class Constructable : Workable, ISaveLoadable
 				}
 			}
 		});
-		if (this.IsReplacementTile)
+		if (this.IsReplacementTile && this.building.Def.ReplacementLayer != ObjectLayer.NumLayers)
 		{
-			if (this.building.Def.ReplacementLayer != ObjectLayer.NumLayers)
+			int num2 = Grid.PosToCell(base.transform.position);
+			GameObject gameObject = Grid.Objects[num2, (int)this.building.Def.ReplacementLayer];
+			if (gameObject == null || gameObject == base.gameObject)
 			{
-				int num2 = Grid.PosToCell(base.transform.position);
-				GameObject gameObject = Grid.Objects[num2, (int)this.building.Def.ReplacementLayer];
-				if (gameObject == null || gameObject == base.gameObject)
+				Grid.Objects[num2, (int)this.building.Def.ReplacementLayer] = base.gameObject;
+				if (base.gameObject.GetComponent<SimCellOccupier>() != null)
 				{
-					Grid.Objects[num2, (int)this.building.Def.ReplacementLayer] = base.gameObject;
-					if (base.gameObject.GetComponent<SimCellOccupier>() != null)
-					{
-						int num3 = LayerMask.NameToLayer("Overlay");
-						World.Instance.blockTileRenderer.AddBlock(num3, this.building.Def, SimHashes.Void, num2);
-					}
-					TileVisualizer.RefreshCell(num2, this.building.Def.TileLayer);
+					int num3 = LayerMask.NameToLayer("Overlay");
+					World.Instance.blockTileRenderer.AddBlock(num3, this.building.Def, SimHashes.Void, num2);
 				}
-				else
-				{
-					Output.LogError(new object[] { "multiple replacement tiles on the same cell!" });
-					Util.KDestroyGameObject(base.gameObject);
-				}
+				TileVisualizer.RefreshCell(num2, this.building.Def.TileLayer);
+			}
+			else
+			{
+				Output.LogError(new object[] { "multiple replacement tiles on the same cell!" });
+				Util.KDestroyGameObject(base.gameObject);
 			}
 		}
 		this.fetchList.Submit(new global::System.Action(this.OnFetchListComplete), true);
@@ -337,16 +329,13 @@ public class Constructable : Workable, ISaveLoadable
 
 	protected override void OnCleanUp()
 	{
-		if (this.IsReplacementTile)
+		if (this.IsReplacementTile && this.building.Def.isKAnimTile)
 		{
-			if (this.building.Def.isKAnimTile)
+			int num = Grid.PosToCell(base.transform.position);
+			GameObject gameObject = Grid.Objects[num, (int)this.building.Def.ReplacementLayer];
+			if (gameObject == base.gameObject && gameObject.GetComponent<SimCellOccupier>() != null)
 			{
-				int num = Grid.PosToCell(base.transform.position);
-				GameObject gameObject = Grid.Objects[num, (int)this.building.Def.ReplacementLayer];
-				if (gameObject == base.gameObject && gameObject.GetComponent<SimCellOccupier>() != null)
-				{
-					World.Instance.blockTileRenderer.RemoveBlock(this.building.Def, SimHashes.Void, num);
-				}
+				World.Instance.blockTileRenderer.RemoveBlock(this.building.Def, SimHashes.Void, num);
 			}
 		}
 		if (this.solidPartitionerEntry != null)
@@ -456,7 +445,7 @@ public class Constructable : Workable, ISaveLoadable
 		}
 		else
 		{
-			this.notifier.Add(this.invalidLocation, "");
+			this.notifier.Add(this.invalidLocation, string.Empty);
 		}
 		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.InvalidBuildingLocation, !flag, this);
 		bool flag2 = digs_complete && flag;
@@ -484,22 +473,24 @@ public class Constructable : Workable, ISaveLoadable
 
 	private void ClearMaterialNeeds()
 	{
-		if (!this.materialNeedsCleared)
+		if (this.materialNeedsCleared)
 		{
-			foreach (Recipe.Ingredient ingredient in this.Recipe.GetAllIngredients(this.SelectedElements))
-			{
-				MaterialNeeds.Instance.UpdateNeed(ingredient.tag, -ingredient.amount);
-			}
-			this.materialNeedsCleared = true;
+			return;
 		}
+		foreach (Recipe.Ingredient ingredient in this.Recipe.GetAllIngredients(this.SelectedElements))
+		{
+			MaterialNeeds.Instance.UpdateNeed(ingredient.tag, -ingredient.amount);
+		}
+		this.materialNeedsCleared = true;
 	}
 
 	private void OnSolidChangedOrDigDestroyed(object data)
 	{
-		if (!(this == null))
+		if (this == null)
 		{
-			this.PlaceDiggables();
+			return;
 		}
+		this.PlaceDiggables();
 	}
 
 	private void UpdateBuildState(Chore chore)
@@ -625,17 +616,17 @@ public class Constructable : Workable, ISaveLoadable
 
 	private ChoreType choreType;
 
-	private bool materialNeedsCleared = false;
+	private bool materialNeedsCleared;
 
 	private bool hasUnreachableDigs;
 
 	[Serialize]
-	public bool isRelocating = false;
+	public bool isRelocating;
 
 	public bool isDiggingRequired = true;
 
 	[Serialize]
-	public bool IsReplacementTile = false;
+	public bool IsReplacementTile;
 
 	private GameScenePartitionerEntry solidPartitionerEntry;
 

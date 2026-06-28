@@ -69,12 +69,9 @@ public class KModalScreen : KScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (Game.Instance != null)
+		if (Game.Instance != null && (e.TryConsume(global::Action.TogglePause) || e.TryConsume(global::Action.CycleSpeed)))
 		{
-			if (e.TryConsume(global::Action.TogglePause) || e.TryConsume(global::Action.CycleSpeed))
-			{
-				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
-			}
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
 		}
 		if (!e.Consumed && e.TryConsume(global::Action.Escape))
 		{
@@ -94,7 +91,7 @@ public class KModalScreen : KScreen
 		base.GetComponent<Image>().color = new Color32(0, 0, 0, (byte)num);
 	}
 
-	private bool shown = false;
+	private bool shown;
 
 	public bool pause = true;
 }

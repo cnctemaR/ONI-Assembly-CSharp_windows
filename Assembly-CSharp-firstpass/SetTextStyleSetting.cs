@@ -8,18 +8,20 @@ public class SetTextStyleSetting : KMonoBehaviour
 {
 	public static void ApplyStyle(TextMeshProUGUI sdfText, TextStyleSetting style)
 	{
-		if (sdfText)
+		if (!sdfText)
 		{
-			if (style)
-			{
-				sdfText.enableWordWrapping = style.enableWordWrapping;
-				sdfText.enableKerning = true;
-				sdfText.extraPadding = true;
-				sdfText.fontSize = (float)style.fontSize;
-				sdfText.color = style.textColor;
-				sdfText.font = style.sdfFont;
-			}
+			return;
 		}
+		if (!style)
+		{
+			return;
+		}
+		sdfText.enableWordWrapping = style.enableWordWrapping;
+		sdfText.enableKerning = true;
+		sdfText.extraPadding = true;
+		sdfText.fontSize = (float)style.fontSize;
+		sdfText.color = style.textColor;
+		sdfText.font = style.sdfFont;
 	}
 
 	protected override void OnPrefabInit()

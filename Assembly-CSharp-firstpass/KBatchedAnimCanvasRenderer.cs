@@ -93,40 +93,41 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 			{
 				this.rootRectTransform = base.gameObject.AddComponent<RectTransform>();
 			}
-			if (this.batch.group.InitOK)
+			if (!this.batch.group.InitOK)
 			{
-				this.canvass.Clear();
-				this.canvass.SetMesh(this.batch.group.mesh);
-				this.canvass.materialCount = 1;
-				if (this.uiMat != null)
-				{
-					global::UnityEngine.Object.Destroy(this.uiMat);
-					this.uiMat = null;
-				}
-				this.uiMat = new Material(this.batch.group.GetMaterial(this.batch.materialType));
-				Texture texture = this.batch.matProperties.GetTexture("instanceTex");
-				this.uiMat.SetTexture("instanceTex", texture);
-				this.uiMat.SetVector("INSTANCE_TEXEL_SIZE", texture.texelSize);
-				this.uiMat.SetVector("INSTANCE_TEXTURE_SIZE", new Vector2((float)texture.width, (float)texture.height));
-				Texture texture2 = this.batch.matProperties.GetTexture("animTex");
-				this.uiMat.SetTexture("animTex", texture2);
-				this.uiMat.SetVector("ANIM_TEXEL_SIZE", texture2.texelSize);
-				this.uiMat.SetVector("ANIM_TEXTURE_SIZE", new Vector2((float)texture2.width, (float)texture2.height));
-				Texture texture3 = this.batch.matProperties.GetTexture("buildTex");
-				this.uiMat.SetTexture("buildTex", texture3);
-				this.uiMat.SetVector("BUILD_TEXEL_SIZE", texture3.texelSize);
-				this.uiMat.SetVector("BUILD_TEXTURE_SIZE", new Vector2((float)texture3.width, (float)texture3.height));
-				for (int i = 0; i < 12; i++)
-				{
-					Texture texture4 = this.batch.matProperties.GetTexture(KBatchedAnimCanvasRenderer.atlasNames[i]);
-					if (texture4 != null)
-					{
-						this.uiMat.SetTexture(KBatchedAnimCanvasRenderer.atlasNames[i], texture4);
-					}
-				}
-				((IMaskable)this).RecalculateMasking();
-				this.canvass.SetMaterial(this.uiMat, 0);
+				return;
 			}
+			this.canvass.Clear();
+			this.canvass.SetMesh(this.batch.group.mesh);
+			this.canvass.materialCount = 1;
+			if (this.uiMat != null)
+			{
+				global::UnityEngine.Object.Destroy(this.uiMat);
+				this.uiMat = null;
+			}
+			this.uiMat = new Material(this.batch.group.GetMaterial(this.batch.materialType));
+			Texture texture = this.batch.matProperties.GetTexture("instanceTex");
+			this.uiMat.SetTexture("instanceTex", texture);
+			this.uiMat.SetVector("INSTANCE_TEXEL_SIZE", texture.texelSize);
+			this.uiMat.SetVector("INSTANCE_TEXTURE_SIZE", new Vector2((float)texture.width, (float)texture.height));
+			Texture texture2 = this.batch.matProperties.GetTexture("animTex");
+			this.uiMat.SetTexture("animTex", texture2);
+			this.uiMat.SetVector("ANIM_TEXEL_SIZE", texture2.texelSize);
+			this.uiMat.SetVector("ANIM_TEXTURE_SIZE", new Vector2((float)texture2.width, (float)texture2.height));
+			Texture texture3 = this.batch.matProperties.GetTexture("buildTex");
+			this.uiMat.SetTexture("buildTex", texture3);
+			this.uiMat.SetVector("BUILD_TEXEL_SIZE", texture3.texelSize);
+			this.uiMat.SetVector("BUILD_TEXTURE_SIZE", new Vector2((float)texture3.width, (float)texture3.height));
+			for (int i = 0; i < 12; i++)
+			{
+				Texture texture4 = this.batch.matProperties.GetTexture(KBatchedAnimCanvasRenderer.atlasNames[i]);
+				if (texture4 != null)
+				{
+					this.uiMat.SetTexture(KBatchedAnimCanvasRenderer.atlasNames[i], texture4);
+				}
+			}
+			((IMaskable)this).RecalculateMasking();
+			this.canvass.SetMaterial(this.uiMat, 0);
 		}
 	}
 
@@ -160,7 +161,7 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 		"atlas10", "atlas11", "atlas12"
 	};
 
-	private KAnimConverter.IAnimConverter converter = null;
+	private KAnimConverter.IAnimConverter converter;
 
 	private CompareFunction _cmp = CompareFunction.Never;
 

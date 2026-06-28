@@ -33,13 +33,10 @@ public class InterfaceTool : KMonoBehaviour
 
 	protected virtual void OnActivateTool()
 	{
-		if (OverlayScreen.Instance != null)
+		if (OverlayScreen.Instance != null && this.viewMode != SimViewMode.None && OverlayScreen.Instance.mode == SimViewMode.None)
 		{
-			if (this.viewMode != SimViewMode.None && OverlayScreen.Instance.mode == SimViewMode.None)
-			{
-				OverlayScreen.Instance.ToggleOverlay(this.viewMode);
-				InterfaceTool.toolActivatedViewMode = this.viewMode;
-			}
+			OverlayScreen.Instance.ToggleOverlay(this.viewMode);
+			InterfaceTool.toolActivatedViewMode = this.viewMode;
 		}
 		this.SetCursor(this.cursor, this.cursorOffset, CursorMode.Auto);
 	}
@@ -47,13 +44,10 @@ public class InterfaceTool : KMonoBehaviour
 	public void DeactivateTool(InterfaceTool new_tool = null)
 	{
 		this.OnDeactivateTool(new_tool);
-		if (new_tool == null || new_tool == SelectTool.Instance)
+		if ((new_tool == null || new_tool == SelectTool.Instance) && InterfaceTool.toolActivatedViewMode != SimViewMode.None)
 		{
-			if (InterfaceTool.toolActivatedViewMode != SimViewMode.None)
-			{
-				OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
-				InterfaceTool.toolActivatedViewMode = SimViewMode.None;
-			}
+			OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
+			InterfaceTool.toolActivatedViewMode = SimViewMode.None;
 		}
 	}
 
@@ -73,13 +67,14 @@ public class InterfaceTool : KMonoBehaviour
 
 	public virtual void OnMouseMove(Vector3 cursor_pos)
 	{
-		if (!(this.visualizer == null) && this.isAppFocused)
+		if (this.visualizer == null || !this.isAppFocused)
 		{
-			int num = Grid.PosToCell(cursor_pos);
-			cursor_pos = Grid.CellToPosCBC(num, this.visualizerLayer);
-			cursor_pos.z += InterfaceTool.DepthBias;
-			this.visualizer.transform.localPosition = cursor_pos;
+			return;
 		}
+		int num = Grid.PosToCell(cursor_pos);
+		cursor_pos = Grid.CellToPosCBC(num, this.visualizerLayer);
+		cursor_pos.z += InterfaceTool.DepthBias;
+		this.visualizer.transform.localPosition = cursor_pos;
 	}
 
 	public virtual void OnKeyDown(KButtonEvent e)
@@ -152,11 +147,11 @@ public class InterfaceTool : KMonoBehaviour
 
 	protected HoverTextConfiguration hoverText;
 
-	private static Texture2D activeCursor = null;
+	private static Texture2D activeCursor;
 
-	private static SimViewMode toolActivatedViewMode = SimViewMode.None;
+	private static SimViewMode toolActivatedViewMode;
 
-	protected SimViewMode viewMode = SimViewMode.None;
+	protected SimViewMode viewMode;
 
 	private List<RaycastResult> castResults = new List<RaycastResult>();
 

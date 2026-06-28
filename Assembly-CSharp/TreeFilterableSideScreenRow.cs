@@ -32,24 +32,19 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 				flag2 = true;
 			}
 		}
-		TreeFilterableSideScreenRow.State state;
 		if (flag && !flag2)
 		{
-			state = TreeFilterableSideScreenRow.State.On;
+			return TreeFilterableSideScreenRow.State.On;
 		}
-		else if (!flag && flag2)
+		if (!flag && flag2)
 		{
-			state = TreeFilterableSideScreenRow.State.Off;
+			return TreeFilterableSideScreenRow.State.Off;
 		}
-		else if (flag && flag2)
+		if (flag && flag2)
 		{
-			state = TreeFilterableSideScreenRow.State.Mixed;
+			return TreeFilterableSideScreenRow.State.Mixed;
 		}
-		else
-		{
-			state = TreeFilterableSideScreenRow.State.On;
-		}
-		return state;
+		return TreeFilterableSideScreenRow.State.On;
 	}
 
 	protected override void OnPrefabInit()
@@ -202,7 +197,7 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 		this.UpdateCheckBoxVisualState();
 	}
 
-	public bool visualDirty = false;
+	public bool visualDirty;
 
 	[SerializeField]
 	private LocText elementName;

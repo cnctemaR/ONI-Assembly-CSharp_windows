@@ -64,42 +64,31 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 
 	public override bool CanPreempt(Chore.Precondition.Context context)
 	{
-		bool flag;
 		if (!base.CanPreempt(context))
 		{
-			flag = false;
+			return false;
 		}
-		else if (context.chore.driver == null)
+		if (context.chore.driver == null)
 		{
-			flag = false;
+			return false;
 		}
-		else if (context.chore.driver == context.consumer.choreDriver)
+		if (context.chore.driver == context.consumer.choreDriver)
 		{
-			flag = false;
+			return false;
 		}
-		else
+		Workable workable = this.smi.sm.workable.Get<WorkableType>(this.smi);
+		if (workable == null)
 		{
-			Workable workable = this.smi.sm.workable.Get<WorkableType>(this.smi);
-			if (workable == null)
-			{
-				flag = false;
-			}
-			else
-			{
-				int navigationCost = context.chore.driver.GetComponent<Navigator>().GetNavigationCost(workable);
-				int num = 4;
-				if (navigationCost == PathProber.InvalidCost || navigationCost < num)
-				{
-					flag = false;
-				}
-				else
-				{
-					int navigationCost2 = context.consumer.GetComponent<Navigator>().GetNavigationCost(workable);
-					flag = navigationCost2 * 2 <= navigationCost;
-				}
-			}
+			return false;
 		}
-		return flag;
+		int navigationCost = context.chore.driver.GetComponent<Navigator>().GetNavigationCost(workable);
+		int num = 4;
+		if (navigationCost == PathProber.InvalidCost || navigationCost < num)
+		{
+			return false;
+		}
+		int navigationCost2 = context.consumer.GetComponent<Navigator>().GetNavigationCost(workable);
+		return navigationCost2 * 2 <= navigationCost;
 	}
 
 	public class StatesInstance : GameStateMachine<WorkChore<WorkableType>.States, WorkChore<WorkableType>.StatesInstance, WorkChore<WorkableType>, object>.GameInstance

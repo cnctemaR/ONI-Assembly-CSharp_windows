@@ -33,9 +33,9 @@ namespace Klei.AI
 
 		public void GetNewNeed()
 		{
-			string text = "";
+			string text = string.Empty;
 			int num = 0;
-			while (text == "" && num < 100)
+			while (text == string.Empty && num < 100)
 			{
 				num++;
 				int count = DUPLICANTSTATS.NEEDTRAITS.Count;
@@ -43,7 +43,7 @@ namespace Klei.AI
 				text = DUPLICANTSTATS.NEEDTRAITS[num2].id;
 				if (this.traits.HasTrait(text))
 				{
-					text = "";
+					text = string.Empty;
 				}
 				else if (DUPLICANTSTATS.NEEDTRAITS[num2].mutuallyExclusiveTraits != null)
 				{
@@ -51,24 +51,22 @@ namespace Klei.AI
 					{
 						if (this.traits.HasTrait(text2))
 						{
-							text = "";
+							text = string.Empty;
 							break;
 						}
 					}
 				}
 			}
-			if (text != "")
+			if (text != string.Empty)
 			{
 				Trait trait = Db.Get().traits.TryGet(text);
 				if (trait == null)
 				{
 					global::Debug.LogWarning("Trait " + text + " was not found in database", null);
+					return;
 				}
-				else
-				{
-					this.traits.Add(trait);
-					this.notifier.Add(this.CreateNewNeedNotification(trait), "");
-				}
+				this.traits.Add(trait);
+				this.notifier.Add(this.CreateNewNeedNotification(trait), string.Empty);
 			}
 		}
 
@@ -87,7 +85,7 @@ namespace Klei.AI
 
 		private string ToolTipResolver(List<Notification> notificationList, object data)
 		{
-			string text = "";
+			string text = string.Empty;
 			for (int i = 0; i < notificationList.Count; i++)
 			{
 				Notification notification = notificationList[i];

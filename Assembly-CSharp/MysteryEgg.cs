@@ -44,7 +44,7 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 			num2++;
 		}
 		float num3 = (float)global::UnityEngine.Random.Range(0, num);
-		string text = "";
+		string text = string.Empty;
 		float num4 = 0f;
 		foreach (KeyValuePair<string, int> keyValuePair2 in this.HatchPossibilities)
 		{
@@ -74,14 +74,14 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 
 	public bool alive = true;
 
-	private float maturity = 0f;
+	private float maturity;
 
 	private float matureRate = 1f;
 
 	private EggIncubator incubator;
 
 	[Serialize]
-	private bool initialized = false;
+	private bool initialized;
 
 	private Dictionary<string, int> HatchPossibilities = new Dictionary<string, int>();
 

@@ -32,18 +32,13 @@ namespace TMPro
 		private bool InternalRegisterTextElementForLayoutRebuild(TMP_Text element)
 		{
 			int instanceID = element.GetInstanceID();
-			bool flag;
 			if (this.m_LayoutQueueLookup.ContainsKey(instanceID))
 			{
-				flag = false;
+				return false;
 			}
-			else
-			{
-				this.m_LayoutQueueLookup[instanceID] = instanceID;
-				this.m_LayoutRebuildQueue.Add(element);
-				flag = true;
-			}
-			return flag;
+			this.m_LayoutQueueLookup[instanceID] = instanceID;
+			this.m_LayoutRebuildQueue.Add(element);
+			return true;
 		}
 
 		public static void RegisterTextElementForGraphicRebuild(TMP_Text element)
@@ -54,18 +49,13 @@ namespace TMPro
 		private bool InternalRegisterTextElementForGraphicRebuild(TMP_Text element)
 		{
 			int instanceID = element.GetInstanceID();
-			bool flag;
 			if (this.m_GraphicQueueLookup.ContainsKey(instanceID))
 			{
-				flag = false;
+				return false;
 			}
-			else
-			{
-				this.m_GraphicQueueLookup[instanceID] = instanceID;
-				this.m_GraphicRebuildQueue.Add(element);
-				flag = true;
-			}
-			return flag;
+			this.m_GraphicQueueLookup[instanceID] = instanceID;
+			this.m_GraphicRebuildQueue.Add(element);
+			return true;
 		}
 
 		private void OnCameraPreRender(Camera cam)

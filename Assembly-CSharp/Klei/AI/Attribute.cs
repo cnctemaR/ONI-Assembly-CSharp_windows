@@ -26,7 +26,7 @@ namespace Klei.AI
 			this.BaseValue = base_value;
 			this.ShowInUI = show_in_ui;
 			this.IsTrainable = is_trainable;
-			if (this.ProfessionName == "")
+			if (this.ProfessionName == string.Empty)
 			{
 				this.ProfessionName = null;
 			}
@@ -45,16 +45,11 @@ namespace Klei.AI
 		public AttributeInstance Lookup(GameObject go)
 		{
 			Attributes attributes = go.GetAttributes();
-			AttributeInstance attributeInstance;
 			if (attributes != null)
 			{
-				attributeInstance = attributes.Get(this);
+				return attributes.Get(this);
 			}
-			else
-			{
-				attributeInstance = null;
-			}
-			return attributeInstance;
+			return null;
 		}
 
 		public string Description;

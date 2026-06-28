@@ -46,17 +46,12 @@ namespace ClipperLib
 
 		public override bool Equals(object obj)
 		{
-			bool flag;
 			if (obj == null || !(obj is Int128))
 			{
-				flag = false;
+				return false;
 			}
-			else
-			{
-				Int128 @int = (Int128)obj;
-				flag = @int.hi == this.hi && @int.lo == this.lo;
-			}
-			return flag;
+			Int128 @int = (Int128)obj;
+			return @int.hi == this.hi && @int.lo == this.lo;
 		}
 
 		public override int GetHashCode()
@@ -66,30 +61,20 @@ namespace ClipperLib
 
 		public static bool operator >(Int128 val1, Int128 val2)
 		{
-			bool flag;
 			if (val1.hi != val2.hi)
 			{
-				flag = val1.hi > val2.hi;
+				return val1.hi > val2.hi;
 			}
-			else
-			{
-				flag = val1.lo > val2.lo;
-			}
-			return flag;
+			return val1.lo > val2.lo;
 		}
 
 		public static bool operator <(Int128 val1, Int128 val2)
 		{
-			bool flag;
 			if (val1.hi != val2.hi)
 			{
-				flag = val1.hi < val2.hi;
+				return val1.hi < val2.hi;
 			}
-			else
-			{
-				flag = val1.lo < val2.lo;
-			}
-			return flag;
+			return val1.lo < val2.lo;
 		}
 
 		public static Int128 operator +(Int128 lhs, Int128 rhs)
@@ -110,37 +95,24 @@ namespace ClipperLib
 
 		public static Int128 operator -(Int128 val)
 		{
-			Int128 @int;
 			if (val.lo == 0UL)
 			{
-				@int = new Int128(-val.hi, 0UL);
+				return new Int128(-val.hi, 0UL);
 			}
-			else
-			{
-				@int = new Int128(~val.hi, ~val.lo + 1UL);
-			}
-			return @int;
+			return new Int128(~val.hi, ~val.lo + 1UL);
 		}
 
 		public static explicit operator double(Int128 val)
 		{
-			double num;
-			if (val.hi < 0L)
+			if (val.hi >= 0L)
 			{
-				if (val.lo == 0UL)
-				{
-					num = (double)val.hi * 1.8446744073709552E+19;
-				}
-				else
-				{
-					num = -(~val.lo + (double)(~(double)val.hi) * 1.8446744073709552E+19);
-				}
+				return val.lo + (double)val.hi * 1.8446744073709552E+19;
 			}
-			else
+			if (val.lo == 0UL)
 			{
-				num = val.lo + (double)val.hi * 1.8446744073709552E+19;
+				return (double)val.hi * 1.8446744073709552E+19;
 			}
-			return num;
+			return -(~val.lo + (double)(~(double)val.hi) * 1.8446744073709552E+19);
 		}
 
 		public static Int128 Int128Mul(long lhs, long rhs)

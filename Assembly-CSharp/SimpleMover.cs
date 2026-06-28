@@ -120,15 +120,15 @@ public class SimpleMover : KMonoBehaviour
 	private Vector3 targetTransformPosition;
 
 	[Serialize]
-	private float moveTimeRemaining = 0f;
+	private float moveTimeRemaining;
 
 	private float zPosition = -2f;
 
-	private float moveDuration = 0f;
+	private float moveDuration;
 
-	private float teleportDelay = 0f;
+	private float teleportDelay;
 
-	public bool smoothStep = false;
+	public bool smoothStep;
 
 	public Vector3 cellPositionOffset = Vector3.zero;
 }

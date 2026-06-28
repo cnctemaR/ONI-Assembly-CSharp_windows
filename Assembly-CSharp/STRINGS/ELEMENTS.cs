@@ -84,7 +84,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Algae is a cluster of non-motile, single-celled lifeforms.\n\nIt can be used to produce <style=\"oxygen\">Oxygen</style> when grown in Algae Terrariums.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class BLEACHSTONE
@@ -93,7 +93,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Bleach stone is an unstable compound that emits toxic <style=\"gas\">Chlorine Gas</style>.\n\nIt is useful in <style=\"hygiene\">Hygienic</style> processes.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class BOTTLEDWATER
@@ -123,7 +123,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Carbon Fiber is a <style=\"RefinedMineral\">Manufactured Material</style> with high tensile strength.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class CARBONGAS
@@ -153,7 +153,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Clay is a soft, naturally occurring composite of stone and soil that hardens at high <style=\"heat\">Temperatures</style>.\n\nIt is a reliable <style=\"RawMineral\">Construction Material</style>.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class BRICK
@@ -162,7 +162,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Ceramic is a hard, brittle material formed from heated <style=\"RawMineral\">Clay</style>.\n\nIt is a reliable <style=\"RawMineral\">Construction Material</style>.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class CONTAMINATEDOXYGEN
@@ -178,7 +178,7 @@ namespace STRINGS
 
 			public static LocString DESC = "(Cu) Copper is a conductive <style=\"RawMetal\">Metal</style>.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class COPPERGAS
@@ -222,7 +222,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Crushed Rock is <style=\"solid\">Igneous Rock</style> crushed into a mechanical mixture.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class CUPRITE
@@ -231,7 +231,7 @@ namespace STRINGS
 
 			public static LocString DESC = "(Cu<sub>2</sub>0) Copper Ore is a conductive <style=\"RawMetal\">Metal</style>.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class DIAMOND
@@ -240,7 +240,7 @@ namespace STRINGS
 
 			public static LocString DESC = "(C) Diamond is industrial-grade, high density carbon.\n\nIt is very difficult to excavate.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class DIRT
@@ -249,7 +249,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Dirt is a soft, nutrient-rich substance capable of supporting life.\n\nIt is necessary in some forms of <style=\"food\">Food</style> production.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class DIRTYICE
@@ -272,7 +272,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Electrum is a conductive <style=\"RawMetal\">Metal</style> alloy composed of gold and silver.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class FERTILIZER
@@ -281,7 +281,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Fertilizer is a processed mixture of biological nutrients.\n\nIt aids in the growth of certain <style=\"plant\">Plants</style>.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class PONDSCUM
@@ -297,16 +297,16 @@ namespace STRINGS
 
 			public static LocString DESC = "(FeS<sub>2</sub>) Pyrite is a conductive <style=\"RawMetal\">Metal</style>.\n\nAlso known as \"Fool's Gold\", is suitable for building <style=\"power\">Power</style> systems.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class GLASS
 		{
 			public static LocString NAME = "Glass";
 
-			public static LocString DESC = "";
+			public static LocString DESC = string.Empty;
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class GOLD
@@ -315,7 +315,7 @@ namespace STRINGS
 
 			public static LocString DESC = "(Au) Gold is a conductive precious <style=\"RawMetal\">Metal</style>.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class GOLDAMALGAM
@@ -324,7 +324,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Gold Amalgam is a conductive amalgam of gold and mercury.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class GOLDGAS
@@ -340,7 +340,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Granite is a dense composite of <style=\"RawMineral\">Igneous Rock</style>.\n\nIt is useful as a <style=\"RawMineral\">Construction Material</style>.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class HELIUM
@@ -377,7 +377,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Igneous Rock is a composite of solidified volcanic rock.\n\nIt is useful as a <style=\"RawMineral\">Construction Material</style>.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class IRON
@@ -386,7 +386,7 @@ namespace STRINGS
 
 			public static LocString DESC = "(Fe) Iron is a common industrial <style=\"RawMetal\">Metal</style>.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class IRONINGOT
@@ -395,7 +395,7 @@ namespace STRINGS
 
 			public static LocString DESC = "(Fe) Iron is refined <style=\"RawMetal\">Iron Ore</style>.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class IRONGAS
@@ -411,7 +411,7 @@ namespace STRINGS
 
 			public static LocString DESC = "(Fe) Iron Ore is a soft <style=\"RawMetal\">Metal</style>.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class KATAIRITE
@@ -420,7 +420,7 @@ namespace STRINGS
 
 			public static LocString DESC = "(Ab) Abyssalite is a resilient, crystalline element.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class LIQUIDCARBONDIOXIDE
@@ -485,7 +485,7 @@ namespace STRINGS
 
 			public static LocString DESC = "(Hg) Mercury is a toxic, <style=\"RawMetal\">Metallic</style> <style=\"liquid\">Liquid</style>.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class MERCURYGAS
@@ -557,7 +557,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Obsidian is a brittle composite of volcanic <style=\"solid\">Glass</style>.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class OXYGEN
@@ -580,7 +580,7 @@ namespace STRINGS
 
 			public static LocString DESC = "(PO<sup>3-</sup><sub>4</sub>) Nodules of sedimentary rock containing high concentrations of phosphate.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class PHOSPHORITE
@@ -589,7 +589,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Phosphorite is a composite of sedimentary rock, saturated with phosphate.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class PHOSPHORUS
@@ -598,7 +598,7 @@ namespace STRINGS
 
 			public static LocString DESC = "(P) Phosphorus is a chemical element in its <style=\"solid\">Solid</style> state.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class PHOSPHORUSGAS
@@ -635,16 +635,16 @@ namespace STRINGS
 
 			public static LocString DESC = "Sand is a composite of granular rock.\n\nIt is useful as a <style=\"misc\">Filtration Medium</style>.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SANDCEMENT
 		{
 			public static LocString NAME = "Sand Cement";
 
-			public static LocString DESC = "";
+			public static LocString DESC = string.Empty;
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SANDSTONE
@@ -653,7 +653,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Sandstone is a composite of relatively soft sedimentary rock.\n\nIt is useful as a <style=\"RawMineral\">Construction Material</style>.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SEDIMENTARYROCK
@@ -662,7 +662,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Sedimentary Rock is a hardened composite of sediment layers.\n\nIt is useful as a <style=\"RawMineral\">Construction Material</style>.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SLIMEMOLD
@@ -671,7 +671,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Slime is a thick biomixture of algae, fungi, and mucopolysaccharides.\n\nIt can be distilled into <style=\"solid\">Algae</style> and is useful in some <style=\"oxygen\">Oxygen</style> production processes.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SNOW
@@ -708,7 +708,7 @@ namespace STRINGS
 
 			public static LocString DESC = "(Hg) Mercury is a toxic <style=\"RawMetal\">Metal</style> in a <style=\"solid\">Solid</style> state.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDOXYGEN
@@ -766,7 +766,7 @@ namespace STRINGS
 
 			public static LocString DESC = "Steel is a <style=\"RefinedMetal\">Metal Alloy</style> composed of iron and carbon.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class STEELGAS
@@ -782,7 +782,7 @@ namespace STRINGS
 
 			public static LocString DESC = "(W) Tungsten is an extremely tough crystalline <style=\"RawMetal\">Metal</style>.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class TUNGSTENGAS
@@ -847,7 +847,7 @@ namespace STRINGS
 
 			public static LocString DESC = "((Fe,Mn)WO<sub>4</sub>) Wolframite is a dense <style=\"RawMetal\">Metallic</style> element in a <style=\"solid\">Solid</style> state.\n\nIt is a source of <style=\"RawMetal\">Tungsten</style> and is suitable for building <style=\"power\">Power</style> systems.";
 
-			public static LocString BUILD_DESC = "";
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class POLYPROPYLENE

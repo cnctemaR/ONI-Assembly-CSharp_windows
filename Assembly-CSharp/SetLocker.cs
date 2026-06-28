@@ -61,26 +61,28 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 
 	public void ActivateChore(object param = null)
 	{
-		if (this.chore == null)
+		if (this.chore != null)
 		{
-			base.GetComponent<Workable>().SetWorkTime(1.5f);
-			ChoreType emptyStorage = Db.Get().ChoreTypes.EmptyStorage;
-			KAnimFile anim = Assets.GetAnim("anim_interacts_clothingfactory_kanim");
-			this.chore = new WorkChore<Workable>(emptyStorage, this, null, true, delegate(Chore o)
-			{
-				this.CompleteChore();
-			}, null, null, true, null, true, default(Tag), anim, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
-			this.OnRefreshUserMenu(null);
+			return;
 		}
+		base.GetComponent<Workable>().SetWorkTime(1.5f);
+		ChoreType emptyStorage = Db.Get().ChoreTypes.EmptyStorage;
+		KAnimFile anim = Assets.GetAnim("anim_interacts_clothingfactory_kanim");
+		this.chore = new WorkChore<Workable>(emptyStorage, this, null, true, delegate(Chore o)
+		{
+			this.CompleteChore();
+		}, null, null, true, null, true, default(Tag), anim, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+		this.OnRefreshUserMenu(null);
 	}
 
 	public void CancelChore(object param = null)
 	{
-		if (this.chore != null)
+		if (this.chore == null)
 		{
-			this.chore.Cancel("User cancelled");
-			this.chore = null;
+			return;
 		}
+		this.chore.Cancel("User cancelled");
+		this.chore = null;
 	}
 
 	private void CompleteChore()
@@ -94,12 +96,12 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 	}
 
 	[Serialize]
-	private string contents = "";
+	private string contents = string.Empty;
 
 	private string[] possible_contents_ids = new string[] { "Warm_Vest", "Cool_Vest", "Funky_Vest" };
 
 	[Serialize]
-	private bool used = false;
+	private bool used;
 
 	private Chore chore;
 

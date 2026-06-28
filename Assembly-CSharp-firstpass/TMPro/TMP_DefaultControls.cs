@@ -24,11 +24,12 @@ namespace TMPro
 
 		private static void SetParentAndAlign(GameObject child, GameObject parent)
 		{
-			if (!(parent == null))
+			if (parent == null)
 			{
-				child.transform.SetParent(parent.transform, false);
-				TMP_DefaultControls.SetLayerRecursively(child, parent.layer);
+				return;
 			}
+			child.transform.SetParent(parent.transform, false);
+			TMP_DefaultControls.SetLayerRecursively(child, parent.layer);
 		}
 
 		private static void SetLayerRecursively(GameObject go, int layer)
@@ -101,7 +102,7 @@ namespace TMPro
 			component.offsetMin = new Vector2(10f, 6f);
 			component.offsetMax = new Vector2(-10f, -7f);
 			TextMeshProUGUI textMeshProUGUI = gameObject4.AddComponent<TextMeshProUGUI>();
-			textMeshProUGUI.text = "";
+			textMeshProUGUI.text = string.Empty;
 			textMeshProUGUI.enableWordWrapping = false;
 			textMeshProUGUI.extraPadding = true;
 			textMeshProUGUI.richText = true;

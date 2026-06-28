@@ -53,15 +53,12 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 			List<WireUtilityNetworkLink> list4 = bridgeGroups[i];
 			Wire.WattageRating wattageRating = (Wire.WattageRating)i;
 			float maxWattageAsFloat = Wire.GetMaxWattageAsFloat(wattageRating);
-			if (watts_used > maxWattageAsFloat)
+			if (watts_used > maxWattageAsFloat && ((list4 != null && list4.Count > 0) || (list3 != null && list3.Count > 0)))
 			{
-				if ((list4 != null && list4.Count > 0) || (list3 != null && list3.Count > 0))
-				{
-					flag = true;
-					list = list3;
-					list2 = list4;
-					break;
-				}
+				flag = true;
+				list = list3;
+				list2 = list4;
+				break;
 			}
 		}
 		if (flag)
@@ -94,7 +91,7 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 					this.timeOverloadNotificationDisplayed = 0f;
 					this.overloadedNotification = new Notification(MISC.NOTIFICATIONS.CIRCUIT_OVERLOADED.NAME, NotificationType.BadMinor, HashedString.Invalid, null, null, true, 0f, null, null, null);
 					Notifier notifier = Game.Instance.FindOrAdd<Notifier>();
-					notifier.Add(this.overloadedNotification, "");
+					notifier.Add(this.overloadedNotification, string.Empty);
 					this.overloadedNotification.Position = this.targetOverloadedWire.transform.position;
 					this.overloadedNotification.Notifier = null;
 				}
@@ -144,9 +141,9 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 
 	private const float MIN_OVERLOAD_NOTIFICATION_DISPLAY_TIME = 5f;
 
-	private GameObject targetOverloadedWire = null;
+	private GameObject targetOverloadedWire;
 
-	private float timeOverloaded = 0f;
+	private float timeOverloaded;
 
-	private float timeOverloadNotificationDisplayed = 0f;
+	private float timeOverloadNotificationDisplayed;
 }

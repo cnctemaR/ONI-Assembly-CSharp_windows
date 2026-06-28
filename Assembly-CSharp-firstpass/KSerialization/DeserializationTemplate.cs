@@ -62,123 +62,62 @@ namespace KSerialization
 			byte b = reader.ReadByte();
 			typeInfo.info = (SerializationTypeInfo)b;
 			SerializationTypeInfo serializationTypeInfo = typeInfo.info & SerializationTypeInfo.VALUE_MASK;
-			if (Helper.IsGenericType(typeInfo.info))
-			{
-				Type type = null;
-				switch (serializationTypeInfo)
-				{
-				case SerializationTypeInfo.Pair:
-					type = typeof(KeyValuePair<, >);
-					break;
-				case SerializationTypeInfo.Dictionary:
-					type = typeof(Dictionary<, >);
-					break;
-				case SerializationTypeInfo.List:
-					type = typeof(List<>);
-					break;
-				case SerializationTypeInfo.HashSet:
-					type = typeof(HashSet<>);
-					break;
-				default:
-				{
-					if (serializationTypeInfo != SerializationTypeInfo.UserDefined)
-					{
-						throw new ArgumentException("unknown type");
-					}
-					string text = reader.ReadKleiString();
-					typeInfo.type = Manager.GetType(text);
-					break;
-				}
-				}
-				byte b2 = reader.ReadByte();
-				Type[] array = new Type[(int)b2];
-				typeInfo.subTypes = new TypeInfo[(int)b2];
-				for (int i = 0; i < (int)b2; i++)
-				{
-					typeInfo.subTypes[i] = this.ReadType(reader);
-					array[i] = typeInfo.subTypes[i].type;
-				}
-				if (type != null)
-				{
-					if (array == null || Array.IndexOf<Type>(array, null) != -1)
-					{
-						typeInfo.type = null;
-						return typeInfo;
-					}
-					typeInfo.type = type.MakeGenericType(array);
-				}
-				else if (typeInfo.type != null)
-				{
-					Type[] genericArguments = typeInfo.type.GetGenericArguments();
-					if (genericArguments.Length != (int)b2)
-					{
-						throw new InvalidOperationException("User defined generic type mismatch");
-					}
-					for (int j = 0; j < (int)b2; j++)
-					{
-						if (array[j] != genericArguments[j])
-						{
-							throw new InvalidOperationException("User defined generic type mismatch");
-						}
-					}
-				}
-			}
-			else
+			if (!Helper.IsGenericType(typeInfo.info))
 			{
 				switch (serializationTypeInfo)
 				{
 				case SerializationTypeInfo.UserDefined:
 				case SerializationTypeInfo.Enumeration:
 				{
-					string text2 = reader.ReadKleiString();
-					typeInfo.type = Manager.GetType(text2);
-					goto IL_03FE;
+					string text = reader.ReadKleiString();
+					typeInfo.type = Manager.GetType(text);
+					return typeInfo;
 				}
 				case SerializationTypeInfo.SByte:
 					typeInfo.type = typeof(sbyte);
-					goto IL_03FE;
+					return typeInfo;
 				case SerializationTypeInfo.Byte:
 					typeInfo.type = typeof(byte);
-					goto IL_03FE;
+					return typeInfo;
 				case SerializationTypeInfo.Boolean:
 					typeInfo.type = typeof(bool);
-					goto IL_03FE;
+					return typeInfo;
 				case SerializationTypeInfo.Int16:
 					typeInfo.type = typeof(short);
-					goto IL_03FE;
+					return typeInfo;
 				case SerializationTypeInfo.UInt16:
 					typeInfo.type = typeof(ushort);
-					goto IL_03FE;
+					return typeInfo;
 				case SerializationTypeInfo.Int32:
 					typeInfo.type = typeof(int);
-					goto IL_03FE;
+					return typeInfo;
 				case SerializationTypeInfo.UInt32:
 					typeInfo.type = typeof(uint);
-					goto IL_03FE;
+					return typeInfo;
 				case SerializationTypeInfo.Int64:
 					typeInfo.type = typeof(long);
-					goto IL_03FE;
+					return typeInfo;
 				case SerializationTypeInfo.UInt64:
 					typeInfo.type = typeof(ulong);
-					goto IL_03FE;
+					return typeInfo;
 				case SerializationTypeInfo.Single:
 					typeInfo.type = typeof(float);
-					goto IL_03FE;
+					return typeInfo;
 				case SerializationTypeInfo.Double:
 					typeInfo.type = typeof(double);
-					goto IL_03FE;
+					return typeInfo;
 				case SerializationTypeInfo.String:
 					typeInfo.type = typeof(string);
-					goto IL_03FE;
+					return typeInfo;
 				case SerializationTypeInfo.Vector2I:
 					typeInfo.type = typeof(Vector2I);
-					goto IL_03FE;
+					return typeInfo;
 				case SerializationTypeInfo.Vector2:
 					typeInfo.type = typeof(Vector2);
-					goto IL_03FE;
+					return typeInfo;
 				case SerializationTypeInfo.Vector3:
 					typeInfo.type = typeof(Vector3);
-					goto IL_03FE;
+					return typeInfo;
 				case SerializationTypeInfo.Array:
 					typeInfo.subTypes = new TypeInfo[1];
 					typeInfo.subTypes[0] = this.ReadType(reader);
@@ -190,13 +129,70 @@ namespace KSerialization
 					{
 						typeInfo.type = null;
 					}
-					goto IL_03FE;
+					return typeInfo;
 				case SerializationTypeInfo.Colour:
 					typeInfo.type = typeof(Color);
-					goto IL_03FE;
+					return typeInfo;
 				}
 				throw new ArgumentException("unknown type");
-				IL_03FE:;
+			}
+			Type type = null;
+			switch (serializationTypeInfo)
+			{
+			case SerializationTypeInfo.Pair:
+				type = typeof(KeyValuePair<, >);
+				break;
+			case SerializationTypeInfo.Dictionary:
+				type = typeof(Dictionary<, >);
+				break;
+			case SerializationTypeInfo.List:
+				type = typeof(List<>);
+				break;
+			case SerializationTypeInfo.HashSet:
+				type = typeof(HashSet<>);
+				break;
+			default:
+			{
+				if (serializationTypeInfo != SerializationTypeInfo.UserDefined)
+				{
+					throw new ArgumentException("unknown type");
+				}
+				string text2 = reader.ReadKleiString();
+				typeInfo.type = Manager.GetType(text2);
+				break;
+			}
+			}
+			byte b2 = reader.ReadByte();
+			Type[] array = new Type[(int)b2];
+			typeInfo.subTypes = new TypeInfo[(int)b2];
+			for (int i = 0; i < (int)b2; i++)
+			{
+				typeInfo.subTypes[i] = this.ReadType(reader);
+				array[i] = typeInfo.subTypes[i].type;
+			}
+			if (type != null)
+			{
+				if (array == null || Array.IndexOf<Type>(array, null) != -1)
+				{
+					typeInfo.type = null;
+					return typeInfo;
+				}
+				typeInfo.type = type.MakeGenericType(array);
+			}
+			else if (typeInfo.type != null)
+			{
+				Type[] genericArguments = typeInfo.type.GetGenericArguments();
+				if (genericArguments.Length != (int)b2)
+				{
+					throw new InvalidOperationException("User defined generic type mismatch");
+				}
+				for (int j = 0; j < (int)b2; j++)
+				{
+					if (array[j] != genericArguments[j])
+					{
+						throw new InvalidOperationException("User defined generic type mismatch");
+					}
+				}
 			}
 			return typeInfo;
 		}

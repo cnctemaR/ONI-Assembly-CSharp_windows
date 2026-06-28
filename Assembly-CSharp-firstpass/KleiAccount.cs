@@ -21,33 +21,31 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		{
 			KleiAccount.KleiUserID = null;
 			this.gotUserID();
+			return;
+		}
+		Stream responseStream = response.GetResponseStream();
+		StreamReader streamReader = new StreamReader(responseStream);
+		string text = streamReader.ReadToEnd();
+		streamReader.Close();
+		responseStream.Close();
+		KleiAccount.AccountReply accountReply = JsonConvert.DeserializeObject<KleiAccount.AccountReply>(text);
+		if (!accountReply.Error)
+		{
+			Debug.Log("[Account] Got login for user " + accountReply.UserID, null);
+			KleiAccount.KleiUserID = ((!(accountReply.UserID == string.Empty)) ? accountReply.UserID : null);
+			this.gotUserID();
 		}
 		else
 		{
-			Stream responseStream = response.GetResponseStream();
-			StreamReader streamReader = new StreamReader(responseStream);
-			string text = streamReader.ReadToEnd();
-			streamReader.Close();
-			responseStream.Close();
-			KleiAccount.AccountReply accountReply = JsonConvert.DeserializeObject<KleiAccount.AccountReply>(text);
-			if (!accountReply.Error)
-			{
-				Debug.Log("[Account] Got login for user " + accountReply.UserID, null);
-				KleiAccount.KleiUserID = ((!(accountReply.UserID == "")) ? accountReply.UserID : null);
-				this.gotUserID();
-			}
-			else
-			{
-				Debug.Log("[Account] Error logging in: " + text, null);
-				this.gotUserID();
-			}
-			base.End();
+			Debug.Log("[Account] Error logging in: " + text, null);
+			this.gotUserID();
 		}
+		base.End();
 	}
 
 	private string EncodeToAsciiHEX(byte[] data)
 	{
-		string text = "";
+		string text = string.Empty;
 		for (int i = 0; i < data.Length; i++)
 		{
 			text += data[i].ToString("X2");
@@ -143,13 +141,13 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 
 	private const string UserIDFieldName = "UserID";
 
-	public static string KleiUserID = null;
+	public static string KleiUserID;
 
-	private KleiAccount.GetUserIDdelegate gotUserID = null;
+	private KleiAccount.GetUserIDdelegate gotUserID;
 
 	private const string AuthTicketKey = "AUTH_TICKET";
 
-	private byte[] authTicket = null;
+	private byte[] authTicket;
 
 	private const string TicketFieldName = "SteamTicket";
 

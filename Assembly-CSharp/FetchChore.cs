@@ -168,16 +168,11 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 
 	public float AmountWaitingToFetch()
 	{
-		float num;
 		if (this.fetcher == null)
 		{
-			num = this.originalAmount;
+			return this.originalAmount;
 		}
-		else
-		{
-			num = this.amount;
-		}
-		return num;
+		return this.amount;
 	}
 
 	private void OnPriorityChanged()

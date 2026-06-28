@@ -17,18 +17,13 @@ public class CustomGameSettings : KMonoBehaviour
 
 	public SettingLevel GetCurrentQualitySetting(string setting_id)
 	{
-		SettingLevel settingLevel;
 		if (this.is_custom_game)
 		{
-			string text = "";
-			this.CurrentQualityLevelsBySetting.TryGetValue(setting_id, out text);
-			settingLevel = this.QualitySettings[setting_id].GetLevel(text);
+			string empty = string.Empty;
+			this.CurrentQualityLevelsBySetting.TryGetValue(setting_id, out empty);
+			return this.QualitySettings[setting_id].GetLevel(empty);
 		}
-		else
-		{
-			settingLevel = this.QualitySettings[setting_id].GetLevel(this.QualitySettings[setting_id].default_level_id);
-		}
-		return settingLevel;
+		return this.QualitySettings[setting_id].GetLevel(this.QualitySettings[setting_id].default_level_id);
 	}
 
 	public string GetSettingLevelLabel(string setting_id, string level_id)
@@ -43,7 +38,7 @@ public class CustomGameSettings : KMonoBehaviour
 			}
 		}
 		global::Debug.LogWarning("No label string for setting: " + setting_id + " level: " + level_id, null);
-		return "";
+		return string.Empty;
 	}
 
 	public string GetSettingLevelTooltip(string setting_id, string level_id)
@@ -58,7 +53,7 @@ public class CustomGameSettings : KMonoBehaviour
 			}
 		}
 		global::Debug.LogWarning("No tooltip string for setting: " + setting_id + " level: " + level_id, null);
-		return "";
+		return string.Empty;
 	}
 
 	protected override void OnPrefabInit()
@@ -130,7 +125,7 @@ public class CustomGameSettings : KMonoBehaviour
 	private static CustomGameSettings instance;
 
 	[Serialize]
-	public bool is_custom_game = false;
+	public bool is_custom_game;
 
 	[Serialize]
 	public Dictionary<string, string> CurrentQualityLevelsBySetting = new Dictionary<string, string>();

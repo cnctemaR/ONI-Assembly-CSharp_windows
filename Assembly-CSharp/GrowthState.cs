@@ -76,11 +76,11 @@ public class GrowthState : KMonoBehaviour
 
 	public int maxMaturity = 10;
 
-	private int maturity = 0;
+	private int maturity;
 
 	private bool isDead;
 
-	private float timeInMaturityState = 0f;
+	private float timeInMaturityState;
 
 	public float maturityStateDuration = 10f;
 }

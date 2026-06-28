@@ -173,14 +173,7 @@ public class GreedyGreen : StateMachineComponent<GreedyGreen.StatesInstance>
 
 	private bool PlantableCell(int cell)
 	{
-		if (Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)])
-		{
-			if (Grid.Objects[cell, 5] == null && Grid.Objects[cell, 0] == null && Grid.Objects[cell, 1] == null)
-			{
-				return true;
-			}
-		}
-		return false;
+		return Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)] && Grid.Objects[cell, 5] == null && Grid.Objects[cell, 0] == null && Grid.Objects[cell, 1] == null;
 	}
 
 	private bool CellIsClear(int cell)

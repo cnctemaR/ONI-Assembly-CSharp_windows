@@ -157,7 +157,7 @@ public class KBatchedAnimInstanceData
 
 	private float symbolScale;
 
-	private KAnimConverter.IAnimConverter target = null;
+	private KAnimConverter.IAnimConverter target;
 
 	public const int bitsPerSlot = 30;
 

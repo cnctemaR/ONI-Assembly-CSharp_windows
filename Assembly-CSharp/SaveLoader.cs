@@ -99,6 +99,7 @@ public class SaveLoader : KMonoBehaviour
 				}
 				App.LoadScene("frontend");
 			}
+			return;
 		}
 	}
 
@@ -208,47 +209,39 @@ public class SaveLoader : KMonoBehaviour
 		SimMessages.CreateDiseaseTable();
 		byte[] array = saveFileRoot.streamed["Sim"];
 		FastReader fastReader = new FastReader(array);
-		bool flag;
 		if (Sim.Load(fastReader) != 0)
 		{
 			Output.LogWarning(new object[] { "\n--- Error loading save ---\nSimDLL found bad data\n" });
 			Sim.Shutdown();
-			flag = false;
+			return false;
 		}
-		else
+		if (KPlayerPrefs.HasKey("TemperatureUnit"))
 		{
-			if (KPlayerPrefs.HasKey("TemperatureUnit"))
-			{
-				GameUtil.temperatureUnit = (GameUtil.TemperatureUnit)KPlayerPrefs.GetInt("TemperatureUnit");
-			}
-			if (KPlayerPrefs.HasKey("MassUnit"))
-			{
-				GameUtil.massUnit = (GameUtil.MassUnit)KPlayerPrefs.GetInt("MassUnit");
-			}
-			SceneInitializer.Instance.PostLoadPrefabs();
-			this.mustRestartOnFail = true;
-			if (!this.saveManager.Load(reader))
-			{
-				Sim.Shutdown();
-				Output.LogWarning(new object[] { "\n--- Error loading save ---\n" });
-				SaveLoader.SetActiveSaveFilePath(null);
-				flag = false;
-			}
-			else
-			{
-				Grid.Visible = saveFileRoot.streamed["GridVisible"];
-				if (saveFileRoot.streamed.ContainsKey("GridSpawnable"))
-				{
-					Grid.Spawnable = saveFileRoot.streamed["GridSpawnable"];
-				}
-				Grid.Damage = this.BytesToFloat(saveFileRoot.streamed["GridDamage"]);
-				Game.Instance.Load(deserializer);
-				FastReader fastReader2 = new FastReader(saveFileRoot.streamed["Camera"]);
-				CameraSaveData.Load(fastReader2);
-				flag = true;
-			}
+			GameUtil.temperatureUnit = (GameUtil.TemperatureUnit)KPlayerPrefs.GetInt("TemperatureUnit");
 		}
-		return flag;
+		if (KPlayerPrefs.HasKey("MassUnit"))
+		{
+			GameUtil.massUnit = (GameUtil.MassUnit)KPlayerPrefs.GetInt("MassUnit");
+		}
+		SceneInitializer.Instance.PostLoadPrefabs();
+		this.mustRestartOnFail = true;
+		if (!this.saveManager.Load(reader))
+		{
+			Sim.Shutdown();
+			Output.LogWarning(new object[] { "\n--- Error loading save ---\n" });
+			SaveLoader.SetActiveSaveFilePath(null);
+			return false;
+		}
+		Grid.Visible = saveFileRoot.streamed["GridVisible"];
+		if (saveFileRoot.streamed.ContainsKey("GridSpawnable"))
+		{
+			Grid.Spawnable = saveFileRoot.streamed["GridSpawnable"];
+		}
+		Grid.Damage = this.BytesToFloat(saveFileRoot.streamed["GridDamage"]);
+		Game.Instance.Load(deserializer);
+		FastReader fastReader2 = new FastReader(saveFileRoot.streamed["Camera"]);
+		CameraSaveData.Load(fastReader2);
+		return true;
 	}
 
 	public static string GetSavePrefix()
@@ -290,16 +283,11 @@ public class SaveLoader : KMonoBehaviour
 	public static string GetActiveSaveFolder()
 	{
 		string activeSaveFilePath = SaveLoader.GetActiveSaveFilePath();
-		string text;
 		if (!string.IsNullOrEmpty(activeSaveFilePath))
 		{
-			text = Path.GetDirectoryName(activeSaveFilePath);
+			return Path.GetDirectoryName(activeSaveFilePath);
 		}
-		else
-		{
-			text = null;
-		}
-		return text;
+		return null;
 	}
 
 	public static List<string> GetSaveFiles(string save_dir)
@@ -333,22 +321,17 @@ public class SaveLoader : KMonoBehaviour
 	public static List<string> GetAllFiles()
 	{
 		List<string> list = SaveLoader.GetSaveFiles(SaveLoader.GetSavePrefix()).ToList<string>();
-		return list.OrderByDescending<string, global::System.DateTime>((string file) => File.GetLastWriteTime(file)).ToList<string>();
+		return list.OrderByDescending<string, global::System.DateTime>(new Func<string, global::System.DateTime>(File.GetLastWriteTime)).ToList<string>();
 	}
 
 	public static string GetLatestSaveFile()
 	{
 		List<string> allFiles = SaveLoader.GetAllFiles();
-		string text;
 		if (allFiles.Count == 0)
 		{
-			text = null;
+			return null;
 		}
-		else
-		{
-			text = SaveLoader.GetAllFiles()[0];
-		}
-		return text;
+		return SaveLoader.GetAllFiles()[0];
 	}
 
 	public void InitialSave()
@@ -370,7 +353,7 @@ public class SaveLoader : KMonoBehaviour
 		if (isAutoSave)
 		{
 			List<string> list = SaveLoader.GetSaveFiles(Path.GetDirectoryName(filename));
-			list = list.OrderBy<string, global::System.DateTime>((string file) => File.GetLastWriteTime(file)).ToList<string>();
+			list = list.OrderBy<string, global::System.DateTime>(new Func<string, global::System.DateTime>(File.GetLastWriteTime)).ToList<string>();
 			while (list.Count >= 10)
 			{
 				File.Delete(list[0]);
@@ -515,50 +498,45 @@ public class SaveLoader : KMonoBehaviour
 	{
 		Output.Log(new object[] { "Attempting to start a new game with current world gen" });
 		SimSaveFileStructure simSaveFileStructure = WorldGen.LoadWorldGenSim();
-		bool flag;
 		if (simSaveFileStructure == null)
 		{
 			global::Debug.LogError("Attempt failed", null);
-			flag = false;
+			return false;
 		}
-		else
+		this.worldDetailSave = simSaveFileStructure.worldDetail;
+		if (this.worldDetailSave == null)
 		{
-			this.worldDetailSave = simSaveFileStructure.worldDetail;
-			if (this.worldDetailSave == null)
+			global::Debug.LogError("Detail is null", null);
+		}
+		GridSettings.Reset(simSaveFileStructure.WidthInCells, simSaveFileStructure.HeightInCells);
+		Sim.SIM_Initialize(null);
+		SimMessages.CreateSimElementsTable(ElementLoader.elements);
+		SimMessages.CreateDiseaseTable();
+		try
+		{
+			FastReader fastReader = new FastReader(simSaveFileStructure.Sim);
+			if (Sim.Load(fastReader) != 0)
 			{
-				global::Debug.LogError("Detail is null", null);
-			}
-			GridSettings.Reset(simSaveFileStructure.WidthInCells, simSaveFileStructure.HeightInCells);
-			Sim.SIM_Initialize(null);
-			SimMessages.CreateSimElementsTable(ElementLoader.elements);
-			SimMessages.CreateDiseaseTable();
-			try
-			{
-				FastReader fastReader = new FastReader(simSaveFileStructure.Sim);
-				if (Sim.Load(fastReader) != 0)
-				{
-					Output.LogWarning(new object[] { "\n--- Error loading save ---\nSimDLL found bad data\n" });
-					Sim.Shutdown();
-					return false;
-				}
-			}
-			catch (Exception ex)
-			{
-				global::Debug.LogWarning("--- Error loading Sim FROM NEW WORLDGEN ---" + ex.Message + "\n" + ex.StackTrace, null);
+				Output.LogWarning(new object[] { "\n--- Error loading save ---\nSimDLL found bad data\n" });
 				Sim.Shutdown();
 				return false;
 			}
-			global::Debug.Log("Attempt success", null);
-			SceneInitializer.Instance.PostLoadPrefabs();
-			SceneInitializer.Instance.NewSaveGamePrefab();
-			WorldGen.ReplayGenerate(new WorldGen.ResetFunction(this.Reset));
-			this.OnWorldGenComplete.Signal();
-			UpdateManager.instance.enabled = true;
-			UpdateManager.instance.SkipNextUpdate();
-			ThreadedHttps<KleiMetrics>.Instance.StartNewGame();
-			flag = true;
 		}
-		return flag;
+		catch (Exception ex)
+		{
+			global::Debug.LogWarning("--- Error loading Sim FROM NEW WORLDGEN ---" + ex.Message + "\n" + ex.StackTrace, null);
+			Sim.Shutdown();
+			return false;
+		}
+		global::Debug.Log("Attempt success", null);
+		SceneInitializer.Instance.PostLoadPrefabs();
+		SceneInitializer.Instance.NewSaveGamePrefab();
+		WorldGen.ReplayGenerate(new WorldGen.ResetFunction(this.Reset));
+		this.OnWorldGenComplete.Signal();
+		UpdateManager.instance.enabled = true;
+		UpdateManager.instance.SkipNextUpdate();
+		ThreadedHttps<KleiMetrics>.Instance.StartNewGame();
+		return true;
 	}
 
 	public GameSpawnData cachedGSD { get; private set; }
@@ -578,13 +556,13 @@ public class SaveLoader : KMonoBehaviour
 	[MyCmpGet]
 	private GridSettings gridSettings;
 
-	private bool saveFileCorrupt = false;
+	private bool saveFileCorrupt;
 
 	private bool compressSaveData = true;
 
-	public bool saveAsText = false;
+	public bool saveAsText;
 
-	public bool zipStreams = false;
+	public bool zipStreams;
 
 	public const string MAINMENU_LEVELNAME = "launchscene";
 
@@ -612,7 +590,7 @@ public class SaveLoader : KMonoBehaviour
 
 	private const string CorruptFileSuffix = "_";
 
-	private bool mustRestartOnFail = false;
+	private bool mustRestartOnFail;
 
 	public class FlowUtilityNetworkInstance
 	{
@@ -620,9 +598,9 @@ public class SaveLoader : KMonoBehaviour
 
 		public SimHashes containedElement = SimHashes.Vacuum;
 
-		public float containedMass = 0f;
+		public float containedMass;
 
-		public float containedTemperature = 0f;
+		public float containedTemperature;
 	}
 
 	[SerializationConfig(MemberSerialization.OptOut)]

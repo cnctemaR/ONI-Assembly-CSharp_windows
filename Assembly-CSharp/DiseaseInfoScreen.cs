@@ -35,45 +35,45 @@ public class DiseaseInfoScreen : TargetScreen
 
 	private void Refresh()
 	{
-		if (!(this.selectedTarget == null))
+		if (this.selectedTarget == null)
 		{
-			List<Descriptor> list = GameUtil.GetAllDescriptors(this.selectedTarget, true);
-			Diseases diseases = this.selectedTarget.GetDiseases();
-			if (diseases != null)
-			{
-				for (int i = 0; i < diseases.Count; i++)
-				{
-					list.AddRange(diseases[i].GetDescriptors());
-				}
-			}
-			list = list.FindAll((Descriptor e) => e.type == Descriptor.DescriptorType.DiseaseSource);
-			if (list.Count > 0)
-			{
-				for (int j = 0; j < list.Count; j++)
-				{
-					this.diseaseSourcePanel.SetLabel("source_" + j.ToString(), list[j].text, list[j].tooltipText);
-				}
-			}
-			if (this.CreateImmuneInfo())
-			{
-			}
-			if (!this.CreateDiseaseInfo())
-			{
-				this.currentGermsPanel.SetTitle(UI.DETAILTABS.DISEASE.NO_CURRENT_GERMS);
-				this.currentGermsPanel.SetLabel("nodisease", UI.DETAILTABS.DISEASE.DETAILS.NODISEASE, UI.DETAILTABS.DISEASE.DETAILS.NODISEASE_TOOLTIP);
-			}
-			this.diseaseSourcePanel.Commit();
-			this.immuneSystemPanel.Commit();
-			this.currentGermsPanel.Commit();
-			this.infoPanel.Commit();
-			this.infectionPanel.Commit();
+			return;
 		}
+		List<Descriptor> list = GameUtil.GetAllDescriptors(this.selectedTarget, true);
+		Diseases diseases = this.selectedTarget.GetDiseases();
+		if (diseases != null)
+		{
+			for (int i = 0; i < diseases.Count; i++)
+			{
+				list.AddRange(diseases[i].GetDescriptors());
+			}
+		}
+		list = list.FindAll((Descriptor e) => e.type == Descriptor.DescriptorType.DiseaseSource);
+		if (list.Count > 0)
+		{
+			for (int j = 0; j < list.Count; j++)
+			{
+				this.diseaseSourcePanel.SetLabel("source_" + j.ToString(), list[j].text, list[j].tooltipText);
+			}
+		}
+		if (this.CreateImmuneInfo())
+		{
+		}
+		if (!this.CreateDiseaseInfo())
+		{
+			this.currentGermsPanel.SetTitle(UI.DETAILTABS.DISEASE.NO_CURRENT_GERMS);
+			this.currentGermsPanel.SetLabel("nodisease", UI.DETAILTABS.DISEASE.DETAILS.NODISEASE, UI.DETAILTABS.DISEASE.DETAILS.NODISEASE_TOOLTIP);
+		}
+		this.diseaseSourcePanel.Commit();
+		this.immuneSystemPanel.Commit();
+		this.currentGermsPanel.Commit();
+		this.infoPanel.Commit();
+		this.infectionPanel.Commit();
 	}
 
 	private bool CreateImmuneInfo()
 	{
 		ImmuneSystemMonitor.Instance smi = this.selectedTarget.GetSMI<ImmuneSystemMonitor.Instance>();
-		bool flag;
 		if (smi != null)
 		{
 			for (int i = 0; i < Db.Get().Diseases.Count; i++)
@@ -93,29 +93,20 @@ public class DiseaseInfoScreen : TargetScreen
 					}
 				}
 			}
-			flag = true;
+			return true;
 		}
-		else
-		{
-			flag = false;
-		}
-		return flag;
+		return false;
 	}
 
 	private bool CreateDiseaseInfo()
 	{
 		PrimaryElement component = this.selectedTarget.GetComponent<PrimaryElement>();
-		bool flag;
 		if (component != null)
 		{
-			flag = this.CreateDiseaseInfo_PrimaryElement();
+			return this.CreateDiseaseInfo_PrimaryElement();
 		}
-		else
-		{
-			CellSelectionObject component2 = this.selectedTarget.GetComponent<CellSelectionObject>();
-			flag = component2 != null && this.CreateDiseaseInfo_CellSelectionObject(component2);
-		}
-		return flag;
+		CellSelectionObject component2 = this.selectedTarget.GetComponent<CellSelectionObject>();
+		return component2 != null && this.CreateDiseaseInfo_CellSelectionObject(component2);
 	}
 
 	private string GetFormattedHalfLife(float hl)
@@ -125,20 +116,15 @@ public class DiseaseInfoScreen : TargetScreen
 
 	private string GetFormattedGrowthRate(float rate)
 	{
-		string text;
 		if (rate < 1f)
 		{
-			text = string.Format(UI.DETAILTABS.DISEASE.DETAILS.DEATH_FORMAT, GameUtil.GetFormattedPercent(100f * (1f - rate), GameUtil.TimeSlice.None), UI.DETAILTABS.DISEASE.DETAILS.DEATH_FORMAT_TOOLTIP);
+			return string.Format(UI.DETAILTABS.DISEASE.DETAILS.DEATH_FORMAT, GameUtil.GetFormattedPercent(100f * (1f - rate), GameUtil.TimeSlice.None), UI.DETAILTABS.DISEASE.DETAILS.DEATH_FORMAT_TOOLTIP);
 		}
-		else if (rate > 1f)
+		if (rate > 1f)
 		{
-			text = string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FORMAT, GameUtil.GetFormattedPercent(100f * (rate - 1f), GameUtil.TimeSlice.None), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FORMAT_TOOLTIP);
+			return string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FORMAT, GameUtil.GetFormattedPercent(100f * (rate - 1f), GameUtil.TimeSlice.None), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FORMAT_TOOLTIP);
 		}
-		else
-		{
-			text = string.Format(UI.DETAILTABS.DISEASE.DETAILS.NEUTRAL_FORMAT, UI.DETAILTABS.DISEASE.DETAILS.NEUTRAL_FORMAT_TOOLTIP);
-		}
-		return text;
+		return string.Format(UI.DETAILTABS.DISEASE.DETAILS.NEUTRAL_FORMAT, UI.DETAILTABS.DISEASE.DETAILS.NEUTRAL_FORMAT_TOOLTIP);
 	}
 
 	private string GetFormattedGrowthEntry(string name, float halfLife, string dyingFormat, string growingFormat, string neutralFormat)
@@ -250,49 +236,36 @@ public class DiseaseInfoScreen : TargetScreen
 
 	private bool CreateDiseaseInfo_PrimaryElement()
 	{
-		bool flag;
 		if (this.selectedTarget == null)
 		{
-			flag = false;
+			return false;
 		}
-		else
+		PrimaryElement component = this.selectedTarget.GetComponent<PrimaryElement>();
+		if (component == null)
 		{
-			PrimaryElement component = this.selectedTarget.GetComponent<PrimaryElement>();
-			if (component == null)
-			{
-				flag = false;
-			}
-			else if (component.DiseaseIdx != 255 && component.DiseaseCount > 0)
-			{
-				Disease disease = Db.Get().Diseases[(int)component.DiseaseIdx];
-				int num = Grid.PosToCell(component.transform.position);
-				KPrefabID component2 = component.GetComponent<KPrefabID>();
-				this.BuildFactorsStrings(component.DiseaseCount, ElementLoader.GetElementIndex(component.Element.id), num, component.Mass, component.Temperature, component2.Tags, disease);
-				flag = true;
-			}
-			else
-			{
-				flag = false;
-			}
+			return false;
 		}
-		return flag;
+		if (component.DiseaseIdx != 255 && component.DiseaseCount > 0)
+		{
+			Disease disease = Db.Get().Diseases[(int)component.DiseaseIdx];
+			int num = Grid.PosToCell(component.transform.position);
+			KPrefabID component2 = component.GetComponent<KPrefabID>();
+			this.BuildFactorsStrings(component.DiseaseCount, ElementLoader.GetElementIndex(component.Element.id), num, component.Mass, component.Temperature, component2.Tags, disease);
+			return true;
+		}
+		return false;
 	}
 
 	private bool CreateDiseaseInfo_CellSelectionObject(CellSelectionObject cso)
 	{
-		bool flag;
 		if (cso.diseaseIdx != 255 && cso.diseaseCount > 0)
 		{
 			Disease disease = Db.Get().Diseases[(int)cso.diseaseIdx];
 			int elementIndex = ElementLoader.GetElementIndex(cso.element.id);
 			this.BuildFactorsStrings(cso.diseaseCount, elementIndex, -1, cso.Mass, cso.temperature, new Tag[0], disease);
-			flag = true;
+			return true;
 		}
-		else
-		{
-			flag = false;
-		}
-		return flag;
+		return false;
 	}
 
 	private void ShowDiseaseInfoPopup(Disease disease)

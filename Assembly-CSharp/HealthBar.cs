@@ -43,7 +43,7 @@ public class HealthBar : ProgressBar
 		}
 	}
 
-	private float showTimer = 0f;
+	private float showTimer;
 
 	private float maxShowTime = 3f;
 }

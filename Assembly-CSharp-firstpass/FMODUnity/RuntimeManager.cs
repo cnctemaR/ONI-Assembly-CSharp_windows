@@ -25,16 +25,13 @@ namespace FMODUnity
 				if (RuntimeManager.instance == null)
 				{
 					RuntimeManager runtimeManager = global::UnityEngine.Object.FindObjectOfType(typeof(RuntimeManager)) as RuntimeManager;
-					if (runtimeManager != null)
+					if (runtimeManager != null && runtimeManager.cachedPointers[0] != 0L)
 					{
-						if (runtimeManager.cachedPointers[0] != 0L)
-						{
-							RuntimeManager.instance = runtimeManager;
-							RuntimeManager.instance.studioSystem = new global::FMOD.Studio.System((IntPtr)RuntimeManager.instance.cachedPointers[0]);
-							RuntimeManager.instance.lowlevelSystem = new global::FMOD.System((IntPtr)RuntimeManager.instance.cachedPointers[1]);
-							RuntimeManager.instance.mixerHead = new DSP((IntPtr)RuntimeManager.instance.cachedPointers[2]);
-							return RuntimeManager.instance;
-						}
+						RuntimeManager.instance = runtimeManager;
+						RuntimeManager.instance.studioSystem = new global::FMOD.Studio.System((IntPtr)RuntimeManager.instance.cachedPointers[0]);
+						RuntimeManager.instance.lowlevelSystem = new global::FMOD.System((IntPtr)RuntimeManager.instance.cachedPointers[1]);
+						RuntimeManager.instance.mixerHead = new DSP((IntPtr)RuntimeManager.instance.cachedPointers[2]);
+						return RuntimeManager.instance;
 					}
 					GameObject gameObject = new GameObject("FMOD.UnityItegration.RuntimeManager");
 					RuntimeManager.instance = gameObject.AddComponent<RuntimeManager>();
@@ -269,7 +266,7 @@ namespace FMODUnity
 				if (runtimeManager.attachedInstances[i].instance == instance)
 				{
 					runtimeManager.attachedInstances.RemoveAt(i);
-					break;
+					return;
 				}
 			}
 		}
@@ -708,13 +705,13 @@ namespace FMODUnity
 
 		private List<RuntimeManager.AttachedInstance> attachedInstances = new List<RuntimeManager.AttachedInstance>(128);
 
-		private bool listenerWarningIssued = false;
+		private bool listenerWarningIssued;
 
 		private Rect windowRect = new Rect(10f, 10f, 300f, 100f);
 
 		private string lastDebugText;
 
-		private float lastDebugUpdate = 0f;
+		private float lastDebugUpdate;
 
 		public static bool[] HasListener = new bool[8];
 

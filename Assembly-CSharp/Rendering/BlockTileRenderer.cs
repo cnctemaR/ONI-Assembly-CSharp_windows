@@ -272,7 +272,7 @@ namespace Rendering
 		}
 
 		[SerializeField]
-		private bool forceRebuild = false;
+		private bool forceRebuild;
 
 		[SerializeField]
 		private Color highlightColour = new Color(1.25f, 1.25f, 1.25f, 1f);
@@ -445,58 +445,59 @@ namespace Rendering
 
 			public void Rebuild(BlockTileRenderer renderer, int chunk_x, int chunk_y, List<Vector3> vertices, List<Vector2> uvs, List<int> indices, List<Color> colours)
 			{
-				if (this.dirtyChunks[chunk_x, chunk_y] || renderer.ForceRebuild)
+				if (!this.dirtyChunks[chunk_x, chunk_y] && !renderer.ForceRebuild)
 				{
-					this.dirtyChunks[chunk_x, chunk_y] = false;
-					vertices.Clear();
-					uvs.Clear();
-					indices.Clear();
-					colours.Clear();
-					for (int i = chunk_y * 16; i < chunk_y * 16 + 16; i++)
+					return;
+				}
+				this.dirtyChunks[chunk_x, chunk_y] = false;
+				vertices.Clear();
+				uvs.Clear();
+				indices.Clear();
+				colours.Clear();
+				for (int i = chunk_y * 16; i < chunk_y * 16 + 16; i++)
+				{
+					for (int j = chunk_x * 16; j < chunk_x * 16 + 16; j++)
 					{
-						for (int j = chunk_x * 16; j < chunk_x * 16 + 16; j++)
+						int num = i * Grid.WidthInCells + j;
+						if (this.occupiedCells.ContainsKey(num))
 						{
-							int num = i * Grid.WidthInCells + j;
-							if (this.occupiedCells.ContainsKey(num))
+							BlockTileRenderer.Bits connectionBits = renderer.GetConnectionBits(j, i, this.queryLayer);
+							for (int k = 0; k < this.atlasInfo.Length; k++)
 							{
-								BlockTileRenderer.Bits connectionBits = renderer.GetConnectionBits(j, i, this.queryLayer);
-								for (int k = 0; k < this.atlasInfo.Length; k++)
+								bool flag = (this.atlasInfo[k].requiredConnections & connectionBits) == this.atlasInfo[k].requiredConnections;
+								bool flag2 = (this.atlasInfo[k].forbiddenConnections & connectionBits) != (BlockTileRenderer.Bits)0;
+								if (flag && !flag2)
 								{
-									bool flag = (this.atlasInfo[k].requiredConnections & connectionBits) == this.atlasInfo[k].requiredConnections;
-									bool flag2 = (this.atlasInfo[k].forbiddenConnections & connectionBits) != (BlockTileRenderer.Bits)0;
-									if (flag && !flag2)
-									{
-										Color cellColour = renderer.GetCellColour(num, this.element);
-										this.AddVertexInfo(this.atlasInfo[k], this.trimUVSize, j, i, connectionBits, cellColour, vertices, uvs, indices, colours);
-										break;
-									}
+									Color cellColour = renderer.GetCellColour(num, this.element);
+									this.AddVertexInfo(this.atlasInfo[k], this.trimUVSize, j, i, connectionBits, cellColour, vertices, uvs, indices, colours);
+									break;
 								}
 							}
 						}
 					}
-					Mesh mesh = this.meshChunks[chunk_x, chunk_y];
-					if (vertices.Count > 0)
+				}
+				Mesh mesh = this.meshChunks[chunk_x, chunk_y];
+				if (vertices.Count > 0)
+				{
+					if (mesh == null)
 					{
-						if (mesh == null)
-						{
-							mesh = new Mesh();
-							mesh.name = "BlockTile";
-							this.meshChunks[chunk_x, chunk_y] = mesh;
-						}
-						mesh.Clear();
-						mesh.SetVertices(vertices);
-						mesh.SetUVs(0, uvs);
-						mesh.SetColors(colours);
-						mesh.SetTriangles(indices, 0);
+						mesh = new Mesh();
+						mesh.name = "BlockTile";
+						this.meshChunks[chunk_x, chunk_y] = mesh;
 					}
-					else if (mesh != null)
-					{
-						this.meshChunks[chunk_x, chunk_y] = null;
-					}
-					if (this.decorRenderInfo != null)
-					{
-						this.decorRenderInfo.Rebuild(renderer, this.occupiedCells, chunk_x, chunk_y, 16, vertices, uvs, colours, indices, this.element);
-					}
+					mesh.Clear();
+					mesh.SetVertices(vertices);
+					mesh.SetUVs(0, uvs);
+					mesh.SetColors(colours);
+					mesh.SetTriangles(indices, 0);
+				}
+				else if (mesh != null)
+				{
+					this.meshChunks[chunk_x, chunk_y] = null;
+				}
+				if (this.decorRenderInfo != null)
+				{
+					this.decorRenderInfo.Rebuild(renderer, this.occupiedCells, chunk_x, chunk_y, 16, vertices, uvs, colours, indices, this.element);
 				}
 			}
 
@@ -559,7 +560,7 @@ namespace Rendering
 				colours.Add(color);
 			}
 
-			private BlockTileRenderer.RenderInfo.AtlasInfo[] atlasInfo = null;
+			private BlockTileRenderer.RenderInfo.AtlasInfo[] atlasInfo;
 
 			private bool[,] dirtyChunks;
 

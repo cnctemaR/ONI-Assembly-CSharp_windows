@@ -192,10 +192,11 @@ public class SpeedControlScreen : KScreen
 
 	public void OnSpeedChange()
 	{
-		if (!Game.IsQuitting())
+		if (Game.IsQuitting())
 		{
-			this.OnChanged();
+			return;
 		}
+		this.OnChanged();
 	}
 
 	private void OnChanged()
@@ -310,5 +311,5 @@ public class SpeedControlScreen : KScreen
 
 	private int speed;
 
-	private int pauseCount = 0;
+	private int pauseCount;
 }

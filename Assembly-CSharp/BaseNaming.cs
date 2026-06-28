@@ -25,22 +25,23 @@ public class BaseNaming : KMonoBehaviour
 			this.inputField.text = this.GenerateBaseNameString();
 			newName = this.inputField.text;
 		}
-		if (!string.IsNullOrEmpty(newName))
+		if (string.IsNullOrEmpty(newName))
 		{
-			this.inputField.text = newName;
-			SaveGame.Instance.SetBaseName(newName);
-			string text = newName;
-			if (!text.Contains(".sav"))
-			{
-				text += ".sav";
-			}
-			string savePrefix = SaveLoader.GetSavePrefix();
-			if (!text.Contains(savePrefix))
-			{
-				text = savePrefix + text;
-			}
-			SaveLoader.SetActiveSaveFilePath(text);
+			return;
 		}
+		this.inputField.text = newName;
+		SaveGame.Instance.SetBaseName(newName);
+		string text = newName;
+		if (!text.Contains(".sav"))
+		{
+			text += ".sav";
+		}
+		string savePrefix = SaveLoader.GetSavePrefix();
+		if (!text.Contains(savePrefix))
+		{
+			text = savePrefix + text;
+		}
+		SaveLoader.SetActiveSaveFilePath(text);
 	}
 
 	private void GenerateBaseName()
@@ -64,16 +65,11 @@ public class BaseNaming : KMonoBehaviour
 
 	private string ReplaceStringWithRandom(string fullString, string replacementKey, string[] replacementValues)
 	{
-		string text;
 		if (!fullString.Contains(replacementKey))
 		{
-			text = fullString;
+			return fullString;
 		}
-		else
-		{
-			text = fullString.Replace(replacementKey, replacementValues.GetRandom<string>());
-		}
-		return text;
+		return fullString.Replace(replacementKey, replacementValues.GetRandom<string>());
 	}
 
 	[SerializeField]

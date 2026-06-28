@@ -99,111 +99,113 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 
 	private void RefreshToggle(KIconToggleMenu.ToggleInfo info)
 	{
-		if (info != null && !(info.toggle == null))
+		if (info == null || info.toggle == null)
 		{
-			BuildMenuBuildingsScreen.UserData userData = info.userData as BuildMenuBuildingsScreen.UserData;
-			BuildingDef def = userData.def;
-			TechItem techItem = Db.Get().TechItems.TryGet(def.PrefabID);
-			bool flag = DebugHandler.InstantBuildMode || techItem == null || techItem.IsComplete();
-			bool flag2 = flag || techItem == null || techItem.parentTech.ArePrerequisitesComplete();
-			KToggle toggle = info.toggle;
-			if (toggle.gameObject.activeSelf != flag2)
+			return;
+		}
+		BuildMenuBuildingsScreen.UserData userData = info.userData as BuildMenuBuildingsScreen.UserData;
+		BuildingDef def = userData.def;
+		TechItem techItem = Db.Get().TechItems.TryGet(def.PrefabID);
+		bool flag = DebugHandler.InstantBuildMode || techItem == null || techItem.IsComplete();
+		bool flag2 = flag || techItem == null || techItem.parentTech.ArePrerequisitesComplete();
+		KToggle toggle = info.toggle;
+		if (toggle.gameObject.activeSelf != flag2)
+		{
+			toggle.gameObject.SetActive(flag2);
+		}
+		if (toggle.bgImage == null)
+		{
+			return;
+		}
+		Image image = toggle.bgImage.GetComponentsInChildren<Image>()[1];
+		Sprite uisprite = def.GetUISprite("ui");
+		image.sprite = uisprite;
+		image.SetNativeSize();
+		image.rectTransform().sizeDelta /= 4f;
+		ToolTip component = toggle.gameObject.GetComponent<ToolTip>();
+		component.ClearMultiStringTooltip();
+		string text = def.Name;
+		string effect = def.Effect;
+		if (def.HotKey != global::Action.NumActions)
+		{
+			text = text + " " + GameUtil.GetHotkeyString(def.HotKey);
+		}
+		component.AddMultiStringTooltip(text, this.buildingToolTipSettings.BuildButtonName);
+		component.AddMultiStringTooltip(effect, this.buildingToolTipSettings.BuildButtonDescription);
+		LocText componentInChildren = toggle.GetComponentInChildren<LocText>();
+		if (componentInChildren != null)
+		{
+			componentInChildren.text = def.Name;
+		}
+		int num = ((BuildMenu.Instance.BuildableState(def) != PlanScreen.RequirementsState.Complete) ? 0 : 1);
+		ImageToggleState.State state;
+		if (def == this.selectedBuilding && (BuildMenu.Instance.BuildableState(def) == PlanScreen.RequirementsState.Complete || DebugHandler.InstantBuildMode))
+		{
+			state = ImageToggleState.State.Active;
+		}
+		else
+		{
+			state = ((BuildMenu.Instance.BuildableState(def) != PlanScreen.RequirementsState.Complete && !DebugHandler.InstantBuildMode) ? ImageToggleState.State.Disabled : ImageToggleState.State.Inactive);
+		}
+		if (def == this.selectedBuilding && state == ImageToggleState.State.Disabled)
+		{
+			state = ImageToggleState.State.DisabledActive;
+		}
+		else if (state == ImageToggleState.State.Disabled)
+		{
+			state = ImageToggleState.State.Disabled;
+		}
+		toggle.GetComponent<ImageToggleState>().SetState(state);
+		Material material;
+		Color color;
+		if (BuildMenu.Instance.BuildableState(def) == PlanScreen.RequirementsState.Complete || DebugHandler.InstantBuildMode)
+		{
+			material = this.defaultUIMaterial;
+			color = Color.white;
+		}
+		else
+		{
+			material = this.desaturatedUIMaterial;
+			Color color2;
+			if (flag)
 			{
-				toggle.gameObject.SetActive(flag2);
+				color2 = new Color(1f, 1f, 1f, 0.6f);
 			}
-			if (!(toggle.bgImage == null))
+			else
 			{
-				Image image = toggle.bgImage.GetComponentsInChildren<Image>()[1];
-				Sprite uisprite = def.GetUISprite("ui");
-				image.sprite = uisprite;
-				image.SetNativeSize();
-				image.rectTransform().sizeDelta /= 4f;
-				ToolTip component = toggle.gameObject.GetComponent<ToolTip>();
-				component.ClearMultiStringTooltip();
-				string text = def.Name;
-				string effect = def.Effect;
-				if (def.HotKey != global::Action.NumActions)
-				{
-					text = text + " " + GameUtil.GetHotkeyString(def.HotKey);
-				}
-				component.AddMultiStringTooltip(text, this.buildingToolTipSettings.BuildButtonName);
-				component.AddMultiStringTooltip(effect, this.buildingToolTipSettings.BuildButtonDescription);
-				LocText componentInChildren = toggle.GetComponentInChildren<LocText>();
-				if (componentInChildren != null)
-				{
-					componentInChildren.text = def.Name;
-				}
-				int num = ((BuildMenu.Instance.BuildableState(def) != PlanScreen.RequirementsState.Complete) ? 0 : 1);
-				ImageToggleState.State state;
-				if (def == this.selectedBuilding && (BuildMenu.Instance.BuildableState(def) == PlanScreen.RequirementsState.Complete || DebugHandler.InstantBuildMode))
-				{
-					state = ImageToggleState.State.Active;
-				}
-				else
-				{
-					state = ((BuildMenu.Instance.BuildableState(def) != PlanScreen.RequirementsState.Complete && !DebugHandler.InstantBuildMode) ? ImageToggleState.State.Disabled : ImageToggleState.State.Inactive);
-				}
-				if (def == this.selectedBuilding && state == ImageToggleState.State.Disabled)
-				{
-					state = ImageToggleState.State.DisabledActive;
-				}
-				else if (state == ImageToggleState.State.Disabled)
-				{
-					state = ImageToggleState.State.Disabled;
-				}
-				toggle.GetComponent<ImageToggleState>().SetState(state);
-				Material material;
-				Color color;
-				if (BuildMenu.Instance.BuildableState(def) == PlanScreen.RequirementsState.Complete || DebugHandler.InstantBuildMode)
-				{
-					material = this.defaultUIMaterial;
-					color = Color.white;
-				}
-				else
-				{
-					material = this.desaturatedUIMaterial;
-					Color color2;
-					if (flag)
-					{
-						color2 = new Color(1f, 1f, 1f, 0.6f);
-					}
-					else
-					{
-						Color color3 = new Color(1f, 1f, 1f, 0.15f);
-						image.color = color3;
-						color2 = color3;
-					}
-					color = color2;
-				}
-				if (image.material != material)
-				{
-					image.material = material;
-					image.color = color;
-				}
-				Image fgImage = toggle.gameObject.GetComponent<KToggle>().fgImage;
-				fgImage.gameObject.SetActive(false);
-				if (!flag)
-				{
-					fgImage.sprite = this.Overlay_NeedTech;
-					fgImage.gameObject.SetActive(true);
-					string text2 = string.Format(UI.PRODUCTINFO_REQUIRESRESEARCHDESC, techItem.parentTech.Name);
-					component.AddMultiStringTooltip("\n", this.buildingToolTipSettings.ResearchRequirement);
-					component.AddMultiStringTooltip(text2, this.buildingToolTipSettings.ResearchRequirement);
-				}
-				else if (BuildMenu.Instance.BuildableState(def) != PlanScreen.RequirementsState.Complete)
-				{
-					fgImage.gameObject.SetActive(false);
-					component.AddMultiStringTooltip("\n", this.buildingToolTipSettings.ResearchRequirement);
-					string text3 = UI.PRODUCTINFO_MISSINGRESOURCES_HOVER;
-					component.AddMultiStringTooltip(text3, this.buildingToolTipSettings.ResearchRequirement);
-					foreach (Recipe.Ingredient ingredient in def.CraftRecipe.Ingredients)
-					{
-						string text4 = string.Format("{0}{1}: {2}", "• ", ingredient.tag.ProperName(), GameUtil.GetFormattedMass(ingredient.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-						component.AddMultiStringTooltip(text4, this.buildingToolTipSettings.ResearchRequirement);
-					}
-					component.AddMultiStringTooltip("", this.buildingToolTipSettings.ResearchRequirement);
-				}
+				Color color3 = new Color(1f, 1f, 1f, 0.15f);
+				image.color = color3;
+				color2 = color3;
 			}
+			color = color2;
+		}
+		if (image.material != material)
+		{
+			image.material = material;
+			image.color = color;
+		}
+		Image fgImage = toggle.gameObject.GetComponent<KToggle>().fgImage;
+		fgImage.gameObject.SetActive(false);
+		if (!flag)
+		{
+			fgImage.sprite = this.Overlay_NeedTech;
+			fgImage.gameObject.SetActive(true);
+			string text2 = string.Format(UI.PRODUCTINFO_REQUIRESRESEARCHDESC, techItem.parentTech.Name);
+			component.AddMultiStringTooltip("\n", this.buildingToolTipSettings.ResearchRequirement);
+			component.AddMultiStringTooltip(text2, this.buildingToolTipSettings.ResearchRequirement);
+		}
+		else if (BuildMenu.Instance.BuildableState(def) != PlanScreen.RequirementsState.Complete)
+		{
+			fgImage.gameObject.SetActive(false);
+			component.AddMultiStringTooltip("\n", this.buildingToolTipSettings.ResearchRequirement);
+			string text3 = UI.PRODUCTINFO_MISSINGRESOURCES_HOVER;
+			component.AddMultiStringTooltip(text3, this.buildingToolTipSettings.ResearchRequirement);
+			foreach (Recipe.Ingredient ingredient in def.CraftRecipe.Ingredients)
+			{
+				string text4 = string.Format("{0}{1}: {2}", "• ", ingredient.tag.ProperName(), GameUtil.GetFormattedMass(ingredient.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				component.AddMultiStringTooltip(text4, this.buildingToolTipSettings.ResearchRequirement);
+			}
+			component.AddMultiStringTooltip(string.Empty, this.buildingToolTipSettings.ResearchRequirement);
 		}
 	}
 
@@ -265,22 +267,23 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 
 	public void UpdateBuildableStates()
 	{
-		if (this.toggleInfo != null && this.toggleInfo.Count > 0)
+		if (this.toggleInfo == null || this.toggleInfo.Count <= 0)
 		{
-			foreach (KIconToggleMenu.ToggleInfo toggleInfo in this.toggleInfo)
+			return;
+		}
+		foreach (KIconToggleMenu.ToggleInfo toggleInfo in this.toggleInfo)
+		{
+			this.RefreshToggle(toggleInfo);
+			BuildMenuBuildingsScreen.UserData userData = toggleInfo.userData as BuildMenuBuildingsScreen.UserData;
+			BuildingDef def = userData.def;
+			if (!def.Deprecated)
 			{
-				this.RefreshToggle(toggleInfo);
-				BuildMenuBuildingsScreen.UserData userData = toggleInfo.userData as BuildMenuBuildingsScreen.UserData;
-				BuildingDef def = userData.def;
-				if (!def.Deprecated)
+				PlanScreen.RequirementsState requirementsState = BuildMenu.Instance.BuildableState(def);
+				if (requirementsState != userData.requirementsState)
 				{
-					PlanScreen.RequirementsState requirementsState = BuildMenu.Instance.BuildableState(def);
-					if (requirementsState != userData.requirementsState)
-					{
-						BuildMenu.Instance.RefreshProductInfoScreen(def);
-						this.RefreshToggle(toggleInfo);
-						userData.requirementsState = requirementsState;
-					}
+					BuildMenu.Instance.RefreshProductInfoScreen(def);
+					this.RefreshToggle(toggleInfo);
+					userData.requirementsState = requirementsState;
 				}
 			}
 		}
@@ -306,54 +309,49 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (this.mouseOver && this.ConsumeMouseScroll)
+		if (!this.mouseOver || !this.ConsumeMouseScroll || e.TryConsume(global::Action.ZoomIn) || e.TryConsume(global::Action.ZoomOut))
 		{
-			if (e.TryConsume(global::Action.ZoomIn) || e.TryConsume(global::Action.ZoomOut))
-			{
-			}
 		}
-		if (this.HasFocus)
+		if (!this.HasFocus)
 		{
-			if (e.TryConsume(global::Action.Escape))
+			return;
+		}
+		if (e.TryConsume(global::Action.Escape))
+		{
+			Game.Instance.Trigger(288942073, null);
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
+			return;
+		}
+		base.OnKeyDown(e);
+		if (!e.Consumed)
+		{
+			global::Action action = e.GetAction();
+			if (action >= global::Action.BUILD_MENU_START_INTERCEPT)
 			{
-				Game.Instance.Trigger(288942073, null);
-				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
-			}
-			else
-			{
-				base.OnKeyDown(e);
-				if (!e.Consumed)
-				{
-					global::Action action = e.GetAction();
-					if (action >= global::Action.BUILD_MENU_START_INTERCEPT)
-					{
-						e.TryConsume(action);
-					}
-				}
+				e.TryConsume(action);
 			}
 		}
 	}
 
 	public override void OnKeyUp(KButtonEvent e)
 	{
-		if (this.HasFocus)
+		if (!this.HasFocus)
 		{
-			if (this.selectedBuilding != null && PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
+			return;
+		}
+		if (this.selectedBuilding != null && PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
+		{
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
+			Game.Instance.Trigger(288942073, null);
+			return;
+		}
+		base.OnKeyUp(e);
+		if (!e.Consumed)
+		{
+			global::Action action = e.GetAction();
+			if (action >= global::Action.BUILD_MENU_START_INTERCEPT)
 			{
-				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
-				Game.Instance.Trigger(288942073, null);
-			}
-			else
-			{
-				base.OnKeyUp(e);
-				if (!e.Consumed)
-				{
-					global::Action action = e.GetAction();
-					if (action >= global::Action.BUILD_MENU_START_INTERCEPT)
-					{
-						e.TryConsume(action);
-					}
-				}
+				e.TryConsume(action);
 			}
 		}
 	}

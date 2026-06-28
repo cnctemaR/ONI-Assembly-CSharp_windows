@@ -28,17 +28,18 @@ public class ConduitBridge : KMonoBehaviour
 	{
 		ConduitFlow flowManager = Conduit.GetFlowManager(this.type);
 		ConduitFlow.Conduit conduit = flowManager.GetConduit(this.inputCell);
-		if (conduit != null)
+		if (conduit == null)
 		{
-			ConduitFlow.ConduitContents contents = conduit.GetContents();
-			if (contents.mass > 0f)
+			return;
+		}
+		ConduitFlow.ConduitContents contents = conduit.GetContents();
+		if (contents.mass > 0f)
+		{
+			float num = flowManager.AddElement(this.outputCell, contents.element, contents.mass, contents.temperature, contents.diseaseIdx, contents.diseaseCount);
+			if (num > 0f)
 			{
-				float num = flowManager.AddElement(this.outputCell, contents.element, contents.mass, contents.temperature, contents.diseaseIdx, contents.diseaseCount);
-				if (num > 0f)
-				{
-					flowManager.RemoveElement(this.inputCell, num);
-					this.flowAccumulator.Accumulate(contents.mass);
-				}
+				flowManager.RemoveElement(this.inputCell, num);
+				this.flowAccumulator.Accumulate(contents.mass);
 			}
 		}
 	}

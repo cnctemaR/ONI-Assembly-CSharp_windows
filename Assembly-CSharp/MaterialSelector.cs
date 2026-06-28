@@ -15,10 +15,11 @@ public class MaterialSelector : KScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (!e.Consumed)
+		if (e.Consumed)
 		{
-			base.OnKeyDown(e);
+			return;
 		}
+		base.OnKeyDown(e);
 	}
 
 	public void ClearMaterialToggles()
@@ -199,17 +200,12 @@ public class MaterialSelector : KScreen
 				ktoggle = keyValuePair2.Key;
 			}
 		}
-		bool flag;
 		if (ktoggle != null)
 		{
 			this.OnSelectMaterial(ktoggle, this.activeRecipe);
-			flag = true;
+			return true;
 		}
-		else
-		{
-			flag = false;
-		}
-		return flag;
+		return false;
 	}
 
 	private void SortElementToggles()
@@ -245,37 +241,38 @@ public class MaterialSelector : KScreen
 
 	private void UpdateHeader()
 	{
-		if (this.activeIngredient != null)
+		if (this.activeIngredient == null)
 		{
-			int num = 0;
-			foreach (KeyValuePair<KToggle, Element> keyValuePair in this.ElementToggles)
+			return;
+		}
+		int num = 0;
+		foreach (KeyValuePair<KToggle, Element> keyValuePair in this.ElementToggles)
+		{
+			KToggle key = keyValuePair.Key;
+			if (key.gameObject.activeSelf)
 			{
-				KToggle key = keyValuePair.Key;
-				if (key.gameObject.activeSelf)
-				{
-					num++;
-				}
+				num++;
 			}
-			LocText componentInChildren = this.Headerbar.GetComponentInChildren<LocText>();
-			if (num == 0)
-			{
-				componentInChildren.text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_TITLE, this.activeIngredient.tag.ProperName(), GameUtil.GetFormattedMass(this.activeIngredient.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-				string text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_DESC, this.activeIngredient.tag.ProperName());
-				this.NoMaterialDiscovered.text = text;
-				this.NoMaterialDiscovered.gameObject.SetActive(true);
-				this.NoMaterialDiscovered.color = Constants.NEGATIVE_COLOR;
-				this.BadBG.SetActive(true);
-				this.Scrollbar.SetActive(false);
-				this.LayoutContainer.SetActive(false);
-			}
-			else
-			{
-				componentInChildren.text = string.Format(UI.PRODUCTINFO_SELECTMATERIAL, this.activeIngredient.tag.ProperName());
-				this.NoMaterialDiscovered.gameObject.SetActive(false);
-				this.BadBG.SetActive(false);
-				this.LayoutContainer.SetActive(true);
-				this.UpdateScrollBar();
-			}
+		}
+		LocText componentInChildren = this.Headerbar.GetComponentInChildren<LocText>();
+		if (num == 0)
+		{
+			componentInChildren.text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_TITLE, this.activeIngredient.tag.ProperName(), GameUtil.GetFormattedMass(this.activeIngredient.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+			string text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_DESC, this.activeIngredient.tag.ProperName());
+			this.NoMaterialDiscovered.text = text;
+			this.NoMaterialDiscovered.gameObject.SetActive(true);
+			this.NoMaterialDiscovered.color = Constants.NEGATIVE_COLOR;
+			this.BadBG.SetActive(true);
+			this.Scrollbar.SetActive(false);
+			this.LayoutContainer.SetActive(false);
+		}
+		else
+		{
+			componentInChildren.text = string.Format(UI.PRODUCTINFO_SELECTMATERIAL, this.activeIngredient.tag.ProperName());
+			this.NoMaterialDiscovered.gameObject.SetActive(false);
+			this.BadBG.SetActive(false);
+			this.LayoutContainer.SetActive(true);
+			this.UpdateScrollBar();
 		}
 	}
 
@@ -287,15 +284,13 @@ public class MaterialSelector : KScreen
 	private void SetDescription(Element element)
 	{
 		string text = Strings.Get(new StringKey("STRINGS.ELEMENTS." + element.tag.ToString().ToUpper() + ".BUILD_DESC"));
-		if (text == "")
+		if (text == string.Empty)
 		{
 			this.MaterialDescriptionPane.SetActive(false);
+			return;
 		}
-		else
-		{
-			this.MaterialDescriptionPane.SetActive(true);
-			this.MaterialDescriptionText.text = text;
-		}
+		this.MaterialDescriptionPane.SetActive(true);
+		this.MaterialDescriptionText.text = text;
 	}
 
 	private void SetEffects(Element element)

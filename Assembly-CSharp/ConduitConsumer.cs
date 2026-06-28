@@ -80,23 +80,15 @@ public class ConduitConsumer : KMonoBehaviour
 	private ConduitFlow GetConduitManager()
 	{
 		ConduitType conduitType = this.conduitType;
-		ConduitFlow conduitFlow;
-		if (conduitType != ConduitType.Gas)
+		if (conduitType == ConduitType.Gas)
 		{
-			if (conduitType != ConduitType.Liquid)
-			{
-				conduitFlow = null;
-			}
-			else
-			{
-				conduitFlow = Game.Instance.liquidConduitFlow;
-			}
+			return Game.Instance.gasConduitFlow;
 		}
-		else
+		if (conduitType != ConduitType.Liquid)
 		{
-			conduitFlow = Game.Instance.gasConduitFlow;
+			return null;
 		}
-		return conduitFlow;
+		return Game.Instance.liquidConduitFlow;
 	}
 
 	public float MassAvailable
@@ -204,14 +196,11 @@ public class ConduitConsumer : KMonoBehaviour
 							}
 						}
 					}
-					else if (num4 > 0f)
+					else if (num4 > 0f && this.wrongElementResult == ConduitConsumer.WrongElementResult.Dump)
 					{
-						if (this.wrongElementResult == ConduitConsumer.WrongElementResult.Dump)
-						{
-							int num6 = (int)((float)contents.diseaseCount * (num4 / contents.mass));
-							int num7 = Grid.PosToCell(base.transform.position);
-							SimMessages.AddRemoveSubstance(num7, contents.element, CellEventLogger.Instance.ConduitConsumerWrongElement, num4, contents.temperature, contents.diseaseIdx, num6, -1);
-						}
+						int num6 = (int)((float)contents.diseaseCount * (num4 / contents.mass));
+						int num7 = Grid.PosToCell(base.transform.position);
+						SimMessages.AddRemoveSubstance(num7, contents.element, CellEventLogger.Instance.ConduitConsumerWrongElement, num4, contents.temperature, contents.diseaseIdx, num6, -1);
 					}
 				}
 			}
@@ -230,7 +219,7 @@ public class ConduitConsumer : KMonoBehaviour
 	public ConduitType conduitType;
 
 	[SerializeField]
-	public bool ignoreMinMassCheck = false;
+	public bool ignoreMinMassCheck;
 
 	[SerializeField]
 	public Tag capacityTag = GameTags.Any;
@@ -239,10 +228,10 @@ public class ConduitConsumer : KMonoBehaviour
 	public float capacityKG = float.PositiveInfinity;
 
 	[SerializeField]
-	public bool forceAlwaysSatisfied = false;
+	public bool forceAlwaysSatisfied;
 
 	[SerializeField]
-	public bool alwaysConsume = false;
+	public bool alwaysConsume;
 
 	[NonSerialized]
 	public bool isConsuming = true;
@@ -267,9 +256,9 @@ public class ConduitConsumer : KMonoBehaviour
 
 	private GameScenePartitionerEntry partitionerEntry;
 
-	private bool satisfied = false;
+	private bool satisfied;
 
-	public ConduitConsumer.WrongElementResult wrongElementResult = ConduitConsumer.WrongElementResult.Destroy;
+	public ConduitConsumer.WrongElementResult wrongElementResult;
 
 	public enum WrongElementResult
 	{

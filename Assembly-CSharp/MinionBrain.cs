@@ -46,16 +46,17 @@ public class MinionBrain : Brain
 	private void AddAnimTracker(GameObject go)
 	{
 		KAnimControllerBase component = go.GetComponent<KAnimControllerBase>();
-		if (!(component == null))
+		if (component == null)
 		{
-			if (component.AnimFiles != null && component.AnimFiles.Count > 0 && component.AnimFiles[0] != null && component.GetComponent<Pickupable>().trackOnPickup)
-			{
-				KBatchedAnimTracker kbatchedAnimTracker = go.AddComponent<KBatchedAnimTracker>();
-				kbatchedAnimTracker.useTargetPoint = false;
-				kbatchedAnimTracker.fadeOut = false;
-				kbatchedAnimTracker.symbol = new HashedString("snapTo_chest");
-				kbatchedAnimTracker.forceAlwaysVisible = true;
-			}
+			return;
+		}
+		if (component.AnimFiles != null && component.AnimFiles.Count > 0 && component.AnimFiles[0] != null && component.GetComponent<Pickupable>().trackOnPickup)
+		{
+			KBatchedAnimTracker kbatchedAnimTracker = go.AddComponent<KBatchedAnimTracker>();
+			kbatchedAnimTracker.useTargetPoint = false;
+			kbatchedAnimTracker.fadeOut = false;
+			kbatchedAnimTracker.symbol = new HashedString("snapTo_chest");
+			kbatchedAnimTracker.forceAlwaysVisible = true;
 		}
 	}
 

@@ -14,7 +14,6 @@ public class HoverTextScreen : KScreen
 			this.currentConfiguration.SetNotConfigured();
 			this.ToggleIncubating(true);
 		}
-		bool flag;
 		if (this.CachedToolFields != null && this.CachedToolFields.ContainsKey(config))
 		{
 			this.ClearLabels();
@@ -22,27 +21,24 @@ public class HoverTextScreen : KScreen
 			this.ShadowBars = this.CachedToolFields[config].ShadowBars;
 			this.currentConfiguration = config;
 			this.ActivateLabels();
-			flag = true;
+			return true;
 		}
-		else
-		{
-			flag = false;
-		}
-		return flag;
+		return false;
 	}
 
 	public void SaveCurrentFieldsAs(HoverTextConfiguration config)
 	{
-		if (!(config == null))
+		if (config == null)
 		{
-			if (this.CachedToolFields.ContainsKey(config))
-			{
-				this.CachedToolFields[config] = this.CurrentFields();
-			}
-			else
-			{
-				this.CachedToolFields.Add(config, this.CurrentFields());
-			}
+			return;
+		}
+		if (this.CachedToolFields.ContainsKey(config))
+		{
+			this.CachedToolFields[config] = this.CurrentFields();
+		}
+		else
+		{
+			this.CachedToolFields.Add(config, this.CurrentFields());
 		}
 	}
 
@@ -60,12 +56,9 @@ public class HoverTextScreen : KScreen
 
 	private void Update()
 	{
-		if (!this.incubating)
+		if (!this.incubating && base.transform.rectTransform().localScale != Vector3.one)
 		{
-			if (base.transform.rectTransform().localScale != Vector3.one)
-			{
-				base.transform.rectTransform().localScale = Vector3.one;
-			}
+			base.transform.rectTransform().localScale = Vector3.one;
 		}
 		this.ToggleIncubating(false);
 		if (this.Container.activeSelf)
@@ -104,12 +97,9 @@ public class HoverTextScreen : KScreen
 	{
 		foreach (Sprite sprite in this.HoverIcons)
 		{
-			if (sprite != null)
+			if (sprite != null && sprite.name == byName)
 			{
-				if (sprite.name == byName)
-				{
-					return sprite;
-				}
+				return sprite;
 			}
 		}
 		global::Debug.LogWarning("No icon named " + byName + " was found on HoverTextScreen.prefab", null);
@@ -150,7 +140,7 @@ public class HoverTextScreen : KScreen
 		global::Debug.Log("Clearing configuration for: " + config.ActionName, null);
 		if (this.CachedToolFields.ContainsKey(config))
 		{
-			string text = "";
+			string text = string.Empty;
 			for (int i = this.CachedToolFields[config].MultiLabelDisplays.Count - 1; i >= 0; i--)
 			{
 				text = text + "\n" + this.CachedToolFields[config].MultiLabelDisplays[i].name;
@@ -227,48 +217,49 @@ public class HoverTextScreen : KScreen
 
 	private void PositionShadowBars()
 	{
-		if (this.ShadowBars != null && this.ShadowBars.Count != 0)
+		if (this.ShadowBars == null || this.ShadowBars.Count == 0)
 		{
-			foreach (ShadowBar shadowBar in this.ShadowBars)
+			return;
+		}
+		foreach (ShadowBar shadowBar in this.ShadowBars)
+		{
+			float num = 0f;
+			float num2 = 0f;
+			shadowBar.gameObject.rectTransform().anchoredPosition = this.MultiLabelDisplays[shadowBar.startLineIndex].rectTransform().anchoredPosition + new Vector2(-shadowBar.SizeBleed.x, shadowBar.SizeBleed.y) + Vector2.right * shadowBar.leftIndent;
+			int num3 = 0;
+			VerticalLayoutGroup component = this.Container.GetComponent<VerticalLayoutGroup>();
+			for (int i = shadowBar.startLineIndex; i < shadowBar.endLineIndex; i++)
 			{
-				float num = 0f;
-				float num2 = 0f;
-				shadowBar.gameObject.rectTransform().anchoredPosition = this.MultiLabelDisplays[shadowBar.startLineIndex].rectTransform().anchoredPosition + new Vector2(-shadowBar.SizeBleed.x, shadowBar.SizeBleed.y) + Vector2.right * shadowBar.leftIndent;
-				int num3 = 0;
-				VerticalLayoutGroup component = this.Container.GetComponent<VerticalLayoutGroup>();
-				for (int i = shadowBar.startLineIndex; i < shadowBar.endLineIndex; i++)
+				if (this.MultiLabelDisplays[i].gameObject.activeSelf)
 				{
-					if (this.MultiLabelDisplays[i].gameObject.activeSelf)
+					num3++;
+					num2 += this.MultiLabelDisplays[i].rectTransform().sizeDelta.y;
+					if (component)
 					{
-						num3++;
-						num2 += this.MultiLabelDisplays[i].rectTransform().sizeDelta.y;
-						if (component)
-						{
-							num2 += component.spacing;
-						}
-						if (this.MultiLabelDisplays[i].rectTransform().sizeDelta.x > num)
-						{
-							num = this.MultiLabelDisplays[i].rectTransform().sizeDelta.x;
-						}
+						num2 += component.spacing;
+					}
+					if (this.MultiLabelDisplays[i].rectTransform().sizeDelta.x > num)
+					{
+						num = this.MultiLabelDisplays[i].rectTransform().sizeDelta.x;
 					}
 				}
-				if (num3 == 0 && shadowBar.gameObject.activeSelf)
-				{
-					shadowBar.gameObject.SetActive(false);
-				}
-				else if (!shadowBar.gameObject.activeSelf && num3 > 0)
-				{
-					shadowBar.gameObject.SetActive(true);
-				}
-				num -= shadowBar.leftIndent;
-				if (num > 0f && num2 > 0f)
-				{
-					shadowBar.gameObject.rectTransform().sizeDelta = new Vector2(num, num2) + shadowBar.SizeBleed * 2f;
-				}
-				else
-				{
-					shadowBar.gameObject.rectTransform().sizeDelta = Vector2.zero;
-				}
+			}
+			if (num3 == 0 && shadowBar.gameObject.activeSelf)
+			{
+				shadowBar.gameObject.SetActive(false);
+			}
+			else if (!shadowBar.gameObject.activeSelf && num3 > 0)
+			{
+				shadowBar.gameObject.SetActive(true);
+			}
+			num -= shadowBar.leftIndent;
+			if (num > 0f && num2 > 0f)
+			{
+				shadowBar.gameObject.rectTransform().sizeDelta = new Vector2(num, num2) + shadowBar.SizeBleed * 2f;
+			}
+			else
+			{
+				shadowBar.gameObject.rectTransform().sizeDelta = Vector2.zero;
 			}
 		}
 	}
@@ -407,7 +398,7 @@ public class HoverTextScreen : KScreen
 	[SerializeField]
 	private GameObject ShadowBarPrefab;
 
-	private bool incubating = false;
+	private bool incubating;
 
 	public Sprite[] HoverIcons;
 
@@ -425,26 +416,21 @@ public class HoverTextScreen : KScreen
 
 	public static HoverTextScreen Instance;
 
-	public bool IsVisible = false;
+	public bool IsVisible;
 
-	public bool JustBecameVisible = false;
+	public bool JustBecameVisible;
 
 	public struct HoverTextUpdateTimer
 	{
 		public bool tick()
 		{
 			this.timeElapsed += Time.unscaledDeltaTime;
-			bool flag;
 			if (this.timeElapsed >= this.tickInterval)
 			{
 				this.timeElapsed = 0f;
-				flag = true;
+				return true;
 			}
-			else
-			{
-				flag = false;
-			}
-			return flag;
+			return false;
 		}
 
 		public void Prime()

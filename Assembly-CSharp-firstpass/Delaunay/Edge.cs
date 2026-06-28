@@ -72,16 +72,11 @@ namespace Delaunay
 
 		public LineSegment VoronoiEdge()
 		{
-			LineSegment lineSegment;
 			if (!this.visible)
 			{
-				lineSegment = new LineSegment(null, null);
+				return new LineSegment(null, null);
 			}
-			else
-			{
-				lineSegment = new LineSegment(this._clippedVertices[Side.LEFT], this._clippedVertices[Side.RIGHT]);
-			}
-			return lineSegment;
+			return new LineSegment(this._clippedVertices[Side.LEFT], this._clippedVertices[Side.RIGHT]);
 		}
 
 		public Vertex leftVertex
@@ -131,20 +126,15 @@ namespace Delaunay
 		{
 			float num = edge0.SitesDistance();
 			float num2 = edge1.SitesDistance();
-			int num3;
 			if (num < num2)
 			{
-				num3 = 1;
+				return 1;
 			}
-			else if (num > num2)
+			if (num > num2)
 			{
-				num3 = -1;
+				return -1;
 			}
-			else
-			{
-				num3 = 0;
-			}
-			return num3;
+			return 0;
 		}
 
 		public static int CompareSitesDistances(Edge edge0, Edge edge1)

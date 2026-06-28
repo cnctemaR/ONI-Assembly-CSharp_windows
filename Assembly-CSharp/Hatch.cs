@@ -73,14 +73,15 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 
 	private void FindAndMoveToFood()
 	{
-		if (this.isHungry(base.smi))
+		if (!this.isHungry(base.smi))
 		{
-			Pickupable eatTarget = base.smi.master.GetEatTarget();
-			if (eatTarget != null)
-			{
-				base.smi.sm.eatMoveTarget.Set(eatTarget.gameObject, base.smi);
-				base.smi.GoTo(base.smi.sm.alive.grounded.eatStates.moveToFood);
-			}
+			return;
+		}
+		Pickupable eatTarget = base.smi.master.GetEatTarget();
+		if (eatTarget != null)
+		{
+			base.smi.sm.eatMoveTarget.Set(eatTarget.gameObject, base.smi);
+			base.smi.GoTo(base.smi.sm.alive.grounded.eatStates.moveToFood);
 		}
 	}
 
@@ -128,16 +129,10 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 					{
 						int num5 = Grid.PosToCell(pickupable2);
 						int navigationCost = component.GetNavigationCost(num5);
-						if (navigationCost != PathProber.InvalidCost)
+						if (navigationCost != PathProber.InvalidCost && navigationCost < num && pickupable2.GetComponent<PrimaryElement>().ElementID != this.emitter.outputElement.elementHash)
 						{
-							if (navigationCost < num)
-							{
-								if (pickupable2.GetComponent<PrimaryElement>().ElementID != this.emitter.outputElement.elementHash)
-								{
-									num = navigationCost;
-									pickupable = pickupable2;
-								}
-							}
+							num = navigationCost;
+							pickupable = pickupable2;
 						}
 					}
 				}
@@ -165,17 +160,12 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 	private bool EmergeIsClear()
 	{
 		int num = Grid.PosToCell(base.gameObject);
-		bool flag;
 		if (!Grid.IsValidCell(num) || !Grid.IsValidCell(Grid.CellAbove(num)))
 		{
-			flag = false;
+			return false;
 		}
-		else
-		{
-			int num2 = Grid.CellAbove(num);
-			flag = !Grid.Solid[num2] && !Grid.IsSubstantialLiquid(Grid.CellAbove(num), 0.9f);
-		}
-		return flag;
+		int num2 = Grid.CellAbove(num);
+		return !Grid.Solid[num2] && !Grid.IsSubstantialLiquid(Grid.CellAbove(num), 0.9f);
 	}
 
 	private bool ShouldBurrow()
@@ -190,31 +180,20 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 
 	private GameObject EdibleOnCell(int cell)
 	{
-		GameObject gameObject;
 		if (base.smi.sm.eatMoveTarget.Get(base.smi) != null && Grid.PosToCell(base.smi.sm.eatMoveTarget.Get(base.smi)) == cell)
 		{
-			gameObject = base.smi.sm.eatMoveTarget.Get(base.smi);
+			return base.smi.sm.eatMoveTarget.Get(base.smi);
 		}
-		else
+		GameObject gameObject = Grid.Objects[cell, 3];
+		if (gameObject != null && gameObject.GetComponent<Pickupable>().storage == null && (gameObject.HasTag(GameTags.Ore) || gameObject.HasTag(GameTags.Edible) || gameObject.HasTag(GameTags.BuildableRaw) || gameObject.HasTag(GameTags.Solid)))
 		{
-			GameObject gameObject2 = Grid.Objects[cell, 3];
-			if (gameObject2 != null && gameObject2.GetComponent<Pickupable>().storage == null)
+			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+			if (component != null && component.ElementID != this.emitter.outputElement.elementHash)
 			{
-				if (gameObject2.HasTag(GameTags.Ore) || gameObject2.HasTag(GameTags.Edible) || gameObject2.HasTag(GameTags.BuildableRaw) || gameObject2.HasTag(GameTags.Solid))
-				{
-					PrimaryElement component = gameObject2.GetComponent<PrimaryElement>();
-					if (component != null)
-					{
-						if (component.ElementID != this.emitter.outputElement.elementHash)
-						{
-							return gameObject2;
-						}
-					}
-				}
+				return gameObject;
 			}
-			gameObject = null;
 		}
-		return gameObject;
+		return null;
 	}
 
 	private void RemoveMassFromEdible(GameObject edibleObject)
@@ -281,20 +260,15 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 	private GameObject FindExistingDigPlacer()
 	{
 		GameObject gameObject = Grid.Objects[Grid.PosToCell(base.gameObject), 7];
-		GameObject gameObject2;
 		if (gameObject == null)
 		{
-			gameObject2 = null;
+			return null;
 		}
-		else if (this.prevDigPlacer == gameObject)
+		if (this.prevDigPlacer == gameObject)
 		{
-			gameObject2 = null;
+			return null;
 		}
-		else
-		{
-			gameObject2 = gameObject;
-		}
-		return gameObject2;
+		return gameObject;
 	}
 
 	private void OnPressDig()
@@ -303,11 +277,9 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 		if (gameObject != null)
 		{
 			global::Debug.LogWarning("User menu trying to create dig placer on hatch while it already has one. This should not be possible", null);
+			return;
 		}
-		else
-		{
-			DigTool.PlaceDig(Grid.PosToCell(base.gameObject), 0);
-		}
+		DigTool.PlaceDig(Grid.PosToCell(base.gameObject), 0);
 	}
 
 	private void OnPressCancelDig()
@@ -321,18 +293,19 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 
 	private void OnDuplicantDigBurrow(object dupeObject)
 	{
-		if (!(base.gameObject == null))
+		if (base.gameObject == null)
 		{
-			FactionAlignment component = ((GameObject)dupeObject).GetComponent<FactionAlignment>();
-			ThreatMonitor.Instance smi = base.gameObject.GetSMI<ThreatMonitor.Instance>();
-			if (smi != null)
-			{
-				smi.OnOffended(component);
-			}
-			if (base.smi.sm.DigPlacer.Get(base.smi) != null)
-			{
-				base.smi.master.ForgetDigPlacer();
-			}
+			return;
+		}
+		FactionAlignment component = ((GameObject)dupeObject).GetComponent<FactionAlignment>();
+		ThreatMonitor.Instance smi = base.gameObject.GetSMI<ThreatMonitor.Instance>();
+		if (smi != null)
+		{
+			smi.OnOffended(component);
+		}
+		if (base.smi.sm.DigPlacer.Get(base.smi) != null)
+		{
+			base.smi.master.ForgetDigPlacer();
 		}
 	}
 
@@ -383,12 +356,9 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 				this.SetDigPlacer(gameObject);
 			}
 		}
-		else if (data == null)
+		else if (data == null && base.smi.sm.DigPlacer.Get(base.smi) != null)
 		{
-			if (base.smi.sm.DigPlacer.Get(base.smi) != null)
-			{
-				this.ForgetDigPlacer();
-			}
+			this.ForgetDigPlacer();
 		}
 		this.userMenu.Refresh();
 	}
@@ -432,7 +402,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 
 	public Element latestMealElement;
 
-	public string latestMealName = "";
+	public string latestMealName = string.Empty;
 
 	public float minimumTimeBetweenMeals = 30f;
 
@@ -591,12 +561,9 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 				smi.Schedule(0.5f, delegate(object d)
 				{
 					GameObject gameObject = smi.master.EdibleOnCell(Grid.PosToCell(smi.master));
-					if (gameObject == null)
+					if (gameObject == null && this.eatMoveTarget.Get(smi) != null && Grid.PosToCell(smi.master.gameObject) == Grid.PosToCell(this.eatMoveTarget.Get(smi).gameObject))
 					{
-						if (this.eatMoveTarget.Get(smi) != null && Grid.PosToCell(smi.master.gameObject) == Grid.PosToCell(this.eatMoveTarget.Get(smi).gameObject))
-						{
-							gameObject = this.eatMoveTarget.Get(smi);
-						}
+						gameObject = this.eatMoveTarget.Get(smi);
 					}
 					if (gameObject != null)
 					{

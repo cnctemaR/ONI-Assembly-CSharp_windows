@@ -69,23 +69,24 @@ public class ImageToggleState : KMonoBehaviour
 
 	public void SetState(ImageToggleState.State newState)
 	{
-		if (this.currentState != newState)
+		if (this.currentState == newState)
 		{
-			switch (newState)
-			{
-			case ImageToggleState.State.Disabled:
-				this.SetDisabled();
-				break;
-			case ImageToggleState.State.Inactive:
-				this.SetInactive();
-				break;
-			case ImageToggleState.State.Active:
-				this.SetActive();
-				break;
-			case ImageToggleState.State.DisabledActive:
-				this.SetDisabledActive();
-				break;
-			}
+			return;
+		}
+		switch (newState)
+		{
+		case ImageToggleState.State.Disabled:
+			this.SetDisabled();
+			break;
+		case ImageToggleState.State.Inactive:
+			this.SetInactive();
+			break;
+		case ImageToggleState.State.Active:
+			this.SetActive();
+			break;
+		case ImageToggleState.State.DisabledActive:
+			this.SetDisabledActive();
+			break;
 		}
 	}
 
@@ -103,24 +104,26 @@ public class ImageToggleState : KMonoBehaviour
 
 	public void SetActive()
 	{
-		if (this.currentState != ImageToggleState.State.Active)
+		if (this.currentState == ImageToggleState.State.Active)
 		{
-			this.isActive = true;
-			this.currentState = ImageToggleState.State.Active;
-			if (!(this.TargetImage == null))
+			return;
+		}
+		this.isActive = true;
+		this.currentState = ImageToggleState.State.Active;
+		if (this.TargetImage == null)
+		{
+			return;
+		}
+		this.SetTargetImageColor(this.ActiveColour);
+		if (this.useSprites)
+		{
+			if (this.ActiveSprite != null && this.TargetImage.sprite != this.ActiveSprite)
 			{
-				this.SetTargetImageColor(this.ActiveColour);
-				if (this.useSprites)
-				{
-					if (this.ActiveSprite != null && this.TargetImage.sprite != this.ActiveSprite)
-					{
-						this.TargetImage.sprite = this.ActiveSprite;
-					}
-					else if (this.ActiveSprite == null)
-					{
-						this.TargetImage.sprite = null;
-					}
-				}
+				this.TargetImage.sprite = this.ActiveSprite;
+			}
+			else if (this.ActiveSprite == null)
+			{
+				this.TargetImage.sprite = null;
 			}
 		}
 	}
@@ -156,24 +159,26 @@ public class ImageToggleState : KMonoBehaviour
 
 	public void SetInactive()
 	{
-		if (this.currentState != ImageToggleState.State.Inactive)
+		if (this.currentState == ImageToggleState.State.Inactive)
 		{
-			this.isActive = false;
-			this.currentState = ImageToggleState.State.Inactive;
-			this.SetTargetImageColor(this.InactiveColour);
-			if (!(this.TargetImage == null))
+			return;
+		}
+		this.isActive = false;
+		this.currentState = ImageToggleState.State.Inactive;
+		this.SetTargetImageColor(this.InactiveColour);
+		if (this.TargetImage == null)
+		{
+			return;
+		}
+		if (this.useSprites)
+		{
+			if (this.InactiveSprite != null && this.TargetImage.sprite != this.InactiveSprite)
 			{
-				if (this.useSprites)
-				{
-					if (this.InactiveSprite != null && this.TargetImage.sprite != this.InactiveSprite)
-					{
-						this.TargetImage.sprite = this.InactiveSprite;
-					}
-					else if (this.InactiveSprite == null)
-					{
-						this.TargetImage.sprite = null;
-					}
-				}
+				this.TargetImage.sprite = this.InactiveSprite;
+			}
+			else if (this.InactiveSprite == null)
+			{
+				this.TargetImage.sprite = null;
 			}
 		}
 	}
@@ -183,25 +188,24 @@ public class ImageToggleState : KMonoBehaviour
 		if (this.currentState == ImageToggleState.State.Disabled)
 		{
 			this.SetTargetImageColor(this.DisabledColour);
+			return;
 		}
-		else
+		this.isActive = false;
+		this.currentState = ImageToggleState.State.Disabled;
+		this.SetTargetImageColor(this.DisabledColour);
+		if (this.TargetImage == null)
 		{
-			this.isActive = false;
-			this.currentState = ImageToggleState.State.Disabled;
-			this.SetTargetImageColor(this.DisabledColour);
-			if (!(this.TargetImage == null))
+			return;
+		}
+		if (this.useSprites)
+		{
+			if (this.DisabledSprite != null && this.TargetImage.sprite != this.DisabledSprite)
 			{
-				if (this.useSprites)
-				{
-					if (this.DisabledSprite != null && this.TargetImage.sprite != this.DisabledSprite)
-					{
-						this.TargetImage.sprite = this.DisabledSprite;
-					}
-					else if (this.DisabledSprite == null)
-					{
-						this.TargetImage.sprite = null;
-					}
-				}
+				this.TargetImage.sprite = this.DisabledSprite;
+			}
+			else if (this.DisabledSprite == null)
+			{
+				this.TargetImage.sprite = null;
 			}
 		}
 	}
@@ -210,19 +214,20 @@ public class ImageToggleState : KMonoBehaviour
 	{
 		this.isActive = false;
 		this.currentState = ImageToggleState.State.DisabledActive;
-		if (!(this.TargetImage == null))
+		if (this.TargetImage == null)
 		{
-			this.SetTargetImageColor(this.DisabledActiveColour);
-			if (this.useSprites)
+			return;
+		}
+		this.SetTargetImageColor(this.DisabledActiveColour);
+		if (this.useSprites)
+		{
+			if (this.DisabledActiveSprite != null && this.TargetImage.sprite != this.DisabledActiveSprite)
 			{
-				if (this.DisabledActiveSprite != null && this.TargetImage.sprite != this.DisabledActiveSprite)
-				{
-					this.TargetImage.sprite = this.DisabledActiveSprite;
-				}
-				else if (this.DisabledActiveSprite == null)
-				{
-					this.TargetImage.sprite = null;
-				}
+				this.TargetImage.sprite = this.DisabledActiveSprite;
+			}
+			else if (this.DisabledActiveSprite == null)
+			{
+				this.TargetImage.sprite = null;
 			}
 		}
 	}
@@ -237,7 +242,7 @@ public class ImageToggleState : KMonoBehaviour
 
 	public Sprite DisabledActiveSprite;
 
-	public bool useSprites = false;
+	public bool useSprites;
 
 	public Color ActiveColour = Color.white;
 
@@ -253,11 +258,11 @@ public class ImageToggleState : KMonoBehaviour
 
 	public ColorStyleSetting colorStyleSetting;
 
-	private bool isActive = false;
+	private bool isActive;
 
 	private ImageToggleState.State currentState = ImageToggleState.State.Inactive;
 
-	public bool useStartingState = false;
+	public bool useStartingState;
 
 	public ImageToggleState.State startingState = ImageToggleState.State.Inactive;
 

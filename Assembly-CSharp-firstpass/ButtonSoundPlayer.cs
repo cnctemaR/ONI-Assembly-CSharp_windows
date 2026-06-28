@@ -19,9 +19,9 @@ public class ButtonSoundPlayer : WidgetSoundPlayer
 
 	public WidgetSoundPlayer.WidgetSoundEvent[] button_widget_sound_events = new WidgetSoundPlayer.WidgetSoundEvent[]
 	{
-		new WidgetSoundPlayer.WidgetSoundEvent(0, "On Use", "", true),
-		new WidgetSoundPlayer.WidgetSoundEvent(1, "On Pointer Enter", "", true),
-		new WidgetSoundPlayer.WidgetSoundEvent(2, "On Use Rejected", "", true)
+		new WidgetSoundPlayer.WidgetSoundEvent(0, "On Use", string.Empty, true),
+		new WidgetSoundPlayer.WidgetSoundEvent(1, "On Pointer Enter", string.Empty, true),
+		new WidgetSoundPlayer.WidgetSoundEvent(2, "On Use Rejected", string.Empty, true)
 	};
 
 	public enum SoundEvents

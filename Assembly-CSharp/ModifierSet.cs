@@ -26,16 +26,11 @@ public class ModifierSet : ScriptableObject
 
 	public static float ConvertValue(float value, Units units)
 	{
-		float num;
 		if (units == Units.PerDay)
 		{
-			num = value * 0.0016666667f;
+			return value * 0.0016666667f;
 		}
-		else
-		{
-			num = value;
-		}
-		return num;
+		return value;
 	}
 
 	private void LoadEffects()
@@ -63,7 +58,7 @@ public class ModifierSet : ScriptableObject
 	{
 		Trait trait = new Trait(id, name, description, 0f, should_save, disabled_chore_groups, positive_trait, is_valid_starter_trait);
 		this.traits.Add(trait);
-		if (group_name == "" || group_name == null)
+		if (group_name == string.Empty || group_name == null)
 		{
 			group_name = "Default";
 		}

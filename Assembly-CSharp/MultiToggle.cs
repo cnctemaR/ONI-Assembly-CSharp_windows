@@ -37,7 +37,7 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 	{
 		if (this.play_sound_on_click)
 		{
-			if (this.states[this.state].on_click_override_sound_path == "")
+			if (this.states[this.state].on_click_override_sound_path == string.Empty)
 			{
 				KFMOD.PlayOneShot(GlobalAssets.GetSound("HUD_Click", false));
 			}
@@ -54,24 +54,26 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 
 	public void OnPointerEnter(PointerEventData eventData)
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			KInputManager.SetUserActive();
-			if (this.states.Length != 0)
+			return;
+		}
+		KInputManager.SetUserActive();
+		if (this.states.Length == 0)
+		{
+			return;
+		}
+		if (this.states[this.state].use_color_on_hover && this.states[this.state].color_on_hover != this.states[this.state].color)
+		{
+			this.toggle_image.color = this.states[this.state].color_on_hover;
+		}
+		foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
+		{
+			if (!(statePresentationSetting.image_target == null))
 			{
-				if (this.states[this.state].use_color_on_hover && this.states[this.state].color_on_hover != this.states[this.state].color)
+				if (statePresentationSetting.use_color_on_hover)
 				{
-					this.toggle_image.color = this.states[this.state].color_on_hover;
-				}
-				foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
-				{
-					if (!(statePresentationSetting.image_target == null))
-					{
-						if (statePresentationSetting.use_color_on_hover)
-						{
-							statePresentationSetting.image_target.color = statePresentationSetting.color_on_hover;
-						}
-					}
+					statePresentationSetting.image_target.color = statePresentationSetting.color_on_hover;
 				}
 			}
 		}
@@ -79,24 +81,26 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 
 	public void OnPointerExit(PointerEventData eventData)
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			KInputManager.SetUserActive();
-			if (this.states.Length != 0)
+			return;
+		}
+		KInputManager.SetUserActive();
+		if (this.states.Length == 0)
+		{
+			return;
+		}
+		if (this.states[this.state].use_color_on_hover && this.states[this.state].color_on_hover != this.states[this.state].color)
+		{
+			this.toggle_image.color = this.states[this.state].color;
+		}
+		foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
+		{
+			if (!(statePresentationSetting.image_target == null))
 			{
-				if (this.states[this.state].use_color_on_hover && this.states[this.state].color_on_hover != this.states[this.state].color)
+				if (statePresentationSetting.use_color_on_hover)
 				{
-					this.toggle_image.color = this.states[this.state].color;
-				}
-				foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
-				{
-					if (!(statePresentationSetting.image_target == null))
-					{
-						if (statePresentationSetting.use_color_on_hover)
-						{
-							statePresentationSetting.image_target.color = statePresentationSetting.color;
-						}
-					}
+					statePresentationSetting.image_target.color = statePresentationSetting.color;
 				}
 			}
 		}

@@ -37,7 +37,7 @@ public class DateTime : KScreen
 			this.tooltip.AddMultiStringTooltip(string.Format(UI.ASTEROIDCLOCK.CYCLES_OLD, this.Days()), this.tooltipstyle_Days);
 			this.tooltip.AddMultiStringTooltip(string.Format(UI.ASTEROIDCLOCK.TIME_PLAYED, (GameClock.Instance.GetTimePlayedInSeconds() / 3600f).ToString("0.00")), this.tooltipstyle_Playtime);
 		}
-		return "";
+		return string.Empty;
 	}
 
 	public static global::DateTime Instance;

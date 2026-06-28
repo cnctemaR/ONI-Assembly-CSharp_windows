@@ -188,12 +188,9 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public override void Evaluate(StateMachineInstanceType smi)
 		{
-			if (this.condition != null)
+			if (this.condition != null && this.condition(smi))
 			{
-				if (this.condition(smi))
-				{
-					this.ExecuteTransition(smi);
-				}
+				this.ExecuteTransition(smi);
 			}
 		}
 
@@ -267,30 +264,19 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 	{
 		private StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter GetStateTarget()
 		{
-			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter targetParameter;
-			if (this.stateTarget == null)
+			if (this.stateTarget != null)
 			{
-				if (this.parent != null)
-				{
-					GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state = (GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State)this.parent;
-					targetParameter = state.GetStateTarget();
-				}
-				else
-				{
-					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter targetParameter2 = this.sm.stateTarget;
-					if (targetParameter2 == null)
-					{
-						targetParameter = this.sm.masterTarget;
-					}
-					else
-					{
-						targetParameter = targetParameter2;
-					}
-				}
+				return this.stateTarget;
 			}
-			else
+			if (this.parent != null)
 			{
-				targetParameter = this.stateTarget;
+				GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state = (GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State)this.parent;
+				return state.GetStateTarget();
+			}
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter targetParameter = this.sm.stateTarget;
+			if (targetParameter == null)
+			{
+				return this.sm.masterTarget;
 			}
 			return targetParameter;
 		}
@@ -835,13 +821,10 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.Exit("RemoveStatusItem(" + status_item.Id + ")", delegate(StateMachineInstanceType smi)
 			{
 				KSelectable kselectable = state_target.Get<KSelectable>(smi);
-				if (kselectable != null)
+				if (kselectable != null && smi.dataTable[data_idx] != null)
 				{
-					if (smi.dataTable[data_idx] != null)
-					{
-						Guid guid2 = (Guid)smi.dataTable[data_idx];
-						kselectable.RemoveStatusItem(guid2, false);
-					}
+					Guid guid2 = (Guid)smi.dataTable[data_idx];
+					kselectable.RemoveStatusItem(guid2, false);
 				}
 				smi.dataTable[data_idx] = null;
 			});
@@ -906,19 +889,16 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.Exit("RemoveStatusItem(" + status_item.Id + ")", delegate(StateMachineInstanceType smi)
 			{
 				KSelectable kselectable = state_target.Get<KSelectable>(smi);
-				if (kselectable != null)
+				if (kselectable != null && smi.dataTable[data_idx] != null)
 				{
-					if (smi.dataTable[data_idx] != null)
+					if (category == null)
 					{
-						if (category == null)
-						{
-							Guid guid3 = (Guid)smi.dataTable[data_idx];
-							kselectable.RemoveStatusItem(guid3, false);
-						}
-						else
-						{
-							kselectable.SetStatusItem(category, null, null);
-						}
+						Guid guid3 = (Guid)smi.dataTable[data_idx];
+						kselectable.RemoveStatusItem(guid3, false);
+					}
+					else
+					{
+						kselectable.SetStatusItem(category, null, null);
 					}
 				}
 				smi.dataTable[data_idx] = null;
@@ -940,13 +920,10 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.Exit("RemoveStatusItem(DynamicallyConstructed)", delegate(StateMachineInstanceType smi)
 			{
 				KSelectable kselectable = state_target.Get<KSelectable>(smi);
-				if (kselectable != null)
+				if (kselectable != null && smi.dataTable[data_idx] != null)
 				{
-					if (smi.dataTable[data_idx] != null)
-					{
-						Guid guid2 = (Guid)smi.dataTable[data_idx];
-						kselectable.RemoveStatusItem(guid2, false);
-					}
+					Guid guid2 = (Guid)smi.dataTable[data_idx];
+					kselectable.RemoveStatusItem(guid2, false);
 				}
 				smi.dataTable[data_idx] = null;
 			});
@@ -1422,7 +1399,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			{
 				Notification notification = callback(smi);
 				smi.dataTable[data_idx] = notification;
-				state_target.Get<Notifier>(smi).Add(notification, "");
+				state_target.Get<Notifier>(smi).Add(notification, string.Empty);
 			});
 			this.Exit("DisableNotification()", delegate(StateMachineInstanceType smi)
 			{
@@ -1460,7 +1437,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.Enter("DoNotification()", delegate(StateMachineInstanceType smi)
 			{
 				Notification notification = callback(smi);
-				state_target.Get<Notifier>(smi).Add(notification, "");
+				state_target.Get<Notifier>(smi).Add(notification, string.Empty);
 			});
 			return this;
 		}
@@ -1496,12 +1473,13 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			});
 			this.Exit("RemovePeriodic(" + name + ")", delegate(StateMachineInstanceType smi)
 			{
-				if (smi.dataTable[data_idx] != null)
+				if (smi.dataTable[data_idx] == null)
 				{
-					SchedulerHandle schedulerHandle2 = (SchedulerHandle)smi.dataTable[data_idx];
-					smi.dataTable[data_idx] = null;
-					schedulerHandle2.ClearScheduler();
+					return;
 				}
+				SchedulerHandle schedulerHandle2 = (SchedulerHandle)smi.dataTable[data_idx];
+				smi.dataTable[data_idx] = null;
+				schedulerHandle2.ClearScheduler();
 			});
 			return this;
 		}
@@ -1865,7 +1843,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				")"
 			}), delegate(StateMachineInstanceType smi)
 			{
-				string text = "";
+				string text = string.Empty;
 				if (suffix_callback != null)
 				{
 					text = suffix_callback(smi);
@@ -1896,7 +1874,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				")"
 			}), delegate(StateMachineInstanceType smi)
 			{
-				string text = "";
+				string text = string.Empty;
 				if (suffix_callback != null)
 				{
 					text = suffix_callback(smi);
@@ -1969,10 +1947,11 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			StateMachineInstanceType cast_smi = (StateMachineInstanceType)((object)smi);
 			Action<object> action = delegate(object d)
 			{
-				if (!StateMachine.Instance.error)
+				if (StateMachine.Instance.error)
 				{
-					this.callback(cast_smi, d);
+					return;
 				}
+				this.callback(cast_smi, d);
 			};
 			if (this.globalEventSystemCallback != null)
 			{
@@ -2153,7 +2132,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		{
 			base.Target(target);
 			base.root.DefaultState(this.satisfied);
-			this.satisfied.EventTransition(GameHashes.AddUrge, this.hungry, (StateMachineInstanceType smi) => GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.HungrySubState.IsHungry(smi));
+			this.satisfied.EventTransition(GameHashes.AddUrge, this.hungry, new StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.ConditionCallback(GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.HungrySubState.IsHungry));
 			this.hungry.EventTransition(GameHashes.RemoveUrge, this.satisfied, (StateMachineInstanceType smi) => !GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.HungrySubState.IsHungry(smi)).ToggleStatusItem(status_item, null);
 			return this;
 		}
@@ -2200,21 +2179,16 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 			public override bool IsMatch(int cell, int parent_cell, int cost)
 			{
-				bool flag;
 				if (!Grid.IsValidCell(cell))
 				{
-					flag = false;
+					return false;
 				}
-				else if (Grid.IsSubstantialLiquid(cell, 0.35f) == (this.navType == NavType.Swim))
+				if (Grid.IsSubstantialLiquid(cell, 0.35f) == (this.navType == NavType.Swim))
 				{
 					this.targetCell = cell;
-					flag = --this.maxIterations <= 0;
+					return --this.maxIterations <= 0;
 				}
-				else
-				{
-					flag = false;
-				}
-				return flag;
+				return false;
 			}
 
 			public override int GetResultCell()

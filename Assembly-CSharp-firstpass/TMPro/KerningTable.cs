@@ -30,17 +30,12 @@ namespace TMPro
 		public int AddKerningPair(int left, int right, float offset)
 		{
 			int num = this.kerningPairs.FindIndex((KerningPair item) => item.AscII_Left == left && item.AscII_Right == right);
-			int num2;
 			if (num == -1)
 			{
 				this.kerningPairs.Add(new KerningPair(left, right, offset));
-				num2 = 0;
+				return 0;
 			}
-			else
-			{
-				num2 = -1;
-			}
-			return num2;
+			return -1;
 		}
 
 		public void RemoveKerningPair(int left, int right)

@@ -30,43 +30,38 @@ public class HatchChewSoundEvent : SoundEvent
 	{
 		Hatch component = behaviour.GetComponent<Hatch>();
 		Element latestMealElement = component.latestMealElement;
-		int num;
 		if (latestMealElement.id == SimHashes.Dirt)
 		{
-			num = 0;
+			return 0;
 		}
-		else if (latestMealElement.id == SimHashes.CrushedIce)
+		if (latestMealElement.id == SimHashes.CrushedIce)
 		{
-			num = 1;
+			return 1;
 		}
-		else if (latestMealElement.HasTag(GameTags.IceOre))
+		if (latestMealElement.HasTag(GameTags.IceOre))
 		{
-			num = 1;
+			return 1;
 		}
-		else if (latestMealElement.id == SimHashes.OxyRock)
+		if (latestMealElement.id == SimHashes.OxyRock)
 		{
-			num = 3;
+			return 3;
 		}
-		else if (latestMealElement.HasTag(GameTags.Metal))
+		if (latestMealElement.HasTag(GameTags.Metal))
 		{
-			num = 5;
+			return 5;
 		}
-		else if (latestMealElement.HasTag(GameTags.RefinedMetal))
+		if (latestMealElement.HasTag(GameTags.RefinedMetal))
 		{
-			num = 6;
+			return 6;
 		}
-		else if (latestMealElement.id == SimHashes.Sand)
+		if (latestMealElement.id == SimHashes.Sand)
 		{
-			num = 8;
+			return 8;
 		}
-		else if (latestMealElement.id == SimHashes.Algae)
+		if (latestMealElement.id == SimHashes.Algae)
 		{
-			num = 10;
+			return 10;
 		}
-		else
-		{
-			num = 7;
-		}
-		return num;
+		return 7;
 	}
 }

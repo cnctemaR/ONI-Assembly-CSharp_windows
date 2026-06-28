@@ -25,7 +25,7 @@ namespace ProcGen
 		public Arc arc { get; private set; }
 
 		[Serialize]
-		public string type = "";
+		public string type = string.Empty;
 
 		[Serialize]
 		public TagSet tags;

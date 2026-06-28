@@ -88,86 +88,56 @@ public class Substance
 
 	public AmbienceType GetAmbience()
 	{
-		AmbienceType ambienceType;
 		if (this.audioConfig == null)
 		{
-			ambienceType = AmbienceType.None;
+			return AmbienceType.None;
 		}
-		else
-		{
-			ambienceType = this.audioConfig.ambienceType;
-		}
-		return ambienceType;
+		return this.audioConfig.ambienceType;
 	}
 
 	public SolidAmbienceType GetSolidAmbience()
 	{
-		SolidAmbienceType solidAmbienceType;
 		if (this.audioConfig == null)
 		{
-			solidAmbienceType = SolidAmbienceType.None;
+			return SolidAmbienceType.None;
 		}
-		else
-		{
-			solidAmbienceType = this.audioConfig.solidAmbienceType;
-		}
-		return solidAmbienceType;
+		return this.audioConfig.solidAmbienceType;
 	}
 
 	public string GetMiningSound()
 	{
-		string text;
 		if (this.audioConfig == null)
 		{
-			text = "";
+			return string.Empty;
 		}
-		else
-		{
-			text = this.audioConfig.miningSound;
-		}
-		return text;
+		return this.audioConfig.miningSound;
 	}
 
 	public string GetMiningBreakSound()
 	{
-		string text;
 		if (this.audioConfig == null)
 		{
-			text = "";
+			return string.Empty;
 		}
-		else
-		{
-			text = this.audioConfig.miningBreakSound;
-		}
-		return text;
+		return this.audioConfig.miningBreakSound;
 	}
 
 	public string GetOreBumpSound()
 	{
-		string text;
 		if (this.audioConfig == null)
 		{
-			text = "";
+			return string.Empty;
 		}
-		else
-		{
-			text = this.audioConfig.oreBumpSound;
-		}
-		return text;
+		return this.audioConfig.oreBumpSound;
 	}
 
 	public string GetFloorEventAudioCategory()
 	{
-		string text;
 		if (this.audioConfig == null)
 		{
-			text = "";
+			return string.Empty;
 		}
-		else
-		{
-			text = this.audioConfig.floorEventAudioCategory;
-		}
-		return text;
+		return this.audioConfig.floorEventAudioCategory;
 	}
 
 	public string name;
@@ -205,7 +175,7 @@ public class Substance
 	[NonSerialized]
 	public KAnimFile[] anims;
 
-	public float hue = 0f;
+	public float hue;
 
 	public float saturation = 1f;
 

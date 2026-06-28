@@ -20,25 +20,17 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 	public string GetHitAnim()
 	{
 		Workable component = this.smi.sm.attackTarget.Get(this.smi).gameObject.GetComponent<Workable>();
-		string text2;
-		if (component)
+		if (!component)
 		{
-			string text = MultitoolController.GetAnimationStrings(component, this.gameObject.GetComponent<Worker>(), "hit")[1];
-			text = text.Replace("_loop", "");
-			if (text.Contains("{verb}"))
-			{
-				text2 = "hit";
-			}
-			else
-			{
-				text2 = text;
-			}
+			return "hit";
 		}
-		else
+		string text = MultitoolController.GetAnimationStrings(component, this.gameObject.GetComponent<Worker>(), "hit")[1];
+		text = text.Replace("_loop", string.Empty);
+		if (text.Contains("{verb}"))
 		{
-			text2 = "hit";
+			return "hit";
 		}
-		return text2;
+		return text;
 	}
 
 	public void OnTargetMoved(object data)
@@ -47,34 +39,32 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 		if (this.smi.sm.attackTarget.Get(this.smi) == null)
 		{
 			this.CleanUpMultitool();
+			return;
 		}
-		else
+		if (this.smi.GetCurrentState() == this.smi.sm.attack)
 		{
-			if (this.smi.GetCurrentState() == this.smi.sm.attack)
+			int num2 = Grid.PosToCell(this.smi.sm.attackTarget.Get(this.smi).gameObject);
+			IApproachable component = this.smi.sm.attackTarget.Get(this.smi).gameObject.GetComponent<IApproachable>();
+			if (component != null)
 			{
-				int num2 = Grid.PosToCell(this.smi.sm.attackTarget.Get(this.smi).gameObject);
-				IApproachable component = this.smi.sm.attackTarget.Get(this.smi).gameObject.GetComponent<IApproachable>();
-				if (component != null)
+				CellOffset[] offsets = component.GetOffsets();
+				if (num == num2 || !Grid.IsCellOffsetOf(num, num2, offsets))
 				{
-					CellOffset[] offsets = component.GetOffsets();
-					if (num == num2 || !Grid.IsCellOffsetOf(num, num2, offsets))
+					if (this.multiTool != null)
 					{
-						if (this.multiTool != null)
-						{
-							this.CleanUpMultitool();
-						}
-						this.smi.GoTo(this.smi.sm.approachtarget);
+						this.CleanUpMultitool();
 					}
-				}
-				else
-				{
-					global::Debug.Log("has no approachable", null);
+					this.smi.GoTo(this.smi.sm.approachtarget);
 				}
 			}
-			if (this.multiTool != null)
+			else
 			{
-				this.multiTool.UpdateHitEffectTarget();
+				global::Debug.Log("has no approachable", null);
 			}
+		}
+		if (this.multiTool != null)
+		{
+			this.multiTool.UpdateHitEffectTarget();
 		}
 	}
 

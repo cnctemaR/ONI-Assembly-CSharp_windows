@@ -39,16 +39,11 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	public TechInstance GetTargetResearch()
 	{
-		TechInstance techInstance;
 		if (this.queuedTech != null && this.queuedTech.Count > 0)
 		{
-			techInstance = this.queuedTech[this.queuedTech.Count - 1];
+			return this.queuedTech[this.queuedTech.Count - 1];
 		}
-		else
-		{
-			techInstance = null;
-		}
-		return techInstance;
+		return null;
 	}
 
 	public TechInstance Get(Tech tech)
@@ -66,17 +61,12 @@ public class Research : KMonoBehaviour, ISaveLoadable
 	public TechInstance GetOrAdd(Tech tech)
 	{
 		TechInstance techInstance = this.techs.Find((TechInstance tc) => tc.tech == tech);
-		TechInstance techInstance2;
 		if (techInstance != null)
 		{
-			techInstance2 = techInstance;
+			return techInstance;
 		}
-		else
-		{
-			TechInstance techInstance3 = new TechInstance(tech);
-			this.techs.Add(techInstance3);
-			techInstance2 = techInstance3;
-		}
+		TechInstance techInstance2 = new TechInstance(tech);
+		this.techs.Add(techInstance2);
 		return techInstance2;
 	}
 
@@ -111,26 +101,29 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	public void CancelResearch(Tech tech, bool clickedEntry = true)
 	{
-		TechInstance ti = this.queuedTech.Find((TechInstance qt) => qt.tech == tech);
-		if (ti != null)
+		Research.<CancelResearch>c__AnonStorey1 <CancelResearch>c__AnonStorey = new Research.<CancelResearch>c__AnonStorey1();
+		<CancelResearch>c__AnonStorey.tech = tech;
+		<CancelResearch>c__AnonStorey.ti = this.queuedTech.Find((TechInstance qt) => qt.tech == <CancelResearch>c__AnonStorey.tech);
+		if (<CancelResearch>c__AnonStorey.ti == null)
 		{
-			if (ti == this.queuedTech[this.queuedTech.Count - 1] && clickedEntry)
+			return;
+		}
+		if (<CancelResearch>c__AnonStorey.ti == this.queuedTech[this.queuedTech.Count - 1] && clickedEntry)
+		{
+			this.SetActiveResearch(null, false);
+		}
+		int i;
+		for (i = <CancelResearch>c__AnonStorey.ti.tech.unlockedTech.Count - 1; i >= 0; i--)
+		{
+			if (this.queuedTech.Find((TechInstance qt) => qt.tech == <CancelResearch>c__AnonStorey.ti.tech.unlockedTech[i]) != null)
 			{
-				this.SetActiveResearch(null, false);
+				this.CancelResearch(<CancelResearch>c__AnonStorey.ti.tech.unlockedTech[i], false);
 			}
-			int i;
-			for (i = ti.tech.unlockedTech.Count - 1; i >= 0; i--)
-			{
-				if (this.queuedTech.Find((TechInstance qt) => qt.tech == ti.tech.unlockedTech[i]) != null)
-				{
-					this.CancelResearch(ti.tech.unlockedTech[i], false);
-				}
-			}
-			this.queuedTech.Remove(ti);
-			if (clickedEntry)
-			{
-				base.Trigger(-1914338957, this.queuedTech);
-			}
+		}
+		this.queuedTech.Remove(<CancelResearch>c__AnonStorey.ti);
+		if (clickedEntry)
+		{
+			base.Trigger(-1914338957, this.queuedTech);
 		}
 	}
 
@@ -166,14 +159,12 @@ public class Research : KMonoBehaviour, ISaveLoadable
 		if (!this.UseGlobalPointInventory && this.activeResearch == null)
 		{
 			Debug.LogWarning("No active research to add research points to. Global research inventory is disabled.", null);
+			return;
 		}
-		else
-		{
-			ResearchPointInventory researchPointInventory = ((!this.UseGlobalPointInventory) ? this.activeResearch.progressInventory : this.globalPointInventory);
-			researchPointInventory.AddResearchPoints(researchTypeID, points);
-			this.CheckBuyResearch();
-			base.Trigger(-125623018, null);
-		}
+		ResearchPointInventory researchPointInventory = ((!this.UseGlobalPointInventory) ? this.activeResearch.progressInventory : this.globalPointInventory);
+		researchPointInventory.AddResearchPoints(researchTypeID, points);
+		this.CheckBuyResearch();
+		base.Trigger(-125623018, null);
 	}
 
 	private void CheckBuyResearch()
@@ -221,7 +212,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 		}
 		else
 		{
-			this.saveData.activeResearchId = "";
+			this.saveData.activeResearchId = string.Empty;
 		}
 		if (this.queuedTech != null && this.queuedTech.Count > 0)
 		{
@@ -229,7 +220,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 		}
 		else
 		{
-			this.saveData.targetResearchId = "";
+			this.saveData.targetResearchId = string.Empty;
 		}
 		this.saveData.techs = new TechInstance.SaveData[this.techs.Count];
 		for (int i = 0; i < this.techs.Count; i++)
@@ -276,7 +267,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	public ResearchTypes researchTypes;
 
-	public bool UseGlobalPointInventory = false;
+	public bool UseGlobalPointInventory;
 
 	[Serialize]
 	public ResearchPointInventory globalPointInventory;

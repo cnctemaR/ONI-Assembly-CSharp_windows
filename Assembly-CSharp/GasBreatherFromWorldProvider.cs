@@ -25,29 +25,25 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 	public bool ConsumeGas(OxygenBreather oxygen_breather, float gas_consumed)
 	{
 		SimHashes getBreathableElement = oxygen_breather.GetBreathableElement;
-		bool flag;
 		if (getBreathableElement == SimHashes.Vacuum)
 		{
-			flag = false;
+			return false;
 		}
-		else
-		{
-			HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimConsume)));
-			SimMessages.ConsumeMass(oxygen_breather.mouthCell, getBreathableElement, gas_consumed, 3, handle.index);
-			flag = true;
-		}
-		return flag;
+		HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimConsume)));
+		SimMessages.ConsumeMass(oxygen_breather.mouthCell, getBreathableElement, gas_consumed, 3, handle.index);
+		return true;
 	}
 
 	private void OnSimConsume(object obj)
 	{
-		if (!(this.oxygenBreather == null))
+		if (this.oxygenBreather == null)
 		{
-			Sim.MassConsumptionCallback massConsumptionCallback = (Sim.MassConsumptionCallback)obj;
-			this.oxygenBreather.o2Accumulator.Accumulate(massConsumptionCallback.mass);
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, -massConsumptionCallback.mass, this.oxygenBreather.GetProperName(), null);
-			this.oxygenBreather.Trigger(240573938, massConsumptionCallback);
+			return;
 		}
+		Sim.MassConsumptionCallback massConsumptionCallback = (Sim.MassConsumptionCallback)obj;
+		this.oxygenBreather.o2Accumulator.Accumulate(massConsumptionCallback.mass);
+		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, -massConsumptionCallback.mass, this.oxygenBreather.GetProperName(), null);
+		this.oxygenBreather.Trigger(240573938, massConsumptionCallback);
 	}
 
 	private SuffocationMonitor.Instance suffocationMonitor;

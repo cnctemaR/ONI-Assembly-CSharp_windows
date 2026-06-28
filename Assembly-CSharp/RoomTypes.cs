@@ -15,45 +15,37 @@ public static class RoomTypes
 
 	public static Assignables[] GetAssignees(Room room)
 	{
-		Assignables[] array;
 		if (room == null)
 		{
-			array = new Assignables[0];
+			return new Assignables[0];
 		}
-		else
+		RoomTypes.RoomType roomType = RoomTypes.GetRoomType(room);
+		if (roomType == RoomTypes.neutral_type)
 		{
-			RoomTypes.RoomType roomType = RoomTypes.GetRoomType(room);
-			if (roomType == RoomTypes.neutral_type)
+			return new Assignables[0];
+		}
+		List<Assignables> list = new List<Assignables>();
+		foreach (BuildingComplete buildingComplete in room.buildings)
+		{
+			if (!(buildingComplete == null))
 			{
-				array = new Assignables[0];
-			}
-			else
-			{
-				List<Assignables> list = new List<Assignables>();
-				foreach (BuildingComplete buildingComplete in room.buildings)
+				if (roomType.primary_constraint.building_criteria(buildingComplete))
 				{
-					if (!(buildingComplete == null))
+					Assignable component = buildingComplete.GetComponent<Assignable>();
+					if (component.assignee != null)
 					{
-						if (roomType.primary_constraint.building_criteria(buildingComplete))
+						foreach (Ownables ownables in component.assignee.GetOwners())
 						{
-							Assignable component = buildingComplete.GetComponent<Assignable>();
-							if (component.assignee != null)
+							if (!list.Contains(ownables))
 							{
-								foreach (Ownables ownables in component.assignee.GetOwners())
-								{
-									if (!list.Contains(ownables))
-									{
-										list.Add(ownables);
-									}
-								}
+								list.Add(ownables);
 							}
 						}
 					}
 				}
-				array = list.ToArray();
 			}
 		}
-		return array;
+		return list.ToArray();
 	}
 
 	public static RoomTypes.RoomType GetRoomType(Room room)
@@ -87,12 +79,9 @@ public static class RoomTypes
 	{
 		RoomTypes.RoomType.RoomIdentificationResult roomIdentificationResult = potential_type.isSatisfactory(room);
 		RoomTypes.RoomType.RoomIdentificationResult roomIdentificationResult2 = suspected_type.isSatisfactory(room);
-		if (roomIdentificationResult == RoomTypes.RoomType.RoomIdentificationResult.all_satisfied && roomIdentificationResult2 == RoomTypes.RoomType.RoomIdentificationResult.all_satisfied)
+		if (roomIdentificationResult == RoomTypes.RoomType.RoomIdentificationResult.all_satisfied && roomIdentificationResult2 == RoomTypes.RoomType.RoomIdentificationResult.all_satisfied && potential_type.priority > suspected_type.priority)
 		{
-			if (potential_type.priority > suspected_type.priority)
-			{
-				return true;
-			}
+			return true;
 		}
 		if (roomIdentificationResult != RoomTypes.RoomType.RoomIdentificationResult.primary_unsatisfied)
 		{
@@ -149,23 +138,23 @@ public static class RoomTypes
 	{
 		{
 			"None",
-			new RoomTypes.TypeCategory("None", "", Color.grey)
+			new RoomTypes.TypeCategory("None", string.Empty, Color.grey)
 		},
 		{
 			"Food",
-			new RoomTypes.TypeCategory("Food", "", new Color(1f, 0.8862745f, 0.5176471f))
+			new RoomTypes.TypeCategory("Food", string.Empty, new Color(1f, 0.8862745f, 0.5176471f))
 		},
 		{
 			"Sleep",
-			new RoomTypes.TypeCategory("Sleep", "", new Color(0.6392157f, 1f, 0.5176471f))
+			new RoomTypes.TypeCategory("Sleep", string.Empty, new Color(0.6392157f, 1f, 0.5176471f))
 		},
 		{
 			"Bathroom",
-			new RoomTypes.TypeCategory("Bathroom", "", new Color(0.5176471f, 1f, 0.95686275f))
+			new RoomTypes.TypeCategory("Bathroom", string.Empty, new Color(0.5176471f, 1f, 0.95686275f))
 		},
 		{
 			"Hospital",
-			new RoomTypes.TypeCategory("Hospital", "", new Color(1f, 0.5176471f, 0.5568628f))
+			new RoomTypes.TypeCategory("Hospital", string.Empty, new Color(1f, 0.5176471f, 0.5568628f))
 		}
 	};
 
@@ -278,12 +267,9 @@ public static class RoomTypes
 
 		public RoomTypes.RoomType.RoomIdentificationResult isSatisfactory(Room candidate_room)
 		{
-			if (this.primary_constraint != null)
+			if (this.primary_constraint != null && !this.primary_constraint.isSatisfied(candidate_room))
 			{
-				if (!this.primary_constraint.isSatisfied(candidate_room))
-				{
-					return RoomTypes.RoomType.RoomIdentificationResult.primary_unsatisfied;
-				}
+				return RoomTypes.RoomType.RoomIdentificationResult.primary_unsatisfied;
 			}
 			if (this.additional_constraints != null)
 			{
@@ -313,7 +299,7 @@ public static class RoomTypes
 			{
 				text = text + "\n    • " + ROOMS.CRITERIA.NEUTRAL_TYPE;
 			}
-			text += ((this.primary_constraint != null) ? ("\n    • " + this.primary_constraint.name) : "");
+			text += ((this.primary_constraint != null) ? ("\n    • " + this.primary_constraint.name) : string.Empty);
 			if (this.additional_constraints != null)
 			{
 				foreach (RoomConstraints.Constraint constraint in this.additional_constraints)

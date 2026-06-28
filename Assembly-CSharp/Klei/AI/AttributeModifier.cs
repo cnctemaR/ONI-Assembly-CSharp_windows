@@ -11,7 +11,7 @@ namespace Klei.AI
 		{
 			this.AttributeId = attribute_id;
 			this.Value = value;
-			this.Description = string.Intern((description != null) ? description : "");
+			this.Description = string.Intern((description != null) ? description : string.Empty);
 			this.DescriptionCB = null;
 			this.IsMultiplier = is_multiplier;
 			this.UIOnly = uiOnly;
@@ -64,7 +64,7 @@ namespace Klei.AI
 					attributeFormatter = attribute.formatter;
 				}
 			}
-			string text = "";
+			string text = string.Empty;
 			if (attributeFormatter != null)
 			{
 				text = attributeFormatter.GetFormattedModifier(this, parent_instance);

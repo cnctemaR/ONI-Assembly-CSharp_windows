@@ -221,20 +221,18 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 	public void UpdateProbe()
 	{
 		int num = Grid.PosToCell(this);
-		if (Grid.IsValidCell(num))
+		if (!Grid.IsValidCell(num))
 		{
-			this.PathProber.UpdateProbe(this.NavGrid, num, this.CurrentNavType, this.GetCurrentAbilities(), this.flags, true);
+			return;
 		}
+		this.PathProber.UpdateProbe(this.NavGrid, num, this.CurrentNavType, this.GetCurrentAbilities(), this.flags, true);
 	}
 
 	private void LateUpdate()
 	{
-		if (this.IsMoving())
+		if (this.IsMoving() && this.selectable.IsSelected)
 		{
-			if (this.selectable.IsSelected)
-			{
-				NavPathDrawer.Instance.DrawPath(base.GetComponent<KAnimControllerBase>().GetPivotSymbolPosition(), this.path);
-			}
+			NavPathDrawer.Instance.DrawPath(base.GetComponent<KAnimControllerBase>().GetPivotSymbolPosition(), this.path);
 		}
 		if (this.DebugDrawPath || this.NavGrid.DebugViewAllPaths)
 		{
@@ -282,37 +280,38 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (!base.gameObject.HasTag(GameTags.Dead))
+		if (base.gameObject.HasTag(GameTags.Dead))
 		{
-			string text;
-			string text2;
-			global::System.Action action;
-			string text3;
-			if (NavPathDrawer.Instance.GetNavigator() != this)
-			{
-				UserMenu userMenu = this.userMenu;
-				text = "action_navigable_regions";
-				text2 = UI.USERMENUACTIONS.DRAWPATHS.NAME;
-				action = new global::System.Action(this.OnDrawPaths);
-				text3 = UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 0.1f);
-			}
-			else
-			{
-				UserMenu userMenu2 = this.userMenu;
-				text3 = "action_navigable_regions";
-				text2 = UI.USERMENUACTIONS.DRAWPATHS.NAME_OFF;
-				action = new global::System.Action(this.OnDrawPaths);
-				text = UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP_OFF;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 0.1f);
-			}
-			UserMenu userMenu3 = this.userMenu;
-			text = "action_follow_cam";
-			text2 = UI.USERMENUACTIONS.FOLLOWCAM.NAME;
-			action = new global::System.Action(this.OnFollowCam);
-			text3 = UI.USERMENUACTIONS.FOLLOWCAM.TOOLTIP;
-			userMenu3.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 0.3f);
+			return;
 		}
+		string text;
+		string text2;
+		global::System.Action action;
+		string text3;
+		if (NavPathDrawer.Instance.GetNavigator() != this)
+		{
+			UserMenu userMenu = this.userMenu;
+			text = "action_navigable_regions";
+			text2 = UI.USERMENUACTIONS.DRAWPATHS.NAME;
+			action = new global::System.Action(this.OnDrawPaths);
+			text3 = UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 0.1f);
+		}
+		else
+		{
+			UserMenu userMenu2 = this.userMenu;
+			text3 = "action_navigable_regions";
+			text2 = UI.USERMENUACTIONS.DRAWPATHS.NAME_OFF;
+			action = new global::System.Action(this.OnDrawPaths);
+			text = UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP_OFF;
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 0.1f);
+		}
+		UserMenu userMenu3 = this.userMenu;
+		text = "action_follow_cam";
+		text2 = UI.USERMENUACTIONS.FOLLOWCAM.NAME;
+		action = new global::System.Action(this.OnFollowCam);
+		text3 = UI.USERMENUACTIONS.FOLLOWCAM.TOOLTIP;
+		userMenu3.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 0.3f);
 	}
 
 	private void OnFollowCam()
@@ -388,16 +387,11 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 
 	public int GetNavigationCost(int cell)
 	{
-		int num;
 		if (Grid.IsValidCell(cell))
 		{
-			num = this.PathProber.GetCost(cell);
+			return this.PathProber.GetCost(cell);
 		}
-		else
-		{
-			num = PathProber.InvalidCost;
-		}
-		return num;
+		return PathProber.InvalidCost;
 	}
 
 	public int GetNavigationCost(int cell, CellOffset[] offsets)

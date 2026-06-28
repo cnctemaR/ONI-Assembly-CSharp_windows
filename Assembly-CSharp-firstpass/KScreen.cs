@@ -7,7 +7,7 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPoi
 	public KScreen()
 	{
 		this.screenName = base.GetType().ToString();
-		if (this.displayName == null || this.displayName == "")
+		if (this.displayName == null || this.displayName == string.Empty)
 		{
 			this.displayName = this.screenName;
 		}
@@ -83,12 +83,9 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPoi
 		{
 			this._rectTransform = this._canvas.GetComponentInParent<RectTransform>();
 		}
-		if (this.activateOnSpawn)
+		if (this.activateOnSpawn && KScreenManager.Instance != null)
 		{
-			if (KScreenManager.Instance != null)
-			{
-				this.Activate();
-			}
+			this.Activate();
 		}
 		if (this.ConsumeMouseScroll && !this.activateOnSpawn)
 		{
@@ -98,15 +95,12 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPoi
 
 	public virtual void OnKeyDown(KButtonEvent e)
 	{
-		if (this.mouseOver && this.ConsumeMouseScroll)
+		if (this.mouseOver && this.ConsumeMouseScroll && !e.Consumed)
 		{
-			if (!e.Consumed)
+			if (!e.TryConsume(global::Action.ZoomIn))
 			{
-				if (!e.TryConsume(global::Action.ZoomIn))
+				if (e.TryConsume(global::Action.ZoomOut))
 				{
-					if (e.TryConsume(global::Action.ZoomOut))
-					{
-					}
 				}
 			}
 		}
@@ -144,16 +138,17 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPoi
 
 	public virtual void Deactivate()
 	{
-		if (Application.isPlaying)
+		if (!Application.isPlaying)
 		{
-			this.OnDeactivate();
-			this.isActive = false;
-			KScreenManager.Instance.PopScreen(this);
-			if (this != null && base.gameObject != null)
-			{
-				base.gameObject.SetActive(false);
-				global::UnityEngine.Object.Destroy(base.gameObject);
-			}
+			return;
+		}
+		this.OnDeactivate();
+		this.isActive = false;
+		KScreenManager.Instance.PopScreen(this);
+		if (this != null && base.gameObject != null)
+		{
+			base.gameObject.SetActive(false);
+			global::UnityEngine.Object.Destroy(base.gameObject);
 		}
 	}
 
@@ -176,20 +171,15 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPoi
 
 	public Vector3 WorldToScreen(Vector3 pos)
 	{
-		Vector3 vector;
 		if (this._rectTransform == null)
 		{
 			global::Debug.LogWarning("Hey you are calling this function too early!", null);
-			vector = Vector3.zero;
+			return Vector3.zero;
 		}
-		else
-		{
-			Camera main = Camera.main;
-			Vector3 vector2 = main.WorldToViewportPoint(pos);
-			vector2.y = vector2.y * main.rect.height + main.rect.y;
-			vector = new Vector2((vector2.x - 0.5f) * this._rectTransform.sizeDelta.x, (vector2.y - 0.5f) * this._rectTransform.sizeDelta.y);
-		}
-		return vector;
+		Camera main = Camera.main;
+		Vector3 vector = main.WorldToViewportPoint(pos);
+		vector.y = vector.y * main.rect.height + main.rect.y;
+		return new Vector2((vector.x - 0.5f) * this._rectTransform.sizeDelta.x, (vector.y - 0.5f) * this._rectTransform.sizeDelta.y);
 	}
 
 	protected virtual void OnShow(bool show)
@@ -220,7 +210,7 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPoi
 	}
 
 	[SerializeField]
-	public bool activateOnSpawn = false;
+	public bool activateOnSpawn;
 
 	private Canvas _canvas;
 
@@ -230,13 +220,13 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPoi
 
 	private bool isActive;
 
-	protected bool mouseOver = false;
+	protected bool mouseOver;
 
-	protected bool ConsumeMouseScroll = false;
+	protected bool ConsumeMouseScroll;
 
-	public WidgetTransition.TransitionType transitionType = WidgetTransition.TransitionType.SlideFromRight;
+	public WidgetTransition.TransitionType transitionType;
 
-	public bool fadeIn = false;
+	public bool fadeIn;
 
 	public string displayName;
 
@@ -244,7 +234,7 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPoi
 
 	public KScreen.PointerExitActions pointerExitActions;
 
-	private bool hasFocus = false;
+	private bool hasFocus;
 
 	public delegate void PointerEnterActions(PointerEventData eventData);
 

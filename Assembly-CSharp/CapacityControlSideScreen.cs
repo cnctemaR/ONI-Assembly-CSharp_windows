@@ -31,28 +31,24 @@ public class CapacityControlSideScreen : SideScreenContent
 		if (new_target == null)
 		{
 			global::Debug.LogError("Invalid gameObject received", null);
+			return;
 		}
-		else
+		this.target = new_target.GetComponent<IUserControlledCapacity>();
+		if (this.target == null)
 		{
-			this.target = new_target.GetComponent<IUserControlledCapacity>();
-			if (this.target == null)
-			{
-				global::Debug.LogError("The gameObject received does not contain a IThresholdSwitch component", null);
-			}
-			else
-			{
-				this.slider.minValue = this.target.MinCapacity;
-				this.slider.maxValue = this.target.MaxCapacity;
-				this.slider.value = this.target.UserMaxCapacity;
-				this.slider.GetComponentInChildren<ToolTip>();
-				this.unitsLabel.text = this.target.CapacityUnits;
-				this.numberInput.minValue = this.target.MinCapacity;
-				this.numberInput.maxValue = this.target.MaxCapacity;
-				this.numberInput.currentValue = Mathf.Max(this.target.MinCapacity, Mathf.Min(this.target.MaxCapacity, this.target.UserMaxCapacity));
-				this.numberInput.Activate();
-				this.UpdateMaxCapacityLabel();
-			}
+			global::Debug.LogError("The gameObject received does not contain a IThresholdSwitch component", null);
+			return;
 		}
+		this.slider.minValue = this.target.MinCapacity;
+		this.slider.maxValue = this.target.MaxCapacity;
+		this.slider.value = this.target.UserMaxCapacity;
+		this.slider.GetComponentInChildren<ToolTip>();
+		this.unitsLabel.text = this.target.CapacityUnits;
+		this.numberInput.minValue = this.target.MinCapacity;
+		this.numberInput.maxValue = this.target.MaxCapacity;
+		this.numberInput.currentValue = Mathf.Max(this.target.MinCapacity, Mathf.Min(this.target.MaxCapacity, this.target.UserMaxCapacity));
+		this.numberInput.Activate();
+		this.UpdateMaxCapacityLabel();
 	}
 
 	private void ReceiveValueFromSlider(float newValue)

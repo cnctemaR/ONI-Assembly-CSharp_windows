@@ -41,313 +41,311 @@ public class DebugHandler : IInputHandler
 
 	public void OnKeyDown(KButtonEvent e)
 	{
-		if (DebugHandler.enabled)
+		if (!DebugHandler.enabled)
 		{
-			if (e.TryConsume(global::Action.DebugSpawnMinion))
+			return;
+		}
+		if (e.TryConsume(global::Action.DebugSpawnMinion))
+		{
+			this.SpawnMinion();
+		}
+		else if (e.TryConsume(global::Action.DebugSpawnStressTest))
+		{
+			for (int i = 0; i < 60; i++)
 			{
 				this.SpawnMinion();
 			}
-			else if (e.TryConsume(global::Action.DebugSpawnStressTest))
+		}
+		else if (e.TryConsume(global::Action.DebugSuperTestMode))
+		{
+			if (!this.superTestMode)
 			{
-				for (int i = 0; i < 60; i++)
+				Time.timeScale = 15f;
+				this.superTestMode = true;
+			}
+			else
+			{
+				Time.timeScale = 1f;
+				this.superTestMode = false;
+			}
+		}
+		else if (e.TryConsume(global::Action.DebugUltraTestMode))
+		{
+			if (!this.ultraTestMode)
+			{
+				Time.timeScale = 30f;
+				this.ultraTestMode = true;
+			}
+			else
+			{
+				Time.timeScale = 1f;
+				this.ultraTestMode = false;
+			}
+		}
+		else if (e.TryConsume(global::Action.DebugSlowTestMode))
+		{
+			if (!this.slowTestMode)
+			{
+				Time.timeScale = 0.06f;
+				this.slowTestMode = true;
+			}
+			else
+			{
+				Time.timeScale = 1f;
+				this.slowTestMode = false;
+			}
+		}
+		else if (e.TryConsume(global::Action.DebugDig))
+		{
+			int mouseCell = DebugHandler.GetMouseCell();
+			SimMessages.Dig(mouseCell, -1);
+		}
+		else if (e.TryConsume(global::Action.DebugInstantBuildMode))
+		{
+			DebugHandler.InstantBuildMode = !DebugHandler.InstantBuildMode;
+			if (PlanScreen.Instance != null)
+			{
+				PlanScreen.Instance.Refresh();
+			}
+			if (BuildMenu.Instance != null)
+			{
+				BuildMenu.Instance.Refresh();
+			}
+			if (OverlayMenu.Instance != null)
+			{
+				OverlayMenu.Instance.Refresh();
+			}
+			ConsumerManager.instance.RefreshDiscovered(null);
+			if (ManagementMenu.Instance != null)
+			{
+				ManagementMenu.Instance.CheckResearch(null);
+			}
+		}
+		else if (e.TryConsume(global::Action.DebugExplosion))
+		{
+			Vector3 mousePosition = Input.mousePosition;
+			mousePosition.z = -Camera.main.transform.position.z - Grid.CellSizeInMeters;
+			Vector3 vector = Camera.main.ScreenToWorldPoint(mousePosition);
+			GameUtil.CreateExplosion(vector);
+		}
+		else if (e.TryConsume(global::Action.DebugDiscoverAllElements))
+		{
+			foreach (Element element in ElementLoader.elements)
+			{
+				WorldInventory.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
+			}
+		}
+		else if (e.TryConsume(global::Action.DebugToggleUI))
+		{
+			DebugHandler.ToggleScreenshotMode();
+		}
+		else if (e.TryConsume(global::Action.SreenShot1x))
+		{
+			string text = Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png");
+			Application.CaptureScreenshot(text, 1);
+		}
+		else if (e.TryConsume(global::Action.SreenShot2x))
+		{
+			string text2 = Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png");
+			Application.CaptureScreenshot(text2, 2);
+		}
+		else if (e.TryConsume(global::Action.SreenShot8x))
+		{
+			string text3 = Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png");
+			Application.CaptureScreenshot(text3, 8);
+		}
+		else if (e.TryConsume(global::Action.SreenShot32x))
+		{
+			string text4 = Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png");
+			Application.CaptureScreenshot(text4, 32);
+		}
+		else if (e.TryConsume(global::Action.DebugCellInfo))
+		{
+			DebugHandler.DebugCellInfo = !DebugHandler.DebugCellInfo;
+		}
+		else if (e.TryConsume(global::Action.DebugToggle))
+		{
+			PropertyTextures.FogOfWarScale = 1f - PropertyTextures.FogOfWarScale;
+			DebugHandler.FreeCameraMode = !DebugHandler.FreeCameraMode;
+			if (Game.Instance != null)
+			{
+				Game.Instance.UpdateGameActiveRegion(0, 0, Grid.WidthInCells, Grid.HeightInCells);
+				WorldGenSpawner.Instance.SpawnEverything();
+			}
+			if (DebugPaintElementScreen.Instance != null)
+			{
+				bool activeSelf = DebugPaintElementScreen.Instance.gameObject.activeSelf;
+				DebugPaintElementScreen.Instance.gameObject.SetActive(!activeSelf);
+				if (DebugElementMenu.Instance && DebugElementMenu.Instance.root.activeSelf)
 				{
-					this.SpawnMinion();
+					DebugElementMenu.Instance.root.SetActive(false);
+				}
+				DebugBaseTemplateButton.Instance.gameObject.SetActive(!activeSelf);
+			}
+		}
+		else if (e.TryConsume(global::Action.DebugCollectGarbage))
+		{
+			GC.Collect();
+		}
+		else if (e.TryConsume(global::Action.DebugInvincible))
+		{
+			DebugHandler.InvincibleMode = !DebugHandler.InvincibleMode;
+		}
+		else if (e.TryConsume(global::Action.DebugVisualTest))
+		{
+			Scenario.Instance.SetupVisualTest();
+		}
+		else if (e.TryConsume(global::Action.DebugGameplayTest))
+		{
+			Scenario.Instance.SetupGameplayTest();
+		}
+		else if (e.TryConsume(global::Action.DebugElementTest))
+		{
+			Scenario.Instance.SetupElementTest();
+		}
+		else if (e.TryConsume(global::Action.DebugRefreshNavCell))
+		{
+			Pathfinding.Instance.RefreshNavCell(DebugHandler.GetMouseCell());
+		}
+		else if (e.TryConsume(global::Action.DebugToggleSelectInEditor))
+		{
+			DebugHandler.SetSelectInEditor(!DebugHandler.SelectInEditor);
+		}
+		else if (e.TryConsume(global::Action.DebugGotoTarget))
+		{
+			global::Debug.Log("Debug GoTo", null);
+			Game.Instance.Trigger(775300118, null);
+			foreach (Brain brain in Components.Brains)
+			{
+				DebugGoToMonitor component = brain.GetComponent<DebugGoToMonitor>();
+				if (component != null)
+				{
+					component.GoToCursor();
 				}
 			}
-			else if (e.TryConsume(global::Action.DebugSuperTestMode))
+		}
+		else if (e.TryConsume(global::Action.DebugTeleport))
+		{
+			KSelectable selected = SelectTool.Instance.selected;
+			if (selected != null)
 			{
-				if (!this.superTestMode)
+				int mouseCell2 = DebugHandler.GetMouseCell();
+				if (!Grid.IsValidCell(mouseCell2))
 				{
-					Time.timeScale = 15f;
-					this.superTestMode = true;
+					return;
 				}
-				else
+				selected.transform.SetPosition(Grid.CellToPosCBC(mouseCell2, Grid.SceneLayer.Move));
+			}
+		}
+		else if (!e.TryConsume(global::Action.DebugPlace))
+		{
+			if (!e.TryConsume(global::Action.DebugSelectMaterial))
+			{
+				if (e.TryConsume(global::Action.DebugNotification))
 				{
-					Time.timeScale = 1f;
-					this.superTestMode = false;
+					Tutorial.Instance.DebugNotification();
 				}
-			}
-			else if (e.TryConsume(global::Action.DebugUltraTestMode))
-			{
-				if (!this.ultraTestMode)
+				else if (e.TryConsume(global::Action.DebugNotificationMessage))
 				{
-					Time.timeScale = 30f;
-					this.ultraTestMode = true;
+					Tutorial.Instance.DebugNotificationMessage();
 				}
-				else
+				else if (e.TryConsume(global::Action.DebugSuperSpeed))
 				{
-					Time.timeScale = 1f;
-					this.ultraTestMode = false;
+					SpeedControlScreen.Instance.ToggleRidiculousSpeed();
 				}
-			}
-			else if (e.TryConsume(global::Action.DebugSlowTestMode))
-			{
-				if (!this.slowTestMode)
+				else if (e.TryConsume(global::Action.DebugGameStep))
 				{
-					Time.timeScale = 0.06f;
-					this.slowTestMode = true;
+					SpeedControlScreen.Instance.DebugStepFrame();
 				}
-				else
+				else if (e.TryConsume(global::Action.DebugSimStep))
 				{
-					Time.timeScale = 1f;
-					this.slowTestMode = false;
+					Game.Instance.ForceSimStep();
 				}
-			}
-			else if (e.TryConsume(global::Action.DebugDig))
-			{
-				int mouseCell = DebugHandler.GetMouseCell();
-				SimMessages.Dig(mouseCell, -1);
-			}
-			else if (e.TryConsume(global::Action.DebugInstantBuildMode))
-			{
-				DebugHandler.InstantBuildMode = !DebugHandler.InstantBuildMode;
-				if (PlanScreen.Instance != null)
+				else if (e.TryConsume(global::Action.DebugToggleMusic))
 				{
-					PlanScreen.Instance.Refresh();
+					AudioDebug.Get().ToggleMusic();
 				}
-				if (BuildMenu.Instance != null)
+				else if (e.TryConsume(global::Action.DebugRiverTest))
 				{
-					BuildMenu.Instance.Refresh();
+					Scenario.Instance.SetupRiverTest();
 				}
-				if (OverlayMenu.Instance != null)
+				else if (e.TryConsume(global::Action.DebugTileTest))
 				{
-					OverlayMenu.Instance.Refresh();
+					Scenario.Instance.SetupTileTest();
 				}
-				ConsumerManager.instance.RefreshDiscovered(null);
-				if (ManagementMenu.Instance != null)
+				else if (e.TryConsume(global::Action.DebugForceLightEverywhere))
 				{
-					ManagementMenu.Instance.CheckResearch(null);
+					PropertyTextures.instance.ForceLightEverywhere = !PropertyTextures.instance.ForceLightEverywhere;
 				}
-			}
-			else if (e.TryConsume(global::Action.DebugExplosion))
-			{
-				Vector3 mousePosition = Input.mousePosition;
-				mousePosition.z = -Camera.main.transform.position.z - Grid.CellSizeInMeters;
-				Vector3 vector = Camera.main.ScreenToWorldPoint(mousePosition);
-				GameUtil.CreateExplosion(vector);
-			}
-			else if (e.TryConsume(global::Action.DebugDiscoverAllElements))
-			{
-				foreach (Element element in ElementLoader.elements)
+				else if (e.TryConsume(global::Action.DebugPathFinding))
 				{
-					WorldInventory.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
+					DebugHandler.DebugPathFinding = !DebugHandler.DebugPathFinding;
+					global::Debug.Log("DebugPathFinding=" + DebugHandler.DebugPathFinding, null);
 				}
-			}
-			else if (e.TryConsume(global::Action.DebugToggleUI))
-			{
-				DebugHandler.ToggleScreenshotMode();
-			}
-			else if (e.TryConsume(global::Action.SreenShot1x))
-			{
-				string text = Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png");
-				Application.CaptureScreenshot(text, 1);
-			}
-			else if (e.TryConsume(global::Action.SreenShot2x))
-			{
-				string text2 = Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png");
-				Application.CaptureScreenshot(text2, 2);
-			}
-			else if (e.TryConsume(global::Action.SreenShot8x))
-			{
-				string text3 = Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png");
-				Application.CaptureScreenshot(text3, 8);
-			}
-			else if (e.TryConsume(global::Action.SreenShot32x))
-			{
-				string text4 = Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png");
-				Application.CaptureScreenshot(text4, 32);
-			}
-			else if (e.TryConsume(global::Action.DebugCellInfo))
-			{
-				DebugHandler.DebugCellInfo = !DebugHandler.DebugCellInfo;
-			}
-			else if (e.TryConsume(global::Action.DebugToggle))
-			{
-				PropertyTextures.FogOfWarScale = 1f - PropertyTextures.FogOfWarScale;
-				DebugHandler.FreeCameraMode = !DebugHandler.FreeCameraMode;
-				if (Game.Instance != null)
+				else if (!e.TryConsume(global::Action.DebugFocus))
 				{
-					Game.Instance.UpdateGameActiveRegion(0, 0, Grid.WidthInCells, Grid.HeightInCells);
-					WorldGenSpawner.Instance.SpawnEverything();
-				}
-				if (DebugPaintElementScreen.Instance != null)
-				{
-					bool activeSelf = DebugPaintElementScreen.Instance.gameObject.activeSelf;
-					DebugPaintElementScreen.Instance.gameObject.SetActive(!activeSelf);
-					if (DebugElementMenu.Instance && DebugElementMenu.Instance.root.activeSelf)
+					if (e.TryConsume(global::Action.DebugReportBug))
 					{
-						DebugElementMenu.Instance.root.SetActive(false);
-					}
-					DebugBaseTemplateButton.Instance.gameObject.SetActive(!activeSelf);
-				}
-			}
-			else if (e.TryConsume(global::Action.DebugCollectGarbage))
-			{
-				GC.Collect();
-			}
-			else if (e.TryConsume(global::Action.DebugInvincible))
-			{
-				DebugHandler.InvincibleMode = !DebugHandler.InvincibleMode;
-			}
-			else if (e.TryConsume(global::Action.DebugVisualTest))
-			{
-				Scenario.Instance.SetupVisualTest();
-			}
-			else if (e.TryConsume(global::Action.DebugGameplayTest))
-			{
-				Scenario.Instance.SetupGameplayTest();
-			}
-			else if (e.TryConsume(global::Action.DebugElementTest))
-			{
-				Scenario.Instance.SetupElementTest();
-			}
-			else if (e.TryConsume(global::Action.DebugRefreshNavCell))
-			{
-				Pathfinding.Instance.RefreshNavCell(DebugHandler.GetMouseCell());
-			}
-			else if (e.TryConsume(global::Action.DebugToggleSelectInEditor))
-			{
-				DebugHandler.SetSelectInEditor(!DebugHandler.SelectInEditor);
-			}
-			else if (e.TryConsume(global::Action.DebugGotoTarget))
-			{
-				global::Debug.Log("Debug GoTo", null);
-				Game.Instance.Trigger(775300118, null);
-				foreach (Brain brain in Components.Brains)
-				{
-					DebugGoToMonitor component = brain.GetComponent<DebugGoToMonitor>();
-					if (component != null)
-					{
-						component.GoToCursor();
-					}
-				}
-			}
-			else if (e.TryConsume(global::Action.DebugTeleport))
-			{
-				KSelectable selected = SelectTool.Instance.selected;
-				if (selected != null)
-				{
-					int mouseCell2 = DebugHandler.GetMouseCell();
-					if (!Grid.IsValidCell(mouseCell2))
-					{
-						return;
-					}
-					selected.transform.SetPosition(Grid.CellToPosCBC(mouseCell2, Grid.SceneLayer.Move));
-				}
-			}
-			else if (!e.TryConsume(global::Action.DebugPlace))
-			{
-				if (!e.TryConsume(global::Action.DebugSelectMaterial))
-				{
-					if (e.TryConsume(global::Action.DebugNotification))
-					{
-						Tutorial.Instance.DebugNotification();
-					}
-					else if (e.TryConsume(global::Action.DebugNotificationMessage))
-					{
-						Tutorial.Instance.DebugNotificationMessage();
-					}
-					else if (e.TryConsume(global::Action.DebugSuperSpeed))
-					{
-						SpeedControlScreen.Instance.ToggleRidiculousSpeed();
-					}
-					else if (e.TryConsume(global::Action.DebugGameStep))
-					{
-						SpeedControlScreen.Instance.DebugStepFrame();
-					}
-					else if (e.TryConsume(global::Action.DebugSimStep))
-					{
-						Game.Instance.ForceSimStep();
-					}
-					else if (e.TryConsume(global::Action.DebugToggleMusic))
-					{
-						AudioDebug.Get().ToggleMusic();
-					}
-					else if (e.TryConsume(global::Action.DebugRiverTest))
-					{
-						Scenario.Instance.SetupRiverTest();
-					}
-					else if (e.TryConsume(global::Action.DebugTileTest))
-					{
-						Scenario.Instance.SetupTileTest();
-					}
-					else if (e.TryConsume(global::Action.DebugForceLightEverywhere))
-					{
-						PropertyTextures.instance.ForceLightEverywhere = !PropertyTextures.instance.ForceLightEverywhere;
-					}
-					else if (e.TryConsume(global::Action.DebugPathFinding))
-					{
-						DebugHandler.DebugPathFinding = !DebugHandler.DebugPathFinding;
-						global::Debug.Log("DebugPathFinding=" + DebugHandler.DebugPathFinding, null);
-					}
-					else if (!e.TryConsume(global::Action.DebugFocus))
-					{
-						if (e.TryConsume(global::Action.DebugReportBug))
+						int num = 0;
+						string validSaveFilename;
+						for (;;)
 						{
-							int num = 0;
-							string validSaveFilename;
-							for (;;)
+							validSaveFilename = SaveScreen.GetValidSaveFilename("bug_report_savefile_" + num.ToString());
+							if (!File.Exists(validSaveFilename))
 							{
-								validSaveFilename = SaveScreen.GetValidSaveFilename("bug_report_savefile_" + num.ToString());
-								if (!File.Exists(validSaveFilename))
-								{
-									break;
-								}
-								num++;
+								break;
 							}
-							string text5 = "No save file (front end)";
-							if (SaveLoader.Instance != null)
-							{
-								text5 = SaveLoader.Instance.Save(validSaveFilename, false, false);
-							}
-							KCrashReporter.ReportBug("Bug Report", text5);
+							num++;
 						}
-						else if (e.TryConsume(global::Action.DebugReloadLevel))
+						string text5 = "No save file (front end)";
+						if (SaveLoader.Instance != null)
 						{
-							global::Debug.Log("Reloading Level.", null);
-							SaveLoader.Instance.InitialSave();
-							LoadScreen.ForceStopGame();
-							SaveLoader.SetActiveSaveFilePath(SaveLoader.GetAutosaveFilePath());
-							LoadingOverlay.Load(delegate
-							{
-								App.LoadScene("frontend");
-							});
+							text5 = SaveLoader.Instance.Save(validSaveFilename, false, false);
 						}
-						else if (e.TryConsume(global::Action.DebugTriggerException))
+						KCrashReporter.ReportBug("Bug Report", text5);
+					}
+					else if (e.TryConsume(global::Action.DebugReloadLevel))
+					{
+						global::Debug.Log("Reloading Level.", null);
+						SaveLoader.Instance.InitialSave();
+						LoadScreen.ForceStopGame();
+						SaveLoader.SetActiveSaveFilePath(SaveLoader.GetAutosaveFilePath());
+						LoadingOverlay.Load(delegate
 						{
-							string text6 = Guid.NewGuid().ToString();
-							KCrashReporter.ReportError("Debug crash with random stack", text6, null, ScreenPrefabs.Instance.ConfirmDialogScreen, "");
-						}
-						else if (e.TryConsume(global::Action.DebugTriggerError))
+							App.LoadScene("frontend");
+						});
+					}
+					else if (e.TryConsume(global::Action.DebugTriggerException))
+					{
+						string text6 = Guid.NewGuid().ToString();
+						KCrashReporter.ReportError("Debug crash with random stack", text6, null, ScreenPrefabs.Instance.ConfirmDialogScreen, string.Empty);
+					}
+					else if (e.TryConsume(global::Action.DebugTriggerError))
+					{
+						global::Debug.LogError("Oooops! Testing error!", null);
+					}
+					else if (e.TryConsume(global::Action.DebugDumpGarbageReferences))
+					{
+						GarbageProfiler.DebugDumpGarbageStats();
+					}
+					else if (e.TryConsume(global::Action.DebugDumpEventData))
+					{
+						KObjectManager.Instance.DumpEventData();
+					}
+					else if (!e.TryConsume(global::Action.DebugDumpSceneParitionerLeakData))
+					{
+						if (e.TryConsume(global::Action.DebugCrashSim))
 						{
-							global::Debug.LogError("Oooops! Testing error!", null);
-						}
-						else if (e.TryConsume(global::Action.DebugDumpGarbageReferences))
-						{
-							GarbageProfiler.DebugDumpGarbageStats();
-						}
-						else if (e.TryConsume(global::Action.DebugDumpEventData))
-						{
-							KObjectManager.Instance.DumpEventData();
-						}
-						else if (!e.TryConsume(global::Action.DebugDumpSceneParitionerLeakData))
-						{
-							if (e.TryConsume(global::Action.DebugCrashSim))
-							{
-								Sim.SIM_DebugCrash();
-							}
+							Sim.SIM_DebugCrash();
 						}
 					}
 				}
 			}
-			if (e.Consumed)
-			{
-				if (Game.Instance != null)
-				{
-					Game.Instance.debugWasUsed = true;
-					KCrashReporter.debugWasUsed = true;
-				}
-			}
+		}
+		if (e.Consumed && Game.Instance != null)
+		{
+			Game.Instance.debugWasUsed = true;
+			KCrashReporter.debugWasUsed = true;
 		}
 	}
 
@@ -396,11 +394,11 @@ public class DebugHandler : IInputHandler
 
 	public static bool DebugCellInfo;
 
-	private bool superTestMode = false;
+	private bool superTestMode;
 
-	private bool ultraTestMode = false;
+	private bool ultraTestMode;
 
-	private bool slowTestMode = false;
+	private bool slowTestMode;
 
 	public enum PaintMode
 	{

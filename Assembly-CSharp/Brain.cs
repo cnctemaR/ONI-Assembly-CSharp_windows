@@ -44,13 +44,14 @@ public abstract class Brain : KMonoBehaviour
 
 	private void UpdateChores()
 	{
-		if (!base.GetComponent<KPrefabID>().HasTag(GameTags.PreventChoreInterruption))
+		if (base.GetComponent<KPrefabID>().HasTag(GameTags.PreventChoreInterruption))
 		{
-			Chore.Precondition.Context context = default(Chore.Precondition.Context);
-			if (this.FindBetterChore(ref context))
-			{
-				base.GetComponent<ChoreDriver>().SetChore(context);
-			}
+			return;
+		}
+		Chore.Precondition.Context context = default(Chore.Precondition.Context);
+		if (this.FindBetterChore(ref context))
+		{
+			base.GetComponent<ChoreDriver>().SetChore(context);
 		}
 	}
 

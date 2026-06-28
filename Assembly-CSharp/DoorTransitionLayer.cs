@@ -18,12 +18,9 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 	{
 		foreach (Door door in this.doors)
 		{
-			if (door != null)
+			if (door != null && !door.IsOpen())
 			{
-				if (!door.IsOpen())
-				{
-					return false;
-				}
+				return false;
 			}
 		}
 		return true;
@@ -87,25 +84,20 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 
 	private Door GetDoor(int cell)
 	{
-		Door door;
 		if (!Grid.HasDoor[cell])
 		{
-			door = null;
+			return null;
 		}
-		else
+		GameObject gameObject = Grid.Objects[cell, 1];
+		if (gameObject != null)
 		{
-			GameObject gameObject = Grid.Objects[cell, 1];
-			if (gameObject != null)
+			Door component = gameObject.GetComponent<Door>();
+			if (component != null && component.isSpawned)
 			{
-				Door component = gameObject.GetComponent<Door>();
-				if (component != null && component.isSpawned)
-				{
-					return component;
-				}
+				return component;
 			}
-			door = null;
 		}
-		return door;
+		return null;
 	}
 
 	private List<Door> doors = new List<Door>();

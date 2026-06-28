@@ -29,20 +29,22 @@ public class Butcherable : Workable, ISaveLoadable
 
 	public void ActivateChore(object param)
 	{
-		if (this.chore == null)
+		if (this.chore != null)
 		{
-			this.chore = new WorkChore<Butcherable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
-			this.OnRefreshUserMenu(null);
+			return;
 		}
+		this.chore = new WorkChore<Butcherable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+		this.OnRefreshUserMenu(null);
 	}
 
 	public void CancelChore(object param)
 	{
-		if (this.chore != null)
+		if (this.chore == null)
 		{
-			this.chore.Cancel("User cancelled");
-			this.chore = null;
+			return;
 		}
+		this.chore.Cancel("User cancelled");
+		this.chore = null;
 	}
 
 	private void OnClickCancel()
@@ -64,16 +66,17 @@ public class Butcherable : Workable, ISaveLoadable
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (this.readyToButcher)
+		if (!this.readyToButcher)
 		{
-			if (this.chore != null)
-			{
-				this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", "Cancel Meatify", new global::System.Action(this.OnClickCancel), global::Action.NumActions, null, null, null, "", true), 1f);
-			}
-			else
-			{
-				this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", "Meatify", new global::System.Action(this.OnClickButcher), global::Action.NumActions, null, null, null, "", true), 1f);
-			}
+			return;
+		}
+		if (this.chore != null)
+		{
+			this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", "Cancel Meatify", new global::System.Action(this.OnClickCancel), global::Action.NumActions, null, null, null, string.Empty, true), 1f);
+		}
+		else
+		{
+			this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", "Meatify", new global::System.Action(this.OnClickButcher), global::Action.NumActions, null, null, null, string.Empty, true), 1f);
 		}
 	}
 
@@ -84,45 +87,41 @@ public class Butcherable : Workable, ISaveLoadable
 
 	public void OnButcherComplete()
 	{
-		if (!this.butchered)
+		if (this.butchered)
 		{
-			KSelectable component = base.GetComponent<KSelectable>();
-			if (component && component.IsSelected)
-			{
-				SelectTool.Instance.Select(null, false);
-			}
-			for (int i = 0; i < this.Drops.Length; i++)
-			{
-				GameObject gameObject = Scenario.SpawnPrefab(this.GetDropSpawnLocation(), 0, 0, this.Drops[i], Grid.SceneLayer.Ore, Folder.Entities);
-				gameObject.SetActive(true);
-				Edible component2 = gameObject.GetComponent<Edible>();
-				if (component2)
-				{
-					ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component2.Calories, string.Format(UI.ENDOFDAYREPORT.NOTES.BUTCHERED, gameObject.GetProperName()), UI.ENDOFDAYREPORT.NOTES.BUTCHERED_CONTEXT);
-				}
-			}
-			this.chore = null;
-			this.butchered = true;
-			this.readyToButcher = false;
-			this.userMenu.Refresh();
-			base.Trigger(395373363, null);
+			return;
 		}
+		KSelectable component = base.GetComponent<KSelectable>();
+		if (component && component.IsSelected)
+		{
+			SelectTool.Instance.Select(null, false);
+		}
+		for (int i = 0; i < this.Drops.Length; i++)
+		{
+			GameObject gameObject = Scenario.SpawnPrefab(this.GetDropSpawnLocation(), 0, 0, this.Drops[i], Grid.SceneLayer.Ore, Folder.Entities);
+			gameObject.SetActive(true);
+			Edible component2 = gameObject.GetComponent<Edible>();
+			if (component2)
+			{
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component2.Calories, string.Format(UI.ENDOFDAYREPORT.NOTES.BUTCHERED, gameObject.GetProperName()), UI.ENDOFDAYREPORT.NOTES.BUTCHERED_CONTEXT);
+			}
+		}
+		this.chore = null;
+		this.butchered = true;
+		this.readyToButcher = false;
+		this.userMenu.Refresh();
+		base.Trigger(395373363, null);
 	}
 
 	private int GetDropSpawnLocation()
 	{
 		int num = Grid.PosToCell(base.gameObject);
 		int num2 = Grid.CellAbove(num);
-		int num3;
 		if (!Grid.Solid[num2])
 		{
-			num3 = num2;
+			return num2;
 		}
-		else
-		{
-			num3 = num;
-		}
-		return num3;
+		return num;
 	}
 
 	public override Workable.AnimInfo GetAnim(Worker worker)
@@ -141,9 +140,9 @@ public class Butcherable : Workable, ISaveLoadable
 	[MyCmpAdd]
 	private UserMenu userMenu;
 
-	private bool readyToButcher = false;
+	private bool readyToButcher;
 
-	private bool butchered = false;
+	private bool butchered;
 
 	public string[] Drops;
 

@@ -24,33 +24,35 @@ public class CrewRationsScreen : CrewListScreen<CrewRationsEntry>
 
 	private void SortByPreviousSelected()
 	{
-		if (!(this.sortToggleGroup == null))
+		if (this.sortToggleGroup == null)
 		{
-			if (!(this.lastSortToggle == null))
+			return;
+		}
+		if (this.lastSortToggle == null)
+		{
+			return;
+		}
+		for (int i = 0; i < this.ColumnTitlesContainer.childCount; i++)
+		{
+			OverviewColumnIdentity component = this.ColumnTitlesContainer.GetChild(i).GetComponent<OverviewColumnIdentity>();
+			Toggle component2 = this.ColumnTitlesContainer.GetChild(i).GetComponent<Toggle>();
+			if (component2 == this.lastSortToggle)
 			{
-				for (int i = 0; i < this.ColumnTitlesContainer.childCount; i++)
+				if (component.columnID == "name")
 				{
-					OverviewColumnIdentity component = this.ColumnTitlesContainer.GetChild(i).GetComponent<OverviewColumnIdentity>();
-					Toggle component2 = this.ColumnTitlesContainer.GetChild(i).GetComponent<Toggle>();
-					if (component2 == this.lastSortToggle)
-					{
-						if (component.columnID == "name")
-						{
-							base.SortByName(this.lastSortReversed);
-						}
-						if (component.columnID == "health")
-						{
-							this.SortByAmount("HitPoints", this.lastSortReversed);
-						}
-						if (component.columnID == "stress")
-						{
-							this.SortByAmount("Stress", this.lastSortReversed);
-						}
-						if (component.columnID == "calories")
-						{
-							this.SortByAmount("Calories", this.lastSortReversed);
-						}
-					}
+					base.SortByName(this.lastSortReversed);
+				}
+				if (component.columnID == "health")
+				{
+					this.SortByAmount("HitPoints", this.lastSortReversed);
+				}
+				if (component.columnID == "stress")
+				{
+					this.SortByAmount("Stress", this.lastSortReversed);
+				}
+				if (component.columnID == "calories")
+				{
+					this.SortByAmount("Calories", this.lastSortReversed);
 				}
 			}
 		}

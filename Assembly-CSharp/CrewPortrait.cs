@@ -135,19 +135,13 @@ public class CrewPortrait : KMonoBehaviour
 			}
 		}
 		CrewPortrait.SetPortraitData(this.identityObject, this.controller, this.useDefaultExpression);
-		if (this.useLabels)
+		if (this.useLabels && this.duplicantName != null)
 		{
-			if (this.duplicantName != null)
+			this.duplicantName.SetText(this.identityObject.GetProperName());
+			if (this.identityObject is MinionIdentity && this.duplicantJob != null)
 			{
-				this.duplicantName.SetText(this.identityObject.GetProperName());
-				if (this.identityObject is MinionIdentity)
-				{
-					if (this.duplicantJob != null)
-					{
-						this.duplicantJob.SetText((this.identityObject == null) ? "" : (this.identityObject as MinionIdentity).GetAttributes().GetProfessionString(true));
-						this.duplicantJob.GetComponent<ToolTip>().toolTip = (this.identityObject as MinionIdentity).GetAttributes().GetProfessionDescriptionString();
-					}
-				}
+				this.duplicantJob.SetText((this.identityObject == null) ? string.Empty : (this.identityObject as MinionIdentity).GetAttributes().GetProfessionString(true));
+				this.duplicantJob.GetComponent<ToolTip>().toolTip = (this.identityObject as MinionIdentity).GetAttributes().GetProfessionDescriptionString();
 			}
 		}
 	}
@@ -156,47 +150,50 @@ public class CrewPortrait : KMonoBehaviour
 	{
 		controller.gameObject.SetActive(true);
 		controller.ClearAnims();
-		if (identityObject != null)
+		if (identityObject == null)
 		{
-			if (identityObject is MinionIdentity)
+			return;
+		}
+		if (!(identityObject is MinionIdentity))
+		{
+			return;
+		}
+		FaceGraph component = (identityObject as MinionIdentity).GetComponent<FaceGraph>();
+		KCompBuildInstance headComp = component.GetHeadComp();
+		controller.SetAnims(new KAnimFile[] { Assets.GetAnim("body_comp_default_kanim") }, false);
+		controller.AddBuildOverride(headComp.GetData(), true, false);
+		headComp.Refresh(controller);
+		float num = 1f;
+		if (GameScreenManager.Instance != null && GameScreenManager.Instance.ssOverlayCanvas != null)
+		{
+			num = 0.2f * (1f / GameScreenManager.Instance.ssOverlayCanvas.GetComponent<KCanvasScaler>().GetUserScale());
+		}
+		controller.animScale = num;
+		string text = "ui";
+		if (!useDefaultExpression)
+		{
+			Expression currentExpression = component.GetCurrentExpression();
+			if (currentExpression != null)
 			{
-				FaceGraph component = (identityObject as MinionIdentity).GetComponent<FaceGraph>();
-				KCompBuildInstance headComp = component.GetHeadComp();
-				controller.SetAnims(new KAnimFile[] { Assets.GetAnim("body_comp_default_kanim") }, false);
-				controller.AddBuildOverride(headComp.GetData(), true, false);
-				headComp.Refresh(controller);
-				float num = 1f;
-				if (GameScreenManager.Instance != null && GameScreenManager.Instance.ssOverlayCanvas != null)
-				{
-					num = 0.2f * (1f / GameScreenManager.Instance.ssOverlayCanvas.GetComponent<KCanvasScaler>().GetUserScale());
-				}
-				controller.animScale = num;
-				string text = "ui";
-				if (!useDefaultExpression)
-				{
-					Expression currentExpression = component.GetCurrentExpression();
-					if (currentExpression != null)
-					{
-						text = currentExpression.face.Id;
-					}
-				}
-				controller.Play(text, KAnim.PlayMode.Once, 1f, 0f);
-				controller.HideSymbol(true, CrewPortrait.snapTo_neck);
-				controller.HideSymbol(true, CrewPortrait.snapTo_pivot);
-				controller.HideSymbol(true, CrewPortrait.snapTo_rgthand);
-				controller.HideSymbol(true, CrewPortrait.snapTo_chest);
+				text = currentExpression.face.Id;
 			}
 		}
+		controller.Play(text, KAnim.PlayMode.Once, 1f, 0f);
+		controller.HideSymbol(true, CrewPortrait.snapTo_neck);
+		controller.HideSymbol(true, CrewPortrait.snapTo_pivot);
+		controller.HideSymbol(true, CrewPortrait.snapTo_rgthand);
+		controller.HideSymbol(true, CrewPortrait.snapTo_chest);
 	}
 
 	public void SetAlpha(float value)
 	{
-		if (!(this.controller == null))
+		if (this.controller == null)
 		{
-			if ((float)this.controller.TintColour.a != value)
-			{
-				this.controller.TintColour = new Color(1f, 1f, 1f, value);
-			}
+			return;
+		}
+		if ((float)this.controller.TintColour.a != value)
+		{
+			this.controller.TintColour = new Color(1f, 1f, 1f, value);
 		}
 	}
 
@@ -204,7 +201,7 @@ public class CrewPortrait : KMonoBehaviour
 
 	public Image targetImage;
 
-	public bool startTransparent = false;
+	public bool startTransparent;
 
 	public bool useLabels = true;
 
@@ -221,7 +218,7 @@ public class CrewPortrait : KMonoBehaviour
 
 	public bool useDefaultExpression = true;
 
-	private bool requiresRefresh = false;
+	private bool requiresRefresh;
 
 	private static readonly HashedString snapTo_neck = new HashedString("snapTo_neck");
 

@@ -128,20 +128,15 @@ namespace Delaunay.Geo
 		public Winding Winding()
 		{
 			float num = this.SignedDoubleArea();
-			Winding winding;
 			if (num < 0f)
 			{
-				winding = Delaunay.Geo.Winding.CLOCKWISE;
+				return Delaunay.Geo.Winding.CLOCKWISE;
 			}
-			else if (num > 0f)
+			if (num > 0f)
 			{
-				winding = Delaunay.Geo.Winding.COUNTERCLOCKWISE;
+				return Delaunay.Geo.Winding.COUNTERCLOCKWISE;
 			}
-			else
-			{
-				winding = Delaunay.Geo.Winding.NONE;
-			}
-			return winding;
+			return Delaunay.Geo.Winding.NONE;
 		}
 
 		public void ForceWinding(Winding wind)
@@ -203,25 +198,20 @@ namespace Delaunay.Geo
 
 		public bool PointInPolygon(Vector2 point)
 		{
-			bool flag;
 			if (!this.bounds.Contains(point))
 			{
-				flag = false;
+				return false;
 			}
-			else
+			int num = this.vertices.Count - 1;
+			bool flag = false;
+			int i = 0;
+			while (i < this.vertices.Count)
 			{
-				int num = this.vertices.Count - 1;
-				bool flag2 = false;
-				int i = 0;
-				while (i < this.vertices.Count)
+				if (((this.vertices[i].y <= point.y && point.y < this.vertices[num].y) || (this.vertices[num].y <= point.y && point.y < this.vertices[i].y)) && point.x < (this.vertices[num].x - this.vertices[i].x) * (point.y - this.vertices[i].y) / (this.vertices[num].y - this.vertices[i].y) + this.vertices[i].x)
 				{
-					if (((this.vertices[i].y <= point.y && point.y < this.vertices[num].y) || (this.vertices[num].y <= point.y && point.y < this.vertices[i].y)) && point.x < (this.vertices[num].x - this.vertices[i].x) * (point.y - this.vertices[i].y) / (this.vertices[num].y - this.vertices[i].y) + this.vertices[i].x)
-					{
-						flag2 = !flag2;
-					}
-					num = i++;
+					flag = !flag;
 				}
-				flag = flag2;
+				num = i++;
 			}
 			return flag;
 		}
@@ -237,23 +227,15 @@ namespace Delaunay.Geo
 			float num = 0f;
 			MathUtil.Pair<Vector2, Vector2> closestEdge = this.GetClosestEdge(other.Centroid(), ref num);
 			MathUtil.Pair<Vector2, Vector2> closestEdge2 = other.GetClosestEdge(this.Centroid(), ref num);
-			Polygon.Commonality commonality2;
-			if (Vector2.Distance(closestEdge.First, closestEdge2.First) < 1E-05f || Vector2.Distance(closestEdge.First, closestEdge2.Second) < 1E-05f)
+			if (Vector2.Distance(closestEdge.First, closestEdge2.First) >= 1E-05f && Vector2.Distance(closestEdge.First, closestEdge2.Second) >= 1E-05f)
 			{
-				if (Vector2.Distance(closestEdge.Second, closestEdge2.First) < 1E-05f || Vector2.Distance(closestEdge.Second, closestEdge2.Second) < 1E-05f)
-				{
-					commonality2 = Polygon.Commonality.Edge;
-				}
-				else
-				{
-					commonality2 = Polygon.Commonality.Point;
-				}
+				return commonality;
 			}
-			else
+			if (Vector2.Distance(closestEdge.Second, closestEdge2.First) < 1E-05f || Vector2.Distance(closestEdge.Second, closestEdge2.Second) < 1E-05f)
 			{
-				commonality2 = commonality;
+				return Polygon.Commonality.Edge;
 			}
-			return commonality2;
+			return Polygon.Commonality.Point;
 		}
 
 		public Polygon.Commonality SharesEdge(Polygon other, ref int edgeIdx)
@@ -353,34 +335,29 @@ namespace Delaunay.Geo
 
 		public bool IsConvex()
 		{
-			bool flag;
 			if (this.vertices.Count < 4)
 			{
-				flag = true;
+				return true;
 			}
-			else
+			bool flag = false;
+			int count = this.vertices.Count;
+			for (int i = 0; i < count; i++)
 			{
-				bool flag2 = false;
-				int count = this.vertices.Count;
-				for (int i = 0; i < count; i++)
+				double num = (double)(this.vertices[(i + 2) % count].x - this.vertices[(i + 1) % count].x);
+				double num2 = (double)(this.vertices[(i + 2) % count].y - this.vertices[(i + 1) % count].y);
+				double num3 = (double)(this.vertices[i].x - this.vertices[(i + 1) % count].x);
+				double num4 = (double)(this.vertices[i].y - this.vertices[(i + 1) % count].y);
+				double num5 = num * num4 - num2 * num3;
+				if (i == 0)
 				{
-					double num = (double)(this.vertices[(i + 2) % count].x - this.vertices[(i + 1) % count].x);
-					double num2 = (double)(this.vertices[(i + 2) % count].y - this.vertices[(i + 1) % count].y);
-					double num3 = (double)(this.vertices[i].x - this.vertices[(i + 1) % count].x);
-					double num4 = (double)(this.vertices[i].y - this.vertices[(i + 1) % count].y);
-					double num5 = num * num4 - num2 * num3;
-					if (i == 0)
-					{
-						flag2 = num5 > 0.0;
-					}
-					else if (flag2 != num5 > 0.0)
-					{
-						return false;
-					}
+					flag = num5 > 0.0;
 				}
-				flag = true;
+				else if (flag != num5 > 0.0)
+				{
+					return false;
+				}
 			}
-			return flag;
+			return true;
 		}
 
 		private List<IntPoint> GetPath()
@@ -405,7 +382,6 @@ namespace Delaunay.Geo
 			clipper.AddPaths(list2, PolyType.ptClip, true);
 			clipper.Execute(type, polyTree, PolyFillType.pftEvenOdd, PolyFillType.pftEvenOdd);
 			List<List<IntPoint>> list3 = Clipper.PolyTreeToPaths(polyTree);
-			Polygon polygon;
 			if (list3.Count > 0)
 			{
 				List<Vector2> list4 = new List<Vector2>();
@@ -413,13 +389,9 @@ namespace Delaunay.Geo
 				{
 					list4.Add(new Vector2((float)list3[0][i].X * 0.0001f, (float)list3[0][i].Y * 0.0001f));
 				}
-				polygon = new Polygon(list4);
+				return new Polygon(list4);
 			}
-			else
-			{
-				polygon = null;
-			}
-			return polygon;
+			return null;
 		}
 
 		private int CrossingNumber(Vector2 point)
@@ -460,69 +432,64 @@ namespace Delaunay.Geo
 			Vector2? p = segment.p0;
 			bool flag = p != null;
 			Vector2? p2 = segment.p1;
-			bool flag2;
 			if (flag == (p2 != null) && (p == null || p.GetValueOrDefault() == p2.GetValueOrDefault()))
 			{
 				intersectingSegment = segment;
-				flag2 = this.CrossingNumber(segment.p0.Value) == 1;
+				return this.CrossingNumber(segment.p0.Value) == 1;
 			}
-			else
+			float num = 0f;
+			float num2 = 1f;
+			Vector2 vector = segment.Direction();
+			for (int i = 0; i < this.vertices.Count; i++)
 			{
-				float num = 0f;
-				float num2 = 1f;
-				Vector2 vector = segment.Direction();
-				for (int i = 0; i < this.vertices.Count; i++)
+				int num3 = i;
+				int num4 = ((i >= this.vertices.Count - 1) ? 0 : (i + 1));
+				Vector2 vector2 = this.vertices[num4] - this.vertices[num3];
+				Vector2 vector3 = new Vector2(vector2.y, -vector2.x);
+				float num5 = this.perp(vector2, segment.p0.Value - this.vertices[num3]);
+				float num6 = -this.perp(vector2, vector);
+				if (Mathf.Abs(num6) < Mathf.Epsilon)
 				{
-					int num3 = i;
-					int num4 = ((i >= this.vertices.Count - 1) ? 0 : (i + 1));
-					Vector2 vector2 = this.vertices[num4] - this.vertices[num3];
-					Vector2 vector3 = new Vector2(vector2.y, -vector2.x);
-					float num5 = this.perp(vector2, segment.p0.Value - this.vertices[num3]);
-					float num6 = -this.perp(vector2, vector);
-					if (Mathf.Abs(num6) < Mathf.Epsilon)
+					if (num5 < 0f)
 					{
-						if (num5 < 0f)
-						{
-							return false;
-						}
+						return false;
 					}
-					else
+				}
+				else
+				{
+					float num7 = num5 / num6;
+					if (num6 < 0f)
 					{
-						float num7 = num5 / num6;
-						if (num6 < 0f)
+						if (num7 > num)
 						{
-							if (num7 > num)
-							{
-								num = num7;
-								normNear = vector3;
-								if (num > num2)
-								{
-									return false;
-								}
-							}
-						}
-						else if (num7 < num2)
-						{
-							num2 = num7;
-							normFar = vector3;
-							if (num2 < num)
+							num = num7;
+							normNear = vector3;
+							if (num > num2)
 							{
 								return false;
 							}
 						}
 					}
+					else if (num7 < num2)
+					{
+						num2 = num7;
+						normFar = vector3;
+						if (num2 < num)
+						{
+							return false;
+						}
+					}
 				}
-				LineSegment lineSegment = intersectingSegment;
-				Vector2? p3 = segment.p0;
-				lineSegment.p0 = ((p3 == null) ? null : new Vector2?(p3.GetValueOrDefault() + num * vector));
-				LineSegment lineSegment2 = intersectingSegment;
-				Vector2? p4 = segment.p0;
-				lineSegment2.p1 = ((p4 == null) ? null : new Vector2?(p4.GetValueOrDefault() + num2 * vector));
-				normFar.Normalize();
-				normNear.Normalize();
-				flag2 = true;
 			}
-			return flag2;
+			LineSegment lineSegment = intersectingSegment;
+			Vector2? p3 = segment.p0;
+			lineSegment.p0 = ((p3 == null) ? null : new Vector2?(p3.GetValueOrDefault() + num * vector));
+			LineSegment lineSegment2 = intersectingSegment;
+			Vector2? p4 = segment.p0;
+			lineSegment2.p1 = ((p4 == null) ? null : new Vector2?(p4.GetValueOrDefault() + num2 * vector));
+			normFar.Normalize();
+			normNear.Normalize();
+			return true;
 		}
 
 		public bool ClipSegmentSAT(LineSegment segment, ref LineSegment intersectingSegment, ref Vector2 normNear, ref Vector2 normFar)
@@ -609,7 +576,7 @@ namespace Delaunay.Geo
 		[Serialize]
 		private List<Vector2> vertices;
 
-		private Vector2? centroid = null;
+		private Vector2? centroid;
 
 		private const int CLIPPER_INTEGER_SCALE = 10000;
 

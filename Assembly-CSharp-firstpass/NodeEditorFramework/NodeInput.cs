@@ -118,75 +118,64 @@ namespace NodeEditorFramework
 
 		public bool TryApplyConnection(NodeOutput output)
 		{
-			bool flag;
 			if (this.CanApplyConnection(output))
 			{
 				this.ApplyConnection(output);
-				flag = true;
+				return true;
 			}
-			else
-			{
-				flag = false;
-			}
-			return flag;
+			return false;
 		}
 
 		public bool CanApplyConnection(NodeOutput output)
 		{
-			bool flag;
 			if (output == null || this.body == output.body || this.connection == output || !this.typeData.Type.IsAssignableFrom(output.typeData.Type))
 			{
-				flag = false;
+				return false;
 			}
-			else
+			if (output.body.isChildOf(this.body) && !output.body.allowsLoopRecursion(this.body))
 			{
-				if (output.body.isChildOf(this.body))
-				{
-					if (!output.body.allowsLoopRecursion(this.body))
-					{
-						global::Debug.LogWarning("Cannot apply connection: Recursion detected!", null);
-						return false;
-					}
-				}
-				flag = true;
+				global::Debug.LogWarning("Cannot apply connection: Recursion detected!", null);
+				return false;
 			}
-			return flag;
+			return true;
 		}
 
 		public void ApplyConnection(NodeOutput output)
 		{
-			if (!(output == null))
+			if (output == null)
 			{
-				if (this.connection != null)
-				{
-					NodeEditorCallbacks.IssueOnRemoveConnection(this);
-					this.connection.connections.Remove(this);
-				}
-				this.connection = output;
-				output.connections.Add(this);
-				if (!output.body.calculated)
-				{
-					NodeEditor.RecalculateFrom(output.body);
-				}
-				else
-				{
-					NodeEditor.RecalculateFrom(this.body);
-				}
-				output.body.OnAddOutputConnection(output);
-				this.body.OnAddInputConnection(this);
-				NodeEditorCallbacks.IssueOnAddConnection(this);
+				return;
 			}
+			if (this.connection != null)
+			{
+				NodeEditorCallbacks.IssueOnRemoveConnection(this);
+				this.connection.connections.Remove(this);
+			}
+			this.connection = output;
+			output.connections.Add(this);
+			if (!output.body.calculated)
+			{
+				NodeEditor.RecalculateFrom(output.body);
+			}
+			else
+			{
+				NodeEditor.RecalculateFrom(this.body);
+			}
+			output.body.OnAddOutputConnection(output);
+			this.body.OnAddInputConnection(this);
+			NodeEditorCallbacks.IssueOnAddConnection(this);
 		}
 
 		public void RemoveConnection()
 		{
-			if (!(this.connection == null))
+			if (this.connection == null)
 			{
-				NodeEditorCallbacks.IssueOnRemoveConnection(this);
-				this.connection.connections.Remove(this);
-				this.connection = null;
-				NodeEditor.RecalculateFrom(this.body);
+				return;
 			}
+			NodeEditorCallbacks.IssueOnRemoveConnection(this);
+			this.connection.connections.Remove(this);
+			this.connection = null;
+			NodeEditor.RecalculateFrom(this.body);
 		}
 
 		public override Node GetNodeAcrossConnection()

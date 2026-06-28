@@ -40,15 +40,12 @@ public class PrioritizableRenderer
 					for (int i = 0; i < Components.Prioritizables.Count; i++)
 					{
 						Prioritizable prioritizable = Components.Prioritizables[i];
-						if (prioritizable != null)
+						if (prioritizable != null && prioritizable.showIcon && prioritizable.IsPrioritizable())
 						{
-							if (prioritizable.showIcon && prioritizable.IsPrioritizable())
+							int num = Grid.PosToCell(prioritizable);
+							if (Grid.Visible[num] > 0)
 							{
-								int num = Grid.PosToCell(prioritizable);
-								if (Grid.Visible[num] > 0)
-								{
-									this.prioritizables.Add(prioritizable);
-								}
+								this.prioritizables.Add(prioritizable);
 							}
 						}
 					}

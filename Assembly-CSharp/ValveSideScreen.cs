@@ -41,19 +41,17 @@ public class ValveSideScreen : SideScreenContent
 		if (this.targetValve == null)
 		{
 			global::Debug.LogError("The target object does not have a Valve component.", null);
+			return;
 		}
-		else
-		{
-			this.flowSlider.minValue = 0f;
-			this.flowSlider.maxValue = this.targetValve.MaxFlow;
-			this.flowSlider.value = this.targetValve.DesiredFlow;
-			this.minFlowLabel.text = GameUtil.GetFormattedMass(0f, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.Gram, true, "{0:0.#}");
-			this.maxFlowLabel.text = GameUtil.GetFormattedMass(this.targetValve.MaxFlow, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.Gram, true, "{0:0.#}");
-			this.numberInput.minValue = 0f;
-			this.numberInput.maxValue = this.targetValve.MaxFlow * 1000f;
-			this.numberInput.SetDisplayValue(GameUtil.GetFormattedMass(Mathf.Max(0f, this.targetValve.DesiredFlow), GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.Gram, false, "{0:0.#####}"));
-			this.numberInput.Activate();
-		}
+		this.flowSlider.minValue = 0f;
+		this.flowSlider.maxValue = this.targetValve.MaxFlow;
+		this.flowSlider.value = this.targetValve.DesiredFlow;
+		this.minFlowLabel.text = GameUtil.GetFormattedMass(0f, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.Gram, true, "{0:0.#}");
+		this.maxFlowLabel.text = GameUtil.GetFormattedMass(this.targetValve.MaxFlow, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.Gram, true, "{0:0.#}");
+		this.numberInput.minValue = 0f;
+		this.numberInput.maxValue = this.targetValve.MaxFlow * 1000f;
+		this.numberInput.SetDisplayValue(GameUtil.GetFormattedMass(Mathf.Max(0f, this.targetValve.DesiredFlow), GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.Gram, false, "{0:0.#####}"));
+		this.numberInput.Activate();
 	}
 
 	private void ReceiveValueFromSlider(float newValue)
@@ -121,7 +119,7 @@ public class ValveSideScreen : SideScreenContent
 	[SerializeField]
 	private LocText unitsLabel;
 
-	private bool isEditing = false;
+	private bool isEditing;
 
 	private float targetFlow;
 }

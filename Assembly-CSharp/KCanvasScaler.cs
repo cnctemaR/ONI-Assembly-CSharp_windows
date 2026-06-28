@@ -42,28 +42,23 @@ public class KCanvasScaler : KMonoBehaviour
 
 	private float ScreenRelativeScale()
 	{
-		float num;
 		if ((float)Screen.height <= this.scaleSteps[0].maxRes_y || (float)Screen.width / (float)Screen.height < 1.6777778f)
 		{
-			num = this.scaleSteps[0].scale;
+			return this.scaleSteps[0].scale;
 		}
-		else if ((float)Screen.height > this.scaleSteps[this.scaleSteps.Length - 1].maxRes_y)
+		if ((float)Screen.height > this.scaleSteps[this.scaleSteps.Length - 1].maxRes_y)
 		{
-			num = this.scaleSteps[this.scaleSteps.Length - 1].scale;
+			return this.scaleSteps[this.scaleSteps.Length - 1].scale;
 		}
-		else
+		for (int i = 0; i < this.scaleSteps.Length; i++)
 		{
-			for (int i = 0; i < this.scaleSteps.Length; i++)
+			if ((float)Screen.height > this.scaleSteps[i].maxRes_y && (float)Screen.height <= this.scaleSteps[i + 1].maxRes_y)
 			{
-				if ((float)Screen.height > this.scaleSteps[i].maxRes_y && (float)Screen.height <= this.scaleSteps[i + 1].maxRes_y)
-				{
-					float num2 = ((float)Screen.height - this.scaleSteps[i].maxRes_y) / (this.scaleSteps[i + 1].maxRes_y - this.scaleSteps[i].maxRes_y);
-					return Mathf.Lerp(this.scaleSteps[i].scale, this.scaleSteps[i + 1].scale, num2);
-				}
+				float num = ((float)Screen.height - this.scaleSteps[i].maxRes_y) / (this.scaleSteps[i + 1].maxRes_y - this.scaleSteps[i].maxRes_y);
+				return Mathf.Lerp(this.scaleSteps[i].scale, this.scaleSteps[i + 1].scale, num);
 			}
-			num = 1f;
 		}
-		return num;
+		return 1f;
 	}
 
 	[MyCmpReq]

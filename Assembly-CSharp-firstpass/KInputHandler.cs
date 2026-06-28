@@ -190,16 +190,11 @@ public class KInputHandler
 
 	public float GetAxis(Axis axis)
 	{
-		float num;
 		if (this.mController != null)
 		{
-			num = this.mController.GetAxis(axis);
+			return this.mController.GetAxis(axis);
 		}
-		else
-		{
-			num = 0f;
-		}
-		return num;
+		return 0f;
 	}
 
 	public bool IsGamepad()

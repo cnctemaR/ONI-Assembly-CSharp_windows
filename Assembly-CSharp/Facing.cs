@@ -67,16 +67,11 @@ public class Facing : KMonoBehaviour
 	public int GetFrontCell()
 	{
 		int num = Grid.PosToCell(this);
-		int num2;
 		if (this.GetFacing())
 		{
-			num2 = Grid.CellLeft(num);
+			return Grid.CellLeft(num);
 		}
-		else
-		{
-			num2 = Grid.CellRight(num);
-		}
-		return num2;
+		return Grid.CellRight(num);
 	}
 
 	[MyCmpGet]

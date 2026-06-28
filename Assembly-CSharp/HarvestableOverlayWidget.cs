@@ -41,63 +41,61 @@ public class HarvestableOverlayWidget : KMonoBehaviour
 		{
 			this.bar.SetActive(false);
 			this.vertical_container.SetActive(false);
+			return;
+		}
+		Image image = this.bar.GetComponent<HierarchyReferences>().GetReference("Fill") as Image;
+		if (target_harvestable.GetAmounts().Has(Db.Get().Amounts.Maturity))
+		{
+			this.bar.SetActive(true);
+			float num = target_harvestable.gameObject.GetAmounts().Get(Db.Get().Amounts.Maturity).value / target_harvestable.gameObject.GetAmounts().Get(Db.Get().Amounts.Maturity).GetMax();
+			image.rectTransform.offsetMin = new Vector2(image.rectTransform.offsetMin.x, 3f);
+			this.bar.SetActive(!target_harvestable.CanBeHavested);
+			float num2 = ((!target_harvestable.CanBeHavested) ? (19f - 19f * num + 3f) : 3f);
+			image.rectTransform.offsetMax = new Vector2(image.rectTransform.offsetMax.x, -num2);
 		}
 		else
 		{
-			Image image = this.bar.GetComponent<HierarchyReferences>().GetReference("Fill") as Image;
-			if (target_harvestable.GetAmounts().Has(Db.Get().Amounts.Maturity))
+			this.bar.SetActive(false);
+		}
+		WiltCondition component = target_harvestable.GetComponent<WiltCondition>();
+		if (component != null)
+		{
+			for (int i = 0; i < this.horizontal_containers.Length; i++)
 			{
-				this.bar.SetActive(true);
-				float num = target_harvestable.gameObject.GetAmounts().Get(Db.Get().Amounts.Maturity).value / target_harvestable.gameObject.GetAmounts().Get(Db.Get().Amounts.Maturity).GetMax();
-				image.rectTransform.offsetMin = new Vector2(image.rectTransform.offsetMin.x, 3f);
-				this.bar.SetActive(!target_harvestable.CanBeHavested);
-				float num2 = ((!target_harvestable.CanBeHavested) ? (19f - 19f * num + 3f) : 3f);
-				image.rectTransform.offsetMax = new Vector2(image.rectTransform.offsetMax.x, -num2);
+				this.horizontal_containers[i].SetActive(false);
 			}
-			else
+			foreach (KeyValuePair<WiltCondition.Condition, GameObject> keyValuePair in this.condition_icons)
 			{
-				this.bar.SetActive(false);
+				keyValuePair.Value.SetActive(false);
 			}
-			WiltCondition component = target_harvestable.GetComponent<WiltCondition>();
-			if (component != null)
+			if (component.IsWilting())
 			{
-				for (int i = 0; i < this.horizontal_containers.Length; i++)
+				this.vertical_container.SetActive(true);
+				image.color = HarvestableOverlayWidget.wilting_color;
+				List<WiltCondition.Condition> list = component.CurrentWiltSources();
+				if (list.Count > 0)
 				{
-					this.horizontal_containers[i].SetActive(false);
-				}
-				foreach (KeyValuePair<WiltCondition.Condition, GameObject> keyValuePair in this.condition_icons)
-				{
-					keyValuePair.Value.SetActive(false);
-				}
-				if (component.IsWilting())
-				{
-					this.vertical_container.SetActive(true);
-					image.color = HarvestableOverlayWidget.wilting_color;
-					List<WiltCondition.Condition> list = component.CurrentWiltSources();
-					if (list.Count > 0)
+					for (int j = 0; j < list.Count; j++)
 					{
-						for (int j = 0; j < list.Count; j++)
+						if (this.condition_icons.ContainsKey(list[j]))
 						{
-							if (this.condition_icons.ContainsKey(list[j]))
-							{
-								this.condition_icons[list[j]].SetActive(true);
-								this.horizontal_containers[j / 2].SetActive(true);
-								this.condition_icons[list[j]].transform.SetParent(this.horizontal_containers[j / 2].transform);
-							}
+							this.condition_icons[list[j]].SetActive(true);
+							this.horizontal_containers[j / 2].SetActive(true);
+							this.condition_icons[list[j]].transform.SetParent(this.horizontal_containers[j / 2].transform);
 						}
 					}
 				}
-				else
-				{
-					this.vertical_container.SetActive(false);
-					image.color = HarvestableOverlayWidget.growing_color;
-				}
 			}
 			else
 			{
-				image.color = HarvestableOverlayWidget.growing_color;
 				this.vertical_container.SetActive(false);
+				image.color = HarvestableOverlayWidget.growing_color;
 			}
+		}
+		else
+		{
+			image.color = HarvestableOverlayWidget.growing_color;
+			this.vertical_container.SetActive(false);
 		}
 	}
 

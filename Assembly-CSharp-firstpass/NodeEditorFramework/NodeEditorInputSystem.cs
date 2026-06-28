@@ -71,13 +71,10 @@ namespace NodeEditorFramework
 									NodeEditorInputSystem.contextEntries.Add(new KeyValuePair<ContextEntryAttribute, PopupMenu.MenuFunctionData>(obj as ContextEntryAttribute, menuFunctionData));
 								}
 							}
-							else if (type2 == typeof(ContextFillerAttribute))
+							else if (type2 == typeof(ContextFillerAttribute) && ContextFillerAttribute.AssureValidity(methodInfo, obj as ContextFillerAttribute))
 							{
-								if (ContextFillerAttribute.AssureValidity(methodInfo, obj as ContextFillerAttribute))
-								{
-									Delegate @delegate = Delegate.CreateDelegate(typeof(Action<NodeEditorInputInfo, GenericMenu>), methodInfo);
-									NodeEditorInputSystem.contextFillers.Add(new KeyValuePair<ContextFillerAttribute, Delegate>(obj as ContextFillerAttribute, @delegate));
-								}
+								Delegate @delegate = Delegate.CreateDelegate(typeof(Action<NodeEditorInputInfo, GenericMenu>), methodInfo);
+								NodeEditorInputSystem.contextFillers.Add(new KeyValuePair<ContextFillerAttribute, Delegate>(obj as ContextFillerAttribute, @delegate));
 							}
 						}
 					}
@@ -140,46 +137,43 @@ namespace NodeEditorFramework
 
 		public static void HandleInputEvents(NodeEditorState state)
 		{
-			if (!NodeEditorInputSystem.shouldIgnoreInput(state))
+			if (NodeEditorInputSystem.shouldIgnoreInput(state))
 			{
-				NodeEditorInputInfo nodeEditorInputInfo = new NodeEditorInputInfo(state);
-				NodeEditorInputSystem.CallEventHandlers(nodeEditorInputInfo, false);
-				NodeEditorInputSystem.CallHotkeys(nodeEditorInputInfo, Event.current.keyCode, Event.current.modifiers);
+				return;
 			}
+			NodeEditorInputInfo nodeEditorInputInfo = new NodeEditorInputInfo(state);
+			NodeEditorInputSystem.CallEventHandlers(nodeEditorInputInfo, false);
+			NodeEditorInputSystem.CallHotkeys(nodeEditorInputInfo, Event.current.keyCode, Event.current.modifiers);
 		}
 
 		public static void HandleLateInputEvents(NodeEditorState state)
 		{
-			if (!NodeEditorInputSystem.shouldIgnoreInput(state))
+			if (NodeEditorInputSystem.shouldIgnoreInput(state))
 			{
-				NodeEditorInputInfo nodeEditorInputInfo = new NodeEditorInputInfo(state);
-				NodeEditorInputSystem.CallEventHandlers(nodeEditorInputInfo, true);
+				return;
 			}
+			NodeEditorInputInfo nodeEditorInputInfo = new NodeEditorInputInfo(state);
+			NodeEditorInputSystem.CallEventHandlers(nodeEditorInputInfo, true);
 		}
 
 		internal static bool shouldIgnoreInput(NodeEditorState state)
 		{
-			bool flag;
 			if (OverlayGUI.HasPopupControl())
 			{
-				flag = true;
+				return true;
 			}
-			else if (!state.canvasRect.Contains(Event.current.mousePosition))
+			if (!state.canvasRect.Contains(Event.current.mousePosition))
 			{
-				flag = true;
+				return true;
 			}
-			else
+			for (int i = 0; i < state.ignoreInput.Count; i++)
 			{
-				for (int i = 0; i < state.ignoreInput.Count; i++)
+				if (state.ignoreInput[i].Contains(Event.current.mousePosition))
 				{
-					if (state.ignoreInput[i].Contains(Event.current.mousePosition))
-					{
-						return true;
-					}
+					return true;
 				}
-				flag = false;
 			}
-			return flag;
+			return false;
 		}
 
 		[EventHandler(-4)]

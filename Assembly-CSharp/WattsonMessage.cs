@@ -46,16 +46,17 @@ public class WattsonMessage : KScreen
 
 	public void Update()
 	{
-		if (this.startFade)
+		if (!this.startFade)
 		{
-			Color color = this.bg.color;
-			color.a -= 0.01f;
-			if (color.a <= 0f)
-			{
-				color.a = 0f;
-			}
-			this.bg.color = color;
+			return;
 		}
+		Color color = this.bg.color;
+		color.a -= 0.01f;
+		if (color.a <= 0f)
+		{
+			color.a = 0f;
+		}
+		this.bg.color = color;
 	}
 
 	protected override void OnActivate()
@@ -189,7 +190,7 @@ public class WattsonMessage : KScreen
 
 	private List<KScreen> hideScreensWhileActive = new List<KScreen>();
 
-	private bool startFade = false;
+	private bool startFade;
 
 	private List<SchedulerHandle> scheduleHandles = new List<SchedulerHandle>();
 

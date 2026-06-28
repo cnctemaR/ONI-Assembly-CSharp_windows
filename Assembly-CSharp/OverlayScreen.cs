@@ -140,10 +140,11 @@ public class OverlayScreen : KMonoBehaviour
 
 	private void ActivateLegend()
 	{
-		if (!(OverlayLegend.Instance == null))
+		if (OverlayLegend.Instance == null)
 		{
-			OverlayLegend.Instance.SetLegend(this.currentMode.ViewMode(), false);
+			return;
 		}
+		OverlayLegend.Instance.SetLegend(this.currentMode.ViewMode(), false);
 	}
 
 	public void Refresh()
@@ -159,7 +160,7 @@ public class OverlayScreen : KMonoBehaviour
 	private void UpdateOverlaySounds()
 	{
 		string text = this.currentMode.GetSoundName();
-		if (text != "")
+		if (text != string.Empty)
 		{
 			text = GlobalAssets.GetSound(text, false);
 			KMonoBehaviour.PlaySound(text);

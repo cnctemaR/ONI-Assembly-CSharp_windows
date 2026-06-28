@@ -118,21 +118,22 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 
 		public void AttemptInitialRecovery()
 		{
-			if (!base.gameObject.HasTag(GameTags.Incapacitated))
+			if (base.gameObject.HasTag(GameTags.Incapacitated))
 			{
-				int num = Grid.PosToCell(this.navigator);
-				foreach (NavGrid.Transition transition in this.navigator.NavGrid.transitions)
+				return;
+			}
+			int num = Grid.PosToCell(this.navigator);
+			foreach (NavGrid.Transition transition in this.navigator.NavGrid.transitions)
+			{
+				if (transition.isEscape)
 				{
-					if (transition.isEscape)
+					if (this.navigator.CurrentNavType == transition.start)
 					{
-						if (this.navigator.CurrentNavType == transition.start)
+						int num2 = transition.IsValid(num, this.navigator.NavGrid.NavTable, Grid.BitFields, false);
+						if (Grid.InvalidCell != num2)
 						{
-							int num2 = transition.IsValid(num, this.navigator.NavGrid.NavTable, Grid.BitFields, false);
-							if (Grid.InvalidCell != num2)
-							{
-								base.smi.GoTo(base.smi.sm.recoverinitialfall);
-								break;
-							}
+							base.smi.GoTo(base.smi.sm.recoverinitialfall);
+							break;
 						}
 					}
 				}
@@ -165,33 +166,22 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 
 		public bool IsFalling()
 		{
-			bool flag;
 			if (this.navigator.IsMoving())
 			{
-				flag = false;
+				return false;
 			}
-			else
+			int num = Grid.PosToCell(base.master.transform.position);
+			if (!Grid.IsValidCell(num))
 			{
-				int num = Grid.PosToCell(base.master.transform.position);
-				if (!Grid.IsValidCell(num))
-				{
-					flag = false;
-				}
-				else
-				{
-					int num2 = Grid.CellBelow(num);
-					if (!Grid.IsValidCell(num2))
-					{
-						flag = false;
-					}
-					else
-					{
-						bool flag2 = this.navigator.NavGrid.NavTable.IsValid(num, this.navigator.CurrentNavType);
-						flag = !flag2;
-					}
-				}
+				return false;
 			}
-			return flag;
+			int num2 = Grid.CellBelow(num);
+			if (!Grid.IsValidCell(num2))
+			{
+				return false;
+			}
+			bool flag = this.navigator.NavGrid.NavTable.IsValid(num, this.navigator.CurrentNavType);
+			return !flag;
 		}
 
 		public void FixedUpdate()

@@ -7,39 +7,35 @@ namespace UnityStandardAssets.ImageEffects
 	{
 		private static bool HasMeshes()
 		{
-			bool flag;
 			if (Triangles.meshes == null)
 			{
-				flag = false;
+				return false;
 			}
-			else
+			for (int i = 0; i < Triangles.meshes.Length; i++)
 			{
-				for (int i = 0; i < Triangles.meshes.Length; i++)
+				if (null == Triangles.meshes[i])
 				{
-					if (null == Triangles.meshes[i])
-					{
-						return false;
-					}
+					return false;
 				}
-				flag = true;
 			}
-			return flag;
+			return true;
 		}
 
 		private static void Cleanup()
 		{
-			if (Triangles.meshes != null)
+			if (Triangles.meshes == null)
 			{
-				for (int i = 0; i < Triangles.meshes.Length; i++)
-				{
-					if (null != Triangles.meshes[i])
-					{
-						global::UnityEngine.Object.DestroyImmediate(Triangles.meshes[i]);
-						Triangles.meshes[i] = null;
-					}
-				}
-				Triangles.meshes = null;
+				return;
 			}
+			for (int i = 0; i < Triangles.meshes.Length; i++)
+			{
+				if (null != Triangles.meshes[i])
+				{
+					global::UnityEngine.Object.DestroyImmediate(Triangles.meshes[i]);
+					Triangles.meshes[i] = null;
+				}
+			}
+			Triangles.meshes = null;
 		}
 
 		private static Mesh GetMesh(int triCount, int triOffset, int totalWidth, int totalHeight)

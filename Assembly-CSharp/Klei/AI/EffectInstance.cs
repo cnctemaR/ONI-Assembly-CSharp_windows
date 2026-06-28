@@ -42,7 +42,7 @@ namespace Klei.AI
 
 		private void ConfigureStatusItem()
 		{
-			this.statusItem = new StatusItem(this.effect.Id, this.effect.Name, Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + this.effect.Id.ToUpper() + ".TOOLTIP"), "", (!this.effect.isBad) ? StatusItem.IconType.Info : StatusItem.IconType.Exclamation, (!this.effect.isBad) ? NotificationType.Neutral : NotificationType.Bad, false, SimViewMode.None, 30718);
+			this.statusItem = new StatusItem(this.effect.Id, this.effect.Name, Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + this.effect.Id.ToUpper() + ".TOOLTIP"), string.Empty, (!this.effect.isBad) ? StatusItem.IconType.Info : StatusItem.IconType.Exclamation, (!this.effect.isBad) ? NotificationType.Neutral : NotificationType.Bad, false, SimViewMode.None, 30718);
 			this.statusItem.resolveStringCallback = new Func<string, object, string>(this.ResolveString);
 			this.statusItem.resolveTooltipCallback = new Func<string, object, string>(this.ResolveTooltip);
 		}

@@ -6,53 +6,54 @@ public class GroundMasks : ScriptableObject
 {
 	public void Initialize()
 	{
-		if (!(this.maskAtlas == null) && this.maskAtlas.items != null)
+		if (this.maskAtlas == null || this.maskAtlas.items == null)
 		{
-			this.biomeMasks = new Dictionary<string, GroundMasks.BiomeMaskData>();
-			foreach (TextureAtlas.Item item in this.maskAtlas.items)
+			return;
+		}
+		this.biomeMasks = new Dictionary<string, GroundMasks.BiomeMaskData>();
+		foreach (TextureAtlas.Item item in this.maskAtlas.items)
+		{
+			string name = item.name;
+			int num = name.IndexOf('/');
+			string text = name.Substring(0, num);
+			string text2 = name.Substring(num + 1, 4);
+			text = text.ToLower();
+			for (int num2 = text.IndexOf('_'); num2 != -1; num2 = text.IndexOf('_'))
 			{
-				string name = item.name;
-				int num = name.IndexOf('/');
-				string text = name.Substring(0, num);
-				string text2 = name.Substring(num + 1, 4);
-				text = text.ToLower();
-				for (int num2 = text.IndexOf('_'); num2 != -1; num2 = text.IndexOf('_'))
-				{
-					text = text.Remove(num2, 1);
-				}
-				GroundMasks.BiomeMaskData biomeMaskData = null;
-				if (!this.biomeMasks.TryGetValue(text, out biomeMaskData))
-				{
-					biomeMaskData = new GroundMasks.BiomeMaskData(text);
-					this.biomeMasks[text] = biomeMaskData;
-				}
-				int num3 = Convert.ToInt32(text2, 2);
-				GroundMasks.Tile tile = biomeMaskData.tiles[num3];
-				if (tile.variationUVs == null)
-				{
-					tile.isSource = true;
-					tile.variationUVs = new GroundMasks.UVData[1];
-				}
-				else
-				{
-					GroundMasks.UVData[] array = new GroundMasks.UVData[tile.variationUVs.Length + 1];
-					Array.Copy(tile.variationUVs, array, tile.variationUVs.Length);
-					tile.variationUVs = array;
-				}
-				Vector4 vector = new Vector4(item.uvBox.x, item.uvBox.w, item.uvBox.z, item.uvBox.y);
-				Vector2 vector2 = new Vector2(vector.x, vector.y);
-				Vector2 vector3 = new Vector2(vector.z, vector.y);
-				Vector2 vector4 = new Vector2(vector.x, vector.w);
-				Vector2 vector5 = new Vector2(vector.z, vector.w);
-				GroundMasks.UVData uvdata = new GroundMasks.UVData(vector2, vector3, vector4, vector5);
-				tile.variationUVs[tile.variationUVs.Length - 1] = uvdata;
-				biomeMaskData.tiles[num3] = tile;
+				text = text.Remove(num2, 1);
 			}
-			foreach (KeyValuePair<string, GroundMasks.BiomeMaskData> keyValuePair in this.biomeMasks)
+			GroundMasks.BiomeMaskData biomeMaskData = null;
+			if (!this.biomeMasks.TryGetValue(text, out biomeMaskData))
 			{
-				keyValuePair.Value.GenerateRotations();
-				keyValuePair.Value.Validate();
+				biomeMaskData = new GroundMasks.BiomeMaskData(text);
+				this.biomeMasks[text] = biomeMaskData;
 			}
+			int num3 = Convert.ToInt32(text2, 2);
+			GroundMasks.Tile tile = biomeMaskData.tiles[num3];
+			if (tile.variationUVs == null)
+			{
+				tile.isSource = true;
+				tile.variationUVs = new GroundMasks.UVData[1];
+			}
+			else
+			{
+				GroundMasks.UVData[] array = new GroundMasks.UVData[tile.variationUVs.Length + 1];
+				Array.Copy(tile.variationUVs, array, tile.variationUVs.Length);
+				tile.variationUVs = array;
+			}
+			Vector4 vector = new Vector4(item.uvBox.x, item.uvBox.w, item.uvBox.z, item.uvBox.y);
+			Vector2 vector2 = new Vector2(vector.x, vector.y);
+			Vector2 vector3 = new Vector2(vector.z, vector.y);
+			Vector2 vector4 = new Vector2(vector.x, vector.w);
+			Vector2 vector5 = new Vector2(vector.z, vector.w);
+			GroundMasks.UVData uvdata = new GroundMasks.UVData(vector2, vector3, vector4, vector5);
+			tile.variationUVs[tile.variationUVs.Length - 1] = uvdata;
+			biomeMaskData.tiles[num3] = tile;
+		}
+		foreach (KeyValuePair<string, GroundMasks.BiomeMaskData> keyValuePair in this.biomeMasks)
+		{
+			keyValuePair.Value.GenerateRotations();
+			keyValuePair.Value.Validate();
 		}
 	}
 

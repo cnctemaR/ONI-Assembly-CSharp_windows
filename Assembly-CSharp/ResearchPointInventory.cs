@@ -16,12 +16,10 @@ public class ResearchPointInventory
 		if (!this.PointsByTypeID.ContainsKey(researchTypeID))
 		{
 			Debug.LogWarning("Research inventory is missing research point key " + researchTypeID, null);
+			return;
 		}
-		else
-		{
-			Dictionary<string, float> pointsByTypeID;
-			(pointsByTypeID = this.PointsByTypeID)[researchTypeID] = pointsByTypeID[researchTypeID] + points;
-		}
+		Dictionary<string, float> pointsByTypeID;
+		(pointsByTypeID = this.PointsByTypeID)[researchTypeID] = pointsByTypeID[researchTypeID] + points;
 	}
 
 	public void RemoveResearchPoints(string researchTypeID, float points)

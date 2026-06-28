@@ -200,12 +200,9 @@ public class EconomyDetails
 					o.Write(", ");
 					EconomyDetails.Transformation.Delta delta3 = transformation3.GetDelta(ratio2.input);
 					EconomyDetails.Transformation.Delta delta4 = transformation3.GetDelta(ratio2.output);
-					if (delta4 != null && delta3 != null)
+					if (delta4 != null && delta3 != null && delta3.amount < 0f && (delta4.amount > 0f || ratio2.allowNegativeOutput))
 					{
-						if (delta3.amount < 0f && (delta4.amount > 0f || ratio2.allowNegativeOutput))
-						{
-							o.Write(delta4.amount / Mathf.Abs(delta3.amount));
-						}
+						o.Write(delta4.amount / Mathf.Abs(delta3.amount));
 					}
 				}
 				o.Write("\n");
@@ -340,20 +337,17 @@ public class EconomyDetails
 		}
 		if (transformation != null)
 		{
-			if (component != null)
+			if (component != null && component.consumedElements != null)
 			{
-				if (component.consumedElements != null)
+				foreach (ElementConverter.ConsumedElement consumedElement in component.consumedElements)
 				{
-					foreach (ElementConverter.ConsumedElement consumedElement in component.consumedElements)
-					{
-						EconomyDetails.Resource resource = this.CreateResource(consumedElement.tag, this.massResourceType);
-						transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource, -consumedElement.massConsumptionRate));
-					}
-					foreach (ElementConverter.OutputElement outputElement in component.outputElements)
-					{
-						EconomyDetails.Resource resource2 = this.CreateResource(outputElement.element.tag, this.massResourceType);
-						transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource2, outputElement.massGenerationRate));
-					}
+					EconomyDetails.Resource resource = this.CreateResource(consumedElement.tag, this.massResourceType);
+					transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource, -consumedElement.massConsumptionRate));
+				}
+				foreach (ElementConverter.OutputElement outputElement in component.outputElements)
+				{
+					EconomyDetails.Resource resource2 = this.CreateResource(outputElement.element.tag, this.massResourceType);
+					transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource2, outputElement.massGenerationRate));
 				}
 			}
 			if (component3 != null && component6 == null && (component == null || prefab_id.GetComponent<AlgaeHabitat>() != null))
@@ -762,16 +756,11 @@ public class EconomyDetails
 
 		public float Transform(Element element, float amount)
 		{
-			float num;
 			if (this.resource.tag == element.tag)
 			{
-				num = this.ratio * amount;
+				return this.ratio * amount;
 			}
-			else
-			{
-				num = 0f;
-			}
-			return num;
+			return 0f;
 		}
 	}
 
@@ -826,23 +815,18 @@ public class EconomyDetails
 
 		public bool IncludesTransformation(EconomyDetails.Transformation transformation)
 		{
-			bool flag;
 			if (this.filter != null)
 			{
-				flag = this.filter(transformation);
+				return this.filter(transformation);
 			}
-			else
+			foreach (EconomyDetails.Scenario.Entry entry in this.entries)
 			{
-				foreach (EconomyDetails.Scenario.Entry entry in this.entries)
+				if (entry.tag == transformation.tag)
 				{
-					if (entry.tag == transformation.tag)
-					{
-						return true;
-					}
+					return true;
 				}
-				flag = false;
 			}
-			return flag;
+			return false;
 		}
 
 		private Func<EconomyDetails.Transformation, bool> filter;

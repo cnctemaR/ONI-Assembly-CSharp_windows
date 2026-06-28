@@ -74,47 +74,48 @@ public class SerializedList<ItemType>
 	[OnDeserialized]
 	private void OnDeserialized()
 	{
-		if (this.serializationBuffer != null)
+		if (this.serializationBuffer == null)
 		{
-			FastReader fastReader = new FastReader(this.serializationBuffer);
-			int num = fastReader.ReadInt32();
-			for (int i = 0; i < num; i++)
+			return;
+		}
+		FastReader fastReader = new FastReader(this.serializationBuffer);
+		int num = fastReader.ReadInt32();
+		for (int i = 0; i < num; i++)
+		{
+			string text = fastReader.ReadKleiString();
+			int num2 = fastReader.ReadInt32();
+			int position = fastReader.Position;
+			Type type = Type.GetType(text);
+			if (type == null)
 			{
-				string text = fastReader.ReadKleiString();
-				int num2 = fastReader.ReadInt32();
-				int position = fastReader.Position;
-				Type type = Type.GetType(text);
-				if (type == null)
+				Output.LogWarning(new object[] { "Type no longer exists: " + text });
+				fastReader.SkipBytes(num2);
+			}
+			else
+			{
+				ItemType itemType;
+				if (typeof(ItemType) != type)
 				{
-					Output.LogWarning(new object[] { "Type no longer exists: " + text });
-					fastReader.SkipBytes(num2);
+					itemType = (ItemType)((object)Activator.CreateInstance(type));
 				}
 				else
 				{
-					ItemType itemType;
-					if (typeof(ItemType) != type)
-					{
-						itemType = (ItemType)((object)Activator.CreateInstance(type));
-					}
-					else
-					{
-						itemType = default(ItemType);
-					}
-					Deserializer.DeserializeTypeless(itemType, fastReader);
-					if (fastReader.Position != position + num2)
-					{
-						Output.LogWarning(new object[]
-						{
-							"Expected to be at offset",
-							position + num2,
-							"but was only at offset",
-							fastReader.Position,
-							". Skipping to catch up."
-						});
-						fastReader.SkipBytes(position + num2 - fastReader.Position);
-					}
-					this.items.Add(itemType);
+					itemType = default(ItemType);
 				}
+				Deserializer.DeserializeTypeless(itemType, fastReader);
+				if (fastReader.Position != position + num2)
+				{
+					Output.LogWarning(new object[]
+					{
+						"Expected to be at offset",
+						position + num2,
+						"but was only at offset",
+						fastReader.Position,
+						". Skipping to catch up."
+					});
+					fastReader.SkipBytes(position + num2 - fastReader.Position);
+				}
+				this.items.Add(itemType);
 			}
 		}
 	}

@@ -19,44 +19,41 @@ public class EatChore : Chore<EatChore.StatesInstance>
 		if (context.consumer == null)
 		{
 			global::Debug.LogError("EATCHORE null context.consumer", null);
+			return;
 		}
-		else
+		RationMonitor.Instance smi = context.consumer.GetSMI<RationMonitor.Instance>();
+		if (smi == null)
 		{
-			RationMonitor.Instance smi = context.consumer.GetSMI<RationMonitor.Instance>();
-			if (smi == null)
-			{
-				global::Debug.LogError("EATCHORE null RationMonitor.Instance", null);
-			}
-			else
-			{
-				Edible edible = smi.GetEdible();
-				if (edible.gameObject == null)
-				{
-					global::Debug.LogError("EATCHORE null edible.gameObject", null);
-				}
-				else if (this.smi == null)
-				{
-					global::Debug.LogError("EATCHORE null smi", null);
-				}
-				else if (this.smi.sm == null)
-				{
-					global::Debug.LogError("EATCHORE null smi.sm", null);
-				}
-				else if (this.smi.sm.ediblesource == null)
-				{
-					global::Debug.LogError("EATCHORE null smi.sm.ediblesource", null);
-				}
-				else
-				{
-					this.smi.sm.ediblesource.Set(edible.gameObject, this.smi);
-					AmountInstance amountInstance = Db.Get().Amounts.Calories.Lookup(this.gameObject);
-					float num = (amountInstance.GetMax() - amountInstance.value) / edible.FoodInfo.CaloriesPerUnit;
-					this.smi.sm.requestedfoodunits.Set(num, this.smi);
-					this.smi.sm.eater.Set(context.consumer.gameObject, this.smi);
-					base.Begin(context);
-				}
-			}
+			global::Debug.LogError("EATCHORE null RationMonitor.Instance", null);
+			return;
 		}
+		Edible edible = smi.GetEdible();
+		if (edible.gameObject == null)
+		{
+			global::Debug.LogError("EATCHORE null edible.gameObject", null);
+			return;
+		}
+		if (this.smi == null)
+		{
+			global::Debug.LogError("EATCHORE null smi", null);
+			return;
+		}
+		if (this.smi.sm == null)
+		{
+			global::Debug.LogError("EATCHORE null smi.sm", null);
+			return;
+		}
+		if (this.smi.sm.ediblesource == null)
+		{
+			global::Debug.LogError("EATCHORE null smi.sm.ediblesource", null);
+			return;
+		}
+		this.smi.sm.ediblesource.Set(edible.gameObject, this.smi);
+		AmountInstance amountInstance = Db.Get().Amounts.Calories.Lookup(this.gameObject);
+		float num = (amountInstance.GetMax() - amountInstance.value) / edible.FoodInfo.CaloriesPerUnit;
+		this.smi.sm.requestedfoodunits.Set(num, this.smi);
+		this.smi.sm.eater.Set(context.consumer.gameObject, this.smi);
+		base.Begin(context);
 	}
 
 	public static Chore.Precondition EdibleIsNotNull = new Chore.Precondition

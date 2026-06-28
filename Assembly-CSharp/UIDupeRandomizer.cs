@@ -89,7 +89,7 @@ public class UIDupeRandomizer : MonoBehaviour
 
 	public UIDupeRandomizer.AnimChoice[] anims;
 
-	private AccessorySlots slots = null;
+	private AccessorySlots slots;
 
 	[Serializable]
 	public struct AnimChoice

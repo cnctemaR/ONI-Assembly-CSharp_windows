@@ -49,29 +49,21 @@ public class ResearchCenter : Workable, IEffectDescriptor
 	{
 		if (!this.operational.IsActive)
 		{
-			if (this.operational.IsOperational)
+			if (this.operational.IsOperational && this.chore == null && this.HasMaterial())
 			{
-				if (this.chore == null && this.HasMaterial())
-				{
-					this.chore = new WorkChore<ResearchCenter>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
-					base.SetWorkTime(float.PositiveInfinity);
-				}
+				this.chore = new WorkChore<ResearchCenter>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+				base.SetWorkTime(float.PositiveInfinity);
 			}
 		}
 	}
 
 	public override float GetPercentComplete()
 	{
-		float num;
 		if (Research.Instance.GetActiveResearch() == null)
 		{
-			num = 0f;
+			return 0f;
 		}
-		else
-		{
-			num = Research.Instance.GetActiveResearch().progressInventory.PointsByTypeID[this.research_point_type_id] / Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[this.research_point_type_id];
-		}
-		return num;
+		return Research.Instance.GetActiveResearch().progressInventory.PointsByTypeID[this.research_point_type_id] / Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[this.research_point_type_id];
 	}
 
 	protected override void OnStartWork(Worker worker)
@@ -119,12 +111,9 @@ public class ResearchCenter : Workable, IEffectDescriptor
 		if (activeResearch != null)
 		{
 			flag = true;
-			if (activeResearch.tech.costsByResearchTypeID.ContainsKey(this.research_point_type_id))
+			if (activeResearch.tech.costsByResearchTypeID.ContainsKey(this.research_point_type_id) && Research.Instance.Get(activeResearch.tech).progressInventory.PointsByTypeID[this.research_point_type_id] < activeResearch.tech.costsByResearchTypeID[this.research_point_type_id])
 			{
-				if (Research.Instance.Get(activeResearch.tech).progressInventory.PointsByTypeID[this.research_point_type_id] < activeResearch.tech.costsByResearchTypeID[this.research_point_type_id])
-				{
-					flag2 = true;
-				}
+				flag2 = true;
 			}
 		}
 		if (this.operational.GetFlag(EnergyConsumer.PoweredFlag))
@@ -154,12 +143,9 @@ public class ResearchCenter : Workable, IEffectDescriptor
 			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoApplicableResearchSelected, false);
 		}
 		this.operational.SetFlag(ResearchCenter.ResearchSelectedFlag, flag && flag2);
-		if (!flag || !flag2)
+		if ((!flag || !flag2) && base.worker)
 		{
-			if (base.worker)
-			{
-				base.StopWork(base.worker, true);
-			}
+			base.StopWork(base.worker, true);
 		}
 	}
 
@@ -192,13 +178,10 @@ public class ResearchCenter : Workable, IEffectDescriptor
 
 	private void CheckHasMaterial(object o = null)
 	{
-		if (!this.HasMaterial())
+		if (!this.HasMaterial() && this.chore != null)
 		{
-			if (this.chore != null)
-			{
-				this.chore.Cancel("No material remaining");
-				this.chore = null;
-			}
+			this.chore.Cancel("No material remaining");
+			this.chore = null;
 		}
 	}
 

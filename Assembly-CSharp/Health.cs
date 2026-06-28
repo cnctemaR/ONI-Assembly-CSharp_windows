@@ -83,8 +83,9 @@ public class Health : KMonoBehaviour, ISaveLoadable
 			{
 				NameDisplayScreen.Instance.SetHealthDisplay(base.gameObject, new Func<float>(this.percent), false);
 			}
+			return;
 		}
-		else if (NameDisplayScreen.Instance != null)
+		if (NameDisplayScreen.Instance != null)
 		{
 			NameDisplayScreen.Instance.SetHealthDisplay(base.gameObject, new Func<float>(this.percent), true);
 		}
@@ -138,50 +139,51 @@ public class Health : KMonoBehaviour, ISaveLoadable
 
 	private void UpdateWoundEffects()
 	{
-		if (this.effects)
+		if (!this.effects)
 		{
-			switch (this.State)
+			return;
+		}
+		switch (this.State)
+		{
+		case Health.HealthState.Perfect:
+			this.effects.Remove("LightWounds");
+			this.effects.Remove("ModerateWounds");
+			this.effects.Remove("SevereWounds");
+			break;
+		case Health.HealthState.Scuffed:
+			this.effects.Remove("ModerateWounds");
+			this.effects.Remove("SevereWounds");
+			if (!this.effects.HasEffect("LightWounds"))
 			{
-			case Health.HealthState.Perfect:
-				this.effects.Remove("LightWounds");
-				this.effects.Remove("ModerateWounds");
-				this.effects.Remove("SevereWounds");
-				break;
-			case Health.HealthState.Scuffed:
-				this.effects.Remove("ModerateWounds");
-				this.effects.Remove("SevereWounds");
-				if (!this.effects.HasEffect("LightWounds"))
-				{
-					this.effects.Add("LightWounds", true);
-				}
-				break;
-			case Health.HealthState.Injured:
-				this.effects.Remove("LightWounds");
-				this.effects.Remove("SevereWounds");
-				if (!this.effects.HasEffect("ModerateWounds"))
-				{
-					this.effects.Add("ModerateWounds", true);
-				}
-				break;
-			case Health.HealthState.Critical:
-				this.effects.Remove("LightWounds");
-				this.effects.Remove("ModerateWounds");
-				if (!this.effects.HasEffect("SevereWounds"))
-				{
-					this.effects.Add("SevereWounds", true);
-				}
-				break;
-			case Health.HealthState.Incapacitated:
-				this.effects.Remove("LightWounds");
-				this.effects.Remove("ModerateWounds");
-				this.effects.Remove("SevereWounds");
-				break;
-			case Health.HealthState.Dead:
-				this.effects.Remove("LightWounds");
-				this.effects.Remove("ModerateWounds");
-				this.effects.Remove("SevereWounds");
-				break;
+				this.effects.Add("LightWounds", true);
 			}
+			break;
+		case Health.HealthState.Injured:
+			this.effects.Remove("LightWounds");
+			this.effects.Remove("SevereWounds");
+			if (!this.effects.HasEffect("ModerateWounds"))
+			{
+				this.effects.Add("ModerateWounds", true);
+			}
+			break;
+		case Health.HealthState.Critical:
+			this.effects.Remove("LightWounds");
+			this.effects.Remove("ModerateWounds");
+			if (!this.effects.HasEffect("SevereWounds"))
+			{
+				this.effects.Add("SevereWounds", true);
+			}
+			break;
+		case Health.HealthState.Incapacitated:
+			this.effects.Remove("LightWounds");
+			this.effects.Remove("ModerateWounds");
+			this.effects.Remove("SevereWounds");
+			break;
+		case Health.HealthState.Dead:
+			this.effects.Remove("LightWounds");
+			this.effects.Remove("ModerateWounds");
+			this.effects.Remove("SevereWounds");
+			break;
 		}
 	}
 
@@ -270,7 +272,7 @@ public class Health : KMonoBehaviour, ISaveLoadable
 	}
 
 	[Serialize]
-	public bool CanBeIncapacitated = false;
+	public bool CanBeIncapacitated;
 
 	[Serialize]
 	public float maxHitPoints = 100f;
@@ -278,7 +280,7 @@ public class Health : KMonoBehaviour, ISaveLoadable
 	[Serialize]
 	public Health.HealthState State;
 
-	public HealthBar healthBar = null;
+	public HealthBar healthBar;
 
 	private Effects effects;
 

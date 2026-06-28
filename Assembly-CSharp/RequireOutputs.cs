@@ -117,23 +117,15 @@ public class RequireOutputs : KMonoBehaviour
 	private ConduitFlow GetConduitManager()
 	{
 		ConduitType conduitType = this.conduitType;
-		ConduitFlow conduitFlow;
-		if (conduitType != ConduitType.Gas)
+		if (conduitType == ConduitType.Gas)
 		{
-			if (conduitType != ConduitType.Liquid)
-			{
-				conduitFlow = null;
-			}
-			else
-			{
-				conduitFlow = Game.Instance.liquidConduitFlow;
-			}
+			return Game.Instance.gasConduitFlow;
 		}
-		else
+		if (conduitType != ConduitType.Liquid)
 		{
-			conduitFlow = Game.Instance.gasConduitFlow;
+			return null;
 		}
-		return conduitFlow;
+		return Game.Instance.liquidConduitFlow;
 	}
 
 	private bool IsConnected(int cell)
@@ -160,7 +152,7 @@ public class RequireOutputs : KMonoBehaviour
 
 	private bool previouslyHadRoom = true;
 
-	private bool connected = false;
+	private bool connected;
 
 	private GameScenePartitionerEntry partitionerEntry;
 }

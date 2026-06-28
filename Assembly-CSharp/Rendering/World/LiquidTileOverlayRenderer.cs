@@ -95,11 +95,9 @@ namespace Rendering.World
 				Brush brush = brush_array[substance_idx * tile.MaskCount + connections - LiquidTileOverlayRenderer.LiquidConnections.Left];
 				brush.Add(tile.Idx);
 				brush_grid[tile.Idx * 4 + i] = brush.Id;
+				return;
 			}
-			else
-			{
-				brush_grid[tile.Idx * 4 + i] = -1;
-			}
+			brush_grid[tile.Idx * 4 + i] = -1;
 		}
 
 		public override void MarkDirty(ref Tile tile, Brush[] brush_array, int[] brush_grid)

@@ -68,30 +68,31 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 				this.orientation = orientation;
 			}
 		}
-		if (flag)
+		if (!flag)
 		{
-			this.DestroyVisualizers();
-			if (this.outputPortInfo != null)
+			return;
+		}
+		this.DestroyVisualizers();
+		if (this.outputPortInfo != null)
+		{
+			this.outputPorts = new List<ILogicUIElement>();
+			for (int i = 0; i < this.outputPortInfo.Length; i++)
 			{
-				this.outputPorts = new List<ILogicUIElement>();
-				for (int i = 0; i < this.outputPortInfo.Length; i++)
-				{
-					LogicPorts.Port port = this.outputPortInfo[i];
-					LogicPortVisualizer logicPortVisualizer = new LogicPortVisualizer(false, this.GetActualCell(port.cellOffset));
-					this.outputPorts.Add(logicPortVisualizer);
-					Game.Instance.logicCircuitManager.AddVisElem(logicPortVisualizer);
-				}
+				LogicPorts.Port port = this.outputPortInfo[i];
+				LogicPortVisualizer logicPortVisualizer = new LogicPortVisualizer(false, this.GetActualCell(port.cellOffset));
+				this.outputPorts.Add(logicPortVisualizer);
+				Game.Instance.logicCircuitManager.AddVisElem(logicPortVisualizer);
 			}
-			if (this.inputPortInfo != null)
+		}
+		if (this.inputPortInfo != null)
+		{
+			this.inputPorts = new List<ILogicUIElement>();
+			for (int j = 0; j < this.inputPortInfo.Length; j++)
 			{
-				this.inputPorts = new List<ILogicUIElement>();
-				for (int j = 0; j < this.inputPortInfo.Length; j++)
-				{
-					LogicPorts.Port port2 = this.inputPortInfo[j];
-					LogicPortVisualizer logicPortVisualizer2 = new LogicPortVisualizer(true, this.GetActualCell(port2.cellOffset));
-					this.inputPorts.Add(logicPortVisualizer2);
-					Game.Instance.logicCircuitManager.AddVisElem(logicPortVisualizer2);
-				}
+				LogicPorts.Port port2 = this.inputPortInfo[j];
+				LogicPortVisualizer logicPortVisualizer2 = new LogicPortVisualizer(true, this.GetActualCell(port2.cellOffset));
+				this.inputPorts.Add(logicPortVisualizer2);
+				Game.Instance.logicCircuitManager.AddVisElem(logicPortVisualizer2);
 			}
 		}
 	}
@@ -117,48 +118,49 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 	private void CreatePhysicalPorts()
 	{
 		int num = Grid.PosToCell(base.transform.position);
-		if (num != this.cell)
+		if (num == this.cell)
 		{
-			this.cell = num;
-			this.DestroyVisualizers();
-			if (this.outputPortInfo != null)
+			return;
+		}
+		this.cell = num;
+		this.DestroyVisualizers();
+		if (this.outputPortInfo != null)
+		{
+			this.outputPorts = new List<ILogicUIElement>();
+			for (int i = 0; i < this.outputPortInfo.Length; i++)
 			{
-				this.outputPorts = new List<ILogicUIElement>();
-				for (int i = 0; i < this.outputPortInfo.Length; i++)
+				LogicPorts.Port port = this.outputPortInfo[i];
+				LogicEventSender logicEventSender = new LogicEventSender(port.id, this.GetActualCell(port.cellOffset), new Action<int, bool>(this.OnLogicNetworkConnectionChanged));
+				this.outputPorts.Add(logicEventSender);
+				Game.Instance.logicCircuitManager.AddVisElem(logicEventSender);
+				Game.Instance.logicCircuitSystem.AddToNetworks(logicEventSender.GetLogicUICell(), logicEventSender, true);
+			}
+			if (this.serializedOutputValues != null && this.serializedOutputValues.Length == this.outputPorts.Count)
+			{
+				for (int j = 0; j < this.outputPorts.Count; j++)
 				{
-					LogicPorts.Port port = this.outputPortInfo[i];
-					LogicEventSender logicEventSender = new LogicEventSender(port.id, this.GetActualCell(port.cellOffset), new Action<int, bool>(this.OnLogicNetworkConnectionChanged));
-					this.outputPorts.Add(logicEventSender);
-					Game.Instance.logicCircuitManager.AddVisElem(logicEventSender);
-					Game.Instance.logicCircuitSystem.AddToNetworks(logicEventSender.GetLogicUICell(), logicEventSender, true);
-				}
-				if (this.serializedOutputValues != null && this.serializedOutputValues.Length == this.outputPorts.Count)
-				{
-					for (int j = 0; j < this.outputPorts.Count; j++)
-					{
-						LogicEventSender logicEventSender2 = this.outputPorts[j] as LogicEventSender;
-						logicEventSender2.SetValue(this.serializedOutputValues[j]);
-					}
+					LogicEventSender logicEventSender2 = this.outputPorts[j] as LogicEventSender;
+					logicEventSender2.SetValue(this.serializedOutputValues[j]);
 				}
 			}
-			this.serializedOutputValues = null;
-			if (this.inputPortInfo != null)
+		}
+		this.serializedOutputValues = null;
+		if (this.inputPortInfo != null)
+		{
+			this.inputPorts = new List<ILogicUIElement>();
+			for (int k = 0; k < this.inputPortInfo.Length; k++)
 			{
-				this.inputPorts = new List<ILogicUIElement>();
-				for (int k = 0; k < this.inputPortInfo.Length; k++)
+				LogicPorts.Port info = this.inputPortInfo[k];
+				LogicEventHandler logicEventHandler = new LogicEventHandler(this.GetActualCell(info.cellOffset), delegate(int new_value)
 				{
-					LogicPorts.Port info = this.inputPortInfo[k];
-					LogicEventHandler logicEventHandler = new LogicEventHandler(this.GetActualCell(info.cellOffset), delegate(int new_value)
+					if (this != null)
 					{
-						if (this != null)
-						{
-							this.OnLogicValueChanged(info.id, new_value);
-						}
-					}, new Action<int, bool>(this.OnLogicNetworkConnectionChanged));
-					this.inputPorts.Add(logicEventHandler);
-					Game.Instance.logicCircuitManager.AddVisElem(logicEventHandler);
-					Game.Instance.logicCircuitSystem.AddToNetworks(logicEventHandler.GetLogicUICell(), logicEventHandler, true);
-				}
+						this.OnLogicValueChanged(info.id, new_value);
+					}
+				}, new Action<int, bool>(this.OnLogicNetworkConnectionChanged));
+				this.inputPorts.Add(logicEventHandler);
+				Game.Instance.logicCircuitManager.AddVisElem(logicEventHandler);
+				Game.Instance.logicCircuitSystem.AddToNetworks(logicEventHandler.GetLogicUICell(), logicEventHandler, true);
 			}
 		}
 	}
@@ -310,16 +312,16 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 		{
 			if (component.inputPortInfo != null && component.inputPortInfo.Length > 0)
 			{
-				string text = "";
-				string text2 = ((component.inputPortInfo.Length != 1) ? "\n\t\t" : "");
+				string text = string.Empty;
+				string text2 = ((component.inputPortInfo.Length != 1) ? "\n\t\t" : string.Empty);
 				foreach (LogicPorts.Port port in component.inputPortInfo)
 				{
 					text = text + text2 + port.description;
 				}
-				string text3 = "";
-				string text4 = string.Format(UI.LOGIC_PORTS.INPUT_PORTS, text);
+				string empty = string.Empty;
+				string text3 = string.Format(UI.LOGIC_PORTS.INPUT_PORTS, text);
 				Descriptor descriptor = default(Descriptor);
-				descriptor.SetupDescriptor(text4, text3, Descriptor.DescriptorType.Effect);
+				descriptor.SetupDescriptor(text3, empty, Descriptor.DescriptorType.Effect);
 				if (list == null)
 				{
 					list = new List<Descriptor>();
@@ -328,16 +330,16 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 			}
 			if (component.outputPortInfo != null && component.outputPortInfo.Length > 0)
 			{
-				string text5 = "";
-				string text6 = ((component.outputPortInfo.Length != 1) ? "\n\t\t" : "");
+				string text4 = string.Empty;
+				string text5 = ((component.outputPortInfo.Length != 1) ? "\n\t\t" : string.Empty);
 				foreach (LogicPorts.Port port2 in component.outputPortInfo)
 				{
-					text5 = text5 + text6 + port2.description;
+					text4 = text4 + text5 + port2.description;
 				}
-				string text7 = "";
-				string text8 = string.Format(UI.LOGIC_PORTS.OUTPUT_PORTS, text5);
+				string empty2 = string.Empty;
+				string text6 = string.Format(UI.LOGIC_PORTS.OUTPUT_PORTS, text4);
 				Descriptor descriptor2 = default(Descriptor);
-				descriptor2.SetupDescriptor(text8, text7, Descriptor.DescriptorType.Effect);
+				descriptor2.SetupDescriptor(text6, empty2, Descriptor.DescriptorType.Effect);
 				if (list == null)
 				{
 					list = new List<Descriptor>();
@@ -387,7 +389,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 	[Serialize]
 	private int[] serializedOutputValues;
 
-	private bool isPhysical = false;
+	private bool isPhysical;
 
 	[Serializable]
 	public struct Port

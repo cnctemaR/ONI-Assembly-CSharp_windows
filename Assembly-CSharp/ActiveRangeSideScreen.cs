@@ -51,33 +51,29 @@ public class ActiveRangeSideScreen : SideScreenContent
 		if (new_target == null)
 		{
 			global::Debug.LogError("Invalid gameObject received", null);
+			return;
 		}
-		else
+		this.target = new_target.GetComponent<IActivationRangeTarget>();
+		if (this.target == null)
 		{
-			this.target = new_target.GetComponent<IActivationRangeTarget>();
-			if (this.target == null)
-			{
-				global::Debug.LogError("The gameObject received does not contain a IActivationRangeTarget component", null);
-			}
-			else
-			{
-				this.activateValueSlider.onValueChanged.RemoveListener(new UnityAction<float>(this.OnActivateValueChanged));
-				this.activateValueSlider.minValue = this.target.MinValue;
-				this.activateValueSlider.maxValue = this.target.MaxValue;
-				this.activateValueSlider.value = this.target.ActivateValue;
-				this.activateValueSlider.wholeNumbers = this.target.UseWholeNumbers;
-				this.activateValueLabel.text = this.target.ActivateValue.ToString();
-				this.activateValueSlider.onValueChanged.AddListener(new UnityAction<float>(this.OnActivateValueChanged));
-				this.deactivateValueSlider.onValueChanged.RemoveListener(new UnityAction<float>(this.OnDeactivateValueChanged));
-				this.deactivateValueSlider.minValue = this.target.MinValue;
-				this.deactivateValueSlider.maxValue = this.target.MaxValue;
-				this.deactivateValueSlider.value = this.target.DeactivateValue;
-				this.deactivateValueSlider.wholeNumbers = this.target.UseWholeNumbers;
-				this.deactivateValueLabel.text = this.target.DeactivateValue.ToString();
-				this.deactivateValueSlider.onValueChanged.AddListener(new UnityAction<float>(this.OnDeactivateValueChanged));
-				this.RefreshTooltips();
-			}
+			global::Debug.LogError("The gameObject received does not contain a IActivationRangeTarget component", null);
+			return;
 		}
+		this.activateValueSlider.onValueChanged.RemoveListener(new UnityAction<float>(this.OnActivateValueChanged));
+		this.activateValueSlider.minValue = this.target.MinValue;
+		this.activateValueSlider.maxValue = this.target.MaxValue;
+		this.activateValueSlider.value = this.target.ActivateValue;
+		this.activateValueSlider.wholeNumbers = this.target.UseWholeNumbers;
+		this.activateValueLabel.text = this.target.ActivateValue.ToString();
+		this.activateValueSlider.onValueChanged.AddListener(new UnityAction<float>(this.OnActivateValueChanged));
+		this.deactivateValueSlider.onValueChanged.RemoveListener(new UnityAction<float>(this.OnDeactivateValueChanged));
+		this.deactivateValueSlider.minValue = this.target.MinValue;
+		this.deactivateValueSlider.maxValue = this.target.MaxValue;
+		this.deactivateValueSlider.value = this.target.DeactivateValue;
+		this.deactivateValueSlider.wholeNumbers = this.target.UseWholeNumbers;
+		this.deactivateValueLabel.text = this.target.DeactivateValue.ToString();
+		this.deactivateValueSlider.onValueChanged.AddListener(new UnityAction<float>(this.OnDeactivateValueChanged));
+		this.RefreshTooltips();
 	}
 
 	private IActivationRangeTarget target;

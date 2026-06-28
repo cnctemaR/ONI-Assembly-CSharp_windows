@@ -16,11 +16,12 @@ public class FaceGraph : KMonoBehaviour
 
 	public void AddExpression(Expression expression)
 	{
-		if (!this.expressions.Contains(expression))
+		if (this.expressions.Contains(expression))
 		{
-			this.expressions.Add(expression);
-			this.UpdateFace();
+			return;
 		}
+		this.expressions.Add(expression);
+		this.UpdateFace();
 	}
 
 	public void RemoveExpression(Expression expression)
@@ -48,30 +49,31 @@ public class FaceGraph : KMonoBehaviour
 
 	private void UpdateFace()
 	{
-		if (this.headComp != null)
+		if (this.headComp == null)
 		{
-			Expression expression = null;
-			if (this.overrideExpression != null)
+			return;
+		}
+		Expression expression = null;
+		if (this.overrideExpression != null)
+		{
+			expression = this.overrideExpression;
+		}
+		else if (this.expressions.Count > 0)
+		{
+			this.expressions.Sort((Expression a, Expression b) => b.priority.CompareTo(a.priority));
+			expression = this.expressions[0];
+		}
+		if (expression != this.currentExpression || expression == null)
+		{
+			if (expression != null)
 			{
-				expression = this.overrideExpression;
+				this.headComp.SetAnimOverride(expression.face.hash);
 			}
-			else if (this.expressions.Count > 0)
+			else
 			{
-				this.expressions.Sort((Expression a, Expression b) => b.priority.CompareTo(a.priority));
-				expression = this.expressions[0];
+				this.headComp.ClearAnimOverride();
 			}
-			if (expression != this.currentExpression || expression == null)
-			{
-				if (expression != null)
-				{
-					this.headComp.SetAnimOverride(expression.face.hash);
-				}
-				else
-				{
-					this.headComp.ClearAnimOverride();
-				}
-				this.currentExpression = expression;
-			}
+			this.currentExpression = expression;
 		}
 	}
 

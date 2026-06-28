@@ -105,7 +105,7 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 	private MeterController cleanMeter;
 
 	[Serialize]
-	public int maxPossiblyRemoved = 0;
+	public int maxPossiblyRemoved;
 
 	private class ScrubOreReactable : WorkableReactable
 	{
@@ -119,12 +119,9 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 			if (base.InternalCanBegin(new_reactor, transition))
 			{
 				Storage component = new_reactor.GetComponent<Storage>();
-				if (component != null)
+				if (component != null && OreScrubber.GetFirstInfected(component) != null)
 				{
-					if (OreScrubber.GetFirstInfected(component) != null)
-					{
-						return true;
-					}
+					return true;
 				}
 			}
 			return false;
@@ -244,6 +241,6 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 			base.OnCompleteWork(worker);
 		}
 
-		private int diseaseRemoved = 0;
+		private int diseaseRemoved;
 	}
 }

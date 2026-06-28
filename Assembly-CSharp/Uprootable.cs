@@ -98,19 +98,20 @@ public class Uprootable : Workable
 
 	public void MarkForUproot()
 	{
-		if (this.canBeUprooted)
+		if (!this.canBeUprooted)
 		{
-			if (DebugHandler.InstantBuildMode)
-			{
-				this.Uproot();
-			}
-			else if (this.chore == null)
-			{
-				this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
-				base.GetComponent<KSelectable>().AddStatusItem(this.pendingStatusItem, this);
-			}
-			this.isMarkedForUproot = true;
+			return;
 		}
+		if (DebugHandler.InstantBuildMode)
+		{
+			this.Uproot();
+		}
+		else if (this.chore == null)
+		{
+			this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			base.GetComponent<KSelectable>().AddStatusItem(this.pendingStatusItem, this);
+		}
+		this.isMarkedForUproot = true;
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -162,27 +163,29 @@ public class Uprootable : Workable
 					SelectTool.Instance.Select(null, false);
 				}
 			}
+			return;
 		}
-		else if (this.canBeUprooted)
+		if (!this.canBeUprooted)
 		{
-			if (this.chore != null)
-			{
-				UserMenu userMenu = this.userMenu;
-				string text = "action_uproot";
-				string text2 = this.cancelButtonLabel;
-				global::System.Action action = new global::System.Action(this.OnClickCancelUproot);
-				string text3 = this.cancelButtonTooltip;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
-			}
-			else
-			{
-				UserMenu userMenu2 = this.userMenu;
-				string text3 = "action_uproot";
-				string text2 = this.buttonLabel;
-				global::System.Action action = new global::System.Action(this.OnClickUproot);
-				string text = this.buttonTooltip;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
-			}
+			return;
+		}
+		if (this.chore != null)
+		{
+			UserMenu userMenu = this.userMenu;
+			string text = "action_uproot";
+			string text2 = this.cancelButtonLabel;
+			global::System.Action action = new global::System.Action(this.OnClickCancelUproot);
+			string text3 = this.cancelButtonTooltip;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+		}
+		else
+		{
+			UserMenu userMenu2 = this.userMenu;
+			string text3 = "action_uproot";
+			string text2 = this.buttonLabel;
+			global::System.Action action = new global::System.Action(this.OnClickUproot);
+			string text = this.buttonTooltip;
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 	}
 
@@ -211,7 +214,7 @@ public class Uprootable : Workable
 	[Serialize]
 	protected bool isMarkedForUproot;
 
-	protected bool uprootComplete = false;
+	protected bool uprootComplete;
 
 	[MyCmpAdd]
 	private Prioritizable prioritizable;

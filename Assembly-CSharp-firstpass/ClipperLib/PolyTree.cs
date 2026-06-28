@@ -22,16 +22,11 @@ namespace ClipperLib
 
 		public PolyNode GetFirst()
 		{
-			PolyNode polyNode;
 			if (this.m_Childs.Count > 0)
 			{
-				polyNode = this.m_Childs[0];
+				return this.m_Childs[0];
 			}
-			else
-			{
-				polyNode = null;
-			}
-			return polyNode;
+			return null;
 		}
 
 		public int Total

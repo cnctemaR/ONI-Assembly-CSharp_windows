@@ -75,16 +75,11 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 	public float GetVisualizerRotation()
 	{
 		PermittedRotations permittedRotations = this.permittedRotations;
-		float num;
 		if (permittedRotations != PermittedRotations.R360 && permittedRotations != PermittedRotations.R90)
 		{
-			num = 0f;
+			return 0f;
 		}
-		else
-		{
-			num = -90f * (float)this.orientation;
-		}
-		return num;
+		return -90f * (float)this.orientation;
 	}
 
 	public bool GetVisualizerFlipX()
@@ -151,35 +146,36 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 	private void OrientCollider(Orientation orientation)
 	{
 		BoxCollider2D component = base.GetComponent<BoxCollider2D>();
-		if (!(component == null))
+		if (component == null)
 		{
-			switch (orientation)
-			{
-			default:
-				component.offset = new Vector2(0f, 0.5f * (float)this.height);
-				component.size = new Vector2((float)this.width, (float)this.height);
-				break;
-			case Orientation.R90:
-				component.offset = new Vector2(0.5f * (float)(this.height - 1), 0.5f);
-				component.size = new Vector2((float)this.height, (float)this.width);
-				break;
-			case Orientation.R180:
-				component.offset = new Vector2(0f, -0.5f * (float)(this.height - 2));
-				component.size = new Vector2((float)this.width, (float)this.height);
-				break;
-			case Orientation.R270:
-				component.offset = new Vector2(-0.5f * (float)(this.height - 1), 0.5f);
-				component.size = new Vector2((float)this.height, (float)this.width);
-				break;
-			case Orientation.FlipH:
-				component.offset = new Vector2(0f, 0.5f * (float)this.height);
-				component.size = new Vector2((float)this.width, (float)this.height);
-				break;
-			case Orientation.FlipV:
-				component.offset = new Vector2(0f, -0.5f * (float)(this.height - 2));
-				component.size = new Vector2((float)this.width, (float)this.height);
-				break;
-			}
+			return;
+		}
+		switch (orientation)
+		{
+		default:
+			component.offset = new Vector2(0f, 0.5f * (float)this.height);
+			component.size = new Vector2((float)this.width, (float)this.height);
+			break;
+		case Orientation.R90:
+			component.offset = new Vector2(0.5f * (float)(this.height - 1), 0.5f);
+			component.size = new Vector2((float)this.height, (float)this.width);
+			break;
+		case Orientation.R180:
+			component.offset = new Vector2(0f, -0.5f * (float)(this.height - 2));
+			component.size = new Vector2((float)this.width, (float)this.height);
+			break;
+		case Orientation.R270:
+			component.offset = new Vector2(-0.5f * (float)(this.height - 1), 0.5f);
+			component.size = new Vector2((float)this.height, (float)this.width);
+			break;
+		case Orientation.FlipH:
+			component.offset = new Vector2(0f, 0.5f * (float)this.height);
+			component.size = new Vector2((float)this.width, (float)this.height);
+			break;
+		case Orientation.FlipV:
+			component.offset = new Vector2(0f, -0.5f * (float)(this.height - 2));
+			component.size = new Vector2((float)this.width, (float)this.height);
+			break;
 		}
 	}
 
@@ -190,29 +186,21 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 
 	public static CellOffset GetRotatedCellOffset(CellOffset offset, Orientation orientation)
 	{
-		CellOffset cellOffset;
 		switch (orientation)
 		{
 		default:
-			cellOffset = offset;
-			break;
+			return offset;
 		case Orientation.R90:
-			cellOffset = new CellOffset(offset.y, -offset.x);
-			break;
+			return new CellOffset(offset.y, -offset.x);
 		case Orientation.R180:
-			cellOffset = new CellOffset(-offset.x, -offset.y);
-			break;
+			return new CellOffset(-offset.x, -offset.y);
 		case Orientation.R270:
-			cellOffset = new CellOffset(-offset.y, offset.x);
-			break;
+			return new CellOffset(-offset.y, offset.x);
 		case Orientation.FlipH:
-			cellOffset = new CellOffset(-offset.x, offset.y);
-			break;
+			return new CellOffset(-offset.x, offset.y);
 		case Orientation.FlipV:
-			cellOffset = new CellOffset(offset.x, -offset.y);
-			break;
+			return new CellOffset(offset.x, -offset.y);
 		}
-		return cellOffset;
 	}
 
 	public Vector3 GetRotatedOffset(Vector3 offset)
@@ -222,29 +210,21 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 
 	public static Vector3 GetRotatedOffset(Vector3 offset, Orientation orientation)
 	{
-		Vector3 vector;
 		switch (orientation)
 		{
 		default:
-			vector = offset;
-			break;
+			return offset;
 		case Orientation.R90:
-			vector = new Vector3(offset.y, -offset.x);
-			break;
+			return new Vector3(offset.y, -offset.x);
 		case Orientation.R180:
-			vector = new Vector3(-offset.x, -offset.y);
-			break;
+			return new Vector3(-offset.x, -offset.y);
 		case Orientation.R270:
-			vector = new Vector3(-offset.y, offset.x);
-			break;
+			return new Vector3(-offset.y, offset.x);
 		case Orientation.FlipH:
-			vector = new Vector3(-offset.x, offset.y);
-			break;
+			return new Vector3(-offset.x, offset.y);
 		case Orientation.FlipV:
-			vector = new Vector3(offset.x, -offset.y);
-			break;
+			return new Vector3(offset.x, -offset.y);
 		}
-		return vector;
 	}
 
 	public Orientation GetOrientation()
@@ -267,7 +247,7 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 	private Building building;
 
 	[Serialize]
-	private Orientation orientation = Orientation.Neutral;
+	private Orientation orientation;
 
 	[SerializeField]
 	private Vector3 pivot = Vector3.zero;
@@ -275,7 +255,7 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 	[SerializeField]
 	private Vector3 visualizerOffset = Vector3.zero;
 
-	public PermittedRotations permittedRotations = PermittedRotations.Unrotatable;
+	public PermittedRotations permittedRotations;
 
 	[SerializeField]
 	private int width;

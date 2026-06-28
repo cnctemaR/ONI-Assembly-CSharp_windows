@@ -34,35 +34,27 @@ public class KFMOD : KMonoBehaviour
 
 	public static EventInstance BeginOneShot(string ev, Vector3 position)
 	{
-		EventInstance eventInstance;
 		if (ev == null)
 		{
-			eventInstance = null;
+			return null;
 		}
-		else if (App.IsExiting)
+		if (App.IsExiting)
 		{
-			eventInstance = null;
+			return null;
 		}
-		else
+		EventInstance eventInstance = RuntimeManager.CreateInstance(ev);
+		if (eventInstance == null)
 		{
-			EventInstance eventInstance2 = RuntimeManager.CreateInstance(ev);
-			if (eventInstance2 == null)
+			if (KFMODDebugger.instance != null)
 			{
-				if (KFMODDebugger.instance != null)
-				{
-				}
-				eventInstance = null;
 			}
-			else
-			{
-				Vector3 vector = new Vector3(position.x, position.y, 0f);
-				if (KFMODDebugger.instance != null)
-				{
-				}
-				eventInstance = KFMOD.BeginOneShot(eventInstance2, vector);
-			}
+			return null;
 		}
-		return eventInstance;
+		Vector3 vector = new Vector3(position.x, position.y, 0f);
+		if (KFMODDebugger.instance != null)
+		{
+		}
+		return KFMOD.BeginOneShot(eventInstance, vector);
 	}
 
 	public static EventInstance BeginOneShot(EventInstance instance, Vector3 position)
@@ -76,18 +68,13 @@ public class KFMOD : KMonoBehaviour
 
 	public static bool EndOneShot(EventInstance instance)
 	{
-		bool flag;
 		if (instance != null)
 		{
 			instance.start();
 			instance.release();
-			flag = true;
+			return true;
 		}
-		else
-		{
-			flag = false;
-		}
-		return flag;
+		return false;
 	}
 
 	public static EventInstance CreateInstance(string path)

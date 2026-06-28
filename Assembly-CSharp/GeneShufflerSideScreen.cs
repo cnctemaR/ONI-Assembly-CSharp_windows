@@ -20,12 +20,10 @@ public class GeneShufflerSideScreen : SideScreenContent
 		if (component == null)
 		{
 			global::Debug.LogError("Target doesn't have a GeneShuffler associated with it.", null);
+			return;
 		}
-		else
-		{
-			this.target = component;
-			this.Refresh();
-		}
+		this.target = component;
+		this.Refresh();
 	}
 
 	private void Refresh()

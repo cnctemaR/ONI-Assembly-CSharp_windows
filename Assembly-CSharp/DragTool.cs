@@ -123,62 +123,63 @@ public class DragTool : InterfaceTool
 	{
 		cursor_pos -= this.placementPivot;
 		KScreenManager.Instance.SetEventSystemEnabled(true);
-		if (this.dragging)
+		if (!this.dragging)
 		{
-			this.dragging = false;
-			DragTool.DragAxis dragAxis = this.dragAxis;
-			if (dragAxis != DragTool.DragAxis.Horizontal)
+			return;
+		}
+		this.dragging = false;
+		DragTool.DragAxis dragAxis = this.dragAxis;
+		if (dragAxis != DragTool.DragAxis.Horizontal)
+		{
+			if (dragAxis == DragTool.DragAxis.Vertical)
 			{
-				if (dragAxis == DragTool.DragAxis.Vertical)
-				{
-					cursor_pos.x = this.downPos.x;
-					this.dragAxis = DragTool.DragAxis.None;
-				}
-			}
-			else
-			{
-				cursor_pos.y = this.downPos.y;
+				cursor_pos.x = this.downPos.x;
 				this.dragAxis = DragTool.DragAxis.None;
 			}
-			DragTool.Mode mode = this.GetMode();
-			if (mode == DragTool.Mode.Box && this.areaVisualizer != null)
+		}
+		else
+		{
+			cursor_pos.y = this.downPos.y;
+			this.dragAxis = DragTool.DragAxis.None;
+		}
+		DragTool.Mode mode = this.GetMode();
+		if (mode == DragTool.Mode.Box && this.areaVisualizer != null)
+		{
+			this.areaVisualizer.SetActive(false);
+			int num;
+			int num2;
+			Grid.PosToXY(this.downPos, out num, out num2);
+			int num3 = num;
+			int num4 = num2;
+			int num5;
+			int num6;
+			Grid.PosToXY(cursor_pos, out num5, out num6);
+			if (num5 < num)
 			{
-				this.areaVisualizer.SetActive(false);
-				int num;
-				int num2;
-				Grid.PosToXY(this.downPos, out num, out num2);
-				int num3 = num;
-				int num4 = num2;
-				int num5;
-				int num6;
-				Grid.PosToXY(cursor_pos, out num5, out num6);
-				if (num5 < num)
+				global::Util.Swap<int>(ref num, ref num5);
+			}
+			if (num6 < num2)
+			{
+				global::Util.Swap<int>(ref num2, ref num6);
+			}
+			for (int i = num2; i <= num6; i++)
+			{
+				for (int j = num; j <= num5; j++)
 				{
-					global::Util.Swap<int>(ref num, ref num5);
-				}
-				if (num6 < num2)
-				{
-					global::Util.Swap<int>(ref num2, ref num6);
-				}
-				for (int i = num2; i <= num6; i++)
-				{
-					for (int j = num; j <= num5; j++)
+					int num7 = Grid.XYToCell(j, i);
+					if (Grid.IsValidCell(num7) && (Grid.Visible[num7] > 0 || PropertyTextures.FogOfWarScale == 1f))
 					{
-						int num7 = Grid.XYToCell(j, i);
-						if (Grid.IsValidCell(num7) && (Grid.Visible[num7] > 0 || PropertyTextures.FogOfWarScale == 1f))
-						{
-							int num8 = i - num4;
-							int num9 = j - num3;
-							num8 = Mathf.Abs(num8);
-							num9 = Mathf.Abs(num9);
-							this.OnDragTool(num7, num8 + num9);
-						}
+						int num8 = i - num4;
+						int num9 = j - num3;
+						num8 = Mathf.Abs(num8);
+						num9 = Mathf.Abs(num9);
+						this.OnDragTool(num7, num8 + num9);
 					}
 				}
-				string sound = GlobalAssets.GetSound(this.GetConfirmSound(), false);
-				KMonoBehaviour.PlaySound(sound);
-				this.OnDragComplete(this.downPos, cursor_pos);
 			}
+			string sound = GlobalAssets.GetSound(this.GetConfirmSound(), false);
+			KMonoBehaviour.PlaySound(sound);
+			this.OnDragComplete(this.downPos, cursor_pos);
 		}
 	}
 
@@ -230,41 +231,42 @@ public class DragTool : InterfaceTool
 			}
 		}
 		base.OnMouseMove(cursorPos);
-		if (this.dragging)
+		if (!this.dragging)
 		{
-			DragTool.Mode mode = this.GetMode();
-			if (mode != DragTool.Mode.Brush)
-			{
-				if (mode == DragTool.Mode.Box)
-				{
-					Vector3 vector2 = Vector3.Max(this.downPos, cursorPos);
-					Vector3 vector3 = Vector3.Min(this.downPos, cursorPos);
-					float z = vector2.z;
-					vector2 = base.GetRegularizedPos(vector2, false);
-					vector3 = base.GetRegularizedPos(vector3, true);
-					Vector3 vector4 = vector2 - vector3;
-					Vector2 vector5 = (vector2 + vector3) * 0.5f;
-					this.areaVisualizer.transform.SetPosition(new Vector3(vector5.x, vector5.y, z));
-					if (this.areaVisualizer.transform.localScale != vector4)
-					{
-						string sound = GlobalAssets.GetSound(this.GetDragSound(), false);
-						if (sound != null)
-						{
-							int num = (int)(vector2.x - vector3.x + (vector2.y - vector3.y) - 1f);
-							EventInstance eventInstance = SoundEvent.BeginOneShot(sound, this.areaVisualizer.transform.position);
-							eventInstance.setParameterValue("tileCount", (float)num);
-							SoundEvent.EndOneShot(eventInstance);
-						}
-					}
-					this.areaVisualizer.transform.localScale = vector4;
-				}
-			}
-			else
-			{
-				this.AddDragPoints(cursorPos, this.previousCursorPos);
-			}
-			this.previousCursorPos = cursorPos;
+			return;
 		}
+		DragTool.Mode mode = this.GetMode();
+		if (mode != DragTool.Mode.Brush)
+		{
+			if (mode == DragTool.Mode.Box)
+			{
+				Vector3 vector2 = Vector3.Max(this.downPos, cursorPos);
+				Vector3 vector3 = Vector3.Min(this.downPos, cursorPos);
+				float z = vector2.z;
+				vector2 = base.GetRegularizedPos(vector2, false);
+				vector3 = base.GetRegularizedPos(vector3, true);
+				Vector3 vector4 = vector2 - vector3;
+				Vector2 vector5 = (vector2 + vector3) * 0.5f;
+				this.areaVisualizer.transform.SetPosition(new Vector3(vector5.x, vector5.y, z));
+				if (this.areaVisualizer.transform.localScale != vector4)
+				{
+					string sound = GlobalAssets.GetSound(this.GetDragSound(), false);
+					if (sound != null)
+					{
+						int num = (int)(vector2.x - vector3.x + (vector2.y - vector3.y) - 1f);
+						EventInstance eventInstance = SoundEvent.BeginOneShot(sound, this.areaVisualizer.transform.position);
+						eventInstance.setParameterValue("tileCount", (float)num);
+						SoundEvent.EndOneShot(eventInstance);
+					}
+				}
+				this.areaVisualizer.transform.localScale = vector4;
+			}
+		}
+		else
+		{
+			this.AddDragPoints(cursorPos, this.previousCursorPos);
+		}
+		this.previousCursorPos = cursorPos;
 	}
 
 	protected virtual void OnDragTool(int cell, int distFromOrigin)
@@ -278,12 +280,9 @@ public class DragTool : InterfaceTool
 	private void AddDragPoint(Vector3 cursorPos)
 	{
 		int num = Grid.PosToCell(cursorPos);
-		if (Grid.IsValidCell(num))
+		if (Grid.IsValidCell(num) && (Grid.Visible[num] > 0 || PropertyTextures.FogOfWarScale == 1f))
 		{
-			if (Grid.Visible[num] > 0 || PropertyTextures.FogOfWarScale == 1f)
-			{
-				this.OnDragTool(num, 0);
-			}
+			this.OnDragTool(num, 0);
 		}
 	}
 
@@ -336,14 +335,11 @@ public class DragTool : InterfaceTool
 	private void HandlePriortyKeysDown(KButtonEvent e)
 	{
 		global::Action action = e.GetAction();
-		if (global::Action.Plan1 <= action && action <= global::Action.Plan9)
+		if (global::Action.Plan1 <= action && action <= global::Action.Plan9 && e.TryConsume(action))
 		{
-			if (e.TryConsume(action))
-			{
-				int num = action - global::Action.Plan1 + 1;
-				ToolMenuPriorityScreen.Instance.SetScreenPriority(PriorityScreen.PriorityClass.basic, num, true);
-				return;
-			}
+			int num = action - global::Action.Plan1 + 1;
+			ToolMenuPriorityScreen.Instance.SetScreenPriority(PriorityScreen.PriorityClass.basic, num, true);
+			return;
 		}
 		if (!e.Consumed)
 		{
@@ -461,11 +457,11 @@ public class DragTool : InterfaceTool
 
 	protected Vector3 placementPivot;
 
-	protected bool interceptNumberKeysForPriority = false;
+	protected bool interceptNumberKeysForPriority;
 
 	private static int defaultLayerMask;
 
-	private bool dragging = false;
+	private bool dragging;
 
 	private Vector3 previousCursorPos;
 

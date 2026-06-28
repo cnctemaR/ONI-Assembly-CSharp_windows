@@ -18,17 +18,12 @@ public class ChoreProvider : KMonoBehaviour
 
 	public virtual Chore RemoveChore(Chore chore)
 	{
-		Chore chore2;
 		if (chore == null)
 		{
-			chore2 = null;
+			return null;
 		}
-		else
-		{
-			this.chores.Remove(chore);
-			chore2 = chore;
-		}
-		return chore2;
+		this.chores.Remove(chore);
+		return chore;
 	}
 
 	public void CollectChores(ChoreConsumer chore_consumer, List<Chore.Precondition.Context> contexts)

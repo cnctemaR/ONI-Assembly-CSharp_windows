@@ -84,35 +84,34 @@ public class ManualDeliveryAmount : KMonoBehaviour
 	[ContextMenu("UpdateDeliveryState")]
 	public void UpdateDeliveryState()
 	{
-		if (this.requestedItemTag.IsValid)
+		if (!this.requestedItemTag.IsValid)
 		{
-			if (!(this.storage == null))
-			{
-				if (!this.paused)
-				{
-					this.RequestDelivery();
-				}
-			}
+			return;
+		}
+		if (this.storage == null)
+		{
+			return;
+		}
+		if (!this.paused)
+		{
+			this.RequestDelivery();
 		}
 	}
 
 	private void RequestDelivery()
 	{
 		float num = this.getFetchAmount();
-		if (num > 0f)
+		if (num > 0f && (this.fetchList == null || this.fetchList.IsComplete))
 		{
-			if (this.fetchList == null || this.fetchList.IsComplete)
+			if (this.fetchList != null)
 			{
-				if (this.fetchList != null)
-				{
-					this.fetchList.Cancel("Request Delivery");
-				}
-				this.fetchList = new FetchList2(this.storage);
-				this.fetchList.ShowStatusItem = this.ShowStatusItem;
-				this.fetchList.MinimumAmount[this.requestedItemTag] = this.minimumAmount;
-				this.fetchList.Add(new Tag[] { this.requestedItemTag }, null, num, this.operationalRequirement);
-				this.fetchList.Submit(null, false);
+				this.fetchList.Cancel("Request Delivery");
 			}
+			this.fetchList = new FetchList2(this.storage);
+			this.fetchList.ShowStatusItem = this.ShowStatusItem;
+			this.fetchList.MinimumAmount[this.requestedItemTag] = this.minimumAmount;
+			this.fetchList.Add(new Tag[] { this.requestedItemTag }, null, num, this.operationalRequirement);
+			this.fetchList.Submit(null, false);
 		}
 	}
 
@@ -178,7 +177,7 @@ public class ManualDeliveryAmount : KMonoBehaviour
 	public float minimumAmount = 10f;
 
 	[SerializeField]
-	public FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.Operational;
+	public FetchOrder2.OperationalRequirement operationalRequirement;
 
 	[NonSerialized]
 	public bool ShowStatusItem = true;
@@ -187,7 +186,7 @@ public class ManualDeliveryAmount : KMonoBehaviour
 
 	private List<PrimaryElement> filteredStoredItems = new List<PrimaryElement>();
 
-	private bool paused = false;
+	private bool paused;
 
 	public Func<float> getFetchAmount;
 }

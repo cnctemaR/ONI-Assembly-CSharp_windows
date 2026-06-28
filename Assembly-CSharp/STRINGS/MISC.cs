@@ -640,16 +640,16 @@ namespace STRINGS
 
 			public class NOMESSAGES
 			{
-				public static LocString NAME = "";
+				public static LocString NAME = string.Empty;
 
-				public static LocString TOOLTIP = "";
+				public static LocString TOOLTIP = string.Empty;
 			}
 
 			public class NOALERTS
 			{
-				public static LocString NAME = "";
+				public static LocString NAME = string.Empty;
 
-				public static LocString TOOLTIP = "";
+				public static LocString TOOLTIP = string.Empty;
 			}
 
 			public class NEWTRAIT
@@ -877,28 +877,28 @@ namespace STRINGS
 			{
 				public static LocString NAME = "The colony is entering a cloud of gas";
 
-				public static LocString TOOLTIP = "";
+				public static LocString TOOLTIP = string.Empty;
 			}
 
 			public class GASCLOUDPEAK
 			{
 				public static LocString NAME = "The gas cloud is at its densest point";
 
-				public static LocString TOOLTIP = "";
+				public static LocString TOOLTIP = string.Empty;
 			}
 
 			public class GASCLOUDDEPARTING
 			{
 				public static LocString NAME = "The gas cloud is receding";
 
-				public static LocString TOOLTIP = "";
+				public static LocString TOOLTIP = string.Empty;
 			}
 
 			public class GASCLOUDGONE
 			{
 				public static LocString NAME = "The colony is once again in open space";
 
-				public static LocString TOOLTIP = "";
+				public static LocString TOOLTIP = string.Empty;
 			}
 
 			public class AVAILABLE

@@ -21,37 +21,38 @@ public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 	private void OnClick()
 	{
 		List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(this.Resource);
-		if (pickupables != null)
+		if (pickupables == null)
 		{
-			Pickupable pickupable = null;
-			for (int i = 0; i < pickupables.Count; i++)
-			{
-				this.selectionIdx++;
-				int num = this.selectionIdx % pickupables.Count;
-				pickupable = pickupables[num];
-				if (pickupable != null)
-				{
-					break;
-				}
-			}
+			return;
+		}
+		Pickupable pickupable = null;
+		for (int i = 0; i < pickupables.Count; i++)
+		{
+			this.selectionIdx++;
+			int num = this.selectionIdx % pickupables.Count;
+			pickupable = pickupables[num];
 			if (pickupable != null)
 			{
-				Transform transform = pickupable.transform;
-				if (pickupable.storage != null)
+				break;
+			}
+		}
+		if (pickupable != null)
+		{
+			Transform transform = pickupable.transform;
+			if (pickupable.storage != null)
+			{
+				transform = pickupable.storage.transform;
+			}
+			SelectTool.Instance.SelectAndFocus(transform.transform.position, transform.GetComponent<KSelectable>(), Vector3.zero);
+			for (int j = 0; j < pickupables.Count; j++)
+			{
+				Pickupable pickupable2 = pickupables[j];
+				if (pickupable2 != null)
 				{
-					transform = pickupable.storage.transform;
-				}
-				SelectTool.Instance.SelectAndFocus(transform.transform.position, transform.GetComponent<KSelectable>(), Vector3.zero);
-				for (int j = 0; j < pickupables.Count; j++)
-				{
-					Pickupable pickupable2 = pickupables[j];
-					if (pickupable2 != null)
+					KAnimControllerBase component = pickupable2.GetComponent<KAnimControllerBase>();
+					if (component != null)
 					{
-						KAnimControllerBase component = pickupable2.GetComponent<KAnimControllerBase>();
-						if (component != null)
-						{
-							component.HighlightColour = this.HighlightColor;
-						}
+						component.HighlightColour = this.HighlightColor;
 					}
 				}
 			}
@@ -127,35 +128,37 @@ public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
 	private void Hover(bool is_hovering)
 	{
-		if (!(WorldInventory.Instance == null))
+		if (WorldInventory.Instance == null)
 		{
-			if (is_hovering)
+			return;
+		}
+		if (is_hovering)
+		{
+			this.Background.color = this.BackgroundHoverColor;
+		}
+		else
+		{
+			this.Background.color = new Color(0f, 0f, 0f, 0f);
+		}
+		List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(this.Resource);
+		if (pickupables == null)
+		{
+			return;
+		}
+		for (int i = 0; i < pickupables.Count; i++)
+		{
+			if (!(pickupables[i] == null))
 			{
-				this.Background.color = this.BackgroundHoverColor;
-			}
-			else
-			{
-				this.Background.color = new Color(0f, 0f, 0f, 0f);
-			}
-			List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(this.Resource);
-			if (pickupables != null)
-			{
-				for (int i = 0; i < pickupables.Count; i++)
+				KAnimControllerBase component = pickupables[i].GetComponent<KAnimControllerBase>();
+				if (!(component == null))
 				{
-					if (!(pickupables[i] == null))
+					if (is_hovering)
 					{
-						KAnimControllerBase component = pickupables[i].GetComponent<KAnimControllerBase>();
-						if (!(component == null))
-						{
-							if (is_hovering)
-							{
-								component.HighlightColour = this.HighlightColor;
-							}
-							else
-							{
-								component.HighlightColour = Color.black;
-							}
-						}
+						component.HighlightColour = this.HighlightColor;
+					}
+					else
+					{
+						component.HighlightColour = Color.black;
 					}
 				}
 			}
@@ -215,13 +218,13 @@ public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
 	private ToolTip tooltip;
 
-	private TextStyleSetting tooltipStyle_Header = null;
+	private TextStyleSetting tooltipStyle_Header;
 
-	private TextStyleSetting tooltipStyle_body = null;
+	private TextStyleSetting tooltipStyle_body;
 
 	private int selectionIdx;
 
-	private string quantityText = null;
+	private string quantityText;
 
-	private float currentQuantity = 0f;
+	private float currentQuantity;
 }

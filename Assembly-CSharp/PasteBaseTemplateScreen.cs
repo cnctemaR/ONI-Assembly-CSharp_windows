@@ -22,7 +22,7 @@ public class PasteBaseTemplateScreen : KScreen
 		this.template_buttons.Clear();
 		this.base_template_assets = TemplateCache.CollectBaseTemplateNames("bases/");
 		this.base_template_assets.AddRange(TemplateCache.CollectBaseTemplateNames("poi/"));
-		this.base_template_assets.AddRange(TemplateCache.CollectBaseTemplateNames(""));
+		this.base_template_assets.AddRange(TemplateCache.CollectBaseTemplateNames(string.Empty));
 		foreach (string text in this.base_template_assets)
 		{
 			GameObject gameObject2 = Util.KInstantiateUI(this.prefab_paste_button, this.button_list_container, true);
@@ -40,14 +40,15 @@ public class PasteBaseTemplateScreen : KScreen
 
 	private void OnClickPasteButton(string template_name)
 	{
-		if (template_name != null)
+		if (template_name == null)
 		{
-			DebugTool.Instance.DeactivateTool(null);
-			DebugBaseTemplateButton.Instance.ClearSelection();
-			DebugBaseTemplateButton.Instance.nameField.text = template_name;
-			TemplateContainer template = TemplateCache.GetTemplate(template_name);
-			StampTool.Instance.Activate(template, true, false);
+			return;
 		}
+		DebugTool.Instance.DeactivateTool(null);
+		DebugBaseTemplateButton.Instance.ClearSelection();
+		DebugBaseTemplateButton.Instance.nameField.text = template_name;
+		TemplateContainer template = TemplateCache.GetTemplate(template_name);
+		StampTool.Instance.Activate(template, true, false);
 	}
 
 	public static PasteBaseTemplateScreen Instance;

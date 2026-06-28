@@ -11,34 +11,32 @@ public class UpgradeTab : TargetScreen
 		if (this.upgradeTarget == null)
 		{
 			global::Debug.LogError("The target provided does not have an Upgradable component", null);
+			return;
 		}
-		else
+		this.InitializeIconDataMap();
+		if (this.upgradeMap == null)
 		{
-			this.InitializeIconDataMap();
-			if (this.upgradeMap == null)
+			this.upgradeMap = new Dictionary<KToggle, Upgradable.Upgrade>();
+		}
+		foreach (KeyValuePair<int, Upgradable.Upgrade> keyValuePair in this.upgradeTarget.upgrades)
+		{
+			bool flag = this.upgradeTarget.availableUpgrades.Contains(keyValuePair.Key);
+			bool flag2 = this.upgradeTarget.currentUpgrades.Contains(keyValuePair.Key);
+			if (flag || flag2)
 			{
-				this.upgradeMap = new Dictionary<KToggle, Upgradable.Upgrade>();
-			}
-			foreach (KeyValuePair<int, Upgradable.Upgrade> keyValuePair in this.upgradeTarget.upgrades)
-			{
-				bool flag = this.upgradeTarget.availableUpgrades.Contains(keyValuePair.Key);
-				bool flag2 = this.upgradeTarget.currentUpgrades.Contains(keyValuePair.Key);
-				if (flag || flag2)
+				KToggle ktoggle = Util.KInstantiateUI<KToggle>(this.togglePrefab.gameObject, this.availableGrid, false);
+				ktoggle.gameObject.SetActive(true);
+				ktoggle.transform.GetChild(0).GetComponent<Image>().sprite = this.iconDataMap[keyValuePair.Value.type].icon;
+				if (flag)
 				{
-					KToggle ktoggle = Util.KInstantiateUI<KToggle>(this.togglePrefab.gameObject, this.availableGrid, false);
-					ktoggle.gameObject.SetActive(true);
-					ktoggle.transform.GetChild(0).GetComponent<Image>().sprite = this.iconDataMap[keyValuePair.Value.type].icon;
-					if (flag)
-					{
-						this.SetAvailableUpgradeToggle(ktoggle, keyValuePair.Value);
-					}
-					else if (flag2)
-					{
-						ktoggle.transform.parent = this.installedGrid.transform;
-					}
-					this.upgradeMap.Add(ktoggle, keyValuePair.Value);
-					this.SetTooltip(ktoggle, flag2);
+					this.SetAvailableUpgradeToggle(ktoggle, keyValuePair.Value);
 				}
+				else if (flag2)
+				{
+					ktoggle.transform.parent = this.installedGrid.transform;
+				}
+				this.upgradeMap.Add(ktoggle, keyValuePair.Value);
+				this.SetTooltip(ktoggle, flag2);
 			}
 		}
 	}
@@ -120,15 +118,16 @@ public class UpgradeTab : TargetScreen
 
 	private void ClearToggles()
 	{
-		if (this.upgradeMap != null)
+		if (this.upgradeMap == null)
 		{
-			foreach (KeyValuePair<KToggle, Upgradable.Upgrade> keyValuePair in this.upgradeMap)
-			{
-				keyValuePair.Value.ClearCallbacks();
-				global::UnityEngine.Object.Destroy(keyValuePair.Key.gameObject);
-			}
-			this.upgradeMap.Clear();
+			return;
 		}
+		foreach (KeyValuePair<KToggle, Upgradable.Upgrade> keyValuePair in this.upgradeMap)
+		{
+			keyValuePair.Value.ClearCallbacks();
+			global::UnityEngine.Object.Destroy(keyValuePair.Key.gameObject);
+		}
+		this.upgradeMap.Clear();
 	}
 
 	private void OpenUpgradeMenuDetails(KToggle toggle)
@@ -146,14 +145,15 @@ public class UpgradeTab : TargetScreen
 
 	private void InitializeIconDataMap()
 	{
-		if (this.iconDataMap == null)
+		if (this.iconDataMap != null)
 		{
-			this.iconDataMap = new Dictionary<Upgradable.Upgrade.Target, UpgradeTab.UpgradeIconData>();
-			this.icons.ForEach(delegate(UpgradeTab.UpgradeIconData ic)
-			{
-				this.iconDataMap.Add(ic.type, ic);
-			});
+			return;
 		}
+		this.iconDataMap = new Dictionary<Upgradable.Upgrade.Target, UpgradeTab.UpgradeIconData>();
+		this.icons.ForEach(delegate(UpgradeTab.UpgradeIconData ic)
+		{
+			this.iconDataMap.Add(ic.type, ic);
+		});
 	}
 
 	[Header("UI Elements")]

@@ -47,21 +47,16 @@ namespace Database
 
 		private int GetTier(Tech tech)
 		{
-			int num;
 			if (tech.requiredTech.Count == 0)
 			{
-				num = 0;
+				return 0;
 			}
-			else
+			int num = 0;
+			foreach (Tech tech2 in tech.requiredTech)
 			{
-				int num2 = 0;
-				foreach (Tech tech2 in tech.requiredTech)
-				{
-					num2 = Math.Max(num2, this.GetTier(tech2));
-				}
-				num = num2 + 1;
+				num = Math.Max(num, this.GetTier(tech2));
 			}
-			return num;
+			return num + 1;
 		}
 
 		private void AddPrerequisite(Tech tech, string prerequisite_name)

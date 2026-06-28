@@ -26,28 +26,29 @@ public class BrainScheduler : KMonoBehaviour
 
 	private void Update()
 	{
-		if (!Game.IsQuitting() && !KMonoBehaviour.isLoadingScene)
+		if (Game.IsQuitting() || KMonoBehaviour.isLoadingScene)
 		{
-			this.updated_brains.Clear();
-			int num = this.BrainUpdatesPerFrame;
-			int num2 = 0;
-			while (num2 < this.brains.Count && num > 0)
-			{
-				Brain brain = this.brains[num2];
-				if (brain.IsRunning())
-				{
-					brain.UpdateBrain();
-					this.updated_brains.Add(brain);
-					this.brains.RemoveAt(num2);
-					num--;
-				}
-				else
-				{
-					num2++;
-				}
-			}
-			this.brains.AddRange(this.updated_brains);
+			return;
 		}
+		this.updated_brains.Clear();
+		int num = this.BrainUpdatesPerFrame;
+		int num2 = 0;
+		while (num2 < this.brains.Count && num > 0)
+		{
+			Brain brain = this.brains[num2];
+			if (brain.IsRunning())
+			{
+				brain.UpdateBrain();
+				this.updated_brains.Add(brain);
+				this.brains.RemoveAt(num2);
+				num--;
+			}
+			else
+			{
+				num2++;
+			}
+		}
+		this.brains.AddRange(this.updated_brains);
 	}
 
 	private static BrainScheduler Instance;

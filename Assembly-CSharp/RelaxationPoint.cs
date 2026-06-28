@@ -43,17 +43,12 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
 		AmountInstance amountInstance = Db.Get().Amounts.Stress.Lookup(worker.gameObject);
-		bool flag;
 		if (amountInstance.value <= this.stopStressingValue)
 		{
-			flag = true;
+			return true;
 		}
-		else
-		{
-			base.OnWorkTick(worker, dt);
-			flag = false;
-		}
-		return flag;
+		base.OnWorkTick(worker, dt);
+		return false;
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -82,9 +77,9 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 	}
 
 	[Serialize]
-	protected float stopStressingValue = 0f;
+	protected float stopStressingValue;
 
-	public float stressModificationValue = 0f;
+	public float stressModificationValue;
 
 	private RelaxationPoint.RelaxationPointSM.Instance smi;
 

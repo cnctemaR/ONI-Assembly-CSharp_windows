@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class FlowUtilityNetwork : UtilityNetwork
 {
@@ -27,17 +26,24 @@ public class FlowUtilityNetwork : UtilityNetwork
 			{
 				if (endpointType != Endpoint.Sink)
 				{
-					global::UnityEngine.Debug.Assert(false, "wtf");
 					item.Network = this;
 				}
-				else if (!this.sinks.Contains(item))
+				else
 				{
+					if (this.sinks.Contains(item))
+					{
+						return;
+					}
 					this.sinks.Add(item);
 					item.Network = this;
 				}
 			}
-			else if (!this.sources.Contains(item))
+			else
 			{
+				if (this.sources.Contains(item))
+				{
+					return;
+				}
 				this.sources.Add(item);
 				item.Network = this;
 			}

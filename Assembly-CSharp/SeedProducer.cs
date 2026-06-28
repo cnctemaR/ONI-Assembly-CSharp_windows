@@ -23,7 +23,6 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public GameObject ProduceSeed(string seedId, int units = 1)
 	{
-		GameObject gameObject2;
 		if (seedId != null && units > 0)
 		{
 			Vector3 vector = base.gameObject.transform.position + new Vector3(0f, 0.5f, 0f);
@@ -35,23 +34,20 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 			base.Trigger(472291861, gameObject.GetComponent<PlantableSeed>());
 			gameObject.SetActive(true);
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, gameObject.GetProperName(), gameObject.transform, 1.5f, false);
-			gameObject2 = gameObject;
+			return gameObject;
 		}
-		else
-		{
-			gameObject2 = null;
-		}
-		return gameObject2;
+		return null;
 	}
 
 	public void DropSeed(object data = null)
 	{
-		if (!this.droppedSeedAlready)
+		if (this.droppedSeedAlready)
 		{
-			GameObject gameObject = this.ProduceSeed(this.seedInfo.seedId, 1);
-			base.Trigger(-1736624145, gameObject.GetComponent<PlantableSeed>());
-			this.droppedSeedAlready = true;
+			return;
 		}
+		GameObject gameObject = this.ProduceSeed(this.seedInfo.seedId, 1);
+		base.Trigger(-1736624145, gameObject.GetComponent<PlantableSeed>());
+		this.droppedSeedAlready = true;
 	}
 
 	public void CropDepleted(object data)
@@ -99,7 +95,7 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public SeedProducer.SeedInfo seedInfo;
 
-	private bool droppedSeedAlready = false;
+	private bool droppedSeedAlready;
 
 	[Serializable]
 	public struct SeedInfo

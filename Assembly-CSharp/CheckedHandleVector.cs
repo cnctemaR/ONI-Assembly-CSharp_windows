@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class CheckedHandleVector<T> where T : new()
 {
@@ -16,7 +15,6 @@ public class CheckedHandleVector<T> where T : new()
 
 	public HandleVector<T>.Handle Add(T item, string debug_info)
 	{
-		global::UnityEngine.Debug.Assert(item != null);
 		HandleVector<T>.Handle handle = this.handleVector.Add(item);
 		if (handle.index >= this.isFree.Count)
 		{

@@ -69,36 +69,34 @@ public class BatchSet
 				this.group.batchID,
 				"]"
 			}), null);
+			return;
 		}
-		else
+		int layer = controller.GetLayer();
+		if (layer != this.key.layer)
 		{
-			int layer = controller.GetLayer();
-			if (layer != this.key.layer)
-			{
-				global::Debug.LogError("Registering with wrong batch set (layer) " + controller.GetName(), null);
-			}
-			HashedString batchGroupID = controller.GetBatchGroupID(false);
-			if (!(batchGroupID == this.key.groupID))
-			{
-				global::Debug.LogError("Registering with wrong batch set (groupID) " + controller.GetName(), null);
-			}
-			KAnimBatchGroup.MaterialType materialType = controller.GetMaterialType();
-			for (int i = 0; i < this.batches.Count; i++)
-			{
-				if (this.batches[i].size < this.group.maxGroupSize && this.batches[i].materialType == materialType)
-				{
-					if (this.batches[i].Register(controller))
-					{
-						this.SetDirty();
-					}
-					return;
-				}
-			}
-			KAnimBatch kanimBatch = new KAnimBatch(this.group, layer, controller.GetZ(), materialType);
-			kanimBatch.Init(controller.batchGroupInstance);
-			this.AddBatch(kanimBatch);
-			kanimBatch.Register(controller);
+			global::Debug.LogError("Registering with wrong batch set (layer) " + controller.GetName(), null);
 		}
+		HashedString batchGroupID = controller.GetBatchGroupID(false);
+		if (!(batchGroupID == this.key.groupID))
+		{
+			global::Debug.LogError("Registering with wrong batch set (groupID) " + controller.GetName(), null);
+		}
+		KAnimBatchGroup.MaterialType materialType = controller.GetMaterialType();
+		for (int i = 0; i < this.batches.Count; i++)
+		{
+			if (this.batches[i].size < this.group.maxGroupSize && this.batches[i].materialType == materialType)
+			{
+				if (this.batches[i].Register(controller))
+				{
+					this.SetDirty();
+				}
+				return;
+			}
+		}
+		KAnimBatch kanimBatch = new KAnimBatch(this.group, layer, controller.GetZ(), materialType);
+		kanimBatch.Init(controller.batchGroupInstance);
+		this.AddBatch(kanimBatch);
+		kanimBatch.Register(controller);
 	}
 
 	public void RemoveBatch(KAnimBatch batch)

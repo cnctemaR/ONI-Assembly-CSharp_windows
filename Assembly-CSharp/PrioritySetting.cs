@@ -20,32 +20,27 @@ public struct PrioritySetting : IComparable
 
 	public int CompareTo(object obj)
 	{
-		int num;
 		if (!(obj is PrioritySetting))
 		{
-			num = 1;
+			return 1;
 		}
-		else if (this.priority_class > ((PrioritySetting)obj).priority_class)
+		if (this.priority_class > ((PrioritySetting)obj).priority_class)
 		{
-			num = 1;
+			return 1;
 		}
-		else if (this.priority_class < ((PrioritySetting)obj).priority_class)
+		if (this.priority_class < ((PrioritySetting)obj).priority_class)
 		{
-			num = -1;
+			return -1;
 		}
-		else if (this.priority_value > ((PrioritySetting)obj).priority_value)
+		if (this.priority_value > ((PrioritySetting)obj).priority_value)
 		{
-			num = 1;
+			return 1;
 		}
-		else if (this.priority_value < ((PrioritySetting)obj).priority_value)
+		if (this.priority_value < ((PrioritySetting)obj).priority_value)
 		{
-			num = -1;
+			return -1;
 		}
-		else
-		{
-			num = 0;
-		}
-		return num;
+		return 0;
 	}
 
 	public PriorityScreen.PriorityClass priority_class;

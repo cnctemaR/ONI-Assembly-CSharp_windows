@@ -10,16 +10,11 @@ public class AssignableSideScreen : SideScreenContent
 
 	public override string GetTitle()
 	{
-		string text;
 		if (this.targetAssignable != null)
 		{
-			text = string.Format(base.GetTitle(), this.targetAssignable.GetProperName());
+			return string.Format(base.GetTitle(), this.targetAssignable.GetProperName());
 		}
-		else
-		{
-			text = base.GetTitle();
-		}
-		return text;
+		return base.GetTitle();
 	}
 
 	protected override void OnSpawn()
@@ -41,38 +36,36 @@ public class AssignableSideScreen : SideScreenContent
 		if (this.targetAssignable == null)
 		{
 			global::Debug.LogError("Object selected has no Assignable component.", null);
+			return;
+		}
+		if (this.rowPool == null)
+		{
+			this.rowPool = new UIPool<AssignableSideScreenRow>(this.rowPrefab);
+		}
+		if (this.targetAssignable.RequiresRegion != null)
+		{
+			if (this.targetAssignable.RequiresRegion.OwnerRegion != null)
+			{
+				this.targetAssignable.RequiresRegion.OwnerRegion.OnValidStateChanged += this.OnValidStateChanged;
+			}
+			this.targetAssignable.RequiresRegion.OnOwnerRegionSet += this.OnRegionChanged;
+		}
+		base.gameObject.SetActive(true);
+		this.identityList = new List<MinionIdentity>(Components.LiveMinionIdentities);
+		this.dupeSortingToggle.ChangeState(0);
+		this.generalSortingToggle.ChangeState(0);
+		this.activeSortToggle = null;
+		Func<MinionIdentity, object> func = (MinionIdentity identity) => this.IsIdentityAssigned(identity);
+		this.ExecuteSort(this.generalSortingToggle, func, true);
+		if (!this.targetAssignable.CanBeAssigned)
+		{
+			this.HideScreen(true);
 		}
 		else
 		{
-			if (this.rowPool == null)
-			{
-				this.rowPool = new UIPool<AssignableSideScreenRow>(this.rowPrefab);
-			}
-			if (this.targetAssignable.RequiresRegion != null)
-			{
-				if (this.targetAssignable.RequiresRegion.OwnerRegion != null)
-				{
-					this.targetAssignable.RequiresRegion.OwnerRegion.OnValidStateChanged += this.OnValidStateChanged;
-				}
-				this.targetAssignable.RequiresRegion.OnOwnerRegionSet += this.OnRegionChanged;
-			}
-			base.gameObject.SetActive(true);
-			this.identityList = new List<MinionIdentity>(Components.LiveMinionIdentities);
-			this.dupeSortingToggle.ChangeState(0);
-			this.generalSortingToggle.ChangeState(0);
-			this.activeSortToggle = null;
-			Func<MinionIdentity, object> func = (MinionIdentity identity) => this.IsIdentityAssigned(identity);
-			this.ExecuteSort(this.generalSortingToggle, func, true);
-			if (!this.targetAssignable.CanBeAssigned)
-			{
-				this.HideScreen(true);
-			}
-			else
-			{
-				this.HideScreen(false);
-			}
-			this.targetAssignableSubscriptionHandle = this.targetAssignable.Subscribe(2070884250, new Action<object>(this.OnForceAssigneeChanged));
+			this.HideScreen(false);
 		}
+		this.targetAssignableSubscriptionHandle = this.targetAssignable.Subscribe(2070884250, new Action<object>(this.OnForceAssigneeChanged));
 	}
 
 	private void OnForceAssigneeChanged(object data = null)
@@ -91,44 +84,42 @@ public class AssignableSideScreen : SideScreenContent
 		if (!is_in_valid_region)
 		{
 			this.SetRegionNeededUI();
+			return;
 		}
-		else
+		this.currentOwnerText.text = string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED, new object[0]);
+		BuildingComplete component = this.targetAssignable.GetComponent<BuildingComplete>();
+		if (component != null)
 		{
-			this.currentOwnerText.text = string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED, new object[0]);
-			BuildingComplete component = this.targetAssignable.GetComponent<BuildingComplete>();
-			if (component != null)
+			Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(component);
+			if (roomOfBuilding != null)
 			{
-				Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(component);
-				if (roomOfBuilding != null)
+				RoomTypes.RoomType roomType = RoomTypes.GetRoomType(roomOfBuilding);
+				if (roomType.primary_constraint != null && !roomType.primary_constraint.building_criteria(component))
 				{
-					RoomTypes.RoomType roomType = RoomTypes.GetRoomType(roomOfBuilding);
-					if (roomType.primary_constraint != null && !roomType.primary_constraint.building_criteria(component))
-					{
-						AssignableSideScreenRow freeElement = this.rowPool.GetFreeElement(this.rowGroup, true);
-						freeElement.SetContent(roomOfBuilding, new Action<IAssignableIdentity>(this.OnRowClicked), this);
-						freeElement.sideScreen = this;
-						this.identityRowMap.Add(roomOfBuilding, freeElement);
-						freeElement.Refresh(null);
-						return;
-					}
+					AssignableSideScreenRow freeElement = this.rowPool.GetFreeElement(this.rowGroup, true);
+					freeElement.SetContent(roomOfBuilding, new Action<IAssignableIdentity>(this.OnRowClicked), this);
+					freeElement.sideScreen = this;
+					this.identityRowMap.Add(roomOfBuilding, freeElement);
+					freeElement.Refresh(null);
+					return;
 				}
 			}
-			if (this.targetAssignable.canBePublic)
-			{
-				AssignableSideScreenRow freeElement2 = this.rowPool.GetFreeElement(this.rowGroup, true);
-				freeElement2.sideScreen = this;
-				freeElement2.transform.SetAsFirstSibling();
-				this.identityRowMap.Add(Game.Instance.assignmentManager.assignment_groups["public"], freeElement2);
-				freeElement2.SetContent(Game.Instance.assignmentManager.assignment_groups["public"], new Action<IAssignableIdentity>(this.OnRowClicked), this);
-				freeElement2.Refresh(null);
-			}
-			foreach (MinionIdentity minionIdentity in identities)
-			{
-				AssignableSideScreenRow freeElement3 = this.rowPool.GetFreeElement(this.rowGroup, true);
-				freeElement3.sideScreen = this;
-				this.identityRowMap.Add(minionIdentity, freeElement3);
-				freeElement3.SetContent(minionIdentity, new Action<IAssignableIdentity>(this.OnRowClicked), this);
-			}
+		}
+		if (this.targetAssignable.canBePublic)
+		{
+			AssignableSideScreenRow freeElement2 = this.rowPool.GetFreeElement(this.rowGroup, true);
+			freeElement2.sideScreen = this;
+			freeElement2.transform.SetAsFirstSibling();
+			this.identityRowMap.Add(Game.Instance.assignmentManager.assignment_groups["public"], freeElement2);
+			freeElement2.SetContent(Game.Instance.assignmentManager.assignment_groups["public"], new Action<IAssignableIdentity>(this.OnRowClicked), this);
+			freeElement2.Refresh(null);
+		}
+		foreach (MinionIdentity minionIdentity in identities)
+		{
+			AssignableSideScreenRow freeElement3 = this.rowPool.GetFreeElement(this.rowGroup, true);
+			freeElement3.sideScreen = this;
+			this.identityRowMap.Add(minionIdentity, freeElement3);
+			freeElement3.SetContent(minionIdentity, new Action<IAssignableIdentity>(this.OnRowClicked), this);
 		}
 	}
 
@@ -199,7 +190,7 @@ public class AssignableSideScreen : SideScreenContent
 			keyValuePair.Value.targetIdentity = null;
 		}
 		this.identityRowMap.Clear();
-		this.regionNeededText.SetText("");
+		this.regionNeededText.SetText(string.Empty);
 	}
 
 	private void HideScreen(bool hide)
@@ -295,7 +286,7 @@ public class AssignableSideScreen : SideScreenContent
 
 	private MultiToggle activeSortToggle;
 
-	private bool sortReversed = false;
+	private bool sortReversed;
 
 	private int targetAssignableSubscriptionHandle = -1;
 

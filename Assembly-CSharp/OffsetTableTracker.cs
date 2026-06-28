@@ -11,24 +11,25 @@ public class OffsetTableTracker : OffsetTracker
 
 	protected override void UpdateCell(int previous_cell, int current_cell)
 	{
-		if (previous_cell != current_cell)
+		if (previous_cell == current_cell)
 		{
-			base.UpdateCell(previous_cell, current_cell);
-			if (this.solidPartitionerEntry == null)
-			{
-				Extents extents = new Extents(current_cell, this.table);
-				extents.height += 2;
-				extents.y--;
-				this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("OffsetTableTracker.UpdateCell", this.cmp.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnCellChanged));
-				this.validNavCellChangedPartitionerEntry = GameScenePartitioner.Instance.Add("OffsetTableTracker.UpdateCell", this.cmp.gameObject, extents, GameScenePartitioner.Instance.validNavCellChangedLayer, new Action<object>(this.OnCellChanged));
-			}
-			else
-			{
-				this.solidPartitionerEntry.UpdatePosition(current_cell);
-				this.validNavCellChangedPartitionerEntry.UpdatePosition(current_cell);
-			}
-			this.offsets = null;
+			return;
 		}
+		base.UpdateCell(previous_cell, current_cell);
+		if (this.solidPartitionerEntry == null)
+		{
+			Extents extents = new Extents(current_cell, this.table);
+			extents.height += 2;
+			extents.y--;
+			this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("OffsetTableTracker.UpdateCell", this.cmp.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnCellChanged));
+			this.validNavCellChangedPartitionerEntry = GameScenePartitioner.Instance.Add("OffsetTableTracker.UpdateCell", this.cmp.gameObject, extents, GameScenePartitioner.Instance.validNavCellChangedLayer, new Action<object>(this.OnCellChanged));
+		}
+		else
+		{
+			this.solidPartitionerEntry.UpdatePosition(current_cell);
+			this.validNavCellChangedPartitionerEntry.UpdatePosition(current_cell);
+		}
+		this.offsets = null;
 	}
 
 	private static bool IsValidRow(int current_cell, CellOffset[] row)
@@ -52,13 +53,10 @@ public class OffsetTableTracker : OffsetTracker
 			for (int j = 0; j < nav_grid.ValidNavTypes.Length; j++)
 			{
 				NavType navType = nav_grid.ValidNavTypes[j];
-				if (nav_grid.NavTable.IsValid(num, navType))
+				if (nav_grid.NavTable.IsValid(num, navType) && OffsetTableTracker.IsValidRow(cell, array))
 				{
-					if (OffsetTableTracker.IsValidRow(cell, array))
-					{
-						offsets.Add(array[0]);
-						break;
-					}
+					offsets.Add(array[0]);
+					break;
 				}
 			}
 		}
@@ -67,16 +65,17 @@ public class OffsetTableTracker : OffsetTracker
 	protected override void UpdateOffsets(int current_cell)
 	{
 		base.UpdateOffsets(current_cell);
-		if (Grid.IsValidCell(current_cell))
+		if (!Grid.IsValidCell(current_cell))
 		{
-			if (this.navGrid == null)
-			{
-				this.navGrid = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
-			}
-			OffsetTableTracker.newOffsets.Clear();
-			OffsetTableTracker.GetOffsets(current_cell, this.table, this.navGrid, OffsetTableTracker.newOffsets);
-			this.offsets = OffsetTableTracker.newOffsets.ToArray();
+			return;
 		}
+		if (this.navGrid == null)
+		{
+			this.navGrid = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
+		}
+		OffsetTableTracker.newOffsets.Clear();
+		OffsetTableTracker.GetOffsets(current_cell, this.table, this.navGrid, OffsetTableTracker.newOffsets);
+		this.offsets = OffsetTableTracker.newOffsets.ToArray();
 	}
 
 	private void OnCellChanged(object data)

@@ -43,6 +43,6 @@ namespace ProcGen
 
 		public static int AmbientMobDensity = 1;
 
-		private TagSet mobkeys = null;
+		private TagSet mobkeys;
 	}
 }

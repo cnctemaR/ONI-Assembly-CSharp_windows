@@ -26,7 +26,7 @@ public class NextUpdateTimer : KMonoBehaviour
 		TimeSpan timeSpan = this.nextReleaseDate - this.currentReleaseDate;
 		TimeSpan timeSpan2 = this.nextReleaseDate - global::System.DateTime.UtcNow;
 		TimeSpan timeSpan3 = global::System.DateTime.UtcNow - this.currentReleaseDate;
-		string text;
+		string text = string.Empty;
 		string text2;
 		if (timeSpan2.TotalHours < 8.0)
 		{

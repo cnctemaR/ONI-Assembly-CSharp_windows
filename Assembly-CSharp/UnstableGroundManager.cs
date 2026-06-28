@@ -60,15 +60,9 @@ public class UnstableGroundManager : KMonoBehaviour
 		this.fallingObjects.Add(kbatchedAnimController.gameObject);
 		this.SpawnPuff(vector, element, mass, temperature, disease_idx, disease_count);
 		Substance substance = element.substance;
-		if (substance != null)
+		if (substance != null && substance.fallingStartSound != null && CameraController.Instance.IsAudibleSound(vector, substance.fallingStartSound))
 		{
-			if (substance.fallingStartSound != null)
-			{
-				if (CameraController.Instance.IsAudibleSound(vector, substance.fallingStartSound))
-				{
-					SoundEvent.PlayOneShot(substance.fallingStartSound, vector);
-				}
-			}
+			SoundEvent.PlayOneShot(substance.fallingStartSound, vector);
 		}
 	}
 
@@ -159,41 +153,39 @@ public class UnstableGroundManager : KMonoBehaviour
 
 	private void Update()
 	{
-		if (!App.isLoading)
+		if (App.isLoading)
 		{
-			int i = 0;
-			while (i < this.fallingObjects.Count)
+			return;
+		}
+		int i = 0;
+		while (i < this.fallingObjects.Count)
+		{
+			GameObject gameObject = this.fallingObjects[i];
+			Vector3 position = gameObject.transform.position;
+			int cell = Grid.PosToCell(position);
+			int num = Grid.CellBelow(cell);
+			if (!Grid.IsValidCell(num) || Grid.Element[num].IsSolid || (Grid.Cell[num].properties & 4) != 0)
 			{
-				GameObject gameObject = this.fallingObjects[i];
-				Vector3 position = gameObject.transform.position;
-				int cell = Grid.PosToCell(position);
-				int num = Grid.CellBelow(cell);
-				if (!Grid.IsValidCell(num) || Grid.Element[num].IsSolid || (Grid.Cell[num].properties & 4) != 0)
+				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+				this.pendingCells.Add(cell);
+				HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(delegate
 				{
-					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-					this.pendingCells.Add(cell);
-					HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(delegate
-					{
-						this.RemoveFromPending(cell);
-					}, false));
-					SimMessages.AddRemoveSubstance(cell, component.ElementID, CellEventLogger.Instance.UnstableGround, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, handle.index);
-					if (component.Element.substance != null && component.Element.substance.fallingStopSound != null)
-					{
-						if (CameraController.Instance.IsAudibleSound(position, component.Element.substance.fallingStopSound))
-						{
-							SoundEvent.PlayOneShot(component.Element.substance.fallingStopSound, position);
-						}
-					}
-					GameObject gameObject2 = GameUtil.KInstantiate(EffectPrefabs.Instance.OreAbsorb, position + this.landEffectOffset, Grid.SceneLayer.Front, Folder.FX, null, 0);
-					gameObject2.SetActive(true);
-					this.fallingObjects[i] = this.fallingObjects[this.fallingObjects.Count - 1];
-					this.fallingObjects.RemoveAt(this.fallingObjects.Count - 1);
-					this.ReleaseGO(gameObject);
-				}
-				else
+					this.RemoveFromPending(cell);
+				}, false));
+				SimMessages.AddRemoveSubstance(cell, component.ElementID, CellEventLogger.Instance.UnstableGround, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, handle.index);
+				if (component.Element.substance != null && component.Element.substance.fallingStopSound != null && CameraController.Instance.IsAudibleSound(position, component.Element.substance.fallingStopSound))
 				{
-					i++;
+					SoundEvent.PlayOneShot(component.Element.substance.fallingStopSound, position);
 				}
+				GameObject gameObject2 = GameUtil.KInstantiate(EffectPrefabs.Instance.OreAbsorb, position + this.landEffectOffset, Grid.SceneLayer.Front, Folder.FX, null, 0);
+				gameObject2.SetActive(true);
+				this.fallingObjects[i] = this.fallingObjects[this.fallingObjects.Count - 1];
+				this.fallingObjects.RemoveAt(this.fallingObjects.Count - 1);
+				this.ReleaseGO(gameObject);
+			}
+			else
+			{
+				i++;
 			}
 		}
 	}
@@ -231,22 +223,23 @@ public class UnstableGroundManager : KMonoBehaviour
 	[OnDeserialized]
 	private void OnDeserialized()
 	{
-		if (this.serializedInfo != null)
+		if (this.serializedInfo == null)
 		{
-			this.fallingObjects.Clear();
-			HashedString hashedString = default(HashedString);
-			foreach (UnstableGroundManager.SerializedInfo serializedInfo in this.serializedInfo)
+			return;
+		}
+		this.fallingObjects.Clear();
+		HashedString hashedString = default(HashedString);
+		foreach (UnstableGroundManager.SerializedInfo serializedInfo in this.serializedInfo)
+		{
+			Element element = ElementLoader.FindElementByHash(serializedInfo.element);
+			hashedString.HashValue = serializedInfo.diseaseID;
+			byte index = Db.Get().Diseases.GetIndex(hashedString);
+			int num = serializedInfo.diseaseCount;
+			if (index == 255)
 			{
-				Element element = ElementLoader.FindElementByHash(serializedInfo.element);
-				hashedString.HashValue = serializedInfo.diseaseID;
-				byte index = Db.Get().Diseases.GetIndex(hashedString);
-				int num = serializedInfo.diseaseCount;
-				if (index == 255)
-				{
-					num = 0;
-				}
-				this.SpawnOld(serializedInfo.position, element, serializedInfo.mass, serializedInfo.temperature, index, num);
+				num = 0;
 			}
+			this.SpawnOld(serializedInfo.position, element, serializedInfo.mass, serializedInfo.temperature, index, num);
 		}
 	}
 

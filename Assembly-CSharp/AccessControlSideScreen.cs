@@ -9,16 +9,11 @@ public class AccessControlSideScreen : SideScreenContent
 {
 	public override string GetTitle()
 	{
-		string text;
 		if (this.target != null)
 		{
-			text = string.Format(base.GetTitle(), this.target.GetProperName());
+			return string.Format(base.GetTitle(), this.target.GetProperName());
 		}
-		else
-		{
-			text = base.GetTitle();
-		}
-		return text;
+		return base.GetTitle();
 	}
 
 	protected override void OnSpawn()
@@ -36,20 +31,21 @@ public class AccessControlSideScreen : SideScreenContent
 		}
 		this.target = target.GetComponent<AccessControl>();
 		this.doorTarget = target.GetComponent<Door>();
-		if (!(this.target == null))
+		if (this.target == null)
 		{
-			target.Subscribe(1734268753, new Action<object>(this.OnDoorStateChanged));
-			target.Subscribe(-1525636549, new Action<object>(this.OnAccessControlChanged));
-			if (this.rowPool == null)
-			{
-				this.rowPool = new UIPool<AccessControlSideScreenRow>(this.rowPrefab);
-			}
-			base.gameObject.SetActive(true);
-			this.identityList = new List<MinionIdentity>(Components.LiveMinionIdentities);
-			this.dupeSortingToggle.isOn = true;
-			this.Refresh(this.identityList, true);
-			this.SortByName(true);
+			return;
 		}
+		target.Subscribe(1734268753, new Action<object>(this.OnDoorStateChanged));
+		target.Subscribe(-1525636549, new Action<object>(this.OnAccessControlChanged));
+		if (this.rowPool == null)
+		{
+			this.rowPool = new UIPool<AccessControlSideScreenRow>(this.rowPrefab);
+		}
+		base.gameObject.SetActive(true);
+		this.identityList = new List<MinionIdentity>(Components.LiveMinionIdentities);
+		this.dupeSortingToggle.isOn = true;
+		this.Refresh(this.identityList, true);
+		this.SortByName(true);
 	}
 
 	public override void ClearTarget()
@@ -113,21 +109,22 @@ public class AccessControlSideScreen : SideScreenContent
 	private void ExecuteSort<T>(Toggle toggle, bool state, Func<MinionIdentity, T> sortFunction, bool refresh = false)
 	{
 		toggle.GetComponent<ImageToggleState>().SetActiveState(state);
-		if (state)
+		if (!state)
 		{
-			this.identityList = ((!state) ? this.identityList.OrderByDescending<MinionIdentity, T>(sortFunction).ToList<MinionIdentity>() : this.identityList.OrderBy<MinionIdentity, T>(sortFunction).ToList<MinionIdentity>());
-			if (refresh)
+			return;
+		}
+		this.identityList = ((!state) ? this.identityList.OrderByDescending<MinionIdentity, T>(sortFunction).ToList<MinionIdentity>() : this.identityList.OrderBy<MinionIdentity, T>(sortFunction).ToList<MinionIdentity>());
+		if (refresh)
+		{
+			this.Refresh(this.identityList, false);
+		}
+		else
+		{
+			for (int i = 0; i < this.identityList.Count; i++)
 			{
-				this.Refresh(this.identityList, false);
-			}
-			else
-			{
-				for (int i = 0; i < this.identityList.Count; i++)
+				if (this.identityRowMap.ContainsKey(this.identityList[i]))
 				{
-					if (this.identityRowMap.ContainsKey(this.identityList[i]))
-					{
-						this.identityRowMap[this.identityList[i]].transform.SetSiblingIndex(i);
-					}
+					this.identityRowMap[this.identityList[i]].transform.SetSiblingIndex(i);
 				}
 			}
 		}

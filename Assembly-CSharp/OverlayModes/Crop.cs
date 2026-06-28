@@ -61,13 +61,10 @@ namespace OverlayModes
 			foreach (Harvestable harvestable2 in Components.Harvestables)
 			{
 				Vector2I vector2I3 = Grid.PosToXY(harvestable2.transform.position);
-				if (vector2I <= vector2I3 && vector2I3 <= vector2I2)
+				if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && !this.privateTargets.Contains(harvestable2))
 				{
-					if (!this.privateTargets.Contains(harvestable2))
-					{
-						this.AddCropUI(harvestable2);
-						this.queuedAdds.Add(harvestable2);
-					}
+					this.AddCropUI(harvestable2);
+					this.queuedAdds.Add(harvestable2);
 				}
 			}
 			foreach (Harvestable harvestable3 in this.queuedAdds)
@@ -134,7 +131,7 @@ namespace OverlayModes
 
 		private List<Crop.UpdateCropInfo> updateCropInfo = new List<Crop.UpdateCropInfo>();
 
-		private int freeHarvestableNotificationIdx = 0;
+		private int freeHarvestableNotificationIdx;
 
 		private List<GameObject> harvestableNotificationList = new List<GameObject>();
 

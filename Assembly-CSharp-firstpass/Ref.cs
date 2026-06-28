@@ -22,16 +22,11 @@ public class Ref<ReferenceType> : ISaveLoadable where ReferenceType : KMonoBehav
 	public ComponentType Get<ComponentType>() where ComponentType : MonoBehaviour
 	{
 		ReferenceType referenceType = this.Get();
-		ComponentType componentType;
 		if (referenceType == null)
 		{
-			componentType = (ComponentType)((object)null);
+			return (ComponentType)((object)null);
 		}
-		else
-		{
-			componentType = referenceType.GetComponent<ComponentType>();
-		}
-		return componentType;
+		return referenceType.GetComponent<ComponentType>();
 	}
 
 	public ReferenceType Get()

@@ -93,16 +93,11 @@ namespace FMODUnity
 		internal static string GetBankPath(string bankName)
 		{
 			string streamingAssetsPath = Application.streamingAssetsPath;
-			string text;
 			if (Path.GetExtension(bankName) != ".bank")
 			{
-				text = string.Format("{0}/{1}.bank", streamingAssetsPath, bankName);
+				return string.Format("{0}/{1}.bank", streamingAssetsPath, bankName);
 			}
-			else
-			{
-				text = string.Format("{0}/{1}", streamingAssetsPath, bankName);
-			}
-			return text;
+			return string.Format("{0}/{1}", streamingAssetsPath, bankName);
 		}
 
 		internal static string GetPluginPath(string pluginName)
@@ -118,7 +113,7 @@ namespace FMODUnity
 			int num2;
 			Memory.GetStats(out num, out num2);
 			Guid guid;
-			global::FMOD.Studio.Util.ParseID("", out guid);
+			global::FMOD.Studio.Util.ParseID(string.Empty, out guid);
 		}
 
 		public const string LogFileName = "fmod.log";

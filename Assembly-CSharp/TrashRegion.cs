@@ -99,17 +99,12 @@ public class TrashRegion : KMonoBehaviour
 
 	private static bool HasRoom(int cell)
 	{
-		bool flag;
 		if (Grid.Solid[cell])
 		{
-			flag = false;
+			return false;
 		}
-		else
-		{
-			int num = Grid.CellAbove(cell);
-			flag = !(Grid.Objects[num, 3] != null);
-		}
-		return flag;
+		int num = Grid.CellAbove(cell);
+		return !(Grid.Objects[num, 3] != null);
 	}
 
 	public bool IsFull()
@@ -162,13 +157,10 @@ public class TrashRegion : KMonoBehaviour
 		foreach (int num5 in this.GetAvailableCells())
 		{
 			int cellDistance = Grid.GetCellDistance(cell, num5);
-			if (TrashRegion.HasRoom(num5))
+			if (TrashRegion.HasRoom(num5) && cellDistance < num4)
 			{
-				if (cellDistance < num4)
-				{
-					num3 = num5;
-					num4 = cellDistance;
-				}
+				num3 = num5;
+				num4 = cellDistance;
 			}
 			if (cellDistance < num2)
 			{
@@ -176,24 +168,20 @@ public class TrashRegion : KMonoBehaviour
 				num2 = cellDistance;
 			}
 		}
-		int num6;
 		if (num3 != Grid.InvalidCell)
 		{
-			num6 = num3;
+			return num3;
 		}
-		else
-		{
-			num6 = num;
-		}
-		return num6;
+		return num;
 	}
 
 	private void MarkAsAvailable()
 	{
-		if (this.IsFull())
+		if (!this.IsFull())
 		{
-			this.CreateFetchChore();
+			return;
 		}
+		this.CreateFetchChore();
 	}
 
 	private void ClearChores()
@@ -207,10 +195,11 @@ public class TrashRegion : KMonoBehaviour
 
 	private void MarkAsFull()
 	{
-		if (!this.IsFull())
+		if (this.IsFull())
 		{
-			this.ClearChores();
+			return;
 		}
+		this.ClearChores();
 	}
 
 	protected override void OnCleanUp()

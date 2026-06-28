@@ -94,8 +94,8 @@ public class YieldEffect
 		{
 			SeedProducer component = plant.GetComponent<SeedProducer>();
 			string text = "Seed";
-			string text2 = "";
-			string text3 = CREATURES.CROP_EFFECTS.ADD_SEEDS.TOOLTIP;
+			string empty = string.Empty;
+			string text2 = CREATURES.CROP_EFFECTS.ADD_SEEDS.TOOLTIP;
 			if (component != null)
 			{
 				GameObject prefab = Assets.GetPrefab(new Tag(component.seedInfo.seedId));
@@ -106,7 +106,7 @@ public class YieldEffect
 			}
 			return new Descriptor[]
 			{
-				new Descriptor(string.Format(CREATURES.CROP_EFFECTS.ADD_SEEDS.DESC, this.numSeeds + component.seedInfo.newSeedsProduced, text, text2), string.Format(text3, this.numSeeds), Descriptor.DescriptorType.Lifecycle, false)
+				new Descriptor(string.Format(CREATURES.CROP_EFFECTS.ADD_SEEDS.DESC, this.numSeeds + component.seedInfo.newSeedsProduced, text, empty), string.Format(text2, this.numSeeds), Descriptor.DescriptorType.Lifecycle, false)
 			};
 		}
 

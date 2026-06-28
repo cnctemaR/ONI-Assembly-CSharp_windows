@@ -5,71 +5,51 @@ public static class TextureUtil
 {
 	public static int GetBytesPerPixel(TextureFormat format)
 	{
-		int num;
 		switch (format)
 		{
 		case TextureFormat.Alpha8:
-			num = 1;
-			break;
+			return 1;
 		default:
-			if (format != TextureFormat.RGFloat)
+			if (format == TextureFormat.RGFloat)
 			{
-				if (format != TextureFormat.RGBAFloat)
-				{
-					throw new ArgumentOutOfRangeException();
-				}
-				num = 16;
+				return 8;
 			}
-			else
+			if (format != TextureFormat.RGBAFloat)
 			{
-				num = 8;
+				throw new ArgumentOutOfRangeException();
 			}
-			break;
+			return 16;
 		case TextureFormat.RGB24:
-			num = 3;
-			break;
+			return 3;
 		case TextureFormat.RGBA32:
-			num = 4;
-			break;
+			return 4;
 		case TextureFormat.ARGB32:
-			num = 4;
-			break;
+			return 4;
 		}
-		return num;
 	}
 
 	public static RenderTextureFormat GetRenderTextureFormat(TextureFormat format)
 	{
-		RenderTextureFormat renderTextureFormat;
 		switch (format)
 		{
 		case TextureFormat.Alpha8:
-			renderTextureFormat = RenderTextureFormat.ARGB32;
-			break;
+			return RenderTextureFormat.ARGB32;
 		default:
-			if (format != TextureFormat.RGFloat)
+			if (format == TextureFormat.RGFloat)
 			{
-				if (format != TextureFormat.RGBAFloat)
-				{
-					throw new ArgumentOutOfRangeException();
-				}
-				renderTextureFormat = RenderTextureFormat.ARGBHalf;
+				return RenderTextureFormat.RGFloat;
 			}
-			else
+			if (format != TextureFormat.RGBAFloat)
 			{
-				renderTextureFormat = RenderTextureFormat.RGFloat;
+				throw new ArgumentOutOfRangeException();
 			}
-			break;
+			return RenderTextureFormat.ARGBHalf;
 		case TextureFormat.RGB24:
-			renderTextureFormat = RenderTextureFormat.ARGB32;
-			break;
+			return RenderTextureFormat.ARGB32;
 		case TextureFormat.RGBA32:
-			renderTextureFormat = RenderTextureFormat.ARGB32;
-			break;
+			return RenderTextureFormat.ARGB32;
 		case TextureFormat.ARGB32:
-			renderTextureFormat = RenderTextureFormat.ARGB32;
-			break;
+			return RenderTextureFormat.ARGB32;
 		}
-		return renderTextureFormat;
 	}
 }

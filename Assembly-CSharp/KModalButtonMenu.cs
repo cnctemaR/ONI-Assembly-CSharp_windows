@@ -89,7 +89,7 @@ public class KModalButtonMenu : KButtonMenu
 		this.childDialog = null;
 	}
 
-	private bool shown = false;
+	private bool shown;
 
 	[SerializeField]
 	private GameObject panelRoot;

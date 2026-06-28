@@ -12,16 +12,11 @@ public static class StateMachineControllerExtensions
 	public static StateMachineInstanceType GetSMI<StateMachineInstanceType>(this GameObject go) where StateMachineInstanceType : class
 	{
 		StateMachineController component = go.GetComponent<StateMachineController>();
-		StateMachineInstanceType stateMachineInstanceType;
 		if (component != null)
 		{
-			stateMachineInstanceType = component.GetSMI<StateMachineInstanceType>();
+			return component.GetSMI<StateMachineInstanceType>();
 		}
-		else
-		{
-			stateMachineInstanceType = (StateMachineInstanceType)((object)null);
-		}
-		return stateMachineInstanceType;
+		return (StateMachineInstanceType)((object)null);
 	}
 
 	public static List<StateMachineInstanceType> GetAllSMI<StateMachineInstanceType>(this Component cmp) where StateMachineInstanceType : class
@@ -32,15 +27,10 @@ public static class StateMachineControllerExtensions
 	public static List<StateMachineInstanceType> GetAllSMI<StateMachineInstanceType>(this GameObject go) where StateMachineInstanceType : class
 	{
 		StateMachineController component = go.GetComponent<StateMachineController>();
-		List<StateMachineInstanceType> list;
 		if (component != null)
 		{
-			list = component.GetAllSMI<StateMachineInstanceType>();
+			return component.GetAllSMI<StateMachineInstanceType>();
 		}
-		else
-		{
-			list = new List<StateMachineInstanceType>();
-		}
-		return list;
+		return new List<StateMachineInstanceType>();
 	}
 }

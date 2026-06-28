@@ -56,12 +56,9 @@ public class RegionTool : DragTool
 	{
 		RegionManager regionManager = Game.Instance.RegionManager;
 		Region intersectionRegion = regionManager.GetIntersectionRegion(cell);
-		if (intersectionRegion != null)
+		if (intersectionRegion != null && intersectionRegion.PrefabID().Name == regionManager.selectedRegionPrefab.PrefabID().Name)
 		{
-			if (intersectionRegion.PrefabID().Name == regionManager.selectedRegionPrefab.PrefabID().Name)
-			{
-				return intersectionRegion;
-			}
+			return intersectionRegion;
 		}
 		return null;
 	}
@@ -186,37 +183,38 @@ public class RegionTool : DragTool
 		this.DeleteOverlappingCells(ref this.overlappedRegionCells);
 		if (this.overlappedRegions.Count > 0)
 		{
-			if (this.overlappedRegions.Count != 1 || newRegionInfo)
+			if (this.overlappedRegions.Count == 1 && !newRegionInfo)
 			{
-				this.mergedTags.Clear();
-				this.overlappedRegionCells.Clear();
-				foreach (Region region in this.overlappedRegions)
+				return;
+			}
+			this.mergedTags.Clear();
+			this.overlappedRegionCells.Clear();
+			foreach (Region region in this.overlappedRegions)
+			{
+				TreeFilterable component = region.gameObject.GetComponent<TreeFilterable>();
+				if (component != null)
 				{
-					TreeFilterable component = region.gameObject.GetComponent<TreeFilterable>();
-					if (component != null)
+					foreach (Tag tag in component.GetTags())
 					{
-						foreach (Tag tag in component.GetTags())
+						if (!this.mergedTags.Contains(tag))
 						{
-							if (!this.mergedTags.Contains(tag))
-							{
-								this.mergedTags.Add(tag);
-							}
+							this.mergedTags.Add(tag);
 						}
 					}
-					foreach (int num in region.Cells)
-					{
-						this.overlappingCells.Add(num);
-					}
 				}
-				foreach (int num2 in this.newRegionCells)
+				foreach (int num in region.Cells)
 				{
-					if (!this.overlappingCells.Contains(num2))
-					{
-						this.overlappingCells.Add(num2);
-					}
+					this.overlappingCells.Add(num);
 				}
-				this.ReplaceRegions(this.overlappedRegions, this.overlappingCells, downPos, this.mergedTags);
 			}
+			foreach (int num2 in this.newRegionCells)
+			{
+				if (!this.overlappingCells.Contains(num2))
+				{
+					this.overlappingCells.Add(num2);
+				}
+			}
+			this.ReplaceRegions(this.overlappedRegions, this.overlappingCells, downPos, this.mergedTags);
 		}
 		else
 		{

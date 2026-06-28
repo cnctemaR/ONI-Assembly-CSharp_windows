@@ -112,32 +112,31 @@ public class NewBaseScreen : KScreen
 		if (headquartersCell == -1)
 		{
 			global::Debug.LogWarning("No headquarters in saved base template. Cannot place minions. Confirm there is a headquarters saved to the base template, or consider creating a new one.", null);
+			return;
 		}
-		else
+		int num;
+		int num2;
+		Grid.CellToXY(headquartersCell, out num, out num2);
+		if (Grid.WidthInCells < 64)
 		{
-			int num;
-			int num2;
-			Grid.CellToXY(headquartersCell, out num, out num2);
-			if (Grid.WidthInCells >= 64)
+			return;
+		}
+		int baseLeft = WorldGen.BaseLeft;
+		int baseRight = WorldGen.BaseRight;
+		Effect a_new_hope = Db.Get().effects.Get("AnewHope");
+		for (int i = 0; i < this.minionStartingStats.Length; i++)
+		{
+			int num3 = num + i % (baseRight - baseLeft) + 1;
+			int num4 = num2;
+			int num5 = Grid.XYToCell(num3, num4);
+			GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.MinionPrefab, SceneOrganizer.Instance.GetFolder(Folder.Minions), null);
+			gameObject.transform.localPosition = Grid.CellToPosCBC(num5, Grid.SceneLayer.Move);
+			gameObject.SetActive(true);
+			this.minionStartingStats[i].Apply(gameObject);
+			GameScheduler.Instance.Schedule("ANewHope", 3f + 0.5f * (float)i, delegate(object m)
 			{
-				int baseLeft = WorldGen.BaseLeft;
-				int baseRight = WorldGen.BaseRight;
-				Effect a_new_hope = Db.Get().effects.Get("AnewHope");
-				for (int i = 0; i < this.minionStartingStats.Length; i++)
-				{
-					int num3 = num + i % (baseRight - baseLeft) + 1;
-					int num4 = num2;
-					int num5 = Grid.XYToCell(num3, num4);
-					GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.MinionPrefab, SceneOrganizer.Instance.GetFolder(Folder.Minions), null);
-					gameObject.transform.localPosition = Grid.CellToPosCBC(num5, Grid.SceneLayer.Move);
-					gameObject.SetActive(true);
-					this.minionStartingStats[i].Apply(gameObject);
-					GameScheduler.Instance.Schedule("ANewHope", 3f + 0.5f * (float)i, delegate(object m)
-					{
-						((GameObject)m).GetComponent<Effects>().Add(a_new_hope, true);
-					}, gameObject, null);
-				}
-			}
+				((GameObject)m).GetComponent<Effects>().Add(a_new_hope, true);
+			}, gameObject, null);
 		}
 	}
 

@@ -56,26 +56,28 @@ public class VendingMachine : StateMachineComponent<VendingMachine.StatesInstanc
 
 	public void ActivateChore(object param = null)
 	{
-		if (this.chore == null)
+		if (this.chore != null)
 		{
-			base.GetComponent<Workable>().SetWorkTime(2f);
-			ChoreType emptyStorage = Db.Get().ChoreTypes.EmptyStorage;
-			KAnimFile anim = Assets.GetAnim("anim_break_kanim");
-			this.chore = new WorkChore<Workable>(emptyStorage, this, null, true, delegate(Chore o)
-			{
-				this.CompleteChore();
-			}, null, null, true, null, true, default(Tag), anim, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
-			this.OnRefreshUserMenu(null);
+			return;
 		}
+		base.GetComponent<Workable>().SetWorkTime(2f);
+		ChoreType emptyStorage = Db.Get().ChoreTypes.EmptyStorage;
+		KAnimFile anim = Assets.GetAnim("anim_break_kanim");
+		this.chore = new WorkChore<Workable>(emptyStorage, this, null, true, delegate(Chore o)
+		{
+			this.CompleteChore();
+		}, null, null, true, null, true, default(Tag), anim, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+		this.OnRefreshUserMenu(null);
 	}
 
 	public void CancelChore(object param = null)
 	{
-		if (this.chore != null)
+		if (this.chore == null)
 		{
-			this.chore.Cancel("User cancelled");
-			this.chore = null;
+			return;
 		}
+		this.chore.Cancel("User cancelled");
+		this.chore = null;
 	}
 
 	private void CompleteChore()
@@ -93,7 +95,7 @@ public class VendingMachine : StateMachineComponent<VendingMachine.StatesInstanc
 	private string[] contents_ids = new string[] { "FieldRation" };
 
 	[Serialize]
-	private bool used = false;
+	private bool used;
 
 	private Chore chore;
 

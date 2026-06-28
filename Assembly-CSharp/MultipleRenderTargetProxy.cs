@@ -81,5 +81,5 @@ public class MultipleRenderTargetProxy : MonoBehaviour
 
 	private Camera camera;
 
-	private bool colouredOverlayBufferEnabled = false;
+	private bool colouredOverlayBufferEnabled;
 }

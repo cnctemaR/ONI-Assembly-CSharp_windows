@@ -176,22 +176,20 @@ public class BuildMenu : KScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (!e.Consumed)
+		if (e.Consumed)
 		{
-			if (this.mouseOver && this.ConsumeMouseScroll)
-			{
-				if (e.TryConsume(global::Action.ZoomIn) || e.TryConsume(global::Action.ZoomOut))
-				{
-				}
-			}
-			if (!e.Consumed && this.selectedCategory != BuildMenu.Category.INVALID && e.TryConsume(global::Action.Escape))
-			{
-				this.OnUIClear(null);
-			}
-			else if (!e.Consumed)
-			{
-				base.OnKeyDown(e);
-			}
+			return;
+		}
+		if (!this.mouseOver || !this.ConsumeMouseScroll || e.TryConsume(global::Action.ZoomIn) || e.TryConsume(global::Action.ZoomOut))
+		{
+		}
+		if (!e.Consumed && this.selectedCategory != BuildMenu.Category.INVALID && e.TryConsume(global::Action.Escape))
+		{
+			this.OnUIClear(null);
+		}
+		else if (!e.Consumed)
+		{
+			base.OnKeyDown(e);
 		}
 	}
 
@@ -293,22 +291,23 @@ public class BuildMenu : KScreen
 	private void Update()
 	{
 		this.elapsedTime += Time.unscaledDeltaTime;
-		if (this.elapsedTime > this.updateInterval)
+		if (this.elapsedTime <= this.updateInterval)
 		{
-			this.elapsedTime = 0f;
-			if (this.productInfoScreen.gameObject.activeSelf)
-			{
-				this.productInfoScreen.materialSelectionPanel.UpdateResourceToggleValues();
-			}
-			foreach (KIconToggleMenu kiconToggleMenu in this.submenuStack)
-			{
-				if (kiconToggleMenu is BuildMenuCategoriesScreen)
-				{
-					(kiconToggleMenu as BuildMenuCategoriesScreen).UpdateBuildableStates(false);
-				}
-			}
-			this.submenus[BuildMenu.Category.ROOT].UpdateBuildableStates(false);
+			return;
 		}
+		this.elapsedTime = 0f;
+		if (this.productInfoScreen.gameObject.activeSelf)
+		{
+			this.productInfoScreen.materialSelectionPanel.UpdateResourceToggleValues();
+		}
+		foreach (KIconToggleMenu kiconToggleMenu in this.submenuStack)
+		{
+			if (kiconToggleMenu is BuildMenuCategoriesScreen)
+			{
+				(kiconToggleMenu as BuildMenuCategoriesScreen).UpdateBuildableStates(false);
+			}
+		}
+		this.submenus[BuildMenu.Category.ROOT].UpdateBuildableStates(false);
 	}
 
 	private void OnRecipeElementsFullySelected()
@@ -527,7 +526,7 @@ public class BuildMenu : KScreen
 
 	private float updateInterval = 1f;
 
-	private float elapsedTime = 0f;
+	private float elapsedTime;
 
 	[Serializable]
 	private struct PadInfo

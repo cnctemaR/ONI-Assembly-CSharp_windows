@@ -73,53 +73,54 @@ public class BaseUtilityBuildTool : DragTool
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
-		if (this.path.Count != 0 && this.path[this.path.Count - 1].cell != cell)
+		if (this.path.Count == 0 || this.path[this.path.Count - 1].cell == cell)
 		{
-			this.placeSound = GlobalAssets.GetSound("Place_building_" + this.def.AudioSize, false);
-			Vector3 vector = Grid.CellToPos(cell);
-			EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector);
-			if (this.path.Count > 1 && cell == this.path[this.path.Count - 2].cell)
-			{
-				if (this.previousCellConnection != null)
-				{
-					this.previousCellConnection.ConnectedEvent(this.previousCell);
-					KMonoBehaviour.PlaySound(GlobalAssets.GetSound("OutletDisconnected", false));
-					this.previousCellConnection = null;
-				}
-				this.previousCell = cell;
-				if (!this.CheckForConnection(cell, "Wire", "", ref this.previousCellConnection, false))
-				{
-					this.CheckForConnection(cell, "Pipe", "", ref this.previousCellConnection, false);
-				}
-				global::UnityEngine.Object.Destroy(this.path[this.path.Count - 1].visualizer);
-				TileVisualizer.RefreshCell(this.path[this.path.Count - 1].cell, this.def.TileLayer);
-				this.path.RemoveAt(this.path.Count - 1);
-				this.buildingCount = ((this.buildingCount != 1) ? (this.buildingCount - 1) : (this.buildingCount = 14));
-				eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
-				SoundEvent.EndOneShot(eventInstance);
-			}
-			else if (!this.path.Exists((BaseUtilityBuildTool.PathNode n) => n.cell == cell))
-			{
-				this.path.Add(new BaseUtilityBuildTool.PathNode
-				{
-					cell = cell,
-					visualizer = null
-				});
-				if (!this.CheckForConnection(cell, "Wire", "OutletConnected", ref this.previousCellConnection, true))
-				{
-					this.CheckForConnection(cell, "Pipe", "OutletConnected", ref this.previousCellConnection, true);
-				}
-				else
-				{
-					this.previousCell = cell;
-				}
-				this.buildingCount = this.buildingCount % 14 + 1;
-				eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
-				SoundEvent.EndOneShot(eventInstance);
-			}
-			this.visualizer.SetActive(this.path.Count < 2);
-			ResourceRemainingDisplayScreen.instance.SetNumberOfPendingConstructions(this.path.Count);
+			return;
 		}
+		this.placeSound = GlobalAssets.GetSound("Place_building_" + this.def.AudioSize, false);
+		Vector3 vector = Grid.CellToPos(cell);
+		EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector);
+		if (this.path.Count > 1 && cell == this.path[this.path.Count - 2].cell)
+		{
+			if (this.previousCellConnection != null)
+			{
+				this.previousCellConnection.ConnectedEvent(this.previousCell);
+				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("OutletDisconnected", false));
+				this.previousCellConnection = null;
+			}
+			this.previousCell = cell;
+			if (!this.CheckForConnection(cell, "Wire", string.Empty, ref this.previousCellConnection, false))
+			{
+				this.CheckForConnection(cell, "Pipe", string.Empty, ref this.previousCellConnection, false);
+			}
+			global::UnityEngine.Object.Destroy(this.path[this.path.Count - 1].visualizer);
+			TileVisualizer.RefreshCell(this.path[this.path.Count - 1].cell, this.def.TileLayer);
+			this.path.RemoveAt(this.path.Count - 1);
+			this.buildingCount = ((this.buildingCount != 1) ? (this.buildingCount - 1) : (this.buildingCount = 14));
+			eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
+			SoundEvent.EndOneShot(eventInstance);
+		}
+		else if (!this.path.Exists((BaseUtilityBuildTool.PathNode n) => n.cell == cell))
+		{
+			this.path.Add(new BaseUtilityBuildTool.PathNode
+			{
+				cell = cell,
+				visualizer = null
+			});
+			if (!this.CheckForConnection(cell, "Wire", "OutletConnected", ref this.previousCellConnection, true))
+			{
+				this.CheckForConnection(cell, "Pipe", "OutletConnected", ref this.previousCellConnection, true);
+			}
+			else
+			{
+				this.previousCell = cell;
+			}
+			this.buildingCount = this.buildingCount % 14 + 1;
+			eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
+			SoundEvent.EndOneShot(eventInstance);
+		}
+		this.visualizer.SetActive(this.path.Count < 2);
+		ResourceRemainingDisplayScreen.instance.SetNumberOfPendingConstructions(this.path.Count);
 	}
 
 	private bool CheckForConnection(int cell, string defName, string soundName, ref BuildingCellVisualizer outBcv, bool fireEvents = true)
@@ -167,42 +168,32 @@ public class BaseUtilityBuildTool : DragTool
 	private Building GetBuilding(int cell)
 	{
 		GameObject gameObject = Grid.Objects[cell, 1];
-		Building building;
 		if (gameObject != null)
 		{
-			building = gameObject.GetComponent<Building>();
+			return gameObject.GetComponent<Building>();
 		}
-		else
-		{
-			building = null;
-		}
-		return building;
+		return null;
 	}
 
 	private UtilityConnections GetConnectionDirection(int prevCell, int cell)
 	{
-		UtilityConnections utilityConnections;
 		if (prevCell + 1 == cell)
 		{
-			utilityConnections = UtilityConnections.Right;
+			return UtilityConnections.Right;
 		}
-		else if (prevCell - 1 == cell)
+		if (prevCell - 1 == cell)
 		{
-			utilityConnections = UtilityConnections.Left;
+			return UtilityConnections.Left;
 		}
-		else if (prevCell + Grid.WidthInCells == cell)
+		if (prevCell + Grid.WidthInCells == cell)
 		{
-			utilityConnections = UtilityConnections.Up;
+			return UtilityConnections.Up;
 		}
-		else if (prevCell - Grid.WidthInCells == cell)
+		if (prevCell - Grid.WidthInCells == cell)
 		{
-			utilityConnections = UtilityConnections.Down;
+			return UtilityConnections.Down;
 		}
-		else
-		{
-			utilityConnections = (UtilityConnections)0;
-		}
-		return utilityConnections;
+		return (UtilityConnections)0;
 	}
 
 	protected override DragTool.Mode GetMode()
@@ -212,77 +203,74 @@ public class BaseUtilityBuildTool : DragTool
 
 	public override void OnLeftClickDown(Vector3 cursor_pos)
 	{
-		if (!(this.visualizer == null))
+		if (this.visualizer == null)
 		{
-			this.path.Clear();
-			int num = Grid.PosToCell(cursor_pos);
-			if (Grid.Visible[num] > 0 || PropertyTextures.FogOfWarScale == 1f)
-			{
-				this.path.Add(new BaseUtilityBuildTool.PathNode
-				{
-					cell = num,
-					visualizer = null
-				});
-				if (!this.CheckForConnection(num, "Wire", "OutletConnected", ref this.previousCellConnection, true))
-				{
-					this.CheckForConnection(num, "Pipe", "OutletConnected", ref this.previousCellConnection, true);
-				}
-			}
-			this.visUpdater = base.StartCoroutine(this.VisUpdater());
-			this.visualizer.GetComponent<KBatchedAnimController>().StopAndClear();
-			ResourceRemainingDisplayScreen.instance.SetNumberOfPendingConstructions(1);
-			this.placeSound = GlobalAssets.GetSound("Place_building_" + this.def.AudioSize, false);
-			if (this.placeSound != null)
-			{
-				this.buildingCount = this.buildingCount % 14 + 1;
-				Vector3 vector = Grid.CellToPos(num);
-				EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector);
-				if (this.def.AudioSize == "small")
-				{
-					eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
-				}
-				SoundEvent.EndOneShot(eventInstance);
-			}
-			base.OnLeftClickDown(cursor_pos);
+			return;
 		}
+		this.path.Clear();
+		int num = Grid.PosToCell(cursor_pos);
+		if (Grid.Visible[num] > 0 || PropertyTextures.FogOfWarScale == 1f)
+		{
+			this.path.Add(new BaseUtilityBuildTool.PathNode
+			{
+				cell = num,
+				visualizer = null
+			});
+			if (!this.CheckForConnection(num, "Wire", "OutletConnected", ref this.previousCellConnection, true))
+			{
+				this.CheckForConnection(num, "Pipe", "OutletConnected", ref this.previousCellConnection, true);
+			}
+		}
+		this.visUpdater = base.StartCoroutine(this.VisUpdater());
+		this.visualizer.GetComponent<KBatchedAnimController>().StopAndClear();
+		ResourceRemainingDisplayScreen.instance.SetNumberOfPendingConstructions(1);
+		this.placeSound = GlobalAssets.GetSound("Place_building_" + this.def.AudioSize, false);
+		if (this.placeSound != null)
+		{
+			this.buildingCount = this.buildingCount % 14 + 1;
+			Vector3 vector = Grid.CellToPos(num);
+			EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector);
+			if (this.def.AudioSize == "small")
+			{
+				eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
+			}
+			SoundEvent.EndOneShot(eventInstance);
+		}
+		base.OnLeftClickDown(cursor_pos);
 	}
 
 	public override void OnLeftClickUp(Vector3 cursor_pos)
 	{
-		if (!(this.visualizer == null))
+		if (this.visualizer == null)
 		{
-			this.BuildPath();
-			this.StopVisUpdater();
-			this.Play(this.visualizer, "None_Place");
-			ResourceRemainingDisplayScreen.instance.SetNumberOfPendingConstructions(0);
-			base.OnLeftClickUp(cursor_pos);
+			return;
 		}
+		this.BuildPath();
+		this.StopVisUpdater();
+		this.Play(this.visualizer, "None_Place");
+		ResourceRemainingDisplayScreen.instance.SetNumberOfPendingConstructions(0);
+		base.OnLeftClickUp(cursor_pos);
 	}
 
 	protected UtilityConnections GetDirection(int start_cell, int end_cell)
 	{
-		UtilityConnections utilityConnections;
 		if (end_cell == start_cell - 1)
 		{
-			utilityConnections = UtilityConnections.Left;
+			return UtilityConnections.Left;
 		}
-		else if (end_cell == start_cell + 1)
+		if (end_cell == start_cell + 1)
 		{
-			utilityConnections = UtilityConnections.Right;
+			return UtilityConnections.Right;
 		}
-		else if (end_cell == start_cell + Grid.WidthInCells)
+		if (end_cell == start_cell + Grid.WidthInCells)
 		{
-			utilityConnections = UtilityConnections.Up;
+			return UtilityConnections.Up;
 		}
-		else if (end_cell == start_cell - Grid.WidthInCells)
+		if (end_cell == start_cell - Grid.WidthInCells)
 		{
-			utilityConnections = UtilityConnections.Down;
+			return UtilityConnections.Down;
 		}
-		else
-		{
-			utilityConnections = (UtilityConnections)0;
-		}
-		return utilityConnections;
+		return (UtilityConnections)0;
 	}
 
 	protected UtilityConnections GetOppositeDirection(UtilityConnections dir)
@@ -313,21 +301,22 @@ public class BaseUtilityBuildTool : DragTool
 
 	protected virtual void ApplyPathToConduitSystem()
 	{
-		if (this.path.Count >= 2)
+		if (this.path.Count < 2)
 		{
-			for (int i = 1; i < this.path.Count; i++)
+			return;
+		}
+		for (int i = 1; i < this.path.Count; i++)
+		{
+			int cell = this.path[i - 1].cell;
+			int cell2 = this.path[i].cell;
+			UtilityConnections direction = this.GetDirection(cell, this.path[i].cell);
+			UtilityConnections oppositeDirection = this.GetOppositeDirection(direction);
+			UtilityConnections connections = this.conduitMgr.GetConnections(cell, false);
+			UtilityConnections connections2 = this.conduitMgr.GetConnections(cell2, false);
+			if (this.ShouldLink(direction, connections) && this.ShouldLink(oppositeDirection, connections2))
 			{
-				int cell = this.path[i - 1].cell;
-				int cell2 = this.path[i].cell;
-				UtilityConnections direction = this.GetDirection(cell, this.path[i].cell);
-				UtilityConnections oppositeDirection = this.GetOppositeDirection(direction);
-				UtilityConnections connections = this.conduitMgr.GetConnections(cell, false);
-				UtilityConnections connections2 = this.conduitMgr.GetConnections(cell2, false);
-				if (this.ShouldLink(direction, connections) && this.ShouldLink(oppositeDirection, connections2))
-				{
-					this.conduitMgr.AddConnection(direction, cell, false);
-					this.conduitMgr.AddConnection(oppositeDirection, cell2, false);
-				}
+				this.conduitMgr.AddConnection(direction, cell, false);
+				this.conduitMgr.AddConnection(oppositeDirection, cell2, false);
 			}
 		}
 	}
@@ -514,11 +503,11 @@ public class BaseUtilityBuildTool : DragTool
 
 	private Coroutine visUpdater;
 
-	private int buildingCount = 0;
+	private int buildingCount;
 
 	private int lastCell = -1;
 
-	private BuildingCellVisualizer previousCellConnection = null;
+	private BuildingCellVisualizer previousCellConnection;
 
 	private int previousCell;
 

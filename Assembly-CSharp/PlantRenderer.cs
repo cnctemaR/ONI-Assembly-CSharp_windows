@@ -95,74 +95,53 @@ public class PlantRenderer : KMonoBehaviour
 
 	private CellOffset GetOffset()
 	{
-		CellOffset cellOffset;
 		switch (this.direction)
 		{
 		case PlantRenderer.Direction.Up:
-			cellOffset = new CellOffset(0, 1);
-			break;
+			return new CellOffset(0, 1);
 		case PlantRenderer.Direction.Down:
-			cellOffset = new CellOffset(0, -1);
-			break;
+			return new CellOffset(0, -1);
 		case PlantRenderer.Direction.Left:
-			cellOffset = new CellOffset(-1, 0);
-			break;
+			return new CellOffset(-1, 0);
 		case PlantRenderer.Direction.Right:
-			cellOffset = new CellOffset(1, 0);
-			break;
+			return new CellOffset(1, 0);
 		default:
-			cellOffset = new CellOffset(1, 0);
-			break;
+			return new CellOffset(1, 0);
 		}
-		return cellOffset;
 	}
 
 	private float GetRotation()
 	{
-		float num;
 		switch (this.direction)
 		{
 		case PlantRenderer.Direction.Up:
-			num = 0f;
-			break;
+			return 0f;
 		case PlantRenderer.Direction.Down:
-			num = 180f;
-			break;
+			return 180f;
 		case PlantRenderer.Direction.Left:
-			num = 90f;
-			break;
+			return 90f;
 		case PlantRenderer.Direction.Right:
-			num = 270f;
-			break;
+			return 270f;
 		default:
-			num = 0f;
-			break;
+			return 0f;
 		}
-		return num;
 	}
 
 	private Vector3 GetRotationOffset()
 	{
-		Vector3 vector;
 		switch (this.direction)
 		{
 		case PlantRenderer.Direction.Up:
-			vector = Vector3.zero;
-			break;
+			return Vector3.zero;
 		case PlantRenderer.Direction.Down:
-			vector = new Vector3(0f, 1f, 0f);
-			break;
+			return new Vector3(0f, 1f, 0f);
 		case PlantRenderer.Direction.Left:
-			vector = new Vector3(0.5f, 0f, 0f);
-			break;
+			return new Vector3(0.5f, 0f, 0f);
 		case PlantRenderer.Direction.Right:
-			vector = new Vector3(-0.5f, 0f, 0f);
-			break;
+			return new Vector3(-0.5f, 0f, 0f);
 		default:
-			vector = Vector3.zero;
-			break;
+			return Vector3.zero;
 		}
-		return vector;
 	}
 
 	public void SetEnableRefresh(bool enable_refresh)
@@ -179,39 +158,34 @@ public class PlantRenderer : KMonoBehaviour
 
 	private string GetAnim(int piece_id)
 	{
-		string text;
 		if (this.isDead)
 		{
-			text = "dead";
+			return "dead";
 		}
-		else if (this.stage == 0)
+		if (this.stage == 0)
 		{
-			text = "seedling_ground";
+			return "seedling_ground";
 		}
-		else if (this.stage == 1)
+		if (this.stage == 1)
 		{
 			if (piece_id == 0)
 			{
-				text = "open";
+				return "open";
 			}
-			else
-			{
-				text = null;
-			}
-		}
-		else if (this.stage - 1 == piece_id)
-		{
-			text = "open";
-		}
-		else if (piece_id < this.stage)
-		{
-			text = "vine_idle";
+			return null;
 		}
 		else
 		{
-			text = null;
+			if (this.stage - 1 == piece_id)
+			{
+				return "open";
+			}
+			if (piece_id < this.stage)
+			{
+				return "vine_idle";
+			}
+			return null;
 		}
-		return text;
 	}
 
 	private void CreateController(KAnimFile anims, int cell, float rotation, string anim)
@@ -230,28 +204,30 @@ public class PlantRenderer : KMonoBehaviour
 
 	private void Refresh()
 	{
-		if (this.enableRefresh)
+		if (!this.enableRefresh)
 		{
-			this.Clear();
-			int num = Grid.PosToCell(this);
-			KAnimFile kanimFile = this.aliveAnims;
-			if (this.IsDead())
+			return;
+		}
+		this.Clear();
+		int num = Grid.PosToCell(this);
+		KAnimFile kanimFile = this.aliveAnims;
+		if (this.IsDead())
+		{
+			kanimFile = this.deadAnims;
+		}
+		if (kanimFile == null)
+		{
+			return;
+		}
+		CellOffset offset = this.GetOffset();
+		float rotation = this.GetRotation();
+		for (int i = 0; i <= this.stage; i++)
+		{
+			string anim = this.GetAnim(i);
+			if (anim != null)
 			{
-				kanimFile = this.deadAnims;
-			}
-			if (!(kanimFile == null))
-			{
-				CellOffset offset = this.GetOffset();
-				float rotation = this.GetRotation();
-				for (int i = 0; i <= this.stage; i++)
-				{
-					string anim = this.GetAnim(i);
-					if (anim != null)
-					{
-						int num2 = Grid.OffsetCell(num, i * offset);
-						this.CreateController(kanimFile, num2, rotation, anim);
-					}
-				}
+				int num2 = Grid.OffsetCell(num, i * offset);
+				this.CreateController(kanimFile, num2, rotation, anim);
 			}
 		}
 	}

@@ -70,28 +70,23 @@ public class FilteredDragTool : DragTool
 	{
 		BuildingComplete component = input.GetComponent<BuildingComplete>();
 		BuildingUnderConstruction component2 = input.GetComponent<BuildingUnderConstruction>();
-		string text;
 		if (component)
 		{
-			text = this.GetFilterLayerFromObjectLayer(component.Def.ObjectLayer);
+			return this.GetFilterLayerFromObjectLayer(component.Def.ObjectLayer);
 		}
-		else if (component2)
+		if (component2)
 		{
-			text = this.GetFilterLayerFromObjectLayer(component2.Def.ObjectLayer);
+			return this.GetFilterLayerFromObjectLayer(component2.Def.ObjectLayer);
 		}
-		else if (input.GetComponent<Clearable>() != null || input.GetComponent<Moppable>() != null)
+		if (input.GetComponent<Clearable>() != null || input.GetComponent<Moppable>() != null)
 		{
-			text = "CleanAndClear";
+			return "CleanAndClear";
 		}
-		else if (input.GetComponent<Diggable>() != null)
+		if (input.GetComponent<Diggable>() != null)
 		{
-			text = "DigPlacer";
+			return "DigPlacer";
 		}
-		else
-		{
-			text = "Default";
-		}
-		return text;
+		return "Default";
 	}
 
 	protected string GetFilterLayerFromObjectLayer(ObjectLayer gamer_layer)
@@ -115,7 +110,7 @@ public class FilteredDragTool : DragTool
 				case ObjectLayer.FoundationTile:
 					return "Tiles";
 				case ObjectLayer.GasConduit:
-					goto IL_0083;
+					goto IL_0073;
 				}
 				return "Default";
 			}
@@ -126,63 +121,64 @@ public class FilteredDragTool : DragTool
 		case ObjectLayer.LogicWires:
 			return "Logic";
 		}
-		IL_0083:
+		IL_0073:
 		return "GasPipes";
 	}
 
 	private void OnOverlayChanged(SimViewMode overlay)
 	{
-		if (this.active)
+		if (!this.active)
 		{
-			string text = null;
-			if (overlay != SimViewMode.LiquidVentMap)
+			return;
+		}
+		string text = null;
+		if (overlay != SimViewMode.LiquidVentMap)
+		{
+			if (overlay != SimViewMode.PowerMap)
 			{
-				if (overlay != SimViewMode.PowerMap)
+				if (overlay != SimViewMode.GasVentMap)
 				{
-					if (overlay != SimViewMode.GasVentMap)
+					if (overlay == SimViewMode.Logic)
 					{
-						if (overlay == SimViewMode.Logic)
-						{
-							text = ToolParameterMenu.FILTERLAYERS.LOGIC;
-						}
-					}
-					else
-					{
-						text = ToolParameterMenu.FILTERLAYERS.GASCONDUIT;
+						text = ToolParameterMenu.FILTERLAYERS.LOGIC;
 					}
 				}
 				else
 				{
-					text = ToolParameterMenu.FILTERLAYERS.WIRES;
+					text = ToolParameterMenu.FILTERLAYERS.GASCONDUIT;
 				}
 			}
 			else
 			{
-				text = ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT;
+				text = ToolParameterMenu.FILTERLAYERS.WIRES;
 			}
-			this.currentFilterTargets = this.filterTargets;
-			if (text != null)
-			{
-				List<string> list = new List<string>(this.filterTargets.Keys);
-				foreach (string text2 in list)
-				{
-					this.filterTargets[text2] = ToolParameterMenu.ToggleState.Disabled;
-					if (text2 == text)
-					{
-						this.filterTargets[text2] = ToolParameterMenu.ToggleState.On;
-					}
-				}
-			}
-			else
-			{
-				if (this.overlayFilterTargets.Count == 0)
-				{
-					this.ResetFilter(this.overlayFilterTargets);
-				}
-				this.currentFilterTargets = this.overlayFilterTargets;
-			}
-			ToolMenu.Instance.toolParameterMenu.PopulateMenu(this.currentFilterTargets);
 		}
+		else
+		{
+			text = ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT;
+		}
+		this.currentFilterTargets = this.filterTargets;
+		if (text != null)
+		{
+			List<string> list = new List<string>(this.filterTargets.Keys);
+			foreach (string text2 in list)
+			{
+				this.filterTargets[text2] = ToolParameterMenu.ToggleState.Disabled;
+				if (text2 == text)
+				{
+					this.filterTargets[text2] = ToolParameterMenu.ToggleState.On;
+				}
+			}
+		}
+		else
+		{
+			if (this.overlayFilterTargets.Count == 0)
+			{
+				this.ResetFilter(this.overlayFilterTargets);
+			}
+			this.currentFilterTargets = this.overlayFilterTargets;
+		}
+		ToolMenu.Instance.toolParameterMenu.PopulateMenu(this.currentFilterTargets);
 	}
 
 	private Dictionary<string, ToolParameterMenu.ToggleState> filterTargets = new Dictionary<string, ToolParameterMenu.ToggleState>();
@@ -191,5 +187,5 @@ public class FilteredDragTool : DragTool
 
 	private Dictionary<string, ToolParameterMenu.ToggleState> currentFilterTargets;
 
-	private bool active = false;
+	private bool active;
 }

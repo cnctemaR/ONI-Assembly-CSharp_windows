@@ -60,7 +60,7 @@ public class SimUpdateTypeInfo
 
 	private static string[] MethodNames;
 
-	public bool IsValid = false;
+	public bool IsValid;
 
 	public int SortKey = 1000;
 

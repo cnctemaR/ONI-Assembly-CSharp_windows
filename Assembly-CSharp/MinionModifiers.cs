@@ -52,10 +52,11 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 
 	public void OnNewDay()
 	{
-		if (GameClock.Instance.GetDay() >= this.nextNeedDay)
+		if (GameClock.Instance.GetDay() < this.nextNeedDay)
 		{
-			this.nextNeedDay = GameClock.Instance.GetDay() + 3;
+			return;
 		}
+		this.nextNeedDay = GameClock.Instance.GetDay() + 3;
 	}
 
 	private void OnDeath(object data)
@@ -69,12 +70,9 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 	private void OnEffectAdded(object data)
 	{
 		Effect effect = (Effect)data;
-		if (effect.triggerFloatingText)
+		if (effect.triggerFloatingText && PopFXManager.Instance != null)
 		{
-			if (PopFXManager.Instance != null)
-			{
-				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, effect.Name, base.transform, 1.5f, false);
-			}
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, effect.Name, base.transform, 1.5f, false);
 		}
 	}
 

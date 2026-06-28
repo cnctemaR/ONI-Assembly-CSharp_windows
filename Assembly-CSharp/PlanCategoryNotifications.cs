@@ -6,10 +6,11 @@ public class PlanCategoryNotifications : MonoBehaviour
 {
 	public void ToggleAttention(bool active)
 	{
-		if (this.AttentionImage)
+		if (!this.AttentionImage)
 		{
-			this.AttentionImage.gameObject.SetActive(active);
+			return;
 		}
+		this.AttentionImage.gameObject.SetActive(active);
 	}
 
 	public void PingAttention()

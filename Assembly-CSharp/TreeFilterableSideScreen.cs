@@ -117,28 +117,23 @@ public class TreeFilterableSideScreen : SideScreenContent
 				flag3 = true;
 			}
 		}
-		TreeFilterableSideScreenRow.State state2;
 		if (flag3)
 		{
-			state2 = TreeFilterableSideScreenRow.State.Mixed;
+			return TreeFilterableSideScreenRow.State.Mixed;
 		}
-		else if (flag && !flag2)
+		if (flag && !flag2)
 		{
-			state2 = TreeFilterableSideScreenRow.State.On;
+			return TreeFilterableSideScreenRow.State.On;
 		}
-		else if (!flag && flag2)
+		if (!flag && flag2)
 		{
-			state2 = TreeFilterableSideScreenRow.State.Off;
+			return TreeFilterableSideScreenRow.State.Off;
 		}
-		else if (flag && flag2)
+		if (flag && flag2)
 		{
-			state2 = TreeFilterableSideScreenRow.State.Mixed;
+			return TreeFilterableSideScreenRow.State.Mixed;
 		}
-		else
-		{
-			state2 = TreeFilterableSideScreenRow.State.Off;
-		}
-		return state2;
+		return TreeFilterableSideScreenRow.State.Off;
 	}
 
 	private void SetAllCheckboxState(TreeFilterableSideScreenRow.State newState)
@@ -177,31 +172,29 @@ public class TreeFilterableSideScreen : SideScreenContent
 		if (target == null)
 		{
 			global::Debug.LogError("The target object provided was null", null);
+			return;
 		}
-		else
+		this.targetFilterable = target.GetComponent<TreeFilterable>();
+		if (this.targetFilterable == null)
 		{
-			this.targetFilterable = target.GetComponent<TreeFilterable>();
-			if (this.targetFilterable == null)
-			{
-				global::Debug.LogError("The target provided does not have a Tree Filterable component", null);
-			}
-			else if (!this.targetFilterable.showUserMenu)
-			{
-				DetailsScreen.Instance.DeactivateSideContent();
-			}
-			else if (this.IsStorage && !this.storage.showInUI)
-			{
-				DetailsScreen.Instance.DeactivateSideContent();
-			}
-			else
-			{
-				this.storage = this.targetFilterable.GetComponent<Storage>();
-				Storage storage = this.storage;
-				storage.onPriorityChanged = (global::System.Action)Delegate.Combine(storage.onPriorityChanged, new global::System.Action(this.OnPriorityChanged));
-				this.OnPriorityChanged();
-				this.CreateCategories();
-			}
+			global::Debug.LogError("The target provided does not have a Tree Filterable component", null);
+			return;
 		}
+		if (!this.targetFilterable.showUserMenu)
+		{
+			DetailsScreen.Instance.DeactivateSideContent();
+			return;
+		}
+		if (this.IsStorage && !this.storage.showInUI)
+		{
+			DetailsScreen.Instance.DeactivateSideContent();
+			return;
+		}
+		this.storage = this.targetFilterable.GetComponent<Storage>();
+		Storage storage = this.storage;
+		storage.onPriorityChanged = (global::System.Action)Delegate.Combine(storage.onPriorityChanged, new global::System.Action(this.OnPriorityChanged));
+		this.OnPriorityChanged();
+		this.CreateCategories();
 	}
 
 	private void OnPriorityChanged()
@@ -217,18 +210,20 @@ public class TreeFilterableSideScreen : SideScreenContent
 
 	public void AddTag(Tag tag)
 	{
-		if (!(this.targetFilterable == null))
+		if (this.targetFilterable == null)
 		{
-			this.targetFilterable.AddTagToFilter(tag);
+			return;
 		}
+		this.targetFilterable.AddTagToFilter(tag);
 	}
 
 	public void RemoveTag(Tag tag)
 	{
-		if (!(this.targetFilterable == null))
+		if (this.targetFilterable == null)
 		{
-			this.targetFilterable.RemoveTagFromFilter(tag);
+			return;
 		}
+		this.targetFilterable.RemoveTagFromFilter(tag);
 	}
 
 	private TreeFilterableSideScreenRow AddRow(Tag rowTag)
@@ -249,16 +244,11 @@ public class TreeFilterableSideScreen : SideScreenContent
 
 	public float GetAmountInStorage(Tag tag)
 	{
-		float num;
 		if (!this.IsStorage)
 		{
-			num = 0f;
+			return 0f;
 		}
-		else
-		{
-			num = this.storage.GetMassAvailable(tag);
-		}
-		return num;
+		return this.storage.GetMassAvailable(tag);
 	}
 
 	private void CreateCategories()
@@ -312,7 +302,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 
 	private GameObject target;
 
-	private bool visualDirty = false;
+	private bool visualDirty;
 
 	private KImage onlyAllowTransportItemsImg;
 

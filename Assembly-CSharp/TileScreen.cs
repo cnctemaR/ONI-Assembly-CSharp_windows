@@ -7,20 +7,15 @@ public class TileScreen : KScreen
 {
 	private bool SetSliderColour(float temperature, float transition_temperature)
 	{
-		bool flag;
 		if (Mathf.Abs(temperature - transition_temperature) < 5f)
 		{
 			this.temperatureSliderText.color = this.temperatureTransitionColour;
 			this.temperatureSliderIcon.color = this.temperatureTransitionColour;
-			flag = true;
+			return true;
 		}
-		else
-		{
-			this.temperatureSliderText.color = this.temperatureDefaultColour;
-			this.temperatureSliderIcon.color = this.temperatureDefaultColour;
-			flag = false;
-		}
-		return flag;
+		this.temperatureSliderText.color = this.temperatureDefaultColour;
+		this.temperatureSliderIcon.color = this.temperatureDefaultColour;
+		return false;
 	}
 
 	private void DisplayTileInfo()
@@ -60,7 +55,7 @@ public class TileScreen : KScreen
 				this.gasIcon.gameObject.transform.parent.gameObject.SetActive(false);
 				this.massIcon.sprite = this.solidIcon.sprite;
 				this.solidText.text = ((int)element.highTemp).ToString();
-				this.gasText.text = "";
+				this.gasText.text = string.Empty;
 				this.liquidIcon.rectTransform.SetParent(this.solidIcon.transform.parent, true);
 				this.liquidIcon.rectTransform.localPosition = new Vector3(0f, 64f);
 				this.SetSliderColour(num3, element.highTemp);
@@ -83,7 +78,7 @@ public class TileScreen : KScreen
 			}
 			else if (element.IsGas)
 			{
-				this.solidText.text = "";
+				this.solidText.text = string.Empty;
 				this.gasText.text = ((int)element.lowTemp).ToString();
 				this.solidIcon.gameObject.transform.parent.gameObject.SetActive(false);
 				this.gasIcon.gameObject.transform.parent.gameObject.SetActive(true);
@@ -155,7 +150,7 @@ public class TileScreen : KScreen
 			}
 			else if (element2.IsGas)
 			{
-				this.solidText.text = "";
+				this.solidText.text = string.Empty;
 				this.gasText.text = ((int)element2.lowTemp).ToString();
 				this.solidIcon.gameObject.transform.parent.gameObject.SetActive(false);
 				this.gasIcon.gameObject.transform.parent.gameObject.SetActive(true);
@@ -171,9 +166,9 @@ public class TileScreen : KScreen
 		else
 		{
 			this.nameLabel.text = "No Conduit";
-			this.symbolLabel.text = "";
-			this.massAmtLabel.text = "";
-			this.massTitleLabel.text = "";
+			this.symbolLabel.text = string.Empty;
+			this.massAmtLabel.text = string.Empty;
+			this.massTitleLabel.text = string.Empty;
 		}
 	}
 

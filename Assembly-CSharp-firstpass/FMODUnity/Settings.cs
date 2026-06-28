@@ -32,7 +32,7 @@ namespace FMODUnity
 			this.ImportType = ImportType.StreamingAssets;
 			this.AutomaticEventLoading = true;
 			this.AutomaticSampleLoading = false;
-			this.TargetAssetPath = "";
+			this.TargetAssetPath = string.Empty;
 		}
 
 		public static Settings Instance
@@ -90,24 +90,16 @@ namespace FMODUnity
 		public static U GetSetting<T, U>(List<T> list, FMODPlatform platform, U def) where T : PlatformSetting<U>
 		{
 			T t = list.Find((T x) => x.Platform == platform);
-			U u;
-			if (t == null)
+			if (t != null)
 			{
-				FMODPlatform parent = Settings.GetParent(platform);
-				if (parent != FMODPlatform.None)
-				{
-					u = Settings.GetSetting<T, U>(list, parent, def);
-				}
-				else
-				{
-					u = def;
-				}
+				return t.Value;
 			}
-			else
+			FMODPlatform parent = Settings.GetParent(platform);
+			if (parent != FMODPlatform.None)
 			{
-				u = t.Value;
+				return Settings.GetSetting<T, U>(list, parent, def);
 			}
-			return u;
+			return def;
 		}
 
 		public static void SetSetting<T, U>(List<T> list, FMODPlatform platform, U value) where T : PlatformSetting<U>, new()
@@ -129,12 +121,12 @@ namespace FMODUnity
 
 		public bool IsLiveUpdateEnabled(FMODPlatform platform)
 		{
-			return Settings.GetSetting<PlatformBoolSetting, TriStateBool>(this.LiveUpdateSettings, platform, TriStateBool.Disabled) != TriStateBool.Disabled;
+			return Settings.GetSetting<PlatformBoolSetting, TriStateBool>(this.LiveUpdateSettings, platform, TriStateBool.Disabled) == TriStateBool.Enabled;
 		}
 
 		public bool IsOverlayEnabled(FMODPlatform platform)
 		{
-			return Settings.GetSetting<PlatformBoolSetting, TriStateBool>(this.OverlaySettings, platform, TriStateBool.Disabled) != TriStateBool.Disabled;
+			return Settings.GetSetting<PlatformBoolSetting, TriStateBool>(this.OverlaySettings, platform, TriStateBool.Disabled) == TriStateBool.Enabled;
 		}
 
 		public int GetRealChannels(FMODPlatform platform)
@@ -159,21 +151,16 @@ namespace FMODUnity
 
 		public string GetBankPlatform(FMODPlatform platform)
 		{
-			string text;
 			if (!this.HasPlatforms)
 			{
-				text = "";
+				return string.Empty;
 			}
-			else
-			{
-				text = Settings.GetSetting<PlatformStringSetting, string>(this.BankDirectorySettings, platform, "Desktop");
-			}
-			return text;
+			return Settings.GetSetting<PlatformStringSetting, string>(this.BankDirectorySettings, platform, "Desktop");
 		}
 
 		private const string SettingsAssetName = "FMODStudioSettings";
 
-		private static Settings instance = null;
+		private static Settings instance;
 
 		[SerializeField]
 		public bool HasSourceProject = true;

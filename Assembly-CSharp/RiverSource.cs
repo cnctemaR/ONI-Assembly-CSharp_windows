@@ -53,5 +53,5 @@ public class RiverSource : KMonoBehaviour
 	[SerializeField]
 	public float temperature;
 
-	private int elementIdx = 0;
+	private int elementIdx;
 }

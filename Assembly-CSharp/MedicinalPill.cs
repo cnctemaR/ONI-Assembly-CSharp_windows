@@ -37,36 +37,28 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor, IConsumableU
 	public bool CanBeTakenBy(GameObject consumer)
 	{
 		Effects component = consumer.GetComponent<Effects>();
-		bool flag;
 		if (component.HasEffect(this.info.effect))
 		{
-			flag = false;
+			return false;
 		}
-		else if (this.info.medicineType == MedicineInfo.MedicineType.Booster)
+		if (this.info.medicineType == MedicineInfo.MedicineType.Booster)
 		{
 			AmountInstance amountInstance = Db.Get().Amounts.ImmuneLevel.Lookup(consumer);
-			flag = amountInstance != null && amountInstance.value < amountInstance.GetMax();
+			return amountInstance != null && amountInstance.value < amountInstance.GetMax();
 		}
-		else
+		Diseases diseases = consumer.GetDiseases();
+		if (this.info.medicineType == MedicineInfo.MedicineType.CureAny && diseases.Count > 0)
 		{
-			Diseases diseases = consumer.GetDiseases();
-			if (this.info.medicineType == MedicineInfo.MedicineType.CureAny && diseases.Count > 0)
+			return true;
+		}
+		foreach (DiseaseInstance diseaseInstance in diseases)
+		{
+			if (this.info.curedDiseases.Contains(diseaseInstance.modifier.Id))
 			{
-				flag = true;
-			}
-			else
-			{
-				foreach (DiseaseInstance diseaseInstance in diseases)
-				{
-					if (this.info.curedDiseases.Contains(diseaseInstance.modifier.Id))
-					{
-						return true;
-					}
-				}
-				flag = false;
+				return true;
 			}
 		}
-		return flag;
+		return false;
 	}
 
 	public List<Descriptor> EffectDescriptors(GameObject go)

@@ -73,22 +73,17 @@ namespace UnityStandardAssets.ImageEffects
 			target = new Texture3D(num, num, num, TextureFormat.ARGB32, false);
 			target.SetPixels(array);
 			target.Apply();
-			this.basedOnTempTex = "";
+			this.basedOnTempTex = string.Empty;
 		}
 
 		public bool ValidDimensions(Texture2D tex2d)
 		{
-			bool flag;
 			if (!tex2d)
 			{
-				flag = false;
+				return false;
 			}
-			else
-			{
-				int height = tex2d.height;
-				flag = height == Mathf.FloorToInt(Mathf.Sqrt((float)tex2d.width));
-			}
-			return flag;
+			int height = tex2d.height;
+			return height == Mathf.FloorToInt(Mathf.Sqrt((float)tex2d.width));
 		}
 
 		public void Convert(Texture2D temp2DTex, string path)
@@ -110,32 +105,30 @@ namespace UnityStandardAssets.ImageEffects
 				if (!this.ValidDimensions(temp2DTex))
 				{
 					global::Debug.LogWarning("The given 2D texture " + temp2DTex.name + " cannot be used as a 3D LUT.", null);
-					this.basedOnTempTex = "";
+					this.basedOnTempTex = string.Empty;
+					return;
 				}
-				else
+				Color[] pixels = temp2DTex.GetPixels();
+				Color[] array = new Color[pixels.Length];
+				for (int i = 0; i < num; i++)
 				{
-					Color[] pixels = temp2DTex.GetPixels();
-					Color[] array = new Color[pixels.Length];
-					for (int i = 0; i < num; i++)
+					for (int j = 0; j < num; j++)
 					{
-						for (int j = 0; j < num; j++)
+						for (int k = 0; k < num; k++)
 						{
-							for (int k = 0; k < num; k++)
-							{
-								int num2 = num - j - 1;
-								array[i + j * num + k * num * num] = pixels[k * num + i + num2 * num * num];
-							}
+							int num2 = num - j - 1;
+							array[i + j * num + k * num * num] = pixels[k * num + i + num2 * num * num];
 						}
 					}
-					if (target)
-					{
-						global::UnityEngine.Object.DestroyImmediate(target);
-					}
-					target = new Texture3D(num, num, num, TextureFormat.ARGB32, false);
-					target.SetPixels(array);
-					target.Apply();
-					this.basedOnTempTex = path;
 				}
+				if (target)
+				{
+					global::UnityEngine.Object.DestroyImmediate(target);
+				}
+				target = new Texture3D(num, num, num, TextureFormat.ARGB32, false);
+				target.SetPixels(array);
+				target.Apply();
+				this.basedOnTempTex = path;
 			}
 			else
 			{
@@ -148,35 +141,33 @@ namespace UnityStandardAssets.ImageEffects
 			if (!this.CheckResources() || !SystemInfo.supports3DTextures)
 			{
 				Graphics.Blit(source, destination);
+				return;
 			}
-			else
+			if (this.converted3DLut == null)
 			{
-				if (this.converted3DLut == null)
-				{
-					this.SetIdentityLut();
-				}
-				if (this.converted3DLut2 == null)
-				{
-					this.SetIdentityLut2();
-				}
-				int width = this.converted3DLut.width;
-				this.converted3DLut.wrapMode = TextureWrapMode.Clamp;
-				this.material.SetFloat("_Scale", (float)(width - 1) / (1f * (float)width));
-				this.material.SetFloat("_Offset", 1f / (2f * (float)width));
-				this.material.SetTexture("_ClutTex", this.converted3DLut);
-				this.material.SetTexture("_ClutTex2", this.converted3DLut2);
-				Graphics.Blit(source, destination, this.material, (QualitySettings.activeColorSpace != ColorSpace.Linear) ? 0 : 1);
+				this.SetIdentityLut();
 			}
+			if (this.converted3DLut2 == null)
+			{
+				this.SetIdentityLut2();
+			}
+			int width = this.converted3DLut.width;
+			this.converted3DLut.wrapMode = TextureWrapMode.Clamp;
+			this.material.SetFloat("_Scale", (float)(width - 1) / (1f * (float)width));
+			this.material.SetFloat("_Offset", 1f / (2f * (float)width));
+			this.material.SetTexture("_ClutTex", this.converted3DLut);
+			this.material.SetTexture("_ClutTex2", this.converted3DLut2);
+			Graphics.Blit(source, destination, this.material, (QualitySettings.activeColorSpace != ColorSpace.Linear) ? 0 : 1);
 		}
 
 		public Shader shader;
 
 		private Material material;
 
-		public Texture3D converted3DLut = null;
+		public Texture3D converted3DLut;
 
-		public Texture3D converted3DLut2 = null;
+		public Texture3D converted3DLut2;
 
-		public string basedOnTempTex = "";
+		public string basedOnTempTex = string.Empty;
 	}
 }

@@ -43,23 +43,24 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 
 	public void Update()
 	{
-		if (!base.smi.IsColonyLost())
+		if (base.smi.IsColonyLost())
 		{
-			if (Immigration.Instance.ImmigrantsAvailable)
-			{
-				base.smi.sm.openPortal.Trigger(base.smi);
-				this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.NewDuplicantsAvailable, this);
-			}
-			else
-			{
-				base.smi.sm.closePortal.Trigger(base.smi);
-				this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Wattson, this);
-			}
-			if (this.GetTimeRemaining() < -120f)
-			{
-				Messenger.Instance.QueueMessage(new DuplicantsLeftMessage());
-				Immigration.Instance.SpawnMinions();
-			}
+			return;
+		}
+		if (Immigration.Instance.ImmigrantsAvailable)
+		{
+			base.smi.sm.openPortal.Trigger(base.smi);
+			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.NewDuplicantsAvailable, this);
+		}
+		else
+		{
+			base.smi.sm.closePortal.Trigger(base.smi);
+			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Wattson, this);
+		}
+		if (this.GetTimeRemaining() < -120f)
+		{
+			Messenger.Instance.QueueMessage(new DuplicantsLeftMessage());
+			Immigration.Instance.SpawnMinions();
 		}
 	}
 

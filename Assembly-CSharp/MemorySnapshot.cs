@@ -51,97 +51,95 @@ public class MemorySnapshot
 
 	public static void CountReference(Type reference_type, object obj, Dictionary<int, MemorySnapshot.TypeData> types, HashSet<object> walked, Dictionary<int, MemorySnapshot.FieldCount> field_counts, Dictionary<string, int> detailTypeCount, string field_name, Type parent_4, Type parent_3, Type parent_2, Type parent_1, Type parent_0)
 	{
-		if (!MemorySnapshot.ShouldExclude(reference_type))
+		if (MemorySnapshot.ShouldExclude(reference_type))
 		{
-			if (reference_type == MemorySnapshot.detailType)
+			return;
+		}
+		if (reference_type == MemorySnapshot.detailType)
+		{
+			string text;
+			if (obj as global::UnityEngine.Object != null)
 			{
-				string text;
-				if (obj as global::UnityEngine.Object != null)
-				{
-					text = "\"" + ((global::UnityEngine.Object)obj).name;
-				}
-				else
-				{
-					text = "\"" + MemorySnapshot.detailTypeStr;
-				}
-				if (parent_0 != null)
-				{
-					text += "\",\"";
-					text += parent_0.ToString();
-				}
-				if (parent_1 != null)
-				{
-					text = text + "\",\"" + parent_1.ToString();
-				}
-				if (parent_2 != null)
-				{
-					text = text + "\",\"" + parent_2.ToString();
-				}
-				if (parent_3 != null)
-				{
-					text = text + "\",\"" + parent_3.ToString();
-				}
-				if (parent_4 != null)
-				{
-					text = text + "\",\"" + parent_4.ToString();
-				}
-				text += "\"\n";
-				int num = 0;
-				detailTypeCount.TryGetValue(text, out num);
-				detailTypeCount[text] = num + 1;
+				text = "\"" + ((global::UnityEngine.Object)obj).name;
 			}
-			if (reference_type.IsClass)
+			else
 			{
-				MemorySnapshot.TypeData typeData = MemorySnapshot.GetTypeData(reference_type, types);
-				typeData.refCount++;
-				MemorySnapshot.IncrementFieldCount(field_counts, field_name);
+				text = "\"" + MemorySnapshot.detailTypeStr;
 			}
-			if (obj != null)
+			if (parent_0 != null)
 			{
-				if (!obj.GetType().IsClass || walked.Add(obj))
+				text += "\",\"";
+				text += parent_0.ToString();
+			}
+			if (parent_1 != null)
+			{
+				text = text + "\",\"" + parent_1.ToString();
+			}
+			if (parent_2 != null)
+			{
+				text = text + "\",\"" + parent_2.ToString();
+			}
+			if (parent_3 != null)
+			{
+				text = text + "\",\"" + parent_3.ToString();
+			}
+			if (parent_4 != null)
+			{
+				text = text + "\",\"" + parent_4.ToString();
+			}
+			text += "\"\n";
+			int num = 0;
+			detailTypeCount.TryGetValue(text, out num);
+			detailTypeCount[text] = num + 1;
+		}
+		if (reference_type.IsClass)
+		{
+			MemorySnapshot.TypeData typeData = MemorySnapshot.GetTypeData(reference_type, types);
+			typeData.refCount++;
+			MemorySnapshot.IncrementFieldCount(field_counts, field_name);
+		}
+		if (obj != null && (!obj.GetType().IsClass || walked.Add(obj)))
+		{
+			MemorySnapshot.TypeData typeData2 = MemorySnapshot.GetTypeData(obj.GetType(), types);
+			if (typeData2.type.IsClass)
+			{
+				typeData2.instanceCount++;
+				MemorySnapshot.HierarchyNode hierarchyNode = new MemorySnapshot.HierarchyNode(parent_0, parent_1, parent_2, parent_3, parent_4);
+				int num2 = 0;
+				typeData2.hierarchies.TryGetValue(hierarchyNode, out num2);
+				typeData2.hierarchies[hierarchyNode] = num2 + 1;
+			}
+			foreach (FieldInfo fieldInfo in typeData2.fields)
+			{
+				MemorySnapshot.CountField(fieldInfo, obj, types, walked, field_counts, detailTypeCount, parent_3, parent_2, parent_1, parent_0, fieldInfo.DeclaringType);
+			}
+			ICollection collection = obj as ICollection;
+			if (collection != null)
+			{
+				Type type = typeof(object);
+				if (collection.GetType().GetElementType() != null)
 				{
-					MemorySnapshot.TypeData typeData2 = MemorySnapshot.GetTypeData(obj.GetType(), types);
-					if (typeData2.type.IsClass)
+					type = collection.GetType().GetElementType();
+				}
+				else if (collection.GetType().GetGenericArguments().Length > 0)
+				{
+					type = collection.GetType().GetGenericArguments()[0];
+				}
+				IEnumerator enumerator2 = collection.GetEnumerator();
+				try
+				{
+					while (enumerator2.MoveNext())
 					{
-						typeData2.instanceCount++;
-						MemorySnapshot.HierarchyNode hierarchyNode = new MemorySnapshot.HierarchyNode(parent_0, parent_1, parent_2, parent_3, parent_4);
-						int num2 = 0;
-						typeData2.hierarchies.TryGetValue(hierarchyNode, out num2);
-						typeData2.hierarchies[hierarchyNode] = num2 + 1;
+						object obj2 = enumerator2.Current;
+						MemorySnapshot.CountReference(type, obj2, types, walked, field_counts, detailTypeCount, field_name + ".Item", parent_3, parent_2, parent_1, parent_0, collection.GetType());
 					}
-					foreach (FieldInfo fieldInfo in typeData2.fields)
+				}
+				finally
+				{
+					IDisposable disposable;
+					if ((disposable = enumerator2 as IDisposable) != null)
 					{
-						MemorySnapshot.CountField(fieldInfo, obj, types, walked, field_counts, detailTypeCount, parent_3, parent_2, parent_1, parent_0, fieldInfo.DeclaringType);
-					}
-					ICollection collection = obj as ICollection;
-					if (collection != null)
-					{
-						Type type = typeof(object);
-						if (collection.GetType().GetElementType() != null)
-						{
-							type = collection.GetType().GetElementType();
-						}
-						else if (collection.GetType().GetGenericArguments().Length > 0)
-						{
-							type = collection.GetType().GetGenericArguments()[0];
-						}
-						IEnumerator enumerator2 = collection.GetEnumerator();
-						try
-						{
-							while (enumerator2.MoveNext())
-							{
-								object obj2 = enumerator2.Current;
-								MemorySnapshot.CountReference(type, obj2, types, walked, field_counts, detailTypeCount, field_name + ".Item", parent_3, parent_2, parent_1, parent_0, collection.GetType());
-							}
-						}
-						finally
-						{
-							IDisposable disposable;
-							if ((disposable = enumerator2 as IDisposable) != null)
-							{
-								disposable.Dispose();
-							}
-						}
+						disposable.Dispose();
 					}
 				}
 			}
@@ -278,10 +276,9 @@ public class MemorySnapshot
 
 		public override string ToString()
 		{
-			string text;
 			if (this.parent4 != null)
 			{
-				text = string.Concat(new string[]
+				return string.Concat(new string[]
 				{
 					this.parent4.FullName,
 					"--",
@@ -294,9 +291,9 @@ public class MemorySnapshot
 					this.parent0.FullName
 				});
 			}
-			else if (this.parent3 != null)
+			if (this.parent3 != null)
 			{
-				text = string.Concat(new string[]
+				return string.Concat(new string[]
 				{
 					this.parent3.FullName,
 					"--",
@@ -307,9 +304,9 @@ public class MemorySnapshot
 					this.parent0.FullName
 				});
 			}
-			else if (this.parent2 != null)
+			if (this.parent2 != null)
 			{
-				text = string.Concat(new string[]
+				return string.Concat(new string[]
 				{
 					this.parent2.FullName,
 					"--",
@@ -318,15 +315,11 @@ public class MemorySnapshot
 					this.parent0.FullName
 				});
 			}
-			else if (this.parent1 != null)
+			if (this.parent1 != null)
 			{
-				text = this.parent1.FullName + "--" + this.parent0.FullName;
+				return this.parent1.FullName + "--" + this.parent0.FullName;
 			}
-			else
-			{
-				text = this.parent0.FullName;
-			}
-			return text;
+			return this.parent0.FullName;
 		}
 
 		public Type parent0;

@@ -59,23 +59,18 @@ public static class Sim
 		{
 			intPtr = Sim.SIM_HandleMessage(-672538170, num, ptr);
 		}
-		int num2;
 		if (intPtr == IntPtr.Zero)
 		{
-			num2 = -1;
+			return -1;
 		}
-		else
-		{
-			Sim.GameDataUpdate* ptr2 = (Sim.GameDataUpdate*)(void*)intPtr;
-			Grid.CellValues = ptr2->cells;
-			Grid.DiseaseCellValues = ptr2->disease;
-			Grid.AccumulatedFlowValues = ptr2->accumulatedFlow;
-			PropertyTextures.externalFlowTex = ptr2->propertyTextureFlow;
-			PropertyTextures.externalLiquidTex = ptr2->propertyTextureLiquid;
-			Grid.InitializeCells(ptr2->cells);
-			num2 = 0;
-		}
-		return num2;
+		Sim.GameDataUpdate* ptr2 = (Sim.GameDataUpdate*)(void*)intPtr;
+		Grid.CellValues = ptr2->cells;
+		Grid.DiseaseCellValues = ptr2->disease;
+		Grid.AccumulatedFlowValues = ptr2->accumulatedFlow;
+		PropertyTextures.externalFlowTex = ptr2->propertyTextureFlow;
+		PropertyTextures.externalLiquidTex = ptr2->propertyTextureLiquid;
+		Grid.InitializeCells(ptr2->cells);
+		return 0;
 	}
 
 	public static void Shutdown()

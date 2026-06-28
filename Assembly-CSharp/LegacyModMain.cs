@@ -39,7 +39,7 @@ public class LegacyModMain
 			}
 		}
 		list.Sort((LegacyModMain.Entry x, LegacyModMain.Entry y) => y.count.CompareTo(x.count));
-		string text = "";
+		string text = string.Empty;
 		foreach (LegacyModMain.Entry entry in list)
 		{
 			string text2 = text;
@@ -76,12 +76,9 @@ public class LegacyModMain
 		{
 			foreach (Type type2 in assembly.GetTypes())
 			{
-				if (typeof(MonoBehaviour).IsAssignableFrom(type2))
+				if (typeof(MonoBehaviour).IsAssignableFrom(type2) && !hashSet.Contains(type2))
 				{
-					if (!hashSet.Contains(type2))
-					{
-						hashSet2.Add(type2);
-					}
+					hashSet2.Add(type2);
 				}
 			}
 		}

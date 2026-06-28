@@ -35,7 +35,7 @@ public class PrickleGrassConfig : IEntityConfig
 		text2 = CREATURES.SPECIES.SEEDS.PRICKLEGRASS.DESC;
 		kanimFile = Assets.GetAnim("seed_bristlebriar_kanim");
 		List<Tag> list = new List<Tag> { GameTags.DecorSeed };
-		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text3, text2, kanimFile, "object", 1, list, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 5, CREATURES.SPECIES.PRICKLEGRASS.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "");
+		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text3, text2, kanimFile, "object", 1, list, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 5, CREATURES.SPECIES.PRICKLEGRASS.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, string.Empty);
 		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "PrickleGrass_preview", Assets.GetAnim("bristlebriar_kanim"), "place", 1, 1);
 		return gameObject;
 	}

@@ -70,19 +70,17 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 
 	public override void Assign(IAssignableIdentity new_assignee)
 	{
-		if (new_assignee != this.assignee)
+		if (new_assignee == this.assignee)
 		{
-			if (new_assignee is MinionIdentity && base.slot != null)
-			{
-				if (new_assignee.GetSoleOwner().GetComponent<Equipment>().GetSlot(base.slot)
-					.assignable != null)
-				{
-					new_assignee.GetSoleOwner().GetComponent<Equipment>().GetSlot(base.slot)
-						.assignable.Unassign();
-				}
-			}
-			base.Assign(new_assignee);
+			return;
 		}
+		if (new_assignee is MinionIdentity && base.slot != null && new_assignee.GetSoleOwner().GetComponent<Equipment>().GetSlot(base.slot)
+			.assignable != null)
+		{
+			new_assignee.GetSoleOwner().GetComponent<Equipment>().GetSlot(base.slot)
+				.assignable.Unassign();
+		}
+		base.Assign(new_assignee);
 	}
 
 	private void CreateChore()
@@ -111,12 +109,9 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 			this.chore.Cancel("Equipment Reassigned");
 			this.chore = null;
 		}
-		if (target != null)
+		if (target != null && !target.GetSoleOwner().GetComponent<Equipment>().IsEquipped(this))
 		{
-			if (!target.GetSoleOwner().GetComponent<Equipment>().IsEquipped(this))
-			{
-				this.CreateChore();
-			}
+			this.CreateChore();
 		}
 	}
 
@@ -164,28 +159,28 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 	public void OnUnequip()
 	{
 		this.isEquipped = false;
-		if (!this.destroyed)
+		if (this.destroyed)
 		{
-			base.GetComponent<KBatchedAnimController>().enabled = true;
-			base.GetComponent<KSelectable>().IsSelectable = true;
-			base.GetComponent<Pickupable>().RegisterListeners();
-			Effects component = this.assignee.GetSoleOwner().GetComponent<Effects>();
-			foreach (Effect effect in this.def.EffectImmunites)
-			{
-				component.RemoveImmunity(effect);
-			}
-			base.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Misc).transform;
-			base.gameObject.transform.SetPosition(this.assignee.GetSoleOwner().gameObject.transform.position + Vector3.up / 2f);
-			if (this.def.OnUnequipCallBack != null)
-			{
-				this.def.OnUnequipCallBack(this);
-			}
+			return;
+		}
+		base.GetComponent<KBatchedAnimController>().enabled = true;
+		base.GetComponent<KSelectable>().IsSelectable = true;
+		base.GetComponent<Pickupable>().RegisterListeners();
+		Effects component = this.assignee.GetSoleOwner().GetComponent<Effects>();
+		foreach (Effect effect in this.def.EffectImmunites)
+		{
+			component.RemoveImmunity(effect);
+		}
+		base.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Misc).transform;
+		base.gameObject.transform.SetPosition(this.assignee.GetSoleOwner().gameObject.transform.position + Vector3.up / 2f);
+		if (this.def.OnUnequipCallBack != null)
+		{
+			this.def.OnUnequipCallBack(this);
 		}
 	}
 
 	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
-		List<Descriptor> list;
 		if (this.def != null)
 		{
 			List<Descriptor> equipmentEffects = GameUtil.GetEquipmentEffects(this.def);
@@ -196,18 +191,14 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 					equipmentEffects.Add(descriptor);
 				}
 			}
-			list = equipmentEffects;
+			return equipmentEffects;
 		}
-		else
-		{
-			list = new List<Descriptor>();
-		}
-		return list;
+		return new List<Descriptor>();
 	}
 
 	public EquipmentDef def;
 
-	private bool destroyed = false;
+	private bool destroyed;
 
 	[MyCmpAdd]
 	private UserMenu userMenu;
@@ -220,5 +211,5 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 	[Serialize]
 	public bool isEquipped;
 
-	private global::QualityLevel quality = global::QualityLevel.Poor;
+	private global::QualityLevel quality;
 }

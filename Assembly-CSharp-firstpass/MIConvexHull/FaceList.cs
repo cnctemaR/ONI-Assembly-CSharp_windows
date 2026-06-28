@@ -23,56 +23,55 @@ namespace MIConvexHull
 					this.Remove(face);
 					this.AddFirst(face);
 				}
+				return;
+			}
+			face.InList = true;
+			if (this.First != null && this.First.VerticesBeyond.Count < face.VerticesBeyond.Count)
+			{
+				this.First.Previous = face;
+				face.Next = this.First;
+				this.First = face;
 			}
 			else
 			{
-				face.InList = true;
-				if (this.First != null && this.First.VerticesBeyond.Count < face.VerticesBeyond.Count)
+				if (this.last != null)
 				{
-					this.First.Previous = face;
-					face.Next = this.First;
-					this.First = face;
+					this.last.Next = face;
 				}
-				else
+				face.Previous = this.last;
+				this.last = face;
+				if (this.First == null)
 				{
-					if (this.last != null)
-					{
-						this.last.Next = face;
-					}
-					face.Previous = this.last;
-					this.last = face;
-					if (this.First == null)
-					{
-						this.First = face;
-					}
+					this.First = face;
 				}
 			}
 		}
 
 		public void Remove(ConvexFaceInternal face)
 		{
-			if (face.InList)
+			if (!face.InList)
 			{
-				face.InList = false;
-				if (face.Previous != null)
-				{
-					face.Previous.Next = face.Next;
-				}
-				else if (face.Previous == null)
-				{
-					this.First = face.Next;
-				}
-				if (face.Next != null)
-				{
-					face.Next.Previous = face.Previous;
-				}
-				else if (face.Next == null)
-				{
-					this.last = face.Previous;
-				}
-				face.Next = null;
-				face.Previous = null;
+				return;
 			}
+			face.InList = false;
+			if (face.Previous != null)
+			{
+				face.Previous.Next = face.Next;
+			}
+			else if (face.Previous == null)
+			{
+				this.First = face.Next;
+			}
+			if (face.Next != null)
+			{
+				face.Next.Previous = face.Previous;
+			}
+			else if (face.Next == null)
+			{
+				this.last = face.Previous;
+			}
+			face.Next = null;
+			face.Previous = null;
 		}
 
 		private ConvexFaceInternal last;

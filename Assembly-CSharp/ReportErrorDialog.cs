@@ -97,16 +97,13 @@ public class ReportErrorDialog : MonoBehaviour
 		yield return new WaitForEndOfFrame();
 		yield return new WaitForEndOfFrame();
 		bool delay = false;
-		if (ReportErrorDialog.MOST_RECENT_SAVEFILE != null)
+		if (ReportErrorDialog.MOST_RECENT_SAVEFILE != null && File.Exists(ReportErrorDialog.MOST_RECENT_SAVEFILE))
 		{
-			if (File.Exists(ReportErrorDialog.MOST_RECENT_SAVEFILE))
-			{
-				delay = true;
-				FileInfo fileInfo = new FileInfo(ReportErrorDialog.MOST_RECENT_SAVEFILE);
-				long length = fileInfo.Length;
-				this.saveFileInfoLabel.text = Path.GetFileName(ReportErrorDialog.MOST_RECENT_SAVEFILE) + " " + length.ToString() + " bytes";
-				this.uploadSaveDialog.SetActive(true);
-			}
+			delay = true;
+			FileInfo fileInfo = new FileInfo(ReportErrorDialog.MOST_RECENT_SAVEFILE);
+			long length = fileInfo.Length;
+			this.saveFileInfoLabel.text = Path.GetFileName(ReportErrorDialog.MOST_RECENT_SAVEFILE) + " " + length.ToString() + " bytes";
+			this.uploadSaveDialog.SetActive(true);
 		}
 		if (!delay)
 		{
@@ -163,7 +160,7 @@ public class ReportErrorDialog : MonoBehaviour
 		this.OpenRefMessage();
 	}
 
-	public static string MOST_RECENT_SAVEFILE = null;
+	public static string MOST_RECENT_SAVEFILE;
 
 	private global::System.Action confirmAction;
 
@@ -208,5 +205,5 @@ public class ReportErrorDialog : MonoBehaviour
 	[SerializeField]
 	private LocText saveFileInfoLabel;
 
-	public static bool hasCrash = false;
+	public static bool hasCrash;
 }

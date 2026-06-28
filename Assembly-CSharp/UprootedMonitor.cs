@@ -71,7 +71,7 @@ public class UprootedMonitor : KMonoBehaviour
 	public bool canBeUprooted = true;
 
 	[Serialize]
-	private bool uprooted = false;
+	private bool uprooted;
 
 	public CellOffset monitorCell = new CellOffset(0, -1);
 

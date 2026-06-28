@@ -17,8 +17,9 @@ public class LoadingOverlay : KModalScreen
 		{
 			this.loadNextFrame = true;
 			this.showLoad = false;
+			return;
 		}
-		else if (this.loadNextFrame)
+		if (this.loadNextFrame)
 		{
 			this.loadNextFrame = false;
 			this.loadCb();
@@ -56,9 +57,9 @@ public class LoadingOverlay : KModalScreen
 		}
 	}
 
-	private bool loadNextFrame = false;
+	private bool loadNextFrame;
 
-	private bool showLoad = false;
+	private bool showLoad;
 
 	private global::System.Action loadCb;
 

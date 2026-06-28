@@ -39,16 +39,11 @@ namespace Klei.AI
 		public AmountInstance Lookup(GameObject go)
 		{
 			Amounts amounts = go.GetAmounts();
-			AmountInstance amountInstance;
 			if (amounts != null)
 			{
-				amountInstance = amounts.Get(this);
+				return amounts.Get(this);
 			}
-			else
-			{
-				amountInstance = null;
-			}
-			return amountInstance;
+			return null;
 		}
 
 		public string GetValueString(AmountInstance instance)

@@ -170,51 +170,41 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISliderControl
 	public List<Descriptor> RequirementDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		List<Descriptor> list2;
 		if (this.formula.inputs == null || this.formula.inputs.Length == 0)
 		{
-			list2 = list;
+			return list;
 		}
-		else
+		for (int i = 0; i < this.formula.inputs.Length; i++)
 		{
-			for (int i = 0; i < this.formula.inputs.Length; i++)
-			{
-				EnergyGenerator.InputItem inputItem = this.formula.inputs[i];
-				Element element = ElementLoader.GetElement(inputItem.tag);
-				string text = element.tag.ProperName();
-				string keywordStyle = GameUtil.GetKeywordStyle(element);
-				Descriptor descriptor = default(Descriptor);
-				descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, keywordStyle, text, GameUtil.GetFormattedMass(inputItem.consumptionRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, keywordStyle, text, GameUtil.GetFormattedMass(inputItem.consumptionRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
-				list.Add(descriptor);
-			}
-			list2 = list;
+			EnergyGenerator.InputItem inputItem = this.formula.inputs[i];
+			Element element = ElementLoader.GetElement(inputItem.tag);
+			string text = element.tag.ProperName();
+			string keywordStyle = GameUtil.GetKeywordStyle(element);
+			Descriptor descriptor = default(Descriptor);
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, keywordStyle, text, GameUtil.GetFormattedMass(inputItem.consumptionRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, keywordStyle, text, GameUtil.GetFormattedMass(inputItem.consumptionRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
+			list.Add(descriptor);
 		}
-		return list2;
+		return list;
 	}
 
 	public List<Descriptor> EffectDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		List<Descriptor> list2;
 		if (this.formula.outputs == null || this.formula.outputs.Length == 0)
 		{
-			list2 = list;
+			return list;
 		}
-		else
+		for (int i = 0; i < this.formula.outputs.Length; i++)
 		{
-			for (int i = 0; i < this.formula.outputs.Length; i++)
-			{
-				EnergyGenerator.OutputItem outputItem = this.formula.outputs[i];
-				Element element = ElementLoader.FindElementByHash(outputItem.element);
-				string text = element.tag.ProperName();
-				string keywordStyle = GameUtil.GetKeywordStyle(element);
-				Descriptor descriptor = default(Descriptor);
-				descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(outputItem.creationRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(outputItem.creationRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Effect);
-				list.Add(descriptor);
-			}
-			list2 = list;
+			EnergyGenerator.OutputItem outputItem = this.formula.outputs[i];
+			Element element = ElementLoader.FindElementByHash(outputItem.element);
+			string text = element.tag.ProperName();
+			string keywordStyle = GameUtil.GetKeywordStyle(element);
+			Descriptor descriptor = default(Descriptor);
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(outputItem.creationRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(outputItem.creationRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Effect);
+			list.Add(descriptor);
 		}
-		return list2;
+		return list;
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
@@ -243,11 +233,11 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISliderControl
 	{
 		if (EnergyGenerator.batteriesSufficientlyFull == null)
 		{
-			EnergyGenerator.batteriesSufficientlyFull = new StatusItem("BatteriesSufficientlyFull", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			EnergyGenerator.batteriesSufficientlyFull = new StatusItem("BatteriesSufficientlyFull", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
 		}
 		if (EnergyGenerator.insufficientConversionMass == null)
 		{
-			EnergyGenerator.insufficientConversionMass = new StatusItem("INSUFFICIENT_CONVERSION_MASS", "BUILDING", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
+			EnergyGenerator.insufficientConversionMass = new StatusItem("INSUFFICIENT_CONVERSION_MASS", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
 		}
 	}
 
@@ -322,7 +312,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISliderControl
 	[Serialize]
 	private float batteryRefillPercent = 0.5f;
 
-	public bool ignoreBatteryRefillPercent = false;
+	public bool ignoreBatteryRefillPercent;
 
 	public bool hasMeter = true;
 
@@ -330,7 +320,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISliderControl
 
 	private static StatusItem insufficientConversionMass;
 
-	public Meter.Offset meterOffset = Meter.Offset.Infront;
+	public Meter.Offset meterOffset;
 
 	[SerializeField]
 	public EnergyGenerator.Formula formula;

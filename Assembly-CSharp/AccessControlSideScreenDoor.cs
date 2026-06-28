@@ -71,7 +71,7 @@ public class AccessControlSideScreenDoor : KMonoBehaviour
 
 	private Action<MinionIdentity, AccessControl.Permission> permissionChangedCallback;
 
-	private bool isUpDown = false;
+	private bool isUpDown;
 
 	protected MinionIdentity targetIdentity;
 }

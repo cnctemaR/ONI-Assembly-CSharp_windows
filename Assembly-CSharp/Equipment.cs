@@ -144,7 +144,7 @@ public class Equipment : Assignables
 				this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("iconDown", text, delegate
 				{
 					((Equippable)slot_iter.assignable).Unassign();
-				}, global::Action.NumActions, null, null, null, "", true), 2f);
+				}, global::Action.NumActions, null, null, null, string.Empty, true), 2f);
 			}
 		}
 	}
@@ -165,5 +165,5 @@ public class Equipment : Assignables
 
 	private SchedulerHandle refreshHandle;
 
-	private bool destroyed = false;
+	private bool destroyed;
 }

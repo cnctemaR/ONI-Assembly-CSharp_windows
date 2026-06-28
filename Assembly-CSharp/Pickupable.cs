@@ -210,52 +210,52 @@ public class Pickupable : Workable
 				"]"
 			}), null);
 			base.gameObject.DeleteObject();
+			return;
 		}
-		else
+		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
+		instance.StartSM();
+		FetchableMonitor.Instance instance2 = new FetchableMonitor.Instance(this);
+		instance2.StartSM();
+		base.SetWorkTime(1.5f);
+		this.faceTargetWhenWorking = true;
+		KSelectable component = base.GetComponent<KSelectable>();
+		if (component != null)
 		{
-			ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
-			instance.StartSM();
-			FetchableMonitor.Instance instance2 = new FetchableMonitor.Instance(this);
-			instance2.StartSM();
-			base.SetWorkTime(1.5f);
-			this.faceTargetWhenWorking = true;
-			KSelectable component = base.GetComponent<KSelectable>();
-			if (component != null)
-			{
-				component.SetStatusIndicatorOffset(new Vector3(0f, -0.65f, 0f));
-			}
-			if (this.storage == null)
-			{
-				this.RegisterListeners();
-			}
-			if (this.storage == null)
-			{
-				this.AddFaller();
-			}
-			this.TryToOffsetIfBuried();
-			DecorProvider component2 = base.GetComponent<DecorProvider>();
-			if (component2 != null && string.IsNullOrEmpty(component2.overrideName))
-			{
-				component2.overrideName = UI.OVERLAYS.DECOR.CLUTTER;
-			}
-			this.rottable = this.GetSMI<Rottable.Instance>();
-			this.UpdateEntombedVisualizer();
+			component.SetStatusIndicatorOffset(new Vector3(0f, -0.65f, 0f));
 		}
+		if (this.storage == null)
+		{
+			this.RegisterListeners();
+		}
+		if (this.storage == null)
+		{
+			this.AddFaller();
+		}
+		this.TryToOffsetIfBuried();
+		DecorProvider component2 = base.GetComponent<DecorProvider>();
+		if (component2 != null && string.IsNullOrEmpty(component2.overrideName))
+		{
+			component2.overrideName = UI.OVERLAYS.DECOR.CLUTTER;
+		}
+		this.rottable = this.GetSMI<Rottable.Instance>();
+		this.UpdateEntombedVisualizer();
 	}
 
 	public void RegisterListeners()
 	{
-		if (!this.cleaningUp)
+		if (this.cleaningUp)
 		{
-			if (this.solidPartitionerEntry == null)
-			{
-				int num = Grid.PosToCell(this);
-				this.objectLayerListItem = new ObjectLayerListItem(base.gameObject, ObjectLayer.Pickupables, num);
-				this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterSolidListener", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
-				this.partitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterPickupable", this, num, GameScenePartitioner.Instance.pickupablesLayer, null);
-				CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChange), false);
-			}
+			return;
 		}
+		if (this.solidPartitionerEntry != null)
+		{
+			return;
+		}
+		int num = Grid.PosToCell(this);
+		this.objectLayerListItem = new ObjectLayerListItem(base.gameObject, ObjectLayer.Pickupables, num);
+		this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterSolidListener", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterPickupable", this, num, GameScenePartitioner.Instance.pickupablesLayer, null);
+		CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChange), false);
 	}
 
 	public void UnregisterListeners()
@@ -285,37 +285,39 @@ public class Pickupable : Workable
 
 	public void TryToOffsetIfBuried()
 	{
-		if (!(this.storage != null))
+		if (this.storage != null)
 		{
-			int num = Grid.PosToCell(this);
-			if (Grid.IsValidCell(num))
+			return;
+		}
+		int num = Grid.PosToCell(this);
+		if (!Grid.IsValidCell(num))
+		{
+			return;
+		}
+		DeathMonitor.Instance smi = base.gameObject.GetSMI<DeathMonitor.Instance>();
+		bool flag = smi == null || smi.IsDead();
+		if (flag && ((Grid.Solid[num] && Grid.Foundation[num]) || Grid.Cell[num].properties != 0))
+		{
+			for (int i = 0; i < Pickupable.displacementOffsets.Length; i++)
 			{
-				DeathMonitor.Instance smi = base.gameObject.GetSMI<DeathMonitor.Instance>();
-				bool flag = smi == null || smi.IsDead();
-				if (flag && ((Grid.Solid[num] && Grid.Foundation[num]) || Grid.Cell[num].properties != 0))
+				int num2 = Grid.OffsetCell(num, Pickupable.displacementOffsets[i]);
+				if (Grid.IsValidCell(num2) && !Grid.Solid[num2])
 				{
-					for (int i = 0; i < Pickupable.displacementOffsets.Length; i++)
+					Vector3 vector = Grid.CellToPosCBC(num2, Grid.SceneLayer.Move);
+					Collider2D component = base.GetComponent<Collider2D>();
+					if (component != null)
 					{
-						int num2 = Grid.OffsetCell(num, Pickupable.displacementOffsets[i]);
-						if (Grid.IsValidCell(num2) && !Grid.Solid[num2])
-						{
-							Vector3 vector = Grid.CellToPosCBC(num2, Grid.SceneLayer.Move);
-							Collider2D component = base.GetComponent<Collider2D>();
-							if (component != null)
-							{
-								vector.y += base.transform.position.y - component.bounds.min.y;
-							}
-							base.transform.SetPosition(vector);
-							num = num2;
-							this.RemoveFaller();
-							this.AddFaller();
-							break;
-						}
+						vector.y += base.transform.position.y - component.bounds.min.y;
 					}
+					base.transform.SetPosition(vector);
+					num = num2;
+					this.RemoveFaller();
+					this.AddFaller();
+					break;
 				}
-				this.HandleSolidCell(num);
 			}
 		}
+		this.HandleSolidCell(num);
 	}
 
 	private bool HandleSolidCell(int cell)
@@ -434,51 +436,41 @@ public class Pickupable : Workable
 
 	public Pickupable Take(float amount)
 	{
-		Pickupable pickupable;
-		if (this.OnTake != null)
-		{
-			if (amount >= this.TotalAmount)
-			{
-				if (this.storage != null)
-				{
-					this.storage.Remove(base.gameObject);
-				}
-			}
-			float num = Math.Min(this.TotalAmount, amount);
-			if (num <= 0f)
-			{
-				pickupable = null;
-			}
-			else
-			{
-				pickupable = this.OnTake(num);
-			}
-		}
-		else
+		if (this.OnTake == null)
 		{
 			if (this.storage != null)
 			{
 				this.storage.Remove(base.gameObject);
 			}
-			pickupable = this;
+			return this;
 		}
-		return pickupable;
+		if (amount >= this.TotalAmount && this.storage != null)
+		{
+			this.storage.Remove(base.gameObject);
+		}
+		float num = Math.Min(this.TotalAmount, amount);
+		if (num <= 0f)
+		{
+			return null;
+		}
+		return this.OnTake(num);
 	}
 
 	public void Absorb(Pickupable pickupable)
 	{
-		if (!pickupable.wasAbsorbed)
+		if (pickupable.wasAbsorbed)
 		{
-			base.Trigger(-2064133523, pickupable);
-			pickupable.Trigger(-1940207677, base.gameObject);
-			pickupable.wasAbsorbed = true;
-			if (SelectTool.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected == pickupable.selectable)
-			{
-				SelectTool.Instance.Select(this.selectable, false);
-			}
-			pickupable.gameObject.DeleteObject();
-			this.NotifyChanged(Grid.PosToCell(this));
+			return;
 		}
+		base.Trigger(-2064133523, pickupable);
+		pickupable.Trigger(-1940207677, base.gameObject);
+		pickupable.wasAbsorbed = true;
+		if (SelectTool.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected == pickupable.selectable)
+		{
+			SelectTool.Instance.Select(this.selectable, false);
+		}
+		pickupable.gameObject.DeleteObject();
+		this.NotifyChanged(Grid.PosToCell(this));
 	}
 
 	public void OnStore(object data)
@@ -523,18 +515,13 @@ public class Pickupable : Workable
 
 	public override Workable.AnimInfo GetAnim(Worker worker)
 	{
-		Workable.AnimInfo animInfo;
 		if (this.useGunforPickup)
 		{
 			Workable.AnimInfo anim = base.GetAnim(worker);
 			anim.smi = new MultitoolController.Instance(this, worker, "pickup", EffectPrefabs.Instance.PickupEffect);
-			animInfo = anim;
+			return anim;
 		}
-		else
-		{
-			animInfo = base.GetAnim(worker);
-		}
-		return animInfo;
+		return base.GetAnim(worker);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -582,23 +569,25 @@ public class Pickupable : Workable
 
 	private void AddFaller()
 	{
-		if (!this.isKinematic && !(base.GetComponent<Health>() != null))
+		if (this.isKinematic || base.GetComponent<Health>() != null)
 		{
-			if (!GameComps.Fallers.Has(base.gameObject))
-			{
-				GameComps.Fallers.Add(base.gameObject, Vector2.zero);
-			}
+			return;
+		}
+		if (!GameComps.Fallers.Has(base.gameObject))
+		{
+			GameComps.Fallers.Add(base.gameObject, Vector2.zero);
 		}
 	}
 
 	private void RemoveFaller()
 	{
-		if (!(base.GetComponent<Health>() != null))
+		if (base.GetComponent<Health>() != null)
 		{
-			if (GameComps.Fallers.Has(base.gameObject))
-			{
-				GameComps.Fallers.Remove(base.gameObject);
-			}
+			return;
+		}
+		if (GameComps.Fallers.Has(base.gameObject))
+		{
+			GameComps.Fallers.Remove(base.gameObject);
 		}
 	}
 
@@ -613,56 +602,58 @@ public class Pickupable : Workable
 
 	private void OnLanded(object data)
 	{
-		if (!(CameraController.Instance == null))
+		if (CameraController.Instance == null)
 		{
-			Vector2 vector = (Vector2)data;
-			float sqrMagnitude = vector.sqrMagnitude;
-			if (sqrMagnitude > 0.2f && !SpeedControlScreen.Instance.IsPaused)
+			return;
+		}
+		Vector2 vector = (Vector2)data;
+		float sqrMagnitude = vector.sqrMagnitude;
+		if (sqrMagnitude <= 0.2f || SpeedControlScreen.Instance.IsPaused)
+		{
+			return;
+		}
+		Element element = this.primaryElement.Element;
+		if (element.substance != null)
+		{
+			string text = element.substance.GetOreBumpSound();
+			if (text == null)
 			{
-				Element element = this.primaryElement.Element;
-				if (element.substance != null)
+				if (element.HasTag(GameTags.RefinedMetal))
 				{
-					string text = element.substance.GetOreBumpSound();
-					if (text == null)
-					{
-						if (element.HasTag(GameTags.RefinedMetal))
-						{
-							text = "RefinedMetal";
-						}
-						else if (element.HasTag(GameTags.Metal))
-						{
-							text = "RawMetal";
-						}
-						else
-						{
-							text = "Rock";
-						}
-					}
-					if (element.tag.ToString() == "Creature" && !base.gameObject.HasTag(GameTags.Seed))
-					{
-						text = "Bodyfall_rock";
-					}
-					else
-					{
-						text = "Ore_bump_" + text;
-					}
-					string text2 = GlobalAssets.GetSound(text, true);
-					text2 = ((text2 == null) ? GlobalAssets.GetSound("Ore_bump_rock", false) : text2);
-					if (CameraController.Instance.IsAudibleSound(base.transform.position, text2))
-					{
-						int num = Grid.PosToCell(base.transform.position);
-						bool isLiquid = Grid.Element[num].IsLiquid;
-						float num2 = 0f;
-						if (isLiquid)
-						{
-							num2 = SoundUtil.GetLiquidDepth(num);
-						}
-						EventInstance eventInstance = KFMOD.BeginOneShot(text2, CameraController.Instance.GetVerticallyScaledPosition(base.transform.position));
-						eventInstance.setParameterValue("velocity", vector.magnitude);
-						eventInstance.setParameterValue("liquidDepth", num2);
-						KFMOD.EndOneShot(eventInstance);
-					}
+					text = "RefinedMetal";
 				}
+				else if (element.HasTag(GameTags.Metal))
+				{
+					text = "RawMetal";
+				}
+				else
+				{
+					text = "Rock";
+				}
+			}
+			if (element.tag.ToString() == "Creature" && !base.gameObject.HasTag(GameTags.Seed))
+			{
+				text = "Bodyfall_rock";
+			}
+			else
+			{
+				text = "Ore_bump_" + text;
+			}
+			string text2 = GlobalAssets.GetSound(text, true);
+			text2 = ((text2 == null) ? GlobalAssets.GetSound("Ore_bump_rock", false) : text2);
+			if (CameraController.Instance.IsAudibleSound(base.transform.position, text2))
+			{
+				int num = Grid.PosToCell(base.transform.position);
+				bool isLiquid = Grid.Element[num].IsLiquid;
+				float num2 = 0f;
+				if (isLiquid)
+				{
+					num2 = SoundUtil.GetLiquidDepth(num);
+				}
+				EventInstance eventInstance = KFMOD.BeginOneShot(text2, CameraController.Instance.GetVerticallyScaledPosition(base.transform.position));
+				eventInstance.setParameterValue("velocity", vector.magnitude);
+				eventInstance.setParameterValue("liquidDepth", num2);
+				KFMOD.EndOneShot(eventInstance);
 			}
 		}
 	}
@@ -677,16 +668,13 @@ public class Pickupable : Workable
 				if (Grid.Objects[num, 1] == null)
 				{
 					KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-					if (component != null)
+					if (component != null && Game.Instance.GetComponent<EntombedItemVisualizer>().AddItem(num))
 					{
-						if (Game.Instance.GetComponent<EntombedItemVisualizer>().AddItem(num))
-						{
-							this.entombedCell = num;
-							component.enabled = false;
-							Collider2D component2 = base.GetComponent<Collider2D>();
-							component2.enabled = false;
-							this.RemoveFaller();
-						}
+						this.entombedCell = num;
+						component.enabled = false;
+						Collider2D component2 = base.GetComponent<Collider2D>();
+						component2.enabled = false;
+						this.RemoveFaller();
 					}
 				}
 			}
@@ -762,9 +750,9 @@ public class Pickupable : Workable
 
 	private bool isEntombed;
 
-	private bool cleaningUp = false;
+	private bool cleaningUp;
 
-	private bool wasAbsorbed = false;
+	private bool wasAbsorbed;
 
 	public bool trackOnPickup = true;
 

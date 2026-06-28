@@ -29,22 +29,20 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 		if (base.smi.sm.receptacle.Get(base.smi) == null)
 		{
 			base.smi.GoTo(base.smi.sm.wild);
+			return;
+		}
+		Operational component = base.smi.sm.receptacle.Get(base.smi).GetComponent<Operational>();
+		if (component == null)
+		{
+			base.smi.GoTo(base.smi.sm.operational);
+		}
+		else if (component.IsOperational)
+		{
+			base.smi.GoTo(base.smi.sm.operational);
 		}
 		else
 		{
-			Operational component = base.smi.sm.receptacle.Get(base.smi).GetComponent<Operational>();
-			if (component == null)
-			{
-				base.smi.GoTo(base.smi.sm.operational);
-			}
-			else if (component.IsOperational)
-			{
-				base.smi.GoTo(base.smi.sm.operational);
-			}
-			else
-			{
-				base.smi.GoTo(base.smi.sm.inoperational);
-			}
+			base.smi.GoTo(base.smi.sm.inoperational);
 		}
 	}
 
@@ -60,7 +58,7 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 	{
 		get
 		{
-			string text = "";
+			string text = string.Empty;
 			if (base.smi.IsInsideState(base.smi.sm.inoperational))
 			{
 				text += CREATURES.STATUSITEMS.RECEPTACLEINOPERATIONAL.NAME;

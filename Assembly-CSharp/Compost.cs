@@ -30,6 +30,7 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IEffectDes
 		GameObject gameObject = (GameObject)data;
 		if (gameObject == null)
 		{
+			return;
 		}
 	}
 

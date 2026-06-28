@@ -45,5 +45,5 @@ public class SavedObject : KMonoBehaviour
 	[Serialize]
 	public bool inStorage;
 
-	private bool registered = false;
+	private bool registered;
 }

@@ -53,32 +53,34 @@ public class KToggle : Toggle
 
 	public void Click()
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			if (!(global::UnityEngine.EventSystems.EventSystem.current == null) && global::UnityEngine.EventSystems.EventSystem.current.enabled)
-			{
-				if (this.isOn)
-				{
-					this.Deselect();
-					this.isOn = false;
-				}
-				else
-				{
-					this.Select();
-					this.isOn = true;
-				}
-				if (this.soundPlayer.AcceptClickCondition != null && !this.soundPlayer.AcceptClickCondition())
-				{
-					this.soundPlayer.Play(3);
-				}
-				else
-				{
-					this.soundPlayer.Play((!this.isOn) ? 1 : 0);
-				}
-				this.onClick.Signal();
-				global::EventSystem.Trigger(base.gameObject, 2098165161, null);
-			}
+			return;
 		}
+		if (global::UnityEngine.EventSystems.EventSystem.current == null || !global::UnityEngine.EventSystems.EventSystem.current.enabled)
+		{
+			return;
+		}
+		if (this.isOn)
+		{
+			this.Deselect();
+			this.isOn = false;
+		}
+		else
+		{
+			this.Select();
+			this.isOn = true;
+		}
+		if (this.soundPlayer.AcceptClickCondition != null && !this.soundPlayer.AcceptClickCondition())
+		{
+			this.soundPlayer.Play(3);
+		}
+		else
+		{
+			this.soundPlayer.Play((!this.isOn) ? 1 : 0);
+		}
+		this.onClick.Signal();
+		global::EventSystem.Trigger(base.gameObject, 2098165161, null);
 	}
 
 	private void OnValueChanged(bool value)
@@ -109,19 +111,21 @@ public class KToggle : Toggle
 
 	public override void OnPointerClick(PointerEventData eventData)
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			if (eventData.button != PointerEventData.InputButton.Right)
-			{
-				if (eventData.clickCount == 1 || this.onDoubleClick == null)
-				{
-					this.Click();
-				}
-				else if (eventData.clickCount == 2 && this.onDoubleClick != null)
-				{
-					this.onDoubleClick();
-				}
-			}
+			return;
+		}
+		if (eventData.button == PointerEventData.InputButton.Right)
+		{
+			return;
+		}
+		if (eventData.clickCount == 1 || this.onDoubleClick == null)
+		{
+			this.Click();
+		}
+		else if (eventData.clickCount == 2 && this.onDoubleClick != null)
+		{
+			this.onDoubleClick();
 		}
 	}
 
@@ -141,14 +145,11 @@ public class KToggle : Toggle
 
 	public void ClearAnimState()
 	{
-		if (this.artExtension.animator != null)
+		if (this.artExtension.animator != null && this.artExtension.animator.isInitialized)
 		{
-			if (this.artExtension.animator.isInitialized)
-			{
-				Animator animator = this.artExtension.animator;
-				animator.SetBool("Toggled", false);
-				animator.Play("idle", 0);
-			}
+			Animator animator = this.artExtension.animator;
+			animator.SetBool("Toggled", false);
+			animator.Play("idle", 0);
 		}
 	}
 
@@ -194,93 +195,86 @@ public class KToggle : Toggle
 	private ToggleGroup GetParentToggleGroup(BaseEventData eventData)
 	{
 		PointerEventData pointerEventData = eventData as PointerEventData;
-		ToggleGroup toggleGroup;
 		if (pointerEventData == null)
 		{
-			toggleGroup = null;
+			return null;
 		}
-		else
+		GameObject gameObject = pointerEventData.pointerPressRaycast.gameObject;
+		if (gameObject == null)
 		{
-			GameObject gameObject = pointerEventData.pointerPressRaycast.gameObject;
-			if (gameObject == null)
-			{
-				toggleGroup = null;
-			}
-			else
-			{
-				Toggle componentInParent = gameObject.GetComponentInParent<Toggle>();
-				if (componentInParent == null || componentInParent.group == null)
-				{
-					toggleGroup = null;
-				}
-				else
-				{
-					toggleGroup = componentInParent.group;
-				}
-			}
+			return null;
 		}
-		return toggleGroup;
+		Toggle componentInParent = gameObject.GetComponentInParent<Toggle>();
+		if (componentInParent == null || componentInParent.group == null)
+		{
+			return null;
+		}
+		return componentInParent.group;
 	}
 
 	public void OnPointerEnter()
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			KInputManager.SetUserActive();
-			ImageToggleState[] components = base.GetComponents<ImageToggleState>();
-			if (components != null && components.Length > 0)
+			return;
+		}
+		KInputManager.SetUserActive();
+		ImageToggleState[] components = base.GetComponents<ImageToggleState>();
+		if (components != null && components.Length > 0)
+		{
+			foreach (ImageToggleState imageToggleState in components)
 			{
-				foreach (ImageToggleState imageToggleState in components)
-				{
-					imageToggleState.OnHoverIn();
-				}
+				imageToggleState.OnHoverIn();
 			}
-			this.soundPlayer.Play(2);
-			this.mouseOver = true;
-			if (this.onPointerEnter != null)
-			{
-				this.onPointerEnter();
-			}
+		}
+		this.soundPlayer.Play(2);
+		this.mouseOver = true;
+		if (this.onPointerEnter != null)
+		{
+			this.onPointerEnter();
 		}
 	}
 
 	public void OnPointerExit()
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			KInputManager.SetUserActive();
-			ImageToggleState[] components = base.GetComponents<ImageToggleState>();
-			if (components != null && components.Length > 0)
+			return;
+		}
+		KInputManager.SetUserActive();
+		ImageToggleState[] components = base.GetComponents<ImageToggleState>();
+		if (components != null && components.Length > 0)
+		{
+			foreach (ImageToggleState imageToggleState in components)
 			{
-				foreach (ImageToggleState imageToggleState in components)
-				{
-					imageToggleState.OnHoverOut();
-				}
+				imageToggleState.OnHoverOut();
 			}
-			this.mouseOver = false;
-			if (this.onPointerExit != null)
-			{
-				this.onPointerExit();
-			}
+		}
+		this.mouseOver = false;
+		if (this.onPointerExit != null)
+		{
+			this.onPointerExit();
 		}
 	}
 
 	public override void OnPointerEnter(PointerEventData eventData)
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			this.OnPointerEnter();
-			base.OnPointerEnter(eventData);
+			return;
 		}
+		this.OnPointerEnter();
+		base.OnPointerEnter(eventData);
 	}
 
 	public override void OnPointerExit(PointerEventData eventData)
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			this.OnPointerExit();
-			base.OnPointerExit(eventData);
+			return;
 		}
+		this.OnPointerExit();
+		base.OnPointerExit(eventData);
 	}
 
 	public new bool isOn
@@ -305,7 +299,7 @@ public class KToggle : Toggle
 
 	public KToggleArtExtensions artExtension;
 
-	protected bool mouseOver = false;
+	protected bool mouseOver;
 
 	public delegate void PointerEvent();
 }

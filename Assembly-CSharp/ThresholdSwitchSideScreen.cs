@@ -41,10 +41,11 @@ public class ThresholdSwitchSideScreen : SideScreenContent
 
 	private void SimUpdate(float dt)
 	{
-		if (this.target != null)
+		if (this.target == null)
 		{
-			this.UpdateLabels();
+			return;
 		}
+		this.UpdateLabels();
 	}
 
 	public override void SetTarget(GameObject new_target)
@@ -52,29 +53,25 @@ public class ThresholdSwitchSideScreen : SideScreenContent
 		if (new_target == null)
 		{
 			global::Debug.LogError("Invalid gameObject received", null);
+			return;
 		}
-		else
+		this.target = new_target.GetComponent<IThresholdSwitch>();
+		if (this.target == null)
 		{
-			this.target = new_target.GetComponent<IThresholdSwitch>();
-			if (this.target == null)
-			{
-				global::Debug.LogError("The gameObject received does not contain a IThresholdSwitch component", null);
-			}
-			else
-			{
-				this.UpdateLabels();
-				this.thresholdSlider.minValue = this.target.RangeMin;
-				this.thresholdSlider.maxValue = this.target.RangeMax;
-				this.thresholdSlider.value = this.target.Threshold;
-				this.thresholdSlider.GetComponentInChildren<ToolTip>();
-				this.unitsLabel.text = this.target.ThresholdValueUnits();
-				this.numberInput.minValue = this.target.GetRangeMinInputField();
-				this.numberInput.maxValue = this.target.GetRangeMaxInputField();
-				this.numberInput.Activate();
-				this.UpdateTargetThresholdLabel();
-				this.OnConditionButtonClicked(this.target.ActivateAboveThreshold);
-			}
+			global::Debug.LogError("The gameObject received does not contain a IThresholdSwitch component", null);
+			return;
 		}
+		this.UpdateLabels();
+		this.thresholdSlider.minValue = this.target.RangeMin;
+		this.thresholdSlider.maxValue = this.target.RangeMax;
+		this.thresholdSlider.value = this.target.Threshold;
+		this.thresholdSlider.GetComponentInChildren<ToolTip>();
+		this.unitsLabel.text = this.target.ThresholdValueUnits();
+		this.numberInput.minValue = this.target.GetRangeMinInputField();
+		this.numberInput.maxValue = this.target.GetRangeMaxInputField();
+		this.numberInput.Activate();
+		this.UpdateTargetThresholdLabel();
+		this.OnConditionButtonClicked(this.target.ActivateAboveThreshold);
 	}
 
 	private void OnThresholdValueChanged(float new_value)

@@ -76,27 +76,28 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause
 
 	private void CheckDrowning(object data = null)
 	{
-		if (!this.incapacitated)
+		if (this.incapacitated)
 		{
-			int num = Grid.PosToCell(base.gameObject.transform.position);
-			if (!this.IsCellSafe(num))
+			return;
+		}
+		int num = Grid.PosToCell(base.gameObject.transform.position);
+		if (!this.IsCellSafe(num))
+		{
+			if (!this.drowning)
 			{
-				if (!this.drowning)
-				{
-					this.drowning = true;
-					base.Trigger(1949704522, null);
-				}
-				if (this.stamina <= 0f)
-				{
-					base.Trigger(-750750377, null);
-					this.SetIncapacitated(true);
-				}
+				this.drowning = true;
+				base.Trigger(1949704522, null);
 			}
-			else if (this.drowning)
+			if (this.stamina <= 0f)
 			{
-				this.drowning = false;
-				base.Trigger(99949694, null);
+				base.Trigger(-750750377, null);
+				this.SetIncapacitated(true);
 			}
+		}
+		else if (this.drowning)
+		{
+			this.drowning = false;
+			base.Trigger(99949694, null);
 		}
 	}
 
@@ -122,16 +123,11 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause
 	{
 		get
 		{
-			string text;
 			if (this.drowning)
 			{
-				text = Db.Get().CreatureStatusItems.Drowning.resolveStringCallback(CREATURES.STATUSITEMS.DROWNING.NAME, this);
+				return Db.Get().CreatureStatusItems.Drowning.resolveStringCallback(CREATURES.STATUSITEMS.DROWNING.NAME, this);
 			}
-			else
-			{
-				text = "";
-			}
-			return text;
+			return string.Empty;
 		}
 	}
 
@@ -177,7 +173,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause
 	[Serialize]
 	private bool incapacitated;
 
-	private bool drowning = false;
+	private bool drowning;
 
 	protected float maxStamina = 10f;
 

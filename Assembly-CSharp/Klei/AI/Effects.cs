@@ -66,42 +66,34 @@ namespace Klei.AI
 
 		public EffectInstance Add(Effect effect, bool should_save)
 		{
-			EffectInstance effectInstance;
 			if (this.effectImmunites.Contains(effect))
 			{
-				effectInstance = null;
+				return null;
 			}
-			else
+			bool flag = true;
+			foreach (Trait trait in base.GetComponent<Traits>())
 			{
-				bool flag = true;
-				foreach (Trait trait in base.GetComponent<Traits>())
+				if (trait.ignoredEffects != null && Array.IndexOf<string>(trait.ignoredEffects, effect.Id) != -1)
 				{
-					if (trait.ignoredEffects != null && Array.IndexOf<string>(trait.ignoredEffects, effect.Id) != -1)
-					{
-						flag = false;
-						break;
-					}
-				}
-				if (flag)
-				{
-					Attributes attributes = this.GetAttributes();
-					EffectInstance effectInstance2 = this.Get(effect);
-					if (effectInstance2 == null)
-					{
-						effectInstance2 = new EffectInstance(base.gameObject, effect, should_save);
-						effect.AddTo(attributes);
-						this.effects.Add(effectInstance2);
-						base.Trigger(-1901442097, effect);
-					}
-					effectInstance2.startTime = Time.time;
-					effectInstance = effectInstance2;
-				}
-				else
-				{
-					effectInstance = null;
+					flag = false;
+					break;
 				}
 			}
-			return effectInstance;
+			if (flag)
+			{
+				Attributes attributes = this.GetAttributes();
+				EffectInstance effectInstance = this.Get(effect);
+				if (effectInstance == null)
+				{
+					effectInstance = new EffectInstance(base.gameObject, effect, should_save);
+					effect.AddTo(attributes);
+					this.effects.Add(effectInstance);
+					base.Trigger(-1901442097, effect);
+				}
+				effectInstance.startTime = Time.time;
+				return effectInstance;
+			}
+			return null;
 		}
 
 		public void Remove(Effect effect)

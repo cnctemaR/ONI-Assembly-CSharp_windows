@@ -46,60 +46,55 @@ public class KFMODDebugger : KMonoBehaviour
 
 	private KFMODDebugger.DebugSoundType GetDebugSoundType(string s)
 	{
-		KFMODDebugger.DebugSoundType debugSoundType;
 		if (s.Contains("Buildings"))
 		{
-			debugSoundType = KFMODDebugger.DebugSoundType.Buildings;
+			return KFMODDebugger.DebugSoundType.Buildings;
 		}
-		else if (s.Contains("Notifications"))
+		if (s.Contains("Notifications"))
 		{
-			debugSoundType = KFMODDebugger.DebugSoundType.Notifications;
+			return KFMODDebugger.DebugSoundType.Notifications;
 		}
-		else if (s.Contains("UI"))
+		if (s.Contains("UI"))
 		{
-			debugSoundType = KFMODDebugger.DebugSoundType.UI;
+			return KFMODDebugger.DebugSoundType.UI;
 		}
-		else if (s.Contains("Creatures"))
+		if (s.Contains("Creatures"))
 		{
-			debugSoundType = KFMODDebugger.DebugSoundType.Creatures;
+			return KFMODDebugger.DebugSoundType.Creatures;
 		}
-		else if (s.Contains("Duplicant_voices"))
+		if (s.Contains("Duplicant_voices"))
 		{
-			debugSoundType = KFMODDebugger.DebugSoundType.DupeVoices;
+			return KFMODDebugger.DebugSoundType.DupeVoices;
 		}
-		else if (s.Contains("Ambience"))
+		if (s.Contains("Ambience"))
 		{
-			debugSoundType = KFMODDebugger.DebugSoundType.Ambience;
+			return KFMODDebugger.DebugSoundType.Ambience;
 		}
-		else if (s.Contains("Environment"))
+		if (s.Contains("Environment"))
 		{
-			debugSoundType = KFMODDebugger.DebugSoundType.Environment;
+			return KFMODDebugger.DebugSoundType.Environment;
 		}
-		else if (s.Contains("FX"))
+		if (s.Contains("FX"))
 		{
-			debugSoundType = KFMODDebugger.DebugSoundType.FX;
+			return KFMODDebugger.DebugSoundType.FX;
 		}
-		else if (s.Contains("Duplicant_actions/LowImportance/Movement"))
+		if (s.Contains("Duplicant_actions/LowImportance/Movement"))
 		{
-			debugSoundType = KFMODDebugger.DebugSoundType.DupeMovement;
+			return KFMODDebugger.DebugSoundType.DupeMovement;
 		}
-		else if (s.Contains("Duplicant_actions"))
+		if (s.Contains("Duplicant_actions"))
 		{
-			debugSoundType = KFMODDebugger.DebugSoundType.DupeActions;
+			return KFMODDebugger.DebugSoundType.DupeActions;
 		}
-		else if (s.Contains("Plants"))
+		if (s.Contains("Plants"))
 		{
-			debugSoundType = KFMODDebugger.DebugSoundType.Plants;
+			return KFMODDebugger.DebugSoundType.Plants;
 		}
-		else if (s.Contains("Music"))
+		if (s.Contains("Music"))
 		{
-			debugSoundType = KFMODDebugger.DebugSoundType.Music;
+			return KFMODDebugger.DebugSoundType.Music;
 		}
-		else
-		{
-			debugSoundType = KFMODDebugger.DebugSoundType.Uncategorized;
-		}
-		return debugSoundType;
+		return KFMODDebugger.DebugSoundType.Uncategorized;
 	}
 
 	public static KFMODDebugger instance;
@@ -108,7 +103,7 @@ public class KFMODDebugger : KMonoBehaviour
 
 	public Dictionary<KFMODDebugger.DebugSoundType, bool> allDebugSoundTypes = new Dictionary<KFMODDebugger.DebugSoundType, bool>();
 
-	public bool debugEnabled = false;
+	public bool debugEnabled;
 
 	public struct AudioDebugEntry
 	{

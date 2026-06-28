@@ -24,19 +24,14 @@ public struct StructureTemperatureData
 	{
 		get
 		{
-			float num;
 			if (this.energySourcesKW == null || this.energySourcesKW.Count == 0)
 			{
-				num = 0f;
+				return 0f;
 			}
-			else
+			float num = 0f;
+			for (int i = 0; i < this.energySourcesKW.Count; i++)
 			{
-				float num2 = 0f;
-				for (int i = 0; i < this.energySourcesKW.Count; i++)
-				{
-					num2 += this.energySourcesKW[i].value;
-				}
-				num = num2;
+				num += this.energySourcesKW[i].value;
 			}
 			return num;
 		}

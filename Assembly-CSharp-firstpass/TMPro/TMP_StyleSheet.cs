@@ -41,16 +41,11 @@ namespace TMPro
 		private TMP_Style GetStyleInternal(int hashCode)
 		{
 			TMP_Style tmp_Style;
-			TMP_Style tmp_Style2;
 			if (this.m_StyleDictionary.TryGetValue(hashCode, out tmp_Style))
 			{
-				tmp_Style2 = tmp_Style;
+				return tmp_Style;
 			}
-			else
-			{
-				tmp_Style2 = null;
-			}
-			return tmp_Style2;
+			return null;
 		}
 
 		public void UpdateStyleDictionaryKey(int old_key, int new_key)

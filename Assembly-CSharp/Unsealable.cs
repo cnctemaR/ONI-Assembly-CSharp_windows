@@ -9,16 +9,11 @@ public class Unsealable : Workable
 
 	public override CellOffset[] GetOffsets()
 	{
-		CellOffset[] array;
 		if (this.facingRight)
 		{
-			array = OffsetGroups.RightOnly;
+			return OffsetGroups.RightOnly;
 		}
-		else
-		{
-			array = OffsetGroups.LeftOnly;
-		}
-		return array;
+		return OffsetGroups.LeftOnly;
 	}
 
 	protected override void OnPrefabInit()
@@ -54,5 +49,5 @@ public class Unsealable : Workable
 	public bool facingRight;
 
 	[Serialize]
-	public bool unsealed = false;
+	public bool unsealed;
 }

@@ -108,15 +108,16 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	public void ActivateTool(InterfaceTool tool)
 	{
-		if (!(this.activeTool == tool))
+		if (this.activeTool == tool)
 		{
-			this.DeactivateTool(tool);
-			this.activeTool = tool;
-			this.activeTool.enabled = true;
-			this.activeTool.gameObject.SetActive(true);
-			this.activeTool.ActivateTool();
-			this.UpdateHover();
+			return;
 		}
+		this.DeactivateTool(tool);
+		this.activeTool = tool;
+		this.activeTool.enabled = true;
+		this.activeTool.gameObject.SetActive(true);
+		this.activeTool.ActivateTool();
+		this.UpdateHover();
 	}
 
 	public void ToolDeactivated(InterfaceTool tool)
@@ -162,12 +163,9 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 	{
 		this.dragDelta = Vector2.zero;
 		Vector3 mousePosition = Input.mousePosition;
-		if (!this.dragging && this.dragAction != global::Action.Invalid)
+		if (!this.dragging && this.dragAction != global::Action.Invalid && ((mousePosition - this.startDragPos).magnitude > 6f || Time.unscaledTime - this.startDragTime > 0.3f))
 		{
-			if ((mousePosition - this.startDragPos).magnitude > 6f || Time.unscaledTime - this.startDragTime > 0.3f)
-			{
-				this.dragging = true;
-			}
+			this.dragging = true;
 		}
 		if (this.dragging)
 		{
@@ -190,39 +188,41 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		if (e.TryConsume(global::Action.ToggleScreenshotMode))
 		{
 			DebugHandler.ToggleScreenshotMode();
+			return;
 		}
-		else if (!(this.activeTool == null) && this.activeTool.enabled)
+		if (this.activeTool == null || !this.activeTool.enabled)
 		{
-			List<RaycastResult> list = new List<RaycastResult>();
-			PointerEventData pointerEventData = new PointerEventData(global::UnityEngine.EventSystems.EventSystem.current);
-			pointerEventData.position = Input.mousePosition;
-			global::UnityEngine.EventSystems.EventSystem current = global::UnityEngine.EventSystems.EventSystem.current;
-			if (current != null)
+			return;
+		}
+		List<RaycastResult> list = new List<RaycastResult>();
+		PointerEventData pointerEventData = new PointerEventData(global::UnityEngine.EventSystems.EventSystem.current);
+		pointerEventData.position = Input.mousePosition;
+		global::UnityEngine.EventSystems.EventSystem current = global::UnityEngine.EventSystems.EventSystem.current;
+		if (current != null)
+		{
+			current.RaycastAll(pointerEventData, list);
+			if (list.Count > 0)
 			{
-				current.RaycastAll(pointerEventData, list);
-				if (list.Count > 0)
-				{
-					return;
-				}
+				return;
 			}
-			if (e.TryConsume(global::Action.MouseLeft) || e.TryConsume(global::Action.ShiftMouseLeft))
-			{
-				this.StartDrag(global::Action.MouseLeft);
-				this.activeTool.OnLeftClickDown(this.GetCursorPos());
-			}
-			else if (e.IsAction(global::Action.MouseRight))
-			{
-				this.StartDrag(global::Action.MouseRight);
-				this.activeTool.OnRightClickDown(this.GetCursorPos(), e);
-			}
-			else if (e.IsAction(global::Action.MouseMiddle))
-			{
-				this.StartDrag(global::Action.MouseMiddle);
-			}
-			else
-			{
-				this.activeTool.OnKeyDown(e);
-			}
+		}
+		if (e.TryConsume(global::Action.MouseLeft) || e.TryConsume(global::Action.ShiftMouseLeft))
+		{
+			this.StartDrag(global::Action.MouseLeft);
+			this.activeTool.OnLeftClickDown(this.GetCursorPos());
+		}
+		else if (e.IsAction(global::Action.MouseRight))
+		{
+			this.StartDrag(global::Action.MouseRight);
+			this.activeTool.OnRightClickDown(this.GetCursorPos(), e);
+		}
+		else if (e.IsAction(global::Action.MouseMiddle))
+		{
+			this.StartDrag(global::Action.MouseMiddle);
+		}
+		else
+		{
+			this.activeTool.OnKeyDown(e);
 		}
 	}
 
@@ -240,23 +240,25 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		{
 			this.StopDrag(global::Action.MouseMiddle);
 		}
-		if (!(this.activeTool == null) && this.activeTool.enabled)
+		if (this.activeTool == null || !this.activeTool.enabled)
 		{
-			if (this.activeTool.hasFocus)
-			{
-				if (e.TryConsume(global::Action.MouseLeft) || e.TryConsume(global::Action.ShiftMouseLeft))
-				{
-					this.activeTool.OnLeftClickUp(this.GetCursorPos());
-				}
-				else if (e.IsAction(global::Action.MouseRight))
-				{
-					this.activeTool.OnRightClickUp(this.GetCursorPos());
-				}
-				else
-				{
-					this.activeTool.OnKeyUp(e);
-				}
-			}
+			return;
+		}
+		if (!this.activeTool.hasFocus)
+		{
+			return;
+		}
+		if (e.TryConsume(global::Action.MouseLeft) || e.TryConsume(global::Action.ShiftMouseLeft))
+		{
+			this.activeTool.OnLeftClickUp(this.GetCursorPos());
+		}
+		else if (e.IsAction(global::Action.MouseRight))
+		{
+			this.activeTool.OnRightClickUp(this.GetCursorPos());
+		}
+		else
+		{
+			this.activeTool.OnKeyUp(e);
 		}
 	}
 
@@ -284,7 +286,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	private InterfaceTool activeTool;
 
-	private bool DebugHidingCursor = false;
+	private bool DebugHidingCursor;
 
 	private Vector3 prevMousePos = new Vector3(float.PositiveInfinity, 0f, 0f);
 
@@ -292,11 +294,11 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	private const float MIN_DRAG_TIME = 0.3f;
 
-	private global::Action dragAction = global::Action.Invalid;
+	private global::Action dragAction;
 
-	private bool dragging = false;
+	private bool dragging;
 
-	private bool queueStopDrag = false;
+	private bool queueStopDrag;
 
 	private Vector3 startDragPos;
 

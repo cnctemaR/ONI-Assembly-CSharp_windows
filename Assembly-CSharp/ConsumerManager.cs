@@ -76,43 +76,35 @@ public class ConsumerManager : KMonoBehaviour, ISaveLoadable
 
 	private bool ShouldBeDiscovered(Tag food_id)
 	{
-		bool flag;
 		if (DebugHandler.InstantBuildMode)
 		{
-			flag = true;
+			return true;
 		}
-		else if (WorldInventory.Instance.IsDiscovered(food_id))
+		if (WorldInventory.Instance.IsDiscovered(food_id))
 		{
-			flag = true;
+			return true;
 		}
-		else
+		foreach (Recipe recipe in RecipeManager.Get().recipes)
 		{
-			foreach (Recipe recipe in RecipeManager.Get().recipes)
+			if (recipe.Result == food_id)
 			{
-				if (recipe.Result == food_id)
+				foreach (string text in recipe.fabricators)
 				{
-					foreach (string text in recipe.fabricators)
-					{
-						if (Db.Get().TechItems.IsTechItemComplete(text))
-						{
-							return true;
-						}
-					}
-				}
-			}
-			foreach (Crop crop in Components.Crops)
-			{
-				if (Grid.Visible[Grid.PosToCell(crop.gameObject)] > 0)
-				{
-					if (crop.cropId == food_id.Name)
+					if (Db.Get().TechItems.IsTechItemComplete(text))
 					{
 						return true;
 					}
 				}
 			}
-			flag = false;
 		}
-		return flag;
+		foreach (Crop crop in Components.Crops)
+		{
+			if (Grid.Visible[Grid.PosToCell(crop.gameObject)] > 0 && crop.cropId == food_id.Name)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static ConsumerManager instance;

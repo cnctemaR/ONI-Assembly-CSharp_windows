@@ -144,20 +144,22 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 
 	public void AddTagToFilter(Tag t)
 	{
-		if (!this.ContainsTag(t))
+		if (this.ContainsTag(t))
 		{
-			this.UpdateFilters(new List<Tag>(this.acceptedTags) { t });
+			return;
 		}
+		this.UpdateFilters(new List<Tag>(this.acceptedTags) { t });
 	}
 
 	public void RemoveTagFromFilter(Tag t)
 	{
-		if (this.ContainsTag(t))
+		if (!this.ContainsTag(t))
 		{
-			List<Tag> list = new List<Tag>(this.acceptedTags);
-			list.Remove(t);
-			this.UpdateFilters(list);
+			return;
 		}
+		List<Tag> list = new List<Tag>(this.acceptedTags);
+		list.Remove(t);
+		this.UpdateFilters(list);
 	}
 
 	public void UpdateFilters(IList<Tag> filters)

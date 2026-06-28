@@ -129,7 +129,6 @@ public class KAnimGroupFile : ScriptableObject
 
 	private bool AddFile(int groupIndex, KAnimFile file)
 	{
-		bool flag2;
 		if (!this.groups[groupIndex].files.Contains(file))
 		{
 			Pair<HashedString, HashedString> pair = new Pair<HashedString, HashedString>(file.homedirectory, this.groups[groupIndex].id);
@@ -148,13 +147,9 @@ public class KAnimGroupFile : ScriptableObject
 				this.currentGroup.Add(pair);
 			}
 			this.groups[groupIndex].files.Add(file);
-			flag2 = true;
+			return true;
 		}
-		else
-		{
-			flag2 = false;
-		}
-		return flag2;
+		return false;
 	}
 
 	public void LoadAll()
@@ -177,20 +172,19 @@ public class KAnimGroupFile : ScriptableObject
 			HashedString hashedString = this.groups[i].id;
 			if (this.groups[i].renderType != KAnimBatchGroup.RendererType.AnimOnly)
 			{
-				goto IL_0112;
+				goto IL_0107;
 			}
 			if (this.groups[i].swapTarget.isValid)
 			{
 				kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[i].swapTarget, false);
 				hashedString = this.groups[i].swapTarget;
-				goto IL_0112;
+				goto IL_0107;
 			}
-			IL_025C:
+			IL_024B:
 			i++;
 			continue;
-			IL_0112:
-			int j = 0;
-			while (j < this.groups[i].files.Count)
+			IL_0107:
+			for (int j = 0; j < this.groups[i].files.Count; j++)
 			{
 				KAnimFile kanimFile = this.groups[i].files[j];
 				if (kanimFile != null && kanimFile.buildFile != null && !this.fileData.ContainsKey(kanimFile.GetInstanceID()))
@@ -210,12 +204,8 @@ public class KAnimGroupFile : ScriptableObject
 						this.fileData.Add(kanimFile.GetInstanceID(), file);
 					}
 				}
-				IL_023B:
-				j++;
-				continue;
-				goto IL_023B;
 			}
-			goto IL_025C;
+			goto IL_024B;
 		}
 		for (int k = 0; k < this.groups.Count; k++)
 		{
@@ -278,8 +268,7 @@ public class KAnimGroupFile : ScriptableObject
 				{
 					kbatchGroupData2 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num2].id, false);
 				}
-				int num3 = 0;
-				while (num3 < this.groups[num2].files.Count)
+				for (int num3 = 0; num3 < this.groups[num2].files.Count; num3++)
 				{
 					KAnimFile kanimFile2 = this.groups[num2].files[num3];
 					if (kanimFile2 != null && kanimFile2.animFile != null)
@@ -303,10 +292,6 @@ public class KAnimGroupFile : ScriptableObject
 							KGlobalAnimParser.ParseAnimData(kbatchGroupData2, hashedString3, fastReader, kanimFileData);
 						}
 					}
-					IL_064B:
-					num3++;
-					continue;
-					goto IL_064B;
 				}
 			}
 		}
@@ -351,7 +336,7 @@ public class KAnimGroupFile : ScriptableObject
 
 	public const int MAX_ANIMS_PER_GROUP = 10;
 
-	private static KAnimGroupFile groupfile = null;
+	private static KAnimGroupFile groupfile;
 
 	private Dictionary<int, KAnimFileData> fileData = new Dictionary<int, KAnimFileData>();
 
@@ -361,7 +346,7 @@ public class KAnimGroupFile : ScriptableObject
 	[SerializeField]
 	private List<Pair<HashedString, HashedString>> currentGroup = new List<Pair<HashedString, HashedString>>();
 
-	private static bool hasCompletedLoadAll = false;
+	private static bool hasCompletedLoadAll;
 
 	[Serializable]
 	public class Group
@@ -375,7 +360,7 @@ public class KAnimGroupFile : ScriptableObject
 		public HashedString id;
 
 		[SerializeField]
-		public string commandDirectory = "";
+		public string commandDirectory = string.Empty;
 
 		[SerializeField]
 		public List<KAnimFile> files = new List<KAnimFile>();
@@ -402,7 +387,7 @@ public class KAnimGroupFile : ScriptableObject
 		public HashedString animTarget;
 
 		[SerializeField]
-		public bool isMultiInstance = false;
+		public bool isMultiInstance;
 	}
 
 	public class GroupFile : YamlIO<KAnimGroupFile.GroupFile>

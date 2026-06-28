@@ -12,14 +12,15 @@ public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 	public void FindAvailableMedicalBed(Navigator navigator)
 	{
 		AssignableSlotInstance slot = this.gameObject.GetComponent<Ownables>().GetSlot(Db.Get().OwnableSlots.Clinic);
-		if (!(slot.assignable == null))
+		if (slot.assignable == null)
 		{
-			Clinic component = slot.assignable.GetComponent<Clinic>();
-			if (navigator.CanReach(component))
-			{
-				this.smi.sm.clinic.Set(component.gameObject, this.smi);
-				this.smi.GoTo(this.smi.sm.incapacitation_root.rescue.waitingForPickup);
-			}
+			return;
+		}
+		Clinic component = slot.assignable.GetComponent<Clinic>();
+		if (navigator.CanReach(component))
+		{
+			this.smi.sm.clinic.Set(component.gameObject, this.smi);
+			this.smi.GoTo(this.smi.sm.incapacitation_root.rescue.waitingForPickup);
 		}
 	}
 

@@ -18,23 +18,18 @@ public static class ChorePreconditions
 		id = "HasUrge",
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			bool flag;
 			if (context.chore.choreType.urge == null)
 			{
-				flag = true;
+				return true;
 			}
-			else
+			foreach (Urge urge in context.consumer.GetUrges())
 			{
-				foreach (Urge urge in context.consumer.GetUrges())
+				if (context.chore.SatisfiesUrge(urge))
 				{
-					if (context.chore.SatisfiesUrge(urge))
-					{
-						return true;
-					}
+					return true;
 				}
-				flag = false;
 			}
-			return flag;
+			return false;
 		}
 	};
 
@@ -62,7 +57,6 @@ public static class ChorePreconditions
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Assignable assignable = (Assignable)data;
-			bool flag2;
 			if (assignable.assignee != null)
 			{
 				foreach (Ownables ownables in assignable.assignee.GetOwners())
@@ -72,13 +66,9 @@ public static class ChorePreconditions
 						return true;
 					}
 				}
-				flag2 = false;
+				return false;
 			}
-			else
-			{
-				flag2 = false;
-			}
-			return flag2;
+			return false;
 		}
 	};
 
@@ -96,17 +86,12 @@ public static class ChorePreconditions
 		id = "IsPreferredAssignableOrUrgent",
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			bool flag3;
 			if (Game.Instance.assignmentManager.GetPreferredAssignables(context.consumer.gameObject.GetComponent<Navigator>(), (data as Assignable).slot).Contains(data as Assignable))
 			{
-				flag3 = true;
+				return true;
 			}
-			else
-			{
-				PeeChoreMonitor.Instance smi = context.consumer.gameObject.GetSMI<PeeChoreMonitor.Instance>();
-				flag3 = smi.IsInsideState(smi.sm.critical);
-			}
-			return flag3;
+			PeeChoreMonitor.Instance smi = context.consumer.gameObject.GetSMI<PeeChoreMonitor.Instance>();
+			return smi.IsInsideState(smi.sm.critical);
 		}
 	};
 
@@ -126,35 +111,24 @@ public static class ChorePreconditions
 		id = "IsMoreSatisfying",
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			bool flag4;
 			if (context.isAttemptingOverride)
 			{
-				flag4 = true;
+				return true;
 			}
-			else
+			Chore currentChore = context.consumer.choreDriver.GetCurrentChore();
+			if (currentChore == null)
 			{
-				Chore currentChore = context.consumer.choreDriver.GetCurrentChore();
-				if (currentChore != null)
-				{
-					if (context.masterPriority.priority_class != currentChore.masterPriority.priority_class)
-					{
-						flag4 = context.masterPriority.priority_class > currentChore.masterPriority.priority_class;
-					}
-					else if (context.masterPriority.priority_value != currentChore.masterPriority.priority_value)
-					{
-						flag4 = context.masterPriority.priority_value > currentChore.masterPriority.priority_value;
-					}
-					else
-					{
-						flag4 = context.priority > currentChore.choreType.priority;
-					}
-				}
-				else
-				{
-					flag4 = true;
-				}
+				return true;
 			}
-			return flag4;
+			if (context.masterPriority.priority_class != currentChore.masterPriority.priority_class)
+			{
+				return context.masterPriority.priority_class > currentChore.masterPriority.priority_class;
+			}
+			if (context.masterPriority.priority_value != currentChore.masterPriority.priority_value)
+			{
+				return context.masterPriority.priority_value > currentChore.masterPriority.priority_value;
+			}
+			return context.priority > currentChore.choreType.priority;
 		}
 	};
 
@@ -194,29 +168,21 @@ public static class ChorePreconditions
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Workable workable = (Workable)data;
-			bool flag5;
 			if (context.consumer == null)
 			{
-				flag5 = false;
+				return false;
 			}
-			else if (workable == null)
+			if (workable == null)
 			{
-				flag5 = false;
+				return false;
 			}
-			else
+			int navigationCost = context.consumer.navigator.GetNavigationCost(workable);
+			if (navigationCost != PathProber.InvalidCost)
 			{
-				int navigationCost = context.consumer.navigator.GetNavigationCost(workable);
-				if (navigationCost != PathProber.InvalidCost)
-				{
-					context.cost += navigationCost;
-					flag5 = true;
-				}
-				else
-				{
-					flag5 = false;
-				}
+				context.cost += navigationCost;
+				return true;
 			}
-			return flag5;
+			return false;
 		}
 	};
 
@@ -235,17 +201,12 @@ public static class ChorePreconditions
 		id = "IsAwake",
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			bool flag6;
 			if (context.consumer == null)
 			{
-				flag6 = false;
+				return false;
 			}
-			else
-			{
-				StaminaMonitor.Instance smi2 = context.consumer.GetSMI<StaminaMonitor.Instance>();
-				flag6 = !context.consumer.GetSMI<StaminaMonitor.Instance>().IsInsideState(smi2.sm.sleepy.sleeping);
-			}
-			return flag6;
+			StaminaMonitor.Instance smi2 = context.consumer.GetSMI<StaminaMonitor.Instance>();
+			return !context.consumer.GetSMI<StaminaMonitor.Instance>().IsInsideState(smi2.sm.sleepy.sleeping);
 		}
 	};
 

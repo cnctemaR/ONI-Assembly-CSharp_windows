@@ -35,20 +35,21 @@ public class ChunkSpawner : KMonoBehaviour
 				}
 			}
 		}
-		if (list.Count != 0)
+		if (list.Count == 0)
 		{
-			foreach (ChunkSpawner.ElementSpawn elementSpawn in this.Spawns)
+			return;
+		}
+		foreach (ChunkSpawner.ElementSpawn elementSpawn in this.Spawns)
+		{
+			float num4 = global::UnityEngine.Random.Range(elementSpawn.totalMass_min, elementSpawn.totalMass_max);
+			int num5 = global::UnityEngine.Random.Range(elementSpawn.chunks_min, elementSpawn.chunks_max + 1);
+			float num6 = num4 / (float)num5;
+			for (int l = 0; l < num5; l++)
 			{
-				float num4 = global::UnityEngine.Random.Range(elementSpawn.totalMass_min, elementSpawn.totalMass_max);
-				int num5 = global::UnityEngine.Random.Range(elementSpawn.chunks_min, elementSpawn.chunks_max + 1);
-				float num6 = num4 / (float)num5;
-				for (int l = 0; l < num5; l++)
-				{
-					int num7 = global::UnityEngine.Random.Range(0, list.Count);
-					Vector3 vector = Grid.CellToPos(list[num7]);
-					vector.z = -2.5f;
-					ElementLoader.FindElementByHash(elementSpawn.element).substance.SpawnResource(vector, num6, ElementLoader.FindElementByHash(elementSpawn.element).defaultValues.temperature, byte.MaxValue, 0, false, false);
-				}
+				int num7 = global::UnityEngine.Random.Range(0, list.Count);
+				Vector3 vector = Grid.CellToPos(list[num7]);
+				vector.z = -2.5f;
+				ElementLoader.FindElementByHash(elementSpawn.element).substance.SpawnResource(vector, num6, ElementLoader.FindElementByHash(elementSpawn.element).defaultValues.temperature, byte.MaxValue, 0, false, false);
 			}
 		}
 	}

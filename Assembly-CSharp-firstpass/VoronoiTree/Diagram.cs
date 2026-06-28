@@ -189,34 +189,26 @@ namespace VoronoiTree
 
 		public bool IsTopEdgeCell(int cell)
 		{
-			bool flag;
 			if (cell < 0 || cell >= this.points.Count)
 			{
-				flag = false;
+				return false;
 			}
-			else
+			List<Vector2> list = this.diagram.Region(this.points[cell]);
+			if (list.Count == 0)
 			{
-				List<Vector2> list = this.diagram.Region(this.points[cell]);
-				if (list.Count == 0)
-				{
-					flag = false;
-				}
-				else
-				{
-					Vector2 vector = list[0];
-					for (int i = 1; i < list.Count; i++)
-					{
-						Vector2 vector2 = list[i];
-						if (vector.y == vector2.y && vector2.y == this.bounds.height)
-						{
-							return true;
-						}
-						vector = vector2;
-					}
-					flag = vector.y == list[0].y && list[0].y == this.bounds.height;
-				}
+				return false;
 			}
-			return flag;
+			Vector2 vector = list[0];
+			for (int i = 1; i < list.Count; i++)
+			{
+				Vector2 vector2 = list[i];
+				if (vector.y == vector2.y && vector2.y == this.bounds.height)
+				{
+					return true;
+				}
+				vector = vector2;
+			}
+			return vector.y == list[0].y && list[0].y == this.bounds.height;
 		}
 
 		public static int maxPowerIterations;
@@ -233,7 +225,7 @@ namespace VoronoiTree
 
 		private List<uint> ids = new List<uint>();
 
-		public int siteIndex = 0;
+		public int siteIndex;
 
 		[SerializationConfig(MemberSerialization.OptIn)]
 		public class Site
@@ -272,10 +264,10 @@ namespace VoronoiTree
 			public Vector2 position;
 
 			[Serialize]
-			public Polygon poly = null;
+			public Polygon poly;
 
 			[Serialize]
-			public HashSet<KeyValuePair<uint, int>> neighbours = null;
+			public HashSet<KeyValuePair<uint, int>> neighbours;
 		}
 	}
 }

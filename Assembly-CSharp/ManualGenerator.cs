@@ -113,25 +113,26 @@ public class ManualGenerator : Workable, ISliderControl
 			if (this.operational.IsOperational)
 			{
 				CircuitManager circuitManager = Game.Instance.circuitManager;
-				if (circuitManager != null)
+				if (circuitManager == null)
 				{
-					ushort circuitID = circuitManager.GetCircuitID(this.powerCell);
-					bool flag = circuitManager.HasBatteries(circuitID);
-					bool flag2 = (flag && circuitManager.GetMinBatteryPercentFullOnCircuit(circuitID) < this.batteryRefillPercent) || (!flag && circuitManager.HasConsumers(circuitID));
-					if (flag2)
-					{
-						if (this.chore == null && this.smi.GetCurrentState() == this.smi.sm.on)
-						{
-							this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
-						}
-					}
-					else if (this.chore != null)
-					{
-						this.chore.Cancel("No refill needed");
-						this.chore = null;
-					}
-					this.selectable.ToggleStatusItem(EnergyGenerator.BatteriesSufficientlyFull, !flag2, null);
+					return;
 				}
+				ushort circuitID = circuitManager.GetCircuitID(this.powerCell);
+				bool flag = circuitManager.HasBatteries(circuitID);
+				bool flag2 = (flag && circuitManager.GetMinBatteryPercentFullOnCircuit(circuitID) < this.batteryRefillPercent) || (!flag && circuitManager.HasConsumers(circuitID));
+				if (flag2)
+				{
+					if (this.chore == null && this.smi.GetCurrentState() == this.smi.sm.on)
+					{
+						this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+					}
+				}
+				else if (this.chore != null)
+				{
+					this.chore.Cancel("No refill needed");
+					this.chore = null;
+				}
+				this.selectable.ToggleStatusItem(EnergyGenerator.BatteriesSufficientlyFull, !flag2, null);
 			}
 		}
 	}
@@ -200,7 +201,7 @@ public class ManualGenerator : Workable, ISliderControl
 	[MyCmpGet]
 	private BuildingEnabledButton buildingEnabledButton;
 
-	private Chore chore = null;
+	private Chore chore;
 
 	private int powerCell;
 

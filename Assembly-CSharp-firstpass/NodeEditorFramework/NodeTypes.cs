@@ -22,18 +22,22 @@ namespace NodeEditorFramework
 				{
 					object[] customAttributes = type.GetCustomAttributes(typeof(NodeAttribute), false);
 					NodeAttribute nodeAttribute = customAttributes[0] as NodeAttribute;
-					if (nodeAttribute == null || !nodeAttribute.hide)
+					if (nodeAttribute != null)
 					{
-						try
+						if (nodeAttribute.hide)
 						{
-							Node node = ScriptableObject.CreateInstance(type.Name) as Node;
-							node = node.Create(Vector2.zero);
-							NodeTypes.nodes.Add(node, new NodeData((nodeAttribute != null) ? nodeAttribute.contextText : node.name, nodeAttribute.typeOfNodeCanvas));
+							continue;
 						}
-						catch (Exception ex)
-						{
-							global::Debug.LogError(ex.Message + " " + type.Name, null);
-						}
+					}
+					try
+					{
+						Node node = ScriptableObject.CreateInstance(type.Name) as Node;
+						node = node.Create(Vector2.zero);
+						NodeTypes.nodes.Add(node, new NodeData((nodeAttribute != null) ? nodeAttribute.contextText : node.name, nodeAttribute.typeOfNodeCanvas));
+					}
+					catch (Exception ex)
+					{
+						global::Debug.LogError(ex.Message + " " + type.Name, null);
 					}
 				}
 			}

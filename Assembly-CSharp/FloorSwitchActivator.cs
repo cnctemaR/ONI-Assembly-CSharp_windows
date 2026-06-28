@@ -53,33 +53,35 @@ public class FloorSwitchActivator : KMonoBehaviour
 
 	private void Register()
 	{
-		if (!this.registered)
+		if (this.registered)
 		{
-			int num = Grid.PosToCell(this);
-			this.partitionerEntry = GameScenePartitioner.Instance.Add("FloorSwitchActivator.Register", this, num, GameScenePartitioner.Instance.floorSwitchActivatorLayer, null);
-			CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChange), false);
-			this.registered = true;
+			return;
 		}
+		int num = Grid.PosToCell(this);
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("FloorSwitchActivator.Register", this, num, GameScenePartitioner.Instance.floorSwitchActivatorLayer, null);
+		CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChange), false);
+		this.registered = true;
 	}
 
 	private void Unregister()
 	{
-		if (this.registered)
+		if (!this.registered)
 		{
-			this.partitionerEntry.Release();
-			CellChangeMonitor.Instance.Remove(this, new Action<int, int>(this.OnCellChange), false);
-			if (this.last_cell_occupied > -1)
-			{
-				this.NotifyChanged(this.last_cell_occupied);
-			}
-			this.registered = false;
+			return;
 		}
+		this.partitionerEntry.Release();
+		CellChangeMonitor.Instance.Remove(this, new Action<int, int>(this.OnCellChange), false);
+		if (this.last_cell_occupied > -1)
+		{
+			this.NotifyChanged(this.last_cell_occupied);
+		}
+		this.registered = false;
 	}
 
 	[MyCmpReq]
 	private PrimaryElement primaryElement;
 
-	private bool registered = false;
+	private bool registered;
 
 	private GameScenePartitionerEntry partitionerEntry;
 

@@ -107,16 +107,16 @@ public class Turbine : KMonoBehaviour
 	public float pumpKGRate;
 
 	[Serialize]
-	private float storedMass = 0f;
+	private float storedMass;
 
 	[Serialize]
-	private float storedTemperature = 0f;
+	private float storedTemperature;
 
 	[Serialize]
 	private byte diseaseIdx = byte.MaxValue;
 
 	[Serialize]
-	private int diseaseCount = 0;
+	private int diseaseCount;
 
 	[MyCmpGet]
 	private Generator generator;
@@ -197,20 +197,18 @@ public class Turbine : KMonoBehaviour
 			if (this.IsOutputBlocked())
 			{
 				base.smi.GoTo(base.sm.operational.outputBlocked);
+				return;
+			}
+			bool flag;
+			bool flag2;
+			this.GetInputState(out flag, out flag2);
+			if (!flag || !flag2)
+			{
+				base.smi.GoTo(base.sm.operational.insufficientMass);
 			}
 			else
 			{
-				bool flag;
-				bool flag2;
-				this.GetInputState(out flag, out flag2);
-				if (!flag || !flag2)
-				{
-					base.smi.GoTo(base.sm.operational.insufficientMass);
-				}
-				else
-				{
-					base.smi.GoTo(base.sm.active);
-				}
+				base.smi.GoTo(base.sm.active);
 			}
 		}
 

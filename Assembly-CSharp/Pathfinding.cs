@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class Pathfinding : KMonoBehaviour
 {
@@ -23,7 +22,7 @@ public class Pathfinding : KMonoBehaviour
 				return navGrid;
 			}
 		}
-		global::Debug.LogError("Could not find nav grid: " + id, null);
+		Debug.LogError("Could not find nav grid: " + id, null);
 		return null;
 	}
 
@@ -37,11 +36,12 @@ public class Pathfinding : KMonoBehaviour
 
 	public void FlushNavGridsOnLoad()
 	{
-		if (!this.navGridsHaveBeenFlushedOnLoad)
+		if (this.navGridsHaveBeenFlushedOnLoad)
 		{
-			this.navGridsHaveBeenFlushedOnLoad = true;
-			this.UpdateNavGrids(true);
+			return;
 		}
+		this.navGridsHaveBeenFlushedOnLoad = true;
+		this.UpdateNavGrids(true);
 	}
 
 	public void UpdateNavGrids(bool update_all = false)
@@ -88,13 +88,11 @@ public class Pathfinding : KMonoBehaviour
 
 	public void AddNavigationFeature(int cell, Pathfinding.INavigationFeature feature)
 	{
-		global::UnityEngine.Debug.Assert(!this.NavigationFeatures.ContainsKey(cell));
 		this.NavigationFeatures[cell] = feature;
 	}
 
 	public void RemoveNavigationFeature(int cell, Pathfinding.INavigationFeature feature)
 	{
-		global::UnityEngine.Debug.Assert(this.NavigationFeatures.ContainsKey(cell));
 		this.NavigationFeatures.Remove(cell);
 	}
 

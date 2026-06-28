@@ -16,7 +16,7 @@ public class PopFXManager : KScreen
 		this.ready = true;
 		for (int i = 0; i < 20; i++)
 		{
-			PopFX popFX = this.SpawnFX(this.sprite_Plus, "", null, Vector3.zero, 1.5f, false, true);
+			PopFX popFX = this.SpawnFX(this.sprite_Plus, string.Empty, null, Vector3.zero, 1.5f, false, true);
 			popFX.Recycle();
 		}
 	}
@@ -28,41 +28,33 @@ public class PopFXManager : KScreen
 
 	public PopFX SpawnFX(Sprite icon, string text, Transform target_transform, Vector3 offset, float lifetime = 1.5f, bool track_target = false, bool force_spawn = false)
 	{
-		PopFX popFX;
 		if (Game.IsQuitting())
 		{
-			popFX = null;
+			return null;
+		}
+		Vector3 vector = offset;
+		if (target_transform != null)
+		{
+			vector += target_transform.position;
+		}
+		if (!force_spawn && Grid.Visible[Grid.PosToCell(vector)] == 0)
+		{
+			return null;
+		}
+		PopFX popFX;
+		if (this.Pool.Count > 0)
+		{
+			popFX = this.Pool[0];
+			this.Pool[0].gameObject.SetActive(true);
+			this.Pool[0].Spawn(icon, text, target_transform, offset, lifetime, track_target);
+			this.Pool.RemoveAt(0);
 		}
 		else
 		{
-			Vector3 vector = offset;
-			if (target_transform != null)
-			{
-				vector += target_transform.position;
-			}
-			if (!force_spawn && Grid.Visible[Grid.PosToCell(vector)] == 0)
-			{
-				popFX = null;
-			}
-			else
-			{
-				PopFX popFX2;
-				if (this.Pool.Count > 0)
-				{
-					popFX2 = this.Pool[0];
-					this.Pool[0].gameObject.SetActive(true);
-					this.Pool[0].Spawn(icon, text, target_transform, offset, lifetime, track_target);
-					this.Pool.RemoveAt(0);
-				}
-				else
-				{
-					GameObject gameObject = Util.KInstantiate(this.Prefab_PopFX, base.gameObject, "Pooled_PopFX");
-					gameObject.transform.localScale = Vector3.one;
-					popFX2 = gameObject.GetComponent<PopFX>();
-					popFX2.Spawn(icon, text, target_transform, offset, lifetime, track_target);
-				}
-				popFX = popFX2;
-			}
+			GameObject gameObject = Util.KInstantiate(this.Prefab_PopFX, base.gameObject, "Pooled_PopFX");
+			gameObject.transform.localScale = Vector3.one;
+			popFX = gameObject.GetComponent<PopFX>();
+			popFX.Spawn(icon, text, target_transform, offset, lifetime, track_target);
 		}
 		return popFX;
 	}
@@ -93,5 +85,5 @@ public class PopFXManager : KScreen
 
 	public Sprite sprite_Research;
 
-	private bool ready = false;
+	private bool ready;
 }

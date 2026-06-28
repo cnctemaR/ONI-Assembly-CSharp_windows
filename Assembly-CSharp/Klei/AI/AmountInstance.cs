@@ -57,12 +57,9 @@ namespace Klei.AI
 			{
 				this.OnDelta(delta);
 			}
-			if (this.OnMaxValueReached != null)
+			if (this.OnMaxValueReached != null && num < this.GetMax() && this.value >= this.GetMax())
 			{
-				if (num < this.GetMax() && this.value >= this.GetMax())
-				{
-					this.OnMaxValueReached();
-				}
+				this.OnMaxValueReached();
 			}
 			return this.value;
 		}
@@ -91,11 +88,11 @@ namespace Klei.AI
 
 		public AttributeInstance deltaAttribute;
 
-		public Action<float> OnDelta = null;
+		public Action<float> OnDelta;
 
 		public global::System.Action OnMaxValueReached;
 
-		public bool paused = false;
+		public bool paused;
 
 		public bool isActive;
 	}

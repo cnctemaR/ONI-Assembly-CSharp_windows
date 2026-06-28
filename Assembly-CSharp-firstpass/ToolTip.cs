@@ -41,7 +41,7 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 		}
 		if (this.OnToolTip == null)
 		{
-			this.OnToolTip = () => "";
+			this.OnToolTip = () => string.Empty;
 		}
 		base.Subscribe(2098165161, new Action<object>(this.OnClick));
 		if (this.UseFixedStringKey)
@@ -99,7 +99,7 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 		{
 			this.ClearMultiStringTooltip();
 			this.AddMultiStringTooltip(message, ToolTipScreen.Instance.defaultTextStyleSetting);
-			return "";
+			return string.Empty;
 		};
 	}
 
@@ -134,16 +134,11 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
 	public string GetToolTip()
 	{
-		string text;
 		if (this.OnToolTip != null)
 		{
-			text = this.OnToolTip();
+			return this.OnToolTip();
 		}
-		else
-		{
-			text = "";
-		}
-		return text;
+		return string.Empty;
 	}
 
 	public void OnPointerEnter(PointerEventData data)
@@ -191,16 +186,17 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
 	private void OnHover(bool is_over)
 	{
-		if (!(ToolTipScreen.Instance == null))
+		if (ToolTipScreen.Instance == null)
 		{
-			if (is_over)
-			{
-				ToolTipScreen.Instance.SetToolTip(this);
-			}
-			else
-			{
-				ToolTipScreen.Instance.ClearToolTip(this);
-			}
+			return;
+		}
+		if (is_over)
+		{
+			ToolTipScreen.Instance.SetToolTip(this);
+		}
+		else
+		{
+			ToolTipScreen.Instance.ClearToolTip(this);
 		}
 	}
 
@@ -214,26 +210,27 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
 	private void Update()
 	{
-		if (this.forceRefresh || this.refreshWhileHovering)
+		if (!this.forceRefresh && !this.refreshWhileHovering)
 		{
-			if (Time.unscaledTime - this.lastUpdateTime > 0.2f)
+			return;
+		}
+		if (Time.unscaledTime - this.lastUpdateTime > 0.2f)
+		{
+			this.lastUpdateTime = Time.unscaledTime;
+			if (this.isHovering)
 			{
-				this.lastUpdateTime = Time.unscaledTime;
-				if (this.isHovering)
+				this.GetToolTip();
+				for (int i = 0; i < this.multiStringToolTips.Count; i++)
 				{
-					this.GetToolTip();
-					for (int i = 0; i < this.multiStringToolTips.Count; i++)
-					{
-						ToolTipScreen.Instance.HotSwapTooltipString(this.multiStringToolTips[i], i);
-					}
+					ToolTipScreen.Instance.HotSwapTooltipString(this.multiStringToolTips[i], i);
 				}
 			}
 		}
 	}
 
-	public bool UseFixedStringKey = false;
+	public bool UseFixedStringKey;
 
-	public string FixedStringKey = "";
+	public string FixedStringKey = string.Empty;
 
 	private List<string> multiStringToolTips = new List<string>();
 
@@ -241,11 +238,11 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
 	public bool worldSpace;
 
-	public bool forceRefresh = false;
+	public bool forceRefresh;
 
-	public bool refreshWhileHovering = false;
+	public bool refreshWhileHovering;
 
-	private bool isHovering = false;
+	private bool isHovering;
 
 	private float lastUpdateTime;
 

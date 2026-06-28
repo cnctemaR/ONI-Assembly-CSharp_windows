@@ -11,18 +11,13 @@ public class SafetyConditions
 		{
 			int num2 = Grid.CellLeft(cell);
 			int num3 = Grid.CellBelow(num2);
-			bool flag;
 			if (Grid.Solid[num3])
 			{
-				flag = false;
+				return false;
 			}
-			else
-			{
-				int num4 = Grid.CellRight(cell);
-				int num5 = Grid.CellBelow(num4);
-				flag = Grid.Solid[num5];
-			}
-			return flag;
+			int num4 = Grid.CellRight(cell);
+			int num5 = Grid.CellBelow(num4);
+			return Grid.Solid[num5];
 		});
 		this.IsNotLiquid = new SafetyChecker.Condition("IsNotLiquid", num *= 2, (int cell, int cost, SafetyChecker.Context context) => !Grid.Element[cell].IsLiquid);
 		this.IsNotLadder = new SafetyChecker.Condition("IsNotLadder", num *= 2, (int cell, int cost, SafetyChecker.Context context) => !context.navigator.NavGrid.NavTable.IsValid(cell, NavType.Ladder) && !context.navigator.NavGrid.NavTable.IsValid(cell, NavType.Pole));

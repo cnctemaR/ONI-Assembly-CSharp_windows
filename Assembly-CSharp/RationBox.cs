@@ -36,14 +36,16 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity
 	private void OnCopySettings(object data)
 	{
 		GameObject gameObject = (GameObject)data;
-		if (!(gameObject == null))
+		if (gameObject == null)
 		{
-			RationBox component = gameObject.GetComponent<RationBox>();
-			if (!(component == null))
-			{
-				this.UserMaxCapacity = component.UserMaxCapacity;
-			}
+			return;
 		}
+		RationBox component = gameObject.GetComponent<RationBox>();
+		if (component == null)
+		{
+			return;
+		}
+		this.UserMaxCapacity = component.UserMaxCapacity;
 	}
 
 	private void UpdatePreservationStatusItems(object data)

@@ -54,7 +54,7 @@ public class AmbienceManager : KMonoBehaviour
 		this.quadrants[3].Update(new Vector2I(vector2I3.x, vector2I3.y), new Vector2I(vector2I2.x, vector2I2.y), new Vector3(vector3.x + vector6.x, vector3.y + vector6.y, this.emitterZPosition));
 	}
 
-	private float emitterZPosition = 0f;
+	private float emitterZPosition;
 
 	public AmbienceManager.QuadrantDef[] quadrantDefs;
 
@@ -123,16 +123,14 @@ public class AmbienceManager : KMonoBehaviour
 					if (eventInstance == null)
 					{
 						global::Debug.LogWarning("Could not find event: " + this.oneShotSound, null);
+						return;
 					}
-					else
-					{
-						Vector3 vector = new Vector3(emitter_position.x, emitter_position.y, 0f);
-						ATTRIBUTES_3D attributes_3D = vector.To3DAttributes();
-						eventInstance.set3DAttributes(attributes_3D);
-						eventInstance.setVolume(this.tilePercentage * 2f);
-						eventInstance.start();
-						eventInstance.release();
-					}
+					Vector3 vector = new Vector3(emitter_position.x, emitter_position.y, 0f);
+					ATTRIBUTES_3D attributes_3D = vector.To3DAttributes();
+					eventInstance.set3DAttributes(attributes_3D);
+					eventInstance.setVolume(this.tilePercentage * 2f);
+					eventInstance.start();
+					eventInstance.release();
 				}
 				else
 				{
@@ -317,12 +315,9 @@ public class AmbienceManager : KMonoBehaviour
 			this.oneShotLayers.Sort();
 			for (int n = 0; n < AmbienceManager.Quadrant.activeSolidLayerCount; n++)
 			{
-				if (this.solidTimers[n].ShouldPlay())
+				if (this.solidTimers[n].ShouldPlay() && this.oneShotLayers[n].tilePercentage > 0f)
 				{
-					if (this.oneShotLayers[n].tilePercentage > 0f)
-					{
-						this.oneShotLayers[n].Start(emitter_position);
-					}
+					this.oneShotLayers[n].Start(emitter_position);
 				}
 			}
 		}
@@ -360,17 +355,12 @@ public class AmbienceManager : KMonoBehaviour
 
 			public bool ShouldPlay()
 			{
-				bool flag;
 				if (Time.unscaledTime > this.solidTargetTime)
 				{
 					this.solidTargetTime = Time.unscaledTime + AmbienceManager.Quadrant.SolidTimer.solidMinTime + global::UnityEngine.Random.value * (AmbienceManager.Quadrant.SolidTimer.solidMaxTime - AmbienceManager.Quadrant.SolidTimer.solidMinTime);
-					flag = true;
+					return true;
 				}
-				else
-				{
-					flag = false;
-				}
-				return flag;
+				return false;
 			}
 
 			public static float solidMinTime = 9f;

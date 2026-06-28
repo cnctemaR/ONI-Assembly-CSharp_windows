@@ -21,59 +21,39 @@ public class MinionVitalsPanel : KMonoBehaviour
 		this.AddLine(Db.Get().Amounts.Decor, this.icon_decor, (AmountInstance ainstance) => this.GetDecorTooltip(ainstance));
 		this.AddCheckboxLine(Db.Get().Amounts.AirPressure, this.conditionsContainerNormal, (GameObject go) => this.GetAirPressureLabel(go), delegate(GameObject go)
 		{
-			MinionVitalsPanel.CheckboxLineDisplayType checkboxLineDisplayType;
 			if (go.GetComponent<PressureVulnerable>() != null && go.GetComponent<PressureVulnerable>().pressure_sensitive)
 			{
-				checkboxLineDisplayType = MinionVitalsPanel.CheckboxLineDisplayType.Normal;
+				return MinionVitalsPanel.CheckboxLineDisplayType.Normal;
 			}
-			else
-			{
-				checkboxLineDisplayType = MinionVitalsPanel.CheckboxLineDisplayType.Hidden;
-			}
-			return checkboxLineDisplayType;
+			return MinionVitalsPanel.CheckboxLineDisplayType.Hidden;
 		}, (GameObject go) => this.check_pressure(go), (GameObject go) => this.GetAirPressureTooltip(go));
 		this.AddCheckboxLine(null, this.conditionsContainerNormal, (GameObject go) => this.GetAtmosphereLabel(go), delegate(GameObject go)
 		{
-			MinionVitalsPanel.CheckboxLineDisplayType checkboxLineDisplayType2;
 			if (go.GetComponent<PressureVulnerable>() != null && go.GetComponent<PressureVulnerable>().safe_atmospheres.Count > 0)
 			{
-				checkboxLineDisplayType2 = MinionVitalsPanel.CheckboxLineDisplayType.Normal;
+				return MinionVitalsPanel.CheckboxLineDisplayType.Normal;
 			}
-			else
-			{
-				checkboxLineDisplayType2 = MinionVitalsPanel.CheckboxLineDisplayType.Hidden;
-			}
-			return checkboxLineDisplayType2;
+			return MinionVitalsPanel.CheckboxLineDisplayType.Hidden;
 		}, (GameObject go) => this.check_atmosphere(go), (GameObject go) => this.GetAtmosphereTooltip(go));
 		this.AddCheckboxLine(Db.Get().Amounts.Temperature, this.conditionsContainerNormal, (GameObject go) => this.GetInternalTemperatureLabel(go), delegate(GameObject go)
 		{
-			MinionVitalsPanel.CheckboxLineDisplayType checkboxLineDisplayType3;
 			if (go.GetComponent<TemperatureVulnerable>() != null)
 			{
-				checkboxLineDisplayType3 = MinionVitalsPanel.CheckboxLineDisplayType.Normal;
+				return MinionVitalsPanel.CheckboxLineDisplayType.Normal;
 			}
-			else
-			{
-				checkboxLineDisplayType3 = MinionVitalsPanel.CheckboxLineDisplayType.Hidden;
-			}
-			return checkboxLineDisplayType3;
+			return MinionVitalsPanel.CheckboxLineDisplayType.Hidden;
 		}, (GameObject go) => this.check_temperature(go), (GameObject go) => this.GetInternalTemperatureTooltip(go));
 		this.AddCheckboxLine(Db.Get().Amounts.Fertilization, this.conditionsContainerAdditional, (GameObject go) => this.GetFertilizationLabel(go), delegate(GameObject go)
 		{
-			MinionVitalsPanel.CheckboxLineDisplayType checkboxLineDisplayType4;
 			if (go.GetComponent<Growing>() == null)
 			{
-				checkboxLineDisplayType4 = MinionVitalsPanel.CheckboxLineDisplayType.Hidden;
+				return MinionVitalsPanel.CheckboxLineDisplayType.Hidden;
 			}
-			else if (go.GetComponent<Growing>().Replanted)
+			if (go.GetComponent<Growing>().Replanted)
 			{
-				checkboxLineDisplayType4 = MinionVitalsPanel.CheckboxLineDisplayType.Normal;
+				return MinionVitalsPanel.CheckboxLineDisplayType.Normal;
 			}
-			else
-			{
-				checkboxLineDisplayType4 = MinionVitalsPanel.CheckboxLineDisplayType.Diminished;
-			}
-			return checkboxLineDisplayType4;
+			return MinionVitalsPanel.CheckboxLineDisplayType.Diminished;
 		}, (GameObject go) => this.check_fertilizer(go), (GameObject go) => this.GetFertilizationTooltip(go));
 		this.AddCheckboxLine(Db.Get().Amounts.Irrigation, this.conditionsContainerAdditional, (GameObject go) => this.GetIrrigationLabel(go), delegate(GameObject go)
 		{
@@ -159,7 +139,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 			{
 				tt.ClearMultiStringTooltip();
 				tt.AddMultiStringTooltip(tooltip_func(this.selectedEntity), null);
-				return "";
+				return string.Empty;
 			};
 		}
 		this.checkboxLines.Add(checkboxLine);
@@ -176,133 +156,128 @@ public class MinionVitalsPanel : KMonoBehaviour
 		if (this.selectedEntity == null || this.selectedEntity.gameObject == null)
 		{
 			base.enabled = false;
+			return;
 		}
-		else
+		Amounts amounts = this.selectedEntity.GetAmounts();
+		WiltCondition component = this.selectedEntity.GetComponent<WiltCondition>();
+		if (component == null)
 		{
-			Amounts amounts = this.selectedEntity.GetAmounts();
-			WiltCondition component = this.selectedEntity.GetComponent<WiltCondition>();
-			if (component == null)
+			this.conditionsContainerNormal.gameObject.SetActive(false);
+			this.conditionsContainerAdditional.gameObject.SetActive(false);
+			for (int i = 0; i < this.vitalsLines.Count; i++)
 			{
-				this.conditionsContainerNormal.gameObject.SetActive(false);
-				this.conditionsContainerAdditional.gameObject.SetActive(false);
-				for (int i = 0; i < this.vitalsLines.Count; i++)
+				MinionVitalsPanel.VitalLine vitalLine = this.vitalsLines[i];
+				bool flag = false;
+				for (int j = 0; j < amounts.Count; j++)
 				{
-					MinionVitalsPanel.VitalLine vitalLine = this.vitalsLines[i];
-					bool flag = false;
-					for (int j = 0; j < amounts.Count; j++)
+					AmountInstance amountInstance = amounts[j];
+					if (vitalLine.amount == amountInstance.amount)
 					{
-						AmountInstance amountInstance = amounts[j];
-						if (vitalLine.amount == amountInstance.amount)
+						vitalLine.locText.SetText(vitalLine.amount.GetDescription(amountInstance));
+						vitalLine.imageToggle.SetValue(amountInstance, vitalLine.tooltip);
+						flag = true;
+						if (!vitalLine.go.activeSelf)
 						{
-							vitalLine.locText.SetText(vitalLine.amount.GetDescription(amountInstance));
-							vitalLine.imageToggle.SetValue(amountInstance, vitalLine.tooltip);
-							flag = true;
-							if (!vitalLine.go.activeSelf)
-							{
-								vitalLine.go.SetActive(true);
-							}
-							break;
+							vitalLine.go.SetActive(true);
 						}
+						break;
 					}
-					if (!flag)
+				}
+				if (!flag && vitalLine.go.activeSelf)
+				{
+					vitalLine.go.SetActive(false);
+				}
+			}
+		}
+		bool flag2 = false;
+		for (int k = 0; k < this.checkboxLines.Count; k++)
+		{
+			MinionVitalsPanel.CheckboxLine checkboxLine = this.checkboxLines[k];
+			MinionVitalsPanel.CheckboxLineDisplayType checkboxLineDisplayType = MinionVitalsPanel.CheckboxLineDisplayType.Hidden;
+			if (this.checkboxLines[k].amount != null)
+			{
+				for (int l = 0; l < amounts.Count; l++)
+				{
+					AmountInstance amountInstance2 = amounts[l];
+					if (checkboxLine.amount == amountInstance2.amount)
 					{
-						if (vitalLine.go.activeSelf)
-						{
-							vitalLine.go.SetActive(false);
-						}
+						checkboxLineDisplayType = checkboxLine.display_condition(this.selectedEntity.gameObject);
+						break;
 					}
 				}
 			}
-			bool flag2 = false;
-			for (int k = 0; k < this.checkboxLines.Count; k++)
+			else
 			{
-				MinionVitalsPanel.CheckboxLine checkboxLine = this.checkboxLines[k];
-				MinionVitalsPanel.CheckboxLineDisplayType checkboxLineDisplayType = MinionVitalsPanel.CheckboxLineDisplayType.Hidden;
-				if (this.checkboxLines[k].amount != null)
+				checkboxLineDisplayType = checkboxLine.display_condition(this.selectedEntity.gameObject);
+			}
+			if (checkboxLineDisplayType != MinionVitalsPanel.CheckboxLineDisplayType.Hidden)
+			{
+				checkboxLine.locText.SetText(checkboxLine.label_text_func(this.selectedEntity.gameObject));
+				if (!checkboxLine.go.activeSelf)
 				{
-					for (int l = 0; l < amounts.Count; l++)
-					{
-						AmountInstance amountInstance2 = amounts[l];
-						if (checkboxLine.amount == amountInstance2.amount)
-						{
-							checkboxLineDisplayType = checkboxLine.display_condition(this.selectedEntity.gameObject);
-							break;
-						}
-					}
+					checkboxLine.go.SetActive(true);
 				}
-				else
+				GameObject gameObject = checkboxLine.go.GetComponent<HierarchyReferences>().GetReference("Check").gameObject;
+				gameObject.SetActive(checkboxLine.get_value(this.selectedEntity.gameObject));
+				if (checkboxLine.go.transform.parent != checkboxLine.parentContainer)
 				{
-					checkboxLineDisplayType = checkboxLine.display_condition(this.selectedEntity.gameObject);
+					checkboxLine.go.transform.SetParent(checkboxLine.parentContainer);
+					checkboxLine.go.transform.localScale = Vector3.one;
 				}
-				if (checkboxLineDisplayType != MinionVitalsPanel.CheckboxLineDisplayType.Hidden)
+				if (checkboxLine.parentContainer == this.conditionsContainerAdditional)
 				{
-					checkboxLine.locText.SetText(checkboxLine.label_text_func(this.selectedEntity.gameObject));
-					if (!checkboxLine.go.activeSelf)
+					flag2 = true;
+				}
+				if (checkboxLineDisplayType == MinionVitalsPanel.CheckboxLineDisplayType.Normal)
+				{
+					if (checkboxLine.get_value(this.selectedEntity.gameObject))
 					{
-						checkboxLine.go.SetActive(true);
-					}
-					GameObject gameObject = checkboxLine.go.GetComponent<HierarchyReferences>().GetReference("Check").gameObject;
-					gameObject.SetActive(checkboxLine.get_value(this.selectedEntity.gameObject));
-					if (checkboxLine.go.transform.parent != checkboxLine.parentContainer)
-					{
-						checkboxLine.go.transform.SetParent(checkboxLine.parentContainer);
-						checkboxLine.go.transform.localScale = Vector3.one;
-					}
-					if (checkboxLine.parentContainer == this.conditionsContainerAdditional)
-					{
-						flag2 = true;
-					}
-					if (checkboxLineDisplayType == MinionVitalsPanel.CheckboxLineDisplayType.Normal)
-					{
-						if (checkboxLine.get_value(this.selectedEntity.gameObject))
-						{
-							checkboxLine.locText.color = Color.black;
-							gameObject.transform.parent.GetComponent<Image>().color = Color.black;
-						}
-						else
-						{
-							Color color = new Color(0.99215686f, 0f, 0.101960786f);
-							checkboxLine.locText.color = color;
-							gameObject.transform.parent.GetComponent<Image>().color = color;
-						}
+						checkboxLine.locText.color = Color.black;
+						gameObject.transform.parent.GetComponent<Image>().color = Color.black;
 					}
 					else
 					{
-						checkboxLine.locText.color = Color.grey;
-						gameObject.transform.parent.GetComponent<Image>().color = Color.grey;
+						Color color = new Color(0.99215686f, 0f, 0.101960786f);
+						checkboxLine.locText.color = color;
+						gameObject.transform.parent.GetComponent<Image>().color = color;
 					}
-				}
-				else if (checkboxLine.go.activeSelf)
-				{
-					checkboxLine.go.SetActive(false);
-				}
-			}
-			if (component != null)
-			{
-				Growing component2 = component.GetComponent<Growing>();
-				this.conditionsContainerNormal.gameObject.SetActive(true);
-				this.conditionsContainerAdditional.gameObject.SetActive(component2 != null);
-				if (component2 == null)
-				{
-					LocText locText = this.conditionsContainerNormal.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
-					locText.text = "";
 				}
 				else
 				{
-					LocText locText = this.conditionsContainerNormal.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
-					locText.text = "";
-					locText.text = string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().WildGrowthTime(), "F1"));
-					locText.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD.TOOLTIP, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().WildGrowthTime(), "F1")));
-					locText = this.conditionsContainerAdditional.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
-					locText.color = ((!this.selectedEntity.GetComponent<Growing>().Replanted) ? Color.grey : Color.black);
-					locText.text = "";
-					locText.text = ((!flag2) ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")));
-					locText.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.TOOLTIP, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")));
+					checkboxLine.locText.color = Color.grey;
+					gameObject.transform.parent.GetComponent<Image>().color = Color.grey;
 				}
-				foreach (MinionVitalsPanel.VitalLine vitalLine2 in this.vitalsLines)
-				{
-					vitalLine2.go.SetActive(false);
-				}
+			}
+			else if (checkboxLine.go.activeSelf)
+			{
+				checkboxLine.go.SetActive(false);
+			}
+		}
+		if (component != null)
+		{
+			Growing component2 = component.GetComponent<Growing>();
+			this.conditionsContainerNormal.gameObject.SetActive(true);
+			this.conditionsContainerAdditional.gameObject.SetActive(component2 != null);
+			if (component2 == null)
+			{
+				LocText locText = this.conditionsContainerNormal.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
+				locText.text = string.Empty;
+			}
+			else
+			{
+				LocText locText = this.conditionsContainerNormal.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
+				locText.text = string.Empty;
+				locText.text = string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().WildGrowthTime(), "F1"));
+				locText.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD.TOOLTIP, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().WildGrowthTime(), "F1")));
+				locText = this.conditionsContainerAdditional.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
+				locText.color = ((!this.selectedEntity.GetComponent<Growing>().Replanted) ? Color.grey : Color.black);
+				locText.text = string.Empty;
+				locText.text = ((!flag2) ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")));
+				locText.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.TOOLTIP, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")));
+			}
+			foreach (MinionVitalsPanel.VitalLine vitalLine2 in this.vitalsLines)
+			{
+				vitalLine2.go.SetActive(false);
 			}
 		}
 	}
@@ -310,114 +285,79 @@ public class MinionVitalsPanel : KMonoBehaviour
 	private string GetAirPressureTooltip(GameObject go)
 	{
 		PressureVulnerable component = go.GetComponent<PressureVulnerable>();
-		string text;
 		if (component == null)
 		{
-			text = "";
+			return string.Empty;
 		}
-		else
-		{
-			text = UI.TOOLTIPS.VITALS_CHECKBOX_PRESSURE.text.Replace("{pressure}", GameUtil.GetFormattedMass(component.GetExternalPressure, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-		}
-		return text;
+		return UI.TOOLTIPS.VITALS_CHECKBOX_PRESSURE.text.Replace("{pressure}", GameUtil.GetFormattedMass(component.GetExternalPressure, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 	}
 
 	private string GetInternalTemperatureTooltip(GameObject go)
 	{
 		TemperatureVulnerable component = go.GetComponent<TemperatureVulnerable>();
-		string text;
 		if (component == null)
 		{
-			text = "";
+			return string.Empty;
 		}
-		else
-		{
-			text = UI.TOOLTIPS.VITALS_CHECKBOX_TEMPERATURE.text.Replace("{temperature}", GameUtil.GetFormattedTemperature(component.InternalTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
-		}
-		return text;
+		return UI.TOOLTIPS.VITALS_CHECKBOX_TEMPERATURE.text.Replace("{temperature}", GameUtil.GetFormattedTemperature(component.InternalTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 	}
 
 	private string GetFertilizationTooltip(GameObject go)
 	{
 		FertilizationMonitor.Instance smi = go.GetSMI<FertilizationMonitor.Instance>();
-		string text;
 		if (smi == null)
 		{
-			text = "";
+			return string.Empty;
 		}
-		else
-		{
-			text = UI.TOOLTIPS.VITALS_CHECKBOX_FERTILIZER.text.Replace("{mass}", GameUtil.GetFormattedMass(smi.total_fertilizer_available, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-		}
-		return text;
+		return UI.TOOLTIPS.VITALS_CHECKBOX_FERTILIZER.text.Replace("{mass}", GameUtil.GetFormattedMass(smi.total_fertilizer_available, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 	}
 
 	private string GetIrrigationTooltip(GameObject go)
 	{
 		IrrigationMonitor.Instance smi = go.GetSMI<IrrigationMonitor.Instance>();
-		string text;
 		if (smi == null)
 		{
-			text = "";
+			return string.Empty;
 		}
-		else
-		{
-			text = UI.TOOLTIPS.VITALS_CHECKBOX_IRRIGATION.text.Replace("{mass}", GameUtil.GetFormattedMass(smi.total_fertilizer_available, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-		}
-		return text;
+		return UI.TOOLTIPS.VITALS_CHECKBOX_IRRIGATION.text.Replace("{mass}", GameUtil.GetFormattedMass(smi.total_fertilizer_available, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 	}
 
 	private string GetIlluminationTooltip(GameObject go)
 	{
 		IlluminationVulnerable component = go.GetComponent<IlluminationVulnerable>();
-		string text;
 		if (component == null)
 		{
-			text = "";
+			return string.Empty;
 		}
-		else if ((component.prefersDarkness && component.IsComfortable()) || (!component.prefersDarkness && !component.IsComfortable()))
+		if ((component.prefersDarkness && component.IsComfortable()) || (!component.prefersDarkness && !component.IsComfortable()))
 		{
-			text = UI.TOOLTIPS.VITALS_CHECKBOX_ILLUMINATION_DARK;
+			return UI.TOOLTIPS.VITALS_CHECKBOX_ILLUMINATION_DARK;
 		}
-		else
-		{
-			text = UI.TOOLTIPS.VITALS_CHECKBOX_ILLUMINATION_LIGHT;
-		}
-		return text;
+		return UI.TOOLTIPS.VITALS_CHECKBOX_ILLUMINATION_LIGHT;
 	}
 
 	private string GetReceptacleTooltip(GameObject go)
 	{
 		ReceptacleMonitor component = go.GetComponent<ReceptacleMonitor>();
-		string text;
 		if (component == null)
 		{
-			text = "";
+			return string.Empty;
 		}
-		else if (component.HasOperationalReceptacle())
+		if (component.HasOperationalReceptacle())
 		{
-			text = UI.TOOLTIPS.VITALS_CHECKBOX_RECEPTACLE_OPERATIONAL;
+			return UI.TOOLTIPS.VITALS_CHECKBOX_RECEPTACLE_OPERATIONAL;
 		}
-		else
-		{
-			text = UI.TOOLTIPS.VITALS_CHECKBOX_RECEPTACLE_INOPERATIONAL;
-		}
-		return text;
+		return UI.TOOLTIPS.VITALS_CHECKBOX_RECEPTACLE_INOPERATIONAL;
 	}
 
 	private string GetAtmosphereTooltip(GameObject go)
 	{
 		PressureVulnerable component = go.GetComponent<PressureVulnerable>();
-		string text;
 		if (component != null)
 		{
-			text = UI.TOOLTIPS.VITALS_CHECKBOX_ATMOSPHERE.text.Replace("{element}", component.GetExternalElement.name);
+			return UI.TOOLTIPS.VITALS_CHECKBOX_ATMOSPHERE.text.Replace("{element}", component.GetExternalElement.name);
 		}
-		else
-		{
-			text = UI.TOOLTIPS.VITALS_CHECKBOX_ATMOSPHERE;
-		}
-		return text;
+		return UI.TOOLTIPS.VITALS_CHECKBOX_ATMOSPHERE;
 	}
 
 	private string GetSubmersionTooltip(GameObject go)

@@ -25,69 +25,73 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 
 	public void Awake()
 	{
-		if (!App.IsExiting)
+		if (App.IsExiting)
 		{
-			this.InitializeComponent();
+			return;
 		}
+		this.InitializeComponent();
 	}
 
 	public void InitializeComponent()
 	{
-		if (!this.isInitialized)
+		if (this.isInitialized)
 		{
-			if (Application.isPlaying && KMonoBehaviour.lastGameObject != base.gameObject)
+			return;
+		}
+		if (Application.isPlaying && KMonoBehaviour.lastGameObject != base.gameObject)
+		{
+			KMonoBehaviour.lastGameObject = base.gameObject;
+			KMonoBehaviour.lastObj = KObjectManager.Instance.GetOrCreateObject(base.gameObject);
+		}
+		this.obj = KMonoBehaviour.lastObj;
+		this.isInitialized = true;
+		MyCmp.OnAwake(this);
+		if (!KMonoBehaviour.isPoolPreInit)
+		{
+			try
 			{
-				KMonoBehaviour.lastGameObject = base.gameObject;
-				KMonoBehaviour.lastObj = KObjectManager.Instance.GetOrCreateObject(base.gameObject);
+				this.OnPrefabInit();
 			}
-			this.obj = KMonoBehaviour.lastObj;
-			this.isInitialized = true;
-			MyCmp.OnAwake(this);
-			if (!KMonoBehaviour.isPoolPreInit)
+			catch (Exception ex)
 			{
-				try
+				Output.LogError(new object[] { string.Concat(new string[]
 				{
-					this.OnPrefabInit();
-				}
-				catch (Exception ex)
-				{
-					Output.LogError(new object[] { string.Concat(new string[]
-					{
-						"Error in: ",
-						base.name,
-						".",
-						base.GetType().Name,
-						".OnPrefabInit\n",
-						ex.ToString()
-					}) });
-				}
+					"Error in: ",
+					base.name,
+					".",
+					base.GetType().Name,
+					".OnPrefabInit\n",
+					ex.ToString()
+				}) });
 			}
 		}
 	}
 
 	private void OnEnable()
 	{
-		if (!App.IsExiting)
+		if (App.IsExiting)
 		{
-			this.OnCmpEnable();
-			if (UpdateManager.instance != null && !this.simUpdateRegistered && this.isSpawned)
-			{
-				this.simUpdateRegistered = true;
-				UpdateManager.AddSimUpdater(this);
-			}
+			return;
+		}
+		this.OnCmpEnable();
+		if (UpdateManager.instance != null && !this.simUpdateRegistered && this.isSpawned)
+		{
+			this.simUpdateRegistered = true;
+			UpdateManager.AddSimUpdater(this);
 		}
 	}
 
 	private void OnDisable()
 	{
-		if (!App.IsExiting && !KMonoBehaviour.isLoadingScene)
+		if (App.IsExiting || KMonoBehaviour.isLoadingScene)
 		{
-			this.OnCmpDisable();
-			if (this.simUpdateRegistered)
-			{
-				this.simUpdateRegistered = false;
-				UpdateManager.RemoveSimUpdater(this);
-			}
+			return;
+		}
+		this.OnCmpDisable();
+		if (this.simUpdateRegistered)
+		{
+			this.simUpdateRegistered = false;
+			UpdateManager.RemoveSimUpdater(this);
 		}
 	}
 
@@ -99,78 +103,77 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 	public void OnDestroy()
 	{
 		this.OnForcedCleanUp();
-		if (!App.IsExiting)
+		if (App.IsExiting)
 		{
-			if (KMonoBehaviour.isLoadingScene)
-			{
-				this.OnLoadLevel();
-			}
-			else
-			{
-				if (KObjectManager.Instance != null)
-				{
-					KObjectManager.Instance.QueueDestroy(this.obj);
-				}
-				this.OnCleanUp();
-			}
+			return;
 		}
+		if (KMonoBehaviour.isLoadingScene)
+		{
+			this.OnLoadLevel();
+			return;
+		}
+		if (KObjectManager.Instance != null)
+		{
+			KObjectManager.Instance.QueueDestroy(this.obj);
+		}
+		this.OnCleanUp();
 	}
 
 	public void Start()
 	{
-		if (!App.IsExiting)
+		if (App.IsExiting)
 		{
-			this.Spawn();
+			return;
 		}
+		this.Spawn();
 	}
 
 	public void Spawn()
 	{
-		if (!this.isSpawned)
+		if (this.isSpawned)
 		{
-			string text = base.GetType().Name;
-			if (text == "LoopingSounds")
+			return;
+		}
+		string text = base.GetType().Name;
+		if (text == "LoopingSounds")
+		{
+			text = "LS";
+		}
+		if (text == "Sequenceable")
+		{
+			text = "S";
+		}
+		if (text == "StructureTemperature")
+		{
+			text = "ST";
+		}
+		if (!this.isInitialized)
+		{
+			global::Debug.LogError(base.name + "." + text + " is not initialized.", null);
+			return;
+		}
+		this.isSpawned = true;
+		MyCmp.OnStart(this);
+		try
+		{
+			this.OnSpawn();
+		}
+		catch (Exception ex)
+		{
+			Output.LogError(new object[] { string.Concat(new string[]
 			{
-				text = "LS";
-			}
-			if (text == "Sequenceable")
-			{
-				text = "S";
-			}
-			if (text == "StructureTemperature")
-			{
-				text = "ST";
-			}
-			if (!this.isInitialized)
-			{
-				global::Debug.LogError(base.name + "." + text + " is not initialized.", null);
-			}
-			else
-			{
-				this.isSpawned = true;
-				MyCmp.OnStart(this);
-				try
-				{
-					this.OnSpawn();
-				}
-				catch (Exception ex)
-				{
-					Output.LogError(new object[] { string.Concat(new string[]
-					{
-						"Error in: ",
-						base.name,
-						".",
-						text,
-						".OnSpawn\n",
-						ex.ToString()
-					}) });
-				}
-				if (UpdateManager.instance != null && !this.simUpdateRegistered && base.enabled)
-				{
-					this.simUpdateRegistered = true;
-					UpdateManager.AddSimUpdater(this);
-				}
-			}
+				"Error in: ",
+				base.name,
+				".",
+				text,
+				".OnSpawn\n",
+				ex.ToString()
+			}) });
+		}
+		if (UpdateManager.instance != null && !this.simUpdateRegistered && base.enabled)
+		{
+			this.simUpdateRegistered = true;
+			UpdateManager.AddSimUpdater(this);
 		}
 	}
 
@@ -342,7 +345,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 
 	private KObject obj;
 
-	private bool isInitialized = false;
+	private bool isInitialized;
 
-	private bool simUpdateRegistered = false;
+	private bool simUpdateRegistered;
 }

@@ -169,24 +169,19 @@ namespace NodeEditorFramework
 
 		private Vector2 GetKnobCenter(Vector2 knobSize)
 		{
-			Vector2 vector;
 			if (this.side == NodeSide.Left)
 			{
-				vector = this.body.rect.position + new Vector2(-this.sideOffset - knobSize.x / 2f, this.sidePosition);
+				return this.body.rect.position + new Vector2(-this.sideOffset - knobSize.x / 2f, this.sidePosition);
 			}
-			else if (this.side == NodeSide.Right)
+			if (this.side == NodeSide.Right)
 			{
-				vector = this.body.rect.position + new Vector2(this.sideOffset + knobSize.x / 2f + this.body.rect.width, this.sidePosition);
+				return this.body.rect.position + new Vector2(this.sideOffset + knobSize.x / 2f + this.body.rect.width, this.sidePosition);
 			}
-			else if (this.side == NodeSide.Bottom)
+			if (this.side == NodeSide.Bottom)
 			{
-				vector = this.body.rect.position + new Vector2(this.sidePosition, this.sideOffset + knobSize.y / 2f + this.body.rect.height);
+				return this.body.rect.position + new Vector2(this.sidePosition, this.sideOffset + knobSize.y / 2f + this.body.rect.height);
 			}
-			else
-			{
-				vector = this.body.rect.position + new Vector2(this.sidePosition, -this.sideOffset - knobSize.y / 2f);
-			}
-			return vector;
+			return this.body.rect.position + new Vector2(this.sidePosition, -this.sideOffset - knobSize.y / 2f);
 		}
 
 		public Vector2 GetDirection()
@@ -211,8 +206,8 @@ namespace NodeEditorFramework
 
 		public NodeSide side;
 
-		public float sidePosition = 0f;
+		public float sidePosition;
 
-		public float sideOffset = 0f;
+		public float sideOffset;
 	}
 }

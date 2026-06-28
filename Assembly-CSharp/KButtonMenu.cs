@@ -31,82 +31,80 @@ public class KButtonMenu : KScreen
 			}
 			this.buttonObjects = null;
 		}
-		if (this.buttons != null)
+		if (this.buttons == null)
 		{
-			this.buttonObjects = new GameObject[this.buttons.Count];
-			for (int j = 0; j < this.buttons.Count; j++)
+			return;
+		}
+		this.buttonObjects = new GameObject[this.buttons.Count];
+		for (int j = 0; j < this.buttons.Count; j++)
+		{
+			KButtonMenu.ButtonInfo binfo = this.buttons[j];
+			GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.buttonPrefab, Vector3.zero, Quaternion.identity);
+			this.buttonObjects[j] = gameObject;
+			Transform transform = ((!(this.buttonParent != null)) ? base.transform : this.buttonParent);
+			gameObject.transform.SetParent(transform, false);
+			gameObject.SetActive(true);
+			gameObject.name = binfo.text + "Button";
+			LocText[] componentsInChildren = gameObject.GetComponentsInChildren<LocText>(true);
+			if (componentsInChildren != null)
 			{
-				KButtonMenu.ButtonInfo binfo = this.buttons[j];
-				GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.buttonPrefab, Vector3.zero, Quaternion.identity);
-				this.buttonObjects[j] = gameObject;
-				Transform transform = ((!(this.buttonParent != null)) ? base.transform : this.buttonParent);
-				gameObject.transform.SetParent(transform, false);
-				gameObject.SetActive(true);
-				gameObject.name = binfo.text + "Button";
-				LocText[] componentsInChildren = gameObject.GetComponentsInChildren<LocText>(true);
-				if (componentsInChildren != null)
+				foreach (LocText locText in componentsInChildren)
 				{
-					foreach (LocText locText in componentsInChildren)
-					{
-						locText.text = ((!(locText.name == "Hotkey")) ? binfo.text : GameUtil.GetActionString(binfo.shortcutKey));
-						locText.color = ((!binfo.isEnabled) ? new Color(0.5f, 0.5f, 0.5f) : new Color(1f, 1f, 1f));
-					}
-				}
-				RawImage componentInChildren = gameObject.GetComponentInChildren<RawImage>();
-				if (componentInChildren != null && binfo.visualizer != null)
-				{
-					Portrait component = Util.KInstantiate(EntityPrefabs.Instance.Portrait, SceneOrganizer.Instance.GetFolder(Folder.Portraits), null).GetComponent<Portrait>();
-					RectTransform component2 = componentInChildren.GetComponent<RectTransform>();
-					componentInChildren.texture = component.CreateTexture((int)component2.rect.width, (int)component2.rect.height);
-					component.SetTarget(binfo.visualizer);
-					component.destroyTargetOnCleanup = true;
-					this.buttons[j].portrait = component;
-				}
-				ToolTip componentInChildren2 = gameObject.GetComponentInChildren<ToolTip>();
-				if (binfo.toolTip != null && binfo.toolTip != "" && componentInChildren2 != null)
-				{
-					componentInChildren2.toolTip = binfo.toolTip;
-				}
-				KButtonMenu screen = this;
-				KButton button = gameObject.GetComponent<KButton>();
-				button.isInteractable = binfo.isEnabled;
-				if (binfo.popupOptions == null && binfo.onPopulatePopup == null)
-				{
-					UnityAction onClick = binfo.onClick;
-					global::System.Action action = delegate
-					{
-						onClick();
-						if (!this.keepMenuOpen)
-						{
-							if (screen != null)
-							{
-								screen.Deactivate();
-							}
-						}
-					};
-					button.onClick += action;
-				}
-				else
-				{
-					button.onClick += delegate
-					{
-						this.SetupPopupMenu(binfo, button);
-					};
-				}
-				binfo.uibutton = button;
-				if (binfo.onHover != null)
-				{
+					locText.text = ((!(locText.name == "Hotkey")) ? binfo.text : GameUtil.GetActionString(binfo.shortcutKey));
+					locText.color = ((!binfo.isEnabled) ? new Color(0.5f, 0.5f, 0.5f) : new Color(1f, 1f, 1f));
 				}
 			}
-			this.Update();
-			for (int l = 0; l < this.buttons.Count - 1; l++)
+			RawImage componentInChildren = gameObject.GetComponentInChildren<RawImage>();
+			if (componentInChildren != null && binfo.visualizer != null)
 			{
-				for (int m = l + 1; m < this.buttons.Count; m++)
+				Portrait component = Util.KInstantiate(EntityPrefabs.Instance.Portrait, SceneOrganizer.Instance.GetFolder(Folder.Portraits), null).GetComponent<Portrait>();
+				RectTransform component2 = componentInChildren.GetComponent<RectTransform>();
+				componentInChildren.texture = component.CreateTexture((int)component2.rect.width, (int)component2.rect.height);
+				component.SetTarget(binfo.visualizer);
+				component.destroyTargetOnCleanup = true;
+				this.buttons[j].portrait = component;
+			}
+			ToolTip componentInChildren2 = gameObject.GetComponentInChildren<ToolTip>();
+			if (binfo.toolTip != null && binfo.toolTip != string.Empty && componentInChildren2 != null)
+			{
+				componentInChildren2.toolTip = binfo.toolTip;
+			}
+			KButtonMenu screen = this;
+			KButton button = gameObject.GetComponent<KButton>();
+			button.isInteractable = binfo.isEnabled;
+			if (binfo.popupOptions == null && binfo.onPopulatePopup == null)
+			{
+				UnityAction onClick = binfo.onClick;
+				global::System.Action action = delegate
 				{
-					if (this.buttons[l].shortcutKey != global::Action.NumActions && this.buttons[l].shortcutKey == this.buttons[m].shortcutKey)
+					onClick();
+					if (!this.keepMenuOpen && screen != null)
 					{
-						Output.LogWarning(new object[] { this.buttons[l].text + " has the same shortcut key as " + this.buttons[m].text });
+						screen.Deactivate();
 					}
+				};
+				button.onClick += action;
+			}
+			else
+			{
+				button.onClick += delegate
+				{
+					this.SetupPopupMenu(binfo, button);
+				};
+			}
+			binfo.uibutton = button;
+			if (binfo.onHover != null)
+			{
+			}
+		}
+		this.Update();
+		for (int l = 0; l < this.buttons.Count - 1; l++)
+		{
+			for (int m = l + 1; m < this.buttons.Count; m++)
+			{
+				if (this.buttons[l].shortcutKey != global::Action.NumActions && this.buttons[l].shortcutKey == this.buttons[m].shortcutKey)
+				{
+					Output.LogWarning(new object[] { this.buttons[l].text + " has the same shortcut key as " + this.buttons[m].text });
 				}
 			}
 		}
@@ -162,20 +160,21 @@ public class KButtonMenu : KScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (this.buttons != null)
+		if (this.buttons == null)
 		{
-			for (int i = 0; i < this.buttons.Count; i++)
-			{
-				KButtonMenu.ButtonInfo buttonInfo = this.buttons[i];
-				if (e.TryConsume(buttonInfo.shortcutKey))
-				{
-					this.buttonObjects[i].GetComponent<KButton>().PlayPointerDownSound();
-					this.buttonObjects[i].GetComponent<KButton>().SignalClick();
-					break;
-				}
-			}
-			base.OnKeyDown(e);
+			return;
 		}
+		for (int i = 0; i < this.buttons.Count; i++)
+		{
+			KButtonMenu.ButtonInfo buttonInfo = this.buttons[i];
+			if (e.TryConsume(buttonInfo.shortcutKey))
+			{
+				this.buttonObjects[i].GetComponent<KButton>().PlayPointerDownSound();
+				this.buttonObjects[i].GetComponent<KButton>().SignalClick();
+				break;
+			}
+		}
+		base.OnKeyDown(e);
 	}
 
 	protected override void OnPrefabInit()
@@ -191,16 +190,17 @@ public class KButtonMenu : KScreen
 
 	protected override void OnDeactivate()
 	{
-		if (this.buttons != null)
+		if (this.buttons == null)
 		{
-			foreach (KButtonMenu.ButtonInfo buttonInfo in this.buttons)
+			return;
+		}
+		foreach (KButtonMenu.ButtonInfo buttonInfo in this.buttons)
+		{
+			if (buttonInfo != null)
 			{
-				if (buttonInfo != null)
+				if (buttonInfo.portrait != null)
 				{
-					if (buttonInfo.portrait != null)
-					{
-						global::UnityEngine.Object.Destroy(buttonInfo.portrait.gameObject);
-					}
+					global::UnityEngine.Object.Destroy(buttonInfo.portrait.gameObject);
 				}
 			}
 		}
@@ -208,15 +208,16 @@ public class KButtonMenu : KScreen
 
 	private void Update()
 	{
-		if (this.followGameObject && !(this.go == null) && !(base.canvas == null))
+		if (!this.followGameObject || this.go == null || base.canvas == null)
 		{
-			Vector3 vector = Camera.main.WorldToViewportPoint(this.go.transform.position);
-			RectTransform component = base.GetComponent<RectTransform>();
-			RectTransform component2 = base.canvas.GetComponent<RectTransform>();
-			if (component != null)
-			{
-				component.anchoredPosition = new Vector2(vector.x * component2.sizeDelta.x - component2.sizeDelta.x * 0.5f, vector.y * component2.sizeDelta.y - component2.sizeDelta.y * 0.5f);
-			}
+			return;
+		}
+		Vector3 vector = Camera.main.WorldToViewportPoint(this.go.transform.position);
+		RectTransform component = base.GetComponent<RectTransform>();
+		RectTransform component2 = base.canvas.GetComponent<RectTransform>();
+		if (component != null)
+		{
+			component.anchoredPosition = new Vector2(vector.x * component2.sizeDelta.x - component2.sizeDelta.x * 0.5f, vector.y * component2.sizeDelta.y - component2.sizeDelta.y * 0.5f);
 		}
 	}
 
@@ -231,7 +232,7 @@ public class KButtonMenu : KScreen
 
 	public GameObject buttonPrefab;
 
-	public bool ShouldConsumeMouseScroll = false;
+	public bool ShouldConsumeMouseScroll;
 
 	[NonSerialized]
 	public GameObject[] buttonObjects;

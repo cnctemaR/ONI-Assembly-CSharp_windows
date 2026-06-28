@@ -113,6 +113,6 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 			base.GetComponent<KPrefabID>().AddTag(GameTags.Corpse);
 		}
 
-		private bool isDuplicant = false;
+		private bool isDuplicant;
 	}
 }

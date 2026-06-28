@@ -61,16 +61,11 @@ public class SteamUGCService : MonoBehaviour
 
 	public Texture2D GetPreviewImage(PublishedFileId_t item)
 	{
-		Texture2D texture2D;
 		if (this.previewImages.ContainsKey(item))
 		{
-			texture2D = this.previewImages[item];
+			return this.previewImages[item];
 		}
-		else
-		{
-			texture2D = null;
-		}
-		return texture2D;
+		return null;
 	}
 
 	public void SetCurrentLanguage(PublishedFileId_t item)
@@ -93,7 +88,7 @@ public class SteamUGCService : MonoBehaviour
 
 	public string GetInstalledLanguageCode(out PublishedFileId_t installed)
 	{
-		string text = "";
+		string text = string.Empty;
 		global::System.DateTime dateTime;
 		global::System.DateTime dateTime2;
 		string languageFile = SteamUGCService.GetLanguageFile(out installed, out dateTime, out dateTime2);
@@ -115,52 +110,47 @@ public class SteamUGCService : MonoBehaviour
 		global::System.DateTime dateTime;
 		global::System.DateTime dateTime2;
 		string languageFile = SteamUGCService.GetLanguageFile(out publishedFileId_t, out dateTime, out dateTime2);
-		string text;
 		if (languageFile == null || !File.Exists(languageFile))
 		{
-			text = "None";
+			return "None";
 		}
-		else
+		string[] array = File.ReadAllLines(languageFile, Encoding.UTF8);
+		Localization.Locale locale = Localization.GetLocale(array);
+		string text = "Error";
+		if (locale != null && locale.Code != null && locale.Code != string.Empty)
 		{
-			string[] array = File.ReadAllLines(languageFile, Encoding.UTF8);
-			Localization.Locale locale = Localization.GetLocale(array);
-			string text2 = "Error";
-			if (locale != null && locale.Code != null && locale.Code != "")
+			text = locale.Code;
+		}
+		string text2 = string.Concat(new object[] { "Code: [", text, "] Id: [", publishedFileId_t.m_PublishedFileId, "]" });
+		if (this.details != null)
+		{
+			for (int i = 0; i < this.details.Length; i++)
 			{
-				text2 = locale.Code;
-			}
-			string text3 = string.Concat(new object[] { "Code: [", text2, "] Id: [", publishedFileId_t.m_PublishedFileId, "]" });
-			if (this.details != null)
-			{
-				for (int i = 0; i < this.details.Length; i++)
+				PublishedFileId_t nPublishedFileId = this.details[i].m_nPublishedFileId;
+				if (publishedFileId_t == nPublishedFileId)
 				{
-					PublishedFileId_t nPublishedFileId = this.details[i].m_nPublishedFileId;
-					if (publishedFileId_t == nPublishedFileId)
+					if (this.details[i].m_rgchTitle != null && this.details[i].m_rgchTitle.Length > 0)
 					{
-						if (this.details[i].m_rgchTitle != null && this.details[i].m_rgchTitle.Length > 0)
-						{
-							text3 = text3 + " Title: [" + this.details[i].m_rgchTitle + "]";
-						}
-						if (this.details[i].m_rgchURL != null && this.details[i].m_rgchURL.Length > 0)
-						{
-							text3 = text3 + " URL: [" + this.details[i].m_rgchURL + "]";
-						}
-						text3 = text3 + " Last Modified (UTC): [" + SteamUGCService.FromUnixTime((long)((ulong)this.details[i].m_rtimeUpdated)).ToString() + "]";
-						break;
+						text2 = text2 + " Title: [" + this.details[i].m_rgchTitle + "]";
 					}
+					if (this.details[i].m_rgchURL != null && this.details[i].m_rgchURL.Length > 0)
+					{
+						text2 = text2 + " URL: [" + this.details[i].m_rgchURL + "]";
+					}
+					text2 = text2 + " Last Modified (UTC): [" + SteamUGCService.FromUnixTime((long)((ulong)this.details[i].m_rtimeUpdated)).ToString() + "]";
+					break;
 				}
 			}
-			if (dateTime != global::System.DateTime.MinValue)
-			{
-				text3 = text3 + " Last Modified On Disk (UTC): [" + dateTime.ToString() + "]";
-			}
-			if (dateTime2 != global::System.DateTime.MinValue)
-			{
-				text3 = text3 + " Last Modified PO (UTC): [" + dateTime2.ToString() + "]";
-			}
-			text = text3;
 		}
-		return text;
+		if (dateTime != global::System.DateTime.MinValue)
+		{
+			text2 = text2 + " Last Modified On Disk (UTC): [" + dateTime.ToString() + "]";
+		}
+		if (dateTime2 != global::System.DateTime.MinValue)
+		{
+			text2 = text2 + " Last Modified PO (UTC): [" + dateTime2.ToString() + "]";
+		}
+		return text2;
 	}
 
 	public static string GetInstalledLanguageFile()
@@ -176,18 +166,13 @@ public class SteamUGCService : MonoBehaviour
 		global::System.DateTime dateTime;
 		global::System.DateTime dateTime2;
 		string languageFileFromSteam = SteamUGCService.GetLanguageFileFromSteam(item, out dateTime, out dateTime2);
-		TMP_FontAsset tmp_FontAsset;
 		if (languageFileFromSteam != null && languageFileFromSteam.Length > 0)
 		{
 			string[] array = languageFileFromSteam.Split(new char[] { '\n' });
 			string fontForLocalisation = SteamUGCService.GetFontForLocalisation(array);
-			tmp_FontAsset = Resources.Load<TMP_FontAsset>(fontForLocalisation);
+			return Resources.Load<TMP_FontAsset>(fontForLocalisation);
 		}
-		else
-		{
-			tmp_FontAsset = null;
-		}
-		return tmp_FontAsset;
+		return null;
 	}
 
 	public static void LoadTranslation()
@@ -209,65 +194,59 @@ public class SteamUGCService : MonoBehaviour
 
 	private void Update()
 	{
-		if (SteamManager.Initialized)
+		if (!SteamManager.Initialized)
 		{
-			if (!this.setupComplete)
+			return;
+		}
+		if (!this.setupComplete && Global.Instance != null && DistributionPlatform.Initialized)
+		{
+			this.Setup();
+		}
+		if (this.doClearList)
+		{
+			this.doClearList = false;
+			this.ClearLists();
+		}
+		this.GetSubscribedDetails();
+		this.numSubscriptions = SteamUGC.GetNumSubscribedItems();
+		this.UpdateSubscription(this.numSubscriptions);
+		if (this.details == null)
+		{
+			return;
+		}
+		for (int i = 0; i < this.details.Length; i++)
+		{
+			PublishedFileId_t nPublishedFileId = this.details[i].m_nPublishedFileId;
+			if (this.subscribed != null && this.subscribed.Contains(nPublishedFileId))
 			{
-				if (Global.Instance != null && DistributionPlatform.Initialized)
+				EItemState itemState = (EItemState)SteamUGC.GetItemState(nPublishedFileId);
+				bool flag = ((itemState & EItemState.k_EItemStateInstalled) != EItemState.k_EItemStateInstalled) | ((itemState & EItemState.k_EItemStateNeedsUpdate) == EItemState.k_EItemStateNeedsUpdate);
+				bool flag2 = ((itemState & EItemState.k_EItemStateDownloading) == EItemState.k_EItemStateDownloading) | ((itemState & EItemState.k_EItemStateDownloadPending) == EItemState.k_EItemStateDownloadPending);
+				bool flag3 = flag && !flag2;
+				if (flag3)
 				{
-					this.Setup();
+					SteamUGC.DownloadItem(nPublishedFileId, false);
 				}
-			}
-			if (this.doClearList)
-			{
-				this.doClearList = false;
-				this.ClearLists();
-			}
-			this.GetSubscribedDetails();
-			this.numSubscriptions = SteamUGC.GetNumSubscribedItems();
-			this.UpdateSubscription(this.numSubscriptions);
-			if (this.details != null)
-			{
-				int i = 0;
-				while (i < this.details.Length)
+				else if (!flag3 && !this.previewImages.ContainsKey(nPublishedFileId) && (itemState & EItemState.k_EItemStateInstalled) == EItemState.k_EItemStateInstalled)
 				{
-					PublishedFileId_t nPublishedFileId = this.details[i].m_nPublishedFileId;
-					if (this.subscribed != null && this.subscribed.Contains(nPublishedFileId))
+					global::System.DateTime dateTime;
+					global::System.DateTime dateTime2;
+					byte[] bytesFromZip = SteamUGCService.GetBytesFromZip(nPublishedFileId, SteamUGCService.previewFileNames, out dateTime, out dateTime2, false);
+					if (this.currentLanguage == nPublishedFileId && this.currentLastModified < dateTime)
 					{
-						EItemState itemState = (EItemState)SteamUGC.GetItemState(nPublishedFileId);
-						bool flag = ((itemState & EItemState.k_EItemStateInstalled) != EItemState.k_EItemStateInstalled) | ((itemState & EItemState.k_EItemStateNeedsUpdate) == EItemState.k_EItemStateNeedsUpdate);
-						bool flag2 = ((itemState & EItemState.k_EItemStateDownloading) == EItemState.k_EItemStateDownloading) | ((itemState & EItemState.k_EItemStateDownloadPending) == EItemState.k_EItemStateDownloadPending);
-						bool flag3 = flag && !flag2;
-						if (flag3)
-						{
-							SteamUGC.DownloadItem(nPublishedFileId, false);
-						}
-						else if (!flag3 && !this.previewImages.ContainsKey(nPublishedFileId) && (itemState & EItemState.k_EItemStateInstalled) == EItemState.k_EItemStateInstalled)
-						{
-							global::System.DateTime dateTime;
-							global::System.DateTime dateTime2;
-							byte[] bytesFromZip = SteamUGCService.GetBytesFromZip(nPublishedFileId, SteamUGCService.previewFileNames, out dateTime, out dateTime2, false);
-							if (this.currentLanguage == nPublishedFileId && this.currentLastModified < dateTime)
-							{
-								this.UpdateInstalledLanguage(nPublishedFileId);
-							}
-							if (bytesFromZip != null)
-							{
-								Texture2D texture2D = new Texture2D(2, 2);
-								texture2D.LoadImage(bytesFromZip);
-								this.previewImages.Add(nPublishedFileId, texture2D);
-								this.doClearList = true;
-							}
-							if (SteamUGCService.getBytesRetryCount.ContainsKey(nPublishedFileId) && SteamUGCService.getBytesRetryCount[nPublishedFileId] > 3)
-							{
-								this.previewImages.Add(nPublishedFileId, null);
-							}
-						}
+						this.UpdateInstalledLanguage(nPublishedFileId);
 					}
-					IL_01D8:
-					i++;
-					continue;
-					goto IL_01D8;
+					if (bytesFromZip != null)
+					{
+						Texture2D texture2D = new Texture2D(2, 2);
+						texture2D.LoadImage(bytesFromZip);
+						this.previewImages.Add(nPublishedFileId, texture2D);
+						this.doClearList = true;
+					}
+					if (SteamUGCService.getBytesRetryCount.ContainsKey(nPublishedFileId) && SteamUGCService.getBytesRetryCount[nPublishedFileId] > 3)
+					{
+						this.previewImages.Add(nPublishedFileId, null);
+					}
 				}
 			}
 		}
@@ -321,11 +300,9 @@ public class SteamUGCService : MonoBehaviour
 		{
 			SteamUGCService.InstalledModData.Set(item, this.currentLastModified, this.currentLastModifiedPofile);
 			File.WriteAllText(Localization.GetModLocalizationFilePath(), languageFileFromSteam);
+			return;
 		}
-		else
-		{
-			global::Debug.LogWarning(string.Concat(new object[] { "Loc file was empty.. [", item, "]  [", this.currentLastModified, "]  [", this.currentLastModifiedPofile, "] " }), null);
-		}
+		global::Debug.LogWarning(string.Concat(new object[] { "Loc file was empty.. [", item, "]  [", this.currentLastModified, "]  [", this.currentLastModifiedPofile, "] " }), null);
 	}
 
 	private void InstallLanguageFile(PublishedFileId_t item, bool fromDownload = false)
@@ -372,13 +349,12 @@ public class SteamUGCService : MonoBehaviour
 
 	private static bool DoDownloadItem(PublishedFileId_t item)
 	{
-		bool flag;
 		if (SteamUGCService.waitingForDownload == item)
 		{
 			global::Debug.Log("We are waiting for [" + item + "] to download", null);
-			flag = false;
+			return false;
 		}
-		else if (SteamUGCService.waitingForDownload != PublishedFileId_t.Invalid)
+		if (SteamUGCService.waitingForDownload != PublishedFileId_t.Invalid)
 		{
 			global::Debug.Log(string.Concat(new object[]
 			{
@@ -388,65 +364,53 @@ public class SteamUGCService : MonoBehaviour
 				item,
 				"] now"
 			}), null);
-			flag = false;
+			return false;
 		}
-		else
+		if (!SteamUGCService.getBytesRetryCount.ContainsKey(item))
 		{
-			if (!SteamUGCService.getBytesRetryCount.ContainsKey(item))
-			{
-				SteamUGCService.getBytesRetryCount.Add(item, 0);
-			}
-			if (SteamUGCService.getBytesRetryCount[item] > SteamUGCService.MAX_FILE_RETRY_COUNT)
-			{
-				global::Debug.Log("Max retry count reached for [" + item + "]", null);
-				flag = false;
-			}
-			else if (!SteamUGC.DownloadItem(item, true))
-			{
-				global::Debug.Log("SteamUGC.DownloadItem returned false for [" + item + "]", null);
-				flag = false;
-			}
-			else
-			{
-				Dictionary<PublishedFileId_t, int> dictionary;
-				(dictionary = SteamUGCService.getBytesRetryCount)[item] = dictionary[item] + 1;
-				SteamUGCService.waitingForDownload = item;
-				flag = true;
-			}
+			SteamUGCService.getBytesRetryCount.Add(item, 0);
 		}
-		return flag;
+		if (SteamUGCService.getBytesRetryCount[item] > SteamUGCService.MAX_FILE_RETRY_COUNT)
+		{
+			global::Debug.Log("Max retry count reached for [" + item + "]", null);
+			return false;
+		}
+		if (!SteamUGC.DownloadItem(item, true))
+		{
+			global::Debug.Log("SteamUGC.DownloadItem returned false for [" + item + "]", null);
+			return false;
+		}
+		Dictionary<PublishedFileId_t, int> dictionary;
+		(dictionary = SteamUGCService.getBytesRetryCount)[item] = dictionary[item] + 1;
+		SteamUGCService.waitingForDownload = item;
+		return true;
 	}
 
 	private static string GetLanguageFileFromSteam(PublishedFileId_t item, out global::System.DateTime lastModified, out global::System.DateTime lastModifiedPofile)
 	{
 		lastModified = global::System.DateTime.MinValue;
 		lastModifiedPofile = global::System.DateTime.MinValue;
-		string text;
 		if (item == PublishedFileId_t.Invalid)
 		{
 			global::Debug.LogWarning("Cant get INVALID file id from Steam", null);
-			text = null;
+			return null;
+		}
+		EItemState itemState = (EItemState)SteamUGC.GetItemState(item);
+		if ((itemState & EItemState.k_EItemStateInstalled) == EItemState.k_EItemStateInstalled)
+		{
+			byte[] bytesFromZip = SteamUGCService.GetBytesFromZip(item, SteamUGCService.poFile, out lastModified, out lastModifiedPofile, false);
+			if (bytesFromZip != null && bytesFromZip.Length > 0)
+			{
+				return Encoding.UTF8.GetString(bytesFromZip);
+			}
+			global::Debug.LogWarning("Empty bytes from Zip file, trying redownload", null);
+			SteamUGCService.DoDownloadItem(item);
 		}
 		else
 		{
-			EItemState itemState = (EItemState)SteamUGC.GetItemState(item);
-			if ((itemState & EItemState.k_EItemStateInstalled) == EItemState.k_EItemStateInstalled)
-			{
-				byte[] bytesFromZip = SteamUGCService.GetBytesFromZip(item, SteamUGCService.poFile, out lastModified, out lastModifiedPofile, false);
-				if (bytesFromZip != null && bytesFromZip.Length > 0)
-				{
-					return Encoding.UTF8.GetString(bytesFromZip);
-				}
-				global::Debug.LogWarning("Empty bytes from Zip file, trying redownload", null);
-				SteamUGCService.DoDownloadItem(item);
-			}
-			else
-			{
-				global::Debug.LogWarning("Steam says item not installed [" + itemState + "]", null);
-			}
-			text = null;
+			global::Debug.LogWarning("Steam says item not installed [" + itemState + "]", null);
 		}
-		return text;
+		return null;
 	}
 
 	private static byte[] GetBytesFromZip(PublishedFileId_t item, string[] filesToExtract, out global::System.DateTime lastModified, out global::System.DateTime lastModifiedPofile, bool getFirstMatch = false)
@@ -511,20 +475,21 @@ public class SteamUGCService : MonoBehaviour
 
 	private void GetSubscribedDetails()
 	{
-		if (!this.listPending)
+		if (this.listPending)
 		{
-			uint numSubscribedItems = SteamUGC.GetNumSubscribedItems();
-			if (numSubscribedItems != 0U && (this.subscribed == null || (ulong)numSubscribedItems != (ulong)((long)this.subscribed.Count)))
-			{
-				PublishedFileId_t[] array = new PublishedFileId_t[numSubscribedItems];
-				SteamUGC.GetSubscribedItems(array, (uint)array.Length);
-				this.subscribed = new List<PublishedFileId_t>(array);
-				this.listPending = true;
-				this.m_UGCQueryHandle = SteamUGC.CreateQueryUGCDetailsRequest(array, (uint)array.Length);
-				SteamUGC.AddRequiredTag(this.m_UGCQueryHandle, "language");
-				SteamAPICall_t steamAPICall_t = SteamUGC.SendQueryUGCRequest(this.m_UGCQueryHandle);
-				this.OnSteamUGCQueryDetailsCompletedCallResult.Set(steamAPICall_t, null);
-			}
+			return;
+		}
+		uint numSubscribedItems = SteamUGC.GetNumSubscribedItems();
+		if (numSubscribedItems != 0U && (this.subscribed == null || (ulong)numSubscribedItems != (ulong)((long)this.subscribed.Count)))
+		{
+			PublishedFileId_t[] array = new PublishedFileId_t[numSubscribedItems];
+			SteamUGC.GetSubscribedItems(array, (uint)array.Length);
+			this.subscribed = new List<PublishedFileId_t>(array);
+			this.listPending = true;
+			this.m_UGCQueryHandle = SteamUGC.CreateQueryUGCDetailsRequest(array, (uint)array.Length);
+			SteamUGC.AddRequiredTag(this.m_UGCQueryHandle, "language");
+			SteamAPICall_t steamAPICall_t = SteamUGC.SendQueryUGCRequest(this.m_UGCQueryHandle);
+			this.OnSteamUGCQueryDetailsCompletedCallResult.Set(steamAPICall_t, null);
 		}
 	}
 
@@ -617,16 +582,13 @@ public class SteamUGCService : MonoBehaviour
 
 	private void OnDownloadPreviewResult(RemoteStorageDownloadUGCResult_t pCallback, bool bIOFailure)
 	{
-		if (pCallback.m_eResult == EResult.k_EResultOK)
+		if (pCallback.m_eResult == EResult.k_EResultOK && !this.previewImages.ContainsKey(this.previews[pCallback.m_hFile]))
 		{
-			if (!this.previewImages.ContainsKey(this.previews[pCallback.m_hFile]))
-			{
-				byte[] array = new byte[pCallback.m_nSizeInBytes];
-				SteamRemoteStorage.UGCRead(pCallback.m_hFile, array, array.Length, 0U, EUGCReadAction.k_EUGCRead_ContinueReadingUntilFinished);
-				Texture2D texture2D = new Texture2D(2, 2);
-				texture2D.LoadImage(array);
-				this.previewImages.Add(this.previews[pCallback.m_hFile], texture2D);
-			}
+			byte[] array = new byte[pCallback.m_nSizeInBytes];
+			SteamRemoteStorage.UGCRead(pCallback.m_hFile, array, array.Length, 0U, EUGCReadAction.k_EUGCRead_ContinueReadingUntilFinished);
+			Texture2D texture2D = new Texture2D(2, 2);
+			texture2D.LoadImage(array);
+			this.previewImages.Add(this.previews[pCallback.m_hFile], texture2D);
 		}
 		this.m_DownloadPreviewResult.Remove(pCallback.m_hFile);
 		if (this.m_DownloadPreviewResult.Count == 0)
@@ -703,17 +665,17 @@ public class SteamUGCService : MonoBehaviour
 
 	private CallResult<SteamUGCQueryCompleted_t> OnSteamUGCQueryDetailsCompletedCallResult;
 
-	private bool listPending = false;
+	private bool listPending;
 
-	private List<PublishedFileId_t> subscribed = null;
+	private List<PublishedFileId_t> subscribed;
 
-	private SteamUGCDetails_t[] details = null;
+	private SteamUGCDetails_t[] details;
 
 	private Dictionary<PublishedFileId_t, Texture2D> previewImages = new Dictionary<PublishedFileId_t, Texture2D>();
 
 	private Dictionary<UGCHandle_t, PublishedFileId_t> previews = new Dictionary<UGCHandle_t, PublishedFileId_t>();
 
-	private bool doClearList = false;
+	private bool doClearList;
 
 	private global::System.DateTime currentLastModified;
 
@@ -725,7 +687,7 @@ public class SteamUGCService : MonoBehaviour
 
 	private static readonly string[] poFile = new string[] { "strings.po" };
 
-	private bool setupComplete = false;
+	private bool setupComplete;
 
 	private static SteamUGCService instance;
 

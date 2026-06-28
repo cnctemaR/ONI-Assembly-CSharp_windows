@@ -36,7 +36,7 @@ public class KTabMenuHeader : KMonoBehaviour
 		RectTransform component = gameObject.GetComponent<RectTransform>();
 		component.transform.SetParent(base.transform, false);
 		component.name = name;
-		if (tooltip == "")
+		if (tooltip == string.Empty)
 		{
 			component.GetComponent<ToolTip>().toolTip = name;
 		}
@@ -65,37 +65,35 @@ public class KTabMenuHeader : KMonoBehaviour
 	public void Activate(int itemIdx, int previouslyActiveTabIdx)
 	{
 		int childCount = base.transform.childCount;
-		if (itemIdx < childCount)
+		if (itemIdx >= childCount)
 		{
-			for (int i = 0; i < childCount; i++)
+			return;
+		}
+		for (int i = 0; i < childCount; i++)
+		{
+			Transform child = base.transform.GetChild(i);
+			if (child.gameObject.activeSelf)
 			{
-				Transform child = base.transform.GetChild(i);
-				if (child.gameObject.activeSelf)
+				KButton componentInChildren = child.GetComponentInChildren<KButton>();
+				if (componentInChildren != null)
 				{
-					KButton componentInChildren = child.GetComponentInChildren<KButton>();
-					if (componentInChildren != null)
-					{
-						Text componentInChildren2 = componentInChildren.GetComponentInChildren<Text>();
-						if (componentInChildren2 != null)
-						{
-							if (i == itemIdx)
-							{
-								this.ActivateTabArtwork(itemIdx);
-							}
-						}
-					}
-					KToggle component = child.GetComponent<KToggle>();
-					if (component != null)
+					Text componentInChildren2 = componentInChildren.GetComponentInChildren<Text>();
+					if (componentInChildren2 != null && i == itemIdx)
 					{
 						this.ActivateTabArtwork(itemIdx);
-						if (i == itemIdx)
-						{
-							component.Select();
-						}
-						else
-						{
-							component.Deselect();
-						}
+					}
+				}
+				KToggle component = child.GetComponent<KToggle>();
+				if (component != null)
+				{
+					this.ActivateTabArtwork(itemIdx);
+					if (i == itemIdx)
+					{
+						component.Select();
+					}
+					else
+					{
+						component.Deselect();
 					}
 				}
 			}
@@ -112,38 +110,39 @@ public class KTabMenuHeader : KMonoBehaviour
 
 	public virtual void ActivateTabArtwork(int tabIdx)
 	{
-		if (tabIdx < base.transform.childCount)
+		if (tabIdx >= base.transform.childCount)
 		{
-			for (int i = 0; i < base.transform.childCount; i++)
+			return;
+		}
+		for (int i = 0; i < base.transform.childCount; i++)
+		{
+			ImageToggleState component = base.transform.GetChild(i).GetComponent<ImageToggleState>();
+			if (component != null)
 			{
-				ImageToggleState component = base.transform.GetChild(i).GetComponent<ImageToggleState>();
-				if (component != null)
+				if (i == tabIdx)
 				{
-					if (i == tabIdx)
-					{
-						component.SetActive();
-					}
-					else
-					{
-						component.SetInactive();
-					}
+					component.SetActive();
 				}
-				Canvas componentInChildren = base.transform.GetChild(i).GetComponentInChildren<Canvas>(true);
-				if (componentInChildren != null)
+				else
 				{
-					componentInChildren.overrideSorting = tabIdx == i;
+					component.SetInactive();
 				}
-				SetTextStyleSetting componentInChildren2 = base.transform.GetChild(i).GetComponentInChildren<SetTextStyleSetting>();
-				if (componentInChildren2 != null && this.TextStyle_Active != null && this.TextStyle_Inactive != null)
+			}
+			Canvas componentInChildren = base.transform.GetChild(i).GetComponentInChildren<Canvas>(true);
+			if (componentInChildren != null)
+			{
+				componentInChildren.overrideSorting = tabIdx == i;
+			}
+			SetTextStyleSetting componentInChildren2 = base.transform.GetChild(i).GetComponentInChildren<SetTextStyleSetting>();
+			if (componentInChildren2 != null && this.TextStyle_Active != null && this.TextStyle_Inactive != null)
+			{
+				if (i == tabIdx)
 				{
-					if (i == tabIdx)
-					{
-						componentInChildren2.SetStyle(this.TextStyle_Active);
-					}
-					else
-					{
-						componentInChildren2.SetStyle(this.TextStyle_Inactive);
-					}
+					componentInChildren2.SetStyle(this.TextStyle_Active);
+				}
+				else
+				{
+					componentInChildren2.SetStyle(this.TextStyle_Inactive);
 				}
 			}
 		}

@@ -31,25 +31,20 @@ namespace MIConvexHull
 
 		public static bool AreConnectable(FaceConnector a, FaceConnector b, int dim)
 		{
-			bool flag;
 			if (a.HashCode != b.HashCode)
 			{
-				flag = false;
+				return false;
 			}
-			else
+			int[] vertices = a.Vertices;
+			int[] vertices2 = b.Vertices;
+			for (int i = 0; i < vertices.Length; i++)
 			{
-				int[] vertices = a.Vertices;
-				int[] vertices2 = b.Vertices;
-				for (int i = 0; i < vertices.Length; i++)
+				if (vertices[i] != vertices2[i])
 				{
-					if (vertices[i] != vertices2[i])
-					{
-						return false;
-					}
+					return false;
 				}
-				flag = true;
 			}
-			return flag;
+			return true;
 		}
 
 		public static void Connect(FaceConnector a, FaceConnector b)

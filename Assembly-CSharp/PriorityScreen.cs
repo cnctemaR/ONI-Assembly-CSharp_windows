@@ -50,23 +50,24 @@ public class PriorityScreen : KScreen
 
 	public void SetScreenPriority(PriorityScreen.PriorityClass priorityClass, int priority, bool play_sound = false)
 	{
-		if (this.priorityClass != priorityClass || this.priority != priority)
+		if (this.priorityClass == priorityClass && this.priority == priority)
 		{
-			this.buttons_basic.ForEach(delegate(PriorityButton b)
-			{
-				this.RefreshButton(b, priorityClass, priority, play_sound);
-			});
-			this.buttons_high.ForEach(delegate(PriorityButton b)
-			{
-				this.RefreshButton(b, priorityClass, priority, play_sound);
-			});
-			this.buttons_emergency.ForEach(delegate(PriorityButton b)
-			{
-				this.RefreshButton(b, priorityClass, priority, play_sound);
-			});
-			this.priorityClass = priorityClass;
-			this.priority = priority;
+			return;
 		}
+		this.buttons_basic.ForEach(delegate(PriorityButton b)
+		{
+			this.RefreshButton(b, priorityClass, priority, play_sound);
+		});
+		this.buttons_high.ForEach(delegate(PriorityButton b)
+		{
+			this.RefreshButton(b, priorityClass, priority, play_sound);
+		});
+		this.buttons_emergency.ForEach(delegate(PriorityButton b)
+		{
+			this.RefreshButton(b, priorityClass, priority, play_sound);
+		});
+		this.priorityClass = priorityClass;
+		this.priority = priority;
 	}
 
 	public PrioritySetting GetScreenPriority()
@@ -106,7 +107,7 @@ public class PriorityScreen : KScreen
 
 	private int priority;
 
-	private PriorityScreen.PriorityClass priorityClass = PriorityScreen.PriorityClass.basic;
+	private PriorityScreen.PriorityClass priorityClass;
 
 	public enum PriorityClass
 	{

@@ -211,36 +211,37 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 
 		private void OnImmuneDelta(float delta)
 		{
-			if (!(Game.Instance.customSettings.GetCurrentQualitySetting("ImmuneSystem").id == "Invincible"))
+			if (Game.Instance.customSettings.GetCurrentQualitySetting("ImmuneSystem").id == "Invincible")
 			{
-				if (this.immuneLevel.value <= 0f && this.lastHighestDisease != null)
+				return;
+			}
+			if (this.immuneLevel.value <= 0f && this.lastHighestDisease != null)
+			{
+				ImmuneSystemMonitor.Instance.DiseaseSourceInfo diseaseSourceInfo;
+				string text;
+				if (this.lastDiseaseSources.TryGetValue(this.lastHighestDisease.Id, out diseaseSourceInfo))
 				{
-					ImmuneSystemMonitor.Instance.DiseaseSourceInfo diseaseSourceInfo;
-					string text;
-					if (this.lastDiseaseSources.TryGetValue(this.lastHighestDisease.Id, out diseaseSourceInfo))
+					switch (diseaseSourceInfo.vector)
 					{
-						switch (diseaseSourceInfo.vector)
-						{
-						case Disease.InfectionVector.Contact:
-							text = DUPLICANTS.DISEASES.INFECTIONSOURCES.SKIN;
-							break;
-						case Disease.InfectionVector.Digestion:
-							text = string.Format(DUPLICANTS.DISEASES.INFECTIONSOURCES.FOOD, diseaseSourceInfo.sourceObject.ProperName());
-							break;
-						case Disease.InfectionVector.Inhalation:
-							text = string.Format(DUPLICANTS.DISEASES.INFECTIONSOURCES.AIR, diseaseSourceInfo.sourceObject.ProperName());
-							break;
-						default:
-							text = DUPLICANTS.DISEASES.INFECTIONSOURCES.UNKNOWN;
-							break;
-						}
-					}
-					else
-					{
+					case Disease.InfectionVector.Contact:
+						text = DUPLICANTS.DISEASES.INFECTIONSOURCES.SKIN;
+						break;
+					case Disease.InfectionVector.Digestion:
+						text = string.Format(DUPLICANTS.DISEASES.INFECTIONSOURCES.FOOD, diseaseSourceInfo.sourceObject.ProperName());
+						break;
+					case Disease.InfectionVector.Inhalation:
+						text = string.Format(DUPLICANTS.DISEASES.INFECTIONSOURCES.AIR, diseaseSourceInfo.sourceObject.ProperName());
+						break;
+					default:
 						text = DUPLICANTS.DISEASES.INFECTIONSOURCES.UNKNOWN;
+						break;
 					}
-					this.activeDiseases.Infect(new DiseaseExposureInfo(this.lastHighestDisease.Id, text));
 				}
+				else
+				{
+					text = DUPLICANTS.DISEASES.INFECTIONSOURCES.UNKNOWN;
+				}
+				this.activeDiseases.Infect(new DiseaseExposureInfo(this.lastHighestDisease.Id, text));
 			}
 		}
 

@@ -29,13 +29,14 @@ public class OverlayMenu : KIconToggleMenu
 	protected override void RefreshButtons()
 	{
 		base.RefreshButtons();
-		if (!(Research.Instance == null))
+		if (Research.Instance == null)
 		{
-			foreach (KIconToggleMenu.ToggleInfo toggleInfo in this.overlay_toggle_infos)
-			{
-				OverlayMenu.OverlayToggleInfo overlayToggleInfo = (OverlayMenu.OverlayToggleInfo)toggleInfo;
-				toggleInfo.toggle.gameObject.SetActive(overlayToggleInfo.IsUnlocked());
-			}
+			return;
+		}
+		foreach (KIconToggleMenu.ToggleInfo toggleInfo in this.overlay_toggle_infos)
+		{
+			OverlayMenu.OverlayToggleInfo overlayToggleInfo = (OverlayMenu.OverlayToggleInfo)toggleInfo;
+			toggleInfo.toggle.gameObject.SetActive(overlayToggleInfo.IsUnlocked());
 		}
 	}
 
@@ -54,17 +55,17 @@ public class OverlayMenu : KIconToggleMenu
 	{
 		return new List<KIconToggleMenu.ToggleInfo>
 		{
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.OXYGEN.BUTTON, "overlay_oxygen", SimViewMode.OxygenMap, "", global::Action.Overlay1, UI.TOOLTIPS.OXYGENOVERLAYSTRING, UI.OVERLAYS.OXYGEN.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.ELECTRICAL.BUTTON, "overlay_power", SimViewMode.PowerMap, "", global::Action.Overlay2, UI.TOOLTIPS.POWEROVERLAYSTRING, UI.OVERLAYS.ELECTRICAL.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.TEMPERATURE.BUTTON, "overlay_temperature", SimViewMode.TemperatureMap, "", global::Action.Overlay3, UI.TOOLTIPS.TEMPERATUREOVERLAYSTRING, UI.OVERLAYS.TEMPERATURE.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.HEATFLOW.BUTTON, "overlay_heatflow", SimViewMode.HeatFlow, "", global::Action.Overlay4, UI.TOOLTIPS.HEATFLOWOVERLAYSTRING, UI.OVERLAYS.HEATFLOW.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.LIGHTING.BUTTON, "overlay_lights", SimViewMode.Light, "", global::Action.Overlay5, UI.TOOLTIPS.LIGHTSOVERLAYSTRING, UI.OVERLAYS.LIGHTING.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.LIQUIDPLUMBING.BUTTON, "overlay_liquidvent", SimViewMode.LiquidVentMap, "", global::Action.Overlay6, UI.TOOLTIPS.LIQUIDVENTOVERLAYSTRING, UI.OVERLAYS.LIQUIDPLUMBING.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.GASPLUMBING.BUTTON, "overlay_gasvent", SimViewMode.GasVentMap, "", global::Action.Overlay7, UI.TOOLTIPS.GASVENTOVERLAYSTRING, UI.OVERLAYS.GASPLUMBING.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.DECOR.BUTTON, "overlay_decor", SimViewMode.Decor, "", global::Action.Overlay8, UI.TOOLTIPS.DECOROVERLAYSTRING, UI.OVERLAYS.DECOR.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.DISEASE.BUTTON, "overlay_disease", SimViewMode.Disease, "", global::Action.Overlay9, UI.TOOLTIPS.DISEASEOVERLAYSTRING, UI.OVERLAYS.DISEASE.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.CROPS.BUTTON, "overlay_farming", SimViewMode.Crop, "", global::Action.Overlay10, UI.TOOLTIPS.CROPS_OVERLAY_STRING, UI.OVERLAYS.CROPS.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.ROOMS.BUTTON, "overlay_rooms", SimViewMode.Rooms, "", global::Action.Overlay11, UI.TOOLTIPS.ROOMSOVERLAYSTRING, UI.OVERLAYS.ROOMS.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.OXYGEN.BUTTON, "overlay_oxygen", SimViewMode.OxygenMap, string.Empty, global::Action.Overlay1, UI.TOOLTIPS.OXYGENOVERLAYSTRING, UI.OVERLAYS.OXYGEN.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.ELECTRICAL.BUTTON, "overlay_power", SimViewMode.PowerMap, string.Empty, global::Action.Overlay2, UI.TOOLTIPS.POWEROVERLAYSTRING, UI.OVERLAYS.ELECTRICAL.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.TEMPERATURE.BUTTON, "overlay_temperature", SimViewMode.TemperatureMap, string.Empty, global::Action.Overlay3, UI.TOOLTIPS.TEMPERATUREOVERLAYSTRING, UI.OVERLAYS.TEMPERATURE.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.HEATFLOW.BUTTON, "overlay_heatflow", SimViewMode.HeatFlow, string.Empty, global::Action.Overlay4, UI.TOOLTIPS.HEATFLOWOVERLAYSTRING, UI.OVERLAYS.HEATFLOW.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.LIGHTING.BUTTON, "overlay_lights", SimViewMode.Light, string.Empty, global::Action.Overlay5, UI.TOOLTIPS.LIGHTSOVERLAYSTRING, UI.OVERLAYS.LIGHTING.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.LIQUIDPLUMBING.BUTTON, "overlay_liquidvent", SimViewMode.LiquidVentMap, string.Empty, global::Action.Overlay6, UI.TOOLTIPS.LIQUIDVENTOVERLAYSTRING, UI.OVERLAYS.LIQUIDPLUMBING.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.GASPLUMBING.BUTTON, "overlay_gasvent", SimViewMode.GasVentMap, string.Empty, global::Action.Overlay7, UI.TOOLTIPS.GASVENTOVERLAYSTRING, UI.OVERLAYS.GASPLUMBING.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.DECOR.BUTTON, "overlay_decor", SimViewMode.Decor, string.Empty, global::Action.Overlay8, UI.TOOLTIPS.DECOROVERLAYSTRING, UI.OVERLAYS.DECOR.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.DISEASE.BUTTON, "overlay_disease", SimViewMode.Disease, string.Empty, global::Action.Overlay9, UI.TOOLTIPS.DISEASEOVERLAYSTRING, UI.OVERLAYS.DISEASE.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.CROPS.BUTTON, "overlay_farming", SimViewMode.Crop, string.Empty, global::Action.Overlay10, UI.TOOLTIPS.CROPS_OVERLAY_STRING, UI.OVERLAYS.CROPS.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.ROOMS.BUTTON, "overlay_rooms", SimViewMode.Rooms, string.Empty, global::Action.Overlay11, UI.TOOLTIPS.ROOMSOVERLAYSTRING, UI.OVERLAYS.ROOMS.BUTTON),
 			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.SUIT.BUTTON, "overlay_suit", SimViewMode.SuitRequiredMap, "SuitsOverlay", global::Action.Overlay12, UI.TOOLTIPS.SUITOVERLAYSTRING, UI.OVERLAYS.SUIT.BUTTON),
 			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.LOGIC.BUTTON, "overlay_logic", SimViewMode.Logic, "AutomationOverlay", global::Action.Overlay13, UI.TOOLTIPS.LOGICOVERLAYSTRING, UI.OVERLAYS.LOGIC.BUTTON)
 		};
@@ -93,37 +94,33 @@ public class OverlayMenu : KIconToggleMenu
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
+		if (e.Consumed)
+		{
+			return;
+		}
+		if (OverlayScreen.Instance.GetMode() != SimViewMode.None && e.TryConsume(global::Action.Escape))
+		{
+			OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
+		}
 		if (!e.Consumed)
 		{
-			if (OverlayScreen.Instance.GetMode() != SimViewMode.None)
-			{
-				if (e.TryConsume(global::Action.Escape))
-				{
-					OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
-				}
-			}
-			if (!e.Consumed)
-			{
-				base.OnKeyDown(e);
-			}
+			base.OnKeyDown(e);
 		}
 	}
 
 	public override void OnKeyUp(KButtonEvent e)
 	{
+		if (e.Consumed)
+		{
+			return;
+		}
+		if (OverlayScreen.Instance.GetMode() != SimViewMode.None && PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
+		{
+			OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
+		}
 		if (!e.Consumed)
 		{
-			if (OverlayScreen.Instance.GetMode() != SimViewMode.None)
-			{
-				if (PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
-				{
-					OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
-				}
-			}
-			if (!e.Consumed)
-			{
-				base.OnKeyUp(e);
-			}
+			base.OnKeyUp(e);
 		}
 	}
 

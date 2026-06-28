@@ -42,8 +42,8 @@ namespace Klei.AI
 			}
 		}
 
-		private KAnimFile[] kanims = null;
+		private KAnimFile[] kanims;
 
-		private string expressionID = null;
+		private string expressionID;
 	}
 }

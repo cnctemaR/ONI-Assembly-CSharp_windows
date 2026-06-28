@@ -13,16 +13,17 @@ public class OilEater : StateMachineComponent<OilEater.StatesInstance>
 
 	public void Exhaust(float dt)
 	{
-		if (!base.smi.master.wiltCondition.IsWilting())
+		if (base.smi.master.wiltCondition.IsWilting())
 		{
-			this.emittedMass += dt * this.emitRate;
-			if (this.emittedMass >= this.minEmitMass)
-			{
-				int num = Grid.PosToCell(base.transform.position + this.emitOffset);
-				PrimaryElement component = base.GetComponent<PrimaryElement>();
-				SimMessages.AddRemoveSubstance(num, SimHashes.CarbonDioxide, CellEventLogger.Instance.ElementEmitted, this.emittedMass, component.Temperature, byte.MaxValue, 0, -1);
-				this.emittedMass = 0f;
-			}
+			return;
+		}
+		this.emittedMass += dt * this.emitRate;
+		if (this.emittedMass >= this.minEmitMass)
+		{
+			int num = Grid.PosToCell(base.transform.position + this.emitOffset);
+			PrimaryElement component = base.GetComponent<PrimaryElement>();
+			SimMessages.AddRemoveSubstance(num, SimHashes.CarbonDioxide, CellEventLogger.Instance.ElementEmitted, this.emittedMass, component.Temperature, byte.MaxValue, 0, -1);
+			this.emittedMass = 0f;
 		}
 	}
 
@@ -32,7 +33,7 @@ public class OilEater : StateMachineComponent<OilEater.StatesInstance>
 
 	public float emitRate = 1f;
 
-	public float minEmitMass = 0f;
+	public float minEmitMass;
 
 	public Vector3 emitOffset = Vector3.zero;
 

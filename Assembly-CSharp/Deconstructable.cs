@@ -89,31 +89,32 @@ public class Deconstructable : Workable
 
 	private void TriggerDestroy(Building building, SimHashes element, float mass, float temperature, byte disease_idx, int disease_count)
 	{
-		if (!(this == null) && !this.destroyed)
+		if (this == null || this.destroyed)
 		{
-			GameObject gameObject = Deconstructable.SpawnItem(base.transform.position, building.Def, element, mass, temperature, disease_idx, disease_count);
-			gameObject.transform.position += Vector3.up * 0.5f;
-			int num = Grid.PosToCell(gameObject.transform.position);
-			int num2 = Grid.CellAbove(num);
-			Vector2 vector;
-			if ((Grid.IsValidCell(num) && Grid.Solid[num]) || (Grid.IsValidCell(num2) && Grid.Solid[num2]))
-			{
-				vector = Vector2.zero;
-			}
-			else
-			{
-				Vector3 vector2;
-				gameObject.transform.position.x = vector2.x + (global::UnityEngine.Random.value - 0.5f) * Deconstructable.scale.x;
-				vector = Vector2.up * Deconstructable.scale.y;
-			}
-			if (GameComps.Fallers.Has(gameObject))
-			{
-				GameComps.Fallers.Remove(gameObject);
-			}
-			GameComps.Fallers.Add(gameObject, vector);
-			this.destroyed = true;
-			base.gameObject.DeleteObject();
+			return;
 		}
+		GameObject gameObject = Deconstructable.SpawnItem(base.transform.position, building.Def, element, mass, temperature, disease_idx, disease_count);
+		gameObject.transform.position += Vector3.up * 0.5f;
+		int num = Grid.PosToCell(gameObject.transform.position);
+		int num2 = Grid.CellAbove(num);
+		Vector2 vector;
+		if ((Grid.IsValidCell(num) && Grid.Solid[num]) || (Grid.IsValidCell(num2) && Grid.Solid[num2]))
+		{
+			vector = Vector2.zero;
+		}
+		else
+		{
+			Vector3 vector2;
+			gameObject.transform.position.x = vector2.x + (global::UnityEngine.Random.value - 0.5f) * Deconstructable.scale.x;
+			vector = Vector2.up * Deconstructable.scale.y;
+		}
+		if (GameComps.Fallers.Has(gameObject))
+		{
+			GameComps.Fallers.Remove(gameObject);
+		}
+		GameComps.Fallers.Add(gameObject, vector);
+		this.destroyed = true;
+		base.gameObject.DeleteObject();
 	}
 
 	private void QueueDeconstruction()
@@ -177,26 +178,27 @@ public class Deconstructable : Workable
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (this.allowDeconstruction)
+		if (!this.allowDeconstruction)
 		{
-			if (this.chore == null)
-			{
-				UserMenu userMenu = this.userMenu;
-				string text = "action_deconstruct";
-				string text2 = UI.USERMENUACTIONS.DEMOLISH.NAME;
-				global::System.Action action = new global::System.Action(this.OnDeconstruct);
-				string text3 = UI.USERMENUACTIONS.DEMOLISH.TOOLTIP;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
-			}
-			else
-			{
-				UserMenu userMenu2 = this.userMenu;
-				string text3 = "action_deconstruct";
-				string text2 = UI.USERMENUACTIONS.DEMOLISH.NAME_OFF;
-				global::System.Action action = new global::System.Action(this.OnDeconstruct);
-				string text = UI.USERMENUACTIONS.DEMOLISH.TOOLTIP_OFF;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
-			}
+			return;
+		}
+		if (this.chore == null)
+		{
+			UserMenu userMenu = this.userMenu;
+			string text = "action_deconstruct";
+			string text2 = UI.USERMENUACTIONS.DEMOLISH.NAME;
+			global::System.Action action = new global::System.Action(this.OnDeconstruct);
+			string text3 = UI.USERMENUACTIONS.DEMOLISH.TOOLTIP;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+		}
+		else
+		{
+			UserMenu userMenu2 = this.userMenu;
+			string text3 = "action_deconstruct";
+			string text2 = UI.USERMENUACTIONS.DEMOLISH.NAME_OFF;
+			global::System.Action action = new global::System.Action(this.OnDeconstruct);
+			string text = UI.USERMENUACTIONS.DEMOLISH.TOOLTIP_OFF;
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 	}
 
@@ -236,7 +238,7 @@ public class Deconstructable : Workable
 	[MyCmpAdd]
 	private UserMenu userMenu;
 
-	private Chore chore = null;
+	private Chore chore;
 
 	public bool allowDeconstruction = true;
 
@@ -245,5 +247,5 @@ public class Deconstructable : Workable
 
 	private static Vector2 scale = new Vector2(0.5f, 4f);
 
-	private bool destroyed = false;
+	private bool destroyed;
 }

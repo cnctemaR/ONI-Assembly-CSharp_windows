@@ -85,12 +85,12 @@ namespace SimpleJSON
 
 		public override string ToString()
 		{
-			return "";
+			return string.Empty;
 		}
 
 		public override string ToString(string aPrefix)
 		{
-			return "";
+			return string.Empty;
 		}
 
 		public override int AsInt
@@ -173,8 +173,8 @@ namespace SimpleJSON
 			}
 		}
 
-		private JSONNode m_Node = null;
+		private JSONNode m_Node;
 
-		private string m_Key = null;
+		private string m_Key;
 	}
 }

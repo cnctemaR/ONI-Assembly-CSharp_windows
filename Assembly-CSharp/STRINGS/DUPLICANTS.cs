@@ -53,7 +53,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "<DO NOT TRANSLATE>";
 
-				public static LocString TOOLTIP = "";
+				public static LocString TOOLTIP = string.Empty;
 			}
 
 			public class BREATH
@@ -109,7 +109,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "<DO NOT TRANSLATE>";
 
-				public static LocString TOOLTIP = "";
+				public static LocString TOOLTIP = string.Empty;
 			}
 
 			public class BLADDER
@@ -3695,7 +3695,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Insulation";
 
-				public static LocString PROFESSION_NAME = "";
+				public static LocString PROFESSION_NAME = string.Empty;
 
 				public static LocString DESC = "Highly insulated Duplicants retain body heat easily, while low insulation Duplicants are easier to keep cool.";
 
@@ -3803,7 +3803,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Hygiene";
 
-				public static LocString PROFESSION_NAME = "";
+				public static LocString PROFESSION_NAME = string.Empty;
 
 				public static LocString DESC = "<style=\"hygiene\">Hygiene</style> affects a Duplicant's sense of cleanliness.";
 			}
@@ -3812,7 +3812,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Air Consumption Rate";
 
-				public static LocString PROFESSION_NAME = "";
+				public static LocString PROFESSION_NAME = string.Empty;
 
 				public static LocString DESC = "Air Consumption determines how much <style=\"oxygen\">Oxygen</style> a Duplicant requires per minute to live.";
 			}
@@ -3835,42 +3835,42 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Bladder Change";
 
-				public static LocString DESC = "";
+				public static LocString DESC = string.Empty;
 			}
 
 			public class CALORIESDELTA
 			{
 				public static LocString NAME = "Calories Change Rate";
 
-				public static LocString DESC = "";
+				public static LocString DESC = string.Empty;
 			}
 
 			public class STAMINADELTA
 			{
 				public static LocString NAME = "Stamina Change";
 
-				public static LocString DESC = "";
+				public static LocString DESC = string.Empty;
 			}
 
 			public class TOXICITYDELTA
 			{
 				public static LocString NAME = "Toxicity Change";
 
-				public static LocString DESC = "";
+				public static LocString DESC = string.Empty;
 			}
 
 			public class IMMUNELEVELDELTA
 			{
 				public static LocString NAME = "Immune System Strength";
 
-				public static LocString DESC = "";
+				public static LocString DESC = string.Empty;
 			}
 
 			public class TOILETEFFICIENCY
 			{
 				public static LocString NAME = "Bladder Efficiency";
 
-				public static LocString PROFESSION_NAME = "";
+				public static LocString PROFESSION_NAME = string.Empty;
 
 				public static LocString DESC = "Determines how long a Duplicant needs to do their \"business\".";
 			}
@@ -3879,7 +3879,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Temperature Preference";
 
-				public static LocString PROFESSION_NAME = "";
+				public static LocString PROFESSION_NAME = string.Empty;
 
 				public static LocString DESC = "Determines the minimum body heat a Duplicant prefers to maintain.";
 			}
@@ -3888,9 +3888,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Underwater Movement";
 
-				public static LocString PROFESSION_NAME = "";
+				public static LocString PROFESSION_NAME = string.Empty;
 
-				public static LocString DESC = "";
+				public static LocString DESC = string.Empty;
 			}
 
 			public class OVERHEATTEMPERATURE

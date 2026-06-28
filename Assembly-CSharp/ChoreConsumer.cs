@@ -86,29 +86,26 @@ public class ChoreConsumer : KMonoBehaviour
 			for (int j = this.contexts.Count - 1; j >= 0; j--)
 			{
 				Chore.Precondition.Context context = this.contexts[j];
-				if (context.IsSuccess())
+				if (context.IsSuccess() && (currentChore == null || context.interruptPriority > currentChore.choreType.interruptPriority))
 				{
-					if (currentChore == null || context.interruptPriority > currentChore.choreType.interruptPriority)
+					bool flag2 = false;
+					if (currentChore != null)
 					{
-						bool flag2 = false;
-						if (currentChore != null)
+						for (int k = 0; k < currentChore.choreType.interruptExclusion.Count; k++)
 						{
-							for (int k = 0; k < currentChore.choreType.interruptExclusion.Count; k++)
+							if (context.chore.choreType.tags.Contains(currentChore.choreType.interruptExclusion[k]))
 							{
-								if (context.chore.choreType.tags.Contains(currentChore.choreType.interruptExclusion[k]))
-								{
-									flag2 = true;
-									break;
-								}
+								flag2 = true;
+								break;
 							}
 						}
-						if (!flag2)
-						{
-							context.chore.PrepareChore(ref context);
-							out_context = context;
-							flag = true;
-							break;
-						}
+					}
+					if (!flag2)
+					{
+						context.chore.PrepareChore(ref context);
+						out_context = context;
+						flag = true;
+						break;
 					}
 				}
 			}
@@ -158,24 +155,19 @@ public class ChoreConsumer : KMonoBehaviour
 
 	public bool IsPermittedOrEnabled(Chore chore)
 	{
-		bool flag;
 		if (chore.choreType.groups.Length == 0)
 		{
-			flag = true;
+			return true;
 		}
-		else
+		for (int i = 0; i < chore.choreType.groups.Length; i++)
 		{
-			for (int i = 0; i < chore.choreType.groups.Length; i++)
+			ChoreGroup choreGroup = chore.choreType.groups[i];
+			if (this.IsPermitted(choreGroup) && this.IsEnabled(choreGroup))
 			{
-				ChoreGroup choreGroup = chore.choreType.groups[i];
-				if (this.IsPermitted(choreGroup) && this.IsEnabled(choreGroup))
-				{
-					return true;
-				}
+				return true;
 			}
-			flag = false;
 		}
-		return flag;
+		return false;
 	}
 
 	[MyCmpAdd]

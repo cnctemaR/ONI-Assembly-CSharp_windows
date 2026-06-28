@@ -45,50 +45,40 @@ public class Upgradable : Workable, ISaveLoadable
 
 	public bool IsUpgraded(Upgradable.Upgrade.Target type)
 	{
-		bool flag;
 		if (this.upgrades == null || this.upgrades.Count == 0)
 		{
-			flag = false;
+			return false;
 		}
-		else if (this.currentUpgrades == null || this.currentUpgrades.Count == 0)
+		if (this.currentUpgrades == null || this.currentUpgrades.Count == 0)
 		{
-			flag = false;
+			return false;
 		}
-		else
+		bool flag = false;
+		foreach (KeyValuePair<int, Upgradable.Upgrade> keyValuePair in this.upgrades)
 		{
-			bool flag2 = false;
-			foreach (KeyValuePair<int, Upgradable.Upgrade> keyValuePair in this.upgrades)
+			if (keyValuePair.Value.type == type)
 			{
-				if (keyValuePair.Value.type == type)
-				{
-					flag2 = this.currentUpgrades.Contains(keyValuePair.Key);
-					break;
-				}
+				flag = this.currentUpgrades.Contains(keyValuePair.Key);
+				break;
 			}
-			flag = flag2;
 		}
 		return flag;
 	}
 
 	public bool CanUpgrade(Upgradable.Upgrade.Target type)
 	{
-		bool flag;
 		if (this.upgrades == null || this.upgrades.Count == 0)
 		{
-			flag = false;
+			return false;
 		}
-		else
+		bool flag = false;
+		foreach (Upgradable.Upgrade upgrade in this.upgrades.Values)
 		{
-			bool flag2 = false;
-			foreach (Upgradable.Upgrade upgrade in this.upgrades.Values)
+			if (upgrade.type == type)
 			{
-				if (upgrade.type == type)
-				{
-					flag2 = true;
-					break;
-				}
+				flag = true;
+				break;
 			}
-			flag = flag2;
 		}
 		return flag;
 	}
@@ -450,7 +440,7 @@ public class Upgradable : Workable, ISaveLoadable
 
 	public static Operational.Flag notUpgradingFlag = new Operational.Flag("not_upgrading", Operational.Flag.Type.Requirement);
 
-	private FetchList2 fetchList = null;
+	private FetchList2 fetchList;
 
 	private Upgradable.Upgrade currentUpgrade;
 
@@ -550,48 +540,33 @@ public class Upgradable : Workable, ISaveLoadable
 
 		public string GetModifierString(int idx)
 		{
-			string text;
 			if (idx < 0 || idx >= this.modifiers.Length)
 			{
-				text = "";
+				return string.Empty;
 			}
-			else if (this.modifiers[idx].modifier == Upgradable.Upgrade.Target.None)
+			if (this.modifiers[idx].modifier == Upgradable.Upgrade.Target.None)
 			{
-				text = "";
+				return string.Empty;
 			}
-			else
-			{
-				text = "";
-			}
-			return text;
+			return string.Empty;
 		}
 
 		public float GetModifierAmount(int idx)
 		{
-			float num;
 			if (idx < 0 || idx > this.modifiers.Length)
 			{
-				num = 0f;
+				return 0f;
 			}
-			else
-			{
-				num = this.modifiers[idx].modifierAmount;
-			}
-			return num;
+			return this.modifiers[idx].modifierAmount;
 		}
 
 		public Upgradable.Upgrade.Target GetModifierTarget(int idx)
 		{
-			Upgradable.Upgrade.Target target;
 			if (idx < 0 || idx > this.modifiers.Length)
 			{
-				target = Upgradable.Upgrade.Target.None;
+				return Upgradable.Upgrade.Target.None;
 			}
-			else
-			{
-				target = this.modifiers[idx].modifier;
-			}
-			return target;
+			return this.modifiers[idx].modifier;
 		}
 
 		public string prefabID;

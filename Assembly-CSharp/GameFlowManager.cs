@@ -41,29 +41,30 @@ public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInsta
 
 		public void CheckForGameOver()
 		{
-			if (Game.Instance.GameStarted())
+			if (!Game.Instance.GameStarted())
 			{
-				bool flag = false;
-				if (Components.LiveMinionIdentities.Count == 0)
+				return;
+			}
+			bool flag = false;
+			if (Components.LiveMinionIdentities.Count == 0)
+			{
+				flag = true;
+			}
+			else
+			{
+				flag = true;
+				foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
 				{
-					flag = true;
-				}
-				else
-				{
-					flag = true;
-					foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+					if (!this.IsIncapacitated(minionIdentity.gameObject))
 					{
-						if (!this.IsIncapacitated(minionIdentity.gameObject))
-						{
-							flag = false;
-							break;
-						}
+						flag = false;
+						break;
 					}
 				}
-				if (flag)
-				{
-					this.GoTo(base.sm.gameover.pending);
-				}
+			}
+			if (flag)
+			{
+				this.GoTo(base.sm.gameover.pending);
 			}
 		}
 

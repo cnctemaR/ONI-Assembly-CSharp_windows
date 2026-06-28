@@ -27,7 +27,7 @@ namespace Database
 
 			public bool ShouldNotify;
 
-			public float NotificationDelay = 0f;
+			public float NotificationDelay;
 
 			public NotificationType NotificationType;
 

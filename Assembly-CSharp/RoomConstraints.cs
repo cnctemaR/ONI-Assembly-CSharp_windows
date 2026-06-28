@@ -6,7 +6,7 @@ public static class RoomConstraints
 {
 	public static string RoomCriteriaString(Room room)
 	{
-		string text = "";
+		string text = string.Empty;
 		RoomTypes.RoomType roomType = RoomTypes.GetRoomType(room);
 		if (roomType != RoomTypes.types[0])
 		{
@@ -30,12 +30,12 @@ public static class RoomConstraints
 		else
 		{
 			RoomTypes.RoomType[] possibleRoomTypes = RoomTypes.GetPossibleRoomTypes(room);
-			text += ((possibleRoomTypes.Length <= 1) ? "" : ("<b>" + ROOMS.CRITERIA.POSSIBLE_TYPES_HEADER + "</b>"));
+			text += ((possibleRoomTypes.Length <= 1) ? string.Empty : ("<b>" + ROOMS.CRITERIA.POSSIBLE_TYPES_HEADER + "</b>"));
 			foreach (RoomTypes.RoomType roomType2 in possibleRoomTypes)
 			{
 				if (roomType2 != RoomTypes.types[0])
 				{
-					if (text != "")
+					if (text != string.Empty)
 					{
 						text += "\n";
 					}
@@ -177,12 +177,9 @@ public static class RoomConstraints
 		public bool isSatisfied(Room room)
 		{
 			int num = 0;
-			if (this.room_criteria != null)
+			if (this.room_criteria != null && this.room_criteria(room))
 			{
-				if (this.room_criteria(room))
-				{
-					num++;
-				}
+				num++;
 			}
 			if (this.building_criteria != null)
 			{

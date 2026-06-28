@@ -50,22 +50,20 @@ public class HoverTextConfiguration : KMonoBehaviour
 		if (instance.LoadPreConfiguredToolFields(this))
 		{
 			this.isConfigured = true;
+			return;
 		}
-		else
+		instance.ToggleIncubating(true);
+		instance.currentConfiguration = this;
+		instance.ClearLabels();
+		instance.NewLine("Spacer", 24);
+		instance.StartShadowBar(0f, 0f, false);
+		if (this.printTitle)
 		{
-			instance.ToggleIncubating(true);
-			instance.currentConfiguration = this;
-			instance.ClearLabels();
-			instance.NewLine("Spacer", 24);
-			instance.StartShadowBar(0f, 0f, false);
-			if (this.printTitle)
-			{
-				this.ConfigureTitle(instance);
-			}
-			this.ConfigureInstructions(instance);
-			instance.EndShadowBar();
-			this.isConfigured = true;
+			this.ConfigureTitle(instance);
 		}
+		this.ConfigureInstructions(instance);
+		instance.EndShadowBar();
+		this.isConfigured = true;
 	}
 
 	protected override void OnCmpDisable()
@@ -85,15 +83,15 @@ public class HoverTextConfiguration : KMonoBehaviour
 
 	public TextStyleSetting[] HoverTextStyleSettings;
 
-	public string ToolNameStringKey = "";
+	public string ToolNameStringKey = string.Empty;
 
-	public string ActionStringKey = "";
-
-	[HideInInspector]
-	public string ActionName = "";
+	public string ActionStringKey = string.Empty;
 
 	[HideInInspector]
-	public string ToolName = null;
+	public string ActionName = string.Empty;
+
+	[HideInInspector]
+	public string ToolName;
 
 	protected GameObject TitleLine;
 

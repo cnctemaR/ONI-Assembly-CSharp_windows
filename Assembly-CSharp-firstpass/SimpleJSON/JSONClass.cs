@@ -12,16 +12,11 @@ namespace SimpleJSON
 		{
 			get
 			{
-				JSONNode jsonnode;
 				if (this.m_Dict.ContainsKey(aKey))
 				{
-					jsonnode = this.m_Dict[aKey];
+					return this.m_Dict[aKey];
 				}
-				else
-				{
-					jsonnode = new JSONLazyCreator(this, aKey);
-				}
-				return jsonnode;
+				return new JSONLazyCreator(this, aKey);
 			}
 			set
 			{
@@ -40,24 +35,20 @@ namespace SimpleJSON
 		{
 			get
 			{
-				JSONNode jsonnode;
 				if (aIndex < 0 || aIndex >= this.m_Dict.Count)
 				{
-					jsonnode = null;
+					return null;
 				}
-				else
-				{
-					jsonnode = this.m_Dict.ElementAt<KeyValuePair<string, JSONNode>>(aIndex).Value;
-				}
-				return jsonnode;
+				return this.m_Dict.ElementAt<KeyValuePair<string, JSONNode>>(aIndex).Value;
 			}
 			set
 			{
-				if (aIndex >= 0 && aIndex < this.m_Dict.Count)
+				if (aIndex < 0 || aIndex >= this.m_Dict.Count)
 				{
-					string key = this.m_Dict.ElementAt<KeyValuePair<string, JSONNode>>(aIndex).Key;
-					this.m_Dict[key] = value;
+					return;
 				}
+				string key = this.m_Dict.ElementAt<KeyValuePair<string, JSONNode>>(aIndex).Key;
+				this.m_Dict[key] = value;
 			}
 		}
 
@@ -90,34 +81,24 @@ namespace SimpleJSON
 
 		public override JSONNode Remove(string aKey)
 		{
-			JSONNode jsonnode;
 			if (!this.m_Dict.ContainsKey(aKey))
 			{
-				jsonnode = null;
+				return null;
 			}
-			else
-			{
-				JSONNode jsonnode2 = this.m_Dict[aKey];
-				this.m_Dict.Remove(aKey);
-				jsonnode = jsonnode2;
-			}
+			JSONNode jsonnode = this.m_Dict[aKey];
+			this.m_Dict.Remove(aKey);
 			return jsonnode;
 		}
 
 		public override JSONNode Remove(int aIndex)
 		{
-			JSONNode jsonnode;
 			if (aIndex < 0 || aIndex >= this.m_Dict.Count)
 			{
-				jsonnode = null;
+				return null;
 			}
-			else
-			{
-				KeyValuePair<string, JSONNode> keyValuePair = this.m_Dict.ElementAt<KeyValuePair<string, JSONNode>>(aIndex);
-				this.m_Dict.Remove(keyValuePair.Key);
-				jsonnode = keyValuePair.Value;
-			}
-			return jsonnode;
+			KeyValuePair<string, JSONNode> keyValuePair = this.m_Dict.ElementAt<KeyValuePair<string, JSONNode>>(aIndex);
+			this.m_Dict.Remove(keyValuePair.Key);
+			return keyValuePair.Value;
 		}
 
 		public override JSONNode Remove(JSONNode aNode)

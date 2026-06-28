@@ -14,16 +14,11 @@ namespace TMPro
 			Vector3 vector = rectTransform.TransformPoint(tmp_CharacterInfo.bottomLeft);
 			Vector3 vector2 = rectTransform.TransformPoint(tmp_CharacterInfo.topRight);
 			float num2 = (position.x - vector.x) / (vector2.x - vector.x);
-			CaretInfo caretInfo;
 			if (num2 < 0.5f)
 			{
-				caretInfo = new CaretInfo(num, CaretPosition.Left);
+				return new CaretInfo(num, CaretPosition.Left);
 			}
-			else
-			{
-				caretInfo = new CaretInfo(num, CaretPosition.Right);
-			}
-			return caretInfo;
+			return new CaretInfo(num, CaretPosition.Right);
 		}
 
 		public static int GetCursorIndexFromPosition(TMP_Text textComponent, Vector3 position, Camera camera)
@@ -35,16 +30,11 @@ namespace TMPro
 			Vector3 vector = rectTransform.TransformPoint(tmp_CharacterInfo.bottomLeft);
 			Vector3 vector2 = rectTransform.TransformPoint(tmp_CharacterInfo.topRight);
 			float num2 = (position.x - vector.x) / (vector2.x - vector.x);
-			int num3;
 			if (num2 < 0.5f)
 			{
-				num3 = num;
+				return num;
 			}
-			else
-			{
-				num3 = num + 1;
-			}
-			return num3;
+			return num + 1;
 		}
 
 		public static int GetCursorIndexFromPosition(TMP_Text textComponent, Vector3 position, Camera camera, out CaretPosition cursor)
@@ -56,18 +46,13 @@ namespace TMPro
 			Vector3 vector = rectTransform.TransformPoint(tmp_CharacterInfo.bottomLeft);
 			Vector3 vector2 = rectTransform.TransformPoint(tmp_CharacterInfo.topRight);
 			float num2 = (position.x - vector.x) / (vector2.x - vector.x);
-			int num3;
 			if (num2 < 0.5f)
 			{
 				cursor = CaretPosition.Left;
-				num3 = num;
+				return num;
 			}
-			else
-			{
-				cursor = CaretPosition.Right;
-				num3 = num + 1;
-			}
-			return num3;
+			cursor = CaretPosition.Right;
+			return num + 1;
 		}
 
 		public static bool IsIntersectingRectTransform(RectTransform rectTransform, Vector3 position, Camera camera)
@@ -806,17 +791,12 @@ namespace TMPro
 			Ray ray = RectTransformUtility.ScreenPointToRay(cam, screenPoint);
 			Plane plane = new Plane(transform.rotation * Vector3.back, transform.position);
 			float num;
-			bool flag;
 			if (!plane.Raycast(ray, out num))
 			{
-				flag = false;
+				return false;
 			}
-			else
-			{
-				worldPoint = ray.GetPoint(num);
-				flag = true;
-			}
-			return flag;
+			worldPoint = ray.GetPoint(num);
+			return true;
 		}
 
 		private static bool IntersectLinePlane(TMP_TextUtilities.LineSegment line, Vector3 point, Vector3 normal, out Vector3 intersectingPoint)
@@ -826,25 +806,17 @@ namespace TMPro
 			Vector3 vector2 = line.Point1 - point;
 			float num = Vector3.Dot(normal, vector);
 			float num2 = -Vector3.Dot(normal, vector2);
-			bool flag;
 			if (Mathf.Abs(num) < Mathf.Epsilon)
 			{
-				flag = num2 == 0f;
+				return num2 == 0f;
 			}
-			else
+			float num3 = num2 / num;
+			if (num3 < 0f || num3 > 1f)
 			{
-				float num3 = num2 / num;
-				if (num3 < 0f || num3 > 1f)
-				{
-					flag = false;
-				}
-				else
-				{
-					intersectingPoint = line.Point1 + num3 * vector;
-					flag = true;
-				}
+				return false;
 			}
-			return flag;
+			intersectingPoint = line.Point1 + num3 * vector;
+			return true;
 		}
 
 		public static float DistanceToLine(Vector3 a, Vector3 b, Vector3 point)
@@ -852,25 +824,17 @@ namespace TMPro
 			Vector3 vector = b - a;
 			Vector3 vector2 = a - point;
 			float num = Vector3.Dot(vector, vector2);
-			float num2;
 			if (num > 0f)
 			{
-				num2 = Vector3.Dot(vector2, vector2);
+				return Vector3.Dot(vector2, vector2);
 			}
-			else
+			Vector3 vector3 = point - b;
+			if (Vector3.Dot(vector, vector3) > 0f)
 			{
-				Vector3 vector3 = point - b;
-				if (Vector3.Dot(vector, vector3) > 0f)
-				{
-					num2 = Vector3.Dot(vector3, vector3);
-				}
-				else
-				{
-					Vector3 vector4 = vector2 - vector * (num / Vector3.Dot(vector, vector));
-					num2 = Vector3.Dot(vector4, vector4);
-				}
+				return Vector3.Dot(vector3, vector3);
 			}
-			return num2;
+			Vector3 vector4 = vector2 - vector * (num / Vector3.Dot(vector, vector));
+			return Vector3.Dot(vector4, vector4);
 		}
 
 		public static char ToLowerFast(char c)

@@ -11,24 +11,25 @@ public class KScrollbarVisibility : MonoBehaviour
 
 	private void Update()
 	{
-		if (!(this.content.content == null))
+		if (this.content.content == null)
 		{
-			bool flag = false;
-			Vector2 vector = new Vector2(this.parent.rect.width, this.parent.rect.height);
-			Vector2 sizeDelta = this.content.content.GetComponent<RectTransform>().sizeDelta;
-			if ((sizeDelta.x >= vector.x && this.checkWidth) || (sizeDelta.y >= vector.y && this.checkHeight))
+			return;
+		}
+		bool flag = false;
+		Vector2 vector = new Vector2(this.parent.rect.width, this.parent.rect.height);
+		Vector2 sizeDelta = this.content.content.GetComponent<RectTransform>().sizeDelta;
+		if ((sizeDelta.x >= vector.x && this.checkWidth) || (sizeDelta.y >= vector.y && this.checkHeight))
+		{
+			flag = true;
+		}
+		if (this.scrollbar.gameObject.activeSelf != flag)
+		{
+			this.scrollbar.gameObject.SetActive(flag);
+			if (this.others != null)
 			{
-				flag = true;
-			}
-			if (this.scrollbar.gameObject.activeSelf != flag)
-			{
-				this.scrollbar.gameObject.SetActive(flag);
-				if (this.others != null)
+				foreach (GameObject gameObject in this.others)
 				{
-					foreach (GameObject gameObject in this.others)
-					{
-						gameObject.SetActive(flag);
-					}
+					gameObject.SetActive(flag);
 				}
 			}
 		}

@@ -39,12 +39,13 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 
 	private void Initialize()
 	{
-		if (!this.initialized)
+		if (this.initialized)
 		{
-			this.checkBoxImg = this.checkBox.gameObject.GetComponentInChildrenOnly<KImage>();
-			this.checkBox.onClick += this.CheckBoxClicked;
-			this.initialized = true;
+			return;
 		}
+		this.checkBoxImg = this.checkBox.gameObject.GetComponentInChildrenOnly<KImage>();
+		this.checkBox.onClick += this.CheckBoxClicked;
+		this.initialized = true;
 	}
 
 	protected override void OnSpawn()
@@ -119,5 +120,5 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 
 	private TreeFilterableSideScreen parent;
 
-	private bool initialized = false;
+	private bool initialized;
 }

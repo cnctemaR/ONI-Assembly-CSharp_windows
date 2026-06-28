@@ -111,15 +111,16 @@ namespace OverlayModes
 
 		protected override void OnSaveLoadRootUnregistered(SaveLoadRoot item)
 		{
-			if (!(item == null) && !(item.gameObject == null))
+			if (item == null || item.gameObject == null)
 			{
-				NoisePolluter component = item.GetComponent<NoisePolluter>();
-				if (this.layerTargets.Contains(component))
-				{
-					this.layerTargets.Remove(component);
-				}
-				this.partition.Remove(component);
+				return;
 			}
+			NoisePolluter component = item.GetComponent<NoisePolluter>();
+			if (this.layerTargets.Contains(component))
+			{
+				this.layerTargets.Remove(component);
+			}
+			this.partition.Remove(component);
 		}
 
 		public override void Disable()

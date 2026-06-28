@@ -27,14 +27,15 @@ public class MinionSounds : KMonoBehaviour
 			{
 				Element targetElement = diggable.GetTargetElement();
 				string text = targetElement.substance.GetMiningSound();
-				if (text != null && !(text == ""))
+				if (text == null || text == string.Empty)
 				{
-					text = "Mine_" + text;
-					this.miningSoundMigrated = GlobalAssets.GetSound(text, false);
-					if (this.miningSoundMigrated != null)
-					{
-						this.loopingSounds.StartSound(this.miningSoundMigrated, base.transform.position);
-					}
+					return;
+				}
+				text = "Mine_" + text;
+				this.miningSoundMigrated = GlobalAssets.GetSound(text, false);
+				if (this.miningSoundMigrated != null)
+				{
+					this.loopingSounds.StartSound(this.miningSoundMigrated, base.transform.position);
 				}
 			}
 		}
@@ -55,7 +56,7 @@ public class MinionSounds : KMonoBehaviour
 	[MyCmpGet]
 	private LoopingSounds loopingSounds;
 
-	private FMODAsset miningSound = null;
+	private FMODAsset miningSound;
 
 	[EventRef]
 	private string miningSoundMigrated;

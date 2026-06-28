@@ -129,24 +129,19 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 		{
 			rotAtmosphereQuality2 = rotAtmosphereQuality;
 		}
-		Rottable.RotAtmosphereQuality rotAtmosphereQuality3;
 		if (rotAtmosphereQuality == rotAtmosphereQuality2)
 		{
-			rotAtmosphereQuality3 = rotAtmosphereQuality;
+			return rotAtmosphereQuality;
 		}
-		else if (rotAtmosphereQuality == Rottable.RotAtmosphereQuality.Contaminating || rotAtmosphereQuality2 == Rottable.RotAtmosphereQuality.Contaminating)
+		if (rotAtmosphereQuality == Rottable.RotAtmosphereQuality.Contaminating || rotAtmosphereQuality2 == Rottable.RotAtmosphereQuality.Contaminating)
 		{
-			rotAtmosphereQuality3 = Rottable.RotAtmosphereQuality.Contaminating;
+			return Rottable.RotAtmosphereQuality.Contaminating;
 		}
-		else if (rotAtmosphereQuality == Rottable.RotAtmosphereQuality.Normal || rotAtmosphereQuality2 == Rottable.RotAtmosphereQuality.Normal)
+		if (rotAtmosphereQuality == Rottable.RotAtmosphereQuality.Normal || rotAtmosphereQuality2 == Rottable.RotAtmosphereQuality.Normal)
 		{
-			rotAtmosphereQuality3 = Rottable.RotAtmosphereQuality.Normal;
+			return Rottable.RotAtmosphereQuality.Normal;
 		}
-		else
-		{
-			rotAtmosphereQuality3 = Rottable.RotAtmosphereQuality.Sterilizing;
-		}
-		return rotAtmosphereQuality3;
+		return Rottable.RotAtmosphereQuality.Sterilizing;
 	}
 
 	public StateMachine<Rottable, Rottable.Instance, IStateMachineTarget, object>.FloatParameter rotParameter;
@@ -272,7 +267,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 
 		public string StateString()
 		{
-			string text = "";
+			string text = string.Empty;
 			if (base.smi.GetCurrentState() == base.sm.Fresh)
 			{
 				text = Db.Get().CreatureStatusItems.Fresh.resolveStringCallback(CREATURES.STATUSITEMS.FRESH.NAME, this);
@@ -297,38 +292,39 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 		public void RefreshModifiers(float dt)
 		{
 			IStateMachineTarget master = this.GetMaster();
-			if (!master.isNull)
+			if (master.isNull)
 			{
-				KSelectable component = base.GetComponent<KSelectable>();
-				if (Grid.Solid[Grid.PosToCell(base.gameObject)])
-				{
-					this.UnrefrigeratedModifier.SetValue(0f);
-					this.ContaminatedAtmosphere.SetValue(0f);
-				}
-				else
-				{
-					this.UnrefrigeratedModifier.SetValue(this.rotTemperatureModifier());
-					this.ContaminatedAtmosphere.SetValue(this.rotAtmosphereModifier());
-				}
-				Rottable.RotAtmosphereQuality rotAtmosphereQuality;
-				if (this.ContaminatedAtmosphere.Value == 0f)
-				{
-					rotAtmosphereQuality = Rottable.RotAtmosphereQuality.Normal;
-				}
-				else
-				{
-					rotAtmosphereQuality = ((this.ContaminatedAtmosphere.Value <= 0f) ? Rottable.RotAtmosphereQuality.Contaminating : Rottable.RotAtmosphereQuality.Sterilizing);
-				}
-				Rottable.SetStatusItems(component, this.UnrefrigeratedModifier.Value == 0f, rotAtmosphereQuality);
-				this.RotAmountInstance.deltaAttribute.ClearModifiers();
-				if (this.UnrefrigeratedModifier.Value != 0f && this.ContaminatedAtmosphere.Value != 0.5f)
-				{
-					this.RotAmountInstance.deltaAttribute.Add("UnrefrigeratedModifier", this.UnrefrigeratedModifier);
-				}
-				if (this.ContaminatedAtmosphere.Value != 0f && this.ContaminatedAtmosphere.Value != 0.5f)
-				{
-					this.RotAmountInstance.deltaAttribute.Add("ContaminatedAtmosphere", this.ContaminatedAtmosphere);
-				}
+				return;
+			}
+			KSelectable component = base.GetComponent<KSelectable>();
+			if (Grid.Solid[Grid.PosToCell(base.gameObject)])
+			{
+				this.UnrefrigeratedModifier.SetValue(0f);
+				this.ContaminatedAtmosphere.SetValue(0f);
+			}
+			else
+			{
+				this.UnrefrigeratedModifier.SetValue(this.rotTemperatureModifier());
+				this.ContaminatedAtmosphere.SetValue(this.rotAtmosphereModifier());
+			}
+			Rottable.RotAtmosphereQuality rotAtmosphereQuality;
+			if (this.ContaminatedAtmosphere.Value == 0f)
+			{
+				rotAtmosphereQuality = Rottable.RotAtmosphereQuality.Normal;
+			}
+			else
+			{
+				rotAtmosphereQuality = ((this.ContaminatedAtmosphere.Value <= 0f) ? Rottable.RotAtmosphereQuality.Contaminating : Rottable.RotAtmosphereQuality.Sterilizing);
+			}
+			Rottable.SetStatusItems(component, this.UnrefrigeratedModifier.Value == 0f, rotAtmosphereQuality);
+			this.RotAmountInstance.deltaAttribute.ClearModifiers();
+			if (this.UnrefrigeratedModifier.Value != 0f && this.ContaminatedAtmosphere.Value != 0.5f)
+			{
+				this.RotAmountInstance.deltaAttribute.Add("UnrefrigeratedModifier", this.UnrefrigeratedModifier);
+			}
+			if (this.ContaminatedAtmosphere.Value != 0f && this.ContaminatedAtmosphere.Value != 0.5f)
+			{
+				this.RotAmountInstance.deltaAttribute.Add("ContaminatedAtmosphere", this.ContaminatedAtmosphere);
 			}
 		}
 

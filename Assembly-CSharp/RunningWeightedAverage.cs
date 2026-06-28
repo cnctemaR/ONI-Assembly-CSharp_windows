@@ -28,26 +28,27 @@ public class RunningWeightedAverage
 
 	public void AddSample(float value)
 	{
-		if (!this.ignoreZero || value != 0f)
+		if (this.ignoreZero && value == 0f)
 		{
-			if (value > this.max)
-			{
-				value = this.max;
-			}
-			if (value < this.min)
-			{
-				value = this.min;
-			}
-			if (this.validValues < this.samples.Length)
-			{
-				this.validValues++;
-			}
-			for (int i = 0; i < this.samples.Length - 1; i++)
-			{
-				this.samples[i] = this.samples[i + 1];
-			}
-			this.samples[this.samples.Length - 1] = value;
+			return;
 		}
+		if (value > this.max)
+		{
+			value = this.max;
+		}
+		if (value < this.min)
+		{
+			value = this.min;
+		}
+		if (this.validValues < this.samples.Length)
+		{
+			this.validValues++;
+		}
+		for (int i = 0; i < this.samples.Length - 1; i++)
+		{
+			this.samples[i] = this.samples[i + 1];
+		}
+		this.samples[this.samples.Length - 1] = value;
 	}
 
 	private float WeightedAverage()
@@ -61,16 +62,11 @@ public class RunningWeightedAverage
 			num2 += num3;
 		}
 		num /= num2;
-		float num4;
 		if (float.IsNaN(num))
 		{
-			num4 = 0f;
+			return 0f;
 		}
-		else
-		{
-			num4 = num;
-		}
-		return num4;
+		return num;
 	}
 
 	private float UnweightedAverage()
@@ -81,16 +77,11 @@ public class RunningWeightedAverage
 			num += this.samples[i];
 		}
 		num /= (float)this.samples.Length;
-		float num2;
 		if (float.IsNaN(num))
 		{
-			num2 = 0f;
+			return 0f;
 		}
-		else
-		{
-			num2 = num;
-		}
-		return num2;
+		return num;
 	}
 
 	private float[] samples;
@@ -99,7 +90,7 @@ public class RunningWeightedAverage
 
 	private float max;
 
-	private bool ignoreZero = false;
+	private bool ignoreZero;
 
-	private int validValues = 0;
+	private int validValues;
 }

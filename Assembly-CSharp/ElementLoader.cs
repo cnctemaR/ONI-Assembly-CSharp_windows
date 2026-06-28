@@ -48,7 +48,7 @@ public class ElementLoader
 				int idx = substance.idx;
 				substance.debugColour = Color.HSVToRGB((float)idx / (float)length, 1f, 1f);
 			}
-			if (substance.name == null || substance.name == "")
+			if (substance.name == null || substance.name == string.Empty)
 			{
 				substance.name = key.ToString();
 			}
@@ -162,24 +162,24 @@ public class ElementLoader
 
 	private static void SetupElementsTable()
 	{
-		if (ElementLoader.elements == null)
+		if (ElementLoader.elements != null)
 		{
-			SimHashes[] array = Enum.GetValues(typeof(SimHashes)) as SimHashes[];
-			ElementLoader.elements = new List<Element>();
-			ElementLoader.elementTable = new Dictionary<int, Element>();
-			foreach (SimHashes simHashes in array)
-			{
-				Element element = new Element();
-				element.id = simHashes;
-				ElementLoader.elements.Add(element);
-				ElementLoader.elementTable[(int)element.id] = element;
-			}
+			return;
+		}
+		SimHashes[] array = Enum.GetValues(typeof(SimHashes)) as SimHashes[];
+		ElementLoader.elements = new List<Element>();
+		ElementLoader.elementTable = new Dictionary<int, Element>();
+		foreach (SimHashes simHashes in array)
+		{
+			Element element = new Element();
+			element.id = simHashes;
+			ElementLoader.elements.Add(element);
+			ElementLoader.elementTable[(int)element.id] = element;
 		}
 	}
 
 	private static SimHashes GetID(int column, int row, string[,] grid, SimHashes defaultValue = SimHashes.Vacuum)
 	{
-		SimHashes simHashes;
 		if (column >= grid.GetLength(0) || row > grid.GetLength(1))
 		{
 			Output.LogError(new object[] { string.Format("Could not find element at loc [{0},{1}] grid is only [{2},{3}]", new object[]
@@ -189,36 +189,28 @@ public class ElementLoader
 				grid.GetLength(0),
 				grid.GetLength(1)
 			}) });
-			simHashes = defaultValue;
+			return defaultValue;
 		}
-		else
+		string text = grid[column, row];
+		if (text == null || text == string.Empty)
 		{
-			string text = grid[column, row];
-			if (text == null || text == "")
-			{
-				simHashes = defaultValue;
-			}
-			else
-			{
-				object obj = null;
-				try
-				{
-					obj = Enum.Parse(typeof(SimHashes), text);
-				}
-				catch (Exception ex)
-				{
-					Output.LogError(new object[] { string.Format("Could not find element {0}: {1}", text, ex.ToString()) });
-					return defaultValue;
-				}
-				simHashes = (SimHashes)obj;
-			}
+			return defaultValue;
 		}
-		return simHashes;
+		object obj = null;
+		try
+		{
+			obj = Enum.Parse(typeof(SimHashes), text);
+		}
+		catch (Exception ex)
+		{
+			Output.LogError(new object[] { string.Format("Could not find element {0}: {1}", text, ex.ToString()) });
+			return defaultValue;
+		}
+		return (SimHashes)obj;
 	}
 
 	private static SpawnFXHashes GetSpawnFX(int column, int row, string[,] grid)
 	{
-		SpawnFXHashes spawnFXHashes;
 		if (column >= grid.GetLength(0) || row > grid.GetLength(1))
 		{
 			Output.LogError(new object[] { string.Format("Could not find SpawnFXHashes at loc [{0},{1}] grid is only [{2},{3}]", new object[]
@@ -228,36 +220,28 @@ public class ElementLoader
 				grid.GetLength(0),
 				grid.GetLength(1)
 			}) });
-			spawnFXHashes = SpawnFXHashes.None;
+			return SpawnFXHashes.None;
 		}
-		else
+		string text = grid[column, row];
+		if (text == null || text == string.Empty)
 		{
-			string text = grid[column, row];
-			if (text == null || text == "")
-			{
-				spawnFXHashes = SpawnFXHashes.None;
-			}
-			else
-			{
-				object obj = null;
-				try
-				{
-					obj = Enum.Parse(typeof(SpawnFXHashes), text);
-				}
-				catch (Exception ex)
-				{
-					Output.LogError(new object[] { string.Format("Could not find FX {0}: {1}", text, ex.ToString()) });
-					return SpawnFXHashes.None;
-				}
-				spawnFXHashes = (SpawnFXHashes)obj;
-			}
+			return SpawnFXHashes.None;
 		}
-		return spawnFXHashes;
+		object obj = null;
+		try
+		{
+			obj = Enum.Parse(typeof(SpawnFXHashes), text);
+		}
+		catch (Exception ex)
+		{
+			Output.LogError(new object[] { string.Format("Could not find FX {0}: {1}", text, ex.ToString()) });
+			return SpawnFXHashes.None;
+		}
+		return (SpawnFXHashes)obj;
 	}
 
 	private static Tag CreateMaterialCategoryTag(Element element, Tag phaseTag, string materialCategoryField)
 	{
-		Tag tag2;
 		if (!string.IsNullOrEmpty(materialCategoryField))
 		{
 			Tag tag = TagManager.Create(materialCategoryField, null);
@@ -265,13 +249,9 @@ public class ElementLoader
 			{
 				global::Debug.LogWarningFormat("Element {0} has category {1}, but that isn't in GameTags.MaterialCategores!", new object[] { element.id, materialCategoryField });
 			}
-			tag2 = tag;
+			return tag;
 		}
-		else
-		{
-			tag2 = phaseTag;
-		}
-		return tag2;
+		return phaseTag;
 	}
 
 	private static Tag[] CreateOreTags(Element element, Tag phaseTag, string tagsField)
@@ -401,12 +381,9 @@ public class ElementLoader
 				element.toxicity = float.Parse(grid[26, i]);
 				element.materialCategory = ElementLoader.CreateMaterialCategoryTag(element, TagManager.Create("Liquid", null), grid[27, i]);
 				element.oreTags = ElementLoader.CreateOreTags(element, TagManager.Create("Liquid", null), grid[28, i]);
-				if (!flag)
+				if (!flag && !ElementLoader.SetOrCreateSubstanceForElement(id, ref substanceList, substanceTable))
 				{
-					if (!ElementLoader.SetOrCreateSubstanceForElement(id, ref substanceList, substanceTable))
-					{
-						Output.Log(new object[] { "no substance for", id });
-					}
+					Output.Log(new object[] { "no substance for", id });
 				}
 				element.lowTempTransitionTarget = ElementLoader.GetID(14, i, grid, SimHashes.Unobtanium);
 				element.highTempTransitionTarget = ElementLoader.GetID(15, i, grid, SimHashes.Unobtanium);
@@ -415,7 +392,7 @@ public class ElementLoader
 				element.convertId = ElementLoader.GetID(18, i, grid, (SimHashes)0);
 				string text = grid[19, i];
 				string text2 = grid[20, i];
-				if (text != null && text != "")
+				if (text != null && text != string.Empty)
 				{
 					object obj = Enum.Parse(typeof(SimHashes), text);
 					if (obj != null)

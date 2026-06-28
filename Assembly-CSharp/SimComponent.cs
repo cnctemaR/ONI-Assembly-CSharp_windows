@@ -51,25 +51,27 @@ public abstract class SimComponent : KMonoBehaviour
 
 	protected virtual void SimUpdate(float dt)
 	{
-		if (Sim.IsValidHandle(this.simHandle))
+		if (!Sim.IsValidHandle(this.simHandle))
 		{
-			this.UpdateSimState();
+			return;
 		}
+		this.UpdateSimState();
 	}
 
 	private void UpdateSimState()
 	{
-		if (this.dirty)
+		if (!this.dirty)
 		{
-			this.dirty = false;
-			if (this.simActive)
-			{
-				this.OnSimActivate();
-			}
-			else
-			{
-				this.OnSimDeactivate();
-			}
+			return;
+		}
+		this.dirty = false;
+		if (this.simActive)
+		{
+			this.OnSimActivate();
+		}
+		else
+		{
+			this.OnSimDeactivate();
 		}
 	}
 

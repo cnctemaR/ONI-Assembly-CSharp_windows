@@ -140,10 +140,10 @@ namespace KSerialization
 						{
 							reader.SkipBytes(num);
 						}
-						break;
+						continue;
 					}
 					case SerializationTypeInfo.Pair:
-						goto IL_020D;
+						break;
 					case SerializationTypeInfo.Dictionary:
 					case SerializationTypeInfo.List:
 					case SerializationTypeInfo.HashSet:
@@ -151,18 +151,16 @@ namespace KSerialization
 						int num2 = reader.ReadInt32();
 						reader.ReadInt32();
 						reader.SkipBytes(num2);
-						break;
+						continue;
 					}
 					default:
-						if (serializationTypeInfo == SerializationTypeInfo.UserDefined)
+						if (serializationTypeInfo != SerializationTypeInfo.UserDefined)
 						{
-							goto IL_020D;
+							this.SkipValue(serializationTypeInfo, reader);
+							continue;
 						}
-						this.SkipValue(serializationTypeInfo, reader);
 						break;
 					}
-					continue;
-					IL_020D:
 					int num3 = reader.ReadInt32();
 					if (num3 > 0)
 					{
@@ -374,24 +372,24 @@ namespace KSerialization
 			case SerializationTypeInfo.SByte:
 			case SerializationTypeInfo.Byte:
 				num = length;
-				goto IL_0085;
+				goto IL_0084;
 			case SerializationTypeInfo.Int16:
 			case SerializationTypeInfo.UInt16:
 				num = length * 2;
-				goto IL_0085;
+				goto IL_0084;
 			case SerializationTypeInfo.Int32:
 			case SerializationTypeInfo.UInt32:
 			case SerializationTypeInfo.Single:
 				num = length * 4;
-				goto IL_0085;
+				goto IL_0084;
 			case SerializationTypeInfo.Int64:
 			case SerializationTypeInfo.UInt64:
 			case SerializationTypeInfo.Double:
 				num = length * 8;
-				goto IL_0085;
+				goto IL_0084;
 			}
 			throw new Exception("unknown pod type");
-			IL_0085:
+			IL_0084:
 			Buffer.BlockCopy(array, position, dest_array, 0, num);
 			reader.SkipBytes(num);
 		}

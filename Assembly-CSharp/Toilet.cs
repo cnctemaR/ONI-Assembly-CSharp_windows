@@ -58,18 +58,19 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (base.smi.GetCurrentState() != base.smi.sm.full && base.smi.IsSoiled && base.smi.cleanChore == null)
+		if (base.smi.GetCurrentState() == base.smi.sm.full || !base.smi.IsSoiled || base.smi.cleanChore != null)
 		{
-			UserMenu userMenu = this.userMenu;
-			string text = "status_item_toilet_needs_emptying";
-			string text2 = UI.USERMENUACTIONS.CLEANTOILET.NAME;
-			global::System.Action action = delegate
-			{
-				base.smi.GoTo(base.smi.sm.earlyclean);
-			};
-			string text3 = UI.USERMENUACTIONS.CLEANTOILET.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+			return;
 		}
+		UserMenu userMenu = this.userMenu;
+		string text = "status_item_toilet_needs_emptying";
+		string text2 = UI.USERMENUACTIONS.CLEANTOILET.NAME;
+		global::System.Action action = delegate
+		{
+			base.smi.GoTo(base.smi.sm.earlyclean);
+		};
+		string text3 = UI.USERMENUACTIONS.CLEANTOILET.TOOLTIP;
+		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 	}
 
 	private void SpawnMonster()
@@ -88,10 +89,11 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 	private void OnStorageChanged(object data)
 	{
 		GameObject gameObject = (GameObject)data;
-		if (!(gameObject == null))
+		if (gameObject == null)
 		{
-			this.PreventStoredSublimation(gameObject);
+			return;
 		}
+		this.PreventStoredSublimation(gameObject);
 	}
 
 	private void PreventStoredSublimation(GameObject go)

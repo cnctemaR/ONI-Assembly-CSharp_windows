@@ -41,7 +41,6 @@ public class KScrollRect : ScrollRect
 
 	private float GetBoundsExceedAmount()
 	{
-		float num3;
 		if (base.vertical && base.verticalScrollbar != null)
 		{
 			RectTransform rectTransform = ((!(base.viewport == null)) ? base.viewport.rectTransform() : base.gameObject.GetComponent<RectTransform>());
@@ -51,24 +50,20 @@ public class KScrollRect : ScrollRect
 			{
 				num2 = 0f;
 			}
-			num3 = num2;
+			return num2;
 		}
-		else if (base.horizontal && base.horizontalScrollbar != null)
+		if (base.horizontal && base.horizontalScrollbar != null)
 		{
 			RectTransform rectTransform2 = ((!(base.viewport == null)) ? base.viewport.rectTransform() : base.gameObject.GetComponent<RectTransform>());
-			float num4 = Mathf.Min(rectTransform2.rect.size.x, base.content.sizeDelta.x) / base.content.sizeDelta.x;
-			float num5 = Mathf.Abs(base.horizontalScrollbar.size - num4);
-			if (Mathf.Abs(num5) < 0.001f)
+			float num3 = Mathf.Min(rectTransform2.rect.size.x, base.content.sizeDelta.x) / base.content.sizeDelta.x;
+			float num4 = Mathf.Abs(base.horizontalScrollbar.size - num3);
+			if (Mathf.Abs(num4) < 0.001f)
 			{
-				num5 = 0f;
+				num4 = 0f;
 			}
-			num3 = num5;
+			return num4;
 		}
-		else
-		{
-			num3 = 0f;
-		}
-		return num3;
+		return 0f;
 	}
 
 	private void PlaySound(KScrollRect.SoundType soundType)
@@ -116,19 +111,13 @@ public class KScrollRect : ScrollRect
 			}
 			base.content.anchoredPosition = anchoredPosition;
 		}
-		if (base.vertical && this.allowVerticalScrollWheel)
+		if (base.vertical && this.allowVerticalScrollWheel && (base.verticalNormalizedPosition < -0.05f || base.verticalNormalizedPosition > 1.05f))
 		{
-			if (base.verticalNormalizedPosition < -0.05f || base.verticalNormalizedPosition > 1.05f)
-			{
-				this.scrollVelocity *= 0.9f;
-			}
+			this.scrollVelocity *= 0.9f;
 		}
-		if (base.horizontal && this.allowHorizontalScrollWheel)
+		if (base.horizontal && this.allowHorizontalScrollWheel && (base.horizontalNormalizedPosition < -0.05f || base.horizontalNormalizedPosition > 1.05f))
 		{
-			if (base.horizontalNormalizedPosition < -0.05f || base.horizontalNormalizedPosition > 1.05f)
-			{
-				this.scrollVelocity *= 0.9f;
-			}
+			this.scrollVelocity *= 0.9f;
 		}
 	}
 
@@ -136,7 +125,7 @@ public class KScrollRect : ScrollRect
 
 	private Dictionary<KScrollRect.SoundType, string> currentSounds = new Dictionary<KScrollRect.SoundType, string>();
 
-	private float scrollVelocity = 0f;
+	private float scrollVelocity;
 
 	private bool default_intertia = true;
 

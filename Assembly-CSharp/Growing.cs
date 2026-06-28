@@ -126,7 +126,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 	{
 		return new List<Descriptor>
 		{
-			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, "")), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, "")), Descriptor.DescriptorType.Requirement, false)
+			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, string.Empty)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, string.Empty)), Descriptor.DescriptorType.Requirement, false)
 		};
 	}
 
@@ -139,7 +139,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 	private AttributeModifier baseMaturityMax;
 
 	[Serialize]
-	private bool replanted = false;
+	private bool replanted;
 
 	[MyCmpGet]
 	private WiltCondition wiltCondition;

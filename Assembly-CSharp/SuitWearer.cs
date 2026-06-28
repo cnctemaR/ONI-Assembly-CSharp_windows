@@ -36,28 +36,29 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 		public void ReserveSuits()
 		{
 			PathFinder.Path path = base.GetComponent<Navigator>().path;
-			if (path.nodes != null)
+			if (path.nodes == null)
 			{
-				for (int i = 0; i < path.nodes.Count; i++)
+				return;
+			}
+			for (int i = 0; i < path.nodes.Count; i++)
+			{
+				if (i != path.nodes.Count - 1)
 				{
-					if (i != path.nodes.Count - 1)
+					int cell = path.nodes[i].cell;
+					Pathfinding.INavigationFeature navigationFeature = Pathfinding.Instance.GetNavigationFeature(cell);
+					if (navigationFeature != null)
 					{
-						int cell = path.nodes[i].cell;
-						Pathfinding.INavigationFeature navigationFeature = Pathfinding.Instance.GetNavigationFeature(cell);
-						if (navigationFeature != null)
+						SuitMarker suitMarker = navigationFeature as SuitMarker;
+						if (!(suitMarker == null))
 						{
-							SuitMarker suitMarker = navigationFeature as SuitMarker;
-							if (!(suitMarker == null))
+							bool flag = suitMarker.DoesTraversalDirectionRequireSuit(cell, path.nodes[i + 1].cell);
+							SuitWearer.Instance.Reservation reservation = new SuitWearer.Instance.Reservation
 							{
-								bool flag = suitMarker.DoesTraversalDirectionRequireSuit(cell, path.nodes[i + 1].cell);
-								SuitWearer.Instance.Reservation reservation = new SuitWearer.Instance.Reservation
-								{
-									suitMarker = suitMarker,
-									isForEquipping = flag
-								};
-								suitMarker.Reserve(this, flag);
-								this.reservations.Add(reservation);
-							}
+								suitMarker = suitMarker,
+								isForEquipping = flag
+							};
+							suitMarker.Reserve(this, flag);
+							this.reservations.Add(reservation);
 						}
 					}
 				}

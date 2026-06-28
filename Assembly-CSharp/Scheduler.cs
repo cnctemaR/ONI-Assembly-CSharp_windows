@@ -94,46 +94,47 @@ public class Scheduler : IScheduler
 
 	public void Update()
 	{
-		if (this.entryCount != 0)
+		if (this.entryCount == 0)
 		{
-			if (this.dirty)
-			{
-				this.dirty = false;
-				Array.Sort<SchedulerEntry>(this.entries, 0, this.entryCount, Scheduler.comparer);
-			}
-			int entryCount = this.entryCount;
-			int i = 0;
-			using (new KProfiler.Region("Scheduler.Update", null))
-			{
-				float time = this.clock.GetTime();
-				if (this.previousTime == time)
-				{
-					return;
-				}
-				this.previousTime = time;
-				while (i < entryCount)
-				{
-					SchedulerEntry schedulerEntry = this.entries[i];
-					if (time < schedulerEntry.time)
-					{
-						break;
-					}
-					if (schedulerEntry.callback != null)
-					{
-						SystemScheduler.instance.AddTask(SystemScheduler.Priority.Default, schedulerEntry.details);
-						if (this.entries[i].timeInterval >= 0f)
-						{
-							SchedulerEntry schedulerEntry2 = this.entries[i];
-							schedulerEntry2.time = this.clock.GetTime() + schedulerEntry2.timeInterval;
-							this.Schedule(schedulerEntry2);
-						}
-					}
-					i++;
-				}
-			}
-			this.entryCount -= i;
-			Array.Copy(this.entries, i, this.entries, 0, this.entryCount);
+			return;
 		}
+		if (this.dirty)
+		{
+			this.dirty = false;
+			Array.Sort<SchedulerEntry>(this.entries, 0, this.entryCount, Scheduler.comparer);
+		}
+		int entryCount = this.entryCount;
+		int i = 0;
+		using (new KProfiler.Region("Scheduler.Update", null))
+		{
+			float time = this.clock.GetTime();
+			if (this.previousTime == time)
+			{
+				return;
+			}
+			this.previousTime = time;
+			while (i < entryCount)
+			{
+				SchedulerEntry schedulerEntry = this.entries[i];
+				if (time < schedulerEntry.time)
+				{
+					break;
+				}
+				if (schedulerEntry.callback != null)
+				{
+					SystemScheduler.instance.AddTask(SystemScheduler.Priority.Default, schedulerEntry.details);
+					if (this.entries[i].timeInterval >= 0f)
+					{
+						SchedulerEntry schedulerEntry2 = this.entries[i];
+						schedulerEntry2.time = this.clock.GetTime() + schedulerEntry2.timeInterval;
+						this.Schedule(schedulerEntry2);
+					}
+				}
+				i++;
+			}
+		}
+		this.entryCount -= i;
+		Array.Copy(this.entries, i, this.entries, 0, this.entryCount);
 	}
 
 	public global::Logger GetAddRemoveLog()
@@ -156,7 +157,7 @@ public class Scheduler : IScheduler
 
 	private float previousTime = float.NegativeInfinity;
 
-	private bool dirty = false;
+	private bool dirty;
 
 	private static Scheduler.EntryComparer comparer = new Scheduler.EntryComparer();
 
@@ -164,20 +165,15 @@ public class Scheduler : IScheduler
 	{
 		public int Compare(SchedulerEntry a, SchedulerEntry b)
 		{
-			int num;
 			if (a.time < b.time)
 			{
-				num = -1;
+				return -1;
 			}
-			else if (a.time > b.time)
+			if (a.time > b.time)
 			{
-				num = 1;
+				return 1;
 			}
-			else
-			{
-				num = 0;
-			}
-			return num;
+			return 0;
 		}
 	}
 }

@@ -63,25 +63,21 @@ public class KSelectable : KMonoBehaviour
 
 	public virtual string GetName()
 	{
-		string name;
-		if (this.entityName == null || this.entityName == "" || this.entityName.Length <= 0)
+		if (this.entityName == null || this.entityName == string.Empty || this.entityName.Length <= 0)
 		{
 			Output.LogWithObj(base.gameObject, new object[] { "Warning Item has blank name!" });
-			name = base.name;
+			return base.name;
 		}
-		else
-		{
-			name = this.entityName;
-		}
-		return name;
+		return this.entityName;
 	}
 
 	public void SetStatusIndicatorOffset(Vector3 offset)
 	{
-		if (this.statusItemGroup != null)
+		if (this.statusItemGroup == null)
 		{
-			this.statusItemGroup.SetOffset(offset);
+			return;
 		}
+		this.statusItemGroup.SetOffset(offset);
 	}
 
 	public void SetName(string name)
@@ -156,10 +152,11 @@ public class KSelectable : KMonoBehaviour
 
 	private void PlayHoverSound()
 	{
-		if (!(base.GetComponent<CellSelectionObject>() != null))
+		if (base.GetComponent<CellSelectionObject>() != null)
 		{
-			UISounds.PlaySound(UISounds.Sound.Object_Mouseover);
+			return;
 		}
+		UISounds.PlaySound(UISounds.Sound.Object_Mouseover);
 	}
 
 	public void Unhover()
@@ -172,92 +169,62 @@ public class KSelectable : KMonoBehaviour
 
 	public Guid ToggleStatusItem(StatusItem status_item, bool on, object data = null)
 	{
-		Guid guid;
 		if (on)
 		{
-			guid = this.AddStatusItem(status_item, data);
+			return this.AddStatusItem(status_item, data);
 		}
-		else
-		{
-			guid = this.RemoveStatusItem(status_item, false);
-		}
-		return guid;
+		return this.RemoveStatusItem(status_item, false);
 	}
 
 	public Guid SetStatusItem(StatusItemCategory category, StatusItem status_item, object data = null)
 	{
-		Guid guid;
 		if (this.statusItemGroup == null)
 		{
-			guid = Guid.Empty;
+			return Guid.Empty;
 		}
-		else
-		{
-			guid = this.statusItemGroup.SetStatusItem(category, status_item, data);
-		}
-		return guid;
+		return this.statusItemGroup.SetStatusItem(category, status_item, data);
 	}
 
 	public Guid ReplaceStatusItem(Guid guid, StatusItem status_item, object data = null)
 	{
-		Guid guid2;
 		if (this.statusItemGroup == null)
 		{
-			guid2 = Guid.Empty;
+			return Guid.Empty;
 		}
-		else
+		if (guid != Guid.Empty)
 		{
-			if (guid != Guid.Empty)
-			{
-				this.statusItemGroup.RemoveStatusItem(guid, false);
-			}
-			guid2 = this.AddStatusItem(status_item, data);
+			this.statusItemGroup.RemoveStatusItem(guid, false);
 		}
-		return guid2;
+		return this.AddStatusItem(status_item, data);
 	}
 
 	public Guid AddStatusItem(StatusItem status_item, object data = null)
 	{
-		Guid guid;
 		if (this.statusItemGroup == null)
 		{
-			guid = Guid.Empty;
+			return Guid.Empty;
 		}
-		else
-		{
-			guid = this.statusItemGroup.AddStatusItem(status_item, data, null);
-		}
-		return guid;
+		return this.statusItemGroup.AddStatusItem(status_item, data, null);
 	}
 
 	public Guid RemoveStatusItem(StatusItem status_item, bool immediate = false)
 	{
-		Guid guid;
 		if (this.statusItemGroup == null)
 		{
-			guid = Guid.Empty;
+			return Guid.Empty;
 		}
-		else
-		{
-			this.statusItemGroup.RemoveStatusItem(status_item, immediate);
-			guid = Guid.Empty;
-		}
-		return guid;
+		this.statusItemGroup.RemoveStatusItem(status_item, immediate);
+		return Guid.Empty;
 	}
 
 	public Guid RemoveStatusItem(Guid guid, bool immediate = false)
 	{
-		Guid guid2;
 		if (this.statusItemGroup == null)
 		{
-			guid2 = Guid.Empty;
+			return Guid.Empty;
 		}
-		else
-		{
-			this.statusItemGroup.RemoveStatusItem(guid, immediate);
-			guid2 = Guid.Empty;
-		}
-		return guid2;
+		this.statusItemGroup.RemoveStatusItem(guid, immediate);
+		return Guid.Empty;
 	}
 
 	public bool HasStatusItem(StatusItem status_item)
@@ -304,7 +271,7 @@ public class KSelectable : KMonoBehaviour
 
 	public string entityName;
 
-	private bool selected = false;
+	private bool selected;
 
 	[SerializeField]
 	private bool selectable = true;

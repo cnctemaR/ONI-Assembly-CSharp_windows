@@ -58,21 +58,22 @@ public class ElementEmitter : SimComponent
 
 	public void ForceEmit(float mass, byte disease_idx, int disease_count, float temperature = -1f)
 	{
-		if (mass > 0f)
+		if (mass <= 0f)
 		{
-			float num = ((temperature <= 0f) ? this.outputElement.outputTemperature : temperature);
-			Element element = ElementLoader.FindElementByHash(this.outputElement.elementHash);
-			if (element.IsGas || element.IsLiquid)
-			{
-				int num2 = Grid.PosToCell(base.transform.position);
-				SimMessages.AddRemoveSubstance(num2, this.outputElement.elementHash, CellEventLogger.Instance.ElementConsumerSimUpdate, mass, num, disease_idx, disease_count, -1);
-			}
-			else if (element.IsSolid)
-			{
-				element.substance.SpawnResource(base.transform.position + new Vector3(0f, 0.5f, 0f), mass, num, disease_idx, disease_count, false, true);
-			}
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, ElementLoader.FindElementByHash(this.outputElement.elementHash).name, base.gameObject.transform, 1.5f, false);
+			return;
 		}
+		float num = ((temperature <= 0f) ? this.outputElement.outputTemperature : temperature);
+		Element element = ElementLoader.FindElementByHash(this.outputElement.elementHash);
+		if (element.IsGas || element.IsLiquid)
+		{
+			int num2 = Grid.PosToCell(base.transform.position);
+			SimMessages.AddRemoveSubstance(num2, this.outputElement.elementHash, CellEventLogger.Instance.ElementConsumerSimUpdate, mass, num, disease_idx, disease_count, -1);
+		}
+		else if (element.IsSolid)
+		{
+			element.substance.SpawnResource(base.transform.position + new Vector3(0f, 0.5f, 0f), mass, num, disease_idx, disease_count, false, true);
+		}
+		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, ElementLoader.FindElementByHash(this.outputElement.elementHash).name, base.gameObject.transform, 1.5f, false);
 	}
 
 	private void OnEmitterBlocked()

@@ -119,23 +119,24 @@ namespace Klei.AI
 			private void Emit(object data)
 			{
 				GameObject gameObject = (GameObject)data;
-				if (!(gameObject == null))
+				if (gameObject == null)
 				{
-					Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
-					Vector2 vector = gameObject.transform.position;
-					for (int i = 0; i < liveMinionIdentities.Count; i++)
+					return;
+				}
+				Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
+				Vector2 vector = gameObject.transform.position;
+				for (int i = 0; i < liveMinionIdentities.Count; i++)
+				{
+					MinionIdentity minionIdentity = liveMinionIdentities[i];
+					if (minionIdentity.gameObject != gameObject.gameObject)
 					{
-						MinionIdentity minionIdentity = liveMinionIdentities[i];
-						if (minionIdentity.gameObject != gameObject.gameObject)
+						Vector2 vector2 = minionIdentity.transform.position;
+						float num = Vector2.SqrMagnitude(vector - vector2);
+						if (num <= 2.25f)
 						{
-							Vector2 vector2 = minionIdentity.transform.position;
-							float num = Vector2.SqrMagnitude(vector - vector2);
-							if (num <= 2.25f)
-							{
-								minionIdentity.Trigger(508119890, Strings.Get("STRINGS.DUPLICANTS.DISEASES.PUTRIDODOUR.CRINGE_EFFECT").String);
-								minionIdentity.GetComponent<Effects>().Add("SmelledPutridOdour", true);
-								minionIdentity.gameObject.GetSMI<ThoughtGraph.Instance>().AddThought(Db.Get().Thoughts.PutridOdour);
-							}
+							minionIdentity.Trigger(508119890, Strings.Get("STRINGS.DUPLICANTS.DISEASES.PUTRIDODOUR.CRINGE_EFFECT").String);
+							minionIdentity.GetComponent<Effects>().Add("SmelledPutridOdour", true);
+							minionIdentity.gameObject.GetSMI<ThoughtGraph.Instance>().AddThought(Db.Get().Thoughts.PutridOdour);
 						}
 					}
 				}

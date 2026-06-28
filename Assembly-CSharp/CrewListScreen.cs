@@ -105,50 +105,49 @@ public class CrewListScreen<EntryType> : KScreen where EntryType : CrewListEntry
 
 	protected virtual void PositionColumnTitles()
 	{
-		if (!(this.ColumnTitlesContainer == null))
+		if (this.ColumnTitlesContainer == null)
 		{
-			if (this.EntryObjects.Count <= 0)
+			return;
+		}
+		if (this.EntryObjects.Count <= 0)
+		{
+			this.SetHeadersActive(false);
+			return;
+		}
+		this.SetHeadersActive(true);
+		EntryType entryType = this.EntryObjects[0];
+		int childCount = entryType.transform.childCount;
+		for (int i = 0; i < childCount; i++)
+		{
+			EntryType entryType2 = this.EntryObjects[0];
+			OverviewColumnIdentity component = entryType2.transform.GetChild(i).GetComponent<OverviewColumnIdentity>();
+			if (component != null)
 			{
-				this.SetHeadersActive(false);
-			}
-			else
-			{
-				this.SetHeadersActive(true);
-				EntryType entryType = this.EntryObjects[0];
-				int childCount = entryType.transform.childCount;
-				for (int i = 0; i < childCount; i++)
+				GameObject gameObject = Util.KInstantiate(this.Prefab_ColumnTitle, null, null);
+				gameObject.name = component.Column_DisplayName;
+				LocText componentInChildren = gameObject.GetComponentInChildren<LocText>();
+				gameObject.transform.SetParent(this.ColumnTitlesContainer);
+				componentInChildren.text = ((!component.StringLookup) ? component.Column_DisplayName : Strings.Get(component.Column_DisplayName));
+				gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.TOOLTIPS.SORTCOLUMN, componentInChildren.text);
+				gameObject.rectTransform().anchoredPosition = new Vector2(component.rectTransform().anchoredPosition.x, 0f);
+				OverviewColumnIdentity overviewColumnIdentity = gameObject.GetComponent<OverviewColumnIdentity>();
+				if (overviewColumnIdentity == null)
 				{
-					EntryType entryType2 = this.EntryObjects[0];
-					OverviewColumnIdentity component = entryType2.transform.GetChild(i).GetComponent<OverviewColumnIdentity>();
-					if (component != null)
-					{
-						GameObject gameObject = Util.KInstantiate(this.Prefab_ColumnTitle, null, null);
-						gameObject.name = component.Column_DisplayName;
-						LocText componentInChildren = gameObject.GetComponentInChildren<LocText>();
-						gameObject.transform.SetParent(this.ColumnTitlesContainer);
-						componentInChildren.text = ((!component.StringLookup) ? component.Column_DisplayName : Strings.Get(component.Column_DisplayName));
-						gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.TOOLTIPS.SORTCOLUMN, componentInChildren.text);
-						gameObject.rectTransform().anchoredPosition = new Vector2(component.rectTransform().anchoredPosition.x, 0f);
-						OverviewColumnIdentity overviewColumnIdentity = gameObject.GetComponent<OverviewColumnIdentity>();
-						if (overviewColumnIdentity == null)
-						{
-							overviewColumnIdentity = gameObject.AddComponent<OverviewColumnIdentity>();
-						}
-						overviewColumnIdentity.Column_DisplayName = component.Column_DisplayName;
-						overviewColumnIdentity.columnID = component.columnID;
-						overviewColumnIdentity.xPivot = component.xPivot;
-						overviewColumnIdentity.Sortable = component.Sortable;
-						if (overviewColumnIdentity.Sortable)
-						{
-							overviewColumnIdentity.GetComponentInChildren<ImageToggleState>(true).gameObject.SetActive(true);
-						}
-					}
+					overviewColumnIdentity = gameObject.AddComponent<OverviewColumnIdentity>();
 				}
-				this.UpdateColumnTitles();
-				this.sortToggleGroup = base.gameObject.AddComponent<ToggleGroup>();
-				this.sortToggleGroup.allowSwitchOff = true;
+				overviewColumnIdentity.Column_DisplayName = component.Column_DisplayName;
+				overviewColumnIdentity.columnID = component.columnID;
+				overviewColumnIdentity.xPivot = component.xPivot;
+				overviewColumnIdentity.Sortable = component.Sortable;
+				if (overviewColumnIdentity.Sortable)
+				{
+					overviewColumnIdentity.GetComponentInChildren<ImageToggleState>(true).gameObject.SetActive(true);
+				}
 			}
 		}
+		this.UpdateColumnTitles();
+		this.sortToggleGroup = base.gameObject.AddComponent<ToggleGroup>();
+		this.sortToggleGroup.allowSwitchOff = true;
 	}
 
 	protected void SortByName(bool reverse)
@@ -185,21 +184,18 @@ public class CrewListScreen<EntryType> : KScreen where EntryType : CrewListEntry
 						}
 						EntryType entryType3 = this.EntryObjects[0];
 						OverviewColumnIdentity component = entryType3.transform.GetChild(num).GetComponent<OverviewColumnIdentity>();
-						if (component != null)
+						if (component != null && component.Column_DisplayName == rectTransform.name)
 						{
-							if (component.Column_DisplayName == rectTransform.name)
+							rectTransform.pivot = new Vector2(component.xPivot, rectTransform.pivot.y);
+							rectTransform.anchoredPosition = new Vector2(component.rectTransform().anchoredPosition.x + this.columnTitleHorizontalOffset, 0f);
+							rectTransform.sizeDelta = new Vector2(component.rectTransform().sizeDelta.x, rectTransform.sizeDelta.y);
+							if (rectTransform.anchoredPosition.x == 0f)
 							{
-								rectTransform.pivot = new Vector2(component.xPivot, rectTransform.pivot.y);
-								rectTransform.anchoredPosition = new Vector2(component.rectTransform().anchoredPosition.x + this.columnTitleHorizontalOffset, 0f);
-								rectTransform.sizeDelta = new Vector2(component.rectTransform().sizeDelta.x, rectTransform.sizeDelta.y);
-								if (rectTransform.anchoredPosition.x == 0f)
-								{
-									rectTransform.gameObject.SetActive(false);
-								}
-								else
-								{
-									rectTransform.gameObject.SetActive(true);
-								}
+								rectTransform.gameObject.SetActive(false);
+							}
+							else
+							{
+								rectTransform.gameObject.SetActive(true);
 							}
 						}
 						num++;

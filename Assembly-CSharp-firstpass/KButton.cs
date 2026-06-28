@@ -52,21 +52,23 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 
 	public void OnPointerUp(PointerEventData eventData)
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			KInputManager.SetUserActive();
-			this.UpdateColor(this.interactable, false, false);
+			return;
 		}
+		KInputManager.SetUserActive();
+		this.UpdateColor(this.interactable, false, false);
 	}
 
 	public void OnPointerDown(PointerEventData eventData)
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			KInputManager.SetUserActive();
-			this.UpdateColor(this.interactable, true, true);
-			this.PlayPointerDownSound();
+			return;
 		}
+		KInputManager.SetUserActive();
+		this.UpdateColor(this.interactable, true, true);
+		this.PlayPointerDownSound();
 	}
 
 	public void SignalClick()
@@ -87,63 +89,66 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 
 	public void OnPointerClick(PointerEventData eventData)
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			KInputManager.SetUserActive();
-			if (this.interactable)
+			return;
+		}
+		KInputManager.SetUserActive();
+		if (this.interactable)
+		{
+			if ((eventData.clickCount == 1 || this.onDoubleClick == null) && this.onClick != null)
 			{
-				if ((eventData.clickCount == 1 || this.onDoubleClick == null) && this.onClick != null)
-				{
-					this.SignalClick();
-				}
-				else if (eventData.clickCount == 2 && this.onDoubleClick != null)
-				{
-					this.SignalDoubleClick();
-				}
+				this.SignalClick();
+			}
+			else if (eventData.clickCount == 2 && this.onDoubleClick != null)
+			{
+				this.SignalDoubleClick();
 			}
 		}
 	}
 
 	public void OnPointerEnter(PointerEventData eventData)
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			KInputManager.SetUserActive();
-			ImageToggleState[] components = base.GetComponents<ImageToggleState>();
-			if (components != null && components.Length > 0)
+			return;
+		}
+		KInputManager.SetUserActive();
+		ImageToggleState[] components = base.GetComponents<ImageToggleState>();
+		if (components != null && components.Length > 0)
+		{
+			foreach (ImageToggleState imageToggleState in components)
 			{
-				foreach (ImageToggleState imageToggleState in components)
-				{
-					imageToggleState.OnHoverIn();
-				}
+				imageToggleState.OnHoverIn();
 			}
-			this.UpdateColor(this.interactable, true, false);
-			this.soundPlayer.Play(1);
-			this.mouseOver = true;
-			if (this.onPointerEnter != null)
-			{
-				this.onPointerEnter();
-			}
+		}
+		this.UpdateColor(this.interactable, true, false);
+		this.soundPlayer.Play(1);
+		this.mouseOver = true;
+		if (this.onPointerEnter != null)
+		{
+			this.onPointerEnter();
 		}
 	}
 
 	public void OnPointerExit(PointerEventData eventData)
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			KInputManager.SetUserActive();
-			ImageToggleState[] components = base.GetComponents<ImageToggleState>();
-			if (components != null && components.Length > 0)
-			{
-				foreach (ImageToggleState imageToggleState in components)
-				{
-					imageToggleState.OnHoverOut();
-				}
-			}
-			this.UpdateColor(this.interactable, false, false);
-			this.mouseOver = false;
-			this.onPointerExit.Signal();
+			return;
 		}
+		KInputManager.SetUserActive();
+		ImageToggleState[] components = base.GetComponents<ImageToggleState>();
+		if (components != null && components.Length > 0)
+		{
+			foreach (ImageToggleState imageToggleState in components)
+			{
+				imageToggleState.OnHoverOut();
+			}
+		}
+		this.UpdateColor(this.interactable, false, false);
+		this.mouseOver = false;
+		this.onPointerExit.Signal();
 	}
 
 	private void UpdateColor(bool interactable, bool hover, bool press)
@@ -151,7 +156,7 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 		if (this.bgImage == null)
 		{
 			this.bgImage = base.GetComponent<KImage>();
-			string text = "";
+			string text = string.Empty;
 			Transform transform = base.transform;
 			for (int i = 0; i < 5; i++)
 			{
@@ -226,5 +231,5 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 
 	private bool interactable = true;
 
-	private bool mouseOver = false;
+	private bool mouseOver;
 }

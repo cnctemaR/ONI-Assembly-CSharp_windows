@@ -56,20 +56,15 @@ namespace MIConvexHull
 		{
 			ConvexHullAlgorithm convexHullAlgorithm = new ConvexHullAlgorithm(data.Cast<IVertex>().ToArray<IVertex>(), false, PlaneDistanceTolerance);
 			convexHullAlgorithm.GetConvexHull();
-			ConvexHull<TVertex, TFace> convexHull;
 			if (convexHullAlgorithm.NumOfDimensions == 2)
 			{
-				convexHull = convexHullAlgorithm.Return2DResultInOrder<TVertex, TFace>(data);
+				return convexHullAlgorithm.Return2DResultInOrder<TVertex, TFace>(data);
 			}
-			else
+			return new ConvexHull<TVertex, TFace>
 			{
-				convexHull = new ConvexHull<TVertex, TFace>
-				{
-					Points = convexHullAlgorithm.GetHullVertices<TVertex>(data),
-					Faces = convexHullAlgorithm.GetConvexFaces<TVertex, TFace>()
-				};
-			}
-			return convexHull;
+				Points = convexHullAlgorithm.GetHullVertices<TVertex>(data),
+				Faces = convexHullAlgorithm.GetConvexFaces<TVertex, TFace>()
+			};
 		}
 
 		private int DetermineDimension()
@@ -213,7 +208,7 @@ namespace MIConvexHull
 			if (this.IsLifted)
 			{
 				int num2 = this.NumOfDimensions - 1;
-				double num3 = 2.0 / (this.minima.Sum<double>((double x) => Math.Abs(x)) + this.maxima.Sum<double>((double x) => Math.Abs(x)) - Math.Abs(this.maxima[num2]) - Math.Abs(this.minima[num2]));
+				double num3 = 2.0 / (this.minima.Sum<double>(new Func<double, double>(Math.Abs)) + this.maxima.Sum<double>(new Func<double, double>(Math.Abs)) - Math.Abs(this.maxima[num2]) - Math.Abs(this.minima[num2]));
 				this.minima[num2] *= num3;
 				this.maxima[num2] *= num3;
 				for (int i = num2; i < num; i += this.NumOfDimensions)
@@ -456,29 +451,30 @@ namespace MIConvexHull
 					break;
 				}
 			}
-			if (i != this.NumOfDimensions)
+			if (i == this.NumOfDimensions)
 			{
-				for (int j = i + 1; j < vertices.Length; j++)
-				{
-					if (!this.VertexVisited[vertices[j]])
-					{
-						return;
-					}
-				}
-				l.AdjacentFaces[i] = r.Index;
-				for (i = 0; i < vertices.Length; i++)
-				{
-					this.VertexVisited[vertices[i]] = false;
-				}
-				for (i = 0; i < vertices2.Length; i++)
-				{
-					if (this.VertexVisited[vertices2[i]])
-					{
-						break;
-					}
-				}
-				r.AdjacentFaces[i] = l.Index;
+				return;
 			}
+			for (int j = i + 1; j < vertices.Length; j++)
+			{
+				if (!this.VertexVisited[vertices[j]])
+				{
+					return;
+				}
+			}
+			l.AdjacentFaces[i] = r.Index;
+			for (i = 0; i < vertices.Length; i++)
+			{
+				this.VertexVisited[vertices[i]] = false;
+			}
+			for (i = 0; i < vertices2.Length; i++)
+			{
+				if (this.VertexVisited[vertices2[i]])
+				{
+					break;
+				}
+			}
+			r.AdjacentFaces[i] = l.Index;
 		}
 
 		private void FindBeyondVertices(ConvexFaceInternal face)
@@ -945,7 +941,7 @@ namespace MIConvexHull
 				TVertex tvertex3 = list[num2];
 				if (num4 < tvertex3.Position[0])
 				{
-					goto IL_0162;
+					goto IL_015F;
 				}
 				double num5 = tvertex2.Position[0];
 				TVertex tvertex4 = list[num2];
@@ -955,16 +951,16 @@ namespace MIConvexHull
 					TVertex tvertex5 = list[num2];
 					if (num6 <= tvertex5.Position[1])
 					{
-						goto IL_0162;
+						goto IL_015F;
 					}
 				}
-				IL_0166:
+				IL_0163:
 				num3++;
 				tvertex2 = tface2.Vertices[0];
 				continue;
-				IL_0162:
+				IL_015F:
 				num2 = num3;
-				goto IL_0166;
+				goto IL_0163;
 			}
 			TVertex[] array2 = new TVertex[num];
 			for (int j = 0; j < num; j++)

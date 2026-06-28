@@ -40,14 +40,15 @@ namespace TMPro
 			}
 			set
 			{
-				if (this.m_sharedMaterial.GetInstanceID() != value.GetInstanceID())
+				if (this.m_sharedMaterial.GetInstanceID() == value.GetInstanceID())
 				{
-					this.m_material = value;
-					this.m_sharedMaterial = value;
-					this.m_padding = this.GetPaddingForMaterial();
-					this.SetVerticesDirty();
-					this.SetMaterialDirty();
+					return;
 				}
+				this.m_material = value;
+				this.m_sharedMaterial = value;
+				this.m_padding = this.GetPaddingForMaterial();
+				this.SetVerticesDirty();
+				this.SetMaterialDirty();
 			}
 		}
 
@@ -246,13 +247,14 @@ namespace TMPro
 
 		public void SetVerticesDirty()
 		{
-			if (base.enabled)
+			if (!base.enabled)
 			{
-				if (this.m_TextComponent != null)
-				{
-					this.m_TextComponent.havePropertiesChanged = true;
-					this.m_TextComponent.SetVerticesDirty();
-				}
+				return;
+			}
+			if (this.m_TextComponent != null)
+			{
+				this.m_TextComponent.havePropertiesChanged = true;
+				this.m_TextComponent.SetVerticesDirty();
 			}
 		}
 

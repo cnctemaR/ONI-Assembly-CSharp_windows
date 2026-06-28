@@ -108,5 +108,5 @@ public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IWire
 
 	public static readonly KAnimHashedString OutlineSymbol = new KAnimHashedString("outline");
 
-	private global::System.Action firstFrameCallback = null;
+	private global::System.Action firstFrameCallback;
 }

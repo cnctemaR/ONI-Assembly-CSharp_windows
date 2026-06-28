@@ -77,16 +77,11 @@ public class RegionManager
 
 	public Region GetRegionByID(ushort ID)
 	{
-		Region region;
 		if (this.regions.ContainsKey(ID))
 		{
-			region = this.regions[ID];
+			return this.regions[ID];
 		}
-		else
-		{
-			region = null;
-		}
-		return region;
+		return null;
 	}
 
 	public void RemoveRegion(Region region, bool fire_region_changed = true)
@@ -108,32 +103,22 @@ public class RegionManager
 	public Region GetIntersectionRegion(Vector2 pt)
 	{
 		int num = Grid.PosToCell(pt);
-		Region region;
 		if (Grid.IsValidCell(num))
 		{
-			region = this.GetIntersectionRegion(num);
+			return this.GetIntersectionRegion(num);
 		}
-		else
-		{
-			region = null;
-		}
-		return region;
+		return null;
 	}
 
 	public Region GetIntersectionRegion(int cell)
 	{
 		DebugUtil.Assert(cell >= 0 && cell < this.idGrid.Length, "Assert!");
 		ushort num = this.idGrid[cell];
-		Region region;
 		if (num == 65535)
 		{
-			region = null;
+			return null;
 		}
-		else
-		{
-			region = this.regions[num];
-		}
-		return region;
+		return this.regions[num];
 	}
 
 	public void SetCellOwner(ushort region_id, int cell)

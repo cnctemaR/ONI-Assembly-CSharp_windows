@@ -71,26 +71,27 @@ public class PlaceTool : DragTool
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
-		if (!(this.visualizer == null))
+		if (this.visualizer == null)
 		{
-			bool flag = false;
-			EntityPreview component = this.visualizer.GetComponent<EntityPreview>();
-			if (component.Valid)
+			return;
+		}
+		bool flag = false;
+		EntityPreview component = this.visualizer.GetComponent<EntityPreview>();
+		if (component.Valid)
+		{
+			if (DebugHandler.InstantBuildMode)
 			{
-				if (DebugHandler.InstantBuildMode)
-				{
-					this.source.Place(cell);
-				}
-				else
-				{
-					this.source.QueuePlacement(cell);
-				}
-				flag = true;
+				this.source.Place(cell);
 			}
-			if (flag)
+			else
 			{
-				this.Deactivate();
+				this.source.QueuePlacement(cell);
 			}
+			flag = true;
+		}
+		if (flag)
+		{
+			this.Deactivate();
 		}
 	}
 
@@ -137,5 +138,5 @@ public class PlaceTool : DragTool
 
 	public static PlaceTool Instance;
 
-	private bool active = false;
+	private bool active;
 }

@@ -100,10 +100,11 @@ namespace TMPro
 			{
 				size = ((size <= 1024) ? Mathf.NextPowerOfTwo(size) : (size + 256));
 			}
-			if (size != array.Length)
+			if (size == array.Length)
 			{
-				Array.Resize<T>(ref array, size);
+				return;
 			}
+			Array.Resize<T>(ref array, size);
 		}
 
 		private static Vector2 k_InfinityVectorPositive = new Vector2(1000000f, 1000000f);

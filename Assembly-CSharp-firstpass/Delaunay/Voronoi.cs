@@ -76,15 +76,16 @@ namespace Delaunay
 
 		private void AddSite(Vector2 p, uint color, int index, float weight = 1f)
 		{
-			if (!this._sitesIndexedByLocation.ContainsKey(p))
+			if (this._sitesIndexedByLocation.ContainsKey(p))
 			{
-				Site site = Site.Create(p, (uint)index, weight, color);
-				this.min_weight = Mathf.Min(this.min_weight, weight);
-				this.max_weight = Mathf.Max(this.max_weight, weight);
-				this._sitesIndexedByLocation[p] = site;
-				this._sites.Add(site);
-				this.weightSum += site.weight;
+				return;
 			}
+			Site site = Site.Create(p, (uint)index, weight, color);
+			this.min_weight = Mathf.Min(this.min_weight, weight);
+			this.max_weight = Mathf.Max(this.max_weight, weight);
+			this._sitesIndexedByLocation[p] = site;
+			this._sites.Add(site);
+			this.weightSum += site.weight;
 		}
 
 		public Site GetSiteByLocation(Vector2 p)
@@ -100,80 +101,60 @@ namespace Delaunay
 		public List<Vector2> Region(Vector2 p)
 		{
 			Site site = this._sitesIndexedByLocation[p];
-			List<Vector2> list;
 			if (site == null)
 			{
-				list = new List<Vector2>();
+				return new List<Vector2>();
 			}
-			else
-			{
-				list = site.Region(this._plotBounds);
-			}
-			return list;
+			return site.Region(this._plotBounds);
 		}
 
 		public List<Vector2> NeighborSitesForSite(Vector2 coord)
 		{
 			List<Vector2> list = new List<Vector2>();
 			Site site = this._sitesIndexedByLocation[coord];
-			List<Vector2> list2;
 			if (site == null)
 			{
-				list2 = list;
+				return list;
 			}
-			else
+			List<Site> list2 = site.NeighborSites();
+			for (int i = 0; i < list2.Count; i++)
 			{
-				List<Site> list3 = site.NeighborSites();
-				for (int i = 0; i < list3.Count; i++)
-				{
-					Site site2 = list3[i];
-					list.Add(site2.Coord);
-				}
-				list2 = list;
+				Site site2 = list2[i];
+				list.Add(site2.Coord);
 			}
-			return list2;
+			return list;
 		}
 
 		public HashSet<uint> NeighborSitesIDsForSite(Vector2 coord)
 		{
 			HashSet<uint> hashSet = new HashSet<uint>();
 			Site site = this._sitesIndexedByLocation[coord];
-			HashSet<uint> hashSet2;
 			if (site == null)
 			{
-				hashSet2 = hashSet;
+				return hashSet;
 			}
-			else
+			List<Site> list = site.NeighborSites();
+			for (int i = 0; i < list.Count; i++)
 			{
-				List<Site> list = site.NeighborSites();
-				for (int i = 0; i < list.Count; i++)
-				{
-					hashSet.Add(list[i].color);
-				}
-				hashSet2 = hashSet;
+				hashSet.Add(list[i].color);
 			}
-			return hashSet2;
+			return hashSet;
 		}
 
 		public List<uint> ListNeighborSitesIDsForSite(Vector2 coord)
 		{
 			List<uint> list = new List<uint>();
 			Site site = this._sitesIndexedByLocation[coord];
-			List<uint> list2;
 			if (site == null)
 			{
-				list2 = list;
+				return list;
 			}
-			else
+			List<Site> list2 = site.NeighborSites();
+			for (int i = 0; i < list2.Count; i++)
 			{
-				List<Site> list3 = site.NeighborSites();
-				for (int i = 0; i < list3.Count; i++)
-				{
-					list.Add(list3[i].color);
-				}
-				list2 = list;
+				list.Add(list2[i].color);
 			}
-			return list2;
+			return list;
 		}
 
 		public List<Circle> Circles()
@@ -215,27 +196,22 @@ namespace Delaunay
 		{
 			List<Edge> list = this.HullEdges();
 			List<Vector2> list2 = new List<Vector2>();
-			List<Vector2> list3;
 			if (list.Count == 0)
 			{
-				list3 = list2;
+				return list2;
 			}
-			else
+			EdgeReorderer edgeReorderer = new EdgeReorderer(list, VertexOrSite.SITE);
+			list = edgeReorderer.edges;
+			List<Side> edgeOrientations = edgeReorderer.edgeOrientations;
+			edgeReorderer.Dispose();
+			int count = list.Count;
+			for (int i = 0; i < count; i++)
 			{
-				EdgeReorderer edgeReorderer = new EdgeReorderer(list, VertexOrSite.SITE);
-				list = edgeReorderer.edges;
-				List<Side> edgeOrientations = edgeReorderer.edgeOrientations;
-				edgeReorderer.Dispose();
-				int count = list.Count;
-				for (int i = 0; i < count; i++)
-				{
-					Edge edge = list[i];
-					Side side = edgeOrientations[i];
-					list2.Add(edge.Site(side).Coord);
-				}
-				list3 = list2;
+				Edge edge = list[i];
+				Side side = edgeOrientations[i];
+				list2.Add(edge.Site(side).Coord);
 			}
-			return list3;
+			return list2;
 		}
 
 		public List<LineSegment> SpanningTree(KruskalType type = KruskalType.MINIMUM)
@@ -388,87 +364,67 @@ namespace Delaunay
 		private Site FortunesAlgorithm_leftRegion(Halfedge he)
 		{
 			Edge edge = he.edge;
-			Site site;
 			if (edge == null)
 			{
-				site = this.fortunesAlgorithm_bottomMostSite;
+				return this.fortunesAlgorithm_bottomMostSite;
 			}
-			else
-			{
-				Edge edge2 = edge;
-				Side? leftRight = he.leftRight;
-				site = edge2.Site(leftRight.Value);
-			}
-			return site;
+			Edge edge2 = edge;
+			Side? leftRight = he.leftRight;
+			return edge2.Site(leftRight.Value);
 		}
 
 		private Site FortunesAlgorithm_rightRegion(Halfedge he)
 		{
 			Edge edge = he.edge;
-			Site site;
 			if (edge == null)
 			{
-				site = this.fortunesAlgorithm_bottomMostSite;
+				return this.fortunesAlgorithm_bottomMostSite;
 			}
-			else
-			{
-				Edge edge2 = edge;
-				Side? leftRight = he.leftRight;
-				site = edge2.Site(SideHelper.Other(leftRight.Value));
-			}
-			return site;
+			Edge edge2 = edge;
+			Side? leftRight = he.leftRight;
+			return edge2.Site(SideHelper.Other(leftRight.Value));
 		}
 
 		public static int CompareByYThenX(Site s1, Site s2)
 		{
-			int num;
 			if (s1.y < s2.y)
 			{
-				num = -1;
+				return -1;
 			}
-			else if (s1.y > s2.y)
+			if (s1.y > s2.y)
 			{
-				num = 1;
+				return 1;
 			}
-			else if (s1.x < s2.x)
+			if (s1.x < s2.x)
 			{
-				num = -1;
+				return -1;
 			}
-			else if (s1.x > s2.x)
+			if (s1.x > s2.x)
 			{
-				num = 1;
+				return 1;
 			}
-			else
-			{
-				num = 0;
-			}
-			return num;
+			return 0;
 		}
 
 		public static int CompareByYThenX(Site s1, Vector2 s2)
 		{
-			int num;
 			if (s1.y < s2.y)
 			{
-				num = -1;
+				return -1;
 			}
-			else if (s1.y > s2.y)
+			if (s1.y > s2.y)
 			{
-				num = 1;
+				return 1;
 			}
-			else if (s1.x < s2.x)
+			if (s1.x < s2.x)
 			{
-				num = -1;
+				return -1;
 			}
-			else if (s1.x > s2.x)
+			if (s1.x > s2.x)
 			{
-				num = 1;
+				return 1;
 			}
-			else
-			{
-				num = 0;
-			}
-			return num;
+			return 0;
 		}
 
 		private SiteList _sites;

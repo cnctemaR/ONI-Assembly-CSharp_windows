@@ -654,7 +654,7 @@ namespace STRINGS
 
 		public class DEBUG_TOOLS
 		{
-			public static LocString ENTER_TEXT = "";
+			public static LocString ENTER_TEXT = string.Empty;
 
 			public class PAINT_ELEMENTS_SCREEN
 			{
@@ -718,7 +718,7 @@ namespace STRINGS
 
 		public class WORLDGEN
 		{
-			public static LocString NOHEADERS = "";
+			public static LocString NOHEADERS = string.Empty;
 
 			public static LocString COMPLETE = "Success! Space adventure awaits.";
 
@@ -977,7 +977,7 @@ namespace STRINGS
 
 			public static LocString HARVESTBUTTON = "Drag to harvest plants";
 
-			public static LocString PRIORITIZEMAINBUTTON = "";
+			public static LocString PRIORITIZEMAINBUTTON = string.Empty;
 
 			public static LocString PRIORITIZEBUTTON = "Drag to reprioritize job tasks";
 
@@ -2048,7 +2048,7 @@ namespace STRINGS
 
 			public static LocString DESCRIPTION = "Thank you for playing <color=#F44A47>Oxygen Not Included</color>!";
 
-			public static LocString DESCRIPTION_2 = "";
+			public static LocString DESCRIPTION_2 = string.Empty;
 
 			public static LocString QUITBUTTON = "RESET";
 		}

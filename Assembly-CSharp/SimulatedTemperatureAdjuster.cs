@@ -41,47 +41,50 @@ public class SimulatedTemperatureAdjuster
 	public void Register(SimTemperatureTransfer stt)
 	{
 		this.unregistered = false;
-		if (!(stt == null))
+		if (stt == null)
 		{
-			stt.onSimRegistered = (Action<SimTemperatureTransfer>)Delegate.Remove(stt.onSimRegistered, new Action<SimTemperatureTransfer>(this.OnItemSimRegistered));
-			stt.onSimRegistered = (Action<SimTemperatureTransfer>)Delegate.Combine(stt.onSimRegistered, new Action<SimTemperatureTransfer>(this.OnItemSimRegistered));
-			if (Sim.IsValidHandle(stt.SimHandle))
-			{
-				this.OnItemSimRegistered(stt);
-			}
+			return;
+		}
+		stt.onSimRegistered = (Action<SimTemperatureTransfer>)Delegate.Remove(stt.onSimRegistered, new Action<SimTemperatureTransfer>(this.OnItemSimRegistered));
+		stt.onSimRegistered = (Action<SimTemperatureTransfer>)Delegate.Combine(stt.onSimRegistered, new Action<SimTemperatureTransfer>(this.OnItemSimRegistered));
+		if (Sim.IsValidHandle(stt.SimHandle))
+		{
+			this.OnItemSimRegistered(stt);
 		}
 	}
 
 	public void Unregister(SimTemperatureTransfer stt)
 	{
 		this.unregistered = true;
-		if (!(stt == null))
+		if (stt == null)
 		{
-			stt.onSimRegistered = (Action<SimTemperatureTransfer>)Delegate.Remove(stt.onSimRegistered, new Action<SimTemperatureTransfer>(this.OnItemSimRegistered));
-			if (Sim.IsValidHandle(stt.SimHandle))
-			{
-				SimMessages.ModifyElementChunkTemperatureAdjuster(stt.SimHandle, 0f, 0f, 0f);
-			}
+			return;
+		}
+		stt.onSimRegistered = (Action<SimTemperatureTransfer>)Delegate.Remove(stt.onSimRegistered, new Action<SimTemperatureTransfer>(this.OnItemSimRegistered));
+		if (Sim.IsValidHandle(stt.SimHandle))
+		{
+			SimMessages.ModifyElementChunkTemperatureAdjuster(stt.SimHandle, 0f, 0f, 0f);
 		}
 	}
 
 	private void OnItemSimRegistered(SimTemperatureTransfer stt)
 	{
-		if (!(stt == null))
+		if (stt == null)
 		{
-			if (Sim.IsValidHandle(stt.SimHandle))
+			return;
+		}
+		if (Sim.IsValidHandle(stt.SimHandle))
+		{
+			float num = this.temperature;
+			float num2 = this.heatCapacity;
+			float num3 = this.thermalConductivity;
+			if (this.unregistered)
 			{
-				float num = this.temperature;
-				float num2 = this.heatCapacity;
-				float num3 = this.thermalConductivity;
-				if (this.unregistered)
-				{
-					num = 0f;
-					num2 = 0f;
-					num3 = 0f;
-				}
-				SimMessages.ModifyElementChunkTemperatureAdjuster(stt.SimHandle, num, num2, num3);
+				num = 0f;
+				num2 = 0f;
+				num3 = 0f;
 			}
+			SimMessages.ModifyElementChunkTemperatureAdjuster(stt.SimHandle, num, num2, num3);
 		}
 	}
 
@@ -133,5 +136,5 @@ public class SimulatedTemperatureAdjuster
 
 	private Storage storage;
 
-	private bool unregistered = false;
+	private bool unregistered;
 }

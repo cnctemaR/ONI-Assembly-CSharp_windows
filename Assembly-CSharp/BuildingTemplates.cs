@@ -23,10 +23,10 @@ public class BuildingTemplates
 		case BuildLocationRule.Anywhere:
 		case BuildLocationRule.Tile:
 			buildingDef.ContinuouslyCheckFoundation = false;
-			goto IL_009B;
+			goto IL_009A;
 		}
 		buildingDef.ContinuouslyCheckFoundation = true;
-		IL_009B:
+		IL_009A:
 		buildingDef.BuildLocationRule = build_location_rule;
 		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.AnimFiles = new KAnimFile[] { Assets.GetAnim(anim) };

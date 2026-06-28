@@ -123,7 +123,7 @@ public class TextureLerper
 		return new Vector4((float)num4, (float)num5, (float)num6, (float)num7);
 	}
 
-	private static int offsetCounter = 0;
+	private static int offsetCounter;
 
 	public string name;
 

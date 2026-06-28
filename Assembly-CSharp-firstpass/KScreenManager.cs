@@ -110,7 +110,7 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 
 	public string DebugScreenStack()
 	{
-		string text = "";
+		string text = string.Empty;
 		foreach (KScreen kscreen in this.screenStack)
 		{
 			text = text + kscreen.name + "\n";
@@ -137,18 +137,19 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 
 	public void OnKeyDown(KButtonEvent e)
 	{
-		if (!KScreenManager.inputDisabled)
+		if (KScreenManager.inputDisabled)
 		{
-			for (int i = this.screenStack.Count - 1; i >= 0; i--)
+			return;
+		}
+		for (int i = this.screenStack.Count - 1; i >= 0; i--)
+		{
+			KScreen kscreen = this.screenStack[i];
+			if (kscreen != null && kscreen.isActiveAndEnabled)
 			{
-				KScreen kscreen = this.screenStack[i];
-				if (kscreen != null && kscreen.isActiveAndEnabled)
+				kscreen.OnKeyDown(e);
+				if (e.Consumed || kscreen.IsModal())
 				{
-					kscreen.OnKeyDown(e);
-					if (e.Consumed || kscreen.IsModal())
-					{
-						break;
-					}
+					break;
 				}
 			}
 		}
@@ -156,18 +157,19 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 
 	public void OnKeyUp(KButtonEvent e)
 	{
-		if (!KScreenManager.inputDisabled)
+		if (KScreenManager.inputDisabled)
 		{
-			for (int i = this.screenStack.Count - 1; i >= 0; i--)
+			return;
+		}
+		for (int i = this.screenStack.Count - 1; i >= 0; i--)
+		{
+			KScreen kscreen = this.screenStack[i];
+			if (kscreen != null && kscreen.isActiveAndEnabled)
 			{
-				KScreen kscreen = this.screenStack[i];
-				if (kscreen != null && kscreen.isActiveAndEnabled)
+				kscreen.OnKeyUp(e);
+				if (e.Consumed || kscreen.IsModal())
 				{
-					kscreen.OnKeyUp(e);
-					if (e.Consumed || kscreen.IsModal())
-					{
-						break;
-					}
+					break;
 				}
 			}
 		}
@@ -192,10 +194,11 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 
 	public void SetNavigationEventsEnabled(bool state)
 	{
-		if (!(this.evSys == null))
+		if (this.evSys == null)
 		{
-			this.evSys.sendNavigationEvents = state;
+			return;
 		}
+		this.evSys.sendNavigationEvents = state;
 	}
 
 	public static GameObject AddExistingChild(GameObject parent, GameObject go)
@@ -213,9 +216,9 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 		return Util.KInstantiateUI(prefab, parent, false);
 	}
 
-	private static bool quitting = false;
+	private static bool quitting;
 
-	private static bool inputDisabled = false;
+	private static bool inputDisabled;
 
 	private List<KScreen> screenStack = new List<KScreen>();
 

@@ -42,12 +42,13 @@ public class StatusScreen : KScreen
 
 	protected override void OnDeactivate()
 	{
-		if (!(this == null))
+		if (this == null)
 		{
-			if (this.portrait != null && this.portrait.gameObject != null)
-			{
-				global::UnityEngine.Object.Destroy(this.portrait.gameObject);
-			}
+			return;
+		}
+		if (this.portrait != null && this.portrait.gameObject != null)
+		{
+			global::UnityEngine.Object.Destroy(this.portrait.gameObject);
 		}
 	}
 

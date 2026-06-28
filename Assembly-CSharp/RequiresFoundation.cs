@@ -77,7 +77,7 @@ public class RequiresFoundation : KMonoBehaviour
 
 	private bool solid = true;
 
-	private bool isBuildingDamaged = false;
+	private bool isBuildingDamaged;
 
 	public static Operational.Flag solidFoundation = new Operational.Flag("solid_foundation", Operational.Flag.Type.Functional);
 }

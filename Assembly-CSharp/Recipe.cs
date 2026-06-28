@@ -217,16 +217,11 @@ public class Recipe : IHasSortOrder
 	{
 		GameObject prefab = Assets.GetPrefab(this.Result);
 		BuildingComplete component = prefab.GetComponent<BuildingComplete>();
-		BuildingDef buildingDef;
 		if (component != null)
 		{
-			buildingDef = component.Def;
+			return component.Def;
 		}
-		else
-		{
-			buildingDef = null;
-		}
-		return buildingDef;
+		return null;
 	}
 
 	public Sprite GetUIIcon()
@@ -267,7 +262,7 @@ public class Recipe : IHasSortOrder
 
 	public GameObject FabricationVisualizer;
 
-	public SimHashes ResultElementOverride = (SimHashes)0;
+	public SimHashes ResultElementOverride;
 
 	public Sprite Icon;
 

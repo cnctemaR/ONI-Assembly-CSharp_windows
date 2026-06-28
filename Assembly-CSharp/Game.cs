@@ -482,39 +482,40 @@ public class Game : KMonoBehaviour
 
 	private void Update()
 	{
-		if (!this.isLoading)
+		if (this.isLoading)
 		{
-			using (new KProfiler.Region("Game.Update", null))
+			return;
+		}
+		using (new KProfiler.Region("Game.Update", null))
+		{
+			if (global::Debug.developerConsoleVisible)
 			{
-				if (global::Debug.developerConsoleVisible)
-				{
-					global::Debug.developerConsoleVisible = false;
-				}
-				if (DebugHandler.DebugCellInfo)
-				{
-					this.ShowDebugCellInfo();
-				}
-				this.gasConduitSystem.Update();
-				this.liquidConduitSystem.Update();
-				this.circuitManager.Update();
-				this.logicCircuitManager.Update();
-				if (this.forceActiveArea)
-				{
-					this.simActiveRegionMin = new Vector2I((int)Mathf.Max(0f, this.minForcedActiveArea.x), (int)Mathf.Max(0f, this.minForcedActiveArea.y));
-					this.simActiveRegionMax = new Vector2I((int)Mathf.Min((float)(Grid.WidthInCells - 1), this.maxForcedActiveArea.x), (int)Mathf.Min((float)(Grid.HeightInCells - 1), this.maxForcedActiveArea.y));
-				}
-				this.simActiveRegionMin = new Vector2I(0, 0);
-				this.simActiveRegionMax = new Vector2I(Grid.WidthInCells, Grid.HeightInCells);
-				LightGridManager.SetActiveWindow(this.simActiveRegionMin, this.simActiveRegionMax);
-				Pathfinding.Instance.DebugUpdate();
-				CellChangeMonitor.Instance.Update();
-				this.UpdateComponents();
-				if (this.forceSimStep || Mathf.CeilToInt(Time.timeScale) != 0)
-				{
-					this.UpdateAmounts();
-					this.UnsafeUpdate();
-					this.forceSimStep = false;
-				}
+				global::Debug.developerConsoleVisible = false;
+			}
+			if (DebugHandler.DebugCellInfo)
+			{
+				this.ShowDebugCellInfo();
+			}
+			this.gasConduitSystem.Update();
+			this.liquidConduitSystem.Update();
+			this.circuitManager.Update();
+			this.logicCircuitManager.Update();
+			if (this.forceActiveArea)
+			{
+				this.simActiveRegionMin = new Vector2I((int)Mathf.Max(0f, this.minForcedActiveArea.x), (int)Mathf.Max(0f, this.minForcedActiveArea.y));
+				this.simActiveRegionMax = new Vector2I((int)Mathf.Min((float)(Grid.WidthInCells - 1), this.maxForcedActiveArea.x), (int)Mathf.Min((float)(Grid.HeightInCells - 1), this.maxForcedActiveArea.y));
+			}
+			this.simActiveRegionMin = new Vector2I(0, 0);
+			this.simActiveRegionMax = new Vector2I(Grid.WidthInCells, Grid.HeightInCells);
+			LightGridManager.SetActiveWindow(this.simActiveRegionMin, this.simActiveRegionMax);
+			Pathfinding.Instance.DebugUpdate();
+			CellChangeMonitor.Instance.Update();
+			this.UpdateComponents();
+			if (this.forceSimStep || Mathf.CeilToInt(Time.timeScale) != 0)
+			{
+				this.UpdateAmounts();
+				this.UnsafeUpdate();
+				this.forceSimStep = false;
 			}
 		}
 	}
@@ -527,7 +528,7 @@ public class Game : KMonoBehaviour
 			Sim.GameDataUpdate* ptr = this.StepTheSim();
 			if (ptr == null)
 			{
-				break;
+				return;
 			}
 			this.callbackManager.NextFrame();
 			this.complexCallbackManager.NextFrame();
@@ -564,22 +565,23 @@ public class Game : KMonoBehaviour
 	private void UpdateAmounts()
 	{
 		float deltaTime = Time.deltaTime;
-		if (deltaTime != 0f)
+		if (deltaTime == 0f)
 		{
-			this.amounts.RemoveAll((AmountInstance x) => !x.isActive);
-			int count = this.amounts.Count;
-			for (int i = 0; i < count; i++)
+			return;
+		}
+		this.amounts.RemoveAll((AmountInstance x) => !x.isActive);
+		int count = this.amounts.Count;
+		for (int i = 0; i < count; i++)
+		{
+			AmountInstance amountInstance = this.amounts[i];
+			if (amountInstance.isActive)
 			{
-				AmountInstance amountInstance = this.amounts[i];
-				if (amountInstance.isActive)
+				if (!amountInstance.paused)
 				{
-					if (!amountInstance.paused)
+					float delta = amountInstance.GetDelta();
+					if (delta != 0f)
 					{
-						float delta = amountInstance.GetDelta();
-						if (delta != 0f)
-						{
-							amountInstance.ApplyDelta(delta * deltaTime);
-						}
+						amountInstance.ApplyDelta(delta * deltaTime);
 					}
 				}
 			}
@@ -1035,12 +1037,9 @@ public class Game : KMonoBehaviour
 	public void StartBE()
 	{
 		Resources.UnloadUnusedAssets();
-		if (TimeOfDay.Instance != null)
+		if (TimeOfDay.Instance != null && !MusicManager.instance.SongIsPlaying("Underscore_Night_LP") && TimeOfDay.Instance.GetCurrentTimeRegion() == TimeOfDay.TimeRegion.Night)
 		{
-			if (!MusicManager.instance.SongIsPlaying("Underscore_Night_LP") && TimeOfDay.Instance.GetCurrentTimeRegion() == TimeOfDay.TimeRegion.Night)
-			{
-				MusicManager.instance.PlaySong("Underscore_Night_LP", false);
-			}
+			MusicManager.instance.PlaySong("Underscore_Night_LP", false);
 		}
 		AudioMixer.instance.Reset();
 		AudioMixer.instance.StartPersistentSnapshots();
@@ -1135,9 +1134,9 @@ public class Game : KMonoBehaviour
 	public Action<Game.GameSaveData> OnLoad;
 
 	[NonSerialized]
-	public bool baseAlreadyCreated = false;
+	public bool baseAlreadyCreated;
 
-	public static bool quitting = false;
+	public static bool quitting;
 
 	public AssignmentManager assignmentManager;
 
@@ -1260,7 +1259,7 @@ public class Game : KMonoBehaviour
 
 	private List<SolidInfo> gameSolidInfo = new List<SolidInfo>();
 
-	private bool IsPaused = false;
+	private bool IsPaused;
 
 	private EventInstance music;
 
@@ -1283,9 +1282,9 @@ public class Game : KMonoBehaviour
 
 	public SimData simData = new SimData();
 
-	private bool gameStarted = false;
+	private bool gameStarted;
 
-	private float simDT = 0f;
+	private float simDT;
 
 	private HashSet<int> activeGasTransitions = new HashSet<int>();
 
@@ -1295,10 +1294,10 @@ public class Game : KMonoBehaviour
 
 	private Vector2I simActiveRegionMax;
 
-	public bool debugWasUsed = false;
+	public bool debugWasUsed;
 
 	[SerializeField]
-	private bool forceActiveArea = false;
+	private bool forceActiveArea;
 
 	[SerializeField]
 	private Vector2 minForcedActiveArea = new Vector2(0f, 0f);
@@ -1306,11 +1305,11 @@ public class Game : KMonoBehaviour
 	[SerializeField]
 	private Vector2 maxForcedActiveArea = new Vector2(128f, 128f);
 
-	private bool isLoading = false;
+	private bool isLoading;
 
-	private bool forceSimStep = false;
+	private bool forceSimStep;
 
-	private SimViewMode previousOverlayMode = SimViewMode.None;
+	private SimViewMode previousOverlayMode;
 
 	private float previousGasConduitFlowDiscreteLerpPercent = -1f;
 
@@ -1323,11 +1322,11 @@ public class Game : KMonoBehaviour
 
 	private Dictionary<SpawnFXHashes, ObjectPool> fxPools = new Dictionary<SpawnFXHashes, ObjectPool>();
 
-	private Game.SavingPreCB activatePreCB = null;
+	private Game.SavingPreCB activatePreCB;
 
-	private Game.SavingActiveCB activateActiveCB = null;
+	private Game.SavingActiveCB activateActiveCB;
 
-	private Game.SavingPostCB activatePostCB = null;
+	private Game.SavingPostCB activatePostCB;
 
 	[SerializeField]
 	public Game.UIColours uiColours = new Game.UIColours();

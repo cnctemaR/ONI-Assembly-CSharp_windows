@@ -44,43 +44,41 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 			if (base.sm.bingeremaining.Get(base.smi) <= 0f)
 			{
 				this.GoTo(base.sm.eat_pst);
+				return;
 			}
-			else
+			foreach (Edible edible2 in Components.Edibles)
 			{
-				foreach (Edible edible2 in Components.Edibles)
+				if (!(edible2 == null))
 				{
-					if (!(edible2 == null))
+					if (!(edible2 == base.sm.ediblesource.Get<Edible>(base.smi)))
 					{
-						if (!(edible2 == base.sm.ediblesource.Get<Edible>(base.smi)))
+						if (edible2.GetComponent<Pickupable>().UnreservedAmount > 0f)
 						{
-							if (edible2.GetComponent<Pickupable>().UnreservedAmount > 0f)
+							if (edible2.GetComponent<Pickupable>().CouldBePickedUp(base.gameObject))
 							{
-								if (edible2.GetComponent<Pickupable>().CouldBePickedUp(base.gameObject))
+								int navigationCost = component.GetNavigationCost(edible2);
+								if (navigationCost != PathProber.InvalidCost)
 								{
-									int navigationCost = component.GetNavigationCost(edible2);
-									if (navigationCost != PathProber.InvalidCost)
+									if (navigationCost < num)
 									{
-										if (navigationCost < num)
-										{
-											num = navigationCost;
-											edible = edible2;
-										}
+										num = navigationCost;
+										edible = edible2;
 									}
 								}
 							}
 						}
 					}
 				}
-				base.sm.ediblesource.Set(edible, base.smi);
-				base.sm.requestedfoodunits.Set(base.sm.bingeremaining.Get(base.smi), base.smi);
-				if (edible == null)
-				{
-					this.GoTo(base.sm.cantFindFood);
-				}
-				else
-				{
-					this.GoTo(base.sm.fetch);
-				}
+			}
+			base.sm.ediblesource.Set(edible, base.smi);
+			base.sm.requestedfoodunits.Set(base.sm.bingeremaining.Get(base.smi), base.smi);
+			if (edible == null)
+			{
+				this.GoTo(base.sm.cantFindFood);
+			}
+			else
+			{
+				this.GoTo(base.sm.fetch);
 			}
 		}
 

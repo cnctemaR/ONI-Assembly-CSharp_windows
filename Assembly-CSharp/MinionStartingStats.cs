@@ -131,64 +131,59 @@ public class MinionStartingStats
 		}
 		Func<List<DUPLICANTSTATS.TraitVal>, bool> func = delegate(List<DUPLICANTSTATS.TraitVal> traitPossibilities)
 		{
-			bool flag2;
 			if (this.Traits.Count > DUPLICANTSTATS.MAX_TRAITS)
 			{
-				flag2 = false;
+				return false;
 			}
-			else
+			float num2 = Util.GaussianRandom(0f, 1f);
+			List<DUPLICANTSTATS.TraitVal> list = new List<DUPLICANTSTATS.TraitVal>(traitPossibilities);
+			list.ShuffleSeeded<DUPLICANTSTATS.TraitVal>(randSeed);
+			list.Sort((DUPLICANTSTATS.TraitVal t1, DUPLICANTSTATS.TraitVal t2) => -t1.probability.CompareTo(t2.probability));
+			foreach (DUPLICANTSTATS.TraitVal traitVal in list)
 			{
-				float num2 = Util.GaussianRandom(0f, 1f);
-				List<DUPLICANTSTATS.TraitVal> list = new List<DUPLICANTSTATS.TraitVal>(traitPossibilities);
-				list.ShuffleSeeded<DUPLICANTSTATS.TraitVal>(randSeed);
-				list.Sort((DUPLICANTSTATS.TraitVal t1, DUPLICANTSTATS.TraitVal t2) => -t1.probability.CompareTo(t2.probability));
-				foreach (DUPLICANTSTATS.TraitVal traitVal in list)
+				if (!selectedTraits.Contains(traitVal.id))
 				{
-					if (!selectedTraits.Contains(traitVal.id))
+					if (traitVal.mutuallyExclusiveTraits != null)
 					{
-						if (traitVal.mutuallyExclusiveTraits != null)
+						bool flag2 = false;
+						foreach (string text in selectedTraits)
 						{
-							bool flag3 = false;
-							foreach (string text in selectedTraits)
+							flag2 = traitVal.mutuallyExclusiveTraits.Contains(text);
+							if (flag2)
 							{
-								flag3 = traitVal.mutuallyExclusiveTraits.Contains(text);
-								if (flag3)
-								{
-									break;
-								}
-							}
-							if (flag3)
-							{
-								continue;
+								break;
 							}
 						}
-						if (num2 > traitVal.probability)
+						if (flag2)
 						{
-							Trait trait3 = Db.Get().traits.TryGet(traitVal.id);
-							if (trait3 == null)
+							continue;
+						}
+					}
+					if (num2 > traitVal.probability)
+					{
+						Trait trait3 = Db.Get().traits.TryGet(traitVal.id);
+						if (trait3 == null)
+						{
+							global::Debug.LogWarning("Trying to add nonexistent trait: " + traitVal.id, null);
+						}
+						else if (!is_starter_minion || trait3.ValidStarterTrait)
+						{
+							selectedTraits.Add(traitVal.id);
+							statDelta += traitVal.statBonus;
+							this.Traits.Add(trait3);
+							if (trait3.disabledChoreGroups != null)
 							{
-								global::Debug.LogWarning("Trying to add nonexistent trait: " + traitVal.id, null);
-							}
-							else if (!is_starter_minion || trait3.ValidStarterTrait)
-							{
-								selectedTraits.Add(traitVal.id);
-								statDelta += traitVal.statBonus;
-								this.Traits.Add(trait3);
-								if (trait3.disabledChoreGroups != null)
+								for (int k = 0; k < trait3.disabledChoreGroups.Length; k++)
 								{
-									for (int k = 0; k < trait3.disabledChoreGroups.Length; k++)
-									{
-										disabled_chore_groups.Add(trait3.disabledChoreGroups[k]);
-									}
+									disabled_chore_groups.Add(trait3.disabledChoreGroups[k]);
 								}
-								return true;
 							}
+							return true;
 						}
 					}
 				}
-				flag2 = false;
 			}
-			return flag2;
+			return false;
 		};
 		int num = ((!is_starter_minion) ? 3 : 1);
 		bool flag = false;

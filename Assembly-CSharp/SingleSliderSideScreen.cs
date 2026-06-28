@@ -18,22 +18,18 @@ public class SingleSliderSideScreen : SideScreenContent
 		if (new_target == null)
 		{
 			global::Debug.LogError("Invalid gameObject received", null);
+			return;
 		}
-		else
+		this.target = new_target.GetComponent<ISliderControl>();
+		if (this.target == null)
 		{
-			this.target = new_target.GetComponent<ISliderControl>();
-			if (this.target == null)
-			{
-				global::Debug.LogError("The gameObject received does not contain a Manual Generator component", null);
-			}
-			else
-			{
-				this.titleKey = this.target.SliderTitleKey;
-				for (int i = 0; i < this.sliderSets.Count; i++)
-				{
-					this.sliderSets[i].SetTarget(this.target);
-				}
-			}
+			global::Debug.LogError("The gameObject received does not contain a Manual Generator component", null);
+			return;
+		}
+		this.titleKey = this.target.SliderTitleKey;
+		for (int i = 0; i < this.sliderSets.Count; i++)
+		{
+			this.sliderSets[i].SetTarget(this.target);
 		}
 	}
 

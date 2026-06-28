@@ -48,7 +48,7 @@ public class BuildMenuCategoriesScreen : KIconToggleMenu
 					category = displayInfo.category,
 					depth = depth,
 					requirementsState = PlanScreen.RequirementsState.Tech
-				}, displayInfo.hotkey, Strings.Get("STRINGS.UI.NEWBUILDCATEGORIES." + text + ".TOOLTIP"), "");
+				}, displayInfo.hotkey, Strings.Get("STRINGS.UI.NEWBUILDCATEGORIES." + text + ".TOOLTIP"), string.Empty);
 				list.Add(toggleInfo);
 				this.subcategories.Add(displayInfo.category);
 			}
@@ -188,16 +188,17 @@ public class BuildMenuCategoriesScreen : KIconToggleMenu
 
 	public void UpdateNotifications(ICollection<BuildMenu.Category> updated_categories)
 	{
-		if (this.toggleInfo != null)
+		if (this.toggleInfo == null)
 		{
-			this.UpdateBuildableStates(false);
-			foreach (KIconToggleMenu.ToggleInfo toggleInfo in this.toggleInfo)
+			return;
+		}
+		this.UpdateBuildableStates(false);
+		foreach (KIconToggleMenu.ToggleInfo toggleInfo in this.toggleInfo)
+		{
+			BuildMenu.Category category = ((BuildMenuCategoriesScreen.UserData)toggleInfo.userData).category;
+			if (updated_categories.Contains(category))
 			{
-				BuildMenu.Category category = ((BuildMenuCategoriesScreen.UserData)toggleInfo.userData).category;
-				if (updated_categories.Contains(category))
-				{
-					toggleInfo.toggle.gameObject.GetComponent<PlanCategoryNotifications>().ToggleAttention(true);
-				}
+				toggleInfo.toggle.gameObject.GetComponent<PlanCategoryNotifications>().ToggleAttention(true);
 			}
 		}
 	}
@@ -356,7 +357,7 @@ public class BuildMenuCategoriesScreen : KIconToggleMenu
 	public Action<BuildMenu.Category, int> onCategoryClicked;
 
 	[SerializeField]
-	public bool modalKeyInputBehaviour = false;
+	public bool modalKeyInputBehaviour;
 
 	[SerializeField]
 	private Image focusIndicator;

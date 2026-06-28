@@ -180,7 +180,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 		descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESPOWERGENERATOR, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESPOWERGENERATOR, Descriptor.DescriptorType.Requirement);
 		list.Add(descriptor);
 		Descriptor descriptor2 = default(Descriptor);
-		string text = string.Format(UI.BUILDINGEFFECTS.BATTERYEFFECT, GameUtil.GetFormattedJoules(this.capacity, ""));
+		string text = string.Format(UI.BUILDINGEFFECTS.BATTERYEFFECT, GameUtil.GetFormattedJoules(this.capacity, string.Empty));
 		descriptor2.SetupDescriptor(text, text, Descriptor.DescriptorType.Effect);
 		list.Add(descriptor2);
 		return list;
@@ -206,5 +206,5 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 
 	private float dt;
 
-	private float joulesConsumed = 0f;
+	private float joulesConsumed;
 }

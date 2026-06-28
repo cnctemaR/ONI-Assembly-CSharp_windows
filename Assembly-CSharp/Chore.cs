@@ -195,34 +195,36 @@ public abstract class Chore
 		StateMachine.Instance instance = smi;
 		instance.OnStop = (Action<string, StateMachine.Status>)Delegate.Remove(instance.OnStop, new Action<string, StateMachine.Status>(this.OnStateMachineStop));
 		smi.StopSM(reason);
-		if (!(this.driver == null))
+		if (this.driver == null)
 		{
-			this.lastDriver = this.driver;
-			this.driver = null;
-			if (this.onEnd != null)
-			{
-				this.onEnd(this);
-			}
-			if (this.onExit != null)
-			{
-				this.onExit(this);
-			}
-			this.driver = null;
+			return;
 		}
+		this.lastDriver = this.driver;
+		this.driver = null;
+		if (this.onEnd != null)
+		{
+			this.onEnd(this);
+		}
+		if (this.onExit != null)
+		{
+			this.onExit(this);
+		}
+		this.driver = null;
 	}
 
 	protected virtual void Succeed(string reason)
 	{
-		if (this.RemoveFromProvider())
+		if (!this.RemoveFromProvider())
 		{
-			this.isComplete = true;
-			if (this.onComplete != null)
-			{
-				this.onComplete(this);
-			}
-			this.End(reason);
-			this.Cleanup();
+			return;
 		}
+		this.isComplete = true;
+		if (this.onComplete != null)
+		{
+			this.onComplete(this);
+		}
+		this.End(reason);
+		this.Cleanup();
 	}
 
 	protected virtual StatusItem GetStatusItem()
@@ -232,29 +234,30 @@ public abstract class Chore
 
 	public virtual void Fail(string reason)
 	{
-		if (!(this.provider == null))
+		if (this.provider == null)
 		{
-			if (!(this.driver == null))
-			{
-				if (!this.runUntilComplete)
-				{
-					this.Cancel(reason);
-				}
-				else
-				{
-					this.End(reason);
-				}
-			}
+			return;
 		}
+		if (this.driver == null)
+		{
+			return;
+		}
+		if (!this.runUntilComplete)
+		{
+			this.Cancel(reason);
+			return;
+		}
+		this.End(reason);
 	}
 
 	public void Cancel(string reason)
 	{
-		if (this.RemoveFromProvider())
+		if (!this.RemoveFromProvider())
 		{
-			this.End(reason);
-			this.Cleanup();
+			return;
 		}
+		this.End(reason);
+		this.Cleanup();
 	}
 
 	protected virtual void OnStateMachineStop(string reason, StateMachine.Status status)
@@ -271,18 +274,13 @@ public abstract class Chore
 
 	private bool RemoveFromProvider()
 	{
-		bool flag;
 		if (this.provider != null)
 		{
 			this.provider.RemoveChore(this);
 			this.provider = null;
-			flag = true;
+			return true;
 		}
-		else
-		{
-			flag = false;
-		}
-		return flag;
+		return false;
 	}
 
 	public virtual bool CanPreempt(Chore.Precondition.Context context)
@@ -412,53 +410,38 @@ public abstract class Chore
 			{
 				bool flag = this.failedPreconditionId != -1;
 				bool flag2 = obj.failedPreconditionId != -1;
-				int num2;
 				if (flag == flag2)
 				{
 					int num = this.masterPriority.priority_class - obj.masterPriority.priority_class;
 					if (num != 0)
 					{
-						num2 = num;
+						return num;
 					}
-					else
+					int num2 = this.masterPriority.priority_value - obj.masterPriority.priority_value;
+					if (num2 != 0)
 					{
-						int num3 = this.masterPriority.priority_value - obj.masterPriority.priority_value;
-						if (num3 != 0)
-						{
-							num2 = num3;
-						}
-						else
-						{
-							int num4 = this.priority - obj.priority;
-							if (num4 != 0)
-							{
-								num2 = num4;
-							}
-							else
-							{
-								int num5 = this.priorityMod - obj.priorityMod;
-								if (num5 != 0)
-								{
-									num2 = num5;
-								}
-								else
-								{
-									int num6 = obj.cost - this.cost;
-									num2 = num6;
-								}
-							}
-						}
+						return num2;
 					}
-				}
-				else if (flag)
-				{
-					num2 = -1;
+					int num3 = this.priority - obj.priority;
+					if (num3 != 0)
+					{
+						return num3;
+					}
+					int num4 = this.priorityMod - obj.priorityMod;
+					if (num4 != 0)
+					{
+						return num4;
+					}
+					return obj.cost - this.cost;
 				}
 				else
 				{
-					num2 = 1;
+					if (flag)
+					{
+						return -1;
+					}
+					return 1;
 				}
-				return num2;
 			}
 
 			public override bool Equals(object obj)

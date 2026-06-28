@@ -15,22 +15,18 @@ public class TitleBarPortrait : KMonoBehaviour
 		if (component != null)
 		{
 			this.SetPortrait(component);
+			return;
 		}
-		else
+		Building component2 = selectedTarget.GetComponent<Building>();
+		if (component2 != null)
 		{
-			Building component2 = selectedTarget.GetComponent<Building>();
-			if (component2 != null)
-			{
-				this.SetPortrait(component2.Def.GetUISprite("ui"));
-			}
-			else
-			{
-				MeshRenderer componentInChildren = selectedTarget.GetComponentInChildren<MeshRenderer>();
-				if (componentInChildren)
-				{
-					this.SetPortrait(Sprite.Create((Texture2D)componentInChildren.material.mainTexture, new Rect(0f, 0f, (float)componentInChildren.material.mainTexture.width, (float)componentInChildren.material.mainTexture.height), new Vector2(0.5f, 0.5f)));
-				}
-			}
+			this.SetPortrait(component2.Def.GetUISprite("ui"));
+			return;
+		}
+		MeshRenderer componentInChildren = selectedTarget.GetComponentInChildren<MeshRenderer>();
+		if (componentInChildren)
+		{
+			this.SetPortrait(Sprite.Create((Texture2D)componentInChildren.material.mainTexture, new Rect(0f, 0f, (float)componentInChildren.material.mainTexture.width, (float)componentInChildren.material.mainTexture.height), new Vector2(0.5f, 0.5f)));
 		}
 	}
 
@@ -55,11 +51,9 @@ public class TitleBarPortrait : KMonoBehaviour
 		if (image == null)
 		{
 			this.ClearPortrait();
+			return;
 		}
-		else
-		{
-			this.ImageObject.GetComponent<Image>().sprite = image;
-		}
+		this.ImageObject.GetComponent<Image>().sprite = image;
 	}
 
 	private void SetPortrait(MinionIdentity identity)

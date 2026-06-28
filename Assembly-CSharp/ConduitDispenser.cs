@@ -30,23 +30,15 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 	public ConduitFlow GetConduitManager()
 	{
 		ConduitType conduitType = this.conduitType;
-		ConduitFlow conduitFlow;
-		if (conduitType != ConduitType.Gas)
+		if (conduitType == ConduitType.Gas)
 		{
-			if (conduitType != ConduitType.Liquid)
-			{
-				conduitFlow = null;
-			}
-			else
-			{
-				conduitFlow = Game.Instance.liquidConduitFlow;
-			}
+			return Game.Instance.gasConduitFlow;
 		}
-		else
+		if (conduitType != ConduitType.Liquid)
 		{
-			conduitFlow = Game.Instance.gasConduitFlow;
+			return null;
 		}
-		return conduitFlow;
+		return Game.Instance.liquidConduitFlow;
 	}
 
 	private void OnConduitConnectionChanged(object data)
@@ -129,13 +121,13 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 	public ConduitType conduitType;
 
 	[SerializeField]
-	public SimHashes[] elementFilter = null;
+	public SimHashes[] elementFilter;
 
 	[SerializeField]
-	public bool invertElementFilter = false;
+	public bool invertElementFilter;
 
 	[SerializeField]
-	public bool alwaysDispense = false;
+	public bool alwaysDispense;
 
 	private static Operational.Flag outputConduitFlag = new Operational.Flag("output_conduit", Operational.Flag.Type.Functional);
 

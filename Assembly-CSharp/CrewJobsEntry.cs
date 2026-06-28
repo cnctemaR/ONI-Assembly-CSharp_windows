@@ -49,7 +49,7 @@ public class CrewJobsEntry : CrewListEntry
 	{
 		GameObject gameObject = Util.KInstantiateUI(this.Prefab_JobPriorityButtonAllTasks, base.transform.gameObject, false);
 		gameObject.GetComponent<OverviewColumnIdentity>().columnID = "AllTasks";
-		gameObject.GetComponent<OverviewColumnIdentity>().Column_DisplayName = "";
+		gameObject.GetComponent<OverviewColumnIdentity>().Column_DisplayName = string.Empty;
 		Button b = gameObject.GetComponent<Button>();
 		b.onClick.AddListener(delegate
 		{
@@ -98,8 +98,9 @@ public class CrewJobsEntry : CrewListEntry
 		if (this.identity == null)
 		{
 			this.dirty = false;
+			return;
 		}
-		else if (this.dirty)
+		if (this.dirty)
 		{
 			Attributes attributes = this.identity.GetAttributes();
 			foreach (CrewJobsEntry.PriorityButton priorityButton in this.PriorityButtons)
@@ -195,7 +196,7 @@ public class CrewJobsEntry : CrewListEntry
 				{
 					string text = string.Format(UI.TOOLTIPS.JOBSSCREEN_CANNOTPERFORMTASK, this.consumer.GetComponent<MinionIdentity>().GetProperName());
 					b.tooltip.AddMultiStringTooltip(text, this.TooltipTextStyle_AbilityNegativeModifier);
-					return "";
+					return string.Empty;
 				}
 				b.tooltip.AddMultiStringTooltip(UI.TOOLTIPS.JOBSSCREEN_RELEVANT_ATTRIBUTES, this.TooltipTextStyle_Ability);
 				Klei.AI.Attribute attribute = b.choreGroup.attribute;
@@ -213,7 +214,7 @@ public class CrewJobsEntry : CrewListEntry
 				b.tooltip.AddMultiStringTooltip(attribute.Name + " " + attributeInstance.GetTotalValue(), textStyleSetting);
 			}
 		}
-		return "";
+		return string.Empty;
 	}
 
 	private void LateUpdate()

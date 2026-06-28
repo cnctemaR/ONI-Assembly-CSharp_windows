@@ -113,11 +113,12 @@ public class EventSystem
 	public void Unsubscribe(GameObject target, int eventName, Action<object> handler)
 	{
 		this.UnregisterEvent(target, eventName, handler);
-		if (!(target == null))
+		if (target == null)
 		{
-			KObject orCreateObject = KObjectManager.Instance.GetOrCreateObject(target);
-			orCreateObject.GetEventSystem().Unsubscribe(eventName, handler);
+			return;
 		}
+		KObject orCreateObject = KObjectManager.Instance.GetOrCreateObject(target);
+		orCreateObject.GetEventSystem().Unsubscribe(eventName, handler);
 	}
 
 	public void Unsubscribe(string[] eventNames, Action<object> handler)
@@ -131,32 +132,30 @@ public class EventSystem
 
 	public void Trigger(int hash, object data = null)
 	{
-		if (!App.IsExiting)
+		if (App.IsExiting)
 		{
-			this.currentlyTriggering++;
-			int count = this.entries.Count;
-			for (int i = 0; i < count; i++)
+			return;
+		}
+		this.currentlyTriggering++;
+		int count = this.entries.Count;
+		for (int i = 0; i < count; i++)
+		{
+			if (this.entries[i].hash == hash && this.entries[i].handler != null)
 			{
-				if (this.entries[i].hash == hash)
+				if (EventSystem.ENABLE_DETAILED_EVENT_PROFILE_INFO)
 				{
-					if (this.entries[i].handler != null)
-					{
-						if (EventSystem.ENABLE_DETAILED_EVENT_PROFILE_INFO)
-						{
-						}
-						this.entries[i].handler(data);
-						if (EventSystem.ENABLE_DETAILED_EVENT_PROFILE_INFO)
-						{
-						}
-					}
+				}
+				this.entries[i].handler(data);
+				if (EventSystem.ENABLE_DETAILED_EVENT_PROFILE_INFO)
+				{
 				}
 			}
-			this.currentlyTriggering--;
-			if (this.dirty && this.currentlyTriggering == 0)
-			{
-				this.dirty = false;
-				this.entries.RemoveAll((EventSystem.Entry x) => x.handler == null);
-			}
+		}
+		this.currentlyTriggering--;
+		if (this.dirty && this.currentlyTriggering == 0)
+		{
+			this.dirty = false;
+			this.entries.RemoveAll((EventSystem.Entry x) => x.handler == null);
 		}
 	}
 
@@ -165,7 +164,7 @@ public class EventSystem
 		return null;
 	}
 
-	private static bool ENABLE_DETAILED_EVENT_PROFILE_INFO = false;
+	private static bool ENABLE_DETAILED_EVENT_PROFILE_INFO;
 
 	private int nextId;
 

@@ -548,7 +548,7 @@ public static class DebugExtension
 
 	public static string MethodsOfObject(object obj, bool includeInfo = false)
 	{
-		string text = "";
+		string text = string.Empty;
 		MethodInfo[] methods = obj.GetType().GetMethods();
 		for (int i = 0; i < methods.Length; i++)
 		{
@@ -566,7 +566,7 @@ public static class DebugExtension
 
 	public static string MethodsOfType(Type type, bool includeInfo = false)
 	{
-		string text = "";
+		string text = string.Empty;
 		MethodInfo[] methods = type.GetMethods();
 		for (int i = 0; i < methods.Length; i++)
 		{

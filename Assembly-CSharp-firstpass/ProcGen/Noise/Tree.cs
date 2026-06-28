@@ -83,71 +83,66 @@ namespace ProcGen.Noise
 
 		private IModule3D GetModuleFromLink(Link link)
 		{
-			IModule3D module3D;
 			if (link == null)
 			{
-				module3D = null;
+				return null;
 			}
-			else
+			switch (link.type)
 			{
-				switch (link.type)
+			case Link.Type.Primitive:
+				if (this.primitiveLookup.ContainsKey(link.name))
 				{
-				case Link.Type.Primitive:
-					if (this.primitiveLookup.ContainsKey(link.name))
-					{
-						return this.primitiveLookup[link.name];
-					}
-					Debug.LogError("Couldnt find [" + link.name + "] in primitives", null);
-					break;
-				case Link.Type.Filter:
-					if (this.filterLookup.ContainsKey(link.name))
-					{
-						return this.filterLookup[link.name];
-					}
-					Debug.LogError("Couldnt find [" + link.name + "] in filters", null);
-					break;
-				case Link.Type.Transformer:
-					if (this.transformerLookup.ContainsKey(link.name))
-					{
-						return this.transformerLookup[link.name];
-					}
-					Debug.LogError("Couldnt find [" + link.name + "] in transformers", null);
-					break;
-				case Link.Type.Selector:
-					if (this.selectorLookup.ContainsKey(link.name))
-					{
-						return this.selectorLookup[link.name];
-					}
-					Debug.LogError("Couldnt find [" + link.name + "] in selectors", null);
-					break;
-				case Link.Type.Modifier:
-					if (this.modifierLookup.ContainsKey(link.name))
-					{
-						return this.modifierLookup[link.name];
-					}
-					Debug.LogError("Couldnt find [" + link.name + "] in modifiers", null);
-					break;
-				case Link.Type.Combiner:
-					if (this.combinerLookup.ContainsKey(link.name))
-					{
-						return this.combinerLookup[link.name];
-					}
-					Debug.LogError("Couldnt find [" + link.name + "] in combiners", null);
-					break;
-				case Link.Type.Terminator:
-					return null;
+					return this.primitiveLookup[link.name];
 				}
-				Debug.LogError(string.Concat(new string[]
+				Debug.LogError("Couldnt find [" + link.name + "] in primitives", null);
+				break;
+			case Link.Type.Filter:
+				if (this.filterLookup.ContainsKey(link.name))
 				{
-					"Couldnt find link [",
-					link.name,
-					"] [",
-					link.type.ToString(),
-					"]"
-				}), null);
-				module3D = null;
+					return this.filterLookup[link.name];
+				}
+				Debug.LogError("Couldnt find [" + link.name + "] in filters", null);
+				break;
+			case Link.Type.Transformer:
+				if (this.transformerLookup.ContainsKey(link.name))
+				{
+					return this.transformerLookup[link.name];
+				}
+				Debug.LogError("Couldnt find [" + link.name + "] in transformers", null);
+				break;
+			case Link.Type.Selector:
+				if (this.selectorLookup.ContainsKey(link.name))
+				{
+					return this.selectorLookup[link.name];
+				}
+				Debug.LogError("Couldnt find [" + link.name + "] in selectors", null);
+				break;
+			case Link.Type.Modifier:
+				if (this.modifierLookup.ContainsKey(link.name))
+				{
+					return this.modifierLookup[link.name];
+				}
+				Debug.LogError("Couldnt find [" + link.name + "] in modifiers", null);
+				break;
+			case Link.Type.Combiner:
+				if (this.combinerLookup.ContainsKey(link.name))
+				{
+					return this.combinerLookup[link.name];
+				}
+				Debug.LogError("Couldnt find [" + link.name + "] in combiners", null);
+				break;
+			case Link.Type.Terminator:
+				return null;
 			}
-			return module3D;
+			Debug.LogError(string.Concat(new string[]
+			{
+				"Couldnt find link [",
+				link.name,
+				"] [",
+				link.type.ToString(),
+				"]"
+			}), null);
+			return null;
 		}
 
 		public IModule3D BuildFinalModule(int globalSeed)

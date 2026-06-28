@@ -83,26 +83,21 @@ public struct Tag : ISerializationCallbackReceiver, IEquatable<Tag>, IComparable
 		}
 		else
 		{
-			this.name = "";
+			this.name = string.Empty;
 		}
 	}
 
 	public int CompareTo(Tag other)
 	{
-		int num;
 		if (this.hash < other.hash)
 		{
-			num = -1;
+			return -1;
 		}
-		else if (this.hash > other.hash)
+		if (this.hash > other.hash)
 		{
-			num = 1;
+			return 1;
 		}
-		else
-		{
-			num = 0;
-		}
-		return num;
+		return 0;
 	}
 
 	public override string ToString()

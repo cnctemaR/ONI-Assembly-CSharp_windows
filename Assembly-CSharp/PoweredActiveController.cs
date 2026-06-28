@@ -47,6 +47,6 @@ public class PoweredActiveController : GameStateMachine<PoweredActiveController,
 		{
 		}
 
-		public bool ShowWorkingStatus = false;
+		public bool ShowWorkingStatus;
 	}
 }

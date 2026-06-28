@@ -57,5 +57,5 @@ public class LogicSwitch : Switch
 
 	public static readonly HashedString PORT_ID = "LogicSwitch";
 
-	private global::System.Action firstFrameCallback = null;
+	private global::System.Action firstFrameCallback;
 }

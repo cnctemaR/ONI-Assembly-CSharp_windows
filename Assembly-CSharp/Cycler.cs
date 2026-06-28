@@ -5,14 +5,15 @@ public class Cycler : MonoBehaviour
 {
 	private void Update()
 	{
-		if (BatchedAnimBulkDisplayer.RunCycler)
+		if (!BatchedAnimBulkDisplayer.RunCycler)
 		{
-			this.timer += Time.deltaTime;
-			if (this.timer > this.maxPerAnim)
-			{
-				this.timer = 0f;
-				this.Next();
-			}
+			return;
+		}
+		this.timer += Time.deltaTime;
+		if (this.timer > this.maxPerAnim)
+		{
+			this.timer = 0f;
+			this.Next();
 		}
 	}
 
@@ -20,7 +21,7 @@ public class Cycler : MonoBehaviour
 	{
 	}
 
-	private float timer = 0f;
+	private float timer;
 
 	public float maxPerAnim = 5f;
 }

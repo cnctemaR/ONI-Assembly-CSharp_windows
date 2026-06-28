@@ -66,12 +66,9 @@ public class GeneShuffler : Ownable
 	public override void Assign(IAssignableIdentity new_assignee)
 	{
 		base.Assign(new_assignee);
-		if (this.geneShufflerSMI != null)
+		if (this.geneShufflerSMI != null && !this.geneShufflerSMI.IsInsideState(this.geneShufflerSMI.sm.consumed))
 		{
-			if (!this.geneShufflerSMI.IsInsideState(this.geneShufflerSMI.sm.consumed))
-			{
-				this.ActivateChore(null);
-			}
+			this.ActivateChore(null);
 		}
 	}
 
@@ -88,7 +85,7 @@ public class GeneShuffler : Ownable
 	{
 		base.OnStartWork(worker);
 		this.notification = new Notification(MISC.NOTIFICATIONS.GENESHUFFLER.NAME, NotificationType.Good, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.GENESHUFFLER.TOOLTIP + notificationList.ReduceMessages(false), null, false, 0f, null, null, null);
-		this.notifier.Add(this.notification, "");
+		this.notifier.Add(this.notification, string.Empty);
 		if (base.GetComponent<KSelectable>().IsSelected)
 		{
 			SelectTool.Instance.Select(null, true);
@@ -181,11 +178,12 @@ public class GeneShuffler : Ownable
 
 	public void CancelChore(object param = null)
 	{
-		if (this.chore != null)
+		if (this.chore == null)
 		{
-			this.chore.Cancel("User cancelled");
-			this.chore = null;
+			return;
 		}
+		this.chore.Cancel("User cancelled");
+		this.chore = null;
 	}
 
 	private void CompleteChore()

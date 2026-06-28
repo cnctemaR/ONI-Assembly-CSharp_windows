@@ -35,7 +35,7 @@ public class ToolMenu : KScreen
 		new ToolMenu.ToolInfo(UI.TOOLS.DECONSTRUCT.NAME, "icon_action_deconstruct", global::Action.BuildingDeconstruct, "DeconstructTool", toolCollection, UI.TOOLTIPS.DECONSTRUCTBUTTON, SimViewMode.None, false, null, null);
 		ToolMenu.ToolCollection toolCollection2 = new ToolMenu.ToolCollection(UI.TOOLS.CANCEL.NAME, "icon_action_cancel", UI.TOOLTIPS.CANCELBUTTON, false, global::Action.BuildingCancel);
 		new ToolMenu.ToolInfo(UI.TOOLS.CANCEL.NAME, "icon_action_cancel", global::Action.BuildingCancel, "CancelTool", toolCollection2, UI.TOOLTIPS.CANCELBUTTON, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection3 = new ToolMenu.ToolCollection(UI.TOOLS.DIG.NAME, "icon_action_dig", "", false, global::Action.Dig);
+		ToolMenu.ToolCollection toolCollection3 = new ToolMenu.ToolCollection(UI.TOOLS.DIG.NAME, "icon_action_dig", string.Empty, false, global::Action.Dig);
 		new ToolMenu.ToolInfo(UI.TOOLS.DIG.NAME, "icon_action_dig", global::Action.Dig, "DigTool", toolCollection3, UI.TOOLTIPS.DIGBUTTON, SimViewMode.None, false, null, null);
 		ToolMenu.ToolCollection toolCollection4 = new ToolMenu.ToolCollection(UI.TOOLS.PRIORITIESCATEGORY.NAME, "icon_action_prioritize", UI.TOOLTIPS.PRIORITIZEMAINBUTTON, false, global::Action.AccessPrioritizeCollection);
 		new ToolMenu.ToolInfo(UI.TOOLS.PRIORITIZE.NAME, "icon_action_prioritize", global::Action.Prioritize, "PrioritizeTool", toolCollection4, UI.TOOLTIPS.PRIORITIZEBUTTON, SimViewMode.None, false, null, null);
@@ -45,9 +45,9 @@ public class ToolMenu : KScreen
 		new ToolMenu.ToolInfo(UI.TOOLS.MOP.NAME, "icon_action_mop", global::Action.Mop, "MopTool", toolCollection6, UI.TOOLTIPS.MOPBUTTON, SimViewMode.None, false, null, null);
 		ToolMenu.ToolCollection toolCollection7 = new ToolMenu.ToolCollection(UI.TOOLS.DISINFECT.NAME, "icon_action_disinfect", UI.TOOLTIPS.DISINFECTBUTTON, false, global::Action.NumActions);
 		new ToolMenu.ToolInfo(UI.TOOLS.DISINFECT.NAME, "icon_action_disinfect", global::Action.Disinfect, "DisinfectTool", toolCollection7, UI.TOOLTIPS.DISINFECTBUTTON, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection8 = new ToolMenu.ToolCollection(UI.TOOLS.ATTACK.NAME, "icon_action_attack", "", false, global::Action.Attack);
+		ToolMenu.ToolCollection toolCollection8 = new ToolMenu.ToolCollection(UI.TOOLS.ATTACK.NAME, "icon_action_attack", string.Empty, false, global::Action.Attack);
 		new ToolMenu.ToolInfo(UI.TOOLS.ATTACK.NAME, "icon_action_attack", global::Action.Attack, "AttackTool", toolCollection8, UI.TOOLTIPS.ATTACKBUTTON, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection9 = new ToolMenu.ToolCollection(UI.TOOLS.HARVEST.NAME, "icon_action_harvest", "", false, global::Action.Harvest);
+		ToolMenu.ToolCollection toolCollection9 = new ToolMenu.ToolCollection(UI.TOOLS.HARVEST.NAME, "icon_action_harvest", string.Empty, false, global::Action.Harvest);
 		new ToolMenu.ToolInfo(UI.TOOLS.HARVEST.NAME, "icon_action_harvest", global::Action.Harvest, "HarvestTool", toolCollection9, UI.TOOLTIPS.HARVESTBUTTON, SimViewMode.None, false, null, null);
 		this.toolCollections = new ToolMenu.ToolCollection[] { toolCollection3, toolCollection8, toolCollection9, toolCollection4, toolCollection5, toolCollection6, toolCollection7, toolCollection, toolCollection2 };
 	}
@@ -85,12 +85,9 @@ public class ToolMenu : KScreen
 			component.soundPlayer.Enabled = false;
 			component.onClick += delegate
 			{
-				if (this.currentlySelectedCollection == tc)
+				if (this.currentlySelectedCollection == tc && tc.tools.Count >= 1)
 				{
-					if (tc.tools.Count >= 1)
-					{
-						KMonoBehaviour.PlaySound(GlobalAssets.GetSound(PlayerController.Instance.ActiveTool.GetDeactivateSound(), false));
-					}
+					KMonoBehaviour.PlaySound(GlobalAssets.GetSound(PlayerController.Instance.ActiveTool.GetDeactivateSound(), false));
 				}
 				this.ChooseCollection(tc, true);
 			};
@@ -146,87 +143,82 @@ public class ToolMenu : KScreen
 
 	private void ChooseTool(ToolMenu.ToolInfo tool)
 	{
+		if (this.currentlySelectedTool == tool)
+		{
+			return;
+		}
 		if (this.currentlySelectedTool != tool)
 		{
-			if (this.currentlySelectedTool != tool)
+			this.currentlySelectedTool = tool;
+			if (this.currentlySelectedTool != null && this.currentlySelectedTool.onSelectCallback != null)
 			{
-				this.currentlySelectedTool = tool;
-				if (this.currentlySelectedTool != null && this.currentlySelectedTool.onSelectCallback != null)
-				{
-					this.currentlySelectedTool.onSelectCallback(this.currentlySelectedTool);
-				}
+				this.currentlySelectedTool.onSelectCallback(this.currentlySelectedTool);
 			}
-			if (this.currentlySelectedTool != null)
+		}
+		if (this.currentlySelectedTool != null)
+		{
+			this.currentlySelectedCollection = this.currentlySelectedTool.collection;
+			foreach (InterfaceTool interfaceTool in PlayerController.Instance.tools)
 			{
-				this.currentlySelectedCollection = this.currentlySelectedTool.collection;
-				foreach (InterfaceTool interfaceTool in PlayerController.Instance.tools)
+				if (this.currentlySelectedTool.toolName == interfaceTool.name)
 				{
-					if (this.currentlySelectedTool.toolName == interfaceTool.name)
+					UISounds.PlaySound(UISounds.Sound.ClickObject);
+					PlayerController.Instance.ActivateTool(interfaceTool);
+					if (tool.forceViewMode && OverlayScreen.Instance.GetMode() != tool.viewMode)
 					{
-						UISounds.PlaySound(UISounds.Sound.ClickObject);
-						PlayerController.Instance.ActivateTool(interfaceTool);
-						if (tool.forceViewMode)
-						{
-							if (OverlayScreen.Instance.GetMode() != tool.viewMode)
-							{
-								EventSystem.Trigger(Game.Instance.gameObject, 1248612973, tool.viewMode);
-							}
-						}
-						break;
+						EventSystem.Trigger(Game.Instance.gameObject, 1248612973, tool.viewMode);
 					}
+					break;
 				}
 			}
-			else
+		}
+		else
+		{
+			PlayerController.Instance.ActivateTool(SelectTool.Instance);
+		}
+		for (int j = 0; j < this.toolCollections.Length; j++)
+		{
+			ToolMenu.ToolCollection tc = this.toolCollections[j];
+			if (this.currentlySelectedTool != null && this.currentlySelectedTool.collection == tc)
 			{
-				PlayerController.Instance.ActivateTool(SelectTool.Instance);
-			}
-			for (int j = 0; j < this.toolCollections.Length; j++)
-			{
-				ToolMenu.ToolCollection tc = this.toolCollections[j];
-				if (this.currentlySelectedTool != null && this.currentlySelectedTool.collection == tc)
+				if (!tc.UIMenuDisplay.activeSelf || tc.UIMenuDisplay.GetComponent<ExpandRevealUIContent>().Collapsing)
 				{
-					if (!tc.UIMenuDisplay.activeSelf || tc.UIMenuDisplay.GetComponent<ExpandRevealUIContent>().Collapsing)
+					if (tc.tools.Count > 1)
 					{
-						if (tc.tools.Count > 1)
+						tc.UIMenuDisplay.SetActive(true);
+						if (tc.tools.Count < this.smallCollectionMax)
 						{
-							tc.UIMenuDisplay.SetActive(true);
-							if (tc.tools.Count < this.smallCollectionMax)
-							{
-								float num = Mathf.Clamp(1f - (float)tc.tools.Count * 0.15f, 0.5f, 1f);
-								tc.UIMenuDisplay.GetComponent<ExpandRevealUIContent>().speedScale = num;
-							}
-							tc.UIMenuDisplay.GetComponent<ExpandRevealUIContent>().Expand(delegate(object s)
-							{
-								this.SetToggleState(tc.toggle.GetComponent<KToggle>(), true);
-							});
+							float num = Mathf.Clamp(1f - (float)tc.tools.Count * 0.15f, 0.5f, 1f);
+							tc.UIMenuDisplay.GetComponent<ExpandRevealUIContent>().speedScale = num;
 						}
-						else
+						tc.UIMenuDisplay.GetComponent<ExpandRevealUIContent>().Expand(delegate(object s)
 						{
-							this.currentlySelectedTool = tc.tools[0];
-						}
-					}
-				}
-				else if (tc.UIMenuDisplay.activeSelf && !tc.UIMenuDisplay.GetComponent<ExpandRevealUIContent>().Collapsing)
-				{
-					if (tc.tools.Count > 0)
-					{
-						tc.UIMenuDisplay.GetComponent<ExpandRevealUIContent>().Collapse(delegate(object s)
-						{
-							this.SetToggleState(tc.toggle.GetComponent<KToggle>(), false);
-							tc.UIMenuDisplay.SetActive(false);
+							this.SetToggleState(tc.toggle.GetComponent<KToggle>(), true);
 						});
-					}
-				}
-				for (int k = 0; k < tc.tools.Count; k++)
-				{
-					if (tc.tools[k] == this.currentlySelectedTool)
-					{
-						this.SetToggleState(tc.tools[k].toggle, true);
 					}
 					else
 					{
-						this.SetToggleState(tc.tools[k].toggle, false);
+						this.currentlySelectedTool = tc.tools[0];
 					}
+				}
+			}
+			else if (tc.UIMenuDisplay.activeSelf && !tc.UIMenuDisplay.GetComponent<ExpandRevealUIContent>().Collapsing && tc.tools.Count > 0)
+			{
+				tc.UIMenuDisplay.GetComponent<ExpandRevealUIContent>().Collapse(delegate(object s)
+				{
+					this.SetToggleState(tc.toggle.GetComponent<KToggle>(), false);
+					tc.UIMenuDisplay.SetActive(false);
+				});
+			}
+			for (int k = 0; k < tc.tools.Count; k++)
+			{
+				if (tc.tools[k] == this.currentlySelectedTool)
+				{
+					this.SetToggleState(tc.tools[k].toggle, true);
+				}
+				else
+				{
+					this.SetToggleState(tc.tools[k].toggle, false);
 				}
 			}
 		}
@@ -335,31 +327,25 @@ public class ToolMenu : KScreen
 			for (int i = 0; i < this.toolCollections.Length; i++)
 			{
 				global::Action toolHotkey = this.toolCollections[i].hotkey;
-				if (toolHotkey != global::Action.NumActions)
+				if (toolHotkey != global::Action.NumActions && e.IsAction(toolHotkey) && (this.currentlySelectedCollection == null || (this.currentlySelectedCollection != null && this.currentlySelectedCollection.tools.Find((ToolMenu.ToolInfo t) => GameInputMapping.CompareActionKeyCodes(t.hotkey, toolHotkey)) == null)))
 				{
-					if (e.IsAction(toolHotkey))
+					if (this.currentlySelectedCollection != this.toolCollections[i])
 					{
-						if (this.currentlySelectedCollection == null || (this.currentlySelectedCollection != null && this.currentlySelectedCollection.tools.Find((ToolMenu.ToolInfo t) => GameInputMapping.CompareActionKeyCodes(t.hotkey, toolHotkey)) == null))
+						this.ChooseCollection(this.toolCollections[i], false);
+						this.ChooseTool(this.toolCollections[i].tools[0]);
+					}
+					else if (this.currentlySelectedCollection.tools.Count > 1)
+					{
+						e.Consumed = true;
+						this.ChooseCollection(null, true);
+						this.ChooseTool(null);
+						string sound = GlobalAssets.GetSound(PlayerController.Instance.ActiveTool.GetDeactivateSound(), false);
+						if (sound != null)
 						{
-							if (this.currentlySelectedCollection != this.toolCollections[i])
-							{
-								this.ChooseCollection(this.toolCollections[i], false);
-								this.ChooseTool(this.toolCollections[i].tools[0]);
-							}
-							else if (this.currentlySelectedCollection.tools.Count > 1)
-							{
-								e.Consumed = true;
-								this.ChooseCollection(null, true);
-								this.ChooseTool(null);
-								string sound = GlobalAssets.GetSound(PlayerController.Instance.ActiveTool.GetDeactivateSound(), false);
-								if (sound != null)
-								{
-									KMonoBehaviour.PlaySound(sound);
-								}
-							}
-							break;
+							KMonoBehaviour.PlaySound(sound);
 						}
 					}
+					break;
 				}
 				for (int j = 0; j < this.toolCollections[i].tools.Count; j++)
 				{
@@ -404,12 +390,9 @@ public class ToolMenu : KScreen
 					SelectTool.Instance.Activate();
 				}
 			}
-			else if (!PlayerController.Instance.IsUsingDefaultTool() && !e.Consumed)
+			else if (!PlayerController.Instance.IsUsingDefaultTool() && !e.Consumed && e.TryConsume(global::Action.Escape))
 			{
-				if (e.TryConsume(global::Action.Escape))
-				{
-					SelectTool.Instance.Activate();
-				}
+				SelectTool.Instance.Activate();
 			}
 		}
 		base.OnKeyDown(e);
@@ -439,16 +422,13 @@ public class ToolMenu : KScreen
 					SelectTool.Instance.Activate();
 				}
 			}
-			else if (!PlayerController.Instance.IsUsingDefaultTool() && !e.Consumed)
+			else if (!PlayerController.Instance.IsUsingDefaultTool() && !e.Consumed && PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
 			{
-				if (PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
+				SelectTool.Instance.Activate();
+				string sound2 = GlobalAssets.GetSound(PlayerController.Instance.ActiveTool.GetDeactivateSound(), false);
+				if (sound2 != null)
 				{
-					SelectTool.Instance.Activate();
-					string sound2 = GlobalAssets.GetSound(PlayerController.Instance.ActiveTool.GetDeactivateSound(), false);
-					if (sound2 != null)
-					{
-						KMonoBehaviour.PlaySound(sound2);
-					}
+					KMonoBehaviour.PlaySound(sound2);
 				}
 			}
 		}

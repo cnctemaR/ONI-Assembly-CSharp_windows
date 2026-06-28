@@ -23,12 +23,9 @@ public class DestroyAfter : KMonoBehaviour
 
 	private void Update()
 	{
-		if (this.particleSystems != null)
+		if (this.particleSystems != null && !this.IsAlive())
 		{
-			if (!this.IsAlive())
-			{
-				this.DeleteObject();
-			}
+			this.DeleteObject();
 		}
 	}
 

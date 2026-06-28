@@ -91,12 +91,9 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	{
 		bool flag = this.Discovered.Add(tag);
 		this.DiscoverCategory(categoryTag, tag);
-		if (flag)
+		if (flag && this.OnDiscover != null)
 		{
-			if (this.OnDiscover != null)
-			{
-				this.OnDiscover(tag);
-			}
+			this.OnDiscover(tag);
 		}
 	}
 
@@ -145,16 +142,11 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	public HashSet<Tag> GetDiscoveredResourcesFromTag(Tag tag)
 	{
 		HashSet<Tag> hashSet;
-		HashSet<Tag> hashSet2;
 		if (this.DiscoveredCategories.TryGetValue(tag, out hashSet))
 		{
-			hashSet2 = hashSet;
+			return hashSet;
 		}
-		else
-		{
-			hashSet2 = new HashSet<Tag>();
-		}
-		return hashSet2;
+		return new HashSet<Tag>();
 	}
 
 	private void Update()
@@ -193,39 +185,40 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	private void OnAddedFetchable(object data)
 	{
 		GameObject gameObject = (GameObject)data;
-		if (!(gameObject.GetComponent<Health>() != null))
+		if (gameObject.GetComponent<Health>() != null)
 		{
-			Pickupable component = gameObject.GetComponent<Pickupable>();
-			KPrefabID component2 = component.GetComponent<KPrefabID>();
-			Tag tag = component2.PrefabID();
-			if (!this.Inventory.ContainsKey(tag))
+			return;
+		}
+		Pickupable component = gameObject.GetComponent<Pickupable>();
+		KPrefabID component2 = component.GetComponent<KPrefabID>();
+		Tag tag = component2.PrefabID();
+		if (!this.Inventory.ContainsKey(tag))
+		{
+			Tag tag2 = Tag.Invalid;
+			for (int i = 0; i < component2.Tags.Length; i++)
 			{
-				Tag tag2 = Tag.Invalid;
-				for (int i = 0; i < component2.Tags.Length; i++)
+				if (GameTags.AllCategories.Contains(component2.Tags[i]))
 				{
-					if (GameTags.AllCategories.Contains(component2.Tags[i]))
-					{
-						tag2 = component2.Tags[i];
-						break;
-					}
+					tag2 = component2.Tags[i];
+					break;
 				}
-				if (!tag2.IsValid)
-				{
-					DebugUtil.SoftAssert(false, component.name + " was found by worldinventory but doesn't have a category! Add it to the element definition.");
-				}
-				this.Discover(tag, tag2);
 			}
-			for (int j = 0; j < component2.Tags.Length; j++)
+			if (!tag2.IsValid)
 			{
-				Tag tag3 = component2.Tags[j];
-				List<Pickupable> list;
-				if (!this.Inventory.TryGetValue(tag3, out list))
-				{
-					list = new List<Pickupable>();
-					this.Inventory[tag3] = list;
-				}
-				list.Add(component);
+				DebugUtil.SoftAssert(false, component.name + " was found by worldinventory but doesn't have a category! Add it to the element definition.");
 			}
+			this.Discover(tag, tag2);
+		}
+		for (int j = 0; j < component2.Tags.Length; j++)
+		{
+			Tag tag3 = component2.Tags[j];
+			List<Pickupable> list;
+			if (!this.Inventory.TryGetValue(tag3, out list))
+			{
+				list = new List<Pickupable>();
+				this.Inventory[tag3] = list;
+			}
+			list.Add(component);
 		}
 	}
 
@@ -255,7 +248,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 
 	private Dictionary<Tag, float> accessibleAmounts = new Dictionary<Tag, float>();
 
-	private int accessibleUpdateIndex = 0;
+	private int accessibleUpdateIndex;
 
 	private bool firstUpdate = true;
 }

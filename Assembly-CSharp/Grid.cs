@@ -274,12 +274,9 @@ public class Grid
 		{
 			Grid.Visible[cell] = Math.Max(visibility, Grid.Visible[cell]);
 		}
-		if (flag)
+		if (flag && Grid.OnReveal != null)
 		{
-			if (Grid.OnReveal != null)
-			{
-				Grid.OnReveal(cell);
-			}
+			Grid.OnReveal(cell);
 		}
 	}
 

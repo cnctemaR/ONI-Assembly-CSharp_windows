@@ -27,11 +27,11 @@ public class AtmoSuitConfig : IEquipmentConfig
 		Dictionary<string, float> dictionary2 = dictionary;
 		float num2 = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_MASS;
 		string text2 = "suit_oxygen_kanim";
-		string text3 = "";
-		string text4 = "body_oxygen_kanim";
+		string empty = string.Empty;
+		string text3 = "body_oxygen_kanim";
 		List<AttributeModifier> list2 = list;
 		Tag[] array = new Tag[] { GameTags.Suit };
-		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, fabricator, num, simHashes, dictionary2, num2, text2, text3, text4, list2, null, true, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array);
+		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, fabricator, num, simHashes, dictionary2, num2, text2, empty, text3, list2, null, true, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array);
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.RECIPE_DESC;
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("SoakingWet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("WetFeet"));

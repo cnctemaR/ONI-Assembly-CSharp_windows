@@ -29,7 +29,7 @@ public static class PointGenerator
 					list.Add(boundingArea.Centroid() + new Vector2(num10, num9));
 				}
 			}
-			goto IL_03D0;
+			goto IL_03BF;
 		}
 		case PointGenerator.SampleBehaviour.UniformHex:
 		{
@@ -40,7 +40,7 @@ public static class PointGenerator
 					list.Add(boundingArea.Centroid() + new Vector2(-num3 + (0.5f + num11) / num6 * num, -num4 + (0.25f + 0.5f * (num11 % 2U) + num12) / num6 * num2));
 				}
 			}
-			goto IL_03D0;
+			goto IL_03BF;
 		}
 		case PointGenerator.SampleBehaviour.UniformSpiral:
 		{
@@ -53,7 +53,7 @@ public static class PointGenerator
 				double num18 = Math.Cos(num15) * num16;
 				list.Add(boundingArea.bounds.center + new Vector2((float)num17 * boundingArea.bounds.width, (float)num18 * boundingArea.bounds.height));
 			}
-			goto IL_03D0;
+			goto IL_03BF;
 		}
 		case PointGenerator.SampleBehaviour.UniformCircle:
 		{
@@ -67,11 +67,11 @@ public static class PointGenerator
 				double num25 = Math.Sin((double)num23) * (double)avoidRadius;
 				list.Add(boundingArea.bounds.center + new Vector2((float)num24, (float)num25));
 			}
-			goto IL_03D0;
+			goto IL_03BF;
 		}
 		case PointGenerator.SampleBehaviour.PoissonDisk:
 			list = new UniformPoissonDiskSampler(rnd).SampleRectangle(min, max, density, num7);
-			goto IL_03D0;
+			goto IL_03BF;
 		}
 		for (float num26 = -num4 + avoidRadius * 0.3f + rnd.RandomValue() * 2f; num26 < num4 - (avoidRadius * 0.3f + rnd.RandomValue() * 2f); num26 += density + rnd.RandomValue())
 		{
@@ -80,7 +80,7 @@ public static class PointGenerator
 				list.Add(boundingArea.Centroid() + new Vector2(num27, num26 + rnd.RandomValue() - 0.5f));
 			}
 		}
-		IL_03D0:
+		IL_03BF:
 		List<Vector2> list2 = new List<Vector2>();
 		for (int i = 0; i < list.Count; i++)
 		{

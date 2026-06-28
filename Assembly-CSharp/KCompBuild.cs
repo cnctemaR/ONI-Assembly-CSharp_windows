@@ -51,7 +51,7 @@ public class KCompBuild
 
 	private List<KCompSymbol> symbols = new List<KCompSymbol>();
 
-	private KAnimFile animFile = null;
+	private KAnimFile animFile;
 
-	private KAnimFile buildFile = null;
+	private KAnimFile buildFile;
 }

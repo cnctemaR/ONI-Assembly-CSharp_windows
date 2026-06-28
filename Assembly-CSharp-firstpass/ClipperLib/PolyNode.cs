@@ -41,34 +41,24 @@ namespace ClipperLib
 
 		public PolyNode GetNext()
 		{
-			PolyNode polyNode;
 			if (this.m_Childs.Count > 0)
 			{
-				polyNode = this.m_Childs[0];
+				return this.m_Childs[0];
 			}
-			else
-			{
-				polyNode = this.GetNextSiblingUp();
-			}
-			return polyNode;
+			return this.GetNextSiblingUp();
 		}
 
 		internal PolyNode GetNextSiblingUp()
 		{
-			PolyNode polyNode;
 			if (this.m_Parent == null)
 			{
-				polyNode = null;
+				return null;
 			}
-			else if (this.m_Index == this.m_Parent.m_Childs.Count - 1)
+			if (this.m_Index == this.m_Parent.m_Childs.Count - 1)
 			{
-				polyNode = this.m_Parent.GetNextSiblingUp();
+				return this.m_Parent.GetNextSiblingUp();
 			}
-			else
-			{
-				polyNode = this.m_Parent.m_Childs[this.m_Index + 1];
-			}
-			return polyNode;
+			return this.m_Parent.m_Childs[this.m_Index + 1];
 		}
 
 		public List<PolyNode> Childs

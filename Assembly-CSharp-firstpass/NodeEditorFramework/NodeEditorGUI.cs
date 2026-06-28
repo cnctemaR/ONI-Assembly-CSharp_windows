@@ -13,36 +13,31 @@ namespace NodeEditorFramework
 			NodeEditorGUI.GUIBox = ResourceManager.LoadTexture("Textures/NE_Box.png");
 			NodeEditorGUI.GUIButton = ResourceManager.LoadTexture("Textures/NE_Button.png");
 			NodeEditorGUI.GUIBoxSelection = ResourceManager.LoadTexture("Textures/BoxSelection.png");
-			bool flag;
 			if (!NodeEditorGUI.Background || !NodeEditorGUI.AALineTex || !NodeEditorGUI.GUIBox || !NodeEditorGUI.GUIButton)
 			{
-				flag = false;
+				return false;
 			}
-			else if (!GUIFunction)
+			if (!GUIFunction)
 			{
-				flag = true;
+				return true;
 			}
-			else
-			{
-				NodeEditorGUI.nodeSkin = global::UnityEngine.Object.Instantiate<GUISkin>(GUI.skin);
-				NodeEditorGUI.nodeSkin.label.normal.textColor = NodeEditorGUI.NE_TextColor;
-				NodeEditorGUI.nodeLabel = NodeEditorGUI.nodeSkin.label;
-				NodeEditorGUI.nodeSkin.box.normal.textColor = NodeEditorGUI.NE_TextColor;
-				NodeEditorGUI.nodeSkin.box.normal.background = NodeEditorGUI.GUIBox;
-				NodeEditorGUI.nodeBox = NodeEditorGUI.nodeSkin.box;
-				NodeEditorGUI.nodeSkin.button.normal.textColor = NodeEditorGUI.NE_TextColor;
-				NodeEditorGUI.nodeSkin.button.normal.background = NodeEditorGUI.GUIButton;
-				NodeEditorGUI.nodeSkin.textArea.normal.background = NodeEditorGUI.GUIBox;
-				NodeEditorGUI.nodeSkin.textArea.active.background = NodeEditorGUI.GUIBox;
-				NodeEditorGUI.nodeLabelBold = new GUIStyle(NodeEditorGUI.nodeLabel);
-				NodeEditorGUI.nodeLabelBold.fontStyle = FontStyle.Bold;
-				NodeEditorGUI.nodeLabelSelected = new GUIStyle(NodeEditorGUI.nodeLabel);
-				NodeEditorGUI.nodeLabelSelected.normal.background = RTEditorGUI.ColorToTex(1, NodeEditorGUI.NE_LightColor);
-				NodeEditorGUI.nodeBoxBold = new GUIStyle(NodeEditorGUI.nodeBox);
-				NodeEditorGUI.nodeBoxBold.fontStyle = FontStyle.Bold;
-				flag = true;
-			}
-			return flag;
+			NodeEditorGUI.nodeSkin = global::UnityEngine.Object.Instantiate<GUISkin>(GUI.skin);
+			NodeEditorGUI.nodeSkin.label.normal.textColor = NodeEditorGUI.NE_TextColor;
+			NodeEditorGUI.nodeLabel = NodeEditorGUI.nodeSkin.label;
+			NodeEditorGUI.nodeSkin.box.normal.textColor = NodeEditorGUI.NE_TextColor;
+			NodeEditorGUI.nodeSkin.box.normal.background = NodeEditorGUI.GUIBox;
+			NodeEditorGUI.nodeBox = NodeEditorGUI.nodeSkin.box;
+			NodeEditorGUI.nodeSkin.button.normal.textColor = NodeEditorGUI.NE_TextColor;
+			NodeEditorGUI.nodeSkin.button.normal.background = NodeEditorGUI.GUIButton;
+			NodeEditorGUI.nodeSkin.textArea.normal.background = NodeEditorGUI.GUIBox;
+			NodeEditorGUI.nodeSkin.textArea.active.background = NodeEditorGUI.GUIBox;
+			NodeEditorGUI.nodeLabelBold = new GUIStyle(NodeEditorGUI.nodeLabel);
+			NodeEditorGUI.nodeLabelBold.fontStyle = FontStyle.Bold;
+			NodeEditorGUI.nodeLabelSelected = new GUIStyle(NodeEditorGUI.nodeLabel);
+			NodeEditorGUI.nodeLabelSelected.normal.background = RTEditorGUI.ColorToTex(1, NodeEditorGUI.NE_LightColor);
+			NodeEditorGUI.nodeBoxBold = new GUIStyle(NodeEditorGUI.nodeBox);
+			NodeEditorGUI.nodeBoxBold.fontStyle = FontStyle.Bold;
+			return true;
 		}
 
 		public static void StartNodeGUI()
@@ -93,20 +88,15 @@ namespace NodeEditorFramework
 
 		internal static Vector2 GetSecondConnectionVector(Vector2 startPos, Vector2 endPos, Vector2 firstVector)
 		{
-			Vector2 vector;
 			if (firstVector.x != 0f && firstVector.y == 0f)
 			{
-				vector = ((startPos.x > endPos.x) ? firstVector : (-firstVector));
+				return (startPos.x > endPos.x) ? firstVector : (-firstVector);
 			}
-			else if (firstVector.y != 0f && firstVector.x == 0f)
+			if (firstVector.y != 0f && firstVector.x == 0f)
 			{
-				vector = ((startPos.y > endPos.y) ? firstVector : (-firstVector));
+				return (startPos.y > endPos.y) ? firstVector : (-firstVector);
 			}
-			else
-			{
-				vector = -firstVector;
-			}
-			return vector;
+			return -firstVector;
 		}
 
 		public static int knobSize = 16;

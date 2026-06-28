@@ -37,28 +37,30 @@ public class CharacterSelectionController : KModalScreen
 	protected virtual void InitializeContainers()
 	{
 		this.DisableProceedButton();
-		if (this.containers == null || this.containers.Count <= 0)
+		if (this.containers != null && this.containers.Count > 0)
 		{
-			this.containers = new List<CharacterContainer>();
-			for (int i = 0; i < this.availableCharCount; i++)
-			{
-				CharacterContainer characterContainer = Util.KInstantiateUI<CharacterContainer>(this.containerPrefab.gameObject, this.containerParent, false);
-				characterContainer.SetController(this);
-				this.containers.Add(characterContainer);
-			}
-			this.startingStats = new List<MinionStartingStats>();
+			return;
 		}
+		this.containers = new List<CharacterContainer>();
+		for (int i = 0; i < this.availableCharCount; i++)
+		{
+			CharacterContainer characterContainer = Util.KInstantiateUI<CharacterContainer>(this.containerPrefab.gameObject, this.containerParent, false);
+			characterContainer.SetController(this);
+			this.containers.Add(characterContainer);
+		}
+		this.startingStats = new List<MinionStartingStats>();
 	}
 
 	public void RemoveLast()
 	{
-		if (this.startingStats != null && this.startingStats.Count != 0)
+		if (this.startingStats == null || this.startingStats.Count == 0)
 		{
-			MinionStartingStats minionStartingStats = this.startingStats[this.startingStats.Count - 1];
-			if (this.OnReplacedEvent != null)
-			{
-				this.OnReplacedEvent(minionStartingStats);
-			}
+			return;
+		}
+		MinionStartingStats minionStartingStats = this.startingStats[this.startingStats.Count - 1];
+		if (this.OnReplacedEvent != null)
+		{
+			this.OnReplacedEvent(minionStartingStats);
 		}
 	}
 
@@ -67,24 +69,23 @@ public class CharacterSelectionController : KModalScreen
 		if (this.startingStats.Contains(charStats))
 		{
 			global::Debug.Log("Tried to add the same minion twice.", null);
+			return;
 		}
-		else if (this.startingStats.Count >= this.selectableCharCount)
+		if (this.startingStats.Count >= this.selectableCharCount)
 		{
 			global::Debug.LogError("Tried to add minions beyond the allowed limit", null);
+			return;
 		}
-		else
+		this.startingStats.Add(charStats);
+		this.OnCharacterAdded();
+		if (this.startingStats.Count == this.selectableCharCount)
 		{
-			this.startingStats.Add(charStats);
-			this.OnCharacterAdded();
-			if (this.startingStats.Count == this.selectableCharCount)
+			this.EnableProceedButton();
+			if (this.OnLimitReachedEvent != null)
 			{
-				this.EnableProceedButton();
-				if (this.OnLimitReachedEvent != null)
-				{
-					this.OnLimitReachedEvent();
-				}
-				this.OnLimitReached();
+				this.OnLimitReachedEvent();
 			}
+			this.OnLimitReached();
 		}
 	}
 
@@ -145,7 +146,7 @@ public class CharacterSelectionController : KModalScreen
 	protected int selectableCharCount;
 
 	[SerializeField]
-	private bool allowsReplacing = false;
+	private bool allowsReplacing;
 
 	protected List<MinionStartingStats> startingStats;
 

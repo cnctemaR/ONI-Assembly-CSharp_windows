@@ -75,67 +75,48 @@ public class CopyBuildingSettings : KMonoBehaviour
 	{
 		int num = Grid.OffsetCell(posCell, offset, 0);
 		GameObject gameObject = Grid.Objects[num, 1];
-		bool flag;
 		if (gameObject == null)
 		{
-			flag = false;
+			return false;
 		}
-		else
+		KPrefabID component = gameObject.GetComponent<KPrefabID>();
+		if (component == null)
 		{
-			KPrefabID component = gameObject.GetComponent<KPrefabID>();
-			if (component == null)
-			{
-				flag = false;
-			}
-			else if (component.PrefabID() != this.id.PrefabID())
-			{
-				flag = false;
-			}
-			else
-			{
-				component.Trigger(-905833192, base.gameObject);
-				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.COPIED_SETTINGS, gameObject.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
-				flag = true;
-			}
+			return false;
 		}
-		return flag;
+		if (component.PrefabID() != this.id.PrefabID())
+		{
+			return false;
+		}
+		component.Trigger(-905833192, base.gameObject);
+		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.COPIED_SETTINGS, gameObject.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
+		return true;
 	}
 
 	public static bool ApplyCopy(int targetCell, GameObject sourceGameObject)
 	{
 		GameObject gameObject = Grid.Objects[targetCell, 1];
-		bool flag;
 		if (gameObject == null)
 		{
-			flag = false;
+			return false;
 		}
-		else
+		KPrefabID component = sourceGameObject.GetComponent<KPrefabID>();
+		if (component == null)
 		{
-			KPrefabID component = sourceGameObject.GetComponent<KPrefabID>();
-			if (component == null)
-			{
-				flag = false;
-			}
-			else
-			{
-				KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
-				if (component2 == null)
-				{
-					flag = false;
-				}
-				else if (component2.PrefabID() != component.PrefabID())
-				{
-					flag = false;
-				}
-				else
-				{
-					component2.Trigger(-905833192, sourceGameObject);
-					PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.COPIED_SETTINGS, gameObject.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
-					flag = true;
-				}
-			}
+			return false;
 		}
-		return flag;
+		KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
+		if (component2 == null)
+		{
+			return false;
+		}
+		if (component2.PrefabID() != component.PrefabID())
+		{
+			return false;
+		}
+		component2.Trigger(-905833192, sourceGameObject);
+		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.COPIED_SETTINGS, gameObject.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
+		return true;
 	}
 
 	[MyCmpAdd]

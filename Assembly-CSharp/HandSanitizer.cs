@@ -113,7 +113,7 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 	private MeterController dirtyMeter;
 
 	[Serialize]
-	public int maxPossiblyRemoved = 0;
+	public int maxPossiblyRemoved;
 
 	private class WashHandsReactable : WorkableReactable
 	{
@@ -254,6 +254,6 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 			base.OnCompleteWork(worker);
 		}
 
-		private int diseaseRemoved = 0;
+		private int diseaseRemoved;
 	}
 }

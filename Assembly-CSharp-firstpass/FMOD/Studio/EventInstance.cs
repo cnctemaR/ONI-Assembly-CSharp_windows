@@ -16,17 +16,12 @@ namespace FMOD.Studio
 			description = null;
 			IntPtr intPtr;
 			RESULT result = EventInstance.FMOD_Studio_EventInstance_GetDescription(this.rawPtr, out intPtr);
-			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				result2 = result;
+				return result;
 			}
-			else
-			{
-				description = new EventDescription(intPtr);
-				result2 = result;
-			}
-			return result2;
+			description = new EventDescription(intPtr);
+			return result;
 		}
 
 		public RESULT getVolume(out float volume)
@@ -119,17 +114,12 @@ namespace FMOD.Studio
 			group = null;
 			IntPtr intPtr = 0;
 			RESULT result = EventInstance.FMOD_Studio_EventInstance_GetChannelGroup(this.rawPtr, out intPtr);
-			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				result2 = result;
+				return result;
 			}
-			else
-			{
-				group = new ChannelGroup(intPtr);
-				result2 = result;
-			}
-			return result2;
+			group = new ChannelGroup(intPtr);
+			return result;
 		}
 
 		public RESULT release()
@@ -147,17 +137,12 @@ namespace FMOD.Studio
 			instance = null;
 			IntPtr intPtr = 0;
 			RESULT result = EventInstance.FMOD_Studio_EventInstance_GetParameter(this.rawPtr, Encoding.UTF8.GetBytes(name + '\0'), out intPtr);
-			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				result2 = result;
+				return result;
 			}
-			else
-			{
-				instance = new ParameterInstance(intPtr);
-				result2 = result;
-			}
-			return result2;
+			instance = new ParameterInstance(intPtr);
+			return result;
 		}
 
 		public RESULT getParameterCount(out int count)
@@ -170,17 +155,12 @@ namespace FMOD.Studio
 			instance = null;
 			IntPtr intPtr = 0;
 			RESULT result = EventInstance.FMOD_Studio_EventInstance_GetParameterByIndex(this.rawPtr, index, out intPtr);
-			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				result2 = result;
+				return result;
 			}
-			else
-			{
-				instance = new ParameterInstance(intPtr);
-				result2 = result;
-			}
-			return result2;
+			instance = new ParameterInstance(intPtr);
+			return result;
 		}
 
 		public RESULT getParameterValue(string name, out float value)

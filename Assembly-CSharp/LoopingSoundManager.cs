@@ -81,65 +81,49 @@ public class LoopingSoundManager : KMonoBehaviour
 
 	public static EventInstance PrepareSound(string path, Vector3 pos, bool pauseOnGamePause = true)
 	{
-		EventInstance eventInstance;
 		if (path == null)
 		{
 			global::Debug.LogWarning("Missing sound", null);
-			eventInstance = null;
+			return null;
 		}
-		else
+		EventInstance eventInstance = KFMOD.CreateInstance(path);
+		if (eventInstance == null)
 		{
-			EventInstance eventInstance2 = KFMOD.CreateInstance(path);
-			if (eventInstance2 == null)
-			{
-				Output.LogError(new object[] { "StartSound() Couldnt Get FMOD event for asset [" + path + "]" });
-				eventInstance = null;
-			}
-			else
-			{
-				LoopingSoundManager.Get().Add(path, eventInstance2, pauseOnGamePause);
-				Vector3 vector = new Vector3(pos.x, pos.y, 0f);
-				eventInstance2.set3DAttributes(SoundEvent.GetCameraScaledPosition(vector).To3DAttributes());
-				LoopingSoundManager.UpdateSpeed(eventInstance2);
-				if (Time.timeScale == 0f)
-				{
-					eventInstance2.setPaused(true);
-				}
-				eventInstance = eventInstance2;
-			}
+			Output.LogError(new object[] { "StartSound() Couldnt Get FMOD event for asset [" + path + "]" });
+			return null;
+		}
+		LoopingSoundManager.Get().Add(path, eventInstance, pauseOnGamePause);
+		Vector3 vector = new Vector3(pos.x, pos.y, 0f);
+		eventInstance.set3DAttributes(SoundEvent.GetCameraScaledPosition(vector).To3DAttributes());
+		LoopingSoundManager.UpdateSpeed(eventInstance);
+		if (Time.timeScale == 0f)
+		{
+			eventInstance.setPaused(true);
 		}
 		return eventInstance;
 	}
 
 	public static EventInstance StartSound(string path, Vector3 pos, bool pauseOnGamePause = true)
 	{
-		EventInstance eventInstance;
 		if (path == null)
 		{
 			global::Debug.LogWarning("Missing sound", null);
-			eventInstance = null;
+			return null;
 		}
-		else
+		EventInstance eventInstance = KFMOD.CreateInstance(path);
+		if (eventInstance == null)
 		{
-			EventInstance eventInstance2 = KFMOD.CreateInstance(path);
-			if (eventInstance2 == null)
-			{
-				Output.LogError(new object[] { "StartSound() Couldnt Get FMOD event for asset [" + path + "]" });
-				eventInstance = null;
-			}
-			else
-			{
-				LoopingSoundManager.Get().Add(path, eventInstance2, pauseOnGamePause);
-				Vector3 vector = new Vector3(pos.x, pos.y, 0f);
-				eventInstance2.set3DAttributes(SoundEvent.GetCameraScaledPosition(vector).To3DAttributes());
-				LoopingSoundManager.UpdateSpeed(eventInstance2);
-				eventInstance2.start();
-				if (Time.timeScale == 0f && pauseOnGamePause)
-				{
-					eventInstance2.setPaused(true);
-				}
-				eventInstance = eventInstance2;
-			}
+			Output.LogError(new object[] { "StartSound() Couldnt Get FMOD event for asset [" + path + "]" });
+			return null;
+		}
+		LoopingSoundManager.Get().Add(path, eventInstance, pauseOnGamePause);
+		Vector3 vector = new Vector3(pos.x, pos.y, 0f);
+		eventInstance.set3DAttributes(SoundEvent.GetCameraScaledPosition(vector).To3DAttributes());
+		LoopingSoundManager.UpdateSpeed(eventInstance);
+		eventInstance.start();
+		if (Time.timeScale == 0f && pauseOnGamePause)
+		{
+			eventInstance.setPaused(true);
 		}
 		return eventInstance;
 	}
@@ -221,7 +205,7 @@ public class LoopingSoundManager : KMonoBehaviour
 			}
 			else
 			{
-				this.curveType = "";
+				this.curveType = string.Empty;
 			}
 		}
 

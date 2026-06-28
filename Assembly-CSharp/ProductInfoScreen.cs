@@ -121,15 +121,9 @@ public class ProductInfoScreen : KScreen
 
 	private void Update()
 	{
-		if (!DebugHandler.InstantBuildMode)
+		if (!DebugHandler.InstantBuildMode && this.currentDef != null && this.materialSelectionPanel.CurrentSelectedElement != null && this.currentDef.Mass[0] > WorldInventory.Instance.GetAmount(this.materialSelectionPanel.CurrentSelectedElement.tag))
 		{
-			if (this.currentDef != null && this.materialSelectionPanel.CurrentSelectedElement != null)
-			{
-				if (this.currentDef.Mass[0] > WorldInventory.Instance.GetAmount(this.materialSelectionPanel.CurrentSelectedElement.tag))
-				{
-					this.materialSelectionPanel.AutoSelectAvailableMaterial();
-				}
-			}
+			this.materialSelectionPanel.AutoSelectAvailableMaterial();
 		}
 	}
 
@@ -181,7 +175,7 @@ public class ProductInfoScreen : KScreen
 					float num3 = 0f;
 					dictionary.TryGetValue(keyValuePair.Key, out num3);
 					float num4 = 0f;
-					string text2 = "";
+					string text2 = string.Empty;
 					if (dictionary2.TryGetValue(keyValuePair.Key, out num4))
 					{
 						num4 = Mathf.Abs(num3 * num4);
@@ -269,76 +263,67 @@ public class ProductInfoScreen : KScreen
 
 	private bool BuildRequirementsMet(BuildingDef def)
 	{
-		bool flag;
 		if (DebugHandler.InstantBuildMode)
 		{
-			flag = true;
+			return true;
 		}
-		else
-		{
-			Recipe craftRecipe = def.CraftRecipe;
-			flag = this.materialSelectionPanel.CanBuild(craftRecipe) && Db.Get().TechItems.IsTechItemComplete(def.PrefabID);
-		}
-		return flag;
+		Recipe craftRecipe = def.CraftRecipe;
+		return this.materialSelectionPanel.CanBuild(craftRecipe) && Db.Get().TechItems.IsTechItemComplete(def.PrefabID);
 	}
 
 	private void onMenuMaterialChanged()
 	{
-		if (!(this.currentDef == null))
+		if (this.currentDef == null)
 		{
-			if (this.materialSelectionPanel.AllSelectorsSelected() && this.BuildRequirementsMet(this.currentDef))
-			{
-				this.onElementsFullySelected.Signal();
-			}
-			else
-			{
-				BuildTool.Instance.Deactivate();
-				if (PlanScreen.Instance != null)
-				{
-					PrebuildTool.Instance.Activate(this.currentDef, PlanScreen.Instance.BuildableState(this.currentDef));
-				}
-				if (BuildMenu.Instance != null)
-				{
-					PrebuildTool.Instance.Activate(this.currentDef, BuildMenu.Instance.BuildableState(this.currentDef));
-				}
-			}
-			this.SetDescription(this.currentDef);
+			return;
 		}
+		if (this.materialSelectionPanel.AllSelectorsSelected() && this.BuildRequirementsMet(this.currentDef))
+		{
+			this.onElementsFullySelected.Signal();
+		}
+		else
+		{
+			BuildTool.Instance.Deactivate();
+			if (PlanScreen.Instance != null)
+			{
+				PrebuildTool.Instance.Activate(this.currentDef, PlanScreen.Instance.BuildableState(this.currentDef));
+			}
+			if (BuildMenu.Instance != null)
+			{
+				PrebuildTool.Instance.Activate(this.currentDef, BuildMenu.Instance.BuildableState(this.currentDef));
+			}
+		}
+		this.SetDescription(this.currentDef);
 	}
 
 	public static bool MaterialsMet(Recipe recipe)
 	{
-		bool flag;
 		if (recipe == null)
 		{
 			global::Debug.LogError("Trying to verify the materials on a null recipe!", null);
-			flag = false;
+			return false;
 		}
-		else if (recipe.Ingredients == null || recipe.Ingredients.Count == 0)
+		if (recipe.Ingredients == null || recipe.Ingredients.Count == 0)
 		{
 			global::Debug.LogError("Trying to verify the materials on a recipe with no MaterialCategoryTags!", null);
-			flag = false;
+			return false;
 		}
-		else
+		for (int i = 0; i < recipe.Ingredients.Count; i++)
 		{
-			for (int i = 0; i < recipe.Ingredients.Count; i++)
+			bool available = false;
+			MaterialSelectionPanel.Filter(recipe.Ingredients[i].tag, recipe.Ingredients[i].amount, delegate(Element element, float kgAvailable, float recipe_amount)
 			{
-				bool available = false;
-				MaterialSelectionPanel.Filter(recipe.Ingredients[i].tag, recipe.Ingredients[i].amount, delegate(Element element, float kgAvailable, float recipe_amount)
+				if (kgAvailable >= recipe_amount)
 				{
-					if (kgAvailable >= recipe_amount)
-					{
-						available = true;
-					}
-				});
-				if (!available)
-				{
-					return false;
+					available = true;
 				}
+			});
+			if (!available)
+			{
+				return false;
 			}
-			flag = true;
 		}
-		return flag;
+		return true;
 	}
 
 	public void Close()

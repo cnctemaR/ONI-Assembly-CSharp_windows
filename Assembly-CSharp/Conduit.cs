@@ -125,5 +125,5 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback
 
 	public ConduitType type;
 
-	private global::System.Action firstFrameCallback = null;
+	private global::System.Action firstFrameCallback;
 }

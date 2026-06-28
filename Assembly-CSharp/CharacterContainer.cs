@@ -328,17 +328,18 @@ public class CharacterContainer : KScreen
 
 	private void OnCharacterSelectionLimitReached()
 	{
-		if (!(this.controller != null) || !this.controller.IsSelected(this.stats))
+		if (this.controller != null && this.controller.IsSelected(this.stats))
 		{
-			this.selectButton.ClearOnClick();
-			if (this.controller.AllowsReplacing)
-			{
-				this.selectButton.onClick += this.ReplaceCharacterSelection;
-			}
-			else
-			{
-				this.selectButton.onClick += this.CantSelectCharacter;
-			}
+			return;
+		}
+		this.selectButton.ClearOnClick();
+		if (this.controller.AllowsReplacing)
+		{
+			this.selectButton.onClick += this.ReplaceCharacterSelection;
+		}
+		else
+		{
+			this.selectButton.onClick += this.CantSelectCharacter;
 		}
 	}
 
@@ -349,23 +350,25 @@ public class CharacterContainer : KScreen
 
 	private void ReplaceCharacterSelection()
 	{
-		if (!(this.controller == null))
+		if (this.controller == null)
 		{
-			this.controller.RemoveLast();
-			this.SelectCharacter();
+			return;
 		}
+		this.controller.RemoveLast();
+		this.SelectCharacter();
 	}
 
 	private void OnCharacterSelectionLimitUnReached()
 	{
-		if (!(this.controller != null) || !this.controller.IsSelected(this.stats))
+		if (this.controller != null && this.controller.IsSelected(this.stats))
 		{
-			this.selectButton.ClearOnClick();
-			this.selectButton.onClick += delegate
-			{
-				this.SelectCharacter();
-			};
+			return;
 		}
+		this.selectButton.ClearOnClick();
+		this.selectButton.onClick += delegate
+		{
+			this.SelectCharacter();
+		};
 	}
 
 	public void SetReshufflingState(bool enable)
@@ -384,18 +387,19 @@ public class CharacterContainer : KScreen
 
 	public void SetController(CharacterSelectionController csc)
 	{
-		if (!(csc == this.controller))
+		if (csc == this.controller)
 		{
-			this.controller = csc;
-			CharacterSelectionController characterSelectionController = this.controller;
-			characterSelectionController.OnLimitReachedEvent = (global::System.Action)Delegate.Combine(characterSelectionController.OnLimitReachedEvent, new global::System.Action(this.OnCharacterSelectionLimitReached));
-			CharacterSelectionController characterSelectionController2 = this.controller;
-			characterSelectionController2.OnLimitUnreachedEvent = (global::System.Action)Delegate.Combine(characterSelectionController2.OnLimitUnreachedEvent, new global::System.Action(this.OnCharacterSelectionLimitUnReached));
-			CharacterSelectionController characterSelectionController3 = this.controller;
-			characterSelectionController3.OnReshuffleEvent = (Action<bool>)Delegate.Combine(characterSelectionController3.OnReshuffleEvent, new Action<bool>(this.Reshuffle));
-			CharacterSelectionController characterSelectionController4 = this.controller;
-			characterSelectionController4.OnReplacedEvent = (Action<MinionStartingStats>)Delegate.Combine(characterSelectionController4.OnReplacedEvent, new Action<MinionStartingStats>(this.OnReplacedEvent));
+			return;
 		}
+		this.controller = csc;
+		CharacterSelectionController characterSelectionController = this.controller;
+		characterSelectionController.OnLimitReachedEvent = (global::System.Action)Delegate.Combine(characterSelectionController.OnLimitReachedEvent, new global::System.Action(this.OnCharacterSelectionLimitReached));
+		CharacterSelectionController characterSelectionController2 = this.controller;
+		characterSelectionController2.OnLimitUnreachedEvent = (global::System.Action)Delegate.Combine(characterSelectionController2.OnLimitUnreachedEvent, new global::System.Action(this.OnCharacterSelectionLimitUnReached));
+		CharacterSelectionController characterSelectionController3 = this.controller;
+		characterSelectionController3.OnReshuffleEvent = (Action<bool>)Delegate.Combine(characterSelectionController3.OnReshuffleEvent, new Action<bool>(this.Reshuffle));
+		CharacterSelectionController characterSelectionController4 = this.controller;
+		characterSelectionController4.OnReplacedEvent = (Action<MinionStartingStats>)Delegate.Combine(characterSelectionController4.OnReplacedEvent, new Action<MinionStartingStats>(this.OnReplacedEvent));
 	}
 
 	public void DisableSelectButton()
@@ -428,10 +432,11 @@ public class CharacterContainer : KScreen
 	protected override void OnCmpEnable()
 	{
 		base.OnActivate();
-		if (this.stats != null)
+		if (this.stats == null)
 		{
-			this.SetAnimator();
+			return;
 		}
+		this.SetAnimator();
 	}
 
 	[SerializeField]

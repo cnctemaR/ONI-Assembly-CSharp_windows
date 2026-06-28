@@ -36,9 +36,9 @@ public class ElementsAudio
 		return null;
 	}
 
-	private static ElementsAudio _instance = null;
+	private static ElementsAudio _instance;
 
-	private ElementsAudio.ElementAudioConfig[] elementAudioConfigs = null;
+	private ElementsAudio.ElementAudioConfig[] elementAudioConfigs;
 
 	[DelimitedRecord(",")]
 	[IgnoreFirst(1)]

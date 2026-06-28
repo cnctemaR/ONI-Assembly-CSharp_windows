@@ -105,19 +105,22 @@ public class LogicGateFilter : LogicGate, ISliderControl
 
 	private void OnDelay(object data)
 	{
-		if (!this.cleaningUp)
+		if (this.cleaningUp)
 		{
-			this.meter.SetPositionPercent(0f);
-			if (this.outputValue != 1)
-			{
-				int outputCell = base.OutputCell;
-				if (Game.Instance.logicCircuitSystem.GetNetworkForCell(outputCell) is LogicCircuitNetwork)
-				{
-					this.outputValue = 1;
-					base.RefreshAnimation();
-				}
-			}
+			return;
 		}
+		this.meter.SetPositionPercent(0f);
+		if (this.outputValue == 1)
+		{
+			return;
+		}
+		int outputCell = base.OutputCell;
+		if (!(Game.Instance.logicCircuitSystem.GetNetworkForCell(outputCell) is LogicCircuitNetwork))
+		{
+			return;
+		}
+		this.outputValue = 1;
+		base.RefreshAnimation();
 	}
 
 	private SchedulerHandle schedulerHandle;

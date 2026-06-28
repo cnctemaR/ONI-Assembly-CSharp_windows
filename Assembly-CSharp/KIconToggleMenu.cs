@@ -30,64 +30,65 @@ public class KIconToggleMenu : KScreen
 			}
 		}
 		this.toggles.Clear();
-		if (this.toggleInfo != null)
+		if (this.toggleInfo == null)
 		{
-			Transform transform = ((!(this.toggleParent != null)) ? base.transform : this.toggleParent);
-			for (int i = 0; i < this.toggleInfo.Count; i++)
+			return;
+		}
+		Transform transform = ((!(this.toggleParent != null)) ? base.transform : this.toggleParent);
+		for (int i = 0; i < this.toggleInfo.Count; i++)
+		{
+			int idx = i;
+			KIconToggleMenu.ToggleInfo toggleInfo = this.toggleInfo[i];
+			KToggle ktoggle2 = global::UnityEngine.Object.Instantiate<KToggle>(this.prefab, Vector3.zero, Quaternion.identity);
+			ktoggle2.Deselect();
+			ktoggle2.gameObject.name = "Toggle:" + toggleInfo.text;
+			ktoggle2.transform.SetParent(transform, false);
+			ktoggle2.group = this.group;
+			ktoggle2.onClick += delegate
 			{
-				int idx = i;
-				KIconToggleMenu.ToggleInfo toggleInfo = this.toggleInfo[i];
-				KToggle ktoggle2 = global::UnityEngine.Object.Instantiate<KToggle>(this.prefab, Vector3.zero, Quaternion.identity);
-				ktoggle2.Deselect();
-				ktoggle2.gameObject.name = "Toggle:" + toggleInfo.text;
-				ktoggle2.transform.SetParent(transform, false);
-				ktoggle2.group = this.group;
-				ktoggle2.onClick += delegate
+				this.OnClick(idx);
+			};
+			Transform transform2 = ktoggle2.transform.Find("Text");
+			if (transform2 != null)
+			{
+				LocText component = transform2.GetComponent<LocText>();
+				if (component != null)
 				{
-					this.OnClick(idx);
-				};
-				Transform transform2 = ktoggle2.transform.Find("Text");
-				if (transform2 != null)
-				{
-					LocText component = transform2.GetComponent<LocText>();
-					if (component != null)
-					{
-						component.text = toggleInfo.text;
-					}
+					component.text = toggleInfo.text;
 				}
-				ToolTip component2 = ktoggle2.GetComponent<ToolTip>();
-				if (component2)
-				{
-					string hotkeyString = GameUtil.GetHotkeyString(toggleInfo.hotKey);
-					if (toggleInfo.tooltipHeader != "")
-					{
-						component2.AddMultiStringTooltip(toggleInfo.tooltipHeader, (!(this.ToggleToolTipHeaderTextStyleSetting != null)) ? this.ToggleToolTipTextStyleSetting : this.ToggleToolTipHeaderTextStyleSetting);
-						if (this.ToggleToolTipHeaderTextStyleSetting == null)
-						{
-							global::Debug.Log("!", null);
-						}
-					}
-					component2.AddMultiStringTooltip(toggleInfo.tooltip + " " + hotkeyString, this.ToggleToolTipTextStyleSetting);
-				}
-				if (toggleInfo.getSpriteCB != null)
-				{
-					ktoggle2.fgImage.sprite = toggleInfo.getSpriteCB();
-				}
-				else
-				{
-					foreach (Sprite sprite in this.icons)
-					{
-						if (sprite != null && sprite.name == toggleInfo.icon)
-						{
-							Image fgImage = ktoggle2.fgImage;
-							fgImage.sprite = sprite;
-							break;
-						}
-					}
-				}
-				toggleInfo.toggle = ktoggle2;
-				this.toggles.Add(ktoggle2);
 			}
+			ToolTip component2 = ktoggle2.GetComponent<ToolTip>();
+			if (component2)
+			{
+				string hotkeyString = GameUtil.GetHotkeyString(toggleInfo.hotKey);
+				if (toggleInfo.tooltipHeader != string.Empty)
+				{
+					component2.AddMultiStringTooltip(toggleInfo.tooltipHeader, (!(this.ToggleToolTipHeaderTextStyleSetting != null)) ? this.ToggleToolTipTextStyleSetting : this.ToggleToolTipHeaderTextStyleSetting);
+					if (this.ToggleToolTipHeaderTextStyleSetting == null)
+					{
+						global::Debug.Log("!", null);
+					}
+				}
+				component2.AddMultiStringTooltip(toggleInfo.tooltip + " " + hotkeyString, this.ToggleToolTipTextStyleSetting);
+			}
+			if (toggleInfo.getSpriteCB != null)
+			{
+				ktoggle2.fgImage.sprite = toggleInfo.getSpriteCB();
+			}
+			else
+			{
+				foreach (Sprite sprite in this.icons)
+				{
+					if (sprite != null && sprite.name == toggleInfo.icon)
+					{
+						Image fgImage = ktoggle2.fgImage;
+						fgImage.sprite = sprite;
+						break;
+					}
+				}
+			}
+			toggleInfo.toggle = ktoggle2;
+			this.toggles.Add(ktoggle2);
 		}
 	}
 
@@ -149,62 +150,66 @@ public class KIconToggleMenu : KScreen
 
 	public virtual void ClearSelection()
 	{
-		if (this.toggles != null)
+		if (this.toggles == null)
 		{
-			foreach (KToggle ktoggle in this.toggles)
-			{
-				ktoggle.Deselect();
-				ktoggle.ClearAnimState();
-			}
-			this.selected = -1;
+			return;
 		}
+		foreach (KToggle ktoggle in this.toggles)
+		{
+			ktoggle.Deselect();
+			ktoggle.ClearAnimState();
+		}
+		this.selected = -1;
 	}
 
 	private void OnClick(int i)
 	{
-		if (this.onSelect != null)
+		if (this.onSelect == null)
 		{
-			this.selected = i;
-			this.onSelect(this.toggleInfo[i]);
-			if (!this.toggles[i].isOn)
+			return;
+		}
+		this.selected = i;
+		this.onSelect(this.toggleInfo[i]);
+		if (!this.toggles[i].isOn)
+		{
+			this.selected = -1;
+		}
+		for (int j = 0; j < this.toggles.Count; j++)
+		{
+			if (j != this.selected)
 			{
-				this.selected = -1;
-			}
-			for (int j = 0; j < this.toggles.Count; j++)
-			{
-				if (j != this.selected)
-				{
-					this.toggles[j].isOn = false;
-				}
+				this.toggles[j].isOn = false;
 			}
 		}
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (this.toggles != null)
+		if (this.toggles == null)
 		{
-			if (this.toggleInfo != null)
+			return;
+		}
+		if (this.toggleInfo == null)
+		{
+			return;
+		}
+		for (int i = 0; i < this.toggleInfo.Count; i++)
+		{
+			if (this.toggles[i].isActiveAndEnabled)
 			{
-				for (int i = 0; i < this.toggleInfo.Count; i++)
+				global::Action hotKey = this.toggleInfo[i].hotKey;
+				if (hotKey != global::Action.NumActions && e.TryConsume(hotKey))
 				{
-					if (this.toggles[i].isActiveAndEnabled)
+					if (this.selected != i || this.repeatKeyDownToggles)
 					{
-						global::Action hotKey = this.toggleInfo[i].hotKey;
-						if (hotKey != global::Action.NumActions && e.TryConsume(hotKey))
+						this.toggles[i].Click();
+						if (this.selected == i)
 						{
-							if (this.selected != i || this.repeatKeyDownToggles)
-							{
-								this.toggles[i].Click();
-								if (this.selected == i)
-								{
-									this.toggles[i].Deselect();
-								}
-								this.selected = i;
-							}
-							break;
+							this.toggles[i].Deselect();
 						}
+						this.selected = i;
 					}
+					break;
 				}
 			}
 		}

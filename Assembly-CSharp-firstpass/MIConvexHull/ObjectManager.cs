@@ -54,16 +54,11 @@ namespace MIConvexHull
 
 		public int GetFace()
 		{
-			int num;
 			if (this.FreeFaceIndices.Count > 0)
 			{
-				num = this.FreeFaceIndices.Pop();
+				return this.FreeFaceIndices.Pop();
 			}
-			else
-			{
-				num = this.CreateFace();
-			}
-			return num;
+			return this.CreateFace();
 		}
 
 		public void DepositConnector(FaceConnector connector)
@@ -82,19 +77,14 @@ namespace MIConvexHull
 
 		public FaceConnector GetConnector()
 		{
-			FaceConnector faceConnector;
 			if (this.ConnectorStack == null)
 			{
-				faceConnector = new FaceConnector(this.Dimension);
+				return new FaceConnector(this.Dimension);
 			}
-			else
-			{
-				FaceConnector connectorStack = this.ConnectorStack;
-				this.ConnectorStack = this.ConnectorStack.Next;
-				connectorStack.Next = null;
-				faceConnector = connectorStack;
-			}
-			return faceConnector;
+			FaceConnector connectorStack = this.ConnectorStack;
+			this.ConnectorStack = this.ConnectorStack.Next;
+			connectorStack.Next = null;
+			return connectorStack;
 		}
 
 		public void DepositVertexBuffer(IndexBuffer buffer)

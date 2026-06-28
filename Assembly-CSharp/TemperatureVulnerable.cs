@@ -71,20 +71,15 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 	{
 		get
 		{
-			string text;
 			if (base.smi.IsInsideState(base.smi.sm.warningCold))
 			{
-				text = Db.Get().CreatureStatusItems.Cold_Crop.resolveStringCallback(CREATURES.STATUSITEMS.COLD_CROP.NAME, this);
+				return Db.Get().CreatureStatusItems.Cold_Crop.resolveStringCallback(CREATURES.STATUSITEMS.COLD_CROP.NAME, this);
 			}
-			else if (base.smi.IsInsideState(base.smi.sm.warningHot))
+			if (base.smi.IsInsideState(base.smi.sm.warningHot))
 			{
-				text = Db.Get().CreatureStatusItems.Hot_Crop.resolveStringCallback(CREATURES.STATUSITEMS.HOT_CROP.NAME, this);
+				return Db.Get().CreatureStatusItems.Hot_Crop.resolveStringCallback(CREATURES.STATUSITEMS.HOT_CROP.NAME, this);
 			}
-			else
-			{
-				text = "";
-			}
-			return text;
+			return string.Empty;
 		}
 	}
 
@@ -128,11 +123,12 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 	public void UpdateTemperature(object data)
 	{
 		int num = Grid.PosToCell(base.gameObject);
-		if (Grid.IsValidCell(num))
+		if (!Grid.IsValidCell(num))
 		{
-			base.smi.sm.internalTemp.Set(this.InternalTemperature, base.smi);
-			this.displayTemperatureAmount.value = this.InternalTemperature;
+			return;
 		}
+		base.smi.sm.internalTemp.Set(this.InternalTemperature, base.smi);
+		this.displayTemperatureAmount.value = this.InternalTemperature;
 	}
 
 	private float GetAverageTemperature(int cell)
@@ -148,16 +144,11 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 			}
 			return true;
 		});
-		float num;
 		if (count > 0)
 		{
-			num = temperature / (float)count;
+			return temperature / (float)count;
 		}
-		else
-		{
-			num = -1f;
-		}
-		return num;
+		return -1f;
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)
@@ -208,7 +199,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 			}
 		}
 
-		public bool hasMaturity = false;
+		public bool hasMaturity;
 	}
 
 	public class States : GameStateMachine<TemperatureVulnerable.States, TemperatureVulnerable.StatesInstance, TemperatureVulnerable>

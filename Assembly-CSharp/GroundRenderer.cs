@@ -38,28 +38,29 @@ public class GroundRenderer : KMonoBehaviour
 
 	public void Render(Vector2I vis_min, Vector2I vis_max)
 	{
-		if (base.enabled)
+		if (!base.enabled)
 		{
-			int num = LayerMask.NameToLayer("World");
-			Vector2I vector2I = new Vector2I(vis_min.x / 16, vis_min.y / 16);
-			Vector2I vector2I2 = new Vector2I((vis_max.x + 16 - 1) / 16, (vis_max.y + 16 - 1) / 16);
-			float layerZ = Grid.GetLayerZ(Grid.SceneLayer.Ground);
-			Matrix4x4 matrix4x = Matrix4x4.TRS(new Vector3(0f, 0f, layerZ), Quaternion.identity, Vector3.one);
-			for (int i = vector2I.y; i < vector2I2.y; i++)
-			{
-				for (int j = vector2I.x; j < vector2I2.x; j++)
-				{
-					GroundRenderer.WorldChunk worldChunk = this.worldChunks[j, i];
-					if (this.dirtyChunks[j, i] || GroundRenderer.forceVisibleRebuild)
-					{
-						this.dirtyChunks[j, i] = false;
-						worldChunk.Rebuild(this.biomeMasks, this.elementMaterials);
-					}
-					worldChunk.Render(num, ref matrix4x);
-				}
-			}
-			this.RebuildDirtyChunks();
+			return;
 		}
+		int num = LayerMask.NameToLayer("World");
+		Vector2I vector2I = new Vector2I(vis_min.x / 16, vis_min.y / 16);
+		Vector2I vector2I2 = new Vector2I((vis_max.x + 16 - 1) / 16, (vis_max.y + 16 - 1) / 16);
+		float layerZ = Grid.GetLayerZ(Grid.SceneLayer.Ground);
+		Matrix4x4 matrix4x = Matrix4x4.TRS(new Vector3(0f, 0f, layerZ), Quaternion.identity, Vector3.one);
+		for (int i = vector2I.y; i < vector2I2.y; i++)
+		{
+			for (int j = vector2I.x; j < vector2I2.x; j++)
+			{
+				GroundRenderer.WorldChunk worldChunk = this.worldChunks[j, i];
+				if (this.dirtyChunks[j, i] || GroundRenderer.forceVisibleRebuild)
+				{
+					this.dirtyChunks[j, i] = false;
+					worldChunk.Rebuild(this.biomeMasks, this.elementMaterials);
+				}
+				worldChunk.Render(num, ref matrix4x);
+			}
+		}
+		this.RebuildDirtyChunks();
 	}
 
 	private void RebuildDirtyChunks()
@@ -264,7 +265,7 @@ public class GroundRenderer : KMonoBehaviour
 
 	private Vector2I size;
 
-	private static bool forceVisibleRebuild = false;
+	private static bool forceVisibleRebuild;
 
 	[Serializable]
 	private struct Materials
@@ -556,17 +557,11 @@ public class GroundRenderer : KMonoBehaviour
 
 		private static int GetBiomeIdx(int cell)
 		{
-			int num;
 			if (!Grid.IsValidCell(cell))
 			{
-				num = 0;
+				return 0;
 			}
-			else
-			{
-				SubWorld.ZoneType subWorldZoneType = global::World.Instance.zoneRenderData.GetSubWorldZoneType(cell);
-				num = (int)subWorldZoneType;
-			}
-			return num;
+			return (int)global::World.Instance.zoneRenderData.GetSubWorldZoneType(cell);
 		}
 
 		private static float GetStaticRandom(int x, int y)

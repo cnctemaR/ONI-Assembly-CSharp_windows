@@ -48,20 +48,15 @@ public struct KAnimHashedString : IComparable<KAnimHashedString>, IEquatable<KAn
 
 	public int CompareTo(KAnimHashedString obj)
 	{
-		int num;
 		if (this.hash < obj.hash)
 		{
-			num = -1;
+			return -1;
 		}
-		else if (this.hash > obj.hash)
+		if (this.hash > obj.hash)
 		{
-			num = 1;
+			return 1;
 		}
-		else
-		{
-			num = 0;
-		}
-		return num;
+		return 0;
 	}
 
 	public override bool Equals(object obj)

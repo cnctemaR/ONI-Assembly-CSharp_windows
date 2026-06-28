@@ -136,5 +136,5 @@ public class ImmigrantScreen : CharacterSelectionController
 
 	private Telepad telepad;
 
-	private bool hasShown = false;
+	private bool hasShown;
 }

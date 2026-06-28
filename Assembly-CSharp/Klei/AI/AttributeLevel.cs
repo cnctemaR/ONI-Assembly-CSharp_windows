@@ -69,26 +69,18 @@ namespace Klei.AI
 
 		public bool AddExperience(AttributeLevels levels, float experience)
 		{
-			bool flag;
 			if (this.level > 25)
 			{
-				flag = false;
+				return false;
 			}
-			else
+			this.experience += experience;
+			this.experience = Mathf.Max(0f, this.experience);
+			if (this.experience >= this.GetExperienceForNextLevel())
 			{
-				this.experience += experience;
-				this.experience = Mathf.Max(0f, this.experience);
-				if (this.experience >= this.GetExperienceForNextLevel())
-				{
-					this.LevelUp(levels);
-					flag = true;
-				}
-				else
-				{
-					flag = false;
-				}
+				this.LevelUp(levels);
+				return true;
 			}
-			return flag;
+			return false;
 		}
 
 		private static string OnLevelUpTooltip(List<Notification> notifications, object data)

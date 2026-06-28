@@ -125,16 +125,11 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 			MinionIdentity.maleNameList = new MinionIdentity.NameList(Game.Instance.maleNamesFile);
 			MinionIdentity.femaleNameList = new MinionIdentity.NameList(Game.Instance.femaleNamesFile);
 		}
-		string text;
 		if (global::UnityEngine.Random.value > 0.5f)
 		{
-			text = MinionIdentity.maleNameList.Next();
+			return MinionIdentity.maleNameList.Next();
 		}
-		else
-		{
-			text = MinionIdentity.femaleNameList.Next();
-		}
-		return text;
+		return MinionIdentity.femaleNameList.Next();
 	}
 
 	protected override void OnCleanUp()
@@ -220,7 +215,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 			for (int i = 0; i < array.Length; i++)
 			{
 				string[] array2 = array[i].Split(new char[] { ' ' });
-				if (array2[array2.Length - 1] != "" && array2[array2.Length - 1] != null)
+				if (array2[array2.Length - 1] != string.Empty && array2[array2.Length - 1] != null)
 				{
 					this.names.Add(array2[array2.Length - 1]);
 				}

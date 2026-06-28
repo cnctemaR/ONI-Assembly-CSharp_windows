@@ -109,12 +109,13 @@ public class SimTemperatureTransfer : KMonoBehaviour
 
 	private void OnCellChanged(int previous_cell, int cell)
 	{
-		if (cell != previous_cell)
+		if (cell == previous_cell)
 		{
-			if (Sim.IsValidHandle(this.simHandle))
-			{
-				SimMessages.MoveElementChunk(this.simHandle, cell);
-			}
+			return;
+		}
+		if (Sim.IsValidHandle(this.simHandle))
+		{
+			SimMessages.MoveElementChunk(this.simHandle, cell);
 		}
 	}
 
@@ -267,7 +268,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 	[SerializeField]
 	protected float thickness = 0.01f;
 
-	private float pendingEnergyModifications = 0f;
+	private float pendingEnergyModifications;
 
-	public float deltaKJ = 0f;
+	public float deltaKJ;
 }

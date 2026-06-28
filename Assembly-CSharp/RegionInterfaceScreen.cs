@@ -29,38 +29,31 @@ public class RegionInterfaceScreen : KScreen
 		float num2 = 0.75f;
 		Region regionByID = Game.Instance.RegionManager.GetRegionByID(regionID);
 		Color color = ((!(regionByID == null)) ? regionByID.OverlayColor : Color.black);
-		Color color2;
 		if (regionByID == null)
 		{
-			color2 = color;
+			return color;
 		}
-		else
+		KSelectable component = regionByID.gameObject.GetComponent<KSelectable>();
+		if (component.IsSelected)
 		{
-			KSelectable component = regionByID.gameObject.GetComponent<KSelectable>();
-			if (component.IsSelected)
-			{
-				color2 = this.AddHighlightToColor(color, num2);
-			}
-			else if (regionByID == this.HoveredRegion)
-			{
-				color2 = this.AddHighlightToColor(color, num);
-			}
-			else
-			{
-				if (this.dragHighlightRegions != null)
-				{
-					foreach (Region region in this.dragHighlightRegions)
-					{
-						if (regionByID == region)
-						{
-							return this.AddHighlightToColor(color, num);
-						}
-					}
-				}
-				color2 = color;
-			}
+			return this.AddHighlightToColor(color, num2);
 		}
-		return color2;
+		if (regionByID == this.HoveredRegion)
+		{
+			return this.AddHighlightToColor(color, num);
+		}
+		if (this.dragHighlightRegions != null)
+		{
+			foreach (Region region in this.dragHighlightRegions)
+			{
+				if (regionByID == region)
+				{
+					return this.AddHighlightToColor(color, num);
+				}
+			}
+			return color;
+		}
+		return color;
 	}
 
 	private Color AddHighlightToColor(Color baseColor, float amount)

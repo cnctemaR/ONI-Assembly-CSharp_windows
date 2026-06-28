@@ -35,16 +35,11 @@ namespace TMPro
 		{
 			get
 			{
-				Texture texture;
 				if (this.sharedMaterial != null)
 				{
-					texture = this.sharedMaterial.mainTexture;
+					return this.sharedMaterial.mainTexture;
 				}
-				else
-				{
-					texture = null;
-				}
-				return texture;
+				return null;
 			}
 		}
 
@@ -56,14 +51,15 @@ namespace TMPro
 			}
 			set
 			{
-				if (!(this.m_sharedMaterial != null) || this.m_sharedMaterial.GetInstanceID() != value.GetInstanceID())
+				if (this.m_sharedMaterial != null && this.m_sharedMaterial.GetInstanceID() == value.GetInstanceID())
 				{
-					this.m_material = value;
-					this.m_sharedMaterial = value;
-					this.m_padding = this.GetPaddingForMaterial();
-					this.SetVerticesDirty();
-					this.SetMaterialDirty();
+					return;
 				}
+				this.m_material = value;
+				this.m_sharedMaterial = value;
+				this.m_padding = this.GetPaddingForMaterial();
+				this.SetVerticesDirty();
+				this.SetMaterialDirty();
 			}
 		}
 
@@ -83,16 +79,11 @@ namespace TMPro
 		{
 			get
 			{
-				Material material;
 				if (this.m_sharedMaterial == null)
 				{
-					material = null;
+					return null;
 				}
-				else
-				{
-					material = this.GetModifiedMaterial(this.m_sharedMaterial);
-				}
-				return material;
+				return this.GetModifiedMaterial(this.m_sharedMaterial);
 			}
 		}
 
@@ -218,12 +209,13 @@ namespace TMPro
 
 		protected override void OnTransformParentChanged()
 		{
-			if (this.IsActive())
+			if (!this.IsActive())
 			{
-				this.m_ShouldRecalculateStencil = true;
-				this.RecalculateClipping();
-				this.RecalculateMasking();
+				return;
 			}
+			this.m_ShouldRecalculateStencil = true;
+			this.RecalculateClipping();
+			this.RecalculateMasking();
 		}
 
 		public override Material GetModifiedMaterial(Material baseMaterial)
@@ -267,13 +259,14 @@ namespace TMPro
 
 		public override void SetVerticesDirty()
 		{
-			if (this.IsActive())
+			if (!this.IsActive())
 			{
-				if (this.m_TextComponent != null)
-				{
-					this.m_TextComponent.havePropertiesChanged = true;
-					this.m_TextComponent.SetVerticesDirty();
-				}
+				return;
+			}
+			if (this.m_TextComponent != null)
+			{
+				this.m_TextComponent.havePropertiesChanged = true;
+				this.m_TextComponent.SetVerticesDirty();
 			}
 		}
 
@@ -289,10 +282,11 @@ namespace TMPro
 
 		public void SetPivotDirty()
 		{
-			if (this.IsActive())
+			if (!this.IsActive())
 			{
-				base.rectTransform.pivot = this.m_TextComponent.rectTransform.pivot;
+				return;
 			}
+			base.rectTransform.pivot = this.m_TextComponent.rectTransform.pivot;
 		}
 
 		protected override void UpdateGeometry()
@@ -303,11 +297,12 @@ namespace TMPro
 		{
 			if (update == CanvasUpdate.PreRender)
 			{
-				if (this.m_materialDirty)
+				if (!this.m_materialDirty)
 				{
-					this.UpdateMaterial();
-					this.m_materialDirty = false;
+					return;
 				}
+				this.UpdateMaterial();
+				this.m_materialDirty = false;
 			}
 		}
 

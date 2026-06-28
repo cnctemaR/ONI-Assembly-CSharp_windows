@@ -112,11 +112,8 @@ namespace VoronoiTree
 			{
 				Vector2 circumcenter = site.Circumcenter;
 				Cell cell = this.mg.GetCell(circumcenter);
-				PowerDiagram.DualSite2d[] vertices = site.Vertices;
-				int i = 0;
-				while (i < vertices.Length)
+				foreach (PowerDiagram.DualSite2d dualSite2d in site.Vertices)
 				{
-					PowerDiagram.DualSite2d dualSite2d = vertices[i];
 					if (!dualSite2d.visited)
 					{
 						dualSite2d.visited = true;
@@ -150,10 +147,6 @@ namespace VoronoiTree
 							}
 						}
 					}
-					IL_01B5:
-					i++;
-					continue;
-					goto IL_01B5;
 				}
 			}
 			this.ClipNeighbors();
@@ -185,23 +178,18 @@ namespace VoronoiTree
 
 		private bool ContainsVert(Site face, PowerDiagram.DualSite2d target)
 		{
-			bool flag;
 			if (face == null || face.Vertices == null)
 			{
-				flag = false;
+				return false;
 			}
-			else
+			for (int i = 0; i < face.Vertices.Length; i++)
 			{
-				for (int i = 0; i < face.Vertices.Length; i++)
+				if (face.Vertices[i] == target)
 				{
-					if (face.Vertices[i] == target)
-					{
-						return true;
-					}
+					return true;
 				}
-				flag = false;
 			}
-			return flag;
+			return false;
 		}
 
 		private void AddSite(Site site)

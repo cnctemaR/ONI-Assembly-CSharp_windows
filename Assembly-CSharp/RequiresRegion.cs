@@ -87,7 +87,7 @@ public class RequiresRegion : KMonoBehaviour
 
 	private Region ownerRegion;
 
-	private bool wasContained = false;
+	private bool wasContained;
 
 	private bool wasRegionValid = true;
 

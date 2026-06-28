@@ -161,7 +161,6 @@ public class TagSet : ICollection<Tag>, IEnumerable<Tag>, IEnumerable
 
 	public override string ToString()
 	{
-		string text;
 		if (this.tags.Count > 0)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
@@ -171,18 +170,13 @@ public class TagSet : ICollection<Tag>, IEnumerable<Tag>, IEnumerable
 				stringBuilder.Append(", ");
 				stringBuilder.Append(this.tags[i].Name);
 			}
-			text = stringBuilder.ToString();
+			return stringBuilder.ToString();
 		}
-		else
-		{
-			text = "";
-		}
-		return text;
+		return string.Empty;
 	}
 
 	public string GetTagDescription()
 	{
-		string text;
 		if (this.tags.Count > 0)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
@@ -192,13 +186,9 @@ public class TagSet : ICollection<Tag>, IEnumerable<Tag>, IEnumerable
 				stringBuilder.Append(", ");
 				stringBuilder.Append(TagDescriptions.GetDescription(this.tags[i].ToString()));
 			}
-			text = stringBuilder.ToString();
+			return stringBuilder.ToString();
 		}
-		else
-		{
-			text = "";
-		}
-		return text;
+		return string.Empty;
 	}
 
 	[Serialize]

@@ -34,21 +34,19 @@ public class CavityInfo
 
 	public void ReleaseResources()
 	{
-		if (this.room != null)
+		if (this.room == null)
 		{
-			foreach (BuildingComplete buildingComplete in this.room.buildings)
+			return;
+		}
+		foreach (BuildingComplete buildingComplete in this.room.buildings)
+		{
+			if (!(buildingComplete == null))
 			{
-				if (!(buildingComplete == null))
+				Assignable assignable = buildingComplete.assignable;
+				if (assignable != null && assignable.assignee == this.room)
 				{
-					Assignable assignable = buildingComplete.assignable;
-					if (assignable != null)
-					{
-						if (assignable.assignee == this.room)
-						{
-							assignable.Unassign();
-							assignable.Trigger(2070884250, null);
-						}
-					}
+					assignable.Unassign();
+					assignable.Trigger(2070884250, null);
 				}
 			}
 		}
@@ -56,9 +54,9 @@ public class CavityInfo
 
 	public HandleVector<int>.Handle handle;
 
-	public bool hasDoor = false;
+	public bool hasDoor;
 
-	public bool dirty = false;
+	public bool dirty;
 
 	public int numCells;
 

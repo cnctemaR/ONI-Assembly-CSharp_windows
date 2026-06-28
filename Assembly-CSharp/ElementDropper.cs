@@ -12,24 +12,25 @@ public class ElementDropper : KMonoBehaviour
 	private void OnStorageChanged(object data)
 	{
 		GameObject gameObject = this.storage.FindFirst(this.emitTag);
-		if (!(gameObject == null))
+		if (gameObject == null)
 		{
-			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			if (component.Mass >= this.emitMass)
+			return;
+		}
+		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+		if (component.Mass >= this.emitMass)
+		{
+			Pickupable pickupable = gameObject.GetComponent<Pickupable>();
+			if (pickupable != null)
 			{
-				Pickupable pickupable = gameObject.GetComponent<Pickupable>();
-				if (pickupable != null)
-				{
-					pickupable = pickupable.Take(this.emitMass);
-					pickupable.transform.position += this.emitOffset;
-				}
-				else
-				{
-					this.storage.Drop(gameObject);
-					gameObject.transform.position += this.emitOffset;
-				}
-				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, pickupable.GetComponent<PrimaryElement>().Element.name + " " + GameUtil.GetFormattedMass(pickupable.TotalAmount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), pickupable.transform, 1.5f, false);
+				pickupable = pickupable.Take(this.emitMass);
+				pickupable.transform.position += this.emitOffset;
 			}
+			else
+			{
+				this.storage.Drop(gameObject);
+				gameObject.transform.position += this.emitOffset;
+			}
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, pickupable.GetComponent<PrimaryElement>().Element.name + " " + GameUtil.GetFormattedMass(pickupable.TotalAmount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), pickupable.transform, 1.5f, false);
 		}
 	}
 

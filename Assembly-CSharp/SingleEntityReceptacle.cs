@@ -17,16 +17,11 @@ public class SingleEntityReceptacle : KMonoBehaviour
 	{
 		get
 		{
-			GameObject gameObject;
 			if (this.occupyObjectRef.Get() != null)
 			{
-				gameObject = this.occupyObjectRef.Get().gameObject;
+				return this.occupyObjectRef.Get().gameObject;
 			}
-			else
-			{
-				gameObject = null;
-			}
-			return gameObject;
+			return null;
 		}
 		set
 		{
@@ -104,8 +99,9 @@ public class SingleEntityReceptacle : KMonoBehaviour
 		if (this.Occupant != null)
 		{
 			component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, null, null);
+			return;
 		}
-		else if (this.fetchChore != null)
+		if (this.fetchChore != null)
 		{
 			bool flag = false;
 			foreach (Tag tag in this.fetchChore.tags)
@@ -258,17 +254,18 @@ public class SingleEntityReceptacle : KMonoBehaviour
 
 	private void SetOperation()
 	{
-		if (!this.Equals(null) && !(this == null) && !base.gameObject.Equals(null) && !(base.gameObject == null))
+		if (this.Equals(null) || this == null || base.gameObject.Equals(null) || base.gameObject == null)
 		{
-			Operational component = base.GetComponent<Operational>();
-			if (component.IsOperational && this.occupyingObject != null)
-			{
-				component.SetActive(true, false);
-			}
-			else
-			{
-				component.SetActive(false, false);
-			}
+			return;
+		}
+		Operational component = base.GetComponent<Operational>();
+		if (component.IsOperational && this.occupyingObject != null)
+		{
+			component.SetActive(true, false);
+		}
+		else
+		{
+			component.SetActive(false, false);
 		}
 	}
 
@@ -305,7 +302,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 	private List<Tag> possibleDepositTagsList = new List<Tag>();
 
 	[SerializeField]
-	protected bool destroyEntityOnDeposit = false;
+	protected bool destroyEntityOnDeposit;
 
 	[SerializeField]
 	protected SingleEntityReceptacle.ReceptacleDirection direction;

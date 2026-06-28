@@ -20,23 +20,25 @@ public class FilterSideScreen : SideScreenContent
 	protected override void OnShow(bool show)
 	{
 		base.OnShow(show);
-		if (show)
+		if (!show)
 		{
-			this.SetFilterType();
-			if (!(DetailsScreen.Instance.target == null) && !(DetailsScreen.Instance.target.GetComponent<ElementFilter>() == null))
-			{
-				Element element = ElementLoader.FindElementByHash(SimHashes.Void);
-				ElementFilter component = DetailsScreen.Instance.target.GetComponent<ElementFilter>();
-				if (component != null)
-				{
-					element = ElementLoader.FindElementByHash(DetailsScreen.Instance.target.GetComponent<ElementFilter>().FilteredElement);
-				}
-				this.SetFilterElement(element);
-				this.ShowElementsByState();
-				this.selectElementHeaderLabel.text = UI.UISIDESCREENS.FILTERSIDESCREEN.SELECTELEMENTHEADER;
-				this.everythingElseHeaderLabel.text = ((this.FilterElementState != FilterSideScreen.elementState.gas) ? UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.LIQUID : UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.GAS);
-			}
+			return;
 		}
+		this.SetFilterType();
+		if (DetailsScreen.Instance.target == null || DetailsScreen.Instance.target.GetComponent<ElementFilter>() == null)
+		{
+			return;
+		}
+		Element element = ElementLoader.FindElementByHash(SimHashes.Void);
+		ElementFilter component = DetailsScreen.Instance.target.GetComponent<ElementFilter>();
+		if (component != null)
+		{
+			element = ElementLoader.FindElementByHash(DetailsScreen.Instance.target.GetComponent<ElementFilter>().FilteredElement);
+		}
+		this.SetFilterElement(element);
+		this.ShowElementsByState();
+		this.selectElementHeaderLabel.text = UI.UISIDESCREENS.FILTERSIDESCREEN.SELECTELEMENTHEADER;
+		this.everythingElseHeaderLabel.text = ((this.FilterElementState != FilterSideScreen.elementState.gas) ? UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.LIQUID : UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.GAS);
 	}
 
 	private void PopulateElements()

@@ -97,34 +97,35 @@ public class MaterialSelectionPanel : KScreen
 
 	public void RefreshSelectors()
 	{
-		if (this.activeRecipe != null)
+		if (this.activeRecipe == null)
 		{
-			this.MaterialSelectors.ForEach(delegate(MaterialSelector selector)
+			return;
+		}
+		this.MaterialSelectors.ForEach(delegate(MaterialSelector selector)
+		{
+			selector.gameObject.SetActive(false);
+		});
+		TechItem techItem = Db.Get().TechItems.TryGet(this.activeRecipe.GetBuildingDef().PrefabID);
+		bool flag = !DebugHandler.InstantBuildMode && techItem != null && !techItem.IsComplete();
+		if (flag)
+		{
+			this.ResearchRequired.SetActive(true);
+			LocText[] componentsInChildren = this.ResearchRequired.GetComponentsInChildren<LocText>();
+			componentsInChildren[0].text = UI.PRODUCTINFO_RESEARCHREQUIRED;
+			componentsInChildren[1].text = string.Format(UI.PRODUCTINFO_REQUIRESRESEARCHDESC, techItem.parentTech.Name);
+			componentsInChildren[1].color = Constants.NEGATIVE_COLOR;
+			this.priorityScreen.gameObject.SetActive(false);
+		}
+		else
+		{
+			this.ResearchRequired.SetActive(false);
+			for (int i = 0; i < this.activeRecipe.Ingredients.Count; i++)
 			{
-				selector.gameObject.SetActive(false);
-			});
-			TechItem techItem = Db.Get().TechItems.TryGet(this.activeRecipe.GetBuildingDef().PrefabID);
-			bool flag = !DebugHandler.InstantBuildMode && techItem != null && !techItem.IsComplete();
-			if (flag)
-			{
-				this.ResearchRequired.SetActive(true);
-				LocText[] componentsInChildren = this.ResearchRequired.GetComponentsInChildren<LocText>();
-				componentsInChildren[0].text = UI.PRODUCTINFO_RESEARCHREQUIRED;
-				componentsInChildren[1].text = string.Format(UI.PRODUCTINFO_REQUIRESRESEARCHDESC, techItem.parentTech.Name);
-				componentsInChildren[1].color = Constants.NEGATIVE_COLOR;
-				this.priorityScreen.gameObject.SetActive(false);
+				this.MaterialSelectors[i].gameObject.SetActive(true);
+				this.MaterialSelectors[i].ConfigureScreen(this.activeRecipe.Ingredients[i], this.activeRecipe);
 			}
-			else
-			{
-				this.ResearchRequired.SetActive(false);
-				for (int i = 0; i < this.activeRecipe.Ingredients.Count; i++)
-				{
-					this.MaterialSelectors[i].gameObject.SetActive(true);
-					this.MaterialSelectors[i].ConfigureScreen(this.activeRecipe.Ingredients[i], this.activeRecipe);
-				}
-				this.priorityScreen.gameObject.SetActive(true);
-				this.priorityScreen.gameObject.transform.SetAsLastSibling();
-			}
+			this.priorityScreen.gameObject.SetActive(true);
+			this.priorityScreen.gameObject.transform.SetAsLastSibling();
 		}
 	}
 
@@ -151,12 +152,9 @@ public class MaterialSelectionPanel : KScreen
 	{
 		foreach (MaterialSelector materialSelector in this.MaterialSelectors)
 		{
-			if (materialSelector.gameObject.activeSelf)
+			if (materialSelector.gameObject.activeSelf && materialSelector.CurrentSelectedElement == null)
 			{
-				if (materialSelector.CurrentSelectedElement == null)
-				{
-					return false;
-				}
+				return false;
 			}
 		}
 		return true;
@@ -170,12 +168,9 @@ public class MaterialSelectionPanel : KScreen
 		foreach (Element element in ElementLoader.elements)
 		{
 			bool flag = element.tag == materialCategoryTag;
-			if (!flag)
+			if (!flag && element.HasTag(materialCategoryTag))
 			{
-				if (element.HasTag(materialCategoryTag))
-				{
-					flag = true;
-				}
+				flag = true;
 			}
 			if (flag)
 			{

@@ -77,14 +77,16 @@ public class MainMenu : KMonoBehaviour
 		if (SteamManager.Initialized)
 		{
 			string steamUILanguage = SteamUtils.GetSteamUILanguage();
-			if (!(steamUILanguage != "schinese"))
+			if (steamUILanguage != "schinese")
 			{
-				if (KPlayerPrefs.GetInt("LanguageConfirmationVersion") < MainMenu.LANGUAGE_CONFIRMATION_VERSION)
-				{
-					KPlayerPrefs.SetInt("LanguageConfirmationVersion", MainMenu.LANGUAGE_CONFIRMATION_VERSION);
-					this.Translations();
-				}
+				return;
 			}
+			if (KPlayerPrefs.GetInt("LanguageConfirmationVersion") >= MainMenu.LANGUAGE_CONFIRMATION_VERSION)
+			{
+				return;
+			}
+			KPlayerPrefs.SetInt("LanguageConfirmationVersion", MainMenu.LANGUAGE_CONFIRMATION_VERSION);
+			this.Translations();
 		}
 	}
 
@@ -143,7 +145,7 @@ public class MainMenu : KMonoBehaviour
 				}
 				SaveGame.Header header;
 				SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(latestSaveFile, out header);
-				if (header.buildVersion > 243104U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 243285U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -220,7 +222,7 @@ public class MainMenu : KMonoBehaviour
 
 	private void CheckDoubleBoundKeys()
 	{
-		string text = "";
+		string text = string.Empty;
 		List<BindingEntry> list = new List<BindingEntry>();
 		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
@@ -264,7 +266,7 @@ public class MainMenu : KMonoBehaviour
 				list.Add(GameInputMapping.KeyBindings[i]);
 			}
 		}
-		if (text != "")
+		if (text != string.Empty)
 		{
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
 			confirmDialogScreen.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupe;

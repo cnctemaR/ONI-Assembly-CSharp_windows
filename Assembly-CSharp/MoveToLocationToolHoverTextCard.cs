@@ -14,44 +14,43 @@ public class MoveToLocationToolHoverTextCard : HoverTextConfiguration
 		if (instance.LoadPreConfiguredToolFields(this))
 		{
 			this.isConfigured = true;
+			return;
 		}
-		else
+		instance.ToggleIncubating(true);
+		instance.ClearLabels();
+		instance.StartShadowBar(0f, 0f, false);
+		if (this.printTitle)
 		{
-			instance.ToggleIncubating(true);
-			instance.ClearLabels();
-			instance.StartShadowBar(0f, 0f, false);
-			if (this.printTitle)
-			{
-				this.ConfigureTitle(instance);
-			}
-			this.ConfigureInstructions(instance);
-			instance.NewLine("Unreachable Line", 24);
-			this.unreachableLine = instance.AddText("Unreachable", this.Styles_Title.Standard, true);
-			instance.EndShadowBar();
-			this.isConfigured = true;
+			this.ConfigureTitle(instance);
 		}
+		this.ConfigureInstructions(instance);
+		instance.NewLine("Unreachable Line", 24);
+		this.unreachableLine = instance.AddText("Unreachable", this.Styles_Title.Standard, true);
+		instance.EndShadowBar();
+		this.isConfigured = true;
 	}
 
 	public override void UpdateHoverElements(List<KSelectable> selected)
 	{
 		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-		if (Grid.IsValidCell(num))
+		if (!Grid.IsValidCell(num))
 		{
-			if (!this.isConfigured)
-			{
-				this.ConfigureHoverScreen();
-			}
-			bool flag = true;
-			if (selected != null && selected.Count > 0 && selected[0] != null)
-			{
-				Navigator component = selected[0].GetComponent<Navigator>();
-				if (component != null && component.CanReach(num))
-				{
-					flag = false;
-				}
-			}
-			base.SetLineActive(this.unreachableLine.gameObject, flag);
+			return;
 		}
+		if (!this.isConfigured)
+		{
+			this.ConfigureHoverScreen();
+		}
+		bool flag = true;
+		if (selected != null && selected.Count > 0 && selected[0] != null)
+		{
+			Navigator component = selected[0].GetComponent<Navigator>();
+			if (component != null && component.CanReach(num))
+			{
+				flag = false;
+			}
+		}
+		base.SetLineActive(this.unreachableLine.gameObject, flag);
 	}
 
 	private LocText unreachableLine;

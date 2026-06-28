@@ -28,10 +28,11 @@ public class TemperatureSwitchSideScreen : SideScreenContent
 
 	private void SimUpdate(float dt)
 	{
-		if (!(this.targetTemperatureSwitch == null))
+		if (this.targetTemperatureSwitch == null)
 		{
-			this.UpdateLabels();
+			return;
 		}
+		this.UpdateLabels();
 	}
 
 	public override void SetTarget(GameObject target)
@@ -39,21 +40,17 @@ public class TemperatureSwitchSideScreen : SideScreenContent
 		if (target == null)
 		{
 			global::Debug.LogError("Invalid gameObject received", null);
+			return;
 		}
-		else
+		this.targetTemperatureSwitch = target.GetComponent<TemperatureControlledSwitch>();
+		if (this.targetTemperatureSwitch == null)
 		{
-			this.targetTemperatureSwitch = target.GetComponent<TemperatureControlledSwitch>();
-			if (this.targetTemperatureSwitch == null)
-			{
-				global::Debug.LogError("The gameObject received does not contain a TimedSwitch component", null);
-			}
-			else
-			{
-				this.UpdateLabels();
-				this.UpdateTargetTemperatureLabel();
-				this.OnConditionButtonClicked(this.targetTemperatureSwitch.activateOnWarmerThan);
-			}
+			global::Debug.LogError("The gameObject received does not contain a TimedSwitch component", null);
+			return;
 		}
+		this.UpdateLabels();
+		this.UpdateTargetTemperatureLabel();
+		this.OnConditionButtonClicked(this.targetTemperatureSwitch.activateOnWarmerThan);
 	}
 
 	private void OnTargetTemperatureChanged(float new_value)

@@ -48,121 +48,124 @@ public class CellSelectionObject : KMonoBehaviour
 
 	private void Update()
 	{
-		if (this.isAppFocused)
+		if (!this.isAppFocused)
 		{
-			if (!(Game.Instance == null) && Game.Instance.GameStarted())
+			return;
+		}
+		if (Game.Instance == null || !Game.Instance.GameStarted())
+		{
+			return;
+		}
+		this.SelectedDisplaySprite.SetActive(PlayerController.Instance.IsUsingDefaultTool() && !DebugHandler.HideUI);
+		if (SelectTool.Instance.selected != this.mSelectable)
+		{
+			this.mouseCell = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(Input.mousePosition));
+			if (Grid.IsValidCell(this.mouseCell) && (Grid.Visible[this.mouseCell] > 0 || DebugHandler.FreeCameraMode))
 			{
-				this.SelectedDisplaySprite.SetActive(PlayerController.Instance.IsUsingDefaultTool() && !DebugHandler.HideUI);
-				if (SelectTool.Instance.selected != this.mSelectable)
+				bool flag = true;
+				foreach (KeyValuePair<SimViewMode, Func<bool>> keyValuePair in this.overlayFilterMap)
 				{
-					this.mouseCell = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(Input.mousePosition));
-					if (Grid.IsValidCell(this.mouseCell) && (Grid.Visible[this.mouseCell] > 0 || DebugHandler.FreeCameraMode))
+					if (keyValuePair.Value == null)
 					{
-						bool flag = true;
-						foreach (KeyValuePair<SimViewMode, Func<bool>> keyValuePair in this.overlayFilterMap)
-						{
-							if (keyValuePair.Value == null)
-							{
-								global::Debug.LogWarning("Filter value is null", null);
-							}
-							else if (OverlayScreen.Instance == null)
-							{
-								global::Debug.LogWarning("Overlay screen Instance is null", null);
-							}
-							else if (OverlayScreen.Instance.GetMode() == keyValuePair.Key)
-							{
-								flag = false;
-								if (base.gameObject.layer != LayerMask.NameToLayer("MaskedOverlay"))
-								{
-									base.gameObject.layer = LayerMask.NameToLayer("MaskedOverlay");
-								}
-								if (!keyValuePair.Value())
-								{
-									this.SelectedDisplaySprite.SetActive(false);
-									return;
-								}
-								break;
-							}
-						}
-						if (flag && base.gameObject.layer != LayerMask.NameToLayer("Default"))
-						{
-							base.gameObject.layer = LayerMask.NameToLayer("Default");
-						}
-						if (this.previousHoverCell != this.mouseCell)
-						{
-							if (this.hoverTextScreen != null)
-							{
-								this.hoverTextScreen.ResetHoverDelay();
-							}
-							else
-							{
-								this.hoverTextScreen = global::UnityEngine.Object.FindObjectOfType<HoverTextScreen>();
-							}
-							this.previousHoverCell = this.mouseCell;
-						}
-						Vector3 vector = Grid.CellToPos(this.mouseCell, 0f, 0f, 0f) + this.offset;
-						vector.z = this.zDepth;
-						base.transform.SetPosition(vector);
-						this.mSelectable.SetName(Grid.Element[this.mouseCell].name);
+						global::Debug.LogWarning("Filter value is null", null);
 					}
-					if (SelectTool.Instance.hover != this.mSelectable)
+					else if (OverlayScreen.Instance == null)
 					{
-						this.SelectedDisplaySprite.SetActive(false);
+						global::Debug.LogWarning("Overlay screen Instance is null", null);
+					}
+					else if (OverlayScreen.Instance.GetMode() == keyValuePair.Key)
+					{
+						flag = false;
+						if (base.gameObject.layer != LayerMask.NameToLayer("MaskedOverlay"))
+						{
+							base.gameObject.layer = LayerMask.NameToLayer("MaskedOverlay");
+						}
+						if (!keyValuePair.Value())
+						{
+							this.SelectedDisplaySprite.SetActive(false);
+							return;
+						}
+						break;
 					}
 				}
-				this.updateTimer += Time.deltaTime;
-				if (this.updateTimer >= 0.5f)
+				if (flag && base.gameObject.layer != LayerMask.NameToLayer("Default"))
 				{
-					this.updateTimer = 0f;
-					if (SelectTool.Instance.selected == this.mSelectable)
-					{
-						this.UpdateValues();
-					}
+					base.gameObject.layer = LayerMask.NameToLayer("Default");
 				}
+				if (this.previousHoverCell != this.mouseCell)
+				{
+					if (this.hoverTextScreen != null)
+					{
+						this.hoverTextScreen.ResetHoverDelay();
+					}
+					else
+					{
+						this.hoverTextScreen = global::UnityEngine.Object.FindObjectOfType<HoverTextScreen>();
+					}
+					this.previousHoverCell = this.mouseCell;
+				}
+				Vector3 vector = Grid.CellToPos(this.mouseCell, 0f, 0f, 0f) + this.offset;
+				vector.z = this.zDepth;
+				base.transform.SetPosition(vector);
+				this.mSelectable.SetName(Grid.Element[this.mouseCell].name);
+			}
+			if (SelectTool.Instance.hover != this.mSelectable)
+			{
+				this.SelectedDisplaySprite.SetActive(false);
+			}
+		}
+		this.updateTimer += Time.deltaTime;
+		if (this.updateTimer >= 0.5f)
+		{
+			this.updateTimer = 0f;
+			if (SelectTool.Instance.selected == this.mSelectable)
+			{
+				this.UpdateValues();
 			}
 		}
 	}
 
 	public void UpdateValues()
 	{
-		if (Grid.IsValidCell(this.selectedCell))
+		if (!Grid.IsValidCell(this.selectedCell))
 		{
-			this.Mass = Grid.Cell[this.selectedCell].mass;
-			this.element = Grid.Element[this.selectedCell];
-			this.ElementName = this.element.name;
-			this.state = this.element.state;
-			this.tags = this.element.GetMaterialCategoryTag();
-			this.temperature = Grid.Cell[this.selectedCell].temperature;
-			this.diseaseIdx = Grid.Disease[this.selectedCell].diseaseIdx;
-			this.diseaseCount = Grid.Disease[this.selectedCell].elementCount;
-			this.mSelectable.SetName(Grid.Element[this.selectedCell].name);
-			DetailsScreen.Instance.Trigger(-1514841199, null);
-			this.UpdateStatusItem();
-			if (this.element.id == SimHashes.OxyRock)
+			return;
+		}
+		this.Mass = Grid.Cell[this.selectedCell].mass;
+		this.element = Grid.Element[this.selectedCell];
+		this.ElementName = this.element.name;
+		this.state = this.element.state;
+		this.tags = this.element.GetMaterialCategoryTag();
+		this.temperature = Grid.Cell[this.selectedCell].temperature;
+		this.diseaseIdx = Grid.Disease[this.selectedCell].diseaseIdx;
+		this.diseaseCount = Grid.Disease[this.selectedCell].elementCount;
+		this.mSelectable.SetName(Grid.Element[this.selectedCell].name);
+		DetailsScreen.Instance.Trigger(-1514841199, null);
+		this.UpdateStatusItem();
+		if (this.element.id == SimHashes.OxyRock)
+		{
+			this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.OxyRockEmitting, this);
+			if (this.FlowRate <= 0f)
 			{
-				this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.OxyRockEmitting, this);
-				if (this.FlowRate <= 0f)
-				{
-					this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.OxyRockBlocked, this);
-				}
-				else
-				{
-					this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.OxyRockBlocked, false);
-				}
+				this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.OxyRockBlocked, this);
 			}
 			else
 			{
-				this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.OxyRockEmitting, false);
 				this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.OxyRockBlocked, false);
 			}
-			if (Game.Instance.GetComponent<EntombedItemVisualizer>().IsEntombedItem(this.selectedCell))
-			{
-				this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.BuriedItem, this);
-			}
-			else
-			{
-				this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.BuriedItem, true);
-			}
+		}
+		else
+		{
+			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.OxyRockEmitting, false);
+			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.OxyRockBlocked, false);
+		}
+		if (Game.Instance.GetComponent<EntombedItemVisualizer>().IsEntombedItem(this.selectedCell))
+		{
+			this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.BuriedItem, this);
+		}
+		else
+		{
+			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.BuriedItem, true);
 		}
 	}
 
@@ -225,14 +228,11 @@ public class CellSelectionObject : KMonoBehaviour
 	public virtual void OnRefreshUserMenu(object data)
 	{
 		this.cellButtons.Clear();
-		if (SelectTool.Instance.selected == this.mSelectable)
+		if (SelectTool.Instance.selected == this.mSelectable && Grid.IsSubstantialLiquid(this.selectedCell, 0.35f) && WaterBodyProbe.Instance.GetBodyIfKnown(this.selectedCell))
 		{
-			if (Grid.IsSubstantialLiquid(this.selectedCell, 0.35f) && WaterBodyProbe.Instance.GetBodyIfKnown(this.selectedCell))
+			BodyOfWater bodyIfKnown = WaterBodyProbe.Instance.GetBodyIfKnown(this.selectedCell);
+			if (bodyIfKnown != null)
 			{
-				BodyOfWater bodyIfKnown = WaterBodyProbe.Instance.GetBodyIfKnown(this.selectedCell);
-				if (bodyIfKnown != null)
-				{
-				}
 			}
 		}
 		foreach (KIconButtonMenu.ButtonInfo buttonInfo in this.cellButtons)
@@ -246,7 +246,7 @@ public class CellSelectionObject : KMonoBehaviour
 
 	private float zDepth = -0.5f;
 
-	private float zDepthSelected = 0f;
+	private float zDepthSelected;
 
 	private BoxCollider2D mCollider;
 
@@ -287,7 +287,7 @@ public class CellSelectionObject : KMonoBehaviour
 
 	public int diseaseCount;
 
-	private float updateTimer = 0f;
+	private float updateTimer;
 
 	private List<KIconButtonMenu.ButtonInfo> cellButtons = new List<KIconButtonMenu.ButtonInfo>();
 

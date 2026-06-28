@@ -48,20 +48,15 @@ public struct HashedString : IComparable<HashedString>, IEquatable<HashedString>
 
 	public int CompareTo(HashedString obj)
 	{
-		int num;
 		if (this.hash < obj.hash)
 		{
-			num = -1;
+			return -1;
 		}
-		else if (this.hash > obj.hash)
+		if (this.hash > obj.hash)
 		{
-			num = 1;
+			return 1;
 		}
-		else
-		{
-			num = 0;
-		}
-		return num;
+		return 0;
 	}
 
 	public override bool Equals(object obj)

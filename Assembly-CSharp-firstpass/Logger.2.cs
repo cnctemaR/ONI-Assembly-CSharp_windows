@@ -23,16 +23,11 @@ public class Logger<EntryType> : Logger
 	{
 		get
 		{
-			int num;
 			if (this.entries == null)
 			{
-				num = 0;
+				return 0;
 			}
-			else
-			{
-				num = this.entries.Count;
-			}
-			return num;
+			return this.entries.Count;
 		}
 	}
 

@@ -40,16 +40,11 @@ namespace Steamworks
 
 		public string GetServerName()
 		{
-			string text;
 			if (this.m_szServerName[0] == 0)
 			{
-				text = this.m_NetAdr.GetConnectionAddressString();
+				return this.m_NetAdr.GetConnectionAddressString();
 			}
-			else
-			{
-				text = Encoding.UTF8.GetString(this.m_szServerName, 0, Array.IndexOf<byte>(this.m_szServerName, 0));
-			}
-			return text;
+			return Encoding.UTF8.GetString(this.m_szServerName, 0, Array.IndexOf<byte>(this.m_szServerName, 0));
 		}
 
 		public void SetServerName(string name)

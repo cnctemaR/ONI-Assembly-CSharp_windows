@@ -51,23 +51,18 @@ public class Assignables : KMonoBehaviour
 
 	public AssignableSlotInstance GetSlot(AssignableSlot slot)
 	{
-		AssignableSlotInstance assignableSlotInstance;
 		if (slot == null)
 		{
-			assignableSlotInstance = null;
+			return null;
 		}
-		else
+		foreach (AssignableSlotInstance assignableSlotInstance in this)
 		{
-			foreach (AssignableSlotInstance assignableSlotInstance2 in this)
+			if (assignableSlotInstance.slot == slot)
 			{
-				if (assignableSlotInstance2.slot == slot)
-				{
-					return assignableSlotInstance2;
-				}
+				return assignableSlotInstance;
 			}
-			assignableSlotInstance = null;
 		}
-		return assignableSlotInstance;
+		return null;
 	}
 
 	public bool IsAssigned(AssignableSlot slot)
@@ -131,42 +126,37 @@ public class Assignables : KMonoBehaviour
 	public Assignable AutoAssignSlot(Navigator navigator, AssignableSlot slot)
 	{
 		Assignable assignable = this.GetAssignable(slot);
-		Assignable assignable2;
 		if (assignable != null)
 		{
-			assignable2 = assignable;
+			return assignable;
 		}
-		else
+		int num = int.MaxValue;
+		foreach (Assignable assignable2 in Game.Instance.assignmentManager)
 		{
-			int num = int.MaxValue;
-			foreach (Assignable assignable3 in Game.Instance.assignmentManager)
+			if (!(assignable2 == null))
 			{
-				if (!(assignable3 == null))
+				if (!assignable2.IsAssigned())
 				{
-					if (!assignable3.IsAssigned())
+					if (assignable2.slot == slot)
 					{
-						if (assignable3.slot == slot)
+						if (assignable2.CanAutoAssignTo(navigator))
 						{
-							if (assignable3.CanAutoAssignTo(navigator))
+							int navigationCost = assignable2.GetNavigationCost(navigator);
+							if (navigationCost != PathProber.InvalidCost && navigationCost < num)
 							{
-								int navigationCost = assignable3.GetNavigationCost(navigator);
-								if (navigationCost != PathProber.InvalidCost && navigationCost < num)
-								{
-									num = navigationCost;
-									assignable = assignable3;
-								}
+								num = navigationCost;
+								assignable = assignable2;
 							}
 						}
 					}
 				}
 			}
-			if (assignable != null)
-			{
-				assignable.Assign(base.GetComponent<IAssignableIdentity>());
-			}
-			assignable2 = assignable;
 		}
-		return assignable2;
+		if (assignable != null)
+		{
+			assignable.Assign(base.GetComponent<IAssignableIdentity>());
+		}
+		return assignable;
 	}
 
 	protected override void OnCleanUp()

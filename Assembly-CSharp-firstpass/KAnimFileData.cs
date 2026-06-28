@@ -25,17 +25,12 @@ public class KAnimFileData
 	{
 		get
 		{
-			KAnim.Build build;
 			if (this.buildIndex == -1)
 			{
-				build = null;
+				return null;
 			}
-			else
-			{
-				KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.batchTag, false);
-				build = batchGroupData.GetBuild(this.buildIndex);
-			}
-			return build;
+			KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.batchTag, false);
+			return batchGroupData.GetBuild(this.buildIndex);
 		}
 	}
 

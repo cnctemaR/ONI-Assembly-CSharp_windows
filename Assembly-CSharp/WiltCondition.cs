@@ -182,11 +182,12 @@ public class WiltCondition : KMonoBehaviour
 
 	private void SetCondition(WiltCondition.Condition condition, bool satisfiedState)
 	{
-		if (this.WiltConditions.ContainsKey(condition))
+		if (!this.WiltConditions.ContainsKey(condition))
 		{
-			this.WiltConditions[condition] = satisfiedState;
-			this.wilt_condition_dirty = true;
+			return;
 		}
+		this.WiltConditions[condition] = satisfiedState;
+		this.wilt_condition_dirty = true;
 	}
 
 	private void CheckShouldWilt()
@@ -277,7 +278,7 @@ public class WiltCondition : KMonoBehaviour
 
 	public string WiltCausesString()
 	{
-		string text = "";
+		string text = string.Empty;
 		List<IWiltCause> allSMI = this.GetAllSMI<IWiltCause>();
 		allSMI.AddRange(base.GetComponents<IWiltCause>());
 		foreach (IWiltCause wiltCause in allSMI)
@@ -315,12 +316,12 @@ public class WiltCondition : KMonoBehaviour
 	private Growing growing;
 
 	[Serialize]
-	private bool goingToWilt = false;
+	private bool goingToWilt;
 
 	[Serialize]
-	private bool wilting = false;
+	private bool wilting;
 
-	private bool wilt_condition_dirty = false;
+	private bool wilt_condition_dirty;
 
 	private Dictionary<WiltCondition.Condition, bool> WiltConditions = new Dictionary<WiltCondition.Condition, bool>();
 

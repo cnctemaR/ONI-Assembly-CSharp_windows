@@ -14,16 +14,16 @@ namespace Database
 
 		private void CreateStatusItems()
 		{
-			this.Idle = new StatusItem("Idle", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.Burrowing = new StatusItem("Burrowing", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.Burrowed = new StatusItem("Burrowed", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.Emerging = new StatusItem("Emerging", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.LookingForFood = new StatusItem("LookingForFood", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.Eating = new StatusItem("Eating", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.Sleeping = new StatusItem("Sleeping", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.Struggling = new StatusItem("Struggling", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.Dead = new StatusItem("Dead", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.Hot = new StatusItem("Hot", "CREATURES", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, false, 30718);
+			this.Idle = new StatusItem("Idle", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Burrowing = new StatusItem("Burrowing", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Burrowed = new StatusItem("Burrowed", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Emerging = new StatusItem("Emerging", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.LookingForFood = new StatusItem("LookingForFood", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Eating = new StatusItem("Eating", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Sleeping = new StatusItem("Sleeping", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Struggling = new StatusItem("Struggling", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Dead = new StatusItem("Dead", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Hot = new StatusItem("Hot", "CREATURES", string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, false, 30718);
 			this.Hot.resolveStringCallback = delegate(string str, object data)
 			{
 				TemperatureVulnerable temperatureVulnerable = (TemperatureVulnerable)data;
@@ -37,7 +37,7 @@ namespace Database
 				str = str.Replace("{high_temperature}", GameUtil.GetFormattedTemperature(temperatureVulnerable2.internalTemperatureWarning_High, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 				return str;
 			};
-			this.Scalding = new StatusItem("Scalding", "CREATURES", "", StatusItem.IconType.Exclamation, NotificationType.DuplicantThreatening, true, SimViewMode.None, true, 30718);
+			this.Scalding = new StatusItem("Scalding", "CREATURES", string.Empty, StatusItem.IconType.Exclamation, NotificationType.DuplicantThreatening, true, SimViewMode.None, true, 30718);
 			this.Scalding.resolveTooltipCallback = delegate(string str, object data)
 			{
 				float averageExternalTemperature = ((ExternalTemperatureMonitor.Instance)data).AverageExternalTemperature;
@@ -47,7 +47,7 @@ namespace Database
 				return str;
 			};
 			this.Scalding.AddNotification(null, null, null, 0f);
-			this.Cold = new StatusItem("Cold", "CREATURES", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, false, 30718);
+			this.Cold = new StatusItem("Cold", "CREATURES", string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, false, 30718);
 			this.Cold.resolveStringCallback = delegate(string str, object data)
 			{
 				TemperatureVulnerable temperatureVulnerable3 = (TemperatureVulnerable)data;
@@ -65,7 +65,7 @@ namespace Database
 			this.Crop_Too_Dark.resolveStringCallback = (string str, object data) => str;
 			this.Crop_Too_Bright = new StatusItem("Crop_Too_Bright", "CREATURES", "status_item_plant_light", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, false, 30718);
 			this.Crop_Too_Bright.resolveStringCallback = (string str, object data) => str;
-			this.Hyperthermia = new StatusItem("Hyperthermia", "CREATURES", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, SimViewMode.None, true, 30718);
+			this.Hyperthermia = new StatusItem("Hyperthermia", "CREATURES", string.Empty, StatusItem.IconType.Exclamation, NotificationType.Bad, false, SimViewMode.None, true, 30718);
 			this.Hyperthermia.resolveTooltipCallback = delegate(string str, object data)
 			{
 				float value = ((TemperatureMonitor.Instance)data).temperature.value;
@@ -74,7 +74,7 @@ namespace Database
 				str = str.Replace("{TargetTemperature}", GameUtil.GetFormattedTemperature(hyperthermiaThreshold, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 				return str;
 			};
-			this.Hypothermia = new StatusItem("Hypothermia", "CREATURES", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, SimViewMode.None, true, 30718);
+			this.Hypothermia = new StatusItem("Hypothermia", "CREATURES", string.Empty, StatusItem.IconType.Exclamation, NotificationType.Bad, false, SimViewMode.None, true, 30718);
 			this.Hypothermia.resolveTooltipCallback = delegate(string str, object data)
 			{
 				float value2 = ((TemperatureMonitor.Instance)data).temperature.value;
@@ -83,19 +83,19 @@ namespace Database
 				str = str.Replace("{TargetTemperature}", GameUtil.GetFormattedTemperature(hypothermiaThreshold, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 				return str;
 			};
-			this.Hungry = new StatusItem("Hungry", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.LayingAnEgg = new StatusItem("LayingAnEgg", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.Suffocating = new StatusItem("Suffocating", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.Hatching = new StatusItem("Hatching", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.Incubating = new StatusItem("Incubating", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.ConsideringLure = new StatusItem("ConsideringLure", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.Falling = new StatusItem("Falling", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.Drowning = new StatusItem("Drowning", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
+			this.Hungry = new StatusItem("Hungry", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.LayingAnEgg = new StatusItem("LayingAnEgg", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Suffocating = new StatusItem("Suffocating", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Hatching = new StatusItem("Hatching", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Incubating = new StatusItem("Incubating", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.ConsideringLure = new StatusItem("ConsideringLure", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Falling = new StatusItem("Falling", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Drowning = new StatusItem("Drowning", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
 			this.Drowning.resolveStringCallback = (string str, object data) => str;
-			this.DryingOut = new StatusItem("DryingOut", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 1026);
+			this.DryingOut = new StatusItem("DryingOut", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 1026);
 			this.DryingOut.resolveStringCallback = (string str, object data) => str;
-			this.ReadyForHarvest = new StatusItem("ReadyForHarvest", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 1026);
-			this.Growing = new StatusItem("Growing", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 1026);
+			this.ReadyForHarvest = new StatusItem("ReadyForHarvest", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 1026);
+			this.Growing = new StatusItem("Growing", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 1026);
 			this.Growing.resolveStringCallback = delegate(string str, object data)
 			{
 				Crop component = ((Growing)data).GetComponent<Crop>();
@@ -108,7 +108,7 @@ namespace Database
 				str = str.Replace("{PercentGrow}", Math.Floor((double)Math.Max(num2, 0f)).ToString("F0"));
 				return str;
 			};
-			this.EnvironmentTooWarm = new StatusItem("EnvironmentTooWarm", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
+			this.EnvironmentTooWarm = new StatusItem("EnvironmentTooWarm", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
 			this.EnvironmentTooWarm.resolveStringCallback = delegate(string str, object data)
 			{
 				float num3 = Grid.Temperature[Grid.PosToCell(((TemperatureVulnerable)data).gameObject)];
@@ -117,7 +117,7 @@ namespace Database
 				str = str.Replace("{TargetTemperature}", GameUtil.GetFormattedTemperature(num4, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 				return str;
 			};
-			this.EnvironmentTooCold = new StatusItem("EnvironmentTooCold", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
+			this.EnvironmentTooCold = new StatusItem("EnvironmentTooCold", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
 			this.EnvironmentTooCold.resolveStringCallback = delegate(string str, object data)
 			{
 				float num5 = Grid.Temperature[Grid.PosToCell(((TemperatureVulnerable)data).gameObject)];
@@ -126,7 +126,7 @@ namespace Database
 				str = str.Replace("{TargetTemperature}", GameUtil.GetFormattedTemperature(num6, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 				return str;
 			};
-			this.Entombed = new StatusItem("Entombed", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
+			this.Entombed = new StatusItem("Entombed", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
 			this.Entombed.resolveStringCallback = (string str, object data) => str;
 			this.Wilting = new StatusItem("Wilting", "CREATURES", "status_item_need_plant", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, false, 1026);
 			this.Wilting.resolveStringCallback = delegate(string str, object data)
@@ -165,7 +165,7 @@ namespace Database
 			this.WrongAtmosphere = new StatusItem("WrongAtmosphere", "CREATURES", "status_item_plant_atmosphere", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, false, 30718);
 			this.WrongAtmosphere.resolveStringCallback = delegate(string str, object data)
 			{
-				string text = "";
+				string text = string.Empty;
 				foreach (Element element in (data as PressureVulnerable).safe_atmospheres)
 				{
 					text = text + "\n    •  " + element.name;
@@ -189,10 +189,10 @@ namespace Database
 				str = str.Replace("{high_mass}", GameUtil.GetFormattedMass(pressureVulnerable2.pressureWarning_High, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				return str;
 			};
-			this.HealthStatus = new StatusItem("HealthStatus", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.HealthStatus = new StatusItem("HealthStatus", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
 			this.HealthStatus.resolveStringCallback = delegate(string str, object data)
 			{
-				string text2 = "";
+				string text2 = string.Empty;
 				switch ((Health.HealthState)data)
 				{
 				case Health.HealthState.Perfect:
@@ -219,7 +219,7 @@ namespace Database
 			};
 			this.HealthStatus.resolveTooltipCallback = delegate(string str, object data)
 			{
-				string text3 = "";
+				string text3 = string.Empty;
 				switch ((Health.HealthState)data)
 				{
 				case Health.HealthState.Perfect:
@@ -244,28 +244,28 @@ namespace Database
 				str = str.Replace("{healthState}", text3);
 				return str;
 			};
-			this.Barren = new StatusItem("Barren", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
-			this.Fleeing = new StatusItem("Fleeing", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Barren = new StatusItem("Barren", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
+			this.Fleeing = new StatusItem("Fleeing", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
 			this.NeedsFertilizer = new StatusItem("NeedsFertilizer", "CREATURES", "status_item_plant_solid", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, false, 30718);
 			Func<string, object, string> func = (string str, object data) => str;
 			this.NeedsFertilizer.resolveStringCallback = func;
 			this.NeedsIrrigation = new StatusItem("NeedsIrrigation", "CREATURES", "status_item_plant_liquid", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, false, 30718);
 			Func<string, object, string> func2 = (string str, object data) => str;
 			this.NeedsIrrigation.resolveStringCallback = func2;
-			this.WrongFertilizer = new StatusItem("WrongFertilizer", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.WrongFertilizer = new StatusItem("WrongFertilizer", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
 			Func<string, object, string> func3 = (string str, object data) => str;
 			this.WrongFertilizer.resolveStringCallback = func3;
 			this.WrongFertilizerMajor = new StatusItem("WrongFertilizerMajor", "CREATURES", "status_item_fabricator_empty", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
 			this.WrongFertilizerMajor.resolveStringCallback = func3;
-			this.WrongIrrigation = new StatusItem("WrongIrrigation", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.WrongIrrigation = new StatusItem("WrongIrrigation", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
 			Func<string, object, string> func4 = (string str, object data) => str;
 			this.WrongIrrigation.resolveStringCallback = func4;
 			this.WrongIrrigationMajor = new StatusItem("WrongIrrigationMajor", "CREATURES", "status_item_fabricator_empty", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
 			this.WrongIrrigationMajor.resolveStringCallback = func4;
-			this.CantAcceptFertilizer = new StatusItem("CantAcceptFertilizer", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
-			this.Rotting = new StatusItem("Rotting", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.CantAcceptFertilizer = new StatusItem("CantAcceptFertilizer", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
+			this.Rotting = new StatusItem("Rotting", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
 			this.Rotting.resolveStringCallback = (string str, object data) => str.Replace("{RotTemperature}", GameUtil.GetFormattedTemperature(277.15f, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
-			this.Fresh = new StatusItem("Fresh", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Fresh = new StatusItem("Fresh", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
 			this.Fresh.resolveStringCallback = delegate(string str, object data)
 			{
 				Rottable.Instance instance = (Rottable.Instance)data;
@@ -276,7 +276,7 @@ namespace Database
 				Rottable.Instance instance2 = (Rottable.Instance)data;
 				return str.Replace("{RotTooltip}", instance2.GetToolTip());
 			};
-			this.Stale = new StatusItem("Stale", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
+			this.Stale = new StatusItem("Stale", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
 			this.Stale.resolveStringCallback = delegate(string str, object data)
 			{
 				Rottable.Instance instance3 = (Rottable.Instance)data;
@@ -287,14 +287,14 @@ namespace Database
 				Rottable.Instance instance4 = (Rottable.Instance)data;
 				return str.Replace("{RotTooltip}", instance4.GetToolTip());
 			};
-			this.Spoiled = new StatusItem("Spoiled", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
-			this.Refrigerated = new StatusItem("Refrigerated", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.Unrefrigerated = new StatusItem("Unrefrigerated", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
+			this.Spoiled = new StatusItem("Spoiled", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
+			this.Refrigerated = new StatusItem("Refrigerated", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Unrefrigerated = new StatusItem("Unrefrigerated", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
 			this.Unrefrigerated.resolveStringCallback = (string str, object data) => str.Replace("{RotTemperature}", GameUtil.GetFormattedTemperature(277.15f, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
-			this.SterilizingAtmosphere = new StatusItem("SterilizingAtmosphere", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.ContaminatedAtmosphere = new StatusItem("ContaminatedAtmosphere", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
-			this.Exhaling = new StatusItem("Exhaling", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-			this.Trapped = new StatusItem("Trapped", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.SterilizingAtmosphere = new StatusItem("SterilizingAtmosphere", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.ContaminatedAtmosphere = new StatusItem("ContaminatedAtmosphere", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
+			this.Exhaling = new StatusItem("Exhaling", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.Trapped = new StatusItem("Trapped", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
 		}
 
 		public StatusItem Idle;

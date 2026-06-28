@@ -8,21 +8,16 @@ public class KAnimFile : ScriptableObject
 	{
 		get
 		{
-			HashedString hashedString;
 			if (this._batchTag.isValid)
 			{
-				hashedString = this._batchTag;
+				return this._batchTag;
 			}
-			else if (this.homedirectory == null || this.homedirectory == "")
+			if (this.homedirectory == null || this.homedirectory == string.Empty)
 			{
-				hashedString = KAnimBatchManager.NO_BATCH;
+				return KAnimBatchManager.NO_BATCH;
 			}
-			else
-			{
-				this._batchTag = KAnimGroupFile.GetGroupFile().GetGroupForHomeDirectory(new HashedString(this.homedirectory));
-				hashedString = this._batchTag;
-			}
-			return hashedString;
+			this._batchTag = KAnimGroupFile.GetGroupFile().GetGroupForHomeDirectory(new HashedString(this.homedirectory));
+			return this._batchTag;
 		}
 	}
 
@@ -47,5 +42,5 @@ public class KAnimFile : ScriptableObject
 
 	private HashedString _batchTag;
 
-	public string homedirectory = "";
+	public string homedirectory = string.Empty;
 }

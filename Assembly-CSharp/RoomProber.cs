@@ -39,11 +39,12 @@ public class RoomProber
 
 	public void SolidChangedEvent(int cell, bool ignoreDoors)
 	{
-		if (!ignoreDoors || !Grid.HasDoor[cell])
+		if (ignoreDoors && Grid.HasDoor[cell])
 		{
-			this.solidChanges.Add(cell);
-			this.MarkBuilderDirty();
+			return;
 		}
+		this.solidChanges.Add(cell);
+		this.MarkBuilderDirty();
 	}
 
 	private CavityInfo CreateNewCavity()
@@ -182,26 +183,24 @@ public class RoomProber
 
 	public void ClearRoom(Room room)
 	{
-		if (room != null && room.id != 65535)
+		if (room == null || room.id == 65535)
 		{
-			foreach (BuildingComplete buildingComplete in room.buildings)
+			return;
+		}
+		foreach (BuildingComplete buildingComplete in room.buildings)
+		{
+			if (!(buildingComplete == null))
 			{
-				if (!(buildingComplete == null))
+				Assignable assignable = buildingComplete.assignable;
+				if (assignable != null && assignable.assignee == room)
 				{
-					Assignable assignable = buildingComplete.assignable;
-					if (assignable != null)
-					{
-						if (assignable.assignee == room)
-						{
-							assignable.Unassign();
-							assignable.Trigger(2070884250, null);
-						}
-					}
+					assignable.Unassign();
+					assignable.Trigger(2070884250, null);
 				}
 			}
-			room.CleanUp();
-			room.cavity.SetRoom(null);
 		}
+		room.CleanUp();
+		room.cavity.SetRoom(null);
 	}
 
 	public void AddDoor(Door door, ICollection<int> door_cells, ICollection<int> adjacent_cells)
@@ -250,11 +249,12 @@ public class RoomProber
 
 	private void SetHasDoor(HandleVector<int>.Handle id, bool value)
 	{
-		if (id.IsValid())
+		if (!id.IsValid())
 		{
-			CavityInfo data = this.cavityInfos.GetData(id);
-			data.hasDoor = value;
+			return;
 		}
+		CavityInfo data = this.cavityInfos.GetData(id);
+		data.hasDoor = value;
 	}
 
 	private void RefreshRooms()
@@ -285,23 +285,22 @@ public class RoomProber
 
 	private void AssignBuildingsToRoom(Room room)
 	{
-		if (room != null && room.id != 65535)
+		if (room == null || room.id == 65535)
 		{
-			RoomTypes.RoomType roomType = RoomTypes.GetRoomType(room);
-			if (roomType != RoomTypes.neutral_type)
+			return;
+		}
+		RoomTypes.RoomType roomType = RoomTypes.GetRoomType(room);
+		if (roomType == RoomTypes.neutral_type)
+		{
+			return;
+		}
+		foreach (BuildingComplete buildingComplete in room.buildings)
+		{
+			Assignable assignable = buildingComplete.assignable;
+			if (assignable != null && (roomType.primary_constraint == null || !roomType.primary_constraint.building_criteria(buildingComplete)))
 			{
-				foreach (BuildingComplete buildingComplete in room.buildings)
-				{
-					Assignable assignable = buildingComplete.assignable;
-					if (assignable != null)
-					{
-						if (roomType.primary_constraint == null || !roomType.primary_constraint.building_criteria(buildingComplete))
-						{
-							assignable.Assign(room);
-							assignable.Trigger(2070884250, null);
-						}
-					}
-				}
+				assignable.Assign(room);
+				assignable.Trigger(2070884250, null);
 			}
 		}
 	}
@@ -323,21 +322,19 @@ public class RoomProber
 
 	private void UnassignBuildingsFromRoom(Room room)
 	{
-		if (room != null)
+		if (room == null)
 		{
-			foreach (BuildingComplete buildingComplete in room.buildings)
+			return;
+		}
+		foreach (BuildingComplete buildingComplete in room.buildings)
+		{
+			if (!(buildingComplete == null))
 			{
-				if (!(buildingComplete == null))
+				Assignable assignable = buildingComplete.assignable;
+				if (assignable != null && assignable.assignee == room)
 				{
-					Assignable assignable = buildingComplete.assignable;
-					if (assignable != null)
-					{
-						if (assignable.assignee == room)
-						{
-							assignable.Unassign();
-							assignable.Trigger(2070884250, null);
-						}
-					}
+					assignable.Unassign();
+					assignable.Trigger(2070884250, null);
 				}
 			}
 		}

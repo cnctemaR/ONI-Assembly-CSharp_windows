@@ -45,16 +45,11 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 
 	private FliesFX.Instance CreateFX(DecompositionMonitor.Instance smi)
 	{
-		FliesFX.Instance instance;
 		if (!smi.isMasterNull)
 		{
-			instance = new FliesFX.Instance(smi.master, new Vector3(0f, 0f, -0.1f));
+			return new FliesFX.Instance(smi.master, new Vector3(0f, 0f, -0.1f));
 		}
-		else
-		{
-			instance = null;
-		}
-		return instance;
+		return null;
 	}
 
 	public StateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget, object>.FloatParameter decomposition;

@@ -58,25 +58,26 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 
 	private void SortByPreviousSelected()
 	{
-		if (!(this.sortToggleGroup == null) && !(this.lastSortToggle == null))
+		if (this.sortToggleGroup == null || this.lastSortToggle == null)
 		{
-			int childCount = this.ColumnTitlesContainer.childCount;
-			for (int i = 0; i < childCount; i++)
+			return;
+		}
+		int childCount = this.ColumnTitlesContainer.childCount;
+		for (int i = 0; i < childCount; i++)
+		{
+			if (i < this.choreGroups.Count)
 			{
-				if (i < this.choreGroups.Count)
+				Toggle componentInChildren = this.ColumnTitlesContainer.GetChild(i).Find("Title").GetComponentInChildren<Toggle>();
+				if (componentInChildren == this.lastSortToggle)
 				{
-					Toggle componentInChildren = this.ColumnTitlesContainer.GetChild(i).Find("Title").GetComponentInChildren<Toggle>();
-					if (componentInChildren == this.lastSortToggle)
-					{
-						this.SortByEffectiveness(this.choreGroups[i], this.lastSortReversed, false);
-						return;
-					}
+					this.SortByEffectiveness(this.choreGroups[i], this.lastSortReversed, false);
+					return;
 				}
 			}
-			if (this.SortEveryoneToggle == this.lastSortToggle)
-			{
-				base.SortByName(this.lastSortReversed);
-			}
+		}
+		if (this.SortEveryoneToggle == this.lastSortToggle)
+		{
+			base.SortByName(this.lastSortReversed);
 		}
 	}
 
@@ -152,7 +153,7 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 			component.AddMultiStringTooltip(UI.TOOLTIPS.JOBSSCREEN_ATTRIBUTES, this.TextStyle_JobTooltip_Description);
 			component.AddMultiStringTooltip("•  " + choreGroup.attribute.Name, this.TextStyle_JobTooltip_RelevantAttributes);
 		}
-		return "";
+		return string.Empty;
 	}
 
 	private void ToggleAllTasksEveryone()
@@ -367,7 +368,7 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 
 	private bool dirty;
 
-	private float screenWidth = 0f;
+	private float screenWidth;
 
 	public enum everyoneToggleState
 	{

@@ -51,13 +51,13 @@ public class LabelTableColumn : TableColumn
 		tt.OnToolTip = delegate
 		{
 			this.on_tooltip(null, widget_go, tt);
-			return "";
+			return string.Empty;
 		};
 		tt = widget_go.GetComponentInChildren<MultiToggle>().GetComponent<ToolTip>();
 		tt.OnToolTip = delegate
 		{
 			this.on_sort_tooltip(null, widget_go, tt);
-			return "";
+			return string.Empty;
 		};
 		LayoutElement component = widget_go.GetComponentInChildren<LocText>().GetComponent<LayoutElement>();
 		LayoutElement layoutElement = component;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine.Assertions;
 
 public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentManager where T : new()
 {
@@ -11,17 +10,12 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 
 	public bool Has(object go)
 	{
-		bool flag;
 		if (this.cleanupList.Exists((KComponentManager<T>.CleanupInfo x) => x.instance == go))
 		{
-			flag = false;
+			return false;
 		}
-		else
-		{
-			HandleVector<int>.Handle handle = this.GetHandle(go);
-			flag = !(handle == HandleVector<int>.InvalidHandle);
-		}
-		return flag;
+		HandleVector<int>.Handle handle = this.GetHandle(go);
+		return !(handle == HandleVector<int>.InvalidHandle);
 	}
 
 	protected HandleVector<int>.Handle InternalAddComponent(object instance, T cmp_values)
@@ -40,7 +34,6 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 		this.spawnList.Remove(handle);
 		this.OnPrefabInit(handle);
 		this.spawnList.Add(handle);
-		Assert.IsTrue(handle.IsValid());
 		return handle;
 	}
 

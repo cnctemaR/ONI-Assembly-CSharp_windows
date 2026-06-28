@@ -111,16 +111,11 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 	{
 		get
 		{
-			string text;
 			if (this.Dry)
 			{
-				text = Db.Get().CreatureStatusItems.DryingOut.resolveStringCallback(CREATURES.STATUSITEMS.DRYINGOUT.NAME, this);
+				return Db.Get().CreatureStatusItems.DryingOut.resolveStringCallback(CREATURES.STATUSITEMS.DRYINGOUT.NAME, this);
 			}
-			else
-			{
-				text = "";
-			}
-			return text;
+			return string.Empty;
 		}
 	}
 
@@ -138,7 +133,7 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 
 	private int position;
 
-	private bool dry = false;
+	private bool dry;
 
 	protected float cellLiquidThreshold = 0.2f;
 

@@ -18,33 +18,35 @@ public class NoiseSplat : IUniformGridObject
 		{
 			this.dB = 0;
 		}
-		if (this.dB != 0)
+		if (this.dB == 0)
 		{
-			setProvider.Clear();
-			OccupyArea occupyArea = setProvider.occupyArea;
-			this.baseExtents = occupyArea.GetExtents();
-			this.provider = setProvider;
-			this.position = setProvider.transform.position;
-			if (setProvider.dBRadius != null)
-			{
-				this.radius = (int)setProvider.dBRadius.GetTotalValue();
-			}
-			if (this.radius != 0)
-			{
-				int num2 = 0;
-				int num3 = 0;
-				Grid.CellToXY(num, out num2, out num3);
-				int widthInCells = occupyArea.GetWidthInCells();
-				int heightInCells = occupyArea.GetHeightInCells();
-				Vector2I vector2I = new Vector2I(num2 - this.radius, num3 - this.radius);
-				Vector2I vector2I2 = vector2I + new Vector2I(this.radius * 2 + widthInCells, this.radius * 2 + heightInCells);
-				vector2I = Vector2I.Max(vector2I, Vector2I.zero);
-				vector2I2 = Vector2I.Min(vector2I2, new Vector2I(Grid.WidthInCells - 1, Grid.HeightInCells - 1));
-				this.effectExtents = new Extents(vector2I.x, vector2I.y, vector2I2.x - vector2I.x, vector2I2.y - vector2I.y);
-				this.partitionerEntry = GameScenePartitioner.Instance.Add("NoiseSplat.SplatCollectNoisePolluters", setProvider.gameObject, this.effectExtents, GameScenePartitioner.Instance.noisePolluterLayer, setProvider.onCollectNoisePollutersCallback);
-				this.solidChangedPartitionerEntry = GameScenePartitioner.Instance.Add("NoiseSplat.SplatSolidCheck", setProvider.gameObject, this.effectExtents, GameScenePartitioner.Instance.solidChangedLayer, setProvider.refreshPartionerCallback);
-			}
+			return;
 		}
+		setProvider.Clear();
+		OccupyArea occupyArea = setProvider.occupyArea;
+		this.baseExtents = occupyArea.GetExtents();
+		this.provider = setProvider;
+		this.position = setProvider.transform.position;
+		if (setProvider.dBRadius != null)
+		{
+			this.radius = (int)setProvider.dBRadius.GetTotalValue();
+		}
+		if (this.radius == 0)
+		{
+			return;
+		}
+		int num2 = 0;
+		int num3 = 0;
+		Grid.CellToXY(num, out num2, out num3);
+		int widthInCells = occupyArea.GetWidthInCells();
+		int heightInCells = occupyArea.GetHeightInCells();
+		Vector2I vector2I = new Vector2I(num2 - this.radius, num3 - this.radius);
+		Vector2I vector2I2 = vector2I + new Vector2I(this.radius * 2 + widthInCells, this.radius * 2 + heightInCells);
+		vector2I = Vector2I.Max(vector2I, Vector2I.zero);
+		vector2I2 = Vector2I.Min(vector2I2, new Vector2I(Grid.WidthInCells - 1, Grid.HeightInCells - 1));
+		this.effectExtents = new Extents(vector2I.x, vector2I.y, vector2I2.x - vector2I.x, vector2I2.y - vector2I.y);
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("NoiseSplat.SplatCollectNoisePolluters", setProvider.gameObject, this.effectExtents, GameScenePartitioner.Instance.noisePolluterLayer, setProvider.onCollectNoisePollutersCallback);
+		this.solidChangedPartitionerEntry = GameScenePartitioner.Instance.Add("NoiseSplat.SplatSolidCheck", setProvider.gameObject, this.effectExtents, GameScenePartitioner.Instance.solidChangedLayer, setProvider.refreshPartionerCallback);
 	}
 
 	public NoiseSplat(IPolluter setProvider, float death_time = 0f)
@@ -59,23 +61,25 @@ public class NoiseSplat : IUniformGridObject
 		{
 			this.dB = 0;
 		}
-		if (this.dB != 0)
+		if (this.dB == 0)
 		{
-			this.radius = this.provider.GetRadius();
-			if (this.radius != 0)
-			{
-				int num2 = 0;
-				int num3 = 0;
-				Grid.CellToXY(num, out num2, out num3);
-				Vector2I vector2I = new Vector2I(num2 - this.radius, num3 - this.radius);
-				Vector2I vector2I2 = vector2I + new Vector2I(this.radius * 2, this.radius * 2);
-				vector2I = Vector2I.Max(vector2I, Vector2I.zero);
-				vector2I2 = Vector2I.Min(vector2I2, new Vector2I(Grid.WidthInCells - 1, Grid.HeightInCells - 1));
-				this.effectExtents = new Extents(vector2I.x, vector2I.y, vector2I2.x - vector2I.x, vector2I2.y - vector2I.y);
-				this.baseExtents = new Extents(num2, num3, 1, 1);
-				this.AddNoise();
-			}
+			return;
 		}
+		this.radius = this.provider.GetRadius();
+		if (this.radius == 0)
+		{
+			return;
+		}
+		int num2 = 0;
+		int num3 = 0;
+		Grid.CellToXY(num, out num2, out num3);
+		Vector2I vector2I = new Vector2I(num2 - this.radius, num3 - this.radius);
+		Vector2I vector2I2 = vector2I + new Vector2I(this.radius * 2, this.radius * 2);
+		vector2I = Vector2I.Max(vector2I, Vector2I.zero);
+		vector2I2 = Vector2I.Min(vector2I2, new Vector2I(Grid.WidthInCells - 1, Grid.HeightInCells - 1));
+		this.effectExtents = new Extents(vector2I.x, vector2I.y, vector2I2.x - vector2I.x, vector2I2.y - vector2I.y);
+		this.baseExtents = new Extents(num2, num3, 1, 1);
+		this.AddNoise();
 	}
 
 	public int dB { get; private set; }

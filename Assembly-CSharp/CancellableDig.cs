@@ -13,11 +13,12 @@ public class CancellableDig : Cancellable
 
 	private void OnAnimationDone(string animationName)
 	{
-		if (!(animationName != "ScaleDown"))
+		if (animationName != "ScaleDown")
 		{
-			EasingAnimations componentInChildren = base.GetComponentInChildren<EasingAnimations>();
-			componentInChildren.OnAnimationDone = (Action<string>)Delegate.Remove(componentInChildren.OnAnimationDone, new Action<string>(this.OnAnimationDone));
-			this.DeleteObject();
+			return;
 		}
+		EasingAnimations componentInChildren = base.GetComponentInChildren<EasingAnimations>();
+		componentInChildren.OnAnimationDone = (Action<string>)Delegate.Remove(componentInChildren.OnAnimationDone, new Action<string>(this.OnAnimationDone));
+		this.DeleteObject();
 	}
 }

@@ -151,9 +151,9 @@ public class BuildingHP : Workable
 
 	public static List<Meter> kbacQueryList = new List<Meter>();
 
-	public bool destroyOnDamaged = false;
+	public bool destroyOnDamaged;
 
-	public bool invincible = false;
+	public bool invincible;
 
 	[MyCmpGet]
 	private Building building;
@@ -162,7 +162,7 @@ public class BuildingHP : Workable
 
 	private float minDamagePopInterval = 4f;
 
-	private float lastPopTime = 0f;
+	private float lastPopTime;
 
 	public struct DamageSourceInfo
 	{
@@ -219,29 +219,30 @@ public class BuildingHP : Workable
 
 		private void CreateProgressBar()
 		{
-			if (!(this.progressBar != null))
+			if (this.progressBar != null)
 			{
-				this.progressBar = Util.KInstantiateUI<ProgressBar>(ProgressBarsConfig.Instance.progressBarPrefab, null, false);
-				this.progressBar.transform.SetParent(GameScreenManager.Instance.worldSpaceCanvas.transform);
-				this.progressBar.name = base.smi.master.name + "." + base.smi.master.GetType().Name + " ProgressBar";
-				this.progressBar.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("ProgressBar");
-				this.progressBar.SetUpdateFunc(new Func<float>(this.HealthPercent));
-				this.progressBar.barColor = ProgressBarsConfig.Instance.GetBarColor("HealthBar");
-				CanvasGroup component = this.progressBar.GetComponent<CanvasGroup>();
-				component.interactable = false;
-				component.blocksRaycasts = false;
-				this.progressBar.Update();
-				float num = 0.15f;
-				Vector3 vector = base.gameObject.transform.position + Vector3.down * num;
-				vector.z += 0.05f;
-				vector -= Vector3.right * 0.5f * (float)(base.smi.master.building.Def.WidthInCells % 2);
-				this.progressBar.transform.SetPosition(vector);
+				return;
 			}
+			this.progressBar = Util.KInstantiateUI<ProgressBar>(ProgressBarsConfig.Instance.progressBarPrefab, null, false);
+			this.progressBar.transform.SetParent(GameScreenManager.Instance.worldSpaceCanvas.transform);
+			this.progressBar.name = base.smi.master.name + "." + base.smi.master.GetType().Name + " ProgressBar";
+			this.progressBar.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("ProgressBar");
+			this.progressBar.SetUpdateFunc(new Func<float>(this.HealthPercent));
+			this.progressBar.barColor = ProgressBarsConfig.Instance.GetBarColor("HealthBar");
+			CanvasGroup component = this.progressBar.GetComponent<CanvasGroup>();
+			component.interactable = false;
+			component.blocksRaycasts = false;
+			this.progressBar.Update();
+			float num = 0.15f;
+			Vector3 vector = base.gameObject.transform.position + Vector3.down * num;
+			vector.z += 0.05f;
+			vector -= Vector3.right * 0.5f * (float)(base.smi.master.building.Def.WidthInCells % 2);
+			this.progressBar.transform.SetPosition(vector);
 		}
 
 		private static string ToolTipResolver(List<Notification> notificationList, object data)
 		{
-			string text = "";
+			string text = string.Empty;
 			for (int i = 0; i < notificationList.Count; i++)
 			{
 				Notification notification = notificationList[i];
@@ -275,21 +276,22 @@ public class BuildingHP : Workable
 		public void SetCrackOverlayValue(float value)
 		{
 			KBatchedAnimController component = base.master.GetComponent<KBatchedAnimController>();
-			if (!(component == null))
+			if (component == null)
 			{
-				component.SetBlendValue(value);
-				BuildingHP.kbacQueryList.Clear();
-				base.master.GetComponentsInChildren<Meter>(BuildingHP.kbacQueryList);
-				for (int i = 0; i < BuildingHP.kbacQueryList.Count; i++)
-				{
-					Meter meter = BuildingHP.kbacQueryList[i];
-					KBatchedAnimController component2 = meter.GetComponent<KBatchedAnimController>();
-					component2.SetBlendValue(value);
-				}
+				return;
+			}
+			component.SetBlendValue(value);
+			BuildingHP.kbacQueryList.Clear();
+			base.master.GetComponentsInChildren<Meter>(BuildingHP.kbacQueryList);
+			for (int i = 0; i < BuildingHP.kbacQueryList.Count; i++)
+			{
+				Meter meter = BuildingHP.kbacQueryList[i];
+				KBatchedAnimController component2 = meter.GetComponent<KBatchedAnimController>();
+				component2.SetBlendValue(value);
 			}
 		}
 
-		private ProgressBar progressBar = null;
+		private ProgressBar progressBar;
 	}
 
 	public class States : GameStateMachine<BuildingHP.States, BuildingHP.SMInstance, BuildingHP>

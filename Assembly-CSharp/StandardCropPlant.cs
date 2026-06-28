@@ -26,7 +26,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 
 	private static string ToolTipResolver(List<Notification> notificationList, object data)
 	{
-		string text = "";
+		string text = string.Empty;
 		for (int i = 0; i < notificationList.Count; i++)
 		{
 			Notification notification = notificationList[i];
@@ -69,20 +69,15 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 		public int WiltStage()
 		{
 			float num = base.master.growing.PercentOfCurrentHarvest();
-			int num2;
 			if (num < 0.75f)
 			{
-				num2 = 1;
+				return 1;
 			}
-			else if (num < 1f)
+			if (num < 1f)
 			{
-				num2 = 2;
+				return 2;
 			}
-			else
-			{
-				num2 = 3;
-			}
-			return num2;
+			return 3;
 		}
 	}
 
@@ -98,7 +93,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 				{
 					Notifier component = smi.master.GetComponent<Notifier>();
 					Notification notification = smi.master.CreateDeathNotification();
-					component.Add(notification, "");
+					component.Add(notification, string.Empty);
 				}
 				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.position, Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
 				smi.master.Trigger(1623392196, null);

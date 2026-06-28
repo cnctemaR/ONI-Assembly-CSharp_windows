@@ -155,16 +155,11 @@ public class StatusItem : Resource
 
 	private string ResolveString(string str, object data)
 	{
-		string text;
 		if (this.resolveStringCallback != null && data != null)
 		{
-			text = this.resolveStringCallback(str, data);
+			return this.resolveStringCallback(str, data);
 		}
-		else
-		{
-			text = str;
-		}
-		return text;
+		return str;
 	}
 
 	private string ResolveTooltip(string str, object data)
@@ -197,11 +192,12 @@ public class StatusItem : Resource
 
 	public void SetIcon(Image image, object data)
 	{
-		if (this.sprite != null)
+		if (this.sprite == null)
 		{
-			image.color = this.sprite.color;
-			image.sprite = this.sprite.sprite;
+			return;
 		}
+		image.color = this.sprite.color;
+		image.sprite = this.sprite.sprite;
 	}
 
 	public bool UseConditionalCallback(SimViewMode overlay, Transform transform)

@@ -42,5 +42,5 @@ public class AnimCycler : Cycler
 
 	public KBatchedAnimController controller;
 
-	public int index = 0;
+	public int index;
 }

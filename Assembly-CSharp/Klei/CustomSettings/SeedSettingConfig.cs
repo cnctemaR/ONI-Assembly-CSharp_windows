@@ -5,7 +5,7 @@ namespace Klei.CustomSettings
 	public class SeedSettingConfig : SettingConfig
 	{
 		public SeedSettingConfig(string id, string label, string tooltip)
-			: base(id, label, tooltip, "")
+			: base(id, label, tooltip, string.Empty)
 		{
 		}
 

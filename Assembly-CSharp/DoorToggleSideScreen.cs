@@ -58,13 +58,14 @@ public class DoorToggleSideScreen : SideScreenContent
 		base.SetTarget(target);
 		this.target = target.GetComponent<Door>();
 		this.accessTarget = target.GetComponent<AccessControl>();
-		if (!(this.target == null))
+		if (this.target == null)
 		{
-			target.Subscribe(1734268753, new Action<object>(this.OnDoorStateChanged));
-			target.Subscribe(-1525636549, new Action<object>(this.OnAccessControlChanged));
-			this.Refresh();
-			base.gameObject.SetActive(true);
+			return;
 		}
+		target.Subscribe(1734268753, new Action<object>(this.OnDoorStateChanged));
+		target.Subscribe(-1525636549, new Action<object>(this.OnAccessControlChanged));
+		this.Refresh();
+		base.gameObject.SetActive(true);
 	}
 
 	public override void ClearTarget()

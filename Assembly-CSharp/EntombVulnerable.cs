@@ -65,25 +65,26 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 	private void CheckEntombed()
 	{
 		int num = Grid.PosToCell(base.gameObject.transform.position);
-		if (Grid.IsValidCell(num))
+		if (!Grid.IsValidCell(num))
 		{
-			if (!this.IsCellSafe(num))
+			return;
+		}
+		if (!this.IsCellSafe(num))
+		{
+			if (!this.isEntombed)
 			{
-				if (!this.isEntombed)
-				{
-					this.isEntombed = true;
-					this.selectable.AddStatusItem(Db.Get().CreatureStatusItems.Entombed, null);
-					base.GetComponent<KPrefabID>().AddTag(GameTags.Entombed);
-					base.Trigger(-1089732772, true);
-				}
+				this.isEntombed = true;
+				this.selectable.AddStatusItem(Db.Get().CreatureStatusItems.Entombed, null);
+				base.GetComponent<KPrefabID>().AddTag(GameTags.Entombed);
+				base.Trigger(-1089732772, true);
 			}
-			else if (this.isEntombed)
-			{
-				this.isEntombed = false;
-				this.selectable.RemoveStatusItem(Db.Get().CreatureStatusItems.Entombed, false);
-				base.GetComponent<KPrefabID>().RemoveTag(GameTags.Entombed);
-				base.Trigger(-1089732772, false);
-			}
+		}
+		else if (this.isEntombed)
+		{
+			this.isEntombed = false;
+			this.selectable.RemoveStatusItem(Db.Get().CreatureStatusItems.Entombed, false);
+			base.GetComponent<KPrefabID>().RemoveTag(GameTags.Entombed);
+			base.Trigger(-1089732772, false);
 		}
 	}
 
@@ -98,7 +99,7 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 	private OccupyArea _occupyArea;
 
 	[Serialize]
-	private bool isEntombed = false;
+	private bool isEntombed;
 
 	private GameScenePartitionerEntry partitionerEntry;
 }

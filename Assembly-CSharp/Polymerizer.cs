@@ -67,14 +67,15 @@ public class Polymerizer : StateMachineComponent<Polymerizer.StatesInstance>
 	private void OnStorageChanged(object data)
 	{
 		GameObject gameObject = (GameObject)data;
-		if (!(gameObject == null))
+		if (gameObject == null)
 		{
-			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			if (component.ElementID == SimHashes.Petroleum)
-			{
-				float num = Mathf.Clamp01(component.Mass / this.consumer.capacityKG);
-				this.oilMeter.SetPositionPercent(num);
-			}
+			return;
+		}
+		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+		if (component.ElementID == SimHashes.Petroleum)
+		{
+			float num = Mathf.Clamp01(component.Mass / this.consumer.capacityKG);
+			this.oilMeter.SetPositionPercent(num);
 		}
 	}
 

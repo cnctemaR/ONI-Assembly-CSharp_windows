@@ -30,16 +30,11 @@ public class EmoteChore : Chore<EmoteChore.StatesInstance>
 
 	public override string ToString()
 	{
-		string text;
 		if (this.smi.emoteKAnim.IsValid())
 		{
-			text = "EmoteChore<" + this.smi.emoteKAnim + ">";
+			return "EmoteChore<" + this.smi.emoteKAnim + ">";
 		}
-		else
-		{
-			text = "EmoteChore<" + this.smi.emoteAnims[0] + ">";
-		}
-		return text;
+		return "EmoteChore<" + this.smi.emoteAnims[0] + ">";
 	}
 
 	private Func<StatusItem> getStatusItem;

@@ -121,11 +121,12 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 
 	private void OnModifyComplete()
 	{
-		if (!(this == null) && !(base.gameObject == null))
+		if (this == null || base.gameObject == null)
 		{
-			this.isReady = true;
-			base.GetComponent<PrimaryElement>().SetUseSimDiseaseInfo(true);
+			return;
 		}
+		this.isReady = true;
+		base.GetComponent<PrimaryElement>().SetUseSimDiseaseInfo(true);
 	}
 
 	private void ForceSetGameCellData(int cell)
@@ -161,10 +162,10 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 	public bool doReplaceElement = true;
 
 	[SerializeField]
-	public bool setGasImpermeable = false;
+	public bool setGasImpermeable;
 
 	[SerializeField]
-	public bool setLiquidImpermeable = false;
+	public bool setLiquidImpermeable;
 
 	[SerializeField]
 	public float strengthMultiplier = 1f;

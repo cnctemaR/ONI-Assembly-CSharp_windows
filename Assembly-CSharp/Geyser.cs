@@ -109,7 +109,7 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>
 			this.duration_erupt = duration_erupt;
 			this.duration_pst = duration_pst;
 			this.emissionElement = emission_element;
-			if (override_animation != "")
+			if (override_animation != string.Empty)
 			{
 				this.animation = override_animation;
 			}

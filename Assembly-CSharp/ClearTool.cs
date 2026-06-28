@@ -18,23 +18,24 @@ public class ClearTool : DragTool
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
 		GameObject gameObject = Grid.Objects[cell, 3];
-		if (!(gameObject == null))
+		if (gameObject == null)
 		{
-			ObjectLayerListItem objectLayerListItem = gameObject.GetComponent<Pickupable>().objectLayerListItem;
-			while (objectLayerListItem != null)
+			return;
+		}
+		ObjectLayerListItem objectLayerListItem = gameObject.GetComponent<Pickupable>().objectLayerListItem;
+		while (objectLayerListItem != null)
+		{
+			GameObject gameObject2 = objectLayerListItem.gameObject;
+			objectLayerListItem = objectLayerListItem.nextItem;
+			if (!(gameObject2 == null))
 			{
-				GameObject gameObject2 = objectLayerListItem.gameObject;
-				objectLayerListItem = objectLayerListItem.nextItem;
-				if (!(gameObject2 == null))
+				if (!(gameObject2.GetComponent<MinionIdentity>() != null))
 				{
-					if (!(gameObject2.GetComponent<MinionIdentity>() != null))
+					gameObject2.GetComponent<Clearable>().MarkForClear(false);
+					Prioritizable component = gameObject2.GetComponent<Prioritizable>();
+					if (component != null)
 					{
-						gameObject2.GetComponent<Clearable>().MarkForClear(false);
-						Prioritizable component = gameObject2.GetComponent<Prioritizable>();
-						if (component != null)
-						{
-							component.SetMasterPriority(ToolMenuPriorityScreen.Instance.GetScreenPriority());
-						}
+						component.SetMasterPriority(ToolMenuPriorityScreen.Instance.GetScreenPriority());
 					}
 				}
 			}

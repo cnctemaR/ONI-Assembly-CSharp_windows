@@ -57,7 +57,7 @@ public class RefinementRecipe
 
 	public List<Tag> fabricators;
 
-	public int sortOrder = 0;
+	public int sortOrder;
 
 	public class Result
 	{

@@ -167,12 +167,9 @@ namespace OverlayModes
 		{
 			Mode.ClearOutsideViewObjects<T>(targets, working_targets, vis_min, vis_max, delegate(T cmp)
 			{
-				if (cmp != null)
+				if (cmp != null && on_removed != null)
 				{
-					if (on_removed != null)
-					{
-						on_removed(cmp);
-					}
+					on_removed(cmp);
 				}
 			});
 			if (special_clear_condition != null)
@@ -311,56 +308,59 @@ namespace OverlayModes
 
 		protected void AddTargetIfVisible<T>(T instance, Vector2I vis_min, Vector2I vis_max, ICollection<T> targets, int layer, Action<T> on_added = null, Func<KMonoBehaviour, bool> should_add = null) where T : IUniformGridObject
 		{
-			if (!instance.Equals(null))
+			if (instance.Equals(null))
 			{
-				Vector2 vector = instance.PosMin();
-				Vector2 vector2 = instance.PosMax();
-				if (vector2.x >= (float)vis_min.x && vector2.y >= (float)vis_min.y && vector.x <= (float)vis_max.x && vector.y <= (float)vis_max.y)
+				return;
+			}
+			Vector2 vector = instance.PosMin();
+			Vector2 vector2 = instance.PosMax();
+			if (vector2.x < (float)vis_min.x || vector2.y < (float)vis_min.y || vector.x > (float)vis_max.x || vector.y > (float)vis_max.y)
+			{
+				return;
+			}
+			if (targets.Contains(instance))
+			{
+				return;
+			}
+			bool flag = false;
+			int num = (int)vector.y;
+			while ((float)num <= vector2.y)
+			{
+				int num2 = (int)vector.x;
+				while ((float)num2 <= vector2.x)
 				{
-					if (!targets.Contains(instance))
+					int num3 = Grid.XYToCell(num2, num);
+					if (Grid.Visible[num3] > 128)
 					{
-						bool flag = false;
-						int num = (int)vector.y;
-						while ((float)num <= vector2.y)
+						flag = true;
+						break;
+					}
+					num2++;
+				}
+				num++;
+			}
+			if (flag)
+			{
+				bool flag2 = true;
+				KMonoBehaviour kmonoBehaviour = instance as KMonoBehaviour;
+				if (kmonoBehaviour != null && should_add != null)
+				{
+					flag2 = should_add(kmonoBehaviour);
+				}
+				if (flag2)
+				{
+					if (kmonoBehaviour != null)
+					{
+						KBatchedAnimController component = kmonoBehaviour.GetComponent<KBatchedAnimController>();
+						if (component != null)
 						{
-							int num2 = (int)vector.x;
-							while ((float)num2 <= vector2.x)
-							{
-								int num3 = Grid.XYToCell(num2, num);
-								if (Grid.Visible[num3] > 128)
-								{
-									flag = true;
-									break;
-								}
-								num2++;
-							}
-							num++;
+							component.SetLayer(layer);
 						}
-						if (flag)
-						{
-							bool flag2 = true;
-							KMonoBehaviour kmonoBehaviour = instance as KMonoBehaviour;
-							if (kmonoBehaviour != null && should_add != null)
-							{
-								flag2 = should_add(kmonoBehaviour);
-							}
-							if (flag2)
-							{
-								if (kmonoBehaviour != null)
-								{
-									KBatchedAnimController component = kmonoBehaviour.GetComponent<KBatchedAnimController>();
-									if (component != null)
-									{
-										component.SetLayer(layer);
-									}
-								}
-								targets.Add(instance);
-								if (on_added != null)
-								{
-									on_added(instance);
-								}
-							}
-						}
+					}
+					targets.Add(instance);
+					if (on_added != null)
+					{
+						on_added(instance);
 					}
 				}
 			}

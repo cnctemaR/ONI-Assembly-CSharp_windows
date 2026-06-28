@@ -45,12 +45,9 @@ public class CheckboxTableColumn : TableColumn
 		GameObject widget_go = Util.KInstantiateUI(this.prefab_header_portrait_checkbox, parent, true);
 		tooltip = widget_go.GetComponent<ToolTip>();
 		HierarchyReferences component = widget_go.GetComponent<HierarchyReferences>();
-		if (tooltip == null)
+		if (tooltip == null && component != null && component.HasReference("ToolTip"))
 		{
-			if (component != null && component.HasReference("ToolTip"))
-			{
-				tooltip = component.GetReference("ToolTip") as ToolTip;
-			}
+			tooltip = component.GetReference("ToolTip") as ToolTip;
 		}
 		tooltip.OnToolTip = () => this.GetTooltip(tooltip);
 		MultiToggle multiToggle = component.GetReference("Toggle") as MultiToggle;

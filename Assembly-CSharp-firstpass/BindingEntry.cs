@@ -17,27 +17,20 @@ public struct BindingEntry
 
 	public static KKeyCode GetGamepadKeyCode(int gamepad_number, GamepadButton button)
 	{
-		KKeyCode kkeyCode;
 		switch (gamepad_number)
 		{
 		case 0:
-			kkeyCode = (KKeyCode)(button + 350);
-			break;
+			return (KKeyCode)(button + 350);
 		case 1:
-			kkeyCode = (KKeyCode)(button + 370);
-			break;
+			return (KKeyCode)(button + 370);
 		case 2:
-			kkeyCode = (KKeyCode)(button + 390);
-			break;
+			return (KKeyCode)(button + 390);
 		case 3:
-			kkeyCode = (KKeyCode)(button + 410);
-			break;
+			return (KKeyCode)(button + 410);
 		default:
 			DebugUtil.Assert(false, "Assert!");
-			kkeyCode = KKeyCode.None;
-			break;
+			return KKeyCode.None;
 		}
-		return kkeyCode;
 	}
 
 	public static bool operator ==(BindingEntry a, BindingEntry b)
@@ -57,17 +50,12 @@ public struct BindingEntry
 
 	public override bool Equals(object o)
 	{
-		bool flag;
 		if (!(o is BindingEntry))
 		{
-			flag = false;
+			return false;
 		}
-		else
-		{
-			BindingEntry bindingEntry = (BindingEntry)o;
-			flag = this == bindingEntry;
-		}
-		return flag;
+		BindingEntry bindingEntry = (BindingEntry)o;
+		return this == bindingEntry;
 	}
 
 	public override int GetHashCode()

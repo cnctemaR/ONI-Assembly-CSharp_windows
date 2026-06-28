@@ -24,10 +24,11 @@ public class BuildQueue : KButtonMenu
 	{
 		if (this.fabricator != null)
 		{
-			if (this.fabricator.NumOrders != 0 && order_idx < this.fabricator.NumOrders)
+			if (this.fabricator.NumOrders == 0 || order_idx >= this.fabricator.NumOrders)
 			{
-				this.fabricator.CancelOrder(order_idx);
+				return;
 			}
+			this.fabricator.CancelOrder(order_idx);
 		}
 	}
 
@@ -96,5 +97,5 @@ public class BuildQueue : KButtonMenu
 
 	private IHasBuildQueue fabricator;
 
-	private int prevLength = 0;
+	private int prevLength;
 }

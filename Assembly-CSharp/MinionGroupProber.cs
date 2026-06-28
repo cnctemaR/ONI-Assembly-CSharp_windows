@@ -49,19 +49,15 @@ public class MinionGroupProber : KMonoBehaviour
 		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
 		{
 			int num = Grid.PosToCell(minionIdentity);
-			if (!flag)
+			if (flag || this.pathProber.GetCost(num) == PathProber.InvalidCost)
 			{
-				if (this.pathProber.GetCost(num) != PathProber.InvalidCost)
-				{
-					continue;
-				}
+				Navigator component = minionIdentity.GetComponent<Navigator>();
+				PathFinderAbilities currentAbilities = minionIdentity.GetComponent<Navigator>().GetCurrentAbilities();
+				currentAbilities.maxUnderwaterCost = 8;
+				currentAbilities.ignoreNavigationMasks = true;
+				this.pathProber.UpdateProbe(this.navGrid, num, component.CurrentNavType, currentAbilities, PathFinder.PotentialPath.Flags.UnlimitedSubmergedTravel, flag);
+				flag = false;
 			}
-			Navigator component = minionIdentity.GetComponent<Navigator>();
-			PathFinderAbilities currentAbilities = minionIdentity.GetComponent<Navigator>().GetCurrentAbilities();
-			currentAbilities.maxUnderwaterCost = 8;
-			currentAbilities.ignoreNavigationMasks = true;
-			this.pathProber.UpdateProbe(this.navGrid, num, component.CurrentNavType, currentAbilities, PathFinder.PotentialPath.Flags.UnlimitedSubmergedTravel, flag);
-			flag = false;
 		}
 		if (this.pathProber.IslandCount > this.islands.Length)
 		{

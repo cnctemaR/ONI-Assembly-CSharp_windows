@@ -44,30 +44,25 @@ public class KAnim
 
 		public int GetFrameIdx(KAnim.PlayMode mode, float t)
 		{
-			int num;
 			if (this.numFrames <= 0)
 			{
-				num = -1;
+				return -1;
+			}
+			int num = 0;
+			if (mode != KAnim.PlayMode.Loop)
+			{
+				if (mode != KAnim.PlayMode.Once)
+				{
+				}
 			}
 			else
 			{
-				int num2 = 0;
-				if (mode != KAnim.PlayMode.Loop)
-				{
-					if (mode != KAnim.PlayMode.Once)
-					{
-					}
-				}
-				else
-				{
-					t %= this.totalTime;
-				}
-				if (t > 0f)
-				{
-					float num3 = t * this.frameRate + 0.49999997f;
-					num2 = Math.Min(this.numFrames - 1, (int)num3);
-				}
-				num = num2;
+				t %= this.totalTime;
+			}
+			if (t > 0f)
+			{
+				float num2 = t * this.frameRate + 0.49999997f;
+				num = Math.Min(this.numFrames - 1, (int)num2);
 			}
 			return num;
 		}
@@ -228,16 +223,11 @@ public class KAnim
 
 		public KAnim.Build.Symbol GetSymbolByIndex(uint index)
 		{
-			KAnim.Build.Symbol symbol;
 			if ((ulong)index >= (ulong)((long)this.symbols.Length))
 			{
-				symbol = null;
+				return null;
 			}
-			else
-			{
-				symbol = this.symbols[(int)((UIntPtr)index)];
-			}
-			return symbol;
+			return this.symbols[(int)((UIntPtr)index)];
 		}
 
 		public Texture2D GetTexture(int index)
@@ -340,17 +330,12 @@ public class KAnim
 		{
 			public int GetFrameIdx(int frame)
 			{
-				int num;
 				if (this.frameLookup.Length == 0 || frame >= this.frameLookup.Length)
 				{
-					num = -1;
+					return -1;
 				}
-				else
-				{
-					frame = Math.Min(frame, this.frameLookup.Length - 1);
-					num = this.frameLookup[frame];
-				}
-				return num;
+				frame = Math.Min(frame, this.frameLookup.Length - 1);
+				return this.frameLookup[frame];
 			}
 
 			public bool HasFrame(int frame)
@@ -368,22 +353,17 @@ public class KAnim
 
 			public int CompareTo(object obj)
 			{
-				int num;
 				if (obj == null)
 				{
-					num = 1;
+					return 1;
 				}
-				else if (obj.GetType() == typeof(HashedString))
+				if (obj.GetType() == typeof(HashedString))
 				{
 					HashedString hashedString = (HashedString)obj;
-					num = this.hash.HashValue.CompareTo(hashedString.HashValue);
+					return this.hash.HashValue.CompareTo(hashedString.HashValue);
 				}
-				else
-				{
-					KAnim.Build.Symbol symbol = (KAnim.Build.Symbol)obj;
-					num = this.hash.HashValue.CompareTo(symbol.hash.HashValue);
-				}
-				return num;
+				KAnim.Build.Symbol symbol = (KAnim.Build.Symbol)obj;
+				return this.hash.HashValue.CompareTo(symbol.hash.HashValue);
 			}
 
 			public bool HasFlag(KAnim.SymbolFlags flag)

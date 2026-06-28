@@ -110,42 +110,45 @@ public class GameInputMapping
 	public static void LoadBindings()
 	{
 		GameInputMapping.KeyBindings = (BindingEntry[])GameInputMapping.DefaultBindings.Clone();
-		if (File.Exists(GameInputMapping.BindingsFilename))
+		if (!File.Exists(GameInputMapping.BindingsFilename))
 		{
-			string text = File.ReadAllText(GameInputMapping.BindingsFilename);
-			if (text != null && !(text == ""))
+			return;
+		}
+		string text = File.ReadAllText(GameInputMapping.BindingsFilename);
+		if (text == null || text == string.Empty)
+		{
+			return;
+		}
+		BindingEntry[] array = null;
+		try
+		{
+			array = JsonConvert.DeserializeObject<BindingEntry[]>(text);
+		}
+		catch
+		{
+			Output.LogError(new object[]
 			{
-				BindingEntry[] array = null;
-				try
+				"Error parsing",
+				GameInputMapping.BindingsFilename
+			});
+		}
+		if (array == null || array.Length == 0)
+		{
+			return;
+		}
+		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
+		{
+			BindingEntry bindingEntry = GameInputMapping.KeyBindings[i];
+			foreach (BindingEntry bindingEntry2 in array)
+			{
+				if (bindingEntry2.mAction == bindingEntry.mAction && bindingEntry.mRebindable)
 				{
-					array = JsonConvert.DeserializeObject<BindingEntry[]>(text);
-				}
-				catch
-				{
-					Output.LogError(new object[]
-					{
-						"Error parsing",
-						GameInputMapping.BindingsFilename
-					});
-				}
-				if (array != null && array.Length != 0)
-				{
-					for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
-					{
-						BindingEntry bindingEntry = GameInputMapping.KeyBindings[i];
-						foreach (BindingEntry bindingEntry2 in array)
-						{
-							if (bindingEntry2.mAction == bindingEntry.mAction && bindingEntry.mRebindable)
-							{
-								BindingEntry bindingEntry3 = bindingEntry;
-								bindingEntry3.mButton = bindingEntry2.mButton;
-								bindingEntry3.mKeyCode = bindingEntry2.mKeyCode;
-								bindingEntry3.mModifier = bindingEntry2.mModifier;
-								GameInputMapping.KeyBindings[i] = bindingEntry3;
-								break;
-							}
-						}
-					}
+					BindingEntry bindingEntry3 = bindingEntry;
+					bindingEntry3.mButton = bindingEntry2.mButton;
+					bindingEntry3.mKeyCode = bindingEntry2.mKeyCode;
+					bindingEntry3.mModifier = bindingEntry2.mModifier;
+					GameInputMapping.KeyBindings[i] = bindingEntry3;
+					break;
 				}
 			}
 		}

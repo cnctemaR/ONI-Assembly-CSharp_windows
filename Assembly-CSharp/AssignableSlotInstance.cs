@@ -34,11 +34,12 @@ public abstract class AssignableSlotInstance
 
 	public void Assign(Assignable assignable)
 	{
-		if (!(this.assignable == assignable))
+		if (this.assignable == assignable)
 		{
-			this.Unassign();
-			this.assignable = assignable;
+			return;
 		}
+		this.Unassign();
+		this.assignable = assignable;
 	}
 
 	public virtual void Unassign()

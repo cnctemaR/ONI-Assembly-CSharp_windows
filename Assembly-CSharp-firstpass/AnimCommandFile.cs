@@ -38,24 +38,19 @@ public class AnimCommandFile : YamlIO<AnimCommandFile>
 
 	public bool IsSwap(KAnimFile file)
 	{
-		bool flag;
 		if (this.TagGroup != AnimCommandFile.GroupBy.NamedGroup)
 		{
-			flag = false;
+			return false;
 		}
-		else
+		string fileName = Path.GetFileName(file.homedirectory);
+		foreach (KeyValuePair<string, List<string>> keyValuePair in this.DefaultBuilds)
 		{
-			string fileName = Path.GetFileName(file.homedirectory);
-			foreach (KeyValuePair<string, List<string>> keyValuePair in this.DefaultBuilds)
+			if (keyValuePair.Value.Contains(fileName))
 			{
-				if (keyValuePair.Value.Contains(fileName))
-				{
-					return false;
-				}
+				return false;
 			}
-			flag = true;
 		}
-		return flag;
+		return true;
 	}
 
 	public void AddGroupFile(KAnimGroupFile.GroupFile gf)
@@ -68,18 +63,14 @@ public class AnimCommandFile : YamlIO<AnimCommandFile>
 
 	public string GetGroupName(KAnimFile kaf)
 	{
-		string text;
 		switch (this.TagGroup)
 		{
 		case AnimCommandFile.GroupBy.__IGNORE__:
-			text = null;
-			break;
+			return null;
 		case AnimCommandFile.GroupBy.DontGroup:
-			text = kaf.name;
-			break;
+			return kaf.name;
 		case AnimCommandFile.GroupBy.Folder:
-			text = Path.GetFileName(this.directory) + (this.groupFiles.Count / 10).ToString();
-			break;
+			return Path.GetFileName(this.directory) + (this.groupFiles.Count / 10).ToString();
 		case AnimCommandFile.GroupBy.NamedGroup:
 		{
 			string fileName = Path.GetFileName(kaf.homedirectory);
@@ -90,21 +81,17 @@ public class AnimCommandFile : YamlIO<AnimCommandFile>
 					return keyValuePair.Key;
 				}
 			}
-			text = this.TargetBuild;
-			break;
+			return this.TargetBuild;
 		}
 		case AnimCommandFile.GroupBy.NamedGroupNoSplit:
-			text = this.TargetBuild;
-			break;
+			return this.TargetBuild;
 		default:
-			text = null;
-			break;
+			return null;
 		}
-		return text;
 	}
 
 	[NonSerialized]
-	public string directory = "";
+	public string directory = string.Empty;
 
 	[NonSerialized]
 	private List<KAnimGroupFile.GroupFile> groupFiles = new List<KAnimGroupFile.GroupFile>();

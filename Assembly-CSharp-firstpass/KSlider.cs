@@ -91,89 +91,96 @@ public class KSlider : Slider
 
 	public void PlayStartSound()
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			if (this.playSounds)
-			{
-				string text = this.currentSounds[0];
-				if (text != null && text.Length > 0)
-				{
-					KFMOD.PlayOneShot(text);
-				}
-			}
+			return;
+		}
+		if (!this.playSounds)
+		{
+			return;
+		}
+		string text = this.currentSounds[0];
+		if (text != null && text.Length > 0)
+		{
+			KFMOD.PlayOneShot(text);
 		}
 	}
 
 	public void PlayMoveSound(KSlider.MoveSource moveSource)
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			if (this.playSounds)
+			return;
+		}
+		if (!this.playSounds)
+		{
+			return;
+		}
+		float num = Time.unscaledTime - this.lastMoveTime;
+		if (num < this.movePlayRate)
+		{
+			return;
+		}
+		if (moveSource != KSlider.MoveSource.MouseDrag)
+		{
+			this.playedBoundaryBump = false;
+		}
+		float num2 = Mathf.InverseLerp(base.minValue, base.maxValue, this.value);
+		string text = null;
+		if (num2 == 1f && this.lastMoveValue == 1f)
+		{
+			if (!this.playedBoundaryBump)
 			{
-				float num = Time.unscaledTime - this.lastMoveTime;
-				if (num >= this.movePlayRate)
-				{
-					if (moveSource != KSlider.MoveSource.MouseDrag)
-					{
-						this.playedBoundaryBump = false;
-					}
-					float num2 = Mathf.InverseLerp(base.minValue, base.maxValue, this.value);
-					string text = null;
-					if (num2 == 1f && this.lastMoveValue == 1f)
-					{
-						if (!this.playedBoundaryBump)
-						{
-							text = this.currentSounds[4];
-							this.playedBoundaryBump = true;
-						}
-					}
-					else if (num2 == 0f && this.lastMoveValue == 0f)
-					{
-						if (!this.playedBoundaryBump)
-						{
-							text = this.currentSounds[3];
-							this.playedBoundaryBump = true;
-						}
-					}
-					else if (num2 >= 0f && num2 <= 1f)
-					{
-						text = this.currentSounds[1];
-						this.playedBoundaryBump = false;
-					}
-					if (text != null && text.Length > 0)
-					{
-						this.lastMoveTime = Time.unscaledTime;
-						this.lastMoveValue = num2;
-						FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, Vector3.zero);
-						eventInstance.setParameterValue("sliderValue", num2);
-						eventInstance.setParameterValue("timeSinceLast", num);
-						KFMOD.EndOneShot(eventInstance);
-					}
-				}
+				text = this.currentSounds[4];
+				this.playedBoundaryBump = true;
 			}
+		}
+		else if (num2 == 0f && this.lastMoveValue == 0f)
+		{
+			if (!this.playedBoundaryBump)
+			{
+				text = this.currentSounds[3];
+				this.playedBoundaryBump = true;
+			}
+		}
+		else if (num2 >= 0f && num2 <= 1f)
+		{
+			text = this.currentSounds[1];
+			this.playedBoundaryBump = false;
+		}
+		if (text != null && text.Length > 0)
+		{
+			this.lastMoveTime = Time.unscaledTime;
+			this.lastMoveValue = num2;
+			FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, Vector3.zero);
+			eventInstance.setParameterValue("sliderValue", num2);
+			eventInstance.setParameterValue("timeSinceLast", num);
+			KFMOD.EndOneShot(eventInstance);
 		}
 	}
 
 	public void PlayEndSound()
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			if (this.playSounds)
-			{
-				string text = this.currentSounds[2];
-				if (text != null && text.Length > 0)
-				{
-					FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, Vector3.zero);
-					eventInstance.setParameterValue("sliderValue", this.value);
-					KFMOD.EndOneShot(eventInstance);
-				}
-			}
+			return;
+		}
+		if (!this.playSounds)
+		{
+			return;
+		}
+		string text = this.currentSounds[2];
+		if (text != null && text.Length > 0)
+		{
+			FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, Vector3.zero);
+			eventInstance.setParameterValue("sliderValue", this.value);
+			KFMOD.EndOneShot(eventInstance);
 		}
 	}
 
 	public static string[] DefaultSounds = new string[5];
 
-	private string[] currentSounds = null;
+	private string[] currentSounds;
 
 	private bool playSounds = true;
 
@@ -183,7 +190,7 @@ public class KSlider : Slider
 
 	private float lastMoveValue;
 
-	public bool playedBoundaryBump = false;
+	public bool playedBoundaryBump;
 
 	private ToolTip tooltip;
 

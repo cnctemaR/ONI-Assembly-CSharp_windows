@@ -69,73 +69,50 @@ public class PlantableSeed : KMonoBehaviour, IHasSortOrder, IReceptacleDirection
 
 	private bool TestSuitableGround(int cell, bool ignoreGround = false)
 	{
-		bool flag;
 		if (!Grid.IsValidCell(cell))
 		{
-			flag = false;
+			return false;
 		}
-		else
+		GameObject prefab = Assets.GetPrefab(this.PlantID);
+		EntombVulnerable component = prefab.GetComponent<EntombVulnerable>();
+		if (component != null && !component.IsCellSafe(cell))
 		{
-			GameObject prefab = Assets.GetPrefab(this.PlantID);
-			EntombVulnerable component = prefab.GetComponent<EntombVulnerable>();
-			if (component != null && !component.IsCellSafe(cell))
+			return false;
+		}
+		PressureVulnerable component2 = prefab.GetComponent<PressureVulnerable>();
+		if (component2 != null && !component2.IsCellSafe(cell))
+		{
+			return false;
+		}
+		DrowningMonitor component3 = prefab.GetComponent<DrowningMonitor>();
+		if (component3 != null && !component3.IsCellSafe(cell))
+		{
+			return false;
+		}
+		TemperatureVulnerable component4 = prefab.GetComponent<TemperatureVulnerable>();
+		if (component4 != null && !component4.IsCellSafe(cell))
+		{
+			return false;
+		}
+		UprootedMonitor component5 = prefab.GetComponent<UprootedMonitor>();
+		if (component5 != null && !component5.IsCellSafe(cell))
+		{
+			return false;
+		}
+		OccupyArea component6 = prefab.GetComponent<OccupyArea>();
+		if (component6 != null && !component6.CanOccupyArea(cell, ObjectLayer.Building))
+		{
+			return false;
+		}
+		if (!ignoreGround)
+		{
+			int num = Grid.CellBelow(cell);
+			if (Grid.Foundation[num] || (this.replantGroundTag.IsValid && !Grid.Element[num].HasTag(this.replantGroundTag)))
 			{
-				flag = false;
-			}
-			else
-			{
-				PressureVulnerable component2 = prefab.GetComponent<PressureVulnerable>();
-				if (component2 != null && !component2.IsCellSafe(cell))
-				{
-					flag = false;
-				}
-				else
-				{
-					DrowningMonitor component3 = prefab.GetComponent<DrowningMonitor>();
-					if (component3 != null && !component3.IsCellSafe(cell))
-					{
-						flag = false;
-					}
-					else
-					{
-						TemperatureVulnerable component4 = prefab.GetComponent<TemperatureVulnerable>();
-						if (component4 != null && !component4.IsCellSafe(cell))
-						{
-							flag = false;
-						}
-						else
-						{
-							UprootedMonitor component5 = prefab.GetComponent<UprootedMonitor>();
-							if (component5 != null && !component5.IsCellSafe(cell))
-							{
-								flag = false;
-							}
-							else
-							{
-								OccupyArea component6 = prefab.GetComponent<OccupyArea>();
-								if (component6 != null && !component6.CanOccupyArea(cell, ObjectLayer.Building))
-								{
-									flag = false;
-								}
-								else
-								{
-									if (!ignoreGround)
-									{
-										int num = Grid.CellBelow(cell);
-										if (Grid.Foundation[num] || (this.replantGroundTag.IsValid && !Grid.Element[num].HasTag(this.replantGroundTag)))
-										{
-											return false;
-										}
-									}
-									flag = true;
-								}
-							}
-						}
-					}
-				}
+				return false;
 			}
 		}
-		return flag;
+		return true;
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)
@@ -159,11 +136,11 @@ public class PlantableSeed : KMonoBehaviour, IHasSortOrder, IReceptacleDirection
 	public Tag PreviewID;
 
 	[Serialize]
-	public float timeUntilSelfPlant = 0f;
+	public float timeUntilSelfPlant;
 
 	public Tag replantGroundTag;
 
 	public string domesticatedDescription;
 
-	public SingleEntityReceptacle.ReceptacleDirection direction = SingleEntityReceptacle.ReceptacleDirection.Top;
+	public SingleEntityReceptacle.ReceptacleDirection direction;
 }

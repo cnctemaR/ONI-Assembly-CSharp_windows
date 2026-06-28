@@ -24,12 +24,9 @@ public class DisinfectTool : DragTool
 			if (gameObject != null)
 			{
 				Disinfectable component = gameObject.GetComponent<Disinfectable>();
-				if (component != null)
+				if (component != null && component.GetComponent<PrimaryElement>().DiseaseCount > 0)
 				{
-					if (component.GetComponent<PrimaryElement>().DiseaseCount > 0)
-					{
-						component.MarkForDisinfect(false);
-					}
+					component.MarkForDisinfect(false);
 				}
 			}
 		}

@@ -30,16 +30,17 @@ public class WidgetTransition : MonoBehaviour
 
 	public void StartTransition()
 	{
-		if (!this.fadingIn)
+		if (this.fadingIn)
 		{
-			this.CanvasGroup.alpha = 0f;
-			this.fadingIn = true;
-			base.enabled = true;
-			Vector2 vector = base.gameObject.rectTransform().anchoredPosition;
-			this.targetPos = new Vector2(vector.x, vector.y);
-			vector += this.beginningOffset;
-			base.gameObject.rectTransform().anchoredPosition = vector;
+			return;
 		}
+		this.CanvasGroup.alpha = 0f;
+		this.fadingIn = true;
+		base.enabled = true;
+		Vector2 vector = base.gameObject.rectTransform().anchoredPosition;
+		this.targetPos = new Vector2(vector.x, vector.y);
+		vector += this.beginningOffset;
+		base.gameObject.rectTransform().anchoredPosition = vector;
 	}
 
 	public void StopTransition()
@@ -89,9 +90,9 @@ public class WidgetTransition : MonoBehaviour
 
 	private const float FADEIN_SPEED = 0.1f;
 
-	private bool fadingIn = false;
+	private bool fadingIn;
 
-	private CanvasGroup canvasGroup = null;
+	private CanvasGroup canvasGroup;
 
 	public enum TransitionType
 	{

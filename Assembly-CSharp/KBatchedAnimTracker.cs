@@ -23,28 +23,26 @@ public class KBatchedAnimTracker : MonoBehaviour
 		{
 			global::Debug.Log("Controller Null for tracker on " + base.gameObject.name, base.gameObject);
 			base.enabled = false;
+			return;
 		}
-		else
+		this.controller.onAnimEnter += this.OnAnimStart;
+		this.controller.onAnimComplete += this.OnAnimStop;
+		this.controller.onLayerChanged += this.OnLayerChanged;
+		this.forceUpdate = true;
+		this.myAnim = base.GetComponent<KBatchedAnimController>();
+		List<KAnimControllerBase> list = new List<KAnimControllerBase>(base.GetComponentsInChildren<KAnimControllerBase>(true));
+		if (!this.skipInitialDisable)
 		{
-			this.controller.onAnimEnter += this.OnAnimStart;
-			this.controller.onAnimComplete += this.OnAnimStop;
-			this.controller.onLayerChanged += this.OnLayerChanged;
-			this.forceUpdate = true;
-			this.myAnim = base.GetComponent<KBatchedAnimController>();
-			List<KAnimControllerBase> list = new List<KAnimControllerBase>(base.GetComponentsInChildren<KAnimControllerBase>(true));
-			if (!this.skipInitialDisable)
+			for (int i = 0; i < base.transform.childCount; i++)
 			{
-				for (int i = 0; i < base.transform.childCount; i++)
-				{
-					base.transform.GetChild(i).gameObject.SetActive(false);
-				}
+				base.transform.GetChild(i).gameObject.SetActive(false);
 			}
-			for (int j = list.Count - 1; j >= 0; j--)
+		}
+		for (int j = list.Count - 1; j >= 0; j--)
+		{
+			if (list[j].gameObject == base.gameObject)
 			{
-				if (list[j].gameObject == base.gameObject)
-				{
-					list.RemoveAt(j);
-				}
+				list.RemoveAt(j);
 			}
 		}
 	}
@@ -159,21 +157,21 @@ public class KBatchedAnimTracker : MonoBehaviour
 
 	public Vector3 targetPoint = Vector3.zero;
 
-	public bool useTargetPoint = false;
+	public bool useTargetPoint;
 
 	public bool fadeOut = true;
 
-	public bool skipInitialDisable = false;
+	public bool skipInitialDisable;
 
-	public bool forceAlwaysVisible = false;
+	public bool forceAlwaysVisible;
 
 	private bool alive = true;
 
-	private bool forceUpdate = false;
+	private bool forceUpdate;
 
 	private Matrix2x3 previousMatrix;
 
 	private Vector3 previousPosition;
 
-	private KBatchedAnimController myAnim = null;
+	private KBatchedAnimController myAnim;
 }

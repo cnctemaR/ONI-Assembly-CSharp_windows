@@ -10,16 +10,11 @@ public class DetailsScreen : KTabMenu
 
 	public override float GetSortKey()
 	{
-		float num;
 		if (this.isEditing)
 		{
-			num = 10f;
+			return 10f;
 		}
-		else
-		{
-			num = base.GetSortKey();
-		}
-		return num;
+		return base.GetSortKey();
 	}
 
 	protected override void OnPrefabInit()
@@ -51,14 +46,16 @@ public class DetailsScreen : KTabMenu
 	private void OnNameChanged(string newName)
 	{
 		this.isEditing = false;
-		if (!string.IsNullOrEmpty(newName))
+		if (string.IsNullOrEmpty(newName))
 		{
-			MinionIdentity component = this.target.GetComponent<MinionIdentity>();
-			if (!(component == null))
-			{
-				component.SetName(newName);
-			}
+			return;
 		}
+		MinionIdentity component = this.target.GetComponent<MinionIdentity>();
+		if (component == null)
+		{
+			return;
+		}
+		component.SetName(newName);
 	}
 
 	protected override void OnDeactivate()
@@ -100,12 +97,9 @@ public class DetailsScreen : KTabMenu
 
 	public override void OnKeyUp(KButtonEvent e)
 	{
-		if (!this.isEditing && this.target != null)
+		if (!this.isEditing && this.target != null && PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
 		{
-			if (PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
-			{
-				this.DeselectAndClose();
-			}
+			this.DeselectAndClose();
 		}
 	}
 
@@ -126,24 +120,19 @@ public class DetailsScreen : KTabMenu
 
 	private static bool IsExcludedPrefabTag(GameObject go, Tag[] excluded_tags)
 	{
-		bool flag;
 		if (excluded_tags == null || excluded_tags.Length == 0)
 		{
-			flag = false;
+			return false;
 		}
-		else
+		bool flag = false;
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		foreach (Tag tag in excluded_tags)
 		{
-			bool flag2 = false;
-			KPrefabID component = go.GetComponent<KPrefabID>();
-			foreach (Tag tag in excluded_tags)
+			if (component.PrefabTag == tag)
 			{
-				if (component.PrefabTag == tag)
-				{
-					flag2 = true;
-					break;
-				}
+				flag = true;
+				break;
 			}
-			flag = flag2;
 		}
 		return flag;
 	}
@@ -162,122 +151,114 @@ public class DetailsScreen : KTabMenu
 
 	public void Refresh(GameObject go)
 	{
-		if (this.screens != null)
+		if (this.screens == null)
 		{
-			this.target = go;
-			CellSelectionObject component = this.target.GetComponent<CellSelectionObject>();
-			if (component)
+			return;
+		}
+		this.target = go;
+		CellSelectionObject component = this.target.GetComponent<CellSelectionObject>();
+		if (component)
+		{
+			component.OnObjectSelected(null);
+		}
+		if (!this.HasActivated)
+		{
+			if (this.screens != null)
 			{
-				component.OnObjectSelected(null);
+				for (int i = 0; i < this.screens.Length; i++)
+				{
+					GameObject gameObject = KScreenManager.Instance.InstantiateScreen(this.screens[i].screen.gameObject, this.body.gameObject).gameObject;
+					this.screens[i].screen = gameObject.GetComponent<TargetScreen>();
+					this.screens[i].tabIdx = base.AddTab(this.screens[i].icon, Strings.Get(this.screens[i].displayName), this.screens[i].screen, Strings.Get(this.screens[i].tooltip));
+				}
 			}
-			if (!this.HasActivated)
+			base.onTabActivated += this.OnTabActivated;
+			this.HasActivated = true;
+		}
+		int num = -1;
+		int num2 = 0;
+		for (int j = 0; j < this.screens.Length; j++)
+		{
+			string requiredComponentType = this.screens[j].requiredComponentType;
+			bool flag = requiredComponentType == null || requiredComponentType == string.Empty || DetailsScreen.GetComponent(go, requiredComponentType) != null;
+			if (flag && requiredComponentType == "Storage")
 			{
-				if (this.screens != null)
-				{
-					for (int i = 0; i < this.screens.Length; i++)
-					{
-						GameObject gameObject = KScreenManager.Instance.InstantiateScreen(this.screens[i].screen.gameObject, this.body.gameObject).gameObject;
-						this.screens[i].screen = gameObject.GetComponent<TargetScreen>();
-						this.screens[i].tabIdx = base.AddTab(this.screens[i].icon, Strings.Get(this.screens[i].displayName), this.screens[i].screen, Strings.Get(this.screens[i].tooltip));
-					}
-				}
-				base.onTabActivated += this.OnTabActivated;
-				this.HasActivated = true;
+				flag = go.GetComponent<Storage>().showInUI;
 			}
-			int num = -1;
-			int num2 = 0;
-			for (int j = 0; j < this.screens.Length; j++)
+			bool flag2 = false;
+			for (int k = 0; k < this.screens[j].excludeComponentType.Length; k++)
 			{
-				string requiredComponentType = this.screens[j].requiredComponentType;
-				bool flag = requiredComponentType == null || requiredComponentType == "" || DetailsScreen.GetComponent(go, requiredComponentType) != null;
-				if (flag && requiredComponentType == "Storage")
+				string text = this.screens[j].excludeComponentType[k];
+				if (text != null && DetailsScreen.GetComponent(go, text) != null)
 				{
-					flag = go.GetComponent<Storage>().showInUI;
+					flag2 = true;
+					break;
 				}
-				bool flag2 = false;
-				for (int k = 0; k < this.screens[j].excludeComponentType.Length; k++)
+			}
+			bool flag3 = this.screens[j].hideWhenDead && base.gameObject.HasTag(GameTags.Dead);
+			base.SetTabEnabled(this.screens[j].tabIdx, flag && !flag2 && !flag3);
+			if (flag)
+			{
+				num2++;
+				if (num == -1)
 				{
-					string text = this.screens[j].excludeComponentType[k];
-					if (text != null)
+					if (SimDebugView.Instance.GetMode() != SimViewMode.None)
 					{
-						if (DetailsScreen.GetComponent(go, text) != null)
-						{
-							flag2 = true;
-							break;
-						}
-					}
-				}
-				bool flag3 = this.screens[j].hideWhenDead && base.gameObject.HasTag(GameTags.Dead);
-				base.SetTabEnabled(this.screens[j].tabIdx, flag && !flag2 && !flag3);
-				if (flag)
-				{
-					num2++;
-					if (num == -1)
-					{
-						if (SimDebugView.Instance.GetMode() != SimViewMode.None)
-						{
-							if (SimDebugView.Instance.GetMode() == this.screens[j].focusInViewMode)
-							{
-								num = j;
-							}
-						}
-						else
+						if (SimDebugView.Instance.GetMode() == this.screens[j].focusInViewMode)
 						{
 							num = j;
 						}
 					}
+					else
+					{
+						num = j;
+					}
 				}
 			}
-			if (num != -1)
+		}
+		if (num != -1)
+		{
+			this.ActivateTab(num);
+		}
+		else
+		{
+			this.ActivateTab(0);
+		}
+		this.tabHeaderContainer.gameObject.SetActive(base.CountTabs() > 1);
+		if (this.sideScreens != null && this.sideScreens.Count > 0)
+		{
+			this.sideScreens.ForEach(delegate(DetailsScreen.SideScreenRef scn)
 			{
-				this.ActivateTab(num);
-			}
-			else
-			{
-				this.ActivateTab(0);
-			}
-			this.tabHeaderContainer.gameObject.SetActive(base.CountTabs() > 1);
-			if (this.sideScreens != null && this.sideScreens.Count > 0)
-			{
-				this.sideScreens.ForEach(delegate(DetailsScreen.SideScreenRef scn)
+				if (!string.IsNullOrEmpty(scn.componentRequired) && DetailsScreen.GetComponent(this.target, scn.componentRequired) != null)
 				{
-					if (!string.IsNullOrEmpty(scn.componentRequired))
+					bool flag4 = true;
+					for (int l = 0; l < scn.componentsExcluded.Length; l++)
 					{
-						if (DetailsScreen.GetComponent(this.target, scn.componentRequired) != null)
+						if (DetailsScreen.GetComponent(this.target, scn.componentsExcluded[l]) != null)
 						{
-							bool flag4 = true;
-							for (int l = 0; l < scn.componentsExcluded.Length; l++)
-							{
-								if (DetailsScreen.GetComponent(this.target, scn.componentsExcluded[l]) != null)
-								{
-									flag4 = false;
-									break;
-								}
-							}
-							if (flag4)
-							{
-								if (!DetailsScreen.IsExcludedPrefabTag(this.target, scn.excludedPrefabTags))
-								{
-									if (!this.sideScreen.activeInHierarchy)
-									{
-										this.sideScreen.SetActive(true);
-									}
-									if (scn.screenInstance == null)
-									{
-										scn.screenInstance = Util.KInstantiateUI<SideScreenContent>(scn.screenPrefab, this.sideScreenContentBody, false);
-									}
-									SideScreenContent component2 = scn.screenInstance.GetComponent<SideScreenContent>();
-									scn.screenInstance.transform.SetAsFirstSibling();
-									component2.SetTarget(this.target);
-									this.currentSideScreen = component2;
-									this.sideScreenTitle.SetText(component2.GetTitle());
-									scn.screenInstance.Show(true);
-								}
-							}
+							flag4 = false;
+							break;
 						}
 					}
-				});
-			}
+					if (flag4 && !DetailsScreen.IsExcludedPrefabTag(this.target, scn.excludedPrefabTags))
+					{
+						if (!this.sideScreen.activeInHierarchy)
+						{
+							this.sideScreen.SetActive(true);
+						}
+						if (scn.screenInstance == null)
+						{
+							scn.screenInstance = Util.KInstantiateUI<SideScreenContent>(scn.screenPrefab, this.sideScreenContentBody, false);
+						}
+						SideScreenContent component2 = scn.screenInstance.GetComponent<SideScreenContent>();
+						scn.screenInstance.transform.SetAsFirstSibling();
+						component2.SetTarget(this.target);
+						this.currentSideScreen = component2;
+						this.sideScreenTitle.SetText(component2.GetTitle());
+						scn.screenInstance.Show(true);
+					}
+				}
+			});
 		}
 	}
 
@@ -304,12 +285,9 @@ public class DetailsScreen : KTabMenu
 
 	public void DeactivateSideContent()
 	{
-		if (SideDetailsScreen.Instance != null)
+		if (SideDetailsScreen.Instance != null && SideDetailsScreen.Instance.gameObject.activeInHierarchy)
 		{
-			if (SideDetailsScreen.Instance.gameObject.activeInHierarchy)
-			{
-				SideDetailsScreen.Instance.Show(false);
-			}
+			SideDetailsScreen.Instance.Show(false);
 		}
 		if (this.sideScreens != null && this.sideScreens.Count > 0)
 		{
@@ -341,12 +319,13 @@ public class DetailsScreen : KTabMenu
 	{
 		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Back", false));
 		SelectTool.Instance.Select(null, false);
-		if (!(this.target == null))
+		if (this.target == null)
 		{
-			this.target = null;
-			this.DeactivateSideContent();
-			base.Show(false);
+			return;
 		}
+		this.target = null;
+		this.DeactivateSideContent();
+		base.Show(false);
 	}
 
 	private void SortScreenOrder()
@@ -357,52 +336,48 @@ public class DetailsScreen : KTabMenu
 	public void UpdatePortrait(GameObject target)
 	{
 		KSelectable component = target.GetComponent<KSelectable>();
-		if (!(component == null))
+		if (component == null)
 		{
-			this.TabTitle.portrait.ClearPortrait();
-			Building component2 = component.GetComponent<Building>();
-			if (component2)
+			return;
+		}
+		this.TabTitle.portrait.ClearPortrait();
+		Building component2 = component.GetComponent<Building>();
+		if (component2)
+		{
+			Sprite uisprite = component2.Def.GetUISprite("ui");
+			if (uisprite != null)
 			{
-				Sprite uisprite = component2.Def.GetUISprite("ui");
-				if (uisprite != null)
-				{
-					this.TabTitle.portrait.SetPortrait(uisprite);
-					return;
-				}
+				this.TabTitle.portrait.SetPortrait(uisprite);
+				return;
 			}
-			MinionIdentity component3 = target.GetComponent<MinionIdentity>();
-			if (component3)
-			{
-				this.TabTitle.SetPortrait(component.gameObject);
-			}
-			else
-			{
-				Edible component4 = target.GetComponent<Edible>();
-				if (component4 != null)
-				{
-					KBatchedAnimController component5 = component4.GetComponent<KBatchedAnimController>();
-					Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component5.AnimFiles[0], "ui");
-					this.TabTitle.portrait.SetPortrait(uispriteFromMultiObjectAnim);
-				}
-				else
-				{
-					PrimaryElement component6 = target.GetComponent<PrimaryElement>();
-					if (component6 != null)
-					{
-						this.TabTitle.portrait.SetPortrait(Def.GetUISpriteFromMultiObjectAnim(ElementLoader.FindElementByHash(component6.ElementID).substance.anim, "ui"));
-					}
-					else
-					{
-						CellSelectionObject component7 = target.GetComponent<CellSelectionObject>();
-						if (component7 != null)
-						{
-							string text = ((!component7.element.IsSolid) ? component7.element.substance.name : "ui");
-							Sprite uispriteFromMultiObjectAnim2 = Def.GetUISpriteFromMultiObjectAnim(component7.element.substance.anim, text);
-							this.TabTitle.portrait.SetPortrait(uispriteFromMultiObjectAnim2);
-						}
-					}
-				}
-			}
+		}
+		MinionIdentity component3 = target.GetComponent<MinionIdentity>();
+		if (component3)
+		{
+			this.TabTitle.SetPortrait(component.gameObject);
+			return;
+		}
+		Edible component4 = target.GetComponent<Edible>();
+		if (component4 != null)
+		{
+			KBatchedAnimController component5 = component4.GetComponent<KBatchedAnimController>();
+			Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component5.AnimFiles[0], "ui");
+			this.TabTitle.portrait.SetPortrait(uispriteFromMultiObjectAnim);
+			return;
+		}
+		PrimaryElement component6 = target.GetComponent<PrimaryElement>();
+		if (component6 != null)
+		{
+			this.TabTitle.portrait.SetPortrait(Def.GetUISpriteFromMultiObjectAnim(ElementLoader.FindElementByHash(component6.ElementID).substance.anim, "ui"));
+			return;
+		}
+		CellSelectionObject component7 = target.GetComponent<CellSelectionObject>();
+		if (component7 != null)
+		{
+			string text = ((!component7.element.IsSolid) ? component7.element.substance.name : "ui");
+			Sprite uispriteFromMultiObjectAnim2 = Def.GetUISpriteFromMultiObjectAnim(component7.element.substance.anim, text);
+			this.TabTitle.portrait.SetPortrait(uispriteFromMultiObjectAnim2);
+			return;
 		}
 	}
 
@@ -428,7 +403,7 @@ public class DetailsScreen : KTabMenu
 			}
 			else
 			{
-				this.TabTitle.SetSubText("", "");
+				this.TabTitle.SetSubText(string.Empty, string.Empty);
 				this.TabTitle.SetUserEditable(false);
 			}
 		}
@@ -473,7 +448,7 @@ public class DetailsScreen : KTabMenu
 
 	private bool HasActivated;
 
-	private bool isEditing = false;
+	private bool isEditing;
 
 	private SideScreenContent currentSideScreen;
 

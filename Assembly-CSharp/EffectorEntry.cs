@@ -12,7 +12,7 @@ internal struct EffectorEntry
 
 	public override string ToString()
 	{
-		string text = "";
+		string text = string.Empty;
 		if (this.count > 1)
 		{
 			text = string.Format(UI.OVERLAYS.DECOR.COUNT, this.count);

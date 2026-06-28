@@ -10,7 +10,7 @@ public static class Strings
 		string text = "MISSING";
 		foreach (StringKey stringKey in keys)
 		{
-			if (text != "")
+			if (text != string.Empty)
 			{
 				text += ".";
 			}
@@ -110,10 +110,8 @@ public static class Strings
 		if (tables != null)
 		{
 			FileHelperEngine fileHelperEngine = new FileHelperEngine(typeof(Strings.StringKeyConfig));
-			int i = 0;
-			while (i < tables.Length)
+			foreach (TextAsset textAsset in tables)
 			{
-				TextAsset textAsset = tables[i];
 				if (textAsset != null)
 				{
 					Strings.StringKeyConfig[] array = (Strings.StringKeyConfig[])fileHelperEngine.ReadString(textAsset.text);
@@ -132,13 +130,13 @@ public static class Strings
 									{
 										List<string> list = new List<string>();
 										list.Add(textAsset.name);
-										if (stringKeyConfig2.name != null && !(stringKeyConfig2.name == "") && !stringKeyConfig2.name.Contains(" "))
+										if (stringKeyConfig2.name != null && !(stringKeyConfig2.name == string.Empty) && !stringKeyConfig2.name.Contains(" "))
 										{
 											list.Add(stringKeyConfig2.name);
-											if (stringKeyConfig.name != null && !(stringKeyConfig.name == "") && !stringKeyConfig.name.Contains(" "))
+											if (stringKeyConfig.name != null && !(stringKeyConfig.name == string.Empty) && !stringKeyConfig.name.Contains(" "))
 											{
 												list.Add(stringKeyConfig.values[k]);
-												if (stringKeyConfig2.values[k] != null && !(stringKeyConfig2.values[k] == ""))
+												if (stringKeyConfig2.values[k] != null && !(stringKeyConfig2.values[k] == string.Empty))
 												{
 													list.Add(stringKeyConfig2.values[k]);
 													Strings.Add(list.ToArray());
@@ -151,7 +149,7 @@ public static class Strings
 								{
 									List<string> list2 = new List<string>();
 									list2.Add(textAsset.name);
-									if (stringKeyConfig2.name != null && !(stringKeyConfig2.name == "") && !stringKeyConfig2.name.Contains(" "))
+									if (stringKeyConfig2.name != null && !(stringKeyConfig2.name == string.Empty) && !stringKeyConfig2.name.Contains(" "))
 									{
 										list2.Add(stringKeyConfig2.name);
 										list2.Add(stringKeyConfig2.values[0]);
@@ -162,17 +160,13 @@ public static class Strings
 						}
 					}
 				}
-				IL_0247:
-				i++;
-				continue;
-				goto IL_0247;
 			}
 		}
 	}
 
 	public static void PrintTable()
 	{
-		Strings.RootTable.Print("");
+		Strings.RootTable.Print(string.Empty);
 	}
 
 	private static StringTable RootTable = new StringTable();

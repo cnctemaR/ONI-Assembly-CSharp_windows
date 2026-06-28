@@ -5,16 +5,11 @@ public class NavigationReservations : KMonoBehaviour
 {
 	public int GetOccupancyCount(int cell)
 	{
-		int num;
 		if (this.cellOccupancyDensity.ContainsKey(cell))
 		{
-			num = this.cellOccupancyDensity[cell];
+			return this.cellOccupancyDensity[cell];
 		}
-		else
-		{
-			num = 0;
-		}
-		return num;
+		return 0;
 	}
 
 	public bool isReserved(int cell)

@@ -33,32 +33,28 @@ public class PathGrid
 	public PathFinder.Cell GetCell(int cell, NavType nav_type)
 	{
 		int num = this.OffsetCell(cell);
-		PathFinder.Cell cell2;
 		if (!this.IsValidOffsetCell(num))
 		{
-			cell2 = new PathFinder.Cell
+			return new PathFinder.Cell
 			{
 				cost = PathProber.InvalidCost
 			};
 		}
-		else
-		{
-			int num2 = this.NavTypeTable[(int)nav_type];
-			int num3 = num * this.ValidNavTypes.Length + num2;
-			cell2 = this.Cells[num3];
-		}
-		return cell2;
+		int num2 = this.NavTypeTable[(int)nav_type];
+		int num3 = num * this.ValidNavTypes.Length + num2;
+		return this.Cells[num3];
 	}
 
 	public void SetCell(PathFinder.PotentialPath potential_path, ref PathFinder.Cell cell_data)
 	{
 		int num = this.OffsetCell(potential_path.cell);
-		if (this.IsValidOffsetCell(num))
+		if (!this.IsValidOffsetCell(num))
 		{
-			int num2 = this.NavTypeTable[(int)potential_path.navType];
-			int num3 = num * this.ValidNavTypes.Length + num2;
-			this.Cells[num3] = cell_data;
+			return;
 		}
+		int num2 = this.NavTypeTable[(int)potential_path.navType];
+		int num3 = num * this.ValidNavTypes.Length + num2;
+		this.Cells[num3] = cell_data;
 	}
 
 	public int GetCost(int cell, int query_id)
@@ -70,12 +66,9 @@ public class PathGrid
 			{
 				NavType navType = this.ValidNavTypes[i];
 				PathFinder.Cell cell2 = this.GetCell(cell, navType);
-				if (cell2.queryId == query_id)
+				if (cell2.queryId == query_id && (num == PathProber.InvalidCost || cell2.cost < num))
 				{
-					if (num == PathProber.InvalidCost || cell2.cost < num)
-					{
-						num = cell2.cost;
-					}
+					num = cell2.cost;
 				}
 			}
 		}
@@ -89,28 +82,20 @@ public class PathGrid
 
 	private int OffsetCell(int cell)
 	{
-		int num3;
-		if (this.applyOffset)
+		if (!this.applyOffset)
 		{
-			int num;
-			int num2;
-			Grid.CellToXY(cell, out num, out num2);
-			if (num < this.rootX || num >= this.rootX + this.widthInCells || num2 < this.rootY || num2 >= this.rootY + this.heightInCells)
-			{
-				num3 = PathProber.InvalidCell;
-			}
-			else
-			{
-				int num4 = num - this.rootX;
-				int num5 = num2 - this.rootY;
-				num3 = num5 * this.widthInCells + num4;
-			}
+			return cell;
 		}
-		else
+		int num;
+		int num2;
+		Grid.CellToXY(cell, out num, out num2);
+		if (num < this.rootX || num >= this.rootX + this.widthInCells || num2 < this.rootY || num2 >= this.rootY + this.heightInCells)
 		{
-			num3 = cell;
+			return PathProber.InvalidCell;
 		}
-		return num3;
+		int num3 = num - this.rootX;
+		int num4 = num2 - this.rootY;
+		return num4 * this.widthInCells + num3;
 	}
 
 	public void SetRootCell(int root_cell)

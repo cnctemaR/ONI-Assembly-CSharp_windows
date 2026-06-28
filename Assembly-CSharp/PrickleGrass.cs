@@ -35,7 +35,7 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 	[MyCmpReq]
 	private EntombVulnerable entombVulnerable;
 
-	public bool replanted = false;
+	public bool replanted;
 
 	private AttributeModifier growth_bonus = new AttributeModifier("Effect", (float)DECOR.BONUS.TIER3.amount, null, false, false, true);
 

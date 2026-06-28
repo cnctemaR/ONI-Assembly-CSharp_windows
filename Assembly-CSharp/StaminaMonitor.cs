@@ -81,17 +81,12 @@ public class StaminaMonitor : GameStateMachine<StaminaMonitor, StaminaMonitor.In
 
 		public bool ShouldExitSleep()
 		{
-			bool flag;
 			if (this.schedulable.IsAllowed(Db.Get().ScheduleBlockTypes.Sleep))
 			{
-				flag = false;
+				return false;
 			}
-			else
-			{
-				Narcolepsy component = base.GetComponent<Narcolepsy>();
-				flag = (!(component != null) || !component.IsNarcolepsing()) && this.stamina.value >= this.stamina.GetMax() && TimeOfDay.Instance.GetCurrentTimeRegion() != TimeOfDay.TimeRegion.Night;
-			}
-			return flag;
+			Narcolepsy component = base.GetComponent<Narcolepsy>();
+			return (!(component != null) || !component.IsNarcolepsing()) && this.stamina.value >= this.stamina.GetMax() && TimeOfDay.Instance.GetCurrentTimeRegion() != TimeOfDay.TimeRegion.Night;
 		}
 
 		private ChoreDriver choreDriver;

@@ -121,68 +121,64 @@ public class JobsTableScreen : TableScreen
 		if (widgetRow == null)
 		{
 			global::Debug.LogWarning("Row is null", null);
+			return;
 		}
-		else
+		ChoreGroupTableColumn choreGroupTableColumn = base.GetWidgetColumn(widget_go) as ChoreGroupTableColumn;
+		MinionIdentity minionIdentity = widgetRow.GetMinionIdentity();
+		ChoreGroup chore_group = choreGroupTableColumn.chore_group;
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Header)
 		{
-			ChoreGroupTableColumn choreGroupTableColumn = base.GetWidgetColumn(widget_go) as ChoreGroupTableColumn;
-			MinionIdentity minionIdentity = widgetRow.GetMinionIdentity();
-			ChoreGroup chore_group = choreGroupTableColumn.chore_group;
-			TableRow.RowType rowType = widgetRow.rowType;
-			if (rowType != TableRow.RowType.Header)
+			if (rowType != TableRow.RowType.Default)
 			{
-				if (rowType != TableRow.RowType.Default)
+				if (rowType == TableRow.RowType.Minion)
 				{
-					if (rowType == TableRow.RowType.Minion)
+					if (minionIdentity != null)
 					{
-						if (minionIdentity != null)
+						ChoreConsumer component = minionIdentity.GetComponent<ChoreConsumer>();
+						if (component == null)
 						{
-							ChoreConsumer component = minionIdentity.GetComponent<ChoreConsumer>();
-							if (component == null)
-							{
-								global::Debug.LogError("Could not find minion identity / row associated with the widget", null);
-							}
-							else
-							{
-								component.SetPermitted(chore_group, new_value);
-								choreGroupTableColumn.on_load_action(widgetRow.GetMinionIdentity(), widget_go);
-								foreach (KeyValuePair<TableRow, GameObject> keyValuePair in choreGroupTableColumn.widgets_by_row)
-								{
-									if (keyValuePair.Key.rowType == TableRow.RowType.Header)
-									{
-										choreGroupTableColumn.on_load_action(null, keyValuePair.Value);
-										break;
-									}
-								}
-							}
+							global::Debug.LogError("Could not find minion identity / row associated with the widget", null);
+							return;
 						}
-					}
-				}
-				else
-				{
-					if (new_value)
-					{
-						ChoreGroupManager.instance.DefaultForbiddenTagsList.Remove(chore_group.Id.ToTag());
-					}
-					else
-					{
-						ChoreGroupManager.instance.DefaultForbiddenTagsList.Add(chore_group.Id.ToTag());
-					}
-					choreGroupTableColumn.on_load_action(minionIdentity, widget_go);
-					foreach (KeyValuePair<TableRow, GameObject> keyValuePair2 in choreGroupTableColumn.widgets_by_row)
-					{
-						if (keyValuePair2.Key.rowType == TableRow.RowType.Header)
+						component.SetPermitted(chore_group, new_value);
+						choreGroupTableColumn.on_load_action(widgetRow.GetMinionIdentity(), widget_go);
+						foreach (KeyValuePair<TableRow, GameObject> keyValuePair in choreGroupTableColumn.widgets_by_row)
 						{
-							choreGroupTableColumn.on_load_action(null, keyValuePair2.Value);
-							break;
+							if (keyValuePair.Key.rowType == TableRow.RowType.Header)
+							{
+								choreGroupTableColumn.on_load_action(null, keyValuePair.Value);
+								break;
+							}
 						}
 					}
 				}
 			}
 			else
 			{
-				this.set_value_choregroup(this.default_row.GetComponent<TableRow>().GetWidget(choreGroupTableColumn), new_value);
-				base.StartCoroutine(base.CascadeSetColumnCheckBoxes(this.sortable_rows, choreGroupTableColumn, new_value, widget_go));
+				if (new_value)
+				{
+					ChoreGroupManager.instance.DefaultForbiddenTagsList.Remove(chore_group.Id.ToTag());
+				}
+				else
+				{
+					ChoreGroupManager.instance.DefaultForbiddenTagsList.Add(chore_group.Id.ToTag());
+				}
+				choreGroupTableColumn.on_load_action(minionIdentity, widget_go);
+				foreach (KeyValuePair<TableRow, GameObject> keyValuePair2 in choreGroupTableColumn.widgets_by_row)
+				{
+					if (keyValuePair2.Key.rowType == TableRow.RowType.Header)
+					{
+						choreGroupTableColumn.on_load_action(null, keyValuePair2.Value);
+						break;
+					}
+				}
 			}
+		}
+		else
+		{
+			this.set_value_choregroup(this.default_row.GetComponent<TableRow>().GetWidget(choreGroupTableColumn), new_value);
+			base.StartCoroutine(base.CascadeSetColumnCheckBoxes(this.sortable_rows, choreGroupTableColumn, new_value, widget_go));
 		}
 	}
 
@@ -204,12 +200,10 @@ public class JobsTableScreen : TableScreen
 						if (component == null)
 						{
 							global::Debug.LogError("Could not find minion identity / row associated with the widget", null);
+							return;
 						}
-						else
-						{
-							ChoreGroup choreGroup = choreGroupTableColumn.chore_group;
-							choreGroupTableColumn.on_set_action(widget_go, !component.IsPermitted(choreGroup));
-						}
+						ChoreGroup choreGroup = choreGroupTableColumn.chore_group;
+						choreGroupTableColumn.on_set_action(widget_go, !component.IsPermitted(choreGroup));
 					}
 				}
 			}
@@ -240,18 +234,15 @@ public class JobsTableScreen : TableScreen
 			{
 				if (rowType == TableRow.RowType.Minion)
 				{
-					if (minion != null)
+					if (minion != null && widgetRow.GetMinionIdentity().GetComponent<ChoreConsumer>().IsEnabled(chore_group))
 					{
-						if (widgetRow.GetMinionIdentity().GetComponent<ChoreConsumer>().IsEnabled(chore_group))
-						{
-							KToggle ktoggle = widget_go.GetComponent<KToggle>();
-							ktoggle.isOn = this.get_value_choregroup(minion, widget_go) == TableScreen.ResultValues.True;
-							Image image = widget_go.GetComponent<HierarchyReferences>().GetReference("BGImage") as Image;
-							AttributeInstance attributeInstance = minion.GetAttributes().Get((base.GetWidgetColumn(widget_go) as ChoreGroupTableColumn).chore_group.attribute);
-							float num = Mathf.Min(attributeInstance.GetTotalValue() / 10f, 1f);
-							Color color = new Color(0.72156864f, 0.44313726f, 0.5803922f, num);
-							image.color = color;
-						}
+						KToggle ktoggle = widget_go.GetComponent<KToggle>();
+						ktoggle.isOn = this.get_value_choregroup(minion, widget_go) == TableScreen.ResultValues.True;
+						Image image = widget_go.GetComponent<HierarchyReferences>().GetReference("BGImage") as Image;
+						AttributeInstance attributeInstance = minion.GetAttributes().Get((base.GetWidgetColumn(widget_go) as ChoreGroupTableColumn).chore_group.attribute);
+						float num = Mathf.Min(attributeInstance.GetTotalValue() / 10f, 1f);
+						Color color = new Color(0.72156864f, 0.44313726f, 0.5803922f, num);
+						image.color = color;
 					}
 				}
 			}
@@ -392,20 +383,15 @@ public class JobsTableScreen : TableScreen
 
 	private int compare_chore_group(MinionIdentity a, MinionIdentity b)
 	{
-		int num;
 		if (a.gameObject.GetAttributes().GetValue(this.current_sort_choregroup.attribute.Id) > b.gameObject.GetAttributes().GetValue(this.current_sort_choregroup.attribute.Id))
 		{
-			num = -1;
+			return -1;
 		}
-		else if (a.gameObject.GetAttributes().GetValue(this.current_sort_choregroup.attribute.Id) < b.gameObject.GetAttributes().GetValue(this.current_sort_choregroup.attribute.Id))
+		if (a.gameObject.GetAttributes().GetValue(this.current_sort_choregroup.attribute.Id) < b.gameObject.GetAttributes().GetValue(this.current_sort_choregroup.attribute.Id))
 		{
-			num = 1;
+			return 1;
 		}
-		else
-		{
-			num = 0;
-		}
-		return num;
+		return 0;
 	}
 
 	private void on_tooltip_chore_group(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
@@ -506,16 +492,11 @@ public class JobsTableScreen : TableScreen
 	protected ChoreGroupTableColumn AddChoreGroupColumn(string id, ChoreGroup chore_group, Action<MinionIdentity, GameObject> on_load_value_action, Func<MinionIdentity, GameObject, TableScreen.ResultValues> get_value_action, Action<GameObject> on_press_action, Action<GameObject, bool> set_value_action, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip)
 	{
 		ChoreGroupTableColumn choreGroupTableColumn = new ChoreGroupTableColumn(chore_group, on_load_value_action, get_value_action, on_press_action, set_value_action, sort_comparison, on_tooltip, on_sort_tooltip, (GameObject widget_go) => chore_group.Name);
-		ChoreGroupTableColumn choreGroupTableColumn2;
 		if (base.RegisterColumn(id, choreGroupTableColumn))
 		{
-			choreGroupTableColumn2 = choreGroupTableColumn;
+			return choreGroupTableColumn;
 		}
-		else
-		{
-			choreGroupTableColumn2 = null;
-		}
-		return choreGroupTableColumn2;
+		return null;
 	}
 
 	public override void SetSortComparison(Comparison<MinionIdentity> comparison, TableColumn sort_column)
@@ -523,18 +504,13 @@ public class JobsTableScreen : TableScreen
 		if (comparison == null)
 		{
 			this.SetCurrentSortChoreGroup(null);
+			return;
 		}
-		else
+		if (this.active_sort_column == sort_column && this.sort_is_reversed)
 		{
-			if (this.active_sort_column == sort_column)
-			{
-				if (this.sort_is_reversed)
-				{
-					this.SetCurrentSortChoreGroup(null);
-				}
-			}
-			base.SetSortComparison(comparison, sort_column);
+			this.SetCurrentSortChoreGroup(null);
 		}
+		base.SetSortComparison(comparison, sort_column);
 	}
 
 	public override TableScreen.ResultValues get_value_checkbox_column_super(MinionIdentity minion, GameObject widget_go)
@@ -584,24 +560,19 @@ public class JobsTableScreen : TableScreen
 				}
 			}
 		}
-		TableScreen.ResultValues resultValues2;
 		if (flag3)
 		{
-			resultValues2 = TableScreen.ResultValues.Partial;
+			return TableScreen.ResultValues.Partial;
 		}
-		else if (flag2)
+		if (flag2)
 		{
-			resultValues2 = TableScreen.ResultValues.True;
+			return TableScreen.ResultValues.True;
 		}
-		else if (flag)
+		if (flag)
 		{
-			resultValues2 = TableScreen.ResultValues.False;
+			return TableScreen.ResultValues.False;
 		}
-		else
-		{
-			resultValues2 = TableScreen.ResultValues.Partial;
-		}
-		return resultValues2;
+		return TableScreen.ResultValues.Partial;
 	}
 
 	public TextStyleSetting TooltipTextStyle_Ability;

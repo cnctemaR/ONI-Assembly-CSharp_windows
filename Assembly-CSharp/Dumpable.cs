@@ -53,28 +53,29 @@ public class Dumpable : Workable
 	private void OnRefreshUserMenu(object data)
 	{
 		Pickupable component = base.GetComponent<Pickupable>();
-		if (!(component != null) || !(component.storage != null))
+		if (component != null && component.storage != null)
 		{
-			if (!this.isMarkedForDumping)
-			{
-				UserMenu userMenu = this.userMenu;
-				string text = "action_empty_contents";
-				string text2 = UI.USERMENUACTIONS.DUMP.NAME;
-				global::System.Action action = new global::System.Action(this.ToggleDumping);
-				global::Action action2 = global::Action.BuildingUtility1;
-				string text3 = UI.USERMENUACTIONS.DUMP.TOOLTIP;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, action2, null, null, null, text3, true), 1f);
-			}
-			else
-			{
-				UserMenu userMenu2 = this.userMenu;
-				string text3 = "action_empty_contents";
-				string text2 = UI.USERMENUACTIONS.DUMP.NAME_OFF;
-				global::System.Action action = new global::System.Action(this.ToggleDumping);
-				global::Action action2 = global::Action.BuildingUtility1;
-				string text = UI.USERMENUACTIONS.DUMP.TOOLTIP_OFF;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, action2, null, null, null, text, true), 1f);
-			}
+			return;
+		}
+		if (!this.isMarkedForDumping)
+		{
+			UserMenu userMenu = this.userMenu;
+			string text = "action_empty_contents";
+			string text2 = UI.USERMENUACTIONS.DUMP.NAME;
+			global::System.Action action = new global::System.Action(this.ToggleDumping);
+			global::Action action2 = global::Action.BuildingUtility1;
+			string text3 = UI.USERMENUACTIONS.DUMP.TOOLTIP;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, action2, null, null, null, text3, true), 1f);
+		}
+		else
+		{
+			UserMenu userMenu2 = this.userMenu;
+			string text3 = "action_empty_contents";
+			string text2 = UI.USERMENUACTIONS.DUMP.NAME_OFF;
+			global::System.Action action = new global::System.Action(this.ToggleDumping);
+			global::Action action2 = global::Action.BuildingUtility1;
+			string text = UI.USERMENUACTIONS.DUMP.TOOLTIP_OFF;
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, action2, null, null, null, text, true), 1f);
 		}
 	}
 

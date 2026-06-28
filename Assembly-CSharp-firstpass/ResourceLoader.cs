@@ -24,21 +24,19 @@ public class ResourceLoader<T> where T : Resource, new()
 		if (file == null)
 		{
 			global::Debug.LogWarning("Missing resource file of type: " + typeof(T).Name, null);
+			return;
 		}
-		else
+		string[,] array = CSVReader.SplitCsvGrid(file.text, file.name);
+		int length = array.GetLength(1);
+		for (int i = 1; i < length; i++)
 		{
-			string[,] array = CSVReader.SplitCsvGrid(file.text, file.name);
-			int length = array.GetLength(1);
-			for (int i = 1; i < length; i++)
+			if (array[0, i] != null && !(array[0, i] == string.Empty))
 			{
-				if (array[0, i] != null && !(array[0, i] == ""))
+				T t = new T();
+				CSVUtil.ParseData<T>(t, array, i);
+				if (!t.Disabled)
 				{
-					T t = new T();
-					CSVUtil.ParseData<T>(t, array, i);
-					if (!t.Disabled)
-					{
-						this.resources.Add(t);
-					}
+					this.resources.Add(t);
 				}
 			}
 		}

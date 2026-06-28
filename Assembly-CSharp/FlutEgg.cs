@@ -24,7 +24,7 @@ public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoada
 			num2++;
 		}
 		float num3 = (float)global::UnityEngine.Random.Range(0, num);
-		string text = "";
+		string text = string.Empty;
 		float num4 = 0f;
 		foreach (KeyValuePair<string, int> keyValuePair2 in this.HatchPossibilities)
 		{
@@ -57,7 +57,7 @@ public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoada
 
 	public bool alive = true;
 
-	private float maturity = 0f;
+	private float maturity;
 
 	private Dictionary<string, int> HatchPossibilities = new Dictionary<string, int>();
 

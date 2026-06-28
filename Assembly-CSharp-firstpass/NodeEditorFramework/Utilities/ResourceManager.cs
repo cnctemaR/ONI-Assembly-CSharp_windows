@@ -36,26 +36,21 @@ namespace NodeEditorFramework.Utilities
 
 		public static Texture2D LoadTexture(string texPath)
 		{
-			Texture2D texture2D;
 			if (string.IsNullOrEmpty(texPath))
 			{
-				texture2D = null;
+				return null;
 			}
-			else
+			int num = ResourceManager.loadedTextures.FindIndex((ResourceManager.MemoryTexture memTex) => memTex.path == texPath);
+			if (num != -1)
 			{
-				int num = ResourceManager.loadedTextures.FindIndex((ResourceManager.MemoryTexture memTex) => memTex.path == texPath);
-				if (num != -1)
+				if (!(ResourceManager.loadedTextures[num].texture == null))
 				{
-					if (!(ResourceManager.loadedTextures[num].texture == null))
-					{
-						return ResourceManager.loadedTextures[num].texture;
-					}
-					ResourceManager.loadedTextures.RemoveAt(num);
+					return ResourceManager.loadedTextures[num].texture;
 				}
-				Texture2D texture2D2 = ResourceManager.LoadResource<Texture2D>(texPath);
-				ResourceManager.AddTextureToMemory(texPath, texture2D2, new string[0]);
-				texture2D = texture2D2;
+				ResourceManager.loadedTextures.RemoveAt(num);
 			}
+			Texture2D texture2D = ResourceManager.LoadResource<Texture2D>(texPath);
+			ResourceManager.AddTextureToMemory(texPath, texture2D, new string[0]);
 			return texture2D;
 		}
 
@@ -75,10 +70,11 @@ namespace NodeEditorFramework.Utilities
 
 		public static void AddTextureToMemory(string texturePath, Texture2D texture, params string[] modifications)
 		{
-			if (!(texture == null))
+			if (texture == null)
 			{
-				ResourceManager.loadedTextures.Add(new ResourceManager.MemoryTexture(texturePath, texture, modifications));
+				return;
 			}
+			ResourceManager.loadedTextures.Add(new ResourceManager.MemoryTexture(texturePath, texture, modifications));
 		}
 
 		public static ResourceManager.MemoryTexture FindInMemory(Texture2D tex)
@@ -96,23 +92,18 @@ namespace NodeEditorFramework.Utilities
 		public static ResourceManager.MemoryTexture GetMemoryTexture(string texturePath, params string[] modifications)
 		{
 			List<ResourceManager.MemoryTexture> list = ResourceManager.loadedTextures.FindAll((ResourceManager.MemoryTexture memTex) => memTex.path == texturePath);
-			ResourceManager.MemoryTexture memoryTexture;
 			if (list == null || list.Count == 0)
 			{
-				memoryTexture = null;
+				return null;
 			}
-			else
+			foreach (ResourceManager.MemoryTexture memoryTexture in list)
 			{
-				foreach (ResourceManager.MemoryTexture memoryTexture2 in list)
+				if (ResourceManager.EqualModifications(memoryTexture.modifications, modifications))
 				{
-					if (ResourceManager.EqualModifications(memoryTexture2.modifications, modifications))
-					{
-						return memoryTexture2;
-					}
+					return memoryTexture;
 				}
-				memoryTexture = null;
 			}
-			return memoryTexture;
+			return null;
 		}
 
 		public static Texture2D GetTexture(string texturePath, params string[] modifications)
@@ -126,7 +117,7 @@ namespace NodeEditorFramework.Utilities
 			return modsA.Length == modsB.Length && Array.TrueForAll<string>(modsA, (string mod) => modsB.Count<string>((string oMod) => mod == oMod) == modsA.Count<string>((string oMod) => mod == oMod));
 		}
 
-		private static string _ResourcePath = "";
+		private static string _ResourcePath = string.Empty;
 
 		private static List<ResourceManager.MemoryTexture> loadedTextures = new List<ResourceManager.MemoryTexture>();
 

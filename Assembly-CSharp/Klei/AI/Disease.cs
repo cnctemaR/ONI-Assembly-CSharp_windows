@@ -32,12 +32,12 @@ namespace Klei.AI
 			string text = Strings.Get("STRINGS.DUPLICANTS.DISEASES." + id.ToUpper() + ".LEGEND_HOVERTEXT").ToString();
 			foreach (Descriptor descriptor in this.GetQualitativeDescriptors())
 			{
-				text = text + "" + descriptor.IndentedText() + "\n";
+				text = text + string.Empty + descriptor.IndentedText() + "\n";
 			}
 			this.overlayLegendHovertext = text + DUPLICANTS.DISEASES.LEGEND_POSTAMBLE;
-			Attribute attribute = new Attribute(id + "Min", "Minimum" + id.ToString(), "", "", 0f, Attribute.Display.Normal, false);
-			Attribute attribute2 = new Attribute(id + "Max", "Maximum" + id.ToString(), "", "", 10000000f, Attribute.Display.Normal, false);
-			this.amountDeltaAttribute = new Attribute(id + "Delta", id.ToString(), "", "", 0f, Attribute.Display.Normal, false);
+			Attribute attribute = new Attribute(id + "Min", "Minimum" + id.ToString(), string.Empty, string.Empty, 0f, Attribute.Display.Normal, false);
+			Attribute attribute2 = new Attribute(id + "Max", "Maximum" + id.ToString(), string.Empty, string.Empty, 10000000f, Attribute.Display.Normal, false);
+			this.amountDeltaAttribute = new Attribute(id + "Delta", id.ToString(), string.Empty, string.Empty, 0f, Attribute.Display.Normal, false);
 			this.amount = new Amount(id, id + " " + DUPLICANTS.DISEASES.GERMS, id + " " + DUPLICANTS.DISEASES.GERMS, 0f, 10000000f, attribute, attribute2, this.amountDeltaAttribute, false, Units.Flat, 0.01f, true);
 			Db.Get().Attributes.Add(attribute);
 			Db.Get().Attributes.Add(attribute2);
@@ -315,29 +315,23 @@ namespace Klei.AI
 			}
 			float value = half_lives.GetValue(num);
 			float value2 = half_lives.GetValue(num2);
-			float num3;
 			if (num == 1 && num2 == 2)
 			{
-				num3 = float.PositiveInfinity;
+				return float.PositiveInfinity;
 			}
-			else if (float.IsInfinity(value) || float.IsInfinity(value2))
+			if (float.IsInfinity(value) || float.IsInfinity(value2))
 			{
-				num3 = float.PositiveInfinity;
+				return float.PositiveInfinity;
 			}
-			else
+			float value3 = range.GetValue(num);
+			float value4 = range.GetValue(num2);
+			float num3 = 0f;
+			float num4 = value4 - value3;
+			if (num4 > 0f)
 			{
-				float value3 = range.GetValue(num);
-				float value4 = range.GetValue(num2);
-				float num4 = 0f;
-				float num5 = value4 - value3;
-				if (num5 > 0f)
-				{
-					num4 = (range_value - value3) / num5;
-				}
-				float num6 = Mathf.Lerp(value, value2, num4);
-				num3 = num6;
+				num3 = (range_value - value3) / num4;
 			}
-			return num3;
+			return Mathf.Lerp(value, value2, num3);
 		}
 
 		protected void AddDiseaseComponent(Disease.DiseaseComponent cmp)
@@ -386,7 +380,7 @@ namespace Klei.AI
 					list.Add(new Descriptor(DUPLICANTS.DISEASES.DESCRIPTORS.INFO.SKINBORNE, DUPLICANTS.DISEASES.DESCRIPTORS.INFO.SKINBORNE_TOOLTIP, Descriptor.DescriptorType.Information, false));
 				}
 			}
-			list.Add(new Descriptor(Strings.Get(this.descriptiveSymptoms), "", Descriptor.DescriptorType.Information, false));
+			list.Add(new Descriptor(Strings.Get(this.descriptiveSymptoms), string.Empty, Descriptor.DescriptorType.Information, false));
 			return list;
 		}
 
@@ -486,9 +480,9 @@ namespace Klei.AI
 
 		private float sicknessDuration = 600f;
 
-		public bool doctorRequired = false;
+		public bool doctorRequired;
 
-		public float fatalityDuration = 0f;
+		public float fatalityDuration;
 
 		public HashedString id;
 
@@ -567,25 +561,19 @@ namespace Klei.AI
 
 			public float GetValue(int idx)
 			{
-				float num;
 				switch (idx)
 				{
 				case 0:
-					num = this.minViable;
-					break;
+					return this.minViable;
 				case 1:
-					num = this.minGrowth;
-					break;
+					return this.minGrowth;
 				case 2:
-					num = this.maxGrowth;
-					break;
+					return this.maxGrowth;
 				case 3:
-					num = this.maxViable;
-					break;
+					return this.maxViable;
 				default:
 					throw new ArgumentOutOfRangeException();
 				}
-				return num;
 			}
 
 			public static Disease.RangeInfo Idempotent()

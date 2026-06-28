@@ -51,69 +51,71 @@ public class ResearchEntry : KMonoBehaviour
 		if (newTech == null)
 		{
 			global::Debug.LogError("The research provided is null!", null);
+			return;
 		}
-		else if (this.targetTech != newTech)
+		if (this.targetTech == newTech)
 		{
-			foreach (ResearchType researchType in Research.Instance.researchTypes.Types)
+			return;
+		}
+		foreach (ResearchType researchType in Research.Instance.researchTypes.Types)
+		{
+			if (newTech.costsByResearchTypeID.ContainsKey(researchType.id) && newTech.costsByResearchTypeID[researchType.id] > 0f)
 			{
-				if (newTech.costsByResearchTypeID.ContainsKey(researchType.id) && newTech.costsByResearchTypeID[researchType.id] > 0f)
-				{
-					GameObject gameObject = Util.KInstantiateUI(this.progressBarPrefab, this.progressBarContainer.gameObject, true);
-					Image image = gameObject.GetComponentsInChildren<Image>()[2];
-					Image component = gameObject.transform.Find("Icon").GetComponent<Image>();
-					image.color = researchType.color;
-					component.sprite = researchType.sprite;
-					this.progressBarsByResearchTypeID[researchType.id] = gameObject;
-				}
+				GameObject gameObject = Util.KInstantiateUI(this.progressBarPrefab, this.progressBarContainer.gameObject, true);
+				Image image = gameObject.GetComponentsInChildren<Image>()[2];
+				Image component = gameObject.transform.Find("Icon").GetComponent<Image>();
+				image.color = researchType.color;
+				component.sprite = researchType.sprite;
+				this.progressBarsByResearchTypeID[researchType.id] = gameObject;
 			}
-			if (this.researchScreen == null)
+		}
+		if (this.researchScreen == null)
+		{
+			this.researchScreen = base.transform.parent.GetComponentInParent<ResearchScreen>();
+		}
+		if (newTech.IsComplete())
+		{
+			this.ResearchCompleted(false);
+		}
+		this.targetTech = newTech;
+		this.researchName.text = this.targetTech.Name;
+		string text = string.Empty;
+		foreach (TechItem techItem in this.targetTech.unlockedItems)
+		{
+			KPointerImage componentInChildrenOnly = this.GetFreeIcon().GetComponentInChildrenOnly<KPointerImage>();
+			componentInChildrenOnly.transform.parent.gameObject.SetActive(true);
+			if (text != string.Empty)
 			{
-				this.researchScreen = base.transform.parent.GetComponentInParent<ResearchScreen>();
+				text += ", ";
 			}
-			if (newTech.IsComplete())
+			text += techItem.Name;
+			string text2 = string.Format("{0}\n{1}", techItem.Name, techItem.description);
+			componentInChildrenOnly.GetComponent<ToolTip>().toolTip = text2;
+			componentInChildrenOnly.sprite = techItem.UISprite();
+			componentInChildrenOnly.ClearPointerEvents();
+			componentInChildrenOnly.onPointerEnter += delegate
 			{
-				this.ResearchCompleted(false);
-			}
-			this.targetTech = newTech;
-			this.researchName.text = this.targetTech.Name;
-			string text = "";
-			foreach (TechItem techItem in this.targetTech.unlockedItems)
-			{
-				KPointerImage componentInChildrenOnly = this.GetFreeIcon().GetComponentInChildrenOnly<KPointerImage>();
-				componentInChildrenOnly.transform.parent.gameObject.SetActive(true);
-				if (text != "")
-				{
-					text += ", ";
-				}
-				text += techItem.Name;
-				string text2 = string.Format("{0}\n{1}", techItem.Name, techItem.description);
-				componentInChildrenOnly.GetComponent<ToolTip>().toolTip = text2;
-				componentInChildrenOnly.sprite = techItem.UISprite();
-				componentInChildrenOnly.ClearPointerEvents();
-				componentInChildrenOnly.onPointerEnter += delegate
-				{
-					KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Mouseover", false));
-				};
-			}
-			text = string.Format(UI.RESEARCHSCREEN_UNLOCKSTOOLTIP, text);
-			this.researchName.GetComponent<ToolTip>().toolTip = string.Format("{0}\n{1}\n\n{2}", this.targetTech.Name, this.targetTech.desc, text);
-			this.toggle.ClearOnClick();
-			this.toggle.onClick += this.OnResearchClicked;
-			this.toggle.onPointerEnter += delegate
-			{
-				this.researchScreen.TurnEverythingOff();
-				this.OnHover(true, this.targetTech);
-			};
-			this.toggle.soundPlayer.AcceptClickCondition = () => !this.targetTech.IsComplete();
-			this.toggle.onPointerExit += delegate
-			{
-				if (this.turnEverythingOn != null)
-				{
-					base.StopCoroutine(this.turnEverythingOn);
-				}
-				this.researchScreen.TurnEverythingOff();
+				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Mouseover", false));
 			};
 		}
+		text = string.Format(UI.RESEARCHSCREEN_UNLOCKSTOOLTIP, text);
+		this.researchName.GetComponent<ToolTip>().toolTip = string.Format("{0}\n{1}\n\n{2}", this.targetTech.Name, this.targetTech.desc, text);
+		this.toggle.ClearOnClick();
+		this.toggle.onClick += this.OnResearchClicked;
+		this.toggle.onPointerEnter += delegate
+		{
+			this.researchScreen.TurnEverythingOff();
+			this.OnHover(true, this.targetTech);
+		};
+		this.toggle.soundPlayer.AcceptClickCondition = () => !this.targetTech.IsComplete();
+		this.toggle.onPointerExit += delegate
+		{
+			if (this.turnEverythingOn != null)
+			{
+				base.StopCoroutine(this.turnEverythingOn);
+			}
+			this.researchScreen.TurnEverythingOff();
+		};
 	}
 
 	private IEnumerator TurnEverythingOnWithDelay(float delay)
@@ -136,16 +138,17 @@ public class ResearchEntry : KMonoBehaviour
 			base.StopCoroutine(this.turnEverythingOn);
 			this.turnEverythingOn = null;
 		}
-		if (this.isOn)
+		if (!this.isOn)
 		{
-			this.borderHighlight.gameObject.SetActive(false);
-			foreach (KeyValuePair<Tech, UILineRenderer> keyValuePair in this.techLineMap)
-			{
-				keyValuePair.Value.LineThickness = (float)this.lineThickness_inactive;
-				keyValuePair.Value.color = this.inactiveLineColor;
-			}
-			this.isOn = false;
+			return;
 		}
+		this.borderHighlight.gameObject.SetActive(false);
+		foreach (KeyValuePair<Tech, UILineRenderer> keyValuePair in this.techLineMap)
+		{
+			keyValuePair.Value.LineThickness = (float)this.lineThickness_inactive;
+			keyValuePair.Value.color = this.inactiveLineColor;
+		}
+		this.isOn = false;
 	}
 
 	public void SetEverythingOn()
@@ -154,18 +157,19 @@ public class ResearchEntry : KMonoBehaviour
 		{
 			this.turnEverythingOn = null;
 		}
-		if (!this.isOn)
+		if (this.isOn)
 		{
-			this.UpdateProgressBars();
-			this.borderHighlight.gameObject.SetActive(true);
-			foreach (KeyValuePair<Tech, UILineRenderer> keyValuePair in this.techLineMap)
-			{
-				keyValuePair.Value.LineThickness = (float)this.lineThickness_active;
-				keyValuePair.Value.color = this.activeLineColor;
-			}
-			base.transform.SetAsLastSibling();
-			this.isOn = true;
+			return;
 		}
+		this.UpdateProgressBars();
+		this.borderHighlight.gameObject.SetActive(true);
+		foreach (KeyValuePair<Tech, UILineRenderer> keyValuePair in this.techLineMap)
+		{
+			keyValuePair.Value.LineThickness = (float)this.lineThickness_active;
+			keyValuePair.Value.color = this.activeLineColor;
+		}
+		base.transform.SetAsLastSibling();
+		this.isOn = true;
 	}
 
 	private void OnHover(bool entered, Tech hoverSource)
@@ -198,13 +202,14 @@ public class ResearchEntry : KMonoBehaviour
 
 	private void OnResearchCanceled()
 	{
-		if (!this.targetTech.IsComplete())
+		if (this.targetTech.IsComplete())
 		{
-			this.toggle.ClearOnClick();
-			this.toggle.onClick += this.OnResearchClicked;
-			this.researchScreen.CancelResearch();
-			Research.Instance.CancelResearch(this.targetTech, true);
+			return;
 		}
+		this.toggle.ClearOnClick();
+		this.toggle.onClick += this.OnResearchClicked;
+		this.researchScreen.CancelResearch();
+		Research.Instance.CancelResearch(this.targetTech, true);
 	}
 
 	public void QueueStateChanged(bool isSelected)
@@ -416,7 +421,7 @@ public class ResearchEntry : KMonoBehaviour
 
 	private Dictionary<string, GameObject> progressBarsByResearchTypeID = new Dictionary<string, GameObject>();
 
-	private Coroutine turnEverythingOn = null;
+	private Coroutine turnEverythingOn;
 
 	public static readonly string UnlockedTechKey = "UnlockedTech";
 

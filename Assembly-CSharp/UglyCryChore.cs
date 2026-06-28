@@ -23,11 +23,12 @@ public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 
 		public void ProduceTears(float dt)
 		{
-			if (dt > 0f)
+			if (dt <= 0f)
 			{
-				int num = Grid.PosToCell(base.smi.master.gameObject);
-				SimMessages.AddRemoveSubstance(num, SimHashes.Water, CellEventLogger.Instance.Tears, 1f * STRESS.TEARS_RATE * dt, this.bodyTemperature.value, byte.MaxValue, 0, -1);
+				return;
 			}
+			int num = Grid.PosToCell(base.smi.master.gameObject);
+			SimMessages.AddRemoveSubstance(num, SimHashes.Water, CellEventLogger.Instance.Tears, 1f * STRESS.TEARS_RATE * dt, this.bodyTemperature.value, byte.MaxValue, 0, -1);
 		}
 
 		private AmountInstance bodyTemperature;

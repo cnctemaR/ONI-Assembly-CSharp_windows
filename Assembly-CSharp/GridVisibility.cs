@@ -10,16 +10,17 @@ public class GridVisibility : KMonoBehaviour
 
 	private void OnCellChange(int previous_cell, int new_cell)
 	{
-		if (!base.gameObject.HasTag(GameTags.Dead))
+		if (base.gameObject.HasTag(GameTags.Dead))
 		{
-			if (!Grid.Revealed[new_cell])
-			{
-				int num;
-				int num2;
-				Grid.PosToXY(base.transform.position, out num, out num2);
-				GridVisibility.Reveal(num, num2, this.radius, this.innerRadius);
-				Grid.Revealed[new_cell] = true;
-			}
+			return;
+		}
+		if (!Grid.Revealed[new_cell])
+		{
+			int num;
+			int num2;
+			Grid.PosToXY(base.transform.position, out num, out num2);
+			GridVisibility.Reveal(num, num2, this.radius, this.innerRadius);
+			Grid.Revealed[new_cell] = true;
 		}
 	}
 

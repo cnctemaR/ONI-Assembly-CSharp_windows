@@ -76,8 +76,7 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 		List<int> list = new List<int>();
 		for (int i = -1; i < 2; i++)
 		{
-			int j = -1;
-			while (j < 2)
+			for (int j = -1; j < 2; j++)
 			{
 				if (Vector3.Distance(Grid.CellToPos(cell, (float)i, (float)j, 0f), this.startLocation) < this.maxRadius * this.maxRadius)
 				{
@@ -94,10 +93,6 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 						}
 					}
 				}
-				IL_00A7:
-				j++;
-				continue;
-				goto IL_00A7;
 			}
 		}
 		return list;
@@ -120,108 +115,106 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 				}
 			}
 			this.maxEnergy = this.totalEnergy;
+			return;
 		}
-		else
+		Dictionary<int, float> dictionary = new Dictionary<int, float>(this.shockwavePoints);
+		foreach (int num2 in this.shockwavePoints.Keys)
 		{
-			Dictionary<int, float> dictionary = new Dictionary<int, float>(this.shockwavePoints);
-			foreach (int num2 in this.shockwavePoints.Keys)
+			this.visitedPoints[num2] = default(ExcavatorBomb.visitedPoint);
+		}
+		this.shockwavePoints.Clear();
+		this.maxEnergy = float.MinValue;
+		foreach (int num3 in dictionary.Keys)
+		{
+			if (Grid.Element[num3].id != SimHashes.Unobtanium && Grid.Element[num3].id != SimHashes.Vacuum)
 			{
-				this.visitedPoints[num2] = default(ExcavatorBomb.visitedPoint);
-			}
-			this.shockwavePoints.Clear();
-			this.maxEnergy = float.MinValue;
-			foreach (int num3 in dictionary.Keys)
-			{
-				if (Grid.Element[num3].id != SimHashes.Unobtanium && Grid.Element[num3].id != SimHashes.Vacuum)
+				float mass = Grid.Cell[num3].mass;
+				float num4 = 1f;
+				float num5 = this.totalEnergy / num4;
+				Element element = Grid.Element[num3];
+				float num6 = 0.37037036f;
+				float num7 = 0.7f;
+				float num8 = 1f;
+				float num9 = 2f;
+				float num10 = 6f;
+				float num11 = 0.5f;
+				float num12 = 1f;
+				float num13 = 1f;
+				float num14 = 300f;
+				float num15 = 0.1f;
+				float num16 = 0.05f;
+				float num17 = 0.2f;
+				float num18 = dictionary[num3];
+				float num19 = 0f;
+				float num21;
+				float num22;
+				if (element.IsSolid)
 				{
-					float mass = Grid.Cell[num3].mass;
-					float num4 = 1f;
-					float num5 = this.totalEnergy / num4;
-					Element element = Grid.Element[num3];
-					float num6 = 0.37037036f;
-					float num7 = 0.7f;
-					float num8 = 1f;
-					float num9 = 2f;
-					float num10 = 6f;
-					float num11 = 0.5f;
-					float num12 = 1f;
-					float num13 = 1f;
-					float num14 = 300f;
-					float num15 = 0.1f;
-					float num16 = 0.05f;
-					float num17 = 0.2f;
-					float num18 = dictionary[num3];
-					float num19 = 0f;
-					float num21;
-					float num22;
+					float num20 = Mathf.Pow((float)element.hardness, num6);
+					num19 = MathUtil.Clamp(num7, num8, MathUtil.ReRange(num20, num9, num10, num7, num8));
+					num21 = MathUtil.Clamp(num11, num12, MathUtil.ReRange(mass, num13, num14, num11, num12));
+					num22 = 1f - num21 * num19 + num15;
+				}
+				else if (element.IsLiquid)
+				{
+					num21 = MathUtil.Clamp(num11, num12, MathUtil.ReRange(mass, num13, num14, num11, num12));
+					num22 = 1f - num21 + num16;
+				}
+				else
+				{
+					num21 = MathUtil.Clamp(num11, num12, MathUtil.ReRange(mass, num13 / 1000f, num14 / 1000f, num11, num12));
+					num22 = 1f - num21 + num17;
+				}
+				num18 -= num22;
+				this.visitedPoints[num3] = new ExcavatorBomb.visitedPoint(dictionary[num3], num18, num22, this.step, (!element.IsSolid) ? ((!element.IsLiquid) ? "gas" : "liquid") : "solid", element.name, num19, num21);
+				this.maxEnergy = Mathf.Max(num18, this.maxEnergy);
+				if (num18 > 0f)
+				{
+					KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("snore_fx_kanim", Grid.CellToPosCCC(num3, Grid.SceneLayer.FXFront), SceneOrganizer.Instance.GetFolder(Folder.FX).transform, false, Grid.SceneLayer.FXFront, false);
+					kbatchedAnimController.destroyOnAnimComplete = true;
+					kbatchedAnimController.Play("snore", KAnim.PlayMode.Once, 1f, 0f);
 					if (element.IsSolid)
 					{
-						float num20 = Mathf.Pow((float)element.hardness, num6);
-						num19 = MathUtil.Clamp(num7, num8, MathUtil.ReRange(num20, num9, num10, num7, num8));
-						num21 = MathUtil.Clamp(num11, num12, MathUtil.ReRange(mass, num13, num14, num11, num12));
-						num22 = 1f - num21 * num19 + num15;
-					}
-					else if (element.IsLiquid)
-					{
-						num21 = MathUtil.Clamp(num11, num12, MathUtil.ReRange(mass, num13, num14, num11, num12));
-						num22 = 1f - num21 + num16;
-					}
-					else
-					{
-						num21 = MathUtil.Clamp(num11, num12, MathUtil.ReRange(mass, num13 / 1000f, num14 / 1000f, num11, num12));
-						num22 = 1f - num21 + num17;
-					}
-					num18 -= num22;
-					this.visitedPoints[num3] = new ExcavatorBomb.visitedPoint(dictionary[num3], num18, num22, this.step, (!element.IsSolid) ? ((!element.IsLiquid) ? "gas" : "liquid") : "solid", element.name, num19, num21);
-					this.maxEnergy = Mathf.Max(num18, this.maxEnergy);
-					if (num18 > 0f)
-					{
-						KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("snore_fx_kanim", Grid.CellToPosCCC(num3, Grid.SceneLayer.FXFront), SceneOrganizer.Instance.GetFolder(Folder.FX).transform, false, Grid.SceneLayer.FXFront, false);
-						kbatchedAnimController.destroyOnAnimComplete = true;
-						kbatchedAnimController.Play("snore", KAnim.PlayMode.Once, 1f, 0f);
-						if (element.IsSolid)
+						float num23 = num18 * 2f / this.totalEnergy;
+						Output.Log(new object[]
 						{
-							float num23 = num18 * 2f / this.totalEnergy;
-							Output.Log(new object[]
+							"step",
+							this.step,
+							"\tprevEnergy",
+							dictionary[num3],
+							"\tenergy",
+							num18,
+							"\tDamageb",
+							num23
+						});
+						float kilojoules = 10000f * dictionary[num3] / this.totalEnergy;
+						float temperature = Grid.Temperature[num3];
+						Element elem = Grid.Element[num3];
+						int local_cell = num3;
+						global::System.Action action = delegate
+						{
+							if (elem.IsSolid)
 							{
-								"step",
-								this.step,
-								"\tprevEnergy",
-								dictionary[num3],
-								"\tenergy",
-								num18,
-								"\tDamageb",
-								num23
-							});
-							float kilojoules = 10000f * dictionary[num3] / this.totalEnergy;
-							float temperature = Grid.Temperature[num3];
-							Element elem = Grid.Element[num3];
-							int local_cell = num3;
-							global::System.Action action = delegate
-							{
-								if (elem.IsSolid)
-								{
-									float num25 = temperature + SimUtil.EnergyFlowToTemperatureDelta(kilojoules, elem.specificHeatCapacity, mass);
-									Substance substance = elem.substance;
-									substance.SpawnResource(Grid.CellToPos(local_cell, CellAlignment.RandomInternal, Grid.SceneLayer.Ore), mass * 0.25f, num25, byte.MaxValue, 0, false, false);
-								}
-							};
-							HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(action, false));
-							if (!WorldDamage.Instance.ApplyDamage(num3, num23, -1, handle.index))
-							{
-								SimMessages.ModifyEnergy(num3, kilojoules, SimMessages.EnergySourceID.Excavator);
+								float num25 = temperature + SimUtil.EnergyFlowToTemperatureDelta(kilojoules, elem.specificHeatCapacity, mass);
+								Substance substance = elem.substance;
+								substance.SpawnResource(Grid.CellToPos(local_cell, CellAlignment.RandomInternal, Grid.SceneLayer.Ore), mass * 0.25f, num25, byte.MaxValue, 0, false, false);
 							}
-						}
-						List<int> neighbors = this.GetNeighbors(num3);
-						foreach (int num24 in neighbors)
+						};
+						HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(action, false));
+						if (!WorldDamage.Instance.ApplyDamage(num3, num23, -1, handle.index))
 						{
-							this.shockwavePoints[num24] = num18;
+							SimMessages.ModifyEnergy(num3, kilojoules, SimMessages.EnergySourceID.Excavator);
 						}
+					}
+					List<int> neighbors = this.GetNeighbors(num3);
+					foreach (int num24 in neighbors)
+					{
+						this.shockwavePoints[num24] = num18;
 					}
 				}
 			}
-			this.step++;
 		}
+		this.step++;
 	}
 
 	private bool Explode(float dt)
@@ -256,7 +249,6 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 			}
 			this.nextExplosion = 0.001f;
 		}
-		bool flag;
 		if (this.currentRadius > this.maxRadius || this.maxEnergy <= 0f)
 		{
 			int num = Grid.PosToCell(this);
@@ -274,13 +266,9 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 			Vector3 vector2 = Grid.CellToPosCCC(num, Grid.SceneLayer.Move);
 			GameUtil.CreateExplosion(vector2);
 			global::Util.KDestroyGameObject(base.gameObject);
-			flag = true;
+			return true;
 		}
-		else
-		{
-			flag = false;
-		}
-		return flag;
+		return false;
 	}
 
 	[MyCmpReq]
@@ -291,27 +279,27 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 
 	public float CountdownTime = 10f;
 
-	private float currentCountdown = 0f;
+	private float currentCountdown;
 
 	public float minSafeDistance = 5f;
 
 	public float maxRadius = 5f;
 
-	public float currentRadius = 0f;
+	public float currentRadius;
 
 	public float nextExplosion = 0.01f;
 
 	public bool detectMinion = true;
 
-	public ExcavatorBomb.ExplosionType type = ExcavatorBomb.ExplosionType.CircularFilled;
+	public ExcavatorBomb.ExplosionType type;
 
-	public Dictionary<int, ExcavatorBomb.visitedPoint> visitedPoints = null;
+	public Dictionary<int, ExcavatorBomb.visitedPoint> visitedPoints;
 
 	private Dictionary<int, float> shockwavePoints;
 
 	private Vector3 startLocation;
 
-	private int step = 0;
+	private int step;
 
 	private float maxEnergy = float.MinValue;
 
@@ -326,22 +314,17 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 
 		public bool DupeInDanger()
 		{
-			bool flag;
 			if (!base.smi.master.detectMinion)
 			{
-				flag = false;
+				return false;
 			}
-			else
+			float num = float.MaxValue;
+			for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
 			{
-				float num = float.MaxValue;
-				for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
-				{
-					float num2 = Vector3.Distance(Components.LiveMinionIdentities[i].gameObject.transform.position, base.transform.position);
-					num = Mathf.Min(num, num2);
-				}
-				flag = num < base.master.maxRadius + base.master.minSafeDistance;
+				float num2 = Vector3.Distance(Components.LiveMinionIdentities[i].gameObject.transform.position, base.transform.position);
+				num = Mathf.Min(num, num2);
 			}
-			return flag;
+			return num < base.master.maxRadius + base.master.minSafeDistance;
 		}
 	}
 
@@ -351,16 +334,16 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 		{
 			base.InitializeStates(out default_state);
 			default_state = this.idle;
-			this.statusItemUnarmed = new StatusItem("Unarmed", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.UNARMED.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.UNARMED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
-			this.statusItemArmed = new StatusItem("Armed", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.ARMED.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.ARMED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
-			this.statusItemCountdown = new StatusItem("Countdown", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.COUNTDOWN.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.COUNTDOWN.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
+			this.statusItemUnarmed = new StatusItem("Unarmed", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.UNARMED.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.UNARMED.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
+			this.statusItemArmed = new StatusItem("Armed", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.ARMED.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.ARMED.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
+			this.statusItemCountdown = new StatusItem("Countdown", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.COUNTDOWN.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.COUNTDOWN.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
 			this.statusItemCountdown.resolveStringCallback = delegate(string str, object data)
 			{
 				ExcavatorBomb.StatesInstance statesInstance = (ExcavatorBomb.StatesInstance)data;
 				return string.Format(str, GameUtil.GetFormattedTime(statesInstance.master.CountdownRemaining));
 			};
-			this.statusItemDupeDanger = new StatusItem("DupeDanger", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.DUPE_DANGER.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.DUPE_DANGER.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
-			this.statusItemExpoding = new StatusItem("Exploding", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.EXPLODING.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.EXPLODING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
+			this.statusItemDupeDanger = new StatusItem("DupeDanger", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.DUPE_DANGER.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.DUPE_DANGER.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
+			this.statusItemExpoding = new StatusItem("Exploding", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.EXPLODING.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.EXPLODING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
 			this.idle.PlayAnim("off", KAnim.PlayMode.Loop).ToggleMainStatusItem(this.statusItemUnarmed).GoTo(this.armed);
 			this.armed.PlayAnim("on", KAnim.PlayMode.Loop).ToggleMainStatusItem(this.statusItemArmed).GoTo(this.dupe_danger);
 			this.dupe_danger.PlayAnim("working_post", KAnim.PlayMode.Loop).ToggleMainStatusItem(this.statusItemDupeDanger).Transition(this.countdown, (ExcavatorBomb.StatesInstance smi) => !smi.DupeInDanger());

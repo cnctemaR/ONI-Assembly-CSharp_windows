@@ -106,11 +106,11 @@ public class LogicTimeOfDaySensor : Switch, ISaveLoadable, IDualSliderControl, I
 
 	[SerializeField]
 	[Serialize]
-	private float minTime = 0f;
+	private float minTime;
 
 	[SerializeField]
 	[Serialize]
 	private float maxTime = 1f;
 
-	private bool wasOn = false;
+	private bool wasOn;
 }

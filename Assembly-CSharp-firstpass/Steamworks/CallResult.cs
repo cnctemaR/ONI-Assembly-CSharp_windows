@@ -35,20 +35,21 @@ namespace Steamworks
 
 		public void Dispose()
 		{
-			if (!this.m_bDisposed)
+			if (this.m_bDisposed)
 			{
-				GC.SuppressFinalize(this);
-				this.Cancel();
-				if (this.m_pVTable != IntPtr.Zero)
-				{
-					Marshal.FreeHGlobal(this.m_pVTable);
-				}
-				if (this.m_pCCallbackBase.IsAllocated)
-				{
-					this.m_pCCallbackBase.Free();
-				}
-				this.m_bDisposed = true;
+				return;
 			}
+			GC.SuppressFinalize(this);
+			this.Cancel();
+			if (this.m_pVTable != IntPtr.Zero)
+			{
+				Marshal.FreeHGlobal(this.m_pVTable);
+			}
+			if (this.m_pCCallbackBase.IsAllocated)
+			{
+				this.m_pCCallbackBase.Free();
+			}
+			this.m_bDisposed = true;
 		}
 
 		public void Set(SteamAPICall_t hAPICall, CallResult<T>.APIDispatchDelegate func = null)
@@ -158,7 +159,7 @@ namespace Steamworks
 
 		private readonly int m_size = Marshal.SizeOf(typeof(T));
 
-		private bool m_bDisposed = false;
+		private bool m_bDisposed;
 
 		public delegate void APIDispatchDelegate(T param, bool bIOFailure);
 	}

@@ -44,16 +44,11 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 
 	public bool IsCellSafe(int cell)
 	{
-		bool flag;
 		if (this.prefersDarkness)
 		{
-			flag = Grid.LightCount[cell] == 0;
+			return Grid.LightCount[cell] == 0;
 		}
-		else
-		{
-			flag = Grid.LightCount[cell] > 0;
-		}
-		return flag;
+		return Grid.LightCount[cell] > 0;
 	}
 
 	WiltCondition.Condition[] IWiltCause.Conditions
@@ -72,20 +67,15 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 	{
 		get
 		{
-			string text;
 			if (base.smi.IsInsideState(base.smi.sm.too_bright))
 			{
-				text = Db.Get().CreatureStatusItems.Crop_Too_Bright.resolveStringCallback(CREATURES.STATUSITEMS.CROP_TOO_BRIGHT.NAME, this);
+				return Db.Get().CreatureStatusItems.Crop_Too_Bright.resolveStringCallback(CREATURES.STATUSITEMS.CROP_TOO_BRIGHT.NAME, this);
 			}
-			else if (base.smi.IsInsideState(base.smi.sm.too_dark))
+			if (base.smi.IsInsideState(base.smi.sm.too_dark))
 			{
-				text = Db.Get().CreatureStatusItems.Crop_Too_Dark.resolveStringCallback(CREATURES.STATUSITEMS.CROP_TOO_DARK.NAME, this);
+				return Db.Get().CreatureStatusItems.Crop_Too_Dark.resolveStringCallback(CREATURES.STATUSITEMS.CROP_TOO_DARK.NAME, this);
 			}
-			else
-			{
-				text = "";
-			}
-			return text;
+			return string.Empty;
 		}
 	}
 
@@ -96,29 +86,24 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 
 	public List<Descriptor> GetDescriptors(GameObject go)
 	{
-		List<Descriptor> list;
 		if (this.prefersDarkness)
 		{
-			list = new List<Descriptor>
+			return new List<Descriptor>
 			{
 				new Descriptor(UI.GAMEOBJECTEFFECTS.REQUIRES_DARKNESS, UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_DARKNESS, Descriptor.DescriptorType.Requirement, false)
 			};
 		}
-		else
+		return new List<Descriptor>
 		{
-			list = new List<Descriptor>
-			{
-				new Descriptor(UI.GAMEOBJECTEFFECTS.REQUIRES_LIGHT, UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_LIGHT, Descriptor.DescriptorType.Requirement, false)
-			};
-		}
-		return list;
+			new Descriptor(UI.GAMEOBJECTEFFECTS.REQUIRES_LIGHT, UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_LIGHT, Descriptor.DescriptorType.Requirement, false)
+		};
 	}
 
 	private OccupyArea _occupyArea;
 
 	private SchedulerHandle handle;
 
-	public bool prefersDarkness = false;
+	public bool prefersDarkness;
 
 	public class StatesInstance : GameStateMachine<IlluminationVulnerable.States, IlluminationVulnerable.StatesInstance, IlluminationVulnerable, object>.GameInstance
 	{
@@ -127,7 +112,7 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 		{
 		}
 
-		public bool hasMaturity = false;
+		public bool hasMaturity;
 	}
 
 	public class States : GameStateMachine<IlluminationVulnerable.States, IlluminationVulnerable.StatesInstance, IlluminationVulnerable>

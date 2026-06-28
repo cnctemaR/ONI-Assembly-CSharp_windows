@@ -39,7 +39,7 @@ namespace Klei.AI
 
 		public static string CreateTooltip(Effect effect, bool showDuration)
 		{
-			string text = "";
+			string text = string.Empty;
 			foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
 			{
 				if (Db.Get().Attributes.Get(attributeModifier.AttributeId).ShowInUI != Attribute.Display.Never)

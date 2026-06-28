@@ -44,82 +44,83 @@ public class TransitionDriver
 
 	public void UpdateTransition(float dt)
 	{
-		if (!(this.navigator == null))
+		if (this.navigator == null)
 		{
-			foreach (TransitionDriver.OverrideLayer overrideLayer in this.overrideLayers)
-			{
-				overrideLayer.UpdateTransition(this.navigator, this.transition);
-			}
-			if (!this.isComplete && this.transition.isCompleteCB != null)
-			{
-				this.isComplete = this.transition.isCompleteCB();
-			}
-			if (this.brain != null)
-			{
-				if (this.isComplete)
-				{
-					this.brain.Resume("transition_handler");
-				}
-				else
-				{
-					this.brain.Suspend("transition_handler");
-				}
-			}
-			if (this.transition.isLooping)
-			{
-				float speed = this.transition.speed;
-				Vector3 position = this.navigator.transform.position;
-				if (this.transition.x > 0)
-				{
-					position.x += dt * speed;
-					if (position.x > this.targetPos.x)
-					{
-						this.isComplete = true;
-					}
-				}
-				else if (this.transition.x < 0)
-				{
-					position.x -= dt * speed;
-					if (position.x < this.targetPos.x)
-					{
-						this.isComplete = true;
-					}
-				}
-				else
-				{
-					position.x = this.targetPos.x;
-				}
-				if (this.transition.y > 0)
-				{
-					position.y += dt * speed;
-					if (position.y > this.targetPos.y)
-					{
-						this.isComplete = true;
-					}
-				}
-				else if (this.transition.y < 0)
-				{
-					position.y -= dt * speed;
-					if (position.y < this.targetPos.y)
-					{
-						this.isComplete = true;
-					}
-				}
-				else
-				{
-					position.y = this.targetPos.y;
-				}
-				this.navigator.transform.position = position;
-			}
+			return;
+		}
+		foreach (TransitionDriver.OverrideLayer overrideLayer in this.overrideLayers)
+		{
+			overrideLayer.UpdateTransition(this.navigator, this.transition);
+		}
+		if (!this.isComplete && this.transition.isCompleteCB != null)
+		{
+			this.isComplete = this.transition.isCompleteCB();
+		}
+		if (this.brain != null)
+		{
 			if (this.isComplete)
 			{
-				this.isComplete = false;
-				Navigator navigator = this.navigator;
-				navigator.SetCurrentNavType(this.transition.end);
-				navigator.transform.SetPosition(this.targetPos);
-				this.EndTransition();
-				navigator.AdvancePath(true);
+				this.brain.Resume("transition_handler");
 			}
+			else
+			{
+				this.brain.Suspend("transition_handler");
+			}
+		}
+		if (this.transition.isLooping)
+		{
+			float speed = this.transition.speed;
+			Vector3 position = this.navigator.transform.position;
+			if (this.transition.x > 0)
+			{
+				position.x += dt * speed;
+				if (position.x > this.targetPos.x)
+				{
+					this.isComplete = true;
+				}
+			}
+			else if (this.transition.x < 0)
+			{
+				position.x -= dt * speed;
+				if (position.x < this.targetPos.x)
+				{
+					this.isComplete = true;
+				}
+			}
+			else
+			{
+				position.x = this.targetPos.x;
+			}
+			if (this.transition.y > 0)
+			{
+				position.y += dt * speed;
+				if (position.y > this.targetPos.y)
+				{
+					this.isComplete = true;
+				}
+			}
+			else if (this.transition.y < 0)
+			{
+				position.y -= dt * speed;
+				if (position.y < this.targetPos.y)
+				{
+					this.isComplete = true;
+				}
+			}
+			else
+			{
+				position.y = this.targetPos.y;
+			}
+			this.navigator.transform.position = position;
+		}
+		if (this.isComplete)
+		{
+			this.isComplete = false;
+			Navigator navigator = this.navigator;
+			navigator.SetCurrentNavType(this.transition.end);
+			navigator.transform.SetPosition(this.targetPos);
+			this.EndTransition();
+			navigator.AdvancePath(true);
 		}
 	}
 
@@ -158,7 +159,7 @@ public class TransitionDriver
 
 	private Vector3 targetPos;
 
-	private bool isComplete = false;
+	private bool isComplete;
 
 	private Brain brain;
 

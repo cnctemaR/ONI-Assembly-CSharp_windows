@@ -73,16 +73,11 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 	{
 		get
 		{
-			float num;
 			if (this.operational.IsActive)
 			{
-				num = this.BaseWattageRating;
+				return this.BaseWattageRating;
 			}
-			else
-			{
-				num = 0f;
-			}
-			return num;
+			return 0f;
 		}
 	}
 
@@ -122,16 +117,11 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 
 	private float GetUpgradeEnergyConsumptionMultiplier()
 	{
-		float num;
 		if (this.upgradable != null)
 		{
-			num = this.upgradable.GetEnergyConsumptionMultiplier();
+			return this.upgradable.GetEnergyConsumptionMultiplier();
 		}
-		else
-		{
-			num = 1f;
-		}
-		return num;
+		return 1f;
 	}
 
 	protected override void OnSpawn()
@@ -175,14 +165,11 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 					}
 				}
 			}
-			else if (this.IsPowered)
+			else if (this.IsPowered && base.GetComponent<Battery>() == null)
 			{
-				if (base.GetComponent<Battery>() == null)
-				{
-					this.IsPowered = false;
-					this.circuitOverloadTime = 6f;
-					this.PlayCircuitSound("overdraw");
-				}
+				this.IsPowered = false;
+				this.circuitOverloadTime = 6f;
+				this.PlayCircuitSound("overdraw");
 			}
 		}
 		else
@@ -226,22 +213,22 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 	private const int SimUpdateSortKey = 1001;
 
 	[MyCmpReq]
-	private Building building = null;
+	private Building building;
 
 	[MyCmpGet]
-	private Operational operational = null;
+	private Operational operational;
 
 	[MyCmpGet]
-	private Upgradable upgradable = null;
+	private Upgradable upgradable;
 
 	[MyCmpGet]
 	private KSelectable selectable;
 
 	[SerializeField]
-	public int powerSortOrder = 0;
+	public int powerSortOrder;
 
 	[Serialize]
-	private float circuitOverloadTime = 0f;
+	private float circuitOverloadTime;
 
 	public static Operational.Flag PoweredFlag = new Operational.Flag("powered", Operational.Flag.Type.Requirement);
 

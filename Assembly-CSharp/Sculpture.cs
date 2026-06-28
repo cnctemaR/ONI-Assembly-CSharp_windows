@@ -25,5 +25,5 @@ public class Sculpture : Artable
 		}
 	}
 
-	private static KAnimFile[] sculptureOverrides = null;
+	private static KAnimFile[] sculptureOverrides;
 }

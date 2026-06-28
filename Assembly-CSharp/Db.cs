@@ -68,32 +68,24 @@ public class Db : EntityModifierSet
 	public ResourceType GetResource<ResourceType>(ResourceGuid guid) where ResourceType : Resource
 	{
 		Resource resource = this.ResourceTable.FirstOrDefault<Resource>((Resource s) => s.Guid == guid);
-		ResourceType resourceType;
 		if (resource == null)
 		{
 			global::Debug.LogWarning("Could not find resource: " + guid, null);
-			resourceType = (ResourceType)((object)null);
+			return (ResourceType)((object)null);
 		}
-		else
+		ResourceType resourceType = (ResourceType)((object)resource);
+		if (resourceType == null)
 		{
-			ResourceType resourceType2 = (ResourceType)((object)resource);
-			if (resourceType2 == null)
+			global::Debug.LogError(string.Concat(new string[]
 			{
-				global::Debug.LogError(string.Concat(new string[]
-				{
-					"Resource type mismatch for resource: ",
-					resource.Id,
-					"\nExpecting Type: ",
-					typeof(ResourceType).Name,
-					"\nGot Type: ",
-					resource.GetType().Name
-				}), null);
-				resourceType = (ResourceType)((object)null);
-			}
-			else
-			{
-				resourceType = resourceType2;
-			}
+				"Resource type mismatch for resource: ",
+				resource.Id,
+				"\nExpecting Type: ",
+				typeof(ResourceType).Name,
+				"\nGot Type: ",
+				resource.GetType().Name
+			}), null);
+			return (ResourceType)((object)null);
 		}
 		return resourceType;
 	}

@@ -81,26 +81,27 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 	{
 		this.userOrders.Clear();
 		this.buildStorage.Transfer(this.inStorage, true, true);
-		if (this.savedOrders != null)
+		if (this.savedOrders == null)
 		{
-			bool flag = true;
-			foreach (Refinery.OrderSaveData orderSaveData in this.savedOrders)
-			{
-				RefinementRecipe recipe = RefineryRecipeManager.Get().GetRecipe(TagManager.Create(orderSaveData.material, null));
-				Refinery.UserOrder userOrder = new Refinery.UserOrder(recipe, orderSaveData.infinite);
-				if (this.OnCreateOrder != null)
-				{
-					this.OnCreateOrder(userOrder);
-				}
-				this.userOrders.Add(userOrder);
-				if (flag)
-				{
-					base.SetWorkTime(recipe.time);
-					flag = false;
-				}
-			}
-			this.savedOrders = null;
+			return;
 		}
+		bool flag = true;
+		foreach (Refinery.OrderSaveData orderSaveData in this.savedOrders)
+		{
+			RefinementRecipe recipe = RefineryRecipeManager.Get().GetRecipe(TagManager.Create(orderSaveData.material, null));
+			Refinery.UserOrder userOrder = new Refinery.UserOrder(recipe, orderSaveData.infinite);
+			if (this.OnCreateOrder != null)
+			{
+				this.OnCreateOrder(userOrder);
+			}
+			this.userOrders.Add(userOrder);
+			if (flag)
+			{
+				base.SetWorkTime(recipe.time);
+				flag = false;
+			}
+		}
+		this.savedOrders = null;
 	}
 
 	protected override void OnPrefabInit()
@@ -126,10 +127,11 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		if (this.operational.IsOperational)
+		if (!this.operational.IsOperational)
 		{
-			this.operational.SetActive(true, false);
+			return;
 		}
+		this.operational.SetActive(true, false);
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -203,30 +205,22 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 		KAnim.Build.Symbol symbol = build.GetSymbol(new KAnimHashedString(build.name));
 		KBatchedAnimController component4 = base.GetComponent<KBatchedAnimController>();
 		component4.AddSymbolOverride(new KAnimHashedString("output_tracker"), batchTag, symbol, false);
-		if (!completed_order.infinite)
+		if (!completed_order.infinite && this.OnOrderCancelledOrComplete != null)
 		{
-			if (this.OnOrderCancelledOrComplete != null)
-			{
-				this.OnOrderCancelledOrComplete(completed_order);
-			}
+			this.OnOrderCancelledOrComplete(completed_order);
 		}
 		return list;
 	}
 
 	public override float GetWorkTime()
 	{
-		float num;
 		if (this.machineOrders.Count > 0)
 		{
 			Refinery.MachineOrder machineOrder = this.machineOrders[0];
 			this.workTime = machineOrder.parentOrder.recipe.time;
-			num = this.workTime;
+			return this.workTime;
 		}
-		else
-		{
-			num = -1f;
-		}
-		return num;
+		return -1f;
 	}
 
 	public void CreateOrder(RefinementRecipe recipe, bool isInfinite, string soundPath)
@@ -259,98 +253,99 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 
 	private void UpdateOrderQueue(bool force_update = false)
 	{
-		if (force_update || this.operational.IsOperational)
+		if (!force_update && !this.operational.IsOperational)
 		{
-			int num = 0;
-			while (num < this.userOrders.Count && this.machineOrders.Count < 3)
-			{
-				Refinery.UserOrder userOrder = this.userOrders[num];
-				if (!this.AlreadyMachineQueued(userOrder) || userOrder.infinite)
-				{
-					Refinery.MachineOrder machineOrder = new Refinery.MachineOrder();
-					machineOrder.parentOrder = userOrder;
-					this.machineOrders.Add(machineOrder);
-				}
-				if (!userOrder.infinite)
-				{
-					num++;
-				}
-			}
-			if (this.machineOrders.Count > 0)
-			{
-				Refinery.MachineOrder machineOrder2 = this.machineOrders[0];
-				if (machineOrder2.chore == null)
-				{
-					RefinementRecipe recipe = machineOrder2.parentOrder.recipe;
-					bool flag = true;
-					if (this.inStorage.GetMassAvailable(recipe.material) < recipe.amount)
-					{
-						flag = false;
-					}
-					if (flag)
-					{
-						machineOrder2.chore = new WorkChore<Refinery>(this.choreType, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
-						if (this.workTimeRemaining <= 0f)
-						{
-							this.workTimeRemaining = this.GetWorkTime();
-						}
-						this.inStorage.Transfer(this.buildStorage, recipe.material, recipe.amount, false, true);
-						this.OnBuildQueued(machineOrder2);
-					}
-				}
-				Dictionary<Tag, float> dictionary = new Dictionary<Tag, float>();
-				for (int i = 0; i < this.machineOrders.Count; i++)
-				{
-					Refinery.MachineOrder machineOrder3 = this.machineOrders[i];
-					if (machineOrder3.chore == null)
-					{
-						Refinery.UserOrder parentOrder = machineOrder3.parentOrder;
-						RefinementRecipe recipe2 = parentOrder.recipe;
-						dictionary[recipe2.material] = this.inStorage.GetMassAvailable(recipe2.material);
-					}
-				}
-				for (int j = 0; j < this.machineOrders.Count; j++)
-				{
-					Refinery.MachineOrder machineOrder4 = this.machineOrders[j];
-					if (machineOrder4.chore == null)
-					{
-						Refinery.UserOrder parentOrder2 = machineOrder4.parentOrder;
-						RefinementRecipe recipe3 = parentOrder2.recipe;
-						float num2;
-						if (dictionary[recipe3.material] < recipe3.amount)
-						{
-							num2 = recipe3.amount - dictionary[recipe3.material];
-							dictionary[recipe3.material] = 0f;
-						}
-						else
-						{
-							Dictionary<Tag, float> dictionary2;
-							Tag material;
-							(dictionary2 = dictionary)[material = recipe3.material] = dictionary2[material] - recipe3.amount;
-							num2 = 0f;
-						}
-						int num3 = -j;
-						if (machineOrder4.fetchList == null && num2 > 0f)
-						{
-							machineOrder4.fetchList = new FetchList2(this.inStorage);
-							machineOrder4.fetchList.ShowStatusItem = false;
-							machineOrder4.fetchList.SetPriorityMod(num3);
-							machineOrder4.fetchList.Add(recipe3.material, null, num2, FetchOrder2.OperationalRequirement.None);
-							machineOrder4.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
-						}
-						else if (machineOrder4.fetchList != null)
-						{
-							machineOrder4.fetchList.SetPriorityMod(num3);
-						}
-					}
-				}
-				if (machineOrder2.chore == null)
-				{
-					machineOrder2.fetchList.ShowStatusItem = true;
-				}
-			}
-			base.Trigger(1721324763, this);
+			return;
 		}
+		int num = 0;
+		while (num < this.userOrders.Count && this.machineOrders.Count < 3)
+		{
+			Refinery.UserOrder userOrder = this.userOrders[num];
+			if (!this.AlreadyMachineQueued(userOrder) || userOrder.infinite)
+			{
+				Refinery.MachineOrder machineOrder = new Refinery.MachineOrder();
+				machineOrder.parentOrder = userOrder;
+				this.machineOrders.Add(machineOrder);
+			}
+			if (!userOrder.infinite)
+			{
+				num++;
+			}
+		}
+		if (this.machineOrders.Count > 0)
+		{
+			Refinery.MachineOrder machineOrder2 = this.machineOrders[0];
+			if (machineOrder2.chore == null)
+			{
+				RefinementRecipe recipe = machineOrder2.parentOrder.recipe;
+				bool flag = true;
+				if (this.inStorage.GetMassAvailable(recipe.material) < recipe.amount)
+				{
+					flag = false;
+				}
+				if (flag)
+				{
+					machineOrder2.chore = new WorkChore<Refinery>(this.choreType, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+					if (this.workTimeRemaining <= 0f)
+					{
+						this.workTimeRemaining = this.GetWorkTime();
+					}
+					this.inStorage.Transfer(this.buildStorage, recipe.material, recipe.amount, false, true);
+					this.OnBuildQueued(machineOrder2);
+				}
+			}
+			Dictionary<Tag, float> dictionary = new Dictionary<Tag, float>();
+			for (int i = 0; i < this.machineOrders.Count; i++)
+			{
+				Refinery.MachineOrder machineOrder3 = this.machineOrders[i];
+				if (machineOrder3.chore == null)
+				{
+					Refinery.UserOrder parentOrder = machineOrder3.parentOrder;
+					RefinementRecipe recipe2 = parentOrder.recipe;
+					dictionary[recipe2.material] = this.inStorage.GetMassAvailable(recipe2.material);
+				}
+			}
+			for (int j = 0; j < this.machineOrders.Count; j++)
+			{
+				Refinery.MachineOrder machineOrder4 = this.machineOrders[j];
+				if (machineOrder4.chore == null)
+				{
+					Refinery.UserOrder parentOrder2 = machineOrder4.parentOrder;
+					RefinementRecipe recipe3 = parentOrder2.recipe;
+					float num2;
+					if (dictionary[recipe3.material] < recipe3.amount)
+					{
+						num2 = recipe3.amount - dictionary[recipe3.material];
+						dictionary[recipe3.material] = 0f;
+					}
+					else
+					{
+						Dictionary<Tag, float> dictionary2;
+						Tag material;
+						(dictionary2 = dictionary)[material = recipe3.material] = dictionary2[material] - recipe3.amount;
+						num2 = 0f;
+					}
+					int num3 = -j;
+					if (machineOrder4.fetchList == null && num2 > 0f)
+					{
+						machineOrder4.fetchList = new FetchList2(this.inStorage);
+						machineOrder4.fetchList.ShowStatusItem = false;
+						machineOrder4.fetchList.SetPriorityMod(num3);
+						machineOrder4.fetchList.Add(recipe3.material, null, num2, FetchOrder2.OperationalRequirement.None);
+						machineOrder4.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
+					}
+					else if (machineOrder4.fetchList != null)
+					{
+						machineOrder4.fetchList.SetPriorityMod(num3);
+					}
+				}
+			}
+			if (machineOrder2.chore == null)
+			{
+				machineOrder2.fetchList.ShowStatusItem = true;
+			}
+		}
+		base.Trigger(1721324763, this);
 	}
 
 	private void OnFetchComplete()
@@ -428,21 +423,19 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 		if (this.machineOrders.Count <= 0)
 		{
 			global::Debug.LogWarning("Somehow we tried to complete an order when there was no orders to complete. Need more info on how to reproduce this for a proper fix.", null);
+			return;
 		}
-		else
+		Refinery.MachineOrder machineOrder = this.machineOrders[0];
+		machineOrder.Complete();
+		if (!machineOrder.parentOrder.infinite)
 		{
-			Refinery.MachineOrder machineOrder = this.machineOrders[0];
-			machineOrder.Complete();
-			if (!machineOrder.parentOrder.infinite)
-			{
-				this.userOrders.RemoveAt(0);
-			}
-			this.machineOrders.RemoveAt(0);
-			this.operational.SetActive(false, false);
-			this.CompleteOrder(machineOrder.parentOrder);
-			this.buildStorage.Transfer(this.outStorage, true, true);
-			this.UpdateOrderQueue(false);
+			this.userOrders.RemoveAt(0);
 		}
+		this.machineOrders.RemoveAt(0);
+		this.operational.SetActive(false, false);
+		this.CompleteOrder(machineOrder.parentOrder);
+		this.buildStorage.Transfer(this.outStorage, true, true);
+		this.UpdateOrderQueue(false);
 	}
 
 	private void OnDroppedAll(object data)
@@ -532,7 +525,7 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 	private MeterController outputVisualizer;
 
 	[SerializeField]
-	public Refinery.ResultState resultState = Refinery.ResultState.Normal;
+	public Refinery.ResultState resultState;
 
 	[Serialize]
 	private List<Refinery.OrderSaveData> savedOrders;

@@ -26,10 +26,11 @@ public static class DrawUtil
 	public static void Arrow(Vector3 start, Vector3 end, float size, Color color, float time = 0f)
 	{
 		Vector3 vector = end - start;
-		if (vector.sqrMagnitude >= 0.001f)
+		if (vector.sqrMagnitude < 0.001f)
 		{
-			Quaternion quaternion = Quaternion.LookRotation(vector, Vector3.up);
+			return;
 		}
+		Quaternion quaternion = Quaternion.LookRotation(vector, Vector3.up);
 	}
 
 	[Conditional("ENABLE_DEBUG_OUTPUT")]

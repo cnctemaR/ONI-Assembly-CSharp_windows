@@ -72,11 +72,12 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 			this.fetchChore.Cancel("Overwrite");
 		}
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.AwaitingBaitDelivery, false);
-		if (!(this.activeBaitSetting == Tag.Invalid))
+		if (this.activeBaitSetting == Tag.Invalid)
 		{
-			this.fetchChore = new FetchChore(this.baitStorage, 100f, new Tag[] { this.activeBaitSetting }, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0);
-			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.AwaitingBaitDelivery, null);
+			return;
 		}
+		this.fetchChore = new FetchChore(this.baitStorage, 100f, new Tag[] { this.activeBaitSetting }, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0);
+		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.AwaitingBaitDelivery, null);
 	}
 
 	public static float CONSUMPTION_RATE = 1f;

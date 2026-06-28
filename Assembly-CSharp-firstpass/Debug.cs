@@ -98,31 +98,26 @@ public static class Debug
 	[Conditional("UNITY_EDITOR")]
 	public static void Assert(bool condition)
 	{
-		global::UnityEngine.Debug.Assert(condition);
 	}
 
 	[Conditional("UNITY_EDITOR")]
 	public static void Assert(bool condition, object message)
 	{
-		global::UnityEngine.Debug.Assert(condition, message);
 	}
 
 	[Conditional("UNITY_EDITOR")]
 	public static void Assert(bool condition, object message, global::UnityEngine.Object context)
 	{
-		global::UnityEngine.Debug.Assert(condition, message, context);
 	}
 
 	[Conditional("UNITY_EDITOR")]
 	public static void AssertFormat(bool condition, string format, params object[] args)
 	{
-		global::UnityEngine.Debug.AssertFormat(condition, format, args);
 	}
 
 	[Conditional("UNITY_EDITOR")]
 	public static void AssertFormat(bool condition, global::UnityEngine.Object context, string format, params object[] args)
 	{
-		global::UnityEngine.Debug.AssertFormat(condition, context, format, args);
 	}
 
 	[Conditional("UNITY_EDITOR")]
@@ -139,7 +134,7 @@ public static class Debug
 
 	public static string BuildString(object[] objs)
 	{
-		string text = "";
+		string text = string.Empty;
 		if (objs.Length > 0)
 		{
 			text = ((objs[0] == null) ? "null" : objs[0].ToString());

@@ -38,17 +38,12 @@ public struct GridArea
 
 	public bool Contains(int cell)
 	{
-		bool flag;
 		if (cell >= this.MinCell && cell < this.MaxCell)
 		{
 			int num = cell % Grid.WidthInCells;
-			flag = num >= this.Min.x && num < this.Max.x;
+			return num >= this.Min.x && num < this.Max.x;
 		}
-		else
-		{
-			flag = false;
-		}
-		return flag;
+		return false;
 	}
 
 	public bool Contains(int x, int y)

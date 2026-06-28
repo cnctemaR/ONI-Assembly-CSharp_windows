@@ -67,16 +67,11 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 	{
 		get
 		{
-			float num;
 			if (this.Capacity == 0f)
 			{
-				num = 1f;
+				return 1f;
 			}
-			else
-			{
-				num = this.joulesAvailable / this.Capacity;
-			}
-			return num;
+			return this.joulesAvailable / this.Capacity;
 		}
 	}
 
@@ -124,12 +119,9 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 
 	private void SetStatusItem(StatusItem status_item)
 	{
-		if (status_item != this.currentStatusItem)
+		if (status_item != this.currentStatusItem && this.currentStatusItem != null)
 		{
-			if (this.currentStatusItem != null)
-			{
-				this.statusItemID = this.selectable.RemoveStatusItem(this.statusItemID, false);
-			}
+			this.statusItemID = this.selectable.RemoveStatusItem(this.statusItemID, false);
 		}
 		if (status_item != null && this.statusItemID == Guid.Empty)
 		{
@@ -162,44 +154,29 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 
 	private float GetUpgradeEfficiencyMultiplier()
 	{
-		float num;
 		if (this.upgradable != null)
 		{
-			num = this.upgradable.GetEnergyGenerationMultiplier();
+			return this.upgradable.GetEnergyGenerationMultiplier();
 		}
-		else
-		{
-			num = 1f;
-		}
-		return num;
+		return 1f;
 	}
 
 	private float GetUpgradeCapacityMultiplier()
 	{
-		float num;
 		if (this.upgradable != null)
 		{
-			num = this.upgradable.GetCapacityUpgradeMultiplier();
+			return this.upgradable.GetCapacityUpgradeMultiplier();
 		}
-		else
-		{
-			num = 1f;
-		}
-		return num;
+		return 1f;
 	}
 
 	protected float GetUpgradeTemperatureMultiplier()
 	{
-		float num;
 		if (this.upgradable != null)
 		{
-			num = this.upgradable.GetTemperatureUpgradeMultiplier();
+			return this.upgradable.GetTemperatureUpgradeMultiplier();
 		}
-		else
-		{
-			num = 1f;
-		}
-		return num;
+		return 1f;
 	}
 
 	protected override void OnCleanUp()
@@ -211,16 +188,11 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 
 	public static float CalculateCapacity(BuildingDef def, Element element)
 	{
-		float num;
 		if (element == null)
 		{
-			num = def.GeneratorBaseCapacity;
+			return def.GeneratorBaseCapacity;
 		}
-		else
-		{
-			num = def.GeneratorBaseCapacity * (1f + ((!element.HasTag(GameTags.RefinedMetal)) ? 0f : 1f));
-		}
-		return num;
+		return def.GeneratorBaseCapacity * (1f + ((!element.HasTag(GameTags.RefinedMetal)) ? 0f : 1f));
 	}
 
 	public void ResetJoules()
@@ -266,7 +238,7 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 	protected KSelectable selectable;
 
 	[Serialize]
-	private float joulesAvailable = 0f;
+	private float joulesAvailable;
 
 	[SerializeField]
 	public int powerDistributionOrder;

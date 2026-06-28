@@ -55,7 +55,7 @@ public class FileNameDialog : KScreen
 	{
 		if (Localization.HasDirtyWords(str))
 		{
-			this.inputField.text = "";
+			this.inputField.text = string.Empty;
 		}
 	}
 

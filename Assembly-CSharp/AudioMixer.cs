@@ -162,8 +162,7 @@ public class AudioMixer
 		int num = 0;
 		int num2 = 0;
 		int num3 = 0;
-		int i = 0;
-		while (i < Components.LiveMinionIdentities.Count)
+		for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
 		{
 			Vector3 position = Components.LiveMinionIdentities[i].transform.position;
 			if (CameraController.Instance.IsVisiblePos(position))
@@ -184,10 +183,6 @@ public class AudioMixer
 					}
 				}
 			}
-			IL_00AB:
-			i++;
-			continue;
-			goto IL_00AB;
 		}
 		this.visibleDupes["visible"] = num;
 		this.visibleDupes["moving"] = num2;
@@ -229,32 +224,30 @@ public class AudioMixer
 		if (!this.userVolumeSettings.ContainsKey(bus))
 		{
 			global::Debug.LogError("The provided bus doesn't exist. Check yo'self fool!", null);
+			return;
+		}
+		if (value > 1f)
+		{
+			value = 1f;
+		}
+		else if (value < 0f)
+		{
+			value = 0f;
+		}
+		this.userVolumeSettings[bus].busLevel = value;
+		KPlayerPrefs.SetFloat("Volume_" + bus, value);
+		EventInstance eventInstance = null;
+		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().UserVolumeSettingsSnapshot, out eventInstance))
+		{
+			eventInstance.setParameterValue(bus, this.userVolumeSettings[bus].busLevel);
 		}
 		else
 		{
-			if (value > 1f)
-			{
-				value = 1f;
-			}
-			else if (value < 0f)
-			{
-				value = 0f;
-			}
-			this.userVolumeSettings[bus].busLevel = value;
-			KPlayerPrefs.SetFloat("Volume_" + bus, value);
-			EventInstance eventInstance = null;
-			if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().UserVolumeSettingsSnapshot, out eventInstance))
-			{
-				eventInstance.setParameterValue(bus, this.userVolumeSettings[bus].busLevel);
-			}
-			else
-			{
-				this.Log(string.Concat(new object[] { "Tried to set [", bus, "] to [", value, "] but UserVolumeSettingsSnapshot is not active." }));
-			}
-			if (bus == "Music")
-			{
-				this.SetSnapshotParameter(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot, "userVolume_Music", value, true);
-			}
+			this.Log(string.Concat(new object[] { "Tried to set [", bus, "] to [", value, "] but UserVolumeSettingsSnapshot is not active." }));
+		}
+		if (bus == "Music")
+		{
+			this.SetSnapshotParameter(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot, "userVolume_Music", value, true);
 		}
 	}
 
@@ -274,19 +267,19 @@ public class AudioMixer
 
 	public List<HashedString> SnapshotDebugLog = new List<HashedString>();
 
-	public bool activeNIS = false;
+	public bool activeNIS;
 
 	public static float LOW_PRIORITY_CUTOFF_DISTANCE = 10f;
 
 	public static float PULSE_SNAPSHOT_BPM = 120f;
 
-	private EventInstance duplicantCountInst = null;
+	private EventInstance duplicantCountInst;
 
-	private EventInstance pulseInst = null;
+	private EventInstance pulseInst;
 
-	private EventInstance duplicantCountMovingInst = null;
+	private EventInstance duplicantCountMovingInst;
 
-	private EventInstance duplicantCountSleepingInst = null;
+	private EventInstance duplicantCountSleepingInst;
 
 	private static readonly HashedString UserVolumeSettingsHash = new HashedString("event:/Snapshots/Mixing/Snapshot_UserVolumeSettings");
 

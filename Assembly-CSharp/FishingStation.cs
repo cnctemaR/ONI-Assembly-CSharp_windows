@@ -133,11 +133,12 @@ public class FishingStation : Harvestable
 
 	public override void OnRefreshUserMenu(object data)
 	{
-		if (this.canBeHarvested)
+		if (!this.canBeHarvested)
 		{
-			if (this.isMarkedForHarvest)
-			{
-			}
+			return;
+		}
+		if (this.isMarkedForHarvest)
+		{
 		}
 	}
 
@@ -174,25 +175,17 @@ public class FishingStation : Harvestable
 		Vector3 vector = new Vector3(0f, 0.5f, -2f);
 		Vector3 vector2 = base.transform.position + Vector3.up;
 		vector2.z = -2f;
-		int i = 0;
-		while (i < 3)
+		for (int i = 0; i < 3; i++)
 		{
 			Vector3 vector3 = new Vector3((float)i, 0f, 0f);
-			Vector3 vector4;
 			if (this.depositLocationPriority(vector2, vector3) == 2)
 			{
-				vector4 = new Vector3(vector3.x + vector2.x, vector3.y + vector2.y, 0f) + vector;
+				return new Vector3(vector3.x + vector2.x, vector3.y + vector2.y, 0f) + vector;
 			}
-			else
+			if (this.depositLocationPriority(vector2, -vector3) == 2)
 			{
-				if (this.depositLocationPriority(vector2, -vector3) != 2)
-				{
-					i++;
-					continue;
-				}
-				vector4 = new Vector3(-vector3.x + vector2.x, -vector3.y + vector2.y, 0f) + vector;
+				return new Vector3(-vector3.x + vector2.x, -vector3.y + vector2.y, 0f) + vector;
 			}
-			return vector4;
 		}
 		for (int j = 0; j < 3; j++)
 		{
@@ -212,23 +205,15 @@ public class FishingStation : Harvestable
 	private int depositLocationPriority(Vector3 rootLocation, Vector3 offsetLocation)
 	{
 		int num = Grid.PosToCell(rootLocation + offsetLocation);
-		int num2;
-		if (!Grid.Solid[num] && Grid.Solid[Grid.CellBelow(num)])
+		if (Grid.Solid[num] || !Grid.Solid[Grid.CellBelow(num)])
 		{
-			if (!Grid.Objects[num, 5])
-			{
-				num2 = 2;
-			}
-			else
-			{
-				num2 = 1;
-			}
+			return 0;
 		}
-		else
+		if (!Grid.Objects[num, 5])
 		{
-			num2 = 0;
+			return 2;
 		}
-		return num2;
+		return 1;
 	}
 
 	private void Update()

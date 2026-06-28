@@ -9,20 +9,20 @@ public class TagFilterScreen : SideScreenContent
 		if (target == null)
 		{
 			global::Debug.LogError("The target object provided was null", null);
+			return;
 		}
-		else
+		this.targetFilterable = target.GetComponent<TreeFilterable>();
+		if (this.targetFilterable == null)
 		{
-			this.targetFilterable = target.GetComponent<TreeFilterable>();
-			if (this.targetFilterable == null)
-			{
-				global::Debug.LogError("The target provided does not have a Tree Filterable component", null);
-			}
-			else if (this.targetFilterable.showUserMenu)
-			{
-				this.Filter(this.targetFilterable.AcceptedTags);
-				base.Activate();
-			}
+			global::Debug.LogError("The target provided does not have a Tree Filterable component", null);
+			return;
 		}
+		if (!this.targetFilterable.showUserMenu)
+		{
+			return;
+		}
+		this.Filter(this.targetFilterable.AcceptedTags);
+		base.Activate();
 	}
 
 	protected override void OnActivate()
@@ -49,7 +49,7 @@ public class TagFilterScreen : SideScreenContent
 	private KTreeControl.UserItem BuildDisplay(TagFilterScreen.TagEntry root)
 	{
 		KTreeControl.UserItem userItem = null;
-		if (root.name != null && root.name != "")
+		if (root.name != null && root.name != string.Empty)
 		{
 			userItem = new KTreeControl.UserItem
 			{
@@ -147,13 +147,11 @@ public class TagFilterScreen : SideScreenContent
 		if (this.targetFilterable == null)
 		{
 			global::Debug.LogError("Cannot update the filters on a null target.", null);
+			return;
 		}
-		else
-		{
-			List<Tag> list = new List<Tag>();
-			this.AddEnabledTags(this.treeControl.root, list);
-			this.targetFilterable.UpdateFilters(list);
-		}
+		List<Tag> list = new List<Tag>();
+		this.AddEnabledTags(this.treeControl.root, list);
+		this.targetFilterable.UpdateFilters(list);
 	}
 
 	[SerializeField]

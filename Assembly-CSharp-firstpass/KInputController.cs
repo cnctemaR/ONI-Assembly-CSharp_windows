@@ -34,22 +34,23 @@ public class KInputController : IInputHandler
 
 	public void QueueButtonEvent(KInputController.KeyDef key_def, bool is_down)
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			bool[] mActionFlags = key_def.mActionFlags;
-			key_def.mIsDown = is_down;
-			InputEventType inputEventType = ((!is_down) ? InputEventType.KeyUp : InputEventType.KeyDown);
-			for (int i = 0; i < mActionFlags.Length; i++)
-			{
-				if (mActionFlags[i])
-				{
-					this.mActionState[i] = is_down;
-				}
-			}
-			KButtonEvent kbuttonEvent = new KButtonEvent(this, inputEventType, mActionFlags);
-			this.mEvents.Add(kbuttonEvent);
-			KInputManager.SetUserActive();
+			return;
 		}
+		bool[] mActionFlags = key_def.mActionFlags;
+		key_def.mIsDown = is_down;
+		InputEventType inputEventType = ((!is_down) ? InputEventType.KeyUp : InputEventType.KeyDown);
+		for (int i = 0; i < mActionFlags.Length; i++)
+		{
+			if (mActionFlags[i])
+			{
+				this.mActionState[i] = is_down;
+			}
+		}
+		KButtonEvent kbuttonEvent = new KButtonEvent(this, inputEventType, mActionFlags);
+		this.mEvents.Add(kbuttonEvent);
+		KInputManager.SetUserActive();
 	}
 
 	private void GenerateActionFlagTable()
@@ -142,44 +143,42 @@ public class KInputController : IInputHandler
 
 	public void Update()
 	{
-		if (KInputManager.isFocused)
+		if (!KInputManager.isFocused)
 		{
-			if (this.mDirtyBindings)
+			return;
+		}
+		if (this.mDirtyBindings)
+		{
+			this.GenerateActionFlagTable();
+			this.mDirtyBindings = false;
+		}
+		if (!this.IsGamepad)
+		{
+			this.UpdateScrollStates();
+			this.UpdateAxis();
+			this.UpdateModifiers();
+			bool flag = this.mActiveModifiers != Modifier.None;
+			foreach (KInputController.KeyDef keyDef in this.mKeyDefs)
 			{
-				this.GenerateActionFlagTable();
-				this.mDirtyBindings = false;
-			}
-			if (!this.IsGamepad)
-			{
-				this.UpdateScrollStates();
-				this.UpdateAxis();
-				this.UpdateModifiers();
-				bool flag = this.mActiveModifiers != Modifier.None;
-				foreach (KInputController.KeyDef keyDef in this.mKeyDefs)
+				int hashCode = keyDef.mKeyCode.GetHashCode();
+				if (!this.mIgnoreKeyboard || hashCode >= KKeyCode.Mouse0.GetHashCode())
 				{
-					int hashCode = keyDef.mKeyCode.GetHashCode();
-					if (!this.mIgnoreKeyboard || hashCode >= KKeyCode.Mouse0.GetHashCode())
+					if (!this.mIgnoreMouse || ((hashCode < KKeyCode.Mouse0.GetHashCode() || hashCode >= KKeyCode.JoystickButton0.GetHashCode()) && hashCode != KKeyCode.MouseScrollDown.GetHashCode() && hashCode != KKeyCode.MouseScrollUp.GetHashCode()))
 					{
-						if (!this.mIgnoreMouse || ((hashCode < KKeyCode.Mouse0.GetHashCode() || hashCode >= KKeyCode.JoystickButton0.GetHashCode()) && hashCode != KKeyCode.MouseScrollDown.GetHashCode() && hashCode != KKeyCode.MouseScrollUp.GetHashCode()))
+						if (this.GetKeyDown(keyDef.mKeyCode))
 						{
-							if (this.GetKeyDown(keyDef.mKeyCode))
+							if (keyDef.mModifier == Modifier.None && !flag)
 							{
-								if (keyDef.mModifier == Modifier.None && !flag)
-								{
-									this.QueueButtonEvent(keyDef, true);
-								}
-								else if (keyDef.mModifier != Modifier.None)
-								{
-									if ((this.mActiveModifiers & keyDef.mModifier) != Modifier.None)
-									{
-										this.QueueButtonEvent(keyDef, true);
-									}
-								}
+								this.QueueButtonEvent(keyDef, true);
 							}
-							if (keyDef.mIsDown && this.GetKeyUp(keyDef.mKeyCode))
+							else if (keyDef.mModifier != Modifier.None && (this.mActiveModifiers & keyDef.mModifier) != Modifier.None)
 							{
-								this.QueueButtonEvent(keyDef, false);
+								this.QueueButtonEvent(keyDef, true);
 							}
+						}
+						if (keyDef.mIsDown && this.GetKeyUp(keyDef.mKeyCode))
+						{
+							this.QueueButtonEvent(keyDef, false);
 						}
 					}
 				}
@@ -240,15 +239,15 @@ public class KInputController : IInputHandler
 
 	private float[] mAxis;
 
-	private Modifier mActiveModifiers = Modifier.None;
+	private Modifier mActiveModifiers;
 
 	private bool[] mActionState;
 
 	private bool[] mScrollState;
 
-	private bool mIgnoreKeyboard = false;
+	private bool mIgnoreKeyboard;
 
-	private bool mIgnoreMouse = false;
+	private bool mIgnoreMouse;
 
 	private Dictionary<KInputController.KeyDefEntry, KInputController.KeyDef> mKeyDefLookup = new Dictionary<KInputController.KeyDefEntry, KInputController.KeyDef>();
 

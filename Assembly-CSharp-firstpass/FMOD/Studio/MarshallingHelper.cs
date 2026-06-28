@@ -19,18 +19,13 @@ namespace FMOD.Studio
 		public static string stringFromNativeUtf8(IntPtr nativeUtf8)
 		{
 			int num = MarshallingHelper.stringLengthUtf8(nativeUtf8);
-			string text;
 			if (num == 0)
 			{
-				text = string.Empty;
+				return string.Empty;
 			}
-			else
-			{
-				byte[] array = new byte[num];
-				Marshal.Copy(nativeUtf8, array, 0, array.Length);
-				text = Encoding.UTF8.GetString(array, 0, num);
-			}
-			return text;
+			byte[] array = new byte[num];
+			Marshal.Copy(nativeUtf8, array, 0, array.Length);
+			return Encoding.UTF8.GetString(array, 0, num);
 		}
 	}
 }

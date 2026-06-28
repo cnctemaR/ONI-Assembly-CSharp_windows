@@ -48,25 +48,25 @@ public class ElementInteractions
 			};
 		}
 
-		public ElementInteractionHashes interactionType = (ElementInteractionHashes)0;
+		public ElementInteractionHashes interactionType;
 
 		[FieldNullValue(1f)]
 		public float interactionProbability = 1f;
 
 		[FieldNullValue(0f)]
-		public float minMass = 0f;
+		public float minMass;
 
-		public SimHashes elemHash1 = (SimHashes)0;
+		public SimHashes elemHash1;
 
 		[FieldNullValue(1f)]
 		public float elem1MassDestructionPercent = 1f;
 
-		public SimHashes elemHash2 = (SimHashes)0;
+		public SimHashes elemHash2;
 
 		[FieldNullValue(1f)]
 		public float elem2MassRequiredMultiplier = 1f;
 
-		public SimHashes elemResultHash = (SimHashes)0;
+		public SimHashes elemResultHash;
 
 		[FieldNullValue(1f)]
 		public float elemResultMassCreationMultiplier = 1f;

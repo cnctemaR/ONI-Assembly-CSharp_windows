@@ -116,31 +116,28 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				}
 				Chore.Precondition.Context context2 = list2[k];
 				FetchChore fetchChore = context2.chore as FetchChore;
-				if (fetchChore != this.rootChore && context2.IsSuccess() && fetchChore.overrideTarget == null && fetchChore.driver == null)
+				if (fetchChore != this.rootChore && context2.IsSuccess() && fetchChore.overrideTarget == null && fetchChore.driver == null && fetchChore.tags.Length == this.rootChore.tags.Length)
 				{
-					if (fetchChore.tags.Length == this.rootChore.tags.Length)
+					bool flag = true;
+					for (int l = 0; l < fetchChore.tags.Length; l++)
 					{
-						bool flag = true;
-						for (int l = 0; l < fetchChore.tags.Length; l++)
+						Tag tag = fetchChore.tags[l];
+						if (Array.IndexOf<Tag>(this.rootChore.tags, tag) < 0)
 						{
-							Tag tag = fetchChore.tags[l];
-							if (Array.IndexOf<Tag>(this.rootChore.tags, tag) < 0)
-							{
-								flag = false;
-								break;
-							}
+							flag = false;
+							break;
 						}
-						if (flag)
+					}
+					if (flag)
+					{
+						num9 = Mathf.Min(fetchChore.originalAmount, num5 - num10);
+						if (minTakeAmount > 0f)
 						{
-							num9 = Mathf.Min(fetchChore.originalAmount, num5 - num10);
-							if (minTakeAmount > 0f)
-							{
-								num9 -= num9 % minTakeAmount;
-							}
-							this.chores.Add(fetchChore);
-							this.deliveries.Add(new FetchAreaChore.StatesInstance.Delivery(context2, num9, new Action<FetchChore>(this.OnFetchChoreCancelled)));
-							num10 += num9;
+							num9 -= num9 % minTakeAmount;
 						}
+						this.chores.Add(fetchChore);
+						this.deliveries.Add(new FetchAreaChore.StatesInstance.Delivery(context2, num9, new Action<FetchChore>(this.OnFetchChoreCancelled)));
+						num10 += num9;
 					}
 				}
 			}
@@ -387,12 +384,9 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 								}
 							}
 						}
-						if (pickupable != null)
+						if (pickupable != null && this.chore.overrideTarget != null)
 						{
-							if (this.chore.overrideTarget != null)
-							{
-								this.chore.FetchAreaEnd(this.chore.overrideTarget.GetComponent<ChoreDriver>(), pickupable, true);
-							}
+							this.chore.FetchAreaEnd(this.chore.overrideTarget.GetComponent<ChoreDriver>(), pickupable, true);
 						}
 						this.chore = null;
 					}

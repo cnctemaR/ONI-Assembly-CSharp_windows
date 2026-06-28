@@ -21,14 +21,15 @@ public class TimedSwitch : CircuitSwitch, ISaveLoadable
 
 	public new void SetState(bool newState)
 	{
-		if (base.IsSwitchedOn != newState)
+		if (base.IsSwitchedOn == newState)
 		{
-			this.TimedToggle();
+			return;
 		}
+		this.TimedToggle();
 	}
 
 	[Serialize]
-	public float switchTime = 0f;
+	public float switchTime;
 
 	[Serialize]
 	public float onTime = 30f;

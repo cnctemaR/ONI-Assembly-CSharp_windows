@@ -29,18 +29,15 @@ public class WorldDamage : KMonoBehaviour
 			if (flag)
 			{
 				GameObject gameObject = Grid.Objects[cell, 9];
-				if (gameObject != null)
+				if (gameObject != null && gameObject.GetComponent<BuildingHP>() != null)
 				{
-					if (gameObject.GetComponent<BuildingHP>() != null)
+					gameObject.Trigger(-794517298, new BuildingHP.DamageSourceInfo
 					{
-						gameObject.Trigger(-794517298, new BuildingHP.DamageSourceInfo
-						{
-							damage = 10,
-							source = BUILDINGS.DAMAGESOURCES.LIQUID_PRESSURE,
-							popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.LIQUID_PRESSURE
-						});
-						num = 0f;
-					}
+						damage = 10,
+						source = BUILDINGS.DAMAGESOURCES.LIQUID_PRESSURE,
+						popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.LIQUID_PRESSURE
+					});
+					num = 0f;
 				}
 			}
 			Grid.Damage[cell] = num;
@@ -59,15 +56,12 @@ public class WorldDamage : KMonoBehaviour
 					{
 						int num3 = cell + num2;
 						Element element2 = Grid.Element[num3];
-						if (!element2.IsSolid && (!element2.IsLiquid || (element2.id == element.id && Grid.Cell[num3].mass <= 100f)) && (Grid.Cell[num3].properties & 2) == 0)
+						if (!element2.IsSolid && (!element2.IsLiquid || (element2.id == element.id && Grid.Cell[num3].mass <= 100f)) && (Grid.Cell[num3].properties & 2) == 0 && !this.spawnTimes.ContainsKey(num3))
 						{
-							if (!this.spawnTimes.ContainsKey(num3))
-							{
-								this.spawnTimes[num3] = Time.realtimeSinceStartup;
-								int elementIndex = ElementLoader.GetElementIndex(element.id);
-								float temperature = Grid.Cell[src_cell].temperature;
-								base.StartCoroutine(this.DelayedSpawnFX(src_cell, num3, num2, element, elementIndex, temperature));
-							}
+							this.spawnTimes[num3] = Time.realtimeSinceStartup;
+							int elementIndex = ElementLoader.GetElementIndex(element.id);
+							float temperature = Grid.Cell[src_cell].temperature;
+							base.StartCoroutine(this.DelayedSpawnFX(src_cell, num3, num2, element, elementIndex, temperature));
 						}
 					}
 				}
@@ -184,17 +178,15 @@ public class WorldDamage : KMonoBehaviour
 			Grid.Damage[cell] = 0f;
 			WorldDamage.Instance.PlaySoundForSubstance(element, vector);
 			float num = mass * 0.5f;
-			if (num > 0f)
+			if (num <= 0f)
 			{
-				GameObject gameObject = element.substance.SpawnResource(vector, num, temperature, disease_idx, disease_count, false, false);
-				Pickupable component = gameObject.GetComponent<Pickupable>();
-				if (component != null)
-				{
-					if (WorldInventory.Instance.IsReachable(gameObject.GetComponent<Pickupable>()))
-					{
-						PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, Mathf.RoundToInt(num).ToString() + " " + element.name, gameObject.transform, 1.5f, false);
-					}
-				}
+				return;
+			}
+			GameObject gameObject = element.substance.SpawnResource(vector, num, temperature, disease_idx, disease_count, false, false);
+			Pickupable component = gameObject.GetComponent<Pickupable>();
+			if (component != null && WorldInventory.Instance.IsReachable(gameObject.GetComponent<Pickupable>()))
+			{
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, Mathf.RoundToInt(num).ToString() + " " + element.name, gameObject.transform, 1.5f, false);
 			}
 		}
 	}

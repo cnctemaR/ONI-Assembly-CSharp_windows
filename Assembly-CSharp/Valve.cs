@@ -53,22 +53,23 @@ public class Valve : Workable, ISaveLoadable
 		{
 			this.UpdateFlow();
 		}
-		else if (this.desiredFlow != this.valveBase.CurrentFlow)
+		else
 		{
+			if (this.desiredFlow == this.valveBase.CurrentFlow)
+			{
+				if (this.chore != null)
+				{
+					this.chore.Cancel("desiredFlow == currentFlow");
+					this.chore = null;
+				}
+				component.RemoveStatusItem(Db.Get().BuildingStatusItems.ValveRequest, false);
+				return;
+			}
 			if (this.chore == null)
 			{
 				component.AddStatusItem(Db.Get().BuildingStatusItems.ValveRequest, this);
 				this.chore = new WorkChore<Valve>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 			}
-		}
-		else
-		{
-			if (this.chore != null)
-			{
-				this.chore.Cancel("desiredFlow == currentFlow");
-				this.chore = null;
-			}
-			component.RemoveStatusItem(Db.Get().BuildingStatusItems.ValveRequest, false);
 		}
 	}
 
@@ -96,5 +97,5 @@ public class Valve : Workable, ISaveLoadable
 	[Serialize]
 	private float desiredFlow = 0.5f;
 
-	private Chore chore = null;
+	private Chore chore;
 }

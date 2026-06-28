@@ -137,86 +137,80 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public bool HasPrefabTag(Tag tag)
 	{
-		bool flag;
 		if (tag == this.PrefabTag)
 		{
-			flag = true;
+			return true;
 		}
-		else
+		for (int i = 0; i < this.PrefabTags.Length; i++)
 		{
-			for (int i = 0; i < this.PrefabTags.Length; i++)
+			if (tag == this.PrefabTags[i])
 			{
-				if (tag == this.PrefabTags[i])
-				{
-					return true;
-				}
+				return true;
 			}
-			flag = false;
 		}
-		return flag;
+		return false;
 	}
 
 	public bool HasAnyPrefabTags(IList<Tag> searchTags)
 	{
-		int i = 0;
-		while (i < searchTags.Count)
+		for (int i = 0; i < searchTags.Count; i++)
 		{
 			Tag tag = searchTags[i];
-			if (!(this.PrefabTag == tag))
+			if (this.PrefabTag == tag)
 			{
-				for (int j = 0; j < this.PrefabTags.Length; j++)
-				{
-					if (tag == this.PrefabTags[j])
-					{
-						return true;
-					}
-				}
-				i++;
-				continue;
+				return true;
 			}
-			return true;
+			for (int j = 0; j < this.PrefabTags.Length; j++)
+			{
+				if (tag == this.PrefabTags[j])
+				{
+					return true;
+				}
+			}
 		}
 		return false;
 	}
 
 	public void AddTag(Tag tag)
 	{
-		if (!this.HasTag(tag))
+		if (this.HasTag(tag))
 		{
-			if (tag.IsValid)
-			{
-				this.tags = new List<Tag>(this.Tags) { tag }.ToArray();
-				base.Trigger(-1582839653, null);
-			}
-			else
-			{
-				DebugUtil.Assert(tag.IsValid, "Assert!");
-			}
+			return;
+		}
+		if (tag.IsValid)
+		{
+			this.tags = new List<Tag>(this.Tags) { tag }.ToArray();
+			base.Trigger(-1582839653, null);
+		}
+		else
+		{
+			DebugUtil.Assert(tag.IsValid, "Assert!");
 		}
 	}
 
 	public void AddTags(IList<Tag> additional_tags)
 	{
-		if (additional_tags != null && additional_tags.Count != 0)
+		if (additional_tags == null || additional_tags.Count == 0)
 		{
-			List<Tag> list = new List<Tag>(this.Tags);
-			foreach (Tag tag in additional_tags)
+			return;
+		}
+		List<Tag> list = new List<Tag>(this.Tags);
+		foreach (Tag tag in additional_tags)
+		{
+			if (!list.Contains(tag))
 			{
-				if (!list.Contains(tag))
+				if (tag.IsValid)
 				{
-					if (tag.IsValid)
-					{
-						list.Add(tag);
-					}
-					else
-					{
-						DebugUtil.Assert(tag.IsValid, "Assert!");
-					}
+					list.Add(tag);
+				}
+				else
+				{
+					DebugUtil.Assert(tag.IsValid, "Assert!");
 				}
 			}
-			this.tags = list.ToArray();
-			base.Trigger(-1582839653, null);
 		}
+		this.tags = list.ToArray();
+		base.Trigger(-1582839653, null);
 	}
 
 	public void RemoveTag(Tag tag)
@@ -288,14 +282,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public bool HasSameTags(KPrefabID prefab_id)
 	{
-		if (this.PrefabTag == prefab_id.PrefabTag)
-		{
-			if (this.Tags.Length == prefab_id.Tags.Length)
-			{
-				return true;
-			}
-		}
-		return false;
+		return this.PrefabTag == prefab_id.PrefabTag && this.Tags.Length == prefab_id.Tags.Length;
 	}
 
 	public override bool Equals(object o)
@@ -387,7 +374,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public const int InvalidInstanceID = -1;
 
-	public static int NextUniqueID = 0;
+	public static int NextUniqueID;
 
 	[ReadOnly]
 	public Tag SaveLoadTag;
@@ -409,7 +396,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public List<Descriptor> AdditionalEffects;
 
-	private Tag[] tags = null;
+	private Tag[] tags;
 
 	public CellAlignment defaultSpawnOffset = CellAlignment.Bottom;
 

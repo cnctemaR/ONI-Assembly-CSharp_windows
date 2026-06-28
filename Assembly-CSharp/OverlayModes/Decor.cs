@@ -103,17 +103,18 @@ namespace OverlayModes
 
 		protected override void OnSaveLoadRootUnregistered(SaveLoadRoot item)
 		{
-			if (!(item == null) && !(item.gameObject == null))
+			if (item == null || item.gameObject == null)
 			{
-				DecorProvider component = item.GetComponent<DecorProvider>();
-				if (component != null)
+				return;
+			}
+			DecorProvider component = item.GetComponent<DecorProvider>();
+			if (component != null)
+			{
+				if (this.layerTargets.Contains(component))
 				{
-					if (this.layerTargets.Contains(component))
-					{
-						this.layerTargets.Remove(component);
-					}
-					this.partition.Remove(component);
+					this.layerTargets.Remove(component);
 				}
+				this.partition.Remove(component);
 			}
 		}
 

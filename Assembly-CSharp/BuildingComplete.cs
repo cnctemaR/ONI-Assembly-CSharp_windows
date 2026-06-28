@@ -83,12 +83,9 @@ public class BuildingComplete : Building
 		Vector3 vector = Grid.CellToPosCBC(num, this.Def.SceneLayer);
 		base.transform.SetPosition(vector);
 		PrimaryElement component4 = base.GetComponent<PrimaryElement>();
-		if (component4 != null)
+		if (component4 != null && component4.Mass == 0f)
 		{
-			if (component4.Mass == 0f)
-			{
-				component4.Mass = this.Def.Mass[0];
-			}
+			component4.Mass = this.Def.Mass[0];
 		}
 		this.Def.MarkArea(num, base.Orientation, this.Def.ObjectLayer, base.gameObject);
 		if (this.Def.IsTilePiece)
@@ -145,47 +142,48 @@ public class BuildingComplete : Building
 
 	protected override void OnCleanUp()
 	{
-		if (!Game.quitting)
+		if (Game.quitting)
 		{
-			if (this.Def.UseStructureTemperature)
+			return;
+		}
+		if (this.Def.UseStructureTemperature)
+		{
+			GameComps.StructureTemperatures.Remove(base.gameObject);
+		}
+		base.OnCleanUp();
+		int num = Grid.PosToCell(this);
+		this.Def.UnmarkArea(num, base.Orientation, this.Def.ObjectLayer, base.gameObject);
+		if (this.Def.IsFoundation)
+		{
+			foreach (CellOffset cellOffset in this.Def.PlacementOffsets)
 			{
-				GameComps.StructureTemperatures.Remove(base.gameObject);
+				int num2 = Grid.OffsetCell(num, cellOffset);
+				Grid.Foundation[num2] = false;
+				Game.Instance.roomProber.SolidChangedEvent(num2, false);
 			}
-			base.OnCleanUp();
-			int num = Grid.PosToCell(this);
-			this.Def.UnmarkArea(num, base.Orientation, this.Def.ObjectLayer, base.gameObject);
-			if (this.Def.IsFoundation)
+		}
+		Game.Instance.roomProber.RemoveBuilding(this);
+		for (int j = 0; j < base.PlacementCells.Length; j++)
+		{
+			Region intersectionRegion = Game.Instance.RegionManager.GetIntersectionRegion(base.PlacementCells[j]);
+			if (intersectionRegion != null)
 			{
-				foreach (CellOffset cellOffset in this.Def.PlacementOffsets)
-				{
-					int num2 = Grid.OffsetCell(num, cellOffset);
-					Grid.Foundation[num2] = false;
-					Game.Instance.roomProber.SolidChangedEvent(num2, false);
-				}
+				intersectionRegion.RemoveBuilding(this, true);
+				break;
 			}
-			Game.Instance.roomProber.RemoveBuilding(this);
-			for (int j = 0; j < base.PlacementCells.Length; j++)
+		}
+		if (this.Def.PreventIdlingInFrontOfBuilding)
+		{
+			for (int k = 0; k < base.PlacementCells.Length; k++)
 			{
-				Region intersectionRegion = Game.Instance.RegionManager.GetIntersectionRegion(base.PlacementCells[j]);
-				if (intersectionRegion != null)
-				{
-					intersectionRegion.RemoveBuilding(this, true);
-					break;
-				}
+				Grid.PreventIdlingOnCell[base.PlacementCells[k]] = false;
 			}
-			if (this.Def.PreventIdlingInFrontOfBuilding)
-			{
-				for (int k = 0; k < base.PlacementCells.Length; k++)
-				{
-					Grid.PreventIdlingOnCell[base.PlacementCells[k]] = false;
-				}
-			}
-			Components.BuildingCompletes.Remove(this);
-			base.UnregisterBlockTileRenderer();
-			if (this.onCleanUp != null)
-			{
-				this.onCleanUp();
-			}
+		}
+		Components.BuildingCompletes.Remove(this);
+		base.UnregisterBlockTileRenderer();
+		if (this.onCleanUp != null)
+		{
+			this.onCleanUp();
 		}
 	}
 

@@ -42,88 +42,66 @@ namespace ProcGen.Noise
 
 		public IModule3D CreateModule()
 		{
-			IModule3D module3D;
 			switch (this.modifyType)
 			{
 			case Modifier.ModifyType.Abs:
-				module3D = new Abs();
-				break;
+				return new Abs();
 			case Modifier.ModifyType.Clamp:
-				module3D = new Clamp
+				return new Clamp
 				{
 					LowerBound = this.lower,
 					UpperBound = this.upper
 				};
-				break;
 			case Modifier.ModifyType.Exponent:
-				module3D = new Exponent
+				return new Exponent
 				{
 					ExponentValue = this.exponent
 				};
-				break;
 			case Modifier.ModifyType.Invert:
-				module3D = new Invert();
-				break;
+				return new Invert();
 			case Modifier.ModifyType.ScaleBias:
-				module3D = new ScaleBias
+				return new ScaleBias
 				{
 					Scale = this.scale,
 					Bias = this.bias
 				};
-				break;
 			case Modifier.ModifyType.Scale2d:
-				module3D = new Scale2d
+				return new Scale2d
 				{
 					Scale = this.scale2d
 				};
-				break;
 			case Modifier.ModifyType.Curve:
-				module3D = new Curve();
-				break;
+				return new Curve();
 			case Modifier.ModifyType.Terrace:
-				module3D = new Terrace();
-				break;
+				return new Terrace();
 			default:
-				module3D = null;
-				break;
+				return null;
 			}
-			return module3D;
 		}
 
 		public IModule3D CreateModule(IModule3D sourceModule)
 		{
-			IModule3D module3D;
 			switch (this.modifyType)
 			{
 			case Modifier.ModifyType.Abs:
-				module3D = new Abs(sourceModule);
-				break;
+				return new Abs(sourceModule);
 			case Modifier.ModifyType.Clamp:
-				module3D = new Clamp(sourceModule, this.lower, this.upper);
-				break;
+				return new Clamp(sourceModule, this.lower, this.upper);
 			case Modifier.ModifyType.Exponent:
-				module3D = new Exponent(sourceModule, this.exponent);
-				break;
+				return new Exponent(sourceModule, this.exponent);
 			case Modifier.ModifyType.Invert:
-				module3D = new Invert(sourceModule);
-				break;
+				return new Invert(sourceModule);
 			case Modifier.ModifyType.ScaleBias:
-				module3D = new ScaleBias(sourceModule, this.scale, this.bias);
-				break;
+				return new ScaleBias(sourceModule, this.scale, this.bias);
 			case Modifier.ModifyType.Scale2d:
-				module3D = new Scale2d(sourceModule, this.scale2d);
-				break;
+				return new Scale2d(sourceModule, this.scale2d);
 			case Modifier.ModifyType.Curve:
-				module3D = new Curve(sourceModule);
-				break;
+				return new Curve(sourceModule);
 			case Modifier.ModifyType.Terrace:
-				module3D = new Terrace(sourceModule);
-				break;
+				return new Terrace(sourceModule);
 			default:
-				module3D = null;
-				break;
+				return null;
 			}
-			return module3D;
 		}
 
 		public void SetSouces(IModule3D target, IModule3D sourceModule, FloatList controlFloats, ControlPointList controlPoints)

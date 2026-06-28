@@ -37,17 +37,12 @@ namespace ProcGen
 
 		public string GetDefaultBiome(string name)
 		{
-			string text;
 			if (this.features.TerrainFeatures.ContainsKey(name))
 			{
-				text = this.features.TerrainFeatures[name].defaultBiome.type;
+				return this.features.TerrainFeatures[name].defaultBiome.type;
 			}
-			else
-			{
-				Debug.LogError("Couldnt get default biome [" + name + "]", null);
-				text = null;
-			}
-			return text;
+			Debug.LogError("Couldnt get default biome [" + name + "]", null);
+			return null;
 		}
 
 		public FeatureSettings GetFeature(string name)
@@ -57,20 +52,15 @@ namespace ProcGen
 				int num = 0;
 				num++;
 			}
-			FeatureSettings featureSettings;
 			if (!name.StartsWith("features/"))
 			{
-				featureSettings = null;
+				return null;
 			}
-			else
+			if (this.featuresettings.ContainsKey(name))
 			{
-				if (!this.featuresettings.ContainsKey(name))
-				{
-					throw new Exception("Couldnt get feature [" + name + "]");
-				}
-				featureSettings = this.featuresettings[name];
+				return this.featuresettings[name];
 			}
-			return featureSettings;
+			throw new Exception("Couldnt get feature [" + name + "]");
 		}
 
 		public string[] GetFeatureSettingsNames()
@@ -87,34 +77,24 @@ namespace ProcGen
 		public float GetDefaultFloat(string target)
 		{
 			object obj = this.defaults.data[target];
-			float num;
 			if (obj.GetType() == typeof(float))
 			{
-				num = (float)obj;
+				return (float)obj;
 			}
-			else
-			{
-				float num2 = float.Parse(obj as string);
-				this.defaults.data[target] = num2;
-				num = num2;
-			}
+			float num = float.Parse(obj as string);
+			this.defaults.data[target] = num;
 			return num;
 		}
 
 		public int GetDefaultInt(string target)
 		{
 			object obj = this.defaults.data[target];
-			int num;
 			if (obj.GetType() == typeof(int))
 			{
-				num = (int)obj;
+				return (int)obj;
 			}
-			else
-			{
-				int num2 = int.Parse(obj as string);
-				this.defaults.data[target] = num2;
-				num = num2;
-			}
+			int num = int.Parse(obj as string);
+			this.defaults.data[target] = num;
 			return num;
 		}
 
@@ -135,57 +115,50 @@ namespace ProcGen
 
 		private bool GetPathAndName(string srcPath, string srcName, out string name)
 		{
-			bool flag;
 			if (File.Exists(srcPath + srcName + ".yaml"))
 			{
 				name = srcName;
-				flag = true;
+				return true;
 			}
-			else
+			string[] array = srcName.Split(new char[] { '/' });
+			name = array[0];
+			for (int i = 1; i < array.Length - 1; i++)
 			{
-				string[] array = srcName.Split(new char[] { '/' });
-				name = array[0];
-				for (int i = 1; i < array.Length - 1; i++)
-				{
-					name = name + "/" + array[i];
-				}
-				if (File.Exists(srcPath + name + ".yaml"))
-				{
-					flag = true;
-				}
-				else
-				{
-					name = srcName;
-					flag = false;
-				}
+				name = name + "/" + array[i];
 			}
-			return flag;
+			if (File.Exists(srcPath + name + ".yaml"))
+			{
+				return true;
+			}
+			name = srcName;
+			return false;
 		}
 
 		private void LoadBiome(string longName)
 		{
-			string text = "";
-			if (this.GetPathAndName(this.base_path, longName, out text))
+			string empty = string.Empty;
+			if (!this.GetPathAndName(this.base_path, longName, out empty))
 			{
-				if (!WorldGenSettings.biomeSettingsCache.ContainsKey(text))
+				return;
+			}
+			if (!WorldGenSettings.biomeSettingsCache.ContainsKey(empty))
+			{
+				BiomeSettings biomeSettings = YamlIO<BiomeSettings>.LoadFile(this.base_path + empty + ".yaml");
+				if (biomeSettings != null)
 				{
-					BiomeSettings biomeSettings = YamlIO<BiomeSettings>.LoadFile(this.base_path + text + ".yaml");
-					if (biomeSettings != null)
+					WorldGenSettings.biomeSettingsCache.Add(empty, biomeSettings);
+					foreach (KeyValuePair<string, ElementBandConfiguration> keyValuePair in biomeSettings.TerrainBiomeLookupTable)
 					{
-						WorldGenSettings.biomeSettingsCache.Add(text, biomeSettings);
-						foreach (KeyValuePair<string, ElementBandConfiguration> keyValuePair in biomeSettings.TerrainBiomeLookupTable)
+						string text = empty + "/" + keyValuePair.Key;
+						if (!this.biomes.BiomeBackgroundElementBandConfigurations.ContainsKey(text))
 						{
-							string text2 = text + "/" + keyValuePair.Key;
-							if (!this.biomes.BiomeBackgroundElementBandConfigurations.ContainsKey(text2))
-							{
-								this.biomes.BiomeBackgroundElementBandConfigurations.Add(text2, keyValuePair.Value);
-							}
+							this.biomes.BiomeBackgroundElementBandConfigurations.Add(text, keyValuePair.Value);
 						}
 					}
-					else
-					{
-						Debug.LogWarning("WorldGen: Attempting to load biome: " + text + " failed", null);
-					}
+				}
+				else
+				{
+					Debug.LogWarning("WorldGen: Attempting to load biome: " + empty + " failed", null);
 				}
 			}
 		}
@@ -198,30 +171,25 @@ namespace ProcGen
 
 		private string LoadFeature(string longName)
 		{
-			string text = "";
-			string text2;
-			if (!this.GetPathAndName(this.base_path, longName, out text))
+			string empty = string.Empty;
+			if (!this.GetPathAndName(this.base_path, longName, out empty))
 			{
-				Debug.LogWarning("LoadFeature GetPathAndName: Attempting to load feature: " + text + " failed", null);
-				text2 = longName;
+				Debug.LogWarning("LoadFeature GetPathAndName: Attempting to load feature: " + empty + " failed", null);
+				return longName;
 			}
-			else
+			if (!this.featuresettings.ContainsKey(empty))
 			{
-				if (!this.featuresettings.ContainsKey(text))
+				FeatureSettings featureSettings = YamlIO<FeatureSettings>.LoadFile(this.base_path + empty + ".yaml");
+				if (featureSettings != null)
 				{
-					FeatureSettings featureSettings = YamlIO<FeatureSettings>.LoadFile(this.base_path + text + ".yaml");
-					if (featureSettings != null)
-					{
-						this.featuresettings.Add(text, featureSettings);
-					}
-					else
-					{
-						Debug.LogWarning("WorldGen: Attempting to load feature: " + text + " failed", null);
-					}
+					this.featuresettings.Add(empty, featureSettings);
 				}
-				text2 = text;
+				else
+				{
+					Debug.LogWarning("WorldGen: Attempting to load feature: " + empty + " failed", null);
+				}
 			}
-			return text2;
+			return empty;
 		}
 
 		public void SetDefaultWorld(string path)
@@ -320,13 +288,13 @@ namespace ProcGen
 			return worldGenSettings;
 		}
 
-		private World world = null;
+		private World world;
 
 		private Dictionary<string, FeatureSettings> featuresettings = new Dictionary<string, FeatureSettings>();
 
 		private static Dictionary<string, BiomeSettings> biomeSettingsCache = new Dictionary<string, BiomeSettings>();
 
-		private string base_path = null;
+		private string base_path;
 
 		private static string LAYERS_FILE = "layers";
 

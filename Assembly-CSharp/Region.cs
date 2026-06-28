@@ -330,58 +330,61 @@ public class Region : KMonoBehaviour, ISaveLoadable
 
 	public void AddBuildings(List<BuildingComplete> buildings, bool fire_region_changed = false)
 	{
-		if (buildings != null && buildings.Count != 0)
+		if (buildings == null || buildings.Count == 0)
 		{
-			foreach (BuildingComplete buildingComplete in buildings)
-			{
-				this.AddBuilding(buildingComplete, fire_region_changed);
-			}
+			return;
+		}
+		foreach (BuildingComplete buildingComplete in buildings)
+		{
+			this.AddBuilding(buildingComplete, fire_region_changed);
 		}
 	}
 
 	public void AddBuilding(BuildingComplete building, bool fire_region_changed = true)
 	{
-		if (!(building == null))
+		if (building == null)
 		{
-			KPrefabID kpid = building.GetComponent<KPrefabID>();
-			Region.BuildingRequirement buildingRequirement = this.buildingRequirements.Find((Region.BuildingRequirement br) => kpid.HasTag(br.buildingTag));
-			if (this.ContainsCells(building.PlacementCells) && !this.ownedBuildings.Contains(building))
+			return;
+		}
+		KPrefabID kpid = building.GetComponent<KPrefabID>();
+		Region.BuildingRequirement buildingRequirement = this.buildingRequirements.Find((Region.BuildingRequirement br) => kpid.HasTag(br.buildingTag));
+		if (this.ContainsCells(building.PlacementCells) && !this.ownedBuildings.Contains(building))
+		{
+			this.ownedBuildings.Add(building);
+			Attributes attributes = this.GetAttributes();
+			foreach (AttributeModifier attributeModifier in building.regionModifiers)
 			{
-				this.ownedBuildings.Add(building);
-				Attributes attributes = this.GetAttributes();
-				foreach (AttributeModifier attributeModifier in building.regionModifiers)
+				attributes.Add(building.GetComponent<KSelectable>().GetName(), attributeModifier);
+			}
+			if (buildingRequirement != null && buildingRequirement.AddBuilding(building))
+			{
+				if (fire_region_changed && this.OnBuildingAdded != null)
 				{
-					attributes.Add(building.GetComponent<KSelectable>().GetName(), attributeModifier);
+					this.OnBuildingAdded(building);
 				}
-				if (buildingRequirement != null && buildingRequirement.AddBuilding(building))
+				RequiresRegion component = building.GetComponent<RequiresRegion>();
+				if (component != null)
 				{
-					if (fire_region_changed && this.OnBuildingAdded != null)
-					{
-						this.OnBuildingAdded(building);
-					}
-					RequiresRegion component = building.GetComponent<RequiresRegion>();
-					if (component != null)
-					{
-						component.SetRegion(this, true);
-					}
+					component.SetRegion(this, true);
 				}
 			}
-			if (fire_region_changed)
-			{
-				this.RegionChanged();
-			}
+		}
+		if (fire_region_changed)
+		{
+			this.RegionChanged();
 		}
 	}
 
 	public void RemoveBuildings(List<BuildingComplete> buildings, bool fire_region_changed = true)
 	{
-		if (buildings != null && buildings.Count != 0)
+		if (buildings == null || buildings.Count == 0)
 		{
-			for (int i = buildings.Count - 1; i >= 0; i--)
-			{
-				BuildingComplete buildingComplete = buildings[i];
-				this.RemoveBuilding(buildingComplete, fire_region_changed);
-			}
+			return;
+		}
+		for (int i = buildings.Count - 1; i >= 0; i--)
+		{
+			BuildingComplete buildingComplete = buildings[i];
+			this.RemoveBuilding(buildingComplete, fire_region_changed);
 		}
 	}
 
@@ -390,58 +393,59 @@ public class Region : KMonoBehaviour, ISaveLoadable
 		if (building == null)
 		{
 			global::Debug.LogError("Can't remove a null building.", null);
+			return;
 		}
-		else
+		KPrefabID kpid = building.GetComponent<KPrefabID>();
+		Region.BuildingRequirement buildingRequirement = this.buildingRequirements.Find((Region.BuildingRequirement br) => kpid.HasTag(br.buildingTag));
+		this.ownedBuildings.Remove(building);
+		if (buildingRequirement == null)
 		{
-			KPrefabID kpid = building.GetComponent<KPrefabID>();
-			Region.BuildingRequirement buildingRequirement = this.buildingRequirements.Find((Region.BuildingRequirement br) => kpid.HasTag(br.buildingTag));
-			this.ownedBuildings.Remove(building);
-			if (buildingRequirement != null)
+			return;
+		}
+		Attributes attributes = this.GetAttributes();
+		foreach (AttributeModifier attributeModifier in building.regionModifiers)
+		{
+			attributes.Remove(attributeModifier);
+		}
+		if (buildingRequirement.RemoveBuilding(building))
+		{
+			if (fire_region_changed && this.OnBuildingRemoved != null)
 			{
-				Attributes attributes = this.GetAttributes();
-				foreach (AttributeModifier attributeModifier in building.regionModifiers)
-				{
-					attributes.Remove(attributeModifier);
-				}
-				if (buildingRequirement.RemoveBuilding(building))
-				{
-					if (fire_region_changed && this.OnBuildingRemoved != null)
-					{
-						this.OnBuildingRemoved(building);
-					}
-					RequiresRegion component = building.GetComponent<RequiresRegion>();
-					if (component != null)
-					{
-						component.SetRegion(null, fire_region_changed);
-					}
-				}
-				if (fire_region_changed)
-				{
-					this.RegionChanged();
-				}
+				this.OnBuildingRemoved(building);
 			}
+			RequiresRegion component = building.GetComponent<RequiresRegion>();
+			if (component != null)
+			{
+				component.SetRegion(null, fire_region_changed);
+			}
+		}
+		if (fire_region_changed)
+		{
+			this.RegionChanged();
 		}
 	}
 
 	public void AddDoor(Door door)
 	{
-		if (this.needsEnclosure)
+		if (!this.needsEnclosure)
 		{
-			if (!this.ownedDoors.Contains(door))
-			{
-				this.ownedDoors.Add(door);
-				this.RegionChanged();
-			}
+			return;
+		}
+		if (!this.ownedDoors.Contains(door))
+		{
+			this.ownedDoors.Add(door);
+			this.RegionChanged();
 		}
 	}
 
 	public void RemoveDoor(Door door)
 	{
-		if (this.needsEnclosure && this.ownedDoors.Contains(door))
+		if (!this.needsEnclosure || !this.ownedDoors.Contains(door))
 		{
-			this.ownedDoors.Remove(door);
-			this.RegionChanged();
+			return;
 		}
+		this.ownedDoors.Remove(door);
+		this.RegionChanged();
 	}
 
 	private Vector3 GetStatusIndicatorOffset()
@@ -516,102 +520,82 @@ public class Region : KMonoBehaviour, ISaveLoadable
 
 	private int FindUpperLeftCell()
 	{
-		int num;
 		if (this.cells.Count == 0)
 		{
-			num = Grid.InvalidCell;
+			return Grid.InvalidCell;
 		}
-		else
+		CellOffset cellOffset = default(CellOffset);
+		bool flag = true;
+		foreach (int num in this.cells)
 		{
-			CellOffset cellOffset = default(CellOffset);
-			bool flag = true;
-			foreach (int num2 in this.cells)
+			CellOffset offset = Grid.GetOffset(num);
+			if (flag || offset.x < cellOffset.x || (offset.x == cellOffset.x && offset.y > cellOffset.y))
 			{
-				CellOffset offset = Grid.GetOffset(num2);
-				if (flag || offset.x < cellOffset.x || (offset.x == cellOffset.x && offset.y > cellOffset.y))
-				{
-					cellOffset = offset;
-					flag = false;
-				}
+				cellOffset = offset;
+				flag = false;
 			}
-			num = Grid.XYToCell(cellOffset.x, cellOffset.y);
 		}
-		return num;
+		return Grid.XYToCell(cellOffset.x, cellOffset.y);
 	}
 
 	private int FindLowerLeftCell()
 	{
-		int num;
 		if (this.cells.Count == 0)
 		{
-			num = Grid.InvalidCell;
+			return Grid.InvalidCell;
 		}
-		else
+		CellOffset cellOffset = default(CellOffset);
+		bool flag = true;
+		foreach (int num in this.cells)
 		{
-			CellOffset cellOffset = default(CellOffset);
-			bool flag = true;
-			foreach (int num2 in this.cells)
+			CellOffset offset = Grid.GetOffset(num);
+			if (flag || offset.x < cellOffset.x || (offset.x == cellOffset.x && offset.y < cellOffset.y))
 			{
-				CellOffset offset = Grid.GetOffset(num2);
-				if (flag || offset.x < cellOffset.x || (offset.x == cellOffset.x && offset.y < cellOffset.y))
-				{
-					cellOffset = offset;
-					flag = false;
-				}
+				cellOffset = offset;
+				flag = false;
 			}
-			num = Grid.XYToCell(cellOffset.x, cellOffset.y);
 		}
-		return num;
+		return Grid.XYToCell(cellOffset.x, cellOffset.y);
 	}
 
 	private int FindUpperRightCell()
 	{
-		int num;
 		if (this.cells.Count == 0)
 		{
-			num = Grid.InvalidCell;
+			return Grid.InvalidCell;
 		}
-		else
+		CellOffset cellOffset = default(CellOffset);
+		bool flag = true;
+		foreach (int num in this.cells)
 		{
-			CellOffset cellOffset = default(CellOffset);
-			bool flag = true;
-			foreach (int num2 in this.cells)
+			CellOffset offset = Grid.GetOffset(num);
+			if (flag || offset.x > cellOffset.x || (offset.x == cellOffset.x && offset.y > cellOffset.y))
 			{
-				CellOffset offset = Grid.GetOffset(num2);
-				if (flag || offset.x > cellOffset.x || (offset.x == cellOffset.x && offset.y > cellOffset.y))
-				{
-					cellOffset = offset;
-					flag = false;
-				}
+				cellOffset = offset;
+				flag = false;
 			}
-			num = Grid.XYToCell(cellOffset.x, cellOffset.y);
 		}
-		return num;
+		return Grid.XYToCell(cellOffset.x, cellOffset.y);
 	}
 
 	private int FindLowerRightCell()
 	{
-		int num;
 		if (this.cells.Count == 0)
 		{
-			num = Grid.InvalidCell;
+			return Grid.InvalidCell;
 		}
-		else
+		CellOffset cellOffset = default(CellOffset);
+		bool flag = true;
+		foreach (int num in this.cells)
 		{
-			CellOffset cellOffset = default(CellOffset);
-			bool flag = true;
-			foreach (int num2 in this.cells)
+			CellOffset offset = Grid.GetOffset(num);
+			if (flag || offset.x > cellOffset.x || (offset.x == cellOffset.x && offset.y < cellOffset.y))
 			{
-				CellOffset offset = Grid.GetOffset(num2);
-				if (flag || offset.x > cellOffset.x || (offset.x == cellOffset.x && offset.y < cellOffset.y))
-				{
-					cellOffset = offset;
-					flag = false;
-				}
+				cellOffset = offset;
+				flag = false;
 			}
-			num = Grid.XYToCell(cellOffset.x, cellOffset.y);
 		}
-		return num;
+		return Grid.XYToCell(cellOffset.x, cellOffset.y);
 	}
 
 	public bool IsCellBlocked(int cell)
@@ -784,25 +768,20 @@ public class Region : KMonoBehaviour, ISaveLoadable
 
 	public bool OwnsBuilding(BuildingComplete building, bool forceRefresh = false)
 	{
-		bool flag;
 		if (building == null || this.ownedBuildings == null)
 		{
-			flag = false;
+			return false;
 		}
-		else
+		if (forceRefresh)
 		{
-			if (forceRefresh)
-			{
-				this.CollectBuildingsInRegion();
-			}
-			flag = this.ownedBuildings.Contains(building);
+			this.CollectBuildingsInRegion();
 		}
-		return flag;
+		return this.ownedBuildings.Contains(building);
 	}
 
 	public string GetMissingRequirementsString()
 	{
-		string text = "";
+		string text = string.Empty;
 		this.ownsDoor = false;
 		bool flag = true;
 		if (this.needsEnclosure)
@@ -843,7 +822,7 @@ public class Region : KMonoBehaviour, ISaveLoadable
 	public string GetMissingBuildingRequirementsString()
 	{
 		this.CheckBuildingRequirements();
-		string text = "";
+		string text = string.Empty;
 		for (int i = 0; i < this.missingRequirements.Count; i++)
 		{
 			Region.BuildingRequirement buildingRequirement = this.missingRequirements[i];
@@ -973,7 +952,7 @@ public class Region : KMonoBehaviour, ISaveLoadable
 		string[] array = new string[this.missingRequirements.Count];
 		for (int i = 0; i < this.missingRequirements.Count; i++)
 		{
-			array[i] = "";
+			array[i] = string.Empty;
 			GameObject prefab = Assets.GetPrefab(new Tag(this.missingRequirements[i].buildingTag));
 			if (prefab == null)
 			{
@@ -1077,9 +1056,9 @@ public class Region : KMonoBehaviour, ISaveLoadable
 
 	private bool[] visitedCells;
 
-	private bool ownsDoor = false;
+	private bool ownsDoor;
 
-	private bool wasValid = false;
+	private bool wasValid;
 
 	private List<Door> ownedDoors = new List<Door>();
 
@@ -1101,7 +1080,7 @@ public class Region : KMonoBehaviour, ISaveLoadable
 
 	private global::Action action;
 
-	private static Region.StatusItemPos statusItemPos = Region.StatusItemPos.UpperLeft;
+	private static Region.StatusItemPos statusItemPos;
 
 	[HideInInspector]
 	public Color OverlayColor;
@@ -1130,49 +1109,40 @@ public class Region : KMonoBehaviour, ISaveLoadable
 	{
 		public BuildingRequirement(RegionManager.BuildingRequirement requirement)
 		{
-			if (requirement != null)
+			if (requirement == null)
 			{
-				this.category = requirement.category;
-				this.buildingTag = requirement.buildingTag;
+				return;
 			}
+			this.category = requirement.category;
+			this.buildingTag = requirement.buildingTag;
 		}
 
 		public bool AddBuilding(BuildingComplete newBuilding)
 		{
-			bool flag;
 			if (newBuilding == null)
 			{
-				flag = false;
+				return false;
 			}
-			else if (!this.buildingsOwned.Contains(newBuilding))
+			if (!this.buildingsOwned.Contains(newBuilding))
 			{
 				this.buildingsOwned.Add(newBuilding);
-				flag = true;
+				return true;
 			}
-			else
-			{
-				flag = false;
-			}
-			return flag;
+			return false;
 		}
 
 		public bool RemoveBuilding(BuildingComplete building)
 		{
-			bool flag;
 			if (building == null)
 			{
-				flag = false;
+				return false;
 			}
-			else if (this.buildingsOwned.Contains(building))
+			if (this.buildingsOwned.Contains(building))
 			{
 				this.buildingsOwned.Remove(building);
-				flag = true;
+				return true;
 			}
-			else
-			{
-				flag = false;
-			}
-			return flag;
+			return false;
 		}
 
 		public string category;

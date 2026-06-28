@@ -38,12 +38,9 @@ public class SceneInitializer : MonoBehaviour
 
 	public void NewSaveGamePrefab()
 	{
-		if (this.prefab_NewSaveGame != null)
+		if (this.prefab_NewSaveGame != null && SaveGame.Instance == null)
 		{
-			if (SaveGame.Instance == null)
-			{
-				Util.KInstantiate(this.prefab_NewSaveGame, base.gameObject, null);
-			}
+			Util.KInstantiate(this.prefab_NewSaveGame, base.gameObject, null);
 		}
 	}
 

@@ -12,12 +12,12 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 		base.smi.StartSM();
 		if (Checkpoint.infoStatusItem_Logic == null)
 		{
-			Checkpoint.infoStatusItem_Logic = new StatusItem("CheckpointLogic", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			Checkpoint.infoStatusItem_Logic = new StatusItem("CheckpointLogic", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
 			Checkpoint.infoStatusItem_Logic.resolveStringCallback = new Func<string, object, string>(Checkpoint.ResolveInfoStatusItem_Logic);
 		}
 		if (Checkpoint.infoStatusItem_Wire == null)
 		{
-			Checkpoint.infoStatusItem_Wire = new StatusItem("CheckpointDisconnected", BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_DISCONNECTED, BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_DISCONNECTED, "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.Logic, 30718);
+			Checkpoint.infoStatusItem_Wire = new StatusItem("CheckpointDisconnected", BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_DISCONNECTED, BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_DISCONNECTED, string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.Logic, 30718);
 		}
 		this.Refresh();
 	}
@@ -39,16 +39,11 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 	private static string ResolveInfoStatusItem_Logic(string format_str, object data)
 	{
 		Checkpoint checkpoint = (Checkpoint)data;
-		string text;
 		if (!checkpoint.hasLogicWire)
 		{
-			text = BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_DISCONNECTED;
+			return BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_DISCONNECTED;
 		}
-		else
-		{
-			text = ((!checkpoint.RedLight) ? BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_OPEN : BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_CLOSED);
-		}
-		return text;
+		return (!checkpoint.RedLight) ? BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_OPEN : BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_CLOSED;
 	}
 
 	private void CreateNewReactable()
@@ -146,29 +141,24 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 
 		public override bool InternalCanBegin(GameObject new_reactor, Navigator.ActiveTransition transition)
 		{
-			bool flag;
 			if (this.reactor != null)
 			{
-				flag = false;
+				return false;
 			}
-			else if (this.checkpoint == null)
+			if (this.checkpoint == null)
 			{
 				base.Cleanup();
-				flag = false;
+				return false;
 			}
-			else if (!this.checkpoint.RedLight)
+			if (!this.checkpoint.RedLight)
 			{
-				flag = false;
+				return false;
 			}
-			else if (this.rotated)
+			if (this.rotated)
 			{
-				flag = transition.x < 0;
+				return transition.x < 0;
 			}
-			else
-			{
-				flag = transition.x > 0;
-			}
-			return flag;
+			return transition.x > 0;
 		}
 
 		protected override void InternalBegin()
@@ -219,7 +209,7 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 
 		private Navigator reactor_navigator;
 
-		private bool rotated = false;
+		private bool rotated;
 	}
 
 	public class SMInstance : GameStateMachine<Checkpoint.States, Checkpoint.SMInstance, Checkpoint, object>.GameInstance

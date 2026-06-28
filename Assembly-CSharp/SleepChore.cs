@@ -83,13 +83,13 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 			}
 		}
 
-		public bool hadPeacefulSleep = false;
+		public bool hadPeacefulSleep;
 
-		public bool hadNormalSleep = false;
+		public bool hadNormalSleep;
 
-		public bool hadBadSleep = false;
+		public bool hadBadSleep;
 
-		public bool hadTerribleSleep = false;
+		public bool hadTerribleSleep;
 
 		public int lastEvaluatedDay = -1;
 
@@ -99,7 +99,7 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 
 		private int locatorCell;
 
-		private GameObject locator = null;
+		private GameObject locator;
 	}
 
 	public class States : GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore>

@@ -32,16 +32,11 @@ public class BaseNodeEditor : Node
 		get
 		{
 			NoiseNodeCanvas noiseNodeCanvas = NodeEditor.curNodeCanvas as NoiseNodeCanvas;
-			SampleSettings sampleSettings;
 			if (noiseNodeCanvas != null)
 			{
-				sampleSettings = noiseNodeCanvas.settings;
+				return noiseNodeCanvas.settings;
 			}
-			else
-			{
-				sampleSettings = null;
-			}
-			return sampleSettings;
+			return null;
 		}
 	}
 

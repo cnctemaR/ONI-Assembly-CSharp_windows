@@ -9,14 +9,7 @@ public class NavTable
 
 	public bool IsValid(int cell, NavType nav_type = NavType.Floor)
 	{
-		if (Grid.IsValidCell(cell))
-		{
-			if (this.ValidCells[(int)((byte)(cell * 8) + nav_type)])
-			{
-				return true;
-			}
-		}
-		return false;
+		return Grid.IsValidCell(cell) && this.ValidCells[(int)((byte)(cell * 8) + nav_type)];
 	}
 
 	public void SetValid(int cell, NavType nav_type, bool is_valid)

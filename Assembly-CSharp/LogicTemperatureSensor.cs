@@ -29,27 +29,25 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch
 		{
 			this.temperatures[this.simUpdateCounter] = Grid.Temperature[Grid.PosToCell(this)];
 			this.simUpdateCounter++;
+			return;
 		}
-		else
+		this.simUpdateCounter = 0;
+		this.averageTemp = 0f;
+		for (int i = 0; i < 8; i++)
 		{
-			this.simUpdateCounter = 0;
-			this.averageTemp = 0f;
-			for (int i = 0; i < 8; i++)
-			{
-				this.averageTemp += this.temperatures[i];
-			}
-			this.averageTemp /= 8f;
-			if (this.activateOnWarmerThan)
-			{
-				if ((this.averageTemp > this.thresholdTemperature && !base.IsSwitchedOn) || (this.averageTemp < this.thresholdTemperature && base.IsSwitchedOn))
-				{
-					this.Toggle();
-				}
-			}
-			else if ((this.averageTemp > this.thresholdTemperature && base.IsSwitchedOn) || (this.averageTemp < this.thresholdTemperature && !base.IsSwitchedOn))
+			this.averageTemp += this.temperatures[i];
+		}
+		this.averageTemp /= 8f;
+		if (this.activateOnWarmerThan)
+		{
+			if ((this.averageTemp > this.thresholdTemperature && !base.IsSwitchedOn) || (this.averageTemp < this.thresholdTemperature && base.IsSwitchedOn))
 			{
 				this.Toggle();
 			}
+		}
+		else if ((this.averageTemp > this.thresholdTemperature && base.IsSwitchedOn) || (this.averageTemp < this.thresholdTemperature && !base.IsSwitchedOn))
+		{
+			this.Toggle();
 		}
 	}
 
@@ -199,7 +197,7 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch
 
 	private HandleVector<int>.Handle structureTemperature;
 
-	private int simUpdateCounter = 0;
+	private int simUpdateCounter;
 
 	[Serialize]
 	public float thresholdTemperature = 280f;
@@ -207,7 +205,7 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch
 	[Serialize]
 	public bool activateOnWarmerThan;
 
-	public float minTemp = 0f;
+	public float minTemp;
 
 	public float maxTemp = 373.15f;
 
@@ -217,5 +215,5 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch
 
 	private float averageTemp;
 
-	private bool wasOn = false;
+	private bool wasOn;
 }

@@ -34,21 +34,16 @@ namespace ClipperLib
 
 		public override bool Equals(object obj)
 		{
-			bool flag;
 			if (obj == null)
 			{
-				flag = false;
+				return false;
 			}
-			else if (obj is IntPoint)
+			if (obj is IntPoint)
 			{
 				IntPoint intPoint = (IntPoint)obj;
-				flag = this.X == intPoint.X && this.Y == intPoint.Y;
+				return this.X == intPoint.X && this.Y == intPoint.Y;
 			}
-			else
-			{
-				flag = false;
-			}
-			return flag;
+			return false;
 		}
 
 		public override int GetHashCode()

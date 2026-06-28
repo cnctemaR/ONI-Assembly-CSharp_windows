@@ -34,16 +34,11 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 	public TimeOfDay.TimeRegion GetCurrentTimeRegion()
 	{
 		float currentDayAsPercentage = GameClock.Instance.GetCurrentDayAsPercentage();
-		TimeOfDay.TimeRegion timeRegion;
 		if (currentDayAsPercentage >= 0.875f)
 		{
-			timeRegion = TimeOfDay.TimeRegion.Night;
+			return TimeOfDay.TimeRegion.Night;
 		}
-		else
-		{
-			timeRegion = TimeOfDay.TimeRegion.Day;
-		}
-		return timeRegion;
+		return TimeOfDay.TimeRegion.Day;
 	}
 
 	private void Update()
@@ -110,9 +105,9 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 	}
 
 	[Serialize]
-	private float scale = 0f;
+	private float scale;
 
-	private TimeOfDay.TimeRegion timeRegion = TimeOfDay.TimeRegion.Invalid;
+	private TimeOfDay.TimeRegion timeRegion;
 
 	private EventInstance nightLPEvent;
 

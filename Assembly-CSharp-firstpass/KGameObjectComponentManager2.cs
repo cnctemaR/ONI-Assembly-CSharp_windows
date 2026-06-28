@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine.Profiling;
 
 public abstract class KGameObjectComponentManager2<T> : KGameObjectComponentManager<T> where T : IComponent, new()
 {
@@ -12,15 +11,14 @@ public abstract class KGameObjectComponentManager2<T> : KGameObjectComponentMana
 
 	public override void Update(float dt)
 	{
-		if (this.doUpdate)
+		if (!this.doUpdate)
 		{
-			Profiler.BeginSample(base.GetType().Name);
-			for (int i = 0; i < this.data.Count; i++)
-			{
-				T t = this.data[i];
-				t.Update(dt);
-			}
-			Profiler.EndSample();
+			return;
+		}
+		for (int i = 0; i < this.data.Count; i++)
+		{
+			T t = this.data[i];
+			t.Update(dt);
 		}
 	}
 
@@ -28,6 +26,7 @@ public abstract class KGameObjectComponentManager2<T> : KGameObjectComponentMana
 	{
 		if (!this.doFixedUpdate)
 		{
+			return;
 		}
 	}
 
@@ -35,6 +34,7 @@ public abstract class KGameObjectComponentManager2<T> : KGameObjectComponentMana
 	{
 		if (!this.doSimUpdate)
 		{
+			return;
 		}
 	}
 

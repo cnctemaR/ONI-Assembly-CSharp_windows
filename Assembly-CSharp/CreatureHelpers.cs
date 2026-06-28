@@ -16,24 +16,16 @@ public static class CreatureHelpers
 
 	public static bool cellsAreClear(int[] cells)
 	{
-		int i = 0;
-		while (i < cells.Length)
+		for (int i = 0; i < cells.Length; i++)
 		{
-			bool flag;
 			if (!Grid.IsValidCell(cells[i]))
 			{
-				flag = false;
+				return false;
 			}
-			else
+			if (!CreatureHelpers.isClear(cells[i]))
 			{
-				if (CreatureHelpers.isClear(cells[i]))
-				{
-					i++;
-					continue;
-				}
-				flag = false;
+				return false;
 			}
-			return flag;
 		}
 		return true;
 	}
@@ -51,12 +43,9 @@ public static class CreatureHelpers
 	public static void DeselectCreature(GameObject creature)
 	{
 		KSelectable component = creature.GetComponent<KSelectable>();
-		if (component != null)
+		if (component != null && SelectTool.Instance.selected == component)
 		{
-			if (SelectTool.Instance.selected == component)
-			{
-				SelectTool.Instance.Select(null, false);
-			}
+			SelectTool.Instance.Select(null, false);
 		}
 	}
 
@@ -195,26 +184,18 @@ public static class CreatureHelpers
 	public static bool CrewNearby(Transform transform, int range = 6)
 	{
 		int num = Grid.PosToCell(transform.gameObject);
-		int i = 1;
-		while (i < range)
+		for (int i = 1; i < range; i++)
 		{
 			int num2 = Grid.OffsetCell(num, i, 0);
 			int num3 = Grid.OffsetCell(num, -i, 0);
-			bool flag;
 			if (Grid.Objects[num2, 0] != null)
 			{
-				flag = true;
+				return true;
 			}
-			else
+			if (Grid.Objects[num3, 0] != null)
 			{
-				if (!(Grid.Objects[num3, 0] != null))
-				{
-					i++;
-					continue;
-				}
-				flag = true;
+				return true;
 			}
-			return flag;
 		}
 		return false;
 	}
@@ -243,58 +224,47 @@ public static class CreatureHelpers
 
 	public static GameObject GetFleeTargetLocatorObject(GameObject self, GameObject threat)
 	{
-		GameObject gameObject;
 		if (threat == null)
 		{
 			global::Debug.LogWarning(self.name + " is trying to flee, bus has no threats", null);
-			gameObject = null;
+			return null;
 		}
-		else
+		int num = Grid.PosToCell(threat);
+		int num2 = Grid.PosToCell(self);
+		Navigator nav = self.GetComponent<Navigator>();
+		if (nav == null)
 		{
-			int num = Grid.PosToCell(threat);
-			int num2 = Grid.PosToCell(self);
-			Navigator nav = self.GetComponent<Navigator>();
-			if (nav == null)
+			global::Debug.LogWarning(self.name + " is trying to flee, bus has no navigator component attached.", null);
+			return null;
+		}
+		HashSet<int> hashSet = GameUtil.FloodCollectCells(Grid.PosToCell(self), (int cell) => CreatureHelpers.CanFleeTo(cell, nav), 300, null);
+		int num3 = -1;
+		int num4 = -1;
+		foreach (int num5 in hashSet)
+		{
+			if (nav.CanReach(num5))
 			{
-				global::Debug.LogWarning(self.name + " is trying to flee, bus has no navigator component attached.", null);
-				gameObject = null;
-			}
-			else
-			{
-				HashSet<int> hashSet = GameUtil.FloodCollectCells(Grid.PosToCell(self), (int cell) => CreatureHelpers.CanFleeTo(cell, nav), 300, null);
-				int num3 = -1;
-				int num4 = -1;
-				foreach (int num5 in hashSet)
+				if (num5 != num2)
 				{
-					if (nav.CanReach(num5))
+					int num6 = -1;
+					num6 += Grid.GetCellDistance(num5, num);
+					if (CreatureHelpers.isInFavoredFleeDirection(num5, num, self))
 					{
-						if (num5 != num2)
-						{
-							int num6 = -1;
-							num6 += Grid.GetCellDistance(num5, num);
-							if (CreatureHelpers.isInFavoredFleeDirection(num5, num, self))
-							{
-								num6 += 2;
-							}
-							if (num6 > num4)
-							{
-								num4 = num6;
-								num3 = num5;
-							}
-						}
+						num6 += 2;
+					}
+					if (num6 > num4)
+					{
+						num4 = num6;
+						num3 = num5;
 					}
 				}
-				if (num3 != -1)
-				{
-					gameObject = ChoreHelpers.CreateLocator("GoToLocator", Grid.CellToPos(num3));
-				}
-				else
-				{
-					gameObject = null;
-				}
 			}
 		}
-		return gameObject;
+		if (num3 != -1)
+		{
+			return ChoreHelpers.CreateLocator("GoToLocator", Grid.CellToPos(num3));
+		}
+		return null;
 	}
 
 	private static bool isInFavoredFleeDirection(int targetFleeCell, int threatCell, GameObject self)

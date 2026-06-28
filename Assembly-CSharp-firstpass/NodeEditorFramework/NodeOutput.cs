@@ -117,17 +117,12 @@ namespace NodeEditorFramework
 				throw new UnityException("Trying to get value of " + base.name + " with null type!");
 			}
 			this.CheckType();
-			object obj;
 			if (type.IsAssignableFrom(this.typeData.Type))
 			{
-				obj = this.value;
+				return this.value;
 			}
-			else
-			{
-				global::Debug.LogError("Trying to GetValue<" + type.FullName + "> for Output Type: " + this.typeData.Type.FullName, null);
-				obj = null;
-			}
-			return obj;
+			global::Debug.LogError("Trying to GetValue<" + type.FullName + "> for Output Type: " + this.typeData.Type.FullName, null);
+			return null;
 		}
 
 		public void SetValue(object Value)
@@ -146,7 +141,6 @@ namespace NodeEditorFramework
 		public T GetValue<T>()
 		{
 			this.CheckType();
-			T t;
 			if (typeof(T).IsAssignableFrom(this.typeData.Type))
 			{
 				object obj;
@@ -154,14 +148,10 @@ namespace NodeEditorFramework
 				{
 					obj = (this.value = NodeOutput.GetDefault<T>());
 				}
-				t = (T)((object)obj);
+				return (T)((object)obj);
 			}
-			else
-			{
-				global::Debug.LogError("Trying to GetValue<" + typeof(T).FullName + "> for Output Type: " + this.typeData.Type.FullName, null);
-				t = NodeOutput.GetDefault<T>();
-			}
-			return t;
+			global::Debug.LogError("Trying to GetValue<" + typeof(T).FullName + "> for Output Type: " + this.typeData.Type.FullName, null);
+			return NodeOutput.GetDefault<T>();
 		}
 
 		public void SetValue<T>(T Value)
@@ -184,30 +174,20 @@ namespace NodeEditorFramework
 
 		public static T GetDefault<T>()
 		{
-			T t;
 			if (typeof(T).GetConstructor(Type.EmptyTypes) != null)
 			{
-				t = Activator.CreateInstance<T>();
+				return Activator.CreateInstance<T>();
 			}
-			else
-			{
-				t = default(T);
-			}
-			return t;
+			return default(T);
 		}
 
 		public static object GetDefault(Type type)
 		{
-			object obj;
 			if (type.GetConstructor(Type.EmptyTypes) != null)
 			{
-				obj = Activator.CreateInstance(type);
+				return Activator.CreateInstance(type);
 			}
-			else
-			{
-				obj = null;
-			}
-			return obj;
+			return null;
 		}
 
 		public override Node GetNodeAcrossConnection()
@@ -225,8 +205,8 @@ namespace NodeEditorFramework
 		private TypeData _typeData;
 
 		[NonSerialized]
-		private object value = null;
+		private object value;
 
-		public bool calculationBlockade = false;
+		public bool calculationBlockade;
 	}
 }

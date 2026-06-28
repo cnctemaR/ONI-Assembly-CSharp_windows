@@ -31,26 +31,19 @@ public class GameScreenManager : KMonoBehaviour
 
 	public Camera GetCamera(GameScreenManager.UIRenderTarget target)
 	{
-		Camera camera;
 		switch (target)
 		{
 		case GameScreenManager.UIRenderTarget.WorldSpace:
-			camera = this.worldSpaceCanvas.GetComponent<Canvas>().worldCamera;
-			break;
+			return this.worldSpaceCanvas.GetComponent<Canvas>().worldCamera;
 		case GameScreenManager.UIRenderTarget.ScreenSpaceCamera:
-			camera = this.ssCameraCanvas.GetComponent<Canvas>().worldCamera;
-			break;
+			return this.ssCameraCanvas.GetComponent<Canvas>().worldCamera;
 		case GameScreenManager.UIRenderTarget.ScreenSpaceOverlay:
-			camera = this.ssOverlayCanvas.GetComponent<Canvas>().worldCamera;
-			break;
+			return this.ssOverlayCanvas.GetComponent<Canvas>().worldCamera;
 		case GameScreenManager.UIRenderTarget.HoverTextScreen:
-			camera = this.ssHoverTextCanvas.GetComponent<Canvas>().worldCamera;
-			break;
+			return this.ssHoverTextCanvas.GetComponent<Canvas>().worldCamera;
 		default:
-			camera = base.gameObject.GetComponent<Canvas>().worldCamera;
-			break;
+			return base.gameObject.GetComponent<Canvas>().worldCamera;
 		}
-		return camera;
 	}
 
 	public void SetCamera(GameScreenManager.UIRenderTarget target, Camera camera)
@@ -69,26 +62,19 @@ public class GameScreenManager : KMonoBehaviour
 
 	public GameObject GetParent(GameScreenManager.UIRenderTarget target)
 	{
-		GameObject gameObject;
 		switch (target)
 		{
 		case GameScreenManager.UIRenderTarget.WorldSpace:
-			gameObject = this.worldSpaceCanvas;
-			break;
+			return this.worldSpaceCanvas;
 		case GameScreenManager.UIRenderTarget.ScreenSpaceCamera:
-			gameObject = this.ssCameraCanvas;
-			break;
+			return this.ssCameraCanvas;
 		case GameScreenManager.UIRenderTarget.ScreenSpaceOverlay:
-			gameObject = this.ssOverlayCanvas;
-			break;
+			return this.ssOverlayCanvas;
 		case GameScreenManager.UIRenderTarget.HoverTextScreen:
-			gameObject = this.ssHoverTextCanvas;
-			break;
+			return this.ssHoverTextCanvas;
 		default:
-			gameObject = base.gameObject;
-			break;
+			return base.gameObject;
 		}
-		return gameObject;
 	}
 
 	public GameObject ActivateScreen(GameObject screen, GameObject parent = null, GameScreenManager.UIRenderTarget target = GameScreenManager.UIRenderTarget.ScreenSpaceOverlay)

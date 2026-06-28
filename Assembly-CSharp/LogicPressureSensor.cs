@@ -23,22 +23,20 @@ public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch
 			float num2 = ((!Grid.Element[num].IsState(this.desiredState)) ? 0f : Grid.Cell[num].mass);
 			this.samples[this.sampleIdx] = num2;
 			this.sampleIdx++;
+			return;
 		}
-		else
+		this.sampleIdx = 0;
+		float currentValue = this.CurrentValue;
+		if (this.activateAboveThreshold)
 		{
-			this.sampleIdx = 0;
-			float currentValue = this.CurrentValue;
-			if (this.activateAboveThreshold)
-			{
-				if ((currentValue > this.threshold && !base.IsSwitchedOn) || (currentValue <= this.threshold && base.IsSwitchedOn))
-				{
-					this.Toggle();
-				}
-			}
-			else if ((currentValue > this.threshold && base.IsSwitchedOn) || (currentValue <= this.threshold && !base.IsSwitchedOn))
+			if ((currentValue > this.threshold && !base.IsSwitchedOn) || (currentValue <= this.threshold && base.IsSwitchedOn))
 			{
 				this.Toggle();
 			}
+		}
+		else if ((currentValue > this.threshold && base.IsSwitchedOn) || (currentValue <= this.threshold && !base.IsSwitchedOn))
+		{
+			this.Toggle();
 		}
 	}
 
@@ -211,15 +209,15 @@ public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch
 
 	[SerializeField]
 	[Serialize]
-	private float threshold = 0f;
+	private float threshold;
 
 	[SerializeField]
 	[Serialize]
 	private bool activateAboveThreshold = true;
 
-	private bool wasOn = false;
+	private bool wasOn;
 
-	public float rangeMin = 0f;
+	public float rangeMin;
 
 	public float rangeMax = 1f;
 
@@ -229,5 +227,5 @@ public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch
 
 	private float[] samples = new float[8];
 
-	private int sampleIdx = 0;
+	private int sampleIdx;
 }

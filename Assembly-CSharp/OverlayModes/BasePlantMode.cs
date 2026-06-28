@@ -26,30 +26,34 @@ namespace OverlayModes
 		protected override void OnSaveLoadRootRegistered(SaveLoadRoot item)
 		{
 			Tag saveLoadTag = item.GetComponent<KPrefabID>().GetSaveLoadTag();
-			if (this.targetIDs.Contains(saveLoadTag))
+			if (!this.targetIDs.Contains(saveLoadTag))
 			{
-				Harvestable component = item.GetComponent<Harvestable>();
-				if (!(component == null))
-				{
-					this.partition.Add(component);
-				}
+				return;
 			}
+			Harvestable component = item.GetComponent<Harvestable>();
+			if (component == null)
+			{
+				return;
+			}
+			this.partition.Add(component);
 		}
 
 		protected override void OnSaveLoadRootUnregistered(SaveLoadRoot item)
 		{
-			if (!(item == null) && !(item.gameObject == null))
+			if (item == null || item.gameObject == null)
 			{
-				Harvestable component = item.GetComponent<Harvestable>();
-				if (!(component == null))
-				{
-					if (this.layerTargets.Contains(component))
-					{
-						this.layerTargets.Remove(component);
-					}
-					this.partition.Remove(component);
-				}
+				return;
 			}
+			Harvestable component = item.GetComponent<Harvestable>();
+			if (component == null)
+			{
+				return;
+			}
+			if (this.layerTargets.Contains(component))
+			{
+				this.layerTargets.Remove(component);
+			}
+			this.partition.Remove(component);
 		}
 
 		public override void Disable()

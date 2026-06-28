@@ -12,12 +12,9 @@ public class ScheduleScreenColumnEntry : MonoBehaviour, IPointerEnterHandler, IP
 
 	private void RunCallbacks()
 	{
-		if (Input.GetMouseButton(0))
+		if (Input.GetMouseButton(0) && this.onLeftClick != null)
 		{
-			if (this.onLeftClick != null)
-			{
-				this.onLeftClick();
-			}
+			this.onLeftClick();
 		}
 	}
 

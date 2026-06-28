@@ -40,23 +40,17 @@ public class ImageToggleStateThrobber : KMonoBehaviour
 
 	private Color ColorForState(ImageToggleState its, ImageToggleState.State state)
 	{
-		Color color;
 		switch (state)
 		{
 		case ImageToggleState.State.Disabled:
-			color = its.DisabledColour;
-			break;
+			return its.DisabledColour;
 		case ImageToggleState.State.Inactive:
-			color = its.InactiveColour;
-			break;
+			return its.InactiveColour;
 		default:
-			color = its.ActiveColour;
-			break;
+			return its.ActiveColour;
 		case ImageToggleState.State.DisabledActive:
-			color = its.DisabledActiveColour;
-			break;
+			return its.DisabledActiveColour;
 		}
-		return color;
 	}
 
 	public ImageToggleState[] targetImageToggleStates;
@@ -67,7 +61,7 @@ public class ImageToggleStateThrobber : KMonoBehaviour
 
 	public float period = 2f;
 
-	public bool useScaledTime = false;
+	public bool useScaledTime;
 
-	private float t = 0f;
+	private float t;
 }

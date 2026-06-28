@@ -21,7 +21,6 @@ public class TagDescriptions
 	{
 		int num = text.IndexOf('{');
 		int num2 = text.IndexOf('}');
-		string text4;
 		if (0 <= num && num < num2)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
@@ -42,12 +41,8 @@ public class TagDescriptions
 				num = text.IndexOf('{', num2);
 			}
 			stringBuilder.Append(text.Substring(num3, text.Length - num3));
-			text4 = stringBuilder.ToString();
+			return stringBuilder.ToString();
 		}
-		else
-		{
-			text4 = text;
-		}
-		return text4;
+		return text;
 	}
 }

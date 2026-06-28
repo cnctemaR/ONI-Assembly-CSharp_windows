@@ -75,14 +75,15 @@ namespace OverlayModes
 
 		protected override void OnSaveLoadRootUnregistered(SaveLoadRoot item)
 		{
-			if (!(item == null) && !(item.gameObject == null))
+			if (item == null || item.gameObject == null)
 			{
-				if (this.layerTargets.Contains(item))
-				{
-					this.layerTargets.Remove(item);
-				}
-				this.partition.Remove(item);
+				return;
 			}
+			if (this.layerTargets.Contains(item))
+			{
+				this.layerTargets.Remove(item);
+			}
+			this.partition.Remove(item);
 		}
 
 		public override void Update()
@@ -333,12 +334,9 @@ namespace OverlayModes
 			bool flag = bat.GetComponent<PowerTransformer>() != null;
 			float num = 1f;
 			Rotatable component = bat.GetComponent<Rotatable>();
-			if (component != null)
+			if (component != null && component.GetVisualizerFlipX())
 			{
-				if (component.GetVisualizerFlipX())
-				{
-					num = -1f;
-				}
+				num = -1f;
 			}
 			Vector3 vector2 = ((!flag) ? this.batteryUIOffset : this.batteryUITransformerOffset);
 			vector2.x *= num;
@@ -417,9 +415,9 @@ namespace OverlayModes
 
 		private Color32 circuitStrainingColour;
 
-		private int freePowerLabelIdx = 0;
+		private int freePowerLabelIdx;
 
-		private int freeBatteryUIIdx = 0;
+		private int freeBatteryUIIdx;
 
 		private List<LocText> powerLabels = new List<LocText>();
 

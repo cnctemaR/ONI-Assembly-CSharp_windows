@@ -254,7 +254,7 @@ public abstract class StateMachine
 
 		public override string ToString()
 		{
-			string text = "";
+			string text = string.Empty;
 			if (this.GetCurrentState() != null)
 			{
 				text = this.GetCurrentState().name;
@@ -282,45 +282,35 @@ public abstract class StateMachine
 		public bool HasTag(Tag tag)
 		{
 			StateMachine.BaseState currentState = this.GetCurrentState();
-			bool flag;
 			if (currentState == null)
 			{
-				flag = false;
+				return false;
 			}
-			else
+			for (int i = 0; i < currentState.branch.Length; i++)
 			{
-				for (int i = 0; i < currentState.branch.Length; i++)
+				if (currentState.branch[i].HasTag(tag))
 				{
-					if (currentState.branch[i].HasTag(tag))
-					{
-						return true;
-					}
+					return true;
 				}
-				flag = false;
 			}
-			return flag;
+			return false;
 		}
 
 		public bool IsInsideState(StateMachine.BaseState state)
 		{
 			StateMachine.BaseState currentState = this.GetCurrentState();
-			bool flag;
 			if (currentState == null)
 			{
-				flag = false;
+				return false;
 			}
-			else
+			for (int i = 0; i < currentState.branch.Length; i++)
 			{
-				for (int i = 0; i < currentState.branch.Length; i++)
+				if (state == currentState.branch[i])
 				{
-					if (state == currentState.branch[i])
-					{
-						return true;
-					}
+					return true;
 				}
-				flag = false;
 			}
-			return flag;
+			return false;
 		}
 
 		public void ScheduleGoTo(float time, StateMachine.BaseState state)
@@ -387,7 +377,7 @@ public abstract class StateMachine
 
 		public const float UPDATE_TIME = 0.2f;
 
-		protected StateMachine.Status status = StateMachine.Status.Initialized;
+		protected StateMachine.Status status;
 
 		protected StateMachine stateMachine;
 
@@ -432,59 +422,60 @@ public abstract class StateMachine
 
 		public void FreeResources()
 		{
-			if (this.name != null)
+			if (this.name == null)
 			{
-				this.name = null;
-				if (this.defaultState != null)
-				{
-					this.defaultState.FreeResources();
-				}
-				this.defaultState = null;
-				this.events = null;
-				if (this.transitions != null)
-				{
-					for (int i = 0; i < this.transitions.Length; i++)
-					{
-						this.transitions[i].Clear();
-					}
-				}
-				this.transitions = null;
-				this.parameterTransitions = null;
-				if (this.enterActions != null)
-				{
-					for (int j = 0; j < this.enterActions.Length; j++)
-					{
-						this.enterActions[j].Clear();
-					}
-				}
-				this.enterActions = null;
-				if (this.exitActions != null)
-				{
-					for (int k = 0; k < this.exitActions.Length; k++)
-					{
-						this.exitActions[k].Clear();
-					}
-				}
-				this.exitActions = null;
-				if (this.updateActions != null)
-				{
-					for (int l = 0; l < this.updateActions.Length; l++)
-					{
-						this.updateActions[l].Clear();
-					}
-				}
-				this.updateActions = null;
-				if (this.branch != null)
-				{
-					for (int m = 0; m < this.branch.Length; m++)
-					{
-						this.branch[m].FreeResources();
-					}
-				}
-				this.branch = null;
-				this.parent = null;
-				this.tags = null;
+				return;
 			}
+			this.name = null;
+			if (this.defaultState != null)
+			{
+				this.defaultState.FreeResources();
+			}
+			this.defaultState = null;
+			this.events = null;
+			if (this.transitions != null)
+			{
+				for (int i = 0; i < this.transitions.Length; i++)
+				{
+					this.transitions[i].Clear();
+				}
+			}
+			this.transitions = null;
+			this.parameterTransitions = null;
+			if (this.enterActions != null)
+			{
+				for (int j = 0; j < this.enterActions.Length; j++)
+				{
+					this.enterActions[j].Clear();
+				}
+			}
+			this.enterActions = null;
+			if (this.exitActions != null)
+			{
+				for (int k = 0; k < this.exitActions.Length; k++)
+				{
+					this.exitActions[k].Clear();
+				}
+			}
+			this.exitActions = null;
+			if (this.updateActions != null)
+			{
+				for (int l = 0; l < this.updateActions.Length; l++)
+				{
+					this.updateActions[l].Clear();
+				}
+			}
+			this.updateActions = null;
+			if (this.branch != null)
+			{
+				for (int m = 0; m < this.branch.Length; m++)
+				{
+					this.branch[m].FreeResources();
+				}
+			}
+			this.branch = null;
+			this.parent = null;
+			this.tags = null;
 		}
 
 		public int GetStateCount()

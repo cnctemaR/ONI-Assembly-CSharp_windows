@@ -109,7 +109,7 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 			global::Debug.Log("!", null);
 		}
 		float num = 0f;
-		string text = "";
+		string text = string.Empty;
 		if (edible != null)
 		{
 			num = edible.FoodInfo.CaloriesPerUnit;
@@ -160,7 +160,7 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public Crop.CropVal cropVal;
 
-	public string domesticatedDesc = "";
+	public string domesticatedDesc = string.Empty;
 
 	private Storage planterStorage;
 

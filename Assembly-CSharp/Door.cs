@@ -345,8 +345,9 @@ public class Door : Workable, ISaveLoadable
 				this.changeStateChore = null;
 				base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, false);
 			}
+			return;
 		}
-		else if (DebugHandler.InstantBuildMode)
+		if (DebugHandler.InstantBuildMode)
 		{
 			this.controlState = this.requestedState;
 			this.RefreshControlState();
@@ -368,22 +369,24 @@ public class Door : Workable, ISaveLoadable
 
 	private void OnSimDoorOpened()
 	{
-		if (!(this == null))
+		if (this == null)
 		{
-			StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
-			HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
-			structureTemperatures.Enable(handle);
+			return;
 		}
+		StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
+		HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
+		structureTemperatures.Enable(handle);
 	}
 
 	private void OnSimDoorClosed()
 	{
-		if (!(this == null))
+		if (this == null)
 		{
-			StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
-			HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
-			structureTemperatures.Disable(handle);
+			return;
 		}
+		StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
+		HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
+		structureTemperatures.Disable(handle);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -489,33 +492,34 @@ public class Door : Workable, ISaveLoadable
 	public void OnLogicValueChanged(object data)
 	{
 		LogicValueChanged logicValueChanged = (LogicValueChanged)data;
-		if (!(logicValueChanged.portID != Door.OPEN_CLOSE_PORT_ID))
+		if (logicValueChanged.portID != Door.OPEN_CLOSE_PORT_ID)
 		{
-			int newValue = logicValueChanged.newValue;
-			if (this.changeStateChore != null)
-			{
-				this.changeStateChore.Cancel("Change state");
-				this.changeStateChore = null;
-			}
-			bool flag = newValue == 1;
-			Door.ControlState controlState = this.controlState;
-			this.controlState = ((!flag) ? Door.ControlState.Closed : Door.ControlState.Opened);
-			this.requestedState = this.controlState;
-			this.RefreshControlState();
-			this.OnOperationalChanged(null);
-			if (controlState != this.controlState)
-			{
-				if (flag)
-				{
-					this.Open();
-				}
-				else
-				{
-					this.Close();
-				}
-			}
-			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, false);
+			return;
 		}
+		int newValue = logicValueChanged.newValue;
+		if (this.changeStateChore != null)
+		{
+			this.changeStateChore.Cancel("Change state");
+			this.changeStateChore = null;
+		}
+		bool flag = newValue == 1;
+		Door.ControlState controlState = this.controlState;
+		this.controlState = ((!flag) ? Door.ControlState.Closed : Door.ControlState.Opened);
+		this.requestedState = this.controlState;
+		this.RefreshControlState();
+		this.OnOperationalChanged(null);
+		if (controlState != this.controlState)
+		{
+			if (flag)
+			{
+				this.Open();
+			}
+			else
+			{
+				this.Close();
+			}
+		}
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, false);
 	}
 
 	[MyCmpReq]
@@ -541,7 +545,7 @@ public class Door : Workable, ISaveLoadable
 	private BoxCollider2D selectionCollider;
 
 	[SerializeField]
-	public bool hasComplexUserControls = false;
+	public bool hasComplexUserControls;
 
 	[SerializeField]
 	public float unpoweredAnimSpeed = 0.25f;
@@ -550,14 +554,14 @@ public class Door : Workable, ISaveLoadable
 	public Door.DoorType doorType;
 
 	[Serialize]
-	private bool hasBeenUnsealed = false;
+	private bool hasBeenUnsealed;
 
 	[Serialize]
-	private Door.ControlState controlState = Door.ControlState.Auto;
+	private Door.ControlState controlState;
 
 	private bool on = true;
 
-	private int openCount = 0;
+	private int openCount;
 
 	private Door.ControlState requestedState;
 

@@ -589,17 +589,11 @@ public class Scenario : KMonoBehaviour
 		int num = Grid.OffsetCell(RootCell, x, y);
 		Tag tag = TagManager.Create(name, null);
 		GameObject prefab = Assets.GetPrefab(tag);
-		GameObject gameObject;
 		if (prefab == null)
 		{
-			gameObject = null;
+			return null;
 		}
-		else
-		{
-			GameObject gameObject2 = GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(num, scene_layer), scene_layer, SceneOrganizer.Instance.GetFolder(folder), null, 0);
-			gameObject = gameObject2;
-		}
-		return gameObject;
+		return GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(num, scene_layer), scene_layer, SceneOrganizer.Instance.GetFolder(folder), null, 0);
 	}
 
 	public void SetupElementTest()

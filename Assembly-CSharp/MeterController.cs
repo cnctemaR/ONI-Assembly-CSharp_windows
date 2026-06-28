@@ -24,17 +24,18 @@ public class MeterController
 
 	public MeterController(KAnimControllerBase building_controller, KBatchedAnimController meter_controller, params string[] symbol_names)
 	{
-		if (!(meter_controller == null))
+		if (meter_controller == null)
 		{
-			this.meterController = meter_controller;
-			this.link = new KAnimLink(building_controller, meter_controller);
-			for (int i = 0; i < symbol_names.Length; i++)
-			{
-				building_controller.HideSymbol(new KAnimHashedString(symbol_names[i]), true);
-			}
-			KBatchedAnimTracker component = this.meterController.GetComponent<KBatchedAnimTracker>();
-			component.symbol = new HashedString(symbol_names[0]);
+			return;
 		}
+		this.meterController = meter_controller;
+		this.link = new KAnimLink(building_controller, meter_controller);
+		for (int i = 0; i < symbol_names.Length; i++)
+		{
+			building_controller.HideSymbol(new KAnimHashedString(symbol_names[i]), true);
+		}
+		KBatchedAnimTracker component = this.meterController.GetComponent<KBatchedAnimTracker>();
+		component.symbol = new HashedString(symbol_names[0]);
 	}
 
 	public KBatchedAnimController meterController { get; private set; }
@@ -84,10 +85,11 @@ public class MeterController
 
 	public void SetPositionPercent(float percent_full)
 	{
-		if (!(this.meterController == null))
+		if (this.meterController == null)
 		{
-			this.meterController.SetPositionPercent(percent_full);
+			return;
 		}
+		this.meterController.SetPositionPercent(percent_full);
 	}
 
 	public void SetSymbolTint(KBatchedAnimController.SymbolTintIndex symbol_tint_idx, KAnimHashedString symbol, Color32 colour)

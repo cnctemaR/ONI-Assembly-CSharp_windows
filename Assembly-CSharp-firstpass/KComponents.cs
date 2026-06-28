@@ -16,13 +16,14 @@ public class KComponents
 
 	public void Spawn()
 	{
-		if (!this.spawned)
+		if (this.spawned)
 		{
-			this.spawned = true;
-			foreach (IComponentManager componentManager in this.managers)
-			{
-				componentManager.Spawn();
-			}
+			return;
+		}
+		this.spawned = true;
+		foreach (IComponentManager componentManager in this.managers)
+		{
+			componentManager.Spawn();
 		}
 	}
 
@@ -70,5 +71,5 @@ public class KComponents
 
 	private List<IComponentManager> managers = new List<IComponentManager>();
 
-	private bool spawned = false;
+	private bool spawned;
 }

@@ -56,17 +56,12 @@ public class Clinic : Ownable, IEffectDescriptor
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
 		KAnimFile[] appropriateOverrideAnims = this.GetAppropriateOverrideAnims(worker);
-		bool flag;
 		if (appropriateOverrideAnims == null || appropriateOverrideAnims != this.overrideAnims)
 		{
-			flag = true;
+			return true;
 		}
-		else
-		{
-			base.OnWorkTick(worker, dt);
-			flag = false;
-		}
-		return flag;
+		base.OnWorkTick(worker, dt);
+		return false;
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -96,17 +91,12 @@ public class Clinic : Ownable, IEffectDescriptor
 	private bool IsInMedicalRegion()
 	{
 		RequiresRegion component = base.GetComponent<RequiresRegion>();
-		bool flag;
 		if (component == null)
 		{
-			flag = true;
+			return true;
 		}
-		else
-		{
-			Region ownerRegion = component.OwnerRegion;
-			flag = ownerRegion != null && ownerRegion.RegionTag == global::TUNING.REGIONS.MedicalRegionTag;
-		}
-		return flag;
+		Region ownerRegion = component.OwnerRegion;
+		return ownerRegion != null && ownerRegion.RegionTag == global::TUNING.REGIONS.MedicalRegionTag;
 	}
 
 	public override bool CanAutoAssignTo(KMonoBehaviour worker)
@@ -131,7 +121,7 @@ public class Clinic : Ownable, IEffectDescriptor
 
 	private bool IsValidEffect(string effect)
 	{
-		return effect != null && effect != "";
+		return effect != null && effect != string.Empty;
 	}
 
 	private bool AllowDoctoring()
@@ -144,7 +134,7 @@ public class Clinic : Ownable, IEffectDescriptor
 		Effect effect = Db.Get().effects.Get(effect_id);
 		foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
 		{
-			Descriptor descriptor = new Descriptor(Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME") + ": " + attributeModifier.GetFormattedString(base.gameObject), "", Descriptor.DescriptorType.Effect, false);
+			Descriptor descriptor = new Descriptor(Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME") + ": " + attributeModifier.GetFormattedString(base.gameObject), string.Empty, Descriptor.DescriptorType.Effect, false);
 			if (increase_indent)
 			{
 				descriptor.IncreaseIndent();

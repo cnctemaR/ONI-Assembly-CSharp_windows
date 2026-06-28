@@ -7,32 +7,20 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 {
 	public static float GetExternalColdThreshold(Attributes affected_attributes)
 	{
-		float num;
 		if (affected_attributes == null)
 		{
-			num = -0.36261335f;
+			return -0.36261335f;
 		}
-		else
-		{
-			float num2 = -(0.36261335f - affected_attributes.GetValue(Db.Get().Attributes.RoomTemperaturePreference.Id));
-			num = num2;
-		}
-		return num;
+		return -(0.36261335f - affected_attributes.GetValue(Db.Get().Attributes.RoomTemperaturePreference.Id));
 	}
 
 	public static float GetExternalWarmThreshold(Attributes affected_attributes)
 	{
-		float num;
 		if (affected_attributes == null)
 		{
-			num = 0.19525334f;
+			return 0.19525334f;
 		}
-		else
-		{
-			float num2 = -(-0.19525334f - affected_attributes.GetValue(Db.Get().Attributes.RoomTemperaturePreference.Id));
-			num = num2;
-		}
-		return num;
+		return -(-0.19525334f - affected_attributes.GetValue(Db.Get().Attributes.RoomTemperaturePreference.Id));
 	}
 
 	public override void InitializeStates(out StateMachine.BaseState default_state)
@@ -124,7 +112,6 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 			get
 			{
 				int num = Grid.PosToCell(base.gameObject);
-				float num3;
 				if (this.occupyArea != null)
 				{
 					float num2 = 0f;
@@ -132,14 +119,9 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 					{
 						num2 += Grid.Temperature[Grid.OffsetCell(num, this.occupyArea.OccupiedCellsOffsets[i])];
 					}
-					num2 /= (float)this.occupyArea.OccupiedCellsOffsets.Length;
-					num3 = num2;
+					return num2 / (float)this.occupyArea.OccupiedCellsOffsets.Length;
 				}
-				else
-				{
-					num3 = Grid.Temperature[num];
-				}
-				return num3;
+				return Grid.Temperature[num];
 			}
 		}
 
@@ -153,16 +135,11 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 		{
 			get
 			{
-				float num;
 				if (this.internalTemperatureMonitor.IdealTemperatureDelta() > 0.5f)
 				{
-					num = 0f;
+					return 0f;
 				}
-				else
-				{
-					num = CreatureSimTemperatureTransfer.PotentialEnergyFlowToCreature(Grid.PosToCell(base.gameObject), this.primaryElement, this.temperatureTransferer, 1f);
-				}
-				return num;
+				return CreatureSimTemperatureTransfer.PotentialEnergyFlowToCreature(Grid.PosToCell(base.gameObject), this.primaryElement, this.temperatureTransferer, 1f);
 			}
 		}
 

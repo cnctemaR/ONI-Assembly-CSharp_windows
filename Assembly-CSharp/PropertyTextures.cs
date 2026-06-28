@@ -106,120 +106,123 @@ public class PropertyTextures : KMonoBehaviour
 
 	private void SimUpdate(float dt)
 	{
-		if (this.lerpers != null && this.lerpers.Length != 0)
+		if (this.lerpers == null || this.lerpers.Length == 0)
 		{
-			for (int i = 0; i < this.lerpers.Length; i++)
+			return;
+		}
+		for (int i = 0; i < this.lerpers.Length; i++)
+		{
+			TextureLerper textureLerper = this.lerpers[i];
+			if (textureLerper != null)
 			{
-				TextureLerper textureLerper = this.lerpers[i];
-				if (textureLerper != null)
-				{
-					textureLerper.LongUpdate(dt);
-				}
+				textureLerper.LongUpdate(dt);
 			}
 		}
 	}
 
 	private void UpdateProperty(ref PropertyTextures.TextureProperties p, int x0, int y0, int x1, int y1)
 	{
-		if (!Game.Instance.IsLoading())
+		if (Game.Instance.IsLoading())
 		{
-			int simProperty = (int)p.simProperty;
-			if (!p.updatedExternally)
+			return;
+		}
+		int simProperty = (int)p.simProperty;
+		if (!p.updatedExternally)
+		{
+			TextureRegion textureRegion = this.textureBuffers[simProperty].Lock(x0, y0, x1 - x0 + 1, y1 - y0 + 1);
+			switch (p.simProperty)
 			{
-				TextureRegion textureRegion = this.textureBuffers[simProperty].Lock(x0, y0, x1 - x0 + 1, y1 - y0 + 1);
-				switch (p.simProperty)
+			case PropertyTextures.Property.StateChange:
+				this.UpdateStateChange(textureRegion, x0, y0, x1, y1);
+				break;
+			case PropertyTextures.Property.GasPressure:
+				this.UpdatePressure(textureRegion, x0, y0, x1, y1);
+				break;
+			case PropertyTextures.Property.GasColour:
+				this.UpdateGasColour(textureRegion, x0, y0, x1, y1);
+				break;
+			case PropertyTextures.Property.GasDanger:
+				this.UpdateDanger(textureRegion, x0, y0, x1, y1);
+				break;
+			case PropertyTextures.Property.FogOfWar:
+				this.UpdateFogOfWar(textureRegion, x0, y0, x1, y1);
+				break;
+			case PropertyTextures.Property.SolidDigAmount:
+				this.UpdateSolidDigAmount(textureRegion, x0, y0, x1, y1);
+				break;
+			case PropertyTextures.Property.SolidLiquidGasMass:
+				this.UpdateSolidLiquidGasMass(textureRegion, x0, y0, x1, y1);
+				break;
+			case PropertyTextures.Property.WorldLight:
+				this.UpdateWorldLight(textureRegion, x0, y0, x1, y1);
+				break;
+			case PropertyTextures.Property.Temperature:
+				this.UpdateTemperature(textureRegion, x0, y0, x1, y1);
+				break;
+			}
+			textureRegion.Unlock();
+		}
+		else
+		{
+			PropertyTextures.Property simProperty2 = p.simProperty;
+			if (simProperty2 != PropertyTextures.Property.Flow)
+			{
+				if (simProperty2 == PropertyTextures.Property.Liquid)
 				{
-				case PropertyTextures.Property.StateChange:
-					this.UpdateStateChange(textureRegion, x0, y0, x1, y1);
-					break;
-				case PropertyTextures.Property.GasPressure:
-					this.UpdatePressure(textureRegion, x0, y0, x1, y1);
-					break;
-				case PropertyTextures.Property.GasColour:
-					this.UpdateGasColour(textureRegion, x0, y0, x1, y1);
-					break;
-				case PropertyTextures.Property.GasDanger:
-					this.UpdateDanger(textureRegion, x0, y0, x1, y1);
-					break;
-				case PropertyTextures.Property.FogOfWar:
-					this.UpdateFogOfWar(textureRegion, x0, y0, x1, y1);
-					break;
-				case PropertyTextures.Property.SolidDigAmount:
-					this.UpdateSolidDigAmount(textureRegion, x0, y0, x1, y1);
-					break;
-				case PropertyTextures.Property.SolidLiquidGasMass:
-					this.UpdateSolidLiquidGasMass(textureRegion, x0, y0, x1, y1);
-					break;
-				case PropertyTextures.Property.WorldLight:
-					this.UpdateWorldLight(textureRegion, x0, y0, x1, y1);
-					break;
-				case PropertyTextures.Property.Temperature:
-					this.UpdateTemperature(textureRegion, x0, y0, x1, y1);
-					break;
+					this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalLiquidTex, 4 * Grid.WidthInCells * Grid.HeightInCells);
 				}
-				textureRegion.Unlock();
 			}
 			else
 			{
-				PropertyTextures.Property simProperty2 = p.simProperty;
-				if (simProperty2 != PropertyTextures.Property.Flow)
-				{
-					if (simProperty2 == PropertyTextures.Property.Liquid)
-					{
-						this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalLiquidTex, 4 * Grid.WidthInCells * Grid.HeightInCells);
-					}
-				}
-				else
-				{
-					this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalFlowTex, 8 * Grid.WidthInCells * Grid.HeightInCells);
-				}
-				this.externallyUpdatedTextures[simProperty].Apply();
+				this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalFlowTex, 8 * Grid.WidthInCells * Grid.HeightInCells);
 			}
+			this.externallyUpdatedTextures[simProperty].Apply();
 		}
 	}
 
 	private void LateUpdate()
 	{
-		if (Grid.IsInitialized())
+		if (!Grid.IsInitialized())
 		{
-			Shader.SetGlobalVector(this.WorldSizeID, new Vector4((float)Grid.WidthInCells, (float)Grid.HeightInCells, 1f / (float)Grid.WidthInCells, 1f / (float)Grid.HeightInCells));
-			Shader.SetGlobalVector(this.PropTexWsToCsID, new Vector4(0f, 0f, 1f, 1f));
-			Shader.SetGlobalVector(this.PropTexCsToWsID, new Vector4(0f, 0f, 1f, 1f));
-			Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.position.z));
-			Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.position.z));
-			Shader.SetGlobalVector("_CamPosInfo", new Vector4(vector.x, vector.y, vector2.x, vector2.y));
-			int num;
-			int num2;
-			int num3;
-			int num4;
-			this.GetVisibleCellRange(out num, out num2, out num3, out num4);
-			Shader.SetGlobalFloat(this.FogOfWarScaleID, PropertyTextures.FogOfWarScale);
-			int num5 = this.NextPropertyIdx++ % this.allTextureProperties.Count;
-			PropertyTextures.TextureProperties textureProperties = this.allTextureProperties[num5];
-			while (textureProperties.updateEveryFrame)
+			return;
+		}
+		Shader.SetGlobalVector(this.WorldSizeID, new Vector4((float)Grid.WidthInCells, (float)Grid.HeightInCells, 1f / (float)Grid.WidthInCells, 1f / (float)Grid.HeightInCells));
+		Shader.SetGlobalVector(this.PropTexWsToCsID, new Vector4(0f, 0f, 1f, 1f));
+		Shader.SetGlobalVector(this.PropTexCsToWsID, new Vector4(0f, 0f, 1f, 1f));
+		Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.position.z));
+		Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.position.z));
+		Shader.SetGlobalVector("_CamPosInfo", new Vector4(vector.x, vector.y, vector2.x, vector2.y));
+		int num;
+		int num2;
+		int num3;
+		int num4;
+		this.GetVisibleCellRange(out num, out num2, out num3, out num4);
+		Shader.SetGlobalFloat(this.FogOfWarScaleID, PropertyTextures.FogOfWarScale);
+		int num5 = this.NextPropertyIdx++ % this.allTextureProperties.Count;
+		PropertyTextures.TextureProperties textureProperties = this.allTextureProperties[num5];
+		while (textureProperties.updateEveryFrame)
+		{
+			num5 = this.NextPropertyIdx++ % this.allTextureProperties.Count;
+			textureProperties = this.allTextureProperties[num5];
+		}
+		for (int i = 0; i < this.allTextureProperties.Count; i++)
+		{
+			PropertyTextures.TextureProperties textureProperties2 = this.allTextureProperties[i];
+			if (num5 == i || textureProperties2.updateEveryFrame)
 			{
-				num5 = this.NextPropertyIdx++ % this.allTextureProperties.Count;
-				textureProperties = this.allTextureProperties[num5];
+				this.UpdateProperty(ref textureProperties2, num, num2, num3, num4);
 			}
-			for (int i = 0; i < this.allTextureProperties.Count; i++)
+		}
+		for (int j = 0; j < 11; j++)
+		{
+			TextureLerper textureLerper = this.lerpers[j];
+			if (textureLerper != null)
 			{
-				PropertyTextures.TextureProperties textureProperties2 = this.allTextureProperties[i];
-				if (num5 == i || textureProperties2.updateEveryFrame)
+				if (Time.timeScale == 0f)
 				{
-					this.UpdateProperty(ref textureProperties2, num, num2, num3, num4);
+					textureLerper.LongUpdate(Time.unscaledDeltaTime);
 				}
-			}
-			for (int j = 0; j < 11; j++)
-			{
-				TextureLerper textureLerper = this.lerpers[j];
-				if (textureLerper != null)
-				{
-					if (Time.timeScale == 0f)
-					{
-						textureLerper.LongUpdate(Time.unscaledDeltaTime);
-					}
-					Shader.SetGlobalTexture(this.allTextureProperties[j].texturePropertyName, textureLerper.Update());
-				}
+				Shader.SetGlobalTexture(this.allTextureProperties[j].texturePropertyName, textureLerper.Update());
 			}
 		}
 	}
@@ -512,7 +515,7 @@ public class PropertyTextures : KMonoBehaviour
 	}
 
 	[NonSerialized]
-	public bool ForceLightEverywhere = false;
+	public bool ForceLightEverywhere;
 
 	[SerializeField]
 	private Vector2 PressureRange = new Vector2(15f, 200f);
@@ -535,7 +538,7 @@ public class PropertyTextures : KMonoBehaviour
 	[SerializeField]
 	private Vector2 hotRange;
 
-	public static float FogOfWarScale = 0f;
+	public static float FogOfWarScale;
 
 	public float MaxFlow;
 

@@ -62,14 +62,11 @@ public class KBasicToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterH
 			}
 			yield return null;
 		}
-		if (!this.didDoubleClick)
+		if (!this.didDoubleClick && this.onClick != null)
 		{
-			if (this.onClick != null)
-			{
-				this.isOn = !this.isOn;
-				this.onClick();
-				this.onValueChanged(this.isOn);
-			}
+			this.isOn = !this.isOn;
+			this.onClick();
+			this.onValueChanged(this.isOn);
 		}
 		this.doubleClickCoroutine = null;
 		this.didDoubleClick = false;
@@ -96,7 +93,7 @@ public class KBasicToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterH
 
 	private bool _isOn;
 
-	private bool didDoubleClick = false;
+	private bool didDoubleClick;
 
 	private IEnumerator doubleClickCoroutine;
 }

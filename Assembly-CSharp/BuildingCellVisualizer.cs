@@ -97,18 +97,19 @@ public class BuildingCellVisualizer : KMonoBehaviour
 		{
 			gameObject = this.secondaryOutputVisualizer;
 		}
-		if (!(gameObject == null))
+		if (gameObject == null)
 		{
-			SizePulse pulse = gameObject.gameObject.AddComponent<SizePulse>();
-			pulse.speed = 20f;
-			pulse.multiplier = 0.75f;
-			pulse.updateWhenPaused = true;
-			SizePulse pulse2 = pulse;
-			pulse2.onComplete = (global::System.Action)Delegate.Combine(pulse2.onComplete, new global::System.Action(delegate
-			{
-				global::UnityEngine.Object.Destroy(pulse);
-			}));
+			return;
 		}
+		SizePulse pulse = gameObject.gameObject.AddComponent<SizePulse>();
+		pulse.speed = 20f;
+		pulse.multiplier = 0.75f;
+		pulse.updateWhenPaused = true;
+		SizePulse pulse2 = pulse;
+		pulse2.onComplete = (global::System.Action)Delegate.Combine(pulse2.onComplete, new global::System.Action(delegate
+		{
+			global::UnityEngine.Object.Destroy(pulse);
+		}));
 	}
 
 	protected override void OnSpawn()

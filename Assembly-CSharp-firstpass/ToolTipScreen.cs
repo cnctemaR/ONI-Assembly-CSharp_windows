@@ -51,7 +51,7 @@ public class ToolTipScreen : KScreen
 			else
 			{
 				this.label.gameObject.SetActive(false);
-				this.label.text = "";
+				this.label.text = string.Empty;
 				if (this.prevTooltip != this.tooltipSetting || !this.multiTooltipContainer.activeInHierarchy)
 				{
 					this.prepareMultiStringTooltip(this.tooltipSetting);
@@ -59,7 +59,7 @@ public class ToolTipScreen : KScreen
 				}
 			}
 			bool flag = true;
-			if (this.label.text == "" && this.multiTooltipContainer.transform.childCount == 0)
+			if (this.label.text == string.Empty && this.multiTooltipContainer.transform.childCount == 0)
 			{
 				flag = false;
 			}
@@ -208,46 +208,47 @@ public class ToolTipScreen : KScreen
 
 	private void Update()
 	{
-		if (!(this.multiTooltipContainer == null) && !(this.anchorRoot == null))
+		if (this.multiTooltipContainer == null || this.anchorRoot == null)
 		{
-			if (this.dirtyHoverTooltip != null)
+			return;
+		}
+		if (this.dirtyHoverTooltip != null)
+		{
+			ToolTip toolTip = this.dirtyHoverTooltip;
+			this.MakeDirtyTooltipClean(toolTip);
+			this.ClearToolTip(toolTip);
+		}
+		if (this.tooltipIncubating)
+		{
+			this.tooltipIncubating = false;
+			Image componentInChildren = this.anchorRoot.GetComponentInChildren<Image>();
+			if (componentInChildren != null)
 			{
-				ToolTip toolTip = this.dirtyHoverTooltip;
-				this.MakeDirtyTooltipClean(toolTip);
-				this.ClearToolTip(toolTip);
+				this.anchorRoot.GetComponentInChildren<Image>(true).enabled = false;
 			}
-			if (this.tooltipIncubating)
+			this.multiTooltipContainer.transform.localScale = Vector3.zero;
+			for (int i = 0; i < this.multiTooltipContainer.transform.childCount; i++)
 			{
-				this.tooltipIncubating = false;
-				Image componentInChildren = this.anchorRoot.GetComponentInChildren<Image>();
-				if (componentInChildren != null)
+				if (this.multiTooltipContainer.transform.GetChild(i).transform.localScale != Vector3.one)
 				{
-					this.anchorRoot.GetComponentInChildren<Image>(true).enabled = false;
+					this.multiTooltipContainer.transform.GetChild(i).transform.localScale = Vector3.one;
 				}
-				this.multiTooltipContainer.transform.localScale = Vector3.zero;
-				for (int i = 0; i < this.multiTooltipContainer.transform.childCount; i++)
+				LayoutElement component = this.multiTooltipContainer.transform.GetChild(i).GetComponent<LayoutElement>();
+				TextMeshProUGUI component2 = component.GetComponent<TextMeshProUGUI>();
+				if (component.minHeight != component2.preferredHeight)
 				{
-					if (this.multiTooltipContainer.transform.GetChild(i).transform.localScale != Vector3.one)
-					{
-						this.multiTooltipContainer.transform.GetChild(i).transform.localScale = Vector3.one;
-					}
-					LayoutElement component = this.multiTooltipContainer.transform.GetChild(i).GetComponent<LayoutElement>();
-					TextMeshProUGUI component2 = component.GetComponent<TextMeshProUGUI>();
-					if (component.minHeight != component2.preferredHeight)
-					{
-						component.minHeight = component2.preferredHeight;
-					}
+					component.minHeight = component2.preferredHeight;
 				}
 			}
-			else if (this.multiTooltipContainer.transform.localScale != Vector3.one)
+		}
+		else if (this.multiTooltipContainer.transform.localScale != Vector3.one)
+		{
+			Image componentInChildren2 = this.anchorRoot.GetComponentInChildren<Image>();
+			if (componentInChildren2 != null)
 			{
-				Image componentInChildren2 = this.anchorRoot.GetComponentInChildren<Image>();
-				if (componentInChildren2 != null)
-				{
-					this.anchorRoot.GetComponentInChildren<Image>(true).enabled = true;
-				}
-				this.multiTooltipContainer.transform.localScale = Vector3.one;
+				this.anchorRoot.GetComponentInChildren<Image>(true).enabled = true;
 			}
+			this.multiTooltipContainer.transform.localScale = Vector3.one;
 		}
 	}
 
@@ -318,7 +319,7 @@ public class ToolTipScreen : KScreen
 
 	private Vector2 ScreenEdgePadding = new Vector2(8f, 8f);
 
-	private ToolTip dirtyHoverTooltip = null;
+	private ToolTip dirtyHoverTooltip;
 
 	private bool tooltipIncubating = true;
 }

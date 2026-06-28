@@ -60,7 +60,7 @@ public class KNumberInputField : KScreen
 
 	private void ProcessInput(string input)
 	{
-		input = ((!(input == "")) ? input : this.minValue.ToString());
+		input = ((!(input == string.Empty)) ? input : this.minValue.ToString());
 		float num = float.Parse(input);
 		num = Mathf.Clamp(num, this.minValue, this.maxValue);
 		if (this.decimalPlaces != -1)
@@ -90,16 +90,11 @@ public class KNumberInputField : KScreen
 
 	public override float GetSortKey()
 	{
-		float num;
 		if (this.isEditing)
 		{
-			num = 10f;
+			return 10f;
 		}
-		else
-		{
-			num = base.GetSortKey();
-		}
-		return num;
+		return base.GetSortKey();
 	}
 
 	public int decimalPlaces = -1;

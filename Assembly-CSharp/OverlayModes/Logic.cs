@@ -98,14 +98,15 @@ namespace OverlayModes
 
 		protected override void OnSaveLoadRootUnregistered(SaveLoadRoot item)
 		{
-			if (!(item == null) && !(item.gameObject == null))
+			if (item == null || item.gameObject == null)
 			{
-				if (this.gameObjTargets.Contains(item))
-				{
-					this.gameObjTargets.Remove(item);
-				}
-				this.gameObjPartition.Remove(item);
+				return;
 			}
+			if (this.gameObjTargets.Contains(item))
+			{
+				this.gameObjTargets.Remove(item);
+			}
+			this.gameObjPartition.Remove(item);
 		}
 
 		private void OnUIElemAdded(ILogicUIElement elem)
@@ -132,21 +133,22 @@ namespace OverlayModes
 			Tag bridge_id = TagManager.Create("LogicWireBridge", null);
 			Mode.RemoveOffscreenTargets<SaveLoadRoot>(this.gameObjTargets, vector2I, vector2I2, delegate(SaveLoadRoot root)
 			{
-				if (!(root == null))
+				if (root == null)
 				{
-					KPrefabID component2 = root.GetComponent<KPrefabID>();
-					if (component2 != null)
+					return;
+				}
+				KPrefabID component2 = root.GetComponent<KPrefabID>();
+				if (component2 != null)
+				{
+					Tag prefabTag = component2.PrefabTag;
+					if (prefabTag == wire_id)
 					{
-						Tag prefabTag = component2.PrefabTag;
-						if (prefabTag == wire_id)
-						{
-							this.wireControllers.Remove(root.GetComponent<KBatchedAnimController>());
-						}
-						else if (prefabTag == bridge_id)
-						{
-							KBatchedAnimController controller = root.GetComponent<KBatchedAnimController>();
-							this.bridgeControllers.RemoveWhere((Logic.BridgeInfo x) => x.controller == controller);
-						}
+						this.wireControllers.Remove(root.GetComponent<KBatchedAnimController>());
+					}
+					else if (prefabTag == bridge_id)
+					{
+						KBatchedAnimController controller = root.GetComponent<KBatchedAnimController>();
+						this.bridgeControllers.RemoveWhere((Logic.BridgeInfo x) => x.controller == controller);
 					}
 				}
 			});
@@ -168,28 +170,29 @@ namespace OverlayModes
 							{
 								base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.gameObjTargets, this.conduitTargetLayer, delegate(SaveLoadRoot root)
 								{
-									if (!(root == null))
+									if (root == null)
 									{
-										KPrefabID component3 = root.GetComponent<KPrefabID>();
-										if (Logic.HighlightItemIDs.Contains(component3.PrefabTag))
+										return;
+									}
+									KPrefabID component3 = root.GetComponent<KPrefabID>();
+									if (Logic.HighlightItemIDs.Contains(component3.PrefabTag))
+									{
+										if (component3.PrefabTag == wire_id)
 										{
-											if (component3.PrefabTag == wire_id)
+											this.wireControllers.Add(root.GetComponent<KBatchedAnimController>());
+										}
+										else if (component3.PrefabTag == bridge_id)
+										{
+											KBatchedAnimController component4 = root.GetComponent<KBatchedAnimController>();
+											LogicUtilityNetworkLink component5 = root.GetComponent<LogicUtilityNetworkLink>();
+											int num;
+											int num2;
+											component5.GetCells(out num, out num2);
+											this.bridgeControllers.Add(new Logic.BridgeInfo
 											{
-												this.wireControllers.Add(root.GetComponent<KBatchedAnimController>());
-											}
-											else if (component3.PrefabTag == bridge_id)
-											{
-												KBatchedAnimController component4 = root.GetComponent<KBatchedAnimController>();
-												LogicUtilityNetworkLink component5 = root.GetComponent<LogicUtilityNetworkLink>();
-												int num;
-												int num2;
-												component5.GetCells(out num, out num2);
-												this.bridgeControllers.Add(new Logic.BridgeInfo
-												{
-													cell = num,
-													controller = component4
-												});
-											}
+												cell = num,
+												controller = component4
+											});
 										}
 									}
 								}, null);
@@ -297,27 +300,29 @@ namespace OverlayModes
 
 		private void AddUI(ILogicUIElement ui_elem)
 		{
-			if (!this.uiNodes.ContainsKey(ui_elem))
+			if (this.uiNodes.ContainsKey(ui_elem))
 			{
-				HandleVector<int>.Handle handle = this.uiInfo.Allocate(new Logic.UIInfo(ui_elem, this.uiAsset));
-				this.uiNodes.Add(ui_elem, new Logic.EventInfo
-				{
-					uiHandle = handle
-				});
+				return;
 			}
+			HandleVector<int>.Handle handle = this.uiInfo.Allocate(new Logic.UIInfo(ui_elem, this.uiAsset));
+			this.uiNodes.Add(ui_elem, new Logic.EventInfo
+			{
+				uiHandle = handle
+			});
 		}
 
 		private void FreeUI(ILogicUIElement item)
 		{
-			if (item != null)
+			if (item == null)
 			{
-				Logic.EventInfo eventInfo;
-				if (this.uiNodes.TryGetValue(item, out eventInfo))
-				{
-					this.uiInfo.GetData(eventInfo.uiHandle).Release();
-					this.uiInfo.Free(eventInfo.uiHandle);
-					this.uiNodes.Remove(item);
-				}
+				return;
+			}
+			Logic.EventInfo eventInfo;
+			if (this.uiNodes.TryGetValue(item, out eventInfo))
+			{
+				this.uiInfo.GetData(eventInfo.uiHandle).Release();
+				this.uiInfo.Free(eventInfo.uiHandle);
+				this.uiNodes.Remove(item);
 			}
 		}
 

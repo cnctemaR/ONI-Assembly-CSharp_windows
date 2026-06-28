@@ -58,14 +58,7 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 
 	private bool isTargetElement(int cell)
 	{
-		if (Grid.Element[cell].id == this.consumedElement)
-		{
-			if (Grid.Cell[cell].mass > this.minimumApproachMass)
-			{
-				return this.nav.CanReach(cell);
-			}
-		}
-		return false;
+		return Grid.Element[cell].id == this.consumedElement && Grid.Cell[cell].mass > this.minimumApproachMass && this.nav.CanReach(cell);
 	}
 
 	private int FindAbovewaterCell()
@@ -113,21 +106,22 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 
 	private void OnMassConsumed(object data)
 	{
-		if (!(this == null))
+		if (this == null)
 		{
-			Sim.MassConsumptionCallback massConsumptionCallback = (Sim.MassConsumptionCallback)data;
-			if (massConsumptionCallback.mass > 0f)
-			{
-				this.storage.AddGasChunk(ElementLoader.elements[(int)massConsumptionCallback.removedElemIdx].id, massConsumptionCallback.mass, massConsumptionCallback.temperature, massConsumptionCallback.diseaseIdx, massConsumptionCallback.diseaseCount, true, true);
-				if (this.HasConsumedEnough())
-				{
-					base.smi.sm.noFood.Trigger(base.smi);
-				}
-			}
-			else
+			return;
+		}
+		Sim.MassConsumptionCallback massConsumptionCallback = (Sim.MassConsumptionCallback)data;
+		if (massConsumptionCallback.mass > 0f)
+		{
+			this.storage.AddGasChunk(ElementLoader.elements[(int)massConsumptionCallback.removedElemIdx].id, massConsumptionCallback.mass, massConsumptionCallback.temperature, massConsumptionCallback.diseaseIdx, massConsumptionCallback.diseaseCount, true, true);
+			if (this.HasConsumedEnough())
 			{
 				base.smi.sm.noFood.Trigger(base.smi);
 			}
+		}
+		else
+		{
+			base.smi.sm.noFood.Trigger(base.smi);
 		}
 	}
 
@@ -248,9 +242,9 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 
 	public int emitDiseasePerKg;
 
-	private bool playingMoveSound = false;
+	private bool playingMoveSound;
 
-	private bool playingInhaleSound = false;
+	private bool playingInhaleSound;
 
 	public class StatesInstance : GameStateMachine<OilFloater.States, OilFloater.StatesInstance, OilFloater, object>.GameInstance
 	{

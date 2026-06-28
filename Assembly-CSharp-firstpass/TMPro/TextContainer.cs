@@ -365,48 +365,43 @@ namespace TMPro
 
 		private TextContainerAnchors GetAnchorPosition(Vector2 pivot)
 		{
-			TextContainerAnchors textContainerAnchors;
 			if (pivot == new Vector2(0f, 1f))
 			{
-				textContainerAnchors = TextContainerAnchors.TopLeft;
+				return TextContainerAnchors.TopLeft;
 			}
-			else if (pivot == new Vector2(0.5f, 1f))
+			if (pivot == new Vector2(0.5f, 1f))
 			{
-				textContainerAnchors = TextContainerAnchors.Top;
+				return TextContainerAnchors.Top;
 			}
-			else if (pivot == new Vector2(1f, 1f))
+			if (pivot == new Vector2(1f, 1f))
 			{
-				textContainerAnchors = TextContainerAnchors.TopRight;
+				return TextContainerAnchors.TopRight;
 			}
-			else if (pivot == new Vector2(0f, 0.5f))
+			if (pivot == new Vector2(0f, 0.5f))
 			{
-				textContainerAnchors = TextContainerAnchors.Left;
+				return TextContainerAnchors.Left;
 			}
-			else if (pivot == new Vector2(0.5f, 0.5f))
+			if (pivot == new Vector2(0.5f, 0.5f))
 			{
-				textContainerAnchors = TextContainerAnchors.Middle;
+				return TextContainerAnchors.Middle;
 			}
-			else if (pivot == new Vector2(1f, 0.5f))
+			if (pivot == new Vector2(1f, 0.5f))
 			{
-				textContainerAnchors = TextContainerAnchors.Right;
+				return TextContainerAnchors.Right;
 			}
-			else if (pivot == new Vector2(0f, 0f))
+			if (pivot == new Vector2(0f, 0f))
 			{
-				textContainerAnchors = TextContainerAnchors.BottomLeft;
+				return TextContainerAnchors.BottomLeft;
 			}
-			else if (pivot == new Vector2(0.5f, 0f))
+			if (pivot == new Vector2(0.5f, 0f))
 			{
-				textContainerAnchors = TextContainerAnchors.Bottom;
+				return TextContainerAnchors.Bottom;
 			}
-			else if (pivot == new Vector2(1f, 0f))
+			if (pivot == new Vector2(1f, 0f))
 			{
-				textContainerAnchors = TextContainerAnchors.BottomRight;
+				return TextContainerAnchors.BottomRight;
 			}
-			else
-			{
-				textContainerAnchors = TextContainerAnchors.Custom;
-			}
-			return textContainerAnchors;
+			return TextContainerAnchors.Custom;
 		}
 
 		private bool m_hasChanged;
@@ -424,7 +419,7 @@ namespace TMPro
 
 		private bool m_isDefaultHeight;
 
-		private bool m_isAutoFitting = false;
+		private bool m_isAutoFitting;
 
 		private Vector3[] m_corners = new Vector3[4];
 

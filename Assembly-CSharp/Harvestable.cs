@@ -52,26 +52,27 @@ public class Harvestable : Workable
 
 	private void CreateOverlayIcon()
 	{
-		if (!(this.HarvestWhenReadyOverlayIcon != null))
+		if (this.HarvestWhenReadyOverlayIcon != null)
 		{
-			if (base.GetComponent<Harvestable>() != null && base.GetComponent<AttackableBase>() == null)
+			return;
+		}
+		if (base.GetComponent<Harvestable>() != null && base.GetComponent<AttackableBase>() == null)
+		{
+			this.HarvestWhenReadyOverlayIcon = Util.KInstantiate(Assets.UIPrefabs.HarvestWhenReadyOverlayIcon, GameScreenManager.Instance.worldSpaceCanvas, null).GetComponent<RectTransform>();
+			OccupyArea component = base.GetComponent<OccupyArea>();
+			Extents extents = component.GetExtents();
+			KPrefabID component2 = base.GetComponent<KPrefabID>();
+			Vector3 vector;
+			if (component2.HasTag(GameTags.Hanging))
 			{
-				this.HarvestWhenReadyOverlayIcon = Util.KInstantiate(Assets.UIPrefabs.HarvestWhenReadyOverlayIcon, GameScreenManager.Instance.worldSpaceCanvas, null).GetComponent<RectTransform>();
-				OccupyArea component = base.GetComponent<OccupyArea>();
-				Extents extents = component.GetExtents();
-				KPrefabID component2 = base.GetComponent<KPrefabID>();
-				Vector3 vector;
-				if (component2.HasTag(GameTags.Hanging))
-				{
-					vector = new Vector3((float)(extents.x + extents.width / 2) + 0.5f, (float)(extents.y + extents.height));
-				}
-				else
-				{
-					vector = new Vector3((float)(extents.x + extents.width / 2) + 0.5f, (float)extents.y);
-				}
-				this.HarvestWhenReadyOverlayIcon.transform.position = vector;
-				this.RefreshOverlayIcon(null);
+				vector = new Vector3((float)(extents.x + extents.width / 2) + 0.5f, (float)(extents.y + extents.height));
 			}
+			else
+			{
+				vector = new Vector3((float)(extents.x + extents.width / 2) + 0.5f, (float)extents.y);
+			}
+			this.HarvestWhenReadyOverlayIcon.transform.position = vector;
+			this.RefreshOverlayIcon(null);
 		}
 	}
 
@@ -207,16 +208,17 @@ public class Harvestable : Workable
 
 	public virtual void MarkForHarvest()
 	{
-		if (this.canBeHarvested)
+		if (!this.canBeHarvested)
 		{
-			if (this.chore == null)
-			{
-				this.chore = new WorkChore<Harvestable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, true, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
-				this.selectable.AddStatusItem(Db.Get().MiscStatusItems.PendingHarvest, this);
-			}
-			this.isMarkedForHarvest = true;
-			this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, false);
+			return;
 		}
+		if (this.chore == null)
+		{
+			this.chore = new WorkChore<Harvestable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, true, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			this.selectable.AddStatusItem(Db.Get().MiscStatusItems.PendingHarvest, this);
+		}
+		this.isMarkedForHarvest = true;
+		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, false);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -320,15 +322,15 @@ public class Harvestable : Workable
 	protected bool isMarkedForHarvest;
 
 	[Serialize]
-	protected bool canBeHarvested = false;
+	protected bool canBeHarvested;
 
 	[Serialize]
-	protected bool harvestWhenReady = false;
+	protected bool harvestWhenReady;
 
 	public RectTransform HarvestWhenReadyOverlayIcon;
 
 	[Serialize]
-	private bool isInPlanterBox = false;
+	private bool isInPlanterBox;
 
 	protected Chore chore;
 

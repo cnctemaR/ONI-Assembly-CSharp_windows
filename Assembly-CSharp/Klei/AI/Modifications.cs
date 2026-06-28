@@ -129,15 +129,12 @@ namespace Klei.AI
 				int num2 = reader.ReadInt32();
 				int position = reader.Position;
 				InstanceType instanceType = this.Get(text);
-				if (instanceType == null)
+				if (instanceType == null && this.resources != null)
 				{
-					if (this.resources != null)
+					ModifierType modifierType = this.resources.TryGet(text);
+					if (modifierType != null)
 					{
-						ModifierType modifierType = this.resources.TryGet(text);
-						if (modifierType != null)
-						{
-							instanceType = this.CreateInstance(modifierType);
-						}
+						instanceType = this.CreateInstance(modifierType);
 					}
 				}
 				if (instanceType == null)

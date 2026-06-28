@@ -49,16 +49,11 @@ namespace Delaunay
 			{
 				global::UnityEngine.Debug.LogError("SiteList::next():  sites have not been sorted");
 			}
-			Site site;
 			if (this._currentIndex < this._sites.Count)
 			{
-				site = this._sites[this._currentIndex++];
+				return this._sites[this._currentIndex++];
 			}
-			else
-			{
-				site = null;
-			}
-			return site;
+			return null;
 		}
 
 		internal Rect GetSitesBounds()
@@ -69,32 +64,27 @@ namespace Delaunay
 				this._currentIndex = 0;
 				this._sorted = true;
 			}
-			Rect rect;
 			if (this._sites.Count == 0)
 			{
-				rect = new Rect(0f, 0f, 0f, 0f);
+				return new Rect(0f, 0f, 0f, 0f);
 			}
-			else
+			float num = float.MaxValue;
+			float num2 = float.MinValue;
+			for (int i = 0; i < this._sites.Count; i++)
 			{
-				float num = float.MaxValue;
-				float num2 = float.MinValue;
-				for (int i = 0; i < this._sites.Count; i++)
+				Site site = this._sites[i];
+				if (site.x < num)
 				{
-					Site site = this._sites[i];
-					if (site.x < num)
-					{
-						num = site.x;
-					}
-					if (site.x > num2)
-					{
-						num2 = site.x;
-					}
+					num = site.x;
 				}
-				float y = this._sites[0].y;
-				float y2 = this._sites[this._sites.Count - 1].y;
-				rect = new Rect(num, y, num2 - num, y2 - y);
+				if (site.x > num2)
+				{
+					num2 = site.x;
+				}
 			}
-			return rect;
+			float y = this._sites[0].y;
+			float y2 = this._sites[this._sites.Count - 1].y;
+			return new Rect(num, y, num2 - num, y2 - y);
 		}
 
 		public List<uint> SiteColors()

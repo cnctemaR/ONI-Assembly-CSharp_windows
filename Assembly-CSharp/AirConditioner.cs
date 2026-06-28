@@ -38,11 +38,9 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		if (this.operational != null && !this.operational.IsOperational)
 		{
 			this.operational.SetActive(false, false);
+			return;
 		}
-		else
-		{
-			this.UpdateState(Time.deltaTime);
-		}
+		this.UpdateState(Time.deltaTime);
 	}
 
 	private void UpdateState(float dt)
@@ -159,7 +157,7 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		float num = Mathf.Abs(this.temperatureDelta * element.specificHeatCapacity);
 		Descriptor descriptor = default(Descriptor);
 		string text = string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.HEATGENERATED_AIRCONDITIONER : UI.BUILDINGEFFECTS.HEATGENERATED_LIQUIDCONDITIONER, GameUtil.GetFormattedWattage(num, GameUtil.WattageFormatterUnit.Automatic));
-		string text2 = string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_AIRCONDITIONER : UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_LIQUIDCONDITIONER, GameUtil.GetFormattedJoules(num, ""));
+		string text2 = string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_AIRCONDITIONER : UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_LIQUIDCONDITIONER, GameUtil.GetFormattedJoules(num, string.Empty));
 		descriptor.SetupDescriptor(text, text2, Descriptor.DescriptorType.Effect);
 		list.Add(descriptor);
 		Descriptor descriptor2 = default(Descriptor);
@@ -194,11 +192,11 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 
 	private float lowTempLag;
 
-	private bool showingLowTemp = false;
+	private bool showingLowTemp;
 
 	public bool isLiquidConditioner;
 
-	private bool showingHotEnv = false;
+	private bool showingHotEnv;
 
 	private Guid statusHandle;
 

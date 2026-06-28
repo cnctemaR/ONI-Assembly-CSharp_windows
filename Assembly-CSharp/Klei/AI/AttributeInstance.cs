@@ -115,25 +115,20 @@ namespace Klei.AI
 
 		public float GetModifierContribution(AttributeModifier testModifier)
 		{
-			float num;
 			if (!testModifier.IsMultiplier)
 			{
-				num = testModifier.Value;
+				return testModifier.Value;
 			}
-			else
+			float num = this.Attribute.BaseValue;
+			for (int i = 0; i < this.Modifiers.Count; i++)
 			{
-				float num2 = this.Attribute.BaseValue;
-				for (int i = 0; i < this.Modifiers.Count; i++)
+				AttributeModifier modifier = this.Modifiers[i].Modifier;
+				if (!modifier.IsMultiplier)
 				{
-					AttributeModifier modifier = this.Modifiers[i].Modifier;
-					if (!modifier.IsMultiplier)
-					{
-						num2 += modifier.Value;
-					}
+					num += modifier.Value;
 				}
-				num = num2 * testModifier.Value;
 			}
-			return num;
+			return num * testModifier.Value;
 		}
 
 		public float GetPercentOfBase()
@@ -184,16 +179,11 @@ namespace Klei.AI
 		public string GetFormattedValue()
 		{
 			IAttributeFormatter formatter = this.Attribute.formatter;
-			string text;
 			if (formatter != null)
 			{
-				text = formatter.GetFormattedAttribute(this);
+				return formatter.GetFormattedAttribute(this);
 			}
-			else
-			{
-				text = GameUtil.GetFormattedSimple(this.GetTotalValue(), GameUtil.TimeSlice.None, null);
-			}
-			return text;
+			return GameUtil.GetFormattedSimple(this.GetTotalValue(), GameUtil.TimeSlice.None, null);
 		}
 
 		public string GetAttributeValueTooltip()
@@ -211,7 +201,7 @@ namespace Klei.AI
 					text += string.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifierEntry.Modifier.Description, formattedString);
 				}
 			}
-			string text2 = "";
+			string text2 = string.Empty;
 			AttributeConverters component = base.gameObject.GetComponent<AttributeConverters>();
 			if (component != null && this.Attribute.converters.Count > 0)
 			{

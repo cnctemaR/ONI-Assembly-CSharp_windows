@@ -68,15 +68,15 @@ public class ConduitFlowVisualizer
 				{
 				case ConduitFlow.FlowDirection.Left:
 				case ConduitFlow.FlowDirection.Right:
-					goto IL_01BA;
+					goto IL_01B0;
 				case ConduitFlow.FlowDirection.Up:
 				case ConduitFlow.FlowDirection.Down:
 					quaternion = ConduitFlowVisualizer.VerticalRotation;
 					break;
 				default:
-					goto IL_01BA;
+					goto IL_01B0;
 				}
-				IL_01C6:
+				IL_01BC:
 				Vector2I vector2I3 = Grid.CellToXY(cell);
 				Vector2I vector2I4 = Grid.CellToXY(cellFromDirection);
 				Vector2 vector = vector2I3;
@@ -120,13 +120,14 @@ public class ConduitFlowVisualizer
 				if (trigger_audio)
 				{
 					this.AddAudioSource(conduit, position);
+					goto IL_0422;
 				}
-				goto IL_043B;
-				IL_01BA:
+				goto IL_0422;
+				IL_01B0:
 				quaternion = Quaternion.identity;
-				goto IL_01C6;
+				goto IL_01BC;
 			}
-			IL_043B:
+			IL_0422:
 			if (conduit.initialContents.mass > conduit.lastFlowContents.mass && conduit.initialContents.mass > 0f)
 			{
 				if (element == null || conduit.initialContents.element != element.id)
@@ -290,29 +291,30 @@ public class ConduitFlowVisualizer
 
 	private void TriggerAudio()
 	{
-		if (!SpeedControlScreen.Instance.IsPaused)
+		if (SpeedControlScreen.Instance.IsPaused)
 		{
-			CameraController instance = CameraController.Instance;
-			int num = 0;
-			List<ConduitFlowVisualizer.AudioInfo> list = new List<ConduitFlowVisualizer.AudioInfo>();
-			for (int i = 0; i < this.audioInfo.Count; i++)
+			return;
+		}
+		CameraController instance = CameraController.Instance;
+		int num = 0;
+		List<ConduitFlowVisualizer.AudioInfo> list = new List<ConduitFlowVisualizer.AudioInfo>();
+		for (int i = 0; i < this.audioInfo.Count; i++)
+		{
+			if (instance.IsVisiblePos(this.audioInfo[i].position))
 			{
-				if (instance.IsVisiblePos(this.audioInfo[i].position))
-				{
-					list.Add(this.audioInfo[i]);
-					num++;
-				}
+				list.Add(this.audioInfo[i]);
+				num++;
 			}
-			for (int j = 0; j < list.Count; j++)
+		}
+		for (int j = 0; j < list.Count; j++)
+		{
+			ConduitFlowVisualizer.AudioInfo audioInfo = list[j];
+			if (audioInfo.distance != float.PositiveInfinity)
 			{
-				ConduitFlowVisualizer.AudioInfo audioInfo = list[j];
-				if (audioInfo.distance != float.PositiveInfinity)
-				{
-					EventInstance eventInstance = SoundEvent.BeginOneShot(this.overlaySound, audioInfo.position);
-					eventInstance.setParameterValue("blobCount", (float)audioInfo.blobCount);
-					eventInstance.setParameterValue("networkCount", (float)num);
-					SoundEvent.EndOneShot(eventInstance);
-				}
+				EventInstance eventInstance = SoundEvent.BeginOneShot(this.overlaySound, audioInfo.position);
+				eventInstance.setParameterValue("blobCount", (float)audioInfo.blobCount);
+				eventInstance.setParameterValue("networkCount", (float)num);
+				SoundEvent.EndOneShot(eventInstance);
 			}
 		}
 	}
@@ -409,11 +411,11 @@ public class ConduitFlowVisualizer
 
 	private static readonly KAnimHashedString TintSymbol = new KAnimHashedString("base");
 
-	private bool showContents = false;
+	private bool showContents;
 
-	private bool moveToOverlayLayer = false;
+	private bool moveToOverlayLayer;
 
-	private int layer = 0;
+	private int layer;
 
 	private static readonly Vector2 offset = new Vector2(0.5f, 0.5f);
 

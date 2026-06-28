@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine.Assertions;
 
 public class KCompactedVector<T> where T : new()
 {
@@ -22,35 +21,29 @@ public class KCompactedVector<T> where T : new()
 
 	public HandleVector<int>.Handle Free(HandleVector<int>.Handle handle)
 	{
-		HandleVector<int>.Handle handle2;
 		if (!handle.IsValid())
 		{
-			handle2 = handle;
+			return handle;
 		}
-		else
+		this.Validate();
+		int num = this.handles.Release(handle);
+		int num2 = this.data.Count - 1;
+		if (num < num2)
 		{
-			this.Validate();
-			int num = this.handles.Release(handle);
-			int num2 = this.data.Count - 1;
-			if (num < num2)
+			this.data[num] = this.data[num2];
+			int num3 = this.dataHandleIndices[num2];
+			if (this.handles.Items[num3] != num2)
 			{
-				this.data[num] = this.data[num2];
-				int num3 = this.dataHandleIndices[num2];
-				if (this.handles.Items[num3] != num2)
-				{
-					Output.LogError(new object[] { "unexpected" });
-					Assert.IsTrue(false);
-				}
-				this.handles.Items[num3] = num;
-				this.dataHandleIndices[num] = num3;
+				Output.LogError(new object[] { "unexpected" });
 			}
-			this.data.RemoveAt(num2);
-			this.dataHandleIndices.RemoveAt(num2);
-			this.Validate();
-			handle = HandleVector<int>.InvalidHandle;
-			handle2 = handle;
+			this.handles.Items[num3] = num;
+			this.dataHandleIndices[num] = num3;
 		}
-		return handle2;
+		this.data.RemoveAt(num2);
+		this.dataHandleIndices.RemoveAt(num2);
+		this.Validate();
+		handle = HandleVector<int>.InvalidHandle;
+		return handle;
 	}
 
 	public T GetData(HandleVector<int>.Handle handle)

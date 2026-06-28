@@ -49,23 +49,24 @@ public class CircuitSwitch : Switch
 
 	public void AttachWire(Wire wire)
 	{
-		if (!(wire == this.attachedWire))
+		if (wire == this.attachedWire)
 		{
-			if (this.attachedWire != null)
-			{
-				this.UnsubscribeFromWire(this.attachedWire);
-			}
-			this.attachedWire = wire;
-			if (this.attachedWire != null)
-			{
-				this.SubscribeToWire(this.attachedWire);
-				this.UpdateCircuit();
-				this.wireConnectedGUID = base.GetComponent<KSelectable>().RemoveStatusItem(this.wireConnectedGUID, false);
-			}
-			else if (this.wireConnectedGUID == Guid.Empty)
-			{
-				this.wireConnectedGUID = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.NoWireConnected, null);
-			}
+			return;
+		}
+		if (this.attachedWire != null)
+		{
+			this.UnsubscribeFromWire(this.attachedWire);
+		}
+		this.attachedWire = wire;
+		if (this.attachedWire != null)
+		{
+			this.SubscribeToWire(this.attachedWire);
+			this.UpdateCircuit();
+			this.wireConnectedGUID = base.GetComponent<KSelectable>().RemoveStatusItem(this.wireConnectedGUID, false);
+		}
+		else if (this.wireConnectedGUID == Guid.Empty)
+		{
+			this.wireConnectedGUID = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.NoWireConnected, null);
 		}
 	}
 
@@ -122,7 +123,7 @@ public class CircuitSwitch : Switch
 	[SerializeField]
 	public ObjectLayer objectLayer;
 
-	private Wire attachedWire = null;
+	private Wire attachedWire;
 
 	private Guid wireConnectedGUID;
 

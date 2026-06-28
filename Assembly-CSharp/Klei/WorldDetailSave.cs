@@ -14,15 +14,15 @@ namespace Klei
 			this.overworldCells = new List<WorldDetailSave.OverworldCell>();
 		}
 
-		public List<WorldDetailSave.OverworldCell> overworldCells = null;
+		public List<WorldDetailSave.OverworldCell> overworldCells;
 
-		public int globalWorldSeed = 0;
+		public int globalWorldSeed;
 
-		public int globalWorldLayoutSeed = 0;
+		public int globalWorldLayoutSeed;
 
-		public int globalTerrainSeed = 0;
+		public int globalTerrainSeed;
 
-		public int globalNoiseSeed = 0;
+		public int globalNoiseSeed;
 
 		[SerializationConfig(MemberSerialization.OptOut)]
 		public class OverworldCell

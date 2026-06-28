@@ -45,49 +45,39 @@ namespace ProcGen.Map
 		public Edge GetEdge(Corner corner0, Corner corner1, bool createOK = true)
 		{
 			Edge edge = this.edgeList.Find((Edge e) => (e.corner0 == corner0 || e.corner0 == corner1) && (e.corner1 == corner0 || e.corner1 == corner1));
-			Edge edge2;
 			if (edge != null)
 			{
-				edge2 = edge;
+				return edge;
 			}
-			else if (!createOK)
+			if (!createOK)
 			{
 				global::Debug.LogWarning("Cant create Edge but no edge found", null);
-				edge2 = null;
+				return null;
 			}
-			else
-			{
-				Arc arc = base.baseGraph.AddArc(corner0.node, corner1.node, Directedness.Undirected);
-				edge = new Edge(arc, corner0, corner1);
-				this.arcList.Add(edge);
-				this.edgeList.Add(edge);
-				edge2 = edge;
-			}
-			return edge2;
+			Arc arc = base.baseGraph.AddArc(corner0.node, corner1.node, Directedness.Undirected);
+			edge = new Edge(arc, corner0, corner1);
+			this.arcList.Add(edge);
+			this.edgeList.Add(edge);
+			return edge;
 		}
 
 		public Edge GetEdge(Corner corner0, Corner corner1, Cell site0, Cell site1, bool createOK = true)
 		{
 			Edge edge = this.edgeList.Find((Edge e) => (e.corner0 == corner0 || e.corner0 == corner1) && (e.corner1 == corner0 || e.corner1 == corner1));
-			Edge edge2;
 			if (edge != null)
 			{
-				edge2 = edge;
+				return edge;
 			}
-			else if (!createOK)
+			if (!createOK)
 			{
 				global::Debug.LogWarning("Cant create Edge but no edge found", null);
-				edge2 = null;
+				return null;
 			}
-			else
-			{
-				Arc arc = base.baseGraph.AddArc(corner0.node, corner1.node, Directedness.Undirected);
-				edge = new Edge(arc, corner0, corner1, site0, site1);
-				this.arcList.Add(edge);
-				this.edgeList.Add(edge);
-				edge2 = edge;
-			}
-			return edge2;
+			Arc arc = base.baseGraph.AddArc(corner0.node, corner1.node, Directedness.Undirected);
+			edge = new Edge(arc, corner0, corner1, site0, site1);
+			this.arcList.Add(edge);
+			this.edgeList.Add(edge);
+			return edge;
 		}
 
 		public Corner GetCorner(Vector2 position, bool createOK = true)

@@ -69,37 +69,29 @@ public class ConduitTemperatureManager : KCompactedVector<ConduitTemperatureMana
 
 	private float ModifyTemperature(float source_temperature, float source_heat_capacity, float cell_temperature, float cell_heat_capacity, ref float kilojoules)
 	{
-		float num;
 		if (source_heat_capacity * cell_heat_capacity <= 0f)
 		{
 			kilojoules = 0f;
-			num = source_temperature;
+			return source_temperature;
 		}
-		else
+		float num = source_temperature;
+		float num2 = Math.Max(0f, num + kilojoules / source_heat_capacity);
+		if (float.IsInfinity(num2) || float.IsNaN(num2))
 		{
-			float num2 = source_temperature;
-			float num3 = Math.Max(0f, num2 + kilojoules / source_heat_capacity);
-			if (float.IsInfinity(num3) || float.IsNaN(num3))
-			{
-				Output.LogError(new object[] { "Invalid temperature" });
-				kilojoules = 0f;
-				num = source_temperature;
-			}
-			else
-			{
-				source_temperature = num3;
-				float num4 = Math.Max(0f, cell_temperature - kilojoules / cell_heat_capacity);
-				if ((num2 - cell_temperature) * (source_temperature - num4) < 0f)
-				{
-					float num5 = num2 * source_heat_capacity + cell_temperature * cell_heat_capacity;
-					float num6 = num5 / (source_heat_capacity + cell_heat_capacity);
-					source_temperature = num6;
-					kilojoules = (num6 - cell_temperature) * cell_heat_capacity;
-				}
-				num = source_temperature;
-			}
+			Output.LogError(new object[] { "Invalid temperature" });
+			kilojoules = 0f;
+			return source_temperature;
 		}
-		return num;
+		source_temperature = num2;
+		float num3 = Math.Max(0f, cell_temperature - kilojoules / cell_heat_capacity);
+		if ((num - cell_temperature) * (source_temperature - num3) < 0f)
+		{
+			float num4 = num * source_heat_capacity + cell_temperature * cell_heat_capacity;
+			float num5 = num4 / (source_heat_capacity + cell_heat_capacity);
+			source_temperature = num5;
+			kilojoules = (num5 - cell_temperature) * cell_heat_capacity;
+		}
+		return source_temperature;
 	}
 
 	private static float ContentsScaleFactor = 50f;

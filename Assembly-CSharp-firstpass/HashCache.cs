@@ -14,9 +14,9 @@ public class HashCache
 
 	public string Get(int hash)
 	{
-		string text = "";
-		this.hashes.TryGetValue(hash, out text);
-		return text;
+		string empty = string.Empty;
+		this.hashes.TryGetValue(hash, out empty);
+		return empty;
 	}
 
 	public string Get(KAnimHashedString hash)

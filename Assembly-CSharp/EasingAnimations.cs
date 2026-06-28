@@ -28,17 +28,18 @@ public class EasingAnimations : MonoBehaviour
 		{
 			this.Initialize();
 		}
-		if (this.animationMap.ContainsKey(animationName))
+		if (!this.animationMap.ContainsKey(animationName))
 		{
-			if (this.animationCoroutine != null)
-			{
-				base.StopCoroutine(this.animationCoroutine);
-			}
-			this.currentAnimation = this.animationMap[animationName];
-			this.currentAnimation.currentScale = this.currentAnimation.startScale;
-			base.transform.localScale = Vector3.one * this.currentAnimation.currentScale;
-			this.animationCoroutine = base.StartCoroutine(this.ExecuteAnimation(delay));
+			return;
 		}
+		if (this.animationCoroutine != null)
+		{
+			base.StopCoroutine(this.animationCoroutine);
+		}
+		this.currentAnimation = this.animationMap[animationName];
+		this.currentAnimation.currentScale = this.currentAnimation.startScale;
+		base.transform.localScale = Vector3.one * this.currentAnimation.currentScale;
+		this.animationCoroutine = base.StartCoroutine(this.ExecuteAnimation(delay));
 	}
 
 	private IEnumerator ExecuteAnimation(float delay)
@@ -79,23 +80,15 @@ public class EasingAnimations : MonoBehaviour
 	private float GetEasing(float t)
 	{
 		EasingAnimations.AnimationScales.AnimationType type = this.currentAnimation.type;
-		float num;
-		if (type != EasingAnimations.AnimationScales.AnimationType.EaseInBack)
+		if (type == EasingAnimations.AnimationScales.AnimationType.EaseInBack)
 		{
-			if (type != EasingAnimations.AnimationScales.AnimationType.EaseOutBack)
-			{
-				num = this.EaseInOutBack(this.currentAnimation.currentScale, this.currentAnimation.endScale, t);
-			}
-			else
-			{
-				num = this.EaseOutBack(this.currentAnimation.currentScale, this.currentAnimation.endScale, t);
-			}
+			return this.EaseInBack(this.currentAnimation.currentScale, this.currentAnimation.endScale, t);
 		}
-		else
+		if (type != EasingAnimations.AnimationScales.AnimationType.EaseOutBack)
 		{
-			num = this.EaseInBack(this.currentAnimation.currentScale, this.currentAnimation.endScale, t);
+			return this.EaseInOutBack(this.currentAnimation.currentScale, this.currentAnimation.endScale, t);
 		}
-		return num;
+		return this.EaseOutBack(this.currentAnimation.currentScale, this.currentAnimation.endScale, t);
 	}
 
 	public float EaseInOutBack(float start, float end, float value)
@@ -103,19 +96,14 @@ public class EasingAnimations : MonoBehaviour
 		float num = 1.70158f;
 		end -= start;
 		value /= 0.5f;
-		float num2;
 		if (value < 1f)
 		{
 			num *= 1.525f;
-			num2 = end * 0.5f * (value * value * ((num + 1f) * value - num)) + start;
+			return end * 0.5f * (value * value * ((num + 1f) * value - num)) + start;
 		}
-		else
-		{
-			value -= 2f;
-			num *= 1.525f;
-			num2 = end * 0.5f * (value * value * ((num + 1f) * value + num) + 2f) + start;
-		}
-		return num2;
+		value -= 2f;
+		num *= 1.525f;
+		return end * 0.5f * (value * value * ((num + 1f) * value + num) + 2f) + start;
 	}
 
 	public float EaseInBack(float start, float end, float value)

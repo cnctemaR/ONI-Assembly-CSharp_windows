@@ -72,18 +72,13 @@ public class GlobalAssets : MonoBehaviour
 
 	public static string GetSound(string name, bool force_no_warning = false)
 	{
-		string text;
 		if (name == null)
 		{
-			text = null;
+			return null;
 		}
-		else
-		{
-			name = name.ToLowerInvariant();
-			string text2 = null;
-			GlobalAssets.SoundTable.TryGetValue(name, out text2);
-			text = text2;
-		}
+		name = name.ToLowerInvariant();
+		string text = null;
+		GlobalAssets.SoundTable.TryGetValue(name, out text);
 		return text;
 	}
 

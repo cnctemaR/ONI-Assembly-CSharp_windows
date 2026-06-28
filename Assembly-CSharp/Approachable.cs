@@ -29,5 +29,5 @@ public class Approachable : KMonoBehaviour, IApproachable
 		return base.transform;
 	}
 
-	public bool preferUnreservedCell = false;
+	public bool preferUnreservedCell;
 }

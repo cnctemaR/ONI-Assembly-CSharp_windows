@@ -42,75 +42,62 @@ public class DisplayNodeEditor : BaseNodeEditor
 
 	public override bool Calculate()
 	{
-		bool flag;
 		if (!base.allInputsReady() || base.settings == null)
 		{
-			flag = false;
+			return false;
+		}
+		IModule3D value = this.Inputs[0].GetValue<IModule3D>();
+		if (value == null)
+		{
+			return false;
+		}
+		this.InitSettings();
+		Vector2f lowerBound = base.settings.lowerBound;
+		Vector2f upperBound = base.settings.upperBound;
+		NoiseMapBuilderPlane noiseMapBuilderPlane = new NoiseMapBuilderPlane(lowerBound.x, upperBound.x, lowerBound.y, upperBound.y, base.settings.seamless);
+		noiseMapBuilderPlane.SetSize(256, 256);
+		noiseMapBuilderPlane.SourceModule = value;
+		Vector2 zero = Vector2.zero;
+		float[] noise = WorldGen.GenerateNoise(zero, base.settings.zoom, noiseMapBuilderPlane, 256, 256, null);
+		if (base.settings.normalise)
+		{
+			WorldGen.Normalise(noise);
+		}
+		GetColourDelegate getColourDelegate = null;
+		DisplayNodeEditor.DisplayType displayType = this.displayType;
+		if (displayType != DisplayNodeEditor.DisplayType.DefaultColour)
+		{
+			if (displayType == DisplayNodeEditor.DisplayType.ElementColourFeature || displayType == DisplayNodeEditor.DisplayType.ElementColourBiome)
+			{
+				getColourDelegate = delegate(int cell)
+				{
+					if (this.biome == null)
+					{
+						return Color.black;
+					}
+					float num = noise[cell];
+					Element element = ElementLoader.FindElementByName(this.biome[this.biome.Count - 1].content);
+					for (int i = 0; i < this.biome.Count; i++)
+					{
+						if (num < this.biome[i].maxValue)
+						{
+							element = ElementLoader.FindElementByName(this.biome[i].content);
+							break;
+						}
+					}
+					return element.substance.debugColour;
+				};
+			}
 		}
 		else
 		{
-			IModule3D value = this.Inputs[0].GetValue<IModule3D>();
-			if (value == null)
-			{
-				flag = false;
-			}
-			else
-			{
-				this.InitSettings();
-				Vector2f lowerBound = base.settings.lowerBound;
-				Vector2f upperBound = base.settings.upperBound;
-				NoiseMapBuilderPlane noiseMapBuilderPlane = new NoiseMapBuilderPlane(lowerBound.x, upperBound.x, lowerBound.y, upperBound.y, base.settings.seamless);
-				noiseMapBuilderPlane.SetSize(256, 256);
-				noiseMapBuilderPlane.SourceModule = value;
-				Vector2 zero = Vector2.zero;
-				float[] noise = WorldGen.GenerateNoise(zero, base.settings.zoom, noiseMapBuilderPlane, 256, 256, null);
-				if (base.settings.normalise)
-				{
-					WorldGen.Normalise(noise);
-				}
-				GetColourDelegate getColourDelegate = null;
-				DisplayNodeEditor.DisplayType displayType = this.displayType;
-				if (displayType != DisplayNodeEditor.DisplayType.DefaultColour)
-				{
-					if (displayType == DisplayNodeEditor.DisplayType.ElementColourFeature || displayType == DisplayNodeEditor.DisplayType.ElementColourBiome)
-					{
-						getColourDelegate = delegate(int cell)
-						{
-							Color color;
-							if (this.biome == null)
-							{
-								color = Color.black;
-							}
-							else
-							{
-								float num = noise[cell];
-								Element element = ElementLoader.FindElementByName(this.biome[this.biome.Count - 1].content);
-								for (int i = 0; i < this.biome.Count; i++)
-								{
-									if (num < this.biome[i].maxValue)
-									{
-										element = ElementLoader.FindElementByName(this.biome[i].content);
-										break;
-									}
-								}
-								color = element.substance.debugColour;
-							}
-							return color;
-						};
-					}
-				}
-				else
-				{
-					getColourDelegate = (int cell) => Color.HSVToRGB((40f + 320f * noise[cell]) / 360f, 1f, 1f);
-				}
-				if (getColourDelegate != null)
-				{
-					this.SetColours(getColourDelegate);
-				}
-				flag = true;
-			}
+			getColourDelegate = (int cell) => Color.HSVToRGB((40f + 320f * noise[cell]) / 360f, 1f, 1f);
 		}
-		return flag;
+		if (getColourDelegate != null)
+		{
+			this.SetColours(getColourDelegate);
+		}
+		return true;
 	}
 
 	private void SetColours(GetColourDelegate getColourCall)
@@ -166,19 +153,19 @@ public class DisplayNodeEditor : BaseNodeEditor
 	private const string Id = "displayNodeEditor";
 
 	[SerializeField]
-	public DisplayNodeEditor.DisplayType displayType = DisplayNodeEditor.DisplayType.DefaultColour;
+	public DisplayNodeEditor.DisplayType displayType;
 
 	private const int width = 256;
 
 	private const int height = 256;
 
-	private Texture2D texture = null;
+	private Texture2D texture;
 
-	private ElementBandConfiguration biome = null;
+	private ElementBandConfiguration biome;
 
-	private string[] biomeOptions = null;
+	private string[] biomeOptions;
 
-	private string[] featureOptions = null;
+	private string[] featureOptions;
 
 	public TextAsset simElementsSolidsFile;
 

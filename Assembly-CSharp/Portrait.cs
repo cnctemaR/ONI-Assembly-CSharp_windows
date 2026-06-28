@@ -138,12 +138,9 @@ public class Portrait : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		if (this.destroyTargetOnCleanup)
+		if (this.destroyTargetOnCleanup && this.go != null)
 		{
-			if (this.go != null)
-			{
-				global::UnityEngine.Object.Destroy(this.go);
-			}
+			global::UnityEngine.Object.Destroy(this.go);
 		}
 	}
 

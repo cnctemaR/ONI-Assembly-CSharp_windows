@@ -12,16 +12,11 @@ public class CellEvent : EventBase
 
 	public string GetMessagePrefix()
 	{
-		string text;
 		if (this.isSend)
 		{
-			text = ">>>: ";
+			return ">>>: ";
 		}
-		else
-		{
-			text = "<<<: ";
-		}
-		return text;
+		return "<<<: ";
 	}
 
 	public string reason;

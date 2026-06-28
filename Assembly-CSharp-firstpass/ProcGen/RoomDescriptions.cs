@@ -15,16 +15,11 @@ namespace ProcGen
 
 		public Room GetDesription(Tag item)
 		{
-			Room room;
 			if (this.rooms.ContainsKey(item.Name))
 			{
-				room = this.rooms[item.Name];
+				return this.rooms[item.Name];
 			}
-			else
-			{
-				room = null;
-			}
-			return room;
+			return null;
 		}
 	}
 }

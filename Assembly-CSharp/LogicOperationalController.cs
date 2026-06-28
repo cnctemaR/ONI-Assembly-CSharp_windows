@@ -9,7 +9,7 @@ public class LogicOperationalController : KMonoBehaviour
 		base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
 		if (LogicOperationalController.infoStatusItem == null)
 		{
-			LogicOperationalController.infoStatusItem = new StatusItem("LogicOperationalInfo", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			LogicOperationalController.infoStatusItem = new StatusItem("LogicOperationalInfo", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
 			LogicOperationalController.infoStatusItem.resolveStringCallback = new Func<string, object, string>(LogicOperationalController.ResolveInfoStatusItemString);
 		}
 		this.CheckWireState();

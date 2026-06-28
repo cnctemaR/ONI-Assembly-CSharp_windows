@@ -23,10 +23,10 @@ public class Artable : Workable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.statuses[Artable.Status.Ready] = new StatusItem("AwaitingArting", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-		this.statuses[Artable.Status.Ugly] = new StatusItem("LookingUgly", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-		this.statuses[Artable.Status.Okay] = new StatusItem("LookingOkay", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-		this.statuses[Artable.Status.Great] = new StatusItem("LookingGreat", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+		this.statuses[Artable.Status.Ready] = new StatusItem("AwaitingArting", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+		this.statuses[Artable.Status.Ugly] = new StatusItem("LookingUgly", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+		this.statuses[Artable.Status.Okay] = new StatusItem("LookingOkay", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+		this.statuses[Artable.Status.Great] = new StatusItem("LookingGreat", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Arting;
 		this.attributeConverter = Db.Get().AttributeConverters.ArtSpeed;
 		base.SetWorkTime(80f);

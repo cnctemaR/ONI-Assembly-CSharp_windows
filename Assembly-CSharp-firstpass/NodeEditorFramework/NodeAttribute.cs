@@ -20,6 +20,6 @@ namespace NodeEditorFramework
 
 		public string contextText { get; private set; }
 
-		public Type[] typeOfNodeCanvas = null;
+		public Type[] typeOfNodeCanvas;
 	}
 }

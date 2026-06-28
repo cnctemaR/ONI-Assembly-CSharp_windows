@@ -90,7 +90,6 @@ public class World : KMonoBehaviour
 		for (int l = 0; l < num_liquid_change_info; l++)
 		{
 			int cellIdx3 = liquid_change_info[l].cellIdx;
-			global::UnityEngine.Debug.Assert(Grid.IsValidCell(cellIdx3));
 			this.changedCells.Add(cellIdx3);
 			if (this.OnLiquidChanged != null)
 			{
@@ -107,30 +106,31 @@ public class World : KMonoBehaviour
 
 	private void LateUpdate()
 	{
-		if (!Game.IsQuitting())
+		if (Game.IsQuitting())
 		{
-			GridArea visibleArea = GridVisibleArea.GetVisibleArea();
-			this.groundRenderer.Render(visibleArea.Min, visibleArea.Max);
-			Vector2I vector2I;
-			Vector2I vector2I2;
-			KBatchedAnimUpdater.instance.GetVisibleArea(out vector2I, out vector2I2);
-			KAnimBatchManager.Instance().UpdateActiveArea(vector2I, vector2I2);
-			KAnimBatchManager.Instance().UpdateDirty(Time.frameCount);
-			KAnimBatchManager.Instance().Render();
-			if (Camera.main != null)
-			{
-				Vector3 vector = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z));
-				Shader.SetGlobalVector("_CursorPos", new Vector4(vector.x, vector.y, vector.z, 0f));
-			}
-			FallingWater.instance.UpdateParticles(Time.deltaTime);
-			FallingWater.instance.Render();
-			SpriteSheetAnimManager.instance.UpdateAnims(Time.deltaTime);
-			SpriteSheetAnimManager.instance.Render();
-			if (this.revealedCells.Count > 0)
-			{
-				GameScenePartitioner.Instance.TriggerEvent(this.revealedCells, GameScenePartitioner.Instance.fogOfWarChangedLayer, null);
-				this.revealedCells.Clear();
-			}
+			return;
+		}
+		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
+		this.groundRenderer.Render(visibleArea.Min, visibleArea.Max);
+		Vector2I vector2I;
+		Vector2I vector2I2;
+		KBatchedAnimUpdater.instance.GetVisibleArea(out vector2I, out vector2I2);
+		KAnimBatchManager.Instance().UpdateActiveArea(vector2I, vector2I2);
+		KAnimBatchManager.Instance().UpdateDirty(Time.frameCount);
+		KAnimBatchManager.Instance().Render();
+		if (Camera.main != null)
+		{
+			Vector3 vector = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z));
+			Shader.SetGlobalVector("_CursorPos", new Vector4(vector.x, vector.y, vector.z, 0f));
+		}
+		FallingWater.instance.UpdateParticles(Time.deltaTime);
+		FallingWater.instance.Render();
+		SpriteSheetAnimManager.instance.UpdateAnims(Time.deltaTime);
+		SpriteSheetAnimManager.instance.Render();
+		if (this.revealedCells.Count > 0)
+		{
+			GameScenePartitioner.Instance.TriggerEvent(this.revealedCells, GameScenePartitioner.Instance.fogOfWarChangedLayer, null);
+			this.revealedCells.Clear();
 		}
 	}
 

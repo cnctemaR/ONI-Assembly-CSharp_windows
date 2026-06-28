@@ -99,13 +99,14 @@ namespace Klei.AI
 
 		public void Remove(AttributeModifier modifier)
 		{
-			if (modifier != null)
+			if (modifier == null)
 			{
-				AttributeInstance attributeInstance = this.Get(modifier.AttributeId);
-				if (attributeInstance != null)
-				{
-					attributeInstance.Remove(modifier);
-				}
+				return;
+			}
+			AttributeInstance attributeInstance = this.Get(modifier.AttributeId);
+			if (attributeInstance != null)
+			{
+				attributeInstance.Remove(modifier);
 			}
 		}
 
@@ -132,31 +133,21 @@ namespace Klei.AI
 		public string GetProfessionString(bool longform = true)
 		{
 			AttributeInstance profession = this.GetProfession();
-			string text;
 			if ((int)profession.GetTotalValue() == 0)
 			{
-				text = string.Format((!longform) ? UI.ATTRIBUTELEVEL_SHORT : UI.ATTRIBUTELEVEL, 0, DUPLICANTS.ATTRIBUTES.UNPROFESSIONAL_NAME);
+				return string.Format((!longform) ? UI.ATTRIBUTELEVEL_SHORT : UI.ATTRIBUTELEVEL, 0, DUPLICANTS.ATTRIBUTES.UNPROFESSIONAL_NAME);
 			}
-			else
-			{
-				text = string.Format((!longform) ? UI.ATTRIBUTELEVEL_SHORT : UI.ATTRIBUTELEVEL, (int)profession.GetTotalValue(), profession.modifier.ProfessionName);
-			}
-			return text;
+			return string.Format((!longform) ? UI.ATTRIBUTELEVEL_SHORT : UI.ATTRIBUTELEVEL, (int)profession.GetTotalValue(), profession.modifier.ProfessionName);
 		}
 
 		public string GetProfessionDescriptionString()
 		{
 			AttributeInstance profession = this.GetProfession();
-			string text;
 			if ((int)profession.GetTotalValue() == 0)
 			{
-				text = DUPLICANTS.ATTRIBUTES.UNPROFESSIONAL_DESC;
+				return DUPLICANTS.ATTRIBUTES.UNPROFESSIONAL_DESC;
 			}
-			else
-			{
-				text = string.Format(DUPLICANTS.ATTRIBUTES.PROFESSION_DESC, profession.modifier.Name);
-			}
-			return text;
+			return string.Format(DUPLICANTS.ATTRIBUTES.PROFESSION_DESC, profession.modifier.Name);
 		}
 
 		public List<AttributeInstance> AttributeTable = new List<AttributeInstance>();

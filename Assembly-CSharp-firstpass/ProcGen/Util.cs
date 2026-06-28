@@ -64,26 +64,21 @@ namespace ProcGen
 		public static List<Vector2I> StaggerLine(Vector2 p0, Vector2 p1, int numberOfBreaks, SeededRandom rand, float staggerRange = 3f)
 		{
 			List<Vector2I> list = new List<Vector2I>();
-			List<Vector2I> list2;
 			if (numberOfBreaks == 0)
 			{
-				list2 = Util.GetLine(p0, p1);
+				return Util.GetLine(p0, p1);
 			}
-			else
+			Vector2 vector = p1 - p0;
+			Vector2 vector2 = p0;
+			Vector2 vector3 = p1;
+			for (int i = 0; i < numberOfBreaks; i++)
 			{
-				Vector2 vector = p1 - p0;
-				Vector2 vector2 = p0;
-				Vector2 vector3 = p1;
-				for (int i = 0; i < numberOfBreaks; i++)
-				{
-					vector3 = p0 + vector * (1f / (float)numberOfBreaks) * (float)i + Vector2.one * rand.RandomRange(-staggerRange, staggerRange);
-					list.AddRange(Util.GetLine(vector2, vector3));
-					vector2 = vector3;
-				}
-				list.AddRange(Util.GetLine(vector3, p1));
-				list2 = list;
+				vector3 = p0 + vector * (1f / (float)numberOfBreaks) * (float)i + Vector2.one * rand.RandomRange(-staggerRange, staggerRange);
+				list.AddRange(Util.GetLine(vector2, vector3));
+				vector2 = vector3;
 			}
-			return list2;
+			list.AddRange(Util.GetLine(vector3, p1));
+			return list;
 		}
 
 		public static List<Vector2I> GetLine(Vector2 p0, Vector2 p1)
@@ -202,19 +197,14 @@ namespace ProcGen
 
 		public static Vector2 RandomInUnitCircle(global::System.Random rng = null)
 		{
-			Vector2 vector;
 			if (rng == null)
 			{
-				vector = global::UnityEngine.Random.insideUnitCircle;
+				return global::UnityEngine.Random.insideUnitCircle;
 			}
-			else
-			{
-				double num = rng.NextDouble();
-				double num2 = rng.NextDouble();
-				double num3 = Math.Sqrt(num);
-				vector = new Vector2((float)(num3 * Math.Cos(num2)), (float)(num3 * Math.Sin(num2)));
-			}
-			return vector;
+			double num = rng.NextDouble();
+			double num2 = rng.NextDouble();
+			double num3 = Math.Sqrt(num);
+			return new Vector2((float)(num3 * Math.Cos(num2)), (float)(num3 * Math.Sin(num2)));
 		}
 
 		public static List<Vector2I> GetBlob(Vector2 center, float radius, global::System.Random rng)

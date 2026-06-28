@@ -137,24 +137,16 @@ public class GlobalChoreProvider : ChoreProvider
 		public int Compare(GlobalChoreProvider.Fetch a, GlobalChoreProvider.Fetch b)
 		{
 			int num = b.priority.priority_class - a.priority.priority_class;
-			int num2;
 			if (num != 0)
 			{
-				num2 = num;
+				return num;
 			}
-			else
+			int num2 = b.priority.priority_value - a.priority.priority_value;
+			if (num2 != 0)
 			{
-				int num3 = b.priority.priority_value - a.priority.priority_value;
-				if (num3 != 0)
-				{
-					num2 = num3;
-				}
-				else
-				{
-					num2 = a.cost - b.cost;
-				}
+				return num2;
 			}
-			return num2;
+			return a.cost - b.cost;
 		}
 	}
 }

@@ -5,7 +5,7 @@ public class DuplicantsLeftMessage : Message
 {
 	public override string GetSound()
 	{
-		return "";
+		return string.Empty;
 	}
 
 	public override string GetTitle()

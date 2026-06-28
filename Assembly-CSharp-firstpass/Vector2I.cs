@@ -175,16 +175,11 @@ public struct Vector2I : IComparable<Vector2I>, IEquatable<Vector2I>
 	public int CompareTo(Vector2I other)
 	{
 		int num = this.y - other.y;
-		int num2;
 		if (other.y == 0)
 		{
-			num2 = this.x - other.x;
+			return this.x - other.x;
 		}
-		else
-		{
-			num2 = num;
-		}
-		return num2;
+		return num;
 	}
 
 	public static readonly Vector2I zero = new Vector2I(0, 0);

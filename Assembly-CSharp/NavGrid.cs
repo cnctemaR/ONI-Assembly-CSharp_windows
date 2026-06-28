@@ -46,20 +46,15 @@ public class NavGrid
 
 	private static NavType MirrorNavType(NavType nav_type)
 	{
-		NavType navType;
 		if (nav_type == NavType.LeftWall)
 		{
-			navType = NavType.RightWall;
+			return NavType.RightWall;
 		}
-		else if (nav_type == NavType.RightWall)
+		if (nav_type == NavType.RightWall)
 		{
-			navType = NavType.LeftWall;
+			return NavType.LeftWall;
 		}
-		else
-		{
-			navType = nav_type;
-		}
-		return navType;
+		return nav_type;
 	}
 
 	public string GetIdleAnim(NavType nav_type)
@@ -292,7 +287,7 @@ public class NavGrid
 			this.isLooping = is_looping;
 			this.isEscape = is_escape;
 			this.anim = anim;
-			this.preAnim = "";
+			this.preAnim = string.Empty;
 			this.cost = cost;
 			if (string.IsNullOrEmpty(this.anim))
 			{
@@ -321,75 +316,55 @@ public class NavGrid
 		public int IsValid(int cell, NavTable nav_table, ushort[] gridBitFields, bool check_if_current_cell_is_valid)
 		{
 			int num = Grid.OffsetCell(cell, this.x, this.y);
-			int num2;
-			if (Grid.IsValidCell(num))
+			if (!Grid.IsValidCell(num))
 			{
-				if (!nav_table.IsValid(cell, this.start) && check_if_current_cell_is_valid)
+				return Grid.InvalidCell;
+			}
+			if (!nav_table.IsValid(cell, this.start) && check_if_current_cell_is_valid)
+			{
+				return Grid.InvalidCell;
+			}
+			if (!nav_table.IsValid(num, this.end))
+			{
+				return Grid.InvalidCell;
+			}
+			int num2 = this.voidOffsets.Length;
+			for (int i = 0; i < num2; i++)
+			{
+				int num3 = Grid.OffsetCell(cell, this.voidOffsets[i].x, this.voidOffsets[i].y);
+				if (Grid.IsValidCell(num3) && (gridBitFields[num3] & 32) != 0)
 				{
-					num2 = Grid.InvalidCell;
-				}
-				else if (!nav_table.IsValid(num, this.end))
-				{
-					num2 = Grid.InvalidCell;
-				}
-				else
-				{
-					int num3 = this.voidOffsets.Length;
-					for (int i = 0; i < num3; i++)
-					{
-						int num4 = Grid.OffsetCell(cell, this.voidOffsets[i].x, this.voidOffsets[i].y);
-						if (Grid.IsValidCell(num4))
-						{
-							if ((gridBitFields[num4] & 32) != 0)
-							{
-								return Grid.InvalidCell;
-							}
-						}
-					}
-					int num5 = this.solidOffsets.Length;
-					for (int j = 0; j < num5; j++)
-					{
-						int num6 = Grid.OffsetCell(cell, this.solidOffsets[j].x, this.solidOffsets[j].y);
-						if (Grid.IsValidCell(num6))
-						{
-							if ((gridBitFields[num6] & 32) == 0)
-							{
-								return Grid.InvalidCell;
-							}
-						}
-					}
-					int num7 = this.validNavOffsets.Length;
-					for (int k = 0; k < num7; k++)
-					{
-						int num8 = Grid.OffsetCell(cell, this.validNavOffsets[k].offset.x, this.validNavOffsets[k].offset.y);
-						if (Grid.IsValidCell(num8))
-						{
-							if (!nav_table.IsValid(num8, this.validNavOffsets[k].navType))
-							{
-								return Grid.InvalidCell;
-							}
-						}
-					}
-					int num9 = this.invalidNavOffsets.Length;
-					for (int l = 0; l < num9; l++)
-					{
-						int num10 = Grid.OffsetCell(cell, this.invalidNavOffsets[l].offset.x, this.invalidNavOffsets[l].offset.y);
-						if (Grid.IsValidCell(num10))
-						{
-							if (nav_table.IsValid(num10, this.invalidNavOffsets[l].navType))
-							{
-								return Grid.InvalidCell;
-							}
-						}
-					}
-					num2 = num;
+					return Grid.InvalidCell;
 				}
 			}
-			else
+			int num4 = this.solidOffsets.Length;
+			for (int j = 0; j < num4; j++)
 			{
-				num2 = Grid.InvalidCell;
+				int num5 = Grid.OffsetCell(cell, this.solidOffsets[j].x, this.solidOffsets[j].y);
+				if (Grid.IsValidCell(num5) && (gridBitFields[num5] & 32) == 0)
+				{
+					return Grid.InvalidCell;
+				}
 			}
-			return num2;
+			int num6 = this.validNavOffsets.Length;
+			for (int k = 0; k < num6; k++)
+			{
+				int num7 = Grid.OffsetCell(cell, this.validNavOffsets[k].offset.x, this.validNavOffsets[k].offset.y);
+				if (Grid.IsValidCell(num7) && !nav_table.IsValid(num7, this.validNavOffsets[k].navType))
+				{
+					return Grid.InvalidCell;
+				}
+			}
+			int num8 = this.invalidNavOffsets.Length;
+			for (int l = 0; l < num8; l++)
+			{
+				int num9 = Grid.OffsetCell(cell, this.invalidNavOffsets[l].offset.x, this.invalidNavOffsets[l].offset.y);
+				if (Grid.IsValidCell(num9) && nav_table.IsValid(num9, this.invalidNavOffsets[l].navType))
+				{
+					return Grid.InvalidCell;
+				}
+			}
+			return num;
 		}
 
 		public NavType start;

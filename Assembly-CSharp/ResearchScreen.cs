@@ -74,19 +74,12 @@ public class ResearchScreen : KModalScreen
 							}
 							list2.Add(edge.path[edge.path.Count - 1]);
 							list2.Add(edge.SrcTarget[1]);
-							break;
+							goto IL_03AD;
 						}
-						case ResourceTreeNode.Edge.EdgeType.ArcEdge:
-						case ResourceTreeNode.Edge.EdgeType.SplineEdge:
-							goto IL_03A6;
-						default:
-							goto IL_03A6;
 						}
-						goto IL_03BA;
-						IL_03A6:
 						list2.AddRange(edge.path);
 					}
-					IL_03BA:;
+					IL_03AD:;
 				}
 			}
 		}
@@ -123,36 +116,26 @@ public class ResearchScreen : KModalScreen
 
 	public Vector3 GetEntryPosition(Tech tech)
 	{
-		Vector3 vector;
 		if (!this.entryMap.ContainsKey(tech))
 		{
 			global::Debug.LogError("The Tech provided was not present in the dictionary", null);
-			vector = Vector3.zero;
+			return Vector3.zero;
 		}
-		else
-		{
-			vector = this.entryMap[tech].transform.position;
-		}
-		return vector;
+		return this.entryMap[tech].transform.position;
 	}
 
 	public ResearchEntry GetEntry(Tech tech)
 	{
-		ResearchEntry researchEntry;
 		if (this.entryMap == null)
 		{
-			researchEntry = null;
+			return null;
 		}
-		else if (!this.entryMap.ContainsKey(tech))
+		if (!this.entryMap.ContainsKey(tech))
 		{
 			global::Debug.LogError("The Tech provided was not present in the dictionary", null);
-			researchEntry = null;
+			return null;
 		}
-		else
-		{
-			researchEntry = this.entryMap[tech];
-		}
-		return researchEntry;
+		return this.entryMap[tech];
 	}
 
 	public void SetEntryPercentage(Tech tech, float percent)
@@ -256,12 +239,9 @@ public class ResearchScreen : KModalScreen
 
 	private void SetActiveResearch(Tech newResearch)
 	{
-		if (newResearch != this.currentResearch)
+		if (newResearch != this.currentResearch && this.currentResearch != null)
 		{
-			if (this.currentResearch != null)
-			{
-				this.SelectAllEntries(this.currentResearch, false);
-			}
+			this.SelectAllEntries(this.currentResearch, false);
 		}
 		this.currentResearch = newResearch;
 		if (this.currentResearch != null)
@@ -279,13 +259,10 @@ public class ResearchScreen : KModalScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (!e.Consumed)
+		if (!e.Consumed && (e.TryConsume(global::Action.MouseRight) || e.TryConsume(global::Action.Escape)))
 		{
-			if (e.TryConsume(global::Action.MouseRight) || e.TryConsume(global::Action.Escape))
-			{
-				ManagementMenu.Instance.CloseAll();
-				return;
-			}
+			ManagementMenu.Instance.CloseAll();
+			return;
 		}
 		base.OnKeyDown(e);
 	}

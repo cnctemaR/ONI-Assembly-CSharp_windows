@@ -219,8 +219,8 @@ public class SimpleInfoScreen : TargetScreen
 		this.infoPanel.gameObject.SetActive(true);
 		this.descriptionContainer.descriptors.gameObject.SetActive(false);
 		this.descriptionContainer.gameObject.SetActive(false);
-		string text = "";
-		string text2 = "";
+		string text = string.Empty;
+		string text2 = string.Empty;
 		if (amounts != null)
 		{
 			this.vitalsPanel.gameObject.SetActive(true);
@@ -238,7 +238,7 @@ public class SimpleInfoScreen : TargetScreen
 		}
 		if (component)
 		{
-			text = "";
+			text = string.Empty;
 		}
 		else if (component6)
 		{
@@ -266,7 +266,7 @@ public class SimpleInfoScreen : TargetScreen
 		else if (component2 != null)
 		{
 			Element element = ElementLoader.FindElementByHash(component2.ElementID);
-			text = ((element == null) ? "" : element.FullDescription(false));
+			text = ((element == null) ? string.Empty : element.FullDescription(false));
 		}
 		List<Descriptor> gameObjectEffects = GameUtil.GetGameObjectEffects(target, true);
 		if (gameObjectEffects.Count > 0)
@@ -276,12 +276,12 @@ public class SimpleInfoScreen : TargetScreen
 		}
 		this.descriptionContainer.description.text = text;
 		this.descriptionContainer.flavour.text = text2;
-		if (this.infoPanel.activeSelf && (text == "" || text == "\n"))
+		if (this.infoPanel.activeSelf && (text == string.Empty || text == "\n"))
 		{
 			this.infoPanel.SetActive(false);
 		}
 		this.descriptionContainer.gameObject.SetActive(this.infoPanel.activeSelf);
-		this.descriptionContainer.flavour.gameObject.SetActive(text2 != "" && text2 != "\n");
+		this.descriptionContainer.flavour.gameObject.SetActive(text2 != string.Empty && text2 != "\n");
 		if (this.vitalsPanel.gameObject.activeSelf && amounts.Count == 0)
 		{
 			this.vitalsPanel.gameObject.SetActive(false);
@@ -328,73 +328,67 @@ public class SimpleInfoScreen : TargetScreen
 		if (this.selectedTarget == null)
 		{
 			this.storagePanel.gameObject.SetActive(false);
+			return;
 		}
-		else
+		Storage[] array = this.selectedTarget.GetComponentsInChildren<Storage>();
+		if (array == null)
 		{
-			Storage[] array = this.selectedTarget.GetComponentsInChildren<Storage>();
-			if (array == null)
+			this.storagePanel.gameObject.SetActive(false);
+			return;
+		}
+		array = Array.FindAll<Storage>(array, (Storage n) => n.showInUI);
+		if (array.Length == 0)
+		{
+			this.storagePanel.gameObject.SetActive(false);
+			return;
+		}
+		this.storagePanel.gameObject.SetActive(true);
+		string text = ((!(this.selectedTarget.GetComponent<MinionIdentity>() != null)) ? UI.DETAILTABS.DETAILS.GROUPNAME_CONTENTS : UI.DETAILTABS.DETAILS.GROUPNAME_MINION_CONTENTS);
+		this.storagePanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = text;
+		foreach (KeyValuePair<string, GameObject> keyValuePair in this.storageLabels)
+		{
+			keyValuePair.Value.SetActive(false);
+		}
+		int num = 0;
+		foreach (Storage storage in array)
+		{
+			foreach (GameObject gameObject in storage.items)
 			{
-				this.storagePanel.gameObject.SetActive(false);
-			}
-			else
-			{
-				array = Array.FindAll<Storage>(array, (Storage n) => n.showInUI);
-				if (array.Length == 0)
+				if (!(gameObject == null))
 				{
-					this.storagePanel.gameObject.SetActive(false);
-				}
-				else
-				{
-					this.storagePanel.gameObject.SetActive(true);
-					string text = ((!(this.selectedTarget.GetComponent<MinionIdentity>() != null)) ? UI.DETAILTABS.DETAILS.GROUPNAME_CONTENTS : UI.DETAILTABS.DETAILS.GROUPNAME_MINION_CONTENTS);
-					this.storagePanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = text;
-					foreach (KeyValuePair<string, GameObject> keyValuePair in this.storageLabels)
+					GameObject gameObject2 = this.AddOrGetStorageLabel(this.storageLabels, this.storagePanel, "storage_" + num.ToString());
+					num++;
+					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+					Rottable.Instance smi = gameObject.GetSMI<Rottable.Instance>();
+					gameObject2.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
+					string text2 = GameUtil.GetUnitFormattedName(gameObject, false);
+					text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedMass(component.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+					text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_TEMPERATURE, text2, GameUtil.GetFormattedTemperature(component.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
+					if (smi != null)
 					{
-						keyValuePair.Value.SetActive(false);
+						text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_ROTTABLE, smi.StateString());
+						gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(smi.GetToolTip(), ToolTipScreen.Instance.defaultTextStyleSetting);
 					}
-					int num = 0;
-					foreach (Storage storage in array)
+					if (component.DiseaseIdx != 255)
 					{
-						foreach (GameObject gameObject in storage.items)
-						{
-							if (!(gameObject == null))
-							{
-								GameObject gameObject2 = this.AddOrGetStorageLabel(this.storageLabels, this.storagePanel, "storage_" + num.ToString());
-								num++;
-								PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-								Rottable.Instance smi = gameObject.GetSMI<Rottable.Instance>();
-								gameObject2.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
-								string text2 = GameUtil.GetUnitFormattedName(gameObject, false);
-								text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedMass(component.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-								text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_TEMPERATURE, text2, GameUtil.GetFormattedTemperature(component.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
-								if (smi != null)
-								{
-									text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_ROTTABLE, smi.StateString());
-									gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(smi.GetToolTip(), ToolTipScreen.Instance.defaultTextStyleSetting);
-								}
-								if (component.DiseaseIdx != 255)
-								{
-									text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_DISEASED, GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, false));
-									string formattedDisease = GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, true);
-									gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(formattedDisease, ToolTipScreen.Instance.defaultTextStyleSetting);
-								}
-								gameObject2.GetComponentInChildren<LocText>().text = text2;
-								KButton component2 = gameObject2.GetComponent<KButton>();
-								GameObject select_target = gameObject;
-								component2.onClick += delegate
-								{
-									SelectTool.Instance.Select(select_target.GetComponent<KSelectable>(), false);
-								};
-							}
-						}
+						text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_DISEASED, GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, false));
+						string formattedDisease = GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, true);
+						gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(formattedDisease, ToolTipScreen.Instance.defaultTextStyleSetting);
 					}
-					if (num == 0)
+					gameObject2.GetComponentInChildren<LocText>().text = text2;
+					KButton component2 = gameObject2.GetComponent<KButton>();
+					GameObject select_target = gameObject;
+					component2.onClick += delegate
 					{
-						GameObject gameObject3 = this.AddOrGetStorageLabel(this.storageLabels, this.storagePanel, "empty");
-						gameObject3.GetComponentInChildren<LocText>().text = UI.DETAILTABS.DETAILS.STORAGE_EMPTY;
-					}
+						SelectTool.Instance.Select(select_target.GetComponent<KSelectable>(), false);
+					};
 				}
 			}
+		}
+		if (num == 0)
+		{
+			GameObject gameObject3 = this.AddOrGetStorageLabel(this.storageLabels, this.storagePanel, "empty");
+			gameObject3.GetComponentInChildren<LocText>().text = UI.DETAILTABS.DETAILS.STORAGE_EMPTY;
 		}
 	}
 
@@ -420,21 +414,22 @@ public class SimpleInfoScreen : TargetScreen
 	private void ShowAttributes(GameObject target)
 	{
 		Attributes attributes = target.GetAttributes();
-		if (attributes != null)
+		if (attributes == null)
 		{
-			List<AttributeInstance> list = attributes.AttributeTable.FindAll((AttributeInstance a) => a.Attribute.ShowInUI == Klei.AI.Attribute.Display.General);
-			if (list.Count > 0)
+			return;
+		}
+		List<AttributeInstance> list = attributes.AttributeTable.FindAll((AttributeInstance a) => a.Attribute.ShowInUI == Klei.AI.Attribute.Display.General);
+		if (list.Count > 0)
+		{
+			this.descriptionContainer.descriptors.gameObject.SetActive(true);
+			List<Descriptor> list2 = new List<Descriptor>();
+			foreach (AttributeInstance attributeInstance in list)
 			{
-				this.descriptionContainer.descriptors.gameObject.SetActive(true);
-				List<Descriptor> list2 = new List<Descriptor>();
-				foreach (AttributeInstance attributeInstance in list)
-				{
-					Descriptor descriptor = new Descriptor(string.Format("{0}: {1}", attributeInstance.Name, attributeInstance.GetFormattedValue()), attributeInstance.GetAttributeValueTooltip(), Descriptor.DescriptorType.Effect, false);
-					descriptor.IncreaseIndent();
-					list2.Add(descriptor);
-				}
-				this.descriptionContainer.descriptors.SetDescriptors(list2);
+				Descriptor descriptor = new Descriptor(string.Format("{0}: {1}", attributeInstance.Name, attributeInstance.GetFormattedValue()), attributeInstance.GetAttributeValueTooltip(), Descriptor.DescriptorType.Effect, false);
+				descriptor.IncreaseIndent();
+				list2.Add(descriptor);
 			}
+			this.descriptionContainer.descriptors.SetDescriptors(list2);
 		}
 	}
 
@@ -600,7 +595,7 @@ public class SimpleInfoScreen : TargetScreen
 		private string OnToolTip()
 		{
 			this.item.ShowToolTip(this.toolTip, this.tooltipStyle);
-			return "";
+			return string.Empty;
 		}
 
 		public void Refresh()
@@ -661,11 +656,11 @@ public class SimpleInfoScreen : TargetScreen
 
 		private SimpleInfoScreen.StatusItemEntry.FadeStage fadeStage;
 
-		private float fade = 0f;
+		private float fade;
 
 		private SchedulerHandle schedulerHandle;
 
-		private float fadeInTime = 0f;
+		private float fadeInTime;
 
 		private float fadeOutTime = 1.8f;
 

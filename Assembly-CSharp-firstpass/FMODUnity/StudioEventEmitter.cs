@@ -129,63 +129,65 @@ namespace FMODUnity
 
 		public void Play()
 		{
-			if (!this.TriggerOnce || !this.hasTriggered)
+			if (this.TriggerOnce && this.hasTriggered)
 			{
-				if (!string.IsNullOrEmpty(this.Event))
+				return;
+			}
+			if (string.IsNullOrEmpty(this.Event))
+			{
+				return;
+			}
+			if (this.eventDescription == null)
+			{
+				this.Lookup();
+			}
+			bool flag = false;
+			if (!this.Event.StartsWith("snapshot", StringComparison.CurrentCultureIgnoreCase))
+			{
+				this.eventDescription.isOneshot(out flag);
+			}
+			bool flag2;
+			this.eventDescription.is3D(out flag2);
+			if (this.instance != null && !this.instance.isValid())
+			{
+				this.instance = null;
+			}
+			if (flag && this.instance != null)
+			{
+				this.instance.release();
+				this.instance = null;
+			}
+			if (this.instance == null)
+			{
+				this.eventDescription.createInstance(out this.instance);
+				if (flag2)
 				{
-					if (this.eventDescription == null)
+					Rigidbody component = base.GetComponent<Rigidbody>();
+					Rigidbody2D component2 = base.GetComponent<Rigidbody2D>();
+					Transform component3 = base.GetComponent<Transform>();
+					if (component)
 					{
-						this.Lookup();
+						this.instance.set3DAttributes(RuntimeUtils.To3DAttributes(base.gameObject, component));
+						RuntimeManager.AttachInstanceToGameObject(this.instance, component3, component);
 					}
-					bool flag = false;
-					if (!this.Event.StartsWith("snapshot", StringComparison.CurrentCultureIgnoreCase))
+					else
 					{
-						this.eventDescription.isOneshot(out flag);
+						this.instance.set3DAttributes(RuntimeUtils.To3DAttributes(base.gameObject, component2));
+						RuntimeManager.AttachInstanceToGameObject(this.instance, component3, component2);
 					}
-					bool flag2;
-					this.eventDescription.is3D(out flag2);
-					if (this.instance != null && !this.instance.isValid())
-					{
-						this.instance = null;
-					}
-					if (flag && this.instance != null)
-					{
-						this.instance.release();
-						this.instance = null;
-					}
-					if (this.instance == null)
-					{
-						this.eventDescription.createInstance(out this.instance);
-						if (flag2)
-						{
-							Rigidbody component = base.GetComponent<Rigidbody>();
-							Rigidbody2D component2 = base.GetComponent<Rigidbody2D>();
-							Transform component3 = base.GetComponent<Transform>();
-							if (component)
-							{
-								this.instance.set3DAttributes(RuntimeUtils.To3DAttributes(base.gameObject, component));
-								RuntimeManager.AttachInstanceToGameObject(this.instance, component3, component);
-							}
-							else
-							{
-								this.instance.set3DAttributes(RuntimeUtils.To3DAttributes(base.gameObject, component2));
-								RuntimeManager.AttachInstanceToGameObject(this.instance, component3, component2);
-							}
-						}
-					}
-					foreach (ParamRef paramRef in this.Params)
-					{
-						this.instance.setParameterValue(paramRef.Name, paramRef.Value);
-					}
-					if (flag2 && this.OverrideAttenuation)
-					{
-						this.instance.setProperty(EVENT_PROPERTY.MINIMUM_DISTANCE, this.OverrideMinDistance);
-						this.instance.setProperty(EVENT_PROPERTY.MAXIMUM_DISTANCE, this.OverrideMaxDistance);
-					}
-					this.instance.start();
-					this.hasTriggered = true;
 				}
 			}
+			foreach (ParamRef paramRef in this.Params)
+			{
+				this.instance.setParameterValue(paramRef.Name, paramRef.Value);
+			}
+			if (flag2 && this.OverrideAttenuation)
+			{
+				this.instance.setProperty(EVENT_PROPERTY.MINIMUM_DISTANCE, this.OverrideMinDistance);
+				this.instance.setProperty(EVENT_PROPERTY.MAXIMUM_DISTANCE, this.OverrideMaxDistance);
+			}
+			this.instance.start();
+			this.hasTriggered = true;
 		}
 
 		public void Stop()
@@ -208,49 +210,44 @@ namespace FMODUnity
 
 		public bool IsPlaying()
 		{
-			bool flag;
 			if (this.instance != null && this.instance.isValid())
 			{
 				PLAYBACK_STATE playback_STATE;
 				this.instance.getPlaybackState(out playback_STATE);
-				flag = playback_STATE != PLAYBACK_STATE.STOPPED;
+				return playback_STATE != PLAYBACK_STATE.STOPPED;
 			}
-			else
-			{
-				flag = false;
-			}
-			return flag;
+			return false;
 		}
 
 		[EventRef]
-		public string Event = "";
+		public string Event = string.Empty;
 
-		public EmitterGameEvent PlayEvent = EmitterGameEvent.None;
+		public EmitterGameEvent PlayEvent;
 
-		public EmitterGameEvent StopEvent = EmitterGameEvent.None;
+		public EmitterGameEvent StopEvent;
 
-		public string CollisionTag = "";
+		public string CollisionTag = string.Empty;
 
 		public bool AllowFadeout = true;
 
-		public bool TriggerOnce = false;
+		public bool TriggerOnce;
 
-		public bool Preload = false;
+		public bool Preload;
 
 		public ParamRef[] Params = new ParamRef[0];
 
-		public bool OverrideAttenuation = false;
+		public bool OverrideAttenuation;
 
 		public float OverrideMinDistance = -1f;
 
 		public float OverrideMaxDistance = -1f;
 
-		private EventDescription eventDescription = null;
+		private EventDescription eventDescription;
 
-		private EventInstance instance = null;
+		private EventInstance instance;
 
-		private bool hasTriggered = false;
+		private bool hasTriggered;
 
-		private bool isQuitting = false;
+		private bool isQuitting;
 	}
 }

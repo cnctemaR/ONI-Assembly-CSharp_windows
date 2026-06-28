@@ -68,14 +68,7 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 
 	private bool isTargetElement(int cell)
 	{
-		if (ElementLoader.elements[(int)Grid.Cell[cell].elementIdx] == ElementLoader.FindElementByHash(this.consumedElement))
-		{
-			if (Grid.Cell[cell].mass > this.minimumApproachMass && !Grid.Solid[Grid.CellAbove(cell)])
-			{
-				return this.nav.CanReach(cell);
-			}
-		}
-		return false;
+		return ElementLoader.elements[(int)Grid.Cell[cell].elementIdx] == ElementLoader.FindElementByHash(this.consumedElement) && Grid.Cell[cell].mass > this.minimumApproachMass && !Grid.Solid[Grid.CellAbove(cell)] && this.nav.CanReach(cell);
 	}
 
 	public void OnAttacked(object data)
@@ -192,7 +185,7 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 
 	private int MAX_LURE_RANGE = 50;
 
-	private bool playingInhaleSound = false;
+	private bool playingInhaleSound;
 
 	public class StatesInstance : GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.GameInstance
 	{

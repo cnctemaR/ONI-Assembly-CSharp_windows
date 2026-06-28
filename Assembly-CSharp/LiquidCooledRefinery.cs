@@ -60,7 +60,7 @@ public class LiquidCooledRefinery : Refinery
 		PrimaryElement component = list[0].GetComponent<PrimaryElement>();
 		component.Temperature = this.outputTemperature;
 		float num = GameUtil.CalculateEnergyDeltaForElementChange(component.Element.specificHeatCapacity, component.Mass, component.Element.highTemp, this.outputTemperature);
-		this.inStorage.Transfer(this.outStorage, this.coolantTag, this.minCoolantMass, true, true);
+		this.inStorage.Transfer(this.outStorage, this.coolantTag, this.minCoolantMass, false, true);
 		List<GameObject> list2 = this.outStorage.Find(this.coolantTag);
 		foreach (GameObject gameObject in list2)
 		{

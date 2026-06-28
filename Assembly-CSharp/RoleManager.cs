@@ -793,7 +793,7 @@ public class RoleManager
 		{ "Farmer", "hat_role_farming2" },
 		{ "SeniorFarmer", "hat_role_farming3" },
 		{ "Rancher", "hat_role_rancher1" },
-		{ "SeniorRancher", "hat_role_rancher1" },
+		{ "SeniorRancher", "hat_role_rancher2" },
 		{
 			JuniorResearcher.ID,
 			"hat_role_research1"

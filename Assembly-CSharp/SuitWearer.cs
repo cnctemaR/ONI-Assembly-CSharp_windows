@@ -35,33 +35,55 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 
 		public void ReserveSuits()
 		{
-			PathFinder.Path path = base.GetComponent<Navigator>().path;
+			Navigator component = base.GetComponent<Navigator>();
+			PathFinder.Path path = component.path;
 			if (path.nodes == null)
 			{
 				return;
 			}
-			for (int i = 0; i < path.nodes.Count; i++)
+			bool flag = (byte)(component.flags & PathFinder.PotentialPath.Flags.HasSuit) != 0;
+			int num = 0;
+			int num2 = 0;
+			for (int i = 0; i < path.nodes.Count - 1; i++)
 			{
-				if (i != path.nodes.Count - 1)
+				int cell = path.nodes[i].cell;
+				Pathfinding.INavigationFeature navigationFeature = Pathfinding.Instance.GetNavigationFeature(cell);
+				if (navigationFeature != null)
 				{
-					int cell = path.nodes[i].cell;
-					Pathfinding.INavigationFeature navigationFeature = Pathfinding.Instance.GetNavigationFeature(cell);
-					if (navigationFeature != null)
+					SuitMarker suitMarker = navigationFeature as SuitMarker;
+					if (!(suitMarker == null))
 					{
-						SuitMarker suitMarker = navigationFeature as SuitMarker;
-						if (!(suitMarker == null))
+						num++;
+						bool flag2 = suitMarker.DoesTraversalDirectionRequireSuit(cell, path.nodes[i + 1].cell);
+						if (flag2 && !flag)
 						{
-							bool flag = suitMarker.DoesTraversalDirectionRequireSuit(cell, path.nodes[i + 1].cell);
 							SuitWearer.Instance.Reservation reservation = new SuitWearer.Instance.Reservation
 							{
 								suitMarker = suitMarker,
-								isForEquipping = flag
+								isForEquipping = flag2
 							};
-							suitMarker.Reserve(this, flag);
+							suitMarker.Reserve(this, flag2);
 							this.reservations.Add(reservation);
+							flag = true;
+							num2++;
+						}
+						else if (!flag2 && flag && suitMarker.IsUnequipAvailableForSuitWearer(this))
+						{
+							SuitWearer.Instance.Reservation reservation2 = new SuitWearer.Instance.Reservation
+							{
+								suitMarker = suitMarker,
+								isForEquipping = flag2
+							};
+							suitMarker.Reserve(this, flag2);
+							this.reservations.Add(reservation2);
+							flag = false;
+							num2++;
 						}
 					}
 				}
+			}
+			if (num > 1)
+			{
 			}
 		}
 

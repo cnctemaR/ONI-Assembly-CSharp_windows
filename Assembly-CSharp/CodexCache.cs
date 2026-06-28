@@ -121,6 +121,10 @@ public static class CodexCache
 		{
 			codexEntry.contentContainers.Insert(0, entry.contentContainers[i]);
 		}
+		if (entry.disabled)
+		{
+			codexEntry.disabled = entry.disabled;
+		}
 	}
 
 	public static void Clear()

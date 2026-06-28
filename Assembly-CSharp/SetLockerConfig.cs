@@ -12,7 +12,10 @@ public class SetLockerConfig : IEntityConfig
 		component.SetElement(SimHashes.Unobtanium);
 		component.Temperature = 294.15f;
 		gameObject.AddOrGet<Workable>();
-		gameObject.AddOrGet<SetLocker>();
+		SetLocker setLocker = gameObject.AddOrGet<SetLocker>();
+		setLocker.overrideAnim = "anim_interacts_clothingfactory_kanim";
+		setLocker.dropOffset = new Vector2I(0, 1);
+		setLocker.possible_contents_ids = new string[] { "Warm_Vest", "Cool_Vest", "Funky_Vest" };
 		gameObject.AddOrGet<LoreBearer>();
 		return gameObject;
 	}

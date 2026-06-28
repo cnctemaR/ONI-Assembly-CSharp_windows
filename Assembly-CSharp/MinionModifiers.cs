@@ -84,7 +84,7 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 	{
 		Klei.AI.Attribute attribute = attributeConverter.attribute;
 		AttributeInstance attributeInstance = attribute.Lookup(this);
-		AttributeModifier target_modifier = new AttributeModifier(targetAttribute.Id, 0f, attribute.Name, false, false, false);
+		AttributeModifier target_modifier = new AttributeModifier(targetAttribute.Id, attributeConverter.Lookup(this).Evaluate(), attribute.Name, false, false, false);
 		this.GetAttributes().Add("dependent from " + attribute.Id, target_modifier);
 		AttributeInstance attributeInstance2 = attributeInstance;
 		attributeInstance2.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance2.OnDirty, new global::System.Action(delegate

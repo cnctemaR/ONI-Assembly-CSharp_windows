@@ -102,17 +102,6 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 		return count < fullyChargedSuitCount || (count == fullyChargedSuitCount && this.equipReservations.Contains(suit_wearer));
 	}
 
-	public bool IsSuitAvailableForReactable(SuitWearer.Instance suit_wearer)
-	{
-		if (this.equipReservations.Contains(suit_wearer))
-		{
-			return true;
-		}
-		int count = this.equipReservations.Count;
-		int fullyChargedSuitCount = this.GetFullyChargedSuitCount();
-		return fullyChargedSuitCount > count;
-	}
-
 	public bool IsUnequipAvailableForSuitWearer(SuitWearer.Instance suit_wearer)
 	{
 		int num = 0;
@@ -173,7 +162,18 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 	{
 		if (reserve_for_equipping)
 		{
-			this.equipReservations.Add(suit_wearer);
+			if (this.equipReservations.Contains(suit_wearer))
+			{
+				Output.LogWarningWithObj(base.gameObject, new object[] { "Reserve called more than once for same suit wearer: " + suit_wearer.gameObject });
+			}
+			else if (!this.IsSuitAvailableForTraversal(suit_wearer))
+			{
+				Output.LogWarningWithObj(base.gameObject, new object[] { "Reserve called with no suit available: " + suit_wearer.gameObject });
+			}
+			else
+			{
+				this.equipReservations.Add(suit_wearer);
+			}
 		}
 		else
 		{
@@ -317,11 +317,16 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 			}
 			Rotatable component = this.gameObject.GetComponent<Rotatable>();
 			SuitWearer.Instance smi = new_reactor.GetSMI<SuitWearer.Instance>();
+			int x = transition.navGridTransition.x;
+			if (x == 0)
+			{
+				return false;
+			}
 			if (new_reactor.GetComponent<Equipment>().IsSlotOccupied(Db.Get().AssignableSlots.Suit))
 			{
-				return (transition.x >= 0 || !component.IsRotated) && (transition.x <= 0 || component.IsRotated);
+				return (x >= 0 || !component.IsRotated) && (x <= 0 || component.IsRotated);
 			}
-			return (transition.x <= 0 || !component.IsRotated) && (transition.x >= 0 || component.IsRotated) && this.suitMarker.IsSuitAvailableForReactable(smi);
+			return (x <= 0 || !component.IsRotated) && (x >= 0 || component.IsRotated) && this.suitMarker.IsSuitAvailableForTraversal(smi);
 		}
 
 		protected override void InternalBegin()

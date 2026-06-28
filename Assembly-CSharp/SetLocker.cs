@@ -20,7 +20,7 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 
 	public void DropContents()
 	{
-		Scenario.SpawnPrefab(Grid.PosToCell(base.gameObject), 0, 1, this.contents, Grid.SceneLayer.Front, Folder.Entities).SetActive(true);
+		Scenario.SpawnPrefab(Grid.PosToCell(base.gameObject), this.dropOffset.x, this.dropOffset.y, this.contents, Grid.SceneLayer.Front, Folder.Entities).SetActive(true);
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, Assets.GetPrefab(this.contents.ToTag()).GetProperName(), base.smi.master.transform, 1.5f, false);
 	}
 
@@ -31,7 +31,7 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 			if (this.chore != null)
 			{
 				UserMenu userMenu = this.userMenu;
-				string text = "action_harvest";
+				string text = "action_empty_contents";
 				string text2 = UI.USERMENUACTIONS.OPENPOI.NAME_OFF;
 				global::System.Action action = new global::System.Action(this.OnClickCancel);
 				string text3 = UI.USERMENUACTIONS.OPENPOI.TOOLTIP_OFF;
@@ -40,7 +40,7 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 			else
 			{
 				UserMenu userMenu2 = this.userMenu;
-				string text3 = "action_harvest";
+				string text3 = "action_empty_contents";
 				string text2 = UI.USERMENUACTIONS.OPENPOI.NAME;
 				global::System.Action action = new global::System.Action(this.OnClickOpen);
 				string text = UI.USERMENUACTIONS.OPENPOI.TOOLTIP;
@@ -66,12 +66,10 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 			return;
 		}
 		base.GetComponent<Workable>().SetWorkTime(1.5f);
-		ChoreType emptyStorage = Db.Get().ChoreTypes.EmptyStorage;
-		KAnimFile anim = Assets.GetAnim("anim_interacts_clothingfactory_kanim");
-		this.chore = new WorkChore<Workable>(emptyStorage, this, null, null, true, delegate(Chore o)
+		this.chore = new WorkChore<Workable>(Db.Get().ChoreTypes.EmptyStorage, this, null, null, true, delegate(Chore o)
 		{
 			this.CompleteChore();
-		}, null, null, true, null, true, anim, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+		}, null, null, true, null, true, Assets.GetAnim(this.overrideAnim), false, true, true, PriorityScreen.PriorityClass.basic, 10, false);
 		this.OnRefreshUserMenu(null);
 	}
 
@@ -89,16 +87,20 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 	{
 		this.used = true;
 		base.smi.GoTo(base.smi.sm.open);
-		this.DropContents();
-		this.chore.Cleanup();
 		this.chore = null;
 		this.userMenu.Refresh();
 	}
 
+	public string[] possible_contents_ids;
+
+	public string machineSound;
+
+	public string overrideAnim;
+
+	public Vector2I dropOffset = Vector2I.zero;
+
 	[Serialize]
 	private string contents = string.Empty;
-
-	private string[] possible_contents_ids = new string[] { "Warm_Vest", "Cool_Vest", "Funky_Vest" };
 
 	[Serialize]
 	private bool used;
@@ -121,12 +123,39 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.closed;
-			this.closed.PlayAnim("on");
-			this.open.PlayAnim("working");
+			base.serializable = true;
+			this.closed.PlayAnim("on").Enter(delegate(SetLocker.StatesInstance smi)
+			{
+				if (smi.master.machineSound != null)
+				{
+					LoopingSounds component = smi.master.GetComponent<LoopingSounds>();
+					if (component != null)
+					{
+						component.StartSound(GlobalAssets.GetSound(smi.master.machineSound, false), smi.master.transform.GetPosition());
+					}
+				}
+			});
+			this.open.PlayAnim("working").OnAnimQueueComplete(this.off).Exit(delegate(SetLocker.StatesInstance smi)
+			{
+				smi.master.DropContents();
+			});
+			this.off.PlayAnim("off").Enter(delegate(SetLocker.StatesInstance smi)
+			{
+				if (smi.master.machineSound != null)
+				{
+					LoopingSounds component2 = smi.master.GetComponent<LoopingSounds>();
+					if (component2 != null)
+					{
+						component2.StopSound(GlobalAssets.GetSound(smi.master.machineSound, false));
+					}
+				}
+			});
 		}
 
 		public GameStateMachine<SetLocker.States, SetLocker.StatesInstance, SetLocker, object>.State closed;
 
 		public GameStateMachine<SetLocker.States, SetLocker.StatesInstance, SetLocker, object>.State open;
+
+		public GameStateMachine<SetLocker.States, SetLocker.StatesInstance, SetLocker, object>.State off;
 	}
 }

@@ -67,9 +67,13 @@ public class TextLinkHandler : MonoBehaviour, IPointerClickHandler, IPointerEnte
 
 	private void ClearState()
 	{
+		if (this == null || this.Equals(null))
+		{
+			return;
+		}
 		if (TextLinkHandler.hoveredText == this)
 		{
-			if (this.hoverLink)
+			if (this.hoverLink && PlayerController.Instance != null && PlayerController.Instance.ActiveTool != null)
 			{
 				PlayerController.Instance.ActiveTool.SetLinkCursor(false);
 			}

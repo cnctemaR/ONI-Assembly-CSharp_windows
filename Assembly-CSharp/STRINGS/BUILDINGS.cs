@@ -14,9 +14,9 @@ namespace STRINGS
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
-					"Cools the",
+					"Cools the ",
 					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
-					"piped through it, but outputs ",
+					" piped through it, but outputs ",
 					UI.FormatAsLink("Heat", "HEAT"),
 					" in its immediate vicinity."
 				});

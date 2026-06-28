@@ -12,7 +12,11 @@ public class VendingMachineConfig : IEntityConfig
 		component.SetElement(SimHashes.Unobtanium);
 		component.Temperature = 294.15f;
 		gameObject.AddOrGet<Workable>();
-		gameObject.AddOrGet<VendingMachine>();
+		SetLocker setLocker = gameObject.AddOrGet<SetLocker>();
+		setLocker.machineSound = "VendingMachine_LP";
+		setLocker.overrideAnim = "anim_break_kanim";
+		setLocker.dropOffset = new Vector2I(1, 1);
+		setLocker.possible_contents_ids = new string[] { "FieldRation" };
 		gameObject.AddOrGet<LoreBearer>();
 		gameObject.AddOrGet<LoopingSounds>();
 		return gameObject;

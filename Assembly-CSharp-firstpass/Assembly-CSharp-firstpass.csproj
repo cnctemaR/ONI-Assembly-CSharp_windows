@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{85578E79-8B2C-48A0-98D0-49943CC2A3AD}</ProjectGuid>
+    <ProjectGuid>{9F1FA855-6ABE-47A8-BA20-30153A5517CD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -1211,51 +1211,51 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArabicSupport\ArabicSupport.csproj">
-      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3AC}</Project>
+      <Project>{9F1FA855-6ABE-47A8-BA20-30153A5517CC}</Project>
       <Name>ArabicSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\FileHelpers\FileHelpers.csproj">
-      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3B0}</Project>
+      <Project>{9F1FA855-6ABE-47A8-BA20-30153A5517D0}</Project>
       <Name>FileHelpers</Name>
     </ProjectReference>
     <ProjectReference Include="..\libnoise\libnoise.csproj">
-      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3B5}</Project>
+      <Project>{9F1FA855-6ABE-47A8-BA20-30153A5517D5}</Project>
       <Name>libnoise</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3B9}</Project>
+      <Project>{9F1FA855-6ABE-47A8-BA20-30153A5517D9}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3BA}</Project>
+      <Project>{9F1FA855-6ABE-47A8-BA20-30153A5517DA}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\Satsuma\Satsuma.csproj">
-      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3BC}</Project>
+      <Project>{9F1FA855-6ABE-47A8-BA20-30153A5517DC}</Project>
       <Name>Satsuma</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3BE}</Project>
+      <Project>{9F1FA855-6ABE-47A8-BA20-30153A5517DE}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3C6}</Project>
+      <Project>{9F1FA855-6ABE-47A8-BA20-30153A5517E6}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3C0}</Project>
+      <Project>{9F1FA855-6ABE-47A8-BA20-30153A5517E0}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3CA}</Project>
+      <Project>{9F1FA855-6ABE-47A8-BA20-30153A5517EA}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3C8}</Project>
+      <Project>{9F1FA855-6ABE-47A8-BA20-30153A5517E8}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
     <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
-      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3CB}</Project>
+      <Project>{9F1FA855-6ABE-47A8-BA20-30153A5517EB}</Project>
       <Name>YamlDotNet</Name>
     </ProjectReference>
   </ItemGroup>

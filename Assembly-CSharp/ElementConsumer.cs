@@ -33,7 +33,7 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		this.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
 		if (this.capacityKG != float.PositiveInfinity)
 		{
-			this.hasAvailableCapacity = this.IsStorageFull();
+			this.hasAvailableCapacity = !this.IsStorageFull();
 			this.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		}
 	}

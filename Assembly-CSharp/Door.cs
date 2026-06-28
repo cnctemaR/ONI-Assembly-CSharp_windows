@@ -62,6 +62,9 @@ public class Door : Workable, ISaveLoadable
 		{
 			this.log = new LoggerFSS("Door");
 		}
+		StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
+		HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
+		structureTemperatures.Disable(handle);
 		this.controller = new Door.Controller.Instance(this);
 		this.controller.StartSM();
 		if (this.doorType == Door.DoorType.Sealed && !this.hasBeenUnsealed)
@@ -71,9 +74,6 @@ public class Door : Workable, ISaveLoadable
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		base.Subscribe(824508782, new Action<object>(this.OnOperationalChanged));
 		base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
-		StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
-		HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
-		structureTemperatures.Disable(handle);
 		this.collisionCollider = base.GetComponent<BoxCollider2D>();
 		this.selectionCollider = new GameObject("selection")
 		{

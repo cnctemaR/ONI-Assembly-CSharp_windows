@@ -347,8 +347,17 @@ public class NavGrid
 				{
 					GameObject gameObject = Grid.Objects[cell, 9];
 					GameObject gameObject2 = Grid.Objects[num, 9];
-					if (gameObject != null && gameObject.GetComponent<TravelTubeBridge>() != null)
+					TravelTubeUtilityNetworkLink travelTubeUtilityNetworkLink = ((!gameObject) ? null : gameObject.GetComponent<TravelTubeUtilityNetworkLink>());
+					TravelTubeUtilityNetworkLink travelTubeUtilityNetworkLink2 = ((!gameObject2) ? null : gameObject2.GetComponent<TravelTubeUtilityNetworkLink>());
+					if (travelTubeUtilityNetworkLink)
 					{
+						int num6;
+						int num7;
+						travelTubeUtilityNetworkLink.GetCells(out num6, out num7);
+						if (num != num6 && num != num7)
+						{
+							return Grid.InvalidCell;
+						}
 						UtilityConnections utilityConnections = UtilityConnectionsExtensions.DirectionFromToCell(cell, num);
 						if (utilityConnections == (UtilityConnections)0)
 						{
@@ -360,8 +369,15 @@ public class NavGrid
 							return Grid.InvalidCell;
 						}
 					}
-					else if (gameObject2 != null && gameObject2.GetComponent<TravelTubeBridge>() != null)
+					else if (travelTubeUtilityNetworkLink2)
 					{
+						int num8;
+						int num9;
+						travelTubeUtilityNetworkLink2.GetCells(out num8, out num9);
+						if (cell != num8 && cell != num9)
+						{
+							return Grid.InvalidCell;
+						}
 						UtilityConnections utilityConnections2 = UtilityConnectionsExtensions.DirectionFromToCell(num, cell);
 						if (utilityConnections2 == (UtilityConnections)0)
 						{
@@ -376,42 +392,42 @@ public class NavGrid
 					else
 					{
 						bool flag = this.startAxis == NavAxis.X;
-						int num6 = cell;
+						int num10 = cell;
 						for (int m = 0; m < 2; m++)
 						{
 							bool flag2 = (flag && m == 0) || (!flag && m == 1);
 							if (flag2)
 							{
-								int num7 = ((this.x <= 0) ? (-1) : 1);
+								int num11 = ((this.x <= 0) ? (-1) : 1);
 								for (int n = 0; n < Mathf.Abs(this.x); n++)
 								{
-									UtilityConnections connections3 = Game.Instance.travelTubeSystem.GetConnections(num6, false);
-									if (num7 > 0 && (connections3 & UtilityConnections.Right) == (UtilityConnections)0)
+									UtilityConnections connections3 = Game.Instance.travelTubeSystem.GetConnections(num10, false);
+									if (num11 > 0 && (connections3 & UtilityConnections.Right) == (UtilityConnections)0)
 									{
 										return Grid.InvalidCell;
 									}
-									if (num7 < 0 && (connections3 & UtilityConnections.Left) == (UtilityConnections)0)
+									if (num11 < 0 && (connections3 & UtilityConnections.Left) == (UtilityConnections)0)
 									{
 										return Grid.InvalidCell;
 									}
-									num6 = Grid.OffsetCell(num6, num7, 0);
+									num10 = Grid.OffsetCell(num10, num11, 0);
 								}
 							}
 							else
 							{
-								int num8 = ((this.y <= 0) ? (-1) : 1);
-								for (int num9 = 0; num9 < Mathf.Abs(this.y); num9++)
+								int num12 = ((this.y <= 0) ? (-1) : 1);
+								for (int num13 = 0; num13 < Mathf.Abs(this.y); num13++)
 								{
-									UtilityConnections connections4 = Game.Instance.travelTubeSystem.GetConnections(num6, false);
-									if (num8 > 0 && (connections4 & UtilityConnections.Up) == (UtilityConnections)0)
+									UtilityConnections connections4 = Game.Instance.travelTubeSystem.GetConnections(num10, false);
+									if (num12 > 0 && (connections4 & UtilityConnections.Up) == (UtilityConnections)0)
 									{
 										return Grid.InvalidCell;
 									}
-									if (num8 < 0 && (connections4 & UtilityConnections.Down) == (UtilityConnections)0)
+									if (num12 < 0 && (connections4 & UtilityConnections.Down) == (UtilityConnections)0)
 									{
 										return Grid.InvalidCell;
 									}
-									num6 = Grid.OffsetCell(num6, 0, num8);
+									num10 = Grid.OffsetCell(num10, 0, num12);
 								}
 							}
 						}
@@ -456,8 +472,8 @@ public class NavGrid
 			}
 			else if (this.start == NavType.Floor && this.end == NavType.Tube)
 			{
-				int num10 = Grid.OffsetCell(cell, this.x, this.y);
-				UtilityConnections connections6 = Game.Instance.travelTubeSystem.GetConnections(num10, false);
+				int num14 = Grid.OffsetCell(cell, this.x, this.y);
+				UtilityConnections connections6 = Game.Instance.travelTubeSystem.GetConnections(num14, false);
 				if (connections6 != UtilityConnections.Up)
 				{
 					return Grid.InvalidCell;

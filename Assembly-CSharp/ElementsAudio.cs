@@ -53,9 +53,9 @@ public class ElementsAudio
 		[FieldOptional]
 		public AmbienceType ambienceType;
 
-		[FieldOrder(3)]
 		[FieldOptional]
 		[FieldNullValue(SolidAmbienceType.None)]
+		[FieldOrder(3)]
 		public SolidAmbienceType solidAmbienceType;
 
 		[FieldOptional]
@@ -63,19 +63,19 @@ public class ElementsAudio
 		[FieldOrder(4)]
 		public string miningSound;
 
+		[FieldOptional]
 		[FieldOrder(5)]
 		[FieldNullValue("")]
-		[FieldOptional]
 		public string miningBreakSound;
 
+		[FieldOptional]
 		[FieldNullValue("")]
 		[FieldOrder(6)]
-		[FieldOptional]
 		public string oreBumpSound;
 
+		[FieldOrder(7)]
 		[FieldOptional]
 		[FieldNullValue("")]
-		[FieldOrder(7)]
 		public string floorEventAudioCategory;
 	}
 }

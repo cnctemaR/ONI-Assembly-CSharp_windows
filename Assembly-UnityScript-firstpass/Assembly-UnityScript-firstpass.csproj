@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{D6789952-8DA8-484D-8655-9DA12E2CF4AB}</ProjectGuid>
+    <ProjectGuid>{68F2EF45-D4D4-4329-AB18-23E95E5FBDA8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-UnityScript-firstpass</RootNamespace>
     <AssemblyName>Assembly-UnityScript-firstpass</AssemblyName>
@@ -19,15 +19,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArabicSupport\ArabicSupport.csproj">
-      <Project>{D6789952-8DA8-484D-8655-9DA12E2CF4A8}</Project>
+      <Project>{68F2EF45-D4D4-4329-AB18-23E95E5FBDA5}</Project>
       <Name>ArabicSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{D6789952-8DA8-484D-8655-9DA12E2CF4B5}</Project>
+      <Project>{68F2EF45-D4D4-4329-AB18-23E95E5FBDB2}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{D6789952-8DA8-484D-8655-9DA12E2CF4C4}</Project>
+      <Project>{68F2EF45-D4D4-4329-AB18-23E95E5FBDC1}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
   </ItemGroup>

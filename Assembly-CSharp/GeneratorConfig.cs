@@ -24,6 +24,7 @@ public class GeneratorConfig : IBuildingConfig
 	{
 		EnergyGenerator energyGenerator = go.AddOrGet<EnergyGenerator>();
 		energyGenerator.formula = EnergyGenerator.CreateSimpleFormula(SimHashes.Carbon, 1f, 500f, SimHashes.Void, 0f, true);
+		energyGenerator.meterOffset = Meter.Offset.Behind;
 		energyGenerator.BatteryRefillPercent = 0.5f;
 		energyGenerator.powerDistributionOrder = 9;
 		Storage storage = go.AddOrGet<Storage>();

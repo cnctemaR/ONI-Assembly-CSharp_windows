@@ -849,7 +849,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Germ spread can be reduced by building wash basins where Duplicants are likely to get dirty.";
 
-				public static LocString EFFECT = "Removes some <style=\"disease\">Germs</style> from Duplicants.\n\nDuplicants use Wash Basins when passing by in the selected direction.";
+				public static LocString EFFECT = "Removes some <style=\"disease\">Germs</style> from Duplicants.\n\nDuplicants use Wash Basins when passing by in the selected direction only if they have germs on them.";
 			}
 
 			public class TILEPOI

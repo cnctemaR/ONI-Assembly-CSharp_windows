@@ -419,12 +419,12 @@ public class DetailsScreen : KTabMenu
 	[Header("Panels")]
 	public Transform UserMenuPanel;
 
-	[Header("Name Editing (disabled)")]
 	[SerializeField]
+	[Header("Name Editing (disabled)")]
 	private KButton CloseButton;
 
-	[SerializeField]
 	[Header("Tabs")]
+	[SerializeField]
 	private EditableTitleBar TabTitle;
 
 	[SerializeField]
@@ -433,8 +433,8 @@ public class DetailsScreen : KTabMenu
 	[SerializeField]
 	private GameObject tabHeaderContainer;
 
-	[SerializeField]
 	[Header("Side Screens")]
+	[SerializeField]
 	private GameObject sideScreenContentBody;
 
 	[SerializeField]

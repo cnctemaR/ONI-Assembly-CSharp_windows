@@ -1115,8 +1115,8 @@ public class OverlayScreen : KMonoBehaviour
 
 	private OverlayScreen.ColorHighlightCondition[] diseaseHighlightConditions;
 
-	[EventRef]
 	[SerializeField]
+	[EventRef]
 	private string techViewSoundPath;
 
 	private EventInstance techViewSound;
@@ -1173,8 +1173,8 @@ public class OverlayScreen : KMonoBehaviour
 	[SerializeField]
 	private Color32 circuitStrainingColour;
 
-	[SerializeField]
 	[Header("Crops")]
+	[SerializeField]
 	private Canvas harvestableUIParent;
 
 	[SerializeField]

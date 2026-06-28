@@ -414,19 +414,19 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	protected bool shouldTransferDiseaseWithWorker = true;
 
-	[SerializeField]
 	[Tooltip("What layer does the dupe switch to when interacting with the building")]
+	[SerializeField]
 	public Grid.SceneLayer workLayer = Grid.SceneLayer.Move;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	protected float workTimeRemaining = float.PositiveInfinity;
 
 	[SerializeField]
 	public KAnimFile[] overrideAnims;
 
-	[SerializeField]
 	[Tooltip("Whether to user the KAnimSynchronizer or not")]
+	[SerializeField]
 	public bool synchronizeAnims = true;
 
 	[Tooltip("Whether to display number of uses in the details panel")]

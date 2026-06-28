@@ -49,8 +49,8 @@ public class AudioSheet
 		[FieldOptional]
 		public string Name2;
 
-		[FieldOptional]
 		[FieldNullValue(0)]
+		[FieldOptional]
 		public int Frame2;
 
 		[FieldOptional]
@@ -77,15 +77,15 @@ public class AudioSheet
 		[FieldOptional]
 		public string Name6;
 
-		[FieldOptional]
 		[FieldNullValue(0)]
+		[FieldOptional]
 		public int Frame6;
 
 		[FieldOptional]
 		public string Name7;
 
-		[FieldNullValue(0)]
 		[FieldOptional]
+		[FieldNullValue(0)]
 		public int Frame7;
 
 		[FieldOptional]
@@ -98,22 +98,22 @@ public class AudioSheet
 		[FieldOptional]
 		public string Name9;
 
-		[FieldOptional]
 		[FieldNullValue(0)]
+		[FieldOptional]
 		public int Frame9;
 
 		[FieldOptional]
 		public string Name10;
 
-		[FieldOptional]
 		[FieldNullValue(0)]
+		[FieldOptional]
 		public int Frame10;
 
 		[FieldOptional]
 		public string Name11;
 
-		[FieldOptional]
 		[FieldNullValue(0)]
+		[FieldOptional]
 		public int Frame11;
 	}
 }

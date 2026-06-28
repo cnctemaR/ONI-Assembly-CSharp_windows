@@ -48,12 +48,12 @@ public class WorldGaps
 		this.voidCells = new HashSet<int>();
 	}
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	public WorldGaps.State state = WorldGaps.State.EnabledOff;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	public HashSet<int> voidCells;
 
 	[SerializeField]
@@ -66,8 +66,8 @@ public class WorldGaps
 	[SerializeField]
 	public float notifyTimeApproaching;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	public int currentCloudIndex = -1;
 
 	public enum State

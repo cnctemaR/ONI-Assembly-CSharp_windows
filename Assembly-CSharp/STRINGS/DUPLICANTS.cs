@@ -1766,6 +1766,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is tearing down the {Target}";
 			}
 
+			public class DISINFECTING
+			{
+				public static LocString NAME = "Disinfecting {Target}";
+
+				public static LocString TOOLTIP = "This Duplicant is disinfecting {Target}";
+			}
+
 			public class FABRICATING
 			{
 				public static LocString NAME = "Fabricating {Item}";

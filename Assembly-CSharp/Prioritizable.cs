@@ -85,8 +85,8 @@ public class Prioritizable : KMonoBehaviour
 		}
 	}
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	private int masterPriority = 5;
 
 	public Action<int> onPriorityChanged;

@@ -38,7 +38,7 @@ public class EnergyGenerator : Generator, IBatteryRefillControl, IEffectDescript
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
+		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", this.meterOffset, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
 	}
 
 	private bool IsConvertible(float dt)
@@ -273,8 +273,8 @@ public class EnergyGenerator : Generator, IBatteryRefillControl, IEffectDescript
 	[MyCmpGet]
 	private ManualDeliveryKG delivery;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	private float batteryRefillPercent = 0.5f;
 
 	public bool ignoreBatteryRefillPercent;
@@ -282,6 +282,8 @@ public class EnergyGenerator : Generator, IBatteryRefillControl, IEffectDescript
 	private static StatusItem batteriesSufficientlyFull;
 
 	private static StatusItem insufficientConversionMass;
+
+	public Meter.Offset meterOffset;
 
 	[SerializeField]
 	public EnergyGenerator.Formula formula;

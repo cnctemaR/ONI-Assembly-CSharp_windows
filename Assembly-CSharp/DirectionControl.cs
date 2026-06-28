@@ -14,6 +14,7 @@ public class DirectionControl : KMonoBehaviour
 			{
 				allowLeft = true,
 				allowRight = true,
+				iconName = "action_direction_both",
 				name = UI.USERMENUACTIONS.WORKABLE_DIRECTION_BOTH.NAME,
 				tooltip = UI.USERMENUACTIONS.WORKABLE_DIRECTION_BOTH.TOOLTIP
 			},
@@ -21,6 +22,7 @@ public class DirectionControl : KMonoBehaviour
 			{
 				allowLeft = true,
 				allowRight = false,
+				iconName = "action_direction_left",
 				name = UI.USERMENUACTIONS.WORKABLE_DIRECTION_LEFT.NAME,
 				tooltip = UI.USERMENUACTIONS.WORKABLE_DIRECTION_LEFT.TOOLTIP
 			},
@@ -28,6 +30,7 @@ public class DirectionControl : KMonoBehaviour
 			{
 				allowLeft = false,
 				allowRight = true,
+				iconName = "action_direction_right",
 				name = UI.USERMENUACTIONS.WORKABLE_DIRECTION_RIGHT.NAME,
 				tooltip = UI.USERMENUACTIONS.WORKABLE_DIRECTION_RIGHT.TOOLTIP
 			}
@@ -94,7 +97,7 @@ public class DirectionControl : KMonoBehaviour
 		DirectionControl.DirectionInfo directionInfo = this.directionInfos[num];
 		UserMenu userMenu = this.userMenu;
 		string tooltip = directionInfo.tooltip;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_direction", directionInfo.name, new global::System.Action(this.OnChangeWorkableDirection), global::Action.NumActions, null, null, null, tooltip, true), 1f);
+		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(directionInfo.iconName, directionInfo.name, new global::System.Action(this.OnChangeWorkableDirection), global::Action.NumActions, null, null, null, tooltip, true), 1f);
 	}
 
 	[Serialize]
@@ -112,6 +115,8 @@ public class DirectionControl : KMonoBehaviour
 		public bool allowLeft;
 
 		public bool allowRight;
+
+		public string iconName;
 
 		public string name;
 

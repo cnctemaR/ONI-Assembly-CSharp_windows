@@ -3,7 +3,6 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-[SkipSaveFileSerialization]
 public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 {
 	protected override void OnPrefabInit()

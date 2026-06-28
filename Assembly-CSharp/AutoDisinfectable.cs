@@ -10,6 +10,7 @@ public class AutoDisinfectable : Workable
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTableWithCorners);
 		this.faceTargetWhenWorking = true;
 		this.synchronizeAnims = false;
+		this.workerStatusItem = Db.Get().DuplicantStatusItems.Disinfecting;
 	}
 
 	protected override void OnSpawn()
@@ -22,27 +23,30 @@ public class AutoDisinfectable : Workable
 
 	private void Update()
 	{
-		if (!this.enableAutoDisinfect)
-		{
-			return;
-		}
-		if (this.chore != null && this.chore.driver != null)
-		{
-			return;
-		}
 		this.RefreshChore();
 	}
 
 	private void RefreshChore()
 	{
-		if (this.chore == null && this.primaryElement.DiseaseCount > SaveGame.Instance.minGermCountForDisinfect)
+		if (!this.enableAutoDisinfect || !SaveGame.Instance.enableAutoDisinfect)
 		{
-			this.chore = new WorkChore<Disinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true);
+			if (this.chore != null)
+			{
+				this.chore.Cancel("Autodisinfect Disabled");
+				this.chore = null;
+			}
 		}
-		else if (this.primaryElement.DiseaseCount < SaveGame.Instance.minGermCountForDisinfect && this.chore != null)
+		else if (this.chore == null || !(this.chore.driver != null))
 		{
-			this.chore.Cancel("AutoDisinfectable.Update");
-			this.chore = null;
+			if (this.chore == null && this.primaryElement.DiseaseCount > SaveGame.Instance.minGermCountForDisinfect)
+			{
+				this.chore = new WorkChore<Disinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true);
+			}
+			else if (this.primaryElement.DiseaseCount < SaveGame.Instance.minGermCountForDisinfect && this.chore != null)
+			{
+				this.chore.Cancel("AutoDisinfectable.Update");
+				this.chore = null;
+			}
 		}
 	}
 
@@ -97,13 +101,13 @@ public class AutoDisinfectable : Workable
 		{
 			UserMenu userMenu = this.userMenu;
 			string text = BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_disinfect", BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.NAME, new global::System.Action(this.EnableAutoDisinfect), global::Action.NumActions, null, null, null, text, true), 1f);
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_disinfect", BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.NAME, new global::System.Action(this.EnableAutoDisinfect), global::Action.NumActions, null, null, null, text, true), 10f);
 		}
 		else
 		{
 			UserMenu userMenu2 = this.userMenu;
 			string text = BUILDINGS.AUTODISINFECTABLE.DISABLE_AUTODISINFECT.TOOLTIP;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_disinfect", BUILDINGS.AUTODISINFECTABLE.DISABLE_AUTODISINFECT.NAME, new global::System.Action(this.DisableAutoDisinfect), global::Action.NumActions, null, null, null, text, true), 1f);
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_disinfect", BUILDINGS.AUTODISINFECTABLE.DISABLE_AUTODISINFECT.NAME, new global::System.Action(this.DisableAutoDisinfect), global::Action.NumActions, null, null, null, text, true), 10f);
 		}
 	}
 

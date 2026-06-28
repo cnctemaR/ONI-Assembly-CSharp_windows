@@ -140,6 +140,8 @@ namespace Database
 			this.Toggling.resolveStringCallback = func;
 			this.Deconstructing = new StatusItem("Deconstructing", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true, 2046);
 			this.Deconstructing.resolveStringCallback = func;
+			this.Disinfecting = new StatusItem("Disinfecting", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true, 2046);
+			this.Disinfecting.resolveStringCallback = func;
 			this.Upgrading = new StatusItem("Upgrading", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true, 2046);
 			this.Upgrading.resolveStringCallback = func;
 			this.Fabricating = new StatusItem("Fabricating", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true, 2046);
@@ -362,6 +364,8 @@ namespace Database
 		public StatusItem Toggling;
 
 		public StatusItem Deconstructing;
+
+		public StatusItem Disinfecting;
 
 		public StatusItem Relocating;
 

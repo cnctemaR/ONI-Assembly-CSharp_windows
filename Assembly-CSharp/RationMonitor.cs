@@ -65,7 +65,7 @@ public class RationMonitor : GameStateMachine<RationMonitor, RationMonitor.Insta
 				ColonyRationMonitor.Instance smi = SaveGame.Instance.GetSMI<ColonyRationMonitor.Instance>();
 				if (smi != null)
 				{
-					return !SaveGame.Instance.GetSMI<ColonyRationMonitor.Instance>().IsOutOfRations();
+					return !smi.IsOutOfRations();
 				}
 			}
 			return false;

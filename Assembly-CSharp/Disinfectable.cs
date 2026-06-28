@@ -9,6 +9,7 @@ public class Disinfectable : Workable
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTableWithCorners);
 		this.faceTargetWhenWorking = true;
 		this.synchronizeAnims = false;
+		this.workerStatusItem = Db.Get().DuplicantStatusItems.Disinfecting;
 		this.Subscribe(2127324410, new Action<object>(this.OnCancel));
 	}
 

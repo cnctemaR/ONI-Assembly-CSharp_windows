@@ -36,6 +36,7 @@ public class HydrogenGeneratorConfig : IBuildingConfig
 		energyGenerator.formula = EnergyGenerator.CreateSimpleFormula(SimHashes.Hydrogen, 0.1f, 2f, SimHashes.Void, 0f, true);
 		energyGenerator.powerDistributionOrder = 8;
 		energyGenerator.ignoreBatteryRefillPercent = true;
+		energyGenerator.meterOffset = Meter.Offset.Behind;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

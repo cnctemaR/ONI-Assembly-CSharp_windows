@@ -71,11 +71,13 @@ public class Valve : Workable, ISaveLoadable
 		float num = Mathf.Min(contents.mass, this.currentFlow * dt);
 		if (num > 0f)
 		{
-			float num2 = flowManager.AddElement(this.outputCell, contents.element, num, contents.temperature, contents.diseaseIdx, contents.diseaseCount);
-			this.flowAccumulator.Accumulate(num2);
-			if (num2 > 0f)
+			float num2 = num / contents.mass;
+			int num3 = (int)(num2 * (float)contents.diseaseCount);
+			float num4 = flowManager.AddElement(this.outputCell, contents.element, num, contents.temperature, contents.diseaseIdx, num3);
+			this.flowAccumulator.Accumulate(num4);
+			if (num4 > 0f)
 			{
-				flowManager.RemoveElement(this.inputCell, num2);
+				flowManager.RemoveElement(this.inputCell, num4);
 			}
 		}
 		this.UpdateAnim();

@@ -132,8 +132,8 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable
 	[Serialize]
 	private new string name;
 
-	[ReadOnly]
 	[Serialize]
+	[ReadOnly]
 	public float arrivalTime;
 
 	[Serialize]

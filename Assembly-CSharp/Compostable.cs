@@ -110,13 +110,13 @@ public class Compostable : KMonoBehaviour
 		{
 			UserMenu userMenu = this.userMenu;
 			string text = UI.USERMENUACTIONS.COMPOST.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_move_to_storage", UI.USERMENUACTIONS.COMPOST.NAME, new global::System.Action(this.OnToggleCompost), global::Action.NumActions, null, null, null, text, true), 1f);
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_compost", UI.USERMENUACTIONS.COMPOST.NAME, new global::System.Action(this.OnToggleCompost), global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 		else
 		{
 			UserMenu userMenu2 = this.userMenu;
 			string text = UI.USERMENUACTIONS.COMPOST.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_move_to_storage", UI.USERMENUACTIONS.COMPOST.NAME_OFF, new global::System.Action(this.OnToggleCompost), global::Action.NumActions, null, null, null, text, true), 1f);
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_compost", UI.USERMENUACTIONS.COMPOST.NAME_OFF, new global::System.Action(this.OnToggleCompost), global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 	}
 

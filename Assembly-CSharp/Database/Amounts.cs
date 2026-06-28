@@ -20,7 +20,7 @@ namespace Database
 			this.OldAge = this.CreateAmount("OldAge", 0f, 2400f, 0f, 0f, false, Units.Flat, 0f, false, "STRINGS.CREATURES.STATS");
 			this.Fertilization = this.CreateAmount("Fertilization", 0f, 100f, 0f, 0f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
 			this.Fertilization.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerSecond, null));
-			this.Irrigation = this.CreateAmount("Irrigation", 0f, 100f, 0f, 0f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
+			this.Irrigation = this.CreateAmount("Irrigation", 0f, 1f, 0f, 0f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
 			this.Irrigation.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerSecond, null));
 			this.HitPoints = this.CreateAmount("HitPoints", 0f, 0f, 0f, 0f, true, Units.Flat, 0.1675f, true, "STRINGS.DUPLICANTS.STATS");
 			this.HitPoints.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.PerSecond, null));

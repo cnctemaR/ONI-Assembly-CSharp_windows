@@ -52,6 +52,11 @@ public class Dumpable : Workable
 
 	private void OnRefreshUserMenu(object data)
 	{
+		Pickupable component = base.GetComponent<Pickupable>();
+		if (component != null && component.storage != null)
+		{
+			return;
+		}
 		if (!this.isMarkedForDumping)
 		{
 			UserMenu userMenu = this.userMenu;

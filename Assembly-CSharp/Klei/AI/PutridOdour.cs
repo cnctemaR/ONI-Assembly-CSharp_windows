@@ -123,6 +123,10 @@ namespace Klei.AI
 			private void Emit(object data)
 			{
 				GameObject gameObject = (GameObject)data;
+				if (gameObject == null)
+				{
+					return;
+				}
 				Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
 				Vector2 vector = gameObject.transform.position;
 				for (int i = 0; i < liveMinionIdentities.Count; i++)

@@ -141,11 +141,14 @@ public class RequireInputs : KMonoBehaviour
 				{
 					statusItem2 = Db.Get().BuildingStatusItems.GasPipeEmpty;
 				}
-				if (statusItem2 != null)
+				if (this.requireConduitHasMass)
 				{
-					this.selectable.ToggleStatusItem(statusItem2, !flag4, this);
+					if (statusItem2 != null)
+					{
+						this.selectable.ToggleStatusItem(statusItem2, !flag4, this);
+					}
+					this.operational.SetFlag(RequireInputs.pipesHaveMass, flag4);
 				}
-				this.operational.SetFlag(RequireInputs.pipesHaveMass, flag4);
 			}
 		}
 		this.requirementsMet = flag;
@@ -158,6 +161,8 @@ public class RequireInputs : KMonoBehaviour
 	private bool requireConduit;
 
 	private bool wasConnected;
+
+	public bool requireConduitHasMass = true;
 
 	[NonSerialized]
 	public bool visualizeRequirements = true;

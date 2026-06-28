@@ -35,8 +35,6 @@ public class HydroponicFarmConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
-		PrimaryElement primaryElement = go.AddOrGet<PrimaryElement>();
-		primaryElement.useSimDiseaseInfo = true;
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
 		go.AddOrGet<TileTemperature>();
@@ -64,6 +62,7 @@ public class HydroponicFarmConfig : IBuildingConfig
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		FarmTileConfig.SetUpFarmPlotTags(go);
+		go.GetComponent<RequireInputs>().requireConduitHasMass = false;
 	}
 
 	public const string ID = "HydroponicFarm";

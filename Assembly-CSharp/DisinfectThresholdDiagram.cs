@@ -1,6 +1,7 @@
 ﻿using System;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DisinfectThresholdDiagram : MonoBehaviour
 {
@@ -37,7 +38,22 @@ public class DisinfectThresholdDiagram : MonoBehaviour
 		this.minLabel.SetText(0.ToString());
 		this.maxLabel.SetText(DisinfectThresholdDiagram.MAX_VALUE.ToString());
 		this.thresholdPrefix.SetText(UI.OVERLAYS.DISEASE.DISINFECT_THRESHOLD_DIAGRAM.THRESHOLD_PREFIX);
-		this.toolTip.OnToolTip = () => UI.OVERLAYS.DISEASE.DISINFECT_THRESHOLD_DIAGRAM.TOOLTIP.ToString().Replace("{NumberOfGerms}", SaveGame.Instance.minGermCountForDisinfect.ToString());
+		this.toolTip.OnToolTip = delegate
+		{
+			this.toolTip.ClearMultiStringTooltip();
+			if (SaveGame.Instance.enableAutoDisinfect)
+			{
+				this.toolTip.AddMultiStringTooltip(UI.OVERLAYS.DISEASE.DISINFECT_THRESHOLD_DIAGRAM.TOOLTIP.ToString().Replace("{NumberOfGerms}", SaveGame.Instance.minGermCountForDisinfect.ToString()), null);
+			}
+			else
+			{
+				this.toolTip.AddMultiStringTooltip(UI.OVERLAYS.DISEASE.DISINFECT_THRESHOLD_DIAGRAM.TOOLTIP_DISABLED.ToString(), null);
+			}
+			return string.Empty;
+		};
+		this.disabledImage.gameObject.SetActive(!SaveGame.Instance.enableAutoDisinfect);
+		this.toggle.isOn = SaveGame.Instance.enableAutoDisinfect;
+		this.toggle.onValueChanged += this.OnClickToggle;
 	}
 
 	private void OnReleaseHandle()
@@ -57,6 +73,12 @@ public class DisinfectThresholdDiagram : MonoBehaviour
 	{
 		this.slider.value = new_value;
 		SaveGame.Instance.minGermCountForDisinfect = (int)new_value;
+	}
+
+	private void OnClickToggle(bool new_value)
+	{
+		SaveGame.Instance.enableAutoDisinfect = new_value;
+		this.disabledImage.gameObject.SetActive(!SaveGame.Instance.enableAutoDisinfect);
 	}
 
 	[SerializeField]
@@ -79,6 +101,12 @@ public class DisinfectThresholdDiagram : MonoBehaviour
 
 	[SerializeField]
 	private ToolTip toolTip;
+
+	[SerializeField]
+	private KToggle toggle;
+
+	[SerializeField]
+	private Image disabledImage;
 
 	private static int MAX_VALUE = 100000;
 }

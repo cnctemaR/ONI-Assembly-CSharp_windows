@@ -1597,6 +1597,8 @@ namespace STRINGS
 					public static LocString THRESHOLD_PREFIX = "Disinfect At:";
 
 					public static LocString TOOLTIP = "Automatically disinfect any building with more than {NumberOfGerms} germs.";
+
+					public static LocString TOOLTIP_DISABLED = "Automatic building disinfection disabled.";
 				}
 			}
 
@@ -2622,21 +2624,21 @@ namespace STRINGS
 
 			public class WORKABLE_DIRECTION_BOTH
 			{
-				public static LocString NAME = "Direction: Both";
+				public static LocString NAME = " Set Direction: Both";
 
 				public static LocString TOOLTIP = "Select to make Duplicants wash when passing by in either direction";
 			}
 
 			public class WORKABLE_DIRECTION_LEFT
 			{
-				public static LocString NAME = "Direction: Left";
+				public static LocString NAME = "Set Direction: Left";
 
 				public static LocString TOOLTIP = "Select to make Duplicants wash when passing by from right to left";
 			}
 
 			public class WORKABLE_DIRECTION_RIGHT
 			{
-				public static LocString NAME = "Direction: Right";
+				public static LocString NAME = "Set Direction: Right";
 
 				public static LocString TOOLTIP = "Select to make Duplicants wash when passing by from left to right";
 			}

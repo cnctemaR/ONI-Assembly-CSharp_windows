@@ -34,7 +34,8 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			.ToggleStateMachine((RationalAi.Instance smi) => new TiredMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new MoveToLocationMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new ReactionMonitor.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new SuitWearer.Instance(smi.master));
+			.ToggleStateMachine((RationalAi.Instance smi) => new SuitWearer.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new TubeTraveller.Instance(smi.master));
 		this.dead.ToggleStateMachine((RationalAi.Instance smi) => new FallWhenDeadMonitor.Instance(smi.master)).ToggleBrain("dead").Enter("RefreshUserMenu", delegate(RationalAi.Instance smi)
 		{
 			smi.RefreshUserMenu();

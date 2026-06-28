@@ -5,32 +5,6 @@ using UnityEngine;
 [SkipSaveFileSerialization]
 public class SimTemperatureTransfer : KMonoBehaviour
 {
-	public static void ClearInstanceMap()
-	{
-		SimTemperatureTransfer.handleInstanceMap.Clear();
-	}
-
-	public static void DoStateTransition(int sim_handle)
-	{
-		SimTemperatureTransfer simTemperatureTransfer = null;
-		if (SimTemperatureTransfer.handleInstanceMap.TryGetValue(sim_handle, out simTemperatureTransfer))
-		{
-			SimTemperatureTransfer simTemperatureTransfer2 = SimTemperatureTransfer.handleInstanceMap[sim_handle];
-			Pickupable component = simTemperatureTransfer2.GetComponent<Pickupable>();
-			if (component.storage == null || !component.storage.HasStoredItemModifier(Storage.StoredItemModifier.Seal))
-			{
-				PrimaryElement component2 = simTemperatureTransfer2.GetComponent<PrimaryElement>();
-				Element element = component2.Element;
-				if (element.highTempTransitionTarget != SimHashes.Unobtanium)
-				{
-					int num = Grid.PosToCell(simTemperatureTransfer2.transform.position);
-					SimMessages.AddRemoveSubstance(num, element.highTempTransitionTarget, CellEventLogger.Instance.OreMelted, component2.Mass, component2.Temperature, component2.DiseaseIdx, component2.DiseaseCount, -1);
-					Util.KDestroyGameObject(simTemperatureTransfer2.gameObject);
-				}
-			}
-		}
-	}
-
 	public float SurfaceArea
 	{
 		get
@@ -60,6 +34,35 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		get
 		{
 			return this.simHandle;
+		}
+	}
+
+	public static void ClearInstanceMap()
+	{
+		SimTemperatureTransfer.handleInstanceMap.Clear();
+	}
+
+	public static void DoStateTransition(int sim_handle)
+	{
+		SimTemperatureTransfer simTemperatureTransfer = null;
+		if (SimTemperatureTransfer.handleInstanceMap.TryGetValue(sim_handle, out simTemperatureTransfer))
+		{
+			SimTemperatureTransfer simTemperatureTransfer2 = SimTemperatureTransfer.handleInstanceMap[sim_handle];
+			if (simTemperatureTransfer2 != null)
+			{
+				Pickupable component = simTemperatureTransfer2.GetComponent<Pickupable>();
+				if (component == null || component.storage == null || !component.storage.HasStoredItemModifier(Storage.StoredItemModifier.Seal))
+				{
+					PrimaryElement component2 = simTemperatureTransfer2.GetComponent<PrimaryElement>();
+					Element element = component2.Element;
+					if (element.highTempTransitionTarget != SimHashes.Unobtanium)
+					{
+						int num = Grid.PosToCell(simTemperatureTransfer2.transform.position);
+						SimMessages.AddRemoveSubstance(num, element.highTempTransitionTarget, CellEventLogger.Instance.OreMelted, component2.Mass, component2.Temperature, component2.DiseaseIdx, component2.DiseaseCount, -1);
+						Util.KDestroyGameObject(simTemperatureTransfer2.gameObject);
+					}
+				}
+			}
 		}
 	}
 
@@ -164,7 +167,8 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		SimTemperatureTransfer component = primary_element.GetComponent<SimTemperatureTransfer>();
 		if (Sim.IsValidHandle(component.simHandle))
 		{
-			float num = primary_element.Mass * primary_element.Element.specificHeatCapacity;
+			float mass = primary_element.Mass;
+			float num = ((mass < 0.01f) ? 0f : (mass * primary_element.Element.specificHeatCapacity));
 			SimMessages.SetElementChunkData(component.simHandle, temperature, num);
 			Game.Instance.simData.elementChunks[component.simHandle].temperature = temperature;
 		}
@@ -178,7 +182,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 	{
 		if (Sim.IsValidHandle(this.simHandle))
 		{
-			float num = primary_element.Mass * primary_element.Element.specificHeatCapacity;
+			float num = ((primary_element.Mass < 0.01f) ? 0f : (primary_element.Mass * primary_element.Element.specificHeatCapacity));
 			SimMessages.SetElementChunkData(this.simHandle, primary_element.Temperature, num);
 		}
 	}
@@ -256,11 +260,15 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		}
 	}
 
+	private const float MIN_MASS_FOR_TEMPERATURE_TRANSFER = 0.01f;
+
+	public float deltaKJ;
+
 	public Action<SimTemperatureTransfer> onSimRegistered;
 
 	protected int simHandle = -1;
 
-	private static Dictionary<int, SimTemperatureTransfer> handleInstanceMap = new Dictionary<int, SimTemperatureTransfer>();
+	private float pendingEnergyModifications;
 
 	[SerializeField]
 	protected float surfaceArea = 10f;
@@ -268,7 +276,5 @@ public class SimTemperatureTransfer : KMonoBehaviour
 	[SerializeField]
 	protected float thickness = 0.01f;
 
-	private float pendingEnergyModifications;
-
-	public float deltaKJ;
+	private static Dictionary<int, SimTemperatureTransfer> handleInstanceMap = new Dictionary<int, SimTemperatureTransfer>();
 }

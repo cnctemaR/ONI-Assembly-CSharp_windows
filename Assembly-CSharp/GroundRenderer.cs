@@ -71,19 +71,10 @@ public class GroundRenderer : KMonoBehaviour
 			{
 				if (this.dirtyChunks[j, i])
 				{
-					SystemScheduler.instance.AddTask(SystemScheduler.Priority.Lowest, new SchedulerEntry.Details("GroundRenderer", new Action<object>(this.RebuildDirtyChunk), new Vector2I(j, i), 0f, base.gameObject));
+					this.dirtyChunks[j, i] = false;
+					this.worldChunks[j, i].Rebuild(this.biomeMasks, this.elementMaterials);
 				}
 			}
-		}
-	}
-
-	private void RebuildDirtyChunk(object data)
-	{
-		Vector2I vector2I = (Vector2I)data;
-		if (this.dirtyChunks[vector2I.x, vector2I.y])
-		{
-			this.dirtyChunks[vector2I.x, vector2I.y] = false;
-			this.worldChunks[vector2I.x, vector2I.y].Rebuild(this.biomeMasks, this.elementMaterials);
 		}
 	}
 
@@ -161,6 +152,7 @@ public class GroundRenderer : KMonoBehaviour
 		material.SetInt("_SrcAlpha", 1);
 		material.SetInt("_DstAlpha", 0);
 		material.SetInt("_ZWrite", 1);
+		material.SetTexture("_AlphaTestMap", Texture2D.whiteTexture);
 	}
 
 	private void InitAlphaMaterial(Material material, Element element)

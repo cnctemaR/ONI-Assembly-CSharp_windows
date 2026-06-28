@@ -385,6 +385,13 @@ namespace STRINGS
 				public static LocString STATUS = "Waiting at Checkpoint";
 			}
 
+			public class TRAVELTUBEENTRANCE
+			{
+				public static LocString NAME = "Enter Transit Tube";
+
+				public static LocString STATUS = "Entering Transit Tube";
+			}
+
 			public class SCRUBORE
 			{
 				public static LocString NAME = "Scrub Ore";

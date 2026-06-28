@@ -123,10 +123,23 @@ public class EditableTitleBar : TitleBar
 		}
 	}
 
+	public void ForceStopEditing()
+	{
+		if (this.postEndEdit != null)
+		{
+			base.StopCoroutine(this.postEndEdit);
+		}
+		this.editNameButton.ClearOnClick();
+		this.SetEditingState(false);
+		this.editNameButton.onClick += this.ToggleNameEditing;
+	}
+
 	public void SetUserEditable(bool editable)
 	{
 		this.userEditable = editable;
 		this.editNameButton.gameObject.SetActive(editable);
+		this.editNameButton.ClearOnClick();
+		this.editNameButton.onClick += this.ToggleNameEditing;
 	}
 
 	public KButton editNameButton;

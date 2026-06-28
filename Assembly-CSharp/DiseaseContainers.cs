@@ -20,6 +20,11 @@ public class DiseaseContainers : KGameObjectComponentManager<DiseaseContainer>
 
 	protected override void OnCleanUp(HandleVector<int>.Handle h)
 	{
+		AutoDisinfectable autoDisinfectable = base.GetData(h).autoDisinfectable;
+		if (autoDisinfectable != null)
+		{
+			AutoDisinfectableManager.Instance.RemoveAutoDisinfectable(autoDisinfectable);
+		}
 		base.OnCleanUp(h);
 	}
 

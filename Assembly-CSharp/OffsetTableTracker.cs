@@ -53,7 +53,7 @@ public class OffsetTableTracker : OffsetTracker
 			for (int j = 0; j < nav_grid.ValidNavTypes.Length; j++)
 			{
 				NavType navType = nav_grid.ValidNavTypes[j];
-				if (nav_grid.NavTable.IsValid(num, navType) && OffsetTableTracker.IsValidRow(cell, array))
+				if (navType != NavType.Tube && nav_grid.NavTable.IsValid(num, navType) && OffsetTableTracker.IsValidRow(cell, array))
 				{
 					offsets.Add(array[0]);
 					break;

@@ -213,9 +213,9 @@ public class GameTags
 
 	public static readonly Tag Preserved = TagManager.Create("Preserved", null);
 
-	public static readonly Tag MarkedForCompost = TagManager.Create("MarkedForCompost", null);
+	public static readonly Tag Compostable = TagManager.Create("Compostable", null);
 
-	public static readonly Tag ToxicSand = TagManager.Create("ToxicSand", null);
+	public static readonly Tag MarkedForCompost = TagManager.Create("MarkedForCompost", null);
 
 	public static readonly Tag Pickled = TagManager.Create("Pickled", null);
 
@@ -230,6 +230,8 @@ public class GameTags
 	public static readonly Tag RecoveringBreath = TagManager.Create("RecoveringBreath", null);
 
 	public static readonly Tag NoOxygen = TagManager.Create("NoOxygen", null);
+
+	public static readonly Tag Idle = TagManager.Create("Idle", null);
 
 	public static readonly Tag Operational = TagManager.Create("Operational", null);
 

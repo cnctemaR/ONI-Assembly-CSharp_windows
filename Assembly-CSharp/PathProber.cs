@@ -43,10 +43,9 @@ public class PathProber : KMonoBehaviour
 			this.IslandCount++;
 		}
 		this.PathGrid.SetRootCell(cell);
-		int num = 0;
 		PathFinder.Cell cell2 = this.PathGrid.GetCell(cell, nav_type);
 		PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(cell, nav_type, flags);
-		PathFinder.AddPotential(potentialPath, Grid.InvalidCell, NavType.NumNavTypes, 0, 0, -1, ref num, this.Potentials, this.QueryId, this.PathGrid, false, ref cell2);
+		PathFinder.AddPotential(potentialPath, Grid.InvalidCell, NavType.NumNavTypes, 0, 0, -1, this.Potentials, this.QueryId, this.PathGrid, ref cell2);
 		if (this.IslandCount > this.Islands.Length)
 		{
 			PathProber.Island[] array = new PathProber.Island[this.IslandCount];
@@ -56,25 +55,27 @@ public class PathProber : KMonoBehaviour
 			}
 			this.Islands = array;
 		}
-		int num2 = this.IslandCount - 1;
-		this.Islands[num2].cell = cell;
-		this.UpdateProbe(nav_grid, ref abilities, this.Potentials, this.QueryId, num2);
+		int num = this.IslandCount - 1;
+		this.Islands[num].cell = cell;
+		this.UpdateProbe(nav_grid, ref abilities, this.Potentials, this.QueryId, num);
 	}
 
-	private void UpdateProbe(NavGrid nav_grid, ref PathFinderAbilities abilities, List<PathFinder.PotentialPath> potentials, int query_id, int island)
+	private void UpdateProbe(NavGrid nav_grid, ref PathFinderAbilities abilities, PathFinder.PotentialList potentials, int query_id, int island)
 	{
-		int i = 0;
-		while (i < potentials.Count)
+		while (potentials.Count > 0)
 		{
-			i++;
-			this.UpdateProbe(nav_grid, ref abilities, ref i, potentials[i - 1], potentials, query_id, island);
+			KeyValuePair<int, PathFinder.PotentialPath> keyValuePair = potentials.Next();
+			this.UpdateProbe(nav_grid, ref abilities, keyValuePair.Value, keyValuePair.Key, potentials, query_id, island);
 		}
 	}
 
-	private void UpdateProbe(NavGrid nav_grid, ref PathFinderAbilities abilities, ref int next_potential_idx, PathFinder.PotentialPath potential, List<PathFinder.PotentialPath> potentials, int query_id, int island)
+	private void UpdateProbe(NavGrid nav_grid, ref PathFinderAbilities abilities, PathFinder.PotentialPath potential, int potential_cost, PathFinder.PotentialList potentials, int query_id, int island)
 	{
 		PathFinder.Cell cell = this.PathGrid.GetCell(potential);
-		PathFinder.AddPotentials(potential, cell.cost, (int)cell.underwaterCost, ref abilities, null, nav_grid.LinkTable, nav_grid.Links, ref next_potential_idx, potentials, query_id, this.PathGrid);
+		if (cell.cost == potential_cost)
+		{
+			PathFinder.AddPotentials(potential, cell.cost, (int)cell.underwaterCost, ref abilities, null, nav_grid.Links, potentials, query_id, this.PathGrid, cell.parent, cell.parentNavType);
+		}
 	}
 
 	public static int InvalidHandle = -1;
@@ -93,7 +94,7 @@ public class PathProber : KMonoBehaviour
 
 	private PathGrid PathGrid;
 
-	private List<PathFinder.PotentialPath> Potentials = new List<PathFinder.PotentialPath>();
+	private PathFinder.PotentialList Potentials = new PathFinder.PotentialList();
 
 	public PathProber.Island[] Islands = new PathProber.Island[1];
 

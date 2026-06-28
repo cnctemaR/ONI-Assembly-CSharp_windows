@@ -173,7 +173,6 @@ public enum GameHashes
 	SaveGameReady = -1917495436,
 	StartGameUser = -838649377,
 	ToiletSensorChanged = -752545459,
-	ConduitContentsChanged = 853768572,
 	ExposeToDisease = -283306403,
 	EntombedChanged = -1089732772,
 	HiddenChanged = -298960054,

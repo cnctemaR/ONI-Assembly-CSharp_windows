@@ -8,6 +8,7 @@ public class ReactEmoteChore : Chore<ReactEmoteChore.StatesInstance>
 	{
 		base.AddPrecondition(ChorePreconditions.IsMoving, null);
 		base.AddPrecondition(ChorePreconditions.IsOffLadder, null);
+		base.AddPrecondition(ChorePreconditions.NotInTube, null);
 		base.AddPrecondition(ChorePreconditions.IsAwake, null);
 		this.getStatusItem = get_status_item;
 		this.smi = new ReactEmoteChore.StatesInstance(this, target.gameObject, reactable, emote_kanim, emote_anims, play_mode);

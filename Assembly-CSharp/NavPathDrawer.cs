@@ -102,7 +102,7 @@ public class NavPathDrawer : KMonoBehaviour
 		{
 			PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(Grid.PosToCell(component), component.CurrentNavType, component.flags);
 			PathFinder.Path path = default(PathFinder.Path);
-			PathFinder.UpdatePath(component.NavGrid, component.GetCurrentAbilities(), potentialPath, PathFinderQueries.cellOffsetQuery.Reset(mouseCell, Grid.DefaultOffset), ref path);
+			PathFinder.UpdatePath(component.NavGrid, component.GetCurrentAbilities(), potentialPath, PathFinderQueries.cellQuery.Reset(mouseCell), ref path);
 			string text = string.Empty;
 			string text2 = text;
 			text = string.Concat(new object[]

@@ -8,6 +8,7 @@ public class StressEmoteChore : Chore<StressEmoteChore.StatesInstance>
 	{
 		base.AddPrecondition(ChorePreconditions.IsMoving, null);
 		base.AddPrecondition(ChorePreconditions.IsOffLadder, null);
+		base.AddPrecondition(ChorePreconditions.NotInTube, null);
 		base.AddPrecondition(ChorePreconditions.IsAwake, null);
 		this.getStatusItem = get_status_item;
 		this.smi = new StressEmoteChore.StatesInstance(this, target.gameObject, emote_kanim, emote_anims, play_mode);

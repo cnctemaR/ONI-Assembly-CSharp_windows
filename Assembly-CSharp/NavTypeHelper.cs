@@ -20,6 +20,8 @@ public static class NavTypeHelper
 			return Grid.CellToPosCCC(cell, Grid.SceneLayer.Move);
 		case NavType.Pole:
 			return Grid.CellToPosCCC(cell, Grid.SceneLayer.Move);
+		case NavType.Tube:
+			return Grid.CellToPosCCC(cell, Grid.SceneLayer.Move);
 		}
 		return Grid.CellToPosCCC(cell, Grid.SceneLayer.Move);
 	}

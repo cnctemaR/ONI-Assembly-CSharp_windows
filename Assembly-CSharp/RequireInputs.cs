@@ -164,7 +164,6 @@ public class RequireInputs : KMonoBehaviour
 
 	public bool requireConduitHasMass = true;
 
-	[NonSerialized]
 	public bool visualizeRequirements = true;
 
 	private static Operational.Flag inputConnectedFlag = new Operational.Flag("inputConnected", Operational.Flag.Type.Requirement);

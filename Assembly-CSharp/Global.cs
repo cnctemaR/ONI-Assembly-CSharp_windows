@@ -14,7 +14,6 @@ public class Global : MonoBehaviour
 		this.mCoroutineManager = base.gameObject.AddComponent<CoroutineManager>();
 		this.mAnimEventManager = new AnimEventManager();
 		KBatchedAnimUpdater.CreateInstance();
-		SystemScheduler.Initialize();
 		DistributionPlatform.Initialize();
 		Localization.Initialize(false);
 		if (DistributionPlatform.Initialized)
@@ -75,7 +74,6 @@ public class Global : MonoBehaviour
 	{
 		int num = KProfiler.BeginSampleI("Global.Update");
 		this.mInputManager.Update();
-		SystemScheduler.instance.Update();
 		if (this.mAnimEventManager != null)
 		{
 			this.mAnimEventManager.Update();
@@ -94,7 +92,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 243285U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 246879U);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());

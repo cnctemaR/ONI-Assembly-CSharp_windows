@@ -372,11 +372,11 @@ namespace STRINGS
 
 			public class PATCHNOTESSCREEN
 			{
-				public static LocString TITLE = "AUTOMATION UPGRADE";
+				public static LocString TITLE = "TUBULAR UPGRADE";
 
-				public static LocString BODY = "<b>Welcome to the Automation Upgrade!</b>\n\n{0}";
+				public static LocString BODY = "<b>Welcome to the Tubular Upgrade!</b>\n\n{0}";
 
-				public static LocString PATCHNOTES = "<b>Update Features:</b>\n\n• New buildings for base automation including sensors, switches, logic gates, and Duplicant checkpoints\n• Automation inputs for existing buildings and new automatable system shutoffs\n• Two new ore processing buildings for Metal refinement\n• Revamped tech tree with new research tiers, buildings, and overlays\n• Bug fixes and performance improvements\n\n<b>Other Notable Changes:</b>\n\n• Automatic power switches have been replaced by Automation sensors and can no longer directly control power\n• Oil and oil products will now properly freeze at low temperatures\n\nPlease view the full patch notes for further details!";
+				public static LocString PATCHNOTES = "<b>Update Features:</b>\n\n• New Transit Tube networks allow rapid Duplicant transport to and from the furthest reaches of your base\n• Ice Sculptures can now be built in cold areas for a special decor boost\n• Berry Sludge, a new recipe made from Bristle Berries, can now be found at the Microbe Musher\n• Extensive performance improvements, affecting late game bases, stored items, Duplicant navigation, memory usage, and more\n\nPlease view the full patch notes for further details!";
 
 				public static LocString OK_BUTTON = "OK";
 			}
@@ -529,6 +529,10 @@ namespace STRINGS
 				public static LocString MUSIC_EVERY_CYCLE = "Play background music each morning: ";
 
 				public static LocString MUSIC_EVERY_CYCLE_TOOLTIP = "If enabled, background music will play every cycle instead of every few cycles";
+
+				public static LocString AUTOMATION_SOUNDS_ALWAYS = "Play automation sounds outside of the overlay: ";
+
+				public static LocString AUTOMATION_SOUNDS_ALWAYS_TOOLTIP = "If enabled, automation sound effects will play even when outside of the automation overlay";
 
 				public static LocString AUDIO_BUS_MASTER = "Master";
 
@@ -1000,6 +1004,10 @@ namespace STRINGS
 			public static LocString HELP_BUILDLOCATION_INSIDEGROUND = "Must be built in the ground";
 
 			public static LocString HELP_BUILDLOCATION_ATTACHPOINT = "Must be built overlapping a {0}";
+
+			public static LocString HELP_TUBELOCATION_NO_UTURNS = "No U-Turns!";
+
+			public static LocString HELP_TUBELOCATION_STRAIGHT_BRIDGES = "Can't Turn Here!";
 
 			public static LocString OXYGENOVERLAYSTRING = "Displays ambient oxygen density";
 
@@ -2513,6 +2521,15 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This gate will continue to send an Active signal for {0} seconds after entering Standby";
 			}
 
+			public class TIME_RANGE_SIDE_SCREEN
+			{
+				public static LocString TITLE = "Time-of-Day Sensor";
+
+				public static LocString ON = "Activation Time";
+
+				public static LocString DURATION = "Activation Duration";
+			}
+
 			public class TIMEDSWITCHSIDESCREEN
 			{
 				public static LocString TITLE = "Time Schedule";
@@ -3134,9 +3151,11 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Move";
 
-				public static LocString TOOLNAME = "Move {0} Here";
+				public static LocString TOOLNAME = "Move Here";
 
-				public static LocString TOOLACTION = "CLICK TO MOVE {0}";
+				public static LocString TOOLACTION = "CLICK TO MOVE";
+
+				public static LocString UNREACHABLE = "UNREACHABLE";
 			}
 
 			public class COPYSETTINGS

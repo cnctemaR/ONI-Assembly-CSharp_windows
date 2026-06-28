@@ -840,6 +840,11 @@ namespace TMPro
 			}
 		}
 
+		public void KForceUpdateDirty()
+		{
+			this.OnPreRenderCanvas();
+		}
+
 		private void OnPreRenderCanvas()
 		{
 			if (!this.m_isAwake || (!this.m_ignoreActiveState && !this.IsActive()))

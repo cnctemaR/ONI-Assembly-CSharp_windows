@@ -17,12 +17,18 @@ public class WireBuildTool : BaseUtilityBuildTool
 		}
 		for (int i = 1; i < this.path.Count; i++)
 		{
-			int cell = this.path[i - 1].cell;
-			int cell2 = this.path[i].cell;
-			UtilityConnections direction = base.GetDirection(cell, this.path[i].cell);
-			UtilityConnections oppositeDirection = base.GetOppositeDirection(direction);
-			this.conduitMgr.AddConnection(direction, cell, false);
-			this.conduitMgr.AddConnection(oppositeDirection, cell2, false);
+			if (this.path[i - 1].valid && this.path[i].valid)
+			{
+				int cell = this.path[i - 1].cell;
+				int cell2 = this.path[i].cell;
+				UtilityConnections utilityConnections = UtilityConnectionsExtensions.DirectionFromToCell(cell, this.path[i].cell);
+				if (utilityConnections != (UtilityConnections)0)
+				{
+					UtilityConnections utilityConnections2 = utilityConnections.InverseDirection();
+					this.conduitMgr.AddConnection(utilityConnections, cell, false);
+					this.conduitMgr.AddConnection(utilityConnections2, cell2, false);
+				}
+			}
 		}
 	}
 

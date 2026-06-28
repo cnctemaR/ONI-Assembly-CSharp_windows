@@ -63,12 +63,13 @@ public class Game : KMonoBehaviour
 		this.electricalConduitSystem = new UtilityNetworkManager<ElectricalUtilityNetwork, Wire>(Grid.WidthInCells, Grid.HeightInCells, 21);
 		this.logicCircuitSystem = new UtilityNetworkManager<LogicCircuitNetwork, LogicWire>(Grid.WidthInCells, Grid.HeightInCells, 26);
 		this.logicCircuitManager = new LogicCircuitManager(this.logicCircuitSystem);
+		this.travelTubeSystem = new UtilityNetworkTubesManager(Grid.WidthInCells, Grid.HeightInCells, 28);
 		this.conduitTemperatureManager = new ConduitTemperatureManager(1f);
 		this.conduitDiseaseManager = new ConduitDiseaseManager(this.conduitTemperatureManager);
-		this.gasConduitFlow = new ConduitFlow(ConduitType.Gas, Grid.CellCount, this.gasConduitSystem, 1f);
-		this.liquidConduitFlow = new ConduitFlow(ConduitType.Liquid, Grid.CellCount, this.liquidConduitSystem, 10f);
-		this.gasFlowVisualizer = new ConduitFlowVisualizer(this.gasConduitFlow, this.gasConduitVisInfo, GlobalResources.Instance().ConduitOverlaySoundGas);
-		this.liquidFlowVisualizer = new ConduitFlowVisualizer(this.liquidConduitFlow, this.liquidConduitVisInfo, GlobalResources.Instance().ConduitOverlaySoundLiquid);
+		this.gasConduitFlow = new ConduitFlow(ConduitType.Gas, Grid.CellCount, this.gasConduitSystem, 1f, 0.25f);
+		this.liquidConduitFlow = new ConduitFlow(ConduitType.Liquid, Grid.CellCount, this.liquidConduitSystem, 10f, 0.75f);
+		this.gasFlowVisualizer = new ConduitFlowVisualizer(this.gasConduitFlow, this.gasConduitVisInfo, GlobalResources.Instance().ConduitOverlaySoundGas, Lighting.Instance.Settings.GasConduit);
+		this.liquidFlowVisualizer = new ConduitFlowVisualizer(this.liquidConduitFlow, this.liquidConduitVisInfo, GlobalResources.Instance().ConduitOverlaySoundLiquid, Lighting.Instance.Settings.LiquidConduit);
 		this.activeFX = new ushort[Grid.CellCount];
 		this.simActiveRegionMax = new Vector2I(0, 0);
 		this.simActiveRegionMin = new Vector2I(Grid.WidthInCells - 1, Grid.HeightInCells - 1);
@@ -544,10 +545,6 @@ public class Game : KMonoBehaviour
 
 	private void UpdateComponents()
 	{
-		foreach (AutoDisinfectable autoDisinfectable in Components.AutoDisinfectables)
-		{
-			autoDisinfectable.RefreshChore();
-		}
 		foreach (WiltCondition wiltCondition in Components.WiltConditions)
 		{
 			wiltCondition.Tick();
@@ -556,9 +553,13 @@ public class Game : KMonoBehaviour
 
 	private void LateUpdateComponents()
 	{
-		foreach (BuildingCellVisualizer buildingCellVisualizer in Components.BuildingCellVisualizers)
+		if (OverlayScreen.Instance != null)
 		{
-			buildingCellVisualizer.Tick();
+			SimViewMode mode = OverlayScreen.Instance.GetMode();
+			foreach (BuildingCellVisualizer buildingCellVisualizer in Components.BuildingCellVisualizers)
+			{
+				buildingCellVisualizer.Tick(mode);
+			}
 		}
 	}
 
@@ -1031,7 +1032,6 @@ public class Game : KMonoBehaviour
 		{
 			MusicManager.instance.StopSong("Music_TitleTheme", true, STOP_MODE.ALLOWFADEOUT);
 		}
-		SystemScheduler.instance.Clear();
 	}
 
 	public void StartBE()
@@ -1079,7 +1079,6 @@ public class Game : KMonoBehaviour
 		KComponentSpawn.instance.comps.Clear();
 		KInputHandler.Remove(Global.Instance.GetInputManager().GetDefaultController(), this.cameraController);
 		KInputHandler.Remove(Global.Instance.GetInputManager().GetDefaultController(), this.playerController);
-		SystemScheduler.instance.Clear();
 		Sim.Shutdown();
 		Resources.UnloadUnusedAssets();
 	}
@@ -1213,6 +1212,8 @@ public class Game : KMonoBehaviour
 	public UtilityNetworkManager<ElectricalUtilityNetwork, Wire> electricalConduitSystem;
 
 	public UtilityNetworkManager<LogicCircuitNetwork, LogicWire> logicCircuitSystem;
+
+	public UtilityNetworkTubesManager travelTubeSystem;
 
 	public ConduitFlow gasConduitFlow;
 

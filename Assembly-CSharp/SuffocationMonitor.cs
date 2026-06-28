@@ -1,6 +1,7 @@
 ﻿using System;
 using Klei.AI;
 using STRINGS;
+using UnityEngine;
 
 public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance>
 {
@@ -13,7 +14,7 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 		}).ToggleSchedulePeriodic("CheckOverPressure", 1f, delegate(SuffocationMonitor.Instance smi)
 		{
 			smi.CheckOverPressure();
-		});
+		}).TagTransition(GameTags.Dead, this.dead, false);
 		this.satisfied.DefaultState(this.satisfied.normal).ToggleAttributeModifier("Breathing", (SuffocationMonitor.Instance smi) => smi.breathing, null).EventTransition(GameHashes.ExitedBreathableArea, this.nooxygen, (SuffocationMonitor.Instance smi) => !smi.IsInBreathableArea());
 		this.satisfied.normal.Transition(this.satisfied.low, (SuffocationMonitor.Instance smi) => smi.oxygenBreather.IsLowOxygen());
 		this.satisfied.low.Transition(this.satisfied.normal, (SuffocationMonitor.Instance smi) => !smi.oxygenBreather.IsLowOxygen()).ToggleEffect("LowOxygen");
@@ -26,6 +27,7 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 		{
 			smi.Kill();
 		});
+		this.dead.DoNothing();
 	}
 
 	public SuffocationMonitor.SatisfiedState satisfied;
@@ -33,6 +35,8 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 	public SuffocationMonitor.NoOxygenState nooxygen;
 
 	public GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, object>.State death;
+
+	public GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, object>.State dead;
 
 	public class NoOxygenState : GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, object>.State
 	{
@@ -85,10 +89,36 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 
 		public void CheckOverPressure()
 		{
-			if (this.oxygenBreather.IsOverPressure())
+			if (this.IsInHighPressure())
 			{
-				base.master.GetComponent<Effects>().Add("PoppedEarDrums", true);
+				if (!this.wasInHighPressure)
+				{
+					this.wasInHighPressure = true;
+					this.highPressureTime = Time.time;
+				}
+				else if (Time.time - this.highPressureTime > 3f)
+				{
+					base.master.GetComponent<Effects>().Add("PoppedEarDrums", true);
+				}
 			}
+			else
+			{
+				this.wasInHighPressure = false;
+			}
+		}
+
+		private bool IsInHighPressure()
+		{
+			int num = Grid.PosToCell(base.gameObject);
+			for (int i = 0; i < SuffocationMonitor.Instance.pressureTestOffsets.Length; i++)
+			{
+				int num2 = Grid.OffsetCell(num, SuffocationMonitor.Instance.pressureTestOffsets[i]);
+				if (Grid.Element[num2].IsGas && Grid.Cell[num2].mass > 4f)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		private AmountInstance breath;
@@ -96,5 +126,17 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 		public AttributeModifier breathing;
 
 		public AttributeModifier holdingbreath;
+
+		private static CellOffset[] pressureTestOffsets = new CellOffset[]
+		{
+			new CellOffset(0, 0),
+			new CellOffset(0, 1)
+		};
+
+		private const float HIGH_PRESSURE_DELAY = 3f;
+
+		private bool wasInHighPressure;
+
+		private float highPressureTime;
 	}
 }

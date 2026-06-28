@@ -108,16 +108,13 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 			this.uiMat = new Material(this.batch.group.GetMaterial(this.batch.materialType));
 			Texture texture = this.batch.matProperties.GetTexture("instanceTex");
 			this.uiMat.SetTexture("instanceTex", texture);
-			this.uiMat.SetVector("INSTANCE_TEXEL_SIZE", texture.texelSize);
-			this.uiMat.SetVector("INSTANCE_TEXTURE_SIZE", new Vector2((float)texture.width, (float)texture.height));
+			this.uiMat.SetVector("INSTANCE_TEXTURE_SIZE", new Vector4(texture.texelSize.x, texture.texelSize.y, (float)texture.width, (float)texture.height));
 			Texture texture2 = this.batch.matProperties.GetTexture("animTex");
 			this.uiMat.SetTexture("animTex", texture2);
-			this.uiMat.SetVector("ANIM_TEXEL_SIZE", texture2.texelSize);
-			this.uiMat.SetVector("ANIM_TEXTURE_SIZE", new Vector2((float)texture2.width, (float)texture2.height));
+			this.uiMat.SetVector("ANIM_TEXTURE_SIZE", new Vector4(texture2.texelSize.x, texture2.texelSize.y, (float)texture2.width, (float)texture2.height));
 			Texture texture3 = this.batch.matProperties.GetTexture("buildTex");
 			this.uiMat.SetTexture("buildTex", texture3);
-			this.uiMat.SetVector("BUILD_TEXEL_SIZE", texture3.texelSize);
-			this.uiMat.SetVector("BUILD_TEXTURE_SIZE", new Vector2((float)texture3.width, (float)texture3.height));
+			this.uiMat.SetVector("BUILD_TEXTURE_SIZE", new Vector4(texture3.texelSize.x, texture3.texelSize.y, (float)texture3.width, (float)texture3.height));
 			for (int i = 0; i < 12; i++)
 			{
 				Texture texture4 = this.batch.matProperties.GetTexture(KBatchedAnimCanvasRenderer.atlasNames[i]);

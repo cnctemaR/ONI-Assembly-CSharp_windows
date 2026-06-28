@@ -132,7 +132,14 @@ namespace Database
 			this.Using.resolveStringCallback = delegate(string str, object data)
 			{
 				Workable workable = (Workable)data;
-				str = str.Replace("{Target}", workable.GetComponent<KSelectable>().GetName());
+				if (workable != null)
+				{
+					KSelectable component = workable.GetComponent<KSelectable>();
+					if (component != null)
+					{
+						str = str.Replace("{Target}", component.GetName());
+					}
+				}
 				return str;
 			};
 			this.Operating = new StatusItem("Operating", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);

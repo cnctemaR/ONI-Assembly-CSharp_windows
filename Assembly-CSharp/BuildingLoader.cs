@@ -39,7 +39,6 @@ public class BuildingLoader : DefLoader
 		Storage storage = gameObject.AddComponent<Storage>();
 		storage.doDiseaseTransfer = false;
 		gameObject.AddComponent<Cancellable>();
-		gameObject.AddComponent<Approachable>();
 		gameObject.AddComponent<UserMenu>();
 		gameObject.AddComponent<Notifier>();
 		gameObject.AddComponent<Prioritizable>();

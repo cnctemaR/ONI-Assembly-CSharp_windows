@@ -64,6 +64,7 @@ public class HumanEntityTypeSet : EntityTypeSet
 				Navigator component3 = go.GetComponent<Navigator>();
 				component3.transitionDriver.overrideLayers.Add(new BipedTransitionLayer(component3, 3.325f, 2.5f));
 				component3.transitionDriver.overrideLayers.Add(new DoorTransitionLayer(component3));
+				component3.transitionDriver.overrideLayers.Add(new TubeTransitionLayer(component3));
 				component3.transitionDriver.overrideLayers.Add(new LadderDiseaseTransitionLayer(component3));
 				component3.transitionDriver.overrideLayers.Add(new ReactableTransitionLayer(component3));
 				component3.transitionDriver.overrideLayers.Add(new SplashTransitionLayer(component3));

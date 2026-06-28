@@ -286,6 +286,10 @@ namespace Database
 			{
 				"DupeTrafficControl",
 				new string[] { "Checkpoint" }
+			},
+			{
+				"TravelTubes",
+				new string[] { "TravelTubeEntrance", "TravelTube", "TravelTubeWallBridge" }
 			}
 		};
 

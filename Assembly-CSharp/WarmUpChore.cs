@@ -103,7 +103,7 @@ public class WarmUpChore : Chore<WarmUpChore.StatesInstance>
 
 		public GameStateMachine<WarmUpChore.States, WarmUpChore.StatesInstance, WarmUpChore, object>.State NoLocationAvailable;
 
-		public GameStateMachine<WarmUpChore.States, WarmUpChore.StatesInstance, WarmUpChore, object>.ApproachSubState<Approachable> approach;
+		public GameStateMachine<WarmUpChore.States, WarmUpChore.StatesInstance, WarmUpChore, object>.ApproachSubState<IApproachable> approach;
 
 		public GameStateMachine<WarmUpChore.States, WarmUpChore.StatesInstance, WarmUpChore, object>.PLPState recover;
 

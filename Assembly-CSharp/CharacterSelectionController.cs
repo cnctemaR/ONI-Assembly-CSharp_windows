@@ -51,6 +51,15 @@ public class CharacterSelectionController : KModalScreen
 		this.startingStats = new List<MinionStartingStats>();
 	}
 
+	public virtual void OnPressBack()
+	{
+		foreach (CharacterContainer characterContainer in this.containers)
+		{
+			characterContainer.ForceStopEditingTitle();
+		}
+		base.Show(false);
+	}
+
 	public void RemoveLast()
 	{
 		if (this.startingStats == null || this.startingStats.Count == 0)

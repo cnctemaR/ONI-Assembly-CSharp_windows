@@ -20,9 +20,9 @@ public class DigMonitor : KMonoBehaviour
 	private void Update()
 	{
 		bool flag = false;
-		foreach (MinionIdentity minionIdentity in Components.MinionIdentities)
+		EquipmentSlot equipmentSlot = EquipmentSet.Get().slotSet.Get("Multitool");
+		foreach (MinionIdentity minionIdentity in Components.MinionIdentities.Items)
 		{
-			EquipmentSlot equipmentSlot = EquipmentSet.Get().slotSet.Get("Multitool");
 			Equipment component = minionIdentity.GetComponent<Equipment>();
 			if (component != null && component.IsSlotOccupied(equipmentSlot))
 			{

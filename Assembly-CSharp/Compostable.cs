@@ -26,8 +26,8 @@ public class Compostable : KMonoBehaviour
 		if (!this.isMarkedForCompost || force)
 		{
 			this.RefreshStatusItem();
-			base.GetComponent<KPrefabID>().AddTag(GameTags.ToxicSand);
 			base.GetComponent<KPrefabID>().AddTag(GameTags.MarkedForCompost);
+			base.GetComponent<KPrefabID>().AddTag(GameTags.Compostable);
 			this.isMarkedForCompost = true;
 			Storage storage = base.GetComponent<Pickupable>().storage;
 			if (storage != null)
@@ -42,7 +42,7 @@ public class Compostable : KMonoBehaviour
 		if (this.isMarkedForCompost)
 		{
 			this.RefreshStatusItem();
-			base.GetComponent<KPrefabID>().RemoveTag(GameTags.ToxicSand);
+			base.GetComponent<KPrefabID>().RemoveTag(GameTags.Compostable);
 			base.GetComponent<KPrefabID>().RemoveTag(GameTags.MarkedForCompost);
 			this.isMarkedForCompost = false;
 		}

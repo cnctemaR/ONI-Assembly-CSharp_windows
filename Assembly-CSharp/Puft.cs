@@ -312,9 +312,9 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 		{
 			public Puft.States.IdleStates idle;
 
-			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.ApproachSubState<Approachable> moveToBreathable;
+			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.ApproachSubState<IApproachable> moveToBreathable;
 
-			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.CreatureFleeSubState<Approachable> flee;
+			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.CreatureFleeSubState<IApproachable> flee;
 
 			public Puft.States.InhaleStates inhale;
 
@@ -325,7 +325,7 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 
 		public class FullStates : GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State
 		{
-			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.ApproachSubState<Approachable> full;
+			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.ApproachSubState<IApproachable> full;
 
 			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State alt;
 

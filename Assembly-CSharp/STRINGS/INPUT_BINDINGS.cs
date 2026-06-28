@@ -141,6 +141,8 @@ namespace STRINGS
 
 			public static LocString BUILDCATEGORYDOORS = "BuildCategoryDoors";
 
+			public static LocString BUILDCATEGORYTRAVELTUBES = "BuildCategoryTravelTubes";
+
 			public static LocString BUILDCATEGORYSTORAGE = "BuildCategoryStorage";
 
 			public static LocString BUILDCATEGORYRESEARCH = "BuildCategoryResearch";

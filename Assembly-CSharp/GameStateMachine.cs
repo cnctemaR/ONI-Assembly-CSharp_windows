@@ -2060,7 +2060,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State plan;
 
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ApproachSubState<Approachable> approach;
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ApproachSubState<IApproachable> approach;
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State cower;
 	}

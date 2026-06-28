@@ -32,7 +32,7 @@ public struct PathFinderAbilities
 				}
 			}
 		}
-		return path.HasFlag(PathFinder.PotentialPath.Flags.HasSuit) || underwater_cost <= this.maxUnderwaterCost;
+		return path.HasFlag(PathFinder.PotentialPath.Flags.HasSuit) || path.navType == NavType.Tube || underwater_cost <= this.maxUnderwaterCost;
 	}
 
 	public void ApplyTraversalToPath(ref PathFinder.PotentialPath path, int from_cell)

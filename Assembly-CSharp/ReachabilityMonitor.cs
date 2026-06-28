@@ -52,8 +52,9 @@ public class ReachabilityMonitor : GameStateMachine<ReachabilityMonitor, Reachab
 		{
 			if (base.master != null)
 			{
-				CellOffset[] offsets = base.master.GetOffsets();
-				bool flag = MinionGroupProber.Get().IsReachable(Grid.PosToCell(base.master), offsets);
+				int num = Grid.PosToCell(base.master);
+				CellOffset[] offsets = base.master.GetOffsets(num);
+				bool flag = MinionGroupProber.Get().IsReachable(num, offsets);
 				base.sm.isReachable.Set(flag, base.smi);
 			}
 		}

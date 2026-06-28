@@ -25,12 +25,14 @@ public class GridSettings : KMonoBehaviour
 		Grid.HasAccessDoor = new bool[Grid.CellCount];
 		Grid.HasLadder = new bool[Grid.CellCount];
 		Grid.HasPole = new bool[Grid.CellCount];
+		Grid.HasTube = new bool[Grid.CellCount];
+		Grid.HasTubeEntrance = new bool[Grid.CellCount];
 		Grid.Decor = new float[Grid.CellCount];
 		Grid.Loudness = new float[Grid.CellCount];
 		Grid.PreventFogOfWarReveal = new bool[Grid.CellCount];
 		Grid.IsTileUnderConstruction = new bool[Grid.CellCount];
 		Grid.PreventIdlingOnCell = new bool[Grid.CellCount];
-		Grid.ObjectLayers = new Dictionary<int, GameObject>[28];
+		Grid.ObjectLayers = new Dictionary<int, GameObject>[32];
 		for (int i = 0; i < Grid.ObjectLayers.Length; i++)
 		{
 			Grid.ObjectLayers[i] = new Dictionary<int, GameObject>();
@@ -46,6 +48,7 @@ public class GridSettings : KMonoBehaviour
 			Game.Instance.gasConduitSystem.Initialize(Grid.WidthInCells, Grid.HeightInCells);
 			Game.Instance.liquidConduitSystem.Initialize(Grid.WidthInCells, Grid.HeightInCells);
 			Game.Instance.electricalConduitSystem.Initialize(Grid.WidthInCells, Grid.HeightInCells);
+			Game.Instance.travelTubeSystem.Initialize(Grid.WidthInCells, Grid.HeightInCells);
 			Game.Instance.gasConduitFlow.Initialize(Grid.CellCount);
 			Game.Instance.liquidConduitFlow.Initialize(Grid.CellCount);
 		}

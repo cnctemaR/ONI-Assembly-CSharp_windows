@@ -52,7 +52,6 @@ public class EntityTemplates
 	{
 		GameObject gameObject = EntityTemplates.CreateBasicEntity(id, name, desc, mass, true, anim, initialAnim, sceneLayer, element, additionalTags, defaultTemperature);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.defaultSpawnOffset = CellAlignment.Bottom;
 		BoxCollider2D boxCollider2D = gameObject.UpdateComponentRequirement<BoxCollider2D>(true);
 		boxCollider2D.size = new Vector2f(width, height);
 		float num = 0.5f * (float)((width + 1) % 2);
@@ -217,11 +216,9 @@ public class EntityTemplates
 	public static GameObject CreateLooseEntity(string id, string name, string desc, float mass, bool unitMass, KAnimFile anim, string initialAnim, Grid.SceneLayer sceneLayer, EntityTemplates.CollisionShape collisionShape, float width = 1f, float height = 1f, bool isPickupable = false, SimHashes element = SimHashes.Creature, List<Tag> additionalTags = null)
 	{
 		GameObject gameObject = EntityTemplates.CreateBasicEntity(id, name, desc, mass, unitMass, anim, initialAnim, sceneLayer, element, additionalTags, 293f);
-		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.defaultSpawnOffset = CellAlignment.RandomInternal;
 		gameObject = EntityTemplates.AddCollision(gameObject, collisionShape, width, height);
-		KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
-		component2.isMovable = true;
+		KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
+		component.isMovable = true;
 		gameObject.UpdateComponentRequirement<Modifiers>(true);
 		if (isPickupable)
 		{
@@ -240,7 +237,6 @@ public class EntityTemplates
 		gameObject.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy).transform;
 		KPrefabID kprefabID = gameObject.UpdateComponentRequirement<KPrefabID>(true);
 		kprefabID.PrefabTag = element.tag;
-		kprefabID.defaultSpawnOffset = CellAlignment.RandomInternal;
 		if (additionalTags != null)
 		{
 			KPrefabID component = gameObject.GetComponent<KPrefabID>();

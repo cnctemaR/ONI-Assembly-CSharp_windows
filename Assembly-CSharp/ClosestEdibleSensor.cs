@@ -11,7 +11,7 @@ public class ClosestEdibleSensor : Sensor
 	public override void Update()
 	{
 		Pickupable pickupable = null;
-		FetchManager.Instance.FindFetchTarget(this.worker, base.GetComponent<Storage>(), ClosestEdibleSensor.edibleTag, null, base.GetComponent<ConsumableConsumer>().forbiddenTags, 0f, ref pickupable);
+		FetchManager.Instance.FindFetchTarget(this.worker, base.GetComponent<Storage>(), new TagBits(ClosestEdibleSensor.edibleTag), null, base.GetComponent<ConsumableConsumer>().forbiddenTags, 0f, ref pickupable);
 		Edible edible = null;
 		bool flag = false;
 		if (pickupable != null)

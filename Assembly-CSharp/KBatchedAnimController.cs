@@ -85,7 +85,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public bool IsActive()
 	{
-		return base.enabled;
+		return base.isActiveAndEnabled;
 	}
 
 	public bool IsVisible()
@@ -1051,7 +1051,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private void Register()
 	{
-		if (!base.enabled)
+		if (!base.isActiveAndEnabled)
 		{
 			return;
 		}

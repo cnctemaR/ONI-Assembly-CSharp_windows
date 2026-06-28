@@ -71,9 +71,16 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 			{
 				NavType currentNavType = base.sm.sleeper.Get<Navigator>(base.smi).CurrentNavType;
 				string text;
-				if (currentNavType != NavType.Ladder && currentNavType != NavType.Pole)
+				if (currentNavType != NavType.Ladder)
 				{
-					text = "anim_sleep_floor_kanim";
+					if (currentNavType != NavType.Pole)
+					{
+						text = "anim_sleep_floor_kanim";
+					}
+					else
+					{
+						text = "anim_sleep_pole_kanim";
+					}
 				}
 				else
 				{
@@ -142,7 +149,7 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 
 		public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State check_for_bed;
 
-		public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.ApproachSubState<Approachable> approach;
+		public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.ApproachSubState<IApproachable> approach;
 
 		public SleepChore.States.SleepStates sleep;
 

@@ -44,6 +44,29 @@ internal class GraphicsOptionsScreen : KModalScreen
 		this.uiScaleSlider.onValueChanged.AddListener(new UnityAction<float>(this.UpdateUIScale));
 	}
 
+	public static void SetResolutionFromPrefs()
+	{
+		if ((Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.OSXEditor) && KPlayerPrefs.HasKey(GraphicsOptionsScreen.ResolutionWidthKey) && KPlayerPrefs.HasKey(GraphicsOptionsScreen.ResolutionHeightKey))
+		{
+			int @int = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ResolutionWidthKey);
+			int int2 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ResolutionHeightKey);
+			int int3 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.RefreshRateKey, Screen.currentResolution.refreshRate);
+			bool flag = KPlayerPrefs.GetInt(GraphicsOptionsScreen.FullScreenKey, (!Screen.fullScreen) ? 0 : 1) == 1;
+			Screen.SetResolution(@int, int2, flag, int3);
+		}
+	}
+
+	private void SaveResolutionToPrefs(GraphicsOptionsScreen.Settings settings)
+	{
+		if (Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.OSXEditor)
+		{
+			KPlayerPrefs.SetInt(GraphicsOptionsScreen.ResolutionWidthKey, settings.resolution.width);
+			KPlayerPrefs.SetInt(GraphicsOptionsScreen.ResolutionHeightKey, settings.resolution.height);
+			KPlayerPrefs.SetInt(GraphicsOptionsScreen.RefreshRateKey, settings.resolution.refreshRate);
+			KPlayerPrefs.SetInt(GraphicsOptionsScreen.FullScreenKey, (!settings.fullscreen) ? 0 : 1);
+		}
+	}
+
 	private void UpdateUIScale(float value)
 	{
 		foreach (KCanvasScaler kcanvasScaler in this.CanvasScalers)
@@ -122,14 +145,14 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	private void OnApply()
 	{
-		this.ApplyConfirmSettings(new GraphicsOptionsScreen.Settings
-		{
-			resolution = this.resolutions[this.resolutionDropdown.value],
-			fullscreen = this.fullscreenToggle.isOn
-		}, delegate
+		GraphicsOptionsScreen.Settings new_settings = default(GraphicsOptionsScreen.Settings);
+		new_settings.resolution = this.resolutions[this.resolutionDropdown.value];
+		new_settings.fullscreen = this.fullscreenToggle.isOn;
+		this.ApplyConfirmSettings(new_settings, delegate
 		{
 			this.applyButton.isInteractable = false;
 			this.revertButton.isInteractable = true;
+			this.SaveResolutionToPrefs(new_settings);
 		});
 	}
 
@@ -139,6 +162,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			this.applyButton.isInteractable = false;
 			this.revertButton.isInteractable = false;
+			this.SaveResolutionToPrefs(this.originalSettings);
 		});
 	}
 
@@ -251,6 +275,14 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	[SerializeField]
 	private LocText title;
+
+	public static readonly string ResolutionWidthKey = "ResolutionWidth";
+
+	public static readonly string ResolutionHeightKey = "ResolutionHeight";
+
+	public static readonly string RefreshRateKey = "RefreshRate";
+
+	public static readonly string FullScreenKey = "FullScreen";
 
 	private KCanvasScaler[] CanvasScalers;
 

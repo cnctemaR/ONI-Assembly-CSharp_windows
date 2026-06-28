@@ -122,6 +122,7 @@ public class KCrashReporter : MonoBehaviour
 				gameObject.name = KCrashReporter.error_canvas_name;
 				Canvas canvas = gameObject.AddComponent<Canvas>();
 				canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+				canvas.additionalShaderChannels = AdditionalCanvasShaderChannels.TexCoord1;
 				gameObject.AddComponent<GraphicRaycaster>();
 			}
 			GameObject gameObject2 = global::UnityEngine.Object.Instantiate<GameObject>(this.reportErrorPrefab, Vector3.zero, Quaternion.identity);
@@ -339,7 +340,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = "UNITY_OUTPUT:\n" + msg;
-			error.build = 243285;
+			error.build = 246879;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = text4;
 			error.user_message = userMessage;

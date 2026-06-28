@@ -6,7 +6,9 @@ using System.Reflection;
 using Delaunay.Geo;
 using Ionic.Zlib;
 using Klei;
+using Klei.AI;
 using KSerialization;
+using Newtonsoft.Json;
 using ProcGenGame;
 using STRINGS;
 using UnityEngine;
@@ -350,6 +352,7 @@ public class SaveLoader : KMonoBehaviour
 
 	public string Save(string filename, bool isAutoSave = false, bool updateSavePointer = true)
 	{
+		this.ReportSaveMetrics(isAutoSave);
 		if (isAutoSave)
 		{
 			List<string> list = SaveLoader.GetSaveFiles(Path.GetDirectoryName(filename));
@@ -553,6 +556,138 @@ public class SaveLoader : KMonoBehaviour
 		this.cachedGSD = gsd;
 	}
 
+	private void ReportSaveMetrics(bool is_auto_save)
+	{
+		if (ThreadedHttps<KleiMetrics>.Instance == null || !ThreadedHttps<KleiMetrics>.Instance.enabled || this.saveManager == null)
+		{
+			return;
+		}
+		Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		dictionary[GameClock.NewCycleKey] = GameClock.Instance.GetDay() + 1;
+		dictionary["WasDebugEverUsed"] = Game.Instance.debugWasUsed;
+		dictionary["IsAutoSave"] = is_auto_save;
+		dictionary["SavedPrefabs"] = this.GetSavedPrefabMetrics();
+		dictionary["ResourcesAccessible"] = this.GetWorldInventoryMetrics();
+		dictionary["MinionMetrics"] = this.GetMinionMetrics();
+		if (is_auto_save)
+		{
+			dictionary["DailyReport"] = this.GetDailyReportMetrics();
+		}
+		if (Game.Instance.customSettings != null && Game.Instance.customSettings.is_custom_game)
+		{
+			dictionary["CustomGameSettings"] = Game.Instance.customSettings.GetSettingsForMetrics();
+		}
+		ThreadedHttps<KleiMetrics>.Instance.SendEvent(dictionary);
+	}
+
+	private List<SaveLoader.MinionMetricsData> GetMinionMetrics()
+	{
+		List<SaveLoader.MinionMetricsData> list = new List<SaveLoader.MinionMetricsData>();
+		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+		{
+			if (!(minionIdentity == null))
+			{
+				Modifiers component = minionIdentity.gameObject.GetComponent<Modifiers>();
+				Amounts amounts = component.amounts;
+				List<SaveLoader.MinionModifierMetricsData> list2 = new List<SaveLoader.MinionModifierMetricsData>(amounts.Count);
+				foreach (AmountInstance amountInstance in amounts)
+				{
+					float value = amountInstance.value;
+					if (!float.IsNaN(value) && !float.IsInfinity(value))
+					{
+						list2.Add(new SaveLoader.MinionModifierMetricsData
+						{
+							Name = amountInstance.modifier.Id,
+							Value = amountInstance.value
+						});
+					}
+				}
+				list.Add(new SaveLoader.MinionMetricsData
+				{
+					Name = minionIdentity.name,
+					Modifiers = list2
+				});
+			}
+		}
+		return list;
+	}
+
+	private List<SaveLoader.SavedPrefabMetricsData> GetSavedPrefabMetrics()
+	{
+		Dictionary<Tag, List<SaveLoadRoot>> lists = this.saveManager.GetLists();
+		List<SaveLoader.SavedPrefabMetricsData> list = new List<SaveLoader.SavedPrefabMetricsData>(lists.Count);
+		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in lists)
+		{
+			Tag key = keyValuePair.Key;
+			List<SaveLoadRoot> value = keyValuePair.Value;
+			if (value.Count > 0)
+			{
+				list.Add(new SaveLoader.SavedPrefabMetricsData
+				{
+					PrefabName = key.ToString(),
+					Count = value.Count
+				});
+			}
+		}
+		return list;
+	}
+
+	private List<SaveLoader.WorldInventoryMetricsData> GetWorldInventoryMetrics()
+	{
+		Dictionary<Tag, float> accessibleAmounts = WorldInventory.Instance.GetAccessibleAmounts();
+		List<SaveLoader.WorldInventoryMetricsData> list = new List<SaveLoader.WorldInventoryMetricsData>(accessibleAmounts.Count);
+		foreach (KeyValuePair<Tag, float> keyValuePair in accessibleAmounts)
+		{
+			list.Add(new SaveLoader.WorldInventoryMetricsData
+			{
+				Name = keyValuePair.Key.ToString(),
+				Amount = keyValuePair.Value
+			});
+		}
+		return list;
+	}
+
+	private List<SaveLoader.DailyReportMetricsData> GetDailyReportMetrics()
+	{
+		List<SaveLoader.DailyReportMetricsData> list = new List<SaveLoader.DailyReportMetricsData>();
+		int day = GameClock.Instance.GetDay();
+		ReportManager.DailyReport dailyReport = ReportManager.Instance.FindReport(day);
+		if (dailyReport != null)
+		{
+			Dictionary<ReportManager.ReportType, object> dictionary = new Dictionary<ReportManager.ReportType, object>();
+			foreach (ReportManager.ReportEntry reportEntry in dailyReport.reportEntries)
+			{
+				SaveLoader.DailyReportMetricsData dailyReportMetricsData = default(SaveLoader.DailyReportMetricsData);
+				dailyReportMetricsData.Name = reportEntry.reportType.ToString();
+				if (!float.IsInfinity(reportEntry.Net) && !float.IsNaN(reportEntry.Net))
+				{
+					dailyReportMetricsData.Net = new float?(reportEntry.Net);
+				}
+				if (SaveLoader.force_infinity)
+				{
+					dailyReportMetricsData.Net = null;
+				}
+				if (!float.IsInfinity(reportEntry.Positive) && !float.IsNaN(reportEntry.Positive))
+				{
+					dailyReportMetricsData.Positive = new float?(reportEntry.Positive);
+				}
+				if (!float.IsInfinity(reportEntry.Negative) && !float.IsNaN(reportEntry.Negative))
+				{
+					dailyReportMetricsData.Negative = new float?(reportEntry.Negative);
+				}
+				list.Add(dailyReportMetricsData);
+			}
+			list.Add(new SaveLoader.DailyReportMetricsData
+			{
+				Name = "MinionCount",
+				Net = new float?((float)Components.LiveMinionIdentities.Count),
+				Positive = new float?(0f),
+				Negative = new float?(0f)
+			});
+		}
+		return list;
+	}
+
 	[MyCmpGet]
 	private GridSettings gridSettings;
 
@@ -592,6 +727,22 @@ public class SaveLoader : KMonoBehaviour
 
 	private bool mustRestartOnFail;
 
+	public const string METRIC_SAVED_PREFAB_KEY = "SavedPrefabs";
+
+	public const string METRIC_IS_AUTO_SAVE_KEY = "IsAutoSave";
+
+	public const string METRIC_WAS_DEBUG_EVER_USED = "WasDebugEverUsed";
+
+	public const string METRIC_RESOURCES_ACCESSIBLE_KEY = "ResourcesAccessible";
+
+	public const string METRIC_DAILY_REPORT_KEY = "DailyReport";
+
+	public const string METRIC_MINION_METRICS_KEY = "MinionMetrics";
+
+	public const string METRIC_CUSTOM_GAME_SETTINGS = "CustomGameSettings";
+
+	private static bool force_infinity;
+
 	public class FlowUtilityNetworkInstance
 	{
 		public int id = -1;
@@ -603,7 +754,7 @@ public class SaveLoader : KMonoBehaviour
 		public float containedTemperature;
 	}
 
-	[SerializationConfig(MemberSerialization.OptOut)]
+	[SerializationConfig(global::KSerialization.MemberSerialization.OptOut)]
 	public class FlowUtilityNetworkSaver : ISaveLoadable
 	{
 		public FlowUtilityNetworkSaver()
@@ -615,5 +766,47 @@ public class SaveLoader : KMonoBehaviour
 		public List<SaveLoader.FlowUtilityNetworkInstance> gas;
 
 		public List<SaveLoader.FlowUtilityNetworkInstance> liquid;
+	}
+
+	private struct MinionModifierMetricsData
+	{
+		public string Name;
+
+		public float Value;
+	}
+
+	private struct MinionMetricsData
+	{
+		public string Name;
+
+		public List<SaveLoader.MinionModifierMetricsData> Modifiers;
+	}
+
+	private struct SavedPrefabMetricsData
+	{
+		public string PrefabName;
+
+		public int Count;
+	}
+
+	private struct WorldInventoryMetricsData
+	{
+		public string Name;
+
+		public float Amount;
+	}
+
+	private struct DailyReportMetricsData
+	{
+		public string Name;
+
+		[JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+		public float? Net;
+
+		[JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+		public float? Positive;
+
+		[JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+		public float? Negative;
 	}
 }

@@ -37,6 +37,7 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 			: base(master)
 		{
 			this.bubble = Util.KInstantiate(EffectPrefabs.Instance.ThoughtBubble, base.gameObject, null);
+			this.spriteRenderer = this.bubble.transform.GetChild(1).GetComponent<SpriteRenderer>();
 			this.bubble.SetActive(false);
 		}
 
@@ -95,15 +96,9 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 			this.thoughts.Sort((Thought a, Thought b) => b.priority.CompareTo(a.priority));
 			Thought thought = this.thoughts[0];
 			this.bubble.SetActive(true);
-			RenderUtil.SetColor(this.bubble.transform, Color.red);
-			Material material = RenderUtil.GetMaterial(this.bubble.transform, "happy");
-			material.mainTexture = thought.texture;
-			material.color = Color.white;
-			this.bubble.transform.localPosition = EffectPrefabs.Instance.ThoughtBubble.transform.localPosition;
-			this.bubble.transform.localScale = EffectPrefabs.Instance.ThoughtBubble.transform.localScale;
-			this.bubble.transform.localRotation = EffectPrefabs.Instance.ThoughtBubble.transform.localRotation;
+			this.spriteRenderer.sprite = thought.sprite;
 			this.bubble.GetComponent<KSelectable>().entityName = thought.hoverText;
-			VoiceSoundEvent voiceSoundEvent = new VoiceSoundEvent("ThoughtGraph", thought.texture.name, 0, false);
+			VoiceSoundEvent voiceSoundEvent = new VoiceSoundEvent("ThoughtGraph", thought.sprite.name, 0, false);
 			AnimEventManager.EventPlayerData eventPlayerData = new AnimEventManager.EventPlayerData
 			{
 				controller = base.transform.GetComponent<KBatchedAnimController>()
@@ -138,6 +133,8 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 		private GameObject bubble;
 
 		private SchedulerHandle schedulerHandle;
+
+		private SpriteRenderer spriteRenderer;
 
 		public HashedString symbol = new HashedString("snapTo_pivot");
 	}

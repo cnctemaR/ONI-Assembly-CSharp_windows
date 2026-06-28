@@ -122,6 +122,20 @@ public class CustomGameSettings : KMonoBehaviour
 		global::Debug.Log(text, null);
 	}
 
+	public List<CustomGameSettings.MetricSettingsData> GetSettingsForMetrics()
+	{
+		List<CustomGameSettings.MetricSettingsData> list = new List<CustomGameSettings.MetricSettingsData>();
+		foreach (KeyValuePair<string, string> keyValuePair in this.CurrentQualityLevelsBySetting)
+		{
+			list.Add(new CustomGameSettings.MetricSettingsData
+			{
+				Name = keyValuePair.Key,
+				Value = keyValuePair.Value
+			});
+		}
+		return list;
+	}
+
 	private static CustomGameSettings instance;
 
 	[Serialize]
@@ -131,4 +145,11 @@ public class CustomGameSettings : KMonoBehaviour
 	public Dictionary<string, string> CurrentQualityLevelsBySetting = new Dictionary<string, string>();
 
 	public Dictionary<string, SettingConfig> QualitySettings = new Dictionary<string, SettingConfig>();
+
+	public struct MetricSettingsData
+	{
+		public string Name;
+
+		public string Value;
+	}
 }

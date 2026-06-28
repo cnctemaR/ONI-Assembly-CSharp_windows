@@ -18,16 +18,15 @@ public class StateMachineComponent<StateMachineInstanceType> : StateMachineCompo
 
 	public override StateMachine.Instance GetSMI()
 	{
-		return this.smi;
+		return this._smi;
 	}
 
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		if (this.smi != null)
+		if (this._smi != null)
 		{
-			StateMachineInstanceType smi = this.smi;
-			smi.StopSM("StateMachineComponent.OnCleanUp");
+			this._smi.StopSM("StateMachineComponent.OnCleanUp");
 			this._smi = (StateMachineInstanceType)((object)null);
 		}
 	}

@@ -200,6 +200,7 @@ public class GameInputMapping
 		new BindingEntry("BaseMenu", GamepadButton.NumButtons, KKeyCode.A, Modifier.None, global::Action.BuildCategoryLadders, true, true),
 		new BindingEntry("BaseMenu", GamepadButton.NumButtons, KKeyCode.T, Modifier.None, global::Action.BuildCategoryTiles, true, true),
 		new BindingEntry("BaseMenu", GamepadButton.NumButtons, KKeyCode.D, Modifier.None, global::Action.BuildCategoryDoors, true, true),
+		new BindingEntry("BaseMenu", GamepadButton.NumButtons, KKeyCode.B, Modifier.None, global::Action.BuildCategoryTravelTubes, true, true),
 		new BindingEntry("BaseMenu", GamepadButton.NumButtons, KKeyCode.S, Modifier.None, global::Action.BuildCategoryStorage, true, true),
 		new BindingEntry("BaseMenu", GamepadButton.NumButtons, KKeyCode.R, Modifier.None, global::Action.BuildCategoryResearch, true, true),
 		new BindingEntry("InfrastructureMenu", GamepadButton.NumButtons, KKeyCode.G, Modifier.None, global::Action.BuildCategoryGenerators, true, true),

@@ -18,12 +18,12 @@ public class FetchManagerUpdater
 			Pickupable pickupable = pickupables[i];
 			if (pickupable.CouldBePickedUp(component.gameObject))
 			{
-				int navigationCost = pickupable.GetNavigationCost(component);
+				int navigationCost = pickupable.GetNavigationCost(component, pickupable.cachedCell);
 				if (navigationCost != PathProber.InvalidCost)
 				{
 					FetchManagerUpdater.Pickup pickup = default(FetchManagerUpdater.Pickup);
 					pickup.Pickupable = pickupable;
-					pickup.PrefabID = pickupable.KPrefabID;
+					pickup.PrefabTagHash = pickupable.KPrefabID.PrefabTag.GetHash();
 					pickup.PathCost = (ushort)navigationCost;
 					pickup.masterPriority = 0;
 					pickup.freshness = 0;
@@ -72,13 +72,13 @@ public class FetchManagerUpdater
 	private static bool IsBetter(ref FetchManagerUpdater.Pickup a, ref FetchManagerUpdater.Pickup b)
 	{
 		bool flag = a.PathCost <= b.PathCost;
-		bool flag2 = a.PrefabID.HasSameTags(b.PrefabID);
+		bool flag2 = a.Pickupable.KPrefabID.GetTabBits().AreEqual(b.Pickupable.KPrefabID.GetTabBits());
 		bool flag3 = a.masterPriority == b.masterPriority;
 		bool flag4 = a.freshness == b.freshness;
 		return flag && flag2 && flag3 && flag4;
 	}
 
-	public static bool IsFetchablePickup(KPrefabID pickup_id, Storage source, float pickup_unreserved_amount, float pickup_min_unit, float maximum_requested, Tag[] tags, Tag[] required_tags, Tag[] forbid_tags, Storage destination)
+	public static bool IsFetchablePickup(KPrefabID pickup_id, Storage source, float pickup_unreserved_amount, float pickup_min_unit, float maximum_requested, TagBits tag_bits, Tag[] required_tags, Tag[] forbid_tags, Storage destination)
 	{
 		if (pickup_id == null)
 		{
@@ -121,17 +121,17 @@ public class FetchManagerUpdater
 				return false;
 			}
 		}
-		return pickup_id.HasAnyTags(tags) && pickup_unreserved_amount > 0f;
+		return pickup_id.GetTabBits().HasAny(tag_bits) && pickup_unreserved_amount > 0f;
 	}
 
-	public static void FindFetchTarget(Worker worker, Storage destination, List<Pickupable> pickupables, Tag[] tags, Tag[] required_tags, Tag[] forbid_tags, float required_amount, ref Pickupable workable)
+	public static void FindFetchTarget(Worker worker, Storage destination, List<Pickupable> pickupables, TagBits tag_bits, Tag[] required_tags, Tag[] forbid_tags, float required_amount, ref Pickupable workable)
 	{
 		workable = null;
 		int num = int.MaxValue;
 		for (int i = 0; i < FetchManagerUpdater.PickupCount; i++)
 		{
 			FetchManagerUpdater.Pickup pickup = FetchManagerUpdater.Pickups[i];
-			bool flag = FetchManagerUpdater.IsFetchablePickup(pickup.PrefabID, pickup.Pickupable.storage, pickup.Pickupable.UnreservedAmount, pickup.Pickupable.MinTakeAmount, required_amount, tags, required_tags, forbid_tags, destination);
+			bool flag = FetchManagerUpdater.IsFetchablePickup(pickup.Pickupable.KPrefabID, pickup.Pickupable.storage, pickup.Pickupable.UnreservedAmount, pickup.Pickupable.MinTakeAmount, required_amount, tag_bits, required_tags, forbid_tags, destination);
 			if (flag && (int)pickup.PathCost < num)
 			{
 				workable = pickup.Pickupable;
@@ -160,7 +160,7 @@ public class FetchManagerUpdater
 	{
 		public Pickupable Pickupable;
 
-		public KPrefabID PrefabID;
+		public int PrefabTagHash;
 
 		public ushort PathCost;
 
@@ -173,7 +173,7 @@ public class FetchManagerUpdater
 	{
 		public int Compare(FetchManagerUpdater.Pickup a, FetchManagerUpdater.Pickup b)
 		{
-			int num = a.PrefabID.PrefabTag.CompareTo(b.PrefabID.PrefabTag);
+			int num = a.PrefabTagHash - b.PrefabTagHash;
 			if (num != 0)
 			{
 				return num;

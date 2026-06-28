@@ -33,6 +33,8 @@ public class Pickupable : Workable
 
 	public bool isKinematic { get; set; }
 
+	public int cachedCell { get; private set; }
+
 	public bool IsEntombed
 	{
 		get
@@ -172,6 +174,7 @@ public class Pickupable : Workable
 		Vector3 position = base.transform.position;
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Ore);
 		base.transform.SetPosition(position);
+		this.cachedCell = Grid.PosToCell(position);
 		base.Subscribe(856640610, new Action<object>(this.OnStore));
 		base.Subscribe(1188683690, new Action<object>(this.OnLanded));
 		base.Subscribe(1807976145, new Action<object>(this.OnOreSizeChanged));
@@ -212,6 +215,7 @@ public class Pickupable : Workable
 			base.gameObject.DeleteObject();
 			return;
 		}
+		this.cachedCell = num;
 		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
 		instance.StartSM();
 		FetchableMonitor.Instance instance2 = new FetchableMonitor.Instance(this);
@@ -352,6 +356,7 @@ public class Pickupable : Workable
 		}
 		else
 		{
+			this.cachedCell = new_cell;
 			bool flag = false;
 			this.ReleaseEntombedVisualizer();
 			if (this.HandleSolidCell(new_cell))
@@ -379,6 +384,7 @@ public class Pickupable : Workable
 			{
 				this.NotifyChanged(new_cell);
 			}
+			this.cachedCell = new_cell;
 		}
 		if (Grid.IsValidCell(previous_cell) && new_cell != previous_cell)
 		{

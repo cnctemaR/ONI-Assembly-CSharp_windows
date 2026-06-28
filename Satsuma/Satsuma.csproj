@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{D83BB70B-C019-46DD-A038-28BFF405B59A}</ProjectGuid>
+    <ProjectGuid>{80BBB707-8EED-4FB2-A62F-BDFF469F050A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Satsuma</RootNamespace>
     <AssemblyName>Satsuma</AssemblyName>
@@ -102,27 +102,27 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B597}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F0507}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B59C}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F050C}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Drawing\System.Drawing.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B59F}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F050F}</Project>
       <Name>System.Drawing</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml.Linq\System.Xml.Linq.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B5A5}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F0515}</Project>
       <Name>System.Xml.Linq</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B5A4}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F0514}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B59E}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F050E}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

@@ -92,7 +92,7 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 			this.recover.pst.QueueAnim("breathe_pst", false, null).OnAnimQueueComplete(null);
 		}
 
-		public GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore, object>.ApproachSubState<Approachable> approach;
+		public GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore, object>.ApproachSubState<IApproachable> approach;
 
 		public GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore, object>.PLPState recover;
 

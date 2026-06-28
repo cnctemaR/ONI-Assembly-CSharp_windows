@@ -292,6 +292,11 @@ public abstract class Chore
 	{
 	}
 
+	public virtual string GetReportName()
+	{
+		return this.choreType.Name;
+	}
+
 	private static int nextId;
 
 	public static bool enableChoreDebugging;

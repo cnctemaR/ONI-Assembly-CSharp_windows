@@ -191,7 +191,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 
 		public class EatOnFloorState : GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.State
 		{
-			public GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.ApproachSubState<Approachable> moveto;
+			public GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.ApproachSubState<IApproachable> moveto;
 
 			public GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.State eat;
 		}

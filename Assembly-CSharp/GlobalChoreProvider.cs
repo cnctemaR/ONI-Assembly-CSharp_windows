@@ -51,7 +51,7 @@ public class GlobalChoreProvider : ChoreProvider
 			{
 				GlobalChoreProvider.Fetch fetch = default(GlobalChoreProvider.Fetch);
 				fetch.chore = this.fetchChores[i];
-				fetch.tags = this.fetchChores[i].tags;
+				fetch.tagBits = this.fetchChores[i].tagBits;
 				fetch.cost = num;
 				fetch.priority = fetchChore.masterPriority;
 				this.fetches[this.fetchCount] = fetch;
@@ -94,38 +94,13 @@ public class GlobalChoreProvider : ChoreProvider
 		{
 			bool flag = this.priority.priority_class > fetch.priority.priority_class || (this.priority.priority_class == fetch.priority.priority_class && this.priority.priority_value > fetch.priority.priority_value);
 			bool flag2 = this.cost <= fetch.cost;
-			bool flag3 = true;
-			if (this.tags.Length == fetch.tags.Length)
-			{
-				for (int i = 0; i < this.tags.Length; i++)
-				{
-					Tag tag = this.tags[i];
-					flag3 = false;
-					for (int j = 0; j < fetch.tags.Length; j++)
-					{
-						Tag tag2 = fetch.tags[j];
-						if (tag == tag2)
-						{
-							flag3 = true;
-							break;
-						}
-					}
-					if (!flag3)
-					{
-						break;
-					}
-				}
-			}
-			else
-			{
-				flag3 = false;
-			}
+			bool flag3 = this.tagBits.AreEqual(fetch.tagBits);
 			return flag && flag2 && flag3;
 		}
 
 		public FetchChore chore;
 
-		public Tag[] tags;
+		public TagBits tagBits;
 
 		public int cost;
 

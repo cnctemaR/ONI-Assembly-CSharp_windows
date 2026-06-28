@@ -16,7 +16,7 @@ public class MoveToLocationTool : InterfaceTool
 		PlayerController.Instance.ActivateTool(this);
 	}
 
-	private bool CanMoveTo(int target_cell)
+	public bool CanMoveTo(int target_cell)
 	{
 		return this.targetNavigator.CanReach(target_cell);
 	}
@@ -81,6 +81,18 @@ public class MoveToLocationTool : InterfaceTool
 	private void SetColor(GameObject root, Color c)
 	{
 		root.GetComponentInChildren<MeshRenderer>().material.color = c;
+	}
+
+	private void LateUpdate()
+	{
+		if (this.hoverText == null)
+		{
+			this.hoverText = base.GetComponent<HoverTextConfiguration>();
+		}
+		if (this.hoverText != null)
+		{
+			this.hoverText.UpdateHoverElements(null);
+		}
 	}
 
 	public static MoveToLocationTool Instance;

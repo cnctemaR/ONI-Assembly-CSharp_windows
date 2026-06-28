@@ -283,7 +283,10 @@ public class ProductInfoScreen : KScreen
 		}
 		else
 		{
-			BuildTool.Instance.Deactivate();
+			if (PlayerController.Instance.ActiveTool == BuildTool.Instance)
+			{
+				BuildTool.Instance.Deactivate();
+			}
 			if (PlanScreen.Instance != null)
 			{
 				PrebuildTool.Instance.Activate(this.currentDef, PlanScreen.Instance.BuildableState(this.currentDef));

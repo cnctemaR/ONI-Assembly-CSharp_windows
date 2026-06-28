@@ -26,7 +26,7 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 		instance.StartShadowBar(0f, 0f, false);
 		if (this.printTitle)
 		{
-			this.ConfigureTitle(instance);
+			this.ConfigureTitle(instance, false);
 		}
 		this.ConfigureInstructions(instance);
 		instance.NewLine("BuildWarning", num);

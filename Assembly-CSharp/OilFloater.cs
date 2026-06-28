@@ -63,17 +63,27 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 
 	private int FindAbovewaterCell()
 	{
-		int num = GameUtil.FloodFillFind(new Func<int, bool>(this.isAboveWater), Grid.PosToCell(base.gameObject), 8, true, false);
-		if (num == -1)
+		int num = Grid.PosToCell(base.gameObject);
+		int num2 = GameUtil.FloodFillFind(new Func<int, bool>(this.isAboveWater), num, 8, true, false);
+		if (num2 == -1)
 		{
-			int num2 = Grid.CellAbove(Grid.PosToCell(base.gameObject));
-			while (Grid.IsSubstantialLiquid(num2, 0.35f))
+			CellOffset[] array = new CellOffset[]
 			{
-				num = num2;
-				num2 = Grid.CellAbove(num);
+				new CellOffset(0, 0),
+				new CellOffset(-1, 0),
+				new CellOffset(1, 0),
+				new CellOffset(-1, -1),
+				new CellOffset(1, -1)
+			};
+			num2 = Grid.OffsetCell(num, array[global::UnityEngine.Random.Range(0, array.Length)]);
+			int num3 = Grid.CellAbove(num2);
+			while (Grid.IsSubstantialLiquid(num3, 0.35f))
+			{
+				num2 = num3;
+				num3 = Grid.CellAbove(num2);
 			}
 		}
-		return num;
+		return num2;
 	}
 
 	private bool isAboveWater(int cell)
@@ -84,9 +94,18 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 	private void CheckForUnderwater()
 	{
 		int num = Grid.PosToCell(this);
-		if (Grid.IsSubstantialLiquid(num, 0.35f))
+		if (!this.isAboveWater(num))
 		{
 			base.smi.GoTo(base.smi.sm.underwater);
+		}
+	}
+
+	private void CheckForAbovewater()
+	{
+		int num = Grid.PosToCell(this);
+		if (this.isAboveWater(num))
+		{
+			base.smi.GoTo(base.smi.sm.alive.idle);
 		}
 	}
 
@@ -277,7 +296,10 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 					smi.master.CheckForUnderwater();
 				});
 			this.alive.flee.InitializeStates(this.mover, this.alive.idle);
-			this.alive.idle.DefaultState(this.alive.idle.idle);
+			this.alive.idle.DefaultState(this.alive.idle.idle).Enter(delegate(OilFloater.StatesInstance smi)
+			{
+				smi.master.CheckForUnderwater();
+			});
 			this.alive.idle.idle.PlayAnim("idle_loop", KAnim.PlayMode.Loop).Enter(delegate(OilFloater.StatesInstance smi)
 			{
 				if (smi.master.HasConsumedEnough())
@@ -363,10 +385,14 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 			this.alive.inhale.pst.PlayAnim("eat_pst", KAnim.PlayMode.Once).OnAnimQueueComplete(this.alive.idle.move);
 			this.underwater.DefaultState(this.underwater.move).Enter(delegate(OilFloater.StatesInstance smi)
 			{
+				smi.master.CheckForAbovewater();
 				Navigator component = smi.GetComponent<Navigator>();
 				component.SetCurrentNavType(NavType.Swim);
+			}).ToggleSchedulePeriodic("floater surface check", 2f, delegate(OilFloater.StatesInstance smi)
+			{
+				smi.master.CheckForAbovewater();
 			});
-			this.underwater.idle.PlayAnim("idle_loop", KAnim.PlayMode.Loop).ScheduleGoTo(1f, this.underwater.move);
+			this.underwater.idle.PlayAnim("swim_idle_loop", KAnim.PlayMode.Loop).ScheduleGoTo(2f, this.underwater.move);
 			this.underwater.move.MoveTo((OilFloater.StatesInstance smi) => smi.master.FindAbovewaterCell(), this.alive.idle, this.underwater.idle, false);
 			this.trapped.InitializeStates(this.masterTarget, this.alive.idle);
 			this.death.ToggleGravity().PlayAnim("death").EventHandler(GameHashes.AnimQueueComplete, delegate(OilFloater.StatesInstance smi)
@@ -400,9 +426,9 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 		{
 			public OilFloater.States.IdleStates idle;
 
-			public GameStateMachine<OilFloater.States, OilFloater.StatesInstance, OilFloater, object>.ApproachSubState<Approachable> moveToBreathable;
+			public GameStateMachine<OilFloater.States, OilFloater.StatesInstance, OilFloater, object>.ApproachSubState<IApproachable> moveToBreathable;
 
-			public GameStateMachine<OilFloater.States, OilFloater.StatesInstance, OilFloater, object>.CreatureFleeSubState<Approachable> flee;
+			public GameStateMachine<OilFloater.States, OilFloater.StatesInstance, OilFloater, object>.CreatureFleeSubState<IApproachable> flee;
 
 			public OilFloater.States.InhaleStates inhale;
 
@@ -411,7 +437,7 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 
 		public class FullStates : GameStateMachine<OilFloater.States, OilFloater.StatesInstance, OilFloater, object>.State
 		{
-			public GameStateMachine<OilFloater.States, OilFloater.StatesInstance, OilFloater, object>.ApproachSubState<Approachable> full;
+			public GameStateMachine<OilFloater.States, OilFloater.StatesInstance, OilFloater, object>.ApproachSubState<IApproachable> full;
 
 			public GameStateMachine<OilFloater.States, OilFloater.StatesInstance, OilFloater, object>.State poop;
 		}

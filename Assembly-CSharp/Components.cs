@@ -26,6 +26,8 @@ public class Components
 
 	public static Components.Cmps<Ladder> Ladders = new Components.Cmps<Ladder>();
 
+	public static Components.Cmps<ITravelTubePiece> ITravelTubePieces = new Components.Cmps<ITravelTubePiece>();
+
 	public static Components.Cmps<CreatureLure> Lures = new Components.Cmps<CreatureLure>();
 
 	public static Components.Cmps<Light2D> Light2Ds = new Components.Cmps<Light2D>();
@@ -63,8 +65,6 @@ public class Components
 	public static Components.Cmps<Clinic> Clinics = new Components.Cmps<Clinic>();
 
 	public static Components.Cmps<HandSanitizer> HandSanitizers = new Components.Cmps<HandSanitizer>();
-
-	public static Components.Cmps<AutoDisinfectable> AutoDisinfectables = new Components.Cmps<AutoDisinfectable>();
 
 	public static Components.Cmps<WiltCondition> WiltConditions = new Components.Cmps<WiltCondition>();
 

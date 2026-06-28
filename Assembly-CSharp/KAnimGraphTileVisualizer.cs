@@ -14,6 +14,7 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 		set
 		{
 			this._connections = value;
+			base.Trigger(-1041684577, this._connections);
 		}
 	}
 
@@ -31,6 +32,8 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 				return Game.Instance.electricalConduitSystem;
 			case KAnimGraphTileVisualizer.ConnectionSource.Logic:
 				return Game.Instance.logicCircuitSystem;
+			case KAnimGraphTileVisualizer.ConnectionSource.Tube:
+				return Game.Instance.travelTubeSystem;
 			default:
 				return null;
 			}
@@ -107,7 +110,6 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 		this._connections = new_connections;
 		int num = Grid.PosToCell(base.transform.position);
 		this.connectionManager.SetConnections(new_connections, num, this.isPhysicalBuilding);
-		base.Trigger(-1041684577, new_connections);
 	}
 
 	public KAnimGraphTileVisualizer GetNeighbour(Direction d)
@@ -160,6 +162,9 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 			case KAnimGraphTileVisualizer.ConnectionSource.Logic:
 				objectLayer = ObjectLayer.LogicWiresTiling;
 				break;
+			case KAnimGraphTileVisualizer.ConnectionSource.Tube:
+				objectLayer = ObjectLayer.TravelTubeTile;
+				break;
 			default:
 				throw new ArgumentNullException("wtf");
 			}
@@ -191,6 +196,7 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 		Gas,
 		Liquid,
 		Electrical,
-		Logic
+		Logic,
+		Tube
 	}
 }

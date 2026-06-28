@@ -6,7 +6,7 @@ public class CreatureDeliveryPointConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("CreatureDeliveryPoint", 1, 3, "creaturetrap_dropoff_kanim", 400f, 10, 10f, new float[] { 1f }, MATERIALS.PLASTICS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, NOISE_POLLUTION.NOISY.TIER0);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("CreatureDeliveryPoint", 1, 3, "creaturetrap_dropoff_kanim", 400f, 10, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER1, MATERIALS.PLASTICS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, NOISE_POLLUTION.NOISY.TIER0);
 		buildingDef.AudioCategory = "Metal";
 		return buildingDef;
 	}

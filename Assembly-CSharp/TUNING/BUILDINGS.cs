@@ -17,6 +17,12 @@ namespace TUNING
 
 		public const float COMPOST_FLIP_TIME = 20f;
 
+		public const int TUBE_LAUNCHER_MAX_CHARGES = 3;
+
+		public const float TUBE_LAUNCHER_RECHARGE_TIME = 10f;
+
+		public const float TUBE_LAUNCHER_WORK_TIME = 1f;
+
 		public const float SMELTER_INGOT_INPUTKG = 500f;
 
 		public const float SMELTER_INGOT_OUTPUTKG = 100f;
@@ -58,7 +64,7 @@ namespace TUNING
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Base, new string[]
 			{
 				"Ladder", "FirePole", "LadderFast", "Tile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile", "MetalTile", "Door",
-				"ManualPressureDoor", "PressureDoor", "StorageLocker"
+				"ManualPressureDoor", "PressureDoor", "StorageLocker", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
 			}),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Oxygen, new string[] { "MineralDeoxidizer", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Power, new string[]
@@ -105,6 +111,7 @@ namespace TUNING
 				"FlowerVase",
 				"Canvas",
 				"Sculpture",
+				"IceSculpture",
 				"FloorLamp",
 				"CeilingLight"
 			}),

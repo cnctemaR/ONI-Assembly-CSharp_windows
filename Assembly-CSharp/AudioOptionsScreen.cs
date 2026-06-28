@@ -51,6 +51,21 @@ public class AudioOptionsScreen : KModalScreen
 		};
 		LocText reference = component.GetReference<LocText>("Label");
 		reference.SetText(UI.FRONTEND.AUDIO_OPTIONS_SCREEN.MUSIC_EVERY_CYCLE);
+		if (!KPlayerPrefs.HasKey(AudioOptionsScreen.AlwaysPlayAutomation))
+		{
+			KPlayerPrefs.SetInt(AudioOptionsScreen.AlwaysPlayAutomation, 1);
+		}
+		HierarchyReferences component2 = this.alwaysPlayAutomationButton.GetComponent<HierarchyReferences>();
+		GameObject gameObject2 = component2.GetReference("Button").gameObject;
+		gameObject2.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.AUDIO_OPTIONS_SCREEN.AUTOMATION_SOUNDS_ALWAYS_TOOLTIP);
+		component2.GetReference("CheckMark").gameObject.SetActive(MusicManager.instance.alwaysPlayMusic);
+		gameObject2.GetComponent<KButton>().onClick += delegate
+		{
+			this.ToggleAlwaysPlayAutomation();
+		};
+		LocText reference2 = component2.GetReference<LocText>("Label");
+		reference2.SetText(UI.FRONTEND.AUDIO_OPTIONS_SCREEN.AUTOMATION_SOUNDS_ALWAYS);
+		this.alwaysPlayAutomationButton.GetComponent<HierarchyReferences>().GetReference("CheckMark").gameObject.SetActive(KPlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayAutomation) == 1);
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -80,6 +95,12 @@ public class AudioOptionsScreen : KModalScreen
 		MusicManager.instance.alwaysPlayMusic = !MusicManager.instance.alwaysPlayMusic;
 		this.alwaysPlayMusicButton.GetComponent<HierarchyReferences>().GetReference("CheckMark").gameObject.SetActive(MusicManager.instance.alwaysPlayMusic);
 		KPlayerPrefs.SetInt(AudioOptionsScreen.AlwaysPlayMusicKey, (!MusicManager.instance.alwaysPlayMusic) ? 0 : 1);
+	}
+
+	private void ToggleAlwaysPlayAutomation()
+	{
+		KPlayerPrefs.SetInt(AudioOptionsScreen.AlwaysPlayAutomation, (KPlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayAutomation) != 1) ? 1 : 0);
+		this.alwaysPlayAutomationButton.GetComponent<HierarchyReferences>().GetReference("CheckMark").gameObject.SetActive(KPlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayAutomation) == 1);
 	}
 
 	private void BuildAudioDeviceList()
@@ -141,6 +162,9 @@ public class AudioOptionsScreen : KModalScreen
 	private GameObject alwaysPlayMusicButton;
 
 	[SerializeField]
+	private GameObject alwaysPlayAutomationButton;
+
+	[SerializeField]
 	private Dropdown deviceDropdown;
 
 	private UIPool<SliderContainer> sliderPool;
@@ -148,6 +172,8 @@ public class AudioOptionsScreen : KModalScreen
 	private Dictionary<KSlider, string> sliderBusMap = new Dictionary<KSlider, string>();
 
 	public static readonly string AlwaysPlayMusicKey = "AlwaysPlayMusic";
+
+	public static readonly string AlwaysPlayAutomation = "AlwaysPlayAutomation";
 
 	private Dictionary<string, object> alwaysPlayMusicMetric = new Dictionary<string, object> { 
 	{

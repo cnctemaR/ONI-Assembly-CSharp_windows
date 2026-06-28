@@ -68,6 +68,7 @@ public class RockCrusherConfig : IBuildingConfig
 				}.AddResult(lowTempTransition.tag, 50f).AddResult(tag, 50f);
 			}
 		}
+		Prioritizable.AddRef(go);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

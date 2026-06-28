@@ -5,31 +5,46 @@ using UnityEngine;
 
 public class ConduitFlowVisualizer
 {
-	public ConduitFlowVisualizer(ConduitFlow flow_manager, Game.ConduitVisInfo vis_info, string overlay_sound)
+	public ConduitFlowVisualizer(ConduitFlow flow_manager, Game.ConduitVisInfo vis_info, string overlay_sound, ConduitFlowVisualizer.Tuning tuning)
 	{
 		this.flowManager = flow_manager;
 		this.visInfo = vis_info;
 		this.overlaySound = overlay_sound;
-		this.visInfo.prefab.SetActive(true);
-		this.visualizerPool = new ObjectPool(new Func<GameObject>(this.InstantiateVisualizer), 32);
+		this.tuning = tuning;
+		this.movingBallMesh = new ConduitFlowVisualizer.ConduitFlowMesh();
+		this.staticBallMesh = new ConduitFlowVisualizer.ConduitFlowMesh();
 	}
 
 	public void FreeResources()
 	{
-		this.visualizers.Clear();
-		this.staticVisualizers.Clear();
-		this.visualizerPool.Destroy();
+		this.movingBallMesh.Cleanup();
+		this.staticBallMesh.Cleanup();
 	}
 
 	private float CalculateMassScale(float mass)
 	{
-		float num = 1f;
-		if (!this.showContents || this.moveToOverlayLayer)
+		float num = (mass - this.visInfo.overlayMassScaleRange.x) / (this.visInfo.overlayMassScaleRange.y - this.visInfo.overlayMassScaleRange.x);
+		return Mathf.Lerp(this.visInfo.overlayMassScaleValues.x, this.visInfo.overlayMassScaleValues.y, num);
+	}
+
+	private Color32 GetContentsColor(Element element, Color32 default_color)
+	{
+		if (element != null)
 		{
-			float num2 = (mass - this.visInfo.overlayMassScaleRange.x) / (this.visInfo.overlayMassScaleRange.y - this.visInfo.overlayMassScaleRange.x);
-			num = Mathf.Lerp(this.visInfo.overlayMassScaleValues.x, this.visInfo.overlayMassScaleValues.y, num2);
+			Color color = element.substance.overlayColour;
+			color.a = 128f;
+			return color;
 		}
-		return num;
+		return default_color;
+	}
+
+	private Color32 GetBackgroundColor(float insulation_lerp)
+	{
+		if (this.showContents)
+		{
+			return Color32.Lerp(this.visInfo.overlayTint, this.visInfo.overlayInsulatedTint, insulation_lerp);
+		}
+		return Color32.Lerp(this.visInfo.tint, this.visInfo.insulatedTint, insulation_lerp);
 	}
 
 	public void Render(float z, int render_layer, float lerp_percent, bool trigger_audio = false)
@@ -37,6 +52,7 @@ public class ConduitFlowVisualizer
 		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
 		Vector2I vector2I = new Vector2I(Mathf.Max(0, visibleArea.Min.x - 1), Mathf.Max(0, visibleArea.Min.y - 1));
 		Vector2I vector2I2 = new Vector2I(Mathf.Min(Grid.WidthInCells - 1, visibleArea.Max.x + 1), Mathf.Min(Grid.HeightInCells - 1, visibleArea.Max.y + 1));
+		this.animTime += (double)Time.deltaTime;
 		if (trigger_audio)
 		{
 			if (this.audioInfo == null)
@@ -54,201 +70,145 @@ public class ConduitFlowVisualizer
 		}
 		Vector3 position = CameraController.Instance.transform.position;
 		Element element = null;
-		IEnumerator<ConduitFlow.Conduit> enumerator = this.flowManager.VisibleConduitsEnumerator(vector2I, vector2I2);
-		while (enumerator.MoveNext())
+		if (this.tuning.renderMesh)
 		{
-			ConduitFlow.Conduit conduit = enumerator.Current;
-			int cell = conduit.cell;
-			int cellFromDirection = ConduitFlow.GetCellFromDirection(conduit.cell, conduit.lastFlowDirection);
-			if (conduit.lastFlowContents.mass > 0f)
+			float num = 0f;
+			if (this.showContents)
 			{
-				this.liveAnimatedCells.Add(conduit.cell);
-				Quaternion quaternion;
-				switch (conduit.lastFlowDirection)
-				{
-				case ConduitFlow.FlowDirection.Left:
-				case ConduitFlow.FlowDirection.Right:
-					goto IL_01B0;
-				case ConduitFlow.FlowDirection.Up:
-				case ConduitFlow.FlowDirection.Down:
-					quaternion = ConduitFlowVisualizer.VerticalRotation;
-					break;
-				default:
-					goto IL_01B0;
-				}
-				IL_01BC:
-				Vector2I vector2I3 = Grid.CellToXY(cell);
-				Vector2I vector2I4 = Grid.CellToXY(cellFromDirection);
-				Vector2 vector = vector2I3;
-				if (cell != -1)
-				{
-					vector = Vector2.Lerp(new Vector2((float)vector2I3.x, (float)vector2I3.y), new Vector2((float)vector2I4.x, (float)vector2I4.y), lerp_percent);
-				}
-				vector += ConduitFlowVisualizer.offset;
-				float num = ((!this.insulatedCells.Contains(cell)) ? 0f : 1f);
-				float num2 = ((!this.insulatedCells.Contains(cellFromDirection)) ? 0f : 1f);
-				float num3 = Mathf.Lerp(num, num2, lerp_percent);
-				if (element == null || conduit.lastFlowContents.element != element.id)
-				{
-					element = ElementLoader.FindElementByHash(conduit.lastFlowContents.element);
-				}
-				KBatchedAnimController kbatchedAnimController;
-				if (this.visualizers.TryGetValue(conduit.cell, out kbatchedAnimController))
-				{
-					kbatchedAnimController.transform.position = new Vector3(vector.x, vector.y, z + -0.1f);
-					this.Colourize(kbatchedAnimController, element, num3, conduit.lastFlowContents.diseaseIdx, conduit.lastFlowContents.diseaseCount);
-				}
-				else
-				{
-					kbatchedAnimController = this.AddAnimatedVisualNode(element, new Vector3(vector.x, vector.y, z + -0.1f), num3, conduit.lastFlowContents.diseaseIdx, conduit.lastFlowContents.diseaseCount);
-					this.visualizers[conduit.cell] = kbatchedAnimController;
-				}
-				kbatchedAnimController.transform.localScale = Vector3.one;
-				kbatchedAnimController.SetSymbolScale(ConduitFlowVisualizer.TintSymbol, 1f);
-				float num4 = this.CalculateMassScale(conduit.lastFlowContents.mass);
-				if (conduit.lastFlowContents.mass >= conduit.initialContents.mass)
-				{
-					kbatchedAnimController.transform.localScale = Vector3.one;
-					kbatchedAnimController.SetSymbolScale(ConduitFlowVisualizer.TintSymbol, num4);
-				}
-				else
-				{
-					kbatchedAnimController.transform.localScale = new Vector3(num4, num4, num4);
-					kbatchedAnimController.HideSymbol(true, ConduitFlowVisualizer.BGSymbols[0]);
-				}
-				kbatchedAnimController.transform.rotation = quaternion;
-				if (trigger_audio)
-				{
-					this.AddAudioSource(conduit, position);
-					goto IL_0422;
-				}
-				goto IL_0422;
-				IL_01B0:
-				quaternion = Quaternion.identity;
-				goto IL_01BC;
+				num = 1f;
 			}
-			IL_0422:
-			if (conduit.initialContents.mass > conduit.lastFlowContents.mass && conduit.initialContents.mass > 0f)
+			int num2 = (int)(this.animTime / (1.0 / (double)this.tuning.framesPerSecond)) % (int)this.tuning.spriteCount;
+			float num3 = (float)num2 * (1f / this.tuning.spriteCount);
+			this.movingBallMesh.Begin();
+			this.movingBallMesh.SetTexture("_BackgroundTex", this.tuning.backgroundTexture);
+			this.movingBallMesh.SetTexture("_ForegroundTex", this.tuning.foregroundTexture);
+			this.movingBallMesh.SetVector("_SpriteSettings", new Vector4(1f / this.tuning.spriteCount, 1f, num, num3));
+			this.movingBallMesh.SetVector("_Highlight", new Vector4((float)this.highlightColour.r / 255f, (float)this.highlightColour.g / 255f, (float)this.highlightColour.b / 255f, 0f));
+			this.staticBallMesh.Begin();
+			this.staticBallMesh.SetTexture("_BackgroundTex", this.tuning.backgroundTexture);
+			this.staticBallMesh.SetTexture("_ForegroundTex", this.tuning.foregroundTexture);
+			this.staticBallMesh.SetVector("_SpriteSettings", new Vector4(1f / this.tuning.spriteCount, 1f, num, 0f));
+			this.staticBallMesh.SetVector("_Highlight", new Vector4((float)this.highlightColour.r / 255f, (float)this.highlightColour.g / 255f, (float)this.highlightColour.b / 255f, 0f));
+			IEnumerator<ConduitFlow.Conduit> enumerator = this.flowManager.VisibleConduitsEnumerator(vector2I, vector2I2);
+			while (enumerator.MoveNext())
 			{
-				if (element == null || conduit.initialContents.element != element.id)
+				ConduitFlow.Conduit conduit = enumerator.Current;
+				ConduitFlow.ConduitFlowInfo lastFlowInfo = conduit.GetLastFlowInfo(this.flowManager);
+				ConduitFlow.ConduitContents initialContents = conduit.GetInitialContents(this.flowManager);
+				if (lastFlowInfo.contents.mass > 0f)
 				{
-					element = ElementLoader.FindElementByHash(conduit.initialContents.element);
+					int cell = conduit.GetCell(this.flowManager);
+					int cellFromDirection = ConduitFlow.GetCellFromDirection(cell, lastFlowInfo.direction);
+					Vector2I vector2I3 = Grid.CellToXY(cell);
+					Vector2I vector2I4 = Grid.CellToXY(cellFromDirection);
+					Vector2 vector = vector2I3;
+					if (cell != -1)
+					{
+						vector = Vector2.Lerp(new Vector2((float)vector2I3.x, (float)vector2I3.y), new Vector2((float)vector2I4.x, (float)vector2I4.y), lerp_percent);
+					}
+					float num4 = ((!this.insulatedCells.Contains(cell)) ? 0f : 1f);
+					float num5 = ((!this.insulatedCells.Contains(cellFromDirection)) ? 0f : 1f);
+					float num6 = Mathf.Lerp(num4, num5, lerp_percent);
+					Color color = this.GetBackgroundColor(num6);
+					Vector2I vector2I5 = new Vector2I(0, 0);
+					Vector2I vector2I6 = new Vector2I(0, 1);
+					Vector2I vector2I7 = new Vector2I(1, 0);
+					Vector2I vector2I8 = new Vector2I(1, 1);
+					switch (lastFlowInfo.direction)
+					{
+					case ConduitFlow.FlowDirection.Up:
+					case ConduitFlow.FlowDirection.Down:
+						vector2I5 = new Vector2I(1, 0);
+						vector2I6 = new Vector2I(0, 0);
+						vector2I7 = new Vector2I(1, 1);
+						vector2I8 = new Vector2I(0, 1);
+						break;
+					}
+					IL_04BB:
+					float num7 = 0f;
+					if (this.showContents)
+					{
+						if (lastFlowInfo.contents.mass >= initialContents.mass)
+						{
+							this.movingBallMesh.AddQuad(vector, color, this.tuning.size, 0f, 0f, vector2I5, vector2I6, vector2I7, vector2I8);
+						}
+						if (element == null || lastFlowInfo.contents.element != element.id)
+						{
+							element = ElementLoader.FindElementByHash(lastFlowInfo.contents.element);
+						}
+					}
+					else
+					{
+						element = null;
+						int num8 = Grid.PosToCell(new Vector3(vector.x + ConduitFlowVisualizer.GRID_OFFSET.x, vector.y + ConduitFlowVisualizer.GRID_OFFSET.y, 0f));
+						if (num8 == this.highlightedCell)
+						{
+							num7 = 1f;
+						}
+					}
+					Color32 contentsColor = this.GetContentsColor(element, color);
+					float num9 = 1f;
+					if (this.showContents || lastFlowInfo.contents.mass < initialContents.mass)
+					{
+						num9 = this.CalculateMassScale(lastFlowInfo.contents.mass);
+					}
+					this.movingBallMesh.AddQuad(vector, contentsColor, this.tuning.size * num9, 1f, num7, vector2I5, vector2I6, vector2I7, vector2I8);
+					if (trigger_audio)
+					{
+						this.AddAudioSource(conduit, position);
+						goto IL_0625;
+					}
+					goto IL_0625;
+					goto IL_04BB;
 				}
-				float num5 = conduit.initialContents.mass - conduit.lastFlowContents.mass;
-				float num6 = num5 / conduit.initialContents.mass;
-				int num7 = (int)(num6 * (float)conduit.initialContents.diseaseCount);
-				this.RenderStaticBlob(conduit.cell, element, num5, conduit.initialContents.diseaseIdx, num7, z);
+				IL_0625:
+				if (initialContents.mass > lastFlowInfo.contents.mass && initialContents.mass > 0f)
+				{
+					int cell2 = conduit.GetCell(this.flowManager);
+					Vector2I vector2I9 = Grid.CellToXY(cell2);
+					Vector2 vector2 = vector2I9;
+					float num10 = initialContents.mass - lastFlowInfo.contents.mass;
+					float num11 = ((!this.insulatedCells.Contains(cell2)) ? 0f : 1f);
+					Vector2I vector2I10 = new Vector2I(0, 0);
+					Vector2I vector2I11 = new Vector2I(0, 1);
+					Vector2I vector2I12 = new Vector2I(1, 0);
+					Vector2I vector2I13 = new Vector2I(1, 1);
+					float num12 = 0f;
+					Color color2 = this.GetBackgroundColor(num11);
+					float num13 = this.CalculateMassScale(num10);
+					if (this.showContents)
+					{
+						this.staticBallMesh.AddQuad(vector2, color2, this.tuning.size * num13, 0f, 0f, vector2I10, vector2I11, vector2I12, vector2I13);
+						if (element == null || initialContents.element != element.id)
+						{
+							element = ElementLoader.FindElementByHash(initialContents.element);
+						}
+					}
+					else
+					{
+						element = null;
+						if (cell2 == this.highlightedCell)
+						{
+							num12 = 1f;
+						}
+					}
+					Color32 contentsColor2 = this.GetContentsColor(element, color2);
+					this.staticBallMesh.AddQuad(vector2, contentsColor2, this.tuning.size * num13, 1f, num12, vector2I10, vector2I11, vector2I12, vector2I13);
+				}
 			}
+			this.movingBallMesh.End(z, this.layer);
+			this.staticBallMesh.End(z, this.layer);
 		}
-		this.ReleaseDeadVisualizers(this.visualizers, this.liveAnimatedCells);
-		this.ReleaseDeadVisualizers(this.staticVisualizers, this.liveStaticCells);
 		if (trigger_audio)
 		{
 			this.TriggerAudio();
 		}
 	}
 
-	private void RenderStaticBlob(int cell, Element elem, float mass, byte disease_idx, int disease_count, float z)
+	public void ColourizePipeContents(bool show_contents, bool move_to_overlay_layer)
 	{
-		this.liveStaticCells.Add(cell);
-		float num = ((!this.insulatedCells.Contains(cell)) ? 0f : 1f);
-		int num2 = cell % Grid.WidthInCells;
-		int num3 = cell / Grid.WidthInCells;
-		Vector3 vector = new Vector3((float)num2 + ConduitFlowVisualizer.offset.x, (float)num3 + ConduitFlowVisualizer.offset.y, z);
-		KBatchedAnimController kbatchedAnimController;
-		if (this.staticVisualizers.TryGetValue(cell, out kbatchedAnimController))
-		{
-			kbatchedAnimController.transform.position = vector;
-			this.Colourize(kbatchedAnimController, elem, num, disease_idx, disease_count);
-		}
-		else
-		{
-			kbatchedAnimController = this.AddStaticVisualNode(elem, vector, num, disease_idx, disease_count);
-			this.staticVisualizers[cell] = kbatchedAnimController;
-		}
-		kbatchedAnimController.transform.localScale = new Vector3(1f, 1f, 1f);
-		kbatchedAnimController.SetSymbolScale(ConduitFlowVisualizer.TintSymbol, 1f);
-		float num4 = this.CalculateMassScale(mass);
-		kbatchedAnimController.transform.localScale = new Vector3(num4, num4, num4);
-	}
-
-	private void ReleaseDeadVisualizers(Dictionary<int, KBatchedAnimController> vis_list, HashSet<int> live_list)
-	{
-		foreach (int num in vis_list.Keys)
-		{
-			if (!live_list.Contains(num))
-			{
-				KBatchedAnimController kbatchedAnimController = vis_list[num];
-				kbatchedAnimController.enabled = false;
-				this.visualizerPool.ReleaseInstance(kbatchedAnimController.gameObject);
-				this.removedCells.Add(num);
-			}
-		}
-		foreach (int num2 in this.removedCells)
-		{
-			vis_list.Remove(num2);
-		}
-		live_list.Clear();
-		this.removedCells.Clear();
-	}
-
-	private void Colourize(KBatchedAnimController controller, Element elem, float insulation_lerp, byte disease_idx, int disease_count)
-	{
-		controller.SetLayer(this.layer);
-		if (this.showContents)
-		{
-			controller.TintColour = Color32.Lerp(this.visInfo.overlayTint, this.visInfo.overlayInsulatedTint, insulation_lerp);
-			Color32 color = Color.white;
-			if (elem != null && elem.substance != null)
-			{
-				color = elem.substance.overlayColour;
-				color.a = 128;
-			}
-			controller.SetSymbolTint(KBatchedAnimController.SymbolTintIndex.Second, ConduitFlowVisualizer.TintSymbol, color);
-			bool flag = !this.moveToOverlayLayer;
-			controller.HideSymbol(flag, ConduitFlowVisualizer.BGSymbols[0]);
-		}
-		else
-		{
-			controller.TintColour = Color32.Lerp(this.visInfo.tint, this.visInfo.insulatedTint, insulation_lerp);
-			int num = Grid.PosToCell(controller.transform.position);
-			Color32 color2 = new Color32(0, 0, 0, 0);
-			if (num == this.highlightedCell)
-			{
-				color2 = this.highlightColour;
-			}
-			controller.HighlightColour = color2;
-		}
-		controller.destroyOnAnimComplete = false;
-		controller.HideSymbols(!this.showContents, ConduitFlowVisualizer.BGSymbols);
-		this.UpdateControllerRenderQueueOverride(controller);
-	}
-
-	private KBatchedAnimController AddVisualNode(Element elem, Vector3 pos, float insulation_lerp, byte disease_idx, int disease_count)
-	{
-		GameObject instance = this.visualizerPool.GetInstance();
-		Transform transform = instance.transform;
-		transform.position = pos;
-		transform.rotation = Quaternion.identity;
-		KBatchedAnimController component = instance.GetComponent<KBatchedAnimController>();
-		this.ResetNode(component, this.layer);
-		component.enabled = true;
-		this.Colourize(component, elem, insulation_lerp, disease_idx, disease_count);
-		return component;
-	}
-
-	private KBatchedAnimController AddAnimatedVisualNode(Element elem, Vector3 pos, float insulation_lerp, byte disease_idx, int disease_count)
-	{
-		KBatchedAnimController kbatchedAnimController = this.AddVisualNode(elem, pos, insulation_lerp, disease_idx, disease_count);
-		kbatchedAnimController.Play("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
-		return kbatchedAnimController;
-	}
-
-	private KBatchedAnimController AddStaticVisualNode(Element elem, Vector3 pos, float insulation_lerp, byte disease_idx, int disease_count)
-	{
-		KBatchedAnimController kbatchedAnimController = this.AddVisualNode(elem, pos, insulation_lerp, disease_idx, disease_count);
-		kbatchedAnimController.Play("working_loop", KAnim.PlayMode.Once, 1f, 0f);
-		return kbatchedAnimController;
+		this.showContents = show_contents;
+		this.layer = ((!show_contents || !move_to_overlay_layer) ? 0 : LayerMask.NameToLayer("MaskedOverlay"));
 	}
 
 	private void AddAudioSource(ConduitFlow.Conduit conduit, Vector3 camera_pos)
@@ -258,7 +218,7 @@ public class ConduitFlowVisualizer
 			UtilityNetwork network = this.flowManager.GetNetwork(conduit);
 			if (network != null)
 			{
-				Vector3 vector = Grid.CellToPosCCC(conduit.cell, Grid.SceneLayer.Building);
+				Vector3 vector = Grid.CellToPosCCC(conduit.GetCell(this.flowManager), Grid.SceneLayer.Building);
 				float num = Vector3.SqrMagnitude(vector - camera_pos);
 				bool flag = false;
 				for (int i = 0; i < this.audioInfo.Count; i++)
@@ -319,66 +279,6 @@ public class ConduitFlowVisualizer
 		}
 	}
 
-	private GameObject InstantiateVisualizer()
-	{
-		GameObject gameObject = GameUtil.KInstantiate(this.visInfo.prefab, Grid.SceneLayer.BuildingFront, Folder.FX, null, 0);
-		gameObject.SetActive(true);
-		KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
-		component.destroyOnAnimComplete = true;
-		component.enabled = false;
-		return gameObject;
-	}
-
-	public void ColourizePipeContents(bool show_contents, bool move_to_overlay_layer)
-	{
-		this.showContents = show_contents;
-		this.moveToOverlayLayer = move_to_overlay_layer;
-		this.layer = ((!show_contents || !move_to_overlay_layer) ? 0 : LayerMask.NameToLayer("MaskedOverlay"));
-		foreach (KBatchedAnimController kbatchedAnimController in this.visualizers.Values)
-		{
-			this.ResetNode(kbatchedAnimController, this.layer);
-		}
-		foreach (KBatchedAnimController kbatchedAnimController2 in this.staticVisualizers.Values)
-		{
-			this.ResetNode(kbatchedAnimController2, this.layer);
-		}
-	}
-
-	private void ResetNode(KBatchedAnimController controller, int layer)
-	{
-		controller.SetLayer(layer);
-		controller.HideSymbols(!this.showContents, ConduitFlowVisualizer.BGSymbols);
-		if (!this.showContents)
-		{
-			controller.UnsetSymbolTint(KBatchedAnimController.SymbolTintIndex.First);
-			controller.UnsetSymbolTint(KBatchedAnimController.SymbolTintIndex.Second);
-			controller.UnsetSymbolScale();
-			controller.OverlayColour = new Color32(0, 0, 0, 0);
-			controller.transform.localScale = Vector3.one;
-		}
-		this.UpdateControllerRenderQueueOverride(controller);
-	}
-
-	private void UpdateControllerRenderQueueOverride(KBatchedAnimController controller)
-	{
-		bool flag = this.showContents && !this.moveToOverlayLayer;
-		if (flag)
-		{
-			if (controller.renderQueueOverride != 3800)
-			{
-				controller.SetRenderQueueOverride(3800);
-				controller.enabled = false;
-				controller.enabled = true;
-			}
-		}
-		else if (controller.renderQueueOverride >= 0 && controller.renderQueueOverride != controller.originalRenderQueue)
-		{
-			controller.UnsetRenderQueueOverride();
-			controller.enabled = false;
-			controller.enabled = true;
-		}
-	}
-
 	public void SetInsulated(int cell, bool insulated)
 	{
 		if (insulated)
@@ -398,46 +298,132 @@ public class ConduitFlowVisualizer
 
 	private ConduitFlow flowManager;
 
-	private ObjectPool visualizerPool;
-
 	private string overlaySound;
-
-	private static readonly Quaternion VerticalRotation = Quaternion.AngleAxis(-90f, Vector3.forward);
-
-	private static readonly KAnimHashedString[] BGSymbols = new KAnimHashedString[]
-	{
-		new KAnimHashedString("base_BG")
-	};
-
-	private static readonly KAnimHashedString TintSymbol = new KAnimHashedString("base");
 
 	private bool showContents;
 
-	private bool moveToOverlayLayer;
+	private double animTime;
 
 	private int layer;
 
-	private static readonly Vector2 offset = new Vector2(0.5f, 0.5f);
+	private static Vector2 GRID_OFFSET = new Vector2(0.5f, 0.5f);
 
 	private List<ConduitFlowVisualizer.AudioInfo> audioInfo;
 
-	private Dictionary<int, KBatchedAnimController> visualizers = new Dictionary<int, KBatchedAnimController>();
-
-	private Dictionary<int, KBatchedAnimController> staticVisualizers = new Dictionary<int, KBatchedAnimController>();
-
-	private HashSet<int> liveStaticCells = new HashSet<int>();
-
-	private HashSet<int> liveAnimatedCells = new HashSet<int>();
-
 	private HashSet<int> insulatedCells = new HashSet<int>();
 
-	private List<int> removedCells = new List<int>();
-
 	private Game.ConduitVisInfo visInfo;
+
+	private ConduitFlowVisualizer.ConduitFlowMesh movingBallMesh;
+
+	private ConduitFlowVisualizer.ConduitFlowMesh staticBallMesh;
 
 	private int highlightedCell = -1;
 
 	private Color32 highlightColour = new Color(0.2f, 0.2f, 0.2f, 0.2f);
+
+	private ConduitFlowVisualizer.Tuning tuning;
+
+	[Serializable]
+	public class Tuning
+	{
+		public bool renderMesh;
+
+		public float size;
+
+		public float spriteCount;
+
+		public float framesPerSecond;
+
+		public Texture2D backgroundTexture;
+
+		public Texture2D foregroundTexture;
+	}
+
+	private class ConduitFlowMesh
+	{
+		public ConduitFlowMesh()
+		{
+			this.mesh = new Mesh();
+			this.mesh.name = "ConduitMesh";
+			this.material = new Material(Shader.Find("Klei/ConduitBall"));
+		}
+
+		public void AddQuad(Vector2 pos, Color32 color, float size, float is_foreground, float highlight, Vector2I uvbl, Vector2I uvtl, Vector2I uvbr, Vector2I uvtr)
+		{
+			float num = size * 0.5f;
+			this.positions.Add(new Vector3(pos.x - num, pos.y - num, 0f));
+			this.positions.Add(new Vector3(pos.x - num, pos.y + num, 0f));
+			this.positions.Add(new Vector3(pos.x + num, pos.y - num, 0f));
+			this.positions.Add(new Vector3(pos.x + num, pos.y + num, 0f));
+			this.uvs.Add(new Vector4((float)uvbl.x, (float)uvbl.y, is_foreground, highlight));
+			this.uvs.Add(new Vector4((float)uvtl.x, (float)uvtl.y, is_foreground, highlight));
+			this.uvs.Add(new Vector4((float)uvbr.x, (float)uvbr.y, is_foreground, highlight));
+			this.uvs.Add(new Vector4((float)uvtr.x, (float)uvtr.y, is_foreground, highlight));
+			this.colors.Add(color);
+			this.colors.Add(color);
+			this.colors.Add(color);
+			this.colors.Add(color);
+			this.triangles.Add(this.quadIndex * 4);
+			this.triangles.Add(this.quadIndex * 4 + 1);
+			this.triangles.Add(this.quadIndex * 4 + 2);
+			this.triangles.Add(this.quadIndex * 4 + 2);
+			this.triangles.Add(this.quadIndex * 4 + 1);
+			this.triangles.Add(this.quadIndex * 4 + 3);
+			this.quadIndex++;
+		}
+
+		public void SetTexture(string id, Texture2D texture)
+		{
+			this.material.SetTexture(id, texture);
+		}
+
+		public void SetVector(string id, Vector4 data)
+		{
+			this.material.SetVector(id, data);
+		}
+
+		public void Begin()
+		{
+			this.positions.Clear();
+			this.uvs.Clear();
+			this.triangles.Clear();
+			this.colors.Clear();
+			this.quadIndex = 0;
+		}
+
+		public void End(float z, int layer)
+		{
+			this.mesh.Clear();
+			this.mesh.SetVertices(this.positions);
+			this.mesh.SetUVs(0, this.uvs);
+			this.mesh.SetColors(this.colors);
+			this.mesh.SetTriangles(this.triangles, 0, false);
+			Graphics.DrawMesh(this.mesh, new Vector3(ConduitFlowVisualizer.GRID_OFFSET.x, ConduitFlowVisualizer.GRID_OFFSET.y, z - 0.1f), Quaternion.identity, this.material, layer);
+		}
+
+		public void Cleanup()
+		{
+			global::UnityEngine.Object.Destroy(this.mesh);
+			this.mesh = null;
+			global::UnityEngine.Object.Destroy(this.material);
+			this.material = null;
+		}
+
+		private Mesh mesh;
+
+		private Material material;
+
+		private List<Vector3> positions = new List<Vector3>();
+
+		private List<Vector4> uvs = new List<Vector4>();
+
+		private List<int> triangles = new List<int>();
+
+		private List<Color32> colors = new List<Color32>();
+
+		private int quadIndex;
+	}
 
 	private struct AudioInfo
 	{

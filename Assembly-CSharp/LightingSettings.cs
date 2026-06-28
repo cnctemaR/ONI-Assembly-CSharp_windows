@@ -201,12 +201,15 @@ public class LightingSettings : ScriptableObject
 
 	public Vector4 BuildingDamagedUVParameters;
 
-	public Color32 BuildingDamagedTint;
-
 	[Header("Disease")]
 	public Texture2D DiseaseOverlayTex;
 
 	public Vector4 DiseaseOverlayTexInfo;
+
+	[Header("Conduits")]
+	public ConduitFlowVisualizer.Tuning GasConduit;
+
+	public ConduitFlowVisualizer.Tuning LiquidConduit;
 
 	[Serializable]
 	public struct EdgeLighting

@@ -53,6 +53,6 @@ public class CheckpointConfig : IBuildingConfig
 
 	public static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
 	{
-		new LogicPorts.Port(Checkpoint.PORT_ID, new CellOffset(0, 2), global::STRINGS.BUILDINGS.PREFABS.CHECKPOINT.LOGIC_PORT_DESC, false)
+		new LogicPorts.Port(Checkpoint.PORT_ID, new CellOffset(0, 2), global::STRINGS.BUILDINGS.PREFABS.CHECKPOINT.LOGIC_PORT_DESC, true)
 	};
 }

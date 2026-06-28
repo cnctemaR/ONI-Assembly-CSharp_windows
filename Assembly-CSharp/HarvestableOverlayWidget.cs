@@ -37,23 +37,20 @@ public class HarvestableOverlayWidget : KMonoBehaviour
 
 	public void Refresh(Harvestable target_harvestable)
 	{
-		if (target_harvestable == null)
-		{
-			this.bar.SetActive(false);
-			this.vertical_container.SetActive(false);
-			return;
-		}
 		Image image = this.bar.GetComponent<HierarchyReferences>().GetReference("Fill") as Image;
-		if (target_harvestable.GetAmounts().Has(Db.Get().Amounts.Maturity))
+		AmountInstance amountInstance = Db.Get().Amounts.Maturity.Lookup(target_harvestable);
+		if (amountInstance != null)
 		{
-			this.bar.SetActive(true);
-			float num = target_harvestable.gameObject.GetAmounts().Get(Db.Get().Amounts.Maturity).value / target_harvestable.gameObject.GetAmounts().Get(Db.Get().Amounts.Maturity).GetMax();
+			float num = amountInstance.value / amountInstance.GetMax();
 			image.rectTransform.offsetMin = new Vector2(image.rectTransform.offsetMin.x, 3f);
-			this.bar.SetActive(!target_harvestable.CanBeHavested);
+			if (this.bar.activeSelf != !target_harvestable.CanBeHavested)
+			{
+				this.bar.SetActive(!target_harvestable.CanBeHavested);
+			}
 			float num2 = ((!target_harvestable.CanBeHavested) ? (19f - 19f * num + 3f) : 3f);
 			image.rectTransform.offsetMax = new Vector2(image.rectTransform.offsetMax.x, -num2);
 		}
-		else
+		else if (this.bar.activeSelf)
 		{
 			this.bar.SetActive(false);
 		}

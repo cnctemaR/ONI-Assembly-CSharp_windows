@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
+using System.Threading;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,7 +12,9 @@ public class LaunchInitializer : MonoBehaviour
 
 	private void Awake()
 	{
-		global::Debug.Log("Development Build: AT-" + 243285U.ToString(), null);
+		GraphicsOptionsScreen.SetResolutionFromPrefs();
+		Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+		global::Debug.Log("Development Build: TB-" + 246879U.ToString(), null);
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		this.CheckForSavePathIssue();
 		if (LaunchInitializer.savePathState == LaunchInitializer.SavePathIssue.Ok)
@@ -114,7 +118,7 @@ public class LaunchInitializer : MonoBehaviour
 		}
 	}
 
-	public const string BUILD_PREFIX = "AT";
+	public const string BUILD_PREFIX = "TB";
 
 	private static readonly string testFile = "testfile";
 

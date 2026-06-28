@@ -22,16 +22,13 @@ public class AutoDisinfectable : Workable
 		this.shouldTransferDiseaseWithWorker = false;
 	}
 
-	protected override void OnCmpEnable()
+	public void CancelChore()
 	{
-		base.OnCmpEnable();
-		Components.AutoDisinfectables.Add(this);
-	}
-
-	protected override void OnCmpDisable()
-	{
-		base.OnCmpDisable();
-		Components.AutoDisinfectables.Remove(this);
+		if (this.chore != null)
+		{
+			this.chore.Cancel("AutoDisinfectable.CancelChore");
+			this.chore = null;
+		}
 	}
 
 	public void RefreshChore()

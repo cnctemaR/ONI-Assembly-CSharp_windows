@@ -27,13 +27,13 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 		}
 	}
 
-	public bool IsPowered
+	public virtual bool IsPowered
 	{
 		get
 		{
 			return this.operational.GetFlag(EnergyConsumer.PoweredFlag);
 		}
-		set
+		private set
 		{
 			this.operational.SetFlag(EnergyConsumer.PoweredFlag, value);
 		}
@@ -140,7 +140,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 		base.OnCleanUp();
 	}
 
-	private void SimUpdate(float dt)
+	protected virtual void SimUpdate(float dt)
 	{
 		this.CircuitID = Game.Instance.circuitManager.GetCircuitID(this.PowerCell);
 		if (!this.IsConnected)
@@ -150,7 +150,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 		this.circuitOverloadTime = Mathf.Max(0f, this.circuitOverloadTime - dt);
 	}
 
-	public void SetConnectionStatus(CircuitManager.ConnectionStatus connection_status)
+	public virtual void SetConnectionStatus(CircuitManager.ConnectionStatus connection_status)
 	{
 		if (connection_status != CircuitManager.ConnectionStatus.NotConnected)
 		{
@@ -178,7 +178,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 		}
 	}
 
-	private void PlayCircuitSound(string state)
+	protected void PlayCircuitSound(string state)
 	{
 		string text = null;
 		if (state == "powered")
@@ -216,7 +216,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 	private Building building;
 
 	[MyCmpGet]
-	private Operational operational;
+	protected Operational operational;
 
 	[MyCmpGet]
 	private Upgradable upgradable;
@@ -228,7 +228,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 	public int powerSortOrder;
 
 	[Serialize]
-	private float circuitOverloadTime;
+	protected float circuitOverloadTime;
 
 	public static Operational.Flag PoweredFlag = new Operational.Flag("powered", Operational.Flag.Type.Requirement);
 

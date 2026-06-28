@@ -476,6 +476,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "All connected power sources have lost charge";
 			}
 
+			public class NOTENOUGHPOWER
+			{
+				public static LocString NAME = "Not Enough Power";
+
+				public static LocString TOOLTIP = "Building will be useable once it has more stored charge";
+			}
+
 			public class NEEDRESOURCE
 			{
 				public static LocString NAME = "Resource Required";
@@ -1371,6 +1378,20 @@ namespace STRINGS
 				public static LocString NAME = "No Automation Wire Connected";
 
 				public static LocString TOOLTIP = "This building has not been connected to an automation grid";
+			}
+
+			public class NOTUBECONNECTED
+			{
+				public static LocString NAME = "No Transit Tube Connected";
+
+				public static LocString TOOLTIP = "A straight Transit Tube must be connected to the top of the launch rail for this building to function.";
+			}
+
+			public class STOREDCHARGE
+			{
+				public static LocString NAME = "Stored Charge: {0}/{1}";
+
+				public static LocString TOOLTIP = "This building has stored {0} out of a maximum {1}. It will consume {2} per use.";
 			}
 		}
 

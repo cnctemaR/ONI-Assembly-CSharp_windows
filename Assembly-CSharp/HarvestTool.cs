@@ -11,7 +11,6 @@ public class HarvestTool : DragTool
 		this.options.Add("HARVEST_WHEN_READY", ToolParameterMenu.ToggleState.On);
 		this.options.Add("DO_NOT_HARVEST", ToolParameterMenu.ToggleState.Off);
 		this.viewMode = SimViewMode.HarvestWhenReady;
-		this.hoverScreenUpdate.tickInterval = 0.2f;
 	}
 
 	protected override void OnDragTool(int cell, int distFromOrigin)

@@ -10,5 +10,6 @@ public enum NavType : byte
 	Hover,
 	Swim,
 	Pole,
+	Tube,
 	NumNavTypes
 }

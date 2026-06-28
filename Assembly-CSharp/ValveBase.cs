@@ -60,13 +60,12 @@ public class ValveBase : KMonoBehaviour, ISaveLoadable
 	{
 		ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
 		ConduitFlow.Conduit conduit = flowManager.GetConduit(this.inputCell);
-		ConduitFlow.Conduit conduit2 = flowManager.GetConduit(this.outputCell);
-		if (conduit == null || conduit2 == null)
+		if (!flowManager.HasConduit(this.inputCell) || !flowManager.HasConduit(this.outputCell))
 		{
 			this.UpdateAnim();
 			return;
 		}
-		ConduitFlow.ConduitContents contents = conduit.GetContents();
+		ConduitFlow.ConduitContents contents = conduit.GetContents(flowManager);
 		float num = Mathf.Min(contents.mass, this.currentFlow * dt);
 		if (num > 0f)
 		{

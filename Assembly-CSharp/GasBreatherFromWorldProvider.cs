@@ -36,7 +36,7 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 
 	private void OnSimConsume(object obj)
 	{
-		if (this.oxygenBreather == null)
+		if (this.oxygenBreather == null || this.oxygenBreather.GetComponent<KPrefabID>().HasTag(GameTags.Dead))
 		{
 			return;
 		}

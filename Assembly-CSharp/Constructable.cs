@@ -43,6 +43,7 @@ public class Constructable : Workable, ISaveLoadable
 	{
 		float num = 0f;
 		float num2 = 0f;
+		bool flag = true;
 		foreach (GameObject gameObject in this.storage.items)
 		{
 			if (!(gameObject == null))
@@ -52,6 +53,7 @@ public class Constructable : Workable, ISaveLoadable
 				{
 					num += component.Mass;
 					num2 += component.Temperature * component.Mass;
+					flag = flag && component.HasTag(GameTags.Liquifiable);
 				}
 			}
 		}
@@ -65,7 +67,14 @@ public class Constructable : Workable, ISaveLoadable
 			});
 			return;
 		}
-		this.initialTemperature = Mathf.Clamp(num2 / num, 288.15f, 318.15f);
+		if (flag)
+		{
+			this.initialTemperature = Mathf.Min(num2 / num, 318.15f);
+		}
+		else
+		{
+			this.initialTemperature = Mathf.Clamp(num2 / num, 288.15f, 318.15f);
+		}
 		KAnimGraphTileVisualizer component2 = base.GetComponent<KAnimGraphTileVisualizer>();
 		UtilityConnections connections = ((!(component2 == null)) ? component2.Connections : ((UtilityConnections)0));
 		if (this.IsReplacementTile)

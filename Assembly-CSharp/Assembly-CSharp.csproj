@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{D83BB70B-C019-46DD-A038-28BFF405B58C}</ProjectGuid>
+    <ProjectGuid>{80BBB707-8EED-4FB2-A62F-BDFF469F04FC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -87,6 +87,7 @@
     <Compile Include="AudioSheet.cs" />
     <Compile Include="AudioSheets.cs" />
     <Compile Include="AutoDisinfectable.cs" />
+    <Compile Include="AutoDisinfectableManager.cs" />
     <Compile Include="Baggable.cs" />
     <Compile Include="BarLayer.cs" />
     <Compile Include="BaseBatteryConfig.cs" />
@@ -435,6 +436,7 @@
     <Compile Include="EmoteReactable.cs" />
     <Compile Include="Endpoint.cs" />
     <Compile Include="EnergyConsumer.cs" />
+    <Compile Include="EnergyConsumerSelfSustaining.cs" />
     <Compile Include="EnergyGenerator.cs" />
     <Compile Include="EnergyInfoScreen.cs" />
     <Compile Include="EntityConfigManager.cs" />
@@ -542,6 +544,7 @@
     <Compile Include="FriedMushroomConfig.cs" />
     <Compile Include="FrontEndBackground.cs" />
     <Compile Include="FrontEndManager.cs" />
+    <Compile Include="FruitCakeConfig.cs" />
     <Compile Include="FullScreenQuad.cs" />
     <Compile Include="FunkyVestConfig.cs" />
     <Compile Include="FXAnim.cs" />
@@ -645,7 +648,9 @@
     <Compile Include="HierarchyReferences.cs" />
     <Compile Include="Hit.cs" />
     <Compile Include="HoverTextConfiguration.cs" />
+    <Compile Include="HoverTextDrawer.cs" />
     <Compile Include="HoverTextScreen.cs" />
+    <Compile Include="HoverTextSkin.cs" />
     <Compile Include="Hud.cs" />
     <Compile Include="HumanEntityTypeSet.cs" />
     <Compile Include="HydrogenGeneratorConfig.cs" />
@@ -658,6 +663,7 @@
     <Compile Include="IAttributeFormatter.cs" />
     <Compile Include="IBuildingConfig.cs" />
     <Compile Include="IBuildQueueOrder.cs" />
+    <Compile Include="IceSculptureConfig.cs" />
     <Compile Include="IChunkManager.cs" />
     <Compile Include="IConsumableUIItem.cs" />
     <Compile Include="IDisconnectable.cs" />
@@ -718,6 +724,7 @@
     <Compile Include="ISliderControl.cs" />
     <Compile Include="IThresholdSwitch.cs" />
     <Compile Include="IToggleHandler.cs" />
+    <Compile Include="ITravelTubePiece.cs" />
     <Compile Include="IUpdateOnDemand.cs" />
     <Compile Include="IUsable.cs" />
     <Compile Include="IUserControlledCapacity.cs" />
@@ -1012,6 +1019,7 @@
     <Compile Include="Narcolepsy.cs" />
     <Compile Include="NarcolepsyChore.cs" />
     <Compile Include="NativeAnimBatchLoader.cs" />
+    <Compile Include="NavAxis.cs" />
     <Compile Include="NavGrid.cs" />
     <Compile Include="NavGridUpdater.cs" />
     <Compile Include="NavigationFeatureMask.cs" />
@@ -1246,7 +1254,6 @@
     <Compile Include="RegionManager.cs" />
     <Compile Include="RegionSelectTool.cs" />
     <Compile Include="RegionTool.cs" />
-    <Compile Include="RegionToolHoverTextCard.cs" />
     <Compile Include="RelaxationPoint.cs" />
     <Compile Include="Relocatable.cs" />
     <Compile Include="RelocateTool.cs" />
@@ -1518,7 +1525,6 @@
     <Compile Include="SwapUIAnimationController.cs" />
     <Compile Include="Switch.cs" />
     <Compile Include="SwitchConfig.cs" />
-    <Compile Include="SystemScheduler.cs" />
     <Compile Include="TableColumn.cs" />
     <Compile Include="TableRow.cs" />
     <Compile Include="TableScreen.cs" />
@@ -1566,6 +1572,7 @@
     <Compile Include="TimedSwitch.cs" />
     <Compile Include="TimedSwitchSideScreen.cs" />
     <Compile Include="TimeOfDay.cs" />
+    <Compile Include="TimeRangeSideScreen.cs" />
     <Compile Include="TintedSprite.cs" />
     <Compile Include="TiredMonitor.cs" />
     <Compile Include="TitleBar.cs" />
@@ -1592,10 +1599,21 @@
     <Compile Include="Trappable.cs" />
     <Compile Include="TrappedType.cs" />
     <Compile Include="TrashRegion.cs" />
+    <Compile Include="TravelTube.cs" />
+    <Compile Include="TravelTubeBridge.cs" />
+    <Compile Include="TravelTubeConfig.cs" />
+    <Compile Include="TravelTubeEntrance.cs" />
+    <Compile Include="TravelTubeEntranceConfig.cs" />
+    <Compile Include="TravelTubeNavMask.cs" />
+    <Compile Include="TravelTubeNetwork.cs" />
+    <Compile Include="TravelTubeUtilityNetworkLink.cs" />
+    <Compile Include="TravelTubeWallBridgeConfig.cs" />
     <Compile Include="TreeFilterable.cs" />
     <Compile Include="TreeFilterableSideScreen.cs" />
     <Compile Include="TreeFilterableSideScreenElement.cs" />
     <Compile Include="TreeFilterableSideScreenRow.cs" />
+    <Compile Include="TubeTransitionLayer.cs" />
+    <Compile Include="TubeTraveller.cs" />
     <Compile Include="TUNING\AUDIO.cs" />
     <Compile Include="TUNING\BUILDINGS.cs" />
     <Compile Include="TUNING\CREATURES.cs" />
@@ -1644,10 +1662,12 @@
     <Compile Include="UserMenuScreen.cs" />
     <Compile Include="UtilityBuildTool.cs" />
     <Compile Include="UtilityConnections.cs" />
+    <Compile Include="UtilityConnectionsExtensions.cs" />
     <Compile Include="UtilityNetwork.cs" />
     <Compile Include="UtilityNetworkGridNode.cs" />
     <Compile Include="UtilityNetworkLink.cs" />
     <Compile Include="UtilityNetworkManager.cs" />
+    <Compile Include="UtilityNetworkTubesManager.cs" />
     <Compile Include="ValueTrendImageToggle.cs" />
     <Compile Include="Valve.cs" />
     <Compile Include="ValveBase.cs" />
@@ -1709,51 +1729,51 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArabicSupport\ArabicSupport.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B58A}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F04FA}</Project>
       <Name>ArabicSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\Assembly-CSharp-firstpass\Assembly-CSharp-firstpass.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B58B}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F04FB}</Project>
       <Name>Assembly-CSharp-firstpass</Name>
     </ProjectReference>
     <ProjectReference Include="..\FileHelpers\FileHelpers.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B58E}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F04FE}</Project>
       <Name>FileHelpers</Name>
     </ProjectReference>
     <ProjectReference Include="..\Ionic.Zip\Ionic.Zip.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B592}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F0502}</Project>
       <Name>Ionic.Zip</Name>
     </ProjectReference>
     <ProjectReference Include="..\libnoise\libnoise.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B593}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F0503}</Project>
       <Name>libnoise</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B597}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F0507}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B598}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F0508}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\Satsuma\Satsuma.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B59A}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F050A}</Project>
       <Name>Satsuma</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B59C}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F050C}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B59E}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F050E}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B5A8}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F0518}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{D83BB70B-C019-46DD-A038-28BFF405B5A6}</Project>
+      <Project>{80BBB707-8EED-4FB2-A62F-BDFF469F0516}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
   </ItemGroup>

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 using STRINGS;
 using UnityEngine;
 
-public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject
+public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, IApproachable
 {
 	public Orientation Orientation
 	{
@@ -282,8 +282,6 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject
 	{
 		if (this.Def.BlockTileAtlas != null)
 		{
-			int num = Grid.PosToCell(base.transform.position);
-			this.Def.UnmarkArea(num, this.Orientation, this.Def.TileLayer, base.gameObject);
 			PrimaryElement component = base.GetComponent<PrimaryElement>();
 			if (component != null)
 			{
@@ -404,13 +402,35 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject
 		return new Vector2((float)(extents.x + extents.width), (float)(extents.y + extents.height));
 	}
 
+	public CellOffset[] GetOffsets()
+	{
+		return OffsetGroups.Use;
+	}
+
+	public int GetCell()
+	{
+		return Grid.PosToCell(this);
+	}
+
+	public bool ShouldPreferPrimaryCell()
+	{
+		return false;
+	}
+
+	public bool ShouldPreferUnreservedCell()
+	{
+		return false;
+	}
+
+	Transform IApproachable.get_transform()
+	{
+		return base.transform;
+	}
+
 	public BuildingDef Def;
 
 	[MyCmpGet]
 	private Rotatable rotatable;
-
-	[MyCmpAdd]
-	private Approachable approachable;
 
 	[MyCmpAdd]
 	private StateMachineController stateMachineController;

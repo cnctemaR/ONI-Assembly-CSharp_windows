@@ -134,22 +134,10 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		{
 			return;
 		}
-		string text = base.GetType().Name;
-		if (text == "LoopingSounds")
-		{
-			text = "LS";
-		}
-		if (text == "Sequenceable")
-		{
-			text = "S";
-		}
-		if (text == "StructureTemperature")
-		{
-			text = "ST";
-		}
+		string name = base.GetType().Name;
 		if (!this.isInitialized)
 		{
-			global::Debug.LogError(base.name + "." + text + " is not initialized.", null);
+			global::Debug.LogError(base.name + "." + name + " is not initialized.", null);
 			return;
 		}
 		this.isSpawned = true;
@@ -165,7 +153,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 				"Error in: ",
 				base.name,
 				".",
-				text,
+				name,
 				".OnSpawn\n",
 				ex.ToString()
 			}) });

@@ -799,7 +799,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 
 			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State regular;
 
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.CreatureFleeSubState<Approachable> flee;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.CreatureFleeSubState<IApproachable> flee;
 		}
 
 		public class DistressStates : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State

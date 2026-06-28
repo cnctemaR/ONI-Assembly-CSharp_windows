@@ -29,6 +29,10 @@ public enum ObjectLayer
 	LogicGates,
 	LogicWires,
 	LogicWiresTiling,
+	TravelTube,
+	TravelTubeTile,
+	ReplacementTravelTube,
+	TravelTubeConnection,
 	AttachableBuilding,
 	NumLayers
 }

@@ -236,6 +236,7 @@ namespace Database
 			this.GasPipeObstructed = new StatusItem("GasPipeObstructed", "BUILDING", "status_item_wrong_resource_in_pipe", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.GasVentMap, true, 30718);
 			this.NeedPlant = new StatusItem("NeedPlant", "BUILDING", "status_item_need_plant", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
 			this.NeedPower = new StatusItem("NeedPower", "BUILDING", "status_item_need_power", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.PowerMap, true, 30718);
+			this.NotEnoughPower = new StatusItem("NotEnoughPower", "BUILDING", "status_item_need_power", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.PowerMap, true, 30718);
 			this.NewDuplicantsAvailable = new StatusItem("NewDuplicantsAvailable", "BUILDING", "status_item_new_duplicants_available", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
 			this.NewDuplicantsAvailable.AddNotification(null, null, null, 0f);
 			this.NewDuplicantsAvailable.notificationClickCallback = delegate(object data)
@@ -252,6 +253,17 @@ namespace Database
 			this.NoPowerConsumers = new StatusItem("NoPowerConsumers", "BUILDING", "status_item_no_power_consumers", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.PowerMap, true, 30718);
 			this.NoWireConnected = new StatusItem("NoWireConnected", "BUILDING", "status_item_no_wire_connected", StatusItem.IconType.Custom, NotificationType.BadMinor, true, SimViewMode.PowerMap, true, 30718);
 			this.NoLogicWireConnected = new StatusItem("NoLogicWireConnected", "BUILDING", "status_item_no_logic_wire_connected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.Logic, true, 30718);
+			this.NoTubeConnected = new StatusItem("NoTubeConnected", "BUILDING", "status_item_need_supply_out", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
+			this.StoredCharge = new StatusItem("StoredCharge", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			this.StoredCharge.resolveStringCallback = delegate(string str, object data)
+			{
+				TravelTubeEntrance.SMInstance sminstance2 = (TravelTubeEntrance.SMInstance)data;
+				if (sminstance2 != null)
+				{
+					str = string.Format(str, GameUtil.GetFormattedRoundedJoules(sminstance2.master.AvailableJoules), GameUtil.GetFormattedRoundedJoules(sminstance2.master.TotalCapacity), GameUtil.GetFormattedRoundedJoules(sminstance2.master.UsageJoules));
+				}
+				return str;
+			};
 			this.PendingDeconstruction = new StatusItem("PendingDeconstruction", "BUILDING", "status_item_pending_deconstruction", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
 			this.PendingDeconstruction.conditionalOverlayCallback = delegate(SimViewMode mode, object data)
 			{
@@ -282,8 +294,8 @@ namespace Database
 			this.PendingRepair = new StatusItem("PendingRepair", "BUILDING", "status_item_pending_repair", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
 			this.PendingRepair.resolveStringCallback = delegate(string str, object data)
 			{
-				Repairable.SMInstance sminstance2 = (Repairable.SMInstance)data;
-				BuildingHP component5 = sminstance2.master.GetComponent<BuildingHP>();
+				Repairable.SMInstance sminstance3 = (Repairable.SMInstance)data;
+				BuildingHP component5 = sminstance3.master.GetComponent<BuildingHP>();
 				return str.Replace("{DamageInfo}", component5.GetDamageSourceInfo().ToString());
 			};
 			this.PendingRepair.conditionalOverlayCallback = (SimViewMode mode, object data) => true;
@@ -575,6 +587,8 @@ namespace Database
 
 		public StatusItem NeedPower;
 
+		public StatusItem NotEnoughPower;
+
 		public StatusItem NeedLiquidIn;
 
 		public StatusItem NeedGasIn;
@@ -646,6 +660,10 @@ namespace Database
 		public StatusItem NoWireConnected;
 
 		public StatusItem NoLogicWireConnected;
+
+		public StatusItem NoTubeConnected;
+
+		public StatusItem StoredCharge;
 
 		public StatusItem NoPowerConsumers;
 

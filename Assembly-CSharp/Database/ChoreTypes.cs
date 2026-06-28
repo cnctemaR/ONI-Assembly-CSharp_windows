@@ -13,6 +13,7 @@ namespace Database
 			this.Entombed = this.Add("Entombed", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.ENTOMBED.NAME, DUPLICANTS.CHORES.ENTOMBED.STATUS);
 			this.SuitMarker = this.Add("SuitMarker", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.WASHHANDS.NAME, DUPLICANTS.CHORES.WASHHANDS.STATUS);
 			this.Checkpoint = this.Add("Checkpoint", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.CHECKPOINT.NAME, DUPLICANTS.CHORES.CHECKPOINT.STATUS);
+			this.TravelTubeEntrance = this.Add("TravelTubeEntrance", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.TRAVELTUBEENTRANCE.NAME, DUPLICANTS.CHORES.TRAVELTUBEENTRANCE.STATUS);
 			this.WashHands = this.Add("WashHands", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.WASHHANDS.NAME, DUPLICANTS.CHORES.WASHHANDS.STATUS);
 			this.HealCritical = this.Add("HealCritical", new string[0], "HealCritical", new string[] { "Vomit", "Cough" }, DUPLICANTS.CHORES.HEALCRITICAL.NAME, DUPLICANTS.CHORES.HEALCRITICAL.STATUS);
 			this.BeIncapacitated = this.Add("BeIncapacitated", new string[0], "BeIncapacitated", new string[0], DUPLICANTS.CHORES.BEINCAPACITATED.NAME, DUPLICANTS.CHORES.BEINCAPACITATED.STATUS);
@@ -116,10 +117,10 @@ namespace Database
 				new ChoreType[]
 				{
 					this.DeliverFood, this.Sigh, this.EmptyStorage, this.Upgrade, this.Repair, this.Disinfect, this.Shower, this.CleanToilet, this.LiquidCooledFan, this.SuitMarker,
-					this.Checkpoint, this.WashHands, this.TakeMedicine, this.Doctor, this.Recharge, this.FetchCritical, this.ScrubOre, this.MoveToSafety, this.Relocate, this.Research,
-					this.ResearchFetch, this.Mop, this.Toggle, this.Deconstruct, this.Fetch, this.Transport, this.Art, this.GeneratePower, this.CompostWorkable, this.DropUnusedInventory,
-					this.Harvest, this.Uproot, this.Fabricate, this.Mush, this.Cook, this.Build, this.Dig, this.BuildDig, this.FlipCompost, this.Depressurize,
-					this.BuildFetch, this.CookFetch, this.MushFetch, this.FabricateFetch, this.StressEmote, this.ReturnSuitUrgent
+					this.Checkpoint, this.TravelTubeEntrance, this.WashHands, this.TakeMedicine, this.Doctor, this.Recharge, this.FetchCritical, this.ScrubOre, this.MoveToSafety, this.Relocate,
+					this.Research, this.ResearchFetch, this.Mop, this.Toggle, this.Deconstruct, this.Fetch, this.Transport, this.Art, this.GeneratePower, this.CompostWorkable,
+					this.DropUnusedInventory, this.Harvest, this.Uproot, this.Fabricate, this.Mush, this.Cook, this.Build, this.Dig, this.BuildDig, this.FlipCompost,
+					this.Depressurize, this.BuildFetch, this.CookFetch, this.MushFetch, this.FabricateFetch, this.StressEmote, this.ReturnSuitUrgent
 				},
 				new ChoreType[] { this.ReturnSuitIdle },
 				new ChoreType[] { this.Idle }
@@ -331,6 +332,8 @@ namespace Database
 		public ChoreType ReturnSuitIdle;
 
 		public ChoreType Checkpoint;
+
+		public ChoreType TravelTubeEntrance;
 
 		private int nextPriority = 10000;
 	}

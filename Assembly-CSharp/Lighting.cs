@@ -54,11 +54,11 @@ public class Lighting : MonoBehaviour
 		float num = ((!flag) ? 0f : 1f);
 		if (this.disableLighting)
 		{
-			Shader.SetGlobalVector("_AnimParameters", new Vector4(1f, 0f, 0f, num));
+			Shader.SetGlobalVector("_AnimParameters", new Vector4(1f, this.Settings.WorldZoneAnimBlend, 0f, num));
 		}
 		else
 		{
-			Shader.SetGlobalVector("_AnimParameters", new Vector4(this.Settings.AnimIntensity, 0f, 0f, num));
+			Shader.SetGlobalVector("_AnimParameters", new Vector4(this.Settings.AnimIntensity, this.Settings.WorldZoneAnimBlend, 0f, num));
 		}
 		Shader.SetGlobalVector("_GasOpacity", new Vector4(this.Settings.GasMinOpacity, this.Settings.GasMaxOpacity, 0f, 0f));
 		Shader.SetGlobalColor("_DarkenTintBackground", this.Settings.DarkenTints[0]);
@@ -88,13 +88,10 @@ public class Lighting : MonoBehaviour
 		Shader.SetGlobalFloat("_WorldZoneLiquidBlend", this.Settings.WorldZoneLiquidBlend);
 		Shader.SetGlobalFloat("_WorldZoneForegroundBlend", this.Settings.WorldZoneForegroundBlend);
 		Shader.SetGlobalFloat("_WorldZoneSimpleAnimBlend", this.Settings.WorldZoneSimpleAnimBlend);
-		Shader.SetGlobalFloat("_WorldZoneAnimBlend", this.Settings.WorldZoneAnimBlend);
 		Shader.SetGlobalColor("_CharacterLitColour", this.Settings.characterLighting.litColour);
 		Shader.SetGlobalColor("_CharacterUnlitColour", this.Settings.characterLighting.unlitColour);
 		Shader.SetGlobalTexture("_BuildingDamagedTex", this.Settings.BuildingDamagedTex);
 		Shader.SetGlobalVector("_BuildingDamagedUVParameters", this.Settings.BuildingDamagedUVParameters);
-		Shader.SetGlobalVector("_BuildingDamagedUVParameters", this.Settings.BuildingDamagedUVParameters);
-		Shader.SetGlobalColor("_BuildingDamagedTint", this.Settings.BuildingDamagedTint);
 		Shader.SetGlobalTexture("_DiseaseOverlayTex", this.Settings.DiseaseOverlayTex);
 		Shader.SetGlobalVector("_DiseaseOverlayTexInfo", this.Settings.DiseaseOverlayTexInfo);
 		if (LightBuffer.Instance != null && LightBuffer.Instance.Texture != null)

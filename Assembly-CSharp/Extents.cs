@@ -58,6 +58,14 @@ public struct Extents
 		this.height = num4 - num2 + 1;
 	}
 
+	public static Extents OneCell(int cell)
+	{
+		int num;
+		int num2;
+		Grid.CellToXY(cell, out num, out num2);
+		return new Extents(num, num2, 1, 1);
+	}
+
 	public bool Contains(Vector2I pos)
 	{
 		return this.x <= pos.x && pos.x < this.x + this.width && this.y <= pos.y && pos.y < this.y + this.height;

@@ -49,10 +49,6 @@ public class SelectTool : InterfaceTool
 		{
 			return;
 		}
-		if (!HoverTextScreen.Instance.IsVisible)
-		{
-			this.hoverScreenUpdate.Prime();
-		}
 		if (!this.hasFocus && this.hoverOverride == null)
 		{
 			this.ClearHover();
@@ -65,7 +61,6 @@ public class SelectTool : InterfaceTool
 			if (this.hoverText == null)
 			{
 				this.hoverText = base.gameObject.GetComponent<HoverTextConfiguration>();
-				this.hoverText.ConfigureHoverScreen();
 			}
 			this.hoverText.UpdateHoverElements(this.hits);
 			if (objectUnderCursor != null && objectUnderCursor != this.hover)
@@ -356,11 +351,6 @@ public class SelectTool : InterfaceTool
 		this.Select(objectUnderCursor, false);
 	}
 
-	public override void OnRightClickUp(Vector3 cursor_pos)
-	{
-		base.OnRightClickUp(cursor_pos);
-	}
-
 	public int GetSelectedCell()
 	{
 		return this.selectedCell;
@@ -383,8 +373,6 @@ public class SelectTool : InterfaceTool
 	protected int defaultLayerMask;
 
 	protected int layerMask;
-
-	private HoverTextScreen.HoverTextUpdateTimer hoverScreenUpdate;
 
 	protected SelectMarker selectMarker;
 

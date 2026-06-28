@@ -32,8 +32,9 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.trapsLayer = this.partitioner.CreateMask(new HashedString("trapsLayer"));
 		this.floorSwitchActivatorLayer = this.partitioner.CreateMask(new HashedString("FloorSwitchActivatorLayer"));
 		this.floorSwitchActivatorChangedLayer = this.partitioner.CreateMask(new HashedString("FloorSwitchActivatorChangedLayer"));
-		this.objectLayers = new ScenePartitionerLayer[28];
-		for (int i = 0; i < 28; i++)
+		this.tubeConnectionsChangedLayer = this.partitioner.CreateMask(new HashedString("TubeConnectionsChangedLayer"));
+		this.objectLayers = new ScenePartitionerLayer[32];
+		for (int i = 0; i < 32; i++)
 		{
 			ObjectLayer objectLayer = (ObjectLayer)i;
 			this.objectLayers[i] = this.partitioner.CreateMask(new HashedString(objectLayer.ToString()));
@@ -62,6 +63,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.trapsLayer = null;
 		this.floorSwitchActivatorLayer = null;
 		this.floorSwitchActivatorChangedLayer = null;
+		this.tubeConnectionsChangedLayer = null;
 		this.objectLayers = null;
 	}
 
@@ -171,6 +173,8 @@ public class GameScenePartitioner : KMonoBehaviour
 	public ScenePartitionerLayer floorSwitchActivatorLayer;
 
 	public ScenePartitionerLayer floorSwitchActivatorChangedLayer;
+
+	public ScenePartitionerLayer tubeConnectionsChangedLayer;
 
 	private ScenePartitioner partitioner;
 

@@ -355,6 +355,30 @@ public class FallingWater : KMonoBehaviour
 
 	private void AddToSim(int cell, int particleIdx, ref int num_particles)
 	{
+		bool flag = false;
+		for (;;)
+		{
+			Element element = Grid.Element[cell];
+			Element.State state = element.state & Element.State.Solid;
+			if (state == Element.State.Solid || (Grid.Cell[cell].properties & 2) != 0)
+			{
+				cell += Grid.WidthInCells;
+				if (!Grid.IsValidCell(cell))
+				{
+					break;
+				}
+			}
+			else
+			{
+				flag = true;
+			}
+			if (flag)
+			{
+				goto Block_3;
+			}
+		}
+		return;
+		Block_3:
 		FallingWater.ParticleProperties particleProperties = this.properties[particleIdx];
 		SimMessages.AddRemoveSubstance(cell, (int)particleProperties.elementIdx, CellEventLogger.Instance.FallingWaterAddToSim, particleProperties.mass, particleProperties.temperature, particleProperties.diseaseIdx, particleProperties.diseaseCount, -1);
 		this.RemoveParticle(particleIdx, ref num_particles);
@@ -366,7 +390,7 @@ public class FallingWater : KMonoBehaviour
 			Vector3 vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.TileMain);
 			if (CameraController.Instance.IsAudibleSound(vector, 0f))
 			{
-				bool flag = true;
+				bool flag2 = true;
 				FallingWater.SoundInfo soundInfo;
 				if (this.splashSounds.TryGetValue(cell, out soundInfo))
 				{
@@ -379,7 +403,7 @@ public class FallingWater : KMonoBehaviour
 						}
 						soundInfo.eventInstance.setParameterValue("liquidDepth", SoundUtil.GetLiquidDepth(cell));
 						soundInfo.eventInstance.setParameterValue("liquidVolume", this.GetParticleVolume(particleProperties.mass));
-						flag = false;
+						flag2 = false;
 					}
 				}
 				else
@@ -388,7 +412,7 @@ public class FallingWater : KMonoBehaviour
 				}
 				soundInfo.startTime = time;
 				this.splashSounds[cell] = soundInfo;
-				if (flag)
+				if (flag2)
 				{
 					EventInstance eventInstance = SoundEvent.BeginOneShot(this.liquid_splash_initial, vector);
 					eventInstance.setParameterValue("liquidDepth", SoundUtil.GetLiquidDepth(cell));

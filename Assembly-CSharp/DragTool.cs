@@ -13,12 +13,6 @@ public class DragTool : InterfaceTool
 		}
 	}
 
-	private void OnEnable()
-	{
-		this.hoverScreenUpdate.tickInterval = 0.5f;
-		this.hoverScreenUpdate.Prime();
-	}
-
 	protected virtual DragTool.Mode GetMode()
 	{
 		return this.mode;
@@ -418,26 +412,15 @@ public class DragTool : InterfaceTool
 
 	public virtual void Update()
 	{
-		if (!HoverTextScreen.Instance.IsVisible)
+		if (this.hoverText == null)
 		{
-			this.hoverScreenUpdate.Prime();
+			this.hoverText = base.GetComponent<HoverTextConfiguration>();
 		}
-		else if (this.hoverScreenUpdate.tick())
+		if (this.hoverText != null)
 		{
-			if (this.hoverText == null)
-			{
-				this.hoverText = base.GetComponent<HoverTextConfiguration>();
-			}
-			if (this.hoverText != null)
-			{
-				this.hits.Clear();
-				SelectTool.Instance.GetSelectablesUnderCursor(this.hits, false);
-				this.hoverText.UpdateHoverElements(this.hits);
-			}
-			else
-			{
-				global::Debug.Log("no hover text configuration " + base.gameObject.name, null);
-			}
+			this.hits.Clear();
+			SelectTool.Instance.GetSelectablesUnderCursor(this.hits, false);
+			this.hoverText.UpdateHoverElements(this.hits);
 		}
 	}
 
@@ -472,8 +455,6 @@ public class DragTool : InterfaceTool
 	private HoverTextScreen hoverTextScreen;
 
 	protected Vector3 downPos;
-
-	protected HoverTextScreen.HoverTextUpdateTimer hoverScreenUpdate;
 
 	protected static int layerMask;
 

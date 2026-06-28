@@ -18,17 +18,29 @@ public class TransitionDriver
 		this.navigator = navigator;
 		this.transition = transition;
 		this.isComplete = false;
+		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Move;
+		if (transition.navGridTransition.start == NavType.Tube || transition.navGridTransition.end == NavType.Tube)
+		{
+			sceneLayer = Grid.SceneLayer.BuildingUse;
+		}
 		int num = Grid.PosToCell(navigator);
 		int num2 = Grid.OffsetCell(num, transition.x, transition.y);
-		this.targetPos = Grid.CellToPosCBC(num2, Grid.SceneLayer.Move);
+		this.targetPos = Grid.CellToPosCBC(num2, sceneLayer);
 		if (transition.isLooping)
 		{
 			KAnimControllerBase component = navigator.GetComponent<KAnimControllerBase>();
 			if (component.CurrentAnim == null || (component.CurrentAnim.name != transition.anim && component.CurrentAnim.name != transition.preAnim))
 			{
 				component.PlaySpeedMultiplier = transition.animSpeed;
-				component.Play(transition.preAnim, KAnim.PlayMode.Once, 1f, 0f);
-				component.Queue(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
+				if (transition.preAnim != string.Empty)
+				{
+					component.Play(transition.preAnim, KAnim.PlayMode.Once, 1f, 0f);
+					component.Queue(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
+				}
+				else
+				{
+					component.Play(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
+				}
 			}
 		}
 		else if (transition.anim != null)

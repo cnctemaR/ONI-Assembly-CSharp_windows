@@ -30,6 +30,16 @@ public class CharacterContainer : KScreen
 		base.StartCoroutine(this.DelayedGeneration());
 	}
 
+	public void ForceStopEditingTitle()
+	{
+		this.characterNameTitle.ForceStopEditing();
+	}
+
+	public override float GetSortKey()
+	{
+		return 100f;
+	}
+
 	private IEnumerator DelayedGeneration()
 	{
 		yield return new WaitForEndOfFrame();
@@ -421,6 +431,11 @@ public class CharacterContainer : KScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
+		if (e.IsAction(global::Action.Escape))
+		{
+			this.characterNameTitle.ForceStopEditing();
+			this.controller.OnPressBack();
+		}
 		e.Consumed = true;
 	}
 
@@ -437,6 +452,12 @@ public class CharacterContainer : KScreen
 			return;
 		}
 		this.SetAnimator();
+	}
+
+	protected override void OnShow(bool show)
+	{
+		base.OnShow(show);
+		this.characterNameTitle.ForceStopEditing();
 	}
 
 	[SerializeField]

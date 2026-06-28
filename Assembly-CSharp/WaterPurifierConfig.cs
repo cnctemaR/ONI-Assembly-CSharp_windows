@@ -67,7 +67,7 @@ public class WaterPurifierConfig : IBuildingConfig
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 10f;
-		conduitConsumer.capacityKG = 10f;
+		conduitConsumer.capacityKG = 20f;
 		conduitConsumer.capacityTag = GameTags.AnyWater;
 		conduitConsumer.forceAlwaysSatisfied = true;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Store;

@@ -16,18 +16,7 @@ public class DigTool : DragTool
 		{
 			return;
 		}
-		if (!HoverTextScreen.Instance.IsVisible)
-		{
-			this.hoverScreenUpdate.Prime();
-		}
-		else if (this.hoverScreenUpdate.tick() || this.cell_old != this.cell_new)
-		{
-			if (this.hoverText == null)
-			{
-				this.hoverText = base.gameObject.GetComponent<HoverTextConfiguration>();
-			}
-			this.hoverText.UpdateHoverElements(null);
-		}
+		base.Update();
 		this.cell_old = this.cell_new;
 	}
 
@@ -74,7 +63,7 @@ public class DigTool : DragTool
 	{
 		if (Grid.Solid[cell] && !Grid.Foundation[cell] && Grid.Objects[cell, 7] == null)
 		{
-			for (int i = 0; i < 28; i++)
+			for (int i = 0; i < 32; i++)
 			{
 				if (Grid.Objects[cell, i] != null && Grid.Objects[cell, i].GetComponent<Constructable>() != null)
 				{

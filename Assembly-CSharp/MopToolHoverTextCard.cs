@@ -20,38 +20,7 @@ public class MopToolHoverTextCard : HoverTextConfiguration
 				instance.currentConfiguration = this;
 				instance.ToggleIncubating(true);
 				instance.ClearLabels();
-				instance.NewLine("Spacer", 24);
-				instance.StartShadowBar(0f, 0f, false);
-				this.hoverScreenElements.UnknownAreaLine = instance.NewLine("UnknownArea", 24);
-				instance.AddIcon(instance.GetSprite("iconWarning"), 18f);
-				instance.AddIndent(4f, 18f);
-				instance.AddText(UI.TOOLS.GENERIC.UNKNOWN, null, true);
-				instance.EndShadowBar();
-				base.SetLineActive(this.hoverScreenElements.UnknownAreaLine, false);
-				instance.StartShadowBar(0f, 0f, false);
-				this.ConfigureTitle(instance);
-				instance.NewLine("Line_ElementName", 24);
-				this.hoverScreenElements.ElementName = instance.AddText(string.Empty, this.Styles_Title.Standard, true);
-				instance.NewLine("Line_Category", 24);
-				instance.AddIcon(instance.GetSprite("dash"), this.iconColor_basic, 18f);
-				instance.AddIndent(4f, 18f);
-				this.hoverScreenElements.ElementCategory = instance.AddText(string.Empty, this.Styles_Title.Standard, false);
-				instance.NewLine("Mass", 24);
-				instance.AddIcon(instance.GetSprite("dash"), this.iconColor_basic, 18f);
-				instance.AddIndent(4f, 18f);
-				this.hoverScreenElements.ElementMass = new LocText[4];
-				this.hoverScreenElements.ElementMass[0] = instance.AddText(string.Empty, this.Styles_Values.Property.Standard, true);
-				this.hoverScreenElements.ElementMass[1] = instance.AddText(string.Empty, this.Styles_Values.Property_Decimal.Standard, true);
-				this.hoverScreenElements.ElementMass[2] = instance.AddText(string.Empty, this.Styles_Values.Property_Unit.Standard, false);
-				this.hoverScreenElements.ElementMass[3] = instance.AddText(string.Empty, this.Styles_Values.Property_Unit.Standard, true);
-				instance.NewLine("NewLine", 24);
-				instance.AddIcon(instance.GetSprite("icon_mouse_left"), 16f);
-				LocText locText = instance.AddText(UI.TOOLS.MOP.TOOLACTION, this.Styles_Instruction.Standard, true);
-				locText.gameObject.name = "ActionText";
-				instance.AddIndent(8f, 18f);
-				instance.AddIcon(instance.GetSprite("icon_mouse_right"), 16f);
-				instance.AddText(UI.TOOLS.GENERIC.BACK, this.Styles_Instruction.Standard, true);
-				instance.EndShadowBar();
+				this.ConfigureTitle(instance, true);
 				this.isConfigured = true;
 			}
 		}
@@ -59,54 +28,43 @@ public class MopToolHoverTextCard : HoverTextConfiguration
 
 	public override void UpdateHoverElements(List<KSelectable> selected)
 	{
-		if (!this.isConfigured || this.hoverScreenElements.ElementCategory == null)
-		{
-			this.ConfigureHoverScreen();
-		}
+		base.UpdateHoverElements(selected);
 		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
 		if (!Grid.IsValidCell(num))
 		{
 			return;
 		}
-		bool flag = Grid.Visible[num] > 0 || DebugHandler.FreeCameraMode;
-		bool flag2 = false;
-		if (flag && Grid.Element[num].IsLiquid)
+		HoverTextScreen instance = HoverTextScreen.Instance;
+		HoverTextDrawer hoverTextDrawer = instance.BeginDrawing();
+		hoverTextDrawer.BeginShadowBar(false);
+		if (Grid.Visible[num] > 0 || DebugPaintElementScreen.Instance.gameObject.activeSelf)
 		{
-			flag2 = true;
-		}
-		base.SetLineActive(this.hoverScreenElements.UnknownAreaLine, Grid.Visible[num] == 0 && !flag2 && !DebugPaintElementScreen.Instance.gameObject.activeSelf);
-		base.SetLineActive(this.hoverScreenElements.ElementMass[0].transform.parent.gameObject, flag2);
-		base.SetLineActive(this.hoverScreenElements.ElementName.transform.parent.gameObject, flag2);
-		base.SetLineActive(this.hoverScreenElements.ElementCategory.transform.parent.gameObject, flag2);
-		if (flag2)
-		{
-			this.hoverScreenElements.ElementName.GetComponent<SetTextStyleSetting>().SetStyle(this.Styles_Title.Standard);
-			for (int i = 0; i < this.hoverScreenElements.ElementMass.Length; i++)
+			base.DrawTitle(instance, hoverTextDrawer);
+			base.DrawInstructions(HoverTextScreen.Instance, hoverTextDrawer);
+			Element element = Grid.Element[num];
+			if (element.IsLiquid)
 			{
-				this.hoverScreenElements.ElementMass[i].GetComponent<SetTextStyleSetting>().SetStyle(this.Styles_BodyText.Standard);
-			}
-			this.hoverScreenElements.ElementCategory.GetComponent<SetTextStyleSetting>().SetStyle(this.Styles_BodyText.Standard);
-			this.hoverScreenElements.ElementCategory.text = ElementLoader.elements[(int)Grid.Cell[num].elementIdx].GetMaterialCategoryTag().ProperName();
-			this.hoverScreenElements.ElementName.text = ElementLoader.elements[(int)Grid.Cell[num].elementIdx].name.ToUpper();
-			base.SetLineActive(this.hoverScreenElements.ElementCategory.transform.parent.gameObject, !ElementLoader.elements[(int)Grid.Cell[num].elementIdx].IsVacuum);
-			string[] array = WorldInspector.MassStrings(num);
-			if (this.hoverScreenElements.ElementMass[0].text != array[0])
-			{
-				this.hoverScreenElements.ElementMass[0].text = array[0];
-			}
-			if (this.hoverScreenElements.ElementMass[1].text != array[1])
-			{
-				this.hoverScreenElements.ElementMass[1].text = array[1];
-			}
-			if (this.hoverScreenElements.ElementMass[2].text != array[2])
-			{
-				this.hoverScreenElements.ElementMass[2].text = array[2];
-			}
-			if (this.hoverScreenElements.ElementMass[3].text != array[3])
-			{
-				this.hoverScreenElements.ElementMass[3].text = array[3];
+				hoverTextDrawer.NewLine(26);
+				hoverTextDrawer.DrawText(element.name.ToUpper(), this.Styles_Title.Standard);
+				hoverTextDrawer.NewLine(26);
+				hoverTextDrawer.DrawIcon(instance.GetSprite("dash"), 18);
+				hoverTextDrawer.DrawText(element.GetMaterialCategoryTag().ProperName(), this.Styles_BodyText.Standard);
+				hoverTextDrawer.NewLine(26);
+				hoverTextDrawer.DrawIcon(instance.GetSprite("dash"), 18);
+				string[] array = WorldInspector.MassStrings(num);
+				hoverTextDrawer.DrawText(array[0], this.Styles_Values.Property.Standard);
+				hoverTextDrawer.DrawText(array[1], this.Styles_Values.Property_Decimal.Standard);
+				hoverTextDrawer.DrawText(array[2], this.Styles_Values.Property.Standard);
+				hoverTextDrawer.DrawText(array[3], this.Styles_Values.Property.Standard);
 			}
 		}
+		else
+		{
+			hoverTextDrawer.DrawIcon(instance.GetSprite("iconWarning"), 18);
+			hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.UNKNOWN.ToString().ToUpper(), this.Styles_BodyText.Standard);
+		}
+		hoverTextDrawer.EndShadowBar();
+		hoverTextDrawer.EndDrawing();
 	}
 
 	private MopToolHoverTextCard.HoverScreenFields hoverScreenElements;

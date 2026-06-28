@@ -33,6 +33,7 @@ public enum Action
 	BuildCategoryLadders,
 	BuildCategoryTiles,
 	BuildCategoryDoors,
+	BuildCategoryTravelTubes,
 	BuildCategoryStorage,
 	BuildCategoryResearch,
 	BuildCategoryGenerators,

@@ -103,7 +103,7 @@ public class CoolDownChore : Chore<CoolDownChore.StatesInstance>
 
 		public GameStateMachine<CoolDownChore.States, CoolDownChore.StatesInstance, CoolDownChore, object>.State NoLocationAvailable;
 
-		public GameStateMachine<CoolDownChore.States, CoolDownChore.StatesInstance, CoolDownChore, object>.ApproachSubState<Approachable> approach;
+		public GameStateMachine<CoolDownChore.States, CoolDownChore.StatesInstance, CoolDownChore, object>.ApproachSubState<IApproachable> approach;
 
 		public GameStateMachine<CoolDownChore.States, CoolDownChore.StatesInstance, CoolDownChore, object>.PLPState recover;
 

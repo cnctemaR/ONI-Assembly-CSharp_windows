@@ -20,17 +20,12 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 	public string GetHitAnim()
 	{
 		Workable component = this.smi.sm.attackTarget.Get(this.smi).gameObject.GetComponent<Workable>();
-		if (!component)
+		if (component)
 		{
-			return "hit";
+			string text = MultitoolController.GetAnimationStrings(component, this.gameObject.GetComponent<Worker>(), "hit")[1];
+			return text.Replace("_loop", string.Empty);
 		}
-		string text = MultitoolController.GetAnimationStrings(component, this.gameObject.GetComponent<Worker>(), "hit")[1];
-		text = text.Replace("_loop", string.Empty);
-		if (text.Contains("{verb}"))
-		{
-			return "hit";
-		}
-		return text;
+		return "hit";
 	}
 
 	public void OnTargetMoved(object data)

@@ -64,6 +64,8 @@ namespace TUNING
 
 			public static EdiblesManager.FoodInfo BASICFORAGEPLANT = new EdiblesManager.FoodInfo("BasicForagePlant", 1000000f, -3, 255.15f, 277.15f, 2400f);
 
+			public static EdiblesManager.FoodInfo FRUITCAKE = new EdiblesManager.FoodInfo("FruitCake", 1600000f, -1, 255.15f, 277.15f, 9600f);
+
 			public static EdiblesManager.FoodInfo BASICPLANTBAR = new EdiblesManager.FoodInfo("BasicPlantBar", 1000000f, -2, 255.15f, 277.15f, 2400f);
 
 			public static EdiblesManager.FoodInfo FRIEDMUSHBAR = new EdiblesManager.FoodInfo("FriedMushBar", 1000000f, -2, 255.15f, 277.15f, 2400f);

@@ -4,6 +4,14 @@ using UnityEngine;
 
 public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 {
+	private bool RedLightDesiredState
+	{
+		get
+		{
+			return this.hasLogicWire && !this.hasInputHigh && this.operational.IsOperational;
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -15,17 +23,26 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 			Checkpoint.infoStatusItem_Logic = new StatusItem("CheckpointLogic", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
 			Checkpoint.infoStatusItem_Logic.resolveStringCallback = new Func<string, object, string>(Checkpoint.ResolveInfoStatusItem_Logic);
 		}
-		if (Checkpoint.infoStatusItem_Wire == null)
-		{
-			Checkpoint.infoStatusItem_Wire = new StatusItem("CheckpointDisconnected", BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_DISCONNECTED, BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_DISCONNECTED, string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.Logic, 30718);
-		}
-		this.Refresh();
+		this.Refresh(this.redLight);
 	}
 
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
 		this.ClearReactable();
+	}
+
+	private void SimUpdate(float dt)
+	{
+		if (this.redLight != this.RedLightDesiredState)
+		{
+			this.Refresh(this.RedLightDesiredState);
+			this.statusDirty = true;
+		}
+		if (this.statusDirty)
+		{
+			this.RefreshStatusItem();
+		}
 	}
 
 	private LogicCircuitNetwork GetNetwork()
@@ -39,10 +56,6 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 	private static string ResolveInfoStatusItem_Logic(string format_str, object data)
 	{
 		Checkpoint checkpoint = (Checkpoint)data;
-		if (!checkpoint.hasLogicWire)
-		{
-			return BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_DISCONNECTED;
-		}
 		return (!checkpoint.RedLight) ? BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_OPEN : BUILDING.STATUSITEMS.CHECKPOINT.LOGIC_CONTROLLED_CLOSED;
 	}
 
@@ -83,22 +96,27 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 		{
 			this.hasInputHigh = logicValueChanged.newValue > 0;
 			this.hasLogicWire = this.GetNetwork() != null;
-			this.Refresh();
+			this.statusDirty = true;
 		}
 	}
 
 	private void OnOperationalChanged(object data)
 	{
-		this.Refresh();
+		this.statusDirty = true;
 	}
 
-	private void Refresh()
+	private void RefreshStatusItem()
 	{
-		this.redLight = this.hasLogicWire && !this.hasInputHigh && this.operational.IsOperational;
-		this.operational.SetActive(this.redLight, false);
+		bool flag = this.operational.IsOperational && this.hasLogicWire;
+		this.selectable.ToggleStatusItem(Checkpoint.infoStatusItem_Logic, flag, this);
+		this.statusDirty = false;
+	}
+
+	private void Refresh(bool redLightState)
+	{
+		this.redLight = redLightState;
+		this.operational.SetActive(this.operational.IsOperational && this.redLight, false);
 		base.smi.sm.redLight.Set(this.redLight, base.smi);
-		this.selectable.ToggleStatusItem(Checkpoint.infoStatusItem_Logic, this.operational.IsOperational && this.hasLogicWire, this);
-		this.selectable.ToggleStatusItem(Checkpoint.infoStatusItem_Wire, !this.hasLogicWire, null);
 		if (this.redLight)
 		{
 			this.CreateNewReactable();
@@ -117,8 +135,6 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 
 	private static StatusItem infoStatusItem_Logic;
 
-	private static StatusItem infoStatusItem_Wire;
-
 	private Checkpoint.CheckpointReactable reactable;
 
 	public static readonly HashedString PORT_ID = "Checkpoint";
@@ -128,6 +144,8 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 	private bool hasInputHigh;
 
 	private bool redLight;
+
+	private bool statusDirty = true;
 
 	private class CheckpointReactable : Reactable
 	{

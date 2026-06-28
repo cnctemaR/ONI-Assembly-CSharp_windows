@@ -43,7 +43,7 @@ public class ConduitTemperatureManager : KCompactedVector<ConduitTemperatureMana
 		for (int i = 0; i < this.data.Count; i++)
 		{
 			ConduitTemperatureManager.Data data = this.data[i];
-			if (data.heatCapacity != 0f)
+			if (data.heatCapacity > 0f && data.conduitHeatCapacity > 0f)
 			{
 				StructureTemperatureData data2 = GameComps.StructureTemperatures.GetData(data.conduitStructureTemperatureHandle);
 				float temperature = data.temperature;
@@ -69,19 +69,8 @@ public class ConduitTemperatureManager : KCompactedVector<ConduitTemperatureMana
 
 	private float ModifyTemperature(float source_temperature, float source_heat_capacity, float cell_temperature, float cell_heat_capacity, ref float kilojoules)
 	{
-		if (source_heat_capacity * cell_heat_capacity <= 0f)
-		{
-			kilojoules = 0f;
-			return source_temperature;
-		}
 		float num = source_temperature;
 		float num2 = Math.Max(0f, num + kilojoules / source_heat_capacity);
-		if (float.IsInfinity(num2) || float.IsNaN(num2))
-		{
-			Output.LogError(new object[] { "Invalid temperature" });
-			kilojoules = 0f;
-			return source_temperature;
-		}
 		source_temperature = num2;
 		float num3 = Math.Max(0f, cell_temperature - kilojoules / cell_heat_capacity);
 		if ((num - cell_temperature) * (source_temperature - num3) < 0f)

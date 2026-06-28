@@ -1,16 +1,28 @@
 ﻿using System;
+using System.IO;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-[SkipSaveFileSerialization]
-public class Navigator : StateMachineComponent<Navigator.StatesInstance>
+public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveLoadableDetails
 {
 	public KMonoBehaviour target { get; set; }
 
 	public CellOffset[] targetOffsets { get; private set; }
 
 	public NavGrid NavGrid { get; private set; }
+
+	public void Serialize(BinaryWriter writer)
+	{
+		byte currentNavType = (byte)this.CurrentNavType;
+		writer.Write(currentNavType);
+	}
+
+	public void Deserialize(IReader reader)
+	{
+		byte b = reader.ReadByte();
+		this.CurrentNavType = (NavType)b;
+	}
 
 	protected override void OnPrefabInit()
 	{
@@ -92,6 +104,12 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 		this.transitionDriver.BeginTransition(this, activeTransition);
 	}
 
+	private bool ValidatePath(ref PathFinder.Path path)
+	{
+		PathFinderAbilities currentAbilities = this.GetCurrentAbilities();
+		return PathFinder.ValidatePath(this.NavGrid, currentAbilities, ref path);
+	}
+
 	public void AdvancePath(bool trigger_advance = true)
 	{
 		int num = Grid.PosToCell(this);
@@ -100,27 +118,40 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 			base.Trigger(-766531887, null);
 			this.Stop(false);
 		}
-		else if (num == this.reservedCell)
+		else if (num == this.reservedCell && this.CurrentNavType != NavType.Tube)
 		{
 			this.Stop(true);
 		}
 		else
 		{
-			bool flag = false;
 			int num2 = Grid.PosToCell(this.target);
-			if (this.reservedCell == NavigationReservations.InvalidReservation || !this.CanReach(this.reservedCell))
+			bool flag;
+			if (this.reservedCell == NavigationReservations.InvalidReservation)
 			{
-				this.ClearReservedCell();
 				flag = true;
 			}
-			else if (Grid.IsCellOffsetOf(this.reservedCell, num2, this.targetOffsets))
+			else if (!this.CanReach(this.reservedCell))
 			{
-				PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(num, this.CurrentNavType, this.flags);
-				PathFinder.UpdatePath(this.NavGrid, this.GetCurrentAbilities(), potentialPath, PathFinderQueries.cellOffsetQuery.Reset(new int[] { this.reservedCell }), ref this.path);
-				if (this.path.IsValid())
+				flag = true;
+			}
+			else if (!Grid.IsCellOffsetOf(this.reservedCell, num2, this.targetOffsets))
+			{
+				flag = true;
+			}
+			else if (this.path.IsValid())
+			{
+				if (num == this.path.nodes[0].cell && this.CurrentNavType == this.path.nodes[0].navType)
 				{
-					flag = false;
-					this.SetReservedCell(this.reservedCell);
+					flag = !this.ValidatePath(ref this.path);
+				}
+				else if (num == this.path.nodes[1].cell && this.CurrentNavType == this.path.nodes[1].navType)
+				{
+					this.path.nodes.RemoveAt(0);
+					flag = !this.ValidatePath(ref this.path);
+				}
+				else
+				{
+					flag = true;
 				}
 			}
 			else
@@ -129,26 +160,16 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 			}
 			if (flag)
 			{
-				this.ClearReservedCell();
-				int[] cellPreferences = this.tactic.GetCellPreferences(num2, this.targetOffsets, this);
-				for (int i = 0; i < cellPreferences.Length; i++)
-				{
-					if (this.CanReach(cellPreferences[i]))
-					{
-						this.SetReservedCell(cellPreferences[i]);
-						break;
-					}
-				}
+				int cellPreferences = this.tactic.GetCellPreferences(num2, this.targetOffsets, this);
+				this.SetReservedCell(cellPreferences);
 				if (this.reservedCell == NavigationReservations.InvalidReservation)
 				{
-					this.path.cost = 0;
 					this.Stop(false);
 				}
 				else
 				{
-					this.checkCellArray[0] = this.reservedCell;
-					PathFinder.PotentialPath potentialPath2 = new PathFinder.PotentialPath(num, this.CurrentNavType, this.flags);
-					PathFinder.UpdatePath(this.NavGrid, this.GetCurrentAbilities(), potentialPath2, PathFinderQueries.cellOffsetQuery.Reset(this.checkCellArray), ref this.path);
+					PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(num, this.CurrentNavType, this.flags);
+					PathFinder.UpdatePath(this.NavGrid, this.GetCurrentAbilities(), potentialPath, PathFinderQueries.cellQuery.Reset(this.reservedCell), ref this.path);
 				}
 			}
 			if (this.path.IsValid())
@@ -192,22 +213,6 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 			this.ClearReservedCell();
 			base.smi.GoTo(base.smi.sm.failed);
 		}
-	}
-
-	private bool AllTargetOffsetsReserved(int targetCell, CellOffset[] targetOffsets)
-	{
-		for (int i = 0; i < targetOffsets.Length; i++)
-		{
-			int num = Grid.OffsetCell(targetCell, targetOffsets[i]);
-			if (num != this.reservedCell)
-			{
-				if (!NavigationReservations.Instance.isReserved(num))
-				{
-					return false;
-				}
-			}
-		}
-		return true;
 	}
 
 	private void FixedUpdate()
@@ -498,8 +503,6 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 	private int reservedCell = NavigationReservations.InvalidReservation;
 
 	private NavTactic tactic;
-
-	private int[] checkCellArray = new int[1];
 
 	public class ActiveTransition
 	{

@@ -62,7 +62,7 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 		}
 	}
 
-	private UtilityNetworkGridNode[] GetGrid(bool is_physical_building)
+	protected UtilityNetworkGridNode[] GetGrid(bool is_physical_building)
 	{
 		return (!is_physical_building) ? this.visualGrid : this.physicalGrid;
 	}
@@ -118,22 +118,6 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 		}
 	}
 
-	private UtilityConnections InverseDirection(UtilityConnections direction)
-	{
-		switch (direction)
-		{
-		case UtilityConnections.Left:
-			return UtilityConnections.Right;
-		case UtilityConnections.Right:
-			return UtilityConnections.Left;
-		case UtilityConnections.Up:
-			return UtilityConnections.Down;
-		case UtilityConnections.Down:
-			return UtilityConnections.Up;
-		}
-		throw new AccessViolationException();
-	}
-
 	private void QueueCellForVisit(UtilityNetworkGridNode[] grid, int dest_cell, UtilityConnections direction)
 	{
 		if (!Grid.IsValidCell(dest_cell))
@@ -144,7 +128,7 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 		{
 			return;
 		}
-		if (direction != (UtilityConnections)0 && (grid[dest_cell].connections & this.InverseDirection(direction)) == (UtilityConnections)0)
+		if (direction != (UtilityConnections)0 && (grid[dest_cell].connections & direction.InverseDirection()) == (UtilityConnections)0)
 		{
 			return;
 		}
@@ -421,7 +405,7 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 		return utilityConnections;
 	}
 
-	public void SetConnections(UtilityConnections connections, int cell, bool is_physical_building)
+	public virtual void SetConnections(UtilityConnections connections, int cell, bool is_physical_building)
 	{
 		HashSet<int> nodes = this.GetNodes(is_physical_building);
 		nodes.Add(cell);
@@ -456,15 +440,25 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 		return utilityConnections | array[cell].connections;
 	}
 
+	public virtual bool CanAddConnection(UtilityConnections new_connection, int cell, bool is_physical_building, out string fail_reason)
+	{
+		fail_reason = null;
+		return true;
+	}
+
 	public void AddConnection(UtilityConnections new_connection, int cell, bool is_physical_building)
 	{
-		if (is_physical_building)
+		string text;
+		if (this.CanAddConnection(new_connection, cell, is_physical_building, out text))
 		{
-			this.dirty = true;
+			if (is_physical_building)
+			{
+				this.dirty = true;
+			}
+			UtilityNetworkGridNode[] grid = this.GetGrid(is_physical_building);
+			UtilityConnections connections = grid[cell].connections;
+			grid[cell].connections = connections | new_connection;
 		}
-		UtilityNetworkGridNode[] grid = this.GetGrid(is_physical_building);
-		UtilityConnections connections = grid[cell].connections;
-		grid[cell].connections = connections | new_connection;
 	}
 
 	public void StashVisualGrids()
@@ -559,15 +553,15 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 
 	private Queue<int> queued = new Queue<int>();
 
-	private UtilityNetworkGridNode[] visualGrid;
+	protected UtilityNetworkGridNode[] visualGrid;
 
 	private UtilityNetworkGridNode[] stashedVisualGrid;
 
-	private UtilityNetworkGridNode[] physicalGrid;
+	protected UtilityNetworkGridNode[] physicalGrid;
 
-	private HashSet<int> physicalNodes;
+	protected HashSet<int> physicalNodes;
 
-	private HashSet<int> visualNodes;
+	protected HashSet<int> visualNodes;
 
 	private bool dirty;
 

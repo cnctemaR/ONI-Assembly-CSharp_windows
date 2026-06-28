@@ -77,6 +77,15 @@ namespace STRINGS
 				public static LocString RECIPEDESC = "An edible, putrefied mudslop.\n\nMush Bars are preferable to starvation, but only just barely.";
 			}
 
+			public class FRUITCAKE
+			{
+				public static LocString NAME = "Berry Sludge";
+
+				public static LocString DESC = "A mashed up <style=\"food\">Bristle Berry</style> sludge with an exceptionally long shelf life.\n\nIts aggressive, overbearing sweetness can leave the tongue feeling temporarily numb.";
+
+				public static LocString RECIPEDESC = "A mashed up <style=\"food\">Bristle Berry</style> sludge with an exceptionally long shelf life.";
+			}
+
 			public class MEAT
 			{
 				public static LocString NAME = "Meat";

@@ -14,11 +14,6 @@ public class PrebuildTool : InterfaceTool
 		base.OnActivateTool();
 	}
 
-	protected override void OnDeactivateTool(InterfaceTool new_tool)
-	{
-		base.OnDeactivateTool(new_tool);
-	}
-
 	public void Activate(BuildingDef def, PlanScreen.RequirementsState reqState)
 	{
 		this.def = def;
@@ -26,11 +21,6 @@ public class PrebuildTool : InterfaceTool
 		PrebuildToolHoverTextCard component = base.GetComponent<PrebuildToolHoverTextCard>();
 		component.currentReqState = reqState;
 		component.currentDef = def;
-		component.ConfigureHoverScreen();
-	}
-
-	public void Deactivate()
-	{
 	}
 
 	public override void OnLeftClickDown(Vector3 cursor_pos)
@@ -39,8 +29,17 @@ public class PrebuildTool : InterfaceTool
 		base.OnLeftClickDown(cursor_pos);
 	}
 
-	[SerializeField]
-	private TextStyleSetting tooltipStyle;
+	private void Update()
+	{
+		if (this.hoverText == null)
+		{
+			this.hoverText = base.GetComponent<HoverTextConfiguration>();
+		}
+		if (this.hoverText != null)
+		{
+			this.hoverText.UpdateHoverElements(null);
+		}
+	}
 
 	public static PrebuildTool Instance;
 

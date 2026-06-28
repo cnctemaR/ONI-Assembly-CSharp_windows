@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class AttackToolHoverTextCard : HoverTextConfiguration
 {
@@ -19,52 +18,36 @@ public class AttackToolHoverTextCard : HoverTextConfiguration
 		instance.ToggleIncubating(true);
 		instance.currentConfiguration = this;
 		instance.ClearLabels();
-		instance.NewLine("Spacer", 24);
-		instance.StartShadowBar(0f, 0f, false);
 		if (this.printTitle)
 		{
-			this.ConfigureTitle(instance);
+			this.ConfigureTitle(instance, true);
 		}
-		this.ConfigureInstructions(instance);
-		instance.EndShadowBar();
-		instance.NewLine("Spacer", 24);
-		this.hoverScreenElements.ShadowBar = instance.StartShadowBar(0f, 0f, false);
-		instance.NewLine("SelectableName", 24);
-		this.hoverScreenElements.SelectableName = instance.AddText(string.Empty, this.Styles_Title.Standard, true);
-		instance.EndShadowBar();
 		this.isConfigured = true;
-	}
-
-	public override void SetNotConfigured()
-	{
-		base.SetNotConfigured();
 	}
 
 	public override void UpdateHoverElements(List<KSelectable> hover_objects)
 	{
-		if (!this.isConfigured)
+		base.UpdateHoverElements(hover_objects);
+		HoverTextScreen instance = HoverTextScreen.Instance;
+		HoverTextDrawer hoverTextDrawer = instance.BeginDrawing();
+		hoverTextDrawer.BeginShadowBar(false);
+		base.DrawTitle(instance, hoverTextDrawer);
+		base.DrawInstructions(HoverTextScreen.Instance, hoverTextDrawer);
+		hoverTextDrawer.EndShadowBar();
+		if (hover_objects != null)
 		{
-			this.ConfigureHoverScreen();
-		}
-		else
-		{
-			bool flag = false;
-			this.hoverScreenElements.SelectableName.text = string.Empty;
-			if (hover_objects != null)
+			foreach (KSelectable kselectable in hover_objects)
 			{
-				foreach (KSelectable kselectable in hover_objects)
+				if (kselectable.GetComponent<AttackableBase>() != null)
 				{
-					if (kselectable.GetComponent<Harvestable>() != null)
-					{
-						this.hoverScreenElements.SelectableName.text = kselectable.GetProperName().ToUpper();
-						flag = true;
-						break;
-					}
+					hoverTextDrawer.BeginShadowBar(false);
+					hoverTextDrawer.DrawText(kselectable.GetProperName().ToUpper(), this.Styles_Title.Standard);
+					hoverTextDrawer.EndShadowBar();
+					break;
 				}
 			}
-			this.hoverScreenElements.ShadowBar.gameObject.rectTransform().localScale = ((!flag) ? Vector3.zero : Vector3.one);
-			this.hoverScreenElements.SelectableName.gameObject.rectTransform().localScale = ((!flag) ? Vector3.zero : Vector3.one);
 		}
+		hoverTextDrawer.EndDrawing();
 	}
 
 	private AttackToolHoverTextCard.HoverScreenFields hoverScreenElements;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class GameNavGrids
 {
@@ -22,18 +23,24 @@ public class GameNavGrids
 
 	private void CreateDuplicantNavigation(Pathfinding pathfinding)
 	{
-		CellOffset[] array = new CellOffset[]
+		NavOffset[] array = new NavOffset[]
+		{
+			new NavOffset(NavType.Floor, 1, 0),
+			new NavOffset(NavType.Ladder, 1, 0),
+			new NavOffset(NavType.Pole, 1, 0)
+		};
+		CellOffset[] array2 = new CellOffset[]
 		{
 			new CellOffset(0, 0),
 			new CellOffset(0, 1)
 		};
-		NavGrid.Transition[] array2 = new NavGrid.Transition[]
+		NavGrid.Transition[] array3 = new NavGrid.Transition[]
 		{
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 0, true, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 0, 1, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 0, -1, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 1, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, 1, false, true, 10, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 0, NavAxis.NA, true, true, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 0, 1, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 0, -1, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 1, NavAxis.NA, false, false, true, 14, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, 1, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
 				new CellOffset(1, 1),
@@ -43,19 +50,15 @@ public class GameNavGrids
 				new NavOffset(NavType.Floor, 1, 1),
 				new NavOffset(NavType.Ladder, 1, 1)
 			}),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, 0, false, true, 20, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, 0, NavAxis.NA, false, false, true, 20, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
 				new CellOffset(1, -1),
 				new CellOffset(1, 1)
-			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
-			{
-				new NavOffset(NavType.Ladder, 1, 0)
-			}),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, -1, false, false, 10, string.Empty, new CellOffset[]
+			}, new CellOffset[0], new NavOffset[0], array),
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, -1, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
-				new CellOffset(1, 1),
 				new CellOffset(1, -1),
 				new CellOffset(1, -2)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
@@ -63,159 +66,365 @@ public class GameNavGrids
 				new NavOffset(NavType.Floor, 1, 0),
 				new NavOffset(NavType.Ladder, 1, 0)
 			}),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, -2, false, false, 20, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, -2, NavAxis.NA, false, false, false, 20, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
 				new CellOffset(1, -1)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, -1, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 2, false, true, 20, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, -1, NavAxis.NA, false, false, false, 14, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 2, NavAxis.NA, false, false, true, 20, string.Empty, new CellOffset[]
 			{
 				new CellOffset(0, 1),
 				new CellOffset(0, 2)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Ladder, 0, 0, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Ladder, 0, 1, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Ladder, 0, -1, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Ladder, 1, 0, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			new NavGrid.Transition(NavType.Floor, NavType.Ladder, 0, 0, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Floor, NavType.Ladder, 0, 1, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Floor, NavType.Ladder, 0, -1, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Floor, NavType.Ladder, 1, 0, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Floor, 1, 0)
 			}),
-			new NavGrid.Transition(NavType.Floor, NavType.Ladder, 1, 1, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
-			{
-				new NavOffset(NavType.Ladder, 1, 0),
-				new NavOffset(NavType.Floor, 1, 0)
-			}),
-			new NavGrid.Transition(NavType.Floor, NavType.Ladder, 1, -1, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			new NavGrid.Transition(NavType.Floor, NavType.Ladder, 1, 1, NavAxis.NA, false, false, true, 14, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Ladder, 1, 0),
 				new NavOffset(NavType.Floor, 1, 0)
 			}),
-			new NavGrid.Transition(NavType.Floor, NavType.Ladder, 2, 0, false, true, 20, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Floor, NavType.Ladder, 1, -1, NavAxis.NA, false, false, false, 14, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Ladder, 1, 0),
+				new NavOffset(NavType.Floor, 1, 0)
+			}),
+			new NavGrid.Transition(NavType.Floor, NavType.Ladder, 2, 0, NavAxis.NA, false, false, true, 20, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
 				new CellOffset(1, -1),
 				new CellOffset(1, 1)
-			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Ladder, NavType.Floor, 0, 0, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Ladder, NavType.Floor, 0, 1, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Ladder, NavType.Floor, 0, -1, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Ladder, NavType.Floor, 1, 0, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			}, new CellOffset[0], new NavOffset[0], array),
+			new NavGrid.Transition(NavType.Ladder, NavType.Floor, 0, 0, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Ladder, NavType.Floor, 0, 1, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Ladder, NavType.Floor, 0, -1, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Ladder, NavType.Floor, 1, 0, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Floor, 0, 0)
 			}),
-			new NavGrid.Transition(NavType.Ladder, NavType.Floor, 1, 1, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			new NavGrid.Transition(NavType.Ladder, NavType.Floor, 1, 1, NavAxis.NA, false, false, true, 14, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Ladder, 0, 1),
 				new NavOffset(NavType.Floor, 0, 1)
 			}),
-			new NavGrid.Transition(NavType.Ladder, NavType.Floor, 1, -1, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			new NavGrid.Transition(NavType.Ladder, NavType.Floor, 1, -1, NavAxis.NA, false, false, false, 14, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Floor, 0, -1),
 				new NavOffset(NavType.Ladder, 0, -1)
 			}),
-			new NavGrid.Transition(NavType.Ladder, NavType.Floor, 2, 0, false, true, 20, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Ladder, NavType.Floor, 2, 0, NavAxis.NA, false, false, true, 20, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
 				new CellOffset(1, -1),
 				new CellOffset(1, 1)
-			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
-			{
-				new NavOffset(NavType.Floor, 1, 0)
-			}),
-			new NavGrid.Transition(NavType.Ladder, NavType.Ladder, 1, 0, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Ladder, NavType.Ladder, 0, 1, true, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Ladder, NavType.Ladder, 0, -1, true, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Ladder, NavType.Ladder, 2, 0, false, true, 20, string.Empty, new CellOffset[]
+			}, new CellOffset[0], new NavOffset[0], array),
+			new NavGrid.Transition(NavType.Ladder, NavType.Ladder, 1, 0, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Ladder, NavType.Ladder, 0, 1, NavAxis.NA, true, true, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Ladder, NavType.Ladder, 0, -1, NavAxis.NA, true, true, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Ladder, NavType.Ladder, 2, 0, NavAxis.NA, false, false, true, 20, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
 				new CellOffset(1, 1)
-			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Pole, 0, 0, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Pole, 0, 1, false, true, 50, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Pole, 0, -1, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Pole, 1, 0, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			}, new CellOffset[0], new NavOffset[0], array),
+			new NavGrid.Transition(NavType.Floor, NavType.Pole, 0, 0, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Floor, NavType.Pole, 0, 1, NavAxis.NA, false, false, true, 50, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Floor, NavType.Pole, 0, -1, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Floor, NavType.Pole, 1, 0, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Floor, 1, 0)
 			}),
-			new NavGrid.Transition(NavType.Floor, NavType.Pole, 1, 1, false, true, 50, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
-			{
-				new NavOffset(NavType.Pole, 1, 0),
-				new NavOffset(NavType.Floor, 1, 0)
-			}),
-			new NavGrid.Transition(NavType.Floor, NavType.Pole, 1, -1, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			new NavGrid.Transition(NavType.Floor, NavType.Pole, 1, 1, NavAxis.NA, false, false, true, 50, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Pole, 1, 0),
 				new NavOffset(NavType.Floor, 1, 0)
 			}),
-			new NavGrid.Transition(NavType.Floor, NavType.Pole, 2, 0, false, true, 50, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Floor, NavType.Pole, 1, -1, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Pole, 1, 0),
+				new NavOffset(NavType.Floor, 1, 0)
+			}),
+			new NavGrid.Transition(NavType.Floor, NavType.Pole, 2, 0, NavAxis.NA, false, false, true, 50, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
 				new CellOffset(1, -1),
 				new CellOffset(1, 1)
-			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Pole, NavType.Floor, 0, 0, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Pole, NavType.Floor, 0, 1, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Pole, NavType.Floor, 0, -1, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Pole, NavType.Floor, 1, 0, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			}, new CellOffset[0], new NavOffset[0], array),
+			new NavGrid.Transition(NavType.Pole, NavType.Floor, 0, 0, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Pole, NavType.Floor, 0, 1, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Pole, NavType.Floor, 0, -1, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Pole, NavType.Floor, 1, 0, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Floor, 0, 0)
 			}),
-			new NavGrid.Transition(NavType.Pole, NavType.Floor, 1, 1, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			new NavGrid.Transition(NavType.Pole, NavType.Floor, 1, 1, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Pole, 0, 1),
 				new NavOffset(NavType.Floor, 0, 1)
 			}),
-			new NavGrid.Transition(NavType.Pole, NavType.Floor, 1, -1, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			new NavGrid.Transition(NavType.Pole, NavType.Floor, 1, -1, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Floor, 0, -1),
 				new NavOffset(NavType.Pole, 0, -1)
 			}),
-			new NavGrid.Transition(NavType.Pole, NavType.Floor, 2, 0, false, true, 20, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Pole, NavType.Floor, 2, 0, NavAxis.NA, false, false, true, 20, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
 				new CellOffset(1, -1),
 				new CellOffset(1, 1)
+			}, new CellOffset[0], new NavOffset[0], array),
+			new NavGrid.Transition(NavType.Pole, NavType.Ladder, 1, 0, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Pole, NavType.Ladder, 0, 1, NavAxis.NA, true, true, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Pole, NavType.Ladder, 0, -1, NavAxis.NA, true, true, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Pole, NavType.Ladder, 2, 0, NavAxis.NA, false, false, true, 20, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(1, 1)
+			}, new CellOffset[0], new NavOffset[0], array),
+			new NavGrid.Transition(NavType.Ladder, NavType.Pole, 1, 0, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Ladder, NavType.Pole, 0, 1, NavAxis.NA, true, true, true, 50, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Ladder, NavType.Pole, 0, -1, NavAxis.NA, true, true, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Ladder, NavType.Pole, 2, 0, NavAxis.NA, false, false, true, 20, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(1, 1)
+			}, new CellOffset[0], new NavOffset[0], array),
+			new NavGrid.Transition(NavType.Pole, NavType.Pole, 1, 0, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Pole, NavType.Pole, 0, 1, NavAxis.NA, true, true, true, 50, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Pole, NavType.Pole, 0, -1, NavAxis.NA, true, true, false, 2, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Pole, NavType.Pole, 2, 0, NavAxis.NA, false, false, true, 50, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(1, 1)
+			}, new CellOffset[0], new NavOffset[0], array),
+			new NavGrid.Transition(NavType.Floor, NavType.Tube, 0, 2, NavAxis.NA, false, false, false, 40, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Floor, 1, 1, NavAxis.NA, false, false, false, 7, string.Empty, new CellOffset[]
+			{
+				new CellOffset(0, 1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Floor, 2, 1, NavAxis.NA, false, false, false, 13, string.Empty, new CellOffset[]
+			{
+				new CellOffset(0, 1),
+				new CellOffset(1, 1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Floor, 1, 1)
+			}),
+			new NavGrid.Transition(NavType.Tube, NavType.Floor, 1, 2, NavAxis.NA, false, false, false, 13, string.Empty, new CellOffset[]
+			{
+				new CellOffset(0, 1),
+				new CellOffset(0, 2)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Floor, 1, 0, NavAxis.NA, false, false, false, 5, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Floor, 2, 0, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Floor, 1, 0)
 			}),
-			new NavGrid.Transition(NavType.Pole, NavType.Ladder, 1, 0, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Pole, NavType.Ladder, 0, 1, true, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Pole, NavType.Ladder, 0, -1, true, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Pole, NavType.Ladder, 2, 0, false, true, 20, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Tube, NavType.Floor, 1, -1, NavAxis.NA, false, false, false, 7, string.Empty, new CellOffset[]
 			{
-				new CellOffset(1, 0),
-				new CellOffset(1, 1)
+				new CellOffset(1, 0)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Ladder, NavType.Pole, 1, 0, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Ladder, NavType.Pole, 0, 1, true, true, 50, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Ladder, NavType.Pole, 0, -1, true, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Ladder, NavType.Pole, 2, 0, false, true, 20, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Tube, NavType.Floor, 1, -2, NavAxis.NA, false, false, false, 13, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
-				new CellOffset(1, 1)
+				new CellOffset(1, -1)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Pole, NavType.Pole, 1, 0, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Pole, NavType.Pole, 0, 1, true, true, 50, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Pole, NavType.Pole, 0, -1, true, false, 2, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Pole, NavType.Pole, 2, 0, false, true, 50, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Tube, NavType.Floor, 2, -1, NavAxis.NA, false, false, false, 13, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
+				new CellOffset(2, 0),
+				new CellOffset(1, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Floor, 1, -1)
+			}),
+			new NavGrid.Transition(NavType.Tube, NavType.Floor, 2, -2, NavAxis.NA, false, false, false, 17, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(2, 0),
+				new CellOffset(1, -1),
+				new CellOffset(2, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Floor, 1, -2)
+			}),
+			new NavGrid.Transition(NavType.Tube, NavType.Floor, 0, -1, NavAxis.NA, false, false, false, 5, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Floor, 0, -2, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[]
+			{
+				new CellOffset(0, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Ladder, 0, 1, NavAxis.NA, false, false, false, 5, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Ladder, 0, 2, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[]
+			{
+				new CellOffset(0, 1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Ladder, 0, 1)
+			}),
+			new NavGrid.Transition(NavType.Tube, NavType.Ladder, 1, 1, NavAxis.NA, false, false, false, 7, string.Empty, new CellOffset[]
+			{
+				new CellOffset(0, 1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Ladder, 2, 1, NavAxis.NA, false, false, false, 13, string.Empty, new CellOffset[]
+			{
+				new CellOffset(0, 1),
 				new CellOffset(1, 1)
-			}, new CellOffset[0], new NavOffset[0], new NavOffset[0])
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Floor, 1, 1)
+			}),
+			new NavGrid.Transition(NavType.Tube, NavType.Ladder, 1, 2, NavAxis.NA, false, false, false, 13, string.Empty, new CellOffset[]
+			{
+				new CellOffset(0, 1),
+				new CellOffset(0, 2)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Ladder, 1, 0, NavAxis.NA, false, false, false, 5, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Ladder, 2, 0, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Floor, 1, 0)
+			}),
+			new NavGrid.Transition(NavType.Tube, NavType.Ladder, 1, -1, NavAxis.NA, false, false, false, 7, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Ladder, 1, -2, NavAxis.NA, false, false, false, 13, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(1, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Ladder, 2, -1, NavAxis.NA, false, false, false, 13, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(2, 0),
+				new CellOffset(1, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Floor, 1, -1)
+			}),
+			new NavGrid.Transition(NavType.Tube, NavType.Ladder, 2, -2, NavAxis.NA, false, false, false, 17, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(2, 0),
+				new CellOffset(1, -1),
+				new CellOffset(2, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Floor, 1, -2)
+			}),
+			new NavGrid.Transition(NavType.Tube, NavType.Ladder, 0, -1, NavAxis.NA, false, false, false, 5, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Ladder, 0, -2, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[]
+			{
+				new CellOffset(0, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Pole, 0, 1, NavAxis.NA, false, false, false, 5, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Pole, 0, 2, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[]
+			{
+				new CellOffset(0, 1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Pole, 0, 1)
+			}),
+			new NavGrid.Transition(NavType.Tube, NavType.Pole, 1, 1, NavAxis.NA, false, false, false, 7, string.Empty, new CellOffset[]
+			{
+				new CellOffset(0, 1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Pole, 2, 1, NavAxis.NA, false, false, false, 13, string.Empty, new CellOffset[]
+			{
+				new CellOffset(0, 1),
+				new CellOffset(1, 1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Floor, 1, 1)
+			}),
+			new NavGrid.Transition(NavType.Tube, NavType.Pole, 1, 2, NavAxis.NA, false, false, false, 13, string.Empty, new CellOffset[]
+			{
+				new CellOffset(0, 1),
+				new CellOffset(0, 2)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Pole, 1, 0, NavAxis.NA, false, false, false, 5, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Pole, 2, 0, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Floor, 1, 0)
+			}),
+			new NavGrid.Transition(NavType.Tube, NavType.Pole, 1, -1, NavAxis.NA, false, false, false, 7, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Pole, 1, -2, NavAxis.NA, false, false, false, 13, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(1, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Pole, 2, -1, NavAxis.NA, false, false, false, 13, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(2, 0),
+				new CellOffset(1, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Floor, 1, -1)
+			}),
+			new NavGrid.Transition(NavType.Tube, NavType.Pole, 2, -2, NavAxis.NA, false, false, false, 17, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(2, 0),
+				new CellOffset(1, -1),
+				new CellOffset(2, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Floor, 1, -2)
+			}),
+			new NavGrid.Transition(NavType.Tube, NavType.Pole, 0, -1, NavAxis.NA, false, false, false, 5, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Pole, 0, -2, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[]
+			{
+				new CellOffset(0, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Tube, 1, 0, NavAxis.NA, true, false, false, 5, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Tube, 0, 1, NavAxis.NA, true, false, false, 5, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Tube, 0, -1, NavAxis.NA, true, false, false, 5, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Tube, 1, 1, NavAxis.Y, false, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Tube, 0, 1)
+			}, new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Tube, 1, 1, NavAxis.X, false, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Tube, 1, 0)
+			}, new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Tube, 1, -1, NavAxis.Y, false, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Tube, 0, -1)
+			}, new NavOffset[0]),
+			new NavGrid.Transition(NavType.Tube, NavType.Tube, 1, -1, NavAxis.X, false, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Tube, 1, 0)
+			}, new NavOffset[0])
 		};
-		NavGrid.Transition[] array3 = this.MirrorTransitions(array2);
+		NavGrid.Transition[] array4 = this.MirrorTransitions(array3);
 		Dictionary<NavType, string> dictionary = new Dictionary<NavType, string>();
 		dictionary[NavType.Floor] = "idle_default";
 		dictionary[NavType.Ladder] = "ladder_idle";
 		dictionary[NavType.Pole] = "ladder_idle";
-		this.DuplicantGrid = new NavGrid("MinionNavGrid", array3, dictionary, array, new NavTableValidator[]
+		dictionary[NavType.Tube] = "tube_idle_loop";
+		this.DuplicantGrid = new NavGrid("MinionNavGrid", array4, dictionary, array2, new NavTableValidator[]
 		{
 			new GameNavGrids.FloorValidator(true, true),
 			new GameNavGrids.LadderValidator(),
-			new GameNavGrids.PoleValidator()
-		});
+			new GameNavGrids.PoleValidator(),
+			new GameNavGrids.TubeValidator()
+		}, 2, 3);
 		pathfinding.AddNavGrid(this.DuplicantGrid);
 	}
 
@@ -227,14 +436,14 @@ public class GameNavGrids
 		};
 		NavGrid.Transition[] array2 = new NavGrid.Transition[]
 		{
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 0, true, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 0, 1, false, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 0, -1, false, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 1, false, true, 1, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 0, NavAxis.NA, true, true, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 0, 1, NavAxis.NA, false, false, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 0, -1, NavAxis.NA, false, false, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 1, NavAxis.NA, false, false, true, 1, string.Empty, new CellOffset[]
 			{
 				new CellOffset(0, 1)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, 0, false, true, 1, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, 0, NavAxis.NA, false, false, true, 1, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
 				new CellOffset(1, -1),
@@ -243,16 +452,16 @@ public class GameNavGrids
 			{
 				new NavOffset(NavType.Ladder, 1, 0)
 			}),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, -2, false, true, 1, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, -2, NavAxis.NA, false, false, true, 1, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
 				new CellOffset(1, -1)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, -1, false, true, 1, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, -1, NavAxis.NA, false, false, true, 1, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 2, false, true, 1, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 2, NavAxis.NA, false, false, true, 1, string.Empty, new CellOffset[]
 			{
 				new CellOffset(0, 1),
 				new CellOffset(0, 2)
@@ -264,7 +473,7 @@ public class GameNavGrids
 		this.HatchGrid = new NavGrid("HatchNavGrid", array3, dictionary, array, new NavTableValidator[]
 		{
 			new GameNavGrids.FloorValidator(false, false)
-		});
+		}, 2, 3);
 		pathfinding.AddNavGrid(this.HatchGrid);
 	}
 
@@ -276,33 +485,33 @@ public class GameNavGrids
 		};
 		NavGrid.Transition[] array2 = new NavGrid.Transition[]
 		{
-			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, 0, true, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, 0, NavAxis.NA, true, true, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Hover, 1, -1)
 			}),
-			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, 1, false, true, 1, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, 1, NavAxis.NA, false, false, true, 1, string.Empty, new CellOffset[]
 			{
 				new CellOffset(0, 1)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Hover, 1, 0)
 			}),
-			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, -1, false, true, 1, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, -1, NavAxis.NA, false, false, true, 1, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Hover, 1, -2)
 			}),
-			new NavGrid.Transition(NavType.Hover, NavType.Hover, 0, 1, false, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 0, 1, NavAxis.NA, false, false, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Hover, 0, 0)
 			}),
-			new NavGrid.Transition(NavType.Hover, NavType.Hover, 0, -1, false, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 0, -1, NavAxis.NA, false, false, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Hover, 0, -2)
 			}),
-			new NavGrid.Transition(NavType.Hover, NavType.Hover, 2, 1, false, true, 3, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 2, 1, NavAxis.NA, false, false, true, 3, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
 				new CellOffset(1, 1),
@@ -311,7 +520,7 @@ public class GameNavGrids
 			{
 				new NavOffset(NavType.Hover, 2, 0)
 			}),
-			new NavGrid.Transition(NavType.Hover, NavType.Hover, 2, 0, false, true, 3, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 2, 0, NavAxis.NA, false, false, true, 3, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
 				new CellOffset(1, -1),
@@ -320,7 +529,7 @@ public class GameNavGrids
 			{
 				new NavOffset(NavType.Hover, 2, -1)
 			}),
-			new NavGrid.Transition(NavType.Hover, NavType.Hover, 2, -1, false, true, 3, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 2, -1, NavAxis.NA, false, false, true, 3, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
 				new CellOffset(1, -1),
@@ -329,7 +538,7 @@ public class GameNavGrids
 			{
 				new NavOffset(NavType.Hover, 2, -2)
 			}),
-			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, 2, false, true, 3, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, 2, NavAxis.NA, false, false, true, 3, string.Empty, new CellOffset[]
 			{
 				new CellOffset(0, 1),
 				new CellOffset(0, 2)
@@ -337,7 +546,7 @@ public class GameNavGrids
 			{
 				new NavOffset(NavType.Hover, 1, 1)
 			}),
-			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, -2, false, true, 3, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, -2, NavAxis.NA, false, false, true, 3, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
 				new CellOffset(1, -1)
@@ -345,19 +554,34 @@ public class GameNavGrids
 			{
 				new NavOffset(NavType.Hover, 1, -3)
 			}),
-			new NavGrid.Transition(NavType.Hover, NavType.Hover, 0, -1, false, true, 4, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Swim, NavType.Swim, 0, 1, false, true, 4, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Swim, NavType.Hover, 0, 1, false, true, 4, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0])
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 0, -1, NavAxis.NA, false, false, true, 4, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, 0, 1, NavAxis.NA, false, false, true, 4, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, 1, NavAxis.NA, false, false, true, 4, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Swim, 0, 1)
+			}),
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, 0, NavAxis.NA, false, false, true, 5, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Swim, 0, 1),
+				new NavOffset(NavType.Swim, 1, 1)
+			}),
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, -1, NavAxis.NA, false, false, true, 6, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Swim, 0, 1),
+				new NavOffset(NavType.Swim, 1, 1),
+				new NavOffset(NavType.Swim, 1, 0)
+			}),
+			new NavGrid.Transition(NavType.Swim, NavType.Hover, 0, 1, NavAxis.NA, false, false, true, 4, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0])
 		};
 		NavGrid.Transition[] array3 = this.MirrorTransitions(array2);
 		Dictionary<NavType, string> dictionary = new Dictionary<NavType, string>();
-		dictionary[NavType.Hover] = "idle_default";
-		dictionary[NavType.Swim] = "idle_default";
+		dictionary[NavType.Hover] = "idle_loop";
+		dictionary[NavType.Swim] = "swim_idle_loop";
 		this.FloaterGrid = new NavGrid("FloaterNavGrid", array3, dictionary, array, new NavTableValidator[]
 		{
 			new GameNavGrids.HoverValidator(),
 			new GameNavGrids.SwimValidator()
-		});
+		}, 2, 2);
 		pathfinding.AddNavGrid(this.FloaterGrid);
 	}
 
@@ -365,18 +589,18 @@ public class GameNavGrids
 	{
 		NavGrid.Transition[] array = new NavGrid.Transition[]
 		{
-			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, 0, true, true, 2, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, 1, true, true, 2, "hover_hover_1_0", new CellOffset[]
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, 0, NavAxis.NA, true, true, true, 2, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, 1, NavAxis.NA, true, true, true, 2, "hover_hover_1_0", new CellOffset[]
 			{
 				new CellOffset(1, 0)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, -1, true, true, 2, "hover_hover_1_0", new CellOffset[]
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, -1, NavAxis.NA, true, true, true, 2, "hover_hover_1_0", new CellOffset[]
 			{
 				new CellOffset(1, 0),
 				new CellOffset(0, -1)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Hover, NavType.Hover, 0, 1, true, true, 3, "hover_hover_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Hover, NavType.Hover, 0, -1, true, true, 3, "hover_hover_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0])
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 0, 1, NavAxis.NA, true, true, true, 3, "hover_hover_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 0, -1, NavAxis.NA, true, true, true, 3, "hover_hover_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0])
 		};
 		NavGrid.Transition[] array2 = this.MirrorTransitions(array);
 		Dictionary<NavType, string> dictionary = new Dictionary<NavType, string>();
@@ -384,7 +608,7 @@ public class GameNavGrids
 		NavGrid navGrid = new NavGrid(id, array2, dictionary, bounding_offsets, new NavTableValidator[]
 		{
 			new GameNavGrids.HoverValidator()
-		});
+		}, 1, 1);
 		pathfinding.AddNavGrid(navGrid);
 		return navGrid;
 	}
@@ -397,11 +621,11 @@ public class GameNavGrids
 		};
 		NavGrid.Transition[] array2 = new NavGrid.Transition[]
 		{
-			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, 0, true, true, 2, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, 1, true, true, 2, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, -1, true, true, 2, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Swim, NavType.Swim, 0, 1, true, true, 3, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Swim, NavType.Swim, 0, -1, true, true, 3, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0])
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, 0, NavAxis.NA, true, true, true, 2, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, 1, NavAxis.NA, true, true, true, 2, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, -1, NavAxis.NA, true, true, true, 2, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, 0, 1, NavAxis.NA, true, true, true, 3, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, 0, -1, NavAxis.NA, true, true, true, 3, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0])
 		};
 		NavGrid.Transition[] array3 = this.MirrorTransitions(array2);
 		Dictionary<NavType, string> dictionary = new Dictionary<NavType, string>();
@@ -409,7 +633,7 @@ public class GameNavGrids
 		this.SwimmerGrid = new NavGrid("SwimmerNavGrid", array3, dictionary, array, new NavTableValidator[]
 		{
 			new GameNavGrids.SwimValidator()
-		});
+		}, 1, 1);
 		pathfinding.AddNavGrid(this.SwimmerGrid);
 	}
 
@@ -454,6 +678,7 @@ public class GameNavGrids
 				list.Add(transition2);
 			}
 		}
+		list.OrderBy<NavGrid.Transition, int>((NavGrid.Transition x) => x.cost);
 		return list.ToArray();
 	}
 
@@ -602,6 +827,42 @@ public class GameNavGrids
 		public override void UpdateCell(int cell, NavTable nav_table, CellOffset[] bounding_offsets)
 		{
 			nav_table.SetValid(cell, NavType.Pole, base.IsClear(cell, bounding_offsets, Grid.BitFields, true) && Grid.HasPole[cell]);
+		}
+	}
+
+	public class TubeValidator : NavTableValidator
+	{
+		public TubeValidator()
+		{
+			Components.ITravelTubePieces.Register(new Action<ITravelTubePiece>(this.OnAddLadder), new Action<ITravelTubePiece>(this.OnRemoveLadder));
+		}
+
+		private void OnAddLadder(ITravelTubePiece tube)
+		{
+			int num = Grid.PosToCell(tube.Position);
+			if (this.onDirty != null)
+			{
+				this.onDirty(num);
+			}
+		}
+
+		private void OnRemoveLadder(ITravelTubePiece tube)
+		{
+			int num = Grid.PosToCell(tube.Position);
+			if (this.onDirty != null)
+			{
+				this.onDirty(num);
+			}
+		}
+
+		public override void UpdateCell(int cell, NavTable nav_table, CellOffset[] bounding_offsets)
+		{
+			nav_table.SetValid(cell, NavType.Tube, Grid.HasTube[cell]);
+		}
+
+		public override void Clear()
+		{
+			Components.ITravelTubePieces.Unregister(new Action<ITravelTubePiece>(this.OnAddLadder), new Action<ITravelTubePiece>(this.OnRemoveLadder));
 		}
 	}
 

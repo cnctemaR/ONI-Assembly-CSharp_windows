@@ -1,0 +1,49 @@
+﻿using System;
+using STRINGS;
+using TUNING;
+using UnityEngine;
+
+public class FruitCakeConfig : IEntityConfig
+{
+	public GameObject CreatePrefab()
+	{
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("FruitCake", ITEMS.FOOD.FRUITCAKE.NAME, ITEMS.FOOD.FRUITCAKE.DESC, 1f, false, Assets.GetAnim("fruitcake_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, SimHashes.Creature, null);
+		gameObject = EntityTemplates.ExtendEntityToFood(gameObject, FOOD.FOOD_TYPES.FRUITCAKE, false);
+		string text = "FruitCake";
+		string text2 = ITEMS.FOOD.FRUITCAKE.RECIPEDESC;
+		Recipe recipe = new Recipe(text, 1f, (SimHashes)0, null, text2, 1);
+		recipe.AddIngredient(new Recipe.Ingredient("ColdWheatSeed", 5f));
+		recipe.AddIngredient(new Recipe.Ingredient(PrickleFruitConfig.ID, 1f));
+		recipe.FabricationVisualizer = FruitCakeConfig.CreateFabricationVisualizer(gameObject);
+		recipe.SetFabricator("MicrobeMusher", FOOD.RECIPES.STANDARD_COOK_TIME);
+		return gameObject;
+	}
+
+	public void OnPrefabInit(GameObject inst)
+	{
+	}
+
+	public void OnSpawn(GameObject inst)
+	{
+	}
+
+	public static GameObject CreateFabricationVisualizer(GameObject result)
+	{
+		KBatchedAnimController component = result.GetComponent<KBatchedAnimController>();
+		GameObject gameObject = new GameObject();
+		gameObject.name = result.name + "Visualizer";
+		gameObject.SetActive(false);
+		gameObject.transform.localPosition = Vector3.zero;
+		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
+		kbatchedAnimController.SetAnims(component.GetAnims(), true);
+		kbatchedAnimController.initialAnim = "fabricating";
+		kbatchedAnimController.isMovable = true;
+		KBatchedAnimTracker kbatchedAnimTracker = gameObject.AddComponent<KBatchedAnimTracker>();
+		kbatchedAnimTracker.symbol = new HashedString("meter_ration");
+		kbatchedAnimTracker.offset = Vector3.zero;
+		kbatchedAnimTracker.skipInitialDisable = true;
+		return gameObject;
+	}
+
+	public const string ID = "FruitCake";
+}

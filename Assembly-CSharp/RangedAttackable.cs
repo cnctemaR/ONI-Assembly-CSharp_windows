@@ -44,7 +44,7 @@ public class RangedAttackable : AttackableBase
 	private void OnDrawGizmosSelected()
 	{
 		Gizmos.color = new Color(0f, 0.5f, 0.5f, 0.15f);
-		foreach (CellOffset cellOffset in this.GetOffsets())
+		foreach (CellOffset cellOffset in base.GetOffsets())
 		{
 			Gizmos.DrawCube(new Vector3(0.5f, 0.5f, 0f) + Grid.CellToPos(Grid.OffsetCell(Grid.PosToCell(base.gameObject), cellOffset)), Vector3.one);
 		}

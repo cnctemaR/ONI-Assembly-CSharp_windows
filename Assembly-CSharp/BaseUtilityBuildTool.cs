@@ -35,7 +35,6 @@ public class BaseUtilityBuildTool : DragTool
 		this.Play(this.visualizer, "None_Place");
 		BuildToolHoverTextCard component2 = base.GetComponent<BuildToolHoverTextCard>();
 		component2.currentDef = this.def;
-		component2.ConfigureHoverScreen();
 		component2.UpdateHoverElements(null);
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
 		IWire component3 = this.def.BuildingComplete.GetComponent<IWire>();
@@ -45,8 +44,16 @@ public class BaseUtilityBuildTool : DragTool
 		}
 		else
 		{
-			this.conduit = this.def.BuildingComplete.GetComponent<Conduit>();
-			this.conduitMgr = this.conduit.GetNetworkManager();
+			TravelTube component4 = this.def.BuildingComplete.GetComponent<TravelTube>();
+			if (component4 != null)
+			{
+				this.conduitMgr = component4.GetNetworkManager();
+			}
+			else
+			{
+				this.conduit = this.def.BuildingComplete.GetComponent<Conduit>();
+				this.conduitMgr = this.conduit.GetNetworkManager();
+			}
 		}
 	}
 
@@ -102,10 +109,12 @@ public class BaseUtilityBuildTool : DragTool
 		}
 		else if (!this.path.Exists((BaseUtilityBuildTool.PathNode n) => n.cell == cell))
 		{
+			bool flag = this.CheckValidPathPiece(cell);
 			this.path.Add(new BaseUtilityBuildTool.PathNode
 			{
 				cell = cell,
-				visualizer = null
+				visualizer = null,
+				valid = flag
 			});
 			if (!this.CheckForConnection(cell, "Wire", "OutletConnected", ref this.previousCellConnection, true))
 			{
@@ -121,6 +130,21 @@ public class BaseUtilityBuildTool : DragTool
 		}
 		this.visualizer.SetActive(this.path.Count < 2);
 		ResourceRemainingDisplayScreen.instance.SetNumberOfPendingConstructions(this.path.Count);
+	}
+
+	private bool CheckValidPathPiece(int cell)
+	{
+		if (this.def.BuildLocationRule == BuildLocationRule.NotInTiles && Grid.Objects[cell, 9] != null)
+		{
+			return false;
+		}
+		GameObject gameObject = Grid.Objects[cell, (int)this.def.ObjectLayer];
+		if (gameObject != null && gameObject.GetComponent<KAnimGraphTileVisualizer>() == null)
+		{
+			return false;
+		}
+		GameObject gameObject2 = Grid.Objects[cell, (int)this.def.TileLayer];
+		return !(gameObject2 != null) || !(gameObject2.GetComponent<KAnimGraphTileVisualizer>() == null);
 	}
 
 	private bool CheckForConnection(int cell, string defName, string soundName, ref BuildingCellVisualizer outBcv, bool fireEvents = true)
@@ -175,27 +199,6 @@ public class BaseUtilityBuildTool : DragTool
 		return null;
 	}
 
-	private UtilityConnections GetConnectionDirection(int prevCell, int cell)
-	{
-		if (prevCell + 1 == cell)
-		{
-			return UtilityConnections.Right;
-		}
-		if (prevCell - 1 == cell)
-		{
-			return UtilityConnections.Left;
-		}
-		if (prevCell + Grid.WidthInCells == cell)
-		{
-			return UtilityConnections.Up;
-		}
-		if (prevCell - Grid.WidthInCells == cell)
-		{
-			return UtilityConnections.Down;
-		}
-		return (UtilityConnections)0;
-	}
-
 	protected override DragTool.Mode GetMode()
 	{
 		return DragTool.Mode.Brush;
@@ -211,10 +214,12 @@ public class BaseUtilityBuildTool : DragTool
 		int num = Grid.PosToCell(cursor_pos);
 		if (Grid.Visible[num] > 0 || PropertyTextures.FogOfWarScale == 1f)
 		{
+			bool flag = this.CheckValidPathPiece(num);
 			this.path.Add(new BaseUtilityBuildTool.PathNode
 			{
 				cell = num,
-				visualizer = null
+				visualizer = null,
+				valid = flag
 			});
 			if (!this.CheckForConnection(num, "Wire", "OutletConnected", ref this.previousCellConnection, true))
 			{
@@ -252,43 +257,6 @@ public class BaseUtilityBuildTool : DragTool
 		base.OnLeftClickUp(cursor_pos);
 	}
 
-	protected UtilityConnections GetDirection(int start_cell, int end_cell)
-	{
-		if (end_cell == start_cell - 1)
-		{
-			return UtilityConnections.Left;
-		}
-		if (end_cell == start_cell + 1)
-		{
-			return UtilityConnections.Right;
-		}
-		if (end_cell == start_cell + Grid.WidthInCells)
-		{
-			return UtilityConnections.Up;
-		}
-		if (end_cell == start_cell - Grid.WidthInCells)
-		{
-			return UtilityConnections.Down;
-		}
-		return (UtilityConnections)0;
-	}
-
-	protected UtilityConnections GetOppositeDirection(UtilityConnections dir)
-	{
-		switch (dir)
-		{
-		case UtilityConnections.Left:
-			return UtilityConnections.Right;
-		case UtilityConnections.Right:
-			return UtilityConnections.Left;
-		case UtilityConnections.Up:
-			return UtilityConnections.Down;
-		case UtilityConnections.Down:
-			return UtilityConnections.Up;
-		}
-		return (UtilityConnections)0;
-	}
-
 	public override void OnMouseMove(Vector3 cursorPos)
 	{
 		base.OnMouseMove(cursorPos);
@@ -307,16 +275,19 @@ public class BaseUtilityBuildTool : DragTool
 		}
 		for (int i = 1; i < this.path.Count; i++)
 		{
-			int cell = this.path[i - 1].cell;
-			int cell2 = this.path[i].cell;
-			UtilityConnections direction = this.GetDirection(cell, this.path[i].cell);
-			UtilityConnections oppositeDirection = this.GetOppositeDirection(direction);
-			UtilityConnections connections = this.conduitMgr.GetConnections(cell, false);
-			UtilityConnections connections2 = this.conduitMgr.GetConnections(cell2, false);
-			if (this.ShouldLink(direction, connections) && this.ShouldLink(oppositeDirection, connections2))
+			if (this.path[i - 1].valid && this.path[i].valid)
 			{
-				this.conduitMgr.AddConnection(direction, cell, false);
-				this.conduitMgr.AddConnection(oppositeDirection, cell2, false);
+				int cell = this.path[i - 1].cell;
+				int cell2 = this.path[i].cell;
+				UtilityConnections utilityConnections = UtilityConnectionsExtensions.DirectionFromToCell(cell, this.path[i].cell);
+				UtilityConnections utilityConnections2 = utilityConnections.InverseDirection();
+				UtilityConnections connections = this.conduitMgr.GetConnections(cell, false);
+				UtilityConnections connections2 = this.conduitMgr.GetConnections(cell2, false);
+				if (this.ShouldLink(utilityConnections, connections) && this.ShouldLink(utilityConnections2, connections2))
+				{
+					this.conduitMgr.AddConnection(utilityConnections, cell, false);
+					this.conduitMgr.AddConnection(utilityConnections2, cell2, false);
+				}
 			}
 		}
 	}
@@ -412,10 +383,6 @@ public class BaseUtilityBuildTool : DragTool
 				if (gameObject.GetComponent<BuildingComplete>() != null)
 				{
 					component3.UpdateConnections(utilityConnections);
-					if (DebugHandler.InstantBuildMode)
-					{
-						this.conduitMgr.SetConnections(utilityConnections, pathNode.cell, true);
-					}
 				}
 			}
 			if (this.def.ReplacementLayer != ObjectLayer.NumLayers && !DebugHandler.InstantBuildMode && this.def.IsValidBuildLocation(null, vector, Orientation.Neutral))
@@ -520,6 +487,8 @@ public class BaseUtilityBuildTool : DragTool
 		}
 
 		public int cell;
+
+		public bool valid;
 
 		public GameObject visualizer;
 	}

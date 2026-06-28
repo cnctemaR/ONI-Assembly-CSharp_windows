@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class HoverTextConfiguration : KMonoBehaviour
 {
-	public virtual void SetNotConfigured()
+	public void SetNotConfigured()
 	{
 		this.isConfigured = false;
 	}
@@ -19,14 +19,17 @@ public class HoverTextConfiguration : KMonoBehaviour
 		}
 	}
 
-	protected virtual void ConfigureTitle(HoverTextScreen screen)
+	protected virtual void ConfigureTitle(HoverTextScreen screen, bool string_only = false)
 	{
 		if (string.IsNullOrEmpty(this.ToolName))
 		{
-			this.ToolName = Strings.Get(this.ToolNameStringKey).String;
+			this.ToolName = Strings.Get(this.ToolNameStringKey).String.ToUpper();
 		}
-		this.TitleLine = screen.NewLine("Title Line", 24);
-		this.TitleText = screen.AddText(this.ToolName, this.ToolTitleTextStyle, true);
+		if (!string_only)
+		{
+			this.TitleLine = screen.NewLine("Title Line", 24);
+			this.TitleText = screen.AddText(this.ToolName, this.ToolTitleTextStyle, true);
+		}
 	}
 
 	protected virtual void ConfigureInstructions(HoverTextScreen screen)
@@ -38,6 +41,26 @@ public class HoverTextConfiguration : KMonoBehaviour
 		screen.AddIndent(8f, 18f);
 		screen.AddIcon(screen.GetSprite("icon_mouse_right"), 16f);
 		screen.AddText(UI.TOOLS.GENERIC.BACK, standard, true);
+	}
+
+	protected void DrawTitle(HoverTextScreen screen, HoverTextDrawer drawer)
+	{
+		if (!this.printTitle)
+		{
+			return;
+		}
+		drawer.DrawText(this.ToolName, this.ToolTitleTextStyle);
+	}
+
+	protected void DrawInstructions(HoverTextScreen screen, HoverTextDrawer drawer)
+	{
+		TextStyleSetting standard = this.Styles_Instruction.Standard;
+		drawer.NewLine(26);
+		drawer.DrawIcon(screen.GetSprite("icon_mouse_left"), 20);
+		drawer.DrawText(this.ActionName, standard);
+		drawer.AddIndent(8);
+		drawer.DrawIcon(screen.GetSprite("icon_mouse_right"), 20);
+		drawer.DrawText(this.backStr, standard);
 	}
 
 	public virtual void ConfigureHoverScreen()
@@ -59,16 +82,17 @@ public class HoverTextConfiguration : KMonoBehaviour
 		instance.StartShadowBar(0f, 0f, false);
 		if (this.printTitle)
 		{
-			this.ConfigureTitle(instance);
+			this.ConfigureTitle(instance, false);
 		}
 		this.ConfigureInstructions(instance);
 		instance.EndShadowBar();
 		this.isConfigured = true;
 	}
 
-	protected override void OnCmpDisable()
+	protected override void OnCmpEnable()
 	{
-		base.OnCmpDisable();
+		base.OnCmpEnable();
+		this.backStr = UI.TOOLS.GENERIC.BACK.ToString().ToUpper();
 	}
 
 	public virtual void UpdateHoverElements(List<KSelectable> hover_objects)
@@ -93,6 +117,8 @@ public class HoverTextConfiguration : KMonoBehaviour
 	[HideInInspector]
 	public string ToolName;
 
+	protected string backStr;
+
 	protected GameObject TitleLine;
 
 	protected GameObject InstructionLine;
@@ -102,8 +128,6 @@ public class HoverTextConfiguration : KMonoBehaviour
 	protected Text ActionText;
 
 	protected bool isConfigured;
-
-	protected Color iconColor_basic = Color.white;
 
 	public TextStyleSetting ToolTitleTextStyle;
 

@@ -35,6 +35,7 @@ public class MoveToSafetyChore : Chore<MoveToSafetyChore.StatesInstance>
 		{
 			default_state = this.move;
 			base.Target(this.mover);
+			this.root.ToggleTag(GameTags.Idle);
 			this.move.Enter("UpdateLocatorPosition", delegate(MoveToSafetyChore.StatesInstance smi)
 			{
 				smi.UpdateTargetCell();

@@ -13,7 +13,7 @@ public class LadderFastConfig : IBuildingConfig
 		float num3 = 100f;
 		int num4 = 10;
 		float num5 = 10f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER1;
 		string[] plastics = MATERIALS.PLASTICS;
 		float num6 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;

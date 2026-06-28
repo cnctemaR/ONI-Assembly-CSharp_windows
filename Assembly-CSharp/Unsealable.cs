@@ -7,7 +7,7 @@ public class Unsealable : Workable
 	{
 	}
 
-	public override CellOffset[] GetOffsets()
+	public override CellOffset[] GetOffsets(int cell)
 	{
 		if (this.facingRight)
 		{

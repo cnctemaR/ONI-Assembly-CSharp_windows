@@ -236,6 +236,11 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
+	public Dictionary<Tag, float> GetAccessibleAmounts()
+	{
+		return this.accessibleAmounts;
+	}
+
 	[Serialize]
 	private HashSet<Tag> Discovered = new HashSet<Tag>();
 

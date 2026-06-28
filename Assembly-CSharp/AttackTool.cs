@@ -3,13 +3,6 @@ using UnityEngine;
 
 public class AttackTool : DragTool
 {
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-		AttackTool.Instance = this;
-		this.hoverScreenUpdate.tickInterval = 0.2f;
-	}
-
 	protected override void OnDragComplete(Vector3 downPos, Vector3 upPos)
 	{
 		Vector2 regularizedPos = base.GetRegularizedPos(Vector2.Min(downPos, upPos), true);

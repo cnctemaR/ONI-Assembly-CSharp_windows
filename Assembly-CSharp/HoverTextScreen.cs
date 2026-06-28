@@ -51,7 +51,21 @@ public class HoverTextScreen : KScreen
 	{
 		base.OnActivate();
 		HoverTextScreen.Instance = this;
+		this.drawer = new HoverTextDrawer(this.skin.skin, base.GetComponent<RectTransform>());
 		this.ToggleIncubating(true);
+	}
+
+	public HoverTextDrawer BeginDrawing()
+	{
+		this.drawer.SetEnabled(true);
+		Vector2 zero = Vector2.zero;
+		Vector2 vector = Input.mousePosition;
+		RectTransform rectTransform = base.transform.parent as RectTransform;
+		RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, vector, base.transform.parent.GetComponent<Canvas>().worldCamera, out zero);
+		zero.x += rectTransform.sizeDelta.x / 2f;
+		zero.y -= rectTransform.sizeDelta.y / 2f;
+		this.drawer.BeginDrawing(zero);
+		return this.drawer;
 	}
 
 	private void Update()
@@ -91,6 +105,7 @@ public class HoverTextScreen : KScreen
 		component.anchoredPosition = new Vector3(Input.mousePosition.x + this.offset.x, Input.mousePosition.y + this.offset.y, 0f);
 		float canvasScale = base.transform.parent.GetComponent<KCanvasScaler>().GetCanvasScale();
 		component.anchoredPosition = new Vector2(component.anchoredPosition.x / canvasScale, component.anchoredPosition.y / canvasScale);
+		this.drawer.SetEnabled(false);
 	}
 
 	public Sprite GetSprite(string byName)
@@ -377,6 +392,12 @@ public class HoverTextScreen : KScreen
 		return gameObject.transform.Find("Image").GetComponent<Image>();
 	}
 
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		this.drawer.Cleanup();
+	}
+
 	[SerializeField]
 	public Vector2 offset;
 
@@ -398,6 +419,9 @@ public class HoverTextScreen : KScreen
 	[SerializeField]
 	private GameObject ShadowBarPrefab;
 
+	[SerializeField]
+	private HoverTextSkin skin;
+
 	private bool incubating;
 
 	public Sprite[] HoverIcons;
@@ -410,6 +434,8 @@ public class HoverTextScreen : KScreen
 
 	public Dictionary<HoverTextConfiguration, ToolHoverFields> CachedToolFields = new Dictionary<HoverTextConfiguration, ToolHoverFields>();
 
+	public HoverTextDrawer drawer;
+
 	private KSelectable previousHover;
 
 	private float hoverDelay;
@@ -419,27 +445,4 @@ public class HoverTextScreen : KScreen
 	public bool IsVisible;
 
 	public bool JustBecameVisible;
-
-	public struct HoverTextUpdateTimer
-	{
-		public bool tick()
-		{
-			this.timeElapsed += Time.unscaledDeltaTime;
-			if (this.timeElapsed >= this.tickInterval)
-			{
-				this.timeElapsed = 0f;
-				return true;
-			}
-			return false;
-		}
-
-		public void Prime()
-		{
-			this.timeElapsed = this.tickInterval;
-		}
-
-		public float tickInterval;
-
-		private float timeElapsed;
-	}
 }

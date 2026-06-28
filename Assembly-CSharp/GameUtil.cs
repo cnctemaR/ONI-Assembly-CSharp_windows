@@ -1948,7 +1948,7 @@ public static class GameUtil
 	[ThreadStatic]
 	private static HashSet<int> FloodFillVisited = new HashSet<int>();
 
-	public static TagSet foodTags = new TagSet(new string[] { "BasicPlantFood", "MushBar", "ColdWheatSeed", "ColdWheatSeed", "SpiceNut", "PrickleFruit", "Meat", "Mushroom" });
+	public static TagSet foodTags = new TagSet(new string[] { "BasicPlantFood", "MushBar", "ColdWheatSeed", "ColdWheatSeed", "SpiceNut", "PrickleFruit", "Meat", "Mushroom", "ColdWheat" });
 
 	public static TagSet solidTags = new TagSet(new string[] { "Filter", "Coal", "BasicFabric", "SwampLilyFlower" });
 

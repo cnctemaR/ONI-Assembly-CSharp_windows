@@ -23,43 +23,61 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 	public override void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
 	{
 		base.BeginTransition(navigator, transition);
-		if (this.isWalking)
+		float num = 1f;
+		bool flag = (transition.start == NavType.Pole || transition.end == NavType.Pole) && transition.y < 0 && transition.x == 0;
+		bool flag2 = transition.start == NavType.Tube || transition.end == NavType.Tube;
+		bool flag3 = !flag && !flag2;
+		if (flag3)
 		{
-			return;
-		}
-		int num = Grid.PosToCell(navigator);
-		float movementSpeedMultiplier = this.GetMovementSpeedMultiplier(navigator);
-		if (transition.x == 0 && transition.start == transition.end && (transition.start == NavType.Ladder || transition.start == NavType.Pole))
-		{
-			transition.speed = this.ladderSpeed * movementSpeedMultiplier;
-			GameObject gameObject = Grid.Objects[num, 1];
-			if (gameObject != null)
+			if (this.isWalking)
 			{
-				Ladder component = gameObject.GetComponent<Ladder>();
-				if (component != null)
+				return;
+			}
+			num = this.GetMovementSpeedMultiplier(navigator);
+		}
+		int num2 = Grid.PosToCell(navigator);
+		if (transition.x == 0 && (transition.start == NavType.Ladder || transition.start == NavType.Pole) && transition.start == transition.end)
+		{
+			if (flag)
+			{
+				transition.speed = this.downPoleSpeed;
+			}
+			else
+			{
+				transition.speed = this.ladderSpeed * num;
+				GameObject gameObject = Grid.Objects[num2, 1];
+				if (gameObject != null)
 				{
-					float num2 = component.upwardsMovementSpeedMultiplier;
-					if (transition.y < 0)
+					Ladder component = gameObject.GetComponent<Ladder>();
+					if (component != null)
 					{
-						num2 = component.downwardsMovementSpeedMultiplier;
+						float num3 = component.upwardsMovementSpeedMultiplier;
+						if (transition.y < 0)
+						{
+							num3 = component.downwardsMovementSpeedMultiplier;
+						}
+						transition.speed *= num3;
+						transition.animSpeed *= num3;
 					}
-					transition.speed *= num2;
-					transition.animSpeed *= num2;
 				}
 			}
 		}
+		else if (flag2)
+		{
+			transition.speed = this.tubeSpeed;
+		}
 		else
 		{
-			transition.speed = this.floorSpeed * movementSpeedMultiplier;
+			transition.speed = this.floorSpeed * num;
 		}
-		float num3 = movementSpeedMultiplier - 1f;
-		transition.animSpeed += transition.animSpeed * num3 / 2f;
+		float num4 = num - 1f;
+		transition.animSpeed += transition.animSpeed * num4 / 2f;
 		if (transition.start == NavType.Floor && transition.end == NavType.Floor)
 		{
-			int num4 = Grid.CellBelow(num);
-			if (Grid.Foundation[num4])
+			int num5 = Grid.CellBelow(num2);
+			if (Grid.Foundation[num5])
 			{
-				GameObject gameObject2 = Grid.Objects[num4, 1];
+				GameObject gameObject2 = Grid.Objects[num5, 1];
 				if (gameObject2 != null)
 				{
 					SimCellOccupier component2 = gameObject2.GetComponent<SimCellOccupier>();
@@ -77,7 +95,9 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 	public override void EndTransition(Navigator navigator, Navigator.ActiveTransition transition)
 	{
 		base.EndTransition(navigator, transition);
-		if (!this.isWalking)
+		bool flag = (transition.start == NavType.Pole || transition.end == NavType.Pole) && transition.y < 0 && transition.x == 0;
+		bool flag2 = transition.start == NavType.Tube || transition.end == NavType.Tube;
+		if (!this.isWalking && !flag && !flag2)
 		{
 			AttributeLevels component = navigator.GetComponent<AttributeLevels>();
 			if (component != null)
@@ -104,6 +124,10 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 	private float ladderSpeed;
 
 	private float startTime;
+
+	private float tubeSpeed = 18f;
+
+	private float downPoleSpeed = 15f;
 
 	private AttributeConverterInstance movementSpeed;
 }

@@ -2,9 +2,10 @@
 
 public class CellQuery : PathFinderQuery
 {
-	public void Reset(int target_cell)
+	public CellQuery Reset(int target_cell)
 	{
 		this.targetCell = target_cell;
+		return this;
 	}
 
 	public override bool IsMatch(int cell, int parent_cell, int cost)

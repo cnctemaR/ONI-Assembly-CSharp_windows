@@ -28,11 +28,6 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
-	public void ResetLayer()
-	{
-		base.gameObject.layer = this.defaultLayer;
-	}
-
 	public void CopyInitFunctions(KPrefabID other)
 	{
 		this.instantiateFn = other.instantiateFn;
@@ -69,6 +64,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 				}
 			}
 			this.tags = list.ToArray();
+			this.dirtyTagBits = true;
 		}
 	}
 
@@ -80,6 +76,16 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	public Tag GetSaveLoadTag()
 	{
 		return this.SaveLoadTag;
+	}
+
+	public TagBits GetTabBits()
+	{
+		if (this.dirtyTagBits)
+		{
+			this.tagBits = new TagBits(this.tags);
+			this.dirtyTagBits = false;
+		}
+		return this.tagBits;
 	}
 
 	protected override void OnPrefabInit()
@@ -106,21 +112,12 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
-	public static int GetID(string str)
-	{
-		int num = 0;
-		if (str != null)
-		{
-			num = Hash.SDBMLower(str);
-		}
-		return num;
-	}
-
 	public void AddPrefabTag(Tag tag)
 	{
 		if (tag.IsValid && !this.HasPrefabTag(tag))
 		{
 			this.PrefabTags = new List<Tag>(this.PrefabTags) { tag }.ToArray();
+			this.dirtyTagBits = true;
 		}
 	}
 
@@ -129,6 +126,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		List<Tag> list = tags.FindAll((Tag t) => t.IsValid && !this.HasPrefabTag(t));
 		if (list.Count > 0)
 		{
+			this.dirtyTagBits = true;
 			List<Tag> list2 = new List<Tag>(this.PrefabTags);
 			list2.AddRange(list);
 			this.PrefabTags = list2.ToArray();
@@ -151,26 +149,6 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		return false;
 	}
 
-	public bool HasAnyPrefabTags(IList<Tag> searchTags)
-	{
-		for (int i = 0; i < searchTags.Count; i++)
-		{
-			Tag tag = searchTags[i];
-			if (this.PrefabTag == tag)
-			{
-				return true;
-			}
-			for (int j = 0; j < this.PrefabTags.Length; j++)
-			{
-				if (tag == this.PrefabTags[j])
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	public void AddTag(Tag tag)
 	{
 		if (this.HasTag(tag))
@@ -179,6 +157,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		}
 		if (tag.IsValid)
 		{
+			this.dirtyTagBits = true;
 			this.tags = new List<Tag>(this.Tags) { tag }.ToArray();
 			base.Trigger(-1582839653, null);
 		}
@@ -188,35 +167,11 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
-	public void AddTags(IList<Tag> additional_tags)
-	{
-		if (additional_tags == null || additional_tags.Count == 0)
-		{
-			return;
-		}
-		List<Tag> list = new List<Tag>(this.Tags);
-		foreach (Tag tag in additional_tags)
-		{
-			if (!list.Contains(tag))
-			{
-				if (tag.IsValid)
-				{
-					list.Add(tag);
-				}
-				else
-				{
-					DebugUtil.Assert(tag.IsValid, "Assert!");
-				}
-			}
-		}
-		this.tags = list.ToArray();
-		base.Trigger(-1582839653, null);
-	}
-
 	public void RemoveTag(Tag tag)
 	{
 		if (this.HasTag(tag))
 		{
+			this.dirtyTagBits = true;
 			List<Tag> list = new List<Tag>(this.Tags);
 			list.Remove(tag);
 			this.tags = list.ToArray();
@@ -349,24 +304,6 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		KPrefabIDTracker.Get().Update(this);
 	}
 
-	public void AddAdditionalRequirement(List<Descriptor> additional)
-	{
-		if (this.AdditionalRequirements == null)
-		{
-			this.AdditionalRequirements = new List<Descriptor>();
-		}
-		this.AdditionalRequirements.AddRange(additional);
-	}
-
-	public void AddAdditionalEffect(List<Descriptor> additional)
-	{
-		if (this.AdditionalEffects == null)
-		{
-			this.AdditionalEffects = new List<Descriptor>();
-		}
-		this.AdditionalRequirements.AddRange(additional);
-	}
-
 	private void OnObjectDestroyed(object data)
 	{
 		this.pendingDestruction = true;
@@ -383,6 +320,10 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public Tag[] PrefabTags = new Tag[0];
 
+	private TagBits tagBits;
+
+	private bool dirtyTagBits = true;
+
 	[Serialize]
 	public int InstanceID;
 
@@ -397,8 +338,6 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	public List<Descriptor> AdditionalEffects;
 
 	private Tag[] tags;
-
-	public CellAlignment defaultSpawnOffset = CellAlignment.Bottom;
 
 	public delegate void PrefabFn(GameObject go);
 }

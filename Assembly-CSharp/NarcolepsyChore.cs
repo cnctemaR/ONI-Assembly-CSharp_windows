@@ -54,9 +54,16 @@ public class NarcolepsyChore : Chore<NarcolepsyChore.StatesInstance>
 		{
 			NavType currentNavType = base.sm.sleeper.Get<Navigator>(base.smi).CurrentNavType;
 			string text;
-			if (currentNavType != NavType.Ladder && currentNavType != NavType.Pole)
+			if (currentNavType != NavType.Ladder)
 			{
-				text = "anim_sleep_floor_kanim";
+				if (currentNavType != NavType.Pole)
+				{
+					text = "anim_sleep_floor_kanim";
+				}
+				else
+				{
+					text = "anim_sleep_pole_kanim";
+				}
 			}
 			else
 			{
@@ -105,7 +112,7 @@ public class NarcolepsyChore : Chore<NarcolepsyChore.StatesInstance>
 
 		public StateMachine<NarcolepsyChore.States, NarcolepsyChore.StatesInstance, NarcolepsyChore, object>.TargetParameter sleeper;
 
-		public GameStateMachine<NarcolepsyChore.States, NarcolepsyChore.StatesInstance, NarcolepsyChore, object>.ApproachSubState<Approachable> approach;
+		public GameStateMachine<NarcolepsyChore.States, NarcolepsyChore.StatesInstance, NarcolepsyChore, object>.ApproachSubState<IApproachable> approach;
 
 		public GameStateMachine<NarcolepsyChore.States, NarcolepsyChore.StatesInstance, NarcolepsyChore, object>.State sleep;
 

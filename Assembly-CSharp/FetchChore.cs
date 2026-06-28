@@ -16,6 +16,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		this.smi.sm.requestedamount.Set(amount, this.smi);
 		this.smi.sm.destination.Set(destination, this.smi);
 		this.tags = tags;
+		this.tagBits = new TagBits(tags);
 		this.forbiddenTags = forbidden_tags;
 		if (destination.GetOnlyFetchMarkedItems())
 		{
@@ -94,6 +95,8 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 
 	public Tag[] tags { get; private set; }
 
+	public TagBits tagBits { get; private set; }
+
 	public Tag[] requiredTags { get; private set; }
 
 	public Tag[] forbiddenTags { get; private set; }
@@ -126,7 +129,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		Pickupable pickupable = null;
 		if (this.destination != null)
 		{
-			FetchManager.Instance.FindFetchTarget(consumer.GetComponent<Worker>(), this.destination, this.tags, this.requiredTags, this.forbiddenTags, this.originalAmount, ref pickupable);
+			FetchManager.Instance.FindFetchTarget(consumer.GetComponent<Worker>(), this.destination, this.tagBits, this.requiredTags, this.forbiddenTags, this.originalAmount, ref pickupable);
 		}
 		return pickupable;
 	}
@@ -229,7 +232,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			}
 			else
 			{
-				flag = FetchManagerUpdater.IsFetchablePickup(pickupable.GetComponent<KPrefabID>(), pickupable.storage, pickupable.UnreservedAmount, pickupable.MinTakeAmount, fetchChore.originalAmount, fetchChore.tags, fetchChore.requiredTags, fetchChore.forbiddenTags, context.consumer.GetComponent<Storage>());
+				flag = FetchManagerUpdater.IsFetchablePickup(pickupable.GetComponent<KPrefabID>(), pickupable.storage, pickupable.UnreservedAmount, pickupable.MinTakeAmount, fetchChore.originalAmount, fetchChore.tagBits, fetchChore.requiredTags, fetchChore.forbiddenTags, context.consumer.GetComponent<Storage>());
 			}
 			if (flag)
 			{

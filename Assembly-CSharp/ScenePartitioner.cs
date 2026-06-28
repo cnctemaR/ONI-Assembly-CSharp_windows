@@ -123,7 +123,19 @@ public class ScenePartitioner
 		{
 			for (int j = nodeExtents.x; j < nodeExtents.x + nodeExtents.width; j++)
 			{
-				this.nodes[layer, i, j].entries.Add(entry);
+				ScenePartitioner.ScenePartitionerNode scenePartitionerNode = this.nodes[layer, i, j];
+				if (!scenePartitionerNode.dirty)
+				{
+					scenePartitionerNode.dirty = true;
+					this.dirtyNodes.Add(new ScenePartitioner.DirtyNode
+					{
+						layer = layer,
+						x = j,
+						y = i
+					});
+					this.nodes[layer, i, j] = scenePartitionerNode;
+				}
+				scenePartitionerNode.entries.Add(entry);
 			}
 		}
 	}
@@ -160,12 +172,24 @@ public class ScenePartitioner
 		{
 			for (int j = nodeExtents.x; j < nodeExtents.x + nodeExtents.width; j++)
 			{
-				List<ScenePartitionerEntry> entries = this.nodes[layer, i, j].entries;
+				ScenePartitioner.ScenePartitionerNode scenePartitionerNode = this.nodes[layer, i, j];
+				List<ScenePartitionerEntry> entries = scenePartitionerNode.entries;
 				int count = entries.Count;
 				for (int k = 0; k < count; k++)
 				{
 					if (entries[k] == entry)
 					{
+						if (!scenePartitionerNode.dirty)
+						{
+							scenePartitionerNode.dirty = true;
+							this.dirtyNodes.Add(new ScenePartitioner.DirtyNode
+							{
+								layer = layer,
+								x = j,
+								y = i
+							});
+							this.nodes[layer, i, j] = scenePartitionerNode;
+						}
 						entries[k] = null;
 						break;
 					}
@@ -183,8 +207,8 @@ public class ScenePartitioner
 	public void UpdatePosition(int x, int y, ScenePartitionerEntry entry)
 	{
 		this.Widthdraw(entry);
-		entry.x = x - entry.width / 2;
-		entry.y = y - entry.height / 2;
+		entry.x = x;
+		entry.y = y;
 		this.Insert(entry);
 	}
 
@@ -277,7 +301,7 @@ public class ScenePartitioner
 		for (int i = 0; i < gathered_entries.Count; i++)
 		{
 			ScenePartitionerEntry scenePartitionerEntry = gathered_entries[i];
-			if (scenePartitionerEntry.eventCallback != null)
+			if (scenePartitionerEntry.obj != null && scenePartitionerEntry.eventCallback != null)
 			{
 				scenePartitionerEntry.eventCallback(event_data);
 			}

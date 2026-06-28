@@ -7,10 +7,16 @@ public class SafeCellSensor : Sensor
 	{
 		this.navigator = base.GetComponent<Navigator>();
 		this.brain = base.GetComponent<MinionBrain>();
+		this.prefabid = base.GetComponent<KPrefabID>();
 	}
 
 	public override void Update()
 	{
+		if (!this.prefabid.HasTag(GameTags.Idle))
+		{
+			this.cell = Grid.InvalidCell;
+			return;
+		}
 		SafeCellQuery safeCellQuery = PathFinderQueries.safeCellQuery.Reset(this.brain);
 		this.navigator.RunQuery(safeCellQuery);
 		bool flag = this.HasSafeCell();
@@ -46,6 +52,8 @@ public class SafeCellSensor : Sensor
 	private MinionBrain brain;
 
 	private Navigator navigator;
+
+	private KPrefabID prefabid;
 
 	private int cell = Grid.InvalidCell;
 }

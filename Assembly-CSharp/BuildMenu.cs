@@ -548,6 +548,7 @@ public class BuildMenu : KScreen
 		Ladders,
 		Tiles,
 		Doors,
+		TravelTubes,
 		Storage,
 		Research,
 		Infrastructure,

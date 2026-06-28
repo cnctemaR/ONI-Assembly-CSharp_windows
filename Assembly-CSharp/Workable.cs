@@ -238,13 +238,18 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		this.offsetTracker = new OffsetTableTracker(offset_table, this);
 	}
 
-	public virtual CellOffset[] GetOffsets()
+	public virtual CellOffset[] GetOffsets(int cell)
 	{
 		if (this.offsetTracker == null)
 		{
 			this.offsetTracker = new StandardOffsetTracker(Grid.DefaultOffset);
 		}
-		return this.offsetTracker.GetOffsets(Grid.PosToCell(this));
+		return this.offsetTracker.GetOffsets(cell);
+	}
+
+	public CellOffset[] GetOffsets()
+	{
+		return this.GetOffsets(Grid.PosToCell(this));
 	}
 
 	public void SetWorkTime(float work_time)
@@ -324,23 +329,24 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return vector;
 	}
 
-	public int GetNavigationCost(Navigator navigator)
+	public int GetNavigationCost(Navigator navigator, int cell)
 	{
 		int num = PathProber.InvalidCost;
-		int num2 = Grid.PosToCell(this);
-		foreach (CellOffset cellOffset in this.GetOffsets())
+		foreach (CellOffset cellOffset in this.GetOffsets(cell))
 		{
-			int num3 = Grid.OffsetCell(num2, cellOffset);
-			if (Grid.IsValidCell(num3))
+			int num2 = Grid.OffsetCell(cell, cellOffset);
+			int navigationCost = navigator.GetNavigationCost(num2);
+			if (navigationCost != PathProber.InvalidCost && (num == PathProber.InvalidCost || navigationCost < num))
 			{
-				int navigationCost = navigator.GetNavigationCost(num3);
-				if (navigationCost != PathProber.InvalidCost && (num == PathProber.InvalidCost || navigationCost < num))
-				{
-					num = navigationCost;
-				}
+				num = navigationCost;
 			}
 		}
 		return num;
+	}
+
+	public int GetNavigationCost(Navigator navigator)
+	{
+		return this.GetNavigationCost(navigator, Grid.PosToCell(this));
 	}
 
 	private void TransferDiseaseWithWorker(Worker worker)

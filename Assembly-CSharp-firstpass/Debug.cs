@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Threading;
 using UnityEngine;
 
 public static class Debug
 {
 	private static string TimeStamp()
 	{
-		return DateTime.UtcNow.ToString("[HH:mm:ss.fff] [") + Thread.CurrentThread.ManagedThreadId + "] ";
+		return string.Empty;
 	}
 
 	public static bool isDebugBuild

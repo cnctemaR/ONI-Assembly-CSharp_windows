@@ -11,22 +11,24 @@ public class NavTactic
 		this._pathCostPenalty = pathCostPenalty;
 	}
 
-	public int[] GetCellPreferences(int root, CellOffset[] offsets, Navigator navigator)
+	public int GetCellPreferences(int root, CellOffset[] offsets, Navigator navigator)
 	{
-		int[] array = new int[offsets.Length];
-		int[] array2 = new int[offsets.Length];
+		int num = NavigationReservations.InvalidReservation;
+		int num2 = int.MaxValue;
 		for (int i = 0; i < offsets.Length; i++)
 		{
-			int num = Grid.OffsetCell(root, offsets[i]);
-			int num2 = 0;
-			num2 += this._overlapPenalty * NavigationReservations.Instance.GetOccupancyCount(num);
-			num2 += this._rangePenalty * Mathf.Abs(this._preferredRange - Grid.GetCellDistance(root, num));
-			num2 += this._pathCostPenalty * Mathf.Max(navigator.GetNavigationCost(num), 0);
-			array[i] = num;
-			array2[i] = num2;
+			int num3 = Grid.OffsetCell(root, offsets[i]);
+			int num4 = 0;
+			num4 += this._overlapPenalty * NavigationReservations.Instance.GetOccupancyCount(num3);
+			num4 += this._rangePenalty * Mathf.Abs(this._preferredRange - Grid.GetCellDistance(root, num3));
+			num4 += this._pathCostPenalty * Mathf.Max(navigator.GetNavigationCost(num3), 0);
+			if (num4 < num2 && navigator.CanReach(num3))
+			{
+				num2 = num4;
+				num = num3;
+			}
 		}
-		Array.Sort<int, int>(array2, array);
-		return array;
+		return num;
 	}
 
 	private int _overlapPenalty = 3;

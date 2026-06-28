@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
+using STRINGS;
 using UnityEngine;
 
 public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
@@ -26,6 +27,16 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 	public override void Cleanup()
 	{
 		base.Cleanup();
+	}
+
+	public override string GetReportName()
+	{
+		if (this.smi.deliveries.Count > 0 && this.smi.deliveries[0].destination != null)
+		{
+			string text = DUPLICANTS.CHORES.FETCH.REPORT_NAME;
+			return text.Replace("{0}", this.smi.deliveries[0].destination.GetProperName());
+		}
+		return base.GetReportName();
 	}
 
 	public class StatesInstance : GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.GameInstance
@@ -116,41 +127,28 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				}
 				Chore.Precondition.Context context2 = list2[k];
 				FetchChore fetchChore = context2.chore as FetchChore;
-				if (fetchChore != this.rootChore && context2.IsSuccess() && fetchChore.overrideTarget == null && fetchChore.driver == null && fetchChore.tags.Length == this.rootChore.tags.Length)
+				if (fetchChore != this.rootChore && context2.IsSuccess() && fetchChore.overrideTarget == null && fetchChore.driver == null && fetchChore.tagBits.AreEqual(this.rootChore.tagBits))
 				{
-					bool flag = true;
-					for (int l = 0; l < fetchChore.tags.Length; l++)
+					num9 = Mathf.Min(fetchChore.originalAmount, num5 - num10);
+					if (minTakeAmount > 0f)
 					{
-						Tag tag = fetchChore.tags[l];
-						if (Array.IndexOf<Tag>(this.rootChore.tags, tag) < 0)
-						{
-							flag = false;
-							break;
-						}
+						num9 -= num9 % minTakeAmount;
 					}
-					if (flag)
-					{
-						num9 = Mathf.Min(fetchChore.originalAmount, num5 - num10);
-						if (minTakeAmount > 0f)
-						{
-							num9 -= num9 % minTakeAmount;
-						}
-						this.chores.Add(fetchChore);
-						this.deliveries.Add(new FetchAreaChore.StatesInstance.Delivery(context2, num9, new Action<FetchChore>(this.OnFetchChoreCancelled)));
-						num10 += num9;
-					}
+					this.chores.Add(fetchChore);
+					this.deliveries.Add(new FetchAreaChore.StatesInstance.Delivery(context2, num9, new Action<FetchChore>(this.OnFetchChoreCancelled)));
+					num10 += num9;
 				}
 			}
 			num10 = Mathf.Min(num10, num5);
 			float num11 = num10;
 			this.fetchables.Clear();
-			for (int m = 0; m < list3.Count; m++)
+			for (int l = 0; l < list3.Count; l++)
 			{
 				if (num11 <= 0f)
 				{
 					break;
 				}
-				Pickupable pickupable3 = list3[m];
+				Pickupable pickupable3 = list3[l];
 				num11 -= pickupable3.UnreservedAmount;
 				this.fetchables.Add(pickupable3);
 			}
@@ -327,7 +325,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 		private List<Pickupable> deliverables = new List<Pickupable>();
 
-		private List<FetchAreaChore.StatesInstance.Delivery> deliveries = new List<FetchAreaChore.StatesInstance.Delivery>();
+		public List<FetchAreaChore.StatesInstance.Delivery> deliveries = new List<FetchAreaChore.StatesInstance.Delivery>();
 
 		private FetchChore rootChore;
 

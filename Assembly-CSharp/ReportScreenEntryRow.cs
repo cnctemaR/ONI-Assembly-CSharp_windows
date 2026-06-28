@@ -6,6 +6,24 @@ using UnityEngine.UI;
 
 public class ReportScreenEntryRow : KMonoBehaviour
 {
+	private List<KeyValuePair<string, float>> Sort(Dictionary<string, float> dict, ReportManager.ReportEntry.Order order)
+	{
+		this.sortedEntries.Clear();
+		foreach (KeyValuePair<string, float> keyValuePair in dict)
+		{
+			this.sortedEntries.Add(keyValuePair);
+		}
+		if (order == ReportManager.ReportEntry.Order.Ascending)
+		{
+			this.sortedEntries.Sort((KeyValuePair<string, float> x, KeyValuePair<string, float> y) => x.Value.CompareTo(y.Value));
+		}
+		else if (order == ReportManager.ReportEntry.Order.Descending)
+		{
+			this.sortedEntries.Sort((KeyValuePair<string, float> x, KeyValuePair<string, float> y) => y.Value.CompareTo(x.Value));
+		}
+		return this.sortedEntries;
+	}
+
 	public void SetLine(ReportManager.ReportEntry entry, ReportManager.ReportGroup reportGroup)
 	{
 		if (entry.context == null)
@@ -29,7 +47,7 @@ public class ReportScreenEntryRow : KMonoBehaviour
 			this.name.text = entry.context;
 		}
 		string text = string.Empty;
-		foreach (KeyValuePair<string, float> keyValuePair in entry.posNotes)
+		foreach (KeyValuePair<string, float> keyValuePair in this.Sort(entry.posNotes, reportGroup.posNoteOrder))
 		{
 			text = string.Format(UI.ENDOFDAYREPORT.NOTES.NOTE_ENTRY_LINE_ITEM, text, keyValuePair.Key, reportGroup.formatfn(keyValuePair.Value));
 		}
@@ -37,7 +55,7 @@ public class ReportScreenEntryRow : KMonoBehaviour
 		string text2 = string.Format(reportGroup.positiveTooltip + "\n" + text, reportGroup.formatfn(entry.Positive));
 		this.added.GetComponent<ToolTip>().toolTip = text2;
 		string text3 = string.Empty;
-		foreach (KeyValuePair<string, float> keyValuePair2 in entry.negNotes)
+		foreach (KeyValuePair<string, float> keyValuePair2 in this.Sort(entry.negNotes, reportGroup.negNoteOrder))
 		{
 			text3 = string.Format(UI.ENDOFDAYREPORT.NOTES.NOTE_ENTRY_LINE_ITEM, text3, keyValuePair2.Key, reportGroup.formatfn(keyValuePair2.Value));
 		}
@@ -71,4 +89,6 @@ public class ReportScreenEntryRow : KMonoBehaviour
 	public float groupSpacerWidth;
 
 	public float contextSpacerWidth;
+
+	private List<KeyValuePair<string, float>> sortedEntries = new List<KeyValuePair<string, float>>();
 }

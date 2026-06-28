@@ -283,6 +283,10 @@ namespace Rendering
 		[SerializeField]
 		private Color invalidPlaceColour = Color.red;
 
+		private const float TILE_ATLAS_WIDTH = 2048f;
+
+		private const float TILE_ATLAS_HEIGHT = 2048f;
+
 		private const int chunkEdgeSize = 16;
 
 		protected Dictionary<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> renderInfo = new Dictionary<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo>();
@@ -370,7 +374,7 @@ namespace Rendering
 					this.atlasInfo[k].uvBox = item.uvBox;
 					this.atlasInfo[k].name = item.name;
 				}
-				this.trimUVSize = new Vector2(64f / (float)def.BlockTileAtlas.texture.width, 64f / (float)def.BlockTileAtlas.texture.height);
+				this.trimUVSize = new Vector2(0.03125f, 0.03125f);
 			}
 
 			public void FreeResources()
@@ -581,6 +585,8 @@ namespace Rendering
 			private Dictionary<int, int> occupiedCells = new Dictionary<int, int>();
 
 			private SimHashes element;
+
+			private const float scale = 0.5f;
 
 			private const float core_size = 256f;
 

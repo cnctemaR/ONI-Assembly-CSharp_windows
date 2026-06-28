@@ -191,7 +191,6 @@ public class PropertyTextures : KMonoBehaviour
 		Shader.SetGlobalVector(this.PropTexCsToWsID, new Vector4(0f, 0f, 1f, 1f));
 		Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.position.z));
 		Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.position.z));
-		Shader.SetGlobalVector("_CamPosInfo", new Vector4(vector.x, vector.y, vector2.x, vector2.y));
 		int num;
 		int num2;
 		int num3;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class MultitoolController : GameStateMachine<MultitoolController, MultitoolController.Instance, Worker>
@@ -27,45 +28,25 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 
 	public static string[] GetAnimationStrings(Workable workable, Worker worker, string toolString = "dig")
 	{
-		string[][][] array = new string[][][]
+		string[][][] array;
+		if (!MultitoolController.TOOL_ANIM_SETS.TryGetValue(toolString, out array))
 		{
-			new string[][]
+			array = new string[MultitoolController.ANIM_BASE.Length][][];
+			MultitoolController.TOOL_ANIM_SETS[toolString] = array;
+			for (int i = 0; i < array.Length; i++)
 			{
-				new string[] { "{verb}_dn_pre", "{verb}_dn_loop" },
-				new string[] { "ladder_{verb}_dn_pre", "ladder_{verb}_dn_loop" }
-			},
-			new string[][]
-			{
-				new string[] { "{verb}_diag_dn_pre", "{verb}_diag_dn_loop" },
-				new string[] { "ladder_{verb}_diag_dn_pre", "ladder_{verb}_loop_diag_dn" }
-			},
-			new string[][]
-			{
-				new string[] { "{verb}_fwd_pre", "{verb}_fwd_loop" },
-				new string[] { "ladder_{verb}_pre", "ladder_{verb}_loop" }
-			},
-			new string[][]
-			{
-				new string[] { "{verb}_diag_up_pre", "{verb}_diag_up_loop" },
-				new string[] { "ladder_{verb}_diag_up_pre", "ladder_{verb}_loop_diag_up" }
-			},
-			new string[][]
-			{
-				new string[] { "{verb}_up_pre", "{verb}_up_loop" },
-				new string[] { "ladder_{verb}_up_pre", "ladder_{verb}_up_loop" }
-			}
-		};
-		if (toolString == "build")
-		{
-			toolString = "dig";
-		}
-		foreach (string[][] array3 in array)
-		{
-			foreach (string[] array5 in array3)
-			{
-				for (int k = 0; k < array5.Length; k++)
+				string[][] array2 = MultitoolController.ANIM_BASE[i];
+				string[][] array3 = new string[array2.Length][];
+				array[i] = array3;
+				for (int j = 0; j < array3.Length; j++)
 				{
-					array5[k] = array5[k].Replace("{verb}", toolString);
+					string[] array4 = array2[j];
+					string[] array5 = new string[array4.Length];
+					array3[j] = array5;
+					for (int k = 0; k < array5.Length; k++)
+					{
+						array5[k] = array4[k].Replace("{verb}", toolString);
+					}
 				}
 			}
 		}
@@ -98,6 +79,37 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 	public StateMachine<MultitoolController, MultitoolController.Instance, Worker, object>.TargetParameter worker;
 
 	public StateMachine<MultitoolController, MultitoolController.Instance, Worker, object>.TargetParameter workable;
+
+	private static string[][][] ANIM_BASE = new string[][][]
+	{
+		new string[][]
+		{
+			new string[] { "{verb}_dn_pre", "{verb}_dn_loop" },
+			new string[] { "ladder_{verb}_dn_pre", "ladder_{verb}_dn_loop" }
+		},
+		new string[][]
+		{
+			new string[] { "{verb}_diag_dn_pre", "{verb}_diag_dn_loop" },
+			new string[] { "ladder_{verb}_diag_dn_pre", "ladder_{verb}_loop_diag_dn" }
+		},
+		new string[][]
+		{
+			new string[] { "{verb}_fwd_pre", "{verb}_fwd_loop" },
+			new string[] { "ladder_{verb}_pre", "ladder_{verb}_loop" }
+		},
+		new string[][]
+		{
+			new string[] { "{verb}_diag_up_pre", "{verb}_diag_up_loop" },
+			new string[] { "ladder_{verb}_diag_up_pre", "ladder_{verb}_loop_diag_up" }
+		},
+		new string[][]
+		{
+			new string[] { "{verb}_up_pre", "{verb}_up_loop" },
+			new string[] { "ladder_{verb}_up_pre", "ladder_{verb}_up_loop" }
+		}
+	};
+
+	private static Dictionary<string, string[][][]> TOOL_ANIM_SETS = new Dictionary<string, string[][][]>();
 
 	public new class Instance : GameStateMachine<MultitoolController, MultitoolController.Instance, Worker, object>.GameInstance
 	{

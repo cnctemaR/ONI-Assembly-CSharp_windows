@@ -50,6 +50,11 @@ public struct Tag : ISerializationCallbackReceiver, IEquatable<Tag>, IComparable
 		return this.hash;
 	}
 
+	public int GetHash()
+	{
+		return this.hash;
+	}
+
 	public override bool Equals(object obj)
 	{
 		Tag tag = (Tag)obj;

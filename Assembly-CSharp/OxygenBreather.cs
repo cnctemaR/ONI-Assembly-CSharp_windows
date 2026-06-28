@@ -35,13 +35,6 @@ public class OxygenBreather : KMonoBehaviour
 		return this.GetOxygenPressure(this.mouthCell) < this.lowOxygenThreshold;
 	}
 
-	public bool IsOverPressure()
-	{
-		bool isGas = Grid.Element[this.mouthCell].IsGas;
-		bool flag = Grid.Cell[this.mouthCell].mass >= 4f;
-		return isGas && flag;
-	}
-
 	protected override void OnSpawn()
 	{
 		this.airConsumptionRate = Db.Get().Attributes.AirConsumptionRate.Lookup(this);

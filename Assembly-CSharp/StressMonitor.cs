@@ -8,7 +8,10 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 	{
 		base.serializable = true;
 		default_state = this.satisfied;
-		this.root.ToggleUrge(Db.Get().Urges.Relax);
+		this.root.ToggleUrge(Db.Get().Urges.Relax).Update(delegate(StressMonitor.Instance smi)
+		{
+			smi.ReportStress(smi.deltatime);
+		});
 		this.satisfied.Transition(this.stressed.tier1, (StressMonitor.Instance smi) => smi.stress.value >= 60f).ToggleExpression(Db.Get().Expressions.Neutral, null);
 		this.stressed.ToggleStatusItem(Db.Get().DuplicantStatusItems.Stressed, null).Transition(this.satisfied, (StressMonitor.Instance smi) => smi.stress.value < 60f).TriggerOnEnter(GameHashes.Stressed, null);
 		this.stressed.tier1.Transition(this.stressed.tier2, (StressMonitor.Instance smi) => smi.HasHadEnough());
@@ -49,6 +52,15 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 		public bool HasHadEnough()
 		{
 			return this.allowStressBreak && this.stress.value >= 100f;
+		}
+
+		public void ReportStress(float dt)
+		{
+			foreach (AttributeInstance.AttributeModifierEntry attributeModifierEntry in this.stress.deltaAttribute.Modifiers)
+			{
+				DebugUtil.DevAssert(!attributeModifierEntry.Modifier.IsMultiplier, "Reporting stress for multipliers not supported yet.");
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.StressDelta, attributeModifierEntry.Modifier.Value * dt, attributeModifierEntry.Name, base.gameObject.GetProperName());
+			}
 		}
 
 		public AmountInstance stress;

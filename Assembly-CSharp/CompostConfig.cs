@@ -45,7 +45,7 @@ public class CompostConfig : IBuildingConfig
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(new Tag("ToxicSand"), 0.1f)
+			new ElementConverter.ConsumedElement(GameTags.Compostable, 0.1f)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
@@ -54,7 +54,7 @@ public class CompostConfig : IBuildingConfig
 		elementConverter.conversionInterval = 1f;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = new Tag("ToxicSand");
+		manualDeliveryKG.requestedItemTag = GameTags.Compostable;
 		manualDeliveryKG.capacity = 200f;
 		manualDeliveryKG.refillMass = 100f;
 		manualDeliveryKG.minimumMass = 1f;

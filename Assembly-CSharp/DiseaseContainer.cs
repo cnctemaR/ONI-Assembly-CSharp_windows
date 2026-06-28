@@ -24,6 +24,11 @@ public struct DiseaseContainer
 		this.instanceGrowthRate = 1f;
 		this.accumulatedError = 0f;
 		this.visualDiseaseProvider = null;
+		this.autoDisinfectable = go.GetComponent<AutoDisinfectable>();
+		if (this.autoDisinfectable != null)
+		{
+			AutoDisinfectableManager.Instance.AddAutoDisinfectable(this.autoDisinfectable);
+		}
 	}
 
 	public void GetVisualDiseaseIdxAndCount(out int disease_idx, out int disease_count)
@@ -50,6 +55,8 @@ public struct DiseaseContainer
 	}
 
 	public PrimaryElement primaryElement;
+
+	public AutoDisinfectable autoDisinfectable;
 
 	public byte elemIdx;
 

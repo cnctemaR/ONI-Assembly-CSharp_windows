@@ -28,7 +28,7 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
-		buildingDef.ObjectLayer = ObjectLayer.FoundationTile;
+		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
 		buildingDef.ReplacementLayer = ObjectLayer.ReplacementTile;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;

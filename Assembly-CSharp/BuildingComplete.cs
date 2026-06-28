@@ -153,6 +153,14 @@ public class BuildingComplete : Building
 		base.OnCleanUp();
 		int num = Grid.PosToCell(this);
 		this.Def.UnmarkArea(num, base.Orientation, this.Def.ObjectLayer, base.gameObject);
+		if (this.Def.IsTilePiece)
+		{
+			this.Def.UnmarkArea(num, base.Orientation, this.Def.TileLayer, base.gameObject);
+			this.Def.RunOnArea(num, base.Orientation, delegate(int c)
+			{
+				TileVisualizer.RefreshCell(c, this.Def.TileLayer);
+			});
+		}
 		if (this.Def.IsFoundation)
 		{
 			foreach (CellOffset cellOffset in this.Def.PlacementOffsets)

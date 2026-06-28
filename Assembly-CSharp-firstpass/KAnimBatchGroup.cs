@@ -342,14 +342,12 @@ public class KAnimBatchGroup
 		if (this.animDataTex != null)
 		{
 			matProperties.SetTexture("animTex", this.animDataTex.texture);
-			matProperties.SetVector("ANIM_TEXEL_SIZE", this.animDataTex.texelSize);
-			matProperties.SetVector("ANIM_TEXTURE_SIZE", new Vector2((float)this.animDataTex.width, (float)this.animDataTex.height));
+			matProperties.SetVector("ANIM_TEXTURE_SIZE", new Vector4(this.animDataTex.texelSize.x, this.animDataTex.texelSize.y, (float)this.animDataTex.width, (float)this.animDataTex.height));
 		}
 		if (instance.buildTex != null)
 		{
 			matProperties.SetTexture("buildTex", instance.buildTex.texture);
-			matProperties.SetVector("BUILD_TEXEL_SIZE", instance.buildTex.texelSize);
-			matProperties.SetVector("BUILD_TEXTURE_SIZE", new Vector2((float)instance.buildTex.width, (float)instance.buildTex.height));
+			matProperties.SetVector("BUILD_TEXTURE_SIZE", new Vector4(instance.buildTex.texelSize.x, instance.buildTex.texelSize.y, (float)instance.buildTex.width, (float)instance.buildTex.height));
 		}
 		for (int i = 0; i < this.data.textures.Count; i++)
 		{

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public interface IUtilityNetworkMgr
 {
+	bool CanAddConnection(UtilityConnections new_connection, int cell, bool is_physical_building, out string fail_reason);
+
 	void AddConnection(UtilityConnections new_connection, int cell, bool is_physical_building);
 
 	void StashVisualGrids();

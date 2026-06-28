@@ -32,7 +32,7 @@ public class CancelTool : FilteredDragTool
 	{
 		if (DragTool.layerMask != this.regionLayerMask)
 		{
-			for (int i = 0; i < 28; i++)
+			for (int i = 0; i < 32; i++)
 			{
 				GameObject gameObject = Grid.Objects[cell, i];
 				if (gameObject != null)

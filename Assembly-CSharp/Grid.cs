@@ -539,6 +539,10 @@ public class Grid
 
 	public static bool[] HasPole;
 
+	public static bool[] HasTube;
+
+	public static bool[] HasTubeEntrance;
+
 	public static bool[] IsTileUnderConstruction;
 
 	public static bool[] PreventFogOfWarReveal;

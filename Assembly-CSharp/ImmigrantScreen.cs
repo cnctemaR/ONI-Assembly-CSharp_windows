@@ -52,6 +52,18 @@ public class ImmigrantScreen : CharacterSelectionController
 		base.OnShow(show);
 	}
 
+	public override void OnPressBack()
+	{
+		if (this.rejectConfirmationScreen.activeSelf)
+		{
+			this.OnRejectionCancelled();
+		}
+		else
+		{
+			base.OnPressBack();
+		}
+	}
+
 	public override void Deactivate()
 	{
 		base.Show(false);

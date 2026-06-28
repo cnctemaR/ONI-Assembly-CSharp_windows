@@ -119,8 +119,7 @@ public class KAnimBatch
 		}
 		this.matProperties = new MaterialPropertyBlock();
 		this.matProperties.SetTexture("instanceTex", this.dataTex.texture);
-		this.matProperties.SetVector("INSTANCE_TEXEL_SIZE", this.dataTex.texelSize);
-		this.matProperties.SetVector("INSTANCE_TEXTURE_SIZE", new Vector2((float)this.dataTex.width, (float)this.dataTex.height));
+		this.matProperties.SetVector("INSTANCE_TEXTURE_SIZE", new Vector4(this.dataTex.texelSize.x, this.dataTex.texelSize.y, (float)this.dataTex.width, (float)this.dataTex.height));
 		this.group.GetDataTextures(this.batchGroupInstance, this.matProperties);
 	}
 

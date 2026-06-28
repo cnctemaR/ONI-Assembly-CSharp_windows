@@ -290,6 +290,17 @@ public static class TemplateLoader
 				}
 			});
 			break;
+		case "TravelTube":
+			spawned.GetComponent<TravelTube>().SetFirstFrameCallback(delegate
+			{
+				Game.Instance.travelTubeSystem.SetConnections(connection, cell, true);
+				KAnimGraphTileVisualizer component5 = spawned.GetComponent<KAnimGraphTileVisualizer>();
+				if (component5 != null)
+				{
+					component5.Refresh();
+				}
+			});
+			break;
 		}
 	}
 

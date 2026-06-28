@@ -9,7 +9,7 @@ public class PathGrid
 		this.heightInCells = height_in_cells;
 		this.ValidNavTypes = valid_nav_types;
 		int num = 0;
-		this.NavTypeTable = new int[8];
+		this.NavTypeTable = new int[9];
 		for (int i = 0; i < this.NavTypeTable.Length; i++)
 		{
 			this.NavTypeTable[i] = -1;
@@ -23,6 +23,7 @@ public class PathGrid
 			}
 		}
 		this.Cells = new PathFinder.Cell[width_in_cells * height_in_cells * this.ValidNavTypes.Length];
+		this.ProberCells = new PathGrid.ProberCell[width_in_cells * height_in_cells];
 	}
 
 	public PathFinder.Cell GetCell(PathFinder.PotentialPath potential_path)
@@ -55,24 +56,32 @@ public class PathGrid
 		int num2 = this.NavTypeTable[(int)potential_path.navType];
 		int num3 = num * this.ValidNavTypes.Length + num2;
 		this.Cells[num3] = cell_data;
+		if (potential_path.navType != NavType.Tube)
+		{
+			PathGrid.ProberCell proberCell = this.ProberCells[num];
+			if (cell_data.queryId != proberCell.queryId || cell_data.cost < proberCell.cost)
+			{
+				proberCell.queryId = cell_data.queryId;
+				proberCell.cost = cell_data.cost;
+				this.ProberCells[num] = proberCell;
+			}
+		}
 	}
 
 	public int GetCost(int cell, int query_id)
 	{
-		int num = PathProber.InvalidCost;
-		if (Grid.IsValidCell(cell))
+		int num = this.OffsetCell(cell);
+		if (!this.IsValidOffsetCell(num))
 		{
-			for (int i = 0; i < this.ValidNavTypes.Length; i++)
-			{
-				NavType navType = this.ValidNavTypes[i];
-				PathFinder.Cell cell2 = this.GetCell(cell, navType);
-				if (cell2.queryId == query_id && (num == PathProber.InvalidCost || cell2.cost < num))
-				{
-					num = cell2.cost;
-				}
-			}
+			return PathProber.InvalidCost;
 		}
-		return num;
+		int num2 = PathProber.InvalidCost;
+		PathGrid.ProberCell proberCell = this.ProberCells[num];
+		if (proberCell.queryId == query_id)
+		{
+			num2 = proberCell.cost;
+		}
+		return num2;
 	}
 
 	private bool IsValidOffsetCell(int offset_cell)
@@ -110,6 +119,8 @@ public class PathGrid
 
 	private PathFinder.Cell[] Cells;
 
+	private PathGrid.ProberCell[] ProberCells;
+
 	private NavType[] ValidNavTypes;
 
 	private int[] NavTypeTable;
@@ -123,4 +134,11 @@ public class PathGrid
 	private int rootX;
 
 	private int rootY;
+
+	private struct ProberCell
+	{
+		public int cost;
+
+		public int queryId;
+	}
 }

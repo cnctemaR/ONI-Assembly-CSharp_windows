@@ -74,10 +74,6 @@ public class Door : Workable, ISaveLoadable
 		StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
 		HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
 		structureTemperatures.Disable(handle);
-		this.requestedState = this.CurrentState;
-		this.RefreshControlState();
-		this.SetSimState(this.IsOpen(), this.building.PlacementCells);
-		this.OnOperationalChanged(null);
 		this.collisionCollider = base.GetComponent<BoxCollider2D>();
 		this.selectionCollider = new GameObject("selection")
 		{
@@ -88,10 +84,8 @@ public class Door : Workable, ISaveLoadable
 			}
 		}.AddComponent<BoxCollider2D>();
 		this.selectionCollider.size = new Vector2(1f, 2f);
-		if (this.controlState == Door.ControlState.Opened)
-		{
-			this.controller.sm.isOpen.Set(true, this.controller);
-		}
+		this.requestedState = this.CurrentState;
+		this.ApplyRequestedControlState(true);
 		if (this.rotatable.IsRotated)
 		{
 			Vector2 vector = new Vector2(2f, 1f);
@@ -126,6 +120,7 @@ public class Door : Workable, ISaveLoadable
 				list.Add(Grid.CellRight(num2));
 			}
 			SimMessages.SetCellProperties(num2, 12);
+			Grid.RenderedByWorld[num2] = false;
 		}
 		List<int> list2 = new List<int>(this.building.PlacementCells);
 		foreach (int num3 in list)
@@ -312,7 +307,6 @@ public class Door : Workable, ISaveLoadable
 					SimMessages.ReplaceAndDisplaceElement(num5, simHashes, cellElementEvent, num4, num3, byte.MaxValue, 0, num2);
 				}
 			}
-			Grid.RenderedByWorld[num] = false;
 		}
 	}
 
@@ -393,13 +387,7 @@ public class Door : Workable, ISaveLoadable
 	{
 		base.OnCompleteWork(worker);
 		this.changeStateChore = null;
-		this.controlState = this.requestedState;
-		this.RefreshControlState();
-		this.OnOperationalChanged(null);
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, false);
-		base.Trigger(1734268753, this);
-		this.Open();
-		this.Close();
+		this.ApplyRequestedControlState(false);
 	}
 
 	public float Open()
@@ -412,20 +400,28 @@ public class Door : Workable, ISaveLoadable
 			{
 				int[] placementCells = this.building.PlacementCells;
 				float num = 0f;
-				foreach (int num2 in placementCells)
+				int num2 = 0;
+				foreach (int num3 in placementCells)
 				{
-					num += Grid.Temperature[num2];
+					if (Grid.Cell[num3].mass > 0f)
+					{
+						num2++;
+						num += Grid.Temperature[num3];
+					}
 				}
-				num /= (float)placementCells.Length;
-				PrimaryElement component = base.GetComponent<PrimaryElement>();
-				component.Temperature = num;
+				if (num2 > 0)
+				{
+					num /= (float)placementCells.Length;
+					PrimaryElement component = base.GetComponent<PrimaryElement>();
+					component.Temperature = num;
+				}
 			}
 		}
 		this.openCount++;
-		float num3 = 1f;
+		float num4 = 1f;
 		if (this.consumer != null)
 		{
-			num3 = ((!this.consumer.IsPowered) ? 0.5f : 1f);
+			num4 = ((!this.consumer.IsPowered) ? 0.5f : 1f);
 		}
 		Door.ControlState controlState = this.controlState;
 		if (controlState != Door.ControlState.Auto && controlState != Door.ControlState.Opened)
@@ -443,7 +439,7 @@ public class Door : Workable, ISaveLoadable
 				this.operational.SetActive(true, false);
 			}
 		}
-		return num3;
+		return num4;
 	}
 
 	public void Close()
@@ -489,6 +485,24 @@ public class Door : Workable, ISaveLoadable
 		return this.controller.IsInsideState(this.controller.sm.open) || this.controller.IsInsideState(this.controller.sm.closedelay) || this.controller.IsInsideState(this.controller.sm.closeblocked);
 	}
 
+	private void ApplyRequestedControlState(bool force = false)
+	{
+		if (this.requestedState == this.controlState && !force)
+		{
+			return;
+		}
+		this.controlState = this.requestedState;
+		this.RefreshControlState();
+		this.OnOperationalChanged(null);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, false);
+		base.Trigger(1734268753, this);
+		if (!force)
+		{
+			this.Open();
+			this.Close();
+		}
+	}
+
 	public void OnLogicValueChanged(object data)
 	{
 		LogicValueChanged logicValueChanged = (LogicValueChanged)data;
@@ -503,23 +517,8 @@ public class Door : Workable, ISaveLoadable
 			this.changeStateChore = null;
 		}
 		bool flag = newValue == 1;
-		Door.ControlState controlState = this.controlState;
-		this.controlState = ((!flag) ? Door.ControlState.Closed : Door.ControlState.Opened);
-		this.requestedState = this.controlState;
-		this.RefreshControlState();
-		this.OnOperationalChanged(null);
-		if (controlState != this.controlState)
-		{
-			if (flag)
-			{
-				this.Open();
-			}
-			else
-			{
-				this.Close();
-			}
-		}
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, false);
+		this.requestedState = ((!flag) ? Door.ControlState.Closed : Door.ControlState.Opened);
+		this.ApplyRequestedControlState(false);
 	}
 
 	[MyCmpReq]

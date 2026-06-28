@@ -35,6 +35,8 @@ namespace OverlayModes
 
 		public override void Update()
 		{
+			this.updateCropInfo.Clear();
+			this.freeHarvestableNotificationIdx = 0;
 			Vector2I vector2I;
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
@@ -58,23 +60,24 @@ namespace OverlayModes
 					disposable.Dispose();
 				}
 			}
-			foreach (Harvestable harvestable2 in Components.Harvestables)
+			foreach (Harvestable harvestable2 in this.layerTargets)
 			{
 				Vector2I vector2I3 = Grid.PosToXY(harvestable2.transform.position);
-				if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && !this.privateTargets.Contains(harvestable2))
+				if (vector2I <= vector2I3 && vector2I3 <= vector2I2)
 				{
 					this.AddCropUI(harvestable2);
-					this.queuedAdds.Add(harvestable2);
 				}
 			}
-			foreach (Harvestable harvestable3 in this.queuedAdds)
-			{
-				this.privateTargets.Add(harvestable3);
-			}
-			this.queuedAdds.Clear();
 			foreach (Crop.UpdateCropInfo updateCropInfo in this.updateCropInfo)
 			{
 				updateCropInfo.harvestableUI.GetComponent<HarvestableOverlayWidget>().Refresh(updateCropInfo.harvestable);
+			}
+			for (int i = this.freeHarvestableNotificationIdx; i < this.harvestableNotificationList.Count; i++)
+			{
+				if (this.harvestableNotificationList[i].activeSelf)
+				{
+					this.harvestableNotificationList[i].SetActive(false);
+				}
 			}
 			base.UpdateHighlightTypeOverlay<Harvestable>(vector2I, vector2I2, this.layerTargets, this.targetIDs, this.highlightConditions, BringToFrontLayerSetting.Constant, this.targetLayer);
 			base.Update();
@@ -102,7 +105,10 @@ namespace OverlayModes
 			if (this.freeHarvestableNotificationIdx < this.harvestableNotificationList.Count)
 			{
 				gameObject = this.harvestableNotificationList[this.freeHarvestableNotificationIdx];
-				gameObject.gameObject.SetActive(true);
+				if (!gameObject.gameObject.activeSelf)
+				{
+					gameObject.gameObject.SetActive(true);
+				}
 				this.freeHarvestableNotificationIdx++;
 			}
 			else
@@ -122,10 +128,6 @@ namespace OverlayModes
 			freeCropUI.GetComponent<RectTransform>().position = Vector3.up + vector;
 			this.updateCropInfo.Add(updateCropInfo);
 		}
-
-		private List<Harvestable> queuedAdds = new List<Harvestable>();
-
-		private HashSet<Harvestable> privateTargets = new HashSet<Harvestable>();
 
 		private Canvas uiRoot;
 

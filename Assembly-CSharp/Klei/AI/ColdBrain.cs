@@ -16,7 +16,6 @@ namespace Klei.AI
 				new AttributeModifier("Machinery", -5f, DUPLICANTS.DISEASES.COLDBRAIN.NAME, false, false, true),
 				new AttributeModifier("Construction", -5f, DUPLICANTS.DISEASES.COLDBRAIN.NAME, false, false, true),
 				new AttributeModifier("Cooking", -5f, DUPLICANTS.DISEASES.COLDBRAIN.NAME, false, false, true),
-				new AttributeModifier("Cooking", -5f, DUPLICANTS.DISEASES.COLDBRAIN.NAME, false, false, true),
 				new AttributeModifier("Sneezyness", 1f, DUPLICANTS.DISEASES.COLDBRAIN.NAME, false, false, true)
 			}));
 			base.AddDiseaseComponent(new AnimatedDisease(new HashedString[] { "anim_idle_cold_kanim", "anim_loco_run_cold_kanim", "anim_loco_walk_cold_kanim" }, "Cold"));

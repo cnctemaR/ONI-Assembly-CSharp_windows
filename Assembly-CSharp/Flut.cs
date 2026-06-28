@@ -349,14 +349,14 @@ public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadable
 		{
 			public Flut.States.Peacefull peacefully;
 
-			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.CreatureFleeSubState<Approachable> flee;
+			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.CreatureFleeSubState<IApproachable> flee;
 		}
 
 		public class Peacefull : GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.State
 		{
 			public Flut.States.IdleStates idling;
 
-			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.ApproachSubState<Approachable> moveToLure;
+			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.ApproachSubState<IApproachable> moveToLure;
 
 			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.State lay;
 		}

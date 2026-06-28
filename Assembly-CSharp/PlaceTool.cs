@@ -29,7 +29,6 @@ public class PlaceTool : DragTool
 		this.ShowToolTip();
 		BuildToolHoverTextCard component2 = base.GetComponent<BuildToolHoverTextCard>();
 		component2.currentDef = null;
-		component2.ConfigureHoverScreen();
 		component2.UpdateHoverElements(null);
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
 		if (component == null)

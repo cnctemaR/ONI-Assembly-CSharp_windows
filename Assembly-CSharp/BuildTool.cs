@@ -39,7 +39,6 @@ public class BuildTool : DragTool
 		this.visualizer.gameObject.SetActive(true);
 		BuildToolHoverTextCard component2 = base.GetComponent<BuildToolHoverTextCard>();
 		component2.currentDef = this.def;
-		component2.ConfigureHoverScreen();
 		component2.UpdateHoverElements(null);
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
 		if (component == null)

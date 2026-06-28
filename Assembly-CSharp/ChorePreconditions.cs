@@ -237,6 +237,15 @@ public static class ChorePreconditions
 		}
 	};
 
+	public static Chore.Precondition NotInTube = new Chore.Precondition
+	{
+		id = "NotInTube",
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			return !(context.consumer == null) && context.consumer.navigator.CurrentNavType != NavType.Tube;
+		}
+	};
+
 	public static Chore.Precondition ConsumerHasTrait = new Chore.Precondition
 	{
 		id = "ConsumerHasTrait",

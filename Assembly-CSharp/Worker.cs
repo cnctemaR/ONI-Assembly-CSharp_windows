@@ -145,7 +145,10 @@ public class Worker : KMonoBehaviour
 	{
 		this.startWorkInfo = start_work_info;
 		Game.Instance.StartedWork();
-		DebugUtil.Assert(this.state == Worker.State.Idle, "Assert!");
+		if (this.state != Worker.State.Idle)
+		{
+			global::Debug.LogError("State should be idle but instead it's:" + this.state.ToString(), null);
+		}
 		string name = this.workable.GetType().Name;
 		try
 		{

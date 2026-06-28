@@ -878,6 +878,19 @@ namespace STRINGS
 				public static LocString AVERAGEQUALITYNAME = "Mediocre Sculpture";
 			}
 
+			public class ICESCULPTURE
+			{
+				public static LocString NAME = "Ice Block";
+
+				public static LocString DESC = "Ice sculptures will melt over time if not kept sufficiently chilled.";
+
+				public static LocString EFFECT = "Increases <style=\"decor\">Decor</style> and reduces <style=\"stress\">Stress</style>.\n\nMust be sculpted by a Duplicant.";
+
+				public static LocString POORQUALITYNAME = "\"Abstract\" Ice Sculpture";
+
+				public static LocString AVERAGEQUALITYNAME = "Mediocre Ice Sculpture";
+			}
+
 			public class SUITMARKER
 			{
 				public static LocString NAME = "Exosuit Checkpoint";
@@ -1337,6 +1350,33 @@ namespace STRINGS
 				public static LocString DESC = "Clock Sensors ensure that systems always turn on at the same time of day or night, every cycle.";
 
 				public static LocString EFFECT = "Sets an automatic <style=\"logic\">Active</style> and <style=\"logic\">Standby</style> schedule using a timer.";
+			}
+
+			public class TRAVELTUBEENTRANCE
+			{
+				public static LocString NAME = "Transit Tube Access";
+
+				public static LocString DESC = "Access points are required for Duplicants to enter tubes, but are not required to exit them.";
+
+				public static LocString EFFECT = "Allows Duplicants to enter the connected Transit Tube system.\n\nStops drawing <style=\"power\">Power</style> once fully charged.";
+			}
+
+			public class TRAVELTUBE
+			{
+				public static LocString NAME = "Transit Tube";
+
+				public static LocString DESC = "Duplicants will only exit a transit tube when a safe landing area is available beneath it.";
+
+				public static LocString EFFECT = "Quickly transports Duplicants from a Transit Tube Access to the tube's end.\n\nOnly transports Duplicants.";
+			}
+
+			public class TRAVELTUBEWALLBRIDGE
+			{
+				public static LocString NAME = "Transit Tube Crossing";
+
+				public static LocString DESC = "Tube crossings can run transit tubes through walls without leaking gas or liquid.";
+
+				public static LocString EFFECT = "Allows Transit Tubes to be run through wall and floor tiles.\n\nFunctions as a regular tile.";
 			}
 		}
 

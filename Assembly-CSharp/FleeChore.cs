@@ -115,7 +115,7 @@ public class FleeChore : Chore<FleeChore.StatesInstance>
 
 		public GameStateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore, object>.State planFleeRoute;
 
-		public GameStateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore, object>.ApproachSubState<Approachable> flee;
+		public GameStateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore, object>.ApproachSubState<IApproachable> flee;
 
 		public GameStateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore, object>.State cower;
 

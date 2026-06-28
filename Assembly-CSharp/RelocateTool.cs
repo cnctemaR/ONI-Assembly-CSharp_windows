@@ -34,7 +34,6 @@ public class RelocateTool : DragTool
 		this.visualizer.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Placers).transform;
 		BuildToolHoverTextCard component2 = base.GetComponent<BuildToolHoverTextCard>();
 		component2.currentDef = this.def;
-		component2.ConfigureHoverScreen();
 		component2.UpdateHoverElements(null);
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
 		this.buildingOrientation = Orientation.Neutral;

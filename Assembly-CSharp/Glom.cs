@@ -137,7 +137,7 @@ public class Glom : StateMachineComponent<Glom.StatesInstance>
 		{
 			public Glom.States.GroundedState.IdleStates idling;
 
-			public GameStateMachine<Glom.States, Glom.StatesInstance, Glom, object>.CreatureFleeSubState<Approachable> flee;
+			public GameStateMachine<Glom.States, Glom.StatesInstance, Glom, object>.CreatureFleeSubState<IApproachable> flee;
 
 			public GameStateMachine<Glom.States, Glom.StatesInstance, Glom, object>.State dirty;
 

@@ -346,6 +346,13 @@ namespace STRINGS
 
 				public static LocString DESC = "High temperatures allow more efficient metal fabrication.";
 			}
+
+			public class TRAVELTUBES
+			{
+				public static LocString NAME = "Transit Tubes";
+
+				public static LocString DESC = "Get around your base quickly, safely, and in style!";
+			}
 		}
 	}
 }

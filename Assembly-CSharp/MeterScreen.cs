@@ -121,7 +121,7 @@ public class MeterScreen : KScreen
 	{
 		if (this.RationsText != null && RationTracker.Get() != null)
 		{
-			int num = (int)RationTracker.Get().CountRations(null, true);
+			long num = (long)RationTracker.Get().CountRations(null, true);
 			this.RationsText.text = GameUtil.GetFormattedCalories((float)num, GameUtil.TimeSlice.None, true);
 		}
 	}

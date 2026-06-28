@@ -142,9 +142,6 @@ public class FishingLure : KMonoBehaviour
 	[MyCmpAdd]
 	private KBatchedAnimController anim;
 
-	[MyCmpAdd]
-	private Approachable approachable;
-
 	private float moveSpeed = 2f;
 
 	private float HookChance = 10f;

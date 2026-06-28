@@ -19,16 +19,10 @@ public class PrioritizeToolHoverTextCard : HoverTextConfiguration
 			this.ActionName = Strings.Get(this.ActionStringKey);
 		}
 		instance.ClearLabels();
-		instance.NewLine("spacer", 24);
-		instance.StartShadowBar(0f, 0f, false);
 		if (this.printTitle)
 		{
-			this.ConfigureTitle(instance);
+			this.ConfigureTitle(instance, true);
 		}
-		this.ConfigureInstructions(instance);
-		instance.NewLine("PriorityText", 24);
-		this.priorityLine = instance.AddText(string.Empty, this.Styles_Title.Standard, true);
-		instance.EndShadowBar();
 		this.isConfigured = true;
 	}
 
@@ -38,12 +32,15 @@ public class PrioritizeToolHoverTextCard : HoverTextConfiguration
 		{
 			return;
 		}
-		if (!this.isConfigured || this.priorityLine == null)
-		{
-			this.ConfigureHoverScreen();
-		}
-		this.priorityLine.text = string.Format(UI.TOOLS.PRIORITIZE.SPECIFIC_PRIORITY, ToolMenuPriorityScreen.Instance.GetScreenPriority().ToString());
+		base.UpdateHoverElements(selected);
+		HoverTextScreen instance = HoverTextScreen.Instance;
+		HoverTextDrawer hoverTextDrawer = instance.BeginDrawing();
+		hoverTextDrawer.BeginShadowBar(false);
+		base.DrawTitle(HoverTextScreen.Instance, hoverTextDrawer);
+		base.DrawInstructions(HoverTextScreen.Instance, hoverTextDrawer);
+		hoverTextDrawer.NewLine(26);
+		hoverTextDrawer.DrawText(string.Format(UI.TOOLS.PRIORITIZE.SPECIFIC_PRIORITY, ToolMenuPriorityScreen.Instance.GetScreenPriority().priority_value.ToString()), this.Styles_Title.Standard);
+		hoverTextDrawer.EndShadowBar();
+		hoverTextDrawer.EndDrawing();
 	}
-
-	private LocText priorityLine;
 }

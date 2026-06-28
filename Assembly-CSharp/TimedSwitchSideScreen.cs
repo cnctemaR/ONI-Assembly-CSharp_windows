@@ -212,8 +212,8 @@ public class TimedSwitchSideScreen : SideScreenContent
 	[SerializeField]
 	private KButton offButton;
 
-	[Header("On Time")]
 	[SerializeField]
+	[Header("On Time")]
 	private KButton onTimeIncreaseButton;
 
 	[SerializeField]

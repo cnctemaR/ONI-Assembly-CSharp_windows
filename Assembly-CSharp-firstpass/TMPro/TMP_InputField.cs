@@ -413,7 +413,7 @@ namespace TMPro
 		{
 			get
 			{
-				return this.m_CaretPosition + Input.compositionString.Length;
+				return this.m_CaretPosition;
 			}
 			set
 			{
@@ -426,7 +426,7 @@ namespace TMPro
 		{
 			get
 			{
-				return this.m_CaretSelectPosition + Input.compositionString.Length;
+				return this.m_CaretSelectPosition;
 			}
 			set
 			{
@@ -965,6 +965,7 @@ namespace TMPro
 			}
 			if (c == '\0' && Input.compositionString.Length > 0)
 			{
+				this.Delete();
 				this.UpdateLabel();
 			}
 			return TMP_InputField.EditState.Continue;
@@ -1544,13 +1545,17 @@ namespace TMPro
 				}
 				else
 				{
-					if (!this.hasSelection)
+					if (Input.compositionString.Length > 0)
 					{
-						this.GenerateCaret(vertexHelper, Vector2.zero);
+						this.GenerateIMEHighlight(vertexHelper, Vector2.zero);
+					}
+					else if (this.hasSelection)
+					{
+						this.GenerateSelectionHighlight(vertexHelper, Vector2.zero);
 					}
 					else
 					{
-						this.GenerateHightlight(vertexHelper, Vector2.zero);
+						this.GenerateCaret(vertexHelper, Vector2.zero);
 					}
 					vertexHelper.FillMesh(vbo);
 				}
@@ -1650,7 +1655,7 @@ namespace TMPro
 			}
 		}
 
-		private void GenerateHightlight(VertexHelper vbo, Vector2 roundingOffset)
+		private void GenerateSelectionHighlight(VertexHelper vbo, Vector2 roundingOffset)
 		{
 			TMP_TextInfo textInfo = this.m_TextComponent.textInfo;
 			Vector2 vector;
@@ -1675,64 +1680,98 @@ namespace TMPro
 				num3 = num4;
 			}
 			num3--;
-			int num5 = (int)textInfo.characterInfo[num2].lineNumber;
-			int num6 = textInfo.lineInfo[num5].lastCharacterIndex;
+			this.GenerateHightlight(textInfo, num2, num3, vbo, roundingOffset);
+		}
+
+		private void GenerateIMEHighlight(VertexHelper vbo, Vector2 roundingOffset)
+		{
+			TMP_TextInfo textInfo = this.m_TextComponent.textInfo;
+			int num = this.caretPositionInternal + Input.compositionString.Length;
+			Vector2 vector;
+			float num2;
+			if (num < textInfo.characterCount)
+			{
+				vector = new Vector2(textInfo.characterInfo[num].origin, textInfo.characterInfo[num].descender);
+				num2 = textInfo.characterInfo[num].ascender - textInfo.characterInfo[num].descender;
+			}
+			else
+			{
+				vector = new Vector2(textInfo.characterInfo[num - 1].xAdvance, textInfo.characterInfo[num - 1].descender);
+				num2 = textInfo.characterInfo[num - 1].ascender - textInfo.characterInfo[num - 1].descender;
+			}
+			this.AdjustRectTransformRelativeToViewport(vector, num2, true);
+			int num3 = Mathf.Max(0, this.caretPositionInternal);
+			int num4 = Mathf.Max(0, num);
+			if (num3 > num4)
+			{
+				int num5 = num3;
+				num3 = num4;
+				num4 = num5;
+			}
+			num4--;
+			this.GenerateHightlight(textInfo, num3, num4, vbo, roundingOffset);
+		}
+
+		private void GenerateHightlight(TMP_TextInfo textInfo, int startChar, int endChar, VertexHelper vbo, Vector2 roundingOffset)
+		{
+			int num = (int)textInfo.characterInfo[startChar].lineNumber;
+			int num2 = textInfo.lineInfo[num].lastCharacterIndex;
 			UIVertex simpleVert = UIVertex.simpleVert;
 			simpleVert.uv0 = Vector2.zero;
 			simpleVert.color = this.selectionColor;
-			int num7 = num2;
-			while (num7 <= num3 && num7 < textInfo.characterCount)
+			int num3 = startChar;
+			while (num3 <= endChar && num3 < textInfo.characterCount)
 			{
-				if (num7 == num6 || num7 == num3)
+				if (num3 == num2 || num3 == endChar)
 				{
-					TMP_CharacterInfo tmp_CharacterInfo = textInfo.characterInfo[num2];
-					TMP_CharacterInfo tmp_CharacterInfo2 = textInfo.characterInfo[num7];
-					Vector2 vector2 = new Vector2(tmp_CharacterInfo.origin, tmp_CharacterInfo.ascender);
-					Vector2 vector3 = new Vector2(tmp_CharacterInfo2.xAdvance, tmp_CharacterInfo2.descender);
-					Vector2 vector4 = this.m_TextViewport.position + this.m_TextViewport.rect.min;
-					Vector2 vector5 = this.m_TextViewport.position + this.m_TextViewport.rect.max;
-					float num8 = this.m_TextComponent.rectTransform.position.x + vector2.x - vector4.x;
-					if (num8 < 0f)
+					TMP_CharacterInfo tmp_CharacterInfo = textInfo.characterInfo[startChar];
+					TMP_CharacterInfo tmp_CharacterInfo2 = textInfo.characterInfo[num3];
+					Vector2 vector = new Vector2(tmp_CharacterInfo.origin, tmp_CharacterInfo.ascender);
+					Vector2 vector2 = new Vector2(tmp_CharacterInfo2.xAdvance, tmp_CharacterInfo2.descender);
+					Vector2 vector3 = this.m_TextViewport.position + this.m_TextViewport.rect.min;
+					Vector2 vector4 = this.m_TextViewport.position + this.m_TextViewport.rect.max;
+					float num4 = this.m_TextComponent.rectTransform.position.x + vector.x - vector3.x;
+					if (num4 < 0f)
 					{
-						vector2.x -= num8;
+						vector.x -= num4;
 					}
-					float num9 = this.m_TextComponent.rectTransform.position.y + vector3.y - vector4.y;
-					if (num9 < 0f)
+					float num5 = this.m_TextComponent.rectTransform.position.y + vector2.y - vector3.y;
+					if (num5 < 0f)
 					{
-						vector3.y -= num9;
+						vector2.y -= num5;
 					}
-					float num10 = vector5.x - (this.m_TextComponent.rectTransform.position.x + vector3.x);
-					if (num10 < 0f)
+					float num6 = vector4.x - (this.m_TextComponent.rectTransform.position.x + vector2.x);
+					if (num6 < 0f)
 					{
-						vector3.x += num10;
+						vector2.x += num6;
 					}
-					float num11 = vector5.y - (this.m_TextComponent.rectTransform.position.y + vector2.y);
-					if (num11 < 0f)
+					float num7 = vector4.y - (this.m_TextComponent.rectTransform.position.y + vector.y);
+					if (num7 < 0f)
 					{
-						vector2.y += num11;
+						vector.y += num7;
 					}
-					if (this.m_TextComponent.rectTransform.position.y + vector2.y >= vector4.y && this.m_TextComponent.rectTransform.position.y + vector3.y <= vector5.y)
+					if (this.m_TextComponent.rectTransform.position.y + vector.y >= vector3.y && this.m_TextComponent.rectTransform.position.y + vector2.y <= vector4.y)
 					{
 						int currentVertCount = vbo.currentVertCount;
-						simpleVert.position = new Vector3(vector2.x, vector3.y, 0f);
-						vbo.AddVert(simpleVert);
-						simpleVert.position = new Vector3(vector3.x, vector3.y, 0f);
-						vbo.AddVert(simpleVert);
-						simpleVert.position = new Vector3(vector3.x, vector2.y, 0f);
+						simpleVert.position = new Vector3(vector.x, vector2.y, 0f);
 						vbo.AddVert(simpleVert);
 						simpleVert.position = new Vector3(vector2.x, vector2.y, 0f);
+						vbo.AddVert(simpleVert);
+						simpleVert.position = new Vector3(vector2.x, vector.y, 0f);
+						vbo.AddVert(simpleVert);
+						simpleVert.position = new Vector3(vector.x, vector.y, 0f);
 						vbo.AddVert(simpleVert);
 						vbo.AddTriangle(currentVertCount, currentVertCount + 1, currentVertCount + 2);
 						vbo.AddTriangle(currentVertCount + 2, currentVertCount + 3, currentVertCount);
 					}
-					num2 = num7 + 1;
-					num5++;
-					if (num5 < textInfo.lineCount)
+					startChar = num3 + 1;
+					num++;
+					if (num < textInfo.lineCount)
 					{
-						num6 = textInfo.lineInfo[num5].lastCharacterIndex;
+						num2 = textInfo.lineInfo[num].lastCharacterIndex;
 					}
 				}
-				num7++;
+				num3++;
 			}
 		}
 

@@ -391,8 +391,8 @@ public class DetailsScreen : KTabMenu
 	[SerializeField]
 	private GameObject tabHeaderContainer;
 
-	[SerializeField]
 	[Header("Side Screens")]
+	[SerializeField]
 	private GameObject sideScreenContentBody;
 
 	[SerializeField]

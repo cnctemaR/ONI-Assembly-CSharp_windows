@@ -339,8 +339,8 @@ public class ResearchEntry : KMonoBehaviour
 	[SerializeField]
 	private Transform lineContainer;
 
-	[Header("Prefabs")]
 	[SerializeField]
+	[Header("Prefabs")]
 	private GameObject iconPanel;
 
 	[SerializeField]
@@ -368,8 +368,8 @@ public class ResearchEntry : KMonoBehaviour
 	[SerializeField]
 	private Sprite completedBG;
 
-	[Header("Colors")]
 	[SerializeField]
+	[Header("Colors")]
 	private Color defaultColor = Color.blue;
 
 	[SerializeField]

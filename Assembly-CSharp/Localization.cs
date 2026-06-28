@@ -369,6 +369,7 @@ public static class Localization
 		new Localization.LocInfo(Localization.Language.Japanese, "ja", "NotoSansCJKjp-Regular"),
 		new Localization.LocInfo(Localization.Language.Korean, "ko", "NotoSansCJKkr-Regular"),
 		new Localization.LocInfo(Localization.Language.Russian, "ru", "RobotoCondensed-Regular"),
+		new Localization.LocInfo(Localization.Language.Thai, "th", "NotoSansThai-Regular"),
 		new Localization.LocInfo(Localization.Language.Unspecified, string.Empty, "NotoSans-Regular")
 	};
 
@@ -393,6 +394,7 @@ public static class Localization
 		Japanese,
 		Korean,
 		Russian,
+		Thai,
 		Unspecified
 	}
 

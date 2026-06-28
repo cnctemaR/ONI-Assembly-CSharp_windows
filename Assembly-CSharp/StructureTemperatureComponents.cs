@@ -40,7 +40,16 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 			StructureTemperatureData data = base.GetData(handle);
 			if (str != BUILDING.STATUSITEMS.OPERATINGENERGY.TOOLTIP)
 			{
-				str = string.Format(str, GameUtil.GetFormattedWattage(data.TotalEnergyProducedKW * 1000f * 0.005f, "F1"));
+				try
+				{
+					str = string.Format(str, GameUtil.GetFormattedWattage(data.TotalEnergyProducedKW * 1000f * 0.005f, "F1"));
+				}
+				catch (Exception ex)
+				{
+					global::Debug.LogWarning(ex, null);
+					global::Debug.LogWarning(BUILDING.STATUSITEMS.OPERATINGENERGY.TOOLTIP, null);
+					global::Debug.LogWarning(str, null);
+				}
 			}
 			else
 			{

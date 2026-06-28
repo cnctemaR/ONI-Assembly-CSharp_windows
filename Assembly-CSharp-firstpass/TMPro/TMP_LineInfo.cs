@@ -38,8 +38,6 @@ namespace TMPro
 
 		public float marginRight;
 
-		public float maxScale;
-
 		public TextAlignmentOptions alignment;
 
 		public Extents lineExtents;

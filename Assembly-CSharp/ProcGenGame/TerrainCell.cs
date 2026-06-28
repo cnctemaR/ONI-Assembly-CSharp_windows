@@ -559,17 +559,6 @@ namespace ProcGenGame
 							this.ApplyPlaceElementForRoom(featureSettings, "RoomBorderChoices" + i, this.borders[i], world, SetValues, temperatureMin, temperatureRange, rnd);
 						}
 					}
-					if (featureSettings.internalMobs != null && featureSettings.internalMobs.Count > 0)
-					{
-						this.LogInfo("\t\t", "internal mobs", (float)featureSettings.internalMobs.Count);
-						if (!this.doneMobs)
-						{
-							if (!this.disableRoomMobs)
-							{
-							}
-							this.doneMobs = true;
-						}
-					}
 				}
 			}
 		}
@@ -809,11 +798,7 @@ namespace ProcGenGame
 
 		private float finalSize;
 
-		private bool doneMobs;
-
 		private bool debugMode;
-
-		private bool disableRoomMobs;
 
 		private List<int> allCells;
 

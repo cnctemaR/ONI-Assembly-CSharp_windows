@@ -481,6 +481,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	private LoggerFS log;
 
+	public Grid.SceneLayer sceneLayer = Grid.SceneLayer.Move;
+
 	private PathFinderAbilities abilities = default(PathFinderAbilities);
 
 	[MyCmpReq]

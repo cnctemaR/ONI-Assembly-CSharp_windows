@@ -16,7 +16,7 @@ public class Dumpable : Workable
 		base.OnSpawn();
 		if (this.isMarkedForDumping)
 		{
-			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		}
 		base.SetWorkTime(0.1f);
 	}
@@ -37,7 +37,7 @@ public class Dumpable : Workable
 		else
 		{
 			this.isMarkedForDumping = true;
-			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		}
 	}
 
@@ -70,9 +70,8 @@ public class Dumpable : Workable
 			string text = "action_empty_contents";
 			string text2 = UI.USERMENUACTIONS.DUMP.NAME;
 			global::System.Action action = new global::System.Action(this.ToggleDumping);
-			global::Action action2 = global::Action.BuildingUtility1;
 			string text3 = UI.USERMENUACTIONS.DUMP.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, action2, null, null, null, text3, true), 1f);
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 		}
 		else
 		{
@@ -80,9 +79,8 @@ public class Dumpable : Workable
 			string text3 = "action_empty_contents";
 			string text2 = UI.USERMENUACTIONS.DUMP.NAME_OFF;
 			global::System.Action action = new global::System.Action(this.ToggleDumping);
-			global::Action action2 = global::Action.BuildingUtility1;
 			string text = UI.USERMENUACTIONS.DUMP.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, action2, null, null, null, text, true), 1f);
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 	}
 

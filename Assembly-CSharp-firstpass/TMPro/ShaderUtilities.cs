@@ -6,6 +6,11 @@ namespace TMPro
 {
 	public static class ShaderUtilities
 	{
+		static ShaderUtilities()
+		{
+			ShaderUtilities.GetShaderPropertyIDs();
+		}
+
 		public static void GetShaderPropertyIDs()
 		{
 			if (!ShaderUtilities.isInitialized)
@@ -61,14 +66,14 @@ namespace TMPro
 			}
 		}
 
-		public static void UpdateShaderRatios(Material mat, bool isBold)
+		public static void UpdateShaderRatios(Material mat)
 		{
 			bool flag = !mat.shaderKeywords.Contains(ShaderUtilities.Keyword_Ratios);
 			float @float = mat.GetFloat(ShaderUtilities.ID_GradientScale);
 			float float2 = mat.GetFloat(ShaderUtilities.ID_FaceDilate);
 			float float3 = mat.GetFloat(ShaderUtilities.ID_OutlineWidth);
 			float float4 = mat.GetFloat(ShaderUtilities.ID_OutlineSoftness);
-			float num = (isBold ? (mat.GetFloat(ShaderUtilities.ID_WeightBold) * 2f / @float) : (mat.GetFloat(ShaderUtilities.ID_WeightNormal) * 2f / @float));
+			float num = Mathf.Max(mat.GetFloat(ShaderUtilities.ID_WeightNormal), mat.GetFloat(ShaderUtilities.ID_WeightBold)) / 4f;
 			float num2 = Mathf.Max(1f, num + float2 + float3 + float4);
 			float num3 = ((!flag) ? 1f : ((@float - ShaderUtilities.m_clamp) / (@float * num2)));
 			mat.SetFloat(ShaderUtilities.ID_ScaleRatio_A, num3);
@@ -129,7 +134,7 @@ namespace TMPro
 			float num7 = 0f;
 			float num8 = 0f;
 			float num9 = 0f;
-			ShaderUtilities.UpdateShaderRatios(material, isBold);
+			ShaderUtilities.UpdateShaderRatios(material);
 			string[] shaderKeywords = material.shaderKeywords;
 			if (material.HasProperty(ShaderUtilities.ID_ScaleRatio_A))
 			{
@@ -225,7 +230,7 @@ namespace TMPro
 			float num10;
 			for (int i = 0; i < materials.Length; i++)
 			{
-				ShaderUtilities.UpdateShaderRatios(materials[i], isBold);
+				ShaderUtilities.UpdateShaderRatios(materials[i]);
 				string[] shaderKeywords = materials[i].shaderKeywords;
 				if (materials[i].HasProperty(ShaderUtilities.ID_ScaleRatio_A))
 				{

@@ -55,7 +55,7 @@ public class WashSinkConfig : IBuildingConfig
 		storage.capacityKg = 25f;
 		storage.doDiseaseTransfer = false;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
-		go.UpdateComponentRequirement<LoopingSounds>(true);
+		go.AddOrGet<LoopingSounds>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

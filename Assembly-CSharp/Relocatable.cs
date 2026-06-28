@@ -33,7 +33,7 @@ public class Relocatable : Workable, ISaveLoadable
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Relocating;
 		this.attributeConverter = Db.Get().AttributeConverters.ConstructionSpeed;
 		this.multitoolContext = "build";
-		this.multitoolHitEffectHash = new HashedString("fx_build_splash");
+		this.multitoolHitEffectTag = "fx_build_splash";
 		base.SetWorkTime(4f);
 	}
 
@@ -82,7 +82,7 @@ public class Relocatable : Workable, ISaveLoadable
 		{
 			if (this.deconstruct && this.chore == null)
 			{
-				this.chore = new WorkChore<Relocatable>(Db.Get().ChoreTypes.Relocate, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+				this.chore = new WorkChore<Relocatable>(Db.Get().ChoreTypes.Relocate, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction, this);
 			}
 			this.Target = target;

@@ -249,8 +249,14 @@ public class Game : KMonoBehaviour
 			else
 			{
 				Sim.GameDataUpdate* ptr2 = (Sim.GameDataUpdate*)(void*)intPtr;
-				Grid.CellValues = ptr2->cells;
-				Grid.DiseaseCellValues = ptr2->disease;
+				Grid.elementIdx = ptr2->elementIdx;
+				Grid.temperature = ptr2->temperature;
+				Grid.mass = ptr2->mass;
+				Grid.properties = ptr2->properties;
+				Grid.strengthInfo = ptr2->strengthInfo;
+				Grid.insulation = ptr2->insulation;
+				Grid.diseaseIdx = ptr2->diseaseIdx;
+				Grid.diseaseCount = ptr2->diseaseCount;
 				Grid.AccumulatedFlowValues = ptr2->accumulatedFlow;
 				PropertyTextures.externalFlowTex = ptr2->propertyTextureFlow;
 				PropertyTextures.externalLiquidTex = ptr2->propertyTextureLiquid;
@@ -427,6 +433,8 @@ public class Game : KMonoBehaviour
 				debugProperties.contaminatedOxygenEmitProbability = 0.001f;
 				debugProperties.contaminatedOxygenConversionPercent = 0.001f;
 				debugProperties.biomeTemperatureLerpRate = 0.001f;
+				debugProperties.isDebugEditing = ((!(DebugPaintElementScreen.Instance != null) || !DebugPaintElementScreen.Instance.gameObject.activeSelf) ? 0 : 1);
+				debugProperties.pad0 = (debugProperties.pad1 = (debugProperties.pad2 = 0));
 				SimMessages.NewGameFrame(dt, this.simActiveRegionMin, this.simActiveRegionMax);
 				SimMessages.SetDebugProperties(debugProperties);
 				if (this.circuitManager != null)
@@ -843,6 +851,8 @@ public class Game : KMonoBehaviour
 		gameSaveData.worldDetail = SaveLoader.Instance.worldDetailSave;
 		gameSaveData.debugWasUsed = this.debugWasUsed;
 		gameSaveData.customGameSettings = this.customSettings;
+		gameSaveData.autoPrioritizeRoles = this.autoPrioritizeRoles;
+		gameSaveData.advancedPersonalPriorities = this.advancedPersonalPriorities;
 		if (this.OnSave != null)
 		{
 			this.OnSave(gameSaveData);
@@ -869,6 +879,8 @@ public class Game : KMonoBehaviour
 		this.simActiveRegionMax = gameSaveData.simActiveRegionMax;
 		this.debugWasUsed = gameSaveData.debugWasUsed;
 		this.customSettings = gameSaveData.customGameSettings;
+		this.autoPrioritizeRoles = gameSaveData.autoPrioritizeRoles;
+		this.advancedPersonalPriorities = gameSaveData.advancedPersonalPriorities;
 		if (this.customSettings != null)
 		{
 			this.customSettings.Print();
@@ -1135,6 +1147,12 @@ public class Game : KMonoBehaviour
 	[NonSerialized]
 	public bool baseAlreadyCreated;
 
+	[NonSerialized]
+	public bool autoPrioritizeRoles;
+
+	[NonSerialized]
+	public bool advancedPersonalPriorities;
+
 	public static bool quitting;
 
 	public AssignmentManager assignmentManager;
@@ -1189,9 +1207,6 @@ public class Game : KMonoBehaviour
 
 	[SerializeField]
 	private TextAsset buildingUpgrades;
-
-	[NonSerialized]
-	public List<WarmingPoint> warmingPoints = new List<WarmingPoint>();
 
 	[NonSerialized]
 	public World world;
@@ -1465,6 +1480,10 @@ public class Game : KMonoBehaviour
 		public CustomGameSettings customGameSettings;
 
 		public bool debugWasUsed;
+
+		public bool autoPrioritizeRoles;
+
+		public bool advancedPersonalPriorities;
 	}
 
 	public delegate void CansaveCB();

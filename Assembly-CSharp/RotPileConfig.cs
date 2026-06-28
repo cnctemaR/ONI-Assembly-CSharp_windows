@@ -16,10 +16,10 @@ public class RotPileConfig : IEntityConfig
 			GameTags.Organics,
 			GameTags.Compostable
 		});
-		gameObject.UpdateComponentRequirement<EntitySplitter>(true);
-		gameObject.UpdateComponentRequirement<OccupyArea>(true);
-		gameObject.UpdateComponentRequirement<Modifiers>(true);
-		gameObject.UpdateComponentRequirement<RotPile>(true);
+		gameObject.AddOrGet<EntitySplitter>();
+		gameObject.AddOrGet<OccupyArea>();
+		gameObject.AddOrGet<Modifiers>();
+		gameObject.AddOrGet<RotPile>();
 		DecorProvider decorProvider = gameObject.AddComponent<DecorProvider>();
 		decorProvider.SetValues(DECOR.PENALTY.TIER2);
 		return gameObject;

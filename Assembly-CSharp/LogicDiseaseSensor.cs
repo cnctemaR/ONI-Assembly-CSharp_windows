@@ -22,7 +22,7 @@ public class LogicDiseaseSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim2
 		if (this.sampleIdx < 8)
 		{
 			int num = Grid.PosToCell(this);
-			this.samples[this.sampleIdx] = Grid.Disease[num].elementCount;
+			this.samples[this.sampleIdx] = Grid.DiseaseCount[num];
 			this.sampleIdx++;
 			return;
 		}
@@ -169,11 +169,11 @@ public class LogicDiseaseSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim2
 			{
 				this.animController.Play(LogicDiseaseSensor.ON_ANIMS, KAnim.PlayMode.Loop);
 				int num = Grid.PosToCell(this);
-				byte diseaseIdx = Grid.Disease[num].diseaseIdx;
+				byte b = Grid.DiseaseIdx[num];
 				Color32 color = Color.white;
-				if (diseaseIdx != 255)
+				if (b != 255)
 				{
-					Disease disease = Db.Get().Diseases[(int)diseaseIdx];
+					Disease disease = Db.Get().Diseases[(int)b];
 					color = disease.overlayColour;
 				}
 				this.animController.SetSymbolTint(LogicDiseaseSensor.TINT_SYMBOL, color);

@@ -11,12 +11,12 @@ public class GeneShufflerConfig : IEntityConfig
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium);
 		component.Temperature = 294.15f;
-		gameObject.UpdateComponentRequirement<Operational>(true);
-		gameObject.UpdateComponentRequirement<Notifier>(true);
-		gameObject.UpdateComponentRequirement<GeneShuffler>(true);
-		gameObject.UpdateComponentRequirement<LoreBearer>(true);
-		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
-		gameObject.UpdateComponentRequirement<Ownable>(true);
+		gameObject.AddOrGet<Operational>();
+		gameObject.AddOrGet<Notifier>();
+		gameObject.AddOrGet<GeneShuffler>();
+		gameObject.AddOrGet<LoreBearer>();
+		gameObject.AddOrGet<LoopingSounds>();
+		gameObject.AddOrGet<Ownable>();
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.sceneLayer = Grid.SceneLayer.BuildingBack;
 		kbatchedAnimController.fgLayer = Grid.SceneLayer.BuildingFront;

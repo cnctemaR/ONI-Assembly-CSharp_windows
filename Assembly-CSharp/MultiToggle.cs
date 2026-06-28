@@ -49,6 +49,7 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 				statePresentationSetting.image_target.color = statePresentationSetting.color;
 			}
 		}
+		this.RefreshHoverColor();
 	}
 
 	public void OnPointerClick(PointerEventData eventData)
@@ -72,10 +73,12 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 		{
 			this.onClick();
 		}
+		this.RefreshHoverColor();
 	}
 
 	public void OnPointerEnter(PointerEventData eventData)
 	{
+		this.pointerOver = true;
 		if (!KInputManager.isFocused)
 		{
 			return;
@@ -105,8 +108,33 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 		}
 	}
 
+	private void RefreshHoverColor()
+	{
+		if (this.pointerOver)
+		{
+			if (this.states[this.state].use_color_on_hover && this.states[this.state].color_on_hover != this.states[this.state].color)
+			{
+				this.toggle_image.color = this.states[this.state].color_on_hover;
+			}
+			foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
+			{
+				if (!(statePresentationSetting.image_target == null))
+				{
+					if (!(statePresentationSetting.image_target == null))
+					{
+						if (statePresentationSetting.use_color_on_hover)
+						{
+							statePresentationSetting.image_target.color = statePresentationSetting.color_on_hover;
+						}
+					}
+				}
+			}
+		}
+	}
+
 	public void OnPointerExit(PointerEventData eventData)
 	{
+		this.pointerOver = false;
 		if (!KInputManager.isFocused)
 		{
 			return;
@@ -147,4 +175,6 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 	protected int state;
 
 	public global::System.Action onClick;
+
+	private bool pointerOver;
 }

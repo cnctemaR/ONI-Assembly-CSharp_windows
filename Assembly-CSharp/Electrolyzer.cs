@@ -37,7 +37,7 @@ public class Electrolyzer : StateMachineComponent<Electrolyzer.StatesInstance>
 
 	public bool OverPressure(int cell)
 	{
-		return Grid.Cell[cell].mass > this.maxMass;
+		return Grid.Mass[cell] > this.maxMass;
 	}
 
 	[SerializeField]

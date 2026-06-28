@@ -131,6 +131,8 @@ namespace Klei.AI
 
 		public global::System.Action OnMaxValueReached;
 
+		public bool hide;
+
 		private bool _paused;
 	}
 }

@@ -31,7 +31,7 @@ public class PrickleFlowerConfig : IEntityConfig
 			}
 		});
 		gameObject.AddOrGet<StandardCropPlant>();
-		IlluminationVulnerable illuminationVulnerable = gameObject.UpdateComponentRequirement<IlluminationVulnerable>(true);
+		IlluminationVulnerable illuminationVulnerable = gameObject.AddOrGet<IlluminationVulnerable>();
 		illuminationVulnerable.Configure(false);
 		GameObject gameObject2 = gameObject;
 		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;

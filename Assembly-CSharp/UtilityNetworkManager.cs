@@ -214,6 +214,10 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 
 	public void RemoveFromNetworks(int cell, object item, bool is_endpoint)
 	{
+		if (Game.IsQuitting())
+		{
+			return;
+		}
 		this.dirty = true;
 		if (item != null)
 		{

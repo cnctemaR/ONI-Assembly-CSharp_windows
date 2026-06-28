@@ -16,7 +16,8 @@ namespace TMPro
 				height = source.height,
 				xOffset = source.xOffset,
 				yOffset = source.yOffset,
-				xAdvance = source.xAdvance
+				xAdvance = source.xAdvance,
+				scale = source.scale
 			};
 		}
 	}

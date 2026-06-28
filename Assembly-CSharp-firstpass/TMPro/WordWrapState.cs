@@ -25,6 +25,8 @@ namespace TMPro
 
 		public int lineNumber;
 
+		public float maxCapHeight;
+
 		public float maxAscender;
 
 		public float maxDescender;
@@ -63,17 +65,41 @@ namespace TMPro
 
 		public Color32 vertexColor;
 
+		public Color32 underlineColor;
+
+		public Color32 strikethroughColor;
+
+		public Color32 highlightColor;
+
+		public TMP_BasicXmlTagStack basicStyleStack;
+
 		public TMP_XmlTagStack<Color32> colorStack;
 
+		public TMP_XmlTagStack<Color32> underlineColorStack;
+
+		public TMP_XmlTagStack<Color32> strikethroughColorStack;
+
+		public TMP_XmlTagStack<Color32> highlightColorStack;
+
+		public TMP_XmlTagStack<TMP_ColorGradient> colorGradientStack;
+
 		public TMP_XmlTagStack<float> sizeStack;
+
+		public TMP_XmlTagStack<float> indentStack;
 
 		public TMP_XmlTagStack<int> fontWeightStack;
 
 		public TMP_XmlTagStack<int> styleStack;
 
+		public TMP_XmlTagStack<float> baselineStack;
+
 		public TMP_XmlTagStack<int> actionStack;
 
 		public TMP_XmlTagStack<MaterialReference> materialReferenceStack;
+
+		public TMP_XmlTagStack<TextAlignmentOptions> lineJustificationStack;
+
+		public int spriteAnimationID;
 
 		public TMP_FontAsset currentFontAsset;
 
@@ -86,5 +112,7 @@ namespace TMPro
 		public Extents meshExtents;
 
 		public bool tagNoParsing;
+
+		public bool isNonBreakingSpace;
 	}
 }

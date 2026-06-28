@@ -24,11 +24,7 @@ public class JuniorResearcher : RoleConfig
 
 	public override void InitRequirements()
 	{
-		base.requirements = new RoleAssignmentRequirement[]
-		{
-			Game.Instance.roleManager.roleAssignmentRequirements.Can_Research,
-			Game.Instance.roleManager.roleAssignmentRequirements.HasExperience_NoRole
-		};
+		base.requirements = new RoleAssignmentRequirement[] { Game.Instance.roleManager.roleAssignmentRequirements.Can_Research };
 	}
 
 	public static string ID = "JuniorResearcher";

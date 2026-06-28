@@ -14,7 +14,7 @@ public class AutoDisinfectable : Workable
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Disinfecting;
 		this.resetProgressOnStop = true;
 		this.multitoolContext = "disinfect";
-		this.multitoolHitEffectHash = new HashedString("fx_disinfect_splash");
+		this.multitoolHitEffectTag = "fx_disinfect_splash";
 	}
 
 	protected override void OnSpawn()
@@ -53,7 +53,7 @@ public class AutoDisinfectable : Workable
 			int diseaseCount = this.primaryElement.DiseaseCount;
 			if (this.chore == null && diseaseCount > SaveGame.Instance.minGermCountForDisinfect)
 			{
-				this.chore = new WorkChore<AutoDisinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+				this.chore = new WorkChore<AutoDisinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 			}
 			else if (diseaseCount < SaveGame.Instance.minGermCountForDisinfect && this.chore != null)
 			{

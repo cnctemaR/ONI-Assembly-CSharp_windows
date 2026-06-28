@@ -13,12 +13,6 @@ public class RoomTracker : KMonoBehaviour, IEffectDescriptor
 		this.FindAndSetRoom();
 	}
 
-	protected override void OnSpawn()
-	{
-		base.OnSpawn();
-		Components.RoomTrackers.Add(this);
-	}
-
 	public void FindAndSetRoom()
 	{
 		CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(Grid.PosToCell(base.gameObject));
@@ -101,12 +95,6 @@ public class RoomTracker : KMonoBehaviour, IEffectDescriptor
 			}
 		}
 		return list;
-	}
-
-	protected override void OnCleanUp()
-	{
-		base.OnCleanUp();
-		Components.RoomTrackers.Remove(this);
 	}
 
 	public RoomTracker.Requirement requirement;

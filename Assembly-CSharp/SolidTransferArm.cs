@@ -50,12 +50,12 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.arm_anim_ctrl.initialAnim = "arm";
 		this.arm_anim_ctrl.isMovable = true;
 		this.arm_anim_ctrl.AddAnims(new KAnimFile[] { component.GetAnims()[0] });
-		this.arm_anim_ctrl.sceneLayer = Grid.SceneLayer.BuildingFront;
+		this.arm_anim_ctrl.sceneLayer = Grid.SceneLayer.TransferArm;
 		component.HideSymbol(new KAnimHashedString("arm_target"), true);
 		bool flag;
 		Vector4 column = component.GetSymbolTransform(new HashedString("arm_target"), out flag).GetColumn(3);
 		Vector3 vector = column;
-		vector.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingFront);
+		vector.z = Grid.GetLayerZ(Grid.SceneLayer.TransferArm);
 		this.arm_go.transform.SetPosition(vector);
 		this.arm_go.SetActive(true);
 		this.link = new KAnimLink(component, this.arm_anim_ctrl);
@@ -65,7 +65,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		ChoreGroups choreGroups = Db.Get().ChoreGroups;
 		for (int i = 0; i < choreGroups.Count; i++)
 		{
-			this.choreConsumer.SetPermitted(choreGroups[i], choreGroups.Hauling.IdHash == choreGroups[i].IdHash);
+			this.choreConsumer.SetPermitted(choreGroups[i], true);
 		}
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		base.Subscribe(1745615042, new Action<object>(this.OnEndChore));
@@ -133,7 +133,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			for (int j = num - this.pickupRange; j < num + this.pickupRange + 1; j++)
 			{
 				int num3 = Grid.XYToCell(j, i);
-				if (Grid.IsValidCell(num3) && Grid.VisibilityTest(num, num2, j, i))
+				if (Grid.IsValidCell(num3) && Grid.VisibilityTest(num, num2, j, i, true))
 				{
 					this.reachableCells.Add(num3);
 				}
@@ -189,22 +189,22 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	private bool IsPickupableRelevantToMyInterests(Pickupable pickupable)
 	{
-		TagBits tabBits = pickupable.KPrefabID.GetTabBits();
-		if (!tabBits.HasAny(this.tagBits))
+		TagBits tagBits = pickupable.KPrefabID.GetTagBits();
+		if (!tagBits.HasAny(this.tagBits))
 		{
 			return false;
 		}
-		if (!tabBits.HasAll(this.requiredTagBits))
+		if (!tagBits.HasAll(this.requiredTagBits))
 		{
 			return false;
 		}
-		if (tabBits.HasAny(this.forbiddenTagBits))
+		if (tagBits.HasAny(this.forbiddenTagBits))
 		{
 			return false;
 		}
 		int num = Grid.PosToCell(this);
 		int pickupableCell = this.GetPickupableCell(pickupable);
-		return Grid.VisibilityTest(num, pickupableCell);
+		return Grid.VisibilityTest(num, pickupableCell, true);
 	}
 
 	public void FindFetchTarget(Storage destination, TagBits tag_bits, TagBits required_tags, TagBits forbid_tags, float required_amount, ref Pickupable target)

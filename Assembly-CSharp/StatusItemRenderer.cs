@@ -275,6 +275,11 @@ public class StatusItemRenderer
 			{
 				return;
 			}
+			KSelectable component = this.transform.GetComponent<KSelectable>();
+			if (!component.IsSelectable)
+			{
+				return;
+			}
 			renderer.visibleEntries.Add(this);
 			if (this.dirty)
 			{
@@ -368,11 +373,15 @@ public class StatusItemRenderer
 		{
 			if (this.Intersects(pos, scale, overlay))
 			{
-				intersections.Add(new SelectTool.Intersection
+				KSelectable component = this.transform.GetComponent<KSelectable>();
+				if (component.IsSelectable)
 				{
-					component = this.transform.GetComponent<KSelectable>(),
-					distance = -100f
-				});
+					intersections.Add(new SelectTool.Intersection
+					{
+						component = this.transform.GetComponent<KSelectable>(),
+						distance = -100f
+					});
+				}
 			}
 		}
 
@@ -381,7 +390,7 @@ public class StatusItemRenderer
 			if (this.Intersects(pos, scale, overlay))
 			{
 				KSelectable component = this.transform.GetComponent<KSelectable>();
-				if (!selectables.Contains(component))
+				if (component.IsSelectable && !selectables.Contains(component))
 				{
 					selectables.Add(component);
 				}

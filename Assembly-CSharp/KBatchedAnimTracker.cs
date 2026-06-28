@@ -47,6 +47,18 @@ public class KBatchedAnimTracker : MonoBehaviour
 		}
 	}
 
+	private void OnDisable()
+	{
+		if (this.myAnim != null)
+		{
+			KBatchedAnimInstanceData batchInstanceData = this.myAnim.GetBatchInstanceData();
+			if (batchInstanceData != null)
+			{
+				batchInstanceData.ClearOverrideTransformMatrix();
+			}
+		}
+	}
+
 	private void OnDestroy()
 	{
 		if (this.controller != null)
@@ -152,7 +164,7 @@ public class KBatchedAnimTracker : MonoBehaviour
 	}
 
 	[SerializeField]
-	private KBatchedAnimController controller;
+	public KBatchedAnimController controller;
 
 	[SerializeField]
 	public Vector3 offset = Vector3.zero;

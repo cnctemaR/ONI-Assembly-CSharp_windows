@@ -156,7 +156,7 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IEffectDes
 
 		private Chore CreateFlipChore(Compost.StatesInstance smi)
 		{
-			return new WorkChore<CompostWorkable>(Db.Get().ChoreTypes.FlipCompost, smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			return new WorkChore<CompostWorkable>(Db.Get().ChoreTypes.FlipCompost, smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		}
 
 		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.State empty;

@@ -25,7 +25,7 @@ public class ChorePreconditions
 			{
 				return true;
 			}
-			foreach (Urge urge in context.consumer.GetUrges())
+			foreach (Urge urge in context.consumerState.consumer.GetUrges())
 			{
 				if (context.chore.SatisfiesUrge(urge))
 				{
@@ -48,7 +48,7 @@ public class ChorePreconditions
 		precondition4.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_PERMITTED;
 		precondition4.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			return context.consumer.IsPermittedOrEnabled(context.choreTypeForPermission, context.chore);
+			return context.consumerState.consumer.IsPermittedOrEnabled(context.choreTypeForPermission, context.chore);
 		};
 		this.IsPermitted = precondition4;
 		Chore.Precondition precondition5 = default(Chore.Precondition);
@@ -61,7 +61,7 @@ public class ChorePreconditions
 			{
 				foreach (Ownables ownables in assignable.assignee.GetOwners())
 				{
-					if (ownables.gameObject == context.consumer.gameObject)
+					if (ownables.gameObject == context.consumerState.gameObject)
 					{
 						return true;
 					}
@@ -79,11 +79,11 @@ public class ChorePreconditions
 			Room room = (Room)data;
 			if (room != null)
 			{
-				if (context.consumer.gameObject.GetComponent<Ownable>() != null)
+				if (context.consumerState.ownable != null)
 				{
 					foreach (Ownables ownables2 in room.GetOwners())
 					{
-						if (ownables2.gameObject == context.consumer.gameObject)
+						if (ownables2.gameObject == context.consumerState.gameObject)
 						{
 							return true;
 						}
@@ -121,7 +121,7 @@ public class ChorePreconditions
 		precondition7.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Assignable assignable2 = (Assignable)data;
-			return Game.Instance.assignmentManager.GetPreferredAssignables(context.consumer.gameObject.GetComponent<Assignables>(), assignable2.slot).Contains(assignable2);
+			return Game.Instance.assignmentManager.GetPreferredAssignables(context.consumerState.assignables, assignable2.slot).Contains(assignable2);
 		};
 		this.IsPreferredAssignable = precondition7;
 		Chore.Precondition precondition8 = default(Chore.Precondition);
@@ -130,11 +130,11 @@ public class ChorePreconditions
 		precondition8.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Assignable assignable3 = (Assignable)data;
-			if (Game.Instance.assignmentManager.GetPreferredAssignables(context.consumer.gameObject.GetComponent<Assignables>(), assignable3.slot).Contains(assignable3))
+			if (Game.Instance.assignmentManager.GetPreferredAssignables(context.consumerState.assignables, assignable3.slot).Contains(assignable3))
 			{
 				return true;
 			}
-			PeeChoreMonitor.Instance smi = context.consumer.gameObject.GetSMI<PeeChoreMonitor.Instance>();
+			PeeChoreMonitor.Instance smi = context.consumerState.gameObject.GetSMI<PeeChoreMonitor.Instance>();
 			return smi.IsInsideState(smi.sm.critical);
 		};
 		this.IsPreferredAssignableOrUrgentBladder = precondition8;
@@ -142,7 +142,7 @@ public class ChorePreconditions
 		precondition9.id = "IsNotTransferArm";
 		precondition9.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			return context.consumer.GetComponent<SolidTransferArm>() == null;
+			return !context.consumerState.hasSolidTransferArm;
 		};
 		this.IsNotTransferArm = precondition9;
 		Chore.Precondition precondition10 = default(Chore.Precondition);
@@ -150,20 +150,20 @@ public class ChorePreconditions
 		precondition10.description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_ROLE_PERK;
 		precondition10.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			MinionResume component = context.consumer.GetComponent<MinionResume>();
-			if (!component)
+			MinionResume resume = context.consumerState.resume;
+			if (!resume)
 			{
 				return false;
 			}
 			if (data is RolePerk)
 			{
 				RolePerk rolePerk = data as RolePerk;
-				return component.HasPerk(rolePerk);
+				return resume.HasPerk(rolePerk);
 			}
 			if (data is HashedString)
 			{
 				HashedString hashedString = (HashedString)data;
-				return component.HasPerk(hashedString);
+				return resume.HasPerk(hashedString);
 			}
 			return false;
 		};
@@ -173,19 +173,19 @@ public class ChorePreconditions
 		precondition11.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_ROLE;
 		precondition11.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			MinionResume component2 = context.consumer.GetComponent<MinionResume>();
-			if (!component2)
+			MinionResume resume2 = context.consumerState.resume;
+			if (!resume2)
 			{
 				return false;
 			}
 			if (data is string)
 			{
 				string text = (string)data;
-				return !string.IsNullOrEmpty(component2.CurrentRole) && text == component2.CurrentRole;
+				return !string.IsNullOrEmpty(resume2.CurrentRole) && text == resume2.CurrentRole;
 			}
 			for (int i = 0; i < (data as string[]).Length; i++)
 			{
-				if ((data as string[])[i] == component2.CurrentRole)
+				if ((data as string[])[i] == resume2.CurrentRole)
 				{
 					return true;
 				}
@@ -203,7 +203,7 @@ public class ChorePreconditions
 			{
 				return true;
 			}
-			Chore currentChore = context.consumer.choreDriver.GetCurrentChore();
+			Chore currentChore = context.consumerState.choreDriver.GetCurrentChore();
 			if (currentChore == null)
 			{
 				return true;
@@ -211,6 +211,10 @@ public class ChorePreconditions
 			if (context.masterPriority.priority_class != currentChore.masterPriority.priority_class)
 			{
 				return context.masterPriority.priority_class > currentChore.masterPriority.priority_class;
+			}
+			if (context.consumerState.consumer != null && context.personalPriority != context.consumerState.consumer.GetPersonalPriority(currentChore.choreType))
+			{
+				return context.personalPriority > context.consumerState.consumer.GetPersonalPriority(currentChore.choreType);
 			}
 			if (context.masterPriority.priority_value != currentChore.masterPriority.priority_value)
 			{
@@ -225,7 +229,7 @@ public class ChorePreconditions
 		precondition13.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)data;
-			return !(context.consumer == null) && !(context.consumer.navigator == null) && !(kmonoBehaviour == null) && context.consumer.navigator.CanReach(kmonoBehaviour.GetComponent<Chattable>());
+			return !(context.consumerState.consumer == null) && !(context.consumerState.navigator == null) && !(kmonoBehaviour == null) && context.consumerState.navigator.CanReach(kmonoBehaviour.GetComponent<Chattable>());
 		};
 		this.IsChattable = precondition13;
 		Chore.Precondition precondition14 = default(Chore.Precondition);
@@ -242,8 +246,8 @@ public class ChorePreconditions
 		precondition15.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			ScheduleBlockType scheduleBlockType = (ScheduleBlockType)data;
-			Schedulable component3 = context.consumer.GetComponent<Schedulable>();
-			return false || component3.IsAllowed(scheduleBlockType);
+			Schedulable schedulable = context.consumerState.schedulable;
+			return false || schedulable.IsAllowed(scheduleBlockType);
 		};
 		this.IsScheduledTime = precondition15;
 		Chore.Precondition precondition16 = default(Chore.Precondition);
@@ -252,7 +256,7 @@ public class ChorePreconditions
 		precondition16.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Workable workable = (Workable)data;
-			if (context.consumer == null)
+			if (context.consumerState.consumer == null)
 			{
 				return false;
 			}
@@ -261,7 +265,7 @@ public class ChorePreconditions
 				return false;
 			}
 			int num;
-			if (context.consumer.GetNavigationCost(workable, out num))
+			if (context.consumerState.consumer.GetNavigationCost(workable, out num))
 			{
 				context.cost += num;
 				return true;
@@ -275,7 +279,7 @@ public class ChorePreconditions
 		precondition17.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Pickupable pickupable = (Pickupable)data;
-			return !(pickupable == null) && !(context.consumer == null) && pickupable.CouldBePickedUp(context.consumer.gameObject) && context.consumer.CanReach(pickupable);
+			return !(pickupable == null) && !(context.consumerState.consumer == null) && pickupable.CouldBePickedUp(context.consumerState.gameObject) && context.consumerState.consumer.CanReach(pickupable);
 		};
 		this.CanPickup = precondition17;
 		Chore.Precondition precondition18 = default(Chore.Precondition);
@@ -283,12 +287,12 @@ public class ChorePreconditions
 		precondition18.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_AWAKE;
 		precondition18.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			if (context.consumer == null)
+			if (context.consumerState.consumer == null)
 			{
 				return false;
 			}
-			StaminaMonitor.Instance smi2 = context.consumer.GetSMI<StaminaMonitor.Instance>();
-			return !context.consumer.GetSMI<StaminaMonitor.Instance>().IsInsideState(smi2.sm.sleepy.sleeping);
+			StaminaMonitor.Instance smi2 = context.consumerState.consumer.GetSMI<StaminaMonitor.Instance>();
+			return !smi2.IsInsideState(smi2.sm.sleepy.sleeping);
 		};
 		this.IsAwake = precondition18;
 		Chore.Precondition precondition19 = default(Chore.Precondition);
@@ -296,7 +300,7 @@ public class ChorePreconditions
 		precondition19.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_STANDING;
 		precondition19.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			return !(context.consumer == null) && !(context.consumer.navigator == null) && context.consumer.navigator.CurrentNavType == NavType.Floor;
+			return !(context.consumerState.consumer == null) && !(context.consumerState.navigator == null) && context.consumerState.navigator.CurrentNavType == NavType.Floor;
 		};
 		this.IsStanding = precondition19;
 		Chore.Precondition precondition20 = default(Chore.Precondition);
@@ -304,7 +308,7 @@ public class ChorePreconditions
 		precondition20.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_MOVING;
 		precondition20.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			return !(context.consumer == null) && !(context.consumer.navigator == null) && context.consumer.navigator.IsMoving();
+			return !(context.consumerState.consumer == null) && !(context.consumerState.navigator == null) && context.consumerState.navigator.IsMoving();
 		};
 		this.IsMoving = precondition20;
 		Chore.Precondition precondition21 = default(Chore.Precondition);
@@ -312,7 +316,7 @@ public class ChorePreconditions
 		precondition21.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_OFF_LADDER;
 		precondition21.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			return !(context.consumer == null) && !(context.consumer.navigator == null) && context.consumer.navigator.CurrentNavType != NavType.Ladder && context.consumer.navigator.CurrentNavType != NavType.Pole;
+			return !(context.consumerState.consumer == null) && !(context.consumerState.navigator == null) && context.consumerState.navigator.CurrentNavType != NavType.Ladder && context.consumerState.navigator.CurrentNavType != NavType.Pole;
 		};
 		this.IsOffLadder = precondition21;
 		Chore.Precondition precondition22 = default(Chore.Precondition);
@@ -320,7 +324,7 @@ public class ChorePreconditions
 		precondition22.description = DUPLICANTS.CHORES.PRECONDITIONS.NOT_IN_TUBE;
 		precondition22.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			return !(context.consumer == null) && !(context.consumer.navigator == null) && context.consumer.navigator.CurrentNavType != NavType.Tube;
+			return !(context.consumerState.consumer == null) && !(context.consumerState.navigator == null) && context.consumerState.navigator.CurrentNavType != NavType.Tube;
 		};
 		this.NotInTube = precondition22;
 		Chore.Precondition precondition23 = default(Chore.Precondition);
@@ -329,8 +333,8 @@ public class ChorePreconditions
 		precondition23.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			string text2 = (string)data;
-			Traits component4 = context.consumer.GetComponent<Traits>();
-			return !(component4 == null) && component4.HasTrait(text2);
+			Traits traits = context.consumerState.traits;
+			return !(traits == null) && traits.HasTrait(text2);
 		};
 		this.ConsumerHasTrait = precondition23;
 		Chore.Precondition precondition24 = default(Chore.Precondition);
@@ -338,9 +342,8 @@ public class ChorePreconditions
 		precondition24.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_OPERATIONAL;
 		precondition24.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			GameObject gameObject = (GameObject)data;
-			Operational component5 = gameObject.GetComponent<Operational>();
-			return component5.IsOperational;
+			Operational operational = data as Operational;
+			return operational.IsOperational;
 		};
 		this.IsOperational = precondition24;
 		Chore.Precondition precondition25 = default(Chore.Precondition);
@@ -348,9 +351,8 @@ public class ChorePreconditions
 		precondition25.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_MARKED_FOR_DECONSTRUCTION;
 		precondition25.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			GameObject gameObject2 = (GameObject)data;
-			Deconstructable component6 = gameObject2.GetComponent<Deconstructable>();
-			return component6 == null || !component6.IsMarkedForDeconstruction();
+			Deconstructable deconstructable = data as Deconstructable;
+			return deconstructable == null || !deconstructable.IsMarkedForDeconstruction();
 		};
 		this.IsMarkedForDeconstruction = precondition25;
 		Chore.Precondition precondition26 = default(Chore.Precondition);
@@ -358,9 +360,8 @@ public class ChorePreconditions
 		precondition26.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_MARKED_FOR_DISABLE;
 		precondition26.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			GameObject gameObject3 = (GameObject)data;
-			BuildingEnabledButton component7 = gameObject3.GetComponent<BuildingEnabledButton>();
-			return component7 == null || (component7.IsEnabled && !component7.WaitingForDisable);
+			BuildingEnabledButton buildingEnabledButton = data as BuildingEnabledButton;
+			return buildingEnabledButton == null || (buildingEnabledButton.IsEnabled && !buildingEnabledButton.WaitingForDisable);
 		};
 		this.IsMarkedForDisable = precondition26;
 		Chore.Precondition precondition27 = default(Chore.Precondition);
@@ -368,9 +369,8 @@ public class ChorePreconditions
 		precondition27.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_FUNCTIONAL;
 		precondition27.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			GameObject gameObject4 = (GameObject)data;
-			Operational componentInParent = gameObject4.GetComponentInParent<Operational>();
-			return componentInParent.IsFunctional;
+			Operational operational2 = data as Operational;
+			return operational2.IsFunctional;
 		};
 		this.IsFunctional = precondition27;
 		Chore.Precondition precondition28 = default(Chore.Precondition);
@@ -378,7 +378,7 @@ public class ChorePreconditions
 		precondition28.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_OVERRIDE_TARGET_NULL_OR_ME;
 		precondition28.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			return context.isAttemptingOverride || context.chore.overrideTarget == null || context.chore.overrideTarget == context.consumer;
+			return context.isAttemptingOverride || context.chore.overrideTarget == null || context.chore.overrideTarget == context.consumerState.consumer;
 		};
 		this.IsOverrideTargetNullOrMe = precondition28;
 		Chore.Precondition precondition29 = default(Chore.Precondition);
@@ -386,8 +386,8 @@ public class ChorePreconditions
 		precondition29.description = DUPLICANTS.CHORES.PRECONDITIONS.NOT_CHORE_CREATOR;
 		precondition29.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			GameObject gameObject5 = (GameObject)data;
-			return !(context.consumer == null) && !(context.consumer.gameObject == gameObject5);
+			GameObject gameObject = (GameObject)data;
+			return !(context.consumerState.consumer == null) && !(context.consumerState.gameObject == gameObject);
 		};
 		this.NotChoreCreator = precondition29;
 		Chore.Precondition precondition30 = default(Chore.Precondition);
@@ -395,7 +395,7 @@ public class ChorePreconditions
 		precondition30.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_GETTING_MORE_STRESSED;
 		precondition30.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			AmountInstance amountInstance = Db.Get().Amounts.Stress.Lookup(context.consumer.gameObject);
+			AmountInstance amountInstance = Db.Get().Amounts.Stress.Lookup(context.consumerState.gameObject);
 			return amountInstance.GetDelta() > 0f;
 		};
 		this.IsGettingMoreStressed = precondition30;
@@ -405,9 +405,25 @@ public class ChorePreconditions
 		precondition31.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Automatable automatable = (Automatable)data;
-			return automatable.AllowedByAutomation(context.consumer.gameObject);
+			return automatable.AllowedByAutomation(context.consumerState.gameObject);
 		};
 		this.IsAllowedByAutomation = precondition31;
+		Chore.Precondition precondition32 = default(Chore.Precondition);
+		precondition32.id = "HasTag";
+		precondition32.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			Tag tag = (Tag)data;
+			return context.consumerState.prefabid.HasTag(tag);
+		};
+		this.HasTag = precondition32;
+		Chore.Precondition precondition33 = default(Chore.Precondition);
+		precondition33.id = "CheckBehaviourPrecondition";
+		precondition33.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			Tag tag2 = (Tag)data;
+			return context.consumerState.consumer.RunBehaviourPrecondition(tag2);
+		};
+		this.CheckBehaviourPrecondition = precondition33;
 		base..ctor();
 	}
 
@@ -486,4 +502,8 @@ public class ChorePreconditions
 	public Chore.Precondition IsGettingMoreStressed;
 
 	public Chore.Precondition IsAllowedByAutomation;
+
+	public Chore.Precondition HasTag;
+
+	public Chore.Precondition CheckBehaviourPrecondition;
 }

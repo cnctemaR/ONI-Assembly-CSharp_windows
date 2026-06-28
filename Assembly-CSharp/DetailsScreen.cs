@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using STRINGS;
 using UnityEngine;
 
 public class DetailsScreen : KTabMenu
@@ -28,6 +29,7 @@ public class DetailsScreen : KTabMenu
 		base.OnSpawn();
 		DetailsScreen.Instance = this;
 		UIRegistry.detailsScreen = this;
+		this.CodexEntryButton.onClick += this.OpenCodexEntry;
 		this.CloseButton.onClick += this.DeselectAndClose;
 		this.TabTitle.OnNameChanged += this.OnNameChanged;
 		this.TabTitle.OnStartedEditing += this.OnStartedEditing;
@@ -134,6 +136,13 @@ public class DetailsScreen : KTabMenu
 			}
 		}
 		return flag;
+	}
+
+	private void UpdateCodexButton()
+	{
+		string selectedObjectCodexID = this.GetSelectedObjectCodexID();
+		this.CodexEntryButton.isInteractable = selectedObjectCodexID != string.Empty;
+		this.CodexEntryButton.GetComponent<ToolTip>().SetSimpleTooltip((!this.CodexEntryButton.isInteractable) ? UI.TOOLTIPS.NO_CODEX_ENTRY : UI.TOOLTIPS.OPEN_CODEX_ENTRY);
 	}
 
 	public void OnRefreshData(object obj)
@@ -314,6 +323,47 @@ public class DetailsScreen : KTabMenu
 		}
 	}
 
+	private string GetSelectedObjectCodexID()
+	{
+		string text = string.Empty;
+		CellSelectionObject component = SelectTool.Instance.selected.GetComponent<CellSelectionObject>();
+		BuildingUnderConstruction component2 = SelectTool.Instance.selected.GetComponent<BuildingUnderConstruction>();
+		if (component != null)
+		{
+			text = CodexCache.FormatLinkID(component.element.id.ToString());
+		}
+		else if (component2 != null)
+		{
+			text = CodexCache.FormatLinkID(component2.Def.PrefabID);
+		}
+		else
+		{
+			text = CodexCache.FormatLinkID(SelectTool.Instance.selected.PrefabID().ToString());
+		}
+		if (CodexCache.entries.ContainsKey(text))
+		{
+			return text;
+		}
+		return string.Empty;
+	}
+
+	public void OpenCodexEntry()
+	{
+		string selectedObjectCodexID = this.GetSelectedObjectCodexID();
+		if (selectedObjectCodexID != string.Empty)
+		{
+			if (!ManagementMenu.Instance.codexScreen.gameObject.activeInHierarchy)
+			{
+				ManagementMenu.Instance.ToggleCodex();
+				(ManagementMenu.Instance.codexScreen as CodexScreen).ChangeArticle(selectedObjectCodexID, false);
+			}
+			else
+			{
+				(ManagementMenu.Instance.codexScreen as CodexScreen).ChangeArticle(selectedObjectCodexID, true);
+			}
+		}
+	}
+
 	public void DeselectAndClose()
 	{
 		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Back", false));
@@ -387,6 +437,7 @@ public class DetailsScreen : KTabMenu
 
 	public void SetTitle(int selectedTabIndex)
 	{
+		this.UpdateCodexButton();
 		if (this.TabTitle != null)
 		{
 			this.TabTitle.SetTitle(this.target.GetProperName());
@@ -414,6 +465,9 @@ public class DetailsScreen : KTabMenu
 	}
 
 	public static DetailsScreen Instance;
+
+	[SerializeField]
+	private KButton CodexEntryButton;
 
 	[Header("Panels")]
 	public Transform UserMenuPanel;

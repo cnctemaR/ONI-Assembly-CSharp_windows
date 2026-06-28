@@ -8,7 +8,6 @@ public class Turbine : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.temperatureAccumulator = Game.Instance.accumulators.Add("TurbineSrcTemp", this);
 		this.simEmitCBHandle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimEmitted)));
 		BuildingDef def = base.GetComponent<BuildingComplete>().Def;
 		this.srcCells = new int[def.WidthInCells];
@@ -27,7 +26,6 @@ public class Turbine : KMonoBehaviour
 			World.Instance.OnSolidChanged(num3);
 			GameScenePartitioner.Instance.TriggerEvent(num3, GameScenePartitioner.Instance.solidChangedLayer, null);
 		}
-		this.structureTemperatureHandle = GameComps.StructureTemperatures.GetHandle(base.gameObject);
 		this.smi = new Turbine.Instance(this);
 		this.smi.StartSM();
 		this.CreateMeter();
@@ -58,7 +56,6 @@ public class Turbine : KMonoBehaviour
 			World.Instance.OnSolidChanged(num3);
 			GameScenePartitioner.Instance.TriggerEvent(num3, GameScenePartitioner.Instance.solidChangedLayer, null);
 		}
-		this.temperatureAccumulator = Game.Instance.accumulators.Remove(this.temperatureAccumulator);
 		Game.Instance.complexCallbackManager.Release(this.simEmitCBHandle);
 		base.OnCleanUp();
 	}
@@ -105,7 +102,7 @@ public class Turbine : KMonoBehaviour
 		if (massEmittedCallback.suceeded != 1)
 		{
 			this.storedTemperature = SimUtil.CalculateFinalTemperature(this.storedMass, this.storedTemperature, massEmittedCallback.mass, massEmittedCallback.temperature);
-			this.storedMass += massEmittedCallback.temperature;
+			this.storedMass += massEmittedCallback.mass;
 			if (massEmittedCallback.diseaseIdx != 255)
 			{
 				SimUtil.DiseaseInfo diseaseInfo = new SimUtil.DiseaseInfo
@@ -146,13 +143,16 @@ public class Turbine : KMonoBehaviour
 			return str;
 		};
 		Turbine.insufficientTemperatureStatusItem = new StatusItem("TURBINE_INSUFFICIENT_TEMPERATURE", "BUILDING", "status_item_plant_temperature", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.PowerMap, true, 63486);
-		Turbine.insufficientTemperatureStatusItem.resolveTooltipCallback = delegate(string str, object data)
-		{
-			Turbine turbine3 = (Turbine)data;
-			str = str.Replace("{ELEMENT}", ElementLoader.FindElementByHash(turbine3.srcElem).name);
-			str = str.Replace("{TEMPERATURE}", GameUtil.GetFormattedTemperature(turbine3.minActiveTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
-			return str;
-		};
+		Turbine.insufficientTemperatureStatusItem.resolveStringCallback = new Func<string, object, string>(Turbine.ResolveStrings);
+		Turbine.insufficientTemperatureStatusItem.resolveTooltipCallback = new Func<string, object, string>(Turbine.ResolveStrings);
+	}
+
+	private static string ResolveStrings(string str, object data)
+	{
+		Turbine turbine = (Turbine)data;
+		str = str.Replace("{ELEMENT}", ElementLoader.FindElementByHash(turbine.srcElem).name);
+		str = str.Replace("{TEMPERATURE}", GameUtil.GetFormattedTemperature(turbine.minActiveTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
+		return str;
 	}
 
 	public SimHashes srcElem;
@@ -176,10 +176,6 @@ public class Turbine : KMonoBehaviour
 	public float minGenerationRPM;
 
 	public float pumpKGRate;
-
-	private HandleVector<int>.Handle structureTemperatureHandle;
-
-	private HandleVector<int>.Handle temperatureAccumulator = HandleVector<int>.InvalidHandle;
 
 	private static readonly HashedString TINT_SYMBOL = new HashedString("meter_fill");
 
@@ -253,10 +249,12 @@ public class Turbine : KMonoBehaviour
 			}, UpdateRate.SIM_200ms, false).ToggleStatusItem((Turbine.Instance smi) => Turbine.activeStatusItem, (Turbine.Instance smi) => smi.master).Enter(delegate(Turbine.Instance smi)
 			{
 				smi.GetComponent<KAnimControllerBase>().Play(Turbine.States.ACTIVE_ANIMS, KAnim.PlayMode.Loop);
+				smi.GetComponent<Operational>().SetActive(true, false);
 			})
 				.Exit(delegate(Turbine.Instance smi)
 				{
 					smi.master.GetComponent<Generator>().ResetJoules();
+					smi.GetComponent<Operational>().SetActive(false, false);
 				});
 		}
 
@@ -331,15 +329,15 @@ public class Turbine : KMonoBehaviour
 			for (int i = 0; i < base.master.srcCells.Length; i++)
 			{
 				int num4 = base.master.srcCells[i];
-				float mass = Grid.Cell[num4].mass;
-				float temperature = Grid.Cell[num4].temperature;
+				float num5 = Grid.Mass[num4];
 				if (Grid.Element[num4].id == base.master.srcElem)
 				{
-					num = Mathf.Max(num, mass);
+					num = Mathf.Max(num, num5);
 				}
-				num2 = Mathf.Max(num2, temperature);
-				byte elementIdx = Grid.Cell[num4].elementIdx;
-				Element element = ElementLoader.elements[(int)elementIdx];
+				float num6 = Grid.Temperature[num4];
+				num2 = Mathf.Max(num2, num6);
+				byte b = Grid.ElementIdx[num4];
+				Element element = ElementLoader.elements[(int)b];
 				if (element.IsLiquid || element.IsSolid)
 				{
 					this.isInputBlocked = true;
@@ -348,18 +346,16 @@ public class Turbine : KMonoBehaviour
 			this.isOutputBlocked = false;
 			for (int j = 0; j < base.master.destCells.Length; j++)
 			{
-				int num5 = base.master.destCells[j];
-				float mass2 = Grid.Cell[num5].mass;
-				num3 = Mathf.Min(num3, mass2);
-				byte elementIdx2 = Grid.Cell[num5].elementIdx;
-				Element element2 = ElementLoader.elements[(int)elementIdx2];
+				int num7 = base.master.destCells[j];
+				float num8 = Grid.Mass[num7];
+				num3 = Mathf.Min(num3, num8);
+				byte b2 = Grid.ElementIdx[num7];
+				Element element2 = ElementLoader.elements[(int)b2];
 				if (element2.IsLiquid || element2.IsSolid)
 				{
 					this.isOutputBlocked = true;
 				}
 			}
-			Game.Instance.accumulators.Accumulate(base.master.temperatureAccumulator, num2);
-			float averageRate = Game.Instance.accumulators.GetAverageRate(base.master.temperatureAccumulator);
 			insufficient_mass = num - num3 < base.master.requiredMassFlowDifferential;
 			insufficient_temperature = num2 < base.master.minActiveTemperature;
 			return !insufficient_mass && !insufficient_temperature;

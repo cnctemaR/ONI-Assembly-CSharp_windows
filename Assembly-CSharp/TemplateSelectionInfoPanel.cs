@@ -59,7 +59,7 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 		float num = 0f;
 		foreach (int num2 in cells)
 		{
-			num += Grid.Cell[num2].mass;
+			num += Grid.Mass[num2];
 		}
 		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.TOTAL_MASS, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 	}
@@ -69,7 +69,7 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 		float num = 0f;
 		foreach (int num2 in cells)
 		{
-			num += Grid.Cell[num2].mass;
+			num += Grid.Mass[num2];
 		}
 		num /= (float)cells.Count;
 		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.AVERAGE_MASS, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
@@ -80,7 +80,7 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 		float num = 0f;
 		foreach (int num2 in cells)
 		{
-			num += Grid.Cell[num2].temperature;
+			num += Grid.Temperature[num2];
 		}
 		num /= (float)cells.Count;
 		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.AVERAGE_TEMPERATURE, GameUtil.GetFormattedTemperature(num, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
@@ -91,7 +91,7 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 		float num = 0f;
 		foreach (int num2 in cells)
 		{
-			num += Grid.Element[num2].specificHeatCapacity * Grid.Cell[num2].temperature * (Grid.Cell[num2].mass * 1000f);
+			num += Grid.Element[num2].specificHeatCapacity * Grid.Temperature[num2] * (Grid.Mass[num2] * 1000f);
 		}
 		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.TOTAL_JOULES, GameUtil.GetFormattedJoules(num, "F1", GameUtil.TimeSlice.None));
 	}
@@ -102,8 +102,8 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 		float num2 = 0f;
 		foreach (int num3 in cells)
 		{
-			num += Grid.Element[num3].specificHeatCapacity * Grid.Cell[num3].temperature * (Grid.Cell[num3].mass * 1000f);
-			num2 += Grid.Cell[num3].mass;
+			num += Grid.Element[num3].specificHeatCapacity * Grid.Temperature[num3] * (Grid.Mass[num3] * 1000f);
+			num2 += Grid.Mass[num3];
 		}
 		num /= num2;
 		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.JOULES_PER_KILOGRAM, GameUtil.GetFormattedJoules(num, "F1", GameUtil.TimeSlice.None));
@@ -119,14 +119,14 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 			{
 				if (TemplateSelectionInfoPanel.mass_per_element[i].first == Grid.Element[num])
 				{
-					TemplateSelectionInfoPanel.mass_per_element[i].second += Grid.Cell[num].mass;
+					TemplateSelectionInfoPanel.mass_per_element[i].second += Grid.Mass[num];
 					flag = true;
 					break;
 				}
 			}
 			if (!flag)
 			{
-				TemplateSelectionInfoPanel.mass_per_element.Add(new Tuple<Element, float>(Grid.Element[num], Grid.Cell[num].mass));
+				TemplateSelectionInfoPanel.mass_per_element.Add(new Tuple<Element, float>(Grid.Element[num], Grid.Mass[num]));
 			}
 		}
 		TemplateSelectionInfoPanel.mass_per_element.Sort(delegate(Tuple<Element, float> a, Tuple<Element, float> b)

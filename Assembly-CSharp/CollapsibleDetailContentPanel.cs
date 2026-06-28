@@ -81,6 +81,7 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 			label.obj.gameObject.name = id;
 			this.labels[id] = label;
 		}
+		label.obj.label.AllowLinks = true;
 		label.obj.label.text = text;
 		label.obj.toolTip.toolTip = tooltip;
 		label.used = true;
@@ -99,6 +100,7 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 			label.obj.gameObject.name = id;
 			this.buttonLabels[id] = label;
 		}
+		label.obj.label.AllowLinks = true;
 		label.obj.label.text = text;
 		label.obj.toolTip.toolTip = tooltip;
 		label.obj.buttonLabel.text = buttonText;

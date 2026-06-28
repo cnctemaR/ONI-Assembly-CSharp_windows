@@ -84,7 +84,7 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 		bool flag = false;
 		if ((this.structure == null || !this.structure.IsEntombed()) && !Grid.Solid[output_cell])
 		{
-			flag = Grid.Cell[output_cell].mass < this.overpressureMass;
+			flag = Grid.Mass[output_cell] < this.overpressureMass;
 		}
 		return flag;
 	}

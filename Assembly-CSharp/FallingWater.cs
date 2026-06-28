@@ -113,7 +113,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 			int num7 = Grid.PosToCell(vector3);
 			Element element2 = Grid.Element[num7];
 			Element.State state = element2.state & Element.State.Solid;
-			if (state == Element.State.Solid || (Grid.Cell[num7].properties & 2) != 0)
+			if (state == Element.State.Solid || (Grid.Properties[num7] & 2) != 0)
 			{
 				vector3.y = Mathf.Floor(vector3.y + 1f);
 			}
@@ -211,7 +211,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 				Element element = Grid.Element[num7];
 				Element.State state = element.state & Element.State.Solid;
 				bool flag = false;
-				if (state == Element.State.Solid || (Grid.Cell[num7].properties & 2) != 0)
+				if (state == Element.State.Solid || (Grid.Properties[num7] & 2) != 0)
 				{
 					this.AddToSim(num8, i, ref count);
 				}
@@ -237,7 +237,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 						Element element2 = ElementLoader.elements[(int)particleProperties2.elementIdx];
 						if (element2.id == element.id)
 						{
-							if (Grid.Cell[num7].mass <= element.defaultValues.mass)
+							if (Grid.Mass[num7] <= element.defaultValues.mass)
 							{
 								flag = true;
 							}
@@ -360,7 +360,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		{
 			Element element = Grid.Element[cell];
 			Element.State state = element.state & Element.State.Solid;
-			if (state == Element.State.Solid || (Grid.Cell[cell].properties & 2) != 0)
+			if (state == Element.State.Solid || (Grid.Properties[cell] & 2) != 0)
 			{
 				cell += Grid.WidthInCells;
 				if (!Grid.IsValidCell(cell))

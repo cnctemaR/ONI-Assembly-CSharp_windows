@@ -81,53 +81,53 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 		{
 			return;
 		}
-		float mass = Grid.Cell[num].mass;
-		if (mass < this.info.maxDestinationMass)
+		float num2 = Grid.Mass[num];
+		if (num2 < this.info.maxDestinationMass)
 		{
-			float num2 = this.primaryElement.Mass;
-			if (num2 > 0f)
+			float num3 = this.primaryElement.Mass;
+			if (num3 > 0f)
 			{
-				float num3 = Mathf.Pow(num2, this.info.massPower);
-				float num4 = Mathf.Max(this.info.sublimationRate, this.info.sublimationRate * num3);
-				num4 *= dt;
-				num4 = Mathf.Min(num4, num2);
-				this.sublimatedMass += num4;
-				num2 -= num4;
+				float num4 = Mathf.Pow(num3, this.info.massPower);
+				float num5 = Mathf.Max(this.info.sublimationRate, this.info.sublimationRate * num4);
+				num5 *= dt;
+				num5 = Mathf.Min(num5, num3);
+				this.sublimatedMass += num5;
+				num3 -= num5;
 				if (this.sublimatedMass > this.info.minSublimationAmount)
 				{
-					float num5 = this.sublimatedMass / this.primaryElement.Mass;
+					float num6 = this.sublimatedMass / this.primaryElement.Mass;
 					byte b;
-					int num6;
+					int num7;
 					if (this.info.diseaseIdx == 255)
 					{
 						b = this.primaryElement.DiseaseIdx;
-						num6 = (int)((float)this.primaryElement.DiseaseCount * num5);
-						this.primaryElement.ModifyDiseaseCount(-num6, "Sublimates.SimUpdate");
+						num7 = (int)((float)this.primaryElement.DiseaseCount * num6);
+						this.primaryElement.ModifyDiseaseCount(-num7, "Sublimates.SimUpdate");
 					}
 					else
 					{
-						float num7 = this.sublimatedMass / this.info.sublimationRate;
+						float num8 = this.sublimatedMass / this.info.sublimationRate;
 						b = this.info.diseaseIdx;
-						num6 = (int)((float)this.info.diseaseCount * num7);
+						num7 = (int)((float)this.info.diseaseCount * num8);
 					}
-					float num8 = Mathf.Min(this.sublimatedMass, this.info.maxDestinationMass - mass);
-					if (num8 > 0f)
+					float num9 = Mathf.Min(this.sublimatedMass, this.info.maxDestinationMass - num2);
+					if (num9 > 0f)
 					{
-						this.Emit(num, num8, this.primaryElement.Temperature, b, num6);
-						this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num8);
-						this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num8);
+						this.Emit(num, num9, this.primaryElement.Temperature, b, num7);
+						this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num9);
+						this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num9);
 						this.UpdateStorage();
 					}
 				}
 			}
 			else if (this.sublimatedMass > 0f)
 			{
-				float num9 = Mathf.Min(this.sublimatedMass, this.info.maxDestinationMass - mass);
-				if (num9 > 0f)
+				float num10 = Mathf.Min(this.sublimatedMass, this.info.maxDestinationMass - num2);
+				if (num10 > 0f)
 				{
-					this.Emit(num, num9, this.primaryElement.Temperature, this.primaryElement.DiseaseIdx, this.primaryElement.DiseaseCount);
-					this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num9);
-					this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num9);
+					this.Emit(num, num10, this.primaryElement.Temperature, this.primaryElement.DiseaseIdx, this.primaryElement.DiseaseCount);
+					this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num10);
+					this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num10);
 					this.UpdateStorage();
 				}
 			}

@@ -16,7 +16,7 @@ public class ResearchType
 	public GameObject CreatePrefab(Recipe.Ingredient[] fabricationIngredients, float fabricationTime, HashedString kAnim_ID, string[] fabricators, string recipeDescription, Color color)
 	{
 		GameObject gameObject = EntityTemplates.CreateBasicEntity(this.id, this.name, this.description, 1f, true, Assets.GetAnim(kAnim_ID), "ui", Grid.SceneLayer.BuildingFront, SimHashes.Creature, null, 293f);
-		ResearchPointObject researchPointObject = gameObject.UpdateComponentRequirement<ResearchPointObject>(true);
+		ResearchPointObject researchPointObject = gameObject.AddOrGet<ResearchPointObject>();
 		researchPointObject.TypeID = this.id;
 		string id = this.id;
 		float num = 1f;

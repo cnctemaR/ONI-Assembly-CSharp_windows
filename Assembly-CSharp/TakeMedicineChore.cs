@@ -4,7 +4,7 @@ using STRINGS;
 public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 {
 	public TakeMedicineChore(MedicinalPill master)
-		: base(Db.Get().ChoreTypes.TakeMedicine, master, null, false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.TakeMedicine, master, null, false, null, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
 	{
 		this.medicine = master;
 		this.pickupable = this.medicine.GetComponent<Pickupable>();
@@ -18,7 +18,7 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 	{
 		this.smi.sm.source.Set(this.pickupable.gameObject, this.smi);
 		this.smi.sm.requestedpillcount.Set(1f, this.smi);
-		this.smi.sm.eater.Set(context.consumer.gameObject, this.smi);
+		this.smi.sm.eater.Set(context.consumerState.gameObject, this.smi);
 		base.Begin(context);
 	}
 
@@ -33,7 +33,7 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			TakeMedicineChore takeMedicineChore = (TakeMedicineChore)data;
-			return takeMedicineChore.medicine.CanBeTakenBy(context.consumer.gameObject);
+			return takeMedicineChore.medicine.CanBeTakenBy(context.consumerState.gameObject);
 		}
 	};
 
@@ -44,8 +44,8 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			TakeMedicineChore takeMedicineChore2 = (TakeMedicineChore)data;
-			ConsumableConsumer component = context.consumer.GetComponent<ConsumableConsumer>();
-			return component == null || component.IsPermitted(takeMedicineChore2.medicine.PrefabID().Name);
+			ConsumableConsumer consumableConsumer = context.consumerState.consumableConsumer;
+			return consumableConsumer == null || consumableConsumer.IsPermitted(takeMedicineChore2.medicine.PrefabID().Name);
 		}
 	};
 

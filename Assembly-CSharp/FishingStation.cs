@@ -12,8 +12,8 @@ public class FishingStation : Harvestable
 		int num2 = Grid.CellLeft(num);
 		int num3 = Grid.CellRight(num);
 		this.faceTargetWhenWorking = false;
-		SimMessages.ReplaceElement(num2, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, this.primaryElement.Mass, Grid.Temperature[num2], Grid.Disease[num2].diseaseIdx, Grid.Disease[num2].elementCount, -1);
-		SimMessages.ReplaceElement(num3, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, this.primaryElement.Mass, Grid.Temperature[num3], Grid.Disease[num3].diseaseIdx, Grid.Disease[num3].elementCount, -1);
+		SimMessages.ReplaceElement(num2, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, this.primaryElement.Mass, Grid.Temperature[num2], Grid.DiseaseIdx[num2], Grid.DiseaseCount[num2], -1);
+		SimMessages.ReplaceElement(num3, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, this.primaryElement.Mass, Grid.Temperature[num3], Grid.DiseaseIdx[num3], Grid.DiseaseCount[num3], -1);
 		Grid.RenderedByWorld[num2] = false;
 		Grid.RenderedByWorld[num3] = false;
 		SimMessages.SetStrength(num2, 0, 1f);
@@ -146,7 +146,7 @@ public class FishingStation : Harvestable
 	{
 		if (this.chore == null)
 		{
-			this.chore = new WorkChore<FishingStation>(Db.Get().ChoreTypes.Harvest, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			this.chore = new WorkChore<FishingStation>(Db.Get().ChoreTypes.Harvest, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingFish, null);
 		}
 		this.isMarkedForHarvest = true;

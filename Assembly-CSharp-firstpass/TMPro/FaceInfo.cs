@@ -19,6 +19,8 @@ namespace TMPro
 
 		public float Ascender;
 
+		public float CapHeight;
+
 		public float Descender;
 
 		public float CenterLine;
@@ -32,6 +34,10 @@ namespace TMPro
 		public float Underline;
 
 		public float UnderlineThickness;
+
+		public float strikethrough;
+
+		public float strikethroughThickness;
 
 		public float TabWidth;
 

@@ -52,8 +52,8 @@ public class FarmTileConfig : IBuildingConfig
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		PlantablePlot plantablePlot = go.AddOrGet<PlantablePlot>();
 		plantablePlot.occupyingObjectRelativePosition = new Vector3(0f, 1f, 0f);
-		plantablePlot.AddDespoitTag(GameTags.CropSeed);
-		plantablePlot.AddDespoitTag(GameTags.WaterSeed);
+		plantablePlot.AddDepositTag(GameTags.CropSeed);
+		plantablePlot.AddDepositTag(GameTags.WaterSeed);
 		plantablePlot.SetFertilizationFlags(true, false);
 		go.AddOrGet<AnimTileable>();
 		Prioritizable.AddRef(go);

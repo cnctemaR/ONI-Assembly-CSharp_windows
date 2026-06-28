@@ -11,6 +11,7 @@ public class FilteredStorage
 		this.noFilterTint = no_filter_tint;
 		this.capacityControl = capacity_control;
 		this.useLogicMeter = use_logic_meter;
+		this.choreType = Db.Get().ChoreTypes.Fetch;
 		root.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 		this.filterable = root.FindOrAdd<TreeFilterable>();
 		TreeFilterable treeFilterable = this.filterable;
@@ -23,7 +24,7 @@ public class FilteredStorage
 			FilteredStorage.capacityStatusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				FilteredStorage filteredStorage = (FilteredStorage)data;
-				string text = Util.FormatWholeNumber(filteredStorage.storage.MassStored());
+				string text = Util.FormatWholeNumber(Mathf.Floor(filteredStorage.storage.MassStored()));
 				float num = filteredStorage.storage.capacityKg;
 				IUserControlledCapacity component = filteredStorage.root.GetComponent<IUserControlledCapacity>();
 				if (component != null)
@@ -38,6 +39,12 @@ public class FilteredStorage
 			FilteredStorage.noFilterStatusItem = new StatusItem("NoStorageFilterSet", "BUILDING", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 		}
 		root.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, FilteredStorage.capacityStatusItem, this);
+	}
+
+	public void SetChoreType(ChoreType chore_type)
+	{
+		this.choreType = chore_type;
+		this.OnFilterChanged(this.filterable.GetTags());
 	}
 
 	private void OnOnlyFetchMarkedItemsSettingChanged(object data)
@@ -140,16 +147,15 @@ public class FilteredStorage
 		float maxCapacity = this.GetMaxCapacity();
 		float num = this.storage.MassStored();
 		float num2 = Mathf.Max(0f, maxCapacity - num);
-		int num3 = (int)num2;
-		if (num3 <= 0)
+		if (num2 < 0.001f)
 		{
 			return;
 		}
 		if (flag)
 		{
-			this.fetchList = new FetchList2(this.storage, Db.Get().ChoreTypes.Fetch, null);
+			this.fetchList = new FetchList2(this.storage, this.choreType, null);
 			this.fetchList.ShowStatusItem = false;
-			this.fetchList.Add(tags, this.forbiddenTags, (float)num3, FetchOrder2.OperationalRequirement.None);
+			this.fetchList.Add(tags, this.forbiddenTags, num2, FetchOrder2.OperationalRequirement.None);
 			this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
 		}
 		this.root.GetComponent<KSelectable>().ToggleStatusItem(FilteredStorage.noFilterStatusItem, !flag, this);
@@ -179,6 +185,8 @@ public class FilteredStorage
 		}
 	}
 
+	private const float MIN_FETCH_AMT = 0.001f;
+
 	public static readonly HashedString FULL_PORT_ID = "FULL";
 
 	private KMonoBehaviour root;
@@ -206,4 +214,6 @@ public class FilteredStorage
 	private static StatusItem capacityStatusItem;
 
 	private static StatusItem noFilterStatusItem;
+
+	private ChoreType choreType;
 }

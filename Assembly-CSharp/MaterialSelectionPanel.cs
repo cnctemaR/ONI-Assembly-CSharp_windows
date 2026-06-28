@@ -39,6 +39,7 @@ public class MaterialSelectionPanel : KScreen
 
 	protected override void OnPrefabInit()
 	{
+		MaterialSelectionPanel.elementsWithTag.Clear();
 		base.OnPrefabInit();
 		this.ConsumeMouseScroll = true;
 		for (int i = 0; i < 3; i++)
@@ -181,28 +182,34 @@ public class MaterialSelectionPanel : KScreen
 		MaterialSelectionPanel.SelectedElemInfo selectedElemInfo = default(MaterialSelectionPanel.SelectedElemInfo);
 		selectedElemInfo.element = null;
 		selectedElemInfo.kgAvailable = 0f;
-		foreach (Element element in ElementLoader.elements)
+		if (WorldInventory.Instance == null || ElementLoader.elements == null || ElementLoader.elements.Count == 0)
 		{
-			bool flag = element.tag == materialCategoryTag;
-			if (!flag && element.HasTag(materialCategoryTag))
+			return selectedElemInfo;
+		}
+		List<Element> list = null;
+		if (!MaterialSelectionPanel.elementsWithTag.TryGetValue(materialCategoryTag, out list))
+		{
+			list = new List<Element>();
+			foreach (Element element in ElementLoader.elements)
 			{
-				flag = true;
-			}
-			if (flag)
-			{
-				if (!(WorldInventory.Instance == null) && element != null)
+				if (element.tag == materialCategoryTag || element.HasTag(materialCategoryTag))
 				{
-					float amount = WorldInventory.Instance.GetAmount(element.tag);
-					if (callback != null)
-					{
-						callback(element, amount, recipe_amount);
-					}
-					if (amount > selectedElemInfo.kgAvailable || element.IsLiquid || selectedElemInfo.element == null)
-					{
-						selectedElemInfo.kgAvailable = amount;
-						selectedElemInfo.element = element;
-					}
+					list.Add(element);
 				}
+			}
+			MaterialSelectionPanel.elementsWithTag[materialCategoryTag] = list;
+		}
+		foreach (Element element2 in list)
+		{
+			float amount = WorldInventory.Instance.GetAmount(element2.tag);
+			if (callback != null)
+			{
+				callback(element2, amount, recipe_amount);
+			}
+			if (amount > selectedElemInfo.kgAvailable || element2.IsLiquid || selectedElemInfo.element == null)
+			{
+				selectedElemInfo.kgAvailable = amount;
+				selectedElemInfo.element = element2;
 			}
 		}
 		return selectedElemInfo;
@@ -243,6 +250,8 @@ public class MaterialSelectionPanel : KScreen
 	public GameObject ResearchRequired;
 
 	private Recipe activeRecipe;
+
+	private static Dictionary<Tag, List<Element>> elementsWithTag = new Dictionary<Tag, List<Element>>();
 
 	public delegate void SelectElement(Element element, float kgAvailable, float recipe_amount);
 

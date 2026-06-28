@@ -10,17 +10,7 @@ public class EntityPrefabs : KMonoBehaviour
 		EntityPrefabs.Instance = this;
 	}
 
-	public GameObject MinionPrefab;
-
 	public GameObject Portrait;
-
-	public GameObject DigPlacer;
-
-	public GameObject MoveTarget;
-
-	public GameObject MinionSelectPreview;
-
-	public GameObject Exclamation;
 
 	public GameObject SelectMarker;
 

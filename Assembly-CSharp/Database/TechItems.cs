@@ -63,7 +63,7 @@ namespace Database
 			return true;
 		}
 
-		private Tech LookupGroupForID(string itemID)
+		public Tech LookupGroupForID(string itemID)
 		{
 			foreach (KeyValuePair<string, string[]> keyValuePair in Techs.TECH_GROUPING)
 			{

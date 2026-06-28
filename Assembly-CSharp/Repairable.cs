@@ -21,7 +21,7 @@ public class Repairable : Workable
 		this.showProgressBar = false;
 		this.faceTargetWhenWorking = true;
 		this.multitoolContext = "build";
-		this.multitoolHitEffectHash = new HashedString("fx_build_splash");
+		this.multitoolHitEffectTag = "fx_build_splash";
 	}
 
 	protected override void OnSpawn()
@@ -164,14 +164,9 @@ public class Repairable : Workable
 	{
 		if (this.storageProxy == null)
 		{
-			GameObject gameObject = new GameObject();
-			gameObject.SetActive(false);
-			gameObject.name = "RepairableStorageProxy";
-			gameObject.transform.parent = base.transform;
+			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(RepairableStorageProxy.ID), base.transform.gameObject, null);
 			gameObject.transform.SetLocalPosition(Vector3.zero);
-			KPrefabID kprefabID = gameObject.AddComponent<KPrefabID>();
-			kprefabID.PrefabTag = new Tag("RepairableStorageProxy");
-			this.storageProxy = gameObject.AddComponent<Storage>();
+			this.storageProxy = gameObject.GetComponent<Storage>();
 			this.storageProxy.prioritizable = base.transform.GetComponent<Prioritizable>();
 			this.storageProxy.prioritizable.AddRef();
 			gameObject.SetActive(true);
@@ -328,9 +323,17 @@ public class Repairable : Workable
 
 		private Chore CreateRepairChore(Repairable.SMInstance smi)
 		{
-			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, true);
-			workChore.AddPrecondition(ChorePreconditions.instance.IsMarkedForDeconstruction, smi.master.gameObject);
-			workChore.AddPrecondition(Repairable.States.IsNotBeingAttacked, smi.master.GetComponent<Breakable>());
+			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, true);
+			Deconstructable component = smi.master.GetComponent<Deconstructable>();
+			if (component != null)
+			{
+				workChore.AddPrecondition(ChorePreconditions.instance.IsMarkedForDeconstruction, component);
+			}
+			Breakable component2 = smi.master.GetComponent<Breakable>();
+			if (component2 != null)
+			{
+				workChore.AddPrecondition(Repairable.States.IsNotBeingAttacked, component2);
+			}
 			workChore.AddPrecondition(Repairable.States.IsNotAngry, null);
 			return workChore;
 		}
@@ -367,9 +370,9 @@ public class Repairable : Workable
 			description = DUPLICANTS.CHORES.PRECONDITIONS.IS_NOT_ANGRY,
 			fn = delegate(ref Chore.Precondition.Context context, object data)
 			{
-				Traits component = context.consumer.GetComponent<Traits>();
-				AmountInstance amountInstance = Db.Get().Amounts.Stress.Lookup(context.consumer);
-				return !(component != null) || amountInstance == null || amountInstance.value < STRESS.ACTING_OUT_RESET || !component.HasTrait("Aggressive");
+				Traits traits = context.consumerState.traits;
+				AmountInstance amountInstance = Db.Get().Amounts.Stress.Lookup(context.consumerState.gameObject);
+				return !(traits != null) || amountInstance == null || amountInstance.value < STRESS.ACTING_OUT_RESET || !traits.HasTrait("Aggressive");
 			}
 		};
 

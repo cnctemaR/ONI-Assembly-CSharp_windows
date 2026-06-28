@@ -59,7 +59,8 @@ public class DigTool : DragTool
 					return null;
 				}
 			}
-			GameObject gameObject = Util.KInstantiate(DigTool.Instance.Placer, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
+			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(new Tag("DigPlacer")), SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
+			gameObject.SetActive(true);
 			Grid.Objects[cell, 7] = gameObject;
 			Vector3 vector = Grid.CellToPosCBC(cell, DigTool.Instance.visualizerLayer);
 			float depthBias = InterfaceTool.DepthBias;
@@ -86,8 +87,6 @@ public class DigTool : DragTool
 		base.OnDeactivateTool(new_tool);
 		ToolMenu.Instance.PriorityScreen.Show(false);
 	}
-
-	public GameObject Placer;
 
 	public static DigTool Instance;
 }

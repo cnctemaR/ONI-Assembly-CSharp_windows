@@ -13,7 +13,8 @@ namespace TMPro
 			this.spriteAsset = spriteAsset;
 			this.material = material;
 			this.isDefaultMaterial = material.GetInstanceID() == fontAsset.material.GetInstanceID();
-			this.isFallbackFont = false;
+			this.isFallbackMaterial = false;
+			this.fallbackMaterial = null;
 			this.padding = padding;
 			this.referenceCount = 0;
 		}
@@ -81,7 +82,9 @@ namespace TMPro
 
 		public bool isDefaultMaterial;
 
-		public bool isFallbackFont;
+		public bool isFallbackMaterial;
+
+		public Material fallbackMaterial;
 
 		public float padding;
 

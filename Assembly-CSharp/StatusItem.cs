@@ -273,7 +273,7 @@ public class StatusItem : Resource
 							}
 							else
 							{
-								statusItemOverlays = StatusItem.StatusItemOverlays.GasPlunbing;
+								statusItemOverlays = StatusItem.StatusItemOverlays.GasPlumbing;
 							}
 						}
 						else
@@ -359,7 +359,7 @@ public class StatusItem : Resource
 		ThermalComfort = 16,
 		Light = 32,
 		LiquidPlumbing = 64,
-		GasPlunbing = 128,
+		GasPlumbing = 128,
 		Decor = 256,
 		Pathogens = 512,
 		Farming = 1024,

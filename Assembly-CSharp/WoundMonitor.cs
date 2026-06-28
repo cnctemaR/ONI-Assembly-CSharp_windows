@@ -5,8 +5,11 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.healthy;
-		this.root.ToggleAnims("anim_hits_kanim", 0f);
-		this.healthy.Transition(this.wounded, (WoundMonitor.Instance smi) => smi.health.State != Health.HealthState.Perfect, UpdateRate.SIM_200ms);
+		this.root.ToggleAnims("anim_hits_kanim", 0f).EventHandler(GameHashes.HealthChanged, delegate(WoundMonitor.Instance smi, object data)
+		{
+			smi.OnHealthChanged(data);
+		});
+		this.healthy.EventTransition(GameHashes.HealthChanged, this.wounded, (WoundMonitor.Instance smi) => smi.health.State != Health.HealthState.Perfect);
 		this.wounded.ToggleUrge(Db.Get().Urges.Heal).Enter(delegate(WoundMonitor.Instance smi)
 		{
 			Health.HealthState state = smi.health.State;
@@ -28,14 +31,10 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 			{
 				smi.GoTo(this.wounded.heavy);
 			}
-		}).EventHandler(GameHashes.Healed, delegate(WoundMonitor.Instance smi)
+		}).EventHandler(GameHashes.HealthChanged, delegate(WoundMonitor.Instance smi)
 		{
 			smi.GoToProperHeathState();
-		})
-			.EventHandler(GameHashes.TookDamage, delegate(WoundMonitor.Instance smi)
-			{
-				smi.GoToProperHeathState();
-			});
+		});
 		this.wounded.medium.ToggleAnims("anim_loco_wounded_kanim", 1f);
 		this.wounded.heavy.ToggleAnims("anim_loco_wounded_kanim", 3f);
 	}
@@ -60,12 +59,12 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 		{
 			this.health = master.GetComponent<Health>();
 			this.worker = master.GetComponent<Worker>();
-			base.smi.master.gameObject.Subscribe(-2121334874, new Action<object>(base.smi.OnTookDamage));
 		}
 
-		public void OnTookDamage(object data)
+		public void OnHealthChanged(object data)
 		{
-			if (this.health.hitPoints != 0f)
+			float num = (float)data;
+			if (this.health.hitPoints != 0f && num < 0f)
 			{
 				this.PlayHitAnimation();
 			}

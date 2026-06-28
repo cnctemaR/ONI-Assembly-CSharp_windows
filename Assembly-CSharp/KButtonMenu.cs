@@ -54,20 +54,10 @@ public class KButtonMenu : KScreen
 					locText.color = ((!binfo.isEnabled) ? new Color(0.5f, 0.5f, 0.5f) : new Color(1f, 1f, 1f));
 				}
 			}
-			RawImage componentInChildren = gameObject.GetComponentInChildren<RawImage>();
-			if (componentInChildren != null && binfo.visualizer != null)
+			ToolTip componentInChildren = gameObject.GetComponentInChildren<ToolTip>();
+			if (binfo.toolTip != null && binfo.toolTip != string.Empty && componentInChildren != null)
 			{
-				Portrait component = Util.KInstantiate(EntityPrefabs.Instance.Portrait, SceneOrganizer.Instance.GetFolder(Folder.Portraits), null).GetComponent<Portrait>();
-				RectTransform component2 = componentInChildren.GetComponent<RectTransform>();
-				componentInChildren.texture = component.CreateTexture((int)component2.rect.width, (int)component2.rect.height);
-				component.SetTarget(binfo.visualizer);
-				component.destroyTargetOnCleanup = true;
-				this.buttons[j].portrait = component;
-			}
-			ToolTip componentInChildren2 = gameObject.GetComponentInChildren<ToolTip>();
-			if (binfo.toolTip != null && binfo.toolTip != string.Empty && componentInChildren2 != null)
-			{
-				componentInChildren2.toolTip = binfo.toolTip;
+				componentInChildren.toolTip = binfo.toolTip;
 			}
 			KButtonMenu screen = this;
 			KButton button = gameObject.GetComponent<KButton>();
@@ -170,7 +160,7 @@ public class KButtonMenu : KScreen
 			if (e.TryConsume(buttonInfo.shortcutKey))
 			{
 				this.buttonObjects[i].GetComponent<KButton>().PlayPointerDownSound();
-				this.buttonObjects[i].GetComponent<KButton>().SignalClick();
+				this.buttonObjects[i].GetComponent<KButton>().SignalClick(KKeyCode.Mouse0);
 				break;
 			}
 		}
@@ -190,20 +180,6 @@ public class KButtonMenu : KScreen
 
 	protected override void OnDeactivate()
 	{
-		if (this.buttons == null)
-		{
-			return;
-		}
-		foreach (KButtonMenu.ButtonInfo buttonInfo in this.buttons)
-		{
-			if (buttonInfo != null)
-			{
-				if (buttonInfo.portrait != null)
-				{
-					global::UnityEngine.Object.Destroy(buttonInfo.portrait.gameObject);
-				}
-			}
-		}
 	}
 
 	private void Update()
@@ -252,7 +228,6 @@ public class KButtonMenu : KScreen
 			this.visualizer = visualizer;
 			this.toolTip = tool_tip;
 			this.isEnabled = is_enabled;
-			this.portrait = null;
 			this.uibutton = null;
 			this.popupOptions = popup_options;
 			this.onPopupClick = on_popup_click;
@@ -267,7 +242,6 @@ public class KButtonMenu : KScreen
 			this.onHover = onHover;
 			this.userData = userData;
 			this.visualizer = null;
-			this.portrait = null;
 			this.uibutton = null;
 		}
 
@@ -279,7 +253,6 @@ public class KButtonMenu : KScreen
 			this.onHover = onHover;
 			this.visualizer = visualizer;
 			this.userData = userData;
-			this.portrait = null;
 			this.uibutton = null;
 		}
 
@@ -288,8 +261,6 @@ public class KButtonMenu : KScreen
 		public global::Action shortcutKey;
 
 		public GameObject visualizer;
-
-		public Portrait portrait;
 
 		public UnityAction onClick;
 

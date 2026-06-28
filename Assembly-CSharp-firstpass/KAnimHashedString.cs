@@ -46,6 +46,11 @@ public struct KAnimHashedString : IComparable<KAnimHashedString>, IEquatable<KAn
 		return new KAnimHashedString(hash.HashValue);
 	}
 
+	public static implicit operator KAnimHashedString(string str)
+	{
+		return new KAnimHashedString(str);
+	}
+
 	public int CompareTo(KAnimHashedString obj)
 	{
 		if (this.hash < obj.hash)

@@ -108,6 +108,11 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		hashSet.Add(item_tag);
 	}
 
+	public HashSet<Tag> GetDiscovered()
+	{
+		return this.Discovered;
+	}
+
 	public bool IsDiscovered(Tag tag)
 	{
 		return this.Discovered.Contains(tag) || this.DiscoveredCategories.ContainsKey(tag);

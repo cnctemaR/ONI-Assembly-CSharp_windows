@@ -148,7 +148,8 @@ public class CharacterContainer : KScreen
 	{
 		if (this.animController == null)
 		{
-			this.animController = Util.KInstantiateUI(EntityPrefabs.Instance.MinionSelectPreview, this.contentBody.gameObject, false).GetComponent<KBatchedAnimController>();
+			this.animController = Util.KInstantiateUI(Assets.GetPrefab(new Tag("MinionSelectPreview")), this.contentBody.gameObject, false).GetComponent<KBatchedAnimController>();
+			this.animController.gameObject.SetActive(true);
 			KCanvasScaler kcanvasScaler = global::UnityEngine.Object.FindObjectOfType<KCanvasScaler>();
 			this.animController.animScale = this.baseCharacterScale * (1f / kcanvasScaler.GetCanvasScale());
 			ScreenResize instance = ScreenResize.Instance;

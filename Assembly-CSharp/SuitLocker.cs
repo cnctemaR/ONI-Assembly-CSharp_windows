@@ -59,7 +59,8 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 
 	public bool HasOxygen()
 	{
-		return null != this.GetOxygen();
+		GameObject oxygen = this.GetOxygen();
+		return oxygen != null && oxygen.GetComponent<PrimaryElement>().Mass > 0f;
 	}
 
 	private void RefreshMeter()
@@ -312,10 +313,10 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 		{
 			if (this.urgentChore == null)
 			{
-				this.urgentChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitUrgent, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+				this.urgentChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitUrgent, this, null, null, true, null, null, null, true, null, false, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false);
 				this.urgentChore.AddPrecondition(SuitLocker.ReturnSuitWorkable.DoesSuitNeedRechargingUrgent, null);
 				this.urgentChore.AddPrecondition(this.HasSuitMarker, base.GetComponent<SuitLocker>());
-				this.idleChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitIdle, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, -1, false);
+				this.idleChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitIdle, this, null, null, true, null, null, null, true, null, false, null, false, true, false, PriorityScreen.PriorityClass.basic, -1, false);
 				this.idleChore.AddPrecondition(SuitLocker.ReturnSuitWorkable.DoesSuitNeedRechargingIdle, null);
 				this.idleChore.AddPrecondition(this.HasSuitMarker, base.GetComponent<SuitLocker>());
 			}
@@ -382,14 +383,14 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			description = DUPLICANTS.CHORES.PRECONDITIONS.DOES_SUIT_NEED_RECHARGING_URGENT,
 			fn = delegate(ref Chore.Precondition.Context context, object data)
 			{
-				Equipment component = context.consumer.GetComponent<Equipment>();
-				AssignableSlotInstance slot = component.GetSlot(Db.Get().AssignableSlots.Suit);
+				Equipment equipment = context.consumerState.equipment;
+				AssignableSlotInstance slot = equipment.GetSlot(Db.Get().AssignableSlots.Suit);
 				if (slot.assignable == null)
 				{
 					return false;
 				}
-				SuitTank component2 = slot.assignable.GetComponent<SuitTank>();
-				return !(component2 == null) && component2.NeedsRecharging();
+				SuitTank component = slot.assignable.GetComponent<SuitTank>();
+				return !(component == null) && component.NeedsRecharging();
 			}
 		};
 
@@ -399,14 +400,14 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			description = DUPLICANTS.CHORES.PRECONDITIONS.DOES_SUIT_NEED_RECHARGING_IDLE,
 			fn = delegate(ref Chore.Precondition.Context context, object data)
 			{
-				Equipment component3 = context.consumer.GetComponent<Equipment>();
-				AssignableSlotInstance slot2 = component3.GetSlot(Db.Get().AssignableSlots.Suit);
+				Equipment equipment2 = context.consumerState.equipment;
+				AssignableSlotInstance slot2 = equipment2.GetSlot(Db.Get().AssignableSlots.Suit);
 				if (slot2.assignable == null)
 				{
 					return false;
 				}
-				SuitTank component4 = slot2.assignable.GetComponent<SuitTank>();
-				return !(component4 == null);
+				SuitTank component2 = slot2.assignable.GetComponent<SuitTank>();
+				return !(component2 == null);
 			}
 		};
 

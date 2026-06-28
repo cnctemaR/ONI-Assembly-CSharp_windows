@@ -8,10 +8,9 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
-		Amounts amounts = this.GetAmounts();
-		this.externalTemperature = amounts.Add(new AmountInstance(Db.Get().Amounts.ExternalTemperature, base.gameObject));
+		this.externalTemperature = Db.Get().Amounts.ExternalTemperature.Lookup(base.gameObject);
 		this.externalTemperature.value = Grid.Temperature[Grid.PosToCell(this)];
-		this.temperature = amounts.Add(new AmountInstance(Db.Get().Amounts.Temperature, base.gameObject));
+		this.temperature = Db.Get().Amounts.Temperature.Lookup(base.gameObject);
 		this.primaryElement = base.GetComponent<PrimaryElement>();
 	}
 
@@ -34,10 +33,6 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 	{
 		this.temperature.value = t;
 	}
-
-	public float temperatureDeltaJoules;
-
-	public GameObject frozenPrefab;
 
 	[MyCmpAdd]
 	private Notifier notifier;

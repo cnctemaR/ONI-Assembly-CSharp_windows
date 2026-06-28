@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class AccessorySlot : Resource
 {
-	public AccessorySlot(string id, ResourceSet parent, KAnimFile swap_build)
+	public AccessorySlot(string id, ResourceSet parent, KAnimFile swap_build, string build_symbol_override = null)
 		: base(id, parent, null)
 	{
 		this.targetSymbolId = new KAnimHashedString("snapTo_" + id.ToLower());

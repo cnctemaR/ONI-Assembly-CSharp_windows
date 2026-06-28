@@ -228,7 +228,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 	{
 		if (Grid.IsGas(test_cell))
 		{
-			PressureVulnerable.testAreaPressure += Grid.Cell[test_cell].mass;
+			PressureVulnerable.testAreaPressure += Grid.Mass[test_cell];
 			PressureVulnerable.testAreaCount++;
 		}
 		return true;

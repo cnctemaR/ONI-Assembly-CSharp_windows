@@ -38,6 +38,7 @@ public class PrioritizeTool : DragTool
 	protected override void OnActivateTool()
 	{
 		base.OnActivateTool();
+		ToolMenu.Instance.PriorityScreen.ShowDiagram(true);
 		ToolMenu.Instance.PriorityScreen.Show(true);
 		ToolMenu.Instance.PriorityScreen.transform.localScale = new Vector3(1.35f, 1.35f, 1.35f);
 	}
@@ -46,6 +47,7 @@ public class PrioritizeTool : DragTool
 	{
 		base.OnDeactivateTool(new_tool);
 		ToolMenu.Instance.PriorityScreen.Show(false);
+		ToolMenu.Instance.PriorityScreen.ShowDiagram(false);
 		ToolMenu.Instance.PriorityScreen.transform.localScale = new Vector3(1f, 1f, 1f);
 	}
 

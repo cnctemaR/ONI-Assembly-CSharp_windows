@@ -80,13 +80,22 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Crops grown within a Greenhouse can be tended by Farmers to increase their growth speed.";
 			}
 
+			public class CREATUREPEN
+			{
+				public static LocString NAME = "Stable";
+
+				public static LocString EFFECT = "- Hastens critter domestication";
+
+				public static LocString TOOLTIP = "Stabled critters will be more productive and less hostile.";
+			}
+
 			public class REC_ROOM
 			{
 				public static LocString NAME = "Recreation Room";
 
 				public static LocString EFFECT = "- Stress relief bonus";
 
-				public static LocString TOOLTIP = "Leisure time will relieve additional stress for Duplicants inside a Recreation Room.";
+				public static LocString TOOLTIP = "Leisure time will relieve additional stress for Duplicants visiting a Recreation Room.";
 			}
 
 			public class PRIVATE_BEDROOM
@@ -186,6 +195,27 @@ namespace STRINGS
 				public static LocString NAME = "Farm Station";
 
 				public static LocString DESCRIPTION = "Requires a single Farm Station";
+			}
+
+			public class CREATURE_RELOCATOR
+			{
+				public static LocString NAME = "Critter Relocator";
+
+				public static LocString DESCRIPTION = "Requires a single Critter Drop-Off";
+			}
+
+			public class CREATURE_FEEDER
+			{
+				public static LocString NAME = "Critter Feeder";
+
+				public static LocString DESCRIPTION = "Requires a single Critter Feeder";
+			}
+
+			public class RANCH_STATION
+			{
+				public static LocString NAME = "Ranch Station";
+
+				public static LocString DESCRIPTION = "Requires a single Ranch Station";
 			}
 
 			public class REC_BUILDING
@@ -295,6 +325,11 @@ namespace STRINGS
 			public class BUILDING_COUNT
 			{
 				public static LocString NAME = "Buildings: {0}";
+			}
+
+			public class CREATURE_COUNT
+			{
+				public static LocString NAME = "Critters: {0}";
 			}
 		}
 	}

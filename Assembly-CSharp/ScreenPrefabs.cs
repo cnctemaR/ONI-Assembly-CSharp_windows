@@ -22,8 +22,6 @@ public class ScreenPrefabs : KMonoBehaviour
 
 	public Hud HudScreen;
 
-	public StatusScreen StatusScreen;
-
 	public HoverTextScreen HoverTextScreen;
 
 	public OverlayScreen OverlayScreen;

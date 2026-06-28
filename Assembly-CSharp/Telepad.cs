@@ -80,10 +80,11 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		}
 		for (int i = 0; i < num2; i++)
 		{
-			GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.MinionPrefab, SceneOrganizer.Instance.GetFolder(Folder.Minions), null);
+			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), SceneOrganizer.Instance.GetFolder(Folder.Minions), null);
 			gameObject.transform.SetLocalPosition(Grid.CellToPosCBC(num, Grid.SceneLayer.Move));
 			gameObject.SetActive(true);
 			starting_stats.Apply(gameObject);
+			Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
 			ChoreProvider component = gameObject.GetComponent<ChoreProvider>();
 			new EmoteChore(component, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", Telepad.PortalBirthAnim, null);
 		}

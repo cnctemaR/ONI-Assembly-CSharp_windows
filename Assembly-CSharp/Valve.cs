@@ -68,7 +68,7 @@ public class Valve : Workable, ISaveLoadable
 			if (this.chore == null)
 			{
 				component.AddStatusItem(Db.Get().BuildingStatusItems.ValveRequest, this);
-				this.chore = new WorkChore<Valve>(Db.Get().ChoreTypes.Toggle, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+				this.chore = new WorkChore<Valve>(Db.Get().ChoreTypes.Toggle, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 			}
 		}
 	}

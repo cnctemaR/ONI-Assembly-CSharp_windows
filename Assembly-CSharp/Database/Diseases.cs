@@ -9,11 +9,13 @@ namespace Database
 			: base("Diseases", parent)
 		{
 			this.FoodPoisoning = base.Add(new FoodPoisoning());
-			this.PutridOdour = base.Add(new PutridOdour());
-			this.Spores = base.Add(new Spores());
 			this.ColdBrain = base.Add(new ColdBrain());
 			this.HeatRash = base.Add(new HeatRash());
 			this.SlimeLung = base.Add(new SlimeLung());
+			this.PutridOdour = base.Add(new PutridOdour());
+			this.PutridOdour.Disabled = true;
+			this.Spores = base.Add(new Spores());
+			this.Spores.Disabled = true;
 		}
 
 		public static bool IsValidDiseaseID(string id)

@@ -130,7 +130,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		int count = 0;
 		this.occupyArea.TestArea(cell, null, delegate(int testCell, object data)
 		{
-			if (Grid.Cell[testCell].mass > 0.1f)
+			if (Grid.Mass[testCell] > 0.1f)
 			{
 				temperature += Grid.Temperature[testCell];
 				count++;

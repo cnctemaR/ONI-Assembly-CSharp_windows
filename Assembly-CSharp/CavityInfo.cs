@@ -60,5 +60,15 @@ public class CavityInfo
 
 	public int numCells;
 
+	public int maxX;
+
+	public int maxY;
+
+	public int minX;
+
+	public int minY;
+
 	public List<KPrefabID> buildings = new List<KPrefabID>();
+
+	public List<KPrefabID> creatures = new List<KPrefabID>();
 }

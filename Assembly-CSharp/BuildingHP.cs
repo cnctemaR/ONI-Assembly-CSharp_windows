@@ -73,7 +73,7 @@ public class BuildingHP : Workable
 		base.OnPrefabInit();
 		base.SetWorkTime(10f);
 		this.multitoolContext = "build";
-		this.multitoolHitEffectHash = new HashedString("fx_build_splash");
+		this.multitoolHitEffectTag = "fx_build_splash";
 	}
 
 	protected override void OnSpawn()
@@ -341,7 +341,7 @@ public class BuildingHP : Workable
 
 		private Chore CreateRepairChore(BuildingHP.SMInstance smi)
 		{
-			return new WorkChore<BuildingHP>(Db.Get().ChoreTypes.Repair, smi.master, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			return new WorkChore<BuildingHP>(Db.Get().ChoreTypes.Repair, smi.master, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		}
 
 		private static Operational.Flag healthyFlag = new Operational.Flag("healthy", Operational.Flag.Type.Functional);

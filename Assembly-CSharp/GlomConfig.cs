@@ -1,5 +1,5 @@
 ﻿using System;
-using Klei;
+using Klei.AI;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -8,32 +8,36 @@ public class GlomConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		string text = "Glom";
-		string text2 = global::STRINGS.CREATURES.SPECIES.GLOM.NAME;
-		string text3 = global::STRINGS.CREATURES.SPECIES.GLOM.DESC;
+		string text = global::STRINGS.CREATURES.SPECIES.GLOM.NAME;
+		string text2 = "Glom";
+		string text3 = text;
+		string text4 = global::STRINGS.CREATURES.SPECIES.GLOM.DESC;
 		float num = 25f;
 		KAnimFile anim = Assets.GetAnim("glom_kanim");
-		string text4 = "idle";
+		string text5 = "idle";
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, 25f, "HatchNavGrid", NavType.Floor, 32, 2f, string.Empty, 0, true, true, 30f, 293.15f, 393.15f, 273.15f, 423.15f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text2, text3, text4, num, anim, text5, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		Trait trait = Db.Get().CreateTrait("GlomBaseTrait", text, text, null, false, null, true, true);
+		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, text, false, false, true));
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, "GlomBaseTrait", "HatchNavGrid", NavType.Floor, 32, 2f, string.Empty, 0, true, true, 30f, 293.15f, 393.15f, 273.15f, 423.15f);
 		gameObject.AddWeapon(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
-		Glom glom = gameObject.UpdateComponentRequirement<Glom>(true);
-		glom.dirtyEmitElement = SimHashes.ContaminatedOxygen;
-		glom.dirtyProbabilityPercent = 25f;
-		glom.dirtyCellToTargetMass = 1f;
-		glom.dirtyMassPerDirty = 0.2f;
-		glom.dirtyMassReleaseOnDeath = 3f;
-		glom.emitDiseaseIdx = Db.Get().Diseases.GetIndex("SlimeLung");
-		glom.emitDiseasePerKg = 1000;
-		gameObject.UpdateComponentRequirement<Trappable>(true);
-		gameObject.UpdateComponentRequirement<FloorSwitchActivator>(true);
-		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
+		gameObject.AddOrGet<Trappable>();
+		gameObject.AddOrGet<NotCapturable>();
+		gameObject.AddOrGet<FloorSwitchActivator>();
+		gameObject.AddOrGetDef<ThreatMonitor.Def>();
+		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
+		ElementDropperMonitor.Def def = gameObject.AddOrGetDef<ElementDropperMonitor.Def>();
+		def.dirtyEmitElement = SimHashes.ContaminatedOxygen;
+		def.dirtyProbabilityPercent = 25f;
+		def.dirtyCellToTargetMass = 1f;
+		def.dirtyMassPerDirty = 0.2f;
+		def.dirtyMassReleaseOnDeath = 3f;
+		def.emitDiseaseIdx = Db.Get().Diseases.GetIndex("SlimeLung");
+		def.emitDiseasePerKg = 1000f;
+		gameObject.AddOrGet<LoopingSounds>();
 		LoopingSounds component = gameObject.GetComponent<LoopingSounds>();
 		component.updatePosition = true;
-		ElementEmitter elementEmitter = gameObject.AddElementEmitter(SimHashes.ContaminatedOxygen, 0f, 0f, SimUtil.DiseaseInfo.Invalid);
-		elementEmitter.showDescriptor = false;
-		DiseaseSourceVisualizer diseaseSourceVisualizer = gameObject.UpdateComponentRequirement<DiseaseSourceVisualizer>(true);
+		DiseaseSourceVisualizer diseaseSourceVisualizer = gameObject.AddOrGet<DiseaseSourceVisualizer>();
 		diseaseSourceVisualizer.alwaysShowDisease = "SlimeLung";
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_movement_short", NOISE_POLLUTION.CREATURES.TIER2);
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_jump", NOISE_POLLUTION.CREATURES.TIER3);
@@ -41,6 +45,14 @@ public class GlomConfig : IEntityConfig
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_expel", NOISE_POLLUTION.CREATURES.TIER4);
 		EntityTemplates.CreateAndRegisterPreview("Glom_Preview", Assets.GetAnim("glom_kanim"), "idle", ObjectLayer.NumLayers, 1, 1);
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, string.Format(global::STRINGS.CREATURES.BAGGED_NAME_FMT, global::STRINGS.CREATURES.SPECIES.GLOM.NAME), string.Format(global::STRINGS.CREATURES.BAGGED_DESC_FMT, global::STRINGS.CREATURES.SPECIES.GLOM.NAME), Assets.GetAnim("creature_interacts_trap_glom_kanim"), "working_pre", new Tag("Glom_Preview"));
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def()).Add(new TrappedStates.Def()).Add(new FallStates.Def())
+			.Add(new StunnedStates.Def())
+			.Add(new DrowningStates.Def())
+			.Add(new DebugGoToStates.Def())
+			.Add(new FleeStates.Def())
+			.Add(new DropElementStates.Def())
+			.Add(new IdleStates.Def());
+		EntityTemplates.AddCreatureBrain(gameObject, builder);
 		return gameObject;
 	}
 
@@ -55,6 +67,8 @@ public class GlomConfig : IEntityConfig
 	public const string ID = "Glom";
 
 	public const string PREVIEW_ID = "Glom_Preview";
+
+	public const string BASE_TRAIT_ID = "GlomBaseTrait";
 
 	public const SimHashes dirtyEmitElement = SimHashes.ContaminatedOxygen;
 

@@ -15,18 +15,18 @@ public class BasicForagePlantPlantedConfig : IEntityConfig
 		string text4 = "idle";
 		EffectorValues tier = DECOR.BONUS.TIER1;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, Grid.SceneLayer.BuildingBack, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		gameObject.UpdateComponentRequirement<SimTemperatureTransfer>(true);
-		OccupyArea occupyArea = gameObject.UpdateComponentRequirement<OccupyArea>(true);
+		gameObject.AddOrGet<SimTemperatureTransfer>();
+		OccupyArea occupyArea = gameObject.AddOrGet<OccupyArea>();
 		occupyArea.objectLayer = ObjectLayer.Building;
-		gameObject.UpdateComponentRequirement<EntombVulnerable>(true);
-		DrowningMonitor drowningMonitor = gameObject.UpdateComponentRequirement<DrowningMonitor>(true);
+		gameObject.AddOrGet<EntombVulnerable>();
+		DrowningMonitor drowningMonitor = gameObject.AddOrGet<DrowningMonitor>();
 		drowningMonitor.Configure(15f, 5f, 0.95f);
-		gameObject.UpdateComponentRequirement<Uprootable>(true);
-		gameObject.UpdateComponentRequirement<UprootedMonitor>(true);
-		gameObject.UpdateComponentRequirement<Harvestable>(true);
-		SeedProducer seedProducer = gameObject.UpdateComponentRequirement<SeedProducer>(true);
+		gameObject.AddOrGet<Uprootable>();
+		gameObject.AddOrGet<UprootedMonitor>();
+		gameObject.AddOrGet<Harvestable>();
+		SeedProducer seedProducer = gameObject.AddOrGet<SeedProducer>();
 		seedProducer.Configure("BasicForagePlant", SeedProducer.ProductionType.DigOnly, 1);
-		gameObject.UpdateComponentRequirement<BasicForagePlantPlanted>(true);
+		gameObject.AddOrGet<BasicForagePlantPlanted>();
 		return gameObject;
 	}
 

@@ -7,6 +7,6 @@ public class Painting : Artable
 		base.OnPrefabInit();
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 		this.multitoolContext = "paint";
-		this.multitoolHitEffectHash = new HashedString("fx_paint_splash");
+		this.multitoolHitEffectTag = "fx_paint_splash";
 	}
 }

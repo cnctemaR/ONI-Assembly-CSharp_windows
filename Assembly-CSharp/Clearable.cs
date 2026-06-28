@@ -11,6 +11,7 @@ public class Clearable : Workable, ISaveLoadable
 		base.Subscribe(856640610, new Action<object>(this.OnStore));
 		base.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(-1617557748, new Action<object>(this.OnEquipped));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Clearing;
 	}
 
@@ -89,6 +90,11 @@ public class Clearable : Workable, ISaveLoadable
 	}
 
 	private void OnClickCancel()
+	{
+		this.CancelClearing();
+	}
+
+	private void OnEquipped(object data)
 	{
 		this.CancelClearing();
 	}

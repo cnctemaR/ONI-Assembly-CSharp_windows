@@ -71,11 +71,16 @@ public class FetchManagerUpdater
 
 	private static bool IsBetter(ref FetchManagerUpdater.Pickup a, ref FetchManagerUpdater.Pickup b)
 	{
-		bool flag = a.PathCost <= b.PathCost;
-		bool flag2 = a.Pickupable.KPrefabID.GetTabBits().AreEqual(b.Pickupable.KPrefabID.GetTabBits());
-		bool flag3 = a.masterPriority == b.masterPriority;
-		bool flag4 = a.freshness == b.freshness;
-		return flag && flag2 && flag3 && flag4;
+		TagBits tagBits = a.Pickupable.KPrefabID.GetTagBits() & FetchManagerUpdater.disallowedTagMask;
+		TagBits tagBits2 = b.Pickupable.KPrefabID.GetTagBits() & FetchManagerUpdater.disallowedTagMask;
+		bool flag = tagBits.AreEqual(tagBits2);
+		bool flag2 = a.masterPriority == b.masterPriority;
+		if (!flag || !flag2)
+		{
+			return false;
+		}
+		bool flag3 = a.PathCost <= b.PathCost;
+		return flag3 || a.freshness <= b.freshness;
 	}
 
 	public static bool IsFetchablePickup(KPrefabID pickup_id, Storage source, float pickup_unreserved_amount, float pickup_min_unit, float maximum_requested, TagBits tag_bits, TagBits required_tags, TagBits forbid_tags, Storage destination)
@@ -84,8 +89,8 @@ public class FetchManagerUpdater
 		{
 			return false;
 		}
-		TagBits tabBits = pickup_id.GetTabBits();
-		if (!tabBits.HasAny(tag_bits))
+		TagBits tagBits = pickup_id.GetTagBits();
+		if (!tagBits.HasAny(tag_bits))
 		{
 			return false;
 		}
@@ -93,11 +98,11 @@ public class FetchManagerUpdater
 		{
 			return false;
 		}
-		if (!tabBits.HasAll(required_tags))
+		if (!tagBits.HasAll(required_tags))
 		{
 			return false;
 		}
-		if (tabBits.HasAny(forbid_tags))
+		if (tagBits.HasAny(forbid_tags))
 		{
 			return false;
 		}
@@ -158,6 +163,13 @@ public class FetchManagerUpdater
 	private static int PickupCount;
 
 	private static FetchManagerUpdater.PickupComparer Comparer = new FetchManagerUpdater.PickupComparer();
+
+	private static TagBits disallowedTagMask = ~new TagBits(new Tag[]
+	{
+		GameTags.Stored,
+		GameTags.Preserved,
+		GameTags.Entombed
+	});
 
 	[DebuggerDisplay("{Pickupable.gameObject.name}")]
 	private struct Pickup

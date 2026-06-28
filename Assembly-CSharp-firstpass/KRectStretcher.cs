@@ -2,18 +2,22 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[ExecuteInEditMode]
 public class KRectStretcher : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.rectTracker = default(DrivenRectTransformTracker);
 		this.UpdateStretching();
-		Canvas.ForceUpdateCanvases();
 	}
 
 	private void Update()
 	{
-		this.UpdateStretching();
+		if (base.transform.parent.hasChanged || (this.OverrideLayoutElement != null && this.OverrideLayoutElement.transform.hasChanged))
+		{
+			this.UpdateStretching();
+		}
 	}
 
 	public void UpdateStretching()
@@ -26,7 +30,7 @@ public class KRectStretcher : KMonoBehaviour
 		{
 			return;
 		}
-		if (base.transform.parent == null)
+		if (base.transform.parent == null && this.OverrideLayoutElement == null)
 		{
 			return;
 		}
@@ -134,9 +138,20 @@ public class KRectStretcher : KMonoBehaviour
 				component.UpdateStretching();
 			}
 		}
+		this.rectTracker.Clear();
+		if (this.StretchX)
+		{
+			this.rectTracker.Add(this, this.rect, DrivenTransformProperties.SizeDeltaX);
+		}
+		if (this.StretchY)
+		{
+			this.rectTracker.Add(this, this.rect, DrivenTransformProperties.SizeDeltaY);
+		}
 	}
 
 	private RectTransform rect;
+
+	private DrivenRectTransformTracker rectTracker;
 
 	public bool StretchX;
 

@@ -76,6 +76,11 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 		this.BindStates(null, this);
 	}
 
+	public override Type GetStateMachineInstanceType()
+	{
+		return typeof(StateMachineInstanceType);
+	}
+
 	public override StateMachine.BaseState GetState(string state_name)
 	{
 		foreach (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state in this.states)
@@ -156,6 +161,10 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			{
 				return (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>)((object)this.sm);
 			}
+		}
+
+		protected virtual void OnCleanUp()
+		{
 		}
 
 		public override float timeinstate
@@ -334,7 +343,15 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 						IStateMachineTarget master = this.GetMaster();
 						if (!master.isNull)
 						{
-							text = "(" + base.gameObject.name + ").";
+							KPrefabID component = master.GetComponent<KPrefabID>();
+							if (component != null)
+							{
+								text = "(" + component.PrefabTag.ToString() + ").";
+							}
+							else
+							{
+								text = "(" + base.gameObject.name + ").";
+							}
 						}
 						string text2 = string.Concat(new string[]
 						{
@@ -441,6 +458,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			{
 				this.parameterContexts[i].Cleanup();
 			}
+			this.OnCleanUp();
 		}
 
 		public override void GoTo(StateMachine.BaseState base_state)

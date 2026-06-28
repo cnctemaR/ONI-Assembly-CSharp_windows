@@ -297,7 +297,7 @@ public class Pickupable : Workable
 		}
 		DeathMonitor.Instance smi = base.gameObject.GetSMI<DeathMonitor.Instance>();
 		bool flag = smi == null || smi.IsDead();
-		if (flag && ((Grid.Solid[num] && Grid.Foundation[num]) || Grid.Cell[num].properties != 0))
+		if (flag && ((Grid.Solid[num] && Grid.Foundation[num]) || Grid.Properties[num] != 0))
 		{
 			for (int i = 0; i < Pickupable.displacementOffsets.Length; i++)
 			{

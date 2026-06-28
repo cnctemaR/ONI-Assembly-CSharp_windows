@@ -69,12 +69,13 @@ public class KModalButtonMenu : KButtonMenu
 		base.GetComponent<Image>().color = new Color32(0, 0, 0, (byte)num);
 	}
 
-	protected void ActivateChildScreen(GameObject screenPrefab)
+	protected GameObject ActivateChildScreen(GameObject screenPrefab)
 	{
 		GameObject gameObject = Util.KInstantiateUI(screenPrefab, base.transform.parent.gameObject, false);
 		this.childDialog = gameObject;
 		gameObject.Subscribe(476357528, new Action<object>(this.Unhide));
 		this.Hide();
+		return gameObject;
 	}
 
 	private void Hide()

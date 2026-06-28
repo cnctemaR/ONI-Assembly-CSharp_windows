@@ -6,7 +6,7 @@ using UnityEngine;
 public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 {
 	public FetchAreaChore(Chore.Precondition.Context context)
-		: base(context.chore.choreType, context.consumer, context.consumer.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
+		: base(context.chore.choreType, context.consumerState.consumer, context.consumerState.choreProvider, false, null, null, null, PriorityScreen.PriorityClass.basic, 0, false, true, 0, null)
 	{
 		this.showAvailabilityInHoverText = false;
 		this.smi = new FetchAreaChore.StatesInstance(this, context);
@@ -63,7 +63,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 		{
 			ScenePartitionerEntry scenePartitionerEntry = list[i];
 			Chore chore = scenePartitionerEntry.obj as Chore;
-			chore.CollectChores(context.consumer, succeeded_contexts, failed_contexts, true);
+			chore.CollectChores(context.consumerState, succeeded_contexts, failed_contexts, true);
 		}
 		ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
 	}
@@ -79,7 +79,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 		public void Begin(Chore.Precondition.Context context)
 		{
-			base.sm.fetcher.Set(context.consumer.gameObject, base.smi);
+			base.sm.fetcher.Set(context.consumerState.gameObject, base.smi);
 			this.chores.Clear();
 			this.chores.Add(this.rootChore);
 			int num;
@@ -89,9 +89,9 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			List<Chore.Precondition.Context> list2 = ListPool<Chore.Precondition.Context, FetchAreaChore>.Allocate();
 			if (this.rootChore.allowMultifetch)
 			{
-				if (context.consumer.resume != null && context.consumer.resume.CurrentRole != "NoRole")
+				if (context.consumerState.resume != null && context.consumerState.resume.CurrentRole != "NoRole")
 				{
-					RoleConfig role = Game.Instance.roleManager.GetRole(context.consumer.resume.CurrentRole);
+					RoleConfig role = Game.Instance.roleManager.GetRole(context.consumerState.resume.CurrentRole);
 					role.GatherNearbyFetchChores(this.rootChore, context, num, num2, 3, list, list2);
 				}
 				else
@@ -99,7 +99,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 					FetchAreaChore.GatherNearbyFetchChores(this.rootChore, context, num, num2, 3, list, list2);
 				}
 			}
-			float num3 = Mathf.Max(1f, Db.Get().Attributes.CarryAmount.Lookup(context.consumer).GetTotalValue());
+			float num3 = Mathf.Max(1f, Db.Get().Attributes.CarryAmount.Lookup(context.consumerState.consumer).GetTotalValue());
 			Pickupable pickupable = context.data as Pickupable;
 			List<Pickupable> list3 = new List<Pickupable>();
 			list3.Add(pickupable);
@@ -125,7 +125,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				Tag prefabTag2 = pickupable2.GetComponent<KPrefabID>().PrefabTag;
 				if (!list3.Contains(pickupable2) && prefabTag2 == prefabTag && pickupable2.UnreservedAmount > 0f)
 				{
-					if (this.rootContext.consumer.CanReach(pickupable2))
+					if (this.rootContext.consumerState.consumer.CanReach(pickupable2))
 					{
 						float unreservedAmount = pickupable2.UnreservedAmount;
 						list3.Add(pickupable2);
@@ -212,9 +212,9 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				base.sm.deliveryObject.Set(this.deliverables[0], base.smi);
 				if (this.deliveries[0].destination != null)
 				{
-					if (this.rootContext.consumer.IsStationary)
+					if (this.rootContext.consumerState.hasSolidTransferArm)
 					{
-						if (this.rootContext.consumer.IsWithinReach(this.deliveries[0].destination))
+						if (this.rootContext.consumerState.consumer.IsWithinReach(this.deliveries[0].destination))
 						{
 							this.GoTo(base.sm.delivering.storing);
 						}
@@ -248,9 +248,9 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				base.sm.fetchAmount.Set(this.reservations[0].amount, base.smi);
 				if (this.reservations[0].pickupable != null)
 				{
-					if (this.rootContext.consumer.IsStationary)
+					if (this.rootContext.consumerState.hasSolidTransferArm)
 					{
-						if (this.rootContext.consumer.IsWithinReach(this.reservations[0].pickupable))
+						if (this.rootContext.consumerState.consumer.IsWithinReach(this.reservations[0].pickupable))
 						{
 							this.GoTo(base.sm.fetching.pickup);
 						}
@@ -425,7 +425,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				this.chore = context.chore as FetchChore;
 				this.amount = this.chore.originalAmount;
 				this.destination = this.chore.destination;
-				this.chore.SetOverrideTarget(context.consumer);
+				this.chore.SetOverrideTarget(context.consumerState.consumer);
 				this.onCancelled = on_cancelled;
 				this.onFetchChoreCleanup = new Action<Chore>(this.OnFetchChoreCleanup);
 				this.chore.FetchAreaBegin(context, amount_to_be_fetched);

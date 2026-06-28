@@ -185,6 +185,19 @@ public static class GameUtil
 		return num3;
 	}
 
+	public static string FloatToString(float f, string format = null)
+	{
+		if (float.IsPositiveInfinity(f))
+		{
+			return UI.POS_INFINITY;
+		}
+		if (float.IsNegativeInfinity(f))
+		{
+			return UI.NEG_INFINITY;
+		}
+		return f.ToString(format);
+	}
+
 	public static string GetUnitFormattedName(GameObject go, bool upperName = false)
 	{
 		KPrefabID component = go.GetComponent<KPrefabID>();
@@ -216,15 +229,15 @@ public static class GameUtil
 		}
 		else if (Mathf.Abs(units) < 1f)
 		{
-			text2 = units.ToString("#,##0.#");
+			text2 = GameUtil.FloatToString(units, "#,##0.#");
 		}
 		else if (Mathf.Abs(units) < 10f)
 		{
-			text2 = units.ToString("#,###.#");
+			text2 = GameUtil.FloatToString(units, "#,###.#");
 		}
 		else
 		{
-			text2 = units.ToString("#,###");
+			text2 = GameUtil.FloatToString(units, "#,###");
 		}
 		if (displaySuffix)
 		{
@@ -250,11 +263,11 @@ public static class GameUtil
 		string text = string.Empty;
 		if (Mathf.Abs(temp) < 0.1f)
 		{
-			text = temp.ToString("##0.####");
+			text = GameUtil.FloatToString(temp, "##0.####");
 		}
 		else
 		{
-			text = temp.ToString("##0.#");
+			text = GameUtil.FloatToString(temp, "##0.#");
 		}
 		if (displayUnits)
 		{
@@ -279,15 +292,15 @@ public static class GameUtil
 		}
 		else if (Mathf.Abs(calories) < 1f)
 		{
-			text2 = calories.ToString("#,##0.#") + text;
+			text2 = GameUtil.FloatToString(calories, "#,##0.#") + text;
 		}
 		else if (Mathf.Abs(calories) < 10f)
 		{
-			text2 = calories.ToString("#,###.#") + text;
+			text2 = GameUtil.FloatToString(calories, "#,###.#") + text;
 		}
 		else
 		{
-			text2 = calories.ToString("#,###") + text;
+			text2 = GameUtil.FloatToString(calories, "#,###") + text;
 		}
 		return GameUtil.AddTimeSliceText(text2, timeSlice);
 	}
@@ -312,7 +325,7 @@ public static class GameUtil
 		{
 			text = "##0";
 		}
-		string text2 = percent.ToString(text) + UI.UNITSUFFIXES.PERCENT;
+		string text2 = GameUtil.FloatToString(percent, text) + UI.UNITSUFFIXES.PERCENT;
 		return GameUtil.AddTimeSliceText(text2, timeSlice);
 	}
 
@@ -320,9 +333,9 @@ public static class GameUtil
 	{
 		if (Mathf.Abs(joules) > 1000f)
 		{
-			return (joules / 1000f).ToString("F1") + UI.UNITSUFFIXES.ELECTRICAL.KILOJOULE;
+			return GameUtil.FloatToString(joules / 1000f, "F1") + UI.UNITSUFFIXES.ELECTRICAL.KILOJOULE;
 		}
-		return joules.ToString("F1") + UI.UNITSUFFIXES.ELECTRICAL.JOULE;
+		return GameUtil.FloatToString(joules, "F1") + UI.UNITSUFFIXES.ELECTRICAL.JOULE;
 	}
 
 	public static string GetFormattedJoules(float joules, string floatFormat = "F1", GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
@@ -331,15 +344,15 @@ public static class GameUtil
 		string text;
 		if (Math.Abs(joules) > 1000000f)
 		{
-			text = (joules / 1000000f).ToString(floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.MEGAJOULE;
+			text = GameUtil.FloatToString(joules / 1000000f, floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.MEGAJOULE;
 		}
 		else if (Mathf.Abs(joules) > 1000f)
 		{
-			text = (joules / 1000f).ToString(floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.KILOJOULE;
+			text = GameUtil.FloatToString(joules / 1000f, floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.KILOJOULE;
 		}
 		else
 		{
-			text = joules.ToString(floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.JOULE;
+			text = GameUtil.FloatToString(joules, floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.JOULE;
 		}
 		return GameUtil.AddTimeSliceText(text, timeSlice);
 	}
@@ -371,13 +384,13 @@ public static class GameUtil
 		{
 			locString = UI.UNITSUFFIXES.ELECTRICAL.WATT;
 		}
-		return watts.ToString("###0.##") + locString;
+		return GameUtil.FloatToString(watts, "###0.##") + locString;
 	}
 
 	public static string GetFormattedInt(float num, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
 	{
 		num = GameUtil.ApplyTimeSlice(num, timeSlice);
-		return GameUtil.AddTimeSliceText(num.ToString("F0"), timeSlice);
+		return GameUtil.AddTimeSliceText(GameUtil.FloatToString(num, "F0"), timeSlice);
 	}
 
 	public static string GetFormattedSimple(float num, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, string formatString = null)
@@ -386,7 +399,7 @@ public static class GameUtil
 		string text = string.Empty;
 		if (formatString != null)
 		{
-			text = num.ToString(formatString);
+			text = GameUtil.FloatToString(num, formatString);
 		}
 		else if (num == 0f)
 		{
@@ -394,15 +407,15 @@ public static class GameUtil
 		}
 		else if (Mathf.Abs(num) < 1f)
 		{
-			text = num.ToString("#,##0.##");
+			text = GameUtil.FloatToString(num, "#,##0.##");
 		}
 		else if (Mathf.Abs(num) < 10f)
 		{
-			text = num.ToString("#,###.##");
+			text = GameUtil.FloatToString(num, "#,###.##");
 		}
 		else
 		{
-			text = num.ToString("#,###.##");
+			text = GameUtil.FloatToString(num, "#,###.##");
 		}
 		return GameUtil.AddTimeSliceText(text, timeSlice);
 	}
@@ -526,7 +539,7 @@ public static class GameUtil
 	{
 		if (Mathf.Abs(seconds) > 100f)
 		{
-			return string.Format(UI.FORMATDAY, (seconds / 600f).ToString(formatString));
+			return string.Format(UI.FORMATDAY, GameUtil.FloatToString(seconds / 600f, formatString));
 		}
 		return GameUtil.GetFormattedTime(seconds);
 	}
@@ -1418,7 +1431,7 @@ public static class GameUtil
 		StateMachineController component = go.GetComponent<StateMachineController>();
 		if (component != null)
 		{
-			list2.AddRange(component.GetAllSMI<IGameObjectEffectDescriptor>());
+			list2.AddRange(component.GetDescriptors());
 		}
 		GameUtil.SortGameObjectDescriptors(list2);
 		foreach (IGameObjectEffectDescriptor gameObjectEffectDescriptor in list2)
@@ -1450,7 +1463,7 @@ public static class GameUtil
 		StateMachineController component = go.GetComponent<StateMachineController>();
 		if (component != null)
 		{
-			list2.AddRange(component.GetAllSMI<IGameObjectEffectDescriptor>());
+			list2.AddRange(component.GetDescriptors());
 		}
 		GameUtil.SortGameObjectDescriptors(list2);
 		foreach (IGameObjectEffectDescriptor gameObjectEffectDescriptor in list2)
@@ -1646,7 +1659,7 @@ public static class GameUtil
 			int num = ptr[i];
 			Element element = Grid.Element[num];
 			all_not_gaseous = all_not_gaseous && (!element.IsGas && !element.IsVacuum);
-			all_over_pressure = all_over_pressure && ((!element.IsGas && !element.IsVacuum) || Grid.Cell[num].mass >= 1.8f);
+			all_over_pressure = all_over_pressure && ((!element.IsGas && !element.IsVacuum) || Grid.Mass[num] >= 1.8f);
 		}
 	}
 
@@ -1792,6 +1805,16 @@ public static class GameUtil
 		return num * 1000f;
 	}
 
+	public static string GetFormattedDiseaseName(byte idx, bool color = false)
+	{
+		Disease disease = Db.Get().Diseases[(int)idx];
+		if (color)
+		{
+			return string.Format(UI.OVERLAYS.DISEASE.DISEASE_NAME_FORMAT, disease.Name, GameUtil.ColourToHex(disease.overlayColour));
+		}
+		return string.Format(UI.OVERLAYS.DISEASE.DISEASE_NAME_FORMAT_NO_COLOR, disease.Name);
+	}
+
 	public static string GetFormattedDisease(byte idx, int units, bool color = false)
 	{
 		if (idx == 255 || units <= 0)
@@ -1824,22 +1847,16 @@ public static class GameUtil
 	public static string GetFormattedDecor(float value)
 	{
 		string text = string.Empty;
-		string text2 = string.Empty;
 		LocString locString = UI.OVERLAYS.DECOR.VALUE;
 		if (value > 0f)
 		{
-			text = "produced";
-			text2 = "+";
+			text = "+";
 		}
-		else if (value < 0f)
-		{
-			text = "consumed";
-		}
-		else
+		else if (value >= 0f)
 		{
 			locString = UI.OVERLAYS.DECOR.VALUE_ZERO;
 		}
-		return string.Format(locString, text, text2, value);
+		return string.Format(locString, text, value);
 	}
 
 	public static Color GetDecorColourFromValue(int decor)

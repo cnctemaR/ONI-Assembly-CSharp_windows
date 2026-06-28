@@ -7,7 +7,7 @@ namespace TMPro
 	{
 		public char character;
 
-		public short index;
+		public int index;
 
 		public TMP_TextElementType elementType;
 
@@ -27,9 +27,9 @@ namespace TMPro
 
 		public float pointSize;
 
-		public short lineNumber;
+		public int lineNumber;
 
-		public short pageNumber;
+		public int pageNumber;
 
 		public int vertexIndex;
 
@@ -64,6 +64,12 @@ namespace TMPro
 		public float scale;
 
 		public Color32 color;
+
+		public Color32 underlineColor;
+
+		public Color32 strikethroughColor;
+
+		public Color32 highlightColor;
 
 		public FontStyles style;
 

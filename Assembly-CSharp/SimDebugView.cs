@@ -250,11 +250,11 @@ public class SimDebugView : KMonoBehaviour
 												{
 													if (!flag)
 													{
-														float mass = Grid.Cell[cell].mass;
-														if (mass > 0f)
+														float num = Grid.Mass[cell];
+														if (num > 0f)
 														{
-															float num = (mass - SimDebugView.Instance.minMassExpected) / (SimDebugView.Instance.maxMassExpected - SimDebugView.Instance.minMassExpected);
-															color = Color.HSVToRGB(1f - num, 1f, 1f);
+															float num2 = (num - SimDebugView.Instance.minMassExpected) / (SimDebugView.Instance.maxMassExpected - SimDebugView.Instance.minMassExpected);
+															color = Color.HSVToRGB(1f - num2, 1f, 1f);
 														}
 													}
 													return color;
@@ -360,14 +360,25 @@ public class SimDebugView : KMonoBehaviour
 													{
 														return this.NormalizedTemperature(Grid.Temperature[cell]);
 													}
+													if (viewMode == SimViewMode.AllowPathfinding)
+													{
+														if (Grid.AllowPathfinding[cell])
+														{
+															color = Color.white;
+														}
+														else
+														{
+															color = Color.black;
+														}
+														return color;
+													}
 													if (viewMode == SimViewMode.Disease)
 													{
-														Sim.DiseaseCell diseaseCell = Grid.Disease[cell];
-														if (diseaseCell.diseaseIdx != 255)
+														if (Grid.DiseaseIdx[cell] != 255)
 														{
-															Disease disease = Db.Get().Diseases[(int)diseaseCell.diseaseIdx];
+															Disease disease = Db.Get().Diseases[(int)Grid.DiseaseIdx[cell]];
 															color = disease.overlayColour;
-															color.a = SimUtil.DiseaseCountToAlpha(diseaseCell.elementCount);
+															color.a = SimUtil.DiseaseCountToAlpha(Grid.DiseaseCount[cell]);
 														}
 														else
 														{
@@ -444,9 +455,9 @@ public class SimDebugView : KMonoBehaviour
 				}
 				else
 				{
-					float num2 = Grid.Element[cell].specificHeatCapacity * Grid.Temperature[cell] * (Grid.Cell[cell].mass * 1000f);
-					float num3 = 0.5f * num2 / (ElementLoader.FindElementByHash(SimHashes.SandStone).specificHeatCapacity * 294f * 1000000f);
-					color = Color.Lerp(Color.black, Color.red, num3);
+					float num3 = Grid.Element[cell].specificHeatCapacity * Grid.Temperature[cell] * (Grid.Mass[cell] * 1000f);
+					float num4 = 0.5f * num3 / (ElementLoader.FindElementByHash(SimHashes.SandStone).specificHeatCapacity * 294f * 1000000f);
+					color = Color.Lerp(Color.black, Color.red, num4);
 				}
 			}
 			else
@@ -530,9 +541,9 @@ public class SimDebugView : KMonoBehaviour
 		Color color = Color.black;
 		if (!Grid.IsLiquid(cell) && !Grid.Solid[cell])
 		{
-			if (Grid.Cell[cell].mass > SimDebugView.minimumBreathable && (Grid.Element[cell].id == SimHashes.Oxygen || Grid.Element[cell].id == SimHashes.ContaminatedOxygen))
+			if (Grid.Mass[cell] > SimDebugView.minimumBreathable && (Grid.Element[cell].id == SimHashes.Oxygen || Grid.Element[cell].id == SimHashes.ContaminatedOxygen))
 			{
-				float num = Mathf.Clamp((Grid.Cell[cell].mass - SimDebugView.minimumBreathable) / SimDebugView.optimallyBreathable, 0f, 1f);
+				float num = Mathf.Clamp((Grid.Mass[cell] - SimDebugView.minimumBreathable) / SimDebugView.optimallyBreathable, 0f, 1f);
 				color = this.breathableGradient.Evaluate(num);
 			}
 			else
@@ -789,19 +800,19 @@ public class SimDebugView : KMonoBehaviour
 	{
 		Color color = Color.black;
 		Element element = Grid.Element[cell];
-		float mass = Grid.Cell[cell].mass;
-		float num = Grid.Temperature[cell];
-		if (float.IsNaN(mass) || float.IsNaN(num) || mass > 10000f || num > 10000f)
+		float num = Grid.Mass[cell];
+		float num2 = Grid.Temperature[cell];
+		if (float.IsNaN(num) || float.IsNaN(num2) || num > 10000f || num2 > 10000f)
 		{
 			return Color.red;
 		}
 		if (element.IsVacuum)
 		{
-			if (num != 0f)
+			if (num2 != 0f)
 			{
 				color = Color.yellow;
 			}
-			else if (mass != 0f)
+			else if (num != 0f)
 			{
 				color = Color.blue;
 			}
@@ -810,19 +821,19 @@ public class SimDebugView : KMonoBehaviour
 				color = Color.gray;
 			}
 		}
-		else if (num < 10f)
+		else if (num2 < 10f)
 		{
 			color = Color.red;
 		}
-		else if (Grid.Cell[cell].mass < 1f && Grid.Pressure[cell] < 1f)
+		else if (Grid.Mass[cell] < 1f && Grid.Pressure[cell] < 1f)
 		{
 			color = Color.green;
 		}
-		else if (num > element.highTemp + 3f && element.highTempTransition != null)
+		else if (num2 > element.highTemp + 3f && element.highTempTransition != null)
 		{
 			color = Color.magenta;
 		}
-		else if (num < element.lowTemp + 3f && element.lowTempTransition != null)
+		else if (num2 < element.lowTemp + 3f && element.lowTempTransition != null)
 		{
 			color = Color.cyan;
 		}

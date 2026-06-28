@@ -4,7 +4,7 @@ using UnityEngine;
 public class ReactEmoteChore : Chore<ReactEmoteChore.StatesInstance>
 {
 	public ReactEmoteChore(IStateMachineTarget target, ChoreType chore_type, EmoteReactable reactable, HashedString emote_kanim, HashedString[] emote_anims, KAnim.PlayMode play_mode, Func<StatusItem> get_status_item)
-		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
+		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, 0, false, true, 0, null)
 	{
 		base.AddPrecondition(ChorePreconditions.instance.IsMoving, null);
 		base.AddPrecondition(ChorePreconditions.instance.IsOffLadder, null);

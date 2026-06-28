@@ -8,6 +8,7 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 	{
 		base.OnPrefabInit();
 		this.showProgressBar = true;
+		this.resetProgressOnStop = true;
 		this.attributeConverter = Db.Get().AttributeConverters.ToiletSpeed;
 		base.SetWorkTime(8.5f);
 	}
@@ -32,12 +33,6 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 	{
 	}
 
-	protected override void OnStopWork(Worker worker)
-	{
-		base.OnStopWork(worker);
-		this.onStop.Signal(worker);
-	}
-
 	protected override void OnCompleteWork(Worker worker)
 	{
 		AmountInstance amountInstance = Db.Get().Amounts.Bladder.Lookup(worker);
@@ -45,8 +40,6 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 		this.timesUsed++;
 		base.OnCompleteWork(worker);
 	}
-
-	public Action<Worker> onStop;
 
 	[Serialize]
 	public int timesUsed;

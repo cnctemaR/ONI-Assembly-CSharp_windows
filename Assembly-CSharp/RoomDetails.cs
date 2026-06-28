@@ -74,6 +74,8 @@ public class RoomDetails
 
 	public static RoomDetails.Detail BUILDING_COUNT = new RoomDetails.Detail((Room room) => string.Format(ROOMS.DETAILS.BUILDING_COUNT.NAME, room.buildings.Count));
 
+	public static RoomDetails.Detail CREATURE_COUNT = new RoomDetails.Detail((Room room) => string.Format(ROOMS.DETAILS.CREATURE_COUNT.NAME, room.cavity.creatures.Count));
+
 	public static RoomDetails.Detail EFFECT = new RoomDetails.Detail((Room room) => Db.Get().RoomTypes.GetRoomType(room).effect);
 
 	public class Detail

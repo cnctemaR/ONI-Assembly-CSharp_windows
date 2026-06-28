@@ -222,10 +222,17 @@ namespace Klei.AI
 					float num = dt * base.master.TotalCureSpeedMultiplier / base.master.modifier.SicknessDuration;
 					base.sm.percentRecovered.Delta(num, base.smi);
 				}
-				if (base.master.modifier.fatalityDuration > 0f && !base.master.IsDoctored)
+				if (base.master.modifier.fatalityDuration > 0f)
 				{
-					float num2 = dt / base.master.modifier.fatalityDuration;
-					base.sm.percentDied.Delta(num2, base.smi);
+					if (!base.master.IsDoctored)
+					{
+						float num2 = dt / base.master.modifier.fatalityDuration;
+						base.sm.percentDied.Delta(num2, base.smi);
+					}
+					else
+					{
+						base.sm.percentDied.Set(0f, base.smi);
+					}
 				}
 			}
 

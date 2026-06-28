@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using KSerialization;
 
@@ -9,20 +10,21 @@ namespace Klei.AI
 	{
 		protected override void OnPrefabInit()
 		{
+			base.OnPrefabInit();
 			this.amounts = new Amounts(base.gameObject);
 			this.diseases = new Diseases(base.gameObject);
 			this.attributes = new Attributes(base.gameObject);
-			this.entityType = EntityTypeSet.Instance.TryGet(this.entityTypeId);
-			if (this.entityType != null)
+			foreach (string text in this.initialAmounts)
 			{
-				this.entityType.Apply(this, base.gameObject);
+				this.amounts.Add(new AmountInstance(Db.Get().Amounts.Get(text), base.gameObject));
 			}
-			foreach (Disease disease in Db.Get().Diseases)
+			Traits component = base.GetComponent<Traits>();
+			if (this.initialTraits != null)
 			{
-				AmountInstance amountInstance = this.amounts.Get(disease.amount);
-				if (amountInstance != null)
+				foreach (string text2 in this.initialTraits)
 				{
-					amountInstance.SetValue(0f);
+					Trait trait = Db.Get().traits.Get(text2);
+					component.Add(trait);
 				}
 			}
 		}
@@ -58,14 +60,14 @@ namespace Klei.AI
 			}
 		}
 
-		public string entityTypeId;
-
-		public EntityType entityType;
-
 		public Amounts amounts;
 
 		public Attributes attributes;
 
 		public Diseases diseases;
+
+		public string[] initialTraits;
+
+		public List<string> initialAmounts = new List<string>();
 	}
 }

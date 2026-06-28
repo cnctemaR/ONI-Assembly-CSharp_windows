@@ -30,7 +30,7 @@ public class EquippableWorkable : Workable, ISaveLoadable
 
 	private void CreateChore()
 	{
-		this.chore = new WorkChore<EquippableWorkable>(Db.Get().ChoreTypes.Equip, this, this.equippable.assignee.GetSoleOwner().GetComponent<ChoreProvider>(), null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+		this.chore = new WorkChore<EquippableWorkable>(Db.Get().ChoreTypes.Equip, this, this.equippable.assignee.GetSoleOwner().GetComponent<ChoreProvider>(), null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 	}
 
 	public void CancelChore()

@@ -144,7 +144,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 			return SimHashes.Vacuum;
 		}
 		Element element = Grid.Element[mouthCellAtCell];
-		bool flag = element.IsGas && element.HasTag(GameTags.Breathable) && Grid.Cell[mouthCellAtCell].mass > this.noOxygenThreshold;
+		bool flag = element.IsGas && element.HasTag(GameTags.Breathable) && Grid.Mass[mouthCellAtCell] > this.noOxygenThreshold;
 		return (!flag) ? SimHashes.Vacuum : element.id;
 	}
 
@@ -187,7 +187,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 			Element element = Grid.Element[cell];
 			if (element.HasTag(GameTags.Breathable))
 			{
-				return Grid.Cell[cell].mass;
+				return Grid.Mass[cell];
 			}
 		}
 		return 0f;
@@ -220,7 +220,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 	public float accumulatedCO2;
 
 	[SerializeField]
-	private float minCO2ToEmit = 0.3f;
+	public float minCO2ToEmit = 0.3f;
 
 	private bool hasAir = true;
 

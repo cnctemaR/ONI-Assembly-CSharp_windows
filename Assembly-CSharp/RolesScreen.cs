@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
@@ -37,20 +36,17 @@ public class RolesScreen : KModalScreen
 		this.ConsumeMouseScroll = true;
 		base.OnActivate();
 		this.RefreshAll(null);
-		this.jobsTableScreen.ToggleColumnSortWidgets(this.expandedJobs);
 		Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
 		liveMinionIdentities.OnAdd = (Action<MinionIdentity>)Delegate.Combine(liveMinionIdentities.OnAdd, new Action<MinionIdentity>(this.MarkDirty));
 		Components.Cmps<MinionIdentity> liveMinionIdentities2 = Components.LiveMinionIdentities;
 		liveMinionIdentities2.OnRemove = (Action<MinionIdentity>)Delegate.Combine(liveMinionIdentities2.OnRemove, new Action<MinionIdentity>(this.MarkDirty));
-		MultiToggle multiToggle = this.expandToggle;
-		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
-		{
-			this.ToggleExpandedJobs(!this.expandedJobs, false);
-		}));
 		this.CloseButton.onClick += delegate
 		{
 			ManagementMenu.Instance.CloseAll();
 		};
+		MultiToggle multiToggle = this.toggleAutoPrioritize;
+		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(this.OnToggleAutoPrioritize));
+		this.toggleAutoPrioritize.GetComponent<ToolTip>().OnToolTip = new Func<string>(this.OnHoverToggleAutoPrioritize);
 	}
 
 	protected override void OnShow(bool show)
@@ -58,20 +54,6 @@ public class RolesScreen : KModalScreen
 		if (show)
 		{
 			this.RefreshAll(null);
-			if (Components.RoleStations.Count == 0 && !DebugHandler.InstantBuildMode)
-			{
-				this.ToggleExpandedJobs(true, true);
-				this.FGDisable.SetActive(true);
-			}
-			else
-			{
-				this.ToggleExpandedJobs(false, true);
-				this.FGDisable.SetActive(false);
-			}
-		}
-		else if (this.expandRoutine != null)
-		{
-			this.ToggleExpandedJobs(false, true);
 		}
 		base.OnShow(show);
 	}
@@ -82,47 +64,7 @@ public class RolesScreen : KModalScreen
 		this.RefreshRoleWidgets();
 		this.RefreshSideBar();
 		this.linesPending = true;
-	}
-
-	private void ToggleExpandedJobs(bool open, bool instant = false)
-	{
-		this.expandedJobs = open;
-		this.jobsTableScreen.ToggleColumnSortWidgets(this.expandedJobs);
-		if (!instant)
-		{
-			this.expandRoutine = base.StartCoroutine(this.AnimateExpandJobs(open));
-		}
-		else
-		{
-			this.expandRoutine = null;
-			HierarchyReferences component = base.GetComponent<HierarchyReferences>();
-			this.screenDivideOffset = Mathf.RoundToInt((!open) ? this.jobs_closed_height : this.jobs_open_height);
-			RectTransform rectTransform = component.GetReference("SideBar").rectTransform();
-			rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, (float)(-(float)this.screenDivideOffset));
-			rectTransform = component.GetReference("RoleExplorer").rectTransform();
-			rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, (float)(-(float)this.screenDivideOffset));
-			rectTransform = component.GetReference("JobsTableScreen").rectTransform();
-			rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x, (float)this.screenDivideOffset);
-		}
-		this.expandToggle.ChangeState((!open) ? 0 : 1);
-	}
-
-	protected IEnumerator AnimateExpandJobs(bool open)
-	{
-		HierarchyReferences refs = base.GetComponent<HierarchyReferences>();
-		RectTransform rect = null;
-		if (open)
-		{
-			for (float i = 0f; i < this.expand_transition_duration; i += Time.unscaledDeltaTime)
-			{
-				this.screenDivideOffset = Mathf.RoundToInt(Mathf.Lerp((!open) ? this.jobs_open_height : this.jobs_closed_height, (!open) ? this.jobs_closed_height : this.jobs_open_height, i / this.expand_transition_duration));
-				rect = refs.GetReference("JobsTableScreen").rectTransform();
-				rect.anchoredPosition = new Vector2(rect.anchoredPosition.x, (float)this.screenDivideOffset);
-				yield return 0;
-			}
-		}
-		this.ToggleExpandedJobs(open, true);
-		yield break;
+		this.toggleAutoPrioritize.ChangeState((!Game.Instance.autoPrioritizeRoles) ? 0 : 1);
 	}
 
 	public void MarkDirty(object eventData = null)
@@ -350,15 +292,27 @@ public class RolesScreen : KModalScreen
 	{
 		if (role != null)
 		{
-			Game.Instance.roleManager.AssignToRole((role as RoleConfig).id, data as MinionResume, false);
+			Game.Instance.roleManager.AssignToRole((role as RoleConfig).id, data as MinionResume, false, false);
 			this.RefreshRoleWidgets();
 			this.RefreshSideBar();
 		}
 	}
 
-	private Dictionary<string, GameObject> roleWidgets = new Dictionary<string, GameObject>();
+	private void OnToggleAutoPrioritize()
+	{
+		Game.Instance.autoPrioritizeRoles = !Game.Instance.autoPrioritizeRoles;
+		this.toggleAutoPrioritize.ChangeState((!Game.Instance.autoPrioritizeRoles) ? 0 : 1);
+		this.toggleAutoPrioritize.GetComponent<ToolTip>().forceRefresh = true;
+	}
 
-	private Dictionary<MinionIdentity, GameObject> minionWidgets = new Dictionary<MinionIdentity, GameObject>();
+	private string OnHoverToggleAutoPrioritize()
+	{
+		return (!Game.Instance.autoPrioritizeRoles) ? UI.ROLES_SCREEN.AUTO_PRIORITIZE_DISABLED : UI.ROLES_SCREEN.AUTO_PRIORITIZE_ENABLED;
+	}
+
+	public new const float SCREEN_SORT_KEY = 101f;
+
+	private Dictionary<string, GameObject> roleWidgets = new Dictionary<string, GameObject>();
 
 	private List<GameObject> tierColumns = new List<GameObject>();
 
@@ -393,10 +347,10 @@ public class RolesScreen : KModalScreen
 	private KButton CloseButton;
 
 	[SerializeField]
-	private GameObject FGDisable;
+	private GameObject SlotWidgetPool;
 
 	[SerializeField]
-	private GameObject SlotWidgetPool;
+	private MultiToggle toggleAutoPrioritize;
 
 	private List<GameObject> freeWidgetSlots = new List<GameObject>();
 
@@ -425,22 +379,7 @@ public class RolesScreen : KModalScreen
 		UI.ROLES_SCREEN.TIER_NAMES.SEVEN
 	};
 
-	[SerializeField]
-	private MultiToggle expandToggle;
-
-	private int screenDivideOffset = -400;
-
 	private int layoutRowHeight = 96;
 
-	private bool expandedJobs;
-
-	public JobsTableScreen jobsTableScreen;
-
 	private Coroutine expandRoutine;
-
-	private float expand_transition_duration = 0.125f;
-
-	private float jobs_open_height = 400f;
-
-	private float jobs_closed_height = 108f;
 }

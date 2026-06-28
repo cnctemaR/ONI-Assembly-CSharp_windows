@@ -81,7 +81,6 @@ namespace TMPro
 			{
 				this.m_ClosingTagArray[j] = (int)this.m_ClosingDefinition[j];
 			}
-			TMPro_EventManager.ON_TEXT_STYLE_PROPERTY_CHANGED(true);
 		}
 
 		[SerializeField]

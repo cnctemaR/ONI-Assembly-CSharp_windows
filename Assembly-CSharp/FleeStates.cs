@@ -1,0 +1,79 @@
+﻿using System;
+using STRINGS;
+
+internal class FleeStates : GameStateMachine<FleeStates, FleeStates.Instance, IStateMachineTarget, FleeStates.Def>
+{
+	public override void InitializeStates(out StateMachine.BaseState default_state)
+	{
+		default_state = this.plan;
+		GameStateMachine<FleeStates, FleeStates.Instance, IStateMachineTarget, FleeStates.Def>.State state = this.root.Enter("SetFleeTarget", delegate(FleeStates.Instance smi)
+		{
+			this.fleeToTarget.Set(CreatureHelpers.GetFleeTargetLocatorObject(smi.master.gameObject, smi.GetSMI<ThreatMonitor.Instance>().GetMainThreat), smi);
+		});
+		string text = CREATURES.STATUSITEMS.FLEEING.NAME;
+		string text2 = CREATURES.STATUSITEMS.FLEEING.TOOLTIP;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, null, null, main);
+		this.plan.Enter(delegate(FleeStates.Instance smi)
+		{
+			ThreatMonitor.Instance smi2 = smi.master.gameObject.GetSMI<ThreatMonitor.Instance>();
+			this.fleeToTarget.Set(CreatureHelpers.GetFleeTargetLocatorObject(smi.master.gameObject, smi2.GetMainThreat), smi);
+			if (this.fleeToTarget.Get(smi) != null)
+			{
+				smi.GoTo(this.approach);
+			}
+			else
+			{
+				smi.GoTo(this.cower);
+			}
+		});
+		this.approach.InitializeStates(this.mover, this.fleeToTarget, this.cower, this.cower, null, NavigationTactics.ReduceTravelDistance).Enter(delegate(FleeStates.Instance smi)
+		{
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, CREATURES.STATUSITEMS.FLEEING.NAME.text, smi.master.transform, 1.5f, false);
+		});
+		this.cower.Enter(delegate(FleeStates.Instance smi)
+		{
+			string text3 = "DEFAULT COWER ANIMATION";
+			if (smi.animController.HasAnimation("cower"))
+			{
+				text3 = "cower";
+			}
+			else if (smi.animController.HasAnimation("idle"))
+			{
+				text3 = "idle";
+			}
+			else if (smi.animController.HasAnimation("idle_loop"))
+			{
+				text3 = "idle_loop";
+			}
+			smi.animController.Play(text3, KAnim.PlayMode.Loop, 1f, 0f);
+		}).ScheduleGoTo(2f, this.behaviourcomplete);
+		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.Flee, false);
+	}
+
+	private StateMachine<FleeStates, FleeStates.Instance, IStateMachineTarget, FleeStates.Def>.TargetParameter mover;
+
+	public StateMachine<FleeStates, FleeStates.Instance, IStateMachineTarget, FleeStates.Def>.TargetParameter fleeToTarget;
+
+	public GameStateMachine<FleeStates, FleeStates.Instance, IStateMachineTarget, FleeStates.Def>.State plan;
+
+	public GameStateMachine<FleeStates, FleeStates.Instance, IStateMachineTarget, FleeStates.Def>.ApproachSubState<IApproachable> approach;
+
+	public GameStateMachine<FleeStates, FleeStates.Instance, IStateMachineTarget, FleeStates.Def>.State cower;
+
+	public GameStateMachine<FleeStates, FleeStates.Instance, IStateMachineTarget, FleeStates.Def>.State behaviourcomplete;
+
+	public class Def : StateMachine.BaseDef
+	{
+	}
+
+	public new class Instance : GameStateMachine<FleeStates, FleeStates.Instance, IStateMachineTarget, FleeStates.Def>.GameInstance
+	{
+		public Instance(Chore<FleeStates.Instance> chore, FleeStates.Def def)
+			: base(chore, def)
+		{
+			chore.AddPrecondition(ChorePreconditions.instance.CheckBehaviourPrecondition, GameTags.Creatures.Flee);
+			base.sm.mover.Set(base.GetComponent<Navigator>(), base.smi);
+		}
+	}
+}

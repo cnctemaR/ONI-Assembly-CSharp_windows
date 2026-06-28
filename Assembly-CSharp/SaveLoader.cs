@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using Delaunay.Geo;
 using Ionic.Zlib;
@@ -303,32 +302,37 @@ public class SaveLoader : KMonoBehaviour
 		{
 			Directory.CreateDirectory(save_dir);
 		}
-		List<string> list = new List<string>(Directory.GetFiles(save_dir, "*.sav", SearchOption.AllDirectories));
-		List<string> list2 = new List<string>();
-		foreach (string text in list)
+		string[] files = Directory.GetFiles(save_dir, "*.sav", SearchOption.AllDirectories);
+		List<SaveLoader.SaveFileEntry> list = new List<SaveLoader.SaveFileEntry>();
+		foreach (string text in files)
 		{
 			try
 			{
-				File.GetLastWriteTime(text);
-				list2.Add(text);
+				global::System.DateTime lastWriteTime = File.GetLastWriteTime(text);
+				SaveLoader.SaveFileEntry saveFileEntry = new SaveLoader.SaveFileEntry
+				{
+					path = text,
+					timeStamp = lastWriteTime
+				};
+				list.Add(saveFileEntry);
 			}
 			catch (Exception ex)
 			{
 				global::Debug.LogWarning("Problem reading file: " + text + "\n" + ex.ToString(), null);
 			}
 		}
+		list.Sort((SaveLoader.SaveFileEntry x, SaveLoader.SaveFileEntry y) => y.timeStamp.CompareTo(x.timeStamp));
+		List<string> list2 = new List<string>();
+		foreach (SaveLoader.SaveFileEntry saveFileEntry2 in list)
+		{
+			list2.Add(saveFileEntry2.path);
+		}
 		return list2;
-	}
-
-	public static int GetSaveFileCount()
-	{
-		return SaveLoader.GetAllFiles().Count;
 	}
 
 	public static List<string> GetAllFiles()
 	{
-		List<string> list = SaveLoader.GetSaveFiles(SaveLoader.GetSavePrefixAndCreateFolder()).ToList<string>();
-		return list.OrderByDescending<string, global::System.DateTime>(new Func<string, global::System.DateTime>(File.GetLastWriteTime)).ToList<string>();
+		return SaveLoader.GetSaveFiles(SaveLoader.GetSavePrefixAndCreateFolder());
 	}
 
 	public static string GetLatestSaveFile()
@@ -338,7 +342,7 @@ public class SaveLoader : KMonoBehaviour
 		{
 			return null;
 		}
-		return SaveLoader.GetAllFiles()[0];
+		return allFiles[0];
 	}
 
 	public void InitialSave()
@@ -360,12 +364,11 @@ public class SaveLoader : KMonoBehaviour
 		this.ReportSaveMetrics(isAutoSave);
 		if (isAutoSave)
 		{
-			List<string> list = SaveLoader.GetSaveFiles(Path.GetDirectoryName(filename));
-			list = list.OrderBy<string, global::System.DateTime>(new Func<string, global::System.DateTime>(File.GetLastWriteTime)).ToList<string>();
-			while (list.Count >= 10)
+			List<string> saveFiles = SaveLoader.GetSaveFiles(Path.GetDirectoryName(filename));
+			while (saveFiles.Count >= 10)
 			{
-				File.Delete(list[0]);
-				list.RemoveAt(0);
+				File.Delete(saveFiles[saveFiles.Count - 1]);
+				saveFiles.RemoveAt(0);
 			}
 		}
 		byte[] array = null;
@@ -790,6 +793,13 @@ public class SaveLoader : KMonoBehaviour
 		public List<SaveLoader.FlowUtilityNetworkInstance> gas;
 
 		public List<SaveLoader.FlowUtilityNetworkInstance> liquid;
+	}
+
+	public struct SaveFileEntry
+	{
+		public string path;
+
+		public global::System.DateTime timeStamp;
 	}
 
 	private struct MinionAttrFloatData

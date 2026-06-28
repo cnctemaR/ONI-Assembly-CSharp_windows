@@ -90,9 +90,9 @@ public class ImageToggleState : KMonoBehaviour
 		}
 	}
 
-	public void SetActiveState(bool state)
+	public void SetActiveState(bool active)
 	{
-		if (state)
+		if (active)
 		{
 			this.SetActive();
 		}

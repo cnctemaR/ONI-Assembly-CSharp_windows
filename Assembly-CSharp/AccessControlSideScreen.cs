@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -21,11 +22,11 @@ public class AccessControlSideScreen : SideScreenContent
 		base.OnSpawn();
 		this.sortByNameToggle.onValueChanged.AddListener(delegate(bool reverse_sort)
 		{
-			this.SortEntries(reverse_sort, new Comparison<MinionIdentity>(MinionIdentitySort.CompareByName));
+			this.SortEntries(reverse_sort, new Comparison<MinionIdentity>(AccessControlSideScreen.MinionIdentitySort.CompareByName));
 		});
 		this.sortByRoleToggle.onValueChanged.AddListener(delegate(bool reverse_sort)
 		{
-			this.SortEntries(reverse_sort, new Comparison<MinionIdentity>(MinionIdentitySort.CompareByRole));
+			this.SortEntries(reverse_sort, new Comparison<MinionIdentity>(AccessControlSideScreen.MinionIdentitySort.CompareByRole));
 		});
 		this.sortByPermissionToggle.onValueChanged.AddListener(new UnityAction<bool>(this.SortByPermission));
 	}
@@ -193,7 +194,7 @@ public class AccessControlSideScreen : SideScreenContent
 	{
 		if (role != null)
 		{
-			foreach (MinionIdentitySort.SortInfo sortInfo in MinionIdentitySort.SortInfos)
+			foreach (AccessControlSideScreen.MinionIdentitySort.SortInfo sortInfo in AccessControlSideScreen.MinionIdentitySort.SortInfos)
 			{
 				if (sortInfo.name == role.GetProperName())
 				{
@@ -242,9 +243,55 @@ public class AccessControlSideScreen : SideScreenContent
 
 	private UIPool<AccessControlSideScreenRow> rowPool;
 
-	private MinionIdentitySort.SortInfo sortInfo = MinionIdentitySort.SortInfos[0];
+	private AccessControlSideScreen.MinionIdentitySort.SortInfo sortInfo = AccessControlSideScreen.MinionIdentitySort.SortInfos[0];
 
 	private Dictionary<MinionIdentity, AccessControlSideScreenRow> identityRowMap = new Dictionary<MinionIdentity, AccessControlSideScreenRow>();
 
 	private List<MinionIdentity> identityList = new List<MinionIdentity>();
+
+	private static class MinionIdentitySort
+	{
+		public static int CompareByName(MinionIdentity a, MinionIdentity b)
+		{
+			return a.GetProperName().CompareTo(b.GetProperName());
+		}
+
+		public static int CompareByRole(MinionIdentity a, MinionIdentity b)
+		{
+			ChoreConsumer component = a.GetComponent<ChoreConsumer>();
+			ChoreConsumer component2 = b.GetComponent<ChoreConsumer>();
+			return component.resume.CurrentRole.CompareTo(component2.resume.CurrentRole);
+		}
+
+		// Note: this type is marked as 'beforefieldinit'.
+		static MinionIdentitySort()
+		{
+			AccessControlSideScreen.MinionIdentitySort.SortInfo[] array = new AccessControlSideScreen.MinionIdentitySort.SortInfo[2];
+			int num = 0;
+			AccessControlSideScreen.MinionIdentitySort.SortInfo sortInfo = new AccessControlSideScreen.MinionIdentitySort.SortInfo();
+			sortInfo.name = UI.MINION_IDENTITY_SORT.NAME;
+			sortInfo.compare = new Comparison<MinionIdentity>(AccessControlSideScreen.MinionIdentitySort.CompareByName);
+			array[num] = sortInfo;
+			int num2 = 1;
+			sortInfo = new AccessControlSideScreen.MinionIdentitySort.SortInfo();
+			sortInfo.name = UI.MINION_IDENTITY_SORT.ROLE;
+			sortInfo.compare = new Comparison<MinionIdentity>(AccessControlSideScreen.MinionIdentitySort.CompareByRole);
+			array[num2] = sortInfo;
+			AccessControlSideScreen.MinionIdentitySort.SortInfos = array;
+		}
+
+		public static readonly AccessControlSideScreen.MinionIdentitySort.SortInfo[] SortInfos;
+
+		public class SortInfo : IListableOption
+		{
+			public string GetProperName()
+			{
+				return this.name;
+			}
+
+			public LocString name;
+
+			public Comparison<MinionIdentity> compare;
+		}
+	}
 }

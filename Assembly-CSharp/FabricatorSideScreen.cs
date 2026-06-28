@@ -191,8 +191,7 @@ public class FabricatorSideScreen : SideScreenContent
 		{
 			return;
 		}
-		Element[] recipeElements = this.GetRecipeElements(this.selectedRecipe);
-		List<Descriptor> ingredientDescriptions = this.GetIngredientDescriptions(recipeElements);
+		List<Descriptor> ingredientDescriptions = this.GetIngredientDescriptions(this.selectedRecipe.Ingredients);
 		if (ingredientDescriptions.Count > 0)
 		{
 			GameUtil.IndentListOfDescriptors(ingredientDescriptions);
@@ -207,51 +206,39 @@ public class FabricatorSideScreen : SideScreenContent
 		this.RefreshIngredientDescriptors();
 	}
 
-	public List<Descriptor> GetIngredientDescriptions(Element[] elements)
+	public List<Descriptor> GetIngredientDescriptions(List<Recipe.Ingredient> ingredients)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		for (int i = 0; i < elements.Length; i++)
+		foreach (Recipe.Ingredient ingredient in ingredients)
 		{
-			Tag tag = this.selectedRecipe.Ingredients[i].tag;
-			GameObject prefab = Assets.GetPrefab(tag);
-			string text = GameUtil.GetKeywordStyle(tag);
-			if (text == null)
-			{
-				text = "solid";
-			}
+			Tag tag = ingredient.tag;
 			LocString reciperquirement = UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPERQUIREMENT;
 			LocString locString = UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPERQUIREMENT_INSUFFICIENT;
-			if (WorldInventory.Instance.GetAmount(tag) >= this.selectedRecipe.Ingredients[i].amount)
+			if (WorldInventory.Instance.GetAmount(tag) >= ingredient.amount)
 			{
 				locString = UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPERQUIREMENT_SUFFICIENT;
 			}
+			string text;
 			string text2;
-			string text3;
 			if (GameTags.DisplayAsCalories.Contains(tag))
 			{
 				EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(tag.Name);
-				float num = foodInfo.CaloriesPerUnit * this.selectedRecipe.Ingredients[i].amount;
-				text2 = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
+				float num = foodInfo.CaloriesPerUnit * ingredient.amount;
+				text = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
 				float num2 = WorldInventory.Instance.GetAmount(tag) * foodInfo.CaloriesPerUnit;
-				text3 = GameUtil.GetFormattedCalories(num2, GameUtil.TimeSlice.None, true);
+				text2 = GameUtil.GetFormattedCalories(num2, GameUtil.TimeSlice.None, true);
 			}
 			else if (GameTags.DisplayAsUnits.Contains(tag))
 			{
-				text2 = GameUtil.GetFormattedUnits(this.selectedRecipe.Ingredients[i].amount, GameUtil.TimeSlice.None, false);
-				text3 = GameUtil.GetFormattedUnits(WorldInventory.Instance.GetAmount(tag), GameUtil.TimeSlice.None, false);
+				text = GameUtil.GetFormattedUnits(ingredient.amount, GameUtil.TimeSlice.None, false);
+				text2 = GameUtil.GetFormattedUnits(WorldInventory.Instance.GetAmount(tag), GameUtil.TimeSlice.None, false);
 			}
 			else
 			{
-				text2 = GameUtil.GetFormattedMass(this.selectedRecipe.Ingredients[i].amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
-				text3 = GameUtil.GetFormattedMass(WorldInventory.Instance.GetAmount(tag), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+				text = GameUtil.GetFormattedMass(ingredient.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+				text2 = GameUtil.GetFormattedMass(WorldInventory.Instance.GetAmount(tag), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
 			}
-			Descriptor descriptor = new Descriptor(string.Format(reciperquirement, new object[]
-			{
-				text,
-				prefab.GetProperName(),
-				text2,
-				text3
-			}), string.Format(locString, prefab.GetProperName(), text2, text3), Descriptor.DescriptorType.Requirement, false);
+			Descriptor descriptor = new Descriptor(string.Format(reciperquirement, tag.ProperName(), text, text2), string.Format(locString, tag.ProperName(), text, text2), Descriptor.DescriptorType.Requirement, false);
 			list.Add(descriptor);
 		}
 		return list;
@@ -270,25 +257,6 @@ public class FabricatorSideScreen : SideScreenContent
 			list.Add(ingredient.tag);
 		}
 		this.targetFab.CreateOrder(this.selectedRecipe, list, isInfinite, this.createOrderSound);
-	}
-
-	private Element[] GetRecipeElements(Recipe recipe)
-	{
-		Element[] array = new Element[recipe.Ingredients.Count];
-		for (int i = 0; i < recipe.Ingredients.Count; i++)
-		{
-			Tag tag = recipe.Ingredients[i].tag;
-			foreach (Element element in ElementLoader.elements)
-			{
-				Tag tag2 = GameTagExtensions.Create(element.id);
-				if (tag2 == tag)
-				{
-					array[i] = element;
-					break;
-				}
-			}
-		}
-		return array;
 	}
 
 	public DescriptorPanel IngredientsDescriptorPanel;

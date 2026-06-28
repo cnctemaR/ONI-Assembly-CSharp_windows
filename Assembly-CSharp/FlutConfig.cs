@@ -15,12 +15,11 @@ public class FlutConfig : IEntityConfig
 		string text4 = "idle_loop";
 		EffectorValues tier = DECOR.BONUS.TIER0;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, 25f, "SwimmerNavGrid", NavType.Swim, 32, 2f, "Meat", 2, false, true, 30f, 283f, 294f, 243f, 343f);
-		gameObject.UpdateComponentRequirement<Flut>(true);
-		gameObject.UpdateComponentRequirement<Catchable>(true);
-		gameObject.UpdateComponentRequirement<Storage>(true);
-		gameObject.UpdateComponentRequirement<Operational>(true);
-		ElementConverter elementConverter = gameObject.UpdateComponentRequirement<ElementConverter>(true);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, null, "SwimmerNavGrid", NavType.Swim, 32, 2f, "Meat", 2, false, true, 30f, 283f, 294f, 243f, 343f);
+		gameObject.AddOrGet<Catchable>();
+		gameObject.AddOrGet<Storage>();
+		gameObject.AddOrGet<Operational>();
+		ElementConverter elementConverter = gameObject.AddOrGet<ElementConverter>();
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
 			new ElementConverter.OutputElement(0.25f, SimHashes.Fertilizer, 0f, false, 0f, 0.5f, false, 1f, byte.MaxValue, 0)

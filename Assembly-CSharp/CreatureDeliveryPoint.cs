@@ -8,7 +8,9 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 	{
 		base.OnPrefabInit();
 		this.filteredStorage = new FilteredStorage(this, null, this.filterTint, this.noFilterTint, null, false);
+		this.filteredStorage.SetChoreType(Db.Get().ChoreTypes.CreatureFetch);
 		base.GetComponent<Storage>().SetOffsets(Grid.DefaultOffset);
+		Prioritizable.AddRef(base.gameObject);
 	}
 
 	protected override void OnSpawn()
@@ -27,6 +29,9 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 		base.smi.StopSM("OnCleanUp");
 		base.OnCleanUp();
 	}
+
+	[MyCmpAdd]
+	private Prioritizable prioritizable;
 
 	[SerializeField]
 	public Color32 noFilterTint = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);

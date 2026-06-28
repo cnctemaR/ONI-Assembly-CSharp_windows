@@ -120,7 +120,8 @@ public class LegacyModMain
 
 	private static void LoadEntities()
 	{
-		GeneratedEntities.LoadGeneratedEntities();
+		EntityConfigManager.Instance.LoadGeneratedEntities();
+		BuildingConfigManager.Instance.ConfigurePost();
 	}
 
 	private static void LoadEquipment()

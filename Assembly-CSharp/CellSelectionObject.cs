@@ -119,14 +119,14 @@ public class CellSelectionObject : KMonoBehaviour
 		{
 			return;
 		}
-		this.Mass = Grid.Cell[this.selectedCell].mass;
+		this.Mass = Grid.Mass[this.selectedCell];
 		this.element = Grid.Element[this.selectedCell];
 		this.ElementName = this.element.name;
 		this.state = this.element.state;
 		this.tags = this.element.GetMaterialCategoryTag();
-		this.temperature = Grid.Cell[this.selectedCell].temperature;
-		this.diseaseIdx = Grid.Disease[this.selectedCell].diseaseIdx;
-		this.diseaseCount = Grid.Disease[this.selectedCell].elementCount;
+		this.temperature = Grid.Temperature[this.selectedCell];
+		this.diseaseIdx = Grid.DiseaseIdx[this.selectedCell];
+		this.diseaseCount = Grid.DiseaseCount[this.selectedCell];
 		this.mSelectable.SetName(Grid.Element[this.selectedCell].name);
 		DetailsScreen.Instance.Trigger(-1514841199, null);
 		this.UpdateStatusItem();

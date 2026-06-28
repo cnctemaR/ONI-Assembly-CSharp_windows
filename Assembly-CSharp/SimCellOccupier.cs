@@ -81,10 +81,9 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 				HandleVector<int>.Handle handle = GameComps.DiseaseContainers.GetHandle(base.gameObject);
 				if (handle.IsValid())
 				{
-					Sim.DiseaseCell diseaseCell = Grid.Disease[num];
 					DiseaseContainer data = GameComps.DiseaseContainers.GetData(handle);
-					data.diseaseIdx = diseaseCell.diseaseIdx;
-					data.diseaseCount = diseaseCell.elementCount;
+					data.diseaseIdx = Grid.DiseaseIdx[num];
+					data.diseaseCount = Grid.DiseaseCount[num];
 					GameComps.DiseaseContainers.SetData(handle, data);
 				}
 				if (onComplete != null)

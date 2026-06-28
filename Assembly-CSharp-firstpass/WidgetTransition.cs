@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class WidgetTransition : MonoBehaviour
 {
@@ -41,6 +42,7 @@ public class WidgetTransition : MonoBehaviour
 		this.targetPos = new Vector2(vector.x, vector.y);
 		vector += this.beginningOffset;
 		base.gameObject.rectTransform().anchoredPosition = vector;
+		LayoutRebuilder.MarkLayoutForRebuild(base.gameObject.rectTransform());
 	}
 
 	public void StopTransition()
@@ -50,6 +52,7 @@ public class WidgetTransition : MonoBehaviour
 			this.fadingIn = false;
 			base.enabled = false;
 			base.gameObject.rectTransform().anchoredPosition = this.targetPos;
+			LayoutRebuilder.MarkLayoutForRebuild(base.gameObject.rectTransform());
 		}
 	}
 
@@ -60,6 +63,7 @@ public class WidgetTransition : MonoBehaviour
 			Vector2 anchoredPosition = base.gameObject.rectTransform().anchoredPosition;
 			Vector2 vector = Vector2.Lerp(anchoredPosition, this.targetPos, 7f * Time.unscaledDeltaTime) - anchoredPosition;
 			base.gameObject.rectTransform().anchoredPosition += vector;
+			LayoutRebuilder.MarkLayoutForRebuild(base.gameObject.rectTransform());
 			float num = this.CanvasGroup.alpha;
 			num += 0.1f;
 			if (num >= 1f)

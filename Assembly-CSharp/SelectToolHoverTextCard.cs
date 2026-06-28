@@ -465,17 +465,17 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 			Element element = Grid.Element[num];
 			hoverTextDrawer.BeginShadowBar(flag10);
 			hoverTextDrawer.DrawText(element.name.ToUpper(), this.Styles_Title.Standard);
-			if (Grid.Disease[num].elementCount > 0 || flag)
+			if (Grid.DiseaseCount[num] > 0 || flag)
 			{
 				hoverTextDrawer.NewLine(26);
 				hoverTextDrawer.DrawIcon(this.iconDash, 18);
-				hoverTextDrawer.DrawText(GameUtil.GetFormattedDisease(Grid.Disease[num].diseaseIdx, Grid.Disease[num].elementCount, true), this.Styles_Values.Property.Standard);
+				hoverTextDrawer.DrawText(GameUtil.GetFormattedDisease(Grid.DiseaseIdx[num], Grid.DiseaseCount[num], true), this.Styles_Values.Property.Standard);
 			}
 			if (!element.IsVacuum)
 			{
 				hoverTextDrawer.NewLine(26);
 				hoverTextDrawer.DrawIcon(this.iconDash, 18);
-				hoverTextDrawer.DrawText(ElementLoader.elements[(int)Grid.Cell[num].elementIdx].GetMaterialCategoryTag().ProperName(), this.Styles_BodyText.Standard);
+				hoverTextDrawer.DrawText(ElementLoader.elements[(int)Grid.ElementIdx[num]].GetMaterialCategoryTag().ProperName(), this.Styles_BodyText.Standard);
 			}
 			string[] array = WorldInspector.MassStrings(num);
 			hoverTextDrawer.NewLine(26);
@@ -492,7 +492,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				hoverTextDrawer.NewLine(26);
 				hoverTextDrawer.DrawIcon(this.iconDash, 18);
 				Element element2 = Grid.Element[num];
-				string text8 = ((element2.specificHeatCapacity != 0f) ? GameUtil.GetFormattedTemperature(Grid.Cell[num].temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true) : "N/A");
+				string text8 = ((element2.specificHeatCapacity != 0f) ? GameUtil.GetFormattedTemperature(Grid.Temperature[num], GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true) : "N/A");
 				hoverTextDrawer.DrawText(text8, this.Styles_BodyText.Standard);
 			}
 			if (Game.Instance.GetComponent<EntombedItemVisualizer>().IsEntombedItem(num))

@@ -64,6 +64,40 @@ namespace TMPro
 			}
 		}
 
+		public Material fallbackMaterial
+		{
+			get
+			{
+				return this.m_fallbackMaterial;
+			}
+			set
+			{
+				if (this.m_fallbackMaterial == value)
+				{
+					return;
+				}
+				if (this.m_fallbackMaterial != null && this.m_fallbackMaterial != value)
+				{
+					TMP_MaterialManager.ReleaseFallbackMaterial(this.m_fallbackMaterial);
+				}
+				this.m_fallbackMaterial = value;
+				TMP_MaterialManager.AddFallbackMaterialReference(this.m_fallbackMaterial);
+				this.SetSharedMaterial(this.m_fallbackMaterial);
+			}
+		}
+
+		public Material fallbackSourceMaterial
+		{
+			get
+			{
+				return this.m_fallbackSourceMaterial;
+			}
+			set
+			{
+				this.m_fallbackSourceMaterial = value;
+			}
+		}
+
 		public bool isDefaultMaterial
 		{
 			get
@@ -119,7 +153,6 @@ namespace TMPro
 				if (this.m_mesh == null)
 				{
 					this.m_mesh = new Mesh();
-					this.m_mesh.name = "TMPro";
 					this.m_mesh.hideFlags = HideFlags.HideAndDontSave;
 					this.meshFilter.mesh = this.m_mesh;
 				}
@@ -128,6 +161,23 @@ namespace TMPro
 			set
 			{
 				this.m_mesh = value;
+			}
+		}
+
+		public BoxCollider boxCollider
+		{
+			get
+			{
+				if (this.m_boxCollider == null)
+				{
+					this.m_boxCollider = base.GetComponent<BoxCollider>();
+					if (this.m_boxCollider == null)
+					{
+						this.m_boxCollider = base.gameObject.AddComponent<BoxCollider>();
+						base.gameObject.AddComponent<Rigidbody>();
+					}
+				}
+				return this.m_boxCollider;
 			}
 		}
 
@@ -140,7 +190,7 @@ namespace TMPro
 			this.meshFilter.sharedMesh = this.mesh;
 			if (this.m_sharedMaterial != null)
 			{
-				this.m_sharedMaterial.SetVector(ShaderUtilities.ID_ClipRect, new Vector4(-10000f, -10000f, 10000f, 10000f));
+				this.m_sharedMaterial.SetVector(ShaderUtilities.ID_ClipRect, new Vector4(-32767f, -32767f, 32767f, 32767f));
 			}
 		}
 
@@ -170,22 +220,22 @@ namespace TMPro
 
 		public static TMP_SubMesh AddSubTextObject(TextMeshPro textComponent, MaterialReference materialReference)
 		{
-			GameObject gameObject = new GameObject("TMP SubMesh [" + materialReference.material.name + "]");
-			TMP_SubMesh tmp_SubMesh = gameObject.AddComponent<TMP_SubMesh>();
+			GameObject gameObject = new GameObject("TMP SubMesh [" + materialReference.material.name + "]", new Type[] { typeof(TMP_SubMesh) });
+			TMP_SubMesh component = gameObject.GetComponent<TMP_SubMesh>();
 			gameObject.transform.SetParent(textComponent.transform, false);
 			gameObject.transform.localPosition = Vector3.zero;
 			gameObject.transform.localRotation = Quaternion.identity;
 			gameObject.transform.localScale = Vector3.one;
 			gameObject.layer = textComponent.gameObject.layer;
-			tmp_SubMesh.m_meshFilter = gameObject.GetComponent<MeshFilter>();
-			tmp_SubMesh.m_TextComponent = textComponent;
-			tmp_SubMesh.m_fontAsset = materialReference.fontAsset;
-			tmp_SubMesh.m_spriteAsset = materialReference.spriteAsset;
-			tmp_SubMesh.m_isDefaultMaterial = materialReference.isDefaultMaterial;
-			tmp_SubMesh.SetSharedMaterial(materialReference.material);
-			tmp_SubMesh.renderer.sortingLayerID = textComponent.renderer.sortingLayerID;
-			tmp_SubMesh.renderer.sortingOrder = textComponent.renderer.sortingOrder;
-			return tmp_SubMesh;
+			component.m_meshFilter = gameObject.GetComponent<MeshFilter>();
+			component.m_TextComponent = textComponent;
+			component.m_fontAsset = materialReference.fontAsset;
+			component.m_spriteAsset = materialReference.spriteAsset;
+			component.m_isDefaultMaterial = materialReference.isDefaultMaterial;
+			component.SetSharedMaterial(materialReference.material);
+			component.renderer.sortingLayerID = textComponent.renderer.sortingLayerID;
+			component.renderer.sortingOrder = textComponent.renderer.sortingOrder;
+			return component;
 		}
 
 		public void DestroySelf()
@@ -272,6 +322,28 @@ namespace TMPro
 			this.m_renderer.sharedMaterial = this.m_sharedMaterial;
 		}
 
+		public void UpdateColliders(int vertexCount)
+		{
+			if (this.boxCollider == null)
+			{
+				return;
+			}
+			Vector2 max_16BIT = TMP_Math.MAX_16BIT;
+			Vector2 min_16BIT = TMP_Math.MIN_16BIT;
+			for (int i = 0; i < vertexCount; i++)
+			{
+				max_16BIT.x = Mathf.Min(max_16BIT.x, this.m_mesh.vertices[i].x);
+				max_16BIT.y = Mathf.Min(max_16BIT.y, this.m_mesh.vertices[i].y);
+				min_16BIT.x = Mathf.Max(min_16BIT.x, this.m_mesh.vertices[i].x);
+				min_16BIT.y = Mathf.Max(min_16BIT.y, this.m_mesh.vertices[i].y);
+			}
+			Vector3 vector = (max_16BIT + min_16BIT) / 2f;
+			Vector3 vector2 = min_16BIT - max_16BIT;
+			vector2.z = 0.1f;
+			this.boxCollider.center = vector;
+			this.boxCollider.size = vector2;
+		}
+
 		[SerializeField]
 		private TMP_FontAsset m_fontAsset;
 
@@ -284,7 +356,9 @@ namespace TMPro
 		[SerializeField]
 		private Material m_sharedMaterial;
 
-		internal Material m_fallbackMaterial;
+		private Material m_fallbackMaterial;
+
+		private Material m_fallbackSourceMaterial;
 
 		[SerializeField]
 		private bool m_isDefaultMaterial;
@@ -299,6 +373,9 @@ namespace TMPro
 		private MeshFilter m_meshFilter;
 
 		private Mesh m_mesh;
+
+		[SerializeField]
+		private BoxCollider m_boxCollider;
 
 		[SerializeField]
 		private TextMeshPro m_TextComponent;

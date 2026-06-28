@@ -171,7 +171,7 @@ public class KIconButtonMenu : KScreen
 			if (e.TryConsume(buttonInfo.shortcutKey))
 			{
 				this.buttonObjects[i].GetComponent<KButton>().PlayPointerDownSound();
-				this.buttonObjects[i].GetComponent<KButton>().SignalClick();
+				this.buttonObjects[i].GetComponent<KButton>().SignalClick(KKeyCode.Mouse0);
 				break;
 			}
 		}

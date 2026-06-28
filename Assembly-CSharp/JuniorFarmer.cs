@@ -26,11 +26,7 @@ public class JuniorFarmer : RoleConfig
 
 	public override void InitRequirements()
 	{
-		base.requirements = new RoleAssignmentRequirement[]
-		{
-			Game.Instance.roleManager.roleAssignmentRequirements.Can_Farming,
-			Game.Instance.roleManager.roleAssignmentRequirements.HasExperience_NoRole
-		};
+		base.requirements = new RoleAssignmentRequirement[] { Game.Instance.roleManager.roleAssignmentRequirements.Can_Farming };
 	}
 
 	public const string ID = "JuniorFarmer";

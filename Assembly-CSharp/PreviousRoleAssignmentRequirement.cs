@@ -4,7 +4,7 @@ using STRINGS;
 public class PreviousRoleAssignmentRequirement : RoleAssignmentRequirement
 {
 	public PreviousRoleAssignmentRequirement(string previousRoleID)
-		: base("HasExperience_" + previousRoleID, UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.HAS_EXPERIENCE.DESCRIPTION, (MinionResume resume) => previousRoleID == "NoRole" || resume.ExperienceByRoleID[previousRoleID] >= Game.Instance.roleManager.GetRole(previousRoleID).experienceRequired)
+		: base("HasExperience_" + previousRoleID, UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.HAS_EXPERIENCE.DESCRIPTION, (MinionResume resume) => previousRoleID == "NoRole" || resume.HasMasteredRole(previousRoleID))
 	{
 		this.previousRoleID = previousRoleID;
 	}

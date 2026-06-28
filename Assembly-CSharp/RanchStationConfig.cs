@@ -1,0 +1,67 @@
+﻿using System;
+using Klei.AI;
+using STRINGS;
+using TUNING;
+using UnityEngine;
+
+public class RanchStationConfig : IBuildingConfig
+{
+	public override BuildingDef CreateBuildingDef()
+	{
+		string text = "RanchStation";
+		int num = 2;
+		int num2 = 3;
+		string text2 = "rancherstation_kanim";
+		int num3 = 30;
+		float num4 = 30f;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num5 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER1;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2, 0.2f);
+		buildingDef.ViewMode = SimViewMode.Rooms;
+		buildingDef.Overheatable = false;
+		buildingDef.AudioCategory = "Metal";
+		buildingDef.AudioSize = "large";
+		return buildingDef;
+	}
+
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
+	{
+		go.AddOrGet<LoopingSounds>();
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.RanchStation);
+	}
+
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, RanchStationConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, RanchStationConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureComplete(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, RanchStationConfig.INPUT_PORTS);
+		go.AddOrGet<LogicOperationalController>();
+		BuildingTemplates.DoPostConfigure(go);
+		Effect effect = new Effect("Ranched", global::STRINGS.CREATURES.MODIFIERS.RANCHED.NAME, global::STRINGS.CREATURES.MODIFIERS.RANCHED.TOOLTIP, 600f, true, true, false);
+		effect.Add(new AttributeModifier(Db.Get().Amounts.Happiness.deltaAttribute.Id, 0.058333334f, global::STRINGS.CREATURES.MODIFIERS.RANCHED.NAME, false, false, true));
+		effect.Add(new AttributeModifier(Db.Get().Amounts.Wildness.deltaAttribute.Id, -0.09166667f, global::STRINGS.CREATURES.MODIFIERS.RANCHED.NAME, false, false, true));
+		RanchStation.Def def = go.AddOrGetDef<RanchStation.Def>();
+		def.effect = effect;
+		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
+		roomTracker.requiredRoomType = Db.Get().RoomTypes.CreaturePen.Id;
+		roomTracker.requirement = RoomTracker.Requirement.Required;
+		Prioritizable.AddRef(go);
+	}
+
+	public const string ID = "RanchStation";
+
+	public const string ROLE_TYPE = "Rancher";
+
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
+}

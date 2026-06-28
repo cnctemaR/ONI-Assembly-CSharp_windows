@@ -9,6 +9,7 @@ namespace TMPro
 		Masking,
 		Truncate,
 		ScrollRect,
-		Page
+		Page,
+		Linked
 	}
 }

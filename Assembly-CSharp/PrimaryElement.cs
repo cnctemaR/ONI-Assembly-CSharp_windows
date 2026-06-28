@@ -62,11 +62,10 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		if (this.useSimDiseaseInfo)
 		{
 			int num = Grid.PosToCell(base.transform.GetPosition());
-			Sim.DiseaseCell diseaseCell = Grid.Disease[num];
-			if (diseaseCell.diseaseIdx != 255)
+			if (Grid.DiseaseIdx[num] != 255)
 			{
-				this.diseaseID = Db.Get().Diseases[(int)diseaseCell.diseaseIdx].id;
-				this.diseaseCount = diseaseCell.elementCount;
+				this.diseaseID = Db.Get().Diseases[(int)Grid.DiseaseIdx[num]].id;
+				this.diseaseCount = Grid.DiseaseCount[num];
 			}
 		}
 		else if (this.diseaseHandle.IsValid())
@@ -150,7 +149,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	{
 		if (this._Temperature <= 0f)
 		{
-			KCrashReporter.Assert(false, base.gameObject.name + " is attempting serializing a temperature of <= 0K. Resetting to default.");
+			KCrashReporter.Assert(false, base.gameObject.name + " is attempting to serialize a temperature of <= 0K. Resetting to default.");
 			this._Temperature = this.Element.defaultValues.temperature;
 		}
 		if (this.Mass > 100000f)
@@ -234,7 +233,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 			if (this.useSimDiseaseInfo)
 			{
 				int num = Grid.PosToCell(base.transform.GetPosition());
-				b = Grid.Disease[num].diseaseIdx;
+				b = Grid.DiseaseIdx[num];
 			}
 			else if (this.diseaseHandle.IsValid())
 			{
@@ -252,7 +251,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 			if (this.useSimDiseaseInfo)
 			{
 				int num2 = Grid.PosToCell(base.transform.GetPosition());
-				num = Grid.Disease[num2].elementCount;
+				num = Grid.DiseaseCount[num2];
 			}
 			else if (this.diseaseHandle.IsValid())
 			{

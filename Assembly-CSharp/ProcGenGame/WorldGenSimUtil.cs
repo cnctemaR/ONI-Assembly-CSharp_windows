@@ -63,12 +63,12 @@ namespace ProcGenGame
 					{
 						Sim.SubstanceChangeInfo substanceChangeInfo = ptr->substanceChangeInfo[k];
 						int cellIdx = substanceChangeInfo.cellIdx;
-						cells[cellIdx].elementIdx = ptr->cells[cellIdx].elementIdx;
-						cells[cellIdx].insulation = ptr->cells[cellIdx].insulation;
-						cells[cellIdx].properties = ptr->cells[cellIdx].properties;
-						cells[cellIdx].temperature = ptr->cells[cellIdx].temperature;
-						cells[cellIdx].mass = ptr->cells[cellIdx].mass;
-						cells[cellIdx].strengthInfo = ptr->cells[cellIdx].strengthInfo;
+						cells[cellIdx].elementIdx = ptr->elementIdx[cellIdx];
+						cells[cellIdx].insulation = ptr->insulation[cellIdx];
+						cells[cellIdx].properties = ptr->properties[cellIdx];
+						cells[cellIdx].temperature = ptr->temperature[cellIdx];
+						cells[cellIdx].mass = ptr->mass[cellIdx];
+						cells[cellIdx].strengthInfo = ptr->strengthInfo[cellIdx];
 					}
 					Cell templateCellData;
 					foreach (KeyValuePair<Vector2I, TemplateContainer> keyValuePair in templateSpawnTargets)
@@ -110,6 +110,7 @@ namespace ProcGenGame
 					}
 				}
 			}
+			Sim.HandleMessage(SimMessageHashes.SettleWorldGen, 0, null);
 			bool flag2 = WorldGenSimUtil.SaveSim(data, error_cb);
 			Sim.Shutdown();
 			return flag2;

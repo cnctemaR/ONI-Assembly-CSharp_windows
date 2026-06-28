@@ -59,7 +59,7 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(-505471181, sizeof(SimMessages.AddElementEmitterMessage), (byte*)ptr);
 	}
 
-	public unsafe static void ModifyElementEmitter(int sim_handle, int game_cell, int max_depth, SimHashes element, float emit_interval, float emit_mass, float emit_temperature)
+	public unsafe static void ModifyElementEmitter(int sim_handle, int game_cell, int max_depth, SimHashes element, float emit_interval, float emit_mass, float emit_temperature, float max_pressure, byte disease_idx, int disease_count)
 	{
 		if (!Grid.IsValidCell(game_cell))
 		{
@@ -72,8 +72,11 @@ public static class SimMessages
 		ptr->emitInterval = emit_interval;
 		ptr->emitMass = emit_mass;
 		ptr->emitTemperature = emit_temperature;
+		ptr->maxPressure = max_pressure;
 		ptr->elementIdx = (byte)elementIndex;
 		ptr->maxDepth = (byte)max_depth;
+		ptr->diseaseIdx = disease_idx;
+		ptr->diseaseCount = disease_count;
 		Sim.SIM_HandleMessage(403589164, sizeof(SimMessages.ModifyElementEmitterMessage), (byte*)ptr);
 	}
 
@@ -710,13 +713,17 @@ public static class SimMessages
 
 		public float emitTemperature;
 
+		public float maxPressure;
+
+		public int diseaseCount;
+
 		public byte elementIdx;
 
 		public byte maxDepth;
 
-		private byte pad0;
+		public byte diseaseIdx;
 
-		private byte pad1;
+		private byte pad0;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]

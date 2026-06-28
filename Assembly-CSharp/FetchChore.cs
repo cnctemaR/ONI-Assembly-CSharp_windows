@@ -5,7 +5,7 @@ using UnityEngine;
 public class FetchChore : Chore<FetchChore.StatesInstance>
 {
 	public FetchChore(ChoreType choreType, Storage destination, float amount, Tag[] tags, Tag[] forbidden_tags = null, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, FetchOrder2.OperationalRequirement operational_requirement = FetchOrder2.OperationalRequirement.Operational, int priority_mod = 0, Tag[] chore_tags = null)
-		: base(choreType, destination, chore_provider, run_until_complete, on_complete, on_begin, on_end, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, priority_mod, chore_tags)
+		: base(choreType, destination, chore_provider, run_until_complete, on_complete, on_begin, on_end, PriorityScreen.PriorityClass.basic, 0, false, true, priority_mod, chore_tags)
 	{
 		if (choreType == null)
 		{
@@ -28,25 +28,41 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		}
 		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, destination);
 		base.AddPrecondition(FetchChore.IsFetchTargetAvailable, null);
-		base.AddPrecondition(ChorePreconditions.instance.IsMarkedForDeconstruction, base.target.gameObject);
-		base.AddPrecondition(ChorePreconditions.instance.IsMarkedForDisable, base.target.gameObject);
+		Deconstructable component = base.target.GetComponent<Deconstructable>();
+		if (component != null)
+		{
+			base.AddPrecondition(ChorePreconditions.instance.IsMarkedForDeconstruction, component);
+		}
+		BuildingEnabledButton component2 = base.target.GetComponent<BuildingEnabledButton>();
+		if (component2 != null)
+		{
+			base.AddPrecondition(ChorePreconditions.instance.IsMarkedForDisable, component2);
+		}
 		if (operational_requirement != FetchOrder2.OperationalRequirement.None && destination.gameObject.GetComponent<Operational>())
 		{
 			if (operational_requirement == FetchOrder2.OperationalRequirement.Operational)
 			{
-				base.AddPrecondition(ChorePreconditions.instance.IsOperational, destination.gameObject);
+				Operational component3 = destination.GetComponent<Operational>();
+				if (component3 != null)
+				{
+					base.AddPrecondition(ChorePreconditions.instance.IsOperational, component3);
+				}
 			}
 			if (operational_requirement == FetchOrder2.OperationalRequirement.Functional)
 			{
-				base.AddPrecondition(ChorePreconditions.instance.IsFunctional, destination.gameObject);
+				Operational component4 = destination.GetComponent<Operational>();
+				if (component4 != null)
+				{
+					base.AddPrecondition(ChorePreconditions.instance.IsFunctional, component4);
+				}
 			}
 		}
 		this.partitionerEntry = GameScenePartitioner.Instance.Add(destination.name, this, Grid.PosToCell(destination), GameScenePartitioner.Instance.fetchChoreLayer, null);
 		destination.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
-		Automatable component = destination.GetComponent<Automatable>();
-		if (component)
+		Automatable component5 = destination.GetComponent<Automatable>();
+		if (component5)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsAllowedByAutomation, component);
+			base.AddPrecondition(ChorePreconditions.instance.IsAllowedByAutomation, component5);
 		}
 	}
 
@@ -113,7 +129,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 	public void FetchAreaBegin(Chore.Precondition.Context context, float amount_to_be_fetched)
 	{
 		this.amount = amount_to_be_fetched;
-		this.smi.sm.fetcher.Set(context.consumer.gameObject, this.smi);
+		this.smi.sm.fetcher.Set(context.consumerState.gameObject, this.smi);
 		base.Begin(context);
 	}
 
@@ -133,19 +149,19 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		}
 	}
 
-	public Pickupable FindFetchTarget(ChoreConsumer consumer)
+	public Pickupable FindFetchTarget(ChoreConsumerState consumer_state)
 	{
 		Pickupable pickupable = null;
 		if (this.destination != null)
 		{
-			if (consumer.IsStationary)
+			if (consumer_state.hasSolidTransferArm)
 			{
-				SolidTransferArm component = consumer.GetComponent<SolidTransferArm>();
-				component.FindFetchTarget(this.destination, this.tagBits, this.requiredTagBits, this.forbiddenTagBits, this.originalAmount, ref pickupable);
+				SolidTransferArm solidTransferArm = consumer_state.solidTransferArm;
+				solidTransferArm.FindFetchTarget(this.destination, this.tagBits, this.requiredTagBits, this.forbiddenTagBits, this.originalAmount, ref pickupable);
 			}
 			else
 			{
-				FetchManager.Instance.FindFetchTarget(consumer.GetComponent<Worker>(), this.destination, this.tagBits, this.requiredTagBits, this.forbiddenTagBits, this.originalAmount, ref pickupable);
+				FetchManager.Instance.FindFetchTarget(consumer_state.worker, this.destination, this.tagBits, this.requiredTagBits, this.forbiddenTagBits, this.originalAmount, ref pickupable);
 			}
 		}
 		return pickupable;
@@ -156,7 +172,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		Pickupable pickupable = (Pickupable)context.data;
 		if (pickupable == null)
 		{
-			pickupable = this.FindFetchTarget(context.consumer);
+			pickupable = this.FindFetchTarget(context.consumerState);
 		}
 		this.smi.sm.source.Set(pickupable.gameObject, this.smi);
 		pickupable.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
@@ -239,18 +255,18 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			bool flag;
 			if (pickupable == null)
 			{
-				pickupable = fetchChore.FindFetchTarget(context.consumer);
+				pickupable = fetchChore.FindFetchTarget(context.consumerState);
 				flag = pickupable != null;
 			}
 			else
 			{
-				flag = FetchManagerUpdater.IsFetchablePickup(pickupable.GetComponent<KPrefabID>(), pickupable.storage, pickupable.UnreservedAmount, pickupable.MinTakeAmount, fetchChore.originalAmount, fetchChore.tagBits, fetchChore.requiredTagBits, fetchChore.forbiddenTagBits, context.consumer.GetComponent<Storage>());
+				flag = FetchManagerUpdater.IsFetchablePickup(pickupable.GetComponent<KPrefabID>(), pickupable.storage, pickupable.UnreservedAmount, pickupable.MinTakeAmount, fetchChore.originalAmount, fetchChore.tagBits, fetchChore.requiredTagBits, fetchChore.forbiddenTagBits, context.consumerState.storage);
 			}
 			if (flag)
 			{
 				context.data = pickupable;
 				int num;
-				if (context.consumer.GetNavigationCost(pickupable, out num))
+				if (context.consumerState.consumer.GetNavigationCost(pickupable, out num))
 				{
 					context.cost += num;
 					return true;

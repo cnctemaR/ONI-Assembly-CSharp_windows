@@ -103,17 +103,25 @@ public class FactionAlignment : KMonoBehaviour
 		KIconButtonMenu.ButtonInfo buttonInfo;
 		if (!this.targeted)
 		{
-			buttonInfo = new KIconButtonMenu.ButtonInfo("action_attack", UI.USERMENUACTIONS.ATTACK.NAME, delegate
+			string text = "action_attack";
+			string text2 = UI.USERMENUACTIONS.ATTACK.NAME;
+			global::System.Action action = delegate
 			{
 				this.SetPlayerTargeted(true);
-			}, global::Action.NumActions, null, null, null, string.Empty, true);
+			};
+			string text3 = UI.USERMENUACTIONS.ATTACK.TOOLTIP;
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
 		}
 		else
 		{
-			buttonInfo = new KIconButtonMenu.ButtonInfo("action_attack", UI.USERMENUACTIONS.CANCELATTACK.NAME, delegate
+			string text3 = "action_attack";
+			string text2 = UI.USERMENUACTIONS.CANCELATTACK.NAME;
+			global::System.Action action = delegate
 			{
 				this.SetPlayerTargeted(false);
-			}, global::Action.NumActions, null, null, null, string.Empty, true);
+			};
+			string text = UI.USERMENUACTIONS.CANCELATTACK.TOOLTIP;
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
 		}
 		if (buttonInfo != null)
 		{

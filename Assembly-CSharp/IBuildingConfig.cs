@@ -18,4 +18,8 @@ public abstract class IBuildingConfig
 	public virtual void DoPostConfigureUnderConstruction(GameObject go)
 	{
 	}
+
+	public virtual void ConfigurePost(BuildingDef def)
+	{
+	}
 }

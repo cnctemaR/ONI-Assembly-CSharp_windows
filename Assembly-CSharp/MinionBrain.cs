@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MinionBrain : Brain
@@ -14,8 +13,6 @@ public class MinionBrain : Brain
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Storage component = base.GetComponent<Storage>();
-		component.SetDefaultStoredItemModifiers(MinionBrain.MinionStoredItemModifiers);
 		this.accessControlNavMask = new AccessControlNavMask(base.gameObject);
 		this.Navigator.AddMask(this.accessControlNavMask);
 		this.Navigator.AddMask(new NavigationFeatureMask(base.gameObject));
@@ -77,6 +74,4 @@ public class MinionBrain : Brain
 	public OxygenBreather OxygenBreather;
 
 	private AccessControlNavMask accessControlNavMask;
-
-	private static readonly List<Storage.StoredItemModifier> MinionStoredItemModifiers = new List<Storage.StoredItemModifier>();
 }

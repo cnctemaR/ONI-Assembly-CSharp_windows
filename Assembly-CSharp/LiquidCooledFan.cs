@@ -213,7 +213,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 				{
 					CellOffset cellOffset = new CellOffset(j, i);
 					int num2 = Grid.OffsetCell(num, cellOffset);
-					if (Grid.Cell[num2].temperature > base.master.minCooledTemperature)
+					if (Grid.Temperature[num2] > base.master.minCooledTemperature)
 					{
 						flag = true;
 						break;
@@ -232,7 +232,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 				{
 					CellOffset cellOffset = new CellOffset(j, i);
 					int num2 = Grid.OffsetCell(num, cellOffset);
-					if (Grid.Cell[num2].mass >= base.master.minEnvironmentMass)
+					if (Grid.Mass[num2] >= base.master.minEnvironmentMass)
 					{
 						return true;
 					}
@@ -314,7 +314,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 
 		private Chore CreateUseChore(LiquidCooledFan.StatesInstance smi)
 		{
-			return new WorkChore<LiquidCooledFanWorkable>(Db.Get().ChoreTypes.LiquidCooledFan, smi.master.workable, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			return new WorkChore<LiquidCooledFanWorkable>(Db.Get().ChoreTypes.LiquidCooledFan, smi.master.workable, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		}
 
 		public LiquidCooledFan.States.Workable workable;

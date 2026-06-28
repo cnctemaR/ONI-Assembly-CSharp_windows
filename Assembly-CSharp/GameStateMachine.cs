@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
-using STRINGS;
 using UnityEngine;
 
 public abstract class GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType> : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType> where StateMachineType : GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType> where StateMachineInstanceType : GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.GameInstance where MasterType : IStateMachineTarget
@@ -510,12 +509,6 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State Tag(params Tag[] tags)
-		{
-			this.tags = tags;
-			return this;
-		}
-
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleAnims(string anim_file, float priority = 0f)
 		{
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
@@ -1003,6 +996,79 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 					instance2.StopSM("ToggleFX.Exit");
 				}
 			});
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State BehaviourComplete(Func<StateMachineInstanceType, Tag> tag_cb, bool on_exit = false)
+		{
+			if (on_exit)
+			{
+				this.Exit("BehaviourComplete()", delegate(StateMachineInstanceType smi)
+				{
+					smi.Trigger(-739654666, tag_cb(smi));
+					smi.GoTo(null);
+				});
+			}
+			else
+			{
+				this.Enter("BehaviourComplete()", delegate(StateMachineInstanceType smi)
+				{
+					smi.Trigger(-739654666, tag_cb(smi));
+					smi.GoTo(null);
+				});
+			}
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State BehaviourComplete(Tag tag, bool on_exit = false)
+		{
+			if (on_exit)
+			{
+				this.Exit("BehaviourComplete(" + tag.ToString() + ")", delegate(StateMachineInstanceType smi)
+				{
+					smi.Trigger(-739654666, tag);
+					smi.GoTo(null);
+				});
+			}
+			else
+			{
+				this.Enter("BehaviourComplete(" + tag.ToString() + ")", delegate(StateMachineInstanceType smi)
+				{
+					smi.Trigger(-739654666, tag);
+					smi.GoTo(null);
+				});
+			}
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleBehaviour(Tag behaviour_tag, Func<StateMachineInstanceType, bool> precondition, Action<StateMachineInstanceType> on_complete = null)
+		{
+			Func<object, bool> precondition_cb = (object obj) => precondition(obj as StateMachineInstanceType);
+			this.Enter("AddPrecondition", delegate(StateMachineInstanceType smi)
+			{
+				if (smi.GetComponent<ChoreConsumer>() != null)
+				{
+					smi.GetComponent<ChoreConsumer>().AddBehaviourPrecondition(behaviour_tag, precondition_cb, smi);
+				}
+			});
+			this.Exit("RemovePrecondition", delegate(StateMachineInstanceType smi)
+			{
+				if (smi.GetComponent<ChoreConsumer>() != null)
+				{
+					smi.GetComponent<ChoreConsumer>().RemoveBehaviourPrecondition(behaviour_tag, precondition_cb, smi);
+				}
+			});
+			this.ToggleTag(behaviour_tag);
+			if (on_complete != null)
+			{
+				this.EventHandler(GameHashes.BehaviourTagComplete, delegate(StateMachineInstanceType smi, object data)
+				{
+					if ((Tag)data == behaviour_tag)
+					{
+						on_complete(smi);
+					}
+				});
+			}
 			return this;
 		}
 
@@ -1671,6 +1737,18 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State OnBehaviourComplete(Tag behaviour, Action<StateMachineInstanceType> cb)
+		{
+			this.EventHandler(GameHashes.BehaviourTagComplete, delegate(StateMachineInstanceType smi, object d)
+			{
+				if ((Tag)d == behaviour)
+				{
+					cb(smi);
+				}
+			});
+			return this;
+		}
+
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State MoveTo(Func<StateMachineInstanceType, int> cell_callback, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state = null, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State fail_state = null, bool update_cell = false)
 		{
 			this.EventTransition(GameHashes.DestinationReached, success_state, null);
@@ -1818,6 +1896,20 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				if (kanimControllerBase != null)
 				{
 					kanimControllerBase.Play(anim, mode, 1f, 0f);
+				}
+			});
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State PlayAnim(Func<StateMachineInstanceType, string> anim_cb, KAnim.PlayMode mode)
+		{
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
+			this.Enter("PlayAnim(" + mode.ToString() + ")", delegate(StateMachineInstanceType smi)
+			{
+				KAnimControllerBase kanimControllerBase = state_target.Get<KAnimControllerBase>(smi);
+				if (kanimControllerBase != null)
+				{
+					kanimControllerBase.Play(anim_cb(smi), mode, 1f, 0f);
 				}
 			});
 			return this;
@@ -2040,65 +2132,6 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		}
 	}
 
-	public class CreatureFleeSubState<ApproachableType> : GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State where ApproachableType : IApproachable
-	{
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State InitializeStates(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter mover, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state)
-		{
-			this.defaultState = this.plan;
-			base.root.Target(mover).ToggleStatusItem(Db.Get().CreatureStatusItems.Fleeing, null);
-			this.plan.Enter(delegate(StateMachineInstanceType smi)
-			{
-				MasterType master = smi.master;
-				ThreatMonitor.Instance smi2 = master.gameObject.GetSMI<ThreatMonitor.Instance>();
-				StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<GameObject> parameter = this.fleeToTarget;
-				MasterType master2 = smi.master;
-				parameter.Set(CreatureHelpers.GetFleeTargetLocatorObject(master2.gameObject, smi2.GetMainThreat), smi);
-				if (this.fleeToTarget.Get(smi) != null)
-				{
-					smi.GoTo(this.approach);
-				}
-				else
-				{
-					smi.GoTo(this.cower);
-				}
-			});
-			this.approach.InitializeStates(mover, this.fleeToTarget, this.cower, this.cower, null, NavigationTactics.ReduceTravelDistance).Enter(delegate(StateMachineInstanceType smi)
-			{
-				PopFXManager instance = PopFXManager.Instance;
-				Sprite sprite_Plus = PopFXManager.Instance.sprite_Plus;
-				string text = CREATURES.STATUSITEMS.FLEEING.NAME.text;
-				MasterType master3 = smi.master;
-				instance.SpawnFX(sprite_Plus, text, master3.transform, 1.5f, false);
-			});
-			this.cower.Enter(delegate(StateMachineInstanceType smi)
-			{
-				string text2 = "DEFAULT COWER ANIMATION";
-				if (smi.animController.HasAnimation("cower"))
-				{
-					text2 = "cower";
-				}
-				else if (smi.animController.HasAnimation("idle"))
-				{
-					text2 = "idle";
-				}
-				else if (smi.animController.HasAnimation("idle_loop"))
-				{
-					text2 = "idle_loop";
-				}
-				smi.animController.Play(text2, KAnim.PlayMode.Loop, 1f, 0f);
-			}).ScheduleGoTo(2f, success_state);
-			return this;
-		}
-
-		public StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter fleeToTarget;
-
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State plan;
-
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ApproachSubState<IApproachable> approach;
-
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State cower;
-	}
-
 	public class DebugGoToSubState : GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State
 	{
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State InitializeStates(GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State exit_state)
@@ -2181,63 +2214,6 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State hungry;
 	}
 
-	public class IdleMoveSubState : GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State
-	{
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State InitializeStates(GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State exit_state)
-		{
-			base.root.Enter("GoToCursor", delegate(StateMachineInstanceType smi)
-			{
-				this.GoToCursor(smi);
-			}).EventHandler(GameHashes.DebugGoTo, (StateMachineInstanceType smi) => Game.Instance, delegate(StateMachineInstanceType smi)
-			{
-				this.GoToCursor(smi);
-			}).EventTransition(GameHashes.DestinationReached, exit_state, null)
-				.EventTransition(GameHashes.NavigationFailed, exit_state, null);
-			return this;
-		}
-
-		public void GoToCursor(StateMachineInstanceType smi)
-		{
-			GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.IdleMoveSubState.MoveCellQuery moveCellQuery = new GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.IdleMoveSubState.MoveCellQuery(smi.GetComponent<Navigator>().CurrentNavType);
-			smi.GetComponent<Navigator>().RunQuery(moveCellQuery);
-			smi.GetComponent<Navigator>().GoTo(moveCellQuery.GetResultCell(), Grid.DefaultOffset);
-		}
-
-		public class MoveCellQuery : PathFinderQuery
-		{
-			public MoveCellQuery(NavType navType)
-			{
-				this.navType = navType;
-				this.maxIterations = global::UnityEngine.Random.Range(5, 25);
-			}
-
-			public override bool IsMatch(int cell, int parent_cell, int cost)
-			{
-				if (!Grid.IsValidCell(cell))
-				{
-					return false;
-				}
-				if (Grid.IsSubstantialLiquid(cell, 0.35f) == (this.navType == NavType.Swim))
-				{
-					this.targetCell = cell;
-					return --this.maxIterations <= 0;
-				}
-				return false;
-			}
-
-			public override int GetResultCell()
-			{
-				return this.targetCell;
-			}
-
-			private NavType navType;
-
-			private int targetCell = Grid.InvalidCell;
-
-			private int maxIterations;
-		}
-	}
-
 	public class PlantAliveSubState : GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State
 	{
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State InitializeStates(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter plant, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State death_state = null)
@@ -2262,58 +2238,5 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			TemperatureVulnerable component = plant.GetComponent<TemperatureVulnerable>();
 			return !(component == null) && (component.GetInternalTemperatureState == TemperatureVulnerable.TemperatureState.LethalCold || component.GetInternalTemperatureState == TemperatureVulnerable.TemperatureState.LethalHot);
 		}
-	}
-
-	public class TrappedSubState : GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State
-	{
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State InitializeStates(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter target, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State on_escape)
-		{
-			base.Target(target);
-			base.root.DefaultState(this.pre);
-			this.pre.Enter(delegate(StateMachineInstanceType smi)
-			{
-				this.AlignWithTrap(smi);
-				KBatchedAnimController component = smi.GetComponent<KBatchedAnimController>();
-				if (component != null)
-				{
-					component.Play("trapped_pre", KAnim.PlayMode.Once, 1f, 0f);
-				}
-			}).EventTransition(GameHashes.AnimQueueComplete, this.trapped, null);
-			this.trapped.Enter(delegate(StateMachineInstanceType smi)
-			{
-				this.AlignWithTrap(smi);
-				KBatchedAnimController component2 = smi.GetComponent<KBatchedAnimController>();
-				if (component2 != null)
-				{
-					component2.Play("trapped", KAnim.PlayMode.Loop, 1f, 0f);
-				}
-			}).ToggleStatusItem(Db.Get().CreatureStatusItems.Trapped, null).TagTransition(GameTags.Trapped, this.escape, true);
-			this.escape.Enter(delegate(StateMachineInstanceType smi)
-			{
-				KBatchedAnimController component3 = smi.GetComponent<KBatchedAnimController>();
-				if (component3 != null)
-				{
-					component3.Play("escape", KAnim.PlayMode.Once, 1f, 0f);
-				}
-			}).EventTransition(GameHashes.AnimQueueComplete, on_escape, null);
-			return this;
-		}
-
-		private void AlignWithTrap(StateMachineInstanceType smi)
-		{
-			MasterType master = smi.master;
-			Transform parent = master.transform.parent;
-			if (parent != null)
-			{
-				MasterType master2 = smi.master;
-				master2.transform.SetPosition(parent.transform.GetPosition());
-			}
-		}
-
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State pre;
-
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State trapped;
-
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State escape;
 	}
 }

@@ -45,6 +45,10 @@ public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInsta
 			{
 				return;
 			}
+			if (GenericGameSettings.instance.disableGameOver)
+			{
+				return;
+			}
 			bool flag = false;
 			if (Components.LiveMinionIdentities.Count == 0)
 			{

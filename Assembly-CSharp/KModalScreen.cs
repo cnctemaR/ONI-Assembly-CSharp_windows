@@ -94,4 +94,6 @@ public class KModalScreen : KScreen
 	private bool shown;
 
 	public bool pause = true;
+
+	public const float SCREEN_SORT_KEY = 100f;
 }

@@ -1,13 +1,14 @@
 ﻿using System;
 using STRINGS;
+using UnityEngine;
 
 public class NextUpdateTimer : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.nextReleaseDate = new global::System.DateTime(2018, 3, 22, 17, 0, 0, DateTimeKind.Utc);
-		this.currentReleaseDate = new global::System.DateTime(2018, 2, 8, 17, 0, 0, DateTimeKind.Utc);
+		this.nextReleaseDate = new global::System.DateTime(2018, 5, 3, 17, 0, 0, DateTimeKind.Utc);
+		this.currentReleaseDate = new global::System.DateTime(2018, 3, 22, 17, 0, 0, DateTimeKind.Utc);
 		this.initialAnimScale = this.UpdateAnimController.animScale;
 		ScreenResize instance = ScreenResize.Instance;
 		instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.RefreshScale));
@@ -30,12 +31,12 @@ public class NextUpdateTimer : KMonoBehaviour
 		string text2;
 		if (timeSpan2.TotalHours < 8.0)
 		{
-			text = UI.DEVELOPMENTBUILDS.UPDATES.NOW;
+			text = UI.DEVELOPMENTBUILDS.UPDATES.TWENTY_FOUR_HOURS;
 			text2 = "4";
 		}
 		else if (timeSpan2.TotalDays < 1.0)
 		{
-			text = UI.DEVELOPMENTBUILDS.UPDATES.TWENTY_FOUR_HOURS;
+			text = string.Format(UI.DEVELOPMENTBUILDS.UPDATES.FINAL_WEEK, 1);
 			text2 = "3";
 		}
 		else
@@ -56,7 +57,8 @@ public class NextUpdateTimer : KMonoBehaviour
 		this.TimerText.text = text;
 		this.UpdateAnimController.Play(text2, KAnim.PlayMode.Loop, 1f, 0f);
 		double num3 = timeSpan3.TotalSeconds / timeSpan.TotalSeconds;
-		this.UpdateAnimMeterController.SetPositionPercent((float)num3);
+		float num4 = Mathf.Clamp01((float)num3);
+		this.UpdateAnimMeterController.SetPositionPercent(num4);
 	}
 
 	private void RefreshScale()

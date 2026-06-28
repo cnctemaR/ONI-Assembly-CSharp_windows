@@ -40,22 +40,17 @@ public class ElementChunk : KMonoBehaviour
 		Pickupable pickupable = (Pickupable)data;
 		if (pickupable != null)
 		{
-			PrimaryElement component = base.GetComponent<PrimaryElement>();
 			PrimaryElement primaryElement = pickupable.PrimaryElement;
 			if (primaryElement != null)
 			{
-				float num = 0f;
-				float mass = component.Mass;
-				float mass2 = primaryElement.Mass;
-				if (mass > 0f && mass2 > 0f)
+				float mass = primaryElement.Mass;
+				if (mass > 0f)
 				{
-					num = SimUtil.CalculateFinalTemperature(mass, component.Temperature, mass2, primaryElement.Temperature);
+					PrimaryElement component = base.GetComponent<PrimaryElement>();
+					float mass2 = component.Mass;
+					float num = ((mass2 <= 0f) ? primaryElement.Temperature : SimUtil.CalculateFinalTemperature(mass2, component.Temperature, mass, primaryElement.Temperature));
+					component.SetMassTemperature(mass2 + mass, num);
 				}
-				else if (primaryElement.Mass > 0f)
-				{
-					num = primaryElement.Temperature;
-				}
-				component.SetMassTemperature(mass + mass2, num);
 				if (CameraController.Instance != null)
 				{
 					string sound = GlobalAssets.GetSound("Ore_absorb", false);

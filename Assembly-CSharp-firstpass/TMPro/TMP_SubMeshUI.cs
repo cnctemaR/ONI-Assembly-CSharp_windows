@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace TMPro
 {
 	[ExecuteInEditMode]
-	public class TMP_SubMeshUI : MaskableGraphic, ITextElement, IClippable, IMaskable, IMaterialModifier
+	public class TMP_SubMeshUI : MaskableGraphic, IClippable, IMaskable, IMaterialModifier
 	{
 		public TMP_FontAsset fontAsset
 		{
@@ -37,7 +37,7 @@ namespace TMPro
 			{
 				if (this.sharedMaterial != null)
 				{
-					return this.sharedMaterial.mainTexture;
+					return this.sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex);
 				}
 				return null;
 			}
@@ -75,15 +75,45 @@ namespace TMPro
 			}
 		}
 
+		public Material fallbackMaterial
+		{
+			get
+			{
+				return this.m_fallbackMaterial;
+			}
+			set
+			{
+				if (this.m_fallbackMaterial == value)
+				{
+					return;
+				}
+				if (this.m_fallbackMaterial != null && this.m_fallbackMaterial != value)
+				{
+					TMP_MaterialManager.ReleaseFallbackMaterial(this.m_fallbackMaterial);
+				}
+				this.m_fallbackMaterial = value;
+				TMP_MaterialManager.AddFallbackMaterialReference(this.m_fallbackMaterial);
+				this.SetSharedMaterial(this.m_fallbackMaterial);
+			}
+		}
+
+		public Material fallbackSourceMaterial
+		{
+			get
+			{
+				return this.m_fallbackSourceMaterial;
+			}
+			set
+			{
+				this.m_fallbackSourceMaterial = value;
+			}
+		}
+
 		public override Material materialForRendering
 		{
 			get
 			{
-				if (this.m_sharedMaterial == null)
-				{
-					return null;
-				}
-				return this.GetModifiedMaterial(this.m_sharedMaterial);
+				return TMP_MaterialManager.GetMaterialForRendering(this, this.m_sharedMaterial);
 			}
 		}
 
@@ -130,7 +160,6 @@ namespace TMPro
 				if (this.m_mesh == null)
 				{
 					this.m_mesh = new Mesh();
-					this.m_mesh.name = "TMPro";
 					this.m_mesh.hideFlags = HideFlags.HideAndDontSave;
 				}
 				return this.m_mesh;
@@ -143,14 +172,14 @@ namespace TMPro
 
 		public static TMP_SubMeshUI AddSubTextObject(TextMeshProUGUI textComponent, MaterialReference materialReference)
 		{
-			GameObject gameObject = new GameObject("TMP UI SubObject [" + materialReference.material.name + "]");
+			GameObject gameObject = new GameObject("TMP UI SubObject [" + materialReference.material.name + "]", new Type[] { typeof(RectTransform) });
 			gameObject.transform.SetParent(textComponent.transform, false);
 			gameObject.layer = textComponent.gameObject.layer;
-			RectTransform rectTransform = gameObject.AddComponent<RectTransform>();
-			rectTransform.anchorMin = Vector2.zero;
-			rectTransform.anchorMax = Vector2.one;
-			rectTransform.sizeDelta = Vector2.zero;
-			rectTransform.pivot = textComponent.rectTransform.pivot;
+			RectTransform component = gameObject.GetComponent<RectTransform>();
+			component.anchorMin = Vector2.zero;
+			component.anchorMax = Vector2.one;
+			component.sizeDelta = Vector2.zero;
+			component.pivot = textComponent.rectTransform.pivot;
 			TMP_SubMeshUI tmp_SubMeshUI = gameObject.AddComponent<TMP_SubMeshUI>();
 			tmp_SubMeshUI.m_canvasRenderer = tmp_SubMeshUI.canvasRenderer;
 			tmp_SubMeshUI.m_TextComponent = textComponent;
@@ -184,6 +213,7 @@ namespace TMPro
 			if (this.m_fallbackMaterial != null)
 			{
 				TMP_MaterialManager.ReleaseFallbackMaterial(this.m_fallbackMaterial);
+				this.m_fallbackMaterial = null;
 			}
 			base.OnDisable();
 		}
@@ -278,6 +308,10 @@ namespace TMPro
 		{
 			this.m_materialDirty = true;
 			this.UpdateMaterial();
+			if (this.m_OnDirtyMaterialCallback != null)
+			{
+				this.m_OnDirtyMaterialCallback();
+			}
 		}
 
 		public void SetPivotDirty()
@@ -289,8 +323,18 @@ namespace TMPro
 			base.rectTransform.pivot = this.m_TextComponent.rectTransform.pivot;
 		}
 
+		public override void Cull(Rect clipRect, bool validRect)
+		{
+			if (this.m_TextComponent.ignoreRectMaskCulling)
+			{
+				return;
+			}
+			base.Cull(clipRect, validRect);
+		}
+
 		protected override void UpdateGeometry()
 		{
+			global::Debug.Log("UpdateGeometry()", null);
 		}
 
 		public override void Rebuild(CanvasUpdate update)
@@ -377,11 +421,6 @@ namespace TMPro
 			this.SetMaterialDirty();
 		}
 
-		int ITextElement.GetInstanceID()
-		{
-			return base.GetInstanceID();
-		}
-
 		[SerializeField]
 		private TMP_FontAsset m_fontAsset;
 
@@ -394,7 +433,9 @@ namespace TMPro
 		[SerializeField]
 		private Material m_sharedMaterial;
 
-		internal Material m_fallbackMaterial;
+		private Material m_fallbackMaterial;
+
+		private Material m_fallbackSourceMaterial;
 
 		[SerializeField]
 		private bool m_isDefaultMaterial;

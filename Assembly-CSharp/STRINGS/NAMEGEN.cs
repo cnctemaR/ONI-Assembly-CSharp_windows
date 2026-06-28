@@ -728,6 +728,19 @@ namespace STRINGS
 				public static LocString ASHES_TO_ASHES_STARDUST_TO_STARDUST = "Ashes to ashes, stardust to stardust.";
 
 				public static LocString NOW_WELL_NEVER_KNOW_WHERE_THEY_BURIED_THE_TREASURE = "Now we'll never know where they buried the treasure.";
+
+				public static LocString ALL_GOOD_THINGS = "All good things must come to an end.";
+			}
+
+			public class PETITAPHS
+			{
+				public static LocString GOOD_BOY = "They were the goodest boy.";
+
+				public static LocString GOOD_GIRL = "They were the goodest girl.";
+
+				public static LocString FARM = "Gone to the farm in the sky.";
+
+				public static LocString BELOVED_PET = "Beloved pet and friend.";
 			}
 		}
 	}

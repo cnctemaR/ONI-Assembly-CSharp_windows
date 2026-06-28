@@ -56,7 +56,7 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 		int num = Grid.CellAbove(this.NaturalBuildingCell());
 		if (Grid.Solid[num])
 		{
-			this.massSolid = Grid.Cell[num].mass;
+			this.massSolid = Grid.Mass[num];
 		}
 		else
 		{

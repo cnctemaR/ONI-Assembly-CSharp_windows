@@ -44,6 +44,19 @@ public class AnimEventManager
 		return handle3;
 	}
 
+	public void SetMode(HandleVector<int>.Handle handle, KAnim.PlayMode mode)
+	{
+		if (!handle.IsValid())
+		{
+			return;
+		}
+		AnimEventManager.IndirectionData data = this.indirectionData.GetData(handle);
+		KCompactedVector<AnimEventManager.EventPlayerData> kcompactedVector = ((!data.isUIData) ? this.eventData : this.uiEventData);
+		AnimEventManager.EventPlayerData data2 = kcompactedVector.GetData(data.eventDataHandle);
+		data2.mode = mode;
+		kcompactedVector.SetData(data.eventDataHandle, data2);
+	}
+
 	public void StopAnim(HandleVector<int>.Handle handle)
 	{
 		if (!handle.IsValid())

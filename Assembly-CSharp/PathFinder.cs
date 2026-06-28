@@ -11,6 +11,25 @@ public class PathFinder
 			array[i] = (NavType)i;
 		}
 		PathFinder.PathGrid = new PathGrid(Grid.WidthInCells, Grid.HeightInCells, false, array);
+		for (int j = 0; j < Grid.CellCount; j++)
+		{
+			if (Grid.Visible[j] > 0 || Grid.Spawnable[j] > 0)
+			{
+				List<int> list = ListPool<int, PathFinder>.Allocate();
+				GameUtil.FloodFillConditional(j, PathFinder.allowPathfindingFloodFillCb, list);
+				Grid.AllowPathfinding[j] = true;
+				ListPool<int, PathFinder>.Free(list);
+			}
+		}
+		Grid.OnReveal = (Action<int>)Delegate.Combine(Grid.OnReveal, new Action<int>(PathFinder.OnReveal));
+	}
+
+	private static void OnReveal(int cell)
+	{
+		List<int> list = ListPool<int, PathFinder>.Allocate();
+		GameUtil.FloodFillConditional(cell, PathFinder.allowPathfindingFloodFillCb, list);
+		Grid.AllowPathfinding[cell] = true;
+		ListPool<int, PathFinder>.Free(list);
 	}
 
 	public static void UpdatePath(NavGrid nav_grid, PathFinderAbilities abilities, PathFinder.PotentialPath potential_path, PathFinderQuery query, ref PathFinder.Path path)
@@ -227,6 +246,20 @@ public class PathFinder
 	public static int QueryId;
 
 	public static PathGrid PathGrid;
+
+	private static Func<int, bool> allowPathfindingFloodFillCb = delegate(int cell)
+	{
+		if (Grid.Solid[cell])
+		{
+			return false;
+		}
+		if (Grid.AllowPathfinding[cell])
+		{
+			return false;
+		}
+		Grid.AllowPathfinding[cell] = true;
+		return true;
+	};
 
 	public struct Cell
 	{

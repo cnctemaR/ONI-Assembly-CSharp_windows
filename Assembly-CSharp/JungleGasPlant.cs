@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using UnityEngine;
 
 public class JungleGasPlant : StateMachineComponent<JungleGasPlant.StatesInstance>
@@ -50,7 +51,11 @@ public class JungleGasPlant : StateMachineComponent<JungleGasPlant.StatesInstanc
 					smi.GoTo(this.alive.seed_grow);
 				}
 			});
-			this.dead.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).Enter(delegate(JungleGasPlant.StatesInstance smi)
+			GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant, object>.State state = this.dead;
+			string text = CREATURES.STATUSITEMS.DEAD.NAME;
+			string text2 = CREATURES.STATUSITEMS.DEAD.TOOLTIP;
+			StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+			state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, main).Enter(delegate(JungleGasPlant.StatesInstance smi)
 			{
 				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
 				smi.master.Trigger(1623392196, null);

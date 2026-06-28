@@ -26,6 +26,8 @@ namespace STRINGS
 
 			public static LocString ATTACK = "Attack";
 
+			public static LocString CAPTURE = "Capture";
+
 			public static LocString HARVEST = "Harvest";
 
 			public static LocString PRIORITIZE = "Prioritize";
@@ -128,6 +130,8 @@ namespace STRINGS
 
 			public static LocString MANAGEREPORT = "ManageReport";
 
+			public static LocString MANAGECODEX = "ManageCodex";
+
 			public static LocString MANAGEROLES = "ManageRoles";
 		}
 
@@ -200,10 +204,6 @@ namespace STRINGS
 
 			public static LocString DEBUGPATHFINDING = "DebugPathFinding";
 
-			public static LocString DEBUGRELOADMODS = "DebugReloadMods";
-
-			public static LocString DEBUGRELOADLEVEL = "DebugReloadLevel";
-
 			public static LocString DEBUGSUPERSPEED = "DebugSuperSpeed";
 
 			public static LocString DEBUGGAMESTEP = "DebugGameStep";
@@ -239,6 +239,8 @@ namespace STRINGS
 			public static LocString SREENSHOT8X = "SreenShot8x";
 
 			public static LocString SREENSHOT32X = "SreenShot32x";
+
+			public static LocString DEBUGTOGGLEPERSONALPRIORITYCOMPARISON = "DebugTogglePersonalPriorityComparison";
 
 			public static LocString DEBUGREPORTBUG = "DebugReportBug";
 		}

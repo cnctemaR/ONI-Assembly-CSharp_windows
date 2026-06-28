@@ -143,6 +143,26 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.partitioner.GatherEntries(x_bottomLeft, y_bottomLeft, width, height, layer, null, gathered_entries);
 	}
 
+	public void Iterate<IteratorType>(int x, int y, int width, int height, ScenePartitionerLayer layer, ref IteratorType iterator) where IteratorType : GameScenePartitioner.Iterator
+	{
+		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+		GameScenePartitioner.Instance.GatherEntries(x, y, width, height, layer, list);
+		for (int i = 0; i < list.Count; i++)
+		{
+			ScenePartitionerEntry scenePartitionerEntry = list[i];
+			iterator.Iterate(scenePartitionerEntry.obj);
+		}
+		ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
+	}
+
+	public void Iterate<IteratorType>(int cell, int radius, ScenePartitionerLayer layer, ref IteratorType iterator) where IteratorType : GameScenePartitioner.Iterator
+	{
+		int num = 0;
+		int num2 = 0;
+		Grid.CellToXY(cell, out num, out num2);
+		this.Iterate<IteratorType>(num - radius, num2 - radius, radius * 2, radius * 2, layer, ref iterator);
+	}
+
 	private void OnValidNavCellChanged(int cell, NavType nav_type)
 	{
 		this.changedCells.Add(cell);
@@ -214,4 +234,11 @@ public class GameScenePartitioner : KMonoBehaviour
 	private static GameScenePartitioner instance;
 
 	private List<int> changedCells = new List<int>();
+
+	public interface Iterator
+	{
+		void Iterate(object obj);
+
+		void Cleanup();
+	}
 }

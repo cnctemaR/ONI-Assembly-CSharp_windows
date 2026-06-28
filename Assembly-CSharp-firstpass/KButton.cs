@@ -12,6 +12,9 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onDoubleClick;
 
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event Action<KKeyCode> onBtnClick;
+
 	public bool isInteractable
 	{
 		get
@@ -42,6 +45,7 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 	public void ClearOnClick()
 	{
 		this.onClick = null;
+		this.onBtnClick = null;
 		this.onDoubleClick = null;
 	}
 
@@ -71,17 +75,24 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 		this.PlayPointerDownSound();
 	}
 
-	public void SignalClick()
+	public void SignalClick(KKeyCode btn)
 	{
 		if (this.interactable)
 		{
-			this.onClick();
+			if (this.onClick != null)
+			{
+				this.onClick();
+			}
+			if (this.onBtnClick != null)
+			{
+				this.onBtnClick(btn);
+			}
 		}
 	}
 
-	public void SignalDoubleClick()
+	public void SignalDoubleClick(KKeyCode btn)
 	{
-		if (this.interactable)
+		if (this.interactable && this.onDoubleClick != null)
 		{
 			this.onDoubleClick();
 		}
@@ -96,13 +107,33 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 		KInputManager.SetUserActive();
 		if (this.interactable)
 		{
-			if ((eventData.clickCount == 1 || this.onDoubleClick == null) && this.onClick != null)
+			KKeyCode kkeyCode = KKeyCode.None;
+			PointerEventData.InputButton button = eventData.button;
+			if (button != PointerEventData.InputButton.Left)
 			{
-				this.SignalClick();
+				if (button != PointerEventData.InputButton.Right)
+				{
+					if (button == PointerEventData.InputButton.Middle)
+					{
+						kkeyCode = KKeyCode.Mouse2;
+					}
+				}
+				else
+				{
+					kkeyCode = KKeyCode.Mouse1;
+				}
+			}
+			else
+			{
+				kkeyCode = KKeyCode.Mouse0;
+			}
+			if ((eventData.clickCount == 1 || this.onDoubleClick == null) && (this.onClick != null || this.onBtnClick != null))
+			{
+				this.SignalClick(kkeyCode);
 			}
 			else if (eventData.clickCount == 2 && this.onDoubleClick != null)
 			{
-				this.SignalDoubleClick();
+				this.SignalDoubleClick(kkeyCode);
 			}
 		}
 	}
@@ -217,6 +248,8 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 	[SerializeField]
 	public ButtonSoundPlayer soundPlayer;
 
+	[HideInInspector]
+	[Tooltip("Don't use this field it is misleading, you need to specify the color style setting on the associate bg image")]
 	public ColorStyleSetting colorStyleSetting;
 
 	public KImage bgImage;

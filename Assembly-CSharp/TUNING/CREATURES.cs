@@ -6,6 +6,8 @@ namespace TUNING
 	{
 		public const int DEFAULT_PROBING_RADIUS = 32;
 
+		public const float INCUBATOR_INCUBATION_RATE = 0.016666668f;
+
 		public class HITPOINTS
 		{
 			public const float TIER0 = 5f;
@@ -44,6 +46,13 @@ namespace TUNING
 			public static float HOT_2 = 323f;
 
 			public static float HOT_3 = 333f;
+		}
+
+		public class DOMESTICATION_RATE
+		{
+			public const float INCREASING = 0.8333333f;
+
+			public const float DECREASING = -0.8333333f;
 		}
 	}
 }

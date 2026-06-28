@@ -7,13 +7,11 @@ namespace Klei.AI
 	[DebuggerDisplay("{Id}")]
 	public class Amount : Resource
 	{
-		public Amount(string id, string name, string description, float starting_min, float starting_max, Attribute min_attribute, Attribute max_attribute, Attribute delta_attribute, bool show_max, Units units, float visual_delta_threshold, bool show_in_ui)
+		public Amount(string id, string name, string description, Attribute min_attribute, Attribute max_attribute, Attribute delta_attribute, bool show_max, Units units, float visual_delta_threshold, bool show_in_ui)
 		{
 			this.Id = id;
 			this.Name = name;
 			this.description = description;
-			this.startingMin = starting_min;
-			this.startingMax = starting_max;
 			this.minAttribute = min_attribute;
 			this.maxAttribute = max_attribute;
 			this.deltaAttribute = delta_attribute;
@@ -62,10 +60,6 @@ namespace Klei.AI
 		}
 
 		public string description;
-
-		public float startingMin;
-
-		public float startingMax;
 
 		public bool showMax;
 

@@ -376,6 +376,11 @@ namespace ProcGenGame
 			return !tc.node.tags.Contains(WorldGenTags.StartLocation) && !tc.node.tags.Contains(WorldGenTags.NearStartLocation) && !tc.node.tags.Contains(WorldGenTags.POI) && !tc.node.tags.Contains(WorldGenTags.AtEdge) && !tc.node.tags.Contains(WorldGenTags.AtDepths) && !tc.node.tags.Contains(WorldGenTags.AtSurface);
 		}
 
+		public bool IsSafeToSpawnFeatureTemplate(TerrainCell tc)
+		{
+			return !tc.node.tags.Contains(WorldGenTags.StartLocation) && !tc.node.tags.Contains(WorldGenTags.NearStartLocation) && !tc.node.tags.Contains(WorldGenTags.POI) && !tc.node.tags.Contains(WorldGenTags.AtEdge) && !tc.node.tags.Contains(WorldGenTags.AtDepths) && !tc.node.tags.Contains(WorldGenTags.AtSurface);
+		}
+
 		public KeyValuePair<Vector2I, TemplateContainer> GetPOISpawnTarget(Sim.Cell[] cells, TerrainCell tc, List<TemplateContainer> poi)
 		{
 			KeyValuePair<Vector2I, TemplateContainer> keyValuePair = new KeyValuePair<Vector2I, TemplateContainer>(new Vector2I(-1, -1), null);
@@ -466,13 +471,13 @@ namespace ProcGenGame
 						}
 						if (terrainCellsForTag2.Count > 0)
 						{
-							string template = null;
+							string template2 = null;
 							TemplateContainer templateContainer = null;
 							int num = 0;
 							while (templateContainer == null && num < keyValuePair.Value.Length)
 							{
-								template = keyValuePair.Value[this.myRandom.RandomRange(0, keyValuePair.Value.Length)];
-								templateContainer = list2.Find((TemplateContainer value) => value.name == template);
+								template2 = keyValuePair.Value[this.myRandom.RandomRange(0, keyValuePair.Value.Length)];
+								templateContainer = list2.Find((TemplateContainer value) => value.name == template2);
 								num++;
 							}
 							if (templateContainer != null)
@@ -480,8 +485,45 @@ namespace ProcGenGame
 								list2.Remove(templateContainer);
 								TerrainCell terrainCell2 = terrainCellsForTag2[this.myRandom.RandomRange(0, terrainCellsForTag2.Count)];
 								list.Add(new KeyValuePair<Vector2I, TemplateContainer>(new Vector2I((int)terrainCell2.poly.Centroid().x, (int)terrainCell2.poly.Centroid().y), templateContainer));
-								terrainCell2.node.tags.Add(template.ToTag());
+								terrainCell2.node.tags.Add(template2.ToTag());
 								terrainCell2.node.tags.Add(WorldGenTags.POI);
+							}
+						}
+					}
+				}
+			}
+			List<TemplateContainer> list3 = TemplateCache.CollectBaseTemplateAssets("features/");
+			foreach (SubWorld subWorld2 in WorldGen.Settings.GetSubWorldList())
+			{
+				if (subWorld2.featureTemplates != null && subWorld2.featureTemplates.Count > 0)
+				{
+					List<string> list4 = new List<string>();
+					foreach (KeyValuePair<string, int> keyValuePair2 in subWorld2.featureTemplates)
+					{
+						for (int j = 0; j < keyValuePair2.Value; j++)
+						{
+							list4.Add(keyValuePair2.Key);
+						}
+					}
+					list4.ShuffleSeeded<string>(this.myRandom.RandomSource());
+					List<TerrainCell> terrainCellsForTag3 = WorldGen.GetTerrainCellsForTag(subWorld2.name.ToTag());
+					terrainCellsForTag3.ShuffleSeeded<TerrainCell>(this.myRandom.RandomSource());
+					foreach (TerrainCell terrainCell3 in terrainCellsForTag3)
+					{
+						if (list4.Count == 0)
+						{
+							break;
+						}
+						if (this.IsSafeToSpawnFeatureTemplate(terrainCell3))
+						{
+							string template = list4[list4.Count - 1];
+							list4.RemoveAt(list4.Count - 1);
+							TemplateContainer templateContainer2 = list3.Find((TemplateContainer value) => value.name == template);
+							if (templateContainer2 != null)
+							{
+								list.Add(new KeyValuePair<Vector2I, TemplateContainer>(new Vector2I((int)terrainCell3.poly.Centroid().x, (int)terrainCell3.poly.Centroid().y), templateContainer2));
+								terrainCell3.node.tags.Add(template.ToTag());
+								terrainCell3.node.tags.Add(WorldGenTags.POI);
 							}
 						}
 					}
@@ -497,52 +539,52 @@ namespace ProcGenGame
 			}
 			MobSpawning.DetectNaturalCavities(WorldGen.successCallbackFn);
 			SeededRandom seededRandom = new SeededRandom(WorldGen.data.globalTerrainSeed);
-			for (int j = 0; j < WorldGen.TerrainCells.Count; j++)
+			for (int k = 0; k < WorldGen.TerrainCells.Count; k++)
 			{
-				float num3 = (float)j / (float)WorldGen.TerrainCells.Count * 100f;
+				float num3 = (float)k / (float)WorldGen.TerrainCells.Count * 100f;
 				WorldGen.successCallbackFn(UI.WORLDGEN.PLACINGCREATURES.key, num3, WorldGenProgressStages.Stages.PlacingCreatures);
-				TerrainCell terrainCell3 = WorldGen.TerrainCells[j];
-				Dictionary<int, string> dictionary = MobSpawning.PlaceAmbientMobs(terrainCell3, seededRandom, array, array2, dc, hashSet);
+				TerrainCell terrainCell4 = WorldGen.TerrainCells[k];
+				Dictionary<int, string> dictionary = MobSpawning.PlaceAmbientMobs(terrainCell4, seededRandom, array, array2, dc, hashSet);
 				if (dictionary != null)
 				{
 					WorldGen.data.gameSpawnData.AddRange(dictionary);
 				}
 			}
 			WorldGen.successCallbackFn(UI.WORLDGEN.PLACINGCREATURES.key, 100f, WorldGenProgressStages.Stages.PlacingCreatures);
-			foreach (KeyValuePair<Vector2I, TemplateContainer> keyValuePair2 in list)
+			foreach (KeyValuePair<Vector2I, TemplateContainer> keyValuePair3 in list)
 			{
-				this.PlaceTemplateSpawners(keyValuePair2.Key, keyValuePair2.Value);
+				this.PlaceTemplateSpawners(keyValuePair3.Key, keyValuePair3.Value);
 			}
-			for (int k = WorldGen.data.gameSpawnData.buildings.Count - 1; k >= 0; k--)
+			for (int l = WorldGen.data.gameSpawnData.buildings.Count - 1; l >= 0; l--)
 			{
-				int num4 = Grid.XYToCell(WorldGen.data.gameSpawnData.buildings[k].location_x, WorldGen.data.gameSpawnData.buildings[k].location_y);
+				int num4 = Grid.XYToCell(WorldGen.data.gameSpawnData.buildings[l].location_x, WorldGen.data.gameSpawnData.buildings[l].location_y);
 				if (hashSet.Contains(num4))
 				{
-					WorldGen.data.gameSpawnData.buildings.RemoveAt(k);
+					WorldGen.data.gameSpawnData.buildings.RemoveAt(l);
 				}
 			}
-			for (int l = WorldGen.data.gameSpawnData.elementalOres.Count - 1; l >= 0; l--)
+			for (int m = WorldGen.data.gameSpawnData.elementalOres.Count - 1; m >= 0; m--)
 			{
-				int num5 = Grid.XYToCell(WorldGen.data.gameSpawnData.elementalOres[l].location_x, WorldGen.data.gameSpawnData.elementalOres[l].location_y);
+				int num5 = Grid.XYToCell(WorldGen.data.gameSpawnData.elementalOres[m].location_x, WorldGen.data.gameSpawnData.elementalOres[m].location_y);
 				if (hashSet.Contains(num5))
 				{
-					WorldGen.data.gameSpawnData.elementalOres.RemoveAt(l);
+					WorldGen.data.gameSpawnData.elementalOres.RemoveAt(m);
 				}
 			}
-			for (int m = WorldGen.data.gameSpawnData.otherEntities.Count - 1; m >= 0; m--)
+			for (int n = WorldGen.data.gameSpawnData.otherEntities.Count - 1; n >= 0; n--)
 			{
-				int num6 = Grid.XYToCell(WorldGen.data.gameSpawnData.otherEntities[m].location_x, WorldGen.data.gameSpawnData.otherEntities[m].location_y);
+				int num6 = Grid.XYToCell(WorldGen.data.gameSpawnData.otherEntities[n].location_x, WorldGen.data.gameSpawnData.otherEntities[n].location_y);
 				if (hashSet.Contains(num6))
 				{
-					WorldGen.data.gameSpawnData.otherEntities.RemoveAt(m);
+					WorldGen.data.gameSpawnData.otherEntities.RemoveAt(n);
 				}
 			}
-			for (int n = WorldGen.data.gameSpawnData.pickupables.Count - 1; n >= 0; n--)
+			for (int num7 = WorldGen.data.gameSpawnData.pickupables.Count - 1; num7 >= 0; num7--)
 			{
-				int num7 = Grid.XYToCell(WorldGen.data.gameSpawnData.pickupables[n].location_x, WorldGen.data.gameSpawnData.pickupables[n].location_y);
-				if (hashSet.Contains(num7))
+				int num8 = Grid.XYToCell(WorldGen.data.gameSpawnData.pickupables[num7].location_x, WorldGen.data.gameSpawnData.pickupables[num7].location_y);
+				if (hashSet.Contains(num8))
 				{
-					WorldGen.data.gameSpawnData.pickupables.RemoveAt(n);
+					WorldGen.data.gameSpawnData.pickupables.RemoveAt(num7);
 				}
 			}
 			WorldGen.SaveWorldGen();

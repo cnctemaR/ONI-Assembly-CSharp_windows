@@ -104,6 +104,10 @@ public class RoomProber : ISim1000ms
 					if (this.floodFiller.NumCells > 0)
 					{
 						cavityInfo2.numCells = this.floodFiller.NumCells;
+						cavityInfo2.minX = this.floodFiller.MinX;
+						cavityInfo2.minY = this.floodFiller.MinY;
+						cavityInfo2.maxX = this.floodFiller.MaxX;
+						cavityInfo2.maxY = this.floodFiller.MaxY;
 						cavityInfo = this.CreateNewCavity();
 					}
 				}
@@ -358,6 +362,17 @@ public class RoomProber : ISim1000ms
 		return cavityForCell.room;
 	}
 
+	public bool IsInRoomType(GameObject go, RoomType checkType)
+	{
+		Room roomOfBuilding = this.GetRoomOfBuilding(go);
+		if (roomOfBuilding != null)
+		{
+			RoomType roomType = Db.Get().RoomTypes.GetRoomType(roomOfBuilding);
+			return checkType == roomType;
+		}
+		return false;
+	}
+
 	private CavityInfo GetCavityInfo(HandleVector<int>.Handle id)
 	{
 		CavityInfo cavityInfo = null;
@@ -407,6 +422,10 @@ public class RoomProber : ISim1000ms
 		{
 			this.cavityID = search_id;
 			this.numCells = 0;
+			this.minX = int.MaxValue;
+			this.minY = int.MaxValue;
+			this.maxX = 0;
+			this.maxY = 0;
 		}
 
 		private static bool IsWall(int cell)
@@ -421,6 +440,13 @@ public class RoomProber : ISim1000ms
 			{
 				flag = true;
 				this.grid[flood_cell] = this.cavityID;
+				int num = 0;
+				int num2 = 0;
+				Grid.CellToXY(flood_cell, out num, out num2);
+				this.minX = Math.Min(num, this.minX);
+				this.minY = Math.Min(num2, this.minY);
+				this.maxX = Math.Max(num, this.maxX);
+				this.maxY = Math.Max(num2, this.maxY);
 				this.numCells++;
 			}
 			else
@@ -438,10 +464,50 @@ public class RoomProber : ISim1000ms
 			}
 		}
 
+		public int MinX
+		{
+			get
+			{
+				return this.minX;
+			}
+		}
+
+		public int MinY
+		{
+			get
+			{
+				return this.minY;
+			}
+		}
+
+		public int MaxX
+		{
+			get
+			{
+				return this.maxX;
+			}
+		}
+
+		public int MaxY
+		{
+			get
+			{
+				return this.maxY;
+			}
+		}
+
 		private HandleVector<int>.Handle[] grid;
 
 		private HandleVector<int>.Handle cavityID;
 
 		private int numCells;
+
+		private int minX;
+
+		private int minY;
+
+		private int maxX;
+
+		private int maxY;
 	}
 }

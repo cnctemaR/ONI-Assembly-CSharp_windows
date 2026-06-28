@@ -13,7 +13,8 @@ namespace Database
 			this.Neutral = base.Add(new RoomType("Neutral", ROOMS.TYPES.NEUTRAL.NAME, ROOMS.TYPES.NEUTRAL.TOOLTIP, ROOMS.TYPES.NEUTRAL.EFFECT, Db.Get().RoomTypeCategories.None, null, null, new RoomDetails.Detail[]
 			{
 				RoomDetails.SIZE,
-				RoomDetails.BUILDING_COUNT
+				RoomDetails.BUILDING_COUNT,
+				RoomDetails.CREATURE_COUNT
 			}, 0, false, false));
 			this.Latrine = base.Add(new RoomType("Latrine", ROOMS.TYPES.LATRINE.NAME, ROOMS.TYPES.LATRINE.TOOLTIP, ROOMS.TYPES.LATRINE.EFFECT, Db.Get().RoomTypeCategories.Bathroom, RoomConstraints.TOILET, new RoomConstraints.Constraint[]
 			{
@@ -75,6 +76,16 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
+			}, 2, true, true));
+			this.CreaturePen = base.Add(new RoomType("CreaturePen", ROOMS.TYPES.CREATUREPEN.NAME, ROOMS.TYPES.CREATUREPEN.TOOLTIP, ROOMS.TYPES.CREATUREPEN.EFFECT, Db.Get().RoomTypeCategories.Agricultural, RoomConstraints.RANCH_STATION, new RoomConstraints.Constraint[]
+			{
+				RoomConstraints.MINIMUM_SIZE_12,
+				RoomConstraints.MAXIMUM_SIZE_96
+			}, new RoomDetails.Detail[]
+			{
+				RoomDetails.SIZE,
+				RoomDetails.BUILDING_COUNT,
+				RoomDetails.CREATURE_COUNT
 			}, 2, true, true));
 			this.MachineShop = new RoomType("MachineShop", ROOMS.TYPES.MACHINE_SHOP.NAME, ROOMS.TYPES.MACHINE_SHOP.TOOLTIP, ROOMS.TYPES.MACHINE_SHOP.EFFECT, Db.Get().RoomTypeCategories.Industrial, RoomConstraints.MACHINE_SHOP, new RoomConstraints.Constraint[]
 			{
@@ -244,6 +255,8 @@ namespace Database
 		public RoomType PowerPlant;
 
 		public RoomType Farm;
+
+		public RoomType CreaturePen;
 
 		public RoomType MachineShop;
 

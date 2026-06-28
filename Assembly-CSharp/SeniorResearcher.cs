@@ -18,7 +18,8 @@ public class SeniorResearcher : RoleConfig
 		base.perks = new RolePerk[]
 		{
 			RoleManager.rolePerks.IncreaseLearningLarge,
-			RoleManager.rolePerks.AllowAdvancedResearch
+			RoleManager.rolePerks.AllowAdvancedResearch,
+			RoleManager.rolePerks.CanStudyWorldObjects
 		};
 	}
 

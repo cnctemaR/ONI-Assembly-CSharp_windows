@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F6795567-677B-4A70-90E4-C4B9FA7408DA}</ProjectGuid>
+    <ProjectGuid>{85578E79-8B2C-48A0-98D0-49943CC2A3AD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -66,6 +66,7 @@
     <Compile Include="CmpUtil.cs" />
     <Compile Include="ColorStyleSetting.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="ContainerPool.cs" />
     <Compile Include="CoroutineManager.cs" />
     <Compile Include="CSVUtil.cs" />
     <Compile Include="Debug.cs" />
@@ -382,6 +383,7 @@
     <Compile Include="HashCache.cs" />
     <Compile Include="HashedEnumAttribute.cs" />
     <Compile Include="HashedString.cs" />
+    <Compile Include="HashSetPool.cs" />
     <Compile Include="HighlightOnHover.cs" />
     <Compile Include="HoverCallback.cs" />
     <Compile Include="HUSL\ColorConverter.cs" />
@@ -1070,6 +1072,7 @@
     <Compile Include="Timer.cs" />
     <Compile Include="TMPro\CaretInfo.cs" />
     <Compile Include="TMPro\CaretPosition.cs" />
+    <Compile Include="TMPro\ColorTween.cs" />
     <Compile Include="TMPro\Compute_DistanceTransform_EventTypes.cs" />
     <Compile Include="TMPro\Compute_DT_EventArgs.cs" />
     <Compile Include="TMPro\Extents.cs" />
@@ -1078,13 +1081,15 @@
     <Compile Include="TMPro\FastAction.3.cs" />
     <Compile Include="TMPro\FastAction.4.cs" />
     <Compile Include="TMPro\FastAction.cs" />
+    <Compile Include="TMPro\FloatTween.cs" />
     <Compile Include="TMPro\FontCreationSetting.cs" />
     <Compile Include="TMPro\FontStyles.cs" />
     <Compile Include="TMPro\FontWeights.cs" />
-    <Compile Include="TMPro\Glyph2D.cs" />
+    <Compile Include="TMPro\GlyphValueRecord.cs" />
     <Compile Include="TMPro\InlineGraphic.cs" />
     <Compile Include="TMPro\InlineGraphicManager.cs" />
     <Compile Include="TMPro\ITextElement.cs" />
+    <Compile Include="TMPro\ITweenValue.cs" />
     <Compile Include="TMPro\KerningPair.cs" />
     <Compile Include="TMPro\KerningPairKey.cs" />
     <Compile Include="TMPro\KerningTable.cs" />
@@ -1095,6 +1100,8 @@
     <Compile Include="TMPro\Mesh_Extents.cs" />
     <Compile Include="TMPro\SetPropertyUtility.cs" />
     <Compile Include="TMPro\ShaderUtilities.cs" />
+    <Compile Include="TMPro\SpriteAssetUtilities\SpriteAssetImportFormats.cs" />
+    <Compile Include="TMPro\SpriteAssetUtilities\TexturePacker.cs" />
     <Compile Include="TMPro\TagAttribute.cs" />
     <Compile Include="TMPro\TagType.cs" />
     <Compile Include="TMPro\TagUnits.cs" />
@@ -1109,13 +1116,18 @@
     <Compile Include="TMPro\TMPro_EventManager.cs" />
     <Compile Include="TMPro\TMPro_ExtensionMethods.cs" />
     <Compile Include="TMPro\TMP_Asset.cs" />
+    <Compile Include="TMPro\TMP_BasicXmlTagStack.cs" />
     <Compile Include="TMPro\TMP_CharacterInfo.cs" />
+    <Compile Include="TMPro\TMP_ColorGradient.cs" />
     <Compile Include="TMPro\TMP_Compatibility.cs" />
     <Compile Include="TMPro\TMP_DefaultControls.cs" />
+    <Compile Include="TMPro\TMP_Dropdown.cs" />
     <Compile Include="TMPro\TMP_FontAsset.cs" />
+    <Compile Include="TMPro\TMP_FontUtilities.cs" />
     <Compile Include="TMPro\TMP_FontWeights.cs" />
     <Compile Include="TMPro\TMP_Glyph.cs" />
     <Compile Include="TMPro\TMP_InputField.cs" />
+    <Compile Include="TMPro\TMP_InputValidator.cs" />
     <Compile Include="TMPro\TMP_LineInfo.cs" />
     <Compile Include="TMPro\TMP_LinkInfo.cs" />
     <Compile Include="TMPro\TMP_ListPool.cs" />
@@ -1124,8 +1136,12 @@
     <Compile Include="TMPro\TMP_MeshInfo.cs" />
     <Compile Include="TMPro\TMP_ObjectPool.cs" />
     <Compile Include="TMPro\TMP_PageInfo.cs" />
+    <Compile Include="TMPro\TMP_PhoneNumberValidator.cs" />
+    <Compile Include="TMPro\TMP_ScrollbarEventHandler.cs" />
+    <Compile Include="TMPro\TMP_SelectionCaret.cs" />
     <Compile Include="TMPro\TMP_Settings.cs" />
     <Compile Include="TMPro\TMP_Sprite.cs" />
+    <Compile Include="TMPro\TMP_SpriteAnimator.cs" />
     <Compile Include="TMPro\TMP_SpriteAsset.cs" />
     <Compile Include="TMPro\TMP_SpriteInfo.cs" />
     <Compile Include="TMPro\TMP_Style.cs" />
@@ -1143,9 +1159,13 @@
     <Compile Include="TMPro\TMP_VertexDataUpdateFlags.cs" />
     <Compile Include="TMPro\TMP_WordInfo.cs" />
     <Compile Include="TMPro\TMP_XmlTagStack.cs" />
+    <Compile Include="TMPro\TweenRunner.cs" />
     <Compile Include="TMPro\VertexGradient.cs" />
+    <Compile Include="TMPro\VertexSortingOrder.cs" />
     <Compile Include="TMPro\WordWrapState.cs" />
     <Compile Include="TMPro\XML_TagAttribute.cs" />
+    <Compile Include="TMPro\_HorizontalAlignmentOptions.cs" />
+    <Compile Include="TMPro\_VerticalAlignmentOptions.cs" />
     <Compile Include="ToggleSoundPlayer.cs" />
     <Compile Include="ToolTip.cs" />
     <Compile Include="ToolTipScreen.cs" />
@@ -1191,51 +1211,51 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArabicSupport\ArabicSupport.csproj">
-      <Project>{F6795567-677B-4A70-90E4-C4B9FA7408D9}</Project>
+      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3AC}</Project>
       <Name>ArabicSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\FileHelpers\FileHelpers.csproj">
-      <Project>{F6795567-677B-4A70-90E4-C4B9FA7408DD}</Project>
+      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3B0}</Project>
       <Name>FileHelpers</Name>
     </ProjectReference>
     <ProjectReference Include="..\libnoise\libnoise.csproj">
-      <Project>{F6795567-677B-4A70-90E4-C4B9FA7408E2}</Project>
+      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3B5}</Project>
       <Name>libnoise</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{F6795567-677B-4A70-90E4-C4B9FA7408E6}</Project>
+      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3B9}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{F6795567-677B-4A70-90E4-C4B9FA7408E7}</Project>
+      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3BA}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\Satsuma\Satsuma.csproj">
-      <Project>{F6795567-677B-4A70-90E4-C4B9FA7408E9}</Project>
+      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3BC}</Project>
       <Name>Satsuma</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{F6795567-677B-4A70-90E4-C4B9FA7408EB}</Project>
+      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3BE}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{F6795567-677B-4A70-90E4-C4B9FA7408F3}</Project>
+      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3C6}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{F6795567-677B-4A70-90E4-C4B9FA7408ED}</Project>
+      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3C0}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{F6795567-677B-4A70-90E4-C4B9FA7408F7}</Project>
+      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3CA}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{F6795567-677B-4A70-90E4-C4B9FA7408F5}</Project>
+      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3C8}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
     <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
-      <Project>{F6795567-677B-4A70-90E4-C4B9FA7408F8}</Project>
+      <Project>{85578E79-8B2C-48A0-98D0-49943CC2A3CB}</Project>
       <Name>YamlDotNet</Name>
     </ProjectReference>
   </ItemGroup>

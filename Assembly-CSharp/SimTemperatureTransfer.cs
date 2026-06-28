@@ -54,8 +54,11 @@ public class SimTemperatureTransfer : KMonoBehaviour
 				Element element = component.Element;
 				if (element.highTempTransitionTarget != SimHashes.Unobtanium)
 				{
-					int num = Grid.PosToCell(simTemperatureTransfer2.transform.GetPosition());
-					SimMessages.AddRemoveSubstance(num, element.highTempTransitionTarget, CellEventLogger.Instance.OreMelted, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, -1);
+					if (component.Mass > 0f)
+					{
+						int num = Grid.PosToCell(simTemperatureTransfer2.transform.GetPosition());
+						SimMessages.AddRemoveSubstance(num, element.highTempTransitionTarget, CellEventLogger.Instance.OreMelted, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, -1);
+					}
 					Util.KDestroyGameObject(simTemperatureTransfer2.gameObject);
 				}
 			}

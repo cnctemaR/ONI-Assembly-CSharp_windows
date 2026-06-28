@@ -14,7 +14,7 @@ public class Disinfectable : Workable
 		this.attributeConverter = Db.Get().AttributeConverters.TidyingSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		this.multitoolContext = "disinfect";
-		this.multitoolHitEffectHash = new HashedString("fx_disinfect_splash");
+		this.multitoolHitEffectTag = "fx_disinfect_splash";
 		base.Subscribe(2127324410, new Action<object>(this.OnCancel));
 	}
 
@@ -93,7 +93,7 @@ public class Disinfectable : Workable
 		{
 			this.isMarkedForDisinfect = true;
 			Prioritizable.AddRef(base.gameObject);
-			this.chore = new WorkChore<Disinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			this.chore = new WorkChore<Disinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.MarkedForDisinfection, this);
 		}
 	}

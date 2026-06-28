@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 public class EntityConfigManager : KMonoBehaviour
@@ -6,6 +9,53 @@ public class EntityConfigManager : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		EntityConfigManager.Instance = this;
+	}
+
+	private static int GetSortOrder(Type type)
+	{
+		foreach (Attribute attribute in type.GetCustomAttributes(true))
+		{
+			if (attribute.GetType() == typeof(EntityConfigOrder))
+			{
+				return (attribute as EntityConfigOrder).sortOrder;
+			}
+		}
+		return 0;
+	}
+
+	public void LoadGeneratedEntities()
+	{
+		Type typeFromHandle = typeof(IEntityConfig);
+		Type typeFromHandle2 = typeof(IMultiEntityConfig);
+		Assembly assembly = Assembly.GetAssembly(typeof(EntityConfigManager));
+		Type[] types = assembly.GetTypes();
+		List<EntityConfigManager.ConfigEntry> list = new List<EntityConfigManager.ConfigEntry>();
+		foreach (Type type in types)
+		{
+			if ((typeFromHandle.IsAssignableFrom(type) || typeFromHandle2.IsAssignableFrom(type)) && !type.IsAbstract && !type.IsInterface)
+			{
+				int sortOrder = EntityConfigManager.GetSortOrder(type);
+				EntityConfigManager.ConfigEntry configEntry = new EntityConfigManager.ConfigEntry
+				{
+					type = type,
+					sortOrder = sortOrder
+				};
+				list.Add(configEntry);
+			}
+		}
+		list = list.OrderBy<EntityConfigManager.ConfigEntry, int>((EntityConfigManager.ConfigEntry x) => x.sortOrder).ToList<EntityConfigManager.ConfigEntry>();
+		foreach (EntityConfigManager.ConfigEntry configEntry2 in list)
+		{
+			object obj = Activator.CreateInstance(configEntry2.type);
+			if (obj is IEntityConfig)
+			{
+				this.RegisterEntity(obj as IEntityConfig);
+			}
+			if (obj is IMultiEntityConfig)
+			{
+				this.RegisterEntities(obj as IMultiEntityConfig);
+			}
+		}
 	}
 
 	public void RegisterEntity(IEntityConfig config)
@@ -17,5 +67,24 @@ public class EntityConfigManager : KMonoBehaviour
 		Assets.AddPrefab(component);
 	}
 
+	public void RegisterEntities(IMultiEntityConfig config)
+	{
+		List<GameObject> list = config.CreatePrefabs();
+		foreach (GameObject gameObject in list)
+		{
+			KPrefabID component = gameObject.GetComponent<KPrefabID>();
+			component.prefabInitFn += config.OnPrefabInit;
+			component.prefabSpawnFn += config.OnSpawn;
+			Assets.AddPrefab(component);
+		}
+	}
+
 	public static EntityConfigManager Instance;
+
+	private struct ConfigEntry
+	{
+		public Type type;
+
+		public int sortOrder;
+	}
 }

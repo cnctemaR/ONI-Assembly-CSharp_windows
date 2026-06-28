@@ -4,7 +4,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>
+public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -56,46 +56,67 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 		this.replanted.starved.wrongLiquid.ParamTransition<bool>(this.hasIncorrectLiquid, this.replanted.starved.normal, (IrrigationMonitor.Instance smi, bool p) => !p);
 	}
 
-	public StateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.TargetParameter resourceStorage;
+	public StateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.TargetParameter resourceStorage;
 
-	public StateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.BoolParameter hasCorrectLiquid;
+	public StateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.BoolParameter hasCorrectLiquid;
 
-	public StateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.BoolParameter hasIncorrectLiquid;
+	public StateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.BoolParameter hasIncorrectLiquid;
 
-	public StateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.BoolParameter enoughCorrectLiquidToRecover;
+	public StateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.BoolParameter enoughCorrectLiquidToRecover;
 
 	public GameHashes ResourceRecievedEvent = GameHashes.LiquidResourceRecieved;
 
 	public GameHashes ResourceDepletedEvent = GameHashes.LiquidResourceEmpty;
 
-	public GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.State wild;
+	public GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.State wild;
 
-	public GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.State unfertilizable;
+	public GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.State unfertilizable;
 
 	public IrrigationMonitor.ReplantedStates replanted;
 
-	public class VariableIrrigationStates : GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.State
+	public class Def : StateMachine.BaseDef, IGameObjectEffectDescriptor
 	{
-		public GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.State normal;
+		public List<Descriptor> GetDescriptors(GameObject obj)
+		{
+			if (this.consumedElements.Length > 0)
+			{
+				List<Descriptor> list = new List<Descriptor>();
+				foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in this.consumedElements)
+				{
+					list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.IDEAL_FERTILIZER, consumeInfo.tag.ProperName(), GameUtil.GetFormattedMass(-consumeInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.IDEAL_FERTILIZER, consumeInfo.tag.ProperName(), GameUtil.GetFormattedMass(consumeInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false));
+				}
+				return list;
+			}
+			return null;
+		}
 
-		public GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.State wrongLiquid;
+		public Tag wrongIrrigationTestTag;
+
+		public PlantElementAbsorber.ConsumeInfo[] consumedElements;
 	}
 
-	public class Irrigated : GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.State
+	public class VariableIrrigationStates : GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.State
+	{
+		public GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.State normal;
+
+		public GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.State wrongLiquid;
+	}
+
+	public class Irrigated : GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.State
 	{
 		public IrrigationMonitor.VariableIrrigationStates absorbing;
 	}
 
-	public class ReplantedStates : GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.State
+	public class ReplantedStates : GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.State
 	{
 		public IrrigationMonitor.Irrigated irrigated;
 
 		public IrrigationMonitor.VariableIrrigationStates starved;
 	}
 
-	public new class Instance : GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.GameInstance, IWiltCause
+	public new class Instance : GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.GameInstance, IWiltCause
 	{
-		public Instance(IStateMachineTarget master, IrrigationMonitor.Instance.Def def)
+		public Instance(IStateMachineTarget master, IrrigationMonitor.Def def)
 			: base(master, def)
 		{
 			this.AddAmounts(base.gameObject);
@@ -366,26 +387,5 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 		private Storage storage;
 
 		private HandleVector<int>.Handle absorberHandle = HandleVector<int>.InvalidHandle;
-
-		public class Def : StateMachine.Instance.BaseDef, IGameObjectEffectDescriptor
-		{
-			public List<Descriptor> GetDescriptors(GameObject obj)
-			{
-				if (this.consumedElements.Length > 0)
-				{
-					List<Descriptor> list = new List<Descriptor>();
-					foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in this.consumedElements)
-					{
-						list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.IDEAL_FERTILIZER, consumeInfo.tag.ProperName(), GameUtil.GetFormattedMass(-consumeInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.IDEAL_FERTILIZER, consumeInfo.tag.ProperName(), GameUtil.GetFormattedMass(consumeInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false));
-					}
-					return list;
-				}
-				return null;
-			}
-
-			public Tag wrongIrrigationTestTag;
-
-			public PlantElementAbsorber.ConsumeInfo[] consumedElements;
-		}
 	}
 }

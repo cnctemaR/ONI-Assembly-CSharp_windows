@@ -12,6 +12,10 @@ public class MessageNotification : Notification
 		base..ctor(title, notificationType, invalid, null, null, false, 0f, null, null, sound);
 		MessageNotification $this = this;
 		this.message = m;
+		if (!this.message.PlayNotificationSound())
+		{
+			this.playSound = false;
+		}
 		base.ToolTip = (List<Notification> notifications, object data) => $this.OnToolTip(notifications, m.GetTooltip());
 		this.hasLocation = false;
 	}

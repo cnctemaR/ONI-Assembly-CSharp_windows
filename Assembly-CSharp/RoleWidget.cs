@@ -111,14 +111,14 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 		this.linePoints.Clear();
 		for (int k = 0; k < list.Count; k++)
 		{
-			float num = this.lines_left.position.x - list[k].x - 12f;
+			float num = this.lines_left.GetPosition().x - list[k].x - 12f;
 			float num2 = 0f;
 			this.linePoints.Add(new Vector2(0f, num2));
 			this.linePoints.Add(new Vector2(-num, num2));
 			this.linePoints.Add(new Vector2(-num, num2));
-			this.linePoints.Add(new Vector2(-num, -(this.lines_left.position.y - list[k].y)));
-			this.linePoints.Add(new Vector2(-num, -(this.lines_left.position.y - list[k].y)));
-			this.linePoints.Add(new Vector2(-(this.lines_left.position.x - list[k].x), -(this.lines_left.position.y - list[k].y)));
+			this.linePoints.Add(new Vector2(-num, -(this.lines_left.GetPosition().y - list[k].y)));
+			this.linePoints.Add(new Vector2(-num, -(this.lines_left.GetPosition().y - list[k].y)));
+			this.linePoints.Add(new Vector2(-(this.lines_left.GetPosition().x - list[k].x), -(this.lines_left.GetPosition().y - list[k].y)));
 		}
 		this.lines = new UILineRenderer[this.linePoints.Count / 2];
 		int num3 = 0;
@@ -143,6 +143,7 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 	private void RefreshSlot(GameObject slot, MinionResume occupier)
 	{
 		HierarchyReferences component = slot.GetComponent<HierarchyReferences>();
+		component.GetReference<CrewPortrait>("Portrait").GetComponentInChildren<KBatchedAnimController>().enabled = occupier != null;
 		if (occupier != null)
 		{
 			component.GetReference<CrewPortrait>("Portrait").SetIdentityObject(occupier.GetComponent<MinionIdentity>(), true);
@@ -226,16 +227,6 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 				{
 					list.Add(minionIdentity);
 				}
-				Action<IListableOption, object> action = delegate(IListableOption minion, object data)
-				{
-					if (minion == null)
-					{
-						return;
-					}
-					Game.Instance.roleManager.AssignToRole(this.roleID, (minion as MinionIdentity).GetComponent<MinionResume>(), false);
-					this.rolesScreen.RefreshRoleWidgets();
-					this.rolesScreen.RefreshSideBar();
-				};
 				DropDown reference2 = component.GetReference<DropDown>("DropDown");
 				reference2.gameObject.SetActive(true);
 				reference2.Initialize(Game.Instance.roleManager.RolesConfigs.Cast<IListableOption>(), new Action<IListableOption, object>(this.OnMinionDropEntryClick), new Func<IListableOption, IListableOption, object, int>(this.minionDropDownSort), new Action<DropDownEntry, object>(this.minionDropEntryRefreshAction), false, occupier);
@@ -251,19 +242,19 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 			{
 				list2.Add(minionIdentity2);
 			}
-			Action<IListableOption, object> action2 = delegate(IListableOption minion, object data)
+			Action<IListableOption, object> action = delegate(IListableOption minion, object data)
 			{
 				if (minion == null)
 				{
 					return;
 				}
-				Game.Instance.roleManager.AssignToRole(this.roleID, (minion as MinionIdentity).GetComponent<MinionResume>(), false);
+				Game.Instance.roleManager.AssignToRole(this.roleID, (minion as MinionIdentity).GetComponent<MinionResume>(), false, false);
 				this.rolesScreen.RefreshRoleWidgets();
 				this.rolesScreen.RefreshSideBar();
 			};
 			DropDown reference3 = component.GetReference<DropDown>("DropDown");
 			reference3.gameObject.SetActive(true);
-			reference3.Initialize(list2, action2, new Func<IListableOption, IListableOption, object, int>(this.roleSlotDropDownSort), new Action<DropDownEntry, object>(this.roleRefreshAction), false, Game.Instance.roleManager.GetRole(this.roleID));
+			reference3.Initialize(list2, action, new Func<IListableOption, IListableOption, object, int>(this.roleSlotDropDownSort), new Action<DropDownEntry, object>(this.roleRefreshAction), false, Game.Instance.roleManager.GetRole(this.roleID));
 			component.GetReference<LocText>("Label").gameObject.SetActive(false);
 			component.GetReference<LayoutElement>("DropDownLayout").minWidth = 156f;
 			component.GetReference<LayoutElement>("DropDownLayout").GetComponentInChildren<LocText>().text = ((!(this.roleID == "NoRole")) ? UI.ROLES_SCREEN.SLOTS.UNASSIGNED : UI.ROLES_SCREEN.SLOTS.PICK_DUPLICANT);
@@ -276,8 +267,8 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 		component.GetReference<KButton>("UnassignButton").onClick += delegate
 		{
 			MinionResume minionResume = Game.Instance.roleManager.GetRoleAssignees(this.roleID)[slot.transform.GetSiblingIndex()];
+			Game.Instance.roleManager.Unassign(minionResume, false);
 			minionResume.SetTargetRole("NoRole");
-			Game.Instance.roleManager.Unassign(minionResume);
 			this.Refresh(this.roleID);
 			this.rolesScreen.RefreshSideBar();
 			this.rolesScreen.RefreshWidgetPositions();
@@ -288,7 +279,7 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 	{
 		if (role != null)
 		{
-			Game.Instance.roleManager.AssignToRole((role as RoleConfig).id, data as MinionResume, false);
+			Game.Instance.roleManager.AssignToRole((role as RoleConfig).id, data as MinionResume, false, false);
 			this.rolesScreen.RefreshRoleWidgets();
 			this.rolesScreen.RefreshSideBar();
 		}

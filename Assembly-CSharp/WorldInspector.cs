@@ -244,7 +244,7 @@ public class WorldInspector : MonoBehaviour
 		if (Grid.IsValidCell(cell))
 		{
 			Element element = Grid.Element[cell];
-			float num = Grid.Cell[cell].mass;
+			float num = Grid.Mass[cell];
 			array[3] = " " + GameUtil.GetBreathableString(element, num);
 			if (element.id == SimHashes.Vacuum)
 			{

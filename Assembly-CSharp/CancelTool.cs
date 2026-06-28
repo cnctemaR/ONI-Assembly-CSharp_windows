@@ -47,14 +47,8 @@ public class CancelTool : FilteredDragTool
 	{
 		Vector2 regularizedPos = base.GetRegularizedPos(Vector2.Min(downPos, upPos), true);
 		Vector2 regularizedPos2 = base.GetRegularizedPos(Vector2.Max(downPos, upPos), false);
-		foreach (FactionAlignment factionAlignment in Components.FactionAlignments)
-		{
-			Vector2 vector = Grid.PosToXY(factionAlignment.transform.GetPosition());
-			if (vector.x >= regularizedPos.x && vector.x < regularizedPos2.x && vector.y >= regularizedPos.y && vector.y < regularizedPos2.y)
-			{
-				factionAlignment.gameObject.Trigger(2127324410, null);
-			}
-		}
+		AttackTool.MarkForAttack(regularizedPos, regularizedPos2, false);
+		CaptureTool.MarkForCapture(regularizedPos, regularizedPos2, false);
 	}
 
 	public static CancelTool Instance;

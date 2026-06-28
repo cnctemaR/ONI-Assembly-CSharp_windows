@@ -12,6 +12,8 @@ namespace Klei
 			this.demoTime = 300;
 			this.showDemoTimer = true;
 			this.sleepWhenOutOfFocus = true;
+			this.debugEnable = false;
+			this.developerDebugEnable = false;
 			GenericGameSettings._instance = this;
 		}
 
@@ -41,6 +43,14 @@ namespace Klei
 		public int demoTime { get; private set; }
 
 		public bool showDemoTimer { get; private set; }
+
+		public bool debugEnable { get; private set; }
+
+		public bool developerDebugEnable { get; private set; }
+
+		public bool disableGameOver { get; private set; }
+
+		public bool disablePopFx { get; private set; }
 
 		private static GenericGameSettings _instance;
 	}

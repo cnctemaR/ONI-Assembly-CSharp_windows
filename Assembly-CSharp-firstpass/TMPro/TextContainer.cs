@@ -210,65 +210,7 @@ namespace TMPro
 
 		protected override void Awake()
 		{
-			this.m_rectTransform = this.rectTransform;
-			if (this.m_rectTransform == null)
-			{
-				Vector2 pivot = this.m_pivot;
-				this.m_rectTransform = base.gameObject.AddComponent<RectTransform>();
-				this.m_pivot = pivot;
-			}
-			this.m_textMeshPro = base.GetComponent(typeof(TextMeshPro)) as TextMeshPro;
-			if (this.m_rect.width == 0f || this.m_rect.height == 0f)
-			{
-				if (this.m_textMeshPro != null && this.m_textMeshPro.anchor != TMP_Compatibility.AnchorPositions.None)
-				{
-					global::Debug.LogWarning("Converting from using anchor and lineLength properties to Text Container.", this);
-					this.m_isDefaultHeight = true;
-					int num = (int)this.m_textMeshPro.anchor;
-					this.m_textMeshPro.anchor = TMP_Compatibility.AnchorPositions.None;
-					if (num == 9)
-					{
-						switch (this.m_textMeshPro.alignment)
-						{
-						case TextAlignmentOptions.TopLeft:
-							this.m_textMeshPro.alignment = TextAlignmentOptions.BaselineLeft;
-							break;
-						case TextAlignmentOptions.Top:
-							this.m_textMeshPro.alignment = TextAlignmentOptions.Baseline;
-							break;
-						case TextAlignmentOptions.TopRight:
-							this.m_textMeshPro.alignment = TextAlignmentOptions.BaselineRight;
-							break;
-						case TextAlignmentOptions.TopJustified:
-							this.m_textMeshPro.alignment = TextAlignmentOptions.BaselineJustified;
-							break;
-						}
-						num = 3;
-					}
-					this.m_anchorPosition = (TextContainerAnchors)num;
-					this.m_pivot = this.GetPivot(this.m_anchorPosition);
-					if (this.m_textMeshPro.lineLength == 72f)
-					{
-						this.m_rect.size = this.m_textMeshPro.GetPreferredValues(this.m_textMeshPro.text);
-					}
-					else
-					{
-						this.m_rect.width = this.m_textMeshPro.lineLength;
-						this.m_rect.height = this.m_textMeshPro.GetPreferredValues(this.m_rect.width, float.PositiveInfinity).y;
-					}
-				}
-				else
-				{
-					this.m_isDefaultWidth = true;
-					this.m_isDefaultHeight = true;
-					this.m_pivot = this.GetPivot(this.m_anchorPosition);
-					this.m_rect.width = 20f;
-					this.m_rect.height = 5f;
-					this.m_rectTransform.sizeDelta = this.size;
-				}
-				this.m_margins = new Vector4(0f, 0f, 0f, 0f);
-				this.UpdateCorners();
-			}
+			global::Debug.LogWarning("The Text Container component is now Obsolete and can safely be removed from [" + base.gameObject.name + "].", this);
 		}
 
 		protected override void OnEnable()

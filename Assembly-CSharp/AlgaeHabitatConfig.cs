@@ -40,14 +40,14 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		manualDeliveryKG.requestedItemTag = new Tag("Algae");
 		manualDeliveryKG.capacity = 90f;
 		manualDeliveryKG.refillMass = 18f;
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.OperateFetch.IdHash;
 		ManualDeliveryKG manualDeliveryKG2 = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG2.SetStorage(storage);
 		manualDeliveryKG2.requestedItemTag = new Tag("Water");
 		manualDeliveryKG2.capacity = 360f;
 		manualDeliveryKG2.refillMass = 72f;
 		manualDeliveryKG2.allowPause = true;
-		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
+		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.OperateFetch.IdHash;
 		AlgaeHabitat algaeHabitat = go.AddOrGet<AlgaeHabitat>();
 		algaeHabitat.lightBonusMultiplier = 1.1f;
 		algaeHabitat.pressureSampleOffset = new CellOffset(0, 1);

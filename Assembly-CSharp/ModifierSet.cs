@@ -19,7 +19,7 @@ public class ModifierSet : ScriptableObject
 		this.traits = new ModifierSet.TraitSet();
 		this.traitGroups = new ModifierSet.TraitGroupSet();
 		this.Amounts = new global::Database.Amounts();
-		this.Amounts.Load(this.amountsFile);
+		this.Amounts.Load();
 		this.AttributeConverters = new global::Database.AttributeConverters();
 		this.LoadEffects();
 	}
@@ -81,8 +81,6 @@ public class ModifierSet : ScriptableObject
 	}
 
 	public TextAsset modifiersFile;
-
-	public TextAsset amountsFile;
 
 	public ModifierSet.ModifierInfos modifierInfos;
 

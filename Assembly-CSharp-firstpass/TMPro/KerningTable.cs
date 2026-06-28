@@ -16,23 +16,34 @@ namespace TMPro
 		{
 			if (this.kerningPairs.Count == 0)
 			{
-				this.kerningPairs.Add(new KerningPair(0, 0, 0f));
+				this.kerningPairs.Add(new KerningPair(0U, 0U, 0f));
 			}
 			else
 			{
-				int ascII_Left = this.kerningPairs.Last<KerningPair>().AscII_Left;
-				int ascII_Right = this.kerningPairs.Last<KerningPair>().AscII_Right;
-				float xadvanceOffset = this.kerningPairs.Last<KerningPair>().XadvanceOffset;
-				this.kerningPairs.Add(new KerningPair(ascII_Left, ascII_Right, xadvanceOffset));
+				uint firstGlyph = this.kerningPairs.Last<KerningPair>().firstGlyph;
+				uint secondGlyph = this.kerningPairs.Last<KerningPair>().secondGlyph;
+				float xOffset = this.kerningPairs.Last<KerningPair>().xOffset;
+				this.kerningPairs.Add(new KerningPair(firstGlyph, secondGlyph, xOffset));
 			}
 		}
 
-		public int AddKerningPair(int left, int right, float offset)
+		public int AddKerningPair(uint first, uint second, float offset)
 		{
-			int num = this.kerningPairs.FindIndex((KerningPair item) => item.AscII_Left == left && item.AscII_Right == right);
+			int num = this.kerningPairs.FindIndex((KerningPair item) => item.firstGlyph == first && item.secondGlyph == second);
 			if (num == -1)
 			{
-				this.kerningPairs.Add(new KerningPair(left, right, offset));
+				this.kerningPairs.Add(new KerningPair(first, second, offset));
+				return 0;
+			}
+			return -1;
+		}
+
+		public int AddGlyphPairAdjustmentRecord(uint first, GlyphValueRecord firstAdjustments, uint second, GlyphValueRecord secondAdjustments)
+		{
+			int num = this.kerningPairs.FindIndex((KerningPair item) => item.firstGlyph == first && item.secondGlyph == second);
+			if (num == -1)
+			{
+				this.kerningPairs.Add(new KerningPair(first, firstAdjustments, second, secondAdjustments));
 				return 0;
 			}
 			return -1;
@@ -40,7 +51,7 @@ namespace TMPro
 
 		public void RemoveKerningPair(int left, int right)
 		{
-			int num = this.kerningPairs.FindIndex((KerningPair item) => item.AscII_Left == left && item.AscII_Right == right);
+			int num = this.kerningPairs.FindIndex((KerningPair item) => (ulong)item.firstGlyph == (ulong)((long)left) && (ulong)item.secondGlyph == (ulong)((long)right));
 			if (num != -1)
 			{
 				this.kerningPairs.RemoveAt(num);
@@ -57,7 +68,7 @@ namespace TMPro
 			if (this.kerningPairs.Count > 0)
 			{
 				this.kerningPairs = (from s in this.kerningPairs
-					orderby s.AscII_Left, s.AscII_Right
+					orderby s.firstGlyph, s.secondGlyph
 					select s).ToList<KerningPair>();
 			}
 		}

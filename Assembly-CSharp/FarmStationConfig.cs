@@ -62,7 +62,7 @@ public class FarmStationConfig : IBuildingConfig
 		tinkerStation.inputMaterial = FarmStationConfig.MATERIAL_FOR_TINKER;
 		tinkerStation.metalPerTinker = 5f;
 		tinkerStation.outputPrefab = FarmStationConfig.TINKER_TOOLS;
-		tinkerStation.requiredRolePerk = "CanFarmTinker";
+		tinkerStation.requiredRolePerk = RoleManager.rolePerks.CanFarmTinker.id;
 		tinkerStation.choreType = Db.Get().ChoreTypes.FarmingFabricate.IdHash;
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.Farm.Id;

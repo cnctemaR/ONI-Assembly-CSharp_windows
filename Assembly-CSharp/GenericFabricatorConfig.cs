@@ -32,15 +32,15 @@ public class GenericFabricatorConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.UpdateComponentRequirement<DropAllWorkable>(true);
+		go.AddOrGet<DropAllWorkable>();
 		Prioritizable.AddRef(go);
-		go.UpdateComponentRequirement<BuildingComplete>(true).isManuallyOperated = true;
-		Fabricator fabricator = go.UpdateComponentRequirement<Fabricator>(true);
+		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
+		Fabricator fabricator = go.AddOrGet<Fabricator>();
 		fabricator.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_fabricator_generic_kanim") };
 		fabricator.choreTags = GameTags.ChoreTypes.FabricateChores;
 		fabricator.fetchChoreTypeIdHash = Db.Get().ChoreTypes.FabricateFetch.IdHash;
 		BuildingTemplates.CreateFabricatorStorage(go, fabricator);
-		go.UpdateComponentRequirement<LoopingSounds>(true);
+		go.AddOrGet<LoopingSounds>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

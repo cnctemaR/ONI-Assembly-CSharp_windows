@@ -83,21 +83,21 @@ public class LiquidPumpingStation : Workable, ISim200ms
 					Element element = Grid.Element[num3];
 					if (element.IsLiquid)
 					{
-						float mass = Grid.Cell[num3].mass;
+						float num4 = Grid.Mass[num3];
 						for (int k = 0; k < this.infoCount; k++)
 						{
 							if (this.infos[k].element == element)
 							{
 								LiquidPumpingStation.LiquidInfo[] array = this.infos;
-								int num4 = k;
-								array[num4].amount = array[num4].amount + mass;
+								int num5 = k;
+								array[num5].amount = array[num5].amount + num4;
 								flag = true;
 								break;
 							}
 						}
 						if (!flag)
 						{
-							this.infos[this.infoCount].amount = mass;
+							this.infos[this.infoCount].amount = num4;
 							this.infos[this.infoCount].element = element;
 							this.infoCount++;
 						}

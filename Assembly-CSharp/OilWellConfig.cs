@@ -13,7 +13,7 @@ public class OilWellConfig : IEntityConfig
 		PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
 		component2.SetElement(SimHashes.SedimentaryRock);
 		component2.Temperature = 372.15f;
-		BuildingAttachPoint buildingAttachPoint = gameObject.UpdateComponentRequirement<BuildingAttachPoint>(true);
+		BuildingAttachPoint buildingAttachPoint = gameObject.AddOrGet<BuildingAttachPoint>();
 		buildingAttachPoint.allowedAttachType = GameTags.OilWell;
 		SoundEventVolumeCache.instance.AddVolume("geyser_side_methane_kanim", "GeyserMethane_shake_LP", NOISE_POLLUTION.NOISY.TIER5);
 		SoundEventVolumeCache.instance.AddVolume("geyser_side_methane_kanim", "GeyserMethane_erupt_LP", NOISE_POLLUTION.NOISY.TIER6);

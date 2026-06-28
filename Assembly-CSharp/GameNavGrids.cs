@@ -446,12 +446,8 @@ public class GameNavGrids
 			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, 0, NavAxis.NA, false, false, true, 1, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
-				new CellOffset(1, -1),
-				new CellOffset(1, 1)
-			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
-			{
-				new NavOffset(NavType.Ladder, 1, 0)
-			}),
+				new CellOffset(1, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
 			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, -2, NavAxis.NA, false, false, true, 1, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
@@ -469,7 +465,7 @@ public class GameNavGrids
 		};
 		NavGrid.Transition[] array3 = this.MirrorTransitions(array2);
 		Dictionary<NavType, string> dictionary = new Dictionary<NavType, string>();
-		dictionary[NavType.Floor] = "idle_default";
+		dictionary[NavType.Floor] = "idle_loop";
 		this.HatchGrid = new NavGrid("HatchNavGrid", array3, dictionary, array, new NavTableValidator[]
 		{
 			new GameNavGrids.FloorValidator(false, false)
@@ -604,7 +600,7 @@ public class GameNavGrids
 		};
 		NavGrid.Transition[] array2 = this.MirrorTransitions(array);
 		Dictionary<NavType, string> dictionary = new Dictionary<NavType, string>();
-		dictionary[NavType.Hover] = "Idle";
+		dictionary[NavType.Hover] = "idle_loop";
 		NavGrid navGrid = new NavGrid(id, array2, dictionary, bounding_offsets, new NavTableValidator[]
 		{
 			new GameNavGrids.HoverValidator()
@@ -629,7 +625,7 @@ public class GameNavGrids
 		};
 		NavGrid.Transition[] array3 = this.MirrorTransitions(array2);
 		Dictionary<NavType, string> dictionary = new Dictionary<NavType, string>();
-		dictionary[NavType.Swim] = "Idle";
+		dictionary[NavType.Swim] = "idle_loop";
 		this.SwimmerGrid = new NavGrid("SwimmerNavGrid", array3, dictionary, array, new NavTableValidator[]
 		{
 			new GameNavGrids.SwimValidator()

@@ -27,7 +27,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Novice Research";
 
-				public static LocString DESC = "<style=\"research\">Novice Research</style> is required to unlock basic technologies.\nIt can be conducted at a <style=\"research\">Research Station</style>.";
+				public static LocString DESC = UI.FormatAsLink("Novice Research", "RESEARCH") + " is required to unlock basic technologies.\nIt can be conducted at a " + BUILDINGS.PREFABS.RESEARCHCENTER.NAME + ".";
 
 				public static LocString RECIPEDESC = "Unlocks rudimentary technologies.";
 			}
@@ -36,7 +36,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Intermediate Research";
 
-				public static LocString DESC = "<style=\"research\">Intermediate Research</style> is required to unlock improved technologies.\nIt can be conducted at a <style=\"research\">Super Computer</style>.";
+				public static LocString DESC = UI.FormatAsLink("Intermediate Research", "RESEARCH") + " is required to unlock improved technologies.\nIt can be conducted at a " + BUILDINGS.PREFABS.ADVANCEDRESEARCHCENTER.NAME + ".";
 
 				public static LocString RECIPEDESC = "Unlocks improved technologies.";
 			}
@@ -77,315 +77,343 @@ namespace STRINGS
 		{
 			public class IMPROVEDOXYGEN
 			{
-				public static LocString NAME = "Air Systems";
+				public static LocString NAME = UI.FormatAsLink("Air Systems", "IMPROVEDOXYGEN");
 
 				public static LocString DESC = "Make the air in your colony clean and breathable.";
 			}
 
 			public class FARMINGTECH
 			{
-				public static LocString NAME = "Basic Farming";
+				public static LocString NAME = UI.FormatAsLink("Basic Farming", "FARMINGTECH");
 
-				public static LocString DESC = "Learn the introductory principles of <style=\"plant\">Plant</style> domestication.";
+				public static LocString DESC = "Learn the introductory principles of " + UI.FormatAsLink("Plant", "PLANTS") + " domestication.";
 			}
 
 			public class AGRICULTURE
 			{
-				public static LocString NAME = "Agriculture";
+				public static LocString NAME = UI.FormatAsLink("Agriculture", "AGRICULTURE");
 
-				public static LocString DESC = "Master the agricultural art of crop irrigation.";
+				public static LocString DESC = "Master the agricultural art of crop raising.";
+			}
+
+			public class RANCHING
+			{
+				public static LocString NAME = UI.FormatAsLink("Ranching", "RANCHING");
+
+				public static LocString DESC = "Manage and care for critters.";
 			}
 
 			public class ANIMALCONTROL
 			{
-				public static LocString NAME = "Animal Control";
+				public static LocString NAME = UI.FormatAsLink("Animal Control", "ANIMALCONTROL");
 
-				public static LocString DESC = "Useful techniques to manage creature populations in your base.";
+				public static LocString DESC = "Useful techniques to manage critter populations in your base.";
 			}
 
 			public class FINEDINING
 			{
-				public static LocString NAME = "Meal Preparation";
+				public static LocString NAME = UI.FormatAsLink("Meal Preparation", "FINEDINING");
 
-				public static LocString DESC = "Prepare more nutritious <style=\"food\">Food</style> and store it longer before spoiling.";
+				public static LocString DESC = "Prepare more nutritious " + UI.FormatAsLink("Food", "FOOD") + " and store it longer before spoiling.";
 			}
 
 			public class GASPIPING
 			{
-				public static LocString NAME = "Ventilation";
+				public static LocString NAME = UI.FormatAsLink("Ventilation", "GASPIPING");
 
-				public static LocString DESC = "Rudimentary technologies for installing <style=\"gas\">Gas</style> infrastructure.";
+				public static LocString DESC = "Rudimentary technologies for installing " + UI.FormatAsLink("Gas", "ELEMENTS_GAS") + " infrastructure.";
 			}
 
 			public class IMPROVEDGASPIPING
 			{
-				public static LocString NAME = "Improved Ventilation";
+				public static LocString NAME = UI.FormatAsLink("Improved Ventilation", "IMPROVEDGASPIPING");
 
-				public static LocString DESC = "<style=\"gas\">Gas</style> infrastructure capable of withstanding more intense conditions, such as <style=\"heat\">Heat</style> and pressure.";
+				public static LocString DESC = UI.FormatAsLink("Gas", "ELEMENTS_GAS") + " infrastructure capable of withstanding more intense conditions, such as " + UI.FormatAsLink("Heat", "Heat") + " and pressure.";
 			}
 
 			public class TEMPERATUREMODULATION
 			{
-				public static LocString NAME = "Temperature Modulation";
+				public static LocString NAME = UI.FormatAsLink("Temperature Modulation", "TEMPERATUREMODULATION");
 
-				public static LocString DESC = "Unlock <style=\"heat\">Temperature</style> changing technologies to keep your colony at the perfect Kelvin.";
+				public static LocString DESC = "Unlock " + UI.FormatAsLink("Temperature", "HEAT") + " changing technologies to keep your colony at the perfect Kelvin.";
 			}
 
 			public class HVAC
 			{
-				public static LocString NAME = "HVAC";
+				public static LocString NAME = UI.FormatAsLink("HVAC", "HVAC");
 
-				public static LocString DESC = "Regulate <style=\"heat\">Temperature</style> in your colony for <style=\"plant\">Plant</style> cultivation and Duplicant comfort.";
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Regulate ",
+					UI.FormatAsLink("Temperature", "HEAT"),
+					" in your colony for ",
+					UI.FormatAsLink("Plant", "PLANTS"),
+					" cultivation and Duplicant comfort."
+				});
 			}
 
 			public class LIQUIDTEMPERATURE
 			{
-				public static LocString NAME = "Liquid Tuning";
+				public static LocString NAME = UI.FormatAsLink("Liquid Tuning", "LIQUIDTEMPERATURE");
 
-				public static LocString DESC = "Easily manipulate <style=\"liquid\">Liquid</style> <style=\"heat\">Temperatures</style> with these technologies.";
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Easily manipulate ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" ",
+					UI.FormatAsLink("heat", "Temperatures"),
+					" with these technologies."
+				});
 			}
 
 			public class INSULATION
 			{
-				public static LocString NAME = "Insulation";
+				public static LocString NAME = UI.FormatAsLink("Insulation", "INSULATION");
 
-				public static LocString DESC = "Improve <style=\"heat\">Heat</style> distribution in your base and guard buildings from extreme temperatures.";
+				public static LocString DESC = "Improve " + UI.FormatAsLink("Heat", "Heat") + " distribution in your base and guard buildings from extreme temperatures.";
 			}
 
 			public class PRESSUREMANAGEMENT
 			{
-				public static LocString NAME = "Pressure Management";
+				public static LocString NAME = UI.FormatAsLink("Pressure Management", "PRESSUREMANAGEMENT");
 
 				public static LocString DESC = "Unlock technologies to manage colony pressure and atmosphere.";
 			}
 
 			public class DIRECTEDAIRSTREAMS
 			{
-				public static LocString NAME = "Decontamination";
+				public static LocString NAME = UI.FormatAsLink("Decontamination", "DIRECTEDAIRSTREAMS");
 
-				public static LocString DESC = "Instruments to help you reduce <style=\"disease\">Germ</style> spread in your base.";
+				public static LocString DESC = "Instruments to help you reduce " + UI.FormatAsLink("Germ", "DISEASE") + " spread in your base.";
 			}
 
 			public class LIQUIDPIPING
 			{
-				public static LocString NAME = "Plumbing";
+				public static LocString NAME = UI.FormatAsLink("Plumbing", "LIQUIDPIPING");
 
-				public static LocString DESC = "Rudimentary technologies for installing <style=\"liquid\">Liquid</style> infrastructure.";
+				public static LocString DESC = "Rudimentary technologies for installing " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " infrastructure.";
 			}
 
 			public class LUXURY
 			{
-				public static LocString NAME = "Home Luxuries";
+				public static LocString NAME = UI.FormatAsLink("Home Luxuries", "LUXURY");
 
-				public static LocString DESC = "Luxury amenities for advanced <style=\"stress\">Stress</style> reduction.";
+				public static LocString DESC = "Luxury amenities for advanced " + UI.FormatAsLink("Stress", "STRESS") + " reduction.";
 			}
 
 			public class IMPROVEDLIQUIDPIPING
 			{
-				public static LocString NAME = "Improved Plumbing";
+				public static LocString NAME = UI.FormatAsLink("Improved Plumbing", "IMPROVEDLIQUIDPIPING");
 
-				public static LocString DESC = "<style=\"liquid\">Liquid</style> infrastructure capable of withstanding more intense conditions, such as <style=\"heat\">Heat</style> and pressure.";
+				public static LocString DESC = UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " infrastructure capable of withstanding more intense conditions, such as " + UI.FormatAsLink("Heat", "Heat") + " and pressure.";
 			}
 
 			public class SANITATIONSCIENCES
 			{
-				public static LocString NAME = "Sanitation";
+				public static LocString NAME = UI.FormatAsLink("Sanitation", "SANITATIONSCIENCES");
 
 				public static LocString DESC = "Make daily ablutions less of a hassle.";
 			}
 
 			public class MEDICALRESEARCH
 			{
-				public static LocString NAME = "Medical Research";
+				public static LocString NAME = UI.FormatAsLink("Medical Research", "MEDICALRESEARCH");
 
-				public static LocString DESC = "Basic medical knowledge to fight the common <style=\"disease\">Diseases</style> that plague Duplicants.";
+				public static LocString DESC = "Basic medical knowledge to fight the common " + UI.FormatAsLink("Diseases", "DISEASE") + " that plague Duplicants.";
 			}
 
 			public class MEDBAY
 			{
-				public static LocString NAME = "Healthcare";
+				public static LocString NAME = UI.FormatAsLink("Healthcare", "MEDBAY");
 
-				public static LocString DESC = "Prevent injury and <style=\"disease\">Disease</style> from running rampant in your colony.";
+				public static LocString DESC = "Prevent injury and " + UI.FormatAsLink("Disease", "DISEASE") + " from running rampant in your colony.";
 			}
 
 			public class ADVANCEDFILTRATION
 			{
-				public static LocString NAME = "Filtration";
+				public static LocString NAME = UI.FormatAsLink("Filtration", "ADVANCEDFILTRATION");
 
-				public static LocString DESC = "Basic technologies for filtering <style=\"liquid\">Liquid</style> and <style=\"gas\">Gas</style>.";
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Basic technologies for filtering ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" and ",
+					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+					"."
+				});
 			}
 
 			public class POWERREGULATION
 			{
-				public static LocString NAME = "Power Regulation";
+				public static LocString NAME = UI.FormatAsLink("Power Regulation", "POWERREGULATION");
 
-				public static LocString DESC = "Prevent wasted <style=\"power\">Power</style> with improved eletrical tools.";
+				public static LocString DESC = "Prevent wasted " + UI.FormatAsLink("Power", "POWER") + " with improved eletrical tools.";
 			}
 
 			public class COMBUSTION
 			{
-				public static LocString NAME = "Internal Combustion";
+				public static LocString NAME = UI.FormatAsLink("Internal Combustion", "COMBUSTION");
 
-				public static LocString DESC = "Crude fuel-powered generators for automatic <style=\"power\">Power</style> production.";
+				public static LocString DESC = "Crude fuel-powered generators for automatic " + UI.FormatAsLink("Power", "POWER") + " production.";
 			}
 
 			public class IMPROVEDCOMBUSTION
 			{
-				public static LocString NAME = "Fossil Fuels";
+				public static LocString NAME = UI.FormatAsLink("Fossil Fuels", "IMPROVEDCOMBUSTION");
 
-				public static LocString DESC = "Burn dirty fuels for exceptional <style=\"power\">Power</style> production.";
+				public static LocString DESC = "Burn dirty fuels for exceptional " + UI.FormatAsLink("Power", "POWER") + " production.";
 			}
 
 			public class INTERIORDECOR
 			{
-				public static LocString NAME = "Interior Decor";
+				public static LocString NAME = UI.FormatAsLink("Interior Decor", "INTERIORDECOR");
 
-				public static LocString DESC = "<style=\"decor\">Decor</style> boosting items to counteract the gloom of underground living.";
+				public static LocString DESC = UI.FormatAsLink("Decor", "DECOR") + " boosting items to counteract the gloom of underground living.";
 			}
 
 			public class ARTISTRY
 			{
-				public static LocString NAME = "Artistic Expression";
+				public static LocString NAME = UI.FormatAsLink("Artistic Expression", "ARTISTRY");
 
-				public static LocString DESC = "Majorly improve <style=\"decor\">Decor</style> by allowing Duplicants artistic and emotional expression.";
+				public static LocString DESC = "Majorly improve " + UI.FormatAsLink("Decor", "DECOR") + " by allowing Duplicants artistic and emotional expression.";
 			}
 
 			public class ADVANCEDPOWERREGULATION
 			{
-				public static LocString NAME = "Advanced Power Regulation";
+				public static LocString NAME = UI.FormatAsLink("Advanced Power Regulation", "ADVANCEDPOWERREGULATION");
 
-				public static LocString DESC = "Circuit components required for large scale <style=\"power\">Power</style> management.";
+				public static LocString DESC = "Circuit components required for large scale " + UI.FormatAsLink("Power", "POWER") + " management.";
 			}
 
 			public class PLASTICS
 			{
-				public static LocString NAME = "Plastic Manufacturing";
+				public static LocString NAME = UI.FormatAsLink("Plastic Manufacturing", "PLASTICS");
 
 				public static LocString DESC = "Stable, light weight, durable. Plastics are useful in a wide array of applications.";
 			}
 
 			public class CLOTHING
 			{
-				public static LocString NAME = "Clothing";
+				public static LocString NAME = UI.FormatAsLink("Clothing", "CLOTHING");
 
 				public static LocString DESC = "Produce decorative and practical clothing for Duplicants.";
 			}
 
 			public class SUITS
 			{
-				public static LocString NAME = "Environmental Protection";
+				public static LocString NAME = UI.FormatAsLink("Environmental Protection", "SUITS");
 
 				public static LocString DESC = "Craft the equipment necessary to survive in extreme conditions and environments.";
 			}
 
 			public class DISTILLATION
 			{
-				public static LocString NAME = "Distillation";
+				public static LocString NAME = UI.FormatAsLink("Distillation", "DISTILLATION");
 
 				public static LocString DESC = "Distill difficult mixtures down to their most useful parts.";
 			}
 
 			public class ADVANCEDRESEARCH
 			{
-				public static LocString NAME = "Advanced Research";
+				public static LocString NAME = UI.FormatAsLink("Advanced Research", "ADVANCEDRESEARCH");
 
 				public static LocString DESC = "The tools your colony needs to conduct more advanced and in depth research.";
 			}
 
 			public class LOGICCONTROL
 			{
-				public static LocString NAME = "Automatic Control";
+				public static LocString NAME = UI.FormatAsLink("Automatic Control", "LOGICCONTROL");
 
 				public static LocString DESC = "Use switches to control your buildings.";
 			}
 
 			public class LOGICCIRCUITS
 			{
-				public static LocString NAME = "Advanced Automation";
+				public static LocString NAME = UI.FormatAsLink("Advanced Automation", "LOGICCIRCUITS");
 
 				public static LocString DESC = "Logic gates and wiring to allow you to program your base.";
 			}
 
 			public class VALVEMINIATURIZATION
 			{
-				public static LocString NAME = "Valve Minaturization";
+				public static LocString NAME = UI.FormatAsLink("Valve Minaturization", "VALVEMINIATURIZATION");
 
 				public static LocString DESC = "Smaller, more efficient pumps for those low-throughput situations.";
 			}
 
 			public class PRETTYGOODCONDUCTORS
 			{
-				public static LocString NAME = "Low-Resistance Conductors";
+				public static LocString NAME = UI.FormatAsLink("Low-Resistance Conductors", "PRETTYGOODCONDUCTORS");
 
 				public static LocString DESC = "Pure-core wires that can handle more current without overloading.";
 			}
 
 			public class RENEWABLEENERGY
 			{
-				public static LocString NAME = "Renewable Energy";
+				public static LocString NAME = UI.FormatAsLink("Renewable Energy", "RENEWABLEENERGY");
 
-				public static LocString DESC = "Clean <style=\"power\">Power</style> production";
+				public static LocString DESC = "Clean " + UI.FormatAsLink("Power", "POWER") + " production";
 			}
 
 			public class BASICREFINEMENT
 			{
-				public static LocString NAME = "Brute-Force Refinement";
+				public static LocString NAME = UI.FormatAsLink("Brute-Force Refinement", "BASICREFINEMENT");
 
 				public static LocString DESC = "When life gives you rocks, make rock-aid! (Or sand.)";
 			}
 
 			public class METALREFINEMENT
 			{
-				public static LocString NAME = "Metallurgy";
+				public static LocString NAME = UI.FormatAsLink("Metallurgy", "METALREFINEMENT");
 
 				public static LocString DESC = "High-temperature pure metal extraction.";
 			}
 
 			public class REFINEDOBJECTS
 			{
-				public static LocString NAME = "Refined Objects";
+				public static LocString NAME = UI.FormatAsLink("Refined Objects", "REFINEDOBJECTS");
 
 				public static LocString DESC = "Using simple materials to improve base function.";
 			}
 
 			public class GENERICSENSORS
 			{
-				public static LocString NAME = "Generic Sensors";
+				public static LocString NAME = UI.FormatAsLink("Generic Sensors", "GENERICSENSORS");
 
 				public static LocString DESC = "Drive automation in brand new ways.";
 			}
 
 			public class DUPETRAFFICCONTROL
 			{
-				public static LocString NAME = "Duplicant Traffic Control";
+				public static LocString NAME = UI.FormatAsLink("Duplicant Traffic Control", "DUPETRAFFICCONTROL");
 
 				public static LocString DESC = "Prevent your Duplicants from getting into dangerous situations.";
 			}
 
 			public class SMELTING
 			{
-				public static LocString NAME = "Smelting";
+				public static LocString NAME = UI.FormatAsLink("Smelting", "SMELTING");
 
 				public static LocString DESC = "High temperatures allow more efficient metal fabrication.";
 			}
 
 			public class TRAVELTUBES
 			{
-				public static LocString NAME = "Transit Tubes";
+				public static LocString NAME = UI.FormatAsLink("Transit Tubes", "TRAVELTUBES");
 
 				public static LocString DESC = "Get around your base quickly, safely, and in style!";
 			}
 
 			public class SMARTSTORAGE
 			{
-				public static LocString NAME = "Smart Storage";
+				public static LocString NAME = UI.FormatAsLink("Smart Storage", "SMARTSTORAGE");
 
 				public static LocString DESC = "Automate the storage of your solids.";
 			}
 
 			public class SOLIDTRANSPORT
 			{
-				public static LocString NAME = "Solid Transport";
+				public static LocString NAME = UI.FormatAsLink("Solid Transport", "SOLIDTRANSPORT");
 
 				public static LocString DESC = "Save so much wear and tear on tired Duplicant feet.";
 			}

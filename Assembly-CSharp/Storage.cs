@@ -311,8 +311,12 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 				if (!flag)
 				{
 					Vector3 vector = Grid.CellToPosCCC(Grid.PosToCell(this), Grid.SceneLayer.Ore);
-					vector.z = gameObject.transform.position.z;
 					gameObject.transform.SetPosition(vector);
+					KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
+					if (component2)
+					{
+						component2.HackRefreshZOrder();
+					}
 					this.MakeWorldActive(gameObject);
 				}
 			}
@@ -659,7 +663,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 				}
 			}
 		}
-		return num;
+		return (float)Mathf.RoundToInt(num * 1000f) / 1000f;
 	}
 
 	public bool Has(Tag tag)

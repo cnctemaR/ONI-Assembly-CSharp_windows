@@ -6,11 +6,6 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Health : KMonoBehaviour, ISaveLoadable
 {
-	public float percent()
-	{
-		return this.hitPoints / this.maxHitPoints;
-	}
-
 	public AmountInstance GetAmountInstance
 	{
 		get
@@ -31,20 +26,27 @@ public class Health : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
+	public float maxHitPoints
+	{
+		get
+		{
+			return this.amountInstance.GetMax();
+		}
+	}
+
+	public float percent()
+	{
+		return this.hitPoints / this.maxHitPoints;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		Components.Health.Add(this);
-		this.amountInstance = new AmountInstance(Db.Get().Amounts.HitPoints, base.gameObject);
-		this.amountInstance.value = this.maxHitPoints;
-		base.gameObject.GetAmounts().Add(this.amountInstance);
+		this.amountInstance = Db.Get().Amounts.HitPoints.Lookup(base.gameObject);
+		this.amountInstance.value = this.amountInstance.GetMax();
 		AmountInstance amountInstance = this.amountInstance;
 		amountInstance.OnDelta = (Action<float>)Delegate.Combine(amountInstance.OnDelta, new Action<float>(this.OnHealthChanged));
-	}
-
-	public void SetMaxHitPoints(float _max)
-	{
-		this.maxHitPoints = _max;
 	}
 
 	protected override void OnSpawn()
@@ -58,7 +60,6 @@ public class Health : KMonoBehaviour, ISaveLoadable
 			}
 			else
 			{
-				global::Debug.Log("death " + base.gameObject.name, null);
 				this.Kill();
 			}
 		}
@@ -93,6 +94,7 @@ public class Health : KMonoBehaviour, ISaveLoadable
 
 	public void OnHealthChanged(float delta)
 	{
+		base.Trigger(-1664904872, delta);
 		if (this.State != Health.HealthState.Invincible)
 		{
 			if (this.hitPoints == 0f && !this.IsDefeated())
@@ -128,7 +130,6 @@ public class Health : KMonoBehaviour, ISaveLoadable
 		{
 			this.hitPoints = Mathf.Max(0f, this.hitPoints - amount);
 		}
-		base.Trigger(-2121334874, amount);
 		this.OnHealthChanged(-amount);
 	}
 
@@ -273,9 +274,6 @@ public class Health : KMonoBehaviour, ISaveLoadable
 
 	[Serialize]
 	public bool CanBeIncapacitated;
-
-	[Serialize]
-	public float maxHitPoints = 100f;
 
 	[Serialize]
 	public Health.HealthState State;

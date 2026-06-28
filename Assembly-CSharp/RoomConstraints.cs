@@ -129,6 +129,8 @@ public static class RoomConstraints
 
 	public static RoomConstraints.Constraint FARM_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.FarmStation), null, 1, ROOMS.CRITERIA.FARM_STATION.NAME, ROOMS.CRITERIA.FARM_STATION.DESCRIPTION, null);
 
+	public static RoomConstraints.Constraint RANCH_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.RanchStation), null, 1, ROOMS.CRITERIA.RANCH_STATION.NAME, ROOMS.CRITERIA.RANCH_STATION.DESCRIPTION, null);
+
 	public static RoomConstraints.Constraint REC_BUILDING = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.RecBuilding), null, 1, ROOMS.CRITERIA.REC_BUILDING.NAME, ROOMS.CRITERIA.REC_BUILDING.DESCRIPTION, null);
 
 	public static RoomConstraints.Constraint MACHINE_SHOP = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.MachineShop), null, 1, ROOMS.CRITERIA.MACHINE_SHOP.NAME, ROOMS.CRITERIA.MACHINE_SHOP.DESCRIPTION, null);
@@ -174,6 +176,12 @@ public static class RoomConstraints
 		public static Tag PowerStation = "PowerStation".ToTag();
 
 		public static Tag FarmStation = "FarmStation".ToTag();
+
+		public static Tag CreatureRelocator = "CreatureRelocator".ToTag();
+
+		public static Tag CreatureFeeder = "CreatureFeeder".ToTag();
+
+		public static Tag RanchStation = "RanchStation".ToTag();
 
 		public static Tag RecBuilding = "RecBuilding".ToTag();
 

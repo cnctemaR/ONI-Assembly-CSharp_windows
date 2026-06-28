@@ -60,7 +60,7 @@ namespace TMPro
 
 		public static void RefreshStyles()
 		{
-			TMP_StyleSheet.s_Instance.LoadStyleDictionaryInternal();
+			TMP_StyleSheet.instance.LoadStyleDictionaryInternal();
 		}
 
 		private void LoadStyleDictionaryInternal()

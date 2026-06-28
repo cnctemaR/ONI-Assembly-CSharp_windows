@@ -56,9 +56,9 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		{
 			animInfo.overrideAnims = this.overrideAnims;
 		}
-		if (this.multitoolContext.IsValid && this.multitoolHitEffectHash.IsValid)
+		if (this.multitoolContext.IsValid && this.multitoolHitEffectTag.IsValid)
 		{
-			animInfo.smi = new MultitoolController.Instance(this, worker, this.multitoolContext, Assets.GetPrefab(this.multitoolHitEffectHash));
+			animInfo.smi = new MultitoolController.Instance(this, worker, this.multitoolContext, Assets.GetPrefab(this.multitoolHitEffectTag));
 		}
 		animInfo.forcePlayPst = this.forcePlayPst;
 		return animInfo;
@@ -67,6 +67,11 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	public virtual HashedString[] GetWorkAnims(Worker worker)
 	{
 		return this.workAnims;
+	}
+
+	public virtual HashedString GetWorkPstAnim(Worker worker)
+	{
+		return this.workPstAnim;
 	}
 
 	public virtual Vector3 GetWorkOffset()
@@ -504,7 +509,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	protected HashedString multitoolContext;
 
 	[SerializeField]
-	protected HashedString multitoolHitEffectHash;
+	protected Tag multitoolHitEffectTag;
 
 	[SerializeField]
 	[Tooltip("Whether to user the KAnimSynchronizer or not")]
@@ -530,9 +535,13 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public HashedString[] workAnims = new HashedString[] { "working_pre", "working_loop" };
 
+	public HashedString workPstAnim = "working_pst";
+
 	protected bool faceTargetWhenWorking;
 
 	protected static readonly HashedString[] DefaultWorkAnims = new HashedString[] { "working_pre", "working_loop" };
+
+	protected static readonly HashedString DefaultPstWorkAnim = "working_pst";
 
 	protected ProgressBar progressBar;
 

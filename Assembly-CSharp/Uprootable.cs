@@ -38,7 +38,7 @@ public class Uprootable : Workable
 		this.pendingStatusItem = Db.Get().MiscStatusItems.PendingUproot;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Uprooting;
 		this.multitoolContext = "harvest";
-		this.multitoolHitEffectHash = new HashedString("fx_harvest_splash");
+		this.multitoolHitEffectTag = "fx_harvest_splash";
 		base.Subscribe(1309017699, new Action<object>(this.OnPlanterStorage));
 	}
 
@@ -118,7 +118,7 @@ public class Uprootable : Workable
 		}
 		else if (this.chore == null)
 		{
-			this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 			base.GetComponent<KSelectable>().AddStatusItem(this.pendingStatusItem, this);
 		}
 		this.isMarkedForUproot = true;

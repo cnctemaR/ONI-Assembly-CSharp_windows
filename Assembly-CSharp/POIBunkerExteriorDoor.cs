@@ -32,8 +32,8 @@ public class POIBunkerExteriorDoor : IBuildingConfig
 		door.hasComplexUserControls = false;
 		door.unpoweredAnimSpeed = 1f;
 		door.doorType = Door.DoorType.Sealed;
-		go.UpdateComponentRequirement<AccessControl>(true);
-		go.UpdateComponentRequirement<Unsealable>(true);
+		go.AddOrGet<AccessControl>();
+		go.AddOrGet<Unsealable>();
 		go.AddOrGet<KBoxCollider2D>();
 		Prioritizable.AddRef(go);
 		Workable workable = go.AddOrGet<Workable>();

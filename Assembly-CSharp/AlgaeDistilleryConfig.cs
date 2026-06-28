@@ -52,7 +52,7 @@ public class AlgaeDistilleryConfig : IBuildingConfig
 		manualDeliveryKG.requestedItemTag = tag;
 		manualDeliveryKG.refillMass = 120f;
 		manualDeliveryKG.capacity = 480f;
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{

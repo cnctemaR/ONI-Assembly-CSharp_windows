@@ -144,6 +144,11 @@ public class InterfaceTool : KMonoBehaviour
 		this.UpdateHoverElements(null);
 	}
 
+	public void SetLinkCursor(bool set)
+	{
+		this.SetCursor((!set) ? this.cursor : Assets.GetTexture("cursor_hand"), (!set) ? this.cursorOffset : Vector2.zero, CursorMode.Auto);
+	}
+
 	public const float MaxClickDistance = 0.02f;
 
 	public static float DepthBias = -0.15f;

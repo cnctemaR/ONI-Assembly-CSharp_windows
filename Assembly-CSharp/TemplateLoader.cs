@@ -61,9 +61,7 @@ public static class TemplateLoader
 			}
 		}
 		HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(callback, false));
-		Sim.Cell cell = Grid.Cell[num];
-		Sim.DiseaseCell diseaseCell = Grid.Disease[num];
-		SimMessages.ReplaceElement(num, ElementLoader.elements[(int)Grid.Cell[num].elementIdx].id, CellEventLogger.Instance.TemplateLoader, cell.mass, cell.temperature, diseaseCell.diseaseIdx, diseaseCell.elementCount, handle.index);
+		SimMessages.ReplaceElement(num, ElementLoader.elements[(int)Grid.ElementIdx[num]].id, CellEventLogger.Instance.TemplateLoader, Grid.Mass[num], Grid.Temperature[num], Grid.DiseaseIdx[num], Grid.DiseaseCount[num], handle.index);
 		handle.index = -1;
 	}
 

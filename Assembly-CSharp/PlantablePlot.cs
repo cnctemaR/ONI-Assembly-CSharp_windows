@@ -46,6 +46,9 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.statusItemNeed = Db.Get().BuildingStatusItems.NeedSeed;
+		this.statusItemNoneAvailable = Db.Get().BuildingStatusItems.NoAvailableSeed;
+		this.statusItemAwaitingDelivery = Db.Get().BuildingStatusItems.AwaitingSeedDelivery;
 		this.cropRef = new Ref<Growing>();
 		this.plantRef = new Ref<KPrefabID>();
 		this.destroyEntityOnDeposit = true;
@@ -137,26 +140,9 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 		}
 		this.autoReplaceEntity = false;
 		Components.PlantablePlots.Add(this);
-		base.Subscribe(-592767678, new Action<object>(this.InformPlantOperationalStatus));
 		Prioritizable component = base.GetComponent<Prioritizable>();
 		Prioritizable prioritizable = component;
 		prioritizable.onPriorityChanged = (Action<PrioritySetting>)Delegate.Combine(prioritizable.onPriorityChanged, new Action<PrioritySetting>(this.SyncPriority));
-	}
-
-	private void InformPlantOperationalStatus(object data)
-	{
-		if (base.occupyingObject == null)
-		{
-			return;
-		}
-		if (base.GetComponent<Operational>().IsOperational)
-		{
-			base.occupyingObject.Trigger(1628751838, null);
-		}
-		else
-		{
-			base.occupyingObject.Trigger(960378201, null);
-		}
 	}
 
 	public void SetFertilizationFlags(bool fertilizer, bool liquid_piping)
@@ -330,7 +316,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 		return this.GetDescriptors(def.BuildingComplete);
 	}
 
-	public List<Descriptor> GetDescriptors(GameObject go)
+	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Descriptor descriptor = default(Descriptor);

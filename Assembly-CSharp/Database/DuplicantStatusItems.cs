@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
+using UnityEngine;
 
 namespace Database
 {
@@ -160,7 +161,7 @@ namespace Database
 			this.Role.resolveStringCallback = delegate(string str, object data)
 			{
 				RoleConfig role = Game.Instance.roleManager.GetRole((data as MinionResume).CurrentRole);
-				return str.Replace("{Role}", role.name).Replace("{Progress}", string.Format(GameUtil.GetFormattedPercent(100f * ((data as MinionResume).ExperienceByRoleID[role.id] / role.experienceRequired), GameUtil.TimeSlice.None), new object[0]));
+				return str.Replace("{Role}", role.name).Replace("{Progress}", GameUtil.GetFormattedPercent(Mathf.Floor(100f * ((data as MinionResume).ExperienceByRoleID[role.id] / Game.Instance.roleManager.GetRole(role.id).experienceRequired)), GameUtil.TimeSlice.None));
 			};
 			this.Storing = new StatusItem("Storing", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.Storing.resolveStringCallback = delegate(string str, object data)
@@ -289,6 +290,7 @@ namespace Database
 			this.LashingOut.AddNotification(null, null, null, 0f);
 			this.LowImmunity = new StatusItem("LowImmunity", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 			this.LowImmunity.AddNotification(null, null, null, 0f);
+			this.Studying = new StatusItem("Studying", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 		}
 
 		public StatusItem Idle;
@@ -456,5 +458,7 @@ namespace Database
 		public StatusItem LowImmunity;
 
 		public StatusItem Role;
+
+		public StatusItem Studying;
 	}
 }

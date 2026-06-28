@@ -88,7 +88,7 @@ public class PopFX : KMonoBehaviour
 
 	public Image IconDisplay;
 
-	public Text TextDisplay;
+	public LocText TextDisplay;
 
 	public CanvasGroup canvasGroup;
 

@@ -80,6 +80,8 @@ namespace TUNING
 
 			public static EdiblesManager.FoodInfo COLD_WHEAT_BREAD = new EdiblesManager.FoodInfo("ColdWheatBread", 1200000f, 2, 255.15f, 277.15f, 2400f);
 
+			public static EdiblesManager.FoodInfo COOKED_EGG = new EdiblesManager.FoodInfo("CookedEgg", 2800000f, 2, 255.15f, 277.15f, 1200f);
+
 			public static EdiblesManager.FoodInfo FRUITCAKE = new EdiblesManager.FoodInfo("FruitCake", 4000000f, 3, 255.15f, 277.15f, 9600f);
 
 			public static EdiblesManager.FoodInfo SALSA = new EdiblesManager.FoodInfo("Salsa", 4000000f, 4, 255.15f, 277.15f, 1200f);

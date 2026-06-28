@@ -1,31 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using KSerialization;
+using UnityEngine;
 
-public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms
+public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPriorityManager
 {
-	public MinionStartingStats MinionStats
-	{
-		get
-		{
-			return this.availableMinionStats;
-		}
-	}
-
 	protected override void OnPrefabInit()
 	{
 		this.bImmigrantAvailable = false;
 		Immigration.Instance = this;
 		int num = Math.Min(this.spawnIdx, this.spawnInterval.Length - 1);
 		this.timeBeforeSpawn = this.spawnInterval[num];
-	}
-
-	protected override void OnSpawn()
-	{
-		base.OnSpawn();
-		if (this.bImmigrantAvailable)
-		{
-			this.availableMinionStats = new MinionStartingStats(false);
-		}
+		this.ResetPersonalPriorities();
 	}
 
 	public bool ImmigrantsAvailable
@@ -67,7 +53,6 @@ public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms
 		if (this.timeBeforeSpawn <= 0f)
 		{
 			this.bImmigrantAvailable = true;
-			this.availableMinionStats = new MinionStartingStats(false);
 		}
 	}
 
@@ -83,11 +68,64 @@ public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms
 		this.stopped = false;
 	}
 
+	public int GetPersonalPriority(ChoreGroup group, out bool auto_assigned)
+	{
+		auto_assigned = false;
+		int num;
+		if (!this.defaultPersonalPriorities.TryGetValue(group.IdHash, out num))
+		{
+			num = 3;
+		}
+		return num;
+	}
+
+	public void SetPersonalPriority(ChoreGroup group, int value, bool is_auto_assigned)
+	{
+		this.defaultPersonalPriorities[group.IdHash] = value;
+	}
+
+	public int GetAssociatedSkillLevel(ChoreGroup group)
+	{
+		return 0;
+	}
+
+	public bool CanRoleManageChoreGroup(ChoreGroup group)
+	{
+		return false;
+	}
+
+	public void ApplyDefaultPersonalPriorities(GameObject minion)
+	{
+		IPersonalPriorityManager instance = Immigration.Instance;
+		IPersonalPriorityManager component = minion.GetComponent<ChoreConsumer>();
+		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
+		{
+			bool flag;
+			int personalPriority = instance.GetPersonalPriority(choreGroup, out flag);
+			component.SetPersonalPriority(choreGroup, personalPriority, false);
+		}
+	}
+
+	public void ResetPersonalPriorities()
+	{
+		bool advancedPersonalPriorities = Game.Instance.advancedPersonalPriorities;
+		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
+		{
+			this.defaultPersonalPriorities[choreGroup.IdHash] = ((!advancedPersonalPriorities) ? 3 : choreGroup.DefaultPersonalPriority);
+		}
+	}
+
+	public bool IsChoreGroupDisabled(ChoreGroup g)
+	{
+		return false;
+	}
+
 	public float[] spawnInterval;
 
 	public int[] spawnTable;
 
-	private MinionStartingStats availableMinionStats;
+	[Serialize]
+	private Dictionary<HashedString, int> defaultPersonalPriorities = new Dictionary<HashedString, int>();
 
 	[Serialize]
 	public float timeBeforeSpawn = float.PositiveInfinity;

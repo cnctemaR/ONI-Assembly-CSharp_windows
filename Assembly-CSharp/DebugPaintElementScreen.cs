@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class DebugPaintElementScreen : KScreen
@@ -14,33 +15,10 @@ public class DebugPaintElementScreen : KScreen
 		base.OnPrefabInit();
 		DebugPaintElementScreen.Instance = this;
 		this.SetupLocText();
-		this.massPressureInput.onValueChanged.AddListener(delegate
-		{
-			this.OnChangeMassPressure();
-			this.blockInput = true;
-		});
-		this.temperatureInput.onValueChanged.AddListener(delegate
-		{
-			this.OnChangeTemperature();
-			this.blockInput = true;
-		});
-		this.diseaseCountInput.onValueChanged.AddListener(delegate
-		{
-			this.OnDiseaseCountChange();
-			this.blockInput = true;
-		});
-		this.temperatureInput.onEndEdit.AddListener(delegate
-		{
-			this.blockInput = false;
-		});
-		this.massPressureInput.onEndEdit.AddListener(delegate
-		{
-			this.blockInput = false;
-		});
-		this.diseaseCountInput.onEndEdit.AddListener(delegate
-		{
-			this.blockInput = false;
-		});
+		this.inputFields.Add(this.massPressureInput);
+		this.inputFields.Add(this.temperatureInput);
+		this.inputFields.Add(this.diseaseCountInput);
+		this.inputFields.Add(this.filterInput);
 		base.gameObject.SetActive(false);
 		this.activateOnSpawn = true;
 		this.ConsumeMouseScroll = true;
@@ -61,23 +39,52 @@ public class DebugPaintElementScreen : KScreen
 		this.diseaseButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.DISEASE;
 		this.paintButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.PAINT;
 		this.fillButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.FILL;
+		this.sampleButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.SAMPLE;
 		this.affectBuildings.transform.parent.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.BUILDINGS;
 		this.affectCells.transform.parent.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.CELLS;
 	}
 
 	public override float GetSortKey()
 	{
-		return 10f;
+		return 100000f;
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		this.element = SimHashes.Ice;
+		this.diseaseIdx = byte.MaxValue;
+		this.ConfigureElements();
+		List<string> list = new List<string>();
+		list.Insert(0, "None");
+		foreach (Disease disease in Db.Get().Diseases)
+		{
+			list.Add(disease.Name);
+		}
+		this.diseasePopup.SetOptions(list.ToArray());
+		KPopupMenu kpopupMenu = this.diseasePopup;
+		kpopupMenu.OnSelect = (Action<string, int>)Delegate.Combine(kpopupMenu.OnSelect, new Action<string, int>(this.OnSelectDisease));
+		this.SelectDiseaseOption((int)this.diseaseIdx);
+		this.paintButton.onClick += this.OnClickPaint;
+		this.fillButton.onClick += this.OnClickFill;
+		this.sampleButton.onClick += this.OnClickSample;
+		this.spawnButton.enabled = false;
+		KPopupMenu kpopupMenu2 = this.elementPopup;
+		kpopupMenu2.OnSelect = (Action<string, int>)Delegate.Combine(kpopupMenu2.OnSelect, new Action<string, int>(this.OnSelectElement));
+		this.elementButton.onClick += this.elementPopup.OnClick;
+		this.diseaseButton.onClick += this.diseasePopup.OnClick;
+	}
+
+	private void ConfigureElements()
+	{
+		if (this.filter != null)
+		{
+			this.filter = this.filter.ToLower();
+		}
 		List<DebugPaintElementScreen.ElemDisplayInfo> list = new List<DebugPaintElementScreen.ElemDisplayInfo>();
 		foreach (Element element in ElementLoader.elements)
 		{
-			if (element.name != "Element Not Loaded" && element.substance != null && element.substance.showInEditor)
+			if (element.name != "Element Not Loaded" && element.substance != null && element.substance.showInEditor && (string.IsNullOrEmpty(this.filter) || element.name.ToLower().Contains(this.filter)))
 			{
 				list.Add(new DebugPaintElementScreen.ElemDisplayInfo
 				{
@@ -87,23 +94,26 @@ public class DebugPaintElementScreen : KScreen
 			}
 		}
 		list.Sort((DebugPaintElementScreen.ElemDisplayInfo a, DebugPaintElementScreen.ElemDisplayInfo b) => a.displayStr.CompareTo(b.displayStr));
-		SimHashes[] array = new SimHashes[]
+		if (string.IsNullOrEmpty(this.filter))
 		{
-			SimHashes.SlimeMold,
-			SimHashes.Vacuum,
-			SimHashes.Dirt,
-			SimHashes.CarbonDioxide,
-			SimHashes.Water,
-			SimHashes.Oxygen
-		};
-		foreach (SimHashes simHashes in array)
-		{
-			Element element2 = ElementLoader.FindElementByHash(simHashes);
-			list.Insert(0, new DebugPaintElementScreen.ElemDisplayInfo
+			SimHashes[] array = new SimHashes[]
 			{
-				id = element2.id,
-				displayStr = element2.name + " (" + element2.GetStateString() + ")"
-			});
+				SimHashes.SlimeMold,
+				SimHashes.Vacuum,
+				SimHashes.Dirt,
+				SimHashes.CarbonDioxide,
+				SimHashes.Water,
+				SimHashes.Oxygen
+			};
+			foreach (SimHashes simHashes in array)
+			{
+				Element element2 = ElementLoader.FindElementByHash(simHashes);
+				list.Insert(0, new DebugPaintElementScreen.ElemDisplayInfo
+				{
+					id = element2.id,
+					displayStr = element2.name + " (" + element2.GetStateString() + ")"
+				});
+			}
 		}
 		this.options_list = new List<string>();
 		List<string> list2 = new List<string>();
@@ -113,8 +123,6 @@ public class DebugPaintElementScreen : KScreen
 			this.options_list.Add(elemDisplayInfo.id.ToString());
 		}
 		this.elementPopup.SetOptions(list2);
-		KPopupMenu kpopupMenu = this.elementPopup;
-		kpopupMenu.OnSelect = (Action<string, int>)Delegate.Combine(kpopupMenu.OnSelect, new Action<string, int>(this.OnSelectElement));
 		for (int j = 0; j < list.Count; j++)
 		{
 			if (list[j].id == this.element)
@@ -122,31 +130,7 @@ public class DebugPaintElementScreen : KScreen
 				this.elementPopup.SelectOption(list2[j], j);
 			}
 		}
-		this.diseaseIdx = byte.MaxValue;
-		List<string> list3 = new List<string>();
-		list3.Insert(0, "None");
-		foreach (Disease disease in Db.Get().Diseases)
-		{
-			list3.Add(disease.Name);
-		}
-		this.diseasePopup.SetOptions(list3.ToArray());
-		KPopupMenu kpopupMenu2 = this.diseasePopup;
-		kpopupMenu2.OnSelect = (Action<string, int>)Delegate.Combine(kpopupMenu2.OnSelect, new Action<string, int>(this.OnSelectDisease));
-		this.SelectDiseaseOption((int)this.diseaseIdx);
-		this.paintButton.onClick += this.OnClickPaint;
-		this.fillButton.onClick += this.OnClickFill;
-		this.spawnButton.enabled = false;
-		this.elementButton.onClick += this.elementPopup.OnClick;
-		this.diseaseButton.onClick += this.diseasePopup.OnClick;
-		this.blockInput = false;
-	}
-
-	public override void OnKeyDown(KButtonEvent e)
-	{
-		if (!this.blockInput || e.TryConsume(global::Action.Plan1) || e.TryConsume(global::Action.Plan2) || e.TryConsume(global::Action.Plan3) || e.TryConsume(global::Action.Plan4) || e.TryConsume(global::Action.Plan5) || e.TryConsume(global::Action.Plan6) || e.TryConsume(global::Action.Plan7) || e.TryConsume(global::Action.Plan8) || e.TryConsume(global::Action.Plan9) || e.TryConsume(global::Action.Plan10) || e.TryConsume(global::Action.DebugToggle))
-		{
-		}
-		base.OnKeyDown(e);
+		this.elementPopup.GetComponent<ScrollRect>().normalizedPosition = new Vector2(0f, 1f);
 	}
 
 	private void OnClickSpawn()
@@ -164,6 +148,15 @@ public class DebugPaintElementScreen : KScreen
 		DebugTool.Instance.Activate(DebugTool.Type.ReplaceSubstance);
 	}
 
+	private void OnClickSample()
+	{
+		this.OnChangeMassPressure();
+		this.OnChangeTemperature();
+		this.OnDiseaseCountChange();
+		this.OnChangeFOWReveal();
+		DebugTool.Instance.Activate(DebugTool.Type.Sample);
+	}
+
 	private void OnClickFill()
 	{
 		this.OnChangeMassPressure();
@@ -176,6 +169,12 @@ public class DebugPaintElementScreen : KScreen
 	{
 		this.element = (SimHashes)Enum.Parse(typeof(SimHashes), this.options_list[index]);
 		this.elementButton.GetComponentInChildren<LocText>().text = str;
+	}
+
+	private void OnSelectElement(SimHashes element)
+	{
+		this.element = element;
+		this.elementButton.GetComponentInChildren<LocText>().text = ElementLoader.FindElementByHash(element).name;
 	}
 
 	private void OnSelectDisease(string str, int index)
@@ -260,6 +259,72 @@ public class DebugPaintElementScreen : KScreen
 		this.diseaseCount = num;
 	}
 
+	public void OnElementsFilterEdited(string new_filter)
+	{
+		this.filter = ((!string.IsNullOrEmpty(new_filter)) ? new_filter : null);
+		this.ConfigureElements();
+	}
+
+	public override void OnKeyDown(KButtonEvent e)
+	{
+		if (this.CheckBlockedInput())
+		{
+			if (!e.Consumed)
+			{
+				e.Consumed = true;
+			}
+		}
+		else
+		{
+			base.OnKeyDown(e);
+		}
+	}
+
+	public override void OnKeyUp(KButtonEvent e)
+	{
+		if (this.CheckBlockedInput())
+		{
+			if (!e.Consumed)
+			{
+				e.Consumed = true;
+			}
+		}
+		else
+		{
+			base.OnKeyDown(e);
+		}
+	}
+
+	private bool CheckBlockedInput()
+	{
+		bool flag = false;
+		if (global::UnityEngine.EventSystems.EventSystem.current != null)
+		{
+			GameObject currentSelectedGameObject = global::UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject;
+			if (currentSelectedGameObject != null)
+			{
+				foreach (InputField inputField in this.inputFields)
+				{
+					if (currentSelectedGameObject == inputField.gameObject)
+					{
+						flag = true;
+						break;
+					}
+				}
+			}
+		}
+		return flag;
+	}
+
+	public void SampleCell(int cell)
+	{
+		this.massPressureInput.text = (Grid.Pressure[cell] * 0.001f).ToString();
+		this.temperatureInput.text = Grid.Temperature[cell].ToString();
+		this.OnSelectElement(ElementLoader.GetElementID(Grid.Element[cell].tag));
+		this.OnChangeMassPressure();
+		this.OnChangeTemperature();
+	}
+
 	[Header("Current State")]
 	public SimHashes element;
 
@@ -275,12 +340,10 @@ public class DebugPaintElementScreen : KScreen
 	[NonSerialized]
 	public bool set_allow_fow_reveal;
 
-	public byte diseaseIdx;
-
 	[NonSerialized]
 	public int diseaseCount;
 
-	private bool blockInput;
+	public byte diseaseIdx;
 
 	[Header("Popup Buttons")]
 	[SerializeField]
@@ -306,12 +369,18 @@ public class DebugPaintElementScreen : KScreen
 	[SerializeField]
 	private InputField diseaseCountInput;
 
+	[SerializeField]
+	private InputField filterInput;
+
 	[Header("Tool Buttons")]
 	[SerializeField]
 	private KButton paintButton;
 
 	[SerializeField]
 	private KButton fillButton;
+
+	[SerializeField]
+	private KButton sampleButton;
 
 	[SerializeField]
 	private KButton spawnButton;
@@ -335,7 +404,11 @@ public class DebugPaintElementScreen : KScreen
 
 	public Toggle paintAllowFOWReveal;
 
+	private List<InputField> inputFields = new List<InputField>();
+
 	private List<string> options_list = new List<string>();
+
+	private string filter;
 
 	private struct ElemDisplayInfo
 	{

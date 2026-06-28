@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
-public class SingleEntityReceptacle : KMonoBehaviour, IRender1000ms
+public class SingleEntityReceptacle : Workable, IRender1000ms
 {
 	public FetchChore GetActiveRequest
 	{
@@ -63,21 +63,25 @@ public class SingleEntityReceptacle : KMonoBehaviour, IRender1000ms
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.autoRegisterSimRender = false;
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.SubscribeToOccupant();
+		if (this.occupyingObject != null)
+		{
+			this.PositionOccupyingObject();
+			this.SubscribeToOccupant();
+		}
 		this.UpdateStatusItem();
 		if (this.occupyingObject == null && this.requestedEntityTag.IsValid)
 		{
 			this.CreateOrder(this.requestedEntityTag);
 		}
+		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 	}
 
-	public void AddDespoitTag(Tag t)
+	public void AddDepositTag(Tag t)
 	{
 		this.possibleDepositTagsList.Add(t);
 	}
@@ -114,24 +118,30 @@ public class SingleEntityReceptacle : KMonoBehaviour, IRender1000ms
 		}
 		if (this.fetchChore != null)
 		{
-			bool flag = false;
-			foreach (Tag tag in this.fetchChore.tags)
-			{
-				if (WorldInventory.Instance.GetTotalAmount(tag) > 0f)
-				{
-					component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, Db.Get().BuildingStatusItems.AwaitingSeedDelivery, null);
-					flag = true;
-					break;
-				}
-			}
+			bool flag = this.fetchChore.fetcher != null;
 			if (!flag)
 			{
-				component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, Db.Get().BuildingStatusItems.NoAvailableSeed, null);
+				foreach (Tag tag in this.fetchChore.tags)
+				{
+					if (WorldInventory.Instance.GetTotalAmount(tag) > 0f)
+					{
+						flag = true;
+						break;
+					}
+				}
+			}
+			if (flag)
+			{
+				component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, this.statusItemAwaitingDelivery, null);
+			}
+			else
+			{
+				component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, this.statusItemNoneAvailable, null);
 			}
 		}
 		else
 		{
-			component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, Db.Get().BuildingStatusItems.NeedSeed, null);
+			component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, this.statusItemNeed, null);
 		}
 	}
 
@@ -147,7 +157,6 @@ public class SingleEntityReceptacle : KMonoBehaviour, IRender1000ms
 				this.UpdateStatusItem();
 			}, FetchOrder2.OperationalRequirement.Functional, 0, GameTags.ChoreTypes.FarmingChores);
 			MaterialNeeds.Instance.UpdateNeed(this.requestedEntityTag, 1f);
-			SimAndRenderScheduler.instance.Add(this, false);
 			this.UpdateStatusItem();
 		}
 	}
@@ -164,7 +173,7 @@ public class SingleEntityReceptacle : KMonoBehaviour, IRender1000ms
 			Util.KDestroyGameObject(this.occupyingObject);
 		}
 		this.occupyingObject = null;
-		this.SetOperation();
+		this.UpdateActive();
 		this.UpdateStatusItem();
 		base.Trigger(-731304873, this.occupyingObject);
 	}
@@ -173,7 +182,6 @@ public class SingleEntityReceptacle : KMonoBehaviour, IRender1000ms
 	{
 		if (this.fetchChore != null)
 		{
-			SimAndRenderScheduler.instance.Remove(this);
 			MaterialNeeds.Instance.UpdateNeed(this.requestedEntityTag, -1f);
 			this.fetchChore.Cancel("User canceled");
 			this.fetchChore = null;
@@ -229,13 +237,8 @@ public class SingleEntityReceptacle : KMonoBehaviour, IRender1000ms
 		{
 			this.requestedEntityTag = Tag.Invalid;
 		}
-		SimAndRenderScheduler.instance.Remove(this);
-		this.SetOperation();
+		this.UpdateActive();
 		this.UpdateStatusItem();
-		base.Subscribe(-592767678, delegate
-		{
-			this.SetOperation();
-		});
 		if (this.destroyEntityOnDeposit)
 		{
 			Util.KDestroyGameObject(fetchTarget.gameObject);
@@ -248,11 +251,9 @@ public class SingleEntityReceptacle : KMonoBehaviour, IRender1000ms
 		return depositedEntity;
 	}
 
-	protected void PositionOccupyingObject()
+	protected virtual void PositionOccupyingObject()
 	{
-		this.occupyingObject.transform.SetPosition(Vector3.zero);
 		this.occupyingObject.transform.SetParent(base.gameObject.transform, false);
-		this.occupyingObject.transform.SetLocalPosition(Vector3.zero);
 		if (this.rotatable != null)
 		{
 			this.occupyingObject.transform.SetLocalPosition(this.rotatable.GetRotatedOffset(this.occupyingObjectRelativePosition));
@@ -263,21 +264,13 @@ public class SingleEntityReceptacle : KMonoBehaviour, IRender1000ms
 		}
 	}
 
-	private void SetOperation()
+	private void UpdateActive()
 	{
 		if (this.Equals(null) || this == null || base.gameObject.Equals(null) || base.gameObject == null)
 		{
 			return;
 		}
-		Operational component = base.GetComponent<Operational>();
-		if (component.IsOperational && this.occupyingObject != null)
-		{
-			component.SetActive(true, false);
-		}
-		else
-		{
-			component.SetActive(false, false);
-		}
+		this.operational.SetActive(this.operational.IsOperational && this.occupyingObject != null, false);
 	}
 
 	protected override void OnCleanUp()
@@ -285,6 +278,15 @@ public class SingleEntityReceptacle : KMonoBehaviour, IRender1000ms
 		this.CancelActiveRequest();
 		this.UnsubscribeFromOccupant();
 		base.OnCleanUp();
+	}
+
+	private void OnOperationalChanged(object data)
+	{
+		this.UpdateActive();
+		if (this.occupyingObject)
+		{
+			this.occupyingObject.Trigger((!this.operational.IsOperational) ? 960378201 : 1628751838, null);
+		}
 	}
 
 	[MyCmpReq]
@@ -316,6 +318,12 @@ public class SingleEntityReceptacle : KMonoBehaviour, IRender1000ms
 	protected SingleEntityReceptacle.ReceptacleDirection direction;
 
 	public Vector3 occupyingObjectRelativePosition = new Vector3(0f, 1f, 3f);
+
+	protected StatusItem statusItemAwaitingDelivery;
+
+	protected StatusItem statusItemNeed;
+
+	protected StatusItem statusItemNoneAvailable;
 
 	public enum ReceptacleDirection
 	{

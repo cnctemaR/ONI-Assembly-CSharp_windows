@@ -35,8 +35,8 @@ public class BasicFabricMaterialPlantConfig : IEntityConfig
 			}
 		});
 		gameObject.AddOrGet<StandardCropPlant>();
-		gameObject.UpdateComponentRequirement<KAnimControllerBase>(true).randomiseLoopedOffset = true;
-		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
+		gameObject.AddOrGet<KAnimControllerBase>().randomiseLoopedOffset = true;
+		gameObject.AddOrGet<LoopingSounds>();
 		gameObject2 = gameObject;
 		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
 		text4 = "BasicFabricMaterialPlantSeed";

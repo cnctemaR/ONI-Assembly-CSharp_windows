@@ -521,6 +521,10 @@ public class BuildingDef : Def
 
 	public Sprite GetUISprite(string animName = "ui")
 	{
+		if (this.UISprite != null)
+		{
+			return this.UISprite;
+		}
 		if (this.AnimFiles == null || this.AnimFiles.Length == 0)
 		{
 			Output.LogWarning(new object[] { "Building", base.name, "missing Anim Files" });
@@ -607,9 +611,9 @@ public class BuildingDef : Def
 		{
 			num4 = 100f / (num3 / (float)num);
 		}
-		Sprite sprite = Sprite.Create(texture, rect, new Vector2(0f, 0f), num4, 0U, SpriteMeshType.FullRect);
-		sprite.name = base.name + ":" + frameElement.frame.ToString();
-		return sprite;
+		this.UISprite = Sprite.Create(texture, rect, new Vector2(0f, 0f), num4, 0U, SpriteMeshType.FullRect);
+		this.UISprite.name = base.name + ":" + frameElement.frame.ToString();
+		return this.UISprite;
 	}
 
 	public void GetExtents(bool is_rotated, Vector3 pos, out Vector2I min, out Vector2I max)

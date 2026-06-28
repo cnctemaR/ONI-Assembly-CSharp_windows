@@ -20,6 +20,11 @@ public class DeathMessage : TargetMessage
 		return string.Empty;
 	}
 
+	public override bool PlayNotificationSound()
+	{
+		return false;
+	}
+
 	public override string GetTitle()
 	{
 		return MISC.NOTIFICATIONS.DUPLICANTDIED.NAME;

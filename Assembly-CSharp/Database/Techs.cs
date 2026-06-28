@@ -101,8 +101,12 @@ namespace Database
 				new string[] { "FertilizerMaker", "HydroponicFarm", "Refrigerator", "FarmStation" }
 			},
 			{
+				"Ranching",
+				new string[] { "CreatureDeliveryPoint", "CreatureFeeder", "RanchStation" }
+			},
+			{
 				"AnimalControl",
-				new string[] { "CreatureTrap", "AirborneCreatureLure", "CreatureDeliveryPoint", "AirborneCreatureLure" }
+				new string[] { "CreatureTrap", "AirborneCreatureLure", "EggIncubator" }
 			},
 			{
 				"ImprovedOxygen",
@@ -229,7 +233,7 @@ namespace Database
 			},
 			{
 				"AdvancedResearch",
-				new string[] { "AdvancedResearchCenter", "BetaResearchPoint" }
+				new string[] { "AdvancedResearchCenter", "RoleStation", "BetaResearchPoint" }
 			},
 			{
 				"BasicRefinement",

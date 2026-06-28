@@ -6,11 +6,15 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MinionVitalsPanel : KMonoBehaviour, IRender200ms
+public class MinionVitalsPanel : KMonoBehaviour
 {
 	public void Init()
 	{
 		this.AddLine(Db.Get().Amounts.HitPoints, this.icon_hitpoints, null);
+		this.AddLine(Db.Get().Amounts.Happiness, this.icon_stress, null);
+		this.AddLine(Db.Get().Amounts.Wildness, this.icon_hitpoints, null);
+		this.AddLine(Db.Get().Amounts.Incubation, this.icon_hitpoints, null);
+		this.AddLine(Db.Get().Amounts.Fertility, this.icon_hitpoints, null);
 		this.AddLine(Db.Get().Amounts.Stress, this.icon_stress, null);
 		this.AddLine(Db.Get().Amounts.Bladder, this.icon_bladder, null);
 		this.AddLine(Db.Get().Amounts.Breath, this.icon_breath, null);
@@ -145,19 +149,21 @@ public class MinionVitalsPanel : KMonoBehaviour, IRender200ms
 		this.checkboxLines.Add(checkboxLine);
 	}
 
-	public void Render200ms(float dt)
-	{
-		this.Refresh();
-	}
-
 	public void Refresh()
 	{
-		if (this.selectedEntity == null || this.selectedEntity.gameObject == null)
+		if (this.selectedEntity == null)
 		{
-			base.enabled = false;
+			return;
+		}
+		if (this.selectedEntity.gameObject == null)
+		{
 			return;
 		}
 		Amounts amounts = this.selectedEntity.GetAmounts();
+		if (amounts == null)
+		{
+			return;
+		}
 		WiltCondition component = this.selectedEntity.GetComponent<WiltCondition>();
 		if (component == null)
 		{
@@ -170,7 +176,7 @@ public class MinionVitalsPanel : KMonoBehaviour, IRender200ms
 				for (int j = 0; j < amounts.Count; j++)
 				{
 					AmountInstance amountInstance = amounts[j];
-					if (vitalLine.amount == amountInstance.amount)
+					if (vitalLine.amount == amountInstance.amount && !amountInstance.hide)
 					{
 						vitalLine.locText.SetText(vitalLine.amount.GetDescription(amountInstance));
 						vitalLine.imageToggle.SetValue(amountInstance, vitalLine.tooltip);

@@ -7,7 +7,7 @@ using UnityEngine;
 public class VomitChore : Chore<VomitChore.StatesInstance>
 {
 	public VomitChore(ChoreType chore_type, IStateMachineTarget target, StatusItem status_item, Notification notification, Action<Chore> on_complete = null)
-		: base(Db.Get().ChoreTypes.Vomit, target, target.GetComponent<ChoreProvider>(), true, on_complete, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.Vomit, target, target.GetComponent<ChoreProvider>(), true, on_complete, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
 	{
 		this.smi = new VomitChore.StatesInstance(this, target.gameObject, status_item, notification);
 	}
@@ -27,7 +27,7 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 		private static bool CanEmitLiquid(int cell)
 		{
 			bool flag = true;
-			if (Grid.Solid[cell] || (Grid.Cell[cell].properties & 2) != 0)
+			if (Grid.Solid[cell] || (Grid.Properties[cell] & 2) != 0)
 			{
 				flag = false;
 			}

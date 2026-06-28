@@ -13,11 +13,7 @@ public class Cook : RoleConfig
 		base.roleGroup = "Cooking";
 		base.hat = Game.Instance.roleManager.GetHat(Cook.ID);
 		this.preferredChoreTags.Add(GameTags.ChoreTypes.Cooking);
-		this.favoredChoreTypes = new List<ChoreType>
-		{
-			Db.Get().ChoreTypes.Mush,
-			Db.Get().ChoreTypes.Cook
-		};
+		this.favoredChoreTypes = new List<ChoreType> { Db.Get().ChoreTypes.Cook };
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Cooking };
 		base.perks = new RolePerk[]
 		{

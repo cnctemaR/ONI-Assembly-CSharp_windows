@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -55,7 +56,11 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 		{
 			default_state = this.grow;
 			base.serializable = true;
-			this.dead.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).Enter(delegate(PrickleGrass.StatesInstance smi)
+			GameStateMachine<PrickleGrass.States, PrickleGrass.StatesInstance, PrickleGrass, object>.State state = this.dead;
+			string text = global::STRINGS.CREATURES.STATUSITEMS.DEAD.NAME;
+			string text2 = global::STRINGS.CREATURES.STATUSITEMS.DEAD.TOOLTIP;
+			StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
+			state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory).Enter(delegate(PrickleGrass.StatesInstance smi)
 			{
 				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
 				smi.master.Trigger(1623392196, null);
@@ -73,7 +78,11 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 					smi.GoTo(this.blocked_from_growing);
 				}
 			}).PlayAnim("grow_seed", KAnim.PlayMode.Once).EventTransition(GameHashes.AnimQueueComplete, this.alive, null);
-			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.idle).ToggleStatusItem(Db.Get().CreatureStatusItems.Idle, null);
+			GameStateMachine<PrickleGrass.States, PrickleGrass.StatesInstance, PrickleGrass, object>.State state2 = this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.idle);
+			text2 = global::STRINGS.CREATURES.STATUSITEMS.IDLE.NAME;
+			text = global::STRINGS.CREATURES.STATUSITEMS.IDLE.TOOLTIP;
+			statusItemCategory = Db.Get().StatusItemCategories.Main;
+			state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
 			this.alive.idle.EventTransition(GameHashes.Wilt, this.alive.wilting, (PrickleGrass.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).PlayAnim("idle", KAnim.PlayMode.Loop).Enter(delegate(PrickleGrass.StatesInstance smi)
 			{
 				smi.master.growth_bonus.Description = "Growth Bonus";

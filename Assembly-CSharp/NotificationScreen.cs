@@ -322,9 +322,12 @@ public class NotificationScreen : KScreen
 		{
 			text2 = GlobalAssets.GetSound(text, false);
 		}
-		EventInstance eventInstance = KFMOD.BeginOneShot(text2, Vector3.zero);
-		eventInstance.setParameterValue("timeSinceLast", num2);
-		KFMOD.EndOneShot(eventInstance);
+		if (notification.playSound)
+		{
+			EventInstance eventInstance = KFMOD.BeginOneShot(text2, Vector3.zero);
+			eventInstance.setParameterValue("timeSinceLast", num2);
+			KFMOD.EndOneShot(eventInstance);
+		}
 	}
 
 	private void Update()

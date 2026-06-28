@@ -1,6 +1,7 @@
 ﻿using System;
 using Klei.AI;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 
 public class VitalsTableScreen : TableScreen
@@ -35,13 +36,9 @@ public class VitalsTableScreen : TableScreen
 		{
 			componentInChildren.text = (base.GetWidgetColumn(widget_go) as LabelTableColumn).get_value_action(minion, widget_go);
 		}
-		else if (widgetRow.isDefault)
-		{
-			componentInChildren.text = string.Empty;
-		}
 		else
 		{
-			componentInChildren.text = UI.CONSUMABLESSCREEN.STRESS;
+			componentInChildren.text = ((!widgetRow.isDefault) ? UI.CONSUMABLESSCREEN.STRESS.ToString() : string.Empty);
 		}
 	}
 
@@ -54,15 +51,7 @@ public class VitalsTableScreen : TableScreen
 	{
 		float value = Db.Get().Amounts.Stress.Lookup(a).value;
 		float value2 = Db.Get().Amounts.Stress.Lookup(b).value;
-		if (value > value2)
-		{
-			return -1;
-		}
-		if (value < value2)
-		{
-			return 1;
-		}
-		return 0;
+		return value2.CompareTo(value);
 	}
 
 	protected void on_tooltip_stress(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
@@ -114,13 +103,9 @@ public class VitalsTableScreen : TableScreen
 		{
 			componentInChildren.text = (base.GetWidgetColumn(widget_go) as LabelTableColumn).get_value_action(minion, widget_go);
 		}
-		else if (widgetRow.isDefault)
-		{
-			componentInChildren.text = string.Empty;
-		}
 		else
 		{
-			componentInChildren.text = UI.VITALSSCREEN.FOOD_EXPECTATIONS;
+			componentInChildren.text = ((!widgetRow.isDefault) ? UI.VITALSSCREEN.FOOD_EXPECTATIONS.ToString() : string.Empty);
 		}
 	}
 
@@ -185,13 +170,9 @@ public class VitalsTableScreen : TableScreen
 		{
 			componentInChildren.text = (base.GetWidgetColumn(widget_go) as LabelTableColumn).get_value_action(minion, widget_go);
 		}
-		else if (widgetRow.isDefault)
-		{
-			componentInChildren.text = string.Empty;
-		}
 		else
 		{
-			componentInChildren.text = UI.VITALSSCREEN.DECOR_EXPECTATIONS;
+			componentInChildren.text = ((!widgetRow.isDefault) ? UI.VITALSSCREEN.DECOR_EXPECTATIONS.ToString() : string.Empty);
 		}
 	}
 
@@ -256,13 +237,21 @@ public class VitalsTableScreen : TableScreen
 		{
 			componentInChildren.text = (base.GetWidgetColumn(widget_go) as LabelTableColumn).get_value_action(minion, widget_go);
 		}
-		else if (widgetRow.isDefault)
-		{
-			componentInChildren.text = string.Empty;
-		}
 		else
 		{
-			componentInChildren.text = UI.VITALSSCREEN_HEALTH;
+			TMP_Text tmp_Text = componentInChildren;
+			string text;
+			if (widgetRow.isDefault)
+			{
+				text = string.Empty;
+			}
+			else
+			{
+				string text2 = UI.VITALSSCREEN_HEALTH.ToString();
+				componentInChildren.text = text2;
+				text = text2;
+			}
+			tmp_Text.text = text;
 		}
 	}
 
@@ -275,15 +264,7 @@ public class VitalsTableScreen : TableScreen
 	{
 		float value = Db.Get().Amounts.HitPoints.Lookup(a).value;
 		float value2 = Db.Get().Amounts.HitPoints.Lookup(b).value;
-		if (value > value2)
-		{
-			return -1;
-		}
-		if (value < value2)
-		{
-			return 1;
-		}
-		return 0;
+		return value2.CompareTo(value);
 	}
 
 	protected void on_tooltip_health(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
@@ -335,13 +316,9 @@ public class VitalsTableScreen : TableScreen
 		{
 			componentInChildren.text = (base.GetWidgetColumn(widget_go) as LabelTableColumn).get_value_action(minion, widget_go);
 		}
-		else if (widgetRow.isDefault)
-		{
-			componentInChildren.text = string.Empty;
-		}
 		else
 		{
-			componentInChildren.text = UI.VITALSSCREEN_IMMUNITY;
+			componentInChildren.text = ((!widgetRow.isDefault) ? UI.VITALSSCREEN_IMMUNITY.ToString() : string.Empty);
 		}
 	}
 
@@ -380,15 +357,7 @@ public class VitalsTableScreen : TableScreen
 	{
 		float value = Db.Get().Amounts.ImmuneLevel.Lookup(a).value;
 		float value2 = Db.Get().Amounts.ImmuneLevel.Lookup(b).value;
-		if (value > value2)
-		{
-			return -1;
-		}
-		if (value < value2)
-		{
-			return 1;
-		}
-		return 0;
+		return value2.CompareTo(value);
 	}
 
 	protected void on_tooltip_immunity(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
@@ -454,13 +423,9 @@ public class VitalsTableScreen : TableScreen
 		{
 			componentInChildren.text = (base.GetWidgetColumn(widget_go) as LabelTableColumn).get_value_action(minion, widget_go);
 		}
-		else if (widgetRow.isDefault)
-		{
-			componentInChildren.text = string.Empty;
-		}
 		else
 		{
-			componentInChildren.text = UI.VITALSSCREEN_CALORIES;
+			componentInChildren.text = ((!widgetRow.isDefault) ? UI.VITALSSCREEN_CALORIES.ToString() : string.Empty);
 		}
 	}
 
@@ -473,15 +438,7 @@ public class VitalsTableScreen : TableScreen
 	{
 		float value = Db.Get().Amounts.Calories.Lookup(a).value;
 		float value2 = Db.Get().Amounts.Calories.Lookup(b).value;
-		if (value > value2)
-		{
-			return -1;
-		}
-		if (value < value2)
-		{
-			return 1;
-		}
-		return 0;
+		return value2.CompareTo(value);
 	}
 
 	protected void on_tooltip_fullness(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
@@ -553,34 +510,36 @@ public class VitalsTableScreen : TableScreen
 		{
 			componentInChildren.text = (base.GetWidgetColumn(widget_go) as LabelTableColumn).get_value_action(minion, widget_go);
 		}
-		else if (widgetRow.isDefault)
-		{
-			componentInChildren.text = string.Empty;
-		}
 		else
 		{
-			componentInChildren.text = UI.VITALSSCREEN_EATENTODAY;
+			componentInChildren.text = ((!widgetRow.isDefault) ? UI.VITALSSCREEN_EATENTODAY.ToString() : string.Empty);
 		}
+	}
+
+	private static float RationsEatenToday(MinionIdentity minion)
+	{
+		float num = 0f;
+		if (minion != null)
+		{
+			RationMonitor.Instance smi = minion.GetSMI<RationMonitor.Instance>();
+			if (smi != null)
+			{
+				num = smi.GetRationsAteToday();
+			}
+		}
+		return num;
 	}
 
 	private string get_value_eaten_today_label(MinionIdentity minion, GameObject widget_go)
 	{
-		return GameUtil.GetFormattedCalories(minion.GetSMI<RationMonitor.Instance>().GetRationsAteToday(), GameUtil.TimeSlice.None, true);
+		float num = VitalsTableScreen.RationsEatenToday(minion);
+		return GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
 	}
 
 	private int compare_rows_eaten_today(MinionIdentity a, MinionIdentity b)
 	{
-		float rationsAteToday = a.GetSMI<RationMonitor.Instance>().GetRationsAteToday();
-		float rationsAteToday2 = b.GetSMI<RationMonitor.Instance>().GetRationsAteToday();
-		if (rationsAteToday > rationsAteToday2)
-		{
-			return -1;
-		}
-		if (rationsAteToday < rationsAteToday2)
-		{
-			return 1;
-		}
-		return 0;
+		float num = VitalsTableScreen.RationsEatenToday(a);
+		return VitalsTableScreen.RationsEatenToday(b).CompareTo(num);
 	}
 
 	protected void on_tooltip_eaten_today(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
@@ -597,7 +556,8 @@ public class VitalsTableScreen : TableScreen
 					if (minion != null)
 					{
 						tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
-						tooltip.AddMultiStringTooltip(string.Format(UI.VITALSSCREEN.EATEN_TODAY_TOOLTIP, GameUtil.GetFormattedCalories(minion.GetSMI<RationMonitor.Instance>().GetRationsAteToday(), GameUtil.TimeSlice.None, true)), null);
+						float num = VitalsTableScreen.RationsEatenToday(minion);
+						tooltip.AddMultiStringTooltip(string.Format(UI.VITALSSCREEN.EATEN_TODAY_TOOLTIP, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true)), null);
 					}
 				}
 			}

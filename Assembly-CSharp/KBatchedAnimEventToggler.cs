@@ -59,16 +59,16 @@ public class KBatchedAnimEventToggler : KMonoBehaviour
 	}
 
 	[SerializeField]
-	private GameObject eventSource;
+	public GameObject eventSource;
 
 	[SerializeField]
-	private string enableEvent;
+	public string enableEvent;
 
 	[SerializeField]
-	private string disableEvent;
+	public string disableEvent;
 
 	[SerializeField]
-	private List<KBatchedAnimEventToggler.Entry> entries;
+	public List<KBatchedAnimEventToggler.Entry> entries;
 
 	private AnimEventHandler animEventHandler;
 

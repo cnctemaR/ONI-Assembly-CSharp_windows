@@ -16,7 +16,7 @@ public class Hauler : RoleConfig
 		this.favoredChoreTypes = new List<ChoreType>
 		{
 			Db.Get().ChoreTypes.Fetch,
-			Db.Get().ChoreTypes.FetchCritical,
+			Db.Get().ChoreTypes.OperateFetch,
 			Db.Get().ChoreTypes.BuildFetch,
 			Db.Get().ChoreTypes.Transport
 		};
@@ -30,11 +30,7 @@ public class Hauler : RoleConfig
 
 	public override void InitRequirements()
 	{
-		base.requirements = new RoleAssignmentRequirement[]
-		{
-			Game.Instance.roleManager.roleAssignmentRequirements.Can_Haul,
-			Game.Instance.roleManager.roleAssignmentRequirements.HasExperience_NoRole
-		};
+		base.requirements = new RoleAssignmentRequirement[] { Game.Instance.roleManager.roleAssignmentRequirements.Can_Haul };
 	}
 
 	public const string ID = "Hauler";

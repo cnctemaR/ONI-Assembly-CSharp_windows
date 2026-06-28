@@ -33,7 +33,7 @@ public class Diggable : Workable
 		this.attributeConverter = Db.Get().AttributeConverters.DiggingSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		this.multitoolContext = "dig";
-		this.multitoolHitEffectHash = new HashedString("fx_dig_splash");
+		this.multitoolHitEffectTag = "fx_dig_splash";
 		Prioritizable.AddRef(base.gameObject);
 	}
 
@@ -50,7 +50,7 @@ public class Diggable : Workable
 		{
 			choreType = Db.Get().ChoreTypes.GetByHash(this.choreTypeIdHash);
 		}
-		this.chore = new WorkChore<Diggable>(choreType, this, null, this.choreTags, true, null, null, null, true, null, true, null, true, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+		this.chore = new WorkChore<Diggable>(choreType, this, null, this.choreTags, true, null, null, null, true, null, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		base.SetWorkTime(float.PositiveInfinity);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Diggable.OnSpawn", base.gameObject, Grid.PosToCell(this), GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		this.OnSolidChanged(null);
@@ -69,9 +69,9 @@ public class Diggable : Workable
 		{
 			animInfo.overrideAnims = this.overrideAnims;
 		}
-		if (this.multitoolContext.IsValid && this.multitoolHitEffectHash.IsValid)
+		if (this.multitoolContext.IsValid && this.multitoolHitEffectTag.IsValid)
 		{
-			animInfo.smi = new MultitoolController.Instance(this, worker, this.multitoolContext, Assets.GetPrefab(this.multitoolHitEffectHash));
+			animInfo.smi = new MultitoolController.Instance(this, worker, this.multitoolContext, Assets.GetPrefab(this.multitoolHitEffectTag));
 		}
 		animInfo.forcePlayPst = this.forcePlayPst;
 		return animInfo;
@@ -303,7 +303,7 @@ public class Diggable : Workable
 		}
 		Element element = ElementLoader.FindElementByHash(SimHashes.Ice);
 		float num3 = num2 / (float)element.hardness;
-		float num4 = Mathf.Min(Grid.Cell[num].mass, 400f) / 400f;
+		float num4 = Mathf.Min(Grid.Mass[num], 400f) / 400f;
 		float num5 = 4f * num4;
 		float num6 = num5 + num3 * num5;
 		float num7 = dt / num6;
@@ -425,7 +425,7 @@ public class Diggable : Workable
 					material.color = Game.Instance.uiColours.Dig.unreachable;
 				}
 				this.multitoolContext = Diggable.lasersForHardness[1].first;
-				this.multitoolHitEffectHash = Diggable.lasersForHardness[1].second;
+				this.multitoolHitEffectTag = Diggable.lasersForHardness[1].second;
 			}
 			else
 			{
@@ -438,7 +438,7 @@ public class Diggable : Workable
 					material.color = Game.Instance.uiColours.Dig.unreachable;
 				}
 				this.multitoolContext = Diggable.lasersForHardness[0].first;
-				this.multitoolHitEffectHash = Diggable.lasersForHardness[0].second;
+				this.multitoolHitEffectTag = Diggable.lasersForHardness[0].second;
 			}
 		}
 	}
@@ -505,15 +505,15 @@ public class Diggable : Workable
 	public Tag[] choreTags;
 
 	[SerializeField]
-	private Material[] materials;
+	public Material[] materials;
 
 	[SerializeField]
-	private MeshRenderer materialDisplay;
+	public MeshRenderer materialDisplay;
 
-	private static List<Tuple<string, HashedString>> lasersForHardness = new List<Tuple<string, HashedString>>
+	private static List<Tuple<string, Tag>> lasersForHardness = new List<Tuple<string, Tag>>
 	{
-		new Tuple<string, HashedString>("dig", new HashedString("fx_dig_splash")),
-		new Tuple<string, HashedString>("specialistdig", new HashedString("fx_dig_splash"))
+		new Tuple<string, Tag>("dig", "fx_dig_splash"),
+		new Tuple<string, Tag>("specialistdig", "fx_dig_splash")
 	};
 
 	private int handle;

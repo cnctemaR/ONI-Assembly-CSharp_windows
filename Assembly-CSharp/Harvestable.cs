@@ -139,7 +139,7 @@ public class Harvestable : Workable
 		base.OnPrefabInit();
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Harvesting;
 		this.multitoolContext = "harvest";
-		this.multitoolHitEffectHash = new HashedString("fx_harvest_splash");
+		this.multitoolHitEffectTag = "fx_harvest_splash";
 		base.Subscribe(1309017699, delegate(object o)
 		{
 			this.SetInPlanterBox(true);
@@ -229,7 +229,7 @@ public class Harvestable : Workable
 		KSelectable component = base.GetComponent<KSelectable>();
 		if (this.chore == null)
 		{
-			this.chore = new WorkChore<Harvestable>(Db.Get().ChoreTypes.Harvest, this, null, null, true, null, null, null, true, null, true, null, true, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			this.chore = new WorkChore<Harvestable>(Db.Get().ChoreTypes.Harvest, this, null, null, true, null, null, null, true, null, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 			component.AddStatusItem(Db.Get().MiscStatusItems.PendingHarvest, this);
 		}
 		this.isMarkedForHarvest = true;

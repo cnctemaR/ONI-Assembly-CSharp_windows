@@ -203,9 +203,6 @@ public class TableRow : KMonoBehaviour
 
 	public bool isDefault;
 
-	[MyCmpGet]
-	private HorizontalLayoutGroup HLG;
-
 	public KButton selectMinionButton;
 
 	[SerializeField]

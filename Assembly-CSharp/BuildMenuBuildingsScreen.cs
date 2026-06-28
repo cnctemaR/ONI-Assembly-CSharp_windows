@@ -27,7 +27,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		this.SetHasFocus(true);
 		List<KIconToggleMenu.ToggleInfo> list = new List<KIconToggleMenu.ToggleInfo>();
 		string text = category.ToString().ToUpper();
-		this.titleLabel.text = Strings.Get("STRINGS.UI.NEWBUILDCATEGORIES." + text + ".NAME");
+		this.titleLabel.text = Strings.Get("STRINGS.UI.NEWBUILDCATEGORIES." + text + ".BUILDMENUTITLE");
 		foreach (BuildMenu.BuildingInfo buildingInfo in building_infos)
 		{
 			BuildingDef def = Assets.GetBuildingDef(buildingInfo.id);
@@ -137,15 +137,16 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		{
 			componentInChildren.text = def.Name;
 		}
-		int num = ((BuildMenu.Instance.BuildableState(def) != PlanScreen.RequirementsState.Complete) ? 0 : 1);
+		PlanScreen.RequirementsState requirementsState = BuildMenu.Instance.BuildableState(def);
+		int num = ((requirementsState != PlanScreen.RequirementsState.Complete) ? 0 : 1);
 		ImageToggleState.State state;
-		if (def == this.selectedBuilding && (BuildMenu.Instance.BuildableState(def) == PlanScreen.RequirementsState.Complete || DebugHandler.InstantBuildMode))
+		if (def == this.selectedBuilding && (requirementsState == PlanScreen.RequirementsState.Complete || DebugHandler.InstantBuildMode))
 		{
 			state = ImageToggleState.State.Active;
 		}
 		else
 		{
-			state = ((BuildMenu.Instance.BuildableState(def) != PlanScreen.RequirementsState.Complete && !DebugHandler.InstantBuildMode) ? ImageToggleState.State.Disabled : ImageToggleState.State.Inactive);
+			state = ((requirementsState != PlanScreen.RequirementsState.Complete && !DebugHandler.InstantBuildMode) ? ImageToggleState.State.Disabled : ImageToggleState.State.Inactive);
 		}
 		if (def == this.selectedBuilding && state == ImageToggleState.State.Disabled)
 		{
@@ -158,7 +159,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		toggle.GetComponent<ImageToggleState>().SetState(state);
 		Material material;
 		Color color;
-		if (BuildMenu.Instance.BuildableState(def) == PlanScreen.RequirementsState.Complete || DebugHandler.InstantBuildMode)
+		if (requirementsState == PlanScreen.RequirementsState.Complete || DebugHandler.InstantBuildMode)
 		{
 			material = this.defaultUIMaterial;
 			color = Color.white;
@@ -194,7 +195,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 			component.AddMultiStringTooltip("\n", this.buildingToolTipSettings.ResearchRequirement);
 			component.AddMultiStringTooltip(text2, this.buildingToolTipSettings.ResearchRequirement);
 		}
-		else if (BuildMenu.Instance.BuildableState(def) != PlanScreen.RequirementsState.Complete)
+		else if (requirementsState != PlanScreen.RequirementsState.Complete)
 		{
 			fgImage.gameObject.SetActive(false);
 			component.AddMultiStringTooltip("\n", this.buildingToolTipSettings.ResearchRequirement);

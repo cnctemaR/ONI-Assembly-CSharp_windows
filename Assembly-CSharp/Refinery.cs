@@ -299,7 +299,7 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 					Refinery.MachineOrder machineOrder3 = machineOrder2;
 					ChoreType choreType = this.choreType;
 					Tag[] array = this.choreTags;
-					machineOrder3.chore = new WorkChore<Refinery>(choreType, this, null, array, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+					machineOrder3.chore = new WorkChore<Refinery>(choreType, this, null, array, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 					if (this.workTimeRemaining <= 0f)
 					{
 						this.workTimeRemaining = this.GetWorkTime();
@@ -342,7 +342,7 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 					int num3 = -j;
 					if (machineOrder5.fetchList == null && num2 > 0f)
 					{
-						machineOrder5.fetchList = new FetchList2(this.inStorage, Db.Get().ChoreTypes.FetchCritical, this.choreTags);
+						machineOrder5.fetchList = new FetchList2(this.inStorage, Db.Get().ChoreTypes.MachineFetch, this.choreTags);
 						machineOrder5.fetchList.ShowStatusItem = false;
 						machineOrder5.fetchList.SetPriorityMod(num3);
 						machineOrder5.fetchList.Add(recipe3.material, null, num2, FetchOrder2.OperationalRequirement.None);

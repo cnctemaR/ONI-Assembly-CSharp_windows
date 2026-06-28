@@ -34,7 +34,7 @@ public class AsPercentAmountDisplayer : IAmountDisplayer, IAttributeFormatter
 
 	public virtual string GetTooltipDescription(Amount master, AmountInstance instance)
 	{
-		return string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null), this.formatter.GetFormattedValue(master.startingMin, GameUtil.TimeSlice.None, null));
+		return string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null));
 	}
 
 	public virtual string GetTooltip(Amount master, AmountInstance instance)

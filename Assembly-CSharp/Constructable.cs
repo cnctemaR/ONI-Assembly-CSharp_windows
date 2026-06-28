@@ -204,7 +204,7 @@ public class Constructable : Workable, ISaveLoadable
 		Prioritizable.AddRef(base.gameObject);
 		this.synchronizeAnims = false;
 		this.multitoolContext = "build";
-		this.multitoolHitEffectHash = new HashedString("fx_build_splash");
+		this.multitoolHitEffectTag = "fx_build_splash";
 	}
 
 	protected override void OnSpawn()
@@ -507,6 +507,7 @@ public class Constructable : Workable, ISaveLoadable
 	{
 		if (this.waitForFetchesBeforeDigging && this.fetchList != null && !this.hasLadderNearby)
 		{
+			this.OnDiggableReachabilityChanged(null);
 			return;
 		}
 		bool digs_complete = true;
@@ -527,7 +528,8 @@ public class Constructable : Workable, ISaveLoadable
 					Diggable diggable = Diggable.GetDiggable(offset_cell);
 					if (diggable == null)
 					{
-						diggable = GameUtil.KInstantiate(EntityPrefabs.Instance.DigPlacer, Grid.SceneLayer.Move, Folder.Placers, null, 0).GetComponent<Diggable>();
+						diggable = GameUtil.KInstantiate(Assets.GetPrefab(new Tag("DigPlacer")), Grid.SceneLayer.Move, Folder.Placers, null, 0).GetComponent<Diggable>();
+						diggable.gameObject.SetActive(true);
 						diggable.transform.SetPosition(Grid.CellToPosCBC(offset_cell, Grid.SceneLayer.Move));
 						diggable.Subscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
 					}
@@ -536,7 +538,7 @@ public class Constructable : Workable, ISaveLoadable
 						diggable.Unsubscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
 						diggable.Subscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
 					}
-					diggable.choreTypeIdHash = Db.Get().ChoreTypes.Dig.IdHash;
+					diggable.choreTypeIdHash = Db.Get().ChoreTypes.BuildDig.IdHash;
 					diggable.choreTags = this.choreTags;
 					diggable.GetComponent<Prioritizable>().SetMasterPriority(masterPriority);
 					RenderUtil.EnableRenderer(diggable.transform, false);
@@ -564,7 +566,7 @@ public class Constructable : Workable, ISaveLoadable
 		{
 			ChoreType build = Db.Get().ChoreTypes.Build;
 			Tag[] array = this.choreTags;
-			this.buildChore = new WorkChore<Constructable>(build, this, null, array, true, new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), true, null, true, null, true, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			this.buildChore = new WorkChore<Constructable>(build, this, null, array, true, new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), true, null, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 			this.UpdateBuildState(this.buildChore);
 		}
 		else if (!flag2 && this.buildChore != null)

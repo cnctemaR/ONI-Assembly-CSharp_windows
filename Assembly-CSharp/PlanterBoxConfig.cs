@@ -31,7 +31,7 @@ public class PlanterBoxConfig : IBuildingConfig
 	{
 		Storage storage = go.AddOrGet<Storage>();
 		PlantablePlot plantablePlot = go.AddOrGet<PlantablePlot>();
-		plantablePlot.AddDespoitTag(GameTags.CropSeed);
+		plantablePlot.AddDepositTag(GameTags.CropSeed);
 		plantablePlot.SetFertilizationFlags(true, false);
 		BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);

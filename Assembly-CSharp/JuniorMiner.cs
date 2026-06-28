@@ -23,11 +23,7 @@ public class JuniorMiner : RoleConfig
 
 	public override void InitRequirements()
 	{
-		base.requirements = new RoleAssignmentRequirement[]
-		{
-			Game.Instance.roleManager.roleAssignmentRequirements.Can_Dig,
-			Game.Instance.roleManager.roleAssignmentRequirements.HasExperience_NoRole
-		};
+		base.requirements = new RoleAssignmentRequirement[] { Game.Instance.roleManager.roleAssignmentRequirements.Can_Dig };
 	}
 
 	public static string ID = "JuniorMiner";

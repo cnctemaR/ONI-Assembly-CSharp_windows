@@ -164,7 +164,17 @@ public class WorldGenSpawner : KMonoBehaviour
 		public Spawnable(Prefab spawn_info)
 		{
 			this.spawnInfo = spawn_info;
-			this.cell = Grid.XYToCell(this.spawnInfo.location_x, this.spawnInfo.location_y);
+			int num = Grid.XYToCell(this.spawnInfo.location_x, this.spawnInfo.location_y);
+			GameObject prefab = Assets.GetPrefab(spawn_info.id);
+			if (prefab != null)
+			{
+				WorldSpawnableMonitor.Def def = prefab.GetDef<WorldSpawnableMonitor.Def>();
+				if (def != null && def.adjustSpawnLocationCb != null)
+				{
+					num = def.adjustSpawnLocationCb(num);
+				}
+			}
+			this.cell = num;
 			if (Grid.Spawnable[this.cell] > 0)
 			{
 				this.TrySpawn();
@@ -240,8 +250,16 @@ public class WorldGenSpawner : KMonoBehaviour
 			GameObject prefab = Assets.GetPrefab(this.GetPrefabTag());
 			if (prefab != null)
 			{
-				Pickupable component = prefab.GetComponent<Pickupable>();
-				if (component != null && Grid.Solid[this.cell])
+				bool flag = false;
+				if (prefab.GetComponent<Pickupable>() != null)
+				{
+					flag = true;
+				}
+				else if (prefab.GetDef<BurrowMonitor.Def>() != null)
+				{
+					flag = true;
+				}
+				if (flag && Grid.Solid[this.cell])
 				{
 					this.solidChangedPartitionerEntry = GameScenePartitioner.Instance.Add("WorldGenSpawner.OnSolidChanged", this, this.cell, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 					Game.Instance.GetComponent<EntombedItemVisualizer>().AddItem(this.cell);

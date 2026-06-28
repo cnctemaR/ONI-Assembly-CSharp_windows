@@ -9,8 +9,7 @@ public class DecorNeed : Need, ISim200ms
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Amounts amounts = base.gameObject.GetAmounts();
-		this.amount = amounts.Add(new AmountInstance(Db.Get().Amounts.Decor, base.gameObject));
+		this.amount = Db.Get().Amounts.Decor.Lookup(base.gameObject);
 		Attributes attributes = base.gameObject.GetAttributes();
 		this.modifier = new AttributeModifier(Db.Get().Amounts.Decor.deltaAttribute.Id, 1f, DUPLICANTS.NEEDS.DECOR.OBSERVED_DECOR, false, false, false);
 		this.expectationAttribute = attributes.Add(Db.Get().Attributes.DecorExpectation);

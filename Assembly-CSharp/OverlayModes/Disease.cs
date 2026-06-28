@@ -30,6 +30,13 @@ namespace OverlayModes
 			CameraController.Instance.ToggleColouredOverlayView(true);
 			Camera.main.cullingMask |= this.cameraLayerMask;
 			base.RegisterSaveLoadListeners();
+			foreach (DiseaseSourceVisualizer diseaseSourceVisualizer in Components.DiseaseSourceVisualizers)
+			{
+				if (!(diseaseSourceVisualizer == null))
+				{
+					diseaseSourceVisualizer.Show(this.ViewMode());
+				}
+			}
 		}
 
 		protected override void OnSaveLoadRootRegistered(SaveLoadRoot item)
@@ -52,6 +59,13 @@ namespace OverlayModes
 
 		public override void Disable()
 		{
+			foreach (DiseaseSourceVisualizer diseaseSourceVisualizer in Components.DiseaseSourceVisualizers)
+			{
+				if (!(diseaseSourceVisualizer == null))
+				{
+					diseaseSourceVisualizer.Show(SimViewMode.None);
+				}
+			}
 			base.UnregisterSaveLoadListeners();
 			Camera.main.cullingMask &= ~this.cameraLayerMask;
 			foreach (KMonoBehaviour kmonoBehaviour in this.layerTargets)

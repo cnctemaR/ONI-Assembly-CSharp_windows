@@ -40,6 +40,11 @@ namespace TMPro
 			TMPro_EventManager.TEXT_STYLE_PROPERTY_EVENT.Call(isChanged);
 		}
 
+		public static void ON_COLOR_GRAIDENT_PROPERTY_CHANGED(TMP_ColorGradient gradient)
+		{
+			TMPro_EventManager.COLOR_GRADIENT_PROPERTY_EVENT.Call(gradient);
+		}
+
 		public static void ON_TEXT_CHANGED(global::UnityEngine.Object obj)
 		{
 			TMPro_EventManager.TEXT_CHANGED_EVENT.Call(obj);
@@ -53,11 +58,6 @@ namespace TMPro
 		public static void ON_TEXTMESHPRO_UGUI_PROPERTY_CHANGED(bool isChanged, TextMeshProUGUI obj)
 		{
 			TMPro_EventManager.TEXTMESHPRO_UGUI_PROPERTY_EVENT.Call(isChanged, obj);
-		}
-
-		public static void ON_BASE_MATERIAL_CHANGED(Material mat)
-		{
-			TMPro_EventManager.BASE_MATERIAL_EVENT.Call(mat);
 		}
 
 		public static void ON_COMPUTE_DT_EVENT(object Sender, Compute_DT_EventArgs e)
@@ -79,16 +79,14 @@ namespace TMPro
 
 		public static readonly FastAction<bool> TEXT_STYLE_PROPERTY_EVENT = new FastAction<bool>();
 
+		public static readonly FastAction<TMP_ColorGradient> COLOR_GRADIENT_PROPERTY_EVENT = new FastAction<TMP_ColorGradient>();
+
 		public static readonly FastAction TMP_SETTINGS_PROPERTY_EVENT = new FastAction();
 
 		public static readonly FastAction<bool, TextMeshProUGUI> TEXTMESHPRO_UGUI_PROPERTY_EVENT = new FastAction<bool, TextMeshProUGUI>();
 
-		public static readonly FastAction<Material> BASE_MATERIAL_EVENT = new FastAction<Material>();
-
 		public static readonly FastAction OnPreRenderObject_Event = new FastAction();
 
 		public static readonly FastAction<global::UnityEngine.Object> TEXT_CHANGED_EVENT = new FastAction<global::UnityEngine.Object>();
-
-		public static readonly FastAction WILL_RENDER_CANVASES = new FastAction();
 	}
 }

@@ -46,11 +46,11 @@ public class PressureDoorConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		Door door = go.UpdateComponentRequirement<Door>(true);
+		Door door = go.AddOrGet<Door>();
 		door.hasComplexUserControls = true;
 		door.unpoweredAnimSpeed = 1f;
-		go.UpdateComponentRequirement<AccessControl>(true);
-		go.UpdateComponentRequirement<KBoxCollider2D>(true);
+		go.AddOrGet<AccessControl>();
+		go.AddOrGet<KBoxCollider2D>();
 		Prioritizable.AddRef(go);
 		Workable workable = go.AddOrGet<Workable>();
 		workable.workTime = 5f;

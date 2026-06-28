@@ -44,7 +44,7 @@ public class CanvasConfig : IBuildingConfig
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		Artable artable = go.AddComponent<Painting>();
-		artable.requiredRolePerk = "CanArt";
+		artable.requiredRolePerk = RoleManager.rolePerks.CanArt.id;
 		artable.stages.Add(new Artable.Stage("Default", global::STRINGS.BUILDINGS.PREFABS.CANVAS.NAME, "off", 0, 0, false, Artable.Status.Ready));
 		artable.stages.Add(new Artable.Stage("Bad", global::STRINGS.BUILDINGS.PREFABS.CANVAS.POORQUALITYNAME, "art_a", 0, 5, false, Artable.Status.Ugly));
 		artable.stages.Add(new Artable.Stage("Average", global::STRINGS.BUILDINGS.PREFABS.CANVAS.AVERAGEQUALITYNAME, "art_b", 2, 10, false, Artable.Status.Okay));

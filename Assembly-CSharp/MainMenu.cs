@@ -29,10 +29,6 @@ public class MainMenu : KMonoBehaviour
 			this.Button_Translations.gameObject.SetActive(false);
 			this.topLeftAlphaMessage.gameObject.SetActive(false);
 		}
-		if (SaveLoader.GetSaveFileCount() == 0)
-		{
-			this.Button_LoadGame.isInteractable = false;
-		}
 		this.StartFEAudio();
 		if (PatchNotesScreen.ShouldShowScreen())
 		{
@@ -45,14 +41,6 @@ public class MainMenu : KMonoBehaviour
 	public void RefreshMainMenu()
 	{
 		this.RefreshResumeButton();
-		if (SaveLoader.GetSaveFileCount() == 0)
-		{
-			this.Button_LoadGame.isInteractable = false;
-		}
-		else
-		{
-			this.Button_LoadGame.isInteractable = true;
-		}
 	}
 
 	private void PlayMouseOverSound()
@@ -143,9 +131,27 @@ public class MainMenu : KMonoBehaviour
 				{
 					flag = false;
 				}
-				SaveGame.Header header;
-				SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(latestSaveFile, out header);
-				if (header.buildVersion > 256131U || gameInfo.saveMajorVersion < 7)
+				global::System.DateTime lastWriteTime = File.GetLastWriteTime(latestSaveFile);
+				MainMenu.SaveFileEntry saveFileEntry = default(MainMenu.SaveFileEntry);
+				SaveGame.Header header = default(SaveGame.Header);
+				SaveGame.GameInfo gameInfo = default(SaveGame.GameInfo);
+				if (!this.saveFileEntries.TryGetValue(latestSaveFile, out saveFileEntry) || saveFileEntry.timeStamp != lastWriteTime)
+				{
+					gameInfo = SaveLoader.LoadHeader(latestSaveFile, out header);
+					saveFileEntry = new MainMenu.SaveFileEntry
+					{
+						timeStamp = lastWriteTime,
+						header = header,
+						headerData = gameInfo
+					};
+					this.saveFileEntries[latestSaveFile] = saveFileEntry;
+				}
+				else
+				{
+					header = saveFileEntry.header;
+					gameInfo = saveFileEntry.headerData;
+				}
+				if (header.buildVersion > 260847U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -297,4 +303,15 @@ public class MainMenu : KMonoBehaviour
 	private GameObject GameSettingsScreen;
 
 	private static int LANGUAGE_CONFIRMATION_VERSION = 2;
+
+	private Dictionary<string, MainMenu.SaveFileEntry> saveFileEntries = new Dictionary<string, MainMenu.SaveFileEntry>();
+
+	private struct SaveFileEntry
+	{
+		public global::System.DateTime timeStamp;
+
+		public SaveGame.Header header;
+
+		public SaveGame.GameInfo headerData;
+	}
 }

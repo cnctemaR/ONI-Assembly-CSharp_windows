@@ -39,7 +39,7 @@ public class KIconToggleMenu : KScreen
 		{
 			int idx = i;
 			KIconToggleMenu.ToggleInfo toggleInfo = this.toggleInfo[i];
-			KToggle ktoggle2 = global::UnityEngine.Object.Instantiate<KToggle>(this.prefab, Vector3.zero, Quaternion.identity);
+			KToggle ktoggle2 = global::UnityEngine.Object.Instantiate<KToggle>((!(toggleInfo.prefabOverride != null)) ? this.prefab : toggleInfo.prefabOverride, Vector3.zero, Quaternion.identity);
 			ktoggle2.Deselect();
 			ktoggle2.gameObject.name = "Toggle:" + toggleInfo.text;
 			ktoggle2.transform.SetParent(transform, false);
@@ -287,5 +287,7 @@ public class KIconToggleMenu : KScreen
 		public global::Action hotKey;
 
 		public Func<Sprite> getSpriteCB;
+
+		public KToggle prefabOverride;
 	}
 }

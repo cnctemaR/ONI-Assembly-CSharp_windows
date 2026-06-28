@@ -48,7 +48,7 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 				if (Grid.Solid[cell])
 				{
 					Element elem = Grid.Element[cell];
-					float mass = Grid.Cell[cell].mass * 0.25f;
+					float mass = Grid.Mass[cell] * 0.25f;
 					global::System.Action action = delegate
 					{
 						if (elem.IsSolid)
@@ -128,7 +128,7 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 		{
 			if (Grid.Element[num3].id != SimHashes.Unobtanium && Grid.Element[num3].id != SimHashes.Vacuum)
 			{
-				float mass = Grid.Cell[num3].mass;
+				float mass = Grid.Mass[num3];
 				float num4 = 1f;
 				float num5 = this.totalEnergy / num4;
 				Element element = Grid.Element[num3];

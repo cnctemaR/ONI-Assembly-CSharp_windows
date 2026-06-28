@@ -137,7 +137,7 @@ public class CellChangeMonitor
 			{
 				int num2 = -1;
 				this.transformLastKnownCell.TryGetValue(num, out num2);
-				int num3 = this.PosToCell(cellChangedEntry.transform.position);
+				int num3 = this.PosToCell(cellChangedEntry.transform.GetPosition());
 				if (num2 != num3)
 				{
 					this.cellChangedCallbacksToRun.Clear();

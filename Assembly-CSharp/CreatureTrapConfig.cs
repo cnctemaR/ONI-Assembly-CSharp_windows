@@ -14,11 +14,11 @@ public class CreatureTrapConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		Storage storage = go.UpdateComponentRequirement<Storage>(true);
+		Storage storage = go.AddOrGet<Storage>();
 		storage.allowItemRemoval = true;
 		storage.SetDefaultStoredItemModifiers(CreatureTrapConfig.StoredItemModifiers);
 		storage.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_restrain_creature_kanim") };
-		go.UpdateComponentRequirement<Trap>(true);
+		go.AddOrGet<Trap>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

@@ -12,7 +12,6 @@ namespace ProcGen
 			this.ElementChoiceGroups = new Dictionary<string, ElementChoiceGroup<WeightedSimHash>>();
 			this.borders = new List<int>();
 			this.excludeTags = new List<string>();
-			this.internalMobs = new List<MobReference>();
 		}
 
 		[StringEnumConverter]
@@ -21,8 +20,6 @@ namespace ProcGen
 		public List<int> borders { get; private set; }
 
 		public MinMax blobSize { get; private set; }
-
-		public List<MobReference> internalMobs { get; private set; }
 
 		public List<string> excludeTags { get; private set; }
 

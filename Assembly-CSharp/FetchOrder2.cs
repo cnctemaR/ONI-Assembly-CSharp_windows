@@ -172,10 +172,10 @@ public class FetchOrder2
 				Pickupable component = gameObject.GetComponent<Pickupable>();
 				if (component != null)
 				{
-					KPrefabID component2 = component.GetComponent<KPrefabID>();
+					KPrefabID kprefabID = component.KPrefabID;
 					foreach (Tag tag in this.Tags)
 					{
-						if (component2.HasTag(tag))
+						if (kprefabID.HasTag(tag))
 						{
 							amount = component.TotalAmount;
 							out_item = component;

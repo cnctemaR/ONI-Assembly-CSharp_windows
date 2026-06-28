@@ -127,11 +127,6 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
-	public void SetTags(List<Tag> tags)
-	{
-		this.acceptedTags = tags;
-	}
-
 	public Tag[] GetTags()
 	{
 		return this.acceptedTags.ToArray();

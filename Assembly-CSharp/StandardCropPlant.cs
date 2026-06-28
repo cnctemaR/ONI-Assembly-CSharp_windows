@@ -87,7 +87,11 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 		{
 			base.serializable = true;
 			default_state = this.alive;
-			this.dead.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).Enter(delegate(StandardCropPlant.StatesInstance smi)
+			GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State state = this.dead;
+			string text = CREATURES.STATUSITEMS.DEAD.NAME;
+			string text2 = CREATURES.STATUSITEMS.DEAD.TOOLTIP;
+			StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+			state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, main).Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
 				if (smi.master.growing.Replanted)
 				{

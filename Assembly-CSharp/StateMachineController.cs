@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using KSerialization;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, IStateMachineControllerHack
@@ -40,7 +41,7 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 		return this.stateMachines.Contains(state_machine);
 	}
 
-	public void AddDef(StateMachine.Instance.BaseDef def)
+	public void AddDef(StateMachine.BaseDef def)
 	{
 		this.defs.Add(def);
 	}
@@ -99,19 +100,30 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 
 	public void CreateSMIS()
 	{
-		KPrefabID originalPrefab = base.GetComponent<KPrefabID>().GetOriginalPrefab();
-		if (originalPrefab != null)
+		GameObject prefab = Assets.GetPrefab(base.GetComponent<KPrefabID>().PrefabTag);
+		if (prefab != null)
 		{
-			StateMachineController component = originalPrefab.GetComponent<StateMachineController>();
+			StateMachineController component = prefab.GetComponent<StateMachineController>();
 			if (component != null)
 			{
 				for (int i = 0; i < component.defs.Count; i++)
 				{
-					StateMachine.Instance.BaseDef baseDef = component.defs[i];
+					StateMachine.BaseDef baseDef = component.defs[i];
+					baseDef.CreateSMI(this);
 					this.defs.Add(baseDef);
-					StateMachine.Instance instance = baseDef.CreateSMI(this);
-					instance.StartSM();
 				}
+			}
+		}
+	}
+
+	public void StartSMIS()
+	{
+		foreach (StateMachine.BaseDef baseDef in this.defs)
+		{
+			StateMachine.Instance smi = this.GetSMI(StateMachineManager.Instance.CreateStateMachine(baseDef.GetStateMachineType()).GetStateMachineInstanceType());
+			if (smi != null && !smi.IsRunning())
+			{
+				smi.StartSM();
 			}
 		}
 	}
@@ -131,7 +143,7 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 		return this.serializer.Restore(smi);
 	}
 
-	public DefType GetDef<DefType>() where DefType : StateMachine.Instance.BaseDef
+	public DefType GetDef<DefType>() where DefType : StateMachine.BaseDef
 	{
 		for (int i = 0; i < this.defs.Count; i++)
 		{
@@ -144,7 +156,7 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 		return (DefType)((object)null);
 	}
 
-	public List<DefType> GetDefs<DefType>() where DefType : StateMachine.Instance.BaseDef
+	public List<DefType> GetDefs<DefType>() where DefType : StateMachine.BaseDef
 	{
 		List<DefType> list = new List<DefType>();
 		for (int i = 0; i < this.defs.Count; i++)
@@ -158,18 +170,22 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 		return list;
 	}
 
-	public StateMachineInstanceType GetSMI<StateMachineInstanceType>() where StateMachineInstanceType : class
+	public StateMachine.Instance GetSMI(Type type)
 	{
 		for (int i = 0; i < this.stateMachines.Count; i++)
 		{
 			StateMachine.Instance instance = this.stateMachines[i];
-			StateMachineInstanceType stateMachineInstanceType = instance as StateMachineInstanceType;
-			if (stateMachineInstanceType != null)
+			if (type.IsAssignableFrom(instance.GetType()))
 			{
-				return stateMachineInstanceType;
+				return instance;
 			}
 		}
-		return (StateMachineInstanceType)((object)null);
+		return null;
+	}
+
+	public StateMachineInstanceType GetSMI<StateMachineInstanceType>() where StateMachineInstanceType : class
+	{
+		return this.GetSMI(typeof(StateMachineInstanceType)) as StateMachineInstanceType;
 	}
 
 	public List<StateMachineInstanceType> GetAllSMI<StateMachineInstanceType>() where StateMachineInstanceType : class
@@ -199,7 +215,7 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 		return list;
 	}
 
-	private List<StateMachine.Instance.BaseDef> defs = new List<StateMachine.Instance.BaseDef>();
+	private List<StateMachine.BaseDef> defs = new List<StateMachine.BaseDef>();
 
 	private List<StateMachine.Instance> stateMachines = new List<StateMachine.Instance>();
 

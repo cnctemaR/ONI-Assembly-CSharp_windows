@@ -67,6 +67,10 @@ public class UIPool<T> where T : MonoBehaviour
 			global::Debug.LogError(text, null);
 			return;
 		}
+		if (this.disabledElementParent != null)
+		{
+			element.gameObject.transform.SetParent(this.disabledElementParent);
+		}
 		element.gameObject.SetActive(false);
 		this.freeElements.Add(element);
 		this.activeElements.Remove(element);
@@ -76,8 +80,13 @@ public class UIPool<T> where T : MonoBehaviour
 	{
 		while (this.activeElements.Count > 0)
 		{
-			T t = this.activeElements[0];
-			t.gameObject.SetActive(false);
+			if (this.disabledElementParent != null)
+			{
+				T t = this.activeElements[0];
+				t.gameObject.transform.SetParent(this.disabledElementParent);
+			}
+			T t2 = this.activeElements[0];
+			t2.gameObject.SetActive(false);
 			this.freeElements.Add(this.activeElements[0]);
 			this.activeElements.RemoveAt(0);
 		}
@@ -122,4 +131,6 @@ public class UIPool<T> where T : MonoBehaviour
 	private List<T> freeElements = new List<T>();
 
 	private List<T> activeElements = new List<T>();
+
+	public Transform disabledElementParent;
 }

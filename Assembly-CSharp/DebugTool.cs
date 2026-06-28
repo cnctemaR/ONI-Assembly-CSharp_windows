@@ -75,21 +75,24 @@ public class DebugTool : DragTool
 			case DebugTool.Type.Destroy:
 				this.DestroyCell(cell);
 				break;
+			case DebugTool.Type.Sample:
+				DebugPaintElementScreen.Instance.SampleCell(cell);
+				break;
 			}
 		}
 	}
 
 	public void DoReplaceSubstance(int cell)
 	{
-		Element element = ((!DebugPaintElementScreen.Instance.paintElement.isOn) ? ElementLoader.elements[(int)Grid.Cell[cell].elementIdx] : ElementLoader.FindElementByHash(DebugPaintElementScreen.Instance.element));
+		Element element = ((!DebugPaintElementScreen.Instance.paintElement.isOn) ? ElementLoader.elements[(int)Grid.ElementIdx[cell]] : ElementLoader.FindElementByHash(DebugPaintElementScreen.Instance.element));
 		if (element == null)
 		{
 			element = ElementLoader.FindElementByHash(SimHashes.Vacuum);
 		}
-		byte b = ((!DebugPaintElementScreen.Instance.paintDisease.isOn) ? Grid.Disease[cell].diseaseIdx : DebugPaintElementScreen.Instance.diseaseIdx);
-		float num = ((!DebugPaintElementScreen.Instance.paintTemperature.isOn) ? Grid.Cell[cell].temperature : DebugPaintElementScreen.Instance.temperature);
-		float num2 = ((!DebugPaintElementScreen.Instance.paintMass.isOn) ? Grid.Cell[cell].mass : DebugPaintElementScreen.Instance.mass);
-		int num3 = ((!DebugPaintElementScreen.Instance.paintDiseaseCount.isOn) ? Grid.Disease[cell].elementCount : DebugPaintElementScreen.Instance.diseaseCount);
+		byte b = ((!DebugPaintElementScreen.Instance.paintDisease.isOn) ? Grid.DiseaseIdx[cell] : DebugPaintElementScreen.Instance.diseaseIdx);
+		float num = ((!DebugPaintElementScreen.Instance.paintTemperature.isOn) ? Grid.Temperature[cell] : DebugPaintElementScreen.Instance.temperature);
+		float num2 = ((!DebugPaintElementScreen.Instance.paintMass.isOn) ? Grid.Mass[cell] : DebugPaintElementScreen.Instance.mass);
+		int num3 = ((!DebugPaintElementScreen.Instance.paintDiseaseCount.isOn) ? Grid.DiseaseCount[cell] : DebugPaintElementScreen.Instance.diseaseCount);
 		if (num == -1f)
 		{
 			num = element.defaultValues.temperature;
@@ -170,7 +173,7 @@ public class DebugTool : DragTool
 			}
 		}
 		this.ClearCell(cell);
-		if (ElementLoader.elements[(int)Grid.Cell[cell].elementIdx].id == SimHashes.Void)
+		if (ElementLoader.elements[(int)Grid.ElementIdx[cell]].id == SimHashes.Void)
 		{
 			SimMessages.ReplaceElement(cell, SimHashes.Void, CellEventLogger.Instance.DebugTool, 0f, 0f, byte.MaxValue, 0, -1);
 		}
@@ -215,6 +218,7 @@ public class DebugTool : DragTool
 		AddSelection,
 		RemoveSelection,
 		Deconstruct,
-		Destroy
+		Destroy,
+		Sample
 	}
 }

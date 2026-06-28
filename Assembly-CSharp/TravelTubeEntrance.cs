@@ -102,7 +102,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 
 	private bool CanAcceptMorePower()
 	{
-		return this.operational.IsFunctional && (this.button == null || this.button.IsEnabled) && this.energyConsumer.IsExternallyPowered && this.availableJoules < this.jouleCapacity;
+		return this.operational.IsOperational && (this.button == null || this.button.IsEnabled) && this.energyConsumer.IsExternallyPowered && this.availableJoules < this.jouleCapacity;
 	}
 
 	public void Sim200ms(float dt)
@@ -110,14 +110,10 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		if (this.CanAcceptMorePower())
 		{
 			this.availableJoules = Mathf.Min(this.jouleCapacity, this.availableJoules + this.energyConsumer.WattsUsed * dt);
-			this.operational.SetActive(true, false);
 			this.UpdateCharge();
 		}
-		else
-		{
-			this.operational.SetActive(false, false);
-		}
 		this.energyConsumer.SetSustained(this.HasLaunchPower);
+		this.UpdateActive();
 		this.UpdateConnectionStatus();
 	}
 
@@ -210,19 +206,18 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 
 	private void OnOperationalChanged(object data)
 	{
-		if (this.CanAcceptMorePower())
-		{
-			this.operational.SetActive(true, false);
-		}
+		this.UpdateActive();
 	}
 
 	private void OnConnectionChanged()
 	{
-		if (this.CanAcceptMorePower())
-		{
-			this.operational.SetActive(true, false);
-		}
+		this.UpdateActive();
 		this.UpdateConnectionStatus();
+	}
+
+	private void UpdateActive()
+	{
+		this.operational.SetActive(this.CanAcceptMorePower(), false);
 	}
 
 	private void UpdateCharge()

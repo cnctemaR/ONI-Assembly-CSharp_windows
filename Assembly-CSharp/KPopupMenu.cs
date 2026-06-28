@@ -45,6 +45,11 @@ public class KPopupMenu : KScreen
 		base.gameObject.SetActive(false);
 	}
 
+	public IList<KButtonMenu.ButtonInfo> GetButtons()
+	{
+		return this.Buttons;
+	}
+
 	[SerializeField]
 	private KButtonMenu buttonMenu;
 

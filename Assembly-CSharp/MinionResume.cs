@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using KSerialization;
 using STRINGS;
 using TUNING;
@@ -16,30 +17,12 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		}
 	}
 
-	protected override void OnPrefabInit()
+	[OnDeserialized]
+	private void OnDeserializedMethod()
 	{
-		base.OnPrefabInit();
-		if (this.MasteryByRoleID == null)
+		if (this.currentRole != "NoRole")
 		{
-			this.MasteryByRoleID = new Dictionary<string, bool>();
-		}
-		foreach (RoleConfig roleConfig in Game.Instance.roleManager.RolesConfigs)
-		{
-			if (!this.MasteryByRoleID.ContainsKey(roleConfig.id))
-			{
-				this.MasteryByRoleID.Add(roleConfig.id, false);
-			}
-			else if (this.MasteryByRoleID[roleConfig.id])
-			{
-				if (!this.ExperienceByRoleID.ContainsKey(roleConfig.id))
-				{
-					this.AddExperience(roleConfig.id, roleConfig.experienceRequired, true);
-				}
-				else
-				{
-					this.ExperienceByRoleID[roleConfig.id] = roleConfig.experienceRequired;
-				}
-			}
+			this.currentRoleConfig = Game.Instance.roleManager.GetRole(this.currentRole);
 		}
 	}
 
@@ -48,24 +31,24 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		base.OnSpawn();
 		this.selectable = base.GetComponent<KSelectable>();
 		this.UpdateStatusItem();
-		if (this.ExperienceByRoleID == null)
-		{
-			this.ExperienceByRoleID = new Dictionary<string, float>();
-		}
-		if (this.AptitudeByRoleGroup == null)
-		{
-			this.AptitudeByRoleGroup = new Dictionary<HashedString, float>();
-		}
 		this.ExperienceByRoleID["NoRole"] = 0f;
 		foreach (RoleConfig roleConfig in Game.Instance.roleManager.RolesConfigs)
 		{
+			if (!this.MasteryByRoleID.ContainsKey(roleConfig.id))
+			{
+				this.MasteryByRoleID.Add(roleConfig.id, false);
+			}
 			if (!this.ExperienceByRoleID.ContainsKey(roleConfig.id))
 			{
 				this.AddExperience(roleConfig.id, 0f, true);
 			}
-			else if (this.ExperienceByRoleID[roleConfig.id] >= roleConfig.experienceRequired)
+			if (this.ExperienceByRoleID[roleConfig.id] >= roleConfig.experienceRequired)
 			{
 				this.MasteryByRoleID[roleConfig.id] = true;
+			}
+			if (this.MasteryByRoleID[roleConfig.id])
+			{
+				this.ExperienceByRoleID[roleConfig.id] = roleConfig.experienceRequired;
 			}
 			if (!this.AptitudeByRoleGroup.ContainsKey(roleConfig.roleGroup))
 			{
@@ -96,6 +79,17 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		if (!string.IsNullOrEmpty(this.currentRole))
 		{
 			Game.Instance.roleManager.RestoreRole(this, this.currentRole);
+			if (this.currentRole != this.targetRole)
+			{
+				if (this.targetRole == "NoRole")
+				{
+					Game.Instance.roleManager.Unassign(this, false);
+				}
+				else
+				{
+					Game.Instance.roleManager.AssignToRole(this.targetRole, this, false, false);
+				}
+			}
 		}
 	}
 
@@ -103,7 +97,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	{
 		if (string.IsNullOrEmpty(this.currentRole) || this.currentRole == "NoRole")
 		{
-			this.currentRole = "NoRole";
+			this.SetCurrentRole("NoRole");
 			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Role, Db.Get().DuplicantStatusItems.NoRole, this);
 		}
 		else
@@ -135,6 +129,11 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		}
 	}
 
+	public bool HasMasteredRole(string roleId)
+	{
+		return this.MasteryByRoleID[roleId];
+	}
+
 	public void UpdateUrge()
 	{
 		if (this.targetRole != this.currentRole && this.targetRole != "NoRole")
@@ -155,6 +154,24 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		get
 		{
 			return this.currentRole;
+		}
+	}
+
+	public RoleConfig GetCurrentRoleConfig()
+	{
+		return this.currentRoleConfig;
+	}
+
+	public void SetCurrentRole(string role_id)
+	{
+		this.currentRole = role_id;
+		if (role_id == "NoRole")
+		{
+			this.currentRoleConfig = null;
+		}
+		else
+		{
+			this.currentRoleConfig = Game.Instance.roleManager.GetRole(this.currentRole);
 		}
 	}
 
@@ -193,7 +210,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		if (this.CurrentRole != null && this.CurrentRole != "NoRole")
 		{
 			roleConfig = Game.Instance.roleManager.GetRole(this.CurrentRole);
-			this.currentRole = "NoRole";
+			this.SetCurrentRole("NoRole");
 		}
 		if (roleConfig == null)
 		{
@@ -226,7 +243,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		{
 			this.targetRole = newRole;
 		}
-		this.currentRole = newRole;
+		this.SetCurrentRole(newRole);
 		StatusItem statusItem = ((!(newRole == "NoRole")) ? Db.Get().DuplicantStatusItems.Role : Db.Get().DuplicantStatusItems.NoRole);
 		this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Role, statusItem, this);
 		RoleConfig role = Game.Instance.roleManager.GetRole(newRole);
@@ -259,20 +276,14 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	public string GetCurrentRoleString()
 	{
-		if (this.currentRole != "NoRole")
-		{
-			return Game.Instance.roleManager.GetRole(this.currentRole).name;
-		}
-		return DUPLICANTS.ROLES.NO_ROLE.NAME;
+		string text = this.targetRole;
+		return Game.Instance.roleManager.GetRole(text).name;
 	}
 
 	public string GetCurrentRoleDescription()
 	{
-		if (this.currentRole != "NoRole")
-		{
-			return Game.Instance.roleManager.GetRole(this.currentRole).description;
-		}
-		return DUPLICANTS.ROLES.NO_ROLE.DESCRIPTION;
+		string text = this.targetRole;
+		return Game.Instance.roleManager.GetRole(text).description;
 	}
 
 	public void Sim200ms(float dt)
@@ -399,8 +410,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 				return true;
 			}
 		}
-		RoleConfig role = Game.Instance.roleManager.GetRole(this.currentRole);
-		return role.HasPerk(perk);
+		return this.currentRoleConfig != null && this.currentRoleConfig.HasPerk(perk);
 	}
 
 	public bool HasPerk(RolePerk perk)
@@ -412,24 +422,25 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 				return true;
 			}
 		}
-		RoleConfig role = Game.Instance.roleManager.GetRole(this.currentRole);
-		return role.HasPerk(perk);
+		return this.currentRoleConfig != null && this.currentRoleConfig.HasPerk(perk);
 	}
 
 	public bool IsFavouredChore(Chore chore)
 	{
-		RoleConfig role = Game.Instance.roleManager.GetRole(this.currentRole);
-		return role.IsFavoredChore(chore);
+		return this.currentRoleConfig != null && this.currentRoleConfig.IsFavoredChore(chore);
 	}
 
 	public bool IsPreferredChore(Chore chore)
 	{
-		RoleConfig role = Game.Instance.roleManager.GetRole(this.currentRole);
+		if (this.currentRoleConfig == null)
+		{
+			return false;
+		}
 		if (chore.choreTags != null)
 		{
 			foreach (Tag tag in chore.choreTags)
 			{
-				if (role.preferredChoreTags.Contains(tag))
+				if (this.currentRoleConfig.preferredChoreTags.Contains(tag))
 				{
 					return true;
 				}
@@ -442,10 +453,10 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	private MinionIdentity identity;
 
 	[Serialize]
-	public Dictionary<string, float> ExperienceByRoleID;
+	public Dictionary<string, float> ExperienceByRoleID = new Dictionary<string, float>();
 
 	[Serialize]
-	public Dictionary<string, bool> MasteryByRoleID;
+	public Dictionary<string, bool> MasteryByRoleID = new Dictionary<string, bool>();
 
 	[Serialize]
 	public Dictionary<HashedString, float> AptitudeByRoleGroup = new Dictionary<HashedString, float>();
@@ -455,6 +466,8 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	[Serialize]
 	private string targetRole = "NoRole";
+
+	private RoleConfig currentRoleConfig;
 
 	private KSelectable selectable;
 }

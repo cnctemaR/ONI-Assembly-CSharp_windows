@@ -84,9 +84,15 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 			{
 				this.drowning = true;
 				base.Trigger(1949704522, null);
+				base.GetComponent<KPrefabID>().AddTag(GameTags.Creatures.Drowning);
 			}
 			if (this.stamina <= 0f)
 			{
+				DeathMonitor.Instance smi = this.GetSMI<DeathMonitor.Instance>();
+				if (smi != null)
+				{
+					smi.Kill(Db.Get().Deaths.Drowned);
+				}
 				base.Trigger(-750750377, null);
 				this.SetIncapacitated(true);
 			}
@@ -94,6 +100,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 		else if (this.drowning)
 		{
 			this.drowning = false;
+			base.GetComponent<KPrefabID>().RemoveTag(GameTags.Creatures.Drowning);
 			base.Trigger(99949694, null);
 		}
 	}

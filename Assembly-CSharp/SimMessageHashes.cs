@@ -7,6 +7,7 @@ public enum SimMessageHashes
 	Disease_CreateTable = 825301935,
 	Load = -672538170,
 	PrepareGameData = 1078620451,
+	SettleWorldGen = 970594729,
 	SimData_InitializeFromCells = 2062421945,
 	SimFrameManager_NewGameFrame = -775326397,
 	Dig = 833038498,

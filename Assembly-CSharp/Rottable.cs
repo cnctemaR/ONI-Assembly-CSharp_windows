@@ -4,14 +4,14 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
+public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, Rottable.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.Fresh;
 		base.serializable = true;
 		this.root.TagTransition(GameTags.Preserved, this.Preserved, false).TagTransition(GameTags.Entombed, this.Preserved, false);
-		this.Fresh.ToggleStatusItem(Db.Get().CreatureStatusItems.Fresh, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Stale_Pre, (Rottable.Instance smi, float p) => p <= smi.SpoilTime - (smi.SpoilTime - smi.StaleTime)).FastUpdate("Rot", Rottable.rotCB, UpdateRate.SIM_1000ms, true);
+		this.Fresh.ToggleStatusItem(Db.Get().CreatureStatusItems.Fresh, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Stale_Pre, (Rottable.Instance smi, float p) => p <= smi.def.spoilTime - (smi.def.spoilTime - smi.def.staleTime)).FastUpdate("Rot", Rottable.rotCB, UpdateRate.SIM_1000ms, true);
 		this.Preserved.TagTransition(new Tag[]
 		{
 			GameTags.Preserved,
@@ -24,7 +24,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 		{
 			smi.GoTo(this.Stale);
 		});
-		this.Stale.ToggleStatusItem(Db.Get().CreatureStatusItems.Stale, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Fresh, (Rottable.Instance smi, float p) => p > smi.SpoilTime - (smi.SpoilTime - smi.StaleTime)).ParamTransition<float>(this.rotParameter, this.Spoiled, (Rottable.Instance smi, float p) => p <= 0f)
+		this.Stale.ToggleStatusItem(Db.Get().CreatureStatusItems.Stale, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Fresh, (Rottable.Instance smi, float p) => p > smi.def.spoilTime - (smi.def.spoilTime - smi.def.staleTime)).ParamTransition<float>(this.rotParameter, this.Spoiled, (Rottable.Instance smi, float p) => p <= 0f)
 			.FastUpdate("Rot", Rottable.rotCB, UpdateRate.SIM_1000ms, false);
 		this.Spoiled.Enter(delegate(Rottable.Instance smi)
 		{
@@ -146,17 +146,17 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 		return Rottable.RotAtmosphereQuality.Sterilizing;
 	}
 
-	public StateMachine<Rottable, Rottable.Instance, IStateMachineTarget, object>.FloatParameter rotParameter;
+	public StateMachine<Rottable, Rottable.Instance, IStateMachineTarget, Rottable.Def>.FloatParameter rotParameter;
 
-	public GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, object>.State Preserved;
+	public GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, Rottable.Def>.State Preserved;
 
-	public GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, object>.State Fresh;
+	public GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, Rottable.Def>.State Fresh;
 
-	public GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, object>.State Stale_Pre;
+	public GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, Rottable.Def>.State Stale_Pre;
 
-	public GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, object>.State Stale;
+	public GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, Rottable.Def>.State Stale;
 
-	public GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, object>.State Spoiled;
+	public GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, Rottable.Def>.State Spoiled;
 
 	private static Rottable.RotCB rotCB = new Rottable.RotCB();
 
@@ -224,6 +224,15 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 		}
 	};
 
+	public class Def : StateMachine.BaseDef
+	{
+		public float spoilTime;
+
+		public float staleTime;
+
+		public float rotTemperature = 277.15f;
+	}
+
 	private class RotCB : UpdateBucketWithUpdater<Rottable.Instance>.IUpdater
 	{
 		public void Update(Rottable.Instance smi, float dt)
@@ -232,22 +241,20 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 		}
 	}
 
-	public new class Instance : GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, object>.GameInstance
+	public new class Instance : GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, Rottable.Def>.GameInstance
 	{
-		public Instance(IStateMachineTarget master, float spoilTime, float staleTime)
-			: base(master)
+		public Instance(IStateMachineTarget master, Rottable.Def def)
+			: base(master, def)
 		{
 			this.pickupable = base.gameObject.RequireComponent<Pickupable>();
 			base.master.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
 			base.master.Subscribe(1335436905, new Action<object>(this.OnSplitFromChunk));
 			this.primaryElement = base.gameObject.GetComponent<PrimaryElement>();
-			this.SpoilTime = spoilTime;
-			this.StaleTime = staleTime;
 			Amounts amounts = master.gameObject.GetAmounts();
 			this.RotAmountInstance = amounts.Add(new AmountInstance(Db.Get().Amounts.Rot, master.gameObject));
 			this.RotAmountInstance.maxAttribute.ClearModifiers();
-			this.RotAmountInstance.maxAttribute.Add("SpoilTime", new AttributeModifier("Rot", this.SpoilTime, null, false, false, true));
-			this.RotAmountInstance.SetValue(this.SpoilTime);
+			this.RotAmountInstance.maxAttribute.Add("SpoilTime", new AttributeModifier("Rot", def.spoilTime, null, false, false, true));
+			this.RotAmountInstance.SetValue(def.spoilTime);
 			base.sm.rotParameter.Set(this.RotAmountInstance.value, base.smi);
 			this.UnrefrigeratedModifier = new AttributeModifier("Rot", 0f, DUPLICANTS.MODIFIERS.ROTTEMPERATURE.NAME, false, false, false);
 			this.ContaminatedAtmosphere = new AttributeModifier("Rot", 0f, DUPLICANTS.MODIFIERS.ROTATMOSPHERE.NAME, false, false, false);
@@ -273,7 +280,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 		{
 			get
 			{
-				return this.RotValue / this.SpoilTime;
+				return this.RotValue / base.def.spoilTime;
 			}
 		}
 
@@ -423,12 +430,6 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 		private AttributeModifier UnrefrigeratedModifier;
 
 		private AttributeModifier ContaminatedAtmosphere;
-
-		public float SpoilTime;
-
-		public float StaleTime;
-
-		public float RotTemperature = 277.15f;
 
 		public PrimaryElement primaryElement;
 

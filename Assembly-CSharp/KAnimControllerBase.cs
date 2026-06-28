@@ -516,6 +516,10 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			timeOffset = time_offset
 		});
 		this.mode = ((mode != KAnim.PlayMode.Paused) ? KAnim.PlayMode.Once : KAnim.PlayMode.Paused);
+		if (this.aem != null)
+		{
+			this.aem.SetMode(this.eventManagerHandle, this.mode);
+		}
 		if (this.animQueue.Count == 1 && this.stopped)
 		{
 			this.StartQueuedAnim();
@@ -889,9 +893,12 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public bool HasAnimation(string animName)
 	{
-		HashedString hashedString = new HashedString(animName);
-		KAnimControllerBase.AnimLookupData animLookupData;
-		return this.anims.TryGetValue(hashedString, out animLookupData);
+		return this.HasAnimation(new HashedString(animName));
+	}
+
+	public bool HasAnimation(HashedString animName)
+	{
+		return this.anims.ContainsKey(animName);
 	}
 
 	public void AddAnims(KAnimFileData animFile)
@@ -1054,7 +1061,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	protected KAnimFile[] animFiles = new KAnimFile[0];
 
 	[SerializeField]
-	protected string missingAnim;
+	public string missingAnim;
 
 	[SerializeField]
 	protected Vector3 offset;

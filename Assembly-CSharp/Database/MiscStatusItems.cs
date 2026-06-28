@@ -12,65 +12,75 @@ namespace Database
 			this.CreateStatusItems();
 		}
 
+		private StatusItem CreateStatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode render_overlay, bool showWorldIcon = true, int status_overlays = 63486)
+		{
+			return base.Add(new StatusItem(id, prefix, icon, icon_type, notification_type, allow_multiples, render_overlay, showWorldIcon, status_overlays));
+		}
+
+		private StatusItem CreateStatusItem(string id, string name, string tooltip, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode render_overlay, int status_overlays = 63486)
+		{
+			return base.Add(new StatusItem(id, name, tooltip, icon, icon_type, notification_type, allow_multiples, render_overlay, status_overlays));
+		}
+
 		private void CreateStatusItems()
 		{
-			this.Edible = new StatusItem("Edible", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.Edible = this.CreateStatusItem("Edible", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.Edible.resolveStringCallback = delegate(string str, object data)
 			{
 				Edible edible = (Edible)data;
 				str = string.Format(str, GameUtil.GetFormattedCalories(edible.Calories, GameUtil.TimeSlice.None, true));
 				return str;
 			};
-			this.PendingClear = new StatusItem("PendingClear", "MISC", "status_item_pending_clear", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.MarkedForCompost = new StatusItem("MarkedForCompost", "MISC", "status_item_pending_compost", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.MarkedForCompostInStorage = new StatusItem("MarkedForCompostInStorage", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.MarkedForDisinfection = new StatusItem("MarkedForDisinfection", "MISC", "status_item_disinfect", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.Disease, true, 63486);
-			this.NoClearLocationsAvailable = new StatusItem("NoClearLocationsAvailable", "MISC", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
-			this.WaitingForDig = new StatusItem("WaitingForDig", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.WaitingForMop = new StatusItem("WaitingForMop", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.OreMass = new StatusItem("OreMass", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.PendingClear = this.CreateStatusItem("PendingClear", "MISC", "status_item_pending_clear", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.MarkedForCompost = this.CreateStatusItem("MarkedForCompost", "MISC", "status_item_pending_compost", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.MarkedForCompostInStorage = this.CreateStatusItem("MarkedForCompostInStorage", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.MarkedForDisinfection = this.CreateStatusItem("MarkedForDisinfection", "MISC", "status_item_disinfect", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.Disease, true, 63486);
+			this.NoClearLocationsAvailable = this.CreateStatusItem("NoClearLocationsAvailable", "MISC", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
+			this.WaitingForDig = this.CreateStatusItem("WaitingForDig", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.WaitingForMop = this.CreateStatusItem("WaitingForMop", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.OreMass = this.CreateStatusItem("OreMass", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.OreMass.resolveStringCallback = delegate(string str, object data)
 			{
 				GameObject gameObject = (GameObject)data;
 				str = str.Replace("{Mass}", GameUtil.GetFormattedMass(gameObject.GetComponent<PrimaryElement>().Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				return str;
 			};
-			this.OreTemp = new StatusItem("OreTemp", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.OreTemp = this.CreateStatusItem("OreTemp", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.OreTemp.resolveStringCallback = delegate(string str, object data)
 			{
 				GameObject gameObject2 = (GameObject)data;
 				str = str.Replace("{Temp}", GameUtil.GetFormattedTemperature(gameObject2.GetComponent<PrimaryElement>().Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 				return str;
 			};
-			this.ElementalState = new StatusItem("ElementalState", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.ElementalState = this.CreateStatusItem("ElementalState", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.ElementalState.resolveStringCallback = delegate(string str, object data)
 			{
 				Element element = ((Func<Element>)data)();
 				str = str.Replace("{State}", element.GetStateString());
 				return str;
 			};
-			this.ElementalCategory = new StatusItem("ElementalCategory", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.ElementalCategory = this.CreateStatusItem("ElementalCategory", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.ElementalCategory.resolveStringCallback = delegate(string str, object data)
 			{
 				Element element2 = ((Func<Element>)data)();
 				str = str.Replace("{Category}", element2.GetMaterialCategoryTag().ProperName());
 				return str;
 			};
-			this.ElementalTemperature = new StatusItem("ElementalTemperature", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.ElementalTemperature = this.CreateStatusItem("ElementalTemperature", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.ElementalTemperature.resolveStringCallback = delegate(string str, object data)
 			{
 				CellSelectionObject cellSelectionObject = (CellSelectionObject)data;
 				str = str.Replace("{Temp}", GameUtil.GetFormattedTemperature(cellSelectionObject.temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 				return str;
 			};
-			this.ElementalMass = new StatusItem("ElementalMass", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.ElementalMass = this.CreateStatusItem("ElementalMass", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.ElementalMass.resolveStringCallback = delegate(string str, object data)
 			{
 				CellSelectionObject cellSelectionObject2 = (CellSelectionObject)data;
 				str = str.Replace("{Mass}", GameUtil.GetFormattedMass(cellSelectionObject2.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				return str;
 			};
-			this.ElementalDisease = new StatusItem("ElementalDisease", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.ElementalDisease = this.CreateStatusItem("ElementalDisease", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.ElementalDisease.resolveStringCallback = delegate(string str, object data)
 			{
 				CellSelectionObject cellSelectionObject3 = (CellSelectionObject)data;
@@ -83,21 +93,21 @@ namespace Database
 				str = str.Replace("{Disease}", GameUtil.GetFormattedDisease(cellSelectionObject4.diseaseIdx, cellSelectionObject4.diseaseCount, true));
 				return str;
 			};
-			this.TreeFilterableTags = new StatusItem("TreeFilterableTags", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.TreeFilterableTags = this.CreateStatusItem("TreeFilterableTags", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.TreeFilterableTags.resolveStringCallback = delegate(string str, object data)
 			{
 				TreeFilterable treeFilterable = (TreeFilterable)data;
 				str = str.Replace("{Tags}", treeFilterable.GetTagsAsStatus(6));
 				return str;
 			};
-			this.OxyRockEmitting = new StatusItem("OxyRockEmitting", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.OxyRockEmitting = this.CreateStatusItem("OxyRockEmitting", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.OxyRockEmitting.resolveStringCallback = delegate(string str, object data)
 			{
 				CellSelectionObject cellSelectionObject5 = (CellSelectionObject)data;
 				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(cellSelectionObject5.FlowRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				return str;
 			};
-			this.OxyRockBlocked = new StatusItem("OxyRockBlocked", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.OxyRockBlocked = this.CreateStatusItem("OxyRockBlocked", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.OxyRockBlocked.resolveStringCallback = delegate(string str, object data)
 			{
 				CellSelectionObject cellSelectionObject6 = (CellSelectionObject)data;
@@ -116,35 +126,96 @@ namespace Database
 				str = str.Replace("{BlockedString}", text);
 				return str;
 			};
-			this.OxyRockInactive = new StatusItem("OxyRockInactive", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.BuriedItem = new StatusItem("BuriedItem", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.SpoutOverPressure = new StatusItem("SpoutOverPressure", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.SpoutEmitting = new StatusItem("SpoutEmitting", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.SpoutPressureBuilding = new StatusItem("SpoutPressureBuilding", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.OrderAttack = new StatusItem("OrderAttack", "MISC", "status_item_attack", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.PendingHarvest = new StatusItem("PendingHarvest", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.NotMarkedForHarvest = new StatusItem("NotMarkedForHarvest", "MISC", "status_item_building_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
+			this.OxyRockInactive = this.CreateStatusItem("OxyRockInactive", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.BuriedItem = this.CreateStatusItem("BuriedItem", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.SpoutOverPressure = this.CreateStatusItem("SpoutOverPressure", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.SpoutOverPressure.resolveStringCallback = delegate(string str, object data)
+			{
+				Geyser.StatesInstance statesInstance = (Geyser.StatesInstance)data;
+				Studyable component = statesInstance.GetComponent<Studyable>();
+				if (statesInstance != null && component != null && component.Studied)
+				{
+					str = str.Replace("{StudiedDetails}", MISC.STATUSITEMS.SPOUTOVERPRESSURE.STUDIED.text.Replace("{Time}", GameUtil.GetFormattedCycles(statesInstance.master.RemainingEruptTime(), "F1")));
+				}
+				else
+				{
+					str = str.Replace("{StudiedDetails}", string.Empty);
+				}
+				return str;
+			};
+			this.SpoutEmitting = this.CreateStatusItem("SpoutEmitting", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.SpoutEmitting.resolveStringCallback = delegate(string str, object data)
+			{
+				Geyser.StatesInstance statesInstance2 = (Geyser.StatesInstance)data;
+				Studyable component2 = statesInstance2.GetComponent<Studyable>();
+				if (statesInstance2 != null && component2 != null && component2.Studied)
+				{
+					str = str.Replace("{StudiedDetails}", MISC.STATUSITEMS.SPOUTEMITTING.STUDIED.text.Replace("{Time}", GameUtil.GetFormattedCycles(statesInstance2.master.RemainingEruptTime(), "F1")));
+				}
+				else
+				{
+					str = str.Replace("{StudiedDetails}", string.Empty);
+				}
+				return str;
+			};
+			this.SpoutPressureBuilding = this.CreateStatusItem("SpoutPressureBuilding", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.SpoutPressureBuilding.resolveStringCallback = delegate(string str, object data)
+			{
+				Geyser.StatesInstance statesInstance3 = (Geyser.StatesInstance)data;
+				Studyable component3 = statesInstance3.GetComponent<Studyable>();
+				if (statesInstance3 != null && component3 != null && component3.Studied)
+				{
+					str = str.Replace("{StudiedDetails}", MISC.STATUSITEMS.SPOUTPRESSUREBUILDING.STUDIED.text.Replace("{Time}", GameUtil.GetFormattedCycles(statesInstance3.master.RemainingNonEruptTime(), "F1")));
+				}
+				else
+				{
+					str = str.Replace("{StudiedDetails}", string.Empty);
+				}
+				return str;
+			};
+			this.SpoutIdle = this.CreateStatusItem("SpoutIdle", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.SpoutIdle.resolveStringCallback = delegate(string str, object data)
+			{
+				Geyser.StatesInstance statesInstance4 = (Geyser.StatesInstance)data;
+				Studyable component4 = statesInstance4.GetComponent<Studyable>();
+				if (statesInstance4 != null && component4 != null && component4.Studied)
+				{
+					str = str.Replace("{StudiedDetails}", MISC.STATUSITEMS.SPOUTIDLE.STUDIED.text.Replace("{Time}", GameUtil.GetFormattedCycles(statesInstance4.master.RemainingNonEruptTime(), "F1")));
+				}
+				else
+				{
+					str = str.Replace("{StudiedDetails}", string.Empty);
+				}
+				return str;
+			};
+			this.SpoutDormant = this.CreateStatusItem("SpoutDormant", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.OrderAttack = this.CreateStatusItem("OrderAttack", "MISC", "status_item_attack", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.OrderCapture = this.CreateStatusItem("OrderCapture", "MISC", "status_item_capture", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.PendingHarvest = this.CreateStatusItem("PendingHarvest", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.NotMarkedForHarvest = this.CreateStatusItem("NotMarkedForHarvest", "MISC", "status_item_building_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 			this.NotMarkedForHarvest.conditionalOverlayCallback = (SimViewMode viewMode, object o) => viewMode == SimViewMode.None;
-			this.PendingUproot = new StatusItem("PendingUproot", "MISC", "status_item_pending_uproot", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.PickupableUnreachable = new StatusItem("PickupableUnreachable", "MISC", string.Empty, StatusItem.IconType.Exclamation, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.Prioritized = new StatusItem("Prioritized", "MISC", "status_item_prioritized", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.Using = new StatusItem("Using", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.PendingUproot = this.CreateStatusItem("PendingUproot", "MISC", "status_item_pending_uproot", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.PickupableUnreachable = this.CreateStatusItem("PickupableUnreachable", "MISC", string.Empty, StatusItem.IconType.Exclamation, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.Prioritized = this.CreateStatusItem("Prioritized", "MISC", "status_item_prioritized", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.Using = this.CreateStatusItem("Using", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.Using.resolveStringCallback = delegate(string str, object data)
 			{
 				Workable workable = (Workable)data;
 				if (workable != null)
 				{
-					KSelectable component = workable.GetComponent<KSelectable>();
-					if (component != null)
+					KSelectable component5 = workable.GetComponent<KSelectable>();
+					if (component5 != null)
 					{
-						str = str.Replace("{Target}", component.GetName());
+						str = str.Replace("{Target}", component5.GetName());
 					}
 				}
 				return str;
 			};
-			this.Operating = new StatusItem("Operating", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.Cleaning = new StatusItem("Cleaning", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.RegionIsBlocked = new StatusItem("RegionIsBlocked", "MISC", "status_item_solids_blocking", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.Operating = this.CreateStatusItem("Operating", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.Cleaning = this.CreateStatusItem("Cleaning", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.RegionIsBlocked = this.CreateStatusItem("RegionIsBlocked", "MISC", "status_item_solids_blocking", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.AwaitingStudy = this.CreateStatusItem("AwaitingStudy", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.Studied = this.CreateStatusItem("Studied", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 		}
 
 		public StatusItem MarkedForDisinfection;
@@ -191,7 +262,13 @@ namespace Database
 
 		public StatusItem SpoutPressureBuilding;
 
+		public StatusItem SpoutIdle;
+
+		public StatusItem SpoutDormant;
+
 		public StatusItem OrderAttack;
+
+		public StatusItem OrderCapture;
 
 		public StatusItem PendingHarvest;
 
@@ -212,5 +289,11 @@ namespace Database
 		public StatusItem RegionIsBlocked;
 
 		public StatusItem NoClearLocationsAvailable;
+
+		public StatusItem AwaitingStudy;
+
+		public StatusItem Studied;
+
+		public StatusItem StudiedGeyserTimeRemaining;
 	}
 }

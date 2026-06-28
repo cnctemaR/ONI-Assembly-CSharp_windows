@@ -63,7 +63,7 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 		{
 			ChoreType research = Db.Get().ChoreTypes.Research;
 			Tag[] researchChores = GameTags.ChoreTypes.ResearchChores;
-			this.chore = new WorkChore<ResearchCenter>(research, this, null, researchChores, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			this.chore = new WorkChore<ResearchCenter>(research, this, null, researchChores, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 			base.SetWorkTime(float.PositiveInfinity);
 		}
 	}
@@ -282,11 +282,11 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
-		List<Descriptor> list = new List<Descriptor>();
-		string keywordStyle = GameUtil.GetKeywordStyle(this.inputMaterial);
-		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.RESEARCH_MATERIALS, keywordStyle, this.inputMaterial.Name, GameUtil.GetFormattedMass(this.mass_per_point, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.RESEARCH_MATERIALS, keywordStyle, this.inputMaterial.Name, GameUtil.GetFormattedMass(this.mass_per_point, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false));
-		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.PRODUCES_RESEARCH_POINTS, Research.Instance.researchTypes.GetResearchType(this.research_point_type_id).name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.PRODUCES_RESEARCH_POINTS, Research.Instance.researchTypes.GetResearchType(this.research_point_type_id).name), Descriptor.DescriptorType.Effect, false));
-		return list;
+		return new List<Descriptor>
+		{
+			new Descriptor(string.Format(UI.BUILDINGEFFECTS.RESEARCH_MATERIALS, this.inputMaterial.Name, GameUtil.GetFormattedMass(this.mass_per_point, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.RESEARCH_MATERIALS, this.inputMaterial.Name, GameUtil.GetFormattedMass(this.mass_per_point, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false),
+			new Descriptor(string.Format(UI.BUILDINGEFFECTS.PRODUCES_RESEARCH_POINTS, Research.Instance.researchTypes.GetResearchType(this.research_point_type_id).name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.PRODUCES_RESEARCH_POINTS, Research.Instance.researchTypes.GetResearchType(this.research_point_type_id).name), Descriptor.DescriptorType.Effect, false)
+		};
 	}
 
 	private Chore chore;

@@ -9,10 +9,10 @@ public class MinionEquipmentPanel : KMonoBehaviour
 	{
 		base.OnPrefabInit();
 		this.roomPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.roomPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.POSSESSIONS.GROUPNAME_ROOMS;
+		this.roomPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.PERSONALITY.EQUIPMENT.GROUPNAME_ROOMS;
 		this.roomPanel.SetActive(true);
 		this.ownablePanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.ownablePanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.POSSESSIONS.GROUPNAME_OWNABLE;
+		this.ownablePanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.PERSONALITY.EQUIPMENT.GROUPNAME_OWNABLE;
 		this.ownablePanel.SetActive(true);
 	}
 
@@ -86,13 +86,15 @@ public class MinionEquipmentPanel : KMonoBehaviour
 				{
 					gameObject.SetActive(true);
 					flag = true;
-					string text = ((!assignableSlotInstance.IsAssigned()) ? UI.DETAILTABS.POSSESSIONS.UNASSIGNED.text : assignableSlotInstance.assignable.GetComponent<KSelectable>().GetName());
+					string text = ((!assignableSlotInstance.IsAssigned()) ? UI.DETAILTABS.PERSONALITY.EQUIPMENT.NO_ASSIGNABLES.text : assignableSlotInstance.assignable.GetComponent<KSelectable>().GetName());
 					gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", assignableSlotInstance.slot.Name, text);
-					gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.DETAILTABS.POSSESSIONS.ASSIGNED_TOOLTIP, text, this.GetAssignedEffectsString(assignableSlotInstance));
+					gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.DETAILTABS.PERSONALITY.EQUIPMENT.ASSIGNED_TOOLTIP, text, this.GetAssignedEffectsString(assignableSlotInstance), this.SelectedMinion.name);
 				}
 				else
 				{
 					gameObject.SetActive(false);
+					gameObject.GetComponent<LocText>().text = UI.DETAILTABS.PERSONALITY.EQUIPMENT.NO_ASSIGNABLES;
+					gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.PERSONALITY.EQUIPMENT.NO_ASSIGNABLES_TOOLTIP;
 				}
 			}
 		}
@@ -102,12 +104,26 @@ public class MinionEquipmentPanel : KMonoBehaviour
 			{
 				GameObject gameObject2 = this.AddOrGetLabel(this.labels, panel, "NothingAssigned");
 				this.labels["NothingAssigned"].SetActive(true);
-				gameObject2.GetComponent<LocText>().text = UI.DETAILTABS.POSSESSIONS.NOTHING;
-				gameObject2.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.POSSESSIONS.NOTHING_TOOLTIP;
+				gameObject2.GetComponent<LocText>().text = UI.DETAILTABS.PERSONALITY.EQUIPMENT.NO_ASSIGNABLES;
+				gameObject2.GetComponent<ToolTip>().toolTip = string.Format(UI.DETAILTABS.PERSONALITY.EQUIPMENT.NO_ASSIGNABLES_TOOLTIP, this.SelectedMinion.name);
 			}
 			else if (this.labels.ContainsKey("NothingAssigned"))
 			{
 				this.labels["NothingAssigned"].SetActive(false);
+			}
+		}
+		if (assignables is Equipment)
+		{
+			if (!flag)
+			{
+				GameObject gameObject3 = this.AddOrGetLabel(this.labels, panel, "NoSuitAssigned");
+				this.labels["NoSuitAssigned"].SetActive(true);
+				gameObject3.GetComponent<LocText>().text = UI.DETAILTABS.PERSONALITY.EQUIPMENT.NOEQUIPMENT;
+				gameObject3.GetComponent<ToolTip>().toolTip = string.Format(UI.DETAILTABS.PERSONALITY.EQUIPMENT.NOEQUIPMENT_TOOLTIP, this.SelectedMinion.name);
+			}
+			else if (this.labels.ContainsKey("NoSuitAssigned"))
+			{
+				this.labels["NoSuitAssigned"].SetActive(false);
 			}
 		}
 	}
@@ -122,7 +138,7 @@ public class MinionEquipmentPanel : KMonoBehaviour
 			text += "\n";
 			foreach (Descriptor descriptor in list)
 			{
-				text = text + descriptor.IndentedText() + "\n";
+				text = text + "  • " + descriptor.IndentedText() + "\n";
 			}
 		}
 		return text;

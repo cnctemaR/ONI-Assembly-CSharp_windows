@@ -56,7 +56,7 @@ public class CompostConfig : IBuildingConfig
 		manualDeliveryKG.capacity = 300f;
 		manualDeliveryKG.refillMass = 60f;
 		manualDeliveryKG.minimumMass = 1f;
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FarmFetch.IdHash;
 		Prioritizable.AddRef(go);
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 	}

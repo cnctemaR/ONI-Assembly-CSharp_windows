@@ -60,9 +60,10 @@ public class SteamTurbineConfig : IBuildingConfig
 		turbine.rpmAcceleration = turbine.maxRPM / 30f;
 		turbine.rpmDeceleration = turbine.maxRPM / 20f;
 		turbine.minGenerationRPM = 3000f;
-		turbine.minActiveTemperature = 525f;
-		turbine.emitTemperature = 450f;
+		turbine.minActiveTemperature = 500f;
+		turbine.emitTemperature = 425f;
 		go.AddOrGet<Generator>();
+		go.AddOrGet<LogicOperationalController>();
 		Prioritizable.AddRef(go);
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabSpawnFn += delegate(GameObject game_object)

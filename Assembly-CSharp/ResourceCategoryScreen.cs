@@ -5,11 +5,6 @@ using UnityEngine;
 
 public class ResourceCategoryScreen : KScreen
 {
-	public bool Filter(Tag tag)
-	{
-		return tag == new Tag("Liquifiable");
-	}
-
 	protected override void OnActivate()
 	{
 		base.OnActivate();
@@ -29,12 +24,9 @@ public class ResourceCategoryScreen : KScreen
 	{
 		foreach (Tag tag in set)
 		{
-			if (!this.Filter(tag))
-			{
-				ResourceCategoryHeader resourceCategoryHeader = this.NewCategoryHeader(tag, measure);
-				this.DisplayedCategories.Add(tag, resourceCategoryHeader);
-				resourceCategoryHeader.gameObject.SetActive(false);
-			}
+			ResourceCategoryHeader resourceCategoryHeader = this.NewCategoryHeader(tag, measure);
+			this.DisplayedCategories.Add(tag, resourceCategoryHeader);
+			resourceCategoryHeader.gameObject.SetActive(false);
 		}
 	}
 

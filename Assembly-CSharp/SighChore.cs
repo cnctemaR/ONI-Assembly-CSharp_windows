@@ -4,7 +4,7 @@ using UnityEngine;
 public class SighChore : Chore<SighChore.StatesInstance>
 {
 	public SighChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Sigh, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.Sigh, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, 0, false, true, 0, null)
 	{
 		this.smi = new SighChore.StatesInstance(this, target.gameObject);
 	}

@@ -32,24 +32,20 @@ public class RationTracker : KMonoBehaviour, ISaveLoadable
 		List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(GameTags.Edible);
 		if (pickupables != null)
 		{
-			for (int i = 0; i < pickupables.Count; i++)
+			foreach (Pickupable pickupable in pickupables)
 			{
-				Edible component = pickupables[i].GetComponent<Edible>();
-				if (!(component == null))
+				if (!pickupable.KPrefabID.HasTag(GameTags.StoredPrivate))
 				{
-					Pickupable component2 = component.GetComponent<Pickupable>();
-					if (component2 != null && !component2.HasTag(GameTags.StoredPrivate))
+					Edible component = pickupable.GetComponent<Edible>();
+					num += component.Calories;
+					if (unitCountByFoodType != null)
 					{
-						num += component.Calories;
-						if (unitCountByFoodType != null)
+						if (!unitCountByFoodType.ContainsKey(component.FoodID))
 						{
-							if (!unitCountByFoodType.ContainsKey(component.FoodID))
-							{
-								unitCountByFoodType[component.FoodID] = 0f;
-							}
-							string foodID;
-							unitCountByFoodType[foodID = component.FoodID] = unitCountByFoodType[foodID] + component.Units;
+							unitCountByFoodType[component.FoodID] = 0f;
 						}
+						string foodID;
+						unitCountByFoodType[foodID = component.FoodID] = unitCountByFoodType[foodID] + component.Units;
 					}
 				}
 			}

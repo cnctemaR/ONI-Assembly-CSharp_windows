@@ -28,7 +28,7 @@ public class TileScreen : KScreen
 		{
 			Element element = Grid.Element[num];
 			this.nameLabel.text = element.name;
-			float num2 = Grid.Cell[num].mass;
+			float num2 = Grid.Mass[num];
 			string text = "kg";
 			if (num2 < 5f)
 			{

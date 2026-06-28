@@ -14,6 +14,7 @@ namespace ProcGen
 			this.tags = new List<string>();
 			this.biomes = new List<WeightedBiome>();
 			this.samplers = new List<SampleDescriber>();
+			this.featureTemplates = new Dictionary<string, int>();
 		}
 
 		public string biomeNoise { get; private set; }
@@ -38,6 +39,8 @@ namespace ProcGen
 		public List<WeightedBiome> biomes { get; private set; }
 
 		public Dictionary<string, string[]> pointsOfInterest { get; private set; }
+
+		public Dictionary<string, int> featureTemplates { get; private set; }
 
 		public int iterations { get; private set; }
 

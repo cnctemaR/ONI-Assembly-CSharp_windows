@@ -24,11 +24,7 @@ public class JuniorBuilder : RoleConfig
 
 	public override void InitRequirements()
 	{
-		base.requirements = new RoleAssignmentRequirement[]
-		{
-			Game.Instance.roleManager.roleAssignmentRequirements.Can_Build,
-			Game.Instance.roleManager.roleAssignmentRequirements.HasExperience_NoRole
-		};
+		base.requirements = new RoleAssignmentRequirement[] { Game.Instance.roleManager.roleAssignmentRequirements.Can_Build };
 	}
 
 	public static string ID = "JuniorBuilder";

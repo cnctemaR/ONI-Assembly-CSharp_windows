@@ -1,14 +1,18 @@
 ﻿using System;
 
-public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance>
+public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.alive;
 		base.serializable = true;
-		this.alive.ParamTransition<Death>(this.death, this.dying_duplicant, (DeathMonitor.Instance smi, Death p) => p != null && smi.IsDuplicant).ParamTransition<Death>(this.death, this.die, (DeathMonitor.Instance smi, Death p) => p != null && !smi.IsDuplicant);
+		this.alive.ParamTransition<Death>(this.death, this.dying_duplicant, (DeathMonitor.Instance smi, Death p) => p != null && smi.IsDuplicant).ParamTransition<Death>(this.death, this.dying_creature, (DeathMonitor.Instance smi, Death p) => p != null && !smi.IsDuplicant);
 		this.dying_duplicant.ToggleTag(GameTags.Dying).ToggleChore((DeathMonitor.Instance smi) => new DieChore(smi.master, this.death.Get(smi)), this.die);
-		this.die.Enter("Die", delegate(DeathMonitor.Instance smi)
+		this.dying_creature.ToggleBehaviour(GameTags.Creatures.Die, (DeathMonitor.Instance smi) => true, delegate(DeathMonitor.Instance smi)
+		{
+			smi.GoTo(this.dead);
+		});
+		this.die.ToggleTag(GameTags.Dying).Enter("Die", delegate(DeathMonitor.Instance smi)
 		{
 			Death death = this.death.Get(smi);
 			if (smi.IsDuplicant)
@@ -48,27 +52,33 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 			.EventTransition(GameHashes.OnUnstored, this.dead.ground, null);
 	}
 
-	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State alive;
+	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>.State alive;
 
-	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State dying_duplicant;
+	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>.State dying_duplicant;
 
-	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State die;
+	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>.State dying_creature;
+
+	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>.State die;
 
 	public DeathMonitor.Dead dead;
 
-	public StateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.ResourceParameter<Death> death;
+	public StateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>.ResourceParameter<Death> death;
 
-	public class Dead : GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State
+	public class Def : StateMachine.BaseDef
 	{
-		public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State ground;
-
-		public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State carried;
 	}
 
-	public new class Instance : GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.GameInstance
+	public class Dead : GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>.State
 	{
-		public Instance(IStateMachineTarget master)
-			: base(master)
+		public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>.State ground;
+
+		public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>.State carried;
+	}
+
+	public new class Instance : GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>.GameInstance
+	{
+		public Instance(IStateMachineTarget master, DeathMonitor.Def def)
+			: base(master, def)
 		{
 			this.isDuplicant = base.GetComponent<MinionIdentity>();
 		}

@@ -30,6 +30,8 @@ public class Components
 
 	public static Components.Cmps<CreatureLure> Lures = new Components.Cmps<CreatureLure>();
 
+	public static Components.Cmps<CreatureFeeder> CreatureFeeders = new Components.Cmps<CreatureFeeder>();
+
 	public static Components.Cmps<Light2D> Light2Ds = new Components.Cmps<Light2D>();
 
 	public static Components.Cmps<Edible> Edibles = new Components.Cmps<Edible>();
@@ -68,9 +70,13 @@ public class Components
 
 	public static Components.Cmps<BuildingCellVisualizer> BuildingCellVisualizers = new Components.Cmps<BuildingCellVisualizer>();
 
-	public static Components.Cmps<RoomTracker> RoomTrackers = new Components.Cmps<RoomTracker>();
-
 	public static Components.Cmps<RoleStation> RoleStations = new Components.Cmps<RoleStation>();
+
+	public static Components.Cmps<Capturable> Capturables = new Components.Cmps<Capturable>();
+
+	public static Components.Cmps<NotCapturable> NotCapturables = new Components.Cmps<NotCapturable>();
+
+	public static Components.Cmps<DiseaseSourceVisualizer> DiseaseSourceVisualizers = new Components.Cmps<DiseaseSourceVisualizer>();
 
 	public class Cmps<T> : IEnumerable<T>, IEnumerable
 	{

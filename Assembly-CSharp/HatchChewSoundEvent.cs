@@ -28,37 +28,48 @@ public class HatchChewSoundEvent : SoundEvent
 
 	private static int GetAudioCategory(AnimEventManager.EventPlayerData behaviour)
 	{
-		Hatch component = behaviour.GetComponent<Hatch>();
-		Element latestMealElement = component.latestMealElement;
-		if (latestMealElement.id == SimHashes.Dirt)
+		Element element = null;
+		if (element == null)
+		{
+			EatStates.Instance smi = behaviour.controller.GetSMI<EatStates.Instance>();
+			if (smi != null)
+			{
+				smi.GetLatestMealElement();
+			}
+		}
+		if (element == null)
 		{
 			return 0;
 		}
-		if (latestMealElement.id == SimHashes.CrushedIce)
+		if (element.id == SimHashes.Dirt)
+		{
+			return 0;
+		}
+		if (element.id == SimHashes.CrushedIce)
 		{
 			return 1;
 		}
-		if (latestMealElement.HasTag(GameTags.IceOre))
+		if (element.HasTag(GameTags.IceOre))
 		{
 			return 1;
 		}
-		if (latestMealElement.id == SimHashes.OxyRock)
+		if (element.id == SimHashes.OxyRock)
 		{
 			return 3;
 		}
-		if (latestMealElement.HasTag(GameTags.Metal))
+		if (element.HasTag(GameTags.Metal))
 		{
 			return 5;
 		}
-		if (latestMealElement.HasTag(GameTags.RefinedMetal))
+		if (element.HasTag(GameTags.RefinedMetal))
 		{
 			return 6;
 		}
-		if (latestMealElement.id == SimHashes.Sand)
+		if (element.id == SimHashes.Sand)
 		{
 			return 8;
 		}
-		if (latestMealElement.id == SimHashes.Algae)
+		if (element.id == SimHashes.Algae)
 		{
 			return 10;
 		}

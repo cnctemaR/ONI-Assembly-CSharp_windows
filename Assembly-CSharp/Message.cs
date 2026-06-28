@@ -29,5 +29,10 @@ public abstract class Message : ISaveLoadable
 		return true;
 	}
 
+	public virtual bool PlayNotificationSound()
+	{
+		return true;
+	}
+
 	public delegate void clickFn();
 }

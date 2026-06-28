@@ -11,6 +11,10 @@ public class CringeMonitor : GameStateMachine<CringeMonitor, CringeMonitor.Insta
 
 	private void TriggerCringe(CringeMonitor.Instance smi, object data)
 	{
+		if (smi.GetComponent<KPrefabID>().HasTag(GameTags.Suit))
+		{
+			return;
+		}
 		smi.SetCringeSourceData(data);
 		smi.GoTo(this.cringe);
 	}

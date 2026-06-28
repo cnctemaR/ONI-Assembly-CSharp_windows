@@ -23,6 +23,26 @@ public class Sleepable : Workable
 		base.SetWorkTime(float.PositiveInfinity);
 	}
 
+	public override HashedString[] GetWorkAnims(Worker worker)
+	{
+		MinionResume component = worker.GetComponent<MinionResume>();
+		if (component != null && component.CurrentRole != "NoRole")
+		{
+			return Sleepable.hatWorkAnims;
+		}
+		return Sleepable.normalWorkAnims;
+	}
+
+	public override HashedString GetWorkPstAnim(Worker worker)
+	{
+		MinionResume component = worker.GetComponent<MinionResume>();
+		if (component != null && component.CurrentRole != "NoRole")
+		{
+			return Sleepable.hatWorkPstAnim;
+		}
+		return Sleepable.normalWorkPstAnim;
+	}
+
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
@@ -85,4 +105,12 @@ public class Sleepable : Workable
 	private float wakeTime;
 
 	private bool isDoneSleeping;
+
+	private static readonly HashedString[] normalWorkAnims = new HashedString[] { "working_pre", "working_loop" };
+
+	private static readonly HashedString[] hatWorkAnims = new HashedString[] { "hat_pre", "working_loop" };
+
+	private static readonly HashedString normalWorkPstAnim = "working_pst";
+
+	private static readonly HashedString hatWorkPstAnim = "hat_pst";
 }

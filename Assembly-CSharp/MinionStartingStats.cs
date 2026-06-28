@@ -21,25 +21,12 @@ public class MinionStartingStats
 		this.voiceIdx = global::UnityEngine.Random.Range(0, 4);
 		this.Name = this.personality.Name;
 		this.NameStringKey = this.personality.nameStringKey;
-		List<Race> list = new List<Race>();
-		foreach (Race race in MinionResources.Get().races)
-		{
-			if (!race.Disabled)
-			{
-				list.Add(race);
-			}
-		}
-		int num3 = global::UnityEngine.Random.Range(0, list.Count);
-		this.Race = list[num3];
-		Trait trait = Db.Get().traits.TryGet(this.Race.Id + "BaseTrait");
-		if (trait != null)
-		{
-			this.Traits.Add(trait);
-		}
-		List<ChoreGroup> list2 = new List<ChoreGroup>();
+		this.GenderStringKey = this.personality.genderStringKey;
+		this.Traits.Add(Db.Get().traits.Get(MinionConfig.MINION_BASE_TRAIT_ID));
+		List<ChoreGroup> list = new List<ChoreGroup>();
 		this.GenerateAptitudes();
-		int num4 = this.GenerateTraits(is_starter_minion, list2);
-		this.GenerateAttributes(num4, list2);
+		int num3 = this.GenerateTraits(is_starter_minion, list);
+		this.GenerateAttributes(num3, list);
 		KCompBuilder.BodyData bodyData = MinionStartingStats.CreateBodyData(this.personality);
 		foreach (AccessorySlot accessorySlot in Db.Get().AccessorySlots)
 		{
@@ -82,6 +69,10 @@ public class MinionStartingStats
 				{
 					accessory = accessorySlot.Lookup(bodyData.hatHair);
 				}
+				else if (accessorySlot == Db.Get().AccessorySlots.HairAlways)
+				{
+					accessory = accessorySlot.Lookup(bodyData.hairAlways);
+				}
 				else if (accessorySlot == Db.Get().AccessorySlots.Body)
 				{
 					accessory = accessorySlot.Lookup(bodyData.body);
@@ -101,8 +92,6 @@ public class MinionStartingStats
 				this.accessories.Add(accessory);
 			}
 		}
-		int num5 = global::UnityEngine.Random.Range(0, this.Race.bodies.Count);
-		this.BodyType = this.Race.bodies[num5].bodyType;
 	}
 
 	private int GenerateTraits(bool is_starter_minion, List<ChoreGroup> disabled_chore_groups)
@@ -311,6 +300,7 @@ public class MinionStartingStats
 		MinionIdentity component = go.GetComponent<MinionIdentity>();
 		component.SetName(this.Name);
 		component.nameStringKey = this.NameStringKey;
+		component.genderStringKey = this.GenderStringKey;
 		this.ApplyTraits(go);
 		this.ApplyRace(go);
 		this.ApplyAptitudes(go);
@@ -340,7 +330,7 @@ public class MinionStartingStats
 		MinionIdentity component = go.GetComponent<MinionIdentity>();
 		component.voiceIdx = this.voiceIdx;
 		KCompBuilder.BodyData bodyData = MinionStartingStats.CreateBodyData(this.personality);
-		MinionStartingStats.ApplyRace(go, this.Race, this.BodyType, bodyData);
+		MinionStartingStats.ApplyRace(go, bodyData);
 	}
 
 	public static KCompBuilder.BodyData CreateBodyData(Personality p)
@@ -355,7 +345,8 @@ public class MinionStartingStats
 			arms = HashCache.Get().Add(string.Format("arm_{0:000}", p.body)),
 			body = HashCache.Get().Add(string.Format("body_{0:000}", p.body)),
 			hat = HashedString.Invalid,
-			hatHair = HashCache.Get().Add(string.Format("hat_hair_{0:000}", p.hair))
+			hatHair = HashCache.Get().Add(string.Format("hat_hair_{0:000}", p.hair)),
+			hairAlways = HashCache.Get().Add(string.Format("hair_{0:000}", p.hair))
 		};
 	}
 
@@ -382,16 +373,25 @@ public class MinionStartingStats
 			component.Add(this.congenitaltrait);
 		}
 		go.GetComponent<MinionIdentity>().SetName(this.Name);
+		go.GetComponent<MinionIdentity>().SetGender(this.GenderStringKey);
 	}
 
-	public static KCompBuildInstance ApplyRace(GameObject go, Race race, BodyType body_type, KCompBuilder.BodyData personality)
+	public static KCompBuildInstance ApplyRace(GameObject go, KCompBuilder.BodyData personality)
 	{
 		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
 		component.ClearAnims();
-		Body body = race.GetBody(body_type);
-		component.AddAnims(body.buildFiles);
-		BodyAnim body2 = MinionResources.Get().GetBody(body_type);
-		component.AddAnims(body2.animFiles);
+		KAnimFile[] array = new KAnimFile[]
+		{
+			Assets.GetAnim("body_comp_default_kanim"),
+			Assets.GetAnim("anim_construction_default_kanim"),
+			Assets.GetAnim("anim_emotes_default_kanim"),
+			Assets.GetAnim("anim_idles_default_kanim"),
+			Assets.GetAnim("anim_loco_firepole_kanim"),
+			Assets.GetAnim("anim_loco_new_kanim"),
+			Assets.GetAnim("anim_loco_tube_kanim"),
+			Assets.GetAnim("anim_construction_firepole_kanim")
+		};
+		component.AddAnims(array);
 		KCompBuildInstance kcompBuildInstance = new KCompBuildInstance(personality, component);
 		component.UpdateSymbolLookups();
 		return kcompBuildInstance;
@@ -401,15 +401,13 @@ public class MinionStartingStats
 
 	public string NameStringKey;
 
+	public string GenderStringKey;
+
 	public List<Trait> Traits = new List<Trait>();
 
 	public Trait stressTrait;
 
 	public Trait congenitaltrait;
-
-	public Race Race;
-
-	public BodyType BodyType;
 
 	public int voiceIdx;
 

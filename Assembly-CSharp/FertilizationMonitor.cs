@@ -4,7 +4,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>
+public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -65,48 +65,69 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 		this.replanted.starved.wrongFert.ParamTransition<bool>(this.hasIncorrectFertilizer, this.replanted.starved.normal, (FertilizationMonitor.Instance smi, bool p) => !p);
 	}
 
-	public StateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.TargetParameter fertilizerStorage;
+	public StateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>.TargetParameter fertilizerStorage;
 
-	public StateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.BoolParameter hasCorrectFertilizer;
+	public StateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>.BoolParameter hasCorrectFertilizer;
 
-	public StateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.BoolParameter hasIncorrectFertilizer;
+	public StateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>.BoolParameter hasIncorrectFertilizer;
 
 	public GameHashes ResourceRecievedEvent = GameHashes.Fertilized;
 
 	public GameHashes ResourceDepletedEvent = GameHashes.Unfertilized;
 
-	public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State wild;
+	public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>.State wild;
 
-	public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State unfertilizable;
+	public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>.State unfertilizable;
 
 	public FertilizationMonitor.ReplantedStates replanted;
 
-	public class VariableFertilizerStates : GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State
+	public class Def : StateMachine.BaseDef, IGameObjectEffectDescriptor
 	{
-		public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State normal;
+		public List<Descriptor> GetDescriptors(GameObject obj)
+		{
+			if (this.consumedElements.Length > 0)
+			{
+				List<Descriptor> list = new List<Descriptor>();
+				foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in this.consumedElements)
+				{
+					list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.IDEAL_FERTILIZER, consumeInfo.tag.ProperName(), GameUtil.GetFormattedMass(-consumeInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.IDEAL_FERTILIZER, consumeInfo.tag.ProperName(), GameUtil.GetFormattedMass(consumeInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false));
+				}
+				return list;
+			}
+			return null;
+		}
 
-		public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State wrongFert;
+		public Tag wrongFertilizerTestTag;
+
+		public PlantElementAbsorber.ConsumeInfo[] consumedElements;
 	}
 
-	public class FertilizedStates : GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State
+	public class VariableFertilizerStates : GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>.State
+	{
+		public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>.State normal;
+
+		public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>.State wrongFert;
+	}
+
+	public class FertilizedStates : GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>.State
 	{
 		public FertilizationMonitor.VariableFertilizerStates decaying;
 
 		public FertilizationMonitor.VariableFertilizerStates absorbing;
 
-		public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State wilting;
+		public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>.State wilting;
 	}
 
-	public class ReplantedStates : GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State
+	public class ReplantedStates : GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>.State
 	{
 		public FertilizationMonitor.FertilizedStates fertilized;
 
 		public FertilizationMonitor.VariableFertilizerStates starved;
 	}
 
-	public new class Instance : GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.GameInstance, IWiltCause
+	public new class Instance : GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>.GameInstance, IWiltCause
 	{
-		public Instance(IStateMachineTarget master, FertilizationMonitor.Instance.Def def)
+		public Instance(IStateMachineTarget master, FertilizationMonitor.Def def)
 			: base(master, def)
 		{
 			this.AddAmounts(base.gameObject);
@@ -291,26 +312,5 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 		private HandleVector<int>.Handle absorberHandle = HandleVector<int>.InvalidHandle;
 
 		private float total_available_mass;
-
-		public class Def : StateMachine.Instance.BaseDef, IGameObjectEffectDescriptor
-		{
-			public List<Descriptor> GetDescriptors(GameObject obj)
-			{
-				if (this.consumedElements.Length > 0)
-				{
-					List<Descriptor> list = new List<Descriptor>();
-					foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in this.consumedElements)
-					{
-						list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.IDEAL_FERTILIZER, consumeInfo.tag.ProperName(), GameUtil.GetFormattedMass(-consumeInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.IDEAL_FERTILIZER, consumeInfo.tag.ProperName(), GameUtil.GetFormattedMass(consumeInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false));
-					}
-					return list;
-				}
-				return null;
-			}
-
-			public Tag wrongFertilizerTestTag;
-
-			public PlantElementAbsorber.ConsumeInfo[] consumedElements;
-		}
 	}
 }

@@ -82,10 +82,7 @@ public class DiseaseInfoScreen : TargetScreen
 				AmountInstance amountInstance = disease.amount.Lookup(this.selectedTarget);
 				if (amountInstance.value > 0f)
 				{
-					this.immuneSystemPanel.SetLabelWithButton("disease_" + disease.Id, string.Format(UI.DETAILTABS.DISEASE.IMMUNE_FACTORS.INTERNAL_GERMS, disease.Name, GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(amountInstance.value))), string.Format(UI.DETAILTABS.DISEASE.IMMUNE_FACTORS.INTERNAL_GERMS_TOOLTIP, disease.Name, GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(amountInstance.value))), UI.DETAILTABS.DISEASE.DISEASE_INFO_POPUP_BUTTON, string.Format(UI.DETAILTABS.DISEASE.DISEASE_INFO_POPUP_TOOLTIP, disease.Name), delegate
-					{
-						this.ShowDiseaseInfoPopup(disease);
-					});
+					this.immuneSystemPanel.SetLabel("disease_" + disease.Id, string.Format(UI.DETAILTABS.DISEASE.IMMUNE_FACTORS.INTERNAL_GERMS, disease.Name, GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(amountInstance.value))), string.Format(UI.DETAILTABS.DISEASE.IMMUNE_FACTORS.INTERNAL_GERMS_TOOLTIP, disease.Name, GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(amountInstance.value))));
 					AttributeModifier currentImmuneModifier = smi.GetCurrentImmuneModifier(disease);
 					if (currentImmuneModifier != null)
 					{
@@ -148,10 +145,7 @@ public class DiseaseInfoScreen : TargetScreen
 	private void BuildFactorsStrings(int diseaseCount, int elementIdx, int environmentCell, float environmentMass, float temperature, Tag[] tags, Disease disease)
 	{
 		this.currentGermsPanel.SetTitle(string.Format(UI.DETAILTABS.DISEASE.CURRENT_GERMS, disease.Name.ToUpper()));
-		this.currentGermsPanel.SetLabelWithButton("currentgerms", string.Format(UI.DETAILTABS.DISEASE.DETAILS.DISEASE_AMOUNT, disease.Name, GameUtil.GetFormattedDiseaseAmount(diseaseCount)), string.Format(UI.DETAILTABS.DISEASE.DETAILS.DISEASE_AMOUNT_TOOLTIP, GameUtil.GetFormattedDiseaseAmount(diseaseCount)), UI.DETAILTABS.DISEASE.DISEASE_INFO_POPUP_BUTTON, string.Format(UI.DETAILTABS.DISEASE.DISEASE_INFO_POPUP_TOOLTIP, disease.Name), delegate
-		{
-			this.ShowDiseaseInfoPopup(disease);
-		});
+		this.currentGermsPanel.SetLabel("currentgerms", string.Format(UI.DETAILTABS.DISEASE.DETAILS.DISEASE_AMOUNT, disease.Name, GameUtil.GetFormattedDiseaseAmount(diseaseCount)), string.Format(UI.DETAILTABS.DISEASE.DETAILS.DISEASE_AMOUNT_TOOLTIP, GameUtil.GetFormattedDiseaseAmount(diseaseCount)));
 		Element element = ElementLoader.elements[elementIdx];
 		CompositeGrowthRule growthRuleForElement = disease.GetGrowthRuleForElement(element);
 		float num = 1f;
@@ -266,49 +260,6 @@ public class DiseaseInfoScreen : TargetScreen
 			return true;
 		}
 		return false;
-	}
-
-	private void ShowDiseaseInfoPopup(Disease disease)
-	{
-		InfoDialogScreen infoDialogScreen = (InfoDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
-		infoDialogScreen.SetHeader(string.Format(UI.DETAILTABS.DISEASE.DISEASE_INFO_POPUP_HEADER, disease.Name.ToUpper()));
-		infoDialogScreen.AddSubHeader(UI.DETAILTABS.DISEASE.GERMS_INFO);
-		List<Descriptor> quantitativeDescriptors = disease.GetQuantitativeDescriptors();
-		for (int i = 0; i < quantitativeDescriptors.Count; i++)
-		{
-			infoDialogScreen.AddLineItem(quantitativeDescriptors[i].IndentedText(), quantitativeDescriptors[i].tooltipText);
-		}
-		infoDialogScreen.AddSubHeader(UI.DETAILTABS.DISEASE.INFECTION_INFO);
-		infoDialogScreen.AddPlainText(UI.DETAILTABS.DISEASE.INFECTION.DISCLAIMER);
-		infoDialogScreen.AddLineItem(UI.DETAILTABS.DISEASE.INFECTION.DURATION, UI.DETAILTABS.DISEASE.INFECTION.DURATION_TOOLTIP);
-		if (disease.doctorRequired)
-		{
-			infoDialogScreen.AddLineItem(string.Format(UI.DETAILTABS.DISEASE.INFECTION.DURATION_AIDREQ, GameUtil.GetFormattedCycles(disease.SicknessDuration, "F1")), string.Format(UI.DETAILTABS.DISEASE.INFECTION.DURATION_AIDREQ_TOOLTIP, GameUtil.GetFormattedCycles(disease.SicknessDuration, "F1")));
-		}
-		else
-		{
-			infoDialogScreen.AddLineItem(string.Format(UI.DETAILTABS.DISEASE.INFECTION.DURATION_NORMAL, GameUtil.GetFormattedCycles(disease.SicknessDuration, "F1")), string.Format(UI.DETAILTABS.DISEASE.INFECTION.DURATION_NORMAL_TOOLTIP, GameUtil.GetFormattedCycles(disease.SicknessDuration, "F1")));
-		}
-		List<Descriptor> symptoms = disease.GetSymptoms();
-		GameUtil.IndentListOfDescriptors(symptoms);
-		List<Descriptor> list = symptoms.FindAll((Descriptor d) => d.type == Descriptor.DescriptorType.SymptomAidable);
-		if (list.Count > 0)
-		{
-			infoDialogScreen.AddLineItem(UI.DETAILTABS.DISEASE.INFECTION.AID_SYMPTOMS, UI.DETAILTABS.DISEASE.INFECTION.AID_SYMPTOMS_TOOLTIP);
-			for (int j = 0; j < list.Count; j++)
-			{
-				infoDialogScreen.AddLineItem(list[j].IndentedText(), list[j].tooltipText);
-			}
-		}
-		List<Descriptor> list2 = symptoms.FindAll((Descriptor d) => d.type == Descriptor.DescriptorType.Symptom);
-		if (list.Count > 0)
-		{
-			infoDialogScreen.AddLineItem(UI.DETAILTABS.DISEASE.INFECTION.SYMPTOMS, UI.DETAILTABS.DISEASE.INFECTION.SYMPTOMS_TOOLTIP);
-			for (int k = 0; k < list2.Count; k++)
-			{
-				infoDialogScreen.AddLineItem(list2[k].IndentedText(), list2[k].tooltipText);
-			}
-		}
 	}
 
 	private CollapsibleDetailContentPanel infectionPanel;

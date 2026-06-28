@@ -46,7 +46,7 @@ namespace TUNING
 
 		public const float RECOVER_BREATH_DELTA = 3f;
 
-		public static string[] DISTRIBUTED_ATTRIBUTES = new string[] { "Strength", "Caring", "Construction", "Digging", "Machinery", "Learning", "Cooking", "Botanist", "Art" };
+		public static string[] DISTRIBUTED_ATTRIBUTES = new string[] { "Strength", "Caring", "Construction", "Digging", "Machinery", "Learning", "Cooking", "Botanist", "Art", "Ranching" };
 
 		public static string[] ROLLED_ATTRIBUTES = new string[] { "Athletics" };
 
@@ -392,6 +392,8 @@ namespace TUNING
 		{
 			public const float STAMINA_USED_PER_SECOND = -0.11666667f;
 
+			public const float MAX_CALORIES = 4000000f;
+
 			public const float CALORIES_BURNED_PER_CYCLE = -1000000f;
 
 			public const float CALORIES_BURNED_PER_SECOND = -1666.6666f;
@@ -425,6 +427,8 @@ namespace TUNING
 			public const float IMMUNE_LEVEL_RECOVERY = 0.025f;
 
 			public const float CARRY_CAPACITY = 200f;
+
+			public const float HIT_POINTS = 100f;
 		}
 
 		public class TEMPERATURE
@@ -520,8 +524,6 @@ namespace TUNING
 
 		public class COMBAT
 		{
-			public const float HIT_POINTS = 100f;
-
 			public const Health.HealthState FLEE_THRESHOLD = Health.HealthState.Critical;
 
 			public class BASICWEAPON

@@ -6,14 +6,14 @@ using UnityEngine;
 public class SleepChore : Chore<SleepChore.StatesInstance>
 {
 	public SleepChore(IStateMachineTarget target, GameObject bed)
-		: base(Db.Get().ChoreTypes.Sleep, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.Sleep, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
 	{
 		this.smi = new SleepChore.StatesInstance(this, target.gameObject, bed);
 		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 		base.AddPrecondition(SleepChore.IsOkayTimeToSleep, null);
 		if (bed != null)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsOperational, bed);
+			base.AddPrecondition(ChorePreconditions.instance.IsOperational, bed.GetComponent<Operational>());
 		}
 	}
 
@@ -23,9 +23,9 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 		description = DUPLICANTS.CHORES.PRECONDITIONS.IS_OKAY_TIME_TO_SLEEP,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			Narcolepsy component = context.consumer.GetComponent<Narcolepsy>();
+			Narcolepsy component = context.consumerState.consumer.GetComponent<Narcolepsy>();
 			bool flag = component != null && component.IsNarcolepsing();
-			StaminaMonitor.Instance smi = context.consumer.GetSMI<StaminaMonitor.Instance>();
+			StaminaMonitor.Instance smi = context.consumerState.consumer.GetSMI<StaminaMonitor.Instance>();
 			bool flag2 = smi != null && smi.NeedsToSleep();
 			bool flag3 = ChorePreconditions.instance.IsScheduledTime.fn(ref context, Db.Get().ScheduleBlockTypes.Sleep);
 			return flag || flag3 || flag2;
@@ -150,7 +150,7 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 			this.sleep.interrupt.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.SleepingInterrupted, null).QueueAnim("interrupt", false, null).OnAnimQueueComplete(this.sleep.interrupt_transition);
 			this.sleep.interrupt_transition.Enter(delegate(SleepChore.StatesInstance smi)
 			{
-				EffectInstance effectInstance = smi.master.GetComponent<Effects>().Add(Db.Get().effects.Get("TerribleSleep"), true);
+				smi.master.GetComponent<Effects>().Add(Db.Get().effects.Get("TerribleSleep"), true);
 				GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State state = ((!GameClock.Instance.IsNighttime()) ? this.success : this.sleep.normal);
 				smi.GoTo(state);
 			});

@@ -53,7 +53,7 @@ public class LiquidCooledFanConfig : IBuildingConfig
 		manualDeliveryKG.capacity = 500f;
 		manualDeliveryKG.refillMass = 50f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
-		ElementConsumer elementConsumer = go.UpdateComponentRequirement<ElementConsumer>(true);
+		ElementConsumer elementConsumer = go.AddOrGet<ElementConsumer>();
 		elementConsumer.storeOnConsume = true;
 		elementConsumer.storage = storage;
 		elementConsumer.configuration = ElementConsumer.Configuration.AllGas;

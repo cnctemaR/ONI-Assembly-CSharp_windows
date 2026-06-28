@@ -20,14 +20,15 @@ namespace Database
 			{
 				torso_swap_build = Assets.GetAnim("body_swap_kanim");
 			}
-			this.Eyes = new AccessorySlot("Eyes", this, swap_build);
-			this.Hair = new AccessorySlot("Hair", this, swap_build);
-			this.HeadShape = new AccessorySlot("HeadShape", this, swap_build);
-			this.Mouth = new AccessorySlot("Mouth", this, swap_build);
-			this.Hat = new AccessorySlot("Hat", this, swap_build);
-			this.HatHair = new AccessorySlot("Hat_Hair", this, swap_build);
-			this.Body = new AccessorySlot("Body", this, torso_swap_build);
-			this.Arm = new AccessorySlot("Arm", this, torso_swap_build);
+			this.Eyes = new AccessorySlot("Eyes", this, swap_build, null);
+			this.Hair = new AccessorySlot("Hair", this, swap_build, null);
+			this.HeadShape = new AccessorySlot("HeadShape", this, swap_build, null);
+			this.Mouth = new AccessorySlot("Mouth", this, swap_build, null);
+			this.Hat = new AccessorySlot("Hat", this, swap_build, null);
+			this.HatHair = new AccessorySlot("Hat_Hair", this, swap_build, null);
+			this.HairAlways = new AccessorySlot("Hair_Always", this, swap_build, "hair");
+			this.Body = new AccessorySlot("Body", this, torso_swap_build, null);
+			this.Arm = new AccessorySlot("Arm", this, torso_swap_build, null);
 			foreach (AccessorySlot accessorySlot in this)
 			{
 				accessorySlot.AddAccessories(default_build, parent);
@@ -49,5 +50,7 @@ namespace Database
 		public AccessorySlot Hat;
 
 		public AccessorySlot HatHair;
+
+		public AccessorySlot HairAlways;
 	}
 }

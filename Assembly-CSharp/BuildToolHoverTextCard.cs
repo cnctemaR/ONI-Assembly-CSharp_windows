@@ -31,16 +31,18 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 					{
 						hoverTextDrawer.NewLine(num2);
 						hoverTextDrawer.AddIndent(num3);
-						hoverTextDrawer.DrawText(UI.TOOLTIPS.HELP_ROTATE_KEY, this.Styles_Instruction.Standard);
+						string text = UI.TOOLTIPS.HELP_ROTATE_KEY.ToString();
+						text = text.Replace("{Key}", GameUtil.GetActionString(global::Action.RotateBuilding));
+						hoverTextDrawer.DrawText(text, this.Styles_Instruction.Standard);
 					}
 					Orientation getBuildingOrientation = BuildTool.Instance.GetBuildingOrientation;
-					string text = "Unknown reason";
+					string text2 = "Unknown reason";
 					Vector3 vector = Grid.CellToPosCCC(num, Grid.SceneLayer.Building);
-					if (!this.currentDef.IsValidPlaceLocation(null, vector, getBuildingOrientation, out text))
+					if (!this.currentDef.IsValidPlaceLocation(null, vector, getBuildingOrientation, out text2))
 					{
 						hoverTextDrawer.NewLine(num2);
 						hoverTextDrawer.AddIndent(num3);
-						hoverTextDrawer.DrawText(text, this.HoverTextStyleSettings[1]);
+						hoverTextDrawer.DrawText(text2, this.HoverTextStyleSettings[1]);
 					}
 					RoomTracker component = this.currentDef.BuildingComplete.GetComponent<RoomTracker>();
 					if (component != null && !component.SufficientBuildLocation(num))

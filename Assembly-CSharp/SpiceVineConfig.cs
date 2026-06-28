@@ -38,7 +38,7 @@ public class SpiceVineConfig : IEntityConfig
 		});
 		UprootedMonitor component = gameObject.GetComponent<UprootedMonitor>();
 		component.monitorCell = new CellOffset(0, 1);
-		gameObject.UpdateComponentRequirement<StandardCropPlant>(true);
+		gameObject.AddOrGet<StandardCropPlant>();
 		GameObject gameObject2 = gameObject;
 		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
 		text4 = "SpiceVineSeed";

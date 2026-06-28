@@ -9,7 +9,7 @@ namespace TMPro
 	{
 		protected TMP_UpdateManager()
 		{
-			Camera.onPreRender = (Camera.CameraCallback)Delegate.Combine(Camera.onPreRender, new Camera.CameraCallback(this.OnCameraPreRender));
+			Camera.onPreCull = (Camera.CameraCallback)Delegate.Combine(Camera.onPreCull, new Camera.CameraCallback(this.OnCameraPreCull));
 		}
 
 		public static TMP_UpdateManager instance
@@ -58,7 +58,7 @@ namespace TMPro
 			return true;
 		}
 
-		private void OnCameraPreRender(Camera cam)
+		private void OnCameraPreCull(Camera cam)
 		{
 			for (int i = 0; i < this.m_LayoutRebuildQueue.Count; i++)
 			{

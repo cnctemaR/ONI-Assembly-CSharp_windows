@@ -6,7 +6,7 @@ public class Grid
 {
 	public static bool IsInitialized()
 	{
-		return Grid.CellValues != null;
+		return Grid.mass != null;
 	}
 
 	public static int GetCellInDirection(int cell, Direction d)
@@ -150,6 +150,11 @@ public class Grid
 	public static int OffsetCell(int cell, int x, int y)
 	{
 		return cell + x + y * Grid.WidthInCells;
+	}
+
+	public static int PosToCell(StateMachine.Instance smi)
+	{
+		return Grid.PosToCell(smi.transform.GetPosition());
 	}
 
 	public static int PosToCell(GameObject go)
@@ -364,15 +369,15 @@ public class Grid
 		bitFields[cell] |= (ushort)((!solid) ? 0 : 32);
 	}
 
-	public static bool IsSubstantialLiquid(int cell, float threshold = 0.35f)
+	public unsafe static bool IsSubstantialLiquid(int cell, float threshold = 0.35f)
 	{
 		if (Grid.IsValidCell(cell))
 		{
-			byte elementIdx = Grid.Cell[cell].elementIdx;
-			if ((int)elementIdx < ElementLoader.elements.Count)
+			byte b = Grid.elementIdx[cell];
+			if ((int)b < ElementLoader.elements.Count)
 			{
-				Element element = ElementLoader.elements[(int)Grid.Cell[cell].elementIdx];
-				if (element.IsLiquid && Grid.Cell[cell].mass >= element.defaultValues.mass * threshold)
+				Element element = ElementLoader.elements[(int)b];
+				if (element.IsLiquid && Grid.mass[cell] >= element.defaultValues.mass * threshold)
 				{
 					return true;
 				}
@@ -383,13 +388,13 @@ public class Grid
 
 	public static bool IsLiquid(int cell)
 	{
-		Element element = ElementLoader.elements[(int)Grid.Cell[cell].elementIdx];
+		Element element = ElementLoader.elements[(int)Grid.ElementIdx[cell]];
 		return element.IsLiquid;
 	}
 
 	public static bool IsGas(int cell)
 	{
-		Element element = ElementLoader.elements[(int)Grid.Cell[cell].elementIdx];
+		Element element = ElementLoader.elements[(int)Grid.ElementIdx[cell]];
 		return element.IsGas;
 	}
 
@@ -408,7 +413,7 @@ public class Grid
 		Grid.GetVisibleExtents(out min.x, out min.y, out max.x, out max.y);
 	}
 
-	public unsafe static void InitializeCells(Sim.Cell* cells)
+	public unsafe static void InitializeCells()
 	{
 		int widthInCells = Grid.WidthInCells;
 		int heightInCells = Grid.HeightInCells;
@@ -418,8 +423,8 @@ public class Grid
 			for (int j = 0; j < widthInCells; j++)
 			{
 				int num = i * widthInCells + j;
-				byte elementIdx = cells[num].elementIdx;
-				Element element = elements[(int)elementIdx];
+				byte b = Grid.elementIdx[num];
+				Element element = elements[(int)b];
 				Grid.Element[num] = element;
 				int num2 = (int)Grid.BitFields[num];
 				num2 &= 65303;
@@ -430,7 +435,7 @@ public class Grid
 		}
 	}
 
-	public static bool VisibilityTest(int x, int y, int x2, int y2)
+	public static bool VisibilityTest(int x, int y, int x2, int y2, bool all_tiles_block = false)
 	{
 		int num = x;
 		int num2 = y;
@@ -483,7 +488,16 @@ public class Grid
 		int num11 = num9 >> 1;
 		for (int i = 0; i <= num9; i++)
 		{
-			if ((x != num || y != num2) && Grid.Element[Grid.XYToCell(x, y)].IsSolid)
+			bool flag;
+			if (all_tiles_block)
+			{
+				flag = Grid.Solid[Grid.XYToCell(x, y)];
+			}
+			else
+			{
+				flag = Grid.Element[Grid.XYToCell(x, y)].IsSolid;
+			}
+			if ((x != num || y != num2) && flag)
 			{
 				return false;
 			}
@@ -503,7 +517,7 @@ public class Grid
 		return true;
 	}
 
-	public static bool VisibilityTest(int cell, int target_cell)
+	public static bool VisibilityTest(int cell, int target_cell, bool all_tiles_block = false)
 	{
 		int num = 0;
 		int num2 = 0;
@@ -511,7 +525,7 @@ public class Grid
 		int num3 = 0;
 		int num4 = 0;
 		Grid.CellToXY(target_cell, out num3, out num4);
-		return Grid.VisibilityTest(num, num2, num3, num4);
+		return Grid.VisibilityTest(num, num2, num3, num4, all_tiles_block);
 	}
 
 	public static readonly CellOffset[] DefaultOffset = new CellOffset[] { default(CellOffset) };
@@ -534,15 +548,23 @@ public class Grid
 
 	public static int InvalidCell = -1;
 
-	public unsafe static Sim.Cell* CellValues = null;
+	public unsafe static byte* elementIdx;
 
-	public unsafe static Sim.DiseaseCell* DiseaseCellValues = null;
+	public unsafe static float* temperature;
+
+	public unsafe static float* mass;
+
+	public unsafe static byte* properties;
+
+	public unsafe static byte* strengthInfo;
+
+	public unsafe static byte* insulation;
+
+	public unsafe static byte* diseaseIdx;
+
+	public unsafe static int* diseaseCount;
 
 	public unsafe static float* AccumulatedFlowValues = null;
-
-	public static Grid.CellIndexer Cell;
-
-	public static Grid.DiseaseCellIndexer Disease;
 
 	public static bool[] Revealed;
 
@@ -564,6 +586,8 @@ public class Grid
 
 	public static bool[] HasTube;
 
+	public static bool[] AllowPathfinding;
+
 	public static bool[] HasTubeEntrance;
 
 	public static bool[] IsTileUnderConstruction;
@@ -578,7 +602,21 @@ public class Grid
 
 	public static Grid.PressureIndexer Pressure;
 
+	public static Grid.ElementIdxIndexer ElementIdx;
+
 	public static Grid.TemperatureIndexer Temperature;
+
+	public static Grid.MassIndexer Mass;
+
+	public static Grid.PropertiesIndexer Properties;
+
+	public static Grid.StrengthInfoIndexer StrengthInfo;
+
+	public static Grid.Insulationndexer Insulation;
+
+	public static Grid.DiseaseIdxIndexer DiseaseIdx;
+
+	public static Grid.DiseaseCountIndexer DiseaseCount;
 
 	public static Grid.AccumulatedFlowIndexer AccumulatedFlow;
 
@@ -646,6 +684,7 @@ public class Grid
 		Building,
 		BuildingUse,
 		BuildingFront,
+		TransferArm,
 		Ore,
 		Creatures,
 		Move,
@@ -684,46 +723,101 @@ public class Grid
 		}
 	}
 
-	public struct CellIndexer
-	{
-		public unsafe Sim.Cell this[int i]
-		{
-			get
-			{
-				return Grid.CellValues[i];
-			}
-		}
-	}
-
-	public struct DiseaseCellIndexer
-	{
-		public unsafe Sim.DiseaseCell this[int i]
-		{
-			get
-			{
-				return Grid.DiseaseCellValues[i];
-			}
-		}
-	}
-
 	public struct PressureIndexer
 	{
-		public float this[int i]
+		public unsafe float this[int i]
 		{
 			get
 			{
-				return Grid.Cell[i].mass * 101.3f;
+				return Grid.mass[i] * 101.3f;
+			}
+		}
+	}
+
+	public struct ElementIdxIndexer
+	{
+		public unsafe byte this[int i]
+		{
+			get
+			{
+				return Grid.elementIdx[i];
 			}
 		}
 	}
 
 	public struct TemperatureIndexer
 	{
-		public float this[int i]
+		public unsafe float this[int i]
 		{
 			get
 			{
-				return Grid.Cell[i].temperature;
+				return Grid.temperature[i];
+			}
+		}
+	}
+
+	public struct MassIndexer
+	{
+		public unsafe float this[int i]
+		{
+			get
+			{
+				return Grid.mass[i];
+			}
+		}
+	}
+
+	public struct PropertiesIndexer
+	{
+		public unsafe byte this[int i]
+		{
+			get
+			{
+				return Grid.properties[i];
+			}
+		}
+	}
+
+	public struct StrengthInfoIndexer
+	{
+		public unsafe byte this[int i]
+		{
+			get
+			{
+				return Grid.strengthInfo[i];
+			}
+		}
+	}
+
+	public struct Insulationndexer
+	{
+		public unsafe byte this[int i]
+		{
+			get
+			{
+				return Grid.insulation[i];
+			}
+		}
+	}
+
+	public struct DiseaseIdxIndexer
+	{
+		public unsafe byte this[int i]
+		{
+			get
+			{
+				return Grid.diseaseIdx[i];
+			}
+		}
+	}
+
+	public struct DiseaseCountIndexer
+	{
+		public unsafe int this[int i]
+		{
+			get
+			{
+				return Grid.diseaseCount[i];
 			}
 		}
 	}

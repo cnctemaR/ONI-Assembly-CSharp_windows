@@ -9,6 +9,11 @@ public class DuplicantTemperatureDeltaAsEnergyAmountDisplayer : StandardAmountDi
 	{
 	}
 
+	public override string GetTooltipDescription(Amount master, AmountInstance instance)
+	{
+		return string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null), this.formatter.GetFormattedValue(310.15f, GameUtil.TimeSlice.None, null));
+	}
+
 	public override string GetTooltip(Amount master, AmountInstance instance)
 	{
 		string text = this.GetTooltipDescription(master, instance);

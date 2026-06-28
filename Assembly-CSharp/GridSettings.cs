@@ -32,6 +32,7 @@ public class GridSettings : KMonoBehaviour
 		Grid.PreventFogOfWarReveal = new bool[Grid.CellCount];
 		Grid.IsTileUnderConstruction = new bool[Grid.CellCount];
 		Grid.PreventIdlingOnCell = new bool[Grid.CellCount];
+		Grid.AllowPathfinding = new bool[Grid.CellCount];
 		Grid.ObjectLayers = new Dictionary<int, GameObject>[36];
 		for (int i = 0; i < Grid.ObjectLayers.Length; i++)
 		{

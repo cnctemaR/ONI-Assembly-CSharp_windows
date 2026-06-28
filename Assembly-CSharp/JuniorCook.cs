@@ -13,11 +13,7 @@ public class JuniorCook : RoleConfig
 		base.roleGroup = "Cooking";
 		base.hat = Game.Instance.roleManager.GetHat(JuniorCook.ID);
 		this.preferredChoreTags.Add(GameTags.ChoreTypes.Cooking);
-		this.favoredChoreTypes = new List<ChoreType>
-		{
-			Db.Get().ChoreTypes.Mush,
-			Db.Get().ChoreTypes.Cook
-		};
+		this.favoredChoreTypes = new List<ChoreType> { Db.Get().ChoreTypes.Cook };
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Cooking };
 		base.perks = new RolePerk[]
 		{
@@ -28,11 +24,7 @@ public class JuniorCook : RoleConfig
 
 	public override void InitRequirements()
 	{
-		base.requirements = new RoleAssignmentRequirement[]
-		{
-			Game.Instance.roleManager.roleAssignmentRequirements.Can_Cook,
-			Game.Instance.roleManager.roleAssignmentRequirements.HasExperience_NoRole
-		};
+		base.requirements = new RoleAssignmentRequirement[] { Game.Instance.roleManager.roleAssignmentRequirements.Can_Cook };
 	}
 
 	public static string ID = "JuniorCook";

@@ -3,11 +3,21 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
-public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Instance>
+public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.safe;
+		this.root.EventHandler(GameHashes.SafeFromThreats, delegate(ThreatMonitor.Instance smi, object d)
+		{
+			smi.OnSafe(d);
+		}).EventHandler(GameHashes.Attacked, delegate(ThreatMonitor.Instance smi, object d)
+		{
+			smi.OnAttacked(d);
+		}).EventHandler(GameHashes.ObjectDestroyed, delegate(ThreatMonitor.Instance smi, object d)
+		{
+			smi.Cleanup(d);
+		});
 		this.safe.Enter(delegate(ThreatMonitor.Instance smi)
 		{
 			smi.revengeThreat.Clear();
@@ -25,29 +35,36 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			}
 		}, UpdateRate.SIM_200ms, false);
 		this.threatned.duplicant.ShoudFlee.ToggleChore(new Func<ThreatMonitor.Instance, Chore>(this.CreateFleeChore), this.safe);
-		this.threatned.creature.Enter(delegate(ThreatMonitor.Instance smi)
+		this.threatned.creature.ToggleBehaviour(GameTags.Creatures.Flee, (ThreatMonitor.Instance smi) => !CreatureHelpers.WillEngageNonEssentialTargets(smi.gameObject, smi.def.fleethresholdState), delegate(ThreatMonitor.Instance smi)
+		{
+			smi.GoTo(this.safe);
+		}).ToggleBehaviour(GameTags.Creatures.Attack, (ThreatMonitor.Instance smi) => CreatureHelpers.WillEngageNonEssentialTargets(smi.gameObject, smi.def.fleethresholdState), delegate(ThreatMonitor.Instance smi)
+		{
+			smi.GoTo(this.safe);
+		}).Enter(delegate(ThreatMonitor.Instance smi)
 		{
 			this.ReportThreat(smi);
-		}).Update("Threatened", delegate(ThreatMonitor.Instance smi, float dt)
-		{
-			if (smi.isMasterNull)
+		})
+			.Update("Threatened", delegate(ThreatMonitor.Instance smi, float dt)
 			{
-				return;
-			}
-			if (smi.revengeThreat.target != null && smi.revengeThreat.Calm(dt, smi.master.gameObject))
-			{
-				smi.Trigger(-21431934, null);
-				return;
-			}
-			if (!smi.CheckForThreats())
-			{
-				smi.GoTo(this.safe);
-			}
-			else
-			{
-				this.ReportThreat(smi);
-			}
-		}, UpdateRate.SIM_200ms, false);
+				if (smi.isMasterNull)
+				{
+					return;
+				}
+				if (smi.revengeThreat.target != null && smi.revengeThreat.Calm(dt, smi.master.gameObject))
+				{
+					smi.Trigger(-21431934, null);
+					return;
+				}
+				if (!smi.CheckForThreats())
+				{
+					smi.GoTo(this.safe);
+				}
+				else
+				{
+					this.ReportThreat(smi);
+				}
+			}, UpdateRate.SIM_200ms, false);
 	}
 
 	public GameObject GetMainThreat(ThreatMonitor.Instance smi)
@@ -70,30 +87,31 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		return new FleeChore(smi.master, smi.GetMainThreat);
 	}
 
-	[MyCmpReq]
 	private FactionAlignment alignment;
 
-	[MyCmpReq]
 	private Navigator navigator;
 
-	public Health.HealthState FleeThresholdState = Health.HealthState.Injured;
-
-	public GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, object>.State safe;
+	public GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>.State safe;
 
 	public ThreatMonitor.ThreatnedStates threatned;
 
-	public class ThreatnedStates : GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, object>.State
+	public class Def : StateMachine.BaseDef
+	{
+		public Health.HealthState fleethresholdState = Health.HealthState.Injured;
+	}
+
+	public class ThreatnedStates : GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>.State
 	{
 		public ThreatMonitor.ThreatnedDuplicantStates duplicant;
 
-		public GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, object>.State creature;
+		public GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>.State creature;
 	}
 
-	public class ThreatnedDuplicantStates : GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, object>.State
+	public class ThreatnedDuplicantStates : GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>.State
 	{
-		public GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, object>.State ShoudFlee;
+		public GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>.State ShoudFlee;
 
-		public GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, object>.State ShouldFight;
+		public GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>.State ShouldFight;
 	}
 
 	public struct Grudge
@@ -135,19 +153,16 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		public float grudgeTime;
 	}
 
-	public new class Instance : GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, object>.GameInstance
+	public new class Instance : GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>.GameInstance
 	{
-		public Instance(IStateMachineTarget master)
-			: base(master)
+		public Instance(IStateMachineTarget master, ThreatMonitor.Def def)
+			: base(master, def)
 		{
 			this.alignment = master.GetComponent<FactionAlignment>();
 			this.navigator = master.GetComponent<Navigator>();
 			this.choreDriver = master.GetComponent<ChoreDriver>();
 			this.health = master.GetComponent<Health>();
 			this.choreConsumer = master.GetComponent<ChoreConsumer>();
-			base.Subscribe(-21431934, new Action<object>(this.OnSafe));
-			base.Subscribe(-787691065, new Action<object>(this.OnAttacked));
-			base.Subscribe(1969584890, new Action<object>(this.Cleanup));
 		}
 
 		public GameObject GetMainThreat
@@ -191,7 +206,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			}
 		}
 
-		private void OnSafe(object data)
+		public void OnSafe(object data)
 		{
 			if (this.revengeThreat.target != null)
 			{
@@ -203,7 +218,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			}
 		}
 
-		private void OnAttacked(object data)
+		public void OnAttacked(object data)
 		{
 			FactionAlignment factionAlignment = (FactionAlignment)data;
 			this.revengeThreat.reset(factionAlignment.gameObject);
@@ -220,7 +235,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 
 		public bool WillEngageNonEssentialTargets()
 		{
-			return (!(this.choreConsumer != null) || (this.choreConsumer.IsPermitted(Db.Get().ChoreGroups.Combat) && this.choreConsumer.IsEnabled(Db.Get().ChoreGroups.Combat))) && this.health.State < base.smi.sm.FleeThresholdState;
+			return (!(this.choreConsumer != null) || (this.choreConsumer.IsPermitted(Db.Get().ChoreGroups.Combat) && this.choreConsumer.IsEnabled(Db.Get().ChoreGroups.Combat))) && this.health.State < base.smi.def.fleethresholdState;
 		}
 
 		public void OnOffended(FactionAlignment offender)
@@ -242,7 +257,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 
 		public void GoToThreatned()
 		{
-			if (this.choreDriver != null)
+			if (base.GetComponent<MinionIdentity>() != null)
 			{
 				this.GotoThreatResponse();
 			}
@@ -252,7 +267,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			}
 		}
 
-		private void Cleanup(object data)
+		public void Cleanup(object data)
 		{
 			if (this.mainThreat)
 			{
@@ -263,6 +278,10 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 
 		public void RefreshThreat(object data)
 		{
+			if (!base.IsRunning())
+			{
+				return;
+			}
 			bool flag = base.smi.CheckForThreats();
 			if (flag)
 			{

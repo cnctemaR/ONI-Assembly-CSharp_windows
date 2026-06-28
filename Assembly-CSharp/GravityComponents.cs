@@ -15,49 +15,52 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 			GravityComponent gravityComponent = this.data[i];
 			if (gravityComponent.elapsedTime >= 0f)
 			{
-				Vector2 velocity = gravityComponent.Velocity;
-				Vector3 position = gravityComponent.transform.GetPosition();
-				Vector2 vector = position;
-				Vector2 vector2 = vector + velocity * dt;
-				Vector2 vector3 = vector2;
-				vector3.y -= gravityComponent.offset;
-				int num = Grid.PosToCell(vector3);
-				if (Grid.IsValidCell(num))
+				if (!(gravityComponent.transform == null))
 				{
-					if (velocity.sqrMagnitude > 0.2f)
+					Vector2 velocity = gravityComponent.Velocity;
+					Vector3 position = gravityComponent.transform.GetPosition();
+					Vector2 vector = position;
+					Vector2 vector2 = vector + velocity * dt;
+					Vector2 vector3 = vector2;
+					vector3.y -= gravityComponent.offset;
+					int num = Grid.PosToCell(vector3);
+					if (Grid.IsValidCell(num))
 					{
-						int num2 = Grid.PosToCell(vector);
-						if (!Grid.Element[num2].IsLiquid && Grid.Element[num].IsLiquid)
+						if (velocity.sqrMagnitude > 0.2f)
 						{
-							AmbienceType ambience = Grid.Element[num].substance.GetAmbience();
-							if (ambience != AmbienceType.None)
+							int num2 = Grid.PosToCell(vector);
+							if (!Grid.Element[num2].IsLiquid && Grid.Element[num].IsLiquid)
 							{
-								string text = Sounds.Instance.OreSplashSoundsMigrated[(int)ambience];
-								if (CameraController.Instance != null && CameraController.Instance.IsAudibleSound(vector2, text))
+								AmbienceType ambience = Grid.Element[num].substance.GetAmbience();
+								if (ambience != AmbienceType.None)
 								{
-									SoundEvent.PlayOneShot(text, vector2);
+									string text = Sounds.Instance.OreSplashSoundsMigrated[(int)ambience];
+									if (CameraController.Instance != null && CameraController.Instance.IsAudibleSound(vector2, text))
+									{
+										SoundEvent.PlayOneShot(text, vector2);
+									}
 								}
 							}
 						}
-					}
-					if (Grid.Solid[num])
-					{
-						vector2.y = Grid.CellToPosCBC(Grid.CellAbove(num), Grid.SceneLayer.Move).y + gravityComponent.offset;
-						gravityComponent.initialVelocity.x = 0f;
-						gravityComponent.elapsedTime = -1f;
-						gravityComponent.transform.SetPosition(new Vector3(vector2.x, vector2.y, position.z));
-						this.data[i] = gravityComponent;
-						EventSystem.Trigger(gravityComponent.transform.gameObject, 1188683690, velocity);
-						if (gravityComponent.onLanded != null)
+						if (Grid.Solid[num])
 						{
-							gravityComponent.onLanded();
+							vector2.y = Grid.CellToPosCBC(Grid.CellAbove(num), Grid.SceneLayer.Move).y + gravityComponent.offset;
+							gravityComponent.initialVelocity.x = 0f;
+							gravityComponent.elapsedTime = -1f;
+							gravityComponent.transform.SetPosition(new Vector3(vector2.x, vector2.y, position.z));
+							this.data[i] = gravityComponent;
+							EventSystem.Trigger(gravityComponent.transform.gameObject, 1188683690, velocity);
+							if (gravityComponent.onLanded != null)
+							{
+								gravityComponent.onLanded();
+							}
 						}
-					}
-					else
-					{
-						gravityComponent.transform.SetPosition(new Vector3(vector2.x, vector2.y, position.z));
-						gravityComponent.elapsedTime += dt;
-						this.data[i] = gravityComponent;
+						else
+						{
+							gravityComponent.transform.SetPosition(new Vector3(vector2.x, vector2.y, position.z));
+							gravityComponent.elapsedTime += dt;
+							this.data[i] = gravityComponent;
+						}
 					}
 				}
 			}

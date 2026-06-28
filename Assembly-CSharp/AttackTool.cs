@@ -7,12 +7,27 @@ public class AttackTool : DragTool
 	{
 		Vector2 regularizedPos = base.GetRegularizedPos(Vector2.Min(downPos, upPos), true);
 		Vector2 regularizedPos2 = base.GetRegularizedPos(Vector2.Max(downPos, upPos), false);
+		AttackTool.MarkForAttack(regularizedPos, regularizedPos2, true);
+	}
+
+	public static void MarkForAttack(Vector2 min, Vector2 max, bool mark)
+	{
 		foreach (FactionAlignment factionAlignment in Components.FactionAlignments)
 		{
 			Vector2 vector = Grid.PosToXY(factionAlignment.transform.GetPosition());
-			if (vector.x >= regularizedPos.x && vector.x < regularizedPos2.x && vector.y >= regularizedPos.y && vector.y < regularizedPos2.y && FactionManager.Instance.GetDisposition(FactionManager.FactionID.Duplicant, factionAlignment.Alignment) != FactionManager.Disposition.Assist)
+			if (vector.x >= min.x && vector.x < max.x && vector.y >= min.y && vector.y < max.y)
 			{
-				factionAlignment.SetPlayerTargeted(true);
+				if (mark)
+				{
+					if (FactionManager.Instance.GetDisposition(FactionManager.FactionID.Duplicant, factionAlignment.Alignment) != FactionManager.Disposition.Assist)
+					{
+						factionAlignment.SetPlayerTargeted(true);
+					}
+				}
+				else
+				{
+					factionAlignment.gameObject.Trigger(2127324410, null);
+				}
 			}
 		}
 	}
@@ -28,8 +43,4 @@ public class AttackTool : DragTool
 		base.OnDeactivateTool(new_tool);
 		ToolMenu.Instance.PriorityScreen.Show(false);
 	}
-
-	public GameObject Placer;
-
-	public static AttackTool Instance;
 }

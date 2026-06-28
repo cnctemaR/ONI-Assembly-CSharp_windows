@@ -311,7 +311,7 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 				}
 				if (flag)
 				{
-					machineOrder2.chore = new WorkChore<Fabricator>(this.choreType, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+					machineOrder2.chore = new WorkChore<Fabricator>(this.choreType, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 					if (this.workTimeRemaining <= 0f)
 					{
 						this.workTimeRemaining = this.GetWorkTime();

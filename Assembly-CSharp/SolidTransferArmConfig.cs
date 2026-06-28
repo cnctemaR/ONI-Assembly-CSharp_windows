@@ -20,7 +20,7 @@ public class SolidTransferArmConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.UpdateComponentRequirement<Operational>(true);
+		go.AddOrGet<Operational>();
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)

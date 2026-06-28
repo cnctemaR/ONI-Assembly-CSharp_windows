@@ -10,8 +10,6 @@ namespace TMPro
 
 		public int valueStartIndex;
 
-		public int valueDecimalIndex;
-
 		public int valueLength;
 
 		public int valueHashCode;

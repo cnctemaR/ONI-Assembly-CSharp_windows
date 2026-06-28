@@ -10,9 +10,9 @@ namespace TMPro
 
 		public int hashCode;
 
-		public Vector2 pivot;
+		public int unicode;
 
-		public float scale;
+		public Vector2 pivot;
 
 		public Sprite sprite;
 	}

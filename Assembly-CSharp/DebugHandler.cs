@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Klei;
 using UnityEngine;
 
 public class DebugHandler : IInputHandler
@@ -7,6 +8,8 @@ public class DebugHandler : IInputHandler
 	public DebugHandler()
 	{
 		DebugHandler.enabled = File.Exists(Path.Combine(Application.dataPath, "debug_enable.txt"));
+		DebugHandler.enabled = DebugHandler.enabled || File.Exists(Path.Combine(Application.dataPath, "../debug_enable.txt"));
+		DebugHandler.enabled = DebugHandler.enabled || GenericGameSettings.instance.debugEnable;
 	}
 
 	public static bool enabled { get; private set; }
@@ -30,8 +33,9 @@ public class DebugHandler : IInputHandler
 
 	private void SpawnMinion()
 	{
-		GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.MinionPrefab, SceneOrganizer.Instance.GetFolder(Folder.Entities), null);
-		gameObject.name = EntityPrefabs.Instance.MinionPrefab.name;
+		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), SceneOrganizer.Instance.GetFolder(Folder.Entities), null);
+		gameObject.name = Assets.GetPrefab(MinionConfig.ID).name;
+		Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
 		Vector3 vector = Grid.CellToPosCBC(DebugHandler.GetMouseCell(), Grid.SceneLayer.Move);
 		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
@@ -221,10 +225,10 @@ public class DebugHandler : IInputHandler
 			Game.Instance.Trigger(775300118, null);
 			foreach (Brain brain in Components.Brains)
 			{
-				DebugGoToMonitor component = brain.GetComponent<DebugGoToMonitor>();
-				if (component != null)
+				DebugGoToMonitor.Instance smi = brain.GetSMI<DebugGoToMonitor.Instance>();
+				if (smi != null)
 				{
-					component.GoToCursor();
+					smi.GoToCursor();
 				}
 			}
 		}
@@ -290,62 +294,73 @@ public class DebugHandler : IInputHandler
 				{
 					if (e.TryConsume(global::Action.DebugReportBug))
 					{
-						int num = 0;
-						string validSaveFilename;
-						for (;;)
+						if (GenericGameSettings.instance.developerDebugEnable)
 						{
-							validSaveFilename = SaveScreen.GetValidSaveFilename("bug_report_savefile_" + num.ToString());
-							if (!File.Exists(validSaveFilename))
+							int num = 0;
+							string validSaveFilename;
+							for (;;)
 							{
-								break;
+								validSaveFilename = SaveScreen.GetValidSaveFilename("bug_report_savefile_" + num.ToString());
+								if (!File.Exists(validSaveFilename))
+								{
+									break;
+								}
+								num++;
 							}
-							num++;
+							string text5 = "No save file (front end)";
+							if (SaveLoader.Instance != null)
+							{
+								text5 = SaveLoader.Instance.Save(validSaveFilename, false, false);
+							}
+							KCrashReporter.ReportBug("Bug Report", text5);
 						}
-						string text5 = "No save file (front end)";
-						if (SaveLoader.Instance != null)
+						else
 						{
-							text5 = SaveLoader.Instance.Save(validSaveFilename, false, false);
+							global::Debug.Log("Debug crash keys are not enabled.", null);
 						}
-						KCrashReporter.ReportBug("Bug Report", text5);
-					}
-					else if (e.TryConsume(global::Action.DebugReloadLevel))
-					{
-						global::Debug.Log("Reloading Level.", null);
-						SaveLoader.Instance.InitialSave();
-						LoadScreen.ForceStopGame();
-						SaveLoader.SetActiveSaveFilePath(SaveLoader.GetAutosaveFilePath());
-						LoadingOverlay.Load(delegate
-						{
-							App.LoadScene("frontend");
-						});
 					}
 					else if (e.TryConsume(global::Action.DebugTriggerException))
 					{
-						string text6 = Guid.NewGuid().ToString();
-						KCrashReporter.ReportError("Debug crash with random stack", text6, null, ScreenPrefabs.Instance.ConfirmDialogScreen, string.Empty);
+						if (GenericGameSettings.instance.developerDebugEnable)
+						{
+							string text6 = Guid.NewGuid().ToString();
+							KCrashReporter.ReportError("Debug crash with random stack", text6, null, ScreenPrefabs.Instance.ConfirmDialogScreen, string.Empty);
+						}
 					}
 					else if (e.TryConsume(global::Action.DebugTriggerError))
 					{
-						global::Debug.LogError("Oooops! Testing error!", null);
+						if (GenericGameSettings.instance.developerDebugEnable)
+						{
+							global::Debug.LogError("Oooops! Testing error!", null);
+						}
 					}
 					else if (e.TryConsume(global::Action.DebugDumpGarbageReferences))
 					{
-						GarbageProfiler.DebugDumpGarbageStats();
+						if (GenericGameSettings.instance.developerDebugEnable)
+						{
+							GarbageProfiler.DebugDumpGarbageStats();
+						}
 					}
 					else if (e.TryConsume(global::Action.DebugDumpEventData))
 					{
-						KObjectManager.Instance.DumpEventData();
+						if (GenericGameSettings.instance.developerDebugEnable)
+						{
+							KObjectManager.Instance.DumpEventData();
+						}
 					}
-					else if (!e.TryConsume(global::Action.DebugDumpSceneParitionerLeakData))
+					else if (e.TryConsume(global::Action.DebugDumpSceneParitionerLeakData))
 					{
-						if (e.TryConsume(global::Action.DebugCrashSim))
+						if (GenericGameSettings.instance.developerDebugEnable)
 						{
-							Sim.SIM_DebugCrash();
 						}
-						else if (e.TryConsume(global::Action.DebugNextCall))
-						{
-							DebugHandler.DebugNextCall = true;
-						}
+					}
+					else if (e.TryConsume(global::Action.DebugNextCall))
+					{
+						DebugHandler.DebugNextCall = true;
+					}
+					else if (e.TryConsume(global::Action.DebugTogglePersonalPriorityComparison))
+					{
+						Chore.ENABLE_PERSONAL_PRIORITIES = !Chore.ENABLE_PERSONAL_PRIORITIES;
 					}
 				}
 			}

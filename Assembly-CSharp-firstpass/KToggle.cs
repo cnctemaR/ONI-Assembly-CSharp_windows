@@ -57,6 +57,10 @@ public class KToggle : Toggle
 		{
 			return;
 		}
+		if (!this.IsInteractable())
+		{
+			return;
+		}
 		if (global::UnityEngine.EventSystems.EventSystem.current == null || !global::UnityEngine.EventSystems.EventSystem.current.enabled)
 		{
 			return;
@@ -85,6 +89,10 @@ public class KToggle : Toggle
 
 	private void OnValueChanged(bool value)
 	{
+		if (!this.IsInteractable())
+		{
+			return;
+		}
 		ImageToggleState[] components = base.GetComponents<ImageToggleState>();
 		if (components != null && components.Length > 0)
 		{
@@ -116,6 +124,10 @@ public class KToggle : Toggle
 			return;
 		}
 		if (eventData.button == PointerEventData.InputButton.Right)
+		{
+			return;
+		}
+		if (!this.IsInteractable())
 		{
 			return;
 		}

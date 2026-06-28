@@ -55,8 +55,8 @@ public class HydroponicFarmConfig : IBuildingConfig
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
 		go.AddOrGet<Storage>();
 		PlantablePlot plantablePlot = go.AddOrGet<PlantablePlot>();
-		plantablePlot.AddDespoitTag(GameTags.CropSeed);
-		plantablePlot.AddDespoitTag(GameTags.WaterSeed);
+		plantablePlot.AddDepositTag(GameTags.CropSeed);
+		plantablePlot.AddDepositTag(GameTags.WaterSeed);
 		plantablePlot.occupyingObjectRelativePosition.y = 1f;
 		plantablePlot.SetFertilizationFlags(true, true);
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);

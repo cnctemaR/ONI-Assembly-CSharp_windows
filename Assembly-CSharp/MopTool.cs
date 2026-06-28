@@ -7,6 +7,7 @@ public class MopTool : DragTool
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.Placer = Assets.GetPrefab(new Tag("MopPlacer"));
 		this.interceptNumberKeysForPriority = true;
 		MopTool.Instance = this;
 	}
@@ -33,7 +34,7 @@ public class MopTool : DragTool
 				if (!Grid.Solid[cell] && gameObject == null && Grid.Element[cell].IsLiquid)
 				{
 					bool flag = Grid.Solid[Grid.CellBelow(cell)];
-					bool flag2 = Grid.Cell[cell].mass <= MopTool.maxMopAmt;
+					bool flag2 = Grid.Mass[cell] <= MopTool.maxMopAmt;
 					if (flag && flag2)
 					{
 						gameObject = Util.KInstantiate(this.Placer, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
@@ -42,6 +43,7 @@ public class MopTool : DragTool
 						float depthBias = InterfaceTool.DepthBias;
 						vector.z += depthBias;
 						gameObject.transform.SetPosition(vector);
+						gameObject.SetActive(true);
 					}
 					else
 					{
@@ -77,7 +79,7 @@ public class MopTool : DragTool
 		ToolMenu.Instance.PriorityScreen.Show(false);
 	}
 
-	public GameObject Placer;
+	private GameObject Placer;
 
 	public static MopTool Instance;
 

@@ -35,7 +35,7 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>
 		float num3 = 0f;
 		for (int i = 0; i < this.monitorCells.Count; i++)
 		{
-			if (Grid.Cell[this.monitorCells[i]].mass > this.minimumCellMass && ((Grid.Element[this.monitorCells[i]].IsGas && !this.heatLiquid) || (Grid.Element[this.monitorCells[i]].IsLiquid && this.heatLiquid)))
+			if (Grid.Mass[this.monitorCells[i]] > this.minimumCellMass && ((Grid.Element[this.monitorCells[i]].IsGas && !this.heatLiquid) || (Grid.Element[this.monitorCells[i]].IsLiquid && this.heatLiquid)))
 			{
 				num2++;
 				num3 += Grid.Temperature[this.monitorCells[i]];

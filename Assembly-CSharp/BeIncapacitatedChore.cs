@@ -4,22 +4,32 @@ using UnityEngine;
 public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 {
 	public BeIncapacitatedChore(IStateMachineTarget master)
-		: base(Db.Get().ChoreTypes.BeIncapacitated, master, master.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.BeIncapacitated, master, master.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
 	{
 		this.smi = new BeIncapacitatedChore.StatesInstance(this);
 	}
 
 	public void FindAvailableMedicalBed(Navigator navigator)
 	{
-		AssignableSlotInstance slot = this.gameObject.GetComponent<Ownables>().GetSlot(Db.Get().AssignableSlots.Clinic);
+		Clinic clinic = null;
+		AssignableSlot clinic2 = Db.Get().AssignableSlots.Clinic;
+		Ownables component = this.gameObject.GetComponent<Ownables>();
+		AssignableSlotInstance slot = component.GetSlot(clinic2);
 		if (slot.assignable == null)
 		{
-			return;
+			Assignable assignable = component.AutoAssignSlot(clinic2);
+			if (assignable != null)
+			{
+				clinic = assignable.GetComponent<Clinic>();
+			}
 		}
-		Clinic component = slot.assignable.GetComponent<Clinic>();
-		if (navigator.CanReach(component))
+		else
 		{
-			this.smi.sm.clinic.Set(component.gameObject, this.smi);
+			clinic = slot.assignable.GetComponent<Clinic>();
+		}
+		if (clinic != null && navigator.CanReach(clinic))
+		{
+			this.smi.sm.clinic.Set(clinic.gameObject, this.smi);
 			this.smi.GoTo(this.smi.sm.incapacitation_root.rescue.waitingForPickup);
 		}
 	}

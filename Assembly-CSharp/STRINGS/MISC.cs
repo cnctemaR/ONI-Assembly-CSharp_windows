@@ -32,7 +32,7 @@ namespace STRINGS
 
 			public static LocString CRUSHABLE = "Crushable";
 
-			public static LocString BAGABLECREATURE = "Creatures";
+			public static LocString BAGABLECREATURE = "Critters";
 
 			public static LocString LIFE = "Life";
 
@@ -136,6 +136,8 @@ namespace STRINGS
 
 			public static LocString DECORATION = "Decoration";
 
+			public static LocString EGG = "Critter Egg";
+
 			public static LocString GENE_SHUFFLER = "Neural Vacillator";
 
 			public static LocString FARMING = "Farm Build-Delivery";
@@ -167,14 +169,14 @@ namespace STRINGS
 				{
 					public static LocString NAME = "Oxylite blocked";
 
-					public static LocString TOOLTIP = "This <style=\"solid\">Oxylite</style> deposit is not exposed to air and cannot emit <style=\"oxygen\">Oxygen</style>";
+					public static LocString TOOLTIP = "This " + ELEMENTS.OXYROCK.NAME + " deposit is not exposed to air and cannot emit " + ELEMENTS.OXYGEN.NAME;
 				}
 
 				public class OVERPRESSURE
 				{
 					public static LocString NAME = "Inert";
 
-					public static LocString TOOLTIP = "Environmental air pressure is too high for this <style=\"solid\">Oxylite</style> deposit to emit <style=\"oxygen\">Oxygen</style>";
+					public static LocString TOOLTIP = "Environmental air pressure is too high for this " + ELEMENTS.OXYROCK.NAME + " deposit to emit " + ELEMENTS.OXYGEN.NAME;
 				}
 			}
 
@@ -182,7 +184,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "{BlockedString}";
 
-				public static LocString TOOLTIP = "This <style=\"solid\">Oxylite</style> deposit has no room to emit <style=\"oxygen\">Oxygen</style>";
+				public static LocString TOOLTIP = "This " + ELEMENTS.OXYROCK.NAME + " deposit has no room to emit " + ELEMENTS.OXYGEN.NAME;
 			}
 
 			public class OXYROCKEMITTING
@@ -196,7 +198,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Inert";
 
-				public static LocString TOOLTIP = "Environmental air pressure is too high for this <style=\"solid\">Oxylite</style> deposit to emit <style=\"oxygen\">Oxygen</style>";
+				public static LocString TOOLTIP = "Environmental air pressure is too high for this " + ELEMENTS.OXYROCK.NAME + " deposit to emit " + ELEMENTS.OXYGEN.NAME;
 			}
 
 			public class BLEACHSTONE
@@ -205,14 +207,14 @@ namespace STRINGS
 				{
 					public static LocString NAME = "Bleachstone blocked";
 
-					public static LocString TOOLTIP = "This <style=\"solid\">Bleachstone</style> deposit is not exposed to air and cannot emit <style=\"gas\">Chlorine</style>";
+					public static LocString TOOLTIP = "This " + ELEMENTS.BLEACHSTONE.NAME + " deposit is not exposed to air and cannot emit " + ELEMENTS.CHLORINE.NAME;
 				}
 
 				public class OVERPRESSURE
 				{
 					public static LocString NAME = "Inert";
 
-					public static LocString TOOLTIP = "Environmental air pressure is too high for this <style=\"solid\">Bleachstone</style> deposit to emit <style=\"gas\">Chlorine</style>";
+					public static LocString TOOLTIP = "Environmental air pressure is too high for this " + ELEMENTS.BLEACHSTONE.NAME + " deposit to emit " + ELEMENTS.CHLORINE.NAME;
 				}
 			}
 
@@ -220,7 +222,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "{BlockedString}";
 
-				public static LocString TOOLTIP = "This <style=\"solid\">Bleachstone</style> deposit has no room to emit <style=\"gas\">Chlorine</style>";
+				public static LocString TOOLTIP = "This " + ELEMENTS.BLEACHSTONE.NAME + " deposit has no room to emit " + ELEMENTS.CHLORINE.NAME;
 			}
 
 			public class BLEACHSTONEEMITTING
@@ -234,14 +236,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Inert";
 
-				public static LocString TOOLTIP = "Environmental air pressure is too high for this <style=\"solid\">Bleachstone</style> deposit to emit <style=\"gas\">Chlorine</style>";
+				public static LocString TOOLTIP = "Environmental air pressure is too high for this " + ELEMENTS.BLEACHSTONE.NAME + " deposit to emit " + ELEMENTS.CHLORINE.NAME;
 			}
 
 			public class EDIBLE
 			{
 				public static LocString NAME = "Rations: {0}";
 
-				public static LocString TOOLTIP = "Can provide <style=\"food\">{0}</style> of energy to Duplicants";
+				public static LocString TOOLTIP = "Can provide " + UI.FormatAsLink("{0}", "KCAL") + " of energy to Duplicants";
 			}
 
 			public class MARKEDFORDISINFECTION
@@ -422,23 +424,45 @@ namespace STRINGS
 
 			public class SPOUTOVERPRESSURE
 			{
-				public static LocString NAME = "Over pressure";
+				public static LocString NAME = "Over pressure {StudiedDetails}";
 
 				public static LocString TOOLTIP = "Spout cannot vent due to high environmental pressure";
+
+				public static LocString STUDIED = "(idle in {Time})";
 			}
 
 			public class SPOUTEMITTING
 			{
-				public static LocString NAME = "Venting";
+				public static LocString NAME = "Venting {StudiedDetails}";
 
 				public static LocString TOOLTIP = "This geyser is erupting";
+
+				public static LocString STUDIED = "(idle in {Time})";
 			}
 
 			public class SPOUTPRESSUREBUILDING
 			{
-				public static LocString NAME = "Rising pressure";
+				public static LocString NAME = "Rising pressure {StudiedDetails}";
 
 				public static LocString TOOLTIP = "This geyser's internal pressure is steadily building";
+
+				public static LocString STUDIED = "(erupts in {Time})";
+			}
+
+			public class SPOUTIDLE
+			{
+				public static LocString NAME = "Idle {StudiedDetails}";
+
+				public static LocString TOOLTIP = "This geyser is not currently erupting";
+
+				public static LocString STUDIED = "(erupts in {Time})";
+			}
+
+			public class SPOUTDORMANT
+			{
+				public static LocString NAME = "Dormant";
+
+				public static LocString TOOLTIP = "This geyser's geoactivity has halted" + UI.HORIZONTAL_BR_RULE + "It won't erupt again for some time";
 			}
 
 			public class PICKUPABLEUNREACHABLE
@@ -450,9 +474,9 @@ namespace STRINGS
 
 			public class PRIORITIZED
 			{
-				public static LocString NAME = "Prioritized";
+				public static LocString NAME = "High Priority";
 
-				public static LocString TOOLTIP = "This errand has been made a high priority";
+				public static LocString TOOLTIP = "This errand has been mark as important and will be preferred over other pending tasks";
 			}
 
 			public class USING
@@ -466,7 +490,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Pending Attack";
 
-				public static LocString TOOLTIP = "Waiting for a Duplicant to murderize this defenseless creature";
+				public static LocString TOOLTIP = "Waiting for a Duplicant to murderize this defenseless critter";
+			}
+
+			public class ORDERCAPTURE
+			{
+				public static LocString NAME = "Pending Wrangle";
+
+				public static LocString TOOLTIP = "Waiting for a Duplicant to capture this critter" + UI.HORIZONTAL_BR_RULE + "Only Duplicants trained as Ranchers can catch critters without traps";
 			}
 
 			public class OPERATING
@@ -489,6 +520,20 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Undug material is blocking off an essential tile";
 			}
+
+			public class STUDIED
+			{
+				public static LocString NAME = "Analysis Complete";
+
+				public static LocString TOOLTIP = "Information on this Natural Feature has been compiled below.";
+			}
+
+			public class AWAITINGSTUDY
+			{
+				public static LocString NAME = "Analysis Pending";
+
+				public static LocString TOOLTIP = "New information on this Natural Feature will be compiled once the field study is complete";
+			}
 		}
 
 		public class POPFX
@@ -502,7 +547,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Basic Controls";
 
-				public static LocString MESSAGEBODY = "• Use the <style=\"misc\">WASD</style> keys to pan your camera and the <style=\"misc\">MOUSE WHEEL</style> to zoom in or out. <color=#F44A47><b>[H]</b></color> will return your screen to the Printing Pod.\n\n• Your simulation can be sped up or slowed down by using the speed buttons in the top left, or by pressing <color=#F44A47><b>[TAB]</b></color>.\n\n• <color=#F44A47><b>[SPACE]</b></color> will pause or resume your game.";
+				public static LocString MESSAGEBODY = string.Concat(new string[]
+				{
+					"• Use the ",
+					UI.FormatAsLink("WASD", "CONTROLS"),
+					" keys to pan your camera and the ",
+					UI.FormatAsLink("MOUSE WHEEL", "CONTROLS"),
+					" to zoom in or out. <color=#F44A47><b>[H]</b></color> will return your screen to the Printing Pod.\n\n• Your simulation can be sped up or slowed down by using the speed buttons in the top left, or by pressing <color=#F44A47><b>[TAB]</b></color>.\n\n• <color=#F44A47><b>[SPACE]</b></color> will pause or resume your game."
+				});
 
 				public static LocString TOOLTIP = "Helpful tips to get you started";
 			}
@@ -511,7 +563,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Colony Management";
 
-				public static LocString MESSAGEBODY = "Duplicants are self-motivated and require no individual management in order to perform errands in the colony.\n\nYou can use the <style=\"misc\">DIG TOOL</style> <color=#F44A47><b>[G]</b></color> and the <style=\"misc\">BUILD MENU</style> in the lower left of the screen to begin planning errands. Once you've placed a few errands, your Duplicants will automatically get to work for you.";
+				public static LocString MESSAGEBODY = string.Concat(new string[]
+				{
+					"Duplicants are self-motivated and require no individual management in order to perform errands in the colony.\n\nYou can use the ",
+					UI.FormatAsLink("DIG TOOL", "TOOLS"),
+					" <color=#F44A47><b>[G]</b></color> and the ",
+					UI.FormatAsLink("Build menu", "misc"),
+					" in the lower left of the screen to begin planning errands. Once you've placed a few errands, your Duplicants will automatically get to work for you."
+				});
 
 				public static LocString TOOLTIP = "Learn how to get Duplicants to do your bidding";
 			}
@@ -520,7 +579,18 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Stress Management";
 
-				public static LocString MESSAGEBODY = "Duplicants are fragile creatures and must be kept mentally healthy in order to function. Subpar conditions will increase Duplicants' <style=\"stress\">Stress</style>, while improved conditions will decrease it. Too much <style=\"stress\">Stress</style> will cause Duplicants to have a nervous breakdown.\n\nSelect a Duplicant and mouse over <style=\"stress\">Stress</style> in their <style=\"misc\">INFORMATION TAB</style> to view their individual <style=\"stress\">Stress</style> factors.";
+				public static LocString MESSAGEBODY = string.Concat(new string[]
+				{
+					"Duplicants are fragile creatures and must be kept mentally healthy in order to function. Subpar conditions will increase Duplicants' ",
+					UI.FormatAsLink("Stress", "STRESS"),
+					", while improved conditions will decrease it. Too much ",
+					UI.FormatAsLink("Stress", "STRESS"),
+					" will cause Duplicants to have a nervous breakdown.\n\nSelect a Duplicant and mouse over ",
+					UI.FormatAsLink("Stress", "STRESS"),
+					" in their INFORMATION TAB to view their individual ",
+					UI.FormatAsLink("Stress", "STRESS"),
+					" factors."
+				});
 
 				public static LocString TOOLTIP = "Learn how to keep Duplicants happy and productive";
 			}
@@ -529,7 +599,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Errand Priorities";
 
-				public static LocString MESSAGEBODY = "Duplicants will perform pending errands in order of highest priority to lowest. For example, Duplicants will always harvest <style=\"food\">Food</style> before they build, and always build new structures before they dig.\n\nOpen the <style=\"misc\">ERRANDS TAB</style> <color=#F44A47><b>[J]</b></color> to set which errands Duplicants may perform, or specialize skilled Duplicants for specific types of work.";
+				public static LocString MESSAGEBODY = "Duplicants will perform pending errands in order of most to least urgent. For example, Duplicants will always harvest " + UI.FormatAsLink("Food", "FOOD") + " before they build, and always build new structures before they dig.\n\nOpen the ERRANDS TAB <color=#F44A47><b>[J]</b></color> to set which errands Duplicants may perform, or specialize skilled Duplicants for specific types of work.";
 
 				public static LocString TOOLTIP = "Learn how to manage Duplicants' priorities";
 			}
@@ -538,7 +608,19 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Polluted Water";
 
-				public static LocString MESSAGEBODY = "<style=\"liquid\">Polluted Water</style> emits <style=\"gas\">Polluted Oxygen</style> and can accelerate the spread of <style=\"disease\">Disease</style> through your base.\n\nSmall accidents can be cleaned up by clicking and dragging with the <style=\"misc\">MOP TOOL</style> <color=#F44A47><b>[M]</b></color>, while larger bodies may be worth filtering. Polluted water also <style=\"stress\">Stresses</style> out Duplicants that come into contact with it, so it is best removed quickly for your colony's safety.";
+				public static LocString MESSAGEBODY = string.Concat(new string[]
+				{
+					ELEMENTS.DIRTYWATER.NAME,
+					" emits ",
+					ELEMENTS.CONTAMINATEDOXYGEN.NAME,
+					" and can accelerate the spread of ",
+					UI.FormatAsLink("Disease", "DISEASE"),
+					" through your base.\n\nSmall accidents can be cleaned up by clicking and dragging with the ",
+					UI.FormatAsLink("Mop tool", "misc"),
+					" <color=#F44A47><b>[M]</b></color>, while larger bodies may be worth filtering. Polluted water also ",
+					UI.FormatAsLink("stress", "STRESS"),
+					" out Duplicants that come into contact with it, so it is best removed quickly for your colony's safety."
+				});
 
 				public static LocString TOOLTIP = "Learn how to handle polluted materials";
 			}
@@ -547,7 +629,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Duplicant Movement";
 
-				public static LocString MESSAGEBODY = "Duplicants must be able to reach their errands in order to work. When placing errands, keep in mind that Duplicants can only climb obstacles two tiles high, and are themselves two tiles tall.\n\nIf you are unsure if a errand you've placed is accessible, select a Duplicant and click <style=\"misc\">SHOW NAVIGATION</style> to view all areas within their reach.";
+				public static LocString MESSAGEBODY = "Duplicants must be able to reach their errands in order to work. When placing errands, keep in mind that Duplicants can only climb obstacles two tiles high, and are themselves two tiles tall.\n\nIf you are unsure if a errand you've placed is accessible, select a Duplicant and click SHOW NAVIGATION to view all areas within their reach.";
 
 				public static LocString TOOLTIP = "Understanding your Duplicants' maneuverability";
 			}
@@ -556,7 +638,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Priorities";
 
-				public static LocString MESSAGEBODY = "Duplicants will choose what work they do based on the priorities you set. To set priorities, use the priority buttons under the tool menu. Many buildings also let you change their priority on selection.";
+				public static LocString MESSAGEBODY = "Duplicants will choose what work they do based on the priorities you set. To set priorities, open the Priorities menu to control master priorities, and then use the Sub-Priorities buttons under the tool menu. Many buildings also let you change their Sub-Priority level on selection.";
 
 				public static LocString TOOLTIP = "Understanding your Duplicants' priorities";
 			}
@@ -565,7 +647,16 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Fetching Water";
 
-				public static LocString MESSAGEBODY = "In order to carry <style=\"liquid\">Liquids</style> from place to place, Duplicants must first bottle them for transport.\n\nBuild Pitcher Pumps over pools of liquid from the <style=\"misc\">PLUMBING TAB</style> of the <style=\"misc\">BUILD MENU</style> to pump those liquids into bottles. Duplicants will then automatically deliver the bottled liquids where they need to go.";
+				public static LocString MESSAGEBODY = string.Concat(new string[]
+				{
+					"In order to carry ",
+					UI.FormatAsLink("liquid", "Liquids"),
+					" from place to place, Duplicants must first bottle them for transport.\n\nBuild Pitcher Pumps over pools of liquid from the ",
+					UI.FormatAsLink("Plumbing tab", "misc"),
+					" of the ",
+					UI.FormatAsLink("Build menu", "misc"),
+					" to pump those liquids into bottles. Duplicants will then automatically deliver the bottled liquids where they need to go."
+				});
 
 				public static LocString TOOLTIP = "How to fetch a pail of water";
 			}
@@ -574,7 +665,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Scheduling";
 
-				public static LocString MESSAGEBODY = "Duplicants crave structure and will only eat, sleep, work, or bathe during the times you allot for these activities.\n\nTo make the best use of your time, open the <style=\"misc\">SCHEDULE TAB</style> <color=#F44A47><b>[U]</b></color> to adjust your colony's agenda and plan how your Duplicants should utilize their day.";
+				public static LocString MESSAGEBODY = "Duplicants crave structure and will only eat, sleep, work, or bathe during the times you allot for these activities.\n\nTo make the best use of your time, open the SCHEDULE TAB <color=#F44A47><b>[U]</b></color> to adjust your colony's agenda and plan how your Duplicants should utilize their day.";
 
 				public static LocString TOOLTIP = "Learn how to schedule your Duplicants' time";
 			}
@@ -585,7 +676,16 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Help your Duplicants keep their cool";
 
-				public static LocString MESSAGEBODY = "Environments that are extremely <style=\"heat\">Hot</style> or <style=\"heat\">Cold</style> will affect your Duplicants' internal body temperature and cause <style=\"stress\">Stress</style>.\n\nThe <style=\"misc\">THERMAL COMFORT OVERLAY</style> <color=#F44A47><b>[F4]</b></color> will allow you to view all areas where Duplicants cannot regulate their temperature and will become uncomfortable.";
+				public static LocString MESSAGEBODY = string.Concat(new string[]
+				{
+					"Environments that are extremely ",
+					UI.FormatAsLink("Hot", "HEAT"),
+					" or ",
+					UI.FormatAsLink("Cold", "HEAT"),
+					" will affect your Duplicants' internal body temperature and cause ",
+					UI.FormatAsLink("Stress", "STRESS"),
+					".\n\nThe THERMAL COMFORT OVERLAY <color=#F44A47><b>[F4]</b></color> will allow you to view all areas where Duplicants cannot regulate their temperature and will become uncomfortable."
+				});
 			}
 
 			public class TUTORIAL_OVERHEATING
@@ -594,7 +694,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Learn how to prevent meltdowns";
 
-				public static LocString MESSAGEBODY = "When constructing buildings, take note of their <style=\"heat\">Overheat Temperature</style> and plan their locations accordingly. Maintaining low ambient temperatures and good ventilation will help keep building temperatures down.\n\nBuildings that exceed their Overheat Temperature will begin to take damage and if left untended, will meltdown and stop functioning until repaired.";
+				public static LocString MESSAGEBODY = "When constructing buildings, take note of their " + UI.FormatAsLink("Overheat Temperature", "HEAT") + " and plan their locations accordingly. Maintaining low ambient temperatures and good ventilation will help keep building temperatures down.\n\nBuildings that exceed their Overheat Temperature will begin to take damage and if left untended, will meltdown and stop functioning until repaired.";
 			}
 
 			public class LOTS_OF_GERMS
@@ -603,7 +703,19 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Learn about the risks of Duplicant disease";
 
-				public static LocString MESSAGEBODY = "<style=\"disease\">Germs</style> are an invisible peril that cause <style=\"disease\">Disease</style> in your Duplicants. The <style=\"misc\">GERM OVERLAY</style> <color=#F44A47><b>[F9]</b></color> will allow you to view all germ concentrations in your colony and the sources spawning them.\n\nWash Basins can be built in dirty areas from the <style=\"misc\">MEDICINE TAB</style> <color=#F44A47><b>[9]</b></color> to tell your Duplicants to where to wash up. If you keep your base clean and your Duplicants hygienic, their <style=\"misc\">Immunity</style> will handle the rest.";
+				public static LocString MESSAGEBODY = string.Concat(new string[]
+				{
+					UI.FormatAsLink("Germs", "DISEASE"),
+					" are an invisible peril that cause ",
+					UI.FormatAsLink("Disease", "DISEASE"),
+					" in your Duplicants. The ",
+					UI.FormatAsLink("Germ overlay", "misc"),
+					" <color=#F44A47><b>[F9]</b></color> will allow you to view all germ concentrations in your colony and the sources spawning them.\n\nWash Basins can be built in dirty areas from the ",
+					UI.FormatAsLink("Medicine tab", "misc"),
+					" <color=#F44A47><b>[8]</b></color> to tell your Duplicants to where to wash up. If you keep your base clean and your Duplicants hygienic, their ",
+					UI.FormatAsLink("Immunity", "IMMUNE SYSTEM"),
+					" will handle the rest."
+				});
 			}
 
 			public class BEING_INFECTED
@@ -612,7 +724,16 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Keep your Duplicants in peak health";
 
-				public static LocString MESSAGEBODY = "When Duplicants come into contact with various <style=\"disease\">Germs</style>, they'll need to expend points of <style=\"misc\">Immunity</style> to resist them and remain healthy. If repeated exposes causes their Immunity to drop to 0%, they'll be unable to resist germs and will contract the next disease they encounter.\n\nDoors with Access Permissions can be built from the <style=\"misc\">BASE TAB</style><color=#F44A47> <b>[1]</b></color> of the <style=\"misc\">BUILD MENU</style> to block Duplicants from entering biohazardous areas while they recover their spent immunity points.";
+				public static LocString MESSAGEBODY = string.Concat(new string[]
+				{
+					"When Duplicants come into contact with various ",
+					UI.FormatAsLink("Germs", "DISEASE"),
+					", they'll need to expend points of ",
+					UI.FormatAsLink("Immunity", "IMMUNE SYSTEM"),
+					" to resist them and remain healthy. If repeated exposes causes their Immunity to drop to 0%, they'll be unable to resist germs and will contract the next disease they encounter.\n\nDoors with Access Permissions can be built from the BASE TAB<color=#F44A47> <b>[1]</b></color> of the ",
+					UI.FormatAsLink("Build menu", "misc"),
+					" to block Duplicants from entering biohazardous areas while they recover their spent immunity points."
+				});
 			}
 
 			public class DISEASE_COOKING
@@ -621,7 +742,22 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Learn how to manage food contamination";
 
-				public static LocString MESSAGEBODY = "The <style=\"food\">Food</style> your Duplicants cook will only ever be as clean as the ingredients used to make it. Storing food in sterile or <style=\"heat\">Refrigerated</style> environments will keep food free of <style=\"disease\">Germs</style>, while carefully placed hygiene stations like <style=\"hygiene\">Wash Basins</style> or <style=\"hygiene\">Showers</style> will prevent your cooks from infecting the food by handling it.\n\nDangerously contaminated food can be sent to compost by clicking the <style=\"misc\">COMPOST</style> button on the selected item.";
+				public static LocString MESSAGEBODY = string.Concat(new string[]
+				{
+					"The ",
+					UI.FormatAsLink("Food", "FOOD"),
+					" your Duplicants cook will only ever be as clean as the ingredients used to make it. Storing food in sterile or ",
+					UI.FormatAsLink("Refrigerated", UI.StripLinkFormatting(BUILDINGS.PREFABS.REFRIGERATOR.NAME)),
+					" environments will keep food free of ",
+					UI.FormatAsLink("Germs", "DISEASE"),
+					", while carefully placed hygiene stations like ",
+					BUILDINGS.PREFABS.WASHBASIN.NAME,
+					" or ",
+					BUILDINGS.PREFABS.SHOWER.NAME,
+					" will prevent your cooks from infecting the food by handling it.\n\nDangerously contaminated food can be sent to compost by clicking the ",
+					UI.FormatAsLink("Compost", "misc"),
+					" button on the selected item."
+				});
 			}
 
 			public class SUITS
@@ -630,7 +766,17 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Learn how to use exosuits";
 
-				public static LocString MESSAGEBODY = "<style=\"equipment\">Exosuits</style> can be equipped to protect your Duplicants from environmental hazards like extreme <style=\"heat\">Heat</style>, airborne <style=\"disease\">Germs</style>, or unbreathable <style=\"gas\">Gas</style>. In order to utilize these suits, you'll need to hook up an Exosuit Dock to a Suit Checkpoint, then store one of your suits inside.\n\nDuplicants will equip an exosuit when they walk past the Checkpoint in the chosen direction, and will unequip their suit when walking back the oppposite way.";
+				public static LocString MESSAGEBODY = string.Concat(new string[]
+				{
+					UI.FormatAsLink("Exosuits", "EXOSUIT"),
+					" can be equipped to protect your Duplicants from environmental hazards like extreme ",
+					UI.FormatAsLink("Heat", "Heat"),
+					", airborne ",
+					UI.FormatAsLink("Germs", "DISEASE"),
+					", or unbreathable ",
+					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+					". In order to utilize these suits, you'll need to hook up an Exosuit Dock to a Suit Checkpoint, then store one of your suits inside.\n\nDuplicants will equip an exosuit when they walk past the Checkpoint in the chosen direction, and will unequip their suit when walking back the opposite way."
+				});
 			}
 
 			public class NOMESSAGES
@@ -658,9 +804,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Research Complete";
 
-				public static LocString MESSAGEBODY = "Eureka! <style=\"research\">{0} Technology</style> has been unlocked.\n\nNew buildings have become available:\n  • <style=\"misc\">{1}</style>";
+				public static LocString MESSAGEBODY = "Eureka! {0} Technology has been unlocked.\n\nNew buildings have become available:\n  • {1}";
 
-				public static LocString TOOLTIP = "<style=\"research\">{0}</style> research complete!";
+				public static LocString TOOLTIP = UI.FormatAsLink("research", "{0}") + " research complete!";
 			}
 
 			public class ROLEMASTERED
@@ -669,7 +815,7 @@ namespace STRINGS
 
 				public static LocString MESSAGEBODY = "These Duplicants have mastered their jobs and may be eligible for promotion:\n{0}";
 
-				public static LocString LINE = "\n• <b>{0}</b> mastered the <style=\"research\">{1}</style> job";
+				public static LocString LINE = "\n• <b>{0}</b> mastered the {1} job";
 
 				public static LocString TOOLTIP = "Job Mastered";
 			}
@@ -694,14 +840,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Food has decayed";
 
-				public static LocString TOOLTIP = "These <style=\"food\">Food</style> items have rotted and are no longer edible:\n• {0}";
+				public static LocString TOOLTIP = "These " + UI.FormatAsLink("Food", "FOOD") + " items have rotted and are no longer edible:\n• {0}";
 			}
 
 			public class FOODSTALE
 			{
 				public static LocString NAME = "Food has become stale";
 
-				public static LocString TOOLTIP = "These <style=\"food\">Food</style> items have become stale and could rot if not stored:";
+				public static LocString TOOLTIP = "These " + UI.FormatAsLink("Food", "FOOD") + " items have become stale and could rot if not stored:";
 			}
 
 			public class REDALERT
@@ -757,21 +903,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Insufficient oxygen generation";
 
-				public static LocString TOOLTIP = "• Your colony has produced {EmittingRate} of <style=\"oxygen\">Oxygen</style> this cycle\n• Your Duplicants have consumed {ConsumptionRate}";
+				public static LocString TOOLTIP = "• Your colony has produced {EmittingRate} of " + ELEMENTS.OXYGEN.NAME + " this cycle\n• Your Duplicants have consumed {ConsumptionRate}";
 			}
 
 			public class UNREFRIGERATEDFOOD
 			{
 				public static LocString NAME = "Unrefrigerated Food";
 
-				public static LocString TOOLTIP = "These <style=\"food\">Food</style> items are in storage but are not refrigerated:\n";
+				public static LocString TOOLTIP = "These " + UI.FormatAsLink("Food", "FOOD") + " items are in storage but are not refrigerated:\n";
 			}
 
 			public class FOODLOW
 			{
 				public static LocString NAME = "Food shortage";
 
-				public static LocString TOOLTIP = "Your colony's <style=\"food\">Food</style> reserves are low:\n    • You have {0} available\n    • Your Duplicants are consuming {1} per cycle";
+				public static LocString TOOLTIP = "Your colony's " + UI.FormatAsLink("Food", "FOOD") + " reserves are low:\n    • You have {0} available\n    • Your Duplicants are consuming {1} per cycle";
 			}
 
 			public class NO_MEDICAL_COTS
@@ -792,14 +938,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Colony requires a food source";
 
-				public static LocString TOOLTIP = "Your colony will soon exhaust their supplies without a new <style=\"food\">Food</style> source";
+				public static LocString TOOLTIP = "Your colony will soon exhaust their supplies without a new " + UI.FormatAsLink("Food", "FOOD") + " source";
 			}
 
 			public class HYGENE_NEEDED
 			{
 				public static LocString NAME = "Colony requires wash basins";
 
-				public static LocString TOOLTIP = "<style=\"disease\">Germs</style> are spreading in your colony because your Duplicants have nowhere to clean up";
+				public static LocString TOOLTIP = UI.FormatAsLink("Germs", "DISEASE") + " are spreading in your colony because your Duplicants have nowhere to clean up";
 			}
 
 			public class NEEDSLEEP
@@ -811,9 +957,9 @@ namespace STRINGS
 
 			public class NEEDENERGYSOURCE
 			{
-				public static LocString NAME = "Colony requires a <style=\"power\">Power</style> source";
+				public static LocString NAME = "Colony requires a " + UI.FormatAsLink("Power", "POWER") + " source";
 
-				public static LocString TOOLTIP = "<style=\"power\">Power</style> is required to operate electrical buildings";
+				public static LocString TOOLTIP = UI.FormatAsLink("Power", "POWER") + " is required to operate electrical buildings";
 			}
 
 			public class RESOURCEMELTED
@@ -989,28 +1135,28 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Duplicants suffocated";
 
-				public static LocString TOOLTIP = "These Duplicants died from a lack of <style=\"oxygen\">Oxygen</style>:";
+				public static LocString TOOLTIP = "These Duplicants died from a lack of " + ELEMENTS.OXYGEN.NAME + ":";
 			}
 
 			public class DEATH_FROZENSOLID
 			{
 				public static LocString NAME = "Duplicants have frozen";
 
-				public static LocString TOOLTIP = "These Duplicants died from extremely low <style=\"heat\">Temperatures</style>:";
+				public static LocString TOOLTIP = "These Duplicants died from extremely low " + UI.FormatAsLink("Temperatures", "HEAT") + ":";
 			}
 
 			public class DEATH_OVERHEATING
 			{
 				public static LocString NAME = "Duplicants have overheated";
 
-				public static LocString TOOLTIP = "These Duplicants died from extreme <style=\"heat\">Heat</style>:";
+				public static LocString TOOLTIP = "These Duplicants died from extreme " + UI.FormatAsLink("Heat", "HEAT") + ":";
 			}
 
 			public class DEATH_STARVATION
 			{
 				public static LocString NAME = "Duplicants have starved";
 
-				public static LocString TOOLTIP = "These Duplicants died from a lack of <style=\"food\">Food</style>:";
+				public static LocString TOOLTIP = "These Duplicants died from a lack of " + UI.FormatAsLink("Food", "FOOD") + ":";
 			}
 
 			public class DEATH_FELL
@@ -1031,21 +1177,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Duplicants have suffocated";
 
-				public static LocString TOOLTIP = "These Duplicants were unable to reach <style=\"oxygen\">Oxygen</style> and died:";
+				public static LocString TOOLTIP = "These Duplicants were unable to reach " + ELEMENTS.OXYGEN.NAME + " and died:";
 			}
 
 			public class DEATH_SUFFOCATEDAIRTOOHOT
 			{
 				public static LocString NAME = "Duplicants have suffocated";
 
-				public static LocString TOOLTIP = "These Duplicants have asphyxiated in <style=\"heat\">Hot</style> air:";
+				public static LocString TOOLTIP = "These Duplicants have asphyxiated in " + UI.FormatAsLink("heat", "HEAT") + " air:";
 			}
 
 			public class DEATH_SUFFOCATEDAIRTOOCOLD
 			{
 				public static LocString NAME = "Duplicants have suffocated";
 
-				public static LocString TOOLTIP = "These Duplicants have asphyxiated in <style=\"heat\">Cold</style> air:";
+				public static LocString TOOLTIP = "These Duplicants have asphyxiated in " + UI.FormatAsLink("Cold", "HEAT") + " air:";
 			}
 
 			public class DEATH_DROWNED
@@ -1087,7 +1233,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Duplicants have succumb to illness";
 
-				public static LocString TOOLTIP = "These Duplicants died from an untreated <style=\"disease\">Disease</style>:";
+				public static LocString TOOLTIP = "These Duplicants died from an untreated " + UI.FormatAsLink("Disease", "DISEASE") + ":";
 			}
 
 			public class CIRCUIT_OVERLOADED

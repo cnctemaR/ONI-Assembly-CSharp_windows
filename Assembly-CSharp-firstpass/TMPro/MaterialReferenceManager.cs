@@ -77,6 +77,20 @@ namespace TMPro
 			this.m_FontMaterialReferenceLookup.Add(hashCode, material);
 		}
 
+		public static void AddColorGradientPreset(int hashCode, TMP_ColorGradient spriteAsset)
+		{
+			MaterialReferenceManager.instance.AddColorGradientPreset_Internal(hashCode, spriteAsset);
+		}
+
+		private void AddColorGradientPreset_Internal(int hashCode, TMP_ColorGradient spriteAsset)
+		{
+			if (this.m_ColorGradientReferenceLookup.ContainsKey(hashCode))
+			{
+				return;
+			}
+			this.m_ColorGradientReferenceLookup.Add(hashCode, spriteAsset);
+		}
+
 		public bool Contains(TMP_FontAsset font)
 		{
 			return this.m_FontAssetReferenceLookup.ContainsKey(font.hashCode);
@@ -109,6 +123,17 @@ namespace TMPro
 			return this.m_SpriteAssetReferenceLookup.TryGetValue(hashCode, out spriteAsset);
 		}
 
+		public static bool TryGetColorGradientPreset(int hashCode, out TMP_ColorGradient gradientPreset)
+		{
+			return MaterialReferenceManager.instance.TryGetColorGradientPresetInternal(hashCode, out gradientPreset);
+		}
+
+		private bool TryGetColorGradientPresetInternal(int hashCode, out TMP_ColorGradient gradientPreset)
+		{
+			gradientPreset = null;
+			return this.m_ColorGradientReferenceLookup.TryGetValue(hashCode, out gradientPreset);
+		}
+
 		public static bool TryGetMaterial(int hashCode, out Material material)
 		{
 			return MaterialReferenceManager.instance.TryGetMaterialInternal(hashCode, out material);
@@ -127,5 +152,7 @@ namespace TMPro
 		private Dictionary<int, TMP_FontAsset> m_FontAssetReferenceLookup = new Dictionary<int, TMP_FontAsset>();
 
 		private Dictionary<int, TMP_SpriteAsset> m_SpriteAssetReferenceLookup = new Dictionary<int, TMP_SpriteAsset>();
+
+		private Dictionary<int, TMP_ColorGradient> m_ColorGradientReferenceLookup = new Dictionary<int, TMP_ColorGradient>();
 	}
 }

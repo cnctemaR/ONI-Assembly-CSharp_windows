@@ -27,14 +27,14 @@ public class GrowthState : KMonoBehaviour, ISim200ms
 	{
 		int num = Grid.PosToCell(base.transform.GetPosition());
 		float num2 = 0f;
-		num2 += Grid.Temperature[Grid.CellDownLeft(num)] * (Grid.Cell[Grid.CellDownLeft(num)].mass / 280f);
-		num2 += Grid.Temperature[Grid.CellDownRight(num)] * (Grid.Cell[Grid.CellDownRight(num)].mass / 280f);
-		num2 += Grid.Temperature[Grid.CellUpLeft(num)] * (Grid.Cell[Grid.CellUpLeft(num)].mass / 280f);
-		num2 += Grid.Temperature[Grid.CellUpRight(num)] * (Grid.Cell[Grid.CellUpRight(num)].mass / 280f);
-		num2 += Grid.Temperature[Grid.CellRight(num)] * (Grid.Cell[Grid.CellRight(num)].mass / 280f);
-		num2 += Grid.Temperature[Grid.CellLeft(num)] * (Grid.Cell[Grid.CellLeft(num)].mass / 280f);
-		num2 += Grid.Temperature[Grid.CellBelow(num)] * (Grid.Cell[Grid.CellBelow(num)].mass / 280f);
-		num2 += Grid.Temperature[Grid.CellAbove(num)] * (Grid.Cell[Grid.CellAbove(num)].mass / 280f);
+		num2 += Grid.Temperature[Grid.CellDownLeft(num)] * (Grid.Mass[Grid.CellDownLeft(num)] / 280f);
+		num2 += Grid.Temperature[Grid.CellDownRight(num)] * (Grid.Mass[Grid.CellDownRight(num)] / 280f);
+		num2 += Grid.Temperature[Grid.CellUpLeft(num)] * (Grid.Mass[Grid.CellUpLeft(num)] / 280f);
+		num2 += Grid.Temperature[Grid.CellUpRight(num)] * (Grid.Mass[Grid.CellUpRight(num)] / 280f);
+		num2 += Grid.Temperature[Grid.CellRight(num)] * (Grid.Mass[Grid.CellRight(num)] / 280f);
+		num2 += Grid.Temperature[Grid.CellLeft(num)] * (Grid.Mass[Grid.CellLeft(num)] / 280f);
+		num2 += Grid.Temperature[Grid.CellBelow(num)] * (Grid.Mass[Grid.CellBelow(num)] / 280f);
+		num2 += Grid.Temperature[Grid.CellAbove(num)] * (Grid.Mass[Grid.CellAbove(num)] / 280f);
 		num2 /= 8f;
 		this.temperature = num2;
 	}

@@ -60,6 +60,7 @@ public class Accessorizer : KMonoBehaviour
 		fd.arms = HashedString.Invalid;
 		fd.hat = HashedString.Invalid;
 		fd.hatHair = HashedString.Invalid;
+		fd.hairAlways = HashedString.Invalid;
 		for (int i = 0; i < this.accessories.Count; i++)
 		{
 			Accessory accessory = this.accessories[i].Get();
@@ -73,6 +74,7 @@ public class Accessorizer : KMonoBehaviour
 				{
 					fd.hair = accessory.IdHash;
 					fd.hatHair = "hat_" + accessory.Id;
+					fd.hairAlways = accessory.IdHash;
 				}
 				else if (accessory.slot.Id == "HeadShape")
 				{

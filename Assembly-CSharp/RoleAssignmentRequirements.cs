@@ -7,7 +7,6 @@ public class RoleAssignmentRequirements
 {
 	public RoleAssignmentRequirements(RoleManager roleManager)
 	{
-		this.HasExperience_NoRole = new PreviousRoleAssignmentRequirement("NoRole");
 		this.HasExperience_JuniorMiner = new PreviousRoleAssignmentRequirement(JuniorMiner.ID);
 		this.HasExperience_Miner = new PreviousRoleAssignmentRequirement(Miner.ID);
 		this.HasExperience_JuniorResearcher = new PreviousRoleAssignmentRequirement(JuniorResearcher.ID);
@@ -16,6 +15,7 @@ public class RoleAssignmentRequirements
 		this.HasExperience_Builder = new PreviousRoleAssignmentRequirement(Builder.ID);
 		this.HasExperience_JuniorFarmer = new PreviousRoleAssignmentRequirement("JuniorFarmer");
 		this.HasExperience_Farmer = new PreviousRoleAssignmentRequirement("Farmer");
+		this.HasExperience_Rancher = new PreviousRoleAssignmentRequirement("Rancher");
 		this.HasExperience_Hauler = new PreviousRoleAssignmentRequirement("Hauler");
 		this.HasExperience_MaterialsManager = new PreviousRoleAssignmentRequirement(MaterialsManager.ID);
 		this.HasExperience_JuniorCook = new PreviousRoleAssignmentRequirement(JuniorCook.ID);
@@ -29,9 +29,9 @@ public class RoleAssignmentRequirements
 		this.HasAttribute_Learning_Medium = new RoleAssignmentRequirement("HasAttribute_Learning_Medium", string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.HAS_ATTRIBUTE_LEARNING_MEDIUM.DESCRIPTION, 3), (MinionResume resume) => resume.GetAttributes().Get(Db.Get().Attributes.Learning).GetTotalValue() >= 3f);
 		this.CompletedAnyOtherRole = new RoleAssignmentRequirement("CompletedAnyOtherRole", UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.HAS_COMPLETED_ANY_OTHER_ROLE.DESCRIPTION, delegate(MinionResume resume)
 		{
-			foreach (KeyValuePair<string, float> keyValuePair in resume.ExperienceByRoleID)
+			foreach (KeyValuePair<string, bool> keyValuePair in resume.MasteryByRoleID)
 			{
-				if (keyValuePair.Value >= roleManager.GetRole(keyValuePair.Key).experienceRequired)
+				if (keyValuePair.Value)
 				{
 					return true;
 				}
@@ -49,13 +49,12 @@ public class RoleAssignmentRequirements
 		this.Can_Combat = new ChoreGroupEnabledRequirement(Db.Get().ChoreGroups.Combat.Id);
 		this.Can_MedicalAid = new ChoreGroupEnabledRequirement(Db.Get().ChoreGroups.MedicalAid.Id);
 		this.Can_Farming = new ChoreGroupEnabledRequirement(Db.Get().ChoreGroups.Farming.Id);
+		this.Can_Ranching = new ChoreGroupEnabledRequirement(Db.Get().ChoreGroups.Ranching.Id);
 	}
 
 	public const int SKILL_LEVEL_BASIC = 1;
 
 	public const int SKILL_LEVEL_MEDIUM = 3;
-
-	public PreviousRoleAssignmentRequirement HasExperience_NoRole;
 
 	public PreviousRoleAssignmentRequirement HasExperience_JuniorMiner;
 
@@ -72,6 +71,8 @@ public class RoleAssignmentRequirements
 	public PreviousRoleAssignmentRequirement HasExperience_JuniorFarmer;
 
 	public PreviousRoleAssignmentRequirement HasExperience_Farmer;
+
+	public PreviousRoleAssignmentRequirement HasExperience_Rancher;
 
 	public RoleAssignmentRequirement HasColonyLeader;
 
@@ -118,4 +119,6 @@ public class RoleAssignmentRequirements
 	public ChoreGroupEnabledRequirement Can_MedicalAid;
 
 	public ChoreGroupEnabledRequirement Can_Farming;
+
+	public ChoreGroupEnabledRequirement Can_Ranching;
 }

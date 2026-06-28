@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei;
 using UnityEngine;
 
 public class PopFXManager : KScreen
@@ -14,6 +15,10 @@ public class PopFXManager : KScreen
 	{
 		base.OnSpawn();
 		this.ready = true;
+		if (GenericGameSettings.instance.disablePopFx)
+		{
+			return;
+		}
 		for (int i = 0; i < 20; i++)
 		{
 			PopFX popFX = this.SpawnFX(this.sprite_Plus, string.Empty, null, Vector3.zero, 1.5f, false, true);
@@ -28,6 +33,10 @@ public class PopFXManager : KScreen
 
 	public PopFX SpawnFX(Sprite icon, string text, Transform target_transform, Vector3 offset, float lifetime = 1.5f, bool track_target = false, bool force_spawn = false)
 	{
+		if (GenericGameSettings.instance.disablePopFx)
+		{
+			return null;
+		}
 		if (Game.IsQuitting())
 		{
 			return null;

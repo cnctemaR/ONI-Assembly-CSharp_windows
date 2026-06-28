@@ -59,9 +59,11 @@ public class ToolMenu : KScreen
 		new ToolMenu.ToolInfo(UI.TOOLS.DISINFECT.NAME, "icon_action_disinfect", global::Action.Disinfect, "DisinfectTool", toolCollection7, UI.TOOLTIPS.DISINFECTBUTTON, SimViewMode.None, false, null, null);
 		ToolMenu.ToolCollection toolCollection8 = new ToolMenu.ToolCollection(UI.TOOLS.ATTACK.NAME, "icon_action_attack", string.Empty, false, global::Action.Attack);
 		new ToolMenu.ToolInfo(UI.TOOLS.ATTACK.NAME, "icon_action_attack", global::Action.Attack, "AttackTool", toolCollection8, UI.TOOLTIPS.ATTACKBUTTON, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection9 = new ToolMenu.ToolCollection(UI.TOOLS.HARVEST.NAME, "icon_action_harvest", string.Empty, false, global::Action.Harvest);
-		new ToolMenu.ToolInfo(UI.TOOLS.HARVEST.NAME, "icon_action_harvest", global::Action.Harvest, "HarvestTool", toolCollection9, UI.TOOLTIPS.HARVESTBUTTON, SimViewMode.None, false, null, null);
-		this.toolCollections = new ToolMenu.ToolCollection[] { toolCollection3, toolCollection8, toolCollection9, toolCollection4, toolCollection5, toolCollection6, toolCollection7, toolCollection, toolCollection2 };
+		ToolMenu.ToolCollection toolCollection9 = new ToolMenu.ToolCollection(UI.TOOLS.CAPTURE.NAME, "icon_action_capture", string.Empty, false, global::Action.Capture);
+		new ToolMenu.ToolInfo(UI.TOOLS.CAPTURE.NAME, "icon_action_capture", global::Action.Capture, "CaptureTool", toolCollection9, UI.TOOLTIPS.CAPTUREBUTTON, SimViewMode.None, false, null, null);
+		ToolMenu.ToolCollection toolCollection10 = new ToolMenu.ToolCollection(UI.TOOLS.HARVEST.NAME, "icon_action_harvest", string.Empty, false, global::Action.Harvest);
+		new ToolMenu.ToolInfo(UI.TOOLS.HARVEST.NAME, "icon_action_harvest", global::Action.Harvest, "HarvestTool", toolCollection10, UI.TOOLTIPS.HARVESTBUTTON, SimViewMode.None, false, null, null);
+		this.toolCollections = new ToolMenu.ToolCollection[] { toolCollection3, toolCollection9, toolCollection10, toolCollection4, toolCollection5, toolCollection6, toolCollection7, toolCollection, toolCollection8, toolCollection2 };
 	}
 
 	private void Setup()

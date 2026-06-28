@@ -8,7 +8,7 @@ public class Personality : Resource
 		: base(name, name)
 	{
 		this.nameStringKey = name_string_key;
-		this.gender = Gender;
+		this.genderStringKey = Gender;
 		this.stresstrait = StressTrait;
 		this.congenitaltrait = CongenitalTrait;
 		this.unformattedDescription = description;
@@ -63,7 +63,7 @@ public class Personality : Resource
 
 	public string nameStringKey;
 
-	public string gender;
+	public string genderStringKey;
 
 	public string stresstrait;
 

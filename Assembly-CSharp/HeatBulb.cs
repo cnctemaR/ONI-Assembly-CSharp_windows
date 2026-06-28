@@ -24,7 +24,7 @@ public class HeatBulb : KMonoBehaviour, ISim200ms
 			for (int j = this.minCheckOffset.x; j <= this.maxCheckOffset.x; j++)
 			{
 				int num6 = Grid.XYToCell(num4 + j, num5 + i);
-				if (Grid.IsValidCell(num6) && Grid.Cell[num6].temperature > this.minTemperature)
+				if (Grid.IsValidCell(num6) && Grid.Temperature[num6] > this.minTemperature)
 				{
 					this.kjConsumed += num3;
 					SimMessages.ModifyEnergy(num6, -num3, 5000f, SimMessages.EnergySourceID.HeatBulb);

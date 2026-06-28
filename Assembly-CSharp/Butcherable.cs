@@ -16,7 +16,7 @@ public class Butcherable : Workable, ISaveLoadable
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.workTime = 3f;
 		this.multitoolContext = "harvest";
-		this.multitoolHitEffectHash = new HashedString("fx_harvest_splash");
+		this.multitoolHitEffectTag = "fx_harvest_splash";
 	}
 
 	public void SetReadyToButcher(object param)
@@ -35,7 +35,7 @@ public class Butcherable : Workable, ISaveLoadable
 		{
 			return;
 		}
-		this.chore = new WorkChore<Butcherable>(Db.Get().ChoreTypes.Harvest, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+		this.chore = new WorkChore<Butcherable>(Db.Get().ChoreTypes.Harvest, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		this.OnRefreshUserMenu(null);
 	}
 

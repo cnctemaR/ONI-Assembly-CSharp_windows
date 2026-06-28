@@ -88,7 +88,7 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 
 	protected override WorkChore<RelaxationPoint> CreateWorkChore()
 	{
-		WorkChore<RelaxationPoint> workChore = new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, null, true, null, null, null, false, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+		WorkChore<RelaxationPoint> workChore = new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, null, true, null, null, null, false, null, true, null, false, true, false, PriorityScreen.PriorityClass.high, 0, false);
 		workChore.AddPrecondition(MassageTable.IsStressAboveActivationRange, this);
 		workChore.isPreferredChoreRegardlessOfTags = true;
 		return workChore;
@@ -178,7 +178,7 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			IActivationRangeTarget activationRangeTarget = (IActivationRangeTarget)data;
-			AmountInstance amountInstance = Db.Get().Amounts.Stress.Lookup(context.consumer.gameObject);
+			AmountInstance amountInstance = Db.Get().Amounts.Stress.Lookup(context.consumerState.gameObject);
 			float value = amountInstance.value;
 			return value >= activationRangeTarget.ActivateValue;
 		}

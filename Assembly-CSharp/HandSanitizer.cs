@@ -63,7 +63,7 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 	{
 		return new List<Descriptor>
 		{
-			new Descriptor(string.Format(UI.BUILDINGEFFECTS.REQUIRESELEMENT, "anyElement", ElementLoader.FindElementByHash(this.consumedElement).name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESELEMENT, "anyElement", ElementLoader.FindElementByHash(this.consumedElement).name), Descriptor.DescriptorType.Requirement, false)
+			new Descriptor(string.Format(UI.BUILDINGEFFECTS.REQUIRESELEMENT, ElementLoader.FindElementByHash(this.consumedElement).name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESELEMENT, ElementLoader.FindElementByHash(this.consumedElement).name), Descriptor.DescriptorType.Requirement, false)
 		};
 	}
 

@@ -126,7 +126,7 @@ public class SelectTool : InterfaceTool
 							{
 								if (!(t == null) && (condition == null || condition(t)))
 								{
-									float num4 = t.transform.position.z - vector2.z;
+									float num4 = t.transform.GetPosition().z - vector2.z;
 									bool flag = false;
 									for (int i = 0; i < intersections.Count; i++)
 									{
@@ -174,7 +174,7 @@ public class SelectTool : InterfaceTool
 		}
 		Game.Instance.statusItemRenderer.GetIntersections(vector3, hits);
 		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-		list.OrderBy<ScenePartitionerEntry, float>((ScenePartitionerEntry x) => (x.obj as Transform).position.z);
+		list.OrderBy<ScenePartitionerEntry, float>((ScenePartitionerEntry x) => (x.obj as Transform).GetPosition().z);
 		GameScenePartitioner.Instance.GatherEntries((int)vector3.x, (int)vector3.y, 1, 1, GameScenePartitioner.Instance.collisionLayer, list);
 		foreach (ScenePartitionerEntry scenePartitionerEntry in list)
 		{

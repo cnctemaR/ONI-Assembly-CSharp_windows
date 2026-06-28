@@ -110,7 +110,7 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 			for (int i = 0; i < SuffocationMonitor.Instance.pressureTestOffsets.Length; i++)
 			{
 				int num2 = Grid.OffsetCell(num, SuffocationMonitor.Instance.pressureTestOffsets[i]);
-				if (Grid.Element[num2].IsGas && Grid.Cell[num2].mass > 4f)
+				if (Grid.Element[num2].IsGas && Grid.Mass[num2] > 4f)
 				{
 					return true;
 				}

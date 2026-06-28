@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInstance> where WorkableType : Workable
 {
-	public WorkChore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider = null, Tag[] chore_tags = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, bool allow_in_red_alert = true, ScheduleBlockType schedule_block = null, bool only_when_operational = true, KAnimFile override_anims = null, bool is_preemptable = false, bool allow_in_context_menu = true, bool allow_prioritization = true, PriorityScreen.PriorityClass priority_class = PriorityScreen.PriorityClass.basic, int priority_class_value = 2147483647, bool ignore_building_assignment = false)
+	public WorkChore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider = null, Tag[] chore_tags = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, bool allow_in_red_alert = true, ScheduleBlockType schedule_block = null, bool only_when_operational = true, KAnimFile override_anims = null, bool is_preemptable = false, bool allow_in_context_menu = true, bool allow_prioritization = true, PriorityScreen.PriorityClass priority_class = PriorityScreen.PriorityClass.basic, int priority_class_value = 0, bool ignore_building_assignment = false)
 		: base(chore_type, target, chore_provider, run_until_complete, on_complete, on_begin, on_end, priority_class, priority_class_value, is_preemptable, allow_in_context_menu, 0, chore_tags)
 	{
 		this.smi = new WorkChore<WorkableType>.StatesInstance(this, target.gameObject, override_anims);
@@ -22,13 +22,18 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 			base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, schedule_block);
 		}
 		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, this.smi.sm.workable.Get<WorkableType>(this.smi));
-		if (only_when_operational && target.gameObject.GetComponent<Operational>() != null)
+		Operational component = target.GetComponent<Operational>();
+		if (only_when_operational && component != null)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsOperational, target.gameObject);
+			base.AddPrecondition(ChorePreconditions.instance.IsOperational, component);
 		}
-		if (only_when_operational && target.gameObject.GetComponent<Deconstructable>() != null)
+		if (only_when_operational)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsMarkedForDeconstruction, target.gameObject);
+			Deconstructable component2 = target.GetComponent<Deconstructable>();
+			if (component2 != null)
+			{
+				base.AddPrecondition(ChorePreconditions.instance.IsMarkedForDeconstruction, component2);
+			}
 		}
 		if (!ignore_building_assignment && this.smi.sm.workable.Get(this.smi).GetComponent<Assignable>() != null)
 		{
@@ -50,7 +55,7 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		this.smi.sm.worker.Set(context.consumer.gameObject, this.smi);
+		this.smi.sm.worker.Set(context.consumerState.gameObject, this.smi);
 		base.Begin(context);
 	}
 
@@ -77,7 +82,7 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		{
 			return false;
 		}
-		if (context.chore.driver == context.consumer.choreDriver)
+		if (context.chore.driver == context.consumerState.choreDriver)
 		{
 			return false;
 		}
@@ -92,7 +97,7 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		{
 			return false;
 		}
-		int navigationCost2 = context.consumer.GetComponent<Navigator>().GetNavigationCost(workable);
+		int navigationCost2 = context.consumerState.navigator.GetNavigationCost(workable);
 		return navigationCost2 * 2 <= navigationCost;
 	}
 

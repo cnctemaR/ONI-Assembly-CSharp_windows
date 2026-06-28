@@ -40,7 +40,7 @@ public class KCompBuilder : MonoBehaviour
 		batch_group.AddBuildSymbol(symbol2);
 	}
 
-	private KAnim.Build GetBuildForVariation(KBatchGroupData batch_group, KAnimHashedString fileHash, HashedString eyes, HashedString hair, HashedString headshape, HashedString mouth, HashedString body, HashedString arms, HashedString hat, HashedString hat_hair)
+	private KAnim.Build GetBuildForVariation(KBatchGroupData batch_group, KAnimHashedString fileHash, HashedString eyes, HashedString hair, HashedString headshape, HashedString mouth, HashedString body, HashedString arms, HashedString hat, HashedString hat_hair, HashedString hair_always)
 	{
 		KAnimFileData data = this.master_anims.GetData();
 		KAnim.Build build = data.build;
@@ -122,6 +122,14 @@ public class KCompBuilder : MonoBehaviour
 		{
 			this.GetSymbolsFromBuild(batch_group, build2, build4, hat_hair, KCompBuilder.snapTo_hat_hair, list, list2, list3);
 		}
+		if (!hair_always.IsValid)
+		{
+			this.GetSymbolsFromBuild(batch_group, build, build4, KCompBuilder.snapTo_hair_always, KCompBuilder.snapTo_hair_always, list, list2, list3);
+		}
+		else
+		{
+			this.GetSymbolsFromBuild(batch_group, build2, build4, hair_always, KCompBuilder.snapTo_hair_always, list, list2, list3);
+		}
 		build4.symbols = list.ToArray();
 		build4.frames = list2.ToArray();
 		batch_group.AddTextures(list3);
@@ -152,7 +160,7 @@ public class KCompBuilder : MonoBehaviour
 		KAnim.Build build = batchGroupData.GetBuild(kanimHashedString);
 		if (build == null)
 		{
-			build = this.GetBuildForVariation(batchGroupData, kanimHashedString, bodyData.eyes, bodyData.hair, bodyData.headShape, bodyData.mouth, bodyData.body, bodyData.arms, bodyData.hat, bodyData.hatHair);
+			build = this.GetBuildForVariation(batchGroupData, kanimHashedString, bodyData.eyes, bodyData.hair, bodyData.headShape, bodyData.mouth, bodyData.body, bodyData.arms, bodyData.hat, bodyData.hatHair, bodyData.hairAlways);
 			build.batchTag = hashedString;
 			build.name = dynamicFile.name;
 			build.fileHash = kanimHashedString;
@@ -243,6 +251,8 @@ public class KCompBuilder : MonoBehaviour
 
 	public static HashedString snapTo_hair = new HashedString("snapTo_hair");
 
+	public static HashedString snapTo_hair_always = new HashedString("snapTo_hair_always");
+
 	public static HashedString snapTo_headshape = new HashedString("snapTo_headshape");
 
 	public static HashedString snapTo_mouth = new HashedString("snapTo_mouth");
@@ -281,5 +291,7 @@ public class KCompBuilder : MonoBehaviour
 		public HashedString hat;
 
 		public HashedString hatHair;
+
+		public HashedString hairAlways;
 	}
 }

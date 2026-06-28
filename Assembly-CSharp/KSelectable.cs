@@ -32,14 +32,6 @@ public class KSelectable : KMonoBehaviour
 		}
 	}
 
-	public string EntityNameLocString
-	{
-		get
-		{
-			return this.entityNameLocString;
-		}
-	}
-
 	protected override void OnPrefabInit()
 	{
 		this.statusItemGroup = new StatusItemGroup(base.gameObject);
@@ -47,17 +39,13 @@ public class KSelectable : KMonoBehaviour
 		if (component != null)
 		{
 		}
-		if (this.entityNameLocString != null && this.entityNameLocString.Length > 0)
-		{
-			string text = Strings.Get(this.entityNameLocString);
-			if (text != null && text.Length > 0)
-			{
-				this.entityName = text;
-			}
-		}
 		if (this.entityName == null || this.entityName.Length <= 0)
 		{
 			this.SetName(base.name);
+		}
+		if (this.entityGender == null)
+		{
+			this.entityGender = "NB";
 		}
 	}
 
@@ -83,6 +71,11 @@ public class KSelectable : KMonoBehaviour
 	public void SetName(string name)
 	{
 		this.entityName = name;
+	}
+
+	public void SetGender(string Gender)
+	{
+		this.entityGender = Gender;
 	}
 
 	public float GetZoom()
@@ -271,6 +264,8 @@ public class KSelectable : KMonoBehaviour
 
 	public string entityName;
 
+	public string entityGender;
+
 	private bool selected;
 
 	[SerializeField]
@@ -278,9 +273,6 @@ public class KSelectable : KMonoBehaviour
 
 	[SerializeField]
 	private bool disableSelectMarker;
-
-	[SerializeField]
-	private string entityNameLocString;
 
 	private StatusItemGroup statusItemGroup;
 }

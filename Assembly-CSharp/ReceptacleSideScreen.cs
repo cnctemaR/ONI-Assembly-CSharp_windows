@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -93,9 +92,9 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 			}
 			else
 			{
-				this.subtitleLabel.SetText(UI.UISIDESCREENS.PLANTERSIDESCREEN.SELECTSEED_TITLE);
+				this.subtitleLabel.SetText(Strings.Get(this.subtitleStringSelect).ToString());
 				this.requestSelectedEntityBtn.isInteractable = false;
-				this.descriptionLabel.SetText(UI.UISIDESCREENS.PLANTERSIDESCREEN.SELECTSEED_DESC);
+				this.descriptionLabel.SetText(Strings.Get(this.subtitleStringSelectDescription).ToString());
 				this.HideAllDescriptorPanels();
 			}
 		}
@@ -122,7 +121,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 					uprootable.ForceCancelUproot(null);
 					this.UpdateState(null);
 				};
-				this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.CANCELREMOVALFROMRECEPTACLE;
+				this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = Strings.Get(this.requestStringCancelRemove).ToString();
 				this.requestSelectedEntityBtn.isInteractable = true;
 				this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringAwaitingRemoval).ToString(), this.targetReceptacle.Occupant.GetProperName()));
 			}
@@ -133,7 +132,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 					this.targetReceptacle.OrderRemoveOccupant();
 					this.UpdateState(null);
 				};
-				this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.USERMENUACTIONS.UPROOT.NAME;
+				this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = Strings.Get(this.requestStringRemove).ToString();
 				this.requestSelectedEntityBtn.isInteractable = true;
 				this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringEntityDeposited).ToString(), this.targetReceptacle.Occupant.GetProperName()));
 			}
@@ -151,7 +150,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 				this.UpdateAvailableAmounts(null);
 				this.UpdateState(null);
 			};
-			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.CANCELPLACEINRECEPTACLE;
+			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = Strings.Get(this.requestStringCancelDeposit).ToString();
 			this.requestSelectedEntityBtn.isInteractable = true;
 			this.ToggleSeedSelector(false);
 			this.ConfigureActiveEntity(this.targetReceptacle.GetActiveRequest.tags[0]);
@@ -170,7 +169,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 				this.UpdateAvailableAmounts(null);
 				this.UpdateState(null);
 			};
-			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.PLACEINRECEPTACLE;
+			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = Strings.Get(this.requestStringDeposit).ToString();
 			this.targetReceptacle.SetPreview(this.depositObjectMap[this.selectedEntityToggle].tag, false);
 			bool flag = this.ValidRotationForDeposit(this.depositObjectMap[this.selectedEntityToggle].direction) && this.GetAvailableAmount(this.depositObjectMap[this.selectedEntityToggle].tag) > 0f && this.AdditionalCanDepositTest();
 			this.requestSelectedEntityBtn.isInteractable = flag;
@@ -185,7 +184,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		}
 		else
 		{
-			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.PLACEINRECEPTACLE;
+			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = Strings.Get(this.requestStringDeposit).ToString();
 			this.requestSelectedEntityBtn.isInteractable = false;
 			this.ToggleSeedSelector(true);
 		}
@@ -434,6 +433,18 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 	[SerializeField]
 	private KButton requestSelectedEntityBtn;
 
+	[SerializeField]
+	private string requestStringDeposit;
+
+	[SerializeField]
+	private string requestStringCancelDeposit;
+
+	[SerializeField]
+	private string requestStringRemove;
+
+	[SerializeField]
+	private string requestStringCancelRemove;
+
 	public GameObject activeEntityContainer;
 
 	public GameObject nothingDiscoveredContainer;
@@ -442,6 +453,12 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 	protected LocText descriptionLabel;
 
 	private Dictionary<SingleEntityReceptacle, int> entityPreviousSelectionMap = new Dictionary<SingleEntityReceptacle, int>();
+
+	[SerializeField]
+	private string subtitleStringSelect;
+
+	[SerializeField]
+	private string subtitleStringSelectDescription;
 
 	[SerializeField]
 	private string subtitleStringAwaitingSelection;

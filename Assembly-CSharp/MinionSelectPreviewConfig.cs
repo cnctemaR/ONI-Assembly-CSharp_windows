@@ -1,0 +1,51 @@
+﻿using System;
+using Klei.AI;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class MinionSelectPreviewConfig : IEntityConfig
+{
+	public GameObject CreatePrefab()
+	{
+		GameObject gameObject = EntityTemplates.CreateEntity(MinionSelectPreviewConfig.ID, MinionSelectPreviewConfig.ID);
+		RectTransform rectTransform = gameObject.AddOrGet<RectTransform>();
+		rectTransform.anchorMin = new Vector2(0f, 0f);
+		rectTransform.anchorMax = new Vector2(1f, 1f);
+		rectTransform.pivot = new Vector2(0.5f, 0f);
+		rectTransform.anchoredPosition = new Vector2(0f, 0f);
+		rectTransform.sizeDelta = new Vector2(0f, 0f);
+		LayoutElement layoutElement = gameObject.AddOrGet<LayoutElement>();
+		layoutElement.preferredHeight = 100f;
+		layoutElement.preferredWidth = 100f;
+		gameObject.AddOrGet<Effects>();
+		gameObject.AddOrGet<Traits>();
+		MinionModifiers minionModifiers = gameObject.AddOrGet<MinionModifiers>();
+		minionModifiers.initialTraits = new string[] { MinionConfig.MINION_BASE_TRAIT_ID };
+		MinionConfig.AddMinionAmounts(minionModifiers);
+		gameObject.AddOrGet<AttributeLevels>();
+		gameObject.AddOrGet<AttributeConverters>();
+		MinionIdentity minionIdentity = gameObject.AddOrGet<MinionIdentity>();
+		minionIdentity.addToIdentityList = false;
+		BoxCollider2D boxCollider2D = gameObject.AddOrGet<BoxCollider2D>();
+		boxCollider2D.size = new Vector2(1f, 1f);
+		gameObject.AddOrGet<FaceGraph>();
+		gameObject.AddOrGet<Accessorizer>();
+		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
+		kbatchedAnimController.materialType = KAnimBatchGroup.MaterialType.UI;
+		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim("anim_cheer_kanim") };
+		kbatchedAnimController.animScale = 0.5f;
+		kbatchedAnimController.setScaleFromAnim = false;
+		kbatchedAnimController.animOverrideSize = new Vector2(100f, 120f);
+		return gameObject;
+	}
+
+	public void OnPrefabInit(GameObject go)
+	{
+	}
+
+	public void OnSpawn(GameObject go)
+	{
+	}
+
+	public static string ID = "MinionSelectPreview";
+}

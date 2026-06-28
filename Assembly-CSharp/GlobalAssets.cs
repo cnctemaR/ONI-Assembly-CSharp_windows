@@ -10,7 +10,6 @@ public class GlobalAssets : MonoBehaviour
 {
 	private void Awake()
 	{
-		GlobalAssets.ignoreMissing = false;
 		if (GlobalAssets.SoundTable.Count == 0)
 		{
 			Bank[] array;
@@ -67,6 +66,7 @@ public class GlobalAssets : MonoBehaviour
 		LocString.CreateLocStringKeys(typeof(BUILDING.STATUSITEMS), "STRINGS.BUILDING.");
 		LocString.CreateLocStringKeys(typeof(BUILDING.DETAILS), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(LORE), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(CODEX), "STRINGS.");
 	}
 
 	public static string GetSound(string name, bool force_no_warning = false)
@@ -113,6 +113,4 @@ public class GlobalAssets : MonoBehaviour
 	private static HashSet<string> HighPrioritySounds = new HashSet<string>();
 
 	private static Dictionary<string, EventDescription> SoundEventDescriptions = new Dictionary<string, EventDescription>();
-
-	private static bool ignoreMissing = true;
 }

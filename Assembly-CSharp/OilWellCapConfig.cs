@@ -37,15 +37,15 @@ public class OilWellCapConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.UpdateComponentRequirement<LoopingSounds>(true);
+		go.AddOrGet<LoopingSounds>();
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.showInUI = true;
-		ConduitConsumer conduitConsumer = go.UpdateComponentRequirement<ConduitConsumer>(true);
+		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 1f;
 		conduitConsumer.capacityKG = 10f;
 		conduitConsumer.capacityTag = GameTags.Liquid;
-		ElementConverter elementConverter = go.UpdateComponentRequirement<ElementConverter>(true);
+		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
 			new ElementConverter.ConsumedElement(new Tag("Water"), 1f)
@@ -54,7 +54,7 @@ public class OilWellCapConfig : IBuildingConfig
 		{
 			new ElementConverter.OutputElement(3.3333333f, SimHashes.CrudeOil, 363.15f, false, 2f, 1.5f, false, 0f, byte.MaxValue, 0)
 		};
-		OilWellCap oilWellCap = go.UpdateComponentRequirement<OilWellCap>(true);
+		OilWellCap oilWellCap = go.AddOrGet<OilWellCap>();
 		oilWellCap.gasElement = SimHashes.Methane;
 		oilWellCap.gasTemperature = 573.15f;
 		oilWellCap.addGasRate = 0.033333335f;

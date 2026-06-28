@@ -11,10 +11,10 @@ public class VendingMachineConfig : IEntityConfig
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium);
 		component.Temperature = 294.15f;
-		gameObject.UpdateComponentRequirement<Workable>(true);
-		gameObject.UpdateComponentRequirement<VendingMachine>(true);
-		gameObject.UpdateComponentRequirement<LoreBearer>(true);
-		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
+		gameObject.AddOrGet<Workable>();
+		gameObject.AddOrGet<VendingMachine>();
+		gameObject.AddOrGet<LoreBearer>();
+		gameObject.AddOrGet<LoopingSounds>();
 		return gameObject;
 	}
 

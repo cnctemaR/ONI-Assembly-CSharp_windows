@@ -11,7 +11,7 @@ public class FruitCakeConfig : IEntityConfig
 		gameObject = EntityTemplates.ExtendEntityToFood(gameObject, FOOD.FOOD_TYPES.FRUITCAKE, false);
 		string text = "FruitCake";
 		string text2 = ITEMS.FOOD.FRUITCAKE.RECIPEDESC;
-		Recipe recipe = new Recipe(text, 1f, (SimHashes)0, null, text2, 1);
+		Recipe recipe = new Recipe(text, 1f, (SimHashes)0, null, text2, 3);
 		recipe.AddIngredient(new Recipe.Ingredient("ColdWheatSeed", 5f));
 		recipe.AddIngredient(new Recipe.Ingredient(PrickleFruitConfig.ID, 1f));
 		recipe.FabricationVisualizer = FruitCakeConfig.CreateFabricationVisualizer(gameObject);

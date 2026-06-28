@@ -11,9 +11,9 @@ public class SetLockerConfig : IEntityConfig
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium);
 		component.Temperature = 294.15f;
-		gameObject.UpdateComponentRequirement<Workable>(true);
-		gameObject.UpdateComponentRequirement<SetLocker>(true);
-		gameObject.UpdateComponentRequirement<LoreBearer>(true);
+		gameObject.AddOrGet<Workable>();
+		gameObject.AddOrGet<SetLocker>();
+		gameObject.AddOrGet<LoreBearer>();
 		return gameObject;
 	}
 

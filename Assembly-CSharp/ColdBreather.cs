@@ -9,9 +9,20 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.simEmitCBHandle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimEmitted)));
 		this.elementConsumer.EnableConsumption(false);
 		base.smi.animController.randomiseLoopedOffset = true;
 		base.smi.StartSM();
+	}
+
+	protected override void OnCleanUp()
+	{
+		Game.Instance.complexCallbackManager.Release(this.simEmitCBHandle);
+		if (this.storage)
+		{
+			this.storage.DropAll(true);
+		}
+		base.OnCleanUp();
 	}
 
 	protected void DestroySelf(object callbackParam)
@@ -28,11 +39,43 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 		};
 	}
 
-	private const float EXHALE_PERIOD = 1f;
+	public void Exhale()
+	{
+		if (this.lastEmitTag != Tag.Invalid)
+		{
+			return;
+		}
+		this.gases.Clear();
+		this.storage.Find(GameTags.Gas, this.gases);
+		if (this.nextGasEmitIndex >= this.gases.Count)
+		{
+			this.nextGasEmitIndex = 0;
+		}
+		while (this.nextGasEmitIndex < this.gases.Count)
+		{
+			int num = this.nextGasEmitIndex++;
+			PrimaryElement component = this.gases[num].GetComponent<PrimaryElement>();
+			if (component != null && component.Mass > 0f)
+			{
+				float num2 = Mathf.Max(component.Element.lowTemp + 5f, component.Temperature + this.deltaEmitTemperature);
+				int num3 = Grid.PosToCell(base.transform.GetPosition() + this.emitOffsetCell);
+				byte b = (byte)ElementLoader.elements.IndexOf(component.Element);
+				SimMessages.EmitMass(num3, b, component.Mass, num2, component.DiseaseIdx, component.DiseaseCount, this.simEmitCBHandle.index);
+				this.lastEmitTag = component.Element.tag;
+				break;
+			}
+		}
+	}
 
-	public float deltaEmitTemperature = -5f;
-
-	public Vector3 emitOffsetCell = new Vector3(0f, 0f);
+	private void OnSimEmitted(object data)
+	{
+		Sim.MassEmittedCallback massEmittedCallback = (Sim.MassEmittedCallback)data;
+		if (massEmittedCallback.suceeded == 1 && this.storage)
+		{
+			this.storage.ConsumeIgnoringDisease(this.lastEmitTag, massEmittedCallback.mass);
+		}
+		this.lastEmitTag = Tag.Invalid;
+	}
 
 	[MyCmpReq]
 	private WiltCondition wiltCondition;
@@ -49,31 +92,26 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 	[MyCmpReq]
 	private ReceptacleMonitor receptacleMonitor;
 
+	private const float EXHALE_PERIOD = 1f;
+
+	public float deltaEmitTemperature = -5f;
+
+	public Vector3 emitOffsetCell = new Vector3(0f, 0f);
+
+	private List<GameObject> gases = new List<GameObject>();
+
+	private Tag lastEmitTag;
+
+	private int nextGasEmitIndex;
+
+	private HandleVector<Game.ComplexCallbackInfo>.Handle simEmitCBHandle = HandleVector<Game.ComplexCallbackInfo>.InvalidHandle;
+
 	public class StatesInstance : GameStateMachine<ColdBreather.States, ColdBreather.StatesInstance, ColdBreather, object>.GameInstance
 	{
 		public StatesInstance(ColdBreather master)
 			: base(master)
 		{
 		}
-
-		public void Exhale()
-		{
-			this.gases.Clear();
-			base.master.storage.Find(GameTags.Gas, this.gases);
-			for (int i = 0; i < this.gases.Count; i++)
-			{
-				PrimaryElement component = this.gases[i].GetComponent<PrimaryElement>();
-				if (component != null && component.Mass > 0f)
-				{
-					float num = Mathf.Max(component.Element.lowTemp + 5f, component.Temperature + base.master.deltaEmitTemperature);
-					int num2 = Grid.PosToCell(base.transform.GetPosition() + base.master.emitOffsetCell);
-					SimMessages.AddRemoveSubstance(num2, component.Element.id, CellEventLogger.Instance.ElementEmitted, component.Mass, num, component.DiseaseIdx, component.DiseaseCount, -1);
-					base.master.storage.ConsumeIgnoringDisease(this.gases[i]);
-				}
-			}
-		}
-
-		private List<GameObject> gases = new List<GameObject>();
 	}
 
 	public class States : GameStateMachine<ColdBreather.States, ColdBreather.StatesInstance, ColdBreather>
@@ -83,7 +121,11 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 			base.serializable = true;
 			default_state = this.grow;
 			this.statusItemCooling = new StatusItem("cooling", CREATURES.STATUSITEMS.COOLING.NAME, CREATURES.STATUSITEMS.COOLING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486);
-			this.dead.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).Enter(delegate(ColdBreather.StatesInstance smi)
+			GameStateMachine<ColdBreather.States, ColdBreather.StatesInstance, ColdBreather, object>.State state = this.dead;
+			string text = CREATURES.STATUSITEMS.DEAD.NAME;
+			string text2 = CREATURES.STATUSITEMS.DEAD.TOOLTIP;
+			StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+			state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, main).Enter(delegate(ColdBreather.StatesInstance smi)
 			{
 				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
 				smi.master.Trigger(1623392196, null);
@@ -101,9 +143,9 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 					smi.GoTo(this.blocked_from_growing);
 				}
 			}).PlayAnim("grow_seed", KAnim.PlayMode.Once).EventTransition(GameHashes.AnimQueueComplete, this.alive, null);
-			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.mature).EventHandler(GameHashes.OnStorageChange, delegate(ColdBreather.StatesInstance smi)
+			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.mature).Update(delegate(ColdBreather.StatesInstance smi, float dt)
 			{
-				smi.Exhale();
+				smi.master.Exhale();
 			});
 			this.alive.mature.EventTransition(GameHashes.Wilt, this.alive.wilting, (ColdBreather.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).PlayAnim("idle", KAnim.PlayMode.Loop).ToggleMainStatusItem(this.statusItemCooling)
 				.Enter(delegate(ColdBreather.StatesInstance smi)

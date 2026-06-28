@@ -91,7 +91,11 @@ namespace TUNING
 				PressureSwitchLiquidConfig.ID,
 				PressureSwitchGasConfig.ID
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Food, new string[] { "MicrobeMusher", "CookingStation", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox", "Refrigerator", "CreatureTrap", "AirborneCreatureLure", "CreatureDeliveryPoint" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Food, new string[]
+			{
+				"MicrobeMusher", "CookingStation", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox", "Refrigerator", "CreatureDeliveryPoint", "CreatureFeeder", "EggIncubator",
+				"CreatureTrap", "AirborneCreatureLure"
+			}),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Plumbing, new string[]
 			{
 				"Outhouse", "FlushToilet", "Shower", "LiquidPumpingStation", "BottleEmptier", "LiquidConduit", "InsulatedLiquidConduit", "LiquidConduitBridge", "LiquidPump", "LiquidMiniPump",
@@ -113,7 +117,7 @@ namespace TUNING
 				"FloorLamp",
 				"CeilingLight"
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Equipment, new string[] { "ResearchCenter", "AdvancedResearchCenter", "PowerControlStation", "FarmStation", "RoleStation", "ClothingFabricator", "SuitFabricator", "SuitMarker", "SuitLocker" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Equipment, new string[] { "ResearchCenter", "AdvancedResearchCenter", "PowerControlStation", "FarmStation", "RanchStation", "RoleStation", "ClothingFabricator", "SuitFabricator", "SuitMarker", "SuitLocker" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Utilities, new string[] { "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Automation, new string[]
 			{
@@ -217,6 +221,7 @@ namespace TUNING
 			"MedicinalHerb",
 			"MedicinalPill",
 			"SeedProducer",
+			"Geyser",
 			"Def",
 			"Overheatable",
 			"Work",

@@ -20,7 +20,7 @@ public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim
 		int num = Grid.PosToCell(this);
 		if (this.sampleIdx < 8)
 		{
-			float num2 = ((!Grid.Element[num].IsState(this.desiredState)) ? 0f : Grid.Cell[num].mass);
+			float num2 = ((!Grid.Element[num].IsState(this.desiredState)) ? 0f : Grid.Mass[num]);
 			this.samples[this.sampleIdx] = num2;
 			this.sampleIdx++;
 			return;

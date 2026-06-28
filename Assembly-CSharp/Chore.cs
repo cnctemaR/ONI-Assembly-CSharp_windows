@@ -145,9 +145,9 @@ public abstract class Chore
 		});
 	}
 
-	public virtual void CollectChores(ChoreConsumer consumer, List<Chore.Precondition.Context> succeeded_contexts, List<Chore.Precondition.Context> failed_contexts, bool is_attempting_override)
+	public virtual void CollectChores(ChoreConsumerState consumer_state, List<Chore.Precondition.Context> succeeded_contexts, List<Chore.Precondition.Context> failed_contexts, bool is_attempting_override)
 	{
-		Chore.Precondition.Context context = new Chore.Precondition.Context(this, consumer, is_attempting_override, null);
+		Chore.Precondition.Context context = new Chore.Precondition.Context(this, consumer_state, is_attempting_override, null);
 		context.RunPreconditions();
 		if (context.IsSuccess())
 		{
@@ -186,7 +186,7 @@ public abstract class Chore
 				this.choreType.Id
 			}), null);
 		}
-		this.driver = context.consumer.GetComponent<ChoreDriver>();
+		this.driver = context.consumerState.choreDriver;
 		StateMachine.Instance smi = this.GetSMI();
 		StateMachine.Instance instance = smi;
 		instance.OnStop = (Action<string, StateMachine.Status>)Delegate.Combine(instance.OnStop, new Action<string, StateMachine.Status>(this.OnStateMachineStop));
@@ -362,6 +362,8 @@ public abstract class Chore
 
 	public const int MIN_BASIC_PRIORITY = 0;
 
+	public static bool ENABLE_PERSONAL_PRIORITIES = true;
+
 	public delegate bool PreconditionFn(ref Chore.Precondition.Context context, object data);
 
 	public struct PreconditionInstance
@@ -387,18 +389,19 @@ public abstract class Chore
 
 		public Chore.PreconditionFn fn;
 
-		[DebuggerDisplay("{chore.GetType()}, {chore.destination.name}")]
+		[DebuggerDisplay("{chore.GetType()}, {chore.gameObject.name}")]
 		public struct Context : IComparable<Chore.Precondition.Context>, IEquatable<Chore.Precondition.Context>
 		{
-			public Context(Chore chore, ChoreConsumer consumer, bool is_attempting_override, object data = null)
+			public Context(Chore chore, ChoreConsumerState consumer_state, bool is_attempting_override, object data = null)
 			{
 				this.masterPriority = chore.masterPriority;
+				this.personalPriority = consumer_state.consumer.GetPersonalPriority(chore.choreType);
 				this.priority = 0;
 				this.priorityMod = chore.priorityMod;
 				this.interruptPriority = 0;
 				this.cost = 0;
 				this.chore = chore;
-				this.consumer = consumer;
+				this.consumerState = consumer_state;
 				this.failedPreconditionId = -1;
 				this.isAttemptingOverride = is_attempting_override;
 				this.data = data;
@@ -406,7 +409,7 @@ public abstract class Chore
 				this.SetPriority(chore);
 			}
 
-			public void Set(Chore chore, ChoreConsumer consumer, bool is_attempting_override, object data = null)
+			public void Set(Chore chore, ChoreConsumerState consumer_state, bool is_attempting_override, object data = null)
 			{
 				this.masterPriority = chore.masterPriority;
 				this.priority = 0;
@@ -414,7 +417,7 @@ public abstract class Chore
 				this.interruptPriority = 0;
 				this.cost = 0;
 				this.chore = chore;
-				this.consumer = consumer;
+				this.consumerState = consumer_state;
 				this.failedPreconditionId = -1;
 				this.isAttemptingOverride = is_attempting_override;
 				this.data = data;
@@ -424,7 +427,7 @@ public abstract class Chore
 
 			public void SetPriority(Chore chore)
 			{
-				this.priority = chore.choreType.priority;
+				this.priority = ((!Game.Instance.advancedPersonalPriorities) ? chore.choreType.priority : chore.choreType.explicitPriority);
 				this.priorityMod = chore.priorityMod;
 				this.interruptPriority = chore.choreType.interruptPriority;
 			}
@@ -440,6 +443,10 @@ public abstract class Chore
 				{
 					int num = 0;
 					num++;
+					if (this.consumerState.consumer.debug)
+					{
+						num++;
+					}
 				}
 				for (int i = 0; i < this.chore.preconditions.Count; i++)
 				{
@@ -456,38 +463,36 @@ public abstract class Chore
 			{
 				bool flag = this.failedPreconditionId != -1;
 				bool flag2 = obj.failedPreconditionId != -1;
-				if (flag == flag2)
+				if (flag != flag2)
 				{
-					int num = this.masterPriority.priority_class - obj.masterPriority.priority_class;
-					if (num != 0)
-					{
-						return num;
-					}
-					int num2 = this.masterPriority.priority_value - obj.masterPriority.priority_value;
-					if (num2 != 0)
-					{
-						return num2;
-					}
-					int num3 = this.priority - obj.priority;
-					if (num3 != 0)
-					{
-						return num3;
-					}
-					int num4 = this.priorityMod - obj.priorityMod;
-					if (num4 != 0)
-					{
-						return num4;
-					}
-					return obj.cost - this.cost;
+					return (!flag) ? 1 : (-1);
 				}
-				else
+				int num = this.masterPriority.priority_class - obj.masterPriority.priority_class;
+				if (num != 0)
 				{
-					if (flag)
-					{
-						return -1;
-					}
-					return 1;
+					return num;
 				}
+				int num2 = this.personalPriority - obj.personalPriority;
+				if (num2 != 0)
+				{
+					return num2;
+				}
+				int num3 = this.masterPriority.priority_value - obj.masterPriority.priority_value;
+				if (num3 != 0)
+				{
+					return num3;
+				}
+				int num4 = this.priority - obj.priority;
+				if (num4 != 0)
+				{
+					return num4;
+				}
+				int num5 = this.priorityMod - obj.priorityMod;
+				if (num5 != 0)
+				{
+					return num5;
+				}
+				return obj.cost - this.cost;
 			}
 
 			public override bool Equals(object obj)
@@ -518,6 +523,8 @@ public abstract class Chore
 
 			public PrioritySetting masterPriority;
 
+			public int personalPriority;
+
 			public int priority;
 
 			public int priorityMod;
@@ -528,7 +535,7 @@ public abstract class Chore
 
 			public Chore chore;
 
-			public ChoreConsumer consumer;
+			public ChoreConsumerState consumerState;
 
 			public int failedPreconditionId;
 

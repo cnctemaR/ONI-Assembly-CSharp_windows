@@ -4,7 +4,7 @@ using UnityEngine;
 public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesInstance>
 {
 	public RescueIncapacitatedChore(IStateMachineTarget master, GameObject incapacitatedDuplicant)
-		: base(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
 	{
 		this.smi = new RescueIncapacitatedChore.StatesInstance(this);
 		base.runUntilComplete = true;
@@ -14,7 +14,7 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		this.smi.sm.rescuer.Set(context.consumer.gameObject, this.smi);
+		this.smi.sm.rescuer.Set(context.consumerState.gameObject, this.smi);
 		this.smi.sm.rescueTarget.Set(this.gameObject, this.smi);
 		this.smi.sm.deliverTarget.Set(this.gameObject.GetSMI<BeIncapacitatedChore.StatesInstance>().master.GetChosenClinic(), this.smi);
 		base.Begin(context);

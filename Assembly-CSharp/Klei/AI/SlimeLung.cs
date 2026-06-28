@@ -12,7 +12,7 @@ namespace Klei.AI
 			: base("SlimeLung", Disease.DiseaseType.Pathogen, Disease.Severity.Critical, 0.00025f, new List<Disease.InfectionVector> { Disease.InfectionVector.Inhalation }, 2400f, 1, new Disease.RangeInfo(283.15f, 293.15f, 363.15f, 373.15f), new Disease.RangeInfo(10f, 1200f, 1200f, 10f), new Disease.RangeInfo(0f, 0f, 1000f, 1000f), Disease.RangeInfo.Idempotent())
 		{
 			this.doctorRequired = true;
-			this.fatalityDuration = 6000f;
+			this.fatalityDuration = 4800f;
 			base.AddDiseaseComponent(new CommonSickEffectDisease());
 			base.AddDiseaseComponent(new AttributeModifierDisease(new AttributeModifier[]
 			{
@@ -131,7 +131,7 @@ namespace Klei.AI
 
 		private const int DISEASE_AMOUNT = 1000;
 
-		private const float DEATH_TIMER = 6000f;
+		private const float DEATH_TIMER = 4800f;
 
 		public const string ID = "SlimeLung";
 

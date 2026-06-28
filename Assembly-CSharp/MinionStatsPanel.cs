@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
-using TUNING;
 using UnityEngine;
 
 public class MinionStatsPanel : TargetScreen
@@ -10,22 +9,14 @@ public class MinionStatsPanel : TargetScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.bioPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.traitsPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.expectationsPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.stressPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.aptitudePanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.expectationsPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.attributesPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.resumePanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.perkPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.traitsPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.attributesDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.attributesPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
 		this.stressDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.stressPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
-		this.aptitudeDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.aptitudePanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
 		this.traitsDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.traitsPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
 		this.expectationsDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.expectationsPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
-		this.bioDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.bioPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
-		this.resumeDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.resumePanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
-		this.perkDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.perkPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
 	}
 
 	protected override void OnCleanUp()
@@ -86,24 +77,7 @@ public class MinionStatsPanel : TargetScreen
 		this.RefreshAttributes();
 		this.RefreshTraits();
 		this.RefreshStress();
-		this.RefreshAptitudes();
 		this.RefreshExpectations();
-		this.RefreshBio();
-		this.RefreshResume();
-		this.RefreshPerks();
-	}
-
-	private void RefreshBio()
-	{
-		MinionIdentity component = this.selectedTarget.GetComponent<MinionIdentity>();
-		if (!component)
-		{
-			this.bioPanel.SetActive(false);
-			return;
-		}
-		this.bioPanel.SetActive(true);
-		this.bioPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.STATS.GROUPNAME_BIO;
-		this.bioDrawer.BeginDrawing().NewLabel(string.Format(Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.DESC", component.nameStringKey.ToUpper())), component.name)).EndDrawing();
 	}
 
 	private void RefreshAttributes()
@@ -127,37 +101,6 @@ public class MinionStatsPanel : TargetScreen
 			}
 		}
 		this.attributesDrawer.EndDrawing();
-	}
-
-	private void RefreshResume()
-	{
-		MinionResume component = this.selectedTarget.GetComponent<MinionResume>();
-		if (!component)
-		{
-			this.resumePanel.SetActive(false);
-			return;
-		}
-		this.resumePanel.SetActive(true);
-		this.resumePanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.STATS.GROUPNAME_RESUME;
-		this.resumeDrawer.BeginDrawing();
-		RoleConfig roleConfig = Game.Instance.roleManager.GetRole(component.CurrentRole);
-		this.resumeDrawer.NewLabel(string.Format(UI.DETAILTABS.STATS.RESUME.CURRENT_ROLE, roleConfig.name) + "\n").Tooltip(Game.Instance.roleManager.RoleTooltip(roleConfig.id)).NewLabel(UI.DETAILTABS.STATS.RESUME.MASTERED_ROLES)
-			.Tooltip(UI.DETAILTABS.STATS.RESUME.MASTERED_ROLES_TOOLTIP);
-		int num = 0;
-		foreach (KeyValuePair<string, bool> keyValuePair in component.MasteryByRoleID)
-		{
-			if (keyValuePair.Value && !(keyValuePair.Key == "NoRole"))
-			{
-				roleConfig = Game.Instance.roleManager.GetRole(keyValuePair.Key);
-				this.resumeDrawer.NewLabel(roleConfig.name).Tooltip(Game.Instance.roleManager.RoleTooltip(roleConfig.id));
-				num++;
-			}
-		}
-		if (num == 0)
-		{
-			this.resumeDrawer.NewLabel(UI.DETAILTABS.STATS.RESUME.NO_MASTERED_ROLES);
-		}
-		this.resumeDrawer.EndDrawing();
 	}
 
 	private void RefreshStress()
@@ -198,30 +141,6 @@ public class MinionStatsPanel : TargetScreen
 		}
 		this.stressDrawer.NewLabel(((num <= 0f) ? string.Empty : UIConstants.ColorPrefixRed) + string.Format(UI.DETAILTABS.DETAILS.NET_STRESS, Util.FormatTwoDecimalPlace(num)) + ((num <= 0f) ? string.Empty : UIConstants.ColorSuffix));
 		this.stressDrawer.EndDrawing();
-	}
-
-	private void RefreshAptitudes()
-	{
-		MinionResume component = this.selectedTarget.GetComponent<MinionResume>();
-		if (!component)
-		{
-			this.aptitudePanel.SetActive(false);
-			return;
-		}
-		this.aptitudePanel.SetActive(true);
-		this.aptitudePanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.STATS.GROUPNAME_APTITUDES;
-		this.aptitudeDrawer.BeginDrawing();
-		if (component.AptitudeByRoleGroup.Count > 0)
-		{
-			foreach (KeyValuePair<HashedString, float> keyValuePair in component.AptitudeByRoleGroup)
-			{
-				if (keyValuePair.Value != 0f)
-				{
-					this.aptitudeDrawer.NewLabel(Game.Instance.roleManager.RoleGroups[keyValuePair.Key].Name).Tooltip(string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION, Game.Instance.roleManager.RoleGroups[keyValuePair.Key].Name, keyValuePair.Value * ROLES.APTITUDE_EXPERIENCE_SCALE));
-				}
-			}
-		}
-		this.aptitudeDrawer.EndDrawing();
 	}
 
 	private void RefreshExpectations()
@@ -265,67 +184,23 @@ public class MinionStatsPanel : TargetScreen
 		this.traitsDrawer.EndDrawing();
 	}
 
-	private void RefreshPerks()
-	{
-		MinionIdentity component = this.selectedTarget.GetComponent<MinionIdentity>();
-		if (!component)
-		{
-			this.perkPanel.SetActive(false);
-			return;
-		}
-		this.perkPanel.SetActive(true);
-		this.perkPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.STATS.GROUPNAME_PERKS;
-		MinionResume component2 = component.GetComponent<MinionResume>();
-		this.perkDrawer.BeginDrawing();
-		foreach (KeyValuePair<HashedString, RoleGroup> keyValuePair in Game.Instance.roleManager.RoleGroups)
-		{
-			foreach (RoleConfig roleConfig in keyValuePair.Value.roles)
-			{
-				if (roleConfig.id == component2.CurrentRole || component2.MasteryByRoleID[roleConfig.id])
-				{
-					foreach (RolePerk rolePerk in roleConfig.perks)
-					{
-						this.perkDrawer.NewLabel(rolePerk.description).Tooltip(roleConfig.GetProperName());
-					}
-				}
-			}
-		}
-		this.perkDrawer.EndDrawing();
-	}
-
 	public GameObject attributesLabelTemplate;
 
 	private GameObject attributesPanel;
 
 	private GameObject stressPanel;
 
-	private GameObject aptitudePanel;
-
 	private GameObject expectationsPanel;
 
 	private GameObject traitsPanel;
-
-	private GameObject bioPanel;
-
-	private GameObject resumePanel;
-
-	private GameObject perkPanel;
 
 	private DetailsPanelDrawer attributesDrawer;
 
 	private DetailsPanelDrawer stressDrawer;
 
-	private DetailsPanelDrawer aptitudeDrawer;
-
 	private DetailsPanelDrawer traitsDrawer;
 
 	private DetailsPanelDrawer expectationsDrawer;
-
-	private DetailsPanelDrawer bioDrawer;
-
-	private DetailsPanelDrawer resumeDrawer;
-
-	private DetailsPanelDrawer perkDrawer;
 
 	private SchedulerHandle updateHandle;
 

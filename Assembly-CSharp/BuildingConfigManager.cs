@@ -36,11 +36,16 @@ public class BuildingConfigManager : KMonoBehaviour
 	public void RegisterBuilding(IBuildingConfig config)
 	{
 		BuildingDef buildingDef = config.CreateBuildingDef();
+		this.configTable[config] = buildingDef;
 		GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.baseTemplate);
 		gameObject.name = buildingDef.PrefabID + "Template";
 		gameObject.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy).transform;
 		gameObject.GetComponent<Building>().Def = buildingDef;
 		gameObject.GetComponent<OccupyArea>().OccupiedCellsOffsets = buildingDef.PlacementOffsets;
+		if (buildingDef.Deprecated)
+		{
+			gameObject.AddTag(GameTags.DeprecatedContent);
+		}
 		buildingDef.BuildingTemplate = gameObject;
 		config.ConfigureBuildingTemplate(gameObject, buildingDef.Tag);
 		buildingDef.BuildingComplete = BuildingLoader.Instance.CreateBuildingComplete(buildingDef);
@@ -75,6 +80,14 @@ public class BuildingConfigManager : KMonoBehaviour
 			config.DoPostConfigureUnderConstruction(buildingDef.BuildingUnderConstruction);
 		}
 		Assets.AddBuildingDef(buildingDef);
+	}
+
+	public void ConfigurePost()
+	{
+		foreach (KeyValuePair<IBuildingConfig, BuildingDef> keyValuePair in this.configTable)
+		{
+			keyValuePair.Key.ConfigurePost(keyValuePair.Value);
+		}
 	}
 
 	public void IgnoreDefaultKComponent(Type type_to_ignore, Tag building_tag)
@@ -156,6 +169,8 @@ public class BuildingConfigManager : KMonoBehaviour
 	public static BuildingConfigManager Instance;
 
 	private GameObject baseTemplate;
+
+	private Dictionary<IBuildingConfig, BuildingDef> configTable = new Dictionary<IBuildingConfig, BuildingDef>();
 
 	private string[] NonBuildableBuildings = new string[] { "Headquarters", "POIBunkerExteriorDoor" };
 

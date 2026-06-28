@@ -33,7 +33,7 @@ namespace TMPro
 			{
 				return string.Empty;
 			}
-			return new string(this.linkID);
+			return new string(this.linkID, 0, this.linkIdLength);
 		}
 
 		public TMP_Text textComponent;

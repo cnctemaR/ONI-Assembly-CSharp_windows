@@ -9,24 +9,25 @@ public class ColdBreatherConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity("ColdBreather", global::STRINGS.CREATURES.SPECIES.COLDBREATHER.NAME, global::STRINGS.CREATURES.SPECIES.COLDBREATHER.DESC, 400f, Assets.GetAnim("coldbreather_kanim"), "grow_seed", Grid.SceneLayer.BuildingFront, 1, 2, DECOR.BONUS.TIER1, NOISE_POLLUTION.NOISY.TIER2, SimHashes.Creature, null, 293f);
-		gameObject.UpdateComponentRequirement<ReceptacleMonitor>(true);
-		gameObject.UpdateComponentRequirement<EntombVulnerable>(true);
-		gameObject.UpdateComponentRequirement<WiltCondition>(true);
-		gameObject.UpdateComponentRequirement<Uprootable>(true);
-		gameObject.UpdateComponentRequirement<UprootedMonitor>(true);
-		DrowningMonitor drowningMonitor = gameObject.UpdateComponentRequirement<DrowningMonitor>(true);
+		gameObject.AddOrGet<ReceptacleMonitor>();
+		gameObject.AddOrGet<EntombVulnerable>();
+		gameObject.AddOrGet<WiltCondition>();
+		gameObject.AddOrGet<Uprootable>();
+		gameObject.AddOrGet<UprootedMonitor>();
+		DrowningMonitor drowningMonitor = gameObject.AddOrGet<DrowningMonitor>();
 		drowningMonitor.Configure(15f, 5f, 0.95f);
-		TemperatureVulnerable temperatureVulnerable = gameObject.UpdateComponentRequirement<TemperatureVulnerable>(true);
+		TemperatureVulnerable temperatureVulnerable = gameObject.AddOrGet<TemperatureVulnerable>();
 		temperatureVulnerable.Configure(213.15f, 183.15f, 368.15f, 463.15f, 0f, 0f);
-		gameObject.UpdateComponentRequirement<OccupyArea>(true).objectLayer = ObjectLayer.Building;
-		ColdBreather coldBreather = gameObject.UpdateComponentRequirement<ColdBreather>(true);
+		gameObject.AddOrGet<OccupyArea>().objectLayer = ObjectLayer.Building;
+		ColdBreather coldBreather = gameObject.AddOrGet<ColdBreather>();
 		coldBreather.deltaEmitTemperature = -5f;
 		coldBreather.emitOffsetCell = new Vector3(0f, 1f);
 		Storage storage = BuildingTemplates.CreateDefaultStorage(gameObject, false);
 		storage.showInUI = false;
-		ElementConsumer elementConsumer = gameObject.UpdateComponentRequirement<ElementConsumer>(true);
+		ElementConsumer elementConsumer = gameObject.AddOrGet<ElementConsumer>();
 		elementConsumer.storeOnConsume = true;
 		elementConsumer.configuration = ElementConsumer.Configuration.AllGas;
+		elementConsumer.capacityKG = 2f;
 		elementConsumer.consumptionRate = 1f;
 		elementConsumer.consumptionRadius = 1;
 		elementConsumer.sampleCellOffset = new Vector3(0f, 0f);

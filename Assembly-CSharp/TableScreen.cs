@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using FMOD.Studio;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -229,14 +230,7 @@ public class TableScreen : KScreen
 		bool flag = minion == null;
 		GameObject gameObject = global::Util.KInstantiateUI((!flag) ? this.prefab_row_empty : this.prefab_row_header, (!(minion == null)) ? this.scroll_content_transform.gameObject : this.header_content_transform.gameObject, true);
 		TableRow component = gameObject.GetComponent<TableRow>();
-		if (flag)
-		{
-			component.rowType = TableRow.RowType.Header;
-		}
-		else
-		{
-			component.rowType = TableRow.RowType.Minion;
-		}
+		component.rowType = ((!flag) ? TableRow.RowType.Minion : TableRow.RowType.Header);
 		this.rows.Add(component);
 		component.ConfigureContent(minion, this.columns);
 		if (!flag)
@@ -350,6 +344,16 @@ public class TableScreen : KScreen
 		return null;
 	}
 
+	protected NumericDropDownTableColumn AddNumericDropDownColumn(string id, object user_data, List<TMP_Dropdown.OptionData> options, Action<MinionIdentity, GameObject> on_load_action, Action<GameObject, int> set_value_action, Comparison<MinionIdentity> sort_comparison, NumericDropDownTableColumn.ToolTipCallbacks tooltip_callbacks)
+	{
+		NumericDropDownTableColumn numericDropDownTableColumn = new NumericDropDownTableColumn(user_data, options, on_load_action, set_value_action, sort_comparison, tooltip_callbacks, null);
+		if (this.RegisterColumn(id, numericDropDownTableColumn))
+		{
+			return numericDropDownTableColumn;
+		}
+		return null;
+	}
+
 	protected bool RegisterColumn(string id, TableColumn new_column)
 	{
 		if (this.columns.ContainsKey(id))
@@ -389,13 +393,9 @@ public class TableScreen : KScreen
 		{
 			component.SetIdentityObject(minion, false);
 		}
-		else if (widgetRow.rowType == TableRow.RowType.Default)
-		{
-			component.targetImage.enabled = true;
-		}
 		else
 		{
-			component.targetImage.enabled = false;
+			component.targetImage.enabled = widgetRow.rowType == TableRow.RowType.Default;
 		}
 	}
 

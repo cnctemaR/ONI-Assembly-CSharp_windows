@@ -164,7 +164,7 @@ public class UnstableGroundManager : KMonoBehaviour
 			Vector3 position = gameObject.transform.GetPosition();
 			int cell = Grid.PosToCell(position);
 			int num = Grid.CellBelow(cell);
-			if (!Grid.IsValidCell(num) || Grid.Element[num].IsSolid || (Grid.Cell[num].properties & 4) != 0)
+			if (!Grid.IsValidCell(num) || Grid.Element[num].IsSolid || (Grid.Properties[num] & 4) != 0)
 			{
 				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 				this.pendingCells.Add(cell);

@@ -49,19 +49,19 @@ public class WorldDamage : KMonoBehaviour
 			if (src_cell != -1 && flag)
 			{
 				Element element = Grid.Element[src_cell];
-				if (element.IsLiquid && Grid.Cell[src_cell].mass > 1f)
+				if (element.IsLiquid && Grid.Mass[src_cell] > 1f)
 				{
 					int num2 = cell - src_cell;
 					if (num2 == 1 || num2 == -1 || num2 == Grid.WidthInCells || num2 == -Grid.WidthInCells)
 					{
 						int num3 = cell + num2;
 						Element element2 = Grid.Element[num3];
-						if (!element2.IsSolid && (!element2.IsLiquid || (element2.id == element.id && Grid.Cell[num3].mass <= 100f)) && (Grid.Cell[num3].properties & 2) == 0 && !this.spawnTimes.ContainsKey(num3))
+						if (!element2.IsSolid && (!element2.IsLiquid || (element2.id == element.id && Grid.Mass[num3] <= 100f)) && (Grid.Properties[num3] & 2) == 0 && !this.spawnTimes.ContainsKey(num3))
 						{
 							this.spawnTimes[num3] = Time.realtimeSinceStartup;
 							int elementIndex = ElementLoader.GetElementIndex(element.id);
-							float temperature = Grid.Cell[src_cell].temperature;
-							base.StartCoroutine(this.DelayedSpawnFX(src_cell, num3, num2, element, elementIndex, temperature));
+							float num4 = Grid.Temperature[src_cell];
+							base.StartCoroutine(this.DelayedSpawnFX(src_cell, num3, num2, element, elementIndex, num4));
 						}
 					}
 				}

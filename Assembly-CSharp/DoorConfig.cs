@@ -46,7 +46,7 @@ public class DoorConfig : IBuildingConfig
 		Door door = go.AddOrGet<Door>();
 		door.unpoweredAnimSpeed = 1f;
 		door.doorType = Door.DoorType.Internal;
-		AccessControl accessControl = go.UpdateComponentRequirement<AccessControl>(true);
+		AccessControl accessControl = go.AddOrGet<AccessControl>();
 		accessControl.controlEnabled = true;
 		Workable workable = go.AddOrGet<Workable>();
 		workable.workTime = 3f;

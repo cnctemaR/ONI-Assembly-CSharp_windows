@@ -69,8 +69,13 @@ public class ReportScreenEntryRow : KMonoBehaviour
 	{
 		this.entry = entry;
 		this.reportGroup = reportGroup;
+		LayoutElement component = this.name.GetComponent<LayoutElement>();
 		if (entry.context == null)
 		{
+			LayoutElement layoutElement = component;
+			float num = this.nameWidth;
+			component.preferredWidth = num;
+			layoutElement.minWidth = num;
 			if (entry.HasContextEntries())
 			{
 				this.toggle.gameObject.SetActive(true);
@@ -88,6 +93,14 @@ public class ReportScreenEntryRow : KMonoBehaviour
 			this.toggle.gameObject.SetActive(false);
 			this.spacer.minWidth = this.contextSpacerWidth;
 			this.name.text = entry.context;
+			LayoutElement layoutElement2 = component;
+			float num = this.nameWidth - this.indentWidth;
+			component.preferredWidth = num;
+			layoutElement2.minWidth = num;
+			if (base.transform.GetSiblingIndex() % 2 != 0)
+			{
+				this.bgImage.color = this.oddRowColor;
+			}
 		}
 		if (this.addedValue != entry.Positive)
 		{
@@ -107,16 +120,16 @@ public class ReportScreenEntryRow : KMonoBehaviour
 	}
 
 	[SerializeField]
-	private new LocText name;
+	public new LocText name;
 
 	[SerializeField]
-	private LocText added;
+	public LocText added;
 
 	[SerializeField]
-	private LocText removed;
+	public LocText removed;
 
 	[SerializeField]
-	private LocText net;
+	public LocText net;
 
 	private float addedValue = float.NegativeInfinity;
 
@@ -130,9 +143,19 @@ public class ReportScreenEntryRow : KMonoBehaviour
 	[SerializeField]
 	private LayoutElement spacer;
 
+	[SerializeField]
+	private Image bgImage;
+
 	public float groupSpacerWidth;
 
 	public float contextSpacerWidth;
+
+	private float nameWidth = 164f;
+
+	private float indentWidth = 6f;
+
+	[SerializeField]
+	private Color oddRowColor;
 
 	private static List<ReportManager.ReportEntry.Note> notes = new List<ReportManager.ReportEntry.Note>();
 

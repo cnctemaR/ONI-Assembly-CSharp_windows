@@ -366,18 +366,6 @@ public static class Util
 		return gameObject;
 	}
 
-	public static T KAddComponent<T>(this Component c) where T : KMonoBehaviour
-	{
-		return c.gameObject.KAddComponent<T>();
-	}
-
-	public static T KAddComponent<T>(this GameObject owner) where T : KMonoBehaviour
-	{
-		T t = owner.AddComponent<T>();
-		t.InitializeComponent();
-		return t;
-	}
-
 	public static T UpdateComponentRequirement<T>(this GameObject go, bool required = true) where T : Component
 	{
 		T t = go.GetComponent(typeof(T)) as T;

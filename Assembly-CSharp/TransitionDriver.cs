@@ -18,7 +18,7 @@ public class TransitionDriver
 		this.navigator = navigator;
 		this.transition = transition;
 		this.isComplete = false;
-		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Move;
+		Grid.SceneLayer sceneLayer = navigator.sceneLayer;
 		if (transition.navGridTransition.start == NavType.Tube || transition.navGridTransition.end == NavType.Tube)
 		{
 			sceneLayer = Grid.SceneLayer.BuildingUse;

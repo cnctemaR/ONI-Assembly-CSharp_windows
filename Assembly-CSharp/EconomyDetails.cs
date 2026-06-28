@@ -19,6 +19,7 @@ public class EconomyDetails
 		this.buildingTransformationType = new EconomyDetails.Transformation.Type("Building");
 		this.foodTransformationType = new EconomyDetails.Transformation.Type("Food");
 		this.plantTransformationType = new EconomyDetails.Transformation.Type("Plant");
+		this.creatureTransformationType = new EconomyDetails.Transformation.Type("Creature");
 		this.dupeTransformationType = new EconomyDetails.Transformation.Type("Duplicant");
 		this.referenceTransformationType = new EconomyDetails.Transformation.Type("Reference");
 		this.effectTransformationType = new EconomyDetails.Transformation.Type("Effect");
@@ -42,7 +43,7 @@ public class EconomyDetails
 		}
 		EconomyDetails.Transformation transformation = new EconomyDetails.Transformation(TagManager.Create("Duplicant", null), this.dupeTransformationType, 1f);
 		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Oxygen), -0.1f));
-		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.CarbonDioxide), 0.1f * EntityPrefabs.Instance.MinionPrefab.GetComponent<OxygenBreather>().O2toCO2conversion));
+		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.CarbonDioxide), 0.1f * Assets.GetPrefab(MinionConfig.ID).GetComponent<OxygenBreather>().O2toCO2conversion));
 		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.duplicantTimeResource, 0.875f));
 		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.caloriesResource, -1666.6666f));
 		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(new Tag(Db.Get().Amounts.Bladder.deltaAttribute.Id), this.amountResourceType), 0.16666667f));
@@ -159,7 +160,7 @@ public class EconomyDetails
 				o.Write("\"" + transformation3.tag.Name + "\"");
 				o.Write("," + scenario.GetCount(transformation3.tag).ToString());
 				o.Write(",\"" + transformation3.type.id + "\"");
-				o.Write(",\"" + transformation3.time.ToString("0.00") + "\"");
+				o.Write(",\"" + transformation3.timeInSeconds.ToString("0.00") + "\"");
 				string text3 = text + num3.ToString();
 				float num5 = 0f;
 				bool flag = false;
@@ -181,14 +182,14 @@ public class EconomyDetails
 					o.Write(",");
 					if (num6 != 0f)
 					{
-						num6 /= transformation3.time;
+						num6 /= transformation3.timeInSeconds;
 						EconomyDetails.WriteProduct(o, text3, num6.ToString("0.00000"), text2);
 					}
 				}
 				o.Write(",");
 				if (flag)
 				{
-					num5 /= transformation3.time;
+					num5 /= transformation3.timeInSeconds;
 					EconomyDetails.WriteProduct(o, text3, num5.ToString("0.00000"), text2);
 				}
 				foreach (EconomyDetails.Ratio ratio2 in list)
@@ -293,14 +294,15 @@ public class EconomyDetails
 		Crop component10 = prefab_id.GetComponent<Crop>();
 		Uprootable component11 = prefab_id.GetComponent<Uprootable>();
 		Recipe recipe = RecipeManager.Get().recipes.Find((Recipe r) => r.Result == prefab_id.PrefabTag);
-		List<FertilizationMonitor.Instance.Def> list = null;
+		List<FertilizationMonitor.Def> list = null;
 		Geyser component12 = prefab_id.GetComponent<Geyser>();
 		Toilet component13 = prefab_id.GetComponent<Toilet>();
 		FlushToilet component14 = prefab_id.GetComponent<FlushToilet>();
 		RelaxationPoint component15 = prefab_id.GetComponent<RelaxationPoint>();
+		CreatureCalorieMonitor.Def def = prefab_id.gameObject.GetDef<CreatureCalorieMonitor.Def>();
 		if (component8 != null)
 		{
-			list = component8.GetDefs<FertilizationMonitor.Instance.Def>();
+			list = component8.GetDefs<FertilizationMonitor.Def>();
 		}
 		EconomyDetails.Transformation transformation = null;
 		float num2 = 1f;
@@ -308,7 +310,7 @@ public class EconomyDetails
 		{
 			transformation = new EconomyDetails.Transformation(tag, this.foodTransformationType, num2);
 		}
-		else if (component != null || component2 != null || component3 != null || component4 != null || component5 != null || component6 != null || component11 != null || component12 != null || component13 != null || component14 != null || component15 != null)
+		else if (component != null || component2 != null || component3 != null || component4 != null || component5 != null || component6 != null || component11 != null || component12 != null || component13 != null || component14 != null || component15 != null || def != null)
 		{
 			if (component11 != null || component10 != null)
 			{
@@ -318,9 +320,9 @@ public class EconomyDetails
 				}
 				transformation = new EconomyDetails.Transformation(tag, this.plantTransformationType, num2);
 			}
-			else if (component12 != null)
+			else if (def != null)
 			{
-				transformation = new EconomyDetails.Transformation(tag, this.geyserTransformationType, component12.idleDuration + component12.emission_a.duration_erupt + component12.emission_a.duration_pst);
+				transformation = new EconomyDetails.Transformation(tag, this.creatureTransformationType, num2);
 			}
 			else
 			{
@@ -340,10 +342,13 @@ public class EconomyDetails
 					EconomyDetails.Resource resource = this.CreateResource(consumedElement.tag, this.massResourceType);
 					transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource, -consumedElement.massConsumptionRate));
 				}
-				foreach (ElementConverter.OutputElement outputElement in component.outputElements)
+				if (component.outputElements != null)
 				{
-					EconomyDetails.Resource resource2 = this.CreateResource(outputElement.element.tag, this.massResourceType);
-					transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource2, outputElement.massGenerationRate));
+					foreach (ElementConverter.OutputElement outputElement in component.outputElements)
+					{
+						EconomyDetails.Resource resource2 = this.CreateResource(outputElement.element.tag, this.massResourceType);
+						transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource2, outputElement.massGenerationRate));
+					}
 				}
 			}
 			if (component3 != null && component6 == null && (component == null || prefab_id.GetComponent<AlgaeHabitat>() != null))
@@ -361,7 +366,7 @@ public class EconomyDetails
 			}
 			if (component5 != null)
 			{
-				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.energyResource, component5.WattageRating));
+				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.energyResource, component5.GetComponent<Building>().Def.GeneratorWattageRating));
 			}
 			if (component6 != null)
 			{
@@ -382,8 +387,8 @@ public class EconomyDetails
 			}
 			if (GameComps.StructureTemperatures.Has(prefab_id.gameObject))
 			{
-				BuildingDef def = prefab_id.GetComponent<BuildingComplete>().Def;
-				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.heatResource, def.SelfHeatKilowattsWhenActive + def.ExhaustKilowattsWhenActive));
+				BuildingDef def2 = prefab_id.GetComponent<BuildingComplete>().Def;
+				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.heatResource, def2.SelfHeatKilowattsWhenActive + def2.ExhaustKilowattsWhenActive));
 			}
 			if (component7)
 			{
@@ -424,22 +429,18 @@ public class EconomyDetails
 			{
 				for (int m = 0; m < components.Length; m++)
 				{
-					transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.duplicantTimeResource, -0.1f * transformation.time));
+					transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.duplicantTimeResource, -0.1f * transformation.timeInSeconds));
 				}
 			}
 			if (list != null && list.Count > 0)
 			{
-				foreach (FertilizationMonitor.Instance.Def def2 in list)
+				foreach (FertilizationMonitor.Def def3 in list)
 				{
-					foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in def2.consumedElements)
+					foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in def3.consumedElements)
 					{
-						transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(consumeInfo.tag), -consumeInfo.massConsumptionRate * transformation.time));
+						transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(consumeInfo.tag), -consumeInfo.massConsumptionRate * transformation.timeInSeconds));
 					}
 				}
-			}
-			if (component12 != null)
-			{
-				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(component12.emission_a.emissionElement.element.tag, this.massResourceType), component12.emission_a.emissionElement.massGenerationRate * component12.emission_a.duration_erupt));
 			}
 			if (component13 != null)
 			{
@@ -462,9 +463,74 @@ public class EconomyDetails
 					transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource6, attributeModifier.Value));
 				}
 			}
+			if (def != null)
+			{
+				this.CollectDietTransformations(prefab_id);
+			}
 			this.transformations.Add(transformation);
 		}
 		return transformation;
+	}
+
+	private void CollectDietTransformations(KPrefabID prefab_id)
+	{
+		CreatureCalorieMonitor.Def def = prefab_id.gameObject.GetDef<CreatureCalorieMonitor.Def>();
+		WildnessMonitor.Def def2 = prefab_id.gameObject.GetDef<WildnessMonitor.Def>();
+		float num = 0f;
+		foreach (AttributeModifier attributeModifier in def2.tameEffect.SelfModifiers)
+		{
+			if (attributeModifier.AttributeId == Db.Get().Amounts.Calories.deltaAttribute.Id)
+			{
+				num = attributeModifier.Value;
+			}
+		}
+		foreach (Diet.Info info in def.diet.infos)
+		{
+			foreach (Tag tag in info.consumedTagBits.GetTagsVerySlow())
+			{
+				float num2 = 0f;
+				Trait trait = Db.Get().traits.Get(prefab_id.GetComponent<Modifiers>().initialTraits[0]);
+				foreach (AttributeModifier attributeModifier2 in trait.SelfModifiers)
+				{
+					if (attributeModifier2.AttributeId == Db.Get().Amounts.Calories.maxAttribute.Id)
+					{
+						num2 = attributeModifier2.Value;
+					}
+				}
+				float num3 = Mathf.Abs(num2 / num);
+				float num4 = num2 / info.caloriesPerKg;
+				float num5 = num4 * info.producedConversionRate;
+				EconomyDetails.Transformation transformation = new EconomyDetails.Transformation(new Tag(prefab_id.PrefabTag.Name + "Diet" + tag.Name), this.creatureTransformationType, num3);
+				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(tag, this.massResourceType), -num4));
+				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(new Tag(info.producedElement.ToString()), this.massResourceType), num5));
+				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.caloriesResource, num2));
+				this.transformations.Add(transformation);
+			}
+		}
+	}
+
+	private static void CollectDietScenarios(List<EconomyDetails.Scenario> scenarios)
+	{
+		EconomyDetails.Scenario scenario = new EconomyDetails.Scenario("diets/all", 0, null);
+		foreach (KPrefabID kprefabID in Assets.Prefabs)
+		{
+			CreatureCalorieMonitor.Def def = kprefabID.gameObject.GetDef<CreatureCalorieMonitor.Def>();
+			if (def != null)
+			{
+				EconomyDetails.Scenario scenario2 = new EconomyDetails.Scenario("diets/" + kprefabID.name, 0, null);
+				foreach (Diet.Info info in def.diet.infos)
+				{
+					foreach (Tag tag in info.consumedTagBits.GetTagsVerySlow())
+					{
+						Tag tag2 = kprefabID.PrefabTag.Name + "Diet" + tag.Name;
+						scenario2.AddEntry(new EconomyDetails.Scenario.Entry(tag2, 1));
+						scenario.AddEntry(new EconomyDetails.Scenario.Entry(tag2, 1));
+					}
+				}
+				scenarios.Add(scenario2);
+			}
+		}
+		scenarios.Add(scenario);
 	}
 
 	public void GatherStartingBiomeAmounts()
@@ -476,7 +542,7 @@ public class EconomyDetails
 				Element element = Grid.Element[i];
 				float num = 0f;
 				this.startingBiomeAmounts.TryGetValue(element, out num);
-				this.startingBiomeAmounts[element] = num + Grid.Cell[i].mass;
+				this.startingBiomeAmounts[element] = num + Grid.Mass[i];
 				this.startingBiomeCellCount++;
 			}
 		}
@@ -531,72 +597,82 @@ public class EconomyDetails
 		scenario4.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Duplicant", null), 9));
 		scenario4.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("WaterPurifier", null), 1));
 		list.Add(scenario4);
-		EconomyDetails.Scenario scenario5 = new EconomyDetails.Scenario("oxygen/electrolyzer", 0, null);
-		scenario5.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Electrolyzer", null), 1));
-		scenario5.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("LiquidPump", null), 1));
-		scenario5.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Duplicant", null), 9));
-		scenario5.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("HydrogenGenerator", null), 1));
-		scenario5.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("GasPump", null), 1));
+		EconomyDetails.Scenario scenario5 = new EconomyDetails.Scenario("oxygen/algae_habitat_electrolyzer", 0, null);
+		scenario5.AddEntry(new EconomyDetails.Scenario.Entry("AlgaeHabitat", 1));
+		scenario5.AddEntry(new EconomyDetails.Scenario.Entry("Duplicant", 1));
+		scenario5.AddEntry(new EconomyDetails.Scenario.Entry("Electrolyzer", 1));
 		list.Add(scenario5);
-		EconomyDetails.Scenario scenario6 = new EconomyDetails.Scenario("purifiers/methane_generator", 0, null);
-		scenario6.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("MethaneGenerator", null), 1));
-		scenario6.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("FertilizerMaker", null), 3));
+		EconomyDetails.Scenario scenario6 = new EconomyDetails.Scenario("oxygen/electrolyzer", 0, null);
 		scenario6.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Electrolyzer", null), 1));
-		scenario6.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("GasPump", null), 1));
-		scenario6.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("LiquidPump", null), 2));
+		scenario6.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("LiquidPump", null), 1));
+		scenario6.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Duplicant", null), 9));
 		scenario6.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("HydrogenGenerator", null), 1));
-		scenario6.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("PrickleFlower", null), 0));
+		scenario6.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("GasPump", null), 1));
 		list.Add(scenario6);
-		EconomyDetails.Scenario scenario7 = new EconomyDetails.Scenario("purifiers/water_purifier", 0, null);
-		scenario7.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("WaterPurifier", null), 1));
-		scenario7.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Compost", null), 2));
+		EconomyDetails.Scenario scenario7 = new EconomyDetails.Scenario("purifiers/methane_generator", 0, null);
+		scenario7.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("MethaneGenerator", null), 1));
+		scenario7.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("FertilizerMaker", null), 3));
 		scenario7.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Electrolyzer", null), 1));
-		scenario7.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("LiquidPump", null), 2));
 		scenario7.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("GasPump", null), 1));
+		scenario7.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("LiquidPump", null), 2));
 		scenario7.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("HydrogenGenerator", null), 1));
-		scenario7.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("PrickleFlower", null), 29));
+		scenario7.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("PrickleFlower", null), 0));
 		list.Add(scenario7);
-		EconomyDetails.Scenario scenario8 = new EconomyDetails.Scenario("energy/petroleum_generator", 0, null);
-		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("PetroleumGenerator", null), 1));
-		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("OilRefinery", null), 1));
+		EconomyDetails.Scenario scenario8 = new EconomyDetails.Scenario("purifiers/water_purifier", 0, null);
 		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("WaterPurifier", null), 1));
-		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("LiquidPump", null), 1));
+		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Compost", null), 2));
+		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Electrolyzer", null), 1));
+		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("LiquidPump", null), 2));
 		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("GasPump", null), 1));
-		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("CO2Scrubber", null), 1));
-		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("MethaneGenerator", null), 1));
+		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("HydrogenGenerator", null), 1));
+		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("PrickleFlower", null), 29));
 		list.Add(scenario8);
-		EconomyDetails.Scenario scenario9 = new EconomyDetails.Scenario("waste/outhouse", 0, null);
-		scenario9.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Outhouse", null), 1));
-		scenario9.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Compost", null), 1));
+		EconomyDetails.Scenario scenario9 = new EconomyDetails.Scenario("energy/petroleum_generator", 0, null);
+		scenario9.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("PetroleumGenerator", null), 1));
+		scenario9.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("OilRefinery", null), 1));
+		scenario9.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("WaterPurifier", null), 1));
+		scenario9.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("LiquidPump", null), 1));
+		scenario9.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("GasPump", null), 1));
+		scenario9.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("CO2Scrubber", null), 1));
+		scenario9.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("MethaneGenerator", null), 1));
 		list.Add(scenario9);
-		EconomyDetails.Scenario scenario10 = new EconomyDetails.Scenario("stress/massage_table", 1, null);
-		scenario10.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("MassageTable", null), 1));
-		scenario10.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("ManualGenerator", null), 1));
+		EconomyDetails.Scenario scenario10 = new EconomyDetails.Scenario("energy/coal_generator", 0, null);
+		scenario10.AddEntry(new EconomyDetails.Scenario.Entry("Generator", 1));
+		scenario10.AddEntry(new EconomyDetails.Scenario.Entry("HatchDietSedimentaryRock", 1));
 		list.Add(scenario10);
-		EconomyDetails.Scenario scenario11 = new EconomyDetails.Scenario("waste/flush_toilet", 0, null);
-		scenario11.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("FlushToilet", null), 1));
-		scenario11.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("WaterPurifier", null), 1));
-		scenario11.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("LiquidPump", null), 1));
-		scenario11.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("FertilizerMaker", null), 1));
+		EconomyDetails.Scenario scenario11 = new EconomyDetails.Scenario("waste/outhouse", 0, null);
+		scenario11.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Outhouse", null), 1));
+		scenario11.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Compost", null), 1));
 		list.Add(scenario11);
-		EconomyDetails.Scenario scenario12 = new EconomyDetails.Scenario("stress/stress", 1, (EconomyDetails.Transformation t) => t.GetDelta(details.GetResource(new Tag(Db.Get().Amounts.Stress.deltaAttribute.Id))) != null);
+		EconomyDetails.Scenario scenario12 = new EconomyDetails.Scenario("stress/massage_table", 1, null);
+		scenario12.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("MassageTable", null), 1));
+		scenario12.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("ManualGenerator", null), 1));
 		list.Add(scenario12);
-		EconomyDetails.Scenario scenario13 = new EconomyDetails.Scenario("food/foods", 1, (EconomyDetails.Transformation t) => t.type == details.foodTransformationType);
+		EconomyDetails.Scenario scenario13 = new EconomyDetails.Scenario("waste/flush_toilet", 0, null);
+		scenario13.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("FlushToilet", null), 1));
+		scenario13.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("WaterPurifier", null), 1));
+		scenario13.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("LiquidPump", null), 1));
+		scenario13.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("FertilizerMaker", null), 1));
 		list.Add(scenario13);
-		EconomyDetails.Scenario scenario14 = new EconomyDetails.Scenario("food/plants", 1, (EconomyDetails.Transformation t) => t.type == details.plantTransformationType);
+		EconomyDetails.Scenario scenario14 = new EconomyDetails.Scenario("stress/stress", 1, (EconomyDetails.Transformation t) => t.GetDelta(details.GetResource(new Tag(Db.Get().Amounts.Stress.deltaAttribute.Id))) != null);
 		list.Add(scenario14);
+		EconomyDetails.Scenario scenario15 = new EconomyDetails.Scenario("food/foods", 1, (EconomyDetails.Transformation t) => t.type == details.foodTransformationType);
+		list.Add(scenario15);
+		EconomyDetails.Scenario scenario16 = new EconomyDetails.Scenario("food/plants", 1, (EconomyDetails.Transformation t) => t.type == details.plantTransformationType);
+		list.Add(scenario16);
+		EconomyDetails.CollectDietScenarios(list);
 		foreach (EconomyDetails.Transformation transformation in details.transformations)
 		{
 			EconomyDetails.Transformation transformation_iter = transformation;
-			EconomyDetails.Scenario scenario15 = new EconomyDetails.Scenario("transformations/" + transformation.tag.Name, 1, (EconomyDetails.Transformation t) => transformation_iter == t);
-			list.Add(scenario15);
+			EconomyDetails.Scenario scenario17 = new EconomyDetails.Scenario("transformations/" + transformation.tag.Name, 1, (EconomyDetails.Transformation t) => transformation_iter == t);
+			list.Add(scenario17);
 		}
 		foreach (EdiblesManager.FoodInfo foodInfo in FOOD.FOOD_TYPES_LIST)
 		{
-			EconomyDetails.Scenario scenario16 = new EconomyDetails.Scenario("food/" + foodInfo.Id, 0, null);
+			EconomyDetails.Scenario scenario18 = new EconomyDetails.Scenario("food/" + foodInfo.Id, 0, null);
 			Tag tag2 = TagManager.Create(foodInfo.Id, null);
-			scenario16.AddEntry(new EconomyDetails.Scenario.Entry(tag2, 1));
-			scenario16.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Duplicant", null), 1));
+			scenario18.AddEntry(new EconomyDetails.Scenario.Entry(tag2, 1));
+			scenario18.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Duplicant", null), 1));
 			List<Tag> list2 = new List<Tag>();
 			list2.Add(tag2);
 			while (list2.Count > 0)
@@ -608,7 +684,7 @@ public class EconomyDetails
 				{
 					foreach (Recipe.Ingredient ingredient in recipe.Ingredients)
 					{
-						scenario16.AddEntry(new EconomyDetails.Scenario.Entry(ingredient.tag, 1));
+						scenario18.AddEntry(new EconomyDetails.Scenario.Entry(ingredient.tag, 1));
 						list2.Add(ingredient.tag);
 					}
 				}
@@ -617,18 +693,18 @@ public class EconomyDetails
 					Crop component = kprefabID.GetComponent<Crop>();
 					if (component != null && component.cropVal.cropId == tag.Name)
 					{
-						scenario16.AddEntry(new EconomyDetails.Scenario.Entry(kprefabID.PrefabTag, 1));
+						scenario18.AddEntry(new EconomyDetails.Scenario.Entry(kprefabID.PrefabTag, 1));
 						list2.Add(kprefabID.PrefabTag);
 					}
 				}
 			}
-			list.Add(scenario16);
+			list.Add(scenario18);
 		}
-		foreach (EconomyDetails.Scenario scenario17 in list)
+		foreach (EconomyDetails.Scenario scenario19 in list)
 		{
-			using (StreamWriter streamWriter = new StreamWriter("assets/Tuning/Economy/" + scenario17.name + ".csv"))
+			using (StreamWriter streamWriter = new StreamWriter("assets/Tuning/Economy/" + scenario19.name + ".csv"))
 			{
-				details.DumpTransformations(scenario17, streamWriter);
+				details.DumpTransformations(scenario19, streamWriter);
 			}
 		}
 		float dupeBreathingPerSecond = details.GetDupeBreathingPerSecond(details);
@@ -698,6 +774,8 @@ public class EconomyDetails
 	public EconomyDetails.Transformation.Type foodTransformationType;
 
 	public EconomyDetails.Transformation.Type plantTransformationType;
+
+	public EconomyDetails.Transformation.Type creatureTransformationType;
 
 	public EconomyDetails.Transformation.Type dupeTransformationType;
 
@@ -845,18 +923,18 @@ public class EconomyDetails
 
 	public class Transformation
 	{
-		public Transformation(Tag tag, EconomyDetails.Transformation.Type type, float time)
+		public Transformation(Tag tag, EconomyDetails.Transformation.Type type, float time_in_seconds)
 		{
 			this.tag = tag;
 			this.type = type;
-			this.time = time;
+			this.timeInSeconds = time_in_seconds;
 		}
 
 		public Tag tag { get; private set; }
 
 		public EconomyDetails.Transformation.Type type { get; private set; }
 
-		public float time { get; private set; }
+		public float timeInSeconds { get; private set; }
 
 		public void AddDelta(EconomyDetails.Transformation.Delta delta)
 		{

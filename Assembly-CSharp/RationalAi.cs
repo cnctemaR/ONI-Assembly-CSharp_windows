@@ -6,7 +6,7 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 	{
 		default_state = this.alive;
 		base.serializable = true;
-		this.root.ToggleStateMachine((RationalAi.Instance smi) => new DeathMonitor.Instance(smi.master));
+		this.root.ToggleStateMachine((RationalAi.Instance smi) => new DeathMonitor.Instance(smi.master, new DeathMonitor.Def()));
 		this.alive.TagTransition(GameTags.Dead, this.dead, false).ToggleStateMachine((RationalAi.Instance smi) => new ThoughtGraph.Instance(smi.master)).ToggleStateMachine((RationalAi.Instance smi) => new StaminaMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new StressMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new EmoteMonitor.Instance(smi.master))
@@ -28,7 +28,7 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			.ToggleStateMachine((RationalAi.Instance smi) => new CringeMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new HygieneMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new FallMonitor.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new ThreatMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new ThreatMonitor.Instance(smi.master, new ThreatMonitor.Def()))
 			.ToggleStateMachine((RationalAi.Instance smi) => new WoundMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new TiredMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new MoveToLocationMonitor.Instance(smi.master))

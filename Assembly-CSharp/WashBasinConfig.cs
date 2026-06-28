@@ -39,8 +39,8 @@ public class WashBasinConfig : IBuildingConfig
 		manualDeliveryKG.minimumMass = 5f;
 		manualDeliveryKG.capacity = 200f;
 		manualDeliveryKG.refillMass = 40f;
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
-		go.UpdateComponentRequirement<LoopingSounds>(true);
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.OperateFetch.IdHash;
+		go.AddOrGet<LoopingSounds>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

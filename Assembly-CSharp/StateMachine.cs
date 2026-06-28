@@ -31,6 +31,8 @@ public abstract class StateMachine
 
 	public abstract void BindStates();
 
+	public abstract Type GetStateMachineInstanceType();
+
 	public int version { get; protected set; }
 
 	public bool serializable { get; protected set; }
@@ -134,6 +136,23 @@ public abstract class StateMachine
 		Running,
 		Failed,
 		Success
+	}
+
+	public class BaseDef
+	{
+		public StateMachine.Instance CreateSMI(IStateMachineTarget master)
+		{
+			return StateMachineManager.Instance.CreateSMIFromDef(master, this);
+		}
+
+		public Type GetStateMachineType()
+		{
+			return base.GetType().DeclaringType;
+		}
+
+		public virtual void Configure(GameObject prefab)
+		{
+		}
 	}
 
 	public class Category : Resource
@@ -278,19 +297,7 @@ public abstract class StateMachine
 
 		public bool HasTag(Tag tag)
 		{
-			StateMachine.BaseState currentState = this.GetCurrentState();
-			if (currentState == null)
-			{
-				return false;
-			}
-			for (int i = 0; i < currentState.branch.Length; i++)
-			{
-				if (currentState.branch[i].HasTag(tag))
-				{
-					return true;
-				}
-			}
-			return false;
+			return this.GetComponent<KPrefabID>().HasTag(tag);
 		}
 
 		public bool IsInsideState(StateMachine.BaseState state)
@@ -398,14 +405,6 @@ public abstract class StateMachine
 
 		public static bool error;
 
-		public class BaseDef
-		{
-			public StateMachine.Instance CreateSMI(IStateMachineTarget master)
-			{
-				return StateMachineManager.Instance.CreateSMIFromDef(master, this);
-			}
-		}
-
 		public struct UpdateTableEntry
 		{
 			public HandleVector<int>.Handle handle;
@@ -455,7 +454,6 @@ public abstract class StateMachine
 			}
 			this.branch = null;
 			this.parent = null;
-			this.tags = null;
 		}
 
 		public int GetStateCount()
@@ -466,21 +464,6 @@ public abstract class StateMachine
 		public StateMachine.BaseState GetState(int idx)
 		{
 			return this.branch[idx];
-		}
-
-		public bool HasTag(Tag tag)
-		{
-			if (this.tags != null)
-			{
-				for (int i = 0; i < this.tags.Length; i++)
-				{
-					if (this.tags[i] == tag)
-					{
-						return true;
-					}
-				}
-			}
-			return false;
 		}
 
 		public string name;
@@ -510,8 +493,6 @@ public abstract class StateMachine
 		public StateMachine.BaseState[] branch;
 
 		public StateMachine.BaseState parent;
-
-		public Tag[] tags;
 	}
 
 	public class BaseTransition

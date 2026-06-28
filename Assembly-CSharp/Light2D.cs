@@ -21,6 +21,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			this.Refresh();
 		}
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged));
 	}
 
 	protected override void OnSpawn()
@@ -31,6 +32,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	protected override void OnCmpDisable()
 	{
+		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged));
 		Components.Light2Ds.Remove(this);
 		base.OnCmpDisable();
 		this.Refresh();
@@ -49,6 +51,11 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 			this.liquidPartitionerEntry.Release();
 			this.liquidPartitionerEntry = null;
 		}
+	}
+
+	private void OnCellChanged()
+	{
+		base.GetComponent<Light2D>().Refresh();
 	}
 
 	private void UnregisterLight()

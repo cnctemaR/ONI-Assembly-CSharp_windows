@@ -53,7 +53,7 @@ public class MineralDeoxidizerConfig : IBuildingConfig
 		manualDeliveryKG.requestedItemTag = new Tag("Algae");
 		manualDeliveryKG.capacity = 330f;
 		manualDeliveryKG.refillMass = 132f;
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.OperateFetch.IdHash;
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)

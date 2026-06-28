@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-[DebuggerDisplay("{Id}")]
+[DebuggerDisplay("{IdHash}")]
 public class Resource
 {
 	public Resource()

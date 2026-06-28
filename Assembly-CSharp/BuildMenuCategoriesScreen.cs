@@ -103,7 +103,8 @@ public class BuildMenuCategoriesScreen : KIconToggleMenu
 		{
 			foreach (KIconToggleMenu.ToggleInfo toggleInfo in this.toggleInfo)
 			{
-				BuildMenu.Category category = ((BuildMenuCategoriesScreen.UserData)toggleInfo.userData).category;
+				BuildMenuCategoriesScreen.UserData userData = (BuildMenuCategoriesScreen.UserData)toggleInfo.userData;
+				BuildMenu.Category category = userData.category;
 				PlanScreen.RequirementsState categoryRequirements = this.GetCategoryRequirements(category);
 				bool flag = categoryRequirements == PlanScreen.RequirementsState.Tech;
 				toggleInfo.toggle.gameObject.SetActive(!flag);
@@ -113,13 +114,21 @@ public class BuildMenuCategoriesScreen : KIconToggleMenu
 					{
 						toggleInfo.toggle.fgImage.SetAlpha((!flag) ? 1f : 0.2509804f);
 						ImageToggleState.State state = ((this.selectedCategory == BuildMenu.Category.INVALID || category != this.selectedCategory) ? ImageToggleState.State.Disabled : ImageToggleState.State.DisabledActive);
-						this.SetImageToggleState(toggleInfo.toggle.gameObject, state);
+						if (userData.currentToggleState == null || userData.currentToggleState.GetValueOrDefault() != state)
+						{
+							userData.currentToggleState = new ImageToggleState.State?(state);
+							this.SetImageToggleState(toggleInfo.toggle.gameObject, state);
+						}
 					}
 				}
 				else
 				{
 					ImageToggleState.State state2 = ((this.selectedCategory != BuildMenu.Category.INVALID && category == this.selectedCategory) ? ImageToggleState.State.Active : ImageToggleState.State.Inactive);
-					this.SetImageToggleState(toggleInfo.toggle.gameObject, state2);
+					if (userData.currentToggleState == null || userData.currentToggleState.GetValueOrDefault() != state2)
+					{
+						userData.currentToggleState = new ImageToggleState.State?(state2);
+						this.SetImageToggleState(toggleInfo.toggle.gameObject, state2);
+					}
 				}
 				GameObject gameObject = toggleInfo.toggle.fgImage.transform.Find("ResearchIcon").gameObject;
 				gameObject.gameObject.SetActive(flag);
@@ -195,7 +204,8 @@ public class BuildMenuCategoriesScreen : KIconToggleMenu
 		this.UpdateBuildableStates(false);
 		foreach (KIconToggleMenu.ToggleInfo toggleInfo in this.toggleInfo)
 		{
-			BuildMenu.Category category = ((BuildMenuCategoriesScreen.UserData)toggleInfo.userData).category;
+			BuildMenuCategoriesScreen.UserData userData = (BuildMenuCategoriesScreen.UserData)toggleInfo.userData;
+			BuildMenu.Category category = userData.category;
 			if (updated_categories.Contains(category))
 			{
 				toggleInfo.toggle.gameObject.GetComponent<PlanCategoryNotifications>().ToggleAttention(true);
@@ -382,12 +392,14 @@ public class BuildMenuCategoriesScreen : KIconToggleMenu
 
 	private BuildMenu.Category selectedCategory = BuildMenu.Category.INVALID;
 
-	private struct UserData
+	private class UserData
 	{
 		public BuildMenu.Category category;
 
 		public int depth;
 
 		public PlanScreen.RequirementsState requirementsState;
+
+		public ImageToggleState.State? currentToggleState;
 	}
 }

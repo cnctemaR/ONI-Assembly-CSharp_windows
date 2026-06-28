@@ -64,20 +64,25 @@ public static class Sim
 			return -1;
 		}
 		Sim.GameDataUpdate* ptr2 = (Sim.GameDataUpdate*)(void*)intPtr;
-		Grid.CellValues = ptr2->cells;
-		Grid.DiseaseCellValues = ptr2->disease;
+		Grid.elementIdx = ptr2->elementIdx;
+		Grid.temperature = ptr2->temperature;
+		Grid.mass = ptr2->mass;
+		Grid.properties = ptr2->properties;
+		Grid.strengthInfo = ptr2->strengthInfo;
+		Grid.insulation = ptr2->insulation;
+		Grid.diseaseIdx = ptr2->diseaseIdx;
+		Grid.diseaseCount = ptr2->diseaseCount;
 		Grid.AccumulatedFlowValues = ptr2->accumulatedFlow;
 		PropertyTextures.externalFlowTex = ptr2->propertyTextureFlow;
 		PropertyTextures.externalLiquidTex = ptr2->propertyTextureLiquid;
-		Grid.InitializeCells(ptr2->cells);
+		Grid.InitializeCells();
 		return 0;
 	}
 
 	public static void Shutdown()
 	{
 		Sim.SIM_Shutdown();
-		Grid.CellValues = null;
-		Grid.DiseaseCellValues = null;
+		Grid.mass = null;
 	}
 
 	[DllImport("SimDLL")]
@@ -403,9 +408,21 @@ public static class Sim
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	public struct GameDataUpdate
 	{
-		public unsafe Sim.Cell* cells;
+		public unsafe byte* elementIdx;
 
-		public unsafe Sim.DiseaseCell* disease;
+		public unsafe float* temperature;
+
+		public unsafe float* mass;
+
+		public unsafe byte* properties;
+
+		public unsafe byte* insulation;
+
+		public unsafe byte* strengthInfo;
+
+		public unsafe byte* diseaseIdx;
+
+		public unsafe int* diseaseCount;
 
 		public int numSolidInfo;
 
@@ -698,6 +715,14 @@ public static class Sim
 		public float contaminatedOxygenConversionPercent;
 
 		public float biomeTemperatureLerpRate;
+
+		public byte isDebugEditing;
+
+		public byte pad0;
+
+		public byte pad1;
+
+		public byte pad2;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]

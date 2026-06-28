@@ -75,31 +75,15 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		base.Subscribe(824508782, new Action<object>(this.OnOperationalChanged));
 		base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
-		this.collisionCollider = base.GetComponent<KBoxCollider2D>();
-		GameObject gameObject = new GameObject("selection");
-		gameObject.transform.parent = base.transform;
-		gameObject.transform.SetLocalPosition(Vector3.zero);
-		this.selectionCollider = gameObject.AddComponent<KBoxCollider2D>();
-		this.selectionCollider.size = new Vector2(1f, 2f);
 		this.requestedState = this.CurrentState;
 		this.ApplyRequestedControlState(true);
 		if (this.rotatable.IsRotated)
 		{
-			Vector2 vector = new Vector2(2f, 1f);
-			Vector2 vector2 = new Vector2(0.5f, 0.5f);
-			this.collisionCollider.size = vector;
-			this.collisionCollider.offset = vector2;
-			this.selectionCollider.size = vector;
-			this.selectionCollider.offset = vector2;
 			foreach (int num in this.building.PlacementCells)
 			{
 				Grid.FakeFloor[num] = true;
 				Pathfinding.Instance.AddDirtyNavGridCell(num);
 			}
-		}
-		else
-		{
-			this.selectionCollider.offset = new Vector2(0f, 1f);
 		}
 		List<int> list = new List<int>();
 		foreach (int num2 in this.building.PlacementCells)
@@ -346,7 +330,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				this.changeStateChore.Cancel("Change state");
 			}
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, this);
-			this.changeStateChore = new WorkChore<Door>(Db.Get().ChoreTypes.Toggle, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			this.changeStateChore = new WorkChore<Door>(Db.Get().ChoreTypes.Toggle, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		}
 	}
 
@@ -392,7 +376,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				int num2 = 0;
 				foreach (int num3 in placementCells)
 				{
-					if (Grid.Cell[num3].mass > 0f)
+					if (Grid.Mass[num3] > 0f)
 					{
 						num2++;
 						num += Grid.Temperature[num3];
@@ -421,7 +405,6 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		}
 		else
 		{
-			this.collisionCollider.enabled = false;
 			this.controller.sm.isOpen.Set(true, this.controller);
 			if (this.operational.IsOperational)
 			{
@@ -454,7 +437,6 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				{
 					if (this.openCount == 0)
 					{
-						this.collisionCollider.enabled = true;
 						this.operational.SetActive(false, false);
 						this.controller.sm.isOpen.Set(false, this.controller);
 						this.userMenu.Refresh();
@@ -463,7 +445,6 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 			}
 			else
 			{
-				this.collisionCollider.enabled = true;
 				this.controller.sm.isOpen.Set(false, this.controller);
 			}
 		}
@@ -542,10 +523,6 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 
 	[MyCmpGet]
 	private EnergyConsumer consumer;
-
-	private KBoxCollider2D collisionCollider;
-
-	private KBoxCollider2D selectionCollider;
 
 	[SerializeField]
 	public bool hasComplexUserControls;
@@ -674,7 +651,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 
 		private Chore CreateUnsealChore(Door.Controller.Instance smi, bool approach_right)
 		{
-			return new WorkChore<Unsealable>(Db.Get().ChoreTypes.Toggle, smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			return new WorkChore<Unsealable>(Db.Get().ChoreTypes.Toggle, smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		}
 
 		public GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State open;

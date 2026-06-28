@@ -53,7 +53,7 @@ public class Def : ScriptableObject
 		}
 		if (!frame.IsValid())
 		{
-			Output.LogWarning(new object[] { "missing '" + animName + "' anim" });
+			Output.LogWarning(new object[] { string.Format("missing '{0}' anim in '{1}'", animName, AnimFile) });
 			return null;
 		}
 		if (data.elementCount == 0)

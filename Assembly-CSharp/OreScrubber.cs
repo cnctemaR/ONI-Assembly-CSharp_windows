@@ -46,10 +46,10 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 
 	public List<Descriptor> RequirementDescriptors(BuildingDef def)
 	{
-		return new List<Descriptor>
-		{
-			new Descriptor(string.Format(UI.BUILDINGEFFECTS.REQUIRESELEMENT, "anyElement", ElementLoader.FindElementByHash(this.consumedElement).name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESELEMENT, "anyElement", ElementLoader.FindElementByHash(this.consumedElement).name), Descriptor.DescriptorType.Requirement, false)
-		};
+		List<Descriptor> list = new List<Descriptor>();
+		string name = ElementLoader.FindElementByHash(this.consumedElement).name;
+		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.REQUIRESELEMENT, name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESELEMENT, name), Descriptor.DescriptorType.Requirement, false));
+		return list;
 	}
 
 	public List<Descriptor> EffectDescriptors(BuildingDef def)

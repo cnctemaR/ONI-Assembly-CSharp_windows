@@ -1,30 +1,500 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class JobsTableScreen : TableScreen
 {
-	public void SetCurrentSortChoreGroup(ChoreGroup chore_group)
+	public override float GetSortKey()
 	{
-		this.current_sort_choregroup = chore_group;
+		return 102f;
 	}
 
 	protected override void OnActivate()
 	{
+		JobsTableScreen.Instance = this;
 		this.title = UI.JOBSSCREEN.TITLE;
 		base.OnActivate();
-		base.AddPortraitColumn("Portrait", new Action<MinionIdentity, GameObject>(base.on_load_portrait), null, false);
-		base.AddButtonLabelColumn("Names", new Action<MinionIdentity, GameObject>(base.on_load_name_label), new Func<MinionIdentity, GameObject, string>(base.get_value_name_label), null, null, new Comparison<MinionIdentity>(base.compare_rows_alphabetical), null, new Action<MinionIdentity, GameObject, ToolTip>(base.on_tooltip_sort_alphabetically), true);
-		ChoreGroupTableColumn[] array = new ChoreGroupTableColumn[Db.Get().ChoreGroups.Count];
-		for (int i = 0; i < Db.Get().ChoreGroups.Count; i++)
+		this.resetSettingsButton.onClick += this.OnResetSettingsClicked;
+		this.priorityInfo = new List<JobsTableScreen.PriorityInfo>
 		{
-			array[i] = this.AddChoreGroupColumn(Db.Get().ChoreGroups[i].Id, Db.Get().ChoreGroups[i], new Action<MinionIdentity, GameObject>(this.on_load_value_choregroup), new Func<MinionIdentity, GameObject, TableScreen.ResultValues>(this.get_value_choregroup), new Action<GameObject>(this.on_press_choregroup), new Action<GameObject, TableScreen.ResultValues>(this.set_value_choregroup), new Comparison<MinionIdentity>(this.compare_chore_group), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_chore_group), new Action<MinionIdentity, GameObject, ToolTip>(this.on_sort_tooltip_chore_group));
+			new JobsTableScreen.PriorityInfo(0, Assets.GetSprite("icon_priority_disabled"), UI.JOBSSCREEN.PRIORITY.DISABLED),
+			new JobsTableScreen.PriorityInfo(1, Assets.GetSprite("icon_priority_down_2"), UI.JOBSSCREEN.PRIORITY.VERYLOW),
+			new JobsTableScreen.PriorityInfo(2, Assets.GetSprite("icon_priority_down"), UI.JOBSSCREEN.PRIORITY.LOW),
+			new JobsTableScreen.PriorityInfo(3, Assets.GetSprite("icon_priority_flat"), UI.JOBSSCREEN.PRIORITY.STANDARD),
+			new JobsTableScreen.PriorityInfo(4, Assets.GetSprite("icon_priority_up"), UI.JOBSSCREEN.PRIORITY.HIGH),
+			new JobsTableScreen.PriorityInfo(5, Assets.GetSprite("icon_priority_up_2"), UI.JOBSSCREEN.PRIORITY.VERYHIGH),
+			new JobsTableScreen.PriorityInfo(5, Assets.GetSprite("icon_priority_automatic"), UI.JOBSSCREEN.PRIORITY.VERYHIGH)
+		};
+		this.prioritySprites = new List<Sprite>();
+		foreach (JobsTableScreen.PriorityInfo priorityInfo in this.priorityInfo)
+		{
+			this.prioritySprites.Add(priorityInfo.sprite);
 		}
-		base.AddSuperCheckboxColumn("SuperCheckJobs", array, new Action<MinionIdentity, GameObject>(base.on_load_value_checkbox_column_super), new Func<MinionIdentity, GameObject, TableScreen.ResultValues>(this.get_value_checkbox_column_super), new Action<GameObject>(base.on_press_checkbox_column_super), new Action<GameObject, TableScreen.ResultValues>(base.set_value_checkbox_column_super), null, new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_chore_group_super));
+		base.AddPortraitColumn("Portrait", new Action<MinionIdentity, GameObject>(base.on_load_portrait), null, true);
+		base.AddButtonLabelColumn("Names", new Action<MinionIdentity, GameObject>(this.ConfigureNameLabel), new Func<MinionIdentity, GameObject, string>(base.get_value_name_label), delegate(GameObject widget_go)
+		{
+			base.GetWidgetRow(widget_go).SelectMinion();
+		}, delegate(GameObject widget_go)
+		{
+			base.GetWidgetRow(widget_go).SelectAndFocusMinion();
+		}, new Comparison<MinionIdentity>(base.compare_rows_alphabetical), null, new Action<MinionIdentity, GameObject, ToolTip>(base.on_tooltip_sort_alphabetically), false);
+		List<ChoreGroup> list = new List<ChoreGroup>(Db.Get().ChoreGroups);
+			from @group in list
+			orderby @group.DefaultPersonalPriority descending, @group.Name
+			select @group;
+		foreach (ChoreGroup choreGroup in list)
+		{
+			PrioritizationGroupTableColumn prioritizationGroupTableColumn = new PrioritizationGroupTableColumn(choreGroup, new Action<MinionIdentity, GameObject>(this.LoadValue), new Action<object, int>(this.ChangePersonalPriority), new Func<object, string>(this.HoverPersonalPriority), new Action<object, int>(this.ChangeColumnPriority), new Func<object, string>(this.HoverChangeColumnPriorityButton), new Action<object>(this.OnSortClicked), new Func<object, string>(this.OnSortHovered));
+			base.RegisterColumn(choreGroup.Id, prioritizationGroupTableColumn);
+		}
+		PrioritizeRowTableColumn prioritizeRowTableColumn = new PrioritizeRowTableColumn(null, new Action<object, int>(this.ChangeRowPriority), new Func<object, int, string>(this.HoverChangeRowPriorityButton));
+		base.RegisterColumn("prioritize_row", prioritizeRowTableColumn);
+		this.settingsButton.onClick += this.OnSettingsButtonClicked;
+		this.resetSettingsButton.onClick += this.OnResetSettingsClicked;
+		this.toggleAdvancedModeButton.onClick += this.OnAdvancedModeToggleClicked;
+		this.toggleAdvancedModeButton.fgImage.gameObject.SetActive(Game.Instance.advancedPersonalPriorities);
 		this.RefreshEffectListeners();
+	}
+
+	private string HoverPersonalPriority(object widget_go_obj)
+	{
+		GameObject gameObject = widget_go_obj as GameObject;
+		PrioritizationGroupTableColumn prioritizationGroupTableColumn = base.GetWidgetColumn(gameObject) as PrioritizationGroupTableColumn;
+		ChoreGroup choreGroup = prioritizationGroupTableColumn.userData as ChoreGroup;
+		string text = null;
+		TableRow widgetRow = base.GetWidgetRow(gameObject);
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Header)
+		{
+			if (rowType != TableRow.RowType.Default)
+			{
+				if (rowType == TableRow.RowType.Minion)
+				{
+					text = UI.JOBSSCREEN.ITEM_TOOLTIP.ToString();
+					text = text.Replace("{Name}", widgetRow.name);
+				}
+			}
+			else
+			{
+				text = UI.JOBSSCREEN.NEW_MINION_ITEM_TOOLTIP.ToString();
+			}
+			ToolTip componentInChildren = gameObject.GetComponentInChildren<ToolTip>();
+			IPersonalPriorityManager priorityManager = this.GetPriorityManager(widgetRow);
+			bool flag;
+			int personalPriority = priorityManager.GetPersonalPriority(choreGroup, out flag);
+			string text2 = this.GetPriorityStr(personalPriority);
+			MinionIdentity minionIdentity = widgetRow.GetMinionIdentity();
+			if (minionIdentity != null && flag)
+			{
+				text = UI.JOBSSCREEN.ITEM_AUTO_ASSIGNED_TOOLTIP.ToString();
+				text = text.Replace("{Role}", minionIdentity.GetComponent<MinionResume>().GetCurrentRoleString());
+				text = text.Replace("{Name}", minionIdentity.GetProperName());
+			}
+			if (priorityManager.IsChoreGroupDisabled(choreGroup))
+			{
+				Trait trait = null;
+				Traits component = minionIdentity.GetComponent<Traits>();
+				foreach (Trait trait2 in component)
+				{
+					if (trait2.disabledChoreGroups != null)
+					{
+						foreach (ChoreGroup choreGroup2 in trait2.disabledChoreGroups)
+						{
+							if (choreGroup2.IdHash == choreGroup.IdHash)
+							{
+								trait = trait2;
+								break;
+							}
+						}
+						if (trait != null)
+						{
+							break;
+						}
+					}
+				}
+				text = UI.JOBSSCREEN.TRAIT_DISABLED.ToString();
+				text = text.Replace("{Name}", minionIdentity.GetProperName());
+				text = text.Replace("{Job}", choreGroup.Name);
+				text = text.Replace("{Trait}", trait.Name);
+				componentInChildren.ClearMultiStringTooltip();
+				componentInChildren.AddMultiStringTooltip(text, null);
+			}
+			else
+			{
+				text = text.Replace("{Job}", choreGroup.Name);
+				text = text.Replace("{Priority}", text2);
+				componentInChildren.ClearMultiStringTooltip();
+				componentInChildren.AddMultiStringTooltip(text, null);
+				if (minionIdentity != null)
+				{
+					text = "\n" + UI.JOBSSCREEN.MINION_SKILL_TOOLTIP.ToString();
+					text = text.Replace("{Name}", minionIdentity.GetProperName());
+					text = text.Replace("{Attribute}", choreGroup.attribute.Name);
+					AttributeInstance attributeInstance = minionIdentity.GetAttributes().Get(choreGroup.attribute);
+					float totalValue = attributeInstance.GetTotalValue();
+					TextStyleSetting textStyleSetting = this.TooltipTextStyle_Ability;
+					if (totalValue > 0f)
+					{
+						textStyleSetting = this.TooltipTextStyle_AbilityPositiveModifier;
+					}
+					else if (totalValue < 0f)
+					{
+						textStyleSetting = this.TooltipTextStyle_AbilityNegativeModifier;
+					}
+					text += GameUtil.ColourizeString(textStyleSetting.textColor, totalValue.ToString());
+					componentInChildren.AddMultiStringTooltip(text, null);
+				}
+				componentInChildren.AddMultiStringTooltip(UI.HORIZONTAL_RULE + "\n" + this.GetUsageString(), null);
+			}
+			return string.Empty;
+		}
+		string text3 = UI.JOBSSCREEN.HEADER_TOOLTIP.ToString();
+		text3 = text3.Replace("{Job}", choreGroup.Name);
+		string text4 = UI.JOBSSCREEN.HEADER_DETAILS_TOOLTIP.ToString();
+		text4 = text4.Replace("{Description}", choreGroup.description);
+		HashSet<string> hashSet = new HashSet<string>();
+		foreach (ChoreType choreType in choreGroup.choreTypes)
+		{
+			hashSet.Add(choreType.Name);
+		}
+		StringBuilder stringBuilder = new StringBuilder();
+		int num = 0;
+		foreach (string text5 in hashSet)
+		{
+			stringBuilder.Append(text5);
+			if (num < hashSet.Count - 1)
+			{
+				stringBuilder.Append(", ");
+			}
+			num++;
+		}
+		text4 = text4.Replace("{ChoreList}", stringBuilder.ToString());
+		text3 = text3.Replace("{Details}", text4);
+		return text3;
+	}
+
+	private string HoverChangeColumnPriorityButton(object widget_go_obj)
+	{
+		GameObject gameObject = widget_go_obj as GameObject;
+		PrioritizationGroupTableColumn prioritizationGroupTableColumn = base.GetWidgetColumn(gameObject) as PrioritizationGroupTableColumn;
+		ChoreGroup choreGroup = prioritizationGroupTableColumn.userData as ChoreGroup;
+		LocString header_CHANGE_TOOLTIP = UI.JOBSSCREEN.HEADER_CHANGE_TOOLTIP;
+		string text = header_CHANGE_TOOLTIP.ToString();
+		return text.Replace("{Job}", choreGroup.Name);
+	}
+
+	private string GetUsageString()
+	{
+		return UI.JOBSSCREEN.INCREASE_PRIORITY_TUTORIAL.ToString().Replace("{Key}", GameUtil.GetHotkeyString(global::Action.MouseLeft)) + "\n" + UI.JOBSSCREEN.DECREASE_PRIORITY_TUTORIAL.ToString().Replace("{Key}", GameUtil.GetHotkeyString(global::Action.MouseRight));
+	}
+
+	private string HoverChangeRowPriorityButton(object widget_go_obj, int delta)
+	{
+		GameObject gameObject = widget_go_obj as GameObject;
+		LocString locString = null;
+		LocString locString2 = null;
+		string text = null;
+		TableRow widgetRow = base.GetWidgetRow(gameObject);
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Header)
+		{
+			if (rowType != TableRow.RowType.Default)
+			{
+				if (rowType == TableRow.RowType.Minion)
+				{
+					locString = UI.JOBSSCREEN.INCREASE_ROW_PRIORITY_MINION_TOOLTIP;
+					locString2 = UI.JOBSSCREEN.DECREASE_ROW_PRIORITY_MINION_TOOLTIP;
+					text = widgetRow.GetMinionIdentity().GetProperName();
+				}
+			}
+			else
+			{
+				locString = UI.JOBSSCREEN.INCREASE_ROW_PRIORITY_NEW_MINION_TOOLTIP;
+				locString2 = UI.JOBSSCREEN.DECREASE_ROW_PRIORITY_NEW_MINION_TOOLTIP;
+			}
+			LocString locString3 = ((delta <= 0) ? locString2 : locString);
+			string text2 = locString3.ToString();
+			if (text != null)
+			{
+				text2 = text2.Replace("{Name}", text);
+			}
+			return text2;
+		}
+		return null;
+	}
+
+	private void OnSortClicked(object widget_go_obj)
+	{
+		GameObject gameObject = widget_go_obj as GameObject;
+		PrioritizationGroupTableColumn prioritizationGroupTableColumn = base.GetWidgetColumn(gameObject) as PrioritizationGroupTableColumn;
+		ChoreGroup chore_group = prioritizationGroupTableColumn.userData as ChoreGroup;
+		if (this.active_sort_column == prioritizationGroupTableColumn)
+		{
+			this.sort_is_reversed = !this.sort_is_reversed;
+		}
+		this.active_sort_column = prioritizationGroupTableColumn;
+		this.active_sort_method = delegate(MinionIdentity m1, MinionIdentity m2)
+		{
+			ChoreConsumer component = m1.GetComponent<ChoreConsumer>();
+			ChoreConsumer component2 = m2.GetComponent<ChoreConsumer>();
+			bool flag;
+			int personalPriority = component.GetPersonalPriority(chore_group, out flag);
+			int personalPriority2 = component2.GetPersonalPriority(chore_group, out flag);
+			return personalPriority2 - personalPriority;
+		};
+		base.SortRows();
+	}
+
+	private string OnSortHovered(object widget_go_obj)
+	{
+		GameObject gameObject = widget_go_obj as GameObject;
+		PrioritizationGroupTableColumn prioritizationGroupTableColumn = base.GetWidgetColumn(gameObject) as PrioritizationGroupTableColumn;
+		ChoreGroup choreGroup = prioritizationGroupTableColumn.userData as ChoreGroup;
+		return UI.JOBSSCREEN.SORT_TOOLTIP.ToString().Replace("{Job}", choreGroup.Name);
+	}
+
+	private IPersonalPriorityManager GetPriorityManager(TableRow row)
+	{
+		IPersonalPriorityManager personalPriorityManager = null;
+		TableRow.RowType rowType = row.rowType;
+		if (rowType != TableRow.RowType.Default)
+		{
+			if (rowType == TableRow.RowType.Minion)
+			{
+				personalPriorityManager = row.GetMinionIdentity().GetComponent<ChoreConsumer>();
+			}
+		}
+		else
+		{
+			personalPriorityManager = Immigration.Instance;
+		}
+		return personalPriorityManager;
+	}
+
+	private LocString GetPriorityStr(int priority)
+	{
+		priority = Mathf.Clamp(priority, 0, 5);
+		LocString locString = null;
+		foreach (JobsTableScreen.PriorityInfo priorityInfo in this.priorityInfo)
+		{
+			if (priorityInfo.priority == priority)
+			{
+				locString = priorityInfo.name;
+			}
+		}
+		return locString;
+	}
+
+	private void LoadValue(MinionIdentity minion, GameObject widget_go)
+	{
+		if (widget_go == null)
+		{
+			return;
+		}
+		PrioritizationGroupTableColumn prioritizationGroupTableColumn = base.GetWidgetColumn(widget_go) as PrioritizationGroupTableColumn;
+		ChoreGroup choreGroup = prioritizationGroupTableColumn.userData as ChoreGroup;
+		TableRow widgetRow = base.GetWidgetRow(widget_go);
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType == TableRow.RowType.Header)
+		{
+			this.InitializeHeader(choreGroup, widget_go);
+		}
+		IPersonalPriorityManager priorityManager = this.GetPriorityManager(widgetRow);
+		if (priorityManager != null)
+		{
+			this.UpdateWidget(widget_go, choreGroup, priorityManager);
+		}
+	}
+
+	private JobsTableScreen.PriorityInfo GetPriorityInfo(int priority)
+	{
+		JobsTableScreen.PriorityInfo priorityInfo = default(JobsTableScreen.PriorityInfo);
+		for (int i = 0; i < this.priorityInfo.Count; i++)
+		{
+			if (this.priorityInfo[i].priority == priority)
+			{
+				priorityInfo = this.priorityInfo[i];
+				break;
+			}
+		}
+		return priorityInfo;
+	}
+
+	private void ChangePersonalPriority(object widget_go_obj, int delta)
+	{
+		GameObject gameObject = widget_go_obj as GameObject;
+		if (widget_go_obj == null)
+		{
+			return;
+		}
+		TableRow widgetRow = base.GetWidgetRow(gameObject);
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Header)
+		{
+		}
+		PrioritizationGroupTableColumn prioritizationGroupTableColumn = base.GetWidgetColumn(gameObject) as PrioritizationGroupTableColumn;
+		ChoreGroup choreGroup = prioritizationGroupTableColumn.userData as ChoreGroup;
+		IPersonalPriorityManager priorityManager = this.GetPriorityManager(widgetRow);
+		this.ChangePersonalPriority(priorityManager, choreGroup, delta, true);
+		this.UpdateWidget(gameObject, choreGroup, priorityManager);
+	}
+
+	private void ChangeColumnPriority(object widget_go_obj, int new_priority)
+	{
+		GameObject gameObject = widget_go_obj as GameObject;
+		if (widget_go_obj == null)
+		{
+			return;
+		}
+		TableRow widgetRow = base.GetWidgetRow(gameObject);
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Header)
+		{
+		}
+		PrioritizationGroupTableColumn prioritizationGroupTableColumn = base.GetWidgetColumn(gameObject) as PrioritizationGroupTableColumn;
+		ChoreGroup choreGroup = prioritizationGroupTableColumn.userData as ChoreGroup;
+		foreach (TableRow tableRow in this.rows)
+		{
+			IPersonalPriorityManager priorityManager = this.GetPriorityManager(tableRow);
+			if (priorityManager != null)
+			{
+				priorityManager.SetPersonalPriority(choreGroup, new_priority, false);
+				GameObject widget = tableRow.GetWidget(prioritizationGroupTableColumn);
+				this.UpdateWidget(widget, choreGroup, priorityManager);
+			}
+		}
+	}
+
+	private void ChangeRowPriority(object widget_go_obj, int delta)
+	{
+		GameObject gameObject = widget_go_obj as GameObject;
+		if (widget_go_obj == null)
+		{
+			return;
+		}
+		TableRow widgetRow = base.GetWidgetRow(gameObject);
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Header)
+		{
+			IPersonalPriorityManager priorityManager = this.GetPriorityManager(widgetRow);
+			foreach (TableColumn tableColumn in this.columns.Values)
+			{
+				PrioritizationGroupTableColumn prioritizationGroupTableColumn = tableColumn as PrioritizationGroupTableColumn;
+				if (prioritizationGroupTableColumn != null)
+				{
+					ChoreGroup choreGroup = prioritizationGroupTableColumn.userData as ChoreGroup;
+					GameObject widget = widgetRow.GetWidget(prioritizationGroupTableColumn);
+					this.ChangePersonalPriority(priorityManager, choreGroup, delta, false);
+					this.UpdateWidget(widget, choreGroup, priorityManager);
+				}
+			}
+			return;
+		}
+	}
+
+	private void ChangePersonalPriority(IPersonalPriorityManager priority_mgr, ChoreGroup chore_group, int delta, bool wrap_around)
+	{
+		if (priority_mgr.IsChoreGroupDisabled(chore_group))
+		{
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
+			return;
+		}
+		bool flag;
+		int num = priority_mgr.GetPersonalPriority(chore_group, out flag);
+		bool flag2 = false;
+		if (num == 5)
+		{
+			if (delta > 0)
+			{
+				if (priority_mgr.CanRoleManageChoreGroup(chore_group))
+				{
+					flag2 = true;
+				}
+			}
+			else if (!flag)
+			{
+				num += delta;
+			}
+		}
+		else
+		{
+			num += delta;
+		}
+		num = Mathf.Clamp(num, 0, 5);
+		if (wrap_around)
+		{
+			num %= 6;
+			if (num < 0)
+			{
+				num += 6;
+			}
+		}
+		priority_mgr.SetPersonalPriority(chore_group, num, flag2);
+		if (delta > 0)
+		{
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
+		}
+		else
+		{
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Deselect", false));
+		}
+	}
+
+	private void UpdateWidget(GameObject widget_go, ChoreGroup chore_group, IPersonalPriorityManager priority_mgr)
+	{
+		int num = 0;
+		bool flag = false;
+		int num2 = 0;
+		bool flag2 = priority_mgr.IsChoreGroupDisabled(chore_group);
+		if (!flag2)
+		{
+			num2 = priority_mgr.GetPersonalPriority(chore_group, out flag);
+		}
+		num2 = Mathf.Clamp(num2, 0, 5);
+		if (!flag)
+		{
+			for (int i = 0; i < this.priorityInfo.Count - 1; i++)
+			{
+				if (this.priorityInfo[i].priority == num2)
+				{
+					num = i;
+					break;
+				}
+			}
+		}
+		else
+		{
+			num = this.priorityInfo.Count - 1;
+		}
+		OptionSelector component = widget_go.GetComponent<OptionSelector>();
+		int associatedSkillLevel = priority_mgr.GetAssociatedSkillLevel(chore_group);
+		Color32 color = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, 128);
+		if (associatedSkillLevel > 0)
+		{
+			float num3 = (float)(associatedSkillLevel - this.skillLevelLow);
+			num3 /= (float)(this.skillLevelHigh - this.skillLevelLow);
+			color = Color32.Lerp(this.skillOutlineColourLow, this.skillOutlineColourHigh, num3);
+		}
+		component.ConfigureItem(flag2, new OptionSelector.DisplayOptionInfo
+		{
+			bgOptions = null,
+			fgOptions = this.prioritySprites,
+			bgIndex = 0,
+			fgIndex = num,
+			fillColour = color
+		});
+		ToolTip componentInChildren = widget_go.transform.GetComponentInChildren<ToolTip>();
+		if (componentInChildren != null)
+		{
+			componentInChildren.toolTip = this.HoverPersonalPriority(widget_go);
+			componentInChildren.forceRefresh = true;
+		}
 	}
 
 	public void ToggleColumnSortWidgets(bool show)
@@ -34,6 +504,33 @@ public class JobsTableScreen : TableScreen
 			if (keyValuePair.Value.column_sort_toggle != null)
 			{
 				keyValuePair.Value.column_sort_toggle.gameObject.SetActive(show);
+			}
+		}
+	}
+
+	public void Refresh(MinionResume minion_resume)
+	{
+		if (this == null)
+		{
+			return;
+		}
+		foreach (TableRow tableRow in this.rows)
+		{
+			MinionIdentity minionIdentity = tableRow.GetMinionIdentity();
+			if (!(minionIdentity == null))
+			{
+				if (!(minionIdentity.gameObject != minion_resume.gameObject))
+				{
+					foreach (TableColumn tableColumn in this.columns.Values)
+					{
+						PrioritizationGroupTableColumn prioritizationGroupTableColumn = tableColumn as PrioritizationGroupTableColumn;
+						if (prioritizationGroupTableColumn != null)
+						{
+							GameObject widget = tableRow.GetWidget(prioritizationGroupTableColumn);
+							this.UpdateWidget(widget, prioritizationGroupTableColumn.userData as ChoreGroup, minionIdentity.GetComponent<ChoreConsumer>());
+						}
+					}
+				}
 			}
 		}
 	}
@@ -54,7 +551,8 @@ public class JobsTableScreen : TableScreen
 		int num2 = 0;
 		for (int i = 0; i < this.header_row.transform.childCount; i++)
 		{
-			LayoutElement component = this.header_row.transform.GetChild(i).GetComponent<LayoutElement>();
+			Transform child = this.header_row.transform.GetChild(i);
+			LayoutElement component = child.GetComponent<LayoutElement>();
 			if (component != null && !component.ignoreLayout)
 			{
 				num2++;
@@ -62,19 +560,23 @@ public class JobsTableScreen : TableScreen
 			}
 			else
 			{
-				HorizontalLayoutGroup component2 = this.header_row.transform.GetChild(i).GetComponent<HorizontalLayoutGroup>();
+				HorizontalOrVerticalLayoutGroup component2 = child.GetComponent<HorizontalOrVerticalLayoutGroup>();
 				if (component2 != null)
 				{
-					num += component2.rectTransform().sizeDelta.x;
+					float x = component2.rectTransform().sizeDelta.x;
+					num += x;
 					num2++;
 				}
 			}
 		}
-		float num3 = (base.gameObject.rectTransform().rect.width - num) / (float)num2;
-		this.header_row.GetComponent<HorizontalLayoutGroup>().spacing = num3;
+		float width = base.gameObject.rectTransform().rect.width;
+		float num3 = 0f;
+		HorizontalLayoutGroup component3 = this.header_row.GetComponent<HorizontalLayoutGroup>();
+		component3.spacing = num3;
+		component3.childAlignment = TextAnchor.UpperLeft;
 		foreach (TableRow tableRow in this.rows)
 		{
-			tableRow.GetComponent<HorizontalLayoutGroup>().spacing = num3;
+			tableRow.transform.GetComponentInChildren<HorizontalLayoutGroup>().spacing = num3;
 		}
 	}
 
@@ -149,538 +651,324 @@ public class JobsTableScreen : TableScreen
 	{
 		foreach (KeyValuePair<string, TableColumn> keyValuePair in this.columns)
 		{
-			foreach (KeyValuePair<TableRow, GameObject> keyValuePair2 in keyValuePair.Value.widgets_by_row)
+			if (keyValuePair.Value != null)
 			{
-				if (!(keyValuePair2.Value == null))
+				if (keyValuePair.Value.on_load_action != null)
 				{
-					if (!(keyValuePair2.Key.GetMinionIdentity() != id))
+					foreach (KeyValuePair<TableRow, GameObject> keyValuePair2 in keyValuePair.Value.widgets_by_row)
 					{
-						keyValuePair.Value.on_load_action(id, keyValuePair2.Value);
+						if (!(keyValuePair2.Value == null))
+						{
+							if (!(keyValuePair2.Key.GetMinionIdentity() != id))
+							{
+								keyValuePair.Value.on_load_action(id, keyValuePair2.Value);
+							}
+						}
 					}
+					keyValuePair.Value.on_load_action(null, this.rows[0].GetWidget(keyValuePair.Value));
 				}
 			}
-			keyValuePair.Value.on_load_action(null, this.rows[0].GetWidget(keyValuePair.Value));
 		}
 	}
 
-	private void set_value_choregroup(GameObject widget_go, TableScreen.ResultValues new_value)
+	protected override void OnCmpDisable()
 	{
-		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		if (widgetRow == null)
+		global::UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+		base.OnCmpDisable();
+		foreach (TableColumn tableColumn in this.columns.Values)
 		{
-			global::Debug.LogWarning("Row is null", null);
+			foreach (TableRow tableRow in this.rows)
+			{
+				GameObject widget = tableRow.GetWidget(tableColumn);
+				if (!(widget == null))
+				{
+					GroupSelectorWidget[] componentsInChildren = widget.GetComponentsInChildren<GroupSelectorWidget>();
+					if (componentsInChildren != null)
+					{
+						foreach (GroupSelectorWidget groupSelectorWidget in componentsInChildren)
+						{
+							groupSelectorWidget.CloseSubPanel();
+						}
+					}
+					GroupSelectorHeaderWidget[] componentsInChildren2 = widget.GetComponentsInChildren<GroupSelectorHeaderWidget>();
+					if (componentsInChildren2 != null)
+					{
+						foreach (GroupSelectorHeaderWidget groupSelectorHeaderWidget in componentsInChildren2)
+						{
+							groupSelectorHeaderWidget.CloseSubPanel();
+						}
+					}
+					SelectablePanel[] componentsInChildren3 = widget.GetComponentsInChildren<SelectablePanel>();
+					if (componentsInChildren3 != null)
+					{
+						foreach (SelectablePanel selectablePanel in componentsInChildren3)
+						{
+							selectablePanel.gameObject.SetActive(false);
+						}
+					}
+				}
+			}
+		}
+		this.optionsPanel.gameObject.SetActive(false);
+	}
+
+	private void GetMouseHoverInfo(out bool is_hovering_screen, out bool is_hovering_button)
+	{
+		global::UnityEngine.EventSystems.EventSystem current = global::UnityEngine.EventSystems.EventSystem.current;
+		if (current == null)
+		{
+			is_hovering_button = false;
+			is_hovering_screen = false;
+		}
+		List<RaycastResult> list = new List<RaycastResult>();
+		current.RaycastAll(new PointerEventData(current)
+		{
+			position = Input.mousePosition
+		}, list);
+		bool flag = false;
+		bool flag2 = false;
+		foreach (RaycastResult raycastResult in list)
+		{
+			if (raycastResult.gameObject.GetComponent<OptionSelector>() != null || (raycastResult.gameObject.transform.parent != null && raycastResult.gameObject.transform.parent.GetComponent<OptionSelector>() != null))
+			{
+				flag = true;
+				flag2 = true;
+				break;
+			}
+			if (this.HasParent(raycastResult.gameObject, base.gameObject))
+			{
+				flag2 = true;
+			}
+		}
+		is_hovering_screen = flag2;
+		is_hovering_button = flag;
+	}
+
+	public override void OnKeyDown(KButtonEvent e)
+	{
+		bool flag = false;
+		if (e.IsAction(global::Action.MouseRight))
+		{
+			bool flag2;
+			bool flag3;
+			this.GetMouseHoverInfo(out flag2, out flag3);
+			if (flag2)
+			{
+				flag = true;
+				if (!e.Consumed)
+				{
+					e.TryConsume(global::Action.MouseRight);
+				}
+			}
+		}
+		if (!flag)
+		{
+			base.OnKeyDown(e);
+		}
+	}
+
+	public override void OnKeyUp(KButtonEvent e)
+	{
+		bool flag = false;
+		if (e.IsAction(global::Action.MouseRight))
+		{
+			bool flag2;
+			bool flag3;
+			this.GetMouseHoverInfo(out flag2, out flag3);
+			if (flag2)
+			{
+				flag = true;
+				if (!flag3)
+				{
+					UISounds.PlaySound(UISounds.Sound.Negative);
+				}
+				if (!e.Consumed)
+				{
+					e.TryConsume(global::Action.MouseRight);
+				}
+			}
+		}
+		if (!flag)
+		{
+			base.OnKeyUp(e);
+		}
+	}
+
+	private bool HasParent(GameObject obj, GameObject parent)
+	{
+		bool flag = false;
+		Transform transform = parent.transform;
+		Transform transform2 = obj.transform;
+		while (transform2 != null)
+		{
+			if (transform2 == transform)
+			{
+				flag = true;
+				break;
+			}
+			transform2 = transform2.parent;
+		}
+		return flag;
+	}
+
+	private void ConfigureNameLabel(MinionIdentity minion, GameObject widget_go)
+	{
+		base.on_load_name_label(minion, widget_go);
+		if (minion == null)
+		{
 			return;
 		}
-		ChoreGroupTableColumn choreGroupTableColumn = base.GetWidgetColumn(widget_go) as ChoreGroupTableColumn;
-		MinionIdentity minionIdentity = widgetRow.GetMinionIdentity();
-		ChoreGroup chore_group = choreGroupTableColumn.chore_group;
-		TableRow.RowType rowType = widgetRow.rowType;
-		if (rowType != TableRow.RowType.Header)
+		ToolTip component = widget_go.GetComponent<ToolTip>();
+		if (component != null)
 		{
-			if (rowType != TableRow.RowType.Default)
+			ToolTip toolTip = component;
+			toolTip.OnToolTip = (Func<string>)Delegate.Combine(toolTip.OnToolTip, new Func<string>(delegate
 			{
-				if (rowType == TableRow.RowType.Minion)
+				StringBuilder stringBuilder = new StringBuilder();
+				stringBuilder.Append("<b>" + UI.DETAILTABS.STATS.NAME + "</b>");
+				foreach (AttributeInstance attributeInstance in minion.GetAttributes())
 				{
-					if (minionIdentity != null)
+					if (attributeInstance.Attribute.ShowInUI == Klei.AI.Attribute.Display.Skill)
 					{
-						ChoreConsumer component = minionIdentity.GetComponent<ChoreConsumer>();
-						if (component == null)
+						string text = UIConstants.ColorPrefixWhite;
+						if (attributeInstance.GetTotalValue() > 0f)
 						{
-							global::Debug.LogError("Could not find minion identity / row associated with the widget", null);
-							return;
+							text = UIConstants.ColorPrefixGreen;
 						}
-						if (new_value != TableScreen.ResultValues.True)
+						else if (attributeInstance.GetTotalValue() < 0f)
 						{
-							if (new_value == TableScreen.ResultValues.False)
-							{
-								component.SetPermitted(chore_group, false);
-							}
+							text = UIConstants.ColorPrefixRed;
 						}
-						else
+						stringBuilder.Append(string.Concat(new object[]
 						{
-							component.SetPermitted(chore_group, true);
-						}
-						choreGroupTableColumn.on_load_action(widgetRow.GetMinionIdentity(), widget_go);
-						foreach (KeyValuePair<TableRow, GameObject> keyValuePair in choreGroupTableColumn.widgets_by_row)
-						{
-							if (keyValuePair.Key.rowType == TableRow.RowType.Header)
-							{
-								choreGroupTableColumn.on_load_action(null, keyValuePair.Value);
-								break;
-							}
-						}
+							"\n    • ",
+							attributeInstance.Name,
+							": ",
+							text,
+							attributeInstance.GetTotalValue(),
+							UIConstants.ColorSuffix
+						}));
 					}
 				}
-			}
-			else
-			{
-				if (new_value == TableScreen.ResultValues.True)
-				{
-					ChoreGroupManager.instance.DefaultChorePermission[chore_group.Id.ToTag()] = 2;
-				}
-				else
-				{
-					ChoreGroupManager.instance.DefaultChorePermission[chore_group.Id.ToTag()] = 0;
-				}
-				choreGroupTableColumn.on_load_action(minionIdentity, widget_go);
-				foreach (KeyValuePair<TableRow, GameObject> keyValuePair2 in choreGroupTableColumn.widgets_by_row)
-				{
-					if (keyValuePair2.Key.rowType == TableRow.RowType.Header)
-					{
-						choreGroupTableColumn.on_load_action(null, keyValuePair2.Value);
-						break;
-					}
-				}
-			}
-		}
-		else
-		{
-			this.set_value_choregroup(this.default_row.GetComponent<TableRow>().GetWidget(choreGroupTableColumn), new_value);
-			base.StartCoroutine(base.CascadeSetColumnCheckBoxes(this.sortable_rows, choreGroupTableColumn, new_value, widget_go));
+				return stringBuilder.ToString();
+			}));
 		}
 	}
 
-	private void on_press_choregroup(GameObject widget_go)
+	private void InitializeHeader(ChoreGroup chore_group, GameObject widget_go)
 	{
-		ChoreGroupTableColumn choreGroupTableColumn = base.GetWidgetColumn(widget_go) as ChoreGroupTableColumn;
-		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		MinionIdentity minionIdentity = widgetRow.GetMinionIdentity();
-		TableRow.RowType rowType = widgetRow.rowType;
-		if (rowType != TableRow.RowType.Header)
+		HierarchyReferences component = widget_go.GetComponent<HierarchyReferences>();
+		HierarchyReferences hierarchyReferences = component.GetReference("PrioritizationWidget") as HierarchyReferences;
+		GameObject items_root = hierarchyReferences.GetReference("ItemPanel").gameObject;
+		if (items_root.transform.childCount > 0)
 		{
-			if (rowType != TableRow.RowType.Default)
-			{
-				if (rowType == TableRow.RowType.Minion)
-				{
-					if (minionIdentity != null)
-					{
-						ChoreConsumer component = minionIdentity.GetComponent<ChoreConsumer>();
-						if (component == null)
-						{
-							global::Debug.LogError("Could not find minion identity / row associated with the widget", null);
-							return;
-						}
-						ChoreGroup choreGroup = choreGroupTableColumn.chore_group;
-						MinionResume component2 = minionIdentity.GetComponent<MinionResume>();
-						if (component2 == null)
-						{
-							global::Debug.LogError("Could not find minion resume / row associated with the widget", null);
-							return;
-						}
-						if (component.IsPermitted(choreGroup))
-						{
-							choreGroupTableColumn.on_set_action(widget_go, TableScreen.ResultValues.False);
-						}
-						else
-						{
-							choreGroupTableColumn.on_set_action(widget_go, TableScreen.ResultValues.True);
-						}
-						choreGroupTableColumn.on_load_action(minionIdentity, widget_go);
-					}
-				}
-			}
-			else
-			{
-				ChoreGroup choreGroup = choreGroupTableColumn.chore_group;
-				switch (ChoreGroupManager.instance.DefaultChorePermission[choreGroup.Id.ToTag()])
-				{
-				case 0:
-					choreGroupTableColumn.on_set_action(widget_go, TableScreen.ResultValues.True);
-					break;
-				case 1:
-				case 3:
-					choreGroupTableColumn.on_set_action(widget_go, TableScreen.ResultValues.True);
-					break;
-				case 2:
-					choreGroupTableColumn.on_set_action(widget_go, TableScreen.ResultValues.False);
-					break;
-				}
-				choreGroupTableColumn.on_load_action(null, widget_go);
-			}
-		}
-		else
-		{
-			switch (this.get_value_choregroup(null, widget_go))
-			{
-			case TableScreen.ResultValues.False:
-				choreGroupTableColumn.on_set_action(widget_go, TableScreen.ResultValues.True);
-				break;
-			case TableScreen.ResultValues.Partial:
-			case TableScreen.ResultValues.ConditionalGroup:
-				choreGroupTableColumn.on_set_action(widget_go, TableScreen.ResultValues.True);
-				break;
-			case TableScreen.ResultValues.True:
-				choreGroupTableColumn.on_set_action(widget_go, TableScreen.ResultValues.False);
-				break;
-			}
-			choreGroupTableColumn.on_load_action(null, widget_go);
-		}
-	}
-
-	private void on_load_value_choregroup(MinionIdentity minion, GameObject widget_go)
-	{
-		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		TableColumn widgetColumn = base.GetWidgetColumn(widget_go);
-		ChoreGroup chore_group = (widgetColumn as ChoreGroupTableColumn).chore_group;
-		TableRow.RowType rowType = widgetRow.rowType;
-		if (rowType != TableRow.RowType.Header)
-		{
-			if (rowType != TableRow.RowType.Default)
-			{
-				if (rowType == TableRow.RowType.Minion)
-				{
-					if (minion != null && widgetRow.GetMinionIdentity().GetComponent<ChoreConsumer>().IsEnabled(chore_group))
-					{
-						MultiToggle multiToggle = widget_go.GetComponent<MultiToggle>();
-						TableScreen.ResultValues resultValues = this.get_value_choregroup(minion, widget_go);
-						if (resultValues != TableScreen.ResultValues.False)
-						{
-							if (resultValues != TableScreen.ResultValues.True)
-							{
-								if (resultValues == TableScreen.ResultValues.ConditionalGroup)
-								{
-									multiToggle.ChangeState(2);
-								}
-							}
-							else
-							{
-								multiToggle.ChangeState(1);
-							}
-						}
-						else
-						{
-							multiToggle.ChangeState(0);
-						}
-						Image image = widget_go.GetComponent<HierarchyReferences>().GetReference("BGImage") as Image;
-						AttributeInstance attributeInstance = minion.GetAttributes().Get((base.GetWidgetColumn(widget_go) as ChoreGroupTableColumn).chore_group.attribute);
-						Color color = Color.Lerp(Color.white, new Color(0.72156864f, 0.44313726f, 0.5803922f, 1f), GameUtil.AttributeSkillToAlpha(attributeInstance));
-						image.color = color;
-					}
-				}
-			}
-			else
-			{
-				MultiToggle multiToggle = widget_go.GetComponent<MultiToggle>();
-				TableScreen.ResultValues resultValues2 = this.get_value_choregroup(minion, widget_go);
-				if (resultValues2 != TableScreen.ResultValues.False)
-				{
-					if (resultValues2 != TableScreen.ResultValues.True)
-					{
-						if (resultValues2 == TableScreen.ResultValues.ConditionalGroup)
-						{
-							multiToggle.ChangeState(2);
-						}
-					}
-					else
-					{
-						multiToggle.ChangeState(1);
-					}
-				}
-				else
-				{
-					multiToggle.ChangeState(0);
-				}
-			}
-		}
-		else
-		{
-			Image image2 = widget_go.GetComponent<HierarchyReferences>().GetReference("PortraitImage") as Image;
-			image2.rectTransform.sizeDelta = new Vector2(0f, -14f);
-			MultiToggle multiToggle2 = widget_go.GetComponent<HierarchyReferences>().GetReference("Toggle") as MultiToggle;
-			multiToggle2.ChangeState((int)this.get_value_choregroup(minion, widget_go));
-		}
-	}
-
-	protected void on_tooltip_name(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
-	{
-		tooltip.ClearMultiStringTooltip();
-		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		TableRow.RowType rowType = widgetRow.rowType;
-		if (rowType != TableRow.RowType.Default)
-		{
-			if (rowType != TableRow.RowType.Header)
-			{
-				if (rowType == TableRow.RowType.Minion)
-				{
-					if (minion != null)
-					{
-						tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.GOTO_DUPLICANT_BUTTON, minion.GetProperName()), null);
-					}
-				}
-			}
-		}
-	}
-
-	private TableScreen.ResultValues get_value_choregroup(MinionIdentity minion, GameObject widget_go)
-	{
-		ChoreGroupTableColumn choreGroupTableColumn = base.GetWidgetColumn(widget_go) as ChoreGroupTableColumn;
-		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		TableScreen.ResultValues resultValues = TableScreen.ResultValues.False;
-		ChoreGroup chore_group = choreGroupTableColumn.chore_group;
-		TableRow.RowType rowType = widgetRow.rowType;
-		if (rowType != TableRow.RowType.Header)
-		{
-			if (rowType != TableRow.RowType.Default)
-			{
-				if (rowType == TableRow.RowType.Minion)
-				{
-					if (minion != null)
-					{
-						ChoreConsumer component = minion.GetComponent<ChoreConsumer>();
-						resultValues = ((!component.IsPermitted(chore_group)) ? TableScreen.ResultValues.False : TableScreen.ResultValues.True);
-						if (resultValues == TableScreen.ResultValues.False)
-						{
-							RoleConfig role = Game.Instance.roleManager.GetRole(minion.GetComponent<MinionResume>().CurrentRole);
-							if (role != null && role.id != "NoRole" && minion.GetComponent<MinionResume>().IsChoreGroupInCurrentRoleGroup(chore_group))
-							{
-								resultValues = TableScreen.ResultValues.ConditionalGroup;
-							}
-						}
-					}
-					else
-					{
-						global::Debug.Log("Minion is null :( ", null);
-					}
-				}
-			}
-			else
-			{
-				resultValues = (TableScreen.ResultValues)ChoreGroupManager.instance.DefaultChorePermission[chore_group.Id.ToTag()];
-			}
-		}
-		else
-		{
-			bool flag = true;
-			bool flag2 = true;
-			bool flag3 = false;
-			bool flag4 = false;
-			bool flag5 = false;
-			foreach (KeyValuePair<TableRow, GameObject> keyValuePair in choreGroupTableColumn.widgets_by_row)
-			{
-				GameObject value = keyValuePair.Value;
-				if (!(value == widget_go))
-				{
-					if (!(value == null))
-					{
-						if (!(keyValuePair.Key.GetMinionIdentity() != null) || keyValuePair.Key.GetMinionIdentity().GetComponent<ChoreConsumer>().IsEnabled(chore_group))
-						{
-							switch (choreGroupTableColumn.get_value_action(keyValuePair.Key.GetMinionIdentity(), value))
-							{
-							case TableScreen.ResultValues.False:
-								flag2 = false;
-								if (!flag)
-								{
-									flag5 = true;
-								}
-								break;
-							case TableScreen.ResultValues.Partial:
-								flag4 = true;
-								flag5 = true;
-								break;
-							case TableScreen.ResultValues.True:
-								flag4 = true;
-								flag = false;
-								if (!flag2)
-								{
-									flag5 = true;
-								}
-								break;
-							case TableScreen.ResultValues.ConditionalGroup:
-								flag3 = true;
-								flag2 = false;
-								flag = false;
-								break;
-							}
-							if (flag5)
-							{
-							}
-						}
-					}
-				}
-			}
-			if (flag3 && !flag4 && !flag2 && !flag)
-			{
-				resultValues = TableScreen.ResultValues.ConditionalGroup;
-			}
-			else if (flag2)
-			{
-				resultValues = TableScreen.ResultValues.True;
-			}
-			else if (flag)
-			{
-				resultValues = TableScreen.ResultValues.False;
-			}
-			else if (flag4)
-			{
-				resultValues = TableScreen.ResultValues.Partial;
-			}
-		}
-		return resultValues;
-	}
-
-	private int compare_chore_group(MinionIdentity a, MinionIdentity b)
-	{
-		if (a.gameObject.GetAttributes().GetValue(this.current_sort_choregroup.attribute.Id) > b.gameObject.GetAttributes().GetValue(this.current_sort_choregroup.attribute.Id))
-		{
-			return -1;
-		}
-		if (a.gameObject.GetAttributes().GetValue(this.current_sort_choregroup.attribute.Id) < b.gameObject.GetAttributes().GetValue(this.current_sort_choregroup.attribute.Id))
-		{
-			return 1;
-		}
-		return 0;
-	}
-
-	private void on_tooltip_chore_group(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
-	{
-		tooltip.ClearMultiStringTooltip();
-		ChoreGroupTableColumn choreGroupTableColumn = base.GetWidgetColumn(widget_go) as ChoreGroupTableColumn;
-		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		TableRow.RowType rowType = widgetRow.rowType;
-		if (rowType != TableRow.RowType.Header)
-		{
-			if (rowType != TableRow.RowType.Default)
-			{
-				if (rowType == TableRow.RowType.Minion)
-				{
-					if (minion != null)
-					{
-						TableScreen.ResultValues resultValues = choreGroupTableColumn.get_value_action(minion, widget_go);
-						if (resultValues != TableScreen.ResultValues.True)
-						{
-							if (resultValues != TableScreen.ResultValues.False)
-							{
-								if (resultValues == TableScreen.ResultValues.ConditionalGroup)
-								{
-									tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.JOB_PERMISSION_FORCED_ROLE, minion.GetProperName(), choreGroupTableColumn.chore_group.Name), null);
-								}
-							}
-							else
-							{
-								tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.JOB_PERMISSION_OFF, minion.GetProperName(), choreGroupTableColumn.chore_group.Name), null);
-							}
-						}
-						else
-						{
-							tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.JOB_PERMISSION_ON, minion.GetProperName(), choreGroupTableColumn.chore_group.Name), null);
-						}
-						Klei.AI.Attribute attribute = choreGroupTableColumn.chore_group.attribute;
-						AttributeInstance attributeInstance = minion.GetAttributes().Get((base.GetWidgetColumn(widget_go) as ChoreGroupTableColumn).chore_group.attribute);
-						float totalValue = attributeInstance.GetTotalValue();
-						TextStyleSetting textStyleSetting = this.TooltipTextStyle_Ability;
-						if (totalValue > 0f)
-						{
-							textStyleSetting = this.TooltipTextStyle_AbilityPositiveModifier;
-						}
-						else if (totalValue < 0f)
-						{
-							textStyleSetting = this.TooltipTextStyle_AbilityNegativeModifier;
-						}
-						tooltip.AddMultiStringTooltip(string.Concat(new object[]
-						{
-							"\n",
-							attribute.Name,
-							" ",
-							attributeInstance.GetTotalValue()
-						}), textStyleSetting);
-					}
-				}
-			}
-			else
-			{
-				TableScreen.ResultValues resultValues2 = choreGroupTableColumn.get_value_action(minion, widget_go);
-				if (resultValues2 != TableScreen.ResultValues.True)
-				{
-					if (resultValues2 == TableScreen.ResultValues.False)
-					{
-						tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.NEW_MINIONS_JOB_PERMISSION_OFF, choreGroupTableColumn.chore_group.Name), null);
-					}
-				}
-				else
-				{
-					tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.NEW_MINIONS_JOB_PERMISSION_ON, choreGroupTableColumn.chore_group.Name), null);
-				}
-			}
-		}
-		else
-		{
-			switch (choreGroupTableColumn.get_value_action(minion, widget_go))
-			{
-			case TableScreen.ResultValues.False:
-				tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.TOOLTIP_TOGGLE_COLUMN_NONE, choreGroupTableColumn.chore_group.Name), null);
-				break;
-			case TableScreen.ResultValues.Partial:
-				tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.TOOLTIP_TOGGLE_COLUMN_PARTIAL, choreGroupTableColumn.chore_group.Name), null);
-				break;
-			case TableScreen.ResultValues.True:
-				tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.TOOLTIP_TOGGLE_COLUMN_ALL, choreGroupTableColumn.chore_group.Name), null);
-				break;
-			case TableScreen.ResultValues.ConditionalGroup:
-				tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.TOOLTIP_TOGGLE_COLUMN_ROLE_ONLY, choreGroupTableColumn.chore_group.Name), null);
-				break;
-			}
-			tooltip.AddMultiStringTooltip("\n" + Strings.Get("STRINGS.DUPLICANTS.CHOREGROUPS." + choreGroupTableColumn.chore_group.Id.ToUpper() + ".DESC"), null);
-		}
-	}
-
-	private void on_sort_tooltip_chore_group(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
-	{
-		ChoreGroupTableColumn choreGroupTableColumn = base.GetWidgetColumn(widget_go) as ChoreGroupTableColumn;
-		tooltip.ClearMultiStringTooltip();
-		tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.COLUMN_SORT_BY_JOB_SKILL, choreGroupTableColumn.chore_group.Name), null);
-	}
-
-	private void on_tooltip_chore_group_super(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
-	{
-		tooltip.ClearMultiStringTooltip();
-		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		TableRow.RowType rowType = widgetRow.rowType;
-		if (rowType != TableRow.RowType.Header)
-		{
-			if (rowType != TableRow.RowType.Default)
-			{
-				if (rowType == TableRow.RowType.Minion)
-				{
-					if (minion != null)
-					{
-						tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.TOOLTIP_TOGGLE_ROW, minion.gameObject.GetProperName()), null);
-					}
-				}
-			}
-			else
-			{
-				tooltip.AddMultiStringTooltip(UI.JOBSSCREEN.NEW_MINIONS_TOOLTIP_TOGGLE_ROW, null);
-			}
-		}
-		else
-		{
-			tooltip.AddMultiStringTooltip(UI.JOBSSCREEN.TOOLTIP_TOGGLE_ALL, null);
-		}
-	}
-
-	protected ChoreGroupTableColumn AddChoreGroupColumn(string id, ChoreGroup chore_group, Action<MinionIdentity, GameObject> on_load_value_action, Func<MinionIdentity, GameObject, TableScreen.ResultValues> get_value_action, Action<GameObject> on_press_action, Action<GameObject, TableScreen.ResultValues> set_value_action, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip)
-	{
-		ChoreGroupTableColumn choreGroupTableColumn = new ChoreGroupTableColumn(chore_group, on_load_value_action, get_value_action, on_press_action, set_value_action, sort_comparison, on_tooltip, on_sort_tooltip, (GameObject widget_go) => chore_group.Name);
-		if (base.RegisterColumn(id, choreGroupTableColumn))
-		{
-			return choreGroupTableColumn;
-		}
-		return null;
-	}
-
-	public override void SetSortComparison(Comparison<MinionIdentity> comparison, TableColumn sort_column)
-	{
-		if (comparison == null)
-		{
-			this.SetCurrentSortChoreGroup(null);
 			return;
 		}
-		if (this.active_sort_column == sort_column && this.sort_is_reversed)
+		items_root.SetActive(false);
+		LocText locText = component.GetReference("Label") as LocText;
+		locText.text = chore_group.Name;
+		KButton kbutton = component.GetReference("PrioritizeButton") as KButton;
+		Selectable selectable = items_root.GetComponent<Selectable>();
+		kbutton.onClick += delegate
 		{
-			this.SetCurrentSortChoreGroup(null);
+			selectable.Select();
+			items_root.SetActive(true);
+		};
+		GameObject gameObject = hierarchyReferences.GetReference("ItemTemplate").gameObject;
+		for (int i = 5; i >= 0; i--)
+		{
+			JobsTableScreen.PriorityInfo priorityInfo = this.GetPriorityInfo(i);
+			if (priorityInfo.name != null)
+			{
+				GameObject gameObject2 = Util.KInstantiateUI(gameObject, items_root, true);
+				KButton component2 = gameObject2.GetComponent<KButton>();
+				HierarchyReferences component3 = gameObject2.GetComponent<HierarchyReferences>();
+				KImage kimage = component3.GetReference("Icon") as KImage;
+				LocText locText2 = component3.GetReference("Label") as LocText;
+				int new_priority = i;
+				component2.onClick += delegate
+				{
+					this.ChangeColumnPriority(widget_go, new_priority);
+					global::UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+				};
+				kimage.sprite = priorityInfo.sprite;
+				locText2.text = priorityInfo.name;
+			}
 		}
-		base.SetSortComparison(comparison, sort_column);
 	}
+
+	private void OnSettingsButtonClicked()
+	{
+		this.optionsPanel.gameObject.SetActive(true);
+		this.optionsPanel.GetComponent<Selectable>().Select();
+	}
+
+	private void OnResetSettingsClicked()
+	{
+		if (Game.Instance.advancedPersonalPriorities)
+		{
+			if (Immigration.Instance != null)
+			{
+				Immigration.Instance.ResetPersonalPriorities();
+			}
+			foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+			{
+				if (!(minionIdentity == null))
+				{
+					Immigration.Instance.ApplyDefaultPersonalPriorities(minionIdentity.gameObject);
+					Game.Instance.roleManager.ResetPersonalPriorities(minionIdentity);
+				}
+			}
+		}
+		else
+		{
+			foreach (MinionIdentity minionIdentity2 in Components.LiveMinionIdentities)
+			{
+				if (!(minionIdentity2 == null))
+				{
+					ChoreConsumer component = minionIdentity2.GetComponent<ChoreConsumer>();
+					foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
+					{
+						component.SetPersonalPriority(choreGroup, 3, false);
+					}
+					Game.Instance.roleManager.ResetPersonalPriorities(minionIdentity2);
+				}
+			}
+		}
+		base.MarkRowsDirty();
+	}
+
+	private void OnAdvancedModeToggleClicked()
+	{
+		Game.Instance.advancedPersonalPriorities = !Game.Instance.advancedPersonalPriorities;
+		this.toggleAdvancedModeButton.fgImage.gameObject.SetActive(Game.Instance.advancedPersonalPriorities);
+	}
+
+	[SerializeField]
+	private Color32 skillOutlineColourLow = Color.white;
+
+	[SerializeField]
+	private Color32 skillOutlineColourHigh = new Color(0.72156864f, 0.44313726f, 0.5803922f);
+
+	[SerializeField]
+	private int skillLevelLow = 1;
+
+	[SerializeField]
+	private int skillLevelHigh = 10;
+
+	[SerializeField]
+	private KButton settingsButton;
+
+	[SerializeField]
+	private KButton resetSettingsButton;
+
+	[SerializeField]
+	private KButton toggleAdvancedModeButton;
+
+	[SerializeField]
+	private KImage optionsPanel;
+
+	public static JobsTableScreen Instance;
 
 	[SerializeField]
 	private bool dynamicRowSpacing = true;
@@ -693,9 +981,27 @@ public class JobsTableScreen : TableScreen
 
 	private HashSet<MinionIdentity> dirty_single_minion_rows = new HashSet<MinionIdentity>();
 
-	private ChoreGroup current_sort_choregroup;
+	private List<JobsTableScreen.PriorityInfo> priorityInfo;
+
+	private List<Sprite> prioritySprites;
 
 	private List<KeyValuePair<GameObject, JobsTableScreen.SkillEventHandlerID>> EffectListeners = new List<KeyValuePair<GameObject, JobsTableScreen.SkillEventHandlerID>>();
+
+	private struct PriorityInfo
+	{
+		public PriorityInfo(int priority, Sprite sprite, LocString name)
+		{
+			this.priority = priority;
+			this.sprite = sprite;
+			this.name = name;
+		}
+
+		public int priority;
+
+		public Sprite sprite;
+
+		public LocString name;
+	}
 
 	private struct SkillEventHandlerID
 	{

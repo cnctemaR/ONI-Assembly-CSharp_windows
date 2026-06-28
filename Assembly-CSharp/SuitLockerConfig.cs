@@ -47,6 +47,7 @@ public class SuitLockerConfig : IBuildingConfig
 		};
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 400f;
+		Prioritizable.AddRef(go);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

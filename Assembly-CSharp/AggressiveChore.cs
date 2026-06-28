@@ -4,7 +4,7 @@ using UnityEngine;
 public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 {
 	public AggressiveChore(IStateMachineTarget target, Action<Chore> on_complete = null)
-		: base(Db.Get().ChoreTypes.StressActingOut, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.StressActingOut, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
 	{
 		this.smi = new AggressiveChore.StatesInstance(this, target.gameObject);
 	}
@@ -16,7 +16,7 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 
 	public void PunchWallDamage(float dt)
 	{
-		if (Grid.Solid[this.smi.sm.wallCellToBreak] && Grid.Cell[this.smi.sm.wallCellToBreak].strengthInfo < 100)
+		if (Grid.Solid[this.smi.sm.wallCellToBreak] && Grid.StrengthInfo[this.smi.sm.wallCellToBreak] < 100)
 		{
 			WorldDamage.Instance.ApplyDamage(this.smi.sm.wallCellToBreak, 0.06f * dt, this.smi.sm.wallCellToBreak, -1);
 		}

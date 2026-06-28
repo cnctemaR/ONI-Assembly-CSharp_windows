@@ -1,37 +1,34 @@
 ﻿using System;
 
-public class DebugGoToMonitor : StateMachineComponent<DebugGoToMonitor.StatesInstance>
+public class DebugGoToMonitor : GameStateMachine<DebugGoToMonitor, DebugGoToMonitor.Instance, IStateMachineTarget, DebugGoToMonitor.Def>
 {
-	public void GoToCursor()
+	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
-		base.smi.GoTo(base.smi.sm.satisfied);
-		base.smi.GoTo(base.smi.sm.moving);
+		default_state = this.satisfied;
+		this.satisfied.DoNothing();
+		this.hastarget.TagTransition(GameTags.HasDebugDestination, this.satisfied, true).ToggleChore((DebugGoToMonitor.Instance smi) => new MoveChore(smi.master, Db.Get().ChoreTypes.DebugGoTo, (MoveChore.StatesInstance smii) => DebugHandler.GetMouseCell(), false), this.satisfied);
 	}
 
-	protected override void OnSpawn()
+	public GameStateMachine<DebugGoToMonitor, DebugGoToMonitor.Instance, IStateMachineTarget, DebugGoToMonitor.Def>.State satisfied;
+
+	public GameStateMachine<DebugGoToMonitor, DebugGoToMonitor.Instance, IStateMachineTarget, DebugGoToMonitor.Def>.State hastarget;
+
+	public class Def : StateMachine.BaseDef
 	{
-		base.smi.StartSM();
 	}
 
-	public class StatesInstance : GameStateMachine<DebugGoToMonitor.States, DebugGoToMonitor.StatesInstance, DebugGoToMonitor, object>.GameInstance
+	public new class Instance : GameStateMachine<DebugGoToMonitor, DebugGoToMonitor.Instance, IStateMachineTarget, DebugGoToMonitor.Def>.GameInstance
 	{
-		public StatesInstance(DebugGoToMonitor smi)
-			: base(smi)
+		public Instance(IStateMachineTarget target, DebugGoToMonitor.Def def)
+			: base(target, def)
 		{
 		}
-	}
 
-	public class States : GameStateMachine<DebugGoToMonitor.States, DebugGoToMonitor.StatesInstance, DebugGoToMonitor>
-	{
-		public override void InitializeStates(out StateMachine.BaseState default_state)
+		public void GoToCursor()
 		{
-			default_state = this.satisfied;
-			this.satisfied.DoNothing();
-			this.moving.ToggleChore((DebugGoToMonitor.StatesInstance smi) => new MoveChore(smi.master, Db.Get().ChoreTypes.DebugGoTo, (MoveChore.StatesInstance smii) => DebugHandler.GetMouseCell(), false), this.satisfied);
+			base.smi.gameObject.AddTag(GameTags.HasDebugDestination);
+			base.smi.GoTo(base.smi.sm.satisfied);
+			base.smi.GoTo(base.smi.sm.hastarget);
 		}
-
-		public GameStateMachine<DebugGoToMonitor.States, DebugGoToMonitor.StatesInstance, DebugGoToMonitor, object>.State satisfied;
-
-		public GameStateMachine<DebugGoToMonitor.States, DebugGoToMonitor.StatesInstance, DebugGoToMonitor, object>.State moving;
 	}
 }

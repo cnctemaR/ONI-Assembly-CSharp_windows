@@ -20,6 +20,8 @@ public class RoleManager
 			new Tuple<string, int>("JuniorFarmer", 128),
 			new Tuple<string, int>("Farmer", 128),
 			new Tuple<string, int>("SeniorFarmer", 128),
+			new Tuple<string, int>("Rancher", 128),
+			new Tuple<string, int>("SeniorRancher", 128),
 			new Tuple<string, int>(JuniorResearcher.ID, 128),
 			new Tuple<string, int>(Researcher.ID, 128),
 			new Tuple<string, int>(SeniorResearcher.ID, 128),
@@ -112,13 +114,13 @@ public class RoleManager
 				return;
 			}
 		}
-		this.Unassign(component);
+		this.Unassign(component, false);
 		this.minionResumes.Remove(component);
 	}
 
 	public void RestoreRole(MinionResume resume, string roleID)
 	{
-		this.AssignToRole(roleID, resume, true);
+		this.AssignToRole(roleID, resume, true, true);
 	}
 
 	public int NumberOfSlotsUnlocked(string role_id)
@@ -169,6 +171,7 @@ public class RoleManager
 			new List<RoleConfig>
 			{
 				new Farmer(),
+				new Rancher(),
 				new Researcher(),
 				new Cook(),
 				new Artist(),
@@ -184,6 +187,7 @@ public class RoleManager
 			{
 				new SeniorResearcher(),
 				new SeniorFarmer(),
+				new SeniorRancher(),
 				new SuitExpert()
 			}
 		};
@@ -348,7 +352,14 @@ public class RoleManager
 		{
 			if (role.perks.Length > 0)
 			{
-				text = text + "<b>" + UI.ROLES_SCREEN.PERKS.TITLE + "</b>\n";
+				if (role.tier < 3)
+				{
+					text = text + "<b>" + UI.ROLES_SCREEN.PERKS.TITLE_BASICTRAINING + "</b>\n";
+				}
+				else
+				{
+					text = text + "<b>" + UI.ROLES_SCREEN.PERKS.TITLE_MORETRAINING + "</b>\n";
+				}
 				for (int i = 0; i < role.perks.Length; i++)
 				{
 					text = text + "    • " + role.perks[i].description;
@@ -358,6 +369,18 @@ public class RoleManager
 					}
 				}
 			}
+			else if (role.tier < 3)
+			{
+				string text2 = text;
+				text = string.Concat(new string[]
+				{
+					text2,
+					"<b>",
+					UI.ROLES_SCREEN.PERKS.TITLE_BASICTRAINING,
+					"</b>\n    • ",
+					UI.ROLES_SCREEN.PERKS.NO_PERKS
+				});
+			}
 			else
 			{
 				string text2 = text;
@@ -365,7 +388,7 @@ public class RoleManager
 				{
 					text2,
 					"<b>",
-					UI.ROLES_SCREEN.PERKS.TITLE,
+					UI.ROLES_SCREEN.PERKS.TITLE_MORETRAINING,
 					"</b>\n    • ",
 					UI.ROLES_SCREEN.PERKS.NO_PERKS
 				});
@@ -410,7 +433,6 @@ public class RoleManager
 				text += string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.ELIGIBILITY.INELIGIBLE, resume.GetProperName(), role.name);
 				text += "\n\n";
 			}
-			text += "\n\n";
 			text += UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.RELEVANT_APTITUDES;
 			bool flag = false;
 			foreach (KeyValuePair<HashedString, float> keyValuePair in resume.AptitudeByRoleGroup)
@@ -578,7 +600,6 @@ public class RoleManager
 
 	public static void ApplyRoleHat(RoleConfig role, Accessorizer accessorizer, KBatchedAnimController controller)
 	{
-		AccessorySlot hat = Db.Get().AccessorySlots.Hat;
 		if (role == null || string.IsNullOrEmpty(role.hat))
 		{
 			RoleManager.RemoveHat(controller);
@@ -606,33 +627,95 @@ public class RoleManager
 		return roleStation;
 	}
 
-	public void AssignToRole(string roleID, MinionResume resume, bool instant = false)
+	public void AssignToRole(string roleID, MinionResume resume, bool instant = false, bool restoring = false)
 	{
 		RoleConfig role = this.GetRole(roleID);
 		if (!instant && resume.CurrentRole != roleID)
 		{
 			if (resume.GetComponent<ChoreProvider>().chores.Find((Chore chore) => chore.choreType == Db.Get().ChoreTypes.SwitchRole) == null && !DebugHandler.InstantBuildMode)
 			{
-				this.Unassign(resume);
+				this.Unassign(resume, true);
 				resume.SetTargetRole(roleID);
-				return;
+				goto IL_008C;
 			}
 		}
 		resume.OnEnterRole(roleID, !instant);
-		if (Components.RoleStations.Count == 0 && resume.TargetRole != resume.CurrentRole)
-		{
-			resume.SetTargetRole(resume.CurrentRole);
-		}
 		RoleManager.ApplyRoleHat(role, resume.GetComponent<Accessorizer>(), resume.GetComponent<KBatchedAnimController>());
+		IL_008C:
+		if (!restoring)
+		{
+			this.AutoAssignPersonalPriorities(roleID, resume.gameObject);
+		}
+		if (JobsTableScreen.Instance != null)
+		{
+			JobsTableScreen.Instance.Refresh(resume);
+		}
 	}
 
-	public void Unassign(MinionResume resume)
+	public void Unassign(MinionResume resume, bool skip_refresh = false)
 	{
 		if (resume == null)
 		{
 			return;
 		}
-		TakeOffHatChore takeOffHatChore = new TakeOffHatChore(resume.GetComponent<Worker>(), Db.Get().ChoreTypes.SwitchHat);
+		ChoreConsumer component = resume.GetComponent<ChoreConsumer>();
+		if (component != null)
+		{
+			string text = ((!(resume.TargetRole != resume.CurrentRole)) ? resume.CurrentRole : resume.TargetRole);
+			RoleConfig role = Game.Instance.roleManager.GetRole(text);
+			RoleGroup roleGroup;
+			if (role != null && Game.Instance.roleManager.RoleGroups.TryGetValue(role.roleGroup, out roleGroup))
+			{
+				foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
+				{
+					if (roleGroup.choreGroupID == choreGroup.Id)
+					{
+						bool flag;
+						component.GetPersonalPriority(choreGroup, out flag);
+						if (flag)
+						{
+							int priorityBeforeAutoAssignment = component.GetPriorityBeforeAutoAssignment(choreGroup);
+							component.SetPersonalPriority(choreGroup, priorityBeforeAutoAssignment, false);
+						}
+					}
+				}
+			}
+		}
+		new TakeOffHatChore(resume.GetComponent<Worker>(), Db.Get().ChoreTypes.SwitchHat);
+		if (!skip_refresh && JobsTableScreen.Instance != null)
+		{
+			JobsTableScreen.Instance.Refresh(resume);
+		}
+	}
+
+	public void ResetPersonalPriorities(MinionIdentity minion)
+	{
+		MinionResume component = minion.GetComponent<MinionResume>();
+		string text = ((!(component.TargetRole != component.CurrentRole)) ? component.CurrentRole : component.TargetRole);
+		this.AutoAssignPersonalPriorities(text, minion.gameObject);
+	}
+
+	private void AutoAssignPersonalPriorities(string roleID, GameObject minion)
+	{
+		if (Game.Instance.autoPrioritizeRoles)
+		{
+			ChoreConsumer component = minion.GetComponent<ChoreConsumer>();
+			if (component != null)
+			{
+				RoleConfig role = Game.Instance.roleManager.GetRole(roleID);
+				RoleGroup roleGroup;
+				if (role != null && Game.Instance.roleManager.RoleGroups.TryGetValue(role.roleGroup, out roleGroup))
+				{
+					foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
+					{
+						if (roleGroup.choreGroupID == choreGroup.Id)
+						{
+							component.SetPersonalPriority(choreGroup, 5, true);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private RoleConfig noRole = new NoRole();
@@ -653,6 +736,10 @@ public class RoleManager
 		{
 			"Farming",
 			new RoleGroup("Farming", "Farming", DUPLICANTS.CHOREGROUPS.FARMING.NAME)
+		},
+		{
+			"Ranching",
+			new RoleGroup("Ranching", "Ranching", DUPLICANTS.CHOREGROUPS.RANCHING.NAME)
 		},
 		{
 			"Mining",
@@ -705,6 +792,8 @@ public class RoleManager
 		{ "JuniorFarmer", "hat_role_farming1" },
 		{ "Farmer", "hat_role_farming2" },
 		{ "SeniorFarmer", "hat_role_farming3" },
+		{ "Rancher", "hat_role_rancher1" },
+		{ "SeniorRancher", "hat_role_rancher1" },
 		{
 			JuniorResearcher.ID,
 			"hat_role_research1"
@@ -817,37 +906,39 @@ public class RoleManager
 		{ "JuniorFarmer", 6 },
 		{ "Farmer", 6 },
 		{ "SeniorFarmer", 6 },
+		{ "Rancher", 7 },
+		{ "SeniorRancher", 7 },
 		{
 			JuniorResearcher.ID,
-			7
-		},
-		{
-			Researcher.ID,
-			7
-		},
-		{
-			SeniorResearcher.ID,
-			7
-		},
-		{
-			Handyman.ID,
 			8
 		},
 		{
-			JuniorCook.ID,
+			Researcher.ID,
+			8
+		},
+		{
+			SeniorResearcher.ID,
+			8
+		},
+		{
+			Handyman.ID,
 			9
+		},
+		{
+			JuniorCook.ID,
+			10
 		},
 		{
 			Cook.ID,
-			9
+			10
 		},
 		{
 			JuniorArtist.ID,
-			10
+			11
 		},
 		{
 			Artist.ID,
-			10
+			11
 		}
 	};
 

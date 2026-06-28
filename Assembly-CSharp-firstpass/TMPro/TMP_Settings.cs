@@ -8,6 +8,14 @@ namespace TMPro
 	[Serializable]
 	public class TMP_Settings : ScriptableObject
 	{
+		public static string version
+		{
+			get
+			{
+				return TMP_Settings.instance.m_version;
+			}
+		}
+
 		public static bool enableWordWrapping
 		{
 			get
@@ -72,6 +80,62 @@ namespace TMPro
 			}
 		}
 
+		public static string defaultFontAssetPath
+		{
+			get
+			{
+				return TMP_Settings.instance.m_defaultFontAssetPath;
+			}
+		}
+
+		public static float defaultFontSize
+		{
+			get
+			{
+				return TMP_Settings.instance.m_defaultFontSize;
+			}
+		}
+
+		public static float defaultTextAutoSizingMinRatio
+		{
+			get
+			{
+				return TMP_Settings.instance.m_defaultAutoSizeMinRatio;
+			}
+		}
+
+		public static float defaultTextAutoSizingMaxRatio
+		{
+			get
+			{
+				return TMP_Settings.instance.m_defaultAutoSizeMaxRatio;
+			}
+		}
+
+		public static Vector2 defaultTextMeshProTextContainerSize
+		{
+			get
+			{
+				return TMP_Settings.instance.m_defaultTextMeshProTextContainerSize;
+			}
+		}
+
+		public static Vector2 defaultTextMeshProUITextContainerSize
+		{
+			get
+			{
+				return TMP_Settings.instance.m_defaultTextMeshProUITextContainerSize;
+			}
+		}
+
+		public static bool autoSizeTextContainer
+		{
+			get
+			{
+				return TMP_Settings.instance.m_autoSizeTextContainer;
+			}
+		}
+
 		public static List<TMP_FontAsset> fallbackFontAssets
 		{
 			get
@@ -80,11 +144,47 @@ namespace TMPro
 			}
 		}
 
+		public static bool matchMaterialPreset
+		{
+			get
+			{
+				return TMP_Settings.instance.m_matchMaterialPreset;
+			}
+		}
+
 		public static TMP_SpriteAsset defaultSpriteAsset
 		{
 			get
 			{
 				return TMP_Settings.instance.m_defaultSpriteAsset;
+			}
+		}
+
+		public static string defaultSpriteAssetPath
+		{
+			get
+			{
+				return TMP_Settings.instance.m_defaultSpriteAssetPath;
+			}
+		}
+
+		public static string defaultColorGradientPresetsPath
+		{
+			get
+			{
+				return TMP_Settings.instance.m_defaultColorGradientPresetsPath;
+			}
+		}
+
+		public static bool enableEmojiSupport
+		{
+			get
+			{
+				return TMP_Settings.instance.m_enableEmojiSupport;
+			}
+			set
+			{
+				TMP_Settings.instance.m_enableEmojiSupport = value;
 			}
 		}
 
@@ -215,6 +315,9 @@ namespace TMPro
 		private static TMP_Settings s_Instance;
 
 		[SerializeField]
+		private string m_version = "1.0.56.0b3";
+
+		[SerializeField]
 		private bool m_enableWordWrapping;
 
 		[SerializeField]
@@ -239,10 +342,43 @@ namespace TMPro
 		private TMP_FontAsset m_defaultFontAsset;
 
 		[SerializeField]
+		private string m_defaultFontAssetPath;
+
+		[SerializeField]
+		private float m_defaultFontSize;
+
+		[SerializeField]
+		private float m_defaultAutoSizeMinRatio;
+
+		[SerializeField]
+		private float m_defaultAutoSizeMaxRatio;
+
+		[SerializeField]
+		private Vector2 m_defaultTextMeshProTextContainerSize;
+
+		[SerializeField]
+		private Vector2 m_defaultTextMeshProUITextContainerSize;
+
+		[SerializeField]
+		private bool m_autoSizeTextContainer;
+
+		[SerializeField]
 		private List<TMP_FontAsset> m_fallbackFontAssets;
 
 		[SerializeField]
+		private bool m_matchMaterialPreset;
+
+		[SerializeField]
 		private TMP_SpriteAsset m_defaultSpriteAsset;
+
+		[SerializeField]
+		private string m_defaultSpriteAssetPath;
+
+		[SerializeField]
+		private string m_defaultColorGradientPresetsPath;
+
+		[SerializeField]
+		private bool m_enableEmojiSupport;
 
 		[SerializeField]
 		private TMP_StyleSheet m_defaultStyleSheet;

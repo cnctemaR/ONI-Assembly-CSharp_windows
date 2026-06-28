@@ -100,20 +100,17 @@ public struct Tag : ISerializationCallbackReceiver, IEquatable<Tag>, IComparable
 
 	public int CompareTo(Tag other)
 	{
-		if (this.hash < other.hash)
-		{
-			return -1;
-		}
-		if (this.hash > other.hash)
-		{
-			return 1;
-		}
-		return 0;
+		return this.hash - other.hash;
 	}
 
 	public override string ToString()
 	{
 		return (this.name == null) ? this.hash.ToString("X") : this.name;
+	}
+
+	public static implicit operator Tag(string s)
+	{
+		return new Tag(s);
 	}
 
 	public static readonly Tag Invalid = default(Tag);

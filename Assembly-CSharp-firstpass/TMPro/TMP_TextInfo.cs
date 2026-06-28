@@ -12,7 +12,7 @@ namespace TMPro
 			this.wordInfo = new TMP_WordInfo[16];
 			this.linkInfo = new TMP_LinkInfo[0];
 			this.lineInfo = new TMP_LineInfo[2];
-			this.pageInfo = new TMP_PageInfo[16];
+			this.pageInfo = new TMP_PageInfo[4];
 			this.meshInfo = new TMP_MeshInfo[1];
 		}
 
@@ -23,7 +23,7 @@ namespace TMPro
 			this.wordInfo = new TMP_WordInfo[4];
 			this.linkInfo = new TMP_LinkInfo[0];
 			this.lineInfo = new TMP_LineInfo[2];
-			this.pageInfo = new TMP_PageInfo[16];
+			this.pageInfo = new TMP_PageInfo[4];
 			this.meshInfo = new TMP_MeshInfo[1];
 			this.meshInfo[0].mesh = textComponent.mesh;
 			this.materialCount = 1;
@@ -60,6 +60,14 @@ namespace TMPro
 			}
 		}
 
+		public void ResetVertexLayout(bool isVolumetric)
+		{
+			for (int i = 0; i < this.meshInfo.Length; i++)
+			{
+				this.meshInfo[i].ResizeMeshInfo(0, isVolumetric);
+			}
+		}
+
 		public void ClearUnusedVertices(MaterialReference[] materials)
 		{
 			for (int i = 0; i < this.meshInfo.Length; i++)
@@ -88,6 +96,38 @@ namespace TMPro
 			}
 		}
 
+		public TMP_MeshInfo[] CopyMeshInfoVertexData()
+		{
+			if (this.m_CachedMeshInfo == null || this.m_CachedMeshInfo.Length != this.meshInfo.Length)
+			{
+				this.m_CachedMeshInfo = new TMP_MeshInfo[this.meshInfo.Length];
+				for (int i = 0; i < this.m_CachedMeshInfo.Length; i++)
+				{
+					int num = this.meshInfo[i].vertices.Length;
+					this.m_CachedMeshInfo[i].vertices = new Vector3[num];
+					this.m_CachedMeshInfo[i].uvs0 = new Vector2[num];
+					this.m_CachedMeshInfo[i].uvs2 = new Vector2[num];
+					this.m_CachedMeshInfo[i].colors32 = new Color32[num];
+				}
+			}
+			for (int j = 0; j < this.m_CachedMeshInfo.Length; j++)
+			{
+				int num2 = this.meshInfo[j].vertices.Length;
+				if (this.m_CachedMeshInfo[j].vertices.Length != num2)
+				{
+					this.m_CachedMeshInfo[j].vertices = new Vector3[num2];
+					this.m_CachedMeshInfo[j].uvs0 = new Vector2[num2];
+					this.m_CachedMeshInfo[j].uvs2 = new Vector2[num2];
+					this.m_CachedMeshInfo[j].colors32 = new Color32[num2];
+				}
+				Array.Copy(this.meshInfo[j].vertices, this.m_CachedMeshInfo[j].vertices, num2);
+				Array.Copy(this.meshInfo[j].uvs0, this.m_CachedMeshInfo[j].uvs0, num2);
+				Array.Copy(this.meshInfo[j].uvs2, this.m_CachedMeshInfo[j].uvs2, num2);
+				Array.Copy(this.meshInfo[j].colors32, this.m_CachedMeshInfo[j].colors32, num2);
+			}
+			return this.m_CachedMeshInfo;
+		}
+
 		public static void Resize<T>(ref T[] array, int size)
 		{
 			int num = ((size <= 1024) ? Mathf.NextPowerOfTwo(size) : (size + 256));
@@ -107,9 +147,9 @@ namespace TMPro
 			Array.Resize<T>(ref array, size);
 		}
 
-		private static Vector2 k_InfinityVectorPositive = new Vector2(1000000f, 1000000f);
+		private static Vector2 k_InfinityVectorPositive = new Vector2(32767f, 32767f);
 
-		private static Vector2 k_InfinityVectorNegative = new Vector2(-1000000f, -1000000f);
+		private static Vector2 k_InfinityVectorNegative = new Vector2(-32767f, -32767f);
 
 		public TMP_Text textComponent;
 
@@ -140,5 +180,7 @@ namespace TMPro
 		public TMP_PageInfo[] pageInfo;
 
 		public TMP_MeshInfo[] meshInfo;
+
+		private TMP_MeshInfo[] m_CachedMeshInfo;
 	}
 }

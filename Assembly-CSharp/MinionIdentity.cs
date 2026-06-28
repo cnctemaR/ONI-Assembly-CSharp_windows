@@ -10,6 +10,9 @@ using UnityEngine;
 public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity, IListableOption
 {
 	[Serialize]
+	public string genderStringKey { get; set; }
+
+	[Serialize]
 	public string nameStringKey { get; set; }
 
 	protected override void OnPrefabInit()
@@ -20,7 +23,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		}
 		if (GameClock.Instance != null)
 		{
-			this.arrivalTime = GameClock.Instance.GetTime();
+			this.arrivalTime = (float)GameClock.Instance.GetCycle();
 		}
 		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
 		component.OnUpdateBounds = (Action<Bounds>)Delegate.Combine(component.OnUpdateBounds, new Action<Bounds>(this.OnUpdateBounds));
@@ -39,6 +42,11 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		{
 			this.nameStringKey = this.name;
 		}
+		this.SetGender(this.gender);
+		if (this.genderStringKey == null)
+		{
+			this.genderStringKey = "NB";
+		}
 		if (this.addToIdentityList)
 		{
 			Components.MinionIdentities.Add(this);
@@ -48,12 +56,10 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 			}
 			Game.Instance.assignmentManager.AddToAssignmentGroup("public", this);
 		}
-		this.raceId = "Human";
-		this.bodyType = BodyType.Human;
 		Accessorizer component2 = base.gameObject.GetComponent<Accessorizer>();
 		this.bodyData = default(KCompBuilder.BodyData);
 		component2.GetBodySlots(ref this.bodyData);
-		this.headComp = MinionStartingStats.ApplyRace(base.gameObject, MinionResources.Get().races.Get(this.raceId), this.bodyType, this.bodyData);
+		this.headComp = MinionStartingStats.ApplyRace(base.gameObject, this.bodyData);
 		FaceGraph component3 = base.GetComponent<FaceGraph>();
 		component3.SetHeadComp(this.headComp);
 		base.GetComponent<KBatchedAnimController>().AddBuildOverride(this.headComp.GetData(), true, true);
@@ -125,6 +131,12 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		NameDisplayScreen.Instance.UpdateName(base.gameObject);
 	}
 
+	public void SetGender(string gender)
+	{
+		this.gender = gender;
+		this.selectable.SetGender(gender);
+	}
+
 	public static string ChooseRandomName()
 	{
 		if (MinionIdentity.femaleNameList == null)
@@ -181,8 +193,11 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		component.AddSymbolOverride(hat.targetSymbolId, hat.accessories[MinionIdentity.testIdx].symbol.build.batchTag, hat.accessories[MinionIdentity.testIdx].symbol, false);
 		component.ShowSymbol(hat.targetSymbolId);
 		AccessorySlot hair = Db.Get().AccessorySlots.Hair;
+		AccessorySlot hairAlways = Db.Get().AccessorySlots.HairAlways;
 		component.AddSymbolOverride(hair.targetSymbolId, hair.accessories[1].symbol.build.batchTag, hair.accessories[1].symbol, false);
 		component.ShowSymbol(hair.targetSymbolId);
+		component.AddSymbolOverride(hairAlways.targetSymbolId, hairAlways.accessories[1].symbol.build.batchTag, hairAlways.accessories[1].symbol, false);
+		component.ShowSymbol(hairAlways.targetSymbolId);
 		AccessorySlot hatHair = Db.Get().AccessorySlots.HatHair;
 		component.AddSymbolOverride(hatHair.targetSymbolId, hatHair.accessories[1].symbol.build.batchTag, hatHair.accessories[1].symbol, false);
 	}
@@ -198,14 +213,11 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 	private new string name;
 
 	[Serialize]
+	public string gender;
+
+	[Serialize]
 	[ReadOnly]
 	public float arrivalTime;
-
-	[Serialize]
-	public string raceId;
-
-	[Serialize]
-	public BodyType bodyType;
 
 	[Serialize]
 	public int voiceIdx;

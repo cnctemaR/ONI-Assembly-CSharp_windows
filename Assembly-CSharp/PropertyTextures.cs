@@ -385,8 +385,8 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 					}
 					else
 					{
-						num3 = liquidAmountOffset + (1f - liquidAmountOffset) * Mathf.Min(Grid.Cell[num2].mass / liquidMaxMass, 1f);
-						num3 = Mathf.Pow(Mathf.Min(Grid.Cell[num2].mass / liquidMaxMass, 1f), 0.45f);
+						num3 = liquidAmountOffset + (1f - liquidAmountOffset) * Mathf.Min(Grid.Mass[num2] / liquidMaxMass, 1f);
+						num3 = Mathf.Pow(Mathf.Min(Grid.Mass[num2] / liquidMaxMass, 1f), 0.45f);
 					}
 					region.SetBytes(i, j, (byte)(num3 * 255f), colour.r, colour.g, colour.b);
 				}
@@ -413,7 +413,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				byte b = 0;
 				byte b2 = 0;
 				byte b3 = 0;
-				if ((int)Grid.Cell[j].elementIdx != elementIndex)
+				if ((int)Grid.ElementIdx[j] != elementIndex)
 				{
 					b3 = byte.MaxValue;
 				}
@@ -452,7 +452,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				{
 					b3 = byte.MaxValue;
 				}
-				float num2 = Grid.Cell[num].mass / 2000f;
+				float num2 = Grid.Mass[num] / 2000f;
 				num2 = Mathf.Min(num2, 1f);
 				region.SetBytes(j, i, b, b2, b3, (byte)(num2 * 255f));
 			}

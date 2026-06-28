@@ -48,24 +48,30 @@ public class StateMachineManager : IScheduler
 		return new SchedulerGroup(this.scheduler);
 	}
 
-	public T CreateStateMachine<T>()
+	public StateMachine CreateStateMachine(Type type)
 	{
 		StateMachine stateMachine = null;
-		Type typeFromHandle = typeof(T);
-		if (!this.stateMachines.TryGetValue(typeFromHandle, out stateMachine))
+		if (!this.stateMachines.TryGetValue(type, out stateMachine))
 		{
-			stateMachine = (StateMachine)Activator.CreateInstance(typeFromHandle);
+			stateMachine = (StateMachine)Activator.CreateInstance(type);
 			stateMachine.InitializeStateMachine();
-			this.stateMachines[typeFromHandle] = stateMachine;
+			this.stateMachines[type] = stateMachine;
 		}
-		return (T)((object)stateMachine);
+		return stateMachine;
 	}
 
-	public StateMachine.Instance CreateSMIFromDef(IStateMachineTarget master, StateMachine.Instance.BaseDef def)
+	public T CreateStateMachine<T>()
+	{
+		return (T)((object)this.CreateStateMachine(typeof(T)));
+	}
+
+	public StateMachine.Instance CreateSMIFromDef(IStateMachineTarget master, StateMachine.BaseDef def)
 	{
 		StateMachineManager.parameters[0] = master;
 		StateMachineManager.parameters[1] = def;
-		return (StateMachine.Instance)Activator.CreateInstance(def.GetType().DeclaringType, StateMachineManager.parameters);
+		StateMachine stateMachine = StateMachineManager.Instance.CreateStateMachine(def.GetStateMachineType());
+		Type stateMachineInstanceType = stateMachine.GetStateMachineInstanceType();
+		return (StateMachine.Instance)Activator.CreateInstance(stateMachineInstanceType, StateMachineManager.parameters);
 	}
 
 	private Scheduler scheduler;

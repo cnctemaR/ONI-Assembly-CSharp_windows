@@ -280,7 +280,7 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 			{
 				for (int j = num5; j < num3; j++)
 				{
-					if (Grid.VisibilityTest(num6, num7, i, j))
+					if (Grid.VisibilityTest(num6, num7, i, j, false))
 					{
 						int num8 = Grid.XYToCell(i, j);
 						Grid.Decor[num8] += this.decor;

@@ -76,8 +76,8 @@ public class DiseaseContainers : KGameObjectComponentManager<DiseaseContainer>
 		num += (float)disease_count * num4 - (float)disease_count;
 		if (Grid.IsValidCell(environment_cell))
 		{
-			byte elementIdx = Grid.Cell[environment_cell].elementIdx;
-			ElemExposureInfo elemExposureInfo = disease.elemExposureInfo[(int)elementIdx];
+			byte b = Grid.ElementIdx[environment_cell];
+			ElemExposureInfo elemExposureInfo = disease.elemExposureInfo[(int)b];
 			num += elemExposureInfo.CalculateExposureDiseaseCountDelta(disease_count, dt);
 		}
 		return num;

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using STRINGS;
+using UnityEngine;
 
-public class Trappable : KMonoBehaviour
+public class Trappable : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -51,6 +54,14 @@ public class Trappable : KMonoBehaviour
 		}
 		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		this.registered = false;
+	}
+
+	public List<Descriptor> GetDescriptors(GameObject go)
+	{
+		return new List<Descriptor>
+		{
+			new Descriptor(UI.BUILDINGEFFECTS.CAPTURE_METHOD_TRAP, UI.BUILDINGEFFECTS.TOOLTIPS.CAPTURE_METHOD_TRAP, Descriptor.DescriptorType.Effect, false)
+		};
 	}
 
 	private bool registered;

@@ -215,15 +215,11 @@ public class SimpleInfoScreen : TargetScreen
 			global::UnityEngine.Object.Destroy(x.gameObject);
 		});
 		this.attributeLabels.Clear();
-		this.vitalsPanel.gameObject.SetActive(false);
-		this.infoPanel.gameObject.SetActive(true);
-		this.descriptionContainer.descriptors.gameObject.SetActive(false);
-		this.descriptionContainer.gameObject.SetActive(false);
+		this.vitalsPanel.gameObject.SetActive(amounts != null);
 		string text = string.Empty;
 		string text2 = string.Empty;
 		if (amounts != null)
 		{
-			this.vitalsPanel.gameObject.SetActive(true);
 			this.vitalsContainer.selectedEntity = this.selectedTarget;
 			Uprootable component8 = this.selectedTarget.gameObject.GetComponent<Uprootable>();
 			if (component8 != null)
@@ -269,17 +265,16 @@ public class SimpleInfoScreen : TargetScreen
 			text = ((element == null) ? string.Empty : element.FullDescription(false));
 		}
 		List<Descriptor> gameObjectEffects = GameUtil.GetGameObjectEffects(target, true);
-		if (gameObjectEffects.Count > 0)
+		bool flag = gameObjectEffects.Count > 0;
+		this.descriptionContainer.gameObject.SetActive(flag);
+		this.descriptionContainer.descriptors.gameObject.SetActive(flag);
+		if (flag)
 		{
-			this.descriptionContainer.descriptors.gameObject.SetActive(true);
 			this.descriptionContainer.descriptors.SetDescriptors(gameObjectEffects);
 		}
 		this.descriptionContainer.description.text = text;
 		this.descriptionContainer.flavour.text = text2;
-		if (this.infoPanel.activeSelf && (text == string.Empty || text == "\n"))
-		{
-			this.infoPanel.SetActive(false);
-		}
+		this.infoPanel.gameObject.SetActive(!(text == string.Empty) && !(text == "\n"));
 		this.descriptionContainer.gameObject.SetActive(this.infoPanel.activeSelf);
 		this.descriptionContainer.flavour.gameObject.SetActive(text2 != string.Empty && text2 != "\n");
 		if (this.vitalsPanel.gameObject.activeSelf && amounts.Count == 0)

@@ -318,6 +318,7 @@ public class BuildingLoader : KMonoBehaviour
 			global::UnityEngine.Object.DestroyImmediate(component3);
 		}
 		gameObject.PreInit();
+		Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());
 		return gameObject;
 	}
 

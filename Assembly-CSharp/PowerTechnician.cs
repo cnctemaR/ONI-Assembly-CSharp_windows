@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using STRINGS;
 
 public class PowerTechnician : RoleConfig
@@ -18,6 +19,7 @@ public class PowerTechnician : RoleConfig
 			Db.Get().ChoreTypes.Toggle,
 			Db.Get().ChoreTypes.PowerTinker
 		};
+		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Machinery };
 		base.perks = new RolePerk[]
 		{
 			RoleManager.rolePerks.IncreaseMachineryMedium,

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class GameTags
 {
+	public static readonly Tag DeprecatedContent = TagManager.Create("DeprecatedContent", null);
+
 	public static readonly Tag Any = TagManager.Create("Any", null);
 
 	public static readonly Tag Miscellaneous = TagManager.Create("Miscellaneous", null);
@@ -70,6 +72,8 @@ public class GameTags
 	public static readonly Tag BagableCreature = TagManager.Create("BagableCreature", null);
 
 	public static readonly Tag Spawner = TagManager.Create("Spawner", null);
+
+	public static readonly Tag FullyIncubated = TagManager.Create("FullyIncubated", null);
 
 	public static readonly Tag Alloy = TagManager.Create("Alloy", null);
 
@@ -237,6 +241,12 @@ public class GameTags
 
 	public static readonly Tag Idle = TagManager.Create("Idle", null);
 
+	public static readonly Tag HasDebugDestination = TagManager.Create("HasDebugDestination", null);
+
+	public static readonly Tag DupeBrain = TagManager.Create("DupeBrain", null);
+
+	public static readonly Tag CreatureBrain = TagManager.Create("CreatureBrain", null);
+
 	public static readonly Tag Operational = TagManager.Create("Operational", null);
 
 	public static readonly Tag Stored = TagManager.Create("Stored", null);
@@ -327,6 +337,8 @@ public class GameTags
 	{
 		public static readonly Tag Farming = TagManager.Create("Farming", null);
 
+		public static readonly Tag Ranching = TagManager.Create("Ranching", null);
+
 		public static readonly Tag Research = TagManager.Create("Research", null);
 
 		public static readonly Tag Power = TagManager.Create("Power", null);
@@ -351,6 +363,8 @@ public class GameTags
 
 		public static readonly Tag[] FarmingChores = new Tag[] { GameTags.ChoreTypes.Farming };
 
+		public static readonly Tag[] RanchingChores = new Tag[] { GameTags.ChoreTypes.Ranching };
+
 		public static readonly Tag[] CookingChores = new Tag[] { GameTags.ChoreTypes.Cooking };
 
 		public static readonly Tag[] PowerChores = new Tag[] { GameTags.ChoreTypes.Power };
@@ -368,5 +382,50 @@ public class GameTags
 		public static readonly Tag[] DoctoringChores = new Tag[] { GameTags.ChoreTypes.Doctoring };
 
 		public static readonly Tag[] ConveyorChores = new Tag[] { GameTags.ChoreTypes.Conveyor };
+	}
+
+	public static class Creatures
+	{
+		public static readonly Tag Stunned = TagManager.Create("Stunned", null);
+
+		public static readonly Tag Falling = TagManager.Create("Falling", null);
+
+		public static readonly Tag WantsToEnterBurrow = TagManager.Create("WantsToBurrow", null);
+
+		public static readonly Tag Burrowed = TagManager.Create("Burrowed", null);
+
+		public static readonly Tag WantsToExitBurrow = TagManager.Create("WantsToExitBurrow", null);
+
+		public static readonly Tag WantsToEat = TagManager.Create("WantsToEat", null);
+
+		public static readonly Tag WantsToGetRanched = TagManager.Create("WantsToGetRanched", null);
+
+		public static readonly Tag Flee = TagManager.Create("Flee", null);
+
+		public static readonly Tag Attack = TagManager.Create("Attack", null);
+
+		public static readonly Tag Die = TagManager.Create("Die", null);
+
+		public static readonly Tag Poop = TagManager.Create("Poop", null);
+
+		public static readonly Tag MoveToLure = TagManager.Create("MoveToLure", null);
+
+		public static readonly Tag Drowning = TagManager.Create("Drowning", null);
+
+		public static readonly Tag Hungry = TagManager.Create("Hungry", null);
+
+		public static readonly Tag Flying = TagManager.Create("Flying", null);
+
+		public static readonly Tag Fertile = TagManager.Create("Fertile", null);
+
+		public static readonly Tag Submerged = TagManager.Create("Submerged", null);
+
+		public static readonly Tag ExitSubmerged = TagManager.Create("ExitSubmerged", null);
+
+		public static readonly Tag WantsToDropElements = TagManager.Create("WantsToDropElements", null);
+
+		public static readonly Tag OriginallyWild = TagManager.Create("Wild", null);
+
+		public static readonly Tag Wild = TagManager.Create("Wild", null);
 	}
 }

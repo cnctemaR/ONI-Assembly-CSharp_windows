@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei.AI;
 using STRINGS;
 
 public class MechatronicEngineer : RoleConfig
@@ -12,6 +13,7 @@ public class MechatronicEngineer : RoleConfig
 		base.hat = Game.Instance.roleManager.GetHat("MechatronicEngineer");
 		this.preferredChoreTags.Add(GameTags.ChoreTypes.Fabricating);
 		this.preferredChoreTags.Add(GameTags.ChoreTypes.Conveyor);
+		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Machinery };
 		base.perks = new RolePerk[]
 		{
 			RoleManager.rolePerks.IncreaseMachineryMedium,

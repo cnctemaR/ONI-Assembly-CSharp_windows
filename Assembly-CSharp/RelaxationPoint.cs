@@ -81,7 +81,7 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 
 	protected virtual WorkChore<RelaxationPoint> CreateWorkChore()
 	{
-		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, null, false, null, null, null, false, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, null, false, null, null, null, false, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)

@@ -974,6 +974,12 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		}
 	}
 
+	public void HackRefreshZOrder()
+	{
+		base.enabled = false;
+		base.enabled = true;
+	}
+
 	[NonSerialized]
 	protected bool _forceRebuild;
 

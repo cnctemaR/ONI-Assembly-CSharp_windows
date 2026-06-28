@@ -7,9 +7,9 @@ public class MicrobeMusher : Fabricator
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.choreType = Db.Get().ChoreTypes.Mush;
+		this.choreType = Db.Get().ChoreTypes.Cook;
 		this.choreTags = GameTags.ChoreTypes.CookingChores;
-		this.fetchChoreTypeIdHash = Db.Get().ChoreTypes.MushFetch.IdHash;
+		this.fetchChoreTypeIdHash = Db.Get().ChoreTypes.CookFetch.IdHash;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Mushing;
 		this.attributeConverter = Db.Get().AttributeConverters.CookingSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;

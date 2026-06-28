@@ -15,7 +15,7 @@ public class MaterialsManager : RoleConfig
 		this.favoredChoreTypes = new List<ChoreType>
 		{
 			Db.Get().ChoreTypes.Fetch,
-			Db.Get().ChoreTypes.FetchCritical,
+			Db.Get().ChoreTypes.OperateFetch,
 			Db.Get().ChoreTypes.Transport
 		};
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Athletics };

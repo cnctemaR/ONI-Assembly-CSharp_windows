@@ -78,7 +78,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		return this.SaveLoadTag;
 	}
 
-	public TagBits GetTabBits()
+	public TagBits GetTagBits()
 	{
 		if (this.dirtyTagBits)
 		{
@@ -106,6 +106,11 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	protected override void OnSpawn()
 	{
+		IStateMachineControllerHack component = base.GetComponent<IStateMachineControllerHack>();
+		if (component != null)
+		{
+			component.StartSMIS();
+		}
 		if (this.prefabSpawnFn != null)
 		{
 			this.prefabSpawnFn(base.gameObject);

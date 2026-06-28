@@ -51,7 +51,7 @@ public class PetroleumGeneratorConfig : IBuildingConfig
 		go.AddOrGet<Storage>();
 		BuildingDef def = go.GetComponent<Building>().Def;
 		float num = 30f;
-		go.UpdateComponentRequirement<LoopingSounds>(true);
+		go.AddOrGet<LoopingSounds>();
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = def.InputConduitType;
 		conduitConsumer.consumptionRate = 10f;

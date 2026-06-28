@@ -11,6 +11,14 @@ public class PlanScreen : KIconToggleMenu
 {
 	public static PlanScreen Instance { get; private set; }
 
+	public static Dictionary<PlanScreen.PlanCategory, string> IconNameMap
+	{
+		get
+		{
+			return PlanScreen.iconNameMap;
+		}
+	}
+
 	public override float GetSortKey()
 	{
 		return 2f;
@@ -30,7 +38,7 @@ public class PlanScreen : KIconToggleMenu
 		base.OnPrefabInit();
 		this.productInfoScreen = global::Util.KInstantiateUI<ProductInfoScreen>(this.productInfoScreenPrefab, this.recipeInfoScreenParent, true);
 		this.productInfoScreen.rectTransform().pivot = new Vector2(0f, 0f);
-		this.productInfoScreen.rectTransform().localPosition = new Vector3(280f, 0f, 0f);
+		this.productInfoScreen.rectTransform().SetLocalPosition(new Vector3(280f, 0f, 0f));
 		this.productInfoScreen.onElementsFullySelected = new global::System.Action(this.OnRecipeElementsFullySelected);
 		Game.Instance.Subscribe(-107300940, new Action<object>(this.OnResearchComplete));
 		Game.Instance.Subscribe(1174281782, new Action<object>(this.OnActiveToolChanged));
@@ -72,7 +80,7 @@ public class PlanScreen : KIconToggleMenu
 			{
 				PlanScreen.PlanInfo planInfo = global::TUNING.BUILDINGS.PLANORDER[i];
 				global::Action action = ((i >= 12) ? global::Action.NumActions : (global::Action.Plan1 + i));
-				string text = this.iconNameMap[planInfo.category];
+				string text = PlanScreen.iconNameMap[planInfo.category];
 				string text2 = planInfo.category.ToString().ToUpper();
 				KIconToggleMenu.ToggleInfo toggleInfo = new KIconToggleMenu.ToggleInfo(Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2 + ".NAME"), text, planInfo.category, action, Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2 + ".TOOLTIP"), string.Empty);
 				list.Add(toggleInfo);
@@ -759,7 +767,7 @@ public class PlanScreen : KIconToggleMenu
 	[SerializeField]
 	private GameObject productInfoScreenPrefab;
 
-	private Dictionary<PlanScreen.PlanCategory, string> iconNameMap = new Dictionary<PlanScreen.PlanCategory, string>
+	private static Dictionary<PlanScreen.PlanCategory, string> iconNameMap = new Dictionary<PlanScreen.PlanCategory, string>
 	{
 		{
 			PlanScreen.PlanCategory.Base,

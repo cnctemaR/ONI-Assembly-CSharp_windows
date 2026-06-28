@@ -12,6 +12,10 @@ public class MessageDialogFrame : KScreen
 	{
 		this.closeButton.onClick += this.OnClickClose;
 		this.nextMessageButton.onClick += this.OnClickNextMessage;
+		MultiToggle multiToggle = this.dontShowAgainButton;
+		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(this.OnClickDontShowAgain));
+		bool flag = KPlayerPrefs.GetInt("HideTutorial_CheckState", 0) == 1;
+		this.dontShowAgainButton.ChangeState((!flag) ? 1 : 0);
 		base.Subscribe(Messenger.Instance.gameObject, -599791736, new Action<object>(this.OnMessagesChanged));
 		this.OnMessagesChanged(null);
 	}
@@ -23,13 +27,22 @@ public class MessageDialogFrame : KScreen
 
 	private void OnClickClose()
 	{
+		this.TryDontShowAgain();
 		global::UnityEngine.Object.Destroy(base.gameObject);
 	}
 
 	private void OnClickNextMessage()
 	{
+		this.TryDontShowAgain();
 		global::UnityEngine.Object.Destroy(base.gameObject);
 		NotificationScreen.Instance.OnClickNextMessage();
+	}
+
+	private void OnClickDontShowAgain()
+	{
+		this.dontShowAgainButton.NextState();
+		bool flag = this.dontShowAgainButton.CurrentState == 0;
+		KPlayerPrefs.SetInt("HideTutorial_CheckState", (!flag) ? 0 : 1);
 	}
 
 	private void OnMessagesChanged(object data)
@@ -47,6 +60,24 @@ public class MessageDialogFrame : KScreen
 		dialog.transform.SetLocalPosition(Vector3.zero);
 		dialog.SetMessage(message);
 		dialog.OnClickAction();
+		if (dialog.CanDontShowAgain)
+		{
+			this.dontShowAgainElement.SetActive(true);
+			this.dontShowAgainDelegate = new global::System.Action(dialog.OnDontShowAgain);
+		}
+		else
+		{
+			this.dontShowAgainElement.SetActive(false);
+			this.dontShowAgainDelegate = null;
+		}
+	}
+
+	private void TryDontShowAgain()
+	{
+		if (this.dontShowAgainDelegate != null && this.dontShowAgainButton.CurrentState == 0)
+		{
+			this.dontShowAgainDelegate();
+		}
 	}
 
 	[SerializeField]
@@ -56,8 +87,16 @@ public class MessageDialogFrame : KScreen
 	private KToggle nextMessageButton;
 
 	[SerializeField]
+	private GameObject dontShowAgainElement;
+
+	[SerializeField]
+	private MultiToggle dontShowAgainButton;
+
+	[SerializeField]
 	private LocText title;
 
 	[SerializeField]
 	private RectTransform body;
+
+	private global::System.Action dontShowAgainDelegate;
 }

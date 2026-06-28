@@ -17,7 +17,7 @@ public class LaunchInitializer : MonoBehaviour
 		{
 			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 		}
-		global::Debug.Log("Development Build: OC-" + 256131U.ToString(), null);
+		global::Debug.Log("Development Build: R1-" + 260847U.ToString(), null);
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		this.CheckForSavePathIssue();
 		if (LaunchInitializer.savePathState == LaunchInitializer.SavePathIssue.Ok)
@@ -126,7 +126,7 @@ public class LaunchInitializer : MonoBehaviour
 		}
 	}
 
-	public const string BUILD_PREFIX = "OC";
+	public const string BUILD_PREFIX = "R1";
 
 	private static readonly string testFile = "testfile";
 

@@ -383,7 +383,19 @@ public class CircuitManager
 			CircuitManager.CircuitInfo circuitInfo4 = this.circuitInfo[num15];
 			bool flag4 = circuitInfo4.generators.Count + circuitInfo4.consumers.Count + circuitInfo4.outputTransformers.Count > 0;
 			this.UpdateBatteryConnectionStatus(circuitInfo4.batteries, flag4, num15);
-			this.UpdateBatteryConnectionStatus(circuitInfo4.inputTransformers, flag4, num15);
+			bool flag5 = circuitInfo4.generators.Count > 0;
+			if (!flag5)
+			{
+				foreach (Battery battery6 in circuitInfo4.batteries)
+				{
+					if (battery6.JoulesAvailable > 0f)
+					{
+						flag5 = true;
+						break;
+					}
+				}
+			}
+			this.UpdateBatteryConnectionStatus(circuitInfo4.inputTransformers, flag5, num15);
 			this.circuitInfo[num15] = circuitInfo4;
 			for (int num16 = 0; num16 < circuitInfo4.generators.Count; num16++)
 			{

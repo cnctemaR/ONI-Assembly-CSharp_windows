@@ -130,10 +130,10 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 								{
 									int num4 = extents.x + k;
 									int num5 = num3 * Grid.WidthInCells + num4;
-									float mass = Grid.Cell[num5].mass;
-									float num6 = Mathf.Min(mass, 1.5f) / 1.5f;
-									float num7 = num2 * num6;
-									SimMessages.ModifyEnergy(num5, num7, structureTemperatureData.maxTemperature, SimMessages.EnergySourceID.StructureTemperature);
+									float num6 = Grid.Mass[num5];
+									float num7 = Mathf.Min(num6, 1.5f) / 1.5f;
+									float num8 = num2 * num7;
+									SimMessages.ModifyEnergy(num5, num8, structureTemperatureData.maxTemperature, SimMessages.EnergySourceID.StructureTemperature);
 								}
 							}
 							structureTemperatureData.energySourcesKW = this.AccumulateProducedEnergyKW(structureTemperatureData.energySourcesKW, structureTemperatureData.ExhaustKilowatts, BUILDING.STATUSITEMS.OPERATINGENERGY.EXHAUSTING);

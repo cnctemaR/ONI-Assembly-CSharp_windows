@@ -47,7 +47,7 @@ public class ElementSpout : StateMachineComponent<ElementSpout.StatesInstance>
 
 		private bool CanEmitOnCell(int cell, float max_pressure, Element.State expected_state)
 		{
-			return Grid.Cell[cell].mass < max_pressure && (Grid.Element[cell].IsState(expected_state) || Grid.Element[cell].IsVacuum);
+			return Grid.Mass[cell] < max_pressure && (Grid.Element[cell].IsState(expected_state) || Grid.Element[cell].IsVacuum);
 		}
 
 		public bool CanEmitAnywhere()

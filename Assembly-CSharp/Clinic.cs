@@ -196,12 +196,16 @@ public class Clinic : Workable, IEffectDescriptor
 		{
 			base.serializable = false;
 			default_state = this.unoperational;
-			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (Clinic.ClinicSM.Instance smi) => smi.GetComponent<Operational>().IsOperational);
+			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (Clinic.ClinicSM.Instance smi) => smi.GetComponent<Operational>().IsOperational).Enter(delegate(Clinic.ClinicSM.Instance smi)
+			{
+				Assignable component = smi.master.GetComponent<Assignable>();
+				component.Unassign();
+			});
 			this.operational.DefaultState(this.operational.idle).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Clinic.ClinicSM.Instance smi) => !smi.master.GetComponent<Operational>().IsOperational).EventTransition(GameHashes.AssigneeChanged, this.unoperational, null)
-				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.Heal, smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.healthEffect))
-				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.HealCritical, smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.healthEffect))
-				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.RestDueToDisease, smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.diseaseEffect))
-				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.SleepDueToDisease, smi.master, null, null, true, null, null, null, true, null, true, null, false, true, false, PriorityScreen.PriorityClass.basic, int.MaxValue, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.diseaseEffect));
+				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.Heal, smi.master, null, null, true, null, null, null, false, null, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.healthEffect))
+				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.HealCritical, smi.master, null, null, true, null, null, null, false, null, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.healthEffect))
+				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.RestDueToDisease, smi.master, null, null, true, null, null, null, false, null, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.diseaseEffect))
+				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.SleepDueToDisease, smi.master, null, null, true, null, null, null, false, null, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.diseaseEffect));
 			this.operational.idle.WorkableStartTransition((Clinic.ClinicSM.Instance smi) => smi.master, this.operational.healing);
 			this.operational.healing.DefaultState(this.operational.healing.undoctored).WorkableStopTransition((Clinic.ClinicSM.Instance smi) => smi.GetComponent<Clinic>(), this.operational.idle).Enter(delegate(Clinic.ClinicSM.Instance smi)
 			{
@@ -246,10 +250,10 @@ public class Clinic : Workable, IEffectDescriptor
 			});
 			this.operational.healing.doctored.Enter(delegate(Clinic.ClinicSM.Instance smi)
 			{
-				Effects component = smi.master.worker.GetComponent<Effects>();
+				Effects component2 = smi.master.worker.GetComponent<Effects>();
 				if (smi.HasEffect(smi.master.doctoredPlaceholderEffect))
 				{
-					EffectInstance effectInstance = component.Get(smi.master.doctoredPlaceholderEffect);
+					EffectInstance effectInstance = component2.Get(smi.master.doctoredPlaceholderEffect);
 					EffectInstance effectInstance2 = smi.StartEffect(smi.master.doctoredDiseaseEffect, true);
 					if (effectInstance2 != null)
 					{
@@ -262,38 +266,38 @@ public class Clinic : Workable, IEffectDescriptor
 						float num2 = effectInstance.effect.duration - effectInstance.timeRemaining;
 						effectInstance3.timeRemaining = effectInstance3.effect.duration - num2;
 					}
-					component.Remove(smi.master.doctoredPlaceholderEffect);
+					component2.Remove(smi.master.doctoredPlaceholderEffect);
 				}
 			}).ScheduleGoTo(delegate(Clinic.ClinicSM.Instance smi)
 			{
 				Worker worker2 = smi.master.worker;
-				Effects component2 = worker2.GetComponent<Effects>();
+				Effects component3 = worker2.GetComponent<Effects>();
 				float num3 = smi.master.doctorVisitInterval;
 				if (smi.HasEffect(smi.master.doctoredHealthEffect))
 				{
-					EffectInstance effectInstance4 = component2.Get(smi.master.doctoredHealthEffect);
+					EffectInstance effectInstance4 = component3.Get(smi.master.doctoredHealthEffect);
 					num3 = Mathf.Min(num3, effectInstance4.GetTimeRemaining());
 				}
 				if (smi.HasEffect(smi.master.doctoredDiseaseEffect))
 				{
-					EffectInstance effectInstance4 = component2.Get(smi.master.doctoredDiseaseEffect);
+					EffectInstance effectInstance4 = component3.Get(smi.master.doctoredDiseaseEffect);
 					num3 = Mathf.Min(num3, effectInstance4.GetTimeRemaining());
 				}
 				return num3;
 			}, this.operational.healing.undoctored).Exit(delegate(Clinic.ClinicSM.Instance smi)
 			{
-				Effects component3 = smi.master.worker.GetComponent<Effects>();
+				Effects component4 = smi.master.worker.GetComponent<Effects>();
 				if (smi.HasEffect(smi.master.doctoredDiseaseEffect) || smi.HasEffect(smi.master.doctoredHealthEffect))
 				{
-					EffectInstance effectInstance5 = component3.Get(smi.master.doctoredDiseaseEffect);
+					EffectInstance effectInstance5 = component4.Get(smi.master.doctoredDiseaseEffect);
 					if (effectInstance5 == null)
 					{
-						effectInstance5 = component3.Get(smi.master.doctoredHealthEffect);
+						effectInstance5 = component4.Get(smi.master.doctoredHealthEffect);
 					}
 					EffectInstance effectInstance6 = smi.StartEffect(smi.master.doctoredPlaceholderEffect, true);
 					effectInstance6.timeRemaining = effectInstance6.effect.duration - (effectInstance5.effect.duration - effectInstance5.timeRemaining);
-					component3.Remove(smi.master.doctoredDiseaseEffect);
-					component3.Remove(smi.master.doctoredHealthEffect);
+					component4.Remove(smi.master.doctoredDiseaseEffect);
+					component4.Remove(smi.master.doctoredHealthEffect);
 				}
 			});
 		}
@@ -329,7 +333,7 @@ public class Clinic : Workable, IEffectDescriptor
 			{
 				if (base.master.IsValidEffect(base.master.doctoredHealthEffect) || base.master.IsValidEffect(base.master.doctoredDiseaseEffect))
 				{
-					this.doctorChore = new WorkChore<DoctorChore>(Db.Get().ChoreTypes.Doctor, base.smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, true);
+					this.doctorChore = new WorkChore<DoctorChore>(Db.Get().ChoreTypes.Doctor, base.smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, true);
 					WorkChore<DoctorChore> workChore = this.doctorChore;
 					workChore.onComplete = (Action<Chore>)Delegate.Combine(workChore.onComplete, new Action<Chore>(delegate(Chore chore)
 					{

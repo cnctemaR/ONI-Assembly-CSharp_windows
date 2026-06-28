@@ -37,12 +37,13 @@ public class SaveManager : KMonoBehaviour
 		}
 		Tag saveLoadTag = prefab.GetSaveLoadTag();
 		this.prefabMap[saveLoadTag] = prefab.gameObject;
-		if (!prefab.gameObject.activeSelf && prefab.gameObject.GetComponent<KAnimControllerBase>() != null)
+		if (!prefab.gameObject.activeSelf && prefab.gameObject.GetComponent<KAnimControllerBase>() != null && prefab.gameObject.GetComponent<Pickupable>() != null)
 		{
 			GameObject gameObject = Util.KInstantiate(prefab.gameObject, null, null);
 			KAnimControllerBase component = gameObject.GetComponent<KAnimControllerBase>();
 			component.enabled = false;
 			gameObject.transform.parent = prefab.gameObject.transform.parent;
+			gameObject.name += "_noanim";
 			this.disabledVisualizerPrefabMap[saveLoadTag] = gameObject;
 		}
 	}

@@ -15,7 +15,7 @@ public class AirborneCreatureLureConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		CreatureLure creatureLure = go.UpdateComponentRequirement<CreatureLure>(true);
+		CreatureLure creatureLure = go.AddOrGet<CreatureLure>();
 		creatureLure.lurePoints = new CellOffset[]
 		{
 			new CellOffset(0, 5),
@@ -32,7 +32,7 @@ public class AirborneCreatureLureConfig : IBuildingConfig
 			new CellOffset(1, 2),
 			new CellOffset(0, 1)
 		};
-		creatureLure.baitStorage = go.UpdateComponentRequirement<Storage>(true);
+		creatureLure.baitStorage = go.AddOrGet<Storage>();
 		creatureLure.baitTypes = new List<Tag>
 		{
 			GameTags.SlimeMold,
@@ -41,7 +41,7 @@ public class AirborneCreatureLureConfig : IBuildingConfig
 		creatureLure.baitStorage.storageFilters = creatureLure.baitTypes;
 		creatureLure.baitStorage.allowItemRemoval = false;
 		creatureLure.baitStorage.SetDefaultStoredItemModifiers(Storage.StandardFabricatorStorage);
-		go.UpdateComponentRequirement<Operational>(true);
+		go.AddOrGet<Operational>();
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)

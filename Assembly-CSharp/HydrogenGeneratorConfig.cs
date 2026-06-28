@@ -47,8 +47,7 @@ public class HydrogenGeneratorConfig : IBuildingConfig
 		go.AddOrGet<LogicOperationalController>();
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddOrGet<LoopingSounds>();
-		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 2f;
+		go.AddOrGet<Storage>();
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Gas;
 		conduitConsumer.consumptionRate = 1f;

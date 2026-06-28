@@ -47,8 +47,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 				Assets.AnimTable[hashedString] = kanimFile;
 			}
 		}
-		EntityTypeSet.Destroy();
-		this.entityTypeSet = EntityTypeSet.Instance;
 		LegacyModMain.Load();
 	}
 
@@ -208,11 +206,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		{
 			on_add(kprefabID);
 		}
-	}
-
-	public static GameObject GetPrefab(HashedString hash)
-	{
-		return Assets.GetPrefab(new Tag(hash.HashValue));
 	}
 
 	public static GameObject GetPrefab(Tag tag)
@@ -428,8 +421,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public static Font DebugFont;
 
-	public EntityTypeSet entityTypeSet;
-
 	public SubstanceTable substanceTable;
 
 	public static SubstanceTable SubstanceTable;
@@ -447,6 +438,12 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	private TextAsset elementAudio;
 
 	public LogicModeUI logicModeUIData;
+
+	public CommonPlacerConfig.CommonPlacerAssets commonPlacerAssets;
+
+	public DigPlacerConfig.DigPlacerAssets digPlacerAssets;
+
+	public MopPlacerConfig.MopPlacerAssets mopPlacerAssets;
 
 	public static Assets instance;
 
@@ -500,6 +497,18 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		public GameObject SuperCheckbox_Vertical;
 
 		public GameObject Spacer;
+
+		public GameObject NumericDropDown;
+
+		public GameObject DropDownHeader;
+
+		public GameObject PriorityGroupSelector;
+
+		public GameObject PriorityGroupSelectorHeader;
+
+		public GameObject PrioritizeRowWidget;
+
+		public GameObject PrioritizeRowHeaderWidget;
 	}
 
 	[Serializable]

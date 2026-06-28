@@ -17,7 +17,8 @@ public class OptionsMenuScreen : KModalButtonMenu
 			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.CONTROLS, global::Action.NumActions, new UnityAction(this.OnKeyBindings), null, null),
 			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.UNITS, global::Action.NumActions, new UnityAction(this.OnUnits), null, null),
 			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.METRICS, global::Action.NumActions, new UnityAction(this.OnMetrics), null, null),
-			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.CREDITS, global::Action.NumActions, new UnityAction(this.OnCredits), null, null)
+			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.CREDITS, global::Action.NumActions, new UnityAction(this.OnCredits), null, null),
+			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.RESET_TUTORIAL, global::Action.NumActions, new UnityAction(this.OnTutorialReset), null, null)
 		};
 		this.closeButton.onClick += this.Deactivate;
 		this.backButton.onClick += this.Deactivate;
@@ -79,6 +80,18 @@ public class OptionsMenuScreen : KModalButtonMenu
 	private void OnCredits()
 	{
 		base.ActivateChildScreen(this.creditsScreenPrefab.gameObject);
+	}
+
+	private void OnTutorialReset()
+	{
+		ConfirmDialogScreen component = base.ActivateChildScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject).GetComponent<ConfirmDialogScreen>();
+		component.PopupConfirmDialog(UI.FRONTEND.OPTIONS_SCREEN.RESET_TUTORIAL_WARNING, delegate
+		{
+			Tutorial.ResetHiddenTutorialMessages();
+		}, delegate
+		{
+		}, null, null, null, null, null);
+		component.Activate();
 	}
 
 	private void Update()

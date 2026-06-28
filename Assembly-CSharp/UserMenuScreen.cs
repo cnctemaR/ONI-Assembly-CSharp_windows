@@ -79,7 +79,7 @@ public class UserMenuScreen : KIconButtonMenu
 		this.RefreshSliders();
 		this.ClearPrioritizable();
 		this.RefreshPrioritizable();
-		if ((this.sliders == null || this.sliders.Count == 0) && (this.buttonInfos == null || this.buttonInfos.Count == 0))
+		if ((this.sliders == null || this.sliders.Count == 0) && (this.buttonInfos == null || this.buttonInfos.Count == 0) && !this.priorityScreen.gameObject.activeSelf)
 		{
 			base.transform.parent.gameObject.SetActive(false);
 		}

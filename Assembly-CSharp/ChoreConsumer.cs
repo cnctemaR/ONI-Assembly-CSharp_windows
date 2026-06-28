@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using Database;
+using Klei.AI;
 using KSerialization;
 using STRINGS;
+using UnityEngine;
 
-public class ChoreConsumer : KMonoBehaviour
+public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 {
-	public bool IsStationary
-	{
-		get
-		{
-			return this.stationaryReach >= 0;
-		}
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -34,6 +30,41 @@ public class ChoreConsumer : KMonoBehaviour
 					this.forbiddenChoreGroups.Add(new HashedString(keyValuePair.Key.GetHashCode()));
 				}
 			}
+		}
+		this.providers.Add(this.choreProvider);
+		this.choreTypePriorities[Db.Get().ChoreTypes.Idle.IdHash] = 0;
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		KPrefabID component = base.GetComponent<KPrefabID>();
+		KPrefabID originalPrefab = component.GetOriginalPrefab();
+		ChoreConsumer component2 = originalPrefab.GetComponent<ChoreConsumer>();
+		if (component2 != null)
+		{
+			this.choreTable = originalPrefab.GetComponent<ChoreConsumer>().choreTable;
+			if (this.choreTable != null)
+			{
+				this.choreTableInstance = new ChoreTable.Instance(this.choreTable, component);
+			}
+		}
+		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
+		{
+			bool flag;
+			int personalPriority = this.GetPersonalPriority(choreGroup, out flag);
+			this.UpdateChoreTypePriorities(choreGroup, personalPriority);
+		}
+		this.consumerState = new ChoreConsumerState(this);
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		if (this.choreTableInstance != null)
+		{
+			this.choreTableInstance.OnCleanUp(base.GetComponent<KPrefabID>());
+			this.choreTableInstance = null;
 		}
 	}
 
@@ -81,18 +112,23 @@ public class ChoreConsumer : KMonoBehaviour
 
 	public bool FindNextChore(ref Chore.Precondition.Context out_context)
 	{
-		this.preconditionSnapshot.Clear();
-		if (this.IsStationary)
+		if (this.debug)
 		{
-			SolidTransferArm component = base.GetComponent<SolidTransferArm>();
-			CellOffset offset = Grid.GetOffset(Grid.PosToCell(component));
-			int pickupRange = component.pickupRange;
+			int num = 0;
+			num++;
+		}
+		this.preconditionSnapshot.Clear();
+		this.consumerState.Refresh();
+		if (this.consumerState.hasSolidTransferArm)
+		{
+			CellOffset offset = Grid.GetOffset(Grid.PosToCell(this));
+			int num2 = this.stationaryReach;
 			List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-			GameScenePartitioner.Instance.GatherEntries(offset.x - pickupRange, offset.y - pickupRange, pickupRange * 2 + 1, pickupRange * 2 + 1, GameScenePartitioner.Instance.fetchChoreLayer, list);
+			GameScenePartitioner.Instance.GatherEntries(offset.x - num2, offset.y - num2, num2 * 2 + 1, num2 * 2 + 1, GameScenePartitioner.Instance.fetchChoreLayer, list);
 			foreach (ScenePartitionerEntry scenePartitionerEntry in list)
 			{
 				Chore chore = scenePartitionerEntry.obj as Chore;
-				chore.CollectChores(this, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts, false);
+				chore.CollectChores(this.consumerState, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts, false);
 			}
 			ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
 		}
@@ -101,7 +137,7 @@ public class ChoreConsumer : KMonoBehaviour
 			for (int i = 0; i < this.providers.Count; i++)
 			{
 				ChoreProvider choreProvider = this.providers[i];
-				choreProvider.CollectChores(this, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts);
+				choreProvider.CollectChores(this.consumerState, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts);
 			}
 		}
 		List<Chore.Precondition.Context> succeededContexts = this.preconditionSnapshot.succeededContexts;
@@ -153,7 +189,6 @@ public class ChoreConsumer : KMonoBehaviour
 
 	public void AddUrge(Urge urge)
 	{
-		this.Log("(AddUrge)", urge.ToString());
 		DebugUtil.Assert(urge != null, "Assert!");
 		this.urges.Add(urge);
 		base.Trigger(-736698276, urge);
@@ -161,7 +196,6 @@ public class ChoreConsumer : KMonoBehaviour
 
 	public void RemoveUrge(Urge urge)
 	{
-		this.Log("(RemoveUrge)", urge.ToString());
 		this.urges.Remove(urge);
 		base.Trigger(231622047, urge);
 	}
@@ -176,6 +210,7 @@ public class ChoreConsumer : KMonoBehaviour
 		return this.urges;
 	}
 
+	[Conditional("ENABLE_LOGGER")]
 	public void Log(string evt, string param)
 	{
 	}
@@ -317,6 +352,175 @@ public class ChoreConsumer : KMonoBehaviour
 		}
 	}
 
+	public int GetPersonalPriority(ChoreType chore_type)
+	{
+		int num;
+		if (!this.choreTypePriorities.TryGetValue(chore_type.IdHash, out num))
+		{
+			num = 3;
+		}
+		num = Mathf.Clamp(num, 0, 5);
+		return num;
+	}
+
+	public int GetPersonalPriority(ChoreGroup group, out bool auto_assigned)
+	{
+		int num = 3;
+		auto_assigned = false;
+		ChoreConsumer.PriorityInfo priorityInfo;
+		if (this.choreGroupPriorities.TryGetValue(group.IdHash, out priorityInfo))
+		{
+			auto_assigned = priorityInfo.wasAutoAssigned;
+			num = priorityInfo.priority;
+		}
+		return Mathf.Clamp(num, 0, 5);
+	}
+
+	public int GetPriorityBeforeAutoAssignment(ChoreGroup group)
+	{
+		int num = 3;
+		ChoreConsumer.PriorityInfo priorityInfo;
+		if (this.choreGroupPriorities.TryGetValue(group.IdHash, out priorityInfo))
+		{
+			num = priorityInfo.priorityWhenAutoAssigned;
+		}
+		return Mathf.Clamp(num, 0, 5);
+	}
+
+	public void SetPersonalPriority(ChoreGroup group, int value, bool auto_assigned)
+	{
+		if (group.choreTypes == null)
+		{
+			return;
+		}
+		value = Mathf.Clamp(value, 0, 5);
+		ChoreConsumer.PriorityInfo priorityInfo;
+		if (!this.choreGroupPriorities.TryGetValue(group.IdHash, out priorityInfo))
+		{
+			priorityInfo.priority = 3;
+		}
+		this.choreGroupPriorities[group.IdHash] = new ChoreConsumer.PriorityInfo
+		{
+			priority = value,
+			wasAutoAssigned = auto_assigned,
+			priorityWhenAutoAssigned = ((!auto_assigned) ? (-1) : priorityInfo.priority)
+		};
+		this.UpdateChoreTypePriorities(group, value);
+		this.SetPermitted(group, value != 0);
+	}
+
+	public int GetAssociatedSkillLevel(ChoreGroup group)
+	{
+		Klei.AI.Attributes attributes = this.GetAttributes();
+		float value = attributes.GetValue(group.attribute.Id);
+		return (int)value;
+	}
+
+	public bool CanRoleManageChoreGroup(ChoreGroup group)
+	{
+		bool flag = false;
+		MinionResume component = base.GetComponent<MinionResume>();
+		if (component != null)
+		{
+			RoleConfig role = Game.Instance.roleManager.GetRole(component.CurrentRole);
+			RoleGroup roleGroup;
+			if (role != null && Game.Instance.roleManager.RoleGroups.TryGetValue(role.roleGroup, out roleGroup) && group.Id == roleGroup.choreGroupID)
+			{
+				flag = true;
+			}
+		}
+		return flag;
+	}
+
+	private void UpdateChoreTypePriorities(ChoreGroup group, int value)
+	{
+		ChoreGroups choreGroups = Db.Get().ChoreGroups;
+		foreach (ChoreType choreType in group.choreTypes)
+		{
+			if (!(choreType.IdHash == Db.Get().ChoreTypes.Idle.IdHash))
+			{
+				int num = 0;
+				foreach (ChoreGroup choreGroup in choreGroups)
+				{
+					if (choreGroup.choreTypes != null)
+					{
+						foreach (ChoreType choreType2 in choreGroup.choreTypes)
+						{
+							if (choreType2.IdHash == choreType.IdHash)
+							{
+								bool flag;
+								int personalPriority = this.GetPersonalPriority(choreGroup, out flag);
+								num = Mathf.Max(num, personalPriority);
+							}
+						}
+					}
+				}
+				this.choreTypePriorities[choreType.IdHash] = num;
+			}
+		}
+	}
+
+	public void ResetPersonalPriorities()
+	{
+	}
+
+	public bool RunBehaviourPrecondition(Tag tag)
+	{
+		ChoreConsumer.BehaviourPrecondition behaviourPrecondition = default(ChoreConsumer.BehaviourPrecondition);
+		return this.behaviourPreconditions.TryGetValue(tag, out behaviourPrecondition) && behaviourPrecondition.cb(behaviourPrecondition.arg);
+	}
+
+	public void AddBehaviourPrecondition(Tag tag, Func<object, bool> precondition, object arg)
+	{
+		DebugUtil.Assert(!this.behaviourPreconditions.ContainsKey(tag), "Assert!");
+		this.behaviourPreconditions[tag] = new ChoreConsumer.BehaviourPrecondition
+		{
+			cb = precondition,
+			arg = arg
+		};
+	}
+
+	public void RemoveBehaviourPrecondition(Tag tag, Func<object, bool> precondition, object arg)
+	{
+		this.behaviourPreconditions.Remove(tag);
+	}
+
+	public bool IsChoreEqualOrAboveCurrentChorePriority<StateMachineType>()
+	{
+		Chore currentChore = this.choreDriver.GetCurrentChore();
+		return currentChore == null || currentChore.choreType.priority <= this.choreTable.GetChorePriority<StateMachineType>();
+	}
+
+	public bool IsChoreGroupDisabled(ChoreGroup chore_group)
+	{
+		bool flag = false;
+		Traits component = base.gameObject.GetComponent<Traits>();
+		foreach (Trait trait in component)
+		{
+			if (trait.disabledChoreGroups != null)
+			{
+				foreach (ChoreGroup choreGroup in trait.disabledChoreGroups)
+				{
+					if (choreGroup.IdHash == chore_group.IdHash)
+					{
+						flag = true;
+						break;
+					}
+				}
+			}
+		}
+		return flag;
+	}
+
+	public const int DEFAULT_PERSONAL_CHORE_PRIORITY = 3;
+
+	public const int MIN_PERSONAL_PRIORITY = 0;
+
+	public const int MAX_PERSONAL_PRIORITY = 5;
+
+	[MyCmpAdd]
+	public ChoreProvider choreProvider;
+
 	[MyCmpAdd]
 	public ChoreDriver choreDriver;
 
@@ -331,14 +535,29 @@ public class ChoreConsumer : KMonoBehaviour
 
 	public global::System.Action choreRulesChanged;
 
+	public bool debug;
+
 	private List<ChoreProvider> providers = new List<ChoreProvider>();
 
 	private List<Urge> urges = new List<Urge>();
+
+	public ChoreTable choreTable;
+
+	private ChoreTable.Instance choreTableInstance;
+
+	public ChoreConsumerState consumerState;
+
+	private Dictionary<Tag, ChoreConsumer.BehaviourPrecondition> behaviourPreconditions = new Dictionary<Tag, ChoreConsumer.BehaviourPrecondition>();
 
 	private ChoreConsumer.PreconditionSnapshot preconditionSnapshot = new ChoreConsumer.PreconditionSnapshot();
 
 	[Serialize]
 	private List<HashedString> forbiddenChoreGroups = new List<HashedString>();
+
+	[Serialize]
+	private Dictionary<HashedString, ChoreConsumer.PriorityInfo> choreGroupPriorities = new Dictionary<HashedString, ChoreConsumer.PriorityInfo>();
+
+	private Dictionary<HashedString, int> choreTypePriorities = new Dictionary<HashedString, int>();
 
 	private List<HashedString> disabledChoreGroups = new List<HashedString>();
 
@@ -346,12 +565,18 @@ public class ChoreConsumer : KMonoBehaviour
 
 	private int stationaryReach = -1;
 
-	private LoggerFSS log = new LoggerFSS("ChoreConsumer");
+	private struct BehaviourPrecondition
+	{
+		public Func<object, bool> cb;
+
+		public object arg;
+	}
 
 	private class PreconditionSnapshot
 	{
 		public void CopyTo(ChoreConsumer.PreconditionSnapshot snapshot)
 		{
+			snapshot.Clear();
 			snapshot.succeededContexts.AddRange(this.succeededContexts);
 			snapshot.failedContexts.AddRange(this.failedContexts);
 		}
@@ -365,5 +590,14 @@ public class ChoreConsumer : KMonoBehaviour
 		public List<Chore.Precondition.Context> succeededContexts = new List<Chore.Precondition.Context>();
 
 		public List<Chore.Precondition.Context> failedContexts = new List<Chore.Precondition.Context>();
+	}
+
+	private struct PriorityInfo
+	{
+		public int priority;
+
+		public bool wasAutoAssigned;
+
+		public int priorityWhenAutoAssigned;
 	}
 }

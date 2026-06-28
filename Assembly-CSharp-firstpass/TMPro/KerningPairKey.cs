@@ -4,17 +4,17 @@ namespace TMPro
 {
 	public struct KerningPairKey
 	{
-		public KerningPairKey(int ascii_left, int ascii_right)
+		public KerningPairKey(uint ascii_left, uint ascii_right)
 		{
 			this.ascii_Left = ascii_left;
 			this.ascii_Right = ascii_right;
 			this.key = (ascii_right << 16) + ascii_left;
 		}
 
-		public int ascii_Left;
+		public uint ascii_Left;
 
-		public int ascii_Right;
+		public uint ascii_Right;
 
-		public int key;
+		public uint key;
 	}
 }

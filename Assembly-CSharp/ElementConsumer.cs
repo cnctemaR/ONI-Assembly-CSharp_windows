@@ -126,7 +126,7 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 		{
 			int num = Grid.PosToCell(base.transform.GetPosition() + this.sampleCellOffset);
 			SimHashes id = Grid.Element[num].id;
-			return this.elementToConsume == id && Grid.Cell[num].mass >= this.minimumMass;
+			return this.elementToConsume == id && Grid.Mass[num] >= this.minimumMass;
 		}
 	}
 
@@ -180,27 +180,23 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 		{
 			Element element = ElementLoader.FindElementByHash(this.elementToConsume);
 			string text = element.tag.ProperName();
-			string text2 = GameUtil.GetKeywordStyle(this.elementToConsume);
 			if (element.IsVacuum)
 			{
 				if (this.configuration == ElementConsumer.Configuration.AllGas)
 				{
-					text2 = "gas";
 					text = ELEMENTS.STATE.GAS;
 				}
 				else if (this.configuration == ElementConsumer.Configuration.AllLiquid)
 				{
-					text2 = "liquid";
 					text = ELEMENTS.STATE.LIQUID;
 				}
 				else
 				{
-					text2 = "anyElement";
 					text = UI.BUILDINGEFFECTS.CONSUMESANYELEMENT;
 				}
 			}
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.REQUIRESELEMENT, text2, text), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESELEMENT, text2, text), Descriptor.DescriptorType.Requirement);
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.REQUIRESELEMENT, text), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESELEMENT, text), Descriptor.DescriptorType.Requirement);
 			list.Add(descriptor);
 		}
 		return list;
@@ -233,7 +229,7 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 				}
 			}
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, text2, text, GameUtil.GetFormattedMass(this.consumptionRate / 100f * 100f, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, text2, text, GameUtil.GetFormattedMass(this.consumptionRate / 100f * 100f, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Effect);
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, text, GameUtil.GetFormattedMass(this.consumptionRate / 100f * 100f, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, text2, text, GameUtil.GetFormattedMass(this.consumptionRate / 100f * 100f, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Effect);
 			list.Add(descriptor);
 		}
 		return list;

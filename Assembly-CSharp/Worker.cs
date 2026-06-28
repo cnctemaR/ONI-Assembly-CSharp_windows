@@ -88,18 +88,19 @@ public class Worker : KMonoBehaviour
 				this.workCompleteTime = Time.time;
 				KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
 				component.Stop();
+				HashedString workPstAnim = this.workable.GetWorkPstAnim(this);
 				if (this.workable != null && this.workable.synchronizeAnims)
 				{
 					KAnimControllerBase component2 = this.workable.GetComponent<KAnimControllerBase>();
-					if (component2 != null && component2.HasAnimation("working_pst"))
+					if (component2 != null && component2.HasAnimation(workPstAnim))
 					{
-						component2.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
-						component.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
+						component2.Play(workPstAnim, KAnim.PlayMode.Once, 1f, 0f);
+						component.Play(workPstAnim, KAnim.PlayMode.Once, 1f, 0f);
 					}
 				}
 				if (this.animInfo.forcePlayPst)
 				{
-					component.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
+					component.Play(workPstAnim, KAnim.PlayMode.Once, 1f, 0f);
 				}
 			}
 		}

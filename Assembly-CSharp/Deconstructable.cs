@@ -20,7 +20,7 @@ public class Deconstructable : Workable
 		this.attributeConverter = Db.Get().AttributeConverters.ConstructionSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		this.multitoolContext = "build";
-		this.multitoolHitEffectHash = new HashedString("fx_build_splash");
+		this.multitoolHitEffectTag = "fx_build_splash";
 	}
 
 	protected override void OnSpawn()
@@ -136,7 +136,7 @@ public class Deconstructable : Workable
 			else
 			{
 				Prioritizable.AddRef(base.gameObject);
-				this.chore = new WorkChore<Deconstructable>(Db.Get().ChoreTypes.Deconstruct, this, null, null, true, null, null, null, true, null, false, null, true, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, true);
+				this.chore = new WorkChore<Deconstructable>(Db.Get().ChoreTypes.Deconstruct, this, null, null, true, null, null, null, true, null, false, null, true, true, true, PriorityScreen.PriorityClass.basic, 0, true);
 				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction, this);
 				this.isMarkedForDeconstruction = true;
 				base.Trigger(-790448070, null);

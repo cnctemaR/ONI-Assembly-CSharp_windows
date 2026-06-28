@@ -13,6 +13,7 @@ namespace TMPro
 		SmallCaps = 32,
 		Strikethrough = 64,
 		Superscript = 128,
-		Subscript = 256
+		Subscript = 256,
+		Highlight = 512
 	}
 }

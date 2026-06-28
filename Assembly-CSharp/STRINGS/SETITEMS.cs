@@ -8,7 +8,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Vending Machine";
 
-			public static LocString DESC = "A pristine <style=\"food\">Nutrient Bar</style> dispenser.";
+			public static LocString DESC = "A pristine " + ITEMS.FOOD.FIELDRATION.NAME + " dispenser.";
 		}
 
 		public class GENESHUFFLER

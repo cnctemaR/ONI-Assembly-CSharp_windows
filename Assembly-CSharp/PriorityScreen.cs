@@ -21,8 +21,14 @@ public class PriorityScreen : KScreen
 			priorityButton.tooltip.SetSimpleTooltip(string.Format(UI.PRIORITYSCREEN.BASIC, num));
 		}
 		this.buttonPrefab_basic.gameObject.SetActive(false);
+		this.EmergencyContainer.SetActive(false);
 		this.button_emergency.gameObject.SetActive(false);
 		this.button_toggleHigh.gameObject.SetActive(false);
+		this.PriorityMenuContainer.SetActive(true);
+		this.button_priorityMenu.gameObject.SetActive(true);
+		this.button_priorityMenu.onClick += this.PriorityButtonClicked;
+		this.button_priorityMenu.GetComponent<ToolTip>().SetSimpleTooltip(UI.PRIORITYSCREEN.OPEN_JOBS_SCREEN);
+		this.diagram.SetActive(false);
 		this.SetScreenPriority(new PrioritySetting(PriorityScreen.PriorityClass.basic, 5), false);
 	}
 
@@ -34,9 +40,19 @@ public class PriorityScreen : KScreen
 		}
 	}
 
+	public void ShowDiagram(bool show)
+	{
+		this.diagram.SetActive(show);
+	}
+
 	public void ResetPriority()
 	{
 		this.SetScreenPriority(new PrioritySetting(PriorityScreen.PriorityClass.basic, 5), false);
+	}
+
+	public void PriorityButtonClicked()
+	{
+		ManagementMenu.Instance.TogglePriorities();
 	}
 
 	private void RefreshButton(PriorityButton b, PrioritySetting priority, bool play_sound)
@@ -109,10 +125,22 @@ public class PriorityScreen : KScreen
 	protected PriorityButton buttonPrefab_basic;
 
 	[SerializeField]
+	protected GameObject EmergencyContainer;
+
+	[SerializeField]
 	protected PriorityButton button_emergency;
 
 	[SerializeField]
+	protected GameObject PriorityMenuContainer;
+
+	[SerializeField]
+	protected KButton button_priorityMenu;
+
+	[SerializeField]
 	protected KToggle button_toggleHigh;
+
+	[SerializeField]
+	protected GameObject diagram;
 
 	protected List<PriorityButton> buttons_basic = new List<PriorityButton>();
 

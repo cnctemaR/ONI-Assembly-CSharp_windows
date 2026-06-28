@@ -537,9 +537,9 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "This building cannot produce the correct research type for the current research focus";
 
-				public static LocString NOTIFICATION_NAME = "<style=\"research\">Research Center</style> idle";
+				public static LocString NOTIFICATION_NAME = UI.FormatAsLink("Research Center", UI.StripLinkFormatting(BUILDINGS.PREFABS.ADVANCEDRESEARCHCENTER.NAME)) + " idle";
 
-				public static LocString NOTIFICATION_TOOLTIP = "These buildings cannot produce the correct <style=\"research\">Research Type</style> for the selected <style=\"research\">Research Focus</style>:";
+				public static LocString NOTIFICATION_TOOLTIP = "These buildings cannot produce the correct <b>Research Type</b> for the selected " + UI.FormatAsLink("Research Focus", "TECH") + ":";
 			}
 
 			public class NOAVAILABLESEED
@@ -790,7 +790,25 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Requires Emptying";
 
-				public static LocString TOOLTIP = "This amenity cannot be used while full" + UI.HORIZONTAL_BR_RULE + "Emptying it will produce <style=\"solid\">Polluted Dirt</style>";
+				public static LocString TOOLTIP = "This amenity cannot be used while full" + UI.HORIZONTAL_BR_RULE + "Emptying it will produce " + ELEMENTS.TOXICSAND.NAME;
+			}
+
+			public class HABITATNEEDSEMPTYING
+			{
+				public static LocString NAME = "Requires Emptying";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This ",
+					BUILDINGS.PREFABS.ALGAEHABITAT.NAME,
+					" needs to be emptied of ",
+					ELEMENTS.DIRTYWATER.NAME,
+					". Consider using a ",
+					BUILDINGS.PREFABS.BOTTLEEMPTIER.NAME,
+					" to dispose of the ",
+					ELEMENTS.DIRTYWATER.NAME,
+					"."
+				});
 			}
 
 			public class UNUSABLE
@@ -804,16 +822,16 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No Research Focus Selected";
 
-				public static LocString TOOLTIP = "Open the <color=#833A5FFF>Research Tree</color> [R] to select a new <style=\"research\">Research</style> project";
+				public static LocString TOOLTIP = "Open the <color=#833A5FFF>Research Tree</color> [R] to select a new " + UI.FormatAsLink("Research", "TECH") + " project";
 
-				public static LocString NOTIFICATION_NAME = "No <style=\"research\">Research Focus</style> selected";
+				public static LocString NOTIFICATION_NAME = "No " + UI.FormatAsLink("Research Focus", "TECH") + " selected";
 
-				public static LocString NOTIFICATION_TOOLTIP = "Open the <color=#833A5FFF>Research Tree</color> [R] to select a new <style=\"research\">Research</style> project";
+				public static LocString NOTIFICATION_TOOLTIP = "Open the <color=#833A5FFF>Research Tree</color> [R] to select a new " + UI.FormatAsLink("Research", "TECH") + " project";
 			}
 
 			public class RESEARCHING
 			{
-				public static LocString NAME = "Current <style=\"research\">Research</style>: {Tech}";
+				public static LocString NAME = "Current " + UI.FormatAsLink("Research", "TECH") + ": {Tech}";
 
 				public static LocString TOOLTIP = "Research produced at this station will be invested in {Tech}";
 			}
@@ -869,14 +887,14 @@ namespace STRINGS
 
 			public class EMITTINGOXYGENAVG
 			{
-				public static LocString NAME = "Emitting <style=\"oxygen\">Oxygen</style>: {FlowRate}";
+				public static LocString NAME = "Emitting " + ELEMENTS.OXYGEN.NAME + ": {FlowRate}";
 
 				public static LocString TOOLTIP = "Producing oxygen at a rate of {FlowRate}";
 			}
 
 			public class EMITTINGGASAVG
 			{
-				public static LocString NAME = "Emitting <style=\"gas\">{Element}</style>: {FlowRate}";
+				public static LocString NAME = "Emitting {Element}: {FlowRate}";
 
 				public static LocString TOOLTIP = "Producing {Element} at a rate of {FlowRate}";
 			}
@@ -981,7 +999,7 @@ namespace STRINGS
 
 			public class JOULESAVAILABLE
 			{
-				public static LocString NAME = "<style=\"power\">Power</style> Available: {JoulesAvailable}";
+				public static LocString NAME = UI.FormatAsLink("Power", "POWER") + " Available: {JoulesAvailable}";
 
 				public static LocString TOOLTIP = "{JoulesAvailable} of stored power available for use";
 			}
@@ -1231,7 +1249,7 @@ namespace STRINGS
 				{
 					public static LocString NAME = "Set";
 
-					public static LocString TOOLTIP = "This trap has been set and is ready to catch a creature";
+					public static LocString TOOLTIP = "This trap has been set and is ready to catch a critter";
 				}
 
 				public class SPRUNG
@@ -1261,23 +1279,23 @@ namespace STRINGS
 
 			public class REQUIRESROLEPERK
 			{
-				public static LocString NAME = "Awaiting Specialist";
+				public static LocString NAME = "Specialist-Operated Building";
 
-				public static LocString TOOLTIP = "Only a Duplicant employed in one of the following jobs can complete this errand:\n{Roles}";
+				public static LocString TOOLTIP = "Only Duplicants trained in one of the following jobs can operate this building:\n{Roles}";
 			}
 
 			public class DIGREQUIRESROLEPERK
 			{
-				public static LocString NAME = "Awaiting Miner";
+				public static LocString NAME = "Miner-Only Dig";
 
-				public static LocString TOOLTIP = "Only a Duplicant employed in one of the following jobs can complete this errand:\n{Roles}";
+				public static LocString TOOLTIP = "Only Duplicants trained in one of the following jobs can mine this material:\n{Roles}";
 			}
 
 			public class COLONYLACKSREQUIREDROLEPERK
 			{
 				public static LocString NAME = "Colony Lacks {Roles}s";
 
-				public static LocString TOOLTIP = "Open the Jobs Panel <color=#F44A47><b>(J)</b></color> and assign a Duplicant to the {Roles} position to use this building";
+				public static LocString TOOLTIP = "Open the Jobs Panel <color=#F44A47><b>(L)</b></color> and assign a Duplicant to the {Roles} position to use this building";
 			}
 
 			public class SWITCHSTATUSACTIVE
@@ -1340,7 +1358,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Spinning Up";
 
-				public static LocString TOOLTIP = "This turbine is currently spinning up\n\nSpinning up allows a turbine to continue running for a short period if the pressure it needs to run becomes unanavailable";
+				public static LocString TOOLTIP = "This turbine is currently spinning up\n\nSpinning up allows a turbine to continue running for a short period if the pressure it needs to run becomes unavailable";
 			}
 
 			public class TURBINE_ACTIVE
@@ -1464,6 +1482,27 @@ namespace STRINGS
 				public static LocString NAME = "Charge Available: {0}/{1}";
 
 				public static LocString TOOLTIP = "This building has {0} of stored energy\n\nIt consumes {2} per use";
+			}
+
+			public class NEEDEGG
+			{
+				public static LocString NAME = "No Egg Selected";
+
+				public static LocString TOOLTIP = "Collect eggs from critters to incubate";
+			}
+
+			public class NOAVAILABLEEGG
+			{
+				public static LocString NAME = "No Egg Available";
+
+				public static LocString TOOLTIP = "The selected egg is not currently available";
+			}
+
+			public class AWAITINGEGGDELIVERY
+			{
+				public static LocString NAME = "Awaiting Delivery";
+
+				public static LocString TOOLTIP = "Awaiting delivery of selected egg";
 			}
 		}
 

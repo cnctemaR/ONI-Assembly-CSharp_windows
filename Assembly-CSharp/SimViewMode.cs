@@ -2,6 +2,7 @@
 
 public enum SimViewMode
 {
+	AllowPathfinding = -844047973,
 	Attack = 1932096648,
 	ChunkState = -241898332,
 	ConduitUpdates = 709732876,

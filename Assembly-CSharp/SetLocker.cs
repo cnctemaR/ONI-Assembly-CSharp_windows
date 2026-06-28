@@ -71,7 +71,7 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 		this.chore = new WorkChore<Workable>(emptyStorage, this, null, null, true, delegate(Chore o)
 		{
 			this.CompleteChore();
-		}, null, null, true, null, true, anim, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+		}, null, null, true, null, true, anim, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		this.OnRefreshUserMenu(null);
 	}
 

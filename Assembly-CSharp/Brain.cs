@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 
-public abstract class Brain : KMonoBehaviour
+public class Brain : KMonoBehaviour
 {
-	public bool clearDebugStatus { get; set; }
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

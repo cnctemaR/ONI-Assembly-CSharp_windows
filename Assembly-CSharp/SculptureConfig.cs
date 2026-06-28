@@ -43,7 +43,7 @@ public class SculptureConfig : IBuildingConfig
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		Artable artable = go.AddComponent<Sculpture>();
-		artable.requiredRolePerk = "CanArt";
+		artable.requiredRolePerk = RoleManager.rolePerks.CanArt.id;
 		artable.stages.Add(new Artable.Stage("Default", global::STRINGS.BUILDINGS.PREFABS.SCULPTURE.NAME, "slab", 0, 0, false, Artable.Status.Ready));
 		artable.stages.Add(new Artable.Stage("Bad", global::STRINGS.BUILDINGS.PREFABS.SCULPTURE.POORQUALITYNAME, "crap", 0, 5, false, Artable.Status.Ugly));
 		artable.stages.Add(new Artable.Stage("Average", global::STRINGS.BUILDINGS.PREFABS.SCULPTURE.AVERAGEQUALITYNAME, "idle", 2, 15, true, Artable.Status.Okay));

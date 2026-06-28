@@ -7,7 +7,7 @@ using UnityEngine;
 public class EatChore : Chore<EatChore.StatesInstance>
 {
 	public EatChore(IStateMachineTarget master)
-		: base(Db.Get().ChoreTypes.Eat, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.Eat, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
 	{
 		this.smi = new EatChore.StatesInstance(this);
 		this.showAvailabilityInHoverText = false;
@@ -18,12 +18,12 @@ public class EatChore : Chore<EatChore.StatesInstance>
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		if (context.consumer == null)
+		if (context.consumerState.consumer == null)
 		{
 			global::Debug.LogError("EATCHORE null context.consumer", null);
 			return;
 		}
-		RationMonitor.Instance smi = context.consumer.GetSMI<RationMonitor.Instance>();
+		RationMonitor.Instance smi = context.consumerState.consumer.GetSMI<RationMonitor.Instance>();
 		if (smi == null)
 		{
 			global::Debug.LogError("EATCHORE null RationMonitor.Instance", null);
@@ -54,7 +54,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 		AmountInstance amountInstance = Db.Get().Amounts.Calories.Lookup(this.gameObject);
 		float num = (amountInstance.GetMax() - amountInstance.value) / edible.FoodInfo.CaloriesPerUnit;
 		this.smi.sm.requestedfoodunits.Set(num, this.smi);
-		this.smi.sm.eater.Set(context.consumer.gameObject, this.smi);
+		this.smi.sm.eater.Set(context.consumerState.gameObject, this.smi);
 		base.Begin(context);
 	}
 
@@ -64,7 +64,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 		description = DUPLICANTS.CHORES.PRECONDITIONS.EDIBLE_IS_NOT_NULL,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			return null != context.consumer.GetSMI<RationMonitor.Instance>().GetEdible();
+			return null != context.consumerState.consumer.GetSMI<RationMonitor.Instance>().GetEdible();
 		}
 	};
 

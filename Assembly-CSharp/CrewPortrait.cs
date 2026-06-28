@@ -138,7 +138,7 @@ public class CrewPortrait : KMonoBehaviour
 
 	public void Update()
 	{
-		if (this.requiresRefresh)
+		if (this.requiresRefresh && (this.controller == null || this.controller.enabled))
 		{
 			this.requiresRefresh = false;
 			this.Rebuild();

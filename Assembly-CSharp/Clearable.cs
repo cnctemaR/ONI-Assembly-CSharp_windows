@@ -24,7 +24,7 @@ public class Clearable : Workable, ISaveLoadable
 		}
 		if (this.isMarkedForClear)
 		{
-			if (base.GetComponent<Pickupable>().storage != null)
+			if (this.HasTag(GameTags.Stored))
 			{
 				this.isMarkedForClear = false;
 			}
@@ -73,7 +73,7 @@ public class Clearable : Workable, ISaveLoadable
 		{
 			return;
 		}
-		if ((!this.isMarkedForClear || force) && !this.pickupable.IsEntombed && this.chore == null && this.pickupable.storage == null)
+		if ((!this.isMarkedForClear || force) && !this.pickupable.IsEntombed && this.chore == null && !this.HasTag(GameTags.Stored))
 		{
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.PendingClear, this);
 			Prioritizable.AddRef(base.gameObject);
@@ -95,7 +95,7 @@ public class Clearable : Workable, ISaveLoadable
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (!this.isClearable || base.GetComponent<Health>() != null || (base.GetComponent<Pickupable>() != null && base.GetComponent<Pickupable>().storage != null))
+		if (!this.isClearable || base.GetComponent<Health>() != null || this.HasTag(GameTags.Stored))
 		{
 			return;
 		}

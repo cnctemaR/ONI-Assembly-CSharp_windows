@@ -15,19 +15,16 @@ public class FlutConfig : IEntityConfig
 		string text4 = "idle_loop";
 		EffectorValues tier = DECOR.BONUS.TIER0;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, 25f, "SwimmerNavGrid", NavType.Swim, 2f, "Meat", 2, false, true, 30f, 283f, 294f, 243f, 343f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, 25f, "SwimmerNavGrid", NavType.Swim, 32, 2f, "Meat", 2, false, true, 30f, 283f, 294f, 243f, 343f);
 		gameObject.UpdateComponentRequirement<Flut>(true);
 		gameObject.UpdateComponentRequirement<Catchable>(true);
 		gameObject.UpdateComponentRequirement<Storage>(true);
 		gameObject.UpdateComponentRequirement<Operational>(true);
 		ElementConverter elementConverter = gameObject.UpdateComponentRequirement<ElementConverter>(true);
-		elementConverter.conversionInterval = 150f;
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.25f / elementConverter.conversionInterval, SimHashes.Fertilizer, 0f, false, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.25f, SimHashes.Fertilizer, 0f, false, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
 		};
-		KBatchedAnimController kbatchedAnimController = gameObject.AddAnimController("flut_single_kanim", Grid.SceneLayer.Front);
-		kbatchedAnimController.isMovable = true;
 		gameObject.AddAquaticReproducer("flutEgg".ToTag(), 60f, 100f, 0.08f);
 		return gameObject;
 	}

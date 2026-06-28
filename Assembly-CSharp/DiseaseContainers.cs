@@ -28,42 +28,39 @@ public class DiseaseContainers : KGameObjectComponentManager<DiseaseContainer>
 		base.OnCleanUp(h);
 	}
 
-	public override void SimUpdate(float dt)
+	public override void Sim200ms(float dt)
 	{
-		using (new KProfiler.Region("DiseaseContainers.SimUpdate", null))
+		for (int i = 0; i < this.data.Count; i++)
 		{
-			for (int i = 0; i < this.data.Count; i++)
+			DiseaseContainer diseaseContainer = this.data[i];
+			if (diseaseContainer.diseaseIdx != 255 && !(diseaseContainer.primaryElement == null))
 			{
-				DiseaseContainer diseaseContainer = this.data[i];
-				if (diseaseContainer.diseaseIdx != 255 && !(diseaseContainer.primaryElement == null))
+				Disease disease = Db.Get().Diseases[(int)diseaseContainer.diseaseIdx];
+				float num = DiseaseContainers.CalculateDelta(diseaseContainer, disease, dt);
+				num += diseaseContainer.accumulatedError;
+				int num2 = (int)num;
+				diseaseContainer.accumulatedError = num - (float)num2;
+				bool flag = diseaseContainer.diseaseCount > diseaseContainer.overpopulationCount;
+				bool flag2 = diseaseContainer.diseaseCount + num2 > diseaseContainer.overpopulationCount;
+				if (flag != flag2)
 				{
-					Disease disease = Db.Get().Diseases[(int)diseaseContainer.diseaseIdx];
-					float num = DiseaseContainers.CalculateDelta(diseaseContainer, disease, dt);
-					num += diseaseContainer.accumulatedError;
-					int num2 = (int)num;
-					diseaseContainer.accumulatedError = num - (float)num2;
-					bool flag = diseaseContainer.diseaseCount > diseaseContainer.overpopulationCount;
-					bool flag2 = diseaseContainer.diseaseCount + num2 > diseaseContainer.overpopulationCount;
-					if (flag != flag2)
-					{
-						diseaseContainer = this.EvaluateGrowthConstants(diseaseContainer);
-					}
-					diseaseContainer.diseaseCount += num2;
-					if (diseaseContainer.diseaseCount <= 0)
-					{
-						diseaseContainer.diseaseCount = 0;
-						diseaseContainer.diseaseIdx = byte.MaxValue;
-						diseaseContainer.accumulatedError = 0f;
-					}
-					this.data[i] = diseaseContainer;
+					diseaseContainer = this.EvaluateGrowthConstants(diseaseContainer);
 				}
+				diseaseContainer.diseaseCount += num2;
+				if (diseaseContainer.diseaseCount <= 0)
+				{
+					diseaseContainer.diseaseCount = 0;
+					diseaseContainer.diseaseIdx = byte.MaxValue;
+					diseaseContainer.accumulatedError = 0f;
+				}
+				this.data[i] = diseaseContainer;
 			}
 		}
 	}
 
 	public static float CalculateDelta(DiseaseContainer container, Disease disease, float dt)
 	{
-		int num = Grid.PosToCell(container.primaryElement.transform.position);
+		int num = Grid.PosToCell(container.primaryElement.transform.GetPosition());
 		return DiseaseContainers.CalculateDelta(container.diseaseCount, (int)container.elemIdx, container.primaryElement.Mass, num, container.primaryElement.Temperature, container.instanceGrowthRate, disease, dt);
 	}
 
@@ -130,7 +127,7 @@ public class DiseaseContainers : KGameObjectComponentManager<DiseaseContainer>
 			if (controller != null)
 			{
 				Color32 color2 = color;
-				Vector3 position = controller.transform.position;
+				Vector3 position = controller.transform.GetPosition();
 				if (visibleArea.Min <= position && position <= visibleArea.Max)
 				{
 					int num = 0;

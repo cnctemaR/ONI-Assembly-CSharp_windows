@@ -10,16 +10,15 @@ public class GasVentHighPressureConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 1;
 		string text2 = "ventgas_powered_kanim";
-		float num3 = 50f;
-		int num4 = 30;
-		float num5 = 30f;
+		int num3 = 30;
+		float num4 = 30f;
 		string[] array = new string[] { "RefinedMetal", "Plastic" };
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, new float[]
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, new float[]
 		{
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0],
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER1[0]
-		}, array, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER1, none);
+		}, array, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
@@ -31,7 +30,7 @@ public class GasVentHighPressureConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		go.AddOrGet<LoopingSounds>();
@@ -61,4 +60,6 @@ public class GasVentHighPressureConfig : IBuildingConfig
 	public const string ID = "GasVentHighPressure";
 
 	private const ConduitType CONDUIT_TYPE = ConduitType.Gas;
+
+	public const float OVERPRESSURE_MASS = 20f;
 }

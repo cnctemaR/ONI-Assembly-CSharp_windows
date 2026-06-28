@@ -10,15 +10,14 @@ public class ClothingFabricatorConfig : IBuildingConfig
 		int num = 4;
 		int num2 = 3;
 		string text2 = "clothingfactory_kanim";
-		float num3 = 800f;
-		int num4 = 100;
-		float num5 = 240f;
+		int num3 = 100;
+		float num4 = 240f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, refined_METALS, num6, buildLocationRule, BUILDINGS.DECOR.NONE, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
@@ -27,7 +26,7 @@ public class ClothingFabricatorConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;

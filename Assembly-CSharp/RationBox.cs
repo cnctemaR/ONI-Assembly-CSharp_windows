@@ -3,11 +3,11 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class RationBox : KMonoBehaviour, IUserControlledCapacity
+public class RationBox : KMonoBehaviour, IUserControlledCapacity, IRender1000ms
 {
 	protected override void OnPrefabInit()
 	{
-		this.filteredStorage = new FilteredStorage(this, new Tag[] { GameTags.MarkedForCompost }, this.filterTint, this.noFilterTint, this);
+		this.filteredStorage = new FilteredStorage(this, new Tag[] { GameTags.MarkedForCompost }, this.filterTint, this.noFilterTint, this, false);
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 		WorldInventory.Instance.Discover("FieldRation".ToTag(), GameTags.Edible);
@@ -17,14 +17,12 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity
 	{
 		Operational component = base.GetComponent<Operational>();
 		component.SetActive(component.IsOperational, false);
-		this.handle = GameScheduler.Instance.SchedulePeriodic(base.name, 0.5f, new Action<object>(this.UpdatePreservationStatusItems), null, null, 0f, null);
 		this.filteredStorage.FilterChanged();
 	}
 
 	protected override void OnCleanUp()
 	{
 		this.filteredStorage.CleanUp();
-		this.handle.ClearScheduler();
 	}
 
 	private void OnOperationalChanged(object data)
@@ -48,7 +46,7 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity
 		this.UserMaxCapacity = component.UserMaxCapacity;
 	}
 
-	private void UpdatePreservationStatusItems(object data)
+	public void Render1000ms(float dt)
 	{
 		Rottable.SetStatusItems(base.GetComponent<KSelectable>(), Rottable.IsRefrigerated(base.gameObject), Rottable.AtmosphereQuality(base.gameObject));
 	}
@@ -114,8 +112,6 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity
 
 	[Serialize]
 	private float userMaxCapacity = float.PositiveInfinity;
-
-	private SchedulerHandle handle;
 
 	private FilteredStorage filteredStorage;
 }

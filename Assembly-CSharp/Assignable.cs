@@ -1,18 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 using KSerialization;
-using UnityEngine;
 
-public abstract class Assignable : Workable
+public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 {
-	public AssignableSlot slot { get; set; }
-
-	public RequiresRegion RequiresRegion
+	public AssignableSlot slot
 	{
 		get
 		{
-			return this.requiresRegion;
+			if (this._slot == null)
+			{
+				this._slot = Db.Get().AssignableSlots.Get(this.slotID);
+			}
+			return this._slot;
 		}
 	}
 
@@ -22,17 +24,6 @@ public abstract class Assignable : Workable
 		{
 			return this.canBeAssigned;
 		}
-	}
-
-	protected abstract Assignables GetAssignables();
-
-	protected abstract void SetAssignables(Assignables assignables);
-
-	public abstract Assignables GetAssignables(GameObject go);
-
-	protected virtual void OnClickAssign(IAssignableIdentity new_assignee)
-	{
-		this.Assign(new_assignee);
 	}
 
 	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -61,14 +52,6 @@ public abstract class Assignable : Workable
 		return null;
 	}
 
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-		KPrefabID originalPrefab = base.GetComponent<KPrefabID>().GetOriginalPrefab();
-		Assignable component = originalPrefab.GetComponent<Assignable>();
-		this.slot = component.slot;
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -86,8 +69,41 @@ public abstract class Assignable : Workable
 		base.OnCleanUp();
 	}
 
-	public virtual bool CanAutoAssignTo(KMonoBehaviour worker)
+	public bool CanAutoAssignTo(IAssignableIdentity identity)
 	{
+		MinionIdentity minionIdentity = identity as MinionIdentity;
+		if (minionIdentity == null)
+		{
+			return true;
+		}
+		if (!this.CanAssignTo(minionIdentity))
+		{
+			return false;
+		}
+		foreach (Func<MinionIdentity, bool> func in this.autoassignmentPreconditions)
+		{
+			if (!func(minionIdentity))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public bool CanAssignTo(IAssignableIdentity identity)
+	{
+		MinionIdentity minionIdentity = identity as MinionIdentity;
+		if (minionIdentity == null)
+		{
+			return true;
+		}
+		foreach (Func<MinionIdentity, bool> func in this.assignmentPreconditions)
+		{
+			if (!func(minionIdentity))
+			{
+				return false;
+			}
+		}
 		return true;
 	}
 
@@ -104,7 +120,12 @@ public abstract class Assignable : Workable
 		}
 		if (new_assignee is KMonoBehaviour)
 		{
-			this.assignee_identityRef.Set(new_assignee as KMonoBehaviour);
+			KMonoBehaviour kmonoBehaviour = new_assignee as KMonoBehaviour;
+			if (!this.CanAssignTo(new_assignee))
+			{
+				return;
+			}
+			this.assignee_identityRef.Set(kmonoBehaviour);
 			this.assignee_groupID = string.Empty;
 		}
 		else if (new_assignee is AssignmentGroup)
@@ -126,8 +147,8 @@ public abstract class Assignable : Workable
 		if (this.OnAssign != null)
 		{
 			this.OnAssign(new_assignee);
-			base.Trigger(684616645, new_assignee);
 		}
+		base.Trigger(684616645, new_assignee);
 	}
 
 	public virtual void Unassign()
@@ -143,14 +164,13 @@ public abstract class Assignable : Workable
 			AssignableSlotInstance slot = component.GetSlot(this.slot);
 			if (slot != null)
 			{
-				slot.Unassign();
+				slot.Unassign(true);
 			}
 		}
 		this.assignee = null;
 		if (this.canBePublic)
 		{
 			this.Assign(Game.Instance.assignmentManager.assignment_groups["public"]);
-			base.Trigger(2070884250, null);
 		}
 		this.assignee_identityRef.Set(null);
 		this.assignee_groupID = string.Empty;
@@ -158,6 +178,7 @@ public abstract class Assignable : Workable
 		{
 			this.OnAssign(null);
 		}
+		base.Trigger(684616645, null);
 	}
 
 	public void SetCanBeAssigned(bool state)
@@ -165,8 +186,46 @@ public abstract class Assignable : Workable
 		this.canBeAssigned = state;
 	}
 
-	[MyCmpGet]
-	private RequiresRegion requiresRegion;
+	public void AddAssignPrecondition(Func<MinionIdentity, bool> precondition)
+	{
+		this.assignmentPreconditions.Add(precondition);
+	}
+
+	public void AddAutoassignPrecondition(Func<MinionIdentity, bool> precondition)
+	{
+		this.autoassignmentPreconditions.Add(precondition);
+	}
+
+	public int GetNavigationCost(Navigator navigator)
+	{
+		int num = PathProber.InvalidCost;
+		int num2 = Grid.PosToCell(this);
+		IApproachable component = base.GetComponent<IApproachable>();
+		CellOffset[] array;
+		if (component != null)
+		{
+			array = component.GetOffsets();
+		}
+		else
+		{
+			(array = new CellOffset[1])[0] = default(CellOffset);
+		}
+		CellOffset[] array2 = array;
+		foreach (CellOffset cellOffset in array2)
+		{
+			int num3 = Grid.OffsetCell(num2, cellOffset);
+			int navigationCost = navigator.GetNavigationCost(num3);
+			if (navigationCost != PathProber.InvalidCost && (num == PathProber.InvalidCost || navigationCost < num))
+			{
+				num = navigationCost;
+			}
+		}
+		return num;
+	}
+
+	public string slotID;
+
+	private AssignableSlot _slot;
 
 	public IAssignableIdentity assignee;
 
@@ -182,4 +241,8 @@ public abstract class Assignable : Workable
 
 	[Serialize]
 	private bool canBeAssigned = true;
+
+	private List<Func<MinionIdentity, bool>> autoassignmentPreconditions = new List<Func<MinionIdentity, bool>>();
+
+	private List<Func<MinionIdentity, bool>> assignmentPreconditions = new List<Func<MinionIdentity, bool>>();
 }

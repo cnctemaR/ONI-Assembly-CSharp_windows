@@ -5,9 +5,9 @@ public class FallWhenDeadMonitor : GameStateMachine<FallWhenDeadMonitor, FallWhe
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.standing;
-		this.standing.Transition(this.entombed, (FallWhenDeadMonitor.Instance smi) => smi.IsEntombed()).Transition(this.falling, (FallWhenDeadMonitor.Instance smi) => smi.IsFalling());
+		this.standing.Transition(this.entombed, (FallWhenDeadMonitor.Instance smi) => smi.IsEntombed(), UpdateRate.SIM_200ms).Transition(this.falling, (FallWhenDeadMonitor.Instance smi) => smi.IsFalling(), UpdateRate.SIM_200ms);
 		this.falling.ToggleGravity(this.standing);
-		this.entombed.Transition(this.standing, (FallWhenDeadMonitor.Instance smi) => !smi.IsEntombed());
+		this.entombed.Transition(this.standing, (FallWhenDeadMonitor.Instance smi) => !smi.IsEntombed(), UpdateRate.SIM_200ms);
 	}
 
 	public GameStateMachine<FallWhenDeadMonitor, FallWhenDeadMonitor.Instance, IStateMachineTarget, object>.State standing;
@@ -31,7 +31,7 @@ public class FallWhenDeadMonitor : GameStateMachine<FallWhenDeadMonitor, FallWhe
 
 		public bool IsFalling()
 		{
-			int num = Grid.PosToCell(base.master.transform.position);
+			int num = Grid.PosToCell(base.master.transform.GetPosition());
 			int num2 = Grid.CellBelow(num);
 			return Grid.IsValidCell(num2) && !Grid.Solid[num2];
 		}

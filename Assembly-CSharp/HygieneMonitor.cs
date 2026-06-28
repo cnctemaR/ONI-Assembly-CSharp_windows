@@ -11,7 +11,7 @@ public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.In
 		this.root.EventHandler(GameHashes.NewDay, (HygieneMonitor.Instance smi) => GameClock.Instance, delegate(HygieneMonitor.Instance smi)
 		{
 			smi.AddUncleanEffect();
-		}).Update(delegate(HygieneMonitor.Instance smi)
+		}).Update(delegate(HygieneMonitor.Instance smi, float dt)
 		{
 			smi.UpdateDirtiness();
 		});
@@ -73,7 +73,7 @@ public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.In
 
 		public void UpdateDirtiness()
 		{
-			int num = Grid.PosToCell(base.master.transform.position);
+			int num = Grid.PosToCell(base.master.transform.GetPosition());
 			int num2 = Grid.CellAbove(num);
 			Element element = Grid.Element[num];
 			Element element2 = Grid.Element[num2];

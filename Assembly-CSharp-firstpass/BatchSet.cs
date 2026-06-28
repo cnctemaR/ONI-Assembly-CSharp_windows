@@ -9,7 +9,6 @@ public class BatchSet
 		this.idx = spacialIdx;
 		this.key = batchKey;
 		this.dirty = true;
-		this.active = true;
 		this.group = batchGroup;
 		this.bounds = new Bounds(new Vector2((float)this.idx.x + 0.5f, (float)this.idx.y + 0.5f), Vector2.one);
 		this.batches = new List<KAnimBatch>();

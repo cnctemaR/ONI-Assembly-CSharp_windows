@@ -17,10 +17,11 @@ public class TemperatureMonitor : GameStateMachine<TemperatureMonitor, Temperatu
 				component.AddTrigger(GameHashes.TooHotDisease, new string[] { "HeatRash" }, (GameObject s, GameObject t) => DUPLICANTS.DISEASES.INFECTIONSOURCES.INTERNAL_TEMPERATURE);
 				component.AddTrigger(GameHashes.TooColdDisease, new string[] { "ColdBrain" }, (GameObject s, GameObject t) => DUPLICANTS.DISEASES.INFECTIONSOURCES.INTERNAL_TEMPERATURE);
 			}
-		}).Update(delegate(TemperatureMonitor.Instance smi)
+		}).Update("UpdateTemperature", delegate(TemperatureMonitor.Instance smi, float dt)
 		{
-		});
-		this.homeostatic.Transition(this.hyperthermic_pre, (TemperatureMonitor.Instance smi) => smi.IsHyperthermic()).Transition(this.hypothermic_pre, (TemperatureMonitor.Instance smi) => smi.IsHypothermic()).TriggerOnEnter(GameHashes.OptimalTemperatureAchieved, null);
+			smi.UpdateTemperature(dt);
+		}, UpdateRate.SIM_200ms, false);
+		this.homeostatic.Transition(this.hyperthermic_pre, (TemperatureMonitor.Instance smi) => smi.IsHyperthermic(), UpdateRate.SIM_200ms).Transition(this.hypothermic_pre, (TemperatureMonitor.Instance smi) => smi.IsHypothermic(), UpdateRate.SIM_200ms).TriggerOnEnter(GameHashes.OptimalTemperatureAchieved, null);
 		this.hyperthermic_pre.Enter(delegate(TemperatureMonitor.Instance smi)
 		{
 			smi.master.Trigger(534694243, smi.master.gameObject);
@@ -31,8 +32,8 @@ public class TemperatureMonitor : GameStateMachine<TemperatureMonitor, Temperatu
 			smi.master.Trigger(1662224548, smi.master.gameObject);
 			smi.GoTo(this.hypothermic);
 		});
-		this.hyperthermic.Transition(this.homeostatic, (TemperatureMonitor.Instance smi) => !smi.IsHyperthermic()).ToggleUrge(Db.Get().Urges.CoolDown);
-		this.hypothermic.Transition(this.homeostatic, (TemperatureMonitor.Instance smi) => !smi.IsHypothermic()).ToggleUrge(Db.Get().Urges.WarmUp);
+		this.hyperthermic.Transition(this.homeostatic, (TemperatureMonitor.Instance smi) => !smi.IsHyperthermic(), UpdateRate.SIM_200ms).ToggleUrge(Db.Get().Urges.CoolDown);
+		this.hypothermic.Transition(this.homeostatic, (TemperatureMonitor.Instance smi) => !smi.IsHypothermic(), UpdateRate.SIM_200ms).ToggleUrge(Db.Get().Urges.WarmUp);
 		this.deathcold.Enter("KillCold", delegate(TemperatureMonitor.Instance smi)
 		{
 			smi.KillCold();
@@ -75,7 +76,7 @@ public class TemperatureMonitor : GameStateMachine<TemperatureMonitor, Temperatu
 			this.navigator = base.GetComponent<Navigator>();
 		}
 
-		public void UpdateTemperatureOnSimUpdate(float dt)
+		public void UpdateTemperature(float dt)
 		{
 			base.smi.averageTemperature *= 1f - dt / 4f;
 			base.smi.averageTemperature += base.smi.primaryElement.Temperature * (dt / 4f);

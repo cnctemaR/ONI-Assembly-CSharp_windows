@@ -19,6 +19,18 @@ public class KSlider : Slider
 	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onMove;
 
+	private new void Awake()
+	{
+		this.currentSounds = new string[KSlider.DefaultSounds.Length];
+		for (int i = 0; i < KSlider.DefaultSounds.Length; i++)
+		{
+			this.currentSounds[i] = KSlider.DefaultSounds[i];
+		}
+		this.lastMoveTime = Time.unscaledTime;
+		this.lastMoveValue = -1f;
+		this.tooltip = base.handleRect.gameObject.GetComponent<ToolTip>();
+	}
+
 	public override void OnPointerUp(PointerEventData eventData)
 	{
 		base.OnPointerUp(eventData);
@@ -77,16 +89,12 @@ public class KSlider : Slider
 		this.onReleaseHandle = null;
 	}
 
-	private new void Awake()
+	public void SetTooltipText(string tooltipText)
 	{
-		this.currentSounds = new string[KSlider.DefaultSounds.Length];
-		for (int i = 0; i < KSlider.DefaultSounds.Length; i++)
+		if (this.tooltip != null)
 		{
-			this.currentSounds[i] = KSlider.DefaultSounds[i];
+			this.tooltip.SetSimpleTooltip(tooltipText);
 		}
-		this.lastMoveTime = Time.unscaledTime;
-		this.lastMoveValue = -1f;
-		this.tooltip = base.handleRect.gameObject.GetComponent<ToolTip>();
 	}
 
 	public void PlayStartSound()

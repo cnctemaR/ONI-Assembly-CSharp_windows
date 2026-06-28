@@ -10,18 +10,17 @@ public class GasFilterConfig : IBuildingConfig
 		int num = 3;
 		int num2 = 1;
 		string text2 = "filter_gas_kanim";
-		float num3 = 50f;
-		int num4 = 30;
-		float num5 = 10f;
+		int num3 = 30;
+		float num4 = 10f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER1;
 		string[] raw_METALS = MATERIALS.RAW_METALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER1;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
-		buildingDef.OperatingKilowatts = 0f;
+		buildingDef.SelfHeatKilowattsWhenActive = 0f;
 		buildingDef.ExhaustKilowattsWhenActive = 0f;
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.OutputConduitType = ConduitType.Gas;
@@ -35,7 +34,7 @@ public class GasFilterConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddOrGet<Structure>();

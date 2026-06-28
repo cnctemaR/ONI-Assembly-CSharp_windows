@@ -10,15 +10,14 @@ public class ShowerConfig : IBuildingConfig
 		int num = 2;
 		int num2 = 4;
 		string text = "shower_kanim";
-		float num3 = 400f;
-		int num4 = 30;
-		float num5 = 30f;
+		int num3 = 30;
+		float num4 = 30f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] raw_METALS = MATERIALS.RAW_METALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER3;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, num5, tier, raw_METALS, num6, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, raw_METALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, tier2, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
 		buildingDef.InputConduitType = ConduitType.Liquid;
@@ -31,7 +30,7 @@ public class ShowerConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.WashStation);
@@ -60,7 +59,6 @@ public class ShowerConfig : IBuildingConfig
 		{
 			new ElementConverter.OutputElement(1f, SimHashes.DirtyWater, 0f, true, 0f, 0.5f, true, 1f, byte.MaxValue, 0)
 		};
-		elementConverter.conversionInterval = 1f;
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 5f;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);

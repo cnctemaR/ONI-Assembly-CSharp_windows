@@ -195,7 +195,7 @@ public class KIconButtonMenu : KScreen
 		{
 			return;
 		}
-		Vector3 vector = Camera.main.WorldToViewportPoint(this.go.transform.position);
+		Vector3 vector = Camera.main.WorldToViewportPoint(this.go.transform.GetPosition());
 		RectTransform component = base.GetComponent<RectTransform>();
 		RectTransform component2 = base.canvas.GetComponent<RectTransform>();
 		if (component != null)
@@ -279,7 +279,7 @@ public class KIconButtonMenu : KScreen
 	protected bool automaticNavigation = true;
 
 	[SerializeField]
-	private Transform buttonParent;
+	protected Transform buttonParent;
 
 	[SerializeField]
 	private GameObject buttonPrefab;

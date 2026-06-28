@@ -63,7 +63,6 @@ public class ScalerMask : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 		}
 		if (this.SourceTransform != null && (!this.hoverLock || !this.grandparentIsHovered || this.isHovered || this.queuedSizeUpdate))
 		{
-			LayoutRebuilder.ForceRebuildLayoutImmediate(this.SourceTransform);
 			this.ThisLayoutElement.minHeight = this.SourceTransform.rect.height + this.topPadding + this.bottomPadding;
 			this.SourceTransform.anchoredPosition = new Vector2(0f, -this.topPadding);
 			this.queuedSizeUpdate = false;

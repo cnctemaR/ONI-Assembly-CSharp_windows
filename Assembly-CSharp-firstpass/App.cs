@@ -16,6 +16,12 @@ public class App : MonoBehaviour
 		App.IsExiting = true;
 	}
 
+	private void Awake()
+	{
+		App.instance = this;
+		this.jobManager = new JobManager();
+	}
+
 	public static void LoadScene(string scene_name)
 	{
 		KMonoBehaviour.isLoadingScene = true;
@@ -68,6 +74,13 @@ public class App : MonoBehaviour
 		}
 	}
 
+	private void OnDestroy()
+	{
+		this.jobManager.Cleanup();
+	}
+
+	public static App instance;
+
 	public static bool IsExiting = false;
 
 	public static global::System.Action OnPreLoadScene;
@@ -83,6 +96,8 @@ public class App : MonoBehaviour
 	private static string currentSceneName = null;
 
 	private float lastSuspendTime;
+
+	public JobManager jobManager;
 
 	private static float[] sleepIntervals = new float[] { 8.333333f, 16.666666f, 33.333332f };
 }

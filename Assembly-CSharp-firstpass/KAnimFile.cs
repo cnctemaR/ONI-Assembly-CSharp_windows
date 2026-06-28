@@ -8,7 +8,7 @@ public class KAnimFile : ScriptableObject
 	{
 		get
 		{
-			if (this._batchTag.isValid)
+			if (this._batchTag.IsValid)
 			{
 				return this._batchTag;
 			}

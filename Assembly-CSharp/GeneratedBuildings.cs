@@ -31,11 +31,6 @@ public class GeneratedBuildings
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<LoopingSounds>());
 	}
 
-	public static void MakeBuildableAnywhere(GameObject go)
-	{
-		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<RequiresFoundation>());
-	}
-
 	public static void RegisterWithOverlay(HashSet<Tag> overlay_tags, string id)
 	{
 		overlay_tags.Add(new Tag(id));

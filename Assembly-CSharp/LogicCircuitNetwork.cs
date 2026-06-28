@@ -82,7 +82,7 @@ public class LogicCircuitNetwork : UtilityNetwork
 			LogicWire logicWire = this.wires[i];
 			if (logicWire != null)
 			{
-				int num = Grid.PosToCell(logicWire.transform.position);
+				int num = Grid.PosToCell(logicWire.transform.GetPosition());
 				UtilityNetworkGridNode utilityNetworkGridNode = grid[num];
 				utilityNetworkGridNode.networkIdx = -1;
 				grid[num] = utilityNetworkGridNode;
@@ -137,7 +137,7 @@ public class LogicCircuitNetwork : UtilityNetwork
 			List<LogicWire> list = new List<LogicWire>();
 			for (int i = 0; i < this.wires.Count; i++)
 			{
-				if (visibleArea.Min <= this.wires[i].transform.position && this.wires[i].transform.position <= visibleArea.Max)
+				if (visibleArea.Min <= this.wires[i].transform.GetPosition() && this.wires[i].transform.GetPosition() <= visibleArea.Max)
 				{
 					list.Add(this.wires[i]);
 				}
@@ -147,7 +147,7 @@ public class LogicCircuitNetwork : UtilityNetwork
 				int num = Mathf.CeilToInt((float)(list.Count / 2));
 				if (list[num] != null)
 				{
-					Vector3 position = list[num].transform.position;
+					Vector3 position = list[num].transform.GetPosition();
 					EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("Logic_Circuit_Toggle", false), position);
 					eventInstance.setParameterValue("wireCount", (float)(this.wires.Count % 24));
 					eventInstance.setParameterValue("enabled", (float)this.outputValue);

@@ -4,23 +4,8 @@ using STRINGS;
 
 public class PrebuildToolHoverTextCard : HoverTextConfiguration
 {
-	public override void ConfigureHoverScreen()
-	{
-		HoverTextScreen instance = HoverTextScreen.Instance;
-		if (instance.LoadPreConfiguredToolFields(this))
-		{
-			this.isConfigured = true;
-			return;
-		}
-		instance.currentConfiguration = this;
-		instance.ToggleIncubating(true);
-		instance.ClearLabels();
-		this.isConfigured = true;
-	}
-
 	public override void UpdateHoverElements(List<KSelectable> selected)
 	{
-		base.UpdateHoverElements(selected);
 		HoverTextScreen instance = HoverTextScreen.Instance;
 		HoverTextDrawer hoverTextDrawer = instance.BeginDrawing();
 		hoverTextDrawer.BeginShadowBar(false);

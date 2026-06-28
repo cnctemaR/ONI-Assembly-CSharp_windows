@@ -15,6 +15,8 @@ public class TemplateContainer : YamlIO<TemplateContainer>
 
 	public string name { get; private set; }
 
+	public int priority { get; set; }
+
 	public TemplateContainer.Info info { get; set; }
 
 	public List<Cell> cells { get; set; }

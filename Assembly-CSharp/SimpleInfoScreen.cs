@@ -195,7 +195,7 @@ public class SimpleInfoScreen : TargetScreen
 		}
 		if (this.vitalsContainer.isActiveAndEnabled)
 		{
-			this.vitalsContainer.Refresh(null);
+			this.vitalsContainer.Refresh();
 		}
 		this.RefreshStorage();
 	}
@@ -367,13 +367,13 @@ public class SimpleInfoScreen : TargetScreen
 					if (smi != null)
 					{
 						text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_ROTTABLE, smi.StateString());
-						gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(smi.GetToolTip(), ToolTipScreen.Instance.defaultTextStyleSetting);
+						gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(smi.GetToolTip(), PluginAssets.Instance.defaultTextStyleSetting);
 					}
 					if (component.DiseaseIdx != 255)
 					{
 						text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_DISEASED, GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, false));
 						string formattedDisease = GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, true);
-						gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(formattedDisease, ToolTipScreen.Instance.defaultTextStyleSetting);
+						gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(formattedDisease, PluginAssets.Instance.defaultTextStyleSetting);
 					}
 					gameObject2.GetComponentInChildren<LocText>().text = text2;
 					KButton component2 = gameObject2.GetComponent<KButton>();
@@ -513,7 +513,7 @@ public class SimpleInfoScreen : TargetScreen
 	}
 
 	[DebuggerDisplay("{item.item.Name}")]
-	public class StatusItemEntry
+	public class StatusItemEntry : IRenderEveryTick
 	{
 		public StatusItemEntry(StatusItemGroup.Entry item, StatusItemCategory category, GameObject status_item_prefab, Transform parent, TextStyleSetting tooltip_style, Color color, bool skip_fade, Action<SimpleInfoScreen.StatusItemEntry> onDestroy)
 		{
@@ -530,7 +530,7 @@ public class SimpleInfoScreen : TargetScreen
 			this.widget.SetActive(true);
 			this.toolTip.OnToolTip = new Func<string>(this.OnToolTip);
 			this.fadeStage = ((!skip_fade) ? SimpleInfoScreen.StatusItemEntry.FadeStage.IN : SimpleInfoScreen.StatusItemEntry.FadeStage.WAIT);
-			this.schedulerHandle = GameScheduler.Instance.SchedulePeriodic("StatusFader", 0f, new Action<object>(this.UpdateRoutine), null, null, 0f, null);
+			SimAndRenderScheduler.instance.Add(this, false);
 			this.Refresh();
 			this.SetColor(1f);
 		}
@@ -561,7 +561,7 @@ public class SimpleInfoScreen : TargetScreen
 			this.widget.transform.SetSiblingIndex(index);
 		}
 
-		private void UpdateRoutine(object data)
+		public void RenderEveryTick(float dt)
 		{
 			SimpleInfoScreen.StatusItemEntry.FadeStage fadeStage = this.fadeStage;
 			if (fadeStage != SimpleInfoScreen.StatusItemEntry.FadeStage.IN)
@@ -623,7 +623,7 @@ public class SimpleInfoScreen : TargetScreen
 				{
 					this.onDestroy(this);
 				}
-				this.schedulerHandle.ClearScheduler();
+				SimAndRenderScheduler.instance.Remove(this);
 				this.toolTip.OnToolTip = null;
 				global::UnityEngine.Object.Destroy(this.widget);
 			}
@@ -657,8 +657,6 @@ public class SimpleInfoScreen : TargetScreen
 		private SimpleInfoScreen.StatusItemEntry.FadeStage fadeStage;
 
 		private float fade;
-
-		private SchedulerHandle schedulerHandle;
 
 		private float fadeInTime;
 

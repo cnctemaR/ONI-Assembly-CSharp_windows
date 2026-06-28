@@ -11,15 +11,14 @@ public class FloorSwitchConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 1;
 		string text2 = "pressureswitch_kanim";
-		float num3 = 100f;
-		int num4 = 30;
-		float num5 = 30f;
+		int num3 = 30;
+		float num4 = 30f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER1;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, refined_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
 		buildingDef.IsFoundation = true;
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
@@ -40,9 +39,9 @@ public class FloorSwitchConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		GeneratedBuildings.MakeBuildableAnywhere(go);
+		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
 		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT.BONUS_2;

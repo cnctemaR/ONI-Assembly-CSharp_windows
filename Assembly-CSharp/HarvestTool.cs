@@ -33,16 +33,15 @@ public class HarvestTool : DragTool
 					Prioritizable component = harvestable.GetComponent<Prioritizable>();
 					if (component != null)
 					{
-						component.SetMasterPriority(ToolMenuPriorityScreen.Instance.GetScreenPriority());
+						component.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
 					}
 				}
 			}
 		}
 	}
 
-	public override void Update()
+	public void Update()
 	{
-		base.Update();
 		MeshRenderer componentInChildren = this.visualizer.GetComponentInChildren<MeshRenderer>();
 		if (componentInChildren != null)
 		{
@@ -65,14 +64,14 @@ public class HarvestTool : DragTool
 	protected override void OnActivateTool()
 	{
 		base.OnActivateTool();
-		ToolMenuPriorityScreen.Instance.Show(true);
+		ToolMenu.Instance.PriorityScreen.Show(true);
 		ToolMenu.Instance.toolParameterMenu.PopulateMenu(this.options);
 	}
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
 	{
 		base.OnDeactivateTool(new_tool);
-		ToolMenuPriorityScreen.Instance.Show(false);
+		ToolMenu.Instance.PriorityScreen.Show(false);
 		ToolMenu.Instance.toolParameterMenu.ClearMenu();
 	}
 

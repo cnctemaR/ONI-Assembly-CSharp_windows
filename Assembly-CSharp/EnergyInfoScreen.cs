@@ -81,7 +81,7 @@ public class EnergyInfoScreen : TargetScreen
 		}
 		if (num == 65535)
 		{
-			int num2 = Grid.PosToCell(this.selectedTarget.transform.position);
+			int num2 = Grid.PosToCell(this.selectedTarget.transform.GetPosition());
 			num = circuitManager.GetCircuitID(num2);
 		}
 		if (num != 65535)
@@ -92,7 +92,7 @@ public class EnergyInfoScreen : TargetScreen
 			this.batteriesPanel.SetActive(true);
 			float joulesAvailableOnCircuit = circuitManager.GetJoulesAvailableOnCircuit(num);
 			GameObject gameObject = this.AddOrGetLabel(this.overviewLabels, this.overviewPanel, "joulesAvailable");
-			gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.ENERGYGENERATOR.AVAILABLE_JOULES, GameUtil.GetFormattedJoules(joulesAvailableOnCircuit, "F1"));
+			gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.ENERGYGENERATOR.AVAILABLE_JOULES, GameUtil.GetFormattedJoules(joulesAvailableOnCircuit, "F1", GameUtil.TimeSlice.None));
 			gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.ENERGYGENERATOR.AVAILABLE_JOULES_TOOLTIP;
 			gameObject.SetActive(true);
 			float wattsGeneratedByCircuit = circuitManager.GetWattsGeneratedByCircuit(num);
@@ -181,7 +181,7 @@ public class EnergyInfoScreen : TargetScreen
 					if (battery != null)
 					{
 						gameObject = this.AddOrGetLabel(this.batteriesLabels, this.batteriesPanel, battery.gameObject.GetInstanceID().ToString());
-						gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", battery.GetComponent<KSelectable>().entityName, GameUtil.GetFormattedJoules(battery.JoulesAvailable, "F1"));
+						gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", battery.GetComponent<KSelectable>().entityName, GameUtil.GetFormattedJoules(battery.JoulesAvailable, "F1", GameUtil.TimeSlice.None));
 						gameObject.SetActive(true);
 						gameObject.GetComponent<LocText>().fontStyle = ((!(battery.gameObject == this.selectedTarget)) ? FontStyles.Normal : FontStyles.Bold);
 					}

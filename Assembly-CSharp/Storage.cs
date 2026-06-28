@@ -5,6 +5,7 @@ using System.IO;
 using Klei;
 using KSerialization;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -14,6 +15,14 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	{
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 		this.showProgressBar = false;
+	}
+
+	public bool ShouldOnlyTransferFromLowerPriority
+	{
+		get
+		{
+			return this.onlyTransferFromLowerPriority || this.allowItemRemoval;
+		}
 	}
 
 	public GameObject this[int idx]
@@ -42,14 +51,9 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		this.defaultStoredItemModifers = modifiers;
 	}
 
-	public bool HasStoredItemModifier(Storage.StoredItemModifier modifier)
-	{
-		return this.defaultStoredItemModifers.Contains(modifier);
-	}
-
 	public override Workable.AnimInfo GetAnim(Worker worker)
 	{
-		if (this.useGunForDelivery)
+		if (this.useGunForDelivery && worker.usesMultiTool)
 		{
 			Workable.AnimInfo anim = base.GetAnim(worker);
 			anim.smi = new MultitoolController.Instance(this, worker, "store", EffectPrefabs.Instance.PickupEffect);
@@ -70,10 +74,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Storing;
 		this.faceTargetWhenWorking = true;
 		this.resetProgressOnStop = true;
-		if (this.choreType == null)
-		{
-			this.choreType = Db.Get().ChoreTypes.Fetch;
-		}
 		this.synchronizeAnims = false;
 	}
 
@@ -82,17 +82,17 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		base.SetWorkTime(1.5f);
 		foreach (GameObject gameObject in this.items)
 		{
-			this.ApplyStoredItemModifiers(gameObject, true);
+			this.ApplyStoredItemModifiers(gameObject, true, true);
 		}
 	}
 
-	public GameObject Store(GameObject go, bool hide_popups = false, bool block_events = false, bool do_disease_transfer = true)
+	public GameObject Store(GameObject go, bool hide_popups = false, bool block_events = false, bool do_disease_transfer = true, bool is_deserializing = false)
 	{
-		GameObject gameObject = go;
 		if (go == null)
 		{
 			return null;
 		}
+		GameObject gameObject = go;
 		Pickupable component = go.GetComponent<Pickupable>();
 		if (!hide_popups && PopFXManager.Instance != null)
 		{
@@ -121,35 +121,43 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		}
 		go.transform.parent = base.transform;
 		Vector3 vector = Grid.CellToPosCCC(Grid.PosToCell(this), Grid.SceneLayer.Move);
-		vector.z = go.transform.position.z;
+		vector.z = go.transform.GetPosition().z;
 		go.transform.SetPosition(vector);
 		if (!block_events && do_disease_transfer)
 		{
 			this.TransferDiseaseWithObject(go);
 		}
-		foreach (GameObject gameObject2 in this.items)
+		if (!is_deserializing)
 		{
-			if (gameObject2 != null && component != null && gameObject2.GetComponent<Pickupable>().TryAbsorb(component, hide_popups))
+			foreach (GameObject gameObject2 in this.items)
 			{
-				base.Trigger(-1697596308, go);
-				this.ApplyStoredItemModifiers(go, true);
-				if (this.OnStorageIncreased != null)
+				if (gameObject2 != null && component != null && gameObject2.GetComponent<Pickupable>().TryAbsorb(component, hide_popups))
 				{
-					this.OnStorageIncreased();
+					base.Trigger(-1697596308, go);
+					base.Trigger(-778359855, null);
+					this.ApplyStoredItemModifiers(go, true, false);
+					if (this.OnStorageIncreased != null)
+					{
+						this.OnStorageIncreased();
+					}
+					gameObject = gameObject2;
+					go = null;
+					break;
 				}
-				gameObject = gameObject2;
-				go = null;
-				break;
 			}
 		}
 		if (go != null)
 		{
 			this.items.Add(go);
-			this.ApplyStoredItemModifiers(go, true);
-			EventSystem.Trigger(go, 856640610, this);
+			if (!is_deserializing)
+			{
+				this.ApplyStoredItemModifiers(go, true, false);
+			}
 			if (!block_events)
 			{
+				EventSystem.Trigger(go, 856640610, this);
 				base.Trigger(-1697596308, go);
+				base.Trigger(-778359855, null);
 				if (this.OnStorageIncreased != null)
 				{
 					this.OnStorageIncreased();
@@ -182,12 +190,12 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		}
 		else
 		{
-			SubstanceChunk substanceChunk = LiquidSourceManager.Instance.CreateChunk(element, mass, temperature, disease_idx, disease_count, base.transform.position);
+			SubstanceChunk substanceChunk = LiquidSourceManager.Instance.CreateChunk(element, mass, temperature, disease_idx, disease_count, base.transform.GetPosition());
 			primaryElement = substanceChunk.GetComponent<PrimaryElement>();
 			primaryElement.KeepZeroMassObject = keep_zero_mass;
 			GameObject gameObject = substanceChunk.gameObject;
 			bool flag = true;
-			this.Store(gameObject, flag, false, do_disease_transfer);
+			this.Store(gameObject, flag, false, do_disease_transfer, false);
 		}
 		return primaryElement;
 	}
@@ -210,12 +218,12 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		}
 		else
 		{
-			SubstanceChunk substanceChunk = GasSourceManager.Instance.CreateChunk(element, mass, temperature, disease_idx, disease_count, base.transform.position);
+			SubstanceChunk substanceChunk = GasSourceManager.Instance.CreateChunk(element, mass, temperature, disease_idx, disease_count, base.transform.GetPosition());
 			primaryElement = substanceChunk.GetComponent<PrimaryElement>();
 			primaryElement.KeepZeroMassObject = keep_zero_mass;
 			GameObject gameObject = substanceChunk.gameObject;
 			bool flag = true;
-			this.Store(gameObject, flag, false, do_disease_transfer);
+			this.Store(gameObject, flag, false, do_disease_transfer, false);
 		}
 		return primaryElement;
 	}
@@ -239,7 +247,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			{
 				Pickupable component2 = gameObject.GetComponent<Pickupable>();
 				Pickupable pickupable = component2.Take(amount);
-				dest_storage.Store(pickupable.gameObject, hide_popups, block_events, true);
+				dest_storage.Store(pickupable.gameObject, hide_popups, block_events, true, false);
 				if (!block_events)
 				{
 					base.Trigger(-1697596308, component2.gameObject);
@@ -263,13 +271,13 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			if (this.items[i] == go)
 			{
 				this.items.RemoveAt(i);
-				this.ApplyStoredItemModifiers(go, false);
+				this.ApplyStoredItemModifiers(go, false, false);
 				if (this.temperatureAdjuster != null)
 				{
 					SimTemperatureTransfer component = go.GetComponent<SimTemperatureTransfer>();
 					this.temperatureAdjuster.Unregister(component);
 				}
-				target.Store(go, hide_popups, block_events, true);
+				target.Store(go, hide_popups, block_events, true, false);
 				if (!block_events)
 				{
 					base.Trigger(-1697596308, go);
@@ -280,7 +288,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		return false;
 	}
 
-	public void DropAll()
+	public void DropAll(bool empty_containers = false)
 	{
 		while (this.items.Count > 0)
 		{
@@ -290,7 +298,20 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			if (gameObject != null)
 			{
 				gameObject.Trigger(1228788923, this);
-				this.MakeWorldActive(gameObject);
+				bool flag = false;
+				if (empty_containers)
+				{
+					Dumpable component = gameObject.GetComponent<Dumpable>();
+					if (component != null && gameObject.GetComponent<PrimaryElement>().Element.IsGas)
+					{
+						component.Dump();
+						flag = true;
+					}
+				}
+				if (!flag)
+				{
+					this.MakeWorldActive(gameObject);
+				}
 			}
 		}
 	}
@@ -324,6 +345,12 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			}
 		}
 		return go;
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole("Hauler", work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+		resume.AddExperienceIfRole(MaterialsManager.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
 	}
 
 	private void TransferDiseaseWithObject(GameObject obj)
@@ -363,7 +390,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			go.transform.parent = folder.transform;
 			base.Trigger(-1697596308, go);
 			EventSystem.Trigger(go, 856640610, null);
-			this.ApplyStoredItemModifiers(go, false);
+			this.ApplyStoredItemModifiers(go, false, false);
 			if (this.temperatureAdjuster != null)
 			{
 				SimTemperatureTransfer component = go.GetComponent<SimTemperatureTransfer>();
@@ -592,7 +619,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	private void OnDeath(object data)
 	{
-		this.DropAll();
+		this.DropAll(true);
 	}
 
 	public bool IsFull()
@@ -677,20 +704,15 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	public PrimaryElement FindPrimaryElement(SimHashes element)
 	{
 		PrimaryElement primaryElement = null;
-		int count = this.items.Count;
-		if (count > 0)
+		foreach (GameObject gameObject in this.items)
 		{
-			for (int i = 0; i < count; i++)
+			if (!(gameObject == null))
 			{
-				GameObject gameObject = this.items[i];
-				if (!(gameObject == null))
+				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+				if (component.ElementID == element)
 				{
-					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-					if (component.ElementID == element)
-					{
-						primaryElement = component;
-						break;
-					}
+					primaryElement = component;
+					break;
 				}
 			}
 		}
@@ -712,7 +734,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		if (is_set != this.onlyFetchMarkedItems)
 		{
 			this.onlyFetchMarkedItems = is_set;
-			this.onPriorityChanged.Signal();
+			base.Trigger(644822890, null);
 		}
 	}
 
@@ -727,7 +749,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	private void OnQueueDestroyObject(object data)
 	{
 		this.endOfLife = true;
-		this.DropAll();
+		this.DropAll(true);
 		this.OnCleanUp();
 	}
 
@@ -736,7 +758,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		this.items.Remove(go);
 		this.TransferDiseaseWithObject(go);
 		base.Trigger(-1697596308, go);
-		this.ApplyStoredItemModifiers(go, false);
+		this.ApplyStoredItemModifiers(go, false, false);
 	}
 
 	public float GetAmountAvailable(Tag tag)
@@ -818,46 +840,60 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		return list;
 	}
 
-	private static void MakeItemTemperatureInsulated(GameObject go, bool insulate)
+	private static void MakeItemTemperatureInsulated(GameObject go, bool is_stored, bool is_initializing)
 	{
 		SimTemperatureTransfer component = go.GetComponent<SimTemperatureTransfer>();
 		if (component == null)
 		{
 			return;
 		}
-		component.enabled = !insulate;
+		component.enabled = !is_stored;
 	}
 
-	private static void MakeItemInvisible(GameObject go, bool invisible)
+	private static void MakeItemInvisible(GameObject go, bool is_stored, bool is_initializing)
 	{
-		KAnimControllerBase component = go.GetComponent<KAnimControllerBase>();
-		if (component == null)
+		if (is_initializing)
 		{
 			return;
 		}
-		component.enabled = !invisible;
-		KSelectable component2 = go.GetComponent<KSelectable>();
-		if (component2 != null)
+		bool flag = !is_stored;
+		KAnimControllerBase component = go.GetComponent<KAnimControllerBase>();
+		if (component != null && component.enabled != flag)
 		{
-			component2.enabled = !invisible;
+			component.enabled = flag;
+		}
+		KSelectable component2 = go.GetComponent<KSelectable>();
+		if (component2 != null && component2.enabled != flag)
+		{
+			component2.enabled = flag;
 		}
 	}
 
-	private static void MakeItemSealed(GameObject go, bool seal)
+	private static void MakeItemSealed(GameObject go, bool is_stored, bool is_initializing)
 	{
 		Sublimates component = go.GetComponent<Sublimates>();
-		if (component == null)
+		if (component != null)
 		{
-			return;
+			component.enabled = !is_stored;
 		}
-		component.enabled = !seal;
+		if (go != null)
+		{
+			if (is_stored)
+			{
+				go.GetComponent<KPrefabID>().AddTag(GameTags.Sealed);
+			}
+			else
+			{
+				go.GetComponent<KPrefabID>().RemoveTag(GameTags.Sealed);
+			}
+		}
 	}
 
-	private static void MakeItemPreserved(GameObject go, bool preserve)
+	private static void MakeItemPreserved(GameObject go, bool is_stored, bool is_initializing)
 	{
 		if (go != null)
 		{
-			if (preserve)
+			if (is_stored)
 			{
 				go.GetComponent<KPrefabID>().AddTag(GameTags.Preserved);
 			}
@@ -868,16 +904,18 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		}
 	}
 
-	private void ApplyStoredItemModifiers(GameObject go, bool stored)
+	private void ApplyStoredItemModifiers(GameObject go, bool is_stored, bool is_initializing)
 	{
 		List<Storage.StoredItemModifier> list = this.defaultStoredItemModifers;
-		foreach (Storage.StoredItemModifier storedItemModifier in list)
+		for (int i = 0; i < list.Count; i++)
 		{
-			foreach (Storage.StoredItemModifierInfo storedItemModifierInfo in Storage.StoredItemModifierHandlers)
+			Storage.StoredItemModifier storedItemModifier = list[i];
+			for (int j = 0; j < Storage.StoredItemModifierHandlers.Count; j++)
 			{
-				if (storedItemModifier == storedItemModifierInfo.modifier)
+				Storage.StoredItemModifierInfo storedItemModifierInfo = Storage.StoredItemModifierHandlers[j];
+				if (storedItemModifierInfo.modifier == storedItemModifier)
 				{
-					storedItemModifierInfo.toggleState(go, stored);
+					storedItemModifierInfo.toggleState(go, is_stored, is_initializing);
 					break;
 				}
 			}
@@ -949,19 +987,30 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	public void Deserialize(IReader reader)
 	{
+		float realtimeSinceStartup = Time.realtimeSinceStartup;
+		float num = 0f;
+		float num2 = 0f;
+		float num3 = 0f;
 		this.ClearItems();
-		int num = reader.ReadInt32();
-		for (int i = 0; i < num; i++)
+		int num4 = reader.ReadInt32();
+		this.items = new List<GameObject>(num4);
+		for (int i = 0; i < num4; i++)
 		{
+			float realtimeSinceStartup2 = Time.realtimeSinceStartup;
 			string text = reader.ReadKleiString();
 			Tag tag = TagManager.Create(text, null);
-			SaveLoadRoot saveLoadRoot = SaveLoadRoot.Load(tag, reader);
+			SaveLoadRoot saveLoadRoot = SaveLoadRoot.Load(tag, reader, true);
+			num += Time.realtimeSinceStartup - realtimeSinceStartup2;
 			if (saveLoadRoot != null)
 			{
-				GameObject gameObject = this.Store(saveLoadRoot.gameObject, true, true, true);
+				float realtimeSinceStartup3 = Time.realtimeSinceStartup;
+				GameObject gameObject = this.Store(saveLoadRoot.gameObject, true, true, false, true);
+				num2 += Time.realtimeSinceStartup - realtimeSinceStartup3;
 				if (gameObject != null)
 				{
+					float realtimeSinceStartup4 = Time.realtimeSinceStartup;
 					gameObject.GetComponent<Pickupable>().OnStore(this);
+					num3 += Time.realtimeSinceStartup - realtimeSinceStartup4;
 					if (this.dropOnLoad)
 					{
 						this.Drop(saveLoadRoot.gameObject);
@@ -988,10 +1037,10 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	static Storage()
 	{
 		List<Storage.StoredItemModifierInfo> list = new List<Storage.StoredItemModifierInfo>();
-		list.Add(new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Insulate, new Action<GameObject, bool>(Storage.MakeItemTemperatureInsulated)));
-		list.Add(new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Hide, new Action<GameObject, bool>(Storage.MakeItemInvisible)));
-		list.Add(new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Seal, new Action<GameObject, bool>(Storage.MakeItemSealed)));
-		list.Add(new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Preserve, new Action<GameObject, bool>(Storage.MakeItemPreserved)));
+		list.Add(new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Hide, new Action<GameObject, bool, bool>(Storage.MakeItemInvisible)));
+		list.Add(new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Insulate, new Action<GameObject, bool, bool>(Storage.MakeItemTemperatureInsulated)));
+		list.Add(new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Seal, new Action<GameObject, bool, bool>(Storage.MakeItemSealed)));
+		list.Add(new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Preserve, new Action<GameObject, bool, bool>(Storage.MakeItemPreserved)));
 		Storage.StoredItemModifierHandlers = list;
 		Storage.StandardSealedStorage = new List<Storage.StoredItemModifier>
 		{
@@ -1007,7 +1056,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	public bool allowItemRemoval;
 
-	public bool countAsAccessible;
+	public bool onlyTransferFromLowerPriority;
 
 	public bool allowSublimation = true;
 
@@ -1021,9 +1070,9 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	public List<Tag> storageFilters;
 
-	public ChoreType choreType;
-
 	public bool useGunForDelivery = true;
+
+	public int storageNetworkID = -1;
 
 	public Storage.FXPrefix fxPrefix;
 
@@ -1034,6 +1083,9 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	[MyCmpGet]
 	public Prioritizable prioritizable;
+
+	[MyCmpGet]
+	public Automatable automatable;
 
 	[MyCmpGet]
 	protected PrimaryElement primaryElement;
@@ -1075,7 +1127,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	private struct StoredItemModifierInfo
 	{
-		public StoredItemModifierInfo(Storage.StoredItemModifier modifier, Action<GameObject, bool> toggle_state)
+		public StoredItemModifierInfo(Storage.StoredItemModifier modifier, Action<GameObject, bool, bool> toggle_state)
 		{
 			this.modifier = modifier;
 			this.toggleState = toggle_state;
@@ -1083,6 +1135,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 		public Storage.StoredItemModifier modifier;
 
-		public Action<GameObject, bool> toggleState;
+		public Action<GameObject, bool, bool> toggleState;
 	}
 }

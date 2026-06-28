@@ -49,7 +49,7 @@ public class MeterController
 		this.gameObject = gameObject;
 		KPrefabID kprefabID = gameObject.AddComponent<KPrefabID>();
 		kprefabID.PrefabTag = new Tag(text);
-		Vector3 position = building_controller.transform.position;
+		Vector3 position = building_controller.transform.GetPosition();
 		if (front_back == Meter.Offset.Behind)
 		{
 			position.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingBack);
@@ -58,7 +58,7 @@ public class MeterController
 		{
 			position.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingFront);
 		}
-		gameObject.transform.position = position;
+		gameObject.transform.SetPosition(position);
 		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
 		kbatchedAnimController.initialAnim = meter_animation;
 		kbatchedAnimController.AddAnims(new KAnimFile[] { building_controller.GetAnims()[0] });
@@ -92,12 +92,35 @@ public class MeterController
 		this.meterController.SetPositionPercent(percent_full);
 	}
 
-	public void SetSymbolTint(KBatchedAnimController.SymbolTintIndex symbol_tint_idx, KAnimHashedString symbol, Color32 colour)
+	public void SetSymbolTint(KAnimHashedString symbol, Color32 colour)
 	{
 		if (this.meterController != null)
 		{
-			this.meterController.SetSymbolTint(symbol_tint_idx, symbol, colour);
+			this.meterController.SetSymbolTint(symbol, colour);
 		}
+	}
+
+	public void SetAllowTransformOverride(bool allow)
+	{
+		if (this.meterController == null)
+		{
+			return;
+		}
+		KBatchedAnimTracker component = this.meterController.GetComponent<KBatchedAnimTracker>();
+		component.allowTransformOverride = allow;
+		if (!allow)
+		{
+			this.meterController.GetBatchInstanceData().ClearOverrideTransformMatrix();
+		}
+	}
+
+	public void SetRotation(float rot)
+	{
+		if (this.meterController == null)
+		{
+			return;
+		}
+		this.meterController.Rotation = rot;
 	}
 
 	public GameObject gameObject;

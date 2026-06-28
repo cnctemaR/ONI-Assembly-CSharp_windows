@@ -16,7 +16,7 @@ public class InfraredVisualizerComponents : KGameObjectComponentManager<Infrared
 			KAnimControllerBase controller = this.data[i].controller;
 			if (controller != null)
 			{
-				Vector3 position = controller.transform.position;
+				Vector3 position = controller.transform.GetPosition();
 				if (visibleArea.Min <= position && position <= visibleArea.Max)
 				{
 					this.data[i].Update();

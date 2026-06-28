@@ -192,6 +192,8 @@ namespace Klei.AI
 				{
 					base.sm.coughFinished.Trigger(this);
 				}
+
+				public float lastCoughtTime;
 			}
 
 			public class States : GameStateMachine<SlimeLung.SlimeLungComponent.States, SlimeLung.SlimeLungComponent.StatesInstance, DiseaseInstance>
@@ -199,13 +201,17 @@ namespace Klei.AI
 				public override void InitializeStates(out StateMachine.BaseState default_state)
 				{
 					default_state = this.breathing;
-					this.breathing.DefaultState(this.breathing.normal).TagTransition(GameTags.NoOxygen, this.notbreathing, false).ToggleSchedulePeriodic("Cough", 20f, delegate(SlimeLung.SlimeLungComponent.StatesInstance smi)
+					this.breathing.DefaultState(this.breathing.normal).TagTransition(GameTags.NoOxygen, this.notbreathing, false).Enter("SetCoughTime", delegate(SlimeLung.SlimeLungComponent.StatesInstance smi)
 					{
-						if (!smi.master.IsDoctored)
+						smi.lastCoughtTime = Time.time;
+					})
+						.Update("Cough", delegate(SlimeLung.SlimeLungComponent.StatesInstance smi, float dt)
 						{
-							smi.GoTo(this.breathing.cough);
-						}
-					});
+							if (!smi.master.IsDoctored && Time.time - smi.lastCoughtTime > 20f)
+							{
+								smi.GoTo(this.breathing.cough);
+							}
+						}, UpdateRate.SIM_4000ms, false);
 					this.breathing.cough.ToggleReactable((SlimeLung.SlimeLungComponent.StatesInstance smi) => smi.GetReactable()).OnSignal(this.coughFinished, this.breathing.normal);
 					this.notbreathing.TagTransition(new Tag[] { GameTags.NoOxygen }, this.breathing, true);
 				}

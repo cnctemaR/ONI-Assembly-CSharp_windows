@@ -5,15 +5,6 @@ public class EntityPreview : KMonoBehaviour
 {
 	public bool Valid { get; private set; }
 
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-		if (this.storage != null)
-		{
-			this.storage.choreType = Db.Get().ChoreTypes.Fetch;
-		}
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -22,7 +13,7 @@ public class EntityPreview : KMonoBehaviour
 		{
 			this.objectPartitionerEntry = GameScenePartitioner.Instance.Add("EntityPreview", base.gameObject, this.occupyArea.GetExtents(), GameScenePartitioner.Instance.objectLayers[(int)this.objectLayer], new Action<object>(this.OnAreaChanged));
 		}
-		CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChange), false);
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		this.OnAreaChanged(null);
 	}
 
@@ -38,19 +29,20 @@ public class EntityPreview : KMonoBehaviour
 			this.objectPartitionerEntry.Release();
 			this.objectPartitionerEntry = null;
 		}
-		CellChangeMonitor.Instance.Remove(this, new Action<int, int>(this.OnCellChange), false);
+		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		base.OnCleanUp();
 	}
 
-	private void OnCellChange(int previous_cell, int current_cell)
+	private void OnCellChange()
 	{
+		int num = Grid.PosToCell(this);
 		if (this.solidPartitionerEntry != null)
 		{
-			this.solidPartitionerEntry.UpdatePosition(current_cell);
+			this.solidPartitionerEntry.UpdatePosition(num);
 		}
 		if (this.objectPartitionerEntry != null)
 		{
-			this.objectPartitionerEntry.UpdatePosition(current_cell);
+			this.objectPartitionerEntry.UpdatePosition(num);
 		}
 		this.OnAreaChanged(null);
 	}

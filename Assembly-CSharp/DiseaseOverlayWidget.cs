@@ -14,7 +14,9 @@ public class DiseaseOverlayWidget : KMonoBehaviour
 		{
 			return;
 		}
-		base.transform.position = gameObject.transform.position + this.offset;
+		KAnimControllerBase component = gameObject.GetComponent<KAnimControllerBase>();
+		Vector3 vector = ((!(component != null)) ? (gameObject.transform.GetPosition() + Vector3.down) : component.GetWorldPivot());
+		base.transform.SetPosition(vector + this.offset);
 		DiseaseMonitor.Instance smi = gameObject.GetSMI<DiseaseMonitor.Instance>();
 		if (smi != null && smi.IsSick())
 		{
@@ -63,8 +65,8 @@ public class DiseaseOverlayWidget : KMonoBehaviour
 						this.displayedDiseases.Add(image);
 					}
 					image.color = disease.overlayColour;
-					ToolTip component = image.GetComponent<ToolTip>();
-					component.toolTip = disease.Name + " " + GameUtil.GetFormattedDiseaseAmount((int)value);
+					ToolTip component2 = image.GetComponent<ToolTip>();
+					component2.toolTip = disease.Name + " " + GameUtil.GetFormattedDiseaseAmount((int)value);
 					num2++;
 				}
 			}

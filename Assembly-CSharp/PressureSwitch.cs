@@ -4,9 +4,9 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class PressureSwitch : CircuitSwitch, ISaveLoadable, IThresholdSwitch
+public class PressureSwitch : CircuitSwitch, ISaveLoadable, IThresholdSwitch, ISim200ms
 {
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		int num = Grid.PosToCell(this);
 		if (this.sampleIdx < 8)
@@ -92,6 +92,14 @@ public class PressureSwitch : CircuitSwitch, ISaveLoadable, IThresholdSwitch
 	public float GetRangeMaxInputField()
 	{
 		return (this.desiredState != Element.State.Gas) ? this.rangeMax : (this.rangeMax * 1000f);
+	}
+
+	public LocString Title
+	{
+		get
+		{
+			return UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.TITLE;
+		}
 	}
 
 	public LocString ThresholdValueName

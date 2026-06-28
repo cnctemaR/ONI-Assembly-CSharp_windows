@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AudioSheets : ScriptableObject
+public abstract class AudioSheets : ScriptableObject
 {
 	protected virtual void Initialize()
 	{
@@ -56,10 +56,7 @@ public class AudioSheets : ScriptableObject
 		}
 	}
 
-	protected virtual AnimEvent CreateSoundOfType(string type, string file_name, string sound_name, int frame, float min_interval)
-	{
-		return null;
-	}
+	protected abstract AnimEvent CreateSoundOfType(string type, string file_name, string sound_name, int frame, float min_interval);
 
 	public List<AnimEvent> GetEvents(HashedString anim_id)
 	{

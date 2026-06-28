@@ -59,9 +59,9 @@ namespace OverlayModes
 				if (!(kmonoBehaviour == null))
 				{
 					float defaultDepth = Mode.GetDefaultDepth(kmonoBehaviour);
-					Vector3 position = kmonoBehaviour.transform.position;
+					Vector3 position = kmonoBehaviour.transform.GetPosition();
 					position.z = defaultDepth;
-					kmonoBehaviour.transform.position = position;
+					kmonoBehaviour.transform.SetPosition(position);
 					KBatchedAnimController component = kmonoBehaviour.GetComponent<KBatchedAnimController>();
 					component.enabled = false;
 					component.enabled = true;
@@ -106,8 +106,9 @@ namespace OverlayModes
 			DiseaseOverlayWidget component = gameObject.GetComponent<DiseaseOverlayWidget>();
 			AmountInstance amountInstance = target.GetComponent<Modifiers>().amounts.Get(Db.Get().Amounts.ImmuneLevel);
 			Disease.UpdateDiseaseInfo updateDiseaseInfo = new Disease.UpdateDiseaseInfo(amountInstance, component);
-			Vector3 vector = new Vector3(0f, -1f, 0f);
-			gameObject.GetComponent<RectTransform>().position = target.transform.position + vector;
+			KAnimControllerBase component2 = target.GetComponent<KAnimControllerBase>();
+			Vector3 vector = ((!(component2 != null)) ? (target.transform.GetPosition() + Vector3.down) : component2.GetWorldPivot());
+			gameObject.GetComponent<RectTransform>().SetPosition(vector);
 			this.updateDiseaseInfo.Add(updateDiseaseInfo);
 		}
 
@@ -123,7 +124,7 @@ namespace OverlayModes
 				{
 					if (!(minionIdentity == null))
 					{
-						Vector2I vector2I3 = Grid.PosToXY(minionIdentity.transform.position);
+						Vector2I vector2I3 = Grid.PosToXY(minionIdentity.transform.GetPosition());
 						if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && !this.privateTargets.Contains(minionIdentity))
 						{
 							this.AddDiseaseUI(minionIdentity);
@@ -202,9 +203,9 @@ namespace OverlayModes
 				if (go != null)
 				{
 					float defaultDepth2 = Mode.GetDefaultDepth(go);
-					Vector3 position2 = go.transform.position;
+					Vector3 position2 = go.transform.GetPosition();
 					position2.z = defaultDepth2;
-					go.transform.position = position2;
+					go.transform.SetPosition(position2);
 					KBatchedAnimController component2 = go.GetComponent<KBatchedAnimController>();
 					component2.enabled = false;
 					component2.enabled = true;
@@ -222,14 +223,14 @@ namespace OverlayModes
 						{
 							if (!this.layerTargets.Contains(kmonoBehaviour))
 							{
-								Vector3 position = kmonoBehaviour.transform.position;
+								Vector3 position = kmonoBehaviour.transform.GetPosition();
 								if (Grid.Visible[Grid.PosToCell(position)] > 0 || DebugHandler.FreeCameraMode)
 								{
 									if (vector2I <= position && position <= vector2I2)
 									{
 										float defaultDepth = Mode.GetDefaultDepth(kmonoBehaviour);
 										position.z = defaultDepth + offset_z;
-										kmonoBehaviour.transform.position = position;
+										kmonoBehaviour.transform.SetPosition(position);
 										KBatchedAnimController component = kmonoBehaviour.GetComponent<KBatchedAnimController>();
 										component.enabled = false;
 										component.enabled = true;

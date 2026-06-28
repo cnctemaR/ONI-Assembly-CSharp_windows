@@ -4,7 +4,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch
+public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim200ms
 {
 	protected override void OnSpawn()
 	{
@@ -15,7 +15,7 @@ public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch
 		this.wasOn = this.switchedOn;
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		int num = Grid.PosToCell(this);
 		if (this.sampleIdx < 8)
@@ -189,6 +189,14 @@ public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch
 			locString = UI.UNITSUFFIXES.MASS.KILOGRAM;
 		}
 		return locString;
+	}
+
+	public LocString Title
+	{
+		get
+		{
+			return UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.TITLE;
+		}
 	}
 
 	private void UpdateLogicCircuit()

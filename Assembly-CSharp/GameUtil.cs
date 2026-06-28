@@ -103,6 +103,21 @@ public static class GameUtil
 		return text;
 	}
 
+	public static float AttributeSkillToAlpha(AttributeInstance attributeInstance)
+	{
+		return Mathf.Min(attributeInstance.GetTotalValue() / 10f, 1f);
+	}
+
+	public static float AttributeSkillToAlpha(float attributeSkill)
+	{
+		return Mathf.Min(attributeSkill / 10f, 1f);
+	}
+
+	public static float AptitudeToAlpha(float aptitude)
+	{
+		return Mathf.Min(aptitude / 10f, 1f);
+	}
+
 	public static float GetThermalEnergy(PrimaryElement pe)
 	{
 		return pe.Temperature * pe.Mass * pe.Element.specificHeatCapacity;
@@ -165,7 +180,7 @@ public static class GameUtil
 		num3 = Mathf.Clamp(num3, num4, num5);
 		if (float.IsNaN(num3) || float.IsInfinity(num3))
 		{
-			global::Debug.LogError("Calculated an invalid temperature", null);
+			global::Debug.LogError(string.Format("Calculated an invalid temperature: t1={0}, m1={1}, t2={2}, m2={3}, min_temp={4}, max_temp={5}", new object[] { t1, m1, t2, m2, num4, num5 }), null);
 		}
 		return num3;
 	}
@@ -310,17 +325,23 @@ public static class GameUtil
 		return joules.ToString("F1") + UI.UNITSUFFIXES.ELECTRICAL.JOULE;
 	}
 
-	public static string GetFormattedJoules(float joules, string floatFormat = "F1")
+	public static string GetFormattedJoules(float joules, string floatFormat = "F1", GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
 	{
+		joules = GameUtil.ApplyTimeSlice(joules, timeSlice);
+		string text;
 		if (Math.Abs(joules) > 1000000f)
 		{
-			return (joules / 1000000f).ToString(floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.MEGAJOULE;
+			text = (joules / 1000000f).ToString(floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.MEGAJOULE;
 		}
-		if (Mathf.Abs(joules) > 1000f)
+		else if (Mathf.Abs(joules) > 1000f)
 		{
-			return (joules / 1000f).ToString(floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.KILOJOULE;
+			text = (joules / 1000f).ToString(floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.KILOJOULE;
 		}
-		return joules.ToString(floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.JOULE;
+		else
+		{
+			text = joules.ToString(floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.JOULE;
+		}
+		return GameUtil.AddTimeSliceText(text, timeSlice);
 	}
 
 	public static string GetFormattedWattage(float watts, GameUtil.WattageFormatterUnit unit = GameUtil.WattageFormatterUnit.Automatic)
@@ -655,9 +676,14 @@ public static class GameUtil
 			cell = start_cell,
 			depth = 0
 		});
-		while (GameUtil.FloodFillNext.Count > 0)
+		GameUtil.FloodFillConditional(GameUtil.FloodFillNext, condition, visited_cells);
+	}
+
+	public static void FloodFillConditional(Queue<GameUtil.FloodFillInfo> queue, Func<int, bool> condition, ICollection<int> visited_cells)
+	{
+		while (queue.Count > 0)
 		{
-			GameUtil.FloodFillInfo floodFillInfo = GameUtil.FloodFillNext.Dequeue();
+			GameUtil.FloodFillInfo floodFillInfo = queue.Dequeue();
 			if (Grid.IsValidCell(floodFillInfo.cell))
 			{
 				if (!visited_cells.Contains(floodFillInfo.cell))
@@ -665,22 +691,22 @@ public static class GameUtil
 					visited_cells.Add(floodFillInfo.cell);
 					if (condition(floodFillInfo.cell))
 					{
-						GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+						queue.Enqueue(new GameUtil.FloodFillInfo
 						{
 							cell = Grid.CellLeft(floodFillInfo.cell),
 							depth = floodFillInfo.depth + 1
 						});
-						GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+						queue.Enqueue(new GameUtil.FloodFillInfo
 						{
 							cell = Grid.CellRight(floodFillInfo.cell),
 							depth = floodFillInfo.depth + 1
 						});
-						GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+						queue.Enqueue(new GameUtil.FloodFillInfo
 						{
 							cell = Grid.CellAbove(floodFillInfo.cell),
 							depth = floodFillInfo.depth + 1
 						});
-						GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+						queue.Enqueue(new GameUtil.FloodFillInfo
 						{
 							cell = Grid.CellBelow(floodFillInfo.cell),
 							depth = floodFillInfo.depth + 1
@@ -689,7 +715,7 @@ public static class GameUtil
 				}
 			}
 		}
-		GameUtil.FloodFillNext.Clear();
+		queue.Clear();
 	}
 
 	public static GameUtil.Hardness GetHardness(Element element)
@@ -1147,7 +1173,7 @@ public static class GameUtil
 		float num2 = num * num;
 		foreach (Health health in Components.Health)
 		{
-			Vector3 position = health.transform.position;
+			Vector3 position = health.transform.GetPosition();
 			Vector2 vector2 = new Vector2(position.x, position.y);
 			float sqrMagnitude = (vector2 - vector).sqrMagnitude;
 			if (num2 >= sqrMagnitude && health != null)
@@ -1414,7 +1440,6 @@ public static class GameUtil
 		{
 			list.AddRange(component2.AdditionalRequirements);
 		}
-		GameUtil.IndentListOfDescriptors(list);
 		return list;
 	}
 
@@ -1558,9 +1583,9 @@ public static class GameUtil
 		return text;
 	}
 
-	public static int GetCurrentDay()
+	public static int GetCurrentCycle()
 	{
-		return (int)Mathf.Floor(GameClock.Instance.GetTime() / 600f) + 1;
+		return GameClock.Instance.GetCycle() + 1;
 	}
 
 	public static GameObject GetTelepad()
@@ -1718,25 +1743,6 @@ public static class GameUtil
 			text = "research";
 		}
 		return text;
-	}
-
-	public static void UpdateRegion(Region new_region, KMonoBehaviour cmp, OwnableSlot slot, Tag region_tag)
-	{
-		Ownable component = cmp.GetComponent<Ownable>();
-		if (component == null)
-		{
-			return;
-		}
-		bool flag = component.slot == slot;
-		bool flag2 = new_region != null && new_region.RegionTag == region_tag;
-		if (flag && !flag2)
-		{
-			component.Unassign();
-		}
-		else if (!flag && flag2)
-		{
-			component.slot = slot;
-		}
 	}
 
 	public static string GenerateRandomDuplicantName()
@@ -1933,7 +1939,7 @@ public static class GameUtil
 
 	public static int NaturalBuildingCell(this KMonoBehaviour cmp)
 	{
-		return Grid.PosToCell(cmp.transform.position);
+		return Grid.PosToCell(cmp.transform.GetPosition());
 	}
 
 	public static GameUtil.TemperatureUnit temperatureUnit;
@@ -1943,10 +1949,10 @@ public static class GameUtil
 	private static string[] adjectives;
 
 	[ThreadStatic]
-	private static Queue<GameUtil.FloodFillInfo> FloodFillNext = new Queue<GameUtil.FloodFillInfo>();
+	public static Queue<GameUtil.FloodFillInfo> FloodFillNext = new Queue<GameUtil.FloodFillInfo>();
 
 	[ThreadStatic]
-	private static HashSet<int> FloodFillVisited = new HashSet<int>();
+	public static HashSet<int> FloodFillVisited = new HashSet<int>();
 
 	public static TagSet foodTags = new TagSet(new string[]
 	{
@@ -1962,7 +1968,7 @@ public static class GameUtil
 		GameTags.Compostable.Name
 	});
 
-	public static TagSet solidTags = new TagSet(new string[] { "Filter", "Coal", "BasicFabric", "SwampLilyFlower" });
+	public static TagSet solidTags = new TagSet(new string[] { "Filter", "Coal", "BasicFabric", "SwampLilyFlower", "RefinedMetal" });
 
 	public enum UnitClass
 	{
@@ -2010,6 +2016,13 @@ public static class GameUtil
 		PerCycle
 	}
 
+	public enum MeasureUnit
+	{
+		mass,
+		kcal,
+		quantity
+	}
+
 	public enum WattageFormatterUnit
 	{
 		Watts,
@@ -2017,7 +2030,7 @@ public static class GameUtil
 		Automatic
 	}
 
-	private struct FloodFillInfo
+	public struct FloodFillInfo
 	{
 		public int cell;
 

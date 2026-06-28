@@ -40,9 +40,16 @@ public class AtmoSuitConfig : IEquipmentConfig
 		equipmentDef.OnEquipCallBack = delegate(Equippable eq)
 		{
 			eq.assignee.GetSoleOwner().GetComponent<Navigator>().SetFlags(PathFinder.PotentialPath.Flags.HasSuit | PathFinder.PotentialPath.Flags.UnlimitedSubmergedTravel);
+			if (eq.assignee.GetSoleOwner().GetComponent<MinionResume>().CurrentRole == "SuitExpert")
+			{
+				eq.assignee.GetSoleOwner().GetAttributes().Get(Db.Get().Attributes.Athletics)
+					.Add("SuitExpert", SuitExpert.AthleticsModifier);
+			}
 		};
 		equipmentDef.OnUnequipCallBack = delegate(Equippable eq)
 		{
+			eq.assignee.GetSoleOwner().GetAttributes().Get(Db.Get().Attributes.Athletics)
+				.Remove(SuitExpert.AthleticsModifier);
 			eq.assignee.GetSoleOwner().GetComponent<Navigator>().ClearFlags(PathFinder.PotentialPath.Flags.HasSuit | PathFinder.PotentialPath.Flags.UnlimitedSubmergedTravel);
 		};
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.SuitIDs, "Atmo_Suit");

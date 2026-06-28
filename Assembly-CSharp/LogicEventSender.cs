@@ -3,11 +3,13 @@ using UnityEngine;
 
 internal class LogicEventSender : ILogicEventSender, ILogicUIElement, ILogicNetworkConnection, IUniformGridObject
 {
-	public LogicEventSender(HashedString id, int cell, Action<int, bool> on_connection_changed)
+	public LogicEventSender(HashedString id, int cell, Action<int> on_value_changed, Action<int, bool> on_connection_changed, LogicPortSpriteType sprite_type)
 	{
 		this.id = id;
 		this.cell = cell;
+		this.onValueChanged = on_value_changed;
 		this.onConnectionChanged = on_connection_changed;
+		this.spriteType = sprite_type;
 	}
 
 	public HashedString ID
@@ -33,9 +35,9 @@ internal class LogicEventSender : ILogicEventSender, ILogicUIElement, ILogicNetw
 		return this.GetLogicCell();
 	}
 
-	public bool IsLogicInput()
+	public LogicPortSpriteType GetLogicPortSpriteType()
 	{
-		return false;
+		return this.spriteType;
 	}
 
 	public Vector2 PosMin()
@@ -51,6 +53,7 @@ internal class LogicEventSender : ILogicEventSender, ILogicUIElement, ILogicNetw
 	public void SetValue(int value)
 	{
 		this.logicValue = value;
+		this.onValueChanged(value);
 	}
 
 	public void OnLogicNetworkConnectionChanged(bool connected)
@@ -61,11 +64,15 @@ internal class LogicEventSender : ILogicEventSender, ILogicUIElement, ILogicNetw
 		}
 	}
 
+	private HashedString id;
+
 	private int cell;
 
 	private int logicValue;
 
-	private HashedString id;
+	private Action<int> onValueChanged;
 
 	private Action<int, bool> onConnectionChanged;
+
+	private LogicPortSpriteType spriteType;
 }

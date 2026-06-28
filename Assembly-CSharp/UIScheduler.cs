@@ -13,11 +13,6 @@ public class UIScheduler : KMonoBehaviour, IScheduler
 		return this.scheduler.Schedule(name, time, callback, callback_data, group);
 	}
 
-	public SchedulerHandle SchedulePeriodic(string name, float interval, Action<object> callback, object callback_data = null, SchedulerGroup group = null)
-	{
-		return this.scheduler.SchedulePeriodic(name, interval, callback, callback_data, group, 0f, null);
-	}
-
 	private void Update()
 	{
 		this.scheduler.Update();

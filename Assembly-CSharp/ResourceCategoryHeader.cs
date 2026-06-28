@@ -5,10 +5,11 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
+public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
 {
-	private void Awake()
+	protected override void OnPrefabInit()
 	{
+		base.OnPrefabInit();
 		this.EntryContainer.SetParent(base.transform.parent);
 		this.EntryContainer.SetSiblingIndex(base.transform.GetSiblingIndex() + 1);
 		this.EntryContainer.localScale = Vector3.one;
@@ -19,11 +20,12 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IPoin
 		});
 		this.SetInteractable(false);
 		this.SetActiveColor(false);
-		this.tooltip = base.GetComponent<ToolTip>();
 	}
 
-	private void Start()
+	protected override void OnSpawn()
 	{
+		base.OnSpawn();
+		this.tooltip.OnToolTip = new Func<string>(this.OnTooltip);
 		this.UpdateContents();
 	}
 
@@ -34,18 +36,10 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IPoin
 			if (!this.IsOpen)
 			{
 				this.expandArrow.SetInactive();
-				if (this.tooltip != null)
-				{
-					this.tooltip.toolTip = UI.RESOURCESCREEN.CATEGORY_TOOLTIP;
-				}
 			}
 			else
 			{
 				this.expandArrow.SetActive();
-				if (this.tooltip != null)
-				{
-					this.tooltip.toolTip = UI.RESOURCESCREEN.CATEGORY_TOOLTIP;
-				}
 			}
 		}
 		else
@@ -75,9 +69,10 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IPoin
 		}
 	}
 
-	public void SetTag(Tag t)
+	public void SetTag(Tag t, GameUtil.MeasureUnit measure)
 	{
 		this.ResourceCategoryTag = t;
+		this.Measure = measure;
 		this.elements.LabelText.text = t.ProperName();
 		if (SaveGame.Instance.expandedResourceTags.Contains(this.ResourceCategoryTag))
 		{
@@ -186,39 +181,48 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IPoin
 		this.EntryContainer.gameObject.SetActive(this.IsOpen);
 	}
 
-	public void UpdateContents()
+	private void GetAmounts(bool doExtras, out float available, out float total, out float reserved)
 	{
-		float num = 0f;
+		available = 0f;
+		total = 0f;
+		reserved = 0f;
 		foreach (Tag tag in WorldInventory.Instance.GetDiscoveredResourcesFromTag(this.ResourceCategoryTag))
 		{
 			this.anyDiscovered = true;
 			if (!this.ResourcesDiscovered.ContainsKey(tag))
 			{
-				this.ResourcesDiscovered.Add(tag, this.NewResourceEntry(tag));
+				this.ResourcesDiscovered.Add(tag, this.NewResourceEntry(tag, this.Measure));
 			}
-			if (this.measure == ResourceCategoryHeader.MeasureUnit.kcal)
+			float num = WorldInventory.Instance.GetAmount(tag);
+			float num2 = ((!doExtras) ? 0f : WorldInventory.Instance.GetTotalAmount(tag));
+			float num3 = ((!doExtras) ? 0f : MaterialNeeds.Instance.GetAmount(tag));
+			if (this.Measure == GameUtil.MeasureUnit.kcal)
 			{
 				EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(tag.Name);
-				num += WorldInventory.Instance.GetAmount(tag) * foodInfo.CaloriesPerUnit;
+				num *= foodInfo.CaloriesPerUnit;
+				num2 *= foodInfo.CaloriesPerUnit;
+				num3 *= foodInfo.CaloriesPerUnit;
 			}
-			else
-			{
-				num += WorldInventory.Instance.GetAmount(tag);
-			}
+			available += num;
+			total += num2;
+			reserved += num3;
 		}
-		foreach (KeyValuePair<Tag, ResourceEntry> keyValuePair in this.ResourcesDiscovered)
-		{
-			keyValuePair.Value.UpdateValue(this.measure);
-		}
-		this.SetActiveColor(num > 0f);
+	}
+
+	public void UpdateContents()
+	{
+		float num;
+		float num2;
+		float num3;
+		this.GetAmounts(false, out num, out num2, out num3);
 		if (this.quantityString == null || this.currentQuantity != num)
 		{
-			ResourceCategoryHeader.MeasureUnit measureUnit = this.measure;
-			if (measureUnit != ResourceCategoryHeader.MeasureUnit.mass)
+			GameUtil.MeasureUnit measure = this.Measure;
+			if (measure != GameUtil.MeasureUnit.mass)
 			{
-				if (measureUnit != ResourceCategoryHeader.MeasureUnit.quantity)
+				if (measure != GameUtil.MeasureUnit.quantity)
 				{
-					if (measureUnit == ResourceCategoryHeader.MeasureUnit.kcal)
+					if (measure == GameUtil.MeasureUnit.kcal)
 					{
 						this.quantityString = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
 					}
@@ -235,6 +239,11 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IPoin
 			this.elements.QuantityText.text = this.quantityString;
 			this.currentQuantity = num;
 		}
+		foreach (KeyValuePair<Tag, ResourceEntry> keyValuePair in this.ResourcesDiscovered)
+		{
+			keyValuePair.Value.UpdateValue();
+		}
+		this.SetActiveColor(num > 0f);
 		if (!this.anyDiscovered)
 		{
 			this.SetInteractable(false);
@@ -245,11 +254,21 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IPoin
 		}
 	}
 
-	private ResourceEntry NewResourceEntry(Tag resourceTag)
+	private string OnTooltip()
+	{
+		float num;
+		float num2;
+		float num3;
+		this.GetAmounts(true, out num, out num2, out num3);
+		string text = this.elements.LabelText.text + "\n";
+		return text + string.Format(UI.RESOURCESCREEN.AVAILABLE_TOOLTIP, ResourceCategoryScreen.QuantityTextForMeasure(num, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num3, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num2, this.Measure));
+	}
+
+	private ResourceEntry NewResourceEntry(Tag resourceTag, GameUtil.MeasureUnit measure)
 	{
 		GameObject gameObject = Util.KInstantiateUI(this.Prefab_ResourceEntry, this.EntryContainer.gameObject, true);
 		ResourceEntry component = gameObject.GetComponent<ResourceEntry>();
-		component.SetTag(resourceTag);
+		component.SetTag(resourceTag, measure);
 		return component;
 	}
 
@@ -258,6 +277,8 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IPoin
 	public Transform EntryContainer;
 
 	public Tag ResourceCategoryTag;
+
+	public GameUtil.MeasureUnit Measure;
 
 	public bool IsOpen;
 
@@ -277,6 +298,9 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IPoin
 
 	private float currentQuantity;
 
+	private bool anyDiscovered;
+
+	[MyCmpGet]
 	private ToolTip tooltip;
 
 	[SerializeField]
@@ -293,17 +317,6 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IPoin
 
 	[SerializeField]
 	private Image Background;
-
-	public ResourceCategoryHeader.MeasureUnit measure;
-
-	private bool anyDiscovered;
-
-	public enum MeasureUnit
-	{
-		mass,
-		kcal,
-		quantity
-	}
 
 	[Serializable]
 	public struct ElementReferences

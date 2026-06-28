@@ -1,14 +1,15 @@
 ﻿using System;
+using STRINGS;
 
 public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 {
 	public TakeMedicineChore(MedicinalPill master)
-		: base(Db.Get().ChoreTypes.TakeMedicine, master, null, false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.TakeMedicine, master, null, false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.medicine = master;
 		this.pickupable = this.medicine.GetComponent<Pickupable>();
 		this.smi = new TakeMedicineChore.StatesInstance(this);
-		base.AddPrecondition(ChorePreconditions.CanPickup, this.pickupable);
+		base.AddPrecondition(ChorePreconditions.instance.CanPickup, this.pickupable);
 		base.AddPrecondition(TakeMedicineChore.CanCure, this);
 		base.AddPrecondition(TakeMedicineChore.IsConsumptionPermitted, this);
 	}
@@ -28,6 +29,7 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 	public static Chore.Precondition CanCure = new Chore.Precondition
 	{
 		id = "CanCure",
+		description = DUPLICANTS.CHORES.PRECONDITIONS.CAN_CURE,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			TakeMedicineChore takeMedicineChore = (TakeMedicineChore)data;
@@ -38,6 +40,7 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 	public static Chore.Precondition IsConsumptionPermitted = new Chore.Precondition
 	{
 		id = "IsConsumptionPermitted",
+		description = DUPLICANTS.CHORES.PRECONDITIONS.IS_CONSUMPTION_PERMITTED,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			TakeMedicineChore takeMedicineChore2 = (TakeMedicineChore)data;

@@ -129,14 +129,6 @@ public class WiltCondition : KMonoBehaviour
 		});
 	}
 
-	public void Tick()
-	{
-		if (this.wilt_condition_dirty)
-		{
-			this.CheckShouldWilt();
-		}
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -161,18 +153,6 @@ public class WiltCondition : KMonoBehaviour
 		}
 	}
 
-	protected override void OnCmpEnable()
-	{
-		base.OnCmpEnable();
-		Components.WiltConditions.Add(this);
-	}
-
-	protected override void OnCmpDisable()
-	{
-		base.OnCmpDisable();
-		Components.WiltConditions.Remove(this);
-	}
-
 	protected override void OnCleanUp()
 	{
 		this.wiltSchedulerHandler.ClearScheduler();
@@ -187,12 +167,11 @@ public class WiltCondition : KMonoBehaviour
 			return;
 		}
 		this.WiltConditions[condition] = satisfiedState;
-		this.wilt_condition_dirty = true;
+		this.CheckShouldWilt();
 	}
 
 	private void CheckShouldWilt()
 	{
-		this.wilt_condition_dirty = false;
 		bool flag = false;
 		foreach (KeyValuePair<WiltCondition.Condition, bool> keyValuePair in this.WiltConditions)
 		{
@@ -320,8 +299,6 @@ public class WiltCondition : KMonoBehaviour
 
 	[Serialize]
 	private bool wilting;
-
-	private bool wilt_condition_dirty;
 
 	private Dictionary<WiltCondition.Condition, bool> WiltConditions = new Dictionary<WiltCondition.Condition, bool>();
 

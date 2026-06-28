@@ -23,7 +23,7 @@ public class Db : EntityModifierSet
 		base.Initialize();
 		this.Diseases = new global::Database.Diseases(this.Root);
 		this.Urges = new Urges();
-		this.OwnableSlots = new OwnableSlots();
+		this.AssignableSlots = new AssignableSlots();
 		this.StateMachineCategories = new StateMachineCategories();
 		this.Personalities = new Personalities(this.personalitiesFile);
 		this.Faces = new Faces();
@@ -39,6 +39,8 @@ public class Db : EntityModifierSet
 		this.AccessorySlots = new AccessorySlots(this.Root, null, null, null);
 		this.ScheduleBlockTypes = new ScheduleBlockTypes(this.Root);
 		this.Roles = new Roles(this.Root);
+		this.RoomTypeCategories = new RoomTypeCategories(this.Root);
+		this.RoomTypes = new RoomTypes(this.Root);
 		this.MiscStatusItems = new MiscStatusItems(this.Root);
 		this.CreatureStatusItems = new CreatureStatusItems(this.Root);
 		this.BuildingStatusItems = new BuildingStatusItems(this.Root);
@@ -100,7 +102,7 @@ public class Db : EntityModifierSet
 
 	public Urges Urges;
 
-	public OwnableSlots OwnableSlots;
+	public AssignableSlots AssignableSlots;
 
 	public StateMachineCategories StateMachineCategories;
 
@@ -137,6 +139,10 @@ public class Db : EntityModifierSet
 	public ScheduleBlockTypes ScheduleBlockTypes;
 
 	public Roles Roles;
+
+	public RoomTypeCategories RoomTypeCategories;
+
+	public RoomTypes RoomTypes;
 
 	[Serializable]
 	public class SlotInfo : Resource

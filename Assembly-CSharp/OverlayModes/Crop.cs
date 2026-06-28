@@ -62,7 +62,7 @@ namespace OverlayModes
 			}
 			foreach (Harvestable harvestable2 in this.layerTargets)
 			{
-				Vector2I vector2I3 = Grid.PosToXY(harvestable2.transform.position);
+				Vector2I vector2I3 = Grid.PosToXY(harvestable2.transform.GetPosition());
 				if (vector2I <= vector2I3 && vector2I3 <= vector2I2)
 				{
 					this.AddCropUI(harvestable2);
@@ -125,7 +125,7 @@ namespace OverlayModes
 			GameObject freeCropUI = this.GetFreeCropUI();
 			Crop.UpdateCropInfo updateCropInfo = new Crop.UpdateCropInfo(harvestable, freeCropUI);
 			Vector3 vector = Grid.CellToPos(Grid.PosToCell(harvestable), 0.5f, -1.25f, 0f);
-			freeCropUI.GetComponent<RectTransform>().position = Vector3.up + vector;
+			freeCropUI.GetComponent<RectTransform>().SetPosition(Vector3.up + vector);
 			this.updateCropInfo.Add(updateCropInfo);
 		}
 

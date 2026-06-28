@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class RequireInputs : KMonoBehaviour
+public class RequireInputs : KMonoBehaviour, ISim200ms
 {
 	public bool RequiresPower
 	{
@@ -59,7 +59,7 @@ public class RequireInputs : KMonoBehaviour
 		}
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		this.CheckRequirements(false);
 	}

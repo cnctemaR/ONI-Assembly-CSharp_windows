@@ -10,15 +10,14 @@ public class AirFilterConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 1;
 		string text2 = "co2filter_kanim";
-		float num3 = 200f;
-		int num4 = 30;
-		float num5 = 30f;
+		int num3 = 30;
+		float num4 = 30f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
 		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.NONE, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = SimViewMode.OxygenMap;
 		buildingDef.MaterialCategory = MATERIALS.RAW_MINERALS;
@@ -28,7 +27,7 @@ public class AirFilterConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
 		Prioritizable.AddRef(go);
@@ -59,12 +58,12 @@ public class AirFilterConfig : IBuildingConfig
 			new ElementConverter.OutputElement(0.14333335f, SimHashes.Clay, 0f, true, 0f, 0.5f, false, 0.25f, byte.MaxValue, 0),
 			new ElementConverter.OutputElement(0.089999996f, SimHashes.Oxygen, 0f, false, 0f, 1f, false, 0.75f, byte.MaxValue, 0)
 		};
-		elementConverter.conversionInterval = 1f;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = new Tag("Filter");
-		manualDeliveryKG.capacity = 80.00001f;
-		manualDeliveryKG.refillMass = 8.000001f;
+		manualDeliveryKG.capacity = 320.00003f;
+		manualDeliveryKG.refillMass = 32.000004f;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		AirFilter airFilter = go.AddOrGet<AirFilter>();
 		airFilter.filterTag = new Tag("Filter");
 	}
@@ -85,9 +84,9 @@ public class AirFilterConfig : IBuildingConfig
 
 	private const float SAND_CONSUMPTION_RATE = 0.13333334f;
 
-	private const float REFILL_RATE = 600f;
+	private const float REFILL_RATE = 2400f;
 
-	private const float SAND_STORAGE_AMOUNT = 80.00001f;
+	private const float SAND_STORAGE_AMOUNT = 320.00003f;
 
 	private const float CLAY_PER_LOAD = 10f;
 }

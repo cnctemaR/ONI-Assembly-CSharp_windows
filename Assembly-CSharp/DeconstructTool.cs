@@ -31,7 +31,7 @@ public class DeconstructTool : FilteredDragTool
 
 	public void DeconstructCell(int cell)
 	{
-		for (int i = 0; i < 32; i++)
+		for (int i = 0; i < 36; i++)
 		{
 			GameObject gameObject = Grid.Objects[cell, i];
 			if (gameObject != null)
@@ -44,7 +44,7 @@ public class DeconstructTool : FilteredDragTool
 				Prioritizable component = gameObject.GetComponent<Prioritizable>();
 				if (component != null)
 				{
-					component.SetMasterPriority(ToolMenuPriorityScreen.Instance.GetScreenPriority());
+					component.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
 				}
 			}
 		}
@@ -53,13 +53,13 @@ public class DeconstructTool : FilteredDragTool
 	protected override void OnActivateTool()
 	{
 		base.OnActivateTool();
-		ToolMenuPriorityScreen.Instance.Show(true);
+		ToolMenu.Instance.PriorityScreen.Show(true);
 	}
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
 	{
 		base.OnDeactivateTool(new_tool);
-		ToolMenuPriorityScreen.Instance.Show(false);
+		ToolMenu.Instance.PriorityScreen.Show(false);
 	}
 
 	public static DeconstructTool Instance;

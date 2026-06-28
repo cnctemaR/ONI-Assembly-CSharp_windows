@@ -1,39 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
 using FMOD.Studio;
+using STRINGS;
 using UnityEngine;
 
 public class PriorityScreen : KScreen
 {
-	public void InstantiateButtons(Action<PriorityScreen.PriorityClass, int> on_click, string tooltip_string_key_root, bool playSelectionSound = true)
+	public void InstantiateButtons(Action<PrioritySetting> on_click, bool playSelectionSound = true)
 	{
+		this.onClick = on_click;
 		for (int i = 1; i <= 9; i++)
 		{
-			int idx = i;
-			PrioritySetting priority = new PrioritySetting(PriorityScreen.PriorityClass.basic, idx);
-			PriorityButton priorityButton = global::Util.KInstantiateUI<PriorityButton>(this.buttonPrefab_basic.gameObject, base.gameObject, false);
+			int num = i;
+			PriorityButton priorityButton = global::Util.KInstantiateUI<PriorityButton>(this.buttonPrefab_basic.gameObject, this.buttonPrefab_basic.transform.parent.gameObject, false);
 			this.buttons_basic.Add(priorityButton);
-			priorityButton.toggle.onClick += delegate
-			{
-				if (playSelectionSound)
-				{
-					this.PlayPriorityConfirmSound(priority);
-				}
-				on_click(PriorityScreen.PriorityClass.basic, idx);
-			};
-			priorityButton.text.text = i.ToString();
-			priorityButton.priority = priority;
-			string text = string.Format(Strings.Get(tooltip_string_key_root + ".BASIC"), i);
-			priorityButton.tooltip.SetSimpleTooltip(text);
+			priorityButton.playSelectionSound = playSelectionSound;
+			priorityButton.onClick = this.onClick;
+			priorityButton.text.text = num.ToString();
+			priorityButton.priority = new PrioritySetting(PriorityScreen.PriorityClass.basic, num);
+			priorityButton.tooltip.SetSimpleTooltip(string.Format(UI.PRIORITYSCREEN.BASIC, num));
 		}
 		this.buttonPrefab_basic.gameObject.SetActive(false);
-		this.buttonPrefab_high.gameObject.SetActive(false);
-		this.buttonPrefab_emergency.gameObject.SetActive(false);
+		this.button_emergency.gameObject.SetActive(false);
+		this.button_toggleHigh.gameObject.SetActive(false);
+		this.SetScreenPriority(new PrioritySetting(PriorityScreen.PriorityClass.basic, 5), false);
 	}
 
-	private void RefreshButton(PriorityButton b, PriorityScreen.PriorityClass priorityClass, int priority, bool play_sound)
+	private void OnClick(PrioritySetting priority)
 	{
-		if (priorityClass == b.priority.priority_class && priority == b.priority.priority_value)
+		if (this.onClick != null)
+		{
+			this.onClick(priority);
+		}
+	}
+
+	public void ResetPriority()
+	{
+		this.SetScreenPriority(new PrioritySetting(PriorityScreen.PriorityClass.basic, 5), false);
+	}
+
+	private void RefreshButton(PriorityButton b, PrioritySetting priority, bool play_sound)
+	{
+		if (b.priority == priority)
 		{
 			b.toggle.Select();
 			b.toggle.isOn = true;
@@ -48,39 +56,49 @@ public class PriorityScreen : KScreen
 		}
 	}
 
-	public void SetScreenPriority(PriorityScreen.PriorityClass priorityClass, int priority, bool play_sound = false)
+	public void SetScreenPriority(PrioritySetting priority, bool play_sound = false)
 	{
-		if (this.priorityClass == priorityClass && this.priority == priority)
+		if (this.lastSelectedPriority == priority)
 		{
 			return;
 		}
-		this.buttons_basic.ForEach(delegate(PriorityButton b)
+		this.lastSelectedPriority = priority;
+		if (priority.priority_class == PriorityScreen.PriorityClass.high)
 		{
-			this.RefreshButton(b, priorityClass, priority, play_sound);
-		});
-		this.buttons_high.ForEach(delegate(PriorityButton b)
+			this.button_toggleHigh.isOn = true;
+		}
+		else if (priority.priority_class == PriorityScreen.PriorityClass.basic)
 		{
-			this.RefreshButton(b, priorityClass, priority, play_sound);
-		});
-		this.buttons_emergency.ForEach(delegate(PriorityButton b)
+			this.button_toggleHigh.isOn = false;
+		}
+		for (int i = 0; i < this.buttons_basic.Count; i++)
 		{
-			this.RefreshButton(b, priorityClass, priority, play_sound);
-		});
-		this.priorityClass = priorityClass;
-		this.priority = priority;
+			this.buttons_basic[i].priority = new PrioritySetting((!this.button_toggleHigh.isOn) ? PriorityScreen.PriorityClass.basic : PriorityScreen.PriorityClass.high, i + 1);
+			this.buttons_basic[i].tooltip.SetSimpleTooltip(string.Format((!this.button_toggleHigh.isOn) ? UI.PRIORITYSCREEN.BASIC : UI.PRIORITYSCREEN.HIGH, i + 1));
+			this.RefreshButton(this.buttons_basic[i], this.lastSelectedPriority, play_sound);
+		}
+		this.RefreshButton(this.button_emergency, this.lastSelectedPriority, play_sound);
 	}
 
-	public PrioritySetting GetScreenPriority()
+	public PrioritySetting GetLastSelectedPriority()
 	{
-		return new PrioritySetting(this.priorityClass, this.priority);
+		return this.lastSelectedPriority;
 	}
 
-	public void PlayPriorityConfirmSound(PrioritySetting priority)
+	public static void PlayPriorityConfirmSound(PrioritySetting priority)
 	{
 		EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("Priority_Tool_Confirm", false), Vector3.zero);
 		if (eventInstance != null)
 		{
 			float num = 0f;
+			if (priority.priority_class >= PriorityScreen.PriorityClass.high)
+			{
+				num += 10f;
+			}
+			if (priority.priority_class >= PriorityScreen.PriorityClass.emergency)
+			{
+				num += 9f;
+			}
 			num += (float)priority.priority_value;
 			eventInstance.setParameterValue("priority", num);
 			KFMOD.EndOneShot(eventInstance);
@@ -91,23 +109,20 @@ public class PriorityScreen : KScreen
 	protected PriorityButton buttonPrefab_basic;
 
 	[SerializeField]
-	protected PriorityButton buttonPrefab_high;
+	protected PriorityButton button_emergency;
 
 	[SerializeField]
-	protected PriorityButton buttonPrefab_emergency;
-
-	[SerializeField]
-	protected GameObject spacerPrefab;
+	protected KToggle button_toggleHigh;
 
 	protected List<PriorityButton> buttons_basic = new List<PriorityButton>();
 
-	protected List<PriorityButton> buttons_high = new List<PriorityButton>();
-
 	protected List<PriorityButton> buttons_emergency = new List<PriorityButton>();
 
-	private int priority;
+	private PrioritySetting priority;
 
-	private PriorityScreen.PriorityClass priorityClass;
+	private PrioritySetting lastSelectedPriority = new PrioritySetting(PriorityScreen.PriorityClass.basic, -1);
+
+	private Action<PrioritySetting> onClick;
 
 	public enum PriorityClass
 	{

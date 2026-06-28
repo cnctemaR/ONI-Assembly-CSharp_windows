@@ -28,7 +28,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		Assets.Controllers = this.BuildingControllers.Where<RuntimeAnimatorController>((RuntimeAnimatorController x) => x != null).ToArray<RuntimeAnimatorController>();
 		Assets.Anims = this.AnimAssets.Where<KAnimFile>((KAnimFile x) => x != null).ToArray<KAnimFile>();
 		Assets.UIPrefabs = this.UIPrefabAssets;
-		Assets.defaultPhysicsMaterial = this.defaultPhysicsMaterialAsset;
 		Assets.DebugFont = this.DebugFontAsset;
 		this.SubstanceListHookup();
 		Assets.BuildingDefs = new BuildingDef[0];
@@ -48,8 +47,8 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 				Assets.AnimTable[hashedString] = kanimFile;
 			}
 		}
-		GameEntityTypeSet.Destroy();
-		this.entityTypeSet = GameEntityTypeSet.Instance;
+		EntityTypeSet.Destroy();
+		this.entityTypeSet = EntityTypeSet.Instance;
 		LegacyModMain.Load();
 	}
 
@@ -211,6 +210,11 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		}
 	}
 
+	public static GameObject GetPrefab(HashedString hash)
+	{
+		return Assets.GetPrefab(new Tag(hash.HashValue));
+	}
+
 	public static GameObject GetPrefab(Tag tag)
 	{
 		KPrefabID kprefabID = null;
@@ -322,7 +326,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public static KAnimFile GetAnim(HashedString name)
 	{
-		if (!name.IsValid())
+		if (!name.IsValid)
 		{
 			global::Debug.LogWarning("Invalid hash name", null);
 			return null;
@@ -416,10 +420,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	private static Dictionary<HashedString, KAnimFile> AnimTable = new Dictionary<HashedString, KAnimFile>();
 
-	public PhysicsMaterial2D defaultPhysicsMaterialAsset;
-
-	public static PhysicsMaterial2D defaultPhysicsMaterial;
-
 	public KAnimFile[] AnimAssets;
 
 	public static KAnimFile[] Anims;
@@ -428,7 +428,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public static Font DebugFont;
 
-	public GameEntityTypeSet entityTypeSet;
+	public EntityTypeSet entityTypeSet;
 
 	public SubstanceTable substanceTable;
 
@@ -484,6 +484,8 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		public GameObject TogglePortrait;
 
 		public GameObject ButtonLabel;
+
+		public GameObject ButtonLabelWhite;
 
 		public GameObject Label;
 

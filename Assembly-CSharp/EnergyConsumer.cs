@@ -23,7 +23,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 	{
 		get
 		{
-			return Grid.Objects[this.PowerCell, 20] != null;
+			return Grid.Objects[this.PowerCell, 24] != null;
 		}
 	}
 
@@ -61,7 +61,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 	{
 		get
 		{
-			return this._BaseWattageRating * this.GetUpgradeEnergyConsumptionMultiplier();
+			return this._BaseWattageRating;
 		}
 		set
 		{
@@ -85,8 +85,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 	{
 		get
 		{
-			float energyConsumptionWhenActive = this.building.Def.EnergyConsumptionWhenActive;
-			return energyConsumptionWhenActive * this.GetUpgradeEnergyConsumptionMultiplier();
+			return this.building.Def.EnergyConsumptionWhenActive;
 		}
 	}
 
@@ -98,30 +97,11 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 		}
 	}
 
-	public static float CalculateWattageRating(BuildingDef def, Element element)
-	{
-		return def.EnergyConsumptionWhenActive / BuildingDef.GetEnergyEfficiency(element, 0.0125f);
-	}
-
-	public static string GetWattageRatingString(BuildingDef def, Element element, bool isNegative)
-	{
-		return EnergyConsumer.CalculateWattageRating(def, element).ToString("0") + " W";
-	}
-
 	protected override void OnPrefabInit()
 	{
 		this.CircuitID = ushort.MaxValue;
 		this.IsPowered = false;
 		this.BaseWattageRating = this.building.Def.EnergyConsumptionWhenActive;
-	}
-
-	private float GetUpgradeEnergyConsumptionMultiplier()
-	{
-		if (this.upgradable != null)
-		{
-			return this.upgradable.GetEnergyConsumptionMultiplier();
-		}
-		return 1f;
 	}
 
 	protected override void OnSpawn()
@@ -131,16 +111,18 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 		Building component = base.GetComponent<Building>();
 		this.PowerCell = component.GetPowerInputCell();
 		Game.Instance.circuitManager.Connect(this);
+		Game.Instance.emergySim.AddEnergyConsumer(this);
 	}
 
 	protected override void OnCleanUp()
 	{
+		Game.Instance.emergySim.RemoveEnergyConsumer(this);
 		Game.Instance.circuitManager.Disconnect(this);
 		Components.EnergyConsumers.Remove(this);
 		base.OnCleanUp();
 	}
 
-	protected virtual void SimUpdate(float dt)
+	public virtual void EnergySim200ms(float dt)
 	{
 		this.CircuitID = Game.Instance.circuitManager.GetCircuitID(this.PowerCell);
 		if (!this.IsConnected)
@@ -199,7 +181,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 			num = 0f;
 		}
 		float num2 = (Time.time - num) / this.soundDecayTime;
-		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(base.transform.position));
+		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(base.transform.GetPosition()));
 		eventInstance.setParameterValue("timeSinceLast", num2);
 		KFMOD.EndOneShot(eventInstance);
 		this.lastTimeSoundPlayed[state] = Time.time;
@@ -210,16 +192,11 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 		return null;
 	}
 
-	private const int SimUpdateSortKey = 1001;
-
 	[MyCmpReq]
 	private Building building;
 
 	[MyCmpGet]
 	protected Operational operational;
-
-	[MyCmpGet]
-	private Upgradable upgradable;
 
 	[MyCmpGet]
 	private KSelectable selectable;

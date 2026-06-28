@@ -68,8 +68,8 @@ public class ScheduleManager : KMonoBehaviour
 
 	public int GetBlockIdx()
 	{
-		float currentDayAsPercentage = GameClock.Instance.GetCurrentDayAsPercentage();
-		int num = (int)(currentDayAsPercentage * 24f);
+		float currentCycleAsPercentage = GameClock.Instance.GetCurrentCycleAsPercentage();
+		int num = (int)(currentCycleAsPercentage * 24f);
 		return Math.Min(num, 23);
 	}
 

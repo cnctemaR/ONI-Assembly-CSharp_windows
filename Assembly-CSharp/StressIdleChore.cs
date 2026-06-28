@@ -4,7 +4,7 @@ using UnityEngine;
 public class StressIdleChore : Chore<StressIdleChore.StatesInstance>
 {
 	public StressIdleChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.StressIdle, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.StressIdle, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new StressIdleChore.StatesInstance(this, target.gameObject);
 	}

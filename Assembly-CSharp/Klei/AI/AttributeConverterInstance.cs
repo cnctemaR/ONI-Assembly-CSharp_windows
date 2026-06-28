@@ -17,7 +17,7 @@ namespace Klei.AI
 			return this.converter.multiplier * this.attributeInstance.GetTotalValue() + this.converter.baseValue;
 		}
 
-		public override string ToString()
+		public string DescriptionFromAttribute()
 		{
 			float num = this.Evaluate();
 			string text;

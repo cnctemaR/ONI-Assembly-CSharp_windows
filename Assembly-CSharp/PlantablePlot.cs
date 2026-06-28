@@ -50,6 +50,13 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 		this.plantRef = new Ref<KPrefabID>();
 		this.destroyEntityOnDeposit = true;
 		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe(144050788, delegate(object room)
+		{
+			if (this.plantRef.Get() != null)
+			{
+				this.plantRef.Get().Trigger(144050788, room);
+			}
+		});
 	}
 
 	private void OnCopySettings(object data)
@@ -277,27 +284,27 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 		{
 			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(plantableSeed.PreviewID), Grid.SceneLayer.Front, Folder.BuildingPreviews, null, 0);
 			this.plantPreview = gameObject.GetComponent<EntityPreview>();
-			gameObject.transform.position = Vector3.zero;
+			gameObject.transform.SetPosition(Vector3.zero);
 			gameObject.transform.SetParent(base.gameObject.transform, false);
-			gameObject.transform.localPosition = Vector3.zero;
+			gameObject.transform.SetLocalPosition(Vector3.zero);
 			if (this.rotatable != null)
 			{
 				if (plantableSeed.direction == SingleEntityReceptacle.ReceptacleDirection.Top)
 				{
-					gameObject.transform.localPosition = this.occupyingObjectRelativePosition;
+					gameObject.transform.SetLocalPosition(this.occupyingObjectRelativePosition);
 				}
 				else if (plantableSeed.direction == SingleEntityReceptacle.ReceptacleDirection.Side)
 				{
-					gameObject.transform.localPosition = Rotatable.GetRotatedOffset(this.occupyingObjectRelativePosition, Orientation.R90);
+					gameObject.transform.SetLocalPosition(Rotatable.GetRotatedOffset(this.occupyingObjectRelativePosition, Orientation.R90));
 				}
 				else
 				{
-					gameObject.transform.localPosition = Rotatable.GetRotatedOffset(this.occupyingObjectRelativePosition, Orientation.R180);
+					gameObject.transform.SetLocalPosition(Rotatable.GetRotatedOffset(this.occupyingObjectRelativePosition, Orientation.R180));
 				}
 			}
 			else
 			{
-				gameObject.transform.localPosition = this.occupyingObjectRelativePosition;
+				gameObject.transform.SetLocalPosition(this.occupyingObjectRelativePosition);
 			}
 			gameObject.SetActive(true);
 			gameObject.Subscribe(-1820564715, new Action<object>(this.OnValidChanged));

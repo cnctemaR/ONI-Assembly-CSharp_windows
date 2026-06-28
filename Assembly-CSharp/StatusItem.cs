@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class StatusItem : Resource
 {
-	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode render_overlay, bool showWorldIcon = true, int status_overlays = 30718)
+	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode render_overlay, bool showWorldIcon = true, int status_overlays = 63486)
 		: base(id, Strings.Get(string.Concat(new string[]
 		{
 			"STRINGS.",
@@ -55,7 +55,7 @@ public class StatusItem : Resource
 		}
 	}
 
-	public StatusItem(string id, string name, string tooltip, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode render_overlay, int status_overlays = 30718)
+	public StatusItem(string id, string name, string tooltip, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode render_overlay, int status_overlays = 63486)
 		: base(id, name)
 	{
 		if (icon_type != StatusItem.IconType.Info)
@@ -234,6 +234,10 @@ public class StatusItem : Resource
 										{
 											return StatusItem.StatusItemOverlays.Suits;
 										}
+										if (mode == SimViewMode.SolidConveyorMap)
+										{
+											return StatusItem.StatusItemOverlays.Conveyor;
+										}
 										if (mode != SimViewMode.ThermalConductivity)
 										{
 											if (mode == SimViewMode.TemperatureMap)
@@ -337,7 +341,7 @@ public class StatusItem : Resource
 
 	private bool showShowWorldIcon = true;
 
-	public const int ALL_OVERLAYS = 30718;
+	public const int ALL_OVERLAYS = 63486;
 
 	public enum IconType
 	{
@@ -361,6 +365,7 @@ public class StatusItem : Resource
 		Farming = 1024,
 		Rooms = 4096,
 		Suits = 8192,
-		Logic = 16384
+		Logic = 16384,
+		Conveyor = 32768
 	}
 }

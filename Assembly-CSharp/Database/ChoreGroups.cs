@@ -9,22 +9,15 @@ namespace Database
 			: base("ChoreGroups", parent)
 		{
 			this.Combat = this.Add("Combat", DUPLICANTS.CHOREGROUPS.COMBAT.NAME, "Digging");
-			this.MedicalAid = this.Add("MedicalAid", DUPLICANTS.CHOREGROUPS.MEDICALAID.NAME, "Medical");
-			this.Massage = this.Add("Massage", DUPLICANTS.CHOREGROUPS.MASSAGE.NAME, "Machinery");
+			this.MedicalAid = this.Add("MedicalAid", DUPLICANTS.CHOREGROUPS.MEDICALAID.NAME, "Caring");
 			this.Cook = this.Add("Cook", DUPLICANTS.CHOREGROUPS.COOK.NAME, "Cooking");
 			this.Art = this.Add("Art", DUPLICANTS.CHOREGROUPS.ART.NAME, "Art");
-			this.Compost = this.Add("Compost", DUPLICANTS.CHOREGROUPS.COMPOST.NAME, "Machinery");
 			this.Research = this.Add("Research", DUPLICANTS.CHOREGROUPS.RESEARCH.NAME, "Learning");
-			this.LiquidCooledFan = this.Add("LiquidCooledFan", DUPLICANTS.CHOREGROUPS.LIQUIDCOOLEDFAN.NAME, "Machinery");
-			this.GeneratePower = this.Add("GeneratePower", DUPLICANTS.CHOREGROUPS.GENERATEPOWER.NAME, "Athletics");
-			this.Disinfect = this.Add("Disinfect", DUPLICANTS.CHOREGROUPS.DISINFECT.NAME, "Digging");
-			this.Repair = this.Add("Repair", DUPLICANTS.CHOREGROUPS.REPAIR.NAME, "Machinery");
-			this.Maintenance = this.Add("Maintenance", DUPLICANTS.CHOREGROUPS.MAINTENANCE.NAME, "Machinery");
-			this.Mop = this.Add("Mop", DUPLICANTS.CHOREGROUPS.MOP.NAME, "Digging");
-			this.Harvest = this.Add("Harvest", DUPLICANTS.CHOREGROUPS.HARVEST.NAME, "Botanist");
-			this.Transport = this.Add("Sweep", DUPLICANTS.CHOREGROUPS.SWEEP.NAME, "Athletics");
+			this.Operating = this.Add("MachineOperating", DUPLICANTS.CHOREGROUPS.MACHINEOPERATING.NAME, "Machinery");
+			this.Farming = this.Add("Farming", DUPLICANTS.CHOREGROUPS.FARMING.NAME, "Botanist");
+			this.Basekeeping = this.Add("Basekeeping", DUPLICANTS.CHOREGROUPS.BASEKEEPING.NAME, "Athletics");
 			this.Build = this.Add("Build", DUPLICANTS.CHOREGROUPS.BUILD.NAME, "Construction");
-			this.Deliver = this.Add("Deliver", DUPLICANTS.CHOREGROUPS.DELIVER.NAME, "Athletics");
+			this.Hauling = this.Add("Hauling", DUPLICANTS.CHOREGROUPS.HAULING.NAME, "Athletics");
 			this.Dig = this.Add("Dig", DUPLICANTS.CHOREGROUPS.DIG.NAME, "Digging");
 		}
 
@@ -37,7 +30,7 @@ namespace Database
 
 		public ChoreGroup Build;
 
-		public ChoreGroup Cleaning;
+		public ChoreGroup Basekeeping;
 
 		public ChoreGroup Cook;
 
@@ -47,30 +40,14 @@ namespace Database
 
 		public ChoreGroup Research;
 
-		public ChoreGroup Combat;
+		public ChoreGroup Farming;
 
-		public ChoreGroup LiquidCooledFan;
+		public ChoreGroup Hauling;
 
-		public ChoreGroup GeneratePower;
-
-		public ChoreGroup Harvest;
-
-		public ChoreGroup Compost;
-
-		public ChoreGroup Transport;
-
-		public ChoreGroup Deliver;
-
-		public ChoreGroup Disinfect;
-
-		public ChoreGroup Repair;
-
-		public ChoreGroup Mop;
-
-		public ChoreGroup Massage;
+		public ChoreGroup Operating;
 
 		public ChoreGroup MedicalAid;
 
-		public ChoreGroup Maintenance;
+		public ChoreGroup Combat;
 	}
 }

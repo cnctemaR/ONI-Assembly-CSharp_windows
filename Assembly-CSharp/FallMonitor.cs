@@ -6,7 +6,10 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.standing;
-		this.root.EventTransition(GameHashes.OnStore, this.instorage, null);
+		this.root.EventTransition(GameHashes.OnStore, this.instorage, null).Update("CheckLanded", delegate(FallMonitor.Instance smi, float dt)
+		{
+			smi.UpdateFalling();
+		}, UpdateRate.SIM_33ms, true);
 		this.standing.ParamTransition<bool>(this.isEntombed, this.entombed, (FallMonitor.Instance smi, bool p) => p).ParamTransition<bool>(this.isFalling, this.falling_pre, (FallMonitor.Instance smi, bool p) => p);
 		this.falling_pre.Enter("StopNavigator", delegate(FallMonitor.Instance smi)
 		{
@@ -18,8 +21,8 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 			.ToggleBrain("falling_pre");
 		this.falling.ToggleBrain("falling").PlayAnim("fall_pre").QueueAnim("fall_loop", true, null)
 			.ParamTransition<bool>(this.isEntombed, this.entombed, (FallMonitor.Instance smi, bool p) => p)
-			.Transition(this.recoverladder, (FallMonitor.Instance smi) => smi.CanRecoverToLadder())
-			.Transition(this.recoverpole, (FallMonitor.Instance smi) => smi.CanRecoverToPole())
+			.Transition(this.recoverladder, (FallMonitor.Instance smi) => smi.CanRecoverToLadder(), UpdateRate.SIM_200ms)
+			.Transition(this.recoverpole, (FallMonitor.Instance smi) => smi.CanRecoverToPole(), UpdateRate.SIM_200ms)
 			.ToggleGravity(this.landfloor);
 		this.recoverinitialfall.ToggleBrain("recoverinitialfall").Enter("Recover", delegate(FallMonitor.Instance smi)
 		{
@@ -113,7 +116,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 		public void LandFloor()
 		{
 			this.navigator.SetCurrentNavType(NavType.Floor);
-			base.GetComponent<Transform>().SetPosition(Grid.CellToPosCBC(Grid.PosToCell(base.GetComponent<Transform>().position), Grid.SceneLayer.Move));
+			base.GetComponent<Transform>().SetPosition(Grid.CellToPosCBC(Grid.PosToCell(base.GetComponent<Transform>().GetPosition()), Grid.SceneLayer.Move));
 		}
 
 		public void AttemptInitialRecovery()
@@ -142,26 +145,26 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 
 		public bool CanRecoverToLadder()
 		{
-			int num = Grid.PosToCell(base.master.transform.position);
+			int num = Grid.PosToCell(base.master.transform.GetPosition());
 			return this.navigator.NavGrid.NavTable.IsValid(num, NavType.Ladder) && !base.gameObject.HasTag(GameTags.Incapacitated);
 		}
 
 		public void MountLadder()
 		{
 			this.navigator.SetCurrentNavType(NavType.Ladder);
-			base.GetComponent<Transform>().SetPosition(Grid.CellToPosCBC(Grid.PosToCell(base.GetComponent<Transform>().position), Grid.SceneLayer.Move));
+			base.GetComponent<Transform>().SetPosition(Grid.CellToPosCBC(Grid.PosToCell(base.GetComponent<Transform>().GetPosition()), Grid.SceneLayer.Move));
 		}
 
 		public bool CanRecoverToPole()
 		{
-			int num = Grid.PosToCell(base.master.transform.position);
+			int num = Grid.PosToCell(base.master.transform.GetPosition());
 			return this.navigator.NavGrid.NavTable.IsValid(num, NavType.Pole) && !base.gameObject.HasTag(GameTags.Incapacitated);
 		}
 
 		public void MountPole()
 		{
 			this.navigator.SetCurrentNavType(NavType.Pole);
-			base.GetComponent<Transform>().SetPosition(Grid.CellToPosCBC(Grid.PosToCell(base.GetComponent<Transform>().position), Grid.SceneLayer.Move));
+			base.GetComponent<Transform>().SetPosition(Grid.CellToPosCBC(Grid.PosToCell(base.GetComponent<Transform>().GetPosition()), Grid.SceneLayer.Move));
 		}
 
 		public bool IsFalling()
@@ -170,7 +173,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 			{
 				return false;
 			}
-			int num = Grid.PosToCell(base.master.transform.position);
+			int num = Grid.PosToCell(base.master.transform.GetPosition());
 			if (!Grid.IsValidCell(num))
 			{
 				return false;
@@ -184,13 +187,13 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 			return !flag;
 		}
 
-		public void FixedUpdate()
+		public void UpdateFalling()
 		{
 			bool flag = false;
 			bool flag2 = false;
 			if (!this.navigator.IsMoving())
 			{
-				int num = Grid.PosToCell(base.transform.position);
+				int num = Grid.PosToCell(base.transform.GetPosition());
 				bool flag3 = this.navigator.NavGrid.NavTable.IsValid(num, this.navigator.CurrentNavType);
 				flag3 = flag3 && (!base.gameObject.HasTag(GameTags.Incapacitated) || (this.navigator.CurrentNavType != NavType.Ladder && this.navigator.CurrentNavType != NavType.Pole));
 				flag2 = !flag3 && (Grid.Solid[num] || Grid.Solid[Grid.CellAbove(num)]);
@@ -207,7 +210,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 
 		public void TryEntombedEscape()
 		{
-			int num = Grid.PosToCell(base.transform.position);
+			int num = Grid.PosToCell(base.transform.GetPosition());
 			foreach (CellOffset cellOffset in this.entombedEscapeOffsets)
 			{
 				int num2 = Grid.OffsetCell(num, cellOffset);
@@ -216,7 +219,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 					base.transform.SetPosition(Grid.CellToPosCBC(num2, Grid.SceneLayer.Move));
 					base.transform.GetComponent<Navigator>().Stop(false);
 					base.transform.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
-					this.FixedUpdate();
+					this.UpdateFalling();
 					this.GoTo(base.sm.standing);
 					return;
 				}
@@ -229,7 +232,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 					base.transform.SetPosition(Grid.CellToPosCBC(num3, Grid.SceneLayer.Move));
 					base.transform.GetComponent<Navigator>().Stop(false);
 					base.transform.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
-					this.FixedUpdate();
+					this.UpdateFalling();
 					this.GoTo(base.sm.standing);
 					return;
 				}

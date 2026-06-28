@@ -4,8 +4,9 @@ using UnityEngine;
 public class IdleChore : Chore<IdleChore.StatesInstance>
 {
 	public IdleChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Idle, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, -1, false, true, 0)
+		: base(Db.Get().ChoreTypes.Idle, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, -1, false, true, 0, null)
 	{
+		this.showAvailabilityInHoverText = false;
 		this.smi = new IdleChore.StatesInstance(this, target.gameObject);
 	}
 
@@ -47,35 +48,34 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 			this.idle.DefaultState(this.idle.onfloor).Enter("UpdateNavType", delegate(IdleChore.StatesInstance smi)
 			{
 				smi.UpdateNavType();
-			}).ToggleSchedulePeriodic("Log idle time", 1f, delegate(IdleChore.StatesInstance smi)
+			}).Update("UpdateNavType", delegate(IdleChore.StatesInstance smi, float dt)
 			{
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.IdleTime, 1f, this.idler.Get(smi).GetProperName(), null);
-			})
+				smi.UpdateNavType();
+			}, UpdateRate.SIM_200ms, false)
+				.Update("Log idle time", delegate(IdleChore.StatesInstance smi, float dt)
+				{
+					ReportManager.Instance.ReportValue(ReportManager.ReportType.IdleTime, dt, this.idler.Get(smi).GetProperName(), null);
+				}, UpdateRate.SIM_1000ms, false)
 				.ToggleStateMachine((IdleChore.StatesInstance smi) => new TaskAvailabilityMonitor.Instance(smi.master))
 				.ToggleTag(GameTags.Idle);
 			this.idle.onfloor.PlayAnim("idle_default", KAnim.PlayMode.Loop).ParamTransition<bool>(this.isOnLadder, this.idle.onladder, (IdleChore.StatesInstance smi, bool p) => p).ParamTransition<bool>(this.isOnTube, this.idle.ontube, (IdleChore.StatesInstance smi, bool p) => p)
-				.ToggleSchedulePeriodic("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)
+				.ToggleScheduleCallback("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)
 				{
-					if (smi.HasIdleCell())
-					{
-						smi.GoTo(this.idle.move);
-					}
-				}, null);
-			this.idle.onladder.PlayAnim("ladder_idle", KAnim.PlayMode.Loop).ToggleSchedulePeriodic("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)
+					smi.GoTo(this.idle.move);
+				});
+			this.idle.onladder.PlayAnim("ladder_idle", KAnim.PlayMode.Loop).ToggleScheduleCallback("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)
+			{
+				smi.GoTo(this.idle.move);
+			});
+			this.idle.ontube.PlayAnim("tube_idle_loop", KAnim.PlayMode.Loop).Update("IdleMove", delegate(IdleChore.StatesInstance smi, float dt)
 			{
 				if (smi.HasIdleCell())
 				{
 					smi.GoTo(this.idle.move);
 				}
-			}, null);
-			this.idle.ontube.PlayAnim("tube_idle_loop", KAnim.PlayMode.Loop).ToggleSchedulePeriodic("IdleMove", (IdleChore.StatesInstance smi) => 1f, delegate(IdleChore.StatesInstance smi)
-			{
-				if (smi.HasIdleCell())
-				{
-					smi.GoTo(this.idle.move);
-				}
-			}, null);
-			this.idle.move.TriggerOnEnter(GameHashes.BeginWalk, null).TriggerOnExit(GameHashes.EndWalk).ToggleAnims("anim_loco_walk_kanim", 0f)
+			}, UpdateRate.SIM_1000ms, false);
+			this.idle.move.Transition(this.idle, (IdleChore.StatesInstance smi) => !smi.HasIdleCell(), UpdateRate.SIM_200ms).TriggerOnEnter(GameHashes.BeginWalk, null).TriggerOnExit(GameHashes.EndWalk)
+				.ToggleAnims("anim_loco_walk_kanim", 0f)
 				.MoveTo((IdleChore.StatesInstance smi) => smi.GetIdleCell(), this.idle, this.idle, false)
 				.Exit("UpdateNavType", delegate(IdleChore.StatesInstance smi)
 				{

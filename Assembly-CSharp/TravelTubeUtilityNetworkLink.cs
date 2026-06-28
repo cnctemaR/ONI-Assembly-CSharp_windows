@@ -1,6 +1,6 @@
 ﻿using System;
 
-public class TravelTubeUtilityNetworkLink : UtilityNetworkLink, IWire
+public class TravelTubeUtilityNetworkLink : UtilityNetworkLink, IHaveUtilityNetworkMgr
 {
 	protected override void OnSpawn()
 	{
@@ -17,7 +17,7 @@ public class TravelTubeUtilityNetworkLink : UtilityNetworkLink, IWire
 		Game.Instance.travelTubeSystem.RemoveLink(cell1, cell2);
 	}
 
-	public IUtilityNetworkMgr GetNetworkMgr()
+	public IUtilityNetworkMgr GetNetworkManager()
 	{
 		return Game.Instance.travelTubeSystem;
 	}

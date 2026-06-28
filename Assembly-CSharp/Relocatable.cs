@@ -32,6 +32,8 @@ public class Relocatable : Workable, ISaveLoadable
 		this.faceTargetWhenWorking = true;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Relocating;
 		this.attributeConverter = Db.Get().AttributeConverters.ConstructionSpeed;
+		this.multitoolContext = "build";
+		this.multitoolHitEffectHash = new HashedString("fx_build_splash");
 		base.SetWorkTime(4f);
 	}
 
@@ -52,7 +54,7 @@ public class Relocatable : Workable, ISaveLoadable
 		}
 		if (component != null)
 		{
-			int num = Grid.PosToCell(base.transform.position);
+			int num = Grid.PosToCell(base.transform.GetPosition());
 			if (Grid.Objects[num, (int)building.Def.TileLayer] == base.gameObject)
 			{
 				Grid.Objects[num, (int)building.Def.ObjectLayer] = null;
@@ -62,13 +64,13 @@ public class Relocatable : Workable, ISaveLoadable
 			}
 			component.DestroySelf(delegate
 			{
-				this.SpawnPackage(this.transform.position, building.Def, primary_element);
+				this.SpawnPackage(this.transform.GetPosition(), building.Def, primary_element);
 				this.gameObject.DeleteObject();
 			});
 		}
 		else
 		{
-			this.SpawnPackage(base.transform.position, building.Def, primary_element);
+			this.SpawnPackage(base.transform.GetPosition(), building.Def, primary_element);
 			base.gameObject.DeleteObject();
 		}
 		base.Trigger(-702296337, this);
@@ -80,7 +82,7 @@ public class Relocatable : Workable, ISaveLoadable
 		{
 			if (this.deconstruct && this.chore == null)
 			{
-				this.chore = new WorkChore<Relocatable>(Db.Get().ChoreTypes.Relocate, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+				this.chore = new WorkChore<Relocatable>(Db.Get().ChoreTypes.Relocate, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction, this);
 			}
 			this.Target = target;
@@ -135,13 +137,6 @@ public class Relocatable : Workable, ISaveLoadable
 	private void OnCancel(object data)
 	{
 		this.CancelRelocation();
-	}
-
-	public override Workable.AnimInfo GetAnim(Worker worker)
-	{
-		Workable.AnimInfo anim = base.GetAnim(worker);
-		anim.smi = new MultitoolController.Instance(this, worker, "build", EffectPrefabs.Instance.BuildEffect);
-		return anim;
 	}
 
 	[MyCmpAdd]

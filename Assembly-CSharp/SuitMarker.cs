@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using KSerialization;
 using STRINGS;
-using TUNING;
 using UnityEngine;
 
 public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
@@ -318,7 +317,7 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 			}
 			Rotatable component = this.gameObject.GetComponent<Rotatable>();
 			SuitWearer.Instance smi = new_reactor.GetSMI<SuitWearer.Instance>();
-			if (new_reactor.GetComponent<Equipment>().IsSlotOccupied(global::TUNING.EQUIPMENT.SUIT_SLOT))
+			if (new_reactor.GetComponent<Equipment>().IsSlotOccupied(Db.Get().AssignableSlots.Suit))
 			{
 				return (transition.x >= 0 || !component.IsRotated) && (transition.x <= 0 || component.IsRotated);
 			}
@@ -349,7 +348,7 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 			if (this.reactor != null)
 			{
 				GameObject reactor = this.reactor;
-				bool flag = !reactor.GetComponent<Equipment>().IsSlotOccupied(global::TUNING.EQUIPMENT.SUIT_SLOT);
+				bool flag = !reactor.GetComponent<Equipment>().IsSlotOccupied(Db.Get().AssignableSlots.Suit);
 				reactor.GetComponent<KBatchedAnimController>().RemoveAnimOverrides(Assets.GetAnim("anim_equip_clothing_kanim"));
 				if (this.suitMarker != null)
 				{
@@ -373,7 +372,7 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 					}
 					if (!flag2 && !flag)
 					{
-						Assignable assignable = reactor.GetComponent<Equipment>().GetAssignable(global::TUNING.EQUIPMENT.SUIT_SLOT);
+						Assignable assignable = reactor.GetComponent<Equipment>().GetAssignable(Db.Get().AssignableSlots.Suit);
 						assignable.Unassign();
 						Notification notification = new Notification(MISC.NOTIFICATIONS.SUIT_DROPPED.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.SUIT_DROPPED.TOOLTIP, null, true, 0f, null, null, null);
 						assignable.GetComponent<Notifier>().Add(notification, string.Empty);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class KBatchedAnimInstanceData
@@ -6,164 +7,155 @@ public class KBatchedAnimInstanceData
 	public KBatchedAnimInstanceData(KAnimConverter.IAnimConverter target)
 	{
 		this.target = target;
-	}
-
-	public void ResetHidden()
-	{
-		for (int i = 0; i < 4; i++)
+		this.bytes = new byte[112];
+		this.converter = new KBatchedAnimInstanceData.AnimInstanceDataToByteConverter
 		{
-			this.hidden[i] = 0U;
-		}
+			bytes = this.bytes
+		};
+		KBatchedAnimInstanceData.AnimInstanceData animInstanceData = this.converter.animInstanceData[0];
+		animInstanceData.tintColour = Color.white;
+		animInstanceData.highlightColour = Color.black;
+		animInstanceData.overlayColour = Color.white;
+		this.converter.animInstanceData[0] = animInstanceData;
 	}
 
-	public void HideAll()
+	public void SetClipRadius(float x, float y, float dist_sq, bool do_clip)
 	{
-		for (int i = 0; i < 4; i++)
-		{
-			this.hidden[i] = uint.MaxValue;
-		}
-	}
-
-	public void SetHiddenBit(int bit)
-	{
-		int num = bit / 30;
-		if (num < 4)
-		{
-			this.hidden[num] |= 1U << 2 + bit % 30;
-		}
-	}
-
-	public void UnsetHiddenBit(int bit)
-	{
-		int num = bit / 30;
-		if (num < 4)
-		{
-			this.hidden[num] = this.hidden[num] & ~(1U << 2 + bit % 30);
-		}
-	}
-
-	public bool IsSet(int bit)
-	{
-		int num = bit / 30;
-		return num < 4 && (this.hidden[num] & (1U << 2 + bit % 30)) != 0U;
-	}
-
-	public void SetClipRadius(float x, float y, float dist_sq, bool doClip)
-	{
-		this.clipRadius.x = x;
-		this.clipRadius.y = y;
-		this.clipRadius.z = dist_sq;
-		this.clipRadius.w = (float)((!doClip) ? 0 : 1);
-	}
-
-	public void SetClipParams(float clipDepth, bool doClip)
-	{
-		this.clipParams.x = (float)((!doClip) ? 0 : 1);
-		this.clipParams.y = clipDepth;
+		this.converter.animInstanceData[0].clipParameters = new Vector4(x, y, dist_sq, (float)((!do_clip) ? 0 : 1));
 	}
 
 	public void SetBlend(float amt)
 	{
-		this.extra.x = amt;
+		this.converter.animInstanceData[0].blend = amt;
 	}
 
-	public void WriteToTexture(float[] data, int startIndex, int thisIndex)
+	public Color GetOverlayColour()
 	{
-		this.currentAnimNumFrames = this.target.GetCurrentNumFrames();
-		this.currentAnimFirstFrameIdx = this.target.GetFirstFrameIndex();
-		this.curAnimFrameIndex = this.target.GetCurrentFrameIndex();
-		this.highlightColour = this.target.GetHighlightColour();
-		this.firstTintColour = this.target.GetFirstTintColour();
-		this.secondTintColour = this.target.GetSecondTintColour();
-		this.overlayColour = this.target.GetOverlayColour();
-		this.firstTintIndex = this.target.GetFirstTintIndex();
-		this.secondTintIndex = this.target.GetSecondTintIndex();
-		this.symbolScaleIndex = this.target.GetSecondTintIndex();
-		this.symbolScale = this.target.GetSymbolScale();
-		this.transformationMatrix = this.target.GetTransformMatrix();
-		data[startIndex++] = (float)this.curAnimFrameIndex;
-		data[startIndex++] = (float)thisIndex;
-		data[startIndex++] = (float)((!this.target.IsVisible()) ? 0 : this.currentAnimNumFrames);
-		data[startIndex++] = (float)this.currentAnimFirstFrameIdx;
-		for (int i = 0; i < 4; i++)
-		{
-			data[startIndex++] = this.hidden[i] & 4294967292U;
-		}
-		for (int j = 0; j < 4; j++)
-		{
-			Vector4 column = this.transformationMatrix.GetColumn(j);
-			data[startIndex++] = column[0];
-			data[startIndex++] = column[1];
-			data[startIndex++] = column[2];
-			data[startIndex++] = column[3];
-		}
-		data[startIndex++] = (float)this.highlightColour.r / 255f;
-		data[startIndex++] = (float)this.highlightColour.g / 255f;
-		data[startIndex++] = (float)this.highlightColour.b / 255f;
-		data[startIndex++] = (float)this.highlightColour.a / 255f;
-		data[startIndex++] = (float)this.firstTintColour.r / 255f;
-		data[startIndex++] = (float)this.firstTintColour.g / 255f;
-		data[startIndex++] = (float)this.firstTintColour.b / 255f;
-		data[startIndex++] = (float)this.firstTintColour.a / 255f;
-		data[startIndex++] = (float)this.secondTintColour.r / 255f;
-		data[startIndex++] = (float)this.secondTintColour.g / 255f;
-		data[startIndex++] = (float)this.secondTintColour.b / 255f;
-		data[startIndex++] = (float)this.secondTintColour.a / 255f;
-		data[startIndex++] = (float)this.overlayColour.r / 255f;
-		data[startIndex++] = (float)this.overlayColour.g / 255f;
-		data[startIndex++] = (float)this.overlayColour.b / 255f;
-		data[startIndex++] = (float)this.overlayColour.a / 255f;
-		data[startIndex++] = this.clipRadius[0];
-		data[startIndex++] = this.clipRadius[1];
-		data[startIndex++] = this.clipRadius[2];
-		data[startIndex++] = this.clipRadius[3];
-		data[startIndex++] = this.clipParams[0];
-		data[startIndex++] = this.clipParams[1];
-		data[startIndex++] = (float)this.firstTintIndex;
-		data[startIndex++] = (float)this.secondTintIndex;
-		data[startIndex++] = (float)this.symbolScaleIndex;
-		data[startIndex++] = this.symbolScale;
-		data[startIndex++] = this.extra.x;
-		data[startIndex++] = this.extra.y;
+		return this.converter.animInstanceData[0].overlayColour;
 	}
 
-	private uint[] hidden = new uint[4];
+	public bool SetOverlayColour(Color color)
+	{
+		if (color != this.converter.animInstanceData[0].overlayColour)
+		{
+			this.converter.animInstanceData[0].overlayColour = color;
+			return true;
+		}
+		return false;
+	}
 
-	private Vector4 clipRadius = Vector4.zero;
+	public Color GetTintColour()
+	{
+		return this.converter.animInstanceData[0].tintColour;
+	}
 
-	private Vector2 clipParams = Vector2.zero;
+	public bool SetTintColour(Color color)
+	{
+		if (color != this.converter.animInstanceData[0].tintColour)
+		{
+			this.converter.animInstanceData[0].tintColour = color;
+			return true;
+		}
+		return false;
+	}
 
-	private int currentAnimNumFrames = -1;
+	public Color GetHighlightcolour()
+	{
+		return this.converter.animInstanceData[0].highlightColour;
+	}
 
-	private int currentAnimFirstFrameIdx = -1;
+	public bool SetHighlightColour(Color color)
+	{
+		if (color != this.converter.animInstanceData[0].highlightColour)
+		{
+			this.converter.animInstanceData[0].highlightColour = color;
+			return true;
+		}
+		return false;
+	}
 
-	private int curAnimFrameIndex = -1;
+	public void WriteToTexture(byte[] output_bytes, int output_index, int this_index)
+	{
+		KBatchedAnimInstanceData.AnimInstanceData animInstanceData = this.converter.animInstanceData[0];
+		animInstanceData.curAnimFrameIndex = (float)this.target.GetCurrentFrameIndex();
+		animInstanceData.thisIndex = (float)this_index;
+		animInstanceData.currentAnimNumFrames = (float)((!this.target.IsVisible()) ? 0 : this.target.GetCurrentNumFrames());
+		animInstanceData.currentAnimFirstFrameIdx = (float)this.target.GetFirstFrameIndex();
+		if (!this.isTransformOverriden)
+		{
+			animInstanceData.transformMatrix = this.target.GetTransformMatrix();
+		}
+		this.converter.animInstanceData[0] = animInstanceData;
+		Buffer.BlockCopy(this.bytes, 0, output_bytes, output_index, 112);
+	}
 
-	private int firstTintIndex = -1;
+	public void SetOverrideTransformMatrix(Matrix2x3 transform_matrix)
+	{
+		this.isTransformOverriden = true;
+		this.converter.animInstanceData[0].transformMatrix = transform_matrix;
+	}
 
-	private int secondTintIndex = -1;
+	public void ClearOverrideTransformMatrix()
+	{
+		this.isTransformOverriden = false;
+	}
 
-	private int symbolScaleIndex = -1;
+	public const int SIZE_IN_BYTES = 112;
 
-	private Color32 highlightColour = Color.white;
-
-	private Color32 firstTintColour = Color.white;
-
-	private Color32 secondTintColour = Color.white;
-
-	private Color32 overlayColour = Color.white;
-
-	private Matrix4x4 transformationMatrix = Matrix4x4.identity;
-
-	private float symbolScale;
+	public const int SIZE_IN_FLOATS = 28;
 
 	private KAnimConverter.IAnimConverter target;
 
-	public const int bitsPerSlot = 30;
+	private bool isTransformOverriden;
 
-	public const int bitOffest = 2;
+	private byte[] bytes;
 
-	public const uint bitsMask = 4294967292U;
+	private KBatchedAnimInstanceData.AnimInstanceDataToByteConverter converter;
 
-	private Vector2 extra = Vector2.zero;
+	[StructLayout(LayoutKind.Explicit)]
+	public struct AnimInstanceData
+	{
+		[FieldOffset(0)]
+		public float curAnimFrameIndex;
+
+		[FieldOffset(4)]
+		public float thisIndex;
+
+		[FieldOffset(8)]
+		public float currentAnimNumFrames;
+
+		[FieldOffset(12)]
+		public float currentAnimFirstFrameIdx;
+
+		[FieldOffset(16)]
+		public Matrix2x3 transformMatrix;
+
+		[FieldOffset(40)]
+		public float blend;
+
+		[FieldOffset(44)]
+		public float unused;
+
+		[FieldOffset(48)]
+		public Color highlightColour;
+
+		[FieldOffset(64)]
+		public Color tintColour;
+
+		[FieldOffset(80)]
+		public Color overlayColour;
+
+		[FieldOffset(96)]
+		public Vector4 clipParameters;
+	}
+
+	[StructLayout(LayoutKind.Explicit)]
+	public struct AnimInstanceDataToByteConverter
+	{
+		[FieldOffset(0)]
+		public byte[] bytes;
+
+		[FieldOffset(0)]
+		public KBatchedAnimInstanceData.AnimInstanceData[] animInstanceData;
+	}
 }

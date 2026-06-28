@@ -14,7 +14,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		this.outputCell = component.GetUtilityOutputCell();
 		ConduitFlow liquidConduitFlow = Game.Instance.liquidConduitFlow;
 		liquidConduitFlow.onConduitsRebuilt += this.OnConduitsRebuilt;
-		liquidConduitFlow.AddConduitUpdater(new Action<float>(this.OnConduitUpdate), ConduitFlow.Priority.Default);
+		liquidConduitFlow.AddConduitUpdater(new Action<float>(this.OnConduitUpdate), ConduitFlowPriority.Default);
 		KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
 		this.fillMeter = new MeterController(component2, "meter_target", "meter", Meter.Offset.Behind, new Vector3(0.4f, 3.2f, 0.1f), new string[0]);
 		this.contaminationMeter = new MeterController(component2, "meter_target", "meter_dirty", Meter.Offset.Behind, new Vector3(0.4f, 3.2f, 0.1f), new string[0]);
@@ -273,7 +273,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 			this.ready.inuse.Enter(delegate(FlushToilet.SMInstance smi)
 			{
 				smi.ShowContaminatedMeter();
-			}).ToggleMainStatusItem(Db.Get().BuildingStatusItems.FlushToiletInUse).Update(delegate(FlushToilet.SMInstance smi)
+			}).ToggleMainStatusItem(Db.Get().BuildingStatusItems.FlushToiletInUse).Update(delegate(FlushToilet.SMInstance smi, float dt)
 			{
 				smi.UpdateDirtyState();
 			})
@@ -288,7 +288,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 
 		private Chore CreateUseChore(FlushToilet.SMInstance smi)
 		{
-			return new WorkChore<ToiletWorkableUse>(Db.Get().ChoreTypes.Pee, smi.master, null, true, null, null, null, false, null, true, default(Tag), null, false, true, false, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			return new WorkChore<ToiletWorkableUse>(Db.Get().ChoreTypes.Pee, smi.master, null, null, true, null, null, null, false, null, true, null, false, true, false, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 		}
 
 		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State disconnected;

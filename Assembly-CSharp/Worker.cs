@@ -56,44 +56,50 @@ public class Worker : KMonoBehaviour
 		}
 		float num = Time.time - this.lastWorkTick;
 		this.lastWorkTick = Time.time;
-		Facing component = base.GetComponent<Facing>();
-		if (this.workable.ShouldFaceTargetWhenWorking())
+		if (this.facing)
 		{
-			component.Face(this.workable.transform.position);
-		}
-		else
-		{
-			component.Face(component.transform.position + Vector3.right);
+			if (this.workable.ShouldFaceTargetWhenWorking())
+			{
+				this.facing.Face(this.workable.transform.GetPosition());
+			}
+			else
+			{
+				this.facing.Face(this.facing.transform.GetPosition() + Vector3.right);
+			}
 		}
 		if (this.workable != null)
 		{
 			Klei.AI.Attribute workAttribute = this.workable.GetWorkAttribute();
 			if (workAttribute != null && workAttribute.IsTrainable)
 			{
-				float experienceMultiplier = this.workable.GetExperienceMultiplier();
-				base.GetComponent<AttributeLevels>().AddExperience(workAttribute.Id, num * experienceMultiplier);
+				float attributeExperienceMultiplier = this.workable.GetAttributeExperienceMultiplier();
+				base.GetComponent<AttributeLevels>().AddExperience(workAttribute.Id, num, attributeExperienceMultiplier);
 			}
 			float efficiencyMultiplier = this.workable.GetEfficiencyMultiplier(this);
 			float num2 = num * efficiencyMultiplier * 1f;
+			if (this.resume != null)
+			{
+				this.workable.AwardExperience(num2, this.resume);
+			}
 			if (this.workable.WorkTick(this, num2) && this.state == Worker.State.Working)
 			{
 				base.GetComponent<KPrefabID>().AddTag(GameTags.PreventChoreInterruption);
 				this.state = Worker.State.PendingCompletion;
 				this.workCompleteTime = Time.time;
-				KAnimControllerBase component2 = base.GetComponent<KAnimControllerBase>();
-				component2.Stop();
+				KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
+				component.Stop();
 				if (this.workable != null && this.workable.synchronizeAnims)
 				{
-					KAnimControllerBase component3 = this.workable.GetComponent<KAnimControllerBase>();
-					if (component3 != null && component3.HasAnimation("working_pst"))
+					KAnimControllerBase component2 = this.workable.GetComponent<KAnimControllerBase>();
+					if (component2 != null && component2.HasAnimation("working_pst"))
 					{
-						component3.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
 						component2.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
+						component.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
 					}
 				}
 				if (this.animInfo.forcePlayPst)
 				{
-					component2.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
+					component.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
 				}
 			}
 		}
@@ -107,13 +113,18 @@ public class Worker : KMonoBehaviour
 		this.workAnimOffset = Vector3.zero;
 		base.GetComponent<KPrefabID>().RemoveTag(GameTags.PreventChoreInterruption);
 		this.DetachAnimOverrides();
-		base.GetComponent<AnimEventHandler>().ClearContext();
+		AnimEventHandler component2 = base.GetComponent<AnimEventHandler>();
+		if (component2)
+		{
+			component2.ClearContext();
+		}
 		if (this.previousStatusItem.item != null)
 		{
 			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, this.previousStatusItem.item, this.previousStatusItem.data);
 		}
 		if (target_workable != null)
 		{
+			target_workable.Unsubscribe(this.onDeconstructHandle);
 			target_workable.StopWork(this, is_aborted);
 		}
 		if (this.smi != null)
@@ -121,10 +132,20 @@ public class Worker : KMonoBehaviour
 			this.smi.StopSM("stopping work");
 			this.smi = null;
 		}
-		Vector3 position = base.transform.position;
+		Vector3 position = base.transform.GetPosition();
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Move);
 		base.transform.SetPosition(position);
 		this.startWorkInfo = null;
+	}
+
+	private void OnDeconstruct(object data)
+	{
+		ChoreConsumer component = base.GetComponent<ChoreConsumer>();
+		if (component != null && component.choreDriver != null)
+		{
+			Chore currentChore = component.choreDriver.GetCurrentChore();
+			currentChore.Fail("DeconstructTriggered");
+		}
 	}
 
 	public void StopWork()
@@ -161,6 +182,7 @@ public class Worker : KMonoBehaviour
 			}
 			else
 			{
+				this.onDeconstructHandle = this.workable.Subscribe(-790448070, new Action<object>(this.OnDeconstruct));
 				KSelectable component = base.GetComponent<KSelectable>();
 				this.previousStatusItem = component.GetStatusItem(Db.Get().StatusItemCategories.Main);
 				component.SetStatusItem(Db.Get().StatusItemCategories.Main, this.workable.GetWorkerStatusItem(), this.workable);
@@ -170,7 +192,7 @@ public class Worker : KMonoBehaviour
 					this.smi = this.animInfo.smi;
 					this.smi.StartSM();
 				}
-				Vector3 position = base.transform.position;
+				Vector3 position = base.transform.GetPosition();
 				position.z = Grid.GetLayerZ(this.workable.workLayer);
 				base.transform.SetPosition(position);
 				KAnimControllerBase component2 = base.GetComponent<KAnimControllerBase>();
@@ -237,24 +259,17 @@ public class Worker : KMonoBehaviour
 		}
 	}
 
-	[MyCmpReq]
-	private SnapOn snapOn;
-
-	[MyCmpReq]
+	[MyCmpGet]
 	private Facing facing;
 
-	[MyCmpReq]
-	private Navigator navigator;
-
-	[MyCmpReq]
+	[MyCmpGet]
 	private MinionResume resume;
-
-	[MyCmpReq]
-	private Effects effects;
 
 	private float lastWorkTick;
 
 	private float workCompleteTime;
+
+	private int onDeconstructHandle;
 
 	public object workCompleteData;
 
@@ -267,6 +282,8 @@ public class Worker : KMonoBehaviour
 	private StateMachine.Instance smi;
 
 	private Vector3 workAnimOffset = Vector3.zero;
+
+	public bool usesMultiTool = true;
 
 	public enum State
 	{

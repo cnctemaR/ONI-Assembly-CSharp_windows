@@ -7,26 +7,6 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Ownable : Assignable, ISaveLoadable, IEffectDescriptor
 {
-	protected override Assignables GetAssignables()
-	{
-		return this.assignablesRef.Get();
-	}
-
-	protected override void SetAssignables(Assignables assignables)
-	{
-		this.assignablesRef.Set((Ownables)assignables);
-	}
-
-	public override Assignables GetAssignables(GameObject go)
-	{
-		return go.GetComponent<Ownables>();
-	}
-
-	public bool isAllowedToUse(GameObject duplicant)
-	{
-		return this.assignee == null || duplicant.GetComponent<Ownables>().GetSlot(base.slot).assignable == this;
-	}
-
 	public override void Assign(IAssignableIdentity new_assignee)
 	{
 		if (new_assignee == this.assignee)
@@ -46,8 +26,8 @@ public class Ownable : Assignable, ISaveLoadable, IEffectDescriptor
 	{
 		base.OnSpawn();
 		this.UpdateTint();
-		base.OnAssign += this.OnNewAssignment;
 		this.UpdateStatusString();
+		base.OnAssign += this.OnNewAssignment;
 	}
 
 	private void OnNewAssignment(IAssignableIdentity assignables)
@@ -59,14 +39,14 @@ public class Ownable : Assignable, ISaveLoadable, IEffectDescriptor
 	private void UpdateTint()
 	{
 		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		if (component != null)
+		if (component != null && component.HasBatchInstanceData)
 		{
 			component.TintColour = ((this.assignee != null) ? this.ownedTint : this.unownedTint);
 		}
 		else
 		{
 			KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
-			if (component2 != null)
+			if (component2 != null && component2.HasBatchInstanceData)
 			{
 				component2.TintColour = ((this.assignee != null) ? this.ownedTint : this.unownedTint);
 			}
@@ -118,7 +98,4 @@ public class Ownable : Assignable, ISaveLoadable, IEffectDescriptor
 	private Color unownedTint = Color.gray;
 
 	private Color ownedTint = Color.white;
-
-	[Serialize]
-	private Ref<Ownables> assignablesRef = new Ref<Ownables>();
 }

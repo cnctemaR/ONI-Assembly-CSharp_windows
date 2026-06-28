@@ -13,8 +13,11 @@ public class LaunchInitializer : MonoBehaviour
 	private void Awake()
 	{
 		GraphicsOptionsScreen.SetResolutionFromPrefs();
-		Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-		global::Debug.Log("Development Build: TB-" + 247630U.ToString(), null);
+		if (Application.platform != RuntimePlatform.WindowsEditor)
+		{
+			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+		}
+		global::Debug.Log("Development Build: OC-" + 254439U.ToString(), null);
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		this.CheckForSavePathIssue();
 		if (LaunchInitializer.savePathState == LaunchInitializer.SavePathIssue.Ok)
@@ -83,10 +86,13 @@ public class LaunchInitializer : MonoBehaviour
 		LaunchInitializer.savePathState = LaunchInitializer.SavePathIssue.Ok;
 		try
 		{
-			FileStream fileStream = File.Open(savePrefix + LaunchInitializer.testFile, FileMode.Create, FileAccess.Write);
-			new BinaryWriter(fileStream);
-			fileStream.Close();
-			flag = false;
+			SaveLoader.GetSavePrefixAndCreateFolder();
+			using (FileStream fileStream = File.Open(savePrefix + LaunchInitializer.testFile, FileMode.Create, FileAccess.Write))
+			{
+				new BinaryWriter(fileStream);
+				fileStream.Close();
+				flag = false;
+			}
 		}
 		catch
 		{
@@ -95,17 +101,19 @@ public class LaunchInitializer : MonoBehaviour
 		}
 		if (!flag)
 		{
-			FileStream fileStream2 = File.Open(savePrefix + LaunchInitializer.testSave, FileMode.Create, FileAccess.Write);
-			try
+			using (FileStream fileStream2 = File.Open(savePrefix + LaunchInitializer.testSave, FileMode.Create, FileAccess.Write))
 			{
-				fileStream2.SetLength(15000000L);
-				new BinaryWriter(fileStream2);
-				fileStream2.Close();
-			}
-			catch
-			{
-				fileStream2.Close();
-				LaunchInitializer.savePathState = LaunchInitializer.SavePathIssue.SpaceTestFail;
+				try
+				{
+					fileStream2.SetLength(15000000L);
+					new BinaryWriter(fileStream2);
+					fileStream2.Close();
+				}
+				catch
+				{
+					fileStream2.Close();
+					LaunchInitializer.savePathState = LaunchInitializer.SavePathIssue.SpaceTestFail;
+				}
 			}
 		}
 		if (File.Exists(savePrefix + LaunchInitializer.testFile))
@@ -118,7 +126,7 @@ public class LaunchInitializer : MonoBehaviour
 		}
 	}
 
-	public const string BUILD_PREFIX = "TB";
+	public const string BUILD_PREFIX = "OC";
 
 	private static readonly string testFile = "testfile";
 

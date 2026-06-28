@@ -17,7 +17,7 @@ public class ValveBase : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
-	public Accumulator Accumulator
+	public HandleVector<int>.Handle AccumulatorHandle
 	{
 		get
 		{
@@ -36,7 +36,7 @@ public class ValveBase : KMonoBehaviour, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.flowAccumulator = new Accumulator("Flow", this, 3f);
+		this.flowAccumulator = Game.Instance.accumulators.Add("Flow", this);
 	}
 
 	protected override void OnSpawn()
@@ -45,13 +45,14 @@ public class ValveBase : KMonoBehaviour, ISaveLoadable
 		Building component = base.GetComponent<Building>();
 		this.inputCell = component.GetUtilityInputCell();
 		this.outputCell = component.GetUtilityOutputCell();
-		Conduit.GetFlowManager(this.conduitType).AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlow.Priority.Default);
+		Conduit.GetFlowManager(this.conduitType).AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Default);
 		this.UpdateAnim();
 		this.OnCmpEnable();
 	}
 
 	protected override void OnCleanUp()
 	{
+		Game.Instance.accumulators.Remove(this.flowAccumulator);
 		Conduit.GetFlowManager(this.conduitType).RemoveConduitUpdater(new Action<float>(this.ConduitUpdate));
 		base.OnCleanUp();
 	}
@@ -72,7 +73,7 @@ public class ValveBase : KMonoBehaviour, ISaveLoadable
 			float num2 = num / contents.mass;
 			int num3 = (int)(num2 * (float)contents.diseaseCount);
 			float num4 = flowManager.AddElement(this.outputCell, contents.element, num, contents.temperature, contents.diseaseIdx, num3);
-			this.flowAccumulator.Accumulate(num4);
+			Game.Instance.accumulators.Accumulate(this.flowAccumulator, num4);
 			if (num4 > 0f)
 			{
 				flowManager.RemoveElement(this.inputCell, num4);
@@ -83,17 +84,17 @@ public class ValveBase : KMonoBehaviour, ISaveLoadable
 
 	public virtual void UpdateAnim()
 	{
-		float avgRate = this.flowAccumulator.AvgRate;
-		if (avgRate > 0f)
+		float averageRate = Game.Instance.accumulators.GetAverageRate(this.flowAccumulator);
+		if (averageRate > 0f)
 		{
 			for (int i = 0; i < this.animFlowRanges.Length; i++)
 			{
-				if (avgRate <= this.animFlowRanges[i].minFlow)
+				if (averageRate <= this.animFlowRanges[i].minFlow)
 				{
 					if (this.curFlowIdx != i)
 					{
 						this.curFlowIdx = i;
-						this.controller.Play(this.animFlowRanges[i].animName, (avgRate > 0f) ? KAnim.PlayMode.Loop : KAnim.PlayMode.Once, 1f, 0f);
+						this.controller.Play(this.animFlowRanges[i].animName, (averageRate > 0f) ? KAnim.PlayMode.Loop : KAnim.PlayMode.Once, 1f, 0f);
 					}
 					break;
 				}
@@ -117,7 +118,7 @@ public class ValveBase : KMonoBehaviour, ISaveLoadable
 	[MyCmpGet]
 	protected KBatchedAnimController controller;
 
-	protected Accumulator flowAccumulator;
+	protected HandleVector<int>.Handle flowAccumulator = HandleVector<int>.InvalidHandle;
 
 	private int curFlowIdx = -1;
 

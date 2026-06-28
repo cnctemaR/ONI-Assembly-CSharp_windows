@@ -78,53 +78,57 @@ public class FetchManagerUpdater
 		return flag && flag2 && flag3 && flag4;
 	}
 
-	public static bool IsFetchablePickup(KPrefabID pickup_id, Storage source, float pickup_unreserved_amount, float pickup_min_unit, float maximum_requested, TagBits tag_bits, Tag[] required_tags, Tag[] forbid_tags, Storage destination)
+	public static bool IsFetchablePickup(KPrefabID pickup_id, Storage source, float pickup_unreserved_amount, float pickup_min_unit, float maximum_requested, TagBits tag_bits, TagBits required_tags, TagBits forbid_tags, Storage destination)
 	{
 		if (pickup_id == null)
 		{
 			return false;
 		}
-		if (required_tags != null)
+		TagBits tabBits = pickup_id.GetTabBits();
+		if (!tabBits.HasAny(tag_bits))
 		{
-			foreach (Tag tag in required_tags)
+			return false;
+		}
+		if (pickup_unreserved_amount <= 0f)
+		{
+			return false;
+		}
+		if (!tabBits.HasAll(required_tags))
+		{
+			return false;
+		}
+		if (tabBits.HasAny(forbid_tags))
+		{
+			return false;
+		}
+		if (source != null)
+		{
+			if (destination.ShouldOnlyTransferFromLowerPriority)
 			{
-				if (!pickup_id.HasTag(tag))
+				int num = 10;
+				if (destination.prioritizable != null)
+				{
+					num = destination.prioritizable.GetMasterPriority().priority_value;
+				}
+				int num2 = 10;
+				if (source.prioritizable != null)
+				{
+					num2 = source.prioritizable.GetMasterPriority().priority_value;
+				}
+				if (num <= num2)
 				{
 					return false;
 				}
 			}
-		}
-		if (forbid_tags != null)
-		{
-			foreach (Tag tag2 in forbid_tags)
-			{
-				if (pickup_id.HasTag(tag2))
-				{
-					return false;
-				}
-			}
-		}
-		if (source != null && destination.allowItemRemoval)
-		{
-			int num = 10;
-			if (destination.prioritizable != null)
-			{
-				num = destination.prioritizable.GetMasterPriority().priority_value;
-			}
-			int num2 = 10;
-			if (source.prioritizable != null)
-			{
-				num2 = source.prioritizable.GetMasterPriority().priority_value;
-			}
-			if (num <= num2)
+			if (destination.storageNetworkID != -1 && destination.storageNetworkID == source.storageNetworkID)
 			{
 				return false;
 			}
 		}
-		return pickup_id.GetTabBits().HasAny(tag_bits) && pickup_unreserved_amount > 0f;
+		return true;
 	}
 
-	public static void FindFetchTarget(Worker worker, Storage destination, List<Pickupable> pickupables, TagBits tag_bits, Tag[] required_tags, Tag[] forbid_tags, float required_amount, ref Pickupable workable)
+	public static void FindFetchTarget(Worker worker, Storage destination, List<Pickupable> pickupables, TagBits tag_bits, TagBits required_tags, TagBits forbid_tags, float required_amount, ref Pickupable workable)
 	{
 		workable = null;
 		int num = int.MaxValue;

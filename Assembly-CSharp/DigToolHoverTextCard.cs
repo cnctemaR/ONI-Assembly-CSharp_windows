@@ -6,28 +6,8 @@ using UnityEngine.UI;
 
 public class DigToolHoverTextCard : HoverTextConfiguration
 {
-	public override void ConfigureHoverScreen()
-	{
-		if (!string.IsNullOrEmpty(this.ActionStringKey))
-		{
-			this.ActionName = Strings.Get(this.ActionStringKey);
-		}
-		HoverTextScreen instance = HoverTextScreen.Instance;
-		if (instance.LoadPreConfiguredToolFields(this))
-		{
-			this.isConfigured = true;
-			return;
-		}
-		instance.ToggleIncubating(true);
-		instance.currentConfiguration = this;
-		instance.ClearLabels();
-		this.ConfigureTitle(instance, true);
-		this.isConfigured = true;
-	}
-
 	public override void UpdateHoverElements(List<KSelectable> selected)
 	{
-		base.UpdateHoverElements(selected);
 		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
 		if (!Grid.IsValidCell(num))
 		{

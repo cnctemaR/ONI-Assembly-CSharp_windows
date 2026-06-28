@@ -23,8 +23,8 @@ public class ChunkSpawner : KMonoBehaviour
 		{
 			for (int j = 0; j < num; j++)
 			{
-				int num2 = Grid.PosToCell(base.transform.position + Vector3.up * (float)i + Vector3.right * (float)j);
-				int num3 = Grid.PosToCell(base.transform.position + Vector3.down * (float)i + Vector3.left * (float)j);
+				int num2 = Grid.PosToCell(base.transform.GetPosition() + Vector3.up * (float)i + Vector3.right * (float)j);
+				int num3 = Grid.PosToCell(base.transform.GetPosition() + Vector3.down * (float)i + Vector3.left * (float)j);
 				if (!Grid.Solid[num2])
 				{
 					list.Add(num2);

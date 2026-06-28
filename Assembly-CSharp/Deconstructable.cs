@@ -1,6 +1,7 @@
 ﻿using System;
 using KSerialization;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class Deconstructable : Workable
@@ -17,6 +18,9 @@ public class Deconstructable : Workable
 		this.synchronizeAnims = false;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Deconstructing;
 		this.attributeConverter = Db.Get().AttributeConverters.ConstructionSpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
+		this.multitoolContext = "build";
+		this.multitoolHitEffectHash = new HashedString("fx_build_splash");
 	}
 
 	protected override void OnSpawn()
@@ -30,6 +34,10 @@ public class Deconstructable : Workable
 		{
 			this.QueueDeconstruction();
 		}
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
 	}
 
 	public override float GetWorkTime()
@@ -61,7 +69,7 @@ public class Deconstructable : Workable
 		{
 			if (building.Def.TileLayer != ObjectLayer.NumLayers)
 			{
-				int num = Grid.PosToCell(base.transform.position);
+				int num = Grid.PosToCell(base.transform.GetPosition());
 				if (Grid.Objects[num, (int)building.Def.TileLayer] == base.gameObject)
 				{
 					Grid.Objects[num, (int)building.Def.ObjectLayer] = null;
@@ -82,7 +90,7 @@ public class Deconstructable : Workable
 		string sound = GlobalAssets.GetSound("Finish_Deconstruction_" + building.Def.AudioSize, false);
 		if (sound != null)
 		{
-			KMonoBehaviour.PlaySound3DAtLocation(sound, base.gameObject.transform.position);
+			KMonoBehaviour.PlaySound3DAtLocation(sound, base.gameObject.transform.GetPosition());
 		}
 		base.Trigger(-702296337, this);
 	}
@@ -93,9 +101,9 @@ public class Deconstructable : Workable
 		{
 			return;
 		}
-		GameObject gameObject = Deconstructable.SpawnItem(base.transform.position, building.Def, element, mass, temperature, disease_idx, disease_count);
-		gameObject.transform.position += Vector3.up * 0.5f;
-		int num = Grid.PosToCell(gameObject.transform.position);
+		GameObject gameObject = Deconstructable.SpawnItem(base.transform.GetPosition(), building.Def, element, mass, temperature, disease_idx, disease_count);
+		gameObject.transform.SetPosition(gameObject.transform.GetPosition() + Vector3.up * 0.5f);
+		int num = Grid.PosToCell(gameObject.transform.GetPosition());
 		int num2 = Grid.CellAbove(num);
 		Vector2 vector;
 		if ((Grid.IsValidCell(num) && Grid.Solid[num]) || (Grid.IsValidCell(num2) && Grid.Solid[num2]))
@@ -105,7 +113,7 @@ public class Deconstructable : Workable
 		else
 		{
 			Vector3 vector2;
-			gameObject.transform.position.x = vector2.x + (global::UnityEngine.Random.value - 0.5f) * Deconstructable.scale.x;
+			gameObject.transform.GetPosition().x = vector2.x + (global::UnityEngine.Random.value - 0.5f) * Deconstructable.scale.x;
 			vector = Vector2.up * Deconstructable.scale.y;
 		}
 		if (GameComps.Fallers.Has(gameObject))
@@ -127,10 +135,11 @@ public class Deconstructable : Workable
 			}
 			else
 			{
-				this.chore = new WorkChore<Deconstructable>(Db.Get().ChoreTypes.Deconstruct, this, null, true, null, null, null, true, null, false, default(Tag), null, true, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+				Prioritizable.AddRef(base.gameObject);
+				this.chore = new WorkChore<Deconstructable>(Db.Get().ChoreTypes.Deconstruct, this, null, null, true, null, null, null, true, null, false, null, true, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, true);
 				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction, this);
 				this.isMarkedForDeconstruction = true;
-				Prioritizable.AddRef(base.gameObject);
+				base.Trigger(-790448070, null);
 			}
 		}
 	}
@@ -152,7 +161,7 @@ public class Deconstructable : Workable
 		return this.chore != null;
 	}
 
-	private static GameObject SpawnItem(Vector3 position, BuildingDef def, SimHashes src_element, float src_mass, float src_temperature, byte disease_idx, int disease_count)
+	public static GameObject SpawnItem(Vector3 position, BuildingDef def, SimHashes src_element, float src_mass, float src_temperature, byte disease_idx, int disease_count)
 	{
 		GameObject gameObject = null;
 		int num = Grid.PosToCell(position);
@@ -226,13 +235,6 @@ public class Deconstructable : Workable
 		{
 			this.QueueDeconstruction();
 		}
-	}
-
-	public override Workable.AnimInfo GetAnim(Worker worker)
-	{
-		Workable.AnimInfo anim = base.GetAnim(worker);
-		anim.smi = new MultitoolController.Instance(this, worker, "build", EffectPrefabs.Instance.BuildEffect);
-		return anim;
 	}
 
 	[MyCmpAdd]

@@ -1,6 +1,6 @@
 ﻿using System;
 
-public class LogicUtilityNetworkLink : UtilityNetworkLink, IWire
+public class LogicUtilityNetworkLink : UtilityNetworkLink, IHaveUtilityNetworkMgr
 {
 	protected override void OnSpawn()
 	{
@@ -18,7 +18,7 @@ public class LogicUtilityNetworkLink : UtilityNetworkLink, IWire
 		Game.Instance.logicCircuitSystem.RemoveLink(cell1, cell2);
 	}
 
-	public IUtilityNetworkMgr GetNetworkMgr()
+	public IUtilityNetworkMgr GetNetworkManager()
 	{
 		return Game.Instance.logicCircuitSystem;
 	}

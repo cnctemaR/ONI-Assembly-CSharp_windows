@@ -33,8 +33,8 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 
 	public TimeOfDay.TimeRegion GetCurrentTimeRegion()
 	{
-		float currentDayAsPercentage = GameClock.Instance.GetCurrentDayAsPercentage();
-		if (currentDayAsPercentage >= 0.875f)
+		float currentCycleAsPercentage = GameClock.Instance.GetCurrentCycleAsPercentage();
+		if (currentCycleAsPercentage >= 0.875f)
 		{
 			return TimeOfDay.TimeRegion.Night;
 		}
@@ -53,7 +53,7 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 		float num2 = 0.2f;
 		float num3 = 1f;
 		float num4 = 0f;
-		if (GameClock.Instance.GetCurrentDayAsPercentage() >= num)
+		if (GameClock.Instance.GetCurrentCycleAsPercentage() >= num)
 		{
 			num4 = num3;
 		}

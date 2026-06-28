@@ -6,7 +6,7 @@ public class ElementSpout : StateMachineComponent<ElementSpout.StatesInstance>
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		Grid.Objects[num, 2] = base.gameObject;
 		base.smi.StartSM();
 	}
@@ -52,7 +52,7 @@ public class ElementSpout : StateMachineComponent<ElementSpout.StatesInstance>
 
 		public bool CanEmitAnywhere()
 		{
-			int num = Grid.PosToCell(base.smi.transform.position);
+			int num = Grid.PosToCell(base.smi.transform.GetPosition());
 			int num2 = Grid.CellLeft(num);
 			int num3 = Grid.CellRight(num);
 			int num4 = Grid.CellAbove(num);
@@ -70,8 +70,8 @@ public class ElementSpout : StateMachineComponent<ElementSpout.StatesInstance>
 			{
 				smi.Play("idle", KAnim.PlayMode.Once);
 			}).ScheduleGoTo((ElementSpout.StatesInstance smi) => smi.master.emissionPollFrequency, this.emit);
-			this.idle.unblocked.ToggleStatusItem(Db.Get().MiscStatusItems.SpoutPressureBuilding, null).Transition(this.idle.blocked, (ElementSpout.StatesInstance smi) => !smi.CanEmitAnywhere());
-			this.idle.blocked.ToggleStatusItem(Db.Get().MiscStatusItems.SpoutOverPressure, null).Transition(this.idle.blocked, (ElementSpout.StatesInstance smi) => smi.CanEmitAnywhere());
+			this.idle.unblocked.ToggleStatusItem(Db.Get().MiscStatusItems.SpoutPressureBuilding, null).Transition(this.idle.blocked, (ElementSpout.StatesInstance smi) => !smi.CanEmitAnywhere(), UpdateRate.SIM_200ms);
+			this.idle.blocked.ToggleStatusItem(Db.Get().MiscStatusItems.SpoutOverPressure, null).Transition(this.idle.blocked, (ElementSpout.StatesInstance smi) => smi.CanEmitAnywhere(), UpdateRate.SIM_200ms);
 			this.emit.DefaultState(this.emit.unblocked).Enter(delegate(ElementSpout.StatesInstance smi)
 			{
 				float num = 1f + global::UnityEngine.Random.Range(0f, smi.master.emissionIrregularity);
@@ -85,12 +85,12 @@ public class ElementSpout : StateMachineComponent<ElementSpout.StatesInstance>
 			{
 				smi.Play("emit", KAnim.PlayMode.Once);
 				smi.master.emitter.SetEmitting(true);
-			}).Transition(this.emit.blocked, (ElementSpout.StatesInstance smi) => !smi.CanEmitAnywhere());
+			}).Transition(this.emit.blocked, (ElementSpout.StatesInstance smi) => !smi.CanEmitAnywhere(), UpdateRate.SIM_200ms);
 			this.emit.blocked.ToggleStatusItem(Db.Get().MiscStatusItems.SpoutOverPressure, null).Enter(delegate(ElementSpout.StatesInstance smi)
 			{
 				smi.Play("idle", KAnim.PlayMode.Once);
 				smi.master.emitter.SetEmitting(false);
-			}).Transition(this.emit.unblocked, (ElementSpout.StatesInstance smi) => smi.CanEmitAnywhere());
+			}).Transition(this.emit.unblocked, (ElementSpout.StatesInstance smi) => smi.CanEmitAnywhere(), UpdateRate.SIM_200ms);
 		}
 
 		public ElementSpout.States.Idle idle;

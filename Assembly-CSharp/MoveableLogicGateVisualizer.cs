@@ -48,7 +48,7 @@ public class MoveableLogicGateVisualizer : LogicGateBase
 		{
 			return;
 		}
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		if (num == this.cell)
 		{
 			return;

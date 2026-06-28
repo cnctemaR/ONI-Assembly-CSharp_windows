@@ -66,7 +66,7 @@ public class StandardAmountDisplayer : IAmountDisplayer, IAttributeFormatter
 		text += "\n";
 		foreach (AttributeInstance.AttributeModifierEntry attributeModifierEntry in instance.deltaAttribute)
 		{
-			text = text + "\n" + string.Format("{0}: {1}", (attributeModifierEntry.Modifier.DescriptionCB == null) ? attributeModifierEntry.Modifier.Description : attributeModifierEntry.Modifier.DescriptionCB(), this.formatter.GetFormattedModifier(attributeModifierEntry.Modifier, instance.gameObject));
+			text = text + "\n" + string.Format("{0}: {1}", attributeModifierEntry.Modifier.GetDescription(), this.formatter.GetFormattedModifier(attributeModifierEntry.Modifier, instance.gameObject));
 		}
 		return text;
 	}

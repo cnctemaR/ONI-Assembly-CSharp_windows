@@ -32,7 +32,7 @@ public class KAnimRenderer : MonoBehaviour
 		gameObject.transform.parent = parent;
 		gameObject.layer = parent.gameObject.layer;
 		cmp.Root = gameObject.transform;
-		cmp.Root.transform.localPosition = Vector3.zero;
+		cmp.Root.transform.SetLocalPosition(Vector3.zero);
 		cmp.Root.transform.rotation = Quaternion.identity;
 		cmp.Root.transform.localScale = Vector3.one;
 		cmp.RootMatrixId = Shader.PropertyToID("_RootMatrix");

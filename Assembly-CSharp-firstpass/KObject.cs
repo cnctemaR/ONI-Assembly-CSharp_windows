@@ -5,7 +5,6 @@ public class KObject
 {
 	public KObject(GameObject go)
 	{
-		this.go = go;
 		this.id = go.GetInstanceID();
 	}
 
@@ -33,8 +32,6 @@ public class KObject
 	}
 
 	public int id { get; private set; }
-
-	public GameObject go { get; private set; }
 
 	public bool hasEventSystem
 	{

@@ -4,7 +4,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class PlantableSeed : KMonoBehaviour, IHasSortOrder, IReceptacleDirection, IGameObjectEffectDescriptor
+public class PlantableSeed : KMonoBehaviour, IHasSortOrder, IReceptacleDirection, IGameObjectEffectDescriptor, ISim200ms
 {
 	public int sortOrder { get; set; }
 
@@ -32,7 +32,7 @@ public class PlantableSeed : KMonoBehaviour, IHasSortOrder, IReceptacleDirection
 	{
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		this.timeUntilSelfPlant -= dt;
 		if (this.timeUntilSelfPlant <= 0f)

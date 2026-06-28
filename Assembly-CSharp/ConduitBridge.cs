@@ -6,7 +6,7 @@ public class ConduitBridge : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.flowAccumulator = new Accumulator("Flow", this, 3f);
+		this.accumulator = Game.Instance.accumulators.Add("Flow", this);
 	}
 
 	protected override void OnSpawn()
@@ -15,11 +15,12 @@ public class ConduitBridge : KMonoBehaviour
 		Building component = base.GetComponent<Building>();
 		this.inputCell = component.GetUtilityInputCell();
 		this.outputCell = component.GetUtilityOutputCell();
-		Conduit.GetFlowManager(this.type).AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlow.Priority.Default);
+		Conduit.GetFlowManager(this.type).AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Default);
 	}
 
 	protected override void OnCleanUp()
 	{
+		Game.Instance.accumulators.Remove(this.accumulator);
 		Conduit.GetFlowManager(this.type).RemoveConduitUpdater(new Action<float>(this.ConduitUpdate));
 		base.OnCleanUp();
 	}
@@ -38,7 +39,7 @@ public class ConduitBridge : KMonoBehaviour
 			if (num > 0f)
 			{
 				flowManager.RemoveElement(this.inputCell, num);
-				this.flowAccumulator.Accumulate(contents.mass);
+				Game.Instance.accumulators.Accumulate(this.accumulator, contents.mass);
 			}
 		}
 	}
@@ -50,5 +51,5 @@ public class ConduitBridge : KMonoBehaviour
 
 	private int outputCell;
 
-	private Accumulator flowAccumulator;
+	private HandleVector<int>.Handle accumulator = HandleVector<int>.InvalidHandle;
 }

@@ -2,6 +2,7 @@
 using Klei;
 using KSerialization;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -19,7 +20,7 @@ public class OilWellCap : Workable, ISliderControl, IElementEmitter
 	{
 		get
 		{
-			return this.accumulator.AvgRate;
+			return Game.Instance.accumulators.GetAverageRate(this.accumulator);
 		}
 	}
 
@@ -69,12 +70,13 @@ public class OilWellCap : Workable, ISliderControl, IElementEmitter
 		base.OnSpawn();
 		this.smi = new OilWellCap.StatesInstance(this);
 		this.smi.StartSM();
-		this.accumulator = new Accumulator("pressuregas", this, 3f);
+		this.accumulator = Game.Instance.accumulators.Add("pressuregas", this);
 		this.showProgressBar = false;
 		base.SetWorkTime(float.PositiveInfinity);
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_oil_cap_kanim") };
 		this.workingStatusItem = Db.Get().BuildingStatusItems.ReleasingPressure;
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		this.pressureMeter = new MeterController(component, "meter_target", "meter", Meter.Offset.Infront, new Vector3(0f, 0f, 0f), null);
 		this.UpdatePressurePercent();
@@ -83,6 +85,7 @@ public class OilWellCap : Workable, ISliderControl, IElementEmitter
 
 	protected override void OnCleanUp()
 	{
+		Game.Instance.accumulators.Remove(this.accumulator);
 		Prioritizable.RemoveRef(base.gameObject);
 		base.OnCleanUp();
 	}
@@ -91,6 +94,11 @@ public class OilWellCap : Workable, ISliderControl, IElementEmitter
 	{
 		this.storage.AddGasChunk(this.gasElement, this.addGasRate * dt, this.gasTemperature, 0, 0, true, true);
 		this.UpdatePressurePercent();
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole(MachineTechnician.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	public void ReleaseGasPressure(float dt)
@@ -106,7 +114,7 @@ public class OilWellCap : Workable, ISliderControl, IElementEmitter
 			num = Mathf.Min(num, primaryElement.Mass);
 			SimUtil.DiseaseInfo percentOfDisease = SimUtil.GetPercentOfDisease(primaryElement, num / primaryElement.Mass);
 			primaryElement.Mass -= num;
-			this.accumulator.Accumulate(num);
+			Game.Instance.accumulators.Accumulate(this.accumulator, num);
 			SimMessages.AddRemoveSubstance(Grid.PosToCell(this), ElementLoader.GetElementIndex(this.gasElement), null, num, primaryElement.Temperature, percentOfDisease.idx, percentOfDisease.count, -1);
 		}
 		this.UpdatePressurePercent();
@@ -128,7 +136,7 @@ public class OilWellCap : Workable, ISliderControl, IElementEmitter
 
 	private WorkChore<OilWellCap> CreateWorkChore()
 	{
-		WorkChore<OilWellCap> workChore = new WorkChore<OilWellCap>(Db.Get().ChoreTypes.Depressurize, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+		WorkChore<OilWellCap> workChore = new WorkChore<OilWellCap>(Db.Get().ChoreTypes.Depressurize, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 		workChore.AddPrecondition(OilWellCap.AllowedToDepressurize, this);
 		return workChore;
 	}
@@ -170,13 +178,14 @@ public class OilWellCap : Workable, ISliderControl, IElementEmitter
 
 	private float depressurizePercent = 0.75f;
 
-	private Accumulator accumulator;
+	private HandleVector<int>.Handle accumulator = HandleVector<int>.InvalidHandle;
 
 	private MeterController pressureMeter;
 
 	private static Chore.Precondition AllowedToDepressurize = new Chore.Precondition
 	{
 		id = "AllowedToDepressurize",
+		description = DUPLICANTS.CHORES.PRECONDITIONS.ALLOWED_TO_DEPRESSURIZE,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			OilWellCap oilWellCap = (OilWellCap)data;
@@ -215,9 +224,9 @@ public class OilWellCap : Workable, ISliderControl, IElementEmitter
 				{
 					smi.master.operational.SetActive(false, false);
 				})
-				.Update(delegate(OilWellCap.StatesInstance smi)
+				.Update(delegate(OilWellCap.StatesInstance smi, float dt)
 				{
-					smi.master.AddGasPressure(smi.deltatime);
+					smi.master.AddGasPressure(dt);
 				});
 			this.active.pre.PlayAnim("working_pre").ParamTransition<float>(this.pressurePercent, this.overpressure, (OilWellCap.StatesInstance smi, float p) => p >= 1f).ParamTransition<bool>(this.working, this.releasing_pressure, (OilWellCap.StatesInstance smi, bool p) => p)
 				.OnAnimQueueComplete(this.active.loop);
@@ -228,9 +237,9 @@ public class OilWellCap : Workable, ISliderControl, IElementEmitter
 				.ParamTransition<float>(this.pressurePercent, this.idle, (OilWellCap.StatesInstance smi, float p) => p <= 0f)
 				.ParamTransition<bool>(this.working, this.releasing_pressure, (OilWellCap.StatesInstance smi, bool p) => p);
 			this.releasing_pressure.DefaultState(this.releasing_pressure.pre).ToggleStatusItem(Db.Get().BuildingStatusItems.EmittingElement, (OilWellCap.StatesInstance smi) => smi.master).ParamTransition<bool>(this.working, this.idle, (OilWellCap.StatesInstance smi, bool p) => !p)
-				.Update(delegate(OilWellCap.StatesInstance smi)
+				.Update(delegate(OilWellCap.StatesInstance smi, float dt)
 				{
-					smi.master.ReleaseGasPressure(smi.deltatime);
+					smi.master.ReleaseGasPressure(dt);
 				});
 			this.releasing_pressure.pre.PlayAnim("steam_out_pre").OnAnimQueueComplete(this.releasing_pressure.loop);
 			this.releasing_pressure.loop.PlayAnim("steam_out_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.OperationalChanged, this.releasing_pressure.pst, (OilWellCap.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational);

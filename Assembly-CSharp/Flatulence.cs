@@ -21,13 +21,13 @@ public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 	{
 		GameObject gameObject = (GameObject)data;
 		Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
-		Vector2 vector = gameObject.transform.position;
+		Vector2 vector = gameObject.transform.GetPosition();
 		for (int i = 0; i < liveMinionIdentities.Count; i++)
 		{
 			MinionIdentity minionIdentity = liveMinionIdentities[i];
 			if (minionIdentity.gameObject != gameObject.gameObject)
 			{
-				Vector2 vector2 = minionIdentity.transform.position;
+				Vector2 vector2 = minionIdentity.transform.GetPosition();
 				float num = Vector2.SqrMagnitude(vector - vector2);
 				if (num <= 2.25f)
 				{
@@ -36,11 +36,11 @@ public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 				}
 			}
 		}
-		int num2 = Grid.PosToCell(gameObject.transform.position);
+		int num2 = Grid.PosToCell(gameObject.transform.GetPosition());
 		float value = Db.Get().Amounts.Temperature.Lookup(this).value;
 		SimMessages.AddRemoveSubstance(num2, SimHashes.Methane, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.1f, value, byte.MaxValue, 0, -1);
-		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), base.transform.position);
-		KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("odor_fx_kanim", gameObject.transform.position, gameObject.transform, true, Grid.SceneLayer.Front, false);
+		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), base.transform.GetPosition());
+		KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("odor_fx_kanim", gameObject.transform.GetPosition(), gameObject.transform, true, Grid.SceneLayer.Front, false);
 		kbatchedAnimController.Play(Flatulence.WorkLoopAnims, KAnim.PlayMode.Once);
 		kbatchedAnimController.destroyOnAnimComplete = true;
 	}

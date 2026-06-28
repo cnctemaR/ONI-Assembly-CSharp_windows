@@ -34,7 +34,7 @@ public class Assignables : KMonoBehaviour
 	{
 		foreach (AssignableSlotInstance assignableSlotInstance in this.slots)
 		{
-			assignableSlotInstance.Unassign();
+			assignableSlotInstance.Unassign(true);
 		}
 	}
 
@@ -65,71 +65,15 @@ public class Assignables : KMonoBehaviour
 		return null;
 	}
 
-	public bool IsAssigned(AssignableSlot slot)
-	{
-		DebugUtil.Assert(slot != null, "Assert!");
-		AssignableSlotInstance slot2 = this.GetSlot(slot);
-		return slot2.assignable != null;
-	}
-
-	public bool IsAssigned(Assignable assignable)
-	{
-		return this.IsAssigned(assignable.slot);
-	}
-
-	public void Unassign(Assignable assignable)
-	{
-		if (assignable != null)
-		{
-			AssignableSlotInstance assignableSlotInstance = this.GetSlot(assignable.slot);
-			if (assignableSlotInstance != null)
-			{
-				assignableSlotInstance.Unassign();
-				if (assignable.subSlots != null)
-				{
-					foreach (AssignableSlot assignableSlot in assignable.subSlots)
-					{
-						assignableSlotInstance = this.GetSlot(assignableSlot);
-						assignableSlotInstance.Unassign();
-					}
-				}
-			}
-		}
-	}
-
-	protected void Save<SaveDataType>(ref SaveDataType[] save_data) where SaveDataType : AssignableSlotInstance.AssignableSaveData
-	{
-		save_data = new SaveDataType[this.slots.Count];
-		for (int i = 0; i < this.slots.Count; i++)
-		{
-			save_data[i] = this.slots[i].Save() as SaveDataType;
-		}
-	}
-
-	protected void Load(AssignableSlotInstance.AssignableSaveData[] save_data_array)
-	{
-		foreach (AssignableSlotInstance.AssignableSaveData assignableSaveData in save_data_array)
-		{
-			if (assignableSaveData != null)
-			{
-				foreach (AssignableSlotInstance assignableSlotInstance in this.slots)
-				{
-					if (assignableSlotInstance.slot.Id == assignableSaveData.id)
-					{
-						assignableSlotInstance.Load(assignableSaveData);
-					}
-				}
-			}
-		}
-	}
-
-	public Assignable AutoAssignSlot(Navigator navigator, AssignableSlot slot)
+	public Assignable AutoAssignSlot(AssignableSlot slot)
 	{
 		Assignable assignable = this.GetAssignable(slot);
 		if (assignable != null)
 		{
 			return assignable;
 		}
+		Navigator component = base.GetComponent<Navigator>();
+		MinionIdentity component2 = base.GetComponent<MinionIdentity>();
 		int num = int.MaxValue;
 		foreach (Assignable assignable2 in Game.Instance.assignmentManager)
 		{
@@ -139,9 +83,9 @@ public class Assignables : KMonoBehaviour
 				{
 					if (assignable2.slot == slot)
 					{
-						if (assignable2.CanAutoAssignTo(navigator))
+						if (assignable2.CanAutoAssignTo(component2))
 						{
-							int navigationCost = assignable2.GetNavigationCost(navigator);
+							int navigationCost = assignable2.GetNavigationCost(component);
 							if (navigationCost != PathProber.InvalidCost && navigationCost < num)
 							{
 								num = navigationCost;
@@ -164,7 +108,7 @@ public class Assignables : KMonoBehaviour
 		base.OnCleanUp();
 		foreach (AssignableSlotInstance assignableSlotInstance in this)
 		{
-			assignableSlotInstance.Unassign();
+			assignableSlotInstance.Unassign(true);
 		}
 	}
 

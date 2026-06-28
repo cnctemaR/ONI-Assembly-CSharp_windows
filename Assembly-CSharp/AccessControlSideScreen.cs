@@ -19,8 +19,15 @@ public class AccessControlSideScreen : SideScreenContent
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.dupeSortingToggle.onValueChanged.AddListener(new UnityAction<bool>(this.SortByName));
-		this.permissionSortingToggle.onValueChanged.AddListener(new UnityAction<bool>(this.SortByPermission));
+		this.sortByNameToggle.onValueChanged.AddListener(delegate(bool reverse_sort)
+		{
+			this.SortEntries(reverse_sort, new Comparison<MinionIdentity>(MinionIdentitySort.CompareByName));
+		});
+		this.sortByRoleToggle.onValueChanged.AddListener(delegate(bool reverse_sort)
+		{
+			this.SortEntries(reverse_sort, new Comparison<MinionIdentity>(MinionIdentitySort.CompareByRole));
+		});
+		this.sortByPermissionToggle.onValueChanged.AddListener(new UnityAction<bool>(this.SortByPermission));
 	}
 
 	public override void SetTarget(GameObject target)
@@ -43,9 +50,7 @@ public class AccessControlSideScreen : SideScreenContent
 		}
 		base.gameObject.SetActive(true);
 		this.identityList = new List<MinionIdentity>(Components.LiveMinionIdentities);
-		this.dupeSortingToggle.isOn = true;
 		this.Refresh(this.identityList, true);
-		this.SortByName(true);
 	}
 
 	public override void ClearTarget()
@@ -96,14 +101,9 @@ public class AccessControlSideScreen : SideScreenContent
 		this.headerBG.ColorState = ((!flag) ? KImage.ColorSelector.Inactive : KImage.ColorSelector.Active);
 	}
 
-	private void SortByName(bool state)
-	{
-		this.ExecuteSort<string>(this.dupeSortingToggle, state, (MinionIdentity idt) => idt.GetProperName(), false);
-	}
-
 	private void SortByPermission(bool state)
 	{
-		this.ExecuteSort<int>(this.permissionSortingToggle, state, (MinionIdentity identity) => (int)((!this.target.IsDefaultPermission(identity.gameObject)) ? this.target.GetSetPermission(identity.gameObject) : ((AccessControl.Permission)(-1))), false);
+		this.ExecuteSort<int>(this.sortByPermissionToggle, state, (MinionIdentity identity) => (int)((!this.target.IsDefaultPermission(identity.gameObject)) ? this.target.GetSetPermission(identity.gameObject) : ((AccessControl.Permission)(-1))), false);
 	}
 
 	private void ExecuteSort<T>(Toggle toggle, bool state, Func<MinionIdentity, T> sortFunction, bool refresh = false)
@@ -126,6 +126,22 @@ public class AccessControlSideScreen : SideScreenContent
 				{
 					this.identityRowMap[this.identityList[i]].transform.SetSiblingIndex(i);
 				}
+			}
+		}
+	}
+
+	private void SortEntries(bool reverse_sort, Comparison<MinionIdentity> compare)
+	{
+		this.identityList.Sort(compare);
+		if (reverse_sort)
+		{
+			this.identityList.Reverse();
+		}
+		for (int i = 0; i < this.identityList.Count; i++)
+		{
+			if (this.identityRowMap.ContainsKey(this.identityList[i]))
+			{
+				this.identityRowMap[this.identityList[i]].transform.SetSiblingIndex(i);
 			}
 		}
 	}
@@ -173,6 +189,29 @@ public class AccessControlSideScreen : SideScreenContent
 		this.RefreshOnline();
 	}
 
+	private void OnSelectSortFunc(IListableOption role, object data)
+	{
+		if (role != null)
+		{
+			foreach (MinionIdentitySort.SortInfo sortInfo in MinionIdentitySort.SortInfos)
+			{
+				if (sortInfo.name == role.GetProperName())
+				{
+					this.sortInfo = sortInfo;
+					this.identityList.Sort(this.sortInfo.compare);
+					for (int j = 0; j < this.identityList.Count; j++)
+					{
+						if (this.identityRowMap.ContainsKey(this.identityList[j]))
+						{
+							this.identityRowMap[this.identityList[j]].transform.SetSiblingIndex(j);
+						}
+					}
+					break;
+				}
+			}
+		}
+	}
+
 	[SerializeField]
 	private AccessControlSideScreenRow rowPrefab;
 
@@ -183,10 +222,13 @@ public class AccessControlSideScreen : SideScreenContent
 	private AccessControlSideScreenDoor defaultsRow;
 
 	[SerializeField]
-	private Toggle dupeSortingToggle;
+	private Toggle sortByNameToggle;
 
 	[SerializeField]
-	private Toggle permissionSortingToggle;
+	private Toggle sortByPermissionToggle;
+
+	[SerializeField]
+	private Toggle sortByRoleToggle;
 
 	[SerializeField]
 	private GameObject disabledOverlay;
@@ -199,6 +241,8 @@ public class AccessControlSideScreen : SideScreenContent
 	private Door doorTarget;
 
 	private UIPool<AccessControlSideScreenRow> rowPool;
+
+	private MinionIdentitySort.SortInfo sortInfo = MinionIdentitySort.SortInfos[0];
 
 	private Dictionary<MinionIdentity, AccessControlSideScreenRow> identityRowMap = new Dictionary<MinionIdentity, AccessControlSideScreenRow>();
 

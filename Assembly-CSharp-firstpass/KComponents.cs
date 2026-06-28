@@ -27,7 +27,7 @@ public class KComponents
 		}
 	}
 
-	public void FixedUpdate(float dt)
+	public void Sim33ms(float dt)
 	{
 		foreach (IComponentManager componentManager in this.managers)
 		{
@@ -35,19 +35,19 @@ public class KComponents
 		}
 	}
 
-	public void Update(float dt)
+	public void RenderEveryTick(float dt)
 	{
 		foreach (IComponentManager componentManager in this.managers)
 		{
-			componentManager.Update(dt);
+			componentManager.RenderEveryTick(dt);
 		}
 	}
 
-	public void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		foreach (IComponentManager componentManager in this.managers)
 		{
-			componentManager.SimUpdate(dt);
+			componentManager.Sim200ms(dt);
 		}
 	}
 

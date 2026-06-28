@@ -21,29 +21,22 @@ public class ColdWheatConfig : IEntityConfig
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		}, true, 0f, 0.15f, 1f, "ColdWheatSeed", true);
-		EntityTemplates.ExtendPlantToFertilizable(gameObject, new FertilizationMonitor.FertilizerInfo[]
+		}, true, 0f, 0.15f, 1f, "ColdWheatSeed", true, true);
+		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
-			new FertilizationMonitor.FertilizerInfo
+			new PlantElementAbsorber.ConsumeInfo
 			{
 				tag = GameTags.Fertilizer,
 				massConsumptionRate = 0.006666667f
 			}
 		});
-		EntityTemplates.ExtendPlantToIrrigated(gameObject, new IrrigationMonitor.LiquidResourceInfo[]
+		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
-			new IrrigationMonitor.LiquidResourceInfo
+			new PlantElementAbsorber.ConsumeInfo
 			{
 				tag = GameTags.Water,
 				massConsumptionRate = 0.033333335f
 			}
-		});
-		EntityTemplates.ExtendPlantWithYield(gameObject, new IYieldEffect[]
-		{
-			new YieldEffect.AddHarvestUnitsMultiple(1f)
-		}, new IYieldEffect[]
-		{
-			new YieldEffect.AddHarvestUnitsMultiple(1f)
 		});
 		gameObject.AddOrGet<StandardCropPlant>();
 		GameObject gameObject2 = gameObject;
@@ -76,8 +69,4 @@ public class ColdWheatConfig : IEntityConfig
 	public const float FERTILIZATION_RATE = 0.006666667f;
 
 	public const float WATER_RATE = 0.033333335f;
-
-	public const float MID_YIELD_BONUS = 1f;
-
-	public const float HIGH_YIELD_BONUS = 1f;
 }

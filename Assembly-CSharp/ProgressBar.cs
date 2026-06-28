@@ -36,11 +36,13 @@ public class ProgressBar : KMonoBehaviour
 		{
 			base.gameObject.SetActive(false);
 		}
+		base.enabled = this.updatePercentFull != null;
 	}
 
 	public void SetUpdateFunc(Func<float> func)
 	{
 		this.updatePercentFull = func;
+		base.enabled = this.updatePercentFull != null;
 	}
 
 	public virtual void Update()
@@ -54,6 +56,7 @@ public class ProgressBar : KMonoBehaviour
 	public void ClearPercentFunction()
 	{
 		this.updatePercentFull = null;
+		base.enabled = this.updatePercentFull != null;
 	}
 
 	public virtual void OnOverlayChanged(object data = null)
@@ -78,6 +81,16 @@ public class ProgressBar : KMonoBehaviour
 			Game.Instance.Unsubscribe(this.overlayUpdateHandle);
 		}
 		base.OnCleanUp();
+	}
+
+	private void OnBecameInvisible()
+	{
+		base.enabled = false;
+	}
+
+	private void OnBecameVisible()
+	{
+		base.enabled = true;
 	}
 
 	public Image bar;

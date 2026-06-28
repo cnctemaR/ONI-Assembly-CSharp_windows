@@ -3,26 +3,23 @@ using UnityEngine;
 
 public class FilteredStorage
 {
-	public FilteredStorage(KMonoBehaviour root, Tag[] forbidden_tags, Color32 filter_tint, Color32 no_filter_tint, IUserControlledCapacity capacity_control)
+	public FilteredStorage(KMonoBehaviour root, Tag[] forbidden_tags, Color32 filter_tint, Color32 no_filter_tint, IUserControlledCapacity capacity_control, bool use_logic_meter)
 	{
 		this.root = root;
 		this.forbiddenTags = forbidden_tags;
 		this.filterTint = filter_tint;
 		this.noFilterTint = no_filter_tint;
 		this.capacityControl = capacity_control;
+		this.useLogicMeter = use_logic_meter;
 		root.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 		this.filterable = root.FindOrAdd<TreeFilterable>();
 		TreeFilterable treeFilterable = this.filterable;
 		treeFilterable.OnFilterChanged = (Action<Tag[]>)Delegate.Combine(treeFilterable.OnFilterChanged, new Action<Tag[]>(this.OnFilterChanged));
 		this.storage = root.GetComponent<Storage>();
-		Storage storage = this.storage;
-		storage.onPriorityChanged = (global::System.Action)Delegate.Combine(storage.onPriorityChanged, new global::System.Action(delegate
-		{
-			this.OnFilterChanged(this.filterable.GetTags());
-		}));
+		this.storage.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
 		if (FilteredStorage.capacityStatusItem == null)
 		{
-			FilteredStorage.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.Regions, true, 30718);
+			FilteredStorage.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			FilteredStorage.capacityStatusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				FilteredStorage filteredStorage = (FilteredStorage)data;
@@ -38,14 +35,24 @@ public class FilteredStorage
 				str = str.Replace("{Capacity}", text2);
 				return str;
 			};
-			FilteredStorage.noFilterStatusItem = new StatusItem("NoStorageFilterSet", "BUILDING", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.Regions, true, 30718);
+			FilteredStorage.noFilterStatusItem = new StatusItem("NoStorageFilterSet", "BUILDING", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 		}
 		root.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, FilteredStorage.capacityStatusItem, this);
+	}
+
+	private void OnOnlyFetchMarkedItemsSettingChanged(object data)
+	{
+		this.OnFilterChanged(this.filterable.GetTags());
 	}
 
 	private void CreateMeter()
 	{
 		this.meter = new MeterController(this.root.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, new string[] { "meter_frame", "meter_level" });
+	}
+
+	private void CreateLogicMeter()
+	{
+		this.logicMeter = new MeterController(this.root.GetComponent<KBatchedAnimController>(), "logicmeter_target", "logicmeter", Meter.Offset.Infront, new string[0]);
 	}
 
 	public void CleanUp()
@@ -67,6 +74,10 @@ public class FilteredStorage
 		{
 			this.CreateMeter();
 		}
+		if (this.logicMeter == null && this.useLogicMeter)
+		{
+			this.CreateLogicMeter();
+		}
 		this.OnFilterChanged(this.filterable.GetTags());
 		this.UpdateMeter();
 	}
@@ -82,11 +93,23 @@ public class FilteredStorage
 
 	private void UpdateMeter()
 	{
+		float maxCapacity = this.GetMaxCapacity();
+		float num = Mathf.Clamp01(this.storage.MassStored() / maxCapacity);
 		if (this.meter != null)
 		{
-			float maxCapacity = this.GetMaxCapacity();
-			this.meter.SetPositionPercent(Mathf.Clamp01(this.storage.MassStored() / maxCapacity));
+			this.meter.SetPositionPercent(num);
 		}
+	}
+
+	public bool IsFull()
+	{
+		float maxCapacity = this.GetMaxCapacity();
+		float num = Mathf.Clamp01(this.storage.MassStored() / maxCapacity);
+		if (this.meter != null)
+		{
+			this.meter.SetPositionPercent(num);
+		}
+		return num >= 1f;
 	}
 
 	private void OnFetchComplete()
@@ -124,7 +147,7 @@ public class FilteredStorage
 		}
 		if (flag)
 		{
-			this.fetchList = new FetchList2(this.storage);
+			this.fetchList = new FetchList2(this.storage, Db.Get().ChoreTypes.Fetch, null);
 			this.fetchList.ShowStatusItem = false;
 			this.fetchList.Add(tags, this.forbiddenTags, (float)num3, FetchOrder2.OperationalRequirement.None);
 			this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
@@ -148,6 +171,16 @@ public class FilteredStorage
 		}
 	}
 
+	public void SetLogicMeter(bool on)
+	{
+		if (this.logicMeter != null)
+		{
+			this.logicMeter.SetPositionPercent((!on) ? 0f : 1f);
+		}
+	}
+
+	public static readonly HashedString FULL_PORT_ID = "FULL";
+
 	private KMonoBehaviour root;
 
 	private FetchList2 fetchList;
@@ -160,11 +193,15 @@ public class FilteredStorage
 
 	private MeterController meter;
 
+	private MeterController logicMeter;
+
 	private Color32 filterTint;
 
 	private Color32 noFilterTint;
 
 	private Tag[] forbiddenTags;
+
+	private bool useLogicMeter;
 
 	private static StatusItem capacityStatusItem;
 

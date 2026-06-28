@@ -5,17 +5,23 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
+public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
 {
-	private void Awake()
+	protected override void OnPrefabInit()
 	{
+		base.OnPrefabInit();
 		this.QuantityLabel.color = this.AvailableColor;
 		this.NameLabel.color = this.AvailableColor;
-		base.GetComponent<Button>().onClick.AddListener(delegate
+		this.button.onClick.AddListener(delegate
 		{
 			this.OnClick();
 		});
-		this.tooltip = base.GetComponent<ToolTip>();
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		this.tooltip.OnToolTip = new Func<string>(this.OnToolTip);
 	}
 
 	private void OnClick()
@@ -43,7 +49,7 @@ public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 			{
 				transform = pickupable.storage.transform;
 			}
-			SelectTool.Instance.SelectAndFocus(transform.transform.position, transform.GetComponent<KSelectable>(), Vector3.zero);
+			SelectTool.Instance.SelectAndFocus(transform.transform.GetPosition(), transform.GetComponent<KSelectable>(), Vector3.zero);
 			for (int j = 0; j < pickupables.Count; j++)
 			{
 				Pickupable pickupable2 = pickupables[j];
@@ -59,47 +65,31 @@ public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 		}
 	}
 
-	public void UpdateValue(ResourceCategoryHeader.MeasureUnit measure = ResourceCategoryHeader.MeasureUnit.mass)
+	private void GetAmounts(bool doExtras, out float available, out float total, out float reserved)
+	{
+		available = WorldInventory.Instance.GetAmount(this.Resource);
+		total = ((!doExtras) ? 0f : WorldInventory.Instance.GetTotalAmount(this.Resource));
+		reserved = ((!doExtras) ? 0f : MaterialNeeds.Instance.GetAmount(this.Resource));
+		if (this.Measure == GameUtil.MeasureUnit.kcal)
+		{
+			EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(this.Resource.Name);
+			available *= foodInfo.CaloriesPerUnit;
+			total *= foodInfo.CaloriesPerUnit;
+			reserved *= foodInfo.CaloriesPerUnit;
+		}
+	}
+
+	public void UpdateValue()
 	{
 		this.SetName(this.Resource.ProperName());
 		float num;
-		if (measure == ResourceCategoryHeader.MeasureUnit.kcal)
-		{
-			EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(this.Resource.Name);
-			num = WorldInventory.Instance.GetAmount(this.Resource) * foodInfo.CaloriesPerUnit;
-		}
-		else
-		{
-			num = WorldInventory.Instance.GetAmount(this.Resource);
-		}
+		float num2;
+		float num3;
+		this.GetAmounts(false, out num, out num2, out num3);
 		if (this.quantityText == null || this.currentQuantity != num)
 		{
-			if (measure != ResourceCategoryHeader.MeasureUnit.mass)
-			{
-				if (measure != ResourceCategoryHeader.MeasureUnit.quantity)
-				{
-					if (measure == ResourceCategoryHeader.MeasureUnit.kcal)
-					{
-						this.quantityText = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
-					}
-				}
-				else
-				{
-					this.quantityText = num.ToString();
-				}
-			}
-			else
-			{
-				this.quantityText = GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
-			}
-			this.QuantityLabel.text = this.quantityText;
 			this.currentQuantity = num;
-			if (this.tooltip != null)
-			{
-				this.tooltip.ClearMultiStringTooltip();
-				this.tooltip.AddMultiStringTooltip(this.NameLabel.text, this.tooltipStyle_Header);
-				this.tooltip.AddMultiStringTooltip(string.Format(UI.RESOURCESCREEN.AVAILABLE_TOOLTIP, this.QuantityLabel.text), this.tooltipStyle_body);
-			}
+			this.QuantityLabel.text = ResourceCategoryScreen.QuantityTextForMeasure(num, this.Measure);
 		}
 		Color color = this.AvailableColor;
 		if (num == 0f)
@@ -116,14 +106,25 @@ public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 		}
 	}
 
+	private string OnToolTip()
+	{
+		float num;
+		float num2;
+		float num3;
+		this.GetAmounts(true, out num, out num2, out num3);
+		string text = this.NameLabel.text;
+		return text + string.Format(UI.RESOURCESCREEN.AVAILABLE_TOOLTIP, ResourceCategoryScreen.QuantityTextForMeasure(num, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num3, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num2, this.Measure));
+	}
+
 	public void SetName(string name)
 	{
 		this.NameLabel.text = name;
 	}
 
-	public void SetTag(Tag t)
+	public void SetTag(Tag t, GameUtil.MeasureUnit measure)
 	{
 		this.Resource = t;
+		this.Measure = measure;
 	}
 
 	private void Hover(bool is_hovering)
@@ -195,6 +196,8 @@ public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
 	public Tag Resource;
 
+	public GameUtil.MeasureUnit Measure;
+
 	public LocText NameLabel;
 
 	public LocText QuantityLabel;
@@ -216,11 +219,11 @@ public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 	[SerializeField]
 	private Image Background;
 
+	[MyCmpGet]
 	private ToolTip tooltip;
 
-	private TextStyleSetting tooltipStyle_Header;
-
-	private TextStyleSetting tooltipStyle_body;
+	[MyCmpReq]
+	private Button button;
 
 	private int selectionIdx;
 

@@ -10,36 +10,34 @@ public class PowerTransformerConfig : IBuildingConfig
 		int num = 3;
 		int num2 = 2;
 		string text2 = "transformer_kanim";
-		float num3 = 100f;
-		int num4 = 30;
-		float num5 = 30f;
+		int num3 = 30;
+		float num4 = 30f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num6 = 800f;
+		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.UseWhitePowerOutputConnectorColour = true;
 		buildingDef.PowerInputOffset = new CellOffset(-1, 1);
 		buildingDef.PowerOutputOffset = new CellOffset(1, 0);
 		buildingDef.ElectricalArrowOffset = new CellOffset(1, 0);
 		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
-		buildingDef.OperatingKilowatts = 1f;
+		buildingDef.SelfHeatKilowattsWhenActive = 1f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.ExhaustKilowattsWhenActive = 0f;
-		buildingDef.OperatingKilowatts = 1f;
+		buildingDef.SelfHeatKilowattsWhenActive = 1f;
 		buildingDef.Entombable = true;
 		buildingDef.GeneratorWattageRating = 1000f;
 		buildingDef.GeneratorBaseCapacity = 1000f;
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
-		buildingDef.HotKey = global::Action.BuildMenuKeyT;
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddComponent<RequireInputs>();

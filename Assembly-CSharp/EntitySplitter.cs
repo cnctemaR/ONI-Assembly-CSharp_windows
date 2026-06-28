@@ -44,7 +44,7 @@ public class EntitySplitter : KMonoBehaviour
 		{
 			prefab = Assets.GetPrefab(pickupable.GetComponent<KPrefabID>().PrefabTag);
 		}
-		GameObject gameObject = GameUtil.KInstantiate(prefab, pickupable.transform.position, Grid.SceneLayer.Ore, pickupable.transform.parent.gameObject, null, 0);
+		GameObject gameObject = GameUtil.KInstantiate(prefab, pickupable.transform.GetPosition(), Grid.SceneLayer.Ore, pickupable.transform.parent.gameObject, null, 0);
 		Pickupable component = gameObject.GetComponent<Pickupable>();
 		if (component == null)
 		{
@@ -57,6 +57,7 @@ public class EntitySplitter : KMonoBehaviour
 		if (storage != null)
 		{
 			storage.Trigger(-1697596308, pickupable.gameObject);
+			storage.Trigger(-778359855, null);
 		}
 		return component;
 	}
@@ -85,7 +86,7 @@ public class EntitySplitter : KMonoBehaviour
 				if (CameraController.Instance != null)
 				{
 					string sound = GlobalAssets.GetSound("Ore_absorb", false);
-					if (sound != null && CameraController.Instance.IsAudibleSound(pickupable.transform.position, sound))
+					if (sound != null && CameraController.Instance.IsAudibleSound(pickupable.transform.GetPosition(), sound))
 					{
 						base.PlaySound3D(sound);
 					}

@@ -44,7 +44,7 @@ public class MessageDialogFrame : KScreen
 		RectTransform component = dialog.GetComponent<RectTransform>();
 		component.offsetMin = Vector2.zero;
 		component.offsetMax = Vector2.zero;
-		dialog.transform.localPosition = Vector3.zero;
+		dialog.transform.SetLocalPosition(Vector3.zero);
 		dialog.SetMessage(message);
 		dialog.OnClickAction();
 	}

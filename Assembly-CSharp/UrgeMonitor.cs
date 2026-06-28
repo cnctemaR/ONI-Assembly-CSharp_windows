@@ -6,8 +6,8 @@ public class UrgeMonitor : GameStateMachine<UrgeMonitor, UrgeMonitor.Instance>
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.satisfied;
-		this.satisfied.Transition(this.hasurge, (UrgeMonitor.Instance smi) => smi.HasUrge());
-		this.hasurge.Transition(this.satisfied, (UrgeMonitor.Instance smi) => !smi.HasUrge()).ToggleUrge((UrgeMonitor.Instance smi) => smi.GetUrge());
+		this.satisfied.Transition(this.hasurge, (UrgeMonitor.Instance smi) => smi.HasUrge(), UpdateRate.SIM_200ms);
+		this.hasurge.Transition(this.satisfied, (UrgeMonitor.Instance smi) => !smi.HasUrge(), UpdateRate.SIM_200ms).ToggleUrge((UrgeMonitor.Instance smi) => smi.GetUrge());
 	}
 
 	public GameStateMachine<UrgeMonitor, UrgeMonitor.Instance, IStateMachineTarget, object>.State satisfied;

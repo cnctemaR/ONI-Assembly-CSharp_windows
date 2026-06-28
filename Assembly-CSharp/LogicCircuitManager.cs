@@ -11,7 +11,17 @@ public class LogicCircuitManager
 		this.elapsedTime = 0f;
 	}
 
-	public void Update()
+	public void Sim200ms(float dt)
+	{
+		this.Refresh(dt);
+	}
+
+	public void RenderEveryTick(float dt)
+	{
+		this.Refresh(dt);
+	}
+
+	private void Refresh(float dt)
 	{
 		bool isDirty = this.conduitSystem.IsDirty;
 		if (isDirty)

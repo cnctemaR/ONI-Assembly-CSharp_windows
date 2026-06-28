@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInstance> where WorkableType : Workable
 {
-	public WorkChore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, bool allow_in_red_alert = true, ScheduleBlockType schedule_block = null, bool only_when_operational = true, Tag required_region = default(Tag), KAnimFile override_anims = null, bool is_preemptable = false, bool allow_in_context_menu = true, bool allow_prioritization = true, PriorityScreen.PriorityClass priority_class = PriorityScreen.PriorityClass.basic, int priority_class_value = 2147483647)
-		: base(chore_type, target, chore_provider, run_until_complete, on_complete, on_begin, on_end, priority_class, priority_class_value, is_preemptable, allow_in_context_menu, 0)
+	public WorkChore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider = null, Tag[] chore_tags = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, bool allow_in_red_alert = true, ScheduleBlockType schedule_block = null, bool only_when_operational = true, KAnimFile override_anims = null, bool is_preemptable = false, bool allow_in_context_menu = true, bool allow_prioritization = true, PriorityScreen.PriorityClass priority_class = PriorityScreen.PriorityClass.basic, int priority_class_value = 2147483647, bool ignore_building_assignment = false)
+		: base(chore_type, target, chore_provider, run_until_complete, on_complete, on_begin, on_end, priority_class, priority_class_value, is_preemptable, allow_in_context_menu, 0, chore_tags)
 	{
 		this.smi = new WorkChore<WorkableType>.StatesInstance(this, target.gameObject, override_anims);
 		this.onlyWhenOperational = only_when_operational;
@@ -12,27 +12,32 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		{
 			base.SetPrioritizable(target.GetComponent<Prioritizable>());
 		}
+		base.AddPrecondition(ChorePreconditions.instance.IsNotTransferArm, null);
 		if (!allow_in_red_alert)
 		{
-			base.AddPrecondition(ChorePreconditions.IsNotRedAlert, null);
+			base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 		}
 		if (schedule_block != null)
 		{
-			base.AddPrecondition(ChorePreconditions.IsScheduledTime, schedule_block);
+			base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, schedule_block);
 		}
-		base.AddPrecondition(ChorePreconditions.CanMoveTo, this.smi.sm.workable.Get<WorkableType>(this.smi));
+		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, this.smi.sm.workable.Get<WorkableType>(this.smi));
 		if (only_when_operational && target.gameObject.GetComponent<Operational>() != null)
 		{
-			base.AddPrecondition(ChorePreconditions.IsOperational, target.gameObject);
+			base.AddPrecondition(ChorePreconditions.instance.IsOperational, target.gameObject);
 		}
 		if (only_when_operational && target.gameObject.GetComponent<Deconstructable>() != null)
 		{
-			base.AddPrecondition(ChorePreconditions.IsMarkedForDeconstruction, target.gameObject);
+			base.AddPrecondition(ChorePreconditions.instance.IsMarkedForDeconstruction, target.gameObject);
 		}
-		if (required_region.GetHashCode() != 0)
+		if (!ignore_building_assignment && this.smi.sm.workable.Get(this.smi).GetComponent<Assignable>() != null)
 		{
-			base.AddPrecondition(ChorePreconditions.IsAssignedtoMe, this.smi.sm.workable.Get<WorkableType>(this.smi));
-			base.AddPrecondition(ChorePreconditions.IsRegionValid, required_region);
+			base.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, this.smi.sm.workable.Get<Assignable>(this.smi));
+		}
+		WorkableType workableType = target as WorkableType;
+		if (workableType != null && workableType.requiredRolePerk.IsValid)
+		{
+			base.AddPrecondition(ChorePreconditions.instance.HasRolePerk, workableType.requiredRolePerk);
 		}
 	}
 
@@ -125,13 +130,13 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		{
 			default_state = this.approach;
 			base.Target(this.worker);
-			this.approach.InitializeStates(this.worker, this.workable, this.work, null, null, null).Update("CheckOperational", delegate(WorkChore<WorkableType>.StatesInstance smi)
+			this.approach.InitializeStates(this.worker, this.workable, this.work, null, null, null).Update("CheckOperational", delegate(WorkChore<WorkableType>.StatesInstance smi, float dt)
 			{
 				if (!smi.master.IsOperationalValid())
 				{
 					smi.StopSM("Building not operational");
 				}
-			});
+			}, UpdateRate.SIM_200ms, false);
 			this.work.Enter(delegate(WorkChore<WorkableType>.StatesInstance smi)
 			{
 				smi.EnableAnimOverrides();

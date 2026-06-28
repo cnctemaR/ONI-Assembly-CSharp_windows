@@ -13,7 +13,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 		List<GameObject> list = base.smi.master.gasStorage.Find(GameTags.Water);
 		if (list != null && list.Count > 0)
 		{
-			global::Debug.LogWarning("Liquid Cooled fan Gas storage contains water - A duplicant probably delivered to the wrong stroage - moving it to liquid storage.", null);
+			global::Debug.LogWarning("Liquid Cooled fan Gas storage contains water - A duplicant probably delivered to the wrong storage - moving it to liquid storage.", null);
 			foreach (GameObject gameObject in list)
 			{
 				base.smi.master.gasStorage.Transfer(gameObject, base.smi.master.liquidStorage, false, false);
@@ -64,7 +64,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_waterbody", "meter_waterlevel" });
 		base.GetComponent<ElementConsumer>().EnableConsumption(true);
 		base.smi.StartSM();
-		base.smi.master.waterConsumptionAccumulator = new Accumulator("waterConsumptionAccumulator", this, 1f);
+		base.smi.master.waterConsumptionAccumulator = Game.Instance.accumulators.Add("waterConsumptionAccumulator", this);
 		base.GetComponent<ElementConsumer>().storage = this.gasStorage;
 		base.GetComponent<ManualDeliveryKG>().SetStorage(this.liquidStorage);
 	}
@@ -130,7 +130,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 			}
 		}
 		float num4 = Mathf.Abs(num2 * this.waterKGConsumedPerKJ);
-		base.smi.master.waterConsumptionAccumulator.Accumulate(num4);
+		Game.Instance.accumulators.Accumulate(base.smi.master.waterConsumptionAccumulator, num4);
 		if (num4 != 0f)
 		{
 			SimUtil.DiseaseInfo diseaseInfo;
@@ -145,7 +145,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.HEATCONSUMED, GameUtil.GetFormattedWattage(this.coolingKilowatts, GameUtil.WattageFormatterUnit.Automatic)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.HEATCONSUMED, GameUtil.GetFormattedJoules(this.coolingKilowatts, "F1")), Descriptor.DescriptorType.Effect);
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.HEATCONSUMED, GameUtil.GetFormattedWattage(this.coolingKilowatts, GameUtil.WattageFormatterUnit.Automatic)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.HEATCONSUMED, GameUtil.GetFormattedJoules(this.coolingKilowatts, "F1", GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect);
 		list.Add(descriptor);
 		return list;
 	}
@@ -182,7 +182,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 	[MyCmpGet]
 	private Operational operational;
 
-	public Accumulator waterConsumptionAccumulator;
+	private HandleVector<int>.Handle waterConsumptionAccumulator = HandleVector<int>.InvalidHandle;
 
 	private MeterController meter;
 
@@ -196,7 +196,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 		public bool IsWorkable()
 		{
 			bool flag = false;
-			if (base.master.operational.IsOperational && base.master.HasMaterial())
+			if (base.master.operational.IsOperational && this.EnvironmentNeedsCooling() && base.smi.master.HasMaterial() && base.smi.EnvironmentHighEnoughPressure())
 			{
 				flag = true;
 			}
@@ -206,7 +206,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 		public bool EnvironmentNeedsCooling()
 		{
 			bool flag = false;
-			int num = Grid.PosToCell(base.transform.position);
+			int num = Grid.PosToCell(base.transform.GetPosition());
 			for (int i = base.master.minCoolingRange.y; i < base.master.maxCoolingRange.y; i++)
 			{
 				for (int j = base.master.minCoolingRange.x; j < base.master.maxCoolingRange.x; j++)
@@ -225,7 +225,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 
 		public bool EnvironmentHighEnoughPressure()
 		{
-			int num = Grid.PosToCell(base.transform.position);
+			int num = Grid.PosToCell(base.transform.GetPosition());
 			for (int i = base.master.minCoolingRange.y; i < base.master.maxCoolingRange.y; i++)
 			{
 				for (int j = base.master.minCoolingRange.x; j < base.master.maxCoolingRange.x; j++)
@@ -252,19 +252,18 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 				smi.master.workable.SetWorkTime(float.PositiveInfinity);
 			});
 			this.workable.ToggleChore(new Func<LiquidCooledFan.StatesInstance, Chore>(this.CreateUseChore), this.work_pst).EventTransition(GameHashes.ActiveChanged, this.workable.consuming, (LiquidCooledFan.StatesInstance smi) => smi.master.workable.worker != null).EventTransition(GameHashes.OperationalChanged, this.workable.consuming, (LiquidCooledFan.StatesInstance smi) => smi.master.workable.worker != null)
-				.Transition(this.unworkable, (LiquidCooledFan.StatesInstance smi) => !smi.master.HasMaterial())
-				.Transition(this.unworkable, (LiquidCooledFan.StatesInstance smi) => !smi.EnvironmentNeedsCooling());
-			this.work_pst.ToggleSchedulePeriodic("LiquidFanEmitCooledContents", 0.25f, delegate(LiquidCooledFan.StatesInstance smi)
+				.Transition(this.unworkable, (LiquidCooledFan.StatesInstance smi) => !smi.IsWorkable(), UpdateRate.SIM_200ms);
+			this.work_pst.Update("LiquidFanEmitCooledContents", delegate(LiquidCooledFan.StatesInstance smi, float dt)
 			{
 				smi.master.EmitContents();
-			}).ScheduleGoTo(2f, this.unworkable);
-			this.unworkable.ToggleSchedulePeriodic("LiquidFanEmitCooledContents", 0.25f, delegate(LiquidCooledFan.StatesInstance smi)
+			}, UpdateRate.SIM_200ms, false).ScheduleGoTo(2f, this.unworkable);
+			this.unworkable.Update("LiquidFanEmitCooledContents", delegate(LiquidCooledFan.StatesInstance smi, float dt)
 			{
 				smi.master.EmitContents();
-			}).ToggleSchedulePeriodic("LiquidFanUnworkableStatusItems", 0.5f, delegate(LiquidCooledFan.StatesInstance smi)
+			}, UpdateRate.SIM_200ms, false).Update("LiquidFanUnworkableStatusItems", delegate(LiquidCooledFan.StatesInstance smi, float dt)
 			{
 				smi.master.UpdateUnworkableStatusItems();
-			}).Transition(this.workable.waiting, (LiquidCooledFan.StatesInstance smi) => smi.EnvironmentNeedsCooling() && smi.master.HasMaterial() && smi.EnvironmentHighEnoughPressure())
+			}, UpdateRate.SIM_200ms, false).Transition(this.workable.waiting, (LiquidCooledFan.StatesInstance smi) => smi.IsWorkable(), UpdateRate.SIM_200ms)
 				.Enter(delegate(LiquidCooledFan.StatesInstance smi)
 				{
 					smi.master.UpdateUnworkableStatusItems();
@@ -282,38 +281,40 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 				{
 					smi.GoTo(this.unworkable);
 				}
-				smi.master.GetComponent<ElementConsumer>().consumptionRate = smi.master.flowRate;
-				smi.master.GetComponent<ElementConsumer>().RefreshConsumptionRate();
+				ElementConsumer component = smi.master.GetComponent<ElementConsumer>();
+				component.consumptionRate = smi.master.flowRate;
+				component.RefreshConsumptionRate();
 			})
-				.Update(delegate(LiquidCooledFan.StatesInstance smi)
+				.Update(delegate(LiquidCooledFan.StatesInstance smi, float dt)
 				{
-					smi.master.CoolContents(smi.dt);
+					smi.master.CoolContents(dt);
 				})
 				.ScheduleGoTo(12f, this.workable.emitting)
 				.Exit(delegate(LiquidCooledFan.StatesInstance smi)
 				{
-					smi.master.GetComponent<ElementConsumer>().consumptionRate = 0f;
-					smi.master.GetComponent<ElementConsumer>().RefreshConsumptionRate();
+					ElementConsumer component2 = smi.master.GetComponent<ElementConsumer>();
+					component2.consumptionRate = 0f;
+					component2.RefreshConsumptionRate();
 				});
 			this.workable.emitting.EventTransition(GameHashes.ActiveChanged, this.unworkable, (LiquidCooledFan.StatesInstance smi) => smi.master.workable.worker == null).EventTransition(GameHashes.OperationalChanged, this.unworkable, (LiquidCooledFan.StatesInstance smi) => smi.master.workable.worker == null).ScheduleGoTo(3f, this.workable.consuming)
-				.ToggleSchedulePeriodic("LiquidFanEmitCooledContents", 0.25f, delegate(LiquidCooledFan.StatesInstance smi)
+				.Update("LiquidFanEmitCooledContents", delegate(LiquidCooledFan.StatesInstance smi, float dt)
 				{
 					smi.master.EmitContents();
-				});
+				}, UpdateRate.SIM_200ms, false);
 			this.workable.emitting.EventTransition(GameHashes.ActiveChanged, this.unworkable, (LiquidCooledFan.StatesInstance smi) => smi.master.workable.worker == null).EventTransition(GameHashes.OperationalChanged, this.unworkable, (LiquidCooledFan.StatesInstance smi) => smi.master.workable.worker == null).ScheduleGoTo(3f, this.workable.consuming)
-				.Update(delegate(LiquidCooledFan.StatesInstance smi)
+				.Update(delegate(LiquidCooledFan.StatesInstance smi, float dt)
 				{
-					smi.master.CoolContents(smi.dt);
+					smi.master.CoolContents(dt);
 				})
-				.ToggleSchedulePeriodic("LiquidFanEmitCooledContents", 0.25f, delegate(LiquidCooledFan.StatesInstance smi)
+				.Update("LiquidFanEmitCooledContents", delegate(LiquidCooledFan.StatesInstance smi, float dt)
 				{
 					smi.master.EmitContents();
-				});
+				}, UpdateRate.SIM_200ms, false);
 		}
 
 		private Chore CreateUseChore(LiquidCooledFan.StatesInstance smi)
 		{
-			return new WorkChore<LiquidCooledFanWorkable>(Db.Get().ChoreTypes.LiquidCooledFan, smi.master.workable, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			return new WorkChore<LiquidCooledFanWorkable>(Db.Get().ChoreTypes.LiquidCooledFan, smi.master.workable, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 		}
 
 		public LiquidCooledFan.States.Workable workable;

@@ -21,7 +21,7 @@ public struct HashedString : IComparable<HashedString>, IEquatable<HashedString>
 		return new HashedString(s);
 	}
 
-	public bool isValid
+	public bool IsValid
 	{
 		get
 		{
@@ -48,15 +48,7 @@ public struct HashedString : IComparable<HashedString>, IEquatable<HashedString>
 
 	public int CompareTo(HashedString obj)
 	{
-		if (this.hash < obj.hash)
-		{
-			return -1;
-		}
-		if (this.hash > obj.hash)
-		{
-			return 1;
-		}
-		return 0;
+		return this.hash - obj.hash;
 	}
 
 	public override bool Equals(object obj)
@@ -96,11 +88,6 @@ public struct HashedString : IComparable<HashedString>, IEquatable<HashedString>
 
 	public void OnBeforeSerialize()
 	{
-	}
-
-	public bool IsValid()
-	{
-		return this.hash != 0;
 	}
 
 	public static HashedString Invalid = default(HashedString);

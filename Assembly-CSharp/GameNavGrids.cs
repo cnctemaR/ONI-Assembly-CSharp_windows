@@ -416,7 +416,7 @@ public class GameNavGrids
 		Dictionary<NavType, string> dictionary = new Dictionary<NavType, string>();
 		dictionary[NavType.Floor] = "idle_default";
 		dictionary[NavType.Ladder] = "ladder_idle";
-		dictionary[NavType.Pole] = "ladder_idle";
+		dictionary[NavType.Pole] = "pole_idle";
 		dictionary[NavType.Tube] = "tube_idle_loop";
 		this.DuplicantGrid = new NavGrid("MinionNavGrid", array4, dictionary, array2, new NavTableValidator[]
 		{

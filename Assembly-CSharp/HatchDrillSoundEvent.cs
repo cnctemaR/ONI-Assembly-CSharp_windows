@@ -11,7 +11,7 @@ public class HatchDrillSoundEvent : SoundEvent
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		Vector3 position = behaviour.GetComponent<Transform>().position;
+		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
 		int num = Grid.PosToCell(position);
 		int num2 = Grid.CellBelow(num);
 		float num3 = (float)HatchDrillSoundEvent.GetAudioCategory(num2);

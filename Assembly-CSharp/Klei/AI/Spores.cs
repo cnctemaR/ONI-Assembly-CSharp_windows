@@ -13,8 +13,6 @@ namespace Klei.AI
 			base.AddDiseaseComponent(new Spores.SporesComponent());
 		}
 
-		private const float EmitInterval = 3f;
-
 		private const float EmitMass = 0.05f;
 
 		private const SimHashes EmitElement = SimHashes.ContaminatedOxygen;
@@ -25,33 +23,42 @@ namespace Klei.AI
 		{
 			public override object OnInfect(GameObject go, DiseaseInstance diseaseInstance)
 			{
-				Spores.SporesComponent.InstanceData instanceData = default(Spores.SporesComponent.InstanceData);
-				instanceData.schedulerHandle = GameScheduler.Instance.SchedulePeriodic("EmitSpores", 3f, new Action<object>(this.Emit), go, null, 0f, null);
-				this.Emit(go);
+				Spores.SporesComponent.InstanceData instanceData = new Spores.SporesComponent.InstanceData();
+				instanceData.go = go;
+				SimAndRenderScheduler.instance.Add(instanceData, false);
+				instanceData.Sim4000ms(0f);
 				return instanceData;
 			}
 
 			public override void OnCure(GameObject go, object instace_data)
 			{
-				((Spores.SporesComponent.InstanceData)instace_data).schedulerHandle.ClearScheduler();
+				Spores.SporesComponent.InstanceData instanceData = (Spores.SporesComponent.InstanceData)instace_data;
+				SimAndRenderScheduler.instance.Remove(instanceData);
 			}
 
-			private void Emit(object data)
+			private void Emit(GameObject go)
 			{
-				GameObject gameObject = (GameObject)data;
-				int num = Grid.PosToCell(gameObject.transform.position);
-				float value = Db.Get().Amounts.Temperature.Lookup(gameObject).value;
-				SimMessages.AddRemoveSubstance(num, SimHashes.ContaminatedOxygen, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.05f, value, byte.MaxValue, 0, -1);
-				KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("spore_fx_kanim", gameObject.transform.position, gameObject.transform, true, Grid.SceneLayer.Front, false);
-				kbatchedAnimController.Play(Spores.SporesComponent.WorkLoopAnims, KAnim.PlayMode.Once);
-				kbatchedAnimController.destroyOnAnimComplete = true;
 			}
 
 			private static readonly HashedString[] WorkLoopAnims = new HashedString[] { "working_pre", "working_loop", "working_pst" };
 
-			private struct InstanceData
+			private class InstanceData : ISim4000ms
 			{
-				public SchedulerHandle schedulerHandle;
+				public void Sim4000ms(float dt)
+				{
+					if (this.go == null)
+					{
+						return;
+					}
+					int num = Grid.PosToCell(this.go.transform.GetPosition());
+					float value = Db.Get().Amounts.Temperature.Lookup(this.go).value;
+					SimMessages.AddRemoveSubstance(num, SimHashes.ContaminatedOxygen, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.05f, value, byte.MaxValue, 0, -1);
+					KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("spore_fx_kanim", this.go.transform.GetPosition(), this.go.transform, true, Grid.SceneLayer.Front, false);
+					kbatchedAnimController.Play(Spores.SporesComponent.WorkLoopAnims, KAnim.PlayMode.Once);
+					kbatchedAnimController.destroyOnAnimComplete = true;
+				}
+
+				public GameObject go;
 			}
 		}
 	}

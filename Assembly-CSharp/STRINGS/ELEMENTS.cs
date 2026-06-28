@@ -108,6 +108,8 @@ namespace STRINGS
 			public static LocString NAME = "Coal";
 
 			public static LocString DESC = "(C) Coal is a combustible fossil fuel composed of carbon.\n\nIt is useful in <style=\"power\">Power</style> production.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class CARBONDIOXIDE
@@ -161,6 +163,24 @@ namespace STRINGS
 			public static LocString NAME = "Ceramic";
 
 			public static LocString DESC = "Ceramic is a hard, brittle material formed from heated <style=\"RawMineral\">Clay</style>.\n\nIt is a reliable <style=\"RawMineral\">Construction Material</style>.";
+
+			public static LocString BUILD_DESC = string.Empty;
+		}
+
+		public class CEMENT
+		{
+			public static LocString NAME = "Cement";
+
+			public static LocString DESC = "Cement is a refined building material used for assembling advanced buildings.";
+
+			public static LocString BUILD_DESC = string.Empty;
+		}
+
+		public class CEMENTMIX
+		{
+			public static LocString NAME = "Cement Mix";
+
+			public static LocString DESC = "Cement Mix can be used to create <style=\"solid\">Cement</style> for advanced building assembly.";
 
 			public static LocString BUILD_DESC = string.Empty;
 		}
@@ -730,6 +750,8 @@ namespace STRINGS
 			public static LocString NAME = "Propane";
 
 			public static LocString DESC = "(C<sub>3</sub>H<sub>8</sub>) Propane is a natural gas in a <style=\"solid\">Solid</style> state.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDCRUDEOIL
@@ -854,7 +876,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Plastic";
 
-			public static LocString DESC = "(C<sub>3</sub>H<sub>6</sub>)<sub>n</sub> Plastic is a thermoplastic polymer.\n\nIt is useful as a raw <style=\"misc\">Plastic</style> feedstock.";
+			public static LocString DESC = "(C<sub>3</sub>H<sub>6</sub>)<sub>n</sub> Plastic is a thermoplastic polymer.\n\nIt is useful as a raw <style=\"solid\">Plastic</style> feedstock.";
 
 			public static LocString BUILD_DESC = "Buildings made of this material have antiseptic properties";
 		}
@@ -864,6 +886,15 @@ namespace STRINGS
 			public static LocString NAME = "Naphtha";
 
 			public static LocString DESC = "Naphtha a distilled hydrocarbon mixture produced from the burning of <style=\"solid\">Plastics</style>.";
+		}
+
+		public class SLABS
+		{
+			public static LocString NAME = "Building Slab";
+
+			public static LocString DESC = "Slabs are a refined mineral building block used for assembling advanced buildings.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 	}
 }

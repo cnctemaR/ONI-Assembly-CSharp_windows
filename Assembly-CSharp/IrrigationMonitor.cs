@@ -30,28 +30,28 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 			smi.UpdateIrrigation(0.2f);
 		})
 			.Target(this.masterTarget);
-		this.replanted.irrigated.DefaultState(this.replanted.irrigated.decaying).TriggerOnEnter(this.ResourceRecievedEvent, null);
-		this.replanted.irrigated.decaying.DefaultState(this.replanted.irrigated.decaying.normal).ToggleAttributeModifier("Consuming", (IrrigationMonitor.Instance smi) => smi.consumptionRate, null).ParamTransition<bool>(this.hasCorrectLiquid, this.replanted.irrigated.absorbing, (IrrigationMonitor.Instance smi, bool p) => p)
-			.Update(delegate(IrrigationMonitor.Instance smi)
+		this.replanted.irrigated.DefaultState(this.replanted.irrigated.absorbing).TriggerOnEnter(this.ResourceRecievedEvent, null);
+		this.replanted.irrigated.absorbing.DefaultState(this.replanted.irrigated.absorbing.normal).ParamTransition<bool>(this.hasCorrectLiquid, this.replanted.starved, (IrrigationMonitor.Instance smi, bool p) => !p).ToggleAttributeModifier("Absorbing", (IrrigationMonitor.Instance smi) => smi.absorptionRate, null)
+			.Enter(delegate(IrrigationMonitor.Instance smi)
 			{
-				if (smi.Starved())
-				{
-					smi.GoTo(this.replanted.starved);
-				}
-			});
-		this.replanted.irrigated.decaying.normal.ParamTransition<bool>(this.hasIncorrectLiquid, this.replanted.irrigated.decaying.wrongLiquid, (IrrigationMonitor.Instance smi, bool p) => p);
-		this.replanted.irrigated.decaying.wrongLiquid.ParamTransition<bool>(this.hasIncorrectLiquid, this.replanted.irrigated.decaying.normal, (IrrigationMonitor.Instance smi, bool p) => !p);
-		this.replanted.irrigated.absorbing.DefaultState(this.replanted.irrigated.absorbing.normal).ParamTransition<bool>(this.hasCorrectLiquid, this.replanted.irrigated.decaying, (IrrigationMonitor.Instance smi, bool p) => !p).ToggleAttributeModifier("Absorbing", (IrrigationMonitor.Instance smi) => smi.absorptionRate, null)
-			.Update(delegate(IrrigationMonitor.Instance smi)
+				smi.StartAbsorbing();
+			})
+			.EventHandler(GameHashes.Wilt, delegate(IrrigationMonitor.Instance smi)
 			{
-				if (!smi.gameObject.HasTag(GameTags.Wilting))
-				{
-					smi.AbsorbLiquid(smi.deltatime);
-				}
+				smi.StopAbsorbing();
+			})
+			.EventHandler(GameHashes.WiltRecover, delegate(IrrigationMonitor.Instance smi)
+			{
+				smi.StartAbsorbing();
+			})
+			.Exit(delegate(IrrigationMonitor.Instance smi)
+			{
+				smi.StopAbsorbing();
 			});
 		this.replanted.irrigated.absorbing.normal.ParamTransition<bool>(this.hasIncorrectLiquid, this.replanted.irrigated.absorbing.wrongLiquid, (IrrigationMonitor.Instance smi, bool p) => p);
 		this.replanted.irrigated.absorbing.wrongLiquid.ParamTransition<bool>(this.hasIncorrectLiquid, this.replanted.irrigated.absorbing.normal, (IrrigationMonitor.Instance smi, bool p) => !p);
-		this.replanted.starved.DefaultState(this.replanted.starved.normal).TriggerOnEnter(this.ResourceDepletedEvent, null).ParamTransition<bool>(this.hasCorrectLiquid, this.replanted.irrigated, (IrrigationMonitor.Instance smi, bool p) => p);
+		this.replanted.starved.DefaultState(this.replanted.starved.normal).TriggerOnEnter(this.ResourceDepletedEvent, null).ParamTransition<bool>(this.enoughCorrectLiquidToRecover, this.replanted.irrigated.absorbing, (IrrigationMonitor.Instance smi, bool p) => p && this.hasCorrectLiquid.Get(smi))
+			.ParamTransition<bool>(this.hasCorrectLiquid, this.replanted.irrigated.absorbing, (IrrigationMonitor.Instance smi, bool p) => p && this.enoughCorrectLiquidToRecover.Get(smi));
 		this.replanted.starved.normal.ParamTransition<bool>(this.hasIncorrectLiquid, this.replanted.starved.wrongLiquid, (IrrigationMonitor.Instance smi, bool p) => p);
 		this.replanted.starved.wrongLiquid.ParamTransition<bool>(this.hasIncorrectLiquid, this.replanted.starved.normal, (IrrigationMonitor.Instance smi, bool p) => !p);
 	}
@@ -61,6 +61,8 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 	public StateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.BoolParameter hasCorrectLiquid;
 
 	public StateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.BoolParameter hasIncorrectLiquid;
+
+	public StateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.BoolParameter enoughCorrectLiquidToRecover;
 
 	public GameHashes ResourceRecievedEvent = GameHashes.LiquidResourceRecieved;
 
@@ -72,19 +74,6 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 
 	public IrrigationMonitor.ReplantedStates replanted;
 
-	public struct LiquidResourceInfo
-	{
-		public LiquidResourceInfo(Tag tag, float mass_consumption_rate)
-		{
-			this.tag = tag;
-			this.massConsumptionRate = mass_consumption_rate;
-		}
-
-		public Tag tag;
-
-		public float massConsumptionRate;
-	}
-
 	public class VariableIrrigationStates : GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.State
 	{
 		public GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.State normal;
@@ -94,8 +83,6 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 
 	public class Irrigated : GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Instance.Def>.State
 	{
-		public IrrigationMonitor.VariableIrrigationStates decaying;
-
 		public IrrigationMonitor.VariableIrrigationStates absorbing;
 	}
 
@@ -113,11 +100,6 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 		{
 			this.AddAmounts(base.gameObject);
 			this.MakeModifiers();
-			this.accumulators = new Accumulator[def.consumedElements.Length];
-			for (int i = 0; i < def.consumedElements.Length; i++)
-			{
-				this.accumulators[i] = new Accumulator("ElementsConsumed", base.master.GetComponent<KPrefabID>(), 3f);
-			}
 			master.Subscribe(1309017699, new Action<object>(this.SetStorage));
 		}
 
@@ -158,14 +140,14 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 
 		public void SetStorage(object obj)
 		{
-			Storage storage = (Storage)obj;
-			base.sm.resourceStorage.Set(storage, base.smi);
+			this.storage = (Storage)obj;
+			base.sm.resourceStorage.Set(this.storage, base.smi);
 			foreach (ManualDeliveryKG manualDeliveryKG in base.smi.gameObject.GetComponents<ManualDeliveryKG>())
 			{
 				bool flag = false;
-				foreach (IrrigationMonitor.LiquidResourceInfo liquidResourceInfo in base.def.consumedElements)
+				foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in base.def.consumedElements)
 				{
-					if (manualDeliveryKG.requestedItemTag == liquidResourceInfo.tag)
+					if (manualDeliveryKG.requestedItemTag == consumeInfo.tag)
 					{
 						flag = true;
 						break;
@@ -173,8 +155,8 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 				}
 				if (flag)
 				{
-					manualDeliveryKG.SetStorage(storage);
-					manualDeliveryKG.enabled = !storage.gameObject.GetComponent<PlantablePlot>().has_liquid_pipe_input;
+					manualDeliveryKG.SetStorage(this.storage);
+					manualDeliveryKG.enabled = !this.storage.gameObject.GetComponent<PlantablePlot>().has_liquid_pipe_input;
 				}
 			}
 		}
@@ -192,11 +174,7 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 			get
 			{
 				string text = string.Empty;
-				if (base.smi.IsInsideState(base.smi.sm.replanted.irrigated.decaying.wrongLiquid))
-				{
-					text = this.GetIncorrectLiquidStatusItemMajor().resolveStringCallback(CREATURES.STATUSITEMS.WRONGIRRIGATIONMAJOR.NAME, this);
-				}
-				else if (base.smi.IsInsideState(base.smi.sm.replanted.irrigated.absorbing.wrongLiquid))
+				if (base.smi.IsInsideState(base.smi.sm.replanted.irrigated.absorbing.wrongLiquid))
 				{
 					text = this.GetIncorrectLiquidStatusItem().resolveStringCallback(CREATURES.STATUSITEMS.WRONGIRRIGATION.NAME, this);
 				}
@@ -230,76 +208,74 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 				return;
 			}
 			Storage storage = base.sm.resourceStorage.Get<Storage>(base.smi);
-			if (storage == null)
-			{
-				return;
-			}
 			bool flag = true;
 			bool flag2 = false;
-			List<GameObject> items = storage.items;
-			for (int i = 0; i < base.def.consumedElements.Length; i++)
+			bool flag3 = true;
+			if (storage != null)
 			{
-				IrrigationMonitor.LiquidResourceInfo liquidResourceInfo = base.def.consumedElements[i];
-				float num = 0f;
-				for (int j = 0; j < items.Count; j++)
+				List<GameObject> items = storage.items;
+				for (int i = 0; i < base.def.consumedElements.Length; i++)
 				{
-					GameObject gameObject = items[j];
-					if (gameObject.HasTag(liquidResourceInfo.tag))
+					float num = 0f;
+					PlantElementAbsorber.ConsumeInfo consumeInfo = base.def.consumedElements[i];
+					for (int j = 0; j < items.Count; j++)
 					{
-						num += gameObject.GetComponent<PrimaryElement>().Mass;
+						GameObject gameObject = items[j];
+						if (gameObject.HasTag(consumeInfo.tag))
+						{
+							num += gameObject.GetComponent<PrimaryElement>().Mass;
+						}
+						else if (gameObject.HasTag(base.def.wrongIrrigationTestTag))
+						{
+							flag2 = true;
+						}
 					}
-					else if (gameObject.HasTag(base.def.wrongIrrigationTestTag))
+					this.total_available_mass = num;
+					if (num < consumeInfo.massConsumptionRate * dt)
 					{
-						flag2 = true;
+						flag = false;
+						break;
+					}
+					if (num < consumeInfo.massConsumptionRate * (dt * 30f))
+					{
+						flag3 = false;
+						break;
 					}
 				}
-				this.total_available_mass = num;
-				if (num < liquidResourceInfo.massConsumptionRate * dt)
-				{
-					flag = false;
-					break;
-				}
+			}
+			else
+			{
+				flag = false;
+				flag3 = false;
+				flag2 = false;
 			}
 			base.sm.hasCorrectLiquid.Set(flag, base.smi);
 			base.sm.hasIncorrectLiquid.Set(flag2, base.smi);
+			base.sm.enoughCorrectLiquidToRecover.Set(flag3 && flag, base.smi);
 		}
 
-		public void AbsorbLiquid(float dt)
+		public void StartAbsorbing()
 		{
-			using (new KProfiler.Region("AbsorbFertilizer", null))
+			if (this.absorberHandle.IsValid())
 			{
-				if (base.def.consumedElements != null)
-				{
-					Storage storage = base.sm.resourceStorage.Get<Storage>(base.smi);
-					if (!(storage == null))
-					{
-						if (base.sm.hasCorrectLiquid.Get(base.smi))
-						{
-							for (int i = 0; i < base.def.consumedElements.Length; i++)
-							{
-								float num = base.def.consumedElements[i].massConsumptionRate * dt;
-								PrimaryElement primaryElement = storage.FindFirstWithMass(base.def.consumedElements[i].tag);
-								while (primaryElement != null)
-								{
-									float num2 = Mathf.Min(num, primaryElement.Mass);
-									primaryElement.Mass -= num2;
-									num -= num2;
-									storage.Trigger(-1697596308, primaryElement.gameObject);
-									this.accumulators[i].Accumulate(num2);
-									if (num <= 0f)
-									{
-										break;
-									}
-									primaryElement = storage.FindFirstWithMass(base.def.consumedElements[i].tag);
-								}
-							}
-						}
-					}
-				}
+				return;
 			}
+			if (base.def.consumedElements == null || base.def.consumedElements.Length == 0)
+			{
+				return;
+			}
+			GameObject gameObject = base.smi.gameObject;
+			this.absorberHandle = Game.Instance.plantElementAbsorbers.Add(this.storage, base.def.consumedElements);
 		}
 
-		private Accumulator[] accumulators;
+		public void StopAbsorbing()
+		{
+			if (!this.absorberHandle.IsValid())
+			{
+				return;
+			}
+			this.absorberHandle = Game.Instance.plantElementAbsorbers.Remove(this.absorberHandle);
+		}
 
 		public AttributeModifier consumptionRate;
 
@@ -309,6 +285,10 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 
 		private float total_available_mass;
 
+		private Storage storage;
+
+		private HandleVector<int>.Handle absorberHandle = HandleVector<int>.InvalidHandle;
+
 		public class Def : StateMachine.Instance.BaseDef, IGameObjectEffectDescriptor
 		{
 			public List<Descriptor> GetDescriptors(GameObject obj)
@@ -316,9 +296,9 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 				if (this.consumedElements.Length > 0)
 				{
 					List<Descriptor> list = new List<Descriptor>();
-					foreach (IrrigationMonitor.LiquidResourceInfo liquidResourceInfo in this.consumedElements)
+					foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in this.consumedElements)
 					{
-						list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.IDEAL_FERTILIZER, liquidResourceInfo.tag.ProperName(), GameUtil.GetFormattedMass(-liquidResourceInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.IDEAL_FERTILIZER, liquidResourceInfo.tag.ProperName(), GameUtil.GetFormattedMass(liquidResourceInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false));
+						list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.IDEAL_FERTILIZER, consumeInfo.tag.ProperName(), GameUtil.GetFormattedMass(-consumeInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.IDEAL_FERTILIZER, consumeInfo.tag.ProperName(), GameUtil.GetFormattedMass(consumeInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false));
 					}
 					return list;
 				}
@@ -327,7 +307,7 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 
 			public Tag wrongIrrigationTestTag;
 
-			public IrrigationMonitor.LiquidResourceInfo[] consumedElements;
+			public PlantElementAbsorber.ConsumeInfo[] consumedElements;
 		}
 	}
 }

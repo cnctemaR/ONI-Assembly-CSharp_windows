@@ -37,9 +37,12 @@ public class NavGrid
 			navTableValidator2.onDirty = (Action<int>)Delegate.Combine(navTableValidator2.onDirty, new Action<int>(this.AddDirtyCell));
 		}
 		this.InitializeGraph();
+		this.NavGraph = new NavGraph(Grid.CellCount, this);
 	}
 
 	public NavTable NavTable { get; private set; }
+
+	public NavGraph NavGraph { get; private set; }
 
 	public NavGrid.Transition[] transitions { get; set; }
 

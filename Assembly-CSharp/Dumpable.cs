@@ -16,7 +16,7 @@ public class Dumpable : Workable
 		base.OnSpawn();
 		if (this.isMarkedForDumping)
 		{
-			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 		}
 		base.SetWorkTime(0.1f);
 	}
@@ -37,7 +37,7 @@ public class Dumpable : Workable
 		else
 		{
 			this.isMarkedForDumping = true;
-			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 		}
 	}
 
@@ -45,15 +45,22 @@ public class Dumpable : Workable
 	{
 		this.isMarkedForDumping = false;
 		this.chore = null;
+		this.Dump();
+	}
+
+	public void Dump()
+	{
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
-		SimMessages.AddRemoveSubstance(Grid.PosToCell(this), component.ElementID, CellEventLogger.Instance.Dumpable, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, -1);
+		if (component.Mass > 0f)
+		{
+			SimMessages.AddRemoveSubstance(Grid.PosToCell(this), component.ElementID, CellEventLogger.Instance.Dumpable, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, -1);
+		}
 		Util.KDestroyGameObject(base.gameObject);
 	}
 
 	private void OnRefreshUserMenu(object data)
 	{
-		Pickupable component = base.GetComponent<Pickupable>();
-		if (component != null && component.storage != null)
+		if (this.HasTag(GameTags.Stored))
 		{
 			return;
 		}

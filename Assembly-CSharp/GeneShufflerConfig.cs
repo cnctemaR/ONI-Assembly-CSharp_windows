@@ -16,6 +16,7 @@ public class GeneShufflerConfig : IEntityConfig
 		gameObject.UpdateComponentRequirement<GeneShuffler>(true);
 		gameObject.UpdateComponentRequirement<LoreBearer>(true);
 		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
+		gameObject.UpdateComponentRequirement<Ownable>(true);
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.sceneLayer = Grid.SceneLayer.BuildingBack;
 		kbatchedAnimController.fgLayer = Grid.SceneLayer.BuildingFront;
@@ -25,10 +26,11 @@ public class GeneShufflerConfig : IEntityConfig
 	public void OnPrefabInit(GameObject inst)
 	{
 		GeneShuffler component = inst.GetComponent<GeneShuffler>();
-		component.slot = Db.Get().OwnableSlots.GeneShuffler;
 		component.workLayer = Grid.SceneLayer.Building;
-		OccupyArea component2 = inst.GetComponent<OccupyArea>();
-		component2.objectLayer = ObjectLayer.Building;
+		Ownable component2 = inst.GetComponent<Ownable>();
+		component2.slotID = Db.Get().AssignableSlots.GeneShuffler.Id;
+		OccupyArea component3 = inst.GetComponent<OccupyArea>();
+		component3.objectLayer = ObjectLayer.Building;
 	}
 
 	public void OnSpawn(GameObject inst)

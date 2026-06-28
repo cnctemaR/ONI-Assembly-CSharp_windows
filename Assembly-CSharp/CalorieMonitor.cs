@@ -7,12 +7,12 @@ public class CalorieMonitor : GameStateMachine<CalorieMonitor, CalorieMonitor.In
 	{
 		default_state = this.satisfied;
 		base.serializable = true;
-		this.satisfied.Transition(this.hungry, (CalorieMonitor.Instance smi) => smi.IsHungry());
-		this.hungry.DefaultState(this.hungry.normal).Transition(this.satisfied, (CalorieMonitor.Instance smi) => smi.IsSatisfied()).ToggleExpression(Db.Get().Expressions.Hungry, null)
+		this.satisfied.Transition(this.hungry, (CalorieMonitor.Instance smi) => smi.IsHungry(), UpdateRate.SIM_200ms);
+		this.hungry.DefaultState(this.hungry.normal).Transition(this.satisfied, (CalorieMonitor.Instance smi) => smi.IsSatisfied(), UpdateRate.SIM_200ms).ToggleExpression(Db.Get().Expressions.Hungry, null)
 			.ToggleThought(Db.Get().Thoughts.Starving, null)
 			.ToggleUrge(Db.Get().Urges.Eat);
-		this.hungry.normal.Transition(this.hungry.starving, (CalorieMonitor.Instance smi) => smi.IsStarving()).ToggleStatusItem(Db.Get().DuplicantStatusItems.Hungry, null);
-		this.hungry.starving.Transition(this.hungry.normal, (CalorieMonitor.Instance smi) => !smi.IsStarving()).Transition(this.depleted, (CalorieMonitor.Instance smi) => smi.IsDepleted()).ToggleStatusItem(Db.Get().DuplicantStatusItems.Starving, null);
+		this.hungry.normal.Transition(this.hungry.starving, (CalorieMonitor.Instance smi) => smi.IsStarving(), UpdateRate.SIM_200ms).ToggleStatusItem(Db.Get().DuplicantStatusItems.Hungry, null);
+		this.hungry.starving.Transition(this.hungry.normal, (CalorieMonitor.Instance smi) => !smi.IsStarving(), UpdateRate.SIM_200ms).Transition(this.depleted, (CalorieMonitor.Instance smi) => smi.IsDepleted(), UpdateRate.SIM_200ms).ToggleStatusItem(Db.Get().DuplicantStatusItems.Starving, null);
 		this.depleted.ToggleTag(GameTags.CaloriesDepleted).Enter(delegate(CalorieMonitor.Instance smi)
 		{
 			smi.Kill();

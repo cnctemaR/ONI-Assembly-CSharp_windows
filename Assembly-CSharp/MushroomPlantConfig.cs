@@ -16,10 +16,10 @@ public class MushroomPlantConfig : IEntityConfig
 		string text4 = "idle_empty";
 		EffectorValues tier = DECOR.BONUS.TIER1;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, kanimFile, text4, Grid.SceneLayer.BuildingFront, 1, 2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 15f, 5f, 268.15f, 278.15f, 293.15f, 296.15f, 308.15f, 318.15f, new SimHashes[] { SimHashes.CarbonDioxide }, true, 0f, 0.15f, 1f, MushroomConfig.ID, true);
-		EntityTemplates.ExtendPlantToFertilizable(gameObject, new FertilizationMonitor.FertilizerInfo[]
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 15f, 5f, 268.15f, 278.15f, 293.15f, 296.15f, 308.15f, 318.15f, new SimHashes[] { SimHashes.CarbonDioxide }, true, 0f, 0.15f, 1f, MushroomConfig.ID, true, true);
+		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
-			new FertilizationMonitor.FertilizerInfo
+			new PlantElementAbsorber.ConsumeInfo
 			{
 				tag = GameTags.SlimeMold,
 				massConsumptionRate = 0.006666667f
@@ -57,8 +57,4 @@ public class MushroomPlantConfig : IEntityConfig
 	public const string ID = "MushroomPlant";
 
 	public const string SEED_ID = "MushroomSeed";
-
-	public const int MID_YIELD_SEEDS = 1;
-
-	public const int HIGH_YIELD_SEEDS = 1;
 }

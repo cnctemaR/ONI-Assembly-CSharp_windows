@@ -67,6 +67,7 @@ public class Health : KMonoBehaviour, ISaveLoadable
 			this.UpdateStatus();
 		}
 		this.effects = base.GetComponent<Effects>();
+		this.UpdateHealthBar();
 	}
 
 	protected override void OnCleanUp()
@@ -77,18 +78,12 @@ public class Health : KMonoBehaviour, ISaveLoadable
 
 	public void UpdateHealthBar()
 	{
-		if (this.State == Health.HealthState.Dead || this.State == Health.HealthState.Incapacitated)
+		if (NameDisplayScreen.Instance == null)
 		{
-			if (NameDisplayScreen.Instance != null)
-			{
-				NameDisplayScreen.Instance.SetHealthDisplay(base.gameObject, new Func<float>(this.percent), false);
-			}
 			return;
 		}
-		if (NameDisplayScreen.Instance != null)
-		{
-			NameDisplayScreen.Instance.SetHealthDisplay(base.gameObject, new Func<float>(this.percent), true);
-		}
+		bool flag = this.State == Health.HealthState.Dead || this.State == Health.HealthState.Incapacitated || this.hitPoints >= this.maxHitPoints;
+		NameDisplayScreen.Instance.SetHealthDisplay(base.gameObject, new Func<float>(this.percent), !flag);
 	}
 
 	private void Recover()
@@ -150,6 +145,11 @@ public class Health : KMonoBehaviour, ISaveLoadable
 			this.effects.Remove("ModerateWounds");
 			this.effects.Remove("SevereWounds");
 			break;
+		case Health.HealthState.Alright:
+			this.effects.Remove("LightWounds");
+			this.effects.Remove("ModerateWounds");
+			this.effects.Remove("SevereWounds");
+			break;
 		case Health.HealthState.Scuffed:
 			this.effects.Remove("ModerateWounds");
 			this.effects.Remove("SevereWounds");
@@ -199,6 +199,10 @@ public class Health : KMonoBehaviour, ISaveLoadable
 		{
 			healthState = Health.HealthState.Perfect;
 		}
+		else if (num >= 0.85f)
+		{
+			healthState = Health.HealthState.Alright;
+		}
 		else if (num >= 0.66f)
 		{
 			healthState = Health.HealthState.Scuffed;
@@ -221,13 +225,9 @@ public class Health : KMonoBehaviour, ISaveLoadable
 		}
 		if (this.State != healthState)
 		{
-			if (this.State == Health.HealthState.Incapacitated && healthState != Health.HealthState.Incapacitated && healthState != Health.HealthState.Dead)
+			if (this.State == Health.HealthState.Incapacitated && healthState != Health.HealthState.Dead)
 			{
 				this.Recover();
-			}
-			if (this.State == Health.HealthState.Perfect)
-			{
-				base.Trigger(-1491582671, this);
 			}
 			if (healthState == Health.HealthState.Perfect)
 			{
@@ -235,7 +235,7 @@ public class Health : KMonoBehaviour, ISaveLoadable
 			}
 			this.State = healthState;
 			KSelectable component = base.GetComponent<KSelectable>();
-			if (this.State != Health.HealthState.Dead && this.State != Health.HealthState.Perfect)
+			if (this.State != Health.HealthState.Dead && this.State != Health.HealthState.Perfect && this.State != Health.HealthState.Alright)
 			{
 				component.SetStatusItem(Db.Get().StatusItemCategories.Hitpoints, Db.Get().CreatureStatusItems.HealthStatus, this.State);
 			}
@@ -289,6 +289,7 @@ public class Health : KMonoBehaviour, ISaveLoadable
 	public enum HealthState
 	{
 		Perfect,
+		Alright,
 		Scuffed,
 		Injured,
 		Critical,

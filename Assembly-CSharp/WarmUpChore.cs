@@ -6,10 +6,10 @@ using UnityEngine;
 public class WarmUpChore : Chore<WarmUpChore.StatesInstance>
 {
 	public WarmUpChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Warmup, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Warmup, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new WarmUpChore.StatesInstance(this, target.gameObject);
-		base.AddPrecondition(ChorePreconditions.IsNotRedAlert, null);
+		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 	}
 
 	public class StatesInstance : GameStateMachine<WarmUpChore.States, WarmUpChore.StatesInstance, WarmUpChore, object>.GameInstance
@@ -37,7 +37,7 @@ public class WarmUpChore : Chore<WarmUpChore.StatesInstance>
 			int num = base.sm.recoverer.GetSMI<TemperatureMonitor.Instance>(base.smi).GetWarmUpCell();
 			if (num == Grid.InvalidCell)
 			{
-				num = Grid.PosToCell(base.sm.recoverer.Get<Transform>(base.smi).position);
+				num = Grid.PosToCell(base.sm.recoverer.Get<Transform>(base.smi).GetPosition());
 				this.noAvailableTarget = true;
 			}
 			else
@@ -75,18 +75,18 @@ public class WarmUpChore : Chore<WarmUpChore.StatesInstance>
 			}).Exit("DestroyLocator", delegate(WarmUpChore.StatesInstance smi)
 			{
 				smi.DestroyLocator();
-			}).Update("UpdateLocator", delegate(WarmUpChore.StatesInstance smi)
+			}).Update("UpdateLocator", delegate(WarmUpChore.StatesInstance smi, float dt)
 			{
 				smi.UpdateLocator();
-			});
-			this.NoLocationAvailable.Update(delegate(WarmUpChore.StatesInstance smi)
+			}, UpdateRate.SIM_200ms, false);
+			this.NoLocationAvailable.Update(delegate(WarmUpChore.StatesInstance smi, float dt)
 			{
 				if (!smi.noAvailableTarget)
 				{
 					smi.GoTo(this.approach);
 				}
 			});
-			this.approach.InitializeStates(this.recoverer, this.locator, this.recover, null, null, null).Transition(this.NoLocationAvailable, (WarmUpChore.StatesInstance smi) => smi.noAvailableTarget);
+			this.approach.InitializeStates(this.recoverer, this.locator, this.recover, null, null, null).Transition(this.NoLocationAvailable, (WarmUpChore.StatesInstance smi) => smi.noAvailableTarget, UpdateRate.SIM_200ms);
 			this.recover.DefaultState(this.recover.pre).ToggleAnims("anim_idle_hot_kanim_kanim", 30f).ToggleAttributeModifier("Warming Up", (WarmUpChore.StatesInstance smi) => smi.warmingUp, null)
 				.Enter(delegate(WarmUpChore.StatesInstance smi)
 				{

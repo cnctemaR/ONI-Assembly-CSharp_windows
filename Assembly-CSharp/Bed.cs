@@ -2,22 +2,30 @@
 using System.Collections.Generic;
 using Klei.AI;
 
-public class Bed : Ownable, IEffectDescriptor
+public class Bed : Workable, IEffectDescriptor
 {
-	private Bed()
+	protected override void OnPrefabInit()
 	{
+		base.OnPrefabInit();
 		this.showProgressBar = false;
-		base.slot = Db.Get().OwnableSlots.Bed;
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		this.sleepable = base.GetComponent<Sleepable>();
-		Sleepable sleepable = this.sleepable;
-		sleepable.OnWorkStartedCB = (global::System.Action)Delegate.Combine(sleepable.OnWorkStartedCB, new global::System.Action(this.AddEffects));
-		Sleepable sleepable2 = this.sleepable;
-		sleepable2.OnWorkStoppedCB = (global::System.Action)Delegate.Combine(sleepable2.OnWorkStoppedCB, new global::System.Action(this.RemoveEffects));
+	}
+
+	private void OnWorkableEvent(Workable.WorkableEvent workable_event)
+	{
+		if (workable_event == Workable.WorkableEvent.WorkStarted)
+		{
+			this.AddEffects();
+		}
+		else if (workable_event == Workable.WorkableEvent.WorkStopped)
+		{
+			this.RemoveEffects();
+		}
 	}
 
 	private void AddEffects()
@@ -30,19 +38,15 @@ public class Bed : Ownable, IEffectDescriptor
 				this.targetWorker.GetComponent<Effects>().Add(text, false);
 			}
 		}
-		string text2 = string.Empty;
-		Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(base.GetComponent<BuildingComplete>());
+		RoomType roomType = null;
+		Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(base.gameObject);
 		if (roomOfBuilding != null)
 		{
-			text2 = RoomTypes.GetRoomType(roomOfBuilding).id;
+			roomType = Db.Get().RoomTypes.GetRoomType(roomOfBuilding);
 		}
-		if (text2 == "Barracks")
+		if (roomType == Db.Get().RoomTypes.Barracks)
 		{
 			this.targetWorker.GetComponent<Effects>().Add("BarracksStamina", false);
-		}
-		else if (text2 == "PrivateBedroom")
-		{
-			this.targetWorker.GetComponent<Effects>().Add("BedroomStamina", false);
 		}
 	}
 
@@ -78,25 +82,26 @@ public class Bed : Ownable, IEffectDescriptor
 		}
 	}
 
-	public new List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
-		List<Descriptor> descriptors = base.GetDescriptors(def);
+		List<Descriptor> list = new List<Descriptor>();
 		if (this.effects != null)
 		{
 			foreach (string text in this.effects)
 			{
 				if (text != null && text != string.Empty)
 				{
-					this.AddModifierDescriptions(descriptors, text, false);
+					this.AddModifierDescriptions(list, text, false);
 				}
 			}
 		}
-		return descriptors;
+		return list;
 	}
 
-	public string[] effects;
-
+	[MyCmpReq]
 	private Sleepable sleepable;
 
 	private Worker targetWorker;
+
+	public string[] effects;
 }

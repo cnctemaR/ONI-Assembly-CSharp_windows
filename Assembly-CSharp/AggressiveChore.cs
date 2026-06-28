@@ -4,7 +4,7 @@ using UnityEngine;
 public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 {
 	public AggressiveChore(IStateMachineTarget target, Action<Chore> on_complete = null)
-		: base(Db.Get().ChoreTypes.StressActingOut, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.StressActingOut, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new AggressiveChore.StatesInstance(this, target.gameObject);
 	}
@@ -14,11 +14,11 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 		base.Cleanup();
 	}
 
-	public void PunchWallDamage()
+	public void PunchWallDamage(float dt)
 	{
 		if (Grid.Solid[this.smi.sm.wallCellToBreak] && Grid.Cell[this.smi.sm.wallCellToBreak].strengthInfo < 100)
 		{
-			WorldDamage.Instance.ApplyDamage(this.smi.sm.wallCellToBreak, 0.04f, this.smi.sm.wallCellToBreak, -1);
+			WorldDamage.Instance.ApplyDamage(this.smi.sm.wallCellToBreak, 0.06f * dt, this.smi.sm.wallCellToBreak, -1);
 		}
 	}
 
@@ -121,14 +121,14 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 				smi.sm.masterTarget.Get<KAnimControllerBase>(smi).RemoveAnimOverrides(Assets.GetAnim("anim_out_of_reach_destructive_low_kanim"));
 			});
 			this.breaking_wall.Pre.PlayAnim("working_pre").OnAnimQueueComplete(this.breaking_wall.Loop);
-			this.breaking_wall.Loop.ScheduleGoTo(26f, this.breaking_wall.Pst).ToggleSchedulePeriodic("PunchWallDamage", 0.7f, delegate(AggressiveChore.StatesInstance smi)
+			this.breaking_wall.Loop.ScheduleGoTo(26f, this.breaking_wall.Pst).Update("PunchWallDamage", delegate(AggressiveChore.StatesInstance smi, float dt)
 			{
-				smi.master.PunchWallDamage();
-			}).Enter(delegate(AggressiveChore.StatesInstance smi)
+				smi.master.PunchWallDamage(dt);
+			}, UpdateRate.SIM_1000ms, false).Enter(delegate(AggressiveChore.StatesInstance smi)
 			{
 				smi.Play("working_loop", KAnim.PlayMode.Loop);
 			})
-				.Update(delegate(AggressiveChore.StatesInstance smi)
+				.Update(delegate(AggressiveChore.StatesInstance smi, float dt)
 				{
 					if (!Grid.Solid[smi.sm.wallCellToBreak])
 					{

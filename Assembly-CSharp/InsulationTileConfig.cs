@@ -10,15 +10,14 @@ public class InsulationTileConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 1;
 		string text2 = "floor_insulated_kanim";
-		float num3 = 1200f;
-		int num4 = 30;
-		float num5 = 30f;
+		int num3 = 30;
+		float num4 = 30f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
 		buildingDef.Insulation = 0.01f;
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
@@ -38,13 +37,13 @@ public class InsulationTileConfig : IBuildingConfig
 		buildingDef.BlockTileMaterial = Assets.GetMaterial("tiles_solid");
 		buildingDef.DecorBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_solid_tops_info");
 		buildingDef.DecorPlaceBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_solid_tops_place_info");
-		buildingDef.HotKey = global::Action.BuildMenuKeyD;
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
+		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
 		go.AddOrGet<Insulator>();

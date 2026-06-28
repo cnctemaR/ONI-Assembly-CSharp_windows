@@ -45,7 +45,7 @@ public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data
 		base.SetData(handle, data);
 	}
 
-	public void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		using (new KProfiler.Region("ConduitDiseaseManager.SimUpdate", null))
 		{
@@ -57,7 +57,7 @@ public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data
 					float num = data.accumulatedError;
 					num += data.growthInfo.CalculateDiseaseCountDelta(data.diseaseCount, data.mass, dt);
 					Disease disease = Db.Get().Diseases[(int)data.diseaseIdx];
-					float temperature = this.temperatureManager.GetData(data.temperatureHandle).temperature;
+					float temperature = this.temperatureManager.GetTemperature(data.temperatureHandle);
 					float num2 = Disease.CalculateRangeHalfLife(temperature, ref disease.temperatureRange, ref disease.temperatureHalfLives);
 					float num3 = Disease.HalfLifeToGrowthRate(num2, dt);
 					num += (float)data.diseaseCount * num3 - (float)data.diseaseCount;

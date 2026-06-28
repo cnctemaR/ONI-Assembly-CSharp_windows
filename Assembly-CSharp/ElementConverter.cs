@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Klei;
+using Klei.AI;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -21,19 +22,11 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		}
 	}
 
-	public Accumulator Accumulator
-	{
-		get
-		{
-			return this.outputElements[0].accumulator;
-		}
-	}
-
 	public float AverageConvertRate
 	{
 		get
 		{
-			return this.outputElements[0].accumulator.AvgRate;
+			return Game.Instance.accumulators.GetAverageRate(this.outputElements[0].accumulator);
 		}
 	}
 
@@ -54,7 +47,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 						num += gameObject.GetComponent<PrimaryElement>().Mass;
 					}
 				}
-				flag = num >= consumedElement.massConsumptionRate * this.conversionInterval;
+				flag = num >= consumedElement.massConsumptionRate;
 				break;
 			}
 		}
@@ -63,7 +56,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 
 	public bool HasEnoughMassToStartConverting()
 	{
-		return this.HasEnoughMass(this.conversionInterval);
+		return this.HasEnoughMass();
 	}
 
 	public bool CanConvertAtAll()
@@ -92,23 +85,25 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		return flag;
 	}
 
-	private bool HasEnoughMass(float dt)
+	private bool HasEnoughMass()
 	{
+		float totalValue = this.machinerySpeedAttribute.GetTotalValue();
+		float num = 1f * totalValue;
 		bool flag = true;
 		List<GameObject> items = this.storage.items;
 		for (int i = 0; i < this.consumedElements.Length; i++)
 		{
 			ElementConverter.ConsumedElement consumedElement = this.consumedElements[i];
-			float num = 0f;
+			float num2 = 0f;
 			for (int j = 0; j < items.Count; j++)
 			{
 				GameObject gameObject = items[j];
 				if (gameObject.HasTag(consumedElement.tag))
 				{
-					num += gameObject.GetComponent<PrimaryElement>().Mass;
+					num2 += gameObject.GetComponent<PrimaryElement>().Mass;
 				}
 			}
-			if (num < consumedElement.massConsumptionRate * dt)
+			if (num2 < consumedElement.massConsumptionRate * num)
 			{
 				flag = false;
 				break;
@@ -117,45 +112,47 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		return flag;
 	}
 
-	private void ConvertMass(float dt)
+	private void ConvertMass()
 	{
-		float num = 0f;
-		float num2 = 1f;
+		float totalValue = this.machinerySpeedAttribute.GetTotalValue();
+		float num = 1f * totalValue;
+		float num2 = 0f;
+		float num3 = 1f;
 		for (int i = 0; i < this.consumedElements.Length; i++)
 		{
 			ElementConverter.ConsumedElement consumedElement = this.consumedElements[i];
-			float num3 = consumedElement.massConsumptionRate * dt * num2;
-			if (num3 <= 0f)
+			float num4 = consumedElement.massConsumptionRate * num * num3;
+			if (num4 <= 0f)
 			{
-				num2 = 0f;
+				num3 = 0f;
 				break;
 			}
-			float num4 = 0f;
+			float num5 = 0f;
 			for (int j = 0; j < this.storage.items.Count; j++)
 			{
 				GameObject gameObject = this.storage.items[j];
 				if (gameObject.HasTag(consumedElement.tag))
 				{
 					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-					float num5 = Mathf.Min(num3, component.Mass);
-					num4 += num5 / num3;
+					float num6 = Mathf.Min(num4, component.Mass);
+					num5 += num6 / num4;
 				}
 			}
-			num2 = Mathf.Min(num2, num4);
+			num3 = Mathf.Min(num3, num5);
 		}
-		if (num2 <= 0f)
+		if (num3 <= 0f)
 		{
 			return;
 		}
 		SimUtil.DiseaseInfo diseaseInfo = SimUtil.DiseaseInfo.Invalid;
 		diseaseInfo.idx = byte.MaxValue;
 		diseaseInfo.count = 0;
-		float num6 = 0f;
+		float num7 = 0f;
 		for (int k = 0; k < this.consumedElements.Length; k++)
 		{
 			ElementConverter.ConsumedElement consumedElement2 = this.consumedElements[k];
-			float num7 = consumedElement2.massConsumptionRate * dt * num2;
-			consumedElement2.accumulator.Accumulate(num7);
+			float num8 = consumedElement2.massConsumptionRate * num * num3;
+			Game.Instance.accumulators.Accumulate(consumedElement2.accumulator, num8);
 			for (int l = 0; l < this.storage.items.Count; l++)
 			{
 				GameObject gameObject2 = this.storage.items[l];
@@ -163,27 +160,27 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 				{
 					PrimaryElement component2 = gameObject2.GetComponent<PrimaryElement>();
 					component2.KeepZeroMassObject = true;
-					float num8 = Mathf.Min(num7, component2.Mass);
-					float num9 = num8 / component2.Mass;
-					int num10 = (int)(num9 * (float)component2.DiseaseCount);
-					component2.Mass -= num8;
-					component2.ModifyDiseaseCount(-num10, "ElementConverter.ConvertMass");
-					num6 += num8;
-					diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(diseaseInfo.idx, diseaseInfo.count, component2.DiseaseIdx, num10);
-					num = component2.Temperature;
-					if (num7 <= 0f)
+					float num9 = Mathf.Min(num8, component2.Mass);
+					float num10 = num9 / component2.Mass;
+					int num11 = (int)(num10 * (float)component2.DiseaseCount);
+					component2.Mass -= num9;
+					component2.ModifyDiseaseCount(-num11, "ElementConverter.ConvertMass");
+					num7 += num9;
+					diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(diseaseInfo.idx, diseaseInfo.count, component2.DiseaseIdx, num11);
+					num2 = component2.Temperature;
+					if (num8 <= 0f)
 					{
 						break;
 					}
 				}
-				if (num7 <= 0f)
+				if (num8 <= 0f)
 				{
 				}
 			}
 		}
-		if (this.onConvertMass != null && num6 > 0f)
+		if (this.onConvertMass != null && num7 > 0f)
 		{
-			this.onConvertMass(num6);
+			this.onConvertMass(num7);
 		}
 		if (this.outputElements != null && this.outputElements.Length > 0)
 		{
@@ -198,8 +195,8 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 				}
 				else
 				{
-					float num11 = outputElement.diseaseWeight / this.totalDiseaseWeight;
-					diseaseInfo2.count = (int)((float)diseaseInfo2.count * num11);
+					float num12 = outputElement.diseaseWeight / this.totalDiseaseWeight;
+					diseaseInfo2.count = (int)((float)diseaseInfo2.count * num12);
 				}
 				if (outputElement.addedDiseaseIdx != 255)
 				{
@@ -209,30 +206,30 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 						count = outputElement.addedDiseaseCount
 					});
 				}
-				float num12 = outputElement.massGenerationRate * this.OutputMultiplier * dt * num2;
-				outputElement.accumulator.Accumulate(num12);
-				float num13 = ((outputElement.outputTemperature != 0f) ? outputElement.outputTemperature : base.GetComponent<PrimaryElement>().Temperature);
+				float num13 = outputElement.massGenerationRate * this.OutputMultiplier * num * num3;
+				Game.Instance.accumulators.Accumulate(outputElement.accumulator, num13);
+				float num14 = ((outputElement.outputTemperature != 0f) ? outputElement.outputTemperature : base.GetComponent<PrimaryElement>().Temperature);
 				if (outputElement.applyInputTemperature)
 				{
-					num13 = num;
+					num14 = num2;
 				}
 				if (outputElement.storeOutput)
 				{
-					PrimaryElement primaryElement = this.storage.AddToPrimaryElement(outputElement.element.id, num12, num13);
+					PrimaryElement primaryElement = this.storage.AddToPrimaryElement(outputElement.element.id, num13, num14);
 					if (primaryElement == null)
 					{
 						if (outputElement.element.IsGas)
 						{
-							this.storage.AddGasChunk(outputElement.elementHash, num12, num13, diseaseInfo2.idx, diseaseInfo2.count, true, true);
+							this.storage.AddGasChunk(outputElement.elementHash, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, true, true);
 						}
 						else if (outputElement.element.IsLiquid)
 						{
-							this.storage.AddLiquid(outputElement.elementHash, num12, num13, diseaseInfo2.idx, diseaseInfo2.count, true, true);
+							this.storage.AddLiquid(outputElement.elementHash, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, true, true);
 						}
 						else
 						{
-							GameObject gameObject3 = outputElement.element.substance.SpawnResource(base.transform.position, num12, num13, diseaseInfo2.idx, diseaseInfo2.count, true, false);
-							this.storage.Store(gameObject3, true, false, true);
+							GameObject gameObject3 = outputElement.element.substance.SpawnResource(base.transform.GetPosition(), num13, num14, diseaseInfo2.idx, diseaseInfo2.count, true, false);
+							this.storage.Store(gameObject3, true, false, true, false);
 						}
 					}
 					else
@@ -242,25 +239,25 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 				}
 				else
 				{
-					Vector3 vector = new Vector3(base.transform.position.x + outputElement.outputElementOffset.x, base.transform.position.y + outputElement.outputElementOffset.y, 0f);
-					int num14 = Grid.PosToCell(vector);
+					Vector3 vector = new Vector3(base.transform.GetPosition().x + outputElement.outputElementOffset.x, base.transform.GetPosition().y + outputElement.outputElementOffset.y, 0f);
+					int num15 = Grid.PosToCell(vector);
 					if (outputElement.element.IsLiquid)
 					{
 						int elementIndex = ElementLoader.GetElementIndex(outputElement.element.id);
-						FallingWater.instance.AddParticle(num14, (byte)elementIndex, num12, num13, diseaseInfo2.idx, diseaseInfo2.count, false, false, false, false);
+						FallingWater.instance.AddParticle(num15, (byte)elementIndex, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, false, false, false, false);
 					}
 					else if (outputElement.element.IsSolid)
 					{
-						outputElement.element.substance.SpawnResource(vector, num12, num13, diseaseInfo2.idx, diseaseInfo2.count, false, false);
+						outputElement.element.substance.SpawnResource(vector, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, false, false);
 					}
 					else
 					{
-						SimMessages.AddRemoveSubstance(num14, outputElement.elementHash, CellEventLogger.Instance.OxygenModifierSimUpdate, num12, num13, diseaseInfo2.idx, diseaseInfo2.count, -1);
+						SimMessages.AddRemoveSubstance(num15, outputElement.elementHash, CellEventLogger.Instance.OxygenModifierSimUpdate, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, -1);
 					}
 				}
 				if (outputElement.elementHash == SimHashes.Oxygen)
 				{
-					ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, num12, base.gameObject.GetProperName(), null);
+					ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, num13, base.gameObject.GetProperName(), null);
 				}
 			}
 		}
@@ -270,9 +267,11 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		Attributes attributes = base.gameObject.GetAttributes();
+		this.machinerySpeedAttribute = attributes.Add(Db.Get().Attributes.MachinerySpeed);
 		if (ElementConverter.ElementConverterInput == null)
 		{
-			ElementConverter.ElementConverterInput = new StatusItem("ElementConverterInput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, true, 30718).SetResolveStringCallback(delegate(string str, object data)
+			ElementConverter.ElementConverterInput = new StatusItem("ElementConverterInput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, true, 63486).SetResolveStringCallback(delegate(string str, object data)
 			{
 				ElementConverter.ConsumedElement consumedElement = (ElementConverter.ConsumedElement)data;
 				str = str.Replace("{ElementTypes}", consumedElement.Name);
@@ -282,7 +281,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		}
 		if (ElementConverter.ElementConverterOutput == null)
 		{
-			ElementConverter.ElementConverterOutput = new StatusItem("ElementConverterOutput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, true, 30718).SetResolveStringCallback(delegate(string str, object data)
+			ElementConverter.ElementConverterOutput = new StatusItem("ElementConverterOutput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, true, 63486).SetResolveStringCallback(delegate(string str, object data)
 			{
 				ElementConverter.OutputElement outputElement = (ElementConverter.OutputElement)data;
 				str = str.Replace("{ElementTypes}", outputElement.Name);
@@ -297,20 +296,37 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		base.OnSpawn();
 		for (int i = 0; i < this.consumedElements.Length; i++)
 		{
-			this.consumedElements[i].accumulator = new Accumulator("ElementsConsumed", this, 3f);
+			this.consumedElements[i].accumulator = Game.Instance.accumulators.Add("ElementsConsumed", this);
 		}
 		this.totalDiseaseWeight = 0f;
 		for (int j = 0; j < this.outputElements.Length; j++)
 		{
-			this.outputElements[j].accumulator = new Accumulator("OutputElements", this, 3f);
+			this.outputElements[j].accumulator = Game.Instance.accumulators.Add("OutputElements", this);
 			this.totalDiseaseWeight += this.outputElements[j].diseaseWeight;
 		}
 		base.smi.StartSM();
 	}
 
+	protected override void OnCleanUp()
+	{
+		for (int i = 0; i < this.consumedElements.Length; i++)
+		{
+			Game.Instance.accumulators.Remove(this.consumedElements[i].accumulator);
+		}
+		for (int j = 0; j < this.outputElements.Length; j++)
+		{
+			Game.Instance.accumulators.Remove(this.outputElements[j].accumulator);
+		}
+		base.OnCleanUp();
+	}
+
 	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
+		if (!this.showDescriptors)
+		{
+			return list;
+		}
 		foreach (ElementConverter.ConsumedElement consumedElement in this.consumedElements)
 		{
 			string keywordStyle = GameUtil.GetKeywordStyle(consumedElement.tag);
@@ -338,14 +354,17 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 
 	private float totalDiseaseWeight = float.MaxValue;
 
+	private AttributeInstance machinerySpeedAttribute;
+
+	public bool showDescriptors = true;
+
+	private const float BASE_INTERVAL = 1f;
+
 	[SerializeField]
 	public ElementConverter.ConsumedElement[] consumedElements;
 
 	[SerializeField]
 	public ElementConverter.OutputElement[] outputElements;
-
-	[SerializeField]
-	public float conversionInterval = 1f;
 
 	private float outputMultiplier = 1f;
 
@@ -361,7 +380,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		{
 			this.tag = tag;
 			this.massConsumptionRate = kgPerSecond;
-			this.accumulator = null;
+			this.accumulator = HandleVector<int>.InvalidHandle;
 		}
 
 		public string Name
@@ -376,7 +395,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		{
 			get
 			{
-				return this.accumulator.AvgRate;
+				return Game.Instance.accumulators.GetAverageRate(this.accumulator);
 			}
 		}
 
@@ -384,7 +403,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 
 		public float massConsumptionRate;
 
-		public Accumulator accumulator;
+		public HandleVector<int>.Handle accumulator;
 	}
 
 	[Serializable]
@@ -397,7 +416,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 			this.storeOutput = storeOutput;
 			this.massGenerationRate = kgPerSecond;
 			this.outputElementOffset = new Vector2(outputElementOffsetx, outputElementOffsety);
-			this.accumulator = null;
+			this.accumulator = HandleVector<int>.InvalidHandle;
 			this.element = ElementLoader.FindElementByHash(element);
 			this.applyInputTemperature = apply_input_temperature;
 			this.diseaseWeight = diseaseWeight;
@@ -417,7 +436,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		{
 			get
 			{
-				return this.accumulator.AvgRate;
+				return Game.Instance.accumulators.GetAverageRate(this.accumulator);
 			}
 		}
 
@@ -435,7 +454,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 
 		public Vector2 outputElementOffset;
 
-		public Accumulator accumulator;
+		public HandleVector<int>.Handle accumulator;
 
 		public float diseaseWeight;
 
@@ -490,10 +509,10 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 			{
 				smi.RemoveStatusItems();
 			}).EventTransition(GameHashes.ActiveChanged, this.disabled, (ElementConverter.StatesInstance smi) => smi.master.operational != null && !smi.master.operational.IsActive)
-				.ToggleSchedulePeriodic("ConvertMass", (ElementConverter.StatesInstance smi) => smi.master.conversionInterval, delegate(ElementConverter.StatesInstance smi)
+				.Update("ConvertMass", delegate(ElementConverter.StatesInstance smi, float dt)
 				{
-					smi.master.ConvertMass(smi.master.conversionInterval);
-				}, (ElementConverter.StatesInstance smi) => smi.master.gameObject);
+					smi.master.ConvertMass();
+				}, UpdateRate.SIM_1000ms, true);
 		}
 
 		public GameStateMachine<ElementConverter.States, ElementConverter.StatesInstance, ElementConverter, object>.State disabled;

@@ -58,9 +58,9 @@ public class LogicGateVisualizer : LogicGateBase
 			return this.cell;
 		}
 
-		public bool IsLogicInput()
+		public LogicPortSpriteType GetLogicPortSpriteType()
 		{
-			return this.input;
+			return (!this.input) ? LogicPortSpriteType.Output : LogicPortSpriteType.Input;
 		}
 
 		public Vector2 PosMin()

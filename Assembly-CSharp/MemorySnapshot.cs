@@ -18,7 +18,7 @@ public class MemorySnapshot
 		{
 			MemorySnapshot.CountField(fieldInfo, null, this.types, this.walked, this.fieldCounts, this.detailTypeCount, null, null, null, null, fieldInfo.DeclaringType);
 		}
-		foreach (global::UnityEngine.Object @object in global::UnityEngine.Object.FindObjectsOfType(typeof(global::UnityEngine.Object)))
+		foreach (global::UnityEngine.Object @object in Resources.FindObjectsOfTypeAll(typeof(global::UnityEngine.Object)))
 		{
 			MemorySnapshot.CountReference(@object.GetType(), @object, this.types, this.walked, this.fieldCounts, this.detailTypeCount, "Object." + @object.name, null, null, null, null, @object.GetType());
 		}
@@ -228,7 +228,7 @@ public class MemorySnapshot
 
 	public Dictionary<string, int> detailTypeCount = new Dictionary<string, int>();
 
-	private static readonly Type detailType = typeof(KObject);
+	private static readonly Type detailType = typeof(GameObject);
 
 	private static readonly string detailTypeStr = MemorySnapshot.detailType.ToString();
 

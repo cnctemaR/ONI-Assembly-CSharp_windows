@@ -8,6 +8,8 @@ public class LogicModeUI : ScriptableObject
 
 	public Sprite outputSprite;
 
+	public Sprite resetSprite;
+
 	public GameObject prefab;
 
 	[Header("Colouring")]

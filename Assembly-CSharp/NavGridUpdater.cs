@@ -7,13 +7,13 @@ public class NavGridUpdater
 	public static void InitializeNavGrid(NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets, NavGrid.Link[] links, NavGrid.Transition[] transitions, ushort[] gridBitFields)
 	{
 		NavGridUpdater.MarkValidCells(gridBitFields, nav_table, valid_nav_types, validators, bounding_offsets);
-		NavGridUpdater.CreateLinks(nav_table, valid_nav_types, gridBitFields, links, transitions);
+		NavGridUpdater.CreateLinks(nav_table, gridBitFields, links, transitions);
 	}
 
 	public static void UpdateNavGrid(NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets, NavGrid.Link[] links, NavGrid.Transition[] transitions, ushort[] gridBitFields, ICollection<int> dirty_nav_cells)
 	{
 		NavGridUpdater.UpdateValidCells(dirty_nav_cells, gridBitFields, nav_table, valid_nav_types, validators, bounding_offsets);
-		NavGridUpdater.UpdateLinks(dirty_nav_cells, nav_table, valid_nav_types, gridBitFields, links, transitions);
+		NavGridUpdater.UpdateLinks(dirty_nav_cells, nav_table, gridBitFields, links, transitions);
 	}
 
 	private static void UpdateValidCells(IEnumerable<int> dirty_solid_cells, ushort[] gridBitFields, NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets)
@@ -27,38 +27,27 @@ public class NavGridUpdater
 		}
 	}
 
-	private static void CreateLinksForCell(int cell, NavTable nav_table, NavType[] valid_nav_types, ushort[] gridBitFields, NavGrid.Link[] links, NavGrid.Transition[] link_offsets)
+	private static void CreateLinksForCell(int cell, NavTable nav_table, ushort[] gridBitFields, NavGrid.Link[] links, NavGrid.Transition[] link_offsets)
 	{
 		NavGridUpdater.CreateLinks(cell, nav_table, gridBitFields, links, link_offsets);
 	}
 
-	private static void UpdateLinks(IEnumerable<int> dirty_nav_cells, NavTable nav_table, NavType[] valid_nav_types, ushort[] gridBitFields, NavGrid.Link[] links, NavGrid.Transition[] link_offsets)
+	private static void UpdateLinks(IEnumerable<int> dirty_nav_cells, NavTable nav_table, ushort[] gridBitFields, NavGrid.Link[] links, NavGrid.Transition[] link_offsets)
 	{
 		foreach (int num in dirty_nav_cells)
 		{
-			NavGridUpdater.CreateLinksForCell(num, nav_table, valid_nav_types, gridBitFields, links, link_offsets);
+			NavGridUpdater.CreateLinksForCell(num, nav_table, gridBitFields, links, link_offsets);
 		}
 	}
 
-	private static void CreateLinks(NavTable nav_table, NavType[] valid_nav_types, ushort[] gridBitFields, NavGrid.Link[] links, NavGrid.Transition[] link_offsets)
+	private static void CreateLinks(NavTable nav_table, ushort[] gridBitFields, NavGrid.Link[] links, NavGrid.Transition[] link_offsets)
 	{
-		int num = 4;
-		int cell_count_per_job = Grid.CellCount / num;
-		JobBatch jobBatch = new JobBatch();
-		int num2 = 0;
-		for (int i = 0; i < num; i++)
+		List<NavGridUpdater.CreateLinkWorkItem> list = new List<NavGridUpdater.CreateLinkWorkItem>();
+		for (int i = 0; i < Grid.HeightInCells; i++)
 		{
-			int first_cell = num2;
-			jobBatch.Add(delegate
-			{
-				for (int j = first_cell; j < first_cell + cell_count_per_job; j++)
-				{
-					NavGridUpdater.CreateLinksForCell(j, nav_table, valid_nav_types, gridBitFields, links, link_offsets);
-				}
-			});
-			num2 += cell_count_per_job;
+			list.Add(new NavGridUpdater.CreateLinkWorkItem(Grid.OffsetCell(0, new CellOffset(0, i)), nav_table, gridBitFields, links, link_offsets));
 		}
-		jobBatch.Run();
+		App.instance.jobManager.Run<NavGridUpdater.CreateLinkWorkItem, object>(list, null);
 	}
 
 	private static void CreateLinks(int cell, NavTable nav_table, ushort[] gridBitFields, NavGrid.Link[] links, NavGrid.Transition[] transitions)
@@ -84,26 +73,12 @@ public class NavGridUpdater
 
 	private static void MarkValidCells(ushort[] gridBitFields, NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets)
 	{
-		int num = 4;
-		int cell_count_per_job = Grid.CellCount / num;
-		JobBatch jobBatch = new JobBatch();
-		int num2 = 0;
-		for (int i = 0; i < num; i++)
+		List<NavGridUpdater.MarkValidCellWorkItem> list = new List<NavGridUpdater.MarkValidCellWorkItem>();
+		for (int i = 0; i < Grid.HeightInCells; i++)
 		{
-			int first_cell = num2;
-			jobBatch.Add(delegate
-			{
-				for (int j = first_cell; j < first_cell + cell_count_per_job; j++)
-				{
-					foreach (NavTableValidator navTableValidator in validators)
-					{
-						navTableValidator.UpdateCell(j, nav_table, bounding_offsets);
-					}
-				}
-			});
-			num2 += cell_count_per_job;
+			list.Add(new NavGridUpdater.MarkValidCellWorkItem(Grid.OffsetCell(0, new CellOffset(0, i)), nav_table, bounding_offsets, validators));
 		}
-		jobBatch.Run();
+		App.instance.jobManager.Run<NavGridUpdater.MarkValidCellWorkItem, object>(list, null);
 	}
 
 	public static void DebugDrawPath(int start_cell, int end_cell)
@@ -128,4 +103,66 @@ public class NavGridUpdater
 	public static int InvalidIdx = -1;
 
 	public static int InvalidCell = -1;
+
+	private struct CreateLinkWorkItem : IWorkItem<object>
+	{
+		public CreateLinkWorkItem(int start_cell, NavTable nav_table, ushort[] grid_bit_fields, NavGrid.Link[] links, NavGrid.Transition[] link_offsets)
+		{
+			this.startCell = start_cell;
+			this.navTable = nav_table;
+			this.gridBitFields = grid_bit_fields;
+			this.links = links;
+			this.linkOffsets = link_offsets;
+		}
+
+		public void Run(object shared_data)
+		{
+			for (int i = 0; i < Grid.WidthInCells; i++)
+			{
+				int num = this.startCell + i;
+				NavGridUpdater.CreateLinksForCell(num, this.navTable, this.gridBitFields, this.links, this.linkOffsets);
+			}
+		}
+
+		private int startCell;
+
+		private NavTable navTable;
+
+		private ushort[] gridBitFields;
+
+		private NavGrid.Link[] links;
+
+		private NavGrid.Transition[] linkOffsets;
+	}
+
+	private struct MarkValidCellWorkItem : IWorkItem<object>
+	{
+		public MarkValidCellWorkItem(int start_cell, NavTable nav_table, CellOffset[] bounding_offsets, NavTableValidator[] validators)
+		{
+			this.startCell = start_cell;
+			this.navTable = nav_table;
+			this.boundingOffsets = bounding_offsets;
+			this.validators = validators;
+		}
+
+		public void Run(object shared_data)
+		{
+			for (int i = 0; i < Grid.WidthInCells; i++)
+			{
+				int num = this.startCell + i;
+				foreach (NavTableValidator navTableValidator in this.validators)
+				{
+					navTableValidator.UpdateCell(num, this.navTable, this.boundingOffsets);
+				}
+			}
+		}
+
+		private NavTable navTable;
+
+		private CellOffset[] boundingOffsets;
+
+		private NavTableValidator[] validators;
+
+		private int startCell;
+	}
 }

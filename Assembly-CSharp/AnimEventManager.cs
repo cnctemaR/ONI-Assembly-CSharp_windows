@@ -230,7 +230,7 @@ public class AnimEventManager
 		{
 			get
 			{
-				return this.controller.transform.position;
+				return this.controller.transform.GetPosition();
 			}
 		}
 

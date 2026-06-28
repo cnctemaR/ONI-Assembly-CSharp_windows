@@ -12,18 +12,17 @@ public class RockCrusherConfig : IBuildingConfig
 		int num = 4;
 		int num2 = 4;
 		string text2 = "rockrefinery_kanim";
-		float num3 = 200f;
-		int num4 = 30;
-		float num5 = 60f;
+		int num3 = 30;
+		float num4 = 60f;
 		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER5;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num6 = 2400f;
+		float num5 = 2400f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER6;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
-		buildingDef.OperatingKilowatts = 16f;
+		buildingDef.SelfHeatKilowattsWhenActive = 16f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "HollowMetal";
@@ -31,7 +30,7 @@ public class RockCrusherConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<DropAllWorkable>();
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;

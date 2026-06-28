@@ -1,30 +1,33 @@
 ﻿using System;
+using Klei.AI;
+using STRINGS;
 using UnityEngine;
 
 public class SleepChore : Chore<SleepChore.StatesInstance>
 {
 	public SleepChore(IStateMachineTarget target, GameObject bed)
-		: base(Db.Get().ChoreTypes.Sleep, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Sleep, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new SleepChore.StatesInstance(this, target.gameObject, bed);
-		base.AddPrecondition(ChorePreconditions.IsNotRedAlert, null);
+		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 		base.AddPrecondition(SleepChore.IsOkayTimeToSleep, null);
 		if (bed != null)
 		{
-			base.AddPrecondition(ChorePreconditions.IsOperational, bed);
+			base.AddPrecondition(ChorePreconditions.instance.IsOperational, bed);
 		}
 	}
 
 	public static Chore.Precondition IsOkayTimeToSleep = new Chore.Precondition
 	{
 		id = "IsOkayTimeToSleep",
+		description = DUPLICANTS.CHORES.PRECONDITIONS.IS_OKAY_TIME_TO_SLEEP,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Narcolepsy component = context.consumer.GetComponent<Narcolepsy>();
 			bool flag = component != null && component.IsNarcolepsing();
 			StaminaMonitor.Instance smi = context.consumer.GetSMI<StaminaMonitor.Instance>();
 			bool flag2 = smi != null && smi.NeedsToSleep();
-			bool flag3 = ChorePreconditions.IsScheduledTime.fn(ref context, Db.Get().ScheduleBlockTypes.Sleep);
+			bool flag3 = ChorePreconditions.instance.IsScheduledTime.fn(ref context, Db.Get().ScheduleBlockTypes.Sleep);
 			return flag || flag3 || flag2;
 		}
 	};
@@ -38,12 +41,20 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 			base.sm.bed.Set(bed, base.smi);
 		}
 
+		public void EvaluateSleepQuality()
+		{
+			if (base.sm.sleepingOnFloor.Get(base.smi))
+			{
+				base.sm.sleeper.Get<Effects>(base.smi).Add(Db.Get().effects.Get("SoreBack"), true);
+			}
+		}
+
 		public void CreateLocator()
 		{
 			int num = base.sm.sleeper.Get<Sensors>(base.smi).GetSensor<SafeCellSensor>().GetCell();
 			if (num == Grid.InvalidCell)
 			{
-				num = Grid.PosToCell(base.sm.sleeper.Get<Transform>(base.smi).position);
+				num = Grid.PosToCell(base.sm.sleeper.Get<Transform>(base.smi).GetPosition());
 			}
 			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
 			Grid.Reserved[num] = true;
@@ -136,9 +147,17 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 			}).DefaultState(this.sleep.normal).ToggleEffect("Sleep")
 				.DoSleep(this.sleeper, this.bed, this.success, null);
 			this.sleep.normal.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.Sleeping, null).QueueAnim("working_loop", true, null).EventTransition(GameHashes.SleepFail, this.sleep.interrupt, null);
-			this.sleep.interrupt.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.SleepingInterrupted, null).QueueAnim("interrupt", false, null).EventTransition(GameHashes.AnimQueueComplete, this.sleep.normal, (SleepChore.StatesInstance smi) => GameClock.Instance.IsNighttime())
-				.EventTransition(GameHashes.AnimQueueComplete, this.success, (SleepChore.StatesInstance smi) => !GameClock.Instance.IsNighttime());
-			this.success.ReturnSuccess();
+			this.sleep.interrupt.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.SleepingInterrupted, null).QueueAnim("interrupt", false, null).OnAnimQueueComplete(this.sleep.interrupt_transition);
+			this.sleep.interrupt_transition.Enter(delegate(SleepChore.StatesInstance smi)
+			{
+				EffectInstance effectInstance = smi.master.GetComponent<Effects>().Add(Db.Get().effects.Get("TerribleSleep"), true);
+				GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State state = ((!GameClock.Instance.IsNighttime()) ? this.success : this.sleep.normal);
+				smi.GoTo(state);
+			});
+			this.success.Enter(delegate(SleepChore.StatesInstance smi)
+			{
+				smi.EvaluateSleepQuality();
+			}).ReturnSuccess();
 		}
 
 		public StateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.TargetParameter sleeper;
@@ -164,6 +183,8 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State normal;
 
 			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State interrupt;
+
+			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State interrupt_transition;
 		}
 	}
 }

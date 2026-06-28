@@ -24,6 +24,7 @@ namespace Database
 			this.Raging = new Thought("Enraged", this, "crew_state_enraged", DUPLICANTS.THOUGHTS.RAGING.TOOLTIP, false);
 			this.PutridOdour = new Thought("PutridOdour", this, "crew_state_smelled_putrid_odour", DUPLICANTS.THOUGHTS.PUTRIDODOUR.TOOLTIP, true);
 			this.Noisy = new Thought("Noisy", this, "crew_state_noisey", DUPLICANTS.THOUGHTS.NOISY.TOOLTIP, true);
+			this.NewRole = new Thought("NewRole", this, "crew_state_role", DUPLICANTS.THOUGHTS.NEWROLE.TOOLTIP, false);
 			for (int i = this.Count - 1; i >= 0; i--)
 			{
 				this.resources[i].priority = 100 * (this.Count - i);
@@ -61,5 +62,7 @@ namespace Database
 		public Thought PutridOdour;
 
 		public Thought Noisy;
+
+		public Thought NewRole;
 	}
 }

@@ -60,7 +60,6 @@ public class GlobalAssets : MonoBehaviour
 		LocString.CreateLocStringKeys(typeof(ELEMENTS), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(CREATURES), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(SETITEMS), "STRINGS.");
-		LocString.CreateLocStringKeys(typeof(REGIONS), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(RESEARCH), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(ITEMS), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(INPUT), "STRINGS.");

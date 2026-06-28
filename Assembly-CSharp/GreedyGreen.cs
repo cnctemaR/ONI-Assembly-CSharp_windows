@@ -25,7 +25,7 @@ public class GreedyGreen : StateMachineComponent<GreedyGreen.StatesInstance>
 
 	private void OnDugOut(object param)
 	{
-		if (!Grid.Solid[Grid.PosToCell(base.transform.position)])
+		if (!Grid.Solid[Grid.PosToCell(base.transform.GetPosition())])
 		{
 			this.Emit();
 			base.smi.GoTo(base.smi.sm.harvestable.death);
@@ -52,13 +52,13 @@ public class GreedyGreen : StateMachineComponent<GreedyGreen.StatesInstance>
 
 	private int TopOfVineCell()
 	{
-		Vector3 vector = base.transform.position + (float)this.growthState.Maturity * this.GrowDirection;
+		Vector3 vector = base.transform.GetPosition() + (float)this.growthState.Maturity * this.GrowDirection;
 		return Grid.PosToCell(vector);
 	}
 
 	private int nextGrowCell()
 	{
-		Vector3 vector = base.transform.position + (float)(this.growthState.Maturity + 1) * this.GrowDirection;
+		Vector3 vector = base.transform.GetPosition() + (float)(this.growthState.Maturity + 1) * this.GrowDirection;
 		return Grid.PosToCell(vector);
 	}
 
@@ -105,20 +105,20 @@ public class GreedyGreen : StateMachineComponent<GreedyGreen.StatesInstance>
 			}
 		}
 		this.OccupiedCells.Clear();
-		this.OccupiedCells.Add(Grid.PosToCell(base.gameObject.transform.position));
-		Grid.Objects[Grid.PosToCell(base.gameObject.transform.position), 5] = base.gameObject;
-		Grid.Objects[Grid.PosToCell(base.gameObject.transform.position), 1] = base.gameObject;
+		this.OccupiedCells.Add(Grid.PosToCell(base.gameObject.transform.GetPosition()));
+		Grid.Objects[Grid.PosToCell(base.gameObject.transform.GetPosition()), 5] = base.gameObject;
+		Grid.Objects[Grid.PosToCell(base.gameObject.transform.GetPosition()), 1] = base.gameObject;
 		for (int j = 1; j < this.growthState.Maturity; j++)
 		{
-			this.OccupiedCells.Add(Grid.PosToCell(base.gameObject.transform.position + this.GrowDirection * (float)j));
-			Grid.Objects[Grid.PosToCell(base.gameObject.transform.position + this.GrowDirection * (float)j), 5] = base.gameObject;
-			Grid.Objects[Grid.PosToCell(base.gameObject.transform.position + this.GrowDirection * (float)j), 1] = base.gameObject;
+			this.OccupiedCells.Add(Grid.PosToCell(base.gameObject.transform.GetPosition() + this.GrowDirection * (float)j));
+			Grid.Objects[Grid.PosToCell(base.gameObject.transform.GetPosition() + this.GrowDirection * (float)j), 5] = base.gameObject;
+			Grid.Objects[Grid.PosToCell(base.gameObject.transform.GetPosition() + this.GrowDirection * (float)j), 1] = base.gameObject;
 		}
 	}
 
 	private void SetCollider()
 	{
-		BoxCollider2D component = base.GetComponent<BoxCollider2D>();
+		KBoxCollider2D component = base.GetComponent<KBoxCollider2D>();
 		if (this.growthState.Maturity == 0)
 		{
 			component.size = Vector2.one;
@@ -232,7 +232,7 @@ public class GreedyGreen : StateMachineComponent<GreedyGreen.StatesInstance>
 				else if (Grid.Solid[Grid.CellBelow(num)])
 				{
 					smi.master.rootCell = Grid.CellBelow(num);
-					smi.transform.SetPosition(smi.transform.position + Vector3.down);
+					smi.transform.SetPosition(smi.transform.GetPosition() + Vector3.down);
 					smi.master.partitionerEntry = GameScenePartitioner.Instance.Add("GreedyGreens.Harvestable", smi.gameObject, Grid.PosToCell(smi.gameObject), GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(smi.master.OnDugOut));
 				}
 				else
@@ -258,7 +258,7 @@ public class GreedyGreen : StateMachineComponent<GreedyGreen.StatesInstance>
 			});
 			this.harvestable.grow.Enter(delegate(GreedyGreen.StatesInstance smi)
 			{
-				smi.master.Spread(Grid.PosToCell(smi.transform.position));
+				smi.master.Spread(Grid.PosToCell(smi.transform.GetPosition()));
 				smi.master.Mature();
 				smi.ScheduleGoTo(1f, this.harvestable.idle);
 			});

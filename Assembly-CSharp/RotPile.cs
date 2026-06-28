@@ -20,9 +20,16 @@ public class RotPile : StateMachineComponent<RotPile.StatesInstance>
 	protected void ConvertToElement()
 	{
 		PrimaryElement component = base.smi.master.GetComponent<PrimaryElement>();
+		float mass = component.Mass;
+		float temperature = component.Temperature;
+		if (mass <= 0f)
+		{
+			Util.KDestroyGameObject(base.gameObject);
+			return;
+		}
 		SimHashes simHashes = SimHashes.ToxicSand;
 		Substance substance = ElementLoader.FindElementByHash(simHashes).substance;
-		GameObject gameObject = substance.SpawnResource(base.smi.master.transform.position, component.Mass, component.Temperature, byte.MaxValue, 0, false, false);
+		GameObject gameObject = substance.SpawnResource(base.smi.master.transform.GetPosition(), mass, temperature, byte.MaxValue, 0, false, false);
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, ElementLoader.FindElementByHash(simHashes).name, gameObject.transform, 1.5f, false);
 		Util.KDestroyGameObject(base.smi.gameObject);
 	}
@@ -34,7 +41,7 @@ public class RotPile : StateMachineComponent<RotPile.StatesInstance>
 		{
 			if (WorldInventory.Instance.IsReachable(base.smi.master.gameObject.GetComponent<Pickupable>()))
 			{
-				Notification notification = new Notification(MISC.NOTIFICATIONS.FOODROT.NAME, NotificationType.Bad, HashedString.Invalid, new Func<List<Notification>, object, string>(RotPile.StatesInstance.OnRottenTooltip), null, true, 0f, null, null, null);
+				Notification notification = new Notification(MISC.NOTIFICATIONS.FOODROT.NAME, NotificationType.BadMinor, HashedString.Invalid, new Func<List<Notification>, object, string>(RotPile.StatesInstance.OnRottenTooltip), null, true, 0f, null, null, null);
 				notification.tooltipData = master.gameObject.GetProperName();
 				base.gameObject.AddOrGet<Notifier>().Add(notification, string.Empty);
 			}
@@ -62,10 +69,10 @@ public class RotPile : StateMachineComponent<RotPile.StatesInstance>
 		{
 			default_state = this.decomposing;
 			base.serializable = true;
-			this.decomposing.ParamTransition<float>(this.decompositionAmount, this.convertDestroy, (RotPile.StatesInstance smi, float p) => p >= 600f).Update(delegate(RotPile.StatesInstance smi)
+			this.decomposing.ParamTransition<float>(this.decompositionAmount, this.convertDestroy, (RotPile.StatesInstance smi, float p) => p >= 600f).Update("Decomposing", delegate(RotPile.StatesInstance smi, float dt)
 			{
-				this.decompositionAmount.Delta(smi.dt, smi);
-			});
+				this.decompositionAmount.Delta(dt, smi);
+			}, UpdateRate.SIM_200ms, false);
 			this.convertDestroy.Enter(delegate(RotPile.StatesInstance smi)
 			{
 				smi.master.ConvertToElement();

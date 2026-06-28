@@ -94,6 +94,8 @@ namespace STRINGS
 
 			public static LocString OVERLAY13 = "Overlay13";
 
+			public static LocString OVERLAY14 = "Overlay14";
+
 			public static LocString SPEEDUP = "SpeedUp";
 
 			public static LocString SLOWDOWN = "SlowDown";
@@ -126,90 +128,7 @@ namespace STRINGS
 
 			public static LocString MANAGEREPORT = "ManageReport";
 
-			public static LocString MANAGECODEX = "ManageCodex";
-
 			public static LocString MANAGEROLES = "ManageRoles";
-		}
-
-		public class BASEMENU
-		{
-			public static LocString NAME = "BaseMenu";
-
-			public static LocString BUILDCATEGORYLADDERS = "BuildCategoryLadders";
-
-			public static LocString BUILDCATEGORYTILES = "BuildCategoryTiles";
-
-			public static LocString BUILDCATEGORYDOORS = "BuildCategoryDoors";
-
-			public static LocString BUILDCATEGORYTRAVELTUBES = "BuildCategoryTravelTubes";
-
-			public static LocString BUILDCATEGORYSTORAGE = "BuildCategoryStorage";
-
-			public static LocString BUILDCATEGORYRESEARCH = "BuildCategoryResearch";
-		}
-
-		public class INFRASTRUCTUREMENU
-		{
-			public static LocString NAME = "InfrastructureMenu";
-
-			public static LocString BUILDCATEGORYGENERATORS = "BuildCategoryGenerators";
-
-			public static LocString BUILDCATEGORYWIRES = "BuildCategoryWires";
-
-			public static LocString BUILDCATEGORYPOWERCONTROL = "BuildCategoryPowerControl";
-
-			public static LocString BUILDCATEGORYPLUMBINGSTRUCTURES = "BuildCategoryPlumbingStructures";
-
-			public static LocString BUILDCATEGORYPIPES = "BuildCategoryPipes";
-
-			public static LocString BUILDCATEGORYVENTILATIONSTRUCTURES = "BuildCategoryVentilationStructures";
-
-			public static LocString BUILDCATEGORYTUBES = "BuildCategoryTubes";
-
-			public static LocString BUILDCATEGORYLOGICWIRING = "BuildCategoryLogicWiring";
-
-			public static LocString BUILDCATEGORYLOGICGATES = "BuildCategoryLogicGates";
-
-			public static LocString BUILDCATEGORYLOGICSWITCHES = "BuildCategoryLogicSwitches";
-		}
-
-		public class FOODAGRICULTUREMENU
-		{
-			public static LocString NAME = "FoodAgricultureMenu";
-
-			public static LocString BUILDCATEGORYCOOKING = "BuildCategoryCooking";
-
-			public static LocString BUILDCATEGORYFARMING = "BuildCategoryFarming";
-
-			public static LocString BUILDCATEGORYRANCHING = "BuildCategoryRanching";
-		}
-
-		public class HEALTHHAPPINESSMENU
-		{
-			public static LocString NAME = "HealthHappinessMenu";
-
-			public static LocString BUILDCATEGORYHYGIENE = "BuildCategoryHygiene";
-
-			public static LocString BUILDCATEGORYMEDICAL = "BuildCategoryMedical";
-
-			public static LocString BUILDCATEGORYRECREATION = "BuildCategoryRecreation";
-
-			public static LocString BUILDCATEGORYFURNITURE = "BuildCategoryFurniture";
-
-			public static LocString BUILDCATEGORYDECOR = "BuildCategoryDecor";
-		}
-
-		public class INDUSTRIALMENU
-		{
-			public static LocString NAME = "IndustrialMenu";
-
-			public static LocString BUILDCATEGORYOXYGEN = "BuildCategoryOxygen";
-
-			public static LocString BUILDCATEGORYUTILITIES = "BuildCategoryUtilities";
-
-			public static LocString BUILDCATEGORYREFINING = "BuildCategoryRefining";
-
-			public static LocString BUILDCATEGORYEQUIPMENT = "BuildCategoryEquipment";
 		}
 
 		public class BUILDING
@@ -310,6 +229,8 @@ namespace STRINGS
 			public static LocString DEBUGDUMPEVENTDATA = "DebugDumpEventData";
 
 			public static LocString DEBUGCRASHSIM = "DebugCrashSim";
+
+			public static LocString DEBUGNEXTCALL = "DebugNextCall";
 
 			public static LocString SREENSHOT1X = "SreenShot1x";
 

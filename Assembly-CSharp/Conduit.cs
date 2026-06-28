@@ -3,7 +3,7 @@ using System.Collections;
 using STRINGS;
 
 [SkipSaveFileSerialization]
-public class Conduit : KMonoBehaviour, IFirstFrameCallback
+public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkMgr
 {
 	public void SetFirstFrameCallback(global::System.Action ffCb)
 	{
@@ -36,7 +36,7 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback
 		if (this.IsInsulated)
 		{
 			ConduitFlowVisualizer flowVisualizer = this.GetFlowVisualizer();
-			flowVisualizer.SetInsulated(Grid.PosToCell(base.transform.position), true);
+			flowVisualizer.SetInsulated(Grid.PosToCell(base.transform.GetPosition()), true);
 		}
 	}
 
@@ -45,14 +45,14 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback
 		if (this.IsInsulated)
 		{
 			ConduitFlowVisualizer flowVisualizer = this.GetFlowVisualizer();
-			flowVisualizer.SetInsulated(Grid.PosToCell(base.transform.position), false);
+			flowVisualizer.SetInsulated(Grid.PosToCell(base.transform.GetPosition()), false);
 		}
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		BuildingComplete component = base.GetComponent<BuildingComplete>();
 		if (component.Def.ReplacementLayer == ObjectLayer.NumLayers || Grid.Objects[num, (int)component.Def.ReplacementLayer] == null)
 		{
 			this.GetNetworkManager().RemoveFromNetworks(num, this, false);
-			this.GetFlowManager().EmptyConduit(Grid.PosToCell(base.transform.position));
+			this.GetFlowManager().EmptyConduit(Grid.PosToCell(base.transform.GetPosition()));
 		}
 		base.OnCleanUp();
 	}
@@ -93,7 +93,7 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback
 	private void OnHighlighted(object data)
 	{
 		bool flag = (bool)data;
-		int num = ((!flag) ? (-1) : Grid.PosToCell(base.transform.position));
+		int num = ((!flag) ? (-1) : Grid.PosToCell(base.transform.GetPosition()));
 		ConduitFlowVisualizer flowVisualizer = this.GetFlowVisualizer();
 		flowVisualizer.SetHighlightedCell(num);
 	}
@@ -106,7 +106,7 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback
 			source = BUILDINGS.DAMAGESOURCES.CONDUIT_CONTENTS_FROZE,
 			popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.CONDUIT_CONTENTS_FROZE
 		});
-		this.GetFlowManager().EmptyConduit(Grid.PosToCell(base.transform.position));
+		this.GetFlowManager().EmptyConduit(Grid.PosToCell(base.transform.GetPosition()));
 	}
 
 	private void OnConduitBoiling(object data)
@@ -117,7 +117,7 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback
 			source = BUILDINGS.DAMAGESOURCES.CONDUIT_CONTENTS_BOILED,
 			popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.CONDUIT_CONTENTS_BOILED
 		});
-		this.GetFlowManager().EmptyConduit(Grid.PosToCell(base.transform.position));
+		this.GetFlowManager().EmptyConduit(Grid.PosToCell(base.transform.GetPosition()));
 	}
 
 	[MyCmpReq]

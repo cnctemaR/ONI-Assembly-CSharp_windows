@@ -3,12 +3,12 @@ using System.Collections;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IWire
+public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkMgr
 {
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		Game.Instance.logicCircuitSystem.AddToNetworks(num, this, false);
 		base.Subscribe(774203113, new Action<object>(this.OnBuildingBroken));
 		base.Subscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
@@ -18,7 +18,7 @@ public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IWire
 
 	protected override void OnCleanUp()
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		BuildingComplete component = base.GetComponent<BuildingComplete>();
 		if (component.Def.ReplacementLayer == ObjectLayer.NumLayers || Grid.Objects[num, (int)component.Def.ReplacementLayer] == null)
 		{
@@ -33,7 +33,7 @@ public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IWire
 	{
 		get
 		{
-			int num = Grid.PosToCell(base.transform.position);
+			int num = Grid.PosToCell(base.transform.GetPosition());
 			LogicCircuitNetwork logicCircuitNetwork = Game.Instance.logicCircuitSystem.GetNetworkForCell(num) as LogicCircuitNetwork;
 			return logicCircuitNetwork != null;
 		}
@@ -60,7 +60,7 @@ public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IWire
 
 	public UtilityConnections GetWireConnections()
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		return Game.Instance.logicCircuitSystem.GetConnections(num, true);
 	}
 
@@ -98,7 +98,7 @@ public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IWire
 		yield break;
 	}
 
-	public IUtilityNetworkMgr GetNetworkMgr()
+	public IUtilityNetworkMgr GetNetworkManager()
 	{
 		return Game.Instance.logicCircuitSystem;
 	}

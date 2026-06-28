@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 using Klei;
 using Klei.AI;
@@ -60,7 +61,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		this.diseaseCount = 0;
 		if (this.useSimDiseaseInfo)
 		{
-			int num = Grid.PosToCell(base.transform.position);
+			int num = Grid.PosToCell(base.transform.GetPosition());
 			Sim.DiseaseCell diseaseCell = Grid.Disease[num];
 			if (diseaseCell.diseaseIdx != 255)
 			{
@@ -199,6 +200,11 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 			Output.LogErrorWithObj(base.gameObject, new object[] { "Invalid temperature [" + temperature + "]" });
 			return;
 		}
+		if (temperature <= 0f)
+		{
+			StackTrace stackTrace = new StackTrace(0, true);
+			KCrashReporter.Assert(false, "Tried to set PrimaryElement.Temperature to a value <= 0\n\n" + stackTrace.ToString());
+		}
 		this.setTemperatureCallback(this, temperature);
 	}
 
@@ -227,7 +233,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 			byte b = byte.MaxValue;
 			if (this.useSimDiseaseInfo)
 			{
-				int num = Grid.PosToCell(base.transform.position);
+				int num = Grid.PosToCell(base.transform.GetPosition());
 				b = Grid.Disease[num].diseaseIdx;
 			}
 			else if (this.diseaseHandle.IsValid())
@@ -245,7 +251,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 			int num = 0;
 			if (this.useSimDiseaseInfo)
 			{
-				int num2 = Grid.PosToCell(base.transform.position);
+				int num2 = Grid.PosToCell(base.transform.GetPosition());
 				num = Grid.Disease[num2].elementCount;
 			}
 			else if (this.diseaseHandle.IsValid())

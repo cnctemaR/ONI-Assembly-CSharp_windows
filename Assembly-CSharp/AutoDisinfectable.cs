@@ -1,6 +1,7 @@
 ﻿using System;
 using KSerialization;
 using STRINGS;
+using TUNING;
 
 public class AutoDisinfectable : Workable
 {
@@ -12,6 +13,8 @@ public class AutoDisinfectable : Workable
 		this.synchronizeAnims = false;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Disinfecting;
 		this.resetProgressOnStop = true;
+		this.multitoolContext = "disinfect";
+		this.multitoolHitEffectHash = new HashedString("fx_disinfect_splash");
 	}
 
 	protected override void OnSpawn()
@@ -47,11 +50,12 @@ public class AutoDisinfectable : Workable
 		}
 		else if (this.chore == null || !(this.chore.driver != null))
 		{
-			if (this.chore == null && this.primaryElement.DiseaseCount > SaveGame.Instance.minGermCountForDisinfect)
+			int diseaseCount = this.primaryElement.DiseaseCount;
+			if (this.chore == null && diseaseCount > SaveGame.Instance.minGermCountForDisinfect)
 			{
-				this.chore = new WorkChore<AutoDisinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+				this.chore = new WorkChore<AutoDisinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 			}
-			else if (this.primaryElement.DiseaseCount < SaveGame.Instance.minGermCountForDisinfect && this.chore != null)
+			else if (diseaseCount < SaveGame.Instance.minGermCountForDisinfect && this.chore != null)
 			{
 				this.chore.Cancel("AutoDisinfectable.Update");
 				this.chore = null;
@@ -63,6 +67,11 @@ public class AutoDisinfectable : Workable
 	{
 		base.OnStartWork(worker);
 		this.diseasePerSecond = (float)base.GetComponent<PrimaryElement>().DiseaseCount / 10f;
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole(Handyman.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -83,14 +92,6 @@ public class AutoDisinfectable : Workable
 		this.userMenu.Refresh();
 	}
 
-	public override Workable.AnimInfo GetAnim(Worker worker)
-	{
-		return new Workable.AnimInfo
-		{
-			smi = new MultitoolController.Instance(this, worker, "disinfect", EffectPrefabs.Instance.DisinfectEffect)
-		};
-	}
-
 	private void EnableAutoDisinfect()
 	{
 		this.enableAutoDisinfect = true;
@@ -109,18 +110,18 @@ public class AutoDisinfectable : Workable
 		{
 			UserMenu userMenu = this.userMenu;
 			string text = "action_disinfect";
-			string text2 = BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.NAME;
+			string text2 = global::STRINGS.BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.NAME;
 			global::System.Action action = new global::System.Action(this.EnableAutoDisinfect);
-			string text3 = BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.TOOLTIP;
+			string text3 = global::STRINGS.BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.TOOLTIP;
 			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 10f);
 		}
 		else
 		{
 			UserMenu userMenu2 = this.userMenu;
 			string text3 = "action_disinfect";
-			string text2 = BUILDINGS.AUTODISINFECTABLE.DISABLE_AUTODISINFECT.NAME;
+			string text2 = global::STRINGS.BUILDINGS.AUTODISINFECTABLE.DISABLE_AUTODISINFECT.NAME;
 			global::System.Action action = new global::System.Action(this.DisableAutoDisinfect);
-			string text = BUILDINGS.AUTODISINFECTABLE.DISABLE_AUTODISINFECT.TOOLTIP;
+			string text = global::STRINGS.BUILDINGS.AUTODISINFECTABLE.DISABLE_AUTODISINFECT.TOOLTIP;
 			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 10f);
 		}
 	}

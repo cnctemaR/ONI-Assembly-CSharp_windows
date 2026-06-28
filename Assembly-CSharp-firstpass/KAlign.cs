@@ -26,7 +26,7 @@ public class KAlign : MonoBehaviour
 				rectTransform.GetWorldCorners(array);
 				Vector3 vector = array[1];
 				Vector3 vector2 = array[3];
-				Vector3 position = base.transform.position;
+				Vector3 position = base.transform.GetPosition();
 				Vector3[] array2 = new Vector3[4];
 				this.rectTransform().GetWorldCorners(array2);
 				Vector3 vector3 = array2[1];

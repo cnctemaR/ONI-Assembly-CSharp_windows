@@ -19,14 +19,30 @@ public class HashCache
 		return empty;
 	}
 
+	public string Get(HashedString hash)
+	{
+		return this.Get(hash.HashValue);
+	}
+
 	public string Get(KAnimHashedString hash)
 	{
 		return this.Get(hash.HashValue);
 	}
 
+	public HashedString Add(string text)
+	{
+		HashedString hashedString = new HashedString(text);
+		this.Add(hashedString.HashValue, text);
+		return hashedString;
+	}
+
 	public void Add(int hash, string text)
 	{
-		this.hashes[hash] = text;
+		string text2 = null;
+		if (!this.hashes.TryGetValue(hash, out text2))
+		{
+			this.hashes[hash] = text.ToLower();
+		}
 	}
 
 	private Dictionary<int, string> hashes = new Dictionary<int, string>();

@@ -1,25 +1,29 @@
 ﻿using System;
 using UnityEngine;
 
-public class KComponentSpawn : MonoBehaviour
+public class KComponentSpawn : MonoBehaviour, ISim200ms, ISim33ms
 {
 	private void FixedUpdate()
 	{
 		KComponentCleanUp.SetInCleanUpPhase(false);
 		this.comps.Spawn();
-		this.comps.FixedUpdate(Time.fixedDeltaTime);
 	}
 
 	private void Update()
 	{
 		KComponentCleanUp.SetInCleanUpPhase(false);
 		this.comps.Spawn();
-		this.comps.Update(Time.deltaTime);
+		this.comps.RenderEveryTick(Time.deltaTime);
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim33ms(float dt)
 	{
-		this.comps.SimUpdate(dt);
+		this.comps.Sim33ms(dt);
+	}
+
+	public void Sim200ms(float dt)
+	{
+		this.comps.Sim200ms(dt);
 	}
 
 	private void OnApplicationQuit()

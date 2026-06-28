@@ -56,7 +56,7 @@ public class AssignmentManager : KMonoBehaviour
 		}
 	}
 
-	public List<Assignable> GetPreferredAssignables(Navigator navigator, AssignableSlot slot)
+	public List<Assignable> GetPreferredAssignables(Assignables owner, AssignableSlot slot)
 	{
 		this.PreferredAssignableResults.Clear();
 		int num = int.MaxValue;
@@ -71,9 +71,9 @@ public class AssignmentManager : KMonoBehaviour
 					{
 						foreach (Ownables ownables in owners)
 						{
-							if (ownables.gameObject == navigator.gameObject)
+							if (ownables.gameObject == owner.gameObject)
 							{
-								if (assignable.assignee is Room && RoomTypes.GetRoomType(assignable.assignee as Room).priority_building_use)
+								if (assignable.assignee is Room && Db.Get().RoomTypes.GetRoomType(assignable.assignee as Room).priority_building_use)
 								{
 									this.PreferredAssignableResults.Clear();
 									this.PreferredAssignableResults.Add(assignable);

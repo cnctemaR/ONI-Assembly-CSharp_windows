@@ -162,7 +162,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 				for (int i = 0; i < value.Count; i++)
 				{
 					Pickupable pickupable = value[i];
-					if (pickupable != null && (pickupable.storage == null || pickupable.storage.allowItemRemoval || pickupable.storage.countAsAccessible))
+					if (pickupable != null && !pickupable.HasTag(GameTags.StoredPrivate))
 					{
 						num2 += pickupable.TotalAmount;
 					}

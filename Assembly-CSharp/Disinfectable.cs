@@ -1,5 +1,6 @@
 ﻿using System;
 using KSerialization;
+using TUNING;
 
 public class Disinfectable : Workable
 {
@@ -10,6 +11,10 @@ public class Disinfectable : Workable
 		this.faceTargetWhenWorking = true;
 		this.synchronizeAnims = false;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Disinfecting;
+		this.attributeConverter = Db.Get().AttributeConverters.TidyingSpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
+		this.multitoolContext = "disinfect";
+		this.multitoolHitEffectHash = new HashedString("fx_disinfect_splash");
 		base.Subscribe(2127324410, new Action<object>(this.OnCancel));
 	}
 
@@ -37,6 +42,11 @@ public class Disinfectable : Workable
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		component.AddDisease(component.DiseaseIdx, -(int)(this.diseasePerSecond * dt + 0.5f), "Disinfectable.OnWorkTick");
 		return false;
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole(Handyman.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -83,17 +93,9 @@ public class Disinfectable : Workable
 		{
 			this.isMarkedForDisinfect = true;
 			Prioritizable.AddRef(base.gameObject);
-			this.chore = new WorkChore<Disinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			this.chore = new WorkChore<Disinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.MarkedForDisinfection, this);
 		}
-	}
-
-	public override Workable.AnimInfo GetAnim(Worker worker)
-	{
-		return new Workable.AnimInfo
-		{
-			smi = new MultitoolController.Instance(this, worker, "disinfect", EffectPrefabs.Instance.DisinfectEffect)
-		};
 	}
 
 	private void OnRefreshUserMenu(object data)

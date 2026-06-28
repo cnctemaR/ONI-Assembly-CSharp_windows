@@ -6,16 +6,17 @@ namespace Klei.AI
 {
 	public class Attribute : Resource
 	{
-		public Attribute(string id, bool is_trainable, Attribute.Display show_in_ui, bool is_profession)
+		public Attribute(string id, bool is_trainable, Attribute.Display show_in_ui, bool is_profession, float base_value = 0f)
 			: base(id, null, null)
 		{
 			string text = "STRINGS.DUPLICANTS.ATTRIBUTES." + id.ToUpper();
 			this.Name = Strings.Get(new StringKey(text + ".NAME"));
-			this.ProfessionName = Strings.Get(new StringKey(text + ".PROFESSION_NAME"));
+			this.ProfessionName = Strings.Get(new StringKey(text + ".NAME"));
 			this.Description = Strings.Get(new StringKey(text + ".DESC"));
 			this.IsTrainable = is_trainable;
 			this.IsProfession = is_profession;
 			this.ShowInUI = show_in_ui;
+			this.BaseValue = base_value;
 		}
 
 		public Attribute(string id, string name, string profession_name, string attribute_description, float base_value, Attribute.Display show_in_ui, bool is_trainable)

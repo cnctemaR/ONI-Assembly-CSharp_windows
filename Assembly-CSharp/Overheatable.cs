@@ -20,13 +20,23 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 		this.fatalTemp = this.GetAttributes().Add(Db.Get().BuildingAttributes.FatalTemperature);
 	}
 
-	protected override void OnSpawn()
+	private void InitializeModifiers()
 	{
-		base.OnSpawn();
+		if (this.modifiersInitialized)
+		{
+			return;
+		}
+		this.modifiersInitialized = true;
 		AttributeModifier attributeModifier = new AttributeModifier(this.overheatTemp.Id, this.baseOverheatTemp, UI.TOOLTIPS.BASE_VALUE, false, false, true);
 		AttributeModifier attributeModifier2 = new AttributeModifier(this.fatalTemp.Id, this.baseFatalTemp, UI.TOOLTIPS.BASE_VALUE, false, false, true);
 		this.GetAttributes().Add("Base", attributeModifier);
 		this.GetAttributes().Add("Base", attributeModifier2);
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		this.InitializeModifiers();
 		HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(base.gameObject);
 		if (handle.IsValid())
 		{
@@ -44,6 +54,7 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 	{
 		get
 		{
+			this.InitializeModifiers();
 			return (this.overheatTemp == null) ? 10000f : this.overheatTemp.GetTotalValue();
 		}
 	}
@@ -97,6 +108,8 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 		return list;
 	}
 
+	private bool modifiersInitialized;
+
 	private AttributeInstance overheatTemp;
 
 	private AttributeInstance fatalTemp;
@@ -112,8 +125,13 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 		{
 		}
 
-		public void DoOverheatDamage()
+		public void TryDoOverheatDamage()
 		{
+			if (Time.time - this.lastOverheatDamageTime < 7.5f)
+			{
+				return;
+			}
+			this.lastOverheatDamageTime += 7.5f;
 			base.master.Trigger(-794517298, new BuildingHP.DamageSourceInfo
 			{
 				damage = 1,
@@ -121,6 +139,8 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 				popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.OVERHEAT
 			});
 		}
+
+		public float lastOverheatDamageTime;
 	}
 
 	public class States : GameStateMachine<Overheatable.States, Overheatable.StatesInstance, Overheatable>
@@ -140,10 +160,14 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 			}).EventTransition(GameHashes.BuildingNoLongerOverheated, this.safeTemperature, null).ToggleStatusItem(Db.Get().BuildingStatusItems.Overheated, null)
 				.ToggleNotification((Overheatable.StatesInstance smi) => smi.master.CreateOverheatedNotification())
 				.TriggerOnEnter(GameHashes.TooHotWarning, null)
-				.ToggleSchedulePeriodic("OverheatDamage", 7.5f, delegate(Overheatable.StatesInstance smi)
+				.Enter("InitOverheatTime", delegate(Overheatable.StatesInstance smi)
 				{
-					smi.DoOverheatDamage();
-				});
+					smi.lastOverheatDamageTime = Time.time;
+				})
+				.Update("OverheatDamage", delegate(Overheatable.StatesInstance smi, float dt)
+				{
+					smi.TryDoOverheatDamage();
+				}, UpdateRate.SIM_4000ms, false);
 		}
 
 		public GameStateMachine<Overheatable.States, Overheatable.StatesInstance, Overheatable, object>.State invulnerable;

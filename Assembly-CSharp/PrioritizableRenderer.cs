@@ -28,7 +28,7 @@ public class PrioritizableRenderer
 		this.mesh = null;
 	}
 
-	public void Render()
+	public void RenderEveryTick()
 	{
 		using (new KProfiler.Region("PrioritizableRenderer", null))
 		{
@@ -69,7 +69,7 @@ public class PrioritizableRenderer
 							}
 							else
 							{
-								vector = prioritizable2.transform.position;
+								vector = prioritizable2.transform.GetPosition();
 							}
 							vector.x += prioritizable2.iconOffset.x;
 							vector.y += prioritizable2.iconOffset.y;
@@ -83,6 +83,14 @@ public class PrioritizableRenderer
 							float num4 = 0.11111111f;
 							PrioritySetting masterPriority = prioritizable2.GetMasterPriority();
 							float num5 = -1f;
+							if (masterPriority.priority_class >= PriorityScreen.PriorityClass.high)
+							{
+								num5 += 9f;
+							}
+							if (masterPriority.priority_class >= PriorityScreen.PriorityClass.emergency)
+							{
+								num5 += 9f;
+							}
 							num5 += (float)masterPriority.priority_value;
 							float num6 = num4 * num5;
 							float num7 = 0f;

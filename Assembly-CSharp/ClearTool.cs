@@ -35,7 +35,7 @@ public class ClearTool : DragTool
 					Prioritizable component = gameObject2.GetComponent<Prioritizable>();
 					if (component != null)
 					{
-						component.SetMasterPriority(ToolMenuPriorityScreen.Instance.GetScreenPriority());
+						component.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
 					}
 				}
 			}
@@ -45,13 +45,13 @@ public class ClearTool : DragTool
 	protected override void OnActivateTool()
 	{
 		base.OnActivateTool();
-		ToolMenuPriorityScreen.Instance.Show(true);
+		ToolMenu.Instance.PriorityScreen.Show(true);
 	}
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
 	{
 		base.OnDeactivateTool(new_tool);
-		ToolMenuPriorityScreen.Instance.Show(false);
+		ToolMenu.Instance.PriorityScreen.Show(false);
 	}
 
 	public static ClearTool Instance;

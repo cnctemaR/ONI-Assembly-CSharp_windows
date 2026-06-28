@@ -4,37 +4,6 @@ using UnityEngine;
 
 public static class CommonEntityTypeSetExtents
 {
-	public static KAnimControllerBase AddKAnimController(this GameObject prefab, string anims)
-	{
-		KAnimControllerBase kanimControllerBase = prefab.UpdateComponentRequirement<KAnimControllerBase>(true);
-		kanimControllerBase.AddAnims(new KAnimFile[] { Assets.GetAnim(anims) });
-		return kanimControllerBase;
-	}
-
-	public static KBatchedAnimController AddKBatchedAnimController(this GameObject prefab, string anims)
-	{
-		KBatchedAnimController kbatchedAnimController = prefab.UpdateComponentRequirement<KBatchedAnimController>(true);
-		kbatchedAnimController.AddAnims(new KAnimFile[] { Assets.GetAnim(anims) });
-		return kbatchedAnimController;
-	}
-
-	public static KBatchedAnimController AddAnimController(this GameObject prefab, string KAnimName, Grid.SceneLayer layer)
-	{
-		KBatchedAnimController kbatchedAnimController = prefab.AddKBatchedAnimController(KAnimName);
-		kbatchedAnimController.sceneLayer = layer;
-		return kbatchedAnimController;
-	}
-
-	public static ElementConsumer AddElementConsumer(this GameObject prefab, SimHashes element, float consumption_rate, float minimum_mass, byte radius = 1)
-	{
-		ElementConsumer elementConsumer = prefab.UpdateComponentRequirement<ElementConsumer>(true);
-		elementConsumer.elementToConsume = element;
-		elementConsumer.consumptionRate = consumption_rate;
-		elementConsumer.minimumMass = minimum_mass;
-		elementConsumer.consumptionRadius = radius;
-		return elementConsumer;
-	}
-
 	public static ElementEmitter AddElementEmitter(this GameObject prefab, SimHashes element, float emission_frequency, float emission_mass, SimUtil.DiseaseInfo disease)
 	{
 		ElementEmitter elementEmitter = prefab.UpdateComponentRequirement<ElementEmitter>(true);
@@ -59,19 +28,5 @@ public static class CommonEntityTypeSetExtents
 		aquaticReproducer.EggPrefabTag = effPrefab;
 		aquaticReproducer.SpawnEgg = true;
 		return aquaticReproducer;
-	}
-
-	public static Butcherable AddButcherable(this GameObject prefab, string[] DropPrefabs)
-	{
-		Butcherable butcherable = prefab.UpdateComponentRequirement<Butcherable>(true);
-		butcherable.SetDrops(DropPrefabs);
-		return butcherable;
-	}
-
-	public static InfoDescription AddDescription(this GameObject prefab, string description)
-	{
-		InfoDescription infoDescription = prefab.UpdateComponentRequirement<InfoDescription>(true);
-		infoDescription.description = description;
-		return infoDescription;
 	}
 }

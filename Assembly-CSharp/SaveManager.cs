@@ -19,13 +19,32 @@ public class SaveManager : KMonoBehaviour
 		Assets.RegisterOnAddPrefab(new Action<KPrefabID>(this.OnAddPrefab));
 	}
 
+	public new void OnDestroy()
+	{
+		foreach (GameObject gameObject in this.disabledVisualizerPrefabMap.Values)
+		{
+			global::UnityEngine.Object.DestroyImmediate(gameObject);
+		}
+		this.disabledVisualizerPrefabMap.Clear();
+		base.OnDestroy();
+	}
+
 	private void OnAddPrefab(KPrefabID prefab)
 	{
 		if (prefab == null)
 		{
 			return;
 		}
-		this.prefabMap[prefab.GetSaveLoadTag()] = prefab.gameObject;
+		Tag saveLoadTag = prefab.GetSaveLoadTag();
+		this.prefabMap[saveLoadTag] = prefab.gameObject;
+		if (!prefab.gameObject.activeSelf && prefab.gameObject.GetComponent<KAnimControllerBase>() != null)
+		{
+			GameObject gameObject = Util.KInstantiate(prefab.gameObject, null, null);
+			KAnimControllerBase component = gameObject.GetComponent<KAnimControllerBase>();
+			component.enabled = false;
+			gameObject.transform.parent = prefab.gameObject.transform.parent;
+			this.disabledVisualizerPrefabMap[saveLoadTag] = gameObject;
+		}
 	}
 
 	public Dictionary<Tag, List<SaveLoadRoot>> GetLists()
@@ -83,11 +102,12 @@ public class SaveManager : KMonoBehaviour
 		saveLoadRootList.Remove(root);
 	}
 
-	public GameObject GetPrefab(Tag tag)
+	public GameObject GetPrefab(Tag tag, bool get_disabled_visualizer)
 	{
-		if (this.prefabMap.ContainsKey(tag))
+		Dictionary<Tag, GameObject> dictionary = ((!get_disabled_visualizer) ? this.prefabMap : this.disabledVisualizerPrefabMap);
+		if (dictionary.ContainsKey(tag))
 		{
-			return this.prefabMap[tag];
+			return dictionary[tag];
 		}
 		Output.Log(new object[]
 		{
@@ -101,7 +121,7 @@ public class SaveManager : KMonoBehaviour
 	{
 		writer.Write(SaveManager.SAVE_HEADER);
 		writer.Write(7);
-		writer.Write(1);
+		writer.Write(3);
 		int num = 0;
 		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in this.sceneObjects)
 		{
@@ -200,9 +220,9 @@ public class SaveManager : KMonoBehaviour
 		}
 		int num = reader.ReadInt32();
 		int num2 = reader.ReadInt32();
-		if (num != 7 || num2 > 1)
+		if (num != 7 || num2 > 3)
 		{
-			Output.LogWarning(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 1, num, num2 }) });
+			Output.LogWarning(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 3, num, num2 }) });
 			return false;
 		}
 		this.ClearScene();
@@ -263,9 +283,11 @@ public class SaveManager : KMonoBehaviour
 
 	public const int SAVE_MAJOR_VERSION = 7;
 
-	public const int SAVE_MINOR_VERSION = 1;
+	public const int SAVE_MINOR_VERSION = 3;
 
 	private Dictionary<Tag, GameObject> prefabMap = new Dictionary<Tag, GameObject>();
+
+	private Dictionary<Tag, GameObject> disabledVisualizerPrefabMap = new Dictionary<Tag, GameObject>();
 
 	private Dictionary<Tag, List<SaveLoadRoot>> sceneObjects = new Dictionary<Tag, List<SaveLoadRoot>>();
 

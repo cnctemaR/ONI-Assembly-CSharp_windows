@@ -4,57 +4,46 @@ using UnityEngine;
 
 public class AssignableSideScreenRow : KMonoBehaviour
 {
-	public void SetAssignmentText(string assignmentStr)
-	{
-		this.assignmentText.text = (string.IsNullOrEmpty(assignmentStr) ? "-" : assignmentStr);
-	}
-
-	public bool Selected
-	{
-		get
-		{
-			return this.sideScreen.targetAssignable.assignee == this.targetIdentity;
-		}
-	}
-
 	public void Refresh(object data = null)
 	{
-		string text = string.Empty;
-		if (this.sideScreen.targetAssignable.slot != null)
+		if (!this.sideScreen.targetAssignable.CanAssignTo(this.targetIdentity))
+		{
+			this.currentState = AssignableSideScreenRow.AssignableState.Disabled;
+			this.assignmentText.text = UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.DISABLED;
+		}
+		else if (this.sideScreen.targetAssignable.assignee == this.targetIdentity)
+		{
+			this.currentState = AssignableSideScreenRow.AssignableState.Selected;
+			this.assignmentText.text = UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.ASSIGNED;
+		}
+		else
 		{
 			Assignables assignables = null;
 			if (this.targetIdentity is MinionIdentity)
 			{
-				if (this.sideScreen.targetAssignable is Ownable)
-				{
-					assignables = (this.targetIdentity as MinionIdentity).GetComponent<Ownables>();
-				}
-				else if (this.sideScreen.targetAssignable is Equippable)
-				{
-					assignables = (this.targetIdentity as MinionIdentity).GetComponent<Equipment>();
-				}
+				assignables = (this.targetIdentity as MinionIdentity).GetComponent<Assignables>();
 			}
-			if (assignables != null && assignables.GetSlot(this.sideScreen.targetAssignable.slot) != null && assignables.GetSlot(this.sideScreen.targetAssignable.slot).IsAssigned())
+			if (assignables != null)
 			{
-				if (assignables.GetSlot(this.sideScreen.targetAssignable.slot).assignable == this.sideScreen.targetAssignable)
+				Assignable assignable = assignables.GetAssignable(this.sideScreen.targetAssignable.slot);
+				if (assignable != null && assignable != this.sideScreen.targetAssignable)
 				{
-					text = UI.DETAILTABS.POSSESSIONS.NAME;
+					this.currentState = AssignableSideScreenRow.AssignableState.AssignedToOther;
+					this.assignmentText.text = assignable.GetProperName();
 				}
 				else
 				{
-					text = assignables.GetSlot(this.sideScreen.targetAssignable.slot).assignable.GetProperName();
+					this.currentState = AssignableSideScreenRow.AssignableState.Unassigned;
+					this.assignmentText.text = UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED;
 				}
 			}
+			else
+			{
+				this.currentState = AssignableSideScreenRow.AssignableState.Unassigned;
+				this.assignmentText.text = UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED;
+			}
 		}
-		if (string.IsNullOrEmpty(text))
-		{
-			this.assignmentText.text = "-";
-		}
-		else
-		{
-			this.assignmentText.text = text;
-		}
-		this.toggle.ChangeState((!this.Selected) ? 0 : 1);
+		this.toggle.ChangeState((int)this.currentState);
 	}
 
 	protected override void OnCleanUp()
@@ -103,9 +92,17 @@ public class AssignableSideScreenRow : KMonoBehaviour
 		component.ClearMultiStringTooltip();
 		if (this.targetIdentity != null)
 		{
-			if (!this.Selected)
+			AssignableSideScreenRow.AssignableState assignableState = this.currentState;
+			if (assignableState != AssignableSideScreenRow.AssignableState.Selected)
 			{
-				component.AddMultiStringTooltip(string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.ASSIGN_TO_TOOLTIP, this.targetIdentity.GetProperName()), null);
+				if (assignableState != AssignableSideScreenRow.AssignableState.Disabled)
+				{
+					component.AddMultiStringTooltip(string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.ASSIGN_TO_TOOLTIP, this.targetIdentity.GetProperName()), null);
+				}
+				else
+				{
+					component.AddMultiStringTooltip(string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.DISABLED_TOOLTIP, this.targetIdentity.GetProperName()), null);
+				}
 			}
 			else
 			{
@@ -130,5 +127,15 @@ public class AssignableSideScreenRow : KMonoBehaviour
 
 	public IAssignableIdentity targetIdentity;
 
+	public AssignableSideScreenRow.AssignableState currentState;
+
 	private int refreshHandle = -1;
+
+	public enum AssignableState
+	{
+		Selected,
+		AssignedToOther,
+		Unassigned,
+		Disabled
+	}
 }

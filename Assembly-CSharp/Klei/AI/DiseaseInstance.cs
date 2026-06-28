@@ -91,7 +91,7 @@ namespace Klei.AI
 			HashedString invalid = HashedString.Invalid;
 			string infectionSourceInfo = this.exposureInfo.infectionSourceInfo;
 			this.notification = new Notification(text, notificationType, invalid, func, infectionSourceInfo, true, 0f, null, null, null);
-			this.statusItem = new StatusItem(disease.Id, disease.Name, DUPLICANTS.DISEASES.STATUS_ITEM_TOOLTIP.TEMPLATE, string.Empty, (disease.severity > Disease.Severity.Minor) ? StatusItem.IconType.Exclamation : StatusItem.IconType.Info, (disease.severity > Disease.Severity.Minor) ? NotificationType.Bad : NotificationType.BadMinor, false, SimViewMode.None, 30718);
+			this.statusItem = new StatusItem(disease.Id, disease.Name, DUPLICANTS.DISEASES.STATUS_ITEM_TOOLTIP.TEMPLATE, string.Empty, (disease.severity > Disease.Severity.Minor) ? StatusItem.IconType.Exclamation : StatusItem.IconType.Info, (disease.severity > Disease.Severity.Minor) ? NotificationType.Bad : NotificationType.BadMinor, false, SimViewMode.None, 63486);
 			this.statusItem.resolveTooltipCallback = new Func<string, object, string>(this.ResolveString);
 			if (this.smi != null)
 			{
@@ -123,8 +123,9 @@ namespace Klei.AI
 			if (this.IsDoctored)
 			{
 				str = str.Replace("{Doctor}", DUPLICANTS.DISEASES.STATUS_ITEM_TOOLTIP.DOCTORED);
+				str = str.Replace("{Fatality}", string.Empty);
 			}
-			if (this.modifier.fatalityDuration > 0f)
+			else if (this.modifier.fatalityDuration > 0f)
 			{
 				str = str.Replace("{Fatality}", string.Format(DUPLICANTS.DISEASES.STATUS_ITEM_TOOLTIP.FATALITY, GameUtil.GetFormattedCycles(this.GetFatalityTimeRemaining(), "F1")));
 			}
@@ -214,16 +215,16 @@ namespace Klei.AI
 			{
 			}
 
-			public void UpdateProgress()
+			public void UpdateProgress(float dt)
 			{
 				if (!base.master.modifier.doctorRequired || base.master.IsDoctored)
 				{
-					float num = this.deltatime * base.master.TotalCureSpeedMultiplier / base.master.modifier.SicknessDuration;
+					float num = dt * base.master.TotalCureSpeedMultiplier / base.master.modifier.SicknessDuration;
 					base.sm.percentRecovered.Delta(num, base.smi);
 				}
 				if (base.master.modifier.fatalityDuration > 0f && !base.master.IsDoctored)
 				{
-					float num2 = this.deltatime / base.master.modifier.fatalityDuration;
+					float num2 = dt / base.master.modifier.fatalityDuration;
 					base.sm.percentDied.Delta(num2, base.smi);
 				}
 			}
@@ -266,10 +267,10 @@ namespace Klei.AI
 				this.infected.Enter("Infect", delegate(DiseaseInstance.StatesInstance smi)
 				{
 					smi.Infect();
-				}).DoNotification((DiseaseInstance.StatesInstance smi) => smi.master.notification).Update("UpdateProgress", delegate(DiseaseInstance.StatesInstance smi)
+				}).DoNotification((DiseaseInstance.StatesInstance smi) => smi.master.notification).Update("UpdateProgress", delegate(DiseaseInstance.StatesInstance smi, float dt)
 				{
-					smi.UpdateProgress();
-				})
+					smi.UpdateProgress(dt);
+				}, UpdateRate.SIM_200ms, false)
 					.ToggleStatusItem((DiseaseInstance.StatesInstance smi) => smi.master.GetStatusItem(), (DiseaseInstance.StatesInstance smi) => smi)
 					.ParamTransition<float>(this.percentRecovered, this.cured, (DiseaseInstance.StatesInstance smi, float p) => p > 1f)
 					.ParamTransition<float>(this.percentDied, this.fatality_pre, (DiseaseInstance.StatesInstance smi, float p) => p > 1f);
@@ -277,7 +278,7 @@ namespace Klei.AI
 				{
 					smi.master.Cure();
 				});
-				this.fatality_pre.Update("DeathByDisease", delegate(DiseaseInstance.StatesInstance smi)
+				this.fatality_pre.Update("DeathByDisease", delegate(DiseaseInstance.StatesInstance smi, float dt)
 				{
 					DeathMonitor.Instance smi2 = smi.master.gameObject.GetSMI<DeathMonitor.Instance>();
 					if (smi2 != null)
@@ -285,7 +286,7 @@ namespace Klei.AI
 						smi2.Kill(Db.Get().Deaths.FatalDisease);
 						smi.GoTo(this.fatality);
 					}
-				});
+				}, UpdateRate.SIM_200ms, false);
 				this.fatality.DoNothing();
 			}
 

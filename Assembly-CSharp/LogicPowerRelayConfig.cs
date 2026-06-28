@@ -12,15 +12,14 @@ public class LogicPowerRelayConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 1;
 		string text = "switchpowershutoff_kanim";
-		float num3 = 100f;
-		int num4 = 10;
-		float num5 = 30f;
+		int num3 = 10;
+		float num4 = 30f;
 		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
@@ -54,8 +53,5 @@ public class LogicPowerRelayConfig : IBuildingConfig
 
 	public static string ID = "LogicPowerRelay";
 
-	public static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
-	{
-		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICPOWERRELAY.LOGIC_PORT_DESC, true)
-	};
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICPOWERRELAY.LOGIC_PORT_DESC, true) };
 }

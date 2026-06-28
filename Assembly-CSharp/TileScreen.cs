@@ -21,7 +21,7 @@ public class TileScreen : KScreen
 	private void DisplayTileInfo()
 	{
 		Vector3 mousePosition = Input.mousePosition;
-		mousePosition.z = -Camera.main.transform.position.z - Grid.CellSizeInMeters;
+		mousePosition.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
 		Vector3 vector = Camera.main.ScreenToWorldPoint(mousePosition);
 		int num = Grid.PosToCell(vector);
 		if (Grid.IsValidCell(num) && (float)Grid.Visible[num] + PropertyTextures.FogOfWarScale != 0f)
@@ -57,7 +57,7 @@ public class TileScreen : KScreen
 				this.solidText.text = ((int)element.highTemp).ToString();
 				this.gasText.text = string.Empty;
 				this.liquidIcon.rectTransform.SetParent(this.solidIcon.transform.parent, true);
-				this.liquidIcon.rectTransform.localPosition = new Vector3(0f, 64f);
+				this.liquidIcon.rectTransform.SetLocalPosition(new Vector3(0f, 64f));
 				this.SetSliderColour(num3, element.highTemp);
 				this.temperatureSlider.SetMinMaxValue(element.highTemp, Mathf.Min(element.highTemp + 100f, 4000f), Mathf.Max(element.highTemp - 100f, 0f), Mathf.Min(element.highTemp + 100f, 4000f));
 			}
@@ -69,7 +69,7 @@ public class TileScreen : KScreen
 				this.solidText.text = ((int)element.lowTemp).ToString();
 				this.gasText.text = ((int)element.highTemp).ToString();
 				this.liquidIcon.rectTransform.SetParent(this.temperatureSlider.transform.parent, true);
-				this.liquidIcon.rectTransform.localPosition = new Vector3(-80f, 0f);
+				this.liquidIcon.rectTransform.SetLocalPosition(new Vector3(-80f, 0f));
 				if (!this.SetSliderColour(num3, element.lowTemp))
 				{
 					this.SetSliderColour(num3, element.highTemp);
@@ -85,7 +85,7 @@ public class TileScreen : KScreen
 				this.massIcon.sprite = this.gasIcon.sprite;
 				this.SetSliderColour(num3, element.lowTemp);
 				this.liquidIcon.rectTransform.SetParent(this.gasIcon.transform.parent, true);
-				this.liquidIcon.rectTransform.localPosition = new Vector3(0f, -64f);
+				this.liquidIcon.rectTransform.SetLocalPosition(new Vector3(0f, -64f));
 				this.temperatureSlider.SetMinMaxValue(0f, Mathf.Max(element.lowTemp - 100f, 0f), 0f, element.lowTemp + 100f);
 			}
 			this.temperatureSlider.SetExtraValue(num3);
@@ -114,7 +114,7 @@ public class TileScreen : KScreen
 		UtilityNetworkManager<FlowUtilityNetwork, Vent> utilityNetworkManager = ((mode != SimViewMode.GasVentMap) ? Game.Instance.liquidConduitSystem : Game.Instance.gasConduitSystem);
 		ConduitFlow conduitFlow = ((mode != SimViewMode.GasVentMap) ? Game.Instance.liquidConduitFlow : Game.Instance.gasConduitFlow);
 		Vector3 mousePosition = Input.mousePosition;
-		mousePosition.z = -Camera.main.transform.position.z - Grid.CellSizeInMeters;
+		mousePosition.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
 		Vector3 vector = Camera.main.ScreenToWorldPoint(mousePosition);
 		int num = Grid.PosToCell(vector);
 		if (Grid.IsValidCell(num) && utilityNetworkManager.GetConnections(num, true) != (UtilityConnections)0)
@@ -141,7 +141,7 @@ public class TileScreen : KScreen
 				this.solidText.text = ((int)element2.lowTemp).ToString();
 				this.gasText.text = ((int)element2.highTemp).ToString();
 				this.liquidIcon.rectTransform.SetParent(this.temperatureSlider.transform.parent, true);
-				this.liquidIcon.rectTransform.localPosition = new Vector3(-80f, 0f);
+				this.liquidIcon.rectTransform.SetLocalPosition(new Vector3(-80f, 0f));
 				if (!this.SetSliderColour(temperature, element2.lowTemp))
 				{
 					this.SetSliderColour(temperature, element2.highTemp);
@@ -157,7 +157,7 @@ public class TileScreen : KScreen
 				this.massIcon.sprite = this.gasIcon.sprite;
 				this.SetSliderColour(temperature, element2.lowTemp);
 				this.liquidIcon.rectTransform.SetParent(this.gasIcon.transform.parent, true);
-				this.liquidIcon.rectTransform.localPosition = new Vector3(0f, -64f);
+				this.liquidIcon.rectTransform.SetLocalPosition(new Vector3(0f, -64f));
 				this.temperatureSlider.SetMinMaxValue(0f, Mathf.Max(element2.lowTemp - 100f, 0f), 0f, element2.lowTemp + 100f);
 			}
 			this.temperatureSlider.SetExtraValue(temperature);

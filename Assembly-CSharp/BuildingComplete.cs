@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Klei.AI;
 using UnityEngine;
 
 public class BuildingComplete : Building
 {
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	public event global::System.Action onCleanUp;
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Vector3 position = base.transform.position;
+		Vector3 position = base.transform.GetPosition();
 		position.z = Grid.GetLayerZ(this.Def.SceneLayer);
 		base.transform.SetPosition(position);
 		base.gameObject.SetLayerRecursively(LayerMask.NameToLayer("Default"));
@@ -61,13 +57,13 @@ public class BuildingComplete : Building
 		{
 			component.Offset = this.Def.GetVisualizerOffset() + this.Def.placementPivot;
 		}
-		BoxCollider2D component3 = base.GetComponent<BoxCollider2D>();
+		KBoxCollider2D component3 = base.GetComponent<KBoxCollider2D>();
 		if (component3 != null)
 		{
 			Vector3 visualizerOffset = this.Def.GetVisualizerOffset();
 			component3.offset += new Vector2(visualizerOffset.x, visualizerOffset.y);
 		}
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		if (this.Def.IsFoundation)
 		{
 			foreach (int num2 in base.PlacementCells)
@@ -75,10 +71,6 @@ public class BuildingComplete : Building
 				Grid.Foundation[num2] = true;
 				Game.Instance.roomProber.SolidChangedEvent(num2, false);
 			}
-		}
-		else
-		{
-			Game.Instance.roomProber.AddBuilding(this);
 		}
 		Vector3 vector = Grid.CellToPosCBC(num, this.Def.SceneLayer);
 		base.transform.SetPosition(vector);
@@ -110,20 +102,11 @@ public class BuildingComplete : Building
 			RenderUtil.SetMaterialBlockTexture(base.transform, "_FillTex", buildingTexture);
 		}
 		base.RegisterBlockTileRenderer();
-		for (int j = 0; j < base.PlacementCells.Length; j++)
-		{
-			Region intersectionRegion = Game.Instance.RegionManager.GetIntersectionRegion(base.PlacementCells[j]);
-			if (intersectionRegion != null)
-			{
-				intersectionRegion.AddBuilding(this, true);
-				break;
-			}
-		}
 		if (this.Def.PreventIdlingInFrontOfBuilding)
 		{
-			for (int k = 0; k < base.PlacementCells.Length; k++)
+			for (int j = 0; j < base.PlacementCells.Length; j++)
 			{
-				Grid.PreventIdlingOnCell[base.PlacementCells[k]] = true;
+				Grid.PreventIdlingOnCell[base.PlacementCells[j]] = true;
 			}
 		}
 		KSelectable component6 = base.GetComponent<KSelectable>();
@@ -132,6 +115,7 @@ public class BuildingComplete : Building
 			component6.SetStatusIndicatorOffset(this.Def.placementPivot);
 		}
 		Components.BuildingCompletes.Add(this);
+		BuildingConfigManager.Instance.AddBuildingCompleteKComponents(base.gameObject, this.Def.Tag);
 	}
 
 	private string GetInspectSound()
@@ -146,6 +130,7 @@ public class BuildingComplete : Building
 		{
 			return;
 		}
+		BuildingConfigManager.Instance.DestroyBuildingCompleteKComponents(base.gameObject, this.Def.Tag);
 		if (this.Def.UseStructureTemperature)
 		{
 			GameComps.StructureTemperatures.Remove(base.gameObject);
@@ -170,29 +155,16 @@ public class BuildingComplete : Building
 				Game.Instance.roomProber.SolidChangedEvent(num2, false);
 			}
 		}
-		Game.Instance.roomProber.RemoveBuilding(this);
-		for (int j = 0; j < base.PlacementCells.Length; j++)
-		{
-			Region intersectionRegion = Game.Instance.RegionManager.GetIntersectionRegion(base.PlacementCells[j]);
-			if (intersectionRegion != null)
-			{
-				intersectionRegion.RemoveBuilding(this, true);
-				break;
-			}
-		}
 		if (this.Def.PreventIdlingInFrontOfBuilding)
 		{
-			for (int k = 0; k < base.PlacementCells.Length; k++)
+			for (int j = 0; j < base.PlacementCells.Length; j++)
 			{
-				Grid.PreventIdlingOnCell[base.PlacementCells[k]] = false;
+				Grid.PreventIdlingOnCell[base.PlacementCells[j]] = false;
 			}
 		}
 		Components.BuildingCompletes.Remove(this);
 		base.UnregisterBlockTileRenderer();
-		if (this.onCleanUp != null)
-		{
-			this.onCleanUp();
-		}
+		base.Trigger(-21016276, this);
 	}
 
 	[MyCmpAdd]

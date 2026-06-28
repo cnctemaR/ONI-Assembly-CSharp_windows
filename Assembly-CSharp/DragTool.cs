@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using FMOD.Studio;
 using UnityEngine;
 
@@ -33,11 +32,6 @@ public class DragTool : InterfaceTool
 		base.OnActivateTool();
 		this.dragging = false;
 		this.SetMode(this.mode);
-		if (this.hoverText == null)
-		{
-			this.hoverText = base.GetComponent<HoverTextConfiguration>();
-		}
-		this.hoverText.UpdateHoverElements(null);
 	}
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
@@ -248,7 +242,7 @@ public class DragTool : InterfaceTool
 					if (sound != null)
 					{
 						int num = (int)(vector2.x - vector3.x + (vector2.y - vector3.y) - 1f);
-						EventInstance eventInstance = SoundEvent.BeginOneShot(sound, this.areaVisualizer.transform.position);
+						EventInstance eventInstance = SoundEvent.BeginOneShot(sound, this.areaVisualizer.transform.GetPosition());
 						eventInstance.setParameterValue("tileCount", (float)num);
 						SoundEvent.EndOneShot(eventInstance);
 					}
@@ -332,8 +326,11 @@ public class DragTool : InterfaceTool
 		if (global::Action.Plan1 <= action && action <= global::Action.Plan9 && e.TryConsume(action))
 		{
 			int num = action - global::Action.Plan1 + 1;
-			ToolMenuPriorityScreen.Instance.SetScreenPriority(PriorityScreen.PriorityClass.basic, num, true);
-			return;
+			if (num <= 9)
+			{
+				ToolMenu.Instance.PriorityScreen.SetScreenPriority(new PrioritySetting(PriorityScreen.PriorityClass.basic, num), true);
+				return;
+			}
 		}
 		if (!e.Consumed)
 		{
@@ -410,23 +407,14 @@ public class DragTool : InterfaceTool
 		this.dragging = false;
 	}
 
-	public virtual void Update()
-	{
-		if (this.hoverText == null)
-		{
-			this.hoverText = base.GetComponent<HoverTextConfiguration>();
-		}
-		if (this.hoverText != null)
-		{
-			this.hits.Clear();
-			SelectTool.Instance.GetSelectablesUnderCursor(this.hits, false);
-			this.hoverText.UpdateHoverElements(this.hits);
-		}
-	}
-
 	public override bool ShowHoverUI()
 	{
 		return this.dragging || base.ShowHoverUI();
+	}
+
+	public override void LateUpdate()
+	{
+		base.LateUpdate();
 	}
 
 	[SerializeField]
@@ -452,13 +440,9 @@ public class DragTool : InterfaceTool
 
 	private DragTool.DragAxis dragAxis = DragTool.DragAxis.Invalid;
 
-	private HoverTextScreen hoverTextScreen;
-
 	protected Vector3 downPos;
 
 	protected static int layerMask;
-
-	private List<KSelectable> hits = new List<KSelectable>();
 
 	private enum DragAxis
 	{

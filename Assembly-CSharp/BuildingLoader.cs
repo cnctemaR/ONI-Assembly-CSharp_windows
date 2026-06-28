@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class BuildingLoader : DefLoader
+public class BuildingLoader : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
@@ -40,7 +40,6 @@ public class BuildingLoader : DefLoader
 		storage.doDiseaseTransfer = false;
 		gameObject.AddComponent<Cancellable>();
 		gameObject.AddComponent<UserMenu>();
-		gameObject.AddComponent<Notifier>();
 		gameObject.AddComponent<Prioritizable>();
 		return gameObject;
 	}
@@ -104,12 +103,11 @@ public class BuildingLoader : DefLoader
 				kbatchedAnimController.materialType = KAnimBatchGroup.MaterialType.Default;
 			}
 		}
-		BoxCollider2D boxCollider2D = BuildingLoader.UpdateComponentRequirement<BoxCollider2D>(go, flag && !no_collider);
-		if (boxCollider2D != null)
+		KBoxCollider2D kboxCollider2D = BuildingLoader.UpdateComponentRequirement<KBoxCollider2D>(go, flag && !no_collider);
+		if (kboxCollider2D != null)
 		{
-			boxCollider2D.offset = new Vector3(0f, 0.5f * (float)def.HeightInCells, 0f);
-			boxCollider2D.size = new Vector3((float)def.WidthInCells, (float)def.HeightInCells, 0f);
-			boxCollider2D.sharedMaterial = Assets.defaultPhysicsMaterial;
+			kboxCollider2D.offset = new Vector3(0f, 0.5f * (float)def.HeightInCells, 0f);
+			kboxCollider2D.size = new Vector3((float)def.WidthInCells, (float)def.HeightInCells, 0f);
 		}
 		if (def.AnimFiles == null)
 		{
@@ -139,13 +137,25 @@ public class BuildingLoader : DefLoader
 		target.secondOutputOffset = component.secondOutputOffset;
 	}
 
+	public static KPrefabID AddID(GameObject go, string str)
+	{
+		KPrefabID kprefabID = go.GetComponent<KPrefabID>();
+		if (kprefabID == null)
+		{
+			kprefabID = go.AddComponent<KPrefabID>();
+		}
+		kprefabID.PrefabTag = new Tag(str);
+		kprefabID.SaveLoadTag = kprefabID.PrefabTag;
+		return kprefabID;
+	}
+
 	public GameObject CreateBuildingUnderConstruction(BuildingDef def, bool isRelocating)
 	{
 		GameObject gameObject = this.CreateBuilding(def, this.constructionTemplate, SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy));
 		KSelectable component = gameObject.GetComponent<KSelectable>();
 		component.SetName(def.Name);
 		gameObject.GetComponent<PrimaryElement>().MassPerUnit = def.Mass[0];
-		KPrefabID kprefabID = DefLoader.AddID(gameObject, def.PrefabID + ((!isRelocating) ? "UnderConstruction" : "UnderRelocation"));
+		KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID + ((!isRelocating) ? "UnderConstruction" : "UnderRelocation"));
 		BuildingCellVisualizer buildingCellVisualizer = BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, BuildingCellVisualizer.CheckRequiresComponent(def));
 		if (buildingCellVisualizer != null)
 		{
@@ -179,9 +189,11 @@ public class BuildingLoader : DefLoader
 			gameObject = global::UnityEngine.Object.Instantiate<GameObject>(gameObject);
 			gameObject.name = def.PrefabID + "Complete";
 			gameObject.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy).transform;
-			gameObject.transform.position = new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer));
-			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			component.MassPerUnit = def.Mass[0];
+			gameObject.transform.SetPosition(new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer)));
+			KSelectable component = gameObject.GetComponent<KSelectable>();
+			component.SetName(def.Name);
+			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
+			component2.MassPerUnit = def.Mass[0];
 			BuildingHP buildingHP = BuildingLoader.UpdateComponentRequirement<BuildingHP>(gameObject, true);
 			if (def.Invincible)
 			{
@@ -194,8 +206,8 @@ public class BuildingLoader : DefLoader
 			}
 			int num = LayerMask.NameToLayer("Default");
 			gameObject.layer = num;
-			Building component2 = gameObject.GetComponent<BuildingComplete>();
-			component2.Def = def;
+			Building component3 = gameObject.GetComponent<BuildingComplete>();
+			component3.Def = def;
 			if (def.InputConduitType != ConduitType.None || def.OutputConduitType != ConduitType.None)
 			{
 				gameObject.AddComponent<BuildingConduitEndpoints>();
@@ -251,12 +263,11 @@ public class BuildingLoader : DefLoader
 				gameObject.AddComponent<Relocatable>();
 			}
 			BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, BuildingCellVisualizer.CheckRequiresComponent(def));
-			LoopingSounds component3 = gameObject.GetComponent<LoopingSounds>();
-			if (component3 == null)
+			LoopingSounds component4 = gameObject.GetComponent<LoopingSounds>();
+			if (component4 == null)
 			{
 				gameObject.AddComponent<LoopingSounds>();
 			}
-			BuildingLoader.UpdateComponentRequirement<Upgradable>(gameObject, def.Upgradeable);
 			if (def.BaseDecor != 0f)
 			{
 				DecorProvider decorProvider = BuildingLoader.UpdateComponentRequirement<DecorProvider>(gameObject, true);
@@ -268,7 +279,7 @@ public class BuildingLoader : DefLoader
 				AttachableBuilding attachableBuilding = BuildingLoader.UpdateComponentRequirement<AttachableBuilding>(gameObject, true);
 				attachableBuilding.attachableTag = def.AttachableBuildingType;
 			}
-			KPrefabID kprefabID = DefLoader.AddID(gameObject, def.PrefabID);
+			KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID);
 			kprefabID.defaultLayer = num;
 			Assets.AddPrefab(kprefabID);
 			gameObject.PreInit();
@@ -280,7 +291,7 @@ public class BuildingLoader : DefLoader
 	{
 		GameObject gameObject = this.CreateBuilding(def, this.previewTemplate, SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy));
 		int num = LayerMask.NameToLayer("Place");
-		gameObject.transform.position = new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer));
+		gameObject.transform.SetPosition(new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer)));
 		BuildingLoader.Add2DComponents(def, gameObject, "place", true, num);
 		KAnimControllerBase component = gameObject.GetComponent<KAnimControllerBase>();
 		if (component != null)
@@ -292,7 +303,7 @@ public class BuildingLoader : DefLoader
 		{
 			rotatable.permittedRotations = def.PermittedRotations;
 		}
-		KPrefabID kprefabID = DefLoader.AddID(gameObject, def.PrefabID + "Preview");
+		KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID + "Preview");
 		kprefabID.defaultLayer = num;
 		KSelectable component2 = gameObject.GetComponent<KSelectable>();
 		component2.SetName(def.Name);
@@ -314,10 +325,10 @@ public class BuildingLoader : DefLoader
 	{
 		GameObject gameObject = this.CreateBuilding(def, this.packageTemplate, SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy));
 		int num = LayerMask.NameToLayer("Loot");
-		gameObject.transform.position = new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer));
+		gameObject.transform.SetPosition(new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer)));
 		Relocatable relocatable = BuildingLoader.UpdateComponentRequirement<Relocatable>(gameObject, true);
 		relocatable.deconstruct = false;
-		KPrefabID kprefabID = DefLoader.AddID(gameObject, def.PrefabID + "Package");
+		KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID + "Package");
 		kprefabID.defaultLayer = num;
 		KSelectable component = gameObject.GetComponent<KSelectable>();
 		component.SetName(def.Name);

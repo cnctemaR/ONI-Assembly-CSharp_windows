@@ -191,13 +191,12 @@ public class TreeFilterableSideScreen : SideScreenContent
 			return;
 		}
 		this.storage = this.targetFilterable.GetComponent<Storage>();
-		Storage storage = this.storage;
-		storage.onPriorityChanged = (global::System.Action)Delegate.Combine(storage.onPriorityChanged, new global::System.Action(this.OnPriorityChanged));
-		this.OnPriorityChanged();
+		this.storage.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
+		this.OnOnlyFetchMarkedItemsSettingChanged(null);
 		this.CreateCategories();
 	}
 
-	private void OnPriorityChanged()
+	private void OnOnlyFetchMarkedItemsSettingChanged(object data)
 	{
 		this.onlyAllowTransportItemsCheckBox.isOn = this.storage.GetOnlyFetchMarkedItems();
 		this.onlyAllowTransportItemsImg.enabled = this.storage.GetOnlyFetchMarkedItems();
@@ -277,8 +276,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 		base.OnCmpDisable();
 		if (this.storage != null)
 		{
-			Storage storage = this.storage;
-			storage.onPriorityChanged = (global::System.Action)Delegate.Remove(storage.onPriorityChanged, new global::System.Action(this.OnPriorityChanged));
+			this.storage.Unsubscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
 		}
 		this.rowPool.ClearAll();
 		this.elementPool.ClearAll();

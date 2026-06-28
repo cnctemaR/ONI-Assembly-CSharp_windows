@@ -21,8 +21,8 @@ public class Lighting : MonoBehaviour
 
 	private void Update()
 	{
-		Shader.SetGlobalInt("_LiquidZ", -16);
-		Shader.SetGlobalInt("_SceneLayerMax", 22);
+		Shader.SetGlobalInt("_LiquidZ", -19);
+		Shader.SetGlobalInt("_SceneLayerMax", 25);
 		Shader.SetGlobalColor("_StateTransitionColour", this.Settings.StateTransitionColor);
 		Shader.SetGlobalVector("_DigMapMapParameters", new Vector4(this.Settings.DigMapColour.r, this.Settings.DigMapColour.g, this.Settings.DigMapColour.b, this.Settings.DigMapScale));
 		Shader.SetGlobalTexture("_DigDamageMap", this.Settings.DigDamageMap);

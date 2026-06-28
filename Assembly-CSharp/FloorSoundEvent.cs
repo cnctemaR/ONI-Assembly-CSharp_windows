@@ -14,7 +14,7 @@ public class FloorSoundEvent : SoundEvent
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		Vector3 vector = behaviour.GetComponent<Transform>().position;
+		Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
 		int num = Grid.PosToCell(vector);
 		int num2 = Grid.CellBelow(num);
 		string audioCategory = FloorSoundEvent.GetAudioCategory(num2);

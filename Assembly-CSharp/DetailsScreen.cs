@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Klei.AI;
 using UnityEngine;
 
 public class DetailsScreen : KTabMenu
@@ -398,7 +397,7 @@ public class DetailsScreen : KTabMenu
 			}
 			if (minionIdentity != null)
 			{
-				this.TabTitle.SetSubText(minionIdentity.gameObject.GetAttributes().GetProfessionString(true), minionIdentity.gameObject.GetAttributes().GetProfessionDescriptionString());
+				this.TabTitle.SetSubText(minionIdentity.GetComponent<MinionResume>().GetCurrentRoleString(), minionIdentity.GetComponent<MinionResume>().GetCurrentRoleDescription());
 				this.TabTitle.SetUserEditable(true);
 			}
 			else

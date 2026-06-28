@@ -7,7 +7,7 @@ namespace Klei.AI
 {
 	[SerializationConfig(MemberSerialization.OptIn)]
 	[DebuggerDisplay("{amount.Name} {value} ({deltaAttribute.value}/{minAttribute.value}/{maxAttribute.value})")]
-	public class AmountInstance : ModifierInstance<Amount>, ISaveLoadable
+	public class AmountInstance : ModifierInstance<Amount>, ISaveLoadable, ISim200ms
 	{
 		public AmountInstance(Amount amount, GameObject game_object)
 			: base(game_object, amount)
@@ -23,6 +23,26 @@ namespace Klei.AI
 			get
 			{
 				return this.modifier;
+			}
+		}
+
+		public bool paused
+		{
+			get
+			{
+				return this._paused;
+			}
+			set
+			{
+				this._paused = this.paused;
+				if (this._paused)
+				{
+					this.Deactivate();
+				}
+				else
+				{
+					this.Activate();
+				}
 			}
 		}
 
@@ -79,6 +99,25 @@ namespace Klei.AI
 			return this.amount.GetTooltip(this);
 		}
 
+		public void Activate()
+		{
+			SimAndRenderScheduler.instance.Add(this, false);
+		}
+
+		public void Sim200ms(float dt)
+		{
+			float delta = this.GetDelta();
+			if (delta != 0f)
+			{
+				this.ApplyDelta(delta * dt);
+			}
+		}
+
+		public void Deactivate()
+		{
+			SimAndRenderScheduler.instance.Remove(this);
+		}
+
 		[Serialize]
 		public float value;
 
@@ -92,8 +131,6 @@ namespace Klei.AI
 
 		public global::System.Action OnMaxValueReached;
 
-		public bool paused;
-
-		public bool isActive;
+		private bool _paused;
 	}
 }

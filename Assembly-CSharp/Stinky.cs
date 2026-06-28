@@ -21,13 +21,13 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 	{
 		GameObject gameObject = (GameObject)data;
 		Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
-		Vector2 vector = gameObject.transform.position;
+		Vector2 vector = gameObject.transform.GetPosition();
 		for (int i = 0; i < liveMinionIdentities.Count; i++)
 		{
 			MinionIdentity minionIdentity = liveMinionIdentities[i];
 			if (minionIdentity.gameObject != gameObject.gameObject)
 			{
-				Vector2 vector2 = minionIdentity.transform.position;
+				Vector2 vector2 = minionIdentity.transform.GetPosition();
 				float num = Vector2.SqrMagnitude(vector - vector2);
 				if (num <= 2.25f)
 				{
@@ -37,10 +37,10 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 				}
 			}
 		}
-		int num2 = Grid.PosToCell(gameObject.transform.position);
+		int num2 = Grid.PosToCell(gameObject.transform.GetPosition());
 		float value = Db.Get().Amounts.Temperature.Lookup(this).value;
 		SimMessages.AddRemoveSubstance(num2, SimHashes.ContaminatedOxygen, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.0025000002f, value, byte.MaxValue, 0, -1);
-		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), base.transform.position);
+		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), base.transform.GetPosition());
 	}
 
 	private void OnDeath(object data)
@@ -84,16 +84,16 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 			default_state = this.idle;
 			this.root.Enter(delegate(Stinky.StatesInstance smi)
 			{
-				KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("odor_fx_kanim", smi.master.gameObject.transform.position, smi.master.gameObject.transform, true, Grid.SceneLayer.Front, false);
+				KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("odor_fx_kanim", smi.master.gameObject.transform.GetPosition(), smi.master.gameObject.transform, true, Grid.SceneLayer.Front, false);
 				kbatchedAnimController.Play(Stinky.WorkLoopAnims, KAnim.PlayMode.Once);
 				smi.master.stinkyController = kbatchedAnimController;
-			}).ToggleSchedulePeriodic("StinkyFX", 5f, delegate(Stinky.StatesInstance smi)
+			}).Update("StinkyFX", delegate(Stinky.StatesInstance smi, float dt)
 			{
 				if (smi.master.stinkyController != null)
 				{
 					smi.master.stinkyController.Play(Stinky.WorkLoopAnims, KAnim.PlayMode.Once);
 				}
-			});
+			}, UpdateRate.SIM_4000ms, false);
 			this.idle.Enter("ScheduleNextFart", delegate(Stinky.StatesInstance smi)
 			{
 				smi.ScheduleGoTo(this.GetNewInterval(), this.emit);

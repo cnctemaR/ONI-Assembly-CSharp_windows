@@ -55,7 +55,7 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 			}
 			num4 += (float)keyValuePair2.Value;
 		}
-		int num5 = Grid.PosToCell(base.transform.position);
+		int num5 = Grid.PosToCell(base.transform.GetPosition());
 		GameObject gameObject = Scenario.SpawnPrefab(num5, 0, 1, text, Grid.SceneLayer.Ore, Folder.Entities);
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, gameObject.GetProperName(), gameObject.transform, 1.5f, false);
 		gameObject.SetActive(true);
@@ -70,7 +70,7 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 	private KBatchedAnimController anim;
 
 	[MyCmpAdd]
-	private CircleCollider2D mCollider;
+	private KCircleCollider2D mCollider;
 
 	public bool alive = true;
 
@@ -100,9 +100,9 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 			default_state = this.grounded.idle;
 			base.serializable = true;
 			this.grounded.EventTransition(GameHashes.TooHotFatal, this.dead, (MysteryEgg.StatesInstance smi) => smi.master.alive && smi.timeinstate > 0f).EventTransition(GameHashes.TooColdFatal, this.dead, (MysteryEgg.StatesInstance smi) => smi.master.alive && smi.timeinstate > 0f).EventTransition(GameHashes.OnStore, this.incubating.idle, (MysteryEgg.StatesInstance smi) => smi.master.transform.parent.GetComponent<EggIncubator>() != null)
-				.Update(delegate(MysteryEgg.StatesInstance smi)
+				.Update(delegate(MysteryEgg.StatesInstance smi, float dt)
 				{
-					int num = Grid.PosToCell(smi.transform.position + Vector3.down);
+					int num = Grid.PosToCell(smi.transform.GetPosition() + Vector3.down);
 					if (Grid.IsValidCell(num) && !Grid.Solid[num])
 					{
 						smi.GoTo(this.fall);
@@ -110,7 +110,7 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 				});
 			this.grounded.idle.PlayAnim("idle").Enter(delegate(MysteryEgg.StatesInstance smi)
 			{
-				int num2 = Grid.PosToCell(smi.transform.position + Vector3.down);
+				int num2 = Grid.PosToCell(smi.transform.GetPosition() + Vector3.down);
 				if (Grid.IsValidCell(num2) && !Grid.Solid[num2])
 				{
 					smi.GoTo(this.fall);
@@ -143,11 +143,11 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 				{
 					smi.ScheduleGoTo(3f, this.incubating.idle_alt);
 				}
-			}).Update(delegate(MysteryEgg.StatesInstance smi)
+			}).Update(delegate(MysteryEgg.StatesInstance smi, float dt)
 			{
 				if (smi.master.incubator != null && smi.master.incubator.operational.IsOperational)
 				{
-					smi.master.maturity += smi.deltatime * smi.master.matureRate;
+					smi.master.maturity += dt * smi.master.matureRate;
 				}
 			});
 			this.hatch_pst.PlayAnim("hatch_pst").Enter(delegate(MysteryEgg.StatesInstance smi)

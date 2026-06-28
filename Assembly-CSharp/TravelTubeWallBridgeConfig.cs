@@ -10,15 +10,14 @@ public class TravelTubeWallBridgeConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 1;
 		string text2 = "tube_tile_bridge_kanim";
-		float num3 = 100f;
-		int num4 = 100;
-		float num5 = 3f;
+		int num3 = 100;
+		float num4 = 3f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
 		string[] plastics = MATERIALS.PLASTICS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, plastics, num6, buildLocationRule, BUILDINGS.DECOR.NONE, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, plastics, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
@@ -35,11 +34,10 @@ public class TravelTubeWallBridgeConfig : IBuildingConfig
 		buildingDef.IsFoundation = true;
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.TileFront;
-		buildingDef.HotKey = global::Action.BuildMenuKeyQ;
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();

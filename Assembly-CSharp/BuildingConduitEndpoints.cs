@@ -10,14 +10,28 @@ public class BuildingConduitEndpoints : KMonoBehaviour
 		if (def.InputConduitType != ConduitType.None)
 		{
 			int utilityInputCell = component.GetUtilityInputCell();
-			this.itemInput = new FlowUtilityNetwork.NetworkItem(def.InputConduitType, Endpoint.Sink, utilityInputCell, 1000);
-			Conduit.GetNetworkManager(def.InputConduitType).AddToNetworks(utilityInputCell, this.itemInput, true);
+			this.itemInput = new FlowUtilityNetwork.NetworkItem(def.InputConduitType, Endpoint.Sink, utilityInputCell);
+			if (def.InputConduitType == ConduitType.Solid)
+			{
+				Game.Instance.solidConduitSystem.AddToNetworks(utilityInputCell, this.itemInput, true);
+			}
+			else
+			{
+				Conduit.GetNetworkManager(def.InputConduitType).AddToNetworks(utilityInputCell, this.itemInput, true);
+			}
 		}
 		if (def.OutputConduitType != ConduitType.None)
 		{
 			int utilityOutputCell = component.GetUtilityOutputCell();
-			this.itemOutput = new FlowUtilityNetwork.NetworkItem(def.OutputConduitType, Endpoint.Source, utilityOutputCell, 1000);
-			Conduit.GetNetworkManager(def.OutputConduitType).AddToNetworks(utilityOutputCell, this.itemOutput, true);
+			this.itemOutput = new FlowUtilityNetwork.NetworkItem(def.OutputConduitType, Endpoint.Source, utilityOutputCell);
+			if (def.OutputConduitType == ConduitType.Solid)
+			{
+				Game.Instance.solidConduitSystem.AddToNetworks(utilityOutputCell, this.itemOutput, true);
+			}
+			else
+			{
+				Conduit.GetNetworkManager(def.OutputConduitType).AddToNetworks(utilityOutputCell, this.itemOutput, true);
+			}
 		}
 	}
 
@@ -25,11 +39,25 @@ public class BuildingConduitEndpoints : KMonoBehaviour
 	{
 		if (this.itemInput != null)
 		{
-			Conduit.GetNetworkManager(this.itemInput.ConduitType).RemoveFromNetworks(this.itemInput.Cell, this.itemInput, true);
+			if (this.itemInput.ConduitType == ConduitType.Solid)
+			{
+				Game.Instance.solidConduitSystem.RemoveFromNetworks(this.itemInput.Cell, this.itemInput, true);
+			}
+			else
+			{
+				Conduit.GetNetworkManager(this.itemInput.ConduitType).RemoveFromNetworks(this.itemInput.Cell, this.itemInput, true);
+			}
 		}
 		if (this.itemOutput != null)
 		{
-			Conduit.GetNetworkManager(this.itemOutput.ConduitType).RemoveFromNetworks(this.itemOutput.Cell, this.itemOutput, true);
+			if (this.itemOutput.ConduitType == ConduitType.Solid)
+			{
+				Game.Instance.solidConduitSystem.RemoveFromNetworks(this.itemOutput.Cell, this.itemOutput, true);
+			}
+			else
+			{
+				Conduit.GetNetworkManager(this.itemOutput.ConduitType).RemoveFromNetworks(this.itemOutput.Cell, this.itemOutput, true);
+			}
 		}
 		base.OnCleanUp();
 	}

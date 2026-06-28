@@ -12,35 +12,29 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		{
 			smi.revengeThreat.Clear();
 			smi.RefreshThreat(null);
-		}).Update(delegate(ThreatMonitor.Instance smi)
+		}).Update("safe", delegate(ThreatMonitor.Instance smi, float dt)
 		{
 			smi.RefreshThreat(null);
-		});
-		this.threatned.duplicant.Update(delegate(ThreatMonitor.Instance smi)
-		{
-			if (!smi.CheckForThreats())
-			{
-				smi.GoTo(this.safe);
-			}
-		});
-		this.threatned.duplicant.ShouldFight.ToggleChore(new Func<ThreatMonitor.Instance, Chore>(this.CreateAttackChore), this.safe).Update(delegate(ThreatMonitor.Instance smi)
+		}, UpdateRate.SIM_200ms, true);
+		this.threatned.duplicant.Transition(this.safe, (ThreatMonitor.Instance smi) => !smi.CheckForThreats(), UpdateRate.SIM_200ms);
+		this.threatned.duplicant.ShouldFight.ToggleChore(new Func<ThreatMonitor.Instance, Chore>(this.CreateAttackChore), this.safe).Update("ShouldFight", delegate(ThreatMonitor.Instance smi, float dt)
 		{
 			if (this.GetMainThreat(smi) == null || !this.GetMainThreat(smi).GetComponent<FactionAlignment>().targeted)
 			{
 				smi.Trigger(2144432245, null);
 			}
-		});
+		}, UpdateRate.SIM_200ms, false);
 		this.threatned.duplicant.ShoudFlee.ToggleChore(new Func<ThreatMonitor.Instance, Chore>(this.CreateFleeChore), this.safe);
 		this.threatned.creature.Enter(delegate(ThreatMonitor.Instance smi)
 		{
 			this.ReportThreat(smi);
-		}).Update(delegate(ThreatMonitor.Instance smi)
+		}).Update("Threatened", delegate(ThreatMonitor.Instance smi, float dt)
 		{
 			if (smi.isMasterNull)
 			{
 				return;
 			}
-			if (smi.revengeThreat.target != null && smi.revengeThreat.Calm(smi.dt, smi.master.gameObject))
+			if (smi.revengeThreat.target != null && smi.revengeThreat.Calm(dt, smi.master.gameObject))
 			{
 				smi.Trigger(-21431934, null);
 				return;
@@ -53,7 +47,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			{
 				this.ReportThreat(smi);
 			}
-		});
+		}, UpdateRate.SIM_200ms, false);
 	}
 
 	public GameObject GetMainThreat(ThreatMonitor.Instance smi)
@@ -269,14 +263,15 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 
 		public void RefreshThreat(object data)
 		{
-			if (!base.smi.CheckForThreats())
+			bool flag = base.smi.CheckForThreats();
+			if (flag)
+			{
+				this.GoToThreatned();
+			}
+			else if (base.smi.GetCurrentState() != base.sm.safe)
 			{
 				base.Trigger(-21431934, null);
 				base.smi.GoTo(base.sm.safe);
-			}
-			else
-			{
-				this.GoToThreatned();
 			}
 		}
 
@@ -304,7 +299,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			}
 			int num = Grid.OffsetCell(Grid.PosToCell(base.gameObject), new CellOffset(-this.maxThreatDistance / 2, -this.maxThreatDistance / 2));
 			bool flag = this.WillEngageNonEssentialTargets();
-			List<ScenePartitionerEntry> list = GameScenePartitioner.Instance.ReserveList();
+			List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
 			GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num).x, Grid.CellToXY(num).y, this.maxThreatDistance, this.maxThreatDistance, GameScenePartitioner.Instance.attackableEntitiesLayer, list);
 			for (int i = 0; i < list.Count; i++)
 			{
@@ -337,7 +332,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 					}
 				}
 			}
-			GameScenePartitioner.Instance.ReleaseList(list);
+			ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
 			if (this.alignment.Alignment == FactionManager.FactionID.Duplicant && flag)
 			{
 				for (int j = 0; j < 6; j++)
@@ -364,13 +359,13 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		public GameObject PickBestTarget(List<FactionAlignment> threats)
 		{
 			float num = 1f;
-			Vector2 vector = base.gameObject.transform.position;
+			Vector2 vector = base.gameObject.transform.GetPosition();
 			GameObject gameObject = null;
 			float num2 = float.PositiveInfinity;
 			for (int i = threats.Count - 1; i >= 0; i--)
 			{
 				FactionAlignment factionAlignment = threats[i];
-				float num3 = Vector2.Distance(vector, factionAlignment.transform.position) / num;
+				float num3 = Vector2.Distance(vector, factionAlignment.transform.GetPosition()) / num;
 				if (num3 < num2)
 				{
 					num2 = num3;

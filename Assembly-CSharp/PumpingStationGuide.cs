@@ -1,12 +1,20 @@
 ﻿using System;
 using UnityEngine;
 
-public class PumpingStationGuide : KMonoBehaviour
+public class PumpingStationGuide : KMonoBehaviour, IRenderEveryTick
 {
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.parentController = this.parent.GetComponent<KBatchedAnimController>();
+		this.guideController = base.GetComponent<KBatchedAnimController>();
+		this.RefreshTint();
 		this.RefreshDepthAvailable();
+	}
+
+	private void RefreshTint()
+	{
+		this.guideController.TintColour = this.parentController.TintColour;
 	}
 
 	private void RefreshDepthAvailable()
@@ -32,14 +40,15 @@ public class PumpingStationGuide : KMonoBehaviour
 		}
 	}
 
-	private void Update()
+	public void RenderEveryTick(float dt)
 	{
+		this.RefreshTint();
 		this.RefreshDepthAvailable();
 	}
 
 	public static void OccupyArea(GameObject go, int depth_available)
 	{
-		int num = Grid.PosToCell(go.transform.position);
+		int num = Grid.PosToCell(go.transform.GetPosition());
 		for (int i = 1; i <= depth_available; i++)
 		{
 			int num2 = Grid.OffsetCell(num, 0, -i);
@@ -57,7 +66,7 @@ public class PumpingStationGuide : KMonoBehaviour
 		{
 			int num3 = Grid.OffsetCell(root_cell, 0, -i);
 			int num4 = Grid.OffsetCell(root_cell, 1, -i);
-			if (Grid.Solid[num3] || Grid.Solid[num4])
+			if (!Grid.IsValidCell(num3) || Grid.Solid[num3] || !Grid.IsValidCell(num4) || Grid.Solid[num4])
 			{
 				break;
 			}
@@ -75,4 +84,8 @@ public class PumpingStationGuide : KMonoBehaviour
 	public GameObject parent;
 
 	public bool occupyTiles;
+
+	private KBatchedAnimController parentController;
+
+	private KBatchedAnimController guideController;
 }

@@ -118,26 +118,6 @@ public class BatchedAnimBulkDisplayer : MonoBehaviour
 
 	private void DrawMinionChoice()
 	{
-		GUILayout.BeginHorizontal(new GUILayoutOption[0]);
-		GUILayout.Label("hair: " + this.bodyData.hair, new GUILayoutOption[0]);
-		this.bodyData.hair = (int)GUILayout.HorizontalSlider((float)this.bodyData.hair, 0f, (float)(this.slots.Hair.accessories.Count - 1), new GUILayoutOption[0]);
-		GUILayout.EndHorizontal();
-		GUILayout.BeginHorizontal(new GUILayoutOption[0]);
-		GUILayout.Label("eyes: " + this.bodyData.eyes, new GUILayoutOption[0]);
-		this.bodyData.eyes = (int)GUILayout.HorizontalSlider((float)this.bodyData.eyes, 0f, (float)(this.slots.Eyes.accessories.Count - 1), new GUILayoutOption[0]);
-		GUILayout.EndHorizontal();
-		GUILayout.BeginHorizontal(new GUILayoutOption[0]);
-		GUILayout.Label("headShape: " + this.bodyData.headShape, new GUILayoutOption[0]);
-		this.bodyData.headShape = (int)GUILayout.HorizontalSlider((float)this.bodyData.headShape, 0f, (float)(this.slots.HeadShape.accessories.Count - 1), new GUILayoutOption[0]);
-		GUILayout.EndHorizontal();
-		GUILayout.BeginHorizontal(new GUILayoutOption[0]);
-		GUILayout.Label("mouth: " + this.bodyData.mouth, new GUILayoutOption[0]);
-		this.bodyData.mouth = (int)GUILayout.HorizontalSlider((float)this.bodyData.mouth, 0f, (float)(this.slots.Mouth.accessories.Count - 1), new GUILayoutOption[0]);
-		GUILayout.EndHorizontal();
-		GUILayout.BeginHorizontal(new GUILayoutOption[0]);
-		GUILayout.Label("body: " + this.bodyData.body, new GUILayoutOption[0]);
-		this.bodyData.body = (int)GUILayout.HorizontalSlider((float)this.bodyData.body, 0f, (float)(this.slots.Body.accessories.Count - 1), new GUILayoutOption[0]);
-		GUILayout.EndHorizontal();
 		this.hideGuides = GUILayout.Toggle(this.hideGuides, "Hide guides", new GUILayoutOption[0]);
 		int num = GUILayout.SelectionGrid(this.faceAnimIdx, this.faceAnimNames.ToArray(), 8, new GUILayoutOption[0]);
 		if (num != this.faceAnimIdx)
@@ -189,29 +169,29 @@ public class BatchedAnimBulkDisplayer : MonoBehaviour
 		{
 			minon.RemoveSymbolOverride(anim.curHair);
 		}
-		anim.curHair = UIDupeRandomizer.AddAccessory(minon, this.slots.Hair.accessories[this.bodyData.hair]);
+		anim.curHair = UIDupeRandomizer.AddAccessory(minon, this.slots.Hair.Lookup(this.bodyData.hair));
 		if (anim.curEyes.IsValid())
 		{
 			minon.RemoveSymbolOverride(anim.curEyes);
 		}
-		anim.curEyes = UIDupeRandomizer.AddAccessory(minon, this.slots.Eyes.accessories[this.bodyData.eyes]);
+		anim.curEyes = UIDupeRandomizer.AddAccessory(minon, this.slots.Eyes.Lookup(this.bodyData.eyes));
 		if (anim.curHeadShape.IsValid())
 		{
 			minon.RemoveSymbolOverride(anim.curHeadShape);
 		}
-		anim.curHeadShape = UIDupeRandomizer.AddAccessory(minon, this.slots.HeadShape.accessories[this.bodyData.headShape]);
+		anim.curHeadShape = UIDupeRandomizer.AddAccessory(minon, this.slots.HeadShape.Lookup(this.bodyData.headShape));
 		if (anim.curMouth.IsValid())
 		{
 			minon.RemoveSymbolOverride(anim.curMouth);
 		}
-		anim.curMouth = UIDupeRandomizer.AddAccessory(minon, this.slots.Mouth.accessories[this.bodyData.mouth]);
+		anim.curMouth = UIDupeRandomizer.AddAccessory(minon, this.slots.Mouth.Lookup(this.bodyData.mouth));
 		if (anim.curTorso.IsValid())
 		{
 			minon.RemoveSymbolOverride(anim.curTorso);
 			minon.RemoveSymbolOverride(anim.curArm);
 		}
-		anim.curTorso = UIDupeRandomizer.AddAccessory(minon, this.slots.Body.accessories[this.bodyData.body]);
-		anim.curArm = UIDupeRandomizer.AddAccessory(minon, this.slots.Arm.accessories[this.bodyData.body]);
+		anim.curTorso = UIDupeRandomizer.AddAccessory(minon, this.slots.Body.Lookup(this.bodyData.body));
+		anim.curArm = UIDupeRandomizer.AddAccessory(minon, this.slots.Arm.Lookup(this.bodyData.body));
 		if (this.hideGuides)
 		{
 			minon.HideSymbol(true, this.snapto_pivot);

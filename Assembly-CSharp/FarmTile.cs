@@ -2,15 +2,9 @@
 
 public class FarmTile : StateMachineComponent<FarmTile.SMInstance>
 {
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.storage.choreType = Db.Get().ChoreTypes.FetchCritical;
 		base.smi.StartSM();
 	}
 

@@ -21,58 +21,89 @@ public class UIDupeRandomizer : MonoBehaviour
 		this.Apply(this.anims[minonIdx].minon, ref this.anims[minonIdx]);
 	}
 
-	private void Apply(KBatchedAnimController minon, ref UIDupeRandomizer.AnimChoice anim)
+	private void Apply(KBatchedAnimController dupe, ref UIDupeRandomizer.AnimChoice anim)
 	{
 		int num = global::UnityEngine.Random.Range(0, Db.Get().Personalities.Count);
 		Personality personality = Db.Get().Personalities[num];
+		KCompBuilder.BodyData bodyData = MinionStartingStats.CreateBodyData(personality);
 		if (anim.curHair.IsValid())
 		{
-			minon.RemoveSymbolOverride(anim.curHair);
+			dupe.RemoveSymbolOverride(anim.curHair);
 		}
-		anim.curHair = UIDupeRandomizer.AddAccessory(minon, this.slots.Hair.accessories[personality.hair]);
+		anim.curHair = UIDupeRandomizer.AddAccessory(dupe, this.slots.Hair.Lookup(bodyData.hair));
+		if (anim.curHatHair.IsValid())
+		{
+			dupe.RemoveSymbolOverride(anim.curHatHair);
+		}
+		anim.curHatHair = UIDupeRandomizer.AddAccessory(dupe, this.slots.HatHair.Lookup(bodyData.hatHair));
 		if (anim.curEyes.IsValid())
 		{
-			minon.RemoveSymbolOverride(anim.curEyes);
+			dupe.RemoveSymbolOverride(anim.curEyes);
 		}
-		anim.curEyes = UIDupeRandomizer.AddAccessory(minon, this.slots.Eyes.accessories[personality.eyes]);
+		anim.curEyes = UIDupeRandomizer.AddAccessory(dupe, this.slots.Eyes.Lookup(bodyData.eyes));
 		if (anim.curHeadShape.IsValid())
 		{
-			minon.RemoveSymbolOverride(anim.curHeadShape);
+			dupe.RemoveSymbolOverride(anim.curHeadShape);
 		}
-		anim.curHeadShape = UIDupeRandomizer.AddAccessory(minon, this.slots.HeadShape.accessories[personality.headShape]);
+		anim.curHeadShape = UIDupeRandomizer.AddAccessory(dupe, this.slots.HeadShape.Lookup(bodyData.headShape));
 		if (anim.curMouth.IsValid())
 		{
-			minon.RemoveSymbolOverride(anim.curMouth);
+			dupe.RemoveSymbolOverride(anim.curMouth);
 		}
-		anim.curMouth = UIDupeRandomizer.AddAccessory(minon, this.slots.Mouth.accessories[personality.mouth]);
+		anim.curMouth = UIDupeRandomizer.AddAccessory(dupe, this.slots.Mouth.Lookup(bodyData.mouth));
 		if (anim.curTorso.IsValid())
 		{
-			minon.RemoveSymbolOverride(anim.curTorso);
-			minon.RemoveSymbolOverride(anim.curArm);
+			dupe.RemoveSymbolOverride(anim.curTorso);
+			dupe.RemoveSymbolOverride(anim.curArm);
 		}
-		int body = personality.body;
-		anim.curTorso = UIDupeRandomizer.AddAccessory(minon, this.slots.Body.accessories[body]);
-		anim.curArm = UIDupeRandomizer.AddAccessory(minon, this.slots.Arm.accessories[body]);
+		anim.curTorso = UIDupeRandomizer.AddAccessory(dupe, this.slots.Body.Lookup(bodyData.body));
+		anim.curArm = UIDupeRandomizer.AddAccessory(dupe, this.slots.Arm.Lookup(bodyData.arms));
+		List<string> list = new List<string>();
+		foreach (KeyValuePair<string, string> keyValuePair in RoleManager.roleHatIndex)
+		{
+			list.Add(keyValuePair.Value);
+		}
+		string text = list[global::UnityEngine.Random.Range(0, list.Count)];
+		if (anim.curHat.IsValid())
+		{
+			dupe.RemoveSymbolOverride(anim.curHat);
+		}
+		anim.curHat = UIDupeRandomizer.AddAccessory(dupe, this.slots.Hat.Lookup(text));
+		dupe.RemoveVisibleSymbol(Db.Get().AccessorySlots.Hair.targetSymbolId);
+		dupe.HideSymbol(Db.Get().AccessorySlots.Hair.targetSymbolId, true);
+		dupe.ShowSymbol(Db.Get().AccessorySlots.HatHair.targetSymbolId);
+		dupe.StopHidingSymbol(Db.Get().AccessorySlots.HatHair.targetSymbolId, true);
 		if (global::UnityEngine.Random.value < 0.1f)
 		{
 			KAnimFile anim2 = Assets.GetAnim("body_oxygen_kanim");
-			minon.AddBuildOverride(anim2, true, false);
+			dupe.AddBuildOverride(anim2, true, false);
 			KAnimFile anim3 = Assets.GetAnim("helm_oxygen_kanim");
-			minon.AddBuildOverride(anim3, true, false);
+			dupe.AddBuildOverride(anim3, true, false);
+		}
+		else
+		{
+			KAnimFile anim4 = Assets.GetAnim("body_oxygen_kanim");
+			dupe.ClearBuildOverride(anim4, false);
+			KAnimFile anim5 = Assets.GetAnim("helm_oxygen_kanim");
+			dupe.ClearBuildOverride(anim5, true);
 		}
 		if (!anim.overrideSet)
 		{
-			minon.AddAnimOverrides(anim.target_minion_anim, 0f);
+			dupe.AddAnimOverrides(anim.target_minion_anim, 0f);
 			anim.overrideSet = true;
 		}
-		minon.UpdateSymbolLookups();
+		dupe.UpdateSymbolLookups();
 	}
 
 	public static KAnimHashedString AddAccessory(KBatchedAnimController minon, Accessory accessory)
 	{
-		minon.AddSymbolOverride(accessory.slot.targetSymbolId, accessory.symbol.build.batchTag, accessory.symbol, false);
-		minon.ShowSymbol(accessory.slot.targetSymbolId);
-		return accessory.slot.targetSymbolId;
+		if (accessory != null)
+		{
+			minon.AddSymbolOverride(accessory.slot.targetSymbolId, accessory.symbol.build.batchTag, accessory.symbol, false);
+			minon.ShowSymbol(accessory.slot.targetSymbolId);
+			return accessory.slot.targetSymbolId;
+		}
+		return HashedString.Invalid;
 	}
 
 	public KAnimHashedString AddRandomAccessory(KBatchedAnimController minon, List<Accessory> choices)
@@ -112,6 +143,8 @@ public class UIDupeRandomizer : MonoBehaviour
 
 		public KAnimHashedString curHair;
 
+		public KAnimHashedString curHatHair;
+
 		public KAnimHashedString curEyes;
 
 		public KAnimHashedString curHeadShape;
@@ -121,5 +154,7 @@ public class UIDupeRandomizer : MonoBehaviour
 		public KAnimHashedString curTorso;
 
 		public KAnimHashedString curArm;
+
+		public KAnimHashedString curHat;
 	}
 }

@@ -58,7 +58,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 
 	public Vector2 GetPosition()
 	{
-		return base.transform.position;
+		return base.transform.GetPosition();
 	}
 
 	public string sourceName { get; private set; }
@@ -160,10 +160,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		}
 		KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
 		this.isMovable = component2 != null && component2.isMovable;
-		if (this.isMovable)
-		{
-			CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChange), false);
-		}
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		AttributeInstance attributeInstance = this.dB;
 		attributeInstance.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance.OnDirty, this.refreshCallback);
 		AttributeInstance attributeInstance2 = this.dBRadius;
@@ -174,7 +171,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		}
 	}
 
-	private void OnCellChange(int previous_cell, int current_cell)
+	private void OnCellChange()
 	{
 		this.Refresh();
 	}
@@ -208,7 +205,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 			}
 			if (this.isMovable)
 			{
-				CellChangeMonitor.Instance.Remove(this, new Action<int, int>(this.OnCellChange), false);
+				CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 			}
 		}
 		if (this.splat != null)

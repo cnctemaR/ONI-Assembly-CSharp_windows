@@ -35,7 +35,7 @@ public class VoiceSoundEvent : SoundEvent
 		{
 			return;
 		}
-		Vector3 position = component2.transform.position;
+		Vector3 position = component2.transform.GetPosition();
 		string sound = GlobalAssets.GetSound(assetName, true);
 		if (sound != null)
 		{

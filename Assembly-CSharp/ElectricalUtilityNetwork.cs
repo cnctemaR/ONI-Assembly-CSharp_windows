@@ -16,6 +16,7 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 			this.wireGroups[(int)maxWattageRating] = list;
 		}
 		list.Add(wire);
+		this.timeOverloaded = Mathf.Max(this.timeOverloaded, wire.circuitOverloadTime);
 	}
 
 	public override void Reset(UtilityNetworkGridNode[] grid)
@@ -30,7 +31,8 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 					Wire wire = list[j];
 					if (wire != null)
 					{
-						int num = Grid.PosToCell(wire.transform.position);
+						wire.circuitOverloadTime = this.timeOverloaded;
+						int num = Grid.PosToCell(wire.transform.GetPosition());
 						UtilityNetworkGridNode utilityNetworkGridNode = grid[num];
 						utilityNetworkGridNode.networkIdx = -1;
 						grid[num] = utilityNetworkGridNode;
@@ -92,14 +94,14 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 					this.overloadedNotification = new Notification(MISC.NOTIFICATIONS.CIRCUIT_OVERLOADED.NAME, NotificationType.BadMinor, HashedString.Invalid, null, null, true, 0f, null, null, null);
 					Notifier notifier = Game.Instance.FindOrAdd<Notifier>();
 					notifier.Add(this.overloadedNotification, string.Empty);
-					this.overloadedNotification.Position = this.targetOverloadedWire.transform.position;
+					this.overloadedNotification.Position = this.targetOverloadedWire.transform.GetPosition();
 					this.overloadedNotification.Notifier = null;
 				}
 			}
 		}
 		else
 		{
-			this.timeOverloaded = 0f;
+			this.timeOverloaded = Mathf.Max(0f, this.timeOverloaded - dt * 0.95f);
 			this.timeOverloadNotificationDisplayed += dt;
 			if (this.timeOverloadNotificationDisplayed > 5f)
 			{
@@ -131,6 +133,15 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 			}
 		}
 		return 0f;
+	}
+
+	public override void RemoveItem(int cell, object item)
+	{
+		if (item.GetType() == typeof(Wire))
+		{
+			Wire wire = (Wire)item;
+			wire.circuitOverloadTime = 0f;
+		}
 	}
 
 	private Notification overloadedNotification;

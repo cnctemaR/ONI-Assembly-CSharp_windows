@@ -119,12 +119,12 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 			{
 				smi.EndChore("ChoreDriver.SignalStop");
 			}).OnSignal(this.stop, this.nochore)
-				.Update(delegate(ChoreDriver.StatesInstance smi)
+				.Update(delegate(ChoreDriver.StatesInstance smi, float dt)
 				{
 					Chore chore = this.currentChore.Get(smi);
 					if (chore != null)
 					{
-						ReportManager.Instance.ReportValue(ReportManager.ReportType.TimeSpent, smi.deltatime, string.Format(UI.ENDOFDAYREPORT.NOTES.TIME_SPENT, chore.GetReportName()), smi.master.context.consumer.GetProperName());
+						ReportManager.Instance.ReportValue(ReportManager.ReportType.TimeSpent, dt, string.Format(UI.ENDOFDAYREPORT.NOTES.TIME_SPENT, chore.GetReportName()), smi.master.context.consumer.GetProperName());
 					}
 				});
 		}

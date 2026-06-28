@@ -4,6 +4,8 @@ namespace TUNING
 {
 	public class CREATURES
 	{
+		public const int DEFAULT_PROBING_RADIUS = 32;
+
 		public class HITPOINTS
 		{
 			public const float TIER0 = 5f;
@@ -21,19 +23,27 @@ namespace TUNING
 			public const float TIER6 = 400f;
 		}
 
-		public class YIELD_BONUS_MODIFIERS
+		public class TEMPERATURE
 		{
-			public const int NUM_PERFECT_MODIFIERS = 4;
+			public static float FREEZING_3 = 243f;
 
-			public const float PERFECT_TEMPERATURE = 0.00041666668f;
+			public static float FREEZING_2 = 253f;
 
-			public const float PERFECT_PRESSURE = 0.00041666668f;
+			public static float FREEZING_1 = 263f;
 
-			public const float FERTILIZED = 0.00041666668f;
+			public static float FREEZING = 273f;
 
-			public const float IRRIGATED = 0.00041666668f;
+			public static float COOL = 283f;
 
-			public const float CONDITION_NOT_MET = 0f;
+			public static float MODERATE = 293f;
+
+			public static float HOT = 303f;
+
+			public static float HOT_1 = 313f;
+
+			public static float HOT_2 = 323f;
+
+			public static float HOT_3 = 333f;
 		}
 	}
 }

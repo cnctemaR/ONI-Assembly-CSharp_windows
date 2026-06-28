@@ -23,10 +23,10 @@ public class ShockwormConfig : IEntityConfig
 		float num2 = 2f;
 		text3 = "Meat";
 		int num3 = 3;
-		float freezing_ = TemperatureTuning.Freezing_2;
-		float freezing_2 = TemperatureTuning.Freezing_1;
-		float hot_ = TemperatureTuning.Hot_1;
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject2, factionID, num, text4, navType, num2, text3, num3, true, true, 30f, freezing_2, hot_, freezing_, TemperatureTuning.Hot_2);
+		float freezing_ = global::TUNING.CREATURES.TEMPERATURE.FREEZING_1;
+		float hot_ = global::TUNING.CREATURES.TEMPERATURE.HOT_1;
+		float hot_2 = global::TUNING.CREATURES.TEMPERATURE.HOT_2;
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject2, factionID, num, text4, navType, 32, num2, text3, num3, true, true, 30f, freezing_, hot_, global::TUNING.CREATURES.TEMPERATURE.FREEZING_2, hot_2);
 		gameObject.UpdateComponentRequirement<Shockworm>(true);
 		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
 		Weapon weapon = gameObject.AddWeapon(3f, 6f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.AreaOfEffect, 10, 4f);

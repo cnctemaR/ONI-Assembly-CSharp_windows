@@ -31,7 +31,7 @@ public class SceneInitializer : MonoBehaviour
 		{
 			if (gameObject != null)
 			{
-				Util.KInstantiatePrecise(gameObject, base.gameObject, null);
+				Util.KInstantiate(gameObject, gameObject.transform.GetPosition(), Quaternion.identity, base.gameObject, null, true, 0);
 			}
 		}
 	}

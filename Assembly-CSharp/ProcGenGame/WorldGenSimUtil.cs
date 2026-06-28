@@ -53,7 +53,7 @@ namespace ProcGenGame
 			}
 			for (int j = 0; j < num; j++)
 			{
-				SimMessages.NewGameFrame(0.25f, vector2I, vector2I2);
+				SimMessages.NewGameFrame(0.2f, vector2I, vector2I2);
 				IntPtr intPtr = Sim.HandleMessage(SimMessageHashes.PrepareGameData, array3.Length, array3);
 				updateProgressFn(UI.WORLDGEN.SETTLESIM.key, (float)j / (float)num * 100f, WorldGenProgressStages.Stages.SettleSim);
 				if (!(intPtr == IntPtr.Zero))
@@ -94,7 +94,7 @@ namespace ProcGenGame
 			bool flag = false;
 			while (!flag)
 			{
-				SimMessages.NewGameFrame(0.25f, vector2I, vector2I2);
+				SimMessages.NewGameFrame(0.2f, vector2I, vector2I2);
 				IntPtr intPtr2 = Sim.HandleMessage(SimMessageHashes.PrepareGameData, array3.Length, array3);
 				if (!(intPtr2 == IntPtr.Zero))
 				{

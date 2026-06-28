@@ -143,7 +143,7 @@ public class KButtonMenu : KScreen
 			RootMenu.Instance.AddSubMenu(component);
 			Game.Instance.LocalPlayer.ScreenManager.ActivateScreen(component.gameObject, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
 			Vector3 vector = default(Vector3);
-			if (Util.IsOnLeftSideOfScreen(<SetupPopupMenu>c__AnonStorey.button.transform.position))
+			if (Util.IsOnLeftSideOfScreen(<SetupPopupMenu>c__AnonStorey.button.transform.GetPosition()))
 			{
 				vector.x = <SetupPopupMenu>c__AnonStorey.button.GetComponent<RectTransform>().rect.width * 0.25f;
 			}
@@ -151,7 +151,7 @@ public class KButtonMenu : KScreen
 			{
 				vector.x = -<SetupPopupMenu>c__AnonStorey.button.GetComponent<RectTransform>().rect.width * 0.25f;
 			}
-			component.transform.SetPosition(<SetupPopupMenu>c__AnonStorey.button.transform.position + vector);
+			component.transform.SetPosition(<SetupPopupMenu>c__AnonStorey.button.transform.GetPosition() + vector);
 		};
 		<SetupPopupMenu>c__AnonStorey.binfo.onClick = unityAction;
 		buttonClickedEvent.AddListener(unityAction);
@@ -212,7 +212,7 @@ public class KButtonMenu : KScreen
 		{
 			return;
 		}
-		Vector3 vector = Camera.main.WorldToViewportPoint(this.go.transform.position);
+		Vector3 vector = Camera.main.WorldToViewportPoint(this.go.transform.GetPosition());
 		RectTransform component = base.GetComponent<RectTransform>();
 		RectTransform component2 = base.canvas.GetComponent<RectTransform>();
 		if (component != null)

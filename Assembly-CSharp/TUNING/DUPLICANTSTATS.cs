@@ -46,9 +46,13 @@ namespace TUNING
 
 		public const float RECOVER_BREATH_DELTA = 3f;
 
-		public static string[] DISTRIBUTED_ATTRIBUTES = new string[] { "Strength", "Construction", "Digging", "Machinery", "Athletics", "Learning", "Cooking", "Medical", "Art" };
+		public static string[] DISTRIBUTED_ATTRIBUTES = new string[] { "Strength", "Caring", "Construction", "Digging", "Machinery", "Learning", "Cooking", "Botanist", "Art" };
 
-		public static string[] ROLLED_ATTRIBUTES = new string[] { "Immunity" };
+		public static string[] ROLLED_ATTRIBUTES = new string[] { "Athletics" };
+
+		public static int ROLLED_ATTRIBUTE_MAX = 5;
+
+		public static float ROLLED_ATTRIBUTE_POWER = 4f;
 
 		public static float PROBABILITY_MINISCULE = 2f;
 
@@ -56,11 +60,11 @@ namespace TUNING
 
 		public static float PROBABILITY_MED = 1f;
 
-		public static int TINY_STATPOINT_BONUS = 2;
+		public static int TINY_STATPOINT_BONUS = 1;
 
-		public static int SMALL_STATPOINT_BONUS = 4;
+		public static int SMALL_STATPOINT_BONUS = 2;
 
-		public static int MEDIUM_STATPOINT_BONUS = 7;
+		public static int MEDIUM_STATPOINT_BONUS = 3;
 
 		public static int MIN_STAT_POINTS = 7;
 
@@ -105,31 +109,36 @@ namespace TUNING
 			{
 				id = "CantResearch",
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_LOW
+				probability = DUPLICANTSTATS.PROBABILITY_LOW,
+				requiredNonPositiveAptitudes = new List<HashedString> { "Research" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "CantDig",
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_LOW
+				probability = DUPLICANTSTATS.PROBABILITY_LOW,
+				requiredNonPositiveAptitudes = new List<HashedString> { "Mining" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "CantCook",
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_LOW
+				probability = DUPLICANTSTATS.PROBABILITY_LOW,
+				requiredNonPositiveAptitudes = new List<HashedString> { "Cooking" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "CantBuild",
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_LOW
+				probability = DUPLICANTSTATS.PROBABILITY_LOW,
+				requiredNonPositiveAptitudes = new List<HashedString> { "Building" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Hemophobia",
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_LOW
+				probability = DUPLICANTSTATS.PROBABILITY_LOW,
+				requiredNonPositiveAptitudes = new List<HashedString> { "Research" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -189,7 +198,8 @@ namespace TUNING
 			{
 				id = "SlowLearner",
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED
+				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				requiredNonPositiveAptitudes = new List<HashedString> { "Research" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -250,14 +260,14 @@ namespace TUNING
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Twinkletoes",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				statBonus = -DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
 				probability = DUPLICANTSTATS.PROBABILITY_MED,
 				mutuallyExclusiveTraits = new List<string> { "Anemic" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "StrongArm",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				statBonus = -DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
 				probability = DUPLICANTSTATS.PROBABILITY_MED,
 				mutuallyExclusiveTraits = new List<string> { "NoodleArms" }
 			},
@@ -297,22 +307,16 @@ namespace TUNING
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "MoleHands",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				statBonus = -DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
 				probability = DUPLICANTSTATS.PROBABILITY_MED,
 				mutuallyExclusiveTraits = new List<string> { "CantDig" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "FastLearner",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				statBonus = -DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
 				probability = DUPLICANTSTATS.PROBABILITY_MED,
 				mutuallyExclusiveTraits = new List<string> { "SlowLearner", "CantResearch" }
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "Amphibious",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -326,7 +330,8 @@ namespace TUNING
 				id = "Uncultured",
 				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
 				probability = DUPLICANTSTATS.PROBABILITY_MED,
-				mutuallyExclusiveTraits = new List<string> { "InteriorDecorator" }
+				mutuallyExclusiveTraits = new List<string> { "InteriorDecorator" },
+				requiredNonPositiveAptitudes = new List<HashedString> { "Research" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -401,11 +406,11 @@ namespace TUNING
 
 			public const float DECOR_EXPECTATION = -35f;
 
-			public const float FOOD_QUALITY_EXPECTATION = -3f;
+			public const float FOOD_QUALITY_EXPECTATION = -1f;
 
 			public const float MAX_PROFESSION_DECOR_EXPECTATION = 75f;
 
-			public const float MAX_PROFESSION_FOOD_EXPECTATION = 3f;
+			public const float MAX_PROFESSION_FOOD_EXPECTATION = 0f;
 
 			public const int MAX_UNDERWATER_TRAVEL_COST = 8;
 
@@ -418,6 +423,8 @@ namespace TUNING
 			public const float IMMUNE_LEVEL_MAX = 100f;
 
 			public const float IMMUNE_LEVEL_RECOVERY = 0.025f;
+
+			public const float CARRY_CAPACITY = 200f;
 		}
 
 		public class TEMPERATURE
@@ -580,14 +587,14 @@ namespace TUNING
 
 			public static List<int[]> TYPES = new List<int[]>
 			{
-				new int[] { 7, 6, 5, 4, 3, 2, 1 },
-				new int[] { 7, 4, 2, 1 },
-				new int[] { 7, 2, 2, 1 },
-				new int[] { 8, 1 },
-				new int[] { 8, 4, 1 },
-				new int[] { 4, 4, 4, 4, 1 },
-				new int[] { 6 },
+				new int[] { 5, 4, 4, 3, 3, 2, 1 },
+				new int[] { 5, 3, 2, 1 },
+				new int[] { 5, 2, 2, 1 },
+				new int[] { 5, 1 },
+				new int[] { 5, 3, 1 },
+				new int[] { 3, 3, 3, 3, 1 },
 				new int[] { 4 },
+				new int[] { 3 },
 				new int[] { 2 },
 				new int[] { 1 }
 			};
@@ -602,6 +609,27 @@ namespace TUNING
 			public float probability;
 
 			public List<string> mutuallyExclusiveTraits;
+
+			public List<HashedString> requiredNonPositiveAptitudes;
+		}
+
+		public class ATTRIBUTE_LEVELING
+		{
+			public static int MAX_GAINED_ATTRIBUTE_LEVEL = 20;
+
+			public static int TARGET_MAX_LEVEL_CYCLE = 400;
+
+			public static float EXPERIENCE_LEVEL_POWER = 1.7f;
+
+			public static float FULL_EXPERIENCE = 1f;
+
+			public static float ALL_DAY_EXPERIENCE = DUPLICANTSTATS.ATTRIBUTE_LEVELING.FULL_EXPERIENCE / 0.8f;
+
+			public static float MOST_DAY_EXPERIENCE = DUPLICANTSTATS.ATTRIBUTE_LEVELING.FULL_EXPERIENCE / 0.5f;
+
+			public static float PART_DAY_EXPERIENCE = DUPLICANTSTATS.ATTRIBUTE_LEVELING.FULL_EXPERIENCE / 0.25f;
+
+			public static float BARELY_EVER_EXPERIENCE = DUPLICANTSTATS.ATTRIBUTE_LEVELING.FULL_EXPERIENCE / 0.1f;
 		}
 	}
 }

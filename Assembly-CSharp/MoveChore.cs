@@ -4,7 +4,7 @@ using UnityEngine;
 public class MoveChore : Chore<MoveChore.StatesInstance>
 {
 	public MoveChore(IStateMachineTarget target, ChoreType chore_type, Func<MoveChore.StatesInstance, int> get_cell_callback, bool update_cell = false)
-		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new MoveChore.StatesInstance(this, target.gameObject, get_cell_callback, update_cell);
 	}

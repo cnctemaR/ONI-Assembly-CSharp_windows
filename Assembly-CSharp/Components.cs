@@ -66,22 +66,34 @@ public class Components
 
 	public static Components.Cmps<HandSanitizer> HandSanitizers = new Components.Cmps<HandSanitizer>();
 
-	public static Components.Cmps<WiltCondition> WiltConditions = new Components.Cmps<WiltCondition>();
-
 	public static Components.Cmps<BuildingCellVisualizer> BuildingCellVisualizers = new Components.Cmps<BuildingCellVisualizer>();
+
+	public static Components.Cmps<RoomTracker> RoomTrackers = new Components.Cmps<RoomTracker>();
+
+	public static Components.Cmps<RoleStation> RoleStations = new Components.Cmps<RoleStation>();
 
 	public class Cmps<T> : IEnumerable<T>, IEnumerable
 	{
 		public Cmps()
 		{
 			App.OnPreLoadScene = (global::System.Action)Delegate.Combine(App.OnPreLoadScene, new global::System.Action(this.Clear));
+			this.items = new KCompactedVector<T>(0);
+			this.table = new Dictionary<T, HandleVector<int>.Handle>();
+		}
+
+		public List<T> Items
+		{
+			get
+			{
+				return this.items.GetDataList();
+			}
 		}
 
 		public int Count
 		{
 			get
 			{
-				return this.Items.Count;
+				return this.items.Count;
 			}
 		}
 
@@ -105,14 +117,16 @@ public class Components
 
 		private void Clear()
 		{
-			this.Items.Clear();
+			this.items.Clear();
+			this.table.Clear();
 			this.OnAdd = null;
 			this.OnRemove = null;
 		}
 
 		public void Add(T cmp)
 		{
-			this.Items.Add(cmp);
+			HandleVector<int>.Handle handle = this.items.Allocate(cmp);
+			this.table[cmp] = handle;
 			if (this.OnAdd != null)
 			{
 				this.OnAdd(cmp);
@@ -121,10 +135,15 @@ public class Components
 
 		public void Remove(T cmp)
 		{
-			this.Items.Remove(cmp);
-			if (this.OnRemove != null)
+			HandleVector<int>.Handle invalidHandle = HandleVector<int>.InvalidHandle;
+			if (this.table.TryGetValue(cmp, out invalidHandle))
 			{
-				this.OnRemove(cmp);
+				this.table.Remove(cmp);
+				this.items.Free(invalidHandle);
+				if (this.OnRemove != null)
+				{
+					this.OnRemove(cmp);
+				}
 			}
 		}
 
@@ -144,7 +163,9 @@ public class Components
 			this.OnRemove = (Action<T>)Delegate.Remove(this.OnRemove, on_remove);
 		}
 
-		public List<T> Items = new List<T>();
+		private Dictionary<T, HandleVector<int>.Handle> table;
+
+		private KCompactedVector<T> items;
 
 		public Action<T> OnAdd;
 

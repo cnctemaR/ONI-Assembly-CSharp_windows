@@ -84,18 +84,15 @@ public class FlowUtilityNetwork : UtilityNetwork
 		Endpoint EndpointType { get; }
 
 		ConduitType ConduitType { get; }
-
-		int SortKey { get; }
 	}
 
 	public class NetworkItem : FlowUtilityNetwork.IItem
 	{
-		public NetworkItem(ConduitType conduit_type, Endpoint endpoint_type, int cell, int sort_key = 1000)
+		public NetworkItem(ConduitType conduit_type, Endpoint endpoint_type, int cell)
 		{
 			this.conduitType = conduit_type;
 			this.endpointType = endpoint_type;
 			this.cell = cell;
-			this.sortKey = sort_key;
 		}
 
 		public Endpoint EndpointType
@@ -134,19 +131,7 @@ public class FlowUtilityNetwork : UtilityNetwork
 			}
 		}
 
-		public int SortKey
-		{
-			get
-			{
-				return this.sortKey;
-			}
-		}
-
-		public const int DefaultSortKey = 1000;
-
 		private int cell;
-
-		private int sortKey;
 
 		private FlowUtilityNetwork network;
 

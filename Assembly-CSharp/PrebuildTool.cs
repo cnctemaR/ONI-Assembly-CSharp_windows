@@ -29,18 +29,6 @@ public class PrebuildTool : InterfaceTool
 		base.OnLeftClickDown(cursor_pos);
 	}
 
-	private void Update()
-	{
-		if (this.hoverText == null)
-		{
-			this.hoverText = base.GetComponent<HoverTextConfiguration>();
-		}
-		if (this.hoverText != null)
-		{
-			this.hoverText.UpdateHoverElements(null);
-		}
-	}
-
 	public static PrebuildTool Instance;
 
 	private BuildingDef def;

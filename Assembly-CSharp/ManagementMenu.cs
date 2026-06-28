@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FMOD.Studio;
 using STRINGS;
+using UnityEngine;
 
 public class ManagementMenu : KIconToggleMenu
 {
@@ -10,24 +11,18 @@ public class ManagementMenu : KIconToggleMenu
 		base.OnPrefabInit();
 		ManagementMenu.Instance = this;
 		this.instantiator.Instantiate();
-		this.jobsScreen = this.instantiator.GetComponentInChildren<JobsTableScreen>();
-		this.jobsScreen.gameObject.SetActive(false);
 		this.consumablesScreen = this.instantiator.GetComponentInChildren<ConsumablesTableScreen>();
 		this.consumablesScreen.gameObject.SetActive(false);
 		this.vitalsScreen = this.instantiator.GetComponentInChildren<VitalsTableScreen>();
 		this.vitalsScreen.gameObject.SetActive(false);
+		this.rolesScreen = Resources.FindObjectsOfTypeAll(typeof(RolesScreen))[0] as KScreen;
+		this.rolesScreen.gameObject.SetActive(false);
 		base.Subscribe(Game.Instance.gameObject, 288942073, new Action<object>(this.OnUIClear));
-		this.jobsInfo = new KIconToggleMenu.ToggleInfo(UI.JOBS, "OverviewUI_jobs_icon", null, global::Action.ManagePeople, UI.TOOLTIPS.MANAGEMENTMENU_JOBS, string.Empty);
 		this.consumablesInfo = new KIconToggleMenu.ToggleInfo(UI.CONSUMABLES, "OverviewUI_consumables_icon", null, global::Action.ManageConsumables, UI.TOOLTIPS.MANAGEMENTMENU_CONSUMABLES, string.Empty);
 		this.vitalsInfo = new KIconToggleMenu.ToggleInfo(UI.VITALS, "OverviewUI_vitals_icon", null, global::Action.ManageVitals, UI.TOOLTIPS.MANAGEMENTMENU_VITALS, string.Empty);
 		this.reportsInfo = new KIconToggleMenu.ToggleInfo(UI.REPORT, "OverviewUI_reports_icon", null, global::Action.ManageReport, UI.TOOLTIPS.MANAGEMENTMENU_DAILYREPORT, string.Empty);
 		this.ResearchInfo = new KIconToggleMenu.ToggleInfo(UI.RESEARCH, "OverviewUI_research_nav_icon", null, global::Action.ManageResearch, UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH, string.Empty);
-		this.ScreenInfoMatch.Add(this.jobsInfo, new ManagementMenu.ScreenData
-		{
-			screen = this.jobsScreen,
-			tabIdx = 0,
-			toggleInfo = this.jobsInfo
-		});
+		this.rolesInfo = new KIconToggleMenu.ToggleInfo(UI.ROLES_SCREEN.MANAGEMENT_BUTTON, "OverviewUI_jobs_icon", null, global::Action.ManageRoles, UI.TOOLTIPS.MANAGEMENTMENU_ROLES, string.Empty);
 		this.ScreenInfoMatch.Add(this.vitalsInfo, new ManagementMenu.ScreenData
 		{
 			screen = this.vitalsScreen,
@@ -46,7 +41,13 @@ public class ManagementMenu : KIconToggleMenu
 			tabIdx = 3,
 			toggleInfo = this.reportsInfo
 		});
-		base.Setup(new List<KIconToggleMenu.ToggleInfo> { this.jobsInfo, this.consumablesInfo, this.vitalsInfo, this.reportsInfo, this.ResearchInfo });
+		this.ScreenInfoMatch.Add(this.rolesInfo, new ManagementMenu.ScreenData
+		{
+			screen = this.rolesScreen,
+			tabIdx = 5,
+			toggleInfo = this.rolesInfo
+		});
+		base.Setup(new List<KIconToggleMenu.ToggleInfo> { this.consumablesInfo, this.vitalsInfo, this.reportsInfo, this.ResearchInfo, this.rolesInfo });
 		base.onSelect += this.OnButtonClick;
 		foreach (KeyValuePair<KIconToggleMenu.ToggleInfo, ManagementMenu.ScreenData> keyValuePair in this.ScreenInfoMatch)
 		{
@@ -145,6 +146,11 @@ public class ManagementMenu : KIconToggleMenu
 		return Components.ResearchCenters.Count > 0 || DebugHandler.InstantBuildMode;
 	}
 
+	private bool RolesAvailable()
+	{
+		return Components.RoleStations.Count > 0 || DebugHandler.InstantBuildMode;
+	}
+
 	public void CloseAll()
 	{
 		if (this.activeScreen == null)
@@ -230,6 +236,14 @@ public class ManagementMenu : KIconToggleMenu
 		}
 	}
 
+	public void ToggleRoles()
+	{
+		if ((this.RolesAvailable() || this.activeScreen == this.ScreenInfoMatch[ManagementMenu.Instance.rolesInfo]) && this.rolesInfo != null)
+		{
+			this.ToggleScreen(this.ScreenInfoMatch[ManagementMenu.Instance.rolesInfo]);
+		}
+	}
+
 	public void OpenReports(int day)
 	{
 		if (this.activeScreen != this.ScreenInfoMatch[ManagementMenu.Instance.reportsInfo])
@@ -247,8 +261,6 @@ public class ManagementMenu : KIconToggleMenu
 
 	public KScreen ResearchScreen;
 
-	private KScreen jobsScreen;
-
 	public KScreen vitalsScreen;
 
 	public KScreen scheduleScreen;
@@ -257,11 +269,11 @@ public class ManagementMenu : KIconToggleMenu
 
 	private KScreen consumablesScreen;
 
+	private KScreen rolesScreen;
+
 	public string colourSchemeDisabled;
 
 	public InstantiateUIPrefabChild instantiator;
-
-	private KIconToggleMenu.ToggleInfo jobsInfo;
 
 	private KIconToggleMenu.ToggleInfo consumablesInfo;
 
@@ -272,6 +284,8 @@ public class ManagementMenu : KIconToggleMenu
 	private KIconToggleMenu.ToggleInfo reportsInfo;
 
 	private KIconToggleMenu.ToggleInfo ResearchInfo;
+
+	private KIconToggleMenu.ToggleInfo rolesInfo;
 
 	private Dictionary<KIconToggleMenu.ToggleInfo, ManagementMenu.ScreenData> ScreenInfoMatch = new Dictionary<KIconToggleMenu.ToggleInfo, ManagementMenu.ScreenData>();
 

@@ -16,7 +16,6 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			.ToggleStateMachine((RationalAi.Instance smi) => new RationMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new CalorieMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new DoctorMonitor.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new ToxicantMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new DiseaseMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new ImmuneSystemMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new SkinInfectionMonitor.Instance(smi.master))
@@ -42,7 +41,7 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 		})
 			.Enter("DropStorage", delegate(RationalAi.Instance smi)
 			{
-				smi.GetComponent<Storage>().DropAll();
+				smi.GetComponent<Storage>().DropAll(false);
 			});
 	}
 

@@ -29,7 +29,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	protected override void OnPrefabInit()
 	{
 		global::Util.Reset(base.transform);
-		base.transform.localPosition = new Vector3(Grid.WidthInMeters / 2f, Grid.HeightInMeters / 2f, this.defaultDepth);
+		base.transform.SetLocalPosition(new Vector3(Grid.WidthInMeters / 2f, Grid.HeightInMeters / 2f, -100f));
 		this.targetOrthographicSize = this.maxOrthographicSize;
 		CameraController.Instance = this;
 		this.DisableUserCameraControl = false;
@@ -65,7 +65,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.overlayCamera.clearFlags = CameraClearFlags.Nothing;
 		this.overlayCamera.transform.parent = base.transform;
 		this.overlayCamera.depth = this.baseCamera.depth + 3f;
-		this.overlayCamera.transform.localPosition = Vector3.zero;
+		this.overlayCamera.transform.SetLocalPosition(Vector3.zero);
 		this.overlayCamera.transform.localRotation = Quaternion.identity;
 		this.overlayCamera.renderingPath = RenderingPath.Forward;
 		this.overlayCamera.allowHDR = false;
@@ -81,7 +81,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.lightBufferCamera.cullingMask = LayerMask.GetMask(new string[] { "Lights" });
 		this.lightBufferCamera.depth = this.baseCamera.depth - 1f;
 		this.lightBufferCamera.transform.parent = base.transform;
-		this.lightBufferCamera.transform.localPosition = Vector3.zero;
+		this.lightBufferCamera.transform.SetLocalPosition(Vector3.zero);
 		this.lightBufferCamera.rect = new Rect(0f, 0f, 1f, 1f);
 		LightBuffer lightBuffer = this.lightBufferCamera.gameObject.AddComponent<LightBuffer>();
 		lightBuffer.Material = this.LightBufferMaterial;
@@ -93,7 +93,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.overlayNoDepthCamera.clearFlags = CameraClearFlags.Depth;
 		this.overlayNoDepthCamera.cullingMask = mask3;
 		this.overlayNoDepthCamera.transform.parent = base.transform;
-		this.overlayNoDepthCamera.transform.localPosition = Vector3.zero;
+		this.overlayNoDepthCamera.transform.SetLocalPosition(Vector3.zero);
 		this.overlayNoDepthCamera.depth = this.baseCamera.depth + 4f;
 		this.overlayNoDepthCamera.tag = "MainCamera";
 		this.overlayNoDepthCamera.gameObject.AddComponent<NavPathDrawer>();
@@ -101,7 +101,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.uiCamera.clearFlags = CameraClearFlags.Depth;
 		this.uiCamera.cullingMask = LayerMask.GetMask(new string[] { "UI" });
 		this.uiCamera.transform.parent = base.transform;
-		this.uiCamera.transform.localPosition = Vector3.zero;
+		this.uiCamera.transform.SetLocalPosition(Vector3.zero);
 		this.uiCamera.depth = this.baseCamera.depth + 5f;
 		GameScreenManager.Instance.SetCamera(GameScreenManager.UIRenderTarget.ScreenSpaceCamera, this.uiCamera);
 		GameScreenManager.Instance.SetCamera(GameScreenManager.UIRenderTarget.WorldSpace, this.uiCamera);
@@ -217,7 +217,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		GameObject telepad = GameUtil.GetTelepad();
 		if (telepad != null)
 		{
-			Vector3 vector = new Vector3(telepad.transform.position.x, telepad.transform.position.y + 1f, base.transform.position.z);
+			Vector3 vector = new Vector3(telepad.transform.GetPosition().x, telepad.transform.GetPosition().y + 1f, base.transform.GetPosition().z);
 			this.SetTargetPos(vector, 10f, true);
 			this.SetOverrideZoomSpeed(speed);
 		}
@@ -225,7 +225,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public void CameraGoTo(Vector3 pos, float speed = 2f, bool playSound = true)
 	{
-		pos.z = base.transform.position.z;
+		pos.z = base.transform.GetPosition().z;
 		this.SetTargetPos(pos, 10f, playSound);
 		this.SetOverrideZoomSpeed(speed);
 	}
@@ -233,6 +233,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	public void SnapTo(Vector3 pos)
 	{
 		this.ClearFollowTarget();
+		pos.z = -100f;
 		base.transform.SetPosition(pos);
 		this.keyPanDelta = Vector3.zero;
 		this.SetOrthographicsSize(this.targetOrthographicSize);
@@ -252,6 +253,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		}
 		this.isTargetPosSet = true;
 		this.targetPos = pos;
+		this.targetPos.z = -100f;
 		this.targetOrthographicSize = orthographic_size;
 	}
 
@@ -272,7 +274,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	{
 		Ray ray = cam.ScreenPointToRay(mousePos);
 		Vector3 direction = ray.direction;
-		Vector3 vector = direction * Mathf.Abs(cam.transform.position.z / direction.z);
+		Vector3 vector = direction * Mathf.Abs(cam.transform.GetPosition().z / direction.z);
 		return ray.origin + vector;
 	}
 
@@ -284,9 +286,9 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		Vector3 vector = ((this.overrideZoomSpeed <= 0f) ? Input.mousePosition : new Vector3((float)Screen.width / 2f, (float)Screen.height / 2f, 0f));
 		Vector3 vector2 = this.PointUnderCursor(vector, main);
 		Vector3 vector3 = main.ScreenToViewportPoint(vector);
-		Vector3 localPosition = base.transform.localPosition;
+		Vector3 localPosition = base.transform.GetLocalPosition();
 		this.SetOrthographicsSize(Mathf.Lerp(main.orthographicSize, this.targetOrthographicSize, num * unscaledDeltaTime));
-		base.transform.localPosition = localPosition;
+		base.transform.SetLocalPosition(localPosition);
 		Vector3 vector4 = main.WorldToViewportPoint(vector2);
 		vector3.z = vector4.z;
 		Vector3 vector5 = main.ViewportToWorldPoint(vector4) - main.ViewportToWorldPoint(vector3);
@@ -358,12 +360,13 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			vector7.x = this.followTargetPos.x;
 			vector7.y = this.followTargetPos.y;
 		}
-		if ((double)(vector7 - base.transform.localPosition).magnitude > 0.001)
+		vector7.z = -100f;
+		if ((double)(vector7 - base.transform.GetLocalPosition()).magnitude > 0.001)
 		{
-			base.transform.localPosition = vector7;
+			base.transform.SetLocalPosition(vector7);
 		}
 		this.ConstrainToWorld();
-		Shader.SetGlobalVector("_WorldCameraPos", new Vector4(base.transform.position.x, base.transform.position.y, base.transform.position.z, main.orthographicSize));
+		Shader.SetGlobalVector("_WorldCameraPos", new Vector4(base.transform.GetPosition().x, base.transform.GetPosition().y, base.transform.GetPosition().z, main.orthographicSize));
 		this.VisibleArea.Update();
 	}
 
@@ -371,7 +374,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	{
 		if (this.followTarget != null)
 		{
-			Vector3 vector = this.followTarget.transform.position;
+			Vector3 vector = this.followTarget.transform.GetPosition();
 			KAnimControllerBase component = this.followTarget.GetComponent<KAnimControllerBase>();
 			if (component != null)
 			{
@@ -403,7 +406,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		{
 			return;
 		}
-		Vector3 vector = base.transform.position - ray.origin;
+		Vector3 vector = base.transform.GetPosition() - ray.origin;
 		Vector3 vector2 = point;
 		vector2.x = Mathf.Max(0f, vector2.x);
 		vector2.y = Mathf.Max(0f, vector2.y);
@@ -411,23 +414,25 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		ray.direction = -ray.direction;
 		vector2 = ray.GetPoint(num);
 		base.transform.SetPosition(vector2 + vector);
-		vector = base.transform.position - ray2.origin;
+		vector = base.transform.GetPosition() - ray2.origin;
 		vector2 = point2;
 		vector2.x = Mathf.Min(Grid.WidthInMeters, vector2.x);
 		vector2.y = Mathf.Min(Grid.HeightInMeters, vector2.y);
 		ray2.origin = vector2;
 		ray2.direction = -ray2.direction;
 		vector2 = ray2.GetPoint(num2);
-		base.transform.SetPosition(vector2 + vector);
+		Vector3 vector3 = vector2 + vector;
+		vector3.z = -100f;
+		base.transform.SetPosition(vector3);
 	}
 
 	public void Save(BinaryWriter writer)
 	{
-		writer.Write(base.transform.position);
+		writer.Write(base.transform.GetPosition());
 		writer.Write(base.transform.localScale);
 		writer.Write(base.transform.rotation);
 		writer.Write(this.targetOrthographicSize);
-		CameraSaveData.position = base.transform.position;
+		CameraSaveData.position = base.transform.GetPosition();
 		CameraSaveData.localScale = base.transform.localScale;
 		CameraSaveData.rotation = base.transform.rotation;
 	}
@@ -440,7 +445,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			base.transform.localScale = CameraSaveData.localScale;
 			base.transform.rotation = CameraSaveData.rotation;
 			this.targetOrthographicSize = Mathf.Clamp(CameraSaveData.orthographicsSize, this.minOrthographicSize, (!DebugHandler.FreeCameraMode) ? this.maxOrthographicSize : this.maxOrthographicSizeDebug);
-			this.SnapTo(base.transform.position);
+			this.SnapTo(base.transform.GetPosition());
 		}
 	}
 
@@ -480,7 +485,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 					float num;
 					soundEventDescription.getMaximumDistance(out num);
 					num *= this.maxAudibleDistanceScale;
-					float num2 = (pos.x - base.transform.position.x) * (pos.x - base.transform.position.x) + (pos.y - base.transform.position.y) * (pos.y - base.transform.position.y);
+					float num2 = (pos.x - base.transform.GetPosition().x) * (pos.x - base.transform.GetPosition().x) + (pos.y - base.transform.GetPosition().y) * (pos.y - base.transform.GetPosition().y);
 					flag = num2 < num * num;
 				}
 			}
@@ -560,8 +565,8 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.SetOrthographicsSize(6f);
 		this.targetOrthographicSize = 6f;
 		Vector3 followPos = this.GetFollowPos();
-		this.followTargetPos = new Vector3(followPos.x, followPos.y, base.transform.position.z);
-		base.transform.position = this.followTargetPos;
+		this.followTargetPos = new Vector3(followPos.x, followPos.y, base.transform.GetPosition().z);
+		base.transform.SetPosition(this.followTargetPos);
 		this.followTarget.GetComponent<KMonoBehaviour>().Trigger(-1506069671, null);
 	}
 
@@ -580,15 +585,15 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		if (this.followTarget != null)
 		{
 			Vector3 followPos = this.GetFollowPos();
-			Vector2 vector = new Vector2(base.transform.localPosition.x, base.transform.localPosition.y);
+			Vector2 vector = new Vector2(base.transform.GetLocalPosition().x, base.transform.GetLocalPosition().y);
 			Vector2 vector2 = Vector2.Lerp(vector, followPos, Time.unscaledDeltaTime * 25f);
-			this.followTargetPos = new Vector3(vector2.x, vector2.y, base.transform.localPosition.z);
+			this.followTargetPos = new Vector3(vector2.x, vector2.y, base.transform.GetLocalPosition().z);
 		}
 	}
 
 	public const float DEFAULT_MAX_ORTHO_SIZE = 20f;
 
-	public float defaultDepth;
+	private const float FIXED_Z = -100f;
 
 	public float zoomSpeed;
 

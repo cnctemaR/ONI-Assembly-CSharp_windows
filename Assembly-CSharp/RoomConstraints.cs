@@ -7,8 +7,8 @@ public static class RoomConstraints
 	public static string RoomCriteriaString(Room room)
 	{
 		string text = string.Empty;
-		RoomTypes.RoomType roomType = RoomTypes.GetRoomType(room);
-		if (roomType != RoomTypes.types[0])
+		RoomType roomType = Db.Get().RoomTypes.GetRoomType(room);
+		if (roomType != Db.Get().RoomTypes.Neutral)
 		{
 			text = text + "<b>" + ROOMS.CRITERIA.HEADER + "</b>";
 			text = text + "\n    • " + roomType.primary_constraint.name;
@@ -29,11 +29,11 @@ public static class RoomConstraints
 		}
 		else
 		{
-			RoomTypes.RoomType[] possibleRoomTypes = RoomTypes.GetPossibleRoomTypes(room);
+			RoomType[] possibleRoomTypes = Db.Get().RoomTypes.GetPossibleRoomTypes(room);
 			text += ((possibleRoomTypes.Length <= 1) ? string.Empty : ("<b>" + ROOMS.CRITERIA.POSSIBLE_TYPES_HEADER + "</b>"));
-			foreach (RoomTypes.RoomType roomType2 in possibleRoomTypes)
+			foreach (RoomType roomType2 in possibleRoomTypes)
 			{
-				if (roomType2 != RoomTypes.types[0])
+				if (roomType2 != Db.Get().RoomTypes.Neutral)
 				{
 					if (text != string.Empty)
 					{
@@ -44,7 +44,7 @@ public static class RoomConstraints
 					{
 						text2,
 						"<b><color=#BCBCBC>    • ",
-						roomType2.name,
+						roomType2.Name,
 						"</b> (",
 						roomType2.primary_constraint.name,
 						")</color>"
@@ -71,11 +71,11 @@ public static class RoomConstraints
 					if (!flag)
 					{
 						bool flag2 = false;
-						foreach (RoomTypes.RoomType roomType3 in RoomTypes.types)
+						foreach (RoomType roomType3 in Db.Get().RoomTypes)
 						{
-							if (roomType3 != roomType2 && roomType3 != RoomTypes.neutral_type)
+							if (roomType3 != roomType2 && roomType3 != Db.Get().RoomTypes.Neutral)
 							{
-								if (RoomTypes.HasAmbiguousRoomType(room, roomType2, roomType3))
+								if (Db.Get().RoomTypes.HasAmbiguousRoomType(room, roomType2, roomType3))
 								{
 									flag2 = true;
 									break;
@@ -101,9 +101,9 @@ public static class RoomConstraints
 
 	public static RoomConstraints.Constraint NO_INDUSTRIAL_MACHINERY = new RoomConstraints.Constraint(null, delegate(Room room)
 	{
-		foreach (BuildingComplete buildingComplete in room.buildings)
+		foreach (KPrefabID kprefabID in room.buildings)
 		{
-			if (buildingComplete.prefabid.HasPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery))
+			if (kprefabID.HasPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery))
 			{
 				return false;
 			}
@@ -111,33 +111,43 @@ public static class RoomConstraints
 		return true;
 	}, 1, ROOMS.CRITERIA.NO_INDUSTRIAL_MACHINERY.NAME, ROOMS.CRITERIA.NO_INDUSTRIAL_MACHINERY.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint BED_SINGLE = new RoomConstraints.Constraint((BuildingComplete bc) => bc.prefabid.HasPrefabTag(RoomConstraints.ConstraintTags.Bed), null, 1, ROOMS.CRITERIA.BED_SINGLE.NAME, ROOMS.CRITERIA.BED_SINGLE.DESCRIPTION, null);
+	public static RoomConstraints.Constraint BED_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.Bed), null, 1, ROOMS.CRITERIA.BED_SINGLE.NAME, ROOMS.CRITERIA.BED_SINGLE.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint BED_MULTIPLE = new RoomConstraints.Constraint((BuildingComplete bc) => bc.prefabid.HasPrefabTag(RoomConstraints.ConstraintTags.Bed), null, 2, ROOMS.CRITERIA.BED_MULTIPLE.NAME, ROOMS.CRITERIA.BED_MULTIPLE.DESCRIPTION, new List<RoomConstraints.Constraint> { RoomConstraints.BED_SINGLE });
+	public static RoomConstraints.Constraint BED_MULTIPLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.Bed), null, 2, ROOMS.CRITERIA.BED_MULTIPLE.NAME, ROOMS.CRITERIA.BED_MULTIPLE.DESCRIPTION, new List<RoomConstraints.Constraint> { RoomConstraints.BED_SINGLE });
 
-	public static RoomConstraints.Constraint BUILDING_DECOR_POSITIVE = new RoomConstraints.Constraint(delegate(BuildingComplete bc)
+	public static RoomConstraints.Constraint BUILDING_DECOR_POSITIVE = new RoomConstraints.Constraint(delegate(KPrefabID bc)
 	{
 		DecorProvider component = bc.GetComponent<DecorProvider>();
 		return component != null && component.baseDecor > 0f;
 	}, null, 1, ROOMS.CRITERIA.BUILDING_DECOR_POSITIVE.NAME, ROOMS.CRITERIA.BUILDING_DECOR_POSITIVE.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint CLINIC = new RoomConstraints.Constraint((BuildingComplete bc) => bc.prefabid.HasPrefabTag(RoomConstraints.ConstraintTags.Clinic), null, 1, ROOMS.CRITERIA.CLINIC.NAME, ROOMS.CRITERIA.CLINIC.DESCRIPTION, null);
+	public static RoomConstraints.Constraint DECORATIVE_ITEM = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(GameTags.Decoration), null, 1, ROOMS.CRITERIA.DECORATIVE_ITEM.NAME, ROOMS.CRITERIA.DECORATIVE_ITEM.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint FOOD_BOX = new RoomConstraints.Constraint((BuildingComplete bc) => bc.prefabid.HasPrefabTag(RoomConstraints.ConstraintTags.FoodStorage), null, 1, ROOMS.CRITERIA.FOOD_BOX.NAME, ROOMS.CRITERIA.FOOD_BOX.DESCRIPTION, null);
+	public static RoomConstraints.Constraint CLINIC = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.Clinic), null, 1, ROOMS.CRITERIA.CLINIC.NAME, ROOMS.CRITERIA.CLINIC.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint LIGHT = new RoomConstraints.Constraint((BuildingComplete bc) => bc.prefabid.HasPrefabTag(RoomConstraints.ConstraintTags.LightSource), null, 1, ROOMS.CRITERIA.LIGHT.NAME, ROOMS.CRITERIA.LIGHT.DESCRIPTION, null);
+	public static RoomConstraints.Constraint POWER_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.PowerStation), null, 1, ROOMS.CRITERIA.POWER_STATION.NAME, ROOMS.CRITERIA.POWER_STATION.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint MASSAGE_TABLE = new RoomConstraints.Constraint((BuildingComplete bc) => bc.prefabid.HasPrefabTag(RoomConstraints.ConstraintTags.MassageTable), null, 1, ROOMS.CRITERIA.MASSAGE_TABLE.NAME, ROOMS.CRITERIA.MASSAGE_TABLE.DESCRIPTION, null);
+	public static RoomConstraints.Constraint FARM_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.FarmStation), null, 1, ROOMS.CRITERIA.FARM_STATION.NAME, ROOMS.CRITERIA.FARM_STATION.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint MESS_STATION_SINGLE = new RoomConstraints.Constraint((BuildingComplete bc) => bc.prefabid.HasPrefabTag(RoomConstraints.ConstraintTags.MessTable), null, 1, ROOMS.CRITERIA.MESS_STATION_SINGLE.NAME, ROOMS.CRITERIA.MESS_STATION_SINGLE.DESCRIPTION, null);
+	public static RoomConstraints.Constraint REC_BUILDING = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.RecBuilding), null, 1, ROOMS.CRITERIA.REC_BUILDING.NAME, ROOMS.CRITERIA.REC_BUILDING.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint MESS_STATION_MULTIPLE = new RoomConstraints.Constraint((BuildingComplete bc) => bc.prefabid.HasPrefabTag(RoomConstraints.ConstraintTags.MessTable), null, 2, ROOMS.CRITERIA.MESS_STATION_MULTIPLE.NAME, ROOMS.CRITERIA.MESS_STATION_MULTIPLE.DESCRIPTION, new List<RoomConstraints.Constraint> { RoomConstraints.MESS_STATION_SINGLE });
+	public static RoomConstraints.Constraint MACHINE_SHOP = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.MachineShop), null, 1, ROOMS.CRITERIA.MACHINE_SHOP.NAME, ROOMS.CRITERIA.MACHINE_SHOP.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint RESEARCH_STATION = new RoomConstraints.Constraint((BuildingComplete bc) => bc.prefabid.HasPrefabTag(RoomConstraints.ConstraintTags.ResearchStation), null, 1, ROOMS.CRITERIA.RESEARCH_STATION.NAME, ROOMS.CRITERIA.RESEARCH_STATION.DESCRIPTION, null);
+	public static RoomConstraints.Constraint FOOD_BOX = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.FoodStorage), null, 1, ROOMS.CRITERIA.FOOD_BOX.NAME, ROOMS.CRITERIA.FOOD_BOX.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint TOILET = new RoomConstraints.Constraint((BuildingComplete bc) => bc.prefabid.HasPrefabTag(RoomConstraints.ConstraintTags.Toilet), null, 1, ROOMS.CRITERIA.TOILET.NAME, ROOMS.CRITERIA.TOILET.DESCRIPTION, null);
+	public static RoomConstraints.Constraint LIGHT = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.LightSource), null, 1, ROOMS.CRITERIA.LIGHT.NAME, ROOMS.CRITERIA.LIGHT.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint WASH_STATION = new RoomConstraints.Constraint((BuildingComplete bc) => bc.prefabid.HasPrefabTag(RoomConstraints.ConstraintTags.WashStation), null, 1, ROOMS.CRITERIA.WASH_STATION.NAME, ROOMS.CRITERIA.WASH_STATION.DESCRIPTION, null);
+	public static RoomConstraints.Constraint MASSAGE_TABLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.MassageTable), null, 1, ROOMS.CRITERIA.MASSAGE_TABLE.NAME, ROOMS.CRITERIA.MASSAGE_TABLE.DESCRIPTION, null);
+
+	public static RoomConstraints.Constraint MESS_STATION_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.MessTable), null, 1, ROOMS.CRITERIA.MESS_STATION_SINGLE.NAME, ROOMS.CRITERIA.MESS_STATION_SINGLE.DESCRIPTION, null);
+
+	public static RoomConstraints.Constraint MESS_STATION_MULTIPLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.MessTable), null, 2, ROOMS.CRITERIA.MESS_STATION_MULTIPLE.NAME, ROOMS.CRITERIA.MESS_STATION_MULTIPLE.DESCRIPTION, new List<RoomConstraints.Constraint> { RoomConstraints.MESS_STATION_SINGLE });
+
+	public static RoomConstraints.Constraint RESEARCH_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.ResearchStation), null, 1, ROOMS.CRITERIA.RESEARCH_STATION.NAME, ROOMS.CRITERIA.RESEARCH_STATION.DESCRIPTION, null);
+
+	public static RoomConstraints.Constraint TOILET = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.Toilet), null, 1, ROOMS.CRITERIA.TOILET.NAME, ROOMS.CRITERIA.TOILET.DESCRIPTION, null);
+
+	public static RoomConstraints.Constraint WASH_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.WashStation), null, 1, ROOMS.CRITERIA.WASH_STATION.NAME, ROOMS.CRITERIA.WASH_STATION.DESCRIPTION, null);
 
 	public static class ConstraintTags
 	{
@@ -160,11 +170,19 @@ public static class RoomConstraints
 		public static Tag MassageTable = "MassageTable".ToTag();
 
 		public static Tag IndustrialMachinery = "IndustrialMachinery".ToTag();
+
+		public static Tag PowerStation = "PowerStation".ToTag();
+
+		public static Tag FarmStation = "FarmStation".ToTag();
+
+		public static Tag RecBuilding = "RecBuilding".ToTag();
+
+		public static Tag MachineShop = "MachineShop".ToTag();
 	}
 
 	public class Constraint
 	{
-		public Constraint(Func<BuildingComplete, bool> building_criteria, Func<Room, bool> room_criteria, int times_required = 1, string name = "", string description = "", List<RoomConstraints.Constraint> stomp_in_conflict = null)
+		public Constraint(Func<KPrefabID, bool> building_criteria, Func<Room, bool> room_criteria, int times_required = 1, string name = "", string description = "", List<RoomConstraints.Constraint> stomp_in_conflict = null)
 		{
 			this.room_criteria = room_criteria;
 			this.building_criteria = building_criteria;
@@ -183,11 +201,11 @@ public static class RoomConstraints
 			}
 			if (this.building_criteria != null)
 			{
-				foreach (BuildingComplete buildingComplete in room.buildings)
+				foreach (KPrefabID kprefabID in room.buildings)
 				{
-					if (!(buildingComplete == null))
+					if (!(kprefabID == null))
 					{
-						if (this.building_criteria(buildingComplete))
+						if (this.building_criteria(kprefabID))
 						{
 							num++;
 						}
@@ -205,7 +223,7 @@ public static class RoomConstraints
 
 		public Func<Room, bool> room_criteria;
 
-		public Func<BuildingComplete, bool> building_criteria;
+		public Func<KPrefabID, bool> building_criteria;
 
 		public List<RoomConstraints.Constraint> stomp_in_conflict;
 	}

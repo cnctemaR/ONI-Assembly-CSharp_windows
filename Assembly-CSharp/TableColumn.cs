@@ -2,21 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TableColumn
+public class TableColumn : IRender1000ms
 {
-	public TableColumn(Action<MinionIdentity, GameObject> on_load_action, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip = null, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip = null, Func<bool> revealed = null, float refresh_frequency = 0f)
+	public TableColumn(Action<MinionIdentity, GameObject> on_load_action, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip = null, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip = null, Func<bool> revealed = null, bool should_refresh_columns = false, string scrollerID = "")
 	{
 		this.on_load_action = on_load_action;
 		this.sort_comparer = sort_comparison;
 		this.on_tooltip = on_tooltip;
 		this.on_sort_tooltip = on_sort_tooltip;
 		this.revealed = revealed;
-		if (refresh_frequency != 0f)
+		this.scrollerID = scrollerID;
+		if (should_refresh_columns)
 		{
-			UIScheduler.Instance.SchedulePeriodic("RefreshTableColumn", refresh_frequency, delegate(object o)
-			{
-				this.MarkDirty(null, false);
-			}, null, null);
+			SimAndRenderScheduler.instance.Add(this, false);
 		}
 	}
 
@@ -102,7 +100,12 @@ public class TableColumn
 		return null;
 	}
 
-	public void MarkDirty(GameObject triggering_obj = null, bool triggering_object_state = false)
+	public void Render1000ms(float dt)
+	{
+		this.MarkDirty(null, TableScreen.ResultValues.False);
+	}
+
+	public void MarkDirty(GameObject triggering_obj = null, TableScreen.ResultValues triggering_object_state = TableScreen.ResultValues.False)
 	{
 		this.dirty = true;
 	}
@@ -121,6 +124,8 @@ public class TableColumn
 	public Comparison<MinionIdentity> sort_comparer;
 
 	public Dictionary<TableRow, GameObject> widgets_by_row = new Dictionary<TableRow, GameObject>();
+
+	public string scrollerID;
 
 	public TableScreen screen;
 

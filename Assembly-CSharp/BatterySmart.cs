@@ -2,65 +2,175 @@
 using System.Diagnostics;
 using KSerialization;
 using STRINGS;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [DebuggerDisplay("{name}")]
-public class BatterySmart : Battery, ISliderControl
+public class BatterySmart : Battery, IActivationRangeTarget
 {
-	private new void SimUpdate(float dt)
+	protected override void OnPrefabInit()
 	{
-		base.SimUpdate(dt);
-		float num = base.JoulesAvailable / base.Capacity;
-		int num2 = ((num < this.logicOnePercentThreshold) ? 0 : 1);
-		this.logicPorts.SendSignal(BatterySmart.PORT_ID, num2);
+		base.OnPrefabInit();
 	}
 
-	public string SliderTitleKey
+	protected override void OnSpawn()
 	{
-		get
+		base.OnSpawn();
+		this.CreateLogicMeter();
+		base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
+		base.Subscribe(-592767678, new Action<object>(this.UpdateLogicCircuit));
+	}
+
+	private void CreateLogicMeter()
+	{
+		this.logicMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "logicmeter_target", "logicmeter", Meter.Offset.Infront, new string[0]);
+	}
+
+	public override void EnergySim200ms(float dt)
+	{
+		base.EnergySim200ms(dt);
+		this.UpdateLogicCircuit(null);
+	}
+
+	private void UpdateLogicCircuit(object data)
+	{
+		float num = (float)Mathf.RoundToInt(base.PercentFull * 100f);
+		if (this.activated)
 		{
-			return "STRINGS.BUILDINGS.PREFABS.BATTERYSMART.SIDESCREEN_LOGIC_ACTIVE_THRESHOLD";
+			if (num >= (float)this.deactivateValue)
+			{
+				this.activated = false;
+			}
+		}
+		else if (num <= (float)this.activateValue)
+		{
+			this.activated = true;
+		}
+		bool isOperational = this.operational.IsOperational;
+		bool flag = this.activated && isOperational;
+		this.logicPorts.SendSignal(BatterySmart.PORT_ID, (!flag) ? 0 : 1);
+	}
+
+	private void OnLogicValueChanged(object data)
+	{
+		LogicValueChanged logicValueChanged = (LogicValueChanged)data;
+		if (logicValueChanged.portID == BatterySmart.PORT_ID)
+		{
+			this.SetLogicMeter(logicValueChanged.newValue > 0);
 		}
 	}
 
-	public string GetSliderTooltipKey(int index)
+	public void SetLogicMeter(bool on)
 	{
-		return "STRINGS.BUILDINGS.PREFABS.BATTERYSMART.SIDESCREEN_LOGIC_ACTIVE_THRESHOLD_TOOLTIP";
-	}
-
-	public string SliderUnits
-	{
-		get
+		if (this.logicMeter != null)
 		{
-			return UI.UNITSUFFIXES.PERCENT;
+			this.logicMeter.SetPositionPercent((!on) ? 0f : 1f);
 		}
 	}
 
-	public float GetSliderMin(int index)
+	public float ActivateValue
 	{
-		return 0f;
+		get
+		{
+			return (float)this.deactivateValue;
+		}
+		set
+		{
+			this.deactivateValue = (int)value;
+			this.UpdateLogicCircuit(null);
+		}
 	}
 
-	public float GetSliderMax(int index)
+	public float DeactivateValue
 	{
-		return 100f;
+		get
+		{
+			return (float)this.activateValue;
+		}
+		set
+		{
+			this.activateValue = (int)value;
+			this.UpdateLogicCircuit(null);
+		}
 	}
 
-	public float GetSliderValue(int index)
+	public float MinValue
 	{
-		return this.logicOnePercentThreshold * 100f;
+		get
+		{
+			return 0f;
+		}
 	}
 
-	public void SetSliderValue(float value, int index)
+	public float MaxValue
 	{
-		this.logicOnePercentThreshold = value / 100f;
+		get
+		{
+			return 100f;
+		}
+	}
+
+	public bool UseWholeNumbers
+	{
+		get
+		{
+			return true;
+		}
+	}
+
+	public string ActivateTooltip
+	{
+		get
+		{
+			return BUILDINGS.PREFABS.BATTERYSMART.DEACTIVATE_TOOLTIP;
+		}
+	}
+
+	public string DeactivateTooltip
+	{
+		get
+		{
+			return BUILDINGS.PREFABS.BATTERYSMART.ACTIVATE_TOOLTIP;
+		}
+	}
+
+	public string ActivationRangeTitleText
+	{
+		get
+		{
+			return BUILDINGS.PREFABS.BATTERYSMART.SIDESCREEN_TITLE;
+		}
+	}
+
+	public string ActivateSliderLabelText
+	{
+		get
+		{
+			return BUILDINGS.PREFABS.BATTERYSMART.SIDESCREEN_DEACTIVATE;
+		}
+	}
+
+	public string DeactivateSliderLabelText
+	{
+		get
+		{
+			return BUILDINGS.PREFABS.BATTERYSMART.SIDESCREEN_ACTIVATE;
+		}
 	}
 
 	public static readonly HashedString PORT_ID = "BatterySmartLogicPort";
 
 	[Serialize]
-	private float logicOnePercentThreshold = 1f;
+	private int activateValue;
+
+	[Serialize]
+	private int deactivateValue = 100;
+
+	[Serialize]
+	private bool activated;
 
 	[MyCmpGet]
 	private LogicPorts logicPorts;
+
+	private MeterController logicMeter;
 }

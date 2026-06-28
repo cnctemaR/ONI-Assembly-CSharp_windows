@@ -8,7 +8,6 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		component.randomiseLoopedOffset = true;
 		base.OnPrefabInit();
-		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FetchCritical;
 	}
 
 	protected override void OnSpawn()
@@ -66,11 +65,11 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 			}).Exit(delegate(AlgaeHabitat.SMInstance smi)
 			{
 				smi.master.operational.SetActive(false, false);
-			}).Update(delegate(AlgaeHabitat.SMInstance smi)
+			}).Update("GeneratingOxygen", delegate(AlgaeHabitat.SMInstance smi, float dt)
 			{
-				int num = Grid.PosToCell(smi.master.transform.position);
+				int num = Grid.PosToCell(smi.master.transform.GetPosition());
 				smi.converter.OutputMultiplier = ((Grid.LightCount[num] <= 0) ? 1f : smi.master.lightBonusMultiplier);
-			})
+			}, UpdateRate.SIM_200ms, false)
 				.QueueAnim("working_loop", true, null)
 				.EventTransition(GameHashes.OnStorageChange, this.stoppedGeneratingOxygen, (AlgaeHabitat.SMInstance smi) => !smi.HasEnoughMass(GameTags.Water) || !smi.HasEnoughMass(GameTags.Algae));
 			this.stoppedGeneratingOxygen.PlayAnim("working_pst").OnAnimQueueComplete(this.stoppedGeneratingOxygenTransition);

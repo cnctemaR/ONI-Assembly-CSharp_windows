@@ -14,7 +14,6 @@ public class World : KMonoBehaviour
 	{
 		World.Instance = this;
 		this.blockTileRenderer = base.GetComponent<BlockTileRenderer>();
-		this.regionTileRenderer = base.GetComponent<RegionTileRenderer>();
 	}
 
 	protected override void OnSpawn()
@@ -33,11 +32,6 @@ public class World : KMonoBehaviour
 			this.blockTileRenderer.FreeResources();
 		}
 		this.blockTileRenderer = null;
-		if (this.regionTileRenderer != null)
-		{
-			this.regionTileRenderer.FreeResources();
-		}
-		this.regionTileRenderer = null;
 		if (this.groundRenderer != null)
 		{
 			this.groundRenderer.FreeResources();
@@ -120,7 +114,7 @@ public class World : KMonoBehaviour
 		KAnimBatchManager.Instance().Render();
 		if (Camera.main != null)
 		{
-			Vector3 vector = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z));
+			Vector3 vector = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.GetPosition().z));
 			Shader.SetGlobalVector("_CursorPos", new Vector4(vector.x, vector.y, vector.z, 0f));
 		}
 		FallingWater.instance.UpdateParticles(Time.deltaTime);
@@ -139,8 +133,6 @@ public class World : KMonoBehaviour
 	public Action<int> OnLiquidChanged;
 
 	public BlockTileRenderer blockTileRenderer;
-
-	public RegionTileRenderer regionTileRenderer;
 
 	[MyCmpGet]
 	[NonSerialized]

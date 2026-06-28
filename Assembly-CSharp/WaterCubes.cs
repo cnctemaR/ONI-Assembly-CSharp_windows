@@ -29,7 +29,7 @@ public class WaterCubes : KMonoBehaviour
 		meshFilter.sharedMesh = this.CreateNewMesh();
 		meshRenderer.gameObject.layer = 0;
 		meshRenderer.gameObject.transform.parent = base.transform;
-		meshRenderer.gameObject.transform.position = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Liquid));
+		meshRenderer.gameObject.transform.SetPosition(new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Liquid)));
 	}
 
 	private Mesh CreateNewMesh()

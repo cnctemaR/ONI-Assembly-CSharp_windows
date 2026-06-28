@@ -91,11 +91,11 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			{
 				if (smi.master.growing.Replanted)
 				{
-					Notifier component = smi.master.GetComponent<Notifier>();
+					Notifier notifier = smi.master.gameObject.AddOrGet<Notifier>();
 					Notification notification = smi.master.CreateDeathNotification();
-					component.Add(notification, string.Empty);
+					notifier.Add(notification, string.Empty);
 				}
-				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.position, Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
+				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
 				smi.master.Trigger(1623392196, null);
 				smi.master.GetComponent<KBatchedAnimController>().StopAndClear();
 				global::UnityEngine.Object.Destroy(smi.master.GetComponent<KBatchedAnimController>());
@@ -107,27 +107,33 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 				{
 					smi.master.animController.SetPositionPercent(smi.master.growing.PercentOfCurrentHarvest());
 				})
-				.Update(delegate(StandardCropPlant.StatesInstance smi)
+				.Update("CheckNotGrown", delegate(StandardCropPlant.StatesInstance smi, float dt)
 				{
 					smi.master.animController.SetPositionPercent(smi.master.growing.PercentOfCurrentHarvest());
-				});
-			this.alive.pre_fruiting.PlayAnim("grow_pst", KAnim.PlayMode.Once).EventHandler(GameHashes.AnimQueueComplete, delegate(StandardCropPlant.StatesInstance smi)
-			{
-				smi.GoTo(this.alive.fruiting);
-			});
+				}, UpdateRate.SIM_4000ms, false);
+			this.alive.pre_fruiting.PlayAnim("grow_pst", KAnim.PlayMode.Once).EventTransition(GameHashes.AnimQueueComplete, this.alive.fruiting, null);
 			this.alive.wilting.PlayAnim("wilt", KAnim.PlayMode.Loop, (StandardCropPlant.StatesInstance smi) => smi.WiltStage().ToString()).EventTransition(GameHashes.WiltRecover, this.alive.idle, (StandardCropPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Harvest, this.alive.fruiting.fruiting_harvest, null);
-			this.alive.fruiting.DefaultState(this.alive.fruiting.fruiting_idle).EventHandler(GameHashes.Wilt, delegate(StandardCropPlant.StatesInstance smi)
-			{
-				smi.GoTo(this.alive.wilting);
-			}).EventTransition(GameHashes.Harvest, this.alive.fruiting.fruiting_harvest, null);
+			this.alive.fruiting.DefaultState(this.alive.fruiting.fruiting_idle).EventTransition(GameHashes.Wilt, this.alive.wilting, null).EventTransition(GameHashes.Harvest, this.alive.fruiting.fruiting_harvest, null);
 			this.alive.fruiting.fruiting_idle.PlayAnim("idle_full", KAnim.PlayMode.Loop).Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
 				smi.master.harvestable.SetCanBeHarvested(true);
-			}).Transition(this.alive.fruiting.fruiting_old, (StandardCropPlant.StatesInstance smi) => smi.IsOld());
+			}).Update("fruiting_idle", delegate(StandardCropPlant.StatesInstance smi, float dt)
+			{
+				if (smi.IsOld())
+				{
+					smi.GoTo(this.alive.fruiting.fruiting_old);
+				}
+			}, UpdateRate.SIM_4000ms, false);
 			this.alive.fruiting.fruiting_old.PlayAnim("wilt", KAnim.PlayMode.Loop, (StandardCropPlant.StatesInstance smi) => smi.WiltStage().ToString()).Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
 				smi.master.harvestable.SetCanBeHarvested(true);
-			}).Transition(this.alive.fruiting.fruiting_idle, (StandardCropPlant.StatesInstance smi) => !smi.IsOld());
+			}).Update("fruiting_old", delegate(StandardCropPlant.StatesInstance smi, float dt)
+			{
+				if (!smi.IsOld())
+				{
+					smi.GoTo(this.alive.fruiting.fruiting_idle);
+				}
+			}, UpdateRate.SIM_4000ms, false);
 			this.alive.fruiting.fruiting_harvest.PlayAnim("harvest", KAnim.PlayMode.Once).Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
 				if (GameScheduler.Instance != null && smi.master != null)

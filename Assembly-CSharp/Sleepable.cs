@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using UnityEngine;
 
 public class Sleepable : Workable
 {
@@ -13,6 +14,7 @@ public class Sleepable : Workable
 		base.OnPrefabInit();
 		this.workerStatusItem = null;
 		this.synchronizeAnims = false;
+		this.forcePlayPst = true;
 	}
 
 	protected override void OnSpawn()
@@ -30,11 +32,24 @@ public class Sleepable : Workable
 		}
 		worker.Trigger(-1283701846, this);
 		worker.GetComponent<Effects>().Add("Sleep", false);
+		this.isDoneSleeping = false;
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
-		return worker.GetSMI<StaminaMonitor.Instance>().ShouldExitSleep();
+		if (this.isDoneSleeping)
+		{
+			if (Time.time > this.wakeTime)
+			{
+				return true;
+			}
+		}
+		else if (worker.GetSMI<StaminaMonitor.Instance>().ShouldExitSleep())
+		{
+			this.isDoneSleeping = true;
+			this.wakeTime = Time.time + global::UnityEngine.Random.value * 3f;
+		}
+		return false;
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -54,6 +69,10 @@ public class Sleepable : Workable
 		}
 	}
 
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+	}
+
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
@@ -62,4 +81,8 @@ public class Sleepable : Workable
 
 	[MyCmpGet]
 	private Operational operational;
+
+	private float wakeTime;
+
+	private bool isDoneSleeping;
 }

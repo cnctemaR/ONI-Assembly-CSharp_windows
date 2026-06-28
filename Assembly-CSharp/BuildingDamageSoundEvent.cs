@@ -11,7 +11,7 @@ public class BuildingDamageSoundEvent : SoundEvent
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		Vector3 position = behaviour.GetComponent<Transform>().position;
+		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
 		Worker component = behaviour.GetComponent<Worker>();
 		if (component == null)
 		{

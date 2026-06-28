@@ -6,7 +6,7 @@ public class POIBunkerExteriorDoor : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("POIBunkerExteriorDoor", 1, 2, "door_poi_kanim", 100f, 30, 60f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER2, NOISE_POLLUTION.NONE);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("POIBunkerExteriorDoor", 1, 2, "door_poi_kanim", 30, 60f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER2, NOISE_POLLUTION.NONE, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.Repairable = false;
 		buildingDef.Floodable = false;
@@ -26,7 +26,7 @@ public class POIBunkerExteriorDoor : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		Door door = go.AddOrGet<Door>();
 		door.hasComplexUserControls = false;
@@ -34,7 +34,7 @@ public class POIBunkerExteriorDoor : IBuildingConfig
 		door.doorType = Door.DoorType.Sealed;
 		go.UpdateComponentRequirement<AccessControl>(true);
 		go.UpdateComponentRequirement<Unsealable>(true);
-		go.AddOrGet<BoxCollider2D>();
+		go.AddOrGet<KBoxCollider2D>();
 		Prioritizable.AddRef(go);
 		Workable workable = go.AddOrGet<Workable>();
 		workable.workTime = 5f;

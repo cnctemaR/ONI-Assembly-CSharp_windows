@@ -111,7 +111,6 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			: base((StateMachine)((object)StateMachineManager.Instance.CreateStateMachine<StateMachineType>()), master)
 		{
 			this.master = master;
-			this.lastUpdateTime = Time.time;
 			this.stateStack = new StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.GenericInstance.StackEntry[this.stateMachine.GetMaxDepth()];
 			for (int i = 0; i < this.stateStack.Length; i++)
 			{
@@ -119,6 +118,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			}
 			this.sm = (StateMachineType)((object)this.stateMachine);
 			this.dataTable = new object[base.GetStateMachine().dataTableSize];
+			this.updateTable = new StateMachine.Instance.UpdateTableEntry[base.GetStateMachine().updateTableSize];
 			this.controller = master.GetComponent<StateMachineController>();
 			if (this.controller == null)
 			{
@@ -166,22 +166,6 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			}
 		}
 
-		public override float deltatime
-		{
-			get
-			{
-				return Time.time - this.lastUpdateTime;
-			}
-		}
-
-		public override float dt
-		{
-			get
-			{
-				return this.deltatime;
-			}
-		}
-
 		public override void FreeResources()
 		{
 			this.updateHandle.FreeResources();
@@ -220,30 +204,6 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			base.FreeResources();
 		}
 
-		public override void Update()
-		{
-			if (App.IsExiting)
-			{
-				return;
-			}
-			if (StateMachine.Instance.error)
-			{
-				return;
-			}
-			int num = this.gotoId;
-			int num2 = 0;
-			while (num2 < this.stackSize && num == this.gotoId)
-			{
-				this.currentSchedulerGroup = this.stateStack[num2].schedulerGroup;
-				if (this.stateStack[num2].state.updateActions != null)
-				{
-					this.ExecuteActions((StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State)this.stateStack[num2].state, this.stateStack[num2].state.updateActions, false);
-				}
-				num2++;
-			}
-			this.lastUpdateTime = Time.time;
-		}
-
 		public override IStateMachineTarget GetMaster()
 		{
 			return this.master;
@@ -275,22 +235,6 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 		private void PushState(StateMachine.BaseState state)
 		{
-			if (state.updateActions != null && state.updateActions.Length > 0)
-			{
-				this.updatingStateCount++;
-				if (this.updatingStateCount == 1)
-				{
-					if (this.updateCallback == null)
-					{
-						this.updateCallback = delegate(object obj)
-						{
-							this.Update();
-						};
-					}
-					this.updateHandle = GameScheduler.Instance.SchedulePeriodic(state.longName, 0.2f, this.updateCallback, this.smi, null, 0f, null);
-					this.lastUpdateTime = Time.time;
-				}
-			}
 			int num = this.gotoId;
 			if (state.events != null)
 			{
@@ -313,14 +257,23 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 					parameterTransition.Register(this.smi);
 				}
 			}
+			if (state.updateActions != null)
+			{
+				for (int l = 0; l < state.updateActions.Length; l++)
+				{
+					StateMachine.UpdateAction updateAction = state.updateActions[l];
+					int updateTableIdx = updateAction.updateTableIdx;
+					int nextBucketIdx = updateAction.nextBucketIdx;
+					updateAction.nextBucketIdx = (updateAction.nextBucketIdx + 1) % updateAction.buckets.Length;
+					UpdateBucketWithUpdater<StateMachineInstanceType> updateBucketWithUpdater = (UpdateBucketWithUpdater<StateMachineInstanceType>)updateAction.buckets[nextBucketIdx];
+					this.smi.updateTable[updateTableIdx].bucket = updateBucketWithUpdater;
+					this.smi.updateTable[updateTableIdx].handle = updateBucketWithUpdater.Add(this.smi, StateMachineUpdater.instance.GetFrameTime(updateAction.updateRate, updateBucketWithUpdater.frame), (UpdateBucketWithUpdater<StateMachineInstanceType>.IUpdater)updateAction.updater);
+					state.updateActions[l] = updateAction;
+				}
+			}
 			this.stateEnterTime = Time.time;
 			this.stateStack[this.stackSize++].state = state;
 			this.currentSchedulerGroup = this.stateStack[this.stackSize - 1].schedulerGroup;
-			this.ExecuteActions((StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State)state, state.enterActions, true);
-			if (num != this.gotoId)
-			{
-				return;
-			}
 			if (state.transitions != null)
 			{
 				foreach (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition transition2 in state.transitions)
@@ -343,9 +296,18 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 					parameterTransition2.Evaluate(this.smi);
 				}
 			}
+			if (num != this.gotoId)
+			{
+				return;
+			}
+			this.ExecuteActions((StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State)state, state.enterActions);
+			if (num != this.gotoId)
+			{
+				return;
+			}
 		}
 
-		private void ExecuteActions(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, StateMachine.Action[] actions, bool should_log)
+		private void ExecuteActions(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, StateMachine.Action[] actions)
 		{
 			if (actions == null)
 			{
@@ -415,17 +377,19 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 					this.PopEvent();
 				}
 			}
-			stackEntry.schedulerGroup.Reset();
-			this.currentSchedulerGroup = stackEntry.schedulerGroup;
-			this.ExecuteActions((StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State)state, state.exitActions, true);
-			if (state.updateActions != null && state.updateActions.Length > 0)
+			if (state.updateActions != null)
 			{
-				this.updatingStateCount--;
-				if (this.updatingStateCount == 0)
+				foreach (StateMachine.UpdateAction updateAction in state.updateActions)
 				{
-					this.updateHandle.ClearScheduler();
+					int updateTableIdx = updateAction.updateTableIdx;
+					UpdateBucketWithUpdater<StateMachineInstanceType> updateBucketWithUpdater = (UpdateBucketWithUpdater<StateMachineInstanceType>)this.smi.updateTable[updateTableIdx].bucket;
+					this.smi.updateTable[updateTableIdx].bucket = null;
+					updateBucketWithUpdater.Remove(this.smi.updateTable[updateTableIdx].handle);
 				}
 			}
+			stackEntry.schedulerGroup.Reset();
+			this.currentSchedulerGroup = stackEntry.schedulerGroup;
+			this.ExecuteActions((StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State)state, state.exitActions);
 		}
 
 		public override SchedulerHandle Schedule(float time, Action<object> callback, object callback_data = null)
@@ -596,13 +560,9 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 		private float stateEnterTime;
 
-		private float lastUpdateTime;
-
 		private int gotoId;
 
 		private SchedulerHandle updateHandle;
-
-		private Action<object> updateCallback;
 
 		private Stack<StateMachine.BaseState> gotoStack = new Stack<StateMachine.BaseState>();
 

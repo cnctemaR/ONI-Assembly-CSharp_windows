@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using KSerialization;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -130,12 +131,16 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 	{
 		base.OnPrefabInit();
 		this.choreType = Db.Get().ChoreTypes.Fabricate;
-		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FabricateFetch;
+		if (!this.fetchChoreTypeIdHash.IsValid)
+		{
+			this.fetchChoreTypeIdHash = Db.Get().ChoreTypes.Fetch.IdHash;
+		}
 		base.Subscribe(-1957399615, new Action<object>(this.OnDroppedAll));
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		Components.Fabricators.Add(this);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Fabricating;
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
 	}
 
 	protected override void OnSpawn()
@@ -194,7 +199,7 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 	protected virtual GameObject CompleteOrder(Fabricator.UserOrder completed_order)
 	{
 		GameObject gameObject = completed_order.recipe.Craft(this.buildStorage, completed_order.orderTags);
-		gameObject.transform.localPosition = base.transform.localPosition;
+		gameObject.transform.SetLocalPosition(base.transform.GetLocalPosition());
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		Fabricator.ResultState resultState = this.resultState;
 		if (resultState != Fabricator.ResultState.Normal)
@@ -297,7 +302,7 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 				}
 				if (flag)
 				{
-					machineOrder2.chore = new WorkChore<Fabricator>(this.choreType, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+					machineOrder2.chore = new WorkChore<Fabricator>(this.choreType, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 					if (this.workTimeRemaining <= 0f)
 					{
 						this.workTimeRemaining = this.GetWorkTime();
@@ -323,6 +328,7 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 					}
 				}
 			}
+			ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.fetchChoreTypeIdHash);
 			for (int m = 0; m < this.machineOrders.Count; m++)
 			{
 				Fabricator.MachineOrder machineOrder4 = this.machineOrders[m];
@@ -350,7 +356,7 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 					int num2 = -m;
 					if (machineOrder4.fetchList == null && !flag2)
 					{
-						machineOrder4.fetchList = new FetchList2(this.inStorage);
+						machineOrder4.fetchList = new FetchList2(this.inStorage, byHash, this.choreTags);
 						machineOrder4.fetchList.ShowStatusItem = false;
 						machineOrder4.fetchList.SetPriorityMod(num2);
 						this.AddIngredientsToFetchList(allIngredients3, machineOrder4.fetchList);
@@ -576,6 +582,12 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 	private List<Fabricator.OrderSaveData> savedOrders;
 
 	protected ChoreType choreType;
+
+	[SerializeField]
+	public HashedString fetchChoreTypeIdHash;
+
+	[SerializeField]
+	public Tag[] choreTags;
 
 	[Serializable]
 	public class UserOrder : IBuildQueueOrder

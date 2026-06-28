@@ -3,14 +3,14 @@ using UnityEngine;
 
 public class BuildingTemplates
 {
-	public static BuildingDef CreateBuildingDef(string id, int width, int height, string anim, float mass, int hitpoints, float construction_time, float[] construction_mass, string[] construction_materials, float melting_point, BuildLocationRule build_location_rule, EffectorValues decor, EffectorValues noise)
+	public static BuildingDef CreateBuildingDef(string id, int width, int height, string anim, int hitpoints, float construction_time, float[] construction_mass, string[] construction_materials, float melting_point, BuildLocationRule build_location_rule, EffectorValues decor, EffectorValues noise, float temperature_modification_mass_scale = 0.2f)
 	{
 		BuildingDef buildingDef = ScriptableObject.CreateInstance<BuildingDef>();
 		buildingDef.PrefabID = id;
 		buildingDef.InitDef();
 		buildingDef.name = id;
 		buildingDef.Mass = construction_mass;
-		buildingDef.MassForTemperatureModification = construction_mass[0] * 0.2f;
+		buildingDef.MassForTemperatureModification = construction_mass[0] * temperature_modification_mass_scale;
 		buildingDef.WidthInCells = width;
 		buildingDef.HeightInCells = height;
 		buildingDef.HitPoints = hitpoints;
@@ -23,10 +23,10 @@ public class BuildingTemplates
 		case BuildLocationRule.Anywhere:
 		case BuildLocationRule.Tile:
 			buildingDef.ContinuouslyCheckFoundation = false;
-			goto IL_009A;
+			goto IL_0097;
 		}
 		buildingDef.ContinuouslyCheckFoundation = true;
-		IL_009A:
+		IL_0097:
 		buildingDef.BuildLocationRule = build_location_rule;
 		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.AnimFiles = new KAnimFile[] { Assets.GetAnim(anim) };

@@ -50,7 +50,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		}
 		else
 		{
-			mouse_pos.z = -Camera.main.transform.position.z - Grid.CellSizeInMeters;
+			mouse_pos.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
 			vector = Camera.main.ScreenToWorldPoint(mouse_pos);
 		}
 		float num = vector.x;

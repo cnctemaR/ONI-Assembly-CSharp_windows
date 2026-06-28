@@ -125,6 +125,12 @@ public class Grid
 		return Math.Abs(offset.x) + Math.Abs(offset.y);
 	}
 
+	public static int GetCellRange(int cell_a, int cell_b)
+	{
+		CellOffset offset = Grid.GetOffset(cell_a, cell_b);
+		return Math.Max(Math.Abs(offset.x), Math.Abs(offset.y));
+	}
+
 	public static CellOffset GetOffset(int base_cell, int offset_cell)
 	{
 		int num;
@@ -148,12 +154,12 @@ public class Grid
 
 	public static int PosToCell(GameObject go)
 	{
-		return Grid.PosToCell(go.transform.position);
+		return Grid.PosToCell(go.transform.GetPosition());
 	}
 
 	public static int PosToCell(KMonoBehaviour cmp)
 	{
-		return Grid.PosToCell(cmp.transform.position);
+		return Grid.PosToCell(cmp.transform.GetPosition());
 	}
 
 	public static bool IsValidCell(int cell)
@@ -165,8 +171,8 @@ public class Grid
 	{
 		float x = pos.x;
 		float num = pos.y + 0.05f;
-		int num2 = (int)(num / Grid.CellSizeInMeters);
-		int num3 = (int)(x / Grid.CellSizeInMeters);
+		int num2 = (int)num;
+		int num3 = (int)x;
 		return num2 * Grid.WidthInCells + num3;
 	}
 
@@ -174,8 +180,8 @@ public class Grid
 	{
 		float x = pos.x;
 		float num = pos.y + 0.05f;
-		int num2 = (int)(num / Grid.CellSizeInMeters);
-		int num3 = (int)(x / Grid.CellSizeInMeters);
+		int num2 = (int)num;
+		int num3 = (int)x;
 		return num2 * Grid.WidthInCells + num3;
 	}
 
@@ -280,6 +286,21 @@ public class Grid
 		}
 	}
 
+	public static ObjectLayer GetObjectLayerForConduitType(ConduitType conduit_type)
+	{
+		switch (conduit_type)
+		{
+		case ConduitType.Gas:
+			return ObjectLayer.GasConduitConnection;
+		case ConduitType.Liquid:
+			return ObjectLayer.LiquidConduitConnection;
+		case ConduitType.Solid:
+			return ObjectLayer.SolidConduitConnection;
+		default:
+			throw new ArgumentException("Invalid value.", "conduit_type");
+		}
+	}
+
 	public static Vector3 CellToPos(int cell, CellAlignment alignment, Grid.SceneLayer layer)
 	{
 		switch (alignment)
@@ -374,8 +395,8 @@ public class Grid
 
 	public static void GetVisibleExtents(out int min_x, out int min_y, out int max_x, out int max_y)
 	{
-		Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.position.z));
-		Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.position.z));
+		Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.GetPosition().z));
+		Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.GetPosition().z));
 		min_y = (int)vector2.y;
 		max_y = (int)(vector.y + 0.5f);
 		min_x = (int)vector2.x;
@@ -505,6 +526,8 @@ public class Grid
 
 	public static float CellSizeInMeters;
 
+	public static float InverseCellSizeInMeters;
+
 	public static float HalfCellSizeInMeters;
 
 	public static int CellCount;
@@ -552,8 +575,6 @@ public class Grid
 	public static float[] Decor;
 
 	public static float[] Loudness;
-
-	public static ushort[] Room;
 
 	public static Grid.PressureIndexer Pressure;
 
@@ -614,6 +635,9 @@ public class Grid
 		GasConduitBridges,
 		LiquidConduits,
 		LiquidConduitBridges,
+		SolidConduits,
+		SolidConduitContents,
+		SolidConduitBridges,
 		Wires,
 		WireBridges,
 		Paintings,

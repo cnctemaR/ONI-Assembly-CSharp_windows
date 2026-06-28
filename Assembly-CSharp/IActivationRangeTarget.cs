@@ -12,6 +12,12 @@ public interface IActivationRangeTarget
 
 	bool UseWholeNumbers { get; }
 
+	string ActivationRangeTitleText { get; }
+
+	string ActivateSliderLabelText { get; }
+
+	string DeactivateSliderLabelText { get; }
+
 	string ActivateTooltip { get; }
 
 	string DeactivateTooltip { get; }

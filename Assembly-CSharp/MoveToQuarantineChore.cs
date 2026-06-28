@@ -4,7 +4,7 @@ using UnityEngine;
 public class MoveToQuarantineChore : Chore<MoveToQuarantineChore.StatesInstance>
 {
 	public MoveToQuarantineChore(IStateMachineTarget target, KMonoBehaviour quarantine_area)
-		: base(Db.Get().ChoreTypes.MoveToQuarantine, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.MoveToQuarantine, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new MoveToQuarantineChore.StatesInstance(this, target.gameObject);
 		this.smi.sm.locator.Set(quarantine_area.gameObject, this.smi);

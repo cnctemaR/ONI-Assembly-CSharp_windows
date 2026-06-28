@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
+public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, ISim200ms
 {
 	public float lastEnvTemp { get; private set; }
 
@@ -33,14 +33,14 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		this.cooledAirOutputCell = this.building.GetUtilityOutputCell();
 	}
 
-	private void Update()
+	public void Sim200ms(float dt)
 	{
 		if (this.operational != null && !this.operational.IsOperational)
 		{
 			this.operational.SetActive(false, false);
 			return;
 		}
-		this.UpdateState(Time.deltaTime);
+		this.UpdateState(dt);
 	}
 
 	private void UpdateState(float dt)
@@ -48,7 +48,7 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		bool flag = this.consumer.IsSatisfied;
 		int cells = 0;
 		float envTemp = 0f;
-		if (this.occupyArea != null)
+		if (this.occupyArea != null && base.gameObject != null)
 		{
 			this.occupyArea.TestArea(Grid.PosToCell(base.gameObject), null, delegate(int cell, object data)
 			{
@@ -157,7 +157,7 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		float num = Mathf.Abs(this.temperatureDelta * element.specificHeatCapacity);
 		Descriptor descriptor = default(Descriptor);
 		string text = string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.HEATGENERATED_AIRCONDITIONER : UI.BUILDINGEFFECTS.HEATGENERATED_LIQUIDCONDITIONER, GameUtil.GetFormattedWattage(num, GameUtil.WattageFormatterUnit.Automatic));
-		string text2 = string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_AIRCONDITIONER : UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_LIQUIDCONDITIONER, GameUtil.GetFormattedJoules(num, string.Empty));
+		string text2 = string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_AIRCONDITIONER : UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_LIQUIDCONDITIONER, GameUtil.GetFormattedJoules(num, string.Empty, GameUtil.TimeSlice.None));
 		descriptor.SetupDescriptor(text, text2, Descriptor.DescriptorType.Effect);
 		list.Add(descriptor);
 		Descriptor descriptor2 = default(Descriptor);

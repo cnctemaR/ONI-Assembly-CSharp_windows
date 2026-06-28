@@ -38,14 +38,7 @@ public class LiquidCooledRefinery : Refinery
 	private void OnStorageChange(object data)
 	{
 		float amountAvailable = this.inStorage.GetAmountAvailable(this.coolantTag);
-		if (amountAvailable < this.minCoolantMass)
-		{
-			this.operational.SetFlag(LiquidCooledRefinery.enoughCoolant, false);
-		}
-		else
-		{
-			this.operational.SetFlag(LiquidCooledRefinery.enoughCoolant, true);
-		}
+		this.operational.SetFlag(LiquidCooledRefinery.enoughCoolant, amountAvailable >= this.minCoolantMass);
 		float capacityKG = this.conduitConsumer.capacityKG;
 		float num = Mathf.Clamp01(amountAvailable / capacityKG);
 		if (this.meter_coolant != null)
@@ -68,8 +61,10 @@ public class LiquidCooledRefinery : Refinery
 			if (component2.Mass != 0f)
 			{
 				float num2 = component2.Mass / this.minCoolantMass;
-				SimTemperatureTransfer component3 = gameObject.GetComponent<SimTemperatureTransfer>();
-				component3.ModifyEnergy(-num * num2 * this.thermalFudge);
+				float num3 = -num * num2 * this.thermalFudge;
+				float num4 = GameUtil.CalculateTemperatureChange(component2.Element.specificHeatCapacity, component2.Mass, num3);
+				float temperature = component2.Temperature;
+				component2.Temperature += num4;
 			}
 		}
 		return list;
@@ -97,7 +92,7 @@ public class LiquidCooledRefinery : Refinery
 		}
 		float num = -GameUtil.CalculateEnergyDeltaForElementChange(component.Element.specificHeatCapacity, recipe.results[0].amount, component.Element.highTemp, this.outputTemperature);
 		float num2 = GameUtil.CalculateTemperatureChange(primaryElement.Element.specificHeatCapacity, this.minCoolantMass, num * this.thermalFudge);
-		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.REFINEMENT_ENERGY, GameUtil.GetFormattedJoules(num, "F1")), string.Format(text, GameUtil.GetFormattedJoules(num, "F1"), primaryElement.GetProperName(), GameUtil.GetFormattedTemperature(num2, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Relative, true)), Descriptor.DescriptorType.Effect, false));
+		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.REFINEMENT_ENERGY, GameUtil.GetFormattedJoules(num, "F1", GameUtil.TimeSlice.None)), string.Format(text, GameUtil.GetFormattedJoules(num, "F1", GameUtil.TimeSlice.None), primaryElement.GetProperName(), GameUtil.GetFormattedTemperature(num2, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Relative, true)), Descriptor.DescriptorType.Effect, false));
 		return list;
 	}
 
@@ -134,7 +129,7 @@ public class LiquidCooledRefinery : Refinery
 		{
 			if (LiquidCooledRefinery.States.waitingForCoolantStatus == null)
 			{
-				LiquidCooledRefinery.States.waitingForCoolantStatus = new StatusItem("waitingForCoolantStatus", BUILDING.STATUSITEMS.ENOUGH_COOLANT.NAME, BUILDING.STATUSITEMS.ENOUGH_COOLANT.TOOLTIP, "status_item_no_liquid_to_pump", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, 30718);
+				LiquidCooledRefinery.States.waitingForCoolantStatus = new StatusItem("waitingForCoolantStatus", BUILDING.STATUSITEMS.ENOUGH_COOLANT.NAME, BUILDING.STATUSITEMS.ENOUGH_COOLANT.TOOLTIP, "status_item_no_liquid_to_pump", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, 63486);
 				LiquidCooledRefinery.States.waitingForCoolantStatus.resolveStringCallback = delegate(string str, object obj)
 				{
 					LiquidCooledRefinery liquidCooledRefinery = (LiquidCooledRefinery)obj;

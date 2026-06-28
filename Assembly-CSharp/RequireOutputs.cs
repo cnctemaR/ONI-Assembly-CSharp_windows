@@ -14,7 +14,14 @@ public class RequireOutputs : KMonoBehaviour
 		ConduitType outputConduitType = component.Def.OutputConduitType;
 		if (outputConduitType != ConduitType.Gas)
 		{
-			if (outputConduitType == ConduitType.Liquid)
+			if (outputConduitType != ConduitType.Liquid)
+			{
+				if (outputConduitType == ConduitType.Solid)
+				{
+					scenePartitionerLayer = GameScenePartitioner.Instance.solidConduitsLayer;
+				}
+			}
+			else
 			{
 				scenePartitionerLayer = GameScenePartitioner.Instance.liquidConduitsLayer;
 			}
@@ -32,7 +39,7 @@ public class RequireOutputs : KMonoBehaviour
 				this.UpdateConnectionState(false);
 			});
 		}
-		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.UpdatePipeState), ConduitFlow.Priority.First);
+		this.GetConduitFlow().AddConduitUpdater(new Action<float>(this.UpdatePipeState), ConduitFlowPriority.First);
 	}
 
 	protected override void OnCleanUp()
@@ -42,7 +49,11 @@ public class RequireOutputs : KMonoBehaviour
 			this.partitionerEntry.Release();
 			this.partitionerEntry = null;
 		}
-		this.GetConduitManager().RemoveConduitUpdater(new Action<float>(this.UpdatePipeState));
+		IConduitFlow conduitFlow = this.GetConduitFlow();
+		if (conduitFlow != null)
+		{
+			conduitFlow.RemoveConduitUpdater(new Action<float>(this.UpdatePipeState));
+		}
 		base.OnCleanUp();
 	}
 
@@ -57,7 +68,14 @@ public class RequireOutputs : KMonoBehaviour
 			ConduitType conduitType = this.conduitType;
 			if (conduitType != ConduitType.Liquid)
 			{
-				if (conduitType == ConduitType.Gas)
+				if (conduitType != ConduitType.Gas)
+				{
+					if (conduitType == ConduitType.Solid)
+					{
+						statusItem = Db.Get().BuildingStatusItems.NeedSolidOut;
+					}
+				}
+				else
 				{
 					statusItem = Db.Get().BuildingStatusItems.NeedGasOut;
 				}
@@ -72,15 +90,11 @@ public class RequireOutputs : KMonoBehaviour
 
 	private bool OutputPipeIsEmpty()
 	{
-		bool flag;
+		bool flag = true;
 		if (this.connected)
 		{
-			ConduitFlow conduitManager = this.GetConduitManager();
-			flag = conduitManager.GetContents(this.utilityCell).mass <= 0f;
-		}
-		else
-		{
-			flag = true;
+			IConduitFlow conduitFlow = this.GetConduitFlow();
+			flag = conduitFlow.IsConduitEmpty(this.utilityCell);
 		}
 		return flag;
 	}
@@ -101,7 +115,14 @@ public class RequireOutputs : KMonoBehaviour
 			ConduitType conduitType = this.conduitType;
 			if (conduitType != ConduitType.Liquid)
 			{
-				if (conduitType == ConduitType.Gas)
+				if (conduitType != ConduitType.Gas)
+				{
+					if (conduitType == ConduitType.Solid)
+					{
+						statusItem = Db.Get().BuildingStatusItems.SolidPipeObstructed;
+					}
+				}
+				else
 				{
 					statusItem = Db.Get().BuildingStatusItems.GasPipeObstructed;
 				}
@@ -114,23 +135,45 @@ public class RequireOutputs : KMonoBehaviour
 		}
 	}
 
-	private ConduitFlow GetConduitManager()
+	private IConduitFlow GetConduitFlow()
 	{
-		ConduitType conduitType = this.conduitType;
-		if (conduitType == ConduitType.Gas)
+		switch (this.conduitType)
 		{
+		case ConduitType.Gas:
 			return Game.Instance.gasConduitFlow;
-		}
-		if (conduitType != ConduitType.Liquid)
-		{
+		case ConduitType.Liquid:
+			return Game.Instance.liquidConduitFlow;
+		case ConduitType.Solid:
+			return Game.Instance.solidConduitFlow;
+		default:
+			global::Debug.LogWarning("GetConduitFlow() called with unexpected conduitType: " + this.conduitType.ToString(), null);
 			return null;
 		}
-		return Game.Instance.liquidConduitFlow;
 	}
 
 	private bool IsConnected(int cell)
 	{
-		GameObject gameObject = Grid.Objects[cell, (this.conduitType != ConduitType.Gas) ? 16 : 12];
+		ObjectLayer objectLayer = ObjectLayer.NumLayers;
+		ConduitType conduitType = this.conduitType;
+		if (conduitType != ConduitType.Gas)
+		{
+			if (conduitType != ConduitType.Liquid)
+			{
+				if (conduitType == ConduitType.Solid)
+				{
+					objectLayer = ObjectLayer.SolidConduit;
+				}
+			}
+			else
+			{
+				objectLayer = ObjectLayer.LiquidConduit;
+			}
+		}
+		else
+		{
+			objectLayer = ObjectLayer.GasConduit;
+		}
+		GameObject gameObject = Grid.Objects[cell, (int)objectLayer];
 		return gameObject != null && gameObject.GetComponent<BuildingComplete>() != null;
 	}
 

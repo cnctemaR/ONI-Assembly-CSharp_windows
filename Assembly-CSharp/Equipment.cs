@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
@@ -19,12 +20,10 @@ public class Equipment : Assignables
 		base.Subscribe(1502190696, delegate(object o)
 		{
 			this.destroyed = true;
-			Debug.Log("QueueDestroyed", null);
 		});
 		base.Subscribe(1969584890, delegate(object o)
 		{
 			this.destroyed = true;
-			Debug.Log("Destroyed", null);
 		});
 	}
 
@@ -36,18 +35,18 @@ public class Equipment : Assignables
 
 	public void Equip(Equippable equippable)
 	{
-		EquipmentSlotInstance equipmentSlotInstance = base.GetSlot(equippable.slot) as EquipmentSlotInstance;
-		equipmentSlotInstance.Assign(equippable);
+		AssignableSlotInstance slot = base.GetSlot(equippable.slot);
+		slot.Assign(equippable);
 		base.Trigger(-448952673, equippable.GetComponent<KPrefabID>());
 		equippable.Trigger(-1617557748, this);
-		KBatchedAnimController component = equipmentSlotInstance.gameObject.GetComponent<KBatchedAnimController>();
+		KBatchedAnimController component = slot.gameObject.GetComponent<KBatchedAnimController>();
 		Attributes attributes = base.gameObject.GetAttributes();
 		string name = base.GetComponent<KSelectable>().GetName();
 		foreach (AttributeModifier attributeModifier in equippable.def.AttributeModifiers)
 		{
 			attributes.Add(name, attributeModifier);
 		}
-		SnapOn component2 = equipmentSlotInstance.gameObject.GetComponent<SnapOn>();
+		SnapOn component2 = slot.gameObject.GetComponent<SnapOn>();
 		component2.AttachSnapOnByName(equippable.def.SnapOn);
 		if (equippable.def.SnapOn1 != null)
 		{
@@ -55,10 +54,10 @@ public class Equipment : Assignables
 		}
 		if (equippable.def.BuildOverride != null)
 		{
-			component.AddBuildOverride(equippable.def.BuildOverride, true, false);
+			base.StartCoroutine(this.ApplyBuildOverride(component, equippable));
 		}
 		equippable.GetComponent<KBatchedAnimController>().enabled = false;
-		equippable.OnEquip(equipmentSlotInstance);
+		equippable.OnEquip(slot);
 		if (this.refreshHandle.TimeRemaining > 0f)
 		{
 			Debug.LogWarning(base.gameObject.GetProperName() + " is already in the process of changing equipment", null);
@@ -82,7 +81,7 @@ public class Equipment : Assignables
 	{
 		equippable.GetComponent<KBatchedAnimController>().enabled = true;
 		AssignableSlotInstance slot = base.GetSlot(equippable.slot);
-		slot.Unassign();
+		slot.Unassign(true);
 		base.Trigger(-1285462312, equippable.GetComponent<KPrefabID>());
 		equippable.Trigger(-170173755, this);
 		KBatchedAnimController component = slot.gameObject.GetComponent<KBatchedAnimController>();
@@ -119,6 +118,13 @@ public class Equipment : Assignables
 			}, null, null);
 		}
 		Game.Instance.Trigger(-2146166042, null);
+	}
+
+	private IEnumerator ApplyBuildOverride(KBatchedAnimController controller, Equippable equippable)
+	{
+		yield return null;
+		controller.AddBuildOverride(equippable.def.BuildOverride, true, false);
+		yield break;
 	}
 
 	public bool IsEquipped(Equippable equippable)

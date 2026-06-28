@@ -11,6 +11,14 @@ namespace STRINGS
 			public static LocString RESEARCHTYPEREQUIRED = "{0} required";
 
 			public static LocString RESEARCHTYPEALSOREQUIRED = "{0} also required";
+
+			public static LocString NO_RESEARCHER_ROLE = "No Researchers assigned";
+
+			public static LocString NO_RESEARCHER_ROLE_TOOLTIP = "The selected research focus requires an advanced type of research to complete\n\nAssign a Duplicant to the Research Assistant job using the Jobs Panel <color=#F44A47>[L]</color> to enable this task";
+
+			public static LocString MISSING_RESEARCH_STATION = "Missing Research Station";
+
+			public static LocString MISSING_RESEARCH_STATION_TOOLTIP = "The selected research focus requires a {0} to perform\n\nOpen the Stations Tab <color=#F44A47>[=]</color> of the Build Menu to construct one";
 		}
 
 		public class TYPES
@@ -55,6 +63,13 @@ namespace STRINGS
 				public static LocString NAME = "Intermediate Research Point";
 
 				public static LocString DESC = "Allows advanced technology tiers to be researched.";
+			}
+
+			public class CONVEYOR_OVERLAY
+			{
+				public static LocString NAME = "Conveyor Overlay";
+
+				public static LocString DESC = "Enables access to the Conveyor Overlay.";
 			}
 		}
 
@@ -305,6 +320,13 @@ namespace STRINGS
 				public static LocString DESC = "Pure-core wires that can handle more current without overloading.";
 			}
 
+			public class RENEWABLEENERGY
+			{
+				public static LocString NAME = "Renewable Energy";
+
+				public static LocString DESC = "Clean <style=\"power\">Power</style> production";
+			}
+
 			public class BASICREFINEMENT
 			{
 				public static LocString NAME = "Brute-Force Refinement";
@@ -352,6 +374,20 @@ namespace STRINGS
 				public static LocString NAME = "Transit Tubes";
 
 				public static LocString DESC = "Get around your base quickly, safely, and in style!";
+			}
+
+			public class SMARTSTORAGE
+			{
+				public static LocString NAME = "Smart Storage";
+
+				public static LocString DESC = "Automate the storage of your solids.";
+			}
+
+			public class SOLIDTRANSPORT
+			{
+				public static LocString NAME = "Solid Transport";
+
+				public static LocString DESC = "Save so much wear and tear on tired Duplicant feet.";
 			}
 		}
 	}

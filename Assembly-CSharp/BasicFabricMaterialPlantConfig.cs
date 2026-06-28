@@ -25,10 +25,10 @@ public class BasicFabricMaterialPlantConfig : IEntityConfig
 			SimHashes.CarbonDioxide,
 			SimHashes.DirtyWater,
 			SimHashes.Water
-		}, false, 0f, 0.15f, 1f, text4, false);
-		EntityTemplates.ExtendPlantToIrrigated(gameObject, new IrrigationMonitor.LiquidResourceInfo[]
+		}, false, 0f, 0.15f, 1f, text4, false, true);
+		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
-			new IrrigationMonitor.LiquidResourceInfo
+			new PlantElementAbsorber.ConsumeInfo
 			{
 				tag = GameTags.DirtyWater,
 				massConsumptionRate = 0.26666668f

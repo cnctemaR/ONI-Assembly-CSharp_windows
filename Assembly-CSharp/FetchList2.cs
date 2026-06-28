@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FetchList2 : IFetchList
+public class FetchList2 : IFetchList, IRender1000ms
 {
-	public FetchList2(Storage destination)
+	public FetchList2(Storage destination, ChoreType chore_type, Tag[] chore_tags)
 	{
 		this.Destination = destination;
+		this.choreType = chore_type;
+		this.choreTags = chore_tags;
 	}
 
 	public bool ShowStatusItem
@@ -54,8 +56,6 @@ public class FetchList2 : IFetchList
 
 	public int PriorityMod { get; private set; }
 
-	public ChoreType ChoreType { get; private set; }
-
 	public void SetPriorityMod(int priorityMod)
 	{
 		this.PriorityMod = priorityMod;
@@ -78,7 +78,7 @@ public class FetchList2 : IFetchList
 				this.MinimumAmount[tag] = amount;
 			}
 		}
-		FetchOrder2 fetchOrder = new FetchOrder2(tags, forbidden_tags, this.Destination, amount, operationalRequirement, this.PriorityMod);
+		FetchOrder2 fetchOrder = new FetchOrder2(this.choreType, tags, forbidden_tags, this.Destination, amount, operationalRequirement, this.PriorityMod, this.choreTags);
 		this.FetchOrders.Add(fetchOrder);
 	}
 
@@ -103,12 +103,12 @@ public class FetchList2 : IFetchList
 			{
 				this.OnComplete();
 			}
-			this.updateStatusItemsHandle.ClearScheduler();
+			SimAndRenderScheduler.instance.Remove(this);
 			this.ClearStatus();
 		}
 		else
 		{
-			FetchList2.UpdateStatus(this);
+			this.UpdateStatus();
 		}
 	}
 
@@ -119,7 +119,7 @@ public class FetchList2 : IFetchList
 			fetchOrder.Cancel(reason);
 		}
 		this.ClearStatus();
-		this.updateStatusItemsHandle.ClearScheduler();
+		SimAndRenderScheduler.instance.Remove(this);
 	}
 
 	private void UpdateRemaining()
@@ -200,8 +200,8 @@ public class FetchList2 : IFetchList
 		}
 		if (!this.IsComplete)
 		{
-			this.updateStatusItemsHandle = UIScheduler.Instance.SchedulePeriodic(this.Destination.name + ".FetchList.Submit", 1f, new Action<object>(FetchList2.UpdateStatus), this, null);
-			FetchList2.UpdateStatus(this);
+			SimAndRenderScheduler.instance.Add(this, false);
+			this.UpdateStatus();
 		}
 	}
 
@@ -248,30 +248,28 @@ public class FetchList2 : IFetchList
 		}
 	}
 
-	public void RefreshChoreType()
+	public void Render1000ms(float dt)
 	{
-		foreach (FetchOrder2 fetchOrder in this.FetchOrders)
-		{
-			fetchOrder.RefreshChoreType();
-		}
+		this.UpdateStatus();
 	}
 
-	private static void UpdateStatus(object data)
+	private void UpdateStatus()
 	{
-		FetchList2 fetchList = (FetchList2)data;
-		if (fetchList.Destination != null)
+		if (this.Destination != null)
 		{
-			fetchList.UpdateRemaining();
-			Dictionary<Tag, float> remaining = fetchList.GetRemaining();
-			fetchList.UpdateStatusItem(Db.Get().BuildingStatusItems.WaitingForMaterials, ref fetchList.waitingForMaterialsHandle, remaining);
-			fetchList.UpdateStatusItem(Db.Get().BuildingStatusItems.MaterialsUnavailable, ref fetchList.materialsUnavailableHandle, remaining);
-			fetchList.UpdateStatusItem(Db.Get().BuildingStatusItems.MaterialsUnavailableForRefill, ref fetchList.materialsUnavailableForRefillHandle, remaining);
+			this.UpdateRemaining();
+			Dictionary<Tag, float> remaining = this.GetRemaining();
+			this.UpdateStatusItem(Db.Get().BuildingStatusItems.WaitingForMaterials, ref this.waitingForMaterialsHandle, remaining);
+			this.UpdateStatusItem(Db.Get().BuildingStatusItems.MaterialsUnavailable, ref this.materialsUnavailableHandle, remaining);
+			this.UpdateStatusItem(Db.Get().BuildingStatusItems.MaterialsUnavailableForRefill, ref this.materialsUnavailableForRefillHandle, remaining);
 		}
 	}
 
 	private global::System.Action OnComplete;
 
-	private SchedulerHandle updateStatusItemsHandle;
+	private ChoreType choreType;
+
+	private Tag[] choreTags;
 
 	private Guid waitingForMaterialsHandle = Guid.Empty;
 

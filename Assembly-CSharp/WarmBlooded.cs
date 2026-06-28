@@ -8,27 +8,21 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
+		Amounts amounts = this.GetAmounts();
+		this.externalTemperature = amounts.Add(new AmountInstance(Db.Get().Amounts.ExternalTemperature, base.gameObject));
+		this.externalTemperature.value = Grid.Temperature[Grid.PosToCell(this)];
+		this.temperature = amounts.Add(new AmountInstance(Db.Get().Amounts.Temperature, base.gameObject));
 		this.primaryElement = base.GetComponent<PrimaryElement>();
 	}
 
 	protected override void OnSpawn()
 	{
-		this.externalTemperature = this.GetAmounts().Get(Db.Get().Amounts.ExternalTemperature);
-		this.externalTemperature.value = Grid.Temperature[Grid.PosToCell(this)];
-		this.temperature = Db.Get().Amounts.Temperature.Lookup(base.gameObject);
 		base.smi.StartSM();
 	}
 
-	private void SimUpdate(float dt)
+	protected override void OnCleanUp()
 	{
-		if (this.monitorInstance != null)
-		{
-			this.monitorInstance.UpdateTemperatureOnSimUpdate(dt);
-		}
-		else
-		{
-			this.monitorInstance = base.gameObject.GetSMI<TemperatureMonitor.Instance>();
-		}
+		base.OnCleanUp();
 	}
 
 	public bool IsAtReasonableTemperature()
@@ -57,8 +51,6 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 	public const float TRANSITION_DELAY_HOT = 3f;
 
 	public const float TRANSITION_DELAY_COLD = 3f;
-
-	private TemperatureMonitor.Instance monitorInstance;
 
 	public class StatesInstance : GameStateMachine<WarmBlooded.States, WarmBlooded.StatesInstance, WarmBlooded, object>.GameInstance
 	{
@@ -125,9 +117,9 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 				component2.NonSimTemperatureModifiers.Add(smi.baseTemperatureModification);
 				component2.NonSimTemperatureModifiers.Add(smi.bodyRegulator);
 			});
-			this.alive.normal.Transition(this.alive.cold.transition, (WarmBlooded.StatesInstance smi) => smi.IsCold()).Transition(this.alive.hot.transition, (WarmBlooded.StatesInstance smi) => smi.IsHot());
-			this.alive.cold.transition.ScheduleGoTo(3f, this.alive.cold.regulating).Transition(this.alive.normal, (WarmBlooded.StatesInstance smi) => !smi.IsCold());
-			this.alive.cold.regulating.Transition(this.alive.normal, (WarmBlooded.StatesInstance smi) => !smi.IsCold()).Update(delegate(WarmBlooded.StatesInstance smi)
+			this.alive.normal.Transition(this.alive.cold.transition, (WarmBlooded.StatesInstance smi) => smi.IsCold(), UpdateRate.SIM_200ms).Transition(this.alive.hot.transition, (WarmBlooded.StatesInstance smi) => smi.IsHot(), UpdateRate.SIM_200ms);
+			this.alive.cold.transition.ScheduleGoTo(3f, this.alive.cold.regulating).Transition(this.alive.normal, (WarmBlooded.StatesInstance smi) => !smi.IsCold(), UpdateRate.SIM_200ms);
+			this.alive.cold.regulating.Transition(this.alive.normal, (WarmBlooded.StatesInstance smi) => !smi.IsCold(), UpdateRate.SIM_200ms).Update("ColdRegulating", delegate(WarmBlooded.StatesInstance smi, float dt)
 			{
 				PrimaryElement component3 = smi.master.GetComponent<PrimaryElement>();
 				float num2 = SimUtil.EnergyFlowToTemperatureDelta(0.083680004f, component3.Element.specificHeatCapacity, component3.Mass);
@@ -140,25 +132,25 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 				}
 				smi.bodyRegulator.SetValue(num3 * num5);
 				smi.burningCalories.SetValue(-0.5578667f * num5 * 1000f / 4184f);
-			}).Exit(delegate(WarmBlooded.StatesInstance smi)
+			}, UpdateRate.SIM_200ms, false).Exit(delegate(WarmBlooded.StatesInstance smi)
 			{
 				smi.bodyRegulator.SetValue(0f);
 				smi.burningCalories.SetValue(0f);
 			});
-			this.alive.hot.transition.ScheduleGoTo(3f, this.alive.hot.regulating).Transition(this.alive.normal, (WarmBlooded.StatesInstance smi) => !smi.IsHot());
-			this.alive.hot.regulating.Transition(this.alive.normal, (WarmBlooded.StatesInstance smi) => !smi.IsHot()).Update(delegate(WarmBlooded.StatesInstance smi)
+			this.alive.hot.transition.ScheduleGoTo(3f, this.alive.hot.regulating).Transition(this.alive.normal, (WarmBlooded.StatesInstance smi) => !smi.IsHot(), UpdateRate.SIM_200ms);
+			this.alive.hot.regulating.Transition(this.alive.normal, (WarmBlooded.StatesInstance smi) => !smi.IsHot(), UpdateRate.SIM_200ms).Update("WarmRegulating", delegate(WarmBlooded.StatesInstance smi, float dt)
 			{
 				PrimaryElement component4 = smi.master.GetComponent<PrimaryElement>();
 				float num6 = SimUtil.EnergyFlowToTemperatureDelta(0.5578667f, component4.Element.specificHeatCapacity, component4.Mass);
 				float num7 = 310.15f - smi.BodyTemperature;
 				float num8 = 1f;
-				if ((num6 - smi.baseTemperatureModification.Value) * smi.dt < num7)
+				if ((num6 - smi.baseTemperatureModification.Value) * dt < num7)
 				{
-					num8 = Mathf.Clamp(num7 / ((num6 - smi.baseTemperatureModification.Value) * smi.dt), 0f, 1f);
+					num8 = Mathf.Clamp(num7 / ((num6 - smi.baseTemperatureModification.Value) * dt), 0f, 1f);
 				}
 				smi.bodyRegulator.SetValue(-num6 * num8);
 				smi.burningCalories.SetValue(-0.5578667f * num8 / 4184f);
-			}).Exit(delegate(WarmBlooded.StatesInstance smi)
+			}, UpdateRate.SIM_200ms, false).Exit(delegate(WarmBlooded.StatesInstance smi)
 			{
 				smi.bodyRegulator.SetValue(0f);
 			});

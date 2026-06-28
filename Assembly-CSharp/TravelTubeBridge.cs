@@ -8,7 +8,7 @@ public class TravelTubeBridge : KMonoBehaviour, ITravelTubePiece
 	{
 		get
 		{
-			return base.transform.position;
+			return base.transform.GetPosition();
 		}
 	}
 

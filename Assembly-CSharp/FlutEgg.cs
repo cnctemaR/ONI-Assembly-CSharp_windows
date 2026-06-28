@@ -35,7 +35,7 @@ public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoada
 			}
 			num4 += (float)keyValuePair2.Value;
 		}
-		int num5 = Grid.PosToCell(base.transform.position);
+		int num5 = Grid.PosToCell(base.transform.GetPosition());
 		GameObject gameObject = Scenario.SpawnPrefab(num5, 0, 0, text, Grid.SceneLayer.Ore, Folder.Entities);
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, gameObject.GetProperName(), gameObject.transform, 1.5f, false);
 		gameObject.SetActive(true);
@@ -53,7 +53,7 @@ public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoada
 	private KBatchedAnimController anim;
 
 	[MyCmpAdd]
-	private BoxCollider2D mCollider;
+	private KBoxCollider2D mCollider;
 
 	public bool alive = true;
 
@@ -76,13 +76,13 @@ public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoada
 			default_state = this.grounded.idle;
 			base.serializable = true;
 			this.lay.PlayAnim("lay").OnAnimQueueComplete(this.grounded.idle);
-			this.grounded.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Incubating).Update(delegate(FlutEgg.StatesInstance smi)
+			this.grounded.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Incubating).Update(delegate(FlutEgg.StatesInstance smi, float dt)
 			{
-				if (!Grid.Solid[Grid.PosToCell(smi.transform.position)])
+				if (!Grid.Solid[Grid.PosToCell(smi.transform.GetPosition())])
 				{
-					smi.master.maturity += smi.deltatime;
+					smi.master.maturity += dt;
 				}
-				int num = Grid.PosToCell(smi.transform.position + Vector3.down);
+				int num = Grid.PosToCell(smi.transform.GetPosition() + Vector3.down);
 				if (Grid.IsValidCell(num) && !Grid.Solid[num])
 				{
 					smi.GoTo(this.fall);
@@ -99,7 +99,7 @@ public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoada
 				{
 					smi.ScheduleGoTo(3f, this.grounded.idle_alt);
 				}
-				int num2 = Grid.PosToCell(smi.transform.position + Vector3.down);
+				int num2 = Grid.PosToCell(smi.transform.GetPosition() + Vector3.down);
 				if (Grid.IsValidCell(num2) && !Grid.Solid[num2])
 				{
 					smi.GoTo(this.fall);

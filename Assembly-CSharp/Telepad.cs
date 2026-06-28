@@ -81,7 +81,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		for (int i = 0; i < num2; i++)
 		{
 			GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.MinionPrefab, SceneOrganizer.Instance.GetFolder(Folder.Minions), null);
-			gameObject.transform.localPosition = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
+			gameObject.transform.SetLocalPosition(Grid.CellToPosCBC(num, Grid.SceneLayer.Move));
 			gameObject.SetActive(true);
 			starting_stats.Apply(gameObject);
 			ChoreProvider component = gameObject.GetComponent<ChoreProvider>();
@@ -138,10 +138,10 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 			this.idle.Enter(delegate(Telepad.StatesInstance smi)
 			{
 				smi.UpdateMeter();
-			}).ToggleSchedulePeriodic("TelepadMeter", 5f, delegate(Telepad.StatesInstance smi)
+			}).Update("TelepadMeter", delegate(Telepad.StatesInstance smi, float dt)
 			{
 				smi.UpdateMeter();
-			}).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Telepad.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational)
+			}, UpdateRate.SIM_4000ms, false).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Telepad.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational)
 				.PlayAnim("idle")
 				.OnSignal(this.openPortal, this.opening);
 			this.unoperational.PlayAnim("idle").Enter("StopImmigration", delegate(Telepad.StatesInstance smi)
@@ -161,7 +161,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 			{
 				smi.master.meter.SetPositionPercent(1f);
 			}).PlayAnim("working_loop", KAnim.PlayMode.Loop)
-				.Transition(this.close, (Telepad.StatesInstance smi) => smi.IsColonyLost())
+				.Transition(this.close, (Telepad.StatesInstance smi) => smi.IsColonyLost(), UpdateRate.SIM_200ms)
 				.EventTransition(GameHashes.OperationalChanged, this.close, (Telepad.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational);
 			this.close.Enter(delegate(Telepad.StatesInstance smi)
 			{

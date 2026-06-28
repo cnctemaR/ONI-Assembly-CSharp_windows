@@ -10,13 +10,14 @@ public struct StructureTemperatureData
 		this.isActiveBuilding = false;
 		this.enabled = true;
 		this.overrideExtents = false;
-		this.overridenExtents = default(Extents);
+		this.overriddenExtents = default(Extents);
 		this.simHandle = -1;
 		this.primaryElement = go.GetComponent<PrimaryElement>();
 		this.selectable = go.GetComponent<KSelectable>();
 		this.building = go.GetComponent<Building>();
 		this.operational = go.GetComponent<Operational>();
 		this.pendingEnergyModifications = 0f;
+		this.maxTemperature = 10000f;
 		this.energySourcesKW = null;
 	}
 
@@ -53,12 +54,12 @@ public struct StructureTemperatureData
 	public void OverrideExtents(Extents newExtents)
 	{
 		this.overrideExtents = true;
-		this.overridenExtents = newExtents;
+		this.overriddenExtents = newExtents;
 	}
 
 	public Extents GetExtents()
 	{
-		return (!this.overrideExtents) ? this.building.GetExtents() : this.overridenExtents;
+		return (!this.overrideExtents) ? this.building.GetExtents() : this.overriddenExtents;
 	}
 
 	public void ApplyPendingEnergyModifications()
@@ -90,7 +91,7 @@ public struct StructureTemperatureData
 	{
 		get
 		{
-			return (!(this.operational != null) || !this.operational.IsActive) ? 0f : this.building.Def.OperatingKilowatts;
+			return (!(this.operational != null) || !this.operational.IsActive) ? 0f : this.building.Def.SelfHeatKilowattsWhenActive;
 		}
 	}
 
@@ -114,9 +115,11 @@ public struct StructureTemperatureData
 
 	public List<StructureTemperatureData.EnergySource> energySourcesKW;
 
+	public float maxTemperature;
+
 	public bool overrideExtents;
 
-	public Extents overridenExtents;
+	public Extents overriddenExtents;
 
 	public class EnergySource
 	{

@@ -22,10 +22,10 @@ public class BodyOfWater : KMonoBehaviour
 			WaterBodyProbe.Instance.BodiesToDestroy.Add(this);
 			return;
 		}
-		float num = this.containedObjects[0].transform.position.x;
-		float num2 = this.containedObjects[0].transform.position.x;
-		float num3 = this.containedObjects[0].transform.position.y;
-		float num4 = this.containedObjects[0].transform.position.y;
+		float num = this.containedObjects[0].transform.GetPosition().x;
+		float num2 = this.containedObjects[0].transform.GetPosition().x;
+		float num3 = this.containedObjects[0].transform.GetPosition().y;
+		float num4 = this.containedObjects[0].transform.GetPosition().y;
 		foreach (int num5 in this.waterCells)
 		{
 			Vector3 vector = Grid.CellToPos(num5);

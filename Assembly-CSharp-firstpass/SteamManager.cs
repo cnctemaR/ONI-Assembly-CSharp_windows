@@ -39,10 +39,6 @@ public class SteamManager : MonoBehaviour
 			return;
 		}
 		SteamManager.s_instance = this;
-		if (SteamManager.s_EverInialized)
-		{
-			throw new Exception("Tried to Initialize the SteamAPI twice in one session!");
-		}
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		if (!Packsize.Test())
 		{
@@ -116,8 +112,6 @@ public class SteamManager : MonoBehaviour
 	public const uint STEAM_APPLICATION_ID = 457140U;
 
 	private static SteamManager s_instance;
-
-	private static bool s_EverInialized;
 
 	private bool m_bInitialized;
 

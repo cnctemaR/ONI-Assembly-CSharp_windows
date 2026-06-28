@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public class AutoDisinfectableManager : KMonoBehaviour
+public class AutoDisinfectableManager : KMonoBehaviour, ISim1000ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -20,7 +20,7 @@ public class AutoDisinfectableManager : KMonoBehaviour
 		this.autoDisinfectables.Remove(auto_disinfectable);
 	}
 
-	private void Update()
+	public void Sim1000ms(float dt)
 	{
 		for (int i = 0; i < this.autoDisinfectables.Count; i++)
 		{

@@ -31,7 +31,7 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 
 	public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State cooldown;
 
-	public new class Instance : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.GameInstance
+	public new class Instance : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.GameInstance, IRenderEveryTick
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
@@ -99,32 +99,33 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 			this.spriteRenderer.sprite = thought.sprite;
 			this.bubble.GetComponent<KSelectable>().entityName = thought.hoverText;
 			VoiceSoundEvent voiceSoundEvent = new VoiceSoundEvent("ThoughtGraph", thought.sprite.name, 0, false);
-			AnimEventManager.EventPlayerData eventPlayerData = new AnimEventManager.EventPlayerData
-			{
-				controller = base.transform.GetComponent<KBatchedAnimController>()
-			};
+			AnimEventManager.EventPlayerData eventPlayerData = default(AnimEventManager.EventPlayerData);
+			eventPlayerData.controller = base.transform.GetComponent<KBatchedAnimController>();
+			this.controller = eventPlayerData.controller;
 			voiceSoundEvent.Play(eventPlayerData);
-			this.schedulerHandle.ClearScheduler();
-			this.schedulerHandle = GameScheduler.Instance.SchedulePeriodic("ThoughtGraph", 0f, new Action<object>(this.UpdatePosition), eventPlayerData.controller, null, 0f, null);
+			SimAndRenderScheduler.instance.Add(this, false);
 			if (thought.showImmediately)
 			{
 				this.thoughts.RemoveAt(0);
 			}
 		}
 
-		private void UpdatePosition(object data)
+		public void RenderEveryTick(float dt)
 		{
-			KBatchedAnimController kbatchedAnimController = data as KBatchedAnimController;
+			if (this.controller == null)
+			{
+				return;
+			}
 			bool flag;
-			Matrix2x3 symbolLocalTransform = kbatchedAnimController.GetSymbolLocalTransform(this.symbol, out flag);
-			Matrix4x4 matrix4x = kbatchedAnimController.GetTransformMatrix() * symbolLocalTransform;
+			Matrix2x3 symbolLocalTransform = this.controller.GetSymbolLocalTransform(this.symbol, out flag);
+			Matrix4x4 matrix4x = this.controller.GetTransformMatrix() * symbolLocalTransform;
 			Vector3 vector = new Vector3(matrix4x.m03, matrix4x.m13, 0f);
-			this.bubble.transform.position = vector + EffectPrefabs.Instance.ThoughtBubble.transform.localPosition;
+			this.bubble.transform.SetPosition(vector + EffectPrefabs.Instance.ThoughtBubble.transform.GetLocalPosition());
 		}
 
 		public void DestroyBubble()
 		{
-			this.schedulerHandle.ClearScheduler();
+			SimAndRenderScheduler.instance.Remove(this);
 			this.bubble.SetActive(false);
 		}
 
@@ -132,7 +133,7 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 
 		private GameObject bubble;
 
-		private SchedulerHandle schedulerHandle;
+		private new KBatchedAnimController controller;
 
 		private SpriteRenderer spriteRenderer;
 

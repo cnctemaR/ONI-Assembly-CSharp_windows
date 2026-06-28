@@ -4,12 +4,6 @@ using KSerialization;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class WaterPurifier : StateMachineComponent<WaterPurifier.StatesInstance>
 {
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FetchCritical;
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();

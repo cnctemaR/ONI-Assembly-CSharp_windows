@@ -59,7 +59,6 @@ public class KAnimBatchManager
 			}
 			KAnimBatchManager.instance.batchSets.Clear();
 			KAnimBatchManager.instance.activeBatchSets.Clear();
-			KAnimBatchManager.instance.inactiveBatchSets.Clear();
 			KAnimBatchManager.instance.dirtyBatchLastFrame = 0;
 			KAnimBatchGroup.FinalizeTextureCache();
 		}
@@ -96,14 +95,9 @@ public class KAnimBatchManager
 		}
 	}
 
-	public HashSet<BatchSet> GetActiveBatchSets()
-	{
-		return this.activeBatchSets;
-	}
-
 	public KBatchGroupData GetBatchGroupData(HashedString groupID, bool isDynamic = false)
 	{
-		if (!groupID.isValid || groupID == KAnimBatchManager.NO_BATCH || groupID == KAnimBatchManager.IGNORE)
+		if (!groupID.IsValid || groupID == KAnimBatchManager.NO_BATCH || groupID == KAnimBatchManager.IGNORE)
 		{
 			return null;
 		}
@@ -163,14 +157,12 @@ public class KAnimBatchManager
 
 	private void AddToActiveBatchSet(BatchSet bs)
 	{
-		this.inactiveBatchSets.Remove(bs);
 		this.activeBatchSets.Add(bs);
 		bs.SetActive(true);
 	}
 
 	private void AddToInactiveBatchSet(BatchSet bs)
 	{
-		this.inactiveBatchSets.Add(bs);
 		this.activeBatchSets.Remove(bs);
 		bs.SetActive(false);
 	}
@@ -183,12 +175,12 @@ public class KAnimBatchManager
 			BatchSet value = keyValuePair.Value;
 			if (value.key.materialType == KAnimBatchGroup.MaterialType.UI || (value.batchCount > 0 && this.currentActiveArea.Intersects(value.bounds)))
 			{
-				if (!value.active || !this.activeBatchSets.Contains(value))
+				if (!value.active)
 				{
 					this.AddToActiveBatchSet(value);
 				}
 			}
-			else if (value.active || this.activeBatchSets.Contains(value))
+			else if (value.active)
 			{
 				this.AddToInactiveBatchSet(value);
 			}
@@ -264,8 +256,6 @@ public class KAnimBatchManager
 	private Dictionary<BatchKey, BatchSet> batchSets = new Dictionary<BatchKey, BatchSet>();
 
 	private HashSet<BatchSet> activeBatchSets = new HashSet<BatchSet>();
-
-	private HashSet<BatchSet> inactiveBatchSets = new HashSet<BatchSet>();
 
 	private static bool created = false;
 }

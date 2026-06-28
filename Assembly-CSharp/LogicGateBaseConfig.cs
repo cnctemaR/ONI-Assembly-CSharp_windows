@@ -7,15 +7,14 @@ public abstract class LogicGateBaseConfig : IBuildingConfig
 {
 	protected BuildingDef CreateBuildingDef(string ID, string anim, int width = 2, int height = 2)
 	{
-		float num = 800f;
-		int num2 = 10;
-		float num3 = 3f;
+		int num = 10;
+		float num2 = 3f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
-		float num4 = 1600f;
+		float num3 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(ID, width, height, anim, num, num2, num3, tier, refined_METALS, num4, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(ID, width, height, anim, num, num2, tier, refined_METALS, num3, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
 		buildingDef.ViewMode = SimViewMode.Logic;
 		buildingDef.ObjectLayer = ObjectLayer.LogicGates;
 		buildingDef.SceneLayer = Grid.SceneLayer.WireBridges;
@@ -36,10 +35,10 @@ public abstract class LogicGateBaseConfig : IBuildingConfig
 
 	protected abstract LogicGateBase.Op GetLogicOp();
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
-		GeneratedBuildings.MakeBuildableAnywhere(go);
+		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)

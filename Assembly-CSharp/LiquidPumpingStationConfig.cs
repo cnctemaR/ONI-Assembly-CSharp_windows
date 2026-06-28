@@ -10,15 +10,14 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 		int num = 2;
 		int num2 = 4;
 		string text2 = "waterpump_kanim";
-		float num3 = 200f;
-		int num4 = 100;
-		float num5 = 10f;
+		int num3 = 100;
+		float num4 = 10f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.NONE, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = true;
 		buildingDef.AudioCategory = "Metal";
@@ -30,7 +29,7 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
@@ -47,7 +46,7 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 	{
 		GameObject gameObject = new GameObject();
 		gameObject.transform.parent = go.transform;
-		gameObject.transform.localPosition = Vector3.zero;
+		gameObject.transform.SetLocalPosition(Vector3.zero);
 		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
 		kbatchedAnimController.Offset = go.GetComponent<Building>().Def.GetVisualizerOffset();
 		kbatchedAnimController.SetAnims(new KAnimFile[] { Assets.GetAnim(new HashedString("waterpump_kanim")) }, true);

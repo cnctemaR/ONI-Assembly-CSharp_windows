@@ -17,7 +17,7 @@ public class KAnimGridTileVisualizer : KMonoBehaviour, IBlockTileInfo
 		Building component = base.GetComponent<Building>();
 		if (component != null)
 		{
-			int num = Grid.PosToCell(base.transform.position);
+			int num = Grid.PosToCell(base.transform.GetPosition());
 			ObjectLayer tileLayer = component.Def.TileLayer;
 			if (Grid.Objects[num, (int)tileLayer] == base.gameObject)
 			{
@@ -31,13 +31,13 @@ public class KAnimGridTileVisualizer : KMonoBehaviour, IBlockTileInfo
 	private void OnSelectionChanged(object data)
 	{
 		bool flag = (bool)data;
-		World.Instance.blockTileRenderer.SelectCell(Grid.PosToCell(base.transform.position), flag);
+		World.Instance.blockTileRenderer.SelectCell(Grid.PosToCell(base.transform.GetPosition()), flag);
 	}
 
 	private void OnHighlightChanged(object data)
 	{
 		bool flag = (bool)data;
-		World.Instance.blockTileRenderer.HighlightCell(Grid.PosToCell(base.transform.position), flag);
+		World.Instance.blockTileRenderer.HighlightCell(Grid.PosToCell(base.transform.GetPosition()), flag);
 	}
 
 	public int GetBlockTileConnectorID()

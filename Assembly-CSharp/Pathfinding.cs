@@ -60,7 +60,7 @@ public class Pathfinding : KMonoBehaviour
 		}
 	}
 
-	public void DebugUpdate()
+	public void RenderEveryTick()
 	{
 		foreach (NavGrid navGrid in this.NavGrids)
 		{

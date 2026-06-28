@@ -10,17 +10,16 @@ public class LiquidCooledFanConfig : IBuildingConfig
 		int num = 2;
 		int num2 = 2;
 		string text2 = "fanliquid_kanim";
-		float num3 = 100f;
-		int num4 = 30;
-		float num5 = 10f;
+		int num3 = 30;
+		float num4 = 10f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER2;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.NONE, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		buildingDef.ExhaustKilowattsWhenActive = 0f;
-		buildingDef.OperatingKilowatts = 0f;
+		buildingDef.SelfHeatKilowattsWhenActive = 0f;
 		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = SimViewMode.TemperatureMap;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
@@ -30,7 +29,7 @@ public class LiquidCooledFanConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		Storage storage = go.AddComponent<Storage>();
 		Storage storage2 = go.AddComponent<Storage>();
@@ -51,8 +50,9 @@ public class LiquidCooledFanConfig : IBuildingConfig
 		liquidCooledFan.maxCoolingRange = new Vector2I(2, 4);
 		ManualDeliveryKG manualDeliveryKG = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG.requestedItemTag = new Tag("Water");
-		manualDeliveryKG.capacity = 100f;
+		manualDeliveryKG.capacity = 500f;
 		manualDeliveryKG.refillMass = 50f;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
 		ElementConsumer elementConsumer = go.UpdateComponentRequirement<ElementConsumer>(true);
 		elementConsumer.storeOnConsume = true;
 		elementConsumer.storage = storage;

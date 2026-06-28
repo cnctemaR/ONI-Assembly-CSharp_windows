@@ -22,7 +22,7 @@ namespace STRINGS
 
 		public static LocString RED_ALERT = "RED ALERT";
 
-		public static LocString JOBS = "JOBS";
+		public static LocString JOBS = "ERRANDS";
 
 		public static LocString CONSUMABLES = "CONSUMABLES";
 
@@ -30,7 +30,7 @@ namespace STRINGS
 
 		public static LocString RESEARCH = "RESEARCH";
 
-		public static LocString ROLES = "ROLES";
+		public static LocString ROLES = "JOB ASSIGNMENTS";
 
 		public static LocString RESEARCHPOINTS = "Research points";
 
@@ -53,6 +53,8 @@ namespace STRINGS
 		public static LocString CHARACTERCONTAINER_SKILLS_TITLE = "ATTRIBUTES";
 
 		public static LocString CHARACTERCONTAINER_TRAITS_TITLE = "TRAITS";
+
+		public static LocString CHARACTERCONTAINER_APTITUDES_TITLE = "INTERESTS";
 
 		public static LocString CHARACTERCONTAINER_EXPECTATIONS_TITLE = "ADDITIONAL";
 
@@ -116,7 +118,7 @@ namespace STRINGS
 
 		public static LocString RESEARCHSCREEN_UNLOCKSTOOLTIP = "Unlocks: {0}";
 
-		public static LocString ATTRIBUTELEVEL = "Profession: Level {0} {1}";
+		public static LocString ATTRIBUTELEVEL = "Expertise: Level {0} {1}";
 
 		public static LocString ATTRIBUTELEVEL_SHORT = "Level {0} {1}";
 
@@ -165,6 +167,11 @@ namespace STRINGS
 		public static LocString LISTENTRYSTRING = "     {0}\n";
 
 		public static LocString LISTENTRYSTRINGNOLINEBREAK = "     {0}";
+
+		public class DROPDOWN
+		{
+			public static string NONE = "Unassigned";
+		}
 
 		public class FRONTEND
 		{
@@ -349,7 +356,9 @@ namespace STRINGS
 
 				public static LocString RESTARTCONFIRM = "Are you sure you want to quit?\nAll unsaved progress will be lost.";
 
-				public static LocString QUITCONFIRM = "Are you sure you want to quit?\nAll unsaved progress will be lost.";
+				public static LocString QUITCONFIRM = "Are you sure you want to quit to main menu?\nAll unsaved progress will be lost.";
+
+				public static LocString DESKTOPQUITCONFIRM = "Are you sure you want to quit?\nAll unsaved progress will be lost.";
 
 				public static LocString RESUMEBUTTON_BASENAME = "{0}: Cycle {1}";
 			}
@@ -372,11 +381,11 @@ namespace STRINGS
 
 			public class PATCHNOTESSCREEN
 			{
-				public static LocString TITLE = "TUBULAR UPGRADE";
+				public static LocString TITLE = "OCCUPATIONAL UPGRADE";
 
-				public static LocString BODY = "<b>Welcome to the Tubular Upgrade!</b>\n\n{0}";
+				public static LocString BODY = "<b>Welcome to the Occupational Upgrade!</b>\n\n{0}";
 
-				public static LocString PATCHNOTES = "<b>Update Features:</b>\n\n• New Transit Tube networks allow rapid Duplicant transport to and from the furthest reaches of your base\n• Ice Sculptures can now be built in cold areas for a special decor boost\n• Berry Sludge, a new recipe made from Bristle Berries, can now be found at the Microbe Musher\n• Extensive performance improvements, affecting late game bases, stored items, Duplicant navigation, memory usage, and more\n\nPlease view the full patch notes for further details!";
+				public static LocString PATCHNOTES = "<b>Update Features:</b>\n\n• Jobs Board added! Employ your Duplicants in new job positions for skill improvements, unique traits, and cool new hats\n• New Conveyor Rail System to quickly transport solid materials around your base\n• Food and Plant rebalances for a more rewarding overall farming experience\n• Tons of bug fixes, performance enhancements, QOL additions, and more!\n\nPlease view the full patch notes for further details!";
 
 				public static LocString OK_BUTTON = "OK";
 			}
@@ -391,7 +400,7 @@ namespace STRINGS
 
 				public static LocString CONFIRMDELETE = "Are you sure you want to delete {0}?\nYou cannot undo this action.";
 
-				public static LocString SAVEDETAILS = "<b>File:</b> {0}\n\n<b>Save Date:</b>\n{1}\n\n<b>Base Name:</b> {2}\n<b>Duplicants Alive:</b> {3}\n<b>Cycles Survived:</b> {4}";
+				public static LocString SAVEDETAILS = "<b>File:</b> {0}\n\n<b>Save Date:</b>\n{1}\n\n<b>Base Name:</b> {2}\n<b>Duplicants Alive:</b> {3}\n<b>Cycle(s) Survived:</b> {4}";
 
 				public static LocString AUTOSAVEWARNING = " <b><color=#ff0000>(Autosave: This file will get deleted as new autosaves are created)</color></b>";
 
@@ -399,7 +408,7 @@ namespace STRINGS
 
 				public static LocString SAVE_TOO_NEW = "<b><color=#ff0000>Could not load file {0}. File is using build {1}. This build is {2}.</color></b>";
 
-				public static LocString UNSUPPORTED_SAVE_VERSION = "<b><color=#ff0000>This save file is from a previous version of the game and is no longer supported.</color></b>\n\nYou may revert to the previous build to play your old save. Please follow the link below for details.";
+				public static LocString UNSUPPORTED_SAVE_VERSION = "<b><color=#ff0000>This save file is from a previous version of the game and is no longer supported.</color></b>";
 
 				public static LocString MORE_INFO = "More Info";
 			}
@@ -517,6 +526,8 @@ namespace STRINGS
 					public static LocString EN = "English (Klei)";
 
 					public static LocString ZH_KLEI = "Chinese (Klei)";
+
+					public static LocString KO_KLEI = "Korean (Klei)";
 				}
 			}
 
@@ -530,9 +541,9 @@ namespace STRINGS
 
 				public static LocString MUSIC_EVERY_CYCLE_TOOLTIP = "If enabled, background music will play every cycle instead of every few cycles";
 
-				public static LocString AUTOMATION_SOUNDS_ALWAYS = "Play automation sounds outside of the overlay: ";
+				public static LocString AUTOMATION_SOUNDS_ALWAYS = "Always play automation sounds: ";
 
-				public static LocString AUTOMATION_SOUNDS_ALWAYS_TOOLTIP = "If enabled, automation sound effects will play even when outside of the automation overlay";
+				public static LocString AUTOMATION_SOUNDS_ALWAYS_TOOLTIP = "If enabled, automation sound effects will play even when outside of the Automation Overlay";
 
 				public static LocString AUDIO_BUS_MASTER = "Master";
 
@@ -653,6 +664,399 @@ namespace STRINGS
 				public static LocString SAVE_DIRECTORY_READ_ONLY = "A problem occurred while accessing your save directory.\nThis may be because your directory is set to read-only.\n\nPlease ensure your save directory is writable and re-launch the game.\n{0}";
 
 				public static LocString SAVE_DIRECTORY_INSUFFICIENT_SPACE = "There is insufficient disk space to write to your save directory.\n\nPlease free at least 15 MB to give your saves some room to breathe.\n{0}";
+			}
+		}
+
+		public class ROLES_SCREEN
+		{
+			public static LocString MANAGEMENT_BUTTON = "JOBS";
+
+			public static LocString ROLE_PROGRESS = "<b>Job Experience: {0}/{1}</b>\nDuplicants can become eligible for specialized jobs by maxing their current job experience";
+
+			public static LocString NO_JOB_STATION_WARNING = "Build a Jobs Desk to unlock Job Assignments";
+
+			public static LocString HIGHEST_EXPECTATIONS_TIER = "<b>Highest Expectations</b>";
+
+			public class WIDGET
+			{
+				public static LocString NUMBER_OF_MASTERS_TOOLTIP = "<b>Duplicants who have mastered this job:</b>{0}";
+
+				public static LocString NO_MASTERS_TOOLTIP = "<b>No Duplicants have mastered this job</b>";
+			}
+
+			public class TIER_NAMES
+			{
+				public static LocString ZERO = "Tier 0";
+
+				public static LocString ONE = "Tier 1";
+
+				public static LocString TWO = "Tier 2";
+
+				public static LocString THREE = "Tier 3";
+
+				public static LocString FOUR = "Tier 4";
+
+				public static LocString FIVE = "Tier 5";
+
+				public static LocString SIX = "Tier 6";
+
+				public static LocString SEVEN = "Tier 7";
+			}
+
+			public class SLOTS
+			{
+				public static LocString UNASSIGNED = "Vacant Posiition";
+
+				public static LocString UNASSIGNED_TOOLTIP = "Click to assign a Duplicant to this job opening";
+
+				public static LocString NOSLOTS = "No slots available";
+
+				public static LocString NO_ELIGIBLE_DUPLICANTS = "No Duplicants meet the requirements for this job";
+
+				public static LocString ASSIGNMENT_PENDING = "(Pending)";
+
+				public static LocString PICK_JOB = "No Job";
+
+				public static LocString PICK_DUPLICANT = "None";
+			}
+
+			public class DROPDOWN
+			{
+				public static LocString NAME_AND_ROLE = "{0} <color=#F44A47FF>({1})</color>";
+
+				public static LocString ALREADY_ROLE = "(Currently {0})";
+			}
+
+			public class SIDEBAR
+			{
+				public static LocString ASSIGNED_DUPLICANTS = "Assigned Duplicants";
+
+				public static LocString UNASSIGNED_DUPLICANTS = "Unassigned Duplicants";
+
+				public static LocString UNASSIGN = "Unassign job";
+			}
+
+			public class PRIORITY
+			{
+				public static LocString TITLE = "Job Priorities";
+
+				public static LocString DESCRIPTION = "{0}s prioritize these work errands: ";
+
+				public static LocString NO_EFFECT = "This job does not affect errand prioritization";
+			}
+
+			public class RESUME
+			{
+				public static LocString TITLE = "Qualifications";
+
+				public static LocString PREVIOUS_ROLES = "PREVIOUS DUTIES";
+
+				public static LocString UNASSIGNED = "Unassigned";
+
+				public static LocString NO_SELECTION = "No Duplicant selected";
+			}
+
+			public class PERKS
+			{
+				public static LocString TITLE = "Training Received";
+
+				public static LocString NO_PERKS = "This job comes with no training";
+
+				public class CAN_DIG_VERY_FIRM
+				{
+					public static LocString DESCRIPTION = "Trait: <style=\"misc\">Very Firm Material</style> Mining";
+				}
+
+				public class CAN_DIG_NEARLY_IMPENETRABLE
+				{
+					public static LocString DESCRIPTION = "Trait: <style=\"solid\">Abyssalite</style> Mining";
+				}
+
+				public class CAN_SCULPT
+				{
+					public static LocString DESCRIPTION = "Trait: <style=\"decor\">Block</style> Sculpting";
+				}
+
+				public class CAN_PAINT
+				{
+					public static LocString DESCRIPTION = "Trait: <style=\"decor\">Canvas</style> Painting";
+				}
+
+				public class CAN_FARM_TINKER
+				{
+					public static LocString DESCRIPTION = "Trait: <style=\"plant\">Crop</style> Tending\n    • Trait: <style=\"misc\">Micronutrient Fertilizer</style> Crafting";
+				}
+
+				public class CAN_POWER_TINKER
+				{
+					public static LocString DESCRIPTION = "Trait: <style=\"misc\">Generator</style> Tuning\n    • Trait: <style=\"misc\">Microchip</style> Crafting";
+				}
+
+				public class CAN_ELECTRIC_GRILL
+				{
+					public static LocString DESCRIPTION = "Trait: <style=\"food\">Electric Grill</style> Cooking";
+				}
+
+				public class ADVANCED_RESEARCH
+				{
+					public static LocString DESCRIPTION = "Trait: <style=\"research\">" + BUILDINGS.PREFABS.ADVANCEDRESEARCHCENTER.NAME + "</style> Researching";
+				}
+
+				public class INCREASED_ART
+				{
+					public static LocString DESCRIPTION = "+{0} to Creativity";
+				}
+
+				public class INCREASED_CONSTRUCTION
+				{
+					public static LocString DESCRIPTION = "+{0} to Construction";
+				}
+
+				public class INCREASE_BOTANIST
+				{
+					public static LocString DESCRIPTION = "+{0} to Farming";
+				}
+
+				public class INCREASED_CARING
+				{
+					public static LocString DESCRIPTION = "+{0} to Caring";
+				}
+
+				public class INCREASED_DIG_SPEED
+				{
+					public static LocString DESCRIPTION = "+{0} to Digging";
+				}
+
+				public class INCREASED_ATHLETICS
+				{
+					public static LocString DESCRIPTION = "+{0} to Athletics";
+				}
+
+				public class INCREASED_CARRY_AMOUNT
+				{
+					public static LocString DESCRIPTION = "+{0}kg to Carrying Capacity";
+				}
+
+				public class INCREASED_MACHINERY
+				{
+					public static LocString DESCRIPTION = "+{0} to Tinkering";
+				}
+
+				public class INCREASED_COOKING
+				{
+					public static LocString DESCRIPTION = "+{0} to Cooking";
+				}
+
+				public class INCREASED_STRENGTH
+				{
+					public static LocString DESCRIPTION = "+{0} to Strength";
+				}
+
+				public class INCREASED_LEARNING
+				{
+					public static LocString DESCRIPTION = "+{0} to Learning";
+				}
+
+				public class MANAGERIAL_DUTIES
+				{
+					public static LocString DESCRIPTION = "Workload stress";
+				}
+
+				public class MANAGED_COLONY
+				{
+					public static LocString DESCRIPTION = "Colony Stress Alleviater";
+				}
+
+				public class EXOSUIT_EXPERTISE
+				{
+					public static LocString DESCRIPTION = "Trait: <style=\"equipment\">Exosuit</style> Sprinting";
+				}
+
+				public class CONVEYOR_BUILD
+				{
+					public static LocString DESCRIPTION = "Trait: <style=\"misc\">Conveyor Rail System</style> Construction";
+				}
+			}
+
+			public class ASSIGNMENT_REQUIREMENTS
+			{
+				public static LocString TITLE = "Qualifications";
+
+				public static LocString NONE = "This position has no qualification requirements";
+
+				public static LocString ALREADY_IS_ROLE = "{0} <b>is already</b> assigned to the job {1}";
+
+				public static LocString ALREADY_IS_JOBLESS = "{0} <b>is already</b> unemployed";
+
+				public static LocString WILL_BE_UNASSIGNED = "Note: Assigning {0} to {1} will <color=#F44A47FF>unassign</color> them from {2}";
+
+				public static LocString RELEVANT_ATTRIBUTES = "Relevant skills:";
+
+				public static LocString APTITUDES = "Interests";
+
+				public static LocString RELEVANT_APTITUDES = "Relevant Interests:";
+
+				public static LocString NO_APTITUDE = "None";
+
+				public class ELIGIBILITY
+				{
+					public static LocString ELIGIBLE = "{0} is qualified for the {1} position";
+
+					public static LocString INELIGIBLE = "{0} is <color=#F44A47FF>not qualified</color> for the {1} position";
+				}
+
+				public class UNEMPLOYED
+				{
+					public static LocString NAME = "Unassigned";
+
+					public static LocString DESCRIPTION = "Duplicant must not already have a job assignment";
+				}
+
+				public class HAS_COLONY_LEADER
+				{
+					public static LocString NAME = "Has colony leader";
+
+					public static LocString DESCRIPTION = "A colony leader must be assigned";
+				}
+
+				public class HAS_ATTRIBUTE_DIGGING_BASIC
+				{
+					public static LocString NAME = "Basic Digging";
+
+					public static LocString DESCRIPTION = "Must have at least {0} digging skill";
+				}
+
+				public class HAS_ATTRIBUTE_COOKING_BASIC
+				{
+					public static LocString NAME = "Basic Cooking";
+
+					public static LocString DESCRIPTION = "Must have at least {0} cooking skill";
+				}
+
+				public class HAS_ATTRIBUTE_LEARNING_BASIC
+				{
+					public static LocString NAME = "Basic Learning";
+
+					public static LocString DESCRIPTION = "Must have at least {0} learning skill";
+				}
+
+				public class HAS_ATTRIBUTE_LEARNING_MEDIUM
+				{
+					public static LocString NAME = "Medium Learning";
+
+					public static LocString DESCRIPTION = "Must have at least {0} learning skill";
+				}
+
+				public class HAS_EXPERIENCE
+				{
+					public static LocString NAME = "{0} Experience";
+
+					public static LocString DESCRIPTION = "Mastery of the <b>{0}</b> job";
+				}
+
+				public class HAS_COMPLETED_ANY_OTHER_ROLE
+				{
+					public static LocString NAME = "General Experience";
+
+					public static LocString DESCRIPTION = "Mastery of <b>at least one</b> job";
+				}
+
+				public class CHOREGROUP_ENABLED
+				{
+					public static LocString NAME = "Can perform {0}";
+
+					public static LocString DESCRIPTION = "Capable of performing <b>{0}</b> jobs";
+				}
+			}
+
+			public class EXPECTATIONS
+			{
+				public static LocString TITLE = "Special Provisions Request";
+
+				public static LocString NO_EXPECTATIONS = "No additional provisions are required to perform this job";
+
+				public class PRIVATE_ROOM
+				{
+					public static LocString NAME = "Private Bedroom";
+
+					public static LocString DESCRIPTION = "Duplicants in this job would appreciate their own place to unwind";
+				}
+
+				public class FOOD_QUALITY
+				{
+					public class MINOR
+					{
+						public static LocString NAME = "Standard Food";
+
+						public static LocString DESCRIPTION = "Duplicants employed in this Tier desire food that meets basic living standards";
+					}
+
+					public class MEDIUM
+					{
+						public static LocString NAME = "Good Food";
+
+						public static LocString DESCRIPTION = "Duplicants employed in this Tier desire decent food for their efforts";
+					}
+
+					public class HIGH
+					{
+						public static LocString NAME = "Great Food";
+
+						public static LocString DESCRIPTION = "Duplicants employed in this Tier desire better than average food";
+					}
+
+					public class VERY_HIGH
+					{
+						public static LocString NAME = "Superb Food";
+
+						public static LocString DESCRIPTION = "Duplicants employed in this Tier have a refined taste for food";
+					}
+
+					public class EXCEPTIONAL
+					{
+						public static LocString NAME = "Ambrosial Food";
+
+						public static LocString DESCRIPTION = "Duplicants employed in this Tier expect only the best cuisine";
+					}
+				}
+
+				public class DECOR
+				{
+					public class MINOR
+					{
+						public static LocString NAME = "Minor Decor";
+
+						public static LocString DESCRIPTION = "Duplicants employed in this Tier desire slightly improved colony decor";
+					}
+
+					public class MEDIUM
+					{
+						public static LocString NAME = "Medium Decor";
+
+						public static LocString DESCRIPTION = "Duplicants employed in this Tier desire reasonably improved colony decor";
+					}
+
+					public class HIGH
+					{
+						public static LocString NAME = "High Decor";
+
+						public static LocString DESCRIPTION = "Duplicants employed in this Tier desire a decent increase in colony decor";
+					}
+
+					public class VERY_HIGH
+					{
+						public static LocString NAME = "Superb Decor";
+
+						public static LocString DESCRIPTION = "Duplicants employed in this Tier desire majorly improved colony decor";
+					}
+
+					public class UNREASONABLE
+					{
+						public static LocString NAME = "Decadent Decor";
+
+						public static LocString DESCRIPTION = "Duplicants employed in this Tier desire unrealistically luxurious improvements to decor";
+					}
+				}
 			}
 		}
 
@@ -925,7 +1329,7 @@ namespace STRINGS
 
 		public class TOOLTIPS
 		{
-			public static LocString MANAGEMENTMENU_JOBS = "Manage Duplicants' job priorities";
+			public static LocString MANAGEMENTMENU_JOBS = "Manage Duplicants' permitted errands";
 
 			public static LocString MANAGEMENTMENU_CONSUMABLES = "Manage Duplicants' diets";
 
@@ -938,6 +1342,10 @@ namespace STRINGS
 			public static LocString MANAGEMENTMENU_SCHEDULE = "Adjust colony timetable";
 
 			public static LocString MANAGEMENTMENU_REQUIRES_RESEARCH = "Build a Research Station to unlock" + UI.HORIZONTAL_BR_RULE + "Research buildings can be found in the Stations Tab <color=#F44A47>[0]</color> of the Build Menu";
+
+			public static LocString MANAGEMENTMENU_REQUIRES_ROLES_STATION = "Build a Jobs Board to unlock" + UI.HORIZONTAL_BR_RULE + "The Jobs Board can be found in the Stations Tab <color=#F44A47>[0]</color> of the Build Menu";
+
+			public static LocString MANAGEMENTMENU_ROLES = "Manage Duplicants' job assignments";
 
 			public static LocString METERSCREEN_AVGSTRESS = "Highest Stress: {0}";
 
@@ -965,35 +1373,33 @@ namespace STRINGS
 
 			public static LocString RED_ALERT_CONTENT = "Colonywide emergency state\nDuplicants ignore basic needs to work";
 
-			public static LocString DISINFECTBUTTON = "Drag to disinfect buildings";
+			public static LocString DISINFECTBUTTON = "Drag to disinfect germy buildings";
 
-			public static LocString MOPBUTTON = "Drag to swab unwanted liquids";
+			public static LocString MOPBUTTON = "Drag to swab up unwanted liquids";
 
-			public static LocString DIGBUTTON = "Drag to set dig tasks";
+			public static LocString DIGBUTTON = "Drag to set dig errands";
 
-			public static LocString CANCELBUTTON = "Drag to cancel job tasks";
+			public static LocString CANCELBUTTON = "Drag to cancel errands";
 
 			public static LocString DECONSTRUCTBUTTON = "Drag to demolish buildings";
 
 			public static LocString ATTACKBUTTON = "Drag to attack witless creatures";
 
-			public static LocString CLEARBUTTON = "Drag to move debris into storage";
+			public static LocString CLEARBUTTON = "Drag to move ore debris into storage";
 
 			public static LocString HARVESTBUTTON = "Drag to harvest plants";
 
 			public static LocString PRIORITIZEMAINBUTTON = string.Empty;
 
-			public static LocString PRIORITIZEBUTTON = "Drag to reprioritize job tasks";
-
-			public static LocString ERASEREGIONBUTTON = "Drag to erase existing exosuit regions";
+			public static LocString PRIORITIZEBUTTON = "Drag to reprioritize errands";
 
 			public static LocString CLEANUPMAINBUTTON = "Mop and sweep messy floors";
-
-			public static LocString STORAGEMAINBUTTON = "Create and manage exosuit regions";
 
 			public static LocString CANCELDECONSTRUCTIONBUTTON = "Cancel queued orders or deconstruct existing buildings";
 
 			public static LocString HELP_ROTATE_KEY = "Press <color=#F44A47>[O]</color> to Rotate";
+
+			public static LocString HELP_BUILDLOCATION_INVALID_CELL = "Invalid Cell";
 
 			public static LocString HELP_BUILDLOCATION_FLOOR = "Must be built on solid ground";
 
@@ -1003,11 +1409,21 @@ namespace STRINGS
 
 			public static LocString HELP_BUILDLOCATION_INSIDEGROUND = "Must be built in the ground";
 
-			public static LocString HELP_BUILDLOCATION_ATTACHPOINT = "Must be built overlapping a {0}";
+			public static LocString HELP_BUILDLOCATION_ATTACHPOINT = "Must be built overlapping an {0}";
 
-			public static LocString HELP_TUBELOCATION_NO_UTURNS = "No U-Turns!";
+			public static LocString HELP_BUILDLOCATION_NOT_IN_TILES = "Cannot be built inside tile";
 
-			public static LocString HELP_TUBELOCATION_STRAIGHT_BRIDGES = "Can't Turn Here!";
+			public static LocString HELP_BUILDLOCATION_GASPORTS_OBSTRUCTED = "Gas ports are obstructed";
+
+			public static LocString HELP_BUILDLOCATION_LIQUIDPORTS_OBSTRUCTED = "Liquid ports are obstructed";
+
+			public static LocString HELP_BUILDLOCATION_WIRE_OBSTRUCTION = "Obstructed by wire";
+
+			public static LocString HELP_TUBELOCATION_NO_UTURNS = "Can't U-Turn";
+
+			public static LocString HELP_TUBELOCATION_STRAIGHT_BRIDGES = "Can't Turn Here";
+
+			public static LocString HELP_REQUIRES_ROOM = "Must be in a room";
 
 			public static LocString OXYGENOVERLAYSTRING = "Displays ambient oxygen density";
 
@@ -1027,21 +1443,21 @@ namespace STRINGS
 
 			public static LocString LIGHTSOVERLAYSTRING = "Displays the visibility radius of light sources";
 
-			public static LocString REGIONOVERLAYSTRING = "Displays areas requiring Duplicant safety gear";
-
 			public static LocString LIQUIDVENTOVERLAYSTRING = "Displays liquid pipe system components";
 
 			public static LocString GASVENTOVERLAYSTRING = "Displays gas pipe system components";
 
 			public static LocString DECOROVERLAYSTRING = "Displays decor values";
 
-			public static LocString PRIORITIESOVERLAYSTRING = "Displays task priority values";
+			public static LocString PRIORITIESOVERLAYSTRING = "Displays errand priority values";
 
 			public static LocString DISEASEOVERLAYSTRING = "Displays disease risk areas";
 
 			public static LocString NOISE_POLLUTION_OVERLAY_STRING = "Displays ambient noise levels";
 
 			public static LocString CROPS_OVERLAY_STRING = "Displays plant growth progress";
+
+			public static LocString CONVEYOR_OVERLAY_STRING = "Displays conveyor transport components";
 
 			public static LocString REACHABILITYOVERLAYSTRING = "Displays areas accessible by Duplicants";
 
@@ -1079,11 +1495,11 @@ namespace STRINGS
 
 			public static LocString RED_ALERT_BUTTON_OFF = "Disable Red Alert";
 
-			public static LocString JOBSSCREEN_PRIORITY = "High priority jobs are performed before low priority jobs. A Duplicant will always continue work on their current job until it is complete, even if a higher priority job becomes available.";
+			public static LocString JOBSSCREEN_PRIORITY = "High priority errands are always performed before low priority errands.\n\nHowever, a busy Duplicant will contine to work on their current errand until it's complete, even if a higher priority errand becomes available.";
 
-			public static LocString JOBSSCREEN_ATTRIBUTES = "The following attributes affect a Duplicant's efficiency at this job:";
+			public static LocString JOBSSCREEN_ATTRIBUTES = "The following attributes affect a Duplicant's efficiency at this errand:";
 
-			public static LocString JOBSSCREEN_CANNOTPERFORMTASK = "{0} cannot perform this task.";
+			public static LocString JOBSSCREEN_CANNOTPERFORMTASK = "{0} cannot perform this errand.";
 
 			public static LocString JOBSSCREEN_RELEVANT_ATTRIBUTES = "Relevant Attributes:";
 
@@ -1126,32 +1542,6 @@ namespace STRINGS
 			public static LocString VITALS_CHECKBOX_RECEPTACLE_OPERATIONAL = "This plant is housed in an operational farm plot";
 
 			public static LocString VITALS_CHECKBOX_RECEPTACLE_INOPERATIONAL = "This plant is not housed in an operational farm plot";
-		}
-
-		public class CODEX
-		{
-			public static LocString TITLE = "CODEX";
-
-			public static LocString MANAGEMENT_BUTTON = "CODEX";
-
-			public class CATEGORYNAMES
-			{
-				public static LocString ROOT = "General";
-
-				public static LocString PLANTS = "Plants";
-
-				public static LocString CREATURES = "Creatures";
-
-				public static LocString COMPUTERFILES = "Recovered Files";
-
-				public static LocString FIRSTACT = "First Act";
-
-				public static LocString SECONDACT = "Second Act";
-
-				public static LocString THIRDACT = "Third Act";
-
-				public static LocString NEWGAMEPLUS = "New Game Plus";
-			}
 		}
 
 		public class DEVELOPMENTBUILDS
@@ -1358,11 +1748,11 @@ namespace STRINGS
 
 					public static LocString LEGEND5 = "<b>Energy Surplus</b>\nThese circuits produce more power than they can consume";
 
-					public static LocString LEGEND6 = "<b>Strained</b>\nThese circuits consume nearly all power they produce";
+					public static LocString LEGEND6 = "<b>Strained</b>\nThese circuits consume nearly all power they produce, but can still function as intended";
 
 					public static LocString LEGEND7 = "Too much power being drawn from system";
 
-					public static LocString LEGEND8 = "<b>Underpowered</b>\nThese circuits consume more power than they can produce";
+					public static LocString LEGEND8 = "<b>Underpowered</b>\nThese circuits consume more power than they can produce" + UI.HORIZONTAL_BR_RULE + "Buildings may be frequently shut off when connected to underpowered circuits";
 
 					public static LocString LEGEND_SWITCH = "<b>Switch</b>\nActivates or deactivates connected circuits";
 				}
@@ -1434,7 +1824,7 @@ namespace STRINGS
 				{
 					public static LocString HEADER = "No Room";
 
-					public static LocString DESC = "Enclose this space with walls and/or doors to make a room";
+					public static LocString DESC = "Enclose this space with walls and doors to make a room";
 				}
 
 				public class TOOLTIPS
@@ -1493,24 +1883,6 @@ namespace STRINGS
 					public static LocString GROWING = "<b>Growing</b>\nThese plants are thriving in their current conditions";
 
 					public static LocString FULLY_GROWN = "<b>Fully Grown</b>\nThese plants have reached maturation" + UI.HORIZONTAL_BR_RULE + "Select the <style=\"misc\">HARVEST TOOL</style> <color=#F44A47><b>[Y]</b></color> to batch harvest";
-				}
-			}
-
-			public class STORAGEREGIONS
-			{
-				public static LocString NAME = "EXOSUIT OVERLAY";
-
-				public static LocString BUTTON = "Exosuit Overlay";
-
-				public static LocString REGION = "Exosuit Region {0}";
-
-				public static LocString NOREGIONS = "No exosuit regions created";
-
-				public class TOOLTIPS
-				{
-					public static LocString REGION = "{0} is accepting materials";
-
-					public static LocString NOREGIONS = "No storage areas have been designated to receive materials";
 				}
 			}
 
@@ -1596,9 +1968,9 @@ namespace STRINGS
 
 				public static LocString BUTTON = "Exosuit Overlay";
 
-				public static LocString SUIT_ICON = "Suit";
+				public static LocString SUIT_ICON = "Exosuit";
 
-				public static LocString SUIT_ICON_TOOLTIP = "Shows the location of suits";
+				public static LocString SUIT_ICON_TOOLTIP = "<b>Exosuit</b>\nHighlights the current location of equippable exosuits";
 			}
 
 			public class LOGIC
@@ -1611,6 +1983,8 @@ namespace STRINGS
 
 				public static LocString OUTPUT = "Output Port";
 
+				public static LocString RESET_UPDATE = "Refresh Port";
+
 				public static LocString CIRCUIT_STATUS_HEADER = "GRID STATUS";
 
 				public static LocString ONE = "Active";
@@ -1621,15 +1995,35 @@ namespace STRINGS
 
 				public abstract class TOOLTIPS
 				{
-					public static LocString INPUT = "Receives a signal from an automation grid";
+					public static LocString INPUT = "<b>Input Port</b>\nReceives a signal from an automation grid";
 
-					public static LocString OUTPUT = "Sends a signal out to an automation grid";
+					public static LocString OUTPUT = "<b>Output Port</b>\nSends a signal out to an automation grid";
 
-					public static LocString ONE = "These ports are currently active";
+					public static LocString RESET_UPDATE = "<b>Refresh Port</b>\nResets or updates a building when activated";
 
-					public static LocString ZERO = "These ports are currently on standby";
+					public static LocString ONE = "<b>Active</b>\nThis port is currently active";
 
-					public static LocString DISCONNECTED = "This port is not connected to an automation grid";
+					public static LocString ZERO = "<b>Standby</b>This port is currently on standby";
+
+					public static LocString DISCONNECTED = "<b>Disconnected</b>\nThis port is not connected to an automation grid";
+				}
+			}
+
+			public class CONVEYOR
+			{
+				public static LocString NAME = "CONVEYOR OVERLAY";
+
+				public static LocString BUTTON = "Conveyor Overlay";
+
+				public static LocString OUTPUT = "Loader";
+
+				public static LocString INPUT = "Receptacle";
+
+				public abstract class TOOLTIPS
+				{
+					public static LocString OUTPUT = "<b>Loader</b>\nLoads material onto a Conveyor Rail for transport to Receptacles";
+
+					public static LocString INPUT = "<b>Receptacle</b>\nReceives material from a Conveyor Rail and stores it for Duplicant use";
 				}
 			}
 
@@ -1653,9 +2047,9 @@ namespace STRINGS
 
 				public static LocString HEADER_NEGATIVE = "Negative Value:";
 
-				public static LocString LOWDECOR = "Low Decor";
+				public static LocString LOWDECOR = "Negative Decor";
 
-				public static LocString HIGHDECOR = "High Decor";
+				public static LocString HIGHDECOR = "Positive Decor";
 
 				public static LocString CLUTTER = "Debris";
 
@@ -1667,9 +2061,9 @@ namespace STRINGS
 
 				public class TOOLTIPS
 				{
-					public static LocString LOWDECOR = "<b>Low Decor</b>\nArea with insufficient decor values\n* Resources on the floor are considered \"debris\" and will decrease decor";
+					public static LocString LOWDECOR = "<b>Negative Decor</b>\nArea with insufficient decor values\n* Resources on the floor are considered \"debris\" and will decrease decor";
 
-					public static LocString HIGHDECOR = "<b>High Decor</b>\nArea with sufficient decor values\n* Lighting and aesthetically pleasing buildings increase decor";
+					public static LocString HIGHDECOR = "<b>Positive Decor</b>\nArea with sufficient decor values\n* Lighting and aesthetically pleasing buildings increase decor";
 				}
 			}
 
@@ -1900,29 +2294,37 @@ namespace STRINGS
 
 		public class JOBSSCREEN
 		{
-			public static LocString TITLE = "JOBS";
+			public static LocString TITLE = "TOGGLE WORK ERRANDS";
 
-			public static LocString TOOLTIP_TOGGLE_ALL = "Toggle all tasks colonywide";
+			public static LocString TOOLTIP_TOGGLE_ALL = "Toggle all errands colonywide";
 
-			public static LocString TOOLTIP_TOGGLE_COLUMN = "Toggle <b>{0} Tasks</b> colonywide";
+			public static LocString TOOLTIP_TOGGLE_COLUMN_ALL = "Toggle <b>{0} Errands</b> colonywide\n<b><color=#B87194FF>All Duplicants</color></b> may perform this errand\n" + UI.HORIZONTAL_RULE;
 
-			public static LocString TOOLTIP_TOGGLE_ROW = "Toggle all tasks for <b>{0}</b>";
+			public static LocString TOOLTIP_TOGGLE_COLUMN_PARTIAL = "Toggle <b>{0} Errands</b> colonywide\n<b><color=#B87194FF>Some Duplicants</color></b> may perform this errand\n" + UI.HORIZONTAL_RULE;
+
+			public static LocString TOOLTIP_TOGGLE_COLUMN_NONE = "Toggle <b>{0} Errands</b> colonywide\n<b><color=#B87194FF>No Duplicants</color></b> may perform this errand\n" + UI.HORIZONTAL_RULE;
+
+			public static LocString TOOLTIP_TOGGLE_COLUMN_ROLE_ONLY = "Toggle <b>{0} Errands</b> colonywide\n<b><color=#B87194FF>Only Duplicants in a related job</color></b> may perform this errand\n" + UI.HORIZONTAL_RULE;
+
+			public static LocString TOOLTIP_TOGGLE_ROW = "Toggle all errands for <b>{0}</b>";
 
 			public static LocString COLUMN_SORT_BY_JOB_SKILL = "Sort colony by <b>{0}</b> skill";
 
-			public static LocString NEW_MINIONS_TOOLTIP_TOGGLE_ROW = "Toggle all tasks for <b>New Duplicants</b>";
+			public static LocString NEW_MINIONS_TOOLTIP_TOGGLE_ROW = "Toggle all errands for <b>New Duplicants</b>";
 
-			public static LocString NEW_MINIONS_JOB_PERMISSION_ON = "<b>New Duplicants</b> will perform\n<b>{0} Tasks</b> by default";
+			public static LocString NEW_MINIONS_JOB_PERMISSION_ON = "<b>New Duplicants</b> will perform\n<b>{0} Errands</b> by default";
 
-			public static LocString NEW_MINIONS_JOB_PERMISSION_OFF = "<b>New Duplicants</b> will not perform\n<b>{0} Tasks</b> by default";
+			public static LocString NEW_MINIONS_JOB_PERMISSION_OFF = "<b>New Duplicants</b> will not perform\n<b>{0} Errands</b> by default";
 
-			public static LocString JOB_PERMISSION_ON = "<b>{0}</b> will perform \n<b>{1} Tasks</b>";
+			public static LocString JOB_PERMISSION_ON = "<b>{0}</b> will perform \n<b>{1} Errands</b>";
 
-			public static LocString JOB_PERMISSION_OFF = "<b>{0}</b> will not perform \n<b>{1} Tasks</b>";
+			public static LocString JOB_PERMISSION_OFF = "<b>{0}</b> will not perform \n<b>{1} Errands</b>";
 
-			public static LocString JOB_CANT_CONSUME = "<b>{0}</b> cannot perform \n<b>{1} Tasks</b>";
+			public static LocString JOB_PERMISSION_FORCED_ROLE = "<b>{0}</b>'s job requires they\nperform <b>{1} Errands</b>";
 
-			public static LocString JOB_REFUSE = "<b>{0}</b> refuses to perform \n<b>{1} Tasks</b>";
+			public static LocString JOB_CANT_CONSUME = "<b>{0}</b> cannot perform \n<b>{1} Errands</b>";
+
+			public static LocString JOB_REFUSE = "<b>{0}</b> refuses to perform \n<b>{1} Errands</b>";
 		}
 
 		public class VITALSSCREEN
@@ -1937,6 +2339,8 @@ namespace STRINGS
 
 			public static LocString STRESS = "Stress";
 
+			public static LocString EXPECTATIONS = "Expectations";
+
 			public static LocString CALORIES = "Fullness";
 
 			public static LocString EATEN_TODAY = "Eaten Today";
@@ -1948,6 +2352,14 @@ namespace STRINGS
 			public static LocString SUBMERSION = "Liquid Level";
 
 			public static LocString NOT_DROWNING = "Liquid Level";
+
+			public static LocString FOOD_EXPECTATIONS = "Food Expectation";
+
+			public static LocString FOOD_EXPECTATIONS_TOOLTIP = "This Duplicant desires food that is {0} quality or better";
+
+			public static LocString DECOR_EXPECTATIONS = "Decor Expectation";
+
+			public static LocString DECOR_EXPECTATIONS_TOOLTIP = "This Duplicant desires decor that is {0} or higher";
 
 			public class CONDITIONS_GROWING
 			{
@@ -2061,40 +2473,6 @@ namespace STRINGS
 			public static LocString QUITBUTTON = "RESET";
 		}
 
-		public class CONTEXTSCREEN
-		{
-			public static LocString ASSIGNEDTO = "Assigned To:";
-
-			public static LocString UNAVAILABLE = "UNAVAILABLE";
-
-			public class PRECONDITIONS
-			{
-				public static LocString CANCHAT = "Can't reach";
-
-				public static LocString ISNOTREDALERT = "Red alert";
-
-				public static LocString CANMOVETO = "Can't reach";
-
-				public static LocString CANPICKUP = "Can't reach";
-
-				public static LocString ISOPERATIONAL = "Not operational";
-
-				public static LocString ISMARKEDFORDECONSTRUCTION = "Not marked for destruction";
-
-				public static LocString ISFUNCTIONAL = "Not operational";
-
-				public static LocString CANCURE = "Can cure";
-
-				public static LocString ISTANKLOW = "Tank not low";
-
-				public static LocString OWNSMATERIALS = "No resources available";
-
-				public static LocString ISFETCHTARGETAVAILABLE = "No retrievable items available";
-
-				public static LocString ISPERMITTED = "Job not allowed";
-			}
-		}
-
 		public class CREDITSSCREEN
 		{
 			public static LocString TITLE = "CREDITS";
@@ -2109,27 +2487,20 @@ namespace STRINGS
 
 		public class PRIORITYSCREEN
 		{
-			public class BUILDMENUPRIORITYTOOLTIP
-			{
-				public static LocString BASIC = "Set construction priority level" + UI.HORIZONTAL_BR_RULE + "Priority 1: Lowest\nPriority 9: Highest";
-			}
+			public static LocString BASIC = "Set the priority level for the selected building or errand" + UI.HORIZONTAL_BR_RULE + "1: Least Urgent\n9: Most Urgent";
 
-			public class TOOLPRIORITYTOOLTIP
-			{
-				public static LocString BASIC = "Set priority level for the currently selected tool" + UI.HORIZONTAL_BR_RULE + "Priority 1: Lowest\nPriority 9: Highest";
-			}
+			public static LocString HIGH = string.Empty;
 
-			public class USERMENUPRIORITYTOOLTIP
-			{
-				public static LocString BASIC = "Set priority level for the currently selected object" + UI.HORIZONTAL_BR_RULE + "Priority 1: Lowest\nPriority 9: Highest";
-			}
+			public static LocString EMERGENCY = string.Empty;
+
+			public static LocString HIGH_TOGGLE = string.Empty;
 		}
 
 		public class RESOURCESCREEN
 		{
 			public static LocString CATEGORY_TOOLTIP = "Counts all unallocated resources within reach" + UI.HORIZONTAL_BR_RULE + "Click to expand";
 
-			public static LocString AVAILABLE_TOOLTIP = "Available: {0}";
+			public static LocString AVAILABLE_TOOLTIP = "Available: {0}\n({1} of {2} allocated to pending errands)";
 		}
 
 		public class CONFIRMDIALOG
@@ -2144,6 +2515,17 @@ namespace STRINGS
 		public class FILE_NAME_DIALOG
 		{
 			public static LocString ENTER_TEXT = "Enter Text...";
+		}
+
+		public class MINION_IDENTITY_SORT
+		{
+			public static LocString TITLE = "Sort By";
+
+			public static LocString NAME = "Duplicant";
+
+			public static LocString ROLE = "Role";
+
+			public static LocString PERMISSION = "Permission";
 		}
 
 		public class UISIDESCREENS
@@ -2194,15 +2576,17 @@ namespace STRINGS
 
 				public static LocString SUBTITLE = "Recipes";
 
-				public static LocString NORECIPEDISCOVERED = "No recipes discovered";
+				public static LocString NORECIPEDISCOVERED = "No discovered recipes";
 
-				public static LocString NORECIPEDISCOVERED_BODY = "Look for new ingredients and materials in the world to unlock recipes.";
+				public static LocString NORECIPEDISCOVERED_BODY = "Discover new ingredients in the world to unlock some recipes.";
 
 				public static LocString NORECIPESELECTED = "No recipe selected";
 
 				public static LocString SELECTRECIPE = "Select a recipe to fabricate.";
 
 				public static LocString COST = "<b>Ingredients:</b>\n";
+
+				public static LocString RESULTREQUIREMENTS = "<b>Requirements:</b>";
 
 				public static LocString RESULTEFFECTS = "<b>Effects:</b>";
 
@@ -2290,12 +2674,6 @@ namespace STRINGS
 
 				public static LocString YIELD_SEED_SINGLE_FINAL_HARVEST = "<style=\"seed\">{0}</style> - Final harvest only";
 
-				public static LocString LOW_YIELD = "Standard [0+ points]:";
-
-				public static LocString NORMAL_YIELD = "Good [40+ points]:";
-
-				public static LocString HIGH_YIELD = "Excellent [80+ points]:";
-
 				public static LocString SELECTSEED_DESC = "Select a seed to plant.";
 
 				public static LocString SELECTSEED_TITLE = "SELECT";
@@ -2356,6 +2734,13 @@ namespace STRINGS
 				public static LocString ENTITYDEPOSITED = "PLANTED: {0}";
 
 				public static LocString ATTRACTS = "Attract {1}s";
+			}
+
+			public class ROLESTATION
+			{
+				public static LocString TITLE = "Job Assignments";
+
+				public static LocString OPENROLESBUTTON = "JOBS";
 			}
 
 			public class RESEARCHSIDESCREEN
@@ -2428,13 +2813,11 @@ namespace STRINGS
 			{
 				public static LocString TITLE = "Assign {0}";
 
-				public static LocString NEEDSREGION = "This {0} needs to be inside a {1} region";
+				public static LocString ASSIGNED = "Assigned";
 
-				public static LocString NEEDSREGIONS = "This {0} needs to be inside one of the following regions: {1}";
+				public static LocString UNASSIGNED = "-";
 
-				public static LocString ASSIGNEDTO = "Assigned to: {0}";
-
-				public static LocString UNASSIGNED = "Unassigned";
+				public static LocString DISABLED = "Ineligible";
 
 				public static LocString SORT_BY_DUPLICANT = "Duplicant";
 
@@ -2444,6 +2827,8 @@ namespace STRINGS
 
 				public static LocString UNASSIGN_TOOLTIP = "Assigned to {0}";
 
+				public static LocString DISABLED_TOOLTIP = "{0} is ineligible for this job assignment";
+
 				public static LocString PUBLIC = "Public";
 			}
 
@@ -2451,7 +2836,7 @@ namespace STRINGS
 			{
 				public static LocString TITLE = "Equip {0}";
 
-				public static LocString ASSIGNEDTO = "Assigned to: {0}";
+				public static LocString ASSIGNEDTO = "Assigned to: {Assignee}";
 
 				public static LocString UNASSIGNED = "Unassigned";
 
@@ -2523,11 +2908,15 @@ namespace STRINGS
 
 			public class TIME_RANGE_SIDE_SCREEN
 			{
-				public static LocString TITLE = "Time-of-Day Sensor";
+				public static LocString TITLE = "Time Schedule";
 
 				public static LocString ON = "Activation Time";
 
-				public static LocString DURATION = "Activation Duration";
+				public static LocString ON_TOOLTIP = "Activation time determines the time of day this sensor should enter its active duration" + UI.HORIZONTAL_BR_RULE + "This sensor becomes active {0} through the day";
+
+				public static LocString DURATION = "Active Duration";
+
+				public static LocString DURATION_TOOLTIP = "Active duration determines what percentage of the day this sensor will spend in an Active state" + UI.HORIZONTAL_BR_RULE + "This sensor will be active for {0} of the day";
 			}
 
 			public class TIMEDSWITCHSIDESCREEN
@@ -2591,18 +2980,28 @@ namespace STRINGS
 				public static LocString TEMPERATURE_TOOLTIP_ABOVE = "Switch will be on if the ambient temperature is above {0}";
 
 				public static LocString TEMPERATURE_TOOLTIP_BELOW = "Switch will be off if the ambient temperature is below {0}";
+
+				public static LocString DISEASE_TITLE = "Germ Threshold";
+
+				public static LocString DISEASE = "Disease";
+
+				public static LocString DISEASE_TOOLTIP_ABOVE = "Switch will be on if the number of germs is above {0}";
+
+				public static LocString DISEASE_TOOLTIP_BELOW = "Switch will be off if the number of germs is below {0}";
+
+				public static LocString DISEASE_UNITS = "germs";
 			}
 
 			public class CAPACITY_CONTROL_SIDE_SCREEN
 			{
-				public static LocString TITLE = "Capacity";
+				public static LocString TITLE = "Automated Storage Capacity";
 
 				public static LocString MAX_LABEL = "Max:";
 			}
 
 			public class DOOR_TOGGLE_SIDE_SCREEN
 			{
-				public static LocString TITLE = "Door Toggle";
+				public static LocString TITLE = "Door Setting";
 
 				public static LocString OPEN = "Door is open.";
 
@@ -2661,6 +3060,15 @@ namespace STRINGS
 
 				public static LocString CONFIG_DROP_SUIT_NO_SUIT_TOOLTIP = "There is no suit in this building to undock";
 			}
+
+			public class AUTOMATABLE_SIDE_SCREEN
+			{
+				public static LocString TITLE = "Automatable Storage";
+
+				public static LocString ALLOWMANUALBUTTON = "Allow Manual Use";
+
+				public static LocString ALLOWMANUALBUTTONTOOLTIP = "Allow Duplicants to manually manage these storage materials";
+			}
 		}
 
 		public class USERMENUACTIONS
@@ -2703,13 +3111,6 @@ namespace STRINGS
 				public static LocString NAME_OFF = "Cancel Empty";
 
 				public static LocString TOOLTIP_OFF = "Cancel this empty order";
-			}
-
-			public class OVERRIDETASK
-			{
-				public static LocString NAME = "Override Task";
-
-				public static LocString TOOLTIP = "Force this Duplicant to perform a specific task";
 			}
 
 			public class TAGFILTER
@@ -2898,7 +3299,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Copy Settings";
 
-				public static LocString TOOLTIP = "Apply the settings and priorities of this building to others of the same type";
+				public static LocString TOOLTIP = "Apply the settings and priorities of this building to other buildings of the same type";
 			}
 
 			public class CLEAR
@@ -3031,6 +3432,13 @@ namespace STRINGS
 				public static LocString NAME = "Base";
 
 				public static LocString TOOLTIP = "Maintain your colony's infrastructure with these homebase basics.";
+			}
+
+			public static class CONVEYANCE
+			{
+				public static LocString NAME = "Shipping";
+
+				public static LocString TOOLTIP = "Effortlessly transport ore and solid materials around your base.";
 			}
 
 			public static class OXYGEN
@@ -3210,31 +3618,9 @@ namespace STRINGS
 				public static LocString TOOLNAME = "Clean Up tools";
 			}
 
-			public class REGIONCATEGORY
-			{
-				public static LocString NAME = "Regions";
-
-				public static LocString TOOLNAME = "Region tool";
-
-				public static LocString CREATETOOLTIP = "DRAG TO CREATE";
-
-				public static LocString ERASETOOLTIP = "DRAG TO ERASE";
-
-				public static LocString MERGETOOLTIP = "DRAG TO MERGE";
-			}
-
 			public class PRIORITIESCATEGORY
 			{
 				public static LocString NAME = "Prioritize";
-			}
-
-			public class ERASEREGION
-			{
-				public static LocString NAME = "Clear Region";
-
-				public static LocString TOOLNAME = "Clear Region tool";
-
-				public static LocString TOOLACTION = "DRAG TO ERASE";
 			}
 
 			public class MARKFORSTORAGE
@@ -3279,13 +3665,6 @@ namespace STRINGS
 				public static LocString SPECIFIC_PRIORITY = "Set Priority: {0}";
 			}
 
-			public class EXOSUITREGION
-			{
-				public static LocString NAME = "Drag to designate an exosuit region";
-
-				public static LocString TOOLNAME = "Exosuit Region tool";
-			}
-
 			public class FILTERSCREEN
 			{
 				public static LocString OPTIONS = "Tool Filter";
@@ -3303,6 +3682,8 @@ namespace STRINGS
 
 				public static LocString GASPIPES = "Gas Pipes";
 
+				public static LocString SOLIDCONDUITS = "Conveyor Rails";
+
 				public static LocString DIGPLACER = "Dig Orders";
 
 				public static LocString CLEANANDCLEAR = "Sweep & Mop Orders";
@@ -3317,7 +3698,7 @@ namespace STRINGS
 
 				public static LocString LOGIC = "Automation";
 
-				public static LocString BACKWALL = "Backwall Buildings";
+				public static LocString BACKWALL = "Background Buildings";
 			}
 		}
 
@@ -3331,11 +3712,30 @@ namespace STRINGS
 
 				public static LocString GROUPNAME_ATTRIBUTES = "ATTRIBUTES";
 
+				public static LocString GROUPNAME_APTITUDES = "INTERESTS";
+
+				public static LocString GROUPNAME_STRESS = "TODAY'S STRESS";
+
 				public static LocString GROUPNAME_EXPECTATIONS = "EXPECTATIONS";
+
+				public static LocString GROUPNAME_PERKS = "JOB TRAINING";
 
 				public static LocString GROUPNAME_BIO = "ABOUT";
 
 				public static LocString GROUPNAME_TRAITS = "TRAITS";
+
+				public static LocString GROUPNAME_RESUME = "EMPLOYMENT HISTORY";
+
+				public class RESUME
+				{
+					public static LocString CURRENT_ROLE = "<b>Current Job:</b> {0}\n";
+
+					public static LocString MASTERED_ROLES = "<b>Mastered Jobs:</b>";
+
+					public static LocString MASTERED_ROLES_TOOLTIP = "All traits and expectations that a Duplicant learns on a job become permanent once that job is mastered." + UI.HORIZONTAL_BR_RULE + "Switching jobs will not remove these traits.";
+
+					public static LocString NO_MASTERED_ROLES = "None";
+				}
 			}
 
 			public class SIMPLEINFO
@@ -3379,9 +3779,11 @@ namespace STRINGS
 
 				public static LocString CONTENTS_TEMPERATURE = "{0} at {1}";
 
-				public static LocString CONTENTS_ROTTABLE = "\n\t• {0}";
+				public static LocString CONTENTS_ROTTABLE = "\n • {0}";
 
-				public static LocString CONTENTS_DISEASED = "\n\t• {0}";
+				public static LocString CONTENTS_DISEASED = "\n • {0}";
+
+				public static LocString NET_STRESS = "<b>Today's Net Stress: {0}%</b>";
 			}
 
 			public class ENERGYCONSUMER
@@ -3484,11 +3886,11 @@ namespace STRINGS
 				{
 					public static LocString AID_SYMPTOMS = "Treatable Symptoms:";
 
-					public static LocString AID_SYMPTOMS_TOOLTIP = "These symptoms are eliminated while a Duplicant is receiving medical aid in a Med-Bed";
+					public static LocString AID_SYMPTOMS_TOOLTIP = "These symptoms are eliminated while a Duplicant is in a Med-Bed receiving medical care";
 
 					public static LocString SYMPTOMS = "Other Symptoms:";
 
-					public static LocString SYMPTOMS_TOOLTIP = "These symptoms must run their course and cannot be alleviated by medical aid";
+					public static LocString SYMPTOMS_TOOLTIP = "These symptoms must run their course and cannot be alleviated by medical care";
 
 					public static LocString SOURCE_SUFFIX = "{0}";
 
@@ -3506,9 +3908,9 @@ namespace STRINGS
 
 					public static LocString DURATION_NORMAL_TOOLTIP = "Duplicants recover from this illness in {0}";
 
-					public static LocString DURATION_AIDREQ = "    {0} (aid required)";
+					public static LocString DURATION_AIDREQ = "    {0} (Medical care required)";
 
-					public static LocString DURATION_AIDREQ_TOOLTIP = "Duplicants recover from this illness in {0} with medical aid" + UI.HORIZONTAL_BR_RULE + "Without aid, they are infected indefinitely";
+					public static LocString DURATION_AIDREQ_TOOLTIP = "Treated Duplicants recover from this illness in {0}" + UI.HORIZONTAL_BR_RULE + "Without medical care, they will be infected indefinitely";
 				}
 
 				public class DETAILS
@@ -3608,7 +4010,7 @@ namespace STRINGS
 						{
 							public static LocString TITLE = "    • <b>Overpopulated: {0}</b>";
 
-							public static LocString TOOLTIP = "Too many germs are present in this area, resulting in rapid die-off until the population stabilizes\n\nA maximum of {0} germs can be on this {1} of material.\n({2} germs/Kg)";
+							public static LocString TOOLTIP = "Too many germs are present in this area, resulting in rapid die-off until the population stabilizes\n\nA maximum of {0} can be on this {1} of material.\n({2} germs/Kg)";
 						}
 					}
 				}
@@ -3691,6 +4093,10 @@ namespace STRINGS
 
 			public static LocString REQUIRESSEED = "1 Unplanted <style=\"seed\">Seed</style>";
 
+			public static LocString PREFERS_ROOM = "Preferred Room: {0}";
+
+			public static LocString REQUIRESROOM = "Dedicated Room: {0}";
+
 			public static LocString ALLOWS_FERTILIZER = "Plant <style=\"solid\">Fertilization</style>";
 
 			public static LocString ALLOWS_IRRIGATION = "Plant <style=\"liquid\">Liquid</style>";
@@ -3703,7 +4109,9 @@ namespace STRINGS
 
 			public static LocString OPERATIONEFFECTS = "<b>Effects:</b>";
 
-			public static LocString BATTERYEFFECT = "<style=\"power\">Power</style> capacity: {0}";
+			public static LocString BATTERYCAPACITY = "<style=\"power\">Power</style> capacity: {0}";
+
+			public static LocString BATTERYLEAK = "<style=\"power\">Power</style> runoff: {0}";
 
 			public static LocString STORAGECAPACITY = "Storage capacity: {0}";
 
@@ -3745,6 +4153,8 @@ namespace STRINGS
 
 			public static LocString OVERHEAT_TEMP = "Overheat <style=\"heat\">Temperature</style>: {0}";
 
+			public static LocString MINIMUM_TEMP = "Freeze <style=\"heat\">Temperature</style>: {0}";
+
 			public static LocString OVER_PRESSURE_MASS = "Over Pressure: {0}";
 
 			public static LocString REFILLOXYGENTANK = "Refills <style=\"equipment\">Exosuit Oxygen Tank</style>";
@@ -3757,13 +4167,15 @@ namespace STRINGS
 
 			public static LocString REMOVEDEFFECT = "<style=\"disease\">{0}</style>";
 
-			public static LocString ADDED_EFFECT = "<style=\"disease\">{0}</style>";
+			public static LocString ADDED_EFFECT = "Added Effect: <style=\"disease\">{0}</style>";
 
 			public static LocString GASCOOLING = "<style=\"heat\">Cooling factor:</style> <style=\"consumed\">{0}</style>";
 
 			public static LocString LIQUIDCOOLING = "<style=\"heat\">Cooling factor:</style> <style=\"consumed\">{0}</style>";
 
 			public static LocString MAX_WATTAGE = "Max <style=\"power\">Power</style>: {0}";
+
+			public static LocString RESEARCH_MATERIALS = "<style={0}>{1}</style>: {2} per <style=\"research\">Research</style> point";
 
 			public static LocString PRODUCES_RESEARCH_POINTS = "{0}";
 
@@ -3778,6 +4190,10 @@ namespace STRINGS
 			public static LocString COOLANT = "Coolant: {1} {0}";
 
 			public static LocString REFINEMENT_ENERGY = "Heat: {0}";
+
+			public static LocString IMPROVED_BUILDINGS = "Improved Buildings";
+
+			public static LocString IMPROVED_BUILDINGS_ITEM = "<style=\"{0}\">{1}</style>";
 
 			public static LocString ITEM_TEMPERATURE_ADJUST = "Stored <style=\"heat\">Temperature</style>: {0}";
 
@@ -3811,6 +4227,10 @@ namespace STRINGS
 
 				public static LocString REQUIRESSEED = "Must receive a plant seed";
 
+				public static LocString PREFERS_ROOM = "This building gains additional effects or functionality when built inside a {0}";
+
+				public static LocString REQUIRESROOM = "Must be built within a Dedicated Room" + UI.HORIZONTAL_BR_RULE + "Room will become a {0} after construction";
+
 				public static LocString ALLOWS_FERTILIZER = "Allows fertilizer to be delivered to plants";
 
 				public static LocString ALLOWS_IRRIGATION = "Allows liquids to be delivered to plants";
@@ -3821,7 +4241,9 @@ namespace STRINGS
 
 				public static LocString OPERATIONEFFECTS = "The building will produce these effects when its requirements are met";
 
-				public static LocString BATTERYEFFECT = "Can hold {0} of power when connected to a generator";
+				public static LocString BATTERYCAPACITY = "Can hold {0} of power when connected to a generator";
+
+				public static LocString BATTERYLEAK = "Imperfect buildings materials mean {0} battery charge will be lost as heat";
 
 				public static LocString STORAGECAPACITY = "Holds up to {0} of material";
 
@@ -3861,6 +4283,8 @@ namespace STRINGS
 
 				public static LocString OVERHEAT_TEMP = "Begins overheating at {0} and melts down at {1}";
 
+				public static LocString MINIMUM_TEMP = "Ceases to function when temperatures fall below {0}";
+
 				public static LocString OVER_PRESSURE_MASS = "Ceases to function when the surrounding mass is above {0}";
 
 				public static LocString REFILLOXYGENTANK = "Refills Exosuit Oxygen Tanks with oxygen for reuse";
@@ -3873,7 +4297,7 @@ namespace STRINGS
 
 				public static LocString REMOVEDEFFECT = "{0}";
 
-				public static LocString ADDED_EFFECT = "{0}";
+				public static LocString ADDED_EFFECT = "Effect being applied:\n\n{0}\n{1}";
 
 				public static LocString GASCOOLING = "Reduces the temperature of piped gases by {0}";
 
@@ -3881,23 +4305,29 @@ namespace STRINGS
 
 				public static LocString MAX_WATTAGE = "Drawing more than the maximum allowed power can result in damage to the circuit";
 
+				public static LocString RESEARCH_MATERIALS = "This research station consumes {2} of {1} for each research point produced";
+
 				public static LocString PRODUCES_RESEARCH_POINTS = "Produces {0} research";
 
 				public static LocString REMOVES_DISEASE = "Cooking pasteurizes ingredients and removes their disease risk";
 
 				public static LocString DOCTORING = "Doctoring increases existing health benefits and can allow treatment of otherwise stubborn diseases";
 
-				public static LocString HEATGENERATED_AIRCONDITIONER = "Generates heat based on the volume, temperature, and specific heat capacity of the pumped gas\n\nCooling 1 Kg of room temperature oxygen will output {0} per second";
+				public static LocString HEATGENERATED_AIRCONDITIONER = "Generates heat based on the volume, temperature, and specific heat capacity of the pumped gas" + UI.HORIZONTAL_BR_RULE + "Cooling 1 Kg of room temperature oxygen will output {0} per second";
 
-				public static LocString HEATGENERATED_LIQUIDCONDITIONER = "Generates heat based on the volume, temperature, and specific heat capacity of the pumped liquid\n\nCooling 1 Kg of room temperature water will output {0} per second";
+				public static LocString HEATGENERATED_LIQUIDCONDITIONER = "Generates heat based on the volume, temperature, and specific heat capacity of the pumped liquid" + UI.HORIZONTAL_BR_RULE + "Cooling 1 Kg of room temperature water will output {0} per second";
 
-				public static LocString MOVEMENT_BONUS = "Increases the run speed of Duplicants";
+				public static LocString MOVEMENT_BONUS = "Increases the Runspeed of Duplicants";
 
-				public static LocString COOLANT = "This building will require {1} of {0} for use as coolant each time it finishes processing an order\n\nThe temperature of the coolant will be raised depending on how much energy was required to cool the product";
+				public static LocString COOLANT = "{1} of {0} coolant is required to cool off an item produced by this building" + UI.HORIZONTAL_BR_RULE + "Coolant temperature increase is variable and dictated by the amount of energy needed to cool the produced item";
 
-				public static LocString REFINEMENT_ENERGY_HAS_COOLANT = "Cooling the output materials will produce {0} of heat, which will raise the temperature of the contained {1} by {2} along with warming the building.";
+				public static LocString REFINEMENT_ENERGY_HAS_COOLANT = "{0} of heat will be produced to cool off the fabricated item\n\nThis will raise the temperature of the contained {1} by {2}, and heat the containing building";
 
-				public static LocString REFINEMENT_ENERGY_NO_COOLANT = "Cooling the output materials will produce {0} of heat. If {1} was used for coolant, its temperature would be raised by {2} along with warming the building.";
+				public static LocString REFINEMENT_ENERGY_NO_COOLANT = "{0} of heat will be produced to cool off the fabricated item\n\nIf {1} is used for coolant, its temperature will be raised by {2}, and will heat the containing building";
+
+				public static LocString IMPROVED_BUILDINGS = "Tune Ups will improve these buildings:";
+
+				public static LocString IMPROVED_BUILDINGS_ITEM = "<style=\"{0}\">{1}</style>";
 
 				public static LocString NOISE_POLLUTION_INCREASE = "Produces noise at {0} dB in a {1} tile radius";
 
@@ -3984,9 +4414,9 @@ namespace STRINGS
 
 			public static LocString REQUIRES_RECEPTACLE = "Farm Plot";
 
-			public static LocString PLANT_MARK_FOR_HARVEST = "Enable Harvest";
+			public static LocString PLANT_MARK_FOR_HARVEST = "Autoharvest Enabled";
 
-			public static LocString PLANT_DO_NOT_HARVEST = "Disable Harvest";
+			public static LocString PLANT_DO_NOT_HARVEST = "Autoharvest Disabled";
 
 			public class TOOLTIPS
 			{
@@ -4069,7 +4499,7 @@ namespace STRINGS
 		{
 			public static LocString CYCLE = "Cycle";
 
-			public static LocString CYCLES_OLD = "This Colony is {0} Cycles Old";
+			public static LocString CYCLES_OLD = "This Colony is {0} Cycle(s) Old";
 
 			public static LocString TIME_PLAYED = "Time Played: {0} hours";
 		}
@@ -4143,7 +4573,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Time Breakdown:";
 
-				public static LocString POSITIVE_TOOLTIP = "Your Duplicants spent a total of {0} doing all tasks over the course of the day";
+				public static LocString POSITIVE_TOOLTIP = "Your Duplicants spent a total of {0} doing errands over the course of the day";
 			}
 
 			public class ENERGY_USAGE
@@ -4269,7 +4699,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Work";
 
-				public static LocString DESCRIPTION = "WORK:\nDuring Work hours Duplicants will perform any pending job tasks in the colony.";
+				public static LocString DESCRIPTION = "WORK:\nDuring Work hours Duplicants will perform any pending errands in the colony.";
 			}
 
 			public static class RECREATION

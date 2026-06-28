@@ -254,7 +254,44 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Trap Components";
 
-				public static LocString DESC = "These components can be assembled into an Animal Trap and used to catch creatures.";
+				public static LocString DESC = "These components can be assembled into an Animal Trap and used to catch <style=\"creature\">Creatures</style>.";
+			}
+
+			public class POWER_STATION_TOOLS
+			{
+				public static LocString NAME = "Microchip";
+
+				public static LocString DESC = "A specialized <style=\"misc\">Microchip</style> created by a professional engineer.\n\nTunes up generators to increase their <style=\"power\">Power</style> output.";
+
+				public static LocString TINKER_REQUIREMENT_NAME = "Job: " + DUPLICANTS.ROLES.POWER_TECHNICIAN.NAME;
+
+				public static LocString TINKER_REQUIREMENT_TOOLTIP = "Can only be used by the " + DUPLICANTS.ROLES.POWER_TECHNICIAN.NAME + " to apply a Tune Up.";
+
+				public static LocString TINKER_EFFECT_NAME = "Engie's Tune-Up: {0} {1}";
+
+				public static LocString TINKER_EFFECT_TOOLTIP = "Can be used to Tune Up a generator, increasing its {0} by {1}.";
+			}
+
+			public class FARM_STATION_TOOLS
+			{
+				public static LocString NAME = "Micronutrient Fertilizer";
+
+				public static LocString DESC = "Specialized <style=\"solid\">Fertilizer</style> mixed by a professional farmer.\n\nIncreases the growth rate of one <style=\"plant\">Plant</style>.";
+			}
+
+			public class MACHINE_PARTS
+			{
+				public static LocString NAME = "Custom Parts";
+
+				public static LocString DESC = "Specialized <style=\"misc\">Parts</style> crafted by a professional engineer.\n\nJerryrigs machine buildings to increase their efficiency.";
+
+				public static LocString TINKER_REQUIREMENT_NAME = "Job: " + DUPLICANTS.ROLES.MECHATRONIC_ENGINEER.NAME;
+
+				public static LocString TINKER_REQUIREMENT_TOOLTIP = "Can only be used by the " + DUPLICANTS.ROLES.MECHATRONIC_ENGINEER.NAME + " to apply a Jerryrig.";
+
+				public static LocString TINKER_EFFECT_NAME = "Engie's Jerryrig: {0} {1}";
+
+				public static LocString TINKER_EFFECT_TOOLTIP = "Can be used to Jerryrig upgrades to a machine building, increasing its {0} by {1}.";
 			}
 		}
 	}

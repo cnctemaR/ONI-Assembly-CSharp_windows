@@ -6,7 +6,7 @@ public class Glom : StateMachineComponent<Glom.StatesInstance>
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		Vector3 position = base.transform.position;
+		Vector3 position = base.transform.GetPosition();
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Move);
 		base.transform.SetPosition(position);
 		this.Heading = Vector2.right;
@@ -63,9 +63,9 @@ public class Glom : StateMachineComponent<Glom.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.embedded;
-			this.embedded.Update(delegate(Glom.StatesInstance smi)
+			this.embedded.Update(delegate(Glom.StatesInstance smi, float dt)
 			{
-				if (!Grid.Solid[Grid.PosToCell(smi.transform.position)])
+				if (!Grid.Solid[Grid.PosToCell(smi.transform.GetPosition())])
 				{
 					smi.GoTo(this.fall);
 				}
@@ -78,9 +78,9 @@ public class Glom : StateMachineComponent<Glom.StatesInstance>
 				{
 					this.mover.Set(smi.master.gameObject, smi);
 				});
-			this.alive.grounded.Update(delegate(Glom.StatesInstance smi)
+			this.alive.grounded.Update(delegate(Glom.StatesInstance smi, float dt)
 			{
-				int num = Grid.PosToCell(smi.transform.position + Vector3.down);
+				int num = Grid.PosToCell(smi.transform.GetPosition() + Vector3.down);
 				if (Grid.IsValidCell(num) && !Grid.Solid[num])
 				{
 					smi.GoTo(this.fall);

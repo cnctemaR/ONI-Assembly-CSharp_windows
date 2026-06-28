@@ -107,7 +107,7 @@ public class ConduitConsumer : KMonoBehaviour
 		this.utilityCell = this.building.GetUtilityInputCell();
 		ScenePartitionerLayer scenePartitionerLayer = GameScenePartitioner.Instance.objectLayers[(this.conduitType != ConduitType.Gas) ? 16 : 12];
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("ConduitConsumer.OnSpawn", base.gameObject, this.utilityCell, scenePartitionerLayer, new Action<object>(this.OnConduitConnectionChanged));
-		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlow.Priority.Default);
+		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Default);
 		this.OnConduitConnectionChanged(null);
 	}
 
@@ -199,7 +199,7 @@ public class ConduitConsumer : KMonoBehaviour
 					else if (num4 > 0f && this.wrongElementResult == ConduitConsumer.WrongElementResult.Dump)
 					{
 						int num6 = (int)((float)contents.diseaseCount * (num4 / contents.mass));
-						int num7 = Grid.PosToCell(base.transform.position);
+						int num7 = Grid.PosToCell(base.transform.GetPosition());
 						SimMessages.AddRemoveSubstance(num7, contents.element, CellEventLogger.Instance.ConduitConsumerWrongElement, num4, contents.temperature, contents.diseaseIdx, num6, -1);
 					}
 				}
@@ -241,9 +241,6 @@ public class ConduitConsumer : KMonoBehaviour
 
 	[MyCmpReq]
 	private Building building;
-
-	[MyCmpGet]
-	private Upgradable upgradable;
 
 	[MyCmpGet]
 	public Storage storage;

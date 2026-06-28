@@ -63,6 +63,7 @@ public class OverlayScreen : KMonoBehaviour
 		this.RegisterMode(new Rooms());
 		this.RegisterMode(new Suit(this.powerLabelParent, this.suitOverlayPrefab));
 		this.RegisterMode(new Logic(this.logicModeUIPrefab));
+		this.RegisterMode(new SolidConveyorMode());
 		IEnumerator enumerator = Enum.GetValues(typeof(SimViewMode)).GetEnumerator();
 		try
 		{
@@ -91,7 +92,7 @@ public class OverlayScreen : KMonoBehaviour
 		this.modes[mode.ViewMode()] = mode;
 	}
 
-	private void Update()
+	private void LateUpdate()
 	{
 		this.currentMode.Update();
 	}
@@ -149,7 +150,7 @@ public class OverlayScreen : KMonoBehaviour
 
 	public void Refresh()
 	{
-		this.Update();
+		this.LateUpdate();
 	}
 
 	public SimViewMode GetMode()
@@ -178,6 +179,8 @@ public class OverlayScreen : KMonoBehaviour
 	public static HashSet<Tag> DiseaseIDs = new HashSet<Tag>();
 
 	public static HashSet<Tag> SuitIDs = new HashSet<Tag>();
+
+	public static HashSet<Tag> SolidConveyorIDs = new HashSet<Tag>();
 
 	[EventRef]
 	[SerializeField]

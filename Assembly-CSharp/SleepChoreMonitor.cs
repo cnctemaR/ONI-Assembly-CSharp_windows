@@ -59,15 +59,15 @@ public class SleepChoreMonitor : GameStateMachine<SleepChoreMonitor, SleepChoreM
 		public void UpdateBed()
 		{
 			Ownables component = base.sm.masterTarget.Get(base.smi).GetComponent<Ownables>();
-			Assignable assignable = component.GetAssignable(Db.Get().OwnableSlots.MedicalBed);
+			Assignable assignable = component.GetAssignable(Db.Get().AssignableSlots.MedicalBed);
 			Assignable assignable2;
-			if (assignable != null && assignable.CanAutoAssignTo(base.gameObject.GetComponent<Worker>()))
+			if (assignable != null && assignable.CanAutoAssignTo(base.gameObject.GetComponent<MinionIdentity>()))
 			{
 				assignable2 = assignable;
 			}
 			else
 			{
-				assignable2 = component.GetAssignable(Db.Get().OwnableSlots.Bed);
+				assignable2 = component.GetAssignable(Db.Get().AssignableSlots.Bed);
 			}
 			base.smi.sm.bed.Set(assignable2, base.smi);
 		}
@@ -75,11 +75,10 @@ public class SleepChoreMonitor : GameStateMachine<SleepChoreMonitor, SleepChoreM
 		public void AutoAssignBed()
 		{
 			Ownables component = base.sm.masterTarget.Get(base.smi).GetComponent<Ownables>();
-			Navigator component2 = component.GetComponent<Navigator>();
-			Assignable assignable = component.AutoAssignSlot(component2, Db.Get().OwnableSlots.Bed);
-			Assignable assignable2 = component.GetAssignable(Db.Get().OwnableSlots.MedicalBed);
+			Assignable assignable = component.AutoAssignSlot(Db.Get().AssignableSlots.Bed);
+			Assignable assignable2 = component.GetAssignable(Db.Get().AssignableSlots.MedicalBed);
 			Assignable assignable3;
-			if (assignable2 != null && assignable2.CanAutoAssignTo(base.gameObject.GetComponent<Worker>()))
+			if (assignable2 != null && assignable2.CanAutoAssignTo(base.gameObject.GetComponent<MinionIdentity>()))
 			{
 				assignable3 = assignable2;
 			}
@@ -98,7 +97,7 @@ public class SleepChoreMonitor : GameStateMachine<SleepChoreMonitor, SleepChoreM
 		public bool IsBedReachable()
 		{
 			AssignableReachabilitySensor sensor = base.GetComponent<Sensors>().GetSensor<AssignableReachabilitySensor>();
-			return sensor.IsReachable(Db.Get().OwnableSlots.Bed) || sensor.IsReachable(Db.Get().OwnableSlots.MedicalBed);
+			return sensor.IsReachable(Db.Get().AssignableSlots.Bed) || sensor.IsReachable(Db.Get().AssignableSlots.MedicalBed);
 		}
 	}
 }

@@ -10,20 +10,19 @@ public class OilRefineryConfig : IBuildingConfig
 		int num = 4;
 		int num2 = 4;
 		string text2 = "oilrefinery_kanim";
-		float num3 = 100f;
-		int num4 = 30;
-		float num5 = 30f;
+		int num3 = 30;
+		float num4 = 30f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num6 = 800f;
+		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER3;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
 		buildingDef.EnergyConsumptionWhenActive = 480f;
 		buildingDef.ExhaustKilowattsWhenActive = 2f;
-		buildingDef.OperatingKilowatts = 8f;
+		buildingDef.SelfHeatKilowattsWhenActive = 8f;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "HollowMetal";
@@ -34,7 +33,7 @@ public class OilRefineryConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;

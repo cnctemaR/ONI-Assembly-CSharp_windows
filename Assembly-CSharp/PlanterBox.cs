@@ -3,12 +3,6 @@
 [SkipSaveFileSerialization]
 public class PlanterBox : StateMachineComponent<PlanterBox.SMInstance>
 {
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FetchCritical;
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();

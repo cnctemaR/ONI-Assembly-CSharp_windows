@@ -4,7 +4,7 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ReceptacleSideScreen : SideScreenContent
+public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 {
 	public override string GetTitle()
 	{
@@ -102,7 +102,7 @@ public class ReceptacleSideScreen : SideScreenContent
 		this.onStorageChangedHandle = this.targetReceptacle.gameObject.Subscribe(-1697596308, new Action<object>(this.CheckAmountsAndUpdate));
 		this.onOccupantValidChangedHandle = this.targetReceptacle.gameObject.Subscribe(-1820564715, new Action<object>(this.OnOccupantValidChanged));
 		this.UpdateState(null);
-		this.handle = GameScheduler.Instance.SchedulePeriodic("CheckAmountsUpdate", 1f, new Action<object>(this.CheckAmountsAndUpdate), null, null, 0f, null);
+		SimAndRenderScheduler.instance.Add(this, false);
 	}
 
 	private void UpdateState(object data)
@@ -247,12 +247,6 @@ public class ReceptacleSideScreen : SideScreenContent
 		this.activeEntityContainer.SetActive(!Show);
 	}
 
-	protected override void OnCleanUp()
-	{
-		this.handle.ClearScheduler();
-		base.OnCleanUp();
-	}
-
 	private void ConfigureActiveEntity(Tag tag)
 	{
 		GameObject prefab = Assets.GetPrefab(tag);
@@ -297,7 +291,7 @@ public class ReceptacleSideScreen : SideScreenContent
 			{
 				this.targetReceptacle.SetPreview(Tag.Invalid, false);
 			}
-			this.handle.ClearScheduler();
+			SimAndRenderScheduler.instance.Remove(this);
 			this.targetReceptacle = null;
 		}
 	}
@@ -323,6 +317,11 @@ public class ReceptacleSideScreen : SideScreenContent
 			toggle.gameObject.GetComponentInChildrenOnly<Image>().material = this.desaturatedMaterial;
 			break;
 		}
+	}
+
+	public void Render1000ms(float dt)
+	{
+		this.CheckAmountsAndUpdate(null);
 	}
 
 	private void CheckAmountsAndUpdate(object data)
@@ -502,8 +501,6 @@ public class ReceptacleSideScreen : SideScreenContent
 	private int onOccupantValidChangedHandle = -1;
 
 	private int onStorageChangedHandle = -1;
-
-	private SchedulerHandle handle;
 
 	protected class SelectableEntity
 	{

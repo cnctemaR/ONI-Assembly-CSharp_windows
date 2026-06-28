@@ -48,19 +48,15 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		if (SimTemperatureTransfer.handleInstanceMap.TryGetValue(sim_handle, out simTemperatureTransfer))
 		{
 			SimTemperatureTransfer simTemperatureTransfer2 = SimTemperatureTransfer.handleInstanceMap[sim_handle];
-			if (simTemperatureTransfer2 != null)
+			if (simTemperatureTransfer2 != null && !simTemperatureTransfer2.HasTag(GameTags.Sealed))
 			{
-				Pickupable component = simTemperatureTransfer2.GetComponent<Pickupable>();
-				if (component == null || component.storage == null || !component.storage.HasStoredItemModifier(Storage.StoredItemModifier.Seal))
+				PrimaryElement component = simTemperatureTransfer2.GetComponent<PrimaryElement>();
+				Element element = component.Element;
+				if (element.highTempTransitionTarget != SimHashes.Unobtanium)
 				{
-					PrimaryElement component2 = simTemperatureTransfer2.GetComponent<PrimaryElement>();
-					Element element = component2.Element;
-					if (element.highTempTransitionTarget != SimHashes.Unobtanium)
-					{
-						int num = Grid.PosToCell(simTemperatureTransfer2.transform.position);
-						SimMessages.AddRemoveSubstance(num, element.highTempTransitionTarget, CellEventLogger.Instance.OreMelted, component2.Mass, component2.Temperature, component2.DiseaseIdx, component2.DiseaseCount, -1);
-						Util.KDestroyGameObject(simTemperatureTransfer2.gameObject);
-					}
+					int num = Grid.PosToCell(simTemperatureTransfer2.transform.GetPosition());
+					SimMessages.AddRemoveSubstance(num, element.highTempTransitionTarget, CellEventLogger.Instance.OreMelted, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, -1);
+					Util.KDestroyGameObject(simTemperatureTransfer2.gameObject);
 				}
 			}
 		}
@@ -80,7 +76,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		base.OnSpawn();
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		Element element = component.Element;
-		CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChanged), false);
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged));
 		if (component.Element.HasTag(GameTags.Special) || element.specificHeatCapacity == 0f)
 		{
 			base.enabled = false;
@@ -110,21 +106,18 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		base.OnCmpDisable();
 	}
 
-	private void OnCellChanged(int previous_cell, int cell)
+	private void OnCellChanged()
 	{
-		if (cell == previous_cell)
-		{
-			return;
-		}
+		int num = Grid.PosToCell(this);
 		if (Sim.IsValidHandle(this.simHandle))
 		{
-			SimMessages.MoveElementChunk(this.simHandle, cell);
+			SimMessages.MoveElementChunk(this.simHandle, num);
 		}
 	}
 
 	protected override void OnCleanUp()
 	{
-		CellChangeMonitor.Instance.Remove(this, new Action<int, int>(this.OnCellChanged), false);
+		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged));
 		this.SimUnregister();
 		base.OnForcedCleanUp();
 	}
@@ -161,7 +154,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 	{
 		if (temperature <= 0f)
 		{
-			KCrashReporter.Assert(false, "Invalid temperature");
+			KCrashReporter.Assert(false, "STT.OnSetTemperature - Tried to set <= 0 degree temperature");
 			temperature = 293f;
 		}
 		SimTemperatureTransfer component = primary_element.GetComponent<SimTemperatureTransfer>();
@@ -197,7 +190,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 				Element element = component.Element;
 				if (!element.IsTemperatureInsulated)
 				{
-					int num = Grid.PosToCell(base.transform.position);
+					int num = Grid.PosToCell(base.transform.GetPosition());
 					this.simHandle = -2;
 					HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object data)
 					{

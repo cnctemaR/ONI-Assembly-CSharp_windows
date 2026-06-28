@@ -10,9 +10,9 @@ public class InfiniteGenerator : Generator
 		}
 	}
 
-	protected override void SimUpdate(float dt)
+	public override void EnergySim200ms(float dt)
 	{
-		base.SimUpdate(dt);
+		base.EnergySim200ms(dt);
 		this.ApplyDeltaJoules(base.WattageRating * dt, false);
 	}
 }

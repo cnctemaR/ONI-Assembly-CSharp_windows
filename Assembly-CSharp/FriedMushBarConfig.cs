@@ -12,7 +12,7 @@ public class FriedMushBarConfig : IEntityConfig
 		string text = "FriedMushBar";
 		string text2 = ITEMS.FOOD.FRIEDMUSHBAR.RECIPEDESC;
 		Recipe recipe = new Recipe(text, 1f, (SimHashes)0, null, text2, 1).SetFabricator("CookingStation", FOOD.RECIPES.STANDARD_COOK_TIME);
-		recipe.AddIngredient(new Recipe.Ingredient("MushBar", 2f));
+		recipe.AddIngredient(new Recipe.Ingredient("MushBar", 1f));
 		return gameObject;
 	}
 

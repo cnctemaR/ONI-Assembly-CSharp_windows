@@ -36,8 +36,8 @@ public class Notifier : KMonoBehaviour
 				notification.NotifierName = "• " + base.name + suffix;
 			}
 			notification.Notifier = this;
-			notification.Position = base.transform.position;
-			if (notification.Group.IsValid() && notification.Group != string.Empty)
+			notification.Position = base.transform.GetPosition();
+			if (notification.Group.IsValid && notification.Group != string.Empty)
 			{
 				if (this.NotificationGroups == null)
 				{
@@ -69,7 +69,7 @@ public class Notifier : KMonoBehaviour
 		if (notification.Notifier != null)
 		{
 			notification.Notifier = null;
-			if (this.NotificationGroups != null && notification.Group.IsValid() && notification.Group != string.Empty)
+			if (this.NotificationGroups != null && notification.Group.IsValid && notification.Group != string.Empty)
 			{
 				this.NotificationGroups.Remove(notification.Group);
 			}

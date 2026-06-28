@@ -16,7 +16,7 @@ public class PuftConfig : IEntityConfig
 		string text4 = "idle_loop";
 		EffectorValues tier = DECOR.BONUS.TIER0;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, 25f, "FlyerNavGrid1x1", NavType.Hover, 2f, "Meat", 1, true, true, 30f, 302f, 318f, 243f, 343f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, 25f, "FlyerNavGrid1x1", NavType.Hover, 32, 2f, "Meat", 1, true, true, 30f, 302f, 318f, 243f, 343f);
 		Puft puft = gameObject.UpdateComponentRequirement<Puft>(true);
 		puft.consumedElement = SimHashes.ContaminatedOxygen;
 		puft.consumptionRate = 0.25f;

@@ -34,9 +34,9 @@ public class RedAlertMonitor : GameStateMachine<RedAlertMonitor, RedAlertMonitor
 				if (currentChore != null)
 				{
 					bool flag = false;
-					for (int i = 0; i < currentChore.preconditions.Count; i++)
+					for (int i = 0; i < currentChore.GetPreconditions().Count; i++)
 					{
-						if (currentChore.preconditions[i].id == ChorePreconditions.IsNotRedAlert.id)
+						if (currentChore.GetPreconditions()[i].id == ChorePreconditions.instance.IsNotRedAlert.id)
 						{
 							flag = true;
 						}

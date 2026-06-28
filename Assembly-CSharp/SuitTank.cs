@@ -106,7 +106,7 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 		}
 		gas_consumed = Mathf.Min(gas_consumed, this.amount);
 		this.amount -= gas_consumed;
-		oxygen_breather.o2Accumulator.Accumulate(gas_consumed);
+		Game.Instance.accumulators.Accumulate(oxygen_breather.O2Accumulator, gas_consumed);
 		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, -gas_consumed, oxygen_breather.GetProperName(), null);
 		return true;
 	}

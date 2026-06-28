@@ -10,22 +10,20 @@ public class MedicalCotConfig : IBuildingConfig
 		int num = 3;
 		int num2 = 2;
 		string text2 = "medical_cot_kanim";
-		float num3 = 200f;
-		int num4 = 10;
-		float num5 = 10f;
+		int num3 = 10;
+		float num4 = 10f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.NONE, none);
-		buildingDef.HotKey = global::Action.BuildMenuKeyB;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.AudioCategory = "Metal";
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.Clinic);
@@ -48,11 +46,17 @@ public class MedicalCotConfig : IBuildingConfig
 		clinic.diseaseEffect = text;
 		clinic.doctoredDiseaseEffect = text2;
 		clinic.doctoredPlaceholderEffect = "DoctoredOffCotEffect";
+		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
+		roomTracker.requiredRoomType = Db.Get().RoomTypes.Hospital.Id;
+		roomTracker.requirement = RoomTracker.Requirement.CustomRecommended;
+		roomTracker.customStatusItemID = Db.Get().BuildingStatusItems.ClinicOutsideHospital.Id;
 		Sleepable sleepable = go.AddOrGet<Sleepable>();
 		sleepable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_med_cot_sick_kanim") };
 		DoctorChore doctorChore = go.AddOrGet<DoctorChore>();
 		doctorChore.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_med_cot_doctor_kanim") };
 		doctorChore.workTime = 45f;
+		Ownable ownable = go.AddOrGet<Ownable>();
+		ownable.slotID = Db.Get().AssignableSlots.Clinic.Id;
 	}
 
 	public const string ID = "MedicalCot";

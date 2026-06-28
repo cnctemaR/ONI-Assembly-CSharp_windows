@@ -14,12 +14,11 @@ namespace Klei.AI
 
 		protected override void OnSpawn()
 		{
-			Modifiers component = base.GetComponent<Modifiers>();
 			foreach (string text in this.TraitIds)
 			{
-				if (component.modifierSet.traits.Exists(text))
+				if (Db.Get().traits.Exists(text))
 				{
-					Trait trait = component.modifierSet.traits.Get(text);
+					Trait trait = Db.Get().traits.Get(text);
 					this.AddInternal(trait);
 				}
 			}

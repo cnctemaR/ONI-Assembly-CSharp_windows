@@ -21,7 +21,7 @@ public class PowerTransformer : Generator
 	{
 		get
 		{
-			return Math.Min(this.battery.JoulesAvailable, base.WattageRating * 0.25f);
+			return Math.Min(this.battery.JoulesAvailable, base.WattageRating * 0.2f);
 		}
 	}
 

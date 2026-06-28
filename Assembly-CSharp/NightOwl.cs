@@ -87,7 +87,7 @@ public class NightOwl : StateMachineComponent<NightOwl.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.idle;
-			this.idle.Transition(this.early, (NightOwl.StatesInstance smi) => smi.IsNight());
+			this.idle.Transition(this.early, (NightOwl.StatesInstance smi) => smi.IsNight(), UpdateRate.SIM_200ms);
 			this.early.Enter("Night", delegate(NightOwl.StatesInstance smi)
 			{
 				smi.master.ApplyModifiers();
@@ -96,7 +96,7 @@ public class NightOwl : StateMachineComponent<NightOwl.StatesInstance>
 				smi.master.RemoveModifiers();
 			}).ToggleStatusItem(Db.Get().DuplicantStatusItems.NightTime, null)
 				.ToggleExpression(Db.Get().Expressions.Happy, null)
-				.Transition(this.idle, (NightOwl.StatesInstance smi) => !smi.IsNight());
+				.Transition(this.idle, (NightOwl.StatesInstance smi) => !smi.IsNight(), UpdateRate.SIM_200ms);
 		}
 
 		public GameStateMachine<NightOwl.States, NightOwl.StatesInstance, NightOwl, object>.State idle;

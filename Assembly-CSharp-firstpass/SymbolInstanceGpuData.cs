@@ -1,0 +1,119 @@
+﻿using System;
+using System.Runtime.InteropServices;
+using UnityEngine;
+
+public class SymbolInstanceGpuData
+{
+	public SymbolInstanceGpuData(int symbol_count)
+	{
+		this.symbolCount = symbol_count;
+		this.bytes = new byte[8 * symbol_count * 4];
+		this.symbolInstancesConverter = new SymbolInstanceGpuData.SymbolInstanceToByteConverter
+		{
+			bytes = this.bytes
+		};
+		for (int i = 0; i < symbol_count; i++)
+		{
+			this.symbolInstances[i].isVisible = 1f;
+			this.symbolInstances[i].symbolIndex = -1f;
+			this.symbolInstances[i].scale = 1f;
+			this.symbolInstances[i].unused = 1f;
+			this.symbolInstances[i].color = Color.white;
+		}
+		this.MarkDirty();
+	}
+
+	private SymbolInstanceGpuData.SymbolInstance[] symbolInstances
+	{
+		get
+		{
+			return this.symbolInstancesConverter.symbolInstances;
+		}
+	}
+
+	public int version { get; private set; }
+
+	private void MarkDirty()
+	{
+		this.version++;
+	}
+
+	public void SetVisible(int symbol_idx, bool is_visible)
+	{
+		float num = 0f;
+		if (is_visible)
+		{
+			num = 1f;
+		}
+		if (this.symbolInstances[symbol_idx].isVisible != num)
+		{
+			this.symbolInstances[symbol_idx].isVisible = num;
+			this.MarkDirty();
+		}
+	}
+
+	public bool IsVisible(int symbol_idx)
+	{
+		return this.symbolInstances[symbol_idx].isVisible > 0.5f;
+	}
+
+	public void SetSymbolScale(int symbol_index, float scale)
+	{
+		if (this.symbolInstances[symbol_index].scale != scale)
+		{
+			this.symbolInstances[symbol_index].scale = scale;
+			this.MarkDirty();
+		}
+	}
+
+	public void SetSymbolTint(int symbol_index, Color color)
+	{
+		if (this.symbolInstances[symbol_index].color != color)
+		{
+			this.symbolInstances[symbol_index].color = color;
+			this.MarkDirty();
+		}
+	}
+
+	public void WriteToTexture(byte[] data, int data_idx, int instance_idx)
+	{
+		Buffer.BlockCopy(this.bytes, 0, data, data_idx, this.symbolCount * 8 * 4);
+	}
+
+	public const int FLOATS_PER_SYMBOL_INSTANCE = 8;
+
+	private byte[] bytes;
+
+	private SymbolInstanceGpuData.SymbolInstanceToByteConverter symbolInstancesConverter;
+
+	private int symbolCount;
+
+	[StructLayout(LayoutKind.Explicit)]
+	public struct SymbolInstance
+	{
+		[FieldOffset(0)]
+		public float symbolIndex;
+
+		[FieldOffset(4)]
+		public float isVisible;
+
+		[FieldOffset(8)]
+		public float scale;
+
+		[FieldOffset(12)]
+		public float unused;
+
+		[FieldOffset(16)]
+		public Color color;
+	}
+
+	[StructLayout(LayoutKind.Explicit)]
+	public struct SymbolInstanceToByteConverter
+	{
+		[FieldOffset(0)]
+		public byte[] bytes;
+
+		[FieldOffset(0)]
+		public SymbolInstanceGpuData.SymbolInstance[] symbolInstances;
+	}
+}

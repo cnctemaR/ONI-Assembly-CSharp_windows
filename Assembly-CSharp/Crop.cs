@@ -57,7 +57,7 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 			if (gameObject != null)
 			{
 				float num = 0.75f;
-				gameObject.transform.SetPosition(gameObject.transform.position + new Vector3(0f, num, 0f));
+				gameObject.transform.SetPosition(gameObject.transform.GetPosition() + new Vector3(0f, num, 0f));
 				gameObject.SetActive(true);
 				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 				component.Units = (float)cropVal.numProduced;
@@ -99,26 +99,18 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 		List<Descriptor> list = new List<Descriptor>();
 		Tag tag = new Tag(this.cropVal.cropId);
 		GameObject prefab = Assets.GetPrefab(tag);
-		Edible edible = null;
-		try
-		{
-			edible = prefab.GetComponent<Edible>();
-		}
-		catch
-		{
-			global::Debug.Log("!", null);
-		}
+		Edible component = prefab.GetComponent<Edible>();
 		float num = 0f;
 		string text = string.Empty;
-		if (edible != null)
+		if (component != null)
 		{
-			num = edible.FoodInfo.CaloriesPerUnit;
+			num = component.FoodInfo.CaloriesPerUnit;
 		}
 		float num2 = num * (float)this.cropVal.numProduced;
-		InfoDescription component = prefab.GetComponent<InfoDescription>();
-		if (component)
+		InfoDescription component2 = prefab.GetComponent<InfoDescription>();
+		if (component2)
 		{
-			text = component.description;
+			text = component2.description;
 		}
 		string text2;
 		if (GameTags.DisplayAsCalories.Contains(tag))
@@ -136,7 +128,7 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 		LocString yield = UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD;
 		Descriptor descriptor = new Descriptor(string.Format(yield, prefab.GetProperName(), text2), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.YIELD, text, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true), GameUtil.GetFormattedCalories(num2, GameUtil.TimeSlice.None, true)), Descriptor.DescriptorType.Effect, false);
 		list.Add(descriptor);
-		Descriptor descriptor2 = new Descriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.BONUS_SEEDS, GameUtil.GetFormattedPercent(33f, GameUtil.TimeSlice.None)), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.BONUS_SEEDS, GameUtil.GetFormattedPercent(33f, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect, false);
+		Descriptor descriptor2 = new Descriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.BONUS_SEEDS, GameUtil.GetFormattedPercent(10f, GameUtil.TimeSlice.None)), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.BONUS_SEEDS, GameUtil.GetFormattedPercent(10f, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect, false);
 		list.Add(descriptor2);
 		return list;
 	}

@@ -7,9 +7,14 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 {
 	protected override void OnPrefabInit()
 	{
+		this.Initialize(false);
+	}
+
+	protected void Initialize(bool use_logic_meter)
+	{
 		base.OnPrefabInit();
 		this.log = new LoggerFS("StorageLocker");
-		this.filteredStorage = new FilteredStorage(this, null, this.filterTint, this.noFilterTint, this);
+		this.filteredStorage = new FilteredStorage(this, null, this.filterTint, this.noFilterTint, this, use_logic_meter);
 		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 	}
 
@@ -47,7 +52,7 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 		this.UserMaxCapacity = component.UserMaxCapacity;
 	}
 
-	public float UserMaxCapacity
+	public virtual float UserMaxCapacity
 	{
 		get
 		{
@@ -111,5 +116,5 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 	[Serialize]
 	private float userMaxCapacity = float.PositiveInfinity;
 
-	private FilteredStorage filteredStorage;
+	protected FilteredStorage filteredStorage;
 }

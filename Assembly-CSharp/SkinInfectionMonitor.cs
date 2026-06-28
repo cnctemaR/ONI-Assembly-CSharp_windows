@@ -9,9 +9,9 @@ public class SkinInfectionMonitor : GameStateMachine<SkinInfectionMonitor, SkinI
 		default_state = this.clean;
 		base.serializable = false;
 		this.clean.EventTransition(GameHashes.ExposeToDisease, this.dirty, (SkinInfectionMonitor.Instance smi) => smi.IsInfecting());
-		this.dirty.Update(delegate(SkinInfectionMonitor.Instance smi)
+		this.dirty.Update(delegate(SkinInfectionMonitor.Instance smi, float dt)
 		{
-			smi.GetInfectedByContainedDisease();
+			smi.GetInfectedByContainedDisease(dt);
 		}).EventTransition(GameHashes.ExposeToDisease, this.clean, (SkinInfectionMonitor.Instance smi) => !smi.IsInfecting());
 	}
 
@@ -44,7 +44,7 @@ public class SkinInfectionMonitor : GameStateMachine<SkinInfectionMonitor, SkinI
 			base.StopSM(reason);
 		}
 
-		public void GetInfectedByContainedDisease()
+		public void GetInfectedByContainedDisease(float dt)
 		{
 			byte diseaseIdx = this.primaryElement.DiseaseIdx;
 			if (diseaseIdx != 255)
@@ -52,7 +52,7 @@ public class SkinInfectionMonitor : GameStateMachine<SkinInfectionMonitor, SkinI
 				Disease disease = Db.Get().Diseases[(int)diseaseIdx];
 				if (disease.infectionVectors.Contains(Disease.InfectionVector.Contact))
 				{
-					int num = Mathf.CeilToInt(1f * base.smi.deltatime);
+					int num = Mathf.CeilToInt(dt);
 					this.primaryElement.ModifyDiseaseCount(-num, "SkinInfectionMonitor.GetInfectedByContainedDisease");
 					this.immuneSystemMonitor.InjectDisease(disease, num, Tag.Invalid, Disease.InfectionVector.Contact);
 				}
@@ -68,7 +68,7 @@ public class SkinInfectionMonitor : GameStateMachine<SkinInfectionMonitor, SkinI
 			float time = Time.time;
 			if (time - this.lastInteractTime > 1f)
 			{
-				int num = Grid.PosToCell(base.master.transform.position);
+				int num = Grid.PosToCell(base.master.transform.GetPosition());
 				int num2 = Grid.CellAbove(num);
 				int num3 = Grid.CellBelow(num);
 				SimMessages.ConsumeDisease(num, 0.016666668f, 250000, this.diseaseConsumptionHandle.index);

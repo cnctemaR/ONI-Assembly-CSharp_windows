@@ -10,19 +10,18 @@ public class ApothecaryConfig : IBuildingConfig
 		int num = 2;
 		int num2 = 3;
 		string text2 = "apothecary_kanim";
-		float num3 = 400f;
-		int num4 = 30;
-		float num5 = 120f;
+		int num3 = 30;
+		float num4 = 120f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num6 = 800f;
+		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.NONE, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
-		buildingDef.OperatingKilowatts = 0.5f;
+		buildingDef.SelfHeatKilowattsWhenActive = 0.5f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Glass";
@@ -30,7 +29,7 @@ public class ApothecaryConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<DropAllWorkable>();
 		Prioritizable.AddRef(go);

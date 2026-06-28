@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using TUNING;
 using UnityEngine;
 
 public class BipedTransitionLayer : TransitionDriver.OverrideLayer
@@ -102,7 +103,7 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 			AttributeLevels component = navigator.GetComponent<AttributeLevels>();
 			if (component != null)
 			{
-				component.AddExperience(Db.Get().Attributes.Athletics.Id, Time.time - this.startTime);
+				component.AddExperience(Db.Get().Attributes.Athletics.Id, Time.time - this.startTime, DUPLICANTSTATS.ATTRIBUTE_LEVELING.ALL_DAY_EXPERIENCE);
 			}
 		}
 	}

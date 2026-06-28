@@ -121,7 +121,7 @@ public class ResearchScreen : KModalScreen
 			global::Debug.LogError("The Tech provided was not present in the dictionary", null);
 			return Vector3.zero;
 		}
-		return this.entryMap[tech].transform.position;
+		return this.entryMap[tech].transform.GetPosition();
 	}
 
 	public ResearchEntry GetEntry(Tech tech)

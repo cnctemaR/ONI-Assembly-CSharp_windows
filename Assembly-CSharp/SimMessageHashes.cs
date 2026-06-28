@@ -22,6 +22,7 @@ public enum SimMessageHashes
 	RemoveBuildingHeatExchange = -456116629,
 	SetDebugProperties = -1683118492,
 	MassConsumption = 1727657959,
+	MassEmission = 797274363,
 	AddElementConsumer = 2024405073,
 	RemoveElementConsumer = 894417742,
 	SetElementConsumerData = 1575539738,
@@ -41,5 +42,6 @@ public enum SimMessageHashes
 	ModifyDiseaseConsumer = -1822987624,
 	RemoveDiseaseConsumer = -781641650,
 	ConsumeDisease = -1019841536,
-	CellDiseaseModification = -1853671274
+	CellDiseaseModification = -1853671274,
+	ToggleProfiler = -409964931
 }

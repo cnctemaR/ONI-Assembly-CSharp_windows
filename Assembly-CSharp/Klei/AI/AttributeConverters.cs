@@ -18,7 +18,7 @@ namespace Klei.AI
 			}
 		}
 
-		protected override void OnSpawn()
+		protected override void OnPrefabInit()
 		{
 			foreach (AttributeInstance attributeInstance in this.GetAttributes())
 			{

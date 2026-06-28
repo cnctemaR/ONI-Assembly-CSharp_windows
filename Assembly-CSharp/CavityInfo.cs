@@ -20,13 +20,13 @@ public class CavityInfo
 		}
 	}
 
-	public void AddBuilding(BuildingComplete bc)
+	public void AddBuilding(KPrefabID bc)
 	{
 		this.buildings.Add(bc);
 		this.dirty = true;
 	}
 
-	public void RemoveBuilding(BuildingComplete bc)
+	public void RemoveBuilding(KPrefabID bc)
 	{
 		this.buildings.Remove(bc);
 		this.dirty = true;
@@ -38,15 +38,15 @@ public class CavityInfo
 		{
 			return;
 		}
-		foreach (BuildingComplete buildingComplete in this.room.buildings)
+		foreach (KPrefabID kprefabID in this.room.buildings)
 		{
-			if (!(buildingComplete == null))
+			if (!(kprefabID == null))
 			{
-				Assignable assignable = buildingComplete.assignable;
-				if (assignable != null && assignable.assignee == this.room)
+				kprefabID.Trigger(144050788, null);
+				Assignable component = kprefabID.GetComponent<Assignable>();
+				if (component != null && component.assignee == this.room)
 				{
-					assignable.Unassign();
-					assignable.Trigger(2070884250, null);
+					component.Unassign();
 				}
 			}
 		}
@@ -60,5 +60,5 @@ public class CavityInfo
 
 	public int numCells;
 
-	public List<BuildingComplete> buildings = new List<BuildingComplete>();
+	public List<KPrefabID> buildings = new List<KPrefabID>();
 }

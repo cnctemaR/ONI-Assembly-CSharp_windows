@@ -74,11 +74,6 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 			return;
 		}
 		this.OnCmpEnable();
-		if (UpdateManager.instance != null && !this.simUpdateRegistered && this.isSpawned)
-		{
-			this.simUpdateRegistered = true;
-			UpdateManager.AddSimUpdater(this);
-		}
 	}
 
 	private void OnDisable()
@@ -88,11 +83,6 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 			return;
 		}
 		this.OnCmpDisable();
-		if (this.simUpdateRegistered)
-		{
-			this.simUpdateRegistered = false;
-			UpdateManager.RemoveSimUpdater(this);
-		}
 	}
 
 	public bool IsInitialized()
@@ -117,6 +107,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 			KObjectManager.Instance.QueueDestroy(this.obj);
 		}
 		this.OnCleanUp();
+		SimAndRenderScheduler.instance.Remove(this);
 	}
 
 	public void Start()
@@ -141,6 +132,10 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 			return;
 		}
 		this.isSpawned = true;
+		if (this.autoRegisterSimRender)
+		{
+			SimAndRenderScheduler.instance.Add(this, this.simRenderLoadBalance);
+		}
 		MyCmp.OnStart(this);
 		try
 		{
@@ -157,11 +152,6 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 				".OnSpawn\n",
 				ex.ToString()
 			}) });
-		}
-		if (UpdateManager.instance != null && !this.simUpdateRegistered && base.enabled)
-		{
-			this.simUpdateRegistered = true;
-			UpdateManager.AddSimUpdater(this);
 		}
 	}
 
@@ -261,7 +251,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 				}
 				else
 				{
-					KFMOD.PlayOneShot(sound, SoundListenerController.Instance.transform.position);
+					KFMOD.PlayOneShot(sound, SoundListenerController.Instance.transform.GetPosition());
 				}
 			}
 			catch
@@ -290,7 +280,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 	{
 		try
 		{
-			KFMOD.PlayOneShot(asset, this.transform.position);
+			KFMOD.PlayOneShot(asset, this.transform.GetPosition());
 		}
 		catch
 		{
@@ -300,12 +290,12 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 
 	public virtual Vector2 PosMin()
 	{
-		return this.transform.position;
+		return this.transform.GetPosition();
 	}
 
 	public virtual Vector2 PosMax()
 	{
-		return this.transform.position;
+		return this.transform.GetPosition();
 	}
 
 	ComponentType IStateMachineTarget.GetComponent<ComponentType>()
@@ -335,5 +325,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 
 	private bool isInitialized;
 
-	private bool simUpdateRegistered;
+	protected bool autoRegisterSimRender = true;
+
+	protected bool simRenderLoadBalance;
 }

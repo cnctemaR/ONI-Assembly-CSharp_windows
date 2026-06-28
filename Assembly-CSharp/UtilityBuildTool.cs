@@ -20,7 +20,7 @@ public class UtilityBuildTool : BaseUtilityBuildTool
 			{
 				int cell = this.path[i - 1].cell;
 				int cell2 = this.path[i].cell;
-				UtilityConnections utilityConnections = UtilityConnectionsExtensions.DirectionFromToCell(cell, this.path[i].cell);
+				UtilityConnections utilityConnections = UtilityConnectionsExtensions.DirectionFromToCell(cell, cell2);
 				if (utilityConnections != (UtilityConnections)0)
 				{
 					UtilityConnections utilityConnections2 = utilityConnections.InverseDirection();

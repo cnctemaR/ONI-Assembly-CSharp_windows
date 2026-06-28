@@ -18,13 +18,14 @@ public class Reservoir : KMonoBehaviour
 		base.OnSpawn();
 		this.meter = new MeterController(this, Meter.Offset.Infront, new string[] { "meter_fill", "meter_OL" });
 		Storage component = base.GetComponent<Storage>();
-		Storage storage = component;
-		storage.onPriorityChanged = (global::System.Action)Delegate.Combine(storage.onPriorityChanged, new global::System.Action(delegate
-		{
-			this.OnFilterChanged(this.filterable.GetTags());
-		}));
+		component.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
 		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		this.OnStorageChange(null);
+	}
+
+	private void OnOnlyFetchMarkedItemsSettingChanged(object data)
+	{
+		this.OnFilterChanged(this.filterable.GetTags());
 	}
 
 	private void OnStorageChange(object data)
@@ -60,7 +61,7 @@ public class Reservoir : KMonoBehaviour
 		}
 		if (flag)
 		{
-			this.fetchList = new FetchList2(component3);
+			this.fetchList = new FetchList2(component3, Db.Get().ChoreTypes.Fetch, null);
 			this.fetchList.ShowStatusItem = false;
 			this.fetchList.Add(tags, null, (float)num, FetchOrder2.OperationalRequirement.None);
 			this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);

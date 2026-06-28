@@ -118,10 +118,11 @@ namespace OverlayModes
 				{
 					if (!(saveLoadRoot2 == null))
 					{
-						Wire component = saveLoadRoot2.GetComponent<Wire>();
+						IUtilityNetworkItem component = saveLoadRoot2.GetComponent<IUtilityNetworkItem>();
 						if (component != null)
 						{
-							KBatchedAnimController component2 = component.GetComponent<KBatchedAnimController>();
+							KMonoBehaviour kmonoBehaviour = component as KMonoBehaviour;
+							KBatchedAnimController component2 = kmonoBehaviour.GetComponent<KBatchedAnimController>();
 							ushort networkID = component.NetworkID;
 							bool flag = circuitManager.HasGenerators(networkID) || circuitManager.HasBatteries(networkID);
 							Color32 color;
@@ -146,7 +147,7 @@ namespace OverlayModes
 			{
 				foreach (Battery battery in Components.Batteries)
 				{
-					Vector2I vector2I3 = Grid.PosToXY(battery.transform.position);
+					Vector2I vector2I3 = Grid.PosToXY(battery.transform.GetPosition());
 					if (vector2I <= vector2I3 && vector2I3 <= vector2I2)
 					{
 						SaveLoadRoot component3 = battery.GetComponent<SaveLoadRoot>();
@@ -159,7 +160,7 @@ namespace OverlayModes
 				}
 				foreach (Generator generator in Components.Generators)
 				{
-					Vector2I vector2I4 = Grid.PosToXY(generator.transform.position);
+					Vector2I vector2I4 = Grid.PosToXY(generator.transform.GetPosition());
 					if (vector2I <= vector2I4 && vector2I4 <= vector2I2)
 					{
 						SaveLoadRoot component4 = generator.GetComponent<SaveLoadRoot>();
@@ -175,7 +176,7 @@ namespace OverlayModes
 				}
 				foreach (EnergyConsumer energyConsumer in Components.EnergyConsumers)
 				{
-					Vector2I vector2I5 = Grid.PosToXY(energyConsumer.transform.position);
+					Vector2I vector2I5 = Grid.PosToXY(energyConsumer.transform.GetPosition());
 					if (vector2I <= vector2I5 && vector2I5 <= vector2I2)
 					{
 						SaveLoadRoot component5 = energyConsumer.GetComponent<SaveLoadRoot>();
@@ -291,7 +292,7 @@ namespace OverlayModes
 					freePowerLabel.enabled = true;
 					component.enabled = true;
 					Vector3 vector = Grid.CellToPos(componentInChildren2.PowerCell, 0.5f, 0f, 0f);
-					freePowerLabel.rectTransform.position = vector + this.powerLabelOffset + Vector3.up * (num * 0.02f);
+					freePowerLabel.rectTransform.SetPosition(vector + this.powerLabelOffset + Vector3.up * (num * 0.02f));
 					if (componentInChildren != null && componentInChildren.PowerCell == componentInChildren2.PowerCell)
 					{
 						num -= 15f;
@@ -309,7 +310,7 @@ namespace OverlayModes
 					freePowerLabel2.enabled = true;
 					component2.enabled = true;
 					Vector3 vector2 = Grid.CellToPos(componentInChildren.PowerCell, 0.5f, 0f, 0f);
-					freePowerLabel2.rectTransform.position = vector2 + this.powerLabelOffset + Vector3.up * (num * 0.02f);
+					freePowerLabel2.rectTransform.SetPosition(vector2 + this.powerLabelOffset + Vector3.up * (num * 0.02f));
 					this.SetToolTip(freePowerLabel2, UI.OVERLAYS.POWER.WATTS_CONSUMED);
 					this.updatePowerInfo.Add(new Power.UpdatePowerInfo(item, freePowerLabel2, component2, null, componentInChildren));
 				}
@@ -331,7 +332,7 @@ namespace OverlayModes
 			BatteryUI freeBatteryUI = this.GetFreeBatteryUI();
 			freeBatteryUI.SetContent(bat);
 			Vector3 vector = Grid.CellToPos(bat.PowerCell, 0.5f, 0f, 0f);
-			bool flag = bat.GetComponent<PowerTransformer>() != null;
+			bool flag = bat.powerTransformer != null;
 			float num = 1f;
 			Rotatable component = bat.GetComponent<Rotatable>();
 			if (component != null && component.GetVisualizerFlipX())
@@ -340,7 +341,7 @@ namespace OverlayModes
 			}
 			Vector3 vector2 = ((!flag) ? this.batteryUIOffset : this.batteryUITransformerOffset);
 			vector2.x *= num;
-			freeBatteryUI.GetComponent<RectTransform>().position = Vector3.up + vector + vector2;
+			freeBatteryUI.GetComponent<RectTransform>().SetPosition(Vector3.up + vector + vector2);
 			this.updateBatteryInfo.Add(new Power.UpdateBatteryInfo(bat, freeBatteryUI));
 		}
 

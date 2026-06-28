@@ -20,7 +20,7 @@ public class KSnap : MonoBehaviour
 				rectTransform.GetWorldCorners(this.corners);
 				Vector3 vector = this.corners[2];
 				Vector3 vector2 = this.corners[0];
-				Vector3 position = base.transform.position;
+				Vector3 position = base.transform.GetPosition();
 				if (this.horizontal == KSnap.LeftRight.Left)
 				{
 					position.x = vector2.x + this.offset.x;
@@ -79,7 +79,7 @@ public class KSnap : MonoBehaviour
 				zero.y = Mathf.Min(zero.y, (float)Screen.height - vector.y);
 			}
 		}
-		base.transform.position += zero;
+		base.transform.SetPosition(base.transform.GetPosition() + zero);
 	}
 
 	public GameObject target;

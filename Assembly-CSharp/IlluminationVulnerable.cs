@@ -120,16 +120,38 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.comfortable;
-			this.root.Update(delegate(IlluminationVulnerable.StatesInstance smi)
+			this.root.Update("Illumination.Comfortable", delegate(IlluminationVulnerable.StatesInstance smi, float dt)
 			{
 				smi.master.GetAmounts().Get(Db.Get().Amounts.Illumination).SetValue((float)Grid.LightCount[Grid.PosToCell(smi.master.gameObject)]);
-			});
-			this.comfortable.Transition(this.too_bright, (IlluminationVulnerable.StatesInstance smi) => smi.master.prefersDarkness && !smi.master.IsCellSafe(Grid.PosToCell(smi.master.gameObject))).Transition(this.too_dark, (IlluminationVulnerable.StatesInstance smi) => !smi.master.prefersDarkness && !smi.master.IsCellSafe(Grid.PosToCell(smi.master.gameObject))).Enter(delegate(IlluminationVulnerable.StatesInstance smi)
+			}, UpdateRate.SIM_1000ms, false);
+			this.comfortable.Update("Illumination.Comfortable", delegate(IlluminationVulnerable.StatesInstance smi, float dt)
+			{
+				int num = Grid.PosToCell(smi.master.gameObject);
+				if (!smi.master.IsCellSafe(num))
+				{
+					GameStateMachine<IlluminationVulnerable.States, IlluminationVulnerable.StatesInstance, IlluminationVulnerable, object>.State state = ((!smi.master.prefersDarkness) ? this.too_dark : this.too_bright);
+					smi.GoTo(state);
+				}
+			}, UpdateRate.SIM_1000ms, false).Enter(delegate(IlluminationVulnerable.StatesInstance smi)
 			{
 				smi.master.Trigger(1113102781, null);
 			});
-			this.too_dark.Transition(this.comfortable, (IlluminationVulnerable.StatesInstance smi) => smi.master.IsCellSafe(Grid.PosToCell(smi.master.gameObject))).TriggerOnEnter(GameHashes.IlluminationDiscomfort, null);
-			this.too_bright.Transition(this.comfortable, (IlluminationVulnerable.StatesInstance smi) => smi.master.IsCellSafe(Grid.PosToCell(smi.master.gameObject))).TriggerOnEnter(GameHashes.IlluminationDiscomfort, null);
+			this.too_dark.TriggerOnEnter(GameHashes.IlluminationDiscomfort, null).Update("Illumination.too_dark", delegate(IlluminationVulnerable.StatesInstance smi, float dt)
+			{
+				int num2 = Grid.PosToCell(smi.master.gameObject);
+				if (smi.master.IsCellSafe(num2))
+				{
+					smi.GoTo(this.comfortable);
+				}
+			}, UpdateRate.SIM_1000ms, false);
+			this.too_bright.TriggerOnEnter(GameHashes.IlluminationDiscomfort, null).Update("Illumination.too_bright", delegate(IlluminationVulnerable.StatesInstance smi, float dt)
+			{
+				int num3 = Grid.PosToCell(smi.master.gameObject);
+				if (smi.master.IsCellSafe(num3))
+				{
+					smi.GoTo(this.comfortable);
+				}
+			}, UpdateRate.SIM_1000ms, false);
 		}
 
 		public StateMachine<IlluminationVulnerable.States, IlluminationVulnerable.StatesInstance, IlluminationVulnerable, object>.BoolParameter illuminated;

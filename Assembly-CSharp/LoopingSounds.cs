@@ -6,7 +6,7 @@ using FMODUnity;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class LoopingSounds : KMonoBehaviour
+public class LoopingSounds : KMonoBehaviour, IRenderEveryTick
 {
 	protected override void OnSpawn()
 	{
@@ -15,27 +15,25 @@ public class LoopingSounds : KMonoBehaviour
 		{
 			this.AddLoopingSoundUpdater();
 		}
+		else
+		{
+			this.RemoveLoopingSoundUpdater();
+		}
 	}
 
 	public void AddLoopingSoundUpdater()
 	{
-		if (!GameComps.LoopingSoundUpdaterComponents.Has(base.gameObject))
-		{
-			GameComps.LoopingSoundUpdaterComponents.Add(this);
-		}
+		SimAndRenderScheduler.instance.Add(this, false);
 	}
 
 	public void RemoveLoopingSoundUpdater()
 	{
-		if (GameComps.LoopingSoundUpdaterComponents.Has(base.gameObject))
-		{
-			GameComps.LoopingSoundUpdaterComponents.Remove(base.gameObject);
-		}
+		SimAndRenderScheduler.instance.Remove(this);
 	}
 
-	public void DoUpdate()
+	public void RenderEveryTick(float dt)
 	{
-		Vector3 position = base.transform.position;
+		Vector3 position = base.transform.GetPosition();
 		for (int i = 0; i < this.loopingSounds.Count; i++)
 		{
 			EventInstance ev = this.loopingSounds[i].ev;
@@ -117,7 +115,7 @@ public class LoopingSounds : KMonoBehaviour
 				this.AddLoopingSoundUpdater();
 			}
 			LoopingSoundManager.Get().Add(asset, eventInstance, true);
-			Vector3 position = behaviour.GetComponent<Transform>().position;
+			Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
 			Vector3 position2 = behaviour.position;
 			Vector3 vector = ((!playAtTarget) ? position : position2);
 			Vector3 vector2 = new Vector3(vector.x, vector.y, 0f);
@@ -265,12 +263,12 @@ public class LoopingSounds : KMonoBehaviour
 			{
 				if (Time.time - num > soundEvent.minInterval)
 				{
-					SoundEvent.PlayOneShot(soundEvent.sound, base.transform.position);
+					SoundEvent.PlayOneShot(soundEvent.sound, base.transform.GetPosition());
 				}
 			}
 			else
 			{
-				SoundEvent.PlayOneShot(soundEvent.sound, base.transform.position);
+				SoundEvent.PlayOneShot(soundEvent.sound, base.transform.GetPosition());
 			}
 			this.lastTimePlayed[soundEvent.soundHash] = Time.time;
 		}

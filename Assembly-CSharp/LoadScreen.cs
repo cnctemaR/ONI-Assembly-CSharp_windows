@@ -133,7 +133,6 @@ public class LoadScreen : KModalScreen
 	public static void ForceStopGame()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SendProfileStats();
-		UpdateManager.instance.enabled = false;
 		Game.Instance.SetIsLoading();
 		Grid.CellCount = 0;
 		Sim.Shutdown();
@@ -141,7 +140,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header)
 	{
-		return header.buildVersion > 247630U;
+		return header.buildVersion > 254439U;
 	}
 
 	private void SetSelectedGame(string filename)
@@ -182,16 +181,15 @@ public class LoadScreen : KModalScreen
 			this.saveDetails.text = text4;
 			if (LoadScreen.IsSaveFileFromUnsupportedFutureBuild(header))
 			{
-				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 247630U);
+				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 254439U);
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
 			else if (gameInfo.saveMajorVersion < 7)
 			{
-				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.UNSUPPORTED_SAVE_VERSION, new object[] { filename, gameInfo.saveMajorVersion, gameInfo.saveMinorVersion, 7, 1 });
+				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.UNSUPPORTED_SAVE_VERSION, new object[] { filename, gameInfo.saveMajorVersion, gameInfo.saveMinorVersion, 7, 3 });
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
-				this.moreInfoButton.gameObject.SetActive(true);
 			}
 			else if (!this.loadButton.isInteractable)
 			{
@@ -224,15 +222,15 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(this.selectedFileName, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 247630U)
+		if (header.buildVersion > 254439U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 247630U.ToString();
+			text2 = 254439U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
 			text = string.Format("v{0}.{1}", gameInfo.saveMajorVersion, gameInfo.saveMinorVersion);
-			text2 = string.Format("v{0}.{1}", 7, 1);
+			text2 = string.Format("v{0}.{1}", 7, 3);
 		}
 		if (!flag)
 		{

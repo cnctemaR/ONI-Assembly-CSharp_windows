@@ -100,7 +100,7 @@ public class Snorer : StateMachineComponent<Snorer.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.idle;
-			this.idle.Transition(this.sleeping, (Snorer.StatesInstance smi) => smi.IsSleeping());
+			this.idle.Transition(this.sleeping, (Snorer.StatesInstance smi) => smi.IsSleeping(), UpdateRate.SIM_200ms);
 			this.sleeping.DefaultState(this.sleeping.quiet).Enter(delegate(Snorer.StatesInstance smi)
 			{
 				smi.StartSmallSnore();
@@ -108,7 +108,7 @@ public class Snorer : StateMachineComponent<Snorer.StatesInstance>
 			{
 				smi.StopSmallSnore();
 			})
-				.Transition(this.idle, (Snorer.StatesInstance smi) => !smi.master.GetSMI<StaminaMonitor.Instance>().IsSleeping());
+				.Transition(this.idle, (Snorer.StatesInstance smi) => !smi.master.GetSMI<StaminaMonitor.Instance>().IsSleeping(), UpdateRate.SIM_200ms);
 			this.sleeping.quiet.Enter("ScheduleNextSnore", delegate(Snorer.StatesInstance smi)
 			{
 				smi.ScheduleGoTo(this.GetNewInterval(), this.sleeping.snoring);

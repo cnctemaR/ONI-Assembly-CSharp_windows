@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 [Serializable]
 public class AssignableSlot : Resource
@@ -7,6 +8,16 @@ public class AssignableSlot : Resource
 		: base(id, name)
 	{
 		this.showInUI = showInUI;
+	}
+
+	public AssignableSlotInstance Lookup(GameObject go)
+	{
+		Assignables component = go.GetComponent<Assignables>();
+		if (component != null)
+		{
+			return component.GetSlot(this);
+		}
+		return null;
 	}
 
 	public bool showInUI = true;

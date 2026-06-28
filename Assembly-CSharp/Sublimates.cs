@@ -3,7 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Sublimates : KMonoBehaviour
+public class Sublimates : KMonoBehaviour, ISim200ms
 {
 	public float Temperature
 	{
@@ -16,7 +16,6 @@ public class Sublimates : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.flowAccumulator = new Accumulator("EmittedMass", this, 3f);
 		base.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
 		base.Subscribe(1335436905, new Action<object>(this.OnSplitFromChunk));
 	}
@@ -24,6 +23,7 @@ public class Sublimates : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.flowAccumulator = Game.Instance.accumulators.Add("EmittedMass", this);
 		if (this.info.sublimatedElement == SimHashes.Oxygen)
 		{
 			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.EmittingOxygenAvg, this);
@@ -32,6 +32,12 @@ public class Sublimates : KMonoBehaviour
 		{
 			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.EmittingGasAvg, this);
 		}
+	}
+
+	protected override void OnCleanUp()
+	{
+		this.flowAccumulator = Game.Instance.accumulators.Remove(this.flowAccumulator);
+		base.OnCleanUp();
 	}
 
 	private void OnAbsorb(object data)
@@ -64,9 +70,9 @@ public class Sublimates : KMonoBehaviour
 		component2.sublimatedMass *= num2;
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		if (!Grid.IsValidCell(num))
 		{
 			return;
@@ -106,6 +112,7 @@ public class Sublimates : KMonoBehaviour
 						this.Emit(num, num8, this.primaryElement.Temperature, b, num6);
 						this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num8);
 						this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num8);
+						this.UpdateStorage();
 					}
 				}
 			}
@@ -117,6 +124,7 @@ public class Sublimates : KMonoBehaviour
 					this.Emit(num, num9, this.primaryElement.Temperature, this.primaryElement.DiseaseIdx, this.primaryElement.DiseaseCount);
 					this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num9);
 					this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num9);
+					this.UpdateStorage();
 				}
 			}
 			else if (!this.primaryElement.KeepZeroMassObject)
@@ -126,20 +134,29 @@ public class Sublimates : KMonoBehaviour
 		}
 	}
 
+	private void UpdateStorage()
+	{
+		Pickupable component = base.GetComponent<Pickupable>();
+		if (component != null && component.storage != null)
+		{
+			component.storage.Trigger(-1697596308, base.gameObject);
+		}
+	}
+
 	private void Emit(int cell, float mass, float temperature, byte disease_idx, int disease_count)
 	{
 		SimMessages.AddRemoveSubstance(cell, this.info.sublimatedElement, CellEventLogger.Instance.SublimatesEmit, mass, temperature, disease_idx, disease_count, -1);
-		this.flowAccumulator.Accumulate(mass);
+		Game.Instance.accumulators.Accumulate(this.flowAccumulator, mass);
 		if (this.spawnFXHash != SpawnFXHashes.None)
 		{
-			base.transform.position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
-			Game.Instance.SpawnFX(this.spawnFXHash, base.transform.position, 0f);
+			base.transform.GetPosition().z = Grid.GetLayerZ(Grid.SceneLayer.Front);
+			Game.Instance.SpawnFX(this.spawnFXHash, base.transform.GetPosition(), 0f);
 		}
 	}
 
 	public float AvgFlowRate()
 	{
-		return this.flowAccumulator.AvgRate;
+		return Game.Instance.accumulators.GetAverageRate(this.flowAccumulator);
 	}
 
 	[MyCmpReq]
@@ -157,7 +174,7 @@ public class Sublimates : KMonoBehaviour
 	[Serialize]
 	private float sublimatedMass;
 
-	private Accumulator flowAccumulator;
+	private HandleVector<int>.Handle flowAccumulator = HandleVector<int>.InvalidHandle;
 
 	[Serializable]
 	public struct Info

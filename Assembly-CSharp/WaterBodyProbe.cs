@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WaterBodyProbe : KMonoBehaviour
+public class WaterBodyProbe : KMonoBehaviour, ISim200ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -122,7 +122,7 @@ public class WaterBodyProbe : KMonoBehaviour
 		{
 			if (body.containedObjects[i] != null)
 			{
-				num = Grid.PosToCell(body.containedObjects[i].transform.position);
+				num = Grid.PosToCell(body.containedObjects[i].transform.GetPosition());
 				break;
 			}
 		}
@@ -193,7 +193,7 @@ public class WaterBodyProbe : KMonoBehaviour
 	{
 		GameObject gameObject = new GameObject("body_of_water");
 		gameObject.transform.parent = base.transform;
-		gameObject.transform.SetPosition(objectInBody.transform.position);
+		gameObject.transform.SetPosition(objectInBody.transform.GetPosition());
 		gameObject.AddComponent<KPrefabID>();
 		BodyOfWater bodyOfWater = gameObject.AddComponent<BodyOfWater>();
 		bodyOfWater.AddObjectToBody(objectInBody);
@@ -207,7 +207,7 @@ public class WaterBodyProbe : KMonoBehaviour
 		return Grid.IsValidCell(cell) && ((Grid.IsValidCell(Grid.CellAbove(cell)) && Grid.IsLiquid(Grid.CellAbove(cell))) || Grid.IsSubstantialLiquid(cell, 0.75f));
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		if (this.DirtyBodies.Count > 0)
 		{

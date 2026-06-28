@@ -2,17 +2,12 @@
 using Klei.AI;
 using KSerialization;
 
-public class ToiletWorkableUse : Ownable, IGameObjectEffectDescriptor
+public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 {
-	private ToiletWorkableUse()
-	{
-		this.showProgressBar = true;
-		base.slot = Db.Get().OwnableSlots.Toilet;
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.showProgressBar = true;
 		this.attributeConverter = Db.Get().AttributeConverters.ToiletSpeed;
 		base.SetWorkTime(8.5f);
 	}
@@ -22,15 +17,19 @@ public class ToiletWorkableUse : Ownable, IGameObjectEffectDescriptor
 		base.OnStartWork(worker);
 		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
 		component.Play(Workable.DefaultWorkAnims, KAnim.PlayMode.Loop);
-		Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(base.GetComponent<BuildingComplete>());
+		Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(base.gameObject);
 		if (roomOfBuilding != null)
 		{
-			string id = RoomTypes.GetRoomType(roomOfBuilding).id;
-			if (id == "Latrine" || id == "PrivateBathroom")
+			RoomType roomType = Db.Get().RoomTypes.GetRoomType(roomOfBuilding);
+			if (roomType.category == Db.Get().RoomTypeCategories.Bathroom)
 			{
 				worker.GetComponent<Effects>().Add("ProperBathroom", true);
 			}
 		}
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
 	}
 
 	protected override void OnStopWork(Worker worker)

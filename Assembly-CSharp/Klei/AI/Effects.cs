@@ -2,35 +2,42 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using KSerialization;
-using UnityEngine;
 
 namespace Klei.AI
 {
 	[SerializationConfig(MemberSerialization.OptIn)]
-	public class Effects : KMonoBehaviour, ISaveLoadable
+	public class Effects : KMonoBehaviour, ISaveLoadable, ISim1000ms
 	{
 		public IEnumerator<EffectInstance> GetEnumerator()
 		{
 			return this.effects.GetEnumerator();
 		}
 
+		protected override void OnPrefabInit()
+		{
+			this.autoRegisterSimRender = false;
+		}
+
 		protected override void OnSpawn()
 		{
-			Modifiers component = base.GetComponent<Modifiers>();
 			if (this.saveLoadEffects != null)
 			{
 				foreach (Effects.SaveLoadEffect saveLoadEffect in this.saveLoadEffects)
 				{
-					if (component.modifierSet.effects.Exists(saveLoadEffect.id))
+					if (Db.Get().effects.Exists(saveLoadEffect.id))
 					{
-						Effect effect = component.modifierSet.effects.Get(saveLoadEffect.id);
+						Effect effect = Db.Get().effects.Get(saveLoadEffect.id);
 						EffectInstance effectInstance = this.Add(effect, true);
 						if (effectInstance != null)
 						{
-							effectInstance.startTime = Time.time - (effect.duration - saveLoadEffect.timeRemaining);
+							effectInstance.timeRemaining = saveLoadEffect.timeRemaining;
 						}
 					}
 				}
+			}
+			if (this.effectsThatExpire.Count > 0)
+			{
+				SimAndRenderScheduler.instance.Add(this, this.simRenderLoadBalance);
 			}
 		}
 
@@ -60,7 +67,7 @@ namespace Klei.AI
 
 		public EffectInstance Add(string effect_id, bool should_save)
 		{
-			Effect effect = base.GetComponent<Modifiers>().modifierSet.effects.Get(effect_id);
+			Effect effect = Db.Get().effects.Get(effect_id);
 			return this.Add(effect, should_save);
 		}
 
@@ -71,12 +78,16 @@ namespace Klei.AI
 				return null;
 			}
 			bool flag = true;
-			foreach (Trait trait in base.GetComponent<Traits>())
+			Traits component = base.GetComponent<Traits>();
+			if (component != null)
 			{
-				if (trait.ignoredEffects != null && Array.IndexOf<string>(trait.ignoredEffects, effect.Id) != -1)
+				foreach (Trait trait in component)
 				{
-					flag = false;
-					break;
+					if (trait.ignoredEffects != null && Array.IndexOf<string>(trait.ignoredEffects, effect.Id) != -1)
+					{
+						flag = false;
+						break;
+					}
 				}
 			}
 			if (flag)
@@ -88,9 +99,17 @@ namespace Klei.AI
 					effectInstance = new EffectInstance(base.gameObject, effect, should_save);
 					effect.AddTo(attributes);
 					this.effects.Add(effectInstance);
+					if (effect.duration > 0f)
+					{
+						this.effectsThatExpire.Add(effectInstance);
+						if (this.effectsThatExpire.Count == 1)
+						{
+							SimAndRenderScheduler.instance.Add(this, this.simRenderLoadBalance);
+						}
+					}
 					base.Trigger(-1901442097, effect);
 				}
-				effectInstance.startTime = Time.time;
+				effectInstance.timeRemaining = effect.duration;
 				return effectInstance;
 			}
 			return null;
@@ -98,33 +117,37 @@ namespace Klei.AI
 
 		public void Remove(Effect effect)
 		{
-			Attributes attributes = this.GetAttributes();
-			for (int i = 0; i < this.effects.Count; i++)
-			{
-				EffectInstance effectInstance = this.effects[i];
-				if (effectInstance.effect == effect)
-				{
-					effect.RemoveFrom(attributes);
-					this.effects.RemoveAt(i);
-					effectInstance.Remove();
-					base.Trigger(-1157678353, effect);
-				}
-			}
+			this.Remove(effect.Id);
 		}
 
 		public void Remove(string effect_id)
 		{
-			Attributes attributes = this.GetAttributes();
-			for (int i = 0; i < this.effects.Count; i++)
+			int num = this.effectsThatExpire.FindIndex((EffectInstance e) => e.effect.Id == effect_id);
+			if (num != -1)
 			{
-				EffectInstance effectInstance = this.effects[i];
-				if (effectInstance.effect.Id == effect_id)
+				int num2 = this.effectsThatExpire.Count - 1;
+				this.effectsThatExpire[num] = this.effectsThatExpire[num2];
+				this.effectsThatExpire.RemoveAt(num2);
+				if (this.effectsThatExpire.Count == 0)
 				{
-					effectInstance.effect.RemoveFrom(attributes);
-					this.effects.RemoveAt(i);
-					effectInstance.Remove();
-					base.Trigger(-1157678353, effectInstance.effect);
+					SimAndRenderScheduler.instance.Remove(this);
 				}
+			}
+			num = this.effects.FindIndex((EffectInstance e) => e.effect.Id == effect_id);
+			if (num != -1)
+			{
+				Attributes attributes = this.GetAttributes();
+				EffectInstance effectInstance = this.effects[num];
+				Effect effect = effectInstance.effect;
+				effect.RemoveFrom(attributes);
+				int num3 = this.effects.Count - 1;
+				this.effects[num] = this.effects[num3];
+				this.effects.RemoveAt(num3);
+				if (effectInstance.statusItem != null)
+				{
+					effectInstance.gameObject.GetComponent<KSelectable>().RemoveStatusItem(effectInstance.statusItem, false);
+				}
+				base.Trigger(-1157678353, effect);
 			}
 		}
 
@@ -152,14 +175,16 @@ namespace Klei.AI
 			return false;
 		}
 
-		private void Update()
+		public void Sim1000ms(float dt)
 		{
-			for (int i = 0; i < this.effects.Count; i++)
+			for (int i = 0; i < this.effectsThatExpire.Count; i++)
 			{
-				if (this.effects[i].IsExpired())
+				EffectInstance effectInstance = this.effectsThatExpire[i];
+				if (effectInstance.IsExpired())
 				{
-					this.Remove(this.effects[i].effect);
+					this.Remove(effectInstance.effect);
 				}
+				effectInstance.timeRemaining -= dt;
 			}
 		}
 
@@ -184,7 +209,7 @@ namespace Klei.AI
 					Effects.SaveLoadEffect saveLoadEffect = new Effects.SaveLoadEffect
 					{
 						id = effectInstance.effect.Id,
-						timeRemaining = effectInstance.effect.duration - (Time.time - effectInstance.startTime)
+						timeRemaining = effectInstance.timeRemaining
 					};
 					list.Add(saveLoadEffect);
 				}
@@ -196,6 +221,8 @@ namespace Klei.AI
 		private Effects.SaveLoadEffect[] saveLoadEffects;
 
 		private List<EffectInstance> effects = new List<EffectInstance>();
+
+		private List<EffectInstance> effectsThatExpire = new List<EffectInstance>();
 
 		private List<Effect> effectImmunites = new List<Effect>();
 

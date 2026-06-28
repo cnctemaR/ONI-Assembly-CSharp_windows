@@ -20,6 +20,14 @@ public class KBatchGroupData
 
 	public int maxVisibleSymbols { get; private set; }
 
+	public int maxSymbolsPerBuild
+	{
+		get
+		{
+			return this.frameElementSymbols.Count;
+		}
+	}
+
 	public List<KAnim.Anim> anims { get; private set; }
 
 	public Dictionary<KAnimHashedString, int> animIndex { get; private set; }
@@ -44,8 +52,6 @@ public class KBatchGroupData
 
 	public Dictionary<KAnimHashedString, int> firstSymbolIndex { get; private set; }
 
-	public List<Color> symbolColourOveride { get; private set; }
-
 	public List<Texture2D> textures { get; private set; }
 
 	private void Init()
@@ -60,7 +66,6 @@ public class KBatchGroupData
 		this.buildIndex = new Dictionary<KAnimHashedString, int>();
 		this.frameElementSymbols = new List<KAnim.Build.Symbol>();
 		this.symbolFrameInstances = new List<KAnim.Build.SymbolFrameInstance>();
-		this.symbolColourOveride = new List<Color>();
 		this.textures = new List<Texture2D>();
 		this.textureStartIndex = new Dictionary<KAnimHashedString, int>();
 		this.firstSymbolIndex = new Dictionary<KAnimHashedString, int>();
@@ -117,11 +122,6 @@ public class KBatchGroupData
 		{
 			this.symbolFrameInstances.Clear();
 			this.symbolFrameInstances = null;
-		}
-		if (this.symbolColourOveride != null)
-		{
-			this.symbolColourOveride.Clear();
-			this.symbolColourOveride = null;
 		}
 		if (this.textures != null)
 		{
@@ -191,6 +191,18 @@ public class KBatchGroupData
 		this.maxVisibleSymbols = Mathf.Min(120, Mathf.Max(this.maxVisibleSymbols, newCount));
 	}
 
+	public KAnim.Build.Symbol GetSymbol(KAnimHashedString symbol_name)
+	{
+		foreach (KAnim.Build.Symbol symbol in this.frameElementSymbols)
+		{
+			if (symbol.hash == symbol_name)
+			{
+				return symbol;
+			}
+		}
+		return null;
+	}
+
 	public KAnim.Build.Symbol GetSymbol(int index)
 	{
 		if (index >= 0 && index < this.frameElementSymbols.Count)
@@ -203,7 +215,6 @@ public class KBatchGroupData
 	public void AddBuildSymbol(KAnim.Build.Symbol symbol)
 	{
 		this.frameElementSymbols.Add(symbol);
-		this.symbolColourOveride.Add(Color.white);
 	}
 
 	public int GetSymbolCount()
@@ -226,11 +237,6 @@ public class KBatchGroupData
 		{
 			symbolIdx = -1
 		};
-	}
-
-	public void SetColourOveride(int index, Color colour)
-	{
-		this.symbolColourOveride[index] = colour;
 	}
 
 	public Texture2D GetTexure(int index)
@@ -386,17 +392,6 @@ public class KBatchGroupData
 		}
 	}
 
-	public int AddSymbol(KAnimHashedString symbol, KAnim.Build targetBuild)
-	{
-		KAnim.Build.Symbol symbol2 = new KAnim.Build.Symbol();
-		symbol2.hash = symbol;
-		symbol2.build = targetBuild;
-		symbol2.index = this.frameElementSymbols.Count;
-		this.frameElementSymbols.Add(symbol2);
-		this.symbolColourOveride.Add(Color.white);
-		return symbol2.index;
-	}
-
 	public int GetFirstIndex(KAnimHashedString symbol)
 	{
 		return this.frameElementSymbols.FindIndex((KAnim.Build.Symbol fes) => fes.hash == symbol);
@@ -417,7 +412,7 @@ public class KBatchGroupData
 	{
 		for (int i = 0; i < instance.symbolFrameInstances.Count; i++)
 		{
-			this.Write(data, i * 32, i, instance.symbolFrameInstances[i].buildImageIdx, instance.symbolFrameInstances[i]);
+			this.Write(data, i * 16, i, instance.symbolFrameInstances[i].buildImageIdx, instance.symbolFrameInstances[i]);
 		}
 	}
 
@@ -430,6 +425,7 @@ public class KBatchGroupData
 		KAnim.Build.Symbol buildSymbol = this.GetBuildSymbol(symbol_frame_instance.symbolIdx);
 		if (buildSymbol == null || symbolFrame == null)
 		{
+			data[startIndex++] = 0f;
 			data[startIndex++] = 0f;
 			data[startIndex++] = 0f;
 			data[startIndex++] = 0f;
@@ -446,40 +442,21 @@ public class KBatchGroupData
 			{
 				data[startIndex++] = 0f;
 			}
+			data[startIndex++] = (float)buildSymbol.symbolIndexInSourceBuild;
 		}
-		data[startIndex++] = 3.1664858E+09f;
 		data[startIndex++] = 3.452817E+09f;
 		if (symbolFrame == null)
 		{
 			return;
 		}
-		data[startIndex++] = symbolFrame.v0[0];
-		data[startIndex++] = symbolFrame.v0[1];
-		data[startIndex++] = symbolFrame.v0[2];
-		data[startIndex++] = symbolFrame.v1[0];
-		data[startIndex++] = symbolFrame.v1[1];
-		data[startIndex++] = symbolFrame.v1[2];
-		data[startIndex++] = symbolFrame.v2[0];
-		data[startIndex++] = symbolFrame.v2[1];
-		data[startIndex++] = symbolFrame.v2[2];
-		data[startIndex++] = symbolFrame.v3[0];
-		data[startIndex++] = symbolFrame.v3[1];
-		data[startIndex++] = symbolFrame.v3[2];
-		data[startIndex++] = symbolFrame.uv0[0];
-		data[startIndex++] = symbolFrame.uv0[1];
-		data[startIndex++] = symbolFrame.uv1[0];
-		data[startIndex++] = symbolFrame.uv1[1];
-		data[startIndex++] = symbolFrame.uv2[0];
-		data[startIndex++] = symbolFrame.uv2[1];
-		data[startIndex++] = symbolFrame.uv3[0];
-		data[startIndex++] = symbolFrame.uv3[1];
-		if (this.symbolColourOveride != null && symbol_frame_instance.symbolIdx >= 0 && symbol_frame_instance.symbolIdx < this.symbolColourOveride.Count)
-		{
-			data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][0];
-			data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][1];
-			data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][2];
-			data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][3];
-		}
+		data[startIndex++] = symbolFrame.bboxMin.x;
+		data[startIndex++] = symbolFrame.bboxMin.y;
+		data[startIndex++] = symbolFrame.bboxMax.x;
+		data[startIndex++] = symbolFrame.bboxMax.y;
+		data[startIndex++] = symbolFrame.uvMin.x;
+		data[startIndex++] = symbolFrame.uvMin.y;
+		data[startIndex++] = symbolFrame.uvMax.x;
+		data[startIndex++] = symbolFrame.uvMax.y;
 	}
 
 	private void WriteAnimFrame(float[] data, int startIndex, int firstElementIdx, int idx, int numElements, int thisFrameIndex)
@@ -525,7 +502,7 @@ public class KBatchGroupData
 		this.WriteAnimFrameElement(data, startIndex, symbolFrameIdx, thisFrameIndex, element.transform, element.multColour, element.flags);
 	}
 
-	public const int SIZE_OF_SYMBOL_FRAME_ELEMENT = 32;
+	public const int SIZE_OF_SYMBOL_FRAME_ELEMENT = 16;
 
 	public const int SIZE_OF_ANIM_FRAME = 4;
 

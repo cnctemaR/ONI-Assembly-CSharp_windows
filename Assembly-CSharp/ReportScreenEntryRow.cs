@@ -6,26 +6,69 @@ using UnityEngine.UI;
 
 public class ReportScreenEntryRow : KMonoBehaviour
 {
-	private List<KeyValuePair<string, float>> Sort(Dictionary<string, float> dict, ReportManager.ReportEntry.Order order)
+	private List<ReportManager.ReportEntry.Note> Sort(List<ReportManager.ReportEntry.Note> notes, ReportManager.ReportEntry.Order order)
 	{
-		this.sortedEntries.Clear();
-		foreach (KeyValuePair<string, float> keyValuePair in dict)
-		{
-			this.sortedEntries.Add(keyValuePair);
-		}
 		if (order == ReportManager.ReportEntry.Order.Ascending)
 		{
-			this.sortedEntries.Sort((KeyValuePair<string, float> x, KeyValuePair<string, float> y) => x.Value.CompareTo(y.Value));
+			notes.Sort((ReportManager.ReportEntry.Note x, ReportManager.ReportEntry.Note y) => x.value.CompareTo(y.value));
 		}
 		else if (order == ReportManager.ReportEntry.Order.Descending)
 		{
-			this.sortedEntries.Sort((KeyValuePair<string, float> x, KeyValuePair<string, float> y) => y.Value.CompareTo(x.Value));
+			notes.Sort((ReportManager.ReportEntry.Note x, ReportManager.ReportEntry.Note y) => y.value.CompareTo(x.value));
 		}
-		return this.sortedEntries;
+		return notes;
+	}
+
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.added.GetComponent<ToolTip>().OnToolTip = new Func<string>(this.OnPositiveNoteTooltip);
+		this.removed.GetComponent<ToolTip>().OnToolTip = new Func<string>(this.OnNegativeNoteTooltip);
+		this.net.GetComponent<ToolTip>().OnToolTip = new Func<string>(this.OnNetNoteTooltip);
+		this.name.GetComponent<ToolTip>().OnToolTip = new Func<string>(this.OnNetNoteTooltip);
+	}
+
+	private string OnNoteTooltip(float total_accumulation, string tooltip_text, ReportManager.ReportEntry.Order order, ReportManager.FormattingFn format_fn, Func<ReportManager.ReportEntry.Note, bool> is_note_applicable_cb)
+	{
+		ReportScreenEntryRow.notes.Clear();
+		this.entry.IterateNotes(delegate(ReportManager.ReportEntry.Note note)
+		{
+			if (is_note_applicable_cb(note))
+			{
+				ReportScreenEntryRow.notes.Add(note);
+			}
+		});
+		string text = string.Empty;
+		foreach (ReportManager.ReportEntry.Note note2 in this.Sort(ReportScreenEntryRow.notes, this.reportGroup.posNoteOrder))
+		{
+			text = string.Format(UI.ENDOFDAYREPORT.NOTES.NOTE_ENTRY_LINE_ITEM, text, note2.note, format_fn(note2.value));
+		}
+		return string.Format(tooltip_text + "\n" + text, format_fn(total_accumulation));
+	}
+
+	private string OnNegativeNoteTooltip()
+	{
+		return this.OnNoteTooltip(this.entry.Negative, this.reportGroup.negativeTooltip, this.reportGroup.negNoteOrder, this.reportGroup.formatfn, (ReportManager.ReportEntry.Note note) => note.value < 0f);
+	}
+
+	private string OnPositiveNoteTooltip()
+	{
+		return this.OnNoteTooltip(this.entry.Positive, this.reportGroup.positiveTooltip, this.reportGroup.posNoteOrder, this.reportGroup.formatfn, (ReportManager.ReportEntry.Note note) => note.value > 0f);
+	}
+
+	private string OnNetNoteTooltip()
+	{
+		if (this.entry.Net > 0f)
+		{
+			return this.OnPositiveNoteTooltip();
+		}
+		return this.OnNegativeNoteTooltip();
 	}
 
 	public void SetLine(ReportManager.ReportEntry entry, ReportManager.ReportGroup reportGroup)
 	{
+		this.entry = entry;
+		this.reportGroup = reportGroup;
 		if (entry.context == null)
 		{
 			if (entry.HasContextEntries())
@@ -46,26 +89,21 @@ public class ReportScreenEntryRow : KMonoBehaviour
 			this.spacer.minWidth = this.contextSpacerWidth;
 			this.name.text = entry.context;
 		}
-		string text = string.Empty;
-		foreach (KeyValuePair<string, float> keyValuePair in this.Sort(entry.posNotes, reportGroup.posNoteOrder))
+		if (this.addedValue != entry.Positive)
 		{
-			text = string.Format(UI.ENDOFDAYREPORT.NOTES.NOTE_ENTRY_LINE_ITEM, text, keyValuePair.Key, reportGroup.formatfn(keyValuePair.Value));
+			this.added.text = reportGroup.formatfn(entry.Positive);
+			this.addedValue = entry.Positive;
 		}
-		this.added.text = reportGroup.formatfn(entry.Positive);
-		string text2 = string.Format(reportGroup.positiveTooltip + "\n" + text, reportGroup.formatfn(entry.Positive));
-		this.added.GetComponent<ToolTip>().toolTip = text2;
-		string text3 = string.Empty;
-		foreach (KeyValuePair<string, float> keyValuePair2 in this.Sort(entry.negNotes, reportGroup.negNoteOrder))
+		if (this.removedValue != entry.Negative)
 		{
-			text3 = string.Format(UI.ENDOFDAYREPORT.NOTES.NOTE_ENTRY_LINE_ITEM, text3, keyValuePair2.Key, reportGroup.formatfn(keyValuePair2.Value));
+			this.removed.text = reportGroup.formatfn(entry.Negative);
+			this.removedValue = entry.Negative;
 		}
-		this.removed.text = reportGroup.formatfn(entry.Negative);
-		string text4 = string.Format(reportGroup.negativeTooltip + "\n" + text3, reportGroup.formatfn(entry.Negative));
-		this.removed.GetComponent<ToolTip>().toolTip = text4;
-		string text5 = ((entry.Positive < entry.Negative) ? text4 : text2);
-		this.net.text = ((reportGroup.formatfn != null) ? reportGroup.formatfn(entry.Net) : entry.Net.ToString());
-		this.net.GetComponent<ToolTip>().toolTip = text5;
-		this.name.GetComponent<ToolTip>().toolTip = text5;
+		if (this.netValue != entry.Net)
+		{
+			this.net.text = ((reportGroup.formatfn != null) ? reportGroup.formatfn(entry.Net) : entry.Net.ToString());
+			this.netValue = entry.Net;
+		}
 	}
 
 	[SerializeField]
@@ -80,6 +118,12 @@ public class ReportScreenEntryRow : KMonoBehaviour
 	[SerializeField]
 	private LocText net;
 
+	private float addedValue = float.NegativeInfinity;
+
+	private float removedValue = float.NegativeInfinity;
+
+	private float netValue = float.NegativeInfinity;
+
 	[SerializeField]
 	public MultiToggle toggle;
 
@@ -90,5 +134,9 @@ public class ReportScreenEntryRow : KMonoBehaviour
 
 	public float contextSpacerWidth;
 
-	private List<KeyValuePair<string, float>> sortedEntries = new List<KeyValuePair<string, float>>();
+	private static List<ReportManager.ReportEntry.Note> notes = new List<ReportManager.ReportEntry.Note>();
+
+	private ReportManager.ReportEntry entry;
+
+	private ReportManager.ReportGroup reportGroup;
 }

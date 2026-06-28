@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -10,29 +11,38 @@ public class RefrigeratorConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 2;
 		string text2 = "fridge_kanim";
-		float num3 = 100f;
-		int num4 = 30;
-		float num5 = 10f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		int num3 = 30;
+		float num4 = 10f;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
-		float num6 = 800f;
+		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.BONUS.TIER1, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
 		buildingDef.Floodable = false;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.AudioCategory = "Metal";
-		buildingDef.HotKey = global::Action.BuildMenuKeyR;
 		SoundEventVolumeCache.instance.AddVolume("fridge_kanim", "Refrigerator_open", NOISE_POLLUTION.NOISY.TIER1);
 		SoundEventVolumeCache.instance.AddVolume("fridge_kanim", "Refrigerator_close", NOISE_POLLUTION.NOISY.TIER1);
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
+		GeneratedBuildings.RegisterLogicPorts(go, RefrigeratorConfig.OUTPUT_PORT);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, RefrigeratorConfig.OUTPUT_PORT);
+	}
+
+	public override void DoPostConfigureComplete(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, RefrigeratorConfig.OUTPUT_PORT);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.showInUI = true;
 		storage.showDescriptor = true;
@@ -46,11 +56,6 @@ public class RefrigeratorConfig : IBuildingConfig
 		refrigerator.filterTint = new Color(1f, 1f, 1f, 1f);
 		go.AddOrGet<UserMenu>();
 		go.AddOrGet<DropAllWorkable>();
-	}
-
-	public override void DoPostConfigureComplete(GameObject go)
-	{
-		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
 			StorageController.Instance instance = new StorageController.Instance(game_object.GetComponent<KPrefabID>());
@@ -59,4 +64,6 @@ public class RefrigeratorConfig : IBuildingConfig
 	}
 
 	public const string ID = "Refrigerator";
+
+	private static readonly LogicPorts.Port OUTPUT_PORT = LogicPorts.Port.OutputPort(FilteredStorage.FULL_PORT_ID, new CellOffset(0, 1), global::STRINGS.BUILDINGS.PREFABS.REFRIGERATOR.LOGIC_PORT_DESC, false);
 }

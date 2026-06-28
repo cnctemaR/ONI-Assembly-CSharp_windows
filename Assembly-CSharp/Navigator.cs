@@ -2,9 +2,10 @@
 using System.IO;
 using Klei.AI;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
-public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveLoadableDetails
+public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveLoadableDetails, ISim4000ms
 {
 	public KMonoBehaviour target { get; set; }
 
@@ -14,8 +15,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	public void Serialize(BinaryWriter writer)
 	{
-		byte currentNavType = (byte)this.CurrentNavType;
-		writer.Write(currentNavType);
+		byte b = (byte)this.CurrentNavType;
+		writer.Write(b);
 	}
 
 	public void Deserialize(IReader reader)
@@ -31,6 +32,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		this.targetLocator.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Misc).transform;
 		this.targetLocator.PrefabTag = new Tag("TargetLocator");
 		this.log = new LoggerFS("Navigator");
+		this.simRenderLoadBalance = true;
+		this.autoRegisterSimRender = false;
 	}
 
 	protected override void OnSpawn()
@@ -45,7 +48,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		this.maxUnderwaterTravelCost = Db.Get().Attributes.MaxUnderwaterTravelCost.Lookup(this);
 		if (this.updateProber)
 		{
-			PathProberScheduler.Instance.Add(this);
+			SimAndRenderScheduler.instance.Add(this, false);
 		}
 	}
 
@@ -60,7 +63,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		{
 			offsets = Grid.DefaultOffset;
 		}
-		this.targetLocator.transform.position = Grid.CellToPosCBC(cell, Grid.SceneLayer.Move);
+		this.targetLocator.transform.SetPosition(Grid.CellToPosCBC(cell, Grid.SceneLayer.Move));
 		return this.GoTo(this.targetLocator, offsets, NavigationTactics.ReduceTravelDistance);
 	}
 
@@ -70,13 +73,13 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		{
 			offsets = Grid.DefaultOffset;
 		}
-		this.targetLocator.transform.position = Grid.CellToPosCBC(cell, Grid.SceneLayer.Move);
+		this.targetLocator.transform.SetPosition(Grid.CellToPosCBC(cell, Grid.SceneLayer.Move));
 		return this.GoTo(this.targetLocator, offsets, tactic);
 	}
 
 	public void UpdateTarget(int cell)
 	{
-		this.targetLocator.transform.position = Grid.CellToPosCBC(cell, Grid.SceneLayer.Move);
+		this.targetLocator.transform.SetPosition(Grid.CellToPosCBC(cell, Grid.SceneLayer.Move));
 	}
 
 	public bool GoTo(KMonoBehaviour target, CellOffset[] offsets, NavTactic tactic)
@@ -215,12 +218,17 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		}
 	}
 
-	private void FixedUpdate()
+	private void Sim33ms(float dt)
 	{
 		if (this.IsMoving())
 		{
-			this.transitionDriver.UpdateTransition(Time.fixedDeltaTime);
+			this.transitionDriver.UpdateTransition(dt);
 		}
+	}
+
+	public void Sim4000ms(float dt)
+	{
+		this.UpdateProbe();
 	}
 
 	public void UpdateProbe()
@@ -233,15 +241,11 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		this.PathProber.UpdateProbe(this.NavGrid, num, this.CurrentNavType, this.GetCurrentAbilities(), this.flags, true);
 	}
 
-	private void LateUpdate()
+	public void DrawPath()
 	{
-		if (this.IsMoving() && this.selectable.IsSelected)
+		if (base.gameObject.activeInHierarchy && this.IsMoving())
 		{
 			NavPathDrawer.Instance.DrawPath(base.GetComponent<KAnimControllerBase>().GetPivotSymbolPosition(), this.path);
-		}
-		if (this.DebugDrawPath || this.NavGrid.DebugViewAllPaths)
-		{
-			NavGrid.DebugDrawPath(this.path);
 		}
 	}
 
@@ -450,15 +454,6 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		this.flags &= ~new_flags;
 	}
 
-	protected override void OnCleanUp()
-	{
-		base.OnCleanUp();
-		if (this.updateProber)
-		{
-			PathProberScheduler.Instance.Remove(this);
-		}
-	}
-
 	public bool DebugDrawPath;
 
 	[MyCmpAdd]
@@ -559,20 +554,33 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 			this.moving.Enter(delegate(Navigator.StatesInstance smi)
 			{
 				smi.Trigger(1027377649, GameHashes.ObjectMovementWakeUp);
-			}).Update("Log travel time", delegate(Navigator.StatesInstance smi)
+			}).Update("Log travel time", delegate(Navigator.StatesInstance smi, float dt)
 			{
 				if (smi.GetComponent<MinionIdentity>() != null)
 				{
 					Chore currentChore = smi.GetComponent<ChoreDriver>().GetCurrentChore();
 					if (currentChore != null)
 					{
-						ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, smi.dt, currentChore.choreType.Name, currentChore.driver.GetProperName());
+						ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, dt, currentChore.choreType.Name, currentChore.driver.GetProperName());
+						if (currentChore.choreType == Db.Get().ChoreTypes.Fetch)
+						{
+							MinionResume component = smi.GetComponent<MinionResume>();
+							if (component != null)
+							{
+								component.AddExperienceIfRole("Hauler", dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+								component.AddExperienceIfRole(MaterialsManager.ID, dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+							}
+						}
 					}
 				}
-			}).Exit(delegate(Navigator.StatesInstance smi)
+			}, UpdateRate.SIM_200ms, false).Update("UpdateNavigator", delegate(Navigator.StatesInstance smi, float dt)
 			{
-				smi.Trigger(1027377649, GameHashes.ObjectMovementSleep);
-			});
+				smi.master.Sim33ms(dt);
+			}, UpdateRate.SIM_33ms, true)
+				.Exit(delegate(Navigator.StatesInstance smi)
+				{
+					smi.Trigger(1027377649, GameHashes.ObjectMovementSleep);
+				});
 			this.arrived.TriggerOnEnter(GameHashes.DestinationReached, null).GoTo(this.stopped);
 			this.failed.TriggerOnEnter(GameHashes.NavigationFailed, null).GoTo(this.stopped);
 			this.stopped.DoNothing();

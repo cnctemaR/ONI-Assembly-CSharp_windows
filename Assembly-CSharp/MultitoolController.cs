@@ -12,7 +12,7 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 		this.pre.Enter(delegate(MultitoolController.Instance smi)
 		{
 			smi.PlayPre();
-			this.worker.Get<Facing>(smi).Face(this.workable.Get(smi).transform.position);
+			this.worker.Get<Facing>(smi).Face(this.workable.Get(smi).transform.GetPosition());
 		}).OnAnimQueueComplete(this.loop);
 		this.loop.Enter("PlayLoop", delegate(MultitoolController.Instance smi)
 		{
@@ -60,15 +60,23 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 		int num3 = array.Length;
 		int num4 = (int)(num2 * (float)num3);
 		num4 = Math.Min(num4, num3 - 1);
+		int num5 = 0;
 		NavType currentNavType = worker.GetComponent<Navigator>().CurrentNavType;
-		int num5 = ((currentNavType != NavType.Ladder && currentNavType != NavType.Pole) ? 0 : 1);
+		if (currentNavType == NavType.Ladder)
+		{
+			num5 = 1;
+		}
+		else if (currentNavType == NavType.Pole)
+		{
+			num5 = 2;
+		}
 		return array[num4][num5];
 	}
 
 	private static void GetTargetPoints(Workable workable, Worker worker, out Vector3 source, out Vector3 target)
 	{
 		target = workable.GetTargetPoint();
-		source = worker.transform.position;
+		source = worker.transform.GetPosition();
 		source.y += 0.7f;
 	}
 
@@ -85,27 +93,32 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 		new string[][]
 		{
 			new string[] { "{verb}_dn_pre", "{verb}_dn_loop" },
-			new string[] { "ladder_{verb}_dn_pre", "ladder_{verb}_dn_loop" }
+			new string[] { "ladder_{verb}_dn_pre", "ladder_{verb}_dn_loop" },
+			new string[] { "pole_{verb}_dn_pre", "pole_{verb}_dn_loop" }
 		},
 		new string[][]
 		{
 			new string[] { "{verb}_diag_dn_pre", "{verb}_diag_dn_loop" },
-			new string[] { "ladder_{verb}_diag_dn_pre", "ladder_{verb}_loop_diag_dn" }
+			new string[] { "ladder_{verb}_diag_dn_pre", "ladder_{verb}_loop_diag_dn" },
+			new string[] { "pole_{verb}_diag_dn_pre", "pole_{verb}_loop_diag_dn" }
 		},
 		new string[][]
 		{
 			new string[] { "{verb}_fwd_pre", "{verb}_fwd_loop" },
-			new string[] { "ladder_{verb}_pre", "ladder_{verb}_loop" }
+			new string[] { "ladder_{verb}_pre", "ladder_{verb}_loop" },
+			new string[] { "pole_{verb}_pre", "pole_{verb}_loop" }
 		},
 		new string[][]
 		{
 			new string[] { "{verb}_diag_up_pre", "{verb}_diag_up_loop" },
-			new string[] { "ladder_{verb}_diag_up_pre", "ladder_{verb}_loop_diag_up" }
+			new string[] { "ladder_{verb}_diag_up_pre", "ladder_{verb}_loop_diag_up" },
+			new string[] { "pole_{verb}_diag_up_pre", "pole_{verb}_loop_diag_up" }
 		},
 		new string[][]
 		{
 			new string[] { "{verb}_up_pre", "{verb}_up_loop" },
-			new string[] { "ladder_{verb}_up_pre", "ladder_{verb}_up_loop" }
+			new string[] { "ladder_{verb}_up_pre", "ladder_{verb}_up_loop" },
+			new string[] { "pole_{verb}_up_pre", "pole_{verb}_up_loop" }
 		}
 	};
 
@@ -113,11 +126,11 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 
 	public new class Instance : GameStateMachine<MultitoolController, MultitoolController.Instance, Worker, object>.GameInstance
 	{
-		public Instance(Workable workable, Worker worker, string context, GameObject hit_effect)
+		public Instance(Workable workable, Worker worker, HashedString context, GameObject hit_effect)
 			: base(worker)
 		{
 			this.hitEffectPrefab = hit_effect;
-			worker.GetComponent<AnimEventHandler>().SetContext(new HashedString(context));
+			worker.GetComponent<AnimEventHandler>().SetContext(context);
 			base.sm.worker.Set(worker, base.smi);
 			base.sm.workable.Set(workable, base.smi);
 			this.anims = MultitoolController.GetAnimationStrings(workable, worker, "dig");
@@ -147,12 +160,12 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 			Worker worker = base.sm.worker.Get<Worker>(base.smi);
 			AnimEventHandler component = worker.GetComponent<AnimEventHandler>();
 			Vector3 targetPoint = workable.GetTargetPoint();
-			worker.GetComponent<Facing>().Face(workable.transform.position);
+			worker.GetComponent<Facing>().Face(workable.transform.GetPosition());
 			this.anims = MultitoolController.GetAnimationStrings(workable, worker, "dig");
 			this.PlayLoop();
 			component.SetTargetPos(targetPoint);
 			component.UpdateWorkTarget(workable.GetTargetPoint());
-			this.hitEffect.transform.position = targetPoint;
+			this.hitEffect.transform.SetPosition(targetPoint);
 		}
 
 		public void CreateHitEffect()

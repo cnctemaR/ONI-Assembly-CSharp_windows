@@ -16,7 +16,7 @@ public class HatchConfig : IEntityConfig
 		string text4 = "idle_loop";
 		EffectorValues tier = DECOR.BONUS.TIER0;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, 25f, "HatchNavGrid", NavType.Floor, 2f, "Meat", 2, true, false, 30f, 283f, 294f, 243f, 343f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, 25f, "HatchNavGrid", NavType.Floor, 32, 2f, "Meat", 2, true, false, 30f, 283f, 294f, 243f, 343f);
 		gameObject.UpdateComponentRequirement<Hatch>(true);
 		gameObject.UpdateComponentRequirement<Trappable>(true);
 		gameObject.UpdateComponentRequirement<FloorSwitchActivator>(true);

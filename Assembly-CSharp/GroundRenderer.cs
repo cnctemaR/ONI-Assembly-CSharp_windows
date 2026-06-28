@@ -167,6 +167,7 @@ public class GroundRenderer : KMonoBehaviour
 		material.SetInt("_ZWrite", 0);
 	}
 
+	[ContextMenu("Reload Shaders")]
 	public void OnShadersReloaded()
 	{
 		this.FreeMaterials();

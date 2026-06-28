@@ -40,7 +40,7 @@ public class WorldDamage : KMonoBehaviour
 					num = 0f;
 				}
 			}
-			Grid.Damage[cell] = num;
+			Grid.Damage[cell] = Mathf.Min(1f, num);
 			if (Grid.Damage[cell] >= 1f)
 			{
 				this.DestroyCell(cell, destroy_cb_index);
@@ -91,12 +91,12 @@ public class WorldDamage : KMonoBehaviour
 			kanim.FlipX = true;
 			kanim.enabled = false;
 			kanim.enabled = true;
-			fx.transform.position += Vector3.right * 0.5f;
+			fx.transform.SetPosition(fx.transform.GetPosition() + Vector3.right * 0.5f);
 			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false, false);
 		}
 		else if (offset == Grid.WidthInCells)
 		{
-			fx.transform.position -= Vector3.up * 0.5f;
+			fx.transform.SetPosition(fx.transform.GetPosition() - Vector3.up * 0.5f);
 			kanim.Play("floor", KAnim.PlayMode.Once, 1f, 0f);
 			kanim.enabled = false;
 			kanim.enabled = true;
@@ -107,7 +107,7 @@ public class WorldDamage : KMonoBehaviour
 			kanim.Play("ceiling", KAnim.PlayMode.Once, 1f, 0f);
 			kanim.enabled = false;
 			kanim.enabled = true;
-			fx.transform.position += Vector3.up * 0.5f;
+			fx.transform.SetPosition(fx.transform.GetPosition() + Vector3.up * 0.5f);
 			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false, false);
 		}
 		else
@@ -115,12 +115,12 @@ public class WorldDamage : KMonoBehaviour
 			kanim.Play("side", KAnim.PlayMode.Once, 1f, 0f);
 			kanim.enabled = false;
 			kanim.enabled = true;
-			fx.transform.position -= Vector3.right * 0.5f;
+			fx.transform.SetPosition(fx.transform.GetPosition() - Vector3.right * 0.5f);
 			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false, false);
 		}
-		if (CameraController.Instance.IsAudibleSound(fx.transform.position, this.leakSoundMigrated))
+		if (CameraController.Instance.IsAudibleSound(fx.transform.GetPosition(), this.leakSoundMigrated))
 		{
-			SoundEvent.PlayOneShot(this.leakSoundMigrated, fx.transform.position);
+			SoundEvent.PlayOneShot(this.leakSoundMigrated, fx.transform.GetPosition());
 		}
 		yield return null;
 		yield break;

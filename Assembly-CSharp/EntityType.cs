@@ -10,19 +10,13 @@ public class EntityType : Resource
 	{
 	}
 
-	public void SetupPrefab(GameObject prefab)
-	{
-		this.prefab = prefab;
-		prefab.SetActive(false);
-		KPrefabID kprefabID = prefab.UpdateComponentRequirement<KPrefabID>(true);
-		kprefabID.PrefabTag = new Tag(this.Id);
-		kprefabID.name = this.Name;
-		prefab.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy).transform;
-		EntityTypeSet.Instance.RegisterPrefab(kprefabID);
-	}
-
 	public void Apply(Modifiers modifiers, GameObject game_object)
 	{
+		Attributes attributes = modifiers.GetAttributes();
+		foreach (Klei.AI.Attribute attribute in this.attributes)
+		{
+			attributes.Add(attribute);
+		}
 		Amounts amounts = modifiers.GetAmounts();
 		foreach (Amount amount in this.amounts)
 		{
@@ -36,11 +30,6 @@ public class EntityType : Resource
 		{
 			component.Add(trait);
 		}
-	}
-
-	public GameObject CreateInstance()
-	{
-		return Util.KInstantiate(this.prefab, null, null);
 	}
 
 	public List<Amount> amounts = new List<Amount>();

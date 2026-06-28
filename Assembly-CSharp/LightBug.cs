@@ -8,7 +8,7 @@ public class LightBug : StateMachineComponent<LightBug.StatesInstance>, ISaveLoa
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Vector3 position = base.transform.position;
+		Vector3 position = base.transform.GetPosition();
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Move);
 		base.transform.SetPosition(position);
 		base.gameObject.SetLayerRecursively(LayerMask.NameToLayer("Default"));
@@ -71,10 +71,10 @@ public class LightBug : StateMachineComponent<LightBug.StatesInstance>, ISaveLoa
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.alive.idleStates.idle;
-			this.root.ToggleSchedulePeriodic("RefreshLightbugLight", 0.5f, delegate(LightBug.StatesInstance smi)
+			this.root.Update("RefreshLightbugLight", delegate(LightBug.StatesInstance smi, float dt)
 			{
 				smi.master.GetComponent<Light2D>().Refresh();
-			});
+			}, UpdateRate.SIM_200ms, false);
 			this.alive.EventTransition(GameHashes.TooColdFatal, this.death, null).EventTransition(GameHashes.TooHotFatal, this.death, null).EventTransition(GameHashes.Drowned, this.death, null)
 				.EventTransition(GameHashes.Drowning, this.alive.distressed.Drowning, null)
 				.TagTransition(GameTags.Entombed, this.death, false)
@@ -87,7 +87,7 @@ public class LightBug : StateMachineComponent<LightBug.StatesInstance>, ISaveLoa
 					if (smi.master.loopingSounds != null)
 					{
 						smi.master.loopingSounds.AddLoopingSoundUpdater();
-						smi.master.loopingSounds.StartSound(GlobalAssets.GetSound(smi.master.wingSound, false), smi.master.transform.position);
+						smi.master.loopingSounds.StartSound(GlobalAssets.GetSound(smi.master.wingSound, false), smi.master.transform.GetPosition());
 					}
 				})
 				.Exit(delegate(LightBug.StatesInstance smi)

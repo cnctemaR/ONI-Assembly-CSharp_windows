@@ -9,7 +9,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 {
 	public override float GetSortKey()
 	{
-		return 7f;
+		return 8f;
 	}
 
 	protected override void OnSpawn()
@@ -21,16 +21,16 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		Game.Instance.Subscribe(-1190690038, new Action<object>(this.OnBuildToolDeactivated));
 	}
 
-	public void Configure(BuildMenu.Category category, IList<string> building_names)
+	public void Configure(BuildMenu.Category category, IList<BuildMenu.BuildingInfo> building_infos)
 	{
 		this.ClearButtons();
 		this.SetHasFocus(true);
 		List<KIconToggleMenu.ToggleInfo> list = new List<KIconToggleMenu.ToggleInfo>();
 		string text = category.ToString().ToUpper();
 		this.titleLabel.text = Strings.Get("STRINGS.UI.NEWBUILDCATEGORIES." + text + ".NAME");
-		foreach (string text2 in building_names)
+		foreach (BuildMenu.BuildingInfo buildingInfo in building_infos)
 		{
-			BuildingDef def = Assets.GetBuildingDef(text2);
+			BuildingDef def = Assets.GetBuildingDef(buildingInfo.id);
 			if (def.ShowInBuildMenu && !def.Deprecated)
 			{
 				KIconToggleMenu.ToggleInfo toggleInfo = new KIconToggleMenu.ToggleInfo(def.Name, new BuildMenuBuildingsScreen.UserData(def, PlanScreen.RequirementsState.Tech), def.HotKey, () => def.GetUISprite("ui"));
@@ -253,7 +253,6 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		{
 			this.selectedBuilding = def;
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
-			PrebuildTool.Instance.Activate(def, BuildMenu.Instance.BuildableState(def));
 		}
 		else
 		{
@@ -300,7 +299,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		if (activeTool != null)
 		{
 			Type type = activeTool.GetType();
-			if (type == typeof(BuildTool) || typeof(BaseUtilityBuildTool).IsAssignableFrom(type))
+			if (type == typeof(BuildTool) || typeof(BaseUtilityBuildTool).IsAssignableFrom(type) || typeof(PrebuildTool).IsAssignableFrom(type))
 			{
 				activeTool.DeactivateTool(null);
 			}

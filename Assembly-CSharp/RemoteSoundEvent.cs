@@ -12,7 +12,7 @@ public class RemoteSoundEvent : SoundEvent
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		Vector3 position = behaviour.GetComponent<Transform>().position;
+		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
 		Workable workable = behaviour.GetComponent<Worker>().workable;
 		if (workable != null)
 		{
@@ -31,4 +31,6 @@ public class RemoteSoundEvent : SoundEvent
 			}
 		}
 	}
+
+	private const string STATE_PARAMETER = "State";
 }

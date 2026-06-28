@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using Klei.AI;
 using KSerialization;
 using UnityEngine;
 
@@ -19,7 +20,7 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 	{
 		get
 		{
-			return this.capacity * this.GetUpgradeCapacityMultiplier();
+			return this.capacity;
 		}
 	}
 
@@ -79,7 +80,7 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 	{
 		get
 		{
-			return Grid.Objects[this.PowerCell, 20] != null;
+			return Grid.Objects[this.PowerCell, 24] != null;
 		}
 	}
 
@@ -97,8 +98,15 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 	{
 		get
 		{
-			return BuildingDef.GetEnergyEfficiency(null, this.GetUpgradeEfficiencyMultiplier());
+			return Mathf.Max(1f + this.generatorOutputAttribute.GetTotalValue() / 100f, 0.1f);
 		}
+	}
+
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		Attributes attributes = base.gameObject.GetAttributes();
+		this.generatorOutputAttribute = attributes.Add(Db.Get().Attributes.GeneratorOutput);
 	}
 
 	protected override void OnSpawn()
@@ -110,9 +118,10 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 		this.PowerCell = this.building.GetPowerOutputCell();
 		this.CheckConnectionStatus();
 		this.OnOperationalChanged(null);
+		Game.Instance.emergySim.AddGenerator(this);
 	}
 
-	protected virtual void SimUpdate(float dt)
+	public virtual void EnergySim200ms(float dt)
 	{
 		this.CheckConnectionStatus();
 	}
@@ -152,35 +161,9 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 		}
 	}
 
-	private float GetUpgradeEfficiencyMultiplier()
-	{
-		if (this.upgradable != null)
-		{
-			return this.upgradable.GetEnergyGenerationMultiplier();
-		}
-		return 1f;
-	}
-
-	private float GetUpgradeCapacityMultiplier()
-	{
-		if (this.upgradable != null)
-		{
-			return this.upgradable.GetCapacityUpgradeMultiplier();
-		}
-		return 1f;
-	}
-
-	protected float GetUpgradeTemperatureMultiplier()
-	{
-		if (this.upgradable != null)
-		{
-			return this.upgradable.GetTemperatureUpgradeMultiplier();
-		}
-		return 1f;
-	}
-
 	protected override void OnCleanUp()
 	{
+		Game.Instance.emergySim.RemoveGenerator(this);
 		Game.Instance.circuitManager.Disconnect(this);
 		Components.Generators.Remove(this);
 		base.OnCleanUp();
@@ -228,9 +211,6 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 	[MyCmpReq]
 	protected Building building;
 
-	[MyCmpGet]
-	protected Upgradable upgradable;
-
 	[MyCmpReq]
 	protected Operational operational;
 
@@ -250,4 +230,6 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 	private StatusItem currentStatusItem;
 
 	private Guid statusItemID;
+
+	private AttributeInstance generatorOutputAttribute;
 }

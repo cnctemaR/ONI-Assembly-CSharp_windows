@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using Klei.AI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,16 +30,57 @@ public class CrewPortrait : KMonoBehaviour
 		yield break;
 	}
 
+	private void OnRoleChanged(object data)
+	{
+		CrewPortrait.RefreshHat(this.identityObject, this.controller);
+	}
+
+	private void RegisterEvents()
+	{
+		KMonoBehaviour kmonoBehaviour = this.identityObject as KMonoBehaviour;
+		if (kmonoBehaviour == null)
+		{
+			return;
+		}
+		kmonoBehaviour.Subscribe(540773776, new Action<object>(this.OnRoleChanged));
+	}
+
+	private void UnregisterEvents()
+	{
+		KMonoBehaviour kmonoBehaviour = this.identityObject as KMonoBehaviour;
+		if (kmonoBehaviour == null)
+		{
+			return;
+		}
+		kmonoBehaviour.Unsubscribe(540773776, new Action<object>(this.OnRoleChanged));
+	}
+
+	protected override void OnCmpEnable()
+	{
+		base.OnCmpEnable();
+		this.RegisterEvents();
+		this.ForceRefresh();
+	}
+
+	protected override void OnCmpDisable()
+	{
+		base.OnCmpDisable();
+		this.UnregisterEvents();
+	}
+
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
+		this.UnregisterEvents();
 		ScreenResize instance = ScreenResize.Instance;
 		instance.OnResize = (global::System.Action)Delegate.Remove(instance.OnResize, new global::System.Action(this.RefreshScale));
 	}
 
 	public void SetIdentityObject(IAssignableIdentity identity, bool jobEnabled = true)
 	{
+		this.UnregisterEvents();
 		this.identityObject = identity;
+		this.RegisterEvents();
 		this.targetImage.enabled = true;
 		if (this.identityObject != null)
 		{
@@ -140,9 +180,28 @@ public class CrewPortrait : KMonoBehaviour
 			this.duplicantName.SetText(this.identityObject.GetProperName());
 			if (this.identityObject is MinionIdentity && this.duplicantJob != null)
 			{
-				this.duplicantJob.SetText((this.identityObject == null) ? string.Empty : (this.identityObject as MinionIdentity).GetAttributes().GetProfessionString(true));
-				this.duplicantJob.GetComponent<ToolTip>().toolTip = (this.identityObject as MinionIdentity).GetAttributes().GetProfessionDescriptionString();
+				this.duplicantJob.SetText((this.identityObject == null) ? string.Empty : (this.identityObject as MinionIdentity).GetComponent<MinionResume>().GetCurrentRoleString());
+				this.duplicantJob.GetComponent<ToolTip>().toolTip = (this.identityObject as MinionIdentity).GetComponent<MinionResume>().GetCurrentRoleDescription();
 			}
+		}
+	}
+
+	private static void RefreshHat(IAssignableIdentity identityObject, KBatchedAnimController controller)
+	{
+		MinionIdentity minionIdentity = identityObject as MinionIdentity;
+		if (minionIdentity == null)
+		{
+			return;
+		}
+		MinionResume component = minionIdentity.GetComponent<MinionResume>();
+		if (component != null)
+		{
+			RoleConfig roleConfig = null;
+			if (!string.IsNullOrEmpty(component.CurrentRole))
+			{
+				roleConfig = Game.Instance.roleManager.GetRole(component.CurrentRole);
+			}
+			RoleManager.ApplyRoleHat(roleConfig, component.GetComponent<Accessorizer>(), controller);
 		}
 	}
 
@@ -154,14 +213,20 @@ public class CrewPortrait : KMonoBehaviour
 		{
 			return;
 		}
-		if (!(identityObject is MinionIdentity))
+		MinionIdentity minionIdentity = identityObject as MinionIdentity;
+		if (minionIdentity == null)
 		{
 			return;
 		}
-		FaceGraph component = (identityObject as MinionIdentity).GetComponent<FaceGraph>();
+		FaceGraph component = minionIdentity.GetComponent<FaceGraph>();
 		KCompBuildInstance headComp = component.GetHeadComp();
 		controller.SetAnims(new KAnimFile[] { Assets.GetAnim("body_comp_default_kanim") }, false);
-		controller.AddBuildOverride(headComp.GetData(), true, false);
+		for (int i = 0; i < headComp.GetData().build.symbols.Length; i++)
+		{
+			controller.AddSymbolOverride(headComp.GetData().build.symbols[i].hash, headComp.GetData().build.batchTag, headComp.GetData().build.symbols[i], false);
+			controller.ShowSymbol(headComp.GetData().build.symbols[i].hash);
+		}
+		CrewPortrait.RefreshHat(identityObject, controller);
 		headComp.Refresh(controller);
 		float num = 1f;
 		if (GameScreenManager.Instance != null && GameScreenManager.Instance.ssOverlayCanvas != null)

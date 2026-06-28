@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Scheduler : IScheduler
@@ -50,20 +49,6 @@ public class Scheduler : IScheduler
 		this.entries = null;
 	}
 
-	public SchedulerHandle SchedulePeriodic(string name, float interval, Action<object> callback, object callback_data = null, SchedulerGroup group = null, float time_offset = 0f, GameObject profiler_obj = null)
-	{
-		if (group != null && group.scheduler != this)
-		{
-			global::Debug.LogError("Scheduler group mismatch!", null);
-		}
-		SchedulerHandle schedulerHandle = this.Schedule(name, interval + time_offset, interval, callback, callback_data, profiler_obj);
-		if (group != null)
-		{
-			group.Add(schedulerHandle);
-		}
-		return schedulerHandle;
-	}
-
 	public SchedulerHandle Schedule(string name, float time, Action<object> callback, object callback_data = null, SchedulerGroup group = null)
 	{
 		if (group != null && group.scheduler != this)
@@ -97,7 +82,6 @@ public class Scheduler : IScheduler
 			if (this.previousTime != time)
 			{
 				this.previousTime = time;
-				this.entriesToRun.Clear();
 				while (i < count)
 				{
 					if (time < this.entries.Peek().Key)
@@ -107,23 +91,9 @@ public class Scheduler : IScheduler
 					SchedulerEntry value = this.entries.Dequeue().Value;
 					if (value.callback != null)
 					{
-						this.entriesToRun.Add(value);
+						value.callback(value.callbackData);
 					}
 					i++;
-				}
-				for (int j = 0; j < this.entriesToRun.Count; j++)
-				{
-					SchedulerEntry schedulerEntry = this.entriesToRun[j];
-					if (schedulerEntry.callback != null)
-					{
-						schedulerEntry.callback(schedulerEntry.callbackData);
-						if (schedulerEntry.timeInterval >= 0f && schedulerEntry.callback != null)
-						{
-							SchedulerEntry schedulerEntry2 = schedulerEntry;
-							schedulerEntry2.time = this.clock.GetTime() + schedulerEntry2.timeInterval;
-							this.Schedule(schedulerEntry2);
-						}
-					}
 				}
 			}
 		}
@@ -148,6 +118,4 @@ public class Scheduler : IScheduler
 	private SchedulerClock clock;
 
 	private float previousTime = float.NegativeInfinity;
-
-	private List<SchedulerEntry> entriesToRun = new List<SchedulerEntry>();
 }

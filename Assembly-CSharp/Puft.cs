@@ -7,7 +7,7 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Vector3 position = base.transform.position;
+		Vector3 position = base.transform.GetPosition();
 		base.transform.SetPosition(position);
 		base.gameObject.SetLayerRecursively(LayerMask.NameToLayer("Default"));
 	}
@@ -87,10 +87,10 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 
 	private void OnMassConsumed(object data)
 	{
-		Sim.MassConsumptionCallback massConsumptionCallback = (Sim.MassConsumptionCallback)data;
-		if (massConsumptionCallback.mass > 0f)
+		Sim.MassConsumedCallback massConsumedCallback = (Sim.MassConsumedCallback)data;
+		if (massConsumedCallback.mass > 0f)
 		{
-			this.storage.AddGasChunk(ElementLoader.elements[(int)massConsumptionCallback.removedElemIdx].id, massConsumptionCallback.mass, massConsumptionCallback.temperature, massConsumptionCallback.diseaseIdx, massConsumptionCallback.diseaseCount, true, true);
+			this.storage.AddGasChunk(ElementLoader.elements[(int)massConsumedCallback.elemIdx].id, massConsumedCallback.mass, massConsumedCallback.temperature, massConsumedCallback.diseaseIdx, massConsumedCallback.diseaseCount, true, true);
 			if (this.HasConsumedEnough())
 			{
 				base.smi.sm.noFood.Trigger(base.smi);
@@ -124,7 +124,7 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 			if (component != null)
 			{
 				component.AddLoopingSoundUpdater();
-				component.StartSound(this.inhaleSound, base.transform.position);
+				component.StartSound(this.inhaleSound, base.transform.GetPosition());
 				this.playingInhaleSound = true;
 			}
 		}
@@ -255,15 +255,15 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 					smi.master.ConvertFoodToPoop();
 				}, null);
 			}).OnAnimQueueComplete(this.alive.idle.idle);
-			this.alive.inhale.DefaultState(this.alive.inhale.pre).Update(delegate(Puft.StatesInstance smi)
+			this.alive.inhale.DefaultState(this.alive.inhale.pre).Update(delegate(Puft.StatesInstance smi, float dt)
 			{
-				smi.master.ConsumeFood(smi.deltatime);
+				smi.master.ConsumeFood(dt);
 			});
 			this.alive.inhale.pre.PlayAnim("inhale_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.alive.inhale.loop);
 			this.alive.inhale.loop.PlayAnim("inhale_loop", KAnim.PlayMode.Loop).Enter(delegate(Puft.StatesInstance smi)
 			{
 				smi.master.StartInhaleSound();
-			}).Update(delegate(Puft.StatesInstance smi)
+			}).Update(delegate(Puft.StatesInstance smi, float dt)
 			{
 				smi.master.UpdateInhaleSound();
 			})

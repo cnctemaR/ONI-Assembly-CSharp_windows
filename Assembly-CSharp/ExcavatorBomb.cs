@@ -203,7 +203,7 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 						HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(action, false));
 						if (!WorldDamage.Instance.ApplyDamage(num3, num23, -1, handle.index))
 						{
-							SimMessages.ModifyEnergy(num3, kilojoules, SimMessages.EnergySourceID.Excavator);
+							SimMessages.ModifyEnergy(num3, kilojoules, 5000f, SimMessages.EnergySourceID.Excavator);
 						}
 					}
 					List<int> neighbors = this.GetNeighbors(num3);
@@ -230,7 +230,7 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 			}
 			else
 			{
-				bounds = base.GetComponentInChildren<Collider2D>().bounds;
+				bounds = base.GetComponentInChildren<KCollider2D>().bounds;
 			}
 			float x = bounds.center.x;
 			float y = bounds.center.y;
@@ -321,7 +321,7 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 			float num = float.MaxValue;
 			for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
 			{
-				float num2 = Vector3.Distance(Components.LiveMinionIdentities[i].gameObject.transform.position, base.transform.position);
+				float num2 = Vector3.Distance(Components.LiveMinionIdentities[i].gameObject.transform.GetPosition(), base.transform.GetPosition());
 				num = Mathf.Min(num, num2);
 			}
 			return num < base.master.maxRadius + base.master.minSafeDistance;
@@ -334,35 +334,35 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 		{
 			base.InitializeStates(out default_state);
 			default_state = this.idle;
-			this.statusItemUnarmed = new StatusItem("Unarmed", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.UNARMED.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.UNARMED.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
-			this.statusItemArmed = new StatusItem("Armed", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.ARMED.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.ARMED.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
-			this.statusItemCountdown = new StatusItem("Countdown", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.COUNTDOWN.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.COUNTDOWN.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
+			this.statusItemUnarmed = new StatusItem("Unarmed", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.UNARMED.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.UNARMED.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486);
+			this.statusItemArmed = new StatusItem("Armed", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.ARMED.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.ARMED.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486);
+			this.statusItemCountdown = new StatusItem("Countdown", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.COUNTDOWN.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.COUNTDOWN.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486);
 			this.statusItemCountdown.resolveStringCallback = delegate(string str, object data)
 			{
 				ExcavatorBomb.StatesInstance statesInstance = (ExcavatorBomb.StatesInstance)data;
 				return string.Format(str, GameUtil.GetFormattedTime(statesInstance.master.CountdownRemaining));
 			};
-			this.statusItemDupeDanger = new StatusItem("DupeDanger", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.DUPE_DANGER.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.DUPE_DANGER.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
-			this.statusItemExpoding = new StatusItem("Exploding", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.EXPLODING.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.EXPLODING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
+			this.statusItemDupeDanger = new StatusItem("DupeDanger", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.DUPE_DANGER.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.DUPE_DANGER.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486);
+			this.statusItemExpoding = new StatusItem("Exploding", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.EXPLODING.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.EXPLODING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486);
 			this.idle.PlayAnim("off", KAnim.PlayMode.Loop).ToggleMainStatusItem(this.statusItemUnarmed).GoTo(this.armed);
 			this.armed.PlayAnim("on", KAnim.PlayMode.Loop).ToggleMainStatusItem(this.statusItemArmed).GoTo(this.dupe_danger);
-			this.dupe_danger.PlayAnim("working_post", KAnim.PlayMode.Loop).ToggleMainStatusItem(this.statusItemDupeDanger).Transition(this.countdown, (ExcavatorBomb.StatesInstance smi) => !smi.DupeInDanger());
-			this.countdown.PlayAnim("working", KAnim.PlayMode.Loop).ToggleMainStatusItem(this.statusItemCountdown).Transition(this.dupe_danger, (ExcavatorBomb.StatesInstance smi) => smi.DupeInDanger())
+			this.dupe_danger.PlayAnim("working_post", KAnim.PlayMode.Loop).ToggleMainStatusItem(this.statusItemDupeDanger).Transition(this.countdown, (ExcavatorBomb.StatesInstance smi) => !smi.DupeInDanger(), UpdateRate.SIM_200ms);
+			this.countdown.PlayAnim("working", KAnim.PlayMode.Loop).ToggleMainStatusItem(this.statusItemCountdown).Transition(this.dupe_danger, (ExcavatorBomb.StatesInstance smi) => smi.DupeInDanger(), UpdateRate.SIM_200ms)
 				.Enter(delegate(ExcavatorBomb.StatesInstance smi)
 				{
 					smi.master.currentCountdown = smi.master.CountdownTime;
 				})
-				.Update(delegate(ExcavatorBomb.StatesInstance smi)
+				.Update(delegate(ExcavatorBomb.StatesInstance smi, float dt)
 				{
-					smi.master.currentCountdown -= smi.deltatime;
+					smi.master.currentCountdown -= dt;
 					if (smi.master.currentCountdown <= 0f)
 					{
 						smi.GoTo(this.exploding);
 					}
 				});
-			this.exploding.ToggleMainStatusItem(this.statusItemExpoding).Update(delegate(ExcavatorBomb.StatesInstance smi)
+			this.exploding.ToggleMainStatusItem(this.statusItemExpoding).Update(delegate(ExcavatorBomb.StatesInstance smi, float dt)
 			{
-				bool flag = smi.master.Explode(smi.deltatime);
+				bool flag = smi.master.Explode(dt);
 				if (flag)
 				{
 					smi.GoTo(this.defunct);

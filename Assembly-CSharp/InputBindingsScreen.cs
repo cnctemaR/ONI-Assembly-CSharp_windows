@@ -132,6 +132,7 @@ public class InputBindingsScreen : KModalScreen
 				{
 					this.waitingForKeyPress = true;
 					this.actionToRebind = binding.mAction;
+					this.ignoreRootConflicts = binding.mIgnoreRootConflics;
 					this.activeButton = button;
 					key_label.text = UI.FRONTEND.INPUT_BINDINGS_SCREEN.WAITING_FOR_INPUT;
 				};
@@ -192,10 +193,16 @@ public class InputBindingsScreen : KModalScreen
 		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
 			BindingEntry bindingEntry2 = GameInputMapping.KeyBindings[i];
-			if ((bindingEntry2.mGroup == null || bindingEntry2.mGroup == activeScreen || bindingEntry2.mGroup == "Root" || activeScreen == "Root") && new_binding.IsBindingEqual(bindingEntry2))
+			if (new_binding.IsBindingEqual(bindingEntry2) && (bindingEntry2.mGroup == null || bindingEntry2.mGroup == activeScreen || bindingEntry2.mGroup == "Root" || activeScreen == "Root"))
 			{
-				bindingEntry = bindingEntry2;
-				break;
+				if (!(activeScreen == "Root") || !bindingEntry2.mIgnoreRootConflics)
+				{
+					if (!(bindingEntry2.mGroup == "Root") || !new_binding.mIgnoreRootConflics)
+					{
+						bindingEntry = bindingEntry2;
+						break;
+					}
+				}
 			}
 		}
 		return bindingEntry;
@@ -321,7 +328,7 @@ public class InputBindingsScreen : KModalScreen
 
 	private void Bind(KKeyCode kkey_code, Modifier modifier)
 	{
-		BindingEntry bindingEntry = new BindingEntry(this.screens[this.activeScreen], GamepadButton.NumButtons, kkey_code, modifier, this.actionToRebind, true, false);
+		BindingEntry bindingEntry = new BindingEntry(this.screens[this.activeScreen], GamepadButton.NumButtons, kkey_code, modifier, this.actionToRebind, true, this.ignoreRootConflicts);
 		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
 			BindingEntry bindingEntry2 = GameInputMapping.KeyBindings[i];
@@ -387,6 +394,8 @@ public class InputBindingsScreen : KModalScreen
 	private bool waitingForKeyPress;
 
 	private global::Action actionToRebind = global::Action.NumActions;
+
+	private bool ignoreRootConflicts;
 
 	private KButton activeButton;
 

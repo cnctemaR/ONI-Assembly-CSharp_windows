@@ -6,6 +6,12 @@ using UnityEngine;
 [Serializable]
 public struct Tag : ISerializationCallbackReceiver, IEquatable<Tag>, IComparable<Tag>
 {
+	public Tag(int hash)
+	{
+		this.hash = hash;
+		this.name = string.Empty;
+	}
+
 	public Tag(Tag orig)
 	{
 		this.name = orig.name;

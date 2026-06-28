@@ -1,6 +1,6 @@
 ﻿using System;
 
-public class Pump : KMonoBehaviour
+public class Pump : KMonoBehaviour, ISim1000ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -13,7 +13,7 @@ public class Pump : KMonoBehaviour
 		base.OnSpawn();
 		this.elapsedTime = 0f;
 		this.pumpable = this.UpdateOperational();
-		this.dispenser.GetConduitManager().AddConduitUpdater(new Action<float>(this.OnConduitUpdate), ConduitFlow.Priority.Last);
+		this.dispenser.GetConduitManager().AddConduitUpdater(new Action<float>(this.OnConduitUpdate), ConduitFlowPriority.Last);
 	}
 
 	protected override void OnCleanUp()
@@ -22,7 +22,7 @@ public class Pump : KMonoBehaviour
 		base.OnCleanUp();
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim1000ms(float dt)
 	{
 		this.elapsedTime += dt;
 		if (this.elapsedTime >= 1f)
@@ -65,7 +65,7 @@ public class Pump : KMonoBehaviour
 
 	private bool IsPumpable(Element.State expected_state, int radius)
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		for (int i = 0; i < (int)this.consumer.consumptionRadius; i++)
 		{
 			for (int j = 0; j < (int)this.consumer.consumptionRadius; j++)
@@ -85,6 +85,14 @@ public class Pump : KMonoBehaviour
 	{
 		bool flag = this.dispenser.ConduitContents.mass > 0f;
 		this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.ConduitBlocked, flag, null);
+	}
+
+	public ConduitType conduitType
+	{
+		get
+		{
+			return this.dispenser.conduitType;
+		}
 	}
 
 	public static Operational.Flag PumpableFlag = new Operational.Flag("vent", Operational.Flag.Type.Requirement);

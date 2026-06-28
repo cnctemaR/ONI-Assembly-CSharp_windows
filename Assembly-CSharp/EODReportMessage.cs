@@ -5,7 +5,7 @@ public class EODReportMessage : Message
 {
 	public EODReportMessage(string title, string tooltip)
 	{
-		this.day = GameUtil.GetCurrentDay();
+		this.day = GameUtil.GetCurrentCycle();
 		this.title = title;
 		this.tooltip = tooltip;
 	}

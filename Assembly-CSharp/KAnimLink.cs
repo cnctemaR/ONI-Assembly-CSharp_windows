@@ -12,11 +12,11 @@ public class KAnimLink
 
 	private void Register()
 	{
-		this.master.onOverlayColourChanged += this.OnOverlayColourChanged;
+		this.master.OnOverlayColourChanged += this.OnOverlayColourChanged;
 		KAnimControllerBase kanimControllerBase = this.master;
-		kanimControllerBase.OnTintChanged = (Action<Color32>)Delegate.Combine(kanimControllerBase.OnTintChanged, new Action<Color32>(this.OnTintColourChanged));
+		kanimControllerBase.OnTintChanged = (Action<Color>)Delegate.Combine(kanimControllerBase.OnTintChanged, new Action<Color>(this.OnTintColourChanged));
 		KAnimControllerBase kanimControllerBase2 = this.master;
-		kanimControllerBase2.OnHighlightChanged = (Action<Color32>)Delegate.Combine(kanimControllerBase2.OnHighlightChanged, new Action<Color32>(this.OnHighlightColourChanged));
+		kanimControllerBase2.OnHighlightChanged = (Action<Color>)Delegate.Combine(kanimControllerBase2.OnHighlightChanged, new Action<Color>(this.OnHighlightColourChanged));
 		this.master.onLayerChanged += this.slave.SetLayer;
 	}
 
@@ -24,11 +24,11 @@ public class KAnimLink
 	{
 		if (this.master != null)
 		{
-			this.master.onOverlayColourChanged -= this.OnOverlayColourChanged;
+			this.master.OnOverlayColourChanged -= this.OnOverlayColourChanged;
 			KAnimControllerBase kanimControllerBase = this.master;
-			kanimControllerBase.OnTintChanged = (Action<Color32>)Delegate.Remove(kanimControllerBase.OnTintChanged, new Action<Color32>(this.OnTintColourChanged));
+			kanimControllerBase.OnTintChanged = (Action<Color>)Delegate.Remove(kanimControllerBase.OnTintChanged, new Action<Color>(this.OnTintColourChanged));
 			KAnimControllerBase kanimControllerBase2 = this.master;
-			kanimControllerBase2.OnHighlightChanged = (Action<Color32>)Delegate.Remove(kanimControllerBase2.OnHighlightChanged, new Action<Color32>(this.OnHighlightColourChanged));
+			kanimControllerBase2.OnHighlightChanged = (Action<Color>)Delegate.Remove(kanimControllerBase2.OnHighlightChanged, new Action<Color>(this.OnHighlightColourChanged));
 			if (this.slave != null)
 			{
 				this.master.onLayerChanged -= this.slave.SetLayer;
@@ -44,7 +44,7 @@ public class KAnimLink
 		}
 	}
 
-	private void OnTintColourChanged(Color32 c)
+	private void OnTintColourChanged(Color c)
 	{
 		if (this.slave != null)
 		{
@@ -52,7 +52,7 @@ public class KAnimLink
 		}
 	}
 
-	private void OnHighlightColourChanged(Color32 c)
+	private void OnHighlightColourChanged(Color c)
 	{
 		if (this.slave != null)
 		{

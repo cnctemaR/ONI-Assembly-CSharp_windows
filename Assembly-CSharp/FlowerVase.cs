@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 public class FlowerVase : StateMachineComponent<FlowerVase.SMInstance>
 {
@@ -18,7 +17,7 @@ public class FlowerVase : StateMachineComponent<FlowerVase.SMInstance>
 	private PlantablePlot plantablePlot;
 
 	[MyCmpReq]
-	private BoxCollider2D boxCollider;
+	private KBoxCollider2D boxCollider;
 
 	public class SMInstance : GameStateMachine<FlowerVase.States, FlowerVase.SMInstance, FlowerVase, object>.GameInstance
 	{

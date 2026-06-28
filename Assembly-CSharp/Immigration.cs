@@ -1,8 +1,7 @@
 ﻿using System;
 using KSerialization;
-using UnityEngine;
 
-public class Immigration : KMonoBehaviour, ISaveLoadable
+public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms
 {
 	public MinionStartingStats MinionStats
 	{
@@ -57,13 +56,13 @@ public class Immigration : KMonoBehaviour, ISaveLoadable
 		return this.spawnInterval[num];
 	}
 
-	private void Update()
+	public void Sim200ms(float dt)
 	{
 		if (this.stopped || this.bImmigrantAvailable)
 		{
 			return;
 		}
-		this.timeBeforeSpawn -= Time.deltaTime;
+		this.timeBeforeSpawn -= dt;
 		this.timeBeforeSpawn = Math.Max(this.timeBeforeSpawn, 0f);
 		if (this.timeBeforeSpawn <= 0f)
 		{

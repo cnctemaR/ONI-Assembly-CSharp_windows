@@ -13,17 +13,6 @@ public class RangedAttackable : AttackableBase
 		base.OnSpawn();
 		base.preferUnreservedCell = true;
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
-		CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnMovedCell), false);
-	}
-
-	protected override void OnCleanUp()
-	{
-		base.OnCleanUp();
-		CellChangeMonitor.Instance.Remove(this, new Action<int, int>(this.OnMovedCell), false);
-	}
-
-	private void OnMovedCell(int oldCell, int newCell)
-	{
 	}
 
 	public new int GetCell()

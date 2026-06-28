@@ -30,7 +30,7 @@ public class PlantState : KMonoBehaviour, ISaveLoadable
 		{
 			GameObject gameObject = Util.KInstantiate(this.seedPrefab, null, null);
 			gameObject.SetActive(true);
-			gameObject.transform.SetPosition(base.transform.position);
+			gameObject.transform.SetPosition(base.transform.GetPosition());
 		}
 		this.DeleteObject();
 	}

@@ -11,15 +11,14 @@ public class GasLogicValveConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 2;
 		string text2 = "valvegas_logic_kanim";
-		float num3 = 50f;
-		int num4 = 30;
-		float num5 = 10f;
+		int num3 = 30;
+		float num4 = 10f;
 		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER1;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER1;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, refined_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER0, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER0, tier2, 0.2f);
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.OutputConduitType = ConduitType.Gas;
 		buildingDef.Floodable = false;
@@ -34,10 +33,10 @@ public class GasLogicValveConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
-		GeneratedBuildings.MakeBuildableAnywhere(go);
+		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		OperationalValve operationalValve = go.AddOrGet<OperationalValve>();
 		operationalValve.conduitType = ConduitType.Gas;
 		operationalValve.maxFlow = 1f;
@@ -69,8 +68,5 @@ public class GasLogicValveConfig : IBuildingConfig
 
 	private const ConduitType CONDUIT_TYPE = ConduitType.Gas;
 
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
-	{
-		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, true)
-	};
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, true) };
 }

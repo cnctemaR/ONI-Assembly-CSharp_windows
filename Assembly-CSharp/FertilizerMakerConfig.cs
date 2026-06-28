@@ -11,19 +11,18 @@ public class FertilizerMakerConfig : IBuildingConfig
 		int num = 4;
 		int num2 = 3;
 		string text2 = "fertilizer_maker_kanim";
-		float num3 = 100f;
-		int num4 = 30;
-		float num5 = 30f;
+		int num3 = 30;
+		float num4 = 30f;
 		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num6 = 800f;
+		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
-		buildingDef.OperatingKilowatts = 0.5f;
+		buildingDef.SelfHeatKilowattsWhenActive = 0.5f;
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
@@ -33,7 +32,7 @@ public class FertilizerMakerConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
@@ -44,7 +43,6 @@ public class FertilizerMakerConfig : IBuildingConfig
 		elementDropper.emitTag = new Tag("Fertilizer");
 		elementDropper.emitOffset = new Vector3(0f, 1f, 0f);
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
-		elementConverter.conversionInterval = 1f;
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
 			new ElementConverter.ConsumedElement(new Tag("DirtyWater"), 0.15f)
@@ -106,8 +104,5 @@ public class FertilizerMakerConfig : IBuildingConfig
 
 	private const float WATER_PER_CYCLE = 90f;
 
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
-	{
-		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(-1, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false)
-	};
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(-1, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
 }

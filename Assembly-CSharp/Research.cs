@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using KSerialization;
+using STRINGS;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Research : KMonoBehaviour, ISaveLoadable
@@ -24,6 +25,19 @@ public class Research : KMonoBehaviour, ISaveLoadable
 		if (this.globalPointInventory == null)
 		{
 			this.globalPointInventory = new ResearchPointInventory();
+		}
+		base.Subscribe(-1523247426, new Action<object>(this.OnRolesUpdated));
+		Components.Cmps<ResearchCenter> researchCenters = Components.ResearchCenters;
+		researchCenters.OnAdd = (Action<ResearchCenter>)Delegate.Combine(researchCenters.OnAdd, new Action<ResearchCenter>(this.CheckResearchBuildings));
+		Components.Cmps<ResearchCenter> researchCenters2 = Components.ResearchCenters;
+		researchCenters2.OnRemove = (Action<ResearchCenter>)Delegate.Combine(researchCenters2.OnRemove, new Action<ResearchCenter>(this.CheckResearchBuildings));
+		foreach (KPrefabID kprefabID in Assets.Prefabs)
+		{
+			ResearchCenter component = kprefabID.GetComponent<ResearchCenter>();
+			if (component != null)
+			{
+				this.researchCenterPrefabs.Add(component);
+			}
 		}
 	}
 
@@ -152,6 +166,28 @@ public class Research : KMonoBehaviour, ISaveLoadable
 		}
 		base.Trigger(-1914338957, this.queuedTech);
 		this.CheckBuyResearch();
+		if (this.activeResearch != null)
+		{
+			this.CheckResearchBuildings(null);
+			if (this.activeResearch.tech.costsByResearchTypeID.Count > 1)
+			{
+				if (Game.Instance.roleManager.GetRoleAssigneesWithPerk(RoleManager.rolePerks.AllowAdvancedResearch.id).Count == 0)
+				{
+					this.notifier.Remove(this.NoResearcherRole);
+					this.notifier.Add(this.NoResearcherRole, string.Empty);
+				}
+			}
+			else
+			{
+				this.notifier.Remove(this.NoResearcherRole);
+				this.notifier.Remove(this.MissingResearchStation);
+			}
+		}
+		else
+		{
+			this.notifier.Remove(this.NoResearcherRole);
+			this.notifier.Remove(this.MissingResearchStation);
+		}
 	}
 
 	public void AddResearchPoints(string researchTypeID, float points)
@@ -184,6 +220,15 @@ public class Research : KMonoBehaviour, ISaveLoadable
 				this.GetNextTech();
 			}
 		}
+	}
+
+	protected override void OnCleanUp()
+	{
+		Components.Cmps<ResearchCenter> researchCenters = Components.ResearchCenters;
+		researchCenters.OnAdd = (Action<ResearchCenter>)Delegate.Remove(researchCenters.OnAdd, new Action<ResearchCenter>(this.CheckResearchBuildings));
+		Components.Cmps<ResearchCenter> researchCenters2 = Components.ResearchCenters;
+		researchCenters2.OnRemove = (Action<ResearchCenter>)Delegate.Remove(researchCenters2.OnRemove, new Action<ResearchCenter>(this.CheckResearchBuildings));
+		base.OnCleanUp();
 	}
 
 	public void CompleteQueue()
@@ -254,6 +299,75 @@ public class Research : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
+	private void OnRolesUpdated(object data)
+	{
+		if (this.activeResearch != null && this.activeResearch.tech.costsByResearchTypeID.Count > 1)
+		{
+			if (Game.Instance.roleManager.GetRoleAssigneesWithPerk(RoleManager.rolePerks.AllowAdvancedResearch.id).Count == 0)
+			{
+				this.notifier.Add(this.NoResearcherRole, string.Empty);
+			}
+			else
+			{
+				this.notifier.Remove(this.NoResearcherRole);
+			}
+		}
+		else
+		{
+			this.notifier.Remove(this.NoResearcherRole);
+		}
+	}
+
+	public string GetMissingResearchBuildingName()
+	{
+		foreach (KeyValuePair<string, float> keyValuePair in this.activeResearch.tech.costsByResearchTypeID)
+		{
+			bool flag = true;
+			if (keyValuePair.Value > 0f)
+			{
+				flag = false;
+				foreach (ResearchCenter researchCenter in Components.ResearchCenters)
+				{
+					if (researchCenter.research_point_type_id == keyValuePair.Key)
+					{
+						flag = true;
+						break;
+					}
+				}
+			}
+			if (!flag)
+			{
+				foreach (ResearchCenter researchCenter2 in this.researchCenterPrefabs)
+				{
+					if (researchCenter2.research_point_type_id == keyValuePair.Key)
+					{
+						return researchCenter2.GetProperName();
+					}
+				}
+				return null;
+			}
+		}
+		return null;
+	}
+
+	private void CheckResearchBuildings(object data)
+	{
+		if (this.activeResearch == null)
+		{
+			this.notifier.Remove(this.MissingResearchStation);
+			return;
+		}
+		string missingResearchBuildingName = this.GetMissingResearchBuildingName();
+		if (string.IsNullOrEmpty(missingResearchBuildingName))
+		{
+			this.notifier.Remove(this.MissingResearchStation);
+		}
+		else
+		{
+			this.notifier.Add(this.MissingResearchStation, string.Empty);
+		}
+	}
+
 	public static Research Instance;
 
 	[MyCmpAdd]
@@ -264,6 +378,12 @@ public class Research : KMonoBehaviour, ISaveLoadable
 	private List<TechInstance> queuedTech = new List<TechInstance>();
 
 	private TechInstance activeResearch;
+
+	private Notification NoResearcherRole = new Notification(RESEARCH.MESSAGING.NO_RESEARCHER_ROLE, NotificationType.Bad, HashedString.Invalid, (List<Notification> list, object data) => RESEARCH.MESSAGING.NO_RESEARCHER_ROLE_TOOLTIP, null, false, 12f, null, null, null);
+
+	private Notification MissingResearchStation = new Notification(RESEARCH.MESSAGING.MISSING_RESEARCH_STATION, NotificationType.Bad, HashedString.Invalid, (List<Notification> list, object data) => RESEARCH.MESSAGING.MISSING_RESEARCH_STATION_TOOLTIP.ToString().Replace("{0}", Research.Instance.GetMissingResearchBuildingName()), null, false, 11f, null, null, null);
+
+	private List<ResearchCenter> researchCenterPrefabs = new List<ResearchCenter>();
 
 	public ResearchTypes researchTypes;
 

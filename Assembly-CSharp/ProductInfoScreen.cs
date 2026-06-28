@@ -259,6 +259,7 @@ public class ProductInfoScreen : KScreen
 		this.materialSelectionPanel.AddSelectAction(new MaterialSelector.SelectMaterialActions(this.RefreshScreen));
 		this.materialSelectionPanel.AddSelectAction(new MaterialSelector.SelectMaterialActions(this.onMenuMaterialChanged));
 		this.materialSelectionPanel.AutoSelectAvailableMaterial();
+		this.ActivateAppropriateTool();
 	}
 
 	private bool BuildRequirementsMet(BuildingDef def)
@@ -277,6 +278,12 @@ public class ProductInfoScreen : KScreen
 		{
 			return;
 		}
+		this.ActivateAppropriateTool();
+		this.SetDescription(this.currentDef);
+	}
+
+	private void ActivateAppropriateTool()
+	{
 		if (this.materialSelectionPanel.AllSelectorsSelected() && this.BuildRequirementsMet(this.currentDef))
 		{
 			this.onElementsFullySelected.Signal();
@@ -296,7 +303,6 @@ public class ProductInfoScreen : KScreen
 				PrebuildTool.Instance.Activate(this.currentDef, BuildMenu.Instance.BuildableState(this.currentDef));
 			}
 		}
-		this.SetDescription(this.currentDef);
 	}
 
 	public static bool MaterialsMet(Recipe recipe)

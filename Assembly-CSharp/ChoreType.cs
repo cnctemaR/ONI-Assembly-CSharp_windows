@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 public class ChoreType : Resource
 {
-	public ChoreType(string id, ResourceSet parent, string[] chore_groups, string urge, string name, string status_message, Tag[] interrupt_exclusion, int priority)
+	public ChoreType(string id, ResourceSet parent, string[] chore_groups, string urge, string name, string status_message, string tooltip, Tag[] interrupt_exclusion, int priority)
 		: base(id, parent, name)
 	{
-		this.statusItem = new StatusItem(id, status_message, status_message, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
+		this.statusItem = new StatusItem(id, status_message, tooltip, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486);
 		this.statusItem.resolveStringCallback = new Func<string, object, string>(this.ResolveStringCallback);
 		this.tags.Add(TagManager.Create(id, null));
 		this.interruptExclusion = new List<Tag>(interrupt_exclusion);

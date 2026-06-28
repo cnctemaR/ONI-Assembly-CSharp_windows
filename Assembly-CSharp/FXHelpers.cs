@@ -13,7 +13,7 @@ public static class FXHelpers
 		{
 			component.transform.SetParent(parent, false);
 		}
-		component.transform.position = position;
+		component.transform.SetPosition(position);
 		if (update_looping_sounds_position)
 		{
 			LoopingSounds loopingSounds = component.FindOrAddComponent<LoopingSounds>();

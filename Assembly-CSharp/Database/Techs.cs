@@ -98,7 +98,7 @@ namespace Database
 			},
 			{
 				"Agriculture",
-				new string[] { "FertilizerMaker", "HydroponicFarm", "Refrigerator" }
+				new string[] { "FertilizerMaker", "HydroponicFarm", "Refrigerator", "FarmStation" }
 			},
 			{
 				"AnimalControl",
@@ -189,11 +189,15 @@ namespace Database
 			},
 			{
 				"AdvancedPowerRegulation",
-				new string[] { "HighWattageWire", "WireBridgeHighWattage", "PowerTransformer" }
+				new string[] { "HighWattageWire", "WireBridgeHighWattage", "PowerTransformer", "PowerControlStation" }
 			},
 			{
 				"PrettyGoodConductors",
 				new string[] { "WireRefined", "WireRefinedBridge", "WireRefinedHighWattage", "WireRefinedBridgeHighWattage" }
+			},
+			{
+				"RenewableEnergy",
+				new string[] { "SteamTurbine" }
 			},
 			{
 				"Combustion",
@@ -267,8 +271,7 @@ namespace Database
 					"LogicWire",
 					"LogicWireBridge",
 					LogicSwitchConfig.ID,
-					LogicPowerRelayConfig.ID,
-					"BatterySmart"
+					LogicPowerRelayConfig.ID
 				}
 			},
 			{
@@ -276,7 +279,9 @@ namespace Database
 				new string[]
 				{
 					LogicTimeOfDaySensorConfig.ID,
-					"FloorSwitch"
+					"FloorSwitch",
+					LogicDiseaseSensorConfig.ID,
+					"BatterySmart"
 				}
 			},
 			{
@@ -290,6 +295,14 @@ namespace Database
 			{
 				"TravelTubes",
 				new string[] { "TravelTubeEntrance", "TravelTube", "TravelTubeWallBridge" }
+			},
+			{
+				"SmartStorage",
+				new string[] { "StorageLockerSmart", "SolidTransferArm", "ConveyorOverlay" }
+			},
+			{
+				"SolidTransport",
+				new string[] { "SolidConduit", "SolidConduitBridge", "SolidConduitInbox", "SolidConduitOutbox" }
 			}
 		};
 

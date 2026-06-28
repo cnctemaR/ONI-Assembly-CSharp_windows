@@ -29,7 +29,6 @@ public class PlaceTool : DragTool
 		this.ShowToolTip();
 		BuildToolHoverTextCard component2 = base.GetComponent<BuildToolHoverTextCard>();
 		component2.currentDef = null;
-		component2.UpdateHoverElements(null);
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
 		if (component == null)
 		{
@@ -109,7 +108,7 @@ public class PlaceTool : DragTool
 		ToolTipScreen.Instance.ClearToolTip(this.tooltip);
 	}
 
-	public override void Update()
+	public void Update()
 	{
 		if (this.active)
 		{

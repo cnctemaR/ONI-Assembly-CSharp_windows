@@ -1,23 +1,9 @@
 ﻿using System;
-using STRINGS;
 
 namespace TUNING
 {
 	public class EQUIPMENT
 	{
-		public static EquipmentSlot SUIT_SLOT = new EquipmentSlot(EQUIPMENT.SUITS.SLOT, MISC.TAGS.SUIT, true);
-
-		public static EquipmentSlot TOOL_SLOT = new EquipmentSlot(EQUIPMENT.TOOLS.TOOLSLOT, MISC.TAGS.MULTITOOL, false);
-
-		public static EquipmentSlot OUTFIT_SLOT = new EquipmentSlot(EQUIPMENT.CLOTHING.SLOT, MISC.TAGS.CLOTHES, true);
-
-		public static EquipmentSlot[] SLOTS = new EquipmentSlot[]
-		{
-			EQUIPMENT.SUIT_SLOT,
-			EQUIPMENT.TOOL_SLOT,
-			EQUIPMENT.OUTFIT_SLOT
-		};
-
 		public class ATTRIBUTE_MOD_IDS
 		{
 			public static string DECOR = "Decor";

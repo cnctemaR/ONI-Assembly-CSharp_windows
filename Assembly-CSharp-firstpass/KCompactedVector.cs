@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public class KCompactedVector<T> where T : new()
+public class KCompactedVector<T>
 {
 	public KCompactedVector(int initial_count = 0)
 	{
@@ -34,7 +34,7 @@ public class KCompactedVector<T> where T : new()
 			int num3 = this.dataHandleIndices[num2];
 			if (this.handles.Items[num3] != num2)
 			{
-				Output.LogError(new object[] { "unexpected" });
+				Output.LogError(new object[] { "KCompactedVector: Bad state after attempting to free handle", handle.index });
 			}
 			this.handles.Items[num3] = num;
 			this.dataHandleIndices[num] = num3;

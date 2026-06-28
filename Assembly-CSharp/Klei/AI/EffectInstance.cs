@@ -26,12 +26,12 @@ namespace Klei.AI
 
 		public float GetTimeRemaining()
 		{
-			return this.effect.duration - (Time.time - this.startTime);
+			return this.timeRemaining;
 		}
 
 		public bool IsExpired()
 		{
-			return this.effect.duration > 0f && Time.time - this.startTime > this.effect.duration;
+			return this.effect.duration > 0f && this.timeRemaining <= 0f;
 		}
 
 		public void Remove()
@@ -42,7 +42,7 @@ namespace Klei.AI
 
 		private void ConfigureStatusItem()
 		{
-			this.statusItem = new StatusItem(this.effect.Id, this.effect.Name, Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + this.effect.Id.ToUpper() + ".TOOLTIP"), string.Empty, (!this.effect.isBad) ? StatusItem.IconType.Info : StatusItem.IconType.Exclamation, (!this.effect.isBad) ? NotificationType.Neutral : NotificationType.Bad, false, SimViewMode.None, 30718);
+			this.statusItem = new StatusItem(this.effect.Id, this.effect.Name, this.effect.description, string.Empty, (!this.effect.isBad) ? StatusItem.IconType.Info : StatusItem.IconType.Exclamation, (!this.effect.isBad) ? NotificationType.Neutral : NotificationType.Bad, false, SimViewMode.None, 63486);
 			this.statusItem.resolveStringCallback = new Func<string, object, string>(this.ResolveString);
 			this.statusItem.resolveTooltipCallback = new Func<string, object, string>(this.ResolveTooltip);
 		}
@@ -70,10 +70,10 @@ namespace Klei.AI
 
 		public Effect effect;
 
-		public float startTime;
-
 		public bool shouldSave;
 
 		public StatusItem statusItem;
+
+		public float timeRemaining;
 	}
 }

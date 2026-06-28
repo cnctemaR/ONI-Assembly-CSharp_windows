@@ -85,13 +85,17 @@ public class RootMenu : KScreen
 		{
 			this.selectedGO = gameObject;
 			this.CloseSubMenus();
-			this.userMenu.SetSelected(gameObject);
 			if (this.selectedGO != null)
 			{
 				this.AddSubMenu(this.detailsScreen);
 				this.detailsScreen.Refresh(this.selectedGO);
 				this.AddSubMenu(this.userMenu);
+				this.userMenu.SetSelected(this.selectedGO);
 				this.userMenu.Refresh(this.selectedGO);
+			}
+			else
+			{
+				this.userMenu.SetSelected(null);
 			}
 		}
 	}

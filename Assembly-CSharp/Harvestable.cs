@@ -1,6 +1,7 @@
 ﻿using System;
 using KSerialization;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -27,6 +28,13 @@ public class Harvestable : Workable
 		{
 			return this.canBeHarvested;
 		}
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole("JuniorFarmer", work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_QUICK);
+		resume.AddExperienceIfRole("Farmer", work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_QUICK);
+		resume.AddExperienceIfRole("SeniorFarmer", work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_QUICK);
 	}
 
 	private void OnEnableOverlay(object data)
@@ -71,7 +79,7 @@ public class Harvestable : Workable
 			{
 				vector = new Vector3((float)(extents.x + extents.width / 2) + 0.5f, (float)extents.y);
 			}
-			this.HarvestWhenReadyOverlayIcon.transform.position = vector;
+			this.HarvestWhenReadyOverlayIcon.transform.SetPosition(vector);
 			this.RefreshOverlayIcon(null);
 		}
 	}
@@ -130,6 +138,8 @@ public class Harvestable : Workable
 	{
 		base.OnPrefabInit();
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Harvesting;
+		this.multitoolContext = "harvest";
+		this.multitoolHitEffectHash = new HashedString("fx_harvest_splash");
 		base.Subscribe(1309017699, delegate(object o)
 		{
 			this.SetInPlanterBox(true);
@@ -144,6 +154,8 @@ public class Harvestable : Workable
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.faceTargetWhenWorking = true;
 		Components.Harvestables.Add(this);
+		this.attributeConverter = Db.Get().AttributeConverters.HarvestSpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		this.area = base.GetComponent<OccupyArea>();
 		if (this.isMarkedForHarvest)
 		{
@@ -152,7 +164,6 @@ public class Harvestable : Workable
 		Game.Instance.Subscribe(1248612973, new Action<object>(this.OnEnableOverlay));
 		Game.Instance.Subscribe(1798162660, new Action<object>(this.OnEnableOverlay));
 		Game.Instance.Subscribe(2015652040, new Action<object>(this.OnDisableOverlay));
-		this.iconRefreshHandle = UIScheduler.Instance.SchedulePeriodic("RefreshHarvestIcon", 1f, new Action<object>(this.RefreshOverlayIcon), null, null);
 	}
 
 	public void Harvest()
@@ -160,8 +171,9 @@ public class Harvestable : Workable
 		this.isMarkedForHarvest = false;
 		this.chore = null;
 		base.Trigger(1272413801, this);
-		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
-		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.Operating, false);
+		KSelectable component = base.GetComponent<KSelectable>();
+		component.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
+		component.RemoveStatusItem(Db.Get().MiscStatusItems.Operating, false);
 		this.userMenu.Refresh();
 	}
 
@@ -177,7 +189,8 @@ public class Harvestable : Workable
 			this.OnCancel(null);
 			if (this.canBeHarvested && this.isInPlanterBox)
 			{
-				this.selectable.AddStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, this);
+				KSelectable component = base.GetComponent<KSelectable>();
+				component.AddStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, this);
 			}
 		}
 		this.RefreshOverlayIcon(null);
@@ -186,22 +199,23 @@ public class Harvestable : Workable
 	public void SetCanBeHarvested(bool state)
 	{
 		this.canBeHarvested = state;
+		KSelectable component = base.GetComponent<KSelectable>();
 		if (this.canBeHarvested)
 		{
-			this.selectable.AddStatusItem(Db.Get().CreatureStatusItems.ReadyForHarvest, null);
+			component.AddStatusItem(Db.Get().CreatureStatusItems.ReadyForHarvest, null);
 			if (this.harvestWhenReady)
 			{
 				this.MarkForHarvest();
 			}
 			else if (this.isInPlanterBox)
 			{
-				this.selectable.AddStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, this);
+				component.AddStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, this);
 			}
 		}
 		else
 		{
-			this.selectable.RemoveStatusItem(Db.Get().CreatureStatusItems.ReadyForHarvest, false);
-			this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, false);
+			component.RemoveStatusItem(Db.Get().CreatureStatusItems.ReadyForHarvest, false);
+			component.RemoveStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, false);
 		}
 		this.userMenu.Refresh();
 	}
@@ -212,13 +226,14 @@ public class Harvestable : Workable
 		{
 			return;
 		}
+		KSelectable component = base.GetComponent<KSelectable>();
 		if (this.chore == null)
 		{
-			this.chore = new WorkChore<Harvestable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, true, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
-			this.selectable.AddStatusItem(Db.Get().MiscStatusItems.PendingHarvest, this);
+			this.chore = new WorkChore<Harvestable>(Db.Get().ChoreTypes.Harvest, this, null, null, true, null, null, null, true, null, true, null, true, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			component.AddStatusItem(Db.Get().MiscStatusItems.PendingHarvest, this);
 		}
 		this.isMarkedForHarvest = true;
-		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, false);
+		component.RemoveStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, false);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -233,7 +248,8 @@ public class Harvestable : Workable
 		{
 			this.chore.Cancel("Cancel harvest");
 			this.chore = null;
-			this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
+			KSelectable component = base.GetComponent<KSelectable>();
+			component.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 			this.SetHarvestWhenReady(false);
 		}
 		this.isMarkedForHarvest = false;
@@ -257,7 +273,8 @@ public class Harvestable : Workable
 	public virtual void ForceCancelHarvest(object data = null)
 	{
 		this.OnCancel(null);
-		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
+		KSelectable component = base.GetComponent<KSelectable>();
+		component.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 		this.userMenu.Refresh();
 	}
 
@@ -298,21 +315,14 @@ public class Harvestable : Workable
 		Game.Instance.Unsubscribe(1248612973, new Action<object>(this.OnEnableOverlay));
 		Game.Instance.Unsubscribe(2015652040, new Action<object>(this.OnDisableOverlay));
 		Game.Instance.Unsubscribe(1798162660, new Action<object>(this.OnEnableOverlay));
-		this.iconRefreshHandle.ClearScheduler();
 		Components.Harvestables.Remove(this);
 	}
 
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
-	}
-
-	public override Workable.AnimInfo GetAnim(Worker worker)
-	{
-		Workable.AnimInfo anim = base.GetAnim(worker);
-		anim.smi = new MultitoolController.Instance(this, worker, "harvest", EffectPrefabs.Instance.HarvestEffect);
-		return anim;
+		KSelectable component = base.GetComponent<KSelectable>();
+		component.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 	}
 
 	[MyCmpAdd]
@@ -335,6 +345,4 @@ public class Harvestable : Workable
 	protected Chore chore;
 
 	public OccupyArea area;
-
-	private SchedulerHandle iconRefreshHandle;
 }

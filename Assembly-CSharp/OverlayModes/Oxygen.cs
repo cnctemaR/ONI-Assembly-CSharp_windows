@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace OverlayModes
 {
@@ -12,6 +13,20 @@ namespace OverlayModes
 		public override string GetSoundName()
 		{
 			return "Oxygen";
+		}
+
+		public override void Enable()
+		{
+			base.Enable();
+			int defaultLayerMask = SelectTool.Instance.GetDefaultLayerMask();
+			int mask = LayerMask.GetMask(new string[] { "MaskedOverlay" });
+			SelectTool.Instance.SetLayerMask(defaultLayerMask | mask);
+		}
+
+		public override void Disable()
+		{
+			base.Disable();
+			SelectTool.Instance.ClearLayerMask();
 		}
 	}
 }

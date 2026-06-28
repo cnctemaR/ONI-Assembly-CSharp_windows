@@ -20,26 +20,30 @@ public class Baggable : KMonoBehaviour
 		{
 			base.Subscribe(856640610, new Action<object>(this.OnStorageChanged));
 		}
+		if (base.transform.parent != null && base.transform.parent.GetComponent<Trap>() != null)
+		{
+			base.GetComponent<KBatchedAnimController>().enabled = true;
+		}
 	}
 
 	private void OnStorageChanged(object data)
 	{
-		Storage storage = (Storage)data;
-		if (storage == null)
+		if (!(data is Storage) && (data == null || !(bool)data))
 		{
 			GameObject prefab = Assets.GetPrefab(this.creatureTag);
-			Vector3 vector = Grid.CellToPosCCC(Grid.PosToCell(base.gameObject.transform.position), Grid.SceneLayer.Creatures);
+			Vector3 vector = Grid.CellToPosCCC(Grid.PosToCell(base.gameObject.transform.GetPosition()), Grid.SceneLayer.Creatures);
 			GameObject gameObject = Util.KInstantiate(prefab, vector, Quaternion.identity, Folder.Entities);
 			gameObject.SetActive(true);
 			Util.KDestroyGameObject(base.gameObject);
 		}
 		else
 		{
-			MinionIdentity component = storage.GetComponent<MinionIdentity>();
-			if (component != null)
+			Storage storage = data as Storage;
+			MinionIdentity minionIdentity = ((storage == null) ? null : storage.GetComponent<MinionIdentity>());
+			if (minionIdentity != null)
 			{
-				KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
-				component2.enabled = false;
+				KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+				component.enabled = false;
 			}
 		}
 	}

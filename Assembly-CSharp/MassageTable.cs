@@ -57,6 +57,10 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 		}
 	}
 
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+	}
+
 	public new List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
@@ -84,8 +88,9 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 
 	protected override WorkChore<RelaxationPoint> CreateWorkChore()
 	{
-		WorkChore<RelaxationPoint> workChore = new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, true, null, null, null, false, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+		WorkChore<RelaxationPoint> workChore = new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, null, true, null, null, null, false, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 		workChore.AddPrecondition(MassageTable.IsStressAboveActivationRange, this);
+		workChore.isPreferredChoreRegardlessOfTags = true;
 		return workChore;
 	}
 
@@ -137,6 +142,30 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 		}
 	}
 
+	public string ActivationRangeTitleText
+	{
+		get
+		{
+			return UI.UISIDESCREENS.ACTIVATION_RANGE_SIDE_SCREEN.NAME;
+		}
+	}
+
+	public string ActivateSliderLabelText
+	{
+		get
+		{
+			return UI.UISIDESCREENS.ACTIVATION_RANGE_SIDE_SCREEN.ACTIVATE;
+		}
+	}
+
+	public string DeactivateSliderLabelText
+	{
+		get
+		{
+			return UI.UISIDESCREENS.ACTIVATION_RANGE_SIDE_SCREEN.DEACTIVATE;
+		}
+	}
+
 	[Serialize]
 	private float activateValue = 50f;
 
@@ -145,6 +174,7 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 	private static Chore.Precondition IsStressAboveActivationRange = new Chore.Precondition
 	{
 		id = "IsStressAboveActivationRange",
+		description = DUPLICANTS.CHORES.PRECONDITIONS.IS_STRESS_ABOVE_ACTIVATION_RANGE,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			IActivationRangeTarget activationRangeTarget = (IActivationRangeTarget)data;

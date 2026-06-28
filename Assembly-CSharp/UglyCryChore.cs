@@ -7,7 +7,7 @@ using UnityEngine;
 public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 {
 	public UglyCryChore(ChoreType chore_type, IStateMachineTarget target, Action<Chore> on_complete = null)
-		: base(Db.Get().ChoreTypes.UglyCry, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.UglyCry, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new UglyCryChore.StatesInstance(this, target.gameObject);
 	}
@@ -50,9 +50,9 @@ public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 				smi.Play("working_loop", KAnim.PlayMode.Loop);
 			}).ScheduleGoTo(18f, this.cry.cry_pst)
 				.ToggleEffect((UglyCryChore.StatesInstance smi) => this.uglyCryingEffect)
-				.Update(delegate(UglyCryChore.StatesInstance smi)
+				.Update(delegate(UglyCryChore.StatesInstance smi, float dt)
 				{
-					smi.ProduceTears(smi.dt);
+					smi.ProduceTears(dt);
 				});
 			this.cry.cry_pst.QueueAnim("working_pst", false, null).OnAnimQueueComplete(this.complete);
 			this.complete.AddEffect("CryFace").Enter(delegate(UglyCryChore.StatesInstance smi)

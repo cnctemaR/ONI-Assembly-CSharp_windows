@@ -21,7 +21,7 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor, IConsumableU
 		EffectInstance effectInstance = component.Get(this.info.effect);
 		if (effectInstance != null)
 		{
-			effectInstance.startTime = Time.time;
+			effectInstance.timeRemaining = effectInstance.effect.duration;
 		}
 		else
 		{
@@ -37,7 +37,7 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor, IConsumableU
 	public bool CanBeTakenBy(GameObject consumer)
 	{
 		Effects component = consumer.GetComponent<Effects>();
-		if (component.HasEffect(this.info.effect))
+		if (component == null || component.HasEffect(this.info.effect))
 		{
 			return false;
 		}

@@ -133,7 +133,7 @@ namespace OverlayModes
 			{
 				if (!(t == null))
 				{
-					Vector2I vector2I = Grid.PosToXY(t.transform.position);
+					Vector2I vector2I = Grid.PosToXY(t.transform.GetPosition());
 					if (!(vis_min <= vector2I) || !(vector2I <= vis_max))
 					{
 						Mode.workingTargets.Add(t);
@@ -247,7 +247,7 @@ namespace OverlayModes
 			{
 				if (!(t == null))
 				{
-					Vector3 position = t.transform.position;
+					Vector3 position = t.transform.GetPosition();
 					if (Grid.Visible[Grid.PosToCell(position)] > 0 || DebugHandler.FreeCameraMode)
 					{
 						if (min <= position && position <= max)

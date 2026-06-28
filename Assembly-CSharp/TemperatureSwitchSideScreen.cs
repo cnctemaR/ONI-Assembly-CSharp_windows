@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class TemperatureSwitchSideScreen : SideScreenContent
+public class TemperatureSwitchSideScreen : SideScreenContent, IRender200ms
 {
 	protected override void OnSpawn()
 	{
@@ -26,7 +26,7 @@ public class TemperatureSwitchSideScreen : SideScreenContent
 		this.targetTemperatureSlider.onValueChanged = sliderEvent;
 	}
 
-	private void SimUpdate(float dt)
+	public void Render200ms(float dt)
 	{
 		if (this.targetTemperatureSwitch == null)
 		{

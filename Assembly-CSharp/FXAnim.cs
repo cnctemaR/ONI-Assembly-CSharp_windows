@@ -25,7 +25,7 @@ public class FXAnim : GameStateMachine<FXAnim, FXAnim.Instance>
 		public Instance(IStateMachineTarget master, string kanim_file, string anim, KAnim.PlayMode mode, Vector3 offset, Color32 tint_colour)
 			: base(master)
 		{
-			this.animController = FXHelpers.CreateEffect(kanim_file, base.smi.master.transform.position + offset, base.smi.master.transform, false, Grid.SceneLayer.Front, false);
+			this.animController = FXHelpers.CreateEffect(kanim_file, base.smi.master.transform.GetPosition() + offset, base.smi.master.transform, false, Grid.SceneLayer.Front, false);
 			this.animController.gameObject.Subscribe(-1061186183, new Action<object>(this.OnAnimQueueComplete));
 			this.animController.TintColour = tint_colour;
 			base.sm.fx.Set(this.controller.gameObject, base.smi);

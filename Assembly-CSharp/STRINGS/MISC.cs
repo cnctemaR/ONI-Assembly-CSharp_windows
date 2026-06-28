@@ -100,6 +100,8 @@ namespace STRINGS
 
 			public static LocString COMPOSTABLE = "Compostable";
 
+			public static LocString COMPOSTBASICPLANTFOOD = "Compost Muckroot";
+
 			public static LocString EDIBLE = "Edible";
 
 			public static LocString COOKINGINGREDIENT = "Cooking Ingredient";
@@ -120,11 +122,41 @@ namespace STRINGS
 
 			public static LocString TOILET = "Toilet";
 
+			public static LocString MASSAGE_TABLE = "Massage Table";
+
+			public static LocString POWERSTATION = "Power Station";
+
+			public static LocString FARMSTATION = "Farm Station";
+
+			public static LocString MACHINE_SHOP = "Machine Shop";
+
 			public static LocString ANTISEPTIC = "Antiseptic";
 
 			public static LocString OIL = "Hydrocarbon";
 
+			public static LocString DECORATION = "Decoration";
+
 			public static LocString GENE_SHUFFLER = "Neural Vacillator";
+
+			public static LocString FARMING = "Farming-related building and delivery";
+
+			public static LocString RESEARCH = "Research-related delivery";
+
+			public static LocString POWER = "Power-related delivery";
+
+			public static LocString BUILDING = "Build-related delivery and digging";
+
+			public static LocString COOKING = "Cooking-related delivery";
+
+			public static LocString FABRICATING = "Fabrication-related delivery";
+
+			public static LocString WIRING = "Wiring-related delivery and building";
+
+			public static LocString ART = "Wiring-related delivery and building";
+
+			public static LocString DOCTORING = "Medicine-related delivery";
+
+			public static LocString CONVEYOR = "Shipping-related building";
 		}
 
 		public class STATUSITEMS
@@ -221,7 +253,7 @@ namespace STRINGS
 
 			public class PENDINGCLEAR
 			{
-				public static LocString NAME = "Sweep Task Assigned";
+				public static LocString NAME = "Sweep Errand Assigned";
 
 				public static LocString TOOLTIP = "Awaiting a Duplicant to sweep";
 			}
@@ -242,37 +274,37 @@ namespace STRINGS
 
 			public class PENDINGHARVEST
 			{
-				public static LocString NAME = "Harvest Task Assigned";
+				public static LocString NAME = "Harvest Errand Assigned";
 
 				public static LocString TOOLTIP = "Awaiting a Duplicant to harvest";
 			}
 
 			public class PENDINGUPROOT
 			{
-				public static LocString NAME = "Uproot Task Assigned";
+				public static LocString NAME = "Uproot Errand Assigned";
 
 				public static LocString TOOLTIP = "Awaiting a Duplicant to uproot";
 			}
 
 			public class WAITINGFORDIG
 			{
-				public static LocString NAME = "Dig Task Assigned";
+				public static LocString NAME = "Dig Errand Assigned";
 
 				public static LocString TOOLTIP = "Awaiting a Duplicant to dig";
 			}
 
 			public class WAITINGFORMOP
 			{
-				public static LocString NAME = "Mop Task Assigned";
+				public static LocString NAME = "Mop Errand Assigned";
 
 				public static LocString TOOLTIP = "Awaiting a Duplicant to mop";
 			}
 
 			public class NOTMARKEDFORHARVEST
 			{
-				public static LocString NAME = "Not marked for harvest";
+				public static LocString NAME = "No Harvest Pending";
 
-				public static LocString TOOLTIP = "Use the harvest tool to mark this plant for harvest.";
+				public static LocString TOOLTIP = "Use the Harvest Tool to mark this plant for harvest";
 			}
 
 			public class ELEMENTALCATEGORY
@@ -317,6 +349,13 @@ namespace STRINGS
 					public static LocString NAME = "None";
 
 					public static LocString TOOLTIP = "This Duplicant is in peak condition";
+				}
+
+				public class ALRIGHT
+				{
+					public static LocString NAME = "None";
+
+					public static LocString TOOLTIP = "This Duplicant is none the worse for wear";
 				}
 
 				public class SCUFFED
@@ -413,7 +452,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Prioritized";
 
-				public static LocString TOOLTIP = "This task has been made a high priority";
+				public static LocString TOOLTIP = "This errand has been made a high priority";
 			}
 
 			public class USING
@@ -444,41 +483,6 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This building is currently being cleaned";
 			}
 
-			public class REGIONINVALID
-			{
-				public static LocString NAME = "Invalid Region";
-
-				public static LocString TOOLTIP = "This region requires:\n{0}";
-			}
-
-			public class REGIONNEEDSCLOSURE
-			{
-				public static LocString NAME = "Missing Walls";
-
-				public static LocString TOOLTIP = "Use tiles to build walls around this region";
-			}
-
-			public class REGIONNEEDSDOOR
-			{
-				public static LocString NAME = "Missing Doors";
-
-				public static LocString TOOLTIP = "This region must have at least one door";
-			}
-
-			public class REGIONNEEDSFURNITURE
-			{
-				public static LocString NAME = "Missing Furniture";
-
-				public static LocString TOOLTIP = "This region still needs:\n{0}";
-			}
-
-			public class REGIONNEEDSSIZE
-			{
-				public static LocString NAME = "Insufficient Size";
-
-				public static LocString TOOLTIP = "This region must be a minimum of {0} tiles high and {0} tiles wide";
-			}
-
 			public class REGIONISBLOCKED
 			{
 				public static LocString NAME = "Blocked";
@@ -507,7 +511,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Colony Management";
 
-				public static LocString MESSAGEBODY = "Duplicants are self-motivated and require no individual management in order to perform tasks in the colony.\n\nYou can use the <style=\"misc\">DIG TOOL</style> <color=#F44A47><b>[G]</b></color> and the <style=\"misc\">BUILD MENU</style> in the lower left of the screen to begin planning job tasks. Once you've placed a few tasks, your Duplicants will automatically get to work for you.";
+				public static LocString MESSAGEBODY = "Duplicants are self-motivated and require no individual management in order to perform errands in the colony.\n\nYou can use the <style=\"misc\">DIG TOOL</style> <color=#F44A47><b>[G]</b></color> and the <style=\"misc\">BUILD MENU</style> in the lower left of the screen to begin planning errands. Once you've placed a few errands, your Duplicants will automatically get to work for you.";
 
 				public static LocString TOOLTIP = "Learn how to get Duplicants to do your bidding";
 			}
@@ -521,20 +525,11 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Learn how to keep Duplicants happy and productive";
 			}
 
-			public class STORAGEREGIONSMESSAGE
-			{
-				public static LocString NAME = "TIP: Storage Regions";
-
-				public static LocString MESSAGEBODY = "Duplicants are incredibly resourceful and will automatically use any materials in their reach. However, a Duplicant's productivity can be improved by storing resources closer to where they'll need them.\n\nUse the <style=\"misc\">STORAGE REGION TOOL</style> <color=#F44A47><b>[Y + T]</b></color> to mark an area as storage, and the <style=\"misc\">STORAGE OVERLAY</style> <color=#F44A47><b>[F6]</b></color> to assign resource types to it.";
-
-				public static LocString TOOLTIP = "Learn how to improve efficiency through organization";
-			}
-
 			public class TASKPRIORITIESMESSAGE
 			{
-				public static LocString NAME = "TIP: Task Priorities";
+				public static LocString NAME = "TIP: Errand Priorities";
 
-				public static LocString MESSAGEBODY = "Duplicants will perform pending job tasks in order of highest priority to lowest. For example, Duplicants will always harvest <style=\"food\">Food</style> before they build, and always build new structures before they dig.\n\nOpen the <style=\"misc\">JOBS TAB</style> <color=#F44A47><b>[J]</b></color> to set which job tasks Duplicants may perform, or specialize skilled Duplicants for specific types of work.";
+				public static LocString MESSAGEBODY = "Duplicants will perform pending errands in order of highest priority to lowest. For example, Duplicants will always harvest <style=\"food\">Food</style> before they build, and always build new structures before they dig.\n\nOpen the <style=\"misc\">ERRANDS TAB</style> <color=#F44A47><b>[J]</b></color> to set which errands Duplicants may perform, or specialize skilled Duplicants for specific types of work.";
 
 				public static LocString TOOLTIP = "Learn how to manage Duplicants' priorities";
 			}
@@ -552,7 +547,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Duplicant Movement";
 
-				public static LocString MESSAGEBODY = "Duplicants must be able to reach their job tasks in order to work. When placing tasks, keep in mind that Duplicants can only climb obstacles two tiles high, and are themselves two tiles tall.\n\nIf you are unsure if a task you've placed is accessible, select a Duplicant and click <style=\"misc\">SHOW NAVIGATION</style> to view all areas within their reach.";
+				public static LocString MESSAGEBODY = "Duplicants must be able to reach their errands in order to work. When placing errands, keep in mind that Duplicants can only climb obstacles two tiles high, and are themselves two tiles tall.\n\nIf you are unsure if a errand you've placed is accessible, select a Duplicant and click <style=\"misc\">SHOW NAVIGATION</style> to view all areas within their reach.";
 
 				public static LocString TOOLTIP = "Understanding your Duplicants' maneuverability";
 			}
@@ -608,7 +603,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Learn about the risks of Duplicant disease";
 
-				public static LocString MESSAGEBODY = "<style=\"disease\">Germs</style> are an invisible peril that cause <style=\"disease\">Disease</style> in your Duplicants. The <style=\"misc\">GERM OVERLAY</style> <color=#F44A47><b>[F9]</b></color> will allow you to view all germ concentrations in your colony and the sources spawning them.\n\nWash Basins can be built in dirty areas from the <style=\"misc\">MEDICINE TAB</style> <color=#F44A47><b>[9]</b></color> to tell your Duplicants to where to wash up. If you keep your base clean and your Duplicants hygienic, your colony's Immunity will handle the rest.";
+				public static LocString MESSAGEBODY = "<style=\"disease\">Germs</style> are an invisible peril that cause <style=\"disease\">Disease</style> in your Duplicants. The <style=\"misc\">GERM OVERLAY</style> <color=#F44A47><b>[F9]</b></color> will allow you to view all germ concentrations in your colony and the sources spawning them.\n\nWash Basins can be built in dirty areas from the <style=\"misc\">MEDICINE TAB</style> <color=#F44A47><b>[9]</b></color> to tell your Duplicants to where to wash up. If you keep your base clean and your Duplicants hygienic, their <style=\"misc\">Immunity</style> will handle the rest.";
 			}
 
 			public class BEING_INFECTED
@@ -617,7 +612,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Keep your Duplicants in peak health";
 
-				public static LocString MESSAGEBODY = "Duplicants must spend points of immunity to fight the various <style=\"disease\">Germs</style> they're exposed to. If their immunity reaches 0%, they'll be unable to fight off any more germs and contract the next disease they encounter.\n\nDoors with Access Permissions can be built from the <style=\"misc\">BASE TAB</style> of the <style=\"misc\">BUILD MENU</style> to block Duplicants from entering biohazardous areas while they recover their spent immunity points.";
+				public static LocString MESSAGEBODY = "When Duplicants come into contact with various <style=\"disease\">Germs</style>, they'll need to expend points of <style=\"misc\">Immunity</style> to resist them and remain healthy. If repeated exposes causes their Immunity to drop to 0%, they'll be unable to resist germs and will contract the next disease they encounter.\n\nDoors with Access Permissions can be built from the <style=\"misc\">BASE TAB</style><color=#F44A47> <b>[1]</b></color> of the <style=\"misc\">BUILD MENU</style> to block Duplicants from entering biohazardous areas while they recover their spent immunity points.";
 			}
 
 			public class DISEASE_COOKING
@@ -626,16 +621,16 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Learn how to manage food contamination";
 
-				public static LocString MESSAGEBODY = "The <style=\"food\">food</style> your Duplicants make is only as clean as the <style=\"solid\">ingredients</style> used to make it. Storing food in sterile or <style=\"heat\">Refrigerated</style> environments will keep the produced food clean, while carefully placed hygiene systems will prevent your cooks from infecting the food while they handle it.\n\nDangerously contaminated food can be recycled by clicking the <style=\"misc\">COMPOST</style> button on the selected item.";
+				public static LocString MESSAGEBODY = "The <style=\"food\">Food</style> your Duplicants cook will only ever be as clean as the ingredients used to make it. Storing food in sterile or <style=\"heat\">Refrigerated</style> environments will keep food free of <style=\"disease\">Germs</style>, while carefully placed hygiene stations like <style=\"hygiene\">Wash Basins</style> or <style=\"hygiene\">Showers</style> will prevent your cooks from infecting the food by handling it.\n\nDangerously contaminated food can be sent to compost by clicking the <style=\"misc\">COMPOST</style> button on the selected item.";
 			}
 
 			public class SUITS
 			{
 				public static LocString NAME = "TIP: Exosuits";
 
-				public static LocString TOOLTIP = "Learn about exosuits";
+				public static LocString TOOLTIP = "Learn how to use exosuits";
 
-				public static LocString MESSAGEBODY = "<style=\"equipment\">Exosuits</style> protect your Duplicants from environmental hazards like extreme <style=\"heat\">Heat</style>, airborne <style=\"disease\">Germs</style>, and unbreathable <style=\"gas\">Gases</style>. In order to utilize these suits, you'll need to store them in an Exosuit Dock and hook that dock up to a Suit Checkpoint.\n\nDuplicants will equip an exosuit when walking past a Checkpoint in the direction it's facing and will unequip the suit when walking the oppposite way.";
+				public static LocString MESSAGEBODY = "<style=\"equipment\">Exosuits</style> can be equipped to protect your Duplicants from environmental hazards like extreme <style=\"heat\">Heat</style>, airborne <style=\"disease\">Germs</style>, or unbreathable <style=\"gas\">Gas</style>. In order to utilize these suits, you'll need to hook up an Exosuit Dock to a Suit Checkpoint, then store one of your suits inside.\n\nDuplicants will equip an exosuit when they walk past the Checkpoint in the chosen direction, and will unequip their suit when walking back the oppposite way.";
 			}
 
 			public class NOMESSAGES
@@ -656,16 +651,27 @@ namespace STRINGS
 			{
 				public static LocString NAME = "{0} has developed a trait";
 
-				public static LocString TOOLTIP = "{0} has developed the trait(s):\n\t• {1}";
+				public static LocString TOOLTIP = "{0} has developed the trait(s):\n    • {1}";
 			}
 
 			public class RESEARCHCOMPLETE
 			{
 				public static LocString NAME = "Research Complete";
 
-				public static LocString MESSAGEBODY = "Eureka! <style=\"research\">{0} Technology</style> has been unlocked.\n\nNew buildings have become available:\n\t• <style=\"misc\">{1}</style>";
+				public static LocString MESSAGEBODY = "Eureka! <style=\"research\">{0} Technology</style> has been unlocked.\n\nNew buildings have become available:\n  • <style=\"misc\">{1}</style>";
 
 				public static LocString TOOLTIP = "<style=\"research\">{0}</style> research complete!";
+			}
+
+			public class ROLEMASTERED
+			{
+				public static LocString NAME = "Jobs Mastered";
+
+				public static LocString MESSAGEBODY = "These Duplicants have mastered their jobs and may be eligible for promotion:\n{0}";
+
+				public static LocString LINE = "\n• <b>{0}</b> mastered the <style=\"research\">{1}</style> job";
+
+				public static LocString TOOLTIP = "Job Mastered";
 			}
 
 			public class DUPLICANTABSORBED
@@ -772,7 +778,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Colony requires Med-Beds";
 
-				public static LocString TOOLTIP = "Your sick Duplicants have nowhere to rest or receive medical aid";
+				public static LocString TOOLTIP = "Your sick Duplicants have nowhere to rest or receive medical care";
 			}
 
 			public class NEEDTOILET
@@ -843,13 +849,6 @@ namespace STRINGS
 				public static LocString NAME = "Building broken";
 
 				public static LocString TOOLTIP = "These buildings have taken significant damage and are nonfunctional:";
-			}
-
-			public class NOSTORAGEREGIONSAVAILABLE
-			{
-				public static LocString NAME = "No storage designated";
-
-				public static LocString TOOLTIP = "You have no defined storage regions.\nUse the <color=#833A5FFF>CREATE STORAGE TOOL</color> <color=#F44A47>[Y]</color> to create storage for these items:\n• {0}";
 			}
 
 			public class STRUCTURALDAMAGE

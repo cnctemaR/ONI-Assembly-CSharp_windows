@@ -8,16 +8,15 @@ public abstract class BaseWireConfig : IBuildingConfig
 {
 	public abstract override BuildingDef CreateBuildingDef();
 
-	public BuildingDef CreateBuildingDef(string id, string anim, float mass, float construction_time, float[] construction_mass, float insulation, EffectorValues decor, EffectorValues noise)
+	public BuildingDef CreateBuildingDef(string id, string anim, float construction_time, float[] construction_mass, float insulation, EffectorValues decor, EffectorValues noise)
 	{
 		int num = 1;
 		int num2 = 1;
-		float num3 = 800f;
-		int num4 = 10;
+		int num3 = 10;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num5 = 1600f;
+		float num4 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, anim, num3, num4, construction_time, construction_mass, all_METALS, num5, buildLocationRule, decor, noise);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, anim, num3, construction_time, construction_mass, all_METALS, num4, buildLocationRule, decor, noise, 0.2f);
 		buildingDef.Insulation = insulation;
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
@@ -39,10 +38,10 @@ public abstract class BaseWireConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
-		GeneratedBuildings.MakeBuildableAnywhere(go);
+		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		go.AddOrGet<Wire>();
 		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddOrGet<KAnimGraphTileVisualizer>();
 		kanimGraphTileVisualizer.isPhysicalBuilding = true;
@@ -52,7 +51,9 @@ public abstract class BaseWireConfig : IBuildingConfig
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		base.DoPostConfigureUnderConstruction(go);
-		go.GetComponent<Constructable>().isDiggingRequired = false;
+		Constructable component = go.GetComponent<Constructable>();
+		component.isDiggingRequired = false;
+		component.choreTags = GameTags.ChoreTypes.WiringChores;
 		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddOrGet<KAnimGraphTileVisualizer>();
 		kanimGraphTileVisualizer.isPhysicalBuilding = false;
 		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Electrical;

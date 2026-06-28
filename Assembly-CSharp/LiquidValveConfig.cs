@@ -10,15 +10,14 @@ public class LiquidValveConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 2;
 		string text2 = "valveliquid_kanim";
-		float num3 = 200f;
-		int num4 = 30;
-		float num5 = 10f;
+		int num3 = 30;
+		float num4 = 10f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] raw_METALS = MATERIALS.RAW_METALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER1;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, tier2, 0.2f);
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.Floodable = false;
@@ -30,10 +29,10 @@ public class LiquidValveConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
-		GeneratedBuildings.MakeBuildableAnywhere(go);
+		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		ValveBase valveBase = go.AddOrGet<ValveBase>();
 		valveBase.conduitType = ConduitType.Liquid;
 		valveBase.maxFlow = 10f;

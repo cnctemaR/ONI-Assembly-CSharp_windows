@@ -29,7 +29,7 @@ public class Substance
 							gameObject = component2.gameObject;
 							primaryElement = component2.GetComponent<PrimaryElement>();
 							temperature = SimUtil.CalculateFinalTemperature(primaryElement.Mass, primaryElement.Temperature, mass, temperature);
-							position = gameObject.transform.position;
+							position = gameObject.transform.GetPosition();
 							break;
 						}
 					}

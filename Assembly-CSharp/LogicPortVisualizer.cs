@@ -3,20 +3,15 @@ using UnityEngine;
 
 public class LogicPortVisualizer : ILogicUIElement, IUniformGridObject
 {
-	public LogicPortVisualizer(bool input, int cell)
+	public LogicPortVisualizer(int cell, LogicPortSpriteType sprite_type)
 	{
-		this.input = input;
 		this.cell = cell;
+		this.spriteType = sprite_type;
 	}
 
 	public int GetLogicUICell()
 	{
 		return this.cell;
-	}
-
-	public bool IsLogicInput()
-	{
-		return this.input;
 	}
 
 	public Vector2 PosMin()
@@ -29,7 +24,12 @@ public class LogicPortVisualizer : ILogicUIElement, IUniformGridObject
 		return Grid.CellToPos2D(this.cell);
 	}
 
-	private bool input;
+	public LogicPortSpriteType GetLogicPortSpriteType()
+	{
+		return this.spriteType;
+	}
 
 	private int cell;
+
+	private LogicPortSpriteType spriteType;
 }

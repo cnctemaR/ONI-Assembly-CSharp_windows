@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public class ScenePartitioner
+public class ScenePartitioner : ISim1000ms
 {
 	public ScenePartitioner(int node_size, int layer_count, int scene_width, int scene_height)
 	{
@@ -19,6 +19,7 @@ public class ScenePartitioner
 				}
 			}
 		}
+		SimAndRenderScheduler.instance.Add(this, false);
 	}
 
 	public void FreeResources()
@@ -261,21 +262,21 @@ public class ScenePartitioner
 		entry.obj = null;
 	}
 
-	public void Update()
+	public void Sim1000ms(float dt)
 	{
-		for (int i = 0; i < this.dirtyNodes.Count; i++)
+		foreach (ScenePartitioner.DirtyNode dirtyNode in this.dirtyNodes)
 		{
-			ScenePartitioner.ScenePartitionerNode scenePartitionerNode = this.nodes[this.dirtyNodes[i].layer, this.dirtyNodes[i].y, this.dirtyNodes[i].x];
+			ScenePartitioner.ScenePartitionerNode scenePartitionerNode = this.nodes[dirtyNode.layer, dirtyNode.y, dirtyNode.x];
 			scenePartitionerNode.entries.RemoveAll(ScenePartitioner.removeCallback);
 			scenePartitionerNode.dirty = false;
-			this.nodes[this.dirtyNodes[i].layer, this.dirtyNodes[i].y, this.dirtyNodes[i].x] = scenePartitionerNode;
+			this.nodes[dirtyNode.layer, dirtyNode.y, dirtyNode.x] = scenePartitionerNode;
 		}
 		this.dirtyNodes.Clear();
 	}
 
 	public void TriggerEvent(List<int> cells, ScenePartitionerLayer layer, object event_data)
 	{
-		List<ScenePartitionerEntry> list = this.ReserveList();
+		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, ScenePartitioner>.Allocate();
 		this.queryId++;
 		for (int i = 0; i < cells.Count; i++)
 		{
@@ -284,13 +285,14 @@ public class ScenePartitioner
 			Grid.CellToXY(cells[i], out num, out num2);
 			this.GatherEntries(num, num2, 1, 1, layer, event_data, list, this.queryId);
 		}
+		this.RunLayerGlobalEvent(cells, layer, event_data);
 		this.RunEntries(list, event_data);
-		this.ReleaseList(list);
+		ListPool<ScenePartitionerEntry, ScenePartitioner>.Free(list);
 	}
 
 	public void TriggerEvent(HashSet<int> cells, ScenePartitionerLayer layer, object event_data)
 	{
-		List<ScenePartitionerEntry> list = this.ReserveList();
+		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, ScenePartitioner>.Allocate();
 		this.queryId++;
 		foreach (int num in cells)
 		{
@@ -299,16 +301,58 @@ public class ScenePartitioner
 			Grid.CellToXY(num, out num2, out num3);
 			this.GatherEntries(num2, num3, 1, 1, layer, event_data, list, this.queryId);
 		}
+		this.RunLayerGlobalEvent(cells, layer, event_data);
 		this.RunEntries(list, event_data);
-		this.ReleaseList(list);
+		ListPool<ScenePartitionerEntry, ScenePartitioner>.Free(list);
 	}
 
 	public void TriggerEvent(int x, int y, int width, int height, ScenePartitionerLayer layer, object event_data)
 	{
-		List<ScenePartitionerEntry> list = this.ReserveList();
+		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, ScenePartitioner>.Allocate();
 		this.GatherEntries(x, y, width, height, layer, event_data, list);
+		this.RunLayerGlobalEvent(x, y, width, height, layer, event_data);
 		this.RunEntries(list, event_data);
-		this.ReleaseList(list);
+		ListPool<ScenePartitionerEntry, ScenePartitioner>.Free(list);
+	}
+
+	private void RunLayerGlobalEvent(List<int> cells, ScenePartitionerLayer layer, object event_data)
+	{
+		if (layer.OnEvent != null)
+		{
+			for (int i = 0; i < cells.Count; i++)
+			{
+				layer.OnEvent(cells[i], event_data);
+			}
+		}
+	}
+
+	private void RunLayerGlobalEvent(HashSet<int> cells, ScenePartitionerLayer layer, object event_data)
+	{
+		if (layer.OnEvent != null)
+		{
+			foreach (int num in cells)
+			{
+				layer.OnEvent(num, event_data);
+			}
+		}
+	}
+
+	private void RunLayerGlobalEvent(int x, int y, int width, int height, ScenePartitionerLayer layer, object event_data)
+	{
+		if (layer.OnEvent != null)
+		{
+			for (int i = y; i < y + height; i++)
+			{
+				for (int j = x; j < x + width; j++)
+				{
+					int num = Grid.XYToCell(j, i);
+					if (Grid.IsValidCell(num))
+					{
+						layer.OnEvent(num, event_data);
+					}
+				}
+			}
+		}
 	}
 
 	private void RunEntries(List<ScenePartitionerEntry> gathered_entries, object event_data)
@@ -365,28 +409,12 @@ public class ScenePartitioner
 		}
 	}
 
-	public List<ScenePartitionerEntry> ReserveList()
+	public void Cleanup()
 	{
-		List<ScenePartitionerEntry> list;
-		if (this.freeLists.Count == 0)
-		{
-			list = new List<ScenePartitionerEntry>();
-		}
-		else
-		{
-			list = this.freeLists[this.freeLists.Count - 1];
-			this.freeLists.RemoveAt(this.freeLists.Count - 1);
-		}
-		return list;
+		SimAndRenderScheduler.instance.Remove(this);
 	}
 
-	public void ReleaseList(List<ScenePartitionerEntry> list)
-	{
-		list.Clear();
-		this.freeLists.Add(list);
-	}
-
-	private List<ScenePartitionerLayer> layers = new List<ScenePartitionerLayer>();
+	public List<ScenePartitionerLayer> layers = new List<ScenePartitionerLayer>();
 
 	private int nodeSize;
 
@@ -395,8 +423,6 @@ public class ScenePartitioner
 	private ScenePartitioner.ScenePartitionerNode[,,] nodes;
 
 	private int queryId;
-
-	private List<List<ScenePartitionerEntry>> freeLists = new List<List<ScenePartitionerEntry>>();
 
 	private static Predicate<ScenePartitionerEntry> removeCallback = (ScenePartitionerEntry entry) => entry == null || entry.obj == null;
 

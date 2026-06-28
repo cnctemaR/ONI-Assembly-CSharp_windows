@@ -4,5 +4,5 @@ public interface ILogicUIElement : IUniformGridObject
 {
 	int GetLogicUICell();
 
-	bool IsLogicInput();
+	LogicPortSpriteType GetLogicPortSpriteType();
 }

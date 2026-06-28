@@ -11,30 +11,28 @@ public class ElectrolyzerConfig : IBuildingConfig
 		int num = 2;
 		int num2 = 2;
 		string text2 = "electrolyzer_kanim";
-		float num3 = 100f;
-		int num4 = 30;
-		float num5 = 30f;
+		int num3 = 30;
+		float num4 = 30f;
 		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num6 = 800f;
+		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER3;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER1, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER1, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
-		buildingDef.OperatingKilowatts = 1f;
+		buildingDef.SelfHeatKilowattsWhenActive = 1f;
 		buildingDef.ViewMode = SimViewMode.OxygenMap;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "HollowMetal";
-		buildingDef.Upgradeable = false;
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		Electrolyzer electrolyzer = go.AddOrGet<Electrolyzer>();
@@ -58,7 +56,6 @@ public class ElectrolyzerConfig : IBuildingConfig
 			new ElementConverter.OutputElement(0.888f, SimHashes.Oxygen, 343.15f, false, 0f, 1f, false, 1f, byte.MaxValue, 0),
 			new ElementConverter.OutputElement(0.11199999f, SimHashes.Hydrogen, 343.15f, false, 0f, 1f, false, 1f, byte.MaxValue, 0)
 		};
-		elementConverter.conversionInterval = 1f;
 		Prioritizable.AddRef(go);
 	}
 
@@ -88,12 +85,7 @@ public class ElectrolyzerConfig : IBuildingConfig
 
 	public const float WATER2OXYGEN_RATIO = 0.888f;
 
-	public const float OXYGEN_CONVERSION_RATE = 1f;
-
 	public const float OXYGEN_TEMPERATURE = 343.15f;
 
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
-	{
-		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(1, 1), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false)
-	};
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(1, 1), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
 }

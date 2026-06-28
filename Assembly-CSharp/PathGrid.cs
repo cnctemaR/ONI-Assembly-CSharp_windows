@@ -26,6 +26,11 @@ public class PathGrid
 		this.ProberCells = new PathGrid.ProberCell[width_in_cells * height_in_cells];
 	}
 
+	public void SetGroupProber(IGroupProber group_prober)
+	{
+		this.groupProber = group_prober;
+	}
+
 	public PathFinder.Cell GetCell(PathFinder.PotentialPath potential_path, int query_id)
 	{
 		return this.GetCell(potential_path.cell, potential_path.navType, query_id);
@@ -78,6 +83,10 @@ public class PathGrid
 				proberCell.queryId = cell_data.queryId;
 				proberCell.cost = cell_data.cost;
 				this.ProberCells[num] = proberCell;
+				if (this.groupProber != null)
+				{
+					this.groupProber.SetProberCell(potential_path.cell);
+				}
 			}
 		}
 	}
@@ -148,6 +157,8 @@ public class PathGrid
 	private int rootX;
 
 	private int rootY;
+
+	private IGroupProber groupProber;
 
 	private struct ProberCell
 	{

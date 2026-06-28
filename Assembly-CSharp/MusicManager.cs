@@ -236,7 +236,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			{
 				this.SetDynamicMusicTimeOfDay();
 			}
-			if (GameClock.Instance != null && GameClock.Instance.GetCurrentDayAsPercentage() >= this.duskTime)
+			if (GameClock.Instance != null && GameClock.Instance.GetCurrentCycleAsPercentage() >= this.duskTime)
 			{
 				this.StopDynamicMusic(false);
 			}
@@ -463,7 +463,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	{
 		if (this.time >= this.timeOfDayUpdateRate)
 		{
-			this.SetSongParameter(Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent), "timeOfDay", GameClock.Instance.GetCurrentDayAsPercentage(), false);
+			this.SetSongParameter(Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent), "timeOfDay", GameClock.Instance.GetCurrentCycleAsPercentage(), false);
 			this.time = 0f;
 		}
 		this.time += Time.deltaTime;
@@ -498,7 +498,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public bool ShouldPlayDynamicMusicLoadedGame()
 	{
-		return GameClock.Instance.GetCurrentDayAsPercentage() <= this.loadGameCutoffPoint;
+		return GameClock.Instance.GetCurrentCycleAsPercentage() <= this.loadGameCutoffPoint;
 	}
 
 	public static MusicManager instance

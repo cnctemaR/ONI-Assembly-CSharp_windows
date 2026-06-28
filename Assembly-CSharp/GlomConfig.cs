@@ -16,7 +16,8 @@ public class GlomConfig : IEntityConfig
 		string text4 = "idle";
 		EffectorValues tier = DECOR.BONUS.TIER0;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, 25f, "HatchNavGrid", NavType.Floor, 2f, string.Empty, 0, true, true, 30f, 293.15f, 393.15f, 273.15f, 423.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, 25f, "HatchNavGrid", NavType.Floor, 32, 2f, string.Empty, 0, true, true, 30f, 293.15f, 393.15f, 273.15f, 423.15f);
+		gameObject.AddWeapon(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
 		Glom glom = gameObject.UpdateComponentRequirement<Glom>(true);
 		glom.dirtyEmitElement = SimHashes.ContaminatedOxygen;
 		glom.dirtyProbabilityPercent = 25f;

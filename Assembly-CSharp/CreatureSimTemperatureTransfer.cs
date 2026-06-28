@@ -4,7 +4,7 @@ using Klei;
 using Klei.AI;
 using STRINGS;
 
-public class CreatureSimTemperatureTransfer : SimTemperatureTransfer
+public class CreatureSimTemperatureTransfer : SimTemperatureTransfer, ISim200ms
 {
 	public float deltaEnergy
 	{
@@ -22,7 +22,7 @@ public class CreatureSimTemperatureTransfer : SimTemperatureTransfer
 	{
 		get
 		{
-			return this.deltaKJ * 4f * 1000f;
+			return this.deltaKJ * 5f * 1000f;
 		}
 	}
 
@@ -41,7 +41,7 @@ public class CreatureSimTemperatureTransfer : SimTemperatureTransfer
 		base.OnPrefabInit();
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		this.average_kilowatts_exchanged.AddSample(this.currentExchangeWattage * 0.001f);
 		this.averageTemperatureTransferPerSecond.SetValue(SimUtil.EnergyFlowToTemperatureDelta(this.average_kilowatts_exchanged.GetWeightedAverage, this.primaryElement.Element.specificHeatCapacity, this.primaryElement.Mass));
@@ -54,10 +54,6 @@ public class CreatureSimTemperatureTransfer : SimTemperatureTransfer
 		{
 			SimMessages.ModifyElementChunkEnergy(this.simHandle, num * dt * (this.primaryElement.Mass * 1000f) * this.primaryElement.Element.specificHeatCapacity * 0.001f);
 		}
-	}
-
-	private void Update()
-	{
 	}
 
 	public void RefreshRegistration()

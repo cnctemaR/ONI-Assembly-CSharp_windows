@@ -7,7 +7,7 @@ public class FishingLure : KMonoBehaviour
 	{
 		get
 		{
-			return this.station.transform.position;
+			return this.station.transform.GetPosition();
 		}
 	}
 
@@ -23,7 +23,7 @@ public class FishingLure : KMonoBehaviour
 	{
 		base.OnSpawn();
 		this.anim.Play("hook", KAnim.PlayMode.Loop, 1f, 0f);
-		this.moveTarget = base.transform.position;
+		this.moveTarget = base.transform.GetPosition();
 	}
 
 	public void SetupLine(FishingStation fishingStation, KAnimFile animFile)
@@ -67,7 +67,7 @@ public class FishingLure : KMonoBehaviour
 
 	private void Splash()
 	{
-		BodyOfWater.MakeSplash(base.transform.position);
+		BodyOfWater.MakeSplash(base.transform.GetPosition());
 	}
 
 	private void Update()
@@ -97,7 +97,7 @@ public class FishingLure : KMonoBehaviour
 				}
 			}
 		}
-		else if (!this.body.waterCells.Contains(Grid.PosToCell(base.transform.position)))
+		else if (!this.body.waterCells.Contains(Grid.PosToCell(base.transform.GetPosition())))
 		{
 			this.body.RemoveObjectFromBody(base.gameObject);
 			if (this.timeSinceBodyTransition > 0.25f)
@@ -111,15 +111,15 @@ public class FishingLure : KMonoBehaviour
 		{
 			this.CheckForCatchableFish(this.body);
 		}
-		float num = Vector3.Distance(this.moveTarget, base.transform.position);
-		base.transform.position += Vector3.Normalize(this.moveTarget - base.transform.position) * Mathf.Clamp(Time.deltaTime * this.moveSpeed, 0f, num);
+		float num = Vector3.Distance(this.moveTarget, base.transform.GetPosition());
+		base.transform.SetPosition(base.transform.GetPosition() + Vector3.Normalize(this.moveTarget - base.transform.GetPosition()) * Mathf.Clamp(Time.deltaTime * this.moveSpeed, 0f, num));
 		if (this.hookedObject != null)
 		{
-			this.hookedObject.transform.SetPosition(base.transform.position);
+			this.hookedObject.transform.SetPosition(base.transform.GetPosition());
 		}
-		if (this.hookedObject != null && Vector3.Distance(base.transform.position, this.station.transform.position) < 1.5f)
+		if (this.hookedObject != null && Vector3.Distance(base.transform.GetPosition(), this.station.transform.GetPosition()) < 1.5f)
 		{
-			this.moveTarget = base.transform.position;
+			this.moveTarget = base.transform.GetPosition();
 			this.station.RemoveFromHook(this.hookedObject.gameObject);
 			this.hookedObject = null;
 		}

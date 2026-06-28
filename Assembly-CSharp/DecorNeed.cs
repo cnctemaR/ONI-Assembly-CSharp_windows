@@ -4,23 +4,22 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class DecorNeed : Need
+public class DecorNeed : Need, ISim200ms
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.modifier = new AttributeModifier(Db.Get().Amounts.Decor.deltaAttribute.Id, 1f, DUPLICANTS.NEEDS.DECOR.OBSERVED_DECOR, false, false, false);
+		Amounts amounts = base.gameObject.GetAmounts();
+		this.amount = amounts.Add(new AmountInstance(Db.Get().Amounts.Decor, base.gameObject));
 		Attributes attributes = base.gameObject.GetAttributes();
-		attributes.Add(Db.Get().Attributes.DecorExpectation);
+		this.modifier = new AttributeModifier(Db.Get().Amounts.Decor.deltaAttribute.Id, 1f, DUPLICANTS.NEEDS.DECOR.OBSERVED_DECOR, false, false, false);
+		this.expectationAttribute = attributes.Add(Db.Get().Attributes.DecorExpectation);
 		attributes.Add("Decor", this.modifier);
-		this.amount = Db.Get().Amounts.Decor.Lookup(this);
 		base.Name = DUPLICANTS.NEEDS.DECOR.NAME;
-		base.ExpectationTooltip = DUPLICANTS.NEEDS.DECOR.EXPECTATION_TOOLTIP;
-		this.expectationModifier = new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, 0f, attributes.GetProfessionString(true), false, false, false);
+		base.ExpectationTooltip = string.Format(DUPLICANTS.NEEDS.DECOR.EXPECTATION_TOOLTIP, Db.Get().Attributes.DecorExpectation.Lookup(this).GetTotalValue());
 		this.decorStressBonus = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -0.033333335f, DUPLICANTS.NEEDS.DECOR.NAME, false, false, true);
 		this.decorStressNeutral = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0f, DUPLICANTS.NEEDS.DECOR.NAME, false, false, true);
 		this.decorStressPenalty = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.016666668f, DUPLICANTS.NEEDS.DECOR.NAME, false, false, true);
-		attributes.Add("Profession", this.expectationModifier);
 		this.RefreshExpectations();
 		base.Subscribe(-110704193, delegate(object data)
 		{
@@ -30,10 +29,6 @@ public class DecorNeed : Need
 
 	private void RefreshExpectations()
 	{
-		Attributes attributes = base.gameObject.GetAttributes();
-		AttributeInstance profession = attributes.GetProfession();
-		this.expectationModifier.SetValue(Math.Min(profession.GetTotalValue() * 5f, 75f));
-		this.expectationAttribute = Db.Get().Attributes.DecorExpectation.Lookup(this);
 	}
 
 	public override Klei.AI.Attribute GetExpectationAttribute()
@@ -41,7 +36,7 @@ public class DecorNeed : Need
 		return Db.Get().Attributes.DecorExpectation;
 	}
 
-	private void Update()
+	public void Sim200ms(float dt)
 	{
 		if (this.skipUpdate)
 		{
@@ -55,7 +50,7 @@ public class DecorNeed : Need
 		float decorAtCell = GameUtil.GetDecorAtCell(num);
 		float num2 = 0f;
 		float num3 = 4.1666665f;
-		if (Mathf.Abs(decorAtCell - this.amount.value) > 0.1f)
+		if (Mathf.Abs(decorAtCell - this.amount.value) > 0.5f)
 		{
 			if (decorAtCell > this.amount.value)
 			{
@@ -96,7 +91,7 @@ public class DecorNeed : Need
 			}
 			if (attributeModifier != null)
 			{
-				attributes.Add(attributeModifier.Description, attributeModifier);
+				attributes.Add(attributeModifier.GetDescription(), attributeModifier);
 			}
 			ThoughtGraph.Instance smi = this.GetSMI<ThoughtGraph.Instance>();
 			if (smi != null)
@@ -124,8 +119,6 @@ public class DecorNeed : Need
 	private AttributeModifier modifier;
 
 	private AmountInstance amount;
-
-	private AttributeModifier expectationModifier;
 
 	private AttributeModifier decorStressBonus;
 

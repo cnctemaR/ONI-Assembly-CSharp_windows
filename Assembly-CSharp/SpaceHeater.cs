@@ -29,7 +29,7 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>
 	private SpaceHeater.MonitorState MonitorHeating(float dt)
 	{
 		this.monitorCells.Clear();
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		GameUtil.GetNonSolidCells(num, this.radius, this.monitorCells);
 		int num2 = 0;
 		float num3 = 0f;
@@ -65,8 +65,6 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>
 	[MyCmpReq]
 	private Operational operational;
 
-	private const float UPDATE_INTERVAL = 5f;
-
 	private List<int> monitorCells = new List<int>();
 
 	public class StatesInstance : GameStateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.GameInstance
@@ -83,18 +81,18 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>
 		{
 			default_state = this.offline;
 			base.serializable = false;
-			this.statusItemUnderMassLiquid = new StatusItem("statusItemUnderMassLiquid", BUILDING.STATUSITEMS.HEATINGSTALLEDLOWMASS_LIQUID.NAME, BUILDING.STATUSITEMS.HEATINGSTALLEDLOWMASS_LIQUID.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, 30718);
-			this.statusItemUnderMassGas = new StatusItem("statusItemUnderMassGas", BUILDING.STATUSITEMS.HEATINGSTALLEDLOWMASS_GAS.NAME, BUILDING.STATUSITEMS.HEATINGSTALLEDLOWMASS_GAS.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, 30718);
-			this.statusItemOverTemp = new StatusItem("statusItemOverTemp", BUILDING.STATUSITEMS.HEATINGSTALLEDHOTENV.NAME, BUILDING.STATUSITEMS.HEATINGSTALLEDHOTENV.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, 30718);
+			this.statusItemUnderMassLiquid = new StatusItem("statusItemUnderMassLiquid", BUILDING.STATUSITEMS.HEATINGSTALLEDLOWMASS_LIQUID.NAME, BUILDING.STATUSITEMS.HEATINGSTALLEDLOWMASS_LIQUID.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, 63486);
+			this.statusItemUnderMassGas = new StatusItem("statusItemUnderMassGas", BUILDING.STATUSITEMS.HEATINGSTALLEDLOWMASS_GAS.NAME, BUILDING.STATUSITEMS.HEATINGSTALLEDLOWMASS_GAS.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, 63486);
+			this.statusItemOverTemp = new StatusItem("statusItemOverTemp", BUILDING.STATUSITEMS.HEATINGSTALLEDHOTENV.NAME, BUILDING.STATUSITEMS.HEATINGSTALLEDHOTENV.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, 63486);
 			this.statusItemOverTemp.resolveStringCallback = delegate(string str, object obj)
 			{
 				SpaceHeater.StatesInstance statesInstance = (SpaceHeater.StatesInstance)obj;
 				return string.Format(str, GameUtil.GetFormattedTemperature(statesInstance.master.TargetTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 			};
 			this.offline.EventTransition(GameHashes.OperationalChanged, this.online, (SpaceHeater.StatesInstance smi) => smi.master.operational.IsOperational);
-			this.online.EventTransition(GameHashes.OperationalChanged, this.offline, (SpaceHeater.StatesInstance smi) => !smi.master.operational.IsOperational).DefaultState(this.online.heating).ToggleSchedulePeriodic("spaceheater_online", 5f, delegate(SpaceHeater.StatesInstance smi)
+			this.online.EventTransition(GameHashes.OperationalChanged, this.offline, (SpaceHeater.StatesInstance smi) => !smi.master.operational.IsOperational).DefaultState(this.online.heating).Update("spaceheater_online", delegate(SpaceHeater.StatesInstance smi, float dt)
 			{
-				switch (smi.master.MonitorHeating(5f))
+				switch (smi.master.MonitorHeating(dt))
 				{
 				case SpaceHeater.MonitorState.ReadyToHeat:
 					smi.GoTo(this.online.heating);
@@ -109,7 +107,7 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>
 					smi.GoTo(this.online.undermassgas);
 					break;
 				}
-			});
+			}, UpdateRate.SIM_4000ms, false);
 			this.online.heating.Enter(delegate(SpaceHeater.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);

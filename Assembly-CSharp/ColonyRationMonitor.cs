@@ -5,10 +5,10 @@ public class ColonyRationMonitor : GameStateMachine<ColonyRationMonitor, ColonyR
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.satisfied;
-		this.root.Update("UpdateOutOfRations", delegate(ColonyRationMonitor.Instance smi)
+		this.root.Update("UpdateOutOfRations", delegate(ColonyRationMonitor.Instance smi, float dt)
 		{
 			smi.UpdateIsOutOfRations();
-		});
+		}, UpdateRate.SIM_200ms, false);
 		this.satisfied.ParamTransition<bool>(this.isOutOfRations, this.outofrations, (ColonyRationMonitor.Instance smi, bool p) => p).TriggerOnEnter(GameHashes.ColonyHasRationsChanged, null);
 		this.outofrations.ParamTransition<bool>(this.isOutOfRations, this.satisfied, (ColonyRationMonitor.Instance smi, bool p) => !p).TriggerOnEnter(GameHashes.ColonyHasRationsChanged, null);
 	}

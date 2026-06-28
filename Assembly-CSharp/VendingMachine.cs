@@ -63,10 +63,10 @@ public class VendingMachine : StateMachineComponent<VendingMachine.StatesInstanc
 		base.GetComponent<Workable>().SetWorkTime(2f);
 		ChoreType emptyStorage = Db.Get().ChoreTypes.EmptyStorage;
 		KAnimFile anim = Assets.GetAnim("anim_break_kanim");
-		this.chore = new WorkChore<Workable>(emptyStorage, this, null, true, delegate(Chore o)
+		this.chore = new WorkChore<Workable>(emptyStorage, this, null, null, true, delegate(Chore o)
 		{
 			this.CompleteChore();
-		}, null, null, true, null, true, default(Tag), anim, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+		}, null, null, true, null, true, anim, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 		this.OnRefreshUserMenu(null);
 	}
 
@@ -120,7 +120,7 @@ public class VendingMachine : StateMachineComponent<VendingMachine.StatesInstanc
 				LoopingSounds component = smi.master.GetComponent<LoopingSounds>();
 				if (component != null)
 				{
-					component.StartSound(GlobalAssets.GetSound(smi.master.machineSound, false), smi.master.transform.position);
+					component.StartSound(GlobalAssets.GetSound(smi.master.machineSound, false), smi.master.transform.GetPosition());
 				}
 			});
 			this.open.PlayAnim("working").OnAnimQueueComplete(this.off).Exit(delegate(VendingMachine.StatesInstance smi)

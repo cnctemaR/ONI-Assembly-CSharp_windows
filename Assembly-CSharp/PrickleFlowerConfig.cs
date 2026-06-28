@@ -16,18 +16,18 @@ public class PrickleFlowerConfig : IEntityConfig
 		string text4 = "idle_empty";
 		EffectorValues tier = DECOR.BONUS.TIER1;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, kanimFile, text4, Grid.SceneLayer.BuildingFront, 1, 2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 15f, 5f, 273.15f, 278.15f, 283.15f, 288.15f, 296.15f, 398.15f, new SimHashes[]
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 15f, 5f, 273.15f, 278.15f, 283.15f, 288.15f, 303.15f, 398.15f, new SimHashes[]
 		{
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		}, true, 0f, 0.15f, 1f, PrickleFruitConfig.ID, true);
-		EntityTemplates.ExtendPlantToIrrigated(gameObject, new IrrigationMonitor.LiquidResourceInfo[]
+		}, true, 0f, 0.15f, 1f, PrickleFruitConfig.ID, true, true);
+		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
-			new IrrigationMonitor.LiquidResourceInfo
+			new PlantElementAbsorber.ConsumeInfo
 			{
 				tag = GameTags.Water,
-				massConsumptionRate = 0.13333334f
+				massConsumptionRate = 0.033333335f
 			}
 		});
 		gameObject.AddOrGet<StandardCropPlant>();
@@ -58,13 +58,9 @@ public class PrickleFlowerConfig : IEntityConfig
 	{
 	}
 
-	public const float WATER_RATE = 0.13333334f;
+	public const float WATER_RATE = 0.033333335f;
 
 	public const string ID = "PrickleFlower";
 
 	public const string SEED_ID = "PrickleFlowerSeed";
-
-	public const int MID_YIELD_SEEDS = 1;
-
-	public const int HIGH_YIELD_SEEDS = 1;
 }

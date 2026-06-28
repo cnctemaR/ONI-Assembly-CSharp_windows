@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -59,6 +60,8 @@ public class ActiveRangeSideScreen : SideScreenContent
 			global::Debug.LogError("The gameObject received does not contain a IActivationRangeTarget component", null);
 			return;
 		}
+		this.activateLabel.text = this.target.ActivateSliderLabelText;
+		this.deactivateLabel.text = this.target.DeactivateSliderLabelText;
 		this.activateValueSlider.onValueChanged.RemoveListener(new UnityAction<float>(this.OnActivateValueChanged));
 		this.activateValueSlider.minValue = this.target.MinValue;
 		this.activateValueSlider.maxValue = this.target.MaxValue;
@@ -76,6 +79,15 @@ public class ActiveRangeSideScreen : SideScreenContent
 		this.RefreshTooltips();
 	}
 
+	public override string GetTitle()
+	{
+		if (this.target != null)
+		{
+			return this.target.ActivationRangeTitleText;
+		}
+		return UI.UISIDESCREENS.ACTIVATION_RANGE_SIDE_SCREEN.NAME;
+	}
+
 	private IActivationRangeTarget target;
 
 	[SerializeField]
@@ -83,6 +95,12 @@ public class ActiveRangeSideScreen : SideScreenContent
 
 	[SerializeField]
 	private KSlider deactivateValueSlider;
+
+	[SerializeField]
+	private LocText activateLabel;
+
+	[SerializeField]
+	private LocText deactivateLabel;
 
 	[SerializeField]
 	private LocText activateValueLabel;

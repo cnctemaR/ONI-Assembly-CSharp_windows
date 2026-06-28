@@ -186,10 +186,10 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.idle;
-			this.root.Update("CheckTransitions", delegate(Vent.StatesInstance smi)
+			this.root.Update("CheckTransitions", delegate(Vent.StatesInstance smi, float dt)
 			{
 				smi.CheckTransitions();
-			});
+			}, UpdateRate.SIM_200ms, false);
 			this.blocked.ToggleStatusItem((Vent.StatesInstance smi) => smi.SelectStatusItem(Db.Get().BuildingStatusItems.GasVentObstructed, Db.Get().BuildingStatusItems.LiquidVentObstructed), null);
 			this.overPressure.ToggleStatusItem((Vent.StatesInstance smi) => smi.SelectStatusItem(Db.Get().BuildingStatusItems.GasVentOverPressure, Db.Get().BuildingStatusItems.LiquidVentOverPressure), null);
 		}

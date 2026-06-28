@@ -25,19 +25,21 @@ public class Hit
 		}
 		this.target.Trigger(-787691065, this.properties.attacker.GetComponent<FactionAlignment>());
 		float num = this.rollDamage();
+		AttackableBase component2 = this.target.GetComponent<AttackableBase>();
+		num *= 1f + component2.GetDamageMultiplier();
 		component.Damage(num);
 		if (this.properties.effects == null)
 		{
 			return;
 		}
-		Effects component2 = this.target.GetComponent<Effects>();
-		if (component2)
+		Effects component3 = this.target.GetComponent<Effects>();
+		if (component3)
 		{
 			foreach (AttackEffect attackEffect in this.properties.effects)
 			{
 				if (global::UnityEngine.Random.Range(0f, 100f) < attackEffect.effectProbability * 100f)
 				{
-					component2.Add(attackEffect.effectID, true);
+					component3.Add(attackEffect.effectID, true);
 				}
 			}
 		}

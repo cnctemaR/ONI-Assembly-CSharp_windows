@@ -49,7 +49,6 @@ public class ReportScreen : KScreen
 
 	private void Refresh()
 	{
-		this.ClearLineItems();
 		if (this.currentReport.day == ReportManager.Instance.TodaysReport.day)
 		{
 			this.SetTitle(string.Format(UI.ENDOFDAYREPORT.DAY_TITLE_TODAY, this.currentReport.day));
@@ -89,14 +88,15 @@ public class ReportScreen : KScreen
 		foreach (KeyValuePair<ReportManager.ReportType, ReportManager.ReportGroup> keyValuePair in ReportManager.Instance.ReportGroups)
 		{
 			ReportManager.ReportEntry entry = this.currentReport.GetEntry(keyValuePair.Key);
-			if (keyValuePair.Value.reportIfZero || entry.accumulate != 0f)
+			bool flag2 = entry.accumulate != 0f || keyValuePair.Value.reportIfZero;
+			this.CreateOrUpdateLine(entry, keyValuePair.Value, flag2);
+			if (flag2)
 			{
 				if (num != keyValuePair.Value.group)
 				{
 					num = keyValuePair.Value.group;
 					this.AddSpacer(num);
 				}
-				this.AddLine(entry, keyValuePair.Value);
 			}
 		}
 	}
@@ -124,31 +124,30 @@ public class ReportScreen : KScreen
 		return gameObject;
 	}
 
-	private GameObject AddLine(ReportManager.ReportEntry entry, ReportManager.ReportGroup reportGroup)
+	private GameObject CreateOrUpdateLine(ReportManager.ReportEntry entry, ReportManager.ReportGroup reportGroup, bool is_line_active)
 	{
-		GameObject gameObject;
-		if (this.lineItems.ContainsKey(reportGroup.stringKey))
+		GameObject gameObject = null;
+		this.lineItems.TryGetValue(reportGroup.stringKey, out gameObject);
+		if (!is_line_active)
 		{
-			gameObject = this.lineItems[reportGroup.stringKey];
+			if (gameObject != null && gameObject.activeSelf)
+			{
+				gameObject.SetActive(false);
+			}
 		}
 		else
 		{
-			gameObject = Util.KInstantiateUI(this.lineItem, this.contentFolder, true);
-			gameObject.name = "LineItem" + this.lineItems.Count;
-			this.lineItems[reportGroup.stringKey] = gameObject;
+			if (gameObject == null)
+			{
+				gameObject = Util.KInstantiateUI(this.lineItem, this.contentFolder, true);
+				gameObject.name = "LineItem" + this.lineItems.Count;
+				this.lineItems[reportGroup.stringKey] = gameObject;
+			}
+			gameObject.SetActive(true);
+			ReportScreenEntry component = gameObject.GetComponent<ReportScreenEntry>();
+			component.SetMainEntry(entry, reportGroup);
 		}
-		gameObject.SetActive(true);
-		ReportScreenEntry component = gameObject.GetComponent<ReportScreenEntry>();
-		component.SetMainEntry(entry, reportGroup);
 		return gameObject;
-	}
-
-	private void ClearLineItems()
-	{
-		foreach (KeyValuePair<string, GameObject> keyValuePair in this.lineItems)
-		{
-			keyValuePair.Value.SetActive(false);
-		}
 	}
 
 	private void OnClickClose()

@@ -10,17 +10,14 @@ public class WashBasinConfig : IBuildingConfig
 		int num = 2;
 		int num2 = 3;
 		string text2 = "wash_basin_kanim";
-		float num3 = 50f;
-		int num4 = 30;
-		float num5 = 30f;
+		int num3 = 30;
+		float num4 = 30f;
 		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER0;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, BUILDINGS.CONSTRUCTION_MASS_KG.TIER1, raw_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, tier);
-		buildingDef.HotKey = global::Action.BuildMenuKeyB;
-		return buildingDef;
+		return BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, BUILDINGS.CONSTRUCTION_MASS_KG.TIER1, raw_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, tier, 0.2f);
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.WashStation);
 		HandSanitizer handSanitizer = go.AddOrGet<HandSanitizer>();
@@ -42,6 +39,7 @@ public class WashBasinConfig : IBuildingConfig
 		manualDeliveryKG.minimumMass = 5f;
 		manualDeliveryKG.capacity = 200f;
 		manualDeliveryKG.refillMass = 40f;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		go.UpdateComponentRequirement<LoopingSounds>(true);
 	}
 

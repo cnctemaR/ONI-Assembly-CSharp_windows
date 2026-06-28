@@ -16,7 +16,7 @@ public class ElementChunk : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		Vector3 position = base.transform.position;
+		Vector3 position = base.transform.GetPosition();
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Ore);
 		base.transform.SetPosition(position);
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
@@ -59,7 +59,7 @@ public class ElementChunk : KMonoBehaviour
 				if (CameraController.Instance != null)
 				{
 					string sound = GlobalAssets.GetSound("Ore_absorb", false);
-					if (sound != null && CameraController.Instance.IsAudibleSound(pickupable.transform.position, sound))
+					if (sound != null && CameraController.Instance.IsAudibleSound(pickupable.transform.GetPosition(), sound))
 					{
 						base.PlaySound3D(sound);
 					}

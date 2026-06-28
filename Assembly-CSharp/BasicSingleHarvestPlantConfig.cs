@@ -23,7 +23,7 @@ public class BasicSingleHarvestPlantConfig : IEntityConfig
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
 		};
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, 15f, 5f, 218.15f, 283.15f, 291.15f, 295.15f, 303.15f, 398.15f, array, true, 0f, 0.15f, 1f, "BasicPlantFood", true);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, 15f, 5f, 218.15f, 283.15f, 291.15f, 295.15f, 303.15f, 398.15f, array, true, 0f, 0.15f, 1f, "BasicPlantFood", true, false);
 		gameObject.UpdateComponentRequirement<StandardCropPlant>(true);
 		gameObject.UpdateComponentRequirement<KAnimControllerBase>(true).randomiseLoopedOffset = true;
 		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
@@ -37,6 +37,14 @@ public class BasicSingleHarvestPlantConfig : IEntityConfig
 		List<Tag> list = new List<Tag> { GameTags.CropSeed };
 		text = global::STRINGS.CREATURES.SPECIES.BASICSINGLEHARVESTPLANT.DOMESTICATEDDESC;
 		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text3, text2, kanimFile, "object", num2, list, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 1, text, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, string.Empty);
+		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
+		{
+			new PlantElementAbsorber.ConsumeInfo
+			{
+				tag = GameTags.Dirt,
+				massConsumptionRate = 0.016666668f
+			}
+		});
 		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "BasicSingleHarvestPlant_preview", Assets.GetAnim("meallice_kanim"), "place", 1, 2);
 		SoundEventVolumeCache.instance.AddVolume("meallice_kanim", "MealLice_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("meallice_kanim", "MealLice_LP", NOISE_POLLUTION.CREATURES.TIER4);
@@ -54,4 +62,6 @@ public class BasicSingleHarvestPlantConfig : IEntityConfig
 	public const string ID = "BasicSingleHarvestPlant";
 
 	public const string SEED_ID = "BasicSingleHarvestPlantSeed";
+
+	public const float DIRT_RATE = 0.016666668f;
 }

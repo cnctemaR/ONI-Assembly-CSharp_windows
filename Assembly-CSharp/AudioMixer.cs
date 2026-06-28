@@ -164,7 +164,7 @@ public class AudioMixer
 		int num3 = 0;
 		for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
 		{
-			Vector3 position = Components.LiveMinionIdentities[i].transform.position;
+			Vector3 position = Components.LiveMinionIdentities[i].transform.GetPosition();
 			if (CameraController.Instance.IsVisiblePos(position))
 			{
 				num++;

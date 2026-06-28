@@ -7,9 +7,9 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 	{
 		default_state = this.healthy;
 		base.serializable = true;
-		this.healthy.TagTransition(GameTags.CaloriesDepleted, this.Incapacitated, false).TagTransition(GameTags.HitPointsDepleted, this.Incapacitated, false).Update(delegate(IncapacitationMonitor.Instance smi)
+		this.healthy.TagTransition(GameTags.CaloriesDepleted, this.Incapacitated, false).TagTransition(GameTags.HitPointsDepleted, this.Incapacitated, false).Update(delegate(IncapacitationMonitor.Instance smi, float dt)
 		{
-			smi.RecoverStamina(smi.dt, smi);
+			smi.RecoverStamina(dt, smi);
 		});
 		this.start_recovery.TagTransition(new Tag[]
 		{
@@ -23,9 +23,9 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 			{
 				smi.master.Trigger(-1506500077, null);
 			})
-			.Update(delegate(IncapacitationMonitor.Instance smi)
+			.Update(delegate(IncapacitationMonitor.Instance smi, float dt)
 			{
-				smi.Bleed(smi.dt, smi);
+				smi.Bleed(dt, smi);
 			});
 		this.die.Enter(delegate(IncapacitationMonitor.Instance smi)
 		{

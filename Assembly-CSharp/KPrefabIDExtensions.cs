@@ -9,7 +9,7 @@ public static class KPrefabIDExtensions
 		KPrefabID component = cmp.GetComponent<KPrefabID>();
 		GameObject prefab = Assets.GetPrefab(component.PrefabTag);
 		GameObject gameObject = Util.KInstantiate(prefab, null, null);
-		gameObject.transform.SetPosition(cmp.transform.position);
+		gameObject.transform.SetPosition(cmp.transform.GetPosition());
 		gameObject.transform.parent = cmp.transform.parent;
 		return gameObject.GetComponent<T>();
 	}

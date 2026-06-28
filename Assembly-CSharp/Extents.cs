@@ -10,6 +10,25 @@ public struct Extents
 		this.height = height;
 	}
 
+	public Extents(int cell, int radius)
+	{
+		int num = 0;
+		int num2 = 0;
+		Grid.CellToXY(cell, out num, out num2);
+		this.x = num - radius;
+		this.y = num2 - radius;
+		this.width = radius * 2 + 1;
+		this.height = radius * 2 + 1;
+	}
+
+	public Extents(int center_x, int center_y, int radius)
+	{
+		this.x = center_x - radius;
+		this.y = center_y - radius;
+		this.width = radius * 2 + 1;
+		this.height = radius * 2 + 1;
+	}
+
 	public Extents(int cell, CellOffset[] offsets)
 	{
 		int num = 0;

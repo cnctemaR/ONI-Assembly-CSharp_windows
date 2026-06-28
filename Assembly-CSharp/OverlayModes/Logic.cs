@@ -55,9 +55,9 @@ namespace OverlayModes
 			foreach (SaveLoadRoot saveLoadRoot in this.gameObjTargets)
 			{
 				float defaultDepth = Mode.GetDefaultDepth(saveLoadRoot);
-				Vector3 position = saveLoadRoot.transform.position;
+				Vector3 position = saveLoadRoot.transform.GetPosition();
 				position.z = defaultDepth;
-				saveLoadRoot.transform.position = position;
+				saveLoadRoot.transform.SetPosition(position);
 			}
 			Mode.ResetDisplayValues<SaveLoadRoot>(this.gameObjTargets);
 			Mode.ResetDisplayValues<KBatchedAnimController>(this.wireControllers);
@@ -201,9 +201,9 @@ namespace OverlayModes
 							{
 								base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.gameObjTargets, this.objectTargetLayer, delegate(SaveLoadRoot root)
 								{
-									Vector3 position = root.transform.position;
+									Vector3 position = root.transform.GetPosition();
 									position.z += 2f;
-									root.transform.position = position;
+									root.transform.SetPosition(position);
 									KBatchedAnimController component6 = root.GetComponent<KBatchedAnimController>();
 									component6.enabled = false;
 									component6.enabled = true;
@@ -251,7 +251,7 @@ namespace OverlayModes
 					if (!(kbatchedAnimController == null))
 					{
 						Color32 color = colourOff;
-						LogicCircuitNetwork networkForCell = logicCircuitManager.GetNetworkForCell(Grid.PosToCell(kbatchedAnimController.transform.position));
+						LogicCircuitNetwork networkForCell = logicCircuitManager.GetNetworkForCell(Grid.PosToCell(kbatchedAnimController.transform.GetPosition()));
 						if (networkForCell != null)
 						{
 							color = ((networkForCell.OutputValue <= 0) ? colourOff : colourOn);
@@ -392,13 +392,24 @@ namespace OverlayModes
 				this.instance.SetActive(true);
 				this.image = this.instance.GetComponent<Image>();
 				this.image.raycastTarget = false;
-				if (ui_elem.IsLogicInput())
+				LogicPortSpriteType logicPortSpriteType = ui_elem.GetLogicPortSpriteType();
+				if (logicPortSpriteType != LogicPortSpriteType.Input)
 				{
-					this.image.sprite = ui_data.inputSprite;
+					if (logicPortSpriteType != LogicPortSpriteType.Output)
+					{
+						if (logicPortSpriteType == LogicPortSpriteType.ResetUpdate)
+						{
+							this.image.sprite = ui_data.resetSprite;
+						}
+					}
+					else
+					{
+						this.image.sprite = ui_data.outputSprite;
+					}
 				}
 				else
 				{
-					this.image.sprite = ui_data.outputSprite;
+					this.image.sprite = ui_data.inputSprite;
 				}
 			}
 

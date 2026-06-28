@@ -70,15 +70,6 @@ public class MinionBrain : Brain
 		}
 	}
 
-	private void FixedUpdate()
-	{
-		FallMonitor.Instance smi = this.GetSMI<FallMonitor.Instance>();
-		if (smi != null)
-		{
-			smi.FixedUpdate();
-		}
-	}
-
 	[MyCmpReq]
 	public Navigator Navigator;
 

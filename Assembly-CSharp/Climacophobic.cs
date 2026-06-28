@@ -67,7 +67,7 @@ public class Climacophobic : StateMachineComponent<Climacophobic.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.satisfied;
-			this.root.ToggleSchedulePeriodic("ClimacophobicCheck", 1f, delegate(Climacophobic.StatesInstance smi)
+			this.root.Update("ClimacophobicCheck", delegate(Climacophobic.StatesInstance smi, float dt)
 			{
 				if (smi.master.IsUncomfortable())
 				{
@@ -77,7 +77,7 @@ public class Climacophobic : StateMachineComponent<Climacophobic.StatesInstance>
 				{
 					smi.GoTo(this.satisfied);
 				}
-			});
+			}, UpdateRate.SIM_1000ms, false);
 			this.suffering.AddEffect("Vertigo").ToggleExpression(Db.Get().Expressions.Uncomfortable, null);
 			this.satisfied.DoNothing();
 		}

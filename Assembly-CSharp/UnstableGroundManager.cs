@@ -88,7 +88,7 @@ public class UnstableGroundManager : KMonoBehaviour
 		KBatchedAnimController kbatchedAnimController = this.Spawn(pos, element, mass, temperature, disease_idx, disease_count);
 		kbatchedAnimController.Play("sandPuff", KAnim.PlayMode.Once, 1f, 0f);
 		kbatchedAnimController.gameObject.name = "Puff " + element.name;
-		kbatchedAnimController.transform.position += this.spawnPuffOffset;
+		kbatchedAnimController.transform.SetPosition(kbatchedAnimController.transform.GetPosition() + this.spawnPuffOffset);
 	}
 
 	private KBatchedAnimController Spawn(Vector3 pos, Element element, float mass, float temperature, byte disease_idx, int disease_count)
@@ -128,7 +128,7 @@ public class UnstableGroundManager : KMonoBehaviour
 		{
 			GameObject gameObject = this.fallingObjects[i];
 			Vector2I vector2I;
-			Grid.PosToXY(gameObject.transform.position, out vector2I);
+			Grid.PosToXY(gameObject.transform.GetPosition(), out vector2I);
 			if (vector2I.x == cellXY.x || vector2I.y >= cellXY.y)
 			{
 				int num = Grid.PosToCell(vector2I);
@@ -161,7 +161,7 @@ public class UnstableGroundManager : KMonoBehaviour
 		while (i < this.fallingObjects.Count)
 		{
 			GameObject gameObject = this.fallingObjects[i];
-			Vector3 position = gameObject.transform.position;
+			Vector3 position = gameObject.transform.GetPosition();
 			int cell = Grid.PosToCell(position);
 			int num = Grid.CellBelow(cell);
 			if (!Grid.IsValidCell(num) || Grid.Element[num].IsSolid || (Grid.Cell[num].properties & 4) != 0)
@@ -204,7 +204,7 @@ public class UnstableGroundManager : KMonoBehaviour
 			int num = ((diseaseIdx == byte.MaxValue) ? 0 : Db.Get().Diseases[(int)diseaseIdx].id.HashValue);
 			this.serializedInfo.Add(new UnstableGroundManager.SerializedInfo
 			{
-				position = gameObject.transform.position,
+				position = gameObject.transform.GetPosition(),
 				element = component.ElementID,
 				mass = component.Mass,
 				temperature = component.Temperature,

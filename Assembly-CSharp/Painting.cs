@@ -6,12 +6,7 @@ public class Painting : Artable
 	{
 		base.OnPrefabInit();
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
-	}
-
-	public override Workable.AnimInfo GetAnim(Worker worker)
-	{
-		Workable.AnimInfo anim = base.GetAnim(worker);
-		anim.smi = new MultitoolController.Instance(this, worker, "paint", EffectPrefabs.Instance.PaintEffect);
-		return anim;
+		this.multitoolContext = "paint";
+		this.multitoolHitEffectHash = new HashedString("fx_paint_splash");
 	}
 }

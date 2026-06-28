@@ -73,7 +73,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 	{
 		get
 		{
-			GameObject gameObject = Grid.Objects[this.PowerCell, 20];
+			GameObject gameObject = Grid.Objects[this.PowerCell, 24];
 			return gameObject != null;
 		}
 	}
@@ -96,6 +96,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 		this.OnOperationalChanged(null);
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
 		Game.Instance.circuitManager.Connect(this);
+		Game.Instance.emergySim.AddBattery(this);
 	}
 
 	private void OnOperationalChanged(object data)
@@ -114,12 +115,13 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 
 	protected override void OnCleanUp()
 	{
+		Game.Instance.emergySim.RemoveBattery(this);
 		Game.Instance.circuitManager.Disconnect(this);
 		Components.Batteries.Remove(this);
 		base.OnCleanUp();
 	}
 
-	protected void SimUpdate(float dt)
+	public virtual void EnergySim200ms(float dt)
 	{
 		this.dt = dt;
 		this.joulesConsumed = 0f;
@@ -128,6 +130,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 		this.meter.SetPositionPercent(percentFull);
 		this.UpdateSounds();
 		this.PreviousJoulesAvailable = this.JoulesAvailable;
+		this.ConsumeEnergy(this.joulesLostPerSecond * dt);
 	}
 
 	private void UpdateSounds()
@@ -170,20 +173,19 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 
 	public void ConsumeEnergy(float joules)
 	{
+		float num = Mathf.Min(this.JoulesAvailable, joules);
+		ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyWasted, num, BUILDINGS.PREFABS.BATTERY.CHARGE_LOSS.ToString().Replace("{Battery}", this.GetProperName()), null);
 		this.joulesAvailable = Mathf.Max(0f, this.JoulesAvailable - joules);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
-		List<Descriptor> list = new List<Descriptor>();
-		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESPOWERGENERATOR, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESPOWERGENERATOR, Descriptor.DescriptorType.Requirement);
-		list.Add(descriptor);
-		Descriptor descriptor2 = default(Descriptor);
-		string text = string.Format(UI.BUILDINGEFFECTS.BATTERYEFFECT, GameUtil.GetFormattedJoules(this.capacity, string.Empty));
-		descriptor2.SetupDescriptor(text, text, Descriptor.DescriptorType.Effect);
-		list.Add(descriptor2);
-		return list;
+		return new List<Descriptor>
+		{
+			new Descriptor(UI.BUILDINGEFFECTS.REQUIRESPOWERGENERATOR, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESPOWERGENERATOR, Descriptor.DescriptorType.Requirement, false),
+			new Descriptor(string.Format(UI.BUILDINGEFFECTS.BATTERYCAPACITY, GameUtil.GetFormattedJoules(this.capacity, string.Empty, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.BATTERYCAPACITY, GameUtil.GetFormattedJoules(this.capacity, string.Empty, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect, false),
+			new Descriptor(string.Format(UI.BUILDINGEFFECTS.BATTERYLEAK, GameUtil.GetFormattedJoules(this.joulesLostPerSecond, "F1", GameUtil.TimeSlice.PerCycle)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.BATTERYLEAK, GameUtil.GetFormattedJoules(this.joulesLostPerSecond, "F1", GameUtil.TimeSlice.PerCycle)), Descriptor.DescriptorType.Effect, false)
+		};
 	}
 
 	[SerializeField]
@@ -193,9 +195,14 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 	private float joulesAvailable;
 
 	[MyCmpGet]
-	private Operational operational;
+	protected Operational operational;
+
+	[MyCmpGet]
+	public PowerTransformer powerTransformer;
 
 	private MeterController meter;
+
+	public float joulesLostPerSecond;
 
 	[SerializeField]
 	public int powerSortOrder;

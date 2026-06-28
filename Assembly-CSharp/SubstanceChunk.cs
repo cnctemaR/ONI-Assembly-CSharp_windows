@@ -12,7 +12,7 @@ public class SubstanceChunk : KMonoBehaviour, ISaveLoadable
 		base.OnSpawn();
 		Color color = base.GetComponent<PrimaryElement>().Element.substance.colour;
 		color.a = 1f;
-		base.GetComponent<KBatchedAnimController>().SetSymbolTint(KBatchedAnimController.SymbolTintIndex.First, SubstanceChunk.symbolToTint, color);
+		base.GetComponent<KBatchedAnimController>().SetSymbolTint(SubstanceChunk.symbolToTint, color);
 	}
 
 	private void OnRefreshUserMenu(object data)
@@ -27,7 +27,7 @@ public class SubstanceChunk : KMonoBehaviour, ISaveLoadable
 
 	private void OnRelease()
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		if (component.Mass > 0f)
 		{

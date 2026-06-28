@@ -11,35 +11,32 @@ public class AlgaeDistilleryConfig : IBuildingConfig
 		int num = 3;
 		int num2 = 4;
 		string text2 = "algae_distillery_kanim";
-		float num3 = 100f;
-		int num4 = 100;
-		float num5 = 30f;
+		int num3 = 100;
+		float num4 = 30f;
 		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num6 = 800f;
+		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER1, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER1, tier2, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
-		buildingDef.OperatingKilowatts = 1f;
+		buildingDef.SelfHeatKilowattsWhenActive = 1f;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "HollowMetal";
-		buildingDef.Upgradeable = false;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		AlgaeDistillery algaeDistillery = go.AddOrGet<AlgaeDistillery>();
-		algaeDistillery.hasMeter = true;
 		algaeDistillery.emitTag = new Tag("Algae");
 		algaeDistillery.emitMass = 30f;
 		ConduitDispenser conduitDispenser = go.AddOrGet<ConduitDispenser>();
@@ -53,8 +50,9 @@ public class AlgaeDistilleryConfig : IBuildingConfig
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = tag;
-		manualDeliveryKG.refillMass = 100f;
-		manualDeliveryKG.capacity = 200f;
+		manualDeliveryKG.refillMass = 120f;
+		manualDeliveryKG.capacity = 480f;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
@@ -65,7 +63,6 @@ public class AlgaeDistilleryConfig : IBuildingConfig
 			new ElementConverter.OutputElement(0.2f, SimHashes.Algae, 303.15f, true, 0f, 1f, false, 1f, byte.MaxValue, 0),
 			new ElementConverter.OutputElement(0.4f, SimHashes.DirtyWater, 303.15f, true, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
 		};
-		elementConverter.conversionInterval = 1f;
 		Prioritizable.AddRef(go);
 	}
 
@@ -101,8 +98,9 @@ public class AlgaeDistilleryConfig : IBuildingConfig
 
 	public const float OUTPUT_TEMP = 303.15f;
 
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
-	{
-		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(0, 1), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false)
-	};
+	public const float REFILL_RATE = 2400f;
+
+	public const float ALGAE_STORAGE_AMOUNT = 480f;
+
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 1), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
 }

@@ -10,7 +10,7 @@ public class LadderSoundEvent : SoundEvent
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		Vector3 position = behaviour.GetComponent<Transform>().position;
+		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
 		int num = Grid.PosToCell(position);
 		BuildingDef buildingDef = null;
 		if (Grid.IsValidCell(num))

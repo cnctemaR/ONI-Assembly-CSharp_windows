@@ -6,16 +6,16 @@ public class BladderMonitor : GameStateMachine<BladderMonitor, BladderMonitor.In
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.satisfied;
-		this.satisfied.Transition(this.needstopee, (BladderMonitor.Instance smi) => smi.NeedsToPee());
+		this.satisfied.Transition(this.needstopee, (BladderMonitor.Instance smi) => smi.NeedsToPee(), UpdateRate.SIM_200ms);
 		this.needstopee.ToggleUrge(Db.Get().Urges.Pee).EventTransition(GameHashes.BeginChore, this.needstopee.peeing, (BladderMonitor.Instance smi) => smi.IsPeeing()).DefaultState(this.needstopee.holdingitin)
 			.ToggleThought(Db.Get().Thoughts.FullBladder, null)
 			.ToggleExpression(Db.Get().Expressions.FullBladder, null)
 			.ToggleStateMachine((BladderMonitor.Instance smi) => new ToiletMonitor.Instance(smi.master))
 			.ToggleStateMachine((BladderMonitor.Instance smi) => new PeeChoreMonitor.Instance(smi.master));
-		this.needstopee.holdingitin.ToggleEffect("FullBladder").DefaultState(this.needstopee.holdingitin.nobathrooms).ToggleSchedulePeriodic("check bathrooms", 1f, delegate(BladderMonitor.Instance smi)
+		this.needstopee.holdingitin.ToggleEffect("FullBladder").DefaultState(this.needstopee.holdingitin.nobathrooms).Update("check bathrooms", delegate(BladderMonitor.Instance smi, float dt)
 		{
 			smi.CheckBathrooms();
-		})
+		}, UpdateRate.SIM_1000ms, false)
 			.OnSignal(this.noBathrooms, this.needstopee.holdingitin.nobathrooms)
 			.OnSignal(this.hasBathrooms, this.needstopee.holdingitin.hasbathrooms);
 		this.needstopee.peeing.EventTransition(GameHashes.EndChore, this.satisfied, (BladderMonitor.Instance smi) => !smi.IsPeeing());

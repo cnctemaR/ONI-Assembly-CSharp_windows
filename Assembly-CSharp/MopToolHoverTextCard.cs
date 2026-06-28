@@ -6,29 +6,8 @@ using UnityEngine.UI;
 
 public class MopToolHoverTextCard : HoverTextConfiguration
 {
-	public override void ConfigureHoverScreen()
-	{
-		using (new KProfiler.Region("ConfigureMopToolHoverScreen", null))
-		{
-			HoverTextScreen instance = HoverTextScreen.Instance;
-			if (instance.LoadPreConfiguredToolFields(this))
-			{
-				this.isConfigured = true;
-			}
-			else
-			{
-				instance.currentConfiguration = this;
-				instance.ToggleIncubating(true);
-				instance.ClearLabels();
-				this.ConfigureTitle(instance, true);
-				this.isConfigured = true;
-			}
-		}
-	}
-
 	public override void UpdateHoverElements(List<KSelectable> selected)
 	{
-		base.UpdateHoverElements(selected);
 		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
 		if (!Grid.IsValidCell(num))
 		{

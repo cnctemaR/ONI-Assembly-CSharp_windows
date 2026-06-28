@@ -9,17 +9,6 @@ public class DigTool : DragTool
 		DigTool.Instance = this;
 	}
 
-	public override void Update()
-	{
-		this.cell_new = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-		if (!Grid.IsValidCell(this.cell_new))
-		{
-			return;
-		}
-		base.Update();
-		this.cell_old = this.cell_new;
-	}
-
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
 		if (!Grid.Solid[cell])
@@ -53,7 +42,7 @@ public class DigTool : DragTool
 				Prioritizable component = gameObject.GetComponent<Prioritizable>();
 				if (component != null)
 				{
-					component.SetMasterPriority(ToolMenuPriorityScreen.Instance.GetScreenPriority());
+					component.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
 				}
 			}
 		}
@@ -63,7 +52,7 @@ public class DigTool : DragTool
 	{
 		if (Grid.Solid[cell] && !Grid.Foundation[cell] && Grid.Objects[cell, 7] == null)
 		{
-			for (int i = 0; i < 32; i++)
+			for (int i = 0; i < 36; i++)
 			{
 				if (Grid.Objects[cell, i] != null && Grid.Objects[cell, i].GetComponent<Constructable>() != null)
 				{
@@ -89,20 +78,16 @@ public class DigTool : DragTool
 	protected override void OnActivateTool()
 	{
 		base.OnActivateTool();
-		ToolMenuPriorityScreen.Instance.Show(true);
+		ToolMenu.Instance.PriorityScreen.Show(true);
 	}
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
 	{
 		base.OnDeactivateTool(new_tool);
-		ToolMenuPriorityScreen.Instance.Show(false);
+		ToolMenu.Instance.PriorityScreen.Show(false);
 	}
 
 	public GameObject Placer;
 
 	public static DigTool Instance;
-
-	protected int cell_new;
-
-	protected int cell_old;
 }

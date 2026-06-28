@@ -60,7 +60,7 @@ public class TextureLerper
 		this.meshGO = new GameObject();
 		this.meshGO.name = "mesh";
 		this.meshGO.transform.parent = this.cameraGO.transform;
-		this.meshGO.transform.localPosition = new Vector3(-0.5f, -0.5f, 0f);
+		this.meshGO.transform.SetLocalPosition(new Vector3(-0.5f, -0.5f, 0f));
 		this.meshGO.isStatic = true;
 		MeshRenderer meshRenderer = this.meshGO.AddComponent<MeshRenderer>();
 		meshRenderer.receiveShadows = false;

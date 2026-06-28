@@ -1,4 +1,5 @@
 ﻿using System;
+using TUNING;
 using UnityEngine;
 
 public class MicrobeMusher : Fabricator
@@ -7,9 +8,11 @@ public class MicrobeMusher : Fabricator
 	{
 		base.OnPrefabInit();
 		this.choreType = Db.Get().ChoreTypes.Mush;
-		this.inStorage.choreType = Db.Get().ChoreTypes.MushFetch;
+		this.choreTags = GameTags.ChoreTypes.CookingChores;
+		this.fetchChoreTypeIdHash = Db.Get().ChoreTypes.MushFetch.IdHash;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Mushing;
 		this.attributeConverter = Db.Get().AttributeConverters.CookingSpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_ration" });
 		this.meter.meterController.HideSymbol(MicrobeMusher.canHash, true);
 		this.meter.meterController.HideSymbol(MicrobeMusher.meterRationHash, true);
@@ -23,6 +26,11 @@ public class MicrobeMusher : Fabricator
 		{
 			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_FetchingWater);
 		}, null, null);
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole(Cook.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	protected override void OnBuildQueued(Fabricator.MachineOrder order)
@@ -48,7 +56,7 @@ public class MicrobeMusher : Fabricator
 	protected override GameObject CompleteOrder(Fabricator.UserOrder completed_order)
 	{
 		GameObject gameObject = base.CompleteOrder(completed_order);
-		gameObject.transform.Translate(this.mushbarSpawnOffset);
+		gameObject.transform.SetPosition(gameObject.transform.GetPosition() + this.mushbarSpawnOffset);
 		gameObject.SetActive(true);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		if (component != null && component.DiseaseCount > 0)
@@ -84,7 +92,7 @@ public class MicrobeMusher : Fabricator
 		}
 		this.visualizer = Util.KInstantiate(order.parentOrder.recipe.FabricationVisualizer, null, null);
 		this.visualizer.transform.parent = this.meter.meterController.transform;
-		this.visualizer.transform.localPosition = new Vector3(0f, 0f, 1f);
+		this.visualizer.transform.SetLocalPosition(new Vector3(0f, 0f, 1f));
 		this.visualizer.SetActive(true);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		KBatchedAnimController component2 = this.visualizer.GetComponent<KBatchedAnimController>();

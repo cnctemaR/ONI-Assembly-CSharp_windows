@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public abstract class Reactable
+public abstract class Reactable : ISim1000ms
 {
 	public Reactable(GameObject gameObject, ChoreType chore_type, int range_width = 15, int range_height = 8, bool follow_transform = false)
 	{
@@ -9,10 +9,10 @@ public abstract class Reactable
 		this.rangeWidth = range_width;
 		this.gameObject = gameObject;
 		this.choreType = chore_type;
-		this.UpdateLocation(null);
+		this.UpdateLocation();
 		if (follow_transform)
 		{
-			this.updateLocationSchedulerHandle = GameScheduler.Instance.SchedulePeriodic("UpdateReactableLocation", 1f, new Action<object>(this.UpdateLocation), null, null, 0f, null);
+			SimAndRenderScheduler.instance.Add(this, false);
 		}
 	}
 
@@ -65,7 +65,7 @@ public abstract class Reactable
 	{
 		this.End();
 		this.InternalCleanup();
-		this.updateLocationSchedulerHandle.ClearScheduler();
+		SimAndRenderScheduler.instance.Remove(this);
 		if (this.partitionerEntry != null)
 		{
 			this.partitionerEntry.Release();
@@ -73,7 +73,12 @@ public abstract class Reactable
 		}
 	}
 
-	public void UpdateLocation(object data = null)
+	public void Sim1000ms(float dt)
+	{
+		this.UpdateLocation();
+	}
+
+	private void UpdateLocation()
 	{
 		if (this.partitionerEntry != null)
 		{
@@ -83,7 +88,7 @@ public abstract class Reactable
 		if (this.gameObject != null)
 		{
 			this.sourceCell = Grid.PosToCell(this.gameObject);
-			Extents extents = new Extents(Grid.PosToXY(this.gameObject.transform.position).x - this.rangeWidth / 2, Grid.PosToXY(this.gameObject.transform.position).y - this.rangeHeight / 2, this.rangeWidth, this.rangeHeight);
+			Extents extents = new Extents(Grid.PosToXY(this.gameObject.transform.GetPosition()).x - this.rangeWidth / 2, Grid.PosToXY(this.gameObject.transform.GetPosition()).y - this.rangeHeight / 2, this.rangeWidth, this.rangeHeight);
 			this.partitionerEntry = GameScenePartitioner.Instance.Add("Reactable", this, extents, GameScenePartitioner.Instance.objectLayers[0], null);
 		}
 	}
@@ -99,8 +104,6 @@ public abstract class Reactable
 	private int rangeWidth;
 
 	private int rangeHeight;
-
-	private SchedulerHandle updateLocationSchedulerHandle;
 
 	protected GameObject reactor;
 

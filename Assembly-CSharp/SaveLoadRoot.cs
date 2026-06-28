@@ -37,7 +37,7 @@ public class SaveLoadRoot : KMonoBehaviour
 	public void Save(BinaryWriter writer)
 	{
 		Transform transform = base.transform;
-		writer.Write(transform.position);
+		writer.Write(transform.GetPosition());
 		writer.Write(transform.rotation);
 		writer.Write(transform.localScale);
 		writer.Write((byte)this.folder);
@@ -106,9 +106,9 @@ public class SaveLoadRoot : KMonoBehaviour
 		}
 	}
 
-	public static SaveLoadRoot Load(Tag tag, IReader reader)
+	public static SaveLoadRoot Load(Tag tag, IReader reader, bool get_disabled_visualizer)
 	{
-		GameObject prefab = SaveLoader.Instance.saveManager.GetPrefab(tag);
+		GameObject prefab = SaveLoader.Instance.saveManager.GetPrefab(tag, get_disabled_visualizer);
 		return SaveLoadRoot.Load(prefab, reader);
 	}
 

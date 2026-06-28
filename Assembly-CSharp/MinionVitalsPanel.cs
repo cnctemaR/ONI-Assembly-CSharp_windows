@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MinionVitalsPanel : KMonoBehaviour
+public class MinionVitalsPanel : KMonoBehaviour, IRender200ms
 {
 	public void Init()
 	{
@@ -66,13 +66,13 @@ public class MinionVitalsPanel : KMonoBehaviour
 	protected override void OnCmpEnable()
 	{
 		base.OnCmpEnable();
-		this.schedulerHandle = GameScheduler.Instance.SchedulePeriodic("Refresh Vitals Screen", 0.25f, new Action<object>(this.Refresh), null, null, 0f, null);
+		SimAndRenderScheduler.instance.Add(this, false);
 	}
 
 	protected override void OnCmpDisable()
 	{
 		base.OnCmpDisable();
-		this.schedulerHandle.ClearScheduler();
+		SimAndRenderScheduler.instance.Remove(this);
 	}
 
 	private string GetDecorTooltip(AmountInstance amount_instance)
@@ -145,13 +145,12 @@ public class MinionVitalsPanel : KMonoBehaviour
 		this.checkboxLines.Add(checkboxLine);
 	}
 
-	protected override void OnCleanUp()
+	public void Render200ms(float dt)
 	{
-		base.OnCleanUp();
-		this.schedulerHandle.ClearScheduler();
+		this.Refresh();
 	}
 
-	public void Refresh(object data)
+	public void Refresh()
 	{
 		if (this.selectedEntity == null || this.selectedEntity.gameObject == null)
 		{
@@ -402,16 +401,16 @@ public class MinionVitalsPanel : KMonoBehaviour
 	{
 		FertilizationMonitor.Instance smi = go.GetSMI<FertilizationMonitor.Instance>();
 		string text = Db.Get().Amounts.Fertilization.Name;
-		foreach (FertilizationMonitor.FertilizerInfo fertilizerInfo in smi.def.consumedElements)
+		foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in smi.def.consumedElements)
 		{
 			string text2 = text;
 			text = string.Concat(new string[]
 			{
 				text2,
 				"\n    • ",
-				ElementLoader.GetElement(fertilizerInfo.tag).name,
+				ElementLoader.GetElement(consumeInfo.tag).name,
 				" ",
-				GameUtil.GetFormattedMass(fertilizerInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")
+				GameUtil.GetFormattedMass(consumeInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")
 			});
 		}
 		return text;
@@ -472,7 +471,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 	private bool check_irrigation(GameObject go)
 	{
 		IrrigationMonitor.Instance smi = go.GetSMI<IrrigationMonitor.Instance>();
-		return smi == null || !smi.Starved();
+		return smi == null || !smi.IsInsideState(smi.sm.replanted.starved);
 	}
 
 	private bool check_illumination(GameObject go)
@@ -536,8 +535,6 @@ public class MinionVitalsPanel : KMonoBehaviour
 	public GameObject CheckboxLinePrefab;
 
 	public GameObject selectedEntity;
-
-	private SchedulerHandle schedulerHandle;
 
 	public List<MinionVitalsPanel.VitalLine> vitalsLines = new List<MinionVitalsPanel.VitalLine>();
 

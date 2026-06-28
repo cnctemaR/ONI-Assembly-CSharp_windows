@@ -8,7 +8,7 @@ public class MessageTarget : ISaveLoadable
 	public MessageTarget(KPrefabID prefab_id)
 	{
 		this.prefabId.Set(prefab_id);
-		this.position = prefab_id.transform.position;
+		this.position = prefab_id.transform.GetPosition();
 		this.name = "Unknown";
 		KSelectable component = prefab_id.GetComponent<KSelectable>();
 		if (component != null)
@@ -22,7 +22,7 @@ public class MessageTarget : ISaveLoadable
 	{
 		if (this.prefabId.Get() != null)
 		{
-			return this.prefabId.Get().transform.position;
+			return this.prefabId.Get().transform.GetPosition();
 		}
 		return this.position;
 	}

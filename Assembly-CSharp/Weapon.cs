@@ -47,7 +47,7 @@ public class Weapon : KMonoBehaviour
 						{
 							if (FactionManager.Instance.GetDisposition(this.alignment.Alignment, component.Alignment) == FactionManager.Disposition.Attack)
 							{
-								vector2 = health.transform.position;
+								vector2 = health.transform.GetPosition();
 								vector2.z = vector.z;
 								if (Vector3.Distance(vector, vector2) <= this.properties.aoe_radius)
 								{

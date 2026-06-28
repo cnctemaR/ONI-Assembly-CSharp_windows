@@ -20,7 +20,7 @@ public class UpgradeFX : GameStateMachine<UpgradeFX, UpgradeFX.Instance>
 		public Instance(IStateMachineTarget master, Vector3 offset)
 			: base(master)
 		{
-			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("upgrade_fx_kanim", master.gameObject.transform.position + offset, master.gameObject.transform, true, Grid.SceneLayer.Front, false);
+			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("upgrade_fx_kanim", master.gameObject.transform.GetPosition() + offset, master.gameObject.transform, true, Grid.SceneLayer.Front, false);
 			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi);
 		}
 

@@ -19,29 +19,29 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 		{
 			smi.OnAirConsumed(obj);
 		}).EventTransition(GameHashes.DiseaseAdded, this.infected, (ImmuneSystemMonitor.Instance smi) => smi.IsSick())
-			.Transition(this.recovering, (ImmuneSystemMonitor.Instance smi) => smi.effects.HasEffect("PostDiseaseRecovery"));
-		this.healthy.ParamTransition<bool>(this.isLosingImmunity, this.infecting, (ImmuneSystemMonitor.Instance smi, bool p) => p).Update(delegate(ImmuneSystemMonitor.Instance smi)
+			.Transition(this.recovering, (ImmuneSystemMonitor.Instance smi) => smi.effects.HasEffect("PostDiseaseRecovery"), UpdateRate.SIM_200ms);
+		this.healthy.ParamTransition<bool>(this.isLosingImmunity, this.infecting, (ImmuneSystemMonitor.Instance smi, bool p) => p).Update(delegate(ImmuneSystemMonitor.Instance smi, float dt)
 		{
 			smi.UpdateImmuneSystem();
 		});
-		this.infecting.DefaultState(this.infecting.high).ParamTransition<bool>(this.isLosingImmunity, this.healthy, (ImmuneSystemMonitor.Instance smi, bool p) => !p).Update(delegate(ImmuneSystemMonitor.Instance smi)
+		this.infecting.DefaultState(this.infecting.high).ParamTransition<bool>(this.isLosingImmunity, this.healthy, (ImmuneSystemMonitor.Instance smi, bool p) => !p).Update(delegate(ImmuneSystemMonitor.Instance smi, float dt)
 		{
 			smi.UpdateImmuneSystem();
 		});
-		this.infecting.high.Transition(this.infecting.low, (ImmuneSystemMonitor.Instance smi) => smi.IsLowImmuneLevel());
-		this.infecting.low.Transition(this.infecting.high, (ImmuneSystemMonitor.Instance smi) => !smi.IsLowImmuneLevel()).Enter(delegate(ImmuneSystemMonitor.Instance smi)
+		this.infecting.high.Transition(this.infecting.low, (ImmuneSystemMonitor.Instance smi) => smi.IsLowImmuneLevel(), UpdateRate.SIM_200ms);
+		this.infecting.low.Transition(this.infecting.high, (ImmuneSystemMonitor.Instance smi) => !smi.IsLowImmuneLevel(), UpdateRate.SIM_200ms).Enter(delegate(ImmuneSystemMonitor.Instance smi)
 		{
 			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_BeingInfected);
 		}).ToggleStatusItem(Db.Get().DuplicantStatusItems.LowImmunity, null);
-		this.infected.Update(delegate(ImmuneSystemMonitor.Instance smi)
+		this.infected.Update(delegate(ImmuneSystemMonitor.Instance smi, float dt)
 		{
 			smi.ClearInternalDisease();
 		}).ToggleAttributeModifier("suppressed by sickness", (ImmuneSystemMonitor.Instance smi) => smi.immuneSuppress, null).EventTransition(GameHashes.DiseaseCured, this.beginrecovering, (ImmuneSystemMonitor.Instance smi) => !smi.IsSick());
 		this.beginrecovering.AddEffect("PostDiseaseRecovery").GoTo(this.recovering);
-		this.recovering.Update(delegate(ImmuneSystemMonitor.Instance smi)
+		this.recovering.Update(delegate(ImmuneSystemMonitor.Instance smi, float dt)
 		{
 			smi.ClearInternalDisease();
-		}).Transition(this.healthy, (ImmuneSystemMonitor.Instance smi) => !smi.effects.HasEffect("PostDiseaseRecovery"));
+		}).Transition(this.healthy, (ImmuneSystemMonitor.Instance smi) => !smi.effects.HasEffect("PostDiseaseRecovery"), UpdateRate.SIM_200ms);
 	}
 
 	public StateMachine<ImmuneSystemMonitor, ImmuneSystemMonitor.Instance, IStateMachineTarget, object>.BoolParameter isLosingImmunity;
@@ -123,13 +123,13 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 
 		public void OnAirConsumed(object obj)
 		{
-			Sim.MassConsumptionCallback massConsumptionCallback = (Sim.MassConsumptionCallback)obj;
-			if (massConsumptionCallback.diseaseIdx != 255)
+			Sim.MassConsumedCallback massConsumedCallback = (Sim.MassConsumedCallback)obj;
+			if (massConsumedCallback.diseaseIdx != 255)
 			{
-				Disease disease = Db.Get().Diseases[(int)massConsumptionCallback.diseaseIdx];
+				Disease disease = Db.Get().Diseases[(int)massConsumedCallback.diseaseIdx];
 				if (disease.infectionVectors.Contains(Disease.InfectionVector.Inhalation))
 				{
-					this.InjectDisease(disease, massConsumptionCallback.diseaseCount, ElementLoader.elements[(int)massConsumptionCallback.removedElemIdx].tag, Disease.InfectionVector.Inhalation);
+					this.InjectDisease(disease, massConsumedCallback.diseaseCount, ElementLoader.elements[(int)massConsumedCallback.elemIdx].tag, Disease.InfectionVector.Inhalation);
 				}
 			}
 		}

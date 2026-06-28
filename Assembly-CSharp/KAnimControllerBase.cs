@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using UnityEngine;
 
@@ -20,24 +19,36 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public string debugName { get; private set; }
 
+	public KAnim.Build curBuild { get; protected set; }
+
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event Action<Color32> OnOverlayColourChanged;
+
+	public bool HasBatchInstanceData
+	{
+		get
+		{
+			return this.batchInstanceData != null;
+		}
+	}
+
+	public SymbolInstanceGpuData symbolInstanceGpuData { get; protected set; }
+
 	public Color32 TintColour
 	{
 		get
 		{
-			return this.tintColour;
+			return this.batchInstanceData.GetTintColour();
 		}
 		set
 		{
-			int num = ((int)this.TintColour.r << 24) | ((int)this.TintColour.g << 16) | ((int)this.TintColour.b << 8) | (int)this.TintColour.a;
-			int num2 = ((int)value.r << 24) | ((int)value.g << 16) | ((int)value.b << 8) | (int)value.a;
-			if (num != num2)
+			if (this.batchInstanceData.SetTintColour(value))
 			{
 				this.SetDirty();
-				this.tintColour = value;
 				this.SuspendUpdates(false);
 				if (this.OnTintChanged != null)
 				{
-					this.OnTintChanged(this.tintColour);
+					this.OnTintChanged(value);
 				}
 			}
 		}
@@ -47,43 +58,37 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	{
 		get
 		{
-			return this.highlightColour;
+			return this.batchInstanceData.GetHighlightcolour();
 		}
 		set
 		{
-			int num = ((int)this.HighlightColour.r << 24) | ((int)this.HighlightColour.g << 16) | ((int)this.HighlightColour.b << 8) | (int)this.HighlightColour.a;
-			int num2 = ((int)value.r << 24) | ((int)value.g << 16) | ((int)value.b << 8) | (int)value.a;
-			if (num != num2)
+			if (this.batchInstanceData.SetHighlightColour(value))
 			{
 				this.SetDirty();
-				this.highlightColour = value;
 				this.SuspendUpdates(false);
 				if (this.OnHighlightChanged != null)
 				{
-					this.OnHighlightChanged(this.highlightColour);
+					this.OnHighlightChanged(value);
 				}
 			}
 		}
 	}
 
-	public Color32 OverlayColour
+	public Color OverlayColour
 	{
 		get
 		{
-			return this.overlayColour;
+			return this.batchInstanceData.GetOverlayColour();
 		}
 		set
 		{
-			int num = ((int)this.OverlayColour.r << 24) | ((int)this.OverlayColour.g << 16) | ((int)this.OverlayColour.b << 8) | (int)this.OverlayColour.a;
-			int num2 = ((int)value.r << 24) | ((int)value.g << 16) | ((int)value.b << 8) | (int)value.a;
-			if (num != num2)
+			if (this.batchInstanceData.SetOverlayColour(value))
 			{
-				this.overlayColour = value;
 				this.SetDirty();
 				this.SuspendUpdates(false);
-				if (this.onOverlayColourChanged != null)
+				if (this.OnOverlayColourChanged != null)
 				{
-					this.onOverlayColourChanged(value);
+					this.OnOverlayColourChanged(value);
 				}
 			}
 		}
@@ -94,9 +99,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event KAnimControllerBase.KAnimEvent onAnimComplete;
-
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	public event Action<Color32> onOverlayColourChanged;
 
 	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<int> onLayerChanged;
@@ -140,14 +142,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		set
 		{
 			this.mode = value;
-		}
-	}
-
-	public ReadOnlyCollection<KAnimControllerBase.OverrideAnimFileData> OverrideAnimFiles
-	{
-		get
-		{
-			return (this.overrideAnimFiles != null) ? this.overrideAnimFiles.AsReadOnly() : null;
 		}
 	}
 
@@ -233,8 +227,8 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public Vector3 GetWorldPivot()
 	{
-		Vector3 position = base.transform.position;
-		BoxCollider2D component = base.GetComponent<BoxCollider2D>();
+		Vector3 position = base.transform.GetPosition();
+		KBoxCollider2D component = base.GetComponent<KBoxCollider2D>();
 		if (component != null)
 		{
 			position.x += component.offset.x;
@@ -372,11 +366,11 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	protected abstract void UpdateFrame(float t);
 
-	public abstract Matrix4x4 GetTransformMatrix();
+	public abstract Matrix2x3 GetTransformMatrix();
 
 	public abstract Matrix2x3 GetSymbolLocalTransform(HashedString symbol, out bool symbolVisible);
 
-	public abstract void UpdateHidden(bool reset = true);
+	public abstract void UpdateHidden();
 
 	public abstract void AddAnims(params KAnimFile[] addedAnims);
 
@@ -392,17 +386,12 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	{
 		bool flag = false;
 		Matrix4x4 symbolTransform = this.GetSymbolTransform(KAnimControllerBase.snaptoPivot, out flag);
-		Vector3 position = base.transform.position;
+		Vector3 position = base.transform.GetPosition();
 		if (flag)
 		{
 			position = new Vector3(symbolTransform[0, 3], symbolTransform[1, 3], symbolTransform[2, 3]);
 		}
 		return position;
-	}
-
-	protected virtual Matrix4x4 GetRootMatrix()
-	{
-		return Matrix4x4.identity;
 	}
 
 	public virtual Matrix4x4 GetSymbolTransform(HashedString symbol, out bool symbolVisible)
@@ -627,7 +616,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		this.AnimEnter(animData.anim);
 	}
 
-	public abstract void AddSymbolOverride(KAnimHashedString overridden_symbol_name, HashedString batchSource, KAnim.Build.Symbol new_symbol, bool is_perminent = false);
+	public abstract void AddSymbolOverride(KAnimHashedString overridden_symbol_name, HashedString batchSource, KAnim.Build.Symbol new_symbol, bool is_permanent = false);
 
 	public void RemoveSymbolOverride(KAnimHashedString symbol_name)
 	{
@@ -635,14 +624,14 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		this.dirtyBuild = true;
 	}
 
-	public void AddBuildOverride(KAnimFile override_file, bool enable_symbols, bool is_perminent = false)
+	public void AddBuildOverride(KAnimFile override_file, bool enable_symbols, bool is_permanent = false)
 	{
 		if (override_file == null)
 		{
 			return;
 		}
 		KAnimFileData data = override_file.GetData();
-		this.AddBuildOverride(data, enable_symbols, is_perminent);
+		this.AddBuildOverride(data, enable_symbols, is_permanent);
 	}
 
 	protected void ReApplyTempBuildOverrides()
@@ -740,7 +729,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			this.SetDirty();
 			if (update_hidden)
 			{
-				this.UpdateHidden(true);
+				this.UpdateHidden();
 			}
 			return true;
 		}
@@ -759,7 +748,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			this.SetDirty();
 			if (update_hidden)
 			{
-				this.UpdateHidden(true);
+				this.UpdateHidden();
 			}
 			return true;
 		}
@@ -772,7 +761,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		{
 			this.visibleSymbols.Add(symbol);
 			this.SetDirty();
-			this.UpdateHidden(true);
+			this.UpdateHidden();
 		}
 	}
 
@@ -780,7 +769,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	{
 		if (this.visibleSymbols.Remove(symbol))
 		{
-			this.UpdateHidden(true);
+			this.UpdateHidden();
 			this.dirtyBuild = true;
 		}
 	}
@@ -893,7 +882,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 					}
 				}
 				this.hiddenSymbols.RemoveAll((KAnimHashedString x) => this.visibleSymbols.Contains(x));
-				this.UpdateHidden(true);
+				this.UpdateHidden();
 			}
 		}
 	}
@@ -1096,8 +1085,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	protected int prevAnimFrame = KAnim.Anim.Frame.InvalidFrame.idx;
 
-	protected KAnim.Build curBuild;
-
 	protected HandleVector<int>.Handle eventManagerHandle = HandleVector<int>.InvalidHandle;
 
 	protected List<KAnimControllerBase.OverrideAnimFileData> overrideAnimFiles = new List<KAnimControllerBase.OverrideAnimFileData>();
@@ -1130,19 +1117,15 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public Action<Bounds> OnUpdateBounds;
 
-	public Action<Color32> OnTintChanged;
+	public Action<Color> OnTintChanged;
 
-	public Action<Color32> OnHighlightChanged;
+	public Action<Color> OnHighlightChanged;
 
 	private KAnimSynchronizer synchronizer;
 
 	protected KAnimLayering layering;
 
-	protected Color32 tintColour = Color.white;
-
-	protected Color32 highlightColour = Color.black;
-
-	protected Color32 overlayColour = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
+	protected KBatchedAnimInstanceData batchInstanceData;
 
 	[NonSerialized]
 	public KAnimControllerBase.VisibilityType visibilityType;

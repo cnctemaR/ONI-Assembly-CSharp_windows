@@ -33,25 +33,19 @@ public static class LightGridManager
 
 	public class LightGridEmitter
 	{
-		public LightGridEmitter(int cell, int intensity, float radius, Color colour, LightShape shape)
+		public LightGridEmitter(int cell, List<int> lit_cells, int intensity, float radius, Color colour, LightShape shape)
 		{
 			this.cell = cell;
 			this.radius = radius;
 			this.intensity = intensity;
 			this.colour = colour;
 			this.shape = shape;
+			this.litCells = lit_cells;
 		}
 
 		public void Add()
 		{
-			if (this.litCells == null)
-			{
-				this.litCells = new List<int>();
-			}
-			else
-			{
-				this.Remove();
-			}
+			this.Remove();
 			DiscreteShadowCaster.GetVisibleCells(this.cell, this.litCells, (int)this.radius, this.shape);
 			if (!this.litCells.Contains(this.cell))
 			{

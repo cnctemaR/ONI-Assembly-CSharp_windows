@@ -199,8 +199,10 @@ public static class Sim
 			{
 				this.state |= 8;
 			}
-			this.lowTempTransitionIdx = (sbyte)elements.FindIndex((global::Element ele) => ele.id == e.lowTempTransitionTarget);
-			this.highTempTransitionIdx = (sbyte)elements.FindIndex((global::Element ele) => ele.id == e.highTempTransitionTarget);
+			int num = elements.FindIndex((global::Element ele) => ele.id == e.lowTempTransitionTarget);
+			int num2 = elements.FindIndex((global::Element ele) => ele.id == e.highTempTransitionTarget);
+			this.lowTempTransitionIdx = (byte)((num < 0) ? 255 : num);
+			this.highTempTransitionIdx = (byte)((num2 < 0) ? 255 : num2);
 			this.elementsTableIdx = (byte)elements.IndexOf(e);
 			this.specificHeatCapacity = e.specificHeatCapacity;
 			this.thermalConductivity = e.thermalConductivity;
@@ -239,8 +241,8 @@ public static class Sim
 		{
 			writer.Write((int)this.id);
 			writer.Write(this.state);
-			writer.Write(this.lowTempTransitionIdx);
-			writer.Write(this.highTempTransitionIdx);
+			writer.Write((sbyte)this.lowTempTransitionIdx);
+			writer.Write((sbyte)this.highTempTransitionIdx);
 			writer.Write(this.elementsTableIdx);
 			writer.Write(this.specificHeatCapacity);
 			writer.Write(this.thermalConductivity);
@@ -271,9 +273,9 @@ public static class Sim
 
 		public byte state;
 
-		public sbyte lowTempTransitionIdx;
+		public byte lowTempTransitionIdx;
 
-		public sbyte highTempTransitionIdx;
+		public byte highTempTransitionIdx;
 
 		public byte elementsTableIdx;
 
@@ -453,9 +455,13 @@ public static class Sim
 
 		public unsafe Sim.BuildingTemperatureInfo* buildingTemperatures;
 
-		public int numMassConsumptionCallbacks;
+		public int numMassConsumedCallbacks;
 
-		public unsafe Sim.MassConsumptionCallback* massConsumptionCallbacks;
+		public unsafe Sim.MassConsumedCallback* massConsumedCallbacks;
+
+		public int numMassEmittedCallbacks;
+
+		public unsafe Sim.MassEmittedCallback* massEmittedCallbacks;
 
 		public int numDiseaseConsumptionCallbacks;
 
@@ -506,6 +512,10 @@ public static class Sim
 		public IntPtr propertyTextureFlow;
 
 		public IntPtr propertyTextureLiquid;
+
+		public int numBuildingConductivityData;
+
+		public unsafe Sim.BuildingConductivityData* buildingConductivityData;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -615,17 +625,37 @@ public static class Sim
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
-	public struct MassConsumptionCallback
+	public struct MassConsumedCallback
 	{
 		public int callbackIdx;
 
-		public byte removedElemIdx;
+		public byte elemIdx;
 
 		public byte diseaseIdx;
 
 		private byte pad0;
 
 		private byte pad1;
+
+		public float mass;
+
+		public float temperature;
+
+		public int diseaseCount;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct MassEmittedCallback
+	{
+		public int callbackIdx;
+
+		public byte suceeded;
+
+		public byte elemIdx;
+
+		public byte diseaseIdx;
+
+		private byte pad0;
 
 		public float mass;
 
@@ -675,9 +705,17 @@ public static class Sim
 	{
 		public byte elemIdx;
 
+		public byte diseaseIdx;
+
+		public byte pad0;
+
+		public byte pad1;
+
 		public float mass;
 
 		public float temperature;
+
+		public int diseaseCount;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -734,6 +772,16 @@ public static class Sim
 	public struct BuildingTemperatureInfo
 	{
 		public float temperature;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct BuildingConductivityData
+	{
+		public float temperature;
+
+		public float heatCapacity;
+
+		public float thermalConductivity;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]

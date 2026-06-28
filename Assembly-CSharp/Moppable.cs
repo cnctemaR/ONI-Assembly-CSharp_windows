@@ -1,8 +1,9 @@
 ﻿using System;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
-public class Moppable : Workable
+public class Moppable : Workable, ISim1000ms, ISim200ms
 {
 	private Moppable()
 	{
@@ -13,7 +14,8 @@ public class Moppable : Workable
 	{
 		base.OnPrefabInit();
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Mopping;
-		this.attributeConverter = Db.Get().AttributeConverters.DiggingSpeed;
+		this.attributeConverter = Db.Get().AttributeConverters.TidyingSpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		this.childRenderer = base.GetComponentInChildren<MeshRenderer>();
 		Prioritizable.AddRef(base.gameObject);
 	}
@@ -27,9 +29,10 @@ public class Moppable : Workable
 			return;
 		}
 		Grid.Objects[Grid.PosToCell(base.gameObject), 8] = base.gameObject;
-		new WorkChore<Moppable>(Db.Get().ChoreTypes.Mop, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+		new WorkChore<Moppable>(Db.Get().ChoreTypes.Mop, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 		base.SetWorkTime(float.PositiveInfinity);
-		this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.WaitingForMop, null);
+		KSelectable component = base.GetComponent<KSelectable>();
+		component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.WaitingForMop, null);
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_mop_dirtywater_kanim") };
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Moppable.OnSpawn", base.gameObject, new Extents(Grid.PosToCell(this), new CellOffset[]
@@ -40,6 +43,7 @@ public class Moppable : Workable
 		base.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
 		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
 		instance.StartSM();
+		SimAndRenderScheduler.instance.Remove(this);
 	}
 
 	private void OnRefreshUserMenu(object data)
@@ -60,22 +64,27 @@ public class Moppable : Workable
 
 	protected override void OnStartWork(Worker worker)
 	{
-		this.popfxHandle = GameScheduler.Instance.SchedulePeriodic("MoppablePopFX", 1f, new Action<object>(this.OnPopFX), null, null, 0f, null);
+		SimAndRenderScheduler.instance.Add(this, false);
 		this.Refresh();
 		this.MopTick();
 	}
 
 	protected override void OnStopWork(Worker worker)
 	{
-		this.popfxHandle.ClearScheduler();
+		SimAndRenderScheduler.instance.Remove(this);
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole(Handyman.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
 	{
-		this.popfxHandle.ClearScheduler();
+		SimAndRenderScheduler.instance.Remove(this);
 	}
 
-	private void OnPopFX(object data)
+	public void Sim1000ms(float dt)
 	{
 		if (this.amountMopped > 0f)
 		{
@@ -84,7 +93,7 @@ public class Moppable : Workable
 		}
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		if (base.worker != null)
 		{
@@ -99,13 +108,13 @@ public class Moppable : Workable
 		{
 			return;
 		}
-		Sim.MassConsumptionCallback massConsumptionCallback = (Sim.MassConsumptionCallback)data;
-		if (massConsumptionCallback.mass > 0f)
+		Sim.MassConsumedCallback massConsumedCallback = (Sim.MassConsumedCallback)data;
+		if (massConsumedCallback.mass > 0f)
 		{
-			this.amountMopped += massConsumptionCallback.mass;
+			this.amountMopped += massConsumedCallback.mass;
 			int num = Grid.PosToCell(this);
-			SubstanceChunk substanceChunk = LiquidSourceManager.Instance.CreateChunk(ElementLoader.elements[(int)massConsumptionCallback.removedElemIdx], massConsumptionCallback.mass, massConsumptionCallback.temperature, massConsumptionCallback.diseaseIdx, massConsumptionCallback.diseaseCount, Grid.CellToPosCCC(num, Grid.SceneLayer.Ore));
-			substanceChunk.transform.Translate((global::UnityEngine.Random.value - 0.5f) * 0.5f, 0f, 0f);
+			SubstanceChunk substanceChunk = LiquidSourceManager.Instance.CreateChunk(ElementLoader.elements[(int)massConsumedCallback.elemIdx], massConsumedCallback.mass, massConsumedCallback.temperature, massConsumedCallback.diseaseIdx, massConsumedCallback.diseaseCount, Grid.CellToPosCCC(num, Grid.SceneLayer.Ore));
+			substanceChunk.transform.SetPosition(substanceChunk.transform.GetPosition() + new Vector3((global::UnityEngine.Random.value - 0.5f) * 0.5f, 0f, 0f));
 		}
 	}
 
@@ -184,7 +193,6 @@ public class Moppable : Workable
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		this.popfxHandle.ClearScheduler();
 		if (this.partitionerEntry != null)
 		{
 			this.partitionerEntry.Release();
@@ -201,14 +209,15 @@ public class Moppable : Workable
 			{
 				return;
 			}
+			KSelectable component = base.GetComponent<KSelectable>();
 			if (flag)
 			{
 				material.color = Game.Instance.uiColours.Dig.validLocation;
-				this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.MopUnreachable, false);
+				component.RemoveStatusItem(Db.Get().BuildingStatusItems.MopUnreachable, false);
 			}
 			else
 			{
-				this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.MopUnreachable, this);
+				component.AddStatusItem(Db.Get().BuildingStatusItems.MopUnreachable, this);
 				GameScheduler.Instance.Schedule("Locomotion Tutorial", 2f, delegate(object obj)
 				{
 					Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Locomotion);
@@ -234,8 +243,6 @@ public class Moppable : Workable
 	private SchedulerHandle destroyHandle;
 
 	private float amountMopped;
-
-	private SchedulerHandle popfxHandle;
 
 	private MeshRenderer childRenderer;
 

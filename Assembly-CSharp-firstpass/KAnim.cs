@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using UnityEngine;
 
 public class KAnim
@@ -29,6 +30,7 @@ public class KAnim
 		public KAnimHashedString[] hashes;
 	}
 
+	[DebuggerDisplay("{id} {animFile}")]
 	[Serializable]
 	public class Anim
 	{
@@ -82,7 +84,7 @@ public class KAnim
 		{
 			int frameIdx = this.GetFrameIdx(mode, t);
 			KAnim.Anim.Frame frame;
-			if (frameIdx >= 0 && animFile.batchTag.isValid && animFile.batchTag != KAnimBatchManager.NO_BATCH)
+			if (frameIdx >= 0 && animFile.batchTag.IsValid && animFile.batchTag != KAnimBatchManager.NO_BATCH)
 			{
 				frame = KAnim.Anim.GetAnimBatchGroupData(animFile).GetFrame(this.firstFrameIdx + frameIdx);
 			}
@@ -295,21 +297,9 @@ public class KAnim
 
 			public KAnimHashedString fileNameHash;
 
-			public Vector3 v0;
+			public Vector2 uvMin;
 
-			public Vector3 v1;
-
-			public Vector3 v2;
-
-			public Vector3 v3;
-
-			public Vector2 uv0;
-
-			public Vector2 uv1;
-
-			public Vector2 uv2;
-
-			public Vector2 uv3;
+			public Vector2 uvMax;
 
 			public Vector2 bboxMin;
 
@@ -325,6 +315,7 @@ public class KAnim
 			public int symbolIdx;
 		}
 
+		[DebuggerDisplay("{hash} {path} {folder} {colourChannel}")]
 		[Serializable]
 		public class Symbol : IComparable
 		{
@@ -383,6 +374,7 @@ public class KAnim
 				symbol.numFrames = this.numFrames;
 				symbol.numLookupFrames = this.numLookupFrames;
 				symbol.frameLookup = new int[this.frameLookup.Length];
+				symbol.symbolIndexInSourceBuild = this.symbolIndexInSourceBuild;
 				Array.Copy(this.frameLookup, symbol.frameLookup, symbol.frameLookup.Length);
 				return symbol;
 			}
@@ -409,6 +401,8 @@ public class KAnim
 			public int[] frameLookup;
 
 			public int index;
+
+			public int symbolIndexInSourceBuild;
 		}
 	}
 }

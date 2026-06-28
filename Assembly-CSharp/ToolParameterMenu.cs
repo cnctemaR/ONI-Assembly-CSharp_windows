@@ -132,6 +132,8 @@ public class ToolParameterMenu : KMonoBehaviour
 
 		public static string GASCONDUIT = "GASPIPES";
 
+		public static string SOLIDCONDUIT = "SOLIDCONDUITS";
+
 		public static string CLEANANDCLEAR = "CLEANANDCLEAR";
 
 		public static string DIGPLACER = "DIGPLACER";

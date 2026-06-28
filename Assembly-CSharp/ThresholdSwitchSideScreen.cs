@@ -2,7 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
-public class ThresholdSwitchSideScreen : SideScreenContent
+public class ThresholdSwitchSideScreen : SideScreenContent, IRender200ms
 {
 	protected override void OnSpawn()
 	{
@@ -39,7 +39,7 @@ public class ThresholdSwitchSideScreen : SideScreenContent
 		this.numberInput.decimalPlaces = 1;
 	}
 
-	private void SimUpdate(float dt)
+	public void Render200ms(float dt)
 	{
 		if (this.target == null)
 		{
@@ -135,6 +135,15 @@ public class ThresholdSwitchSideScreen : SideScreenContent
 	private void UpdateLabels()
 	{
 		this.currentValue.text = string.Format(UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.CURRENT_VALUE, this.target.ThresholdValueName, this.target.Format(this.target.CurrentValue, true));
+	}
+
+	public override string GetTitle()
+	{
+		if (this.target != null)
+		{
+			return this.target.Title;
+		}
+		return UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.TITLE;
 	}
 
 	private IThresholdSwitch target;

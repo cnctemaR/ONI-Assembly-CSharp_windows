@@ -19,7 +19,7 @@ public class HatchChewSoundEvent : SoundEvent
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		Vector3 position = behaviour.GetComponent<Transform>().position;
+		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
 		int audioCategory = HatchChewSoundEvent.GetAudioCategory(behaviour);
 		EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, position);
 		eventInstance.setParameterValue("material_ID", (float)audioCategory);

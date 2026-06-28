@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class ChoreGroupTableColumn : CheckboxTableColumn
 {
-	public ChoreGroupTableColumn(ChoreGroup chore_group, Action<MinionIdentity, GameObject> on_load_value, Func<MinionIdentity, GameObject, TableScreen.ResultValues> get_value_action, Action<GameObject> on_press_action, Action<GameObject, bool> set_value_action, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip, Func<GameObject, string> get_header_label)
+	public ChoreGroupTableColumn(ChoreGroup chore_group, Action<MinionIdentity, GameObject> on_load_value, Func<MinionIdentity, GameObject, TableScreen.ResultValues> get_value_action, Action<GameObject> on_press_action, Action<GameObject, TableScreen.ResultValues> set_value_action, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip, Func<GameObject, string> get_header_label)
 		: base(on_load_value, get_value_action, on_press_action, set_value_action, sort_comparison, on_tooltip, on_sort_tooltip, null)
 	{
 		this.chore_group = chore_group;

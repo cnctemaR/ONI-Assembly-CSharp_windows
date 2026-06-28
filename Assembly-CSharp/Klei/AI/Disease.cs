@@ -42,7 +42,7 @@ namespace Klei.AI
 			Db.Get().Attributes.Add(attribute);
 			Db.Get().Attributes.Add(attribute2);
 			Db.Get().Attributes.Add(this.amountDeltaAttribute);
-			this.cureSpeedBase = new Attribute(id + "CureSpeed", false, Attribute.Display.Normal, false);
+			this.cureSpeedBase = new Attribute(id + "CureSpeed", false, Attribute.Display.Normal, false, 0f);
 			this.cureSpeedBase.BaseValue = 1f;
 			this.cureSpeedBase.SetFormatter(new ToPercentAttributeFormatter(1f, GameUtil.TimeSlice.None));
 			Db.Get().Attributes.Add(this.cureSpeedBase);

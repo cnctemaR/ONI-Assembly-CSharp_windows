@@ -9,7 +9,6 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 		base.OnPrefabInit();
 		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 		base.Subscribe(1502190696, new Action<object>(this.OnDestroyObject));
-		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FetchCritical;
 		this.epitaphIdx = global::UnityEngine.Random.Range(0, int.MaxValue);
 	}
 
@@ -33,8 +32,8 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 	{
 		if (this.graveName != null && base.smi.IsInsideState(base.smi.sm.full))
 		{
-			GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.Bones, Folder.Misc);
-			gameObject.transform.position = base.transform.position;
+			GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.Bones, Folder.Misc, base.transform.GetPosition());
+			gameObject.transform.SetPosition(base.transform.GetPosition());
 			gameObject.SetActive(true);
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 			component.Temperature = gameObject.GetComponent<PrimaryElement>().Temperature;
@@ -56,7 +55,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 
 		public void CreateFetchTask()
 		{
-			this.chore = new FetchChore(base.GetComponent<Storage>(), 1f, new Tag[] { GameTags.Corpse }, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0);
+			this.chore = new FetchChore(Db.Get().ChoreTypes.FetchCritical, base.GetComponent<Storage>(), 1f, new Tag[] { GameTags.Corpse }, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0, null);
 			this.chore.allowMultifetch = false;
 		}
 

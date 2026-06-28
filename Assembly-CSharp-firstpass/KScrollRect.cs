@@ -109,7 +109,10 @@ public class KScrollRect : ScrollRect
 			{
 				anchoredPosition.x -= this.scrollVelocity;
 			}
-			base.content.anchoredPosition = anchoredPosition;
+			if (base.content.anchoredPosition != anchoredPosition)
+			{
+				base.content.anchoredPosition = anchoredPosition;
+			}
 		}
 		if (base.vertical && this.allowVerticalScrollWheel && (base.verticalNormalizedPosition < -0.05f || base.verticalNormalizedPosition > 1.05f))
 		{

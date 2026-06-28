@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PropertyTextures : KMonoBehaviour
+public class PropertyTextures : KMonoBehaviour, ISim200ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -104,7 +104,7 @@ public class PropertyTextures : KMonoBehaviour
 		}
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		if (this.lerpers == null || this.lerpers.Length == 0)
 		{
@@ -120,6 +120,18 @@ public class PropertyTextures : KMonoBehaviour
 		}
 	}
 
+	private void UpdateTextureThreaded(TextureRegion texture_region, int x0, int y0, int x1, int y1, PropertyTextures.WorkItem.Callback update_texture_cb)
+	{
+		this.workItems.Clear();
+		int num = 16;
+		for (int i = y0; i <= y1; i += num)
+		{
+			int num2 = Math.Min(i + num - 1, y1);
+			this.workItems.Add(new PropertyTextures.WorkItem(texture_region, x0, i, x1, num2, update_texture_cb));
+		}
+		App.instance.jobManager.Run<PropertyTextures.WorkItem, object>(this.workItems, null);
+	}
+
 	private void UpdateProperty(ref PropertyTextures.TextureProperties p, int x0, int y0, int x1, int y1)
 	{
 		if (Game.Instance.IsLoading())
@@ -133,31 +145,31 @@ public class PropertyTextures : KMonoBehaviour
 			switch (p.simProperty)
 			{
 			case PropertyTextures.Property.StateChange:
-				this.UpdateStateChange(textureRegion, x0, y0, x1, y1);
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdateStateChange));
 				break;
 			case PropertyTextures.Property.GasPressure:
-				this.UpdatePressure(textureRegion, x0, y0, x1, y1);
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdatePressure));
 				break;
 			case PropertyTextures.Property.GasColour:
-				this.UpdateGasColour(textureRegion, x0, y0, x1, y1);
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdateGasColour));
 				break;
 			case PropertyTextures.Property.GasDanger:
-				this.UpdateDanger(textureRegion, x0, y0, x1, y1);
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdateDanger));
 				break;
 			case PropertyTextures.Property.FogOfWar:
-				this.UpdateFogOfWar(textureRegion, x0, y0, x1, y1);
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdateFogOfWar));
 				break;
 			case PropertyTextures.Property.SolidDigAmount:
-				this.UpdateSolidDigAmount(textureRegion, x0, y0, x1, y1);
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdateSolidDigAmount));
 				break;
 			case PropertyTextures.Property.SolidLiquidGasMass:
-				this.UpdateSolidLiquidGasMass(textureRegion, x0, y0, x1, y1);
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdateSolidLiquidGasMass));
 				break;
 			case PropertyTextures.Property.WorldLight:
-				this.UpdateWorldLight(textureRegion, x0, y0, x1, y1);
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdateWorldLight));
 				break;
 			case PropertyTextures.Property.Temperature:
-				this.UpdateTemperature(textureRegion, x0, y0, x1, y1);
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdateTemperature));
 				break;
 			}
 			textureRegion.Unlock();
@@ -189,8 +201,6 @@ public class PropertyTextures : KMonoBehaviour
 		Shader.SetGlobalVector(this.WorldSizeID, new Vector4((float)Grid.WidthInCells, (float)Grid.HeightInCells, 1f / (float)Grid.WidthInCells, 1f / (float)Grid.HeightInCells));
 		Shader.SetGlobalVector(this.PropTexWsToCsID, new Vector4(0f, 0f, 1f, 1f));
 		Shader.SetGlobalVector(this.PropTexCsToWsID, new Vector4(0f, 0f, 1f, 1f));
-		Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.position.z));
-		Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.position.z));
 		int num;
 		int num2;
 		int num3;
@@ -628,7 +638,7 @@ public class PropertyTextures : KMonoBehaviour
 			simProperty = PropertyTextures.Property.FogOfWar,
 			textureFormat = TextureFormat.Alpha8,
 			filterMode = FilterMode.Bilinear,
-			updateEveryFrame = false,
+			updateEveryFrame = true,
 			updatedExternally = false,
 			blend = false,
 			blendSpeed = 0f
@@ -677,6 +687,8 @@ public class PropertyTextures : KMonoBehaviour
 
 	private List<PropertyTextures.TextureProperties> allTextureProperties = new List<PropertyTextures.TextureProperties>();
 
+	private List<PropertyTextures.WorkItem> workItems = new List<PropertyTextures.WorkItem>();
+
 	public enum Property
 	{
 		StateChange,
@@ -710,5 +722,37 @@ public class PropertyTextures : KMonoBehaviour
 		public float blendSpeed;
 
 		public string texturePropertyName;
+	}
+
+	private struct WorkItem : IWorkItem<object>
+	{
+		public WorkItem(TextureRegion texture_region, int x0, int y0, int x1, int y1, PropertyTextures.WorkItem.Callback update_texture_cb)
+		{
+			this.textureRegion = texture_region;
+			this.x0 = x0;
+			this.y0 = y0;
+			this.x1 = x1;
+			this.y1 = y1;
+			this.updateTextureCb = update_texture_cb;
+		}
+
+		public void Run(object shared_data)
+		{
+			this.updateTextureCb(this.textureRegion, this.x0, this.y0, this.x1, this.y1);
+		}
+
+		private int x0;
+
+		private int y0;
+
+		private int x1;
+
+		private int y1;
+
+		private TextureRegion textureRegion;
+
+		private PropertyTextures.WorkItem.Callback updateTextureCb;
+
+		public delegate void Callback(TextureRegion texture_region, int x0, int y0, int x1, int y1);
 	}
 }

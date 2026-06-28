@@ -5,28 +5,26 @@ public class GridVisibility : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
-		CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChange), false);
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		this.OnCellChange();
 	}
 
-	private void OnCellChange(int previous_cell, int new_cell)
+	private void OnCellChange()
 	{
 		if (base.gameObject.HasTag(GameTags.Dead))
 		{
 			return;
 		}
-		if (!Grid.Revealed[new_cell])
+		int num = Grid.PosToCell(this);
+		if (!Grid.Revealed[num])
 		{
-			int num;
 			int num2;
-			Grid.PosToXY(base.transform.position, out num, out num2);
-			GridVisibility.Reveal(num, num2, this.radius, this.innerRadius);
-			Grid.Revealed[new_cell] = true;
+			int num3;
+			Grid.PosToXY(base.transform.GetPosition(), out num2, out num3);
+			GridVisibility.Reveal(num2, num3, this.radius, this.innerRadius);
+			Grid.Revealed[num] = true;
 		}
-	}
-
-	private void Update()
-	{
-		FogOfWarMask.ClearMask(Grid.PosToCell(this));
+		FogOfWarMask.ClearMask(num);
 	}
 
 	public static void Reveal(int baseX, int baseY, float radius, float innerRadius)
@@ -56,7 +54,7 @@ public class GridVisibility : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		CellChangeMonitor.Instance.Remove(this, new Action<int, int>(this.OnCellChange), false);
+		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 	}
 
 	public float radius = 18f;

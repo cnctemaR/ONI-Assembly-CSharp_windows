@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class CheckboxTableColumn : TableColumn
 {
-	public CheckboxTableColumn(Action<MinionIdentity, GameObject> on_load_action, Func<MinionIdentity, GameObject, TableScreen.ResultValues> get_value_action, Action<GameObject> on_press_action, Action<GameObject, bool> set_value_action, Comparison<MinionIdentity> sort_comparer, Action<MinionIdentity, GameObject, ToolTip> on_tooltip, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip, Func<bool> revealed = null)
-		: base(on_load_action, sort_comparer, on_tooltip, on_sort_tooltip, revealed, 0f)
+	public CheckboxTableColumn(Action<MinionIdentity, GameObject> on_load_action, Func<MinionIdentity, GameObject, TableScreen.ResultValues> get_value_action, Action<GameObject> on_press_action, Action<GameObject, TableScreen.ResultValues> set_value_action, Comparison<MinionIdentity> sort_comparer, Action<MinionIdentity, GameObject, ToolTip> on_tooltip, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip, Func<bool> revealed = null)
+		: base(on_load_action, sort_comparer, on_tooltip, on_sort_tooltip, revealed, false, string.Empty)
 	{
 		this.get_value_action = get_value_action;
 		this.on_press_action = on_press_action;
@@ -18,10 +18,11 @@ public class CheckboxTableColumn : TableColumn
 		{
 			widget_go.GetComponent<ToolTip>().OnToolTip = () => this.GetTooltip(widget_go.GetComponent<ToolTip>());
 		}
-		widget_go.GetComponent<KToggle>().onClick += delegate
+		MultiToggle component = widget_go.GetComponent<MultiToggle>();
+		component.onClick = (global::System.Action)Delegate.Combine(component.onClick, new global::System.Action(delegate
 		{
 			this.on_press_action(widget_go);
-		};
+		}));
 		return widget_go;
 	}
 
@@ -32,10 +33,11 @@ public class CheckboxTableColumn : TableColumn
 		{
 			widget_go.GetComponent<ToolTip>().OnToolTip = () => this.GetTooltip(widget_go.GetComponent<ToolTip>());
 		}
-		widget_go.GetComponent<KToggle>().onClick += delegate
+		MultiToggle component = widget_go.GetComponent<MultiToggle>();
+		component.onClick = (global::System.Action)Delegate.Combine(component.onClick, new global::System.Action(delegate
 		{
 			this.on_press_action(widget_go);
-		};
+		}));
 		return widget_go;
 	}
 
@@ -74,7 +76,7 @@ public class CheckboxTableColumn : TableColumn
 
 	public Action<GameObject> on_press_action;
 
-	public Action<GameObject, bool> on_set_action;
+	public Action<GameObject, TableScreen.ResultValues> on_set_action;
 
 	public Func<MinionIdentity, GameObject, TableScreen.ResultValues> get_value_action;
 }

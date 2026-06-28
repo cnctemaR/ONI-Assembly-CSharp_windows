@@ -8,7 +8,7 @@ public class SneezeMonitor : GameStateMachine<SneezeMonitor, SneezeMonitor.Insta
 	{
 		default_state = this.idle;
 		this.Sneezy.idle.ScheduleGoTo(global::UnityEngine.Random.Range(45f, 90f), this.Sneezy.sneeze_pre);
-		this.Sneezy.sneeze_pre.ToggleScheduleCallback("Sneeze", 2f, delegate(SneezeMonitor.Instance instanceObject)
+		this.Sneezy.sneeze_pre.ToggleScheduleCallback("Sneeze", (SneezeMonitor.Instance smi) => 2f, delegate(SneezeMonitor.Instance instanceObject)
 		{
 			AcousticDisturbance.Emit(instanceObject.master.gameObject, 3);
 		}).ToggleChore((SneezeMonitor.Instance smi) => new EmoteChore(smi.master, Db.Get().ChoreTypes.EmoteHighPriority, "anim_sneeze_kanim", SneezeMonitor.SneezeAnims, null), this.Sneezy.sneeze_pst).ScheduleGoTo(5f, this.Sneezy.sneeze_pst);

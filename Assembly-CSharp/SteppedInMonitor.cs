@@ -6,22 +6,22 @@ public class SteppedInMonitor : GameStateMachine<SteppedInMonitor, SteppedInMoni
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.satisfied;
-		this.satisfied.Transition(this.wetFloor, (SteppedInMonitor.Instance smi) => smi.IsFloorWet()).Transition(this.wetBody, (SteppedInMonitor.Instance smi) => smi.IsSubmerged());
+		this.satisfied.Transition(this.wetFloor, (SteppedInMonitor.Instance smi) => smi.IsFloorWet(), UpdateRate.SIM_200ms).Transition(this.wetBody, (SteppedInMonitor.Instance smi) => smi.IsSubmerged(), UpdateRate.SIM_200ms);
 		this.wetFloor.Enter(delegate(SteppedInMonitor.Instance smi)
 		{
 			smi.GetWetFeet(null);
-		}).ToggleSchedulePeriodic("GetWetFeet", 2f, delegate(SteppedInMonitor.Instance smi)
+		}).Update("GetWetFeet", delegate(SteppedInMonitor.Instance smi, float dt)
 		{
 			smi.GetWetFeet(null);
-		}).Transition(this.satisfied, (SteppedInMonitor.Instance smi) => !smi.IsFloorWet())
-			.Transition(this.wetBody, (SteppedInMonitor.Instance smi) => smi.IsSubmerged());
+		}, UpdateRate.SIM_1000ms, false).Transition(this.satisfied, (SteppedInMonitor.Instance smi) => !smi.IsFloorWet(), UpdateRate.SIM_200ms)
+			.Transition(this.wetBody, (SteppedInMonitor.Instance smi) => smi.IsSubmerged(), UpdateRate.SIM_200ms);
 		this.wetBody.Enter(delegate(SteppedInMonitor.Instance smi)
 		{
 			smi.GetSoaked(null);
-		}).ToggleSchedulePeriodic("GetSoaked", 2f, delegate(SteppedInMonitor.Instance smi)
+		}).Update("GetSoaked", delegate(SteppedInMonitor.Instance smi, float dt)
 		{
 			smi.GetSoaked(null);
-		}).Transition(this.wetFloor, (SteppedInMonitor.Instance smi) => !smi.IsSubmerged());
+		}, UpdateRate.SIM_1000ms, false).Transition(this.wetFloor, (SteppedInMonitor.Instance smi) => !smi.IsSubmerged(), UpdateRate.SIM_200ms);
 	}
 
 	public GameStateMachine<SteppedInMonitor, SteppedInMonitor.Instance, IStateMachineTarget, object>.State satisfied;
@@ -35,36 +35,39 @@ public class SteppedInMonitor : GameStateMachine<SteppedInMonitor, SteppedInMoni
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
+			this.effects = base.GetComponent<Effects>();
 		}
 
 		public bool IsFloorWet()
 		{
-			int num = Grid.PosToCell(base.transform.position);
+			int num = Grid.PosToCell(base.transform.GetPosition());
 			return Grid.Element[num].IsLiquid;
 		}
 
 		public bool IsSubmerged()
 		{
-			int num = Grid.PosToCell(base.transform.position);
+			int num = Grid.PosToCell(base.transform.GetPosition());
 			int num2 = Grid.CellAbove(num);
 			return Grid.Element[num2].IsLiquid;
 		}
 
 		public void GetWetFeet(object data)
 		{
-			if (!base.smi.master.GetComponent<Effects>().HasEffect("SoakingWet"))
+			if (!this.effects.HasEffect("SoakingWet"))
 			{
-				base.smi.master.GetComponent<Effects>().Add("WetFeet", true);
+				this.effects.Add("WetFeet", true);
 			}
 		}
 
 		public void GetSoaked(object data)
 		{
-			if (base.smi.master.GetComponent<Effects>().HasEffect("WetFeet"))
+			if (this.effects.HasEffect("WetFeet"))
 			{
-				base.smi.master.GetComponent<Effects>().Remove("WetFeet");
+				this.effects.Remove("WetFeet");
 			}
-			base.smi.master.GetComponent<Effects>().Add("SoakingWet", true);
+			this.effects.Add("SoakingWet", true);
 		}
+
+		private Effects effects;
 	}
 }

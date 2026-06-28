@@ -26,6 +26,15 @@ namespace STRINGS
 				public static LocString CONTENTS_WITH_DISEASE = "\n  {0}";
 			}
 
+			public class CONVEYOR_CONTENTS
+			{
+				public static LocString EMPTY = "Empty";
+
+				public static LocString CONTENTS = "{0} of {1} at {2}";
+
+				public static LocString CONTENTS_WITH_DISEASE = "\n  {0}";
+			}
+
 			public class ASSIGNEDTO
 			{
 				public static LocString NAME = "Assigned to: {Assignee}";
@@ -455,6 +464,27 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This pump is not active";
 			}
 
+			public class NEEDSOLIDIN
+			{
+				public static LocString NAME = "No Conveyor Loader";
+
+				public static LocString TOOLTIP = "Material cannot be fed onto this Conveyor Rail system for transport" + UI.HORIZONTAL_BR_RULE + "Enter the Shipping Tab <color=#F44A47>[7]</color> of the Build Menu to build and connect a Conveyor Loader";
+			}
+
+			public class NEEDSOLIDOUT
+			{
+				public static LocString NAME = "No Conveyor Receptacle";
+
+				public static LocString TOOLTIP = "Material cannot be offloaded from this Conveyor system and will backup the rails" + UI.HORIZONTAL_BR_RULE + "Enter the Shipping Tab <color=#F44A47>[7]</color> of the Build Menu to build and connect a Conveyor Receptacle";
+			}
+
+			public class SOLIDPIPEOBSTRUCTED
+			{
+				public static LocString NAME = "Conveyor Rail Backup";
+
+				public static LocString TOOLTIP = "This Conveyor Rail cannot carry anymore material" + UI.HORIZONTAL_BR_RULE + "Remove material from the Conveyor Receptacle to free space for more objects";
+			}
+
 			public class NEEDPLANT
 			{
 				public static LocString NAME = "No Seeds";
@@ -478,9 +508,9 @@ namespace STRINGS
 
 			public class NOTENOUGHPOWER
 			{
-				public static LocString NAME = "Not Enough Power";
+				public static LocString NAME = "Insufficient Power";
 
-				public static LocString TOOLTIP = "Building will be useable once it has more stored charge";
+				public static LocString TOOLTIP = "This building does not have enough stored charge to run";
 			}
 
 			public class NEEDRESOURCE
@@ -505,11 +535,11 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Inapplicable Research";
 
-				public static LocString TOOLTIP = "This building cannot produce the correct research type for the selected research task";
+				public static LocString TOOLTIP = "This building cannot produce the correct research type for the current research focus";
 
 				public static LocString NOTIFICATION_NAME = "<style=\"research\">Research Center</style> idle";
 
-				public static LocString NOTIFICATION_TOOLTIP = "These buildings cannot produce the correct <style=\"research\">Research Type</style> for the selected <style=\"research\">Research Task</style>:";
+				public static LocString NOTIFICATION_TOOLTIP = "These buildings cannot produce the correct <style=\"research\">Research Type</style> for the selected <style=\"research\">Research Focus</style>:";
 			}
 
 			public class NOAVAILABLESEED
@@ -577,49 +607,49 @@ namespace STRINGS
 
 			public class PENDINGDECONSTRUCTION
 			{
-				public static LocString NAME = "Deconstruction Task Assigned";
+				public static LocString NAME = "Deconstruction Errand Assigned";
 
 				public static LocString TOOLTIP = "Waiting for a Duplicant to deconstruct this building";
 			}
 
 			public class PENDINGFISH
 			{
-				public static LocString NAME = "Fishing Task Assigned";
+				public static LocString NAME = "Fishing Errand Assigned";
 
 				public static LocString TOOLTIP = "Waiting for a Duplicant to fish";
 			}
 
 			public class PENDINGHARVEST
 			{
-				public static LocString NAME = "Harvest Task Assigned";
+				public static LocString NAME = "Harvest Errand Assigned";
 
 				public static LocString TOOLTIP = "Waiting for a Duplicant to harvest";
 			}
 
 			public class PENDINGUPROOT
 			{
-				public static LocString NAME = "Uproot Task Assigned";
+				public static LocString NAME = "Uproot Errand Assigned";
 
 				public static LocString TOOLTIP = "Waiting for a Duplicant to uproot";
 			}
 
 			public class PENDINGREPAIR
 			{
-				public static LocString NAME = "Repair Task Assigned";
+				public static LocString NAME = "Repair Errand Assigned";
 
-				public static LocString TOOLTIP = "Waiting for a Duplicant to repair\nReceived damage {DamageInfo}";
+				public static LocString TOOLTIP = "Waiting for a Duplicant to repair\nReceived damage from {DamageInfo}";
 			}
 
 			public class PENDINGSWITCHTOGGLE
 			{
-				public static LocString NAME = "Toggle Switch Task Assigned";
+				public static LocString NAME = "Change Setting Errand Assigned";
 
-				public static LocString TOOLTIP = "Waiting for a Duplicant to toggle switch";
+				public static LocString TOOLTIP = "Waiting for a Duplicant to change setting";
 			}
 
 			public class PENDINGWORK
 			{
-				public static LocString NAME = "Work Task Assigned";
+				public static LocString NAME = "Errand Assigned";
 
 				public static LocString TOOLTIP = "Waiting for a Duplicant to operate this building";
 			}
@@ -675,7 +705,7 @@ namespace STRINGS
 
 			public class UNDERCONSTRUCTIONNOWORKER
 			{
-				public static LocString NAME = "Construction Task Assigned";
+				public static LocString NAME = "Construction Errand Assigned";
 
 				public static LocString TOOLTIP = "Waiting for a Duplicant to build";
 			}
@@ -735,6 +765,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This pipe is delivering {Contents}";
 			}
 
+			public class CONVEYOR
+			{
+				public static LocString NAME = "Contents: {Contents}";
+
+				public static LocString TOOLTIP = "This conveyor is delivering {Contents}";
+			}
+
 			public class FABRICATOREMPTY
 			{
 				public static LocString NAME = "No Fabrications Queued";
@@ -765,11 +802,11 @@ namespace STRINGS
 
 			public class NORESEARCHSELECTED
 			{
-				public static LocString NAME = "No Research Task Selected";
+				public static LocString NAME = "No Research Focus Selected";
 
 				public static LocString TOOLTIP = "Open the <color=#833A5FFF>Research Tree</color> [R] to select a new <style=\"research\">Research</style> project";
 
-				public static LocString NOTIFICATION_NAME = "No <style=\"research\">Research Task</style> selected";
+				public static LocString NOTIFICATION_NAME = "No <style=\"research\">Research Focus</style> selected";
 
 				public static LocString NOTIFICATION_TOOLTIP = "Open the <color=#833A5FFF>Research Tree</color> [R] to select a new <style=\"research\">Research</style> project";
 			}
@@ -779,6 +816,13 @@ namespace STRINGS
 				public static LocString NAME = "Current <style=\"research\">Research</style>: {Tech}";
 
 				public static LocString TOOLTIP = "Research produced at this station will be invested in {Tech}";
+			}
+
+			public class TINKERING
+			{
+				public static LocString NAME = "Tinkering: {0}";
+
+				public static LocString TOOLTIP = "The duplicant working this station is creating {0} for use elsewhere.";
 			}
 
 			public class VALVE
@@ -1070,20 +1114,6 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This building is working as intended";
 			}
 
-			public class NEEDSREGION
-			{
-				public static LocString NAME = "Missing Region";
-
-				public static LocString TOOLTIP = "This building must be inside a {0} region";
-			}
-
-			public class NEEDSVALIDREGION
-			{
-				public static LocString NAME = "Valid Region Required";
-
-				public static LocString TOOLTIP = "This building region has not yet met its requirements";
-			}
-
 			public class GRAVEEMPTY
 			{
 				public static LocString NAME = "Empty";
@@ -1229,25 +1259,25 @@ namespace STRINGS
 				}
 			}
 
-			public class REQUIRESMINER
+			public class REQUIRESROLEPERK
 			{
-				public static LocString NAME = "Requires Miner";
+				public static LocString NAME = "Awaiting Specialist";
 
-				public static LocString TOOLTIP = "Only Duplicants assigned to one of the Miner roles can dig this tile";
+				public static LocString TOOLTIP = "Only a Duplicant employed in one of the following jobs can complete this errand:\n{Roles}";
 			}
 
-			public class REQUIRESRESEARCHER
+			public class DIGREQUIRESROLEPERK
 			{
-				public static LocString NAME = "Requires Researcher";
+				public static LocString NAME = "Awaiting Miner";
 
-				public static LocString TOOLTIP = "Only Duplicants assigned to one of the Researcher roles can work this building";
+				public static LocString TOOLTIP = "Only a Duplicant employed in one of the following jobs can complete this errand:\n{Roles}";
 			}
 
-			public class REQUIRESROLE
+			public class COLONYLACKSREQUIREDROLEPERK
 			{
-				public static LocString NAME = "Requires {Role}";
+				public static LocString NAME = "Colony Lacks {Roles}s";
 
-				public static LocString TOOLTIP = "Only Duplicants assigned to the {Role} role can work this building";
+				public static LocString TOOLTIP = "Open the Jobs Panel <color=#F44A47><b>(J)</b></color> and assign a Duplicant to the {Roles} position to use this building";
 			}
 
 			public class SWITCHSTATUSACTIVE
@@ -1278,25 +1308,46 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Recuperating Duplicants must have toilets available within {0} cells";
 			}
 
+			public class TURBINE_BLOCKED_INPUT
+			{
+				public static LocString NAME = "Input Blocked";
+
+				public static LocString TOOLTIP = "A blocked input has stopped this turbine from functioning";
+			}
+
 			public class TURBINE_BLOCKED_OUTPUT
 			{
 				public static LocString NAME = "Output Blocked";
 
-				public static LocString TOOLTIP = "This turbine's output is blocked";
+				public static LocString TOOLTIP = "A blocked output has stopped this turbine from functioning";
 			}
 
 			public class TURBINE_INSUFFICIENT_MASS
 			{
-				public static LocString NAME = "Underpowered";
+				public static LocString NAME = "Underpressure";
 
-				public static LocString TOOLTIP = "This turbine requires {MASS} of {ELEMENT} at {TEMPERATURE} to run";
+				public static LocString TOOLTIP = "This turbine must have {MASS} more {ELEMENT} below it than above it in order to run";
+			}
+
+			public class TURBINE_INSUFFICIENT_TEMPERATURE
+			{
+				public static LocString NAME = "Too Cold";
+
+				public static LocString TOOLTIP = "The {ELEMENT} used to power the turbine must be at least {TEMPERATURE}";
 			}
 
 			public class TURBINE_SPINNING_UP
 			{
-				public static LocString NAME = "Warming Up";
+				public static LocString NAME = "Spinning Up";
 
-				public static LocString TOOLTIP = "The turbine is spinning up";
+				public static LocString TOOLTIP = "The turbine needs more time to spin up";
+			}
+
+			public class TURBINE_ACTIVE
+			{
+				public static LocString NAME = "Active";
+
+				public static LocString TOOLTIP = "This turbine is running at {0}RPM";
 			}
 
 			public class WELL_PRESSURIZING
@@ -1311,6 +1362,20 @@ namespace STRINGS
 				public static LocString NAME = "Overpressure";
 
 				public static LocString TOOLTIP = "This well can no longer function due to excessive backpressure";
+			}
+
+			public class NOTINREQUIREDROOM
+			{
+				public static LocString NAME = "Outside of {0}";
+
+				public static LocString TOOLTIP = "This building must be built inside a {0} for full functionality\n\nOpen the Room Overlay <color=#F44A47>[F11]</color> to view full room status";
+			}
+
+			public class NOTINRECOMMENDEDROOM
+			{
+				public static LocString NAME = "Outside of {0}";
+
+				public static LocString TOOLTIP = "It is recommended to place this building inside a {0}\n\nOpen the Room Overlay <color=#F44A47>[F11]</color> to view full room status";
 			}
 
 			public class RELEASING_PRESSURE
@@ -1382,23 +1447,23 @@ namespace STRINGS
 
 			public class NOTUBECONNECTED
 			{
-				public static LocString NAME = "No Transit Tube Connected";
+				public static LocString NAME = "No Tube Connected";
 
-				public static LocString TOOLTIP = "A straight Transit Tube must be connected to the top of the launch rail for this building to function.";
+				public static LocString TOOLTIP = "The first section of tube extending from an Access must connect directly upward";
 			}
 
 			public class NOTUBEEXITS
 			{
-				public static LocString NAME = "No Valid Landing Spot";
+				public static LocString NAME = "No Landing Available";
 
-				public static LocString TOOLTIP = "Dupes can exit a transit tube if there is a spot to land within 2 tiles of the tube's end.";
+				public static LocString TOOLTIP = "Duplicants can only exit a tube when there is somewhere for them to land within two tiles";
 			}
 
 			public class STOREDCHARGE
 			{
-				public static LocString NAME = "Stored Charge: {0}/{1}";
+				public static LocString NAME = "Charge Available: {0}/{1}";
 
-				public static LocString TOOLTIP = "This building has stored {0} out of a maximum {1}. It will consume {2} per use.";
+				public static LocString TOOLTIP = "This building has {0} of stored energy\n\nIt consumes {2} per use";
 			}
 		}
 

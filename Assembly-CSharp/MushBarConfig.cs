@@ -33,7 +33,7 @@ public class MushBarConfig : IEntityConfig
 		GameObject gameObject = new GameObject();
 		gameObject.name = result.name + "Visualizer";
 		gameObject.SetActive(false);
-		gameObject.transform.localPosition = Vector3.zero;
+		gameObject.transform.SetLocalPosition(Vector3.zero);
 		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
 		kbatchedAnimController.SetAnims(component.GetAnims(), true);
 		kbatchedAnimController.initialAnim = "fabricating";

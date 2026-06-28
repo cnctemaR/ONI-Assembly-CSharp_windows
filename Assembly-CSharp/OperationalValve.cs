@@ -37,9 +37,10 @@ public class OperationalValve : ValveBase
 
 	public override void UpdateAnim()
 	{
+		float averageRate = Game.Instance.accumulators.GetAverageRate(this.flowAccumulator);
 		if (this.operational.IsOperational)
 		{
-			if (this.flowAccumulator.AvgRate > 0f)
+			if (averageRate > 0f)
 			{
 				this.controller.Play("on_flow", KAnim.PlayMode.Loop, 1f, 0f);
 			}
@@ -48,7 +49,7 @@ public class OperationalValve : ValveBase
 				this.controller.Play("on", KAnim.PlayMode.Once, 1f, 0f);
 			}
 		}
-		else if (this.flowAccumulator.AvgRate > 0f)
+		else if (averageRate > 0f)
 		{
 			this.controller.Play("off_flow", KAnim.PlayMode.Loop, 1f, 0f);
 		}

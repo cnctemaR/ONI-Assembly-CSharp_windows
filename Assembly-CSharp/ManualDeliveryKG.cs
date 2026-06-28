@@ -6,7 +6,7 @@ using UnityEngine;
 
 [SkipSaveFileSerialization]
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ManualDeliveryKG : KMonoBehaviour
+public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 {
 	public float Capacity
 	{
@@ -32,6 +32,10 @@ public class ManualDeliveryKG : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		if (!this.choreTypeIDHash.IsValid)
+		{
+			this.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
+		}
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		base.Subscribe(-111137758, new Action<object>(this.OnRefreshUserMenu));
 		if (this.storage != null)
@@ -76,7 +80,7 @@ public class ManualDeliveryKG : KMonoBehaviour
 		}
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		this.UpdateDeliveryState();
 	}
@@ -107,7 +111,8 @@ public class ManualDeliveryKG : KMonoBehaviour
 			{
 				this.fetchList.Cancel("Request Delivery");
 			}
-			this.fetchList = new FetchList2(this.storage);
+			ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.choreTypeIDHash);
+			this.fetchList = new FetchList2(this.storage, byHash, this.choreTags);
 			this.fetchList.ShowStatusItem = this.ShowStatusItem;
 			this.fetchList.MinimumAmount[this.requestedItemTag] = this.minimumMass;
 			this.fetchList.Add(new Tag[] { this.requestedItemTag }, null, fetchAmount, this.operationalRequirement);
@@ -223,6 +228,12 @@ public class ManualDeliveryKG : KMonoBehaviour
 
 	[SerializeField]
 	private bool paused;
+
+	[SerializeField]
+	public HashedString choreTypeIDHash;
+
+	[SerializeField]
+	public Tag[] choreTags;
 
 	[NonSerialized]
 	public bool ShowStatusItem = true;

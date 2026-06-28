@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
-using TUNING;
 using UnityEngine;
 
-public class Clinic : Ownable, IEffectDescriptor
+public class Clinic : Workable, IEffectDescriptor
 {
-	public Clinic()
+	protected override void OnPrefabInit()
 	{
+		base.OnPrefabInit();
 		this.showProgressBar = false;
-		base.slot = Db.Get().OwnableSlots.Clinic;
-		this.subSlots = new AssignableSlot[] { Db.Get().OwnableSlots.MedicalBed };
+		this.assignable.subSlots = new AssignableSlot[] { Db.Get().AssignableSlots.MedicalBed };
+		this.assignable.AddAutoassignPrecondition(new Func<MinionIdentity, bool>(this.CanAutoAssignTo));
 	}
 
 	protected override void OnSpawn()
@@ -22,6 +22,10 @@ public class Clinic : Ownable, IEffectDescriptor
 		base.SetWorkTime(float.PositiveInfinity);
 		this.clinicSMI = new Clinic.ClinicSM.Instance(this);
 		this.clinicSMI.StartSM();
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
 	}
 
 	protected override void OnCleanUp()
@@ -73,7 +77,7 @@ public class Clinic : Ownable, IEffectDescriptor
 
 	protected override void OnCompleteWork(Worker worker)
 	{
-		this.Unassign();
+		this.assignable.Unassign();
 		base.OnCompleteWork(worker);
 		Effects component = worker.GetComponent<Effects>();
 		for (int i = 0; i < Clinic.EffectsRemoved.Length; i++)
@@ -83,23 +87,7 @@ public class Clinic : Ownable, IEffectDescriptor
 		}
 	}
 
-	private void OnRegionChanged(Region new_region)
-	{
-		GameUtil.UpdateRegion(new_region, this, Db.Get().OwnableSlots.Clinic, global::TUNING.REGIONS.MedicalRegionTag);
-	}
-
-	private bool IsInMedicalRegion()
-	{
-		RequiresRegion component = base.GetComponent<RequiresRegion>();
-		if (component == null)
-		{
-			return true;
-		}
-		Region ownerRegion = component.OwnerRegion;
-		return ownerRegion != null && ownerRegion.RegionTag == global::TUNING.REGIONS.MedicalRegionTag;
-	}
-
-	public override bool CanAutoAssignTo(KMonoBehaviour worker)
+	private bool CanAutoAssignTo(MinionIdentity worker)
 	{
 		bool flag = false;
 		if (this.IsValidEffect(this.healthEffect))
@@ -143,33 +131,36 @@ public class Clinic : Ownable, IEffectDescriptor
 		}
 	}
 
-	public new List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
-		List<Descriptor> descriptors = base.GetDescriptors(def);
+		List<Descriptor> list = new List<Descriptor>();
 		if (this.IsValidEffect(this.healthEffect))
 		{
-			this.AddModifierDescriptions(descriptors, this.healthEffect, false);
+			this.AddModifierDescriptions(list, this.healthEffect, false);
 		}
 		if (this.diseaseEffect != this.healthEffect && this.IsValidEffect(this.diseaseEffect))
 		{
-			this.AddModifierDescriptions(descriptors, this.diseaseEffect, false);
+			this.AddModifierDescriptions(list, this.diseaseEffect, false);
 		}
 		if (this.AllowDoctoring())
 		{
 			Descriptor descriptor = default(Descriptor);
 			descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.DOCTORING, UI.BUILDINGEFFECTS.TOOLTIPS.DOCTORING, Descriptor.DescriptorType.Effect);
-			descriptors.Add(descriptor);
+			list.Add(descriptor);
 			if (this.IsValidEffect(this.doctoredHealthEffect))
 			{
-				this.AddModifierDescriptions(descriptors, this.doctoredHealthEffect, true);
+				this.AddModifierDescriptions(list, this.doctoredHealthEffect, true);
 			}
 			if (this.doctoredDiseaseEffect != this.doctoredHealthEffect && this.IsValidEffect(this.doctoredDiseaseEffect))
 			{
-				this.AddModifierDescriptions(descriptors, this.doctoredDiseaseEffect, true);
+				this.AddModifierDescriptions(list, this.doctoredDiseaseEffect, true);
 			}
 		}
-		return descriptors;
+		return list;
 	}
+
+	[MyCmpReq]
+	private Assignable assignable;
 
 	private static readonly string[] EffectsRemoved = new string[] { "SoreBack" };
 
@@ -204,45 +195,13 @@ public class Clinic : Ownable, IEffectDescriptor
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			base.serializable = false;
-			default_state = this.invalidRegion;
-			this.root.EventTransition(GameHashes.RegionChanged, this.invalidRegion, (Clinic.ClinicSM.Instance smi) => !smi.master.IsInMedicalRegion()).EventHandler(GameHashes.UpdateRoom, delegate(Clinic.ClinicSM.Instance smi)
-			{
-				smi.OnUpdateRoom(null);
-			}).Enter(delegate(Clinic.ClinicSM.Instance smi)
-			{
-				smi.OnUpdateRoom(null);
-			});
-			this.invalidRegion.EventTransition(GameHashes.RegionChanged, this.unoperational, (Clinic.ClinicSM.Instance smi) => smi.master.IsInMedicalRegion());
+			default_state = this.unoperational;
 			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (Clinic.ClinicSM.Instance smi) => smi.GetComponent<Operational>().IsOperational);
 			this.operational.DefaultState(this.operational.idle).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Clinic.ClinicSM.Instance smi) => !smi.master.GetComponent<Operational>().IsOperational).EventTransition(GameHashes.AssigneeChanged, this.unoperational, null)
-				.ToggleRecurringChore(delegate(Clinic.ClinicSM.Instance smi)
-				{
-					ChoreType heal = Db.Get().ChoreTypes.Heal;
-					Clinic master = smi.master;
-					Tag medicalRegionTag = global::TUNING.REGIONS.MedicalRegionTag;
-					return new WorkChore<Clinic>(heal, master, null, true, null, null, null, true, null, true, medicalRegionTag, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
-				}, (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.healthEffect))
-				.ToggleRecurringChore(delegate(Clinic.ClinicSM.Instance smi)
-				{
-					ChoreType healCritical = Db.Get().ChoreTypes.HealCritical;
-					Clinic master2 = smi.master;
-					Tag medicalRegionTag2 = global::TUNING.REGIONS.MedicalRegionTag;
-					return new WorkChore<Clinic>(healCritical, master2, null, true, null, null, null, true, null, true, medicalRegionTag2, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
-				}, (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.healthEffect))
-				.ToggleRecurringChore(delegate(Clinic.ClinicSM.Instance smi)
-				{
-					ChoreType restDueToDisease = Db.Get().ChoreTypes.RestDueToDisease;
-					Clinic master3 = smi.master;
-					Tag medicalRegionTag3 = global::TUNING.REGIONS.MedicalRegionTag;
-					return new WorkChore<Clinic>(restDueToDisease, master3, null, true, null, null, null, true, null, true, medicalRegionTag3, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
-				}, (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.diseaseEffect))
-				.ToggleRecurringChore(delegate(Clinic.ClinicSM.Instance smi)
-				{
-					ChoreType sleepDueToDisease = Db.Get().ChoreTypes.SleepDueToDisease;
-					Clinic master4 = smi.master;
-					Tag medicalRegionTag4 = global::TUNING.REGIONS.MedicalRegionTag;
-					return new WorkChore<Clinic>(sleepDueToDisease, master4, null, true, null, null, null, true, null, true, medicalRegionTag4, null, false, true, false, PriorityScreen.PriorityClass.basic, int.MaxValue);
-				}, (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.diseaseEffect));
+				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.Heal, smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.healthEffect))
+				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.HealCritical, smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.healthEffect))
+				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.RestDueToDisease, smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.diseaseEffect))
+				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.SleepDueToDisease, smi.master, null, null, true, null, null, null, true, null, true, null, false, true, false, PriorityScreen.PriorityClass.basic, int.MaxValue, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.diseaseEffect));
 			this.operational.idle.WorkableStartTransition((Clinic.ClinicSM.Instance smi) => smi.master, this.operational.healing);
 			this.operational.healing.DefaultState(this.operational.healing.undoctored).WorkableStopTransition((Clinic.ClinicSM.Instance smi) => smi.GetComponent<Clinic>(), this.operational.idle).Enter(delegate(Clinic.ClinicSM.Instance smi)
 			{
@@ -294,12 +253,14 @@ public class Clinic : Ownable, IEffectDescriptor
 					EffectInstance effectInstance2 = smi.StartEffect(smi.master.doctoredDiseaseEffect, true);
 					if (effectInstance2 != null)
 					{
-						effectInstance2.startTime = effectInstance.startTime;
+						float num = effectInstance.effect.duration - effectInstance.timeRemaining;
+						effectInstance2.timeRemaining = effectInstance2.effect.duration - num;
 					}
 					EffectInstance effectInstance3 = smi.StartEffect(smi.master.doctoredHealthEffect, true);
 					if (effectInstance3 != null)
 					{
-						effectInstance3.startTime = effectInstance.startTime;
+						float num2 = effectInstance.effect.duration - effectInstance.timeRemaining;
+						effectInstance3.timeRemaining = effectInstance3.effect.duration - num2;
 					}
 					component.Remove(smi.master.doctoredPlaceholderEffect);
 				}
@@ -307,18 +268,18 @@ public class Clinic : Ownable, IEffectDescriptor
 			{
 				Worker worker2 = smi.master.worker;
 				Effects component2 = worker2.GetComponent<Effects>();
-				float num = smi.master.doctorVisitInterval;
+				float num3 = smi.master.doctorVisitInterval;
 				if (smi.HasEffect(smi.master.doctoredHealthEffect))
 				{
 					EffectInstance effectInstance4 = component2.Get(smi.master.doctoredHealthEffect);
-					num = Mathf.Min(num, effectInstance4.GetTimeRemaining());
+					num3 = Mathf.Min(num3, effectInstance4.GetTimeRemaining());
 				}
 				if (smi.HasEffect(smi.master.doctoredDiseaseEffect))
 				{
 					EffectInstance effectInstance4 = component2.Get(smi.master.doctoredDiseaseEffect);
-					num = Mathf.Min(num, effectInstance4.GetTimeRemaining());
+					num3 = Mathf.Min(num3, effectInstance4.GetTimeRemaining());
 				}
-				return num;
+				return num3;
 			}, this.operational.healing.undoctored).Exit(delegate(Clinic.ClinicSM.Instance smi)
 			{
 				Effects component3 = smi.master.worker.GetComponent<Effects>();
@@ -330,7 +291,7 @@ public class Clinic : Ownable, IEffectDescriptor
 						effectInstance5 = component3.Get(smi.master.doctoredHealthEffect);
 					}
 					EffectInstance effectInstance6 = smi.StartEffect(smi.master.doctoredPlaceholderEffect, true);
-					effectInstance6.startTime = effectInstance5.startTime;
+					effectInstance6.timeRemaining = effectInstance6.effect.duration - (effectInstance5.effect.duration - effectInstance5.timeRemaining);
 					component3.Remove(smi.master.doctoredDiseaseEffect);
 					component3.Remove(smi.master.doctoredHealthEffect);
 				}
@@ -340,8 +301,6 @@ public class Clinic : Ownable, IEffectDescriptor
 		public GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, Clinic, object>.State unoperational;
 
 		public Clinic.ClinicSM.OperationalStates operational;
-
-		public GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, Clinic, object>.State invalidRegion;
 
 		public class OperationalStates : GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, Clinic, object>.State
 		{
@@ -370,7 +329,7 @@ public class Clinic : Ownable, IEffectDescriptor
 			{
 				if (base.master.IsValidEffect(base.master.doctoredHealthEffect) || base.master.IsValidEffect(base.master.doctoredDiseaseEffect))
 				{
-					this.doctorChore = new WorkChore<DoctorChore>(Db.Get().ChoreTypes.Doctor, base.smi.master, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+					this.doctorChore = new WorkChore<DoctorChore>(Db.Get().ChoreTypes.Doctor, base.smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, true);
 					WorkChore<DoctorChore> workChore = this.doctorChore;
 					workChore.onComplete = (Action<Chore>)Delegate.Combine(workChore.onComplete, new Action<Chore>(delegate(Chore chore)
 					{
@@ -385,19 +344,6 @@ public class Clinic : Ownable, IEffectDescriptor
 				{
 					this.doctorChore.Cancel("StopDoctorChore");
 					this.doctorChore = null;
-				}
-			}
-
-			public void OnUpdateRoom(object data = null)
-			{
-				Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(base.GetComponent<BuildingComplete>());
-				if (roomOfBuilding != null && RoomTypes.GetRoomType(roomOfBuilding).category == RoomTypes.TypeCategories["Hospital"])
-				{
-					base.smi.gameObject.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ClinicOutsideHospital, true);
-				}
-				else
-				{
-					base.smi.gameObject.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ClinicOutsideHospital, null);
 				}
 			}
 

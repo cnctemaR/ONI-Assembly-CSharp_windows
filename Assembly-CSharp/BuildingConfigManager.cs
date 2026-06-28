@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using UnityEngine;
 
@@ -14,8 +15,6 @@ public class BuildingConfigManager : KMonoBehaviour
 		this.baseTemplate.AddComponent<Modifiers>();
 		this.baseTemplate.AddComponent<PrimaryElement>();
 		this.baseTemplate.AddComponent<BuildingComplete>();
-		this.baseTemplate.AddComponent<ChoreProvider>();
-		this.baseTemplate.AddComponent<Notifier>();
 		this.baseTemplate.AddComponent<StateMachineController>();
 		this.baseTemplate.AddComponent<Deconstructable>();
 		this.baseTemplate.AddComponent<UserMenu>();
@@ -25,8 +24,13 @@ public class BuildingConfigManager : KMonoBehaviour
 		this.baseTemplate.AddComponent<DecorProvider>();
 		this.baseTemplate.AddComponent<Operational>();
 		this.baseTemplate.AddComponent<BuildingEnabledButton>();
-		this.baseTemplate.AddComponent<RequiresFoundation>();
 		this.baseTemplate.AddComponent<Prioritizable>();
+		this.defaultBuildingCompleteKComponents.Add(typeof(RequiresFoundation));
+	}
+
+	public static string GetUnderConstructionName(string name)
+	{
+		return name + "UnderConstruction";
 	}
 
 	public void RegisterBuilding(IBuildingConfig config)
@@ -38,7 +42,7 @@ public class BuildingConfigManager : KMonoBehaviour
 		gameObject.GetComponent<Building>().Def = buildingDef;
 		gameObject.GetComponent<OccupyArea>().OccupiedCellsOffsets = buildingDef.PlacementOffsets;
 		buildingDef.BuildingTemplate = gameObject;
-		config.ConfigureBuildingTemplate(gameObject);
+		config.ConfigureBuildingTemplate(gameObject, buildingDef.Tag);
 		buildingDef.BuildingComplete = BuildingLoader.Instance.CreateBuildingComplete(buildingDef);
 		bool flag = true;
 		for (int i = 0; i < this.NonBuildableBuildings.Length; i++)
@@ -52,8 +56,7 @@ public class BuildingConfigManager : KMonoBehaviour
 		if (flag)
 		{
 			buildingDef.BuildingUnderConstruction = BuildingLoader.Instance.CreateBuildingUnderConstruction(buildingDef, false);
-			GameObject buildingUnderConstruction = buildingDef.BuildingUnderConstruction;
-			buildingUnderConstruction.name += "UnderConstruction";
+			buildingDef.BuildingUnderConstruction.name = BuildingConfigManager.GetUnderConstructionName(buildingDef.BuildingUnderConstruction.name);
 			buildingDef.BuildingUnderRelocation = BuildingLoader.Instance.CreateBuildingUnderConstruction(buildingDef, true);
 			GameObject buildingUnderRelocation = buildingDef.BuildingUnderRelocation;
 			buildingUnderRelocation.name += "UnderRelocation";
@@ -74,9 +77,93 @@ public class BuildingConfigManager : KMonoBehaviour
 		Assets.AddBuildingDef(buildingDef);
 	}
 
+	public void IgnoreDefaultKComponent(Type type_to_ignore, Tag building_tag)
+	{
+		HashSet<Tag> hashSet;
+		if (!this.ignoredDefaultKComponents.TryGetValue(type_to_ignore, out hashSet))
+		{
+			hashSet = new HashSet<Tag>();
+			this.ignoredDefaultKComponents[type_to_ignore] = hashSet;
+		}
+		hashSet.Add(building_tag);
+	}
+
+	private bool IsIgnoredDefaultKComponent(Tag building_tag, Type type)
+	{
+		bool flag = false;
+		HashSet<Tag> hashSet;
+		if (this.ignoredDefaultKComponents.TryGetValue(type, out hashSet) && hashSet.Contains(building_tag))
+		{
+			flag = true;
+		}
+		return flag;
+	}
+
+	public void AddBuildingCompleteKComponents(GameObject go, Tag prefab_tag)
+	{
+		foreach (Type type in this.defaultBuildingCompleteKComponents)
+		{
+			if (!this.IsIgnoredDefaultKComponent(prefab_tag, type))
+			{
+				GameComps.GetKComponentManager(type).Add(go);
+			}
+		}
+		HashSet<Type> hashSet;
+		if (this.buildingCompleteKComponents.TryGetValue(prefab_tag, out hashSet))
+		{
+			foreach (Type type2 in hashSet)
+			{
+				GameComps.GetKComponentManager(type2).Add(go);
+			}
+		}
+	}
+
+	public void DestroyBuildingCompleteKComponents(GameObject go, Tag prefab_tag)
+	{
+		foreach (Type type in this.defaultBuildingCompleteKComponents)
+		{
+			if (!this.IsIgnoredDefaultKComponent(prefab_tag, type))
+			{
+				GameComps.GetKComponentManager(type).Remove(go);
+			}
+		}
+		HashSet<Type> hashSet;
+		if (this.buildingCompleteKComponents.TryGetValue(prefab_tag, out hashSet))
+		{
+			foreach (Type type2 in hashSet)
+			{
+				GameComps.GetKComponentManager(type2).Remove(go);
+			}
+		}
+	}
+
+	public void AddDefaultBuildingCompleteKComponent(Type kcomponent_type)
+	{
+		this.defaultKComponents.Add(kcomponent_type);
+	}
+
+	public void AddBuildingCompleteKComponent(Tag prefab_tag, Type kcomponent_type)
+	{
+		HashSet<Type> hashSet;
+		if (!this.buildingCompleteKComponents.TryGetValue(prefab_tag, out hashSet))
+		{
+			hashSet = new HashSet<Type>();
+			this.buildingCompleteKComponents[prefab_tag] = hashSet;
+		}
+		hashSet.Add(kcomponent_type);
+	}
+
 	public static BuildingConfigManager Instance;
 
 	private GameObject baseTemplate;
 
 	private string[] NonBuildableBuildings = new string[] { "Headquarters", "POIBunkerExteriorDoor" };
+
+	private HashSet<Type> defaultKComponents = new HashSet<Type>();
+
+	private HashSet<Type> defaultBuildingCompleteKComponents = new HashSet<Type>();
+
+	private Dictionary<Type, HashSet<Tag>> ignoredDefaultKComponents = new Dictionary<Type, HashSet<Tag>>();
+
+	private Dictionary<Tag, HashSet<Type>> buildingCompleteKComponents = new Dictionary<Tag, HashSet<Type>>();
 }

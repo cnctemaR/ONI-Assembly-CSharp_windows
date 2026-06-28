@@ -8,8 +8,16 @@ public class MinionStartingStats
 {
 	public MinionStartingStats(bool is_starter_minion)
 	{
-		int num = global::UnityEngine.Random.Range(0, Db.Get().Personalities.Count);
-		this.personality = Db.Get().Personalities[num];
+		if (is_starter_minion)
+		{
+			int num = global::UnityEngine.Random.Range(0, 32);
+			this.personality = Db.Get().Personalities[num];
+		}
+		else
+		{
+			int num2 = global::UnityEngine.Random.Range(0, 35);
+			this.personality = Db.Get().Personalities[num2];
+		}
 		this.voiceIdx = global::UnityEngine.Random.Range(0, 4);
 		this.Name = this.personality.Name;
 		this.NameStringKey = this.personality.nameStringKey;
@@ -21,91 +29,75 @@ public class MinionStartingStats
 				list.Add(race);
 			}
 		}
-		int num2 = global::UnityEngine.Random.Range(0, list.Count);
-		this.Race = list[num2];
+		int num3 = global::UnityEngine.Random.Range(0, list.Count);
+		this.Race = list[num3];
 		Trait trait = Db.Get().traits.TryGet(this.Race.Id + "BaseTrait");
 		if (trait != null)
 		{
 			this.Traits.Add(trait);
 		}
 		List<ChoreGroup> list2 = new List<ChoreGroup>();
-		int num3 = this.GenerateTraits(is_starter_minion, list2);
-		this.GenerateAttributes(num3, list2);
+		this.GenerateAptitudes();
+		int num4 = this.GenerateTraits(is_starter_minion, list2);
+		this.GenerateAttributes(num4, list2);
+		KCompBuilder.BodyData bodyData = MinionStartingStats.CreateBodyData(this.personality);
 		foreach (AccessorySlot accessorySlot in Db.Get().AccessorySlots)
 		{
 			if (accessorySlot.accessories.Count != 0)
 			{
-				int num4 = 0;
+				Accessory accessory = null;
 				if (accessorySlot == Db.Get().AccessorySlots.HeadShape)
 				{
-					num4 = this.personality.headShape;
-					if (num4 > accessorySlot.accessories.Count - 1)
+					accessory = accessorySlot.Lookup(bodyData.headShape);
+					if (accessory == null)
 					{
-						global::Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id), null);
-						num4 = 0;
 						this.personality.headShape = 0;
 					}
 				}
 				else if (accessorySlot == Db.Get().AccessorySlots.Mouth)
 				{
-					num4 = this.personality.mouth;
-					if (num4 > accessorySlot.accessories.Count - 1)
+					accessory = accessorySlot.Lookup(bodyData.mouth);
+					if (accessory == null)
 					{
-						global::Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id), null);
-						num4 = 0;
 						this.personality.mouth = 0;
-					}
-				}
-				else if (accessorySlot == Db.Get().AccessorySlots.Neck)
-				{
-					num4 = this.personality.neck;
-					if (num4 > accessorySlot.accessories.Count - 1)
-					{
-						global::Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id), null);
-						num4 = 0;
-						this.personality.neck = 0;
 					}
 				}
 				else if (accessorySlot == Db.Get().AccessorySlots.Eyes)
 				{
-					num4 = this.personality.eyes;
-					if (num4 > accessorySlot.accessories.Count - 1)
+					accessory = accessorySlot.Lookup(bodyData.eyes);
+					if (accessory == null)
 					{
-						global::Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id), null);
-						num4 = 0;
 						this.personality.eyes = 0;
 					}
 				}
 				else if (accessorySlot == Db.Get().AccessorySlots.Hair)
 				{
-					num4 = this.personality.hair;
-					if (num4 > accessorySlot.accessories.Count - 1)
+					accessory = accessorySlot.Lookup(bodyData.hair);
+					if (accessory == null)
 					{
-						global::Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id), null);
-						num4 = 0;
 						this.personality.hair = 0;
 					}
 				}
-				else if (accessorySlot == Db.Get().AccessorySlots.Body || accessorySlot == Db.Get().AccessorySlots.Arm)
+				else if (accessorySlot == Db.Get().AccessorySlots.HatHair)
 				{
-					num4 = this.personality.body;
-					if (num4 > accessorySlot.accessories.Count - 1)
+					accessory = accessorySlot.Lookup(bodyData.hatHair);
+				}
+				else if (accessorySlot == Db.Get().AccessorySlots.Body)
+				{
+					accessory = accessorySlot.Lookup(bodyData.body);
+					if (accessory == null)
 					{
-						global::Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id), null);
-						num4 = 0;
 						this.personality.body = 0;
 					}
 				}
-				if (num4 == -1)
+				else if (accessorySlot == Db.Get().AccessorySlots.Arm)
 				{
-					num4 = global::UnityEngine.Random.Range(0, accessorySlot.accessories.Count);
+					accessory = accessorySlot.Lookup(bodyData.arms);
 				}
-				if (num4 > accessorySlot.accessories.Count - 1)
+				if (accessory == null)
 				{
-					global::Debug.LogWarning(string.Format("Invalid index {0} for accessory slot {1}", num4, accessorySlot.Id), null);
-					num4 = 0;
+					accessory = accessorySlot.accessories[0];
 				}
-				Accessory accessory = accessorySlot.accessories[num4];
 				this.accessories.Add(accessory);
 			}
 		}
@@ -143,18 +135,41 @@ public class MinionStartingStats
 			{
 				if (!selectedTraits.Contains(traitVal.id))
 				{
-					if (traitVal.mutuallyExclusiveTraits != null)
+					if (traitVal.requiredNonPositiveAptitudes != null)
 					{
 						bool flag2 = false;
-						foreach (string text in selectedTraits)
+						foreach (KeyValuePair<HashedString, float> keyValuePair in this.roleAptitudes)
 						{
-							flag2 = traitVal.mutuallyExclusiveTraits.Contains(text);
 							if (flag2)
 							{
 								break;
 							}
+							foreach (HashedString hashedString in traitVal.requiredNonPositiveAptitudes)
+							{
+								if (hashedString == keyValuePair.Key && keyValuePair.Value > 0f)
+								{
+									flag2 = true;
+									break;
+								}
+							}
 						}
 						if (flag2)
+						{
+							continue;
+						}
+					}
+					if (traitVal.mutuallyExclusiveTraits != null)
+					{
+						bool flag3 = false;
+						foreach (string text in selectedTraits)
+						{
+							flag3 = traitVal.mutuallyExclusiveTraits.Contains(text);
+							if (flag3)
+							{
+								break;
+							}
+						}
+						if (flag3)
 						{
 							continue;
 						}
@@ -203,6 +218,23 @@ public class MinionStartingStats
 			}
 		}
 		return statDelta;
+	}
+
+	private void GenerateAptitudes()
+	{
+		int num = global::UnityEngine.Random.Range(1, 4);
+		for (int i = 0; i < num; i++)
+		{
+			RoleConfig random = Game.Instance.roleManager.RolesConfigs.GetRandom<RoleConfig>();
+			if (random.id != "NoRole" && !this.roleAptitudes.ContainsKey(random.roleGroup))
+			{
+				this.roleAptitudes.Add(random.roleGroup, 1f);
+			}
+			else if (num < this.roleAptitudes.Count)
+			{
+				i--;
+			}
+		}
 	}
 
 	private void GenerateAttributes(int pointsDelta, List<ChoreGroup> disabled_chore_groups)
@@ -270,7 +302,7 @@ public class MinionStartingStats
 		}
 		foreach (string text4 in DUPLICANTSTATS.ROLLED_ATTRIBUTES)
 		{
-			this.StartingLevels[text4] = Mathf.RoundToInt(Mathf.Pow(global::UnityEngine.Random.value, 4f) * 10f);
+			this.StartingLevels[text4] = Mathf.RoundToInt(Mathf.Pow(global::UnityEngine.Random.value, DUPLICANTSTATS.ROLLED_ATTRIBUTE_POWER) * (float)DUPLICANTSTATS.ROLLED_ATTRIBUTE_MAX);
 		}
 	}
 
@@ -281,6 +313,7 @@ public class MinionStartingStats
 		component.nameStringKey = this.NameStringKey;
 		this.ApplyTraits(go);
 		this.ApplyRace(go);
+		this.ApplyAptitudes(go);
 		this.ApplyAccessories(go);
 		this.ApplyExperience(go);
 	}
@@ -306,14 +339,33 @@ public class MinionStartingStats
 	{
 		MinionIdentity component = go.GetComponent<MinionIdentity>();
 		component.voiceIdx = this.voiceIdx;
-		KCompBuilder.BodyData bodyData = default(KCompBuilder.BodyData);
-		bodyData.eyes = this.personality.eyes;
-		bodyData.hair = this.personality.hair;
-		bodyData.headShape = this.personality.headShape;
-		bodyData.mouth = this.personality.mouth;
-		bodyData.neck = this.personality.neck;
-		bodyData.arms = (bodyData.body = this.personality.body);
+		KCompBuilder.BodyData bodyData = MinionStartingStats.CreateBodyData(this.personality);
 		MinionStartingStats.ApplyRace(go, this.Race, this.BodyType, bodyData);
+	}
+
+	public static KCompBuilder.BodyData CreateBodyData(Personality p)
+	{
+		return new KCompBuilder.BodyData
+		{
+			eyes = HashCache.Get().Add(string.Format("eyes_{0:000}", p.eyes)),
+			hair = HashCache.Get().Add(string.Format("hair_{0:000}", p.hair)),
+			headShape = HashCache.Get().Add(string.Format("headshape_{0:000}", p.headShape)),
+			mouth = HashCache.Get().Add(string.Format("mouth_{0:000}", p.mouth)),
+			neck = HashCache.Get().Add(string.Format("neck_{0:000}", p.neck)),
+			arms = HashCache.Get().Add(string.Format("arm_{0:000}", p.body)),
+			body = HashCache.Get().Add(string.Format("body_{0:000}", p.body)),
+			hat = HashedString.Invalid,
+			hatHair = HashCache.Get().Add(string.Format("hat_hair_{0:000}", p.hair))
+		};
+	}
+
+	public void ApplyAptitudes(GameObject go)
+	{
+		MinionResume component = go.GetComponent<MinionResume>();
+		foreach (KeyValuePair<HashedString, float> keyValuePair in this.roleAptitudes)
+		{
+			component.AddAptitude(keyValuePair.Key, keyValuePair.Value);
+		}
 	}
 
 	public void ApplyTraits(GameObject go)
@@ -366,4 +418,6 @@ public class MinionStartingStats
 	public Personality personality;
 
 	public List<Accessory> accessories = new List<Accessory>();
+
+	public Dictionary<HashedString, float> roleAptitudes = new Dictionary<HashedString, float>();
 }

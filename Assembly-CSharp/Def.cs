@@ -83,10 +83,10 @@ public class Def : ScriptableObject
 			return null;
 		}
 		Texture2D texture = build.GetTexture(0);
-		float x = symbolFrame.uv0.x;
-		float x2 = symbolFrame.uv1.x;
-		float y = symbolFrame.uv2.y;
-		float y2 = symbolFrame.uv0.y;
+		float x = symbolFrame.uvMin.x;
+		float x2 = symbolFrame.uvMax.x;
+		float y = symbolFrame.uvMax.y;
+		float y2 = symbolFrame.uvMin.y;
 		int num = (int)((float)texture.width * Mathf.Abs(x2 - x));
 		int num2 = (int)((float)texture.height * Mathf.Abs(y2 - y));
 		float num3 = Mathf.Abs(symbolFrame.bboxMax.x - symbolFrame.bboxMin.x);

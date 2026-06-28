@@ -79,15 +79,9 @@ namespace Database
 
 		public Amount Calories;
 
-		public Amount HitPoints;
-
 		public Amount ImmuneLevel;
 
-		public Amount Temperature;
-
 		public Amount ExternalTemperature;
-
-		public Amount AirPressure;
 
 		public Amount Breath;
 
@@ -99,6 +93,12 @@ namespace Database
 
 		public Amount Decor;
 
+		public Amount Temperature;
+
+		public Amount HitPoints;
+
+		public Amount AirPressure;
+
 		public Amount Maturity;
 
 		public Amount OldAge;
@@ -108,8 +108,6 @@ namespace Database
 		public Amount Illumination;
 
 		public Amount Irrigation;
-
-		public Amount YieldBonus;
 
 		public Amount Rot;
 

@@ -26,30 +26,38 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 	protected override void OnPrefabInit(HandleVector<int>.Handle h)
 	{
 		FallerComponent data = base.GetData(h);
-		int num = Grid.PosToCell(data.transform.position);
-		if (Grid.Solid[num])
+		Vector3 position = data.transform.GetPosition();
+		int num = Grid.PosToCell(position);
+		data.cellChangedCB = delegate
+		{
+			FallerComponents.OnSolidChanged(h, null);
+		};
+		float num2 = -GravityComponent.GetOffset(data.transform) - 0.07f;
+		bool flag = Grid.Solid[Grid.PosToCell(new Vector3(position.x, position.y + num2, position.z))] && data.initialVelocity.sqrMagnitude == 0f;
+		if (Grid.Solid[num] || flag)
 		{
 			data.solidChangedCB = delegate(object ev_data)
 			{
 				FallerComponents.OnSolidChanged(h, ev_data);
 			};
-			int num2 = 2;
+			int num3 = 2;
 			Vector2I vector2I = Grid.CellToXY(num);
 			vector2I.y--;
 			if (vector2I.y < 0)
 			{
 				vector2I.y = 0;
-				num2 = 1;
+				num3 = 1;
 			}
 			else if (vector2I.y == Grid.HeightInCells - 1)
 			{
-				num2 = 1;
+				num3 = 1;
 			}
-			data.partitionerEntry = GameScenePartitioner.Instance.Add("Faller", data.transform.gameObject, vector2I.x, vector2I.y, 1, num2, GameScenePartitioner.Instance.solidChangedLayer, data.solidChangedCB);
+			data.partitionerEntry = GameScenePartitioner.Instance.Add("Faller", data.transform.gameObject, vector2I.x, vector2I.y, 1, num3, GameScenePartitioner.Instance.solidChangedLayer, data.solidChangedCB);
 			GameComps.Fallers.SetData(h, data);
 		}
 		else
 		{
+			GameComps.Fallers.SetData(h, data);
 			FallerComponents.AddGravity(data.transform, data.initialVelocity);
 		}
 	}
@@ -58,7 +66,7 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 	{
 		base.OnSpawn(h);
 		FallerComponent data = base.GetData(h);
-		data.transform.gameObject.Subscribe(1088554450, data.solidChangedCB);
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(data.transform, data.cellChangedCB);
 	}
 
 	private void OnCleanUpImmediate(HandleVector<int>.Handle h)
@@ -70,10 +78,10 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 			data.partitionerEntry = null;
 			base.SetData(h, data);
 		}
-		if (data.solidChangedCB != null && data.transform != null)
+		if (data.cellChangedCB != null && data.transform != null)
 		{
-			data.transform.gameObject.Unsubscribe(1088554450, data.solidChangedCB);
-			data.solidChangedCB = null;
+			CellChangeMonitor.Instance.UnregisterCellChangedHandler(data.transform, data.cellChangedCB);
+			data.cellChangedCB = null;
 		}
 		if (GameComps.Gravities.Has(data.transform.gameObject))
 		{
@@ -112,7 +120,7 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 			{
 				FallerComponents.OnSolidChanged(h, ev_data);
 			};
-			int num = Grid.PosToCell(transform.position);
+			int num = Grid.PosToCell(transform.GetPosition());
 			int num2 = Grid.CellBelow(num);
 			if (data.partitionerEntry != null)
 			{
@@ -131,7 +139,7 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 	private static void OnSolidChanged(HandleVector<int>.Handle handle, object ev_data)
 	{
 		FallerComponent data = GameComps.Fallers.GetData(handle);
-		Vector3 position = data.transform.position;
+		Vector3 position = data.transform.GetPosition();
 		position.y = position.y - data.offset - 0.1f;
 		int num = Grid.PosToCell(position);
 		if (!Grid.IsValidCell(num))

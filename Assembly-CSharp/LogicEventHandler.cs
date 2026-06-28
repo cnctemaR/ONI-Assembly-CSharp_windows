@@ -4,11 +4,12 @@ using UnityEngine;
 
 internal class LogicEventHandler : ILogicEventReceiver, ILogicUIElement, ILogicNetworkConnection, IUniformGridObject
 {
-	public LogicEventHandler(int cell, Action<int> on_value_changed, Action<int, bool> on_connection_changed)
+	public LogicEventHandler(int cell, Action<int> on_value_changed, Action<int, bool> on_connection_changed, LogicPortSpriteType sprite_type)
 	{
 		this.cell = cell;
 		this.onValueChanged = on_value_changed;
 		this.onConnectionChanged = on_connection_changed;
+		this.spriteType = sprite_type;
 	}
 
 	public void ReceiveLogicEvent(int value)
@@ -31,9 +32,9 @@ internal class LogicEventHandler : ILogicEventReceiver, ILogicUIElement, ILogicN
 		return this.cell;
 	}
 
-	public bool IsLogicInput()
+	public LogicPortSpriteType GetLogicPortSpriteType()
 	{
-		return true;
+		return this.spriteType;
 	}
 
 	public Vector2 PosMin()
@@ -83,4 +84,6 @@ internal class LogicEventHandler : ILogicEventReceiver, ILogicUIElement, ILogicN
 	private Action<int> onValueChanged;
 
 	private Action<int, bool> onConnectionChanged;
+
+	private LogicPortSpriteType spriteType;
 }

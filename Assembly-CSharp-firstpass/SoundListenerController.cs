@@ -33,7 +33,7 @@ public class SoundListenerController : MonoBehaviour
 	private void Update()
 	{
 		Audio audio = Audio.Get();
-		Vector3 position = Camera.main.transform.position;
+		Vector3 position = Camera.main.transform.GetPosition();
 		float num = (Camera.main.orthographicSize - audio.listenerMinOrthographicSize) / (audio.listenerReferenceOrthographicSize - audio.listenerMinOrthographicSize);
 		num = Mathf.Max(num, 0f);
 		float num2 = -audio.listenerMinZ - num * (audio.listenerReferenceZ - audio.listenerMinZ);

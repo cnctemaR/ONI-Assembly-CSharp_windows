@@ -33,7 +33,7 @@ public class WattsonMessage : KScreen
 		}
 		this.hideScreensWhileActive.Add(ManagementMenu.Instance);
 		this.hideScreensWhileActive.Add(ToolMenu.Instance);
-		this.hideScreensWhileActive.Add(ToolMenuPriorityScreen.Instance);
+		this.hideScreensWhileActive.Add(ToolMenu.Instance.PriorityScreen);
 		this.hideScreensWhileActive.Add(ResourceCategoryScreen.Instance);
 		this.hideScreensWhileActive.Add(TopLeftControlScreen.Instance);
 		this.hideScreensWhileActive.Add(global::DateTime.Instance);
@@ -79,7 +79,7 @@ public class WattsonMessage : KScreen
 		{
 			int idx = i + 1;
 			MinionIdentity minionIdentity = Components.LiveMinionIdentities[i];
-			minionIdentity.gameObject.transform.position = new Vector3(telepad.transform.position.x + (float)idx - 1.5f, telepad.transform.position.y, minionIdentity.gameObject.transform.position.z);
+			minionIdentity.gameObject.transform.SetPosition(new Vector3(telepad.transform.GetPosition().x + (float)idx - 1.5f, telepad.transform.GetPosition().y, minionIdentity.gameObject.transform.GetPosition().z));
 			GameObject gameObject = minionIdentity.gameObject;
 			ChoreProvider chore_provider = gameObject.GetComponent<ChoreProvider>();
 			EmoteChore chorePre = new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_pre_" + idx }, KAnim.PlayMode.Loop);

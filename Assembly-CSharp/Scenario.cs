@@ -394,7 +394,6 @@ public class Scenario : KMonoBehaviour
 	{
 		this.Init();
 		Vector3 vector = Grid.CellToPosCCC(this.RootCell, Grid.SceneLayer.Background);
-		vector.z = CameraController.Instance.defaultDepth;
 		CameraController.Instance.SnapTo(vector);
 		if (this.ClearExistingScene)
 		{
@@ -601,7 +600,6 @@ public class Scenario : KMonoBehaviour
 		this.Init();
 		PropertyTextures.FogOfWarScale = 1f;
 		Vector3 vector = Grid.CellToPosCCC(this.RootCell, Grid.SceneLayer.Background);
-		vector.z = CameraController.Instance.defaultDepth;
 		CameraController.Instance.SnapTo(vector);
 		this.Clear();
 		Scenario.RowLayout rowLayout = new Scenario.RowLayout(0, 0);
@@ -679,7 +677,6 @@ public class Scenario : KMonoBehaviour
 		this.Init();
 		PropertyTextures.FogOfWarScale = 1f;
 		Vector3 vector = Grid.CellToPosCCC(this.RootCell, Grid.SceneLayer.Background);
-		vector.z = CameraController.Instance.defaultDepth;
 		CameraController.Instance.SnapTo(vector);
 		this.Clear();
 	}
@@ -730,17 +727,6 @@ public class Scenario : KMonoBehaviour
 				SimHashes simHashes = ((i != 0) ? SimHashes.Oxygen : SimHashes.Unobtanium);
 				SimMessages.ReplaceElement(Grid.XYToCell(j, i), simHashes, CellEventLogger.Instance.Scenario, 1000f, -1f, byte.MaxValue, 0, -1);
 			}
-		}
-		for (int k = 1; k < num - 1; k++)
-		{
-			Vector3 vector = Grid.CellToPosCCC(Grid.XYToCell(k, 40), Grid.SceneLayer.Move);
-			RiverSource component = Util.KInstantiate(Assets.GetPrefab(GameTags.RiverSource), null, null).GetComponent<RiverSource>();
-			Element element2 = list[k % list.Count];
-			component.elementID = list[k % list.Count].id;
-			component.flowRate = 1500f;
-			component.maxMass = 3000f;
-			component.temperature = element2.defaultValues.temperature;
-			component.transform.SetPosition(vector);
 		}
 	}
 

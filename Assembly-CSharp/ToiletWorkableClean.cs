@@ -1,5 +1,6 @@
 ﻿using System;
 using KSerialization;
+using TUNING;
 
 public class ToiletWorkableClean : Workable
 {
@@ -8,6 +9,8 @@ public class ToiletWorkableClean : Workable
 		base.OnPrefabInit();
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Cleaning;
 		this.workingStatusItem = Db.Get().MiscStatusItems.Cleaning;
+		this.attributeConverter = Db.Get().AttributeConverters.TidyingSpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 	}
 
 	protected override void OnStartWork(Worker worker)
@@ -22,6 +25,11 @@ public class ToiletWorkableClean : Workable
 		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
 		component.Queue("unclog_pst", KAnim.PlayMode.Once, 1f, 0f);
 		base.OnStopWork(worker);
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole(Handyman.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	protected override void OnCompleteWork(Worker worker)

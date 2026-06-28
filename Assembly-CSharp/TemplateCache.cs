@@ -83,7 +83,14 @@ public static class TemplateCache
 				list.Add(templateContainer);
 			}
 		}
-		list.Sort((TemplateContainer x, TemplateContainer y) => x.name.CompareTo(y.name));
+		list.Sort(delegate(TemplateContainer x, TemplateContainer y)
+		{
+			if (y.priority - x.priority == 0)
+			{
+				return x.name.CompareTo(y.name);
+			}
+			return y.priority - x.priority;
+		});
 		return list;
 	}
 

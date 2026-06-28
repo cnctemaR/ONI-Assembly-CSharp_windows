@@ -2,7 +2,7 @@
 using KSerialization;
 using UnityEngine;
 
-public class HeatBulb : KMonoBehaviour
+public class HeatBulb : KMonoBehaviour, ISim200ms
 {
 	protected override void OnSpawn()
 	{
@@ -10,7 +10,7 @@ public class HeatBulb : KMonoBehaviour
 		this.kanim.Play("off", KAnim.PlayMode.Once, 1f, 0f);
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		float num = this.kjConsumptionRate * dt;
 		Vector2I vector2I = this.maxCheckOffset - this.minCheckOffset + 1;
@@ -18,7 +18,7 @@ public class HeatBulb : KMonoBehaviour
 		float num3 = num / (float)num2;
 		int num4;
 		int num5;
-		Grid.PosToXY(base.transform.position, out num4, out num5);
+		Grid.PosToXY(base.transform.GetPosition(), out num4, out num5);
 		for (int i = this.minCheckOffset.y; i <= this.maxCheckOffset.y; i++)
 		{
 			for (int j = this.minCheckOffset.x; j <= this.maxCheckOffset.x; j++)
@@ -27,7 +27,7 @@ public class HeatBulb : KMonoBehaviour
 				if (Grid.IsValidCell(num6) && Grid.Cell[num6].temperature > this.minTemperature)
 				{
 					this.kjConsumed += num3;
-					SimMessages.ModifyEnergy(num6, -num3, SimMessages.EnergySourceID.HeatBulb);
+					SimMessages.ModifyEnergy(num6, -num3, 5000f, SimMessages.EnergySourceID.HeatBulb);
 				}
 			}
 		}

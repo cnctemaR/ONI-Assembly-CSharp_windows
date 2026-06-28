@@ -7,7 +7,7 @@ using UnityEngine;
 public class PeeChore : Chore<PeeChore.StatesInstance>
 {
 	public PeeChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Pee, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Pee, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new PeeChore.StatesInstance(this, target.gameObject);
 	}
@@ -54,11 +54,11 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 			this.running.ToggleAnims("anim_expel_kanim", 0f).ToggleEffect("StressfulyEmptyingBladder").DoNotification((PeeChore.StatesInstance smi) => smi.stressfullyEmptyingBladder)
 				.DoReport(ReportManager.ReportType.ToiletIncident, (PeeChore.StatesInstance smi) => 1f, (PeeChore.StatesInstance smi) => this.masterTarget.Get(smi).GetProperName())
 				.DoTutorial(Tutorial.TutorialMessages.TM_Mopping)
-				.Transition(null, (PeeChore.StatesInstance smi) => smi.IsDonePeeing())
-				.Update("SpawnDirtyWater", delegate(PeeChore.StatesInstance smi)
+				.Transition(null, (PeeChore.StatesInstance smi) => smi.IsDonePeeing(), UpdateRate.SIM_200ms)
+				.Update("SpawnDirtyWater", delegate(PeeChore.StatesInstance smi, float dt)
 				{
-					smi.SpawnDirtyWater(smi.deltatime);
-				})
+					smi.SpawnDirtyWater(dt);
+				}, UpdateRate.SIM_200ms, false)
 				.PlayAnim("working_loop", KAnim.PlayMode.Loop);
 		}
 

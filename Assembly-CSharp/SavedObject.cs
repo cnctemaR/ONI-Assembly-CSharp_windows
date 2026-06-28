@@ -26,7 +26,8 @@ public class SavedObject : KMonoBehaviour
 
 	private void OnStore(object data)
 	{
-		if (data != null)
+		bool flag = data is Storage || (data != null && (bool)data);
+		if (flag)
 		{
 			SaveLoader.Instance.saveManager.Unregister(this.root);
 			this.inStorage = true;

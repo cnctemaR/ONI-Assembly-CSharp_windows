@@ -38,7 +38,7 @@ public class RationTracker : KMonoBehaviour, ISaveLoadable
 				if (!(component == null))
 				{
 					Pickupable component2 = component.GetComponent<Pickupable>();
-					if (component2 != null && (component2.storage == null || component2.storage.allowItemRemoval || component2.storage.countAsAccessible))
+					if (component2 != null && !component2.HasTag(GameTags.StoredPrivate))
 					{
 						num += component.Calories;
 						if (unitCountByFoodType != null)

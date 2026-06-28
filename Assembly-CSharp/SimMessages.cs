@@ -505,6 +505,23 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(1727657959, sizeof(SimMessages.MassConsumptionMessage), (byte*)ptr);
 	}
 
+	public unsafe static void EmitMass(int gameCell, byte element_idx, float mass, float temperature, byte disease_idx, int disease_count, int callbackIdx)
+	{
+		if (!Grid.IsValidCell(gameCell))
+		{
+			return;
+		}
+		SimMessages.MassEmissionMessage* ptr = stackalloc SimMessages.MassEmissionMessage[checked(1 * sizeof(SimMessages.MassEmissionMessage))];
+		ptr->cellIdx = gameCell;
+		ptr->callbackIdx = callbackIdx;
+		ptr->mass = mass;
+		ptr->temperature = temperature;
+		ptr->elementIdx = element_idx;
+		ptr->diseaseIdx = disease_idx;
+		ptr->diseaseCount = disease_count;
+		Sim.SIM_HandleMessage(797274363, sizeof(SimMessages.MassEmissionMessage), (byte*)ptr);
+	}
+
 	public unsafe static void ConsumeDisease(int game_cell, float percent_to_consume, int max_to_consume, int callback_idx)
 	{
 		if (!Grid.IsValidCell(game_cell))
@@ -561,15 +578,21 @@ public static class SimMessages
 		}
 	}
 
-	public unsafe static void ModifyEnergy(int gameCell, float kilojoules, SimMessages.EnergySourceID id)
+	public unsafe static void ModifyEnergy(int gameCell, float kilojoules, float max_temperature, SimMessages.EnergySourceID id)
 	{
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
 		}
+		if (max_temperature <= 0f)
+		{
+			Output.LogError(new object[] { "invalid max temperature for cell energy modification" });
+			return;
+		}
 		SimMessages.ModifyCellEnergyMessage* ptr = stackalloc SimMessages.ModifyCellEnergyMessage[checked(1 * sizeof(SimMessages.ModifyCellEnergyMessage))];
 		ptr->cellIdx = gameCell;
 		ptr->kilojoules = kilojoules;
+		ptr->maxTemperature = max_temperature;
 		ptr->id = (int)id;
 		Sim.SIM_HandleMessage(818320644, sizeof(SimMessages.ModifyCellEnergyMessage), (byte*)ptr);
 	}
@@ -958,6 +981,12 @@ public static class SimMessages
 
 		public byte diseaseIdx;
 
+		public byte pad0;
+
+		public byte pad1;
+
+		public byte pad2;
+
 		public int diseaseCount;
 	}
 
@@ -973,6 +1002,24 @@ public static class SimMessages
 		public byte elementIdx;
 
 		public byte radius;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	private struct MassEmissionMessage
+	{
+		public int cellIdx;
+
+		public int callbackIdx;
+
+		public float mass;
+
+		public float temperature;
+
+		public int diseaseCount;
+
+		public byte elementIdx;
+
+		public byte diseaseIdx;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -993,6 +1040,8 @@ public static class SimMessages
 		public int cellIdx;
 
 		public float kilojoules;
+
+		public float maxTemperature;
 
 		public int id;
 	}

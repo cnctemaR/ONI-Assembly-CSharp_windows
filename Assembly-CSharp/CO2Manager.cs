@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CO2Manager : KMonoBehaviour
+public class CO2Manager : KMonoBehaviour, ISim33ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -27,21 +27,20 @@ public class CO2Manager : KMonoBehaviour
 		return gameObject;
 	}
 
-	private void FixedUpdate()
+	public void Sim33ms(float dt)
 	{
-		float fixedDeltaTime = Time.fixedDeltaTime;
 		Vector2I vector2I = default(Vector2I);
 		Vector2I vector2I2 = default(Vector2I);
-		Vector3 vector = this.acceleration * fixedDeltaTime;
+		Vector3 vector = this.acceleration * dt;
 		int num = this.co2Items.Count;
 		for (int i = 0; i < num; i++)
 		{
 			CO2 co = this.co2Items[i];
 			co.velocity += vector;
-			co.lifetimeRemaining -= fixedDeltaTime;
-			Grid.PosToXY(co.transform.position, out vector2I);
-			co.transform.position += co.velocity * fixedDeltaTime;
-			Grid.PosToXY(co.transform.position, out vector2I2);
+			co.lifetimeRemaining -= dt;
+			Grid.PosToXY(co.transform.GetPosition(), out vector2I);
+			co.transform.SetPosition(co.transform.GetPosition() + co.velocity * dt);
+			Grid.PosToXY(co.transform.GetPosition(), out vector2I2);
 			int num2 = Grid.XYToCell(vector2I.x, vector2I.y);
 			int num3 = num2;
 			for (int j = vector2I.y; j >= vector2I2.y; j--)

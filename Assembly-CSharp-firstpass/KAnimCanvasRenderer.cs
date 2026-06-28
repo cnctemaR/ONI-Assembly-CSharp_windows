@@ -39,7 +39,7 @@ public class KAnimCanvasRenderer : KAnimRenderer
 		cmp.canvases = gameObject.AddComponent<CanvasRenderer>();
 		cmp.rectTransforms = gameObject.AddComponent<RectTransform>();
 		cmp.rectTransforms.SetParent(cmp.rootRectTransform);
-		cmp.rectTransforms.localPosition = Vector3.zero;
+		cmp.rectTransforms.SetLocalPosition(Vector3.zero);
 		cmp.rectTransforms.localScale = Vector3.one;
 		cmp.SetStretch(cmp.rectTransforms);
 		cmp.canvases.Clear();

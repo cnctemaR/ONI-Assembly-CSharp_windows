@@ -5,25 +5,23 @@ using System.Runtime.Serialization;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Repairable : Workable
 {
-	public override Workable.AnimInfo GetAnim(Worker worker)
-	{
-		Workable.AnimInfo anim = base.GetAnim(worker);
-		anim.smi = new MultitoolController.Instance(this, worker, "build", EffectPrefabs.Instance.BuildEffect);
-		return anim;
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTableWithCorners);
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		this.attributeConverter = Db.Get().AttributeConverters.ConstructionSpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		this.showProgressBar = false;
 		this.faceTargetWhenWorking = true;
+		this.multitoolContext = "build";
+		this.multitoolHitEffectHash = new HashedString("fx_build_splash");
 	}
 
 	protected override void OnSpawn()
@@ -33,6 +31,11 @@ public class Repairable : Workable
 		this.smi.StartSM();
 		this.workTime = float.PositiveInfinity;
 		this.workTimeRemaining = float.PositiveInfinity;
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole(Handyman.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	private void OnProxyStorageChanged(object data)
@@ -64,18 +67,18 @@ public class Repairable : Workable
 			{
 				UserMenu userMenu = this.userMenu;
 				string text = "action_repair";
-				string text2 = BUILDINGS.REPAIRABLE.ENABLE_AUTOREPAIR.NAME;
+				string text2 = global::STRINGS.BUILDINGS.REPAIRABLE.ENABLE_AUTOREPAIR.NAME;
 				global::System.Action action = new global::System.Action(this.AllowRepair);
-				string text3 = BUILDINGS.REPAIRABLE.ENABLE_AUTOREPAIR.TOOLTIP;
+				string text3 = global::STRINGS.BUILDINGS.REPAIRABLE.ENABLE_AUTOREPAIR.TOOLTIP;
 				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 			}
 			else
 			{
 				UserMenu userMenu2 = this.userMenu;
 				string text3 = "action_repair";
-				string text2 = BUILDINGS.REPAIRABLE.DISABLE_AUTOREPAIR.NAME;
+				string text2 = global::STRINGS.BUILDINGS.REPAIRABLE.DISABLE_AUTOREPAIR.NAME;
 				global::System.Action action = new global::System.Action(this.CancelRepair);
-				string text = BUILDINGS.REPAIRABLE.DISABLE_AUTOREPAIR.TOOLTIP;
+				string text = global::STRINGS.BUILDINGS.REPAIRABLE.DISABLE_AUTOREPAIR.TOOLTIP;
 				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
 			}
 		}
@@ -165,10 +168,12 @@ public class Repairable : Workable
 			gameObject.SetActive(false);
 			gameObject.name = "RepairableStorageProxy";
 			gameObject.transform.parent = base.transform;
-			gameObject.transform.localPosition = Vector3.zero;
+			gameObject.transform.SetLocalPosition(Vector3.zero);
 			KPrefabID kprefabID = gameObject.AddComponent<KPrefabID>();
 			kprefabID.PrefabTag = new Tag("RepairableStorageProxy");
 			this.storageProxy = gameObject.AddComponent<Storage>();
+			this.storageProxy.prioritizable = base.transform.GetComponent<Prioritizable>();
+			this.storageProxy.prioritizable.AddRef();
 			gameObject.SetActive(true);
 		}
 	}
@@ -261,7 +266,8 @@ public class Repairable : Workable
 		{
 			if (base.smi.master.storageProxy != null)
 			{
-				base.smi.master.storageProxy.DropAll();
+				base.smi.master.transform.GetComponent<Prioritizable>().RemoveRef();
+				base.smi.master.storageProxy.DropAll(false);
 				Util.KDestroyGameObject(base.smi.master.storageProxy.gameObject);
 			}
 		}
@@ -294,7 +300,18 @@ public class Repairable : Workable
 				{
 					smi.DestroyStorageProxy();
 				});
-			this.allowed.needMass.EventTransition(GameHashes.OnStorageChange, this.allowed.repairable, (Repairable.SMInstance smi) => smi.HasRequiredMass()).ToggleChore(new Func<Repairable.SMInstance, Chore>(this.CreateFetchChore), this.allowed.repairable, this.allowed.needMass).ToggleStatusItem(Db.Get().BuildingStatusItems.WaitingForRepairMaterials, (Repairable.SMInstance smi) => smi.GetRequiredMass());
+			this.allowed.needMass.Enter(delegate(Repairable.SMInstance smi)
+			{
+				Prioritizable.AddRef(smi.master.storageProxy.transform.parent.gameObject);
+			}).Exit(delegate(Repairable.SMInstance smi)
+			{
+				if (!smi.isMasterNull && smi.master.storageProxy != null)
+				{
+					Prioritizable.RemoveRef(smi.master.storageProxy.transform.parent.gameObject);
+				}
+			}).EventTransition(GameHashes.OnStorageChange, this.allowed.repairable, (Repairable.SMInstance smi) => smi.HasRequiredMass())
+				.ToggleChore(new Func<Repairable.SMInstance, Chore>(this.CreateFetchChore), this.allowed.repairable, this.allowed.needMass)
+				.ToggleStatusItem(Db.Get().BuildingStatusItems.WaitingForRepairMaterials, (Repairable.SMInstance smi) => smi.GetRequiredMass());
 			this.allowed.repairable.ToggleRecurringChore(new Func<Repairable.SMInstance, Chore>(this.CreateRepairChore), null).ToggleStatusItem(Db.Get().BuildingStatusItems.PendingRepair, null);
 			this.repaired.EventTransition(GameHashes.BuildingReceivedDamage, this.allowed, (Repairable.SMInstance smi) => smi.NeedsRepairs()).OnSignal(this.allow, this.allowed).OnSignal(this.forbid, this.forbidden);
 		}
@@ -306,13 +323,15 @@ public class Repairable : Workable
 			PrimaryElement primaryElement = storageProxy.FindPrimaryElement(component.ElementID);
 			float num = component.Mass * 0.1f - ((!(primaryElement != null)) ? 0f : primaryElement.Mass);
 			Tag[] array = new Tag[] { GameTagExtensions.Create(component.ElementID) };
-			return new FetchChore(smi.master.storageProxy, num, array, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0);
+			return new FetchChore(Db.Get().ChoreTypes.Fetch, smi.master.storageProxy, num, array, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0, null);
 		}
 
 		private Chore CreateRepairChore(Repairable.SMInstance smi)
 		{
-			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			workChore.AddPrecondition(ChorePreconditions.instance.IsMarkedForDeconstruction, smi.master.gameObject);
 			workChore.AddPrecondition(Repairable.States.IsNotBeingAttacked, smi.master.GetComponent<Breakable>());
+			workChore.AddPrecondition(Repairable.States.IsNotAngry, null);
 			return workChore;
 		}
 
@@ -329,6 +348,7 @@ public class Repairable : Workable
 		public static Chore.Precondition IsNotBeingAttacked = new Chore.Precondition
 		{
 			id = "IsNotBeingAttacked",
+			description = DUPLICANTS.CHORES.PRECONDITIONS.IS_NOT_BEING_ATTACKED,
 			fn = delegate(ref Chore.Precondition.Context context, object data)
 			{
 				bool flag = true;
@@ -338,6 +358,18 @@ public class Repairable : Workable
 					flag = breakable.worker == null;
 				}
 				return flag;
+			}
+		};
+
+		public static Chore.Precondition IsNotAngry = new Chore.Precondition
+		{
+			id = "IsNotAngry",
+			description = DUPLICANTS.CHORES.PRECONDITIONS.IS_NOT_ANGRY,
+			fn = delegate(ref Chore.Precondition.Context context, object data)
+			{
+				Traits component = context.consumer.GetComponent<Traits>();
+				AmountInstance amountInstance = Db.Get().Amounts.Stress.Lookup(context.consumer);
+				return !(component != null) || amountInstance == null || amountInstance.value < STRESS.ACTING_OUT_RESET || !component.HasTrait("Aggressive");
 			}
 		};
 

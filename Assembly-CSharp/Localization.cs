@@ -638,7 +638,8 @@ public static class Localization
 	public static readonly List<string> PreinstalledLanguages = new List<string>
 	{
 		Localization.DEFAULT_LANGUAGE_CODE,
-		"zh_klei"
+		"zh_klei",
+		"ko_klei"
 	};
 
 	public static string SELECTED_LANGUAGE_TYPE_KEY = "SelectedLanguageType";

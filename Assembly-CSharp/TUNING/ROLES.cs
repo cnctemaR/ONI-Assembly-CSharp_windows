@@ -8,6 +8,10 @@ namespace TUNING
 
 		public static float PASSIVE_EXPERIENCE_SCALE = 0.041666668f;
 
+		public static float BASIC_ROLE_MASTERY_EXPERIENCE_REQUIRED = 250f;
+
+		public static float APTITUDE_EXPERIENCE_SCALE = 50f;
+
 		public static float ACTIVE_EXPERIENCE_VERY_SLOW = 0.025f;
 
 		public static float ACTIVE_EXPERIENCE_SLOW = 0.05f;
@@ -15,5 +19,11 @@ namespace TUNING
 		public static float ACTIVE_EXPERIENCE_QUICK = 0.1f;
 
 		public static float ACTIVE_EXPERIENCE_VERY_QUICK = 0.2f;
+
+		public static int ATTRIBUTE_BONUS_SMALL = 2;
+
+		public static int ATTRIBUTE_BONUS_MEDIUM = 2;
+
+		public static int ATTRIBUTE_BONUS_LARGE = 2;
 	}
 }

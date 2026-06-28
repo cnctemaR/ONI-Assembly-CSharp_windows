@@ -2,8 +2,9 @@
 
 public class GameInputManager : KInputManager
 {
-	public GameInputManager()
+	public GameInputManager(BindingEntry[] default_keybindings)
 	{
+		GameInputMapping.SetDefaultKeyBindings(default_keybindings);
 		GameInputMapping.LoadBindings();
 		this.AddKeyboardMouseController();
 		for (int i = 0; i < 4; i++)

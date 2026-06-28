@@ -11,26 +11,24 @@ public class PetroleumGeneratorConfig : IBuildingConfig
 		int num = 3;
 		int num2 = 4;
 		string text2 = "generatorpetrol_kanim";
-		float num3 = 400f;
-		int num4 = 100;
-		float num5 = 480f;
+		int num3 = 100;
+		float num4 = 480f;
 		string[] array = new string[] { "Metal", "Plastic" };
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER5;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, new float[]
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, new float[]
 		{
 			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER5[0],
 			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0]
-		}, array, 2400f, BuildLocationRule.OnFloor, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier);
+		}, array, 2400f, BuildLocationRule.OnFloor, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier, 0.2f);
 		buildingDef.GeneratorWattageRating = 2000f;
 		buildingDef.GeneratorBaseCapacity = 2000f;
 		buildingDef.ExhaustKilowattsWhenActive = 4f;
-		buildingDef.OperatingKilowatts = 16f;
+		buildingDef.SelfHeatKilowattsWhenActive = 16f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityInputOffset = new CellOffset(-1, 0);
 		buildingDef.PowerOutputOffset = new CellOffset(1, 0);
 		buildingDef.InputConduitType = ConduitType.Liquid;
-		buildingDef.HotKey = global::Action.BuildMenuKeyT;
 		return buildingDef;
 	}
 
@@ -77,6 +75,7 @@ public class PetroleumGeneratorConfig : IBuildingConfig
 				new EnergyGenerator.OutputItem(SimHashes.DirtyWater, 1.25f, false, new CellOffset(1, 1))
 			}
 		};
+		Tinkerable.MakePowerTinkerable(go);
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
@@ -105,8 +104,5 @@ public class PetroleumGeneratorConfig : IBuildingConfig
 
 	private const int HEIGHT = 4;
 
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
-	{
-		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false)
-	};
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
 }

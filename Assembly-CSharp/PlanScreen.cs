@@ -60,10 +60,18 @@ public class PlanScreen : KIconToggleMenu
 			int num = 0;
 			this.tagCategoryMap = new Dictionary<Tag, PlanScreen.PlanCategory>();
 			this.tagOrderMap = new Dictionary<Tag, int>();
+			if (global::TUNING.BUILDINGS.PLANORDER.Length > 12)
+			{
+				Output.LogWarning(new object[]
+				{
+					"Insufficient keys to cover root plan menu",
+					"Max of 12 keys supported but TUNING.BUILDINGS.PLANORDER has " + global::TUNING.BUILDINGS.PLANORDER.Length
+				});
+			}
 			for (int i = 0; i < global::TUNING.BUILDINGS.PLANORDER.Length; i++)
 			{
 				PlanScreen.PlanInfo planInfo = global::TUNING.BUILDINGS.PLANORDER[i];
-				global::Action action = global::Action.Plan1 + i;
+				global::Action action = ((i >= 12) ? global::Action.NumActions : (global::Action.Plan1 + i));
 				string text = this.iconNameMap[planInfo.category];
 				string text2 = planInfo.category.ToString().ToUpper();
 				KIconToggleMenu.ToggleInfo toggleInfo = new KIconToggleMenu.ToggleInfo(Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2 + ".NAME"), text, planInfo.category, action, Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2 + ".TOOLTIP"), string.Empty);
@@ -229,14 +237,14 @@ public class PlanScreen : KIconToggleMenu
 												string sound = GlobalAssets.GetSound("NewBuildable_Embellishment", false);
 												if (sound != null)
 												{
-													EventInstance eventInstance = SoundEvent.BeginOneShot(sound, SoundListenerController.Instance.transform.position);
+													EventInstance eventInstance = SoundEvent.BeginOneShot(sound, SoundListenerController.Instance.transform.GetPosition());
 													SoundEvent.EndOneShot(eventInstance);
 												}
 											}
 											string sound2 = GlobalAssets.GetSound("NewBuildable", false);
 											if (sound2 != null)
 											{
-												EventInstance eventInstance2 = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.position);
+												EventInstance eventInstance2 = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.GetPosition());
 												eventInstance2.setParameterValue("playCount", (float)this.notificationPingCount);
 												SoundEvent.EndOneShot(eventInstance2);
 											}
@@ -737,6 +745,11 @@ public class PlanScreen : KIconToggleMenu
 		}
 	}
 
+	public PrioritySetting GetBuildingPriority()
+	{
+		return this.productInfoScreen.materialSelectionPanel.PriorityScreen.GetLastSelectedPriority();
+	}
+
 	[SerializeField]
 	private GameObject planButtonPrefab;
 
@@ -773,10 +786,6 @@ public class PlanScreen : KIconToggleMenu
 			"icon_category_ventilation"
 		},
 		{
-			PlanScreen.PlanCategory.Utilities,
-			"icon_category_utilities"
-		},
-		{
 			PlanScreen.PlanCategory.Refining,
 			"icon_category_refinery"
 		},
@@ -793,8 +802,16 @@ public class PlanScreen : KIconToggleMenu
 			"icon_category_misc"
 		},
 		{
+			PlanScreen.PlanCategory.Utilities,
+			"icon_category_utilities"
+		},
+		{
 			PlanScreen.PlanCategory.Automation,
 			"icon_category_automation"
+		},
+		{
+			PlanScreen.PlanCategory.Conveyance,
+			"icon_category_shipping"
 		}
 	};
 
@@ -872,12 +889,13 @@ public class PlanScreen : KIconToggleMenu
 		Food,
 		Plumbing,
 		HVAC,
-		Utilities,
 		Refining,
 		Medical,
 		Equipment,
 		Furniture,
-		Automation
+		Utilities,
+		Automation,
+		Conveyance
 	}
 
 	public struct PlanInfo

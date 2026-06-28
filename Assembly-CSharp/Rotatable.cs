@@ -145,7 +145,7 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 
 	private void OrientCollider(Orientation orientation)
 	{
-		BoxCollider2D component = base.GetComponent<BoxCollider2D>();
+		KBoxCollider2D component = base.GetComponent<KBoxCollider2D>();
 		if (component == null)
 		{
 			return;

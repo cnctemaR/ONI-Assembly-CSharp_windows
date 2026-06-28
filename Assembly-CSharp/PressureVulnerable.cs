@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class PressureVulnerable : StateMachineComponent<PressureVulnerable.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause
+public class PressureVulnerable : StateMachineComponent<PressureVulnerable.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause, ISim1000ms
 {
 	private OccupyArea occupyArea
 	{
@@ -79,14 +79,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		base.OnSpawn();
 		base.smi.sm.pressure.Set(1f, base.smi);
 		base.smi.sm.safe_element.Set(this.IsSafeElement(this.GetExternalElement), base.smi);
-		this.handle = GameScheduler.Instance.SchedulePeriodic("PressureVulnerable", 1f, new Action<object>(this.UpdatePressure), null, null, 0f, null);
 		base.smi.StartSM();
-	}
-
-	protected override void OnCleanUp()
-	{
-		this.handle.ClearScheduler();
-		base.OnCleanUp();
 	}
 
 	public void Configure(SimHashes[] safeAtmospheres = null)
@@ -175,7 +168,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		return !this.pressure_sensitive || (pressure > this.pressureLethal_Low && pressure < this.pressureLethal_High);
 	}
 
-	public void UpdatePressure(object data)
+	public void Sim1000ms(float dt)
 	{
 		int num = Grid.PosToCell(base.gameObject);
 		float pressureOverArea = this.GetPressureOverArea(num);
@@ -248,8 +241,6 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 	public HashSet<Element> safe_atmospheres = new HashSet<Element>();
 
 	private PressureVulnerable.PressureState pressureState = PressureVulnerable.PressureState.Normal;
-
-	private SchedulerHandle handle;
 
 	public class StatesInstance : GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.GameInstance
 	{

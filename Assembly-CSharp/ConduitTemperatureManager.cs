@@ -1,110 +1,144 @@
 ﻿using System;
-using Klei;
+using System.Runtime.InteropServices;
 
-public class ConduitTemperatureManager : KCompactedVector<ConduitTemperatureManager.Data>
+public class ConduitTemperatureManager
 {
-	public ConduitTemperatureManager(float contents_surface_area)
-		: base(0)
+	public ConduitTemperatureManager()
 	{
-		this.contentsSurfaceArea = contents_surface_area;
+		ConduitTemperatureManager.ConduitTemperatureManager_Initialize();
 	}
 
-	public HandleVector<int>.Handle Allocate(HandleVector<int>.Handle conduit_structure_temperature_handle, ref ConduitFlow.ConduitContents contents)
+	public void Shutdown()
 	{
-		ConduitTemperatureManager.Data data = this.CreateDataItem(conduit_structure_temperature_handle, ref contents);
-		return base.Allocate(data);
+		ConduitTemperatureManager.ConduitTemperatureManager_Shutdown();
 	}
 
-	public void SetData(HandleVector<int>.Handle handle, HandleVector<int>.Handle conduit_structure_temperature_handle, ref ConduitFlow.ConduitContents contents)
+	public HandleVector<int>.Handle Allocate(ConduitType conduit_type, int conduit_idx, HandleVector<int>.Handle conduit_structure_temperature_handle, ref ConduitFlow.ConduitContents contents)
 	{
-		ConduitTemperatureManager.Data data = this.CreateDataItem(conduit_structure_temperature_handle, ref contents);
-		base.SetData(handle, data);
-	}
-
-	private ConduitTemperatureManager.Data CreateDataItem(HandleVector<int>.Handle conduit_structure_temperature_handle, ref ConduitFlow.ConduitContents contents)
-	{
-		Element element = ElementLoader.FindElementByHash(contents.element);
-		ConduitTemperatureManager.Data data = default(ConduitTemperatureManager.Data);
-		data.temperature = contents.temperature;
-		data.thermalConductivity = element.thermalConductivity;
-		data.heatCapacity = contents.mass * element.specificHeatCapacity;
-		data.conduitStructureTemperatureHandle = conduit_structure_temperature_handle;
-		StructureTemperatureData data2 = GameComps.StructureTemperatures.GetData(conduit_structure_temperature_handle);
-		Element element2 = data2.primaryElement.Element;
-		data.conduitHeatCapacity = data2.building.Def.MassForTemperatureModification * element2.specificHeatCapacity;
-		data.conduitThermalConductivity = element2.thermalConductivity;
-		data.lowStateTransitionTemperature = ((element.lowTempTransition == null) ? 0f : (element.lowTemp - 3f));
-		data.highStateTransitionTemperature = ((element.highTempTransition == null) ? float.PositiveInfinity : (element.highTemp + 3f));
-		return data;
-	}
-
-	public void SimUpdate(float dt)
-	{
-		for (int i = 0; i < this.data.Count; i++)
+		StructureTemperatureData data = GameComps.StructureTemperatures.GetData(conduit_structure_temperature_handle);
+		Element element = data.primaryElement.Element;
+		float num = data.building.Def.MassForTemperatureModification * element.specificHeatCapacity;
+		int num2 = ConduitTemperatureManager.ConduitTemperatureManager_Add(contents.temperature, contents.mass, (int)contents.element, conduit_structure_temperature_handle.index, num, element.thermalConductivity);
+		HandleVector<int>.Handle handle = default(HandleVector<int>.Handle);
+		handle.index = num2;
+		if (num2 + 1 > this.temperatures.Length)
 		{
-			ConduitTemperatureManager.Data data = this.data[i];
-			if (data.heatCapacity > 0f && data.conduitHeatCapacity > 0f)
+			Array.Resize<float>(ref this.temperatures, (num2 + 1) * 2);
+			Array.Resize<ConduitTemperatureManager.ConduitInfo>(ref this.conduitInfo, (num2 + 1) * 2);
+		}
+		this.temperatures[num2] = contents.temperature;
+		this.conduitInfo[num2] = new ConduitTemperatureManager.ConduitInfo
+		{
+			type = conduit_type,
+			idx = conduit_idx
+		};
+		return handle;
+	}
+
+	public void SetData(HandleVector<int>.Handle handle, ref ConduitFlow.ConduitContents contents)
+	{
+		if (!handle.IsValid())
+		{
+			return;
+		}
+		this.temperatures[handle.index] = contents.temperature;
+		ConduitTemperatureManager.ConduitTemperatureManager_Set(handle.index, contents.temperature, contents.mass, (int)contents.element);
+	}
+
+	public void Free(HandleVector<int>.Handle handle)
+	{
+		if (handle.IsValid())
+		{
+			this.temperatures[handle.index] = 0f;
+			this.conduitInfo[handle.index] = new ConduitTemperatureManager.ConduitInfo
 			{
-				StructureTemperatureData data2 = GameComps.StructureTemperatures.GetData(data.conduitStructureTemperatureHandle);
-				float temperature = data.temperature;
-				float temperature2 = data2.Temperature;
-				float num = SimUtil.CalculateEnergyFlow(temperature, data.thermalConductivity, temperature2, data.conduitThermalConductivity, this.contentsSurfaceArea * ConduitTemperatureManager.ContentsScaleFactor, 1f);
-				float num2 = SimUtil.ClampEnergyTransfer(dt, temperature, data.heatCapacity, temperature2, data.conduitHeatCapacity, num);
-				float num3 = -num2;
-				float num4 = this.ModifyTemperature(data.temperature, data.heatCapacity, data2.Temperature, data.conduitHeatCapacity, ref num3);
-				data.temperature = num4;
-				this.data[i] = data;
-				if (num4 < data.lowStateTransitionTemperature)
-				{
-					data2.primaryElement.Trigger(-700727624, null);
-				}
-				else if (num4 > data.highStateTransitionTemperature)
-				{
-					data2.primaryElement.Trigger(-1152799878, null);
-				}
-				data2.ModifyEnergy(num2);
-			}
+				type = ConduitType.None,
+				idx = -1
+			};
+			ConduitTemperatureManager.ConduitTemperatureManager_Remove(handle.index);
 		}
 	}
 
-	private float ModifyTemperature(float source_temperature, float source_heat_capacity, float cell_temperature, float cell_heat_capacity, ref float kilojoules)
+	public void Clear()
 	{
-		float num = source_temperature;
-		float num2 = Math.Max(0f, num + kilojoules / source_heat_capacity);
-		source_temperature = num2;
-		float num3 = Math.Max(0f, cell_temperature - kilojoules / cell_heat_capacity);
-		if ((num - cell_temperature) * (source_temperature - num3) < 0f)
+		ConduitTemperatureManager.ConduitTemperatureManager_Clear();
+	}
+
+	public unsafe void Sim200ms(float dt)
+	{
+		IntPtr intPtr = ConduitTemperatureManager.ConduitTemperatureManager_Update(dt, (IntPtr)((void*)Game.Instance.simData.buildingTemperatures));
+		ConduitTemperatureManager.ConduitTemperatureUpdateData* ptr = (ConduitTemperatureManager.ConduitTemperatureUpdateData*)(void*)intPtr;
+		int numEntries = ptr->numEntries;
+		if (numEntries > 0)
 		{
-			float num4 = num * source_heat_capacity + cell_temperature * cell_heat_capacity;
-			float num5 = num4 / (source_heat_capacity + cell_heat_capacity);
-			source_temperature = num5;
-			kilojoules = (num5 - cell_temperature) * cell_heat_capacity;
+			Marshal.Copy((IntPtr)((void*)ptr->temperatures), this.temperatures, 0, numEntries);
 		}
-		return source_temperature;
+		for (int i = 0; i < ptr->numFrozenHandles; i++)
+		{
+			int num = ptr->frozenHandles[i];
+			ConduitTemperatureManager.ConduitInfo conduitInfo = this.conduitInfo[num];
+			ConduitFlow flowManager = Conduit.GetFlowManager(conduitInfo.type);
+			flowManager.FreezeConduitContents(conduitInfo.idx);
+		}
+		for (int j = 0; j < ptr->numMeltedHandles; j++)
+		{
+			int num2 = ptr->meltedHandles[j];
+			ConduitTemperatureManager.ConduitInfo conduitInfo2 = this.conduitInfo[num2];
+			ConduitFlow flowManager2 = Conduit.GetFlowManager(conduitInfo2.type);
+			flowManager2.MeltConduitContents(conduitInfo2.idx);
+		}
 	}
 
-	private static float ContentsScaleFactor = 50f;
-
-	private float contentsSurfaceArea;
-
-	public struct Data
+	public float GetTemperature(HandleVector<int>.Handle handle)
 	{
-		public int cell;
+		return this.temperatures[handle.index];
+	}
 
-		public float temperature;
+	[DllImport("SimDLL")]
+	private static extern void ConduitTemperatureManager_Initialize();
 
-		public float thermalConductivity;
+	[DllImport("SimDLL")]
+	private static extern void ConduitTemperatureManager_Shutdown();
 
-		public float heatCapacity;
+	[DllImport("SimDLL")]
+	private static extern int ConduitTemperatureManager_Add(float contents_temperature, float contents_mass, int contents_element_hash, int conduit_structure_temperature_handle, float conduit_heat_capacity, float conduit_thermal_conductivity);
 
-		public HandleVector<int>.Handle conduitStructureTemperatureHandle;
+	[DllImport("SimDLL")]
+	private static extern int ConduitTemperatureManager_Set(int handle, float contents_temperature, float contents_mass, int contents_element_hash);
 
-		public float conduitHeatCapacity;
+	[DllImport("SimDLL")]
+	private static extern void ConduitTemperatureManager_Remove(int handle);
 
-		public float conduitThermalConductivity;
+	[DllImport("SimDLL")]
+	private static extern IntPtr ConduitTemperatureManager_Update(float dt, IntPtr building_conductivity_data);
 
-		public float lowStateTransitionTemperature;
+	[DllImport("SimDLL")]
+	private static extern void ConduitTemperatureManager_Clear();
 
-		public float highStateTransitionTemperature;
+	private float[] temperatures = new float[0];
+
+	private ConduitTemperatureManager.ConduitInfo[] conduitInfo = new ConduitTemperatureManager.ConduitInfo[0];
+
+	private struct ConduitInfo
+	{
+		public ConduitType type;
+
+		public int idx;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	private struct ConduitTemperatureUpdateData
+	{
+		public int numEntries;
+
+		public unsafe float* temperatures;
+
+		public int numFrozenHandles;
+
+		public unsafe int* frozenHandles;
+
+		public int numMeltedHandles;
+
+		public unsafe int* meltedHandles;
 	}
 }

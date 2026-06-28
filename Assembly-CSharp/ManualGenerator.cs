@@ -2,6 +2,7 @@
 using Klei.AI;
 using KSerialization;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -68,6 +69,7 @@ public class ManualGenerator : Workable, ISliderControl
 		base.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.GeneratingPower;
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		EnergyGenerator.EnsureStatusItemAvailable();
 	}
 
@@ -75,7 +77,8 @@ public class ManualGenerator : Workable, ISliderControl
 	{
 		if (this.operational.IsActive)
 		{
-			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.ManualGeneratorChargingUp, null);
+			KSelectable component = base.GetComponent<KSelectable>();
+			component.SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.ManualGeneratorChargingUp, null);
 		}
 	}
 
@@ -91,25 +94,33 @@ public class ManualGenerator : Workable, ISliderControl
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_generatormanual_kanim") };
 		this.smi = new ManualGenerator.GeneratePowerSM.Instance(this);
 		this.smi.StartSM();
+		Game.Instance.emergySim.AddManualGenerator(this);
 	}
 
 	protected override void OnCleanUp()
 	{
+		Game.Instance.emergySim.RemoveManualGenerator(this);
 		this.smi.StopSM("cleanup");
 		base.OnCleanUp();
 	}
 
-	private void SimUpdate(float dt)
+	public override void AwardExperience(float work_dt, MinionResume resume)
 	{
+		resume.AddExperienceIfRole(MachineTechnician.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+	}
+
+	public void EnergySim200ms(float dt)
+	{
+		KSelectable component = base.GetComponent<KSelectable>();
 		if (this.operational.IsActive)
 		{
 			this.generator.GenerateJoules(this.generator.WattageRating * dt, false);
-			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.Wattage, this.generator);
+			component.SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.Wattage, this.generator);
 		}
 		else
 		{
 			this.generator.ResetJoules();
-			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.GeneratorOffline, null);
+			component.SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.GeneratorOffline, null);
 			if (this.operational.IsOperational)
 			{
 				CircuitManager circuitManager = Game.Instance.circuitManager;
@@ -119,12 +130,27 @@ public class ManualGenerator : Workable, ISliderControl
 				}
 				ushort circuitID = circuitManager.GetCircuitID(this.powerCell);
 				bool flag = circuitManager.HasBatteries(circuitID);
-				bool flag2 = (flag && circuitManager.GetMinBatteryPercentFullOnCircuit(circuitID) < this.batteryRefillPercent) || (!flag && circuitManager.HasConsumers(circuitID));
+				bool flag2 = false;
+				if (!flag && circuitManager.HasConsumers(circuitID))
+				{
+					flag2 = true;
+				}
+				else if (flag)
+				{
+					if (this.batteryRefillPercent <= 0f && circuitManager.GetMinBatteryPercentFullOnCircuit(circuitID) <= 0f)
+					{
+						flag2 = true;
+					}
+					else if (circuitManager.GetMinBatteryPercentFullOnCircuit(circuitID) < this.batteryRefillPercent)
+					{
+						flag2 = true;
+					}
+				}
 				if (flag2)
 				{
 					if (this.chore == null && this.smi.GetCurrentState() == this.smi.sm.on)
 					{
-						this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+						this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 					}
 				}
 				else if (this.chore != null)
@@ -132,7 +158,7 @@ public class ManualGenerator : Workable, ISliderControl
 					this.chore.Cancel("No refill needed");
 					this.chore = null;
 				}
-				this.selectable.ToggleStatusItem(EnergyGenerator.BatteriesSufficientlyFull, !flag2, null);
+				component.ToggleStatusItem(EnergyGenerator.BatteriesSufficientlyFull, !flag2, null);
 			}
 		}
 	}
@@ -156,7 +182,7 @@ public class ManualGenerator : Workable, ISliderControl
 		AttributeLevels component = worker.GetComponent<AttributeLevels>();
 		if (component != null)
 		{
-			component.AddExperience(Db.Get().Attributes.Athletics.Id, dt);
+			component.AddExperience(Db.Get().Attributes.Athletics.Id, dt, DUPLICANTSTATS.ATTRIBUTE_LEVELING.ALL_DAY_EXPERIENCE);
 		}
 		return !flag;
 	}
@@ -223,12 +249,11 @@ public class ManualGenerator : Workable, ISliderControl
 		{
 			default_state = this.off;
 			base.serializable = true;
-			this.off.EventTransition(GameHashes.OperationalChanged, this.on, (ManualGenerator.GeneratePowerSM.Instance smi) => smi.master.GetComponent<Operational>().IsOperational);
-			this.on.EventTransition(GameHashes.OperationalChanged, this.off, (ManualGenerator.GeneratePowerSM.Instance smi) => !smi.master.GetComponent<Operational>().IsOperational).EventTransition(GameHashes.ActiveChanged, this.working.pre, (ManualGenerator.GeneratePowerSM.Instance smi) => smi.master.GetComponent<Operational>().IsActive);
+			this.off.EventTransition(GameHashes.OperationalChanged, this.on, (ManualGenerator.GeneratePowerSM.Instance smi) => smi.master.GetComponent<Operational>().IsOperational).PlayAnim("off");
+			this.on.EventTransition(GameHashes.OperationalChanged, this.off, (ManualGenerator.GeneratePowerSM.Instance smi) => !smi.master.GetComponent<Operational>().IsOperational).EventTransition(GameHashes.ActiveChanged, this.working.pre, (ManualGenerator.GeneratePowerSM.Instance smi) => smi.master.GetComponent<Operational>().IsActive).PlayAnim("on");
 			this.working.DefaultState(this.working.pre);
 			this.working.pre.PlayAnim("working_pre").OnAnimQueueComplete(this.working.loop);
-			this.working.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.ActiveChanged, this.working.pst, (ManualGenerator.GeneratePowerSM.Instance smi) => this.masterTarget.Get(smi) != null && !smi.master.GetComponent<Operational>().IsActive);
-			this.working.pst.PlayAnim("working_pst").OnAnimQueueComplete(this.off);
+			this.working.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.ActiveChanged, this.off, (ManualGenerator.GeneratePowerSM.Instance smi) => this.masterTarget.Get(smi) != null && !smi.master.GetComponent<Operational>().IsActive);
 		}
 
 		public GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance, IStateMachineTarget, object>.State off;

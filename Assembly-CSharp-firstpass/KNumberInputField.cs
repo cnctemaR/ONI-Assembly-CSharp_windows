@@ -66,7 +66,7 @@ public class KNumberInputField : KScreen
 		{
 			num = float.Parse(input);
 		}
-		catch (Exception ex)
+		catch
 		{
 		}
 		num = Mathf.Clamp(num, this.minValue, this.maxValue);

@@ -26,7 +26,7 @@ public class EntombedItemVisualizer : KMonoBehaviour
 			if (data.refCount == 0)
 			{
 				GameObject instance = this.entombedItemPool.GetInstance();
-				instance.transform.position = Grid.CellToPosCCC(cell, Grid.SceneLayer.FXFront);
+				instance.transform.SetPosition(Grid.CellToPosCCC(cell, Grid.SceneLayer.FXFront));
 				instance.transform.rotation = Quaternion.Euler(0f, 0f, global::UnityEngine.Random.value * 360f);
 				KBatchedAnimController component = instance.GetComponent<KBatchedAnimController>();
 				component.renderQueueOverride = RenderQueues.BuriedObjects;

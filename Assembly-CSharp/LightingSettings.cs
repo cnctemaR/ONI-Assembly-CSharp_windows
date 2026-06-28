@@ -211,6 +211,8 @@ public class LightingSettings : ScriptableObject
 
 	public ConduitFlowVisualizer.Tuning LiquidConduit;
 
+	public SolidConduitFlowVisualizer.Tuning SolidConduit;
+
 	[Serializable]
 	public struct EdgeLighting
 	{

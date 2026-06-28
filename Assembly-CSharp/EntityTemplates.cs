@@ -51,13 +51,12 @@ public class EntityTemplates
 	public static GameObject CreatePlacedEntity(string id, string name, string desc, float mass, KAnimFile anim, string initialAnim, Grid.SceneLayer sceneLayer, int width, int height, EffectorValues decor, EffectorValues noise = default(EffectorValues), SimHashes element = SimHashes.Creature, List<Tag> additionalTags = null, float defaultTemperature = 293f)
 	{
 		GameObject gameObject = EntityTemplates.CreateBasicEntity(id, name, desc, mass, true, anim, initialAnim, sceneLayer, element, additionalTags, defaultTemperature);
-		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		BoxCollider2D boxCollider2D = gameObject.UpdateComponentRequirement<BoxCollider2D>(true);
-		boxCollider2D.size = new Vector2f(width, height);
+		KBoxCollider2D kboxCollider2D = gameObject.UpdateComponentRequirement<KBoxCollider2D>(true);
+		kboxCollider2D.size = new Vector2f(width, height);
 		float num = 0.5f * (float)((width + 1) % 2);
-		boxCollider2D.offset = new Vector2f(num, (float)height / 2f);
-		KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
-		component2.Offset = new Vector3(num, 0f, 0f);
+		kboxCollider2D.offset = new Vector2f(num, (float)height / 2f);
+		KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
+		component.Offset = new Vector3(num, 0f, 0f);
 		OccupyArea occupyArea = gameObject.UpdateComponentRequirement<OccupyArea>(true);
 		occupyArea.OccupiedCellsOffsets = EntityTemplates.GenerateOffsets(width, height);
 		occupyArea.objectLayer = ObjectLayer.NumLayers;
@@ -69,7 +68,7 @@ public class EntityTemplates
 
 	public static GameObject MakeHangingOffsets(GameObject template, int width, int height)
 	{
-		BoxCollider2D component = template.GetComponent<BoxCollider2D>();
+		KBoxCollider2D component = template.GetComponent<KBoxCollider2D>();
 		if (component)
 		{
 			component.size = new Vector2f(width, height);
@@ -85,7 +84,7 @@ public class EntityTemplates
 		return template;
 	}
 
-	public static GameObject ExtendEntityToBasicPlant(GameObject template, float drowning_stamina = 15f, float drowning_regen = 5f, float temperature_lethal_low = 218.15f, float temperature_warning_low = 283.15f, float temperature_perfect_low = 291.15f, float temperature_perfect_high = 295.15f, float temperature_warning_high = 303.15f, float temperature_lethal_high = 398.15f, SimHashes[] safe_elements = null, bool pressure_sensitive = true, float pressure_lethal_low = 0f, float pressure_warning_low = 0.15f, float grow_time = 1f, string crop_id = null, bool can_drown = true)
+	public static GameObject ExtendEntityToBasicPlant(GameObject template, float drowning_stamina = 15f, float drowning_regen = 5f, float temperature_lethal_low = 218.15f, float temperature_warning_low = 283.15f, float temperature_perfect_low = 291.15f, float temperature_perfect_high = 295.15f, float temperature_warning_high = 303.15f, float temperature_lethal_high = 398.15f, SimHashes[] safe_elements = null, bool pressure_sensitive = true, float pressure_lethal_low = 0f, float pressure_warning_low = 0.15f, float grow_time = 1f, string crop_id = null, bool can_drown = true, bool can_tinker = true)
 	{
 		template.UpdateComponentRequirement<EntombVulnerable>(true);
 		PressureVulnerable pressureVulnerable = template.UpdateComponentRequirement<PressureVulnerable>(true);
@@ -134,10 +133,14 @@ public class EntityTemplates
 				}
 			}
 		};
+		if (can_tinker)
+		{
+			Tinkerable.MakeFarmTinkerable(template);
+		}
 		return template;
 	}
 
-	public static GameObject ExtendEntityToBasicCreature(GameObject template, FactionManager.FactionID faction = FactionManager.FactionID.Prey, float HitPoints = 100f, string NavGridName = "HatchNavGrid", NavType navType = NavType.Floor, float moveSpeed = 2f, string onDeathDropID = "Meat", int onDeathDropCount = 1, bool drownVulnerable = true, bool entombVulnerable = true, float drowningStamina = 30f, float warningLowTemperature = 283f, float warningHighTemperature = 294f, float lethalLowTemperature = 243f, float lethalHighTemperature = 343f)
+	public static GameObject ExtendEntityToBasicCreature(GameObject template, FactionManager.FactionID faction = FactionManager.FactionID.Prey, float HitPoints = 100f, string NavGridName = "HatchNavGrid", NavType navType = NavType.Floor, int max_probing_radius = 32, float moveSpeed = 2f, string onDeathDropID = "Meat", int onDeathDropCount = 1, bool drownVulnerable = true, bool entombVulnerable = true, float drowningStamina = 30f, float warningLowTemperature = 283f, float warningHighTemperature = 294f, float lethalLowTemperature = 243f, float lethalHighTemperature = 343f)
 	{
 		template.GetComponent<KBatchedAnimController>().isMovable = true;
 		template.UpdateComponentRequirement<Health>(true).SetMaxHitPoints(HitPoints);
@@ -168,7 +171,7 @@ public class EntityTemplates
 		navigator.CurrentNavType = navType;
 		navigator.defaultSpeed = moveSpeed;
 		navigator.updateProber = true;
-		navigator.maxProbingRadius = 50;
+		navigator.maxProbingRadius = max_probing_radius;
 		KPrefabID component = template.GetComponent<KPrefabID>();
 		component.prefabInitFn += delegate(GameObject inst)
 		{
@@ -338,16 +341,19 @@ public class EntityTemplates
 		return template;
 	}
 
-	public static GameObject ExtendPlantToFertilizable(GameObject template, FertilizationMonitor.FertilizerInfo[] fertilizers)
+	public static GameObject ExtendPlantToFertilizable(GameObject template, PlantElementAbsorber.ConsumeInfo[] fertilizers)
 	{
-		foreach (FertilizationMonitor.FertilizerInfo fertilizerInfo in fertilizers)
+		HashedString idHash = Db.Get().ChoreTypes.FarmFetch.IdHash;
+		foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in fertilizers)
 		{
 			ManualDeliveryKG manualDeliveryKG = template.AddComponent<ManualDeliveryKG>();
-			manualDeliveryKG.RequestedItemTag = fertilizerInfo.tag;
-			manualDeliveryKG.capacity = fertilizerInfo.massConsumptionRate * 600f * 3f;
-			manualDeliveryKG.refillMass = fertilizerInfo.massConsumptionRate * 600f * 0.5f;
-			manualDeliveryKG.minimumMass = fertilizerInfo.massConsumptionRate * 600f * 0.5f;
+			manualDeliveryKG.RequestedItemTag = consumeInfo.tag;
+			manualDeliveryKG.capacity = consumeInfo.massConsumptionRate * 600f * 3f;
+			manualDeliveryKG.refillMass = consumeInfo.massConsumptionRate * 600f * 0.5f;
+			manualDeliveryKG.minimumMass = consumeInfo.massConsumptionRate * 600f * 0.5f;
 			manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.Functional;
+			manualDeliveryKG.choreTags = new Tag[] { GameTags.ChoreTypes.Farming };
+			manualDeliveryKG.choreTypeIDHash = idHash;
 		}
 		KPrefabID component = template.GetComponent<KPrefabID>();
 		FertilizationMonitor.Instance.Def def = new FertilizationMonitor.Instance.Def();
@@ -364,35 +370,27 @@ public class EntityTemplates
 		return template;
 	}
 
-	public static GameObject ExtendPlantToIrrigated(GameObject template, IrrigationMonitor.LiquidResourceInfo info)
+	public static GameObject ExtendPlantToIrrigated(GameObject template, PlantElementAbsorber.ConsumeInfo info)
 	{
-		return EntityTemplates.ExtendPlantToIrrigated(template, new IrrigationMonitor.LiquidResourceInfo[] { info });
+		return EntityTemplates.ExtendPlantToIrrigated(template, new PlantElementAbsorber.ConsumeInfo[] { info });
 	}
 
-	public static GameObject ExtendPlantToIrrigated(GameObject template, IrrigationMonitor.LiquidResourceInfo[] liquids)
+	public static GameObject ExtendPlantToIrrigated(GameObject template, PlantElementAbsorber.ConsumeInfo[] liquids)
 	{
-		foreach (IrrigationMonitor.LiquidResourceInfo liquidResourceInfo in liquids)
+		foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in liquids)
 		{
 			ManualDeliveryKG manualDeliveryKG = template.AddComponent<ManualDeliveryKG>();
-			manualDeliveryKG.RequestedItemTag = liquidResourceInfo.tag;
-			manualDeliveryKG.capacity = liquidResourceInfo.massConsumptionRate * 600f * 3f;
-			manualDeliveryKG.refillMass = liquidResourceInfo.massConsumptionRate * 600f * 0.5f;
-			manualDeliveryKG.minimumMass = liquidResourceInfo.massConsumptionRate * 600f * 0.5f;
+			manualDeliveryKG.RequestedItemTag = consumeInfo.tag;
+			manualDeliveryKG.capacity = consumeInfo.massConsumptionRate * 600f * 3f;
+			manualDeliveryKG.refillMass = consumeInfo.massConsumptionRate * 600f * 0.5f;
+			manualDeliveryKG.minimumMass = consumeInfo.massConsumptionRate * 600f * 0.5f;
 			manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.Functional;
+			manualDeliveryKG.choreTags = new Tag[] { GameTags.ChoreTypes.Farming };
 		}
 		IrrigationMonitor.Instance.Def def = new IrrigationMonitor.Instance.Def();
 		def.wrongIrrigationTestTag = GameTags.Liquid;
 		def.consumedElements = liquids;
 		template.GetComponent<StateMachineController>().AddDef(def);
-		return template;
-	}
-
-	public static GameObject ExtendPlantWithYield(GameObject template, IYieldEffect[] midYieldEffects, IYieldEffect[] highYieldEffects)
-	{
-		KPrefabID component = template.GetComponent<KPrefabID>();
-		component.prefabInitFn += delegate(GameObject inst)
-		{
-		};
 		return template;
 	}
 
@@ -513,8 +511,8 @@ public class EntityTemplates
 		{
 			if (shape != EntityTemplates.CollisionShape.POLYGONAL)
 			{
-				CircleCollider2D circleCollider2D = template.UpdateComponentRequirement<CircleCollider2D>(true);
-				circleCollider2D.radius = Mathf.Max(width, height);
+				KCircleCollider2D kcircleCollider2D = template.UpdateComponentRequirement<KCircleCollider2D>(true);
+				kcircleCollider2D.radius = Mathf.Max(width, height);
 			}
 			else
 			{
@@ -523,8 +521,8 @@ public class EntityTemplates
 		}
 		else
 		{
-			BoxCollider2D boxCollider2D = template.UpdateComponentRequirement<BoxCollider2D>(true);
-			boxCollider2D.size = new Vector2f(width, height);
+			KBoxCollider2D kboxCollider2D = template.UpdateComponentRequirement<KBoxCollider2D>(true);
+			kboxCollider2D.size = new Vector2f(width, height);
 		}
 		return template;
 	}

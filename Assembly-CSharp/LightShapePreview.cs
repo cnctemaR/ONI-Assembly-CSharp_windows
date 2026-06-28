@@ -4,7 +4,7 @@ public class LightShapePreview : KMonoBehaviour
 {
 	private void Update()
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		if (num != this.previousCell)
 		{
 			this.previousCell = num;

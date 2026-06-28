@@ -10,15 +10,14 @@ public class FlowerVaseConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 1;
 		string text2 = "flowervase_kanim";
-		float num3 = 50f;
-		int num4 = 10;
-		float num5 = 10f;
+		int num3 = 10;
+		float num4 = 10f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER1;
 		string[] farmable = MATERIALS.FARMABLE;
-		float num6 = 800f;
+		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, farmable, num6, buildLocationRule, BUILDINGS.DECOR.NONE, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, farmable, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = SimViewMode.Decor;
@@ -28,7 +27,7 @@ public class FlowerVaseConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<Storage>();
 		Prioritizable.AddRef(go);
@@ -36,6 +35,7 @@ public class FlowerVaseConfig : IBuildingConfig
 		plantablePlot.AddDespoitTag(GameTags.DecorSeed);
 		go.AddOrGet<FlowerVase>();
 		go.AddOrGet<AnimTileable>();
+		go.GetComponent<KPrefabID>().AddPrefabTag(GameTags.Decoration);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

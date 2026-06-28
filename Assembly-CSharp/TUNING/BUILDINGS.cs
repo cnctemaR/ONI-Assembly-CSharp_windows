@@ -41,8 +41,6 @@ namespace TUNING
 
 		public const float PHARMACY_GENERIC_SINGLE = 1f;
 
-		public const float MASS_BURN_RATE_COALGENERATOR = 1f;
-
 		public const float MASS_BURN_RATE_HYDROGENGENERATOR = 0.1f;
 
 		public const float COOKER_FOOD_TEMPERATURE = 368.15f;
@@ -64,7 +62,7 @@ namespace TUNING
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Base, new string[]
 			{
 				"Ladder", "FirePole", "LadderFast", "Tile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile", "MetalTile", "Door",
-				"ManualPressureDoor", "PressureDoor", "StorageLocker", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
+				"ManualPressureDoor", "PressureDoor", "StorageLocker", "StorageLockerSmart", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
 			}),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Oxygen, new string[] { "MineralDeoxidizer", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Power, new string[]
@@ -74,6 +72,7 @@ namespace TUNING
 				"HydrogenGenerator",
 				"MethaneGenerator",
 				"PetroleumGenerator",
+				"SteamTurbine",
 				"Wire",
 				"WireBridge",
 				"HighWattageWire",
@@ -99,7 +98,6 @@ namespace TUNING
 				"LiquidVent", "LiquidFilter", "LiquidValve", "LiquidLogicValve"
 			}),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.HVAC, new string[] { "GasConduit", "InsulatedGasConduit", "GasConduitBridge", "GasPump", "GasMiniPump", "GasVent", "GasVentHighPressure", "GasFilter", "GasValve", "GasLogicValve" }),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Utilities, new string[] { "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Refining, new string[] { "Compost", "WaterPurifier", "FertilizerMaker", "AlgaeDistillery", "RockCrusher", "MetalRefinery", "OilRefinery", "Polymerizer" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Medical, new string[] { "WashBasin", "WashSink", "HandSanitizer", "Apothecary", "MedicalCot", "MedicalBed", "Grave" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Furniture, new string[]
@@ -115,7 +113,8 @@ namespace TUNING
 				"FloorLamp",
 				"CeilingLight"
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Equipment, new string[] { "ResearchCenter", "AdvancedResearchCenter", "GenericFabricator", "ClothingFabricator", "SuitFabricator", "SuitMarker", "SuitLocker" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Equipment, new string[] { "ResearchCenter", "AdvancedResearchCenter", "PowerControlStation", "FarmStation", "RoleStation", "ClothingFabricator", "SuitFabricator", "SuitMarker", "SuitLocker" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Utilities, new string[] { "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Automation, new string[]
 			{
 				"LogicWire",
@@ -131,9 +130,11 @@ namespace TUNING
 				LogicPressureSensorLiquidConfig.ID,
 				LogicTemperatureSensorConfig.ID,
 				LogicTimeOfDaySensorConfig.ID,
+				LogicDiseaseSensorConfig.ID,
 				"FloorSwitch",
 				"Checkpoint"
-			})
+			}),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Conveyance, new string[] { "SolidTransferArm", "SolidConduit", "SolidConduitInbox", "SolidConduitOutbox", "SolidConduitBridge" })
 		};
 
 		public static List<string> COMPONENT_DESCRIPTION_ORDER = new List<string>
@@ -143,6 +144,7 @@ namespace TUNING
 			"Fabricator",
 			"MicrobeMusher",
 			"CookingStation",
+			"RoleStation",
 			"ResearchCenter",
 			"LiquidCooledFan",
 			"OxygenRecharger",
@@ -153,6 +155,7 @@ namespace TUNING
 			"ElementConverter",
 			"ElementConsumer",
 			"PassiveElementConsumer",
+			"TinkerStation",
 			"EnergyConsumer",
 			"AirConditioner",
 			"Storage",
@@ -193,6 +196,7 @@ namespace TUNING
 			"FertilizationMonitor",
 			"RestRestoreHealth",
 			"GeneShuffler",
+			"BatterySmart",
 			"Polymerizer",
 			"OilRefinery",
 			"Compost",
@@ -201,6 +205,9 @@ namespace TUNING
 			"OreScrubber",
 			"Refinery",
 			"LiquidCooledRefinery",
+			"MinimumOperatingTemperature",
+			"RoomTracker",
+			"EnergyConsumerSelfSustaining",
 			"Edible",
 			"PlantableSeed",
 			"FriedMushBar",
@@ -220,8 +227,8 @@ namespace TUNING
 			"SimCellOccupier",
 			"Vent",
 			"TilePOI",
-			"DecorProvider",
-			"LogicPorts"
+			"LogicPorts",
+			"DecorProvider"
 		};
 
 		public class OVERPRESSURE
@@ -243,7 +250,9 @@ namespace TUNING
 
 			public const float HIGH_2 = 398.15f;
 
-			public const float HIGH_3 = 2273.15f;
+			public const float HIGH_3 = 1273.15f;
+
+			public const float HIGH_4 = 2273.15f;
 		}
 
 		public class OVERHEAT_MATERIAL_MOD
@@ -339,28 +348,7 @@ namespace TUNING
 			public const float TIER8 = 16f;
 		}
 
-		public class OPERATING_TEMPERATURE
-		{
-			public const float TIER0 = 0f;
-
-			public const float TIER1 = 1f;
-
-			public const float TIER2 = 2f;
-
-			public const float TIER3 = 4f;
-
-			public const float TIER4 = 8f;
-
-			public const float TIER5 = 16f;
-
-			public const float TIER6 = 32f;
-
-			public const float TIER7 = 64f;
-
-			public const float TIER8 = 128f;
-		}
-
-		public class OPERATING_KILOWATTS
+		public class SELF_HEAT_KILOWATTS
 		{
 			public const float TIER0 = 0f;
 
@@ -443,6 +431,8 @@ namespace TUNING
 		public class WORK_TIME_SECONDS
 		{
 			public const float VERYSHORT_WORK_TIME = 5f;
+
+			public const float SHORT_WORK_TIME = 15f;
 
 			public const float MEDIUM_WORK_TIME = 30f;
 

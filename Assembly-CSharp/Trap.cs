@@ -8,15 +8,15 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 {
 	private void SetStoredPosition(GameObject go)
 	{
-		go.transform.position = Grid.CellToPosCBC(Grid.PosToCell(base.transform.position), Grid.SceneLayer.BuildingBack);
+		go.transform.SetPosition(Grid.CellToPosCBC(Grid.PosToCell(base.transform.GetPosition()), Grid.SceneLayer.BuildingBack));
 	}
 
 	private static void CreateStatusItems()
 	{
 		if (Trap.statusSprung == null)
 		{
-			Trap.statusReady = new StatusItem("Ready", BUILDING.STATUSITEMS.CREATURE_TRAP.READY.NAME, BUILDING.STATUSITEMS.CREATURE_TRAP.READY.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
-			Trap.statusSprung = new StatusItem("Sprung", BUILDING.STATUSITEMS.CREATURE_TRAP.SPRUNG.NAME, BUILDING.STATUSITEMS.CREATURE_TRAP.SPRUNG.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
+			Trap.statusReady = new StatusItem("Ready", BUILDING.STATUSITEMS.CREATURE_TRAP.READY.NAME, BUILDING.STATUSITEMS.CREATURE_TRAP.READY.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486);
+			Trap.statusSprung = new StatusItem("Sprung", BUILDING.STATUSITEMS.CREATURE_TRAP.SPRUNG.NAME, BUILDING.STATUSITEMS.CREATURE_TRAP.SPRUNG.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486);
 			Trap.statusSprung.resolveTooltipCallback = delegate(string str, object obj)
 			{
 				Trap.StatesInstance statesInstance = (Trap.StatesInstance)obj;
@@ -52,7 +52,7 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 			}
 			else
 			{
-				component.DropAll();
+				component.DropAll(false);
 			}
 		}
 	}
@@ -93,11 +93,11 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 			KPrefabID component2 = trappable.GetComponent<KPrefabID>();
 			Tag baggedCreatureTag = EntityTemplates.GetBaggedCreatureTag(component2.PrefabTag);
 			GameObject prefab = Assets.GetPrefab(baggedCreatureTag);
-			GameObject gameObject = Util.KInstantiate(prefab, Folder.Entities);
+			GameObject gameObject = Util.KInstantiate(prefab, Folder.Entities, base.master.transform.GetPosition());
 			KPrefabID component3 = gameObject.GetComponent<KPrefabID>();
 			base.master.contents.Set(component3);
 			gameObject.SetActive(true);
-			component.Store(gameObject, true, false, true);
+			component.Store(gameObject, true, false, true, false);
 			base.master.SetStoredPosition(gameObject);
 			Util.KDestroyGameObject(trappable.gameObject);
 			base.smi.sm.trapTriggered.Trigger(base.smi);

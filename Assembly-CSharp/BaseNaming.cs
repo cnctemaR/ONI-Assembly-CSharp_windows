@@ -36,10 +36,10 @@ public class BaseNaming : KMonoBehaviour
 		{
 			text += ".sav";
 		}
-		string savePrefix = SaveLoader.GetSavePrefix();
-		if (!text.Contains(savePrefix))
+		string savePrefixAndCreateFolder = SaveLoader.GetSavePrefixAndCreateFolder();
+		if (!text.Contains(savePrefixAndCreateFolder))
 		{
-			text = savePrefix + text;
+			text = savePrefixAndCreateFolder + text;
 		}
 		SaveLoader.SetActiveSaveFilePath(text);
 	}

@@ -48,10 +48,10 @@ public class Placeable : KMonoBehaviour
 		{
 			this.chore.Cancel("new target");
 		}
-		this.chore = new FetchChore(this.preview.GetComponent<Storage>(), 1f, new Tag[]
+		this.chore = new FetchChore(Db.Get().ChoreTypes.Fetch, this.preview.GetComponent<Storage>(), 1f, new Tag[]
 		{
 			new Tag(this.prefabId.InstanceID.ToString())
-		}, null, null, true, new Action<Chore>(this.OnChoreComplete), null, null, FetchOrder2.OperationalRequirement.None, 0);
+		}, null, null, true, new Action<Chore>(this.OnChoreComplete), null, null, FetchOrder2.OperationalRequirement.None, 0, null);
 	}
 
 	private void OnChoreComplete(Chore completed_chore)

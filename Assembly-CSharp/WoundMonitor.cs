@@ -6,13 +6,7 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 	{
 		default_state = this.healthy;
 		this.root.ToggleAnims("anim_hits_kanim", 0f);
-		this.healthy.Update(delegate(WoundMonitor.Instance smi)
-		{
-			if (smi.health.State != Health.HealthState.Perfect)
-			{
-				smi.GoTo(this.wounded);
-			}
-		});
+		this.healthy.Transition(this.wounded, (WoundMonitor.Instance smi) => smi.health.State != Health.HealthState.Perfect, UpdateRate.SIM_200ms);
 		this.wounded.ToggleUrge(Db.Get().Urges.Heal).Enter(delegate(WoundMonitor.Instance smi)
 		{
 			Health.HealthState state = smi.health.State;

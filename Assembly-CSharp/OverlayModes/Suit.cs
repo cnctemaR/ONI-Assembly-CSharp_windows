@@ -147,7 +147,7 @@ namespace OverlayModes
 					if (flag)
 					{
 						GameObject freeUI = this.GetFreeUI();
-						freeUI.GetComponent<RectTransform>().position = saveLoadRoot2.transform.position;
+						freeUI.GetComponent<RectTransform>().SetPosition(saveLoadRoot2.transform.GetPosition());
 					}
 				}
 			}

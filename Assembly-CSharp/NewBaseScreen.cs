@@ -23,7 +23,6 @@ public class NewBaseScreen : KScreen
 		Vector2I baseStartPos = SaveLoader.Instance.cachedGSD.baseStartPos;
 		int num = Grid.OffsetCell(0, baseStartPos.x, baseStartPos.y);
 		Vector3 vector = Grid.CellToPosCCC(Grid.OffsetCell(num, 0, -2), Grid.SceneLayer.Background);
-		vector.z = CameraController.Instance.defaultDepth;
 		CameraController.Instance.SetMaxOrthographicSize(40f);
 		CameraController.Instance.SnapTo(vector);
 		CameraController.Instance.SetTargetPos(vector, 20f, false);
@@ -130,7 +129,7 @@ public class NewBaseScreen : KScreen
 			int num4 = num2;
 			int num5 = Grid.XYToCell(num3, num4);
 			GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.MinionPrefab, SceneOrganizer.Instance.GetFolder(Folder.Minions), null);
-			gameObject.transform.localPosition = Grid.CellToPosCBC(num5, Grid.SceneLayer.Move);
+			gameObject.transform.SetLocalPosition(Grid.CellToPosCBC(num5, Grid.SceneLayer.Move));
 			gameObject.SetActive(true);
 			this.minionStartingStats[i].Apply(gameObject);
 			GameScheduler.Instance.Schedule("ANewHope", 3f + 0.5f * (float)i, delegate(object m)

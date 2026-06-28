@@ -93,7 +93,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 				array = new Tag[0];
 			}
 			Storage component2 = base.GetComponent<Storage>();
-			this.chore = new FetchChore(component2, component2.Capacity(), base.GetComponent<TreeFilterable>().GetTags(), array, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0);
+			this.chore = new FetchChore(Db.Get().ChoreTypes.Fetch, component2, component2.Capacity(), base.GetComponent<TreeFilterable>().GetTags(), array, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0, null);
 		}
 
 		public void CancelChore()
@@ -128,9 +128,9 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			{
 				return;
 			}
-			this.meter.SetSymbolTint(KBatchedAnimController.SymbolTintIndex.First, new KAnimHashedString("meter_fill"), firstPrimaryElement.Element.substance.colour);
-			this.meter.SetSymbolTint(KBatchedAnimController.SymbolTintIndex.Second, new KAnimHashedString("water1"), firstPrimaryElement.Element.substance.colour);
-			base.GetComponent<KBatchedAnimController>().SetSymbolTint(KBatchedAnimController.SymbolTintIndex.Second, new KAnimHashedString("leak_ceiling"), firstPrimaryElement.Element.substance.colour);
+			this.meter.SetSymbolTint(new KAnimHashedString("meter_fill"), firstPrimaryElement.Element.substance.colour);
+			this.meter.SetSymbolTint(new KAnimHashedString("water1"), firstPrimaryElement.Element.substance.colour);
+			base.GetComponent<KBatchedAnimController>().SetSymbolTint(new KAnimHashedString("leak_ceiling"), firstPrimaryElement.Element.substance.colour);
 		}
 
 		private PrimaryElement GetFirstPrimaryElement()
@@ -170,7 +170,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			SimUtil.DiseaseInfo diseaseInfo;
 			float num3;
 			component.ConsumeAndGetDisease(prefabTag, num2, out diseaseInfo, out num3);
-			Vector3 position = base.transform.position;
+			Vector3 position = base.transform.GetPosition();
 			position.y += 1.8f;
 			bool flag = base.GetComponent<Rotatable>().GetOrientation() == Orientation.FlipH;
 			position.x += ((!flag) ? 0.2f : (-0.2f));
@@ -190,7 +190,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.waitingfordelivery;
-			this.statusItem = new StatusItem("BottleEmptier", string.Empty, string.Empty, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
+			this.statusItem = new StatusItem("BottleEmptier", string.Empty, string.Empty, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486);
 			this.statusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				BottleEmptier bottleEmptier = (BottleEmptier)data;
@@ -232,10 +232,10 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			{
 				smi.StartMeter();
 			})
-				.Update("DripLiquid", delegate(BottleEmptier.StatesInstance smi)
+				.Update("DripLiquid", delegate(BottleEmptier.StatesInstance smi, float dt)
 				{
-					smi.DripLiquid(smi.dt);
-				})
+					smi.DripLiquid(dt);
+				}, UpdateRate.SIM_200ms, false)
 				.PlayAnim("working_loop", KAnim.PlayMode.Loop);
 		}
 

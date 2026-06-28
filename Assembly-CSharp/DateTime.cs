@@ -26,7 +26,7 @@ public class DateTime : KScreen
 
 	private string Days()
 	{
-		return GameUtil.GetCurrentDay().ToString();
+		return GameUtil.GetCurrentCycle().ToString();
 	}
 
 	private string OnToolTip()

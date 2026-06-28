@@ -30,7 +30,7 @@ public class PopFX : KMonoBehaviour
 		this.offset = Offset;
 		if (this.targetTransform != null)
 		{
-			this.startPos = this.targetTransform.position;
+			this.startPos = this.targetTransform.GetPosition();
 			int num;
 			int num2;
 			Grid.PosToXY(this.startPos, out num, out num2);
@@ -63,7 +63,7 @@ public class PopFX : KMonoBehaviour
 		}
 		if (this.trackTarget && this.targetTransform != null)
 		{
-			Vector3 vector = PopFXManager.Instance.WorldToScreen(this.targetTransform.position + this.offset + Vector3.up * this.lifeElapsed * (this.Speed * this.lifeElapsed));
+			Vector3 vector = PopFXManager.Instance.WorldToScreen(this.targetTransform.GetPosition() + this.offset + Vector3.up * this.lifeElapsed * (this.Speed * this.lifeElapsed));
 			vector.z = 0f;
 			base.gameObject.rectTransform().anchoredPosition = vector;
 		}

@@ -7,7 +7,7 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class MeterScreen : KScreen
+public class MeterScreen : KScreen, IRender200ms
 {
 	public static MeterScreen Instance { get; private set; }
 
@@ -61,13 +61,9 @@ public class MeterScreen : KScreen
 		}
 	}
 
-	private void SimUpdate(float dt)
+	public void Render200ms(float dt)
 	{
-		this.tickCount++;
-		if (this.tickCount % 4 == 0)
-		{
-			this.Refresh();
-		}
+		this.Refresh();
 	}
 
 	public void InitializeValues()
@@ -257,15 +253,13 @@ public class MeterScreen : KScreen
 			{
 				display_info.selectedIndex = (display_info.selectedIndex + 1) % Components.LiveMinionIdentities.Count;
 				MinionIdentity minionIdentity = minions[display_info.selectedIndex];
-				SelectTool.Instance.SelectAndFocus(minionIdentity.transform.position, minionIdentity.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
+				SelectTool.Instance.SelectAndFocus(minionIdentity.transform.GetPosition(), minionIdentity.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
 			}
 		}
 	}
 
 	[SerializeField]
 	private LocText currentMinions;
-
-	private int tickCount;
 
 	public ToolTip MinionsTooltip;
 

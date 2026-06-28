@@ -129,108 +129,9 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 			if (component != null)
 			{
 				SimHashes visualizationElementID = this.GetVisualizationElementID(component);
-				World.Instance.blockTileRenderer.AddBlock(base.gameObject.layer, this.Def, visualizationElementID, Grid.PosToCell(base.transform.position));
+				World.Instance.blockTileRenderer.AddBlock(base.gameObject.layer, this.Def, visualizationElementID, Grid.PosToCell(base.transform.GetPosition()));
 			}
 		}
-	}
-
-	public bool IsValidBuildLocation(Vector3 pos, out string reason, Orientation orientation)
-	{
-		reason = null;
-		int num = Grid.PosToCell(pos);
-		bool flag = true;
-		if (this.Def.BuildLocationRule == BuildLocationRule.OnFloor || this.Def.BuildLocationRule == BuildLocationRule.OnCeiling)
-		{
-			int num2 = -(this.Def.WidthInCells - 1) / 2;
-			int num3 = this.Def.WidthInCells / 2;
-			if (orientation == Orientation.FlipH)
-			{
-				int num4 = num2;
-				num2 = -num3;
-				num3 = -num4;
-			}
-			int num5 = ((this.Def.BuildLocationRule != BuildLocationRule.OnFloor) ? this.Def.HeightInCells : (-1));
-			for (int i = num2; i <= num3; i++)
-			{
-				int num6 = Grid.OffsetCell(num, i, num5);
-				if (!Grid.IsValidCell(num6))
-				{
-					reason = "Foundation is not too near edge of world";
-					return false;
-				}
-				if (Grid.Objects[num, 5] != null)
-				{
-					reason = "Location occupied by plant";
-					return false;
-				}
-				flag = flag && Grid.Solid[num6];
-				if (!flag)
-				{
-					reason = "Foundation is not solid";
-					return false;
-				}
-			}
-		}
-		else
-		{
-			if (this.Def.BuildLocationRule == BuildLocationRule.Anywhere)
-			{
-				return true;
-			}
-			if (this.Def.BuildLocationRule == BuildLocationRule.Tile)
-			{
-				flag = Grid.Solid[num];
-				if (!flag)
-				{
-					reason = "Tile Solid should be covering cell but isn't";
-					return false;
-				}
-			}
-		}
-		if (!flag)
-		{
-			reason = "Unknown reason.";
-		}
-		return flag;
-	}
-
-	public bool IsBuildingProneToCollapse(Vector3 pos)
-	{
-		int num = Grid.PosToCell(pos);
-		bool flag = true;
-		if (this.Def.BuildLocationRule == BuildLocationRule.OnFloor)
-		{
-			int num2 = -(this.Def.WidthInCells - 1) / 2;
-			int num3 = this.Def.WidthInCells / 2;
-			for (int i = num2; i <= num3; i++)
-			{
-				int num4 = Grid.OffsetCell(num, i, -1);
-				if (!Grid.IsValidCell(num4))
-				{
-					flag = true;
-					break;
-				}
-				if (Grid.Solid[num4])
-				{
-					flag = false;
-					break;
-				}
-				if (Grid.Objects[num4, 1] != null)
-				{
-					flag = false;
-					break;
-				}
-			}
-		}
-		else if (this.Def.BuildLocationRule == BuildLocationRule.Anywhere)
-		{
-			flag = false;
-		}
-		else if (this.Def.BuildLocationRule == BuildLocationRule.Tile)
-		{
-			flag = !Grid.Solid[num];
-		}
-		return flag;
 	}
 
 	public CellOffset GetRotatedOffset(CellOffset offset)
@@ -240,7 +141,7 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 
 	private int GetBottomLeftCell()
 	{
-		Vector3 position = base.transform.position;
+		Vector3 position = base.transform.GetPosition();
 		return Grid.PosToCell(position);
 	}
 
@@ -286,7 +187,7 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 			if (component != null)
 			{
 				SimHashes visualizationElementID = this.GetVisualizationElementID(component);
-				World.Instance.blockTileRenderer.RemoveBlock(this.Def, visualizationElementID, Grid.PosToCell(base.transform.position));
+				World.Instance.blockTileRenderer.RemoveBlock(this.Def, visualizationElementID, Grid.PosToCell(base.transform.GetPosition()));
 			}
 		}
 	}
@@ -367,10 +268,10 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ENERGYGENERATED, GameUtil.GetFormattedWattage(def.GeneratorWattageRating, GameUtil.WattageFormatterUnit.Automatic)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ENERGYGENERATED, GameUtil.GetFormattedWattage(def.GeneratorWattageRating, GameUtil.WattageFormatterUnit.Automatic)), Descriptor.DescriptorType.Effect);
 			list.Add(descriptor);
 		}
-		if (def.ExhaustKilowattsWhenActive > 0f || def.OperatingKilowatts > 0f)
+		if (def.ExhaustKilowattsWhenActive > 0f || def.SelfHeatKilowattsWhenActive > 0f)
 		{
 			Descriptor descriptor2 = default(Descriptor);
-			descriptor2.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.HEATGENERATED, GameUtil.GetFormattedWattage(5f * (def.ExhaustKilowattsWhenActive + def.OperatingKilowatts), GameUtil.WattageFormatterUnit.Automatic)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED, GameUtil.GetFormattedJoules(5f * (def.ExhaustKilowattsWhenActive + def.OperatingKilowatts), "F1")), Descriptor.DescriptorType.Effect);
+			descriptor2.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.HEATGENERATED, GameUtil.GetFormattedWattage(5f * (def.ExhaustKilowattsWhenActive + def.SelfHeatKilowattsWhenActive), GameUtil.WattageFormatterUnit.Automatic)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED, GameUtil.GetFormattedJoules(5f * (def.ExhaustKilowattsWhenActive + def.SelfHeatKilowattsWhenActive), "F1", GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect);
 			list.Add(descriptor2);
 		}
 		return list;

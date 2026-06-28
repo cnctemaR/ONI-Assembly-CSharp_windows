@@ -10,27 +10,25 @@ public class OuthouseConfig : IBuildingConfig
 		int num = 2;
 		int num2 = 3;
 		string text2 = "outhouse_kanim";
-		float num3 = 200f;
-		int num4 = 30;
-		float num5 = 30f;
+		int num3 = 30;
+		float num4 = 30f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
-		float num6 = 800f;
+		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER4, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER4, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
 		buildingDef.DiseaseCellVisName = "FoodPoisoning";
 		buildingDef.MaterialCategory = MATERIALS.RAW_MINERALS;
 		buildingDef.AudioCategory = "Metal";
-		buildingDef.HotKey = global::Action.BuildMenuKeyT;
 		SoundEventVolumeCache.instance.AddVolume("outhouse_kanim", "Latrine_door_open", NOISE_POLLUTION.NOISY.TIER1);
 		SoundEventVolumeCache.instance.AddVolume("outhouse_kanim", "Latrine_door_close", NOISE_POLLUTION.NOISY.TIER1);
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.Toilet);
@@ -45,21 +43,22 @@ public class OuthouseConfig : IBuildingConfig
 		ToiletWorkableUse toiletWorkableUse = go.AddOrGet<ToiletWorkableUse>();
 		toiletWorkableUse.overrideAnims = array;
 		toiletWorkableUse.workLayer = Grid.SceneLayer.BuildingFront;
-		toiletWorkableUse.canBePublic = true;
 		ToiletWorkableClean toiletWorkableClean = go.AddOrGet<ToiletWorkableClean>();
 		toiletWorkableClean.workTime = 90f;
 		toiletWorkableClean.overrideAnims = array;
+		toiletWorkableClean.workLayer = Grid.SceneLayer.BuildingFront;
 		Storage storage = go.AddOrGet<Storage>();
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		storage.showInUI = true;
-		Storage storage2 = go.AddComponent<Storage>();
-		storage2.capacityKg = 20000f;
-		storage2.showInUI = true;
-		storage2.allowItemRemoval = true;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = new Tag("Dirt");
 		manualDeliveryKG.capacity = 200f;
-		manualDeliveryKG.refillMass = 25f;
+		manualDeliveryKG.refillMass = 0.01f;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
+		Ownable ownable = go.AddOrGet<Ownable>();
+		ownable.slotID = Db.Get().AssignableSlots.Toilet.Id;
+		ownable.canBePublic = true;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -68,4 +67,8 @@ public class OuthouseConfig : IBuildingConfig
 	}
 
 	public const string ID = "Outhouse";
+
+	private const int USES_PER_REFILL = 15;
+
+	private const float DIRT_PER_REFILL = 200f;
 }

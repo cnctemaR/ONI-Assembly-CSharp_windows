@@ -5,7 +5,7 @@ using UnityEngine;
 public class FleeChore : Chore<FleeChore.StatesInstance>
 {
 	public FleeChore(IStateMachineTarget target, GameObject enemy)
-		: base(Db.Get().ChoreTypes.Flee, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Flee, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new FleeChore.StatesInstance(this);
 		this.smi.sm.self.Set(this.gameObject, this.smi);
@@ -15,7 +15,7 @@ public class FleeChore : Chore<FleeChore.StatesInstance>
 
 	private bool isInFavoredDirection(int cell, int fleeFromCell)
 	{
-		bool flag = Grid.CellToPos(fleeFromCell).x < this.gameObject.transform.position.x;
+		bool flag = Grid.CellToPos(fleeFromCell).x < this.gameObject.transform.GetPosition().x;
 		bool flag2 = Grid.CellToPos(fleeFromCell).x < Grid.CellToPos(cell).x;
 		return flag == flag2;
 	}

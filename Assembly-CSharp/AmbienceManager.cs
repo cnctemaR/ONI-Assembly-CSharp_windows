@@ -32,8 +32,8 @@ public class AmbienceManager : KMonoBehaviour
 		}
 		vector2I = vector2I3 - vector2I4 / 2;
 		vector2I2 = vector2I3 + vector2I4 / 2;
-		Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.position.z));
-		Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.position.z));
+		Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.GetPosition().z));
+		Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.GetPosition().z));
 		Vector3 vector3 = vector2 + (vector - vector2) / 2f;
 		Vector3 vector4 = vector - vector2;
 		if (vector4.x > vector4.y)

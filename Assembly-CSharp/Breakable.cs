@@ -26,7 +26,8 @@ public class Breakable : Workable
 
 	public Notification CreateDamageNotification()
 	{
-		return new Notification(BUILDING.STATUSITEMS.ANGERDAMAGE.NOTIFICATION, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => BUILDING.STATUSITEMS.ANGERDAMAGE.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), this.selectable.GetProperName(), false, 0f, null, null, null);
+		KSelectable component = base.GetComponent<KSelectable>();
+		return new Notification(BUILDING.STATUSITEMS.ANGERDAMAGE.NOTIFICATION, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => BUILDING.STATUSITEMS.ANGERDAMAGE.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), component.GetProperName(), false, 0f, null, null, null);
 	}
 
 	private static string ToolTipResolver(List<Notification> notificationList, object data)
@@ -51,7 +52,7 @@ public class Breakable : Workable
 		this.tenPercentDamage = Mathf.CeilToInt((float)this.hp.MaxHitPoints * 0.1f);
 		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.AngerDamage, this);
 		this.notification = this.CreateDamageNotification();
-		base.GetComponent<Notifier>().Add(this.notification, string.Empty);
+		base.gameObject.AddOrGet<Notifier>().Add(this.notification, string.Empty);
 		this.elapsedDamageTime = 0f;
 	}
 
@@ -75,7 +76,7 @@ public class Breakable : Workable
 	{
 		base.OnStopWork(worker);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.AngerDamage, false);
-		base.GetComponent<Notifier>().Remove(this.notification);
+		base.gameObject.AddOrGet<Notifier>().Remove(this.notification);
 		if (worker != null)
 		{
 			worker.Trigger(-1734580852, null);

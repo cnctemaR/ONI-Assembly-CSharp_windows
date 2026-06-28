@@ -97,9 +97,9 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISliderControl
 		return flag;
 	}
 
-	protected override void SimUpdate(float dt)
+	public override void EnergySim200ms(float dt)
 	{
-		base.SimUpdate(dt);
+		base.EnergySim200ms(dt);
 		if (this.hasMeter)
 		{
 			EnergyGenerator.InputItem inputItem = this.formula.inputs[0];
@@ -123,6 +123,11 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISliderControl
 			{
 				foreach (Battery battery in batteriesOnCircuit)
 				{
+					if (this.batteryRefillPercent <= 0f && battery.PercentFull <= 0f)
+					{
+						flag2 = true;
+						break;
+					}
 					if (battery.PercentFull < this.batteryRefillPercent)
 					{
 						flag2 = true;
@@ -233,11 +238,11 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISliderControl
 	{
 		if (EnergyGenerator.batteriesSufficientlyFull == null)
 		{
-			EnergyGenerator.batteriesSufficientlyFull = new StatusItem("BatteriesSufficientlyFull", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			EnergyGenerator.batteriesSufficientlyFull = new StatusItem("BatteriesSufficientlyFull", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 		}
 		if (EnergyGenerator.insufficientConversionMass == null)
 		{
-			EnergyGenerator.insufficientConversionMass = new StatusItem("INSUFFICIENT_CONVERSION_MASS", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
+			EnergyGenerator.insufficientConversionMass = new StatusItem("INSUFFICIENT_CONVERSION_MASS", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 		}
 	}
 
@@ -278,13 +283,13 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISliderControl
 			}
 			else
 			{
-				GameObject gameObject = element.substance.SpawnResource(base.transform.position, num, root_pe.Temperature, byte.MaxValue, 0, false, false);
-				this.storage.Store(gameObject, true, false, true);
+				GameObject gameObject = element.substance.SpawnResource(base.transform.GetPosition(), num, root_pe.Temperature, byte.MaxValue, 0, false, false);
+				this.storage.Store(gameObject, true, false, true, false);
 			}
 		}
 		else
 		{
-			int num2 = Grid.PosToCell(base.transform.position);
+			int num2 = Grid.PosToCell(base.transform.GetPosition());
 			int num3 = Grid.OffsetCell(num2, output.emitOffset);
 			if (element.IsGas)
 			{

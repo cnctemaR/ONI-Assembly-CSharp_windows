@@ -53,6 +53,42 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Sick Duplicants assigned to medical beds located within a Med Bay are less likely to spread Disease.";
 			}
 
+			public class POWER_PLANT
+			{
+				public static LocString NAME = "Power Plant";
+
+				public static LocString EFFECT = "- Power production increase";
+
+				public static LocString TOOLTIP = "Electrical Engineers can tune-up generators built within a Power Plant, improving their power production.";
+			}
+
+			public class MACHINE_SHOP
+			{
+				public static LocString NAME = "Machine Shop";
+
+				public static LocString EFFECT = "- Increased fabrication efficiency";
+
+				public static LocString TOOLTIP = "Engineers working in a Machine Shop can maintain buildings and increase the speed with which they produce items.";
+			}
+
+			public class FARM
+			{
+				public static LocString NAME = "Greenhouse";
+
+				public static LocString EFFECT = "- Accelerated plant growth";
+
+				public static LocString TOOLTIP = "Crops grown within a Greenhouse can be tended by Farmers to increase their growth speed.";
+			}
+
+			public class REC_ROOM
+			{
+				public static LocString NAME = "Recreation Room";
+
+				public static LocString EFFECT = "- Stress relief bonus";
+
+				public static LocString TOOLTIP = "Leisure time will relieve additional stress for Duplicants inside a Recreation Room.";
+			}
+
 			public class PRIVATE_BEDROOM
 			{
 				public static LocString NAME = "Private Bedroom";
@@ -105,9 +141,9 @@ namespace STRINGS
 
 			public class BED_SINGLE
 			{
-				public static LocString NAME = "One bed";
+				public static LocString NAME = "Single bed";
 
-				public static LocString DESCRIPTION = "Requires a single Cot or Comfy Bed";
+				public static LocString DESCRIPTION = "Requires one Cot or Comfy Bed";
 			}
 
 			public class BED_MULTIPLE
@@ -124,11 +160,46 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Requires at least one building with positive decor";
 			}
 
+			public class DECORATIVE_ITEM
+			{
+				public static LocString NAME = "Decoration item";
+
+				public static LocString DESCRIPTION = "Requires one or more Paintings, Sculptures, or Vases";
+			}
+
 			public class CLINIC
 			{
 				public static LocString NAME = "Medical bed";
 
 				public static LocString DESCRIPTION = "Requires one or more Med-Beds or Pharma Chambers";
+			}
+
+			public class POWER_STATION
+			{
+				public static LocString NAME = "Power Control Station";
+
+				public static LocString DESCRIPTION = "Requires a single Power Control Station";
+			}
+
+			public class FARM_STATION
+			{
+				public static LocString NAME = "Farm Station";
+
+				public static LocString DESCRIPTION = "Requires a single Farm Station";
+			}
+
+			public class REC_BUILDING
+			{
+				public static LocString NAME = "Recreational building";
+
+				public static LocString DESCRIPTION = "Requires one or more Massage Tables";
+			}
+
+			public class MACHINE_SHOP
+			{
+				public static LocString NAME = "Mechanics Station";
+
+				public static LocString DESCRIPTION = "Requires requires one or more Mechanics Stations";
 			}
 
 			public class FOOD_BOX
@@ -147,21 +218,21 @@ namespace STRINGS
 
 			public class MASSAGE_TABLE
 			{
-				public static LocString NAME = "Massage table";
+				public static LocString NAME = "Massage Table";
 
 				public static LocString DESCRIPTION = "Requires one or more Massage Tables";
 			}
 
 			public class MESS_STATION_SINGLE
 			{
-				public static LocString NAME = "One table";
+				public static LocString NAME = "Mess Table";
 
 				public static LocString DESCRIPTION = "Requires a single Mess Table";
 			}
 
 			public class MESS_STATION_MULTIPLE
 			{
-				public static LocString NAME = "Tables";
+				public static LocString NAME = "Mess Tables";
 
 				public static LocString DESCRIPTION = "Requires two or more Mess Tables";
 			}

@@ -10,17 +10,18 @@ public struct FallerComponent
 		this.initialVelocity = initial_velocity;
 		this.partitionerEntry = null;
 		this.solidChangedCB = null;
-		CircleCollider2D component = transform.GetComponent<CircleCollider2D>();
+		this.cellChangedCB = null;
+		KCircleCollider2D component = transform.GetComponent<KCircleCollider2D>();
 		if (component != null)
 		{
 			this.offset = component.radius;
 		}
 		else
 		{
-			Collider2D component2 = transform.GetComponent<Collider2D>();
+			KCollider2D component2 = transform.GetComponent<KCollider2D>();
 			if (component2 != null)
 			{
-				this.offset = transform.position.y - component2.bounds.min.y;
+				this.offset = transform.GetPosition().y - component2.bounds.min.y;
 			}
 			else
 			{
@@ -40,4 +41,6 @@ public struct FallerComponent
 	public ScenePartitionerEntry partitionerEntry;
 
 	public Action<object> solidChangedCB;
+
+	public global::System.Action cellChangedCB;
 }

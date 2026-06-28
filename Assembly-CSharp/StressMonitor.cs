@@ -8,14 +8,14 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 	{
 		base.serializable = true;
 		default_state = this.satisfied;
-		this.root.ToggleUrge(Db.Get().Urges.Relax).Update(delegate(StressMonitor.Instance smi)
+		this.root.ToggleUrge(Db.Get().Urges.Relax).Update("StressMonitor", delegate(StressMonitor.Instance smi, float dt)
 		{
-			smi.ReportStress(smi.deltatime);
-		});
-		this.satisfied.Transition(this.stressed.tier1, (StressMonitor.Instance smi) => smi.stress.value >= 60f).ToggleExpression(Db.Get().Expressions.Neutral, null);
-		this.stressed.ToggleStatusItem(Db.Get().DuplicantStatusItems.Stressed, null).Transition(this.satisfied, (StressMonitor.Instance smi) => smi.stress.value < 60f).TriggerOnEnter(GameHashes.Stressed, null);
-		this.stressed.tier1.Transition(this.stressed.tier2, (StressMonitor.Instance smi) => smi.HasHadEnough());
-		this.stressed.tier2.TriggerOnEnter(GameHashes.StressedHadEnough, null).Transition(this.stressed.tier1, (StressMonitor.Instance smi) => !smi.HasHadEnough());
+			smi.ReportStress(dt);
+		}, UpdateRate.SIM_200ms, false);
+		this.satisfied.Transition(this.stressed.tier1, (StressMonitor.Instance smi) => smi.stress.value >= 60f, UpdateRate.SIM_200ms).ToggleExpression(Db.Get().Expressions.Neutral, null);
+		this.stressed.ToggleStatusItem(Db.Get().DuplicantStatusItems.Stressed, null).Transition(this.satisfied, (StressMonitor.Instance smi) => smi.stress.value < 60f, UpdateRate.SIM_200ms).TriggerOnEnter(GameHashes.Stressed, null);
+		this.stressed.tier1.Transition(this.stressed.tier2, (StressMonitor.Instance smi) => smi.HasHadEnough(), UpdateRate.SIM_200ms);
+		this.stressed.tier2.TriggerOnEnter(GameHashes.StressedHadEnough, null).Transition(this.stressed.tier1, (StressMonitor.Instance smi) => !smi.HasHadEnough(), UpdateRate.SIM_200ms);
 	}
 
 	public GameStateMachine<StressMonitor, StressMonitor.Instance, IStateMachineTarget, object>.State satisfied;

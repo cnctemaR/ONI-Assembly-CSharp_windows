@@ -121,16 +121,21 @@ internal class GraphicsOptionsScreen : KModalScreen
 	private int GetResolutionIndex(Resolution resolution)
 	{
 		int num = -1;
+		int num2 = -1;
 		for (int i = 0; i < this.resolutions.Count; i++)
 		{
 			Resolution resolution2 = this.resolutions[i];
+			if (resolution2.width == resolution.width && resolution2.height == resolution.height && resolution2.refreshRate == 0)
+			{
+				num2 = i;
+			}
 			if (resolution2.width == resolution.width && resolution2.height == resolution.height && Math.Abs(resolution2.refreshRate - resolution.refreshRate) <= 1)
 			{
 				num = i;
 				break;
 			}
 		}
-		return num;
+		return (num != -1) ? num : num2;
 	}
 
 	private GraphicsOptionsScreen.Settings CaptureSettings()
@@ -182,7 +187,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			this.applyButton.isInteractable = true;
 		}
-		else if (this.fullscreenToggle.isOn)
+		else if (this.resDropdownAlwaysActive || this.fullscreenToggle.isOn)
 		{
 			int resolutionIndex = this.GetResolutionIndex(settings.resolution);
 			this.applyButton.isInteractable = this.resolutionDropdown.value != resolutionIndex;

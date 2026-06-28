@@ -12,19 +12,19 @@ public class BatchAnimCamera : MonoBehaviour
 	{
 		if (Input.GetKey(KeyCode.RightArrow))
 		{
-			base.transform.position += Vector3.right * BatchAnimCamera.pan_speed * Time.deltaTime;
+			base.transform.SetPosition(base.transform.GetPosition() + Vector3.right * BatchAnimCamera.pan_speed * Time.deltaTime);
 		}
 		if (Input.GetKey(KeyCode.LeftArrow))
 		{
-			base.transform.position += Vector3.left * BatchAnimCamera.pan_speed * Time.deltaTime;
+			base.transform.SetPosition(base.transform.GetPosition() + Vector3.left * BatchAnimCamera.pan_speed * Time.deltaTime);
 		}
 		if (Input.GetKey(KeyCode.UpArrow))
 		{
-			base.transform.position += Vector3.up * BatchAnimCamera.pan_speed * Time.deltaTime;
+			base.transform.SetPosition(base.transform.GetPosition() + Vector3.up * BatchAnimCamera.pan_speed * Time.deltaTime);
 		}
 		if (Input.GetKey(KeyCode.DownArrow))
 		{
-			base.transform.position += Vector3.down * BatchAnimCamera.pan_speed * Time.deltaTime;
+			base.transform.SetPosition(base.transform.GetPosition() + Vector3.down * BatchAnimCamera.pan_speed * Time.deltaTime);
 		}
 		this.ClampToBounds();
 		if (Input.GetKey(KeyCode.LeftShift))
@@ -56,11 +56,11 @@ public class BatchAnimCamera : MonoBehaviour
 
 	private void ClampToBounds()
 	{
-		Vector3 position = base.transform.position;
-		position.x = Mathf.Clamp(base.transform.position.x, BatchAnimCamera.bounds.min.x, BatchAnimCamera.bounds.max.x);
-		position.y = Mathf.Clamp(base.transform.position.y, BatchAnimCamera.bounds.min.y, BatchAnimCamera.bounds.max.y);
-		position.z = Mathf.Clamp(base.transform.position.z, BatchAnimCamera.bounds.min.z, BatchAnimCamera.bounds.max.z);
-		base.transform.position = position;
+		Vector3 position = base.transform.GetPosition();
+		position.x = Mathf.Clamp(base.transform.GetPosition().x, BatchAnimCamera.bounds.min.x, BatchAnimCamera.bounds.max.x);
+		position.y = Mathf.Clamp(base.transform.GetPosition().y, BatchAnimCamera.bounds.min.y, BatchAnimCamera.bounds.max.y);
+		position.z = Mathf.Clamp(base.transform.GetPosition().z, BatchAnimCamera.bounds.min.z, BatchAnimCamera.bounds.max.z);
+		base.transform.SetPosition(position);
 	}
 
 	private void OnDrawGizmosSelected()

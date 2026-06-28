@@ -72,7 +72,7 @@ public class CrewListEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitH
 	{
 		if (focus)
 		{
-			SelectTool.Instance.SelectAndFocus(this.identity.transform.position, this.identity.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
+			SelectTool.Instance.SelectAndFocus(this.identity.transform.GetPosition(), this.identity.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
 		}
 		else
 		{

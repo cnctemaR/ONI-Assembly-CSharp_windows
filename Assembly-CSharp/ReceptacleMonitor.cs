@@ -4,27 +4,15 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause
+public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause, ISim1000ms
 {
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.handle = GameScheduler.Instance.SchedulePeriodic("ReceptacleMonitor", 1f, new Action<object>(this.UpdateReceptacle), null, null, 0f, null);
 		base.smi.StartSM();
 	}
 
-	protected override void OnCleanUp()
-	{
-		this.handle.ClearScheduler();
-		base.OnCleanUp();
-	}
-
-	private void UpdateReceptacle(object param = null)
+	public void Sim1000ms(float dt)
 	{
 		if (base.smi.sm.receptacle.Get(base.smi) == null)
 		{
@@ -84,8 +72,6 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 			new Descriptor(UI.GAMEOBJECTEFFECTS.REQUIRES_RECEPTACLE, UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_RECEPTACLE, Descriptor.DescriptorType.Requirement, false)
 		};
 	}
-
-	private SchedulerHandle handle;
 
 	public class StatesInstance : GameStateMachine<ReceptacleMonitor.States, ReceptacleMonitor.StatesInstance, ReceptacleMonitor, object>.GameInstance
 	{

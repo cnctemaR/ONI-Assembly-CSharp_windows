@@ -105,22 +105,46 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 				global::UnityEngine.Object.Destroy(this.uiMat);
 				this.uiMat = null;
 			}
-			this.uiMat = new Material(this.batch.group.GetMaterial(this.batch.materialType));
-			Texture texture = this.batch.matProperties.GetTexture("instanceTex");
-			this.uiMat.SetTexture("instanceTex", texture);
-			this.uiMat.SetVector("INSTANCE_TEXTURE_SIZE", new Vector4(texture.texelSize.x, texture.texelSize.y, (float)texture.width, (float)texture.height));
-			Texture texture2 = this.batch.matProperties.GetTexture("animTex");
-			this.uiMat.SetTexture("animTex", texture2);
-			this.uiMat.SetVector("ANIM_TEXTURE_SIZE", new Vector4(texture2.texelSize.x, texture2.texelSize.y, (float)texture2.width, (float)texture2.height));
-			Texture texture3 = this.batch.matProperties.GetTexture("buildTex");
-			this.uiMat.SetTexture("buildTex", texture3);
-			this.uiMat.SetVector("BUILD_TEXTURE_SIZE", new Vector4(texture3.texelSize.x, texture3.texelSize.y, (float)texture3.width, (float)texture3.height));
-			for (int i = 0; i < 12; i++)
+			Material material = this.batch.group.GetMaterial(this.batch.materialType);
+			this.uiMat = new Material(material);
+			this.uiMat.SetFloat(KAnimBatchGroup.ShaderProperty_SYMBOLS_PER_BUILD, material.GetFloat(KAnimBatchGroup.ShaderProperty_SYMBOLS_PER_BUILD));
+			if (KBatchedAnimCanvasRenderer.texturesToCopy == null)
 			{
-				Texture texture4 = this.batch.matProperties.GetTexture(KBatchedAnimCanvasRenderer.atlasNames[i]);
-				if (texture4 != null)
+				KBatchedAnimCanvasRenderer.texturesToCopy = new KBatchedAnimCanvasRenderer.TextureTopCopyEntry[]
 				{
-					this.uiMat.SetTexture(KBatchedAnimCanvasRenderer.atlasNames[i], texture4);
+					new KBatchedAnimCanvasRenderer.TextureTopCopyEntry
+					{
+						textureId = Shader.PropertyToID("instanceTex"),
+						sizeId = Shader.PropertyToID("INSTANCE_TEXTURE_SIZE")
+					},
+					new KBatchedAnimCanvasRenderer.TextureTopCopyEntry
+					{
+						textureId = Shader.PropertyToID("animTex"),
+						sizeId = Shader.PropertyToID("ANIM_TEXTURE_SIZE")
+					},
+					new KBatchedAnimCanvasRenderer.TextureTopCopyEntry
+					{
+						textureId = Shader.PropertyToID("buildTex"),
+						sizeId = Shader.PropertyToID("BUILD_TEXTURE_SIZE")
+					},
+					new KBatchedAnimCanvasRenderer.TextureTopCopyEntry
+					{
+						textureId = Shader.PropertyToID("symbolInstanceTex"),
+						sizeId = Shader.PropertyToID("SYMBOL_INSTANCE_TEXTURE_SIZE")
+					}
+				};
+			}
+			foreach (KBatchedAnimCanvasRenderer.TextureTopCopyEntry textureTopCopyEntry in KBatchedAnimCanvasRenderer.texturesToCopy)
+			{
+				this.uiMat.SetTexture(textureTopCopyEntry.textureId, this.batch.matProperties.GetTexture(textureTopCopyEntry.textureId));
+				this.uiMat.SetVector(textureTopCopyEntry.sizeId, this.batch.matProperties.GetVector(textureTopCopyEntry.sizeId));
+			}
+			for (int j = 0; j < 12; j++)
+			{
+				Texture texture = this.batch.matProperties.GetTexture(KBatchedAnimCanvasRenderer.atlasNames[j]);
+				if (texture != null)
+				{
+					this.uiMat.SetTexture(KBatchedAnimCanvasRenderer.atlasNames[j], texture);
 				}
 			}
 			((IMaskable)this).RecalculateMasking();
@@ -143,6 +167,7 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 			this._ClipRect.w = this.rootRectTransform.rect.yMax;
 			Texture texture = this.batch.matProperties.GetTexture("instanceTex");
 			this.uiMat.SetTexture("instanceTex", texture);
+			this.uiMat.SetTexture("symbolInstanceTex", this.batch.matProperties.GetTexture("symbolInstanceTex"));
 		}
 	}
 
@@ -164,5 +189,14 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 
 	private StencilOp _op = StencilOp.Zero;
 
+	private static KBatchedAnimCanvasRenderer.TextureTopCopyEntry[] texturesToCopy = null;
+
 	private Vector4 _ClipRect = new Vector4(0f, 0f, 0f, 1f);
+
+	private struct TextureTopCopyEntry
+	{
+		public int textureId;
+
+		public int sizeId;
+	}
 }

@@ -3,18 +3,13 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TimeRangeSideScreen : SideScreenContent
+public class TimeRangeSideScreen : SideScreenContent, IRender200ms
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		this.labelHeaderStart.text = UI.UISIDESCREENS.TIME_RANGE_SIDE_SCREEN.ON;
 		this.labelHeaderDuration.text = UI.UISIDESCREENS.TIME_RANGE_SIDE_SCREEN.DURATION;
-	}
-
-	protected override void OnActivate()
-	{
-		base.OnActivate();
 	}
 
 	public override void SetTarget(GameObject target)
@@ -43,16 +38,18 @@ public class TimeRangeSideScreen : SideScreenContent
 		this.imageActiveZone.rectTransform.rotation = Quaternion.identity;
 		this.imageActiveZone.rectTransform.Rotate(0f, 0f, this.NormalizedValueToDegrees(this.startTime.value));
 		this.imageActiveZone.fillAmount = this.duration.value;
-		this.labelValueStart.text = (100f * this.targetTimedSwitch.startTime).ToString("F0") + "%";
-		this.labelValueDuration.text = (100f * this.targetTimedSwitch.duration).ToString("F0") + "%";
+		this.labelValueStart.text = GameUtil.GetFormattedPercent(this.targetTimedSwitch.startTime * 100f, GameUtil.TimeSlice.None);
+		this.labelValueDuration.text = GameUtil.GetFormattedPercent(this.targetTimedSwitch.duration * 100f, GameUtil.TimeSlice.None);
 		this.endIndicator.rotation = Quaternion.identity;
 		this.endIndicator.Rotate(0f, 0f, this.NormalizedValueToDegrees(this.startTime.value + this.duration.value));
+		this.startTime.SetTooltipText(string.Format(UI.UISIDESCREENS.TIME_RANGE_SIDE_SCREEN.ON_TOOLTIP, GameUtil.GetFormattedPercent(this.targetTimedSwitch.startTime * 100f, GameUtil.TimeSlice.None)));
+		this.duration.SetTooltipText(string.Format(UI.UISIDESCREENS.TIME_RANGE_SIDE_SCREEN.DURATION_TOOLTIP, GameUtil.GetFormattedPercent(this.targetTimedSwitch.duration * 100f, GameUtil.TimeSlice.None)));
 	}
 
-	private void SimUpdate(float dt)
+	public void Render200ms(float dt)
 	{
 		this.currentTimeMarker.rotation = Quaternion.identity;
-		this.currentTimeMarker.Rotate(0f, 0f, this.NormalizedValueToDegrees(GameClock.Instance.GetCurrentDayAsPercentage()));
+		this.currentTimeMarker.Rotate(0f, 0f, this.NormalizedValueToDegrees(GameClock.Instance.GetCurrentCycleAsPercentage()));
 	}
 
 	private float NormalizedValueToDegrees(float value)

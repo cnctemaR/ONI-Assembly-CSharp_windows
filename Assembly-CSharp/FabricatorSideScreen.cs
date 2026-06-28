@@ -97,6 +97,7 @@ public class FabricatorSideScreen : SideScreenContent
 			}
 			else
 			{
+				this.selectedRecipe = null;
 				this.recipeToggles.ForEach(delegate(KToggle tg)
 				{
 					if (tg != this.selectedToggle)
@@ -163,13 +164,24 @@ public class FabricatorSideScreen : SideScreenContent
 		this.RefreshIngredientDescriptors();
 		GameObject prefab = Assets.GetPrefab(this.selectedRecipe.Result);
 		List<Descriptor> list = new List<Descriptor>();
-		list.AddRange(GameUtil.GetGameObjectEffects(prefab, false));
-		if (list.Count > 0)
+		List<Descriptor> list2 = new List<Descriptor>();
+		list2.AddRange(GameUtil.GetGameObjectRequirements(prefab));
+		if (list2.Count > 0)
 		{
-			GameUtil.IndentListOfDescriptors(list);
-			list.Insert(0, new Descriptor(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RESULTEFFECTS, UI.UISIDESCREENS.FABRICATORSIDESCREEN.RESULTEFFECTS, Descriptor.DescriptorType.Effect, false));
+			GameUtil.IndentListOfDescriptors(list2);
+			list2.Insert(0, new Descriptor(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RESULTREQUIREMENTS, UI.UISIDESCREENS.FABRICATORSIDESCREEN.RESULTREQUIREMENTS, Descriptor.DescriptorType.Effect, false));
 			this.EffectsDescriptorPanel.gameObject.SetActive(true);
 		}
+		List<Descriptor> list3 = new List<Descriptor>();
+		list3.AddRange(GameUtil.GetGameObjectEffects(prefab, false));
+		if (list3.Count > 0)
+		{
+			GameUtil.IndentListOfDescriptors(list3);
+			list3.Insert(0, new Descriptor(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RESULTEFFECTS, UI.UISIDESCREENS.FABRICATORSIDESCREEN.RESULTEFFECTS, Descriptor.DescriptorType.Effect, false));
+			this.EffectsDescriptorPanel.gameObject.SetActive(true);
+		}
+		list.AddRange(list2);
+		list.AddRange(list3);
 		this.EffectsDescriptorPanel.SetDescriptors(list);
 	}
 

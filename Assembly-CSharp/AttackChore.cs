@@ -4,7 +4,7 @@ using UnityEngine;
 public class AttackChore : Chore<AttackChore.StatesInstance>
 {
 	public AttackChore(IStateMachineTarget target, GameObject enemy)
-		: base(Db.Get().ChoreTypes.Attack, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Attack, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new AttackChore.StatesInstance(this);
 		this.smi.sm.attackTarget.Set(enemy, this.smi);
@@ -142,7 +142,7 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 				}
 				this.attackTarget.Get(smi).Subscribe(1969584890, new Action<object>(smi.master.OnTargetDestroyed));
 				smi.ScheduleGoTo(0.5f, this.success);
-			}).Update(delegate(AttackChore.StatesInstance smi)
+			}).Update(delegate(AttackChore.StatesInstance smi, float dt)
 			{
 				if (smi.master.multiTool != null)
 				{

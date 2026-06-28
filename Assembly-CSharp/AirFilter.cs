@@ -20,7 +20,6 @@ public class AirFilter : StateMachineComponent<AirFilter.StatesInstance>, IEffec
 		base.OnPrefabInit();
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		component.randomiseLoopedOffset = true;
-		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FetchCritical;
 	}
 
 	protected override void OnSpawn()

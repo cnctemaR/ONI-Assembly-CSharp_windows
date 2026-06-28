@@ -1,6 +1,6 @@
 ﻿using System;
 
-public enum NavType : byte
+public enum NavType : short
 {
 	Floor,
 	LeftWall,

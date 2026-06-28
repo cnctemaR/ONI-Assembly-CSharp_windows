@@ -130,12 +130,13 @@ public class StatusItemRenderer
 		}
 	}
 
-	public void Render()
+	public void RenderEveryTick()
 	{
 		this.scale = 1f + Mathf.Sin(Time.unscaledTime * 8f) * 0.1f;
 		Shader.SetGlobalVector("_StatusItemParameters", new Vector4(this.scale, 0f, 0f, 0f));
-		Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.position.z));
-		Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.position.z));
+		Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.GetPosition().z));
+		Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.GetPosition().z));
+		this.visibleEntries.Clear();
 		for (int i = 0; i < this.entryCount; i++)
 		{
 			this.entries[i].Render(this, vector2, vector, this.GetMode());
@@ -144,17 +145,17 @@ public class StatusItemRenderer
 
 	public void GetIntersections(Vector2 pos, List<SelectTool.Intersection> intersections)
 	{
-		for (int i = 0; i < this.entryCount; i++)
+		foreach (StatusItemRenderer.Entry entry in this.visibleEntries)
 		{
-			this.entries[i].GetIntersection(pos, intersections, this.scale, this.GetMode());
+			entry.GetIntersection(pos, intersections, this.scale, this.GetMode());
 		}
 	}
 
 	public void GetIntersections(Vector2 pos, List<KSelectable> selectables)
 	{
-		for (int i = 0; i < this.entryCount; i++)
+		foreach (StatusItemRenderer.Entry entry in this.visibleEntries)
 		{
-			this.entries[i].GetIntersection(pos, selectables, this.scale, this.GetMode());
+			entry.GetIntersection(pos, selectables, this.scale, this.GetMode());
 		}
 	}
 
@@ -234,7 +235,9 @@ public class StatusItemRenderer
 
 	private Shader shader;
 
-	private struct Entry
+	public List<StatusItemRenderer.Entry> visibleEntries = new List<StatusItemRenderer.Entry>();
+
+	public struct Entry
 	{
 		public void Init(Shader shader)
 		{
@@ -247,6 +250,10 @@ public class StatusItemRenderer
 
 		public void Render(StatusItemRenderer renderer, Vector3 camera_bl, Vector3 camera_tr, SimViewMode overlay)
 		{
+			if (DebugHandler.HideUI)
+			{
+				return;
+			}
 			Vector3 vector = Vector3.zero;
 			if (!(this.transform != null))
 			{
@@ -258,7 +265,7 @@ public class StatusItemRenderer
 				global::Debug.LogWarning(text, null);
 				return;
 			}
-			vector = this.transform.position;
+			vector = this.transform.GetPosition();
 			if (vector.x < camera_bl.x || vector.x > camera_tr.x || vector.y < camera_bl.y || vector.y > camera_tr.y)
 			{
 				return;
@@ -268,6 +275,7 @@ public class StatusItemRenderer
 			{
 				return;
 			}
+			renderer.visibleEntries.Add(this);
 			if (this.dirty)
 			{
 				int num2 = 0;
@@ -346,13 +354,14 @@ public class StatusItemRenderer
 			{
 				return false;
 			}
-			Vector3 vector = this.transform.position + this.offset;
 			Bounds bounds = this.mesh.bounds;
-			bounds.size *= scale;
-			bounds.center += vector;
-			Vector3 min = bounds.min;
-			Vector3 max = bounds.max;
-			return pos.x >= min.x && pos.x <= max.x && pos.y >= min.y && pos.y <= max.y;
+			Vector3 vector = this.transform.GetPosition() + this.offset + bounds.center;
+			Vector2 vector2 = new Vector2(vector.x, vector.y);
+			Vector3 size = bounds.size;
+			Vector2 vector3 = new Vector2(size.x * scale * 0.5f, size.y * scale * 0.5f);
+			Vector2 vector4 = vector2 - vector3;
+			Vector2 vector5 = vector2 + vector3;
+			return pos.x >= vector4.x && pos.x <= vector5.x && pos.y >= vector4.y && pos.y <= vector5.y;
 		}
 
 		public void GetIntersection(Vector2 pos, List<SelectTool.Intersection> intersections, float scale, SimViewMode overlay)

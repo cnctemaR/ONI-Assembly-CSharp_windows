@@ -6,8 +6,14 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class LogicPorts : KMonoBehaviour, IEffectDescriptor
+public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.autoRegisterSimRender = false;
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -18,8 +24,8 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 			OverlayScreen instance = OverlayScreen.Instance;
 			instance.OnOverlayChanged = (Action<SimViewMode>)Delegate.Combine(instance.OnOverlayChanged, new Action<SimViewMode>(this.OnOverlayChanged));
 			this.OnOverlayChanged(OverlayScreen.Instance.mode);
-			this.UpdateMoveable(null);
-			this.updateHandle = UIScheduler.Instance.SchedulePeriodic("moveablePorts", 0f, new Action<object>(this.UpdateMoveable), null, null);
+			this.CreateVisualizers();
+			SimAndRenderScheduler.instance.Add(this, false);
 		}
 		else if (this.isPhysical)
 		{
@@ -34,10 +40,6 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 
 	protected override void OnCleanUp()
 	{
-		if (this.updateHandle.IsValid)
-		{
-			this.updateHandle.ClearScheduler();
-		}
 		OverlayScreen instance = OverlayScreen.Instance;
 		instance.OnOverlayChanged = (Action<SimViewMode>)Delegate.Remove(instance.OnOverlayChanged, new Action<SimViewMode>(this.OnOverlayChanged));
 		this.DestroyVisualizers();
@@ -48,14 +50,14 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 		base.OnCleanUp();
 	}
 
-	private void UpdateMoveable(object data)
+	public void RenderEveryTick(float dt)
 	{
 		this.CreateVisualizers();
 	}
 
 	private void CreateVisualizers()
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		bool flag = num != this.cell;
 		this.cell = num;
 		if (!flag)
@@ -79,7 +81,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 			for (int i = 0; i < this.outputPortInfo.Length; i++)
 			{
 				LogicPorts.Port port = this.outputPortInfo[i];
-				LogicPortVisualizer logicPortVisualizer = new LogicPortVisualizer(false, this.GetActualCell(port.cellOffset));
+				LogicPortVisualizer logicPortVisualizer = new LogicPortVisualizer(this.GetActualCell(port.cellOffset), port.spriteType);
 				this.outputPorts.Add(logicPortVisualizer);
 				Game.Instance.logicCircuitManager.AddVisElem(logicPortVisualizer);
 			}
@@ -90,7 +92,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 			for (int j = 0; j < this.inputPortInfo.Length; j++)
 			{
 				LogicPorts.Port port2 = this.inputPortInfo[j];
-				LogicPortVisualizer logicPortVisualizer2 = new LogicPortVisualizer(true, this.GetActualCell(port2.cellOffset));
+				LogicPortVisualizer logicPortVisualizer2 = new LogicPortVisualizer(this.GetActualCell(port2.cellOffset), port2.spriteType);
 				this.inputPorts.Add(logicPortVisualizer2);
 				Game.Instance.logicCircuitManager.AddVisElem(logicPortVisualizer2);
 			}
@@ -117,7 +119,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 
 	private void CreatePhysicalPorts()
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		if (num == this.cell)
 		{
 			return;
@@ -129,8 +131,14 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 			this.outputPorts = new List<ILogicUIElement>();
 			for (int i = 0; i < this.outputPortInfo.Length; i++)
 			{
-				LogicPorts.Port port = this.outputPortInfo[i];
-				LogicEventSender logicEventSender = new LogicEventSender(port.id, this.GetActualCell(port.cellOffset), new Action<int, bool>(this.OnLogicNetworkConnectionChanged));
+				LogicPorts.Port info2 = this.outputPortInfo[i];
+				LogicEventSender logicEventSender = new LogicEventSender(info2.id, this.GetActualCell(info2.cellOffset), delegate(int new_value)
+				{
+					if (this != null)
+					{
+						this.OnLogicValueChanged(info2.id, new_value);
+					}
+				}, new Action<int, bool>(this.OnLogicNetworkConnectionChanged), info2.spriteType);
 				this.outputPorts.Add(logicEventSender);
 				Game.Instance.logicCircuitManager.AddVisElem(logicEventSender);
 				Game.Instance.logicCircuitSystem.AddToNetworks(logicEventSender.GetLogicUICell(), logicEventSender, true);
@@ -157,7 +165,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 					{
 						this.OnLogicValueChanged(info.id, new_value);
 					}
-				}, new Action<int, bool>(this.OnLogicNetworkConnectionChanged));
+				}, new Action<int, bool>(this.OnLogicNetworkConnectionChanged), info.spriteType);
 				this.inputPorts.Add(logicEventHandler);
 				Game.Instance.logicCircuitManager.AddVisElem(logicEventHandler);
 				Game.Instance.logicCircuitSystem.AddToNetworks(logicEventHandler.GetLogicUICell(), logicEventHandler, true);
@@ -254,7 +262,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 		{
 			offset = component.GetRotatedCellOffset(offset);
 		}
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		return Grid.OffsetCell(num, offset);
 	}
 
@@ -288,6 +296,32 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 			}
 		}
 		return -1;
+	}
+
+	public int GetInputValue(HashedString port_id)
+	{
+		for (int i = 0; i < this.inputPortInfo.Length; i++)
+		{
+			if (this.inputPortInfo[i].id == port_id)
+			{
+				LogicEventHandler logicEventHandler = this.inputPorts[i] as LogicEventHandler;
+				return logicEventHandler.Value;
+			}
+		}
+		return 0;
+	}
+
+	public int GetOutputValue(HashedString port_id)
+	{
+		for (int i = 0; i < this.outputPorts.Count; i++)
+		{
+			LogicEventSender logicEventSender = this.outputPorts[i] as LogicEventSender;
+			if (logicEventSender.ID == port_id)
+			{
+				return logicEventSender.GetLogicValue();
+			}
+		}
+		return 0;
 	}
 
 	private void OnOverlayChanged(SimViewMode mode)
@@ -384,8 +418,6 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 
 	private Orientation orientation = Orientation.NumRotations;
 
-	private SchedulerHandle updateHandle;
-
 	[Serialize]
 	private int[] serializedOutputValues;
 
@@ -394,12 +426,23 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 	[Serializable]
 	public struct Port
 	{
-		public Port(HashedString id, CellOffset cell_offset, LocString description, bool show_wire_missing_icon)
+		public Port(HashedString id, CellOffset cell_offset, LocString description, bool show_wire_missing_icon, LogicPortSpriteType sprite_type)
 		{
 			this.id = id;
 			this.cellOffset = cell_offset;
 			this.description = description;
 			this.requiresConnection = show_wire_missing_icon;
+			this.spriteType = sprite_type;
+		}
+
+		public static LogicPorts.Port InputPort(HashedString id, CellOffset cell_offset, LocString description, bool show_wire_missing_icon = false)
+		{
+			return new LogicPorts.Port(id, cell_offset, description, show_wire_missing_icon, LogicPortSpriteType.Input);
+		}
+
+		public static LogicPorts.Port OutputPort(HashedString id, CellOffset cell_offset, LocString description, bool show_wire_missing_icon = false)
+		{
+			return new LogicPorts.Port(id, cell_offset, description, show_wire_missing_icon, LogicPortSpriteType.Output);
 		}
 
 		public HashedString id;
@@ -409,5 +452,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor
 		public LocString description;
 
 		public bool requiresConnection;
+
+		public LogicPortSpriteType spriteType;
 	}
 }

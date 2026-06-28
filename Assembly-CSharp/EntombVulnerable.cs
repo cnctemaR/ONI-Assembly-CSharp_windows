@@ -64,7 +64,7 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 
 	private void CheckEntombed()
 	{
-		int num = Grid.PosToCell(base.gameObject.transform.position);
+		int num = Grid.PosToCell(base.gameObject.transform.GetPosition());
 		if (!Grid.IsValidCell(num))
 		{
 			return;

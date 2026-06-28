@@ -7,10 +7,6 @@ public class OutputPoint : KMonoBehaviour
 		return Grid.CellBelow(Grid.CellBelow(Grid.PosToCell(this)));
 	}
 
-	private void Update()
-	{
-	}
-
 	[MyCmpReq]
 	private Building building;
 

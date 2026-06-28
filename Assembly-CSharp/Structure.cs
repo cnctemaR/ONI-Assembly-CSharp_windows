@@ -48,9 +48,6 @@ public class Structure : KMonoBehaviour
 		}
 	}
 
-	[MyCmpAdd]
-	private Notifier notifier;
-
 	[MyCmpReq]
 	private Building building;
 

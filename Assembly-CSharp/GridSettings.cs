@@ -32,15 +32,13 @@ public class GridSettings : KMonoBehaviour
 		Grid.PreventFogOfWarReveal = new bool[Grid.CellCount];
 		Grid.IsTileUnderConstruction = new bool[Grid.CellCount];
 		Grid.PreventIdlingOnCell = new bool[Grid.CellCount];
-		Grid.ObjectLayers = new Dictionary<int, GameObject>[32];
+		Grid.ObjectLayers = new Dictionary<int, GameObject>[36];
 		for (int i = 0; i < Grid.ObjectLayers.Length; i++)
 		{
 			Grid.ObjectLayers[i] = new Dictionary<int, GameObject>();
 		}
-		Grid.Room = new ushort[Grid.CellCount];
 		for (int j = 0; j < Grid.CellCount; j++)
 		{
-			Grid.Room[j] = ushort.MaxValue;
 			Grid.Loudness[j] = 0f;
 		}
 		if (Game.Instance != null)

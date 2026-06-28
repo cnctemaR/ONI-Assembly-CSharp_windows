@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -33,6 +34,7 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable
 				this.filteredTag = GameTags.Oxygen;
 			}
 		}
+		this.InitializeStatusItems();
 	}
 
 	protected override void OnSpawn()
@@ -43,13 +45,14 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable
 		CellOffset rotatedOffset = this.building.GetRotatedOffset(this.filterOffset);
 		this.filteredCell = Grid.OffsetCell(this.inputCell, rotatedOffset);
 		IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.conduitType);
-		this.itemFilter = new FlowUtilityNetwork.NetworkItem(this.conduitType, Endpoint.Source, this.filteredCell, 0);
+		this.itemFilter = new FlowUtilityNetwork.NetworkItem(this.conduitType, Endpoint.Source, this.filteredCell);
 		networkManager.AddToNetworks(this.filteredCell, this.itemFilter, true);
 		base.GetComponent<ConduitConsumer>().isConsuming = false;
 		this.OnFilterChanged(ElementLoader.FindElementByHash(this.filteredElem).tag);
 		this.filterable.onFilterChanged += this.OnFilterChanged;
 		ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
-		flowManager.AddConduitUpdater(new Action<float>(this.OnConduitTick), ConduitFlow.Priority.Default);
+		flowManager.AddConduitUpdater(new Action<float>(this.OnConduitTick), ConduitFlowPriority.Default);
+		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, ElementFilter.filterStatusItem, this);
 	}
 
 	protected override void OnCleanUp()
@@ -107,6 +110,47 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
+	private void InitializeStatusItems()
+	{
+		if (ElementFilter.filterStatusItem == null)
+		{
+			ElementFilter.filterStatusItem = new StatusItem("Filter", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.LiquidVentMap, true, 63486);
+			ElementFilter.filterStatusItem.resolveStringCallback = delegate(string str, object data)
+			{
+				if (this.filteredElem == SimHashes.Void)
+				{
+					str = string.Format(BUILDINGS.PREFABS.GASFILTER.STATUS_ITEM, BUILDINGS.PREFABS.GASFILTER.ELEMENT_NOT_SPECIFIED);
+				}
+				else
+				{
+					Element element = ElementLoader.FindElementByHash(this.filteredElem);
+					str = string.Format(BUILDINGS.PREFABS.GASFILTER.STATUS_ITEM, element.name);
+				}
+				return str;
+			};
+			ElementFilter.filterStatusItem.conditionalOverlayCallback = new Func<SimViewMode, object, bool>(this.ShowInUtilityOverlay);
+		}
+	}
+
+	private bool ShowInUtilityOverlay(SimViewMode mode, object data)
+	{
+		bool flag = false;
+		ElementFilter elementFilter = (ElementFilter)data;
+		ConduitType conduitType = elementFilter.conduitType;
+		if (conduitType != ConduitType.Gas)
+		{
+			if (conduitType == ConduitType.Liquid)
+			{
+				flag = mode == SimViewMode.LiquidVentMap;
+			}
+		}
+		else
+		{
+			flag = mode == SimViewMode.GasVentMap;
+		}
+		return flag;
+	}
+
 	[SerializeField]
 	public ConduitType conduitType = ConduitType.Liquid;
 
@@ -137,4 +181,6 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable
 	private FlowUtilityNetwork.NetworkItem itemOutput;
 
 	private FlowUtilityNetwork.NetworkItem itemFilter;
+
+	private static StatusItem filterStatusItem;
 }

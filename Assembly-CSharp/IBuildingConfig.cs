@@ -5,7 +5,7 @@ public abstract class IBuildingConfig
 {
 	public abstract BuildingDef CreateBuildingDef();
 
-	public virtual void ConfigureBuildingTemplate(GameObject go)
+	public virtual void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 	}
 

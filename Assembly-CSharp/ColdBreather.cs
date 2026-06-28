@@ -66,7 +66,7 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 				if (component != null && component.Mass > 0f)
 				{
 					float num = Mathf.Max(component.Element.lowTemp + 5f, component.Temperature + base.master.deltaEmitTemperature);
-					int num2 = Grid.PosToCell(base.transform.position + base.master.emitOffsetCell);
+					int num2 = Grid.PosToCell(base.transform.GetPosition() + base.master.emitOffsetCell);
 					SimMessages.AddRemoveSubstance(num2, component.Element.id, CellEventLogger.Instance.ElementEmitted, component.Mass, num, component.DiseaseIdx, component.DiseaseCount, -1);
 					base.master.storage.ConsumeIgnoringDisease(this.gases[i]);
 				}
@@ -82,10 +82,10 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 		{
 			base.serializable = true;
 			default_state = this.grow;
-			this.statusItemCooling = new StatusItem("cooling", CREATURES.STATUSITEMS.COOLING.NAME, CREATURES.STATUSITEMS.COOLING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
+			this.statusItemCooling = new StatusItem("cooling", CREATURES.STATUSITEMS.COOLING.NAME, CREATURES.STATUSITEMS.COOLING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486);
 			this.dead.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).Enter(delegate(ColdBreather.StatesInstance smi)
 			{
-				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.position, Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
+				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
 				smi.master.Trigger(1623392196, null);
 				smi.master.GetComponent<KBatchedAnimController>().StopAndClear();
 				global::UnityEngine.Object.Destroy(smi.master.GetComponent<KBatchedAnimController>());

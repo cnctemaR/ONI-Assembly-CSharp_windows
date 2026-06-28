@@ -11,19 +11,18 @@ public class WaterPurifierConfig : IBuildingConfig
 		int num = 4;
 		int num2 = 3;
 		string text2 = "waterpurifier_kanim";
-		float num3 = 100f;
-		int num4 = 100;
-		float num5 = 30f;
+		int num3 = 100;
+		float num4 = 30f;
 		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num6 = 800f;
+		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER3;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.ExhaustKilowattsWhenActive = 0f;
-		buildingDef.OperatingKilowatts = 4f;
+		buildingDef.SelfHeatKilowattsWhenActive = 4f;
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
@@ -36,7 +35,7 @@ public class WaterPurifierConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
@@ -44,7 +43,6 @@ public class WaterPurifierConfig : IBuildingConfig
 		go.AddOrGet<WaterPurifier>();
 		Prioritizable.AddRef(go);
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
-		elementConverter.conversionInterval = 0.2f;
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
 			new ElementConverter.ConsumedElement(new Tag("Filter"), 1f),
@@ -62,8 +60,9 @@ public class WaterPurifierConfig : IBuildingConfig
 		ManualDeliveryKG manualDeliveryKG = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = new Tag("Filter");
-		manualDeliveryKG.capacity = 200f;
-		manualDeliveryKG.refillMass = 50f;
+		manualDeliveryKG.capacity = 1200f;
+		manualDeliveryKG.refillMass = 300f;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 10f;
@@ -101,8 +100,15 @@ public class WaterPurifierConfig : IBuildingConfig
 
 	public const string ID = "WaterPurifier";
 
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
-	{
-		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(-1, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false)
-	};
+	private const float FILTER_INPUT_RATE = 1f;
+
+	private const float DIRTY_WATER_INPUT_RATE = 5f;
+
+	private const float FILTER_CAPACITY = 1200f;
+
+	private const float USED_FILTER_OUTPUT_RATE = 0.2f;
+
+	private const float CLEAN_WATER_OUTPUT_RATE = 5f;
+
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(-1, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
 }

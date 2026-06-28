@@ -7,7 +7,7 @@ using UnityEngine;
 public class VomitChore : Chore<VomitChore.StatesInstance>
 {
 	public VomitChore(ChoreType chore_type, IStateMachineTarget target, StatusItem status_item, Notification notification, Action<Chore> on_complete = null)
-		: base(Db.Get().ChoreTypes.Vomit, target, target.GetComponent<ChoreProvider>(), true, on_complete, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Vomit, target, target.GetComponent<ChoreProvider>(), true, on_complete, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new VomitChore.StatesInstance(this, target.gameObject, status_item, notification);
 	}
@@ -53,7 +53,7 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 					}
 				}
 				Facing component = base.sm.vomiter.Get(base.smi).GetComponent<Facing>();
-				int num2 = Grid.PosToCell(component.transform.position);
+				int num2 = Grid.PosToCell(component.transform.GetPosition());
 				int frontCell = component.GetFrontCell();
 				int num3 = frontCell;
 				if (!VomitChore.StatesInstance.CanEmitLiquid(num3))
@@ -98,10 +98,10 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 				.DoNotification((VomitChore.StatesInstance smi) => smi.notification)
 				.DoTutorial(Tutorial.TutorialMessages.TM_Mopping);
 			this.vomit.buildup.PlayAnim("vomit_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.vomit.release);
-			this.vomit.release.ToggleEffect("Vomiting").PlayAnim("vomit_loop", KAnim.PlayMode.Once).Update("SpawnDirtyWater", delegate(VomitChore.StatesInstance smi)
+			this.vomit.release.ToggleEffect("Vomiting").PlayAnim("vomit_loop", KAnim.PlayMode.Once).Update("SpawnDirtyWater", delegate(VomitChore.StatesInstance smi, float dt)
 			{
-				smi.SpawnDirtyWater(smi.deltatime);
-			})
+				smi.SpawnDirtyWater(dt);
+			}, UpdateRate.SIM_200ms, false)
 				.OnAnimQueueComplete(this.vomit.release_pst);
 			this.vomit.release_pst.PlayAnim("vomit_pst", KAnim.PlayMode.Once).OnAnimQueueComplete(this.recover);
 			this.recover.PlayAnim("breathe_pre").QueueAnim("breathe_loop", true, null).ScheduleGoTo(8f, this.recover_pst);

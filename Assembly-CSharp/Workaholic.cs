@@ -27,7 +27,7 @@ public class Workaholic : StateMachineComponent<Workaholic.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.satisfied;
-			this.root.ToggleSchedulePeriodic("WorkaholicCheck", 1f, delegate(Workaholic.StatesInstance smi)
+			this.root.Update("WorkaholicCheck", delegate(Workaholic.StatesInstance smi, float dt)
 			{
 				if (smi.master.IsUncomfortable())
 				{
@@ -37,7 +37,7 @@ public class Workaholic : StateMachineComponent<Workaholic.StatesInstance>
 				{
 					smi.GoTo(this.satisfied);
 				}
-			});
+			}, UpdateRate.SIM_1000ms, false);
 			this.suffering.AddEffect("Restless").ToggleExpression(Db.Get().Expressions.Uncomfortable, null);
 			this.satisfied.DoNothing();
 		}

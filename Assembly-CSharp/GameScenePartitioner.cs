@@ -26,6 +26,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.pickupablesChangedLayer = this.partitioner.CreateMask(new HashedString("PickupablesChanged"));
 		this.gasConduitsLayer = this.partitioner.CreateMask(new HashedString("GasConduit"));
 		this.liquidConduitsLayer = this.partitioner.CreateMask(new HashedString("LiquidConduit"));
+		this.solidConduitsLayer = this.partitioner.CreateMask(new HashedString("SolidConduit"));
 		this.wiresLayer = this.partitioner.CreateMask(new HashedString("Wire"));
 		this.noisePolluterLayer = this.partitioner.CreateMask(new HashedString("NoisePolluters"));
 		this.validNavCellChangedLayer = this.partitioner.CreateMask(new HashedString("validNavCellChangedLayer"));
@@ -33,8 +34,9 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.trapsLayer = this.partitioner.CreateMask(new HashedString("trapsLayer"));
 		this.floorSwitchActivatorLayer = this.partitioner.CreateMask(new HashedString("FloorSwitchActivatorLayer"));
 		this.floorSwitchActivatorChangedLayer = this.partitioner.CreateMask(new HashedString("FloorSwitchActivatorChangedLayer"));
-		this.objectLayers = new ScenePartitionerLayer[32];
-		for (int i = 0; i < 32; i++)
+		this.collisionLayer = this.partitioner.CreateMask(new HashedString("Collision"));
+		this.objectLayers = new ScenePartitionerLayer[36];
+		for (int i = 0; i < 36; i++)
 		{
 			ObjectLayer objectLayer = (ObjectLayer)i;
 			this.objectLayers[i] = this.partitioner.CreateMask(new HashedString(objectLayer.ToString()));
@@ -57,6 +59,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.pickupablesChangedLayer = null;
 		this.gasConduitsLayer = null;
 		this.liquidConduitsLayer = null;
+		this.solidConduitsLayer = null;
 		this.wiresLayer = null;
 		this.noisePolluterLayer = null;
 		this.validNavCellChangedLayer = null;
@@ -97,6 +100,16 @@ public class GameScenePartitioner : KMonoBehaviour
 		return this.Add(name, obj, num, num2, 1, 1, layer, event_callback);
 	}
 
+	public void AddGlobalLayerListener(ScenePartitionerLayer layer, Action<int, object> action)
+	{
+		layer.OnEvent = (Action<int, object>)Delegate.Combine(layer.OnEvent, action);
+	}
+
+	public void RemoveGlobalLayerListener(ScenePartitionerLayer layer, Action<int, object> action)
+	{
+		layer.OnEvent = (Action<int, object>)Delegate.Remove(layer.OnEvent, action);
+	}
+
 	public void TriggerEvent(List<int> cells, ScenePartitionerLayer layer, object event_data)
 	{
 		this.partitioner.TriggerEvent(cells, layer, event_data);
@@ -120,24 +133,14 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.TriggerEvent(num, num2, 1, 1, layer, event_data);
 	}
 
+	public void GatherEntries(Extents extents, ScenePartitionerLayer layer, List<ScenePartitionerEntry> gathered_entries)
+	{
+		this.GatherEntries(extents.x, extents.y, extents.width, extents.height, layer, gathered_entries);
+	}
+
 	public void GatherEntries(int x_bottomLeft, int y_bottomLeft, int width, int height, ScenePartitionerLayer layer, List<ScenePartitionerEntry> gathered_entries)
 	{
 		this.partitioner.GatherEntries(x_bottomLeft, y_bottomLeft, width, height, layer, null, gathered_entries);
-	}
-
-	public List<ScenePartitionerEntry> ReserveList()
-	{
-		return this.partitioner.ReserveList();
-	}
-
-	public void ReleaseList(List<ScenePartitionerEntry> list)
-	{
-		this.partitioner.ReleaseList(list);
-	}
-
-	private void Update()
-	{
-		this.partitioner.Update();
 	}
 
 	private void OnValidNavCellChanged(int cell, NavType nav_type)
@@ -156,6 +159,12 @@ public class GameScenePartitioner : KMonoBehaviour
 			GameScenePartitioner.Instance.TriggerEvent(this.changedCells, GameScenePartitioner.Instance.validNavCellChangedLayer, null);
 			this.changedCells.Clear();
 		}
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		this.partitioner.Cleanup();
 	}
 
 	public ScenePartitionerLayer solidChangedLayer;
@@ -180,6 +189,8 @@ public class GameScenePartitioner : KMonoBehaviour
 
 	public ScenePartitionerLayer liquidConduitsLayer;
 
+	public ScenePartitionerLayer solidConduitsLayer;
+
 	public ScenePartitionerLayer wiresLayer;
 
 	public ScenePartitionerLayer[] objectLayers;
@@ -195,6 +206,8 @@ public class GameScenePartitioner : KMonoBehaviour
 	public ScenePartitionerLayer floorSwitchActivatorLayer;
 
 	public ScenePartitionerLayer floorSwitchActivatorChangedLayer;
+
+	public ScenePartitionerLayer collisionLayer;
 
 	private ScenePartitioner partitioner;
 

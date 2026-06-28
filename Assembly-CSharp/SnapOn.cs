@@ -26,7 +26,7 @@ public class SnapOn : KMonoBehaviour
 			if (snapPoint.pointName == name)
 			{
 				HashedString context = base.GetComponent<AnimEventHandler>().GetContext();
-				if (!context.IsValid() || !snapPoint.context.IsValid() || context == snapPoint.context)
+				if (!context.IsValid || !snapPoint.context.IsValid || context == snapPoint.context)
 				{
 					this.DoAttachSnapOn(snapPoint);
 				}
@@ -41,7 +41,7 @@ public class SnapOn : KMonoBehaviour
 			if (snapPoint.pointName == name)
 			{
 				HashedString context = base.GetComponent<AnimEventHandler>().GetContext();
-				if (!context.IsValid() || !snapPoint.context.IsValid() || context == snapPoint.context)
+				if (!context.IsValid || !snapPoint.context.IsValid || context == snapPoint.context)
 				{
 					this.kanimController.RemoveSymbolOverride(snapPoint.overrideSymbol);
 					this.kanimController.RemoveVisibleSymbol(snapPoint.overrideSymbol);

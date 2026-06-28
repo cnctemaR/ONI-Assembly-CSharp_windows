@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
-public class SingleEntityReceptacle : KMonoBehaviour
+public class SingleEntityReceptacle : KMonoBehaviour, IRender1000ms
 {
 	public FetchChore GetActiveRequest
 	{
@@ -60,11 +60,17 @@ public class SingleEntityReceptacle : KMonoBehaviour
 		}
 	}
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.autoRegisterSimRender = false;
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		this.SubscribeToOccupant();
-		this.UpdateStatusItem(this);
+		this.UpdateStatusItem();
 		if (this.occupyingObject == null && this.requestedEntityTag.IsValid)
 		{
 			this.CreateOrder(this.requestedEntityTag);
@@ -90,10 +96,15 @@ public class SingleEntityReceptacle : KMonoBehaviour
 		this.requestedEntityTag = entityTag;
 		this.CreateFetchChore(this.requestedEntityTag);
 		this.SetPreview(entityTag, true);
-		this.UpdateStatusItem(this);
+		this.UpdateStatusItem();
 	}
 
-	protected void UpdateStatusItem(object data)
+	public void Render1000ms(float dt)
+	{
+		this.UpdateStatusItem();
+	}
+
+	protected void UpdateStatusItem()
 	{
 		KSelectable component = base.GetComponent<KSelectable>();
 		if (this.Occupant != null)
@@ -128,16 +139,16 @@ public class SingleEntityReceptacle : KMonoBehaviour
 	{
 		if (this.fetchChore == null && entityTag.IsValid && entityTag != GameTags.Empty)
 		{
-			this.fetchChore = new FetchChore(this.storage, 1f, new Tag[] { entityTag }, null, null, true, new Action<Chore>(this.OnFetchComplete), delegate(Chore chore)
+			this.fetchChore = new FetchChore(Db.Get().ChoreTypes.FarmFetch, this.storage, 1f, new Tag[] { entityTag }, null, null, true, new Action<Chore>(this.OnFetchComplete), delegate(Chore chore)
 			{
-				this.UpdateStatusItem(this);
+				this.UpdateStatusItem();
 			}, delegate(Chore chore)
 			{
-				this.UpdateStatusItem(this);
-			}, FetchOrder2.OperationalRequirement.Functional, 0);
+				this.UpdateStatusItem();
+			}, FetchOrder2.OperationalRequirement.Functional, 0, GameTags.ChoreTypes.FarmingChores);
 			MaterialNeeds.Instance.UpdateNeed(this.requestedEntityTag, 1f);
-			this.updateStatusItemsHandle = UIScheduler.Instance.SchedulePeriodic("SingleEntityReceptacle.StatusUpdate", 1f, new Action<object>(this.UpdateStatusItem), this, null);
-			this.UpdateStatusItem(this);
+			SimAndRenderScheduler.instance.Add(this, false);
+			this.UpdateStatusItem();
 		}
 	}
 
@@ -154,7 +165,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 		}
 		this.occupyingObject = null;
 		this.SetOperation();
-		this.UpdateStatusItem(this);
+		this.UpdateStatusItem();
 		base.Trigger(-731304873, this.occupyingObject);
 	}
 
@@ -162,13 +173,13 @@ public class SingleEntityReceptacle : KMonoBehaviour
 	{
 		if (this.fetchChore != null)
 		{
-			this.updateStatusItemsHandle.ClearScheduler();
+			SimAndRenderScheduler.instance.Remove(this);
 			MaterialNeeds.Instance.UpdateNeed(this.requestedEntityTag, -1f);
 			this.fetchChore.Cancel("User canceled");
 			this.fetchChore = null;
 		}
 		this.requestedEntityTag = Tag.Invalid;
-		this.UpdateStatusItem(this);
+		this.UpdateStatusItem();
 		this.SetPreview(Tag.Invalid, false);
 	}
 
@@ -218,9 +229,9 @@ public class SingleEntityReceptacle : KMonoBehaviour
 		{
 			this.requestedEntityTag = Tag.Invalid;
 		}
-		this.updateStatusItemsHandle.ClearScheduler();
+		SimAndRenderScheduler.instance.Remove(this);
 		this.SetOperation();
-		this.UpdateStatusItem(this);
+		this.UpdateStatusItem();
 		base.Subscribe(-592767678, delegate
 		{
 			this.SetOperation();
@@ -239,16 +250,16 @@ public class SingleEntityReceptacle : KMonoBehaviour
 
 	protected void PositionOccupyingObject()
 	{
-		this.occupyingObject.transform.position = Vector3.zero;
+		this.occupyingObject.transform.SetPosition(Vector3.zero);
 		this.occupyingObject.transform.SetParent(base.gameObject.transform, false);
-		this.occupyingObject.transform.localPosition = Vector3.zero;
+		this.occupyingObject.transform.SetLocalPosition(Vector3.zero);
 		if (this.rotatable != null)
 		{
-			this.occupyingObject.transform.localPosition = this.rotatable.GetRotatedOffset(this.occupyingObjectRelativePosition);
+			this.occupyingObject.transform.SetLocalPosition(this.rotatable.GetRotatedOffset(this.occupyingObjectRelativePosition));
 		}
 		else
 		{
-			this.occupyingObject.transform.localPosition = this.occupyingObjectRelativePosition;
+			this.occupyingObject.transform.SetLocalPosition(this.occupyingObjectRelativePosition);
 		}
 	}
 
@@ -273,7 +284,6 @@ public class SingleEntityReceptacle : KMonoBehaviour
 	{
 		this.CancelActiveRequest();
 		this.UnsubscribeFromOccupant();
-		this.updateStatusItemsHandle.ClearScheduler();
 		base.OnCleanUp();
 	}
 
@@ -295,8 +305,6 @@ public class SingleEntityReceptacle : KMonoBehaviour
 
 	[Serialize]
 	private Ref<KSelectable> occupyObjectRef = new Ref<KSelectable>();
-
-	private SchedulerHandle updateStatusItemsHandle;
 
 	[SerializeField]
 	private List<Tag> possibleDepositTagsList = new List<Tag>();

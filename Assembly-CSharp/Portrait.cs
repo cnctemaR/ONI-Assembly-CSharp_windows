@@ -115,7 +115,7 @@ public class Portrait : KMonoBehaviour
 		if (this.ShouldCapture)
 		{
 			KSelectable component = this.go.GetComponent<KSelectable>();
-			Vector3 vector = this.go.transform.position;
+			Vector3 vector = this.go.transform.GetPosition();
 			if (component != null)
 			{
 				vector = component.GetPortraitLocation();
@@ -128,7 +128,7 @@ public class Portrait : KMonoBehaviour
 				vector = bounds.center;
 			}
 			vector = new Vector3(vector.x, vector.y, vector.z - 20f);
-			this.portraitCamera.transform.localPosition = vector;
+			this.portraitCamera.transform.SetLocalPosition(vector);
 		}
 		else if (this.go != null)
 		{

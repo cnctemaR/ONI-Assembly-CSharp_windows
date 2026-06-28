@@ -11,13 +11,7 @@ namespace TUNING
 
 		public const float PLANTERPLOT_GROWTH_PENTALY = -0.5f;
 
-		public const float BASE_BONUS_SEED_PROBABILITY = 0.33f;
-
-		public const float YIELD_DISPLAY_TOTAL = 100f;
-
-		public const float MED_YIELD_THRESHOLD = 0.4f;
-
-		public const float HIGH_YIELD_THRESHOLD = 0.8f;
+		public const float BASE_BONUS_SEED_PROBABILITY = 0.1f;
 
 		public const float SELF_HARVEST_TIME = 2400f;
 
@@ -29,13 +23,13 @@ namespace TUNING
 
 		public static List<Crop.CropVal> CROP_TYPES = new List<Crop.CropVal>
 		{
-			new Crop.CropVal("BasicPlantFood", 1800f, 8, true),
-			new Crop.CropVal(SwampLilyFlowerConfig.ID, 7200f, 2, true),
-			new Crop.CropVal(PrickleFruitConfig.ID, 2400f, 1, true),
-			new Crop.CropVal("ColdWheatSeed", 12000f, 25, true),
-			new Crop.CropVal(SpiceNutConfig.ID, 13200f, 4, true),
+			new Crop.CropVal("BasicPlantFood", 1800f, 1, true),
+			new Crop.CropVal(PrickleFruitConfig.ID, 3600f, 1, true),
+			new Crop.CropVal(MushroomConfig.ID, 4500f, 1, true),
+			new Crop.CropVal("ColdWheatSeed", 10800f, 18, true),
+			new Crop.CropVal(SpiceNutConfig.ID, 4800f, 4, true),
 			new Crop.CropVal(BasicFabricConfig.ID, 1200f, 1, true),
-			new Crop.CropVal(MushroomConfig.ID, 6000f, 2, true)
+			new Crop.CropVal(SwampLilyFlowerConfig.ID, 7200f, 2, true)
 		};
 	}
 }

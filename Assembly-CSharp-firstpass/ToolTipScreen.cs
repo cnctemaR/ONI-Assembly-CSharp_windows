@@ -13,7 +13,6 @@ public class ToolTipScreen : KScreen
 		this.toolTipWidget = Util.KInstantiate(this.ToolTipPrefab, base.gameObject, null);
 		this.toolTipWidget.transform.SetParent(base.gameObject.transform, false);
 		Util.Reset(this.toolTipWidget.transform);
-		this.label = this.toolTipWidget.GetComponentInChildren<TextMeshProUGUI>();
 		this.toolTipWidget.SetActive(false);
 	}
 
@@ -41,28 +40,17 @@ public class ToolTipScreen : KScreen
 		}
 		if (this.tooltipSetting != null)
 		{
-			string toolTip = this.tooltipSetting.GetToolTip();
+			this.tooltipSetting.RebuildDynamicTooltip();
 			if (this.tooltipSetting.multiStringCount == 0)
 			{
-				this.label.gameObject.SetActive(true);
-				this.label.text = toolTip;
 				this.clearMultiStringTooltip();
 			}
-			else
+			else if (this.prevTooltip != this.tooltipSetting || !this.multiTooltipContainer.activeInHierarchy)
 			{
-				this.label.gameObject.SetActive(false);
-				this.label.text = string.Empty;
-				if (this.prevTooltip != this.tooltipSetting || !this.multiTooltipContainer.activeInHierarchy)
-				{
-					this.prepareMultiStringTooltip(this.tooltipSetting);
-					this.prevTooltip = this.tooltipSetting;
-				}
+				this.prepareMultiStringTooltip(this.tooltipSetting);
+				this.prevTooltip = this.tooltipSetting;
 			}
-			bool flag = true;
-			if (this.label.text == string.Empty && this.multiTooltipContainer.transform.childCount == 0)
-			{
-				flag = false;
-			}
+			bool flag = this.multiTooltipContainer.transform.childCount != 0;
 			this.toolTipWidget.SetActive(flag);
 			if (flag)
 			{
@@ -79,11 +67,11 @@ public class ToolTipScreen : KScreen
 				component.transform.SetParent(this.anchorRoot.transform);
 				if (!this.tooltipSetting.worldSpace)
 				{
-					this.anchorRoot.anchoredPosition = rectTransform.transform.position;
+					this.anchorRoot.anchoredPosition = rectTransform.transform.GetPosition();
 				}
 				else
 				{
-					this.anchorRoot.anchoredPosition = base.WorldToScreen(rectTransform.transform.position) + new Vector3((float)(Screen.width / 2), (float)(Screen.height / 2), 0f);
+					this.anchorRoot.anchoredPosition = base.WorldToScreen(rectTransform.transform.GetPosition()) + new Vector3((float)(Screen.width / 2), (float)(Screen.height / 2), 0f);
 				}
 				this.anchorRoot.anchoredPosition -= Vector2.up * (rectTransform.rectTransform().pivot.y * rectTransform.rectTransform().sizeDelta.y);
 				this.anchorRoot.anchoredPosition -= Vector2.right * (rectTransform.rectTransform().pivot.x * rectTransform.rectTransform().sizeDelta.x);
@@ -109,16 +97,16 @@ public class ToolTipScreen : KScreen
 				if (!this.tooltipSetting.worldSpace)
 				{
 					Rect rect = ((RectTransform)base.transform).rect;
-					Vector2 vector2 = new Vector2(base.transform.position.x, base.transform.position.y) + this.ScreenEdgePadding;
-					Vector2 vector3 = new Vector2(base.transform.position.x, base.transform.position.y) + rect.width * Vector2.right + rect.height * Vector2.up - this.ScreenEdgePadding * Mathf.Max(1f, num);
+					Vector2 vector2 = new Vector2(base.transform.GetPosition().x, base.transform.GetPosition().y) + this.ScreenEdgePadding;
+					Vector2 vector3 = new Vector2(base.transform.GetPosition().x, base.transform.GetPosition().y) + rect.width * Vector2.right + rect.height * Vector2.up - this.ScreenEdgePadding * Mathf.Max(1f, num);
 					vector3.x *= num;
 					vector3.y *= num;
 					Vector2 vector4;
-					vector4.x = component.position.x - component.pivot.x * (component.sizeDelta.x * num);
-					vector4.y = component.position.y - component.pivot.y * (component.sizeDelta.y * num);
+					vector4.x = component.GetPosition().x - component.pivot.x * (component.sizeDelta.x * num);
+					vector4.y = component.GetPosition().y - component.pivot.y * (component.sizeDelta.y * num);
 					Vector2 vector5;
-					vector5.x = component.position.x + (1f - component.pivot.x) * (component.sizeDelta.x * num);
-					vector5.y = component.position.y + (1f - component.pivot.y) * (component.sizeDelta.y * num);
+					vector5.x = component.GetPosition().x + (1f - component.pivot.x) * (component.sizeDelta.x * num);
+					vector5.y = component.GetPosition().y + (1f - component.pivot.y) * (component.sizeDelta.y * num);
 					Vector2 vector6 = Vector2.zero;
 					if (vector4.x < vector2.x)
 					{
@@ -153,7 +141,7 @@ public class ToolTipScreen : KScreen
 		this.clearMultiStringTooltip();
 		for (int i = 0; i < multiStringCount; i++)
 		{
-			GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.labelPrefab);
+			GameObject gameObject = Util.KInstantiateUI(this.labelPrefab, null, true);
 			gameObject.transform.SetParent(this.multiTooltipContainer.transform);
 		}
 		for (int j = 0; j < this.tooltipSetting.multiStringCount; j++)
@@ -202,12 +190,17 @@ public class ToolTipScreen : KScreen
 				this.multiTooltipContainer.rectTransform().sizeDelta = new Vector2(component.minWidth, component.minHeight);
 				this.multiTooltipContainer.transform.parent.rectTransform().sizeDelta = this.multiTooltipContainer.rectTransform().sizeDelta;
 			}
+			component2.ForceMeshUpdate();
 		}
 		this.tooltipIncubating = true;
 	}
 
 	private void Update()
 	{
+		if (this.tooltipSetting != null)
+		{
+			this.tooltipSetting.UpdateWhileHovered();
+		}
 		if (this.multiTooltipContainer == null || this.anchorRoot == null)
 		{
 			return;
@@ -299,15 +292,11 @@ public class ToolTipScreen : KScreen
 		}
 	}
 
-	public TextStyleSetting defaultTextStyleSetting;
-
 	public GameObject ToolTipPrefab;
 
 	public RectTransform anchorRoot;
 
 	private GameObject toolTipWidget;
-
-	private TextMeshProUGUI label;
 
 	private ToolTip prevTooltip;
 

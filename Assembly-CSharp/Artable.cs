@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Klei.AI;
 using KSerialization;
+using TUNING;
 using UnityEngine;
 
 public class Artable : Workable
@@ -23,12 +24,13 @@ public class Artable : Workable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.statuses[Artable.Status.Ready] = new StatusItem("AwaitingArting", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-		this.statuses[Artable.Status.Ugly] = new StatusItem("LookingUgly", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-		this.statuses[Artable.Status.Okay] = new StatusItem("LookingOkay", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
-		this.statuses[Artable.Status.Great] = new StatusItem("LookingGreat", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+		this.statuses[Artable.Status.Ready] = new StatusItem("AwaitingArting", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+		this.statuses[Artable.Status.Ugly] = new StatusItem("LookingUgly", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+		this.statuses[Artable.Status.Okay] = new StatusItem("LookingOkay", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+		this.statuses[Artable.Status.Great] = new StatusItem("LookingGreat", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Arting;
 		this.attributeConverter = Db.Get().AttributeConverters.ArtSpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
 		base.SetWorkTime(80f);
 	}
 
@@ -39,11 +41,17 @@ public class Artable : Workable
 			this.currentStage = "Default";
 		}
 		this.SetStage(this.currentStage, true);
+		this.shouldShowRolePerkStatusItem = false;
 		if (this.currentStage == "Default")
 		{
+			this.shouldShowRolePerkStatusItem = true;
 			Prioritizable.AddRef(base.gameObject);
-			new WorkChore<Artable>(Db.Get().ChoreTypes.Art, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			ChoreType art = Db.Get().ChoreTypes.Art;
+			Tag[] artChores = GameTags.ChoreTypes.ArtChores;
+			this.chore = new WorkChore<Artable>(art, this, null, artChores, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			this.chore.AddPrecondition(ChorePreconditions.instance.HasRolePerk, RoleManager.rolePerks.CanArt.id);
 		}
+		base.OnSpawn();
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -69,6 +77,8 @@ public class Artable : Workable
 		{
 			new EmoteChore(worker.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_disappointed_kanim", new HashedString[] { "disappointed_pre", "disappointed_loop", "disappointed_pst" }, null);
 		}
+		this.shouldShowRolePerkStatusItem = false;
+		this.UpdateStatusItem(null);
 		Prioritizable.RemoveRef(base.gameObject);
 	}
 
@@ -96,9 +106,17 @@ public class Artable : Workable
 				AttributeModifier attributeModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, (float)stage.decor, "Art Quality", false, false, true);
 				this.GetAttributes().Add("Art Quality", attributeModifier);
 			}
-			this.selectable.SetName(stage.name);
-			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, this.statuses[stage.statusItem], this);
+			KSelectable component = base.GetComponent<KSelectable>();
+			component.SetName(stage.name);
+			component.SetStatusItem(Db.Get().StatusItemCategories.Main, this.statuses[stage.statusItem], this);
+			this.shouldShowRolePerkStatusItem = false;
+			this.UpdateStatusItem(null);
 		}
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole(Artist.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	private Dictionary<Artable.Status, StatusItem> statuses;
@@ -108,6 +126,8 @@ public class Artable : Workable
 
 	[Serialize]
 	private string currentStage;
+
+	private WorkChore<Artable> chore;
 
 	[Serializable]
 	public class Stage

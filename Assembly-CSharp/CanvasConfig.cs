@@ -11,19 +11,18 @@ public class CanvasConfig : IBuildingConfig
 		int num = 2;
 		int num2 = 2;
 		string text2 = "painting_kanim";
-		float num3 = 100f;
-		int num4 = 30;
-		float num5 = 120f;
+		int num3 = 30;
+		float num4 = 120f;
 		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, new EffectorValues
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, new EffectorValues
 		{
 			amount = 5,
 			radius = 6
-		}, none);
+		}, none, 0.2f);
 		buildingDef.Floodable = false;
 		buildingDef.SceneLayer = Grid.SceneLayer.Paintings;
 		buildingDef.Overheatable = false;
@@ -35,15 +34,17 @@ public class CanvasConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<BuildingComplete>().isArtable = true;
+		go.GetComponent<KPrefabID>().AddPrefabTag(GameTags.Decoration);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		Artable artable = go.AddComponent<Painting>();
+		artable.requiredRolePerk = "CanArt";
 		artable.stages.Add(new Artable.Stage("Default", global::STRINGS.BUILDINGS.PREFABS.CANVAS.NAME, "off", 0, 0, false, Artable.Status.Ready));
 		artable.stages.Add(new Artable.Stage("Bad", global::STRINGS.BUILDINGS.PREFABS.CANVAS.POORQUALITYNAME, "art_a", 0, 5, false, Artable.Status.Ugly));
 		artable.stages.Add(new Artable.Stage("Average", global::STRINGS.BUILDINGS.PREFABS.CANVAS.AVERAGEQUALITYNAME, "art_b", 2, 10, false, Artable.Status.Okay));

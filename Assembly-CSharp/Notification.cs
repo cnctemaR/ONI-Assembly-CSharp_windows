@@ -100,7 +100,7 @@ public class Notification
 		}
 		else
 		{
-			text = "UNKNOWN TAG";
+			text = "UNKNOWN TAG: " + tag;
 		}
 		return text;
 	}

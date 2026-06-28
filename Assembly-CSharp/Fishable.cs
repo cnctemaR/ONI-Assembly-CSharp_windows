@@ -31,10 +31,10 @@ public class Fishable : Harvestable
 		{
 			return;
 		}
-		this.progressBar.transform.SetPosition(new Vector3(base.transform.position.x - 0.5f, base.transform.position.y + 1f, 0f));
+		this.progressBar.transform.SetPosition(new Vector3(base.transform.GetPosition().x - 0.5f, base.transform.GetPosition().y + 1f, 0f));
 		if (base.worker != null && this.positionToWorker)
 		{
-			this.progressBar.transform.SetPosition(base.worker.transform.position - new Vector3(0.5f, 0f, 0f));
+			this.progressBar.transform.SetPosition(base.worker.transform.GetPosition() - new Vector3(0.5f, 0f, 0f));
 		}
 	}
 
@@ -98,11 +98,11 @@ public class Fishable : Harvestable
 		Vector3 vector;
 		if (base.GetWorker() != null && this.positionToWorker)
 		{
-			vector = base.GetWorker().transform.position;
+			vector = base.GetWorker().transform.GetPosition();
 		}
 		else
 		{
-			vector = base.transform.position + Vector3.up;
+			vector = base.transform.GetPosition() + Vector3.up;
 		}
 		for (int i = 0; i < 3; i++)
 		{
@@ -171,7 +171,7 @@ public class Fishable : Harvestable
 	{
 		if (this.chore == null)
 		{
-			this.chore = new WorkChore<Fishable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			this.chore = new WorkChore<Fishable>(Db.Get().ChoreTypes.Harvest, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 		}
 		this.isMarkedForHarvest = true;
 	}

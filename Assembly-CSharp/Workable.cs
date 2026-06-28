@@ -4,6 +4,7 @@ using Klei;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -55,6 +56,10 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		{
 			animInfo.overrideAnims = this.overrideAnims;
 		}
+		if (this.multitoolContext.IsValid && this.multitoolHitEffectHash.IsValid)
+		{
+			animInfo.smi = new MultitoolController.Instance(this, worker, this.multitoolContext, Assets.GetPrefab(this.multitoolHitEffectHash));
+		}
 		animInfo.forcePlayPst = this.forcePlayPst;
 		return animInfo;
 	}
@@ -74,9 +79,51 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		base.OnPrefabInit();
 		this.workerStatusItem = Db.Get().MiscStatusItems.Using;
 		this.workingStatusItem = Db.Get().MiscStatusItems.Operating;
-		this.statusItemData = this;
+		this.readyForRoleWorkStatusItem = Db.Get().BuildingStatusItems.RequiresRolePerk;
 		this.workTime = this.GetWorkTime();
 		this.workTimeRemaining = Mathf.Min(this.workTimeRemaining, this.workTime);
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		if (this.shouldShowRolePerkStatusItem && this.requiredRolePerk.IsValid)
+		{
+			if (this.roleUpdateHandle != -1)
+			{
+				Game.Instance.Unsubscribe(this.roleUpdateHandle);
+			}
+			this.roleUpdateHandle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateStatusItem));
+		}
+		this.UpdateStatusItem(null);
+	}
+
+	protected virtual void UpdateStatusItem(object data = null)
+	{
+		KSelectable component = base.GetComponent<KSelectable>();
+		if (component == null)
+		{
+			return;
+		}
+		component.RemoveStatusItem(this.workStatusItemHandle, false);
+		if (this.worker == null)
+		{
+			if (this.shouldShowRolePerkStatusItem && this.requiredRolePerk.IsValid)
+			{
+				if (Game.Instance.roleManager.GetRoleAssigneesWithPerk(this.requiredRolePerk).Count == 0)
+				{
+					this.workStatusItemHandle = component.AddStatusItem(Db.Get().BuildingStatusItems.ColonyLacksRequiredRolePerk, this.requiredRolePerk);
+				}
+				else
+				{
+					this.workStatusItemHandle = component.AddStatusItem(this.readyForRoleWorkStatusItem, this.requiredRolePerk);
+				}
+			}
+		}
+		else if (this.workingStatusItem != null)
+		{
+			this.workStatusItemHandle = component.AddStatusItem(this.workingStatusItem, this);
+		}
 	}
 
 	protected override void OnLoadLevel()
@@ -102,16 +149,13 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public void StartWork(Worker workerToStart)
 	{
-		if (this.selectable != null && this.workingStatusItem != null)
-		{
-			this.selectable.AddStatusItem(this.workingStatusItem, this.statusItemData);
-		}
 		this.worker = workerToStart;
+		this.UpdateStatusItem(null);
 		this.ShowProgressBar(true);
 		this.OnStartWork(this.worker);
-		if (this.OnWorkStartedCB != null)
+		if (this.OnWorkableEventCB != null)
 		{
-			this.OnWorkStartedCB();
+			this.OnWorkableEventCB(Workable.WorkableEvent.WorkStarted);
 		}
 		this.numberOfUses++;
 	}
@@ -146,14 +190,18 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return null;
 	}
 
+	public virtual void AwardExperience(float work_dt, MinionResume resume)
+	{
+	}
+
 	public void SetAttributeConverter(AttributeConverter attributeConverter)
 	{
 		this.attributeConverter = attributeConverter;
 	}
 
-	public virtual float GetExperienceMultiplier()
+	public float GetAttributeExperienceMultiplier()
 	{
-		return 1f;
+		return this.attributeExperienceMultiplier;
 	}
 
 	protected virtual bool OnWorkTick(Worker worker, float dt)
@@ -163,10 +211,6 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public void StopWork(Worker workerToStop, bool aborted)
 	{
-		if (this.selectable != null && this.workingStatusItem != null)
-		{
-			this.selectable.RemoveStatusItem(this.workingStatusItem, false);
-		}
 		if (this.worker == workerToStop && aborted)
 		{
 			this.OnAbortWork(workerToStop);
@@ -175,7 +219,10 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		{
 			this.TransferDiseaseWithWorker(workerToStop);
 		}
-		this.OnWorkStoppedCB.Signal();
+		if (this.OnWorkableEventCB != null)
+		{
+			this.OnWorkableEventCB(Workable.WorkableEvent.WorkStopped);
+		}
 		this.OnStopWork(workerToStop);
 		if (this.resetProgressOnStop)
 		{
@@ -183,6 +230,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 			this.ShowProgressBar(false);
 		}
 		this.worker = null;
+		this.UpdateStatusItem(null);
 	}
 
 	public virtual StatusItem GetWorkerStatusItem()
@@ -192,17 +240,19 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public void CompleteWork(Worker worker)
 	{
-		if (this.selectable != null && this.workingStatusItem != null)
-		{
-			this.selectable.RemoveStatusItem(this.workingStatusItem, false);
-		}
 		if (this.shouldTransferDiseaseWithWorker)
 		{
 			this.TransferDiseaseWithWorker(worker);
 		}
 		this.OnCompleteWork(worker);
-		this.OnWorkCompleteCB.Signal();
-		this.OnWorkStoppedCB.Signal();
+		if (this.OnWorkableEventCB != null)
+		{
+			this.OnWorkableEventCB(Workable.WorkableEvent.WorkCompleted);
+		}
+		if (this.OnWorkableEventCB != null)
+		{
+			this.OnWorkableEventCB(Workable.WorkableEvent.WorkStopped);
+		}
 		this.workTimeRemaining = this.GetWorkTime();
 		this.ShowProgressBar(false);
 	}
@@ -280,7 +330,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		this.progressBar.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("ProgressBar");
 		this.progressBar.Update();
 		Building component = base.GetComponent<Building>();
-		Vector3 vector = base.gameObject.transform.position + Vector3.down * this.progressbar_y_offset;
+		Vector3 vector = base.gameObject.transform.GetPosition() + Vector3.down * this.progressbar_y_offset;
 		if (component != null)
 		{
 			vector = vector - Vector3.right * 0.5f * (float)(component.Def.WidthInCells % 2) + component.Def.placementPivot;
@@ -312,14 +362,19 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		{
 			this.offsetTracker.Clear();
 		}
+		if (this.roleUpdateHandle != -1)
+		{
+			Game.Instance.Unsubscribe(this.roleUpdateHandle);
+		}
 		base.OnCleanUp();
+		this.OnWorkableEventCB = null;
 	}
 
 	public virtual Vector3 GetTargetPoint()
 	{
-		Vector3 vector = base.transform.position;
+		Vector3 vector = base.transform.GetPosition();
 		float num = vector.y + 0.65f;
-		BoxCollider2D component = base.GetComponent<BoxCollider2D>();
+		KBoxCollider2D component = base.GetComponent<KBoxCollider2D>();
 		if (component != null)
 		{
 			vector = component.bounds.center;
@@ -420,7 +475,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	protected StatusItem workingStatusItem;
 
-	protected object statusItemData;
+	protected Guid workStatusItemHandle;
 
 	protected OffsetTracker offsetTracker;
 
@@ -431,6 +486,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	public bool resetProgressOnStop;
 
 	protected bool shouldTransferDiseaseWithWorker = true;
+
+	protected float attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 
 	[SerializeField]
 	[Tooltip("What layer does the dupe switch to when interacting with the building")]
@@ -444,6 +501,12 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	public KAnimFile[] overrideAnims;
 
 	[SerializeField]
+	protected HashedString multitoolContext;
+
+	[SerializeField]
+	protected HashedString multitoolHitEffectHash;
+
+	[SerializeField]
 	[Tooltip("Whether to user the KAnimSynchronizer or not")]
 	public bool synchronizeAnims = true;
 
@@ -454,26 +517,31 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	[Serialize]
 	protected int numberOfUses;
 
-	[MyCmpGet]
-	protected KSelectable selectable;
+	public Action<Workable.WorkableEvent> OnWorkableEventCB;
 
-	public int masterPriority = int.MaxValue;
+	private int roleUpdateHandle = -1;
 
-	public global::System.Action OnWorkStartedCB;
+	public HashedString requiredRolePerk;
 
-	public global::System.Action OnWorkCompleteCB;
+	[SerializeField]
+	protected bool shouldShowRolePerkStatusItem = true;
 
-	public global::System.Action OnWorkStoppedCB;
+	protected StatusItem readyForRoleWorkStatusItem;
 
 	public HashedString[] workAnims = new HashedString[] { "working_pre", "working_loop" };
 
 	protected bool faceTargetWhenWorking;
 
-	public global::System.Action onPriorityChanged;
-
 	protected static readonly HashedString[] DefaultWorkAnims = new HashedString[] { "working_pre", "working_loop" };
 
 	protected ProgressBar progressBar;
+
+	public enum WorkableEvent
+	{
+		WorkStarted,
+		WorkCompleted,
+		WorkStopped
+	}
 
 	public struct AnimInfo
 	{

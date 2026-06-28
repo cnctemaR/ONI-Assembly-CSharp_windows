@@ -75,14 +75,15 @@ public class NameDisplayScreen : KScreen
 		}
 		Transform transform = entry.display_go.transform.Find("Bars");
 		entry.bars_go = transform.gameObject;
-		if (representedObject.GetComponent<MinionBrain>() == null)
+		bool flag = representedObject.GetComponent<MinionBrain>() != null;
+		if (flag)
 		{
-			Transform transform2 = entry.display_go.transform.Find("Name");
-			transform2.gameObject.SetActive(false);
+			this.UpdateName(representedObject);
 		}
 		else
 		{
-			this.UpdateName(representedObject);
+			Transform transform2 = entry.display_go.transform.Find("Name");
+			transform2.gameObject.SetActive(false);
 		}
 		if (Component is Health)
 		{
@@ -91,6 +92,7 @@ public class NameDisplayScreen : KScreen
 			gameObject.name = "Health Bar";
 			health.healthBar = gameObject.GetComponent<HealthBar>();
 			health.healthBar.GetComponent<KSelectable>().entityName = UI.METERS.HEALTH.TOOLTIP;
+			health.healthBar.GetComponent<KSelectableHealthBar>().IsSelectable = flag;
 			entry.healthBar = health.healthBar;
 			gameObject.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("HealthBar");
 		}
@@ -131,7 +133,7 @@ public class NameDisplayScreen : KScreen
 		{
 			if (this.entries[i].world_go != null)
 			{
-				Vector3 vector = this.entries[i].world_go.transform.position;
+				Vector3 vector = this.entries[i].world_go.transform.GetPosition();
 				if (flag && CameraController.Instance.IsVisiblePos(vector))
 				{
 					RectTransform component = this.entries[i].display_go.GetComponent<RectTransform>();

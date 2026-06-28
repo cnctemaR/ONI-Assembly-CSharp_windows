@@ -10,9 +10,7 @@ public class LogicGateBufferConfig : LogicGateBaseConfig
 
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = base.CreateBuildingDef("LogicGateBUFFER", "logic_buffer_kanim", 2, 1);
-		buildingDef.HotKey = global::Action.BuildMenuKeyB;
-		return buildingDef;
+		return base.CreateBuildingDef("LogicGateBUFFER", "logic_buffer_kanim", 2, 1);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

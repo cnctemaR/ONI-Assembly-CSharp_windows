@@ -13,7 +13,6 @@ public class Accessorizer : KMonoBehaviour
 	public void AddAccessory(Accessory accessory)
 	{
 		this.animController.AddSymbolOverride(accessory.slot.targetSymbolId, accessory.batchSource, accessory.symbol, false);
-		this.animController.ShowSymbol(accessory.slot.targetSymbolId);
 		if (!this.HasAccessory(accessory))
 		{
 			ResourceRef<Accessory> resourceRef = new ResourceRef<Accessory>(accessory);
@@ -35,15 +34,32 @@ public class Accessorizer : KMonoBehaviour
 		return this.accessories.Exists((ResourceRef<Accessory> x) => x.Get() == accessory);
 	}
 
+	public Accessory GetAccessory(AccessorySlot slot)
+	{
+		for (int i = 0; i < this.accessories.Count; i++)
+		{
+			if (this.accessories[i].Get() != null)
+			{
+				if (this.accessories[i].Get().slot == slot)
+				{
+					return this.accessories[i].Get();
+				}
+			}
+		}
+		return null;
+	}
+
 	public void GetBodySlots(ref KCompBuilder.BodyData fd)
 	{
-		fd.eyes = 0;
-		fd.hair = 0;
-		fd.headShape = 0;
-		fd.mouth = 0;
-		fd.neck = 0;
-		fd.body = 0;
-		fd.arms = 0;
+		fd.eyes = HashedString.Invalid;
+		fd.hair = HashedString.Invalid;
+		fd.headShape = HashedString.Invalid;
+		fd.mouth = HashedString.Invalid;
+		fd.neck = HashedString.Invalid;
+		fd.body = HashedString.Invalid;
+		fd.arms = HashedString.Invalid;
+		fd.hat = HashedString.Invalid;
+		fd.hatHair = HashedString.Invalid;
 		for (int i = 0; i < this.accessories.Count; i++)
 		{
 			Accessory accessory = this.accessories[i].Get();
@@ -51,27 +67,36 @@ public class Accessorizer : KMonoBehaviour
 			{
 				if (accessory.slot.Id == "Eyes")
 				{
-					fd.eyes = accessory.subtype;
+					fd.eyes = accessory.IdHash;
 				}
 				else if (accessory.slot.Id == "Hair")
 				{
-					fd.hair = accessory.subtype;
+					fd.hair = accessory.IdHash;
+					fd.hatHair = "hat_" + accessory.Id;
 				}
 				else if (accessory.slot.Id == "HeadShape")
 				{
-					fd.headShape = accessory.subtype;
+					fd.headShape = accessory.IdHash;
 				}
 				else if (accessory.slot.Id == "Mouth")
 				{
-					fd.mouth = accessory.subtype;
+					fd.mouth = accessory.IdHash;
 				}
 				else if (accessory.slot.Id == "Neck")
 				{
-					fd.neck = accessory.subtype;
+					fd.neck = accessory.IdHash;
 				}
 				else if (accessory.slot.Id == "Body")
 				{
-					fd.arms = (fd.body = accessory.subtype);
+					fd.body = accessory.IdHash;
+				}
+				else if (accessory.slot.Id == "Arm")
+				{
+					fd.arms = accessory.IdHash;
+				}
+				else if (accessory.slot.Id == "Hat")
+				{
+					fd.hat = HashedString.Invalid;
 				}
 			}
 		}

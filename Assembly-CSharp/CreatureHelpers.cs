@@ -85,12 +85,12 @@ public static class CreatureHelpers
 
 	public static Vector3 GetWalkMoveTarget(Transform transform, Vector2 Heading)
 	{
-		int num = Grid.PosToCell(transform.position);
+		int num = Grid.PosToCell(transform.GetPosition());
 		if (Heading.x == 1f)
 		{
-			if (CreatureHelpers.isClear(Grid.CellRight(num)) && CreatureHelpers.isClear(Grid.CellDownRight(num)) && CreatureHelpers.isClear(Grid.CellRight(Grid.CellRight(num))) && !CreatureHelpers.isClear(Grid.PosToCell(transform.position + Vector3.right * 2f + Vector3.down)))
+			if (CreatureHelpers.isClear(Grid.CellRight(num)) && CreatureHelpers.isClear(Grid.CellDownRight(num)) && CreatureHelpers.isClear(Grid.CellRight(Grid.CellRight(num))) && !CreatureHelpers.isClear(Grid.PosToCell(transform.GetPosition() + Vector3.right * 2f + Vector3.down)))
 			{
-				return transform.position + Vector3.right * 2f;
+				return transform.GetPosition() + Vector3.right * 2f;
 			}
 			if (CreatureHelpers.cellsAreClear(new int[]
 			{
@@ -98,7 +98,7 @@ public static class CreatureHelpers
 				Grid.CellDownRight(num)
 			}) && !CreatureHelpers.isClear(Grid.CellBelow(Grid.CellDownRight(num))))
 			{
-				return transform.position + Vector3.right + Vector3.down;
+				return transform.GetPosition() + Vector3.right + Vector3.down;
 			}
 			if (CreatureHelpers.cellsAreClear(new int[]
 			{
@@ -107,7 +107,7 @@ public static class CreatureHelpers
 				Grid.OffsetCell(num, 1, -2)
 			}) && !CreatureHelpers.isClear(Grid.OffsetCell(num, 1, -3)))
 			{
-				return transform.position + Vector3.right + Vector3.down + Vector3.down;
+				return transform.GetPosition() + Vector3.right + Vector3.down + Vector3.down;
 			}
 			if (CreatureHelpers.cellsAreClear(new int[]
 			{
@@ -117,26 +117,26 @@ public static class CreatureHelpers
 				Grid.OffsetCell(num, 1, -3)
 			}))
 			{
-				return transform.position;
+				return transform.GetPosition();
 			}
 			if (CreatureHelpers.isClear(Grid.CellRight(num)))
 			{
-				return transform.position + Vector3.right;
+				return transform.GetPosition() + Vector3.right;
 			}
 			if (CreatureHelpers.isClear(Grid.CellUpRight(num)) && !Grid.Solid[Grid.CellAbove(num)] && Grid.Solid[Grid.CellRight(num)])
 			{
-				return transform.position + Vector3.up + Vector3.right;
+				return transform.GetPosition() + Vector3.up + Vector3.right;
 			}
 			if (!Grid.Solid[Grid.CellAbove(num)] && !Grid.Solid[Grid.CellAbove(Grid.CellAbove(num))] && Grid.Solid[Grid.CellAbove(Grid.CellRight(num))] && CreatureHelpers.isClear(Grid.CellRight(Grid.CellAbove(Grid.CellAbove(num)))))
 			{
-				return transform.position + Vector3.up + Vector3.up + Vector3.right;
+				return transform.GetPosition() + Vector3.up + Vector3.up + Vector3.right;
 			}
 		}
 		if (Heading.x == -1f)
 		{
-			if (CreatureHelpers.isClear(Grid.CellLeft(num)) && CreatureHelpers.isClear(Grid.CellDownLeft(num)) && CreatureHelpers.isClear(Grid.CellLeft(Grid.CellLeft(num))) && !CreatureHelpers.isClear(Grid.PosToCell(transform.position + Vector3.left * 2f + Vector3.down)))
+			if (CreatureHelpers.isClear(Grid.CellLeft(num)) && CreatureHelpers.isClear(Grid.CellDownLeft(num)) && CreatureHelpers.isClear(Grid.CellLeft(Grid.CellLeft(num))) && !CreatureHelpers.isClear(Grid.PosToCell(transform.GetPosition() + Vector3.left * 2f + Vector3.down)))
 			{
-				return transform.position + Vector3.left * 2f;
+				return transform.GetPosition() + Vector3.left * 2f;
 			}
 			if (CreatureHelpers.cellsAreClear(new int[]
 			{
@@ -144,7 +144,7 @@ public static class CreatureHelpers
 				Grid.CellDownLeft(num)
 			}) && !CreatureHelpers.isClear(Grid.CellBelow(Grid.CellDownLeft(num))))
 			{
-				return transform.position + Vector3.left + Vector3.down;
+				return transform.GetPosition() + Vector3.left + Vector3.down;
 			}
 			if (CreatureHelpers.cellsAreClear(new int[]
 			{
@@ -153,7 +153,7 @@ public static class CreatureHelpers
 				Grid.OffsetCell(num, -1, -2)
 			}) && !CreatureHelpers.isClear(Grid.OffsetCell(num, -1, -3)))
 			{
-				return transform.position + Vector3.left + Vector3.down + Vector3.down;
+				return transform.GetPosition() + Vector3.left + Vector3.down + Vector3.down;
 			}
 			if (CreatureHelpers.cellsAreClear(new int[]
 			{
@@ -163,22 +163,22 @@ public static class CreatureHelpers
 				Grid.OffsetCell(num, -1, -3)
 			}))
 			{
-				return transform.position;
+				return transform.GetPosition();
 			}
-			if (CreatureHelpers.isClear(Grid.CellLeft(Grid.PosToCell(transform.position))))
+			if (CreatureHelpers.isClear(Grid.CellLeft(Grid.PosToCell(transform.GetPosition()))))
 			{
-				return transform.position + Vector3.left;
+				return transform.GetPosition() + Vector3.left;
 			}
 			if (CreatureHelpers.isClear(Grid.CellUpLeft(num)) && !Grid.Solid[Grid.CellAbove(num)] && Grid.Solid[Grid.CellLeft(num)])
 			{
-				return transform.position + Vector3.up + Vector3.left;
+				return transform.GetPosition() + Vector3.up + Vector3.left;
 			}
 			if (!Grid.Solid[Grid.CellAbove(num)] && !Grid.Solid[Grid.CellAbove(Grid.CellAbove(num))] && Grid.Solid[Grid.CellAbove(Grid.CellLeft(num))] && CreatureHelpers.isClear(Grid.CellLeft(Grid.CellAbove(Grid.CellAbove(num)))))
 			{
-				return transform.position + Vector3.up + Vector3.up + Vector3.left;
+				return transform.GetPosition() + Vector3.up + Vector3.up + Vector3.left;
 			}
 		}
-		return transform.position;
+		return transform.GetPosition();
 	}
 
 	public static bool CrewNearby(Transform transform, int range = 6)
@@ -269,7 +269,7 @@ public static class CreatureHelpers
 
 	private static bool isInFavoredFleeDirection(int targetFleeCell, int threatCell, GameObject self)
 	{
-		bool flag = Grid.CellToPos(threatCell).x < self.transform.position.x;
+		bool flag = Grid.CellToPos(threatCell).x < self.transform.GetPosition().x;
 		bool flag2 = Grid.CellToPos(threatCell).x < Grid.CellToPos(targetFleeCell).x;
 		return flag == flag2;
 	}

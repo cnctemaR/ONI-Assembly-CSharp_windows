@@ -10,15 +10,14 @@ public class InsulatedLiquidConduitConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 1;
 		string text2 = "utilities_liquid_insulated_kanim";
-		float num3 = 400f;
-		int num4 = 30;
-		float num5 = 10f;
+		int num3 = 30;
+		float num4 = 10f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] plumbable = MATERIALS.PLUMBABLE;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, plumbable, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, plumbable, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
 		buildingDef.Insulation = 0.05f;
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
@@ -41,7 +40,7 @@ public class InsulatedLiquidConduitConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		Conduit conduit = go.AddOrGet<Conduit>();

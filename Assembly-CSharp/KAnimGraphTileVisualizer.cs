@@ -34,6 +34,8 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 				return Game.Instance.logicCircuitSystem;
 			case KAnimGraphTileVisualizer.ConnectionSource.Tube:
 				return Game.Instance.travelTubeSystem;
+			case KAnimGraphTileVisualizer.ConnectionSource.Solid:
+				return Game.Instance.solidConduitSystem;
 			default:
 				return null;
 			}
@@ -44,7 +46,7 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 	{
 		base.OnSpawn();
 		this.connectionManager = this.ConnectionManager;
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		this.connectionManager.SetConnections(this.Connections, num, this.isPhysicalBuilding);
 		Building component = base.GetComponent<Building>();
 		TileVisualizer.RefreshCell(num, component.Def.TileLayer);
@@ -55,7 +57,7 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 		if (this.connectionManager != null && !this.skipCleanup)
 		{
 			this.skipRefresh = true;
-			int num = Grid.PosToCell(base.transform.position);
+			int num = Grid.PosToCell(base.transform.GetPosition());
 			this.connectionManager.ClearCell(num, this.isPhysicalBuilding);
 			Building component = base.GetComponent<Building>();
 			TileVisualizer.RefreshCell(num, component.Def.TileLayer);
@@ -69,7 +71,7 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 		{
 			return;
 		}
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		this.Connections = this.connectionManager.GetConnections(num, this.isPhysicalBuilding);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		if (component != null)
@@ -95,28 +97,31 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 
 	private UtilityNetwork GetNetwork()
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		return this.connectionManager.GetNetworkForDirection(num, Direction.None);
 	}
 
 	public UtilityNetwork GetNetworkForDirection(Direction d)
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		return this.connectionManager.GetNetworkForDirection(num, d);
 	}
 
 	public void UpdateConnections(UtilityConnections new_connections)
 	{
 		this._connections = new_connections;
-		int num = Grid.PosToCell(base.transform.position);
-		this.connectionManager.SetConnections(new_connections, num, this.isPhysicalBuilding);
+		if (this.connectionManager != null)
+		{
+			int num = Grid.PosToCell(base.transform.GetPosition());
+			this.connectionManager.SetConnections(new_connections, num, this.isPhysicalBuilding);
+		}
 	}
 
 	public KAnimGraphTileVisualizer GetNeighbour(Direction d)
 	{
 		KAnimGraphTileVisualizer kanimGraphTileVisualizer = null;
 		Vector2I vector2I;
-		Grid.PosToXY(base.transform.position, out vector2I);
+		Grid.PosToXY(base.transform.GetPosition(), out vector2I);
 		int num = -1;
 		switch (d)
 		{
@@ -165,6 +170,9 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 			case KAnimGraphTileVisualizer.ConnectionSource.Tube:
 				objectLayer = ObjectLayer.TravelTubeTile;
 				break;
+			case KAnimGraphTileVisualizer.ConnectionSource.Solid:
+				objectLayer = ObjectLayer.SolidConduitTile;
+				break;
 			default:
 				throw new ArgumentNullException("wtf");
 			}
@@ -197,6 +205,7 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 		Liquid,
 		Electrical,
 		Logic,
-		Tube
+		Tube,
+		Solid
 	}
 }

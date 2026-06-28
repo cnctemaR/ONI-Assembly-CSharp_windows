@@ -41,7 +41,7 @@ public class MopTool : DragTool
 						Vector3 vector = Grid.CellToPosCBC(cell, this.visualizerLayer);
 						float depthBias = InterfaceTool.DepthBias;
 						vector.z += depthBias;
-						gameObject.transform.position = vector;
+						gameObject.transform.SetPosition(vector);
 					}
 					else
 					{
@@ -58,7 +58,7 @@ public class MopTool : DragTool
 					Prioritizable component = gameObject.GetComponent<Prioritizable>();
 					if (component != null)
 					{
-						component.SetMasterPriority(ToolMenuPriorityScreen.Instance.GetScreenPriority());
+						component.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
 					}
 				}
 			}
@@ -68,13 +68,13 @@ public class MopTool : DragTool
 	protected override void OnActivateTool()
 	{
 		base.OnActivateTool();
-		ToolMenuPriorityScreen.Instance.Show(true);
+		ToolMenu.Instance.PriorityScreen.Show(true);
 	}
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
 	{
 		base.OnDeactivateTool(new_tool);
-		ToolMenuPriorityScreen.Instance.Show(false);
+		ToolMenu.Instance.PriorityScreen.Show(false);
 	}
 
 	public GameObject Placer;

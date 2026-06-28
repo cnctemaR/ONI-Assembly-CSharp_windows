@@ -10,9 +10,7 @@ public class LogicGateFilterConfig : LogicGateBaseConfig
 
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = base.CreateBuildingDef("LogicGateFILTER", "logic_filter_kanim", 2, 1);
-		buildingDef.HotKey = global::Action.BuildMenuKeyB;
-		return buildingDef;
+		return base.CreateBuildingDef("LogicGateFILTER", "logic_filter_kanim", 2, 1);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

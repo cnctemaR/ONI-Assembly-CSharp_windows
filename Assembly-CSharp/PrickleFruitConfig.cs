@@ -44,7 +44,7 @@ public class PrickleFruitConfig : IEntityConfig
 			}
 			if (num > 0)
 			{
-				Vector3 vector = edible.transform.position + new Vector3(0f, 0.05f, 0f);
+				Vector3 vector = edible.transform.GetPosition() + new Vector3(0f, 0.05f, 0f);
 				vector = Grid.CellToPosCCC(Grid.PosToCell(vector), Grid.SceneLayer.Ore);
 				GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(new Tag("PrickleFlowerSeed")), vector, Grid.SceneLayer.Ore, SceneOrganizer.Instance.GetFolder(Folder.Entities), null, 0);
 				PrimaryElement component = edible.GetComponent<PrimaryElement>();

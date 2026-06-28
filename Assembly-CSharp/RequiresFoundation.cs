@@ -1,83 +1,102 @@
 ﻿using System;
+using UnityEngine;
 
-[SkipSaveFileSerialization]
-public class RequiresFoundation : KMonoBehaviour
+public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation.Data>, IKComponentManager
 {
-	protected override void OnPrefabInit()
+	public HandleVector<int>.Handle Add(GameObject go)
 	{
-		base.OnPrefabInit();
-		this.building = base.GetComponent<Building>();
+		BuildingDef def = go.GetComponent<Building>().Def;
+		int num = Grid.PosToCell(go.transform.GetPosition());
+		RequiresFoundation.Data data = new RequiresFoundation.Data
+		{
+			cell = num,
+			width = def.WidthInCells,
+			height = def.HeightInCells,
+			buildRule = def.BuildLocationRule,
+			solidPartitionerEntry = null,
+			buildingPartitionerEntry = null,
+			solid = true,
+			go = go
+		};
+		HandleVector<int>.Handle h = base.Add(go, data);
+		if (def.ContinuouslyCheckFoundation)
+		{
+			Action<object> action = delegate(object d)
+			{
+				this.OnSolidChanged(h);
+			};
+			Vector2I vector2I = Grid.CellToXY(num);
+			int xoffset = BuildingDef.GetXOffset(def.WidthInCells);
+			data.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Overheatable.OnSpawn", go, vector2I.x + xoffset, vector2I.y - 1, def.WidthInCells, def.HeightInCells + 1, GameScenePartitioner.Instance.solidChangedLayer, action);
+			data.buildingPartitionerEntry = GameScenePartitioner.Instance.Add("Overheatable.OnSpawn", go, vector2I.x + xoffset, vector2I.y - 1, def.WidthInCells, def.HeightInCells + 1, GameScenePartitioner.Instance.objectLayers[1], action);
+			base.SetData(h, data);
+			this.OnSolidChanged(h);
+		}
+		return h;
 	}
 
-	protected override void OnSpawn()
+	protected override void OnCleanUp(HandleVector<int>.Handle h)
 	{
-		base.OnSpawn();
-		if (this.building.Def.ContinuouslyCheckFoundation)
+		RequiresFoundation.Data data = base.GetData(h);
+		if (data.solidPartitionerEntry != null)
 		{
-			Extents validPlacementExtents = this.building.GetValidPlacementExtents();
-			this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Overheatable.OnSpawn", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
-			this.buildingPartitionerEntry = GameScenePartitioner.Instance.Add("Overheatable.OnSpawn", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.objectLayers[1], new Action<object>(this.OnSolidChanged));
-			this.OnSolidChanged(null);
+			data.solidPartitionerEntry.Release();
+			data.solidPartitionerEntry = null;
 		}
+		if (data.buildingPartitionerEntry != null)
+		{
+			data.buildingPartitionerEntry.Release();
+			data.buildingPartitionerEntry = null;
+		}
+		base.SetData(h, data);
 	}
 
-	protected override void OnCleanUp()
+	private void OnSolidChanged(HandleVector<int>.Handle h)
 	{
-		if (this.solidPartitionerEntry != null)
+		RequiresFoundation.Data data = base.GetData(h);
+		SimCellOccupier component = data.go.GetComponent<SimCellOccupier>();
+		if (component == null || component.IsReady())
 		{
-			this.solidPartitionerEntry.Release();
-			this.solidPartitionerEntry = null;
-		}
-		if (this.buildingPartitionerEntry != null)
-		{
-			this.buildingPartitionerEntry.Release();
-			this.buildingPartitionerEntry = null;
-		}
-		base.OnCleanUp();
-	}
-
-	private void OnSolidChanged(object data)
-	{
-		SimCellOccupier component = base.GetComponent<SimCellOccupier>();
-		if (!this.isBuildingDamaged && (component == null || component.IsReady()))
-		{
-			string text = null;
-			Rotatable component2 = base.GetComponent<Rotatable>();
+			Rotatable component2 = data.go.GetComponent<Rotatable>();
 			Orientation orientation = ((!(component2 != null)) ? Orientation.Neutral : component2.GetOrientation());
-			if (this.building.IsValidBuildLocation(base.transform.position, out text, orientation))
-			{
-				this.UpdateSolidState(true);
-			}
-			else
-			{
-				this.UpdateSolidState(false);
-			}
+			bool flag = BuildingDef.CheckFoundation(data.cell, orientation, data.buildRule, data.width, data.height);
+			this.UpdateSolidState(flag, ref data);
+			base.SetData(h, data);
 		}
 	}
 
-	private void UpdateSolidState(bool is_solid)
+	private void UpdateSolidState(bool is_solid, ref RequiresFoundation.Data data)
 	{
-		if (this.solid != is_solid)
+		if (data.solid != is_solid)
 		{
-			this.solid = is_solid;
-			Operational component = base.GetComponent<Operational>();
+			data.solid = is_solid;
+			Operational component = data.go.GetComponent<Operational>();
 			if (component != null)
 			{
 				component.SetFlag(RequiresFoundation.solidFoundation, is_solid);
 			}
-			base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.MissingFoundation, !is_solid, this);
+			data.go.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.MissingFoundation, !is_solid, this);
 		}
 	}
 
-	private Building building;
-
-	private GameScenePartitionerEntry solidPartitionerEntry;
-
-	private GameScenePartitionerEntry buildingPartitionerEntry;
-
-	private bool solid = true;
-
-	private bool isBuildingDamaged;
-
 	public static Operational.Flag solidFoundation = new Operational.Flag("solid_foundation", Operational.Flag.Type.Functional);
+
+	public struct Data
+	{
+		public int cell;
+
+		public int width;
+
+		public int height;
+
+		public BuildLocationRule buildRule;
+
+		public GameScenePartitionerEntry solidPartitionerEntry;
+
+		public GameScenePartitionerEntry buildingPartitionerEntry;
+
+		public bool solid;
+
+		public GameObject go;
+	}
 }

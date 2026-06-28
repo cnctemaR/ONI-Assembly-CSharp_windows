@@ -8,7 +8,7 @@ public class Shockworm : StateMachineComponent<Shockworm.StatesInstance>, ISaveL
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Vector3 position = base.transform.position;
+		Vector3 position = base.transform.GetPosition();
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Move);
 		base.transform.SetPosition(position);
 		base.gameObject.SetLayerRecursively(LayerMask.NameToLayer("Default"));
@@ -72,7 +72,7 @@ public class Shockworm : StateMachineComponent<Shockworm.StatesInstance>, ISaveL
 					if (smi.master.loopingSounds != null)
 					{
 						smi.master.loopingSounds.AddLoopingSoundUpdater();
-						smi.master.loopingSounds.StartSound(GlobalAssets.GetSound(smi.master.wingSound, false), smi.master.transform.position);
+						smi.master.loopingSounds.StartSound(GlobalAssets.GetSound(smi.master.wingSound, false), smi.master.transform.GetPosition());
 					}
 				})
 				.Exit(delegate(Shockworm.StatesInstance smi)
@@ -105,7 +105,7 @@ public class Shockworm : StateMachineComponent<Shockworm.StatesInstance>, ISaveL
 				{
 					smi.Schedule(0.85f, delegate
 					{
-						smi.master.weapon.AttackArea(smi.master.transform.position);
+						smi.master.weapon.AttackArea(smi.master.transform.GetPosition());
 					}, null);
 				});
 			this.death.ToggleGravity().PlayAnim("death").EventHandler(GameHashes.AnimQueueComplete, delegate(Shockworm.StatesInstance smi)

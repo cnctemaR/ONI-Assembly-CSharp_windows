@@ -6,10 +6,7 @@ public class ReachabilityMonitor : GameStateMachine<ReachabilityMonitor, Reachab
 	{
 		default_state = this.unreachable;
 		base.serializable = false;
-		this.root.ToggleSchedulePeriodic("UpdateReachability", 3f, delegate(ReachabilityMonitor.Instance smi)
-		{
-			smi.UpdateReachability();
-		});
+		this.root.FastUpdate("UpdateReachability", ReachabilityMonitor.updateReachabilityCB, UpdateRate.SIM_1000ms, true);
 		this.reachable.ToggleTag(GameTags.Reachable).Enter("TriggerEvent", delegate(ReachabilityMonitor.Instance smi)
 		{
 			smi.TriggerEvent();
@@ -26,6 +23,16 @@ public class ReachabilityMonitor : GameStateMachine<ReachabilityMonitor, Reachab
 
 	public StateMachine<ReachabilityMonitor, ReachabilityMonitor.Instance, Workable, object>.BoolParameter isReachable = new StateMachine<ReachabilityMonitor, ReachabilityMonitor.Instance, Workable, object>.BoolParameter(false);
 
+	private static ReachabilityMonitor.UpdateReachabilityCB updateReachabilityCB = new ReachabilityMonitor.UpdateReachabilityCB();
+
+	private class UpdateReachabilityCB : UpdateBucketWithUpdater<ReachabilityMonitor.Instance>.IUpdater
+	{
+		public void Update(ReachabilityMonitor.Instance smi, float dt)
+		{
+			smi.UpdateReachability();
+		}
+	}
+
 	public new class Instance : GameStateMachine<ReachabilityMonitor, ReachabilityMonitor.Instance, Workable, object>.GameInstance
 	{
 		public Instance(Workable workable)
@@ -38,14 +45,6 @@ public class ReachabilityMonitor : GameStateMachine<ReachabilityMonitor, Reachab
 		{
 			bool flag = base.sm.isReachable.Get(base.smi);
 			base.Trigger(-1432940121, flag);
-			if (flag)
-			{
-				Game.Instance.Trigger(1992428732, base.gameObject);
-			}
-			else
-			{
-				Game.Instance.Trigger(124211798, base.gameObject);
-			}
 		}
 
 		public void UpdateReachability()

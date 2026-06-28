@@ -13,7 +13,7 @@ public class BasicPlantBarConfig : IEntityConfig
 		float num = 1f;
 		string text2 = ITEMS.FOOD.BASICPLANTBAR.RECIPEDESC;
 		Recipe recipe = new Recipe(text, num, (SimHashes)0, null, text2, 2);
-		recipe.AddIngredient(new Recipe.Ingredient("BasicPlantFood", 5f));
+		recipe.AddIngredient(new Recipe.Ingredient("BasicPlantFood", 2f));
 		recipe.AddIngredient(new Recipe.Ingredient("Water", 50f));
 		recipe.FabricationVisualizer = MushBarConfig.CreateFabricationVisualizer(gameObject);
 		recipe.SetFabricator("MicrobeMusher", FOOD.RECIPES.STANDARD_COOK_TIME);

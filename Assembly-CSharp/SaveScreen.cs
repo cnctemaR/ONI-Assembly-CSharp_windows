@@ -98,7 +98,7 @@ public class SaveScreen : KModalScreen
 		FileNameDialog fileNameDialog = (FileNameDialog)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.FileNameDialog.gameObject, base.transform.parent.gameObject);
 		fileNameDialog.onConfirm = delegate(string filename)
 		{
-			filename = Path.Combine(SaveLoader.GetSavePrefix(), filename);
+			filename = Path.Combine(SaveLoader.GetSavePrefixAndCreateFolder(), filename);
 			this.Save(filename);
 		};
 	}

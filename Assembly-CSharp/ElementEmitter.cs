@@ -32,7 +32,7 @@ public class ElementEmitter : SimComponent
 
 	protected override void OnSimActivate()
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		int num2 = Grid.OffsetCell(num, (int)this.outputElement.outputElementOffset.x, (int)this.outputElement.outputElementOffset.y);
 		if (this.outputElement.elementHash != (SimHashes)0 && this.outputElement.massGenerationRate > 0f && this.emissionFrequency > 0f)
 		{
@@ -47,7 +47,7 @@ public class ElementEmitter : SimComponent
 
 	protected override void OnSimDeactivate()
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		int num2 = Grid.OffsetCell(num, (int)this.outputElement.outputElementOffset.x, (int)this.outputElement.outputElementOffset.y);
 		SimMessages.ModifyElementEmitter(this.simHandle, num2, (int)this.emitRange, SimHashes.Vacuum, 0f, 0f, 0f);
 		if (this.showDescriptor)
@@ -66,12 +66,12 @@ public class ElementEmitter : SimComponent
 		Element element = ElementLoader.FindElementByHash(this.outputElement.elementHash);
 		if (element.IsGas || element.IsLiquid)
 		{
-			int num2 = Grid.PosToCell(base.transform.position);
+			int num2 = Grid.PosToCell(base.transform.GetPosition());
 			SimMessages.AddRemoveSubstance(num2, this.outputElement.elementHash, CellEventLogger.Instance.ElementConsumerSimUpdate, mass, num, disease_idx, disease_count, -1);
 		}
 		else if (element.IsSolid)
 		{
-			element.substance.SpawnResource(base.transform.position + new Vector3(0f, 0.5f, 0f), mass, num, disease_idx, disease_count, false, true);
+			element.substance.SpawnResource(base.transform.GetPosition() + new Vector3(0f, 0.5f, 0f), mass, num, disease_idx, disease_count, false, true);
 		}
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, ElementLoader.FindElementByHash(this.outputElement.elementHash).name, base.gameObject.transform, 1.5f, false);
 	}
@@ -105,7 +105,7 @@ public class ElementEmitter : SimComponent
 
 	private void OnDrawGizmosSelected()
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		int num2 = Grid.OffsetCell(num, (int)this.outputElement.outputElementOffset.x, (int)this.outputElement.outputElementOffset.y);
 		Gizmos.color = Color.green;
 		Gizmos.DrawSphere(Grid.CellToPos(num2) + Vector3.right / 2f + Vector3.up / 2f, 0.2f);

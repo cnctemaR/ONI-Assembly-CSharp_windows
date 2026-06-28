@@ -83,18 +83,6 @@ public class MoveToLocationTool : InterfaceTool
 		root.GetComponentInChildren<MeshRenderer>().material.color = c;
 	}
 
-	private void LateUpdate()
-	{
-		if (this.hoverText == null)
-		{
-			this.hoverText = base.GetComponent<HoverTextConfiguration>();
-		}
-		if (this.hoverText != null)
-		{
-			this.hoverText.UpdateHoverElements(null);
-		}
-	}
-
 	public static MoveToLocationTool Instance;
 
 	private Navigator targetNavigator;

@@ -47,7 +47,7 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 		if (baitSetting != this.activeBaitSetting)
 		{
 			this.activeBaitSetting = baitSetting;
-			this.baitStorage.DropAll();
+			this.baitStorage.DropAll(false);
 		}
 		base.smi.GoTo(base.smi.sm.idle);
 		this.baitStorage.storageFilters = new List<Tag> { this.activeBaitSetting };
@@ -76,7 +76,7 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 		{
 			return;
 		}
-		this.fetchChore = new FetchChore(this.baitStorage, 100f, new Tag[] { this.activeBaitSetting }, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0);
+		this.fetchChore = new FetchChore(Db.Get().ChoreTypes.Fetch, this.baitStorage, 100f, new Tag[] { this.activeBaitSetting }, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0, null);
 		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.AwaitingBaitDelivery, null);
 	}
 
@@ -105,7 +105,6 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 		public StatesInstance(CreatureLure master)
 			: base(master)
 		{
-			master.baitStorage.choreType = Db.Get().ChoreTypes.Fetch;
 		}
 	}
 

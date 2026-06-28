@@ -79,18 +79,17 @@ public class KBatchedAnimTracker : MonoBehaviour
 		if (currentAnim != null)
 		{
 			Matrix2x3 symbolLocalTransform = this.controller.GetSymbolLocalTransform(this.symbol, out flag);
-			Vector3 position = this.controller.transform.position;
+			Vector3 position = this.controller.transform.GetPosition();
 			if (flag && (this.previousMatrix != symbolLocalTransform || position != this.previousPosition || this.useTargetPoint))
 			{
 				this.previousMatrix = symbolLocalTransform;
 				this.previousPosition = position;
-				Matrix4x4 matrix4x = this.controller.GetTransformMatrix() * symbolLocalTransform;
-				matrix4x *= Matrix4x4.Scale(this.matrixScale);
-				float z = base.transform.position.z;
-				base.transform.SetPosition(matrix4x.MultiplyPoint3x4(this.offset));
+				Matrix2x3 matrix2x = this.controller.GetTransformMatrix() * symbolLocalTransform;
+				float z = base.transform.GetPosition().z;
+				base.transform.SetPosition(matrix2x.MultiplyPoint(this.offset));
 				if (this.useTargetPoint)
 				{
-					Vector3 position2 = base.transform.position;
+					Vector3 position2 = base.transform.GetPosition();
 					position2.z = 0f;
 					Vector3 vector = this.targetPoint - position2;
 					float num = Vector3.Angle(vector, Vector3.right);
@@ -101,16 +100,24 @@ public class KBatchedAnimTracker : MonoBehaviour
 					base.transform.localRotation = Quaternion.identity;
 					base.transform.RotateAround(position2, new Vector3(0f, 0f, 1f), num);
 					float sqrMagnitude = vector.sqrMagnitude;
-					this.myAnim.GetBatchInstanceData().SetClipRadius(base.transform.position.x, base.transform.position.y, sqrMagnitude, true);
+					this.myAnim.GetBatchInstanceData().SetClipRadius(base.transform.GetPosition().x, base.transform.GetPosition().y, sqrMagnitude, true);
 				}
 				else
 				{
 					Vector3 vector2 = ((!this.controller.FlipX) ? Vector3.right : Vector3.left);
 					Vector3 vector3 = ((!this.controller.FlipY) ? Vector3.up : Vector3.down);
-					base.transform.up = matrix4x.MultiplyVector(vector3);
-					base.transform.right = matrix4x.MultiplyVector(vector2);
+					base.transform.up = matrix2x.MultiplyVector(vector3);
+					base.transform.right = matrix2x.MultiplyVector(vector2);
+					if (this.allowTransformOverride && this.myAnim != null)
+					{
+						KBatchedAnimInstanceData batchInstanceData = this.myAnim.GetBatchInstanceData();
+						if (batchInstanceData != null)
+						{
+							batchInstanceData.SetOverrideTransformMatrix(matrix2x);
+						}
+					}
 				}
-				base.transform.SetPosition(new Vector3(base.transform.position.x, base.transform.position.y, z));
+				base.transform.SetPosition(new Vector3(base.transform.GetPosition().x, base.transform.GetPosition().y, z));
 				this.myAnim.MarkDirty();
 			}
 		}
@@ -148,9 +155,6 @@ public class KBatchedAnimTracker : MonoBehaviour
 	private KBatchedAnimController controller;
 
 	[SerializeField]
-	public Vector3 matrixScale = Vector3.one;
-
-	[SerializeField]
 	public Vector3 offset = Vector3.zero;
 
 	public HashedString symbol;
@@ -164,6 +168,8 @@ public class KBatchedAnimTracker : MonoBehaviour
 	public bool skipInitialDisable;
 
 	public bool forceAlwaysVisible;
+
+	public bool allowTransformOverride = true;
 
 	private bool alive = true;
 

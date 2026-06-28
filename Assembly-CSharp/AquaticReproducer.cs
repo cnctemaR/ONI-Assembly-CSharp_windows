@@ -1,24 +1,17 @@
 ﻿using System;
 using UnityEngine;
 
-public class AquaticReproducer : KMonoBehaviour
+public class AquaticReproducer : KMonoBehaviour, ISim1000ms
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		this.timeUntilNextSpawn = this.cycleLength;
-		this.handle = GameScheduler.Instance.SchedulePeriodic("AquaticReproducer", this.UpdateFrequency, new Action<object>(this.CheckReproduce), null, null, 0f, null);
 	}
 
-	protected override void OnCleanUp()
+	public void Sim1000ms(float dt)
 	{
-		this.handle.ClearScheduler();
-		base.OnCleanUp();
-	}
-
-	private void CheckReproduce(object data)
-	{
-		this.timeUntilNextSpawn -= this.UpdateFrequency;
+		this.timeUntilNextSpawn -= dt;
 		if (this.timeUntilNextSpawn <= 0f)
 		{
 			this.Reproduce();
@@ -80,8 +73,4 @@ public class AquaticReproducer : KMonoBehaviour
 	public bool SpawnEgg;
 
 	public Tag EggPrefabTag;
-
-	private float UpdateFrequency = 1f;
-
-	private SchedulerHandle handle;
 }

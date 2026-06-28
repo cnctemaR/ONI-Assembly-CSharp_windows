@@ -249,17 +249,22 @@ public class SaveLoader : KMonoBehaviour
 	public static string GetSavePrefix()
 	{
 		string text = Util.RootFolder();
-		string text2 = Path.Combine(text, "save_files/");
-		if (!Directory.Exists(text2))
+		return Path.Combine(text, "save_files/");
+	}
+
+	public static string GetSavePrefixAndCreateFolder()
+	{
+		string savePrefix = SaveLoader.GetSavePrefix();
+		if (!Directory.Exists(savePrefix))
 		{
-			Directory.CreateDirectory(text2);
+			Directory.CreateDirectory(savePrefix);
 		}
-		return text2;
+		return savePrefix;
 	}
 
 	public static string GetAutoSavePrefix()
 	{
-		string text = Path.Combine(SaveLoader.GetSavePrefix(), "auto_save/");
+		string text = Path.Combine(SaveLoader.GetSavePrefixAndCreateFolder(), "auto_save/");
 		if (!Directory.Exists(text))
 		{
 			Directory.CreateDirectory(text);
@@ -322,7 +327,7 @@ public class SaveLoader : KMonoBehaviour
 
 	public static List<string> GetAllFiles()
 	{
-		List<string> list = SaveLoader.GetSaveFiles(SaveLoader.GetSavePrefix()).ToList<string>();
+		List<string> list = SaveLoader.GetSaveFiles(SaveLoader.GetSavePrefixAndCreateFolder()).ToList<string>();
 		return list.OrderByDescending<string, global::System.DateTime>(new Func<string, global::System.DateTime>(File.GetLastWriteTime)).ToList<string>();
 	}
 
@@ -536,8 +541,6 @@ public class SaveLoader : KMonoBehaviour
 		SceneInitializer.Instance.NewSaveGamePrefab();
 		WorldGen.ReplayGenerate(new WorldGen.ResetFunction(this.Reset));
 		this.OnWorldGenComplete.Signal();
-		UpdateManager.instance.enabled = true;
-		UpdateManager.instance.SkipNextUpdate();
 		ThreadedHttps<KleiMetrics>.Instance.StartNewGame();
 		return true;
 	}
@@ -563,7 +566,7 @@ public class SaveLoader : KMonoBehaviour
 			return;
 		}
 		Dictionary<string, object> dictionary = new Dictionary<string, object>();
-		dictionary[GameClock.NewCycleKey] = GameClock.Instance.GetDay() + 1;
+		dictionary[GameClock.NewCycleKey] = GameClock.Instance.GetCycle() + 1;
 		dictionary["WasDebugEverUsed"] = Game.Instance.debugWasUsed;
 		dictionary["IsAutoSave"] = is_auto_save;
 		dictionary["SavedPrefabs"] = this.GetSavedPrefabMetrics();
@@ -589,23 +592,39 @@ public class SaveLoader : KMonoBehaviour
 			{
 				Modifiers component = minionIdentity.gameObject.GetComponent<Modifiers>();
 				Amounts amounts = component.amounts;
-				List<SaveLoader.MinionModifierMetricsData> list2 = new List<SaveLoader.MinionModifierMetricsData>(amounts.Count);
+				List<SaveLoader.MinionAttrFloatData> list2 = new List<SaveLoader.MinionAttrFloatData>(amounts.Count);
 				foreach (AmountInstance amountInstance in amounts)
 				{
 					float value = amountInstance.value;
 					if (!float.IsNaN(value) && !float.IsInfinity(value))
 					{
-						list2.Add(new SaveLoader.MinionModifierMetricsData
+						list2.Add(new SaveLoader.MinionAttrFloatData
 						{
 							Name = amountInstance.modifier.Id,
 							Value = amountInstance.value
 						});
 					}
 				}
+				MinionResume component2 = minionIdentity.gameObject.GetComponent<MinionResume>();
+				List<SaveLoader.MinionAttrFloatData> list3 = new List<SaveLoader.MinionAttrFloatData>(component2.ExperienceByRoleID.Count);
+				foreach (KeyValuePair<string, float> keyValuePair in component2.ExperienceByRoleID)
+				{
+					float value2 = keyValuePair.Value;
+					if (!float.IsNaN(value2) && !float.IsInfinity(value2))
+					{
+						list3.Add(new SaveLoader.MinionAttrFloatData
+						{
+							Name = keyValuePair.Key,
+							Value = keyValuePair.Value
+						});
+					}
+				}
 				list.Add(new SaveLoader.MinionMetricsData
 				{
 					Name = minionIdentity.name,
-					Modifiers = list2
+					Modifiers = list2,
+					CurrentRole = component2.CurrentRole,
+					RoleExperience = list3
 				});
 			}
 		}
@@ -638,11 +657,15 @@ public class SaveLoader : KMonoBehaviour
 		List<SaveLoader.WorldInventoryMetricsData> list = new List<SaveLoader.WorldInventoryMetricsData>(accessibleAmounts.Count);
 		foreach (KeyValuePair<Tag, float> keyValuePair in accessibleAmounts)
 		{
-			list.Add(new SaveLoader.WorldInventoryMetricsData
+			float value = keyValuePair.Value;
+			if (!float.IsInfinity(value) && !float.IsNaN(value))
 			{
-				Name = keyValuePair.Key.ToString(),
-				Amount = keyValuePair.Value
-			});
+				list.Add(new SaveLoader.WorldInventoryMetricsData
+				{
+					Name = keyValuePair.Key.ToString(),
+					Amount = value
+				});
+			}
 		}
 		return list;
 	}
@@ -650,11 +673,10 @@ public class SaveLoader : KMonoBehaviour
 	private List<SaveLoader.DailyReportMetricsData> GetDailyReportMetrics()
 	{
 		List<SaveLoader.DailyReportMetricsData> list = new List<SaveLoader.DailyReportMetricsData>();
-		int day = GameClock.Instance.GetDay();
-		ReportManager.DailyReport dailyReport = ReportManager.Instance.FindReport(day);
+		int cycle = GameClock.Instance.GetCycle();
+		ReportManager.DailyReport dailyReport = ReportManager.Instance.FindReport(cycle);
 		if (dailyReport != null)
 		{
-			Dictionary<ReportManager.ReportType, object> dictionary = new Dictionary<ReportManager.ReportType, object>();
 			foreach (ReportManager.ReportEntry reportEntry in dailyReport.reportEntries)
 			{
 				SaveLoader.DailyReportMetricsData dailyReportMetricsData = default(SaveLoader.DailyReportMetricsData);
@@ -768,7 +790,7 @@ public class SaveLoader : KMonoBehaviour
 		public List<SaveLoader.FlowUtilityNetworkInstance> liquid;
 	}
 
-	private struct MinionModifierMetricsData
+	private struct MinionAttrFloatData
 	{
 		public string Name;
 
@@ -779,7 +801,11 @@ public class SaveLoader : KMonoBehaviour
 	{
 		public string Name;
 
-		public List<SaveLoader.MinionModifierMetricsData> Modifiers;
+		public List<SaveLoader.MinionAttrFloatData> Modifiers;
+
+		public string CurrentRole;
+
+		public List<SaveLoader.MinionAttrFloatData> RoleExperience;
 	}
 
 	private struct SavedPrefabMetricsData

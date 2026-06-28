@@ -17,7 +17,7 @@ public static class Util
 
 	public static Vector3 Position(GameObject o)
 	{
-		return o.transform.position;
+		return o.transform.GetPosition();
 	}
 
 	public static void InitializeComponent(Component cmp)
@@ -230,24 +230,14 @@ public static class Util
 		return gameObject;
 	}
 
-	public static GameObject KInstantiate(GameObject original, Folder folder)
+	public static GameObject KInstantiate(GameObject original, Folder folder, Vector3 position)
 	{
-		return Util.KInstantiate(original, Vector3.zero, Quaternion.identity, SceneOrganizer.Instance.GetFolder(folder), null, true, 0);
+		return Util.KInstantiate(original, position, Quaternion.identity, SceneOrganizer.Instance.GetFolder(folder), null, true, 0);
 	}
 
-	public static GameObject KInstantiate(Component original, Folder folder)
+	public static T KInstantiate<T>(GameObject original, Folder folder, Vector3 position)
 	{
-		return Util.KInstantiate(original.gameObject, folder);
-	}
-
-	public static T KInstantiate<T>(Component original, Folder folder)
-	{
-		return Util.KInstantiate<T>(original.gameObject, folder);
-	}
-
-	public static T KInstantiate<T>(GameObject original, Folder folder)
-	{
-		return Util.KInstantiate(original, folder).GetComponent<T>();
+		return Util.KInstantiate(original, folder, position).GetComponent<T>();
 	}
 
 	public static T KInstantiate<T>(Component original, GameObject parent)
@@ -263,11 +253,6 @@ public static class Util
 	public static GameObject KInstantiate(Component original, GameObject parent = null, string name = null)
 	{
 		return Util.KInstantiate(original.gameObject, Vector3.zero, Quaternion.identity, parent, name, true, 0);
-	}
-
-	public static GameObject KInstantiatePrecise(GameObject original, GameObject parent = null, string name = null)
-	{
-		return Util.KInstantiate(original, original.transform.position, Quaternion.identity, parent, name, true, 0);
 	}
 
 	public static GameObject KInstantiate(GameObject original, GameObject parent = null, string name = null)
@@ -357,11 +342,7 @@ public static class Util
 		}
 		if (gameObject == null)
 		{
-			gameObject = global::UnityEngine.Object.Instantiate<GameObject>(original);
-			if (parent != null)
-			{
-				gameObject.transform.SetParent(parent.transform, false);
-			}
+			gameObject = global::UnityEngine.Object.Instantiate<GameObject>(original, (!(parent != null)) ? null : parent.transform, false);
 		}
 		gameObject.name = original.name;
 		if (force_active)
@@ -549,7 +530,7 @@ public static class Util
 
 	public static void ZeroTransform(Transform child)
 	{
-		child.localPosition = Vector3.zero;
+		child.SetLocalPosition(Vector3.zero);
 		child.localRotation = Quaternion.identity;
 		child.localScale = Vector3.one;
 	}
@@ -590,7 +571,7 @@ public static class Util
 
 	public static void Reset(Transform transform)
 	{
-		transform.localPosition = Vector3.zero;
+		transform.SetLocalPosition(Vector3.zero);
 		transform.localRotation = Quaternion.identity;
 		transform.localScale = Vector3.one;
 	}
@@ -621,7 +602,7 @@ public static class Util
 
 	public static void CopyTransform(Transform source, Transform dest)
 	{
-		dest.localPosition = source.localPosition;
+		dest.SetLocalPosition(source.GetLocalPosition());
 		dest.rotation = source.rotation;
 		dest.localScale = source.localScale;
 	}

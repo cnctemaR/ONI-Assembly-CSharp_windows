@@ -50,7 +50,7 @@ public class HoverTextDrawer
 		this.EndSample();
 	}
 
-	public void DrawText(string text, TextStyleSetting style)
+	public void DrawText(string text, TextStyleSetting style, Color color, bool override_color = true)
 	{
 		if (!this.skin.drawWidgets)
 		{
@@ -58,11 +58,20 @@ public class HoverTextDrawer
 		}
 		this.BeginSample("DrawText");
 		LocText widget = this.textWidgets.Draw(this.currentPos).widget;
+		Color color2 = Color.white;
 		if (widget.textStyleSetting != style)
 		{
 			widget.textStyleSetting = style;
 			widget.ApplySettings();
 		}
+		if (style != null)
+		{
+			color2 = style.textColor;
+		}
+		if (override_color)
+		{
+		}
+		widget.color = color;
 		if (widget.text != text)
 		{
 			widget.text = text;
@@ -73,6 +82,11 @@ public class HoverTextDrawer
 		this.maxShadowX = Mathf.Max(this.currentPos.x, this.maxShadowX);
 		this.minLineHeight = (int)Mathf.Max((float)this.minLineHeight, vector.y * 2f);
 		this.EndSample();
+	}
+
+	public void DrawText(string text, TextStyleSetting style)
+	{
+		this.DrawText(text, style, Color.white, false);
 	}
 
 	public void AddIndent(int width = 36)
@@ -230,6 +244,8 @@ public class HoverTextDrawer
 		public bool enableProfiling;
 
 		public bool enableDebugOffset;
+
+		public bool drawInProgressHoverText;
 
 		public Vector2 debugOffset;
 	}

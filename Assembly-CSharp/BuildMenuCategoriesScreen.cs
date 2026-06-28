@@ -7,7 +7,7 @@ public class BuildMenuCategoriesScreen : KIconToggleMenu
 {
 	public override float GetSortKey()
 	{
-		return 6f;
+		return 7f;
 	}
 
 	public BuildMenu.Category Category
@@ -31,9 +31,9 @@ public class BuildMenuCategoriesScreen : KIconToggleMenu
 		this.categorizedCategoryMap = categorized_category_map;
 		this.buildingsScreen = buildings_screen;
 		List<KIconToggleMenu.ToggleInfo> list = new List<KIconToggleMenu.ToggleInfo>();
-		if (data.GetType() == typeof(string[]))
+		if (data.GetType() == typeof(BuildMenu.BuildingInfo[]))
 		{
-			this.buildingNames = (string[])data;
+			this.buildingInfos = (BuildMenu.BuildingInfo[])data;
 		}
 		else if (data.GetType() == typeof(BuildMenu.DisplayInfo[]))
 		{
@@ -208,7 +208,7 @@ public class BuildMenuCategoriesScreen : KIconToggleMenu
 		base.Close();
 		this.selectedCategory = BuildMenu.Category.INVALID;
 		this.SetHasFocus(false);
-		if (this.buildingNames != null)
+		if (this.buildingInfos != null)
 		{
 			this.buildingsScreen.Close();
 		}
@@ -256,11 +256,11 @@ public class BuildMenuCategoriesScreen : KIconToggleMenu
 
 	protected override void OnShow(bool show)
 	{
-		if (this.buildingNames != null)
+		if (this.buildingInfos != null)
 		{
 			if (show)
 			{
-				this.buildingsScreen.Configure(this.category, this.buildingNames);
+				this.buildingsScreen.Configure(this.category, this.buildingInfos);
 				this.buildingsScreen.Show(true);
 			}
 			else
@@ -378,7 +378,7 @@ public class BuildMenuCategoriesScreen : KIconToggleMenu
 
 	private BuildMenu.Category category;
 
-	private IList<string> buildingNames;
+	private IList<BuildMenu.BuildingInfo> buildingInfos;
 
 	private BuildMenu.Category selectedCategory = BuildMenu.Category.INVALID;
 

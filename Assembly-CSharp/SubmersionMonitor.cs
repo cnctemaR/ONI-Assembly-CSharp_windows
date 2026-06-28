@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
-public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IWiltCause
+public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IWiltCause, ISim1000ms
 {
 	public bool Dry
 	{
@@ -13,21 +13,15 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 		}
 	}
 
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.checkDrynessHandle = GameScheduler.Instance.SchedulePeriodic("SubmersionMonitor", this.pollFrequency, new Action<object>(this.CheckDry), null, null, 0f, null);
-		this.OnMove(null);
-		this.CheckDry(null);
-		base.Subscribe(1088554450, new Action<object>(this.OnMove));
+		this.OnMove();
+		this.CheckDry();
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove));
 	}
 
-	private void OnMove(object data = null)
+	private void OnMove()
 	{
 		this.position = Grid.PosToCell(base.gameObject);
 		if (this.partitionerEntry != null)
@@ -36,11 +30,11 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 		}
 		else
 		{
-			Vector2I vector2I = Grid.PosToXY(base.transform.position);
+			Vector2I vector2I = Grid.PosToXY(base.transform.GetPosition());
 			Extents extents = new Extents(vector2I.x, vector2I.y, 1, 2);
 			this.partitionerEntry = GameScenePartitioner.Instance.Add("DrowningMonitor.OnSpawn", base.gameObject, extents, GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.OnLiquidChanged));
 		}
-		this.CheckDry(null);
+		this.CheckDry();
 	}
 
 	private void OnDrawGizmosSelected()
@@ -58,12 +52,12 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 
 	protected override void OnCleanUp()
 	{
+		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove));
 		if (this.partitionerEntry != null)
 		{
 			this.partitionerEntry.Release();
 		}
 		base.OnCleanUp();
-		this.checkDrynessHandle.ClearScheduler();
 	}
 
 	public void Configure(float _maxStamina, float _staminaRegenRate, float _cellLiquidThreshold = 0.95f)
@@ -71,7 +65,12 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 		this.cellLiquidThreshold = _cellLiquidThreshold;
 	}
 
-	private void CheckDry(object data = null)
+	public void Sim1000ms(float dt)
+	{
+		this.CheckDry();
+	}
+
+	private void CheckDry()
 	{
 		if (!this.IsCellSafe())
 		{
@@ -96,7 +95,7 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 
 	private void OnLiquidChanged(object data)
 	{
-		this.CheckDry(null);
+		this.CheckDry();
 	}
 
 	WiltCondition.Condition[] IWiltCause.Conditions
@@ -137,11 +136,7 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 
 	protected float cellLiquidThreshold = 0.2f;
 
-	private float pollFrequency = 1f;
-
 	private Extents extents;
 
 	private GameScenePartitionerEntry partitionerEntry;
-
-	private SchedulerHandle checkDrynessHandle;
 }

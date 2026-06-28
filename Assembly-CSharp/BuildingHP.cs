@@ -72,6 +72,8 @@ public class BuildingHP : Workable
 	{
 		base.OnPrefabInit();
 		base.SetWorkTime(10f);
+		this.multitoolContext = "build";
+		this.multitoolHitEffectHash = new HashedString("fx_build_splash");
 	}
 
 	protected override void OnSpawn()
@@ -93,13 +95,6 @@ public class BuildingHP : Workable
 	private void DestroyOnDamaged(object data)
 	{
 		Util.KDestroyGameObject(base.gameObject);
-	}
-
-	public override Workable.AnimInfo GetAnim(Worker worker)
-	{
-		Workable.AnimInfo anim = base.GetAnim(worker);
-		anim.smi = new MultitoolController.Instance(this, worker, "build", EffectPrefabs.Instance.BuildEffect);
-		return anim;
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -234,7 +229,7 @@ public class BuildingHP : Workable
 			component.blocksRaycasts = false;
 			this.progressBar.Update();
 			float num = 0.15f;
-			Vector3 vector = base.gameObject.transform.position + Vector3.down * num;
+			Vector3 vector = base.gameObject.transform.GetPosition() + Vector3.down * num;
 			vector.z += 0.05f;
 			vector -= Vector3.right * 0.5f * (float)(base.smi.master.building.Def.WidthInCells % 2);
 			this.progressBar.transform.SetPosition(vector);
@@ -313,7 +308,7 @@ public class BuildingHP : Workable
 				{
 					smi.ShowProgressBar(false);
 				});
-			this.healthy.imperfect.playEffect.Transition(this.healthy.imperfect.waiting, (BuildingHP.SMInstance smi) => true);
+			this.healthy.imperfect.playEffect.Transition(this.healthy.imperfect.waiting, (BuildingHP.SMInstance smi) => true, UpdateRate.SIM_200ms);
 			this.healthy.imperfect.waiting.ScheduleGoTo((BuildingHP.SMInstance smi) => global::UnityEngine.Random.Range(15f, 30f), this.healthy.imperfect.playEffect);
 			this.healthy.perfect.EventTransition(GameHashes.BuildingReceivedDamage, this.healthy.imperfect, (BuildingHP.SMInstance smi) => smi.master.HitPoints < smi.master.building.Def.HitPoints);
 			this.damaged.Enter(delegate(BuildingHP.SMInstance smi)
@@ -346,7 +341,7 @@ public class BuildingHP : Workable
 
 		private Chore CreateRepairChore(BuildingHP.SMInstance smi)
 		{
-			return new WorkChore<BuildingHP>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			return new WorkChore<BuildingHP>(Db.Get().ChoreTypes.Repair, smi.master, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 		}
 
 		private static Operational.Flag healthyFlag = new Operational.Flag("healthy", Operational.Flag.Type.Functional);

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{EEB0B483-9393-49AE-B767-9DDE8CA6C623}</ProjectGuid>
+    <ProjectGuid>{914D88A8-D547-42E0-ACDE-47F6B1FB132C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -28,9 +28,11 @@
     <Compile Include="BinaryHeap.cs" />
     <Compile Include="BindingEntry.cs" />
     <Compile Include="BoundsCheck.cs" />
+    <Compile Include="BucketUpdater.cs" />
     <Compile Include="ButtonLock.cs" />
     <Compile Include="ButtonSoundPlayer.cs" />
     <Compile Include="CellAlignment.cs" />
+    <Compile Include="CellChangeMonitor.cs" />
     <Compile Include="CellOffset.cs" />
     <Compile Include="Chunk.cs" />
     <Compile Include="ChunkIndexList.cs" />
@@ -366,6 +368,7 @@
     <Compile Include="GameInputMapping.cs" />
     <Compile Include="GamepadButton.cs" />
     <Compile Include="GameScreenManager.cs" />
+    <Compile Include="GarbageCollectionProfiler.cs" />
     <Compile Include="Geometry\HorizontalEvent.cs" />
     <Compile Include="Geometry\KRect.cs" />
     <Compile Include="Geometry\RectangleUtil.cs" />
@@ -382,7 +385,6 @@
     <Compile Include="HighlightOnHover.cs" />
     <Compile Include="HoverCallback.cs" />
     <Compile Include="HUSL\ColorConverter.cs" />
-    <Compile Include="IComponent.cs" />
     <Compile Include="IComponentManager.cs" />
     <Compile Include="IInputHandler.cs" />
     <Compile Include="ImageToggleState.cs" />
@@ -390,13 +392,23 @@
     <Compile Include="InputEventType.cs" />
     <Compile Include="IPreUpdater.cs" />
     <Compile Include="IReader.cs" />
+    <Compile Include="IRender1000ms.cs" />
+    <Compile Include="IRender200ms.cs" />
+    <Compile Include="IRenderEveryTick.cs" />
     <Compile Include="ISaveLoadable.cs" />
     <Compile Include="ISaveLoadableDetails.cs" />
     <Compile Include="ISerializableComponentManager.cs" />
+    <Compile Include="ISim1000ms.cs" />
+    <Compile Include="ISim200ms.cs" />
+    <Compile Include="ISim33ms.cs" />
+    <Compile Include="ISim4000ms.cs" />
     <Compile Include="IStateMachineControllerHack.cs" />
     <Compile Include="IStateMachineTarget.cs" />
     <Compile Include="IUniformGridObject.cs" />
-    <Compile Include="JobBatch.cs" />
+    <Compile Include="IWorkItem.cs" />
+    <Compile Include="Job.2.cs" />
+    <Compile Include="Job.cs" />
+    <Compile Include="JobManager.cs" />
     <Compile Include="KAlign.cs" />
     <Compile Include="KAnim.cs" />
     <Compile Include="KAnimBatch.cs" />
@@ -429,7 +441,6 @@
     <Compile Include="KFMOD.cs" />
     <Compile Include="KFMODDebugger.cs" />
     <Compile Include="KGameObjectComponentManager.cs" />
-    <Compile Include="KGameObjectComponentManager2.cs" />
     <Compile Include="KGameObjectComponentManagerUtil.cs" />
     <Compile Include="KGlobalAnimParser.cs" />
     <Compile Include="KImage.cs" />
@@ -442,6 +453,7 @@
     <Compile Include="KInputHandler.cs" />
     <Compile Include="KInputManager.cs" />
     <Compile Include="KKeyCode.cs" />
+    <Compile Include="KLayoutElement.cs" />
     <Compile Include="KleiAccount.cs" />
     <Compile Include="KleiMetrics.cs" />
     <Compile Include="Klei\CSVReader.cs" />
@@ -492,6 +504,7 @@
     <Compile Include="LevelLayer.cs" />
     <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Modifier\Scale2d.cs" />
     <Compile Include="LinearDictionary.cs" />
+    <Compile Include="ListPool.cs" />
     <Compile Include="Logger.2.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="LoggerFIO.cs" />
@@ -582,6 +595,7 @@
     <Compile Include="Pair.cs" />
     <Compile Include="PerlinNoise.cs" />
     <Compile Include="PerlinSimplexNoise.cs" />
+    <Compile Include="PluginAssets.cs" />
     <Compile Include="PointGenerator.cs" />
     <Compile Include="PreUpdateScheduler.cs" />
     <Compile Include="PriorityQueueDemo\PriorityQueue.cs" />
@@ -662,6 +676,7 @@
     <Compile Include="SeededRandom.cs" />
     <Compile Include="SetArabicTextExample.cs" />
     <Compile Include="SetTextStyleSetting.cs" />
+    <Compile Include="SimAndRenderScheduler.cs" />
     <Compile Include="SimpleJSON\JSON.cs" />
     <Compile Include="SimpleJSON\JSONArray.cs" />
     <Compile Include="SimpleJSON\JSONBinaryTag.cs" />
@@ -670,13 +685,10 @@
     <Compile Include="SimpleJSON\JSONLazyCreator.cs" />
     <Compile Include="SimpleJSON\JSONNode.cs" />
     <Compile Include="SimplexNoise.cs" />
-    <Compile Include="SimUpdateArray.cs" />
-    <Compile Include="SimUpdateFn.cs" />
-    <Compile Include="SimUpdateGroup.cs" />
-    <Compile Include="SimUpdateTypeInfo.cs" />
     <Compile Include="Singleton.cs" />
     <Compile Include="SingletonResource.cs" />
     <Compile Include="SoundListenerController.cs" />
+    <Compile Include="StateMachineUpdater.cs" />
     <Compile Include="SteamDistributionPlatform.cs" />
     <Compile Include="SteamManager.cs" />
     <Compile Include="Steamworks\AccountID_t.cs" />
@@ -1038,6 +1050,8 @@
     <Compile Include="Strings.cs" />
     <Compile Include="StringsUnitTest.cs" />
     <Compile Include="StringTable.cs" />
+    <Compile Include="StructByteArray.cs" />
+    <Compile Include="SymbolInstanceGpuData.cs" />
     <Compile Include="TabHeaderIcon.cs" />
     <Compile Include="Tag.cs" />
     <Compile Include="TagBits.cs" />
@@ -1153,7 +1167,9 @@
     <Compile Include="UnityStandardAssets\ImageEffects\PostEffectsBase.cs" />
     <Compile Include="UnityStandardAssets\ImageEffects\Quads.cs" />
     <Compile Include="UnityStandardAssets\ImageEffects\Triangles.cs" />
+    <Compile Include="UpdateBucketWithUpdater.cs" />
     <Compile Include="UpdateManager.cs" />
+    <Compile Include="UpdateRate.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="UtilHashes.cs" />
     <Compile Include="ValueArray.cs" />
@@ -1175,51 +1191,51 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArabicSupport\ArabicSupport.csproj">
-      <Project>{EEB0B483-9393-49AE-B767-9DDE8CA6C622}</Project>
+      <Project>{914D88A8-D547-42E0-ACDE-47F6B1FB132B}</Project>
       <Name>ArabicSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\FileHelpers\FileHelpers.csproj">
-      <Project>{EEB0B483-9393-49AE-B767-9DDE8CA6C626}</Project>
+      <Project>{914D88A8-D547-42E0-ACDE-47F6B1FB132F}</Project>
       <Name>FileHelpers</Name>
     </ProjectReference>
     <ProjectReference Include="..\libnoise\libnoise.csproj">
-      <Project>{EEB0B483-9393-49AE-B767-9DDE8CA6C62B}</Project>
+      <Project>{914D88A8-D547-42E0-ACDE-47F6B1FB1334}</Project>
       <Name>libnoise</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{EEB0B483-9393-49AE-B767-9DDE8CA6C62F}</Project>
+      <Project>{914D88A8-D547-42E0-ACDE-47F6B1FB1338}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{EEB0B483-9393-49AE-B767-9DDE8CA6C630}</Project>
+      <Project>{914D88A8-D547-42E0-ACDE-47F6B1FB1339}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\Satsuma\Satsuma.csproj">
-      <Project>{EEB0B483-9393-49AE-B767-9DDE8CA6C632}</Project>
+      <Project>{914D88A8-D547-42E0-ACDE-47F6B1FB133B}</Project>
       <Name>Satsuma</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{EEB0B483-9393-49AE-B767-9DDE8CA6C634}</Project>
+      <Project>{914D88A8-D547-42E0-ACDE-47F6B1FB133D}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{EEB0B483-9393-49AE-B767-9DDE8CA6C63C}</Project>
+      <Project>{914D88A8-D547-42E0-ACDE-47F6B1FB1345}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{EEB0B483-9393-49AE-B767-9DDE8CA6C636}</Project>
+      <Project>{914D88A8-D547-42E0-ACDE-47F6B1FB133F}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{EEB0B483-9393-49AE-B767-9DDE8CA6C640}</Project>
+      <Project>{914D88A8-D547-42E0-ACDE-47F6B1FB1349}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{EEB0B483-9393-49AE-B767-9DDE8CA6C63E}</Project>
+      <Project>{914D88A8-D547-42E0-ACDE-47F6B1FB1347}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
     <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
-      <Project>{EEB0B483-9393-49AE-B767-9DDE8CA6C641}</Project>
+      <Project>{914D88A8-D547-42E0-ACDE-47F6B1FB134A}</Project>
       <Name>YamlDotNet</Name>
     </ProjectReference>
   </ItemGroup>

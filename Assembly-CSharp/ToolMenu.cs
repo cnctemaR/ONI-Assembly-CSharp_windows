@@ -7,6 +7,14 @@ using UnityEngine.UI;
 
 public class ToolMenu : KScreen
 {
+	public PriorityScreen PriorityScreen
+	{
+		get
+		{
+			return this.priorityScreen;
+		}
+	}
+
 	public override float GetSortKey()
 	{
 		return 5f;
@@ -16,6 +24,9 @@ public class ToolMenu : KScreen
 	{
 		base.OnPrefabInit();
 		ToolMenu.Instance = this;
+		this.priorityScreen = Util.KInstantiateUI<PriorityScreen>(this.Prefab_priorityScreen.gameObject, base.transform.parent.gameObject, false);
+		this.priorityScreen.InstantiateButtons(new Action<PrioritySetting>(this.OnPriorityClicked), false);
+		this.priorityScreen.gameObject.SetActive(false);
 	}
 
 	protected override void OnSpawn()
@@ -27,6 +38,7 @@ public class ToolMenu : KScreen
 		this.BuildCollectionToggles();
 		this.BuildToolToggles();
 		this.ChooseCollection(null, true);
+		this.priorityScreen.gameObject.SetActive(false);
 	}
 
 	private void SetData()
@@ -50,29 +62,6 @@ public class ToolMenu : KScreen
 		ToolMenu.ToolCollection toolCollection9 = new ToolMenu.ToolCollection(UI.TOOLS.HARVEST.NAME, "icon_action_harvest", string.Empty, false, global::Action.Harvest);
 		new ToolMenu.ToolInfo(UI.TOOLS.HARVEST.NAME, "icon_action_harvest", global::Action.Harvest, "HarvestTool", toolCollection9, UI.TOOLTIPS.HARVESTBUTTON, SimViewMode.None, false, null, null);
 		this.toolCollections = new ToolMenu.ToolCollection[] { toolCollection3, toolCollection8, toolCollection9, toolCollection4, toolCollection5, toolCollection6, toolCollection7, toolCollection, toolCollection2 };
-	}
-
-	private void SetupRegionTools(ToolMenu.ToolCollection Collection_StorageRegions)
-	{
-		new ToolMenu.ToolInfo(UI.TOOLS.ERASEREGION.NAME, "icon_action_cancel", global::Action.EraseRegion, "EraseRegionTool", Collection_StorageRegions, UI.TOOLTIPS.ERASEREGIONBUTTON, SimViewMode.None, false, null, null);
-		List<Region> regionPrefabs = Game.Instance.RegionManager.regionPrefabs;
-		foreach (Region region in regionPrefabs)
-		{
-			string regionName = region.RegionName;
-			string iconName = region.IconName;
-			global::Action action = region.Action;
-			string text = "RegionTool";
-			string buttonStr = region.ButtonStr;
-			string regionName2 = region.RegionName;
-			new ToolMenu.ToolInfo(regionName, iconName, action, text, Collection_StorageRegions, buttonStr, SimViewMode.None, false, new Action<object>(this.RegionToolCallback), regionName2);
-		}
-	}
-
-	private void RegionToolCallback(object data)
-	{
-		ToolMenu.ToolInfo toolInfo = (ToolMenu.ToolInfo)data;
-		string text = (string)toolInfo.toolData;
-		Game.Instance.RegionManager.SelectRegionPrefab(text);
 	}
 
 	private void Setup()
@@ -548,6 +537,11 @@ public class ToolMenu : KScreen
 		return flag;
 	}
 
+	private void OnPriorityClicked(PrioritySetting priority)
+	{
+		this.priorityScreen.SetScreenPriority(priority, false);
+	}
+
 	public static ToolMenu Instance;
 
 	public ToolMenu.ToolCollection[] toolCollections;
@@ -572,6 +566,10 @@ public class ToolMenu : KScreen
 	public GameObject Prefab_collectionContainer;
 
 	public GameObject Prefab_collectionContainerWindow;
+
+	public PriorityScreen Prefab_priorityScreen;
+
+	private PriorityScreen priorityScreen;
 
 	private Coroutine activeOpenAnimationRoutine;
 

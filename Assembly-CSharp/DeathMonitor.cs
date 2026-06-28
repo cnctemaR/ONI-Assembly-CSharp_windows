@@ -14,7 +14,7 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 			if (smi.IsDuplicant)
 			{
 				DeathMessage deathMessage = new DeathMessage(smi.gameObject, death);
-				KFMOD.PlayOneShot(GlobalAssets.GetSound("Death_Notification_localized", false), smi.master.transform.position);
+				KFMOD.PlayOneShot(GlobalAssets.GetSound("Death_Notification_localized", false), smi.master.transform.GetPosition());
 				KFMOD.PlayOneShot(GlobalAssets.GetSound("Death_Notification_ST", false));
 				Messenger.Instance.QueueMessage(deathMessage);
 			}
@@ -88,7 +88,8 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 
 		public void PickedUp(object data = null)
 		{
-			if (data != null)
+			bool flag = data is Storage || (data != null && (bool)data);
+			if (flag)
 			{
 				base.smi.GoTo(base.sm.dead.carried);
 			}

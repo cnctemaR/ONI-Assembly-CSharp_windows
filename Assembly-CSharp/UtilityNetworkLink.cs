@@ -59,7 +59,7 @@ public abstract class UtilityNetworkLink : KMonoBehaviour
 			Orientation orientation = component.Orientation;
 			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(this.link1, orientation);
 			CellOffset rotatedCellOffset2 = Rotatable.GetRotatedCellOffset(this.link2, orientation);
-			int num = Grid.PosToCell(base.transform.position);
+			int num = Grid.PosToCell(base.transform.GetPosition());
 			linked_cell1 = Grid.OffsetCell(num, rotatedCellOffset);
 			linked_cell2 = Grid.OffsetCell(num, rotatedCellOffset2);
 		}

@@ -1,9 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
-public class AntiCluster : KMonoBehaviour
+public class AntiCluster : KMonoBehaviour, ISim200ms
 {
-	private void Update()
+	public void Sim200ms(float dt)
 	{
 		int num = Grid.PosToCell(this);
 		this.UpdateCell(this.previousCell, num);

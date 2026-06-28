@@ -6,7 +6,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class FallingWater : KMonoBehaviour
+public class FallingWater : KMonoBehaviour, ISim200ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -14,12 +14,6 @@ public class FallingWater : KMonoBehaviour
 		base.OnPrefabInit();
 		this.mistEffect.SetActive(false);
 		this.mistPool = new ObjectPool(new Func<GameObject>(this.InstantiateMist), 16);
-	}
-
-	protected override void OnCleanUp()
-	{
-		FallingWater.instance = null;
-		base.OnCleanUp();
 	}
 
 	protected override void OnSpawn()
@@ -35,6 +29,12 @@ public class FallingWater : KMonoBehaviour
 		this.propertyBlock = new MaterialPropertyBlock();
 		this.propertyBlock.SetTexture("_MainTex", this.texture);
 		this.uvFrameSize = new Vector2(1f / (float)this.numFrames, 1f);
+	}
+
+	protected override void OnCleanUp()
+	{
+		FallingWater.instance = null;
+		base.OnCleanUp();
 	}
 
 	private float GetTime()
@@ -521,11 +521,15 @@ public class FallingWater : KMonoBehaviour
 		this.mistPool.ReleaseInstance(go);
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		if (this.simUpdateDelay >= 0)
 		{
 			this.simUpdateDelay--;
+		}
+		else
+		{
+			SimAndRenderScheduler.instance.Remove(this);
 		}
 	}
 

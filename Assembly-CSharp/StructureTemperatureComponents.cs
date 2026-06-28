@@ -22,7 +22,7 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		StructureTemperatureData data = base.GetData(handle);
 		data.primaryElement.getTemperatureCallback = new PrimaryElement.GetTemperatureCallback(StructureTemperatureComponents.OnGetTemperature);
 		data.primaryElement.setTemperatureCallback = new PrimaryElement.SetTemperatureCallback(StructureTemperatureComponents.OnSetTemperature);
-		data.isActiveBuilding = data.building.Def.OperatingKilowatts != 0f || data.ExhaustKilowatts != 0f;
+		data.isActiveBuilding = data.building.Def.SelfHeatKilowattsWhenActive != 0f || data.ExhaustKilowatts != 0f;
 		base.SetData(handle, data);
 	}
 
@@ -32,7 +32,7 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		{
 			return;
 		}
-		this.operatingEnergyStatusItem = new StatusItem("OperatingEnergy", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+		this.operatingEnergyStatusItem = new StatusItem("OperatingEnergy", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 		this.operatingEnergyStatusItem.resolveStringCallback = delegate(string str, object ev_data)
 		{
 			int num = (int)ev_data;
@@ -74,6 +74,12 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 				StructureTemperatureComponents.OnActiveChanged(handle, ev_data);
 			});
 		}
+		Overheatable component = data.primaryElement.GetComponent<Overheatable>();
+		data.maxTemperature = ((!(component != null)) ? 10000f : component.OverheatTemperature);
+		if (data.maxTemperature <= 0f)
+		{
+			Output.LogError(new object[] { "invalid max temperature" });
+		}
 		base.SetData(handle, data);
 		this.SimRegister(handle, ref data);
 	}
@@ -93,15 +99,14 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		base.OnCleanUp(handle);
 	}
 
-	public override void SimUpdate(float dt)
+	public override void Sim200ms(float dt)
 	{
 		for (int i = 0; i < this.data.Count; i++)
 		{
 			StructureTemperatureData structureTemperatureData = this.data[i];
 			if (Sim.IsValidHandle(structureTemperatureData.simHandle))
 			{
-				StructureTemperatureComponents.UpdateSimState(structureTemperatureData);
-				structureTemperatureData.dirty = false;
+				StructureTemperatureComponents.UpdateSimState(ref structureTemperatureData);
 				structureTemperatureData.ApplyPendingEnergyModifications();
 				if (!structureTemperatureData.isActiveBuilding)
 				{
@@ -128,7 +133,7 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 									float mass = Grid.Cell[num5].mass;
 									float num6 = Mathf.Min(mass, 1.5f) / 1.5f;
 									float num7 = num2 * num6;
-									SimMessages.ModifyEnergy(num5, num7, SimMessages.EnergySourceID.StructureTemperature);
+									SimMessages.ModifyEnergy(num5, num7, structureTemperatureData.maxTemperature, SimMessages.EnergySourceID.StructureTemperature);
 								}
 							}
 							structureTemperatureData.energySourcesKW = this.AccumulateProducedEnergyKW(structureTemperatureData.energySourcesKW, structureTemperatureData.ExhaustKilowatts, BUILDING.STATUSITEMS.OPERATINGENERGY.EXHAUSTING);
@@ -144,7 +149,7 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		}
 	}
 
-	private static void UpdateSimState(StructureTemperatureData data)
+	private static void UpdateSimState(ref StructureTemperatureData data)
 	{
 		if (!data.dirty)
 		{
@@ -154,6 +159,7 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		{
 			return;
 		}
+		data.dirty = false;
 		float internalTemperature = data.primaryElement.InternalTemperature;
 		float num = data.building.Def.MassForTemperatureModification;
 		float operatingKilowatts = data.OperatingKilowatts;
@@ -181,7 +187,7 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 			}
 			else
 			{
-				int num2 = Grid.PosToCell(data.primaryElement.transform.position);
+				int num2 = Grid.PosToCell(data.primaryElement.transform.GetPosition());
 				num = Grid.Temperature[num2];
 			}
 		}
@@ -200,9 +206,8 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		data.dirty = true;
 		if (!data.isActiveBuilding && Sim.IsValidHandle(data.simHandle))
 		{
-			StructureTemperatureComponents.UpdateSimState(data);
+			StructureTemperatureComponents.UpdateSimState(ref data);
 			data.ApplyPendingEnergyModifications();
-			data.dirty = false;
 		}
 		GameComps.StructureTemperatures.SetData(handle, data);
 	}
@@ -246,7 +251,7 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 			Element element = data.primaryElement.Element;
 			if (element.highTempTransitionTarget != SimHashes.Unobtanium)
 			{
-				int num = Grid.PosToCell(data.primaryElement.transform.position);
+				int num = Grid.PosToCell(data.primaryElement.transform.GetPosition());
 				SimMessages.AddRemoveSubstance(num, element.highTempTransitionTarget, CellEventLogger.Instance.OreMelted, data.primaryElement.Mass, data.primaryElement.Temperature, data.primaryElement.DiseaseIdx, data.primaryElement.DiseaseCount, -1);
 				Util.KDestroyGameObject(data.primaryElement.gameObject);
 			}

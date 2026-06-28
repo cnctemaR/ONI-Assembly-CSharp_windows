@@ -4,7 +4,7 @@ using UnityEngine;
 public class MoveToSafetyChore : Chore<MoveToSafetyChore.StatesInstance>
 {
 	public MoveToSafetyChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.MoveToSafety, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, -1, false, true, 0)
+		: base(Db.Get().ChoreTypes.MoveToSafety, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, -1, false, true, 0, null)
 	{
 		this.smi = new MoveToSafetyChore.StatesInstance(this, target.gameObject);
 	}
@@ -39,10 +39,10 @@ public class MoveToSafetyChore : Chore<MoveToSafetyChore.StatesInstance>
 			this.move.Enter("UpdateLocatorPosition", delegate(MoveToSafetyChore.StatesInstance smi)
 			{
 				smi.UpdateTargetCell();
-			}).Update("UpdateLocatorPosition", delegate(MoveToSafetyChore.StatesInstance smi)
+			}).Update("UpdateLocatorPosition", delegate(MoveToSafetyChore.StatesInstance smi, float dt)
 			{
 				smi.UpdateTargetCell();
-			}).MoveTo((MoveToSafetyChore.StatesInstance smi) => smi.targetCell, null, null, true);
+			}, UpdateRate.SIM_200ms, false).MoveTo((MoveToSafetyChore.StatesInstance smi) => smi.targetCell, null, null, true);
 		}
 
 		public StateMachine<MoveToSafetyChore.States, MoveToSafetyChore.StatesInstance, MoveToSafetyChore, object>.TargetParameter mover;

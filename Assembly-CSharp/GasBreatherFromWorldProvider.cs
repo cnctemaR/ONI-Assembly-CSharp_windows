@@ -40,10 +40,11 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 		{
 			return;
 		}
-		Sim.MassConsumptionCallback massConsumptionCallback = (Sim.MassConsumptionCallback)obj;
-		this.oxygenBreather.o2Accumulator.Accumulate(massConsumptionCallback.mass);
-		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, -massConsumptionCallback.mass, this.oxygenBreather.GetProperName(), null);
-		this.oxygenBreather.Trigger(240573938, massConsumptionCallback);
+		Sim.MassConsumedCallback massConsumedCallback = (Sim.MassConsumedCallback)obj;
+		Game.Instance.accumulators.Accumulate(this.oxygenBreather.O2Accumulator, massConsumedCallback.mass);
+		float num = -massConsumedCallback.mass;
+		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, num, this.oxygenBreather.GetProperName(), null);
+		this.oxygenBreather.Trigger(240573938, massConsumedCallback);
 	}
 
 	private SuffocationMonitor.Instance suffocationMonitor;

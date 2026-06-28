@@ -21,8 +21,26 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 	public void ChangeState(int new_state_index)
 	{
 		this.state = new_state_index;
-		this.toggle_image.sprite = this.states[new_state_index].sprite;
-		this.toggle_image.color = this.states[new_state_index].color;
+		try
+		{
+			this.toggle_image.sprite = this.states[new_state_index].sprite;
+			this.toggle_image.color = this.states[new_state_index].color;
+			if (this.states[new_state_index].use_rect_margins)
+			{
+				this.toggle_image.rectTransform().sizeDelta = this.states[new_state_index].rect_margins;
+			}
+		}
+		catch
+		{
+			string text = base.gameObject.name;
+			Transform transform = base.transform;
+			while (transform.parent != null)
+			{
+				text = text.Insert(0, transform.name + ">");
+				transform = transform.parent;
+			}
+			global::Debug.LogError(string.Concat(new object[] { "Multi Toggle state index out of range: ", text, " idx:", new_state_index }), base.gameObject);
+		}
 		foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
 		{
 			if (!(statePresentationSetting.image_target == null))
@@ -35,6 +53,10 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 
 	public void OnPointerClick(PointerEventData eventData)
 	{
+		if (this.states.Length - 1 < this.state)
+		{
+			global::Debug.LogWarning("Multi toggle has too few / no states", null);
+		}
 		if (this.play_sound_on_click)
 		{
 			if (this.states[this.state].on_click_override_sound_path == string.Empty)
@@ -67,6 +89,10 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 		{
 			this.toggle_image.color = this.states[this.state].color_on_hover;
 		}
+		if (this.states[this.state].use_rect_margins)
+		{
+			this.toggle_image.rectTransform().sizeDelta = this.states[this.state].rect_margins;
+		}
 		foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
 		{
 			if (!(statePresentationSetting.image_target == null))
@@ -93,6 +119,10 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 		if (this.states[this.state].use_color_on_hover && this.states[this.state].color_on_hover != this.states[this.state].color)
 		{
 			this.toggle_image.color = this.states[this.state].color;
+		}
+		if (this.states[this.state].use_rect_margins)
+		{
+			this.toggle_image.rectTransform().sizeDelta = this.states[this.state].rect_margins;
 		}
 		foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
 		{

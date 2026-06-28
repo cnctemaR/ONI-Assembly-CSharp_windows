@@ -6,10 +6,10 @@ using UnityEngine;
 public class CoolDownChore : Chore<CoolDownChore.StatesInstance>
 {
 	public CoolDownChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Cooldown, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Cooldown, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new CoolDownChore.StatesInstance(this, target.gameObject);
-		base.AddPrecondition(ChorePreconditions.IsNotRedAlert, null);
+		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 	}
 
 	public class StatesInstance : GameStateMachine<CoolDownChore.States, CoolDownChore.StatesInstance, CoolDownChore, object>.GameInstance
@@ -37,7 +37,7 @@ public class CoolDownChore : Chore<CoolDownChore.StatesInstance>
 			int num = base.sm.recoverer.GetSMI<TemperatureMonitor.Instance>(base.smi).GetCoolDownCell();
 			if (num == Grid.InvalidCell)
 			{
-				num = Grid.PosToCell(base.sm.recoverer.Get<Transform>(base.smi).position);
+				num = Grid.PosToCell(base.sm.recoverer.Get<Transform>(base.smi).GetPosition());
 				this.noAvailableTarget = true;
 			}
 			else
@@ -75,18 +75,18 @@ public class CoolDownChore : Chore<CoolDownChore.StatesInstance>
 			}).Exit("DestroyLocator", delegate(CoolDownChore.StatesInstance smi)
 			{
 				smi.DestroyLocator();
-			}).Update("UpdateLocator", delegate(CoolDownChore.StatesInstance smi)
+			}).Update("UpdateLocator", delegate(CoolDownChore.StatesInstance smi, float dt)
 			{
 				smi.UpdateLocator();
-			});
-			this.NoLocationAvailable.Update(delegate(CoolDownChore.StatesInstance smi)
+			}, UpdateRate.SIM_200ms, false);
+			this.NoLocationAvailable.Update(delegate(CoolDownChore.StatesInstance smi, float dt)
 			{
 				if (!smi.noAvailableTarget)
 				{
 					smi.GoTo(this.approach);
 				}
 			});
-			this.approach.InitializeStates(this.recoverer, this.locator, this.recover, null, null, null).Transition(this.NoLocationAvailable, (CoolDownChore.StatesInstance smi) => smi.noAvailableTarget);
+			this.approach.InitializeStates(this.recoverer, this.locator, this.recover, null, null, null).Transition(this.NoLocationAvailable, (CoolDownChore.StatesInstance smi) => smi.noAvailableTarget, UpdateRate.SIM_200ms);
 			this.recover.DefaultState(this.recover.pre).ToggleAnims("anim_idle_hot_kanim", 30f).ToggleAttributeModifier("Cooling Down", (CoolDownChore.StatesInstance smi) => smi.coolingDown, null)
 				.Enter(delegate(CoolDownChore.StatesInstance smi)
 				{

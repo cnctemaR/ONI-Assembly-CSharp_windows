@@ -25,7 +25,7 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 	{
 		if (seedId != null && units > 0)
 		{
-			Vector3 vector = base.gameObject.transform.position + new Vector3(0f, 0.5f, 0f);
+			Vector3 vector = base.gameObject.transform.GetPosition() + new Vector3(0f, 0.5f, 0f);
 			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(new Tag(seedId)), vector, Grid.SceneLayer.Ore, SceneOrganizer.Instance.GetFolder(Folder.Entities), null, 0);
 			PrimaryElement component = base.gameObject.GetComponent<PrimaryElement>();
 			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
@@ -60,10 +60,10 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		if (this.seedInfo.productionType == SeedProducer.ProductionType.Harvest)
 		{
 			Worker completed_by = base.GetComponent<Harvestable>().completed_by;
-			float num = 33f;
+			float num = 10f;
 			if (completed_by != null)
 			{
-				num += completed_by.GetAttributes().Get(Db.Get().Attributes.Botanist).GetTotalValue() * 10f;
+				num += completed_by.GetAttributes().Get(Db.Get().Attributes.Botanist).GetTotalValue() * Db.Get().AttributeConverters.SeedHarvestChance.multiplier;
 			}
 			int num2 = (((float)global::UnityEngine.Random.Range(0, 100) > num) ? 0 : 1);
 			this.ProduceSeed(this.seedInfo.seedId, num2);

@@ -114,8 +114,7 @@ public class KBatchedAnimUpdater
 		{
 			chunkXY = chunk_xy,
 			controller = controller,
-			register = true,
-			update = false
+			register = true
 		});
 	}
 
@@ -129,8 +128,7 @@ public class KBatchedAnimUpdater
 		{
 			chunkXY = chunk_xy,
 			controller = controller,
-			register = false,
-			update = false
+			register = false
 		});
 	}
 
@@ -194,7 +192,7 @@ public class KBatchedAnimUpdater
 
 	private void UpdateVisibility(KBatchedAnimController controller)
 	{
-		Vector2I vector2I = KBatchedAnimUpdater.PosToChunkXY(controller.transform.position);
+		Vector2I vector2I = KBatchedAnimUpdater.PosToChunkXY(controller.transform.GetPosition());
 		if (this.visibleChunkGrid[vector2I.x, vector2I.y])
 		{
 			controller.OnBecameVisible();
@@ -244,7 +242,10 @@ public class KBatchedAnimUpdater
 					for (int k = 0; k < list2.Count; k++)
 					{
 						KBatchedAnimController kbatchedAnimController = list2[k];
-						kbatchedAnimController.OnBecameVisible();
+						if (!(kbatchedAnimController == null))
+						{
+							kbatchedAnimController.OnBecameVisible();
+						}
 					}
 				}
 			}
@@ -257,7 +258,11 @@ public class KBatchedAnimUpdater
 				List<KBatchedAnimController> list3 = this.controllerGrid[vector2I3.x, vector2I3.y];
 				for (int m = 0; m < list3.Count; m++)
 				{
-					list3[m].OnBecameInvisible();
+					KBatchedAnimController kbatchedAnimController2 = list3[m];
+					if (!(kbatchedAnimController2 == null))
+					{
+						kbatchedAnimController2.OnBecameInvisible();
+					}
 				}
 			}
 		}
@@ -270,32 +275,17 @@ public class KBatchedAnimUpdater
 			KBatchedAnimUpdater.RegistrationInfo registrationInfo = this.queuedRegistrations[i];
 			if (!(registrationInfo.controller == null))
 			{
-				if (registrationInfo.update)
+				List<KBatchedAnimController> controllerList = this.GetControllerList(registrationInfo.chunkXY);
+				if (controllerList != null)
 				{
-					List<KBatchedAnimController> list = ((registrationInfo.controller.visibilityType != KAnimControllerBase.VisibilityType.Always) ? this.updateList : this.alwaysUpdateList);
 					if (registrationInfo.register)
 					{
-						list.Add(registrationInfo.controller);
+						controllerList.Add(registrationInfo.controller);
+						this.newlyVisible.Add(registrationInfo.controller);
 					}
 					else
 					{
-						list.Remove(registrationInfo.controller);
-					}
-				}
-				else
-				{
-					List<KBatchedAnimController> controllerList = this.GetControllerList(registrationInfo.chunkXY);
-					if (controllerList != null)
-					{
-						if (registrationInfo.register)
-						{
-							controllerList.Add(registrationInfo.controller);
-							this.newlyVisible.Add(registrationInfo.controller);
-						}
-						else
-						{
-							controllerList.Remove(registrationInfo.controller);
-						}
+						controllerList.Remove(registrationInfo.controller);
 					}
 				}
 			}
@@ -348,6 +338,8 @@ public class KBatchedAnimUpdater
 
 	private const int VISIBLE_BORDER = 4;
 
+	public static Vector2I INVALID_CHUNK_ID = Vector2I.minusone;
+
 	private List<KBatchedAnimController>[,] controllerGrid;
 
 	private List<KBatchedAnimController> updateList = new List<KBatchedAnimController>();
@@ -384,8 +376,6 @@ public class KBatchedAnimUpdater
 	private struct RegistrationInfo
 	{
 		public bool register;
-
-		public bool update;
 
 		public Vector2I chunkXY;
 

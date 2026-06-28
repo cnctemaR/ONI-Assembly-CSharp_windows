@@ -11,20 +11,19 @@ public class OilWellCapConfig : IBuildingConfig
 		int num = 4;
 		int num2 = 4;
 		string text2 = "geyser_oil_cap_kanim";
-		float num3 = 200f;
-		int num4 = 100;
-		float num5 = 120f;
+		int num3 = 100;
+		float num4 = 120f;
 		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER2;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, refined_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		BuildingTemplates.CreateElectricalBuildingDef(buildingDef);
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
-		buildingDef.OperatingKilowatts = 2f;
+		buildingDef.SelfHeatKilowattsWhenActive = 2f;
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 1);
 		buildingDef.PowerInputOffset = new CellOffset(1, 1);
@@ -36,7 +35,7 @@ public class OilWellCapConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.UpdateComponentRequirement<LoopingSounds>(true);
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
@@ -47,7 +46,6 @@ public class OilWellCapConfig : IBuildingConfig
 		conduitConsumer.capacityKG = 10f;
 		conduitConsumer.capacityTag = GameTags.Liquid;
 		ElementConverter elementConverter = go.UpdateComponentRequirement<ElementConverter>(true);
-		elementConverter.conversionInterval = 1f;
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
 			new ElementConverter.ConsumedElement(new Tag("Water"), 1f)
@@ -97,8 +95,5 @@ public class OilWellCapConfig : IBuildingConfig
 
 	public const string ID = "OilWellCap";
 
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
-	{
-		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false)
-	};
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
 }

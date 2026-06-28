@@ -1,6 +1,6 @@
 ﻿using System;
 
-public class GrowthState : KMonoBehaviour
+public class GrowthState : KMonoBehaviour, ISim200ms
 {
 	public int Maturity
 	{
@@ -14,7 +14,7 @@ public class GrowthState : KMonoBehaviour
 		}
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		if (this.CanGrow && this.GrowingEnabled)
 		{
@@ -25,7 +25,7 @@ public class GrowthState : KMonoBehaviour
 
 	private void SyncTemp()
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		float num2 = 0f;
 		num2 += Grid.Temperature[Grid.CellDownLeft(num)] * (Grid.Cell[Grid.CellDownLeft(num)].mass / 280f);
 		num2 += Grid.Temperature[Grid.CellDownRight(num)] * (Grid.Cell[Grid.CellDownRight(num)].mass / 280f);

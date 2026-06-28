@@ -12,15 +12,14 @@ public class LogicSwitchConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 1;
 		string text = "switchdupecontrolledpower_kanim";
-		float num3 = 100f;
-		int num4 = 10;
-		float num5 = 30f;
+		int num3 = 10;
+		float num4 = 30f;
 		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, num5, tier, refined_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
@@ -43,7 +42,7 @@ public class LogicSwitchConfig : IBuildingConfig
 		GeneratedBuildings.RegisterLogicPorts(go, LogicSwitchConfig.OUTPUT_PORT);
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 	}
@@ -53,10 +52,11 @@ public class LogicSwitchConfig : IBuildingConfig
 		GeneratedBuildings.RegisterLogicPorts(go, LogicSwitchConfig.OUTPUT_PORT);
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		go.AddOrGet<LogicSwitch>();
+		Prioritizable.AddRef(go);
 		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public static string ID = "LogicSwitch";
 
-	public static readonly LogicPorts.Port OUTPUT_PORT = new LogicPorts.Port(LogicSwitch.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICSWITCH.LOGIC_PORT_DESC, true);
+	public static readonly LogicPorts.Port OUTPUT_PORT = LogicPorts.Port.OutputPort(LogicSwitch.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICSWITCH.LOGIC_PORT_DESC, true);
 }

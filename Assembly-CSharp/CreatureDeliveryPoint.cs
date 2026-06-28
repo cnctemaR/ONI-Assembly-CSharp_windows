@@ -7,7 +7,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.filteredStorage = new FilteredStorage(this, null, this.filterTint, this.noFilterTint, null);
+		this.filteredStorage = new FilteredStorage(this, null, this.filterTint, this.noFilterTint, null, false);
 		base.GetComponent<Storage>().SetOffsets(Grid.DefaultOffset);
 	}
 
@@ -62,8 +62,8 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 					KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
 					Tag unbaggedCreatureTag = EntityTemplates.GetUnbaggedCreatureTag(component2.PrefabTag);
 					GameObject prefab = Assets.GetPrefab(unbaggedCreatureTag);
-					GameObject gameObject2 = Util.KInstantiate(prefab, Folder.Entities);
-					gameObject2.transform.position = smi.master.transform.position;
+					GameObject gameObject2 = Util.KInstantiate(prefab, Folder.Entities, smi.master.transform.GetPosition());
+					gameObject2.transform.SetPosition(smi.master.transform.GetPosition());
 					gameObject2.SetActive(true);
 					Util.KDestroyGameObject(gameObject);
 				}

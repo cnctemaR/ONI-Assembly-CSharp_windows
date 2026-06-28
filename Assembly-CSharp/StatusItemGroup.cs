@@ -128,7 +128,7 @@ public class StatusItemGroup
 			bool flag = false;
 			Notification.ClickCallback notificationClickCallback = item.notificationClickCallback;
 			entry2.notification = new Notification(notificationText, notificationType, invalid, func, item, flag, item.notificationDelay, notificationClickCallback, data, item.soundPath);
-			this.gameObject.GetComponent<Notifier>().Add(entry2.notification, string.Empty);
+			this.gameObject.AddOrGet<Notifier>().Add(entry2.notification, string.Empty);
 		}
 		if (item.ShouldShowIcon())
 		{

@@ -49,7 +49,8 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 					typeof(T).ToString(),
 					"on instance",
 					info.instance.ToString(),
-					"but instance has not been registered yet."
+					"but instance has not been registered yet. Handle:",
+					info.handle
 				});
 				return;
 			}
@@ -95,7 +96,7 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 		this.shadowSpawnList.Clear();
 	}
 
-	public virtual void Update(float dt)
+	public virtual void RenderEveryTick(float dt)
 	{
 	}
 
@@ -103,7 +104,7 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 	{
 	}
 
-	public virtual void SimUpdate(float dt)
+	public virtual void Sim200ms(float dt)
 	{
 	}
 

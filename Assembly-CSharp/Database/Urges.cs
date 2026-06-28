@@ -31,6 +31,7 @@ namespace Database
 			this.MoveToSafety = base.Add(new Urge("MoveToSafety"));
 			this.WarmUp = base.Add(new Urge("WarmUp"));
 			this.CoolDown = base.Add(new Urge("CoolDown"));
+			this.SwitchRole = base.Add(new Urge("SwitchRole"));
 		}
 
 		public Urge BeIncapacitated;
@@ -84,5 +85,7 @@ namespace Database
 		public Urge WarmUp;
 
 		public Urge CoolDown;
+
+		public Urge SwitchRole;
 	}
 }

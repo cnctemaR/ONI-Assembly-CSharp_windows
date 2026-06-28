@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Klei.AI;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -88,6 +89,7 @@ public class CharacterContainer : KScreen
 		this.iconGroups = new List<GameObject>();
 		this.traitLabels = new List<LocText>();
 		this.expectationLabels = new List<LocText>();
+		this.aptitudeLabels = new List<LocText>();
 		if (CharacterContainer.containers == null)
 		{
 			CharacterContainer.containers = new List<CharacterContainer>();
@@ -176,21 +178,26 @@ public class CharacterContainer : KScreen
 		});
 		this.traitLabels.Clear();
 		this.characterNameTitle.SetTitle(this.stats.Name);
-		string professionString = this.animController.gameObject.GetAttributes().GetProfessionString(true);
-		this.characterJob.text = professionString;
-		string professionDescriptionString = this.animController.gameObject.GetAttributes().GetProfessionDescriptionString();
-		this.characterJob.GetComponent<ToolTip>().toolTip = professionDescriptionString;
+		string empty = string.Empty;
+		this.characterJob.text = empty;
+		string empty2 = string.Empty;
+		this.characterJob.GetComponent<ToolTip>().toolTip = empty2;
 		for (int i = 1; i < this.stats.Traits.Count; i++)
 		{
 			Trait trait = this.stats.Traits[i];
 			LocText locText = ((!trait.PositiveTrait) ? this.badTrait : this.goodTrait);
-			LocText locText2 = Util.KInstantiateUI<LocText>(locText.gameObject, locText.transform.parent.gameObject, false);
+			LocText locText2 = Util.KInstantiateUI<LocText>(locText.gameObject, this.goodTrait.transform.parent.gameObject, false);
 			locText2.gameObject.SetActive(true);
 			locText2.text = this.stats.Traits[i].Name;
 			locText2.color = ((!trait.PositiveTrait) ? Constants.NEGATIVE_COLOR : Constants.POSITIVE_COLOR);
 			locText2.GetComponent<ToolTip>().SetSimpleTooltip(trait.GetTooltip());
 			this.traitLabels.Add(locText2);
 		}
+		this.aptitudeLabels.ForEach(delegate(LocText al)
+		{
+			global::UnityEngine.Object.Destroy(al.gameObject);
+		});
+		this.aptitudeLabels.Clear();
 		this.expectationLabels.ForEach(delegate(LocText el)
 		{
 			global::UnityEngine.Object.Destroy(el.gameObject);
@@ -208,21 +215,40 @@ public class CharacterContainer : KScreen
 			text += attributeInstance.GetAttributeValueTooltip();
 			locText3.GetComponent<ToolTip>().SetSimpleTooltip(text);
 		}
-		if (this.stats.stressTrait != null)
+		foreach (KeyValuePair<HashedString, float> keyValuePair in this.stats.roleAptitudes)
 		{
-			LocText locText4 = Util.KInstantiateUI<LocText>(this.expectationRight.gameObject, this.expectationRight.transform.parent.gameObject, false);
-			locText4.gameObject.SetActive(true);
-			locText4.text = string.Format(UI.CHARACTERCONTAINER_STRESSTRAIT, this.stats.stressTrait.Name);
-			locText4.GetComponent<ToolTip>().SetSimpleTooltip(this.stats.stressTrait.GetTooltip());
-			this.expectationLabels.Add(locText4);
+			if (keyValuePair.Value != 0f)
+			{
+				if (!Game.Instance.roleManager.RoleGroups.ContainsKey(keyValuePair.Key))
+				{
+					global::Debug.LogWarningFormat("Role group not found for aptitude: {0}", new object[] { keyValuePair.Key });
+				}
+				else
+				{
+					LocText locText4 = Util.KInstantiateUI<LocText>(this.aptitudeLabel.gameObject, this.aptitudeContainer.gameObject, false);
+					locText4.gameObject.SetActive(true);
+					locText4.text = Game.Instance.roleManager.RoleGroups[keyValuePair.Key].Name;
+					string text2 = string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION, Game.Instance.roleManager.RoleGroups[keyValuePair.Key].Name, keyValuePair.Value * ROLES.APTITUDE_EXPERIENCE_SCALE);
+					locText4.GetComponent<ToolTip>().SetSimpleTooltip(text2);
+					this.aptitudeLabels.Add(locText4);
+				}
+			}
 		}
-		if (this.stats.congenitaltrait != null)
+		if (this.stats.stressTrait != null)
 		{
 			LocText locText5 = Util.KInstantiateUI<LocText>(this.expectationRight.gameObject, this.expectationRight.transform.parent.gameObject, false);
 			locText5.gameObject.SetActive(true);
-			locText5.text = string.Format(UI.CHARACTERCONTAINER_CONGENITALTRAIT, this.stats.congenitaltrait.Name);
-			locText5.GetComponent<ToolTip>().SetSimpleTooltip(this.stats.congenitaltrait.GetTooltip());
+			locText5.text = string.Format(UI.CHARACTERCONTAINER_STRESSTRAIT, this.stats.stressTrait.Name);
+			locText5.GetComponent<ToolTip>().SetSimpleTooltip(this.stats.stressTrait.GetTooltip());
 			this.expectationLabels.Add(locText5);
+		}
+		if (this.stats.congenitaltrait != null)
+		{
+			LocText locText6 = Util.KInstantiateUI<LocText>(this.expectationRight.gameObject, this.expectationRight.transform.parent.gameObject, false);
+			locText6.gameObject.SetActive(true);
+			locText6.text = string.Format(UI.CHARACTERCONTAINER_CONGENITALTRAIT, this.stats.congenitaltrait.Name);
+			locText6.GetComponent<ToolTip>().SetSimpleTooltip(this.stats.congenitaltrait.GetTooltip());
+			this.expectationLabels.Add(locText6);
 		}
 		this.description.text = this.stats.personality.description;
 	}
@@ -266,7 +292,7 @@ public class CharacterContainer : KScreen
 				foreach (AttributeConverter attributeConverter in attributeInstance.Attribute.converters)
 				{
 					AttributeConverterInstance converter = this.animController.gameObject.GetComponent<AttributeConverters>().GetConverter(attributeConverter.Id);
-					string text2 = converter.ToString();
+					string text2 = converter.DescriptionFromAttribute();
 					if (text2 != null)
 					{
 						text = text + "\n" + text2;
@@ -502,12 +528,20 @@ public class CharacterContainer : KScreen
 	private LocText badTrait;
 
 	[SerializeField]
+	private Transform aptitudeContainer;
+
+	[SerializeField]
+	private Transform aptitudeLabel;
+
+	[SerializeField]
 	private LocText expectation;
 
 	[SerializeField]
 	private LocText expectationRight;
 
 	private List<LocText> expectationLabels;
+
+	private List<LocText> aptitudeLabels;
 
 	private List<LocText> traitLabels;
 

@@ -20,7 +20,7 @@ public class OilEater : StateMachineComponent<OilEater.StatesInstance>
 		this.emittedMass += dt * this.emitRate;
 		if (this.emittedMass >= this.minEmitMass)
 		{
-			int num = Grid.PosToCell(base.transform.position + this.emitOffset);
+			int num = Grid.PosToCell(base.transform.GetPosition() + this.emitOffset);
 			PrimaryElement component = base.GetComponent<PrimaryElement>();
 			SimMessages.AddRemoveSubstance(num, SimHashes.CarbonDioxide, CellEventLogger.Instance.ElementEmitted, this.emittedMass, component.Temperature, byte.MaxValue, 0, -1);
 			this.emittedMass = 0f;
@@ -64,7 +64,7 @@ public class OilEater : StateMachineComponent<OilEater.StatesInstance>
 			default_state = this.grow;
 			this.dead.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).Enter(delegate(OilEater.StatesInstance smi)
 			{
-				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.position, Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
+				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
 				smi.master.Trigger(1623392196, null);
 				smi.master.GetComponent<KBatchedAnimController>().StopAndClear();
 				global::UnityEngine.Object.Destroy(smi.master.GetComponent<KBatchedAnimController>());
@@ -85,10 +85,10 @@ public class OilEater : StateMachineComponent<OilEater.StatesInstance>
 					smi.GoTo(this.blocked_from_growing);
 				}
 			}).PlayAnim("grow_seed", KAnim.PlayMode.Once).EventTransition(GameHashes.AnimQueueComplete, this.alive, null);
-			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.mature).Update(delegate(OilEater.StatesInstance smi)
+			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.mature).Update("Alive", delegate(OilEater.StatesInstance smi, float dt)
 			{
-				smi.master.Exhaust(smi.dt);
-			});
+				smi.master.Exhaust(dt);
+			}, UpdateRate.SIM_200ms, false);
 			this.alive.mature.EventTransition(GameHashes.Wilt, this.alive.wilting, (OilEater.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).PlayAnim("idle", KAnim.PlayMode.Loop);
 			this.alive.wilting.PlayAnim("wilt1").EventTransition(GameHashes.WiltRecover, this.alive.mature, (OilEater.StatesInstance smi) => !smi.master.wiltCondition.IsWilting());
 		}

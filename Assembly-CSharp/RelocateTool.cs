@@ -34,7 +34,6 @@ public class RelocateTool : DragTool
 		this.visualizer.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Placers).transform;
 		BuildToolHoverTextCard component2 = base.GetComponent<BuildToolHoverTextCard>();
 		component2.currentDef = this.def;
-		component2.UpdateHoverElements(null);
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
 		this.buildingOrientation = Orientation.Neutral;
 		if (component == null)
@@ -130,7 +129,7 @@ public class RelocateTool : DragTool
 		base.OnMouseMove(cursorPos);
 		if (this.def != null)
 		{
-			Vector3 position = this.visualizer.transform.position;
+			Vector3 position = this.visualizer.transform.GetPosition();
 			position.z = Grid.CellToPosCCC(0, this.def.SceneLayer).z;
 			this.visualizer.transform.SetPosition(position);
 			base.transform.SetPosition(position - Vector3.up * 0.5f);
@@ -167,13 +166,12 @@ public class RelocateTool : DragTool
 			if (this.lastCell != num)
 			{
 				this.lastCell = num;
-				BuildToolHoverTextCard component = base.GetComponent<BuildToolHoverTextCard>();
-				component.UpdateHoverElements(null);
 			}
 		}
 		if (this.visualizer != null)
 		{
-			bool flag = this.def.IsValidPlaceLocation(this.visualizer, cursorPos, this.buildingOrientation);
+			string text;
+			bool flag = this.def.IsValidPlaceLocation(this.visualizer, cursorPos, this.buildingOrientation, out text);
 			bool flag2 = this.def.IsValidBuildLocation(this.visualizer, cursorPos, this.buildingOrientation);
 			Color color = Color.white;
 			float num3 = 0f;
@@ -221,7 +219,8 @@ public class RelocateTool : DragTool
 		GameObject gameObject = null;
 		if (DebugHandler.InstantBuildMode)
 		{
-			if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation))
+			string text;
+			if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation, out text))
 			{
 				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, true, true);
 				this.source.DeleteObject();
@@ -256,8 +255,6 @@ public class RelocateTool : DragTool
 				this.source.QueueRelocation(component3);
 			}
 		}
-		BuildToolHoverTextCard component4 = base.GetComponent<BuildToolHoverTextCard>();
-		component4.UpdateHoverElements(null);
 		this.placeSound = GlobalAssets.GetSound("Place_Building_" + this.def.AudioSize, false);
 		if (gameObject != null && this.placeSound != null)
 		{
@@ -268,10 +265,10 @@ public class RelocateTool : DragTool
 				eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
 			}
 			SoundEvent.EndOneShot(eventInstance);
-			Rotatable component5 = gameObject.GetComponent<Rotatable>();
-			if (component5 != null)
+			Rotatable component4 = gameObject.GetComponent<Rotatable>();
+			if (component4 != null)
 			{
-				component5.SetOrientation(this.buildingOrientation);
+				component4.SetOrientation(this.buildingOrientation);
 			}
 		}
 		if (gameObject != null)
@@ -304,7 +301,7 @@ public class RelocateTool : DragTool
 		ToolTipScreen.Instance.ClearToolTip(this.tooltip);
 	}
 
-	public override void Update()
+	public void Update()
 	{
 		if (this.active)
 		{

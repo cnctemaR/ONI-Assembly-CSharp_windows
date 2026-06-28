@@ -4,23 +4,21 @@ using KSerialization;
 using UnityEngine;
 
 [RequireComponent(typeof(Health))]
-public class OxygenBreather : KMonoBehaviour
+public class OxygenBreather : KMonoBehaviour, ISim200ms
 {
-	public Accumulator o2Accumulator { get; private set; }
-
-	public float O2ConsumptionRate
-	{
-		get
-		{
-			return this.o2Accumulator.AvgRate;
-		}
-	}
-
 	public float CO2EmitRate
 	{
 		get
 		{
-			return this.CO2Accumulator.AvgRate;
+			return Game.Instance.accumulators.GetAverageRate(this.co2Accumulator);
+		}
+	}
+
+	public HandleVector<int>.Handle O2Accumulator
+	{
+		get
+		{
+			return this.o2Accumulator;
 		}
 	}
 
@@ -38,8 +36,8 @@ public class OxygenBreather : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		this.airConsumptionRate = Db.Get().Attributes.AirConsumptionRate.Lookup(this);
-		this.o2Accumulator = new Accumulator("O2", this, 3f);
-		this.CO2Accumulator = new Accumulator("CO2", this, 3f);
+		this.o2Accumulator = Game.Instance.accumulators.Add("O2", this);
+		this.co2Accumulator = Game.Instance.accumulators.Add("CO2", this);
 		KSelectable component = base.GetComponent<KSelectable>();
 		component.AddStatusItem(Db.Get().DuplicantStatusItems.BreathingO2, this);
 		component.AddStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, this);
@@ -47,7 +45,14 @@ public class OxygenBreather : KMonoBehaviour
 		NameDisplayScreen.Instance.RegisterComponent(base.gameObject, this);
 	}
 
-	private void SimUpdate(float dt)
+	protected override void OnCleanUp()
+	{
+		Game.Instance.accumulators.Remove(this.o2Accumulator);
+		Game.Instance.accumulators.Remove(this.co2Accumulator);
+		base.OnCleanUp();
+	}
+
+	public void Sim200ms(float dt)
 	{
 		if (!base.gameObject.HasTag(GameTags.Dead))
 		{
@@ -56,12 +61,12 @@ public class OxygenBreather : KMonoBehaviour
 			if (flag && this.gasProvider.ShouldEmitCO2())
 			{
 				float num2 = num * this.O2toCO2conversion;
-				this.CO2Accumulator.Accumulate(num2);
+				Game.Instance.accumulators.Accumulate(this.co2Accumulator, num2);
 				this.accumulatedCO2 += num2;
 				if (this.accumulatedCO2 >= this.minCO2ToEmit)
 				{
 					this.accumulatedCO2 -= this.minCO2ToEmit;
-					Vector3 position = base.transform.position;
+					Vector3 position = base.transform.GetPosition();
 					position.x += ((!this.facing.GetFacing()) ? this.mouthOffset.x : (-this.mouthOffset.x));
 					position.y += this.mouthOffset.y;
 					position.z -= 0.5f;
@@ -227,7 +232,9 @@ public class OxygenBreather : KMonoBehaviour
 	[MyCmpGet]
 	private Facing facing;
 
-	private Accumulator CO2Accumulator;
+	private HandleVector<int>.Handle o2Accumulator = HandleVector<int>.InvalidHandle;
+
+	private HandleVector<int>.Handle co2Accumulator = HandleVector<int>.InvalidHandle;
 
 	private AmountInstance temperature;
 

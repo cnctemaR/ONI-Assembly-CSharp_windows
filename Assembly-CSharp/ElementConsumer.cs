@@ -12,19 +12,14 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 	{
 		get
 		{
-			return this.accumulator.AvgRate;
+			return Game.Instance.accumulators.GetAverageRate(this.accumulator);
 		}
-	}
-
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-		this.accumulator = new Accumulator("Element", this, 3f);
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.accumulator = Game.Instance.accumulators.Add("Element", this);
 		if (this.elementToConsume == SimHashes.Void)
 		{
 			throw new ArgumentException("No consumable elements specified");
@@ -35,6 +30,12 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 			this.hasAvailableCapacity = !this.IsStorageFull();
 			base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		}
+	}
+
+	protected override void OnCleanUp()
+	{
+		Game.Instance.accumulators.Remove(this.accumulator);
+		base.OnCleanUp();
 	}
 
 	protected virtual bool IsActive()
@@ -116,14 +117,14 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 				this.consumedMass += consumed_info.mass;
 			}
 		}
-		this.accumulator.Accumulate(consumed_info.mass);
+		Game.Instance.accumulators.Accumulate(this.accumulator, consumed_info.mass);
 	}
 
 	public bool IsElementAvailable
 	{
 		get
 		{
-			int num = Grid.PosToCell(base.transform.position + this.sampleCellOffset);
+			int num = Grid.PosToCell(base.transform.GetPosition() + this.sampleCellOffset);
 			SimHashes id = Grid.Element[num].id;
 			return this.elementToConsume == id && Grid.Cell[num].mass >= this.minimumMass;
 		}
@@ -266,7 +267,7 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 
 	protected override void OnSimRegister(HandleVector<Game.ComplexCallbackInfo>.Handle cb_handle)
 	{
-		int num = Grid.PosToCell(base.transform.position + this.sampleCellOffset);
+		int num = Grid.PosToCell(base.transform.GetPosition() + this.sampleCellOffset);
 		SimMessages.AddElementConsumer(num, this.configuration, this.elementToConsume, this.consumptionRadius, cb_handle.index);
 	}
 
@@ -334,7 +335,7 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 	[MyCmpGet]
 	private KSelectable selectable;
 
-	private Accumulator accumulator;
+	private HandleVector<int>.Handle accumulator = HandleVector<int>.InvalidHandle;
 
 	private Guid statusHandle;
 

@@ -160,7 +160,7 @@ public class KAnimGroupFile : ScriptableObject
 		while (i < this.groups.Count)
 		{
 			KBatchGroupData kbatchGroupData;
-			if (this.groups[i].target.isValid)
+			if (this.groups[i].target.IsValid)
 			{
 				kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[i].target, false);
 			}
@@ -174,7 +174,7 @@ public class KAnimGroupFile : ScriptableObject
 			{
 				goto IL_0107;
 			}
-			if (this.groups[i].swapTarget.isValid)
+			if (this.groups[i].swapTarget.IsValid)
 			{
 				kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[i].swapTarget, false);
 				hashedString = this.groups[i].swapTarget;
@@ -233,16 +233,12 @@ public class KAnimGroupFile : ScriptableObject
 									symbol2.flags = symbol.flags;
 									symbol2.firstFrameIdx = batchGroupData2.symbolFrameInstances.Count;
 									symbol2.numFrames = symbol.numFrames;
+									symbol2.symbolIndexInSourceBuild = batchGroupData2.frameElementSymbols.Count;
 									for (int n = 0; n < symbol2.numFrames; n++)
 									{
 										KAnim.Build.SymbolFrameInstance symbolFrameInstance = batchGroupData.GetSymbolFrameInstance(n + symbol.firstFrameIdx);
 										KAnim.Build.SymbolFrameInstance symbolFrameInstance2 = default(KAnim.Build.SymbolFrameInstance);
 										symbolFrameInstance2.symbolFrame = symbolFrameInstance.symbolFrame;
-										if (symbolFrameInstance2.symbolFrame == null)
-										{
-											int num = 0;
-											num++;
-										}
 										symbolFrameInstance2.buildImageIdx = -1;
 										symbolFrameInstance2.symbolIdx = batchGroupData2.GetSymbolCount();
 										batchGroupData2.symbolFrameInstances.Add(symbolFrameInstance2);
@@ -255,22 +251,22 @@ public class KAnimGroupFile : ScriptableObject
 				}
 			}
 		}
-		for (int num2 = 0; num2 < this.groups.Count; num2++)
+		for (int num = 0; num < this.groups.Count; num++)
 		{
-			if (this.groups[num2].renderType != KAnimBatchGroup.RendererType.DontRender)
+			if (this.groups[num].renderType != KAnimBatchGroup.RendererType.DontRender)
 			{
 				KBatchGroupData kbatchGroupData2;
-				if (this.groups[num2].animTarget.isValid)
+				if (this.groups[num].animTarget.IsValid)
 				{
-					kbatchGroupData2 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num2].animTarget, false);
+					kbatchGroupData2 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num].animTarget, false);
 				}
 				else
 				{
-					kbatchGroupData2 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num2].id, false);
+					kbatchGroupData2 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num].id, false);
 				}
-				for (int num3 = 0; num3 < this.groups[num2].files.Count; num3++)
+				for (int num2 = 0; num2 < this.groups[num].files.Count; num2++)
 				{
-					KAnimFile kanimFile2 = this.groups[num2].files[num3];
+					KAnimFile kanimFile2 = this.groups[num].files[num2];
 					if (kanimFile2 != null && kanimFile2.animFile != null)
 					{
 						if (kanimFile2.animFile.bytes == null || kanimFile2.animFile.bytes.Length == 0)
@@ -283,7 +279,7 @@ public class KAnimGroupFile : ScriptableObject
 							{
 								KAnimFileData file2 = KGlobalAnimParser.Get().GetFile(kanimFile2);
 								file2.maxVisSymbolFrames = 0;
-								file2.batchTag = this.groups[num2].id;
+								file2.batchTag = this.groups[num].id;
 								this.fileData.Add(kanimFile2.GetInstanceID(), file2);
 							}
 							HashedString hashedString3 = new HashedString(kanimFile2.name);
@@ -295,16 +291,16 @@ public class KAnimGroupFile : ScriptableObject
 				}
 			}
 		}
-		for (int num4 = 0; num4 < this.groups.Count; num4++)
+		for (int num3 = 0; num3 < this.groups.Count; num3++)
 		{
 			KBatchGroupData kbatchGroupData3;
-			if (this.groups[num4].target.isValid)
+			if (this.groups[num3].target.IsValid)
 			{
-				kbatchGroupData3 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num4].target, false);
+				kbatchGroupData3 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num3].target, false);
 			}
 			else
 			{
-				kbatchGroupData3 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num4].id, false);
+				kbatchGroupData3 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num3].id, false);
 			}
 			KGlobalAnimParser.PostParse(kbatchGroupData3);
 		}

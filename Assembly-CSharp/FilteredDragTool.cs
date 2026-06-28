@@ -15,6 +15,7 @@ public class FilteredDragTool : DragTool
 		filters.Add(ToolParameterMenu.FILTERLAYERS.WIRES, ToolParameterMenu.ToggleState.Off);
 		filters.Add(ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT, ToolParameterMenu.ToggleState.Off);
 		filters.Add(ToolParameterMenu.FILTERLAYERS.GASCONDUIT, ToolParameterMenu.ToggleState.Off);
+		filters.Add(ToolParameterMenu.FILTERLAYERS.SOLIDCONDUIT, ToolParameterMenu.ToggleState.Off);
 		filters.Add(ToolParameterMenu.FILTERLAYERS.BUILDINGS, ToolParameterMenu.ToggleState.Off);
 		filters.Add(ToolParameterMenu.FILTERLAYERS.LOGIC, ToolParameterMenu.ToggleState.Off);
 		filters.Add(ToolParameterMenu.FILTERLAYERS.BACKWALL, ToolParameterMenu.ToggleState.Off);
@@ -110,18 +111,21 @@ public class FilteredDragTool : DragTool
 				case ObjectLayer.FoundationTile:
 					return "Tiles";
 				case ObjectLayer.GasConduit:
-					goto IL_0073;
+					goto IL_0083;
 				}
 				return "Default";
 			}
 			return "BackWall";
+		case ObjectLayer.SolidConduit:
+		case ObjectLayer.SolidConduitConnection:
+			return "SolidConduits";
 		case ObjectLayer.Wire:
 			return "Wires";
 		case ObjectLayer.LogicGates:
 		case ObjectLayer.LogicWires:
 			return "Logic";
 		}
-		IL_0073:
+		IL_0083:
 		return "GasPipes";
 	}
 
@@ -138,9 +142,16 @@ public class FilteredDragTool : DragTool
 			{
 				if (overlay != SimViewMode.GasVentMap)
 				{
-					if (overlay == SimViewMode.Logic)
+					if (overlay != SimViewMode.SolidConveyorMap)
 					{
-						text = ToolParameterMenu.FILTERLAYERS.LOGIC;
+						if (overlay == SimViewMode.Logic)
+						{
+							text = ToolParameterMenu.FILTERLAYERS.LOGIC;
+						}
+					}
+					else
+					{
+						text = ToolParameterMenu.FILTERLAYERS.SOLIDCONDUIT;
 					}
 				}
 				else

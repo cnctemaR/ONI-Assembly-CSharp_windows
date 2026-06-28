@@ -15,13 +15,25 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 	{
 		base.OnPrefabInit();
 		base.GetComponent<KPrefabID>().AddTag(TagManager.Create("RelaxationPoint", MISC.TAGS.RELAXATION_POINT));
-		this.stressReductionEffect = this.CreateEffect();
+		if (RelaxationPoint.stressReductionEffect == null)
+		{
+			RelaxationPoint.stressReductionEffect = this.CreateEffect();
+			RelaxationPoint.roomBonusEffect = this.CreateRoomBonusEffect();
+		}
 	}
 
 	public Effect CreateEffect()
 	{
-		Effect effect = new Effect("StressReduction", DUPLICANTS.RELAXATION.RELAXATION_EFFECT.NAME, DUPLICANTS.RELAXATION.RELAXATION_EFFECT.DESCRIPTION, 0f, true, false, false);
-		AttributeModifier attributeModifier = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, this.stressModificationValue / 600f, DUPLICANTS.RELAXATION.RELAXATION_EFFECT.NAME, false, false, true);
+		Effect effect = new Effect("StressReduction", DUPLICANTS.MODIFIERS.STRESSREDUCTION.NAME, DUPLICANTS.MODIFIERS.STRESSREDUCTION.TOOLTIP, 0f, true, false, false);
+		AttributeModifier attributeModifier = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, this.stressModificationValue / 600f, DUPLICANTS.MODIFIERS.STRESSREDUCTION.NAME, false, false, true);
+		effect.Add(attributeModifier);
+		return effect;
+	}
+
+	public Effect CreateRoomBonusEffect()
+	{
+		Effect effect = new Effect("RoomRelaxationEffect", DUPLICANTS.MODIFIERS.ROOM_RELAXATION_EFFECT.NAME, DUPLICANTS.MODIFIERS.ROOM_RELAXATION_EFFECT.TOOLTIP, 0f, true, false, false);
+		AttributeModifier attributeModifier = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, this.stressModificationValue / 600f, DUPLICANTS.MODIFIERS.ROOM_RELAXATION_EFFECT.NAME, false, false, true);
 		effect.Add(attributeModifier);
 		return effect;
 	}
@@ -37,7 +49,11 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		worker.GetComponent<Effects>().Add(this.stressReductionEffect, false);
+		worker.GetComponent<Effects>().Add(RelaxationPoint.stressReductionEffect, false);
+		if (this.roomTracker != null && this.roomTracker.room != null && Db.Get().RoomTypes.GetRoomType(this.roomTracker.room) == Db.Get().RoomTypes.RecRoom)
+		{
+			worker.GetComponent<Effects>().Add(RelaxationPoint.roomBonusEffect, false);
+		}
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -53,7 +69,8 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 
 	protected override void OnStopWork(Worker worker)
 	{
-		worker.GetComponent<Effects>().Remove(this.stressReductionEffect);
+		worker.GetComponent<Effects>().Remove(RelaxationPoint.stressReductionEffect);
+		worker.GetComponent<Effects>().Remove(RelaxationPoint.roomBonusEffect);
 		base.OnStopWork(worker);
 	}
 
@@ -64,7 +81,7 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 
 	protected virtual WorkChore<RelaxationPoint> CreateWorkChore()
 	{
-		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, false, null, null, null, false, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, null, false, null, null, null, false, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
@@ -76,14 +93,21 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 		return list;
 	}
 
+	[MyCmpGet]
+	private RoomTracker roomTracker;
+
 	[Serialize]
 	protected float stopStressingValue;
 
 	public float stressModificationValue;
 
+	public float roomBonusValue;
+
 	private RelaxationPoint.RelaxationPointSM.Instance smi;
 
-	private Effect stressReductionEffect;
+	private static Effect stressReductionEffect;
+
+	private static Effect roomBonusEffect;
 
 	public class RelaxationPointSM : GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, RelaxationPoint>
 	{
@@ -104,7 +128,6 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 					smi.master.gameObject.GetComponent<Operational>().SetActive(true, false);
 					smi.Queue("working_pre", KAnim.PlayMode.Once);
 					smi.Queue("working_loop", KAnim.PlayMode.Loop);
-					smi.master.GetComponent<Operational>().SetActive(true, false);
 				}
 			});
 			this.operational.exiting.PlayAnim("working_pst").OnAnimQueueComplete(this.unoperational).Enter(delegate(RelaxationPoint.RelaxationPointSM.Instance smi)

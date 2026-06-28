@@ -8,14 +8,14 @@ public class StaminaMonitor : GameStateMachine<StaminaMonitor, StaminaMonitor.In
 		default_state = this.satisfied;
 		base.serializable = true;
 		this.root.ToggleStateMachine((StaminaMonitor.Instance smi) => new UrgeMonitor.Instance(smi.master, Db.Get().Urges.Sleep, Db.Get().Amounts.Stamina, Db.Get().ScheduleBlockTypes.Sleep, 100f, 0f, false)).ToggleStateMachine((StaminaMonitor.Instance smi) => new SleepChoreMonitor.Instance(smi.master));
-		this.satisfied.Transition(this.sleepy, (StaminaMonitor.Instance smi) => smi.NeedsToSleep() || smi.WantsToSleep());
-		this.sleepy.ToggleSchedulePeriodic("Check Sleep State", 1f, delegate(StaminaMonitor.Instance smi)
+		this.satisfied.Transition(this.sleepy, (StaminaMonitor.Instance smi) => smi.NeedsToSleep() || smi.WantsToSleep(), UpdateRate.SIM_200ms);
+		this.sleepy.Update("Check Sleep State", delegate(StaminaMonitor.Instance smi, float dt)
 		{
 			smi.TryExitSleepState();
-		}).DefaultState(this.sleepy.needssleep);
-		this.sleepy.needssleep.Transition(this.sleepy.sleeping, (StaminaMonitor.Instance smi) => smi.IsSleeping()).ToggleExpression(Db.Get().Expressions.Tired, null).ToggleStatusItem(Db.Get().DuplicantStatusItems.Tired, null)
+		}, UpdateRate.SIM_1000ms, false).DefaultState(this.sleepy.needssleep);
+		this.sleepy.needssleep.Transition(this.sleepy.sleeping, (StaminaMonitor.Instance smi) => smi.IsSleeping(), UpdateRate.SIM_200ms).ToggleExpression(Db.Get().Expressions.Tired, null).ToggleStatusItem(Db.Get().DuplicantStatusItems.Tired, null)
 			.ToggleThought(Db.Get().Thoughts.Sleepy, null);
-		this.sleepy.sleeping.Transition(this.satisfied, (StaminaMonitor.Instance smi) => !smi.IsSleeping());
+		this.sleepy.sleeping.Transition(this.satisfied, (StaminaMonitor.Instance smi) => !smi.IsSleeping(), UpdateRate.SIM_200ms);
 	}
 
 	public GameStateMachine<StaminaMonitor, StaminaMonitor.Instance, IStateMachineTarget, object>.State satisfied;

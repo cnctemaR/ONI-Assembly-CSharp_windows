@@ -18,7 +18,7 @@ public class ToiletSensor : Sensor
 			if (usable2.IsUsable())
 			{
 				flag = true;
-				int navigationCost = this.navigator.GetNavigationCost(Grid.PosToCell(usable2.transform.position));
+				int navigationCost = this.navigator.GetNavigationCost(Grid.PosToCell(usable2.transform.GetPosition()));
 				if (navigationCost != PathProber.InvalidCost && navigationCost < num)
 				{
 					usable = usable2;

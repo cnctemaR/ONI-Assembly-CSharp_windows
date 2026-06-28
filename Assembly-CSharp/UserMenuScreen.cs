@@ -8,6 +8,9 @@ public class UserMenuScreen : KIconButtonMenu
 	{
 		this.keepMenuOpen = true;
 		base.OnPrefabInit();
+		this.priorityScreen = Util.KInstantiateUI<PriorityScreen>(this.priorityScreenPrefab.gameObject, this.priorityScreenParent, false);
+		this.priorityScreen.InstantiateButtons(new Action<PrioritySetting>(this.OnPriorityClicked), true);
+		this.buttonParent.transform.SetAsLastSibling();
 	}
 
 	protected override void OnSpawn()
@@ -18,8 +21,41 @@ public class UserMenuScreen : KIconButtonMenu
 
 	public void SetSelected(GameObject go)
 	{
-		this.priorityScreen.SetTarget(go);
+		this.ClearPrioritizable();
 		this.selected = go;
+		this.RefreshPrioritizable();
+	}
+
+	private void ClearPrioritizable()
+	{
+		if (this.selected != null)
+		{
+			Prioritizable component = this.selected.GetComponent<Prioritizable>();
+			if (component != null)
+			{
+				Prioritizable prioritizable = component;
+				prioritizable.onPriorityChanged = (Action<PrioritySetting>)Delegate.Remove(prioritizable.onPriorityChanged, new Action<PrioritySetting>(this.OnPriorityChanged));
+			}
+		}
+	}
+
+	private void RefreshPrioritizable()
+	{
+		if (this.selected != null)
+		{
+			Prioritizable component = this.selected.GetComponent<Prioritizable>();
+			if (component != null && component.IsPrioritizable())
+			{
+				Prioritizable prioritizable = component;
+				prioritizable.onPriorityChanged = (Action<PrioritySetting>)Delegate.Combine(prioritizable.onPriorityChanged, new Action<PrioritySetting>(this.OnPriorityChanged));
+				this.priorityScreen.gameObject.SetActive(true);
+				this.priorityScreen.SetScreenPriority(component.GetMasterPriority(), false);
+			}
+			else
+			{
+				this.priorityScreen.gameObject.SetActive(false);
+			}
+		}
 	}
 
 	public void Refresh(GameObject go)
@@ -28,7 +64,6 @@ public class UserMenuScreen : KIconButtonMenu
 		{
 			return;
 		}
-		this.priorityScreen.SetTarget(go);
 		this.buttonInfos.Clear();
 		this.slidersInfos.Clear();
 		UserMenu[] components = go.GetComponents<UserMenu>();
@@ -42,6 +77,8 @@ public class UserMenuScreen : KIconButtonMenu
 		base.SetButtons(this.buttonInfos);
 		base.RefreshButtons();
 		this.RefreshSliders();
+		this.ClearPrioritizable();
+		this.RefreshPrioritizable();
 		if ((this.sliders == null || this.sliders.Count == 0) && (this.buttonInfos == null || this.buttonInfos.Count == 0))
 		{
 			base.transform.parent.gameObject.SetActive(false);
@@ -110,11 +147,32 @@ public class UserMenuScreen : KIconButtonMenu
 		}
 	}
 
+	private void OnPriorityClicked(PrioritySetting priority)
+	{
+		if (this.selected != null)
+		{
+			Prioritizable component = this.selected.GetComponent<Prioritizable>();
+			if (component != null)
+			{
+				component.SetMasterPriority(priority);
+			}
+		}
+	}
+
+	private void OnPriorityChanged(PrioritySetting priority)
+	{
+		this.priorityScreen.SetScreenPriority(priority, false);
+	}
+
 	private GameObject selected;
 
 	public MinMaxSlider sliderPrefab;
 
 	public GameObject sliderParent;
+
+	public PriorityScreen priorityScreenPrefab;
+
+	public GameObject priorityScreenParent;
 
 	private List<MinMaxSlider> sliders = new List<MinMaxSlider>();
 
@@ -122,6 +180,5 @@ public class UserMenuScreen : KIconButtonMenu
 
 	private List<KIconButtonMenu.ButtonInfo> buttonInfos = new List<KIconButtonMenu.ButtonInfo>();
 
-	[SerializeField]
-	private InfoPriorityScreen priorityScreen;
+	private PriorityScreen priorityScreen;
 }

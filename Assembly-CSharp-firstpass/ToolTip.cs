@@ -39,10 +39,6 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 		{
 			global::Debug.LogError("The object " + base.gameObject.name + " has more than one ToolTip, it conflict when displaying this tooltip.", null);
 		}
-		if (this.OnToolTip == null)
-		{
-			this.OnToolTip = () => string.Empty;
-		}
 		base.Subscribe(2098165161, new Action<object>(this.OnClick));
 		if (this.UseFixedStringKey)
 		{
@@ -95,12 +91,8 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
 	public void SetSimpleTooltip(string message)
 	{
-		this.OnToolTip = delegate
-		{
-			this.ClearMultiStringTooltip();
-			this.AddMultiStringTooltip(message, ToolTipScreen.Instance.defaultTextStyleSetting);
-			return string.Empty;
-		};
+		this.ClearMultiStringTooltip();
+		this.AddMultiStringTooltip(message, PluginAssets.Instance.defaultTextStyleSetting);
 	}
 
 	public void AddMultiStringTooltip(string newString, ScriptableObject styleSetting)
@@ -132,24 +124,28 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 		this.toolTip = text;
 	}
 
-	public string GetToolTip()
+	public void RebuildDynamicTooltip()
 	{
 		if (this.OnToolTip != null)
 		{
-			return this.OnToolTip();
+			this.ClearMultiStringTooltip();
+			string text = this.OnToolTip();
+			if (!string.IsNullOrEmpty(text))
+			{
+				this.AddMultiStringTooltip(text, PluginAssets.Instance.defaultTextStyleSetting);
+			}
 		}
-		return string.Empty;
 	}
 
 	public void OnPointerEnter(PointerEventData data)
 	{
-		this.OnHover(true);
+		this.OnHoverStateChanged(true);
 		this.isHovering = true;
 	}
 
 	public void OnPointerExit(PointerEventData data)
 	{
-		this.OnHover(false);
+		this.OnHoverStateChanged(false);
 		this.isHovering = false;
 	}
 
@@ -184,7 +180,7 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 		}
 	}
 
-	private void OnHover(bool is_over)
+	private void OnHoverStateChanged(bool is_over)
 	{
 		if (ToolTipScreen.Instance == null)
 		{
@@ -208,7 +204,7 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 		}
 	}
 
-	private void Update()
+	public void UpdateWhileHovered()
 	{
 		if (!this.forceRefresh && !this.refreshWhileHovering)
 		{
@@ -219,7 +215,7 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 			this.lastUpdateTime = Time.unscaledTime;
 			if (this.isHovering)
 			{
-				this.GetToolTip();
+				this.RebuildDynamicTooltip();
 				for (int i = 0; i < this.multiStringToolTips.Count; i++)
 				{
 					ToolTipScreen.Instance.HotSwapTooltipString(this.multiStringToolTips[i], i);

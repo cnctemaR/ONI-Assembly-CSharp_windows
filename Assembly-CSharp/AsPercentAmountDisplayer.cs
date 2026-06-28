@@ -53,7 +53,7 @@ public class AsPercentAmountDisplayer : IAmountDisplayer, IAttributeFormatter
 		foreach (AttributeInstance.AttributeModifierEntry attributeModifierEntry in instance.deltaAttribute)
 		{
 			float modifierContribution = instance.deltaAttribute.GetModifierContribution(attributeModifierEntry.Modifier);
-			text = text + "\n" + string.Format("{0}: {1}", (attributeModifierEntry.Modifier.DescriptionCB == null) ? attributeModifierEntry.Modifier.Description : attributeModifierEntry.Modifier.DescriptionCB(), this.formatter.GetFormattedValue(this.ToPercent(modifierContribution, instance), this.formatter.DeltaTimeSlice, null));
+			text = text + "\n" + string.Format("{0}: {1}", attributeModifierEntry.Modifier.GetDescription(), this.formatter.GetFormattedValue(this.ToPercent(modifierContribution, instance), this.formatter.DeltaTimeSlice, null));
 		}
 		return text;
 	}

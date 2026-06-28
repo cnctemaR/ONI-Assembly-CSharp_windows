@@ -35,7 +35,7 @@ public class WarmingPoint : Workable
 
 	private void CreateTask()
 	{
-		this.chore = new WorkChore<WarmingPoint>(Db.Get().ChoreTypes.Warmup, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+		this.chore = new WorkChore<WarmingPoint>(Db.Get().ChoreTypes.Warmup, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 	}
 
 	public override CellOffset[] GetOffsets(int cell)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using KSerialization;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -79,7 +80,7 @@ public class Constructable : Workable, ISaveLoadable
 		UtilityConnections connections = ((!(component2 == null)) ? component2.Connections : ((UtilityConnections)0));
 		if (this.IsReplacementTile)
 		{
-			int num3 = Grid.PosToCell(base.transform.localPosition);
+			int num3 = Grid.PosToCell(base.transform.GetLocalPosition());
 			GameObject gameObject2 = Grid.Objects[num3, (int)this.building.Def.TileLayer];
 			if (gameObject2 != null)
 			{
@@ -105,10 +106,10 @@ public class Constructable : Workable, ISaveLoadable
 					BuildingComplete component5 = gameObject2.GetComponent<BuildingComplete>();
 					if (component5 != null)
 					{
-						component5.onCleanUp += delegate
+						component5.Subscribe(-21016276, delegate(object data)
 						{
 							this.FinishConstruction(connections);
-						};
+						});
 					}
 					else
 					{
@@ -121,6 +122,13 @@ public class Constructable : Workable, ISaveLoadable
 				{
 					component6.skipCleanup = true;
 				}
+				PrimaryElement component7 = gameObject2.GetComponent<PrimaryElement>();
+				float mass = component7.Mass;
+				float temperature = component7.Temperature;
+				SimHashes elementID = component7.ElementID;
+				byte diseaseIdx = component7.DiseaseIdx;
+				int diseaseCount = component7.DiseaseCount;
+				Deconstructable.SpawnItem(component7.transform.GetPosition(), component7.GetComponent<Building>().Def, elementID, mass, temperature, diseaseIdx, diseaseCount);
 				gameObject2.DeleteObject();
 			}
 		}
@@ -131,11 +139,18 @@ public class Constructable : Workable, ISaveLoadable
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Building, base.GetComponent<KSelectable>().GetName(), base.transform, 1.5f, false);
 	}
 
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole(JuniorBuilder.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
+		resume.AddExperienceIfRole(Builder.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
+		resume.AddExperienceIfRole(SeniorBuilder.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
+	}
+
 	private void FinishConstruction(UtilityConnections connections)
 	{
 		Rotatable component = base.GetComponent<Rotatable>();
 		Orientation orientation = ((!(component != null)) ? Orientation.Neutral : component.GetOrientation());
-		int num = Grid.PosToCell(base.transform.localPosition);
+		int num = Grid.PosToCell(base.transform.GetLocalPosition());
 		GameObject gameObject = this.building.Def.Build(num, orientation, this.storage, this.selectedElements, this.initialTemperature, this.isRelocating, true);
 		gameObject.transform.rotation = base.transform.rotation;
 		Rotatable component2 = gameObject.GetComponent<Rotatable>();
@@ -160,13 +175,13 @@ public class Constructable : Workable, ISaveLoadable
 			}
 		}
 		this.storage.ConsumeAllIgnoringDisease();
+		this.finished = true;
 		this.DeleteObject();
 	}
 
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.choreType = Db.Get().ChoreTypes.Build;
 		this.invalidLocation = new Notification(MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null);
 		CellOffset[][] array = OffsetGroups.InvertedStandardTable;
 		if (this.building.Def.IsTilePiece)
@@ -175,7 +190,7 @@ public class Constructable : Workable, ISaveLoadable
 		}
 		CellOffset[][] array2 = OffsetGroups.BuildReachabilityTable(this.building.Def.PlacementOffsets, array, this.building.Def.ConstructionOffsetFilter);
 		base.SetOffsetTable(array2);
-		base.GetComponent<Storage>().SetOffsetTable(array2);
+		this.storage.SetOffsetTable(array2);
 		this.faceTargetWhenWorking = true;
 		base.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
 		if (this.rotatable == null)
@@ -185,10 +200,11 @@ public class Constructable : Workable, ISaveLoadable
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Building;
 		this.workingStatusItem = null;
 		this.attributeConverter = Db.Get().AttributeConverters.ConstructionSpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		Prioritizable.AddRef(base.gameObject);
-		this.storage.choreType = Db.Get().ChoreTypes.BuildFetch;
-		this.choreType = Db.Get().ChoreTypes.Build;
 		this.synchronizeAnims = false;
+		this.multitoolContext = "build";
+		this.multitoolHitEffectHash = new HashedString("fx_build_splash");
 	}
 
 	protected override void OnSpawn()
@@ -199,8 +215,16 @@ public class Constructable : Workable, ISaveLoadable
 		{
 			this.MarkArea();
 		}
-		this.storage.choreType = Db.Get().ChoreTypes.BuildFetch;
-		this.fetchList = new FetchList2(this.storage);
+		if (this.choreTags == null)
+		{
+			this.choreTags = GameTags.ChoreTypes.BuildingChores;
+		}
+		else if (Array.IndexOf<Tag>(this.choreTags, GameTags.ChoreTypes.Building) < 0)
+		{
+			Array.Resize<Tag>(ref this.choreTags, this.choreTags.Length + 1);
+			this.choreTags[this.choreTags.Length - 1] = GameTags.ChoreTypes.Building;
+		}
+		this.fetchList = new FetchList2(this.storage, Db.Get().ChoreTypes.BuildFetch, this.choreTags);
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		component.ElementID = this.selectedElements[0].id;
 		PrimaryElement primaryElement = component;
@@ -227,9 +251,10 @@ public class Constructable : Workable, ISaveLoadable
 				}
 			}
 		});
+		Diggable.UpdateBuildableDiggables(Grid.PosToCell(this));
 		if (this.IsReplacementTile && this.building.Def.ReplacementLayer != ObjectLayer.NumLayers)
 		{
-			int num2 = Grid.PosToCell(base.transform.position);
+			int num2 = Grid.PosToCell(base.transform.GetPosition());
 			GameObject gameObject = Grid.Objects[num2, (int)this.building.Def.ReplacementLayer];
 			if (gameObject == null || gameObject == base.gameObject)
 			{
@@ -247,7 +272,21 @@ public class Constructable : Workable, ISaveLoadable
 				Util.KDestroyGameObject(base.gameObject);
 			}
 		}
+		bool flag = this.building.Def.BuildingComplete.GetComponent<Ladder>();
+		this.waitForFetchesBeforeDigging = flag || this.building.Def.BuildingComplete.GetComponent<SimCellOccupier>() || this.building.Def.BuildingComplete.GetComponent<Door>() || this.building.Def.BuildingComplete.GetComponent<LiquidPumpingStation>();
+		if (flag)
+		{
+			int num4 = 0;
+			int num5 = 0;
+			int num6 = Grid.PosToCell(this);
+			Grid.CellToXY(num6, out num4, out num5);
+			int num7 = num5 - 3;
+			this.ladderDetectionExtents = new Extents(num4, num7, 1, 5);
+			this.ladderParititonerEntry = GameScenePartitioner.Instance.Add("Constructable.OnNearbyBuildingLayerChanged", base.gameObject, this.ladderDetectionExtents, GameScenePartitioner.Instance.objectLayers[1], new Action<object>(this.OnNearbyBuildingLayerChanged));
+			this.OnNearbyBuildingLayerChanged(null);
+		}
 		this.fetchList.Submit(new global::System.Action(this.OnFetchListComplete), true);
+		this.PlaceDiggables();
 		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
 		instance.StartSM();
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
@@ -271,7 +310,7 @@ public class Constructable : Workable, ISaveLoadable
 
 	private void MarkArea()
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		BuildingDef def = this.building.Def;
 		Orientation orientation = this.building.Orientation;
 		ObjectLayer objectLayer = ((!this.IsReplacementTile) ? def.ObjectLayer : def.ReplacementLayer);
@@ -293,7 +332,7 @@ public class Constructable : Workable, ISaveLoadable
 
 	private void UnmarkArea()
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		ObjectLayer objectLayer = ((!this.IsReplacementTile) ? this.building.Def.ObjectLayer : this.building.Def.ReplacementLayer);
 		this.building.Def.UnmarkArea(num, this.building.Orientation, objectLayer, base.gameObject);
 		if (this.building.Def.IsTilePiece)
@@ -302,9 +341,33 @@ public class Constructable : Workable, ISaveLoadable
 		}
 	}
 
+	private void OnNearbyBuildingLayerChanged(object data)
+	{
+		this.hasLadderNearby = false;
+		for (int i = this.ladderDetectionExtents.y; i < this.ladderDetectionExtents.y + this.ladderDetectionExtents.height; i++)
+		{
+			int num = Grid.OffsetCell(0, this.ladderDetectionExtents.x, i);
+			if (Grid.IsValidCell(num))
+			{
+				GameObject gameObject = null;
+				Grid.ObjectLayers[1].TryGetValue(num, out gameObject);
+				if (gameObject != null && gameObject.GetComponent<Ladder>() != null)
+				{
+					this.hasLadderNearby = true;
+					break;
+				}
+			}
+		}
+	}
+
+	private bool IsWire()
+	{
+		return this.building.Def.name.Contains("Wire");
+	}
+
 	public bool IconConnectionAnimation(float delay, int connectionCount, string defName, string soundName)
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		if (this.building.Def.Name.Contains(defName))
 		{
 			Building building = null;
@@ -315,7 +378,7 @@ public class Constructable : Workable, ISaveLoadable
 			}
 			if (building != null)
 			{
-				bool flag = defName.Contains("Wire");
+				bool flag = this.IsWire();
 				int num2 = ((!flag) ? building.GetUtilityInputCell() : building.GetPowerInputCell());
 				int num3 = ((!flag) ? building.GetUtilityOutputCell() : num2);
 				if (num == num2 || num == num3)
@@ -323,7 +386,7 @@ public class Constructable : Workable, ISaveLoadable
 					BuildingCellVisualizer component = building.gameObject.GetComponent<BuildingCellVisualizer>();
 					if (component != null)
 					{
-						bool flag2 = ((!flag) ? component.RequiresGasOrLiquid : component.RequiresPower);
+						bool flag2 = ((!flag) ? component.RequiresUtilityConnection : component.RequiresPower);
 						if (flag2)
 						{
 							component.ConnectedEventWithDelay(delay, connectionCount, num, soundName);
@@ -340,7 +403,7 @@ public class Constructable : Workable, ISaveLoadable
 	{
 		if (this.IsReplacementTile && this.building.Def.isKAnimTile)
 		{
-			int num = Grid.PosToCell(base.transform.position);
+			int num = Grid.PosToCell(base.transform.GetPosition());
 			GameObject gameObject = Grid.Objects[num, (int)this.building.Def.ReplacementLayer];
 			if (gameObject == base.gameObject && gameObject.GetComponent<SimCellOccupier>() != null)
 			{
@@ -357,11 +420,23 @@ public class Constructable : Workable, ISaveLoadable
 			this.digPartitionerEntry.Release();
 			this.digPartitionerEntry = null;
 		}
+		if (this.ladderParititonerEntry != null)
+		{
+			this.ladderParititonerEntry.Release();
+			this.ladderParititonerEntry = null;
+		}
 		SaveLoadRoot component = base.GetComponent<SaveLoadRoot>();
 		if (component != null)
 		{
 			SaveLoader.Instance.saveManager.Unregister(component);
 		}
+		if (this.fetchList != null)
+		{
+			this.fetchList.Cancel("Constructable destroyed");
+		}
+		this.UnmarkArea();
+		Queue<GameUtil.FloodFillInfo> floodFillNext = GameUtil.FloodFillNext;
+		floodFillNext.Clear();
 		foreach (int num2 in this.building.PlacementCells)
 		{
 			Diggable diggable = Diggable.GetDiggable(num2);
@@ -369,12 +444,28 @@ public class Constructable : Workable, ISaveLoadable
 			{
 				diggable.gameObject.DeleteObject();
 			}
+			floodFillNext.Enqueue(new GameUtil.FloodFillInfo
+			{
+				cell = Grid.CellLeft(num2),
+				depth = 0
+			});
+			floodFillNext.Enqueue(new GameUtil.FloodFillInfo
+			{
+				cell = Grid.CellRight(num2),
+				depth = 0
+			});
+			floodFillNext.Enqueue(new GameUtil.FloodFillInfo
+			{
+				cell = Grid.CellAbove(num2),
+				depth = 0
+			});
+			floodFillNext.Enqueue(new GameUtil.FloodFillInfo
+			{
+				cell = Grid.CellBelow(num2),
+				depth = 0
+			});
 		}
-		if (this.fetchList != null)
-		{
-			this.fetchList.Cancel("Constructable destroyed");
-		}
-		this.UnmarkArea();
+		Diggable.UpdateBuildableDiggables(floodFillNext);
 		base.OnCleanUp();
 	}
 
@@ -414,7 +505,17 @@ public class Constructable : Workable, ISaveLoadable
 
 	private void PlaceDiggables()
 	{
+		if (this.waitForFetchesBeforeDigging && this.fetchList != null && !this.hasLadderNearby)
+		{
+			return;
+		}
 		bool digs_complete = true;
+		if (this.solidPartitionerEntry == null)
+		{
+			Extents validPlacementExtents = this.building.GetValidPlacementExtents();
+			this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Constructable.OnFetchListComplete", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+			this.digPartitionerEntry = GameScenePartitioner.Instance.Add("Constructable.OnFetchListComplete", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.digDestroyedLayer, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+		}
 		if (!this.IsReplacementTile)
 		{
 			this.building.RunOnArea(delegate(int offset_cell)
@@ -435,7 +536,8 @@ public class Constructable : Workable, ISaveLoadable
 						diggable.Unsubscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
 						diggable.Subscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
 					}
-					diggable.SetChoreType(Db.Get().ChoreTypes.BuildDig);
+					diggable.choreTypeIdHash = Db.Get().ChoreTypes.Dig.IdHash;
+					diggable.choreTags = this.choreTags;
 					diggable.GetComponent<Prioritizable>().SetMasterPriority(masterPriority);
 					RenderUtil.EnableRenderer(diggable.transform, false);
 					SaveLoadRoot component = diggable.GetComponent<SaveLoadRoot>();
@@ -447,7 +549,7 @@ public class Constructable : Workable, ISaveLoadable
 			});
 			this.OnDiggableReachabilityChanged(null);
 		}
-		bool flag = this.building.Def.IsValidBuildLocation(base.gameObject, base.transform.position, this.building.Orientation);
+		bool flag = this.building.Def.IsValidBuildLocation(base.gameObject, base.transform.GetPosition(), this.building.Orientation);
 		if (flag)
 		{
 			this.notifier.Remove(this.invalidLocation);
@@ -457,10 +559,12 @@ public class Constructable : Workable, ISaveLoadable
 			this.notifier.Add(this.invalidLocation, string.Empty);
 		}
 		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.InvalidBuildingLocation, !flag, this);
-		bool flag2 = digs_complete && flag;
+		bool flag2 = digs_complete && flag && this.fetchList == null;
 		if (flag2 && this.buildChore == null)
 		{
-			this.buildChore = new WorkChore<Constructable>(this.choreType, this, null, true, new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), true, null, true, default(Tag), null, true, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			ChoreType build = Db.Get().ChoreTypes.Build;
+			Tag[] array = this.choreTags;
+			this.buildChore = new WorkChore<Constructable>(build, this, null, array, true, new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), true, null, true, null, true, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 			this.UpdateBuildState(this.buildChore);
 		}
 		else if (!flag2 && this.buildChore != null)
@@ -472,11 +576,8 @@ public class Constructable : Workable, ISaveLoadable
 
 	private void OnFetchListComplete()
 	{
-		this.PlaceDiggables();
-		Extents validPlacementExtents = this.building.GetValidPlacementExtents();
-		this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Constructable.OnFetchListComplete", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChangedOrDigDestroyed));
-		this.digPartitionerEntry = GameScenePartitioner.Instance.Add("Constructable.OnFetchListComplete", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.digDestroyedLayer, new Action<object>(this.OnSolidChangedOrDigDestroyed));
 		this.fetchList = null;
+		this.PlaceDiggables();
 		this.ClearMaterialNeeds();
 	}
 
@@ -495,7 +596,7 @@ public class Constructable : Workable, ISaveLoadable
 
 	private void OnSolidChangedOrDigDestroyed(object data)
 	{
-		if (this == null)
+		if (this == null || this.finished)
 		{
 			return;
 		}
@@ -504,21 +605,15 @@ public class Constructable : Workable, ISaveLoadable
 
 	private void UpdateBuildState(Chore chore)
 	{
+		KSelectable component = base.GetComponent<KSelectable>();
 		if (chore.InProgress())
 		{
-			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.UnderConstruction, null);
+			component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.UnderConstruction, null);
 		}
 		else
 		{
-			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.UnderConstructionNoWorker, null);
+			component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.UnderConstructionNoWorker, null);
 		}
-	}
-
-	public override Workable.AnimInfo GetAnim(Worker worker)
-	{
-		Workable.AnimInfo anim = base.GetAnim(worker);
-		anim.smi = new MultitoolController.Instance(this, worker, "build", EffectPrefabs.Instance.BuildEffect);
-		return anim;
 	}
 
 	[OnSerializing]
@@ -623,23 +718,34 @@ public class Constructable : Workable, ISaveLoadable
 
 	private Chore buildChore;
 
-	private ChoreType choreType;
-
 	private bool materialNeedsCleared;
 
 	private bool hasUnreachableDigs;
+
+	private bool finished;
 
 	[Serialize]
 	public bool isRelocating;
 
 	public bool isDiggingRequired = true;
 
+	private bool waitForFetchesBeforeDigging;
+
+	private bool hasLadderNearby;
+
+	private Extents ladderDetectionExtents;
+
 	[Serialize]
 	public bool IsReplacementTile;
+
+	[Serialize]
+	public Tag[] choreTags;
 
 	private GameScenePartitionerEntry solidPartitionerEntry;
 
 	private GameScenePartitionerEntry digPartitionerEntry;
+
+	private GameScenePartitionerEntry ladderParititonerEntry;
 
 	private LoggerFSS log = new LoggerFSS("Constructable");
 

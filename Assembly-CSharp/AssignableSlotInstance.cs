@@ -19,34 +19,26 @@ public abstract class AssignableSlotInstance
 		}
 	}
 
-	public abstract AssignableSlotInstance.AssignableSaveData Save();
-
-	protected void Save(AssignableSlotInstance.AssignableSaveData save_data)
-	{
-		save_data.id = this.slot.Id;
-		save_data.assignable = new Ref<Assignable>(this.assignable);
-	}
-
-	public virtual void Load(AssignableSlotInstance.AssignableSaveData save_data)
-	{
-		this.Assign(save_data.assignable.Get());
-	}
-
 	public void Assign(Assignable assignable)
 	{
 		if (this.assignable == assignable)
 		{
 			return;
 		}
-		this.Unassign();
+		this.Unassign(false);
 		this.assignable = assignable;
+		this.assignables.Trigger(-1585839766, this);
 	}
 
-	public virtual void Unassign()
+	public virtual void Unassign(bool trigger_event = true)
 	{
 		if (this.IsAssigned())
 		{
 			this.assignable = null;
+		}
+		if (trigger_event)
+		{
+			this.assignables.Trigger(-1585839766, this);
 		}
 	}
 
@@ -58,11 +50,4 @@ public abstract class AssignableSlotInstance
 	public AssignableSlot slot;
 
 	public Assignable assignable;
-
-	public class AssignableSaveData
-	{
-		public string id;
-
-		public Ref<Assignable> assignable = new Ref<Assignable>();
-	}
 }

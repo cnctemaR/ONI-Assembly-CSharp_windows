@@ -1,7 +1,6 @@
 ﻿using System;
 using Klei.AI;
 using STRINGS;
-using UnityEngine;
 
 [SkipSaveFileSerialization]
 public class FoodQualityNeed : Need
@@ -10,29 +9,14 @@ public class FoodQualityNeed : Need
 	{
 		base.OnPrefabInit();
 		Attributes attributes = base.gameObject.GetAttributes();
-		attributes.Add(Db.Get().Attributes.FoodExpectation);
+		this.expectationAttribute = attributes.Add(Db.Get().Attributes.FoodExpectation);
 		base.Name = DUPLICANTS.NEEDS.FOOD_QUALITY.NAME;
-		this.expectationModifier = new AttributeModifier(Db.Get().Attributes.FoodExpectation.Id, 0f, attributes.GetProfessionString(true), false, false, false);
-		this.foodQualitStressBonus = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -0.033333335f, DUPLICANTS.NEEDS.FOOD_QUALITY.GOOD_FOOD_MOD, false, false, true);
+		this.foodQualityStressBonus = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -0.033333335f, DUPLICANTS.NEEDS.FOOD_QUALITY.GOOD_FOOD_MOD, false, false, false);
 		this.foodQualityStressNeutral = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0f, DUPLICANTS.NEEDS.FOOD_QUALITY.NORMAL_FOOD_MOD, false, false, true);
-		this.foodQualityStressPenalty = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.016666668f, DUPLICANTS.NEEDS.FOOD_QUALITY.BAD_FOOD_MOD, false, false, true);
-		attributes.Add("Profession", this.expectationModifier);
-		this.expectationAttribute = Db.Get().Attributes.FoodExpectation.Lookup(this);
-		this.RefreshExpectations();
+		this.foodQualityStressPenalty = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.016666668f, DUPLICANTS.NEEDS.FOOD_QUALITY.BAD_FOOD_MOD, false, false, false);
 		base.ExpectationTooltip = string.Format(DUPLICANTS.NEEDS.FOOD_QUALITY.EXPECTATION_TOOLTIP, Db.Get().Attributes.FoodExpectation.Lookup(this).GetTotalValue());
-		base.Subscribe(-110704193, delegate(object data)
-		{
-			this.RefreshExpectations();
-		});
 		base.Subscribe(1406130139, new Action<object>(this.OnEatStart));
 		base.Subscribe(1121894420, new Action<object>(this.OnEatComplete));
-	}
-
-	private void RefreshExpectations()
-	{
-		Attributes attributes = base.gameObject.GetAttributes();
-		AttributeInstance profession = attributes.GetProfession();
-		this.expectationModifier.SetValue(Math.Min(Mathf.Floor(profession.GetTotalValue() / 5f), 3f));
 	}
 
 	public override Klei.AI.Attribute GetExpectationAttribute()
@@ -66,15 +50,17 @@ public class FoodQualityNeed : Need
 		bool flag2 = false;
 		float totalValue = this.expectationAttribute.GetTotalValue();
 		AttributeModifier attributeModifier;
-		if ((float)quality < totalValue - 1f)
+		if ((float)quality < totalValue)
 		{
+			this.foodQualityStressPenalty.SetValue((totalValue - (float)quality) * 0.25f);
 			flag = true;
 			attributeModifier = this.foodQualityStressPenalty;
 		}
-		else if ((float)quality > totalValue + 1f)
+		else if ((float)quality > totalValue)
 		{
+			this.foodQualityStressBonus.SetValue(((float)quality - totalValue) * -0.5f);
 			flag2 = true;
-			attributeModifier = this.foodQualitStressBonus;
+			attributeModifier = this.foodQualityStressBonus;
 		}
 		else
 		{
@@ -89,7 +75,7 @@ public class FoodQualityNeed : Need
 			}
 			if (attributeModifier != null)
 			{
-				attributes.Add(attributeModifier.Description, attributeModifier);
+				attributes.Add(attributeModifier.GetDescription(), attributeModifier);
 			}
 			ThoughtGraph.Instance smi = this.GetSMI<ThoughtGraph.Instance>();
 			if (smi != null)
@@ -119,9 +105,7 @@ public class FoodQualityNeed : Need
 		}
 	}
 
-	private AttributeModifier expectationModifier;
-
-	private AttributeModifier foodQualitStressBonus;
+	private AttributeModifier foodQualityStressBonus;
 
 	private AttributeModifier foodQualityStressNeutral;
 

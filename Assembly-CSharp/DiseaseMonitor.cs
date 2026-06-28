@@ -13,10 +13,10 @@ public class DiseaseMonitor : GameStateMachine<DiseaseMonitor, DiseaseMonitor.In
 		this.sick.DefaultState(this.sick.notify).EventTransition(GameHashes.DiseaseCured, this.post_nocheer, (DiseaseMonitor.Instance smi) => !smi.IsSick()).ToggleAnims("anim_idle_sick_kanim", 0f)
 			.ToggleExpression(Db.Get().Expressions.Sick, null)
 			.ToggleUrge(Db.Get().Urges.RestDueToDisease)
-			.ToggleSchedulePeriodic("AutoAssignClinic", 10f, delegate(DiseaseMonitor.Instance smi)
+			.Update("AutoAssignClinic", delegate(DiseaseMonitor.Instance smi, float dt)
 			{
 				smi.AutoAssignClinic();
-			})
+			}, UpdateRate.SIM_4000ms, false)
 			.Exit(delegate(DiseaseMonitor.Instance smi)
 			{
 				smi.UnassignClinic();
@@ -85,7 +85,7 @@ public class DiseaseMonitor : GameStateMachine<DiseaseMonitor, DiseaseMonitor.In
 		public void AutoAssignClinic()
 		{
 			Ownables component = base.sm.masterTarget.Get(base.smi).GetComponent<Ownables>();
-			OwnableSlot clinic = Db.Get().OwnableSlots.Clinic;
+			AssignableSlot clinic = Db.Get().AssignableSlots.Clinic;
 			AssignableSlotInstance slot = component.GetSlot(clinic);
 			if (slot == null)
 			{
@@ -95,18 +95,17 @@ public class DiseaseMonitor : GameStateMachine<DiseaseMonitor, DiseaseMonitor.In
 			{
 				return;
 			}
-			Navigator component2 = component.GetComponent<Navigator>();
-			component.AutoAssignSlot(component2, clinic);
+			component.AutoAssignSlot(clinic);
 		}
 
 		public void UnassignClinic()
 		{
 			Ownables component = base.sm.masterTarget.Get(base.smi).GetComponent<Ownables>();
-			OwnableSlot clinic = Db.Get().OwnableSlots.Clinic;
+			AssignableSlot clinic = Db.Get().AssignableSlots.Clinic;
 			AssignableSlotInstance slot = component.GetSlot(clinic);
 			if (slot != null)
 			{
-				slot.Unassign();
+				slot.Unassign(true);
 			}
 		}
 

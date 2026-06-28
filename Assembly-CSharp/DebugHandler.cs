@@ -16,7 +16,7 @@ public class DebugHandler : IInputHandler
 	public static int GetMouseCell()
 	{
 		Vector3 mousePosition = Input.mousePosition;
-		mousePosition.z = -Camera.main.transform.position.z - Grid.CellSizeInMeters;
+		mousePosition.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
 		Vector3 vector = Camera.main.ScreenToWorldPoint(mousePosition);
 		return Grid.PosToCell(vector);
 	}
@@ -24,7 +24,7 @@ public class DebugHandler : IInputHandler
 	public static Vector3 GetMousePos()
 	{
 		Vector3 mousePosition = Input.mousePosition;
-		mousePosition.z = -Camera.main.transform.position.z - Grid.CellSizeInMeters;
+		mousePosition.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
 		return Camera.main.ScreenToWorldPoint(mousePosition);
 	}
 
@@ -33,7 +33,7 @@ public class DebugHandler : IInputHandler
 		GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.MinionPrefab, SceneOrganizer.Instance.GetFolder(Folder.Entities), null);
 		gameObject.name = EntityPrefabs.Instance.MinionPrefab.name;
 		Vector3 vector = Grid.CellToPosCBC(DebugHandler.GetMouseCell(), Grid.SceneLayer.Move);
-		gameObject.transform.localPosition = vector;
+		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
 		MinionStartingStats minionStartingStats = new MinionStartingStats(false);
 		minionStartingStats.Apply(gameObject);
@@ -124,7 +124,7 @@ public class DebugHandler : IInputHandler
 		else if (e.TryConsume(global::Action.DebugExplosion))
 		{
 			Vector3 mousePosition = Input.mousePosition;
-			mousePosition.z = -Camera.main.transform.position.z - Grid.CellSizeInMeters;
+			mousePosition.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
 			Vector3 vector = Camera.main.ScreenToWorldPoint(mousePosition);
 			GameUtil.CreateExplosion(vector);
 		}
@@ -202,6 +202,10 @@ public class DebugHandler : IInputHandler
 		else if (e.TryConsume(global::Action.DebugElementTest))
 		{
 			Scenario.Instance.SetupElementTest();
+		}
+		else if (e.TryConsume(global::Action.ToggleProfiler))
+		{
+			Sim.SIM_HandleMessage(-409964931, 0, null);
 		}
 		else if (e.TryConsume(global::Action.DebugRefreshNavCell))
 		{
@@ -338,6 +342,10 @@ public class DebugHandler : IInputHandler
 						{
 							Sim.SIM_DebugCrash();
 						}
+						else if (e.TryConsume(global::Action.DebugNextCall))
+						{
+							DebugHandler.DebugNextCall = true;
+						}
 					}
 				}
 			}
@@ -393,6 +401,8 @@ public class DebugHandler : IInputHandler
 	public static bool HideUI;
 
 	public static bool DebugCellInfo;
+
+	public static bool DebugNextCall;
 
 	private bool superTestMode;
 

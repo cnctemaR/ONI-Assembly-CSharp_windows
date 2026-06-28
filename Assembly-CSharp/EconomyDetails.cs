@@ -35,10 +35,6 @@ public class EconomyDetails
 		foreach (KPrefabID kprefabID in Assets.Prefabs)
 		{
 			this.CreateTransformation(kprefabID, kprefabID.PrefabTag);
-			Crop component = kprefabID.GetComponent<Crop>();
-			if (component != null)
-			{
-			}
 		}
 		foreach (Effect effect in Db.Get().effects)
 		{
@@ -387,7 +383,7 @@ public class EconomyDetails
 			if (GameComps.StructureTemperatures.Has(prefab_id.gameObject))
 			{
 				BuildingDef def = prefab_id.GetComponent<BuildingComplete>().Def;
-				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.heatResource, def.OperatingKilowatts + def.ExhaustKilowattsWhenActive));
+				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.heatResource, def.SelfHeatKilowattsWhenActive + def.ExhaustKilowattsWhenActive));
 			}
 			if (component7)
 			{
@@ -435,9 +431,9 @@ public class EconomyDetails
 			{
 				foreach (FertilizationMonitor.Instance.Def def2 in list)
 				{
-					foreach (FertilizationMonitor.FertilizerInfo fertilizerInfo in def2.consumedElements)
+					foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in def2.consumedElements)
 					{
-						transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(fertilizerInfo.tag), -fertilizerInfo.massConsumptionRate * transformation.time));
+						transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(consumeInfo.tag), -consumeInfo.massConsumptionRate * transformation.time));
 					}
 				}
 			}

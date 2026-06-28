@@ -1,16 +1,15 @@
 ﻿using System;
 using Klei.AI;
 using STRINGS;
-using TUNING;
 using UnityEngine;
 
 public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 {
 	public RecoverBreathChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.RecoverBreath, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.RecoverBreath, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new RecoverBreathChore.StatesInstance(this, target.gameObject);
-		base.AddPrecondition(ChorePreconditions.IsNotRedAlert, null);
+		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 	}
 
 	public class StatesInstance : GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore, object>.GameInstance
@@ -36,7 +35,7 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 			int num = base.sm.recoverer.GetSMI<BreathMonitor.Instance>(base.smi).GetRecoverCell();
 			if (num == Grid.InvalidCell)
 			{
-				num = Grid.PosToCell(base.sm.recoverer.Get<Transform>(base.smi).position);
+				num = Grid.PosToCell(base.sm.recoverer.Get<Transform>(base.smi).GetPosition());
 			}
 			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
 			base.sm.locator.Get<Transform>(base.smi).SetPosition(vector);
@@ -55,7 +54,7 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 			{
 				return;
 			}
-			Assignable assignable = equipment.GetAssignable(global::TUNING.EQUIPMENT.SUIT_SLOT);
+			Assignable assignable = equipment.GetAssignable(Db.Get().AssignableSlots.Suit);
 			if (assignable == null)
 			{
 				return;
@@ -78,10 +77,10 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 			}).Exit("DestroyLocator", delegate(RecoverBreathChore.StatesInstance smi)
 			{
 				smi.DestroyLocator();
-			}).Update("UpdateLocator", delegate(RecoverBreathChore.StatesInstance smi)
+			}).Update("UpdateLocator", delegate(RecoverBreathChore.StatesInstance smi, float dt)
 			{
 				smi.UpdateLocator();
-			});
+			}, UpdateRate.SIM_200ms, false);
 			this.approach.InitializeStates(this.recoverer, this.locator, this.remove_suit, null, null, null);
 			this.remove_suit.GoTo(this.recover);
 			this.recover.DefaultState(this.recover.pre).ToggleAttributeModifier("Recovering Breath", (RecoverBreathChore.StatesInstance smi) => smi.recoveringbreath, null).ToggleTag(GameTags.RecoveringBreath)

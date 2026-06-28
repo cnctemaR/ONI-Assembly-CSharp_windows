@@ -16,8 +16,8 @@ public class SelectMarker : KMonoBehaviour
 			base.gameObject.SetActive(false);
 			return;
 		}
-		Vector3 position = this.targetTransform.position;
-		Collider2D component = this.targetTransform.GetComponent<Collider2D>();
+		Vector3 position = this.targetTransform.GetPosition();
+		KCollider2D component = this.targetTransform.GetComponent<KCollider2D>();
 		if (component != null)
 		{
 			position.x = component.bounds.center.x;

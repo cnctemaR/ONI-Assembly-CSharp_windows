@@ -6,15 +6,4 @@ public class OwnableSlotInstance : AssignableSlotInstance
 		: base(assignables, slot)
 	{
 	}
-
-	public override AssignableSlotInstance.AssignableSaveData Save()
-	{
-		OwnableSlotInstance.SaveData saveData = new OwnableSlotInstance.SaveData();
-		base.Save(saveData);
-		return saveData;
-	}
-
-	public class SaveData : AssignableSlotInstance.AssignableSaveData
-	{
-	}
 }

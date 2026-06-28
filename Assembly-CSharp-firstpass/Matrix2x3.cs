@@ -49,6 +49,11 @@ public struct Matrix2x3
 		return new Vector3(v.x * this.m00 + v.y * this.m01 + this.m02, v.x * this.m10 + v.y * this.m11 + this.m12, v.z);
 	}
 
+	public Vector3 MultiplyVector(Vector3 v)
+	{
+		return new Vector3(v.x * this.m00 + v.y * this.m01, v.x * this.m10 + v.y * this.m11, v.z);
+	}
+
 	public static implicit operator Matrix4x4(Matrix2x3 m)
 	{
 		Matrix4x4 matrix4x = Matrix4x4.identity;
@@ -59,6 +64,75 @@ public struct Matrix2x3
 		matrix4x.m11 = m.m11;
 		matrix4x.m13 = m.m12;
 		return matrix4x;
+	}
+
+	public static Matrix2x3 Scale(Vector2 scale)
+	{
+		Matrix2x3 matrix2x = Matrix2x3.identity;
+		matrix2x.m00 = scale.x;
+		matrix2x.m11 = scale.y;
+		return matrix2x;
+	}
+
+	public static Matrix2x3 Translate(Vector2 translation)
+	{
+		Matrix2x3 matrix2x = Matrix2x3.identity;
+		matrix2x.m02 = translation.x;
+		matrix2x.m12 = translation.y;
+		return matrix2x;
+	}
+
+	public static Matrix2x3 Rotate(float angle_in_radians)
+	{
+		Matrix2x3 matrix2x = Matrix2x3.identity;
+		float num = Mathf.Cos(angle_in_radians);
+		float num2 = Mathf.Sin(angle_in_radians);
+		matrix2x.m00 = num;
+		matrix2x.m01 = -num2;
+		matrix2x.m10 = num2;
+		matrix2x.m11 = num;
+		return matrix2x;
+	}
+
+	public static Matrix2x3 Rotate(Quaternion quaternion)
+	{
+		Matrix2x3 matrix2x = Matrix2x3.identity;
+		float num = quaternion.x * quaternion.x;
+		float num2 = quaternion.y * quaternion.y;
+		float num3 = quaternion.z * quaternion.z;
+		float num4 = quaternion.x * quaternion.y;
+		float num5 = quaternion.x * quaternion.z;
+		float num6 = quaternion.y * quaternion.z;
+		float num7 = quaternion.w * quaternion.x;
+		float num8 = quaternion.w * quaternion.y;
+		float num9 = quaternion.w * quaternion.z;
+		matrix2x.m00 = 1f - 2f * (num2 + num3);
+		matrix2x.m01 = 2f * (num4 - num9);
+		matrix2x.m02 = 2f * (num5 + num8);
+		matrix2x.m10 = 2f * (num4 + num9);
+		matrix2x.m11 = 1f - 2f * (num + num3);
+		matrix2x.m12 = 2f * (num6 - num7);
+		return matrix2x;
+	}
+
+	public static Matrix2x3 TRS(Vector2 translation, Quaternion quaternion, Vector2 scale)
+	{
+		Matrix2x3 matrix2x = Matrix2x3.Rotate(quaternion);
+		matrix2x.m00 *= scale.x;
+		matrix2x.m11 *= scale.y;
+		matrix2x.m02 = translation.x;
+		matrix2x.m12 = translation.y;
+		return matrix2x;
+	}
+
+	public static Matrix2x3 TRS(Vector2 translation, float angle_in_radians, Vector2 scale)
+	{
+		Matrix2x3 matrix2x = Matrix2x3.Rotate(angle_in_radians);
+		matrix2x.m00 *= scale.x;
+		matrix2x.m11 *= scale.y;
+		matrix2x.m02 = translation.x;
+		matrix2x.m12 = translation.y;
+		return matrix2x;
 	}
 
 	public float m00;

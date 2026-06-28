@@ -20,6 +20,7 @@ public enum GameHashes
 	UIRefreshData = -1514841199,
 	BuildToolDeactivated = -1190690038,
 	ActiveToolChanged = 1174281782,
+	OnStorageInteracted = -778359855,
 	OnStorageChange = -1697596308,
 	UpdateStorageInfo = -1197125120,
 	OnStore = 856640610,
@@ -111,7 +112,6 @@ public enum GameHashes
 	NavigationFailed = -766531887,
 	AssignablesChanged = -1585839766,
 	AssigneeChanged = 684616645,
-	ForceAssigneeChanged = 2070884250,
 	ObjectDestroyed = 1969584890,
 	QueueDestroyObject = 1502190696,
 	TargetLost = 2144432245,
@@ -126,8 +126,6 @@ public enum GameHashes
 	PowerStatusChanged = 1088293757,
 	ConnectionsChanged = -1041684577,
 	ReachableChanged = -1432940121,
-	EnteredReach = 1992428732,
-	ExitedReach = 124211798,
 	AddedFetchable = -1588644844,
 	RemovedFetchable = -1491270284,
 	EnteredRedAlert = 1585324898,
@@ -261,5 +259,9 @@ public enum GameHashes
 	BeginBreathRecovery = 961737054,
 	EndBreathRecovery = -2037519664,
 	FabricatorOrdersUpdated = 1721324763,
-	TagsChanged = -1582839653
+	TagsChanged = -1582839653,
+	RolesUpdated = -1523247426,
+	AssignedRoleChanged = 540773776,
+	OnlyFetchMarkedItemsSettingChanged = 644822890,
+	BuildingCompleteDestroyed = -21016276
 }

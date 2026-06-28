@@ -215,17 +215,17 @@ public static class TemplateLoader
 					}
 					goto IL_0506;
 				}
-				IL_053C:
+				IL_053D:
 				l++;
 				continue;
 				IL_0506:
-				GameObject gameObject3 = component6.Store(gameObject2, true, true, true);
+				GameObject gameObject3 = component6.Store(gameObject2, true, true, true, false);
 				if (gameObject3 != null)
 				{
 					gameObject3.GetComponent<Pickupable>().OnStore(component6);
 				}
 				gameObject2.GetComponent<SavedObject>().inStorage = true;
-				goto IL_053C;
+				goto IL_053D;
 			}
 		}
 		if (prefab.connections != 0)
@@ -279,10 +279,10 @@ public static class TemplateLoader
 				}
 			});
 			break;
-		case "LogicWire":
-			spawned.GetComponent<LogicWire>().SetFirstFrameCallback(delegate
+		case "SolidConduit":
+			spawned.GetComponent<SolidConduit>().SetFirstFrameCallback(delegate
 			{
-				Game.Instance.logicCircuitSystem.SetConnections(connection, cell, true);
+				Game.Instance.solidConduitSystem.SetConnections(connection, cell, true);
 				KAnimGraphTileVisualizer component4 = spawned.GetComponent<KAnimGraphTileVisualizer>();
 				if (component4 != null)
 				{
@@ -290,14 +290,25 @@ public static class TemplateLoader
 				}
 			});
 			break;
-		case "TravelTube":
-			spawned.GetComponent<TravelTube>().SetFirstFrameCallback(delegate
+		case "LogicWire":
+			spawned.GetComponent<LogicWire>().SetFirstFrameCallback(delegate
 			{
-				Game.Instance.travelTubeSystem.SetConnections(connection, cell, true);
+				Game.Instance.logicCircuitSystem.SetConnections(connection, cell, true);
 				KAnimGraphTileVisualizer component5 = spawned.GetComponent<KAnimGraphTileVisualizer>();
 				if (component5 != null)
 				{
 					component5.Refresh();
+				}
+			});
+			break;
+		case "TravelTube":
+			spawned.GetComponent<TravelTube>().SetFirstFrameCallback(delegate
+			{
+				Game.Instance.travelTubeSystem.SetConnections(connection, cell, true);
+				KAnimGraphTileVisualizer component6 = spawned.GetComponent<KAnimGraphTileVisualizer>();
+				if (component6 != null)
+				{
+					component6.Refresh();
 				}
 			});
 			break;

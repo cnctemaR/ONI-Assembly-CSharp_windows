@@ -80,7 +80,7 @@ public class DiseaseSourceVisualizer : KMonoBehaviour
 		{
 			return;
 		}
-		this.visualizer.transform.position = base.transform.position + this.offset;
+		this.visualizer.transform.SetPosition(base.transform.GetPosition() + this.offset);
 	}
 
 	private void OnViewModeChanged(SimViewMode mode)

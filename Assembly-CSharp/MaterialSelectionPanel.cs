@@ -29,6 +29,14 @@ public class MaterialSelectionPanel : KScreen
 		}
 	}
 
+	public PriorityScreen PriorityScreen
+	{
+		get
+		{
+			return this.priorityScreen;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -41,6 +49,8 @@ public class MaterialSelectionPanel : KScreen
 		this.MaterialSelectors[0].gameObject.SetActive(true);
 		this.MaterialSelectorTemplate.SetActive(false);
 		this.ResearchRequired.SetActive(false);
+		this.priorityScreen = Util.KInstantiateUI<PriorityScreen>(this.priorityScreenPrefab.gameObject, this.priorityScreenParent, false);
+		this.priorityScreen.InstantiateButtons(new Action<PrioritySetting>(this.OnPriorityClicked), true);
 		Game.Instance.Subscribe(-107300940, delegate(object d)
 		{
 			this.RefreshSelectors();
@@ -140,12 +150,18 @@ public class MaterialSelectionPanel : KScreen
 		});
 	}
 
-	public void AutoSelectAvailableMaterial()
+	public bool AutoSelectAvailableMaterial()
 	{
-		this.MaterialSelectors.ForEach(delegate(MaterialSelector selector)
+		bool flag = true;
+		for (int i = 0; i < this.MaterialSelectors.Count; i++)
 		{
-			selector.AutoSelectAvailableMaterial();
-		});
+			MaterialSelector materialSelector = this.MaterialSelectors[i];
+			if (!materialSelector.AutoSelectAvailableMaterial())
+			{
+				flag = false;
+			}
+		}
+		return flag;
 	}
 
 	public bool CanBuild(Recipe recipe)
@@ -203,6 +219,11 @@ public class MaterialSelectionPanel : KScreen
 		}
 	}
 
+	private void OnPriorityClicked(PrioritySetting priority)
+	{
+		this.priorityScreen.SetScreenPriority(priority, false);
+	}
+
 	public Dictionary<KToggle, Element> ElementToggles = new Dictionary<KToggle, Element>();
 
 	private List<MaterialSelector> MaterialSelectors = new List<MaterialSelector>();
@@ -210,7 +231,12 @@ public class MaterialSelectionPanel : KScreen
 	private List<Element> currentSelectedElements = new List<Element>();
 
 	[SerializeField]
-	private BuildMenuPriorityScreen priorityScreen;
+	protected PriorityScreen priorityScreenPrefab;
+
+	[SerializeField]
+	protected GameObject priorityScreenParent;
+
+	private PriorityScreen priorityScreen;
 
 	public GameObject MaterialSelectorTemplate;
 

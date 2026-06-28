@@ -24,7 +24,7 @@ public class SplashTransitionLayer : TransitionDriver.OverrideLayer
 		{
 			return;
 		}
-		Vector3 position = navigator.transform.position;
+		Vector3 position = navigator.transform.GetPosition();
 		if (this.lastSplashTime + 1f < Time.time && Grid.Element[Grid.PosToCell(position)].IsLiquid)
 		{
 			this.lastSplashTime = Time.time;

@@ -1,8 +1,9 @@
 ﻿using System;
 using Klei;
+using TUNING;
 using UnityEngine;
 
-public class LiquidPumpingStation : Workable
+public class LiquidPumpingStation : Workable, ISim200ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -24,7 +25,7 @@ public class LiquidPumpingStation : Workable
 		this.infos = new LiquidPumpingStation.LiquidInfo[LiquidPumpingStation.liquidOffsets.Length * 2];
 		base.GetComponent<KSelectable>().SetStatusIndicatorOffset(base.GetComponent<Building>().Def.placementPivot);
 		this.RefreshStatusItem();
-		this.SimUpdate(0f);
+		this.Sim200ms(0f);
 		base.SetWorkTime(10f);
 		this.RefreshDepthAvailable();
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_arrow", "meter_scale" });
@@ -53,7 +54,13 @@ public class LiquidPumpingStation : Workable
 		}
 	}
 
-	private void SimUpdate(float dt)
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole("Hauler", work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+		resume.AddExperienceIfRole(MaterialsManager.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+	}
+
+	public void Sim200ms(float dt)
 	{
 		if (this.session != null)
 		{
@@ -195,7 +202,7 @@ public class LiquidPumpingStation : Workable
 		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
 		component.Play(Workable.DefaultWorkAnims, KAnim.PlayMode.Loop);
 		this.meter.SetPositionPercent(0f);
-		this.meter.SetSymbolTint(KBatchedAnimController.SymbolTintIndex.First, new KAnimHashedString("meter_target"), element.substance.colour);
+		this.meter.SetSymbolTint(new KAnimHashedString("meter_target"), element.substance.colour);
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -246,14 +253,14 @@ public class LiquidPumpingStation : Workable
 				SubstanceChunk source = this.session.GetSource();
 				SimUtil.DiseaseInfo diseaseInfo = ((this.session == null) ? SimUtil.DiseaseInfo.Invalid : this.session.GetDiseaseInfo());
 				PrimaryElement component2 = source.GetComponent<PrimaryElement>();
-				Pickupable component3 = LiquidSourceManager.Instance.CreateChunk(component2.Element, consumedAmount, this.session.GetTemperature(), diseaseInfo.idx, diseaseInfo.count, base.transform.position).GetComponent<Pickupable>();
+				Pickupable component3 = LiquidSourceManager.Instance.CreateChunk(component2.Element, consumedAmount, this.session.GetTemperature(), diseaseInfo.idx, diseaseInfo.count, base.transform.GetPosition()).GetComponent<Pickupable>();
 				component3.TotalAmount = consumedAmount;
 				component3.Trigger(1335436905, source.GetComponent<Pickupable>());
 				worker.workCompleteData = component3;
-				this.SimUpdate(0f);
+				this.Sim200ms(0f);
 				if (component3 != null)
 				{
-					component.Store(component3.gameObject, false, false, true);
+					component.Store(component3.gameObject, false, false, true, false);
 				}
 			}
 			this.session.Cleanup();
@@ -338,7 +345,7 @@ public class LiquidPumpingStation : Workable
 			this.amountToPickup = amount_to_pickup;
 			this.temperature = ElementLoader.FindElementByHash(element).defaultValues.temperature;
 			this.diseaseInfo = SimUtil.DiseaseInfo.Invalid;
-			this.amountPerTick = 50f;
+			this.amountPerTick = 40f;
 			this.pump = pump;
 			this.lastTickAmount = this.amountPerTick;
 			this.ConsumeMass();
@@ -346,18 +353,18 @@ public class LiquidPumpingStation : Workable
 
 		private void OnSimConsume(object data)
 		{
-			Sim.MassConsumptionCallback massConsumptionCallback = (Sim.MassConsumptionCallback)data;
+			Sim.MassConsumedCallback massConsumedCallback = (Sim.MassConsumedCallback)data;
 			if (this.consumedAmount == 0f)
 			{
-				this.temperature = massConsumptionCallback.temperature;
+				this.temperature = massConsumedCallback.temperature;
 			}
 			else
 			{
-				this.temperature = GameUtil.GetFinalTemperature(this.temperature, this.consumedAmount, massConsumptionCallback.temperature, massConsumptionCallback.mass);
+				this.temperature = GameUtil.GetFinalTemperature(this.temperature, this.consumedAmount, massConsumedCallback.temperature, massConsumedCallback.mass);
 			}
-			this.consumedAmount += massConsumptionCallback.mass;
-			this.lastTickAmount = massConsumptionCallback.mass;
-			this.diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(this.diseaseInfo.idx, this.diseaseInfo.count, massConsumptionCallback.diseaseIdx, massConsumptionCallback.diseaseCount);
+			this.consumedAmount += massConsumedCallback.mass;
+			this.lastTickAmount = massConsumedCallback.mass;
+			this.diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(this.diseaseInfo.idx, this.diseaseInfo.count, massConsumedCallback.diseaseIdx, massConsumedCallback.diseaseCount);
 			if (this.consumedAmount >= this.amountToPickup)
 			{
 				this.amountPerTick = 0f;

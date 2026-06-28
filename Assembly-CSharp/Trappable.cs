@@ -6,7 +6,7 @@ public class Trappable : KMonoBehaviour
 	{
 		base.OnSpawn();
 		this.Register();
-		this.OnCellChange(0, Grid.PosToCell(base.gameObject));
+		this.OnCellChange();
 	}
 
 	protected override void OnCleanUp()
@@ -15,9 +15,10 @@ public class Trappable : KMonoBehaviour
 		base.OnCleanUp();
 	}
 
-	private void OnCellChange(int previous_cell, int current_cell)
+	private void OnCellChange()
 	{
-		GameScenePartitioner.Instance.TriggerEvent(current_cell, GameScenePartitioner.Instance.trapsLayer, this);
+		int num = Grid.PosToCell(this);
+		GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.trapsLayer, this);
 	}
 
 	protected override void OnCmpEnable()
@@ -38,7 +39,7 @@ public class Trappable : KMonoBehaviour
 		{
 			return;
 		}
-		CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChange), false);
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		this.registered = true;
 	}
 
@@ -48,7 +49,7 @@ public class Trappable : KMonoBehaviour
 		{
 			return;
 		}
-		CellChangeMonitor.Instance.Remove(this, new Action<int, int>(this.OnCellChange), false);
+		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		this.registered = false;
 	}
 

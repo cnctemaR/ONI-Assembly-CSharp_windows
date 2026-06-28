@@ -11,15 +11,14 @@ public class LogicWireBridgeConfig : IBuildingConfig
 		int num = 3;
 		int num2 = 1;
 		string text2 = "logic_bridge_kanim";
-		float num3 = 100f;
-		int num4 = 30;
-		float num5 = 3f;
+		int num3 = 30;
+		float num4 = 3f;
 		float[] tier_TINY = BUILDINGS.CONSTRUCTION_MASS_KG.TIER_TINY;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier_TINY, refined_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier_TINY, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
 		buildingDef.ViewMode = SimViewMode.Logic;
 		buildingDef.ObjectLayer = ObjectLayer.LogicGates;
 		buildingDef.SceneLayer = Grid.SceneLayer.WireBridges;
@@ -32,12 +31,11 @@ public class LogicWireBridgeConfig : IBuildingConfig
 		buildingDef.PermittedRotations = PermittedRotations.R360;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 2);
-		buildingDef.HotKey = global::Action.BuildMenuKeyB;
 		GeneratedBuildings.RegisterWithOverlay(Logic.HighlightItemIDs, "LogicWireBridge");
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 	}
@@ -53,6 +51,8 @@ public class LogicWireBridgeConfig : IBuildingConfig
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		base.DoPostConfigureUnderConstruction(go);
+		Constructable component = go.GetComponent<Constructable>();
+		component.choreTags = GameTags.ChoreTypes.WiringChores;
 		LogicUtilityNetworkLink logicUtilityNetworkLink = this.AddNetworkLink(go);
 		logicUtilityNetworkLink.visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();

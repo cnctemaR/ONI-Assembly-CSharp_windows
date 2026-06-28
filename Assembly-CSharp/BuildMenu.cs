@@ -8,7 +8,7 @@ public class BuildMenu : KScreen
 {
 	public override float GetSortKey()
 	{
-		return 2f;
+		return 6f;
 	}
 
 	public static BuildMenu Instance { get; private set; }
@@ -155,10 +155,10 @@ public class BuildMenu : KScreen
 		}
 		else
 		{
-			string[] array3 = (string[])data;
-			foreach (string text in array3)
+			BuildMenu.BuildingInfo[] array3 = (BuildMenu.BuildingInfo[])data;
+			foreach (BuildMenu.BuildingInfo buildingInfo in array3)
 			{
-				Tag tag = new Tag(text);
+				Tag tag = new Tag(buildingInfo.id);
 				category_map[tag] = category;
 				order_map[tag] = building_index;
 				building_index++;
@@ -168,7 +168,9 @@ public class BuildMenu : KScreen
 					list3 = new List<BuildingDef>();
 					categorized_building_map[category] = list3;
 				}
-				list3.Add(Assets.GetBuildingDef(text));
+				BuildingDef buildingDef = Assets.GetBuildingDef(buildingInfo.id);
+				buildingDef.HotKey = buildingInfo.hotkey;
+				list3.Add(buildingDef);
 			}
 		}
 		this.submenus[category] = this.CreateCategorySubMenu(category, depth, data, this.categorizedBuildingMap, this.categorizedCategoryMap, this.tagCategoryMap, this.buildingsScreen);
@@ -211,7 +213,14 @@ public class BuildMenu : KScreen
 		SelectTool.Instance.Activate();
 		PlayerController.Instance.ActivateTool(SelectTool.Instance);
 		SelectTool.Instance.Select(null, true);
+		this.productInfoScreen.materialSelectionPanel.PriorityScreen.ResetPriority();
 		this.CloseMenus();
+	}
+
+	private void OnBuildToolDeactivated(object data)
+	{
+		this.CloseMenus();
+		this.productInfoScreen.materialSelectionPanel.PriorityScreen.ResetPriority();
 	}
 
 	private void CloseMenus()
@@ -249,14 +258,14 @@ public class BuildMenu : KScreen
 				string sound = GlobalAssets.GetSound("NewBuildable_Embellishment", false);
 				if (sound != null)
 				{
-					EventInstance eventInstance = SoundEvent.BeginOneShot(sound, SoundListenerController.Instance.transform.position);
+					EventInstance eventInstance = SoundEvent.BeginOneShot(sound, SoundListenerController.Instance.transform.GetPosition());
 					SoundEvent.EndOneShot(eventInstance);
 				}
 			}
 			string sound2 = GlobalAssets.GetSound("NewBuildable", false);
 			if (sound2 != null)
 			{
-				EventInstance eventInstance2 = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.position);
+				EventInstance eventInstance2 = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.GetPosition());
 				eventInstance2.setParameterValue("playCount", (float)BuildMenu.Instance.notificationPingCount);
 				SoundEvent.EndOneShot(eventInstance2);
 			}
@@ -468,6 +477,11 @@ public class BuildMenu : KScreen
 		}
 	}
 
+	public PrioritySetting GetBuildingPriority()
+	{
+		return this.productInfoScreen.materialSelectionPanel.PriorityScreen.GetLastSelectedPriority();
+	}
+
 	[SerializeField]
 	private BuildMenuCategoriesScreen categoriesMenuPrefab;
 
@@ -504,7 +518,7 @@ public class BuildMenu : KScreen
 	[SerializeField]
 	private Vector2 buildingsMenuOffset = Vector2.zero;
 
-	private static readonly BuildMenu.DisplayInfo OrderedBuildings = new BuildMenu.DisplayInfo(BuildMenu.Category.INVALID, "none", global::Action.NumActions, null);
+	private static readonly BuildMenu.DisplayInfo OrderedBuildings = new BuildMenu.DisplayInfo(BuildMenu.Category.INVALID, "none", global::Action.NumActions, KKeyCode.None, null);
 
 	private Dictionary<BuildMenu.Category, List<BuildingDef>> categorizedBuildingMap;
 
@@ -545,32 +559,33 @@ public class BuildMenu : KScreen
 		INVALID = -1,
 		ROOT,
 		Base,
-		Ladders,
 		Tiles,
+		Ladders,
 		Doors,
-		TravelTubes,
 		Storage,
-		Research,
 		Infrastructure,
-		Generators,
 		Wires,
 		PowerControl,
-		PlumbingStructures,
+		Generators,
 		Pipes,
+		PlumbingStructures,
 		VentilationStructures,
-		Tubes,
+		Logistics,
+		TravelTubes,
+		Conveyance,
 		LogicWiring,
 		LogicGates,
 		LogicSwitches,
 		FoodAndAgriculture,
-		Cooking,
 		Farming,
 		Ranching,
+		Cooking,
 		HealthAndHappiness,
+		Research,
+		Medical,
+		Hygiene,
 		Furniture,
 		Decor,
-		Hygiene,
-		Medical,
 		Recreation,
 		Industrial,
 		Oxygen,
@@ -579,13 +594,27 @@ public class BuildMenu : KScreen
 		Equipment
 	}
 
+	public struct BuildingInfo
+	{
+		public BuildingInfo(string id, global::Action hotkey)
+		{
+			this.id = id;
+			this.hotkey = hotkey;
+		}
+
+		public string id;
+
+		public global::Action hotkey;
+	}
+
 	public struct DisplayInfo
 	{
-		public DisplayInfo(BuildMenu.Category category, string icon_name, global::Action hotkey, object data)
+		public DisplayInfo(BuildMenu.Category category, string icon_name, global::Action hotkey, KKeyCode key_code, object data)
 		{
 			this.category = category;
 			this.iconName = icon_name;
 			this.hotkey = hotkey;
+			this.keyCode = key_code;
 			this.data = data;
 		}
 
@@ -594,6 +623,8 @@ public class BuildMenu : KScreen
 		public string iconName;
 
 		public global::Action hotkey;
+
+		public KKeyCode keyCode;
 
 		public object data;
 	}

@@ -42,7 +42,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Slickster";
 
-				public static LocString DESC = "Slicksters are slimy creatures that consume <style=\"gas\">Carbon Dioxide</style> and exude <style=\"misc\">Crude Oil</style>.";
+				public static LocString DESC = "Slicksters are slimy creatures that consume <style=\"gas\">Carbon Dioxide</style> and exude <style=\"liquid\">Crude Oil</style>.";
 			}
 
 			public class PUFT
@@ -912,27 +912,6 @@ namespace STRINGS
 				public static LocString NAME = "Air Pressure";
 
 				public static LocString TOOLTIP = "The average gas density of the air surrounding this plant";
-			}
-		}
-
-		public class CROP_EFFECTS
-		{
-			public class MODIFY_HARVEST_UNITS
-			{
-				public static LocString DESC = "<style=\"produced\">{0}</style> <style=\"food\">{1}</style>";
-
-				public static LocString TOOLTIP = "This plant will produce {0} more {1}";
-			}
-
-			public class ADD_SEEDS
-			{
-				public static LocString DESC = "<style=\"produced\">+{0}</style> <style=\"seed\">{1}</style> {2}";
-
-				public static LocString TOOLTIP = "This plant will produce {0} additional seeds when harvested";
-
-				public static LocString FINAL_HARVEST_ONLY = "(Final harvest only)";
-
-				public static LocString TOOLTIP_FINAL_HARVEST_ONLY = "This plant will produce {0} additional seeds in the final harvest of its lifecycle";
 			}
 		}
 	}

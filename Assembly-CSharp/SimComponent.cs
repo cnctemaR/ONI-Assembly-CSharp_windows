@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using UnityEngine;
 
-public abstract class SimComponent : KMonoBehaviour
+public abstract class SimComponent : KMonoBehaviour, ISim200ms
 {
 	protected virtual void OnSimRegister(HandleVector<Game.ComplexCallbackInfo>.Handle cb_handle)
 	{
@@ -49,7 +49,7 @@ public abstract class SimComponent : KMonoBehaviour
 		this.dirty = true;
 	}
 
-	protected virtual void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		if (!Sim.IsValidHandle(this.simHandle))
 		{

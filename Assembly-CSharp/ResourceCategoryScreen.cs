@@ -14,25 +14,24 @@ public class ResourceCategoryScreen : KScreen
 	{
 		base.OnActivate();
 		ResourceCategoryScreen.Instance = this;
-		this.CreateTagSetHeaders(GameTags.MaterialCategories, ResourceCategoryHeader.MeasureUnit.mass);
-		this.CreateTagSetHeaders(GameTags.CalorieCategories, ResourceCategoryHeader.MeasureUnit.kcal);
-		this.CreateTagSetHeaders(GameTags.UnitCategories, ResourceCategoryHeader.MeasureUnit.quantity);
+		this.CreateTagSetHeaders(GameTags.MaterialCategories, GameUtil.MeasureUnit.mass);
+		this.CreateTagSetHeaders(GameTags.CalorieCategories, GameUtil.MeasureUnit.kcal);
+		this.CreateTagSetHeaders(GameTags.UnitCategories, GameUtil.MeasureUnit.quantity);
 		if (!this.DisplayedCategories.ContainsKey(GameTags.Miscellaneous))
 		{
-			ResourceCategoryHeader resourceCategoryHeader = this.NewCategoryHeader(GameTags.Miscellaneous);
+			ResourceCategoryHeader resourceCategoryHeader = this.NewCategoryHeader(GameTags.Miscellaneous, GameUtil.MeasureUnit.mass);
 			this.DisplayedCategories.Add(GameTags.Miscellaneous, resourceCategoryHeader);
 			resourceCategoryHeader.gameObject.SetActive(false);
 		}
 	}
 
-	private void CreateTagSetHeaders(IEnumerable<Tag> set, ResourceCategoryHeader.MeasureUnit measure)
+	private void CreateTagSetHeaders(IEnumerable<Tag> set, GameUtil.MeasureUnit measure)
 	{
 		foreach (Tag tag in set)
 		{
 			if (!this.Filter(tag))
 			{
-				ResourceCategoryHeader resourceCategoryHeader = this.NewCategoryHeader(tag);
-				resourceCategoryHeader.measure = measure;
+				ResourceCategoryHeader resourceCategoryHeader = this.NewCategoryHeader(tag, measure);
 				this.DisplayedCategories.Add(tag, resourceCategoryHeader);
 				resourceCategoryHeader.gameObject.SetActive(false);
 			}
@@ -61,13 +60,25 @@ public class ResourceCategoryScreen : KScreen
 		}
 	}
 
-	private ResourceCategoryHeader NewCategoryHeader(Tag categoryTag)
+	private ResourceCategoryHeader NewCategoryHeader(Tag categoryTag, GameUtil.MeasureUnit measure)
 	{
 		GameObject gameObject = Util.KInstantiateUI(this.Prefab_CategoryBar, this.CategoryContainer.gameObject, true);
 		gameObject.name = "CategoryHeader_" + categoryTag.Name;
 		ResourceCategoryHeader component = gameObject.GetComponent<ResourceCategoryHeader>();
-		component.SetTag(categoryTag);
+		component.SetTag(categoryTag, measure);
 		return component;
+	}
+
+	public static string QuantityTextForMeasure(float quantity, GameUtil.MeasureUnit measure)
+	{
+		switch (measure)
+		{
+		case GameUtil.MeasureUnit.mass:
+			return GameUtil.GetFormattedMass(quantity, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+		case GameUtil.MeasureUnit.kcal:
+			return GameUtil.GetFormattedCalories(quantity, GameUtil.TimeSlice.None, true);
+		}
+		return quantity.ToString();
 	}
 
 	public static ResourceCategoryScreen Instance;

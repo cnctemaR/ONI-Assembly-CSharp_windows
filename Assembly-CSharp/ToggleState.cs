@@ -16,5 +16,9 @@ public struct ToggleState
 
 	public bool use_color_on_hover;
 
+	public bool use_rect_margins;
+
+	public Vector2 rect_margins;
+
 	public StatePresentationSetting[] additional_display_settings;
 }

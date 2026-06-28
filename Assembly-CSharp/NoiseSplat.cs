@@ -26,7 +26,7 @@ public class NoiseSplat : IUniformGridObject
 		OccupyArea occupyArea = setProvider.occupyArea;
 		this.baseExtents = occupyArea.GetExtents();
 		this.provider = setProvider;
-		this.position = setProvider.transform.position;
+		this.position = setProvider.transform.GetPosition();
 		if (setProvider.dBRadius != null)
 		{
 			this.radius = (int)setProvider.dBRadius.GetTotalValue();

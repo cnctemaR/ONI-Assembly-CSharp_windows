@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 namespace Klei.AI
@@ -40,9 +41,15 @@ namespace Klei.AI
 			this.level = level;
 		}
 
-		private float GetExperienceForNextLevel()
+		public float GetExperienceForNextLevel()
 		{
-			return 150f * ((float)this.level + 1f);
+			float num = (float)this.level / (float)DUPLICANTSTATS.ATTRIBUTE_LEVELING.MAX_GAINED_ATTRIBUTE_LEVEL;
+			float num2 = Mathf.Pow(num, DUPLICANTSTATS.ATTRIBUTE_LEVELING.EXPERIENCE_LEVEL_POWER);
+			float num3 = num2 * (float)DUPLICANTSTATS.ATTRIBUTE_LEVELING.TARGET_MAX_LEVEL_CYCLE * 600f;
+			float num4 = ((float)this.level + 1f) / (float)DUPLICANTSTATS.ATTRIBUTE_LEVELING.MAX_GAINED_ATTRIBUTE_LEVEL;
+			float num5 = Mathf.Pow(num4, DUPLICANTSTATS.ATTRIBUTE_LEVELING.EXPERIENCE_LEVEL_POWER);
+			float num6 = num5 * (float)DUPLICANTSTATS.ATTRIBUTE_LEVELING.TARGET_MAX_LEVEL_CYCLE * 600f;
+			return num6 - num3;
 		}
 
 		public float GetPercentComplete()
@@ -69,7 +76,7 @@ namespace Klei.AI
 
 		public bool AddExperience(AttributeLevels levels, float experience)
 		{
-			if (this.level > 25)
+			if (this.level >= DUPLICANTSTATS.ATTRIBUTE_LEVELING.MAX_GAINED_ATTRIBUTE_LEVEL)
 			{
 				return false;
 			}

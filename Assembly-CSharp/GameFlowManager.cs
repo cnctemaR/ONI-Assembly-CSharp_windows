@@ -77,10 +77,10 @@ public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInsta
 		{
 			default_state = this.loading;
 			this.loading.ScheduleGoTo(4f, this.running);
-			this.running.Update("CheckForGameOver", delegate(GameFlowManager.StatesInstance smi)
+			this.running.Update("CheckForGameOver", delegate(GameFlowManager.StatesInstance smi, float dt)
 			{
 				smi.CheckForGameOver();
-			});
+			}, UpdateRate.SIM_200ms, false);
 			this.gameover.TriggerOnEnter(GameHashes.GameOver, null).ToggleNotification((GameFlowManager.StatesInstance smi) => smi.colonyLostNotification);
 			this.gameover.pending.Enter("Goto(gameover.active)", delegate(GameFlowManager.StatesInstance smi)
 			{

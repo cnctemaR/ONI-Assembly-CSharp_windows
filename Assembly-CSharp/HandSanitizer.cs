@@ -11,7 +11,6 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 	{
 		base.OnPrefabInit();
 		base.gameObject.FindOrAddComponent<Workable>();
-		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FetchCritical;
 	}
 
 	private void RefreshMeters()
@@ -222,6 +221,10 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 		{
 			base.OnStartWork(worker);
 			this.diseaseRemoved = 0;
+		}
+
+		public override void AwardExperience(float work_dt, MinionResume resume)
+		{
 		}
 
 		protected override bool OnWorkTick(Worker worker, float dt)

@@ -35,7 +35,7 @@ public class Sensors : KMonoBehaviour
 
 	public void UpdateSensors()
 	{
-		foreach (Sensor sensor in this)
+		foreach (Sensor sensor in this.sensors)
 		{
 			sensor.Update();
 		}

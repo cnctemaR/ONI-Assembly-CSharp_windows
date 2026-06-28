@@ -48,7 +48,7 @@ public class Valve : Workable, ISaveLoadable
 	{
 		this.desiredFlow = Mathf.Clamp(amount, 0f, this.valveBase.MaxFlow);
 		KSelectable component = base.GetComponent<KSelectable>();
-		component.ToggleStatusItem(Db.Get().BuildingStatusItems.PumpingLiquidOrGas, this.desiredFlow >= 0f, this.valveBase.Accumulator);
+		component.ToggleStatusItem(Db.Get().BuildingStatusItems.PumpingLiquidOrGas, this.desiredFlow >= 0f, this.valveBase.AccumulatorHandle);
 		if (DebugHandler.InstantBuildMode)
 		{
 			this.UpdateFlow();
@@ -68,7 +68,7 @@ public class Valve : Workable, ISaveLoadable
 			if (this.chore == null)
 			{
 				component.AddStatusItem(Db.Get().BuildingStatusItems.ValveRequest, this);
-				this.chore = new WorkChore<Valve>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+				this.chore = new WorkChore<Valve>(Db.Get().ChoreTypes.Toggle, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 			}
 		}
 	}

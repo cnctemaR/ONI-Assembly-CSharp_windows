@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using FMOD.Studio;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class Pickupable : Workable
@@ -33,6 +35,8 @@ public class Pickupable : Workable
 
 	public bool isKinematic { get; set; }
 
+	public bool wasAbsorbed { get; private set; }
+
 	public int cachedCell { get; private set; }
 
 	public bool IsEntombed
@@ -63,9 +67,11 @@ public class Pickupable : Workable
 	public bool CouldBePickedUp(GameObject carrier)
 	{
 		bool flag = this.UnreservedAmount > 0f || this.GetReservedAmount(carrier) > 0f;
-		bool flag2 = this.storage == null || this.storage.allowItemRemoval;
-		bool flag3 = this.UnreservedAmount >= this.MinTakeAmount;
-		return flag && flag2 && flag3;
+		bool flag2 = !this.KPrefabID.HasTag(GameTags.StoredPrivate);
+		bool flag3 = !this.KPrefabID.HasTag(GameTags.Equipped);
+		bool flag4 = !this.storage || !this.storage.automatable || this.storage.automatable.AllowedByAutomation(carrier);
+		bool flag5 = this.UnreservedAmount >= this.MinTakeAmount;
+		return flag && flag2 && flag4 && flag5 && flag3;
 	}
 
 	public float GetReservedAmount(GameObject reserver)
@@ -121,6 +127,11 @@ public class Pickupable : Workable
 		}
 	}
 
+	[Conditional("UNITY_EDITOR")]
+	private void Log(string evt, string param, float value)
+	{
+	}
+
 	public void ClearReservations()
 	{
 		this.reservations.Clear();
@@ -169,27 +180,19 @@ public class Pickupable : Workable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.log = new LoggerFSSF("Pickupable");
+		this.workerStatusItem = Db.Get().DuplicantStatusItems.PickingUp;
+		base.SetWorkTime(1.5f);
+		this.targetWorkable = this;
+		this.resetProgressOnStop = true;
 		base.gameObject.layer = Game.PickupableLayer;
-		Vector3 position = base.transform.position;
-		position.z = Grid.GetLayerZ(Grid.SceneLayer.Ore);
-		base.transform.SetPosition(position);
+		Vector3 position = base.transform.GetPosition();
 		this.cachedCell = Grid.PosToCell(position);
 		base.Subscribe(856640610, new Action<object>(this.OnStore));
 		base.Subscribe(1188683690, new Action<object>(this.OnLanded));
 		base.Subscribe(1807976145, new Action<object>(this.OnOreSizeChanged));
+		base.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
 		this.KPrefabID.AddTag(GameTags.Pickupable);
 		Components.Pickupables.Add(this);
-		base.SetWorkTime(1.5f);
-		Collider2D component = base.GetComponent<Collider2D>();
-		if (component != null)
-		{
-			component.sharedMaterial = Assets.defaultPhysicsMaterial;
-		}
-		this.workerStatusItem = Db.Get().DuplicantStatusItems.PickingUp;
-		base.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
-		this.targetWorkable = this;
-		this.resetProgressOnStop = true;
 	}
 
 	protected override void OnLoadLevel()
@@ -209,7 +212,7 @@ public class Pickupable : Workable
 				"Destroying GO [",
 				base.name,
 				"] because it is in an invalid position [",
-				base.transform.position,
+				base.transform.GetPosition(),
 				"]"
 			}), null);
 			base.gameObject.DeleteObject();
@@ -227,14 +230,7 @@ public class Pickupable : Workable
 		{
 			component.SetStatusIndicatorOffset(new Vector3(0f, -0.65f, 0f));
 		}
-		if (this.storage == null)
-		{
-			this.RegisterListeners();
-		}
-		if (this.storage == null)
-		{
-			this.AddFaller();
-		}
+		this.OnTagsChanged(null);
 		this.TryToOffsetIfBuried();
 		DecorProvider component2 = base.GetComponent<DecorProvider>();
 		if (component2 != null && string.IsNullOrEmpty(component2.overrideName))
@@ -243,6 +239,7 @@ public class Pickupable : Workable
 		}
 		this.rottable = this.GetSMI<Rottable.Instance>();
 		this.UpdateEntombedVisualizer();
+		base.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
 	}
 
 	public void RegisterListeners()
@@ -259,7 +256,7 @@ public class Pickupable : Workable
 		this.objectLayerListItem = new ObjectLayerListItem(base.gameObject, ObjectLayer.Pickupables, num);
 		this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterSolidListener", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterPickupable", this, num, GameScenePartitioner.Instance.pickupablesLayer, null);
-		CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChange), false);
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 	}
 
 	public void UnregisterListeners()
@@ -279,7 +276,7 @@ public class Pickupable : Workable
 			this.partitionerEntry.Release();
 			this.partitionerEntry = null;
 		}
-		CellChangeMonitor.Instance.Remove(this, new Action<int, int>(this.OnCellChange), false);
+		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 	}
 
 	private void OnSolidChanged(object data)
@@ -289,7 +286,7 @@ public class Pickupable : Workable
 
 	public void TryToOffsetIfBuried()
 	{
-		if (this.storage != null)
+		if (this.KPrefabID.HasTag(GameTags.Stored) || this.KPrefabID.HasTag(GameTags.Equipped))
 		{
 			return;
 		}
@@ -308,10 +305,10 @@ public class Pickupable : Workable
 				if (Grid.IsValidCell(num2) && !Grid.Solid[num2])
 				{
 					Vector3 vector = Grid.CellToPosCBC(num2, Grid.SceneLayer.Move);
-					Collider2D component = base.GetComponent<Collider2D>();
+					KCollider2D component = base.GetComponent<KCollider2D>();
 					if (component != null)
 					{
-						vector.y += base.transform.position.y - component.bounds.min.y;
+						vector.y += base.transform.GetPosition().y - component.bounds.min.y;
 					}
 					base.transform.SetPosition(vector);
 					num = num2;
@@ -338,7 +335,7 @@ public class Pickupable : Workable
 				flag2 = true;
 			}
 		}
-		if (flag2 != flag && this.storage == null)
+		if (flag2 != flag && !this.KPrefabID.HasTag(GameTags.Stored))
 		{
 			this.IsEntombed = flag2;
 			KSelectable component = base.GetComponent<KSelectable>();
@@ -348,47 +345,65 @@ public class Pickupable : Workable
 		return this.IsEntombed;
 	}
 
-	private void OnCellChange(int previous_cell, int new_cell)
+	private void OnCellChange()
 	{
-		if (!Grid.IsValidCell(new_cell))
+		int num = Grid.PosToCell(this);
+		if (!Grid.IsValidCell(num))
 		{
 			this.DeleteObject();
 		}
 		else
 		{
-			this.cachedCell = new_cell;
 			bool flag = false;
-			this.ReleaseEntombedVisualizer();
-			if (this.HandleSolidCell(new_cell))
+			this.ReleaseEntombedVisualizerAndAddFaller(true);
+			if (this.HandleSolidCell(num))
 			{
 				return;
 			}
-			this.objectLayerListItem.Update(new_cell);
-			if (this.storage == null)
+			this.objectLayerListItem.Update(num);
+			if (!this.KPrefabID.HasTag(GameTags.Stored))
 			{
-				ObjectLayerListItem objectLayerListItem = this.objectLayerListItem.nextItem;
-				while (objectLayerListItem != null)
+				int num2 = Grid.CellBelow(num);
+				if (Grid.IsValidCell(num2) && Grid.Solid[num2])
 				{
-					GameObject gameObject = objectLayerListItem.gameObject;
-					objectLayerListItem = objectLayerListItem.nextItem;
-					Pickupable component = gameObject.GetComponent<Pickupable>();
-					if (component != null)
+					ObjectLayerListItem objectLayerListItem = this.objectLayerListItem.nextItem;
+					while (objectLayerListItem != null)
 					{
-						flag = component.TryAbsorb(this, false);
+						GameObject gameObject = objectLayerListItem.gameObject;
+						objectLayerListItem = objectLayerListItem.nextItem;
+						Pickupable component = gameObject.GetComponent<Pickupable>();
+						if (component != null)
+						{
+							flag = component.TryAbsorb(this, false);
+						}
 					}
 				}
 			}
-			this.solidPartitionerEntry.UpdatePosition(new_cell);
-			this.partitionerEntry.UpdatePosition(new_cell);
+			this.solidPartitionerEntry.UpdatePosition(num);
+			this.partitionerEntry.UpdatePosition(num);
 			if (!flag)
 			{
-				this.NotifyChanged(new_cell);
+				this.NotifyChanged(num);
 			}
-			this.cachedCell = new_cell;
+			if (Grid.IsValidCell(this.cachedCell) && num != this.cachedCell)
+			{
+				this.NotifyChanged(this.cachedCell);
+			}
+			this.cachedCell = num;
 		}
-		if (Grid.IsValidCell(previous_cell) && new_cell != previous_cell)
+	}
+
+	private void OnTagsChanged(object data)
+	{
+		if (!this.KPrefabID.HasTag(GameTags.Stored) && !this.KPrefabID.HasTag(GameTags.Equipped))
 		{
-			this.NotifyChanged(previous_cell);
+			this.RegisterListeners();
+			this.AddFaller();
+		}
+		else
+		{
+			this.UnregisterListeners();
+			this.RemoveFaller();
 		}
 	}
 
@@ -407,7 +422,7 @@ public class Pickupable : Workable
 				this.Absorb(other);
 				if (!hide_effects && EffectPrefabs.Instance != null)
 				{
-					Vector3 position = other.transform.position;
+					Vector3 position = other.transform.GetPosition();
 					position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
 					GameObject gameObject = global::Util.KInstantiate(EffectPrefabs.Instance.OreAbsorb, position, Quaternion.identity, SceneOrganizer.Instance.GetFolder(Folder.FX), null, true, 0);
 					gameObject.SetActive(true);
@@ -421,7 +436,7 @@ public class Pickupable : Workable
 	protected override void OnCleanUp()
 	{
 		this.cleaningUp = true;
-		this.ReleaseEntombedVisualizer();
+		this.ReleaseEntombedVisualizerAndAddFaller(false);
 		this.RemoveFaller();
 		if (this.storage)
 		{
@@ -471,9 +486,10 @@ public class Pickupable : Workable
 		base.Trigger(-2064133523, pickupable);
 		pickupable.Trigger(-1940207677, base.gameObject);
 		pickupable.wasAbsorbed = true;
-		if (SelectTool.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected == pickupable.selectable)
+		KSelectable component = base.GetComponent<KSelectable>();
+		if (SelectTool.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected == pickupable.GetComponent<KSelectable>())
 		{
-			SelectTool.Instance.Select(this.selectable, false);
+			SelectTool.Instance.Select(component, false);
 		}
 		pickupable.gameObject.DeleteObject();
 		this.NotifyChanged(Grid.PosToCell(this));
@@ -481,53 +497,82 @@ public class Pickupable : Workable
 
 	public void OnStore(object data)
 	{
-		this.storage = (Storage)data;
+		this.storage = data as Storage;
+		bool flag = data is Storage || (data != null && (bool)data);
 		if (this.carryAnimOverride != null && this.lastCarrier != null)
 		{
 			this.lastCarrier.RemoveAnimOverrides(this.carryAnimOverride);
 			this.lastCarrier = null;
 		}
-		if (this.storage != null)
+		if (flag)
 		{
-			this.RemoveFaller();
-			this.UnregisterListeners();
-			Collider2D component = base.GetComponent<Collider2D>();
+			this.KPrefabID.AddTag(GameTags.Stored);
+			bool flag2 = this.storage == null || !this.storage.allowItemRemoval;
+			if (flag2)
+			{
+				this.KPrefabID.AddTag(GameTags.StoredPrivate);
+			}
+			else
+			{
+				this.KPrefabID.RemoveTag(GameTags.StoredPrivate);
+			}
+			KCollider2D component = base.GetComponent<KCollider2D>();
 			if (component != null)
 			{
 				component.enabled = false;
 			}
-			if (this.carryAnimOverride != null && this.storage.GetComponent<Navigator>() != null)
+			if (this.storage != null)
 			{
-				this.lastCarrier = this.storage.GetComponent<KBatchedAnimController>();
-				if (this.lastCarrier != null)
+				if (this.carryAnimOverride != null && this.storage.GetComponent<Navigator>() != null)
 				{
-					this.lastCarrier.AddAnimOverrides(this.carryAnimOverride, 0f);
+					this.lastCarrier = this.storage.GetComponent<KBatchedAnimController>();
+					if (this.lastCarrier != null)
+					{
+						this.lastCarrier.AddAnimOverrides(this.carryAnimOverride, 0f);
+					}
 				}
+				this.cachedCell = Grid.PosToCell(this.storage);
 			}
 		}
 		else
 		{
-			this.AddFaller();
-			base.GetComponent<KAnimControllerBase>().enabled = true;
-			base.gameObject.transform.rotation = Quaternion.identity;
-			Collider2D component2 = base.GetComponent<Collider2D>();
-			if (component2 != null)
-			{
-				component2.enabled = true;
-			}
-			this.RegisterListeners();
+			this.RemovedFromStorage();
 		}
+	}
+
+	private void RemovedFromStorage()
+	{
+		this.storage = null;
+		this.KPrefabID.RemoveTag(GameTags.Stored);
+		this.KPrefabID.RemoveTag(GameTags.StoredPrivate);
+		this.AddFaller();
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		component.enabled = true;
+		base.gameObject.transform.rotation = Quaternion.identity;
+		KCollider2D component2 = base.GetComponent<KCollider2D>();
+		if (component2 != null)
+		{
+			component2.enabled = true;
+		}
+		this.RegisterListeners();
+		component.GetBatchInstanceData().ClearOverrideTransformMatrix();
 	}
 
 	public override Workable.AnimInfo GetAnim(Worker worker)
 	{
-		if (this.useGunforPickup)
+		if (this.useGunforPickup && worker.usesMultiTool)
 		{
 			Workable.AnimInfo anim = base.GetAnim(worker);
 			anim.smi = new MultitoolController.Instance(this, worker, "pickup", EffectPrefabs.Instance.PickupEffect);
 			return anim;
 		}
 		return base.GetAnim(worker);
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole("Hauler", work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+		resume.AddExperienceIfRole(MaterialsManager.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -538,14 +583,14 @@ public class Pickupable : Workable
 		Pickupable pickupable = this.Take(amount);
 		if (pickupable != null)
 		{
-			component.Store(pickupable.gameObject, false, false, true);
+			component.Store(pickupable.gameObject, false, false, true, false);
 			worker.workCompleteData = pickupable;
 		}
 	}
 
 	public override Vector3 GetTargetPoint()
 	{
-		return base.transform.position;
+		return base.transform.GetPosition();
 	}
 
 	public bool IsReachable()
@@ -556,20 +601,14 @@ public class Pickupable : Workable
 	private void OnReachableChanged(object data)
 	{
 		this.isReachable = (bool)data;
+		KSelectable component = base.GetComponent<KSelectable>();
 		if (this.isReachable)
 		{
-			this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PickupableUnreachable, false);
+			component.RemoveStatusItem(Db.Get().MiscStatusItems.PickupableUnreachable, false);
 		}
 		else
 		{
-			try
-			{
-				this.selectable.AddStatusItem(Db.Get().MiscStatusItems.PickupableUnreachable, this);
-			}
-			catch
-			{
-				global::Debug.Log("!", null);
-			}
+			component.AddStatusItem(Db.Get().MiscStatusItems.PickupableUnreachable, this);
 		}
 	}
 
@@ -600,7 +639,7 @@ public class Pickupable : Workable
 	private void OnOreSizeChanged(object data)
 	{
 		this.RemoveFaller();
-		if (this.storage == null)
+		if (!this.KPrefabID.HasTag(GameTags.Stored))
 		{
 			this.AddFaller();
 		}
@@ -647,16 +686,16 @@ public class Pickupable : Workable
 			}
 			string text2 = GlobalAssets.GetSound(text, true);
 			text2 = ((text2 == null) ? GlobalAssets.GetSound("Ore_bump_rock", false) : text2);
-			if (CameraController.Instance.IsAudibleSound(base.transform.position, text2))
+			if (CameraController.Instance.IsAudibleSound(base.transform.GetPosition(), text2))
 			{
-				int num = Grid.PosToCell(base.transform.position);
+				int num = Grid.PosToCell(base.transform.GetPosition());
 				bool isLiquid = Grid.Element[num].IsLiquid;
 				float num2 = 0f;
 				if (isLiquid)
 				{
 					num2 = SoundUtil.GetLiquidDepth(num);
 				}
-				EventInstance eventInstance = KFMOD.BeginOneShot(text2, CameraController.Instance.GetVerticallyScaledPosition(base.transform.position));
+				FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text2, CameraController.Instance.GetVerticallyScaledPosition(base.transform.GetPosition()));
 				eventInstance.setParameterValue("velocity", vector.magnitude);
 				eventInstance.setParameterValue("liquidDepth", num2);
 				KFMOD.EndOneShot(eventInstance);
@@ -670,7 +709,7 @@ public class Pickupable : Workable
 		{
 			if (this.entombedCell == -1)
 			{
-				int num = Grid.PosToCell(base.transform.position);
+				int num = Grid.PosToCell(base.transform.GetPosition());
 				if (Grid.Objects[num, 1] == null)
 				{
 					KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
@@ -678,7 +717,7 @@ public class Pickupable : Workable
 					{
 						this.entombedCell = num;
 						component.enabled = false;
-						Collider2D component2 = base.GetComponent<Collider2D>();
+						KCollider2D component2 = base.GetComponent<KCollider2D>();
 						component2.enabled = false;
 						this.RemoveFaller();
 					}
@@ -687,11 +726,11 @@ public class Pickupable : Workable
 		}
 		else
 		{
-			this.ReleaseEntombedVisualizer();
+			this.ReleaseEntombedVisualizerAndAddFaller(true);
 		}
 	}
 
-	private void ReleaseEntombedVisualizer()
+	private void ReleaseEntombedVisualizerAndAddFaller(bool add_faller_if_necessary)
 	{
 		if (this.entombedCell != -1)
 		{
@@ -699,9 +738,12 @@ public class Pickupable : Workable
 			this.entombedCell = -1;
 			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 			component.enabled = true;
-			Collider2D component2 = base.GetComponent<Collider2D>();
+			KCollider2D component2 = base.GetComponent<KCollider2D>();
 			component2.enabled = true;
-			this.AddFaller();
+			if (add_faller_if_necessary)
+			{
+				this.AddFaller();
+			}
 		}
 	}
 
@@ -757,8 +799,6 @@ public class Pickupable : Workable
 	private bool isEntombed;
 
 	private bool cleaningUp;
-
-	private bool wasAbsorbed;
 
 	public bool trackOnPickup = true;
 

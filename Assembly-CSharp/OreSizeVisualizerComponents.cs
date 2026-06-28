@@ -60,7 +60,7 @@ public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVi
 		}
 		KBatchedAnimController component2 = primaryElement.GetComponent<KBatchedAnimController>();
 		component2.Play(massTier.animName, KAnim.PlayMode.Once, 1f, 0f);
-		CircleCollider2D component3 = primaryElement.GetComponent<CircleCollider2D>();
+		KCircleCollider2D component3 = primaryElement.GetComponent<KCircleCollider2D>();
 		if (component3 != null)
 		{
 			component3.radius = massTier.colliderRadius;

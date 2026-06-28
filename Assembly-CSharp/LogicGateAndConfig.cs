@@ -9,9 +9,7 @@ public class LogicGateAndConfig : LogicGateBaseConfig
 
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = base.CreateBuildingDef("LogicGateAND", "logic_and_kanim", 2, 2);
-		buildingDef.HotKey = global::Action.BuildMenuKeyA;
-		return buildingDef;
+		return base.CreateBuildingDef("LogicGateAND", "logic_and_kanim", 2, 2);
 	}
 
 	public const string ID = "LogicGateAND";

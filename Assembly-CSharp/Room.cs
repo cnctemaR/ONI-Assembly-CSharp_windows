@@ -3,14 +3,7 @@ using System.Collections.Generic;
 
 public class Room : IAssignableIdentity
 {
-	public ushort id { get; private set; }
-
-	public void SetID(ushort ID)
-	{
-		this.id = ID;
-	}
-
-	public List<BuildingComplete> buildings
+	public List<KPrefabID> buildings
 	{
 		get
 		{
@@ -20,17 +13,17 @@ public class Room : IAssignableIdentity
 
 	public string GetProperName()
 	{
-		return RoomTypes.GetRoomType(this).name;
+		return Db.Get().RoomTypes.GetRoomType(this).Name;
 	}
 
 	public List<Ownables> GetOwners()
 	{
 		this.current_owners.Clear();
-		foreach (BuildingComplete buildingComplete in this.GetPrimaryBuildings())
+		foreach (KPrefabID kprefabID in this.GetPrimaryEntities())
 		{
-			if (buildingComplete != null)
+			if (kprefabID != null)
 			{
-				Ownable component = buildingComplete.GetComponent<Ownable>();
+				Ownable component = kprefabID.GetComponent<Ownable>();
 				if (component != null && component.assignee != null)
 				{
 					foreach (Ownables ownables in component.assignee.GetOwners())
@@ -51,17 +44,17 @@ public class Room : IAssignableIdentity
 		return this.GetOwners()[0];
 	}
 
-	public List<BuildingComplete> GetPrimaryBuildings()
+	public List<KPrefabID> GetPrimaryEntities()
 	{
 		this.primary_buildings.Clear();
-		RoomTypes.RoomType roomType = RoomTypes.GetRoomType(this);
-		if (roomType != RoomTypes.neutral_type)
+		RoomType roomType = Db.Get().RoomTypes.GetRoomType(this);
+		if (roomType.primary_constraint != null)
 		{
-			foreach (BuildingComplete buildingComplete in this.buildings)
+			foreach (KPrefabID kprefabID in this.buildings)
 			{
-				if (buildingComplete != null && RoomTypes.GetRoomType(this).primary_constraint.building_criteria(buildingComplete))
+				if (kprefabID != null && roomType.primary_constraint.building_criteria(kprefabID))
 				{
-					this.primary_buildings.Add(buildingComplete);
+					this.primary_buildings.Add(kprefabID);
 				}
 			}
 		}
@@ -75,7 +68,7 @@ public class Room : IAssignableIdentity
 
 	public CavityInfo cavity;
 
-	private List<BuildingComplete> primary_buildings = new List<BuildingComplete>();
+	private List<KPrefabID> primary_buildings = new List<KPrefabID>();
 
 	public List<Ownables> current_owners = new List<Ownables>();
 }

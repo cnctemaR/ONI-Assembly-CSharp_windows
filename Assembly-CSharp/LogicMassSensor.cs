@@ -68,17 +68,20 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 	{
 		float num = 0f;
 		int num2 = Grid.CellAbove(this.NaturalBuildingCell());
-		List<ScenePartitionerEntry> list = GameScenePartitioner.Instance.ReserveList();
+		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
 		GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num2).x, Grid.CellToXY(num2).y, 1, 1, GameScenePartitioner.Instance.pickupablesLayer, list);
 		for (int i = 0; i < list.Count; i++)
 		{
 			Pickupable pickupable = list[i].obj as Pickupable;
 			if (!(pickupable == null))
 			{
-				num += pickupable.PrimaryElement.Mass;
+				if (!pickupable.wasAbsorbed)
+				{
+					num += pickupable.PrimaryElement.Mass;
+				}
 			}
 		}
-		GameScenePartitioner.Instance.ReleaseList(list);
+		ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
 		this.massPickupables = num;
 	}
 
@@ -86,7 +89,7 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 	{
 		float num = 0f;
 		int num2 = Grid.CellAbove(this.NaturalBuildingCell());
-		List<ScenePartitionerEntry> list = GameScenePartitioner.Instance.ReserveList();
+		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
 		GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num2).x, Grid.CellToXY(num2).y, 1, 1, GameScenePartitioner.Instance.floorSwitchActivatorLayer, list);
 		for (int i = 0; i < list.Count; i++)
 		{
@@ -96,8 +99,16 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 				num += floorSwitchActivator.PrimaryElement.Mass;
 			}
 		}
-		GameScenePartitioner.Instance.ReleaseList(list);
+		ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
 		this.massActivators = num;
+	}
+
+	public LocString Title
+	{
+		get
+		{
+			return UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.TITLE;
+		}
 	}
 
 	public float Threshold

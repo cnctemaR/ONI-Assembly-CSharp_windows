@@ -15,7 +15,7 @@ public static class UtilityConnectionsExtensions
 		case UtilityConnections.Down:
 			return UtilityConnections.Up;
 		}
-		throw new ArgumentOutOfRangeException("direction", direction, null);
+		throw new ArgumentException("Unexpected enum value: " + direction, "direction");
 	}
 
 	public static UtilityConnections LeftDirection(this UtilityConnections direction)
@@ -31,7 +31,7 @@ public static class UtilityConnectionsExtensions
 		case UtilityConnections.Down:
 			return UtilityConnections.Right;
 		}
-		throw new ArgumentOutOfRangeException("direction", direction, null);
+		throw new ArgumentException("Unexpected enum value: " + direction, "direction");
 	}
 
 	public static UtilityConnections RightDirection(this UtilityConnections direction)
@@ -47,7 +47,7 @@ public static class UtilityConnectionsExtensions
 		case UtilityConnections.Down:
 			return UtilityConnections.Left;
 		}
-		throw new ArgumentOutOfRangeException("direction", direction, null);
+		throw new ArgumentException("Unexpected enum value: " + direction, "direction");
 	}
 
 	public static int CellInDirection(this UtilityConnections direction, int from_cell)
@@ -63,7 +63,7 @@ public static class UtilityConnectionsExtensions
 		case UtilityConnections.Down:
 			return from_cell - Grid.WidthInCells;
 		}
-		throw new ArgumentOutOfRangeException("direction", direction, null);
+		throw new ArgumentException("Unexpected enum value: " + direction, "direction");
 	}
 
 	public static UtilityConnections DirectionFromToCell(int from_cell, int to_cell)

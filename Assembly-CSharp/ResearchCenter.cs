@@ -1,18 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
-public class ResearchCenter : Workable, IEffectDescriptor
+public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Researching;
 		this.attributeConverter = Db.Get().AttributeConverters.ResearchSpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.ALL_DAY_EXPERIENCE;
 		ElementConverter elementConverter = this.elementConverter;
 		elementConverter.onConvertMass = (Action<float>)Delegate.Combine(elementConverter.onConvertMass, new Action<float>(this.ConvertMassToResearchPoints));
-		this.storage.choreType = Db.Get().ChoreTypes.ResearchFetch;
+		if (this.research_point_type_id != ResearchTypes.ID.ALPHA)
+		{
+			this.requiredRolePerk = RoleManager.rolePerks.AllowAdvancedResearch.id;
+		}
 	}
 
 	protected override void OnSpawn()
@@ -45,15 +50,21 @@ public class ResearchCenter : Workable, IEffectDescriptor
 		}
 	}
 
-	private void SimUpdate(float dt)
+	public override void AwardExperience(float work_dt, MinionResume resume)
 	{
-		if (!this.operational.IsActive)
+		resume.AddExperienceIfRole(JuniorResearcher.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_SLOW);
+		resume.AddExperienceIfRole(Researcher.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_SLOW);
+		resume.AddExperienceIfRole(SeniorResearcher.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_SLOW);
+	}
+
+	public void Sim200ms(float dt)
+	{
+		if (!this.operational.IsActive && this.operational.IsOperational && this.chore == null && this.HasMaterial())
 		{
-			if (this.operational.IsOperational && this.chore == null && this.HasMaterial())
-			{
-				this.chore = new WorkChore<ResearchCenter>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
-				base.SetWorkTime(float.PositiveInfinity);
-			}
+			ChoreType research = Db.Get().ChoreTypes.Research;
+			Tag[] researchChores = GameTags.ChoreTypes.ResearchChores;
+			this.chore = new WorkChore<ResearchCenter>(research, this, null, researchChores, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			base.SetWorkTime(float.PositiveInfinity);
 		}
 	}
 
@@ -63,7 +74,9 @@ public class ResearchCenter : Workable, IEffectDescriptor
 		{
 			return 0f;
 		}
-		return Research.Instance.GetActiveResearch().progressInventory.PointsByTypeID[this.research_point_type_id] / Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[this.research_point_type_id];
+		float num = Research.Instance.GetActiveResearch().progressInventory.PointsByTypeID[this.research_point_type_id];
+		float num2 = Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[this.research_point_type_id];
+		return num / num2;
 	}
 
 	protected override void OnStartWork(Worker worker)
@@ -103,6 +116,18 @@ public class ResearchCenter : Workable, IEffectDescriptor
 		return false;
 	}
 
+	private bool IsAllResearchComplete()
+	{
+		foreach (Tech tech in Db.Get().Techs)
+		{
+			if (!tech.IsComplete())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	private void CheckValidResearchSelected(object data)
 	{
 		bool flag = false;
@@ -116,7 +141,7 @@ public class ResearchCenter : Workable, IEffectDescriptor
 				flag2 = true;
 			}
 		}
-		if (this.operational.GetFlag(EnergyConsumer.PoweredFlag))
+		if (this.operational.GetFlag(EnergyConsumer.PoweredFlag) && !this.IsAllResearchComplete())
 		{
 			if (flag)
 			{
@@ -258,9 +283,9 @@ public class ResearchCenter : Workable, IEffectDescriptor
 	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.PRODUCES_RESEARCH_POINTS, Research.Instance.researchTypes.GetResearchType(this.research_point_type_id).name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.PRODUCES_RESEARCH_POINTS, Research.Instance.researchTypes.GetResearchType(this.research_point_type_id).name), Descriptor.DescriptorType.Effect);
-		list.Add(descriptor);
+		string keywordStyle = GameUtil.GetKeywordStyle(this.inputMaterial);
+		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.RESEARCH_MATERIALS, keywordStyle, this.inputMaterial.Name, GameUtil.GetFormattedMass(this.mass_per_point, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.RESEARCH_MATERIALS, keywordStyle, this.inputMaterial.Name, GameUtil.GetFormattedMass(this.mass_per_point, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false));
+		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.PRODUCES_RESEARCH_POINTS, Research.Instance.researchTypes.GetResearchType(this.research_point_type_id).name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.PRODUCES_RESEARCH_POINTS, Research.Instance.researchTypes.GetResearchType(this.research_point_type_id).name), Descriptor.DescriptorType.Effect, false));
 		return list;
 	}
 
@@ -285,6 +310,9 @@ public class ResearchCenter : Workable, IEffectDescriptor
 
 	[SerializeField]
 	public string research_point_type_id;
+
+	[SerializeField]
+	public Tag inputMaterial;
 
 	[SerializeField]
 	public float mass_per_point;

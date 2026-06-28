@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using Klei;
 using KSerialization;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -108,11 +109,12 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 	{
 		base.OnPrefabInit();
 		this.choreType = Db.Get().ChoreTypes.Fabricate;
-		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FabricateFetch;
+		this.choreTags = new Tag[] { GameTags.ChoreTypes.Fabricating };
 		base.Subscribe(-1957399615, new Action<object>(this.OnDroppedAll));
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Processing;
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 	}
 
 	protected override void OnSpawn()
@@ -163,11 +165,11 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 
 	protected override void OnCleanUp()
 	{
-		base.OnCleanUp();
 		foreach (Refinery.UserOrder userOrder in this.userOrders)
 		{
 			this.Cancel(userOrder);
 		}
+		base.OnCleanUp();
 	}
 
 	protected virtual List<GameObject> CompleteOrder(Refinery.UserOrder completed_order)
@@ -189,7 +191,7 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 		{
 			GameObject prefab = Assets.GetPrefab(result.tag);
 			GameObject gameObject2 = GameUtil.KInstantiate(prefab, Grid.SceneLayer.Ore, Folder.Ore, null, 0);
-			gameObject2.transform.localPosition = base.transform.localPosition + this.outputOffset;
+			gameObject2.transform.SetLocalPosition(base.transform.GetLocalPosition() + this.outputOffset);
 			PrimaryElement component2 = gameObject2.GetComponent<PrimaryElement>();
 			component2.Units = result.amount;
 			component2.Temperature = num;
@@ -285,7 +287,10 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 				}
 				if (flag)
 				{
-					machineOrder2.chore = new WorkChore<Refinery>(this.choreType, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+					Refinery.MachineOrder machineOrder3 = machineOrder2;
+					ChoreType choreType = this.choreType;
+					Tag[] array = this.choreTags;
+					machineOrder3.chore = new WorkChore<Refinery>(choreType, this, null, array, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 					if (this.workTimeRemaining <= 0f)
 					{
 						this.workTimeRemaining = this.GetWorkTime();
@@ -297,20 +302,20 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 			Dictionary<Tag, float> dictionary = new Dictionary<Tag, float>();
 			for (int i = 0; i < this.machineOrders.Count; i++)
 			{
-				Refinery.MachineOrder machineOrder3 = this.machineOrders[i];
-				if (machineOrder3.chore == null)
+				Refinery.MachineOrder machineOrder4 = this.machineOrders[i];
+				if (machineOrder4.chore == null)
 				{
-					Refinery.UserOrder parentOrder = machineOrder3.parentOrder;
+					Refinery.UserOrder parentOrder = machineOrder4.parentOrder;
 					RefinementRecipe recipe2 = parentOrder.recipe;
 					dictionary[recipe2.material] = this.inStorage.GetMassAvailable(recipe2.material);
 				}
 			}
 			for (int j = 0; j < this.machineOrders.Count; j++)
 			{
-				Refinery.MachineOrder machineOrder4 = this.machineOrders[j];
-				if (machineOrder4.chore == null)
+				Refinery.MachineOrder machineOrder5 = this.machineOrders[j];
+				if (machineOrder5.chore == null)
 				{
-					Refinery.UserOrder parentOrder2 = machineOrder4.parentOrder;
+					Refinery.UserOrder parentOrder2 = machineOrder5.parentOrder;
 					RefinementRecipe recipe3 = parentOrder2.recipe;
 					float num2;
 					if (dictionary[recipe3.material] < recipe3.amount)
@@ -326,17 +331,17 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 						num2 = 0f;
 					}
 					int num3 = -j;
-					if (machineOrder4.fetchList == null && num2 > 0f)
+					if (machineOrder5.fetchList == null && num2 > 0f)
 					{
-						machineOrder4.fetchList = new FetchList2(this.inStorage);
-						machineOrder4.fetchList.ShowStatusItem = false;
-						machineOrder4.fetchList.SetPriorityMod(num3);
-						machineOrder4.fetchList.Add(recipe3.material, null, num2, FetchOrder2.OperationalRequirement.None);
-						machineOrder4.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
+						machineOrder5.fetchList = new FetchList2(this.inStorage, Db.Get().ChoreTypes.FetchCritical, this.choreTags);
+						machineOrder5.fetchList.ShowStatusItem = false;
+						machineOrder5.fetchList.SetPriorityMod(num3);
+						machineOrder5.fetchList.Add(recipe3.material, null, num2, FetchOrder2.OperationalRequirement.None);
+						machineOrder5.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
 					}
-					else if (machineOrder4.fetchList != null)
+					else if (machineOrder5.fetchList != null)
 					{
-						machineOrder4.fetchList.SetPriorityMod(num3);
+						machineOrder5.fetchList.SetPriorityMod(num3);
 					}
 				}
 			}
@@ -531,6 +536,8 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 	private List<Refinery.OrderSaveData> savedOrders;
 
 	protected ChoreType choreType;
+
+	protected Tag[] choreTags;
 
 	[Serializable]
 	public class UserOrder : IBuildQueueOrder

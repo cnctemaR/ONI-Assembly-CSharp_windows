@@ -212,18 +212,18 @@ public class KGlobalAnimParser
 			}
 		}
 		KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(data.groupID);
+		int num2 = reader.ReadInt32();
+		int num3 = reader.ReadInt32();
 		KAnim.Build build = data.AddNewBuildFile(fileNameHash);
 		build.textureCount = textures.Count;
 		if (textures.Count > 0)
 		{
 			data.AddTextures(textures);
 		}
-		int num2 = reader.ReadInt32();
-		int num3 = reader.ReadInt32();
 		build.symbols = new KAnim.Build.Symbol[num2];
 		build.frames = new KAnim.Build.SymbolFrame[num3];
 		build.name = reader.ReadKleiString();
-		build.batchTag = ((!group.swapTarget.isValid) ? data.groupID : group.target);
+		build.batchTag = ((!group.swapTarget.IsValid) ? data.groupID : group.target);
 		build.fileHash = fileNameHash;
 		int num4 = 0;
 		for (int i = 0; i < build.symbols.Length; i++)
@@ -240,6 +240,7 @@ public class KGlobalAnimParser
 			symbol.flags = reader.ReadInt32();
 			symbol.firstFrameIdx = data.symbolFrameInstances.Count;
 			symbol.numFrames = reader.ReadInt32();
+			symbol.symbolIndexInSourceBuild = i;
 			int num5 = 0;
 			for (int j = 0; j < symbol.numFrames; j++)
 			{
@@ -262,16 +263,8 @@ public class KGlobalAnimParser
 				float num11 = reader.ReadSingle();
 				float num12 = reader.ReadSingle();
 				float num13 = reader.ReadSingle();
-				Vector2 vector = new Vector2(num10, num11);
-				Vector2 vector2 = new Vector2(num12, num13);
-				symbolFrame.v0 = new Vector3(symbolFrame.bboxMin.x, symbolFrame.bboxMin.y, 0f);
-				symbolFrame.v1 = new Vector3(symbolFrame.bboxMax.x, symbolFrame.bboxMin.y, 0f);
-				symbolFrame.v2 = new Vector3(symbolFrame.bboxMin.x, symbolFrame.bboxMax.y, 0f);
-				symbolFrame.v3 = new Vector3(symbolFrame.bboxMax.x, symbolFrame.bboxMax.y, 0f);
-				symbolFrame.uv0 = new Vector2(vector.x, 1f - vector.y);
-				symbolFrame.uv1 = new Vector2(vector2.x, 1f - vector.y);
-				symbolFrame.uv2 = new Vector2(vector.x, 1f - vector2.y);
-				symbolFrame.uv3 = new Vector2(vector2.x, 1f - vector2.y);
+				symbolFrame.uvMin = new Vector2(num10, 1f - num11);
+				symbolFrame.uvMax = new Vector2(num12, 1f - num13);
 				build.frames[num4] = symbolFrame;
 				data.symbolFrameInstances.Add(symbolFrameInstance);
 				num4++;

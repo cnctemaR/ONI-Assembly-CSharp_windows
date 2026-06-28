@@ -10,19 +10,18 @@ public class OreScrubberConfig : IBuildingConfig
 		int num = 3;
 		int num2 = 3;
 		string text2 = "orescrubber_kanim";
-		float num3 = 50f;
-		int num4 = 30;
-		float num5 = 30f;
+		int num3 = 30;
+		float num4 = 30f;
 		string[] array = new string[] { "Metal" };
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, new float[] { BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0] }, array, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, new float[] { BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0] }, array, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
 		buildingDef.UtilityInputOffset = new CellOffset(1, 1);
 		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.InputConduitType = ConduitType.Gas;
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		OreScrubber oreScrubber = go.AddOrGet<OreScrubber>();

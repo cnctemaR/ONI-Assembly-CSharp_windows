@@ -4,5 +4,6 @@ public enum ConduitType
 {
 	None,
 	Gas,
-	Liquid
+	Liquid,
+	Solid
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TUNING;
 using UnityEngine;
 
 public class SeedSplicer : Fabricator, IEffectDescriptor
@@ -8,10 +9,11 @@ public class SeedSplicer : Fabricator, IEffectDescriptor
 	{
 		base.OnPrefabInit();
 		this.choreType = Db.Get().ChoreTypes.Cook;
-		this.inStorage.choreType = Db.Get().ChoreTypes.CookFetch;
+		this.choreTags = new Tag[] { GameTags.ChoreTypes.Cooking };
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Cooking;
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_cookstation_kanim") };
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 	}
 
 	protected override void OnSpawn()

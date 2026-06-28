@@ -43,6 +43,10 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 		}
 	}
 
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+	}
+
 	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
@@ -81,14 +85,14 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 		{
 			default_state = this.unoperational;
 			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (Shower.ShowerSM.Instance smi) => smi.IsOperational).PlayAnim("off");
-			this.operational.DefaultState(this.operational.idle).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Shower.ShowerSM.Instance smi) => !smi.IsOperational).ToggleChore((Shower.ShowerSM.Instance smi) => new WorkChore<Shower>(Db.Get().ChoreTypes.Shower, smi.master, null, true, null, null, null, false, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue), this.unoperational);
+			this.operational.DefaultState(this.operational.idle).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Shower.ShowerSM.Instance smi) => !smi.IsOperational).ToggleChore((Shower.ShowerSM.Instance smi) => new WorkChore<Shower>(Db.Get().ChoreTypes.Shower, smi.master, null, null, true, null, null, null, false, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false), this.unoperational);
 			this.operational.idle.WorkableStartTransition((Shower.ShowerSM.Instance smi) => smi.master, this.operational.showering);
 			this.operational.showering.WorkableStopTransition((Shower.ShowerSM.Instance smi) => smi.master, this.operational.exiting).Enter(delegate(Shower.ShowerSM.Instance smi)
 			{
 				smi.master.GetComponent<Operational>().SetActive(true, false);
-			}).Update(delegate(Shower.ShowerSM.Instance smi)
+			}).Update(delegate(Shower.ShowerSM.Instance smi, float dt)
 			{
-				smi.RemoveDisease(smi.deltatime);
+				smi.RemoveDisease(dt);
 			})
 				.PlayAnims((Shower.ShowerSM.Instance smi) => Shower.ShowerSM.workingAnims, KAnim.PlayMode.Loop)
 				.Exit(delegate(Shower.ShowerSM.Instance smi)

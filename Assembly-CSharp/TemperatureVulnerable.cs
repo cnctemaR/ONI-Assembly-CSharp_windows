@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause
+public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause, ISim1000ms
 {
 	private OccupyArea occupyArea
 	{
@@ -94,14 +94,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 	{
 		base.OnSpawn();
 		base.smi.sm.internalTemp.Set(this.primaryElement.Temperature, base.smi);
-		this.handle = GameScheduler.Instance.SchedulePeriodic("TemperatureVulnerable", 1f, new Action<object>(this.UpdateTemperature), null, null, 0f, null);
 		base.smi.StartSM();
-	}
-
-	protected override void OnCleanUp()
-	{
-		this.handle.ClearScheduler();
-		base.OnCleanUp();
 	}
 
 	public void Configure(float tempWarningLow = 283f, float tempLethalLow = 263f, float tempWarningHigh = 294f, float tempLethalHigh = 343f, float tempPerfectLow = 0f, float tempPerfectHigh = 0f)
@@ -120,7 +113,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		return averageTemperature > -1f && averageTemperature > this.internalTemperatureLethal_Low && averageTemperature < this.internalTemperatureLethal_High;
 	}
 
-	public void UpdateTemperature(object data)
+	public void Sim1000ms(float dt)
 	{
 		int num = Grid.PosToCell(base.gameObject);
 		if (!Grid.IsValidCell(num))
@@ -184,8 +177,6 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 	private AmountInstance displayTemperatureAmount;
 
 	private TemperatureVulnerable.TemperatureState internalTemperatureState = TemperatureVulnerable.TemperatureState.Normal;
-
-	private SchedulerHandle handle;
 
 	public class StatesInstance : GameStateMachine<TemperatureVulnerable.States, TemperatureVulnerable.StatesInstance, TemperatureVulnerable, object>.GameInstance
 	{

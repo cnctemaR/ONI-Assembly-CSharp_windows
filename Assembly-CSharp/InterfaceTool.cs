@@ -22,13 +22,18 @@ public class InterfaceTool : KMonoBehaviour
 
 	public virtual bool ShowHoverUI()
 	{
-		Vector3 vector = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0f);
+		bool flag = false;
 		global::UnityEngine.EventSystems.EventSystem current = global::UnityEngine.EventSystems.EventSystem.current;
-		current.RaycastAll(new PointerEventData(current)
+		if (current != null)
 		{
-			position = vector
-		}, this.castResults);
-		return this.castResults.Count == 0;
+			Vector3 vector = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0f);
+			current.RaycastAll(new PointerEventData(current)
+			{
+				position = vector
+			}, this.castResults);
+			flag = this.castResults.Count == 0;
+		}
+		return flag;
 	}
 
 	protected virtual void OnActivateTool()
@@ -74,7 +79,7 @@ public class InterfaceTool : KMonoBehaviour
 		int num = Grid.PosToCell(cursor_pos);
 		cursor_pos = Grid.CellToPosCBC(num, this.visualizerLayer);
 		cursor_pos.z += InterfaceTool.DepthBias;
-		this.visualizer.transform.localPosition = cursor_pos;
+		this.visualizer.transform.SetLocalPosition(cursor_pos);
 	}
 
 	public virtual void OnKeyDown(KButtonEvent e)
@@ -125,6 +130,20 @@ public class InterfaceTool : KMonoBehaviour
 		}
 	}
 
+	protected void UpdateHoverElements(List<KSelectable> hits)
+	{
+		HoverTextConfiguration component = base.GetComponent<HoverTextConfiguration>();
+		if (component != null)
+		{
+			component.UpdateHoverElements(hits);
+		}
+	}
+
+	public virtual void LateUpdate()
+	{
+		this.UpdateHoverElements(null);
+	}
+
 	public const float MaxClickDistance = 0.02f;
 
 	public static float DepthBias = -0.15f;
@@ -144,8 +163,6 @@ public class InterfaceTool : KMonoBehaviour
 	public Vector2 cursorOffset = new Vector2(2f, 2f);
 
 	public global::System.Action OnDeactivate;
-
-	protected HoverTextConfiguration hoverText;
 
 	private static Texture2D activeCursor;
 

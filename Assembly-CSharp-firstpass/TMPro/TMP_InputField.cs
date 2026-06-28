@@ -32,19 +32,7 @@ namespace TMPro
 			get
 			{
 				RuntimePlatform platform = Application.platform;
-				switch (platform)
-				{
-				case RuntimePlatform.IPhonePlayer:
-				case RuntimePlatform.Android:
-					break;
-				default:
-					if (platform != RuntimePlatform.BlackBerryPlayer && platform != RuntimePlatform.TizenPlayer)
-					{
-						return true;
-					}
-					break;
-				}
-				return this.m_HideMobileInput;
+				return (platform != RuntimePlatform.Android && platform != RuntimePlatform.IPhonePlayer && platform != RuntimePlatform.TizenPlayer) || this.m_HideMobileInput;
 			}
 			set
 			{
@@ -844,7 +832,7 @@ namespace TMPro
 		{
 			EventModifiers modifiers = evt.modifiers;
 			RuntimePlatform platform = Application.platform;
-			bool flag = platform == RuntimePlatform.OSXEditor || platform == RuntimePlatform.OSXPlayer || platform == RuntimePlatform.OSXWebPlayer;
+			bool flag = platform == RuntimePlatform.OSXEditor || platform == RuntimePlatform.OSXPlayer;
 			bool flag2 = ((!flag) ? ((modifiers & EventModifiers.Control) != EventModifiers.None) : ((modifiers & EventModifiers.Command) != EventModifiers.None));
 			bool flag3 = (modifiers & EventModifiers.Shift) != EventModifiers.None;
 			bool flag4 = (modifiers & EventModifiers.Alt) != EventModifiers.None;
@@ -863,7 +851,7 @@ namespace TMPro
 						this.SelectAll();
 						return TMP_InputField.EditState.Continue;
 					}
-					goto IL_0205;
+					goto IL_01FE;
 				default:
 					switch (keyCode)
 					{
@@ -873,7 +861,7 @@ namespace TMPro
 							this.Append(TMP_InputField.clipboard);
 							return TMP_InputField.EditState.Continue;
 						}
-						goto IL_0205;
+						goto IL_01FE;
 					default:
 						if (keyCode == KeyCode.Backspace)
 						{
@@ -889,7 +877,7 @@ namespace TMPro
 							}
 							if (keyCode != KeyCode.Delete)
 							{
-								goto IL_0205;
+								goto IL_01FE;
 							}
 							this.ForwardSpace();
 							return TMP_InputField.EditState.Continue;
@@ -910,7 +898,7 @@ namespace TMPro
 							this.SendOnValueChangedAndUpdateLabel();
 							return TMP_InputField.EditState.Continue;
 						}
-						goto IL_0205;
+						goto IL_01FE;
 					}
 					break;
 				case KeyCode.C:
@@ -926,7 +914,7 @@ namespace TMPro
 						}
 						return TMP_InputField.EditState.Continue;
 					}
-					goto IL_0205;
+					goto IL_01FE;
 				}
 				break;
 			case KeyCode.UpArrow:
@@ -952,7 +940,7 @@ namespace TMPro
 			{
 				return TMP_InputField.EditState.Finish;
 			}
-			IL_0205:
+			IL_01FE:
 			char c = evt.character;
 			if (!this.multiLine && (c == '\t' || c == '\r' || c == '\n'))
 			{

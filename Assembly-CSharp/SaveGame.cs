@@ -49,15 +49,15 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		string text;
 		if (isAutoSave)
 		{
-			text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetDay(), Components.LiveMinionIdentities.Count, this.baseName, true, SaveLoader.GetActiveSaveFilePath()));
+			text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, true, SaveLoader.GetActiveSaveFilePath()));
 		}
 		else
 		{
-			text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetDay(), Components.LiveMinionIdentities.Count, this.baseName));
+			text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName));
 		}
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 247630U;
+		header.buildVersion = 254439U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);
@@ -157,7 +157,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			this.isAutoSave = isAutoSave;
 			this.originalSaveName = originalSaveName;
 			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 1;
+			this.saveMinorVersion = 3;
 		}
 
 		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName)
@@ -168,7 +168,17 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			this.isAutoSave = false;
 			this.originalSaveName = string.Empty;
 			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 1;
+			this.saveMinorVersion = 3;
+		}
+
+		public bool IsVersionOlderThan(int major, int minor)
+		{
+			return this.saveMajorVersion < major || (this.saveMajorVersion == major && this.saveMinorVersion < minor);
+		}
+
+		public bool IsVersionExactly(int major, int minor)
+		{
+			return this.saveMajorVersion == major && this.saveMinorVersion == minor;
 		}
 
 		public int numberOfCycles;

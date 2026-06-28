@@ -6,10 +6,10 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 {
 	protected override void OnSpawn()
 	{
-		this.inputOne = new LogicEventHandler(base.InputCellOne, new Action<int>(this.UpdateState), null);
+		this.inputOne = new LogicEventHandler(base.InputCellOne, new Action<int>(this.UpdateState), null, LogicPortSpriteType.Input);
 		if (base.RequiresTwoInputs)
 		{
-			this.inputTwo = new LogicEventHandler(base.InputCellTwo, new Action<int>(this.UpdateState), null);
+			this.inputTwo = new LogicEventHandler(base.InputCellTwo, new Action<int>(this.UpdateState), null, LogicPortSpriteType.Input);
 		}
 		base.Subscribe(774203113, new Action<object>(this.OnBuildingBroken));
 		base.Subscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
@@ -48,7 +48,7 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 			this.connected = true;
 			int outputCell = base.OutputCell;
 			logicCircuitSystem.AddToNetworks(outputCell, this, true);
-			this.output = new LogicPortVisualizer(false, outputCell);
+			this.output = new LogicPortVisualizer(outputCell, LogicPortSpriteType.Output);
 			logicCircuitManager.AddVisElem(this.output);
 			int inputCellOne = base.InputCellOne;
 			logicCircuitSystem.AddToNetworks(inputCellOne, this.inputOne, true);

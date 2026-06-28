@@ -3,11 +3,23 @@ using System.Collections.Generic;
 
 public struct TagBits
 {
+	public TagBits(Tag tag)
+	{
+		this.bits0 = 0UL;
+		this.bits1 = 0UL;
+		this.bits2 = 0UL;
+		this.SetTag(tag);
+	}
+
 	public TagBits(Tag[] tags)
 	{
 		this.bits0 = 0UL;
 		this.bits1 = 0UL;
 		this.bits2 = 0UL;
+		if (tags == null)
+		{
+			return;
+		}
 		for (int i = 0; i < tags.Length; i++)
 		{
 			this.SetTag(tags[i]);
@@ -56,6 +68,11 @@ public struct TagBits
 		this.bits0 &= ~tagBits.bits0;
 		this.bits1 &= ~tagBits.bits1;
 		this.bits2 &= ~tagBits.bits2;
+	}
+
+	public bool HasAll(TagBits tag_bits)
+	{
+		return (this.bits0 & tag_bits.bits0) == tag_bits.bits0 && (this.bits1 & tag_bits.bits1) == tag_bits.bits1 && (this.bits2 & tag_bits.bits2) == tag_bits.bits2;
 	}
 
 	public bool HasAny(TagBits tag_bits)

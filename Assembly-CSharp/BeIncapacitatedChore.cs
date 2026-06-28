@@ -4,14 +4,14 @@ using UnityEngine;
 public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 {
 	public BeIncapacitatedChore(IStateMachineTarget master)
-		: base(Db.Get().ChoreTypes.BeIncapacitated, master, master.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.BeIncapacitated, master, master.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new BeIncapacitatedChore.StatesInstance(this);
 	}
 
 	public void FindAvailableMedicalBed(Navigator navigator)
 	{
-		AssignableSlotInstance slot = this.gameObject.GetComponent<Ownables>().GetSlot(Db.Get().OwnableSlots.Clinic);
+		AssignableSlotInstance slot = this.gameObject.GetComponent<Ownables>().GetSlot(Db.Get().AssignableSlots.Clinic);
 		if (slot.assignable == null)
 		{
 			return;
@@ -62,17 +62,17 @@ public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 				smi.SetStatus(StateMachine.Status.Failed);
 				smi.StopSM("died");
 			});
-			this.incapacitation_root.lookingForBed.ToggleSchedulePeriodic("LookForAvailableClinic", 1f, delegate(BeIncapacitatedChore.StatesInstance smi)
+			this.incapacitation_root.lookingForBed.Update("LookForAvailableClinic", delegate(BeIncapacitatedChore.StatesInstance smi, float dt)
 			{
 				smi.master.FindAvailableMedicalBed(smi.master.GetComponent<Navigator>());
-			}).Enter("PlayAnim", delegate(BeIncapacitatedChore.StatesInstance smi)
+			}, UpdateRate.SIM_1000ms, false).Enter("PlayAnim", delegate(BeIncapacitatedChore.StatesInstance smi)
 			{
 				smi.sm.clinic.Set(null, smi);
 				smi.Play(BeIncapacitatedChore.IncapacitatedDuplicantAnim_pre, KAnim.PlayMode.Once);
 				smi.Queue(BeIncapacitatedChore.IncapacitatedDuplicantAnim_loop, KAnim.PlayMode.Loop);
 			});
 			this.incapacitation_root.rescue.ToggleChore((BeIncapacitatedChore.StatesInstance smi) => new RescueIncapacitatedChore(smi.master, this.masterTarget.Get(smi)), this.incapacitation_root.recovering, this.incapacitation_root.lookingForBed);
-			this.incapacitation_root.rescue.waitingForPickup.EventTransition(GameHashes.OnStore, this.incapacitation_root.rescue.carried, null).ToggleSchedulePeriodic("LookForAvailableClinic", 1f, delegate(BeIncapacitatedChore.StatesInstance smi)
+			this.incapacitation_root.rescue.waitingForPickup.EventTransition(GameHashes.OnStore, this.incapacitation_root.rescue.carried, null).Update("LookForAvailableClinic", delegate(BeIncapacitatedChore.StatesInstance smi, float dt)
 			{
 				bool flag = false;
 				if (smi.sm.clinic.Get(smi) == null)
@@ -83,11 +83,11 @@ public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 				{
 					flag = true;
 				}
-				else if (this.clinic.Get(smi).GetComponent<Clinic>().assignee == null)
+				else if (this.clinic.Get(smi).GetComponent<Assignable>().assignee == null)
 				{
 					flag = true;
 				}
-				else if (this.clinic.Get(smi).GetComponent<Clinic>().assignee.GetSoleOwner().gameObject != smi.master.gameObject)
+				else if (this.clinic.Get(smi).GetComponent<Assignable>().assignee.GetSoleOwner().gameObject != smi.master.gameObject)
 				{
 					flag = true;
 				}
@@ -95,19 +95,19 @@ public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 				{
 					smi.GoTo(this.incapacitation_root.lookingForBed);
 				}
-			});
-			this.incapacitation_root.rescue.carried.ToggleSchedulePeriodic("LookForAvailableClinic", 1f, delegate(BeIncapacitatedChore.StatesInstance smi)
+			}, UpdateRate.SIM_1000ms, false);
+			this.incapacitation_root.rescue.carried.Update("LookForAvailableClinic", delegate(BeIncapacitatedChore.StatesInstance smi, float dt)
 			{
 				bool flag2 = false;
 				if (smi.sm.clinic.Get(smi) == null)
 				{
 					flag2 = true;
 				}
-				else if (this.clinic.Get(smi).GetComponent<Clinic>().assignee == null)
+				else if (this.clinic.Get(smi).GetComponent<Assignable>().assignee == null)
 				{
 					flag2 = true;
 				}
-				else if (this.clinic.Get(smi).GetComponent<Clinic>().assignee.GetSoleOwner().gameObject != smi.master.gameObject)
+				else if (this.clinic.Get(smi).GetComponent<Assignable>().assignee.GetSoleOwner().gameObject != smi.master.gameObject)
 				{
 					flag2 = true;
 				}
@@ -115,7 +115,7 @@ public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 				{
 					smi.GoTo(this.incapacitation_root.lookingForBed);
 				}
-			}).Enter(delegate(BeIncapacitatedChore.StatesInstance smi)
+			}, UpdateRate.SIM_1000ms, false).Enter(delegate(BeIncapacitatedChore.StatesInstance smi)
 			{
 				smi.Queue(BeIncapacitatedChore.IncapacitatedDuplicantAnim_carry, KAnim.PlayMode.Loop);
 			}).Exit(delegate(BeIncapacitatedChore.StatesInstance smi)

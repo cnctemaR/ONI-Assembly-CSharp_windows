@@ -15,6 +15,8 @@ public class Butcherable : Workable, ISaveLoadable
 		base.Subscribe(1272413801, new Action<object>(this.SetReadyToButcher));
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.workTime = 3f;
+		this.multitoolContext = "harvest";
+		this.multitoolHitEffectHash = new HashedString("fx_harvest_splash");
 	}
 
 	public void SetReadyToButcher(object param)
@@ -33,7 +35,7 @@ public class Butcherable : Workable, ISaveLoadable
 		{
 			return;
 		}
-		this.chore = new WorkChore<Butcherable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+		this.chore = new WorkChore<Butcherable>(Db.Get().ChoreTypes.Harvest, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 		this.OnRefreshUserMenu(null);
 	}
 
@@ -122,13 +124,6 @@ public class Butcherable : Workable, ISaveLoadable
 			return num2;
 		}
 		return num;
-	}
-
-	public override Workable.AnimInfo GetAnim(Worker worker)
-	{
-		Workable.AnimInfo anim = base.GetAnim(worker);
-		anim.smi = new MultitoolController.Instance(this, worker, "harvest", EffectPrefabs.Instance.HarvestEffect);
-		return anim;
 	}
 
 	[MyCmpGet]

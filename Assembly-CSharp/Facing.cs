@@ -12,7 +12,7 @@ public class Facing : KMonoBehaviour
 
 	public void Face(float target_x)
 	{
-		float x = base.transform.localPosition.x;
+		float x = base.transform.GetLocalPosition().x;
 		if (target_x < x)
 		{
 			this.facingLeft = true;
@@ -27,7 +27,7 @@ public class Facing : KMonoBehaviour
 
 	public void Face(Vector3 target_pos)
 	{
-		int num = Grid.CellColumn(Grid.PosToCell(base.transform.localPosition));
+		int num = Grid.CellColumn(Grid.PosToCell(base.transform.GetLocalPosition()));
 		int num2 = Grid.CellColumn(Grid.PosToCell(target_pos));
 		if (num > num2)
 		{

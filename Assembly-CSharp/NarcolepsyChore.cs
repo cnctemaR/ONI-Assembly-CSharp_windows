@@ -1,10 +1,11 @@
 ﻿using System;
+using STRINGS;
 using UnityEngine;
 
 public class NarcolepsyChore : Chore<NarcolepsyChore.StatesInstance>
 {
 	public NarcolepsyChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Narcolepsy, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Narcolepsy, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new NarcolepsyChore.StatesInstance(this, target.gameObject);
 		base.AddPrecondition(NarcolepsyChore.IsNarcolepsing, null);
@@ -13,6 +14,7 @@ public class NarcolepsyChore : Chore<NarcolepsyChore.StatesInstance>
 	public static Chore.Precondition IsNarcolepsing = new Chore.Precondition
 	{
 		id = "IsNarcolepsing",
+		description = DUPLICANTS.CHORES.PRECONDITIONS.IS_NARCOLEPSING,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Narcolepsy component = context.consumer.GetComponent<Narcolepsy>();
@@ -33,7 +35,7 @@ public class NarcolepsyChore : Chore<NarcolepsyChore.StatesInstance>
 			int num = base.sm.sleeper.Get<Sensors>(base.smi).GetSensor<SafeCellSensor>().GetCell();
 			if (num == Grid.InvalidCell)
 			{
-				num = Grid.PosToCell(base.sm.sleeper.Get<Transform>(base.smi).position);
+				num = Grid.PosToCell(base.sm.sleeper.Get<Transform>(base.smi).GetPosition());
 			}
 			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
 			Grid.Reserved[num] = true;

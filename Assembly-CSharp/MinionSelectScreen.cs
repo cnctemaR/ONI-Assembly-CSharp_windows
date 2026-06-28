@@ -76,6 +76,14 @@ public class MinionSelectScreen : CharacterSelectionController
 		}
 	}
 
+	public override void OnPressBack()
+	{
+		foreach (CharacterContainer characterContainer in this.containers)
+		{
+			characterContainer.ForceStopEditingTitle();
+		}
+	}
+
 	[SerializeField]
 	private NewBaseScreen newBasePrefab;
 

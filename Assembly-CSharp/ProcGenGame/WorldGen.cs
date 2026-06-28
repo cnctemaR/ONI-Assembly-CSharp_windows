@@ -450,7 +450,6 @@ namespace ProcGenGame
 				list.Add(new KeyValuePair<Vector2I, TemplateContainer>(new Vector2I((int)terrainCell.poly.Centroid().x, (int)terrainCell.poly.Centroid().y), baseStartingTemplate));
 			}
 			List<TemplateContainer> list2 = TemplateCache.CollectBaseTemplateAssets("poi/");
-			Dictionary<SubWorld.ZoneType, List<TemplateContainer>> dictionary = new Dictionary<SubWorld.ZoneType, List<TemplateContainer>>();
 			foreach (SubWorld subWorld in WorldGen.Settings.GetSubWorldList())
 			{
 				if (subWorld.pointsOfInterest != null)
@@ -503,10 +502,10 @@ namespace ProcGenGame
 				float num3 = (float)j / (float)WorldGen.TerrainCells.Count * 100f;
 				WorldGen.successCallbackFn(UI.WORLDGEN.PLACINGCREATURES.key, num3, WorldGenProgressStages.Stages.PlacingCreatures);
 				TerrainCell terrainCell3 = WorldGen.TerrainCells[j];
-				Dictionary<int, string> dictionary2 = MobSpawning.PlaceAmbientMobs(terrainCell3, seededRandom, array, array2, dc, hashSet);
-				if (dictionary2 != null)
+				Dictionary<int, string> dictionary = MobSpawning.PlaceAmbientMobs(terrainCell3, seededRandom, array, array2, dc, hashSet);
+				if (dictionary != null)
 				{
-					WorldGen.data.gameSpawnData.AddRange(dictionary2);
+					WorldGen.data.gameSpawnData.AddRange(dictionary);
 				}
 			}
 			WorldGen.successCallbackFn(UI.WORLDGEN.PLACINGCREATURES.key, 100f, WorldGenProgressStages.Stages.PlacingCreatures);

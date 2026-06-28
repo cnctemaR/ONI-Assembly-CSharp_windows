@@ -357,7 +357,7 @@ public class NotificationScreen : KScreen
 			}
 			if (notification.Notifier != null)
 			{
-				notification.Position = notification.Notifier.transform.position;
+				notification.Position = notification.Notifier.transform.GetPosition();
 			}
 			if (notification.expires && KTime.Instance.UnscaledGameTime - notification.Time > this.lifetime)
 			{

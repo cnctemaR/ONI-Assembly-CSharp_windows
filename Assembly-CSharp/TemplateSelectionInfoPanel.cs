@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
-public class TemplateSelectionInfoPanel : KMonoBehaviour
+public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 {
 	public TemplateSelectionInfoPanel()
 	{
@@ -25,8 +25,7 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour
 		{
 			Util.KInstantiateUI(this.prefab_detail_label, this.current_detail_container, true);
 		}
-		this.RefreshDetails(null);
-		UIScheduler.Instance.SchedulePeriodic("RefreshTemplateSelectionInfo", 1f, new Action<object>(this.RefreshDetails), null, null);
+		this.RefreshDetails();
 		this.save_button.onClick += this.SaveCurrentDetails;
 	}
 
@@ -42,7 +41,12 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour
 		this.saved_detail_label.text = text;
 	}
 
-	public void RefreshDetails(object data = null)
+	public void Render1000ms(float dt)
+	{
+		this.RefreshDetails();
+	}
+
+	public void RefreshDetails()
 	{
 		for (int i = 0; i < this.details.Length; i++)
 		{
@@ -89,7 +93,7 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour
 		{
 			num += Grid.Element[num2].specificHeatCapacity * Grid.Cell[num2].temperature * (Grid.Cell[num2].mass * 1000f);
 		}
-		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.TOTAL_JOULES, GameUtil.GetFormattedJoules(num, "F1"));
+		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.TOTAL_JOULES, GameUtil.GetFormattedJoules(num, "F1", GameUtil.TimeSlice.None));
 	}
 
 	private static string JoulesPerKilogram(List<int> cells)
@@ -102,7 +106,7 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour
 			num2 += Grid.Cell[num3].mass;
 		}
 		num /= num2;
-		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.JOULES_PER_KILOGRAM, GameUtil.GetFormattedJoules(num, "F1"));
+		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.JOULES_PER_KILOGRAM, GameUtil.GetFormattedJoules(num, "F1", GameUtil.TimeSlice.None));
 	}
 
 	private static string MassPerElement(List<int> cells)

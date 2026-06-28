@@ -11,4 +11,6 @@ public class ScenePartitionerLayer
 	public HashedString name;
 
 	public int layer;
+
+	public Action<int, object> OnEvent;
 }

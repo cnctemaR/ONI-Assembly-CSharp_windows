@@ -5,30 +5,8 @@ using UnityEngine;
 
 public class MoveToLocationToolHoverTextCard : HoverTextConfiguration
 {
-	public override void ConfigureHoverScreen()
-	{
-		HoverTextScreen instance = HoverTextScreen.Instance;
-		if (!string.IsNullOrEmpty(this.ActionStringKey))
-		{
-			this.ActionName = Strings.Get(this.ActionStringKey);
-		}
-		if (instance.LoadPreConfiguredToolFields(this))
-		{
-			this.isConfigured = true;
-			return;
-		}
-		instance.ToggleIncubating(true);
-		instance.ClearLabels();
-		if (this.printTitle)
-		{
-			this.ConfigureTitle(instance, true);
-		}
-		this.isConfigured = true;
-	}
-
 	public override void UpdateHoverElements(List<KSelectable> selected)
 	{
-		base.UpdateHoverElements(selected);
 		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
 		if (!Grid.IsValidCell(num))
 		{
@@ -48,6 +26,4 @@ public class MoveToLocationToolHoverTextCard : HoverTextConfiguration
 		hoverTextDrawer.EndShadowBar();
 		hoverTextDrawer.EndDrawing();
 	}
-
-	private LocText unreachableLine;
 }

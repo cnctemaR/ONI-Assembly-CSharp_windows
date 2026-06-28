@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 
 public abstract class Chore
 {
-	public Chore(ChoreType chore_type, ChoreProvider chore_provider, bool run_until_complete, Action<Chore> on_complete, Action<Chore> on_begin, Action<Chore> on_end, PriorityScreen.PriorityClass priority_class, int priority_value, bool is_preemptable, bool allow_in_context_menu, int priority_mod)
+	public Chore(ChoreType chore_type, ChoreProvider chore_provider, Tag[] chore_tags, bool run_until_complete, Action<Chore> on_complete, Action<Chore> on_begin, Action<Chore> on_end, PriorityScreen.PriorityClass priority_class, int priority_value, bool is_preemptable, bool allow_in_context_menu, int priority_mod)
 	{
 		if (priority_value == 2147483647)
 		{
-			priority_value = 10;
+			priority_class = PriorityScreen.PriorityClass.emergency;
+			priority_value = 2;
 		}
 		this.masterPriority = new PrioritySetting(priority_class, priority_value);
 		this.priorityMod = priority_mod;
@@ -19,17 +22,18 @@ public abstract class Chore
 			DebugUtil.Assert(chore_provider != null, "Assert!");
 		}
 		this.choreType = chore_type;
+		this.choreTags = chore_tags;
 		this.runUntilComplete = run_until_complete;
 		this.onComplete = on_complete;
 		this.onEnd = on_end;
 		this.onBegin = on_begin;
 		this.IsPreemptable = is_preemptable;
-		this.AddPrecondition(ChorePreconditions.IsValid, null);
-		this.AddPrecondition(ChorePreconditions.IsPermitted, null);
-		this.AddPrecondition(ChorePreconditions.ChoreDriverIsNull, null);
-		this.AddPrecondition(ChorePreconditions.HasUrge, null);
-		this.AddPrecondition(ChorePreconditions.IsMoreSatisfying, null);
-		this.AddPrecondition(ChorePreconditions.IsOverrideTargetNullOrMe, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsValid, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsPermitted, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsPreemptable, null);
+		this.AddPrecondition(ChorePreconditions.instance.HasUrge, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsMoreSatisfying, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsOverrideTargetNullOrMe, null);
 		chore_provider.AddChore(this);
 	}
 
@@ -48,6 +52,12 @@ public abstract class Chore
 	public ChoreConsumer overrideTarget { get; private set; }
 
 	public bool isComplete { get; protected set; }
+
+	public bool isPreferredChoreRegardlessOfTags { get; set; }
+
+	public IStateMachineTarget target { get; protected set; }
+
+	public Tag[] choreTags { get; private set; }
 
 	public bool runUntilComplete { get; set; }
 
@@ -77,6 +87,15 @@ public abstract class Chore
 	public void SetPriorityMod(int priorityMod)
 	{
 		this.priorityMod = priorityMod;
+	}
+
+	public List<Chore.PreconditionInstance> GetPreconditions()
+	{
+		if (this.arePreconditionsDirty)
+		{
+			this.preconditions.OrderBy<Chore.PreconditionInstance, int>((Chore.PreconditionInstance x) => x.sortOrder);
+		}
+		return this.preconditions;
 	}
 
 	protected void SetPrioritizable(Prioritizable prioritizable)
@@ -115,26 +134,28 @@ public abstract class Chore
 
 	public void AddPrecondition(Chore.Precondition precondition, object data = null)
 	{
+		this.arePreconditionsDirty = true;
 		this.preconditions.Add(new Chore.PreconditionInstance
 		{
 			id = precondition.id,
+			description = precondition.description,
+			sortOrder = precondition.sortOrder,
 			fn = precondition.fn,
 			data = data
 		});
 	}
 
-	public bool CheckPrecondition(bool is_valid, string condition_name)
-	{
-		return is_valid;
-	}
-
-	public virtual void CollectChores(ChoreConsumer consumer, List<Chore.Precondition.Context> contexts, bool is_attempting_override)
+	public virtual void CollectChores(ChoreConsumer consumer, List<Chore.Precondition.Context> succeeded_contexts, List<Chore.Precondition.Context> failed_contexts, bool is_attempting_override)
 	{
 		Chore.Precondition.Context context = new Chore.Precondition.Context(this, consumer, is_attempting_override, null);
 		context.RunPreconditions();
-		if (Chore.enableChoreDebugging || context.IsSuccess())
+		if (context.IsSuccess())
 		{
-			contexts.Add(context);
+			succeeded_contexts.Add(context);
+		}
+		else
+		{
+			failed_contexts.Add(context);
 		}
 	}
 
@@ -299,9 +320,9 @@ public abstract class Chore
 
 	private static int nextId;
 
-	public static bool enableChoreDebugging;
-
 	public bool isExpanded;
+
+	public bool showAvailabilityInHoverText = true;
 
 	public PrioritySetting masterPriority;
 
@@ -317,13 +338,23 @@ public abstract class Chore
 
 	public bool debug;
 
-	public List<Chore.PreconditionInstance> preconditions = new List<Chore.PreconditionInstance>();
+	private List<Chore.PreconditionInstance> preconditions = new List<Chore.PreconditionInstance>();
+
+	private bool arePreconditionsDirty;
 
 	private Prioritizable prioritizable;
 
 	public const int MAX_PLAYER_BASIC_PRIORITY = 9;
 
 	public const int MIN_PLAYER_BASIC_PRIORITY = 1;
+
+	public const int MAX_PLAYER_HIGH_PRIORITY = 9;
+
+	public const int MIN_PLAYER_HIGH_PRIORITY = 1;
+
+	public const int MAX_PLAYER_EMERGENCY_PRIORITY = 1;
+
+	public const int MIN_PLAYER_EMERGENCY_PRIORITY = 1;
 
 	public const int DEFAULT_BASIC_PRIORITY = 5;
 
@@ -337,6 +368,10 @@ public abstract class Chore
 	{
 		public string id;
 
+		public string description;
+
+		public int sortOrder;
+
 		public Chore.PreconditionFn fn;
 
 		public object data;
@@ -346,14 +381,18 @@ public abstract class Chore
 	{
 		public string id;
 
+		public string description;
+
+		public int sortOrder;
+
 		public Chore.PreconditionFn fn;
 
+		[DebuggerDisplay("{chore.GetType()}, {chore.destination.name}")]
 		public struct Context : IComparable<Chore.Precondition.Context>, IEquatable<Chore.Precondition.Context>
 		{
 			public Context(Chore chore, ChoreConsumer consumer, bool is_attempting_override, object data = null)
 			{
 				this.masterPriority = chore.masterPriority;
-				this.masterPriority.priority_value = chore.masterPriority.priority_value;
 				this.priority = 0;
 				this.priorityMod = chore.priorityMod;
 				this.interruptPriority = 0;
@@ -363,6 +402,7 @@ public abstract class Chore
 				this.failedPreconditionId = -1;
 				this.isAttemptingOverride = is_attempting_override;
 				this.data = data;
+				this.isPreferredChore = ((!consumer.DoesPrefer(chore)) ? 0 : 1);
 				this.SetPriority(chore);
 			}
 
@@ -378,6 +418,7 @@ public abstract class Chore
 				this.failedPreconditionId = -1;
 				this.isAttemptingOverride = is_attempting_override;
 				this.data = data;
+				this.isPreferredChore = ((!consumer.DoesPrefer(chore)) ? 0 : 1);
 				this.SetPriority(chore);
 			}
 
@@ -477,6 +518,8 @@ public abstract class Chore
 
 			public PrioritySetting masterPriority;
 
+			public int isPreferredChore;
+
 			public int priority;
 
 			public int priorityMod;
@@ -491,9 +534,9 @@ public abstract class Chore
 
 			public int failedPreconditionId;
 
-			public bool isAttemptingOverride;
-
 			public object data;
+
+			public bool isAttemptingOverride;
 		}
 	}
 }

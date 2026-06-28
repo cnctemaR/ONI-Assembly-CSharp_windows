@@ -4,12 +4,12 @@ using UnityEngine;
 public class StressEmoteChore : Chore<StressEmoteChore.StatesInstance>
 {
 	public StressEmoteChore(IStateMachineTarget target, ChoreType chore_type, HashedString emote_kanim, HashedString[] emote_anims, KAnim.PlayMode play_mode, Func<StatusItem> get_status_item)
-		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
-		base.AddPrecondition(ChorePreconditions.IsMoving, null);
-		base.AddPrecondition(ChorePreconditions.IsOffLadder, null);
-		base.AddPrecondition(ChorePreconditions.NotInTube, null);
-		base.AddPrecondition(ChorePreconditions.IsAwake, null);
+		base.AddPrecondition(ChorePreconditions.instance.IsMoving, null);
+		base.AddPrecondition(ChorePreconditions.instance.IsOffLadder, null);
+		base.AddPrecondition(ChorePreconditions.instance.NotInTube, null);
+		base.AddPrecondition(ChorePreconditions.instance.IsAwake, null);
 		this.getStatusItem = get_status_item;
 		this.smi = new StressEmoteChore.StatesInstance(this, target.gameObject, emote_kanim, emote_anims, play_mode);
 	}
@@ -21,7 +21,7 @@ public class StressEmoteChore : Chore<StressEmoteChore.StatesInstance>
 
 	public override string ToString()
 	{
-		if (this.smi.emoteKAnim.IsValid())
+		if (this.smi.emoteKAnim.IsValid)
 		{
 			return "StressEmoteChore<" + this.smi.emoteKAnim + ">";
 		}

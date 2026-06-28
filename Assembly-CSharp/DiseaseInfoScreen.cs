@@ -248,7 +248,7 @@ public class DiseaseInfoScreen : TargetScreen
 		if (component.DiseaseIdx != 255 && component.DiseaseCount > 0)
 		{
 			Disease disease = Db.Get().Diseases[(int)component.DiseaseIdx];
-			int num = Grid.PosToCell(component.transform.position);
+			int num = Grid.PosToCell(component.transform.GetPosition());
 			KPrefabID component2 = component.GetComponent<KPrefabID>();
 			this.BuildFactorsStrings(component.DiseaseCount, ElementLoader.GetElementIndex(component.Element.id), num, component.Mass, component.Temperature, component2.Tags, disease);
 			return true;

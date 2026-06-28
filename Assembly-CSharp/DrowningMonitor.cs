@@ -3,7 +3,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class DrowningMonitor : KMonoBehaviour, IWiltCause
+public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 {
 	private OccupyArea occupyArea
 	{
@@ -34,14 +34,12 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.staminaHandle = GameScheduler.Instance.SchedulePeriodic("UpdateStamina", this.staminaUpdateFrequency, new Action<object>(this.UpdateStamina), null, null, 0f, null);
-		this.checkDrowningHandle = GameScheduler.Instance.SchedulePeriodic("CheckDrowning", this.staminaUpdateFrequency, new Action<object>(this.CheckDrowning), null, null, 0f, null);
-		this.OnMove(null);
+		this.OnMove();
 		this.CheckDrowning(null);
-		base.Subscribe(1088554450, new Action<object>(this.OnMove));
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove));
 	}
 
-	private void OnMove(object data = null)
+	private void OnMove()
 	{
 		if (this.partitionerEntry != null)
 		{
@@ -57,13 +55,12 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause
 
 	protected override void OnCleanUp()
 	{
+		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove));
 		if (this.partitionerEntry != null)
 		{
 			this.partitionerEntry.Release();
 		}
 		base.OnCleanUp();
-		this.staminaHandle.ClearScheduler();
-		this.checkDrowningHandle.ClearScheduler();
 	}
 
 	public void Configure(float maxStamina, float staminaRegenRate, float cellLiquidThreshold = 0.95f)
@@ -80,7 +77,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause
 		{
 			return;
 		}
-		int num = Grid.PosToCell(base.gameObject.transform.position);
+		int num = Grid.PosToCell(base.gameObject.transform.GetPosition());
 		if (!this.IsCellSafe(num))
 		{
 			if (!this.drowning)
@@ -136,8 +133,9 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause
 		this.CheckDrowning(null);
 	}
 
-	private void UpdateStamina(object data)
+	public void Sim1000ms(float dt)
 	{
+		this.CheckDrowning(null);
 		if (this.drowning)
 		{
 			if (!this.incapacitated)
@@ -186,8 +184,4 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause
 	private Extents extents;
 
 	private GameScenePartitionerEntry partitionerEntry;
-
-	private SchedulerHandle staminaHandle;
-
-	private SchedulerHandle checkDrowningHandle;
 }

@@ -10,28 +10,26 @@ public class ResearchCenterConfig : IBuildingConfig
 		int num = 2;
 		int num2 = 2;
 		string text2 = "research_center_kanim";
-		float num3 = 200f;
-		int num4 = 30;
-		float num5 = 30f;
+		int num3 = 30;
+		float num4 = 30f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.NONE, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 60f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.ExhaustKilowattsWhenActive = 0.125f;
-		buildingDef.OperatingKilowatts = 1f;
+		buildingDef.SelfHeatKilowattsWhenActive = 1f;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "large";
-		buildingDef.HotKey = global::Action.BuildMenuKeyR;
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		Prioritizable.AddRef(go);
@@ -40,19 +38,22 @@ public class ResearchCenterConfig : IBuildingConfig
 		storage.showInUI = true;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = GameTags.Dirt;
-		manualDeliveryKG.refillMass = 250f;
-		manualDeliveryKG.capacity = 500f;
+		manualDeliveryKG.requestedItemTag = ResearchCenterConfig.INPUT_MATERIAL;
+		manualDeliveryKG.refillMass = 150f;
+		manualDeliveryKG.capacity = 750f;
+		manualDeliveryKG.choreTags = GameTags.ChoreTypes.ResearchChores;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.ResearchFetch.IdHash;
 		ResearchCenter researchCenter = go.AddOrGet<ResearchCenter>();
 		researchCenter.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_research_center_kanim") };
 		researchCenter.research_point_type_id = ResearchTypes.ID.ALPHA;
+		researchCenter.inputMaterial = ResearchCenterConfig.INPUT_MATERIAL;
 		researchCenter.mass_per_point = 50f;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(GameTags.Dirt, 1.16f)
+			new ElementConverter.ConsumedElement(ResearchCenterConfig.INPUT_MATERIAL, 1.16f)
 		};
-		elementConverter.conversionInterval = 1f;
+		elementConverter.showDescriptors = false;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -70,6 +71,10 @@ public class ResearchCenterConfig : IBuildingConfig
 	public const float MIN_RESEARCH_SPEED = 0.2f;
 
 	public const float MASS_PER_POINT = 50f;
+
+	public static readonly Tag INPUT_MATERIAL = GameTags.Dirt;
+
+	public const float CAPACITY = 750f;
 
 	public const string ID = "ResearchCenter";
 }

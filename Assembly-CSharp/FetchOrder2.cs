@@ -4,18 +4,20 @@ using UnityEngine;
 
 public class FetchOrder2
 {
-	public FetchOrder2(Tag[] tags, Tag[] forbidden_tags, Storage destination, float amount, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None, int priorityMod = 0)
+	public FetchOrder2(ChoreType chore_type, Tag[] tags, Tag[] forbidden_tags, Storage destination, float amount, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None, int priorityMod = 0, Tag[] chore_tags = null)
 	{
 		if (amount <= 0f)
 		{
 			Output.LogError(new object[] { "Requesting an invalid FetchOrder2 amount" });
 		}
+		this.choreType = chore_type;
 		this.Tags = tags;
 		this.ForbiddenTags = forbidden_tags;
 		this.Destination = destination;
 		this.TotalAmount = amount;
 		this.UnfetchedAmount = amount;
 		this.PriorityMod = priorityMod;
+		this.ChoreTags = chore_tags;
 		this.operationalRequirement = operationalRequirement;
 	}
 
@@ -26,6 +28,8 @@ public class FetchOrder2
 	public Tag[] Tags { get; protected set; }
 
 	public Tag[] ForbiddenTags { get; protected set; }
+
+	public Tag[] ChoreTags { get; protected set; }
 
 	public Storage Destination { get; set; }
 
@@ -80,7 +84,7 @@ public class FetchOrder2
 
 	private void SetFetchTask(float amount)
 	{
-		FetchChore fetchChore = new FetchChore(this.Destination, amount, this.Tags, this.ForbiddenTags, null, true, new Action<Chore>(this.OnFetchChoreComplete), new Action<Chore>(this.OnFetchChoreBegin), new Action<Chore>(this.OnFetchChoreEnd), this.operationalRequirement, this.PriorityMod);
+		FetchChore fetchChore = new FetchChore(this.choreType, this.Destination, amount, this.Tags, this.ForbiddenTags, null, true, new Action<Chore>(this.OnFetchChoreComplete), new Action<Chore>(this.OnFetchChoreBegin), new Action<Chore>(this.OnFetchChoreEnd), this.operationalRequirement, this.PriorityMod, this.ChoreTags);
 		this.Chores.Add(fetchChore);
 	}
 
@@ -159,14 +163,6 @@ public class FetchOrder2
 		}
 	}
 
-	public void RefreshChoreType()
-	{
-		foreach (FetchChore fetchChore in this.Chores)
-		{
-			fetchChore.RefreshChoreType();
-		}
-	}
-
 	public bool IsMaterialOnStorage(Storage storage, ref float amount, ref Pickupable out_item)
 	{
 		foreach (GameObject gameObject in this.Destination)
@@ -242,6 +238,8 @@ public class FetchOrder2
 	public Action<FetchOrder2, Pickupable> OnComplete;
 
 	public List<FetchChore> Chores = new List<FetchChore>();
+
+	private ChoreType choreType;
 
 	private float _UnfetchedAmount;
 

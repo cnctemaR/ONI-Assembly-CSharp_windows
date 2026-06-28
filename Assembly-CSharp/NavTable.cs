@@ -4,21 +4,39 @@ public class NavTable
 {
 	public NavTable(int cell_count)
 	{
-		this.ValidCells = new bool[cell_count * 9];
+		this.ValidCells = new short[cell_count];
+		this.NavTypeMasks = new short[9];
+		for (short num = 0; num < 9; num += 1)
+		{
+			this.NavTypeMasks[(int)num] = (short)(1 << (int)num);
+		}
 	}
 
 	public bool IsValid(int cell, NavType nav_type = NavType.Floor)
 	{
-		return Grid.IsValidCell(cell) && this.ValidCells[(int)((byte)(cell * 9) + nav_type)];
+		if (Grid.IsValidCell(cell))
+		{
+			short num = this.NavTypeMasks[(int)nav_type];
+			return (num & this.ValidCells[cell]) != 0;
+		}
+		return false;
 	}
 
 	public void SetValid(int cell, NavType nav_type, bool is_valid)
 	{
-		int num = (int)((byte)(cell * 9) + nav_type);
-		bool flag = this.ValidCells[num];
+		short num = this.NavTypeMasks[(int)nav_type];
+		short num2 = this.ValidCells[cell];
+		bool flag = (num2 & num) != 0;
 		if (flag != is_valid)
 		{
-			this.ValidCells[num] = is_valid;
+			if (is_valid)
+			{
+				this.ValidCells[cell] = num | num2;
+			}
+			else
+			{
+				this.ValidCells[cell] = ~num & num2;
+			}
 			if (this.OnValidCellChanged != null)
 			{
 				this.OnValidCellChanged(cell, nav_type);
@@ -28,5 +46,7 @@ public class NavTable
 
 	public Action<int, NavType> OnValidCellChanged;
 
-	private bool[] ValidCells;
+	private short[] NavTypeMasks;
+
+	private short[] ValidCells;
 }

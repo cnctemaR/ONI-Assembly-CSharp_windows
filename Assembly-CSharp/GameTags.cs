@@ -47,6 +47,8 @@ public class GameTags
 
 	public static readonly Tag BuildableAny = TagManager.Create("BuildableAny", null);
 
+	public static readonly Tag Decoration = TagManager.Create("Decoration", null);
+
 	public static readonly Tag Incapacitated = TagManager.Create("Incapacitated", null);
 
 	public static readonly Tag CaloriesDepleted = TagManager.Create("CaloriesDepleted", null);
@@ -115,8 +117,6 @@ public class GameTags
 
 	public static readonly Tag SlimeMold = TagManager.Create("SlimeMold", null);
 
-	public static readonly Tag Building = TagManager.Create("Building", null);
-
 	public static readonly Tag Filler = TagManager.Create("Filler", null);
 
 	public static readonly Tag Item = TagManager.Create("Item", null);
@@ -148,6 +148,8 @@ public class GameTags
 	public static readonly Tag Gas = TagManager.Create("Gas", null);
 
 	public static readonly Tag Crushable = TagManager.Create("Crushable", null);
+
+	public static readonly Tag IronOre = TagManager.Create("IronOre", null);
 
 	public static readonly Tag Minion = TagManager.Create("Minion", null);
 
@@ -209,6 +211,8 @@ public class GameTags
 
 	public static readonly Tag Helmet = TagManager.Create("Helmet", null);
 
+	public static readonly Tag Equipped = TagManager.Create("Equipped", null);
+
 	public static readonly Tag Entombed = TagManager.Create("Entombed", null);
 
 	public static readonly Tag Preserved = TagManager.Create("Preserved", null);
@@ -234,6 +238,12 @@ public class GameTags
 	public static readonly Tag Idle = TagManager.Create("Idle", null);
 
 	public static readonly Tag Operational = TagManager.Create("Operational", null);
+
+	public static readonly Tag Stored = TagManager.Create("Stored", null);
+
+	public static readonly Tag StoredPrivate = TagManager.Create("StoredPrivate", null);
+
+	public static readonly Tag Sealed = TagManager.Create("Sealed", null);
 
 	public static readonly Tag CropSeed = TagManager.Create("CropSeed", null);
 
@@ -312,4 +322,51 @@ public class GameTags
 	public static TagSet DisplayAsCalories = new TagSet(GameTags.CalorieCategories);
 
 	public static TagSet DisplayAsUnits = new TagSet(GameTags.UnitCategories);
+
+	public abstract class ChoreTypes
+	{
+		public static readonly Tag Farming = TagManager.Create("Farming", null);
+
+		public static readonly Tag Research = TagManager.Create("Research", null);
+
+		public static readonly Tag Power = TagManager.Create("Power", null);
+
+		public static readonly Tag Building = TagManager.Create("Building", null);
+
+		public static readonly Tag Cooking = TagManager.Create("Cooking", null);
+
+		public static readonly Tag Fabricating = TagManager.Create("Fabricating", null);
+
+		public static readonly Tag Wiring = TagManager.Create("Wiring", null);
+
+		public static readonly Tag Art = TagManager.Create("Art", null);
+
+		public static readonly Tag Digging = TagManager.Create("Digging", null);
+
+		public static readonly Tag Doctoring = TagManager.Create("Doctoring", null);
+
+		public static readonly Tag Conveyor = TagManager.Create("Conveyor", null);
+
+		public static readonly Tag[] FabricateChores = new Tag[] { GameTags.ChoreTypes.Fabricating };
+
+		public static readonly Tag[] FarmingChores = new Tag[] { GameTags.ChoreTypes.Farming };
+
+		public static readonly Tag[] CookingChores = new Tag[] { GameTags.ChoreTypes.Cooking };
+
+		public static readonly Tag[] PowerChores = new Tag[] { GameTags.ChoreTypes.Power };
+
+		public static readonly Tag[] WiringChores = new Tag[] { GameTags.ChoreTypes.Wiring };
+
+		public static readonly Tag[] BuildingChores = new Tag[] { GameTags.ChoreTypes.Building };
+
+		public static readonly Tag[] ResearchChores = new Tag[] { GameTags.ChoreTypes.Research };
+
+		public static readonly Tag[] ArtChores = new Tag[] { GameTags.ChoreTypes.Art };
+
+		public static readonly Tag[] DigChores = new Tag[] { GameTags.ChoreTypes.Digging };
+
+		public static readonly Tag[] DoctoringChores = new Tag[] { GameTags.ChoreTypes.Doctoring };
+
+		public static readonly Tag[] ConveyorChores = new Tag[] { GameTags.ChoreTypes.Conveyor };
+	}
 }

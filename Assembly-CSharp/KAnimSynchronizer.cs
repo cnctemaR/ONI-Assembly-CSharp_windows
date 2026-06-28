@@ -56,7 +56,7 @@ public class KAnimSynchronizer
 		Facing component = controller.GetComponent<Facing>();
 		if (component != null)
 		{
-			component.Face(component.transform.position.x + 1f);
+			component.Face(component.transform.GetPosition().x + 1f);
 		}
 		else
 		{

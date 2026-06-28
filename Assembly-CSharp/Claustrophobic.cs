@@ -40,7 +40,7 @@ public class Claustrophobic : StateMachineComponent<Claustrophobic.StatesInstanc
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.satisfied;
-			this.root.ToggleSchedulePeriodic("ClaustrophobicCheck", 1f, delegate(Claustrophobic.StatesInstance smi)
+			this.root.Update("ClaustrophobicCheck", delegate(Claustrophobic.StatesInstance smi, float dt)
 			{
 				if (smi.master.IsUncomfortable())
 				{
@@ -50,7 +50,7 @@ public class Claustrophobic : StateMachineComponent<Claustrophobic.StatesInstanc
 				{
 					smi.GoTo(this.satisfied);
 				}
-			});
+			}, UpdateRate.SIM_1000ms, false);
 			this.suffering.AddEffect("Claustrophobic").ToggleExpression(Db.Get().Expressions.Uncomfortable, null);
 			this.satisfied.DoNothing();
 		}

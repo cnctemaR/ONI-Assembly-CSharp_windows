@@ -48,6 +48,11 @@ namespace Klei.AI
 			}
 		}
 
+		public string GetDescription()
+		{
+			return (this.DescriptionCB == null) ? this.Description : this.DescriptionCB();
+		}
+
 		public string GetFormattedString(GameObject parent_instance)
 		{
 			IAttributeFormatter attributeFormatter = null;

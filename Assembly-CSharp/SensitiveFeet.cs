@@ -27,7 +27,7 @@ public class SensitiveFeet : StateMachineComponent<SensitiveFeet.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.satisfied;
-			this.root.ToggleSchedulePeriodic("SensitiveFeetCheck", 1f, delegate(SensitiveFeet.StatesInstance smi)
+			this.root.Update("SensitiveFeetCheck", delegate(SensitiveFeet.StatesInstance smi, float dt)
 			{
 				if (smi.master.IsUncomfortable())
 				{
@@ -37,7 +37,7 @@ public class SensitiveFeet : StateMachineComponent<SensitiveFeet.StatesInstance>
 				{
 					smi.GoTo(this.satisfied);
 				}
-			});
+			}, UpdateRate.SIM_1000ms, false);
 			this.suffering.AddEffect("UncomfortableFeet").ToggleExpression(Db.Get().Expressions.Uncomfortable, null);
 			this.satisfied.DoNothing();
 		}

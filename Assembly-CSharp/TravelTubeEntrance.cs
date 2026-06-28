@@ -4,7 +4,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMInstance>, ISaveLoadable
+public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMInstance>, ISaveLoadable, ISim200ms
 {
 	public float AvailableJoules
 	{
@@ -47,12 +47,12 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		int num = (int)base.transform.position.x;
-		int num2 = (int)base.transform.position.y + 2;
+		int num = (int)base.transform.GetPosition().x;
+		int num2 = (int)base.transform.GetPosition().y + 2;
 		Extents extents = new Extents(num, num2, 1, 1);
 		UtilityConnections connections = Game.Instance.travelTubeSystem.GetConnections(Grid.XYToCell(num, num2), true);
 		this.TubeConnectionsChanged(connections);
-		this.tubeChangedEntry = GameScenePartitioner.Instance.Add("TravelTubeEntrance.TubeListener", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[28], new Action<object>(this.TubeChanged));
+		this.tubeChangedEntry = GameScenePartitioner.Instance.Add("TravelTubeEntrance.TubeListener", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[32], new Action<object>(this.TubeChanged));
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		this.meter = new MeterController(this, Meter.Offset.Infront, new string[0]);
 		this.CreateNewWaitReactable();
@@ -105,7 +105,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		return this.operational.IsFunctional && (this.button == null || this.button.IsEnabled) && this.energyConsumer.IsExternallyPowered && this.availableJoules < this.jouleCapacity;
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		if (this.CanAcceptMorePower())
 		{

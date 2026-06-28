@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using KSerialization;
 using UnityEngine;
@@ -26,8 +27,13 @@ public class Prioritizable : KMonoBehaviour
 	{
 		if (this.masterPriority != -2147483648)
 		{
-			this.masterPrioritySetting = new PrioritySetting(PriorityScreen.PriorityClass.basic, this.masterPriority);
+			this.masterPrioritySetting = new PrioritySetting(PriorityScreen.PriorityClass.basic, 5);
 			this.masterPriority = int.MinValue;
+		}
+		PrioritySetting prioritySetting;
+		if (SaveLoader.Instance.GameInfo.IsVersionExactly(7, 2) && Prioritizable.conversions.TryGetValue(this.masterPrioritySetting, out prioritySetting))
+		{
+			this.masterPrioritySetting = prioritySetting;
 		}
 	}
 
@@ -114,4 +120,48 @@ public class Prioritizable : KMonoBehaviour
 
 	[SerializeField]
 	private int refCount;
+
+	private static Dictionary<PrioritySetting, PrioritySetting> conversions = new Dictionary<PrioritySetting, PrioritySetting>
+	{
+		{
+			new PrioritySetting(PriorityScreen.PriorityClass.basic, 1),
+			new PrioritySetting(PriorityScreen.PriorityClass.basic, 4)
+		},
+		{
+			new PrioritySetting(PriorityScreen.PriorityClass.basic, 2),
+			new PrioritySetting(PriorityScreen.PriorityClass.basic, 5)
+		},
+		{
+			new PrioritySetting(PriorityScreen.PriorityClass.basic, 3),
+			new PrioritySetting(PriorityScreen.PriorityClass.basic, 6)
+		},
+		{
+			new PrioritySetting(PriorityScreen.PriorityClass.basic, 4),
+			new PrioritySetting(PriorityScreen.PriorityClass.basic, 7)
+		},
+		{
+			new PrioritySetting(PriorityScreen.PriorityClass.basic, 5),
+			new PrioritySetting(PriorityScreen.PriorityClass.basic, 8)
+		},
+		{
+			new PrioritySetting(PriorityScreen.PriorityClass.high, 1),
+			new PrioritySetting(PriorityScreen.PriorityClass.basic, 6)
+		},
+		{
+			new PrioritySetting(PriorityScreen.PriorityClass.high, 2),
+			new PrioritySetting(PriorityScreen.PriorityClass.basic, 7)
+		},
+		{
+			new PrioritySetting(PriorityScreen.PriorityClass.high, 3),
+			new PrioritySetting(PriorityScreen.PriorityClass.basic, 8)
+		},
+		{
+			new PrioritySetting(PriorityScreen.PriorityClass.high, 4),
+			new PrioritySetting(PriorityScreen.PriorityClass.basic, 9)
+		},
+		{
+			new PrioritySetting(PriorityScreen.PriorityClass.high, 5),
+			new PrioritySetting(PriorityScreen.PriorityClass.basic, 9)
+		}
+	};
 }

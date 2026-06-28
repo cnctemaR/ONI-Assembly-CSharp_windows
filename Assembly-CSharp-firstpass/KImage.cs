@@ -19,8 +19,33 @@ public class KImage : Image
 		this.ColorState = this.defaultState;
 	}
 
+	protected override void OnEnable()
+	{
+		bool flag = this.clearMaskOnDisable;
+		if (!this.hasEnabledOnce)
+		{
+			this.hasEnabledOnce = true;
+		}
+		base.OnEnable();
+	}
+
+	protected override void OnDisable()
+	{
+		bool flag = this.clearMaskOnDisable;
+		base.OnDisable();
+	}
+
+	protected override void OnDestroy()
+	{
+		base.OnDestroy();
+		bool flag = !this.clearMaskOnDisable;
+		if (flag)
+		{
+		}
+	}
+
 	[ContextMenu("Apply Color Style Settings")]
-	private void ApplyColorStyleSetting()
+	public void ApplyColorStyleSetting()
 	{
 		if (this.colorStyleSetting != null)
 		{
@@ -47,6 +72,10 @@ public class KImage : Image
 	private KImage.ColorSelector colorSelector = KImage.ColorSelector.Inactive;
 
 	public ColorStyleSetting colorStyleSetting;
+
+	public bool clearMaskOnDisable = true;
+
+	private bool hasEnabledOnce;
 
 	public enum ColorSelector
 	{

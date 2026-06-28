@@ -9,7 +9,6 @@ namespace NodeEditorFramework.Utilities
 	{
 		public static void SetDefaultResourcePath(string defaultResourcePath)
 		{
-			ResourceManager._ResourcePath = defaultResourcePath;
 		}
 
 		public static string PreparePath(string path)
@@ -116,8 +115,6 @@ namespace NodeEditorFramework.Utilities
 		{
 			return modsA.Length == modsB.Length && Array.TrueForAll<string>(modsA, (string mod) => modsB.Count<string>((string oMod) => mod == oMod) == modsA.Count<string>((string oMod) => mod == oMod));
 		}
-
-		private static string _ResourcePath = string.Empty;
 
 		private static List<ResourceManager.MemoryTexture> loadedTextures = new List<ResourceManager.MemoryTexture>();
 

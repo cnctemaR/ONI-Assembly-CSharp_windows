@@ -3,7 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class LogicTimeOfDaySensor : Switch, ISaveLoadable
+public class LogicTimeOfDaySensor : Switch, ISaveLoadable, ISim200ms
 {
 	protected override void OnSpawn()
 	{
@@ -14,15 +14,15 @@ public class LogicTimeOfDaySensor : Switch, ISaveLoadable
 		this.wasOn = this.switchedOn;
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
-		float currentDayAsPercentage = GameClock.Instance.GetCurrentDayAsPercentage();
+		float currentCycleAsPercentage = GameClock.Instance.GetCurrentCycleAsPercentage();
 		bool flag = false;
-		if (currentDayAsPercentage >= this.startTime && currentDayAsPercentage < this.startTime + this.duration)
+		if (currentCycleAsPercentage >= this.startTime && currentCycleAsPercentage < this.startTime + this.duration)
 		{
 			flag = true;
 		}
-		if (currentDayAsPercentage < this.startTime + this.duration - 1f)
+		if (currentCycleAsPercentage < this.startTime + this.duration - 1f)
 		{
 			flag = true;
 		}

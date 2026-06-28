@@ -58,7 +58,7 @@ public class SolitarySleeper : StateMachineComponent<SolitarySleeper.StatesInsta
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.satisfied;
-			this.root.EventTransition(GameHashes.Died, null, (SolitarySleeper.StatesInstance smi) => smi.gameObject.GetSMI<DeathMonitor.Instance>().IsDead()).EventTransition(GameHashes.NewDay, this.satisfied, null).ToggleSchedulePeriodic("SolitarySleeperCheck", 6f, delegate(SolitarySleeper.StatesInstance smi)
+			this.root.EventTransition(GameHashes.Died, null, (SolitarySleeper.StatesInstance smi) => smi.gameObject.GetSMI<DeathMonitor.Instance>().IsDead()).EventTransition(GameHashes.NewDay, this.satisfied, null).Update("SolitarySleeperCheck", delegate(SolitarySleeper.StatesInstance smi, float dt)
 			{
 				if (smi.master.IsUncomfortable())
 				{
@@ -71,11 +71,11 @@ public class SolitarySleeper : StateMachineComponent<SolitarySleeper.StatesInsta
 				{
 					smi.GoTo(this.satisfied);
 				}
-			});
-			this.suffering.AddEffect("PeopleTooCloseWhileSleeping").ToggleExpression(Db.Get().Expressions.Uncomfortable, null).ToggleSchedulePeriodic("PeopleTooCloseSleepFail", 2f, delegate(SolitarySleeper.StatesInstance smi)
+			}, UpdateRate.SIM_4000ms, false);
+			this.suffering.AddEffect("PeopleTooCloseWhileSleeping").ToggleExpression(Db.Get().Expressions.Uncomfortable, null).Update("PeopleTooCloseSleepFail", delegate(SolitarySleeper.StatesInstance smi, float dt)
 			{
 				smi.master.gameObject.Trigger(1338475637, this);
-			});
+			}, UpdateRate.SIM_1000ms, false);
 			this.satisfied.DoNothing();
 		}
 

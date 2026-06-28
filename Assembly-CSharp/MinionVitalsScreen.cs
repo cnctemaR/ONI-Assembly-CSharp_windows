@@ -11,7 +11,7 @@ public class MinionVitalsScreen : TargetScreen
 	public override void OnSelectTarget(GameObject target)
 	{
 		this.panel.selectedEntity = target;
-		this.panel.Refresh(null);
+		this.panel.Refresh();
 	}
 
 	public override void OnDeselectTarget(GameObject target)

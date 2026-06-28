@@ -118,6 +118,8 @@ public abstract class StateMachine
 
 	public int dataTableSize;
 
+	public int updateTableSize;
+
 	public StateMachineDebuggerSettings.Entry debugSettings;
 
 	public bool saveHistory;
@@ -151,17 +153,11 @@ public abstract class StateMachine
 			this.CreateParameterContexts();
 		}
 
-		public abstract void Update();
-
 		public abstract StateMachine.BaseState GetCurrentState();
 
 		public abstract void GoTo(StateMachine.BaseState state);
 
 		public abstract float timeinstate { get; }
-
-		public abstract float deltatime { get; }
-
-		public abstract float dt { get; }
 
 		public abstract IStateMachineTarget GetMaster();
 
@@ -179,6 +175,7 @@ public abstract class StateMachine
 			this.subscribedEvents = null;
 			this.parameterContexts = null;
 			this.dataTable = null;
+			this.updateTable = null;
 		}
 
 		public bool IsRunning()
@@ -375,8 +372,6 @@ public abstract class StateMachine
 			}
 		}
 
-		public const float UPDATE_TIME = 0.2f;
-
 		protected StateMachine.Status status;
 
 		protected StateMachine stateMachine;
@@ -389,9 +384,9 @@ public abstract class StateMachine
 
 		public object[] dataTable;
 
-		private Action<object> scheduleGoToCallback;
+		public StateMachine.Instance.UpdateTableEntry[] updateTable;
 
-		protected int updatingStateCount;
+		private Action<object> scheduleGoToCallback;
 
 		public Action<string, StateMachine.Status> OnStop;
 
@@ -409,6 +404,13 @@ public abstract class StateMachine
 			{
 				return StateMachineManager.Instance.CreateSMIFromDef(master, this);
 			}
+		}
+
+		public struct UpdateTableEntry
+		{
+			public HandleVector<int>.Handle handle;
+
+			public StateMachineUpdater.BaseUpdateBucket bucket;
 		}
 	}
 
@@ -442,35 +444,13 @@ public abstract class StateMachine
 			}
 			this.transitions = null;
 			this.parameterTransitions = null;
-			if (this.enterActions != null)
-			{
-				for (int j = 0; j < this.enterActions.Length; j++)
-				{
-					this.enterActions[j].Clear();
-				}
-			}
 			this.enterActions = null;
-			if (this.exitActions != null)
-			{
-				for (int k = 0; k < this.exitActions.Length; k++)
-				{
-					this.exitActions[k].Clear();
-				}
-			}
 			this.exitActions = null;
-			if (this.updateActions != null)
-			{
-				for (int l = 0; l < this.updateActions.Length; l++)
-				{
-					this.updateActions[l].Clear();
-				}
-			}
-			this.updateActions = null;
 			if (this.branch != null)
 			{
-				for (int m = 0; m < this.branch.Length; m++)
+				for (int j = 0; j < this.branch.Length; j++)
 				{
-					this.branch[m].FreeResources();
+					this.branch[j].FreeResources();
 				}
 			}
 			this.branch = null;
@@ -521,11 +501,11 @@ public abstract class StateMachine
 
 		public StateMachine.ParameterTransition[] parameterTransitions;
 
+		public StateMachine.UpdateAction[] updateActions;
+
 		public StateMachine.Action[] enterActions;
 
 		public StateMachine.Action[] exitActions;
-
-		public StateMachine.Action[] updateActions;
 
 		public StateMachine.BaseState[] branch;
 
@@ -565,29 +545,28 @@ public abstract class StateMachine
 		public StateMachine.BaseState targetState;
 	}
 
-	public class Action
+	public struct UpdateAction
 	{
-		public Action(string name, string log_name, object callback)
+		public int updateTableIdx;
+
+		public UpdateRate updateRate;
+
+		public int nextBucketIdx;
+
+		public StateMachineUpdater.BaseUpdateBucket[] buckets;
+
+		public object updater;
+	}
+
+	public struct Action
+	{
+		public Action(string name, object callback)
 		{
 			this.name = name;
-			this.logName = log_name;
-			this.prefixedLogName = "." + log_name;
 			this.callback = callback;
 		}
 
-		public void Clear()
-		{
-			this.name = null;
-			this.logName = null;
-			this.callback = null;
-			this.prefixedLogName = null;
-		}
-
 		public string name;
-
-		public string logName;
-
-		public string prefixedLogName;
 
 		public object callback;
 	}

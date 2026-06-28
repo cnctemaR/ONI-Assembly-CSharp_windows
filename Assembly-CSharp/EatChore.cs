@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
+using STRINGS;
 using UnityEngine;
 
 public class EatChore : Chore<EatChore.StatesInstance>
 {
 	public EatChore(IStateMachineTarget master)
-		: base(Db.Get().ChoreTypes.Eat, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Eat, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new EatChore.StatesInstance(this);
-		base.AddPrecondition(ChorePreconditions.IsNotRedAlert, null);
-		base.AddPrecondition(ChorePreconditions.IsScheduledTime, Db.Get().ScheduleBlockTypes.Eat);
+		this.showAvailabilityInHoverText = false;
+		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
+		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Eat);
 		base.AddPrecondition(EatChore.EdibleIsNotNull, null);
 	}
 
@@ -59,6 +61,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 	public static Chore.Precondition EdibleIsNotNull = new Chore.Precondition
 	{
 		id = "EdibleIsNotNull",
+		description = DUPLICANTS.CHORES.PRECONDITIONS.EDIBLE_IS_NOT_NULL,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			return null != context.consumer.GetSMI<RationMonitor.Instance>().GetEdible();
@@ -75,12 +78,11 @@ public class EatChore : Chore<EatChore.StatesInstance>
 		public void UpdateMessStation()
 		{
 			Ownables component = base.sm.eater.Get(base.smi).GetComponent<Ownables>();
-			Navigator component2 = component.GetComponent<Navigator>();
-			List<Assignable> preferredAssignables = Game.Instance.assignmentManager.GetPreferredAssignables(component2, Db.Get().OwnableSlots.MessStation);
+			List<Assignable> preferredAssignables = Game.Instance.assignmentManager.GetPreferredAssignables(component, Db.Get().AssignableSlots.MessStation);
 			Assignable assignable = ((preferredAssignables.Count <= 0) ? null : preferredAssignables[0]);
 			if (assignable == null)
 			{
-				component.AutoAssignSlot(component2, Db.Get().OwnableSlots.MessStation);
+				component.AutoAssignSlot(Db.Get().AssignableSlots.MessStation);
 			}
 			base.smi.sm.messstation.Set(assignable, base.smi);
 		}
@@ -90,7 +92,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			int num = base.sm.eater.Get<Sensors>(base.smi).GetSensor<SafeCellSensor>().GetCell();
 			if (num == Grid.InvalidCell)
 			{
-				num = Grid.PosToCell(base.sm.eater.Get<Transform>(base.smi).position);
+				num = Grid.PosToCell(base.sm.eater.Get<Transform>(base.smi).GetPosition());
 			}
 			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
 			Grid.Reserved[num] = true;
@@ -113,9 +115,9 @@ public class EatChore : Chore<EatChore.StatesInstance>
 
 		public void SetZ(GameObject go, float z)
 		{
-			Vector3 position = go.transform.position;
+			Vector3 position = go.transform.GetPosition();
 			position.z = z;
-			go.transform.position = position;
+			go.transform.SetPosition(position);
 		}
 
 		private int locatorCell;
@@ -140,11 +142,11 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			this.eatatmessstation.eat.ToggleAnims("anim_eat_table_kanim", 0f).DoEat(this.ediblechunk, this.actualfoodunits, null, null).Enter(delegate(EatChore.StatesInstance smi)
 			{
 				smi.SetZ(this.eater.Get(smi), Grid.GetLayerZ(Grid.SceneLayer.BuildingFront));
-				Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(this.messstation.Get(smi).GetComponent<BuildingComplete>());
+				Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(this.messstation.Get(smi).gameObject);
 				if (roomOfBuilding != null)
 				{
-					string id = RoomTypes.GetRoomType(roomOfBuilding).id;
-					if (id == "MessHall")
+					RoomType roomType = Db.Get().RoomTypes.GetRoomType(roomOfBuilding);
+					if (roomType == Db.Get().RoomTypes.MessHall)
 					{
 						this.eater.Get(smi).gameObject.GetComponent<Effects>().Add("EatInMessHall", true);
 					}

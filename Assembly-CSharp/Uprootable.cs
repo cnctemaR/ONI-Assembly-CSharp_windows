@@ -36,6 +36,8 @@ public class Uprootable : Workable
 		base.OnPrefabInit();
 		this.pendingStatusItem = Db.Get().MiscStatusItems.PendingUproot;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Uprooting;
+		this.multitoolContext = "harvest";
+		this.multitoolHitEffectHash = new HashedString("fx_harvest_splash");
 		base.Subscribe(1309017699, new Action<object>(this.OnPlanterStorage));
 	}
 
@@ -108,7 +110,7 @@ public class Uprootable : Workable
 		}
 		else if (this.chore == null)
 		{
-			this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 			base.GetComponent<KSelectable>().AddStatusItem(this.pendingStatusItem, this);
 		}
 		this.isMarkedForUproot = true;
@@ -199,13 +201,6 @@ public class Uprootable : Workable
 	{
 		base.OnStartWork(worker);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingUproot, false);
-	}
-
-	public override Workable.AnimInfo GetAnim(Worker worker)
-	{
-		Workable.AnimInfo anim = base.GetAnim(worker);
-		anim.smi = new MultitoolController.Instance(this, worker, "harvest", EffectPrefabs.Instance.HarvestEffect);
-		return anim;
 	}
 
 	[MyCmpAdd]

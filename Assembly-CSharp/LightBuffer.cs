@@ -55,7 +55,7 @@ public class LightBuffer : MonoBehaviour
 			{
 				MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
 				materialPropertyBlock.SetVector(this.ColorRangeTag, new Vector4(light2D.Color.r * light2D.IntensityAnimation, light2D.Color.g * light2D.IntensityAnimation, light2D.Color.b * light2D.IntensityAnimation, light2D.Range));
-				Vector3 position = light2D.transform.position;
+				Vector3 position = light2D.transform.GetPosition();
 				position.x += light2D.Offset.x;
 				position.y += light2D.Offset.y;
 				materialPropertyBlock.SetVector(this.LightPosTag, new Vector4(position.x, position.y, 0f, 0f));

@@ -9,10 +9,10 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 	{
 		default_state = this.satisfied;
 		base.serializable = true;
-		this.satisfied.Update("UpdateDecomposition", delegate(DecompositionMonitor.Instance smi)
+		this.satisfied.Update("UpdateDecomposition", delegate(DecompositionMonitor.Instance smi, float dt)
 		{
-			smi.UpdateDecomposition();
-		}).ParamTransition<float>(this.decomposition, this.rotten, (DecompositionMonitor.Instance smi, float p) => p >= 1f).ToggleAttributeModifier("Dead", (DecompositionMonitor.Instance smi) => smi.satisfiedDecorModifier, null)
+			smi.UpdateDecomposition(dt);
+		}, UpdateRate.SIM_200ms, false).ParamTransition<float>(this.decomposition, this.rotten, (DecompositionMonitor.Instance smi, float p) => p >= 1f).ToggleAttributeModifier("Dead", (DecompositionMonitor.Instance smi) => smi.satisfiedDecorModifier, null)
 			.ToggleAttributeModifier("Dead", (DecompositionMonitor.Instance smi) => smi.satisfiedDecorRadiusModifier, null);
 		this.rotten.DefaultState(this.rotten.exposed).ToggleStatusItem(Db.Get().DuplicantStatusItems.Rotten, null).ToggleAttributeModifier("Rotten", (DecompositionMonitor.Instance smi) => smi.rottenDecorModifier, null)
 			.ToggleAttributeModifier("Rotten", (DecompositionMonitor.Instance smi) => smi.rottenDecorRadiusModifier, null);
@@ -23,8 +23,8 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 			{
 				smi.ScheduleGoTo(global::UnityEngine.Random.Range(150f, 300f), this.rotten.spawningmonster);
 			}
-		}).Transition(this.rotten.exposed.submerged, (DecompositionMonitor.Instance smi) => smi.IsSubmerged()).ToggleFX((DecompositionMonitor.Instance smi) => this.CreateFX(smi));
-		this.rotten.exposed.submerged.DefaultState(this.rotten.exposed.submerged.idle).Transition(this.rotten.exposed.openair, (DecompositionMonitor.Instance smi) => !smi.IsSubmerged());
+		}).Transition(this.rotten.exposed.submerged, (DecompositionMonitor.Instance smi) => smi.IsSubmerged(), UpdateRate.SIM_200ms).ToggleFX((DecompositionMonitor.Instance smi) => this.CreateFX(smi));
+		this.rotten.exposed.submerged.DefaultState(this.rotten.exposed.submerged.idle).Transition(this.rotten.exposed.openair, (DecompositionMonitor.Instance smi) => !smi.IsSubmerged(), UpdateRate.SIM_200ms);
 		this.rotten.exposed.submerged.idle.ScheduleGoTo(0.25f, this.rotten.exposed.submerged.dirtywater);
 		this.rotten.exposed.submerged.dirtywater.Enter("DirtyWater", delegate(DecompositionMonitor.Instance smi)
 		{
@@ -35,7 +35,7 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 			if (this.remainingRotMonsters > 0)
 			{
 				this.remainingRotMonsters--;
-				GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(new Tag("Glom")), smi.transform.position, Grid.SceneLayer.Creatures, SceneOrganizer.Instance.GetFolder(Folder.Creatures), null, 0);
+				GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(new Tag("Glom")), smi.transform.GetPosition(), Grid.SceneLayer.Creatures, SceneOrganizer.Instance.GetFolder(Folder.Creatures), null, 0);
 				gameObject.SetActive(true);
 			}
 			smi.GoTo(this.rotten.exposed);
@@ -95,9 +95,9 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 			this.spawnsRotMonsters = spawnRotMonsters;
 		}
 
-		public void UpdateDecomposition()
+		public void UpdateDecomposition(float dt)
 		{
-			float num = this.deltatime * this.decompositionRate;
+			float num = dt * this.decompositionRate;
 			base.sm.decomposition.Delta(num, base.smi);
 		}
 
@@ -114,12 +114,12 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 
 		public bool IsSubmerged()
 		{
-			return PathFinder.IsSubmerged(Grid.PosToCell(base.master.transform.position));
+			return PathFinder.IsSubmerged(Grid.PosToCell(base.master.transform.GetPosition()));
 		}
 
 		public void DirtyWater(int maxCellRange = 3)
 		{
-			int num = Grid.PosToCell(base.master.transform.position);
+			int num = Grid.PosToCell(base.master.transform.GetPosition());
 			if (Grid.Element[num].id == SimHashes.Water)
 			{
 				SimMessages.ReplaceElement(num, SimHashes.DirtyWater, CellEventLogger.Instance.DecompositionDirtyWater, Grid.Cell[num].mass, Grid.Temperature[num], Grid.Disease[num].diseaseIdx, Grid.Disease[num].elementCount, -1);

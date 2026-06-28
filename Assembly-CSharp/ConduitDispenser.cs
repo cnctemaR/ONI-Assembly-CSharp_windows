@@ -52,7 +52,7 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 		this.utilityCell = base.GetComponent<Building>().GetUtilityOutputCell();
 		ScenePartitionerLayer scenePartitionerLayer = GameScenePartitioner.Instance.objectLayers[(this.conduitType != ConduitType.Gas) ? 16 : 12];
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("ConduitConsumer.OnSpawn", base.gameObject, this.utilityCell, scenePartitionerLayer, new Action<object>(this.OnConduitConnectionChanged));
-		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlow.Priority.Last);
+		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Last);
 		this.OnConduitConnectionChanged(null);
 	}
 
@@ -92,11 +92,14 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 	private PrimaryElement FindSuitableElement()
 	{
 		List<GameObject> items = this.storage.items;
-		for (int i = 0; i < items.Count; i++)
+		int count = items.Count;
+		for (int i = 0; i < count; i++)
 		{
-			PrimaryElement component = items[i].GetComponent<PrimaryElement>();
+			int num = (i + this.elementOutputOffset) % count;
+			PrimaryElement component = items[num].GetComponent<PrimaryElement>();
 			if (component != null && component.Mass > 0f && ((this.conduitType != ConduitType.Liquid) ? component.Element.IsGas : component.Element.IsLiquid) && (this.elementFilter == null || this.elementFilter.Length == 0 || (!this.invertElementFilter && this.IsFilteredElement(component.ElementID)) || (this.invertElementFilter && !this.IsFilteredElement(component.ElementID))))
 			{
+				this.elementOutputOffset = (this.elementOutputOffset + 1) % count;
 				return component;
 			}
 		}
@@ -140,4 +143,6 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 	private GameScenePartitionerEntry partitionerEntry;
 
 	private int utilityCell = -1;
+
+	private int elementOutputOffset;
 }

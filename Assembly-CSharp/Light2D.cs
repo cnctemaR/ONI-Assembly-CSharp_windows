@@ -82,19 +82,18 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			return;
 		}
-		Vector3 position = base.transform.position;
+		Vector3 position = base.transform.GetPosition();
 		position = new Vector3(position.x + this.Offset.x, position.y + this.Offset.y, position.z);
 		int num = Grid.PosToCell(position);
 		if (Grid.IsValidCell(num))
 		{
 			Vector2I vector2I = Grid.CellToXY(num);
 			int num2 = (int)this.Range;
-			int num3 = num2 / 2;
 			if (this.shape == LightShape.Circle)
 			{
-				Vector2I vector2I2 = new Vector2I(vector2I.x - num3, vector2I.y - num3);
-				this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I2.x, vector2I2.y, num2, num2, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.TriggerRefresh));
-				this.liquidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I2.x, vector2I2.y, num2, num2, GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.TriggerRefresh));
+				Vector2I vector2I2 = new Vector2I(vector2I.x - num2, vector2I.y - num2);
+				this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I2.x, vector2I2.y, 2 * num2, 2 * num2, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.TriggerRefresh));
+				this.liquidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I2.x, vector2I2.y, 2 * num2, 2 * num2, GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.TriggerRefresh));
 			}
 			else if (this.shape == LightShape.Cone)
 			{
@@ -103,7 +102,8 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 				this.liquidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I3.x, vector2I3.y, 2 * num2, num2, GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.TriggerRefresh));
 			}
 			this.cell = num;
-			this.emitter = new LightGridManager.LightGridEmitter(this.cell, 1, this.Range, this.Color, this.shape);
+			this.litCells.Clear();
+			this.emitter = new LightGridManager.LightGridEmitter(this.cell, this.litCells, 1, this.Range, this.Color, this.shape);
 			this.emitter.Add();
 			this.isRegistered = true;
 		}
@@ -153,4 +153,6 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 	private GameScenePartitionerEntry liquidPartitionerEntry;
 
 	private LightGridManager.LightGridEmitter emitter;
+
+	private List<int> litCells = new List<int>();
 }

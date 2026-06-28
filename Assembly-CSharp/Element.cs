@@ -164,18 +164,7 @@ public class Element : IComparable<Element>
 
 	public bool HasTag(Tag search_tag)
 	{
-		if (this.tag == search_tag)
-		{
-			return true;
-		}
-		for (int i = 0; i < this.oreTags.Length; i++)
-		{
-			if (this.oreTags[i] == search_tag)
-			{
-				return true;
-			}
-		}
-		return false;
+		return this.tag == search_tag || Array.IndexOf<Tag>(this.oreTags, search_tag) != -1;
 	}
 
 	public Tag GetMaterialCategoryTag()

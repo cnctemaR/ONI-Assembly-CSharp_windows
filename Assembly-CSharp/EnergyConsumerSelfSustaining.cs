@@ -66,11 +66,6 @@ public class EnergyConsumerSelfSustaining : EnergyConsumer
 		this.operational.SetFlag(EnergyConsumer.PoweredFlag, this.IsPowered);
 	}
 
-	protected override void SimUpdate(float dt)
-	{
-		base.SimUpdate(dt);
-	}
-
 	private bool isSustained;
 
 	private CircuitManager.ConnectionStatus connectionStatus;

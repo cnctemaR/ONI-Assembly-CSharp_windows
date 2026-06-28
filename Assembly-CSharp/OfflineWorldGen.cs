@@ -82,10 +82,6 @@ public class OfflineWorldGen : KMonoBehaviour
 			this.percentText.gameObject.SetActive(false);
 			this.RemoveButtons();
 		}
-		if (UpdateManager.instance)
-		{
-			UpdateManager.instance.enabled = false;
-		}
 		this.buttonPrefab.SetActive(false);
 	}
 

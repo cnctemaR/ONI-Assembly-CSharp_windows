@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using UnityEngine;
 
 public class KAnimConverter
 {
-	public const int COST_PER_CONTROLLER = 64;
-
 	public interface IAnimConverter
 	{
 		int GetMaxVisible();
@@ -36,38 +32,14 @@ public class KAnimConverter
 
 		int GetCurrentFrameIndex();
 
-		Matrix4x4 GetTransformMatrix();
-
-		Color32 GetHighlightColour();
-
-		Color32 GetFirstTintColour();
-
-		Color32 GetSecondTintColour();
-
-		Color32 GetOverlayColour();
-
-		int GetFirstTintIndex();
-
-		int GetSecondTintIndex();
-
-		int GetSymbolScaleIndex();
-
-		float GetSymbolScale();
+		Matrix2x3 GetTransformMatrix();
 
 		KBatchedAnimInstanceData GetBatchInstanceData();
+
+		SymbolInstanceGpuData symbolInstanceGpuData { get; }
 
 		BatchGroupInstance batchGroupInstance { get; }
 
 		KAnimBatchGroup.MaterialType GetMaterialType();
-	}
-
-	[StructLayout(LayoutKind.Explicit)]
-	public struct ByteToFloatConverter
-	{
-		[FieldOffset(0)]
-		public byte[] bytes;
-
-		[FieldOffset(0)]
-		public float[] floats;
 	}
 }

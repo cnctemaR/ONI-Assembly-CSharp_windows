@@ -114,7 +114,6 @@ public class KCompBuildInstance
 							break;
 						}
 					}
-					target_controller.ShowSymbol(animFrameElement.symbol);
 				}
 			}
 		}

@@ -3,10 +3,10 @@ using UnityEngine;
 
 public class Chore<StateMachineInstanceType> : Chore, IStateMachineTarget where StateMachineInstanceType : StateMachine.Instance
 {
-	public Chore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, PriorityScreen.PriorityClass master_priority_class = PriorityScreen.PriorityClass.basic, int master_priority_value = 2147483647, bool is_preemptable = false, bool allow_in_context_menu = true, int priority_mod = 0)
-		: base(chore_type, chore_provider, run_until_complete, on_complete, on_begin, on_end, master_priority_class, master_priority_value, is_preemptable, allow_in_context_menu, priority_mod)
+	public Chore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, PriorityScreen.PriorityClass master_priority_class = PriorityScreen.PriorityClass.basic, int master_priority_value = 2147483647, bool is_preemptable = false, bool allow_in_context_menu = true, int priority_mod = 0, Tag[] chore_tags = null)
+		: base(chore_type, chore_provider, chore_tags, run_until_complete, on_complete, on_begin, on_end, master_priority_class, master_priority_value, is_preemptable, allow_in_context_menu, priority_mod)
 	{
-		this.target = target;
+		base.target = target;
 		target.Subscribe(1969584890, new Action<object>(this.OnTargetDestroyed));
 	}
 
@@ -45,14 +45,14 @@ public class Chore<StateMachineInstanceType> : Chore, IStateMachineTarget where 
 
 	public ComponentType GetComponent<ComponentType>()
 	{
-		return this.target.GetComponent<ComponentType>();
+		return base.target.GetComponent<ComponentType>();
 	}
 
 	public override GameObject gameObject
 	{
 		get
 		{
-			return this.target.gameObject;
+			return base.target.gameObject;
 		}
 	}
 
@@ -60,7 +60,7 @@ public class Chore<StateMachineInstanceType> : Chore, IStateMachineTarget where 
 	{
 		get
 		{
-			return this.target.gameObject.transform;
+			return base.target.gameObject.transform;
 		}
 	}
 
@@ -76,15 +76,15 @@ public class Chore<StateMachineInstanceType> : Chore, IStateMachineTarget where 
 	{
 		get
 		{
-			return this.target.isNull;
+			return base.target.isNull;
 		}
 	}
 
 	public override string ResolveString(string str)
 	{
-		if (!this.target.isNull)
+		if (!base.target.isNull)
 		{
-			str = str.Replace("{Target}", this.target.gameObject.GetProperName());
+			str = str.Replace("{Target}", base.target.gameObject.GetProperName());
 		}
 		return base.ResolveString(str);
 	}
@@ -92,9 +92,9 @@ public class Chore<StateMachineInstanceType> : Chore, IStateMachineTarget where 
 	public override void Cleanup()
 	{
 		base.Cleanup();
-		if (this.target != null)
+		if (base.target != null)
 		{
-			this.target.Unsubscribe(1969584890, new Action<object>(this.OnTargetDestroyed));
+			base.target.Unsubscribe(1969584890, new Action<object>(this.OnTargetDestroyed));
 		}
 		if (this.onCleanup != null)
 		{
@@ -111,8 +111,6 @@ public class Chore<StateMachineInstanceType> : Chore, IStateMachineTarget where 
 	{
 		return base.CanPreempt(context);
 	}
-
-	protected IStateMachineTarget target;
 
 	protected StateMachineInstanceType smi;
 }

@@ -11,21 +11,20 @@ public class PolymerizerConfig : IBuildingConfig
 		int num = 3;
 		int num2 = 3;
 		string text2 = "plasticrefinery_kanim";
-		float num3 = 200f;
-		int num4 = 30;
-		float num5 = 30f;
+		int num3 = 30;
+		float num4 = 30f;
 		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER3;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		BuildingTemplates.CreateElectricalBuildingDef(buildingDef);
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "large";
 		buildingDef.EnergyConsumptionWhenActive = 240f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
-		buildingDef.OperatingKilowatts = 32f;
+		buildingDef.SelfHeatKilowattsWhenActive = 32f;
 		buildingDef.PowerInputOffset = new CellOffset(0, 0);
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
@@ -35,7 +34,7 @@ public class PolymerizerConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		Polymerizer polymerizer = go.AddOrGet<Polymerizer>();
@@ -45,7 +44,7 @@ public class PolymerizerConfig : IBuildingConfig
 		polymerizer.exhaustElement = SimHashes.Steam;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
-		conduitConsumer.consumptionRate = 0.8333333f;
+		conduitConsumer.consumptionRate = 1.6666666f;
 		conduitConsumer.capacityTag = GameTagExtensions.Create(SimHashes.Petroleum);
 		conduitConsumer.capacityKG = 1.6666666f;
 		conduitConsumer.forceAlwaysSatisfied = true;
@@ -65,7 +64,6 @@ public class PolymerizerConfig : IBuildingConfig
 			new ElementConverter.OutputElement(0.008333334f, SimHashes.Steam, 473.15f, true, 0f, 0.5f, false, 1f, byte.MaxValue, 0),
 			new ElementConverter.OutputElement(0.008333334f, SimHashes.CarbonDioxide, 423.15f, true, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
 		};
-		elementConverter.conversionInterval = 1f;
 		go.AddOrGet<DropAllWorkable>();
 		Prioritizable.AddRef(go);
 	}
@@ -116,8 +114,5 @@ public class PolymerizerConfig : IBuildingConfig
 
 	private const SimHashes EXHAUST_CONDUIT_ELEMENT = SimHashes.CarbonDioxide;
 
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
-	{
-		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(0, 1), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false)
-	};
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 1), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
 }

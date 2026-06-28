@@ -1,0 +1,45 @@
+﻿using System;
+using STRINGS;
+using TUNING;
+
+namespace Database
+{
+	public class AssignableSlots : ResourceSet<AssignableSlot>
+	{
+		public AssignableSlots()
+		{
+			this.Bed = base.Add(new OwnableSlot("Bed", MISC.TAGS.BED));
+			this.MessStation = base.Add(new OwnableSlot("MessStation", MISC.TAGS.MESSSTATION));
+			this.Clinic = base.Add(new OwnableSlot("Clinic", MISC.TAGS.CLINIC));
+			this.MedicalBed = base.Add(new OwnableSlot("MedicalBed", MISC.TAGS.CLINIC));
+			this.MedicalBed.showInUI = false;
+			this.GeneShuffler = base.Add(new OwnableSlot("GeneShuffler", MISC.TAGS.GENE_SHUFFLER));
+			this.GeneShuffler.showInUI = false;
+			this.Toilet = base.Add(new OwnableSlot("Toilet", MISC.TAGS.TOILET));
+			this.MassageTable = base.Add(new OwnableSlot("MassageTable", MISC.TAGS.MASSAGE_TABLE));
+			this.Suit = base.Add(new EquipmentSlot(global::TUNING.EQUIPMENT.SUITS.SLOT, MISC.TAGS.SUIT, true));
+			this.Tool = base.Add(new EquipmentSlot(global::TUNING.EQUIPMENT.TOOLS.TOOLSLOT, MISC.TAGS.MULTITOOL, false));
+			this.Outfit = base.Add(new EquipmentSlot(global::TUNING.EQUIPMENT.CLOTHING.SLOT, MISC.TAGS.CLOTHES, true));
+		}
+
+		public AssignableSlot Bed;
+
+		public AssignableSlot MessStation;
+
+		public AssignableSlot Clinic;
+
+		public AssignableSlot GeneShuffler;
+
+		public AssignableSlot MedicalBed;
+
+		public AssignableSlot Toilet;
+
+		public AssignableSlot MassageTable;
+
+		public AssignableSlot Suit;
+
+		public AssignableSlot Tool;
+
+		public AssignableSlot Outfit;
+	}
+}

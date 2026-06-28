@@ -40,7 +40,7 @@ public class KCompBuilder : MonoBehaviour
 		batch_group.AddBuildSymbol(symbol2);
 	}
 
-	private KAnim.Build GetBuildForVariation(KBatchGroupData batch_group, KAnimHashedString fileHash, string eyes, string hair, string headshape, string mouth, string body, string arms)
+	private KAnim.Build GetBuildForVariation(KBatchGroupData batch_group, KAnimHashedString fileHash, HashedString eyes, HashedString hair, HashedString headshape, HashedString mouth, HashedString body, HashedString arms, HashedString hat, HashedString hat_hair)
 	{
 		KAnimFileData data = this.master_anims.GetData();
 		KAnim.Build build = data.build;
@@ -58,53 +58,69 @@ public class KCompBuilder : MonoBehaviour
 		}
 		KAnimGroupFile.AddDynamicGroup(batch_group.groupID);
 		build4 = batch_group.AddNewBuildFile(fileHash);
-		if (eyes == KCompBuilder.default_build)
+		if (!eyes.IsValid)
 		{
 			this.GetSymbolsFromBuild(batch_group, build, build4, KCompBuilder.snapTo_eyes, KCompBuilder.snapTo_eyes, list, list2, list3);
 		}
 		else
 		{
-			this.GetSymbolsFromBuild(batch_group, build2, build4, new HashedString("eyes_" + eyes), KCompBuilder.snapTo_eyes, list, list2, list3);
+			this.GetSymbolsFromBuild(batch_group, build2, build4, eyes, KCompBuilder.snapTo_eyes, list, list2, list3);
 		}
-		if (hair == KCompBuilder.default_build)
+		if (!hair.IsValid)
 		{
 			this.GetSymbolsFromBuild(batch_group, build, build4, KCompBuilder.snapTo_hair, KCompBuilder.snapTo_hair, list, list2, list3);
 		}
 		else
 		{
-			this.GetSymbolsFromBuild(batch_group, build2, build4, new HashedString("hair_" + hair), KCompBuilder.snapTo_hair, list, list2, list3);
+			this.GetSymbolsFromBuild(batch_group, build2, build4, hair, KCompBuilder.snapTo_hair, list, list2, list3);
 		}
-		if (headshape == KCompBuilder.default_build)
+		if (!headshape.IsValid)
 		{
 			this.GetSymbolsFromBuild(batch_group, build, build4, KCompBuilder.snapTo_headshape, KCompBuilder.snapTo_headshape, list, list2, list3);
 		}
 		else
 		{
-			this.GetSymbolsFromBuild(batch_group, build2, build4, new HashedString("headshape_" + headshape), KCompBuilder.snapTo_headshape, list, list2, list3);
+			this.GetSymbolsFromBuild(batch_group, build2, build4, headshape, KCompBuilder.snapTo_headshape, list, list2, list3);
 		}
-		if (mouth == KCompBuilder.default_build)
+		if (!mouth.IsValid)
 		{
 			this.GetSymbolsFromBuild(batch_group, build, build4, KCompBuilder.snapTo_mouth, KCompBuilder.snapTo_mouth, list, list2, list3);
 		}
 		else
 		{
-			this.GetSymbolsFromBuild(batch_group, build2, build4, new HashedString("mouth_" + mouth), KCompBuilder.snapTo_mouth, list, list2, list3);
+			this.GetSymbolsFromBuild(batch_group, build2, build4, mouth, KCompBuilder.snapTo_mouth, list, list2, list3);
 		}
-		if (body == KCompBuilder.default_build)
+		if (!body.IsValid)
 		{
 			this.GetSymbolsFromBuild(batch_group, build, build4, KCompBuilder.snapTo_body, KCompBuilder.snapTo_body, list, list2, list3);
 		}
 		else
 		{
-			this.GetSymbolsFromBuild(batch_group, build3, build4, new HashedString("body_" + body), KCompBuilder.snapTo_body, list, list2, list3);
+			this.GetSymbolsFromBuild(batch_group, build3, build4, body, KCompBuilder.snapTo_body, list, list2, list3);
 		}
-		if (arms == KCompBuilder.default_build)
+		if (!arms.IsValid)
 		{
 			this.GetSymbolsFromBuild(batch_group, build, build4, KCompBuilder.snapTo_arm, KCompBuilder.snapTo_arm, list, list2, list3);
 		}
 		else
 		{
-			this.GetSymbolsFromBuild(batch_group, build3, build4, new HashedString("arm_" + arms), KCompBuilder.snapTo_arm, list, list2, list3);
+			this.GetSymbolsFromBuild(batch_group, build3, build4, arms, KCompBuilder.snapTo_arm, list, list2, list3);
+		}
+		if (!hat.IsValid)
+		{
+			this.GetSymbolsFromBuild(batch_group, build, build4, KCompBuilder.snapTo_hat, KCompBuilder.snapTo_hat, list, list2, list3);
+		}
+		else
+		{
+			this.GetSymbolsFromBuild(batch_group, build2, build4, hat, KCompBuilder.snapTo_hat, list, list2, list3);
+		}
+		if (!hat_hair.IsValid)
+		{
+			this.GetSymbolsFromBuild(batch_group, build, build4, KCompBuilder.snapTo_hat_hair, KCompBuilder.snapTo_hat_hair, list, list2, list3);
+		}
+		else
+		{
+			this.GetSymbolsFromBuild(batch_group, build2, build4, hat_hair, KCompBuilder.snapTo_hat_hair, list, list2, list3);
 		}
 		build4.symbols = list.ToArray();
 		build4.frames = list2.ToArray();
@@ -114,12 +130,12 @@ public class KCompBuilder : MonoBehaviour
 
 	public KAnimFileData GenerateDefaultPose(KCompBuilder.BodyData bodyData)
 	{
-		string text = string.Format("{0:000}", bodyData.eyes);
-		string text2 = string.Format("{0:000}", bodyData.hair);
-		string text3 = string.Format("{0:000}", bodyData.headShape);
-		string text4 = string.Format("{0:000}", bodyData.mouth);
-		string text5 = string.Format("{0:000}", bodyData.body);
-		string text6 = string.Format("{0:000}", bodyData.arms);
+		string text = HashCache.Get().Get(bodyData.eyes);
+		string text2 = HashCache.Get().Get(bodyData.hair);
+		string text3 = HashCache.Get().Get(bodyData.headShape);
+		string text4 = HashCache.Get().Get(bodyData.mouth);
+		string text5 = HashCache.Get().Get(bodyData.body);
+		string text6 = HashCache.Get().Get(bodyData.arms);
 		string text7 = string.Concat(new string[]
 		{
 			text, "_", text2, "_", text3, "_", text4, "_", text5, "_",
@@ -136,7 +152,7 @@ public class KCompBuilder : MonoBehaviour
 		KAnim.Build build = batchGroupData.GetBuild(kanimHashedString);
 		if (build == null)
 		{
-			build = this.GetBuildForVariation(batchGroupData, kanimHashedString, text, text2, text3, text4, text5, text6);
+			build = this.GetBuildForVariation(batchGroupData, kanimHashedString, bodyData.eyes, bodyData.hair, bodyData.headShape, bodyData.mouth, bodyData.body, bodyData.arms, bodyData.hat, bodyData.hatHair);
 			build.batchTag = hashedString;
 			build.name = dynamicFile.name;
 			build.fileHash = kanimHashedString;
@@ -219,9 +235,11 @@ public class KCompBuilder : MonoBehaviour
 
 	public KAnimFile body_variations;
 
-	private static string default_build = "000";
-
 	public static HashedString snapTo_eyes = new HashedString("snapTo_eyes");
+
+	public static HashedString snapTo_hat = new HashedString("snapTo_hat");
+
+	public static HashedString snapTo_hat_hair = new HashedString("snapTo_hat_hair");
 
 	public static HashedString snapTo_hair = new HashedString("snapTo_hair");
 
@@ -246,18 +264,22 @@ public class KCompBuilder : MonoBehaviour
 	[Serializable]
 	public struct BodyData
 	{
-		public int headShape;
+		public HashedString headShape;
 
-		public int mouth;
+		public HashedString mouth;
 
-		public int neck;
+		public HashedString neck;
 
-		public int eyes;
+		public HashedString eyes;
 
-		public int hair;
+		public HashedString hair;
 
-		public int body;
+		public HashedString body;
 
-		public int arms;
+		public HashedString arms;
+
+		public HashedString hat;
+
+		public HashedString hatHair;
 	}
 }

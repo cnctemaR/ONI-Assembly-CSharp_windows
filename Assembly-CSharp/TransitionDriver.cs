@@ -68,21 +68,13 @@ public class TransitionDriver
 		{
 			this.isComplete = this.transition.isCompleteCB();
 		}
-		if (this.brain != null)
+		if (!(this.brain != null) || this.isComplete)
 		{
-			if (this.isComplete)
-			{
-				this.brain.Resume("transition_handler");
-			}
-			else
-			{
-				this.brain.Suspend("transition_handler");
-			}
 		}
 		if (this.transition.isLooping)
 		{
 			float speed = this.transition.speed;
-			Vector3 position = this.navigator.transform.position;
+			Vector3 position = this.navigator.transform.GetPosition();
 			if (this.transition.x > 0)
 			{
 				position.x += dt * speed;
@@ -123,7 +115,7 @@ public class TransitionDriver
 			{
 				position.y = this.targetPos.y;
 			}
-			this.navigator.transform.position = position;
+			this.navigator.transform.SetPosition(position);
 		}
 		if (this.isComplete)
 		{

@@ -37,10 +37,10 @@ public class DebugTool : DragTool
 				SimMessages.Dig(cell, -1);
 				break;
 			case DebugTool.Type.Heat:
-				SimMessages.ModifyEnergy(cell, 10000f, SimMessages.EnergySourceID.DebugHeat);
+				SimMessages.ModifyEnergy(cell, 10000f, 10000f, SimMessages.EnergySourceID.DebugHeat);
 				break;
 			case DebugTool.Type.Cool:
-				SimMessages.ModifyEnergy(cell, -10000f, SimMessages.EnergySourceID.DebugCool);
+				SimMessages.ModifyEnergy(cell, -10000f, 10000f, SimMessages.EnergySourceID.DebugCool);
 				break;
 			case DebugTool.Type.ReplaceSubstance:
 				this.DoReplaceSubstance(cell);
@@ -121,7 +121,7 @@ public class DebugTool : DragTool
 				Grid.Objects[cell, 16],
 				Grid.Objects[cell, 12],
 				Grid.Objects[cell, 16],
-				Grid.Objects[cell, 20]
+				Grid.Objects[cell, 24]
 			})
 			{
 				if (gameObject != null)
@@ -161,7 +161,7 @@ public class DebugTool : DragTool
 			Grid.Objects[cell, 12],
 			Grid.Objects[cell, 16],
 			Grid.Objects[cell, 0],
-			Grid.Objects[cell, 20]
+			Grid.Objects[cell, 24]
 		})
 		{
 			if (gameObject != null)
@@ -182,15 +182,19 @@ public class DebugTool : DragTool
 
 	public void ClearCell(int cell)
 	{
-		Vector2 vector = Grid.CellToXY(cell);
-		Collider2D[] array = Physics2D.OverlapAreaAll(vector + Vector2.one * (Grid.CellSizeInMeters * 0.2f), vector + Vector2.one * (Grid.CellSizeInMeters * 0.8f), Game.PickupableLayerMask);
-		if (array != null)
+		Vector2I vector2I = Grid.CellToXY(cell);
+		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+		GameScenePartitioner.Instance.GatherEntries(vector2I.x, vector2I.y, 1, 1, GameScenePartitioner.Instance.pickupablesLayer, list);
+		for (int i = 0; i < list.Count; i++)
 		{
-			for (int i = 0; i < array.Length; i++)
+			ScenePartitionerEntry scenePartitionerEntry = list[i];
+			Pickupable pickupable = scenePartitionerEntry.obj as Pickupable;
+			if (pickupable != null && pickupable.GetComponent<MinionBrain>() == null)
 			{
-				Util.KDestroyGameObject(array[i].gameObject);
+				Util.KDestroyGameObject(pickupable.gameObject);
 			}
 		}
+		ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
 	}
 
 	public static DebugTool Instance;

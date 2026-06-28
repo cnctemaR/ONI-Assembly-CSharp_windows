@@ -10,15 +10,14 @@ public class PressureDoorConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 2;
 		string text2 = "door_external_kanim";
-		float num3 = 100f;
-		int num4 = 30;
-		float num5 = 60f;
+		int num3 = 30;
+		float num4 = 60f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num6 = 1600f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
+		float num5 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none, 1f);
 		buildingDef.Overheatable = false;
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
@@ -30,7 +29,6 @@ public class PressureDoorConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.R90;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
-		buildingDef.HotKey = global::Action.BuildMenuKeyE;
 		SoundEventVolumeCache.instance.AddVolume("door_external_kanim", "Open_DoorPressure", NOISE_POLLUTION.NOISY.TIER2);
 		SoundEventVolumeCache.instance.AddVolume("door_external_kanim", "Close_DoorPressure", NOISE_POLLUTION.NOISY.TIER2);
 		return buildingDef;
@@ -52,7 +50,7 @@ public class PressureDoorConfig : IBuildingConfig
 		door.hasComplexUserControls = true;
 		door.unpoweredAnimSpeed = 1f;
 		go.UpdateComponentRequirement<AccessControl>(true);
-		go.UpdateComponentRequirement<BoxCollider2D>(true);
+		go.UpdateComponentRequirement<KBoxCollider2D>(true);
 		Prioritizable.AddRef(go);
 		Workable workable = go.AddOrGet<Workable>();
 		workable.workTime = 5f;

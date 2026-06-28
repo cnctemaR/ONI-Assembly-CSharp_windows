@@ -151,7 +151,7 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 		private bool HasSuitTank()
 		{
 			Equipment component = base.GetComponent<Equipment>();
-			AssignableSlotInstance slot = component.GetSlot(global::TUNING.EQUIPMENT.SUIT_SLOT);
+			AssignableSlotInstance slot = component.GetSlot(Db.Get().AssignableSlots.Suit);
 			if (slot != null && slot.assignable != null)
 			{
 				SuitTank component2 = slot.assignable.GetComponent<SuitTank>();

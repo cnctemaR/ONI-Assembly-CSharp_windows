@@ -4,12 +4,12 @@ using UnityEngine;
 public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesInstance>
 {
 	public RescueIncapacitatedChore(IStateMachineTarget master, GameObject incapacitatedDuplicant)
-		: base(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0, null)
 	{
 		this.smi = new RescueIncapacitatedChore.StatesInstance(this);
 		base.runUntilComplete = true;
-		base.AddPrecondition(ChorePreconditions.NotChoreCreator, incapacitatedDuplicant.gameObject);
-		base.AddPrecondition(ChorePreconditions.CanMoveTo, incapacitatedDuplicant.GetComponent<Workable>());
+		base.AddPrecondition(ChorePreconditions.instance.NotChoreCreator, incapacitatedDuplicant.gameObject);
+		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, incapacitatedDuplicant.GetComponent<Workable>());
 	}
 
 	public override void Begin(Chore.Precondition.Context context)
@@ -75,7 +75,7 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 			})
 				.Exit(delegate(RescueIncapacitatedChore.StatesInstance smi)
 				{
-					this.rescuer.Get(smi).GetComponent<Storage>().Store(this.rescueTarget.Get(smi), false, false, true);
+					this.rescuer.Get(smi).GetComponent<Storage>().Store(this.rescueTarget.Get(smi), false, false, true, false);
 					this.rescueTarget.Get(smi).transform.SetLocalPosition(Vector3.zero);
 					KBatchedAnimTracker component = this.rescueTarget.Get(smi).GetComponent<KBatchedAnimTracker>();
 					component.symbol = new HashedString("snapTo_pivot");
@@ -89,7 +89,7 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 				{
 					smi.StopSM("target died");
 				}
-			}).Update(delegate(RescueIncapacitatedChore.StatesInstance smi)
+			}).Update(delegate(RescueIncapacitatedChore.StatesInstance smi, float dt)
 			{
 				if (this.deliverTarget.Get(smi) == null)
 				{

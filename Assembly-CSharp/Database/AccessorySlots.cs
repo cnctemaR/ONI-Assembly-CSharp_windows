@@ -24,7 +24,8 @@ namespace Database
 			this.Hair = new AccessorySlot("Hair", this, swap_build);
 			this.HeadShape = new AccessorySlot("HeadShape", this, swap_build);
 			this.Mouth = new AccessorySlot("Mouth", this, swap_build);
-			this.Neck = new AccessorySlot("Neck", this, swap_build);
+			this.Hat = new AccessorySlot("Hat", this, swap_build);
+			this.HatHair = new AccessorySlot("Hat_Hair", this, swap_build);
 			this.Body = new AccessorySlot("Body", this, torso_swap_build);
 			this.Arm = new AccessorySlot("Arm", this, torso_swap_build);
 			foreach (AccessorySlot accessorySlot in this)
@@ -41,10 +42,12 @@ namespace Database
 
 		public AccessorySlot Mouth;
 
-		public AccessorySlot Neck;
-
 		public AccessorySlot Body;
 
 		public AccessorySlot Arm;
+
+		public AccessorySlot Hat;
+
+		public AccessorySlot HatHair;
 	}
 }

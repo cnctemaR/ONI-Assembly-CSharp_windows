@@ -8,9 +8,7 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDesc
 {
 	protected override void OnPrefabInit()
 	{
-		this.filteredStorage = new FilteredStorage(this, new Tag[] { GameTags.MarkedForCompost }, this.filterTint, this.noFilterTint, this);
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
-		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		this.filteredStorage = new FilteredStorage(this, new Tag[] { GameTags.MarkedForCompost }, this.filterTint, this.noFilterTint, this, true);
 	}
 
 	protected override void OnSpawn()
@@ -19,6 +17,11 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDesc
 		base.GetComponent<KAnimControllerBase>().Play("off", KAnim.PlayMode.Once, 1f, 0f);
 		this.filteredStorage.FilterChanged();
 		this.temperatureAdjuster = new SimulatedTemperatureAdjuster(this.simulatedInternalTemperature, this.simulatedInternalHeatCapacity, this.simulatedThermalConductivity, base.GetComponent<Storage>());
+		this.UpdateLogicCircuit();
+		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe(-1697596308, new Action<object>(this.UpdateLogicCircuitCB));
+		base.Subscribe(-592767678, new Action<object>(this.UpdateLogicCircuitCB));
 	}
 
 	protected override void OnCleanUp()
@@ -73,6 +76,7 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDesc
 		{
 			this.userMaxCapacity = value;
 			this.filteredStorage.FilterChanged();
+			this.UpdateLogicCircuit();
 		}
 	}
 
@@ -113,14 +117,31 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDesc
 		}
 	}
 
-	[MyCmpReq]
+	private void UpdateLogicCircuitCB(object data)
+	{
+		this.UpdateLogicCircuit();
+	}
+
+	private void UpdateLogicCircuit()
+	{
+		bool flag = this.filteredStorage.IsFull();
+		bool isOperational = this.operational.IsOperational;
+		bool flag2 = flag && isOperational;
+		this.ports.SendSignal(FilteredStorage.FULL_PORT_ID, (!flag2) ? 0 : 1);
+		this.filteredStorage.SetLogicMeter(flag2);
+	}
+
+	[MyCmpGet]
 	private PrimaryElement primaryElement;
 
-	[MyCmpReq]
+	[MyCmpGet]
 	private Storage storage;
 
-	[MyCmpReq]
+	[MyCmpGet]
 	private Operational operational;
+
+	[MyCmpGet]
+	private LogicPorts ports;
 
 	[SerializeField]
 	public Color noFilterTint = Color.white;

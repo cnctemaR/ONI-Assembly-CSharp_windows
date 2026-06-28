@@ -15,15 +15,14 @@ public class WireBridgeConfig : IBuildingConfig
 		int num = 3;
 		int num2 = 1;
 		string text = "utilityelectricbridge_kanim";
-		float num3 = 100f;
-		int num4 = 30;
-		float num5 = 3f;
+		int num3 = 30;
+		float num4 = 3f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
@@ -37,11 +36,11 @@ public class WireBridgeConfig : IBuildingConfig
 		buildingDef.PermittedRotations = PermittedRotations.R360;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 2);
-		buildingDef.HotKey = global::Action.BuildMenuKeyB;
+		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.WireIDs, "WireBridge");
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 	}
@@ -57,6 +56,8 @@ public class WireBridgeConfig : IBuildingConfig
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		base.DoPostConfigureUnderConstruction(go);
+		Constructable component = go.GetComponent<Constructable>();
+		component.choreTags = GameTags.ChoreTypes.WiringChores;
 		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
 		wireUtilityNetworkLink.visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();

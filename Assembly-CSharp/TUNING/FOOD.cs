@@ -11,11 +11,15 @@ namespace TUNING
 
 		public const int FOOD_AMOUNT_INGREDIENT_ONLY = 0;
 
-		public const float FOOD_AMOUNT_TINY = 100000f;
+		public const float KCAL_SMALL_PORTION = 600000f;
 
-		public const float FOOD_AMOUNT_SMALL = 1000000f;
+		public const float KCAL_BONUS_COOKING_LOW = 250000f;
 
-		public const float FOOD_AMOUNT_NORMAL = 1600000f;
+		public const float KCAL_BASIC_PORTION = 800000f;
+
+		public const float KCAL_PREPARED_FOOD = 4000000f;
+
+		public const float KCAL_BONUS_COOKING_BASIC = 400000f;
 
 		public const float DEFAULT_PRESERVE_TEMPERATURE = 255.15f;
 
@@ -31,7 +35,7 @@ namespace TUNING
 
 		public const float ROT_TO_ELEMENT_TIME = 600f;
 
-		public const float MAX_RATIONS_STACK = 10000000f;
+		public const float MAX_RATIONS_STACK = 8000000f;
 
 		public const float MAX_UNITS_STACK = 10f;
 
@@ -50,39 +54,39 @@ namespace TUNING
 
 		public class FOOD_TYPES
 		{
-			public static EdiblesManager.FoodInfo FIELDRATION = new EdiblesManager.FoodInfo("FieldRation", 1000000f, -3, 255.15f, 277.15f, 9600f);
+			public static EdiblesManager.FoodInfo FIELDRATION = new EdiblesManager.FoodInfo("FieldRation", 800000f, -1, 255.15f, 277.15f, 9600f);
 
-			public static EdiblesManager.FoodInfo MUSHBAR = new EdiblesManager.FoodInfo("MushBar", 1000000f, -3, 255.15f, 277.15f, 2400f).AddEffects(new List<string> { "Diarrhea" });
+			public static EdiblesManager.FoodInfo MUSHBAR = new EdiblesManager.FoodInfo("MushBar", 800000f, -1, 255.15f, 277.15f, 2400f).AddEffects(new List<string> { "Diarrhea" });
 
-			public static EdiblesManager.FoodInfo MUSHROOM = new EdiblesManager.FoodInfo(MushroomConfig.ID, 1600000f, 0, 255.15f, 277.15f, 2400f);
+			public static EdiblesManager.FoodInfo BASICPLANTFOOD = new EdiblesManager.FoodInfo("BasicPlantFood", 600000f, -1, 255.15f, 277.15f, 2400f);
 
-			public static EdiblesManager.FoodInfo MEAT = new EdiblesManager.FoodInfo("Meat", 1000000f, -2, 255.15f, 277.15f, 2400f);
+			public static EdiblesManager.FoodInfo BASICFORAGEPLANT = new EdiblesManager.FoodInfo("BasicForagePlant", 800000f, -1, 255.15f, 277.15f, 2400f);
 
-			public static EdiblesManager.FoodInfo PRICKLEFRUIT = new EdiblesManager.FoodInfo(PrickleFruitConfig.ID, 1600000f, -1, 255.15f, 277.15f, 2400f);
+			public static EdiblesManager.FoodInfo MUSHROOM = new EdiblesManager.FoodInfo(MushroomConfig.ID, 2400000f, 0, 255.15f, 277.15f, 2400f);
 
-			public static EdiblesManager.FoodInfo BASICPLANTFOOD = new EdiblesManager.FoodInfo("BasicPlantFood", 100000f, -3, 255.15f, 277.15f, 2400f);
+			public static EdiblesManager.FoodInfo MEAT = new EdiblesManager.FoodInfo("Meat", 1600000f, -1, 255.15f, 277.15f, 2400f);
 
-			public static EdiblesManager.FoodInfo BASICFORAGEPLANT = new EdiblesManager.FoodInfo("BasicForagePlant", 1000000f, -3, 255.15f, 277.15f, 2400f);
+			public static EdiblesManager.FoodInfo PRICKLEFRUIT = new EdiblesManager.FoodInfo(PrickleFruitConfig.ID, 1600000f, 0, 255.15f, 277.15f, 2400f);
 
-			public static EdiblesManager.FoodInfo FRUITCAKE = new EdiblesManager.FoodInfo("FruitCake", 1600000f, -1, 255.15f, 277.15f, 9600f);
+			public static EdiblesManager.FoodInfo PICKLEDMEAL = new EdiblesManager.FoodInfo("PickledMeal", 1800000f, -1, 255.15f, 277.15f, 9600f);
 
-			public static EdiblesManager.FoodInfo BASICPLANTBAR = new EdiblesManager.FoodInfo("BasicPlantBar", 1000000f, -2, 255.15f, 277.15f, 2400f);
+			public static EdiblesManager.FoodInfo BASICPLANTBAR = new EdiblesManager.FoodInfo("BasicPlantBar", 1700000f, 0, 255.15f, 277.15f, 2400f);
 
-			public static EdiblesManager.FoodInfo FRIEDMUSHBAR = new EdiblesManager.FoodInfo("FriedMushBar", 1000000f, -2, 255.15f, 277.15f, 2400f);
+			public static EdiblesManager.FoodInfo FRIEDMUSHBAR = new EdiblesManager.FoodInfo("FriedMushBar", 1050000f, 0, 255.15f, 277.15f, 2400f);
 
-			public static EdiblesManager.FoodInfo PICKLEDMEAL = new EdiblesManager.FoodInfo("PickledMeal", 100000f, -3, 255.15f, 277.15f, 9600f);
+			public static EdiblesManager.FoodInfo GRILLED_PRICKLEFRUIT = new EdiblesManager.FoodInfo("GrilledPrickleFruit", 2000000f, 1, 255.15f, 277.15f, 2400f);
 
-			public static EdiblesManager.FoodInfo GRILLED_PRICKLEFRUIT = new EdiblesManager.FoodInfo("GrilledPrickleFruit", 1000000f, 0, 255.15f, 277.15f, 2400f);
+			public static EdiblesManager.FoodInfo FRIED_MUSHROOM = new EdiblesManager.FoodInfo("FriedMushroom", 2800000f, 1, 255.15f, 277.15f, 2400f);
 
-			public static EdiblesManager.FoodInfo FRIED_MUSHROOM = new EdiblesManager.FoodInfo("FriedMushroom", 1000000f, 1, 255.15f, 277.15f, 2400f);
+			public static EdiblesManager.FoodInfo COLD_WHEAT_BREAD = new EdiblesManager.FoodInfo("ColdWheatBread", 1200000f, 2, 255.15f, 277.15f, 2400f);
 
-			public static EdiblesManager.FoodInfo COLD_WHEAT_BREAD = new EdiblesManager.FoodInfo("ColdWheatBread", 1000000f, -1, 255.15f, 277.15f, 2400f);
+			public static EdiblesManager.FoodInfo FRUITCAKE = new EdiblesManager.FoodInfo("FruitCake", 4000000f, 3, 255.15f, 277.15f, 9600f);
 
-			public static EdiblesManager.FoodInfo SALSA = new EdiblesManager.FoodInfo("Salsa", 1000000f, 2, 255.15f, 277.15f, 1200f);
+			public static EdiblesManager.FoodInfo SALSA = new EdiblesManager.FoodInfo("Salsa", 4000000f, 4, 255.15f, 277.15f, 1200f);
 
-			public static EdiblesManager.FoodInfo SPICEBREAD = new EdiblesManager.FoodInfo("SpiceBread", 1000000f, 1, 255.15f, 277.15f, 2400f);
+			public static EdiblesManager.FoodInfo SPICEBREAD = new EdiblesManager.FoodInfo("SpiceBread", 4000000f, 5, 255.15f, 277.15f, 2400f);
 
-			public static EdiblesManager.FoodInfo COOKEDMEAT = new EdiblesManager.FoodInfo("CookedMeat", 1600000f, 1, 255.15f, 277.15f, 1200f).AddEffects(new List<string> { "GoodEats" });
+			public static EdiblesManager.FoodInfo COOKEDMEAT = new EdiblesManager.FoodInfo("CookedMeat", 4000000f, 5, 255.15f, 277.15f, 1200f).AddEffects(new List<string> { "GoodEats" });
 
 			public static EdiblesManager.FoodInfo SPICENUT = new EdiblesManager.FoodInfo(SpiceNutConfig.ID, 0f, 0, 255.15f, 277.15f, 1200f);
 
@@ -91,9 +95,9 @@ namespace TUNING
 
 		public class RECIPES
 		{
-			public static float SMALL_COOK_TIME = 20f;
+			public static float SMALL_COOK_TIME = 30f;
 
-			public static float STANDARD_COOK_TIME = 40f;
+			public static float STANDARD_COOK_TIME = 50f;
 		}
 	}
 }

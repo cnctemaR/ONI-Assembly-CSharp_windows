@@ -12,18 +12,17 @@ public class MetalRefineryConfig : IBuildingConfig
 		int num = 3;
 		int num2 = 4;
 		string text2 = "metalrefinery_kanim";
-		float num3 = 200f;
-		int num4 = 30;
-		float num5 = 60f;
+		int num3 = 30;
+		float num4 = 60f;
 		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER5;
 		string[] all_MINERALS = MATERIALS.ALL_MINERALS;
-		float num6 = 2400f;
+		float num5 = 2400f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER6;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_MINERALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_MINERALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 1200f;
-		buildingDef.OperatingKilowatts = 16f;
+		buildingDef.SelfHeatKilowattsWhenActive = 16f;
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.UtilityInputOffset = new CellOffset(-1, 1);
 		buildingDef.OutputConduitType = ConduitType.Liquid;
@@ -34,7 +33,7 @@ public class MetalRefineryConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<DropAllWorkable>();
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
@@ -44,9 +43,9 @@ public class MetalRefineryConfig : IBuildingConfig
 		liquidCooledRefinery.minCoolantMass = 400f;
 		liquidCooledRefinery.outStorage.capacityKg = 2000f;
 		liquidCooledRefinery.thermalFudge = 0.8f;
-		liquidCooledRefinery.inStorage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
-		liquidCooledRefinery.buildStorage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
-		liquidCooledRefinery.outStorage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
+		liquidCooledRefinery.inStorage.SetDefaultStoredItemModifiers(MetalRefineryConfig.RefineryStoredItemModifiers);
+		liquidCooledRefinery.buildStorage.SetDefaultStoredItemModifiers(MetalRefineryConfig.RefineryStoredItemModifiers);
+		liquidCooledRefinery.outStorage.SetDefaultStoredItemModifiers(MetalRefineryConfig.RefineryStoredItemModifiers);
 		liquidCooledRefinery.outputOffset = new Vector3(1f, 0.5f);
 		liquidCooledRefinery.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_metalrefinery_kanim") };
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
@@ -99,4 +98,11 @@ public class MetalRefineryConfig : IBuildingConfig
 	private static readonly Tag COOLANT_TAG = GameTags.Liquid;
 
 	private const float COOLANT_MASS = 400f;
+
+	private static readonly List<Storage.StoredItemModifier> RefineryStoredItemModifiers = new List<Storage.StoredItemModifier>
+	{
+		Storage.StoredItemModifier.Hide,
+		Storage.StoredItemModifier.Preserve,
+		Storage.StoredItemModifier.Insulate
+	};
 }

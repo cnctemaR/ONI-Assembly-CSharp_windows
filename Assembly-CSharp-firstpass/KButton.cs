@@ -33,9 +33,9 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 		}
 	}
 
-	protected override void OnPrefabInit()
+	protected override void OnSpawn()
 	{
-		base.OnPrefabInit();
+		base.OnSpawn();
 		this.UpdateColor(this.interactable, false, false);
 	}
 

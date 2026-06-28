@@ -4,7 +4,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch
+public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim200ms
 {
 	public float StructureTemperature
 	{
@@ -23,7 +23,7 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch
 		this.wasOn = this.switchedOn;
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		if (this.simUpdateCounter < 8)
 		{
@@ -129,6 +129,14 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch
 	public float GetRangeMaxInputField()
 	{
 		return GameUtil.GetConvertedTemperature(this.RangeMax);
+	}
+
+	public LocString Title
+	{
+		get
+		{
+			return UI.UISIDESCREENS.TEMPERATURESWITCHSIDESCREEN.TITLE;
+		}
 	}
 
 	public LocString ThresholdValueName

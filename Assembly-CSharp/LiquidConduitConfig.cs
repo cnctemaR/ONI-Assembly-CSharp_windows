@@ -15,15 +15,14 @@ public class LiquidConduitConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 1;
 		string text2 = "utilities_liquid_kanim";
-		float num3 = 100f;
-		int num4 = 10;
-		float num5 = 3f;
+		int num3 = 10;
+		float num4 = 3f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
 		string[] plumbable = MATERIALS.PLUMBABLE;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, plumbable, num6, buildLocationRule, BUILDINGS.DECOR.NONE, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, plumbable, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;
@@ -41,15 +40,14 @@ public class LiquidConduitConfig : IBuildingConfig
 		buildingDef.isKAnimTile = true;
 		buildingDef.isUtility = true;
 		buildingDef.DragBuild = true;
-		buildingDef.HotKey = global::Action.BuildMenuKeyE;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.LiquidVentIDs, "LiquidConduit");
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
-		GeneratedBuildings.MakeBuildableAnywhere(go);
+		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		Conduit conduit = go.AddOrGet<Conduit>();
 		conduit.type = ConduitType.Liquid;
 	}

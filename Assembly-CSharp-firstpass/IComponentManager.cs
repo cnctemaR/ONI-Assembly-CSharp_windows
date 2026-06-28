@@ -4,11 +4,11 @@ public interface IComponentManager
 {
 	void Spawn();
 
-	void Update(float dt);
+	void RenderEveryTick(float dt);
 
 	void FixedUpdate(float dt);
 
-	void SimUpdate(float dt);
+	void Sim200ms(float dt);
 
 	void CleanUp();
 

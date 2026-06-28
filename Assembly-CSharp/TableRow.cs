@@ -15,6 +15,16 @@ public class TableRow : KMonoBehaviour
 		}
 	}
 
+	public GameObject GetScroller(string scrollerID)
+	{
+		return this.scrollers[scrollerID];
+	}
+
+	public GameObject GetScrollerBorder(string scrolledID)
+	{
+		return this.scrollerBorders[scrolledID];
+	}
+
 	public void SelectMinion()
 	{
 		if (this.minion == null)
@@ -30,7 +40,7 @@ public class TableRow : KMonoBehaviour
 		{
 			return;
 		}
-		SelectTool.Instance.SelectAndFocus(this.minion.transform.position, this.minion.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
+		SelectTool.Instance.SelectAndFocus(this.minion.transform.GetPosition(), this.minion.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
 	}
 
 	public void ConfigureContent(MinionIdentity minion, Dictionary<string, TableColumn> columns)
@@ -39,32 +49,73 @@ public class TableRow : KMonoBehaviour
 		KImage componentInChildren = base.GetComponentInChildren<KImage>(true);
 		componentInChildren.colorStyleSetting = ((!(minion == null)) ? this.style_setting_minion : this.style_setting_default);
 		componentInChildren.ColorState = KImage.ColorSelector.Inactive;
-		foreach (KeyValuePair<string, TableColumn> keyValuePair in columns)
+		using (Dictionary<string, TableColumn>.Enumerator enumerator = columns.GetEnumerator())
 		{
-			GameObject gameObject;
-			if (minion == null)
+			while (enumerator.MoveNext())
 			{
-				if (this.isDefault)
+				KeyValuePair<string, TableColumn> column = enumerator.Current;
+				GameObject gameObject;
+				if (minion == null)
 				{
-					gameObject = keyValuePair.Value.GetDefaultWidget(base.gameObject);
+					if (this.isDefault)
+					{
+						gameObject = column.Value.GetDefaultWidget(base.gameObject);
+					}
+					else
+					{
+						gameObject = column.Value.GetHeaderWidget(base.gameObject);
+					}
 				}
 				else
 				{
-					gameObject = keyValuePair.Value.GetHeaderWidget(base.gameObject);
+					gameObject = column.Value.GetMinionWidget(base.gameObject);
+				}
+				this.widgets.Add(column.Value, gameObject);
+				column.Value.widgets_by_row.Add(this, gameObject);
+				if (column.Key.Contains("scroller_spacer_") && (minion != null || this.isDefault))
+				{
+					gameObject.GetComponentInChildren<LayoutElement>().minWidth += 3f;
+				}
+				if (column.Value.scrollerID != string.Empty)
+				{
+					foreach (string text in column.Value.screen.column_scrollers)
+					{
+						if (text == column.Value.scrollerID)
+						{
+							if (!this.scrollers.ContainsKey(text))
+							{
+								GameObject gameObject2 = Util.KInstantiateUI(this.scrollerPrefab, base.gameObject, true);
+								KScrollRect scroll_rect = gameObject2.GetComponent<KScrollRect>();
+								scroll_rect.onValueChanged.AddListener(delegate
+								{
+									foreach (TableRow tableRow in column.Value.screen.rows)
+									{
+										KScrollRect componentInChildren2 = tableRow.GetComponentInChildren<KScrollRect>();
+										if (componentInChildren2 != null)
+										{
+											componentInChildren2.horizontalNormalizedPosition = scroll_rect.horizontalNormalizedPosition;
+										}
+									}
+								});
+								this.scrollers.Add(text, scroll_rect.content.gameObject);
+								Transform transform = scroll_rect.content.transform.parent.Find("Border");
+								if (transform != null)
+								{
+									this.scrollerBorders.Add(text, scroll_rect.content.transform.parent.Find("Border").gameObject);
+								}
+							}
+							gameObject.transform.SetParent(this.scrollers[text].transform);
+							this.scrollers[text].transform.parent.GetComponent<KScrollRect>().horizontalNormalizedPosition = 0f;
+						}
+					}
 				}
 			}
-			else
-			{
-				gameObject = keyValuePair.Value.GetMinionWidget(base.gameObject);
-			}
-			this.widgets.Add(keyValuePair.Value, gameObject);
-			keyValuePair.Value.widgets_by_row.Add(this, gameObject);
 		}
-		foreach (KeyValuePair<string, TableColumn> keyValuePair2 in columns)
+		foreach (KeyValuePair<string, TableColumn> keyValuePair in columns)
 		{
-			if (keyValuePair2.Value.on_load_action != null)
+			if (keyValuePair.Value.on_load_action != null)
 			{
-				keyValuePair2.Value.on_load_action(minion, keyValuePair2.Value.widgets_by_row[this]);
+				keyValuePair.Value.on_load_action(minion, keyValuePair.Value.widgets_by_row[this]);
 			}
 		}
 		if (minion != null)
@@ -78,6 +129,36 @@ public class TableRow : KMonoBehaviour
 		if (this.selectMinionButton)
 		{
 			this.selectMinionButton.transform.SetAsLastSibling();
+		}
+		foreach (KeyValuePair<string, GameObject> keyValuePair2 in this.scrollerBorders)
+		{
+			RectTransform rectTransform = keyValuePair2.Value.rectTransform();
+			float width = rectTransform.rect.width;
+			keyValuePair2.Value.transform.SetParent(base.gameObject.transform);
+			RectTransform rectTransform2 = rectTransform;
+			Vector2 vector = new Vector2(0f, 1f);
+			rectTransform.anchorMax = vector;
+			rectTransform2.anchorMin = vector;
+			rectTransform.sizeDelta = new Vector2(width, rectTransform.sizeDelta.y);
+			RectTransform rectTransform3 = this.scrollers[keyValuePair2.Key].transform.parent.rectTransform();
+			Vector3 vector2 = this.scrollers[keyValuePair2.Key].transform.parent.rectTransform().GetLocalPosition() - new Vector3(rectTransform3.sizeDelta.x / 2f, -1f * (rectTransform3.sizeDelta.y / 2f), 0f);
+			vector2.y = 0f;
+			rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, 374f);
+			rectTransform.SetLocalPosition(vector2 + Vector3.up * rectTransform.GetLocalPosition().y + Vector3.up * -rectTransform.anchoredPosition.y);
+		}
+	}
+
+	public void RefreshScrollers()
+	{
+		foreach (KeyValuePair<string, GameObject> keyValuePair in this.scrollers)
+		{
+			KScrollRect component = keyValuePair.Value.transform.parent.GetComponent<KScrollRect>();
+			component.GetComponent<LayoutElement>().minWidth = Mathf.Min(768f, component.content.sizeDelta.x);
+		}
+		foreach (KeyValuePair<string, GameObject> keyValuePair2 in this.scrollerBorders)
+		{
+			RectTransform rectTransform = keyValuePair2.Value.rectTransform();
+			rectTransform.sizeDelta = new Vector2(this.scrollers[keyValuePair2.Key].transform.parent.GetComponent<LayoutElement>().minWidth, rectTransform.sizeDelta.y);
 		}
 	}
 
@@ -116,6 +197,10 @@ public class TableRow : KMonoBehaviour
 
 	private Dictionary<TableColumn, GameObject> widgets = new Dictionary<TableColumn, GameObject>();
 
+	private Dictionary<string, GameObject> scrollers = new Dictionary<string, GameObject>();
+
+	private Dictionary<string, GameObject> scrollerBorders = new Dictionary<string, GameObject>();
+
 	public bool isDefault;
 
 	[MyCmpGet]
@@ -128,6 +213,12 @@ public class TableRow : KMonoBehaviour
 
 	[SerializeField]
 	private ColorStyleSetting style_setting_minion;
+
+	[SerializeField]
+	private GameObject scrollerPrefab;
+
+	[SerializeField]
+	private GameObject scrollbarPrefab;
 
 	public enum RowType
 	{

@@ -15,14 +15,6 @@ namespace Klei.AI
 			this.entityType = EntityTypeSet.Instance.TryGet(this.entityTypeId);
 			if (this.entityType != null)
 			{
-				foreach (Attribute attribute in this.modifierSet.Attributes)
-				{
-					if (this.attributes.Get(attribute) == null)
-					{
-						this.attributes.Add(attribute);
-					}
-				}
-				this.amounts = this.GetAmounts();
 				this.entityType.Apply(this, base.gameObject);
 			}
 			foreach (Disease disease in Db.Get().Diseases)
@@ -65,8 +57,6 @@ namespace Klei.AI
 				this.amounts.Cleanup();
 			}
 		}
-
-		public ModifierSet modifierSet;
 
 		public string entityTypeId;
 

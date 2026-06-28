@@ -198,7 +198,7 @@ namespace Klei.AI
 				string formattedString = attributeModifierEntry.Modifier.GetFormattedString(base.gameObject);
 				if (formattedString != null)
 				{
-					text += string.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifierEntry.Modifier.Description, formattedString);
+					text += string.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifierEntry.Modifier.GetDescription(), formattedString);
 				}
 			}
 			string text2 = string.Empty;
@@ -209,7 +209,7 @@ namespace Klei.AI
 				{
 					if (attributeConverterInstance.converter.attribute == this.Attribute)
 					{
-						string text3 = attributeConverterInstance.ToString();
+						string text3 = attributeConverterInstance.DescriptionFromAttribute();
 						if (text3 != null)
 						{
 							text2 = text2 + "\n" + text3;

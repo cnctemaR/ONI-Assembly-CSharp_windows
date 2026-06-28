@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -10,38 +11,35 @@ public class GeneratorConfig : IBuildingConfig
 		int num = 3;
 		int num2 = 3;
 		string text2 = "generatorphos_kanim";
-		float num3 = 400f;
-		int num4 = 100;
-		float num5 = 120f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER5;
+		int num3 = 100;
+		float num4 = 120f;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER5;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num6 = 2400f;
+		float num5 = 2400f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER2, tier2);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2, 0.2f);
 		buildingDef.GeneratorWattageRating = 600f;
 		buildingDef.GeneratorBaseCapacity = 20000f;
 		buildingDef.ExhaustKilowattsWhenActive = 8f;
-		buildingDef.OperatingKilowatts = 1f;
+		buildingDef.SelfHeatKilowattsWhenActive = 1f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.AudioSize = "large";
-		buildingDef.Upgradeable = false;
-		buildingDef.HotKey = global::Action.BuildMenuKeyC;
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		EnergyGenerator energyGenerator = go.AddOrGet<EnergyGenerator>();
-		energyGenerator.formula = EnergyGenerator.CreateSimpleFormula(SimHashes.Carbon, 1f, 500f, SimHashes.Void, 0f, true);
+		energyGenerator.formula = EnergyGenerator.CreateSimpleFormula(SimHashes.Carbon, 1f, 600f, SimHashes.Void, 0f, true);
 		energyGenerator.meterOffset = Meter.Offset.Behind;
 		energyGenerator.SetSliderValue(50f, 0);
 		energyGenerator.powerDistributionOrder = 9;
 		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 500f;
+		storage.capacityKg = 600f;
 		go.AddOrGet<LoopingSounds>();
 		Prioritizable.AddRef(go);
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
@@ -49,15 +47,30 @@ public class GeneratorConfig : IBuildingConfig
 		manualDeliveryKG.requestedItemTag = new Tag("Coal");
 		manualDeliveryKG.capacity = storage.capacityKg;
 		manualDeliveryKG.refillMass = 100f;
+		manualDeliveryKG.choreTags = new Tag[] { GameTags.ChoreTypes.Power };
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.PowerFetch.IdHash;
 		BuildingElementEmitter buildingElementEmitter = go.AddOrGet<BuildingElementEmitter>();
 		buildingElementEmitter.emitRate = 0.02f;
 		buildingElementEmitter.temperature = 310f;
 		buildingElementEmitter.element = SimHashes.CarbonDioxide;
 		buildingElementEmitter.modifierOffset = new Vector2(1f, 2f);
+		Tinkerable.MakePowerTinkerable(go);
+	}
+
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, GeneratorConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, GeneratorConfig.INPUT_PORTS);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		GeneratedBuildings.RegisterLogicPorts(go, GeneratorConfig.INPUT_PORTS);
+		go.AddOrGet<LogicOperationalController>();
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
@@ -67,4 +80,10 @@ public class GeneratorConfig : IBuildingConfig
 	}
 
 	public const string ID = "Generator";
+
+	private const float COAL_BURN_RATE = 1f;
+
+	private const float COAL_CAPACITY = 600f;
+
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
 }

@@ -25,12 +25,12 @@ public class TiredMonitor : GameStateMachine<TiredMonitor, TiredMonitor.Instance
 
 		public void SetInterruptDay()
 		{
-			this.interruptedDay = GameClock.Instance.GetDay();
+			this.interruptedDay = GameClock.Instance.GetCycle();
 		}
 
 		public bool AllowInterruptClear()
 		{
-			bool flag = GameClock.Instance.GetDay() > this.interruptedDay + 1;
+			bool flag = GameClock.Instance.GetCycle() > this.interruptedDay + 1;
 			if (flag)
 			{
 				this.interruptedDay = -1;

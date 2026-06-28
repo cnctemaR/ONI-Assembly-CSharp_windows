@@ -16,7 +16,7 @@ public class OilFloaterConfig : IEntityConfig
 		string text4 = "idle_loop";
 		EffectorValues tier = DECOR.BONUS.TIER1;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 348.15f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, 25f, "FloaterNavGrid", NavType.Hover, 2f, "Meat", 2, false, false, 30f, 323.15f, 413.15f, 308.15f, 433.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, 25f, "FloaterNavGrid", NavType.Hover, 32, 2f, "Meat", 2, false, false, 30f, 323.15f, 413.15f, 308.15f, 433.15f);
 		OilFloater oilFloater = gameObject.UpdateComponentRequirement<OilFloater>(true);
 		oilFloater.consumedElement = SimHashes.CarbonDioxide;
 		oilFloater.consumptionRate = 0.25f;

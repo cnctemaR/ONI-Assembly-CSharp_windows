@@ -15,15 +15,22 @@ public class BuildTool : DragTool
 
 	protected override void OnActivateTool()
 	{
+		if (this.visualizer != null)
+		{
+			this.ClearTilePreview();
+			global::UnityEngine.Object.Destroy(this.visualizer);
+		}
 		this.active = true;
 		base.OnActivateTool();
 		this.buildingOrientation = Orientation.Neutral;
 		this.placementPivot = this.def.placementPivot;
+		Vector3 cursorPos = PlayerController.GetCursorPos(Input.mousePosition);
 		GameObject buildingPreview = this.def.BuildingPreview;
+		Vector3 vector = cursorPos;
 		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Ore;
 		Folder folder = Folder.Placers;
 		int num = LayerMask.NameToLayer("Place");
-		this.visualizer = GameUtil.KInstantiate(buildingPreview, sceneLayer, folder, null, num);
+		this.visualizer = GameUtil.KInstantiate(buildingPreview, vector, sceneLayer, folder, null, num);
 		KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
@@ -35,11 +42,9 @@ public class BuildTool : DragTool
 		}
 		this.visualizer.SetActive(true);
 		this.visualizer.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Placers).transform;
-		this.visualizer.gameObject.SetActive(false);
-		this.visualizer.gameObject.SetActive(true);
+		this.UpdateVis(cursorPos);
 		BuildToolHoverTextCard component2 = base.GetComponent<BuildToolHoverTextCard>();
 		component2.currentDef = this.def;
-		component2.UpdateHoverElements(null);
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
 		if (component == null)
 		{
@@ -54,6 +59,10 @@ public class BuildTool : DragTool
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
 	{
+		if (!this.active)
+		{
+			return;
+		}
 		this.active = false;
 		GridCompositor.Instance.ToggleMajor(false);
 		this.buildingOrientation = Orientation.Neutral;
@@ -73,6 +82,7 @@ public class BuildTool : DragTool
 		this.viewMode = def.ViewMode;
 		ResourceRemainingDisplayScreen.instance.SetResources(selected_elements, def.CraftRecipe);
 		PlayerController.Instance.ActivateTool(this);
+		this.OnActivateTool();
 	}
 
 	public void Deactivate()
@@ -129,67 +139,70 @@ public class BuildTool : DragTool
 	{
 		cursorPos -= this.placementPivot;
 		base.OnMouseMove(cursorPos);
-		int num = Grid.PosToCell(cursorPos);
-		bool flag = this.def.IsValidPlaceLocation(this.visualizer, cursorPos, this.buildingOrientation);
-		bool flag2 = this.def.IsValidReplaceLocation(cursorPos, this.buildingOrientation, this.def.ReplacementLayer, this.def.ObjectLayer);
+		this.UpdateVis(cursorPos);
+	}
+
+	private void UpdateVis(Vector3 pos)
+	{
+		string text;
+		bool flag = this.def.IsValidPlaceLocation(this.visualizer, pos, this.buildingOrientation, out text);
+		bool flag2 = this.def.IsValidReplaceLocation(pos, this.buildingOrientation, this.def.ReplacementLayer, this.def.ObjectLayer);
 		flag = flag || flag2;
 		if (this.visualizer != null)
 		{
 			Color color = Color.white;
-			float num2 = 0f;
+			float num = 0f;
 			if (!flag)
 			{
 				color = Color.red;
-				num2 = 1f;
+				num = 1f;
 			}
-			this.SetColor(this.visualizer, color, num2);
+			this.SetColor(this.visualizer, color, num);
 		}
+		int num2 = Grid.PosToCell(pos);
 		if (this.def != null)
 		{
-			Vector3 position = this.visualizer.transform.position;
-			position.z = Grid.CellToPosCCC(0, this.def.SceneLayer).z;
-			this.visualizer.transform.SetPosition(position);
-			base.transform.SetPosition(position - Vector3.up * 0.5f);
+			Vector3 vector = Grid.CellToPosCBC(num2, this.def.SceneLayer);
+			this.visualizer.transform.SetPosition(vector);
+			base.transform.SetPosition(vector - Vector3.up * 0.5f);
 			if (this.def.IsTilePiece)
 			{
 				this.ClearTilePreview();
-				if (Grid.IsValidCell(num))
+				if (Grid.IsValidCell(num2))
 				{
-					GameObject gameObject = Grid.Objects[num, (int)this.def.TileLayer];
+					GameObject gameObject = Grid.Objects[num2, (int)this.def.TileLayer];
 					if (gameObject == null)
 					{
-						Grid.Objects[num, (int)this.def.TileLayer] = this.visualizer;
+						Grid.Objects[num2, (int)this.def.TileLayer] = this.visualizer;
 					}
 					if (this.def.isKAnimTile)
 					{
 						GameObject gameObject2 = null;
 						if (this.def.ReplacementLayer != ObjectLayer.NumLayers)
 						{
-							gameObject2 = Grid.Objects[num, 11];
+							gameObject2 = Grid.Objects[num2, 11];
 						}
 						if (gameObject == null || (gameObject.GetComponent<Constructable>() == null && gameObject2 == null))
 						{
-							TileVisualizer.RefreshCell(num, this.def.TileLayer);
+							TileVisualizer.RefreshCell(num2, this.def.TileLayer);
 							if (this.def.BlockTileAtlas != null)
 							{
 								int num3 = LayerMask.NameToLayer("Overlay");
 								BlockTileRenderer blockTileRenderer = World.Instance.blockTileRenderer;
-								blockTileRenderer.SetInvalidPlaceCell(num, !flag);
-								if (this.lastCell != num)
+								blockTileRenderer.SetInvalidPlaceCell(num2, !flag);
+								if (this.lastCell != num2)
 								{
 									blockTileRenderer.SetInvalidPlaceCell(this.lastCell, false);
 								}
-								blockTileRenderer.AddBlock(num3, this.def, SimHashes.Void, num);
+								blockTileRenderer.AddBlock(num3, this.def, SimHashes.Void, num2);
 							}
 						}
 					}
 				}
 			}
-			if (this.lastCell != num)
+			if (this.lastCell != num2)
 			{
-				this.lastCell = num;
-				BuildToolHoverTextCard component = base.GetComponent<BuildToolHoverTextCard>();
-				component.UpdateHoverElements(null);
+				this.lastCell = num2;
 			}
 		}
 	}
@@ -205,6 +218,11 @@ public class BuildTool : DragTool
 				{
 					KFMOD.PlayOneShot(GlobalAssets.GetSound("HUD_Rotate", false));
 					this.buildingOrientation = component.Rotate();
+					if (Grid.IsValidCell(this.lastCell))
+					{
+						Vector3 vector = Grid.CellToPosCCC(this.lastCell, Grid.SceneLayer.Building);
+						this.UpdateVis(vector);
+					}
 				}
 			}
 		}
@@ -225,7 +243,8 @@ public class BuildTool : DragTool
 		GameObject gameObject = null;
 		if (DebugHandler.InstantBuildMode)
 		{
-			if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation))
+			string text;
+			if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation, out text))
 			{
 				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, false, true);
 				if (this.source != null)
@@ -264,7 +283,14 @@ public class BuildTool : DragTool
 				Prioritizable component3 = gameObject.GetComponent<Prioritizable>();
 				if (component3 != null)
 				{
-					component3.SetMasterPriority(BuildMenuPriorityScreen.Instance.GetScreenPriority());
+					if (BuildMenu.Instance != null)
+					{
+						component3.SetMasterPriority(BuildMenu.Instance.GetBuildingPriority());
+					}
+					if (PlanScreen.Instance != null)
+					{
+						component3.SetMasterPriority(PlanScreen.Instance.GetBuildingPriority());
+					}
 				}
 				if (this.source != null)
 				{
@@ -274,8 +300,6 @@ public class BuildTool : DragTool
 		}
 		if (gameObject != null)
 		{
-			BuildToolHoverTextCard component4 = base.GetComponent<BuildToolHoverTextCard>();
-			component4.UpdateHoverElements(null);
 			this.placeSound = GlobalAssets.GetSound("Place_Building_" + this.def.AudioSize, false);
 			if (this.placeSound != null)
 			{
@@ -286,10 +310,10 @@ public class BuildTool : DragTool
 					eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
 				}
 				SoundEvent.EndOneShot(eventInstance);
-				Rotatable component5 = gameObject.GetComponent<Rotatable>();
-				if (component5 != null)
+				Rotatable component4 = gameObject.GetComponent<Rotatable>();
+				if (component4 != null)
 				{
-					component5.SetOrientation(this.buildingOrientation);
+					component4.SetOrientation(this.buildingOrientation);
 				}
 			}
 		}
@@ -319,7 +343,7 @@ public class BuildTool : DragTool
 		ToolTipScreen.Instance.ClearToolTip(this.tooltip);
 	}
 
-	public override void Update()
+	public void Update()
 	{
 		if (this.active)
 		{

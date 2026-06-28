@@ -16,7 +16,7 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 			if (gravityComponent.elapsedTime >= 0f)
 			{
 				Vector2 velocity = gravityComponent.Velocity;
-				Vector3 position = gravityComponent.transform.position;
+				Vector3 position = gravityComponent.transform.GetPosition();
 				Vector2 vector = position;
 				Vector2 vector2 = vector + velocity * dt;
 				Vector2 vector3 = vector2;

@@ -5,7 +5,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class Tutorial : KMonoBehaviour
+public class Tutorial : KMonoBehaviour, IRender1000ms
 {
 	public static Tutorial Instance { get; private set; }
 
@@ -16,10 +16,10 @@ public class Tutorial : KMonoBehaviour
 			GameObject telepad = GameUtil.GetTelepad();
 			if (telepad != null)
 			{
-				this.notifierPosition = telepad.transform.position;
+				this.notifierPosition = telepad.transform.GetPosition();
 			}
 		}
-		this.notifier.transform.position = this.notifierPosition;
+		this.notifier.transform.SetPosition(this.notifierPosition);
 	}
 
 	protected override void OnPrefabInit()
@@ -31,7 +31,7 @@ public class Tutorial : KMonoBehaviour
 	{
 		if (this.tutorialMessagesRemaining.Count == 0)
 		{
-			for (int i = 0; i <= 15; i++)
+			for (int i = 0; i <= 14; i++)
 			{
 				this.tutorialMessagesRemaining.Add((Tutorial.TutorialMessages)i);
 			}
@@ -111,9 +111,6 @@ public class Tutorial : KMonoBehaviour
 			break;
 		case Tutorial.TutorialMessages.TM_StressManagement:
 			message = new GenericMessage(MISC.NOTIFICATIONS.STRESSMANAGEMENTMESSAGE.NAME, MISC.NOTIFICATIONS.STRESSMANAGEMENTMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.STRESSMANAGEMENTMESSAGE.TOOLTIP);
-			break;
-		case Tutorial.TutorialMessages.TM_StorageRegions:
-			message = new GenericMessage(MISC.NOTIFICATIONS.STORAGEREGIONSMESSAGE.NAME, MISC.NOTIFICATIONS.STORAGEREGIONSMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.STORAGEREGIONSMESSAGE.TOOLTIP);
 			break;
 		case Tutorial.TutorialMessages.TM_Scheduling:
 			message = new GenericMessage(MISC.NOTIFICATIONS.SCHEDULEMESSAGE.NAME, MISC.NOTIFICATIONS.SCHEDULEMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.SCHEDULEMESSAGE.TOOLTIP);
@@ -209,7 +206,7 @@ public class Tutorial : KMonoBehaviour
 		Messenger.Instance.QueueMessage(message);
 	}
 
-	private void Update()
+	public void Render1000ms(float dt)
 	{
 		if (App.isLoading)
 		{
@@ -257,7 +254,7 @@ public class Tutorial : KMonoBehaviour
 				item2.lastNotifyTime = Time.time;
 			}
 		}
-		if (GameClock.Instance.GetDay() > 0 && !this.tutorialMessagesRemaining.Contains(Tutorial.TutorialMessages.TM_Priorities) && !this.queuedPrioritiesMessage)
+		if (GameClock.Instance.GetCycle() > 0 && !this.tutorialMessagesRemaining.Contains(Tutorial.TutorialMessages.TM_Priorities) && !this.queuedPrioritiesMessage)
 		{
 			this.queuedPrioritiesMessage = true;
 			GameScheduler.Instance.Schedule("PrioritiesTutorial", 2f, delegate(object obj)
@@ -270,7 +267,7 @@ public class Tutorial : KMonoBehaviour
 	private bool SufficientOxygen()
 	{
 		ReportManager.ReportEntry entry = ReportManager.Instance.TodaysReport.GetEntry(ReportManager.ReportType.OxygenCreated);
-		return entry == null || entry.Net > 0.0001f || (GameClock.Instance.GetDay() < 1 && !GameClock.Instance.IsNighttime());
+		return entry.Net > 0.0001f || (GameClock.Instance.GetCycle() < 1 && !GameClock.Instance.IsNighttime());
 	}
 
 	private bool FoodIsRefrigerated()
@@ -384,7 +381,6 @@ public class Tutorial : KMonoBehaviour
 		TM_Basics,
 		TM_Welcome,
 		TM_StressManagement,
-		TM_StorageRegions,
 		TM_Scheduling,
 		TM_Mopping,
 		TM_Locomotion,

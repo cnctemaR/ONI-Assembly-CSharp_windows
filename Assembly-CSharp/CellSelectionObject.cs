@@ -23,7 +23,7 @@ public class CellSelectionObject : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.mCollider = base.GetComponent<BoxCollider2D>();
+		this.mCollider = base.GetComponent<KBoxCollider2D>();
 		this.mCollider.size = new Vector2(1.1f, 1.1f);
 		this.mSelectable = base.GetComponent<KSelectable>();
 		this.SelectedDisplaySprite.transform.localScale = Vector3.one * 0.390625f;
@@ -91,18 +91,6 @@ public class CellSelectionObject : KMonoBehaviour
 				if (flag && base.gameObject.layer != LayerMask.NameToLayer("Default"))
 				{
 					base.gameObject.layer = LayerMask.NameToLayer("Default");
-				}
-				if (this.previousHoverCell != this.mouseCell)
-				{
-					if (this.hoverTextScreen != null)
-					{
-						this.hoverTextScreen.ResetHoverDelay();
-					}
-					else
-					{
-						this.hoverTextScreen = global::UnityEngine.Object.FindObjectOfType<HoverTextScreen>();
-					}
-					this.previousHoverCell = this.mouseCell;
 				}
 				Vector3 vector = Grid.CellToPos(this.mouseCell, 0f, 0f, 0f) + this.offset;
 				vector.z = this.zDepth;
@@ -248,7 +236,7 @@ public class CellSelectionObject : KMonoBehaviour
 
 	private float zDepthSelected;
 
-	private BoxCollider2D mCollider;
+	private KBoxCollider2D mCollider;
 
 	private KSelectable mSelectable;
 
@@ -261,10 +249,6 @@ public class CellSelectionObject : KMonoBehaviour
 	public Sprite Sprite_Hover;
 
 	public int mouseCell;
-
-	public int previousHoverCell;
-
-	private HoverTextScreen hoverTextScreen;
 
 	[MyCmpAdd]
 	private UserMenu userMenu;

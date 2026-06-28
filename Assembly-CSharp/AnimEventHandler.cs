@@ -19,7 +19,7 @@ public class AnimEventHandler : KMonoBehaviour
 			}
 		}
 		this.controller = base.GetComponent<KBatchedAnimController>();
-		this.animCollider = base.GetComponent<BoxCollider2D>();
+		this.animCollider = base.GetComponent<KBoxCollider2D>();
 		this.baseOffset = this.animCollider.offset;
 	}
 
@@ -59,12 +59,12 @@ public class AnimEventHandler : KMonoBehaviour
 	public void LateUpdate()
 	{
 		Vector3 pivotSymbolPosition = this.controller.GetPivotSymbolPosition();
-		this.animCollider.offset = new Vector2(this.baseOffset.x + pivotSymbolPosition.x - base.transform.position.x, this.baseOffset.y + pivotSymbolPosition.y - base.transform.position.y);
+		this.animCollider.offset = new Vector2(this.baseOffset.x + pivotSymbolPosition.x - base.transform.GetPosition().x, this.baseOffset.y + pivotSymbolPosition.y - base.transform.GetPosition().y);
 	}
 
 	private KBatchedAnimController controller;
 
-	private BoxCollider2D animCollider;
+	private KBoxCollider2D animCollider;
 
 	private Vector3 targetPos;
 

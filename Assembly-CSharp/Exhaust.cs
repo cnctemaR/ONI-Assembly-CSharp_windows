@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class Exhaust : KMonoBehaviour
+public class Exhaust : KMonoBehaviour, ISim200ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -29,7 +29,7 @@ public class Exhaust : KMonoBehaviour
 		disease_to_item2 = (int)((float)item1.DiseaseCount * transfer_rate);
 	}
 
-	private void SimUpdate(float dt)
+	public void Sim200ms(float dt)
 	{
 		this.operational.SetFlag(Exhaust.canExhaust, !this.vent.IsBlocked);
 		if (!this.operational.IsOperational)
@@ -42,7 +42,7 @@ public class Exhaust : KMonoBehaviour
 			}
 			return;
 		}
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		if (!Grid.Solid[num] && this.consumer.ConsumptionRate != 0f)
 		{
 			List<GameObject> items = this.storage.items;

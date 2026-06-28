@@ -1,22 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class GameClock : KMonoBehaviour, ISaveLoadable
+public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 {
 	protected override void OnPrefabInit()
 	{
 		GameClock.Instance = this;
-		this.time = 50f;
+		this.timeSinceStartOfCycle = 50f;
 	}
 
-	private void Update()
+	[OnDeserialized]
+	private void OnDeserialized()
 	{
-		this.UpdateTime(Time.deltaTime);
-		this.timePlayed += Time.unscaledDeltaTime;
+		if (this.time != 0f)
+		{
+			this.cycle = (int)(this.time / 600f);
+			this.timeSinceStartOfCycle = Mathf.Max(this.time - (float)this.cycle * 600f, 0f);
+			this.time = 0f;
+		}
+	}
+
+	public void Sim33ms(float dt)
+	{
+		this.AddTime(dt);
+	}
+
+	public void Render1000ms(float dt)
+	{
+		this.timePlayed += dt;
 	}
 
 	private void LateUpdate()
@@ -24,12 +40,17 @@ public class GameClock : KMonoBehaviour, ISaveLoadable
 		this.frame++;
 	}
 
-	private void UpdateTime(float dt)
+	private void AddTime(float dt)
 	{
-		int day = this.GetDay();
-		this.time += dt;
-		int day2 = this.GetDay();
-		int num = day2 - day;
+		this.timeSinceStartOfCycle += dt;
+		bool flag = false;
+		while (this.timeSinceStartOfCycle >= 600f)
+		{
+			this.cycle++;
+			this.timeSinceStartOfCycle -= 600f;
+			base.Trigger(631075836, null);
+			flag = true;
+		}
 		if (!this.isNight && this.IsNighttime())
 		{
 			this.isNight = true;
@@ -39,32 +60,20 @@ public class GameClock : KMonoBehaviour, ISaveLoadable
 		{
 			this.isNight = false;
 		}
-		if (num > 0)
+		if (flag && this.cycle % 1 == 0)
 		{
-			for (int i = 0; i < num; i++)
-			{
-				base.Trigger(631075836, null);
-			}
-			if (day2 != 0 && day2 % 1 == 0)
-			{
-				this.DoAutoSave(day2);
-			}
+			this.DoAutoSave(this.cycle);
 		}
 	}
 
-	public float GetSecondsSinceStartOfDay()
+	public float GetCurrentCycleAsPercentage()
 	{
-		return this.time - (float)this.GetDay() * 600f;
-	}
-
-	public float GetCurrentDayAsPercentage()
-	{
-		return this.GetSecondsSinceStartOfDay() / 600f;
+		return this.timeSinceStartOfCycle / 600f;
 	}
 
 	public float GetTime()
 	{
-		return this.time;
+		return this.timeSinceStartOfCycle + (float)this.cycle * 600f;
 	}
 
 	public int GetFrame()
@@ -72,21 +81,20 @@ public class GameClock : KMonoBehaviour, ISaveLoadable
 		return this.frame;
 	}
 
-	public int GetDay()
+	public int GetCycle()
 	{
-		return (int)(this.time / 600f);
+		return this.cycle;
 	}
 
 	public bool IsNighttime()
 	{
-		return GameClock.Instance.GetCurrentDayAsPercentage() >= 0.875f;
+		return GameClock.Instance.GetCurrentCycleAsPercentage() >= 0.875f;
 	}
 
 	public void SetTime(float new_time)
 	{
-		float num = Mathf.Max(new_time - this.time, 0f);
-		this.UpdateTime(num);
-		this.time = new_time;
+		float num = Mathf.Max(new_time - this.GetTime(), 0f);
+		this.AddTime(num);
 	}
 
 	public float GetTimePlayedInSeconds()
@@ -138,8 +146,15 @@ public class GameClock : KMonoBehaviour, ISaveLoadable
 	private float time;
 
 	[Serialize]
+	private float timeSinceStartOfCycle;
+
+	[Serialize]
+	private int cycle;
+
+	[Serialize]
 	private float timePlayed;
 
+	[Serialize]
 	private bool isNight;
 
 	public static readonly string NewCycleKey = "NewCycle";

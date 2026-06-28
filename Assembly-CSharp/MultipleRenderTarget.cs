@@ -23,7 +23,7 @@ public class MultipleRenderTarget : MonoBehaviour
 		this.renderProxy = new_camera.gameObject.AddComponent<MultipleRenderTargetProxy>();
 		new_camera.name = camera.name + " MRT";
 		new_camera.transform.parent = camera.transform;
-		new_camera.transform.localPosition = Vector3.zero;
+		new_camera.transform.SetLocalPosition(Vector3.zero);
 		new_camera.depth = camera.depth - 1f;
 		camera.cullingMask = 0;
 		camera.clearFlags = CameraClearFlags.Color;

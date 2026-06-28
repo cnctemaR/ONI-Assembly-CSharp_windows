@@ -16,14 +16,26 @@ public class ResearchEntry : KMonoBehaviour
 		foreach (Tech tech in this.targetTech.requiredTech)
 		{
 			float num = this.targetTech.width / 2f;
+			Vector2 zero = Vector2.zero;
+			Vector2 zero2 = Vector2.zero;
+			if (tech.center.y > this.targetTech.center.y + 2f)
+			{
+				zero = new Vector2(0f, 20f);
+				zero2 = new Vector2(0f, -20f);
+			}
+			else if (tech.center.y < this.targetTech.center.y - 2f)
+			{
+				zero = new Vector2(0f, -20f);
+				zero2 = new Vector2(0f, 20f);
+			}
 			GameObject gameObject = Util.KInstantiateUI(this.linePrefab, this.lineContainer.gameObject, true);
 			UILineRenderer component = gameObject.GetComponent<UILineRenderer>();
 			component.Points = new Vector2[]
 			{
-				new Vector2(0f, 0f),
-				new Vector2(-((this.targetTech.center.x - num - (tech.center.x + num)) / 2f), 0f),
-				new Vector2(-((this.targetTech.center.x - num - (tech.center.x + num)) / 2f), tech.center.y - this.targetTech.center.y),
-				new Vector2(-(this.targetTech.center.x - num - (tech.center.x + num)) + 2f, tech.center.y - this.targetTech.center.y)
+				new Vector2(0f, 0f) + zero,
+				new Vector2(-((this.targetTech.center.x - num - (tech.center.x + num)) / 2f), 0f) + zero,
+				new Vector2(-((this.targetTech.center.x - num - (tech.center.x + num)) / 2f), tech.center.y - this.targetTech.center.y) + zero2,
+				new Vector2(-(this.targetTech.center.x - num - (tech.center.x + num)) + 2f, tech.center.y - this.targetTech.center.y) + zero2
 			};
 			component.LineThickness = (float)this.lineThickness_inactive;
 			component.color = this.inactiveLineColor;

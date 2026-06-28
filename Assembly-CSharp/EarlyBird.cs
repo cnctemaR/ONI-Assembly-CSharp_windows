@@ -88,7 +88,7 @@ public class EarlyBird : StateMachineComponent<EarlyBird.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.idle;
-			this.idle.Transition(this.early, (EarlyBird.StatesInstance smi) => smi.IsMorning());
+			this.idle.Transition(this.early, (EarlyBird.StatesInstance smi) => smi.IsMorning(), UpdateRate.SIM_200ms);
 			this.early.Enter("Morning", delegate(EarlyBird.StatesInstance smi)
 			{
 				smi.master.ApplyModifiers();
@@ -97,7 +97,7 @@ public class EarlyBird : StateMachineComponent<EarlyBird.StatesInstance>
 				smi.master.RemoveModifiers();
 			}).ToggleStatusItem(Db.Get().DuplicantStatusItems.EarlyMorning, null)
 				.ToggleExpression(Db.Get().Expressions.Happy, null)
-				.Transition(this.idle, (EarlyBird.StatesInstance smi) => !smi.IsMorning());
+				.Transition(this.idle, (EarlyBird.StatesInstance smi) => !smi.IsMorning(), UpdateRate.SIM_200ms);
 		}
 
 		public GameStateMachine<EarlyBird.States, EarlyBird.StatesInstance, EarlyBird, object>.State idle;

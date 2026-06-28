@@ -20,41 +20,27 @@ public class BaseUtilityBuildTool : DragTool
 	protected override void OnActivateTool()
 	{
 		base.OnActivateTool();
+		Vector3 cursorPos = PlayerController.GetCursorPos(Input.mousePosition);
 		GameObject buildingPreview = this.def.BuildingPreview;
+		Vector3 vector = cursorPos;
 		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Ore;
 		Folder folder = Folder.Placers;
 		int num = LayerMask.NameToLayer("Place");
-		this.visualizer = GameUtil.KInstantiate(buildingPreview, sceneLayer, folder, null, num);
+		this.visualizer = GameUtil.KInstantiate(buildingPreview, vector, sceneLayer, folder, null, num);
 		KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
 			component.visibilityType = KAnimControllerBase.VisibilityType.Always;
 			component.isMovable = true;
+			component.SetDirty();
 		}
 		this.visualizer.SetActive(true);
 		this.Play(this.visualizer, "None_Place");
 		BuildToolHoverTextCard component2 = base.GetComponent<BuildToolHoverTextCard>();
 		component2.currentDef = this.def;
-		component2.UpdateHoverElements(null);
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
-		IWire component3 = this.def.BuildingComplete.GetComponent<IWire>();
-		if (component3 != null)
-		{
-			this.conduitMgr = component3.GetNetworkMgr();
-		}
-		else
-		{
-			TravelTube component4 = this.def.BuildingComplete.GetComponent<TravelTube>();
-			if (component4 != null)
-			{
-				this.conduitMgr = component4.GetNetworkManager();
-			}
-			else
-			{
-				this.conduit = this.def.BuildingComplete.GetComponent<Conduit>();
-				this.conduitMgr = this.conduit.GetNetworkManager();
-			}
-		}
+		IHaveUtilityNetworkMgr component3 = this.def.BuildingComplete.GetComponent<IHaveUtilityNetworkMgr>();
+		this.conduitMgr = component3.GetNetworkManager();
 	}
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
@@ -75,7 +61,6 @@ public class BaseUtilityBuildTool : DragTool
 		this.viewMode = def.ViewMode;
 		PlayerController.Instance.ActivateTool(this);
 		ResourceRemainingDisplayScreen.instance.SetResources(selected_elements, def.CraftRecipe);
-		base.GetComponent<BuildToolHoverTextCard>().UpdateHoverElements(null);
 	}
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
@@ -164,7 +149,7 @@ public class BaseUtilityBuildTool : DragTool
 					if (component != null)
 					{
 						bool flag2 = false;
-						if ((flag && component.RequiresPower) || (this.conduit != null && ((component.RequiresGas && this.conduit.type == ConduitType.Gas) || (component.RequiresLiquid && this.conduit.type == ConduitType.Liquid))))
+						if (flag && component.RequiresPower)
 						{
 							flag2 = true;
 						}
@@ -265,40 +250,31 @@ public class BaseUtilityBuildTool : DragTool
 		{
 			this.lastCell = num;
 		}
+		if (this.visualizer != null)
+		{
+			Color color = Color.white;
+			float num2 = 0f;
+			string text;
+			if (!this.def.IsValidPlaceLocation(this.visualizer, num, Orientation.Neutral, out text))
+			{
+				color = Color.red;
+				num2 = 1f;
+			}
+			this.SetColor(this.visualizer, color, num2);
+		}
+	}
+
+	private void SetColor(GameObject root, Color c, float strength)
+	{
+		KBatchedAnimController component = root.GetComponent<KBatchedAnimController>();
+		if (component != null)
+		{
+			component.TintColour = c;
+		}
 	}
 
 	protected virtual void ApplyPathToConduitSystem()
 	{
-		if (this.path.Count < 2)
-		{
-			return;
-		}
-		for (int i = 1; i < this.path.Count; i++)
-		{
-			if (this.path[i - 1].valid && this.path[i].valid)
-			{
-				int cell = this.path[i - 1].cell;
-				int cell2 = this.path[i].cell;
-				UtilityConnections utilityConnections = UtilityConnectionsExtensions.DirectionFromToCell(cell, this.path[i].cell);
-				UtilityConnections utilityConnections2 = utilityConnections.InverseDirection();
-				UtilityConnections connections = this.conduitMgr.GetConnections(cell, false);
-				UtilityConnections connections2 = this.conduitMgr.GetConnections(cell2, false);
-				if (this.ShouldLink(utilityConnections, connections) && this.ShouldLink(utilityConnections2, connections2))
-				{
-					this.conduitMgr.AddConnection(utilityConnections, cell, false);
-					this.conduitMgr.AddConnection(utilityConnections2, cell2, false);
-				}
-			}
-		}
-	}
-
-	private bool ShouldLink(UtilityConnections direction, UtilityConnections existing_connections)
-	{
-		UtilityConnections utilityConnections = UtilityConnections.Left | UtilityConnections.Right;
-		UtilityConnections utilityConnections2 = UtilityConnections.Up | UtilityConnections.Down;
-		existing_connections |= direction;
-		bool flag = ((existing_connections & utilityConnections) == utilityConnections && (existing_connections & utilityConnections2) != (UtilityConnections)0) || ((existing_connections & utilityConnections2) == utilityConnections2 && (existing_connections & utilityConnections) != (UtilityConnections)0);
-		return !flag;
 	}
 
 	private IEnumerator VisUpdater()
@@ -350,7 +326,8 @@ public class BaseUtilityBuildTool : DragTool
 			if (gameObject == null)
 			{
 				utilityConnections = this.conduitMgr.GetConnections(pathNode.cell, false);
-				if (DebugHandler.InstantBuildMode && this.def.IsValidBuildLocation(this.visualizer, vector, Orientation.Neutral) && this.def.IsValidPlaceLocation(this.visualizer, vector, Orientation.Neutral))
+				string text;
+				if (DebugHandler.InstantBuildMode && this.def.IsValidBuildLocation(this.visualizer, vector, Orientation.Neutral) && this.def.IsValidPlaceLocation(this.visualizer, vector, Orientation.Neutral, out text))
 				{
 					gameObject = this.def.Build(pathNode.cell, Orientation.Neutral, null, this.selectedElements, 293.15f, false, true);
 				}
@@ -367,7 +344,14 @@ public class BaseUtilityBuildTool : DragTool
 						Prioritizable component2 = gameObject.GetComponent<Prioritizable>();
 						if (component2 != null)
 						{
-							component2.SetMasterPriority(BuildMenuPriorityScreen.Instance.GetScreenPriority());
+							if (BuildMenu.Instance != null)
+							{
+								component2.SetMasterPriority(BuildMenu.Instance.GetBuildingPriority());
+							}
+							if (PlanScreen.Instance != null)
+							{
+								component2.SetMasterPriority(PlanScreen.Instance.GetBuildingPriority());
+							}
 						}
 					}
 				}
@@ -410,12 +394,12 @@ public class BaseUtilityBuildTool : DragTool
 							component6.UpdateConnections(utilityConnections);
 						}
 						string visualizerString = this.conduitMgr.GetVisualizerString(utilityConnections);
-						string text = visualizerString;
+						string text2 = visualizerString;
 						if (gameObject.GetComponent<KBatchedAnimController>().HasAnimation(visualizerString + "_place"))
 						{
-							text += "_place";
+							text2 += "_place";
 						}
-						this.Play(gameObject, text);
+						this.Play(gameObject, text2);
 					}
 				}
 			}
@@ -461,8 +445,6 @@ public class BaseUtilityBuildTool : DragTool
 	private IList<Element> selectedElements;
 
 	private BuildingDef def;
-
-	private Conduit conduit;
 
 	protected List<BaseUtilityBuildTool.PathNode> path = new List<BaseUtilityBuildTool.PathNode>();
 

@@ -50,7 +50,7 @@ public class QuarantineMonitor : GameStateMachine<QuarantineMonitor, QuarantineM
 
 		public KMonoBehaviour GetQuarantineArea()
 		{
-			return Db.Get().OwnableSlots.Bed.Get(base.master.gameObject).assignable;
+			return Db.Get().AssignableSlots.Bed.Lookup(base.master.gameObject).assignable;
 		}
 
 		public bool HasQuarantineArea()
@@ -120,7 +120,7 @@ public class QuarantineMonitor : GameStateMachine<QuarantineMonitor, QuarantineM
 
 		private bool HasBedRoom()
 		{
-			Assignable assignable = base.smi.master.GetComponent<Ownables>().GetAssignable(Db.Get().OwnableSlots.Bed);
+			Assignable assignable = base.smi.master.GetComponent<Ownables>().GetAssignable(Db.Get().AssignableSlots.Bed);
 			return assignable != null;
 		}
 

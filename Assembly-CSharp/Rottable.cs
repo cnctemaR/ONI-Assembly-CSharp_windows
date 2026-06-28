@@ -11,10 +11,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 		default_state = this.Fresh;
 		base.serializable = true;
 		this.root.TagTransition(GameTags.Preserved, this.Preserved, false).TagTransition(GameTags.Entombed, this.Preserved, false);
-		this.Fresh.ToggleStatusItem(Db.Get().CreatureStatusItems.Fresh, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Stale_Pre, (Rottable.Instance smi, float p) => p <= smi.SpoilTime - (smi.SpoilTime - smi.StaleTime)).ToggleSchedulePeriodic("Rot", 1f, delegate(Rottable.Instance smi)
-		{
-			smi.Rot(smi, 1f);
-		});
+		this.Fresh.ToggleStatusItem(Db.Get().CreatureStatusItems.Fresh, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Stale_Pre, (Rottable.Instance smi, float p) => p <= smi.SpoilTime - (smi.SpoilTime - smi.StaleTime)).FastUpdate("Rot", Rottable.rotCB, UpdateRate.SIM_1000ms, true);
 		this.Preserved.TagTransition(new Tag[]
 		{
 			GameTags.Preserved,
@@ -28,15 +25,12 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 			smi.GoTo(this.Stale);
 		});
 		this.Stale.ToggleStatusItem(Db.Get().CreatureStatusItems.Stale, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Fresh, (Rottable.Instance smi, float p) => p > smi.SpoilTime - (smi.SpoilTime - smi.StaleTime)).ParamTransition<float>(this.rotParameter, this.Spoiled, (Rottable.Instance smi, float p) => p <= 0f)
-			.ToggleSchedulePeriodic("Rot", 1f, delegate(Rottable.Instance smi)
-			{
-				smi.Rot(smi, 1f);
-			});
+			.FastUpdate("Rot", Rottable.rotCB, UpdateRate.SIM_1000ms, false);
 		this.Spoiled.Enter(delegate(Rottable.Instance smi)
 		{
 			GameObject gameObject = Scenario.SpawnPrefab(Grid.PosToCell(smi.master.gameObject), 0, 0, "RotPile", Grid.SceneLayer.Ore, Folder.Entities);
 			gameObject.gameObject.GetComponent<KSelectable>().SetName(UI.GAMEOBJECTEFFECTS.ROTTEN + " " + smi.master.gameObject.GetProperName());
-			gameObject.transform.SetPosition(smi.master.transform.position);
+			gameObject.transform.SetPosition(smi.master.transform.GetPosition());
 			gameObject.GetComponent<PrimaryElement>().Mass = smi.master.GetComponent<PrimaryElement>().Mass;
 			gameObject.GetComponent<PrimaryElement>().Temperature = smi.master.GetComponent<PrimaryElement>().Temperature;
 			gameObject.SetActive(true);
@@ -44,6 +38,14 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 			Edible component = smi.GetComponent<Edible>();
 			if (component != null)
 			{
+				if (component.worker != null)
+				{
+					ChoreDriver component2 = component.worker.GetComponent<ChoreDriver>();
+					if (component2 != null && component2.GetCurrentChore() != null)
+					{
+						component2.GetCurrentChore().Fail("food rotted");
+					}
+				}
 				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -component.Calories, string.Format(UI.ENDOFDAYREPORT.NOTES.ROTTED, smi.gameObject.GetProperName()), UI.ENDOFDAYREPORT.NOTES.ROTTED_CONTEXT);
 			}
 			Util.KDestroyGameObject(smi.gameObject);
@@ -156,6 +158,8 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 
 	public GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, object>.State Spoiled;
 
+	private static Rottable.RotCB rotCB = new Rottable.RotCB();
+
 	public static Dictionary<int, Rottable.RotAtmosphereQuality> AtmosphereModifier = new Dictionary<int, Rottable.RotAtmosphereQuality>
 	{
 		{
@@ -219,6 +223,14 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 			Rottable.RotAtmosphereQuality.Sterilizing
 		}
 	};
+
+	private class RotCB : UpdateBucketWithUpdater<Rottable.Instance>.IUpdater
+	{
+		public void Update(Rottable.Instance smi, float dt)
+		{
+			smi.Rot(smi, dt);
+		}
+	}
 
 	public new class Instance : GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, object>.GameInstance
 	{

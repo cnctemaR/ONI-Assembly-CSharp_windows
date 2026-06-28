@@ -7,7 +7,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
+public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity, IListableOption
 {
 	[Serialize]
 	public string nameStringKey { get; set; }
@@ -29,6 +29,11 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 
 	protected override void OnSpawn()
 	{
+		PathProber component = base.GetComponent<PathProber>();
+		if (component != null)
+		{
+			component.SetGroupProber(MinionGroupProber.Get());
+		}
 		this.SetName(this.name);
 		if (this.nameStringKey == null)
 		{
@@ -45,24 +50,26 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		}
 		this.raceId = "Human";
 		this.bodyType = BodyType.Human;
-		Accessorizer component = base.gameObject.GetComponent<Accessorizer>();
+		Accessorizer component2 = base.gameObject.GetComponent<Accessorizer>();
 		this.bodyData = default(KCompBuilder.BodyData);
-		component.GetBodySlots(ref this.bodyData);
+		component2.GetBodySlots(ref this.bodyData);
 		this.headComp = MinionStartingStats.ApplyRace(base.gameObject, MinionResources.Get().races.Get(this.raceId), this.bodyType, this.bodyData);
-		FaceGraph component2 = base.GetComponent<FaceGraph>();
-		component2.SetHeadComp(this.headComp);
+		FaceGraph component3 = base.GetComponent<FaceGraph>();
+		component3.SetHeadComp(this.headComp);
 		base.GetComponent<KBatchedAnimController>().AddBuildOverride(this.headComp.GetData(), true, true);
+		base.GetComponent<KBatchedAnimController>().RemoveVisibleSymbol(KCompBuilder.snapTo_hat);
+		base.GetComponent<KBatchedAnimController>().RemoveVisibleSymbol(KCompBuilder.snapTo_hat_hair);
 		this.voiceId = "0";
 		this.voiceId += (this.voiceIdx + 1).ToString();
-		Prioritizable component3 = base.GetComponent<Prioritizable>();
-		if (component3 != null)
-		{
-			component3.showIcon = false;
-		}
-		Pickupable component4 = base.GetComponent<Pickupable>();
+		Prioritizable component4 = base.GetComponent<Prioritizable>();
 		if (component4 != null)
 		{
-			component4.carryAnimOverride = Assets.GetAnim("anim_incapacitated_carrier_kanim");
+			component4.showIcon = false;
+		}
+		Pickupable component5 = base.GetComponent<Pickupable>();
+		if (component5 != null)
+		{
+			component5.carryAnimOverride = Assets.GetAnim("anim_incapacitated_carrier_kanim");
 		}
 		SettingLevel currentQualitySetting = Game.Instance.customSettings.GetCurrentQualitySetting("ImmuneSystem");
 		if (currentQualitySetting.id == "Compromised")
@@ -141,7 +148,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 
 	private void OnUpdateBounds(Bounds bounds)
 	{
-		BoxCollider2D component = base.GetComponent<BoxCollider2D>();
+		KBoxCollider2D component = base.GetComponent<KBoxCollider2D>();
 		component.offset = bounds.center;
 		component.size = bounds.extents;
 	}
@@ -163,6 +170,21 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 	public Ownables GetSoleOwner()
 	{
 		return base.GetComponent<Ownables>();
+	}
+
+	[ContextMenu("TestHat")]
+	public void TestHat()
+	{
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		AccessorySlot hat = Db.Get().AccessorySlots.Hat;
+		MinionIdentity.testIdx = (MinionIdentity.testIdx + 1) % hat.accessories.Count;
+		component.AddSymbolOverride(hat.targetSymbolId, hat.accessories[MinionIdentity.testIdx].symbol.build.batchTag, hat.accessories[MinionIdentity.testIdx].symbol, false);
+		component.ShowSymbol(hat.targetSymbolId);
+		AccessorySlot hair = Db.Get().AccessorySlots.Hair;
+		component.AddSymbolOverride(hair.targetSymbolId, hair.accessories[1].symbol.build.batchTag, hair.accessories[1].symbol, false);
+		component.ShowSymbol(hair.targetSymbolId);
+		AccessorySlot hatHair = Db.Get().AccessorySlots.HatHair;
+		component.AddSymbolOverride(hatHair.targetSymbolId, hatHair.accessories[1].symbol.build.batchTag, hatHair.accessories[1].symbol, false);
 	}
 
 	[MyCmpReq]
@@ -206,6 +228,8 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 	private static MinionIdentity.NameList maleNameList;
 
 	private static MinionIdentity.NameList femaleNameList;
+
+	private static int testIdx;
 
 	private class NameList
 	{

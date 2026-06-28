@@ -101,6 +101,10 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		this.StartConsuming();
 	}
 
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+	}
+
 	protected override void OnStopWork(Worker worker)
 	{
 		worker.GetAttributes().Remove(this.caloriesModifier);

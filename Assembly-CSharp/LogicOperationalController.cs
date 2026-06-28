@@ -9,7 +9,7 @@ public class LogicOperationalController : KMonoBehaviour
 		base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
 		if (LogicOperationalController.infoStatusItem == null)
 		{
-			LogicOperationalController.infoStatusItem = new StatusItem("LogicOperationalInfo", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
+			LogicOperationalController.infoStatusItem = new StatusItem("LogicOperationalInfo", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			LogicOperationalController.infoStatusItem.resolveStringCallback = new Func<string, object, string>(LogicOperationalController.ResolveInfoStatusItemString);
 		}
 		this.CheckWireState();
@@ -33,17 +33,17 @@ public class LogicOperationalController : KMonoBehaviour
 
 	private static string ResolveInfoStatusItemString(string format_str, object data)
 	{
-		Operational operational = (Operational)data;
-		return (!operational.IsOperational) ? BUILDING.STATUSITEMS.LOGIC.LOGIC_CONTROLLED_DISABLED : BUILDING.STATUSITEMS.LOGIC.LOGIC_CONTROLLED_ENABLED;
+		LogicOperationalController logicOperationalController = (LogicOperationalController)data;
+		Operational component = logicOperationalController.GetComponent<Operational>();
+		return (!component.GetFlag(LogicOperationalController.logicOperationalFlag)) ? BUILDING.STATUSITEMS.LOGIC.LOGIC_CONTROLLED_DISABLED : BUILDING.STATUSITEMS.LOGIC.LOGIC_CONTROLLED_ENABLED;
 	}
 
 	private void OnLogicValueChanged(object data)
 	{
-		LogicValueChanged logicValueChanged = (LogicValueChanged)data;
-		if (logicValueChanged.portID == LogicOperationalController.PORT_ID)
+		if (((LogicValueChanged)data).portID == LogicOperationalController.PORT_ID)
 		{
 			LogicCircuitNetwork logicCircuitNetwork = this.CheckWireState();
-			base.GetComponent<KSelectable>().ToggleStatusItem(LogicOperationalController.infoStatusItem, logicCircuitNetwork != null && logicValueChanged.newValue > 0, base.GetComponent<Operational>());
+			base.GetComponent<KSelectable>().ToggleStatusItem(LogicOperationalController.infoStatusItem, logicCircuitNetwork != null, this);
 		}
 	}
 
@@ -51,7 +51,7 @@ public class LogicOperationalController : KMonoBehaviour
 
 	public int unNetworkedValue = 1;
 
-	private static Operational.Flag logicOperationalFlag = new Operational.Flag("LogicOperational", Operational.Flag.Type.Requirement);
+	private static Operational.Flag logicOperationalFlag = new Operational.Flag("LogicOperational", Operational.Flag.Type.Functional);
 
 	private static StatusItem infoStatusItem;
 }

@@ -26,7 +26,7 @@ public class EggIncubator : KMonoBehaviour, ISaveLoadable
 	{
 		if (this.fetchChore == null && this.egg == null)
 		{
-			this.fetchChore = new FetchChore(this.storage, 1f, new Tag[] { GameTags.Egg }, null, null, true, new Action<Chore>(this.OnFetchComplete), null, null, FetchOrder2.OperationalRequirement.Operational, 0);
+			this.fetchChore = new FetchChore(Db.Get().ChoreTypes.Fetch, this.storage, 1f, new Tag[] { GameTags.Egg }, null, null, true, new Action<Chore>(this.OnFetchComplete), null, null, FetchOrder2.OperationalRequirement.Operational, 0, null);
 		}
 	}
 

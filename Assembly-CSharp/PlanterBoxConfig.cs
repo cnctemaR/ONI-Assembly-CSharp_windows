@@ -10,15 +10,14 @@ public class PlanterBoxConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 1;
 		string text2 = "planterbox_kanim";
-		float num3 = 400f;
-		int num4 = 10;
-		float num5 = 3f;
+		int num3 = 10;
+		float num4 = 3f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
 		string[] farmable = MATERIALS.FARMABLE;
-		float num6 = 800f;
+		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, farmable, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, farmable, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
 		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingBack;
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
@@ -28,7 +27,7 @@ public class PlanterBoxConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		Storage storage = go.AddOrGet<Storage>();
 		PlantablePlot plantablePlot = go.AddOrGet<PlantablePlot>();

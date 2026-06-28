@@ -14,10 +14,10 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 		this.reacting.Enter("Reactable.Begin", delegate(ReactionMonitor.Instance smi)
 		{
 			this.reactable.Get(smi).Begin(smi.gameObject);
-		}).Update("Reactable.Update", delegate(ReactionMonitor.Instance smi)
+		}).Update("Reactable.Update", delegate(ReactionMonitor.Instance smi, float dt)
 		{
-			this.reactable.Get(smi).Update(smi.dt);
-		}).Exit("Reactable.End", delegate(ReactionMonitor.Instance smi)
+			this.reactable.Get(smi).Update(dt);
+		}, UpdateRate.SIM_200ms, false).Exit("Reactable.End", delegate(ReactionMonitor.Instance smi)
 		{
 			this.reactable.Get(smi).End();
 		})
@@ -71,7 +71,7 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 				this.lastReactable = null;
 			}
 			int num = Grid.PosToCell(base.smi.gameObject);
-			List<ScenePartitionerEntry> list = GameScenePartitioner.Instance.ReserveList();
+			List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
 			GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num).x, Grid.CellToXY(num).y, 1, 1, GameScenePartitioner.Instance.objectLayers[0], list);
 			for (int i = 0; i < list.Count; i++)
 			{
@@ -88,7 +88,7 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 					}
 				}
 			}
-			GameScenePartitioner.Instance.ReleaseList(list);
+			ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
 		}
 
 		public void StopReaction()

@@ -14,7 +14,7 @@ public class KAnimLayering
 		this.layer = layer;
 		if (this.foregroundController != null)
 		{
-			Vector3 vector = new Vector3(0f, 0f, Grid.GetLayerZ(layer) - this.controller.gameObject.transform.position.z - 0.1f);
+			Vector3 vector = new Vector3(0f, 0f, Grid.GetLayerZ(layer) - this.controller.gameObject.transform.GetPosition().z - 0.1f);
 			this.foregroundController.transform.SetLocalPosition(vector);
 		}
 	}
@@ -101,7 +101,7 @@ public class KAnimLayering
 			this.link = new KAnimLink(this.controller, this.foregroundController);
 			this.Dirty();
 			this.controller.GetSynchronizer().Add(this.foregroundController);
-			Vector3 vector = new Vector3(0f, 0f, Grid.GetLayerZ(this.layer) - this.controller.gameObject.transform.position.z - 0.1f);
+			Vector3 vector = new Vector3(0f, 0f, Grid.GetLayerZ(this.layer) - this.controller.gameObject.transform.GetPosition().z - 0.1f);
 			gameObject.transform.SetLocalPosition(vector);
 			gameObject.SetActive(true);
 		}

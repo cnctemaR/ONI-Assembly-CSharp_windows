@@ -15,7 +15,7 @@ public class WireRefinedBridgeConfig : WireBridgeConfig
 		buildingDef.AnimFiles = new KAnimFile[] { Assets.GetAnim("utilityelectricbridgeconductive_kanim") };
 		buildingDef.Mass = BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
 		buildingDef.MaterialCategory = MATERIALS.REFINED_METALS;
-		buildingDef.HotKey = global::Action.BuildMenuKeyC;
+		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.WireIDs, "WireRefinedBridge");
 		return buildingDef;
 	}
 

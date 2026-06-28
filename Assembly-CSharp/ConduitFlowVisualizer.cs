@@ -68,7 +68,7 @@ public class ConduitFlowVisualizer
 				this.audioInfo[i] = audioInfo;
 			}
 		}
-		Vector3 position = CameraController.Instance.transform.position;
+		Vector3 position = CameraController.Instance.transform.GetPosition();
 		Element element = null;
 		if (this.tuning.renderMesh)
 		{

@@ -14,7 +14,7 @@ public class FloorSwitchActivator : KMonoBehaviour
 	{
 		base.OnSpawn();
 		this.Register();
-		this.OnCellChange(0, Grid.PosToCell(base.gameObject));
+		this.OnCellChange();
 	}
 
 	protected override void OnCleanUp()
@@ -23,15 +23,16 @@ public class FloorSwitchActivator : KMonoBehaviour
 		base.OnCleanUp();
 	}
 
-	private void OnCellChange(int previous_cell, int new_cell)
+	private void OnCellChange()
 	{
-		this.partitionerEntry.UpdatePosition(new_cell);
-		if (Grid.IsValidCell(previous_cell) && new_cell != previous_cell)
+		int num = Grid.PosToCell(this);
+		this.partitionerEntry.UpdatePosition(num);
+		if (Grid.IsValidCell(this.last_cell_occupied) && num != this.last_cell_occupied)
 		{
-			this.NotifyChanged(previous_cell);
+			this.NotifyChanged(this.last_cell_occupied);
 		}
-		this.NotifyChanged(new_cell);
-		this.last_cell_occupied = new_cell;
+		this.NotifyChanged(num);
+		this.last_cell_occupied = num;
 	}
 
 	private void NotifyChanged(int cell)
@@ -59,7 +60,7 @@ public class FloorSwitchActivator : KMonoBehaviour
 		}
 		int num = Grid.PosToCell(this);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("FloorSwitchActivator.Register", this, num, GameScenePartitioner.Instance.floorSwitchActivatorLayer, null);
-		CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChange), false);
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		this.registered = true;
 	}
 
@@ -70,7 +71,7 @@ public class FloorSwitchActivator : KMonoBehaviour
 			return;
 		}
 		this.partitionerEntry.Release();
-		CellChangeMonitor.Instance.Remove(this, new Action<int, int>(this.OnCellChange), false);
+		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		if (this.last_cell_occupied > -1)
 		{
 			this.NotifyChanged(this.last_cell_occupied);

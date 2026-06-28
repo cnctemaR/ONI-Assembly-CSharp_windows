@@ -13,7 +13,7 @@ public class MinionSounds : KMonoBehaviour
 	{
 		if (data is FMODAsset)
 		{
-			SoundEvent.PlayOneShot((string)data, base.transform.position);
+			SoundEvent.PlayOneShot((string)data, base.transform.GetPosition());
 		}
 	}
 
@@ -35,7 +35,7 @@ public class MinionSounds : KMonoBehaviour
 				this.miningSoundMigrated = GlobalAssets.GetSound(text, false);
 				if (this.miningSoundMigrated != null)
 				{
-					this.loopingSounds.StartSound(this.miningSoundMigrated, base.transform.position);
+					this.loopingSounds.StartSound(this.miningSoundMigrated, base.transform.GetPosition());
 				}
 			}
 		}

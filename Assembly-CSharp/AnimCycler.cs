@@ -12,10 +12,10 @@ public class AnimCycler : Cycler
 		else
 		{
 			this.Next();
-			BoxCollider2D boxCollider2D = base.gameObject.AddComponent<BoxCollider2D>();
-			boxCollider2D.size = Vector2.one * 3f;
-			boxCollider2D.offset = Vector2.up * 1.5f;
-			BatchAnimCamera.bounds.Encapsulate(boxCollider2D.bounds);
+			KBoxCollider2D kboxCollider2D = base.gameObject.AddComponent<KBoxCollider2D>();
+			kboxCollider2D.size = Vector2.one * 3f;
+			kboxCollider2D.offset = Vector2.up * 1.5f;
+			BatchAnimCamera.bounds.Encapsulate(kboxCollider2D.bounds);
 			base.gameObject.AddComponent<LoopingSounds>();
 		}
 	}

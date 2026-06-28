@@ -6,7 +6,7 @@ public class KBatchedAnimEventToggler : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
-		Vector3 position = this.eventSource.transform.position;
+		Vector3 position = this.eventSource.transform.GetPosition();
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.FXFront);
 		int num = LayerMask.NameToLayer("Default");
 		foreach (KBatchedAnimEventToggler.Entry entry in this.entries)
@@ -30,7 +30,7 @@ public class KBatchedAnimEventToggler : KMonoBehaviour
 	{
 		this.StopAll();
 		HashedString context = this.animEventHandler.GetContext();
-		if (!context.isValid)
+		if (!context.IsValid)
 		{
 			return;
 		}

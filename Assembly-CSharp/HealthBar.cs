@@ -7,10 +7,12 @@ public class HealthBar : ProgressBar
 	{
 		base.OnSpawn();
 		base.barColor = ProgressBarsConfig.Instance.GetBarColor("HealthBar");
+		base.gameObject.SetActive(this.showTimer > 0f);
 	}
 
 	public void OnChange()
 	{
+		base.enabled = true;
 		base.gameObject.SetActive(true);
 		this.showTimer = this.maxShowTime;
 	}
@@ -28,17 +30,29 @@ public class HealthBar : ProgressBar
 		}
 	}
 
+	private void OnBecameInvisible()
+	{
+		base.enabled = false;
+	}
+
+	private void OnBecameVisible()
+	{
+		base.enabled = true;
+	}
+
 	public override void OnOverlayChanged(object data = null)
 	{
 		if ((SimViewMode)data == SimViewMode.None)
 		{
 			if (!base.gameObject.activeSelf && this.showTimer != 0f)
 			{
+				base.enabled = true;
 				base.gameObject.SetActive(true);
 			}
 		}
 		else if (base.gameObject.activeSelf)
 		{
+			base.enabled = false;
 			base.gameObject.SetActive(false);
 		}
 	}

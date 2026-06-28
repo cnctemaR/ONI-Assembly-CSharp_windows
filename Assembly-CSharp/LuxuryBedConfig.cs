@@ -10,21 +10,20 @@ public class LuxuryBedConfig : IBuildingConfig
 		int num = 4;
 		int num2 = 2;
 		string text = "elegantbed_kanim";
-		float num3 = 200f;
-		int num4 = 10;
-		float num5 = 10f;
+		int num3 = 10;
+		float num4 = 10f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] plastics = MATERIALS.PLASTICS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, num5, tier, plastics, num6, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER2, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, plastics, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER2, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.AudioCategory = "Metal";
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.Bed);
@@ -40,6 +39,8 @@ public class LuxuryBedConfig : IBuildingConfig
 		Sleepable sleepable = go.AddOrGet<Sleepable>();
 		sleepable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_sleep_bed_kanim") };
 		sleepable.workLayer = Grid.SceneLayer.BuildingFront;
+		Ownable ownable = go.AddOrGet<Ownable>();
+		ownable.slotID = Db.Get().AssignableSlots.Bed.Id;
 	}
 
 	public static string ID = "LuxuryBed";

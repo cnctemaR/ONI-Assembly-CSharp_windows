@@ -20,7 +20,7 @@ public class FliesFX : GameStateMachine<FliesFX, FliesFX.Instance>
 		public Instance(IStateMachineTarget master, Vector3 offset)
 			: base(master)
 		{
-			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("fly_swarm_kanim", base.smi.master.transform.position + offset, base.smi.master.transform, false, Grid.SceneLayer.Front, false);
+			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("fly_swarm_kanim", base.smi.master.transform.GetPosition() + offset, base.smi.master.transform, false, Grid.SceneLayer.Front, false);
 			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi);
 		}
 

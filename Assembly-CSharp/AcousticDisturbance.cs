@@ -8,7 +8,7 @@ public class AcousticDisturbance
 	{
 		GameObject gameObject = (GameObject)data;
 		Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
-		Vector2 vector = gameObject.transform.position;
+		Vector2 vector = gameObject.transform.GetPosition();
 		int num = Grid.PosToCell(vector);
 		int num2 = EmissionRadius * EmissionRadius;
 		int num3 = Mathf.CeilToInt((float)EmissionRadius);
@@ -19,7 +19,7 @@ public class AcousticDisturbance
 			MinionIdentity minionIdentity = liveMinionIdentities[i];
 			if (minionIdentity.gameObject != gameObject.gameObject)
 			{
-				Vector2 vector2 = minionIdentity.transform.position;
+				Vector2 vector2 = minionIdentity.transform.GetPosition();
 				float num4 = Vector2.SqrMagnitude(vector - vector2);
 				if (num4 <= (float)num2)
 				{

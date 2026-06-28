@@ -32,7 +32,10 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 		int num = Grid.PosToCell(navigator);
 		int num2 = Grid.OffsetCell(num, transition.x, transition.y);
 		this.AddDoor(num2);
-		this.AddDoor(Grid.CellAbove(num2));
+		if (navigator.CurrentNavType != NavType.Tube)
+		{
+			this.AddDoor(Grid.CellAbove(num2));
+		}
 		for (int i = 0; i < transition.navGridTransition.voidOffsets.Length; i++)
 		{
 			int num3 = Grid.OffsetCell(num, transition.navGridTransition.voidOffsets[i]);

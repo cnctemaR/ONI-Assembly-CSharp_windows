@@ -9,7 +9,7 @@ public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Vector3 position = base.transform.position;
+		Vector3 position = base.transform.GetPosition();
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Move);
 		base.transform.SetPosition(position);
 		base.gameObject.SetLayerRecursively(LayerMask.NameToLayer("Default"));
@@ -91,7 +91,7 @@ public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadable
 		FishingLure fishingLure = null;
 		foreach (FishingLure fishingLure2 in list)
 		{
-			float num2 = Vector3.Distance(fishingLure2.transform.position, base.transform.position);
+			float num2 = Vector3.Distance(fishingLure2.transform.GetPosition(), base.transform.GetPosition());
 			if (fishingLure2.HookedObject == null && num2 < num)
 			{
 				num = num2;
@@ -166,11 +166,11 @@ public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadable
 			{
 				smi.Play("hook_loop", KAnim.PlayMode.Loop);
 			})
-				.Update(delegate(Flut.StatesInstance smi)
+				.Update(delegate(Flut.StatesInstance smi, float dt)
 				{
 					if (CreatureHelpers.isSwimmable(Grid.PosToCell(smi.master.gameObject)))
 					{
-						BodyOfWater.MakeSplash(smi.master.transform.position);
+						BodyOfWater.MakeSplash(smi.master.transform.GetPosition());
 						smi.GoTo(this.alive.swimming.peacefully.idling.idle);
 					}
 					else if (Grid.Solid[Grid.CellBelow(Grid.PosToCell(smi.master.gameObject))])
@@ -190,7 +190,7 @@ public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadable
 				smi.Play("flop_loop", KAnim.PlayMode.Loop);
 				smi.master.butcherable.SetReadyToButcher(true);
 				smi.ScheduleGoTo(smi.master.LandSuffocateTime, this.dead.idle);
-			}).Update(delegate(Flut.StatesInstance smi)
+			}).Update(delegate(Flut.StatesInstance smi, float dt)
 			{
 				int num = Grid.PosToCell(smi.master.gameObject);
 				if (CreatureHelpers.isSwimmable(num))
@@ -209,7 +209,7 @@ public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadable
 						Util.KDestroyGameObject(smi.gameObject);
 					}, null);
 				})
-				.Update(delegate(Flut.StatesInstance smi)
+				.Update(delegate(Flut.StatesInstance smi, float dt)
 				{
 					int num2 = Grid.PosToCell(smi.gameObject);
 					if (CreatureHelpers.isSwimmable(Grid.CellDownLeft(num2)))
@@ -236,7 +236,7 @@ public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadable
 				smi.master.MarkCell(true);
 				smi.master.GetBodyOfWater();
 				smi.master.butcherable.SetReadyToButcher(false);
-			}).Update(delegate(Flut.StatesInstance smi)
+			}).Update(delegate(Flut.StatesInstance smi, float dt)
 			{
 				int num3 = Grid.PosToCell(smi.master.gameObject);
 				int num4 = Grid.CellBelow(num3);
@@ -265,7 +265,7 @@ public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadable
 						smi.GoTo(this.alive.swimming.peacefully.idling.move);
 					}
 				}, null);
-			}).Update(delegate(Flut.StatesInstance smi)
+			}).Update(delegate(Flut.StatesInstance smi, float dt)
 			{
 				int num5 = Grid.PosToCell(smi.master.gameObject);
 				int num6 = Grid.CellBelow(num5);
@@ -286,7 +286,7 @@ public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadable
 			this.alive.swimming.peacefully.lay.ToggleMainStatusItem(Db.Get().CreatureStatusItems.LayingAnEgg).Enter(delegate(Flut.StatesInstance smi)
 			{
 				smi.animController.Queue("lay", KAnim.PlayMode.Once, 1f, 0f);
-				GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(smi.master.GetComponent<AquaticReproducer>().EggPrefabTag), smi.master.transform.position, Quaternion.identity, null, null, true, 0);
+				GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(smi.master.GetComponent<AquaticReproducer>().EggPrefabTag), smi.master.transform.GetPosition(), Quaternion.identity, null, null, true, 0);
 				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, gameObject.GetComponent<KPrefabID>().GetProperName(), gameObject.transform, 1.5f, false);
 				gameObject.SetActive(true);
 			}).OnAnimQueueComplete(this.alive.swimming.peacefully.idling.idle);
@@ -309,7 +309,7 @@ public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadable
 				smi.master.butcherable.SetReadyToButcher(true);
 				smi.Play("death", KAnim.PlayMode.Once);
 				smi.master.MarkCell(true);
-			}).Update(delegate(Flut.StatesInstance smi)
+			}).Update(delegate(Flut.StatesInstance smi, float dt)
 			{
 				int num7 = Grid.PosToCell(smi.master);
 				if (!Grid.Solid[Grid.CellBelow(num7)])

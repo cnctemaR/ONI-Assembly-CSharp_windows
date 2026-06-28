@@ -6,16 +6,8 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class GeneShuffler : Ownable
+public class GeneShuffler : Workable
 {
-	public Assignable Assignable
-	{
-		get
-		{
-			return this.assignable;
-		}
-	}
-
 	public bool WorkComplete
 	{
 		get
@@ -35,6 +27,7 @@ public class GeneShuffler : Ownable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.assignable.OnAssign += this.Assign;
 	}
 
 	protected override void OnSpawn()
@@ -63,19 +56,16 @@ public class GeneShuffler : Ownable
 		}
 	}
 
-	public override void Assign(IAssignableIdentity new_assignee)
+	private void Assign(IAssignableIdentity new_assignee)
 	{
-		base.Assign(new_assignee);
-		if (this.geneShufflerSMI != null && !this.geneShufflerSMI.IsInsideState(this.geneShufflerSMI.sm.consumed))
+		if (new_assignee != null)
 		{
-			this.ActivateChore(null);
+			if (this.geneShufflerSMI != null && !this.geneShufflerSMI.IsInsideState(this.geneShufflerSMI.sm.consumed))
+			{
+				this.ActivateChore(null);
+			}
 		}
-	}
-
-	public override void Unassign()
-	{
-		base.Unassign();
-		if (this.geneShufflerSMI.IsInsideState(this.geneShufflerSMI.sm.idle))
+		else if (this.geneShufflerSMI.IsInsideState(this.geneShufflerSMI.sm.idle))
 		{
 			this.CancelChore(null);
 		}
@@ -90,7 +80,7 @@ public class GeneShuffler : Ownable
 		{
 			SelectTool.Instance.Select(null, true);
 		}
-		base.SetCanBeAssigned(false);
+		this.assignable.SetCanBeAssigned(false);
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -121,7 +111,7 @@ public class GeneShuffler : Ownable
 	protected override void OnCompleteWork(Worker worker)
 	{
 		base.OnCompleteWork(worker);
-		CameraController.Instance.CameraGoTo(base.transform.position, 1f, false);
+		CameraController.Instance.CameraGoTo(base.transform.GetPosition(), 1f, false);
 		this.ApplyRandomTrait(worker);
 		this.assignable.Unassign();
 		if (base.GetComponent<KSelectable>().IsSelected)
@@ -168,12 +158,12 @@ public class GeneShuffler : Ownable
 		base.GetComponent<Workable>().SetWorkTime(float.PositiveInfinity);
 		ChoreType geneShuffle = Db.Get().ChoreTypes.GeneShuffle;
 		KAnimFile anim = Assets.GetAnim("anim_interacts_neuralvacillator_kanim");
-		this.chore = new WorkChore<Workable>(geneShuffle, this, null, true, delegate(Chore o)
+		this.chore = new WorkChore<Workable>(geneShuffle, this, null, null, true, delegate(Chore o)
 		{
 			this.CompleteChore();
-		}, null, null, true, null, true, default(Tag), anim, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
-		this.chore.AddPrecondition(ChorePreconditions.IsAssignedtoMe, this.assignable);
-		this.chore.AddPrecondition(ChorePreconditions.IsOperational, this.assignable.gameObject);
+		}, null, null, true, null, true, anim, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+		this.chore.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, this.assignable);
+		this.chore.AddPrecondition(ChorePreconditions.instance.IsOperational, this.assignable.gameObject);
 	}
 
 	public void CancelChore(object param = null)
@@ -192,10 +182,10 @@ public class GeneShuffler : Ownable
 		this.chore = null;
 	}
 
-	[MyCmpGet]
+	[MyCmpReq]
 	public Assignable assignable;
 
-	[MyCmpGet]
+	[MyCmpAdd]
 	public Notifier notifier;
 
 	private Notification notification;
@@ -218,7 +208,8 @@ public class GeneShuffler : Ownable
 			this.working.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).ScheduleGoTo(5f, this.working.complete);
 			this.working.complete.ToggleStatusItem(Db.Get().BuildingStatusItems.GeneShuffleCompleted, null).Enter(delegate(GeneShuffler.GeneShufflerSM.Instance smi)
 			{
-				if (smi.master.selectable.IsSelected)
+				KSelectable component = smi.master.GetComponent<KSelectable>();
+				if (component.IsSelected)
 				{
 					DetailsScreen.Instance.Refresh(smi.master.gameObject);
 				}

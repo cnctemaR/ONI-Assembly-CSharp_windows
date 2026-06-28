@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece
+public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece, IHaveUtilityNetworkMgr
 {
 	public IUtilityNetworkMgr GetNetworkManager()
 	{
@@ -14,7 +14,7 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece
 	{
 		get
 		{
-			return base.transform.position;
+			return base.transform.GetPosition();
 		}
 	}
 
@@ -28,14 +28,14 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		Game.Instance.travelTubeSystem.AddToNetworks(num, this, false);
 		base.Subscribe(-1041684577, new Action<object>(this.OnConnectionsChanged));
 	}
 
 	protected override void OnCleanUp()
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		BuildingComplete component = base.GetComponent<BuildingComplete>();
 		if (component.Def.ReplacementLayer == ObjectLayer.NumLayers || Grid.Objects[num, (int)component.Def.ReplacementLayer] == null)
 		{
@@ -68,7 +68,7 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece
 	{
 		if (enable && this.dirtyNavCellUpdatedEntry == null)
 		{
-			int num = Grid.PosToCell(base.transform.position);
+			int num = Grid.PosToCell(base.transform.GetPosition());
 			this.dirtyNavCellUpdatedEntry = GameScenePartitioner.Instance.Add("TravelTube.OnDirtyNavCellUpdated", this, num, GameScenePartitioner.Instance.dirtyNavCellUpdateLayer, new Action<object>(this.OnDirtyNavCellUpdated));
 			this.OnDirtyNavCellUpdated(null);
 		}
@@ -81,7 +81,7 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece
 
 	private void OnDirtyNavCellUpdated(object data)
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		int num2 = num * NavGrid.MaxLinksPerCell;
 		bool flag = false;
 		if (this.isExitTube)

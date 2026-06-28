@@ -5,109 +5,71 @@ using UnityEngine;
 
 public class BuildToolHoverTextCard : HoverTextConfiguration
 {
-	public override void ConfigureHoverScreen()
+	public override void UpdateHoverElements(List<KSelectable> hoverObjects_dont_use_this_is_null)
 	{
+		HoverTextScreen instance = HoverTextScreen.Instance;
+		HoverTextDrawer hoverTextDrawer = instance.BeginDrawing();
+		hoverTextDrawer.BeginShadowBar(false);
 		this.ActionName = ((!(this.currentDef != null) || !this.currentDef.DragBuild) ? UI.TOOLS.BUILD.TOOLACTION : UI.TOOLS.BUILD.TOOLACTION_DRAG);
 		if (this.currentDef != null && this.currentDef.Name != null)
 		{
 			this.ToolName = string.Format(UI.TOOLS.BUILD.NAME, this.currentDef.Name);
 		}
-		HoverTextScreen instance = HoverTextScreen.Instance;
-		int num = 0;
-		if (instance.LoadPreConfiguredToolFields(this))
-		{
-			this.isConfigured = true;
-			return;
-		}
-		instance.ToggleIncubating(true);
-		instance.currentConfiguration = this;
-		instance.ClearLabels();
-		instance.NewLine("Spacer", 24);
-		instance.StartShadowBar(0f, 0f, false);
-		if (this.printTitle)
-		{
-			this.ConfigureTitle(instance, false);
-		}
-		this.ConfigureInstructions(instance);
-		instance.NewLine("BuildWarning", num);
-		instance.AddIndent(8f, 18f);
-		this.BuildWarningText = instance.AddText(string.Empty, this.HoverTextStyleSettings[1], false);
-		this.RotateLine = instance.NewLine("RotateLine", num);
-		instance.AddIndent(8f, 18f);
-		instance.AddText(UI.TOOLTIPS.HELP_ROTATE_KEY, this.Styles_Instruction.Standard, false);
-		base.SetLineActive(this.BuildWarningText.transform.parent.gameObject, false);
-		base.SetLineActive(this.RotateLine, false);
-		instance.NewLine("Power", num);
-		instance.AddIndent(8f, 18f);
-		this.PowerText = instance.AddText(string.Empty, this.Styles_BodyText.Standard, false);
-		instance.NewLine("MaterialsRemaining", num);
-		instance.AddIndent(8f, 18f);
-		this.MaterialsRemainingText = instance.AddText(string.Empty, this.Styles_BodyText.Standard, false);
-		instance.EndShadowBar();
-		this.isConfigured = true;
-	}
-
-	public override void UpdateHoverElements(List<KSelectable> hoverObjects_dont_use_this_is_null)
-	{
-		base.UpdateHoverElements(hoverObjects_dont_use_this_is_null);
-		if (!this.isConfigured || this.RotateLine == null)
-		{
-			this.ConfigureHoverScreen();
-		}
+		base.DrawTitle(instance, hoverTextDrawer);
+		base.DrawInstructions(instance, hoverTextDrawer);
+		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+		int num2 = 26;
+		int num3 = 8;
 		if (this.currentDef != null)
 		{
-			this.MaterialsRemainingText.text = ResourceRemainingDisplayScreen.instance.GetString();
-			if (BuildTool.Instance.isActiveAndEnabled)
+			if (PlayerController.Instance.ActiveTool != null)
 			{
-				base.SetLineActive(this.RotateLine, this.currentDef.BuildingComplete.GetComponent<Rotatable>() != null);
-				Orientation getBuildingOrientation = BuildTool.Instance.GetBuildingOrientation;
-				int getLastCell = BuildTool.Instance.GetLastCell;
-				string text = "Unknown reason";
-				if (!this.currentDef.IsValidBuildLocation(null, getLastCell, getBuildingOrientation, out text))
+				Type type = PlayerController.Instance.ActiveTool.GetType();
+				if (typeof(BuildTool).IsAssignableFrom(type) || typeof(BaseUtilityBuildTool).IsAssignableFrom(type))
 				{
-					base.SetLineActive(this.BuildWarningText.transform.parent.gameObject, true);
-					this.BuildWarningText.text = text;
-				}
-				else
-				{
-					base.SetLineActive(this.BuildWarningText.transform.parent.gameObject, false);
+					if (this.currentDef.BuildingComplete.GetComponent<Rotatable>() != null)
+					{
+						hoverTextDrawer.NewLine(num2);
+						hoverTextDrawer.AddIndent(num3);
+						hoverTextDrawer.DrawText(UI.TOOLTIPS.HELP_ROTATE_KEY, this.Styles_Instruction.Standard);
+					}
+					Orientation getBuildingOrientation = BuildTool.Instance.GetBuildingOrientation;
+					string text = "Unknown reason";
+					Vector3 vector = Grid.CellToPosCCC(num, Grid.SceneLayer.Building);
+					if (!this.currentDef.IsValidPlaceLocation(null, vector, getBuildingOrientation, out text))
+					{
+						hoverTextDrawer.NewLine(num2);
+						hoverTextDrawer.AddIndent(num3);
+						hoverTextDrawer.DrawText(text, this.HoverTextStyleSettings[1]);
+					}
+					RoomTracker component = this.currentDef.BuildingComplete.GetComponent<RoomTracker>();
+					if (component != null && !component.SufficientBuildLocation(num))
+					{
+						hoverTextDrawer.NewLine(num2);
+						hoverTextDrawer.AddIndent(num3);
+						hoverTextDrawer.DrawText(UI.TOOLTIPS.HELP_REQUIRES_ROOM, this.HoverTextStyleSettings[1]);
+					}
 				}
 			}
-			else if (UtilityBuildTool.Instance.isActiveAndEnabled || WireBuildTool.Instance.isActiveAndEnabled)
-			{
-				if (this.BuildWarningText.transform.parent.gameObject.activeSelf)
-				{
-					base.SetLineActive(this.BuildWarningText.transform.parent.gameObject, false);
-				}
-				if (this.RotateLine.transform.gameObject.activeSelf)
-				{
-					base.SetLineActive(this.RotateLine.gameObject, false);
-				}
-			}
-			bool flag = false;
-			int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
 			CircuitManager circuitManager = Game.Instance.circuitManager;
 			ushort circuitID = circuitManager.GetCircuitID(num);
 			if (circuitID != 65535)
 			{
-				flag = true;
-				float num2 = circuitManager.GetWattsNeededWhenActive(circuitID);
-				num2 += this.currentDef.EnergyConsumptionWhenActive;
+				float num4 = circuitManager.GetWattsNeededWhenActive(circuitID);
+				num4 += this.currentDef.EnergyConsumptionWhenActive;
 				float maxSafeWattageForCircuit = circuitManager.GetMaxSafeWattageForCircuit(circuitID);
-				this.PowerText.color = ((num2 < maxSafeWattageForCircuit) ? Color.white : Color.red);
-				this.PowerText.text = string.Format(UI.DETAILTABS.ENERGYGENERATOR.POTENTIAL_WATTAGE_CONSUMED, GameUtil.GetFormattedWattage(num2, GameUtil.WattageFormatterUnit.Automatic));
+				Color color = ((num4 < maxSafeWattageForCircuit) ? Color.white : Color.red);
+				hoverTextDrawer.NewLine(num2);
+				hoverTextDrawer.AddIndent(num3);
+				hoverTextDrawer.DrawText(string.Format(UI.DETAILTABS.ENERGYGENERATOR.POTENTIAL_WATTAGE_CONSUMED, GameUtil.GetFormattedWattage(num4, GameUtil.WattageFormatterUnit.Automatic)), this.Styles_BodyText.Standard, color, true);
 			}
-			base.SetLineActive(this.PowerText.transform.parent.gameObject, flag);
+			hoverTextDrawer.NewLine(num2);
+			hoverTextDrawer.AddIndent(num3);
+			hoverTextDrawer.DrawText(ResourceRemainingDisplayScreen.instance.GetString(), this.Styles_BodyText.Standard);
 		}
+		hoverTextDrawer.EndShadowBar();
+		hoverTextDrawer.EndDrawing();
 	}
 
 	public BuildingDef currentDef;
-
-	private LocText BuildWarningText;
-
-	private LocText MaterialsRemainingText;
-
-	private LocText PowerText;
-
-	private GameObject RotateLine;
 }

@@ -9,7 +9,7 @@ public class CircuitSwitch : Switch
 	{
 		base.OnSpawn();
 		base.OnToggle += this.CircuitOnToggle;
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		GameObject gameObject = Grid.Objects[num, (int)this.objectLayer];
 		Wire wire = ((!(gameObject != null)) ? null : gameObject.GetComponent<Wire>());
 		if (wire == null)
@@ -37,7 +37,7 @@ public class CircuitSwitch : Switch
 
 	public bool IsConnected()
 	{
-		int num = Grid.PosToCell(base.transform.position);
+		int num = Grid.PosToCell(base.transform.GetPosition());
 		GameObject gameObject = Grid.Objects[num, (int)this.objectLayer];
 		return gameObject != null && gameObject.GetComponent<IDisconnectable>() != null;
 	}

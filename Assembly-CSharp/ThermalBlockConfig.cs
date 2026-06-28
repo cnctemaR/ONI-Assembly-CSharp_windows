@@ -10,15 +10,14 @@ public class ThermalBlockConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 1;
 		string text2 = "thermalblock_kanim";
-		float num3 = 800f;
-		int num4 = 30;
-		float num5 = 120f;
+		int num3 = 30;
+		float num4 = 120f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER5;
 		string[] any_BUILDABLE = MATERIALS.ANY_BUILDABLE;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.NotInTiles;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, any_BUILDABLE, num6, buildLocationRule, DECOR.NONE, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, any_BUILDABLE, num5, buildLocationRule, DECOR.NONE, none, 0.2f);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.AudioCategory = "Metal";
@@ -30,10 +29,11 @@ public class ThermalBlockConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		AnimTileable animTileable = go.AddOrGet<AnimTileable>();
 		animTileable.objectLayer = ObjectLayer.Backwall;
+		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

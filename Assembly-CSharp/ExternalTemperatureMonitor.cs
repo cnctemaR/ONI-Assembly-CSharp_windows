@@ -29,16 +29,16 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 		this.root.Enter(delegate(ExternalTemperatureMonitor.Instance smi)
 		{
 			smi.AverageExternalTemperature = smi.GetCurrentExternalTemperature;
-		}).Update(delegate(ExternalTemperatureMonitor.Instance smi)
+		}).Update(delegate(ExternalTemperatureMonitor.Instance smi, float dt)
 		{
-			smi.AverageExternalTemperature *= Mathf.Max(0f, 1f - smi.dt / 6f);
-			smi.AverageExternalTemperature += smi.GetCurrentExternalTemperature * (smi.dt / 6f);
+			smi.AverageExternalTemperature *= Mathf.Max(0f, 1f - dt / 6f);
+			smi.AverageExternalTemperature += smi.GetCurrentExternalTemperature * (dt / 6f);
 		});
-		this.comfortable.Transition(this.transitionToTooWarm, (ExternalTemperatureMonitor.Instance smi) => smi.IsTooHot() && smi.timeinstate > 6f).Transition(this.transitionToTooCool, (ExternalTemperatureMonitor.Instance smi) => smi.IsTooCold() && smi.timeinstate > 6f);
-		this.transitionToTooWarm.Transition(this.comfortable, (ExternalTemperatureMonitor.Instance smi) => !smi.IsTooHot()).Transition(this.tooWarm, (ExternalTemperatureMonitor.Instance smi) => smi.IsTooHot() && smi.timeinstate > 1f);
-		this.transitionToTooCool.Transition(this.comfortable, (ExternalTemperatureMonitor.Instance smi) => !smi.IsTooCold()).Transition(this.tooCool, (ExternalTemperatureMonitor.Instance smi) => smi.IsTooCold() && smi.timeinstate > 1f);
-		this.transitionToScalding.Transition(this.tooWarm, (ExternalTemperatureMonitor.Instance smi) => !smi.IsScalding()).Transition(this.scalding, (ExternalTemperatureMonitor.Instance smi) => smi.IsScalding() && smi.timeinstate > 1f);
-		this.tooWarm.Transition(this.comfortable, (ExternalTemperatureMonitor.Instance smi) => !smi.IsTooHot() && smi.timeinstate > 6f).Transition(this.transitionToScalding, (ExternalTemperatureMonitor.Instance smi) => smi.IsScalding()).ToggleExpression(Db.Get().Expressions.Hot, null)
+		this.comfortable.Transition(this.transitionToTooWarm, (ExternalTemperatureMonitor.Instance smi) => smi.IsTooHot() && smi.timeinstate > 6f, UpdateRate.SIM_200ms).Transition(this.transitionToTooCool, (ExternalTemperatureMonitor.Instance smi) => smi.IsTooCold() && smi.timeinstate > 6f, UpdateRate.SIM_200ms);
+		this.transitionToTooWarm.Transition(this.comfortable, (ExternalTemperatureMonitor.Instance smi) => !smi.IsTooHot(), UpdateRate.SIM_200ms).Transition(this.tooWarm, (ExternalTemperatureMonitor.Instance smi) => smi.IsTooHot() && smi.timeinstate > 1f, UpdateRate.SIM_200ms);
+		this.transitionToTooCool.Transition(this.comfortable, (ExternalTemperatureMonitor.Instance smi) => !smi.IsTooCold(), UpdateRate.SIM_200ms).Transition(this.tooCool, (ExternalTemperatureMonitor.Instance smi) => smi.IsTooCold() && smi.timeinstate > 1f, UpdateRate.SIM_200ms);
+		this.transitionToScalding.Transition(this.tooWarm, (ExternalTemperatureMonitor.Instance smi) => !smi.IsScalding(), UpdateRate.SIM_200ms).Transition(this.scalding, (ExternalTemperatureMonitor.Instance smi) => smi.IsScalding() && smi.timeinstate > 1f, UpdateRate.SIM_200ms);
+		this.tooWarm.Transition(this.comfortable, (ExternalTemperatureMonitor.Instance smi) => !smi.IsTooHot() && smi.timeinstate > 6f, UpdateRate.SIM_200ms).Transition(this.transitionToScalding, (ExternalTemperatureMonitor.Instance smi) => smi.IsScalding(), UpdateRate.SIM_200ms).ToggleExpression(Db.Get().Expressions.Hot, null)
 			.ToggleThought(Db.Get().Thoughts.Hot, null)
 			.ToggleStatusItem(Db.Get().DuplicantStatusItems.Hot, (ExternalTemperatureMonitor.Instance smi) => smi)
 			.ToggleEffect("WarmAir")
@@ -46,13 +46,13 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 			{
 				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_ThermalComfort);
 			});
-		this.scalding.Transition(this.tooWarm, (ExternalTemperatureMonitor.Instance smi) => !smi.IsScalding() && smi.timeinstate > 6f).ToggleExpression(Db.Get().Expressions.Hot, null).ToggleThought(Db.Get().Thoughts.Hot, null)
+		this.scalding.Transition(this.tooWarm, (ExternalTemperatureMonitor.Instance smi) => !smi.IsScalding() && smi.timeinstate > 6f, UpdateRate.SIM_200ms).ToggleExpression(Db.Get().Expressions.Hot, null).ToggleThought(Db.Get().Thoughts.Hot, null)
 			.ToggleStatusItem(Db.Get().CreatureStatusItems.Scalding, (ExternalTemperatureMonitor.Instance smi) => smi)
-			.ToggleSchedulePeriodic("ScaldDamage", 2f, delegate(ExternalTemperatureMonitor.Instance smi)
+			.Update("ScaldDamage", delegate(ExternalTemperatureMonitor.Instance smi, float dt)
 			{
-				smi.ScaldDamage(2f);
-			});
-		this.tooCool.Transition(this.comfortable, (ExternalTemperatureMonitor.Instance smi) => !smi.IsTooCold() && smi.timeinstate > 6f).ToggleExpression(Db.Get().Expressions.Cold, null).ToggleThought(Db.Get().Thoughts.Cold, null)
+				smi.ScaldDamage(dt);
+			}, UpdateRate.SIM_1000ms, false);
+		this.tooCool.Transition(this.comfortable, (ExternalTemperatureMonitor.Instance smi) => !smi.IsTooCold() && smi.timeinstate > 6f, UpdateRate.SIM_200ms).ToggleExpression(Db.Get().Expressions.Cold, null).ToggleThought(Db.Get().Thoughts.Cold, null)
 			.ToggleStatusItem(Db.Get().DuplicantStatusItems.Cold, (ExternalTemperatureMonitor.Instance smi) => smi)
 			.ToggleEffect("ColdAir")
 			.Enter(delegate(ExternalTemperatureMonitor.Instance smi)
@@ -74,8 +74,6 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 	public GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.State transitionToScalding;
 
 	public GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.State scalding;
-
-	private const float SCALD_DAMAGE_INTERVAL = 2f;
 
 	private const float SCALDING_DAMAGE_AMOUNT = 10f;
 
@@ -128,7 +126,7 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 		public override void StartSM()
 		{
 			base.StartSM();
-			base.smi.attributes.Get("ScaldingThreshold").Add("base", this.baseScalindingThreshold);
+			base.smi.attributes.Get(Db.Get().Attributes.ScaldingThreshold).Add("base", this.baseScalindingThreshold);
 		}
 
 		public float GetCurrentColdThreshold
@@ -171,11 +169,12 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 			return this.AverageExternalTemperature > base.smi.attributes.GetValue("ScaldingThreshold");
 		}
 
-		public void ScaldDamage(float deltaTime)
+		public void ScaldDamage(float dt)
 		{
-			if (this.health != null)
+			if (this.health != null && Time.time - this.lastScaldTime > 5f)
 			{
-				this.health.Damage(this.deltatime * 10f);
+				this.lastScaldTime = Time.time;
+				this.health.Damage(dt * 10f);
 			}
 		}
 
@@ -205,5 +204,9 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 		public Health health;
 
 		public PrimaryElement primaryElement;
+
+		private const float MIN_SCALD_INTERVAL = 5f;
+
+		private float lastScaldTime;
 	}
 }

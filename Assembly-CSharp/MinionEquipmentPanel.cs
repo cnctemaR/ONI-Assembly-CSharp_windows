@@ -31,10 +31,6 @@ public class MinionEquipmentPanel : KMonoBehaviour
 		this.Refresh(null);
 	}
 
-	private void Update()
-	{
-	}
-
 	public void Refresh(object data = null)
 	{
 		if (this.SelectedMinion == null)

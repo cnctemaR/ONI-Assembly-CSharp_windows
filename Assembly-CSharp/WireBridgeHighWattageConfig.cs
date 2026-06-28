@@ -15,15 +15,14 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 1;
 		string text = "heavywatttile_kanim";
-		float num3 = 100f;
-		int num4 = 100;
-		float num5 = 3f;
+		int num3 = 100;
+		float num4 = 3f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] all_METALS = MATERIALS.ALL_METALS;
-		float num6 = 1600f;
+		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER5, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER5, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
@@ -40,11 +39,11 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 2);
 		buildingDef.IsFoundation = true;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
-		buildingDef.HotKey = global::Action.BuildMenuKeyQ;
+		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.WireIDs, "WireBridgeHighWattage");
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
@@ -66,6 +65,8 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		base.DoPostConfigureUnderConstruction(go);
+		Constructable component = go.GetComponent<Constructable>();
+		component.choreTags = GameTags.ChoreTypes.WiringChores;
 		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
 		wireUtilityNetworkLink.visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();
@@ -73,10 +74,10 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		BuildingTemplates.DoPostConfigure(go);
 		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
 		wireUtilityNetworkLink.visualizeOnly = false;
 		go.AddOrGet<BuildingCellVisualizer>();
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	protected virtual WireUtilityNetworkLink AddNetworkLink(GameObject go)

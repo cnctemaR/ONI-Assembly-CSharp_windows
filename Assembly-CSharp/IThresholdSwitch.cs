@@ -16,6 +16,8 @@ public interface IThresholdSwitch
 
 	float GetRangeMaxInputField();
 
+	LocString Title { get; }
+
 	LocString ThresholdValueName { get; }
 
 	LocString ThresholdValueUnits();

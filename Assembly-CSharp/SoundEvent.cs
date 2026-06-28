@@ -79,7 +79,7 @@ public class SoundEvent : AnimEvent
 
 	public virtual void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		Vector3 position = behaviour.GetComponent<Transform>().position;
+		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
 		Vector3 position2 = behaviour.position;
 		AudioDebug audioDebug = AudioDebug.Get();
 		if (audioDebug != null && audioDebug.debugSoundEvents)
@@ -158,7 +158,7 @@ public class SoundEvent : AnimEvent
 		bool flag = false;
 		if (!string.IsNullOrEmpty(sound))
 		{
-			Vector3 position = behaviour.GetComponent<Transform>().position;
+			Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
 			Vector3 position2 = behaviour.position;
 			Vector3 vector = ((!playAtTarget) ? position : position2);
 			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector);

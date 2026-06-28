@@ -205,6 +205,22 @@ public static class Localization
 		return text;
 	}
 
+	public static string GetLanguageCode(string[] lines)
+	{
+		foreach (string text in lines)
+		{
+			if (text != null && text.Length != 0)
+			{
+				string languageParam = Localization.GetLanguageParam(text);
+				if (languageParam != null)
+				{
+					return languageParam;
+				}
+			}
+		}
+		return null;
+	}
+
 	private static string GetFontForLocalization(string filename)
 	{
 		string[] array = File.ReadAllLines(filename, Encoding.UTF8);
@@ -370,7 +386,7 @@ public static class Localization
 		new Localization.LocInfo(Localization.Language.Korean, "ko", "NotoSansCJKkr-Regular"),
 		new Localization.LocInfo(Localization.Language.Russian, "ru", "RobotoCondensed-Regular"),
 		new Localization.LocInfo(Localization.Language.Thai, "th", "NotoSansThai-Regular"),
-		new Localization.LocInfo(Localization.Language.Unspecified, string.Empty, "NotoSans-Regular")
+		new Localization.LocInfo(Localization.Language.Unspecified, string.Empty, "RobotoCondensed-Regular")
 	};
 
 	private struct Entry

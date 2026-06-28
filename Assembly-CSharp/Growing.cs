@@ -15,6 +15,18 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		}
 	}
 
+	private Crop crop
+	{
+		get
+		{
+			if (this._crop == null)
+			{
+				this._crop = base.GetComponent<Crop>();
+			}
+			return this._crop;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		Amounts amounts = base.gameObject.GetAmounts();
@@ -119,7 +131,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		return this.oldAge.value / this.oldAge.GetMax();
 	}
 
-	private float GetTotalGrowthTime()
+	public float GetTotalGrowthTime()
 	{
 		if (this.crop == null)
 		{
@@ -179,8 +191,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 	[MyCmpReq]
 	private Modifiers modifiers;
 
-	[MyCmpGet]
-	private Crop crop;
+	private Crop _crop;
 
 	public class StatesInstance : GameStateMachine<Growing.States, Growing.StatesInstance, Growing, object>.GameInstance
 	{

@@ -253,10 +253,11 @@ public class Game : KMonoBehaviour
 				for (int k = 0; k < ptr2->numCallbackInfo; k++)
 				{
 					Sim.CallbackInfo callbackInfo = ptr2->callbackInfo[k];
-					this.callbackInfo.Add(new CallbackInfo(new HandleVector<global::System.Action>.Handle
+					HandleVector<Game.CallbackInfo>.Handle handle = new HandleVector<Game.CallbackInfo>.Handle
 					{
 						index = callbackInfo.callbackIdx
-					}));
+					};
+					this.callbackInfo.Add(new global::Klei.CallbackInfo(handle));
 				}
 				int numSpawnFallingLiquidInfo = ptr2->numSpawnFallingLiquidInfo;
 				for (int l = 0; l < numSpawnFallingLiquidInfo; l++)
@@ -306,29 +307,20 @@ public class Game : KMonoBehaviour
 					ElementConsumer.AddMass(consumedMassInfo);
 				}
 				int numMassConsumptionCallbacks = ptr2->numMassConsumptionCallbacks;
-				HandleVector<Action<object>>.Handle handle = default(HandleVector<Action<object>>.Handle);
+				HandleVector<Game.ComplexCallbackInfo>.Handle handle2 = default(HandleVector<Game.ComplexCallbackInfo>.Handle);
 				for (int num4 = 0; num4 < numMassConsumptionCallbacks; num4++)
 				{
 					Sim.MassConsumptionCallback massConsumptionCallback = ptr2->massConsumptionCallbacks[num4];
-					handle.index = massConsumptionCallback.callbackIdx;
-					Action<object> action = this.complexCallbackManager.Release(handle);
-					action(massConsumptionCallback);
+					handle2.index = massConsumptionCallback.callbackIdx;
+					this.complexCallbackManager.Release(handle2).cb(massConsumptionCallback);
 				}
 				int numComponentStateChangedMessages = ptr2->numComponentStateChangedMessages;
-				HandleVector<Action<object>>.Handle handle2 = default(HandleVector<Action<object>>.Handle);
+				HandleVector<Game.ComplexCallbackInfo>.Handle handle3 = default(HandleVector<Game.ComplexCallbackInfo>.Handle);
 				for (int num5 = 0; num5 < numComponentStateChangedMessages; num5++)
 				{
 					Sim.ComponentStateChangedMessage componentStateChangedMessage = ptr2->componentStateChangedMessages[num5];
-					handle2.index = componentStateChangedMessage.callbackIdx;
-					Action<object> action2 = this.complexCallbackManager.Release(handle2);
-					if (action2 != null)
-					{
-						action2(componentStateChangedMessage.simHandle);
-					}
-					else
-					{
-						Output.LogError(new object[] { "Null callback with handle", componentStateChangedMessage.callbackIdx });
-					}
+					handle3.index = componentStateChangedMessage.callbackIdx;
+					this.complexCallbackManager.Release(handle3).cb(componentStateChangedMessage.simHandle);
 				}
 				int numElementChunkMeltedInfos = ptr2->numElementChunkMeltedInfos;
 				for (int num6 = 0; num6 < numElementChunkMeltedInfos; num6++)
@@ -1035,9 +1027,9 @@ public class Game : KMonoBehaviour
 
 	public RoomProber roomProber;
 
-	public CheckedHandleVector<global::System.Action> callbackManager = new CheckedHandleVector<global::System.Action>(256);
+	public CheckedHandleVector<Game.CallbackInfo> callbackManager = new CheckedHandleVector<Game.CallbackInfo>(256);
 
-	public CheckedHandleVector<Action<object>> complexCallbackManager = new CheckedHandleVector<Action<object>>(256);
+	public CheckedHandleVector<Game.ComplexCallbackInfo> complexCallbackManager = new CheckedHandleVector<Game.ComplexCallbackInfo>(256);
 
 	[NonSerialized]
 	public Player LocalPlayer;
@@ -1115,7 +1107,7 @@ public class Game : KMonoBehaviour
 
 	private List<SolidInfo> solidInfo = new List<SolidInfo>();
 
-	private List<CallbackInfo> callbackInfo = new List<CallbackInfo>();
+	private List<global::Klei.CallbackInfo> callbackInfo = new List<global::Klei.CallbackInfo>();
 
 	private List<SolidInfo> gameSolidInfo = new List<SolidInfo>();
 
@@ -1202,6 +1194,29 @@ public class Game : KMonoBehaviour
 	public Game.UIColours uiColours = new Game.UIColours();
 
 	private float lastTimeWorkStarted = float.NegativeInfinity;
+
+	public struct CallbackInfo
+	{
+		public CallbackInfo(global::System.Action cb, bool manually_release = false)
+		{
+			this.cb = cb;
+			this.manuallyRelease = manually_release;
+		}
+
+		public global::System.Action cb;
+
+		public bool manuallyRelease;
+	}
+
+	public struct ComplexCallbackInfo
+	{
+		public ComplexCallbackInfo(Action<object> cb)
+		{
+			this.cb = cb;
+		}
+
+		public Action<object> cb;
+	}
 
 	[Serializable]
 	public class ConduitVisInfo

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{663D9E9E-F51C-439A-A214-F3FBBF58E7EF}</ProjectGuid>
+    <ProjectGuid>{565589DF-B67A-41EC-ACAE-A05769824863}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.UI</AssemblyName>
@@ -127,19 +127,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{663D9E9E-F51C-439A-A214-F3FBBF58E7DE}</Project>
+      <Project>{565589DF-B67A-41EC-ACAE-A05769824852}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{663D9E9E-F51C-439A-A214-F3FBBF58E7E3}</Project>
+      <Project>{565589DF-B67A-41EC-ACAE-A05769824857}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{663D9E9E-F51C-439A-A214-F3FBBF58E7E5}</Project>
+      <Project>{565589DF-B67A-41EC-ACAE-A05769824859}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{663D9E9E-F51C-439A-A214-F3FBBF58E7ED}</Project>
+      <Project>{565589DF-B67A-41EC-ACAE-A05769824861}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
   </ItemGroup>

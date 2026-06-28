@@ -11,7 +11,7 @@ namespace FMODUnity
 	[AddComponentMenu("")]
 	public class RuntimeManager : MonoBehaviour
 	{
-		private static RuntimeManager Instance
+		public static RuntimeManager Instance
 		{
 			get
 			{
@@ -112,7 +112,20 @@ namespace FMODUnity
 				initflags2 |= global::FMOD.Studio.INITFLAGS.LIVEUPDATE;
 			}
 			RESULT result2 = this.studioSystem.initialize(settings.GetVirtualChannels(this.fmodPlatform), initflags2, initflags, IntPtr.Zero);
+			if (result2 == RESULT.ERR_OUTPUT_INIT)
+			{
+				this.studioSystem.release();
+				global::FMOD.Studio.System.create(out this.studioSystem);
+				this.studioSystem.getLowLevelSystem(out this.lowlevelSystem);
+				this.lowlevelSystem.setOutput(OUTPUTTYPE.NOSOUND);
+				this.initializedSuccessfully = false;
+				result2 = this.studioSystem.initialize(settings.GetVirtualChannels(this.fmodPlatform), initflags2, initflags, IntPtr.Zero);
+			}
 			this.CheckInitResult(result2, "Calling initialize");
+			if (result2 == RESULT.OK)
+			{
+				this.initializedSuccessfully = true;
+			}
 			this.studioSystem.flushCommands();
 			RESULT result3 = this.studioSystem.update();
 			if (result3 == RESULT.ERR_NET_SOCKET_ERROR)
@@ -637,6 +650,8 @@ namespace FMODUnity
 				return RuntimeManager.instance != null && RuntimeManager.instance.studioSystem != null;
 			}
 		}
+
+		public bool initializedSuccessfully;
 
 		private static SystemNotInitializedException initException = null;
 

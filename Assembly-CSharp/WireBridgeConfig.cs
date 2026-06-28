@@ -6,7 +6,7 @@ public class WireBridgeConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("WireBridge", 3, 1, "utilityelectricbridge_kanim", 100f, 10, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER0, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.PENALTY.TIER0, null);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("WireBridge", 3, 1, "utilityelectricbridge_kanim", 100f, 10, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER0, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER0, null);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;

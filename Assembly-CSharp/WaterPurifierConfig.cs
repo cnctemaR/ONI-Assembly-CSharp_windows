@@ -36,8 +36,8 @@ public class WaterPurifierConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(5f, SimHashes.Water, 313.15f, true, 0f, 0f, false),
-			new ElementConverter.OutputElement(0.2f, SimHashes.ToxicSand, 313.15f, true, 0f, 0f, false)
+			new ElementConverter.OutputElement(5f, SimHashes.Water, 313.15f, true, 0f, 0.5f, false),
+			new ElementConverter.OutputElement(0.2f, SimHashes.ToxicSand, 313.15f, true, 0f, 0.5f, false)
 		};
 		ElementDropper elementDropper = go.AddComponent<ElementDropper>();
 		elementDropper.emitMass = 10f;

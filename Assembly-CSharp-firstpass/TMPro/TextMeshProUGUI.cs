@@ -5,11 +5,11 @@ using UnityEngine.UI;
 
 namespace TMPro
 {
-	[RequireComponent(typeof(CanvasRenderer))]
-	[DisallowMultipleComponent]
-	[RequireComponent(typeof(RectTransform))]
 	[AddComponentMenu("UI/TextMeshPro - Text (UI)", 11)]
 	[SelectionBase]
+	[DisallowMultipleComponent]
+	[RequireComponent(typeof(CanvasRenderer))]
+	[RequireComponent(typeof(RectTransform))]
 	[ExecuteInEditMode]
 	public class TextMeshProUGUI : TMP_Text, ILayoutElement
 	{

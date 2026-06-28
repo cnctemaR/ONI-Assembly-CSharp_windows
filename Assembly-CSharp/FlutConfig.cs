@@ -18,7 +18,7 @@ public class FlutConfig : IEntityConfig
 		elementConverter.conversionInterval = 150f;
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.25f / elementConverter.conversionInterval, SimHashes.Fertilizer, 0f, false, 0f, 0f, false)
+			new ElementConverter.OutputElement(0.25f / elementConverter.conversionInterval, SimHashes.Fertilizer, 0f, false, 0f, 0.5f, false)
 		};
 		KBatchedAnimController kbatchedAnimController = gameObject.AddAnimController("flut_single_kanim", Grid.SceneLayer.Front);
 		kbatchedAnimController.isMovable = true;

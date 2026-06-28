@@ -4015,8 +4015,8 @@ namespace TMPro
 
 		protected bool m_isMaterialDirty;
 
-		[SerializeField]
 		[FormerlySerializedAs("m_fontColor")]
+		[SerializeField]
 		protected Color32 m_fontColor32 = Color.white;
 
 		[SerializeField]

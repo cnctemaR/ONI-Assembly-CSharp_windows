@@ -59,6 +59,13 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		}
 	}
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		Amounts amounts = base.gameObject.GetAmounts();
+		this.displayTemperatureAmount = amounts.Add(new AmountInstance(Db.Get().Amounts.ExternalTemperature, base.gameObject));
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -102,6 +109,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		if (averageTemperature > -1f)
 		{
 			base.smi.sm.externalTemp.Set(averageTemperature, base.smi);
+			this.displayTemperatureAmount.value = averageTemperature;
 		}
 	}
 
@@ -155,6 +163,8 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 
 	[MyCmpReq]
 	private SimTemperatureTransfer temperatureTransfer;
+
+	private AmountInstance displayTemperatureAmount;
 
 	private TemperatureVulnerable.TemperatureState externalTemperatureState = TemperatureVulnerable.TemperatureState.Normal;
 

@@ -24,31 +24,43 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 			{
 				manualDeliveryKG.Pause(false, "replanted");
 			}
-		});
-		this.replanted.fertilized.TriggerOnEnter(GameHashes.Fertilized, null).DefaultState(this.replanted.fertilized.decaying);
-		this.replanted.fertilized.decaying.ParamTransition<GameObject>(this.fertilizerStorage, this.replanted.fertilized.absorbing, (FertilizationMonitor.Instance smi, GameObject p) => smi.StorageHasFertilizer(0.2f)).ToggleAttributeModifier("Consuming", (FertilizationMonitor.Instance smi) => smi.consumptionRate, null).ToggleAttributeModifier("FertCondition", (FertilizationMonitor.Instance smi) => smi.goodConditionModifier, null)
+			smi.UpdateFertilization(0.033333335f);
+		}).Target(this.fertilizerStorage).EventHandler(GameHashes.OnStorageChange, delegate(FertilizationMonitor.Instance smi)
+		{
+			smi.UpdateFertilization(0.2f);
+		})
+			.Target(this.masterTarget);
+		this.replanted.fertilized.DefaultState(this.replanted.fertilized.decaying).TriggerOnEnter(GameHashes.Fertilized, null).ToggleAttributeModifier("FertCondition", (FertilizationMonitor.Instance smi) => smi.goodConditionModifier, null);
+		this.replanted.fertilized.decaying.DefaultState(this.replanted.fertilized.decaying.normal).ToggleAttributeModifier("Consuming", (FertilizationMonitor.Instance smi) => smi.consumptionRate, null).ParamTransition<bool>(this.hasCorrectFertilizer, this.replanted.fertilized.absorbing, (FertilizationMonitor.Instance smi, bool p) => p)
 			.Update(delegate(FertilizationMonitor.Instance smi)
 			{
 				if (smi.Starved())
 				{
 					smi.GoTo(this.replanted.starved);
 				}
-			})
-			.Target(this.fertilizerStorage)
-			.EventTransition(GameHashes.OnStorageChange, this.replanted.fertilized.absorbing, (FertilizationMonitor.Instance smi) => smi.StorageHasFertilizer(0.2f));
-		this.replanted.fertilized.absorbing.ParamTransition<GameObject>(this.fertilizerStorage, this.replanted.fertilized.decaying, (FertilizationMonitor.Instance smi, GameObject p) => !smi.StorageHasFertilizer(0.2f)).ToggleAttributeModifier("Absorbing", (FertilizationMonitor.Instance smi) => smi.absorptionRate, null).ToggleAttributeModifier("FertCondition", (FertilizationMonitor.Instance smi) => smi.goodConditionModifier, null)
+			});
+		this.replanted.fertilized.decaying.normal.ParamTransition<bool>(this.hasIncorrectFertilizer, this.replanted.fertilized.decaying.wrongFert, (FertilizationMonitor.Instance smi, bool p) => p);
+		this.replanted.fertilized.decaying.wrongFert.ParamTransition<bool>(this.hasIncorrectFertilizer, this.replanted.fertilized.decaying.normal, (FertilizationMonitor.Instance smi, bool p) => !p).ToggleStatusItem((FertilizationMonitor.Instance smi) => smi.GetIncorrectFertStatusItemMajor(), (FertilizationMonitor.Instance smi) => smi);
+		this.replanted.fertilized.absorbing.DefaultState(this.replanted.fertilized.absorbing.normal).ParamTransition<bool>(this.hasCorrectFertilizer, this.replanted.fertilized.decaying, (FertilizationMonitor.Instance smi, bool p) => !p).ToggleAttributeModifier("Absorbing", (FertilizationMonitor.Instance smi) => smi.absorptionRate, null)
+			.ToggleAttributeModifier("FertCondition", (FertilizationMonitor.Instance smi) => smi.goodConditionModifier, null)
 			.Update(delegate(FertilizationMonitor.Instance smi)
 			{
 				smi.AbsorbFertilizer(smi.deltatime);
-			})
-			.Target(this.fertilizerStorage)
-			.EventTransition(GameHashes.OnStorageChange, this.replanted.fertilized.decaying, (FertilizationMonitor.Instance smi) => !smi.StorageHasFertilizer(0.2f));
-		this.replanted.starved.ToggleStatusItem((FertilizationMonitor.Instance smi) => smi.GetStarvedStatusItem(), (FertilizationMonitor.Instance smi) => smi).ToggleAttributeModifier("BadFertCondition", (FertilizationMonitor.Instance smi) => smi.badConditionModifier, null).TriggerOnEnter(GameHashes.Unfertilized, null)
-			.Target(this.fertilizerStorage)
-			.EventTransition(GameHashes.OnStorageChange, this.replanted.fertilized, (FertilizationMonitor.Instance smi) => smi.StorageHasFertilizer(0.2f));
+			});
+		this.replanted.fertilized.absorbing.normal.ParamTransition<bool>(this.hasIncorrectFertilizer, this.replanted.fertilized.absorbing.wrongFert, (FertilizationMonitor.Instance smi, bool p) => p);
+		this.replanted.fertilized.absorbing.wrongFert.ParamTransition<bool>(this.hasIncorrectFertilizer, this.replanted.fertilized.absorbing.normal, (FertilizationMonitor.Instance smi, bool p) => !p).ToggleStatusItem((FertilizationMonitor.Instance smi) => smi.GetIncorrectFertStatusItem(), (FertilizationMonitor.Instance smi) => smi);
+		this.replanted.starved.DefaultState(this.replanted.starved.normal).ToggleStatusItem((FertilizationMonitor.Instance smi) => smi.GetStarvedStatusItem(), (FertilizationMonitor.Instance smi) => smi).ToggleAttributeModifier("BadFertCondition", (FertilizationMonitor.Instance smi) => smi.badConditionModifier, null)
+			.TriggerOnEnter(GameHashes.Unfertilized, null)
+			.ParamTransition<bool>(this.hasCorrectFertilizer, this.replanted.fertilized, (FertilizationMonitor.Instance smi, bool p) => p);
+		this.replanted.starved.normal.ParamTransition<bool>(this.hasIncorrectFertilizer, this.replanted.starved.wrongFert, (FertilizationMonitor.Instance smi, bool p) => p);
+		this.replanted.starved.wrongFert.ParamTransition<bool>(this.hasIncorrectFertilizer, this.replanted.starved.normal, (FertilizationMonitor.Instance smi, bool p) => !p).ToggleStatusItem((FertilizationMonitor.Instance smi) => smi.GetIncorrectFertStatusItemMajor(), (FertilizationMonitor.Instance smi) => smi);
 	}
 
 	public StateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.TargetParameter fertilizerStorage;
+
+	public StateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.BoolParameter hasCorrectFertilizer;
+
+	public StateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.BoolParameter hasIncorrectFertilizer;
 
 	public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State wild;
 
@@ -63,18 +75,25 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 		public float massConsumptionRate;
 	}
 
+	public class VariableFertilizerStates : GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State
+	{
+		public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State normal;
+
+		public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State wrongFert;
+	}
+
 	public class FertilizedStates : GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State
 	{
-		public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State decaying;
+		public FertilizationMonitor.VariableFertilizerStates decaying;
 
-		public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State absorbing;
+		public FertilizationMonitor.VariableFertilizerStates absorbing;
 	}
 
 	public class ReplantedStates : GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State
 	{
 		public FertilizationMonitor.FertilizedStates fertilized;
 
-		public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.State starved;
+		public FertilizationMonitor.VariableFertilizerStates starved;
 	}
 
 	public new class Instance : GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Instance.Def>.GameInstance
@@ -95,6 +114,16 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 		public virtual StatusItem GetStarvedStatusItem()
 		{
 			return Db.Get().CreatureStatusItems.NeedsFertilizer;
+		}
+
+		public virtual StatusItem GetIncorrectFertStatusItem()
+		{
+			return Db.Get().CreatureStatusItems.WrongFertilizer;
+		}
+
+		public virtual StatusItem GetIncorrectFertStatusItemMajor()
+		{
+			return Db.Get().CreatureStatusItems.WrongFertilizerMajor;
 		}
 
 		public virtual StatusItem GetNotAcceptedStatusItem()
@@ -138,18 +167,19 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 			return this.fertilization.value == 0f;
 		}
 
-		public bool StorageHasFertilizer(float dt)
+		public void UpdateFertilization(float dt)
 		{
 			if (base.def.consumedElements == null)
 			{
-				return false;
+				return;
 			}
 			Storage storage = base.sm.fertilizerStorage.Get<Storage>(base.smi);
 			if (storage == null)
 			{
-				return false;
+				return;
 			}
 			bool flag = true;
+			bool flag2 = false;
 			List<GameObject> items = storage.items;
 			for (int i = 0; i < base.def.consumedElements.Length; i++)
 			{
@@ -162,6 +192,10 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 					{
 						num += gameObject.GetComponent<PrimaryElement>().Mass;
 					}
+					else if (gameObject.HasTag(base.def.wrongFertilizerTestTag))
+					{
+						flag2 = true;
+					}
 				}
 				if (num < fertilizerInfo.massConsumptionRate * dt)
 				{
@@ -169,7 +203,8 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 					break;
 				}
 			}
-			return flag;
+			base.sm.hasCorrectFertilizer.Set(flag, base.smi);
+			base.sm.hasIncorrectFertilizer.Set(flag2, base.smi);
 		}
 
 		public void AbsorbFertilizer(float dt)
@@ -181,7 +216,7 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 					Storage storage = base.sm.fertilizerStorage.Get<Storage>(base.smi);
 					if (!(storage == null))
 					{
-						if (this.StorageHasFertilizer(dt))
+						if (base.sm.hasCorrectFertilizer.Get(base.smi))
 						{
 							for (int i = 0; i < base.def.consumedElements.Length; i++)
 							{
@@ -234,6 +269,8 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 				}
 				return null;
 			}
+
+			public Tag wrongFertilizerTestTag;
 
 			public FertilizationMonitor.FertilizerInfo[] consumedElements;
 		}

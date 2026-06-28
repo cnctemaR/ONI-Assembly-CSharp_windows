@@ -286,6 +286,7 @@ public class EntityTemplates
 		}
 		KPrefabID component = template.GetComponent<KPrefabID>();
 		FertilizationMonitor.Instance.Def def = new FertilizationMonitor.Instance.Def();
+		def.wrongFertilizerTestTag = GameTags.Solid;
 		def.consumedElements = fertilizers;
 		template.GetComponent<StateMachineController>().AddDef(def);
 		component.prefabInitFn += delegate(GameObject inst)
@@ -301,6 +302,7 @@ public class EntityTemplates
 	public static GameObject ExtendPlantToIrrigated(GameObject template, FertilizationMonitor.FertilizerInfo[] fertilizers)
 	{
 		IrrigationMonitorInstance.Def def = new IrrigationMonitorInstance.Def();
+		def.wrongFertilizerTestTag = GameTags.Liquid;
 		def.consumedElements = fertilizers;
 		template.GetComponent<StateMachineController>().AddDef(def);
 		return template;

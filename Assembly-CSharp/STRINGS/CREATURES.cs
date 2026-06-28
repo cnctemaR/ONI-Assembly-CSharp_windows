@@ -300,14 +300,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Toasty surroundings";
 
-				public static LocString TOOLTIP = "This creature cannot let off enough heat to keep cool in this area\n\nIt prefers temperatures between {0} and {1}";
+				public static LocString TOOLTIP = "This creature cannot let off enough heat to keep cool in this environment\n\nIt prefers temperatures between {0} and {1}";
 			}
 
 			public class COLD
 			{
 				public static LocString NAME = "Chilly surroundings";
 
-				public static LocString TOOLTIP = "This creature cannot retain enough heat to stay warm in this area\n\nIt prefers temperatures between {0} and {1}";
+				public static LocString TOOLTIP = "This creature cannot retain enough heat to stay warm in this environment\n\nIt prefers temperatures between {0} and {1}";
 			}
 
 			public class PERFECTTEMPERATURE
@@ -486,7 +486,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Growing ({PercentGrow}%)";
 
-				public static LocString TOOLTIP = "This plant is growing because all of it basic requirements are being met";
+				public static LocString TOOLTIP = "This plant is growing because all of its basic requirements are being met";
 			}
 
 			public class HARVESTSREMAINING
@@ -512,6 +512,42 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This plant requires additional liquid to improve growth:\n{Required}";
 
 				public static LocString LINE_ITEM = "    • {0}: {1}\n";
+			}
+
+			public class WRONGFERTILIZER
+			{
+				public static LocString NAME = "Wrong Fertilizer";
+
+				public static LocString TOOLTIP = "This plant is being fed the wrong nutrients. It requires:\n{Required}\nA dupe should be sent to empty the storage.";
+
+				public static LocString LINE_ITEM = "    • {0}: {1}\n";
+			}
+
+			public class WRONGIRRIGATION
+			{
+				public static LocString NAME = "Wrong Irrigation";
+
+				public static LocString TOOLTIP = "This plant is being fed the wrong nutrients. It requires:\n{Required}\nA dupe should be sent to empty the storage.";
+
+				public static LocString LINE_ITEM = "    • {0}: {1}\n";
+			}
+
+			public class WRONGFERTILIZERMAJOR
+			{
+				public static LocString NAME = CREATURES.STATUSITEMS.WRONGFERTILIZER.NAME;
+
+				public static LocString TOOLTIP = CREATURES.STATUSITEMS.WRONGFERTILIZER.TOOLTIP;
+
+				public static LocString LINE_ITEM = CREATURES.STATUSITEMS.WRONGFERTILIZER.LINE_ITEM;
+			}
+
+			public class WRONGIRRIGATIONMAJOR
+			{
+				public static LocString NAME = CREATURES.STATUSITEMS.WRONGIRRIGATION.NAME;
+
+				public static LocString TOOLTIP = CREATURES.STATUSITEMS.WRONGIRRIGATION.TOOLTIP;
+
+				public static LocString LINE_ITEM = CREATURES.STATUSITEMS.WRONGIRRIGATION.LINE_ITEM;
 			}
 
 			public class CANTACCEPTFERTILIZER
@@ -671,6 +707,13 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "This creature is expelling gas from its lungsacs";
 			}
+
+			public class EXTERNALTEMPERATURE
+			{
+				public static LocString NAME = "External Temperature";
+
+				public static LocString TOOLTIP = "External Temperature\n----------\nThis creature's environment is {0}";
+			}
 		}
 
 		public class STATS
@@ -690,7 +733,9 @@ namespace STRINGS
 
 				public static LocString TOOLTIP_GROWING_CROP = "Predicted Maturation Time: {0}\nNext harvest occurs in approximately {1}.";
 
-				public static LocString TOOLTIP_STALLED = "This plant's growth has halted";
+				public static LocString TOOLTIP_GROWN = "This plant is awaiting harvest and is not currently growing";
+
+				public static LocString TOOLTIP_STALLED = "This plant's growth has halted due to poor conditions";
 
 				public static LocString AMOUNT_DESC_FMT = "{0}: {1}\nNext harvest in {2}";
 
@@ -703,7 +748,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Fertilization";
 
-				public static LocString TOOLTIP = "Plants absorb solid nutrients over time when fertilized";
+				public static LocString TOOLTIP = "Plants gain Harvest Rating Points over time when fertilized";
 
 				public static LocString CONSUME_MODIFIER = "Consuming";
 
@@ -714,7 +759,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Irrigation";
 
-				public static LocString TOOLTIP = "Plants absorb liquid nutrients over time when irrigated";
+				public static LocString TOOLTIP = "Plants gain Harvest Rating Points over time when irrigated";
 
 				public static LocString CONSUME_MODIFIER = "Consuming";
 
@@ -778,6 +823,13 @@ namespace STRINGS
 				public static LocString NAME = "Freshness Percent";
 
 				public static LocString TOOLTIP = "Freshness\n----------\nFood items will become stale at fifty percent freshness, and will rot at zero percent";
+			}
+
+			public class AIRPRESSURE
+			{
+				public static LocString NAME = "Air Pressure";
+
+				public static LocString TOOLTIP = "The average gas density of the air surrounding this plant";
 			}
 		}
 

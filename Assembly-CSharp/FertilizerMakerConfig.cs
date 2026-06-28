@@ -36,7 +36,7 @@ public class FertilizerMakerConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(FertilizerMakerConfig.FERTILIZER_PER_CYCLE / 600f, SimHashes.Fertilizer, 323.15f, true, 0f, 0f, false)
+			new ElementConverter.OutputElement(FertilizerMakerConfig.FERTILIZER_PER_CYCLE / 600f, SimHashes.Fertilizer, 323.15f, true, 0f, 0.5f, false)
 		};
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
@@ -44,6 +44,7 @@ public class FertilizerMakerConfig : IBuildingConfig
 		conduitConsumer.capacityTag = ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag;
 		conduitConsumer.capacityKG = FertilizerMakerConfig.WATER_PER_CYCLE * 5f;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
+		conduitConsumer.forceAlwaysSatisfied = true;
 		BuildingElementEmitter buildingElementEmitter = go.AddOrGet<BuildingElementEmitter>();
 		buildingElementEmitter.emitRate = 0.02f;
 		buildingElementEmitter.temperature = 303f;

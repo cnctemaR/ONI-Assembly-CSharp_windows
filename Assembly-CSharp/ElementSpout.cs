@@ -6,6 +6,8 @@ public class ElementSpout : StateMachineComponent<ElementSpout.StatesInstance>
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		int num = Grid.PosToCell(this.transform.position);
+		Grid.Objects[num, 2] = base.gameObject;
 		base.smi.StartSM();
 	}
 
@@ -36,13 +38,26 @@ public class ElementSpout : StateMachineComponent<ElementSpout.StatesInstance>
 
 	public float perEmitAmount = 0.5f;
 
-	private Vector2 emitPoint = Vector2.zero;
-
 	public class StatesInstance : GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout, object>.GameInstance
 	{
 		public StatesInstance(ElementSpout smi)
 			: base(smi)
 		{
+		}
+
+		private bool CanEmitOnCell(int cell, float max_pressure, Element.State expected_state)
+		{
+			return Grid.Cell[cell].mass < max_pressure && (Grid.Element[cell].IsState(expected_state) || Grid.Element[cell].IsVacuum);
+		}
+
+		public bool CanEmitAnywhere()
+		{
+			int num = Grid.PosToCell(base.smi.transform.position);
+			int num2 = Grid.CellLeft(num);
+			int num3 = Grid.CellRight(num);
+			int num4 = Grid.CellAbove(num);
+			Element.State state = base.smi.master.emitter.outputElement.element.state;
+			return false || this.CanEmitOnCell(num, base.smi.master.maxPressure, state) || this.CanEmitOnCell(num2, base.smi.master.maxPressure, state) || this.CanEmitOnCell(num3, base.smi.master.maxPressure, state) || this.CanEmitOnCell(num4, base.smi.master.maxPressure, state);
 		}
 	}
 
@@ -51,76 +66,49 @@ public class ElementSpout : StateMachineComponent<ElementSpout.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.idle;
-			this.idle.Enter(delegate(ElementSpout.StatesInstance smi)
+			this.idle.DefaultState(this.idle.unblocked).Enter(delegate(ElementSpout.StatesInstance smi)
 			{
 				smi.Play("idle", KAnim.PlayMode.Once);
-				Grid.Objects[Grid.PosToCell(smi.gameObject.transform.position), 2] = smi.gameObject;
-				bool flag = Grid.Cell[Grid.CellLeft(Grid.PosToCell(smi.transform.position))].mass < smi.master.maxPressure;
-				bool flag2 = Grid.Cell[Grid.CellRight(Grid.PosToCell(smi.transform.position))].mass < smi.master.maxPressure;
-				bool flag3 = Grid.Cell[Grid.CellAbove(Grid.PosToCell(smi.transform.position))].mass < smi.master.maxPressure;
-				bool flag4 = Grid.Cell[Grid.PosToCell(smi.transform.position)].mass < smi.master.maxPressure;
-				bool flag5 = true;
-				smi.master.emitPoint = Vector2.zero;
-				if (flag4)
-				{
-					smi.master.emitPoint = Vector2.zero;
-				}
-				else if (flag3)
-				{
-					smi.master.emitPoint = Vector2.up;
-				}
-				else if (flag && flag2)
-				{
-					smi.master.emitPoint = ((global::UnityEngine.Random.Range(0, 100) <= 50) ? Vector2.right : Vector2.left);
-				}
-				else if (flag)
-				{
-					smi.master.emitPoint = Vector2.left;
-				}
-				else if (flag2)
-				{
-					smi.master.emitPoint = Vector2.right;
-				}
-				else
-				{
-					flag5 = false;
-				}
-				if (flag5)
-				{
-					smi.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.SpoutPressureBuilding, this);
-					smi.ScheduleGoTo(smi.master.emissionPollFrequency, this.emit);
-				}
-				else
-				{
-					smi.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.SpoutOverPressure, this);
-					smi.ScheduleGoTo(smi.master.emissionPollFrequency, this.overPressure);
-				}
-			});
-			this.emit.Enter(delegate(ElementSpout.StatesInstance smi)
+			}).ScheduleGoTo((ElementSpout.StatesInstance smi) => smi.master.emissionPollFrequency, this.emit);
+			this.idle.unblocked.ToggleStatusItem(Db.Get().MiscStatusItems.SpoutPressureBuilding, null).Transition(this.idle.blocked, (ElementSpout.StatesInstance smi) => !smi.CanEmitAnywhere());
+			this.idle.blocked.ToggleStatusItem(Db.Get().MiscStatusItems.SpoutOverPressure, null).Transition(this.idle.blocked, (ElementSpout.StatesInstance smi) => smi.CanEmitAnywhere());
+			this.emit.DefaultState(this.emit.unblocked).Enter(delegate(ElementSpout.StatesInstance smi)
 			{
-				smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.SpoutPressureBuilding, false);
-				smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.SpoutOverPressure, false);
-				smi.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.SpoutEmitting, this);
+				float num = 1f + global::UnityEngine.Random.Range(0f, smi.master.emissionIrregularity);
+				float num2 = smi.master.perEmitAmount / num;
+				smi.master.emitter.SetEmitting(true);
+				smi.master.emitter.emissionFrequency = 1f;
+				smi.master.emitter.outputElement.massGenerationRate = num2;
+				smi.ScheduleGoTo(num, this.idle);
+			});
+			this.emit.unblocked.ToggleStatusItem(Db.Get().MiscStatusItems.SpoutEmitting, null).Enter(delegate(ElementSpout.StatesInstance smi)
+			{
 				smi.Play("emit", KAnim.PlayMode.Once);
-				smi.master.emitter.outputElement.outputElementOffset = smi.master.emitPoint;
-				smi.master.emitter.ForceEmit(smi.master.perEmitAmount, -1f);
-				smi.ScheduleGoTo(1f + global::UnityEngine.Random.Range(0f, smi.master.emissionIrregularity), this.idle);
-			}).Exit(delegate(ElementSpout.StatesInstance smi)
+				smi.master.emitter.SetEmitting(true);
+			}).Transition(this.emit.blocked, (ElementSpout.StatesInstance smi) => !smi.CanEmitAnywhere());
+			this.emit.blocked.ToggleStatusItem(Db.Get().MiscStatusItems.SpoutOverPressure, null).Enter(delegate(ElementSpout.StatesInstance smi)
 			{
-				smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.SpoutEmitting, false);
-			});
-			this.overPressure.Enter(delegate(ElementSpout.StatesInstance smi)
-			{
-				smi.GoTo(this.idle);
-			}).Exit(delegate(ElementSpout.StatesInstance smi)
-			{
-			});
+				smi.Play("idle", KAnim.PlayMode.Once);
+				smi.master.emitter.SetEmitting(false);
+			}).Transition(this.emit.unblocked, (ElementSpout.StatesInstance smi) => smi.CanEmitAnywhere());
 		}
 
-		public GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout, object>.State idle;
+		public ElementSpout.States.Idle idle;
 
-		public GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout, object>.State emit;
+		public ElementSpout.States.Emitting emit;
 
-		public GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout, object>.State overPressure;
+		public class Idle : GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout, object>.State
+		{
+			public GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout, object>.State unblocked;
+
+			public GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout, object>.State blocked;
+		}
+
+		public class Emitting : GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout, object>.State
+		{
+			public GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout, object>.State unblocked;
+
+			public GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout, object>.State blocked;
+		}
 	}
 }

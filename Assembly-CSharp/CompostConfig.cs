@@ -35,7 +35,7 @@ public class CompostConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.1f, SimHashes.Fertilizer, 0f, true, 0.5f, 1f, false)
+			new ElementConverter.OutputElement(0.1f, SimHashes.Fertilizer, 323.15f, true, 0.5f, 1f, false)
 		};
 		elementConverter.conversionInterval = 1f;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();

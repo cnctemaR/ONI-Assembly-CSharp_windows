@@ -51,7 +51,7 @@ public class AlgaeDistilleryConfig : IBuildingConfig
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
 			new ElementConverter.OutputElement(0.2f, SimHashes.Algae, 303.15f, true, 0f, 1f, false),
-			new ElementConverter.OutputElement(0.4f, SimHashes.DirtyWater, 303.15f, true, 0f, 0f, false)
+			new ElementConverter.OutputElement(0.4f, SimHashes.DirtyWater, 303.15f, true, 0f, 0.5f, false)
 		};
 		elementConverter.conversionInterval = 1f;
 		go.AddOrGet<Prioritizable>();

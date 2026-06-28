@@ -58,7 +58,7 @@ namespace Database
 			this.Deconstruct = this.Add("Deconstruct", new string[] { "Build" }, string.Empty, new string[0], DUPLICANTS.CHORES.DECONSTRUCT.NAME, DUPLICANTS.CHORES.DECONSTRUCT.STATUS);
 			this.Research = this.Add("Research", new string[] { "Research" }, string.Empty, new string[0], DUPLICANTS.CHORES.RESEARCH.NAME, DUPLICANTS.CHORES.RESEARCH.STATUS);
 			this.ResearchFetch = this.Add("ResearchFetch", new string[] { "Research", "Deliver" }, string.Empty, new string[0], DUPLICANTS.CHORES.RESEARCHFETCH.NAME, DUPLICANTS.CHORES.RESEARCHFETCH.STATUS);
-			this.GeneratePower = this.Add("GeneratePower", new string[] { "GeneratePower" }, string.Empty, new string[0], DUPLICANTS.CHORES.GENERATEPOWER.NAME, DUPLICANTS.CHORES.GENERATEPOWER.STATUS);
+			this.GeneratePower = this.Add("GeneratePower", new string[] { "GeneratePower" }, string.Empty, new string[] { "Relax" }, DUPLICANTS.CHORES.GENERATEPOWER.NAME, DUPLICANTS.CHORES.GENERATEPOWER.STATUS);
 			this.Harvest = this.Add("Harvest", new string[] { "Harvest" }, string.Empty, new string[0], DUPLICANTS.CHORES.HARVEST.NAME, DUPLICANTS.CHORES.HARVEST.STATUS);
 			this.Uproot = this.Add("Uproot", new string[] { "Harvest" }, string.Empty, new string[0], DUPLICANTS.CHORES.UPROOT.NAME, DUPLICANTS.CHORES.UPROOT.STATUS);
 			this.CleanToilet = this.Add("CleanToilet", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.CLEANTOILET.NAME, DUPLICANTS.CHORES.CLEANTOILET.STATUS);

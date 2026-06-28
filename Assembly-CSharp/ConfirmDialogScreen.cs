@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ConfirmDialogScreen : KModalScreen
 {
@@ -57,6 +58,11 @@ public class ConfirmDialogScreen : KModalScreen
 				componentInChildren.text = third_text;
 			}
 		}
+		Image component = this.imageGO.GetComponent<Image>();
+		if (component != null && component.sprite != null)
+		{
+			this.imageGO.SetActive(true);
+		}
 		this.popupMessage.text = text;
 	}
 
@@ -103,6 +109,8 @@ public class ConfirmDialogScreen : KModalScreen
 	private global::System.Action thirdAction;
 
 	public LocText popupMessage;
+
+	public GameObject imageGO;
 
 	public global::System.Action onDeactivateCB;
 

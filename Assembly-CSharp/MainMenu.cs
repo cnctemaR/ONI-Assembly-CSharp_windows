@@ -1,15 +1,18 @@
 ﻿using System;
 using System.IO;
 using FMOD.Studio;
+using FMODUnity;
 using Klei;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MainMenu : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		KCrashReporter.MOST_RECENT_SAVEFILE = null;
 		this.StartFEAudio();
 		this.RefreshResumeButton();
 		this.Button_ResumeGame.onClick += this.ResumeGame;
@@ -22,6 +25,12 @@ public class MainMenu : KMonoBehaviour
 		if (SaveLoader.GetSaveFileCount() == 0)
 		{
 			this.Button_LoadGame.isInteractable = false;
+		}
+		if (RuntimeManager.Instance != null && !RuntimeManager.Instance.initializedSuccessfully)
+		{
+			ConfirmDialogScreen confirmDialogScreen = global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
+			confirmDialogScreen.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupe;
+			confirmDialogScreen.PopupConfirmDialog(UI.FRONTEND.AUDIODRIVERSCREEN.WARNING, null, null, null, null);
 		}
 		if (PatchNotesScreen.ShouldShowScreen())
 		{
@@ -53,6 +62,7 @@ public class MainMenu : KMonoBehaviour
 	{
 		if (SteamManager.Initialized && SteamUGCService.HasInstalledLanguage())
 		{
+			Output.Log(new object[] { "Installing language pack " + SteamUGCService.Instance.GetInstalledLanguageData() });
 			SteamUGCService.SetFontForLocalization();
 		}
 		base.OnSpawn();
@@ -120,7 +130,7 @@ public class MainMenu : KMonoBehaviour
 			{
 				SaveGame.Header header;
 				SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(latestSaveFile, out header);
-				if (header.buildVersion > 217955U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 218235U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}

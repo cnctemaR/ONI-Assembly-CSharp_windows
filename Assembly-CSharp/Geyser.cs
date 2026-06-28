@@ -17,8 +17,6 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>
 		this.emitter = emitter;
 	}
 
-	private const float EMIT_INTERVAL = 1f;
-
 	[SerializeField]
 	private ElementEmitter emitter;
 
@@ -41,53 +39,6 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>
 		{
 			base.master.emitter.outputElement = type.emissionElement;
 		}
-
-		public void EmitTest(Geyser.EmissionType type)
-		{
-			bool flag = Grid.Cell[Grid.CellLeft(Grid.PosToCell(base.transform.position))].mass < type.maxPressure;
-			bool flag2 = Grid.Cell[Grid.CellRight(Grid.PosToCell(base.transform.position))].mass < type.maxPressure;
-			bool flag3 = Grid.Cell[Grid.CellAbove(Grid.PosToCell(base.transform.position))].mass < type.maxPressure;
-			bool flag4 = Grid.Cell[Grid.PosToCell(base.transform.position)].mass < type.maxPressure;
-			bool flag5 = true;
-			Vector2 vector = Vector2.zero;
-			if (flag4)
-			{
-				vector = Vector2.zero;
-			}
-			else if (flag3)
-			{
-				vector = Vector2.up;
-			}
-			else if (flag)
-			{
-				vector = Vector2.left;
-			}
-			else if (flag2)
-			{
-				vector = Vector2.right;
-			}
-			else
-			{
-				flag5 = false;
-			}
-			if (flag5)
-			{
-				if (vector != this.lastEmitPoint)
-				{
-					base.master.emitter.SetEmitting(false);
-					base.master.emitter.outputElement.outputElementOffset = vector;
-					base.master.emitter.SetEmitting(true);
-					this.lastEmitPoint = vector;
-				}
-				base.sm.isEmitting.Set(true, this);
-			}
-			else
-			{
-				base.sm.isEmitting.Set(false, this);
-			}
-		}
-
-		private Vector2 lastEmitPoint;
 	}
 
 	public class States : GameStateMachine<Geyser.States, Geyser.StatesInstance, Geyser>
@@ -105,8 +56,6 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>
 			this.erupt.InitializeStates(this, this.emitType).PlayAnim("erupt", KAnim.PlayMode.Loop, null).ScheduleGoTo((Geyser.StatesInstance smi) => smi.master.emissionElement.duration, this.post_erupt);
 			this.post_erupt.InitializeStates(this, this.postType).PlayAnim("shake", KAnim.PlayMode.Loop, null).ScheduleGoTo((Geyser.StatesInstance smi) => smi.master.postEmissionElement.duration, this.idle);
 		}
-
-		public StateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.BoolParameter isEmitting;
 
 		public StateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.ObjectParameter<Geyser.EmissionType> preType;
 
@@ -129,20 +78,13 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>
 				base.root.DefaultState(this.over_pressure).Enter(delegate(Geyser.StatesInstance smi)
 				{
 					smi.SetEmissionElement(type.Get(smi));
-					smi.EmitTest(type.Get(smi));
-				}).ToggleSchedulePeriodic("checkEmissionBlocked", 1f, delegate(Geyser.StatesInstance smi)
-				{
-					smi.EmitTest(type.Get(smi));
-				});
-				this.emitting.Enter(delegate(Geyser.StatesInstance smi)
-				{
 					smi.master.emitter.SetEmitting(true);
 				}).Exit(delegate(Geyser.StatesInstance smi)
 				{
 					smi.master.emitter.SetEmitting(false);
-				}).ToggleMainStatusItem(Db.Get().MiscStatusItems.SpoutEmitting)
-					.ParamTransition<bool>(parent.isEmitting, this.over_pressure, (Geyser.StatesInstance smi, bool p) => !p);
-				this.over_pressure.ToggleMainStatusItem(Db.Get().MiscStatusItems.SpoutOverPressure).ParamTransition<bool>(parent.isEmitting, this.emitting, (Geyser.StatesInstance smi, bool p) => p);
+				});
+				this.emitting.ToggleMainStatusItem(Db.Get().MiscStatusItems.SpoutEmitting).EventTransition(GameHashes.EmitterBlocked, this.over_pressure, null);
+				this.over_pressure.ToggleMainStatusItem(Db.Get().MiscStatusItems.SpoutOverPressure).EventTransition(GameHashes.EmitterUnblocked, this.emitting, null);
 				return this;
 			}
 
@@ -155,17 +97,14 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>
 	[Serializable]
 	public class EmissionType
 	{
-		public EmissionType(float duration, ElementConverter.OutputElement emissionElement, float maxPressure)
+		public EmissionType(float duration, ElementConverter.OutputElement emissionElement)
 		{
 			this.duration = duration;
 			this.emissionElement = emissionElement;
-			this.maxPressure = maxPressure;
 		}
 
 		public float duration;
 
 		public ElementConverter.OutputElement emissionElement;
-
-		public float maxPressure;
 	}
 }

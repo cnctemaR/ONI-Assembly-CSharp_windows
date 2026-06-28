@@ -58,11 +58,7 @@ public class World : KMonoBehaviour
 		int count2 = callbackInfo.Count;
 		for (int j = 0; j < count2; j++)
 		{
-			if (callbackInfo[j].onComplete.IsValid())
-			{
-				global::System.Action action = Game.Instance.callbackManager.Release(callbackInfo[j].onComplete);
-				action();
-			}
+			callbackInfo[j].Release();
 		}
 		for (int k = 0; k < num_solid_substance_change_info; k++)
 		{

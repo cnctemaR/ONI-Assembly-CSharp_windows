@@ -70,9 +70,9 @@ namespace NodeEditorFramework
 			}
 		}
 
-		[Hotkey(KeyCode.UpArrow, EventType.KeyDown)]
 		[Hotkey(KeyCode.RightArrow, EventType.KeyDown)]
 		[Hotkey(KeyCode.LeftArrow, EventType.KeyDown)]
+		[Hotkey(KeyCode.UpArrow, EventType.KeyDown)]
 		[Hotkey(KeyCode.DownArrow, EventType.KeyDown)]
 		private static void KB_MoveNode(NodeEditorInputInfo inputInfo)
 		{

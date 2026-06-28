@@ -13,7 +13,7 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 
 	protected override void OnSpawn()
 	{
-		this.externalTemperature = this.GetAmounts().Get("ExternalTemperature");
+		this.externalTemperature = this.GetAmounts().Get(Db.Get().Amounts.ExternalTemperature);
 		this.externalTemperature.value = Grid.Temperature[Grid.PosToCell(this)];
 		this.temperature = Db.Get().Amounts.Temperature.Lookup(base.gameObject);
 		base.smi.StartSM();

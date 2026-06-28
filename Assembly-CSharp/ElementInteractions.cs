@@ -27,8 +27,8 @@ public class ElementInteractions
 	private TextAsset asset;
 
 	[IgnoreFirst(1)]
-	[IgnoreEmptyLines]
 	[IgnoreCommentedLines("//")]
+	[IgnoreEmptyLines]
 	[DelimitedRecord(",")]
 	private class InteractionDef
 	{

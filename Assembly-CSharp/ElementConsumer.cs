@@ -249,10 +249,10 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		{
 			int num = Grid.PosToCell(this.transform.position + this.sampleCellOffset);
 			this.simHandle = -2;
-			HandleVector<Action<object>>.Handle handle = Game.Instance.complexCallbackManager.Add(delegate(object data)
+			HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object data)
 			{
 				ElementConsumer.OnSimRegistered(this, data);
-			}, "ElementConsumer");
+			}), "ElementConsumer");
 			SimMessages.AddElementConsumer(num, this.configuration, this.elementToConsume, this.consumptionRadius, handle.index);
 		}
 	}
@@ -288,8 +288,8 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		}
 	}
 
-	[HashedEnum]
 	[SerializeField]
+	[HashedEnum]
 	public SimHashes elementToConsume = SimHashes.Vacuum;
 
 	[SerializeField]

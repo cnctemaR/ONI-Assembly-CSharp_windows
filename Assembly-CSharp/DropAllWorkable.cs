@@ -1,8 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
+using UnityEngine;
 
 public class DropAllWorkable : Workable
 {
+	protected DropAllWorkable()
+	{
+		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -50,7 +57,19 @@ public class DropAllWorkable : Workable
 		Storage[] array = this.GetStorages();
 		for (int i = 0; i < array.Length; i++)
 		{
-			array[i].DropAll();
+			List<GameObject> list = new List<GameObject>(array[i].items);
+			for (int j = 0; j < list.Count; j++)
+			{
+				GameObject gameObject = array[i].Drop(list[j]);
+				if (gameObject != null)
+				{
+					Pickupable component = gameObject.GetComponent<Pickupable>();
+					if (component != null)
+					{
+						component.TryToOffsetIfBuried();
+					}
+				}
+			}
 		}
 		this.chore = null;
 		this.Trigger(-1957399615, null);

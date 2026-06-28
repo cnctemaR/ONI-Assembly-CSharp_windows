@@ -67,7 +67,7 @@ public class EntombVulnerable : KMonoBehaviour
 
 	public bool IsCellSafe(int cell)
 	{
-		return this.occupyArea.TestArea(cell, (int testCell) => !Grid.Solid[testCell]);
+		return this.occupyArea.TestArea(cell, (int testCell) => Grid.IsValidCell(testCell) && !Grid.Solid[testCell]);
 	}
 
 	[MyCmpReq]

@@ -19,14 +19,14 @@ public class SimCellOccupier : KMonoBehaviour
 
 	protected override void OnSpawn()
 	{
-		this.callbackHandle = Game.Instance.callbackManager.Add(new global::System.Action(this.OnModifyComplete), "SimCellOccupier");
+		HandleVector<Game.CallbackInfo>.Handle callbackHandle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnModifyComplete), false), "SimCellOccupier");
 		int num = this.building.Def.PlacementOffsets.Length;
 		float mass_per_cell = this.primaryElement.Mass / (float)num;
 		this.building.RunOnArea(delegate(int offset_cell)
 		{
 			if (this.doReplaceElement)
 			{
-				SimMessages.ReplaceAndDisplaceElement(offset_cell, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, mass_per_cell, this.primaryElement.Temperature, this.callbackHandle.index);
+				SimMessages.ReplaceAndDisplaceElement(offset_cell, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, mass_per_cell, this.primaryElement.Temperature, callbackHandle.index);
 				SimMessages.SetStrength(offset_cell, 0, 1f);
 				Game.Instance.RemoveSolidChangedFilter(offset_cell);
 			}
@@ -79,7 +79,7 @@ public class SimCellOccupier : KMonoBehaviour
 			{
 				if (onComplete != null)
 				{
-					HandleVector<global::System.Action>.Handle handle = Game.Instance.callbackManager.Add(onComplete, "SimCellOccupier");
+					HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(onComplete, false), "SimCellOccupier");
 					SimMessages.ReplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, -1f, handle.index);
 				}
 				else
@@ -125,10 +125,6 @@ public class SimCellOccupier : KMonoBehaviour
 	[MyCmpReq]
 	private PrimaryElement primaryElement;
 
-	private bool isReady;
-
-	private HandleVector<global::System.Action>.Handle callbackHandle;
-
 	[SerializeField]
 	public bool doReplaceElement = true;
 
@@ -137,6 +133,8 @@ public class SimCellOccupier : KMonoBehaviour
 
 	[SerializeField]
 	public bool setLiquidImpermeable;
+
+	private bool isReady;
 
 	private bool callDestroy = true;
 }

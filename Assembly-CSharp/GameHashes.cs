@@ -235,5 +235,7 @@ public enum GameHashes
 	AcousticDisturbance = -527751701,
 	CopySettings = -905833192,
 	AttachFollowCam = -1506069671,
-	DetachFollowCam = -485480405
+	DetachFollowCam = -485480405,
+	EmitterBlocked = 1615168894,
+	EmitterUnblocked = -657992955
 }

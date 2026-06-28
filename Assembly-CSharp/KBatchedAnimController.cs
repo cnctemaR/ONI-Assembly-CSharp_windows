@@ -829,6 +829,21 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		this.forceRebuild = true;
 	}
 
+	protected override void RemoveSymbolOverride(KAnimFile kanim_file)
+	{
+		if (this.batch != null && this.batch.batchGroupInstance != null)
+		{
+			KAnimFileData data = kanim_file.GetData();
+			if (data.buildIndex != -1)
+			{
+				for (int i = 0; i < data.build.symbols.Length; i++)
+				{
+					this.batch.batchGroupInstance.RemoveOverride(data.build.symbols[i].hash);
+				}
+			}
+		}
+	}
+
 	protected override void ApplySymbolOverride(KAnimHashedString overridden_symbol_name, HashedString batchSource, KAnim.Build.Symbol new_symbol, bool is_perminent)
 	{
 		if (this.batch != null && this.batch.batchGroupInstance != null)
@@ -856,6 +871,68 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			{
 				int num = -1;
 				bool flag = this.batch.batchGroupInstance.AddOverrideTexture(list[i], ref num);
+				int num2 = this.batch.batchGroupInstance.textures.Count + this.batch.group.data.textures.Count;
+				if (num >= KBatchedAnimCanvasRenderer.atlasNames.Length || num >= num2)
+				{
+					string text = string.Empty;
+					int num3 = 0;
+					for (int j = 0; j < this.batch.batchGroupInstance.group.data.textures.Count; j++)
+					{
+						if (this.batch.batchGroupInstance.group.data.textures[j] != null)
+						{
+							string text2 = text;
+							text = string.Concat(new object[]
+							{
+								text2,
+								"\n[",
+								num3,
+								"] [",
+								this.batch.batchGroupInstance.group.data.textures[j].name,
+								"]"
+							});
+						}
+						else
+						{
+							string text2 = text;
+							text = string.Concat(new object[] { text2, "\n[", num3, "] [NULL]" });
+						}
+						num3++;
+					}
+					for (int k = 0; k < this.batch.batchGroupInstance.textures.Count; k++)
+					{
+						if (this.batch.batchGroupInstance.textures[k] != null)
+						{
+							string text2 = text;
+							text = string.Concat(new object[]
+							{
+								text2,
+								"\n[",
+								num3,
+								"] [",
+								this.batch.batchGroupInstance.textures[k].name,
+								"]"
+							});
+						}
+						else
+						{
+							string text2 = text;
+							text = string.Concat(new object[] { text2, "\n[", num3, "] [NULL]" });
+						}
+						num3++;
+					}
+					global::Debug.LogError(string.Concat(new object[]
+					{
+						"[",
+						this.batchGroupID.ToString(),
+						"] Too many textures!  texIndex: [",
+						num,
+						"] tex count: [",
+						num2,
+						"] ",
+						text
+					}), null);
+					return;
+				}
 				list2.Add(num);
 				dictionary[i] = num;
 				if (flag)
@@ -865,11 +942,11 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			}
 			if (list2.Count > 0)
 			{
-				for (int j = 0; j < this.substituteFrames.Count; j++)
+				for (int l = 0; l < this.substituteFrames.Count; l++)
 				{
-					KAnim.Build.SymbolFrameInstance symbolFrameInstance = this.substituteFrames[j];
+					KAnim.Build.SymbolFrameInstance symbolFrameInstance = this.substituteFrames[l];
 					symbolFrameInstance.buildImageIdx = dictionary[symbolFrameInstance.buildImageIdx];
-					this.substituteFrames[j] = symbolFrameInstance;
+					this.substituteFrames[l] = symbolFrameInstance;
 				}
 				this.batch.batchGroupInstance.AddOverride(overridden_symbol_name, batchSource, this.substituteFrames, list2, new_symbol.path, is_perminent);
 			}

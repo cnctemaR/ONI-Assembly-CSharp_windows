@@ -165,7 +165,7 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		elementConverter.conversionInterval = 150f;
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.25f / elementConverter.conversionInterval, SimHashes.Fertilizer, 0f, false, 0f, 0f, false)
+			new ElementConverter.OutputElement(0.25f / elementConverter.conversionInterval, SimHashes.Fertilizer, 0f, false, 0f, 0.5f, false)
 		};
 		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("flut_single_kanim", Grid.SceneLayer.Front);
 		kbatchedAnimController.isMovable = true;
@@ -188,7 +188,7 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		entityType.prefab.UpdateComponentRequirement<EntombVulnerable>(true);
 		ElementEmitter elementEmitter = entityType.prefab.UpdateComponentRequirement<ElementEmitter>(true);
 		entityType.prefab.UpdateComponentRequirement<TemperatureVulnerable>(true).Configure(293f, 283f, 310f, 330f, 0f, 0f);
-		elementEmitter.outputElement = new ElementConverter.OutputElement(0f, SimHashes.ContaminatedOxygen, 0f, false, 0f, 0f, false);
+		elementEmitter.outputElement = new ElementConverter.OutputElement(0f, SimHashes.ContaminatedOxygen, 0f, false, 0f, 0.5f, false);
 		elementEmitter.emissionFrequency = 0f;
 		elementEmitter.SetEmitting(false);
 	}

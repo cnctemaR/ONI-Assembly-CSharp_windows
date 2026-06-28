@@ -773,8 +773,15 @@ public abstract class KAnimControllerBase : MonoBehaviour
 				break;
 			}
 		}
+		if (this.temporaryBuildOverrides != null && this.temporaryBuildOverrides.Contains(kanim_file.GetData()))
+		{
+			this.RemoveSymbolOverride(kanim_file);
+			this.temporaryBuildOverrides.Remove(kanim_file.GetData());
+		}
 		this.RebuildOverrides(kanim_file);
 	}
+
+	protected abstract void RemoveSymbolOverride(KAnimFile kanim_file);
 
 	private void RebuildOverrides(KAnimFile kanim_file)
 	{

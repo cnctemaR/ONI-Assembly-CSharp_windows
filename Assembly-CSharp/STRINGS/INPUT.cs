@@ -6,6 +6,8 @@ namespace STRINGS
 	{
 		public static LocString ENTER = "Enter";
 
+		public static LocString ESCAPE = "Escape";
+
 		public static LocString BACKSPACE = "Backspace";
 
 		public static LocString SPACE = "Space";

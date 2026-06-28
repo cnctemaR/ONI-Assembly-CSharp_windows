@@ -81,13 +81,13 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor
 			{
 				Vector3 vector = new Vector3(this.transform.position.x + this.modifierOffset.x, this.transform.position.y + this.modifierOffset.y, 0f);
 				int num = Grid.PosToCell(vector);
-				SimMessages.ModifyElementEmitter(this.simHandle, num, this.element, 0.25f, this.emitRate * 0.25f, this.temperature);
+				SimMessages.ModifyElementEmitter(this.simHandle, num, (int)this.emitRange, this.element, 0.25f, this.emitRate * 0.25f, this.temperature);
 			}
 			this.statusHandle = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.EmittingElement, this);
 		}
 		else
 		{
-			SimMessages.ModifyElementEmitter(this.simHandle, 0, SimHashes.Vacuum, 0f, 0f, 0f);
+			SimMessages.ModifyElementEmitter(this.simHandle, 0, 0, SimHashes.Vacuum, 0f, 0f, 0f);
 			this.statusHandle = base.GetComponent<KSelectable>().RemoveStatusItem(this.statusHandle, this);
 		}
 	}
@@ -97,10 +97,10 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor
 		if (base.isSpawned && this.simHandle == -1)
 		{
 			this.simHandle = -2;
-			SimMessages.AddElementEmitter(Game.Instance.complexCallbackManager.Add(delegate(object data)
+			SimMessages.AddElementEmitter(float.MaxValue, Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object data)
 			{
 				BuildingElementEmitter.OnSimRegistered(this, data);
-			}, "BuildingElementEmitter").index);
+			}), "BuildingElementEmitter").index, -1, -1);
 		}
 	}
 
@@ -144,8 +144,8 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor
 	[SerializeField]
 	public float emitRate = 0.3f;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	public float temperature = 293f;
 
 	[SerializeField]
@@ -154,6 +154,9 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor
 
 	[SerializeField]
 	public Vector2 modifierOffset;
+
+	[SerializeField]
+	public byte emitRange = 1;
 
 	private Accumulator accumulator;
 

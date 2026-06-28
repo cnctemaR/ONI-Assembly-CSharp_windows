@@ -281,6 +281,14 @@ namespace STRINGS
 				public static LocString RESET = "Reset";
 
 				public static LocString APPLY = "Apply";
+
+				public static LocString DUPLICATE = "{0} was already bound to {1} and is now unbound.";
+
+				public static LocString UNBOUND_ACTION = "{0} is unbound. Are you sure you want to continue?";
+
+				public static LocString MULTIPLE_UNBOUND_ACTIONS = "You have multiple unbound actions, this may result in difficulty playing the game. Are you sure you want to continue?";
+
+				public static LocString WAITING_FOR_INPUT = "???";
 			}
 
 			public class TRANSLATIONS_SCREEN
@@ -420,13 +428,9 @@ namespace STRINGS
 				public static LocString QUITBUTTON = "Quit";
 			}
 
-			public class INPUTBINDINGSCREEN
+			public class AUDIODRIVERSCREEN
 			{
-				public static LocString DUPLICATE = "{0} was already bound to {1} and is now unbound.";
-
-				public static LocString UNBOUND_ACTION = "{0} is unbound. Are you sure you want to continue?";
-
-				public static LocString MULTIPLE_UNBOUND_ACTIONS = "You have multiple unbound actions, this may result in difficulty playing the game. Are you sure you want to continue?";
+				public static LocString WARNING = "A problem occurred initializing your audio device.\nSorry about that!\n\nThis is usually caused by outdated audio drivers.\n\nPlease visit your audio device manufacturer's website to download the latest drivers.";
 			}
 		}
 
@@ -1627,25 +1631,25 @@ namespace STRINGS
 				{
 					public static LocString PLANTREQUIREMENTS = "Lifecycle and growth requirements";
 
-					public static LocString PLANTEFFECTS = "Harvest Rating Point generation and additional effects";
+					public static LocString PLANTEFFECTS = "Conditions for Harvest Rating Point generation and additional effects";
 
-					public static LocString YIELD = "<style=\"produced\">{2}</style> produced in this tier (<style=\"produced\">{1}</style> per unit)";
+					public static LocString YIELD = "<style=\"produced\">{2}</style> produced in this harvest tier (<style=\"produced\">{1}</style> per unit)";
 
-					public static LocString LOW_YIELD = "If a plant reaches maturity with fewer than 40 Harvest Rating Points it will produce a Standard yield";
+					public static LocString LOW_YIELD = "Standard Harvest Tier\n------------------\nPlants produce Standard yields if they mature with 40 Harvest Rating Points or less.";
 
-					public static LocString NORMAL_YIELD = "If a plant reaches maturity with more than {0} Harvest Rating Points it will produce a Good yield";
+					public static LocString NORMAL_YIELD = "Good Harvest Tier\n------------------\nPlants produce Good yields if they mature with {0} or more Harvest Rating Points.\nAchieving this tier will yield more materials.";
 
-					public static LocString HIGH_YIELD = "If a plant reaches maturity with more than {0} Harvest Rating Points it will produce an Excellent yield";
+					public static LocString HIGH_YIELD = "Excellent Harvest Tier\n------------------\nPlants produce Excellent yields if they mature with {0} or more Harvest Rating Points.\nAchieving this tier will yield the maximum number of materials this plant can produce.";
 
-					public static LocString HARVESTDETAILS = "Yield bonuses for Harvest Ratings";
+					public static LocString HARVESTDETAILS = "Complete yield bonuses for each Harvest Rating Tier";
 
-					public static LocString OPTIMUMCONDITIONS = "A plant will continuously generate Harvest Rating Points when kept within ideal conditions, generating up to {1} points per condition in a day.\n\nThis plant's maximum Harvest Rating Point generation is +{0} per cycle. It will generate additional points the longer it stays within ideal conditions.";
+					public static LocString OPTIMUMCONDITIONS = "Plants continuously generate Harvest Rating Points while in ideal conditions.\n------------------\nThis plant can generate up to {1} points per cycle for each satisfied condition.\nIt can earn a maximum of {0} points per cycle.";
 
-					public static LocString NUMBEROFHARVESTS = "This plant will yield {0} harvests in its lifecycle";
+					public static LocString NUMBEROFHARVESTS = "This plant can mature {0} times before the end of its lifecycle.";
 
 					public static LocString YIELD_SEED = "Can be sown to grow more of this plant";
 
-					public static LocString YIELD_SEED_FINAL_HARVEST = "{0}\n\nThese seeds will be produced in the final harvest of a plant's lifecycle";
+					public static LocString YIELD_SEED_FINAL_HARVEST = "{0}\n\nThese seeds will be produced in the final harvest of the plant's lifecycle";
 				}
 			}
 
@@ -1837,9 +1841,9 @@ namespace STRINGS
 
 				public static LocString OPEN = "Door is open.";
 
-				public static LocString AUTO = "Door is automated.";
+				public static LocString AUTO = "Door is on auto.";
 
-				public static LocString CLOSE = "Door is locked shut.";
+				public static LocString CLOSE = "Door is locked.";
 
 				public static LocString PENDING_FORMAT = "{0} {1}";
 
@@ -1870,7 +1874,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Clean Toilet";
 
-				public static LocString TOOLTIP = "Remove waste from this toilet";
+				public static LocString TOOLTIP = "Empty waste from this toilet";
 			}
 
 			public class CANCELCLEANTOILET
@@ -2709,9 +2713,9 @@ namespace STRINGS
 
 			public static LocString ROTTEN = "Rotten";
 
-			public static LocString REQUIRES_PRESSURE = "<style=\"gas\">Gas</style> Pressure: {0} minimum";
+			public static LocString REQUIRES_PRESSURE = "<style=\"gas\">Air</style> Pressure: {0} minimum";
 
-			public static LocString IDEAL_PRESSURE = "<style=\"gas\">Gas</style> Pressure: {0}";
+			public static LocString IDEAL_PRESSURE = "<style=\"gas\">Air</style> Pressure: {0}";
 
 			public static LocString REQUIRES_TEMPERATURE = "<style=\"heat\">Temperature</style>: {0} to {1}";
 
@@ -2749,7 +2753,7 @@ namespace STRINGS
 
 				public static LocString GROWTHTIME_SIMPLE = "This plant takes {0} to grow";
 
-				public static LocString GROWTHTIME_REGROWTH = "This plant takes {0} to grow, and {1} to mature again after first harvest";
+				public static LocString GROWTHTIME_REGROWTH = "This plant initially takes {0} to grow, but only {1} to mature again after first harvest";
 
 				public static LocString GROWTHTIME = "This plant takes {0} to grow";
 
@@ -2761,15 +2765,15 @@ namespace STRINGS
 
 				public static LocString REQUIRESFERTILIZER = "This plant requires {1} {0} for basic growth";
 
-				public static LocString IDEAL_FERTILIZER = "This plant will gain Harvest Rating Points if provided with {1} of {0}";
+				public static LocString IDEAL_FERTILIZER = "This plant will generate Harvest Rating Points if provided with {1} of {0}";
 
-				public static LocString REQUIRES_PRESSURE = "Atmospheric gas pressure must be at least {0} for basic growth";
+				public static LocString REQUIRES_PRESSURE = "Gas pressure around this plant must be at least {0} for basic growth";
 
-				public static LocString IDEAL_PRESSURE = "This plant will gain Harvest Rating Points if atmospheric pressure is kept above {0}";
+				public static LocString IDEAL_PRESSURE = "This plant will generate Harvest Rating Points in atmospheric pressures above {0}";
 
 				public static LocString REQUIRES_TEMPERATURE = "Atmospheric temperature must be kept between {0} and {1} for basic growth";
 
-				public static LocString IDEAL_TEMPERATURE = "This plant will gain Harvest Rating Points if atmospheric temperature is kept between {0} and {1}";
+				public static LocString IDEAL_TEMPERATURE = "This plant will generate Harvest Rating Points in temperatures between {0} and {1}";
 
 				public static LocString REQUIRES_SUBMERSION = "This plant must be fully submerged in liquid for basic growth";
 

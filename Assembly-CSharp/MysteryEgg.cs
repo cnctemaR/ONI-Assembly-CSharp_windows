@@ -14,11 +14,11 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 		base.GetComponent<KPrefabID>().AddTag(GameTags.Egg);
 		if (!this.initialized)
 		{
-			HandleVector<global::System.Action>.Handle handle = Game.Instance.callbackManager.Add(delegate
+			HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(delegate
 			{
 				base.smi.StartSM();
 				base.smi.master.initialized = true;
-			}, "MysteryEgg");
+			}, false), "MysteryEgg");
 			SimMessages.ReplaceElement(Grid.PosToCell(base.gameObject), SimHashes.Dirt, CellEventLogger.Instance.ObjectSetSimOnSpawn, global::UnityEngine.Random.Range(1000f, 3000f), -1f, handle.index);
 			handle.index = -1;
 		}

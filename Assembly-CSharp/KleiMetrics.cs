@@ -235,7 +235,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 			dictionary.Add("Level", text2);
 		}
 		dictionary.Add("Branch", "release");
-		dictionary.Add("Build", 217955U);
+		dictionary.Add("Build", 218235U);
 		return dictionary;
 	}
 

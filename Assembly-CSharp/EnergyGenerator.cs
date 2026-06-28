@@ -250,8 +250,8 @@ public class EnergyGenerator : Generator, IBatteryRefillControl, IEffectDescript
 	[MyCmpGet]
 	private ManualDeliveryKG delivery;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	private float batteryRefillPercent = 0.5f;
 
 	[SerializeField]

@@ -191,11 +191,26 @@ namespace STRINGS
 
 				public static class CONTROL_STATE
 				{
-					public static LocString OPEN = "Open";
+					public class OPEN
+					{
+						public static LocString NAME = "Open";
 
-					public static LocString CLOSE = "Lock";
+						public static LocString TOOLTIP = "This door will remain open";
+					}
 
-					public static LocString AUTO = "Auto";
+					public class CLOSE
+					{
+						public static LocString NAME = "Lock";
+
+						public static LocString TOOLTIP = "Nothing may pass through";
+					}
+
+					public class AUTO
+					{
+						public static LocString NAME = "Auto";
+
+						public static LocString TOOLTIP = "Duplicants open and close this door as needed";
+					}
 				}
 			}
 
@@ -203,9 +218,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Electrolyzer";
 
-				public static LocString DESC = "Water goes in, life-sustaining oxygen comes out.";
+				public static LocString DESC = "Water goes in, oxygen comes out.\nAnd hydrogen. Deadly, deadly hydrogen.";
 
-				public static LocString EFFECT = "Produces a steady supply of <style=\"oxygen\">Oxygen</style> using piped in <style=\"liquid\">Water</style>.\n\nBecomes idle when the room enters maximum air pressure range.";
+				public static LocString EFFECT = "Produces <style=\"oxygen\">Oxygen</style> and <style=\"gas\">Hydrogen</style> using piped in <style=\"liquid\">Water</style>.\n\nBecomes idle when the room enters maximum air pressure range.";
 			}
 
 			public class POWERTRANSFORMER
@@ -356,7 +371,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Natural Gas Generator";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "It smells about how you'd expect.";
 
 				public static LocString EFFECT = "A <style=\"power\">Power</style> source that converts <style=\"gas\">Natural Gas</style> into electricity.";
 			}
@@ -365,7 +380,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Hydroponic Farm";
 
-				public static LocString DESC = "Reduce irritation with this automatic irrigation.";
+				public static LocString DESC = "Reduce farming irritation with this automatic irrigation.";
 
 				public static LocString EFFECT = "Grows a single <style=\"plant\">Plant</style> when sown with a <style=\"seed\">Seed</style>.\n\nAllows <style=\"liquid\">Liquid</style> delivery for plant irrigation.\n\nCan be used as floor tile.\n\nCan be rotated before construction.";
 			}
@@ -374,7 +389,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Insulated Gas Pipe";
 
-				public static LocString DESC = "Ensure your gases stay piping hot.\nOr cold.\nOr what have you.";
+				public static LocString DESC = "Keep your gases piping hot.\nOr cold.\nOr what have you.";
 
 				public static LocString EFFECT = "Transports <style=\"gas\">Gas</style> with minimal change in <style=\"heat\">Temperature</style>.\n\nCan be run through Tile.";
 			}
@@ -383,7 +398,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Insulated Liquid Pipe";
 
-				public static LocString DESC = "Ensure your liquids stay piping hot.\nOr cold.\nOr what have you.";
+				public static LocString DESC = "Keep your liquids piping hot.\nOr cold.\nOr what have you.";
 
 				public static LocString EFFECT = "Transports <style=\"liquid\">Liquid</style> with minimal change in <style=\"heat\">Temperature</style>.\n\nCan be run through Tile.";
 			}

@@ -542,7 +542,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Slime";
 
-			public static LocString DESC = "Slime is a thick biomixture of algae, fungi, and mucopolysaccarides.\n\nIt can be distilled into <style=\"solid\">Algae</style> and is useful in some <style=\"oxygen\">Oxygen</style> production processes.";
+			public static LocString DESC = "Slime is a thick biomixture of algae, fungi, and mucopolysaccharides.\n\nIt can be distilled into <style=\"solid\">Algae</style> and is useful in some <style=\"oxygen\">Oxygen</style> production processes.";
 		}
 
 		public class SNOW

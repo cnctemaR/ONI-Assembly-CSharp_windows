@@ -210,8 +210,8 @@ namespace TMPro
 		[SerializeField]
 		private InlineGraphic m_inlineGraphic;
 
-		[SerializeField]
 		[HideInInspector]
+		[SerializeField]
 		private CanvasRenderer m_inlineGraphicCanvasRenderer;
 
 		private UIVertex[] m_uiVertex;

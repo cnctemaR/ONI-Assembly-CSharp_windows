@@ -118,7 +118,7 @@ public static class TemplateLoader
 				}
 			}
 		}
-		HandleVector<global::System.Action>.Handle handle = Game.Instance.callbackManager.Add(callback, "TemplateLoader");
+		HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(callback, false), "TemplateLoader");
 		Sim.Cell cell = Grid.Cell[num];
 		SimMessages.ReplaceElement(num, ElementLoader.elements[(int)Grid.Cell[num].elementIdx].id, CellEventLogger.Instance.TemplateLoader, cell.mass, cell.temperature, handle.index);
 		handle.index = -1;
@@ -174,7 +174,7 @@ public static class TemplateLoader
 
 	private static void AddStartLocation(int baseX, int baseY, BaseTemplate template, global::System.Action callback)
 	{
-		HandleVector<global::System.Action>.Handle handle = Game.Instance.callbackManager.Add(callback, "TemplateLoaderAddStartLoc");
+		HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(callback, false), "TemplateLoaderAddStartLoc");
 		if (template == null)
 		{
 			global::Debug.LogError("Template Loader does not have template.", null);

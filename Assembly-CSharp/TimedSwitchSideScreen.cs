@@ -196,8 +196,8 @@ public class TimedSwitchSideScreen : SideScreenContent
 
 	private TimedSwitch targetTimedSwitch;
 
-	[SerializeField]
 	[Header("Header")]
+	[SerializeField]
 	private GameObject validContent;
 
 	[SerializeField]

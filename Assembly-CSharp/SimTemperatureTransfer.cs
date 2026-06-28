@@ -190,10 +190,10 @@ public class SimTemperatureTransfer : KMonoBehaviour
 				{
 					int num = Grid.PosToCell(this.transform.position);
 					this.simHandle = -2;
-					HandleVector<Action<object>>.Handle handle = Game.Instance.complexCallbackManager.Add(delegate(object data)
+					HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object data)
 					{
 						SimTemperatureTransfer.OnSimRegistered(this, data);
-					}, "SimTempTransfer");
+					}), "SimTempTransfer");
 					float num2 = component.InternalTemperature;
 					KCrashReporter.Assert(num2 > 0f, "Invalid temperature");
 					KCrashReporter.Assert(component.Mass > 0f);

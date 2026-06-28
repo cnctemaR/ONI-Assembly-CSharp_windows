@@ -47,14 +47,17 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(894417742, sizeof(SimMessages.RemoveElementConsumerMessage), (byte*)ptr);
 	}
 
-	public unsafe static void AddElementEmitter(int cb_handle)
+	public unsafe static void AddElementEmitter(float max_pressure, int on_registered, int on_blocked = -1, int on_unblocked = -1)
 	{
 		SimMessages.AddElementEmitterMessage* ptr = stackalloc SimMessages.AddElementEmitterMessage[checked(1 * sizeof(SimMessages.AddElementEmitterMessage))];
-		ptr->callbackIdx = cb_handle;
+		ptr->maxPressure = max_pressure;
+		ptr->callbackIdx = on_registered;
+		ptr->onBlockedCB = on_blocked;
+		ptr->onUnblockedCB = on_unblocked;
 		Sim.SIM_HandleMessage(-505471181, sizeof(SimMessages.AddElementEmitterMessage), (byte*)ptr);
 	}
 
-	public unsafe static void ModifyElementEmitter(int sim_handle, int game_cell, SimHashes element, float emit_interval, float emit_mass, float emit_temperature)
+	public unsafe static void ModifyElementEmitter(int sim_handle, int game_cell, int max_depth, SimHashes element, float emit_interval, float emit_mass, float emit_temperature)
 	{
 		if (!Grid.IsValidCell(game_cell))
 		{
@@ -68,6 +71,7 @@ public static class SimMessages
 		ptr->emitMass = emit_mass;
 		ptr->emitTemperature = emit_temperature;
 		ptr->elementIdx = (byte)elementIndex;
+		ptr->maxDepth = (byte)max_depth;
 		Sim.SIM_HandleMessage(403589164, sizeof(SimMessages.ModifyElementEmitterMessage), (byte*)ptr);
 	}
 
@@ -515,7 +519,13 @@ public static class SimMessages
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	private struct AddElementEmitterMessage
 	{
+		public float maxPressure;
+
 		public int callbackIdx;
+
+		public int onBlockedCB;
+
+		public int onUnblockedCB;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -533,11 +543,11 @@ public static class SimMessages
 
 		public byte elementIdx;
 
+		public byte maxDepth;
+
 		private byte pad0;
 
 		private byte pad1;
-
-		private byte pad2;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]

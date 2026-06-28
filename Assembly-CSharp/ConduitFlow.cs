@@ -23,6 +23,14 @@ public class ConduitFlow
 
 	public event global::System.Action onConduitsRebuilt;
 
+	public float MaxConduitCapacity
+	{
+		get
+		{
+			return this.MaxMass;
+		}
+	}
+
 	public void AddConduitUpdater(Action<float> callback, int priority = 0)
 	{
 		this.conduitUpdaters.Add(new ConduitFlow.ConduitUpdater
@@ -260,7 +268,58 @@ public class ConduitFlow
 		pathInfo.sortKey = sort_key;
 		pathInfo.path.AddRange(this.path);
 		pathInfo.path.Reverse();
-		this.pathList.Add(pathInfo);
+		this.TryAdd(pathInfo);
+	}
+
+	private void TryAdd(ConduitFlow.PathInfo new_path_info)
+	{
+		foreach (ConduitFlow.PathInfo pathInfo in this.pathList)
+		{
+			if (pathInfo.path.Count > new_path_info.path.Count)
+			{
+				int num = new_path_info.path[new_path_info.path.Count - 1].Cell;
+				int num2 = new_path_info.path[0].Cell;
+				for (int i = 0; i < pathInfo.path.Count; i++)
+				{
+					int cell = pathInfo.path[i].Cell;
+					if (cell == num)
+					{
+						num = -1;
+					}
+					if (cell == num2)
+					{
+						num2 = -1;
+					}
+					if (num == -1 && num2 == -1)
+					{
+						return;
+					}
+				}
+			}
+		}
+		for (int j = this.pathList.Count - 1; j >= 0; j--)
+		{
+			int num3 = this.pathList[j].path[this.pathList[j].path.Count - 1].Cell;
+			int num4 = this.pathList[j].path[0].Cell;
+			for (int k = 0; k < new_path_info.path.Count; k++)
+			{
+				int cell2 = new_path_info.path[k].Cell;
+				if (cell2 == num3)
+				{
+					num3 = -1;
+				}
+				if (cell2 == num4)
+				{
+					num4 = -1;
+				}
+				if (num3 == -1 && num4 == -1)
+				{
+					this.pathList.RemoveAt(j);
+					break;
+				}
+			}
+		}
+		this.pathList.Add(new_path_info);
 	}
 
 	public ConduitFlow.ConduitContents GetContents(int cell)
@@ -270,7 +329,10 @@ public class ConduitFlow
 		if (gridNode.frontIdx != -1)
 		{
 			ConduitFlow.Conduit conduit = this.conduits[gridNode.frontIdx];
-			frontContents.temperature = this.temperatureManager.GetData(conduit.temperatureHandle).temperature;
+			if (conduit.temperatureHandle.IsValid())
+			{
+				frontContents.temperature = this.temperatureManager.GetData(conduit.temperatureHandle).temperature;
+			}
 		}
 		if (frontContents.mass > 0f && frontContents.temperature <= 0f)
 		{
@@ -887,7 +949,12 @@ public class ConduitFlow
 
 		public ConduitFlow.ConduitContents GetContents()
 		{
-			return this.manager.grid[this.cell].frontContents;
+			ConduitFlow.ConduitContents frontContents = this.manager.grid[this.cell].frontContents;
+			if (this.temperatureHandle.IsValid())
+			{
+				frontContents.temperature = this.manager.temperatureManager.GetData(this.temperatureHandle).temperature;
+			}
+			return frontContents;
 		}
 
 		public void SetContents(ConduitFlow.ConduitContents contents)

@@ -66,6 +66,10 @@ public class Diggable : Workable
 
 	private void OnSolidChanged(object data)
 	{
+		if (this == null || base.gameObject == null)
+		{
+			return;
+		}
 		if (this.unstableEntry != null)
 		{
 			this.unstableEntry.Release();

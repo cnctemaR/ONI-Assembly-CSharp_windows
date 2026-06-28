@@ -38,7 +38,7 @@ public class AirFilterConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.5f, SimHashes.Clay, 0f, false, 0f, 0f, false),
+			new ElementConverter.OutputElement(0.5f, SimHashes.Clay, 0f, false, 0f, 0.5f, false),
 			new ElementConverter.OutputElement(0.05f, SimHashes.Oxygen, 0f, false, 0f, 1f, false)
 		};
 		elementConverter.conversionInterval = 1f;

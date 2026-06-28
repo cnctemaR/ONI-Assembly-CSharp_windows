@@ -222,7 +222,7 @@ public class Pickupable : Workable
 		{
 			this.AddFaller();
 		}
-		this.OnSolidChanged(num);
+		this.TryToOffsetIfBuried();
 		DecorProvider component2 = base.GetComponent<DecorProvider>();
 		if (component2 != null && string.IsNullOrEmpty(component2.overrideName))
 		{
@@ -267,6 +267,11 @@ public class Pickupable : Workable
 
 	private void OnSolidChanged(object data)
 	{
+		this.TryToOffsetIfBuried();
+	}
+
+	public void TryToOffsetIfBuried()
+	{
 		if (this.storage != null)
 		{
 			return;
@@ -278,7 +283,7 @@ public class Pickupable : Workable
 		}
 		Health component = base.GetComponent<Health>();
 		bool flag = component == null || component.IsDead();
-		if (flag && Grid.Solid[num] && Grid.Foundation[num])
+		if (flag && ((Grid.Solid[num] && Grid.Foundation[num]) || Grid.Cell[num].properties != 0))
 		{
 			for (int i = 0; i < Pickupable.displacementOffsets.Length; i++)
 			{

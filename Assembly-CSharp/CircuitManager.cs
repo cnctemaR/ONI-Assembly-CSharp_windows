@@ -313,7 +313,7 @@ public class CircuitManager
 		for (int l = 0; l < this.circuitInfo.Count; l++)
 		{
 			CircuitManager.CircuitInfo circuitInfo4 = this.circuitInfo[l];
-			bool flag4 = circuitInfo4.generators.Count + circuitInfo4.consumers.Count + circuitInfo4.inputTransformers.Count > 0;
+			bool flag4 = circuitInfo4.generators.Count + circuitInfo4.consumers.Count + circuitInfo4.outputTransformers.Count > 0;
 			this.UpdateBatteryConnectionStatus(circuitInfo4.batteries, flag4, l);
 			this.UpdateBatteryConnectionStatus(circuitInfo4.inputTransformers, flag4, l);
 			foreach (Generator generator5 in circuitInfo4.generators)

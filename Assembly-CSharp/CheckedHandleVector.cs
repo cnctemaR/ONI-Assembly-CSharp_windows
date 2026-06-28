@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CheckedHandleVector<T> where T : class
+public class CheckedHandleVector<T> where T : new()
 {
 	public CheckedHandleVector(int initial_size)
 	{
@@ -41,12 +41,19 @@ public class CheckedHandleVector<T> where T : class
 		{
 			Output.LogError(new object[]
 			{
-				"Tried to double free checked handle, debug info:",
+				"Tried to double free checked handle ",
+				handle.index,
+				"- Debug info:",
 				this.debugInfo[handle.index]
 			});
 		}
 		this.isFree[handle.index] = true;
 		return this.handleVector.Release(handle);
+	}
+
+	public T Get(HandleVector<T>.Handle handle)
+	{
+		return this.handleVector.GetItem(handle);
 	}
 
 	private HandleVector<T> handleVector;

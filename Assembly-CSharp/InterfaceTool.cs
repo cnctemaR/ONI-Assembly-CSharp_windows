@@ -167,7 +167,7 @@ public class InterfaceTool : KMonoBehaviour
 	[SerializeField]
 	protected Texture2D cursor;
 
-	public Vector2 cursorOffset = new Vector2(8f, 8f);
+	public Vector2 cursorOffset = new Vector2(2f, 2f);
 
 	public global::System.Action OnDeactivate;
 

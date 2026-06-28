@@ -127,8 +127,8 @@ public class Prioritizable : KMonoBehaviour
 		Game.Instance.Unsubscribe(1798162660, new Action<object>(this.OnEnableOverlay));
 	}
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	private int masterPriority = 5;
 
 	public Action<int> onPriorityChanged;

@@ -13,6 +13,13 @@ public class Pump : KMonoBehaviour
 		base.OnSpawn();
 		this.elapsedTime = 0f;
 		this.pumpable = this.UpdateOperational();
+		this.dispenser.GetConduitManager().AddConduitUpdater(new Action<float>(this.OnConduitUpdate), 10);
+	}
+
+	protected override void OnCleanUp()
+	{
+		this.dispenser.GetConduitManager().RemoveConduitUpdater(new Action<float>(this.OnConduitUpdate));
+		base.OnCleanUp();
 	}
 
 	private void SimUpdate(float dt)
@@ -49,10 +56,10 @@ public class Pump : KMonoBehaviour
 		{
 			state = Element.State.Gas;
 		}
-		bool flag = !this.storage.IsFull() && this.IsPumpable(state, (int)this.consumer.consumptionRadius);
-		this.operational.SetFlag(Pump.PumpableFlag, flag);
+		bool flag = this.IsPumpable(state, (int)this.consumer.consumptionRadius);
 		StatusItem statusItem = ((state != Element.State.Gas) ? Db.Get().BuildingStatusItems.NoLiquidElementToPump : Db.Get().BuildingStatusItems.NoGasElementToPump);
 		this.selectable.ToggleStatusItem(statusItem, !flag, null);
+		this.operational.SetFlag(Pump.PumpableFlag, !this.storage.IsFull() && flag);
 		return flag;
 	}
 
@@ -72,6 +79,12 @@ public class Pump : KMonoBehaviour
 			}
 		}
 		return false;
+	}
+
+	private void OnConduitUpdate(float dt)
+	{
+		bool flag = this.dispenser.ConduitContents.mass > 0f;
+		this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.ConduitBlocked, flag, null);
 	}
 
 	private const float OperationalUpdateInterval = 1f;

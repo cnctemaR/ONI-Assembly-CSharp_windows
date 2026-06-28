@@ -332,8 +332,8 @@ public class ResearchEntry : KMonoBehaviour
 	[Header("Labels")]
 	private LocText researchName;
 
-	[SerializeField]
 	[Header("Transforms")]
+	[SerializeField]
 	private Transform progressBarContainer;
 
 	[SerializeField]
@@ -368,8 +368,8 @@ public class ResearchEntry : KMonoBehaviour
 	[SerializeField]
 	private Sprite completedBG;
 
-	[SerializeField]
 	[Header("Colors")]
+	[SerializeField]
 	private Color defaultColor = Color.blue;
 
 	[SerializeField]

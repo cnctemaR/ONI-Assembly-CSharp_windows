@@ -253,6 +253,11 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		}
 	}
 
+	public bool IsEnabled(HandleVector<int>.Handle handle)
+	{
+		return base.GetData(handle).enabled;
+	}
+
 	public void Enable(HandleVector<int>.Handle handle)
 	{
 		StructureTemperatureData data = base.GetData(handle);
@@ -280,10 +285,10 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 				if (!element.IsTemperatureInsulated)
 				{
 					data.simHandle = -2;
-					HandleVector<Action<object>>.Handle handle2 = Game.Instance.complexCallbackManager.Add(delegate(object ev_data)
+					HandleVector<Game.ComplexCallbackInfo>.Handle handle2 = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object ev_data)
 					{
 						StructureTemperatureComponents.OnSimRegistered(handle, ev_data);
-					}, "StructureTemperature");
+					}), "StructureTemperature");
 					float internalTemperature = primaryElement.InternalTemperature;
 					float massForTemperatureModification = primaryElement.GetComponent<Building>().Def.MassForTemperatureModification;
 					float operatingKilowatts = data.OperatingKilowatts;

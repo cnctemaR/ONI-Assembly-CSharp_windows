@@ -51,7 +51,7 @@ public class LightBuffer : MonoBehaviour
 		this.ConeMaterial.SetTexture("_PropertyWorldLight", this.WorldLight);
 		foreach (Light2D light2D in Components.Light2Ds)
 		{
-			if (light2D.enabled)
+			if (!(light2D == null) && light2D.enabled)
 			{
 				MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
 				materialPropertyBlock.SetVector(this.ColorRangeTag, new Vector4(light2D.Color.r * light2D.Intensity * light2D.IntensityAnimation, light2D.Color.g * light2D.Intensity * light2D.IntensityAnimation, light2D.Color.b * light2D.Intensity * light2D.IntensityAnimation, light2D.Range));

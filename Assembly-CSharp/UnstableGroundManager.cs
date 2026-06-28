@@ -163,10 +163,10 @@ public class UnstableGroundManager : KMonoBehaviour
 			{
 				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 				this.pendingCells.Add(cell);
-				HandleVector<global::System.Action>.Handle handle = Game.Instance.callbackManager.Add(delegate
+				HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(delegate
 				{
 					this.RemoveFromPending(cell);
-				}, "UnstableGroundManager");
+				}, false), "UnstableGroundManager");
 				SimMessages.AddRemoveSubstance(cell, component.ElementID, CellEventLogger.Instance.UnstableGround, component.Mass, component.Temperature, handle.index);
 				if (component.Element.substance != null && component.Element.substance.fallingStopSound != null && CameraController.Instance.IsAudibleSound(position, component.Element.substance.fallingStopSound))
 				{

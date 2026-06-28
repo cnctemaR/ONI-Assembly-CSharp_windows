@@ -28,6 +28,8 @@ namespace Database
 			this.HitPoints.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.PerSecond, null));
 			this.Rot = this.CreateAmount("Rot", 0f, 0f, 0f, 0f, false, Units.Flat, 0f, true, "STRINGS.CREATURES.STATS");
 			this.Rot.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
+			this.AirPressure = this.CreateAmount("AirPressure", 0f, 1E+09f, 0f, 1E+09f, false, Units.Flat, 0f, true, "STRINGS.CREATURES.STATS");
+			this.AirPressure.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Mass, GameUtil.TimeSlice.PerSecond, null));
 			this.BindAmounts();
 		}
 
@@ -77,6 +79,8 @@ namespace Database
 		public Amount Temperature;
 
 		public Amount ExternalTemperature;
+
+		public Amount AirPressure;
 
 		public Amount Breath;
 

@@ -38,7 +38,7 @@ public class ButtonLabelColumn : LabelTableColumn
 		{
 			this.on_click_action(widget_go);
 		};
-		widget_go.GetComponent<KButton>().onClick += delegate
+		widget_go.GetComponent<KButton>().onDoubleClick += delegate
 		{
 			this.on_double_click_action(widget_go);
 		};

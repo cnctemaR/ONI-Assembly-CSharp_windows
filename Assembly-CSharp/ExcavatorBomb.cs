@@ -57,7 +57,7 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 							substance.SpawnResource(Grid.CellToPosCCC(cell, Grid.SceneLayer.Use), mass, 300f, false, false);
 						}
 					};
-					num = Game.Instance.callbackManager.Add(action, "ExcavatorBombCircleExplosion").index;
+					num = Game.Instance.callbackManager.Add(new Game.CallbackInfo(action, false), "ExcavatorBombCircleExplosion").index;
 				}
 				SimMessages.ReplaceElement(cell, SimHashes.CarbonDioxide, CellEventLogger.Instance.Excavator, 8f, 1000f, num);
 			}
@@ -194,7 +194,7 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 								substance.SpawnResource(Grid.CellToPos(local_cell, CellAlignment.RandomInternal, Grid.SceneLayer.Use), mass * 0.25f, num25, false, false);
 							}
 						};
-						HandleVector<global::System.Action>.Handle handle = Game.Instance.callbackManager.Add(action, "ExcavatorBombShockwave");
+						HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(action, false), "ExcavatorBombShockwave");
 						if (!WorldDamage.Instance.ApplyDamage(num3, num23, -1, handle.index))
 						{
 							SimMessages.ModifyEnergy(num3, kilojoules, SimMessages.EnergySourceID.Excavator);

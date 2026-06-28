@@ -194,6 +194,14 @@ namespace Database
 			this.NeedsFertilizer.resolveStringCallback = func;
 			this.NeedsIrrigation = new StatusItem("NeedsIrrigation", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
 			this.NeedsIrrigation.resolveStringCallback = func;
+			this.WrongFertilizer = new StatusItem("WrongFertilizer", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.WrongFertilizer.resolveStringCallback = func;
+			this.WrongIrrigation = new StatusItem("WrongIrrigation", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.WrongIrrigation.resolveStringCallback = func;
+			this.WrongFertilizerMajor = new StatusItem("WrongFertilizerMajor", "CREATURES", "status_item_fabricator_empty", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.WrongFertilizerMajor.resolveStringCallback = func;
+			this.WrongIrrigationMajor = new StatusItem("WrongIrrigationMajor", "CREATURES", "status_item_fabricator_empty", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.WrongIrrigationMajor.resolveStringCallback = func;
 			this.CantAcceptFertilizer = new StatusItem("CantAcceptFertilizer", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
 			this.CantAcceptIrrigation = new StatusItem("CantAcceptIrrigation", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
 			this.Rotting = new StatusItem("Rotting", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
@@ -300,6 +308,14 @@ namespace Database
 		public StatusItem NeedsFertilizer;
 
 		public StatusItem NeedsIrrigation;
+
+		public StatusItem WrongFertilizer;
+
+		public StatusItem WrongIrrigation;
+
+		public StatusItem WrongFertilizerMajor;
+
+		public StatusItem WrongIrrigationMajor;
 
 		public StatusItem CantAcceptFertilizer;
 

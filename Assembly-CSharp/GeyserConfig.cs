@@ -15,11 +15,13 @@ public class GeyserConfig : IEntityConfig
 		Geyser geyser = gameObject.AddComponent<Geyser>();
 		geyser.idleDuration = 90f;
 		ElementEmitter elementEmitter = gameObject.AddComponent<ElementEmitter>();
+		elementEmitter.emitRange = 2;
+		elementEmitter.maxPressure = 5f;
 		geyser.SetEmitter(elementEmitter);
 		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
-		geyser.preEmissionElement = new Geyser.EmissionType(30f, new ElementConverter.OutputElement(0.6666667f, SimHashes.Steam, 423.15f, false, 0f, 0f, false), 5f);
-		geyser.emissionElement = new Geyser.EmissionType(10f, new ElementConverter.OutputElement(60f, SimHashes.Water, 368.15f, false, 0f, 0f, false), 1000f);
-		geyser.postEmissionElement = new Geyser.EmissionType(20f, new ElementConverter.OutputElement(0.5f, SimHashes.Steam, 368.15f, false, 0f, 0f, false), 5f);
+		geyser.preEmissionElement = new Geyser.EmissionType(30f, new ElementConverter.OutputElement(0.6666667f, SimHashes.Steam, 423.15f, false, 0f, 0.5f, false));
+		geyser.emissionElement = new Geyser.EmissionType(10f, new ElementConverter.OutputElement(60f, SimHashes.Water, 368.15f, false, 1f, 1f, false));
+		geyser.postEmissionElement = new Geyser.EmissionType(20f, new ElementConverter.OutputElement(0.5f, SimHashes.Steam, 368.15f, false, 1f, 1f, false));
 		return gameObject;
 	}
 

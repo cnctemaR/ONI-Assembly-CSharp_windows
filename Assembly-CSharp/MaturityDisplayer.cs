@@ -12,11 +12,11 @@ public class MaturityDisplayer : AsPercentAmountDisplayer
 	public override string GetTooltipDescription(Amount master, AmountInstance instance)
 	{
 		string text = base.GetTooltipDescription(master, instance);
-		if (instance.GetDelta() != 0f)
+		Growing component = instance.gameObject.GetComponent<Growing>();
+		if (component.IsGrowing())
 		{
 			float num = instance.GetMax() - instance.value;
 			float num2 = num / instance.GetDelta();
-			Growing component = instance.gameObject.GetComponent<Growing>();
 			if (component != null && component.IsGrowing())
 			{
 				text += string.Format(CREATURES.STATS.MATURITY.TOOLTIP_GROWING_CROP, GameUtil.GetFormattedCycles(num2, "F1"), GameUtil.GetFormattedCycles(component.TimeUntilNextHarvest(), "F1"));
@@ -25,6 +25,10 @@ public class MaturityDisplayer : AsPercentAmountDisplayer
 			{
 				text += string.Format(CREATURES.STATS.MATURITY.TOOLTIP_GROWING, GameUtil.GetFormattedCycles(num2, "F1"));
 			}
+		}
+		else if (component.ReachedNextHarvest())
+		{
+			text += CREATURES.STATS.MATURITY.TOOLTIP_GROWN;
 		}
 		else
 		{

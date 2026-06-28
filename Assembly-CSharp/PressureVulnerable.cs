@@ -51,6 +51,13 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		}
 	}
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		Amounts amounts = base.gameObject.GetAmounts();
+		this.displayPressureAmount = amounts.Add(new AmountInstance(Db.Get().Amounts.AirPressure, base.gameObject));
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -84,7 +91,9 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 	public void UpdatePressure(object data)
 	{
 		int num = Grid.PosToCell(base.gameObject);
-		base.smi.sm.pressure.Set(this.GetPressureOverArea(num), base.smi);
+		float pressureOverArea = this.GetPressureOverArea(num);
+		base.smi.sm.pressure.Set(pressureOverArea, base.smi);
+		this.displayPressureAmount.value = pressureOverArea;
 	}
 
 	private float GetPressureOverArea(int cell)
@@ -135,6 +144,8 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 	public float pressureWarning_High;
 
 	public float pressureLethal_High;
+
+	private AmountInstance displayPressureAmount;
 
 	private PressureVulnerable.PressureState pressureState = PressureVulnerable.PressureState.Normal;
 

@@ -303,7 +303,14 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 
 	private void OnFollowCam()
 	{
-		CameraController.Instance.SetFollowTarget(this.transform);
+		if (CameraController.Instance.followTarget == this.transform)
+		{
+			CameraController.Instance.ClearFollowTarget();
+		}
+		else
+		{
+			CameraController.Instance.SetFollowTarget(this.transform);
+		}
 	}
 
 	private void OnDrawPaths()

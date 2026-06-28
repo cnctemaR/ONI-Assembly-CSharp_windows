@@ -58,12 +58,12 @@ public class ValveSideScreen : SideScreenContent
 
 	private Valve targetValve;
 
-	[Header("Slider")]
 	[SerializeField]
+	[Header("Slider")]
 	private KSlider flowSlider;
 
-	[Header("Labels")]
 	[SerializeField]
+	[Header("Labels")]
 	private LocText currentFlowLabel;
 
 	[SerializeField]

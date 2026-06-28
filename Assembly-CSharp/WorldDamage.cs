@@ -156,7 +156,7 @@ public class WorldDamage : KMonoBehaviour
 					{
 						WorldDamage.OnDigComplete(this, cell, mass, temperature, element);
 					};
-					HandleVector<global::System.Action>.Handle handle = Game.Instance.callbackManager.Add(action, "WorldDamage");
+					HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(action, false), "WorldDamage");
 					SimMessages.Dig(cell, handle.index);
 				}
 			}
@@ -227,8 +227,8 @@ public class WorldDamage : KMonoBehaviour
 	[SerializeField]
 	private FMODAsset leakSound;
 
-	[EventRef]
 	[SerializeField]
+	[EventRef]
 	private string leakSoundMigrated;
 
 	private List<int> queuedDigCallbackCells = new List<int>();

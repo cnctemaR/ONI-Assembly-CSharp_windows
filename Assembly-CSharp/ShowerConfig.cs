@@ -40,7 +40,7 @@ public class ShowerConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(1f, SimHashes.DirtyWater, 0f, true, 0f, 0f, true)
+			new ElementConverter.OutputElement(1f, SimHashes.DirtyWater, 0f, true, 0f, 0.5f, true)
 		};
 		elementConverter.conversionInterval = 1f;
 		Storage storage = go.AddOrGet<Storage>();

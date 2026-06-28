@@ -884,7 +884,7 @@ namespace STRINGS
 
 			public class DEATH_OVERHEATING
 			{
-				public static LocString NAME = "A Duplicant have overheated";
+				public static LocString NAME = "Duplicants have overheated";
 
 				public static LocString TOOLTIP = "These Duplicants died from extreme <style=\"heat\">Heat</style>:";
 			}

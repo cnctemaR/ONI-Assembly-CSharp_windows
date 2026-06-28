@@ -71,6 +71,7 @@ public class SaveScreen : KScreen
 
 	private void DoSave(string filename)
 	{
+		ReportErrorDialog.MOST_RECENT_SAVEFILE = filename;
 		SaveLoader.Instance.Save(filename, false, true);
 		this.Deactivate();
 	}

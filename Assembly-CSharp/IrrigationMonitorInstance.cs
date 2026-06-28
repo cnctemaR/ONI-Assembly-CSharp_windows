@@ -15,6 +15,16 @@ public class IrrigationMonitorInstance : FertilizationMonitor.Instance
 		return Db.Get().CreatureStatusItems.NeedsIrrigation;
 	}
 
+	public override StatusItem GetIncorrectFertStatusItem()
+	{
+		return Db.Get().CreatureStatusItems.WrongIrrigation;
+	}
+
+	public override StatusItem GetIncorrectFertStatusItemMajor()
+	{
+		return Db.Get().CreatureStatusItems.WrongIrrigationMajor;
+	}
+
 	public override StatusItem GetNotAcceptedStatusItem()
 	{
 		return Db.Get().CreatureStatusItems.CantAcceptIrrigation;

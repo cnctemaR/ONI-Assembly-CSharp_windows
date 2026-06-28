@@ -58,6 +58,9 @@ public class Door : BuildingWorkable, ISaveLoadable
 		this.controller.StartSM();
 		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		this.Subscribe(824508782, new Action<object>(this.OnOperationalChanged));
+		StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
+		HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
+		structureTemperatures.Disable(handle);
 		Components.Doors.Add(this);
 		Game.Instance.roomProber.AddDoor(this);
 		this.RefreshControlState();
@@ -225,9 +228,8 @@ public class Door : BuildingWorkable, ISaveLoadable
 		bool flag2 = flag || this.controlState == Door.ControlState.Auto;
 		bool flag3 = !flag;
 		float num = 0f;
-		for (int i = 0; i < placementCells.Length; i++)
+		foreach (int num2 in placementCells)
 		{
-			int num2 = placementCells[i];
 			num += Grid.Temperature[num2];
 			switch (this.doorType)
 			{
@@ -236,24 +238,17 @@ public class Door : BuildingWorkable, ISaveLoadable
 			{
 				Game.Instance.SetForceField(num2, flag2, flag3);
 				World.Instance.groundRenderer.MarkDirty(num2);
-				HandleVector<global::System.Action>.Handle handle = HandleVector<global::System.Action>.InvalidHandle;
+				HandleVector<Game.CallbackInfo>.Handle handle = HandleVector<Game.CallbackInfo>.InvalidHandle;
 				if (flag)
 				{
-					if (i == placementCells.Length - 1)
-					{
-						num /= (float)placementCells.Length;
-						base.GetComponent<PrimaryElement>().InternalTemperature = num;
-						handle = Game.Instance.callbackManager.Add(new global::System.Action(this.OnSimOpenedDoor), "SimOpenedDoor");
-					}
+					handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false), "SimDoorOpened");
 					SimMessages.ReplaceElement(num2, SimHashes.Vacuum, CellEventLogger.Instance.DoorOpen, 0f, -1f, handle.index);
 				}
 				else
 				{
-					if (i == placementCells.Length - 1)
-					{
-						handle = Game.Instance.callbackManager.Add(new global::System.Action(this.OnSimClosedDoor), "SimClosedDoor");
-					}
-					SimMessages.ReplaceAndDisplaceElement(num2, SimHashes.SteelDoor, CellEventLogger.Instance.DoorClose, 400f, base.GetComponent<PrimaryElement>().Temperature, handle.index);
+					PrimaryElement component = base.GetComponent<PrimaryElement>();
+					handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorClosed), false), "SimDoorClosed");
+					SimMessages.ReplaceAndDisplaceElement(num2, SimHashes.SteelDoor, CellEventLogger.Instance.DoorClose, 400f, component.Temperature, handle.index);
 				}
 				break;
 			}
@@ -316,7 +311,7 @@ public class Door : BuildingWorkable, ISaveLoadable
 		}
 	}
 
-	private void OnSimOpenedDoor()
+	private void OnSimDoorOpened()
 	{
 		if (this == null)
 		{
@@ -327,7 +322,7 @@ public class Door : BuildingWorkable, ISaveLoadable
 		structureTemperatures.Enable(handle);
 	}
 
-	private void OnSimClosedDoor()
+	private void OnSimDoorClosed()
 	{
 		if (this == null)
 		{
@@ -335,9 +330,6 @@ public class Door : BuildingWorkable, ISaveLoadable
 		}
 		StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
 		HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
-		StructureTemperatureData data = structureTemperatures.GetData(handle);
-		PrimaryElement component = base.GetComponent<PrimaryElement>();
-		component.InternalTemperature = data.Temperature;
 		structureTemperatures.Disable(handle);
 	}
 
@@ -356,11 +348,28 @@ public class Door : BuildingWorkable, ISaveLoadable
 
 	public float Open()
 	{
+		if (this.openCount == 0)
+		{
+			StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
+			HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
+			if (handle.IsValid() && !structureTemperatures.IsEnabled(handle))
+			{
+				int[] placementCells = this.building.PlacementCells;
+				float num = 0f;
+				foreach (int num2 in placementCells)
+				{
+					num += Grid.Temperature[num2];
+				}
+				num /= (float)placementCells.Length;
+				PrimaryElement component = base.GetComponent<PrimaryElement>();
+				component.Temperature = num;
+			}
+		}
 		this.openCount++;
-		float num = 1f;
+		float num3 = 1f;
 		if (this.consumer != null)
 		{
-			num = ((!this.consumer.IsPowered) ? 0.5f : 1f);
+			num3 = ((!this.consumer.IsPowered) ? 0.5f : 1f);
 		}
 		switch (this.controlState)
 		{
@@ -374,12 +383,23 @@ public class Door : BuildingWorkable, ISaveLoadable
 			}
 			break;
 		}
-		return num;
+		return num3;
 	}
 
 	public void Close()
 	{
 		this.openCount = Mathf.Max(0, this.openCount - 1);
+		if (this.openCount == 0)
+		{
+			StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
+			HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
+			PrimaryElement component = base.GetComponent<PrimaryElement>();
+			if (handle.IsValid() && structureTemperatures.IsEnabled(handle))
+			{
+				float temperature = structureTemperatures.GetData(handle).Temperature;
+				component.Temperature = temperature;
+			}
+		}
 		switch (this.controlState)
 		{
 		case Door.ControlState.Auto:

@@ -108,14 +108,15 @@ public class InputBindingsScreen : KModalScreen
 				LocText componentInChildren = gameObject.transform.GetChild(0).GetComponentInChildren<LocText>();
 				string text3 = "STRINGS.INPUT_BINDINGS." + binding.mScreen.ToUpper() + "." + binding.mAction.ToString().ToUpper();
 				componentInChildren.text = Strings.Get(text3);
-				LocText componentInChildren2 = gameObject.transform.GetChild(1).GetComponentInChildren<LocText>();
-				componentInChildren2.text = this.GetBindingText(binding);
+				LocText key_label = gameObject.transform.GetChild(1).GetComponentInChildren<LocText>();
+				key_label.text = this.GetBindingText(binding);
 				KButton button = gameObject.GetComponentInChildren<KButton>();
 				button.onClick += delegate
 				{
 					this.waitingForKeyPress = true;
 					this.actionToRebind = binding.mAction;
 					this.activeButton = button;
+					key_label.text = UI.FRONTEND.INPUT_BINDINGS_SCREEN.WAITING_FOR_INPUT;
 				};
 				gameObject.transform.SetSiblingIndex(num);
 				num++;
@@ -218,11 +219,11 @@ public class InputBindingsScreen : KModalScreen
 			if (num == 1)
 			{
 				BindingEntry firstUnbound = this.GetFirstUnbound();
-				text = string.Format(UI.FRONTEND.INPUTBINDINGSCREEN.UNBOUND_ACTION, firstUnbound.mAction.ToString());
+				text = string.Format(UI.FRONTEND.INPUT_BINDINGS_SCREEN.UNBOUND_ACTION, firstUnbound.mAction.ToString());
 			}
 			else
 			{
-				text = UI.FRONTEND.INPUTBINDINGSCREEN.MULTIPLE_UNBOUND_ACTIONS;
+				text = UI.FRONTEND.INPUT_BINDINGS_SCREEN.MULTIPLE_UNBOUND_ACTIONS;
 			}
 			this.confirmDialog = Util.KInstantiateUI(this.confirmPrefab.gameObject, this.transform.gameObject, false).GetComponent<ConfirmDialogScreen>();
 			this.confirmDialog.PopupConfirmDialog(text, delegate
@@ -296,7 +297,7 @@ public class InputBindingsScreen : KModalScreen
 		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
 			BindingEntry bindingEntry2 = GameInputMapping.KeyBindings[i];
-			if (bindingEntry2.mAction == this.actionToRebind)
+			if (bindingEntry2.mRebindable && bindingEntry2.mAction == this.actionToRebind)
 			{
 				BindingEntry duplicatedBinding = this.GetDuplicatedBinding(this.screens[this.activeScreen], bindingEntry);
 				GameInputMapping.KeyBindings[i] = bindingEntry;
@@ -308,7 +309,7 @@ public class InputBindingsScreen : KModalScreen
 					string text = "STRINGS.INPUT_BINDINGS." + duplicatedBinding.mScreen.ToUpper() + "." + duplicatedBinding.mAction.ToString().ToUpper();
 					string text2 = Strings.Get(text);
 					string bindingText = this.GetBindingText(duplicatedBinding);
-					string text3 = string.Format(UI.FRONTEND.INPUTBINDINGSCREEN.DUPLICATE, text2, bindingText);
+					string text3 = string.Format(UI.FRONTEND.INPUT_BINDINGS_SCREEN.DUPLICATE, text2, bindingText);
 					this.Unbind(duplicatedBinding.mAction);
 					this.confirmDialog.PopupConfirmDialog(text3, null, null, null, null);
 					this.confirmDialog.gameObject.SetActive(true);
@@ -385,7 +386,6 @@ public class InputBindingsScreen : KModalScreen
 		KeyCode.Clear,
 		KeyCode.Return,
 		KeyCode.Pause,
-		KeyCode.Escape,
 		KeyCode.Space,
 		KeyCode.Exclaim,
 		KeyCode.DoubleQuote,

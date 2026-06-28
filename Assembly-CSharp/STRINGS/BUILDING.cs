@@ -56,7 +56,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Current State: {ControlState}";
 
-				public static LocString TOOLTIP = "Current State: {ControlState}\n\nAuto: Duplicants open and close this door as needed\nLocked: Nothing may pass through\nOpen: This door will remain open";
+				public static LocString TOOLTIP = "Current State: {ControlState}\n------------------\nAuto: Duplicants open and close this door as needed\nLocked: Nothing may pass through\nOpen: This door will remain open";
 
 				public static LocString OPENED = "Opened";
 
@@ -141,7 +141,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Gas Vent Overpressure";
 
-				public static LocString TOOLTIP = "Area's ambient pressure is too high to emit additional gas\nReduce pressure by pumping gas away or clearing more space";
+				public static LocString TOOLTIP = "High air or liquid pressure in this area is preventing further liquid emission\nReduce pressure by pumping gas away or clearing more space";
 			}
 
 			public class WATTSONGAMEOVER
@@ -169,7 +169,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Liquid Vent Overpressure";
 
-				public static LocString TOOLTIP = "Area's ambient pressure is too high to emit additional liquid\nReduce pressure by pumping liquid away or clearing more space";
+				public static LocString TOOLTIP = "High air or liquid pressure in this area is preventing further liquid emission\nReduce pressure by pumping liquid away or clearing more space";
 			}
 
 			public class MANUALLYCONTROLLED
@@ -547,7 +547,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No Fabrications Queued";
 
-				public static LocString TOOLTIP = "Queue a recipe to begin fabrication";
+				public static LocString TOOLTIP = "Select a recipe to begin fabrication";
 			}
 
 			public class TOILET

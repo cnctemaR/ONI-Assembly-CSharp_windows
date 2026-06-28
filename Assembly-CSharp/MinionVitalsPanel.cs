@@ -14,13 +14,14 @@ public class MinionVitalsPanel : KMonoBehaviour
 		this.AddLine(Db.Get().Amounts.Breath, this.icon_breath, null);
 		this.AddLine(Db.Get().Amounts.Stamina, this.icon_stamina, null);
 		this.AddLine(Db.Get().Amounts.Calories, this.icon_calories, null);
+		this.AddLine(Db.Get().Amounts.Maturity, this.icon_maturity, null);
+		this.AddLine(Db.Get().Amounts.YieldBonus, this.icon_hitpoints, null);
 		this.AddLine(Db.Get().Amounts.Temperature, this.icon_temperature, null);
 		this.AddLine(Db.Get().Amounts.ExternalTemperature, this.icon_temperature, null);
+		this.AddLine(Db.Get().Amounts.AirPressure, this.icon_breath, null);
 		this.AddLine(Db.Get().Amounts.Decor, this.icon_decor, (AmountInstance ainstance) => this.GetDecorTooltip(ainstance));
-		this.AddLine(Db.Get().Amounts.Maturity, this.icon_maturity, null);
 		this.AddLine(Db.Get().Amounts.Fertilization, this.icon_calories, null);
 		this.AddLine(Db.Get().Amounts.Irrigation, this.icon_calories, null);
-		this.AddLine(Db.Get().Amounts.YieldBonus, this.icon_hitpoints, null);
 	}
 
 	protected override void OnCmpEnable()

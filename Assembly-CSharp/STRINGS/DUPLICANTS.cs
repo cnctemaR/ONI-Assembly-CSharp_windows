@@ -125,9 +125,9 @@ namespace STRINGS
 
 			public class OVERHEATING
 			{
-				public static LocString NAME = "Starvation";
+				public static LocString NAME = "Overheated";
 
-				public static LocString DESCRIPTION = "{Target} has starved to death.";
+				public static LocString DESCRIPTION = "{Target} has overheated to death.";
 			}
 
 			public class DROWNED
@@ -934,7 +934,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No food available";
 
-				public static LocString TOOLTIP = "There is nothing in the colony for this Duplicant to eat";
+				public static LocString TOOLTIP = "There's nothing in the colony for this Duplicant to eat";
 
 				public static LocString NOTIFICATION_NAME = "No food available";
 
@@ -1190,7 +1190,7 @@ namespace STRINGS
 
 				public static LocString NOTIFICATION_NAME = "Made a mess";
 
-				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants could not find a toilet in time.\nUse the <color=#833A5FFF>MOP TOOL</color> [K] to clean up their mess:\n";
+				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants could not find a toilet in time.\nUse the <color=#833A5FFF>MOP TOOL</color> [M] to clean up their mess:\n";
 			}
 
 			public class WASHINGHANDS
@@ -1792,7 +1792,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "This Duplicant had to climb a tall ladder that left them dizzy and unsettled";
 
-				public static LocString CAUSE = "This Duplicant got so good at their job that they became bad at ladders";
+				public static LocString CAUSE = "This Duplicant got so good at their job they became bad at ladders";
 			}
 
 			public class UNCOMFORTABLEFEET
@@ -1955,11 +1955,11 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Insatiable Hunger";
 
-				public static LocString TOOLTIP = "This Duplicant is stuffing their face a result of stress";
+				public static LocString TOOLTIP = "This Duplicant is stuffing their face as a result of stress";
 
 				public static LocString NOTIFICATION_NAME = "Binge Eating";
 
-				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants became too <style=\"stress\">Stressed</style> and started eating everything in sight:";
+				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants became too <style=\"stress\">Stressed</style> and began eating everything in sight:";
 			}
 
 			public class WORKING
@@ -2057,7 +2057,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Low Oxygen";
 
-				public static LocString TOOLTIP = "The air in this area is unpleasantly thin";
+				public static LocString TOOLTIP = "The air quite thin in this area";
 			}
 
 			public class MOURNING
@@ -2092,7 +2092,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Center of Attention";
 
-				public static LocString TOOLTIP = "This Duplicant feels like someone is watching them...";
+				public static LocString TOOLTIP = "This Duplicant feels like someone's watching over them...";
 			}
 
 			public class INSPIRED
@@ -2902,7 +2902,7 @@ namespace STRINGS
 
 				public static LocString PROFESSION_NAME = "Gourmet";
 
-				public static LocString EXPECTATION_TOOLTIP = "Food Quality Expectation is the minimum quality of <style=\"food\">Food</style> a Duplicant can tolerate eating.\n\nThis Duplicant requires {0} or higher food, and will become <style=\"stress\">Stressed</style> if to forced to eat lower quality foods.";
+				public static LocString EXPECTATION_TOOLTIP = "Food Quality Expectation is the minimum quality of <style=\"food\">Food</style> a Duplicant can tolerate eating.\n\nThis Duplicant requires {0} or higher food, and will become <style=\"stress\">Stressed</style> if forced to eat lower quality foods.";
 
 				public static LocString BAD_FOOD_MOD = "Food Quality";
 

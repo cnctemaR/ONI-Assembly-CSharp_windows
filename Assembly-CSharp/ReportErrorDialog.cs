@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.IO;
 using STRINGS;
 using TMPro;
 using UnityEngine;
@@ -22,6 +23,8 @@ public class ReportErrorDialog : MonoBehaviour
 		this.continueGameButton.gameObject.SetActive(!KCrashReporter.terminateOnError);
 		this.submitButton.onClick += this.OnSelect_SUBMIT;
 		this.quitButton.onClick += this.OnSelect_QUIT;
+		this.uploadSaveButton.onClick += this.OnSelect_UPLOADSAVE;
+		this.skipUploadSaveButton.onClick += this.OnSelect_SKIPUPLOADSAVE;
 		this.messageInputField.text = UI.CRASHSCREEN.BODY.text;
 		ReportErrorDialog.hasCrash = true;
 	}
@@ -51,11 +54,10 @@ public class ReportErrorDialog : MonoBehaviour
 		}
 	}
 
-	public void PopupConfirmDialog(string text, global::System.Action onConfirm, global::System.Action onQuit, global::System.Action onContinue, string third_text = null, global::System.Action onThird = null, bool is_vcruntime_error = false)
+	public void PopupConfirmDialog(string text, global::System.Action onConfirm, global::System.Action onQuit, global::System.Action onContinue, bool is_vcruntime_error = false)
 	{
 		this.confirmAction = onConfirm;
 		this.quitAction = onQuit;
-		this.thirdAction = onThird;
 		this.continueAction = onContinue;
 		if (is_vcruntime_error)
 		{
@@ -80,10 +82,6 @@ public class ReportErrorDialog : MonoBehaviour
 		{
 			num++;
 		}
-		if (this.thirdAction != null)
-		{
-			num++;
-		}
 		this.quitButton.gameObject.SetActive(onQuit != null);
 	}
 
@@ -98,11 +96,19 @@ public class ReportErrorDialog : MonoBehaviour
 	{
 		yield return new WaitForEndOfFrame();
 		yield return new WaitForEndOfFrame();
-		if (this.confirmAction != null)
+		bool delay = false;
+		if (ReportErrorDialog.MOST_RECENT_SAVEFILE != null && File.Exists(ReportErrorDialog.MOST_RECENT_SAVEFILE))
 		{
-			this.confirmAction();
+			delay = true;
+			FileInfo info = new FileInfo(ReportErrorDialog.MOST_RECENT_SAVEFILE);
+			long length = info.Length;
+			this.saveFileInfoLabel.text = Path.GetFileName(ReportErrorDialog.MOST_RECENT_SAVEFILE) + " " + length.ToString() + " bytes";
+			this.uploadSaveDialog.SetActive(true);
 		}
-		this.OpenRefMessage();
+		if (!delay)
+		{
+			this.Submit();
+		}
 		yield break;
 	}
 
@@ -123,15 +129,6 @@ public class ReportErrorDialog : MonoBehaviour
 		}
 	}
 
-	public void OnSelect_third()
-	{
-		if (this.thirdAction != null)
-		{
-			this.thirdAction();
-		}
-		global::UnityEngine.Object.Destroy(base.gameObject);
-	}
-
 	public void OpenRefMessage()
 	{
 		this.submitButton.gameObject.SetActive(false);
@@ -143,15 +140,33 @@ public class ReportErrorDialog : MonoBehaviour
 		return this.messageInputField.text;
 	}
 
+	private void OnSelect_UPLOADSAVE()
+	{
+		this.uploadSaveDialog.SetActive(false);
+		KCrashReporter.MOST_RECENT_SAVEFILE = ReportErrorDialog.MOST_RECENT_SAVEFILE;
+		this.Submit();
+	}
+
+	private void OnSelect_SKIPUPLOADSAVE()
+	{
+		this.uploadSaveDialog.SetActive(false);
+		KCrashReporter.MOST_RECENT_SAVEFILE = null;
+		this.Submit();
+	}
+
+	private void Submit()
+	{
+		this.confirmAction();
+		this.OpenRefMessage();
+	}
+
+	public static string MOST_RECENT_SAVEFILE;
+
 	private global::System.Action confirmAction;
 
 	private global::System.Action quitAction;
 
-	private global::System.Action thirdAction;
-
 	private global::System.Action continueAction;
-
-	public Text popupMessage;
 
 	public TMP_InputField messageInputField;
 
@@ -177,6 +192,18 @@ public class ReportErrorDialog : MonoBehaviour
 
 	[SerializeField]
 	private GameObject InfoBox;
+
+	[SerializeField]
+	private GameObject uploadSaveDialog;
+
+	[SerializeField]
+	private KButton uploadSaveButton;
+
+	[SerializeField]
+	private KButton skipUploadSaveButton;
+
+	[SerializeField]
+	private LocText saveFileInfoLabel;
 
 	public static bool hasCrash;
 }

@@ -59,8 +59,8 @@ public class TagModifierLoader : KMonoBehaviour
 
 	private Dictionary<int, float> beautyModifiers;
 
-	[DelimitedRecord(",")]
 	[IgnoreEmptyLines]
+	[DelimitedRecord(",")]
 	[IgnoreFirst(1)]
 	private class TagModifierConfig
 	{

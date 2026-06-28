@@ -15,11 +15,13 @@ public class MethaneGeyserConfig : IEntityConfig
 		Geyser geyser = gameObject.AddComponent<Geyser>();
 		geyser.idleDuration = 100f;
 		ElementEmitter elementEmitter = gameObject.AddComponent<ElementEmitter>();
+		elementEmitter.emitRange = 2;
+		elementEmitter.maxPressure = 5f;
 		geyser.SetEmitter(elementEmitter);
 		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
-		geyser.preEmissionElement = new Geyser.EmissionType(100f, new ElementConverter.OutputElement(0.06f, SimHashes.Methane, 423.15f, false, 0f, 0f, false), 5f);
-		geyser.emissionElement = new Geyser.EmissionType(370f, new ElementConverter.OutputElement(0.12162162f, SimHashes.Methane, 368.15f, false, 0f, 0f, false), 5f);
-		geyser.postEmissionElement = new Geyser.EmissionType(30f, new ElementConverter.OutputElement(0.3f, SimHashes.Methane, 368.15f, false, 0f, 0f, false), 5f);
+		geyser.preEmissionElement = new Geyser.EmissionType(100f, new ElementConverter.OutputElement(0.06f, SimHashes.Methane, 423.15f, false, 1f, 1f, false));
+		geyser.emissionElement = new Geyser.EmissionType(370f, new ElementConverter.OutputElement(0.12162162f, SimHashes.Methane, 368.15f, false, 1f, 1f, false));
+		geyser.postEmissionElement = new Geyser.EmissionType(30f, new ElementConverter.OutputElement(0.3f, SimHashes.Methane, 368.15f, false, 1f, 1f, false));
 		return gameObject;
 	}
 

@@ -334,7 +334,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 	[Serializable]
 	public struct OutputElement
 	{
-		public OutputElement(float kgPerSecond, SimHashes element, float outputTemperature = 0f, bool storeOutput = false, float outputElementOffsetx = 0f, float outputElementOffsety = 0f, bool apply_input_temperature = false)
+		public OutputElement(float kgPerSecond, SimHashes element, float outputTemperature = 0f, bool storeOutput = false, float outputElementOffsetx = 0f, float outputElementOffsety = 0.5f, bool apply_input_temperature = false)
 		{
 			this.elementHash = element;
 			this.outputTemperature = ((outputTemperature <= 0f) ? ElementLoader.FindElementByHash(element).defaultValues.temperature : outputTemperature);

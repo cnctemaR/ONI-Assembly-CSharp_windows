@@ -96,26 +96,26 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	public void CancelResearch(Tech tech, bool clickedEntry = true)
 	{
-		Research.<CancelResearch>c__AnonStoreyDE <CancelResearch>c__AnonStoreyDE = new Research.<CancelResearch>c__AnonStoreyDE();
-		<CancelResearch>c__AnonStoreyDE.tech = tech;
-		<CancelResearch>c__AnonStoreyDE.ti = this.queuedTech.Find((TechInstance qt) => qt.tech == <CancelResearch>c__AnonStoreyDE.tech);
-		if (<CancelResearch>c__AnonStoreyDE.ti == null)
+		Research.<CancelResearch>c__AnonStoreyDD <CancelResearch>c__AnonStoreyDD = new Research.<CancelResearch>c__AnonStoreyDD();
+		<CancelResearch>c__AnonStoreyDD.tech = tech;
+		<CancelResearch>c__AnonStoreyDD.ti = this.queuedTech.Find((TechInstance qt) => qt.tech == <CancelResearch>c__AnonStoreyDD.tech);
+		if (<CancelResearch>c__AnonStoreyDD.ti == null)
 		{
 			return;
 		}
-		if (<CancelResearch>c__AnonStoreyDE.ti == this.queuedTech[this.queuedTech.Count - 1] && clickedEntry)
+		if (<CancelResearch>c__AnonStoreyDD.ti == this.queuedTech[this.queuedTech.Count - 1] && clickedEntry)
 		{
 			this.SetActiveResearch(null, false);
 		}
 		int i;
-		for (i = <CancelResearch>c__AnonStoreyDE.ti.tech.unlockedTech.Count - 1; i >= 0; i--)
+		for (i = <CancelResearch>c__AnonStoreyDD.ti.tech.unlockedTech.Count - 1; i >= 0; i--)
 		{
-			if (this.queuedTech.Find((TechInstance qt) => qt.tech == <CancelResearch>c__AnonStoreyDE.ti.tech.unlockedTech[i]) != null)
+			if (this.queuedTech.Find((TechInstance qt) => qt.tech == <CancelResearch>c__AnonStoreyDD.ti.tech.unlockedTech[i]) != null)
 			{
-				this.CancelResearch(<CancelResearch>c__AnonStoreyDE.ti.tech.unlockedTech[i], false);
+				this.CancelResearch(<CancelResearch>c__AnonStoreyDD.ti.tech.unlockedTech[i], false);
 			}
 		}
-		this.queuedTech.Remove(<CancelResearch>c__AnonStoreyDE.ti);
+		this.queuedTech.Remove(<CancelResearch>c__AnonStoreyDD.ti);
 		if (clickedEntry)
 		{
 			this.Trigger(-1914338957, this.queuedTech);

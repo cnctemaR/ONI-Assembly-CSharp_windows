@@ -21,7 +21,7 @@ public class Clearable : Workable, ISaveLoadable
 	{
 		if (this.isMarkedForClear)
 		{
-			if (base.GetComponent<Pickupable>().storage == null)
+			if (base.GetComponent<Pickupable>().storage != null)
 			{
 				this.isMarkedForClear = false;
 			}

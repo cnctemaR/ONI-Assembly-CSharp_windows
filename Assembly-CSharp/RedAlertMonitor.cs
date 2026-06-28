@@ -27,7 +27,26 @@ public class RedAlertMonitor : GameStateMachine<RedAlertMonitor, RedAlertMonitor
 
 		public void EnableRedAlert()
 		{
-			base.GetComponent<ChoreDriver>().StopChore();
+			ChoreDriver component = base.GetComponent<ChoreDriver>();
+			if (component != null)
+			{
+				Chore currentChore = component.GetCurrentChore();
+				if (currentChore != null)
+				{
+					bool flag = false;
+					for (int i = 0; i < currentChore.preconditions.Count; i++)
+					{
+						if (currentChore.preconditions[i].id == ChorePreconditions.IsNotRedAlert.id)
+						{
+							flag = true;
+						}
+					}
+					if (flag)
+					{
+						component.StopChore();
+					}
+				}
+			}
 		}
 	}
 }

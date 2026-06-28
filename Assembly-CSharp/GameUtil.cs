@@ -819,28 +819,35 @@ public static class GameUtil
 										{
 											if (key_code != KKeyCode.None)
 											{
-												if (key_code != KKeyCode.Space)
+												if (key_code != KKeyCode.Escape)
 												{
-													if (KKeyCode.A <= key_code && key_code <= KKeyCode.Z)
+													if (key_code != KKeyCode.Space)
 													{
-														text = ((char)(65 + (key_code - KKeyCode.A))).ToString();
-													}
-													else if (KKeyCode.Alpha0 <= key_code && key_code <= KKeyCode.Alpha9)
-													{
-														text = ((char)(48 + (key_code - KKeyCode.Alpha0))).ToString();
-													}
-													else if (KKeyCode.F1 <= key_code && key_code <= KKeyCode.F12)
-													{
-														text = "F" + (key_code - KKeyCode.F1 + 1).ToString();
+														if (KKeyCode.A <= key_code && key_code <= KKeyCode.Z)
+														{
+															text = ((char)(65 + (key_code - KKeyCode.A))).ToString();
+														}
+														else if (KKeyCode.Alpha0 <= key_code && key_code <= KKeyCode.Alpha9)
+														{
+															text = ((char)(48 + (key_code - KKeyCode.Alpha0))).ToString();
+														}
+														else if (KKeyCode.F1 <= key_code && key_code <= KKeyCode.F12)
+														{
+															text = "F" + (key_code - KKeyCode.F1 + 1).ToString();
+														}
+														else
+														{
+															global::Debug.LogWarning("Unable to find proper string for KKeyCode: " + key_code.ToString() + " using key_code.ToString()", null);
+														}
 													}
 													else
 													{
-														global::Debug.LogWarning("Unable to find proper string for KKeyCode: " + key_code.ToString() + "using key_code.ToString()", null);
+														text = INPUT.SPACE;
 													}
 												}
 												else
 												{
-													text = INPUT.SPACE;
+													text = INPUT.ESCAPE;
 												}
 											}
 										}
@@ -1293,11 +1300,11 @@ public static class GameUtil
 		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(go, false);
 		List<Descriptor> list2 = new List<Descriptor>();
 		List<Descriptor> cropOptimumConditionDescriptors = GameUtil.GetCropOptimumConditionDescriptors(allDescriptors);
-		float num = component.baseGrowthTime / 600f;
+		float num = component.GetTotalGrowthTime() / 600f;
 		float num2 = 100f / num;
 		float num3 = num2 / 4f;
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.OPTIMUMCONDITIONS, num3), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.OPTIMUMCONDITIONS, num2, num3), Descriptor.DescriptorType.Effect);
+		descriptor.SetupDescriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.OPTIMUMCONDITIONS, num3.ToString("0.##")), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.OPTIMUMCONDITIONS, num2.ToString("0.##"), num3.ToString("0.##")), Descriptor.DescriptorType.Effect);
 		descriptor.IncreaseIndent();
 		list2.Add(descriptor);
 		GameUtil.IndentListOfDescriptors(cropOptimumConditionDescriptors);
@@ -1340,12 +1347,12 @@ public static class GameUtil
 		float num2 = 0f;
 		if (component != null)
 		{
-			float num3 = component.baseGrowthTime / 600f;
+			float num3 = component.GetTotalGrowthTime() / 600f;
 			num = 100f / num3;
 			num2 = num / 4f;
 		}
 		Descriptor descriptor3 = default(Descriptor);
-		descriptor3.SetupDescriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.OPTIMUMCONDITIONS, num2), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.OPTIMUMCONDITIONS, num, num2), Descriptor.DescriptorType.Effect);
+		descriptor3.SetupDescriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.OPTIMUMCONDITIONS, num2.ToString("0.##")), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.OPTIMUMCONDITIONS, num.ToString("0.##"), num2.ToString("0.##")), Descriptor.DescriptorType.Effect);
 		descriptor3.IncreaseIndent();
 		list2.Add(descriptor3);
 		GameUtil.IndentListOfDescriptors(cropOptimumConditionDescriptors);

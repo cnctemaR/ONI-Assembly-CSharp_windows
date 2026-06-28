@@ -81,6 +81,7 @@ public class SteamUGCService : MonoBehaviour
 		this.m_ItemInstalled = Callback<ItemInstalled_t>.Create(new Callback<ItemInstalled_t>.DispatchDelegate(this.OnItemInstalled));
 		this.m_DownloadItemResult = Callback<DownloadItemResult_t>.Create(new Callback<DownloadItemResult_t>.DispatchDelegate(this.OnDownloadItemResult));
 		this.OnSteamUGCQueryCompletedCallResult = CallResult<SteamUGCQueryCompleted_t>.Create(new CallResult<SteamUGCQueryCompleted_t>.APIDispatchDelegate(this.OnSteamUGCQueryCompleted));
+		this.OnSteamUGCQueryDetailsCompletedCallResult = CallResult<SteamUGCQueryCompleted_t>.Create(new CallResult<SteamUGCQueryCompleted_t>.APIDispatchDelegate(this.OnSteamUGCQueryDetailsCompleted));
 		this.doClearList = true;
 		this.currentLanguage = SteamUGCService.GetInstalledLanguage();
 		this.setupComplete = true;
@@ -135,6 +136,9 @@ public class SteamUGCService : MonoBehaviour
 					{
 						array = SteamUGCService.GetBytesFromZip(nPublishedFileId, "preview.png");
 					}
+					if (array == null)
+					{
+					}
 					if (array != null)
 					{
 						Texture2D texture2D = new Texture2D(128, 64);
@@ -169,6 +173,38 @@ public class SteamUGCService : MonoBehaviour
 			}
 		}
 		return null;
+	}
+
+	public string GetInstalledLanguageData()
+	{
+		PublishedFileId_t installedLanguage = SteamUGCService.GetInstalledLanguage();
+		if (installedLanguage == PublishedFileId_t.Invalid)
+		{
+			return "None";
+		}
+		string text = "Error";
+		string languageFile = SteamUGCService.GetLanguageFile(installedLanguage);
+		if (languageFile != null && languageFile.Length > 0)
+		{
+			string[] array = languageFile.Split(new char[] { '\n' });
+			text = Localization.GetLanguageCode(array);
+		}
+		string text2 = string.Empty;
+		string text3 = string.Empty;
+		if (this.details != null)
+		{
+			for (int i = 0; i < this.details.Length; i++)
+			{
+				PublishedFileId_t nPublishedFileId = this.details[i].m_nPublishedFileId;
+				if (installedLanguage == nPublishedFileId)
+				{
+					text2 = this.details[i].m_rgchTitle;
+					text3 = this.details[i].m_rgchURL;
+					break;
+				}
+			}
+		}
+		return string.Concat(new object[] { "Code: [", text, "] Id: [", installedLanguage.m_PublishedFileId, "] Title: [", text2, "] Url: [", text3, "]" });
 	}
 
 	public static string GetInstalledLanguageFile()
@@ -275,6 +311,22 @@ public class SteamUGCService : MonoBehaviour
 		}
 	}
 
+	private void GetSubscribedDetails()
+	{
+		uint numSubscribedItems = SteamUGC.GetNumSubscribedItems();
+		if (numSubscribedItems != 0U && (this.subscribed == null || (ulong)numSubscribedItems != (ulong)((long)this.subscribed.Count)))
+		{
+			PublishedFileId_t[] array = new PublishedFileId_t[numSubscribedItems];
+			SteamUGC.GetSubscribedItems(array, (uint)array.Length);
+			this.subscribed = new List<PublishedFileId_t>(array);
+			this.listPending = true;
+			this.m_UGCQueryHandle = SteamUGC.CreateQueryUGCDetailsRequest(array, (uint)array.Length);
+			SteamUGC.AddRequiredTag(this.m_UGCQueryHandle, "language");
+			SteamAPICall_t steamAPICall_t = SteamUGC.SendQueryUGCRequest(this.m_UGCQueryHandle);
+			this.OnSteamUGCQueryDetailsCompletedCallResult.Set(steamAPICall_t, null);
+		}
+	}
+
 	private void GetAvailable()
 	{
 		this.listPending = true;
@@ -327,6 +379,28 @@ public class SteamUGCService : MonoBehaviour
 		SteamUGC.ReleaseQueryUGCRequest(this.m_UGCQueryHandle);
 	}
 
+	private void OnSteamUGCQueryDetailsCompleted(SteamUGCQueryCompleted_t pCallback, bool bIOFailure)
+	{
+		if (pCallback.m_eResult == EResult.k_EResultOK)
+		{
+			this.details = new SteamUGCDetails_t[pCallback.m_unNumResultsReturned];
+			for (uint num = 0U; num < pCallback.m_unNumResultsReturned; num += 1U)
+			{
+				SteamUGC.GetQueryUGCResult(this.m_UGCQueryHandle, num, out this.details[(int)((UIntPtr)num)]);
+			}
+			this.listPending = false;
+			if (this.OnRefreshLanguage != null)
+			{
+				this.OnRefreshLanguage();
+			}
+		}
+		else
+		{
+			global::Debug.Log(string.Concat(new object[] { "[OnSteamUGCQueryDetailsCompleted] - handle: ", pCallback.m_handle, " -- Result: ", pCallback.m_eResult, " -- NUm results: ", pCallback.m_unNumResultsReturned, " --Total Matching: ", pCallback.m_unTotalMatchingResults, " -- cached: ", pCallback.m_bCachedData }), null);
+		}
+		SteamUGC.ReleaseQueryUGCRequest(this.m_UGCQueryHandle);
+	}
+
 	private void OnRemoteStorageSubscribePublishedFileResult(RemoteStorageSubscribePublishedFileResult_t pCallback, bool bIOFailure)
 	{
 		this.doClearList = true;
@@ -361,6 +435,8 @@ public class SteamUGCService : MonoBehaviour
 
 	private CallResult<SteamUGCQueryCompleted_t> OnSteamUGCQueryCompletedCallResult;
 
+	private CallResult<SteamUGCQueryCompleted_t> OnSteamUGCQueryDetailsCompletedCallResult;
+
 	private bool listPending;
 
 	private List<PublishedFileId_t> subscribed;
@@ -378,6 +454,8 @@ public class SteamUGCService : MonoBehaviour
 	private static SteamUGCService instance;
 
 	private bool setupComplete;
+
+	private bool printLanguageWhenReady;
 
 	public class Subscibed
 	{

@@ -50,6 +50,10 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public void SpawnFruit(object callbackParam)
 	{
+		if (this == null)
+		{
+			return;
+		}
 		Crop.CropVal cropVal = this.cropVal;
 		if (!string.IsNullOrEmpty(cropVal.cropId))
 		{

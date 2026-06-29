@@ -20,6 +20,7 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 		this.smi.sm.requestedpillcount.Set(1f, this.smi);
 		this.smi.sm.eater.Set(context.consumerState.gameObject, this.smi);
 		base.Begin(context);
+		new TakeMedicineChore(this.medicine);
 	}
 
 	private Pickupable pickupable;

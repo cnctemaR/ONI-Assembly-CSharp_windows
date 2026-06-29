@@ -14,7 +14,7 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 	{
 		base.OnPrefabInit();
 		this.log = new LoggerFS("StorageLocker");
-		this.filteredStorage = new FilteredStorage(this, null, this.filterTint, this.noFilterTint, this, use_logic_meter);
+		this.filteredStorage = new FilteredStorage(this, null, this.filterTint, this.noFilterTint, this, use_logic_meter, Db.Get().ChoreTypes.Fetch);
 		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 	}
 

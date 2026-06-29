@@ -59,22 +59,23 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandl
 
 	private void OnMenuToggle()
 	{
-		this.Toggleable.Toggle(this.ToggleIdx);
-		bool flag = this.IsEnabled;
-		if (this.Toggleable.IsToggleQueued(this.ToggleIdx))
+		if (!this.Toggleable.IsToggleQueued(this.ToggleIdx))
 		{
-			flag = !flag;
 			Prioritizable.AddRef(base.gameObject);
 		}
 		else
 		{
 			Prioritizable.RemoveRef(base.gameObject);
 		}
+		this.Toggleable.Toggle(this.ToggleIdx);
+		this.UserMenu.Refresh();
 	}
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (this.IsEnabled)
+		bool isEnabled = this.IsEnabled;
+		bool flag = this.Toggleable.IsToggleQueued(this.ToggleIdx);
+		if ((isEnabled && !flag) || (!isEnabled && flag))
 		{
 			UserMenu userMenu = this.UserMenu;
 			string text = "action_building_disabled";

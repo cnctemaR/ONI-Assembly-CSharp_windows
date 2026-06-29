@@ -153,12 +153,11 @@ public class SteamUGCService : MonoBehaviour
 		return text2;
 	}
 
-	public static string GetInstalledLanguageFile()
+	public static string GetInstalledLanguageFile(ref PublishedFileId_t item)
 	{
-		PublishedFileId_t publishedFileId_t;
 		global::System.DateTime dateTime;
 		global::System.DateTime dateTime2;
-		return SteamUGCService.GetLanguageFile(out publishedFileId_t, out dateTime, out dateTime2);
+		return SteamUGCService.GetLanguageFile(out item, out dateTime, out dateTime2);
 	}
 
 	public static TMP_FontAsset GetFontForLangage(PublishedFileId_t item)
@@ -175,9 +174,9 @@ public class SteamUGCService : MonoBehaviour
 		return null;
 	}
 
-	public static void LoadTranslation()
+	public static void LoadTranslation(ref PublishedFileId_t item)
 	{
-		string installedLanguageFile = SteamUGCService.GetInstalledLanguageFile();
+		string installedLanguageFile = SteamUGCService.GetInstalledLanguageFile(ref item);
 		Localization.LoadLocalTranslationFile(Localization.SelectedLanguageType.UGC, installedLanguageFile);
 	}
 
@@ -312,7 +311,8 @@ public class SteamUGCService : MonoBehaviour
 		{
 			this.UpdateInstalledLanguage(item);
 		}
-		SteamUGCService.LoadTranslation();
+		PublishedFileId_t invalid = PublishedFileId_t.Invalid;
+		SteamUGCService.LoadTranslation(ref invalid);
 		this.currentLanguage = item;
 	}
 

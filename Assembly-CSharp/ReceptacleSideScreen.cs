@@ -216,12 +216,23 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		{
 			return;
 		}
-		if (!this.CheckReceptacleOccupied() && this.targetReceptacle.GetActiveRequest != null && (!this.ValidRotationForDeposit(this.depositObjectMap[this.selectedEntityToggle].direction) || this.GetAvailableAmount(this.depositObjectMap[this.selectedEntityToggle].tag) <= 0f || !this.AdditionalCanDepositTest()))
+		if (!this.CheckReceptacleOccupied() && this.targetReceptacle.GetActiveRequest != null)
 		{
-			this.targetReceptacle.CancelActiveRequest();
-			this.ClearSelection();
-			this.UpdateState(null);
-			this.UpdateAvailableAmounts(null);
+			bool flag = false;
+			ReceptacleSideScreen.SelectableEntity selectableEntity;
+			if (this.depositObjectMap.TryGetValue(this.selectedEntityToggle, out selectableEntity))
+			{
+				flag = this.ValidRotationForDeposit(selectableEntity.direction);
+				flag = flag && this.GetAvailableAmount(selectableEntity.tag) > 0f;
+				flag = flag && this.AdditionalCanDepositTest();
+			}
+			if (!flag)
+			{
+				this.targetReceptacle.CancelActiveRequest();
+				this.ClearSelection();
+				this.UpdateState(null);
+				this.UpdateAvailableAmounts(null);
+			}
 		}
 	}
 

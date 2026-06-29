@@ -8,7 +8,7 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDesc
 {
 	protected override void OnPrefabInit()
 	{
-		this.filteredStorage = new FilteredStorage(this, new Tag[] { GameTags.MarkedForCompost }, this.filterTint, this.noFilterTint, this, true);
+		this.filteredStorage = new FilteredStorage(this, new Tag[] { GameTags.MarkedForCompost }, this.filterTint, this.noFilterTint, this, true, Db.Get().ChoreTypes.FoodFetch);
 	}
 
 	protected override void OnSpawn()

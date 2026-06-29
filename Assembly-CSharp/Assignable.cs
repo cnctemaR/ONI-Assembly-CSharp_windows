@@ -137,11 +137,18 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 		this.assignee = new_assignee;
 		if (this.slot != null && new_assignee is MinionIdentity)
 		{
-			Assignables component = (new_assignee as MinionIdentity).GetComponent<Ownables>();
+			MinionIdentity minionIdentity = new_assignee as MinionIdentity;
+			Ownables component = minionIdentity.GetComponent<Ownables>();
 			AssignableSlotInstance slot = component.GetSlot(this.slot);
 			if (slot != null)
 			{
-				component.GetSlot(this.slot).Assign(this);
+				slot.Assign(this);
+			}
+			Equipment component2 = minionIdentity.GetComponent<Equipment>();
+			AssignableSlotInstance slot2 = component2.GetSlot(this.slot);
+			if (slot2 != null)
+			{
+				slot2.Assign(this);
 			}
 		}
 		if (this.OnAssign != null)

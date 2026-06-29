@@ -122,13 +122,17 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		if (this.consumerState.hasSolidTransferArm)
 		{
 			CellOffset offset = Grid.GetOffset(Grid.PosToCell(this));
-			int num2 = this.stationaryReach;
+			Extents extents = new Extents(offset.x, offset.y, this.stationaryReach);
 			List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-			GameScenePartitioner.Instance.GatherEntries(offset.x - num2, offset.y - num2, num2 * 2 + 1, num2 * 2 + 1, GameScenePartitioner.Instance.fetchChoreLayer, list);
+			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.fetchChoreLayer, list);
 			foreach (ScenePartitionerEntry scenePartitionerEntry in list)
 			{
 				Chore chore = scenePartitionerEntry.obj as Chore;
-				chore.CollectChores(this.consumerState, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts, false);
+				int num2 = Grid.PosToCell(chore.gameObject);
+				if (this.consumerState.solidTransferArm.IsCellReachable(num2))
+				{
+					chore.CollectChores(this.consumerState, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts, false);
+				}
 			}
 			ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
 		}
@@ -215,18 +219,9 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 	{
 	}
 
-	public bool DoesPrefer(Chore chore)
-	{
-		return chore.isPreferredChoreRegardlessOfTags || (this.resume != null && (this.resume.IsFavouredChore(chore) || this.resume.IsPreferredChore(chore)));
-	}
-
 	public bool IsPermittedOrEnabled(ChoreType chore_type, Chore chore)
 	{
 		if (chore_type.groups.Length == 0)
-		{
-			return true;
-		}
-		if (this.DoesPrefer(chore))
 		{
 			return true;
 		}
@@ -246,35 +241,39 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		this.stationaryReach = reach;
 	}
 
-	public bool GetNavigationCost(IApproachable approchable, out int cost)
+	public bool GetNavigationCost(IApproachable approachable, out int cost)
 	{
 		if (this.navigator)
 		{
-			cost = this.navigator.GetNavigationCost(approchable);
+			cost = this.navigator.GetNavigationCost(approachable);
 			if (cost != PathProber.InvalidCost)
 			{
 				return true;
 			}
 		}
-		else if (this.stationaryReach > 0)
+		else if (this.consumerState.hasSolidTransferArm)
 		{
-			cost = Grid.GetCellRange(this.NaturalBuildingCell(), approchable.GetCell());
-			return this.stationaryReach >= cost;
+			int cell = approachable.GetCell();
+			if (this.consumerState.solidTransferArm.IsCellReachable(cell))
+			{
+				cost = Grid.GetCellRange(this.NaturalBuildingCell(), cell);
+				return true;
+			}
 		}
 		cost = 0;
 		return false;
 	}
 
-	public bool CanReach(IApproachable approchable)
+	public bool CanReach(IApproachable approachable)
 	{
 		if (this.navigator)
 		{
-			return this.navigator.CanReach(approchable);
+			return this.navigator.CanReach(approachable);
 		}
-		if (this.stationaryReach > 0)
+		if (this.consumerState.hasSolidTransferArm)
 		{
-			int cellRange = Grid.GetCellRange(this.NaturalBuildingCell(), approchable.GetCell());
-			return this.stationaryReach >= cellRange;
+			int cell = approachable.GetCell();
+			return this.consumerState.solidTransferArm.IsCellReachable(cell);
 		}
 		return false;
 	}
@@ -285,8 +284,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		{
 			return !(this == null) && !(base.gameObject == null) && Grid.IsCellOffsetOf(Grid.PosToCell(this), approachable.GetCell(), approachable.GetOffsets());
 		}
-		int num;
-		return this.stationaryReach > 0 && this.GetNavigationCost(approachable, out num) && this.stationaryReach >= num;
+		return this.consumerState.hasSolidTransferArm && this.consumerState.solidTransferArm.IsCellReachable(approachable.GetCell());
 	}
 
 	public void ShowHoverTextOnHoveredItem(Chore.Precondition.Context context, KSelectable hover_obj, HoverTextDrawer drawer, SelectToolHoverTextCard hover_text_card)
@@ -406,7 +404,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 			priorityWhenAutoAssigned = ((!auto_assigned) ? (-1) : priorityInfo.priority)
 		};
 		this.UpdateChoreTypePriorities(group, value);
-		this.SetPermitted(group, value != 0);
+		this.SetEnabled(group, value != 0);
 	}
 
 	public int GetAssociatedSkillLevel(ChoreGroup group)

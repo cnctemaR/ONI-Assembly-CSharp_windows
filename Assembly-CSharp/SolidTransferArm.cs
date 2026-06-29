@@ -133,7 +133,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			for (int j = num - this.pickupRange; j < num + this.pickupRange + 1; j++)
 			{
 				int num3 = Grid.XYToCell(j, i);
-				if (Grid.IsValidCell(num3) && Grid.VisibilityTest(num, num2, j, i, true))
+				if (Grid.IsValidCell(num3) && Grid.VisibilityTest(num, num2, j, i, true, true))
 				{
 					this.reachableCells.Add(num3);
 				}
@@ -147,6 +147,11 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		{
 			MinionGroupProber.Get().SetProberCell(num);
 		}
+	}
+
+	public bool IsCellReachable(int cell)
+	{
+		return this.reachableCells.Contains(cell);
 	}
 
 	private void RefreshPickupables()
@@ -202,9 +207,8 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		{
 			return false;
 		}
-		int num = Grid.PosToCell(this);
 		int pickupableCell = this.GetPickupableCell(pickupable);
-		return Grid.VisibilityTest(num, pickupableCell, true);
+		return this.IsCellReachable(pickupableCell);
 	}
 
 	public void FindFetchTarget(Storage destination, TagBits tag_bits, TagBits required_tags, TagBits forbid_tags, float required_amount, ref Pickupable target)

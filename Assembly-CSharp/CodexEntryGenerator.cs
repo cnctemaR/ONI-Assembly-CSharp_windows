@@ -30,7 +30,7 @@ public static class CodexEntryGenerator
 				CodexCache.AddEntry((planInfo.data as string[])[j], codexEntry, null);
 				dictionary2.Add(codexEntry.id, codexEntry);
 			}
-			CategoryEntry categoryEntry = CodexEntryGenerator.GenerateCategoryEntry(CodexCache.FormatLinkID(text2), Strings.Get("STRINGS.UI.BUILDCATEGORIES." + planInfo.category.ToString().ToUpper() + ".NAME"), dictionary2);
+			CategoryEntry categoryEntry = CodexEntryGenerator.GenerateCategoryEntry(CodexCache.FormatLinkID(text2), Strings.Get("STRINGS.UI.BUILDCATEGORIES." + planInfo.category.ToString().ToUpper() + ".NAME"), dictionary2, null);
 			categoryEntry.parentId = "BUILDINGS";
 			categoryEntry.category = "BUILDINGS";
 			categoryEntry.icon = Assets.GetSprite(PlanScreen.IconNameMap[planInfo.category]);
@@ -293,22 +293,22 @@ public static class CodexEntryGenerator
 			}
 		}
 		text7 = text2;
-		CodexEntry codexEntry5 = CodexEntryGenerator.GenerateCategoryEntry(text7, UI.CODEX.CATEGORYNAMES.ELEMENTSSOLID, dictionary2);
+		CodexEntry codexEntry5 = CodexEntryGenerator.GenerateCategoryEntry(text7, UI.CODEX.CATEGORYNAMES.ELEMENTSSOLID, dictionary2, null);
 		codexEntry5.parentId = text;
 		codexEntry5.category = text;
 		dictionary.Add(text7, codexEntry5);
 		text7 = text3;
-		codexEntry5 = CodexEntryGenerator.GenerateCategoryEntry(text7, UI.CODEX.CATEGORYNAMES.ELEMENTSLIQUID, dictionary3);
+		codexEntry5 = CodexEntryGenerator.GenerateCategoryEntry(text7, UI.CODEX.CATEGORYNAMES.ELEMENTSLIQUID, dictionary3, Assets.GetSprite("overlay_liquidvent"));
 		codexEntry5.parentId = text;
 		codexEntry5.category = text;
 		dictionary.Add(text7, codexEntry5);
 		text7 = text4;
-		codexEntry5 = CodexEntryGenerator.GenerateCategoryEntry(text7, UI.CODEX.CATEGORYNAMES.ELEMENTSGAS, dictionary4);
+		codexEntry5 = CodexEntryGenerator.GenerateCategoryEntry(text7, UI.CODEX.CATEGORYNAMES.ELEMENTSGAS, dictionary4, Assets.GetSprite("overlay_gasvent"));
 		codexEntry5.parentId = text;
 		codexEntry5.category = text;
 		dictionary.Add(text7, codexEntry5);
 		text7 = text5;
-		codexEntry5 = CodexEntryGenerator.GenerateCategoryEntry(text7, UI.CODEX.CATEGORYNAMES.ELEMENTSOTHER, dictionary5);
+		codexEntry5 = CodexEntryGenerator.GenerateCategoryEntry(text7, UI.CODEX.CATEGORYNAMES.ELEMENTSOTHER, dictionary5, Assets.GetSprite("overlay_heatflow"));
 		codexEntry5.parentId = text;
 		codexEntry5.category = text;
 		dictionary.Add(text7, codexEntry5);
@@ -335,22 +335,21 @@ public static class CodexEntryGenerator
 		return dictionary;
 	}
 
-	public static CategoryEntry GenerateCategoryEntry(string id, string name, Dictionary<string, CodexEntry> entries)
+	public static CategoryEntry GenerateCategoryEntry(string id, string name, Dictionary<string, CodexEntry> entries, Sprite icon = null)
 	{
 		List<ContentContainer> list = new List<ContentContainer>();
 		CodexEntryGenerator.GenerateTitleContainers(name, list);
 		List<CodexEntry> list2 = new List<CodexEntry>();
-		Sprite sprite = null;
 		foreach (KeyValuePair<string, CodexEntry> keyValuePair in entries)
 		{
 			list2.Add(keyValuePair.Value);
-			if (sprite == null)
+			if (icon == null)
 			{
-				sprite = keyValuePair.Value.icon;
+				icon = keyValuePair.Value.icon;
 			}
 		}
 		CategoryEntry categoryEntry = new CategoryEntry("Root", list, name, list2);
-		categoryEntry.icon = sprite;
+		categoryEntry.icon = icon;
 		CodexCache.AddEntry(id, categoryEntry, null);
 		return categoryEntry;
 	}

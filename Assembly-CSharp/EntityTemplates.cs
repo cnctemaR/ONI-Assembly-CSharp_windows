@@ -160,12 +160,11 @@ public class EntityTemplates
 		def2.wildEffect = new Effect("Wild" + prefabTag.Name, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, global::STRINGS.CREATURES.MODIFIERS.WILD.TOOLTIP, 0f, true, true, false);
 		def2.wildEffect.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -calorie_loss_per_cycle_when_wild / 600f, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, false, false, true));
 		def2.wildEffect.Add(new AttributeModifier(Db.Get().Amounts.Wildness.deltaAttribute.Id, 0.008333334f, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, false, false, true));
+		def2.wildEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, -0.033333335f, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, false, false, true));
 		def2.tameEffect = new Effect("Tame" + prefabTag.Name, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, global::STRINGS.CREATURES.MODIFIERS.TAME.TOOLTIP, 0f, true, true, false);
 		def2.tameEffect.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -calorie_loss_per_cycle_when_tame / 600f, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, false, false, true));
 		def2.tameEffect.Add(new AttributeModifier(Db.Get().Amounts.Happiness.deltaAttribute.Id, -0.016666668f, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, false, false, true));
 		OvercrowdingMonitor.Def def3 = prefab.AddOrGetDef<OvercrowdingMonitor.Def>();
-		def3.overcrowdedEffect = new Effect("Overcrowded" + prefabTag.Name, global::STRINGS.CREATURES.MODIFIERS.OVERCROWDED.NAME, global::STRINGS.CREATURES.MODIFIERS.OVERCROWDED.TOOLTIP, 0f, true, true, true);
-		def3.overcrowdedEffect.Add(new AttributeModifier(Db.Get().Amounts.Happiness.deltaAttribute.Id, -0.083333336f, global::STRINGS.CREATURES.MODIFIERS.OVERCROWDED.NAME, false, false, true));
 		def3.spaceRequiredPerCreature = space_required_per_creature;
 		return prefab;
 	}

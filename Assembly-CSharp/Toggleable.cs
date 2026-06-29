@@ -51,8 +51,8 @@ public class Toggleable : Workable
 		int targetForWorker = this.GetTargetForWorker(worker);
 		if (targetForWorker != -1 && this.targets[targetForWorker].Key != null)
 		{
-			this.targets[targetForWorker].Key.HandleToggle();
 			this.targets[targetForWorker] = new KeyValuePair<IToggleHandler, Chore>(this.targets[targetForWorker].Key, null);
+			this.targets[targetForWorker].Key.HandleToggle();
 		}
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingSwitchToggle, false);
 	}

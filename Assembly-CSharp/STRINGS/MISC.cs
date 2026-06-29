@@ -806,7 +806,7 @@ namespace STRINGS
 
 				public static LocString MESSAGEBODY = "Eureka! {0} Technology has been unlocked.\n\nNew buildings have become available:\n  • {1}";
 
-				public static LocString TOOLTIP = UI.FormatAsLink("research", "{0}") + " research complete!";
+				public static LocString TOOLTIP = "{0} research complete!";
 			}
 
 			public class ROLEMASTERED

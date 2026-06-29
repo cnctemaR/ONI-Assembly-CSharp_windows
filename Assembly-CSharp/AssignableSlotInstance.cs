@@ -34,6 +34,7 @@ public abstract class AssignableSlotInstance
 	{
 		if (this.IsAssigned())
 		{
+			this.assignable.Unassign();
 			this.assignable = null;
 		}
 		if (trigger_event)

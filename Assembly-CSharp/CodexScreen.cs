@@ -268,15 +268,18 @@ public class CodexScreen : KScreen
 			this.contentContainerPool.ClearElement(this.contentContainers.transform.GetChild(0).gameObject);
 			num++;
 		}
+		bool flag = CodexCache.entries[id] is CategoryEntry;
 		this.activeEntryID = id;
 		if (CodexCache.entries[id].contentContainers == null)
 		{
 			CodexCache.entries[id].contentContainers = new List<ContentContainer>();
 		}
+		bool flag2 = false;
 		foreach (ContentContainer contentContainer in CodexCache.entries[id].contentContainers)
 		{
 			GameObject gameObject3 = this.contentContainerPool.GetFreeElement(this.contentContainers.gameObject, true).gameObject;
-			this.ConfigureContentContainer(contentContainer, gameObject3);
+			this.ConfigureContentContainer(contentContainer, gameObject3, flag && flag2);
+			flag2 = !flag2;
 			if (contentContainer.content != null)
 			{
 				foreach (CodexWidget codexWidget in contentContainer.content)
@@ -289,7 +292,7 @@ public class CodexScreen : KScreen
 		string text = string.Empty;
 		string text2 = id;
 		int num3 = 0;
-		while (text2 != CodexCache.FormatLinkID("HOME") && num3 < 6)
+		while (text2 != CodexCache.FormatLinkID("HOME") && num3 < 10)
 		{
 			num3++;
 			if (text2 != null)
@@ -336,7 +339,7 @@ public class CodexScreen : KScreen
 		}
 	}
 
-	private void ConfigureContentContainer(ContentContainer container, GameObject containerGameObject)
+	private void ConfigureContentContainer(ContentContainer container, GameObject containerGameObject, bool bgColor = false)
 	{
 		HorizontalOrVerticalLayoutGroup horizontalOrVerticalLayoutGroup = containerGameObject.GetComponent<HorizontalOrVerticalLayoutGroup>();
 		if (horizontalOrVerticalLayoutGroup != null)

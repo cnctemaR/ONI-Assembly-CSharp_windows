@@ -412,6 +412,13 @@ public class SaveLoader : KMonoBehaviour
 				confirmDialogScreen.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "Unauthorized Access Exception"), null, null, null, null, null, null, null);
 				return SaveLoader.GetActiveSaveFilePath();
 			}
+			if (ex is IOException)
+			{
+				Output.Log(new object[] { "IOException (probably out of disk space) for " + filename });
+				ConfirmDialogScreen confirmDialogScreen2 = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
+				confirmDialogScreen2.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "IOException. You may not have enough free space!"), null, null, null, null, null, null, null);
+				return SaveLoader.GetActiveSaveFilePath();
+			}
 			throw ex;
 		}
 		if (updateSavePointer)

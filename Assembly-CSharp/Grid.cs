@@ -435,7 +435,7 @@ public class Grid
 		}
 	}
 
-	public static bool VisibilityTest(int x, int y, int x2, int y2, bool all_tiles_block = false)
+	public static bool VisibilityTest(int x, int y, int x2, int y2, bool all_tiles_block = false, bool blocking_tile_visible = false)
 	{
 		int num = x;
 		int num2 = y;
@@ -499,7 +499,7 @@ public class Grid
 			}
 			if ((x != num || y != num2) && flag)
 			{
-				return false;
+				return blocking_tile_visible && x == x2 && y == y2;
 			}
 			num11 += num10;
 			if (num11 >= num9)
@@ -517,7 +517,7 @@ public class Grid
 		return true;
 	}
 
-	public static bool VisibilityTest(int cell, int target_cell, bool all_tiles_block = false)
+	public static bool VisibilityTest(int cell, int target_cell, bool all_tiles_block = false, bool blocking_tile_visible = false)
 	{
 		int num = 0;
 		int num2 = 0;
@@ -525,7 +525,7 @@ public class Grid
 		int num3 = 0;
 		int num4 = 0;
 		Grid.CellToXY(target_cell, out num3, out num4);
-		return Grid.VisibilityTest(num, num2, num3, num4, all_tiles_block);
+		return Grid.VisibilityTest(num, num2, num3, num4, all_tiles_block, blocking_tile_visible);
 	}
 
 	public static readonly CellOffset[] DefaultOffset = new CellOffset[] { default(CellOffset) };

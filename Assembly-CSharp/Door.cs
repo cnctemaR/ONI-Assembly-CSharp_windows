@@ -55,6 +55,11 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		return (wantedState + 1) % Door.ControlState.NumStates;
 	}
 
+	private static bool DisplacesGas(Door.DoorType type)
+	{
+		return type != Door.DoorType.Internal;
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -65,7 +70,10 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		}
 		StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
 		HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
-		structureTemperatures.Disable(handle);
+		if (Door.DisplacesGas(this.doorType))
+		{
+			structureTemperatures.Disable(handle);
+		}
 		this.controller = new Door.Controller.Instance(this);
 		this.controller.StartSM();
 		if (this.doorType == Door.DoorType.Sealed && !this.hasBeenUnsealed)
@@ -336,7 +344,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 
 	private void OnSimDoorOpened()
 	{
-		if (this == null)
+		if (this == null || !Door.DisplacesGas(this.doorType))
 		{
 			return;
 		}
@@ -347,7 +355,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 
 	private void OnSimDoorClosed()
 	{
-		if (this == null)
+		if (this == null || !Door.DisplacesGas(this.doorType))
 		{
 			return;
 		}
@@ -365,7 +373,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 
 	public float Open()
 	{
-		if (this.openCount == 0)
+		if (this.openCount == 0 && Door.DisplacesGas(this.doorType))
 		{
 			StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
 			HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
@@ -417,7 +425,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 	public void Close()
 	{
 		this.openCount = Mathf.Max(0, this.openCount - 1);
-		if (this.openCount == 0)
+		if (this.openCount == 0 && Door.DisplacesGas(this.doorType))
 		{
 			StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
 			HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);

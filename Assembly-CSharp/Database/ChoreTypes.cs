@@ -90,6 +90,7 @@ namespace Database
 			this.PowerFabricate = this.Add("PowerFabricate", new string[] { "MachineOperating" }, string.Empty, new string[0], DUPLICANTS.CHORES.FABRICATE.NAME, DUPLICANTS.CHORES.FABRICATE.STATUS, DUPLICANTS.CHORES.FABRICATE.TOOLTIP, false, 5000);
 			this.Fabricate = this.Add("Fabricate", new string[] { "MachineOperating" }, string.Empty, new string[0], DUPLICANTS.CHORES.FABRICATE.NAME, DUPLICANTS.CHORES.FABRICATE.STATUS, DUPLICANTS.CHORES.FABRICATE.TOOLTIP, false, 5000);
 			this.FabricateFetch = this.Add("FabricateFetch", new string[] { "MachineOperating", "Hauling" }, string.Empty, new string[0], DUPLICANTS.CHORES.FETCH.NAME, DUPLICANTS.CHORES.FETCH.STATUS, DUPLICANTS.CHORES.FETCH.TOOLTIP, false, 5000);
+			this.FoodFetch = this.Add("FoodFetch", new string[] { "Hauling" }, string.Empty, new string[0], DUPLICANTS.CHORES.FETCH.NAME, DUPLICANTS.CHORES.FETCH.STATUS, DUPLICANTS.CHORES.FETCH.TOOLTIP, false, 5000);
 			this.Transport = this.Add("Transport", new string[] { "Hauling", "Basekeeping" }, string.Empty, new string[0], DUPLICANTS.CHORES.TRANSPORT.NAME, DUPLICANTS.CHORES.TRANSPORT.STATUS, DUPLICANTS.CHORES.TRANSPORT.TOOLTIP, true, 5000);
 			this.Build = this.Add("Build", new string[] { "Build" }, string.Empty, new string[0], DUPLICANTS.CHORES.BUILD.NAME, DUPLICANTS.CHORES.BUILD.STATUS, DUPLICANTS.CHORES.BUILD.TOOLTIP, true, 5000);
 			this.BuildDig = this.Add("BuildDig", new string[] { "Build", "Dig" }, string.Empty, new string[0], DUPLICANTS.CHORES.BUILDDIG.NAME, DUPLICANTS.CHORES.BUILDDIG.STATUS, DUPLICANTS.CHORES.BUILDDIG.TOOLTIP, true, 5000);
@@ -128,7 +129,7 @@ namespace Database
 					this.Research, this.ResearchFetch, this.Mop, this.Toggle, this.Deconstruct, this.Capture, this.CreatureFetch, this.CreatureHatch, this.Fetch, this.Transport,
 					this.Art, this.GeneratePower, this.CropTend, this.PowerTinker, this.MachineTinker, this.DropUnusedInventory, this.Harvest, this.FarmFetch, this.Uproot, this.FarmingFabricate,
 					this.PowerFabricate, this.Fabricate, this.Cook, this.Build, this.Dig, this.BuildDig, this.FlipCompost, this.Depressurize, this.BuildFetch, this.CookFetch,
-					this.MachineFetch, this.PowerFetch, this.FabricateFetch, this.StressEmote, this.ReturnSuitUrgent
+					this.MachineFetch, this.PowerFetch, this.FabricateFetch, this.StressEmote, this.ReturnSuitUrgent, this.FoodFetch
 				},
 				new ChoreType[] { this.ReturnSuitIdle },
 				new ChoreType[] { this.Idle }
@@ -295,6 +296,8 @@ namespace Database
 		public ChoreType BuildFetch;
 
 		public ChoreType CreatureFetch;
+
+		public ChoreType FoodFetch;
 
 		public ChoreType Disinfect;
 

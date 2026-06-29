@@ -17,17 +17,19 @@ public class ConduitTemperatureManager
 	{
 		StructureTemperatureData data = GameComps.StructureTemperatures.GetData(conduit_structure_temperature_handle);
 		Element element = data.primaryElement.Element;
-		float num = data.building.Def.MassForTemperatureModification * element.specificHeatCapacity;
-		int num2 = ConduitTemperatureManager.ConduitTemperatureManager_Add(contents.temperature, contents.mass, (int)contents.element, conduit_structure_temperature_handle.index, num, element.thermalConductivity);
+		BuildingDef def = data.building.Def;
+		float num = def.MassForTemperatureModification * element.specificHeatCapacity;
+		float num2 = element.thermalConductivity * def.Insulation;
+		int num3 = ConduitTemperatureManager.ConduitTemperatureManager_Add(contents.temperature, contents.mass, (int)contents.element, conduit_structure_temperature_handle.index, num, num2);
 		HandleVector<int>.Handle handle = default(HandleVector<int>.Handle);
-		handle.index = num2;
-		if (num2 + 1 > this.temperatures.Length)
+		handle.index = num3;
+		if (num3 + 1 > this.temperatures.Length)
 		{
-			Array.Resize<float>(ref this.temperatures, (num2 + 1) * 2);
-			Array.Resize<ConduitTemperatureManager.ConduitInfo>(ref this.conduitInfo, (num2 + 1) * 2);
+			Array.Resize<float>(ref this.temperatures, (num3 + 1) * 2);
+			Array.Resize<ConduitTemperatureManager.ConduitInfo>(ref this.conduitInfo, (num3 + 1) * 2);
 		}
-		this.temperatures[num2] = contents.temperature;
-		this.conduitInfo[num2] = new ConduitTemperatureManager.ConduitInfo
+		this.temperatures[num3] = contents.temperature;
+		this.conduitInfo[num3] = new ConduitTemperatureManager.ConduitInfo
 		{
 			type = conduit_type,
 			idx = conduit_idx

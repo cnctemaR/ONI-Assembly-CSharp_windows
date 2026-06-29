@@ -32,7 +32,7 @@ public class CreatureFeederConfig : IBuildingConfig
 		Prioritizable.AddRef(go);
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.CreatureFeeder);
 		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 200f;
+		storage.capacityKg = 2000f;
 		storage.showInUI = true;
 		storage.showDescriptor = true;
 		storage.allowItemRemoval = false;

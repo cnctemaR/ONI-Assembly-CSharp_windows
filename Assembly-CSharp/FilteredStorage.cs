@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class FilteredStorage
 {
-	public FilteredStorage(KMonoBehaviour root, Tag[] forbidden_tags, Color32 filter_tint, Color32 no_filter_tint, IUserControlledCapacity capacity_control, bool use_logic_meter)
+	public FilteredStorage(KMonoBehaviour root, Tag[] forbidden_tags, Color32 filter_tint, Color32 no_filter_tint, IUserControlledCapacity capacity_control, bool use_logic_meter, ChoreType fetch_chore_type)
 	{
 		this.root = root;
 		this.forbiddenTags = forbidden_tags;
@@ -11,7 +11,7 @@ public class FilteredStorage
 		this.noFilterTint = no_filter_tint;
 		this.capacityControl = capacity_control;
 		this.useLogicMeter = use_logic_meter;
-		this.choreType = Db.Get().ChoreTypes.Fetch;
+		this.choreType = fetch_chore_type;
 		root.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 		this.filterable = root.FindOrAdd<TreeFilterable>();
 		TreeFilterable treeFilterable = this.filterable;
@@ -39,12 +39,6 @@ public class FilteredStorage
 			FilteredStorage.noFilterStatusItem = new StatusItem("NoStorageFilterSet", "BUILDING", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 		}
 		root.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, FilteredStorage.capacityStatusItem, this);
-	}
-
-	public void SetChoreType(ChoreType chore_type)
-	{
-		this.choreType = chore_type;
-		this.OnFilterChanged(this.filterable.GetTags());
 	}
 
 	private void OnOnlyFetchMarkedItemsSettingChanged(object data)

@@ -46,7 +46,7 @@ public class ModifierSet : ScriptableObject
 				{
 					if (modifierInfo2.Id == modifierInfo.Id)
 					{
-						effect.Add(new AttributeModifier(modifierInfo2.Attribute, ModifierSet.ConvertValue(modifierInfo2.Value, modifierInfo2.Units), text, false, false, true));
+						effect.Add(new AttributeModifier(modifierInfo2.Attribute, ModifierSet.ConvertValue(modifierInfo2.Value, modifierInfo2.Units), text, modifierInfo2.Multiplier, false, true));
 					}
 				}
 				this.effects.Add(effect);
@@ -111,6 +111,8 @@ public class ModifierSet : ScriptableObject
 		public float Value;
 
 		public Units Units;
+
+		public bool Multiplier;
 
 		public float Duration;
 

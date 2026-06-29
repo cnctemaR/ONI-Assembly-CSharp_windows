@@ -193,7 +193,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			: base(master, def)
 		{
 			this.calories = Db.Get().Amounts.Calories.Lookup(base.gameObject);
-			this.calories.value = global::UnityEngine.Random.Range(this.calories.GetMax() * 0.6f, this.calories.GetMax() * 0.9f);
+			this.calories.value = this.calories.GetMax() * 0.9f;
 			this.stomach = new CreatureCalorieMonitor.Stomach(def.diet, master.gameObject, def.minPoopSizeInCalories);
 		}
 
@@ -223,7 +223,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 
 		public bool IsHungry()
 		{
-			return this.GetCalories0to1() < 0.5f;
+			return this.GetCalories0to1() < 0.9f;
 		}
 
 		public bool IsOutOfCalories()

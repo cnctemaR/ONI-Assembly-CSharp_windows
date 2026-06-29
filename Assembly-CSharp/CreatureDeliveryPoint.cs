@@ -7,8 +7,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.filteredStorage = new FilteredStorage(this, null, this.filterTint, this.noFilterTint, null, false);
-		this.filteredStorage.SetChoreType(Db.Get().ChoreTypes.CreatureFetch);
+		this.filteredStorage = new FilteredStorage(this, null, this.filterTint, this.noFilterTint, null, false, Db.Get().ChoreTypes.CreatureFetch);
 		base.GetComponent<Storage>().SetOffsets(Grid.DefaultOffset);
 		Prioritizable.AddRef(base.gameObject);
 	}

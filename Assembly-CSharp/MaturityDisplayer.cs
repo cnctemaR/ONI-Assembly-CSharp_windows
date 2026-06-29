@@ -58,7 +58,14 @@ public class MaturityDisplayer : AsPercentAmountDisplayer
 
 		public override string GetFormattedModifier(AttributeModifier modifier, GameObject parent_instance)
 		{
-			return this.GetFormattedValue(modifier.Value * 100f * 600f, base.DeltaTimeSlice, parent_instance);
+			float num = modifier.Value;
+			GameUtil.TimeSlice timeSlice = base.DeltaTimeSlice;
+			if (modifier.IsMultiplier)
+			{
+				num *= 100f;
+				timeSlice = GameUtil.TimeSlice.None;
+			}
+			return this.GetFormattedValue(num, timeSlice, parent_instance);
 		}
 	}
 }

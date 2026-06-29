@@ -43,7 +43,16 @@ public static class Localization
 		else if (selectedLanguageType == Localization.SelectedLanguageType.UGC && !dontCheckSteam && SteamManager.Initialized && SteamUGCService.HasInstalledLanguage())
 		{
 			global::Debug.Log("Initialize... SteamUGCService", null);
-			SteamUGCService.LoadTranslation();
+			PublishedFileId_t invalid = PublishedFileId_t.Invalid;
+			SteamUGCService.LoadTranslation(ref invalid);
+			if (invalid != PublishedFileId_t.Invalid)
+			{
+				Console.WriteLine("LOCALIZATION: Loaded steamworks file id: " + invalid.ToString());
+			}
+			else
+			{
+				Console.WriteLine("LOCALIZATION: Failed to load steamworks file id: " + invalid.ToString());
+			}
 		}
 		else
 		{

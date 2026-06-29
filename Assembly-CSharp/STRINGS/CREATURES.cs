@@ -1370,6 +1370,13 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "This critter isn't comfortable with so many other critters in a room of this size";
 			}
+
+			public class CONFINED
+			{
+				public static LocString NAME = "Confined";
+
+				public static LocString TOOLTIP = "This critter is inside a door, tile, or confined space.";
+			}
 		}
 
 		public class DOMESTICATION

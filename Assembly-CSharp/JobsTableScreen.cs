@@ -301,14 +301,27 @@ public class JobsTableScreen : TableScreen
 		ChoreGroup choreGroup = prioritizationGroupTableColumn.userData as ChoreGroup;
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
 		TableRow.RowType rowType = widgetRow.rowType;
-		if (rowType == TableRow.RowType.Header)
+		if (rowType != TableRow.RowType.Header)
+		{
+			if (rowType == TableRow.RowType.Default || rowType == TableRow.RowType.Minion)
+			{
+				IPersonalPriorityManager priorityManager = this.GetPriorityManager(widgetRow);
+				bool flag = priorityManager.IsChoreGroupDisabled(choreGroup);
+				HierarchyReferences component = widget_go.GetComponent<HierarchyReferences>();
+				KImage kimage = component.GetReference("FG") as KImage;
+				kimage.raycastTarget = flag;
+				ToolTip toolTip = component.GetReference("FGToolTip") as ToolTip;
+				toolTip.enabled = flag;
+			}
+		}
+		else
 		{
 			this.InitializeHeader(choreGroup, widget_go);
 		}
-		IPersonalPriorityManager priorityManager = this.GetPriorityManager(widgetRow);
-		if (priorityManager != null)
+		IPersonalPriorityManager priorityManager2 = this.GetPriorityManager(widgetRow);
+		if (priorityManager2 != null)
 		{
-			this.UpdateWidget(widget_go, choreGroup, priorityManager);
+			this.UpdateWidget(widget_go, choreGroup, priorityManager2);
 		}
 	}
 

@@ -59,14 +59,11 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 		{
 			return;
 		}
-		if (new_assignee is MinionIdentity && base.slot != null)
+		if (new_assignee is MinionIdentity && base.slot != null && new_assignee.GetSoleOwner().GetComponent<Equipment>().GetSlot(base.slot)
+			.assignable != null)
 		{
-			Equipment component = new_assignee.GetSoleOwner().GetComponent<Equipment>();
-			AssignableSlotInstance slot = component.GetSlot(base.slot);
-			if (slot.assignable != null)
-			{
-				slot.Unassign(true);
-			}
+			new_assignee.GetSoleOwner().GetComponent<Equipment>().GetSlot(base.slot)
+				.assignable.Unassign();
 		}
 		base.Assign(new_assignee);
 	}

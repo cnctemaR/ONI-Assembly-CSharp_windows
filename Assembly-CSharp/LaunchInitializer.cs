@@ -17,7 +17,7 @@ public class LaunchInitializer : MonoBehaviour
 		{
 			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 		}
-		global::Debug.Log("Development Build: R1-" + 261394U.ToString(), null);
+		global::Debug.Log("Development Build: R1-" + 261452U.ToString(), null);
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		this.CheckForSavePathIssue();
 		if (LaunchInitializer.savePathState == LaunchInitializer.SavePathIssue.Ok)

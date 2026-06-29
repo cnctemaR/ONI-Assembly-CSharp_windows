@@ -244,7 +244,6 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.needsdirt;
-			base.serializable = true;
 			this.root.PlayAnim("off").EventTransition(GameHashes.OnStorageChange, this.needsdirt, (Toilet.StatesInstance smi) => !smi.HasDirt()).EventTransition(GameHashes.OperationalChanged, this.notoperational, (Toilet.StatesInstance smi) => !smi.Get<Operational>().IsOperational);
 			this.needsdirt.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable).EventTransition(GameHashes.OnStorageChange, this.ready, (Toilet.StatesInstance smi) => smi.HasDirt());
 			this.ready.DefaultState(this.ready.idle).ParamTransition<int>(this.flushes, this.full, (Toilet.StatesInstance smi, int p) => smi.GetFlushesRemaining() <= 0).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Toilet)

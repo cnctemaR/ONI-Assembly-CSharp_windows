@@ -1658,9 +1658,9 @@ namespace STRINGS
 				public static LocString EFFECT = string.Concat(new string[]
 				{
 					"Converts ",
-					ELEMENTS.CRUDEOIL.NAME,
-					" into raw ",
 					ELEMENTS.PETROLEUM.NAME,
+					" into raw ",
+					ELEMENTS.POLYPROPYLENE.NAME,
 					"."
 				});
 			}

@@ -3,14 +3,25 @@ using System.Collections.Generic;
 
 public class TagManager
 {
-	public static Tag Create(string tag_string, string proper_name = null)
+	public static Tag Create(string tag_string)
 	{
 		Tag tag = default(Tag);
 		tag.Name = tag_string;
-		if (!TagManager.ProperNames.ContainsKey(tag) || proper_name != null)
+		if (!TagManager.ProperNames.ContainsKey(tag))
 		{
-			TagManager.SetProperName(tag, proper_name);
+			TagManager.ProperNames[tag] = string.Empty;
 		}
+		return tag;
+	}
+
+	public static Tag Create(string tag_string, string proper_name)
+	{
+		Tag tag = TagManager.Create(tag_string);
+		if (string.IsNullOrEmpty(proper_name))
+		{
+			DebugUtil.Assert(false, "Attempting to set proper name for tag: " + tag_string + "to null or empty.");
+		}
+		TagManager.ProperNames[tag] = proper_name;
 		return tag;
 	}
 
@@ -19,7 +30,7 @@ public class TagManager
 		Tag[] array = new Tag[strings.Count];
 		for (int i = 0; i < strings.Count; i++)
 		{
-			array[i] = TagManager.Create(strings[i], null);
+			array[i] = TagManager.Create(strings[i]);
 		}
 		return array;
 	}
@@ -28,22 +39,11 @@ public class TagManager
 	{
 		foreach (Tag tag in new List<Tag>(TagManager.ProperNames.Keys))
 		{
-			if (TagManager.ProperNames[tag] == null)
+			if (string.IsNullOrEmpty(TagManager.ProperNames[tag]))
 			{
 				TagManager.ProperNames[tag] = TagDescriptions.GetDescription(tag.Name);
 			}
 		}
-	}
-
-	public static void SetProperName(string tag_name, string name)
-	{
-		Tag tag = TagManager.Create(tag_name, null);
-		TagManager.SetProperName(tag, name);
-	}
-
-	public static void SetProperName(Tag tag, string name)
-	{
-		TagManager.ProperNames[tag] = name;
 	}
 
 	public static string GetProperName(Tag tag)

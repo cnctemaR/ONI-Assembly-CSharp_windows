@@ -82,11 +82,11 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece,
 	private void OnDirtyNavCellUpdated(object data)
 	{
 		int num = Grid.PosToCell(base.transform.GetPosition());
-		int num2 = num * NavGrid.MaxLinksPerCell;
+		NavGrid navGrid = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
+		int num2 = num * navGrid.maxLinksPerCell;
 		bool flag = false;
 		if (this.isExitTube)
 		{
-			NavGrid navGrid = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
 			NavGrid.Link link = navGrid.Links[num2];
 			while (link.link != PathFinder.InvalidHandle)
 			{

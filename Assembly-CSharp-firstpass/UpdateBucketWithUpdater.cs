@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
+[DebuggerDisplay("{name}")]
 public class UpdateBucketWithUpdater<DataType> : StateMachineUpdater.BaseUpdateBucket
 {
 	public UpdateBucketWithUpdater(string name)

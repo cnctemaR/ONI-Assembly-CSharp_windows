@@ -13,8 +13,8 @@ public class LocText : TextMeshProUGUI
 		}
 		set
 		{
-			this.RefreshLinkHandler();
 			this.allowLinksInternal = value;
+			this.RefreshLinkHandler();
 			this.raycastTarget = this.raycastTarget || this.allowLinksInternal;
 		}
 	}
@@ -57,6 +57,8 @@ public class LocText : TextMeshProUGUI
 		{
 			setTextStyleSetting.SetStyle(this.textStyleSetting);
 		}
+		this.textLinkHandler = base.GetComponent<TextLinkHandler>();
+		this.RefreshLinkHandler();
 	}
 
 	public override void SetLayoutDirty()
@@ -156,7 +158,7 @@ public class LocText : TextMeshProUGUI
 
 	private void RefreshLinkHandler()
 	{
-		if (this.textLinkHandler == null)
+		if (this.textLinkHandler == null && this.allowLinksInternal)
 		{
 			this.textLinkHandler = base.GetComponent<TextLinkHandler>();
 			if (this.textLinkHandler == null)
@@ -164,7 +166,15 @@ public class LocText : TextMeshProUGUI
 				this.textLinkHandler = base.gameObject.AddComponent<TextLinkHandler>();
 			}
 		}
-		this.textLinkHandler.CheckMouseOver();
+		else if (!this.allowLinksInternal && this.textLinkHandler != null)
+		{
+			global::UnityEngine.Object.Destroy(this.textLinkHandler);
+			this.textLinkHandler = null;
+		}
+		if (this.textLinkHandler != null)
+		{
+			this.textLinkHandler.CheckMouseOver();
+		}
 	}
 
 	public string key;

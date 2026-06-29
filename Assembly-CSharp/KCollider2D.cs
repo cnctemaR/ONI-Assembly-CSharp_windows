@@ -25,14 +25,14 @@ public abstract class KCollider2D : KMonoBehaviour, IRenderEveryTick
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		CellChangeMonitor.Instance.RegisterMovementStateChanged(base.transform, new Action<bool>(this.OnMovementStateChanged));
+		CellChangeMonitor.Instance.RegisterMovementStateChanged(base.transform, new Action<Transform, bool>(KCollider2D.OnMovementStateChanged));
 		this.MarkDirty(true);
 	}
 
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		CellChangeMonitor.Instance.UnregisterMovementStateChanged(base.transform, new Action<bool>(this.OnMovementStateChanged));
+		CellChangeMonitor.Instance.UnregisterMovementStateChanged(base.transform, new Action<Transform, bool>(KCollider2D.OnMovementStateChanged));
 		if (this.partitionerEntry != null)
 		{
 			this.partitionerEntry.Release();
@@ -75,6 +75,11 @@ public abstract class KCollider2D : KMonoBehaviour, IRenderEveryTick
 		{
 			SimAndRenderScheduler.instance.Remove(this);
 		}
+	}
+
+	private static void OnMovementStateChanged(Transform transform, bool is_moving)
+	{
+		transform.GetComponent<KCollider2D>().OnMovementStateChanged(is_moving);
 	}
 
 	public void RenderEveryTick(float dt)

@@ -70,10 +70,19 @@ public class MinionConfig : IEntityConfig
 		navigator.NavGridName = "MinionNavGrid";
 		navigator.CurrentNavType = NavType.Floor;
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
-		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim("anim_cheer_kanim") };
-		kbatchedAnimController.missingAnim = "idle_default";
 		kbatchedAnimController.isMovable = true;
 		kbatchedAnimController.sceneLayer = Grid.SceneLayer.Move;
+		kbatchedAnimController.AnimFiles = new KAnimFile[]
+		{
+			Assets.GetAnim("body_comp_default_kanim"),
+			Assets.GetAnim("anim_construction_default_kanim"),
+			Assets.GetAnim("anim_emotes_default_kanim"),
+			Assets.GetAnim("anim_idles_default_kanim"),
+			Assets.GetAnim("anim_loco_firepole_kanim"),
+			Assets.GetAnim("anim_loco_new_kanim"),
+			Assets.GetAnim("anim_loco_tube_kanim"),
+			Assets.GetAnim("anim_construction_firepole_kanim")
+		};
 		KBoxCollider2D kboxCollider2D = gameObject.AddOrGet<KBoxCollider2D>();
 		kboxCollider2D.offset = new Vector2(0f, 0.8f);
 		kboxCollider2D.size = new Vector2(1f, 1.5f);
@@ -84,137 +93,137 @@ public class MinionConfig : IEntityConfig
 			{
 				pointName = "dig",
 				automatic = false,
-				context = new HashedString("dig"),
+				context = "dig",
 				buildFile = Assets.GetAnim("excavator_kanim"),
-				overrideSymbol = new HashedString("snapTo_rgtHand")
+				overrideSymbol = "snapTo_rgtHand"
 			},
 			new SnapOn.SnapPoint
 			{
 				pointName = "dig",
 				automatic = false,
-				context = new HashedString("build"),
+				context = "build",
 				buildFile = Assets.GetAnim("constructor_gun_kanim"),
-				overrideSymbol = new HashedString("snapTo_rgtHand")
+				overrideSymbol = "snapTo_rgtHand"
 			},
 			new SnapOn.SnapPoint
 			{
 				pointName = "dig",
 				automatic = false,
-				context = new HashedString("fetchliquid"),
+				context = "fetchliquid",
 				buildFile = Assets.GetAnim("water_gun_kanim"),
-				overrideSymbol = new HashedString("snapTo_rgtHand")
+				overrideSymbol = "snapTo_rgtHand"
 			},
 			new SnapOn.SnapPoint
 			{
 				pointName = "dig",
 				automatic = false,
-				context = new HashedString("paint"),
+				context = "paint",
 				buildFile = Assets.GetAnim("painting_gun_kanim"),
-				overrideSymbol = new HashedString("snapTo_rgtHand")
+				overrideSymbol = "snapTo_rgtHand"
 			},
 			new SnapOn.SnapPoint
 			{
 				pointName = "dig",
 				automatic = false,
-				context = new HashedString("harvest"),
+				context = "harvest",
 				buildFile = Assets.GetAnim("plant_harvester_gun_kanim"),
-				overrideSymbol = new HashedString("snapTo_rgtHand")
+				overrideSymbol = "snapTo_rgtHand"
 			},
 			new SnapOn.SnapPoint
 			{
 				pointName = "dig",
 				automatic = false,
-				context = new HashedString("capture"),
+				context = "capture",
 				buildFile = Assets.GetAnim("net_gun_kanim"),
-				overrideSymbol = new HashedString("snapTo_rgtHand")
+				overrideSymbol = "snapTo_rgtHand"
 			},
 			new SnapOn.SnapPoint
 			{
 				pointName = "dig",
 				automatic = false,
-				context = new HashedString("attack"),
+				context = "attack",
 				buildFile = Assets.GetAnim("attack_gun_kanim"),
-				overrideSymbol = new HashedString("snapTo_rgtHand")
+				overrideSymbol = "snapTo_rgtHand"
 			},
 			new SnapOn.SnapPoint
 			{
 				pointName = "dig",
 				automatic = false,
-				context = new HashedString("pickup"),
+				context = "pickup",
 				buildFile = Assets.GetAnim("pickupdrop_gun_kanim"),
-				overrideSymbol = new HashedString("snapTo_rgtHand")
+				overrideSymbol = "snapTo_rgtHand"
 			},
 			new SnapOn.SnapPoint
 			{
 				pointName = "dig",
 				automatic = false,
-				context = new HashedString("store"),
+				context = "store",
 				buildFile = Assets.GetAnim("pickupdrop_gun_kanim"),
-				overrideSymbol = new HashedString("snapTo_rgtHand")
+				overrideSymbol = "snapTo_rgtHand"
 			},
 			new SnapOn.SnapPoint
 			{
 				pointName = "dig",
 				automatic = false,
-				context = new HashedString("disinfect"),
+				context = "disinfect",
 				buildFile = Assets.GetAnim("plant_spray_gun_kanim"),
-				overrideSymbol = new HashedString("snapTo_rgtHand")
+				overrideSymbol = "snapTo_rgtHand"
 			},
 			new SnapOn.SnapPoint
 			{
 				pointName = "dig",
 				automatic = false,
-				context = new HashedString("tend"),
+				context = "tend",
 				buildFile = Assets.GetAnim("plant_harvester_gun_kanim"),
-				overrideSymbol = new HashedString("snapTo_rgtHand")
+				overrideSymbol = "snapTo_rgtHand"
 			},
 			new SnapOn.SnapPoint
 			{
 				pointName = "carry",
 				automatic = false,
-				context = new HashedString(string.Empty),
+				context = string.Empty,
 				buildFile = null,
-				overrideSymbol = new HashedString("snapTo_chest")
+				overrideSymbol = "snapTo_chest"
 			},
 			new SnapOn.SnapPoint
 			{
 				pointName = "build",
 				automatic = false,
-				context = new HashedString(string.Empty),
+				context = string.Empty,
 				buildFile = null,
-				overrideSymbol = new HashedString("snapTo_rgtHand")
+				overrideSymbol = "snapTo_rgtHand"
 			},
 			new SnapOn.SnapPoint
 			{
 				pointName = "remote",
 				automatic = false,
-				context = new HashedString(string.Empty),
+				context = string.Empty,
 				buildFile = null,
-				overrideSymbol = new HashedString("snapTo_rgtHand")
+				overrideSymbol = "snapTo_rgtHand"
 			},
 			new SnapOn.SnapPoint
 			{
 				pointName = "snapTo_neck",
 				automatic = false,
-				context = new HashedString(string.Empty),
+				context = string.Empty,
 				buildFile = Assets.GetAnim("helm_oxygen_kanim"),
-				overrideSymbol = new HashedString("snapTo_neck")
+				overrideSymbol = "snapTo_neck"
 			},
 			new SnapOn.SnapPoint
 			{
 				pointName = "dig",
 				automatic = false,
-				context = new HashedString("powertinker"),
+				context = "powertinker",
 				buildFile = Assets.GetAnim("electrician_gun_kanim"),
-				overrideSymbol = new HashedString("snapTo_rgtHand")
+				overrideSymbol = "snapTo_rgtHand"
 			},
 			new SnapOn.SnapPoint
 			{
 				pointName = "dig",
 				automatic = false,
-				context = new HashedString("specialistdig"),
+				context = "specialistdig",
 				buildFile = Assets.GetAnim("excavator_kanim"),
-				overrideSymbol = new HashedString("snapTo_rgtHand")
+				overrideSymbol = "snapTo_rgtHand"
 			}
 		});
 		gameObject.AddOrGet<Effects>();
@@ -243,7 +252,7 @@ public class MinionConfig : IEntityConfig
 		gameObject.AddOrGet<RangedAttackable>();
 		gameObject.AddOrGet<CharacterOverlay>();
 		OccupyArea occupyArea = gameObject.AddOrGet<OccupyArea>();
-		occupyArea.objectLayer = ObjectLayer.Minion;
+		occupyArea.objectLayers = new ObjectLayer[1];
 		occupyArea.ApplyToCells = false;
 		occupyArea.OccupiedCellsOffsets = new CellOffset[]
 		{
@@ -266,6 +275,8 @@ public class MinionConfig : IEntityConfig
 		gameObject.AddOrGet<MinionResume>();
 		DuplicantNoiseLevels.SetupNoiseLevels();
 		this.SetupLaserEffects(gameObject);
+		SymbolOverrideControllerUtil.AddToPrefab(gameObject);
+		MinionConfig.ConfigureSymbols(gameObject);
 		return gameObject;
 	}
 
@@ -476,9 +487,33 @@ public class MinionConfig : IEntityConfig
 		modifiers.initialAmounts.Add(Db.Get().Amounts.Decor.Id);
 	}
 
+	public static void ConfigureSymbols(GameObject go)
+	{
+		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
+		component.SetSymbolVisiblity("snapto_hat", false);
+		component.SetSymbolVisiblity("snapTo_hat_hair", false);
+		component.SetSymbolVisiblity("snapto_chest", false);
+		component.SetSymbolVisiblity("snapto_neck", false);
+		component.SetSymbolVisiblity("snapto_goggles", false);
+		component.SetSymbolVisiblity("snapto_pivot", false);
+		component.SetSymbolVisiblity("snapTo_rgtHand", false);
+	}
+
 	public static string ID = "Minion";
 
 	public static string MINION_BASE_TRAIT_ID = MinionConfig.ID + "BaseTrait";
+
+	public const int MINION_BASE_SYMBOL_LAYER = 0;
+
+	public const int MINION_HAIR_ALWAYS_HACK_LAYER = 1;
+
+	public const int MINION_EXPRESSION_SYMBOL_LAYER = 2;
+
+	public const int MINION_CLOTHING_SYMBOL_LAYER = 3;
+
+	public const int MINION_PICKUP_SYMBOL_LAYER = 4;
+
+	public const int MINION_SUIT_SYMBOL_LAYER = 5;
 
 	public struct LaserEffect
 	{

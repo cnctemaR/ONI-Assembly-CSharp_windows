@@ -72,6 +72,8 @@ namespace STRINGS
 					UI.FormatAsLink("Light", "LIGHT"),
 					"."
 				});
+
+				public static LocString SIDESCREEN_TITLE = "Empty " + ELEMENTS.DIRTYWATER.NAME + " Threshold";
 			}
 
 			public class BATTERY
@@ -521,6 +523,16 @@ namespace STRINGS
 				});
 			}
 
+			public class CONDUIT
+			{
+				public class STATUS_ITEM
+				{
+					public static LocString NAME = "Marked for Emptying";
+
+					public static LocString TOOLTIP = "Awaiting a Plumber to clear this pipe";
+				}
+			}
+
 			public class GASCONDUIT
 			{
 				public static LocString NAME = UI.FormatAsLink("Gas Pipe", "GASCONDUIT");
@@ -546,6 +558,42 @@ namespace STRINGS
 				public static LocString DESC = "Separate pipe systems prevent mingled contents from causing building damage.";
 
 				public static LocString EFFECT = "Runs one " + UI.FormatAsLink("Gas Pipe", "GASPIPING") + " section over another without joining them.\n\nCan be run through tiles.";
+			}
+
+			public class GASCONDUITPREFERENTIALFLOW
+			{
+				public static LocString NAME = UI.FormatAsLink("Priority Gas Flow", "GASCONDUITPREFERENTIALFLOW");
+
+				public static LocString DESC = string.Empty;
+
+				public static LocString EFFECT = "Has a secondary input which is only drawn from when the primary input is empty.";
+			}
+
+			public class LIQUIDCONDUITPREFERENTIALFLOW
+			{
+				public static LocString NAME = UI.FormatAsLink("Priority Liquid Flow", "LIQUIDCONDUITPREFERENTIALFLOW");
+
+				public static LocString DESC = string.Empty;
+
+				public static LocString EFFECT = "Has a secondary input which is only drawn from when the primary input is empty.";
+			}
+
+			public class GASCONDUITOVERFLOW
+			{
+				public static LocString NAME = UI.FormatAsLink("Gas Overflow Valve", "GASCONDUITOVERFLOW");
+
+				public static LocString DESC = string.Empty;
+
+				public static LocString EFFECT = "Has a secondary output which is only used when the primary output is blocked.";
+			}
+
+			public class LIQUIDCONDUITOVERFLOW
+			{
+				public static LocString NAME = UI.FormatAsLink("Liquid Overflow Valve", "LIQUIDCONDUITOVERFLOW");
+
+				public static LocString DESC = string.Empty;
+
+				public static LocString EFFECT = "Has a secondary output which is only used when the primary output is blocked.";
 			}
 
 			public class GASFILTER
@@ -815,6 +863,22 @@ namespace STRINGS
 				});
 			}
 
+			public class GASCONDUITRADIANT
+			{
+				public static LocString NAME = UI.FormatAsLink("Radiant Gas Pipe", "GASCONDUITRADIANT");
+
+				public static LocString DESC = "Radiant pipes significantly improve the rate of temperature exchange with the surrounding environment.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Carries ",
+					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+					" and encourages significant change in ",
+					UI.FormatAsLink("Temperature", "HEAT"),
+					".\n\nCan be run through tiles."
+				});
+			}
+
 			public class INSULATEDLIQUIDCONDUIT
 			{
 				public static LocString NAME = UI.FormatAsLink("Insulated Liquid Pipe", "INSULATEDLIQUIDCONDUIT");
@@ -826,6 +890,22 @@ namespace STRINGS
 					"Carries ",
 					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
 					" with minimal change in ",
+					UI.FormatAsLink("Temperature", "HEAT"),
+					".\n\nCan be run through tiles."
+				});
+			}
+
+			public class LIQUIDCONDUITRADIANT
+			{
+				public static LocString NAME = UI.FormatAsLink("Radiant Liquid Pipe", "LIQUIDCONDUITRADIANT");
+
+				public static LocString DESC = "Radiant pipes significantly improve the rate of temperature exchange with the surrounding environment.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Carries ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" and encourages significant change in ",
 					UI.FormatAsLink("Temperature", "HEAT"),
 					".\n\nCan be run through tiles."
 				});
@@ -1350,6 +1430,15 @@ namespace STRINGS
 				public static LocString AVERAGEQUALITYNAME = "Genius Ice Sculpture";
 			}
 
+			public class SHEARINGSTATION
+			{
+				public static LocString NAME = UI.FormatAsLink("Shearing Station", "SHEARINGSTATION");
+
+				public static LocString DESC = "Shearing stations are used to shear Dreckos.";
+
+				public static LocString EFFECT = "Shears dreckos.";
+			}
+
 			public class SUITMARKER
 			{
 				public static LocString NAME = UI.FormatAsLink("Exosuit Checkpoint", "SUITMARKER");
@@ -1819,6 +1908,33 @@ namespace STRINGS
 				});
 			}
 
+			public class FISHDELIVERYPOINT
+			{
+				public static LocString NAME = UI.FormatAsLink("Fish Release", "FISHDELIVERYPOINT");
+
+				public static LocString DESC = "This building must be built above liquid to prevent fish from suffocating.";
+
+				public static LocString EFFECT = "Releases trapped fish back into the world.\n\nCan be used multiple times.";
+			}
+
+			public class FISHFEEDER
+			{
+				public static LocString NAME = UI.FormatAsLink("Fish Feeder", "FISHFEEDER");
+
+				public static LocString DESC = "Build this feeder above a body of water to feed the fish within.";
+
+				public static LocString EFFECT = "Automatically dispenses stored food into the area below.\n\nDispenses once per day.";
+			}
+
+			public class FISHTRAP
+			{
+				public static LocString NAME = UI.FormatAsLink("Fish Trap", "FISHTRAP");
+
+				public static LocString DESC = "Trapped fish will automatically be bagged for transport.";
+
+				public static LocString EFFECT = "Attracts and traps swimming fish.\n\nSingle use.";
+			}
+
 			public class RANCHSTATION
 			{
 				public static LocString NAME = UI.FormatAsLink("Grooming Station", "RANCHSTATION");
@@ -1995,30 +2111,32 @@ namespace STRINGS
 
 			public class LOGICMEMORY
 			{
-				public static LocString NAME = UI.FormatAsLink("Memory", "LOGICMEMORY");
+				public static LocString NAME = UI.FormatAsLink("Memory Toggle", "LOGICMEMORY");
 
 				public static LocString DESC = string.Empty;
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
-					"When the ",
-					UI.FormatAsLink("logic", "Write"),
+					"Becomes ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" when the ",
+					UI.FormatAsLink("logic", "Set"),
 					" port is ",
 					UI.FormatAsLink("Active", "LOGIC"),
-					" the ",
-					UI.FormatAsLink("logic", "Value"),
-					" port is read and stored. Reading from the ",
-					UI.FormatAsLink("Read", "LOGIC"),
-					" port will then return the new value."
+					". Goes to ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" when the reset port is ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					"."
 				});
 
-				public static LocString STATUS_ITEM_VALUE = "Stored Value: {0}";
+				public static LocString STATUS_ITEM_VALUE = "Current Value: {0}";
 
-				public static LocString VALUE_PORT_DESC = "Specify Value";
+				public static LocString READ_PORT_DESC = "Current Value";
 
-				public static LocString WRITE_PORT_DESC = "Trigger Write";
+				public static LocString SET_PORT_DESC = "Make Active";
 
-				public static LocString READ_PORT_DESC = "Stored Value";
+				public static LocString RESET_PORT_DESC = "Make Inactive";
 			}
 
 			public class LOGICSWITCH
@@ -2123,14 +2241,154 @@ namespace STRINGS
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
-					string.Empty,
+					"Becomes ",
 					UI.FormatAsLink("Active", "LOGIC"),
-					"/",
+					" or on ",
 					UI.FormatAsLink("Standby", "LOGIC"),
 					" depending on quantity of surrounding ",
 					UI.FormatAsLink("Germs", "DISEASE"),
 					"."
 				});
+
+				public static LocString LOGIC_PORT_DESC = "Active/Standby based on ambient Germs";
+			}
+
+			public class LOGICELEMENTSENSORGAS
+			{
+				public static LocString NAME = UI.FormatAsLink("Gaseous Element Sensor", "LOGICELEMENTSENSORGAS");
+
+				public static LocString DESC = "These sensors can detect the presence of a specific gas and alter systems accordingly.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Becomes ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" when the selected Gaseous Element is detected.\n\nRemains on ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" when the Element is not present."
+				});
+
+				public static LocString LOGIC_PORT_DESC = "Active/Standby based on the ambient Gas";
+			}
+
+			public class LOGICELEMENTSENSORLIQUID
+			{
+				public static LocString NAME = UI.FormatAsLink("Liquid Element Sensor", "LOGICELEMENTSENSORLIQUID");
+
+				public static LocString DESC = "These sensors can detect the presence of a specific liquid and alter systems accordingly.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Becomes ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" when the selected Liquid Element is detected.\n\nRemains on ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" when the Element is not present."
+				});
+
+				public static LocString LOGIC_PORT_DESC = "Active/Standby based on the ambient Liquid";
+			}
+
+			public class GASCONDUITDISEASESENSOR
+			{
+				public static LocString NAME = UI.FormatAsLink("Gas Pipe Germ Sensor", "GASCONDUITDISEASESENSOR");
+
+				public static LocString DESC = "Gas Pipe Germ Sensors are used to control automation behaviour in the presence of disease.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Becomes",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" or on ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" depending on quantity of the contained ",
+					UI.FormatAsLink("Germs", "DISEASE"),
+					"."
+				});
+
+				public static LocString LOGIC_PORT_DESC = "Active/Standby based on the contained Germs";
+			}
+
+			public class LIQUIDCONDUITDISEASESENSOR
+			{
+				public static LocString NAME = UI.FormatAsLink("Liquid Pipe Germ Sensor", "LIQUIDCONDUITDISEASESENSOR");
+
+				public static LocString DESC = "Liquid Pipe Germ Sensors are used to control automation behaviour in the presence of disease.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Becomes ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" or on ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" depending on quantity of the contained ",
+					UI.FormatAsLink("Germs", "DISEASE"),
+					"."
+				});
+
+				public static LocString LOGIC_PORT_DESC = "Active/Standby based on the contained Germs";
+			}
+
+			public class GASCONDUITELEMENTSENSOR
+			{
+				public static LocString NAME = UI.FormatAsLink("Gas Pipe Element Sensor", "LOGICELEMENTSENSORGAS");
+
+				public static LocString DESC = "Gas Pipe Element Sensors can be used to detect the presence of a specific gas in a pipe";
+
+				public static LocString EFFECT = "Becomes " + UI.FormatAsLink("Active", "LOGIC") + " when the configured Gas Element is detected.";
+
+				public static LocString LOGIC_PORT_DESC = "Active/Standby based on the contained Gas";
+			}
+
+			public class LIQUIDCONDUITELEMENTSENSOR
+			{
+				public static LocString NAME = UI.FormatAsLink("Liquid Pipe Element Sensor", "LOGICELEMENTSENSORLIQUID");
+
+				public static LocString DESC = "Liquid Pipe Element Sensors can be used to detect the presence of a specific liquid in a pipe";
+
+				public static LocString EFFECT = "Becomes " + UI.FormatAsLink("Active", "LOGIC") + " when the configured Liquid Element is detected.";
+
+				public static LocString LOGIC_PORT_DESC = "Active/Standby based on the contained Liquid";
+			}
+
+			public class GASCONDUITTEMPERATURESENSOR
+			{
+				public static LocString NAME = UI.FormatAsLink("Gas Pipe Thermo Sensor", "GASCONDUITTEMPERATURESENSOR");
+
+				public static LocString DESC = "Gas Pipe Thermo Sensors can disable buildings when contents reach a certain temperature.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Becomes ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" or on ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" when the pipe contents ",
+					UI.FormatAsLink("Temperature", "HEAT"),
+					" enters the chosen range."
+				});
+
+				public static LocString LOGIC_PORT_DESC = "Active/Standby based on the " + UI.FormatAsLink("Temperature", "HEAT") + " of the contained Gas";
+			}
+
+			public class LIQUIDCONDUITTEMPERATURESENSOR
+			{
+				public static LocString NAME = UI.FormatAsLink("Liquid Pipe Thermo Sensor", "LIQUIDCONDUITTEMPERATURESENSOR");
+
+				public static LocString DESC = "Liquid Pipe Thermo Sensors can disable buildings when their contents reach a certain temperature.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Becomes ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" or on ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" when the pipe contents ",
+					UI.FormatAsLink("Temperature", "HEAT"),
+					" enters the chosen range."
+				});
+
+				public static LocString LOGIC_PORT_DESC = "Active/Standby based on the " + UI.FormatAsLink("Temperature", "HEAT") + " of the contained Liquid";
 			}
 
 			public class TRAVELTUBEENTRANCE

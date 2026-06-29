@@ -40,7 +40,7 @@ public class TableRow : KMonoBehaviour
 		{
 			return;
 		}
-		SelectTool.Instance.SelectAndFocus(this.minion.transform.GetPosition(), this.minion.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
+		SelectTool.Instance.SelectAndFocus(this.minion.transform.GetPosition(), this.minion.GetComponent<KSelectable>(), new Vector3(8f, 0f, 0f));
 	}
 
 	public void ConfigureContent(MinionIdentity minion, Dictionary<string, TableColumn> columns)

@@ -6,6 +6,7 @@ using System.Text;
 using Database;
 using Klei.AI;
 using Klei.AI.DiseaseGrowthRules;
+using STRINGS;
 
 public static class SimMessages
 {
@@ -176,7 +177,7 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(-1387601379, sizeof(SimMessages.ModifyElementChunkAdjusterMessage), (byte*)ptr);
 	}
 
-	public unsafe static void AddBuildingHeatExchange(Extents extents, float temperature, float operating_kw, byte element_idx, float mass, int callbackIdx = -1)
+	public unsafe static void AddBuildingHeatExchange(Extents extents, float mass, float temperature, float thermal_conductivity, float operating_kw, byte elem_idx, int callbackIdx = -1)
 	{
 		int num = Grid.XYToCell(extents.x, extents.y);
 		if (!Grid.IsValidCell(num))
@@ -190,11 +191,12 @@ public static class SimMessages
 		}
 		SimMessages.AddBuildingHeatExchangeMessage* ptr = stackalloc SimMessages.AddBuildingHeatExchangeMessage[checked(1 * sizeof(SimMessages.AddBuildingHeatExchangeMessage))];
 		ptr->callbackIdx = callbackIdx;
-		ptr->elemIdx = element_idx;
+		ptr->elemIdx = elem_idx;
+		ptr->mass = mass;
 		ptr->temperature = temperature;
+		ptr->thermalConductivity = thermal_conductivity;
 		ptr->overheatTemperature = float.MaxValue;
 		ptr->operatingKilowatts = operating_kw;
-		ptr->mass = mass;
 		ptr->minX = extents.x;
 		ptr->minY = extents.y;
 		ptr->maxX = extents.x + extents.width;
@@ -202,7 +204,7 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(1739021608, sizeof(SimMessages.AddBuildingHeatExchangeMessage), (byte*)ptr);
 	}
 
-	public unsafe static void ModifyBuildingHeatExchange(int sim_handle, Extents extents, float temperature, float overheat_temperature, float operating_kw, byte element_idx, float mass)
+	public unsafe static void ModifyBuildingHeatExchange(int sim_handle, Extents extents, float mass, float temperature, float thermal_conductivity, float overheat_temperature, float operating_kw, byte element_idx)
 	{
 		int num = Grid.XYToCell(extents.x, extents.y);
 		if (!Grid.IsValidCell(num))
@@ -215,12 +217,13 @@ public static class SimMessages
 			return;
 		}
 		SimMessages.ModifyBuildingHeatExchangeMessage* ptr = stackalloc SimMessages.ModifyBuildingHeatExchangeMessage[checked(1 * sizeof(SimMessages.ModifyBuildingHeatExchangeMessage))];
-		ptr->handle = sim_handle;
+		ptr->callbackIdx = sim_handle;
 		ptr->elemIdx = element_idx;
+		ptr->mass = mass;
 		ptr->temperature = temperature;
+		ptr->thermalConductivity = thermal_conductivity;
 		ptr->overheatTemperature = overheat_temperature;
 		ptr->operatingKilowatts = operating_kw;
-		ptr->mass = mass;
 		ptr->minX = extents.x;
 		ptr->minY = extents.y;
 		ptr->maxX = extents.x + extents.width;
@@ -236,11 +239,13 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(-456116629, sizeof(SimMessages.RemoveBuildingHeatExchangeMessage), (byte*)ptr);
 	}
 
-	public unsafe static void ModifyBuildingEnergy(int sim_handle, float delta_kj)
+	public unsafe static void ModifyBuildingEnergy(int sim_handle, float delta_kj, float min_temperature, float max_temperature)
 	{
 		SimMessages.ModifyBuildingEnergyMessage* ptr = stackalloc SimMessages.ModifyBuildingEnergyMessage[checked(1 * sizeof(SimMessages.ModifyBuildingEnergyMessage))];
 		ptr->handle = sim_handle;
 		ptr->deltaKJ = delta_kj;
+		ptr->minTemperature = min_temperature;
+		ptr->maxTemperature = max_temperature;
 		Sim.SIM_HandleMessage(-1348791658, sizeof(SimMessages.ModifyBuildingEnergyMessage), (byte*)ptr);
 	}
 
@@ -283,7 +288,7 @@ public static class SimMessages
 		}
 		for (int j = 0; j < elements.Count; j++)
 		{
-			byte[] bytes = Encoding.UTF8.GetBytes(elements[j].name);
+			byte[] bytes = Encoding.UTF8.GetBytes(UI.StripLinkFormatting(elements[j].name));
 			binaryWriter.Write(bytes.Length);
 			binaryWriter.Write(bytes);
 		}
@@ -821,6 +826,8 @@ public static class SimMessages
 
 		public float temperature;
 
+		public float thermalConductivity;
+
 		public float overheatTemperature;
 
 		public float operatingKilowatts;
@@ -837,7 +844,7 @@ public static class SimMessages
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	public struct ModifyBuildingHeatExchangeMessage
 	{
-		public int handle;
+		public int callbackIdx;
 
 		public byte elemIdx;
 
@@ -850,6 +857,8 @@ public static class SimMessages
 		public float mass;
 
 		public float temperature;
+
+		public float thermalConductivity;
 
 		public float overheatTemperature;
 
@@ -870,6 +879,10 @@ public static class SimMessages
 		public int handle;
 
 		public float deltaKJ;
+
+		public float minTemperature;
+
+		public float maxTemperature;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]

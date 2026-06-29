@@ -44,7 +44,7 @@ public class GroupSelectorHeaderWidget : MonoBehaviour
 
 	private void RebuildSubPanel(Vector3 pos, Func<object, IList<int>> display_list_query, Action<object> on_item_selected, Func<object, object, string> get_item_hover_text)
 	{
-		this.itemsPanel.gameObject.transform.position = pos + new Vector3(2f, 2f, 0f);
+		this.itemsPanel.gameObject.transform.SetPosition(pos + new Vector3(2f, 2f, 0f));
 		IList<int> list = display_list_query(this.widgetID);
 		if (list.Count > 0)
 		{

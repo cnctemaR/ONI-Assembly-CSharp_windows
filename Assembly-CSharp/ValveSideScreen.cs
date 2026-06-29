@@ -35,6 +35,11 @@ public class ValveSideScreen : SideScreenContent
 		this.targetValve.ChangeFlow(this.targetFlow);
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<Valve>() != null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		this.targetValve = target.GetComponent<Valve>();

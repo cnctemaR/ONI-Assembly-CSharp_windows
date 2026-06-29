@@ -93,7 +93,19 @@ namespace OverlayModes
 				if (!(saveLoadRoot2 == null))
 				{
 					BuildingDef def = saveLoadRoot2.GetComponent<Building>().Def;
-					Color32 color = ((!def.IsInsulated) ? conduitVisInfo.overlayTint : conduitVisInfo.overlayInsulatedTint);
+					Color32 color;
+					if (def.ThermalConductivity == 1f)
+					{
+						color = conduitVisInfo.overlayTint;
+					}
+					else if (def.ThermalConductivity < 1f)
+					{
+						color = conduitVisInfo.overlayInsulatedTint;
+					}
+					else
+					{
+						color = conduitVisInfo.overlayRadiantTint;
+					}
 					KBatchedAnimController component = saveLoadRoot2.GetComponent<KBatchedAnimController>();
 					component.TintColour = color;
 				}

@@ -65,28 +65,6 @@ public class KAnimBatchManager
 		Singleton<KAnimBatchManager>.Destroy();
 	}
 
-	public void ClearMultiInstances()
-	{
-		List<BatchGroupKey> list = new List<BatchGroupKey>();
-		foreach (KeyValuePair<BatchGroupKey, KAnimBatchGroup> keyValuePair in this.batchGroups)
-		{
-			if (keyValuePair.Value.data != null && keyValuePair.Value.data.isDynamic)
-			{
-				list.Add(keyValuePair.Key);
-			}
-			keyValuePair.Value.ClearMuiltiInstanceData();
-		}
-		foreach (BatchGroupKey batchGroupKey in list)
-		{
-			if (this.batchGroupData.ContainsKey(batchGroupKey.groupID))
-			{
-				this.batchGroupData.Remove(batchGroupKey.groupID);
-			}
-			this.batchGroups[batchGroupKey].FreeResources();
-			this.batchGroups.Remove(batchGroupKey);
-		}
-	}
-
 	public bool isReady
 	{
 		get
@@ -95,7 +73,7 @@ public class KAnimBatchManager
 		}
 	}
 
-	public KBatchGroupData GetBatchGroupData(HashedString groupID, bool isDynamic = false)
+	public KBatchGroupData GetBatchGroupData(HashedString groupID)
 	{
 		if (!groupID.IsValid || groupID == KAnimBatchManager.NO_BATCH || groupID == KAnimBatchManager.IGNORE)
 		{
@@ -103,7 +81,7 @@ public class KAnimBatchManager
 		}
 		if (!this.batchGroupData.ContainsKey(groupID))
 		{
-			this.batchGroupData[groupID] = new KBatchGroupData(groupID, isDynamic);
+			this.batchGroupData[groupID] = new KBatchGroupData(groupID);
 		}
 		return this.batchGroupData[groupID];
 	}
@@ -124,17 +102,10 @@ public class KAnimBatchManager
 		return new Vector2I(cell_xy.x / 32, cell_xy.y / 32);
 	}
 
-	public void MoveChunk(KAnimConverter.IAnimConverter controller, Vector2I lastChunkXY, Vector2I newChunkXY)
+	public static Vector2I ControllerToChunkXY(KAnimConverter.IAnimConverter controller)
 	{
-		BatchKey batchKey = BatchKey.Create(controller, newChunkXY);
-		KAnimBatch batch = controller.GetBatch();
-		BatchSet batchSet;
-		if (!this.batchSets.TryGetValue(batchKey, out batchSet))
-		{
-			batchSet = new BatchSet(this.GetBatchGroup(new BatchGroupKey(batchKey.groupID)), batchKey, newChunkXY);
-			this.batchSets[batchKey] = batchSet;
-		}
-		batchSet.AddBatch(batch);
+		Vector2I cellXY = controller.GetCellXY();
+		return KAnimBatchManager.CellXYToChunkXY(cellXY);
 	}
 
 	public void Register(KAnimConverter.IAnimConverter controller)
@@ -144,8 +115,7 @@ public class KAnimBatchManager
 			global::Debug.LogError(string.Format("Batcher isnt finished setting up, controller [{0}] is registering too early.", controller.GetName()), null);
 		}
 		BatchKey batchKey = BatchKey.Create(controller);
-		Vector2I cellXY = controller.GetCellXY();
-		Vector2I vector2I = KAnimBatchManager.CellXYToChunkXY(cellXY);
+		Vector2I vector2I = KAnimBatchManager.ControllerToChunkXY(controller);
 		BatchSet batchSet;
 		if (!this.batchSets.TryGetValue(batchKey, out batchSet))
 		{
@@ -256,6 +226,21 @@ public class KAnimBatchManager
 	private Dictionary<BatchKey, BatchSet> batchSets = new Dictionary<BatchKey, BatchSet>();
 
 	private HashSet<BatchSet> activeBatchSets = new HashSet<BatchSet>();
+
+	public int[] atlasNames = new int[]
+	{
+		Shader.PropertyToID("atlas0"),
+		Shader.PropertyToID("atlas1"),
+		Shader.PropertyToID("atlas2"),
+		Shader.PropertyToID("atlas3"),
+		Shader.PropertyToID("atlas4"),
+		Shader.PropertyToID("atlas5"),
+		Shader.PropertyToID("atlas6"),
+		Shader.PropertyToID("atlas7"),
+		Shader.PropertyToID("atlas8"),
+		Shader.PropertyToID("atlas9"),
+		Shader.PropertyToID("atlas10")
+	};
 
 	private static bool created = false;
 }

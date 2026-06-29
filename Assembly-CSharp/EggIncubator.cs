@@ -17,7 +17,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		this.occupyingObjectRelativePosition = new Vector3(0.5f, 1f, -1f);
 		this.synchronizeAnims = false;
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		component.HideSymbol(new KAnimHashedString("egg_target"), true);
+		component.SetSymbolVisiblity("egg_target", false);
 		this.meter = new MeterController(this, Meter.Offset.Infront, new string[0]);
 	}
 
@@ -137,7 +137,8 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		KBatchedAnimController component = base.occupyingObject.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
-			component.HackRefreshZOrder();
+			component.enabled = false;
+			component.enabled = true;
 		}
 		KBoxCollider2D component2 = base.occupyingObject.GetComponent<KBoxCollider2D>();
 		if (component2 != null)
@@ -160,7 +161,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		this.ClearOccupant();
 	}
 
-	private void UpdateProgress()
+	public float GetProgress()
 	{
 		float num = 0f;
 		if (base.occupyingObject)
@@ -169,7 +170,12 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 			AmountInstance amountInstance = amounts.Get(Db.Get().Amounts.Incubation);
 			num = amountInstance.value / amountInstance.GetMax();
 		}
-		this.meter.SetPositionPercent(num);
+		return num;
+	}
+
+	private void UpdateProgress()
+	{
+		this.meter.SetPositionPercent(this.GetProgress());
 	}
 
 	public void Sim1000ms(float dt)

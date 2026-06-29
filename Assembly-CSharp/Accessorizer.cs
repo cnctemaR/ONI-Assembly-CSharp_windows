@@ -1,18 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using KSerialization;
-using UnityEngine;
 
 public class Accessorizer : KMonoBehaviour
 {
+	[OnDeserialized]
+	private void OnDeserialized()
+	{
+		this.ApplyAccessories();
+	}
+
 	protected override void OnSpawn()
 	{
-		this.RefreshAccessories();
+		base.OnSpawn();
 	}
 
 	public void AddAccessory(Accessory accessory)
 	{
-		this.animController.AddSymbolOverride(accessory.slot.targetSymbolId, accessory.batchSource, accessory.symbol, false);
+		SymbolOverrideController component = this.animController.GetComponent<SymbolOverrideController>();
+		component.AddSymbolOverride(accessory.slot.targetSymbolId, accessory.symbol, 0);
 		if (!this.HasAccessory(accessory))
 		{
 			ResourceRef<Accessory> resourceRef = new ResourceRef<Accessory>(accessory);
@@ -26,7 +33,20 @@ public class Accessorizer : KMonoBehaviour
 	public void RemoveAccessory(Accessory accessory)
 	{
 		this.accessories.RemoveAll((ResourceRef<Accessory> x) => x.Get() == accessory);
-		this.animController.RemoveSymbolOverride(accessory.slot.targetSymbolId);
+		SymbolOverrideController component = this.animController.GetComponent<SymbolOverrideController>();
+		component.TryRemoveSymbolOverride(accessory.slot.targetSymbolId, 0);
+	}
+
+	public void ApplyAccessories()
+	{
+		foreach (ResourceRef<Accessory> resourceRef in this.accessories)
+		{
+			Accessory accessory = resourceRef.Get();
+			if (accessory != null)
+			{
+				this.AddAccessory(accessory);
+			}
+		}
 	}
 
 	public bool HasAccessory(Accessory accessory)
@@ -59,8 +79,6 @@ public class Accessorizer : KMonoBehaviour
 		fd.body = HashedString.Invalid;
 		fd.arms = HashedString.Invalid;
 		fd.hat = HashedString.Invalid;
-		fd.hatHair = HashedString.Invalid;
-		fd.hairAlways = HashedString.Invalid;
 		for (int i = 0; i < this.accessories.Count; i++)
 		{
 			Accessory accessory = this.accessories[i].Get();
@@ -73,8 +91,6 @@ public class Accessorizer : KMonoBehaviour
 				else if (accessory.slot.Id == "Hair")
 				{
 					fd.hair = accessory.IdHash;
-					fd.hatHair = "hat_" + accessory.Id;
-					fd.hairAlways = accessory.IdHash;
 				}
 				else if (accessory.slot.Id == "HeadShape")
 				{
@@ -102,16 +118,6 @@ public class Accessorizer : KMonoBehaviour
 				}
 			}
 		}
-	}
-
-	public void ApplyAccessories(KAnimControllerBase controller)
-	{
-	}
-
-	[ContextMenu("Refresh Accessories")]
-	public void RefreshAccessories()
-	{
-		this.ApplyAccessories(this.animController);
 	}
 
 	[Serialize]

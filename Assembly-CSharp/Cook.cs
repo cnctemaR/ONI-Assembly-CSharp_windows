@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 
@@ -12,8 +11,6 @@ public class Cook : RoleConfig
 		base.description = DUPLICANTS.ROLES.COOK.DESCRIPTION;
 		base.roleGroup = "Cooking";
 		base.hat = Game.Instance.roleManager.GetHat(Cook.ID);
-		this.preferredChoreTags.Add(GameTags.ChoreTypes.Cooking);
-		this.favoredChoreTypes = new List<ChoreType> { Db.Get().ChoreTypes.Cook };
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Cooking };
 		base.perks = new RolePerk[]
 		{

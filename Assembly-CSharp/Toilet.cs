@@ -273,26 +273,24 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 			{
 				smi.Flush();
 			}).GoTo(this.ready.idle);
-			this.earlyclean.Enter(delegate(Toilet.StatesInstance smi)
+			this.earlyclean.PlayAnims((Toilet.StatesInstance smi) => Toilet.States.FULL_ANIMS, KAnim.PlayMode.Once).OnAnimQueueComplete(this.earlyWaitingForClean);
+			this.earlyWaitingForClean.Enter(delegate(Toilet.StatesInstance smi)
 			{
 				smi.CreateCleanChore();
 			}).Exit(delegate(Toilet.StatesInstance smi)
 			{
 				smi.CancelCleanChore();
-			}).PlayAnim("full_pre")
-				.QueueAnim("full", false, null)
-				.ToggleStatusItem(Db.Get().BuildingStatusItems.ToiletNeedsEmptying, null)
+			}).ToggleStatusItem(Db.Get().BuildingStatusItems.ToiletNeedsEmptying, null)
 				.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable)
 				.EventTransition(GameHashes.OnStorageChange, this.empty, (Toilet.StatesInstance smi) => smi.IsToxicSandRemoved());
-			this.full.Enter(delegate(Toilet.StatesInstance smi)
+			this.full.PlayAnims((Toilet.StatesInstance smi) => Toilet.States.FULL_ANIMS, KAnim.PlayMode.Once).OnAnimQueueComplete(this.fullWaitingForClean);
+			this.fullWaitingForClean.Enter(delegate(Toilet.StatesInstance smi)
 			{
 				smi.CreateCleanChore();
 			}).Exit(delegate(Toilet.StatesInstance smi)
 			{
 				smi.CancelCleanChore();
-			}).PlayAnim("full_pre")
-				.QueueAnim("full", false, null)
-				.ToggleStatusItem(Db.Get().BuildingStatusItems.ToiletNeedsEmptying, null)
+			}).ToggleStatusItem(Db.Get().BuildingStatusItems.ToiletNeedsEmptying, null)
 				.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable)
 				.EventTransition(GameHashes.OnStorageChange, this.empty, (Toilet.StatesInstance smi) => smi.IsToxicSandRemoved())
 				.Enter(delegate(Toilet.StatesInstance smi)
@@ -330,9 +328,15 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 
 		public Toilet.States.ReadyStates ready;
 
+		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State earlyclean;
+
+		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State earlyWaitingForClean;
+
 		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State full;
 
-		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State earlyclean;
+		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State fullWaitingForClean;
+
+		private static readonly HashedString[] FULL_ANIMS = new HashedString[] { "full_pre", "full" };
 
 		public StateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.IntParameter flushes = new StateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.IntParameter(0);
 

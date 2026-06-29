@@ -235,7 +235,7 @@ public class SaveManager : KMonoBehaviour
 				string text = reader.ReadKleiString();
 				int num4 = reader.ReadInt32();
 				int num5 = reader.ReadInt32();
-				Tag tag = TagManager.Create(text, null);
+				Tag tag = TagManager.Create(text);
 				GameObject gameObject;
 				if (!this.prefabMap.TryGetValue(tag, out gameObject))
 				{

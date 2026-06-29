@@ -42,9 +42,14 @@ namespace Klei.AI
 			string text = string.Empty;
 			foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
 			{
-				if (Db.Get().Attributes.Get(attributeModifier.AttributeId).ShowInUI != Attribute.Display.Never)
+				Attribute attribute = Db.Get().Attributes.TryGet(attributeModifier.AttributeId);
+				if (attribute == null)
 				{
-					text = text + "\n" + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, Db.Get().Attributes.Get(attributeModifier.AttributeId).Name, attributeModifier.GetFormattedString(null));
+					attribute = Db.Get().CritterAttributes.TryGet(attributeModifier.AttributeId);
+				}
+				if (attribute != null && attribute.ShowInUI != Attribute.Display.Never)
+				{
+					text = text + "\n" + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, attribute.Name, attributeModifier.GetFormattedString(null));
 				}
 			}
 			StringEntry stringEntry;

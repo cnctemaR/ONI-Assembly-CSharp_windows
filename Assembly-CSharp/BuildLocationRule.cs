@@ -8,5 +8,6 @@ public enum BuildLocationRule
 	Tile,
 	Conduit,
 	NotInTiles,
-	BuildingAttachPoint
+	BuildingAttachPoint,
+	LogicBridge
 }

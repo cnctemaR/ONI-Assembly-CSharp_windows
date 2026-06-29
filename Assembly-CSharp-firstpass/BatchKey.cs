@@ -8,7 +8,7 @@ public struct BatchKey : IEquatable<BatchKey>
 		this._groupID = controller.GetBatchGroupID(false);
 		this._materialType = controller.GetMaterialType();
 		this._z = controller.GetZ();
-		this._idx = KAnimBatchManager.CellXYToChunkXY(controller.GetCellXY());
+		this._idx = KAnimBatchManager.ControllerToChunkXY(controller);
 		this._hash = 0;
 	}
 

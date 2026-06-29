@@ -227,19 +227,17 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		{
 			float totalValue = this.dB.GetTotalValue();
 			float totalValue2 = this.dBRadius.GetTotalValue();
-			string text = ((this.noise <= 0) ? "consumed" : "produced");
-			string text2 = ((this.noise <= 0) ? UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_DECREASE : UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_INCREASE);
-			text2 = text2 + "\n\n" + this.dB.GetAttributeValueTooltip();
-			string text3 = GameUtil.AddPositiveSign(totalValue.ToString(), totalValue > 0f);
-			Descriptor descriptor = new Descriptor(string.Format(UI.BUILDINGEFFECTS.NOISE_CREATED, text3, totalValue2), string.Format(text2, text3, totalValue2), Descriptor.DescriptorType.Effect, false);
+			string text = ((this.noise <= 0) ? UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_DECREASE : UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_INCREASE);
+			text = text + "\n\n" + this.dB.GetAttributeValueTooltip();
+			string text2 = GameUtil.AddPositiveSign(totalValue.ToString(), totalValue > 0f);
+			Descriptor descriptor = new Descriptor(string.Format(UI.BUILDINGEFFECTS.NOISE_CREATED, text2, totalValue2), string.Format(text, text2, totalValue2), Descriptor.DescriptorType.Effect, false);
 			list.Add(descriptor);
 		}
 		else if (this.noise != 0)
 		{
-			string text4 = ((this.noise < 0) ? "consumed" : "produced");
-			string text5 = ((this.noise < 0) ? UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_DECREASE : UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_INCREASE);
-			string text6 = GameUtil.AddPositiveSign(this.noise.ToString(), this.noise > 0);
-			Descriptor descriptor2 = new Descriptor(string.Format(UI.BUILDINGEFFECTS.NOISE_CREATED, text6, this.radius), string.Format(text5, text6, this.radius), Descriptor.DescriptorType.Effect, false);
+			string text3 = ((this.noise < 0) ? UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_DECREASE : UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_INCREASE);
+			string text4 = GameUtil.AddPositiveSign(this.noise.ToString(), this.noise > 0);
+			Descriptor descriptor2 = new Descriptor(string.Format(UI.BUILDINGEFFECTS.NOISE_CREATED, text4, this.radius), string.Format(text3, text4, this.radius), Descriptor.DescriptorType.Effect, false);
 			list.Add(descriptor2);
 		}
 		return list;

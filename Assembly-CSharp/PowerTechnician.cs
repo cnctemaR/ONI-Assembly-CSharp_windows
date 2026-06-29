@@ -12,13 +12,6 @@ public class PowerTechnician : RoleConfig
 		base.description = DUPLICANTS.ROLES.POWER_TECHNICIAN.DESCRIPTION;
 		base.roleGroup = "Technicals";
 		base.hat = Game.Instance.roleManager.GetHat("PowerTechnician");
-		this.preferredChoreTags.Add(GameTags.ChoreTypes.Wiring);
-		this.favoredChoreTypes = new List<ChoreType>
-		{
-			Db.Get().ChoreTypes.GeneratePower,
-			Db.Get().ChoreTypes.Toggle,
-			Db.Get().ChoreTypes.PowerTinker
-		};
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Machinery };
 		base.perks = new RolePerk[]
 		{
@@ -47,13 +40,13 @@ public class PowerTechnician : RoleConfig
 
 	private static HashSet<Tag> GroupedBuildTags = new HashSet<Tag>
 	{
-		TagManager.Create(BuildingConfigManager.GetUnderConstructionName("Wire"), null),
-		TagManager.Create(BuildingConfigManager.GetUnderConstructionName("WireBridge"), null),
-		TagManager.Create(BuildingConfigManager.GetUnderConstructionName("WireRefined"), null),
-		TagManager.Create(BuildingConfigManager.GetUnderConstructionName("WireRefinedBridge"), null),
-		TagManager.Create(BuildingConfigManager.GetUnderConstructionName("HighWattageWire"), null),
-		TagManager.Create(BuildingConfigManager.GetUnderConstructionName("WireBridgeHighWattage"), null),
-		TagManager.Create(BuildingConfigManager.GetUnderConstructionName("LogicWire"), null),
-		TagManager.Create(BuildingConfigManager.GetUnderConstructionName("LogicWireBridge"), null)
+		TagManager.Create(BuildingConfigManager.GetUnderConstructionName("Wire")),
+		TagManager.Create(BuildingConfigManager.GetUnderConstructionName("WireBridge")),
+		TagManager.Create(BuildingConfigManager.GetUnderConstructionName("WireRefined")),
+		TagManager.Create(BuildingConfigManager.GetUnderConstructionName("WireRefinedBridge")),
+		TagManager.Create(BuildingConfigManager.GetUnderConstructionName("HighWattageWire")),
+		TagManager.Create(BuildingConfigManager.GetUnderConstructionName("WireBridgeHighWattage")),
+		TagManager.Create(BuildingConfigManager.GetUnderConstructionName("LogicWire")),
+		TagManager.Create(BuildingConfigManager.GetUnderConstructionName("LogicWireBridge"))
 	};
 }

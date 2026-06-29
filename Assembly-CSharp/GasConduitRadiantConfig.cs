@@ -1,0 +1,69 @@
+﻿using System;
+using TUNING;
+using UnityEngine;
+
+public class GasConduitRadiantConfig : IBuildingConfig
+{
+	public override BuildingDef CreateBuildingDef()
+	{
+		string text = "GasConduitRadiant";
+		int num = 1;
+		int num2 = 1;
+		string text2 = "utilities_gas_radiant_kanim";
+		int num3 = 30;
+		float num4 = 10f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
+		string[] raw_METALS = MATERIALS.RAW_METALS;
+		float num5 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
+		buildingDef.ThermalConductivity = 2f;
+		buildingDef.Overheatable = false;
+		buildingDef.Floodable = false;
+		buildingDef.Entombable = false;
+		buildingDef.Relocatable = false;
+		buildingDef.ViewMode = SimViewMode.GasVentMap;
+		buildingDef.ObjectLayer = ObjectLayer.GasConduit;
+		buildingDef.TileLayer = ObjectLayer.GasConduitTile;
+		buildingDef.ReplacementLayer = ObjectLayer.ReplacementGasConduit;
+		buildingDef.AudioCategory = "Metal";
+		buildingDef.AudioSize = "small";
+		buildingDef.BaseTimeUntilRepair = 0f;
+		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
+		buildingDef.UtilityOutputOffset = new CellOffset(0, 0);
+		buildingDef.SceneLayer = Grid.SceneLayer.GasConduits;
+		buildingDef.isKAnimTile = true;
+		buildingDef.isUtility = true;
+		buildingDef.DragBuild = true;
+		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.GasVentIDs, "GasConduitRadiant");
+		return buildingDef;
+	}
+
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
+	{
+		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
+		Conduit conduit = go.AddOrGet<Conduit>();
+		conduit.type = ConduitType.Gas;
+	}
+
+	public override void DoPostConfigureComplete(GameObject go)
+	{
+		go.GetComponent<Building>().Def.BuildingUnderConstruction.GetComponent<Constructable>().isDiggingRequired = false;
+		go.AddComponent<EmptyConduitWorkable>();
+		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddComponent<KAnimGraphTileVisualizer>();
+		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Gas;
+		kanimGraphTileVisualizer.isPhysicalBuilding = true;
+		BuildingTemplates.DoPostConfigure(go);
+		LiquidConduitConfig.CommonConduitPostConfigureComplete(go);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddComponent<KAnimGraphTileVisualizer>();
+		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Gas;
+		kanimGraphTileVisualizer.isPhysicalBuilding = false;
+	}
+
+	public const string ID = "GasConduitRadiant";
+}

@@ -15,6 +15,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	protected override void OnCmpEnable()
 	{
+		this.materialPropertyBlock = new MaterialPropertyBlock();
 		base.OnCmpEnable();
 		Components.Light2Ds.Add(this);
 		if (base.isSpawned)
@@ -152,6 +153,8 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 	public LightShape shape;
 
 	private int cell = Grid.InvalidCell;
+
+	public MaterialPropertyBlock materialPropertyBlock;
 
 	private bool isRegistered;
 

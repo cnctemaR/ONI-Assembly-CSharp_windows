@@ -34,6 +34,7 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 		this.DoorClose = base.AddEvent(new CellElementEvent("DoorClose", "Door Close", true, true)) as CellElementEvent;
 		this.Excavator = base.AddEvent(new CellElementEvent("Excavator", "Excavator", true, true)) as CellElementEvent;
 		this.DebugTool = base.AddEvent(new CellElementEvent("DebugTool", "Debug Tool", true, true)) as CellElementEvent;
+		this.SandBoxTool = base.AddEvent(new CellElementEvent("SandBoxTool", "Sandbox Tool", true, true)) as CellElementEvent;
 		this.TemplateLoader = base.AddEvent(new CellElementEvent("TemplateLoader", "Template Loader", true, true)) as CellElementEvent;
 		this.Scenario = base.AddEvent(new CellElementEvent("Scenario", "Scenario", true, true)) as CellElementEvent;
 		this.SimCellOccupierOnSpawn = base.AddEvent(new CellElementEvent("SimCellOccupierOnSpawn", "Sim Cell Occupier OnSpawn", true, true)) as CellElementEvent;
@@ -104,6 +105,8 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 	public CellElementEvent Excavator;
 
 	public CellElementEvent DebugTool;
+
+	public CellElementEvent SandBoxTool;
 
 	public CellElementEvent TemplateLoader;
 

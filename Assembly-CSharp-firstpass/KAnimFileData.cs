@@ -29,20 +29,20 @@ public class KAnimFileData
 			{
 				return null;
 			}
-			KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.batchTag, false);
+			KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.batchTag);
 			return batchGroupData.GetBuild(this.buildIndex);
 		}
 	}
 
 	public KAnim.Anim GetAnim(int index)
 	{
-		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.animBatchTag, false);
+		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.animBatchTag);
 		return batchGroupData.GetAnim(index + this.firstAnimIndex);
 	}
 
 	public KAnim.Anim.FrameElement GetAnimFrameElement(int index)
 	{
-		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.animBatchTag, false);
+		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.animBatchTag);
 		return batchGroupData.GetFrameElement(this.firstElementIndex + index);
 	}
 

@@ -356,8 +356,13 @@ public static class TemplateLoader
 		{
 			return null;
 		}
-		KBatchedAnimController kbatchedAnimController = prefab2.AddOrGet<KBatchedAnimController>();
-		GameObject gameObject = Scenario.SpawnPrefab(root_cell, location_x, location_y, prefab.id, kbatchedAnimController.sceneLayer, Folder.Entities);
+		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Front;
+		KBatchedAnimController component = prefab2.GetComponent<KBatchedAnimController>();
+		if (component != null)
+		{
+			sceneLayer = component.sceneLayer;
+		}
+		GameObject gameObject = Scenario.SpawnPrefab(root_cell, location_x, location_y, prefab.id, sceneLayer, Folder.Entities);
 		if (gameObject == null)
 		{
 			global::Debug.LogWarning("Null prefab for " + prefab.id, null);

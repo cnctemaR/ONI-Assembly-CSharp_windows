@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 
@@ -12,12 +11,6 @@ public class SeniorBuilder : RoleConfig
 		base.description = DUPLICANTS.ROLES.SENIOR_BUILDER.DESCRIPTION;
 		base.roleGroup = "Building";
 		base.hat = Game.Instance.roleManager.GetHat(SeniorBuilder.ID);
-		this.preferredChoreTags.Add(GameTags.ChoreTypes.Building);
-		this.favoredChoreTypes = new List<ChoreType>
-		{
-			Db.Get().ChoreTypes.Build,
-			Db.Get().ChoreTypes.Deconstruct
-		};
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Construction };
 		base.perks = new RolePerk[] { RoleManager.rolePerks.IncreaseConstructionLarge };
 	}

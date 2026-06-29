@@ -15,7 +15,6 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		Components.Lures.Add(this);
 		if (this.activeBaitSetting == Tag.Invalid)
 		{
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.NoLureElementSelected, null);
@@ -28,24 +27,10 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 	}
 
-	protected override void OnCleanUp()
-	{
-		Components.Lures.Remove(this);
-		base.OnCleanUp();
-	}
-
 	private void OnStorageChange(object data = null)
 	{
 		bool flag = this.baitStorage.GetAmountAvailable(this.activeBaitSetting) > 0f;
 		this.operational.SetFlag(this.baited, flag);
-		if (flag)
-		{
-			base.GetComponent<KPrefabID>().AddTag(this.activeBaitTag);
-		}
-		else
-		{
-			base.GetComponent<KPrefabID>().RemoveTag(this.activeBaitTag);
-		}
 	}
 
 	public void ChangeBaitSetting(Tag baitSetting)
@@ -57,10 +42,8 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 		if (baitSetting != this.activeBaitSetting)
 		{
 			this.activeBaitSetting = baitSetting;
-			base.GetComponent<KPrefabID>().RemoveTag(this.activeBaitTag);
 			this.baitStorage.DropAll(false);
 		}
-		this.activeBaitTag = TagManager.Create(CreatureLure.BAIT_TAG_PREFIX + baitSetting.Name, null);
 		base.smi.GoTo(base.smi.sm.idle);
 		this.baitStorage.storageFilters = new List<Tag> { this.activeBaitSetting };
 		if (baitSetting != Tag.Invalid)
@@ -94,13 +77,6 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 
 	public static float CONSUMPTION_RATE = 1f;
 
-	public static readonly string BAIT_TAG_PREFIX = "Bait_";
-
-	public CellOffset[] lurePoints = new CellOffset[]
-	{
-		new CellOffset(0, 0)
-	};
-
 	[Serialize]
 	public Tag activeBaitSetting;
 
@@ -113,8 +89,6 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 	private Operational operational;
 
 	private Operational.Flag baited = new Operational.Flag("Baited", Operational.Flag.Type.Requirement);
-
-	private Tag activeBaitTag;
 
 	public class StatesInstance : GameStateMachine<CreatureLure.States, CreatureLure.StatesInstance, CreatureLure, object>.GameInstance
 	{
@@ -150,10 +124,13 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 				HashedString batchTag = ElementLoader.FindElementByName(smi.master.activeBaitSetting.ToString()).substance.anim.batchTag;
 				KAnim.Build build = ElementLoader.FindElementByName(smi.master.activeBaitSetting.ToString()).substance.anim.GetData().build;
 				KAnim.Build.Symbol symbol = build.GetSymbol(new KAnimHashedString(build.name));
-				KAnimHashedString kanimHashedString = new KAnimHashedString("slime_mold");
-				smi.master.GetComponent<KBatchedAnimController>().RemoveSymbolOverride(kanimHashedString);
-				smi.master.GetComponent<KBatchedAnimController>().AddSymbolOverride(kanimHashedString, batchTag, symbol, false);
-			}).QueueAnim("working_pre", false, null).QueueAnim("working_loop", true, null)
+				HashedString hashedString = "slime_mold";
+				SymbolOverrideController component = smi.GetComponent<SymbolOverrideController>();
+				component.TryRemoveSymbolOverride(hashedString, 0);
+				component.AddSymbolOverride(hashedString, symbol, 0);
+				smi.GetSMI<Lure.Instance>().SetActiveLures(new Tag[] { smi.master.activeBaitSetting });
+			}).Exit(new StateMachine<CreatureLure.States, CreatureLure.StatesInstance, CreatureLure, object>.State.Callback(CreatureLure.States.ClearBait)).QueueAnim("working_pre", false, null)
+				.QueueAnim("working_loop", true, null)
 				.EventTransition(GameHashes.OnStorageChange, this.empty, (CreatureLure.StatesInstance smi) => smi.master.baitStorage.IsEmpty() && smi.master.activeBaitSetting != Tag.Invalid)
 				.EventTransition(GameHashes.OperationalChanged, this.idle, (CreatureLure.StatesInstance smi) => !smi.master.operational.IsOperational && !smi.master.baitStorage.IsEmpty());
 			this.empty.QueueAnim("working_pst", false, null).QueueAnim("off", false, null).Enter(delegate(CreatureLure.StatesInstance smi)
@@ -162,6 +139,15 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 			})
 				.EventTransition(GameHashes.OnStorageChange, this.working, (CreatureLure.StatesInstance smi) => !smi.master.baitStorage.IsEmpty() && smi.master.operational.IsOperational)
 				.EventTransition(GameHashes.OperationalChanged, this.working, (CreatureLure.StatesInstance smi) => !smi.master.baitStorage.IsEmpty() && smi.master.operational.IsOperational);
+		}
+
+		private static void ClearBait(StateMachine.Instance smi)
+		{
+			Lure.Instance smi2 = smi.GetSMI<Lure.Instance>();
+			if (smi2 != null)
+			{
+				smi.GetSMI<Lure.Instance>().SetActiveLures(null);
+			}
 		}
 
 		public GameStateMachine<CreatureLure.States, CreatureLure.StatesInstance, CreatureLure, object>.State idle;

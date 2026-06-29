@@ -19,7 +19,8 @@ public class TextureBuffer
 	public TextureRegion Lock(int x, int y, int width, int height)
 	{
 		TexturePage texturePage = this.pool.Alloc(this.name, width, height, this.format);
-		return new TextureRegion(x, y, texturePage, this);
+		TextureRegion textureRegion = new TextureRegion(x, y, texturePage, this);
+		return textureRegion;
 	}
 
 	public void Unlock(TextureRegion region)

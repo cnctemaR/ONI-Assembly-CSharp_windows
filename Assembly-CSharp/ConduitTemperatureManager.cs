@@ -19,8 +19,8 @@ public class ConduitTemperatureManager
 		Element element = data.primaryElement.Element;
 		BuildingDef def = data.building.Def;
 		float num = def.MassForTemperatureModification * element.specificHeatCapacity;
-		float num2 = element.thermalConductivity * def.Insulation;
-		int num3 = ConduitTemperatureManager.ConduitTemperatureManager_Add(contents.temperature, contents.mass, (int)contents.element, conduit_structure_temperature_handle.index, num, num2);
+		float num2 = element.thermalConductivity * def.ThermalConductivity;
+		int num3 = ConduitTemperatureManager.ConduitTemperatureManager_Add(contents.temperature, contents.mass, (int)contents.element, conduit_structure_temperature_handle.index, num, num2, def.ThermalConductivity < 1f);
 		HandleVector<int>.Handle handle = default(HandleVector<int>.Handle);
 		handle.index = num3;
 		if (num3 + 1 > this.temperatures.Length)
@@ -51,7 +51,7 @@ public class ConduitTemperatureManager
 	{
 		if (handle.IsValid())
 		{
-			this.temperatures[handle.index] = 0f;
+			this.temperatures[handle.index] = -1f;
 			this.conduitInfo[handle.index] = new ConduitTemperatureManager.ConduitInfo
 			{
 				type = ConduitType.None,
@@ -103,7 +103,7 @@ public class ConduitTemperatureManager
 	private static extern void ConduitTemperatureManager_Shutdown();
 
 	[DllImport("SimDLL")]
-	private static extern int ConduitTemperatureManager_Add(float contents_temperature, float contents_mass, int contents_element_hash, int conduit_structure_temperature_handle, float conduit_heat_capacity, float conduit_thermal_conductivity);
+	private static extern int ConduitTemperatureManager_Add(float contents_temperature, float contents_mass, int contents_element_hash, int conduit_structure_temperature_handle, float conduit_heat_capacity, float conduit_thermal_conductivity, bool conduit_insulated);
 
 	[DllImport("SimDLL")]
 	private static extern int ConduitTemperatureManager_Set(int handle, float contents_temperature, float contents_mass, int contents_element_hash);

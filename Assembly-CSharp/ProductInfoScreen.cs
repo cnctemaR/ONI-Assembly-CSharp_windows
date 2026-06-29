@@ -67,6 +67,18 @@ public class ProductInfoScreen : KScreen
 		}
 		this.pointerEnterActions = (KScreen.PointerEnterActions)Delegate.Combine(this.pointerEnterActions, new KScreen.PointerEnterActions(this.CheckMouseOver));
 		this.pointerExitActions = (KScreen.PointerExitActions)Delegate.Combine(this.pointerExitActions, new KScreen.PointerExitActions(this.CheckMouseOver));
+		this.sandboxInstantBuildToggle.ChangeState((!SandboxToolParameterMenu.instance.settings.InstantBuild) ? 0 : 1);
+		MultiToggle multiToggle = this.sandboxInstantBuildToggle;
+		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
+		{
+			SandboxToolParameterMenu.instance.settings.InstantBuild = !SandboxToolParameterMenu.instance.settings.InstantBuild;
+			this.sandboxInstantBuildToggle.ChangeState((!SandboxToolParameterMenu.instance.settings.InstantBuild) ? 0 : 1);
+		}));
+		this.sandboxInstantBuildToggle.gameObject.SetActive(Game.Instance.SandboxModeActive);
+		Game.Instance.Subscribe(-1948169901, delegate(object data)
+		{
+			this.sandboxInstantBuildToggle.gameObject.SetActive(Game.Instance.SandboxModeActive);
+		});
 	}
 
 	public void ConfigureScreen(BuildingDef def)
@@ -121,7 +133,7 @@ public class ProductInfoScreen : KScreen
 
 	private void Update()
 	{
-		if (!DebugHandler.InstantBuildMode && this.currentDef != null && this.materialSelectionPanel.CurrentSelectedElement != null && this.currentDef.Mass[0] > WorldInventory.Instance.GetAmount(this.materialSelectionPanel.CurrentSelectedElement.tag))
+		if (!DebugHandler.InstantBuildMode && !Game.Instance.SandboxModeActive && this.currentDef != null && this.materialSelectionPanel.CurrentSelectedElement != null && this.currentDef.Mass[0] > WorldInventory.Instance.GetAmount(this.materialSelectionPanel.CurrentSelectedElement.tag))
 		{
 			this.materialSelectionPanel.AutoSelectAvailableMaterial();
 		}
@@ -264,7 +276,7 @@ public class ProductInfoScreen : KScreen
 
 	private bool BuildRequirementsMet(BuildingDef def)
 	{
-		if (DebugHandler.InstantBuildMode)
+		if (DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive)
 		{
 			return true;
 		}
@@ -319,15 +331,7 @@ public class ProductInfoScreen : KScreen
 		}
 		for (int i = 0; i < recipe.Ingredients.Count; i++)
 		{
-			bool available = false;
-			MaterialSelectionPanel.Filter(recipe.Ingredients[i].tag, recipe.Ingredients[i].amount, delegate(Element element, float kgAvailable, float recipe_amount)
-			{
-				if (kgAvailable >= recipe_amount)
-				{
-					available = true;
-				}
-			});
-			if (!available)
+			if (MaterialSelectionPanel.Filter(recipe.Ingredients[i].tag).kgAvailable < recipe.Ingredients[i].amount)
 			{
 				return false;
 			}
@@ -360,6 +364,8 @@ public class ProductInfoScreen : KScreen
 	public MaterialSelectionPanel materialSelectionPanelPrefab;
 
 	private Dictionary<string, GameObject> descLabels = new Dictionary<string, GameObject>();
+
+	public MultiToggle sandboxInstantBuildToggle;
 
 	[NonSerialized]
 	public MaterialSelectionPanel materialSelectionPanel;

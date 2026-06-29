@@ -33,7 +33,7 @@ public class MedicalCotConfig : IBuildingConfig
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KAnimControllerBase>().initialAnim = "off";
-		go.GetComponent<KPrefabID>().AddTag(TagManager.Create("Bed", null));
+		go.GetComponent<KPrefabID>().AddTag(TagManager.Create("Bed"));
 		Clinic clinic = go.AddOrGet<Clinic>();
 		clinic.doctorVisitInterval = 300f;
 		clinic.workerInjuredAnims = new KAnimFile[] { Assets.GetAnim("anim_healing_bed_kanim") };
@@ -52,9 +52,9 @@ public class MedicalCotConfig : IBuildingConfig
 		roomTracker.customStatusItemID = Db.Get().BuildingStatusItems.ClinicOutsideHospital.Id;
 		Sleepable sleepable = go.AddOrGet<Sleepable>();
 		sleepable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_med_cot_sick_kanim") };
-		DoctorChore doctorChore = go.AddOrGet<DoctorChore>();
-		doctorChore.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_med_cot_doctor_kanim") };
-		doctorChore.workTime = 45f;
+		DoctorChoreWorkable doctorChoreWorkable = go.AddOrGet<DoctorChoreWorkable>();
+		doctorChoreWorkable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_med_cot_doctor_kanim") };
+		doctorChoreWorkable.workTime = 45f;
 		Ownable ownable = go.AddOrGet<Ownable>();
 		ownable.slotID = Db.Get().AssignableSlots.Clinic.Id;
 	}

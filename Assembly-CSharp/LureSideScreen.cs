@@ -6,6 +6,11 @@ using UnityEngine.UI;
 
 public class LureSideScreen : SideScreenContent
 {
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<CreatureLure>() != null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		base.SetTarget(target);

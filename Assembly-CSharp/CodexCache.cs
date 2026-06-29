@@ -38,14 +38,69 @@ public static class CodexCache
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.GEYSERS, CodexEntryGenerator.GenerateGeyserEntries(), null));
 		CategoryEntry categoryEntry = CodexEntryGenerator.GenerateCategoryEntry(CodexCache.FormatLinkID("HOME"), UI.CODEX.CATEGORYNAMES.ROOT, dictionary, null);
 		CodexEntryGenerator.GeneratePageNotFound();
-		CodexCache.baseEntryPath = Application.streamingAssetsPath + "/codex";
 		List<CategoryEntry> list = new List<CategoryEntry>();
 		foreach (KeyValuePair<string, CodexEntry> keyValuePair in dictionary)
 		{
 			list.Add(keyValuePair.Value as CategoryEntry);
 		}
-		List<CodexEntry> list2 = CodexCache.CollectEntries(string.Empty);
-		foreach (CodexEntry codexEntry in list2)
+		CodexCache.CollectYAMLEntries(list);
+		CodexCache.CollectYAMLSubEntries(list);
+		list.Add(categoryEntry);
+		foreach (KeyValuePair<string, CodexEntry> keyValuePair2 in CodexCache.entries)
+		{
+			if (keyValuePair2.Value.subEntries.Count > 0)
+			{
+				keyValuePair2.Value.subEntries.Sort((SubEntry a, SubEntry b) => a.layoutPriority.CompareTo(b.layoutPriority));
+				if (keyValuePair2.Value.icon == null)
+				{
+					keyValuePair2.Value.icon = keyValuePair2.Value.subEntries[0].icon;
+					keyValuePair2.Value.iconColor = keyValuePair2.Value.subEntries[0].iconColor;
+				}
+				List<CodexWidget> list2 = new List<CodexWidget>();
+				list2.Add(new CodexWidget(CodexWidget.ContentType.Spacer));
+				list2.Add(new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string>
+				{
+					{
+						"string",
+						CODEX.HEADERS.SUBENTRIES
+					},
+					{ "style", "subtitle" }
+				}));
+				foreach (SubEntry subEntry in keyValuePair2.Value.subEntries)
+				{
+					list2.Add(new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string> { { "string", subEntry.name } }));
+				}
+				list2.Add(new CodexWidget(CodexWidget.ContentType.Spacer));
+				keyValuePair2.Value.contentContainers.Insert(keyValuePair2.Value.customContentLength, new ContentContainer(list2, ContentContainer.ContentLayout.Vertical));
+			}
+			for (int i = 0; i < keyValuePair2.Value.subEntries.Count; i++)
+			{
+				keyValuePair2.Value.contentContainers.AddRange(keyValuePair2.Value.subEntries[i].contentContainers);
+			}
+		}
+		CodexEntryGenerator.PopulateCategoryEntries(list);
+	}
+
+	public static SubEntry FindSubEntry(string id)
+	{
+		foreach (KeyValuePair<string, CodexEntry> keyValuePair in CodexCache.entries)
+		{
+			foreach (SubEntry subEntry in keyValuePair.Value.subEntries)
+			{
+				if (subEntry.id.ToUpper() == id.ToUpper())
+				{
+					return subEntry;
+				}
+			}
+		}
+		return null;
+	}
+
+	private static void CollectYAMLEntries(List<CategoryEntry> categories)
+	{
+		CodexCache.baseEntryPath = Application.streamingAssetsPath + "/codex";
+		List<CodexEntry> list = CodexCache.CollectEntries(string.Empty);
+		foreach (CodexEntry codexEntry in list)
 		{
 			if (codexEntry != null && codexEntry.id != null && codexEntry.contentContainers != null)
 			{
@@ -55,14 +110,14 @@ public static class CodexCache
 				}
 				else
 				{
-					CodexCache.AddEntry(codexEntry.id, codexEntry, list);
+					CodexCache.AddEntry(codexEntry.id, codexEntry, categories);
 				}
 			}
 		}
-		foreach (string text2 in Directory.GetDirectories(CodexCache.baseEntryPath))
+		foreach (string text in Directory.GetDirectories(CodexCache.baseEntryPath))
 		{
-			List<CodexEntry> list3 = CodexCache.CollectEntries(Path.GetFileNameWithoutExtension(text2));
-			foreach (CodexEntry codexEntry2 in list3)
+			List<CodexEntry> list2 = CodexCache.CollectEntries(Path.GetFileNameWithoutExtension(text));
+			foreach (CodexEntry codexEntry2 in list2)
 			{
 				if (codexEntry2 != null && codexEntry2.id != null && codexEntry2.contentContainers != null)
 				{
@@ -72,13 +127,44 @@ public static class CodexCache
 					}
 					else
 					{
-						CodexCache.AddEntry(codexEntry2.id, codexEntry2, list);
+						CodexCache.AddEntry(codexEntry2.id, codexEntry2, categories);
 					}
 				}
 			}
 		}
-		list.Add(categoryEntry);
-		CodexEntryGenerator.PopulateCategoryEntries(list);
+	}
+
+	private static void CollectYAMLSubEntries(List<CategoryEntry> categories)
+	{
+		CodexCache.baseEntryPath = Application.streamingAssetsPath + "/codex";
+		List<SubEntry> list = CodexCache.CollectSubEntries(string.Empty);
+		using (List<SubEntry>.Enumerator enumerator = list.GetEnumerator())
+		{
+			while (enumerator.MoveNext())
+			{
+				SubEntry v = enumerator.Current;
+				if (v.parentEntryID != null && v.id != null)
+				{
+					if (CodexCache.entries.ContainsKey(v.parentEntryID.ToUpper()))
+					{
+						SubEntry subEntry = CodexCache.entries[v.parentEntryID.ToUpper()].subEntries.Find((SubEntry match) => match.id == v.id);
+						if (subEntry != null)
+						{
+							subEntry.contentContainers.InsertRange(0, v.contentContainers);
+							subEntry.layoutPriority = v.layoutPriority;
+						}
+						else
+						{
+							CodexCache.entries[v.parentEntryID.ToUpper()].subEntries.Add(v);
+						}
+					}
+					else
+					{
+						global::Debug.LogWarningFormat("Codex SubEntry {0} cannot find parent codex entry with id {1}", new object[] { v.name, v.parentEntryID });
+					}
+				}
+			}
+		}
 	}
 
 	public static void AddEntry(string id, CodexEntry entry, List<CategoryEntry> categoryEntries = null)
@@ -112,11 +198,20 @@ public static class CodexCache
 		}
 	}
 
+	public static void AddSubEntry(string id, SubEntry entry)
+	{
+	}
+
+	public static void MergeSubEntry(string id, SubEntry entry)
+	{
+	}
+
 	public static void MergeEntry(string id, CodexEntry entry)
 	{
 		id = CodexCache.FormatLinkID(entry.id);
 		entry.id = id;
 		CodexEntry codexEntry = CodexCache.entries[id];
+		codexEntry.customContentLength = entry.contentContainers.Count;
 		for (int i = entry.contentContainers.Count - 1; i >= 0; i--)
 		{
 			codexEntry.contentContainers.Insert(0, entry.contentContainers[i]);
@@ -172,6 +267,23 @@ public static class CodexCache
 			}
 		}
 		list.Sort((CodexEntry x, CodexEntry y) => x.title.CompareTo(y.title));
+		return list;
+	}
+
+	public static List<SubEntry> CollectSubEntries(string folder)
+	{
+		List<SubEntry> list = new List<SubEntry>();
+		string text = ((!(folder == string.Empty)) ? Path.Combine(CodexCache.baseEntryPath, folder) : CodexCache.baseEntryPath);
+		string[] files = Directory.GetFiles(text, "*.yaml", SearchOption.AllDirectories);
+		foreach (string text2 in files)
+		{
+			SubEntry subEntry = YamlIO<SubEntry>.LoadFile(text2);
+			if (subEntry != null)
+			{
+				list.Add(subEntry);
+			}
+		}
+		list.Sort((SubEntry x, SubEntry y) => x.title.CompareTo(y.title));
 		return list;
 	}
 

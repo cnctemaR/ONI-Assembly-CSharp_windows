@@ -29,7 +29,7 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 		{
 			return false;
 		}
-		HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimConsume)));
+		HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimConsume), "GasBreatherFromWorldProvider"));
 		SimMessages.ConsumeMass(oxygen_breather.mouthCell, getBreathableElement, gas_consumed, 3, handle.index);
 		return true;
 	}
@@ -40,7 +40,22 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 		{
 			return;
 		}
-		Sim.MassConsumedCallback massConsumedCallback = (Sim.MassConsumedCallback)obj;
+		Sim.MassConsumedCallback massConsumedCallback;
+		try
+		{
+			massConsumedCallback = (Sim.MassConsumedCallback)obj;
+		}
+		catch (Exception ex)
+		{
+			Output.LogError(new object[]
+			{
+				"Error occurred trying to cast",
+				obj,
+				(obj == null) ? "null" : obj.GetType().ToString(),
+				"to Sim.MassConsumedCallback"
+			});
+			throw ex;
+		}
 		Game.Instance.accumulators.Accumulate(this.oxygenBreather.O2Accumulator, massConsumedCallback.mass);
 		float num = -massConsumedCallback.mass;
 		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, num, this.oxygenBreather.GetProperName(), null);

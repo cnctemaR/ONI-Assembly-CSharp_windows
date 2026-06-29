@@ -15,12 +15,14 @@ public class MinionVitalsPanel : KMonoBehaviour
 		this.AddLine(Db.Get().Amounts.Wildness, this.icon_hitpoints, null);
 		this.AddLine(Db.Get().Amounts.Incubation, this.icon_hitpoints, null);
 		this.AddLine(Db.Get().Amounts.Fertility, this.icon_hitpoints, null);
+		this.AddLine(Db.Get().Amounts.Age, this.icon_stamina, null);
 		this.AddLine(Db.Get().Amounts.Stress, this.icon_stress, null);
 		this.AddLine(Db.Get().Amounts.Bladder, this.icon_bladder, null);
 		this.AddLine(Db.Get().Amounts.Breath, this.icon_breath, null);
 		this.AddLine(Db.Get().Amounts.Stamina, this.icon_stamina, null);
 		this.AddLine(Db.Get().Amounts.Calories, this.icon_calories, null);
 		this.AddLine(Db.Get().Amounts.ImmuneLevel, this.icon_disease, null);
+		this.AddLine(Db.Get().Amounts.ScaleGrowth, this.icon_hitpoints, null);
 		this.AddLine(Db.Get().Amounts.Temperature, this.icon_temperature, null);
 		this.AddLine(Db.Get().Amounts.Decor, this.icon_decor, (AmountInstance ainstance) => this.GetDecorTooltip(ainstance));
 		this.AddCheckboxLine(Db.Get().Amounts.AirPressure, this.conditionsContainerNormal, (GameObject go) => this.GetAirPressureLabel(go), delegate(GameObject go)

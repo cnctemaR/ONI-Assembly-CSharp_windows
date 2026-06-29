@@ -106,7 +106,7 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor, IElemen
 			SimMessages.AddElementEmitter(float.MaxValue, Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object data)
 			{
 				BuildingElementEmitter.OnSimRegistered(this, data);
-			})).index, -1, -1);
+			}, "BuildingElementEmitter")).index, -1, -1);
 		}
 	}
 

@@ -24,11 +24,17 @@ public class GeneratedBuildings
 	{
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<Operational>());
+		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<LogicPorts>());
 	}
 
 	public static void RemoveLoopingSounds(GameObject go)
 	{
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<LoopingSounds>());
+	}
+
+	public static void RemoveDefaultLogicPorts(GameObject go)
+	{
+		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<LogicPorts>());
 	}
 
 	public static void RegisterWithOverlay(HashSet<Tag> overlay_tags, string id)

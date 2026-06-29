@@ -134,7 +134,7 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 					{
 						smi.GoTo(this.breaking_wall.Pst);
 					}
-				});
+				}, UpdateRate.SIM_200ms, false);
 			this.breaking_wall.Pst.QueueAnim("working_pst", false, null).OnAnimQueueComplete(this.noTarget);
 			this.breaking.ToggleWork<Breakable>(this.breakable, null, null, null);
 		}

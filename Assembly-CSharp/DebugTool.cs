@@ -47,11 +47,19 @@ public class DebugTool : DragTool
 				break;
 			case DebugTool.Type.FillReplaceSubstance:
 			{
-				HashSet<int> hashSet = GameUtil.FloodCollectCells(cell, (int check_cell) => Grid.Element[check_cell].id == Grid.Element[cell].id, 1000, null);
-				foreach (int num in hashSet)
+				GameUtil.FloodFillNext.Clear();
+				GameUtil.FloodFillVisited.Clear();
+				SimHashes elem_hash = Grid.Element[cell].id;
+				GameUtil.FloodFillConditional(cell, delegate(int check_cell)
 				{
-					this.DoReplaceSubstance(num);
-				}
+					bool flag = false;
+					if (Grid.Element[check_cell].id == elem_hash)
+					{
+						flag = true;
+						this.DoReplaceSubstance(check_cell);
+					}
+					return flag;
+				}, GameUtil.FloodFillVisited, null);
 				break;
 			}
 			case DebugTool.Type.AddPressure:

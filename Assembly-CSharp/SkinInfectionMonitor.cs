@@ -12,7 +12,7 @@ public class SkinInfectionMonitor : GameStateMachine<SkinInfectionMonitor, SkinI
 		this.dirty.Update(delegate(SkinInfectionMonitor.Instance smi, float dt)
 		{
 			smi.GetInfectedByContainedDisease(dt);
-		}).EventTransition(GameHashes.ExposeToDisease, this.clean, (SkinInfectionMonitor.Instance smi) => !smi.IsInfecting());
+		}, UpdateRate.SIM_200ms, false).EventTransition(GameHashes.ExposeToDisease, this.clean, (SkinInfectionMonitor.Instance smi) => !smi.IsInfecting());
 	}
 
 	public GameStateMachine<SkinInfectionMonitor, SkinInfectionMonitor.Instance, IStateMachineTarget, object>.State clean;
@@ -25,7 +25,7 @@ public class SkinInfectionMonitor : GameStateMachine<SkinInfectionMonitor, SkinI
 			: base(master)
 		{
 			this.primaryElement = master.GetComponent<PrimaryElement>();
-			this.diseaseConsumptionHandle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnDiseaseConsumed)));
+			this.diseaseConsumptionHandle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnDiseaseConsumed), "SkinInfectionMonitor"));
 		}
 
 		public override void StartSM()

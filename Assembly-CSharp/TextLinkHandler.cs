@@ -7,6 +7,10 @@ public class TextLinkHandler : MonoBehaviour, IPointerClickHandler, IPointerEnte
 {
 	public void OnPointerClick(PointerEventData eventData)
 	{
+		if (eventData.button != PointerEventData.InputButton.Left)
+		{
+			return;
+		}
 		if (!this.text.AllowLinks)
 		{
 			return;
@@ -15,7 +19,15 @@ public class TextLinkHandler : MonoBehaviour, IPointerClickHandler, IPointerEnte
 		if (num != -1)
 		{
 			string text = CodexCache.FormatLinkID(this.text.textInfo.linkInfo[num].GetLinkID());
-			if (!CodexCache.entries.ContainsKey(text) || CodexCache.entries[text].disabled)
+			if (!CodexCache.entries.ContainsKey(text))
+			{
+				SubEntry subEntry = CodexCache.FindSubEntry(text);
+				if (subEntry == null || subEntry.disabled)
+				{
+					text = "PAGENOTFOUND";
+				}
+			}
+			else if (CodexCache.entries[text].disabled)
 			{
 				text = "PAGENOTFOUND";
 			}
@@ -30,7 +42,7 @@ public class TextLinkHandler : MonoBehaviour, IPointerClickHandler, IPointerEnte
 	private void Update()
 	{
 		this.CheckMouseOver();
-		if (TextLinkHandler.hoveredText == this)
+		if (TextLinkHandler.hoveredText == this && this.text.AllowLinks)
 		{
 			PlayerController.Instance.ActiveTool.SetLinkCursor(this.hoverLink);
 		}
@@ -49,9 +61,9 @@ public class TextLinkHandler : MonoBehaviour, IPointerClickHandler, IPointerEnte
 	private void Awake()
 	{
 		this.text = base.GetComponent<LocText>();
-		if (!this.text.AllowLinks)
+		if (this.text.AllowLinks && !this.text.raycastTarget)
 		{
-			this.text.raycastTarget = false;
+			this.text.raycastTarget = true;
 		}
 	}
 
@@ -92,6 +104,10 @@ public class TextLinkHandler : MonoBehaviour, IPointerClickHandler, IPointerEnte
 		{
 			this.SetMouseOver();
 			this.hoverLink = true;
+		}
+		else if (TextLinkHandler.hoveredText == this)
+		{
+			this.hoverLink = false;
 		}
 	}
 

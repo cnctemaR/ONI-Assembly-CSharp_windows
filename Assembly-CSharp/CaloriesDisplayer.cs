@@ -1,0 +1,29 @@
+﻿using System;
+using Klei.AI;
+using UnityEngine;
+
+public class CaloriesDisplayer : StandardAmountDisplayer
+{
+	public CaloriesDisplayer()
+		: base(GameUtil.UnitClass.Calories, GameUtil.TimeSlice.PerCycle, null)
+	{
+		this.formatter = new CaloriesDisplayer.CaloriesAttributeFormatter();
+	}
+
+	public class CaloriesAttributeFormatter : StandardAttributeFormatter
+	{
+		public CaloriesAttributeFormatter()
+			: base(GameUtil.UnitClass.Calories, GameUtil.TimeSlice.PerCycle)
+		{
+		}
+
+		public override string GetFormattedModifier(AttributeModifier modifier, GameObject parent_instance)
+		{
+			if (modifier.IsMultiplier)
+			{
+				return GameUtil.GetFormattedPercent(-modifier.Value * 100f, GameUtil.TimeSlice.None);
+			}
+			return base.GetFormattedModifier(modifier, parent_instance);
+		}
+	}
+}

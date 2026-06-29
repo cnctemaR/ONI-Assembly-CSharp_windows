@@ -30,7 +30,6 @@ public class KPlayerPrefs : YamlIO<KPlayerPrefs>
 				{
 					global::Debug.LogWarning("Creating new KPlayerPrefs..", null);
 					KPlayerPrefs._instance = new KPlayerPrefs();
-					KPlayerPrefs.Save();
 				}
 			}
 			return KPlayerPrefs._instance;

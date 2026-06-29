@@ -31,6 +31,7 @@ public class Global : MonoBehaviour
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.T, Modifier.None, global::Action.Attack, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.N, Modifier.None, global::Action.Capture, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Y, Modifier.None, global::Action.Harvest, true, false),
+			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.B, Modifier.None, global::Action.EmptyPipe, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.P, Modifier.None, global::Action.Prioritize, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.S, Modifier.Alt, global::Action.ToggleScreenshotMode, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.C, Modifier.None, global::Action.BuildingCancel, true, false),
@@ -151,7 +152,16 @@ public class Global : MonoBehaviour
 			new BindingEntry("BuildingsMenu", GamepadButton.NumButtons, KKeyCode.W, Modifier.None, global::Action.BuildMenuKeyW, false, true),
 			new BindingEntry("BuildingsMenu", GamepadButton.NumButtons, KKeyCode.X, Modifier.None, global::Action.BuildMenuKeyX, false, true),
 			new BindingEntry("BuildingsMenu", GamepadButton.NumButtons, KKeyCode.Y, Modifier.None, global::Action.BuildMenuKeyY, false, true),
-			new BindingEntry("BuildingsMenu", GamepadButton.NumButtons, KKeyCode.Z, Modifier.None, global::Action.BuildMenuKeyZ, false, true)
+			new BindingEntry("BuildingsMenu", GamepadButton.NumButtons, KKeyCode.Z, Modifier.None, global::Action.BuildMenuKeyZ, false, true),
+			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.B, Modifier.Shift, global::Action.SandboxBrush, true, false),
+			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.N, Modifier.Shift, global::Action.SandboxSprinkle, true, false),
+			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.F, Modifier.Shift, global::Action.SandboxFlood, true, false),
+			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.K, Modifier.Shift, global::Action.SandboxSample, true, false),
+			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.H, Modifier.Shift, global::Action.SandboxHeatGun, true, false),
+			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.C, Modifier.Shift, global::Action.SandboxClearFloor, true, false),
+			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.X, Modifier.Shift, global::Action.SandboxDestroy, true, false),
+			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.E, Modifier.Shift, global::Action.SandboxSpawnEntity, true, false),
+			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.S, Modifier.Shift, global::Action.ToggleSandboxTools, true, false)
 		};
 		return list.ToArray();
 	}
@@ -188,18 +198,22 @@ public class Global : MonoBehaviour
 		KBatchedAnimUpdater.CreateInstance();
 		DistributionPlatform.Initialize();
 		Localization.Initialize(false);
+		this.RestoreLegacyMetricsSetting();
 		if (DistributionPlatform.Initialized)
 		{
-			global::Debug.Log(string.Concat(new object[]
+			if (!KPrivacyPrefs.instance.disableDataCollection)
 			{
-				"Logged into ",
-				DistributionPlatform.Inst.Name,
-				" with ID:",
-				DistributionPlatform.Inst.LocalUser.Id,
-				", NAME:",
-				DistributionPlatform.Inst.LocalUser.Name
-			}), null);
-			ThreadedHttps<KleiAccount>.Instance.AuthenticateUser(new KleiAccount.GetUserIDdelegate(this.OnGetUserIdKey));
+				global::Debug.Log(string.Concat(new object[]
+				{
+					"Logged into ",
+					DistributionPlatform.Inst.Name,
+					" with ID:",
+					DistributionPlatform.Inst.LocalUser.Id,
+					", NAME:",
+					DistributionPlatform.Inst.LocalUser.Name
+				}), null);
+				ThreadedHttps<KleiAccount>.Instance.AuthenticateUser(new KleiAccount.GetUserIDdelegate(this.OnGetUserIdKey));
+			}
 		}
 		else
 		{
@@ -211,6 +225,17 @@ public class Global : MonoBehaviour
 	private void Start()
 	{
 		base.StartCoroutine(this.mCoroutineManager.UpdateCoroutines());
+	}
+
+	private void RestoreLegacyMetricsSetting()
+	{
+		if (KPlayerPrefs.GetInt("ENABLE_METRICS", 1) == 0)
+		{
+			KPlayerPrefs.DeleteKey("ENABLE_METRICS");
+			KPlayerPrefs.Save();
+			KPrivacyPrefs.instance.disableDataCollection = true;
+			KPrivacyPrefs.Save();
+		}
 	}
 
 	public GameInputManager GetInputManager()
@@ -265,7 +290,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 262109U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 266730U);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());

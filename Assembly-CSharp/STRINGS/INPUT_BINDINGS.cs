@@ -30,6 +30,8 @@ namespace STRINGS
 
 			public static LocString HARVEST = "Harvest";
 
+			public static LocString EMPTYPIPE = "EmptyPipe";
+
 			public static LocString PRIORITIZE = "Prioritize";
 
 			public static LocString TOGGLESCREENSHOTMODE = "ToggleScreenshotMode";
@@ -243,6 +245,29 @@ namespace STRINGS
 			public static LocString DEBUGTOGGLEPERSONALPRIORITYCOMPARISON = "DebugTogglePersonalPriorityComparison";
 
 			public static LocString DEBUGREPORTBUG = "DebugReportBug";
+		}
+
+		public class SANDBOX
+		{
+			public static LocString NAME = "Sandbox";
+
+			public static LocString SANDBOXBRUSH = "SandboxBrush";
+
+			public static LocString SANDBOXSPRINKLE = "SandboxSprinkle";
+
+			public static LocString SANDBOXFLOOD = "SandboxFlood";
+
+			public static LocString SANDBOXSAMPLE = "SandboxSample";
+
+			public static LocString SANDBOXHEATGUN = "SandboxHeatGun";
+
+			public static LocString SANDBOXCLEARFLOOR = "SandboxClearFloor";
+
+			public static LocString SANDBOXDESTROY = "SandboxDestroy";
+
+			public static LocString SANDBOXSPAWNENTITY = "SandboxSpawnEntity";
+
+			public static LocString TOGGLESANDBOXTOOLS = "ToggleSandboxTools";
 		}
 	}
 }

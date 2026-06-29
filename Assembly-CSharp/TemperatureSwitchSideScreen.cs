@@ -35,6 +35,11 @@ public class TemperatureSwitchSideScreen : SideScreenContent, IRender200ms
 		this.UpdateLabels();
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<TemperatureControlledSwitch>() != null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		if (target == null)

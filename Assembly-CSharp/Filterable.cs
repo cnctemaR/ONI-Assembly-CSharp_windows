@@ -6,6 +6,9 @@ using KSerialization;
 
 public class Filterable : KMonoBehaviour
 {
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event Action<Tag> onFilterChanged;
+
 	public Tag SelectedTag
 	{
 		get
@@ -19,10 +22,7 @@ public class Filterable : KMonoBehaviour
 		}
 	}
 
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	public event Action<Tag> onFilterChanged;
-
-	protected virtual IList<Tag> GetTagOptions()
+	public virtual IList<Tag> GetTagOptions()
 	{
 		List<Tag> list = new List<Tag>();
 		IEnumerator enumerator = Enum.GetValues(typeof(SimHashes)).GetEnumerator();
@@ -32,8 +32,35 @@ public class Filterable : KMonoBehaviour
 			{
 				object obj = enumerator.Current;
 				SimHashes simHashes = (SimHashes)obj;
-				Tag tag = GameTagExtensions.Create(simHashes);
-				list.Add(tag);
+				bool flag = true;
+				if (this.filterElementState != Filterable.ElementState.None)
+				{
+					Element element = ElementLoader.FindElementByHash(simHashes);
+					Filterable.ElementState elementState = this.filterElementState;
+					if (elementState != Filterable.ElementState.Gas)
+					{
+						if (elementState != Filterable.ElementState.Liquid)
+						{
+							if (elementState == Filterable.ElementState.Solid)
+							{
+								flag = element.IsSolid;
+							}
+						}
+						else
+						{
+							flag = element.IsLiquid;
+						}
+					}
+					else
+					{
+						flag = element.IsGas;
+					}
+				}
+				if (flag)
+				{
+					Tag tag = GameTagExtensions.Create(simHashes);
+					list.Add(tag);
+				}
 			}
 		}
 		finally
@@ -47,12 +74,6 @@ public class Filterable : KMonoBehaviour
 		return list;
 	}
 
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-		this.selectedTag = this.defaultValue;
-	}
-
 	protected override void OnSpawn()
 	{
 		this.OnFilterChanged();
@@ -64,19 +85,26 @@ public class Filterable : KMonoBehaviour
 		{
 			this.onFilterChanged(this.selectedTag);
 		}
-		if (this.operational != null)
+		Operational component = base.GetComponent<Operational>();
+		if (component != null)
 		{
-			this.operational.SetFlag(Filterable.filterSelected, this.selectedTag != GameTags.Void);
+			component.SetFlag(Filterable.filterSelected, this.selectedTag.IsValid);
 		}
 	}
 
-	private Tag defaultValue = GameTags.Void;
+	[Serialize]
+	public Filterable.ElementState filterElementState;
 
 	[Serialize]
 	private Tag selectedTag;
 
 	private static Operational.Flag filterSelected = new Operational.Flag("filterSelected", Operational.Flag.Type.Requirement);
 
-	[MyCmpGet]
-	private Operational operational;
+	public enum ElementState
+	{
+		None,
+		Solid,
+		Liquid,
+		Gas
+	}
 }

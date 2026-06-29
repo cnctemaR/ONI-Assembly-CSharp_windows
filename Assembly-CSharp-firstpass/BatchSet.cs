@@ -93,7 +93,7 @@ public class BatchSet
 			}
 		}
 		KAnimBatch kanimBatch = new KAnimBatch(this.group, layer, controller.GetZ(), materialType);
-		kanimBatch.Init(controller.batchGroupInstance);
+		kanimBatch.Init();
 		this.AddBatch(kanimBatch);
 		kanimBatch.Register(controller);
 	}

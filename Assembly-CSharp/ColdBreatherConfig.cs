@@ -18,7 +18,7 @@ public class ColdBreatherConfig : IEntityConfig
 		drowningMonitor.Configure(15f, 5f, 0.95f);
 		TemperatureVulnerable temperatureVulnerable = gameObject.AddOrGet<TemperatureVulnerable>();
 		temperatureVulnerable.Configure(213.15f, 183.15f, 368.15f, 463.15f, 0f, 0f);
-		gameObject.AddOrGet<OccupyArea>().objectLayer = ObjectLayer.Building;
+		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		ColdBreather coldBreather = gameObject.AddOrGet<ColdBreather>();
 		coldBreather.deltaEmitTemperature = -5f;
 		coldBreather.emitOffsetCell = new Vector3(0f, 1f);
@@ -58,7 +58,7 @@ public class ColdBreatherConfig : IEntityConfig
 
 	public const string ID = "ColdBreather";
 
-	public static readonly Tag TAG = TagManager.Create("ColdBreather", null);
+	public static readonly Tag TAG = TagManager.Create("ColdBreather");
 
 	public const float FERTILIZATION_RATE = 0.033333335f;
 
@@ -70,5 +70,5 @@ public class ColdBreatherConfig : IEntityConfig
 
 	public const string SEED_ID = "ColdBreatherSeed";
 
-	public static readonly Tag SEED_TAG = TagManager.Create("ColdBreatherSeed", null);
+	public static readonly Tag SEED_TAG = TagManager.Create("ColdBreatherSeed");
 }

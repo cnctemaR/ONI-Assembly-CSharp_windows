@@ -12,9 +12,14 @@ public class HelmetController : KMonoBehaviour
 
 	private KBatchedAnimController GetAssigneeController()
 	{
+		KBatchedAnimController kbatchedAnimController = null;
 		Equippable component = base.GetComponent<Equippable>();
-		Transform transform = component.assignee.GetSoleOwner().transform;
-		return transform.GetComponent<KBatchedAnimController>();
+		if (component.assignee != null)
+		{
+			Transform transform = component.assignee.GetSoleOwner().transform;
+			kbatchedAnimController = transform.GetComponent<KBatchedAnimController>();
+		}
+		return kbatchedAnimController;
 	}
 
 	private void OnEquipped(object data)
@@ -28,20 +33,31 @@ public class HelmetController : KMonoBehaviour
 	private void ShowHelmet()
 	{
 		KBatchedAnimController assigneeController = this.GetAssigneeController();
+		if (assigneeController == null)
+		{
+			return;
+		}
 		KAnimFile anim = Assets.GetAnim("helm_oxygen_kanim");
 		KAnimHashedString kanimHashedString = new KAnimHashedString("snapTo_neck");
-		assigneeController.AddSymbolOverride(kanimHashedString, anim.batchTag, anim.GetData().build.GetSymbol(kanimHashedString), false);
-		assigneeController.StopHidingSymbol(kanimHashedString, true);
-		assigneeController.ShowSymbol(kanimHashedString);
+		assigneeController.GetComponent<SymbolOverrideController>().AddSymbolOverride(kanimHashedString, anim.GetData().build.GetSymbol(kanimHashedString), 5);
+		assigneeController.SetSymbolVisiblity(kanimHashedString, true);
 	}
 
 	private void HideHelmet()
 	{
 		KBatchedAnimController assigneeController = this.GetAssigneeController();
-		KAnimHashedString kanimHashedString = new KAnimHashedString("snapTo_neck");
-		assigneeController.RemoveSymbolOverride(kanimHashedString);
-		assigneeController.HideSymbol(kanimHashedString, true);
-		assigneeController.RemoveVisibleSymbol(kanimHashedString);
+		if (assigneeController == null)
+		{
+			return;
+		}
+		KAnimHashedString kanimHashedString = "snapTo_neck";
+		SymbolOverrideController component = assigneeController.GetComponent<SymbolOverrideController>();
+		if (component == null)
+		{
+			return;
+		}
+		component.RemoveSymbolOverride(kanimHashedString, 5);
+		assigneeController.SetSymbolVisiblity(kanimHashedString, false);
 	}
 
 	private void OnUnequipped(object data)
@@ -50,8 +66,13 @@ public class HelmetController : KMonoBehaviour
 		if (component != null)
 		{
 			this.HideHelmet();
-			component.assignee.GetSoleOwner().transform.GetComponent<KMonoBehaviour>().Unsubscribe(961737054, new Action<object>(this.OnBeginRecoverBreath));
-			component.assignee.GetSoleOwner().transform.GetComponent<KMonoBehaviour>().Unsubscribe(-2037519664, new Action<object>(this.OnEndRecoverBreath));
+			IAssignableIdentity assignee = component.assignee;
+			if (assignee != null)
+			{
+				KMonoBehaviour component2 = assignee.GetSoleOwner().transform.GetComponent<KMonoBehaviour>();
+				component2.Unsubscribe(961737054, new Action<object>(this.OnBeginRecoverBreath));
+				component2.Unsubscribe(-2037519664, new Action<object>(this.OnEndRecoverBreath));
+			}
 		}
 	}
 

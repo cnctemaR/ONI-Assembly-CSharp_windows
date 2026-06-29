@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Database;
+using FMODUnity;
 using Klei.AI;
 using KSerialization;
 using TUNING;
@@ -44,14 +45,16 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.arm_go = new GameObject(text);
 		this.arm_go.SetActive(false);
 		this.arm_go.transform.parent = component.transform;
+		this.looping_sounds = this.arm_go.AddComponent<LoopingSounds>();
+		this.rotateSound = GlobalAssets.GetSound(this.rotateSound, false);
 		KPrefabID kprefabID = this.arm_go.AddComponent<KPrefabID>();
 		kprefabID.PrefabTag = new Tag(text);
 		this.arm_anim_ctrl = this.arm_go.AddComponent<KBatchedAnimController>();
+		this.arm_anim_ctrl.AnimFiles = new KAnimFile[] { component.AnimFiles[0] };
 		this.arm_anim_ctrl.initialAnim = "arm";
 		this.arm_anim_ctrl.isMovable = true;
-		this.arm_anim_ctrl.AddAnims(new KAnimFile[] { component.GetAnims()[0] });
 		this.arm_anim_ctrl.sceneLayer = Grid.SceneLayer.TransferArm;
-		component.HideSymbol(new KAnimHashedString("arm_target"), true);
+		component.SetSymbolVisiblity("arm_target", false);
 		bool flag;
 		Vector4 column = component.GetSymbolTransform(new HashedString("arm_target"), out flag).GetColumn(3);
 		Vector3 vector = column;
@@ -107,6 +110,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		FetchAreaChore fetchAreaChore = this.choreDriver.GetCurrentChore() as FetchAreaChore;
 		if (this.worker.workable && fetchAreaChore != null && this.rotation_complete)
 		{
+			this.StopRotateSound();
 			if (fetchAreaChore.IsDelivering)
 			{
 				this.SetArmAnim(SolidTransferArm.ArmAnim.Drop);
@@ -335,6 +339,44 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.arm_rot += num2;
 		this.SetArmRotation(this.arm_rot);
 		this.rotation_complete = Mathf.Approximately(num2, 0f);
+		if (!warp && !this.rotation_complete)
+		{
+			if (!this.rotateSoundPlaying)
+			{
+				this.StartRotateSound();
+			}
+			this.SetRotateSoundParameter(this.arm_rot);
+		}
+		else
+		{
+			this.StopRotateSound();
+		}
+	}
+
+	private void StartRotateSound()
+	{
+		if (!this.rotateSoundPlaying)
+		{
+			this.looping_sounds.StartSound(this.rotateSound, base.transform.GetPosition());
+			this.rotateSoundPlaying = true;
+		}
+	}
+
+	private void SetRotateSoundParameter(float arm_rot)
+	{
+		if (this.rotateSoundPlaying)
+		{
+			this.looping_sounds.SetParameter(this.rotateSound, "rotation", arm_rot);
+		}
+	}
+
+	private void StopRotateSound()
+	{
+		if (this.rotateSoundPlaying)
+		{
+			this.looping_sounds.StopSound(this.rotateSound);
+			this.rotateSoundPlaying = false;
+		}
 	}
 
 	[MyCmpReq]
@@ -374,6 +416,13 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	private GameObject arm_go;
 
+	private LoopingSounds looping_sounds;
+
+	private bool rotateSoundPlaying;
+
+	[EventRef]
+	private string rotateSound = "TransferArm_rotate";
+
 	private KAnimLink link;
 
 	private float arm_rot = 45f;
@@ -407,7 +456,10 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		{
 			default_state = this.off;
 			this.root.DoNothing();
-			this.off.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.on, (SolidTransferArm.SMInstance smi) => smi.GetComponent<Operational>().IsOperational);
+			this.off.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.on, (SolidTransferArm.SMInstance smi) => smi.GetComponent<Operational>().IsOperational).Enter(delegate(SolidTransferArm.SMInstance smi)
+			{
+				smi.master.StopRotateSound();
+			});
 			this.on.DefaultState(this.on.idle).EventTransition(GameHashes.OperationalChanged, this.off, (SolidTransferArm.SMInstance smi) => !smi.GetComponent<Operational>().IsOperational);
 			this.on.idle.PlayAnim("on").EventTransition(GameHashes.ActiveChanged, this.on.working, (SolidTransferArm.SMInstance smi) => smi.GetComponent<Operational>().IsActive);
 			this.on.working.PlayAnim("working").EventTransition(GameHashes.ActiveChanged, this.on.idle, (SolidTransferArm.SMInstance smi) => !smi.GetComponent<Operational>().IsActive);

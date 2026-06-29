@@ -11,8 +11,6 @@ public class MechatronicEngineer : RoleConfig
 		base.description = DUPLICANTS.ROLES.MECHATRONIC_ENGINEER.DESCRIPTION;
 		base.roleGroup = "Technicals";
 		base.hat = Game.Instance.roleManager.GetHat("MechatronicEngineer");
-		this.preferredChoreTags.Add(GameTags.ChoreTypes.Fabricating);
-		this.preferredChoreTags.Add(GameTags.ChoreTypes.Conveyor);
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Machinery };
 		base.perks = new RolePerk[]
 		{

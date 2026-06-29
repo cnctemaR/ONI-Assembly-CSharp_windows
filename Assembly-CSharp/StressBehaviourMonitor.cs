@@ -16,7 +16,7 @@ public class StressBehaviourMonitor : GameStateMachine<StressBehaviourMonitor, S
 		this.stressed.tierTwo.DefaultState(this.stressed.tierTwo.actingOut).Update(delegate(StressBehaviourMonitor.Instance smi, float dt)
 		{
 			smi.sm.timeInTierTwoStressResponse.Set(smi.sm.timeInTierTwoStressResponse.Get(smi) + dt, smi);
-		}).Exit("ResetStress", delegate(StressBehaviourMonitor.Instance smi)
+		}, UpdateRate.SIM_200ms, false).Exit("ResetStress", delegate(StressBehaviourMonitor.Instance smi)
 		{
 			Db.Get().Amounts.Stress.Lookup(smi.gameObject).SetValue(STRESS.ACTING_OUT_RESET);
 		});

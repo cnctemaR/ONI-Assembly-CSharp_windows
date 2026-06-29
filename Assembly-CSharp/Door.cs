@@ -47,7 +47,6 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 	{
 		base.OnPrefabInit();
 		this.overrideAnims = Door.OVERRIDE_ANIMS;
-		this.autoRegisterSimRender = false;
 	}
 
 	private Door.ControlState GetNextState(Door.ControlState wantedState)
@@ -351,6 +350,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
 		HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
 		structureTemperatures.Enable(handle);
+		this.do_melt_check = false;
 	}
 
 	private void OnSimDoorClosed()
@@ -362,6 +362,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
 		HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
 		structureTemperatures.Disable(handle);
+		this.do_melt_check = true;
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -497,7 +498,6 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		bool flag = newValue == 1;
 		this.requestedState = ((!flag) ? Door.ControlState.Closed : Door.ControlState.Opened);
 		this.applyLogicChange = true;
-		SimAndRenderScheduler.instance.Add(this, false);
 	}
 
 	public void Sim200ms(float dt)
@@ -510,7 +510,23 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		{
 			this.applyLogicChange = false;
 			this.ApplyRequestedControlState(false);
-			SimAndRenderScheduler.instance.Remove(this);
+		}
+		if (this.do_melt_check)
+		{
+			StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
+			HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
+			if (handle.IsValid() && !structureTemperatures.GetData(handle).enabled)
+			{
+				foreach (int num in this.building.PlacementCells)
+				{
+					if (!Grid.Solid[num])
+					{
+						PrimaryElement component = base.GetComponent<PrimaryElement>();
+						StructureTemperatureComponents.DoMelt(component);
+						break;
+					}
+				}
+			}
 		}
 	}
 
@@ -548,6 +564,8 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 	private Door.ControlState controlState;
 
 	private bool on = true;
+
+	private bool do_melt_check;
 
 	private int openCount;
 

@@ -53,28 +53,40 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 		public void FindFood()
 		{
 			this.targetCell = PathProber.InvalidCell;
-			int num = Grid.PosToCell(base.transform.position);
-			Element element = Grid.Element[num];
-			TagBits tagBits = new TagBits(element.tag);
-			foreach (Diet.Info info in base.def.diet.infos)
+			this.FindTargetGasCell();
+		}
+
+		public void FindTargetGasCell()
+		{
+			GameUtil.FloodFillFind(delegate(int test_cell)
 			{
-				if (info.IsMatch(tagBits))
+				Element element = Grid.Element[test_cell];
+				TagBits tagBits = new TagBits(element.tag);
+				foreach (Diet.Info info in base.def.diet.infos)
 				{
-					this.targetCell = num;
-					this.targetElement = element;
-					break;
+					if (info.IsMatch(tagBits))
+					{
+						this.targetCell = test_cell;
+						this.targetElement = element;
+						return true;
+					}
 				}
-			}
+				return false;
+			}, Grid.PosToCell(base.gameObject), 5, true, true);
 		}
 
 		public void Consume(float dt)
 		{
-			int index = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnMassConsumed))).index;
+			int index = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnMassConsumed), " GasAndLiquidConsumerMonitor")).index;
 			SimMessages.ConsumeMass(Grid.PosToCell(this), this.targetElement.id, base.def.consumptionRate * dt, 3, index);
 		}
 
 		public void OnMassConsumed(object data)
 		{
+			if (!base.IsRunning())
+			{
+				return;
+			}
 			Sim.MassConsumedCallback massConsumedCallback = (Sim.MassConsumedCallback)data;
 			if (massConsumedCallback.mass > 0f)
 			{

@@ -8,6 +8,40 @@ namespace STRINGS
 
 		public static LocString BAGGED_DESC_FMT = "This {0} has been captured and is now safe to relocate.";
 
+		public class FAMILY
+		{
+			public static LocString HATCH = UI.FormatAsLink("Hatch", "HATCHSPECIES");
+
+			public static LocString LIGHTBUG = UI.FormatAsLink("Shine Bug", "LIGHTBUGSPECIES");
+
+			public static LocString OILFLOATER = UI.FormatAsLink("Slickster", "OILFLOATERSPECIES");
+
+			public static LocString DRECKO = UI.FormatAsLink("Drecko", "DRECKOSPECIES");
+
+			public static LocString GLOM = UI.FormatAsLink("Morb", "GLOMSPECIES");
+
+			public static LocString PUFT = UI.FormatAsLink("Puft", "PUFTSPECIES");
+
+			public static LocString PACU = UI.FormatAsLink("Pacu", "PACUSPECIES");
+		}
+
+		public class FAMILY_PLURAL
+		{
+			public static LocString HATCHSPECIES = UI.FormatAsLink("Hatches", "HATCHSPECIES");
+
+			public static LocString LIGHTBUGSPECIES = UI.FormatAsLink("Shine Bugs", "LIGHTBUGSPECIES");
+
+			public static LocString OILFLOATERSPECIES = UI.FormatAsLink("Slicksters", "OILFLOATERSPECIES");
+
+			public static LocString DRECKOSPECIES = UI.FormatAsLink("Dreckos", "DRECKOSPECIES");
+
+			public static LocString GLOMSPECIES = UI.FormatAsLink("Morbs", "GLOMSPECIES");
+
+			public static LocString PUFTSPECIES = UI.FormatAsLink("Pufts", "PUFTSPECIES");
+
+			public static LocString PACUSPECIES = UI.FormatAsLink("Pacus", "PACUSPECIES");
+		}
+
 		public class SPECIES
 		{
 			public class CHLORINEGEYSER
@@ -17,11 +51,38 @@ namespace STRINGS
 				public static LocString DESC = "A highly pressurized geyser that periodically erupts with " + ELEMENTS.CHLORINEGAS.NAME + ".";
 			}
 
-			public class FLUT
+			public class PACU
 			{
-				public static LocString NAME = UI.FormatAsLink("Pacu", "FLUT");
+				public static LocString NAME = UI.FormatAsLink("Pacu", "PACU");
 
-				public static LocString DESC = "Every organism in the known universe finds the Pacu extremely delicious.";
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Pacus are aquatic creatures that cannot live outside of ",
+					ELEMENTS.WATER.NAME,
+					" or ",
+					ELEMENTS.DIRTYWATER.NAME,
+					".\n\nEvery organism in the known universe finds the Pacu extremely delicious."
+				});
+
+				public static LocString EGG_NAME = UI.FormatAsLink("Pacu Egg", "PACUEGG");
+
+				public class VARIANT_TROPICAL
+				{
+					public static LocString NAME = UI.FormatAsLink("Tropical Pacu", "TROPICAL_PACU");
+
+					public static LocString DESC = "Every organism in the known universe finds the Pacu extremely delicious.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Tropical Pacu Egg", "TROPICALPACUEGG");
+				}
+
+				public class VARIANT_CLEANER
+				{
+					public static LocString NAME = UI.FormatAsLink("Gulp Fish", "GULP_FISH");
+
+					public static LocString DESC = "Every organism in the known universe finds the Pacu extremely delicious.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Gulp Fish Egg", "CLEANERPACUEGG");
+				}
 			}
 
 			public class GLOM
@@ -39,7 +100,108 @@ namespace STRINGS
 
 				public static LocString DESC = "Hatches excrete solid " + ELEMENTS.CARBON.NAME + " as waste and may be uncovered by digging up Buried Objects.";
 
-				public static LocString EGG_NAME = UI.FormatAsLink("Hatchling Egg", "HATCHEGG");
+				public static LocString EGG_NAME = UI.FormatAsLink("Hatchling Egg", "HATCH");
+
+				public class BABY
+				{
+					public static LocString NAME = UI.FormatAsLink("Hatchling", "HATCH");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"An innocent little ",
+						UI.FormatAsLink("Hatchling", "HATCHLING"),
+						".\n\nIn time, it will mature into an adult ",
+						UI.FormatAsLink("Hatch", "HATCH"),
+						"."
+					});
+				}
+
+				public class VARIANT_HARD
+				{
+					public static LocString NAME = UI.FormatAsLink("Stone Hatch", "HATCHHARD");
+
+					public static LocString DESC = "Stone Hatches excrete solid " + ELEMENTS.CARBON.NAME + " as waste and enjoy burrowing into the ground.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Stone Hatchling Egg", "HATCHHARD");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Stone Hatchling", "HATCHHARD");
+
+						public static LocString DESC = "An innocent baby " + UI.FormatAsLink("Hatch", "HATCH") + ".\n\nThis one is a Stone morph, and loves nibbling on rocks and metals.";
+					}
+				}
+
+				public class VARIANT_VEGGIE
+				{
+					public static LocString NAME = UI.FormatAsLink("Sage Hatch", "HATCHVEGGIE");
+
+					public static LocString DESC = "Sage Hatches excrete solid " + ELEMENTS.CARBON.NAME + " as waste and enjoy burrowing into the ground.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Sage Hatchling Egg", "HATCHVEGGIE");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Sage Hatchling", "HATCHVEGGIE");
+
+						public static LocString DESC = "An innocent baby " + UI.FormatAsLink("Hatch", "HATCH") + ".\n\nThis one is a Sage morph, and loves nibbling on most organic materials.";
+					}
+				}
+
+				public class VARIANT_METAL
+				{
+					public static LocString NAME = UI.FormatAsLink("Smooth Hatch", "HATCHMETAL");
+
+					public static LocString DESC = "Smooth Hatches excrete solid " + ELEMENTS.COPPER.NAME + " as waste and enjoy burrowing into the ground.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Smooth Hatchling Egg", "HATCHMETAL");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Smooth Hatchling", "HATCHMETAL");
+
+						public static LocString DESC = "An innocent baby " + UI.FormatAsLink("Hatch", "HATCHMETAL") + ".\n\nThis one is a Smooth morph, and loves nibbling on different types of metals.";
+					}
+				}
+			}
+
+			public class DRECKO
+			{
+				public static LocString NAME = UI.FormatAsLink("Drecko", "DRECKO");
+
+				public static LocString DESC = "Dreckos are slinking creatures that can clamber up walls with unexpected speed.\n\nTheir backsides are covered in thick woolly fibers that only grow in " + UI.FormatAsLink("Hydrogen", "HYDROGEN") + " climates.";
+
+				public static LocString EGG_NAME = UI.FormatAsLink("Drecklet Egg", "DRECKO");
+
+				public class BABY
+				{
+					public static LocString NAME = UI.FormatAsLink("Drecklet", "DRECKO");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"A little bug-eyed ",
+						UI.FormatAsLink("Drecklet", "DRECKO"),
+						".\n\nIn time it will mature into a fully grown ",
+						UI.FormatAsLink("Drecko", "DRECKO"),
+						"."
+					});
+				}
+
+				public class VARIANT_PLASTIC
+				{
+					public static LocString NAME = UI.FormatAsLink("Glossy Drecko", "DRECKOPLASTIC");
+
+					public static LocString DESC = "Glossy Dreckos are slinking creatures that can clamber up walls with unexpected speed.\n\nTheir backsides are covered in bioplastic scales that only grow in " + UI.FormatAsLink("Hydrogen", "HYDROGEN") + " climates.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Glossy Drecklet Egg", "DRECKOPLASTIC");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Glossy Drecklet", "DRECKOPLASTIC");
+
+						public static LocString DESC = "A little bug-eyed " + UI.FormatAsLink("Drecklet", "DRECKO") + ".\n\nThis one is a Glossy morph.";
+					}
+				}
 			}
 
 			public class OILFLOATER
@@ -55,7 +217,60 @@ namespace STRINGS
 					"."
 				});
 
-				public static LocString EGG_NAME = UI.FormatAsLink("Slickster Larva Egg", "OILFLOATEREGG");
+				public static LocString EGG_NAME = UI.FormatAsLink("Slickster Larva Egg", "OILFLOATER");
+
+				public class BABY
+				{
+					public static LocString NAME = UI.FormatAsLink("Slickster Larva", "OILFLOATER");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"A goopy little ",
+						UI.FormatAsLink("Slickster Larva", "OILFLOATER"),
+						".\n\nOne day it will grow into an adult",
+						UI.FormatAsLink("Slickster", "OILFLOATER"),
+						"."
+					});
+				}
+
+				public class VARIANT_HIGHTEMP
+				{
+					public static LocString NAME = UI.FormatAsLink("Molten Slickster", "OILFLOATERHIGHTEMP");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"Molten Slicksters are slimy critters that consume ",
+						ELEMENTS.CARBONDIOXIDE.NAME,
+						" and exude ",
+						ELEMENTS.PETROLEUM.NAME,
+						"."
+					});
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Molten Slickster Larva Egg", "OILFLOATERHIGHTEMP");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Molten Slickster Larva", "OILFLOATERHIGHTEMP");
+
+						public static LocString DESC = "A goopy baby " + UI.FormatAsLink("Slickster", "OILFLOATERHIGHTEMP") + ".\n\nThis one is a Molten morph.";
+					}
+				}
+
+				public class VARIANT_DECOR
+				{
+					public static LocString NAME = UI.FormatAsLink("Longhair Slickster", "OILFLOATERDECOR");
+
+					public static LocString DESC = "Longhair Slicksters are slimy critters that consume " + ELEMENTS.OXYGEN.NAME + " and thrive in close contact with Duplicant companions.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Longhair Slickster Larva Egg", "OILFLOATERDECOR");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Longhair Slickster Larva", "OILFLOATERDECOR");
+
+						public static LocString DESC = "A goopy baby " + UI.FormatAsLink("Slickster", "OILFLOATERDECOR") + ".\n\nThis one is a Longhair morph.";
+					}
+				}
 			}
 
 			public class PUFT
@@ -64,7 +279,69 @@ namespace STRINGS
 
 				public static LocString DESC = "Pufts are non-aggressive critters that excrete lumps of " + ELEMENTS.SLIMEMOLD.NAME + " with each breath.";
 
-				public static LocString EGG_NAME = UI.FormatAsLink("Puftlet Egg", "PUFTEGG");
+				public static LocString EGG_NAME = UI.FormatAsLink("Puftlet Egg", "PUFT");
+
+				public class BABY
+				{
+					public static LocString NAME = UI.FormatAsLink("Puftlet", "PUFT");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"A gassy little ",
+						UI.FormatAsLink("Puftlet", "PUFT"),
+						".\n\nIn time it will grow into an adult ",
+						UI.FormatAsLink("Puft", "PUFT"),
+						"."
+					});
+				}
+
+				public class VARIANT_ALPHA
+				{
+					public static LocString NAME = UI.FormatAsLink("Puft Prince", "PUFTALPHA");
+
+					public static LocString DESC = "The Puft Prince is a lazy critter that excretes little lumps of " + ELEMENTS.SLIMEMOLD.NAME + " with each breath.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Puftlet Prince Egg", "PUFTALPHA");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Puftlet Prince", "PUFTALPHA");
+
+						public static LocString DESC = "A gassy baby " + UI.FormatAsLink("Puft", "PUFTALPHA") + ".\n\nThis one seems a bit snobby...";
+					}
+				}
+
+				public class VARIANT_OXYLITE
+				{
+					public static LocString NAME = UI.FormatAsLink("Dense Puft", "PUFTOXYLITE");
+
+					public static LocString DESC = "Dense Pufts are non-aggressive critters that excrete condensed " + ELEMENTS.OXYROCK.NAME + " with each breath.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Dense Puftlet Egg", "PUFTOXYLITE");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Dense Puftlet", "PUFTOXYLITE");
+
+						public static LocString DESC = "A gassy baby " + UI.FormatAsLink("Puft", "PUFTOXYLITE") + ".\n\nThis one is a Dense morph.";
+					}
+				}
+
+				public class VARIANT_BLEACHSTONE
+				{
+					public static LocString NAME = UI.FormatAsLink("Squeaky Puft", "PUFTBLEACHSTONE");
+
+					public static LocString DESC = "Squeaky Pufts are non-aggressive critters that excrete lumps of " + ELEMENTS.BLEACHSTONE.NAME + " with each breath.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Squeaky Puftlet Egg", "PUFTBLEACHSTONE");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Squeaky Puftlet", "PUFTBLEACHSTONE");
+
+						public static LocString DESC = "A gassy baby " + UI.FormatAsLink("Puft", "PUFTBLEACHSTONE") + ".\n\nThis one is a Squeaky morph.";
+					}
+				}
 			}
 
 			public class GREEDYGREEN
@@ -87,7 +364,110 @@ namespace STRINGS
 
 				public static LocString DESC = "Shine Bugs emit a soft " + UI.FormatAsLink("Light", "LIGHT") + " in hopes of attracting more of their kind for company.";
 
-				public static LocString EGG_NAME = UI.FormatAsLink("Shine Nymph Egg", "LIGHTBUGEGG");
+				public static LocString EGG_NAME = UI.FormatAsLink("Shine Nymph Egg", "LIGHTBUG");
+
+				public class BABY
+				{
+					public static LocString NAME = UI.FormatAsLink("Shine Nymph", "LIGHTBUG");
+
+					public static LocString DESC = "A chubby baby " + UI.FormatAsLink("Shine Bug", "LIGHTBUG") + ".";
+				}
+
+				public class VARIANT_ORANGE
+				{
+					public static LocString NAME = UI.FormatAsLink("Sunny Shine Bug", "LIGHTBUGORANGE");
+
+					public static LocString DESC = "Shine Bugs emit a soft " + UI.FormatAsLink("Light", "LIGHT") + " in hopes of attracting more of their kind for company.\n\nThe light of the Sunny morph has been turned orange through selective breeding.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Sunny Shine Nymph Egg", "LIGHTBUGORANGE");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Sunny Shine Nymph", "LIGHTBUGORANGE");
+
+						public static LocString DESC = "A chubby baby " + UI.FormatAsLink("Shine Bug", "LIGHTBUGORANGE") + ".\n\nThis one is an orange Sunny morph.";
+					}
+				}
+
+				public class VARIANT_PURPLE
+				{
+					public static LocString NAME = UI.FormatAsLink("Royal Shine Bug", "LIGHTBUGPURPLE");
+
+					public static LocString DESC = "Shine Bugs emit a soft " + UI.FormatAsLink("Light", "LIGHT") + " in hopes of attracting more of their kind for company.\n\nThe light of the Royal morph has been turned purple through selective breeding.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Royal Shine Nymph Egg", "LIGHTBUGPURPLE");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Royal Shine Nymph", "LIGHTBUGPURPLE");
+
+						public static LocString DESC = "A chubby baby " + UI.FormatAsLink("Shine Bug", "LIGHTBUGPURPLE") + ".\n\nThis one is a purple Royal morph.";
+					}
+				}
+
+				public class VARIANT_PINK
+				{
+					public static LocString NAME = UI.FormatAsLink("Vital Shine Bug", "LIGHTBUGPINK");
+
+					public static LocString DESC = "Shine Bugs emit a soft " + UI.FormatAsLink("Light", "LIGHT") + " in hopes of attracting more of their kind for company.\n\nThe light of the Vital morph has been turned pink through selective breeding.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Vital Shine Nymph Egg", "LIGHTBUGPINK");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Vital Shine Nymph", "LIGHTBUGPINK");
+
+						public static LocString DESC = "A chubby baby " + UI.FormatAsLink("Shine Bug", "LIGHTBUGPINK") + ".\n\nThis one is a pink Vital morph.";
+					}
+				}
+
+				public class VARIANT_BLUE
+				{
+					public static LocString NAME = UI.FormatAsLink("Placid Shine Bug", "LIGHTBUGBLUE");
+
+					public static LocString DESC = "Shine Bugs emit a soft " + UI.FormatAsLink("Light", "LIGHT") + " in hopes of attracting more of their kind for company.\n\nThe light of the Placid morph has been turned blue through selective breeding.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Placid Shine Nymph Egg", "LIGHTBUGBLUE");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Placid Shine Nymph", "LIGHTBUGBLUE");
+
+						public static LocString DESC = "A chubby baby " + UI.FormatAsLink("Shine Bug", "LIGHTBUGBLUE") + ".\n\nThis one is a blue Placid morph.";
+					}
+				}
+
+				public class VARIANT_BLACK
+				{
+					public static LocString NAME = UI.FormatAsLink("Nega Shine Bug", "LIGHTBUGBLACK");
+
+					public static LocString DESC = "This Shine Bug emits no " + UI.FormatAsLink("Light", "LIGHT") + ", but it makes up for it by having an excellent personality.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Nega Shine Nymph Egg", "LIGHTBUGBLACK");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Nega Shine Nymph", "LIGHTBUGBLACK");
+
+						public static LocString DESC = "A chubby baby " + UI.FormatAsLink("Shine Bug", "LIGHTBUGBLACK") + ".\n\nThis one is a black Nega morph.";
+					}
+				}
+
+				public class VARIANT_CRYSTAL
+				{
+					public static LocString NAME = UI.FormatAsLink("Crystal Shine Bug", "LIGHTBUGCRYSTAL");
+
+					public static LocString DESC = "Shine Bugs emit a soft " + UI.FormatAsLink("Light", "LIGHT") + " in hopes of attracting more of their kind for company.\n\nThe light of the Crystal morph has been amplified through selective breeding.";
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Crystal Shine Nymph Egg", "LIGHTBUGCRYSTAL");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Crystal Shine Nymph", "LIGHTBUGCRYSTAL");
+
+						public static LocString DESC = "A chubby baby " + UI.FormatAsLink("Shine Bug", "LIGHTBUGCRYSTAL") + ".\n\nThis one is a bright Crystal morph.";
+					}
+				}
 			}
 
 			public class GEYSER
@@ -295,9 +675,9 @@ namespace STRINGS
 				public static LocString DESC = "A temperature reactive, subterranean " + UI.FormatAsLink("Plant", "PLANTS") + ".";
 			}
 
-			public class FLUTEGG
+			public class PACUEGG
 			{
-				public static LocString NAME = UI.FormatAsLink("Pacu Egg", "FLUTEGG");
+				public static LocString NAME = UI.FormatAsLink("Pacu Egg", "PACUEGG");
 
 				public static LocString DESC = "A tiny Pacu is nestled inside.\n\nIt is not yet ready for the world.";
 			}
@@ -586,6 +966,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This critter is replenishing its stamina";
 			}
 
+			public class CALL_ADULT
+			{
+				public static LocString NAME = "Calling Adult";
+
+				public static LocString TOOLTIP = "This baby is craving attention.";
+			}
+
 			public class HOT
 			{
 				public static LocString NAME = "Toasty surroundings";
@@ -832,6 +1219,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Witness the miracle of life!";
 			}
 
+			public class GROWINGUP
+			{
+				public static LocString NAME = "Maturing";
+
+				public static LocString TOOLTIP = "This baby critter is about to reach adulthood";
+			}
+
 			public class SUFFOCATING
 			{
 				public static LocString NAME = "Suffocating";
@@ -865,6 +1259,13 @@ namespace STRINGS
 				public static LocString NAME = "Falling";
 
 				public static LocString TOOLTIP = "AHHHH!";
+			}
+
+			public class FLOPPING
+			{
+				public static LocString NAME = "Flopping";
+
+				public static LocString TOOLTIP = "Fish out of water!";
 			}
 
 			public class DROWNING
@@ -1109,6 +1510,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This food has putrefied and should not be consumed";
 			}
 
+			public class STUNTED_SCALE_GROWTH
+			{
+				public static LocString NAME = "Stunted Scales";
+
+				public static LocString TOOLTIP = "This critter's scale growth is being stunted by an unfavorable environment";
+			}
+
 			public class REFRIGERATED
 			{
 				public static LocString NAME = "Refrigerated";
@@ -1189,6 +1597,13 @@ namespace STRINGS
 			public class HEALTH
 			{
 				public static LocString NAME = "Health";
+			}
+
+			public class AGE
+			{
+				public static LocString NAME = "Age";
+
+				public static LocString TOOLTIP = "Age" + UI.HORIZONTAL_BR_RULE + "This critter will die when its Age reaches its species' maximum lifespan";
 			}
 
 			public class MATURITY
@@ -1291,6 +1706,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Freshness" + UI.HORIZONTAL_BR_RULE + "Food items become stale at fifty percent freshness, and rot at zero percent";
 			}
 
+			public class SCALEGROWTH
+			{
+				public static LocString NAME = "Scale Growth";
+
+				public static LocString TOOLTIP = "Scale Growth" + UI.HORIZONTAL_BR_RULE + "How long until this creatures scales will grow back.";
+			}
+
 			public class AIRPRESSURE
 			{
 				public static LocString NAME = "Air Pressure";
@@ -1322,11 +1744,21 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This is the base speed with which critters produce new eggs";
 			}
 
-			public class INCUBATOR_INCUBATION_RATE
+			public class BASE_INCUBATION_RATE
 			{
-				public static LocString NAME = "Incubation Rate";
+				public static LocString NAME = "Base Incubation Rate";
+			}
 
-				public static LocString TOOLTIP = "Determines an egg's gestation period when placed in an Incubator";
+			public class SCALE_GROWTH_RATE
+			{
+				public static LocString NAME = "Scale Regrowth Rate";
+			}
+
+			public class INCUBATOR
+			{
+				public static LocString NAME = "Incubator";
+
+				public static LocString TOOLTIP = "Increased incubation rate when placed inside an Incubator";
 			}
 
 			public class RANCHED
@@ -1340,7 +1772,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Happy";
 
-				public static LocString TOOLTIP = "All of this critter's needs have been met and it's feeling quite contented" + UI.HORIZONTAL_BR_RULE + "It will produce more as a result";
+				public static LocString TOOLTIP = "This critter's in high spirits because all of its needs are being met" + UI.HORIZONTAL_BR_RULE + "It will produce more materials as a result";
+			}
+
+			public class UNHAPPY
+			{
+				public static LocString NAME = "Glum";
+
+				public static LocString TOOLTIP = "This critter's feeling down because its needs aren't being met" + UI.HORIZONTAL_BR_RULE + "It will produce less materials as a result";
+			}
+
+			public class ATE_FROM_FEEDER
+			{
+				public static LocString NAME = "Ate From Feeder";
+
+				public static LocString TOOLTIP = "This critter is getting tamer because it ate from a feeder.";
 			}
 
 			public class WILD
@@ -1348,6 +1794,13 @@ namespace STRINGS
 				public static LocString NAME = "Wild";
 
 				public static LocString TOOLTIP = "This critter is wild";
+			}
+
+			public class BABY
+			{
+				public static LocString NAME = "Tiny Baby";
+
+				public static LocString TOOLTIP = "This critter will become an adult as it ages and grows wise to the ways of the world";
 			}
 
 			public class TAME
@@ -1364,6 +1817,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Get this critter something to eat!";
 			}
 
+			public class FUTURE_OVERCROWDED
+			{
+				public static LocString NAME = "Expecting";
+
+				public static LocString TOOLTIP = "This critter has slowed its reproduction while it waits for the new member of the family to arrive\n\nIf there were more room, it might consider laying eggs again";
+			}
+
 			public class OVERCROWDED
 			{
 				public static LocString NAME = "Overcrowded";
@@ -1375,7 +1835,38 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Confined";
 
-				public static LocString TOOLTIP = "This critter is inside a door, tile, or confined space.";
+				public static LocString TOOLTIP = "This critter is trapped inside a door, tile, or confined space\n\nSounds uncomfortable!";
+			}
+		}
+
+		public class FERTILITY_MODIFIERS
+		{
+			public class DIET
+			{
+				public static LocString NAME = "Diet";
+
+				public static LocString DESC = "Eats any: {0}";
+			}
+
+			public class NEARBY_CREATURE
+			{
+				public static LocString NAME = "Nearby Creature";
+
+				public static LocString DESC = "Penned with: {0}";
+			}
+
+			public class NEARBY_CREATURE_NEG
+			{
+				public static LocString NAME = "No Nearby Creature";
+
+				public static LocString DESC = "Not penned with: {0}";
+			}
+
+			public class TEMPERATURE
+			{
+				public static LocString NAME = "Temperature";
+
+				public static LocString DESC = "Body temperature between: {0} and {1}";
 			}
 		}
 

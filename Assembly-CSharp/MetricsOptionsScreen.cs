@@ -1,6 +1,7 @@
 ﻿using System;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MetricsOptionsScreen : KModalScreen
 {
@@ -10,10 +11,10 @@ public class MetricsOptionsScreen : KModalScreen
 		this.title.SetText(UI.FRONTEND.METRICS_OPTIONS_SCREEN.TITLE);
 		GameObject gameObject = this.enableButton.GetComponent<HierarchyReferences>().GetReference("Button").gameObject;
 		gameObject.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.METRICS_OPTIONS_SCREEN.TOOLTIP);
-		gameObject.transform.GetChild(0).gameObject.SetActive(ThreadedHttps<KleiMetrics>.Instance.enabled);
+		gameObject.transform.GetChild(0).gameObject.SetActive(!KPrivacyPrefs.instance.disableDataCollection);
 		gameObject.GetComponent<KButton>().onClick += delegate
 		{
-			this.EnableToggle();
+			this.OnClickToggle();
 		};
 		LocText reference = this.enableButton.GetComponent<HierarchyReferences>().GetReference<LocText>("Text");
 		reference.SetText(UI.FRONTEND.METRICS_OPTIONS_SCREEN.ENABLE_BUTTON);
@@ -27,11 +28,17 @@ public class MetricsOptionsScreen : KModalScreen
 		{
 			this.Deactivate();
 		};
+		this.descriptionButton.onClick.AddListener(delegate
+		{
+			Application.OpenURL("https://www.kleientertainment.com/privacy-policy");
+		});
 	}
 
-	private void EnableToggle()
+	private void OnClickToggle()
 	{
-		ThreadedHttps<KleiMetrics>.Instance.SetEnabled(!ThreadedHttps<KleiMetrics>.Instance.enabled);
+		KPrivacyPrefs.instance.disableDataCollection = !KPrivacyPrefs.instance.disableDataCollection;
+		KPrivacyPrefs.Save();
+		ThreadedHttps<KleiMetrics>.Instance.SetEnabled(!KPrivacyPrefs.instance.disableDataCollection);
 		this.enableButton.GetComponent<HierarchyReferences>().GetReference("CheckMark").gameObject.SetActive(ThreadedHttps<KleiMetrics>.Instance.enabled);
 	}
 
@@ -42,4 +49,6 @@ public class MetricsOptionsScreen : KModalScreen
 	public KButton closeButton;
 
 	public GameObject enableButton;
+
+	public Button descriptionButton;
 }

@@ -14,7 +14,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		this.CLIENT_KEY = DistributionPlatform.Inst.MetricsClientKey;
 		this.PlatformUserIDFieldName = DistributionPlatform.Inst.MetricsUserIDField;
 		KleiMetrics.sessionID = -1;
-		this.enabled = KPlayerPrefs.GetInt("ENABLE_METRICS", 1) == 1;
+		this.enabled = !KPrivacyPrefs.instance.disableDataCollection;
 		this.isMultiThreaded = true;
 	}
 
@@ -24,7 +24,6 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 
 	public void SetEnabled(bool enabled)
 	{
-		KPlayerPrefs.SetInt("ENABLE_METRICS", (!enabled) ? 0 : 1);
 		this.enabled = enabled;
 	}
 
@@ -518,6 +517,10 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 				SystemInfo.supportedRenderTargetCount
 			},
 			{
+				"GPUsupports2DArrayTextures",
+				SystemInfo.supports2DArrayTextures
+			},
+			{
 				"GPUsupports3DTextures",
 				SystemInfo.supports3DTextures
 			},
@@ -547,8 +550,6 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 			}
 		};
 	}
-
-	private const string EnableMetricsKey = "ENABLE_METRICS";
 
 	private const string SessionIDKey = "SESSION_ID";
 

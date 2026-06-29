@@ -17,7 +17,7 @@ public class PropDeskConfig : IEntityConfig
 	public void OnPrefabInit(GameObject inst)
 	{
 		OccupyArea component = inst.GetComponent<OccupyArea>();
-		component.objectLayer = ObjectLayer.Building;
+		component.objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 	}
 
 	public void OnSpawn(GameObject inst)

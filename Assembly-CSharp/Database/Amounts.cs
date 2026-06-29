@@ -10,7 +10,7 @@ namespace Database
 			this.Stamina = this.CreateAmount("Stamina", 0f, 100f, false, Units.Flat, 0.35f, true, "STRINGS.DUPLICANTS.STATS");
 			this.Stamina.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerCycle, null));
 			this.Calories = this.CreateAmount("Calories", 0f, 0f, false, Units.Flat, 4000f, true, "STRINGS.DUPLICANTS.STATS");
-			this.Calories.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Calories, GameUtil.TimeSlice.PerCycle, null));
+			this.Calories.SetDisplayer(new CaloriesDisplayer());
 			this.Temperature = this.CreateAmount("Temperature", 0f, 10000f, false, Units.Kelvin, 0.5f, true, "STRINGS.DUPLICANTS.STATS");
 			this.Temperature.SetDisplayer(new DuplicantTemperatureDeltaAsEnergyAmountDisplayer(GameUtil.UnitClass.Temperature, GameUtil.TimeSlice.PerSecond));
 			this.ExternalTemperature = this.CreateAmount("ExternalTemperature", 0f, 10000f, false, Units.Kelvin, 0.5f, true, "STRINGS.DUPLICANTS.STATS");
@@ -30,14 +30,16 @@ namespace Database
 			this.OldAge = this.CreateAmount("OldAge", 0f, 2400f, false, Units.Flat, 0f, false, "STRINGS.CREATURES.STATS");
 			this.Fertilization = this.CreateAmount("Fertilization", 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
 			this.Fertilization.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerSecond, null));
-			this.Happiness = this.CreateAmount("Happiness", 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
-			this.Happiness.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
+			this.Happiness = this.CreateAmount("Happiness", -1000f, 1000f, false, Units.Flat, 0.1f, true, "STRINGS.CREATURES.STATS");
+			this.Happiness.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.None, null));
 			this.Fertility = this.CreateAmount("Fertility", 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
 			this.Fertility.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
 			this.Wildness = this.CreateAmount("Wildness", 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
 			this.Wildness.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
 			this.Incubation = this.CreateAmount("Incubation", 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
 			this.Incubation.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
+			this.Age = this.CreateAmount("Age", 0f, 0f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
+			this.Age.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.PerCycle, null));
 			this.Irrigation = this.CreateAmount("Irrigation", 0f, 1f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
 			this.Irrigation.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerSecond, null));
 			this.HitPoints = this.CreateAmount("HitPoints", 0f, 0f, true, Units.Flat, 0.1675f, true, "STRINGS.DUPLICANTS.STATS");
@@ -50,6 +52,8 @@ namespace Database
 			this.AirPressure.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Mass, GameUtil.TimeSlice.PerSecond, null));
 			this.Illumination = this.CreateAmount("Illumination", 0f, 1f, false, Units.Flat, 0f, true, "STRINGS.CREATURES.STATS");
 			this.Illumination.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.None, null));
+			this.ScaleGrowth = this.CreateAmount("ScaleGrowth", 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
+			this.ScaleGrowth.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
 		}
 
 		public Amount CreateAmount(string id, float min, float max, bool show_max, Units units, float delta_threshold, bool show_in_ui, string string_root)
@@ -97,6 +101,8 @@ namespace Database
 
 		public Amount OldAge;
 
+		public Amount Age;
+
 		public Amount Fertilization;
 
 		public Amount Illumination;
@@ -112,6 +118,8 @@ namespace Database
 		public Amount Wildness;
 
 		public Amount Incubation;
+
+		public Amount ScaleGrowth;
 
 		public Amount Rot;
 	}

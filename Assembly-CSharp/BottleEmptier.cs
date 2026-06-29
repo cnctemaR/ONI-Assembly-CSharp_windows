@@ -160,7 +160,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			}
 			Storage component = base.GetComponent<Storage>();
 			float mass = firstPrimaryElement.Mass;
-			float num = 2f;
+			float num = 10f;
 			float num2 = Mathf.Min(mass, num * dt);
 			if (num2 <= 0f)
 			{

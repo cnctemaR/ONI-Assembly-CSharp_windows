@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 
@@ -12,15 +11,6 @@ public class MachineTechnician : RoleConfig
 		base.description = DUPLICANTS.ROLES.MACHINE_TECHNICIAN.DESCRIPTION;
 		base.roleGroup = "Technicals";
 		base.hat = Game.Instance.roleManager.GetHat(MachineTechnician.ID);
-		this.favoredChoreTypes = new List<ChoreType>
-		{
-			Db.Get().ChoreTypes.Fabricate,
-			Db.Get().ChoreTypes.GeneratePower,
-			Db.Get().ChoreTypes.LiquidCooledFan,
-			Db.Get().ChoreTypes.ScrubOre,
-			Db.Get().ChoreTypes.Toggle
-		};
-		this.preferredChoreTags.Add(GameTags.ChoreTypes.Fabricating);
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Machinery };
 		base.perks = new RolePerk[] { RoleManager.rolePerks.IncreaseMachineryMedium };
 	}

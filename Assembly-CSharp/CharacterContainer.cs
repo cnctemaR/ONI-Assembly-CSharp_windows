@@ -328,10 +328,6 @@ public class CharacterContainer : KScreen
 		};
 		this.selectedBorder.SetActive(true);
 		this.titleBar.color = this.selectedTitleColor;
-		if (!this.animController.HasAnimation("cheer_pre"))
-		{
-			this.animController.AddAnims(new KAnimFile[] { this.cheer_anim_file });
-		}
 		this.animController.Play("cheer_pre", KAnim.PlayMode.Once, 1f, 0f);
 		this.animController.Play("cheer_loop", KAnim.PlayMode.Loop, 1f, 0f);
 	}
@@ -498,8 +494,6 @@ public class CharacterContainer : KScreen
 
 	[SerializeField]
 	private LocText characterJob;
-
-	public KAnimFile cheer_anim_file;
 
 	public GameObject selectedBorder;
 

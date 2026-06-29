@@ -52,30 +52,9 @@ public class DirectionControl : KMonoBehaviour
 		bool flag = directionInfo.allowLeft && directionInfo.allowRight;
 		bool flag2 = !flag && directionInfo.allowLeft;
 		bool flag3 = !flag && directionInfo.allowRight;
-		if (flag)
-		{
-			component.StopHidingSymbol(new KAnimHashedString("arrow2"), true);
-		}
-		else
-		{
-			component.HideSymbol(new KAnimHashedString("arrow2"), true);
-		}
-		if (flag2)
-		{
-			component.StopHidingSymbol(new KAnimHashedString("arrow_left"), true);
-		}
-		else
-		{
-			component.HideSymbol(new KAnimHashedString("arrow_left"), true);
-		}
-		if (flag3)
-		{
-			component.StopHidingSymbol(new KAnimHashedString("arrow_right"), true);
-		}
-		else
-		{
-			component.HideSymbol(new KAnimHashedString("arrow_right"), true);
-		}
+		component.SetSymbolVisiblity("arrow2", flag);
+		component.SetSymbolVisiblity("arrow_left", flag2);
+		component.SetSymbolVisiblity("arrow_right", flag3);
 		if (new_direction != this.allowedDirection)
 		{
 			this.allowedDirection = new_direction;

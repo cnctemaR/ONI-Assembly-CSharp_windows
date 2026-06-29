@@ -12,17 +12,26 @@ public class ClosestEdibleSensor : Sensor
 	{
 		Pickupable pickupable = null;
 		FetchManager.Instance.FindFetchTarget(this.worker, base.GetComponent<Storage>(), new TagBits(ClosestEdibleSensor.edibleTag), default(TagBits), new TagBits(base.GetComponent<ConsumableConsumer>().forbiddenTags), 0f, ref pickupable);
+		bool flag = this.edibleInReachButNotPermitted;
 		Edible edible = null;
-		bool flag = false;
+		bool flag2 = false;
 		if (pickupable != null)
 		{
 			edible = pickupable.GetComponent<Edible>();
-			flag = true;
+			flag2 = true;
+			flag = false;
 		}
-		if (edible != this.edible || this.hasEdible != flag)
+		else
+		{
+			Pickupable pickupable2 = null;
+			FetchManager.Instance.FindFetchTarget(this.worker, base.GetComponent<Storage>(), new TagBits(ClosestEdibleSensor.edibleTag), default(TagBits), default(TagBits), 0f, ref pickupable2);
+			flag = pickupable2 != null;
+		}
+		if (edible != this.edible || this.hasEdible != flag2)
 		{
 			this.edible = edible;
-			this.hasEdible = flag;
+			this.hasEdible = flag2;
+			this.edibleInReachButNotPermitted = flag;
 			base.Trigger(86328522, this.edible);
 		}
 	}
@@ -39,4 +48,6 @@ public class ClosestEdibleSensor : Sensor
 	private Worker worker;
 
 	private bool hasEdible;
+
+	public bool edibleInReachButNotPermitted;
 }

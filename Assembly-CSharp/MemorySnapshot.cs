@@ -49,7 +49,7 @@ public class MemorySnapshot
 		fieldCount.count++;
 	}
 
-	public static void CountReference(Type reference_type, object obj, Dictionary<int, MemorySnapshot.TypeData> types, HashSet<object> walked, Dictionary<int, MemorySnapshot.FieldCount> field_counts, Dictionary<string, int> detailTypeCount, string field_name, Type parent_4, Type parent_3, Type parent_2, Type parent_1, Type parent_0)
+	public static void CountReference(Type reference_type, object obj, Dictionary<int, MemorySnapshot.TypeData> types, HashSet<object> walked, Dictionary<int, MemorySnapshot.FieldCount> field_counts, Dictionary<string, MemorySnapshot.DetailInfo> detailTypeCount, string field_name, Type parent_4, Type parent_3, Type parent_2, Type parent_1, Type parent_0)
 	{
 		if (MemorySnapshot.ShouldExclude(reference_type))
 		{
@@ -88,9 +88,15 @@ public class MemorySnapshot
 				text = text + "\",\"" + parent_4.ToString();
 			}
 			text += "\"\n";
-			int num = 0;
-			detailTypeCount.TryGetValue(text, out num);
-			detailTypeCount[text] = num + 1;
+			MemorySnapshot.DetailInfo detailInfo;
+			detailTypeCount.TryGetValue(text, out detailInfo);
+			detailInfo.count++;
+			if (typeof(Array).IsAssignableFrom(reference_type) && obj != null)
+			{
+				Array array = obj as Array;
+				detailInfo.numArrayEntries += array.Length;
+			}
+			detailTypeCount[text] = detailInfo;
 		}
 		if (reference_type.IsClass)
 		{
@@ -104,10 +110,15 @@ public class MemorySnapshot
 			if (typeData2.type.IsClass)
 			{
 				typeData2.instanceCount++;
+				if (typeof(Array).IsAssignableFrom(typeData2.type))
+				{
+					Array array2 = obj as Array;
+					typeData2.numArrayEntries += array2.Length;
+				}
 				MemorySnapshot.HierarchyNode hierarchyNode = new MemorySnapshot.HierarchyNode(parent_0, parent_1, parent_2, parent_3, parent_4);
-				int num2 = 0;
-				typeData2.hierarchies.TryGetValue(hierarchyNode, out num2);
-				typeData2.hierarchies[hierarchyNode] = num2 + 1;
+				int num = 0;
+				typeData2.hierarchies.TryGetValue(hierarchyNode, out num);
+				typeData2.hierarchies[hierarchyNode] = num + 1;
 			}
 			foreach (FieldInfo fieldInfo in typeData2.fields)
 			{
@@ -146,7 +157,7 @@ public class MemorySnapshot
 		}
 	}
 
-	public static void CountField(FieldInfo field, object obj, Dictionary<int, MemorySnapshot.TypeData> types, HashSet<object> walked, Dictionary<int, MemorySnapshot.FieldCount> field_counts, Dictionary<string, int> detailTypeCount, Type parent_4, Type parent_3, Type parent_2, Type parent_1, Type parent_0)
+	public static void CountField(FieldInfo field, object obj, Dictionary<int, MemorySnapshot.TypeData> types, HashSet<object> walked, Dictionary<int, MemorySnapshot.FieldCount> field_counts, Dictionary<string, MemorySnapshot.DetailInfo> detailTypeCount, Type parent_4, Type parent_3, Type parent_2, Type parent_1, Type parent_0)
 	{
 		if (!MemorySnapshot.ShouldExclude(field.FieldType))
 		{
@@ -190,30 +201,40 @@ public class MemorySnapshot
 
 	public void WriteTypeDetails(MemorySnapshot compare)
 	{
-		List<KeyValuePair<string, int>> list = null;
+		List<KeyValuePair<string, MemorySnapshot.DetailInfo>> list = null;
 		if (compare != null)
 		{
-			list = compare.detailTypeCount.ToList<KeyValuePair<string, int>>();
+			list = compare.detailTypeCount.ToList<KeyValuePair<string, MemorySnapshot.DetailInfo>>();
 		}
-		List<KeyValuePair<string, int>> list2 = this.detailTypeCount.ToList<KeyValuePair<string, int>>();
-		list2.Sort((KeyValuePair<string, int> x, KeyValuePair<string, int> y) => y.Value - x.Value);
+		List<KeyValuePair<string, MemorySnapshot.DetailInfo>> list2 = this.detailTypeCount.ToList<KeyValuePair<string, MemorySnapshot.DetailInfo>>();
+		list2.Sort((KeyValuePair<string, MemorySnapshot.DetailInfo> x, KeyValuePair<string, MemorySnapshot.DetailInfo> y) => y.Value.count - x.Value.count);
 		using (StreamWriter streamWriter = new StreamWriter(GarbageProfiler.GetFileName("type_details_" + MemorySnapshot.detailTypeStr)))
 		{
-			foreach (KeyValuePair<string, int> keyValuePair in list2)
+			streamWriter.WriteLine("Delta,Count,NumArrayEntries,Type");
+			foreach (KeyValuePair<string, MemorySnapshot.DetailInfo> keyValuePair in list2)
 			{
-				int num = keyValuePair.Value;
+				int num = keyValuePair.Value.count;
 				if (list != null)
 				{
-					foreach (KeyValuePair<string, int> keyValuePair2 in list)
+					foreach (KeyValuePair<string, MemorySnapshot.DetailInfo> keyValuePair2 in list)
 					{
 						if (keyValuePair2.Key == keyValuePair.Key)
 						{
-							num -= keyValuePair2.Value;
+							num -= keyValuePair2.Value.count;
 							break;
 						}
 					}
 				}
-				streamWriter.Write(string.Concat(new object[] { num, ", ", keyValuePair.Value, ", ", keyValuePair.Key }));
+				streamWriter.Write(string.Concat(new object[]
+				{
+					num,
+					",",
+					keyValuePair.Value.count,
+					",",
+					keyValuePair.Value.numArrayEntries,
+					",",
+					keyValuePair.Key
+				}));
 			}
 		}
 	}
@@ -226,9 +247,9 @@ public class MemorySnapshot
 
 	public List<FieldInfo> statics = new List<FieldInfo>();
 
-	public Dictionary<string, int> detailTypeCount = new Dictionary<string, int>();
+	public Dictionary<string, MemorySnapshot.DetailInfo> detailTypeCount = new Dictionary<string, MemorySnapshot.DetailInfo>();
 
-	private static readonly Type detailType = typeof(GameObject);
+	private static readonly Type detailType = typeof(byte[]);
 
 	private static readonly string detailTypeStr = MemorySnapshot.detailType.ToString();
 
@@ -348,6 +369,7 @@ public class MemorySnapshot
 			this.fields = new List<FieldInfo>();
 			this.instanceCount = 0;
 			this.refCount = 0;
+			this.numArrayEntries = 0;
 			foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
 			{
 				if (!fieldInfo.IsStatic && !MemorySnapshot.ShouldExclude(fieldInfo.FieldType))
@@ -366,5 +388,14 @@ public class MemorySnapshot
 		public int instanceCount;
 
 		public int refCount;
+
+		public int numArrayEntries;
+	}
+
+	public struct DetailInfo
+	{
+		public int count;
+
+		public int numArrayEntries;
 	}
 }

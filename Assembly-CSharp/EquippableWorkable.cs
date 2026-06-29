@@ -63,6 +63,12 @@ public class EquippableWorkable : Workable, ISaveLoadable
 		}
 	}
 
+	protected override void OnStopWork(Worker worker)
+	{
+		this.workTimeRemaining = this.GetWorkTime();
+		base.OnStopWork(worker);
+	}
+
 	[MyCmpReq]
 	private Equippable equippable;
 

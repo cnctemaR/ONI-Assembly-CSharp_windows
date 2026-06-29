@@ -15,26 +15,28 @@ public class GameScenePartitioner : KMonoBehaviour
 	{
 		GameScenePartitioner.instance = this;
 		this.partitioner = new ScenePartitioner(16, 64, Grid.WidthInCells, Grid.HeightInCells);
-		this.solidChangedLayer = this.partitioner.CreateMask(new HashedString("SolidChanged"));
-		this.liquidChangedLayer = this.partitioner.CreateMask(new HashedString("LiquidChanged"));
-		this.digDestroyedLayer = this.partitioner.CreateMask(new HashedString("DigDestroyed"));
-		this.fogOfWarChangedLayer = this.partitioner.CreateMask(new HashedString("FogOfWarChanged"));
-		this.decorProviderLayer = this.partitioner.CreateMask(new HashedString("DecorProviders"));
-		this.attackableEntitiesLayer = this.partitioner.CreateMask(new HashedString("FactionedEntities"));
-		this.fetchChoreLayer = this.partitioner.CreateMask(new HashedString("FetchChores"));
-		this.pickupablesLayer = this.partitioner.CreateMask(new HashedString("Pickupables"));
-		this.pickupablesChangedLayer = this.partitioner.CreateMask(new HashedString("PickupablesChanged"));
-		this.gasConduitsLayer = this.partitioner.CreateMask(new HashedString("GasConduit"));
-		this.liquidConduitsLayer = this.partitioner.CreateMask(new HashedString("LiquidConduit"));
-		this.solidConduitsLayer = this.partitioner.CreateMask(new HashedString("SolidConduit"));
-		this.wiresLayer = this.partitioner.CreateMask(new HashedString("Wire"));
-		this.noisePolluterLayer = this.partitioner.CreateMask(new HashedString("NoisePolluters"));
-		this.validNavCellChangedLayer = this.partitioner.CreateMask(new HashedString("validNavCellChangedLayer"));
-		this.dirtyNavCellUpdateLayer = this.partitioner.CreateMask(new HashedString("dirtyNavCellUpdateLayer"));
-		this.trapsLayer = this.partitioner.CreateMask(new HashedString("trapsLayer"));
-		this.floorSwitchActivatorLayer = this.partitioner.CreateMask(new HashedString("FloorSwitchActivatorLayer"));
-		this.floorSwitchActivatorChangedLayer = this.partitioner.CreateMask(new HashedString("FloorSwitchActivatorChangedLayer"));
-		this.collisionLayer = this.partitioner.CreateMask(new HashedString("Collision"));
+		this.solidChangedLayer = this.partitioner.CreateMask("SolidChanged");
+		this.liquidChangedLayer = this.partitioner.CreateMask("LiquidChanged");
+		this.digDestroyedLayer = this.partitioner.CreateMask("DigDestroyed");
+		this.fogOfWarChangedLayer = this.partitioner.CreateMask("FogOfWarChanged");
+		this.decorProviderLayer = this.partitioner.CreateMask("DecorProviders");
+		this.attackableEntitiesLayer = this.partitioner.CreateMask("FactionedEntities");
+		this.fetchChoreLayer = this.partitioner.CreateMask("FetchChores");
+		this.pickupablesLayer = this.partitioner.CreateMask("Pickupables");
+		this.pickupablesChangedLayer = this.partitioner.CreateMask("PickupablesChanged");
+		this.gasConduitsLayer = this.partitioner.CreateMask("GasConduit");
+		this.liquidConduitsLayer = this.partitioner.CreateMask("LiquidConduit");
+		this.solidConduitsLayer = this.partitioner.CreateMask("SolidConduit");
+		this.wiresLayer = this.partitioner.CreateMask("Wire");
+		this.noisePolluterLayer = this.partitioner.CreateMask("NoisePolluters");
+		this.validNavCellChangedLayer = this.partitioner.CreateMask("validNavCellChangedLayer");
+		this.dirtyNavCellUpdateLayer = this.partitioner.CreateMask("dirtyNavCellUpdateLayer");
+		this.trapsLayer = this.partitioner.CreateMask("trapsLayer");
+		this.floorSwitchActivatorLayer = this.partitioner.CreateMask("FloorSwitchActivatorLayer");
+		this.floorSwitchActivatorChangedLayer = this.partitioner.CreateMask("FloorSwitchActivatorChangedLayer");
+		this.collisionLayer = this.partitioner.CreateMask("Collision");
+		this.lure = this.partitioner.CreateMask("Lure");
+		this.plants = this.partitioner.CreateMask("Plants");
 		this.objectLayers = new ScenePartitionerLayer[36];
 		for (int i = 0; i < 36; i++)
 		{
@@ -228,6 +230,10 @@ public class GameScenePartitioner : KMonoBehaviour
 	public ScenePartitionerLayer floorSwitchActivatorChangedLayer;
 
 	public ScenePartitionerLayer collisionLayer;
+
+	public ScenePartitionerLayer lure;
+
+	public ScenePartitionerLayer plants;
 
 	private ScenePartitioner partitioner;
 

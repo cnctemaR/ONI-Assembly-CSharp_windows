@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 
@@ -13,13 +12,6 @@ public class Hauler : RoleConfig
 		base.roleGroup = "Hauling";
 		base.hat = Game.Instance.roleManager.GetHat("Hauler");
 		this.experienceRequired = 50f;
-		this.favoredChoreTypes = new List<ChoreType>
-		{
-			Db.Get().ChoreTypes.Fetch,
-			Db.Get().ChoreTypes.OperateFetch,
-			Db.Get().ChoreTypes.BuildFetch,
-			Db.Get().ChoreTypes.Transport
-		};
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Athletics };
 		base.perks = new RolePerk[]
 		{

@@ -22,6 +22,7 @@ public class RoleAssignmentRequirements
 		this.HasExperience_MachineTechnician = new PreviousRoleAssignmentRequirement(MachineTechnician.ID);
 		this.HasExperience_PowerTechnician = new PreviousRoleAssignmentRequirement("PowerTechnician");
 		this.HasExperience_JuniorArtist = new PreviousRoleAssignmentRequirement(JuniorArtist.ID);
+		this.HasExperience_Handyman = new PreviousRoleAssignmentRequirement(Handyman.ID);
 		this.HasColonyLeader = new RoleAssignmentRequirement("HasColonyLeader", UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.HAS_COLONY_LEADER.DESCRIPTION, (MinionResume resume) => true);
 		this.HasAttribute_Learning_Basic = new RoleAssignmentRequirement("HasAttribute_Learning_Basic", string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.HAS_ATTRIBUTE_LEARNING_BASIC.DESCRIPTION, 1), (MinionResume resume) => resume.GetAttributes().Get(Db.Get().Attributes.Learning).GetTotalValue() >= 1f);
 		this.HasAttribute_Cooking_Basic = new RoleAssignmentRequirement("HasAttribute_Cooking_Basic", string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.HAS_ATTRIBUTE_COOKING_BASIC.DESCRIPTION, 1), (MinionResume resume) => resume.GetAttributes().Get(Db.Get().Attributes.Cooking).GetTotalValue() >= 1f);
@@ -95,6 +96,8 @@ public class RoleAssignmentRequirements
 	public PreviousRoleAssignmentRequirement HasExperience_JuniorCook;
 
 	public PreviousRoleAssignmentRequirement HasExperience_JuniorArtist;
+
+	public PreviousRoleAssignmentRequirement HasExperience_Handyman;
 
 	public RoleAssignmentRequirement CompletedAnyOtherRole;
 

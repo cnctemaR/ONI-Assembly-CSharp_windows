@@ -2513,45 +2513,49 @@ namespace TMPro
 			this.caretPositionInternal = (this.m_CaretPosition = this.GetCaretPositionFromStringIndex(this.stringPositionInternal));
 			this.caretSelectPositionInternal = (this.m_CaretSelectPosition = this.GetCaretPositionFromStringIndex(this.stringSelectPositionInternal));
 			Vector2 vector;
-			float num;
+			float num2;
 			if (this.caretSelectPositionInternal < textInfo.characterCount)
 			{
-				vector = new Vector2(textInfo.characterInfo[this.caretSelectPositionInternal].origin, textInfo.characterInfo[this.caretSelectPositionInternal].descender);
-				num = textInfo.characterInfo[this.caretSelectPositionInternal].ascender - textInfo.characterInfo[this.caretSelectPositionInternal].descender;
+				int num = Mathf.Min(textInfo.characterInfo.Length - 1, this.caretSelectPositionInternal);
+				TMP_CharacterInfo tmp_CharacterInfo = textInfo.characterInfo[num];
+				vector = new Vector2(tmp_CharacterInfo.origin, tmp_CharacterInfo.descender);
+				num2 = textInfo.characterInfo[this.caretSelectPositionInternal].ascender - textInfo.characterInfo[this.caretSelectPositionInternal].descender;
 			}
 			else
 			{
-				vector = new Vector2(textInfo.characterInfo[this.caretSelectPositionInternal - 1].xAdvance, textInfo.characterInfo[this.caretSelectPositionInternal - 1].descender);
-				num = textInfo.characterInfo[this.caretSelectPositionInternal - 1].ascender - textInfo.characterInfo[this.caretSelectPositionInternal - 1].descender;
+				int num3 = Mathf.Min(textInfo.characterInfo.Length - 1, this.caretSelectPositionInternal - 1);
+				TMP_CharacterInfo tmp_CharacterInfo2 = textInfo.characterInfo[num3];
+				vector = new Vector2(tmp_CharacterInfo2.xAdvance, tmp_CharacterInfo2.descender);
+				num2 = textInfo.characterInfo[this.caretSelectPositionInternal - 1].ascender - textInfo.characterInfo[this.caretSelectPositionInternal - 1].descender;
 			}
-			this.AdjustRectTransformRelativeToViewport(vector, num, true);
-			int num2 = Mathf.Max(0, this.caretPositionInternal);
-			int num3 = Mathf.Max(0, this.caretSelectPositionInternal);
-			if (num2 > num3)
+			this.AdjustRectTransformRelativeToViewport(vector, num2, true);
+			int num4 = Mathf.Max(0, this.caretPositionInternal);
+			int num5 = Mathf.Max(0, this.caretSelectPositionInternal);
+			if (num4 > num5)
 			{
-				int num4 = num2;
-				num2 = num3;
-				num3 = num4;
+				int num6 = num4;
+				num4 = num5;
+				num5 = num6;
 			}
-			num3--;
-			int num5 = textInfo.characterInfo[num2].lineNumber;
-			int num6 = textInfo.lineInfo[num5].lastCharacterIndex;
+			num5--;
+			int num7 = textInfo.characterInfo[Math.Min(textInfo.characterInfo.Length - 1, num4)].lineNumber;
+			int num8 = textInfo.lineInfo[num7].lastCharacterIndex;
 			UIVertex simpleVert = UIVertex.simpleVert;
 			simpleVert.uv0 = Vector2.zero;
 			simpleVert.color = this.selectionColor;
-			int num7 = num2;
-			while (num7 <= num3 && num7 < textInfo.characterCount)
+			int num9 = num4;
+			while (num9 <= num5 && num9 < textInfo.characterCount)
 			{
-				if (num7 == num6 || num7 == num3)
+				if (num9 == num8 || num9 == num5)
 				{
-					TMP_CharacterInfo tmp_CharacterInfo = textInfo.characterInfo[num2];
-					TMP_CharacterInfo tmp_CharacterInfo2 = textInfo.characterInfo[num7];
-					if (num7 > 0 && tmp_CharacterInfo2.character == '\n' && textInfo.characterInfo[num7 - 1].character == '\r')
+					TMP_CharacterInfo tmp_CharacterInfo3 = textInfo.characterInfo[num4];
+					TMP_CharacterInfo tmp_CharacterInfo4 = textInfo.characterInfo[num9];
+					if (num9 > 0 && tmp_CharacterInfo4.character == '\n' && textInfo.characterInfo[num9 - 1].character == '\r')
 					{
-						tmp_CharacterInfo2 = textInfo.characterInfo[num7 - 1];
+						tmp_CharacterInfo4 = textInfo.characterInfo[num9 - 1];
 					}
-					Vector2 vector2 = new Vector2(tmp_CharacterInfo.origin, textInfo.lineInfo[num5].ascender);
-					Vector2 vector3 = new Vector2(tmp_CharacterInfo2.xAdvance, textInfo.lineInfo[num5].descender);
+					Vector2 vector2 = new Vector2(tmp_CharacterInfo3.origin, textInfo.lineInfo[num7].ascender);
+					Vector2 vector3 = new Vector2(tmp_CharacterInfo4.xAdvance, textInfo.lineInfo[num7].descender);
 					int currentVertCount = vbo.currentVertCount;
 					simpleVert.position = new Vector3(vector2.x, vector3.y, 0f);
 					vbo.AddVert(simpleVert);
@@ -2563,14 +2567,14 @@ namespace TMPro
 					vbo.AddVert(simpleVert);
 					vbo.AddTriangle(currentVertCount, currentVertCount + 1, currentVertCount + 2);
 					vbo.AddTriangle(currentVertCount + 2, currentVertCount + 3, currentVertCount);
-					num2 = num7 + 1;
-					num5++;
-					if (num5 < textInfo.lineCount)
+					num4 = num9 + 1;
+					num7++;
+					if (num7 < textInfo.lineCount)
 					{
-						num6 = textInfo.lineInfo[num5].lastCharacterIndex;
+						num8 = textInfo.lineInfo[num7].lastCharacterIndex;
 					}
 				}
-				num7++;
+				num9++;
 			}
 			this.m_IsScrollbarUpdateRequired = true;
 		}

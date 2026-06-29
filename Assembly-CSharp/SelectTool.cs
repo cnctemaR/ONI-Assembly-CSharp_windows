@@ -100,7 +100,7 @@ public class SelectTool : InterfaceTool
 			});
 		}
 		int num = Grid.PosToCell(vector2);
-		if (Grid.IsValidCell(num) && (Grid.Visible[num] != 0 || DebugPaintElementScreen.Instance.gameObject.activeSelf))
+		if (Grid.IsValidCell(num) && Grid.IsVisible(num))
 		{
 			Game.Instance.statusItemRenderer.GetIntersections(vector3, intersections);
 			List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
@@ -168,7 +168,7 @@ public class SelectTool : InterfaceTool
 		Vector3 vector2 = main.ScreenToWorldPoint(vector);
 		Vector2 vector3 = new Vector2(vector2.x, vector2.y);
 		int num = Grid.PosToCell(vector2);
-		if (!Grid.IsValidCell(num) || (Grid.Visible[num] == 0 && !DebugPaintElementScreen.Instance.gameObject.activeSelf))
+		if (!Grid.IsValidCell(num) || !Grid.IsVisible(num))
 		{
 			return;
 		}

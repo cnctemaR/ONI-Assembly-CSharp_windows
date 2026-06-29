@@ -18,7 +18,7 @@ public class InsulatedGasConduitConfig : IBuildingConfig
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
-		buildingDef.Insulation = 0.05f;
+		buildingDef.ThermalConductivity = 0.03125f;
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
@@ -50,6 +50,7 @@ public class InsulatedGasConduitConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.GetComponent<Building>().Def.BuildingUnderConstruction.GetComponent<Constructable>().isDiggingRequired = false;
+		go.AddComponent<EmptyConduitWorkable>();
 		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddComponent<KAnimGraphTileVisualizer>();
 		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Gas;
 		kanimGraphTileVisualizer.isPhysicalBuilding = true;

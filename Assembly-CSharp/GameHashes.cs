@@ -68,6 +68,7 @@ public enum GameHashes
 	CaloriesConsumed = -2038961714,
 	PrepareForExplosion = -979425869,
 	Cancel = 2127324410,
+	WorkChoreDisabled = 2108245096,
 	MarkForDeconstruct = -790448070,
 	MarkForRelocate = 923661281,
 	Prioritize = 1531330463,
@@ -145,7 +146,6 @@ public enum GameHashes
 	TooHotDisease = 534694243,
 	OptimalTemperatureAchieved = 115888613,
 	CreatureReproduce = 230069070,
-	LayEgg = 1193600993,
 	ReadyToHatch = 657149762,
 	Hatch = 1922945024,
 	IlluminationComfort = 1113102781,
@@ -274,5 +274,10 @@ public enum GameHashes
 	RanchingComplete = 1827504087,
 	CreatureAbandonedRanchStation = -364750427,
 	RanchStationNoLongerAvailable = 1689625967,
-	ElementNoLongerAvailable = 801383139
+	ElementNoLongerAvailable = 801383139,
+	BreedingChancesChanged = 1059811075,
+	ToggleSandbox = -1948169901,
+	ConsumePlant = -1793167409,
+	AteFromStorage = -1452790913,
+	SpawnedFrom = -2027483228
 }

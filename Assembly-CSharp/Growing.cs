@@ -7,6 +7,20 @@ using UnityEngine;
 
 public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjectEffectDescriptor
 {
+	private static void AddToScenePartitioner(Growing.StatesInstance smi)
+	{
+		Extents extents = new Extents(Grid.PosToCell(smi), smi.Get<OccupyArea>().OccupiedCellsOffsets);
+		smi.partitionerEntry = GameScenePartitioner.Instance.Add(smi.gameObject.name, smi.GetComponent<KPrefabID>(), extents, GameScenePartitioner.Instance.plants, null);
+	}
+
+	private static void RemoveFromScenePartitioner(Growing.StatesInstance smi)
+	{
+		if (smi.partitionerEntry != null)
+		{
+			smi.partitionerEntry.Release();
+		}
+	}
+
 	public bool Replanted
 	{
 		get
@@ -44,6 +58,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
+		base.gameObject.AddTag(GameTags.Plant);
 	}
 
 	private void OnNewGameSpawn(object data)
@@ -187,6 +202,8 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		public AttributeModifier wildGrowingRate;
 
 		public AttributeModifier getOldRate;
+
+		public ScenePartitionerEntry partitionerEntry;
 	}
 
 	public class States : GameStateMachine<Growing.States, Growing.StatesInstance, Growing>
@@ -195,7 +212,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		{
 			default_state = this.growing;
 			base.serializable = true;
-			this.root.EventTransition(GameHashes.Wilt, this.stalled, (Growing.StatesInstance smi) => smi.IsWilting());
+			this.root.EventTransition(GameHashes.Wilt, this.stalled, (Growing.StatesInstance smi) => smi.IsWilting()).Enter(new StateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State.Callback(Growing.AddToScenePartitioner)).Exit(new StateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State.Callback(Growing.RemoveFromScenePartitioner));
 			this.growing.Update("CheckGrown", delegate(Growing.StatesInstance smi, float dt)
 			{
 				if (smi.ReachedNextHarvest())

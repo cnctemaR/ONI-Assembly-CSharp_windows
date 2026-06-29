@@ -23,18 +23,6 @@ public class RoleConfig : IListableOption
 
 	public Expectation[] expectations { get; protected set; }
 
-	public bool IsFavoredChore(Chore chore)
-	{
-		foreach (ChoreType choreType in this.favoredChoreTypes)
-		{
-			if (choreType.IdHash == chore.choreType.IdHash)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public string GetProperName()
 	{
 		return this.name;
@@ -79,11 +67,7 @@ public class RoleConfig : IListableOption
 		FetchAreaChore.GatherNearbyFetchChores(root_chore, context, x, y, radius, succeeded_contexts, failed_contexts);
 	}
 
-	public HashSet<Tag> preferredChoreTags = new HashSet<Tag>();
-
 	public float experienceRequired = 100f;
-
-	public List<ChoreType> favoredChoreTypes = new List<ChoreType>();
 
 	public Klei.AI.Attribute[] relevantAttributes = new Klei.AI.Attribute[0];
 }

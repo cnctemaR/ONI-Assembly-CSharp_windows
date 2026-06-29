@@ -84,7 +84,7 @@ public abstract class SimComponent : KMonoBehaviour, ISim200ms
 			HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object data)
 			{
 				SimComponent.OnSimRegistered(this, data, static_unregister);
-			}));
+			}, "SimComponent.SimREgister"));
 			this.OnSimRegister(handle);
 		}
 	}

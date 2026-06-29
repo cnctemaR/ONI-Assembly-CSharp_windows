@@ -12,7 +12,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		this.PlaySpeedMultiplier = 1f;
 		this.synchronizer = new KAnimSynchronizer(this);
 		this.layering = new KAnimLayering(this, this.fgLayer);
-		this.visible = true;
+		this.isVisible = true;
 	}
 
 	public abstract KAnim.Anim GetAnim(int index);
@@ -33,6 +33,8 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	}
 
 	public SymbolInstanceGpuData symbolInstanceGpuData { get; protected set; }
+
+	public SymbolOverrideInfoGpuData symbolOverrideInfoGpuData { get; protected set; }
 
 	public Color32 TintColour
 	{
@@ -122,14 +124,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		if (this.layering != null)
 		{
 			this.layering.SetLayer(this.fgLayer);
-		}
-	}
-
-	public float PlayTime
-	{
-		get
-		{
-			return (this.curAnim == null) ? (-1f) : this.elapsedTime;
 		}
 	}
 
@@ -242,11 +236,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		return this.curAnim;
 	}
 
-	public KAnimFile[] GetAnims()
-	{
-		return this.animFiles;
-	}
-
 	public KAnimHashedString GetBuildHash()
 	{
 		if (this.curBuild == null)
@@ -356,14 +345,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	protected abstract void OnStop();
 
-	protected abstract void RebuildBatchGroupInstance();
-
-	protected abstract void ApplySymbolOverride(KAnimHashedString overridden_symbol_name, HashedString batchSource, KAnim.Build.Symbol new_symbol, bool is_perminent);
-
-	protected abstract void ApplyRemoveSingleFrameOverride(KAnimHashedString symbol_name);
-
-	protected abstract void ApplyClearOverrides();
-
 	protected abstract void UpdateFrame(float t);
 
 	public abstract Matrix2x3 GetTransformMatrix();
@@ -372,7 +353,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public abstract void UpdateHidden();
 
-	public abstract void AddAnims(params KAnimFile[] addedAnims);
+	public abstract void TriggerStop();
 
 	public virtual void SetLayer(int layer)
 	{
@@ -428,13 +409,10 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		this.curBuild = null;
 		this.synchronizer = null;
 		this.layering = null;
-		this.curAnimFile = null;
 		this.animQueue = null;
 		this.overrideAnims = null;
 		this.anims = null;
-		this.baseHiddenSymbols = null;
 		this.hiddenSymbols = null;
-		this.visibleSymbols = null;
 		this.synchronizer = null;
 		this.layering = null;
 		this.overrideAnimFiles = null;
@@ -446,12 +424,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		{
 			this.onAnimEnter(hashed_name);
 		}
-	}
-
-	public void MarkDirty()
-	{
-		this.SetDirty();
-		this.dirtyBuild = true;
 	}
 
 	public void Play(HashedString anim_name, KAnim.PlayMode mode = KAnim.PlayMode.Once, float speed = 1f, float time_offset = 0f)
@@ -478,36 +450,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public void Queue(HashedString anim_name, KAnim.PlayMode mode = KAnim.PlayMode.Once, float speed = 1f, float time_offset = 0f)
 	{
-		if (this.curBuild == null)
-		{
-			if (this.animFiles != null && this.animFiles.Length > 0)
-			{
-				for (int i = 0; i < this.animFiles.Length; i++)
-				{
-					if (!(this.animFiles[i] == null))
-					{
-						KAnimFileData data = this.animFiles[i].GetData();
-						if (data != null && data.build != null)
-						{
-							this.curBuild = data.build;
-							break;
-						}
-					}
-				}
-			}
-			if (this.curBuild == null)
-			{
-				global::Debug.LogWarning(string.Concat(new object[]
-				{
-					"[",
-					base.gameObject.name,
-					"] Missing build while trying to play anim [",
-					anim_name,
-					"]"
-				}), base.gameObject);
-				return;
-			}
-		}
 		this.animQueue.Enqueue(new KAnimControllerBase.AnimData
 		{
 			anim = anim_name,
@@ -583,17 +525,13 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			if (!this.anims.TryGetValue(animData.anim, out animLookupData))
 			{
 				bool flag = true;
-				if (!string.IsNullOrEmpty(this.missingAnim))
+				if (this.showWhenMissing != null)
 				{
-					animData.anim = new HashedString(this.missingAnim);
-					flag = !this.anims.TryGetValue(animData.anim, out animLookupData);
-					if (this.showWhenMissing != null)
-					{
-						this.showWhenMissing.SetActive(true);
-					}
+					this.showWhenMissing.SetActive(true);
 				}
 				if (flag)
 				{
+					this.TriggerStop();
 					return;
 				}
 			}
@@ -603,7 +541,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			}
 		}
 		this.curAnim = this.GetAnim(animLookupData.animIndex);
-		this.curAnimFile = this.curAnim.animFile;
 		int num = 0;
 		if (animData.mode == KAnim.PlayMode.Loop && this.randomiseLoopedOffset)
 		{
@@ -620,166 +557,35 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		this.AnimEnter(animData.anim);
 	}
 
-	public abstract void AddSymbolOverride(KAnimHashedString overridden_symbol_name, HashedString batchSource, KAnim.Build.Symbol new_symbol, bool is_permanent = false);
-
-	public void RemoveSymbolOverride(KAnimHashedString symbol_name)
+	public bool GetSymbolVisiblity(KAnimHashedString symbol)
 	{
-		this.ApplyRemoveSingleFrameOverride(symbol_name);
-		this.dirtyBuild = true;
+		return !this.hiddenSymbols.Contains(symbol);
 	}
 
-	public void AddBuildOverride(KAnimFile override_file, bool enable_symbols, bool is_permanent = false)
+	public void SetSymbolVisiblity(KAnimHashedString symbol, bool is_visible)
 	{
-		if (override_file == null)
+		if (is_visible)
 		{
-			return;
+			this.hiddenSymbols.Remove(symbol);
 		}
-		KAnimFileData data = override_file.GetData();
-		this.AddBuildOverride(data, enable_symbols, is_permanent);
-	}
-
-	protected void ReApplyTempBuildOverrides()
-	{
-		if (this.temporaryBuildOverrides == null)
+		else if (!this.hiddenSymbols.Contains(symbol))
 		{
-			return;
+			this.hiddenSymbols.Add(symbol);
 		}
-		foreach (KAnimFileData kanimFileData in this.temporaryBuildOverrides)
-		{
-			this.ApplyBuildOverride(kanimFileData.build, true, false);
-		}
-	}
-
-	private void ApplyBuildOverride(KAnim.Build build, bool enable_symbols, bool is_perminent)
-	{
-		for (int i = 0; i < build.symbols.Length; i++)
-		{
-			this.AddSymbolOverride(build.symbols[i].hash, build.batchTag, build.symbols[i], is_perminent);
-			if (enable_symbols)
-			{
-				this.ShowSymbol(build.symbols[i].hash);
-			}
-		}
-	}
-
-	public void AddBuildOverride(KAnimFileData kafd, bool enable_symbols, bool is_perminent)
-	{
-		this.ApplyBuildOverride(kafd.build, enable_symbols, is_perminent);
-		if (!is_perminent)
-		{
-			if (this.temporaryBuildOverrides == null)
-			{
-				this.temporaryBuildOverrides = new HashSet<KAnimFileData>();
-			}
-			this.temporaryBuildOverrides.Add(kafd);
-		}
-	}
-
-	public void ClearBuildOverride(KAnimFile override_file, bool enable_symbols)
-	{
-		if (override_file == null)
-		{
-			return;
-		}
-		KAnimFileData data = override_file.GetData();
-		this.ClearBuildOverride(data, enable_symbols);
-	}
-
-	public void ClearBuildOverride(KAnimFileData kafd, bool enable_symbols)
-	{
-		for (int i = 0; i < kafd.build.symbols.Length; i++)
-		{
-			this.RemoveSymbolOverride(kafd.build.symbols[i].hash);
-			if (enable_symbols)
-			{
-				this.RemoveVisibleSymbol(kafd.build.symbols[i].hash);
-			}
-		}
-		if (this.temporaryBuildOverrides != null)
-		{
-			this.temporaryBuildOverrides.Remove(kafd);
-		}
-	}
-
-	public void HideSymbol(bool hide, KAnimHashedString symbol)
-	{
-		if (hide)
-		{
-			this.HideSymbol(symbol, true);
-		}
-		else
-		{
-			this.StopHidingSymbol(symbol, true);
-		}
-	}
-
-	public void HideSymbols(bool hide, KAnimHashedString[] symbol_names)
-	{
-		for (int i = 0; i < symbol_names.Length; i++)
-		{
-			this.HideSymbol(hide, symbol_names[i]);
-		}
-	}
-
-	public bool HideSymbol(KAnimHashedString symbol, bool update_hidden = true)
-	{
-		if (this.baseHiddenSymbols == null)
-		{
-			this.baseHiddenSymbols = new List<KAnimHashedString>();
-		}
-		if (!this.baseHiddenSymbols.Contains(symbol))
-		{
-			this.baseHiddenSymbols.Add(symbol);
-			this.SetDirty();
-			if (update_hidden)
-			{
-				this.UpdateHidden();
-			}
-			return true;
-		}
-		return false;
-	}
-
-	public bool StopHidingSymbol(KAnimHashedString symbol, bool update_hidden = true)
-	{
-		if (this.baseHiddenSymbols == null)
-		{
-			return false;
-		}
-		if (this.baseHiddenSymbols.Contains(symbol))
-		{
-			this.baseHiddenSymbols.Remove(symbol);
-			this.SetDirty();
-			if (update_hidden)
-			{
-				this.UpdateHidden();
-			}
-			return true;
-		}
-		return false;
-	}
-
-	public void ShowSymbol(KAnimHashedString symbol)
-	{
-		if (!this.visibleSymbols.Contains(symbol))
-		{
-			this.visibleSymbols.Add(symbol);
-			this.SetDirty();
-			this.UpdateHidden();
-		}
-	}
-
-	public void RemoveVisibleSymbol(KAnimHashedString symbol)
-	{
-		if (this.visibleSymbols.Remove(symbol))
+		if (this.curBuild != null)
 		{
 			this.UpdateHidden();
-			this.dirtyBuild = true;
 		}
 	}
 
 	public void AddAnimOverrides(KAnimFile kanim_file, float priority = 0f)
 	{
+		if (kanim_file.GetData().build != null && kanim_file.GetData().build.symbols.Length > 0)
+		{
+			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
+			DebugUtil.Assert(component != null, "Anim overrides containing additional symbols require a symbol override controller.");
+			component.AddBuildOverride(kanim_file.GetData(), 0);
+		}
 		this.overrideAnimFiles.Add(new KAnimControllerBase.OverrideAnimFileData
 		{
 			priority = priority,
@@ -791,6 +597,12 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public void RemoveAnimOverrides(KAnimFile kanim_file)
 	{
+		if (kanim_file.GetData().build != null && kanim_file.GetData().build.symbols.Length > 0)
+		{
+			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
+			DebugUtil.Assert(component != null, "Anim overrides containing additional symbols require a symbol override controller.");
+			component.TryRemoveBuildOverride(kanim_file.GetData(), 0);
+		}
 		for (int i = 0; i < this.overrideAnimFiles.Count; i++)
 		{
 			if (this.overrideAnimFiles[i].file == kanim_file)
@@ -799,15 +611,8 @@ public abstract class KAnimControllerBase : MonoBehaviour
 				break;
 			}
 		}
-		if (this.temporaryBuildOverrides != null && this.temporaryBuildOverrides.Contains(kanim_file.GetData()))
-		{
-			this.RemoveSymbolOverride(kanim_file);
-			this.temporaryBuildOverrides.Remove(kanim_file.GetData());
-		}
 		this.RebuildOverrides(kanim_file);
 	}
-
-	protected abstract void RemoveSymbolOverride(KAnimFile kanim_file);
 
 	private void RebuildOverrides(KAnimFile kanim_file)
 	{
@@ -817,10 +622,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		{
 			KAnimControllerBase.OverrideAnimFileData overrideAnimFileData = this.overrideAnimFiles[i];
 			KAnimFileData data = overrideAnimFileData.file.GetData();
-			if (data.buildIndex != -1)
-			{
-				this.AddBuildOverride(data, true, false);
-			}
 			for (int j = 0; j < data.animCount; j++)
 			{
 				KAnim.Anim anim = data.GetAnim(j);
@@ -837,102 +638,45 @@ public abstract class KAnimControllerBase : MonoBehaviour
 				}
 			}
 		}
-		this.dirtyBuild = true;
 		if (flag)
 		{
 			this.Restart(this.curAnim.name, this.mode, this.playSpeed, 0f);
 		}
 	}
 
-	private void HideSnapToSymbols(KAnim.Build build)
+	public bool HasAnimation(HashedString anim_name)
 	{
-		if (build == null || build.symbols == null)
-		{
-			return;
-		}
-		for (int i = 0; i < build.symbols.Length; i++)
-		{
-			KAnim.Build.Symbol symbol = build.symbols[i];
-			if (symbol.HasFlag(KAnim.SymbolFlags.SnapTo))
-			{
-				this.hiddenSymbols.Add(symbol.hash);
-			}
-		}
+		return this.anims.ContainsKey(anim_name);
 	}
 
-	public void UpdateSymbolLookups()
+	public void AddAnims(KAnimFile anim_file)
 	{
-		if (this.dirtyBuild)
-		{
-			if (this.layering != null)
-			{
-				this.layering.HideSymbols();
-			}
-			this.dirtyBuild = false;
-			if (this.curBuild != null)
-			{
-				this.hiddenSymbols.Clear();
-				if (this.doHideSnapTo)
-				{
-					this.HideSnapToSymbols(this.curBuild);
-					for (int i = 0; i < this.overrideAnimFiles.Count; i++)
-					{
-						KAnimFile file = this.overrideAnimFiles[i].file;
-						KAnim.Build build = file.GetData().build;
-						if (build != null)
-						{
-							this.HideSnapToSymbols(build);
-						}
-					}
-				}
-				this.hiddenSymbols.RemoveAll((KAnimHashedString x) => this.visibleSymbols.Contains(x));
-				this.UpdateHidden();
-			}
-		}
-	}
-
-	public bool HasAnimation(string animName)
-	{
-		return this.HasAnimation(new HashedString(animName));
-	}
-
-	public bool HasAnimation(HashedString animName)
-	{
-		return this.anims.ContainsKey(animName);
-	}
-
-	public void AddAnims(KAnimFileData animFile)
-	{
-		if (animFile == null)
+		KAnimFileData data = anim_file.GetData();
+		if (data == null)
 		{
 			global::Debug.LogError("AddAnims() Null animfile data", null);
 			return;
 		}
-		this.maxSymbols = Mathf.Max(this.maxSymbols, animFile.maxVisSymbolFrames);
-		for (int i = 0; i < animFile.animCount; i++)
+		this.maxSymbols = Mathf.Max(this.maxSymbols, data.maxVisSymbolFrames);
+		for (int i = 0; i < data.animCount; i++)
 		{
-			KAnim.Anim anim = animFile.GetAnim(i);
+			KAnim.Anim anim = data.GetAnim(i);
+			if (anim.animFile.hashName != data.hashName)
+			{
+			}
 			this.anims[anim.hash] = new KAnimControllerBase.AnimLookupData
 			{
 				animIndex = anim.index
 			};
 		}
-		if (animFile.buildIndex != -1 && animFile.build.symbols != null && animFile.build.symbols.Length > 0 && this.curBuild == null)
+		if (this.usingNewSymbolOverrideSystem && data.buildIndex != -1 && data.build.symbols != null && data.build.symbols.Length > 0)
 		{
-			this.curBuild = animFile.build;
-			this.dirtyBuild = true;
+			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
+			component.AddBuildOverride(anim_file.GetData(), -1);
 		}
 	}
 
-	public void ClearAnims()
-	{
-		this.curBuild = null;
-		this.anims.Clear();
-		this.overrideAnims.Clear();
-		this.animFiles = new KAnimFile[0];
-	}
-
-	public IList<KAnimFile> AnimFiles
+	public KAnimFile[] AnimFiles
 	{
 		get
 		{
@@ -940,22 +684,17 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		}
 		set
 		{
-			this.animFiles = new KAnimFile[value.Count];
-			for (int i = 0; i < value.Count; i++)
+			DebugUtil.Assert(value.Length > 0, "Controller has no anim files.");
+			DebugUtil.Assert(value[0].buildFile != null, "First anim file needs to be the build file.");
+			for (int i = 0; i < value.Length; i++)
 			{
-				this.animFiles[i] = value[i];
+				DebugUtil.Assert(value[i] != null, "Anim file is null");
 			}
-		}
-	}
-
-	public void SetAnims(KAnimFile[] setAnims, bool dobind = true)
-	{
-		this.dirtyBuild = true;
-		this.animFiles = new KAnimFile[0];
-		this.AddAnims(setAnims);
-		if (dobind)
-		{
-			this.UpdateSymbolLookups();
+			this.animFiles = new KAnimFile[value.Length];
+			for (int j = 0; j < value.Length; j++)
+			{
+				this.animFiles[j] = value[j];
+			}
 		}
 	}
 
@@ -1061,9 +800,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	protected KAnimFile[] animFiles = new KAnimFile[0];
 
 	[SerializeField]
-	public string missingAnim;
-
-	[SerializeField]
 	protected Vector3 offset;
 
 	[SerializeField]
@@ -1084,13 +820,13 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	[SerializeField]
 	protected bool flipY;
 
-	protected KAnimFileData curAnimFile;
-
 	protected KAnim.Anim curAnim;
 
 	protected int curAnimFrameIdx = KAnim.Anim.Frame.InvalidFrame.idx;
 
 	protected int prevAnimFrame = KAnim.Anim.Frame.InvalidFrame.idx;
+
+	public bool usingNewSymbolOverrideSystem;
 
 	protected HandleVector<int>.Handle eventManagerHandle = HandleVector<int>.InvalidHandle;
 
@@ -1108,17 +844,11 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	protected bool stopped = true;
 
-	protected bool dirtyBuild;
-
 	public float animHeight = 1f;
 
 	public float animWidth = 1f;
 
-	protected bool visible;
-
-	public bool doHideSnapTo = true;
-
-	public bool warnOnMissinAnim = true;
+	protected bool isVisible;
 
 	protected Bounds bounds;
 
@@ -1139,11 +869,8 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public Action<GameObject> onDestroySelf;
 
-	protected List<KAnimHashedString> baseHiddenSymbols;
-
+	[SerializeField]
 	protected List<KAnimHashedString> hiddenSymbols = new List<KAnimHashedString>();
-
-	protected List<KAnimHashedString> visibleSymbols = new List<KAnimHashedString>();
 
 	protected Dictionary<HashedString, KAnimControllerBase.AnimLookupData> anims = new Dictionary<HashedString, KAnimControllerBase.AnimLookupData>();
 
@@ -1158,8 +885,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	protected AnimEventManager aem;
 
 	private static HashedString snaptoPivot = new HashedString("snapTo_pivot");
-
-	private HashSet<KAnimFileData> temporaryBuildOverrides;
 
 	public struct OverrideAnimFileData
 	{

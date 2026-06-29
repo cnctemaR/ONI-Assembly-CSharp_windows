@@ -16,6 +16,11 @@ public class AutomatableSideScreen : SideScreenContent
 		this.allowManualToggle.onValueChanged += this.OnAllowManualChanged;
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<Automatable>() != null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		base.SetTarget(target);

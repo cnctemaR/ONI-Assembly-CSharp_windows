@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 
@@ -12,12 +11,6 @@ public class MaterialsManager : RoleConfig
 		base.description = DUPLICANTS.ROLES.MATERIALS_MANAGER.DESCRIPTION;
 		base.roleGroup = "Hauling";
 		base.hat = Game.Instance.roleManager.GetHat(MaterialsManager.ID);
-		this.favoredChoreTypes = new List<ChoreType>
-		{
-			Db.Get().ChoreTypes.Fetch,
-			Db.Get().ChoreTypes.OperateFetch,
-			Db.Get().ChoreTypes.Transport
-		};
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Athletics };
 		base.perks = new RolePerk[]
 		{

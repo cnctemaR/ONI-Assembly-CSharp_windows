@@ -13,6 +13,11 @@ public class SealedDoorSideScreen : SideScreenContent
 		this.Refresh();
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<Door>() != null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		Door component = target.GetComponent<Door>();

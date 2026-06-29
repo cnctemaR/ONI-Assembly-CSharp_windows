@@ -38,7 +38,8 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 2);
 		buildingDef.IsFoundation = true;
-		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
+		buildingDef.SceneLayer = Grid.SceneLayer.Building;
+		buildingDef.ForegroundLayer = Grid.SceneLayer.TileFront;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.WireIDs, "WireBridgeHighWattage");
 		return buildingDef;
 	}

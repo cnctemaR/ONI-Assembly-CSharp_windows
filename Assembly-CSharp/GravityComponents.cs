@@ -17,39 +17,62 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 			{
 				if (!(gravityComponent.transform == null))
 				{
-					Vector2 velocity = gravityComponent.Velocity;
 					Vector3 position = gravityComponent.transform.GetPosition();
 					Vector2 vector = position;
-					Vector2 vector2 = vector + velocity * dt;
-					Vector2 vector3 = vector2;
-					vector3.y -= gravityComponent.offset;
-					int num = Grid.PosToCell(vector3);
-					if (Grid.IsValidCell(num))
+					Vector2 vector2 = new Vector2(gravityComponent.velocity.x, gravityComponent.velocity.y + -9.8f * dt);
+					float sqrMagnitude = vector2.sqrMagnitude;
+					if (sqrMagnitude > 784f)
 					{
-						if (velocity.sqrMagnitude > 0.2f)
+						vector2 *= 28f / Mathf.Sqrt(sqrMagnitude);
+					}
+					int num = Grid.PosToCell(vector);
+					bool flag = Grid.IsVisiblyInLiquid(vector + new Vector2(0f, gravityComponent.radius));
+					if (flag)
+					{
+						flag = true;
+						float num2 = (float)(gravityComponent.transform.GetInstanceID() % 1000) / 1000f * 0.25f;
+						float num3 = 1.1f + num2 * 1.1f;
+						if (sqrMagnitude > num3 * num3)
 						{
-							int num2 = Grid.PosToCell(vector);
-							if (!Grid.Element[num2].IsLiquid && Grid.Element[num].IsLiquid)
+							float num4 = Mathf.Sqrt(sqrMagnitude);
+							vector2 = vector2 / num4 * Mathf.Lerp(num4, num2, dt * (5f + 5f * num2));
+						}
+					}
+					gravityComponent.velocity = vector2;
+					gravityComponent.elapsedTime += dt;
+					Vector2 vector3 = vector + vector2 * dt;
+					Vector2 vector4 = vector3;
+					vector4.y -= gravityComponent.radius;
+					bool flag2 = Grid.IsVisiblyInLiquid(vector3 + new Vector2(0f, gravityComponent.radius));
+					if (!flag && flag2)
+					{
+						KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("splash_step_kanim", new Vector3(vector3.x, vector3.y, 0f) + new Vector3(-0.38f, 0.75f, -0.1f), null, false, Grid.SceneLayer.FXFront, false);
+						kbatchedAnimController.Play("fx1", KAnim.PlayMode.Once, 1f, 0f);
+						kbatchedAnimController.destroyOnAnimComplete = true;
+					}
+					int num5 = Grid.PosToCell(vector4);
+					if (Grid.IsValidCell(num5))
+					{
+						if (vector2.sqrMagnitude > 0.2f && Grid.IsValidCell(num) && !Grid.Element[num].IsLiquid && Grid.Element[num5].IsLiquid)
+						{
+							AmbienceType ambience = Grid.Element[num5].substance.GetAmbience();
+							if (ambience != AmbienceType.None)
 							{
-								AmbienceType ambience = Grid.Element[num].substance.GetAmbience();
-								if (ambience != AmbienceType.None)
+								string text = Sounds.Instance.OreSplashSoundsMigrated[(int)ambience];
+								if (CameraController.Instance != null && CameraController.Instance.IsAudibleSound(vector3, text))
 								{
-									string text = Sounds.Instance.OreSplashSoundsMigrated[(int)ambience];
-									if (CameraController.Instance != null && CameraController.Instance.IsAudibleSound(vector2, text))
-									{
-										SoundEvent.PlayOneShot(text, vector2);
-									}
+									SoundEvent.PlayOneShot(text, vector3);
 								}
 							}
 						}
-						if (Grid.Solid[num])
+						if (Grid.Solid[num5])
 						{
-							vector2.y = Grid.CellToPosCBC(Grid.CellAbove(num), Grid.SceneLayer.Move).y + gravityComponent.offset;
-							gravityComponent.initialVelocity.x = 0f;
+							vector3.y = Grid.CellToPosCBC(Grid.CellAbove(num5), Grid.SceneLayer.Move).y + gravityComponent.radius;
+							gravityComponent.velocity.x = 0f;
 							gravityComponent.elapsedTime = -1f;
-							gravityComponent.transform.SetPosition(new Vector3(vector2.x, vector2.y, position.z));
+							gravityComponent.transform.SetPosition(new Vector3(vector3.x, vector3.y, position.z));
 							this.data[i] = gravityComponent;
-							EventSystem.Trigger(gravityComponent.transform.gameObject, 1188683690, velocity);
+							EventSystem.Trigger(gravityComponent.transform.gameObject, 1188683690, vector2);
 							if (gravityComponent.onLanded != null)
 							{
 								gravityComponent.onLanded();
@@ -57,13 +80,44 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 						}
 						else
 						{
-							gravityComponent.transform.SetPosition(new Vector3(vector2.x, vector2.y, position.z));
-							gravityComponent.elapsedTime += dt;
+							Vector2 vector5 = vector3;
+							vector5.x -= gravityComponent.radius;
+							int num6 = Grid.PosToCell(vector5);
+							if (Grid.IsValidCell(num6) && Grid.Solid[num6])
+							{
+								vector3.x = Mathf.Floor(vector3.x - gravityComponent.radius) + (1f + gravityComponent.radius);
+								gravityComponent.velocity.x = -0.1f * gravityComponent.velocity.x;
+								this.data[i] = gravityComponent;
+							}
+							else
+							{
+								Vector3 vector6 = vector3;
+								vector6.x += gravityComponent.radius;
+								int num7 = Grid.PosToCell(vector6);
+								if (Grid.IsValidCell(num7) && Grid.Solid[num7])
+								{
+									vector3.x = Mathf.Floor(vector3.x + gravityComponent.radius) - gravityComponent.radius;
+									gravityComponent.velocity.x = -0.1f * gravityComponent.velocity.x;
+									this.data[i] = gravityComponent;
+								}
+							}
+							gravityComponent.transform.SetPosition(new Vector3(vector3.x, vector3.y, position.z));
 							this.data[i] = gravityComponent;
 						}
+					}
+					else
+					{
+						gravityComponent.transform.SetPosition(new Vector3(vector3.x, vector3.y, position.z));
+						this.data[i] = gravityComponent;
 					}
 				}
 			}
 		}
 	}
+
+	private const float Acceleration = -9.8f;
+
+	private const float MAX_VELOCITY = 28f;
+
+	private const float MAX_VELOCITY_IN_LIQUID = 1.1f;
 }

@@ -89,7 +89,7 @@ public class Worker : KMonoBehaviour
 				KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
 				component.Stop();
 				HashedString workPstAnim = this.workable.GetWorkPstAnim(this);
-				if (this.workable != null && this.workable.synchronizeAnims)
+				if (workPstAnim.IsValid && this.workable != null && this.workable.synchronizeAnims)
 				{
 					KAnimControllerBase component2 = this.workable.GetComponent<KAnimControllerBase>();
 					if (component2 != null && component2.HasAnimation(workPstAnim))
@@ -125,7 +125,7 @@ public class Worker : KMonoBehaviour
 		}
 		if (target_workable != null)
 		{
-			target_workable.Unsubscribe(this.onDeconstructHandle);
+			target_workable.Unsubscribe(this.onWorkChoreDisabledHandle);
 			target_workable.StopWork(this, is_aborted);
 		}
 		if (this.smi != null)
@@ -139,13 +139,14 @@ public class Worker : KMonoBehaviour
 		this.startWorkInfo = null;
 	}
 
-	private void OnDeconstruct(object data)
+	private void OnWorkChoreDisabled(object data)
 	{
+		string text = data as string;
 		ChoreConsumer component = base.GetComponent<ChoreConsumer>();
 		if (component != null && component.choreDriver != null)
 		{
 			Chore currentChore = component.choreDriver.GetCurrentChore();
-			currentChore.Fail("DeconstructTriggered");
+			currentChore.Fail((text == null) ? "WorkChoreDisabled" : text);
 		}
 	}
 
@@ -188,17 +189,8 @@ public class Worker : KMonoBehaviour
 		{
 			this.state = Worker.State.Working;
 			this.lastWorkTick = Time.time;
-			this.workable.StartWork(this);
-			if (this.workable == null)
+			if (this.workable != null)
 			{
-				global::Debug.LogWarning("Stopped work as soon as I started. This is usuually a sign that a chore is open when it shouldn't be or that it's preconditions are wrong.", null);
-			}
-			else
-			{
-				this.onDeconstructHandle = this.workable.Subscribe(-790448070, new Action<object>(this.OnDeconstruct));
-				KSelectable component = base.GetComponent<KSelectable>();
-				this.previousStatusItem = component.GetStatusItem(Db.Get().StatusItemCategories.Main);
-				component.SetStatusItem(Db.Get().StatusItemCategories.Main, this.workable.GetWorkerStatusItem(), this.workable);
 				this.animInfo = this.workable.GetAnim(this);
 				if (this.animInfo.smi != null)
 				{
@@ -208,31 +200,43 @@ public class Worker : KMonoBehaviour
 				Vector3 position = base.transform.GetPosition();
 				position.z = Grid.GetLayerZ(this.workable.workLayer);
 				base.transform.SetPosition(position);
-				KAnimControllerBase component2 = base.GetComponent<KAnimControllerBase>();
+				KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
 				if (this.animInfo.smi == null)
 				{
-					this.AttachOverrideAnims(component2);
+					this.AttachOverrideAnims(component);
 				}
 				HashedString[] workAnims = this.workable.GetWorkAnims(this);
 				Vector3 workOffset = this.workable.GetWorkOffset();
 				this.workAnimOffset = workOffset;
-				component2.Offset += workOffset;
+				component.Offset += workOffset;
 				if (this.animInfo.smi == null && workAnims != null)
 				{
 					if (this.workable.synchronizeAnims)
 					{
-						KAnimControllerBase component3 = this.workable.GetComponent<KAnimControllerBase>();
-						if (component3 != null)
+						KAnimControllerBase component2 = this.workable.GetComponent<KAnimControllerBase>();
+						if (component2 != null)
 						{
-							this.kanimSynchronizer = component3.GetSynchronizer();
+							this.kanimSynchronizer = component2.GetSynchronizer();
 							if (this.kanimSynchronizer != null)
 							{
-								this.kanimSynchronizer.Add(component2);
+								this.kanimSynchronizer.Add(component);
 							}
 						}
 					}
-					component2.Play(workAnims, KAnim.PlayMode.Loop);
+					component.Play(workAnims, KAnim.PlayMode.Loop);
 				}
+			}
+			this.workable.StartWork(this);
+			if (this.workable == null)
+			{
+				global::Debug.LogWarning("Stopped work as soon as I started. This is usually a sign that a chore is open when it shouldn't be or that it's preconditions are wrong.", null);
+			}
+			else
+			{
+				this.onWorkChoreDisabledHandle = this.workable.Subscribe(2108245096, new Action<object>(this.OnWorkChoreDisabled));
+				KSelectable component3 = base.GetComponent<KSelectable>();
+				this.previousStatusItem = component3.GetStatusItem(Db.Get().StatusItemCategories.Main);
+				component3.SetStatusItem(Db.Get().StatusItemCategories.Main, this.workable.GetWorkerStatusItem(), this.workable);
 			}
 		}
 		catch (Exception ex)
@@ -282,7 +286,7 @@ public class Worker : KMonoBehaviour
 
 	private float workCompleteTime;
 
-	private int onDeconstructHandle;
+	private int onWorkChoreDisabledHandle;
 
 	public object workCompleteData;
 

@@ -8,7 +8,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 	{
 		base.OnPrefabInit();
 		this.filteredStorage = new FilteredStorage(this, null, this.filterTint, this.noFilterTint, null, false, Db.Get().ChoreTypes.CreatureFetch);
-		base.GetComponent<Storage>().SetOffsets(Grid.DefaultOffset);
+		base.GetComponent<Storage>().SetOffsets(this.deliveryOffsets);
 		Prioritizable.AddRef(base.gameObject);
 	}
 
@@ -17,9 +17,6 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 		base.OnSpawn();
 		base.smi.StartSM();
 		this.filteredStorage.FilterChanged();
-		WorldInventory.Instance.Discover(EntityTemplates.GetBaggedCreatureTag("Glom".ToTag()), GameTags.BagableCreature);
-		WorldInventory.Instance.Discover(EntityTemplates.GetBaggedCreatureTag("Hatch".ToTag()), GameTags.BagableCreature);
-		WorldInventory.Instance.Discover(EntityTemplates.GetBaggedCreatureTag("Oilfloater".ToTag()), GameTags.BagableCreature);
 	}
 
 	protected override void OnCleanUp()
@@ -40,6 +37,10 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 
 	private FilteredStorage filteredStorage;
 
+	public CellOffset[] deliveryOffsets = new CellOffset[] { default(CellOffset) };
+
+	public CellOffset spawnOffset = new CellOffset(0, 0);
+
 	public class SMInstance : GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.GameInstance
 	{
 		public SMInstance(CreatureDeliveryPoint master)
@@ -59,6 +60,8 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 				Storage component = smi.master.GetComponent<Storage>();
 				List<GameObject> items = component.items;
 				int count = items.Count;
+				int num = Grid.OffsetCell(Grid.PosToCell(smi.transform.GetPosition()), smi.master.spawnOffset);
+				Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Creatures);
 				for (int i = count - 1; i >= 0; i--)
 				{
 					GameObject gameObject = items[i];
@@ -67,7 +70,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 					Tag unbaggedCreatureTag = EntityTemplates.GetUnbaggedCreatureTag(component2.PrefabTag);
 					GameObject prefab = Assets.GetPrefab(unbaggedCreatureTag);
 					GameObject gameObject2 = Util.KInstantiate(prefab, Folder.Entities, smi.master.transform.GetPosition());
-					gameObject2.transform.SetPosition(smi.master.transform.GetPosition());
+					gameObject2.transform.SetPosition(vector);
 					gameObject2.SetActive(true);
 					Util.KDestroyGameObject(gameObject);
 				}

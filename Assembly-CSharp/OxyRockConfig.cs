@@ -24,7 +24,7 @@ public class OxyRockConfig : IOreConfig
 		GameObject gameObject = EntityTemplates.CreateSolidOreEntity(this.ElementID, null);
 		Sublimates sublimates = gameObject.AddOrGet<Sublimates>();
 		sublimates.spawnFXHash = SpawnFXHashes.OxygenEmissionBubbles;
-		sublimates.info = new Sublimates.Info(0.4f, 0.1f, 1.8f, 1f, this.SublimeElementID, byte.MaxValue, 0);
+		sublimates.info = new Sublimates.Info(0.010000001f, 0.0050000004f, 1.8f, 0.7f, this.SublimeElementID, byte.MaxValue, 0);
 		return gameObject;
 	}
 }

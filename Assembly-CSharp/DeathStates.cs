@@ -51,7 +51,7 @@ internal class DeathStates : GameStateMachine<DeathStates, DeathStates.Instance,
 
 		public void EnableGravityIfNecessary()
 		{
-			if (base.HasTag(GameTags.Creatures.Flying))
+			if (base.HasTag(GameTags.Creatures.Flyer))
 			{
 				GameComps.Gravities.Add(base.smi.gameObject, Vector2.zero, null);
 			}

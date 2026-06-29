@@ -34,7 +34,6 @@ public class LogicCircuitNetwork : UtilityNetwork
 		{
 			ILogicEventReceiver logicEventReceiver = item as ILogicEventReceiver;
 			this.receivers.Remove(logicEventReceiver);
-			logicEventReceiver.ReceiveLogicEvent(0);
 		}
 		else if (item is ILogicEventSender)
 		{

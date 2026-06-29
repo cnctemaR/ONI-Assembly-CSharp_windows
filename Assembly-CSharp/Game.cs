@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using FMOD.Studio;
 using Klei;
+using Klei.CustomSettings;
 using KSerialization;
 using ProcGenGame;
 using UnityEngine;
@@ -20,6 +21,27 @@ public class Game : KMonoBehaviour
 	public KInputHandler inputHandler { get; set; }
 
 	public static Game Instance { get; private set; }
+
+	public bool SandboxModeActive
+	{
+		get
+		{
+			return this.sandboxModeActive;
+		}
+		set
+		{
+			this.sandboxModeActive = value;
+			base.Trigger(-1948169901, null);
+			if (PlanScreen.Instance != null)
+			{
+				PlanScreen.Instance.Refresh();
+			}
+			if (BuildMenu.Instance != null)
+			{
+				BuildMenu.Instance.Refresh();
+			}
+		}
+	}
 
 	public StatusItemRenderer statusItemRenderer { get; private set; }
 
@@ -180,6 +202,12 @@ public class Game : KMonoBehaviour
 		this.solidConduitFlow.Initialize();
 		SimAndRenderScheduler.instance.Add(this.roomProber, false);
 		SimAndRenderScheduler.instance.Add(KComponentSpawn.instance, false);
+		if (!SaveLoader.Instance.loadedFromSave)
+		{
+			SettingConfig settingConfig = Game.Instance.customSettings.QualitySettings["SandboxMode"];
+			SettingLevel currentQualitySetting = Game.Instance.customSettings.GetCurrentQualitySetting("SandboxMode");
+			SaveGame.Instance.sandboxEnabled = !settingConfig.IsDefaultLevel(currentQualitySetting.id);
+		}
 	}
 
 	protected override void OnCleanUp()
@@ -358,6 +386,10 @@ public class Game : KMonoBehaviour
 					Game.ComplexCallbackInfo complexCallbackInfo = this.complexCallbackManager.Release(handle2);
 					if (complexCallbackInfo.cb != null)
 					{
+						if (massConsumedCallback.GetType() != typeof(Sim.MassConsumedCallback))
+						{
+							Output.LogError(new object[] { "Somehow a callback from", complexCallbackInfo.debugInfo, "got into the MassEmittedCallbacks list" });
+						}
 						complexCallbackInfo.cb(massConsumedCallback);
 					}
 				}
@@ -370,6 +402,10 @@ public class Game : KMonoBehaviour
 					Game.ComplexCallbackInfo item = this.complexCallbackManager.GetItem(handle3);
 					if (item.cb != null)
 					{
+						if (massEmittedCallback.GetType() != typeof(Sim.MassEmittedCallback))
+						{
+							Output.LogError(new object[] { "Somehow a callback from", item.debugInfo, "got into the MassEmittedCallbacks list" });
+						}
 						item.cb(massEmittedCallback);
 					}
 				}
@@ -580,6 +616,10 @@ public class Game : KMonoBehaviour
 		if (ptr == null)
 		{
 			global::Debug.LogError("UNEXPECTED!", null);
+			return;
+		}
+		if (ptr->numFramesProcessed <= 0)
+		{
 			return;
 		}
 		this.callbackManager.NextFrame();
@@ -1181,9 +1221,11 @@ public class Game : KMonoBehaviour
 
 	public CustomGameSettings customSettings;
 
+	private bool sandboxModeActive;
+
 	public FrameDelayedHandleVector<Game.CallbackInfo> callbackManager = new FrameDelayedHandleVector<Game.CallbackInfo>(256);
 
-	public FrameDelayedHandleVector<Game.ComplexCallbackInfo> complexCallbackManager = new FrameDelayedHandleVector<Game.ComplexCallbackInfo>(256);
+	public Game.ComplexCallbackHandleVector complexCallbackManager = new Game.ComplexCallbackHandleVector(256);
 
 	[NonSerialized]
 	public Player LocalPlayer;
@@ -1375,12 +1417,30 @@ public class Game : KMonoBehaviour
 
 	public struct ComplexCallbackInfo
 	{
-		public ComplexCallbackInfo(Action<object> cb)
+		public ComplexCallbackInfo(Action<object> cb, string debug_info)
 		{
 			this.cb = cb;
+			this.debugInfo = debug_info;
 		}
 
 		public Action<object> cb;
+
+		public string debugInfo;
+	}
+
+	public class ComplexCallbackHandleVector : FrameDelayedHandleVector<Game.ComplexCallbackInfo>
+	{
+		public ComplexCallbackHandleVector(int initial_size)
+			: base(initial_size)
+		{
+		}
+
+		public override void Reset(HandleVector<Game.ComplexCallbackInfo>.Handle handle)
+		{
+			Game.ComplexCallbackInfo complexCallbackInfo = this.items[handle.index];
+			complexCallbackInfo.cb = null;
+			this.items[handle.index] = complexCallbackInfo;
+		}
 	}
 
 	[Serializable]
@@ -1393,10 +1453,14 @@ public class Game : KMonoBehaviour
 
 		public Color32 insulatedTint;
 
+		public Color32 radiantTint;
+
 		[Header("Overlay")]
 		public Color32 overlayTint;
 
 		public Color32 overlayInsulatedTint;
+
+		public Color32 overlayRadiantTint;
 
 		public Vector2 overlayMassScaleRange = new Vector2f(1f, 1000f);
 

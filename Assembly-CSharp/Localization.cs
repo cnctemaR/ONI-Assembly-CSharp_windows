@@ -216,19 +216,29 @@ public static class Localization
 			where t.IsClass && t.Namespace == "STRINGS" && !t.IsNested
 			select t;
 		string empty = string.Empty;
+		string empty2 = string.Empty;
+		string empty3 = string.Empty;
 		List<Type> list = enumerable.ToList<Type>();
 		foreach (Type type in list)
 		{
 			string text = "STRINGS." + type.Name;
-			Localization.OverloadStrings(translated_strings, text, type, ref empty);
+			Localization.OverloadStrings(translated_strings, text, type, ref empty, ref empty2, ref empty3);
 		}
-		if (empty != string.Empty)
+		if (!string.IsNullOrEmpty(empty))
 		{
 			global::Debug.Log("TRANSLATION ERROR! The following have missing or mismatched parameters:\n" + empty, null);
 		}
+		if (!string.IsNullOrEmpty(empty2))
+		{
+			global::Debug.Log("TRANSLATION ERROR! The following have mismatched <link> tags:\n" + empty2, null);
+		}
+		if (!string.IsNullOrEmpty(empty3))
+		{
+			global::Debug.Log("TRANSLATION ERROR! The following do not have the same amount of <link> tags as the english string which can cause nested link errors:\n" + empty3, null);
+		}
 	}
 
-	private static void OverloadStrings(Dictionary<string, string> translated_strings, string path, Type t, ref string errors)
+	private static void OverloadStrings(Dictionary<string, string> translated_strings, string path, Type t, ref string parameter_errors, ref string link_errors, ref string link_count_errors)
 	{
 		FieldInfo[] fields = t.GetFields();
 		foreach (FieldInfo fieldInfo in fields)
@@ -243,11 +253,25 @@ public static class Localization
 					LocString locString2 = new LocString(text2, text);
 					if (Localization.AreParametersPreserved(locString.text, text2))
 					{
-						fieldInfo.SetValue(null, locString2);
+						if (Localization.HasSameLinkCountAsEnglish(locString.text, text2))
+						{
+							if (Localization.HasMatchingLinkTags(text2, 0))
+							{
+								fieldInfo.SetValue(null, locString2);
+							}
+							else
+							{
+								link_errors = link_errors + "\t" + text + "\n";
+							}
+						}
+						else
+						{
+							link_count_errors = link_count_errors + "\t" + text + "\n";
+						}
 					}
 					else
 					{
-						errors = errors + "\t" + text + "\n";
+						parameter_errors = parameter_errors + "\t" + text + "\n";
 					}
 				}
 			}
@@ -256,7 +280,7 @@ public static class Localization
 		foreach (Type type in nestedTypes)
 		{
 			string text3 = path + "." + type.Name;
-			Localization.OverloadStrings(translated_strings, text3, type, ref errors);
+			Localization.OverloadStrings(translated_strings, text3, type, ref parameter_errors, ref link_errors, ref link_count_errors);
 		}
 	}
 
@@ -494,6 +518,42 @@ public static class Localization
 		}
 	}
 
+	private static bool HasSameTokenCount(string first, string second, string token)
+	{
+		int num = first.Split(new string[] { token }, StringSplitOptions.None).Length;
+		int num2 = second.Split(new string[] { token }, StringSplitOptions.None).Length;
+		return num == num2;
+	}
+
+	private static bool HasSameLinkCountAsEnglish(string english_string, string translated_string)
+	{
+		return Localization.HasSameTokenCount(english_string, translated_string, "<link") && Localization.HasSameTokenCount(english_string, translated_string, "</link");
+	}
+
+	private static bool HasMatchingLinkTags(string str, int idx = 0)
+	{
+		int num = str.IndexOf("<link", idx);
+		int num2 = str.IndexOf("</link", idx);
+		if (num == -1 && num2 == -1)
+		{
+			return true;
+		}
+		if (num == -1 && num2 != -1)
+		{
+			return false;
+		}
+		if (num != -1 && num2 == -1)
+		{
+			return false;
+		}
+		if (num2 < num)
+		{
+			return false;
+		}
+		int num3 = str.IndexOf("<link", num + 1);
+		return (num < 0 || num3 == -1 || num3 >= num2) && Localization.HasMatchingLinkTags(str, num2 + 1);
+	}
+
 	private static bool AreParametersPreserved(string old_string, string new_string)
 	{
 		MatchCollection matchCollection = Regex.Matches(old_string, "{.*?}");
@@ -648,12 +708,17 @@ public static class Localization
 	{
 		Localization.DEFAULT_LANGUAGE_CODE,
 		"zh_klei",
-		"ko_klei"
+		"ko_klei",
+		"ru_klei"
 	};
 
 	public static string SELECTED_LANGUAGE_TYPE_KEY = "SelectedLanguageType";
 
 	public static string SELECTED_LANGUAGE_CODE_KEY = "SelectedLanguageCode";
+
+	private const string start_link_token = "<link";
+
+	private const string end_link_token = "</link";
 
 	public enum Language
 	{

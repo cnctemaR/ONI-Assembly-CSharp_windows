@@ -298,36 +298,58 @@ public class SaveLoader : KMonoBehaviour
 
 	public static List<string> GetSaveFiles(string save_dir)
 	{
-		if (!Directory.Exists(save_dir))
+		List<string> list = new List<string>();
+		try
 		{
-			Directory.CreateDirectory(save_dir);
-		}
-		string[] files = Directory.GetFiles(save_dir, "*.sav", SearchOption.AllDirectories);
-		List<SaveLoader.SaveFileEntry> list = new List<SaveLoader.SaveFileEntry>();
-		foreach (string text in files)
-		{
-			try
+			if (!Directory.Exists(save_dir))
 			{
-				global::System.DateTime lastWriteTime = File.GetLastWriteTime(text);
-				SaveLoader.SaveFileEntry saveFileEntry = new SaveLoader.SaveFileEntry
+				Directory.CreateDirectory(save_dir);
+			}
+			string[] files = Directory.GetFiles(save_dir, "*.sav", SearchOption.AllDirectories);
+			List<SaveLoader.SaveFileEntry> list2 = new List<SaveLoader.SaveFileEntry>();
+			foreach (string text in files)
+			{
+				try
 				{
-					path = text,
-					timeStamp = lastWriteTime
-				};
-				list.Add(saveFileEntry);
+					global::System.DateTime lastWriteTime = File.GetLastWriteTime(text);
+					SaveLoader.SaveFileEntry saveFileEntry = new SaveLoader.SaveFileEntry
+					{
+						path = text,
+						timeStamp = lastWriteTime
+					};
+					list2.Add(saveFileEntry);
+				}
+				catch (Exception ex)
+				{
+					global::Debug.LogWarning("Problem reading file: " + text + "\n" + ex.ToString(), null);
+				}
 			}
-			catch (Exception ex)
+			list2.Sort((SaveLoader.SaveFileEntry x, SaveLoader.SaveFileEntry y) => y.timeStamp.CompareTo(x.timeStamp));
+			foreach (SaveLoader.SaveFileEntry saveFileEntry2 in list2)
 			{
-				global::Debug.LogWarning("Problem reading file: " + text + "\n" + ex.ToString(), null);
+				list.Add(saveFileEntry2.path);
 			}
 		}
-		list.Sort((SaveLoader.SaveFileEntry x, SaveLoader.SaveFileEntry y) => y.timeStamp.CompareTo(x.timeStamp));
-		List<string> list2 = new List<string>();
-		foreach (SaveLoader.SaveFileEntry saveFileEntry2 in list)
+		catch (Exception ex2)
 		{
-			list2.Add(saveFileEntry2.path);
+			string text2 = null;
+			if (ex2 is UnauthorizedAccessException)
+			{
+				text2 = string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_READ_ONLY, save_dir);
+			}
+			else if (ex2 is IOException)
+			{
+				text2 = string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_INSUFFICIENT_SPACE, save_dir);
+			}
+			if (text2 == null)
+			{
+				throw ex2;
+			}
+			GameObject gameObject = ((!(FrontEndManager.Instance == null)) ? FrontEndManager.Instance.gameObject : GameScreenManager.Instance.ssOverlayCanvas);
+			ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>();
+			component.PopupConfirmDialog(text2, null, null, null, null, null, null, null);
 		}
-		return list2;
+		return list;
 	}
 
 	public static List<string> GetAllFiles()

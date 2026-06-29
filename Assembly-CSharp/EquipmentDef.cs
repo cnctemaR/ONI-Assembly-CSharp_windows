@@ -42,6 +42,8 @@ public class EquipmentDef : Def
 
 	public KAnimFile BuildOverride;
 
+	public int BuildOverridePriority;
+
 	public bool IsBody;
 
 	public List<AttributeModifier> AttributeModifiers;

@@ -7,10 +7,9 @@ public class SymbolInstanceGpuData
 	public SymbolInstanceGpuData(int symbol_count)
 	{
 		this.symbolCount = symbol_count;
-		this.bytes = new byte[8 * symbol_count * 4];
 		this.symbolInstancesConverter = new SymbolInstanceGpuData.SymbolInstanceToByteConverter
 		{
-			bytes = this.bytes
+			bytes = new byte[8 * symbol_count * 4]
 		};
 		for (int i = 0; i < symbol_count; i++)
 		{
@@ -40,6 +39,7 @@ public class SymbolInstanceGpuData
 
 	public void SetVisible(int symbol_idx, bool is_visible)
 	{
+		DebugUtil.Assert(symbol_idx < this.symbolCount, "Assert!");
 		float num = 0f;
 		if (is_visible)
 		{
@@ -54,11 +54,13 @@ public class SymbolInstanceGpuData
 
 	public bool IsVisible(int symbol_idx)
 	{
+		DebugUtil.Assert(symbol_idx < this.symbolCount, "Assert!");
 		return this.symbolInstances[symbol_idx].isVisible > 0.5f;
 	}
 
 	public void SetSymbolScale(int symbol_index, float scale)
 	{
+		DebugUtil.Assert(symbol_index < this.symbolCount, "Assert!");
 		if (this.symbolInstances[symbol_index].scale != scale)
 		{
 			this.symbolInstances[symbol_index].scale = scale;
@@ -68,6 +70,7 @@ public class SymbolInstanceGpuData
 
 	public void SetSymbolTint(int symbol_index, Color color)
 	{
+		DebugUtil.Assert(symbol_index < this.symbolCount, "Assert!");
 		if (this.symbolInstances[symbol_index].color != color)
 		{
 			this.symbolInstances[symbol_index].color = color;
@@ -77,12 +80,10 @@ public class SymbolInstanceGpuData
 
 	public void WriteToTexture(byte[] data, int data_idx, int instance_idx)
 	{
-		Buffer.BlockCopy(this.bytes, 0, data, data_idx, this.symbolCount * 8 * 4);
+		Buffer.BlockCopy(this.symbolInstancesConverter.bytes, 0, data, data_idx, this.symbolCount * 8 * 4);
 	}
 
 	public const int FLOATS_PER_SYMBOL_INSTANCE = 8;
-
-	private byte[] bytes;
 
 	private SymbolInstanceGpuData.SymbolInstanceToByteConverter symbolInstancesConverter;
 

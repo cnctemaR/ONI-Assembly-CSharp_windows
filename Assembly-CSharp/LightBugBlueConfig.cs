@@ -1,0 +1,51 @@
+﻿using System;
+using Klei.AI;
+using STRINGS;
+using TUNING;
+using UnityEngine;
+
+public class LightBugBlueConfig : IEntityConfig
+{
+	public static GameObject CreateLightBug(string id, string name, string desc, string anim_file, bool is_baby)
+	{
+		GameObject gameObject = BaseLightBugConfig.BaseLightBug(id, name, desc, anim_file, "LightBugBlueBaseTrait", LIGHT2D.LIGHTBUG_COLOR_BLUE, DECOR.BONUS.TIER6, is_baby, "blu_");
+		EntityTemplates.ExtendEntityToWildCreature(gameObject, LightBugTuning.PEN_SIZE_PER_CREATURE, 25f);
+		Trait trait = Db.Get().CreateTrait("LightBugBlueBaseTrait", name, name, null, false, null, true, true);
+		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, LightBugTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -LightBugTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 5f, name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 25f, name, false, false, true));
+		TagBits tagBits = default(TagBits);
+		tagBits.SetTag(SimHashes.Phosphorite.CreateTag());
+		tagBits.SetTag(SimHashes.Phosphorus.CreateTag());
+		return BaseLightBugConfig.SetupDiet(gameObject, tagBits, Tag.Invalid, LightBugBlueConfig.CALORIES_PER_KG_OF_ORE);
+	}
+
+	public GameObject CreatePrefab()
+	{
+		GameObject gameObject = LightBugBlueConfig.CreateLightBug("LightBugBlue", global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_BLUE.NAME, global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_BLUE.DESC, "lightbug_kanim", false);
+		EntityTemplates.ExtendEntityToFertileCreature(gameObject, "LightBugBlueEgg", global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_BLUE.EGG_NAME, global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_BLUE.DESC, "egg_lightbug_kanim", "LightBugBlueBaby", LightBugTuning.EGG_CHANCES_BLUE, LightBugBlueConfig.EGG_SORT_ORDER, true, false);
+		return gameObject;
+	}
+
+	public void OnPrefabInit(GameObject inst)
+	{
+	}
+
+	public void OnSpawn(GameObject inst)
+	{
+		BaseLightBugConfig.SetupLoopingSounds(inst);
+	}
+
+	public const string ID = "LightBugBlue";
+
+	public const string BASE_TRAIT_ID = "LightBugBlueBaseTrait";
+
+	public const string EGG_ID = "LightBugBlueEgg";
+
+	private static float KG_ORE_EATEN_PER_CYCLE = 1f;
+
+	private static float CALORIES_PER_KG_OF_ORE = LightBugTuning.STANDARD_CALORIES_PER_CYCLE / LightBugBlueConfig.KG_ORE_EATEN_PER_CYCLE;
+
+	public static int EGG_SORT_ORDER = LightBugConfig.EGG_SORT_ORDER + 4;
+}

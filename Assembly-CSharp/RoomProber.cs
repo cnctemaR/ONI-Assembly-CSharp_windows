@@ -100,7 +100,7 @@ public class RoomProber : ISim1000ms
 				{
 					CavityInfo cavityInfo2 = cavityInfo;
 					this.floodFiller.Reset(cavityInfo2.handle);
-					GameUtil.FloodFillConditional(num3, new Func<int, bool>(this.floodFiller.ShouldContinue), this.visitedCells);
+					GameUtil.FloodFillConditional(num3, new Func<int, bool>(this.floodFiller.ShouldContinue), this.visitedCells, null);
 					if (this.floodFiller.NumCells > 0)
 					{
 						cavityInfo2.numCells = this.floodFiller.NumCells;

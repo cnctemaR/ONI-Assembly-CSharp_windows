@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,23 +24,10 @@ public class CellChangeMonitor
 			return;
 		}
 		this.pendingDirtyTransforms.Add(transform.GetInstanceID());
-		IEnumerator enumerator = transform.GetEnumerator();
-		try
+		int childCount = transform.childCount;
+		for (int i = 0; i < childCount; i++)
 		{
-			while (enumerator.MoveNext())
-			{
-				object obj = enumerator.Current;
-				Transform transform2 = (Transform)obj;
-				this.MarkDirty(transform2);
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
-			}
+			this.MarkDirty(transform.GetChild(i));
 		}
 	}
 
@@ -50,32 +36,36 @@ public class CellChangeMonitor
 		return this.movingTransforms.Contains(transform.GetInstanceID());
 	}
 
-	public void RegisterMovementStateChanged(Transform transform, Action<bool> handler)
+	public void RegisterMovementStateChanged(Transform transform, Action<Transform, bool> handler)
 	{
 		int instanceID = transform.GetInstanceID();
 		CellChangeMonitor.MovementStateChangedEntry movementStateChangedEntry = default(CellChangeMonitor.MovementStateChangedEntry);
 		if (!this.movementStateChangedHandlers.TryGetValue(instanceID, out movementStateChangedEntry))
 		{
 			movementStateChangedEntry = default(CellChangeMonitor.MovementStateChangedEntry);
-			movementStateChangedEntry.handlers = new List<Action<bool>>();
+			movementStateChangedEntry.handlers = new List<Action<Transform, bool>>();
 			movementStateChangedEntry.transform = transform;
 		}
 		movementStateChangedEntry.handlers.Add(handler);
 		this.movementStateChangedHandlers[instanceID] = movementStateChangedEntry;
 	}
 
-	public void UnregisterMovementStateChanged(Transform transform, Action<bool> callback)
+	public void UnregisterMovementStateChanged(int instance_id, Action<Transform, bool> callback)
 	{
-		int instanceID = transform.GetInstanceID();
 		CellChangeMonitor.MovementStateChangedEntry movementStateChangedEntry = default(CellChangeMonitor.MovementStateChangedEntry);
-		if (this.movementStateChangedHandlers.TryGetValue(instanceID, out movementStateChangedEntry))
+		if (this.movementStateChangedHandlers.TryGetValue(instance_id, out movementStateChangedEntry))
 		{
 			movementStateChangedEntry.handlers.Remove(callback);
 			if (movementStateChangedEntry.handlers.Count == 0)
 			{
-				this.movementStateChangedHandlers.Remove(instanceID);
+				this.movementStateChangedHandlers.Remove(instance_id);
 			}
 		}
+	}
+
+	public void UnregisterMovementStateChanged(Transform transform, Action<Transform, bool> callback)
+	{
+		this.UnregisterMovementStateChanged(transform.GetInstanceID(), callback);
 	}
 
 	public void RegisterCellChangedHandler(Transform transform, global::System.Action handler)
@@ -175,11 +165,11 @@ public class CellChangeMonitor
 		{
 			this.moveChangedCallbacksToRun.Clear();
 			this.moveChangedCallbacksToRun.AddRange(movementStateChangedEntry.handlers);
-			foreach (Action<bool> action in this.moveChangedCallbacksToRun)
+			foreach (Action<Transform, bool> action in this.moveChangedCallbacksToRun)
 			{
 				if (movementStateChangedEntry.handlers.Contains(action))
 				{
-					action(state);
+					action(movementStateChangedEntry.transform, state);
 				}
 			}
 		}
@@ -205,7 +195,7 @@ public class CellChangeMonitor
 
 	private List<global::System.Action> cellChangedCallbacksToRun = new List<global::System.Action>();
 
-	private List<Action<bool>> moveChangedCallbacksToRun = new List<Action<bool>>();
+	private List<Action<Transform, bool>> moveChangedCallbacksToRun = new List<Action<Transform, bool>>();
 
 	private int gridWidth;
 
@@ -220,6 +210,6 @@ public class CellChangeMonitor
 	{
 		public Transform transform;
 
-		public List<Action<bool>> handlers;
+		public List<Action<Transform, bool>> handlers;
 	}
 }

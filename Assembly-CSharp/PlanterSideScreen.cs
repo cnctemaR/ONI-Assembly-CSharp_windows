@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class PlanterSideScreen : ReceptacleSideScreen
 {
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<PlantablePlot>() != null;
+	}
+
 	protected override Sprite GetEntityIcon(Tag prefabTag)
 	{
 		GameObject prefab = Assets.GetPrefab(prefabTag);

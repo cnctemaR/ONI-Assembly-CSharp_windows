@@ -74,7 +74,8 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 		{
 			flag2 = false;
 		}
-		if (Grid.Visible[num] == 0 && !DebugPaintElementScreen.Instance.gameObject.activeSelf)
+		bool flag3 = Grid.IsVisible(num);
+		if (!flag3)
 		{
 			flag2 = false;
 		}
@@ -159,7 +160,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				hoverTextDrawer.DrawText(UI.OVERLAYS.DECOR.HOVERTITLE, this.Styles_Title.Standard);
 				hoverTextDrawer.NewLine(26);
 				hoverTextDrawer.DrawText(UI.OVERLAYS.DECOR.TOTAL + GameUtil.GetFormattedDecor(decorAtCell), this.Styles_BodyText.Standard);
-				if (!Grid.Solid[num] && Grid.Visible[num] > 0)
+				if (!Grid.Solid[num] && flag3)
 				{
 					List<EffectorEntry> list2 = new List<EffectorEntry>();
 					List<EffectorEntry> list3 = new List<EffectorEntry>();
@@ -174,7 +175,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 							{
 								SelectToolHoverTextCard.highlightedObjects.Add(component.gameObject);
 							}
-							bool flag3 = false;
+							bool flag4 = false;
 							if (decorForCell > 0f)
 							{
 								for (int i = 0; i < list2.Count; i++)
@@ -185,11 +186,11 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 										effectorEntry.count++;
 										effectorEntry.value += decorForCell;
 										list2[i] = effectorEntry;
-										flag3 = true;
+										flag4 = true;
 										break;
 									}
 								}
-								if (!flag3)
+								if (!flag4)
 								{
 									list2.Add(new EffectorEntry(name, decorForCell));
 								}
@@ -204,11 +205,11 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 										effectorEntry2.count++;
 										effectorEntry2.value += decorForCell;
 										list3[j] = effectorEntry2;
-										flag3 = true;
+										flag4 = true;
 										break;
 									}
 								}
-								if (!flag3)
+								if (!flag4)
 								{
 									list3.Add(new EffectorEntry(name, decorForCell));
 								}
@@ -248,7 +249,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				hoverTextDrawer.EndShadowBar();
 			}
 		}
-		else if (!Grid.Solid[num] && Grid.Visible[num] > 0)
+		else if (!Grid.Solid[num] && flag3)
 		{
 			float thermalComfort = GameUtil.GetThermalComfort(num, 0f);
 			float thermalComfort2 = GameUtil.GetThermalComfort(num, -0.083680004f);
@@ -286,17 +287,17 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				KSelectable kselectable2 = this.overlayValidHoverObjects[k];
 				if (!(OverlayScreen.Instance != null) || OverlayScreen.Instance.mode == SimViewMode.None || (kselectable2.gameObject.layer & mask) == 0)
 				{
-					if (Grid.Visible[num] != 0 || DebugPaintElementScreen.Instance.gameObject.activeSelf)
+					if (flag3)
 					{
-						bool flag4 = SelectTool.Instance.selected == this.overlayValidHoverObjects[k];
-						if (flag4)
+						bool flag5 = SelectTool.Instance.selected == this.overlayValidHoverObjects[k];
+						if (flag5)
 						{
 							this.currentSelectedSelectableIndex = k;
 						}
 						num3++;
-						hoverTextDrawer.BeginShadowBar(flag4);
+						hoverTextDrawer.BeginShadowBar(flag5);
 						hoverTextDrawer.DrawText(GameUtil.GetUnitFormattedName(this.overlayValidHoverObjects[k].gameObject, true), this.Styles_Title.Standard);
-						bool flag5 = false;
+						bool flag6 = false;
 						string text6 = UI.OVERLAYS.DISEASE.NO_DISEASE;
 						PrimaryElement component2 = kselectable2.GetComponent<PrimaryElement>();
 						if (flag)
@@ -305,7 +306,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 							{
 								text6 = GameUtil.GetFormattedDisease(component2.DiseaseIdx, component2.DiseaseCount, true);
 							}
-							flag5 = true;
+							flag6 = true;
 							Storage component3 = kselectable2.GetComponent<Storage>();
 							if (component3 != null && component3.showInUI)
 							{
@@ -324,7 +325,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 								}
 							}
 						}
-						if (flag5)
+						if (flag6)
 						{
 							StateMachineController component5 = kselectable2.GetComponent<StateMachineController>();
 							if (component5 != null)
@@ -334,10 +335,10 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 								{
 									AmountInstance amountInstance = Db.Get().Amounts.ImmuneLevel.Lookup(kselectable2);
 									float value = amountInstance.value;
-									bool flag6 = smi.sm.isLosingImmunity.Get(smi);
+									bool flag7 = smi.sm.isLosingImmunity.Get(smi);
 									Color32 badColorBG = NotificationScreen.Instance.BadColorBG;
 									badColorBG.a = byte.MaxValue;
-									Color32 color = ((!flag6) ? new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue) : badColorBG);
+									Color32 color = ((!flag7) ? new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue) : badColorBG);
 									string text7 = string.Format(UI.OVERLAYS.DISEASE.IMMUNITY, GameUtil.GetFormattedPercent(value, GameUtil.TimeSlice.None));
 									hoverTextDrawer.NewLine(26);
 									hoverTextDrawer.DrawIcon(this.iconDash, 18);
@@ -392,13 +393,13 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 							}
 						}
 						float num5 = 0f;
-						bool flag7 = true;
-						bool flag8 = SimViewMode.TemperatureMap == SimDebugView.Instance.GetMode();
+						bool flag8 = true;
+						bool flag9 = SimViewMode.TemperatureMap == SimDebugView.Instance.GetMode();
 						if (kselectable2.GetComponent<Constructable>())
 						{
-							flag7 = false;
+							flag8 = false;
 						}
-						else if (flag8 && component2)
+						else if (flag9 && component2)
 						{
 							num5 = component2.Temperature;
 						}
@@ -412,13 +413,13 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 						}
 						else
 						{
-							flag7 = false;
+							flag8 = false;
 						}
 						if (mode != SimViewMode.None && mode != SimViewMode.TemperatureMap)
 						{
-							flag7 = false;
+							flag8 = false;
 						}
-						if (flag7)
+						if (flag8)
 						{
 							hoverTextDrawer.NewLine(26);
 							hoverTextDrawer.DrawIcon(this.iconDash, 18);
@@ -431,16 +432,16 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 						}
 						if (choreConsumer != null)
 						{
-							bool flag9 = false;
+							bool flag10 = false;
 							foreach (Type type in SelectToolHoverTextCard.hiddenChoreConsumerTypes)
 							{
 								if (choreConsumer.gameObject.GetComponent(type) != null)
 								{
-									flag9 = true;
+									flag10 = true;
 									break;
 								}
 							}
-							if (!flag9)
+							if (!flag10)
 							{
 								choreConsumer.ShowHoverTextOnHoveredItem(kselectable2, hoverTextDrawer, this);
 							}
@@ -457,13 +458,13 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 			{
 				cellSelectionObject = SelectTool.Instance.selected.GetComponent<CellSelectionObject>();
 			}
-			bool flag10 = cellSelectionObject != null && cellSelectionObject.mouseCell == cellSelectionObject.alternateSelectionObject.mouseCell;
-			if (flag10)
+			bool flag11 = cellSelectionObject != null && cellSelectionObject.mouseCell == cellSelectionObject.alternateSelectionObject.mouseCell;
+			if (flag11)
 			{
 				this.currentSelectedSelectableIndex = this.recentNumberOfDisplayedSelectables - 1;
 			}
 			Element element = Grid.Element[num];
-			hoverTextDrawer.BeginShadowBar(flag10);
+			hoverTextDrawer.BeginShadowBar(flag11);
 			hoverTextDrawer.DrawText(element.name.ToUpper(), this.Styles_Title.Standard);
 			if (Grid.DiseaseCount[num] > 0 || flag)
 			{
@@ -511,15 +512,15 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				hoverTextDrawer.DrawText(text9, this.Styles_BodyText.Standard);
 				if (num6 <= 0f)
 				{
-					bool flag11;
 					bool flag12;
-					GameUtil.IsEmissionBlocked(num, out flag11, out flag12);
+					bool flag13;
+					GameUtil.IsEmissionBlocked(num, out flag12, out flag13);
 					string text10 = null;
-					if (flag11)
+					if (flag12)
 					{
 						text10 = MISC.STATUSITEMS.OXYROCK.NEIGHBORSBLOCKED.NAME;
 					}
-					else if (flag12)
+					else if (flag13)
 					{
 						text10 = MISC.STATUSITEMS.OXYROCK.OVERPRESSURE.NAME;
 					}
@@ -533,7 +534,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 			}
 			hoverTextDrawer.EndShadowBar();
 		}
-		else if (Grid.Visible[num] <= 0)
+		else if (!flag3)
 		{
 			hoverTextDrawer.BeginShadowBar(false);
 			hoverTextDrawer.DrawIcon(this.iconWarning, 18);
@@ -592,7 +593,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 							}
 							else
 							{
-								flag = (selectable.GetComponent<Conduit>() != null && selectable.GetComponent<Conduit>().type == ConduitType.Gas) || selectable.GetComponent<GasFilterable>() != null || (selectable.GetComponent<Vent>() != null && selectable.GetComponent<Vent>().conduitType == ConduitType.Gas) || (selectable.GetComponent<Pump>() != null && selectable.GetComponent<Pump>().conduitType == ConduitType.Gas) || (selectable.GetComponent<ValveBase>() != null && selectable.GetComponent<ValveBase>().conduitType == ConduitType.Gas);
+								flag = (selectable.GetComponent<Conduit>() != null && selectable.GetComponent<Conduit>().type == ConduitType.Gas) || (selectable.GetComponent<Filterable>() != null && selectable.GetComponent<Filterable>().filterElementState == Filterable.ElementState.Gas) || (selectable.GetComponent<Vent>() != null && selectable.GetComponent<Vent>().conduitType == ConduitType.Gas) || (selectable.GetComponent<Pump>() != null && selectable.GetComponent<Pump>().conduitType == ConduitType.Gas) || (selectable.GetComponent<ValveBase>() != null && selectable.GetComponent<ValveBase>().conduitType == ConduitType.Gas);
 							}
 						}
 						else
@@ -603,7 +604,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 					}
 					else
 					{
-						flag = (selectable.GetComponent<Conduit>() != null && selectable.GetComponent<Conduit>().type == ConduitType.Liquid) || selectable.GetComponent<LiquidFilterable>() != null || (selectable.GetComponent<Vent>() != null && selectable.GetComponent<Vent>().conduitType == ConduitType.Liquid) || (selectable.GetComponent<Pump>() != null && selectable.GetComponent<Pump>().conduitType == ConduitType.Liquid) || (selectable.GetComponent<ValveBase>() != null && selectable.GetComponent<ValveBase>().conduitType == ConduitType.Liquid);
+						flag = (selectable.GetComponent<Conduit>() != null && selectable.GetComponent<Conduit>().type == ConduitType.Liquid) || (selectable.GetComponent<Filterable>() != null && selectable.GetComponent<Filterable>().filterElementState == Filterable.ElementState.Liquid) || (selectable.GetComponent<Vent>() != null && selectable.GetComponent<Vent>().conduitType == ConduitType.Liquid) || (selectable.GetComponent<Pump>() != null && selectable.GetComponent<Pump>().conduitType == ConduitType.Liquid) || (selectable.GetComponent<ValveBase>() != null && selectable.GetComponent<ValveBase>().conduitType == ConduitType.Liquid);
 					}
 				}
 				else

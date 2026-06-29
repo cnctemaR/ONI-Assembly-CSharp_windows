@@ -6,7 +6,7 @@ public class DebugGoToMonitor : GameStateMachine<DebugGoToMonitor, DebugGoToMoni
 	{
 		default_state = this.satisfied;
 		this.satisfied.DoNothing();
-		this.hastarget.TagTransition(GameTags.HasDebugDestination, this.satisfied, true).ToggleChore((DebugGoToMonitor.Instance smi) => new MoveChore(smi.master, Db.Get().ChoreTypes.DebugGoTo, (MoveChore.StatesInstance smii) => DebugHandler.GetMouseCell(), false), this.satisfied);
+		this.hastarget.ToggleChore((DebugGoToMonitor.Instance smi) => new MoveChore(smi.master, Db.Get().ChoreTypes.DebugGoTo, (MoveChore.StatesInstance smii) => DebugHandler.GetMouseCell(), false), this.satisfied);
 	}
 
 	public GameStateMachine<DebugGoToMonitor, DebugGoToMonitor.Instance, IStateMachineTarget, DebugGoToMonitor.Def>.State satisfied;
@@ -26,7 +26,6 @@ public class DebugGoToMonitor : GameStateMachine<DebugGoToMonitor, DebugGoToMoni
 
 		public void GoToCursor()
 		{
-			base.smi.gameObject.AddTag(GameTags.HasDebugDestination);
 			base.smi.GoTo(base.smi.sm.satisfied);
 			base.smi.GoTo(base.smi.sm.hastarget);
 		}

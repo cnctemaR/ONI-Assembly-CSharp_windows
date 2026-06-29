@@ -191,6 +191,7 @@ public class Pickupable : Workable
 		base.Subscribe(1188683690, new Action<object>(this.OnLanded));
 		base.Subscribe(1807976145, new Action<object>(this.OnOreSizeChanged));
 		base.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
+		base.Subscribe(-778359855, new Action<object>(this.RefreshStorageTags));
 		this.KPrefabID.AddTag(GameTags.Pickupable);
 		Components.Pickupables.Add(this);
 	}
@@ -313,7 +314,7 @@ public class Pickupable : Workable
 					base.transform.SetPosition(vector);
 					num = num2;
 					this.RemoveFaller();
-					this.AddFaller();
+					this.AddFaller(Vector2.zero);
 					break;
 				}
 			}
@@ -374,7 +375,7 @@ public class Pickupable : Workable
 						Pickupable component = gameObject.GetComponent<Pickupable>();
 						if (component != null && !flag)
 						{
-							flag = component.TryAbsorb(this, false);
+							flag = component.TryAbsorb(this, false, false);
 						}
 					}
 				}
@@ -398,7 +399,7 @@ public class Pickupable : Workable
 		if (!this.KPrefabID.HasTag(GameTags.Stored) && !this.KPrefabID.HasTag(GameTags.Equipped))
 		{
 			this.RegisterListeners();
-			this.AddFaller();
+			this.AddFaller(Vector2.zero);
 		}
 		else
 		{
@@ -412,10 +413,14 @@ public class Pickupable : Workable
 		GameScenePartitioner.Instance.TriggerEvent(new_cell, GameScenePartitioner.Instance.pickupablesChangedLayer, this);
 	}
 
-	public bool TryAbsorb(Pickupable other, bool hide_effects)
+	public bool TryAbsorb(Pickupable other, bool hide_effects, bool allow_cross_storage = false)
 	{
 		if (other != null && this.CanAbsorb(other))
 		{
+			if (!allow_cross_storage && this.storage == null != (other.storage == null))
+			{
+				return false;
+			}
 			Pickupable component = other.GetComponent<Pickupable>();
 			if (component != null && component.CanAbsorb(this))
 			{
@@ -457,6 +462,10 @@ public class Pickupable : Workable
 
 	public Pickupable Take(float amount)
 	{
+		if (amount <= 0f)
+		{
+			return null;
+		}
 		if (this.OnTake == null)
 		{
 			if (this.storage != null)
@@ -495,15 +504,9 @@ public class Pickupable : Workable
 		this.NotifyChanged(Grid.PosToCell(this));
 	}
 
-	public void OnStore(object data)
+	private void RefreshStorageTags(object data = null)
 	{
-		this.storage = data as Storage;
 		bool flag = data is Storage || (data != null && (bool)data);
-		if (this.carryAnimOverride != null && this.lastCarrier != null)
-		{
-			this.lastCarrier.RemoveAnimOverrides(this.carryAnimOverride);
-			this.lastCarrier = null;
-		}
 		if (flag)
 		{
 			this.KPrefabID.AddTag(GameTags.Stored);
@@ -516,6 +519,26 @@ public class Pickupable : Workable
 			{
 				this.KPrefabID.RemoveTag(GameTags.StoredPrivate);
 			}
+		}
+		else
+		{
+			this.KPrefabID.RemoveTag(GameTags.Stored);
+			this.KPrefabID.RemoveTag(GameTags.StoredPrivate);
+		}
+	}
+
+	public void OnStore(object data)
+	{
+		this.storage = data as Storage;
+		bool flag = data is Storage || (data != null && (bool)data);
+		if (this.carryAnimOverride != null && this.lastCarrier != null)
+		{
+			this.lastCarrier.RemoveAnimOverrides(this.carryAnimOverride);
+			this.lastCarrier = null;
+		}
+		if (flag)
+		{
+			this.RefreshStorageTags(data);
 			KCollider2D component = base.GetComponent<KCollider2D>();
 			if (component != null)
 			{
@@ -543,9 +566,8 @@ public class Pickupable : Workable
 	private void RemovedFromStorage()
 	{
 		this.storage = null;
-		this.KPrefabID.RemoveTag(GameTags.Stored);
-		this.KPrefabID.RemoveTag(GameTags.StoredPrivate);
-		this.AddFaller();
+		this.RefreshStorageTags(null);
+		this.AddFaller(Vector2.zero);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		component.enabled = true;
 		base.gameObject.transform.rotation = Quaternion.identity;
@@ -612,7 +634,7 @@ public class Pickupable : Workable
 		}
 	}
 
-	private void AddFaller()
+	private void AddFaller(Vector2 initial_velocity)
 	{
 		if (this.isKinematic || base.GetComponent<Health>() != null)
 		{
@@ -620,7 +642,7 @@ public class Pickupable : Workable
 		}
 		if (!GameComps.Fallers.Has(base.gameObject))
 		{
-			GameComps.Fallers.Add(base.gameObject, Vector2.zero);
+			GameComps.Fallers.Add(base.gameObject, initial_velocity);
 		}
 	}
 
@@ -638,10 +660,16 @@ public class Pickupable : Workable
 
 	private void OnOreSizeChanged(object data)
 	{
+		Vector3 vector = Vector3.zero;
+		HandleVector<int>.Handle handle = GameComps.Gravities.GetHandle(base.gameObject);
+		if (handle.IsValid())
+		{
+			vector = GameComps.Gravities.GetData(handle).velocity;
+		}
 		this.RemoveFaller();
 		if (!this.KPrefabID.HasTag(GameTags.Stored))
 		{
-			this.AddFaller();
+			this.AddFaller(vector);
 		}
 	}
 
@@ -649,6 +677,13 @@ public class Pickupable : Workable
 	{
 		if (CameraController.Instance == null)
 		{
+			return;
+		}
+		Vector3 position = base.transform.GetPosition();
+		Vector2I vector2I = Grid.PosToXY(position);
+		if (vector2I.x < 0 || Grid.WidthInCells <= vector2I.x || vector2I.y < 0 || Grid.HeightInCells <= vector2I.y)
+		{
+			this.DeleteObject();
 			return;
 		}
 		Vector2 vector = (Vector2)data;
@@ -688,7 +723,7 @@ public class Pickupable : Workable
 			text2 = ((text2 == null) ? GlobalAssets.GetSound("Ore_bump_rock", false) : text2);
 			if (CameraController.Instance.IsAudibleSound(base.transform.GetPosition(), text2))
 			{
-				int num = Grid.PosToCell(base.transform.GetPosition());
+				int num = Grid.PosToCell(position);
 				bool isLiquid = Grid.Element[num].IsLiquid;
 				float num2 = 0f;
 				if (isLiquid)
@@ -742,7 +777,7 @@ public class Pickupable : Workable
 			component2.enabled = true;
 			if (add_faller_if_necessary)
 			{
-				this.AddFaller();
+				this.AddFaller(Vector2.zero);
 			}
 		}
 	}

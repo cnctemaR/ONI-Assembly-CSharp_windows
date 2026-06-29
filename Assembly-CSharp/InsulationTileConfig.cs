@@ -18,7 +18,7 @@ public class InsulationTileConfig : IBuildingConfig
 		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
-		buildingDef.Insulation = 0.01f;
+		buildingDef.ThermalConductivity = 0.01f;
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;

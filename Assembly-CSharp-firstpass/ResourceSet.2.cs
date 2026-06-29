@@ -139,16 +139,5 @@ public class ResourceSet<T> : ResourceSet, IEnumerable<T>, IEnumerable where T :
 		}
 	}
 
-	public Resource[] ToArray()
-	{
-		List<Resource> list = new List<Resource>();
-		foreach (T t in this)
-		{
-			Resource resource = t;
-			list.Add(resource);
-		}
-		return list.ToArray();
-	}
-
 	public List<T> resources = new List<T>();
 }

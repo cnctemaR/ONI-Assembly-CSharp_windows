@@ -438,10 +438,10 @@ namespace ProcGenGame
 			Sim.Cell[] array = null;
 			float[] array2 = null;
 			dc = null;
-			HashSet<int> hashSet = new HashSet<int>();
+			HashSet<int> borderCells = new HashSet<int>();
 			this.CompleteLayout(WorldGen.successCallbackFn);
 			WorldGen.WriteOverWorldNoise(WorldGen.successCallbackFn);
-			if (!WorldGen.RenderToMap(WorldGen.successCallbackFn, ref array, ref array2, ref dc, ref hashSet))
+			if (!WorldGen.RenderToMap(WorldGen.successCallbackFn, ref array, ref array2, ref dc, ref borderCells))
 			{
 				WorldGen.successCallbackFn(UI.WORLDGEN.FAILED.key, -100f, WorldGenProgressStages.Stages.Failure);
 				return null;
@@ -529,68 +529,75 @@ namespace ProcGenGame
 					}
 				}
 			}
+			foreach (int num2 in borderCells)
+			{
+				array[num2].SetValues(WorldGen.unobtaniumElement, ElementLoader.elements);
+			}
 			if (doSettle)
 			{
-				foreach (int num2 in hashSet)
+				WorldGen.running = WorldGenSimUtil.DoSettleSim(array, array2, dc, WorldGen.successCallbackFn, WorldGen.data, list, this.errorCallback, delegate(Sim.Cell[] updatedCells, float[] updatedBGTemp, Sim.DiseaseCell[] updatedDisease)
 				{
-					array[num2].SetValues(WorldGen.unobtaniumElement, ElementLoader.elements);
-				}
-				WorldGen.running = WorldGenSimUtil.DoSettleSim(array, array2, dc, WorldGen.successCallbackFn, WorldGen.data, list, this.errorCallback);
+					this.SpawnMobsAndTemplates(updatedCells, updatedBGTemp, updatedDisease, borderCells);
+				});
 			}
-			MobSpawning.DetectNaturalCavities(WorldGen.successCallbackFn);
-			SeededRandom seededRandom = new SeededRandom(WorldGen.data.globalTerrainSeed);
-			for (int k = 0; k < WorldGen.TerrainCells.Count; k++)
-			{
-				float num3 = (float)k / (float)WorldGen.TerrainCells.Count * 100f;
-				WorldGen.successCallbackFn(UI.WORLDGEN.PLACINGCREATURES.key, num3, WorldGenProgressStages.Stages.PlacingCreatures);
-				TerrainCell terrainCell4 = WorldGen.TerrainCells[k];
-				Dictionary<int, string> dictionary = MobSpawning.PlaceAmbientMobs(terrainCell4, seededRandom, array, array2, dc, hashSet);
-				if (dictionary != null)
-				{
-					WorldGen.data.gameSpawnData.AddRange(dictionary);
-				}
-			}
-			WorldGen.successCallbackFn(UI.WORLDGEN.PLACINGCREATURES.key, 100f, WorldGenProgressStages.Stages.PlacingCreatures);
 			foreach (KeyValuePair<Vector2I, TemplateContainer> keyValuePair3 in list)
 			{
 				this.PlaceTemplateSpawners(keyValuePair3.Key, keyValuePair3.Value);
 			}
-			for (int l = WorldGen.data.gameSpawnData.buildings.Count - 1; l >= 0; l--)
+			for (int k = WorldGen.data.gameSpawnData.buildings.Count - 1; k >= 0; k--)
 			{
-				int num4 = Grid.XYToCell(WorldGen.data.gameSpawnData.buildings[l].location_x, WorldGen.data.gameSpawnData.buildings[l].location_y);
-				if (hashSet.Contains(num4))
+				int num3 = Grid.XYToCell(WorldGen.data.gameSpawnData.buildings[k].location_x, WorldGen.data.gameSpawnData.buildings[k].location_y);
+				if (borderCells.Contains(num3))
 				{
-					WorldGen.data.gameSpawnData.buildings.RemoveAt(l);
+					WorldGen.data.gameSpawnData.buildings.RemoveAt(k);
 				}
 			}
-			for (int m = WorldGen.data.gameSpawnData.elementalOres.Count - 1; m >= 0; m--)
+			for (int l = WorldGen.data.gameSpawnData.elementalOres.Count - 1; l >= 0; l--)
 			{
-				int num5 = Grid.XYToCell(WorldGen.data.gameSpawnData.elementalOres[m].location_x, WorldGen.data.gameSpawnData.elementalOres[m].location_y);
-				if (hashSet.Contains(num5))
+				int num4 = Grid.XYToCell(WorldGen.data.gameSpawnData.elementalOres[l].location_x, WorldGen.data.gameSpawnData.elementalOres[l].location_y);
+				if (borderCells.Contains(num4))
 				{
-					WorldGen.data.gameSpawnData.elementalOres.RemoveAt(m);
+					WorldGen.data.gameSpawnData.elementalOres.RemoveAt(l);
 				}
 			}
-			for (int n = WorldGen.data.gameSpawnData.otherEntities.Count - 1; n >= 0; n--)
+			for (int m = WorldGen.data.gameSpawnData.otherEntities.Count - 1; m >= 0; m--)
 			{
-				int num6 = Grid.XYToCell(WorldGen.data.gameSpawnData.otherEntities[n].location_x, WorldGen.data.gameSpawnData.otherEntities[n].location_y);
-				if (hashSet.Contains(num6))
+				int num5 = Grid.XYToCell(WorldGen.data.gameSpawnData.otherEntities[m].location_x, WorldGen.data.gameSpawnData.otherEntities[m].location_y);
+				if (borderCells.Contains(num5))
 				{
-					WorldGen.data.gameSpawnData.otherEntities.RemoveAt(n);
+					WorldGen.data.gameSpawnData.otherEntities.RemoveAt(m);
 				}
 			}
-			for (int num7 = WorldGen.data.gameSpawnData.pickupables.Count - 1; num7 >= 0; num7--)
+			for (int n = WorldGen.data.gameSpawnData.pickupables.Count - 1; n >= 0; n--)
 			{
-				int num8 = Grid.XYToCell(WorldGen.data.gameSpawnData.pickupables[num7].location_x, WorldGen.data.gameSpawnData.pickupables[num7].location_y);
-				if (hashSet.Contains(num8))
+				int num6 = Grid.XYToCell(WorldGen.data.gameSpawnData.pickupables[n].location_x, WorldGen.data.gameSpawnData.pickupables[n].location_y);
+				if (borderCells.Contains(num6))
 				{
-					WorldGen.data.gameSpawnData.pickupables.RemoveAt(num7);
+					WorldGen.data.gameSpawnData.pickupables.RemoveAt(n);
 				}
 			}
 			WorldGen.SaveWorldGen();
 			WorldGen.successCallbackFn(UI.WORLDGEN.COMPLETE.key, 101f, WorldGenProgressStages.Stages.Complete);
 			WorldGen.running = false;
 			return array;
+		}
+
+		private void SpawnMobsAndTemplates(Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, HashSet<int> borderCells)
+		{
+			MobSpawning.DetectNaturalCavities(WorldGen.successCallbackFn);
+			SeededRandom seededRandom = new SeededRandom(WorldGen.data.globalTerrainSeed);
+			for (int i = 0; i < WorldGen.TerrainCells.Count; i++)
+			{
+				float num = (float)i / (float)WorldGen.TerrainCells.Count * 100f;
+				WorldGen.successCallbackFn(UI.WORLDGEN.PLACINGCREATURES.key, num, WorldGenProgressStages.Stages.PlacingCreatures);
+				TerrainCell terrainCell = WorldGen.TerrainCells[i];
+				Dictionary<int, string> dictionary = MobSpawning.PlaceAmbientMobs(terrainCell, seededRandom, cells, bgTemp, dc, borderCells);
+				if (dictionary != null)
+				{
+					WorldGen.data.gameSpawnData.AddRange(dictionary);
+				}
+			}
+			WorldGen.successCallbackFn(UI.WORLDGEN.PLACINGCREATURES.key, 100f, WorldGenProgressStages.Stages.PlacingCreatures);
 		}
 
 		public static void SetWorldSize(int width, int height)

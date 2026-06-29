@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class TagFilterScreen : SideScreenContent
 {
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<TreeFilterable>() != null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		if (target == null)

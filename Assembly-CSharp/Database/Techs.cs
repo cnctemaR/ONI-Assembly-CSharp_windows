@@ -33,7 +33,7 @@ namespace Database
 				}
 			}
 			this.tierCount = 0;
-			foreach (Tech tech3 in this)
+			foreach (Tech tech3 in this.resources)
 			{
 				tech3.tier = this.GetTier(tech3);
 				List<Tuple<string, float>> list = this.TECH_TIERS[tech3.tier];
@@ -71,7 +71,7 @@ namespace Database
 
 		public bool IsTechItemComplete(string id)
 		{
-			foreach (Tech tech in this)
+			foreach (Tech tech in this.resources)
 			{
 				foreach (TechItem techItem in tech.unlockedItems)
 				{
@@ -102,11 +102,11 @@ namespace Database
 			},
 			{
 				"Ranching",
-				new string[] { "CreatureDeliveryPoint", "CreatureFeeder", "RanchStation" }
+				new string[] { "CreatureDeliveryPoint", "FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "RanchStation", "ShearingStation" }
 			},
 			{
 				"AnimalControl",
-				new string[] { "CreatureTrap", "AirborneCreatureLure", "EggIncubator" }
+				new string[] { "CreatureTrap", "FishTrap", "AirborneCreatureLure", "EggIncubator" }
 			},
 			{
 				"ImprovedOxygen",
@@ -123,7 +123,9 @@ namespace Database
 					"InsulatedGasConduit",
 					LogicPressureSensorGasConfig.ID,
 					"GasVentHighPressure",
-					"GasLogicValve"
+					"GasLogicValve",
+					"GasConduitPreferentialFlow",
+					"GasConduitOverflow"
 				}
 			},
 			{
@@ -157,7 +159,9 @@ namespace Database
 				{
 					"InsulatedLiquidConduit",
 					LogicPressureSensorLiquidConfig.ID,
-					"LiquidLogicValve"
+					"LiquidLogicValve",
+					"LiquidConduitPreferentialFlow",
+					"LiquidConduitOverflow"
 				}
 			},
 			{
@@ -172,7 +176,13 @@ namespace Database
 			},
 			{
 				"Medbay",
-				new string[] { "HandSanitizer", "MedicalBed" }
+				new string[]
+				{
+					"HandSanitizer",
+					"MedicalBed",
+					GasConduitDiseaseSensorConfig.ID,
+					LiquidConduitDiseaseSensorConfig.ID
+				}
 			},
 			{
 				"AdvancedFiltration",
@@ -241,7 +251,11 @@ namespace Database
 			},
 			{
 				"MedicalResearch",
-				new string[] { "Apothecary" }
+				new string[]
+				{
+					"Apothecary",
+					LogicDiseaseSensorConfig.ID
+				}
 			},
 			{
 				"RefinedObjects",
@@ -260,12 +274,22 @@ namespace Database
 				new string[]
 				{
 					"AirConditioner",
-					LogicTemperatureSensorConfig.ID
+					LogicTemperatureSensorConfig.ID,
+					"GasConduitRadiant",
+					GasConduitTemperatureSensorConfig.ID,
+					GasConduitElementSensorConfig.ID
 				}
 			},
 			{
 				"LiquidTemperature",
-				new string[] { "LiquidHeater", "LiquidConditioner" }
+				new string[]
+				{
+					"LiquidHeater",
+					"LiquidConditioner",
+					"LiquidConduitRadiant",
+					LiquidConduitTemperatureSensorConfig.ID,
+					LiquidConduitElementSensorConfig.ID
+				}
 			},
 			{
 				"LogicControl",
@@ -284,7 +308,7 @@ namespace Database
 				{
 					LogicTimeOfDaySensorConfig.ID,
 					"FloorSwitch",
-					LogicDiseaseSensorConfig.ID,
+					LogicElementSensorGasConfig.ID,
 					"BatterySmart"
 				}
 			},
@@ -294,7 +318,11 @@ namespace Database
 			},
 			{
 				"DupeTrafficControl",
-				new string[] { "Checkpoint" }
+				new string[]
+				{
+					"Checkpoint",
+					LogicMemoryConfig.ID
+				}
 			},
 			{
 				"TravelTubes",

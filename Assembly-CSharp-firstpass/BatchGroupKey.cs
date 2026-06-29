@@ -5,7 +5,6 @@ public struct BatchGroupKey : IEquatable<BatchGroupKey>
 	public BatchGroupKey(HashedString group_id)
 	{
 		this._groupID = group_id;
-		this._hash = this._groupID.GetHashCode();
 	}
 
 	public bool Equals(BatchGroupKey other)
@@ -15,7 +14,7 @@ public struct BatchGroupKey : IEquatable<BatchGroupKey>
 
 	public override int GetHashCode()
 	{
-		return this._hash;
+		return this._groupID.HashValue;
 	}
 
 	public HashedString groupID
@@ -27,6 +26,4 @@ public struct BatchGroupKey : IEquatable<BatchGroupKey>
 	}
 
 	private HashedString _groupID;
-
-	private int _hash;
 }

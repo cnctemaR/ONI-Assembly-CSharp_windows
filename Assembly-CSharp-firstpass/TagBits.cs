@@ -134,6 +134,11 @@ public struct TagBits
 		return new TagBits(tag);
 	}
 
+	public static implicit operator TagBits(string tag)
+	{
+		return new TagBits(new Tag(tag));
+	}
+
 	public static TagBits operator &(TagBits a, TagBits b)
 	{
 		return new TagBits

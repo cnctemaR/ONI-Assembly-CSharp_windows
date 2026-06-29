@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -35,6 +36,12 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 450f;
 		storage.showInUI = true;
+		Storage storage2 = go.AddComponent<Storage>();
+		storage2.capacityKg = 360f;
+		storage2.showInUI = true;
+		storage2.SetDefaultStoredItemModifiers(AlgaeHabitatConfig.PollutedWaterStorageModifiers);
+		storage2.allowItemRemoval = false;
+		storage2.storageFilters = AlgaeHabitatConfig.pollutedWaterFilter;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = new Tag("Algae");
@@ -48,10 +55,15 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		manualDeliveryKG2.refillMass = 72f;
 		manualDeliveryKG2.allowPause = true;
 		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.OperateFetch.IdHash;
+		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_interacts_outhouse_kanim") };
+		AlgaeHabitatEmpty algaeHabitatEmpty = go.AddOrGet<AlgaeHabitatEmpty>();
+		algaeHabitatEmpty.workTime = 5f;
+		algaeHabitatEmpty.overrideAnims = array;
+		algaeHabitatEmpty.workLayer = Grid.SceneLayer.BuildingFront;
 		AlgaeHabitat algaeHabitat = go.AddOrGet<AlgaeHabitat>();
 		algaeHabitat.lightBonusMultiplier = 1.1f;
 		algaeHabitat.pressureSampleOffset = new CellOffset(0, 1);
-		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
+		ElementConverter elementConverter = go.AddComponent<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
 			new ElementConverter.ConsumedElement(new Tag("Algae"), 0.030000001f),
@@ -61,6 +73,12 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		{
 			new ElementConverter.OutputElement(0.040000003f, SimHashes.Oxygen, 303.15f, false, 0f, 1f, false, 1f, byte.MaxValue, 0)
 		};
+		ElementConverter elementConverter2 = go.AddComponent<ElementConverter>();
+		new ElementConverter.OutputElement(0.29033333f, SimHashes.DirtyWater, 303.15f, true, 0f, 1f, false, 1f, byte.MaxValue, 0);
+		elementConverter2.outputElements = new ElementConverter.OutputElement[]
+		{
+			new ElementConverter.OutputElement(0.29033333f, SimHashes.DirtyWater, 303.15f, true, 0f, 1f, false, 1f, byte.MaxValue, 0)
+		};
 		ElementConsumer elementConsumer = go.AddOrGet<ElementConsumer>();
 		elementConsumer.elementToConsume = SimHashes.CarbonDioxide;
 		elementConsumer.consumptionRate = 0.0003333333f;
@@ -68,13 +86,14 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		elementConsumer.showInStatusPanel = true;
 		elementConsumer.sampleCellOffset = new Vector3(0f, 1f, 0f);
 		elementConsumer.isRequired = false;
-		ElementConsumer elementConsumer2 = go.AddComponent<PassiveElementConsumer>();
-		elementConsumer2.elementToConsume = SimHashes.Water;
-		elementConsumer2.consumptionRate = 1.25f;
-		elementConsumer2.consumptionRadius = 1;
-		elementConsumer2.showDescriptor = false;
-		elementConsumer2.storeOnConsume = true;
-		elementConsumer2.capacityKG = 360f;
+		PassiveElementConsumer passiveElementConsumer = go.AddComponent<PassiveElementConsumer>();
+		passiveElementConsumer.elementToConsume = SimHashes.Water;
+		passiveElementConsumer.consumptionRate = 1.2f;
+		passiveElementConsumer.consumptionRadius = 1;
+		passiveElementConsumer.showDescriptor = false;
+		passiveElementConsumer.storeOnConsume = true;
+		passiveElementConsumer.capacityKG = 360f;
+		passiveElementConsumer.showInStatusPanel = false;
 		go.AddOrGet<AnimTileable>();
 		Prioritizable.AddRef(go);
 	}
@@ -90,7 +109,15 @@ public class AlgaeHabitatConfig : IBuildingConfig
 
 	private const float WATER_RATE = 0.3f;
 
+	private const float OXYGEN_RATE = 0.040000003f;
+
+	private const float CO2_RATE = 0.0003333333f;
+
 	private const float ALGAE_CAPACITY = 90f;
 
 	private const float WATER_CAPACITY = 360f;
+
+	private static readonly List<Storage.StoredItemModifier> PollutedWaterStorageModifiers = new List<Storage.StoredItemModifier> { Storage.StoredItemModifier.Seal };
+
+	public static List<Tag> pollutedWaterFilter = new List<Tag> { ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag };
 }

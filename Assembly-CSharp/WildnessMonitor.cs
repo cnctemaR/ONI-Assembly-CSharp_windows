@@ -17,14 +17,18 @@ public class WildnessMonitor : GameStateMachine<WildnessMonitor, WildnessMonitor
 
 	private static void HideDomesticationSymbol(WildnessMonitor.Instance smi)
 	{
-		smi.GetComponent<KBatchedAnimController>().HideSymbol(WildnessMonitor.DOMESTICATION_SYMBOL, true);
-		smi.GetComponent<KBatchedAnimController>().RemoveVisibleSymbol(WildnessMonitor.DOMESTICATION_SYMBOL);
+		foreach (KAnimHashedString kanimHashedString in WildnessMonitor.DOMESTICATION_SYMBOLS)
+		{
+			smi.GetComponent<KBatchedAnimController>().SetSymbolVisiblity(kanimHashedString, false);
+		}
 	}
 
 	private static void ShowDomesticationSymbol(WildnessMonitor.Instance smi)
 	{
-		smi.GetComponent<KBatchedAnimController>().StopHidingSymbol(WildnessMonitor.DOMESTICATION_SYMBOL, true);
-		smi.GetComponent<KBatchedAnimController>().ShowSymbol(WildnessMonitor.DOMESTICATION_SYMBOL);
+		foreach (KAnimHashedString kanimHashedString in WildnessMonitor.DOMESTICATION_SYMBOLS)
+		{
+			smi.GetComponent<KBatchedAnimController>().SetSymbolVisiblity(kanimHashedString, true);
+		}
 	}
 
 	private static bool IsWild(WildnessMonitor.Instance smi)
@@ -38,15 +42,20 @@ public class WildnessMonitor : GameStateMachine<WildnessMonitor, WildnessMonitor
 		smi.wildness.hide = !flag;
 		Db.Get().Amounts.Happiness.Lookup(smi.gameObject).hide = flag;
 		Db.Get().Amounts.Calories.Lookup(smi.gameObject).hide = flag;
-		Db.Get().Amounts.Fertility.Lookup(smi.gameObject).hide = flag;
 		Db.Get().Amounts.Temperature.Lookup(smi.gameObject).hide = flag;
+		Db.Get().Amounts.Age.Lookup(smi.gameObject).hide = flag;
+		AmountInstance amountInstance = Db.Get().Amounts.Fertility.Lookup(smi.gameObject);
+		if (amountInstance != null)
+		{
+			amountInstance.hide = flag;
+		}
 	}
 
-	private GameStateMachine<WildnessMonitor, WildnessMonitor.Instance, IStateMachineTarget, WildnessMonitor.Def>.State wild;
+	public GameStateMachine<WildnessMonitor, WildnessMonitor.Instance, IStateMachineTarget, WildnessMonitor.Def>.State wild;
 
-	private GameStateMachine<WildnessMonitor, WildnessMonitor.Instance, IStateMachineTarget, WildnessMonitor.Def>.State tame;
+	public GameStateMachine<WildnessMonitor, WildnessMonitor.Instance, IStateMachineTarget, WildnessMonitor.Def>.State tame;
 
-	private static KAnimHashedString DOMESTICATION_SYMBOL = "snapto_collar";
+	private static KAnimHashedString[] DOMESTICATION_SYMBOLS = new KAnimHashedString[] { "tag", "snapto_tag" };
 
 	public class Def : StateMachine.BaseDef
 	{

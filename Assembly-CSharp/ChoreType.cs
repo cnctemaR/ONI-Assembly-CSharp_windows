@@ -10,7 +10,7 @@ public class ChoreType : Resource
 	{
 		this.statusItem = new StatusItem(id, status_message, tooltip, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486);
 		this.statusItem.resolveStringCallback = new Func<string, object, string>(this.ResolveStringCallback);
-		this.tags.Add(TagManager.Create(id, null));
+		this.tags.Add(TagManager.Create(id));
 		this.interruptExclusion = new List<Tag>(interrupt_exclusion);
 		Db.Get().DuplicantStatusItems.Add(this.statusItem);
 		this.groups = new ChoreGroup[chore_groups.Length];

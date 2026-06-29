@@ -32,10 +32,18 @@ public class MinionSelectPreviewConfig : IEntityConfig
 		gameObject.AddOrGet<Accessorizer>();
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.materialType = KAnimBatchGroup.MaterialType.UI;
-		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim("anim_cheer_kanim") };
 		kbatchedAnimController.animScale = 0.5f;
 		kbatchedAnimController.setScaleFromAnim = false;
 		kbatchedAnimController.animOverrideSize = new Vector2(100f, 120f);
+		kbatchedAnimController.AnimFiles = new KAnimFile[]
+		{
+			Assets.GetAnim("body_comp_default_kanim"),
+			Assets.GetAnim("anim_construction_default_kanim"),
+			Assets.GetAnim("anim_idles_default_kanim"),
+			Assets.GetAnim("anim_cheer_kanim")
+		};
+		SymbolOverrideControllerUtil.AddToPrefab(gameObject);
+		MinionConfig.ConfigureSymbols(gameObject);
 		return gameObject;
 	}
 

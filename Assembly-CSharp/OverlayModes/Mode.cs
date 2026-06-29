@@ -248,7 +248,7 @@ namespace OverlayModes
 				if (!(t == null))
 				{
 					Vector3 position = t.transform.GetPosition();
-					if (Grid.Visible[Grid.PosToCell(position)] > 0 || DebugHandler.FreeCameraMode)
+					if (Grid.IsVisible(Grid.PosToCell(position)))
 					{
 						if (min <= position && position <= max)
 						{
@@ -330,7 +330,7 @@ namespace OverlayModes
 				while ((float)num2 <= vector2.x)
 				{
 					int num3 = Grid.XYToCell(num2, num);
-					if (Grid.Visible[num3] > 128)
+					if (Grid.Visible[num3] > 20 || !PropertyTextures.IsFogOfWarEnabled)
 					{
 						flag = true;
 						break;

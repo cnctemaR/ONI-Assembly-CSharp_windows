@@ -14,7 +14,7 @@ public class Recipe : IHasSortOrder
 
 	public Recipe(string prefabId, float outputUnits = 1f, SimHashes elementOverride = (SimHashes)0, string nameOverride = null, string recipeDescription = null, int sortOrder = 0)
 	{
-		this.Result = TagManager.Create(prefabId, null);
+		this.Result = TagManager.Create(prefabId);
 		this.ResultElementOverride = elementOverride;
 		this.nameOverride = nameOverride;
 		this.OutputUnits = outputUnits;
@@ -154,7 +154,7 @@ public class Recipe : IHasSortOrder
 			gameObject2.GetComponent<KSelectable>().entityName = this.Name;
 			if (component2 != null)
 			{
-				gameObject2.GetComponent<KPrefabID>().RemoveTag(TagManager.Create("Vacuum", null));
+				gameObject2.GetComponent<KPrefabID>().RemoveTag(TagManager.Create("Vacuum"));
 				if (this.ResultElementOverride != (SimHashes)0)
 				{
 					if (component2.GetComponent<ElementChunk>() != null)
@@ -280,7 +280,7 @@ public class Recipe : IHasSortOrder
 	{
 		public Ingredient(string tag, float amount)
 		{
-			this.tag = TagManager.Create(tag, null);
+			this.tag = TagManager.Create(tag);
 			this.amount = amount;
 		}
 

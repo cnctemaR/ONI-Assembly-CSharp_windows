@@ -8,6 +8,7 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		component.randomiseLoopedOffset = true;
 		base.OnPrefabInit();
+		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 	}
 
 	protected override void OnSpawn()
@@ -18,10 +19,56 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 		{
 			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_FetchingWater);
 		}, null, null);
+		this.ConfigurePollutedWaterOutput();
+		this.emptyWaterThreshold = this.pollutedWaterStorage.capacityKg;
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		if (gameObject == null)
+		{
+			return;
+		}
+		AlgaeHabitat component = gameObject.GetComponent<AlgaeHabitat>();
+		if (component == null)
+		{
+			return;
+		}
+		this.emptyWaterThreshold = component.emptyWaterThreshold;
+	}
+
+	private void ConfigurePollutedWaterOutput()
+	{
+		Storage storage = null;
+		foreach (Storage storage2 in base.GetComponents<Storage>())
+		{
+			if (storage2.storageFilters.Contains(ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag))
+			{
+				storage = storage2;
+				break;
+			}
+		}
+		foreach (ElementConverter elementConverter in base.GetComponents<ElementConverter>())
+		{
+			foreach (ElementConverter.OutputElement outputElement in elementConverter.outputElements)
+			{
+				if (outputElement.element.tag == ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag)
+				{
+					elementConverter.SetStorage(storage);
+					break;
+				}
+			}
+		}
+		this.pollutedWaterStorage = storage;
 	}
 
 	[MyCmpGet]
 	private Operational operational;
+
+	private Storage pollutedWaterStorage;
+
+	private float emptyWaterThreshold = 100f;
 
 	[SerializeField]
 	public float lightBonusMultiplier = 1.1f;
@@ -41,7 +88,39 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 			return this.converter.HasEnoughMass(tag);
 		}
 
+		public bool NeedsEmptying()
+		{
+			return base.smi.master.pollutedWaterStorage.RemainingCapacity() <= 0f;
+		}
+
+		public void CreateEmptyChore()
+		{
+			if (this.emptyChore != null)
+			{
+				this.emptyChore.Cancel("dupe");
+			}
+			AlgaeHabitatEmpty component = base.master.GetComponent<AlgaeHabitatEmpty>();
+			this.emptyChore = new WorkChore<AlgaeHabitatEmpty>(Db.Get().ChoreTypes.EmptyStorage, component, null, null, true, new Action<Chore>(this.OnEmptyComplete), null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, true);
+		}
+
+		public void CancelEmptyChore()
+		{
+			if (this.emptyChore != null)
+			{
+				this.emptyChore.Cancel("Cancelled");
+				this.emptyChore = null;
+			}
+		}
+
+		private void OnEmptyComplete(Chore chore)
+		{
+			this.emptyChore = null;
+			base.master.pollutedWaterStorage.DropAll(true);
+		}
+
 		public ElementConverter converter;
+
+		public Chore emptyChore;
 	}
 
 	public class States : GameStateMachine<AlgaeHabitat.States, AlgaeHabitat.SMInstance, AlgaeHabitat>
@@ -50,15 +129,30 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 		{
 			default_state = this.noAlgae;
 			this.root.EventTransition(GameHashes.OperationalChanged, this.notoperational, (AlgaeHabitat.SMInstance smi) => !smi.master.operational.IsOperational).EventTransition(GameHashes.OperationalChanged, this.noAlgae, (AlgaeHabitat.SMInstance smi) => smi.master.operational.IsOperational);
+			this.notoperational.QueueAnim("off", false, null);
+			this.gotAlgae.PlayAnim("on_pre").OnAnimQueueComplete(this.noWater);
+			this.gotEmptied.PlayAnim("on_pre").OnAnimQueueComplete(this.generatingOxygen);
+			this.lostAlgae.PlayAnim("on_pst").OnAnimQueueComplete(this.noAlgae);
 			this.noAlgae.QueueAnim("off", false, null).EventTransition(GameHashes.OnStorageChange, this.gotAlgae, (AlgaeHabitat.SMInstance smi) => smi.HasEnoughMass(GameTags.Algae)).Enter(delegate(AlgaeHabitat.SMInstance smi)
 			{
 				smi.master.operational.SetActive(false, false);
 			});
-			this.notoperational.QueueAnim("off", false, null);
-			this.gotAlgae.PlayAnim("on_pre").OnAnimQueueComplete(this.noWater);
-			this.lostAlgae.PlayAnim("on_pst").OnAnimQueueComplete(this.noAlgae);
-			this.noWater.QueueAnim("on", false, null).EventTransition(GameHashes.OnStorageChange, this.lostAlgae, (AlgaeHabitat.SMInstance smi) => !smi.HasEnoughMass(GameTags.Algae)).EventTransition(GameHashes.OnStorageChange, this.gotWater, (AlgaeHabitat.SMInstance smi) => smi.HasEnoughMass(GameTags.Algae) && smi.HasEnoughMass(GameTags.Water));
-			this.gotWater.PlayAnim("working_pre").OnAnimQueueComplete(this.generatingOxygen);
+			this.noWater.QueueAnim("on", false, null).Enter(delegate(AlgaeHabitat.SMInstance smi)
+			{
+				smi.master.GetComponent<PassiveElementConsumer>().EnableConsumption(true);
+			}).EventTransition(GameHashes.OnStorageChange, this.lostAlgae, (AlgaeHabitat.SMInstance smi) => !smi.HasEnoughMass(GameTags.Algae))
+				.EventTransition(GameHashes.OnStorageChange, this.gotWater, (AlgaeHabitat.SMInstance smi) => smi.HasEnoughMass(GameTags.Algae) && smi.HasEnoughMass(GameTags.Water));
+			this.needsEmptying.QueueAnim("off", false, null).Enter(delegate(AlgaeHabitat.SMInstance smi)
+			{
+				smi.CreateEmptyChore();
+			}).Exit(delegate(AlgaeHabitat.SMInstance smi)
+			{
+				smi.CancelEmptyChore();
+			})
+				.ToggleStatusItem(Db.Get().BuildingStatusItems.HabitatNeedsEmptying, null)
+				.EventTransition(GameHashes.OnStorageChange, this.noAlgae, (AlgaeHabitat.SMInstance smi) => !smi.HasEnoughMass(GameTags.Algae) || !smi.HasEnoughMass(GameTags.Water))
+				.EventTransition(GameHashes.OnStorageChange, this.gotEmptied, (AlgaeHabitat.SMInstance smi) => smi.HasEnoughMass(GameTags.Algae) && smi.HasEnoughMass(GameTags.Water) && !smi.NeedsEmptying());
+			this.gotWater.PlayAnim("working_pre").OnAnimQueueComplete(this.needsEmptying);
 			this.generatingOxygen.Enter(delegate(AlgaeHabitat.SMInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);
@@ -71,9 +165,10 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 				smi.converter.OutputMultiplier = ((Grid.LightCount[num] <= 0) ? 1f : smi.master.lightBonusMultiplier);
 			}, UpdateRate.SIM_200ms, false)
 				.QueueAnim("working_loop", true, null)
-				.EventTransition(GameHashes.OnStorageChange, this.stoppedGeneratingOxygen, (AlgaeHabitat.SMInstance smi) => !smi.HasEnoughMass(GameTags.Water) || !smi.HasEnoughMass(GameTags.Algae));
+				.EventTransition(GameHashes.OnStorageChange, this.stoppedGeneratingOxygen, (AlgaeHabitat.SMInstance smi) => !smi.HasEnoughMass(GameTags.Water) || !smi.HasEnoughMass(GameTags.Algae) || smi.NeedsEmptying());
 			this.stoppedGeneratingOxygen.PlayAnim("working_pst").OnAnimQueueComplete(this.stoppedGeneratingOxygenTransition);
-			this.stoppedGeneratingOxygenTransition.EventTransition(GameHashes.OnStorageChange, this.noWater, (AlgaeHabitat.SMInstance smi) => !smi.HasEnoughMass(GameTags.Water)).EventTransition(GameHashes.OnStorageChange, this.lostAlgae, (AlgaeHabitat.SMInstance smi) => !smi.HasEnoughMass(GameTags.Algae)).EventTransition(GameHashes.OnStorageChange, this.gotWater, (AlgaeHabitat.SMInstance smi) => smi.HasEnoughMass(GameTags.Water) && smi.HasEnoughMass(GameTags.Algae));
+			this.stoppedGeneratingOxygenTransition.EventTransition(GameHashes.OnStorageChange, this.needsEmptying, (AlgaeHabitat.SMInstance smi) => smi.NeedsEmptying()).EventTransition(GameHashes.OnStorageChange, this.noWater, (AlgaeHabitat.SMInstance smi) => !smi.HasEnoughMass(GameTags.Water)).EventTransition(GameHashes.OnStorageChange, this.lostAlgae, (AlgaeHabitat.SMInstance smi) => !smi.HasEnoughMass(GameTags.Algae))
+				.EventTransition(GameHashes.OnStorageChange, this.gotWater, (AlgaeHabitat.SMInstance smi) => smi.HasEnoughMass(GameTags.Water) && smi.HasEnoughMass(GameTags.Algae));
 		}
 
 		public GameStateMachine<AlgaeHabitat.States, AlgaeHabitat.SMInstance, AlgaeHabitat, object>.State generatingOxygen;
@@ -86,9 +181,13 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 
 		public GameStateMachine<AlgaeHabitat.States, AlgaeHabitat.SMInstance, AlgaeHabitat, object>.State noAlgae;
 
+		public GameStateMachine<AlgaeHabitat.States, AlgaeHabitat.SMInstance, AlgaeHabitat, object>.State needsEmptying;
+
 		public GameStateMachine<AlgaeHabitat.States, AlgaeHabitat.SMInstance, AlgaeHabitat, object>.State gotAlgae;
 
 		public GameStateMachine<AlgaeHabitat.States, AlgaeHabitat.SMInstance, AlgaeHabitat, object>.State gotWater;
+
+		public GameStateMachine<AlgaeHabitat.States, AlgaeHabitat.SMInstance, AlgaeHabitat, object>.State gotEmptied;
 
 		public GameStateMachine<AlgaeHabitat.States, AlgaeHabitat.SMInstance, AlgaeHabitat, object>.State lostAlgae;
 

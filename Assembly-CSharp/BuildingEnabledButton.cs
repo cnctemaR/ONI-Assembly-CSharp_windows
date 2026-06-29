@@ -61,6 +61,10 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandl
 	{
 		if (!this.Toggleable.IsToggleQueued(this.ToggleIdx))
 		{
+			if (this.IsEnabled)
+			{
+				base.Trigger(2108245096, "BuildingDisabled");
+			}
 			Prioritizable.AddRef(base.gameObject);
 		}
 		else

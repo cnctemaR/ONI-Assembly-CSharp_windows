@@ -6,6 +6,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using Klei;
 using Newtonsoft.Json;
 using STRINGS;
 using UnityEngine;
@@ -75,7 +76,7 @@ public class KCrashReporter : MonoBehaviour
 			KCrashReporter.ignoreAll = true;
 			global::Debug.Log("Ignoring crash due to ignorekcrashreporter.txt", null);
 		}
-		if (Application.isEditor)
+		if (Application.isEditor && !GenericGameSettings.instance.enableEditorCrashReporting)
 		{
 			KCrashReporter.terminateOnError = false;
 		}
@@ -128,7 +129,6 @@ public class KCrashReporter : MonoBehaviour
 			GameObject gameObject2 = global::UnityEngine.Object.Instantiate<GameObject>(this.reportErrorPrefab, Vector3.zero, Quaternion.identity);
 			gameObject2.transform.SetParent(gameObject.transform, false);
 			this.errorDialog = gameObject2.GetComponentInChildren<ReportErrorDialog>();
-			bool flag = local_msg != null && local_msg.ToLower().Contains("simdll.dll");
 			this.errorDialog.PopupConfirmDialog("ERROR OCCURRED!\nDo you want to report this error?", delegate
 			{
 				string text = null;
@@ -143,7 +143,7 @@ public class KCrashReporter : MonoBehaviour
 			}, delegate
 			{
 				this.OnCloseErrorDialog();
-			}, flag);
+			});
 		}
 	}
 
@@ -165,6 +165,10 @@ public class KCrashReporter : MonoBehaviour
 	private static string UploadSaveFile(string save_file, string stack_trace, Dictionary<string, string> metadata = null)
 	{
 		global::Debug.Log(string.Format("Save_file: {0}", save_file), null);
+		if (KPrivacyPrefs.instance.disableDataCollection)
+		{
+			return string.Empty;
+		}
 		if (save_file != null && File.Exists(save_file))
 		{
 			using (WebClient webClient = new WebClient())
@@ -277,6 +281,10 @@ public class KCrashReporter : MonoBehaviour
 		}
 		global::Debug.Log("Reporting error.", null);
 		KCrashReporter.hasReportedError = true;
+		if (KPrivacyPrefs.instance.disableDataCollection)
+		{
+			return;
+		}
 		string text6;
 		using (WebClient webClient = new WebClient())
 		{
@@ -343,7 +351,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = "UNITY_OUTPUT:\n" + msg;
-			error.build = 262109;
+			error.build = 266730;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = text4;
 			error.user_message = userMessage;

@@ -17,10 +17,16 @@ public class LogicMemory : KMonoBehaviour
 
 	public void OnLogicValueChanged(object data)
 	{
-		if (((LogicValueChanged)data).portID == LogicMemory.WRITE_PORT_ID)
+		LogicValueChanged logicValueChanged = (LogicValueChanged)data;
+		if (logicValueChanged.portID == LogicMemory.SET_PORT_ID)
 		{
-			int inputValue = this.ports.GetInputValue(LogicMemory.VALUE_PORT_ID);
-			this.ports.SendSignal(LogicMemory.READ_PORT_ID, inputValue);
+			this.ports.SendSignal(LogicMemory.READ_PORT_ID, 1);
+			base.GetComponent<KBatchedAnimController>().Play("on", KAnim.PlayMode.Once, 1f, 0f);
+		}
+		else if (logicValueChanged.portID == LogicMemory.RESET_PORT_ID)
+		{
+			this.ports.SendSignal(LogicMemory.READ_PORT_ID, 0);
+			base.GetComponent<KBatchedAnimController>().Play("off", KAnim.PlayMode.Once, 1f, 0f);
 		}
 	}
 
@@ -36,9 +42,9 @@ public class LogicMemory : KMonoBehaviour
 
 	private static StatusItem infoStatusItem;
 
-	public static readonly HashedString VALUE_PORT_ID = new HashedString("LogicMemoryValue");
-
-	public static readonly HashedString WRITE_PORT_ID = new HashedString("LogicMemoryWrite");
-
 	public static readonly HashedString READ_PORT_ID = new HashedString("LogicMemoryRead");
+
+	public static readonly HashedString SET_PORT_ID = new HashedString("LogicMemorySet");
+
+	public static readonly HashedString RESET_PORT_ID = new HashedString("LogicMemoryReset");
 }

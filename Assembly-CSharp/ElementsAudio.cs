@@ -77,5 +77,10 @@ public class ElementsAudio
 		[FieldOptional]
 		[FieldNullValue("")]
 		public string floorEventAudioCategory;
+
+		[FieldOrder(8)]
+		[FieldOptional]
+		[FieldNullValue("")]
+		public string creatureChewSound;
 	}
 }

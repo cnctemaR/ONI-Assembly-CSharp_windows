@@ -30,7 +30,7 @@ public class FloorSoundEvent : SoundEvent
 				text2 = GlobalAssets.GetSound(text, true);
 			}
 		}
-		if (base.IsLowPrioritySound(text2))
+		if (SoundEvent.IsLowPrioritySound(text2))
 		{
 			return;
 		}

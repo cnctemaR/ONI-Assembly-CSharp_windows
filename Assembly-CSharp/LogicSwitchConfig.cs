@@ -49,8 +49,8 @@ public class LogicSwitchConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicSwitchConfig.OUTPUT_PORT);
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
+		GeneratedBuildings.RegisterLogicPorts(go, LogicSwitchConfig.OUTPUT_PORT);
 		go.AddOrGet<LogicSwitch>();
 		Prioritizable.AddRef(go);
 		BuildingTemplates.DoPostConfigure(go);

@@ -54,7 +54,7 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 		base.GetComponent<KSelectable>().AddStatusItem(Wire.WireMaxWattageStatus, this);
 		base.GetComponent<KSelectable>().AddStatusItem(Wire.WireCircuitStatus, this);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		component.HideSymbol(true, Wire.OutlineSymbol);
+		component.SetSymbolVisiblity(Wire.OutlineSymbol, false);
 	}
 
 	protected override void OnCleanUp()

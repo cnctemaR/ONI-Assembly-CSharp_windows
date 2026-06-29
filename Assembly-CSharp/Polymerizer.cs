@@ -10,7 +10,7 @@ public class Polymerizer : StateMachineComponent<Polymerizer.StatesInstance>
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		this.plasticMeter = new MeterController(component, "meter_target", "meter", Meter.Offset.Infront, new Vector3(0f, 0f, 0f), null);
 		this.oilMeter = new MeterController(component, "meter2_target", "meter2", Meter.Offset.Infront, new Vector3(0f, 0f, 0f), null);
-		component.StopHidingSymbol(new KAnimHashedString("meter_target"), true);
+		component.SetSymbolVisiblity("meter_target", true);
 		float num = 0f;
 		PrimaryElement primaryElement = this.storage.FindPrimaryElement(SimHashes.Petroleum);
 		if (primaryElement != null)

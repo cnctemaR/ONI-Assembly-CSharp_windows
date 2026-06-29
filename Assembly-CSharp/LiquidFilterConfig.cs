@@ -34,14 +34,32 @@ public class LiquidFilterConfig : IBuildingConfig
 		return buildingDef;
 	}
 
+	private void AttachPort(GameObject go)
+	{
+		ConduitSecondaryOutput conduitSecondaryOutput = go.AddComponent<ConduitSecondaryOutput>();
+		conduitSecondaryOutput.portInfo = this.secondaryPort;
+	}
+
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		base.DoPostConfigurePreview(def, go);
+		this.AttachPort(go);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		base.DoPostConfigureUnderConstruction(go);
+		this.AttachPort(go);
+	}
+
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddOrGet<Structure>();
 		ElementFilter elementFilter = go.AddOrGet<ElementFilter>();
-		elementFilter.conduitType = ConduitType.Liquid;
-		elementFilter.filterOffset = new CellOffset(1, 0);
-		go.AddOrGet<LiquidFilterable>();
+		elementFilter.portInfo = this.secondaryPort;
+		Filterable filterable = go.AddOrGet<Filterable>();
+		filterable.filterElementState = Filterable.ElementState.Liquid;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -59,4 +77,6 @@ public class LiquidFilterConfig : IBuildingConfig
 	public const string ID = "LiquidFilter";
 
 	private const ConduitType CONDUIT_TYPE = ConduitType.Liquid;
+
+	private ConduitPortInfo secondaryPort = new ConduitPortInfo(ConduitType.Liquid, new CellOffset(0, 0));
 }

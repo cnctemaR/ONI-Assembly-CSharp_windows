@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class StateMachineControllerExtensions
 {
-	public static StateMachineInstanceType GetSMI<StateMachineInstanceType>(this StateMachine.Instance smi) where StateMachineInstanceType : class
+	public static StateMachineInstanceType GetSMI<StateMachineInstanceType>(this StateMachine.Instance smi) where StateMachineInstanceType : StateMachine.Instance
 	{
 		return smi.gameObject.GetSMI<StateMachineInstanceType>();
 	}

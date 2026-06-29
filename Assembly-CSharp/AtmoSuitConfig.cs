@@ -29,9 +29,10 @@ public class AtmoSuitConfig : IEquipmentConfig
 		string text2 = "suit_oxygen_kanim";
 		string empty = string.Empty;
 		string text3 = "body_oxygen_kanim";
+		int num3 = 5;
 		List<AttributeModifier> list2 = list;
 		Tag[] array = new Tag[] { GameTags.Suit };
-		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, fabricator, num, simHashes, dictionary2, num2, text2, empty, text3, list2, null, true, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array);
+		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, fabricator, num, simHashes, dictionary2, num2, text2, empty, text3, num3, list2, null, true, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array);
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.RECIPE_DESC;
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("SoakingWet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("WetFeet"));
@@ -48,9 +49,12 @@ public class AtmoSuitConfig : IEquipmentConfig
 		};
 		equipmentDef.OnUnequipCallBack = delegate(Equippable eq)
 		{
-			eq.assignee.GetSoleOwner().GetAttributes().Get(Db.Get().Attributes.Athletics)
-				.Remove(SuitExpert.AthleticsModifier);
-			eq.assignee.GetSoleOwner().GetComponent<Navigator>().ClearFlags(PathFinder.PotentialPath.Flags.HasSuit | PathFinder.PotentialPath.Flags.UnlimitedSubmergedTravel);
+			if (eq.assignee != null)
+			{
+				Ownables soleOwner = eq.assignee.GetSoleOwner();
+				soleOwner.GetAttributes().Get(Db.Get().Attributes.Athletics).Remove(SuitExpert.AthleticsModifier);
+				soleOwner.GetComponent<Navigator>().ClearFlags(PathFinder.PotentialPath.Flags.HasSuit | PathFinder.PotentialPath.Flags.UnlimitedSubmergedTravel);
+			}
 		};
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.SuitIDs, "Atmo_Suit");
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.SuitIDs, "Helmet");

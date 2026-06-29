@@ -2,7 +2,6 @@
 using System.IO;
 using Klei.AI;
 using STRINGS;
-using TUNING;
 using UnityEngine;
 
 public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveLoadableDetails, ISim4000ms
@@ -50,6 +49,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		{
 			SimAndRenderScheduler.instance.Add(this, false);
 		}
+		this.SetCurrentNavType(this.CurrentNavType);
 	}
 
 	public bool IsMoving()
@@ -61,7 +61,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	{
 		if (offsets == null)
 		{
-			offsets = Grid.DefaultOffset;
+			offsets = new CellOffset[] { default(CellOffset) };
 		}
 		this.targetLocator.transform.SetPosition(Grid.CellToPosCBC(cell, Grid.SceneLayer.Move));
 		return this.GoTo(this.targetLocator, offsets, NavigationTactics.ReduceTravelDistance);
@@ -71,7 +71,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	{
 		if (offsets == null)
 		{
-			offsets = Grid.DefaultOffset;
+			offsets = new CellOffset[] { default(CellOffset) };
 		}
 		this.targetLocator.transform.SetPosition(Grid.CellToPosCBC(cell, Grid.SceneLayer.Move));
 		return this.GoTo(this.targetLocator, offsets, tactic);
@@ -281,10 +281,27 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		return this.AnchorCell;
 	}
 
+	public bool IsValidNavType(NavType nav_type)
+	{
+		return this.NavGrid.HasNavTypeData(nav_type);
+	}
+
 	public void SetCurrentNavType(NavType nav_type)
 	{
 		this.CurrentNavType = nav_type;
 		this.AnchorCell = NavTypeHelper.GetAnchorCell(nav_type, Grid.PosToCell(this));
+		NavGrid.NavTypeData navTypeData = this.NavGrid.GetNavTypeData(this.CurrentNavType);
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		Vector2 one = Vector2.one;
+		if (navTypeData.flipX)
+		{
+			one.x = -1f;
+		}
+		if (navTypeData.flipY)
+		{
+			one.y = -1f;
+		}
+		component.navMatrix = Matrix2x3.Translate(navTypeData.animControllerOffset * 200f) * Matrix2x3.Rotate(navTypeData.rotation) * Matrix2x3.Scale(one);
 	}
 
 	private void OnRefreshUserMenu(object data)
@@ -526,9 +543,9 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 		public NavType end;
 
-		public string preAnim;
+		public HashedString preAnim;
 
-		public string anim;
+		public HashedString anim;
 
 		public float speed;
 
@@ -556,34 +573,13 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 			this.moving.Enter(delegate(Navigator.StatesInstance smi)
 			{
 				smi.Trigger(1027377649, GameHashes.ObjectMovementWakeUp);
-			}).Update("Log travel time", delegate(Navigator.StatesInstance smi, float dt)
-			{
-				if (smi.GetComponent<MinionIdentity>() != null)
-				{
-					Chore currentChore = smi.GetComponent<ChoreDriver>().GetCurrentChore();
-					if (currentChore != null)
-					{
-						ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, dt, currentChore.choreType.Name, currentChore.driver.GetProperName());
-						if (currentChore is FetchAreaChore)
-						{
-							MinionResume component = smi.GetComponent<MinionResume>();
-							if (component != null)
-							{
-								component.AddExperienceIfRole("Hauler", dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
-								component.AddExperienceIfRole(MaterialsManager.ID, dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
-								component.AddExperienceIfRole(Handyman.ID, dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
-							}
-						}
-					}
-				}
-			}, UpdateRate.SIM_200ms, false).Update("UpdateNavigator", delegate(Navigator.StatesInstance smi, float dt)
+			}).Update("UpdateNavigator", delegate(Navigator.StatesInstance smi, float dt)
 			{
 				smi.master.Sim33ms(dt);
-			}, UpdateRate.SIM_33ms, true)
-				.Exit(delegate(Navigator.StatesInstance smi)
-				{
-					smi.Trigger(1027377649, GameHashes.ObjectMovementSleep);
-				});
+			}, UpdateRate.SIM_33ms, true).Exit(delegate(Navigator.StatesInstance smi)
+			{
+				smi.Trigger(1027377649, GameHashes.ObjectMovementSleep);
+			});
 			this.arrived.TriggerOnEnter(GameHashes.DestinationReached, null).GoTo(this.stopped);
 			this.failed.TriggerOnEnter(GameHashes.NavigationFailed, null).GoTo(this.stopped);
 			this.stopped.DoNothing();

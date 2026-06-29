@@ -13,23 +13,15 @@ public class ToiletWorkableClean : Workable
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 	}
 
-	protected override void OnStartWork(Worker worker)
-	{
-		base.OnStartWork(worker);
-		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		component.Play(ToiletWorkableClean.CleanAnims, KAnim.PlayMode.Loop);
-	}
-
-	protected override void OnStopWork(Worker worker)
-	{
-		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		component.Queue("unclog_pst", KAnim.PlayMode.Once, 1f, 0f);
-		base.OnStopWork(worker);
-	}
-
 	public override void AwardExperience(float work_dt, MinionResume resume)
 	{
 		resume.AddExperienceIfRole(Handyman.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
+	}
+
+	protected override void OnStartWork(Worker worker)
+	{
+		base.OnStartWork(worker);
+		base.GetComponent<KAnimControllerBase>().Play(ToiletWorkableClean.CLEAN_ANIMS, KAnim.PlayMode.Loop);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -40,11 +32,18 @@ public class ToiletWorkableClean : Workable
 
 	public override HashedString[] GetWorkAnims(Worker worker)
 	{
-		return ToiletWorkableClean.CleanAnims;
+		return ToiletWorkableClean.CLEAN_ANIMS;
+	}
+
+	public override HashedString GetWorkPstAnim(Worker worker)
+	{
+		return ToiletWorkableClean.PST_ANIM;
 	}
 
 	[Serialize]
 	public int timesCleaned;
 
-	private static readonly HashedString[] CleanAnims = new HashedString[] { "unclog_pre", "unclog_loop" };
+	private static readonly HashedString[] CLEAN_ANIMS = new HashedString[] { "unclog_pre", "unclog_loop" };
+
+	private static readonly HashedString PST_ANIM = new HashedString("unclog_pst");
 }

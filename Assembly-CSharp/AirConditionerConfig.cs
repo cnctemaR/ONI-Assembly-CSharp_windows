@@ -23,6 +23,7 @@ public class AirConditionerConfig : IBuildingConfig
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0f;
+		buildingDef.ThermalConductivity = 5f;
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.OutputConduitType = ConduitType.Gas;
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);

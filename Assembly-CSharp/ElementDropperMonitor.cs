@@ -102,7 +102,7 @@ public class ElementDropperMonitor : GameStateMachine<ElementDropperMonitor, Ele
 
 		public bool CellIsClean()
 		{
-			int num = Grid.PosToCell(base.transform.position);
+			int num = Grid.PosToCell(base.transform.GetPosition());
 			int elementIndex = ElementLoader.GetElementIndex(base.def.dirtyEmitElement);
 			int num2 = (int)Grid.ElementIdx[num];
 			return num2 != elementIndex || Grid.Mass[num] < 1f;

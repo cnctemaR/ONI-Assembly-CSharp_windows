@@ -15,11 +15,11 @@ public static class GameTagExtensions
 
 	public static Tag Create(SimHashes id)
 	{
-		return TagManager.Create(id.ToString(), null);
+		return TagManager.Create(id.ToString());
 	}
 
 	public static Tag CreateTag(this SimHashes id)
 	{
-		return TagManager.Create(id.ToString(), null);
+		return TagManager.Create(id.ToString());
 	}
 }

@@ -333,8 +333,8 @@ public class Clinic : Workable, IEffectDescriptor
 			{
 				if (base.master.IsValidEffect(base.master.doctoredHealthEffect) || base.master.IsValidEffect(base.master.doctoredDiseaseEffect))
 				{
-					this.doctorChore = new WorkChore<DoctorChore>(Db.Get().ChoreTypes.Doctor, base.smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, true);
-					WorkChore<DoctorChore> workChore = this.doctorChore;
+					this.doctorChore = new WorkChore<DoctorChoreWorkable>(Db.Get().ChoreTypes.Doctor, base.smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, true);
+					WorkChore<DoctorChoreWorkable> workChore = this.doctorChore;
 					workChore.onComplete = (Action<Chore>)Delegate.Combine(workChore.onComplete, new Action<Chore>(delegate(Chore chore)
 					{
 						base.smi.GoTo(base.smi.sm.operational.healing.newlyDoctored);
@@ -396,7 +396,7 @@ public class Clinic : Workable, IEffectDescriptor
 				}
 			}
 
-			private WorkChore<DoctorChore> doctorChore;
+			private WorkChore<DoctorChoreWorkable> doctorChore;
 		}
 	}
 }

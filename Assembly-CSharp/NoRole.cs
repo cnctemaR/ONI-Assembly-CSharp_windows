@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using STRINGS;
 
 public class NoRole : RoleConfig
@@ -10,7 +9,6 @@ public class NoRole : RoleConfig
 		base.name = DUPLICANTS.ROLES.NO_ROLE.NAME;
 		base.description = DUPLICANTS.ROLES.NO_ROLE.DESCRIPTION;
 		this.experienceRequired = -1f;
-		this.favoredChoreTypes = new List<ChoreType>();
 		base.perks = new RolePerk[0];
 	}
 

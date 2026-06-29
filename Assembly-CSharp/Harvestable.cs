@@ -88,7 +88,7 @@ public class Harvestable : Workable
 	{
 		if (this.HarvestWhenReadyOverlayIcon != null)
 		{
-			if (Grid.Visible[Grid.PosToCell(base.gameObject)] > 0 || DebugHandler.FreeCameraMode)
+			if (Grid.IsVisible(Grid.PosToCell(base.gameObject)) || (CameraController.Instance != null && CameraController.Instance.FreeCameraEnabled))
 			{
 				if (!this.HarvestWhenReadyOverlayIcon.gameObject.activeSelf)
 				{

@@ -56,6 +56,11 @@ public class InterfaceTool : KMonoBehaviour
 		}
 	}
 
+	public virtual void GetOverlayColorData(out HashSet<ToolMenu.CellColorData> colors)
+	{
+		colors = null;
+	}
+
 	protected virtual void OnDeactivateTool(InterfaceTool new_tool)
 	{
 	}

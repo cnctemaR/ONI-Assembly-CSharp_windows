@@ -297,7 +297,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	{
 		if (this.offsetTracker == null)
 		{
-			this.offsetTracker = new StandardOffsetTracker(Grid.DefaultOffset);
+			this.offsetTracker = new StandardOffsetTracker(new CellOffset[] { default(CellOffset) });
 		}
 		return this.offsetTracker.GetOffsets(cell);
 	}

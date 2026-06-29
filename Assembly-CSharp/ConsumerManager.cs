@@ -76,10 +76,6 @@ public class ConsumerManager : KMonoBehaviour, ISaveLoadable
 
 	private bool ShouldBeDiscovered(Tag food_id)
 	{
-		if (DebugHandler.InstantBuildMode)
-		{
-			return true;
-		}
 		if (WorldInventory.Instance.IsDiscovered(food_id))
 		{
 			return true;
@@ -99,7 +95,7 @@ public class ConsumerManager : KMonoBehaviour, ISaveLoadable
 		}
 		foreach (Crop crop in Components.Crops)
 		{
-			if (Grid.Visible[Grid.PosToCell(crop.gameObject)] > 0 && crop.cropId == food_id.Name)
+			if (Grid.IsVisible(Grid.PosToCell(crop.gameObject)) && crop.cropId == food_id.Name)
 			{
 				return true;
 			}

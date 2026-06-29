@@ -24,9 +24,10 @@ public class TemperatureSuitConfig : IEquipmentConfig
 		string anim = global::TUNING.EQUIPMENT.SUITS.ANIM;
 		string snapon = global::TUNING.EQUIPMENT.SUITS.SNAPON;
 		string text2 = "body_oxygen_kanim";
+		int num3 = 5;
 		List<AttributeModifier> list2 = list;
 		Tag[] array = new Tag[] { GameTags.Suit };
-		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, fabricator, num, simHashes, dictionary2, num2, anim, snapon, text2, list2, null, false, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array);
+		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, fabricator, num, simHashes, dictionary2, num2, anim, snapon, text2, num3, list2, null, false, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array);
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.TEMPERATURE_SUIT.RECIPE_DESC;
 		return equipmentDef;
 	}

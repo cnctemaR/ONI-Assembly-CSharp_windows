@@ -82,32 +82,6 @@ public class TitleBarPortrait : KMonoBehaviour
 		}
 	}
 
-	private void SetPortrait(KAnimFile[] animFiles, string animName)
-	{
-		if (this.PortraitShadow)
-		{
-			this.PortraitShadow.SetActive(true);
-		}
-		if (this.FaceObject != null)
-		{
-			this.FaceObject.SetActive(false);
-		}
-		if (this.ImageObject != null)
-		{
-			this.ImageObject.SetActive(false);
-		}
-		if (this.AnimControllerObject != null)
-		{
-			this.AnimControllerObject.SetActive(true);
-			KBatchedAnimController component = this.AnimControllerObject.GetComponent<KBatchedAnimController>();
-			CrewPortrait.SetPortraitData(base.gameObject.GetComponent<IAssignableIdentity>(), component, true);
-			component.ClearAnims();
-			component.FlipX = false;
-			component.SetAnims(animFiles, true);
-			component.Play(animName, KAnim.PlayMode.Once, 1f, 0f);
-		}
-	}
-
 	public void ClearPortrait()
 	{
 		if (this.PortraitShadow)

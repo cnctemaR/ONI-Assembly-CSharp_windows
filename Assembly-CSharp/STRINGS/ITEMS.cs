@@ -90,36 +90,45 @@ namespace STRINGS
 			{
 				public static LocString NAME = CREATURES.SPECIES.HATCH.EGG_NAME;
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "An egg laid by a " + CREATURES.SPECIES.HATCH.NAME + "\n\nIf incubated, it will hatch into a " + CREATURES.SPECIES.HATCH.BABY.NAME;
 
-				public static LocString RECIPEDESC = string.Empty;
+				public static LocString RECIPEDESC = "An egg laid by a " + CREATURES.SPECIES.HATCH.NAME;
+			}
+
+			public class DRECKOEGG
+			{
+				public static LocString NAME = CREATURES.SPECIES.DRECKO.EGG_NAME;
+
+				public static LocString DESC = "An egg laid by a " + CREATURES.SPECIES.DRECKO.NAME + "\n\nIf incubated, it will hatch into a new " + CREATURES.SPECIES.DRECKO.NAME;
+
+				public static LocString RECIPEDESC = "An egg laid by a " + CREATURES.SPECIES.DRECKO.NAME;
 			}
 
 			public class LIGHTBUGEGG
 			{
 				public static LocString NAME = CREATURES.SPECIES.LIGHTBUG.EGG_NAME;
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "An egg laid by a " + CREATURES.SPECIES.LIGHTBUG.NAME + "\n\nIf incubated, it will hatch into a " + CREATURES.SPECIES.LIGHTBUG.BABY.NAME;
 
-				public static LocString RECIPEDESC = string.Empty;
+				public static LocString RECIPEDESC = "An egg laid by a " + CREATURES.SPECIES.LIGHTBUG.NAME;
 			}
 
 			public class OILFLOATEREGG
 			{
 				public static LocString NAME = CREATURES.SPECIES.OILFLOATER.EGG_NAME;
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "An egg laid by a " + CREATURES.SPECIES.OILFLOATER.NAME + "\n\nIf incubated, it will hatch into a " + CREATURES.SPECIES.OILFLOATER.BABY.NAME;
 
-				public static LocString RECIPEDESC = string.Empty;
+				public static LocString RECIPEDESC = "An egg laid by a " + CREATURES.SPECIES.OILFLOATER.NAME;
 			}
 
 			public class PUFTEGG
 			{
 				public static LocString NAME = CREATURES.SPECIES.PUFT.EGG_NAME;
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "An egg laid by a " + CREATURES.SPECIES.PUFT.NAME + "\n\nIf incubated, it will hatch into a " + CREATURES.SPECIES.PUFT.BABY.NAME;
 
-				public static LocString RECIPEDESC = string.Empty;
+				public static LocString RECIPEDESC = "An egg laid by a " + CREATURES.SPECIES.PUFT.NAME;
 			}
 
 			public class MEAT

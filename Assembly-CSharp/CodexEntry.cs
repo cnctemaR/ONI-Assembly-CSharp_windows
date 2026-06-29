@@ -25,6 +25,24 @@ public class CodexEntry : YamlIO<CodexEntry>
 
 	public List<ContentContainer> contentContainers { get; set; }
 
+	public CodexWidget GetFirstWidget()
+	{
+		for (int i = 0; i < this.contentContainers.Count; i++)
+		{
+			if (this.contentContainers[i].content != null)
+			{
+				for (int j = 0; j < this.contentContainers[i].content.Count; j++)
+				{
+					if (this.contentContainers[i].content[j] != null)
+					{
+						return this.contentContainers[i].content[j];
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	public string id { get; set; }
 
 	public string parentId { get; set; }
@@ -43,5 +61,11 @@ public class CodexEntry : YamlIO<CodexEntry>
 
 	public bool disabled { get; set; }
 
+	public List<SubEntry> subEntries = new List<SubEntry>();
+
+	public Color iconColor = Color.white;
+
 	public bool searchOnly;
+
+	public int customContentLength;
 }

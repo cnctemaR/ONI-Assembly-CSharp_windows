@@ -72,7 +72,7 @@ public class SolidConduitSerializer : KMonoBehaviour, ISaveLoadableDetails
 		{
 			int num2 = reader.ReadInt32();
 			string text = reader.ReadKleiString();
-			Tag tag = TagManager.Create(text, null);
+			Tag tag = TagManager.Create(text);
 			SaveLoadRoot saveLoadRoot = SaveLoadRoot.Load(tag, reader, false);
 			if (saveLoadRoot != null)
 			{

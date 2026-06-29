@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 
@@ -12,7 +11,6 @@ public class JuniorMiner : RoleConfig
 		base.description = DUPLICANTS.ROLES.JUNIOR_MINER.DESCRIPTION;
 		base.roleGroup = "Mining";
 		base.hat = Game.Instance.roleManager.GetHat(JuniorMiner.ID);
-		this.favoredChoreTypes = new List<ChoreType> { Db.Get().ChoreTypes.Dig };
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Digging };
 		base.perks = new RolePerk[]
 		{

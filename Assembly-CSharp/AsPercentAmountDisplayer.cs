@@ -65,6 +65,10 @@ public class AsPercentAmountDisplayer : IAmountDisplayer, IAttributeFormatter
 
 	public string GetFormattedModifier(AttributeModifier modifier, GameObject parent_instance)
 	{
+		if (modifier.IsMultiplier)
+		{
+			return GameUtil.GetFormattedPercent(modifier.Value * 100f, GameUtil.TimeSlice.None);
+		}
 		return this.formatter.GetFormattedModifier(modifier, parent_instance);
 	}
 

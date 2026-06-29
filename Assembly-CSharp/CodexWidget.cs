@@ -18,6 +18,21 @@ public class CodexWidget : YamlIO<CodexWidget>
 	{
 	}
 
+	public CodexWidget(CodexWidget.ContentType type, Dictionary<string, string> properties, Dictionary<string, object> objectProperties)
+	{
+		this.type = type;
+		this.properties = properties;
+		this.objectProperties = objectProperties;
+		if (!properties.ContainsKey("preferredWidth"))
+		{
+			properties["preferredWidth"] = "-1";
+		}
+		if (!properties.ContainsKey("preferredHeight"))
+		{
+			properties["preferredHeight"] = "-1";
+		}
+	}
+
 	public CodexWidget(CodexWidget.ContentType type, Dictionary<string, string> properties)
 	{
 		this.type = type;

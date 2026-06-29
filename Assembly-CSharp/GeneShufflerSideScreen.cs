@@ -14,6 +14,11 @@ public class GeneShufflerSideScreen : SideScreenContent
 		this.Refresh();
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<GeneShuffler>() != null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		GeneShuffler component = target.GetComponent<GeneShuffler>();

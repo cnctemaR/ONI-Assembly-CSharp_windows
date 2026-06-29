@@ -6,15 +6,16 @@ using UnityEngine.UI;
 
 public class FilterSideScreen : SideScreenContent
 {
-	public FilterSideScreen.elementState FilterElementState { get; private set; }
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.SetFilterType();
 		this.filterRowMap.Clear();
 		this.PopulateElements();
-		this.ShowElementsByState();
+	}
+
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<Filterable>() != null;
 	}
 
 	protected override void OnShow(bool show)
@@ -24,21 +25,20 @@ public class FilterSideScreen : SideScreenContent
 		{
 			return;
 		}
-		this.SetFilterType();
-		if (DetailsScreen.Instance.target == null || DetailsScreen.Instance.target.GetComponent<ElementFilter>() == null)
+		if (DetailsScreen.Instance.target == null)
 		{
 			return;
 		}
-		Element element = ElementLoader.FindElementByHash(SimHashes.Void);
-		ElementFilter component = DetailsScreen.Instance.target.GetComponent<ElementFilter>();
-		if (component != null)
+		Filterable component = DetailsScreen.Instance.target.GetComponent<Filterable>();
+		if (component == null)
 		{
-			element = ElementLoader.FindElementByHash(DetailsScreen.Instance.target.GetComponent<ElementFilter>().FilteredElement);
+			return;
 		}
-		this.SetFilterElement(element);
-		this.ShowElementsByState();
 		this.selectElementHeaderLabel.text = UI.UISIDESCREENS.FILTERSIDESCREEN.SELECTELEMENTHEADER;
-		this.everythingElseHeaderLabel.text = ((this.FilterElementState != FilterSideScreen.elementState.gas) ? UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.LIQUID : UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.GAS);
+		this.everythingElseHeaderLabel.text = ((component.filterElementState != Filterable.ElementState.Gas) ? UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.LIQUID : UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.GAS);
+		Element element = ((!component.SelectedTag.IsValid) ? null : ElementLoader.GetElement(component.SelectedTag));
+		this.SetFilterElement(element);
+		this.Configure(component);
 	}
 
 	private void PopulateElements()
@@ -57,62 +57,37 @@ public class FilterSideScreen : SideScreenContent
 		}
 	}
 
-	private void SetFilterType()
+	private void Configure(Filterable filterable)
 	{
-		GasFilterable component = DetailsScreen.Instance.target.GetComponent<GasFilterable>();
-		LiquidFilterable component2 = DetailsScreen.Instance.target.GetComponent<LiquidFilterable>();
-		if (component != null)
-		{
-			this.outputIcon.color = this.outputIconColor;
-			this.everythingElseIcon.color = this.colorGas;
-			this.FilterElementState = FilterSideScreen.elementState.gas;
-		}
-		else if (component2 != null)
-		{
-			this.outputIcon.color = this.outputIconColor;
-			this.everythingElseIcon.color = this.colorLiquid;
-			this.FilterElementState = FilterSideScreen.elementState.liquid;
-		}
-	}
-
-	private void ShowElementsByState()
-	{
-		this.SetFilterType();
+		IList<Tag> tagOptions = filterable.GetTagOptions();
 		foreach (KeyValuePair<Element, FilterSideScreenRow> keyValuePair in this.filterRowMap)
 		{
-			bool flag = false;
-			if (keyValuePair.Key.IsGas && this.FilterElementState == FilterSideScreen.elementState.gas)
-			{
-				flag = true;
-			}
-			else if (keyValuePair.Key.IsLiquid && this.FilterElementState == FilterSideScreen.elementState.liquid)
-			{
-				flag = true;
-			}
+			Element key = keyValuePair.Key;
+			bool flag = tagOptions.Contains(key.tag);
 			keyValuePair.Value.gameObject.SetActive(flag);
 		}
 	}
 
 	private void SetFilterElement(Element element)
 	{
-		this.currentSelectionLabel.text = string.Format((this.FilterElementState != FilterSideScreen.elementState.gas) ? UI.UISIDESCREENS.FILTERSIDESCREEN.FILTEREDELEMENT.LIQUID : UI.UISIDESCREENS.FILTERSIDESCREEN.FILTEREDELEMENT.GAS, UI.UISIDESCREENS.FILTERSIDESCREEN.NOELEMENTSELECTED);
-		if (DetailsScreen.Instance.target.GetComponent<ElementFilter>().filterable != null)
+		Filterable component = DetailsScreen.Instance.target.GetComponent<Filterable>();
+		if (component == null)
 		{
-			DetailsScreen.Instance.target.GetComponent<ElementFilter>().filterable.SelectedTag = element.tag;
+			return;
 		}
-		foreach (KeyValuePair<Element, FilterSideScreenRow> keyValuePair in this.filterRowMap)
+		LocString locString = ((component.filterElementState != Filterable.ElementState.Gas) ? UI.UISIDESCREENS.FILTERSIDESCREEN.FILTEREDELEMENT.LIQUID : UI.UISIDESCREENS.FILTERSIDESCREEN.FILTEREDELEMENT.GAS);
+		this.currentSelectionLabel.text = string.Format(locString, UI.UISIDESCREENS.FILTERSIDESCREEN.NOELEMENTSELECTED);
+		if (element != null)
 		{
-			if (keyValuePair.Key == element)
+			component.SelectedTag = element.tag;
+			foreach (KeyValuePair<Element, FilterSideScreenRow> keyValuePair in this.filterRowMap)
 			{
-				keyValuePair.Value.SetSelected(true);
-				if (element.tag != ElementLoader.FindElementByHash(SimHashes.Void).tag && element.tag != ElementLoader.FindElementByHash(SimHashes.Vacuum).tag)
+				bool flag = keyValuePair.Key == element;
+				keyValuePair.Value.SetSelected(flag);
+				if (flag && element.id != SimHashes.Void && element.id != SimHashes.Vacuum)
 				{
-					this.currentSelectionLabel.text = string.Format((this.FilterElementState != FilterSideScreen.elementState.gas) ? UI.UISIDESCREENS.FILTERSIDESCREEN.FILTEREDELEMENT.LIQUID : UI.UISIDESCREENS.FILTERSIDESCREEN.FILTEREDELEMENT.GAS, element.name);
+					this.currentSelectionLabel.text = string.Format(locString, element.name);
 				}
-			}
-			else
-			{
-				keyValuePair.Value.SetSelected(false);
 			}
 		}
 	}
@@ -129,20 +104,7 @@ public class FilterSideScreen : SideScreenContent
 
 	public LocText selectElementHeaderLabel;
 
-	private Color outputIconColor = BuildingCellVisualizer.secondOutputColour;
-
-	private Color colorLiquid = Color.white;
-
-	private Color colorGas = Color.white;
-
-	public Dictionary<Element, FilterSideScreenRow> filterRowMap = new Dictionary<Element, FilterSideScreenRow>();
-
 	public LocText currentSelectionLabel;
 
-	public enum elementState
-	{
-		solid,
-		liquid,
-		gas
-	}
+	public Dictionary<Element, FilterSideScreenRow> filterRowMap = new Dictionary<Element, FilterSideScreenRow>();
 }

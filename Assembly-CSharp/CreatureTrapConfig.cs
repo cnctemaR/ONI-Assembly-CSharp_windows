@@ -18,7 +18,7 @@ public class CreatureTrapConfig : IBuildingConfig
 		storage.allowItemRemoval = true;
 		storage.SetDefaultStoredItemModifiers(CreatureTrapConfig.StoredItemModifiers);
 		storage.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_restrain_creature_kanim") };
-		go.AddOrGet<Trap>();
+		go.AddOrGet<Trap>().trappableCreatures = new Tag[] { GameTags.Creatures.GroundBased };
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

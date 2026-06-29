@@ -60,6 +60,7 @@ public static class GarbageProfiler
 		Array.Sort<MemorySnapshot.TypeData>(array, 0, array.Length, new GarbageProfiler.InstanceCountComparer());
 		using (StreamWriter streamWriter = new StreamWriter(GarbageProfiler.GetFileName("memory_instances")))
 		{
+			streamWriter.WriteLine("Delta,Instances,NumArrayEntries,Type Name");
 			foreach (MemorySnapshot.TypeData typeData in array)
 			{
 				if (typeData.instanceCount != 0)
@@ -75,7 +76,9 @@ public static class GarbageProfiler
 						num,
 						",",
 						typeData.instanceCount,
-						", \"",
+						",",
+						typeData.numArrayEntries,
+						",\"",
 						typeData.type.FullName,
 						"\""
 					}));
@@ -86,6 +89,7 @@ public static class GarbageProfiler
 		{
 			foreach (MemorySnapshot.TypeData typeData3 in array)
 			{
+				streamWriter2.WriteLine("Delta,Count,Type Hierarchy");
 				if (typeData3.instanceCount != 0)
 				{
 					foreach (KeyValuePair<MemorySnapshot.HierarchyNode, int> keyValuePair in typeData3.hierarchies)

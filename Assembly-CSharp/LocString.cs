@@ -51,6 +51,11 @@ public class LocString
 		this.key = key;
 	}
 
+	public string Replace(string search, string replacement)
+	{
+		return this.ToString().Replace(search, replacement);
+	}
+
 	public static void CreateLocStringKeys(Type type, string parent_path = "STRINGS.")
 	{
 		FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);

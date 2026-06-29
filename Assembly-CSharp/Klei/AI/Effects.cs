@@ -108,6 +108,10 @@ namespace Klei.AI
 						}
 					}
 					base.Trigger(-1901442097, effect);
+					if (effect.triggerFloatingText && PopFXManager.Instance != null)
+					{
+						PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, effect.Name, base.transform, 1.5f, false);
+					}
 				}
 				effectInstance.timeRemaining = effect.duration;
 				return effectInstance;

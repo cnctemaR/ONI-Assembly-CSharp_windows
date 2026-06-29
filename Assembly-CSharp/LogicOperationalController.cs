@@ -54,4 +54,6 @@ public class LogicOperationalController : KMonoBehaviour
 	private static Operational.Flag logicOperationalFlag = new Operational.Flag("LogicOperational", Operational.Flag.Type.Requirement);
 
 	private static StatusItem infoStatusItem;
+
+	public static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
 }

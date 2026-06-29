@@ -5,6 +5,16 @@ using UnityEngine;
 
 public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesInstance>
 {
+	private static void RefreshPositionPercent(StandardCropPlant.StatesInstance smi, float dt)
+	{
+		StandardCropPlant.RefreshPositionPercent(smi);
+	}
+
+	private static void RefreshPositionPercent(StandardCropPlant.StatesInstance smi)
+	{
+		smi.master.animController.SetPositionPercent(smi.master.growing.PercentOfCurrentHarvest());
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -107,14 +117,9 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			});
 			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.idle).ToggleComponent<Growing>();
 			this.alive.idle.EventTransition(GameHashes.Wilt, this.alive.wilting, (StandardCropPlant.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Grow, this.alive.pre_fruiting, (StandardCropPlant.StatesInstance smi) => smi.master.growing.ReachedNextHarvest()).PlayAnim("grow", KAnim.PlayMode.Paused)
-				.Enter(delegate(StandardCropPlant.StatesInstance smi)
-				{
-					smi.master.animController.SetPositionPercent(smi.master.growing.PercentOfCurrentHarvest());
-				})
-				.Update("CheckNotGrown", delegate(StandardCropPlant.StatesInstance smi, float dt)
-				{
-					smi.master.animController.SetPositionPercent(smi.master.growing.PercentOfCurrentHarvest());
-				}, UpdateRate.SIM_4000ms, false);
+				.Enter(new StateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State.Callback(StandardCropPlant.RefreshPositionPercent))
+				.Update(new Action<StandardCropPlant.StatesInstance, float>(StandardCropPlant.RefreshPositionPercent), UpdateRate.SIM_4000ms, false)
+				.EventHandler(GameHashes.ConsumePlant, new StateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State.Callback(StandardCropPlant.RefreshPositionPercent));
 			this.alive.pre_fruiting.PlayAnim("grow_pst", KAnim.PlayMode.Once).EventTransition(GameHashes.AnimQueueComplete, this.alive.fruiting, null);
 			this.alive.wilting.PlayAnim("wilt", KAnim.PlayMode.Loop, (StandardCropPlant.StatesInstance smi) => smi.WiltStage().ToString()).EventTransition(GameHashes.WiltRecover, this.alive.idle, (StandardCropPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Harvest, this.alive.fruiting.fruiting_harvest, null);
 			this.alive.fruiting.DefaultState(this.alive.fruiting.fruiting_idle).EventTransition(GameHashes.Wilt, this.alive.wilting, null).EventTransition(GameHashes.Harvest, this.alive.fruiting.fruiting_harvest, null);

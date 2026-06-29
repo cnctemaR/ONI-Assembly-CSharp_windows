@@ -586,7 +586,7 @@ public class Scenario : KMonoBehaviour
 	public static GameObject SpawnPrefab(int RootCell, int x, int y, string name, Grid.SceneLayer scene_layer = Grid.SceneLayer.Ore, Folder folder = Folder.Entities)
 	{
 		int num = Grid.OffsetCell(RootCell, x, y);
-		Tag tag = TagManager.Create(name, null);
+		Tag tag = TagManager.Create(name);
 		GameObject prefab = Assets.GetPrefab(tag);
 		if (prefab == null)
 		{

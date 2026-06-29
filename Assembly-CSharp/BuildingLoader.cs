@@ -131,12 +131,6 @@ public class BuildingLoader : KMonoBehaviour
 		return t;
 	}
 
-	private static void CopyBuildingCellVisualizer(GameObject src, BuildingCellVisualizer target)
-	{
-		BuildingCellVisualizer component = src.GetComponent<BuildingCellVisualizer>();
-		target.secondOutputOffset = component.secondOutputOffset;
-	}
-
 	public static KPrefabID AddID(GameObject go, string str)
 	{
 		KPrefabID kprefabID = go.GetComponent<KPrefabID>();
@@ -156,11 +150,7 @@ public class BuildingLoader : KMonoBehaviour
 		component.SetName(def.Name);
 		gameObject.GetComponent<PrimaryElement>().MassPerUnit = def.Mass[0];
 		KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID + ((!isRelocating) ? "UnderConstruction" : "UnderRelocation"));
-		BuildingCellVisualizer buildingCellVisualizer = BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, BuildingCellVisualizer.CheckRequiresComponent(def));
-		if (buildingCellVisualizer != null)
-		{
-			BuildingLoader.CopyBuildingCellVisualizer(def.BuildingComplete, buildingCellVisualizer);
-		}
+		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, BuildingCellVisualizer.CheckRequiresComponent(def));
 		Constructable component2 = gameObject.GetComponent<Constructable>();
 		component2.isRelocating = isRelocating;
 		component2.SetWorkTime((!isRelocating) ? def.ConstructionTime : 4f);
@@ -175,6 +165,10 @@ public class BuildingLoader : KMonoBehaviour
 		BuildingLoader.UpdateComponentRequirement<Vent>(gameObject, false);
 		bool flag = def.BuildingComplete.GetComponent<AnimTileable>() != null;
 		BuildingLoader.UpdateComponentRequirement<AnimTileable>(gameObject, flag);
+		if (def.RequiresPowerInput)
+		{
+			GeneratedBuildings.RegisterLogicPorts(gameObject, LogicOperationalController.INPUT_PORTS);
+		}
 		Assets.AddPrefab(kprefabID);
 		gameObject.PreInit();
 		return gameObject;
@@ -262,6 +256,11 @@ public class BuildingLoader : KMonoBehaviour
 			{
 				gameObject.AddComponent<Relocatable>();
 			}
+			if (def.RequiresPowerInput)
+			{
+				GeneratedBuildings.RegisterLogicPorts(gameObject, LogicOperationalController.INPUT_PORTS);
+				gameObject.AddOrGet<LogicOperationalController>();
+			}
 			BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, BuildingCellVisualizer.CheckRequiresComponent(def));
 			LoopingSounds component4 = gameObject.GetComponent<LoopingSounds>();
 			if (component4 == null)
@@ -307,15 +306,15 @@ public class BuildingLoader : KMonoBehaviour
 		kprefabID.defaultLayer = num;
 		KSelectable component2 = gameObject.GetComponent<KSelectable>();
 		component2.SetName(def.Name);
-		BuildingCellVisualizer buildingCellVisualizer = BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, BuildingCellVisualizer.CheckRequiresComponent(def));
-		if (buildingCellVisualizer != null)
-		{
-			BuildingLoader.CopyBuildingCellVisualizer(def.BuildingComplete, buildingCellVisualizer);
-		}
+		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, BuildingCellVisualizer.CheckRequiresComponent(def));
 		KAnimGraphTileVisualizer component3 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
 		if (component3 != null)
 		{
 			global::UnityEngine.Object.DestroyImmediate(component3);
+		}
+		if (def.RequiresPowerInput)
+		{
+			GeneratedBuildings.RegisterLogicPorts(gameObject, LogicOperationalController.INPUT_PORTS);
 		}
 		gameObject.PreInit();
 		Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());

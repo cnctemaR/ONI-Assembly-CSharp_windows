@@ -24,7 +24,7 @@ public class TileScreen : KScreen
 		mousePosition.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
 		Vector3 vector = Camera.main.ScreenToWorldPoint(mousePosition);
 		int num = Grid.PosToCell(vector);
-		if (Grid.IsValidCell(num) && (float)Grid.Visible[num] + PropertyTextures.FogOfWarScale != 0f)
+		if (Grid.IsValidCell(num) && Grid.IsVisible(num))
 		{
 			Element element = Grid.Element[num];
 			this.nameLabel.text = element.name;

@@ -15,12 +15,52 @@ public class RationMonitor : GameStateMachine<RationMonitor, RationMonitor.Insta
 		}).ParamTransition<float>(this.rationsAteToday, this.rationsavailable, (RationMonitor.Instance smi, float p) => smi.HasRationsAvailable())
 			.ParamTransition<float>(this.rationsAteToday, this.outofrations, (RationMonitor.Instance smi, float p) => !smi.HasRationsAvailable());
 		this.rationsavailable.DefaultState(this.rationsavailable.noediblesavailable);
-		this.rationsavailable.noediblesavailable.InitializeStates(this.masterTarget, Db.Get().DuplicantStatusItems.NoRationsAvailable).EventTransition(GameHashes.ColonyHasRationsChanged, (RationMonitor.Instance smi) => SaveGame.Instance, this.rationsavailable.ediblesunreachable, (RationMonitor.Instance smi) => smi.AreThereAnyEdibles());
-		this.rationsavailable.ediblesunreachable.InitializeStates(this.masterTarget, Db.Get().DuplicantStatusItems.RationsUnreachable).EventTransition(GameHashes.ColonyHasRationsChanged, (RationMonitor.Instance smi) => SaveGame.Instance, this.rationsavailable.noediblesavailable, (RationMonitor.Instance smi) => !smi.AreThereAnyEdibles()).EventTransition(GameHashes.ClosestEdibleChanged, this.rationsavailable.edibleavailable, (RationMonitor.Instance smi) => smi.IsEdibleAvailable());
+		this.rationsavailable.noediblesavailable.InitializeStates(this.masterTarget, Db.Get().DuplicantStatusItems.NoRationsAvailable).EventTransition(GameHashes.ColonyHasRationsChanged, new Func<RationMonitor.Instance, KMonoBehaviour>(RationMonitor.GetSaveGame), this.rationsavailable.ediblesunreachable, new StateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(RationMonitor.AreThereAnyEdibles));
+		this.rationsavailable.ediblereachablebutnotpermitted.InitializeStates(this.masterTarget, Db.Get().DuplicantStatusItems.RationsNotPermitted).EventTransition(GameHashes.ColonyHasRationsChanged, new Func<RationMonitor.Instance, KMonoBehaviour>(RationMonitor.GetSaveGame), this.rationsavailable.noediblesavailable, new StateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(RationMonitor.AreThereNoEdibles)).EventTransition(GameHashes.ClosestEdibleChanged, this.rationsavailable.ediblesunreachable, new StateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(RationMonitor.NotIsEdibleInReachButNotPermitted));
+		this.rationsavailable.ediblesunreachable.InitializeStates(this.masterTarget, Db.Get().DuplicantStatusItems.RationsUnreachable).EventTransition(GameHashes.ColonyHasRationsChanged, new Func<RationMonitor.Instance, KMonoBehaviour>(RationMonitor.GetSaveGame), this.rationsavailable.noediblesavailable, new StateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(RationMonitor.AreThereNoEdibles)).EventTransition(GameHashes.ClosestEdibleChanged, this.rationsavailable.edibleavailable, new StateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(RationMonitor.IsEdibleAvailable))
+			.EventTransition(GameHashes.ClosestEdibleChanged, this.rationsavailable.ediblereachablebutnotpermitted, new StateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(RationMonitor.IsEdibleInReachButNotPermitted));
 		this.rationsavailable.edibleavailable.ToggleChore((RationMonitor.Instance smi) => new EatChore(smi.master), this.rationsavailable.noediblesavailable).DefaultState(this.rationsavailable.edibleavailable.readytoeat);
 		this.rationsavailable.edibleavailable.readytoeat.EventTransition(GameHashes.ClosestEdibleChanged, this.rationsavailable.noediblesavailable, null).EventTransition(GameHashes.BeginChore, this.rationsavailable.edibleavailable.eating, (RationMonitor.Instance smi) => smi.IsEating());
 		this.rationsavailable.edibleavailable.eating.DoNothing();
 		this.outofrations.InitializeStates(this.masterTarget, Db.Get().DuplicantStatusItems.DailyRationLimitReached);
+	}
+
+	private static bool AreThereNoEdibles(RationMonitor.Instance smi)
+	{
+		return !RationMonitor.AreThereAnyEdibles(smi);
+	}
+
+	private static bool AreThereAnyEdibles(RationMonitor.Instance smi)
+	{
+		if (SaveGame.Instance != null)
+		{
+			ColonyRationMonitor.Instance smi2 = SaveGame.Instance.GetSMI<ColonyRationMonitor.Instance>();
+			if (smi2 != null)
+			{
+				return !smi2.IsOutOfRations();
+			}
+		}
+		return false;
+	}
+
+	private static KMonoBehaviour GetSaveGame(RationMonitor.Instance smi)
+	{
+		return SaveGame.Instance;
+	}
+
+	private static bool IsEdibleAvailable(RationMonitor.Instance smi)
+	{
+		return smi.GetEdible() != null;
+	}
+
+	private static bool NotIsEdibleInReachButNotPermitted(RationMonitor.Instance smi)
+	{
+		return !RationMonitor.IsEdibleInReachButNotPermitted(smi);
+	}
+
+	private static bool IsEdibleInReachButNotPermitted(RationMonitor.Instance smi)
+	{
+		return smi.GetComponent<Sensors>().GetSensor<ClosestEdibleSensor>().edibleInReachButNotPermitted;
 	}
 
 	public StateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.FloatParameter rationsAteToday;
@@ -40,6 +80,8 @@ public class RationMonitor : GameStateMachine<RationMonitor, RationMonitor.Insta
 	{
 		public GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.HungrySubState noediblesavailable;
 
+		public GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.HungrySubState ediblereachablebutnotpermitted;
+
 		public GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.HungrySubState ediblesunreachable;
 
 		public RationMonitor.EdibleAvailablestate edibleavailable;
@@ -56,24 +98,6 @@ public class RationMonitor : GameStateMachine<RationMonitor, RationMonitor.Insta
 		public Edible GetEdible()
 		{
 			return base.GetComponent<Sensors>().GetSensor<ClosestEdibleSensor>().GetEdible();
-		}
-
-		public bool AreThereAnyEdibles()
-		{
-			if (SaveGame.Instance != null)
-			{
-				ColonyRationMonitor.Instance smi = SaveGame.Instance.GetSMI<ColonyRationMonitor.Instance>();
-				if (smi != null)
-				{
-					return !smi.IsOutOfRations();
-				}
-			}
-			return false;
-		}
-
-		public bool IsEdibleAvailable()
-		{
-			return this.GetEdible() != null;
 		}
 
 		public bool HasRationsAvailable()

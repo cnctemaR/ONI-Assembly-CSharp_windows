@@ -87,7 +87,10 @@ public class ManualGenerator : Workable, ISliderControl
 		base.OnSpawn();
 		base.SetWorkTime(float.PositiveInfinity);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		component.HideSymbols(true, ManualGenerator.symbol_names);
+		foreach (KAnimHashedString kanimHashedString in ManualGenerator.symbol_names)
+		{
+			component.SetSymbolVisiblity(kanimHashedString, false);
+		}
 		Building component2 = base.GetComponent<Building>();
 		this.powerCell = component2.GetPowerOutputCell();
 		this.OnActiveChanged(null);
@@ -233,15 +236,7 @@ public class ManualGenerator : Workable, ISliderControl
 
 	private ManualGenerator.GeneratePowerSM.Instance smi;
 
-	private static readonly KAnimHashedString[] symbol_names = new KAnimHashedString[]
-	{
-		new KAnimHashedString("meter"),
-		new KAnimHashedString("meter_target"),
-		new KAnimHashedString("meter_fill"),
-		new KAnimHashedString("meter_frame"),
-		new KAnimHashedString("meter_light"),
-		new KAnimHashedString("meter_tubing")
-	};
+	private static readonly KAnimHashedString[] symbol_names = new KAnimHashedString[] { "meter", "meter_target", "meter_fill", "meter_frame", "meter_light", "meter_tubing" };
 
 	public class GeneratePowerSM : GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance>
 	{

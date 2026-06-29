@@ -13,12 +13,41 @@ public class AirborneCreatureLureConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
+	public override void ConfigureBuildingTemplate(GameObject prefab, Tag prefab_tag)
 	{
-		CreatureLure creatureLure = go.AddOrGet<CreatureLure>();
-		creatureLure.lurePoints = new CellOffset[]
+		CreatureLure creatureLure = prefab.AddOrGet<CreatureLure>();
+		creatureLure.baitStorage = prefab.AddOrGet<Storage>();
+		creatureLure.baitTypes = new List<Tag>
 		{
-			new CellOffset(0, 5),
+			GameTags.SlimeMold,
+			GameTags.Phosphorite
+		};
+		creatureLure.baitStorage.storageFilters = creatureLure.baitTypes;
+		creatureLure.baitStorage.allowItemRemoval = false;
+		creatureLure.baitStorage.SetDefaultStoredItemModifiers(Storage.StandardFabricatorStorage);
+		prefab.AddOrGet<Operational>();
+	}
+
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, AirborneCreatureLureConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, AirborneCreatureLureConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureComplete(GameObject prefab)
+	{
+		BuildingTemplates.DoPostConfigure(prefab);
+		SymbolOverrideControllerUtil.AddToPrefab(prefab);
+		GeneratedBuildings.RegisterLogicPorts(prefab, AirborneCreatureLureConfig.INPUT_PORTS);
+		prefab.AddOrGet<LogicOperationalController>();
+		Lure.Def def = prefab.AddOrGetDef<Lure.Def>();
+		def.lurePoints = new CellOffset[]
+		{
+			new CellOffset(0, 0),
 			new CellOffset(-1, 4),
 			new CellOffset(0, 4),
 			new CellOffset(1, 4),
@@ -32,33 +61,7 @@ public class AirborneCreatureLureConfig : IBuildingConfig
 			new CellOffset(1, 2),
 			new CellOffset(0, 1)
 		};
-		creatureLure.baitStorage = go.AddOrGet<Storage>();
-		creatureLure.baitTypes = new List<Tag>
-		{
-			GameTags.SlimeMold,
-			GameTags.Phosphorite
-		};
-		creatureLure.baitStorage.storageFilters = creatureLure.baitTypes;
-		creatureLure.baitStorage.allowItemRemoval = false;
-		creatureLure.baitStorage.SetDefaultStoredItemModifiers(Storage.StandardFabricatorStorage);
-		go.AddOrGet<Operational>();
-	}
-
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, AirborneCreatureLureConfig.INPUT_PORTS);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, AirborneCreatureLureConfig.INPUT_PORTS);
-	}
-
-	public override void DoPostConfigureComplete(GameObject go)
-	{
-		BuildingTemplates.DoPostConfigure(go);
-		GeneratedBuildings.RegisterLogicPorts(go, AirborneCreatureLureConfig.INPUT_PORTS);
-		go.AddOrGet<LogicOperationalController>();
+		def.radius = 32;
 	}
 
 	public const string ID = "AirborneCreatureLure";

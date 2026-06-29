@@ -93,15 +93,51 @@ namespace TUNING
 			}),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Food, new string[]
 			{
-				"MicrobeMusher", "CookingStation", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox", "Refrigerator", "CreatureDeliveryPoint", "CreatureFeeder", "EggIncubator",
-				"CreatureTrap", "AirborneCreatureLure"
+				"MicrobeMusher", "CookingStation", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox", "Refrigerator", "CreatureDeliveryPoint", "FishDeliveryPoint", "CreatureFeeder",
+				"FishFeeder", "EggIncubator", "CreatureTrap", "FishTrap", "AirborneCreatureLure"
 			}),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Plumbing, new string[]
 			{
-				"Outhouse", "FlushToilet", "Shower", "LiquidPumpingStation", "BottleEmptier", "LiquidConduit", "InsulatedLiquidConduit", "LiquidConduitBridge", "LiquidPump", "LiquidMiniPump",
-				"LiquidVent", "LiquidFilter", "LiquidValve", "LiquidLogicValve"
+				"Outhouse",
+				"FlushToilet",
+				"Shower",
+				"LiquidPumpingStation",
+				"BottleEmptier",
+				"LiquidConduit",
+				"InsulatedLiquidConduit",
+				"LiquidConduitRadiant",
+				"LiquidConduitBridge",
+				"LiquidConduitPreferentialFlow",
+				"LiquidConduitOverflow",
+				"LiquidPump",
+				"LiquidMiniPump",
+				"LiquidVent",
+				"LiquidFilter",
+				"LiquidValve",
+				"LiquidLogicValve",
+				LiquidConduitElementSensorConfig.ID,
+				LiquidConduitDiseaseSensorConfig.ID,
+				LiquidConduitTemperatureSensorConfig.ID
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.HVAC, new string[] { "GasConduit", "InsulatedGasConduit", "GasConduitBridge", "GasPump", "GasMiniPump", "GasVent", "GasVentHighPressure", "GasFilter", "GasValve", "GasLogicValve" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.HVAC, new string[]
+			{
+				"GasConduit",
+				"InsulatedGasConduit",
+				"GasConduitRadiant",
+				"GasConduitBridge",
+				"GasConduitPreferentialFlow",
+				"GasConduitOverflow",
+				"GasPump",
+				"GasMiniPump",
+				"GasVent",
+				"GasVentHighPressure",
+				"GasFilter",
+				"GasValve",
+				"GasLogicValve",
+				GasConduitElementSensorConfig.ID,
+				GasConduitDiseaseSensorConfig.ID,
+				GasConduitTemperatureSensorConfig.ID
+			}),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Refining, new string[] { "Compost", "WaterPurifier", "FertilizerMaker", "AlgaeDistillery", "RockCrusher", "MetalRefinery", "OilRefinery", "Polymerizer" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Medical, new string[] { "WashBasin", "WashSink", "HandSanitizer", "Apothecary", "MedicalCot", "MedicalBed", "Grave" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Furniture, new string[]
@@ -117,7 +153,11 @@ namespace TUNING
 				"FloorLamp",
 				"CeilingLight"
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Equipment, new string[] { "ResearchCenter", "AdvancedResearchCenter", "PowerControlStation", "FarmStation", "RanchStation", "RoleStation", "ClothingFabricator", "SuitFabricator", "SuitMarker", "SuitLocker" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Equipment, new string[]
+			{
+				"ResearchCenter", "AdvancedResearchCenter", "PowerControlStation", "FarmStation", "RanchStation", "ShearingStation", "RoleStation", "ClothingFabricator", "SuitFabricator", "SuitMarker",
+				"SuitLocker"
+			}),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Utilities, new string[] { "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Automation, new string[]
 			{
@@ -129,12 +169,14 @@ namespace TUNING
 				"LogicGateNOT",
 				"LogicGateBUFFER",
 				"LogicGateFILTER",
+				LogicMemoryConfig.ID,
 				LogicSwitchConfig.ID,
 				LogicPressureSensorGasConfig.ID,
 				LogicPressureSensorLiquidConfig.ID,
 				LogicTemperatureSensorConfig.ID,
 				LogicTimeOfDaySensorConfig.ID,
 				LogicDiseaseSensorConfig.ID,
+				LogicElementSensorGasConfig.ID,
 				"FloorSwitch",
 				"Checkpoint"
 			}),
@@ -233,6 +275,9 @@ namespace TUNING
 			"Vent",
 			"TilePOI",
 			"LogicPorts",
+			"Capturable",
+			"Trappable",
+			"ScaleGrowthMonitor",
 			"DecorProvider"
 		};
 

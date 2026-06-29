@@ -420,26 +420,6 @@ public static class Util
 		return Regex.Replace(original, "<[^>]*>([^<]*)<[^>]*>", "$1");
 	}
 
-	public static bool Contains(this Bounds parentBounds, Bounds queryBounds)
-	{
-		return parentBounds.Contains(queryBounds.max) && parentBounds.Contains(queryBounds.min);
-	}
-
-	public static Bounds DeepRenderBounds(GameObject obj)
-	{
-		Bounds bounds = default(Bounds);
-		Renderer[] componentsInChildren = obj.transform.GetComponentsInChildren<Renderer>();
-		if (componentsInChildren.Length >= 1)
-		{
-			bounds = componentsInChildren[0].bounds;
-			for (int i = 1; i < componentsInChildren.Length; i++)
-			{
-				bounds.Encapsulate(componentsInChildren[i].bounds);
-			}
-		}
-		return bounds;
-	}
-
 	public static GameObject FindChildGameObject(this Transform root, string name)
 	{
 		if (root == null)
@@ -476,102 +456,11 @@ public static class Util
 		return gameObject;
 	}
 
-	public static bool IsChildOf(this GameObject testChild, GameObject testParent)
-	{
-		if (testChild == testParent)
-		{
-			return true;
-		}
-		Transform transform = testChild.transform;
-		while (transform.parent != null)
-		{
-			if (transform.parent.gameObject == testParent)
-			{
-				return true;
-			}
-			transform = transform.parent;
-		}
-		return false;
-	}
-
-	public static bool HasMethod(this object obj, string method)
-	{
-		return obj.GetType().GetMethod(method) != null;
-	}
-
-	public static GameObject CreateFolder(string name, Component c)
-	{
-		return Util.CreateFolder(name, c.gameObject);
-	}
-
-	public static GameObject CreateFolder(string name, GameObject parent)
-	{
-		return new GameObject
-		{
-			name = name,
-			transform = 
-			{
-				parent = parent.transform
-			}
-		};
-	}
-
-	public static void ZeroTransform(Transform child)
-	{
-		child.SetLocalPosition(Vector3.zero);
-		child.localRotation = Quaternion.identity;
-		child.localScale = Vector3.one;
-	}
-
-	public static void Parent(GameObject child, GameObject parent)
-	{
-		child.transform.parent = parent.transform;
-	}
-
-	public static GameObject GetSubFolder(GameObject go, string name)
-	{
-		if (go != null)
-		{
-			IEnumerator enumerator = go.transform.GetEnumerator();
-			try
-			{
-				while (enumerator.MoveNext())
-				{
-					object obj = enumerator.Current;
-					Transform transform = (Transform)obj;
-					if (transform.gameObject.name == name)
-					{
-						return transform.gameObject;
-					}
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
-				}
-			}
-		}
-		return null;
-	}
-
 	public static void Reset(Transform transform)
 	{
 		transform.SetLocalPosition(Vector3.zero);
 		transform.localRotation = Quaternion.identity;
 		transform.localScale = Vector3.one;
-	}
-
-	public static int RandomInt(int b, int e)
-	{
-		return Util.random.Next(b, e);
-	}
-
-	public static int RandomInt()
-	{
-		return Util.random.Next();
 	}
 
 	public static float GaussianRandom(float mu = 0f, float sigma = 1f)
@@ -586,20 +475,6 @@ public static class Util
 	public static void Shuffle<T>(this IList<T> list)
 	{
 		list.ShuffleSeeded<T>(Util.random);
-	}
-
-	public static void CopyTransform(Transform source, Transform dest)
-	{
-		dest.SetLocalPosition(source.GetLocalPosition());
-		dest.rotation = source.rotation;
-		dest.localScale = source.localScale;
-	}
-
-	public static Vector2 ScreenToGUI(Vector2 pos)
-	{
-		pos.x = pos.x / (float)Screen.width * 1280f;
-		pos.y = pos.y / (float)Screen.height / 1.7777778f * 1280f;
-		return pos;
 	}
 
 	public static Bounds GetBounds(GameObject go)
@@ -752,14 +627,28 @@ public static class Util
 		return array2;
 	}
 
-	public static string RootFolder()
+	public static string GetKleiRootPath()
 	{
 		if (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)
 		{
 			string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			return Path.Combine(folderPath, "Klei/OxygenNotIncluded");
+			return Path.Combine(folderPath, "Klei");
 		}
 		return Util.defaultRootFolder;
+	}
+
+	public static string GetTitleFolderName()
+	{
+		return "OxygenNotIncluded";
+	}
+
+	public static string RootFolder()
+	{
+		if (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)
+		{
+			return Path.Combine(Util.GetKleiRootPath(), Util.GetTitleFolderName());
+		}
+		return Util.GetKleiRootPath();
 	}
 
 	public static T GetComponentInChildren<T>(this GameObject go, bool include_inactive) where T : Component
@@ -812,19 +701,6 @@ public static class Util
 		return null;
 	}
 
-	public static void SkipKleiString(this BinaryReader reader)
-	{
-		int num = reader.ReadInt32();
-		reader.Read(Util.chars, 0, num);
-	}
-
-	public static string ReadKleiString(this BinaryReader reader)
-	{
-		int num = reader.ReadInt32();
-		reader.Read(Util.chars, 0, num);
-		return new string(Util.chars, 0, num);
-	}
-
 	public static Vector3 ReadVector3(this IReader reader)
 	{
 		return new Vector3
@@ -870,6 +746,4 @@ public static class Util
 	private static global::System.Random random = new global::System.Random();
 
 	private static string defaultRootFolder = Application.persistentDataPath;
-
-	private static char[] chars = new char[128];
 }

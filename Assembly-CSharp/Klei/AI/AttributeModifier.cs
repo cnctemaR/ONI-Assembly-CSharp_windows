@@ -82,7 +82,7 @@ namespace Klei.AI
 			{
 				text += GameUtil.GetFormattedSimple(this.Value, GameUtil.TimeSlice.None, null);
 			}
-			if (text != null)
+			if (text != null && text.Length > 0 && text[0] != '-')
 			{
 				text = GameUtil.AddPositiveSign(text, this.Value > 0f);
 			}

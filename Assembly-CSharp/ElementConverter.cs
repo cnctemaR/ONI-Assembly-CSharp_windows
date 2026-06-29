@@ -10,6 +10,11 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class ElementConverter : StateMachineComponent<ElementConverter.StatesInstance>, IEffectDescriptor
 {
+	public void SetStorage(Storage storage)
+	{
+		this.storage = storage;
+	}
+
 	public float OutputMultiplier
 	{
 		get
@@ -131,11 +136,14 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 			for (int j = 0; j < this.storage.items.Count; j++)
 			{
 				GameObject gameObject = this.storage.items[j];
-				if (gameObject.HasTag(consumedElement.tag))
+				if (!(gameObject == null))
 				{
-					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-					float num6 = Mathf.Min(num4, component.Mass);
-					num5 += num6 / num4;
+					if (gameObject.HasTag(consumedElement.tag))
+					{
+						PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+						float num6 = Mathf.Min(num4, component.Mass);
+						num5 += num6 / num4;
+					}
 				}
 			}
 			num3 = Mathf.Min(num3, num5);

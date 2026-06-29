@@ -77,7 +77,7 @@ public class KAnim
 			{
 				hashedString = group.swapTarget;
 			}
-			return KAnimBatchManager.Instance().GetBatchGroupData(hashedString, false);
+			return KAnimBatchManager.Instance().GetBatchGroupData(hashedString);
 		}
 
 		public KAnim.Anim.Frame GetFrame(KAnimFileData animFile, KAnim.PlayMode mode, float t)
@@ -97,7 +97,7 @@ public class KAnim
 
 		public KAnim.Anim.Frame GetFrame(HashedString batchTag, int idx)
 		{
-			KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(batchTag, false);
+			KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(batchTag);
 			return batchGroupData.GetFrame(idx + this.firstFrameIdx);
 		}
 
@@ -234,7 +234,11 @@ public class KAnim
 
 		public Texture2D GetTexture(int index)
 		{
-			KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.batchTag, false);
+			if (index < 0 || index >= this.textureCount)
+			{
+				global::Debug.LogError("Invalid texture index:" + index, null);
+			}
+			KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.batchTag);
 			return batchGroupData.GetTexure(this.textureStartIdx + index);
 		}
 
@@ -338,7 +342,7 @@ public class KAnim
 			public KAnim.Build.SymbolFrameInstance GetFrame(int frame)
 			{
 				int frameIdx = this.GetFrameIdx(frame);
-				KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.build.batchTag, false);
+				KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.build.batchTag);
 				return batchGroupData.GetSymbolFrameInstance(frameIdx);
 			}
 

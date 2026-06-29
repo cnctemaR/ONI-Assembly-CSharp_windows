@@ -42,6 +42,11 @@ public class AssignableSideScreen : SideScreenContent
 		base.ClearTarget();
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<Assignable>() != null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		if (this.targetAssignableSubscriptionHandle != -1 && this.targetAssignable != null)

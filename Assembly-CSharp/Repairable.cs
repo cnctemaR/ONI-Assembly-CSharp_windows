@@ -327,7 +327,7 @@ public class Repairable : Workable
 			Deconstructable component = smi.master.GetComponent<Deconstructable>();
 			if (component != null)
 			{
-				workChore.AddPrecondition(ChorePreconditions.instance.IsMarkedForDeconstruction, component);
+				workChore.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component);
 			}
 			Breakable component2 = smi.master.GetComponent<Breakable>();
 			if (component2 != null)

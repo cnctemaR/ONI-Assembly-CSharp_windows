@@ -17,6 +17,11 @@ public class RefinerySideScreen : SideScreenContent
 		return string.Format(Strings.Get(this.titleKey), this.targetFab.GetProperName());
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<Refinery>() != null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		Refinery component = target.GetComponent<Refinery>();

@@ -46,7 +46,7 @@ public class PopFXManager : KScreen
 		{
 			vector += target_transform.GetPosition();
 		}
-		if (!force_spawn && Grid.Visible[Grid.PosToCell(vector)] == 0)
+		if (!force_spawn && !Grid.IsVisible(Grid.PosToCell(vector)))
 		{
 			return null;
 		}

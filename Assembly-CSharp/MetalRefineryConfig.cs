@@ -72,7 +72,7 @@ public class MetalRefineryConfig : IBuildingConfig
 					amount = 100f,
 					time = 40f,
 					description = string.Format(global::STRINGS.BUILDINGS.PREFABS.METALREFINERY.RECIPE_DESCRIPTION, lowTempTransition.name, element.name),
-					fabricators = new List<Tag> { TagManager.Create("MetalRefinery", null) }
+					fabricators = new List<Tag> { TagManager.Create("MetalRefinery") }
 				}.AddResult(lowTempTransition.tag, 100f);
 			}
 		}
@@ -82,6 +82,7 @@ public class MetalRefineryConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
+		SymbolOverrideControllerUtil.AddToPrefab(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
 			PoweredActiveStoppableController.Instance instance = new PoweredActiveStoppableController.Instance(game_object.GetComponent<KPrefabID>());

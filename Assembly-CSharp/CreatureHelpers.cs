@@ -237,7 +237,7 @@ public static class CreatureHelpers
 			global::Debug.LogWarning(self.name + " is trying to flee, bus has no navigator component attached.", null);
 			return null;
 		}
-		HashSet<int> hashSet = GameUtil.FloodCollectCells(Grid.PosToCell(self), (int cell) => CreatureHelpers.CanFleeTo(cell, nav), 300, null);
+		HashSet<int> hashSet = GameUtil.FloodCollectCells(Grid.PosToCell(self), (int cell) => CreatureHelpers.CanFleeTo(cell, nav), 300, null, true);
 		int num3 = -1;
 		int num4 = -1;
 		foreach (int num5 in hashSet)

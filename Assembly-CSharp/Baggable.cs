@@ -15,7 +15,10 @@ public class Baggable : KMonoBehaviour
 		component.overrideAnims = new KAnimFile[] { this.animOverride };
 		component.trackOnPickup = false;
 		component.useGunforPickup = false;
-		component.SetOffsets(Grid.DefaultOffset);
+		if (this.mustStandOntopOfTrapForPickup)
+		{
+			component.SetOffsets(new CellOffset[] { default(CellOffset) });
+		}
 		if (this.animOverride != null)
 		{
 			base.Subscribe(856640610, new Action<object>(this.OnStorageChanged));
@@ -55,4 +58,6 @@ public class Baggable : KMonoBehaviour
 	public Tag creatureTag;
 
 	private MinionIdentity minion;
+
+	public bool mustStandOntopOfTrapForPickup;
 }

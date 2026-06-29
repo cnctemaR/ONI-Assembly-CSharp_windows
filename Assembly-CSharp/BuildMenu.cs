@@ -277,7 +277,7 @@ public class BuildMenu : KScreen
 	public PlanScreen.RequirementsState BuildableState(BuildingDef def)
 	{
 		PlanScreen.RequirementsState requirementsState = PlanScreen.RequirementsState.Complete;
-		if (!DebugHandler.InstantBuildMode)
+		if (!DebugHandler.InstantBuildMode && !Game.Instance.SandboxModeActive)
 		{
 			if (!Db.Get().TechItems.IsTechItemComplete(def.PrefabID))
 			{
@@ -576,6 +576,7 @@ public class BuildMenu : KScreen
 		LogicWiring,
 		LogicGates,
 		LogicSwitches,
+		ConduitSensors,
 		FoodAndAgriculture,
 		Farming,
 		Ranching,

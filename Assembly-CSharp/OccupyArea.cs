@@ -90,26 +90,28 @@ public class OccupyArea : KMonoBehaviour
 
 	private void ClearOccupiedArea()
 	{
-		if (this.objectLayer == ObjectLayer.NumLayers)
-		{
-			return;
-		}
 		if (this.occupiedGridCells == null)
 		{
 			return;
 		}
-		foreach (int num in this.occupiedGridCells)
+		foreach (ObjectLayer objectLayer in this.objectLayers)
 		{
-			if (Grid.Objects[num, (int)this.objectLayer] == base.gameObject)
+			if (objectLayer != ObjectLayer.NumLayers)
 			{
-				Grid.Objects[num, (int)this.objectLayer] = null;
+				foreach (int num in this.occupiedGridCells)
+				{
+					if (Grid.Objects[num, (int)objectLayer] == base.gameObject)
+					{
+						Grid.Objects[num, (int)objectLayer] = null;
+					}
+				}
 			}
 		}
 	}
 
 	private void UpdateOccupiedArea()
 	{
-		if (this.objectLayer == ObjectLayer.NumLayers)
+		if (this.objectLayers.Length == 0)
 		{
 			return;
 		}
@@ -119,12 +121,18 @@ public class OccupyArea : KMonoBehaviour
 		}
 		this.ClearOccupiedArea();
 		int num = Grid.PosToCell(base.gameObject);
-		for (int i = 0; i < this.occupiedGridCells.Length; i++)
+		foreach (ObjectLayer objectLayer in this.objectLayers)
 		{
-			CellOffset cellOffset = this.OccupiedCellsOffsets[i];
-			int num2 = Grid.OffsetCell(num, cellOffset);
-			Grid.Objects[num2, (int)this.objectLayer] = base.gameObject;
-			this.occupiedGridCells[i] = num2;
+			if (objectLayer != ObjectLayer.NumLayers)
+			{
+				for (int j = 0; j < this.OccupiedCellsOffsets.Length; j++)
+				{
+					CellOffset cellOffset = this.OccupiedCellsOffsets[j];
+					int num2 = Grid.OffsetCell(num, cellOffset);
+					Grid.Objects[num2, (int)objectLayer] = base.gameObject;
+					this.occupiedGridCells[j] = num2;
+				}
+			}
 		}
 	}
 
@@ -238,7 +246,7 @@ public class OccupyArea : KMonoBehaviour
 
 	private int[] occupiedGridCells;
 
-	public ObjectLayer objectLayer = ObjectLayer.NumLayers;
+	public ObjectLayer[] objectLayers = new ObjectLayer[0];
 
 	[SerializeField]
 	private bool applyToCells = true;

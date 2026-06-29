@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-public class TextureRegion
+public struct TextureRegion
 {
 	public TextureRegion(int x, int y, TexturePage page, TextureBuffer buffer)
 	{

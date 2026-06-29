@@ -26,6 +26,11 @@ public class CapacityControlSideScreen : SideScreenContent
 		this.numberInput.decimalPlaces = 1;
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<IUserControlledCapacity>() != null;
+	}
+
 	public override void SetTarget(GameObject new_target)
 	{
 		if (new_target == null)

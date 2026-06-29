@@ -120,7 +120,7 @@ public class KBatchedAnimTracker : MonoBehaviour
 					Vector3 vector3 = ((!this.controller.FlipY) ? Vector3.up : Vector3.down);
 					base.transform.up = matrix2x.MultiplyVector(vector3);
 					base.transform.right = matrix2x.MultiplyVector(vector2);
-					if (this.allowTransformOverride && this.myAnim != null)
+					if (this.myAnim != null)
 					{
 						KBatchedAnimInstanceData batchInstanceData = this.myAnim.GetBatchInstanceData();
 						if (batchInstanceData != null)
@@ -130,7 +130,7 @@ public class KBatchedAnimTracker : MonoBehaviour
 					}
 				}
 				base.transform.SetPosition(new Vector3(base.transform.GetPosition().x, base.transform.GetPosition().y, z));
-				this.myAnim.MarkDirty();
+				this.myAnim.SetDirty();
 			}
 		}
 		if (this.myAnim != null && flag != this.myAnim.enabled)
@@ -180,8 +180,6 @@ public class KBatchedAnimTracker : MonoBehaviour
 	public bool skipInitialDisable;
 
 	public bool forceAlwaysVisible;
-
-	public bool allowTransformOverride = true;
 
 	private bool alive = true;
 

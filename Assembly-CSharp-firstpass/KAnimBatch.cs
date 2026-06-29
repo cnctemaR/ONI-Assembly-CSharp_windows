@@ -12,8 +12,8 @@ public class KAnimBatch
 		this.batchGroup = group.batchID;
 		this.materialType = material_type;
 		this.position = new Vector3(0f, 0f, z);
-		this.instanceID = KAnimBatch.maxInstanceID++;
 		this.symbolInstanceSlots = new KAnimBatch.SymbolInstanceSlot[group.maxGroupSize];
+		this.symbolOverrideInfoSlots = new KAnimBatch.SymbolOverrideInfoSlot[group.maxGroupSize];
 	}
 
 	public bool dirty
@@ -70,12 +70,7 @@ public class KAnimBatch
 
 	public KAnimBatchGroup.KAnimBatchTextureCache.Entry symbolInstanceTex { get; private set; }
 
-	public BatchGroupInstance batchGroupInstance { get; private set; }
-
-	public int GetInstanceID()
-	{
-		return this.instanceID;
-	}
+	public KAnimBatchGroup.KAnimBatchTextureCache.Entry symbolOverrideInfoTex { get; private set; }
 
 	public void DestroyTex()
 	{
@@ -89,11 +84,15 @@ public class KAnimBatch
 			this.group.FreeTexture(this.symbolInstanceTex);
 			this.symbolInstanceTex = null;
 		}
+		if (this.symbolOverrideInfoTex != null)
+		{
+			this.group.FreeTexture(this.symbolOverrideInfoTex);
+			this.symbolOverrideInfoTex = null;
+		}
 	}
 
-	public void Init(BatchGroupInstance batch_group_instance)
+	public void Init()
 	{
-		this.batchGroupInstance = batch_group_instance;
 		this.dataTex = this.group.CreateTexture();
 		int bestTextureSize = KAnimBatchGroup.GetBestTextureSize((float)(this.group.data.maxSymbolsPerBuild * this.group.maxGroupSize * 8));
 		this.symbolInstanceTex = this.group.CreateTexture("SymbolInstanceTex", bestTextureSize, KAnimBatch.ShaderProperty_symbolInstanceTex, KAnimBatch.ShaderProperty_SYMBOL_INSTANCE_TEXTURE_SIZE);
@@ -120,7 +119,8 @@ public class KAnimBatch
 		this.matProperties = new MaterialPropertyBlock();
 		this.dataTex.SetTextureAndSize(this.matProperties);
 		this.symbolInstanceTex.SetTextureAndSize(this.matProperties);
-		this.group.GetDataTextures(this.batchGroupInstance, this.matProperties);
+		this.group.GetDataTextures(this.matProperties, this.atlases);
+		this.atlases.Apply(this.matProperties);
 	}
 
 	public void Clear()
@@ -130,10 +130,8 @@ public class KAnimBatch
 		this.dirtySet.Clear();
 		this.batchset = null;
 		this.group = null;
-		this.batchGroupInstance = null;
 		this.matProperties = null;
 		this.dataTex = null;
-		this.batchGroupInstance = null;
 	}
 
 	public void SetBatchSet(BatchSet newBatchSet)
@@ -150,42 +148,11 @@ public class KAnimBatch
 		}
 	}
 
-	public bool ContainsPos(Vector3 pos)
-	{
-		return new Vector2I((int)(pos.x / 32f), (int)(pos.y / 32f)) == this.batchset.idx;
-	}
-
-	public void ClearRender(KAnimConverter.IAnimConverter controller)
-	{
-		int num = this.controllers.IndexOf(controller);
-		if (num >= 0)
-		{
-			int num2 = num * 28;
-			for (int i = 0; i < 28; i++)
-			{
-				this.dataTex.floats[num2 + i] = -1f;
-			}
-			this.dirtySet.Remove(num);
-			this.AddToClear();
-		}
-	}
-
-	private void AddToClear()
-	{
-		this.needsWrite = true;
-		this.batchset.SetDirty();
-	}
-
-	public int GetIndex(KAnimConverter.IAnimConverter controller)
-	{
-		return this.controllers.IndexOf(controller);
-	}
-
 	public bool Register(KAnimConverter.IAnimConverter controller)
 	{
 		if (this.dataTex == null || this.dataTex.floats.Length == 0)
 		{
-			this.Init(controller.batchGroupInstance);
+			this.Init();
 		}
 		if (!this.controllers.Contains(controller))
 		{
@@ -257,7 +224,10 @@ public class KAnimBatch
 
 	private void AddToDirty(int dirtyIdx)
 	{
-		this.dirtySet.Add(dirtyIdx);
+		if (!this.dirtySet.Contains(dirtyIdx))
+		{
+			this.dirtySet.Add(dirtyIdx);
+		}
 		this.batchset.SetDirty();
 		this.needsWrite = true;
 	}
@@ -283,39 +253,39 @@ public class KAnimBatch
 		this.AddToDirty(num);
 	}
 
-	private bool WriteToByteArray(int index)
+	private void WriteBatchedAnimInstanceData(int index, KAnimConverter.IAnimConverter controller)
+	{
+		controller.GetBatchInstanceData().WriteToTexture(this.dataTex.bytes, index * 112, index);
+	}
+
+	private bool WriteSymbolInstanceData(int index, KAnimConverter.IAnimConverter controller)
 	{
 		bool flag = false;
-		KAnimConverter.IAnimConverter animConverter = this.controllers[index];
-		if (animConverter != null && animConverter as global::UnityEngine.Object != null)
+		KAnimBatch.SymbolInstanceSlot symbolInstanceSlot = this.symbolInstanceSlots[index];
+		if (symbolInstanceSlot.symbolInstanceData != controller.symbolInstanceGpuData || symbolInstanceSlot.dataVersion != controller.symbolInstanceGpuData.version)
 		{
-			animConverter.GetBatchInstanceData().WriteToTexture(this.dataTex.bytes, index * 112, index);
-			KAnimBatch.SymbolInstanceSlot symbolInstanceSlot = this.symbolInstanceSlots[index];
-			if (symbolInstanceSlot.symbolInstanceData != animConverter.symbolInstanceGpuData || symbolInstanceSlot.dataVersion != animConverter.symbolInstanceGpuData.version)
-			{
-				animConverter.symbolInstanceGpuData.WriteToTexture(this.symbolInstanceTex.bytes, index * 8 * this.group.data.maxSymbolsPerBuild * 4, index);
-				symbolInstanceSlot.symbolInstanceData = animConverter.symbolInstanceGpuData;
-				symbolInstanceSlot.dataVersion = animConverter.symbolInstanceGpuData.version;
-				this.symbolInstanceSlots[index] = symbolInstanceSlot;
-				flag = true;
-			}
-		}
-		else
-		{
-			this.controllers.RemoveAt(index);
+			controller.symbolInstanceGpuData.WriteToTexture(this.symbolInstanceTex.bytes, index * 8 * this.group.data.maxSymbolsPerBuild * 4, index);
+			symbolInstanceSlot.symbolInstanceData = controller.symbolInstanceGpuData;
+			symbolInstanceSlot.dataVersion = controller.symbolInstanceGpuData.version;
+			this.symbolInstanceSlots[index] = symbolInstanceSlot;
+			flag = true;
 		}
 		return flag;
 	}
 
-	public void UpdateTexture(bool is_symbol_instance_data_dirty)
+	private bool WriteSymbolOverrideInfoTex(int index, KAnimConverter.IAnimConverter controller)
 	{
-		this.dataTex.LoadRawTextureData(this.dataTex.bytes);
-		this.dataTex.Apply();
-		if (is_symbol_instance_data_dirty)
+		bool flag = false;
+		KAnimBatch.SymbolOverrideInfoSlot symbolOverrideInfoSlot = this.symbolOverrideInfoSlots[index];
+		if (symbolOverrideInfoSlot.symbolOverrideInfo != controller.symbolOverrideInfoGpuData || symbolOverrideInfoSlot.dataVersion != controller.symbolOverrideInfoGpuData.version)
 		{
-			this.symbolInstanceTex.LoadRawTextureData(this.symbolInstanceTex.bytes);
-			this.symbolInstanceTex.Apply();
+			controller.symbolOverrideInfoGpuData.WriteToTexture(this.symbolOverrideInfoTex.bytes, index * 12 * this.group.data.maxSymbolFrameInstancesPerbuild * 4, index);
+			symbolOverrideInfoSlot.symbolOverrideInfo = controller.symbolOverrideInfoGpuData;
+			symbolOverrideInfoSlot.dataVersion = controller.symbolOverrideInfoGpuData.version;
+			this.symbolOverrideInfoSlots[index] = symbolOverrideInfoSlot;
+			flag = true;
 		}
+		return flag;
 	}
 
 	public int UpdateDirty(int frame)
@@ -326,17 +296,36 @@ public class KAnimBatch
 		}
 		if (this.dataTex == null || this.dataTex.floats.Length == 0)
 		{
-			this.Init(this.batchGroupInstance);
+			this.Init();
 		}
 		this.writtenLastFrame = 0;
 		bool flag = false;
+		bool flag2 = false;
 		if (this.dirtySet.Count > 0)
 		{
 			foreach (int num in this.dirtySet)
 			{
-				bool flag2 = this.WriteToByteArray(num);
-				flag = flag || flag2;
-				this.writtenLastFrame++;
+				KAnimConverter.IAnimConverter animConverter = this.controllers[num];
+				if (animConverter != null && animConverter as global::UnityEngine.Object != null)
+				{
+					this.WriteBatchedAnimInstanceData(num, animConverter);
+					bool flag3 = this.WriteSymbolInstanceData(num, animConverter);
+					flag = flag || flag3;
+					bool flag4 = animConverter.ApplySymbolOverrides();
+					if (flag4)
+					{
+						if (this.symbolOverrideInfoTex == null)
+						{
+							int bestTextureSize = KAnimBatchGroup.GetBestTextureSize((float)(this.group.data.maxSymbolFrameInstancesPerbuild * this.group.maxGroupSize * 12));
+							this.symbolOverrideInfoTex = this.group.CreateTexture("SymbolOverrideInfoTex", bestTextureSize, KAnimBatch.ShaderProperty_symbolOverrideInfoTex, KAnimBatch.ShaderProperty_SYMBOL_OVERRIDE_INFO_TEXTURE_SIZE);
+							this.symbolOverrideInfoTex.SetTextureAndSize(this.matProperties);
+							this.matProperties.SetFloat(KAnimBatch.ShaderProperty_SUPPORTS_SYMBOL_OVERRIDING, 1f);
+						}
+						bool flag5 = this.WriteSymbolOverrideInfoTex(num, animConverter);
+						flag2 = flag2 || flag5;
+					}
+					this.writtenLastFrame++;
+				}
 			}
 			if (this.writtenLastFrame != 0)
 			{
@@ -347,25 +336,42 @@ public class KAnimBatch
 				global::Debug.LogError("dirtySet not written", null);
 			}
 		}
-		this.UpdateTexture(flag);
+		this.dataTex.LoadRawTextureData();
+		this.dataTex.Apply();
+		if (flag)
+		{
+			this.symbolInstanceTex.LoadRawTextureData();
+			this.symbolInstanceTex.Apply();
+		}
+		if (flag2)
+		{
+			this.symbolOverrideInfoTex.LoadRawTextureData();
+			this.symbolOverrideInfoTex.Apply();
+		}
 		return this.writtenLastFrame;
 	}
 
 	private List<KAnimConverter.IAnimConverter> controllers = new List<KAnimConverter.IAnimConverter>();
 
-	private HashSet<int> dirtySet = new HashSet<int>();
+	private List<int> dirtySet = new List<int>();
 
 	private int currentOffset;
-
-	private int instanceID = -1;
-
-	private static int maxInstanceID = 0;
 
 	private static int ShaderProperty_SYMBOL_INSTANCE_TEXTURE_SIZE = Shader.PropertyToID("SYMBOL_INSTANCE_TEXTURE_SIZE");
 
 	private static int ShaderProperty_symbolInstanceTex = Shader.PropertyToID("symbolInstanceTex");
 
+	private static int ShaderProperty_SYMBOL_OVERRIDE_INFO_TEXTURE_SIZE = Shader.PropertyToID("SYMBOL_OVERRIDE_INFO_TEXTURE_SIZE");
+
+	private static int ShaderProperty_symbolOverrideInfoTex = Shader.PropertyToID("symbolOverrideInfoTex");
+
+	public static int ShaderProperty_SUPPORTS_SYMBOL_OVERRIDING = Shader.PropertyToID("SUPPORTS_SYMBOL_OVERRIDING");
+
 	private KAnimBatch.SymbolInstanceSlot[] symbolInstanceSlots;
+
+	private KAnimBatch.SymbolOverrideInfoSlot[] symbolOverrideInfoSlots;
+
+	public KAnimBatch.AtlasList atlases = new KAnimBatch.AtlasList(0);
 
 	private bool needsWrite;
 
@@ -374,5 +380,89 @@ public class KAnimBatch
 		public SymbolInstanceGpuData symbolInstanceData;
 
 		public int dataVersion;
+	}
+
+	public struct SymbolOverrideInfoSlot
+	{
+		public SymbolOverrideInfoGpuData symbolOverrideInfo;
+
+		public int dataVersion;
+	}
+
+	public class AtlasList
+	{
+		public AtlasList(int start_idx)
+		{
+			this.startIdx = start_idx;
+		}
+
+		public int Add(Texture2D atlas)
+		{
+			DebugUtil.Assert(atlas != null, "Assert!");
+			DebugUtil.Assert(this.atlases.Count < KAnimBatchManager.instance.atlasNames.Length, "Assert!");
+			int num = this.atlases.IndexOf(atlas);
+			if (num == -1)
+			{
+				num = this.atlases.Count;
+				this.atlases.Add(atlas);
+			}
+			return num + this.startIdx;
+		}
+
+		public void Apply(MaterialPropertyBlock material_property_block)
+		{
+			bool flag = false;
+			for (int i = 0; i < this.atlases.Count; i++)
+			{
+				int num = this.startIdx + i;
+				if (num >= KAnimBatchManager.instance.atlasNames.Length)
+				{
+					flag = true;
+				}
+				else
+				{
+					material_property_block.SetTexture(KAnimBatchManager.instance.atlasNames[num], this.atlases[i]);
+				}
+			}
+			if (flag)
+			{
+				string text = "Atlas overflow: + \n";
+				foreach (Texture2D texture2D in this.atlases)
+				{
+					text = text + texture2D.name + "\n";
+				}
+				global::Debug.LogError(text, null);
+			}
+		}
+
+		public void Clear(int start_idx)
+		{
+			this.atlases.Clear();
+			this.startIdx = start_idx;
+		}
+
+		public int GetAtlasIdx(Texture2D atlas)
+		{
+			for (int i = 0; i < this.atlases.Count; i++)
+			{
+				if (this.atlases[i] == atlas)
+				{
+					return i + this.startIdx;
+				}
+			}
+			return -1;
+		}
+
+		public int Count
+		{
+			get
+			{
+				return this.atlases.Count;
+			}
+		}
+
+		private List<Texture2D> atlases = new List<Texture2D>();
+
+		private int startIdx;
 	}
 }

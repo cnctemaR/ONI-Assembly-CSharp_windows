@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 public class AnimEventManager
@@ -188,6 +189,7 @@ public class AnimEventManager
 		public bool useUnscaledTime;
 	}
 
+	[DebuggerDisplay("{controller.name}, Anim={currentAnim}, Frame={currentFrame}, Mode={mode}")]
 	public struct EventPlayerData
 	{
 		public int currentFrame { get; set; }

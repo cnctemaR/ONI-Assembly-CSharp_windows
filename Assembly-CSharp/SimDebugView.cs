@@ -36,7 +36,7 @@ public class SimDebugView : KMonoBehaviour
 		this.tex = SimDebugView.CreateTexture(out this.texBytes, Grid.WidthInCells, Grid.HeightInCells);
 		this.plane.GetComponent<Renderer>().sharedMaterial = this.material;
 		this.plane.GetComponent<Renderer>().sharedMaterial.mainTexture = this.tex;
-		this.plane.transform.SetLocalPosition(new Vector3(Grid.WidthInMeters / 2f, Grid.HeightInMeters / 2f, -6f));
+		this.plane.transform.SetLocalPosition(new Vector3(0f, 0f, -6f));
 		this.SetMode(SimViewMode.None);
 	}
 
@@ -53,18 +53,41 @@ public class SimDebugView : KMonoBehaviour
 
 	public static GameObject CreatePlane(string layer, Transform parent)
 	{
-		GameObject gameObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
-		gameObject.name = "OverlayPlane";
+		GameObject gameObject = new GameObject();
+		gameObject.name = "overlayViewDisplayPlane";
 		gameObject.SetLayerRecursively(LayerMask.NameToLayer(layer));
-		global::UnityEngine.Object.Destroy(gameObject.GetComponent<Collider>());
-		if (parent != null)
-		{
-			gameObject.transform.SetParent(parent);
-		}
+		gameObject.transform.SetParent(parent);
 		gameObject.transform.SetPosition(Vector3.zero);
-		gameObject.transform.localScale = new Vector3(Grid.WidthInMeters / -10f, 1f, Grid.HeightInMeters / -10f);
-		gameObject.transform.eulerAngles = new Vector3(270f, 0f, 0f);
-		gameObject.GetComponent<MeshRenderer>().reflectionProbeUsage = ReflectionProbeUsage.Off;
+		MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
+		meshRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
+		MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
+		Mesh mesh = new Mesh();
+		meshFilter.mesh = mesh;
+		int num = 4;
+		Vector3[] array = new Vector3[num];
+		Vector2[] array2 = new Vector2[num];
+		int[] array3 = new int[6];
+		float num2 = 2f * (float)Grid.HeightInCells;
+		array = new Vector3[]
+		{
+			new Vector3(0f, 0f, 0f),
+			new Vector3((float)Grid.WidthInCells, 0f, 0f),
+			new Vector3(0f, num2, 0f),
+			new Vector3(Grid.WidthInMeters, num2, 0f)
+		};
+		array2 = new Vector2[]
+		{
+			new Vector2(0f, 0f),
+			new Vector2(1f, 0f),
+			new Vector2(0f, 2f),
+			new Vector2(1f, 2f)
+		};
+		array3 = new int[] { 0, 2, 1, 1, 2, 3 };
+		mesh.vertices = array;
+		mesh.uv = array2;
+		mesh.triangles = array3;
+		Vector2 vector = new Vector2((float)Grid.WidthInCells, num2);
+		mesh.bounds = new Bounds(new Vector3(0.5f * vector.x, 0.5f * vector.y, 0f), new Vector3(vector.x, vector.y, 0f));
 		return gameObject;
 	}
 
@@ -840,6 +863,7 @@ public class SimDebugView : KMonoBehaviour
 		return color;
 	}
 
+	[SerializeField]
 	public Material material;
 
 	public Material diseaseMaterial;
@@ -852,8 +876,10 @@ public class SimDebugView : KMonoBehaviour
 
 	private int currentFrame;
 
+	[SerializeField]
 	private Texture2D tex;
 
+	[SerializeField]
 	private GameObject plane;
 
 	private SimViewMode mode = SimViewMode.PowerMap;

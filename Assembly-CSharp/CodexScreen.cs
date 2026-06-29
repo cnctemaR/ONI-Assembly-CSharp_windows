@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using STRINGS;
 using TMPro;
@@ -97,17 +98,19 @@ public class CodexScreen : KScreen
 					this.searchResults.Add(keyValuePair.Value);
 				}
 			}
-			else if (input == keyValuePair.Value.name.ToLower())
+			else if (input == keyValuePair.Value.name.ToLower() || input.Contains(keyValuePair.Value.name.ToLower()) || keyValuePair.Value.name.ToLower().Contains(input))
 			{
 				this.searchResults.Add(keyValuePair.Value);
 			}
-			else if (input.Contains(keyValuePair.Value.name.ToLower()))
+			else
 			{
-				this.searchResults.Add(keyValuePair.Value);
-			}
-			else if (keyValuePair.Value.name.ToLower().Contains(input))
-			{
-				this.searchResults.Add(keyValuePair.Value);
+				foreach (SubEntry subEntry in keyValuePair.Value.subEntries)
+				{
+					if (input == subEntry.name.ToLower() || input.Contains(subEntry.name.ToLower()) || subEntry.name.ToLower().Contains(input))
+					{
+						this.searchResults.Add(keyValuePair.Value);
+					}
+				}
 			}
 		}
 		this.FilterEntries(input != string.Empty);
@@ -248,6 +251,29 @@ public class CodexScreen : KScreen
 		{
 			this.Init();
 		}
+		SubEntry subEntry = null;
+		if (!CodexCache.entries.ContainsKey(id))
+		{
+			subEntry = CodexCache.FindSubEntry(id);
+			if (subEntry != null && !subEntry.disabled)
+			{
+				id = subEntry.parentEntryID.ToUpper();
+			}
+		}
+		CodexWidget codexWidget = null;
+		CodexCache.entries[id].GetFirstWidget();
+		RectTransform rectTransform = null;
+		if (subEntry != null)
+		{
+			foreach (ContentContainer contentContainer in CodexCache.entries[id].contentContainers)
+			{
+				if (contentContainer == subEntry.contentContainers[0])
+				{
+					codexWidget = contentContainer.content[0];
+					break;
+				}
+			}
+		}
 		if (!CodexCache.entries.ContainsKey(id) || CodexCache.entries[id].disabled)
 		{
 			id = "PAGENOTFOUND";
@@ -275,17 +301,21 @@ public class CodexScreen : KScreen
 			CodexCache.entries[id].contentContainers = new List<ContentContainer>();
 		}
 		bool flag2 = false;
-		foreach (ContentContainer contentContainer in CodexCache.entries[id].contentContainers)
+		foreach (ContentContainer contentContainer2 in CodexCache.entries[id].contentContainers)
 		{
 			GameObject gameObject3 = this.contentContainerPool.GetFreeElement(this.contentContainers.gameObject, true).gameObject;
-			this.ConfigureContentContainer(contentContainer, gameObject3, flag && flag2);
+			this.ConfigureContentContainer(contentContainer2, gameObject3, flag && flag2);
 			flag2 = !flag2;
-			if (contentContainer.content != null)
+			if (contentContainer2.content != null)
 			{
-				foreach (CodexWidget codexWidget in contentContainer.content)
+				foreach (CodexWidget codexWidget2 in contentContainer2.content)
 				{
-					GameObject gameObject4 = this.ContentUIPools[codexWidget.type].GetFreeElement(gameObject3, true).gameObject;
-					this.ConfigureContentWidget(codexWidget, gameObject4);
+					GameObject gameObject4 = this.ContentUIPools[codexWidget2.type].GetFreeElement(gameObject3, true).gameObject;
+					this.ConfigureContentWidget(codexWidget2, gameObject4);
+					if (codexWidget2 == codexWidget)
+					{
+						rectTransform = gameObject4.rectTransform();
+					}
 				}
 			}
 		}
@@ -337,6 +367,25 @@ public class CodexScreen : KScreen
 		{
 			this.backButton.text = string.Empty;
 		}
+		if (rectTransform != null)
+		{
+			if (this.scrollToTargetRoutine != null)
+			{
+				base.StopCoroutine(this.scrollToTargetRoutine);
+			}
+			this.scrollToTargetRoutine = base.StartCoroutine(this.ScrollToTarget(rectTransform));
+		}
+		else
+		{
+			this.displayScrollRect.content.SetLocalPosition(Vector3.zero);
+		}
+	}
+
+	private IEnumerator ScrollToTarget(RectTransform targetWidgetTransform)
+	{
+		yield return 0;
+		this.displayScrollRect.content.SetLocalPosition(Vector3.down * (this.displayScrollRect.content.InverseTransformPoint(targetWidgetTransform.position).y + 12f));
+		yield break;
 	}
 
 	private void ConfigureContentContainer(ContentContainer container, GameObject containerGameObject, bool bgColor = false)
@@ -406,15 +455,36 @@ public class CodexScreen : KScreen
 			{
 				string text;
 				content.properties.TryGetValue("spriteName", out text);
-				contentGameObject.GetComponent<Image>().sprite = Assets.GetSprite(text);
+				Image component2 = contentGameObject.GetComponent<Image>();
+				component2.sprite = Assets.GetSprite(text);
+				component2.color = Color.white;
 			}
 			else if (content.properties.ContainsKey("batchedAnimPrefabSourceID"))
 			{
-				contentGameObject.GetComponent<Image>().sprite = Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab(content.properties["batchedAnimPrefabSourceID"]).GetComponent<KBatchedAnimController>().AnimFiles[0], "ui");
+				Image component3 = contentGameObject.GetComponent<Image>();
+				component3.sprite = Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab(content.properties["batchedAnimPrefabSourceID"]).GetComponent<KBatchedAnimController>().AnimFiles[0], "ui");
+				component3.color = Color.white;
+			}
+			else if (content.objectProperties.ContainsKey("coloredSprite"))
+			{
+				Tuple<Sprite, Color> tuple = (Tuple<Sprite, Color>)content.objectProperties["coloredSprite"];
+				Image component4 = contentGameObject.GetComponent<Image>();
+				if (tuple != null)
+				{
+					component4.sprite = tuple.first;
+					component4.color = tuple.second;
+				}
+				else
+				{
+					component4.sprite = null;
+					component4.color = Color.clear;
+				}
 			}
 			else
 			{
-				contentGameObject.GetComponent<Image>().sprite = (Sprite)content.objectProperties["sprite"];
+				Image component5 = contentGameObject.GetComponent<Image>();
+				component5.sprite = (Sprite)content.objectProperties["sprite"];
+				component5.color = Color.white;
 			}
 			this.ConfigurePreferredLayout(content, contentGameObject);
 			break;
@@ -461,6 +531,12 @@ public class CodexScreen : KScreen
 	private UIGameObjectPool contentContainerPool;
 
 	private List<LocText> activeText = new List<LocText>();
+
+	[SerializeField]
+	private KScrollRect displayScrollRect;
+
+	[SerializeField]
+	private RectTransform scrollContentPane;
 
 	private bool editingSearch;
 
@@ -527,6 +603,8 @@ public class CodexScreen : KScreen
 	private TextStyleSetting textStyleBody;
 
 	private List<CodexEntry> searchResults = new List<CodexEntry>();
+
+	private Coroutine scrollToTargetRoutine;
 
 	public enum PlanCategory
 	{

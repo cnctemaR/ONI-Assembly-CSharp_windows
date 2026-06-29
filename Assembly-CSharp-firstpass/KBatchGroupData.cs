@@ -4,15 +4,12 @@ using UnityEngine;
 
 public class KBatchGroupData
 {
-	public KBatchGroupData(HashedString id, bool dynamic)
+	public KBatchGroupData(HashedString id)
 	{
 		this.groupID = id;
 		this.maxVisibleSymbols = 1;
-		this.isDynamic = dynamic;
 		this.Init();
 	}
-
-	public bool isDynamic { get; private set; }
 
 	public HashedString groupID { get; private set; }
 
@@ -25,6 +22,14 @@ public class KBatchGroupData
 		get
 		{
 			return this.frameElementSymbols.Count;
+		}
+	}
+
+	public int maxSymbolFrameInstancesPerbuild
+	{
+		get
+		{
+			return this.symbolFrameInstances.Count;
 		}
 	}
 
@@ -408,11 +413,11 @@ public class KBatchGroupData
 		return this.frameElementSymbols.FindIndex(KBatchGroupData.getSymbolIndexPredicateSymbol);
 	}
 
-	public void WriteBuildData(BatchGroupInstance instance, float[] data)
+	public void WriteBuildData(List<KAnim.Build.SymbolFrameInstance> symbol_frame_instances, float[] data)
 	{
-		for (int i = 0; i < instance.symbolFrameInstances.Count; i++)
+		for (int i = 0; i < symbol_frame_instances.Count; i++)
 		{
-			this.Write(data, i * 16, i, instance.symbolFrameInstances[i].buildImageIdx, instance.symbolFrameInstances[i]);
+			this.Write(data, i * 16, i, this.symbolFrameInstances[i].buildImageIdx, symbol_frame_instances[i]);
 		}
 	}
 

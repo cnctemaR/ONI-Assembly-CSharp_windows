@@ -10,7 +10,7 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		foreach (Klei.AI.Attribute attribute in Db.Get().Attributes)
+		foreach (Klei.AI.Attribute attribute in Db.Get().Attributes.resources)
 		{
 			if (this.attributes.Get(attribute) == null)
 			{
@@ -59,7 +59,6 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 		ChoreConsumer component = base.GetComponent<ChoreConsumer>();
 		if (component != null)
 		{
-			base.Subscribe(-1901442097, new Action<object>(this.OnEffectAdded));
 			base.Subscribe(1623392196, new Action<object>(this.OnDeath));
 			base.Subscribe(-1506069671, new Action<object>(this.OnAttachFollowCam));
 			base.Subscribe(-485480405, new Action<object>(this.OnDetachFollowCam));
@@ -98,15 +97,6 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
 		{
 			minionIdentity.GetComponent<Effects>().Add("Mourning", true);
-		}
-	}
-
-	private void OnEffectAdded(object data)
-	{
-		Effect effect = (Effect)data;
-		if (effect.triggerFloatingText && PopFXManager.Instance != null)
-		{
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, effect.Name, base.transform, 1.5f, false);
 		}
 	}
 

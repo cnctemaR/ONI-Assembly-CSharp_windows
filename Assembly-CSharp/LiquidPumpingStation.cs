@@ -29,6 +29,16 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		base.SetWorkTime(10f);
 		this.RefreshDepthAvailable();
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_arrow", "meter_scale" });
+		foreach (GameObject gameObject in base.GetComponent<Storage>().items)
+		{
+			if (!(gameObject == null))
+			{
+				if (gameObject != null)
+				{
+					gameObject.DeleteObject();
+				}
+			}
+		}
 	}
 
 	private void RefreshDepthAvailable()
@@ -40,14 +50,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 			KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
 			for (int i = 1; i <= num2; i++)
 			{
-				if (i <= num)
-				{
-					component.StopHidingSymbol(new KAnimHashedString("pipe" + i.ToString()), true);
-				}
-				else
-				{
-					component.HideSymbol(new KAnimHashedString("pipe" + i.ToString()), true);
-				}
+				component.SetSymbolVisiblity("pipe" + i.ToString(), i <= num);
 			}
 			PumpingStationGuide.OccupyArea(base.gameObject, num);
 			this.depthAvailable = num;
@@ -379,7 +382,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 			{
 				float num = Mathf.Min(this.amountPerTick, this.amountToPickup - this.consumedAmount);
 				num = Mathf.Max(num, 1f);
-				HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimConsume)));
+				HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimConsume), "LiquidPumpingStation"));
 				int num2 = Grid.OffsetCell(this.cell, new CellOffset(0, -PumpingStationGuide.GetDepthAvailable(this.cell, this.pump)));
 				SimMessages.ConsumeMass(num2, this.element, num, 3, handle.index);
 			}

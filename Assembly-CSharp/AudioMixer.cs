@@ -130,15 +130,15 @@ public class AudioMixer
 		this.SetVisibleDuplicants();
 		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().DuplicantCountMovingSnapshot, out this.duplicantCountMovingInst))
 		{
-			this.duplicantCountMovingInst.setParameterValue(AudioMixer.DUPLICANT_COUNT_ID, (float)this.visibleDupes["moving"]);
+			this.duplicantCountMovingInst.setParameterValue(AudioMixer.DUPLICANT_COUNT_ID, (float)Mathf.Max(0, this.visibleDupes["moving"] - AudioMixer.VISIBLE_DUPLICANTS_BEFORE_ATTENUATION));
 		}
 		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().DuplicantCountSleepingSnapshot, out this.duplicantCountSleepingInst))
 		{
-			this.duplicantCountSleepingInst.setParameterValue(AudioMixer.DUPLICANT_COUNT_ID, (float)this.visibleDupes["sleeping"]);
+			this.duplicantCountSleepingInst.setParameterValue(AudioMixer.DUPLICANT_COUNT_ID, (float)Mathf.Max(0, this.visibleDupes["sleeping"] - AudioMixer.VISIBLE_DUPLICANTS_BEFORE_ATTENUATION));
 		}
 		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().DuplicantCountAttenuatorMigrated, out this.duplicantCountInst))
 		{
-			this.duplicantCountInst.setParameterValue(AudioMixer.DUPLICANT_COUNT_ID, (float)this.visibleDupes["visible"]);
+			this.duplicantCountInst.setParameterValue(AudioMixer.DUPLICANT_COUNT_ID, (float)Mathf.Max(0, this.visibleDupes["visible"] - AudioMixer.VISIBLE_DUPLICANTS_BEFORE_ATTENUATION));
 		}
 		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().PulseSnapshot, out this.pulseInst))
 		{
@@ -272,6 +272,8 @@ public class AudioMixer
 	public static float LOW_PRIORITY_CUTOFF_DISTANCE = 10f;
 
 	public static float PULSE_SNAPSHOT_BPM = 120f;
+
+	public static int VISIBLE_DUPLICANTS_BEFORE_ATTENUATION = 2;
 
 	private EventInstance duplicantCountInst;
 

@@ -93,14 +93,6 @@ public class CrewPortrait : KMonoBehaviour
 		this.requiresRefresh = true;
 	}
 
-	public void SetNameLabel(string newTitle)
-	{
-		if (this.duplicantName != null)
-		{
-			this.duplicantName.SetText(newTitle);
-		}
-	}
-
 	public void SetSubTitle(string newTitle)
 	{
 		if (this.subTitle != null)
@@ -123,12 +115,6 @@ public class CrewPortrait : KMonoBehaviour
 		{
 			this.duplicantJob.gameObject.SetActive(state);
 		}
-	}
-
-	public void SetPortraitScale(float scale)
-	{
-		this.targetImage.transform.localScale = Vector3.one * scale;
-		this.RefreshScale();
 	}
 
 	public void ForceRefresh()
@@ -208,7 +194,6 @@ public class CrewPortrait : KMonoBehaviour
 	public static void SetPortraitData(IAssignableIdentity identityObject, KBatchedAnimController controller, bool useDefaultExpression = true)
 	{
 		controller.gameObject.SetActive(true);
-		controller.ClearAnims();
 		if (identityObject == null)
 		{
 			return;
@@ -218,16 +203,20 @@ public class CrewPortrait : KMonoBehaviour
 		{
 			return;
 		}
-		FaceGraph component = minionIdentity.GetComponent<FaceGraph>();
-		KCompBuildInstance headComp = component.GetHeadComp();
-		controller.SetAnims(new KAnimFile[] { Assets.GetAnim("body_comp_default_kanim") }, false);
-		for (int i = 0; i < headComp.GetData().build.symbols.Length; i++)
+		SymbolOverrideController component = controller.GetComponent<SymbolOverrideController>();
+		component.RemoveAllSymbolOverrides(0);
+		Accessorizer component2 = minionIdentity.GetComponent<Accessorizer>();
+		foreach (AccessorySlot accessorySlot in Db.Get().AccessorySlots)
 		{
-			controller.AddSymbolOverride(headComp.GetData().build.symbols[i].hash, headComp.GetData().build.batchTag, headComp.GetData().build.symbols[i], false);
-			controller.ShowSymbol(headComp.GetData().build.symbols[i].hash);
+			Accessory accessory = component2.GetAccessory(accessorySlot);
+			if (accessory != null)
+			{
+				component.AddSymbolOverride(accessorySlot.targetSymbolId, accessory.symbol, 0);
+				controller.SetSymbolVisiblity(accessorySlot.targetSymbolId, true);
+			}
 		}
+		component.AddSymbolOverride(Db.Get().AccessorySlots.HatHair.targetSymbolId, Db.Get().AccessorySlots.HatHair.Lookup("hat_" + HashCache.Get().Get(component2.GetAccessory(Db.Get().AccessorySlots.Hair).symbol.hash)).symbol, 1);
 		CrewPortrait.RefreshHat(identityObject, controller);
-		headComp.Refresh(controller);
 		float num = 1f;
 		if (GameScreenManager.Instance != null && GameScreenManager.Instance.ssOverlayCanvas != null)
 		{
@@ -235,19 +224,11 @@ public class CrewPortrait : KMonoBehaviour
 		}
 		controller.animScale = num;
 		string text = "ui";
-		if (!useDefaultExpression)
-		{
-			Expression currentExpression = component.GetCurrentExpression();
-			if (currentExpression != null)
-			{
-				text = currentExpression.face.Id;
-			}
-		}
 		controller.Play(text, KAnim.PlayMode.Once, 1f, 0f);
-		controller.HideSymbol(true, CrewPortrait.snapTo_neck);
-		controller.HideSymbol(true, CrewPortrait.snapTo_pivot);
-		controller.HideSymbol(true, CrewPortrait.snapTo_rgthand);
-		controller.HideSymbol(true, CrewPortrait.snapTo_chest);
+		controller.SetSymbolVisiblity(CrewPortrait.snapTo_neck, false);
+		controller.SetSymbolVisiblity(CrewPortrait.snapTo_pivot, false);
+		controller.SetSymbolVisiblity(CrewPortrait.snapTo_rgthand, false);
+		controller.SetSymbolVisiblity(CrewPortrait.snapTo_chest, false);
 	}
 
 	public void SetAlpha(float value)

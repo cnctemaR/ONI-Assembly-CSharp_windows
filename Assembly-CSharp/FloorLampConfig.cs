@@ -1,5 +1,4 @@
 ﻿using System;
-using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -13,12 +12,12 @@ public class FloorLampConfig : IBuildingConfig
 		string text2 = "floorlamp_kanim";
 		int num3 = 10;
 		float num4 = 10f;
-		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER1;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER1;
 		string[] all_METALS = MATERIALS.ALL_METALS;
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 5f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0.5f;
@@ -34,18 +33,10 @@ public class FloorLampConfig : IBuildingConfig
 		lightShapePreview.radius = 4f;
 		lightShapePreview.shape = LightShape.Circle;
 		lightShapePreview.offset = new CellOffset((int)def.BuildingComplete.GetComponent<Light2D>().Offset.x, (int)def.BuildingComplete.GetComponent<Light2D>().Offset.y);
-		GeneratedBuildings.RegisterLogicPorts(go, FloorLampConfig.INPUT_PORTS);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, FloorLampConfig.INPUT_PORTS);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, FloorLampConfig.INPUT_PORTS);
-		go.AddOrGet<LogicOperationalController>();
 		go.AddOrGet<EnergyConsumer>();
 		go.AddOrGet<LoopingSounds>();
 		Light2D light2D = go.AddOrGet<Light2D>();
@@ -66,6 +57,4 @@ public class FloorLampConfig : IBuildingConfig
 	}
 
 	public const string ID = "FloorLamp";
-
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
 }

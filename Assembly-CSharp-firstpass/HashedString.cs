@@ -77,6 +77,11 @@ public struct HashedString : IComparable<HashedString>, IEquatable<HashedString>
 		return x.hash != y.hash;
 	}
 
+	public static implicit operator HashedString(KAnimHashedString hash)
+	{
+		return new HashedString(hash.HashValue);
+	}
+
 	public override string ToString()
 	{
 		return base.ToString();

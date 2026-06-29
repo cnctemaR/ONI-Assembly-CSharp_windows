@@ -12,6 +12,11 @@ public class TimeRangeSideScreen : SideScreenContent, IRender200ms
 		this.labelHeaderDuration.text = UI.UISIDESCREENS.TIME_RANGE_SIDE_SCREEN.DURATION;
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<LogicTimeOfDaySensor>() != null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		base.SetTarget(target);

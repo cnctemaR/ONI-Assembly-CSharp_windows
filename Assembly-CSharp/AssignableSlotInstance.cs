@@ -32,13 +32,20 @@ public abstract class AssignableSlotInstance
 
 	public virtual void Unassign(bool trigger_event = true)
 	{
+		if (this.unassigning)
+		{
+			return;
+		}
 		if (this.IsAssigned())
 		{
+			this.unassigning = true;
+			this.assignable.Unassign();
+			if (trigger_event)
+			{
+				this.assignables.Trigger(-1585839766, this);
+			}
 			this.assignable = null;
-		}
-		if (trigger_event)
-		{
-			this.assignables.Trigger(-1585839766, this);
+			this.unassigning = false;
 		}
 	}
 
@@ -50,4 +57,6 @@ public abstract class AssignableSlotInstance
 	public AssignableSlot slot;
 
 	public Assignable assignable;
+
+	private bool unassigning;
 }

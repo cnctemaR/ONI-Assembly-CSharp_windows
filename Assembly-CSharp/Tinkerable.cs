@@ -66,7 +66,7 @@ public class Tinkerable : Workable
 		RoomTracker roomTracker = prefab.AddOrGet<RoomTracker>();
 		roomTracker.requirement = RoomTracker.Requirement.TrackingOnly;
 		Tinkerable tinkerable = prefab.AddOrGet<Tinkerable>();
-		tinkerable.tinkerMaterialTag = TagManager.Create("MachineParts", null);
+		tinkerable.tinkerMaterialTag = TagManager.Create("MachineParts");
 		tinkerable.tinkerMaterialAmount = 1f;
 		tinkerable.addedEffect = "MachineTinker";
 		tinkerable.requiredRolePerk = RoleManager.rolePerks.IncreaseMachineryMedium.id;

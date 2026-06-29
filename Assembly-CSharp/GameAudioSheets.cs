@@ -36,9 +36,9 @@ public class GameAudioSheets : AudioSheets
 		{
 			return new HatchDrillSoundEvent(file_name, sound_name, frame, min_interval);
 		}
-		if (type == "HatchChewSoundEvent")
+		if (type == "CreatureChewSoundEvent")
 		{
-			return new HatchChewSoundEvent(file_name, sound_name, frame, min_interval);
+			return new CreatureChewSoundEvent(file_name, sound_name, frame, min_interval);
 		}
 		if (type == "BuildingDamageSoundEvent")
 		{
@@ -59,6 +59,11 @@ public class GameAudioSheets : AudioSheets
 		if (type == "MainMenuSoundEvent")
 		{
 			return new MainMenuSoundEvent(file_name, sound_name, frame);
+		}
+		if (type == "CreatureVariationSoundEvent")
+		{
+			bool flag = type == "LoopingSoundEvent";
+			return new CreatureVariationSoundEvent(file_name, sound_name, frame, true, flag, min_interval, false);
 		}
 		return null;
 	}

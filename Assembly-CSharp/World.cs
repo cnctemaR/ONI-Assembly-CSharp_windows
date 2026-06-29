@@ -119,8 +119,6 @@ public class World : KMonoBehaviour
 		}
 		FallingWater.instance.UpdateParticles(Time.deltaTime);
 		FallingWater.instance.Render();
-		SpriteSheetAnimManager.instance.UpdateAnims(Time.deltaTime);
-		SpriteSheetAnimManager.instance.Render();
 		if (this.revealedCells.Count > 0)
 		{
 			GameScenePartitioner.Instance.TriggerEvent(this.revealedCells, GameScenePartitioner.Instance.fogOfWarChangedLayer, null);

@@ -65,25 +65,20 @@ public class MinionStartingStats
 						this.personality.hair = 0;
 					}
 				}
-				else if (accessorySlot == Db.Get().AccessorySlots.HatHair)
+				else if (accessorySlot != Db.Get().AccessorySlots.HatHair)
 				{
-					accessory = accessorySlot.Lookup(bodyData.hatHair);
-				}
-				else if (accessorySlot == Db.Get().AccessorySlots.HairAlways)
-				{
-					accessory = accessorySlot.Lookup(bodyData.hairAlways);
-				}
-				else if (accessorySlot == Db.Get().AccessorySlots.Body)
-				{
-					accessory = accessorySlot.Lookup(bodyData.body);
-					if (accessory == null)
+					if (accessorySlot == Db.Get().AccessorySlots.Body)
 					{
-						this.personality.body = 0;
+						accessory = accessorySlot.Lookup(bodyData.body);
+						if (accessory == null)
+						{
+							this.personality.body = 0;
+						}
 					}
-				}
-				else if (accessorySlot == Db.Get().AccessorySlots.Arm)
-				{
-					accessory = accessorySlot.Lookup(bodyData.arms);
+					else if (accessorySlot == Db.Get().AccessorySlots.Arm)
+					{
+						accessory = accessorySlot.Lookup(bodyData.arms);
+					}
 				}
 				if (accessory == null)
 				{
@@ -329,8 +324,6 @@ public class MinionStartingStats
 	{
 		MinionIdentity component = go.GetComponent<MinionIdentity>();
 		component.voiceIdx = this.voiceIdx;
-		KCompBuilder.BodyData bodyData = MinionStartingStats.CreateBodyData(this.personality);
-		MinionStartingStats.ApplyRace(go, bodyData);
 	}
 
 	public static KCompBuilder.BodyData CreateBodyData(Personality p)
@@ -344,9 +337,7 @@ public class MinionStartingStats
 			neck = HashCache.Get().Add(string.Format("neck_{0:000}", p.neck)),
 			arms = HashCache.Get().Add(string.Format("arm_{0:000}", p.body)),
 			body = HashCache.Get().Add(string.Format("body_{0:000}", p.body)),
-			hat = HashedString.Invalid,
-			hatHair = HashCache.Get().Add(string.Format("hat_hair_{0:000}", p.hair)),
-			hairAlways = HashCache.Get().Add(string.Format("hair_{0:000}", p.hair))
+			hat = HashedString.Invalid
 		};
 	}
 
@@ -374,27 +365,6 @@ public class MinionStartingStats
 		}
 		go.GetComponent<MinionIdentity>().SetName(this.Name);
 		go.GetComponent<MinionIdentity>().SetGender(this.GenderStringKey);
-	}
-
-	public static KCompBuildInstance ApplyRace(GameObject go, KCompBuilder.BodyData personality)
-	{
-		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
-		component.ClearAnims();
-		KAnimFile[] array = new KAnimFile[]
-		{
-			Assets.GetAnim("body_comp_default_kanim"),
-			Assets.GetAnim("anim_construction_default_kanim"),
-			Assets.GetAnim("anim_emotes_default_kanim"),
-			Assets.GetAnim("anim_idles_default_kanim"),
-			Assets.GetAnim("anim_loco_firepole_kanim"),
-			Assets.GetAnim("anim_loco_new_kanim"),
-			Assets.GetAnim("anim_loco_tube_kanim"),
-			Assets.GetAnim("anim_construction_firepole_kanim")
-		};
-		component.AddAnims(array);
-		KCompBuildInstance kcompBuildInstance = new KCompBuildInstance(personality, component);
-		component.UpdateSymbolLookups();
-		return kcompBuildInstance;
 	}
 
 	public string Name;

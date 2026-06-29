@@ -148,7 +148,7 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 				{
 					smi.master.multiTool.UpdateHitEffectTarget();
 				}
-			})
+			}, UpdateRate.SIM_200ms, false)
 				.Exit(delegate(AttackChore.StatesInstance smi)
 				{
 					if (this.attackTarget.Get(smi) != null)

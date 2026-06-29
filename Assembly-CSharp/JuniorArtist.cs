@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 
@@ -12,9 +11,7 @@ public class JuniorArtist : RoleConfig
 		base.description = DUPLICANTS.ROLES.JUNIOR_ARTIST.DESCRIPTION;
 		base.roleGroup = "Art";
 		base.hat = Game.Instance.roleManager.GetHat(JuniorArtist.ID);
-		this.preferredChoreTags.Add(GameTags.ChoreTypes.Art);
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Art };
-		this.favoredChoreTypes = new List<ChoreType> { Db.Get().ChoreTypes.Art };
 		base.perks = new RolePerk[]
 		{
 			RoleManager.rolePerks.CanArt,

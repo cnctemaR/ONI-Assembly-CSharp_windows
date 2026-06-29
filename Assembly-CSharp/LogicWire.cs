@@ -13,7 +13,7 @@ public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetwor
 		base.Subscribe(774203113, new Action<object>(this.OnBuildingBroken));
 		base.Subscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		component.HideSymbol(true, LogicWire.OutlineSymbol);
+		component.SetSymbolVisiblity(LogicWire.OutlineSymbol, false);
 	}
 
 	protected override void OnCleanUp()

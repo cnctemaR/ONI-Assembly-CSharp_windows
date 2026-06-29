@@ -129,8 +129,8 @@ namespace OverlayModes
 			Vector2I vector2I;
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
-			Tag wire_id = TagManager.Create("LogicWire", null);
-			Tag bridge_id = TagManager.Create("LogicWireBridge", null);
+			Tag wire_id = TagManager.Create("LogicWire");
+			Tag bridge_id = TagManager.Create("LogicWireBridge");
 			Mode.RemoveOffscreenTargets<SaveLoadRoot>(this.gameObjTargets, vector2I, vector2I2, delegate(SaveLoadRoot root)
 			{
 				if (root == null)

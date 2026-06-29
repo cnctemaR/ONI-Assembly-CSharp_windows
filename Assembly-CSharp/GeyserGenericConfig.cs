@@ -29,7 +29,7 @@ public class GeyserGenericConfig : IMultiEntityConfig
 			{
 				global::Debug.LogWarning("Could not load global world seed for geysers", null);
 			}
-			num = num + (int)inst.transform.position.x + (int)inst.transform.position.y;
+			num = num + (int)inst.transform.GetPosition().x + (int)inst.transform.GetPosition().y;
 			global::System.Random random = new global::System.Random(num);
 			int num2 = random.Next(0, configs.Count);
 			GameObject gameObject2 = GameUtil.KInstantiate(Assets.GetPrefab(configs[num2].id), inst.transform.GetPosition(), Grid.SceneLayer.BuildingBack, Folder.Entities, null, 0);
@@ -44,7 +44,7 @@ public class GeyserGenericConfig : IMultiEntityConfig
 	{
 		float num = 2000f;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim), "inactive", Grid.SceneLayer.BuildingBack, width, height, BUILDINGS.DECOR.BONUS.TIER1, NOISE_POLLUTION.NOISY.TIER6, SimHashes.Creature, null, 293f);
-		gameObject.AddOrGet<OccupyArea>().objectLayer = ObjectLayer.Building;
+		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Katairite);
 		component.Temperature = 372.15f;

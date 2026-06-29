@@ -599,6 +599,14 @@ namespace Database
 			this.WellOverpressure = this.CreateStatusItem("WellOverpressure", BUILDING.STATUSITEMS.WELL_OVERPRESSURE.NAME, BUILDING.STATUSITEMS.WELL_OVERPRESSURE.TOOLTIP, string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, 63486);
 			this.ReleasingPressure = this.CreateStatusItem("ReleasingPressure", BUILDING.STATUSITEMS.RELEASING_PRESSURE.NAME, BUILDING.STATUSITEMS.RELEASING_PRESSURE.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486);
 			this.TooCold = this.CreateStatusItem("TooCold", BUILDING.STATUSITEMS.TOO_COLD.NAME, BUILDING.STATUSITEMS.TOO_COLD.TOOLTIP, string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, 63486);
+			this.IncubatorProgress = this.CreateStatusItem("IncubatorProgress", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.IncubatorProgress.resolveStringCallback = delegate(string str, object data)
+			{
+				EggIncubator eggIncubator = (EggIncubator)data;
+				str = str.Replace("{Percent}", GameUtil.GetFormattedPercent(eggIncubator.GetProgress() * 100f, GameUtil.TimeSlice.None));
+				return str;
+			};
+			this.HabitatNeedsEmptying = this.CreateStatusItem("HabitatNeedsEmptying", "BUILDING", "status_item_need_supply_out", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 		}
 
 		private static bool ShowInUtilityOverlay(SimViewMode mode, object data)
@@ -914,5 +922,9 @@ namespace Database
 		public StatusItem NotInRequiredRoom;
 
 		public StatusItem NotInRecommendedRoom;
+
+		public StatusItem IncubatorProgress;
+
+		public StatusItem HabitatNeedsEmptying;
 	}
 }

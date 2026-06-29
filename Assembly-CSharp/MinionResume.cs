@@ -247,7 +247,6 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		StatusItem statusItem = ((!(newRole == "NoRole")) ? Db.Get().DuplicantStatusItems.Role : Db.Get().DuplicantStatusItems.NoRole);
 		this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Role, statusItem, this);
 		RoleConfig role = Game.Instance.roleManager.GetRole(newRole);
-		base.GetComponent<ChoreConsumer>().preferredChoreTags = role.preferredChoreTags;
 		base.Trigger(540773776, newRole);
 		this.AddExperience(newRole, 0f, true);
 		foreach (RolePerk rolePerk in role.perks)
@@ -423,30 +422,6 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 			}
 		}
 		return this.currentRoleConfig != null && this.currentRoleConfig.HasPerk(perk);
-	}
-
-	public bool IsFavouredChore(Chore chore)
-	{
-		return this.currentRoleConfig != null && this.currentRoleConfig.IsFavoredChore(chore);
-	}
-
-	public bool IsPreferredChore(Chore chore)
-	{
-		if (this.currentRoleConfig == null)
-		{
-			return false;
-		}
-		if (chore.choreTags != null)
-		{
-			foreach (Tag tag in chore.choreTags)
-			{
-				if (this.currentRoleConfig.preferredChoreTags.Contains(tag))
-				{
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	[MyCmpReq]

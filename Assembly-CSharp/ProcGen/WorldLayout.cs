@@ -220,66 +220,6 @@ namespace ProcGen
 			}
 		}
 
-		private void ConvertNearStartAndHotEdgeToType(global::VoronoiTree.Node startArea, string newType)
-		{
-			TagSet tagSet = new TagSet();
-			tagSet.Add(new Tag(Temperature.Range.Hot.ToString()));
-			tagSet.Add(new Tag(Temperature.Range.VeryHot.ToString()));
-			global::VoronoiTree.Node.SplitCommand splitCommand = new global::VoronoiTree.Node.SplitCommand();
-			splitCommand.SplitFunction = new Action<global::VoronoiTree.Tree, global::VoronoiTree.Node.SplitCommand>(this.SplitFunction);
-			int num = 0;
-			List<KeyValuePair<global::VoronoiTree.Node, LineSegment>> neighborsByEdge = startArea.GetNeighborsByEdge();
-			for (int i = 0; i < neighborsByEdge.Count; i++)
-			{
-				KeyValuePair<global::VoronoiTree.Node, LineSegment> keyValuePair = neighborsByEdge[i];
-				if (keyValuePair.Key == null)
-				{
-					global::Debug.Log("Weird, kvp.Key NULL", null);
-				}
-				else
-				{
-					global::VoronoiTree.Tree tree = (global::VoronoiTree.Tree)keyValuePair.Key;
-					if (tree == null)
-					{
-						global::Debug.Log(string.Concat(new object[]
-						{
-							"Weird, VT null [",
-							keyValuePair.Key.type,
-							"] site ID: ",
-							keyValuePair.Key.site.id
-						}), null);
-					}
-					else
-					{
-						LineSegment lineSegment = keyValuePair.Value;
-						Vector2 value = lineSegment.Center().Value;
-						Vector2 vector = 2f * (value - startArea.site.poly.Centroid()).normalized;
-						Vector2 vector2 = lineSegment.p1.Value - lineSegment.p0.Value;
-						lineSegment = new LineSegment(new Vector2?(value + vector2 * 0.55f + vector * 2f), new Vector2?(value - vector2 * 0.55f + vector * 2f));
-						if (tree.tags != null && tree.tags.ContainsOne(tagSet))
-						{
-							List<Leaf> list = new List<Leaf>();
-							tree.GetIntersectingLeafNodes(lineSegment, list);
-							for (int j = 0; j < list.Count; j++)
-							{
-								list[j].AddTag(WorldGenTags.HighDensitySplit);
-								list[j].Split(splitCommand);
-							}
-							global::VoronoiTree.Node.maxDepth = this.voronoiTree.MaxDepth(0);
-							this.voronoiTree.ForceLowestToLeaf();
-							list.Clear();
-							tree.GetIntersectingLeafNodes(lineSegment, list);
-							for (int k = 0; k < list.Count; k++)
-							{
-								this.localGraph.FindNodeByID(list[k].site.id).SetType(newType);
-							}
-							num++;
-						}
-					}
-				}
-			}
-		}
-
 		private char ConvertSignToCmp(int val)
 		{
 			if (val > 0)
@@ -605,7 +545,7 @@ namespace ProcGen
 					}
 					else
 					{
-						global::Debug.LogWarning("No allowedSubworld types. Using default.", null);
+						global::Debug.LogWarning("No allowed Subworld types. Using default.", null);
 						text = "Default";
 					}
 				}

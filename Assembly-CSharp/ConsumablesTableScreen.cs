@@ -20,7 +20,7 @@ public class ConsumablesTableScreen : TableScreen
 		{
 			base.GetWidgetRow(widget_go).SelectAndFocusMinion();
 		}, new Comparison<MinionIdentity>(base.compare_rows_alphabetical), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_name), new Action<MinionIdentity, GameObject, ToolTip>(base.on_tooltip_sort_alphabetically), false);
-		base.AddLabelColumn("Expectations", new Action<MinionIdentity, GameObject>(this.on_load_expectations), new Func<MinionIdentity, GameObject, string>(this.get_value_expectations_label), new Comparison<MinionIdentity>(this.compare_rows_expectations), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_expectations), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_sort_expectations), 128, false);
+		base.AddLabelColumn("Expectations", new Action<MinionIdentity, GameObject>(this.on_load_expectations), new Func<MinionIdentity, GameObject, string>(this.get_value_expectations_label), new Comparison<MinionIdentity>(this.compare_rows_expectations), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_expectations), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_sort_expectations), 128, true);
 		base.AddLabelColumn("Stress", new Action<MinionIdentity, GameObject>(this.on_load_stress), new Func<MinionIdentity, GameObject, string>(this.get_value_stress_label), new Comparison<MinionIdentity>(this.compare_rows_stress), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_stress), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_sort_stress), 64, true);
 		List<IConsumableUIItem> list = new List<IConsumableUIItem>();
 		for (int i = 0; i < FOOD.FOOD_TYPES_LIST.Count; i++)
@@ -88,7 +88,7 @@ public class ConsumablesTableScreen : TableScreen
 		int num = 0;
 		foreach (EdiblesManager.FoodInfo foodInfo in FOOD.FOOD_TYPES_LIST)
 		{
-			if (ConsumerManager.instance.isDiscovered(foodInfo.ConsumableId.ToTag()))
+			if (DebugHandler.InstantBuildMode || ConsumerManager.instance.isDiscovered(foodInfo.ConsumableId.ToTag()))
 			{
 				num++;
 			}
@@ -631,7 +631,7 @@ public class ConsumablesTableScreen : TableScreen
 			}
 			KBatchedAnimController component2 = prefab.GetComponent<KBatchedAnimController>();
 			Image image2 = widget_go.GetComponent<HierarchyReferences>().GetReference("PortraitImage") as Image;
-			if (component2.AnimFiles.Count > 0)
+			if (component2.AnimFiles.Length > 0)
 			{
 				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], "ui");
 				image2.sprite = uispriteFromMultiObjectAnim;

@@ -16,7 +16,7 @@ public class TagModifierLoader : KMonoBehaviour
 		this.beautyModifiers = new Dictionary<int, float>();
 		for (int i = 0; i < array.Length; i++)
 		{
-			Tag tag = TagManager.Create(array[i].tag, null);
+			Tag tag = TagManager.Create(array[i].tag);
 			this.durablityModifiers.Add(tag.GetHashCode(), array[i].durablityModifier);
 			this.beautyModifiers.Add(tag.GetHashCode(), array[i].beautyModifier);
 		}

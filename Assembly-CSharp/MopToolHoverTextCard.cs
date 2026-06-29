@@ -16,7 +16,7 @@ public class MopToolHoverTextCard : HoverTextConfiguration
 		HoverTextScreen instance = HoverTextScreen.Instance;
 		HoverTextDrawer hoverTextDrawer = instance.BeginDrawing();
 		hoverTextDrawer.BeginShadowBar(false);
-		if (Grid.Visible[num] > 0 || DebugPaintElementScreen.Instance.gameObject.activeSelf)
+		if (Grid.IsVisible(num))
 		{
 			base.DrawTitle(instance, hoverTextDrawer);
 			base.DrawInstructions(HoverTextScreen.Instance, hoverTextDrawer);

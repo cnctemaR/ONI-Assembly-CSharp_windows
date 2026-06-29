@@ -326,9 +326,9 @@ public class DebugBaseTemplateButton : KScreen
 			{
 				goto IL_07AF;
 			}
-			if (DebugBaseTemplateButton.<>f__switch$map1 == null)
+			if (DebugBaseTemplateButton.<>f__switch$map2 == null)
 			{
-				DebugBaseTemplateButton.<>f__switch$map1 = new Dictionary<string, int>(8)
+				DebugBaseTemplateButton.<>f__switch$map2 = new Dictionary<string, int>(8)
 				{
 					{ "Wire", 1 },
 					{ "InsulatedWire", 1 },
@@ -341,7 +341,7 @@ public class DebugBaseTemplateButton : KScreen
 				};
 			}
 			int num28;
-			if (!DebugBaseTemplateButton.<>f__switch$map1.TryGetValue(id, out num28))
+			if (!DebugBaseTemplateButton.<>f__switch$map2.TryGetValue(id, out num28))
 			{
 				goto IL_07AF;
 			}

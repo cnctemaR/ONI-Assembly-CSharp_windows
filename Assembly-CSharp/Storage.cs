@@ -131,7 +131,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		{
 			foreach (GameObject gameObject2 in this.items)
 			{
-				if (gameObject2 != null && component != null && gameObject2.GetComponent<Pickupable>().TryAbsorb(component, hide_popups))
+				if (gameObject2 != null && component != null && gameObject2.GetComponent<Pickupable>().TryAbsorb(component, hide_popups, true))
 				{
 					base.Trigger(-1697596308, go);
 					base.Trigger(-778359855, null);
@@ -315,7 +315,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 					KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
 					if (component2)
 					{
-						component2.HackRefreshZOrder();
+						component2.SetSceneLayer(Grid.SceneLayer.Ore);
 					}
 					this.MakeWorldActive(gameObject);
 				}
@@ -1000,7 +1000,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		{
 			float realtimeSinceStartup2 = Time.realtimeSinceStartup;
 			string text = reader.ReadKleiString();
-			Tag tag = TagManager.Create(text, null);
+			Tag tag = TagManager.Create(text);
 			SaveLoadRoot saveLoadRoot = SaveLoadRoot.Load(tag, reader, true);
 			num += Time.realtimeSinceStartup - realtimeSinceStartup2;
 			if (saveLoadRoot != null)

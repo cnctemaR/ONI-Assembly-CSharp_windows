@@ -140,6 +140,15 @@ public class Substance
 		return this.audioConfig.floorEventAudioCategory;
 	}
 
+	public string GetCreatureChewSound()
+	{
+		if (this.audioConfig == null)
+		{
+			return string.Empty;
+		}
+		return this.audioConfig.creatureChewSound;
+	}
+
 	public string name;
 
 	public SimHashes elementID;

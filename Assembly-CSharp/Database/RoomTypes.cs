@@ -146,7 +146,7 @@ namespace Database
 
 		public RoomType GetRoomTypeForID(string id)
 		{
-			foreach (RoomType roomType in this)
+			foreach (RoomType roomType in this.resources)
 			{
 				if (roomType.Id == id)
 				{
@@ -158,12 +158,12 @@ namespace Database
 
 		public RoomType GetRoomType(Room room)
 		{
-			foreach (RoomType roomType in this)
+			foreach (RoomType roomType in this.resources)
 			{
 				if (roomType != this.Neutral && roomType.isSatisfactory(room) == RoomType.RoomIdentificationResult.all_satisfied)
 				{
 					bool flag = false;
-					foreach (RoomType roomType2 in this)
+					foreach (RoomType roomType2 in this.resources)
 					{
 						if (roomType != roomType2 && roomType2 != this.Neutral)
 						{
@@ -222,7 +222,7 @@ namespace Database
 		{
 			RoomType[] array = new RoomType[this.Count];
 			int num = 0;
-			foreach (RoomType roomType in this)
+			foreach (RoomType roomType in this.resources)
 			{
 				if (roomType != this.Neutral)
 				{

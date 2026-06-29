@@ -7,10 +7,9 @@ public class KBatchedAnimInstanceData
 	public KBatchedAnimInstanceData(KAnimConverter.IAnimConverter target)
 	{
 		this.target = target;
-		this.bytes = new byte[112];
 		this.converter = new KBatchedAnimInstanceData.AnimInstanceDataToByteConverter
 		{
-			bytes = this.bytes
+			bytes = new byte[112]
 		};
 		KBatchedAnimInstanceData.AnimInstanceData animInstanceData = this.converter.animInstanceData[0];
 		animInstanceData.tintColour = Color.white;
@@ -86,7 +85,7 @@ public class KBatchedAnimInstanceData
 			animInstanceData.transformMatrix = this.target.GetTransformMatrix();
 		}
 		this.converter.animInstanceData[0] = animInstanceData;
-		Buffer.BlockCopy(this.bytes, 0, output_bytes, output_index, 112);
+		Buffer.BlockCopy(this.converter.bytes, 0, output_bytes, output_index, 112);
 	}
 
 	public void SetOverrideTransformMatrix(Matrix2x3 transform_matrix)
@@ -107,8 +106,6 @@ public class KBatchedAnimInstanceData
 	private KAnimConverter.IAnimConverter target;
 
 	private bool isTransformOverriden;
-
-	private byte[] bytes;
 
 	private KBatchedAnimInstanceData.AnimInstanceDataToByteConverter converter;
 

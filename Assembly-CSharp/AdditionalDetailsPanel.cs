@@ -98,7 +98,9 @@ public class AdditionalDetailsPanel : TargetScreen
 		}
 		bool flag2 = element.id == SimHashes.Vacuum || element.id == SimHashes.Void;
 		float specificHeatCapacity = element.specificHeatCapacity;
-		float thermalConductivity = element.thermalConductivity;
+		float num5 = element.thermalConductivity;
+		Building component3 = this.selectedTarget.GetComponent<Building>();
+		num5 *= ((!(component3 != null)) ? 1f : component3.Def.ThermalConductivity);
 		float highTemp = element.highTemp;
 		float lowTemp = element.lowTemp;
 		this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.PRIMARYELEMENT.NAME, element.name)).Tooltip(this.drawer.Format(UI.ELEMENTAL.PRIMARYELEMENT.TOOLTIP, element.name)).NewLabel(this.drawer.Format(UI.ELEMENTAL.MASS.NAME, GameUtil.GetFormattedMass(num2, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")))
@@ -120,7 +122,7 @@ public class AdditionalDetailsPanel : TargetScreen
 				.Tooltip(this.drawer.Format(UI.ELEMENTAL.SHC.TOOLTIP, specificHeatCapacity))
 				.NewLabel(string.Concat(new string[]
 				{
-					this.drawer.Format(UI.ELEMENTAL.THERMALCONDUCTIVITY.NAME, thermalConductivity),
+					this.drawer.Format(UI.ELEMENTAL.THERMALCONDUCTIVITY.NAME, num5),
 					" (",
 					UI.UNITSUFFIXES.ELECTRICAL.WATT,
 					"/",
@@ -128,7 +130,7 @@ public class AdditionalDetailsPanel : TargetScreen
 					")/",
 					UI.UNITSUFFIXES.TEMPERATURE.KELVIN
 				}))
-				.Tooltip(this.drawer.Format(UI.ELEMENTAL.THERMALCONDUCTIVITY.TOOLTIP, thermalConductivity));
+				.Tooltip(this.drawer.Format(UI.ELEMENTAL.THERMALCONDUCTIVITY.TOOLTIP, num5));
 		}
 		if (flag)
 		{
@@ -147,8 +149,8 @@ public class AdditionalDetailsPanel : TargetScreen
 		if (element.IsSolid)
 		{
 			this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.MELTINGPOINT.NAME, GameUtil.GetFormattedTemperature(highTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true))).Tooltip(this.drawer.Format(UI.ELEMENTAL.MELTINGPOINT.TOOLTIP, GameUtil.GetFormattedTemperature(highTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true)));
-			ElementChunk component3 = this.selectedTarget.GetComponent<ElementChunk>();
-			if (component3 != null)
+			ElementChunk component4 = this.selectedTarget.GetComponent<ElementChunk>();
+			if (component4 != null)
 			{
 				AttributeModifier attributeModifier = component.Element.attributeModifiers.Find((AttributeModifier m) => m.AttributeId == Db.Get().BuildingAttributes.OverheatTemperature.Id);
 				if (attributeModifier != null)

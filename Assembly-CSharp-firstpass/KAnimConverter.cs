@@ -20,8 +20,6 @@ public class KAnimConverter
 
 		string GetName();
 
-		KAnimFile[] GetAnims();
-
 		bool IsActive();
 
 		bool IsVisible();
@@ -38,8 +36,10 @@ public class KAnimConverter
 
 		SymbolInstanceGpuData symbolInstanceGpuData { get; }
 
-		BatchGroupInstance batchGroupInstance { get; }
+		SymbolOverrideInfoGpuData symbolOverrideInfoGpuData { get; }
 
 		KAnimBatchGroup.MaterialType GetMaterialType();
+
+		bool ApplySymbolOverrides();
 	}
 }

@@ -31,12 +31,12 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		Deconstructable component = base.target.GetComponent<Deconstructable>();
 		if (component != null)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsMarkedForDeconstruction, component);
+			base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component);
 		}
 		BuildingEnabledButton component2 = base.target.GetComponent<BuildingEnabledButton>();
 		if (component2 != null)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsMarkedForDisable, component2);
+			base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component2);
 		}
 		if (operational_requirement != FetchOrder2.OperationalRequirement.None && destination.gameObject.GetComponent<Operational>())
 		{

@@ -97,9 +97,6 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 			{
 				return;
 			}
-			this.canvass.Clear();
-			this.canvass.SetMesh(this.batch.group.mesh);
-			this.canvass.materialCount = 1;
 			if (this.uiMat != null)
 			{
 				global::UnityEngine.Object.Destroy(this.uiMat);
@@ -107,52 +104,81 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 			}
 			Material material = this.batch.group.GetMaterial(this.batch.materialType);
 			this.uiMat = new Material(material);
-			this.uiMat.SetFloat(KAnimBatchGroup.ShaderProperty_SYMBOLS_PER_BUILD, material.GetFloat(KAnimBatchGroup.ShaderProperty_SYMBOLS_PER_BUILD));
-			if (KBatchedAnimCanvasRenderer.texturesToCopy == null)
-			{
-				KBatchedAnimCanvasRenderer.texturesToCopy = new KBatchedAnimCanvasRenderer.TextureTopCopyEntry[]
-				{
-					new KBatchedAnimCanvasRenderer.TextureTopCopyEntry
-					{
-						textureId = Shader.PropertyToID("instanceTex"),
-						sizeId = Shader.PropertyToID("INSTANCE_TEXTURE_SIZE")
-					},
-					new KBatchedAnimCanvasRenderer.TextureTopCopyEntry
-					{
-						textureId = Shader.PropertyToID("animTex"),
-						sizeId = Shader.PropertyToID("ANIM_TEXTURE_SIZE")
-					},
-					new KBatchedAnimCanvasRenderer.TextureTopCopyEntry
-					{
-						textureId = Shader.PropertyToID("buildTex"),
-						sizeId = Shader.PropertyToID("BUILD_TEXTURE_SIZE")
-					},
-					new KBatchedAnimCanvasRenderer.TextureTopCopyEntry
-					{
-						textureId = Shader.PropertyToID("symbolInstanceTex"),
-						sizeId = Shader.PropertyToID("SYMBOL_INSTANCE_TEXTURE_SIZE")
-					}
-				};
-			}
-			foreach (KBatchedAnimCanvasRenderer.TextureTopCopyEntry textureTopCopyEntry in KBatchedAnimCanvasRenderer.texturesToCopy)
-			{
-				this.uiMat.SetTexture(textureTopCopyEntry.textureId, this.batch.matProperties.GetTexture(textureTopCopyEntry.textureId));
-				this.uiMat.SetVector(textureTopCopyEntry.sizeId, this.batch.matProperties.GetVector(textureTopCopyEntry.sizeId));
-			}
-			for (int j = 0; j < 12; j++)
-			{
-				Texture texture = this.batch.matProperties.GetTexture(KBatchedAnimCanvasRenderer.atlasNames[j]);
-				if (texture != null)
-				{
-					this.uiMat.SetTexture(KBatchedAnimCanvasRenderer.atlasNames[j], texture);
-				}
-			}
 			((IMaskable)this).RecalculateMasking();
-			this.canvass.SetMaterial(this.uiMat, 0);
 		}
 	}
 
-	private void Update()
+	private void UpdateCanvas()
+	{
+		this.canvass.Clear();
+		this.canvass.SetMesh(this.batch.group.mesh);
+		this.canvass.materialCount = 1;
+		this.canvass.SetMaterial(this.uiMat, 0);
+	}
+
+	private void CopyPropertyBlockToMaterial()
+	{
+		if (KBatchedAnimCanvasRenderer.texturesToCopy == null)
+		{
+			KBatchedAnimCanvasRenderer.texturesToCopy = new KBatchedAnimCanvasRenderer.TextureToCopyEntry[]
+			{
+				new KBatchedAnimCanvasRenderer.TextureToCopyEntry
+				{
+					textureId = Shader.PropertyToID("instanceTex"),
+					sizeId = Shader.PropertyToID("INSTANCE_TEXTURE_SIZE")
+				},
+				new KBatchedAnimCanvasRenderer.TextureToCopyEntry
+				{
+					textureId = Shader.PropertyToID("animTex"),
+					sizeId = Shader.PropertyToID("ANIM_TEXTURE_SIZE")
+				},
+				new KBatchedAnimCanvasRenderer.TextureToCopyEntry
+				{
+					textureId = Shader.PropertyToID("buildTex"),
+					sizeId = Shader.PropertyToID("BUILD_TEXTURE_SIZE")
+				},
+				new KBatchedAnimCanvasRenderer.TextureToCopyEntry
+				{
+					textureId = Shader.PropertyToID("symbolInstanceTex"),
+					sizeId = Shader.PropertyToID("SYMBOL_INSTANCE_TEXTURE_SIZE")
+				},
+				new KBatchedAnimCanvasRenderer.TextureToCopyEntry
+				{
+					textureId = Shader.PropertyToID("symbolOverrideInfoTex"),
+					sizeId = Shader.PropertyToID("SYMBOL_OVERRIDE_INFO_TEXTURE_SIZE")
+				}
+			};
+		}
+		foreach (KBatchedAnimCanvasRenderer.TextureToCopyEntry textureToCopyEntry in KBatchedAnimCanvasRenderer.texturesToCopy)
+		{
+			this.uiMat.SetTexture(textureToCopyEntry.textureId, this.batch.matProperties.GetTexture(textureToCopyEntry.textureId));
+			this.uiMat.SetVector(textureToCopyEntry.sizeId, this.batch.matProperties.GetVector(textureToCopyEntry.sizeId));
+		}
+		for (int j = 0; j < KAnimBatchManager.instance.atlasNames.Length; j++)
+		{
+			Texture texture = this.batch.matProperties.GetTexture(KAnimBatchManager.instance.atlasNames[j]);
+			if (texture != null)
+			{
+				this.uiMat.SetTexture(KAnimBatchManager.instance.atlasNames[j], texture);
+			}
+		}
+		foreach (KBatchedAnimCanvasRenderer.TextureToCopyEntry textureToCopyEntry2 in KBatchedAnimCanvasRenderer.texturesToCopy)
+		{
+			this.uiMat.SetTexture(textureToCopyEntry2.textureId, this.batch.matProperties.GetTexture(textureToCopyEntry2.textureId));
+			this.uiMat.SetVector(textureToCopyEntry2.sizeId, this.batch.matProperties.GetVector(textureToCopyEntry2.sizeId));
+		}
+		for (int l = 0; l < KAnimBatchManager.instance.atlasNames.Length; l++)
+		{
+			Texture texture2 = this.batch.matProperties.GetTexture(KAnimBatchManager.instance.atlasNames[l]);
+			if (texture2 != null)
+			{
+				this.uiMat.SetTexture(KAnimBatchManager.instance.atlasNames[l], texture2);
+			}
+		}
+		this.uiMat.SetFloat(KAnimBatch.ShaderProperty_SUPPORTS_SYMBOL_OVERRIDING, this.batch.matProperties.GetFloat(KAnimBatch.ShaderProperty_SUPPORTS_SYMBOL_OVERRIDING));
+	}
+
+	private void LateUpdate()
 	{
 		if (this.batch != null)
 		{
@@ -165,9 +191,8 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 			this._ClipRect.y = this.rootRectTransform.rect.yMin;
 			this._ClipRect.z = this.rootRectTransform.rect.xMax;
 			this._ClipRect.w = this.rootRectTransform.rect.yMax;
-			Texture texture = this.batch.matProperties.GetTexture("instanceTex");
-			this.uiMat.SetTexture("instanceTex", texture);
-			this.uiMat.SetTexture("symbolInstanceTex", this.batch.matProperties.GetTexture("symbolInstanceTex"));
+			this.UpdateCanvas();
+			this.CopyPropertyBlockToMaterial();
 		}
 	}
 
@@ -177,23 +202,17 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 
 	public Material uiMat;
 
-	public static string[] atlasNames = new string[]
-	{
-		"atlas0", "atlas1", "atlas2", "atlas3", "atlas4", "atlas5", "atlas6", "atlas7", "atlas8", "atlas9",
-		"atlas10", "atlas11", "atlas12"
-	};
-
 	private KAnimConverter.IAnimConverter converter;
 
 	private CompareFunction _cmp = CompareFunction.Never;
 
 	private StencilOp _op = StencilOp.Zero;
 
-	private static KBatchedAnimCanvasRenderer.TextureTopCopyEntry[] texturesToCopy = null;
+	private static KBatchedAnimCanvasRenderer.TextureToCopyEntry[] texturesToCopy;
 
 	private Vector4 _ClipRect = new Vector4(0f, 0f, 0f, 1f);
 
-	private struct TextureTopCopyEntry
+	private struct TextureToCopyEntry
 	{
 		public int textureId;
 

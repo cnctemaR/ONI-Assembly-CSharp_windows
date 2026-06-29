@@ -560,16 +560,16 @@ public static class GameUtil
 		HashSet<int> hashSet = new HashSet<int>();
 		if (allowLiquid)
 		{
-			hashSet = GameUtil.FloodCollectCells(startCell, (int cell) => !Grid.Solid[cell], 300, null);
+			hashSet = GameUtil.FloodCollectCells(startCell, (int cell) => !Grid.Solid[cell], 300, null, true);
 		}
 		else
 		{
-			hashSet = GameUtil.FloodCollectCells(startCell, (int cell) => Grid.Element[cell].IsVacuum || Grid.Element[cell].IsGas, 300, null);
+			hashSet = GameUtil.FloodCollectCells(startCell, (int cell) => Grid.Element[cell].IsVacuum || Grid.Element[cell].IsGas, 300, null, true);
 		}
 		return hashSet;
 	}
 
-	public static HashSet<int> FloodCollectCells(int start_cell, Func<int, bool> is_valid, int maxSize = 300, HashSet<int> AddInvalidCellsToSet = null)
+	public static HashSet<int> FloodCollectCells(int start_cell, Func<int, bool> is_valid, int maxSize = 300, HashSet<int> AddInvalidCellsToSet = null, bool clearOversizedResults = true)
 	{
 		HashSet<int> hashSet = new HashSet<int>();
 		HashSet<int> hashSet2 = new HashSet<int>();
@@ -582,7 +582,7 @@ public static class GameUtil
 				AddInvalidCellsToSet.UnionWith(hashSet);
 			}
 		}
-		if (hashSet.Count > maxSize)
+		if (hashSet.Count > maxSize && clearOversizedResults)
 		{
 			hashSet.Clear();
 		}
@@ -682,17 +682,17 @@ public static class GameUtil
 		return num;
 	}
 
-	public static void FloodFillConditional(int start_cell, Func<int, bool> condition, ICollection<int> visited_cells)
+	public static void FloodFillConditional(int start_cell, Func<int, bool> condition, ICollection<int> visited_cells, ICollection<int> valid_cells = null)
 	{
 		GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
 		{
 			cell = start_cell,
 			depth = 0
 		});
-		GameUtil.FloodFillConditional(GameUtil.FloodFillNext, condition, visited_cells);
+		GameUtil.FloodFillConditional(GameUtil.FloodFillNext, condition, visited_cells, valid_cells);
 	}
 
-	public static void FloodFillConditional(Queue<GameUtil.FloodFillInfo> queue, Func<int, bool> condition, ICollection<int> visited_cells)
+	public static void FloodFillConditional(Queue<GameUtil.FloodFillInfo> queue, Func<int, bool> condition, ICollection<int> visited_cells, ICollection<int> valid_cells = null)
 	{
 		while (queue.Count > 0)
 		{
@@ -704,6 +704,10 @@ public static class GameUtil
 					visited_cells.Add(floodFillInfo.cell);
 					if (condition(floodFillInfo.cell))
 					{
+						if (valid_cells != null)
+						{
+							valid_cells.Add(floodFillInfo.cell);
+						}
 						queue.Enqueue(new GameUtil.FloodFillInfo
 						{
 							cell = Grid.CellLeft(floodFillInfo.cell),
@@ -1175,8 +1179,29 @@ public static class GameUtil
 		{
 			return empty;
 		}
-		KKeyCode mKeyCode = GameUtil.ActionToBinding(action).mKeyCode;
-		return GameUtil.GetKeycodeLocalized(mKeyCode).ToUpper();
+		BindingEntry bindingEntry = GameUtil.ActionToBinding(action);
+		KKeyCode mKeyCode = bindingEntry.mKeyCode;
+		if (bindingEntry.mModifier == global::Modifier.None)
+		{
+			return GameUtil.GetKeycodeLocalized(mKeyCode).ToUpper();
+		}
+		string text = string.Empty;
+		switch (bindingEntry.mModifier)
+		{
+		case global::Modifier.Alt:
+			text = GameUtil.GetKeycodeLocalized(KKeyCode.LeftAlt).ToUpper();
+			break;
+		case global::Modifier.Ctrl:
+			text = GameUtil.GetKeycodeLocalized(KKeyCode.LeftControl).ToUpper();
+			break;
+		case global::Modifier.Shift:
+			text = GameUtil.GetKeycodeLocalized(KKeyCode.LeftShift).ToUpper();
+			break;
+		case global::Modifier.CapsLock:
+			text = GameUtil.GetKeycodeLocalized(KKeyCode.CapsLock).ToUpper();
+			break;
+		}
+		return text + " + " + GameUtil.GetKeycodeLocalized(mKeyCode).ToUpper();
 	}
 
 	public static void CreateExplosion(Vector3 explosion_pos)

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 
@@ -12,9 +11,7 @@ public class SeniorResearcher : RoleConfig
 		base.description = DUPLICANTS.ROLES.SENIOR_RESEARCHER.DESCRIPTION;
 		base.roleGroup = "Research";
 		base.hat = Game.Instance.roleManager.GetHat(SeniorResearcher.ID);
-		this.preferredChoreTags.Add(GameTags.ChoreTypes.Research);
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Learning };
-		this.favoredChoreTypes = new List<ChoreType> { Db.Get().ChoreTypes.Research };
 		base.perks = new RolePerk[]
 		{
 			RoleManager.rolePerks.IncreaseLearningLarge,

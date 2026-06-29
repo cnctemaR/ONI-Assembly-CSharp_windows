@@ -58,7 +58,7 @@ public class FleeChore : Chore<FleeChore.StatesInstance>
 			this.planFleeRoute.Enter(delegate(FleeChore.StatesInstance smi)
 			{
 				int num = Grid.PosToCell(this.fleeFromTarget.Get(smi));
-				HashSet<int> hashSet = GameUtil.FloodCollectCells(Grid.PosToCell(smi.master.gameObject), new Func<int, bool>(smi.master.CanFleeTo), 300, null);
+				HashSet<int> hashSet = GameUtil.FloodCollectCells(Grid.PosToCell(smi.master.gameObject), new Func<int, bool>(smi.master.CanFleeTo), 300, null, true);
 				int num2 = -1;
 				int num3 = -1;
 				foreach (int num4 in hashSet)

@@ -49,15 +49,15 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		string text;
 		if (isAutoSave)
 		{
-			text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, true, SaveLoader.GetActiveSaveFilePath()));
+			text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, true, SaveLoader.GetActiveSaveFilePath(), false));
 		}
 		else
 		{
-			text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName));
+			text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, false));
 		}
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 262109U;
+		header.buildVersion = 266730U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);
@@ -124,6 +124,9 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 	[Serialize]
 	public bool enableAutoDisinfect = true;
 
+	[Serialize]
+	public bool sandboxEnabled;
+
 	private string baseName;
 
 	public static SaveGame Instance;
@@ -149,7 +152,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 
 	public struct GameInfo
 	{
-		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName, bool isAutoSave, string originalSaveName)
+		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName, bool isAutoSave, string originalSaveName, bool sandboxEnabled = false)
 		{
 			this.numberOfCycles = numberOfCycles;
 			this.numberOfDuplicants = numberOfDuplicants;
@@ -160,7 +163,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			this.saveMinorVersion = 3;
 		}
 
-		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName)
+		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName, bool sandboxEnabled = false)
 		{
 			this.numberOfCycles = numberOfCycles;
 			this.numberOfDuplicants = numberOfDuplicants;

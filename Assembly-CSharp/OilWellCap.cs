@@ -227,7 +227,7 @@ public class OilWellCap : Workable, ISliderControl, IElementEmitter
 				.Update(delegate(OilWellCap.StatesInstance smi, float dt)
 				{
 					smi.master.AddGasPressure(dt);
-				});
+				}, UpdateRate.SIM_200ms, false);
 			this.active.pre.PlayAnim("working_pre").ParamTransition<float>(this.pressurePercent, this.overpressure, (OilWellCap.StatesInstance smi, float p) => p >= 1f).ParamTransition<bool>(this.working, this.releasing_pressure, (OilWellCap.StatesInstance smi, bool p) => p)
 				.OnAnimQueueComplete(this.active.loop);
 			this.active.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).ParamTransition<float>(this.pressurePercent, this.active.pst, (OilWellCap.StatesInstance smi, float p) => p >= 1f).ParamTransition<bool>(this.working, this.active.pst, (OilWellCap.StatesInstance smi, bool p) => p)
@@ -240,7 +240,7 @@ public class OilWellCap : Workable, ISliderControl, IElementEmitter
 				.Update(delegate(OilWellCap.StatesInstance smi, float dt)
 				{
 					smi.master.ReleaseGasPressure(dt);
-				});
+				}, UpdateRate.SIM_200ms, false);
 			this.releasing_pressure.pre.PlayAnim("steam_out_pre").OnAnimQueueComplete(this.releasing_pressure.loop);
 			this.releasing_pressure.loop.PlayAnim("steam_out_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.OperationalChanged, this.releasing_pressure.pst, (OilWellCap.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational);
 			this.releasing_pressure.pst.PlayAnim("steam_out_pst").OnAnimQueueComplete(this.active);

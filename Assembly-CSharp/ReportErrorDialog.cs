@@ -54,25 +54,13 @@ public class ReportErrorDialog : MonoBehaviour
 		}
 	}
 
-	public void PopupConfirmDialog(string text, global::System.Action onConfirm, global::System.Action onQuit, global::System.Action onContinue, bool is_vcruntime_error = false)
+	public void PopupConfirmDialog(string text, global::System.Action onConfirm, global::System.Action onQuit, global::System.Action onContinue)
 	{
 		this.confirmAction = onConfirm;
 		this.quitAction = onQuit;
 		this.continueAction = onContinue;
-		if (is_vcruntime_error)
-		{
-			this.CrashLabel.gameObject.SetActive(false);
-			this.InfoBox.gameObject.SetActive(false);
-			this.VCLinkButton.onClick.AddListener(delegate
-			{
-				Application.OpenURL("http://support.kleientertainment.com/customer/portal/articles/2747147");
-			});
-		}
-		else
-		{
-			this.VCCrashLabel.gameObject.SetActive(false);
-			this.VCLinkButton.gameObject.SetActive(false);
-		}
+		this.VCCrashLabel.gameObject.SetActive(false);
+		this.VCLinkButton.gameObject.SetActive(false);
 		int num = 0;
 		if (this.confirmAction != null)
 		{

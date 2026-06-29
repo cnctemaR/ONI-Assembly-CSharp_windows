@@ -283,8 +283,11 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 					if (Grid.VisibilityTest(num6, num7, i, j, false, false))
 					{
 						int num8 = Grid.XYToCell(i, j);
-						Grid.Decor[num8] += this.decor;
-						this.provider.cells[this.provider.cellCount++] = num8;
+						if (Grid.IsValidCell(num8))
+						{
+							Grid.Decor[num8] += this.decor;
+							this.provider.cells[this.provider.cellCount++] = num8;
+						}
 					}
 				}
 			}
@@ -296,9 +299,17 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 			{
 				return;
 			}
+			if (this.provider == null)
+			{
+				return;
+			}
 			for (int i = 0; i < this.provider.cellCount; i++)
 			{
-				Grid.Decor[this.provider.cells[i]] -= this.decor;
+				int num = this.provider.cells[i];
+				if (Grid.IsValidCell(num))
+				{
+					Grid.Decor[num] -= this.decor;
+				}
 			}
 		}
 

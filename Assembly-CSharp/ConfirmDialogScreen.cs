@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -45,14 +46,8 @@ public class ConfirmDialogScreen : KModalScreen
 		{
 			num++;
 		}
-		if (confirm_text != null)
-		{
-			this.confirmButton.GetComponentInChildren<LocText>().text = confirm_text;
-		}
-		if (cancel_text != null)
-		{
-			this.cancelButton.GetComponentInChildren<LocText>().text = cancel_text;
-		}
+		this.confirmButton.GetComponentInChildren<LocText>().text = ((confirm_text != null) ? confirm_text : UI.CONFIRMDIALOG.OK.text);
+		this.cancelButton.GetComponentInChildren<LocText>().text = ((cancel_text != null) ? cancel_text : UI.CONFIRMDIALOG.CANCEL.text);
 		this.confirmButton.GetComponent<KButton>().onClick += this.OnSelect_OK;
 		this.cancelButton.GetComponent<KButton>().onClick += this.OnSelect_CANCEL;
 		this.configurableButton.GetComponent<KButton>().onClick += this.OnSelect_third;

@@ -32,27 +32,29 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 		{
 			FallerComponents.OnSolidChanged(h, null);
 		};
-		float num2 = -GravityComponent.GetOffset(data.transform) - 0.07f;
-		bool flag = Grid.Solid[Grid.PosToCell(new Vector3(position.x, position.y + num2, position.z))] && data.initialVelocity.sqrMagnitude == 0f;
-		if (Grid.Solid[num] || flag)
+		float num2 = -GravityComponent.GetRadius(data.transform) - 0.07f;
+		int num3 = Grid.PosToCell(new Vector3(position.x, position.y + num2, position.z));
+		bool flag = Grid.IsValidCell(num3) && Grid.Solid[num3];
+		bool flag2 = flag && data.initialVelocity.sqrMagnitude == 0f;
+		if ((Grid.IsValidCell(num) && Grid.Solid[num]) || flag2)
 		{
 			data.solidChangedCB = delegate(object ev_data)
 			{
 				FallerComponents.OnSolidChanged(h, ev_data);
 			};
-			int num3 = 2;
+			int num4 = 2;
 			Vector2I vector2I = Grid.CellToXY(num);
 			vector2I.y--;
 			if (vector2I.y < 0)
 			{
 				vector2I.y = 0;
-				num3 = 1;
+				num4 = 1;
 			}
 			else if (vector2I.y == Grid.HeightInCells - 1)
 			{
-				num3 = 1;
+				num4 = 1;
 			}
-			data.partitionerEntry = GameScenePartitioner.Instance.Add("Faller", data.transform.gameObject, vector2I.x, vector2I.y, 1, num3, GameScenePartitioner.Instance.solidChangedLayer, data.solidChangedCB);
+			data.partitionerEntry = GameScenePartitioner.Instance.Add("Faller", data.transform.gameObject, vector2I.x, vector2I.y, 1, num4, GameScenePartitioner.Instance.solidChangedLayer, data.solidChangedCB);
 			GameComps.Fallers.SetData(h, data);
 		}
 		else
@@ -126,8 +128,11 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 			{
 				data.partitionerEntry.Release();
 			}
-			data.partitionerEntry = GameScenePartitioner.Instance.Add("Faller", transform.gameObject, num2, GameScenePartitioner.Instance.solidChangedLayer, action);
-			GameComps.Fallers.SetData(h, data);
+			if (Grid.IsValidCell(num2))
+			{
+				data.partitionerEntry = GameScenePartitioner.Instance.Add("Faller", transform.gameObject, num2, GameScenePartitioner.Instance.solidChangedLayer, action);
+				GameComps.Fallers.SetData(h, data);
+			}
 		}
 	}
 

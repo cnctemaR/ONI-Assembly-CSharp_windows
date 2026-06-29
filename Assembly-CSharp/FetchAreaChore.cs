@@ -451,6 +451,10 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 						Pickupable pickupable = null;
 						for (int i = 0; i < deliverables.Count; i++)
 						{
+							if (num <= 0f)
+							{
+								break;
+							}
 							if (!(deliverables[i] == null))
 							{
 								Pickupable pickupable2 = deliverables[i].Take(num);

@@ -1409,6 +1409,17 @@ namespace STRINGS
 				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants cannot access the colony's " + UI.FormatAsLink("Food", "FOOD") + ":";
 			}
 
+			public class RATIONSNOTPERMITTED
+			{
+				public static LocString NAME = "Food Not Permitted";
+
+				public static LocString TOOLTIP = "This Duplicant is not allowed to eat any of the food they can reach.";
+
+				public static LocString NOTIFICATION_NAME = "Unpermitted food";
+
+				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants are not allowed to eat any of the " + UI.FormatAsLink("Food", "FOOD") + " within their reach:";
+			}
+
 			public class ROTTEN
 			{
 				public static LocString NAME = "Rotten";
@@ -2662,6 +2673,11 @@ namespace STRINGS
 				public static LocString NOTIFICATION_NAME = "Binge Eating";
 
 				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants became so " + UI.FormatAsLink("Stressed", "STRESS") + " they began overeating:";
+			}
+
+			public class METABOLISM_CALORIE_MODIFIER
+			{
+				public static LocString NAME = "Metabolism";
 			}
 
 			public class WORKING
@@ -4217,6 +4233,13 @@ namespace STRINGS
 				public static LocString DESC = "Determines how long a Duplicant needs to do their \"business\".";
 			}
 
+			public class METABOLISM
+			{
+				public static LocString NAME = "Metabolism";
+
+				public static LocString DESC = "Affects the rate at which a critter burns calories.";
+			}
+
 			public class ROOMTEMPERATUREPREFERENCE
 			{
 				public static LocString NAME = "Temperature Preference";
@@ -4271,11 +4294,18 @@ namespace STRINGS
 				public static LocString NAME = "Power Output";
 			}
 
-			public class DOMESTICATIONDELTA
+			public class INCUBATIONDELTA
 			{
-				public static LocString NAME = "Domesticability";
+				public static LocString NAME = "Incubation Rate";
 
-				public static LocString DESC = "Determines how easily a critter gains or loses Domestication.";
+				public static LocString DESC = string.Empty;
+			}
+
+			public class HAPPINESS
+			{
+				public static LocString NAME = "Happiness";
+
+				public static LocString DESC = string.Empty;
 			}
 		}
 
@@ -4505,6 +4535,13 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Groundskeeper", "HANDYMAN");
 
 				public static LocString DESCRIPTION = "Becoming a Groundskeeper minorly improves a Duplicant's physical strength.";
+			}
+
+			public class PLUMBER
+			{
+				public static LocString NAME = UI.FormatAsLink("Plumber", "PLUMBER");
+
+				public static LocString DESCRIPTION = "Becoming a plumber allows you to empty pipes without leaking water everywhere.";
 			}
 
 			public class RANCHER

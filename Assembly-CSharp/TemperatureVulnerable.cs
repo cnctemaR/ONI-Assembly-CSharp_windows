@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -18,6 +19,9 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 			return this._occupyArea;
 		}
 	}
+
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event Action<float, float> OnTemperature;
 
 	public float InternalTemperature
 	{
@@ -122,6 +126,10 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		}
 		base.smi.sm.internalTemp.Set(this.InternalTemperature, base.smi);
 		this.displayTemperatureAmount.value = this.InternalTemperature;
+		if (this.OnTemperature != null)
+		{
+			this.OnTemperature(dt, this.InternalTemperature);
+		}
 	}
 
 	private float GetAverageTemperature(int cell)
@@ -201,11 +209,13 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 			this.lethalCold.TriggerOnEnter(GameHashes.TooColdFatal, null).ParamTransition<float>(this.internalTemp, this.warningCold, (TemperatureVulnerable.StatesInstance smi, float p) => p > smi.master.internalTemperatureLethal_Low).Enter(delegate(TemperatureVulnerable.StatesInstance smi)
 			{
 				smi.master.internalTemperatureState = TemperatureVulnerable.TemperatureState.LethalCold;
-			});
+			})
+				.Enter(new StateMachine<TemperatureVulnerable.States, TemperatureVulnerable.StatesInstance, TemperatureVulnerable, object>.State.Callback(TemperatureVulnerable.States.Kill));
 			this.lethalHot.TriggerOnEnter(GameHashes.TooHotFatal, null).ParamTransition<float>(this.internalTemp, this.warningHot, (TemperatureVulnerable.StatesInstance smi, float p) => p < smi.master.internalTemperatureLethal_High).Enter(delegate(TemperatureVulnerable.StatesInstance smi)
 			{
 				smi.master.internalTemperatureState = TemperatureVulnerable.TemperatureState.LethalHot;
-			});
+			})
+				.Enter(new StateMachine<TemperatureVulnerable.States, TemperatureVulnerable.StatesInstance, TemperatureVulnerable, object>.State.Callback(TemperatureVulnerable.States.Kill));
 			this.warningCold.TriggerOnEnter(GameHashes.TooColdWarning, null).ParamTransition<float>(this.internalTemp, this.lethalCold, (TemperatureVulnerable.StatesInstance smi, float p) => p < smi.master.internalTemperatureLethal_Low).ParamTransition<float>(this.internalTemp, this.normal, (TemperatureVulnerable.StatesInstance smi, float p) => p > smi.master.internalTemperatureWarning_Low)
 				.Enter(delegate(TemperatureVulnerable.StatesInstance smi)
 				{
@@ -232,6 +242,15 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 			{
 				smi.master.internalTemperatureState = TemperatureVulnerable.TemperatureState.Perfect;
 			});
+		}
+
+		private static void Kill(StateMachine.Instance smi)
+		{
+			DeathMonitor.Instance smi2 = smi.GetSMI<DeathMonitor.Instance>();
+			if (smi2 != null)
+			{
+				smi2.Kill(Db.Get().Deaths.Generic);
+			}
 		}
 
 		public StateMachine<TemperatureVulnerable.States, TemperatureVulnerable.StatesInstance, TemperatureVulnerable, object>.FloatParameter internalTemp;

@@ -16,8 +16,7 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		component.Play(Workable.DefaultWorkAnims, KAnim.PlayMode.Loop);
+		base.GetComponent<KAnimControllerBase>().Play(Workable.DefaultWorkAnims, KAnim.PlayMode.Loop);
 		Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(base.gameObject);
 		if (roomOfBuilding != null)
 		{

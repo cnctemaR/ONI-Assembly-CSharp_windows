@@ -8,7 +8,7 @@ public class Turbine : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.simEmitCBHandle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimEmitted)));
+		this.simEmitCBHandle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimEmitted), "TurbineEmit"));
 		BuildingDef def = base.GetComponent<BuildingComplete>().Def;
 		this.srcCells = new int[def.WidthInCells];
 		this.destCells = new int[def.WidthInCells];
@@ -65,7 +65,7 @@ public class Turbine : KMonoBehaviour
 		float num = this.pumpKGRate * dt / (float)this.srcCells.Length;
 		foreach (int num2 in this.srcCells)
 		{
-			HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimConsume)));
+			HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimConsume), "TurbineConsume"));
 			SimMessages.ConsumeMass(num2, this.srcElem, num, 1, handle.index);
 		}
 	}

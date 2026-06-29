@@ -197,7 +197,7 @@ public class BaseUtilityBuildTool : DragTool
 		}
 		this.path.Clear();
 		int num = Grid.PosToCell(cursor_pos);
-		if (Grid.Visible[num] > 0 || PropertyTextures.FogOfWarScale == 1f)
+		if (Grid.IsVisible(num))
 		{
 			bool flag = this.CheckValidPathPiece(num);
 			this.path.Add(new BaseUtilityBuildTool.PathNode
@@ -327,7 +327,7 @@ public class BaseUtilityBuildTool : DragTool
 			{
 				utilityConnections = this.conduitMgr.GetConnections(pathNode.cell, false);
 				string text;
-				if (DebugHandler.InstantBuildMode && this.def.IsValidBuildLocation(this.visualizer, vector, Orientation.Neutral) && this.def.IsValidPlaceLocation(this.visualizer, vector, Orientation.Neutral, out text))
+				if ((DebugHandler.InstantBuildMode || (Game.Instance.SandboxModeActive && SandboxToolParameterMenu.instance.settings.InstantBuild)) && this.def.IsValidBuildLocation(this.visualizer, vector, Orientation.Neutral) && this.def.IsValidPlaceLocation(this.visualizer, vector, Orientation.Neutral, out text))
 				{
 					gameObject = this.def.Build(pathNode.cell, Orientation.Neutral, null, this.selectedElements, 293.15f, false, true);
 				}
@@ -369,7 +369,7 @@ public class BaseUtilityBuildTool : DragTool
 					component3.UpdateConnections(utilityConnections);
 				}
 			}
-			if (this.def.ReplacementLayer != ObjectLayer.NumLayers && !DebugHandler.InstantBuildMode && this.def.IsValidBuildLocation(null, vector, Orientation.Neutral))
+			if (this.def.ReplacementLayer != ObjectLayer.NumLayers && !DebugHandler.InstantBuildMode && (!Game.Instance.SandboxModeActive || !SandboxToolParameterMenu.instance.settings.InstantBuild) && this.def.IsValidBuildLocation(null, vector, Orientation.Neutral))
 			{
 				GameObject gameObject2 = Grid.Objects[pathNode.cell, (int)this.def.TileLayer];
 				GameObject gameObject3 = Grid.Objects[pathNode.cell, (int)this.def.ReplacementLayer];

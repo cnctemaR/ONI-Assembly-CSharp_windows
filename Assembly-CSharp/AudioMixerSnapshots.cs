@@ -37,6 +37,9 @@ public class AudioMixerSnapshots : ScriptableObject
 	public string MenuOpenMigrated;
 
 	[EventRef]
+	public string MenuOpenHalfEffect;
+
+	[EventRef]
 	public string SpeedPausedMigrated;
 
 	[EventRef]

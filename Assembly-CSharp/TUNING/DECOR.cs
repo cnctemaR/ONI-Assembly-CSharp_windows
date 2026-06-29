@@ -49,6 +49,24 @@ namespace TUNING
 				amount = 35,
 				radius = 6
 			};
+
+			public static EffectorValues TIER6 = new EffectorValues
+			{
+				amount = 50,
+				radius = 7
+			};
+
+			public static EffectorValues TIER7 = new EffectorValues
+			{
+				amount = 80,
+				radius = 7
+			};
+
+			public static EffectorValues TIER8 = new EffectorValues
+			{
+				amount = 200,
+				radius = 8
+			};
 		}
 
 		public class PENALTY

@@ -105,22 +105,22 @@ public class Deconstructable : Workable
 		gameObject.transform.SetPosition(gameObject.transform.GetPosition() + Vector3.up * 0.5f);
 		int num = Grid.PosToCell(gameObject.transform.GetPosition());
 		int num2 = Grid.CellAbove(num);
-		Vector2 vector;
+		Vector2 zero;
 		if ((Grid.IsValidCell(num) && Grid.Solid[num]) || (Grid.IsValidCell(num2) && Grid.Solid[num2]))
 		{
-			vector = Vector2.zero;
+			zero = Vector2.zero;
 		}
 		else
 		{
-			Vector3 vector2;
-			gameObject.transform.GetPosition().x = vector2.x + (global::UnityEngine.Random.value - 0.5f) * Deconstructable.scale.x;
-			vector = Vector2.up * Deconstructable.scale.y;
+			Vector3 vector;
+			gameObject.transform.GetPosition().x = vector.x + (global::UnityEngine.Random.value - 0.5f) * 0.5f;
+			zero = new Vector2(global::UnityEngine.Random.Range(-1f, 1f) * Deconstructable.INITIAL_VELOCITY_RANGE.x, Deconstructable.INITIAL_VELOCITY_RANGE.y);
 		}
 		if (GameComps.Fallers.Has(gameObject))
 		{
 			GameComps.Fallers.Remove(gameObject);
 		}
-		GameComps.Fallers.Add(gameObject, vector);
+		GameComps.Fallers.Add(gameObject, zero);
 		this.destroyed = true;
 		base.gameObject.DeleteObject();
 	}
@@ -139,7 +139,7 @@ public class Deconstructable : Workable
 				this.chore = new WorkChore<Deconstructable>(Db.Get().ChoreTypes.Deconstruct, this, null, null, true, null, null, null, true, null, false, null, true, true, true, PriorityScreen.PriorityClass.basic, 0, true);
 				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction, this);
 				this.isMarkedForDeconstruction = true;
-				base.Trigger(-790448070, null);
+				base.Trigger(2108245096, "Deconstruct");
 			}
 		}
 	}
@@ -247,7 +247,7 @@ public class Deconstructable : Workable
 	[Serialize]
 	private bool isMarkedForDeconstruction;
 
-	private static Vector2 scale = new Vector2(0.5f, 4f);
+	private static Vector2 INITIAL_VELOCITY_RANGE = new Vector2(0.5f, 4f);
 
 	private bool destroyed;
 }

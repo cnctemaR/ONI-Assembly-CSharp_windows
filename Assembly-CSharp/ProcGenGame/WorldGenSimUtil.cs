@@ -10,14 +10,14 @@ namespace ProcGenGame
 {
 	public static class WorldGenSimUtil
 	{
-		public unsafe static bool DoSettleSim(Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dcs, WorldGen.OfflineCallbackFunction updateProgressFn, Data data, List<KeyValuePair<Vector2I, TemplateContainer>> templateSpawnTargets, Action<OfflineWorldGen.ErrorInfo> error_cb)
+		public unsafe static bool DoSettleSim(Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dcs, WorldGen.OfflineCallbackFunction updateProgressFn, Data data, List<KeyValuePair<Vector2I, TemplateContainer>> templateSpawnTargets, Action<OfflineWorldGen.ErrorInfo> error_cb, Action<Sim.Cell[], float[], Sim.DiseaseCell[]> onSettleComplete)
 		{
 			Sim.SIM_Initialize(null);
 			SimMessages.CreateSimElementsTable(ElementLoader.elements);
 			SimMessages.CreateWorldGenHACKDiseaseTable(WorldGen.diseaseIds);
 			Sim.DiseaseCell[] array = new Sim.DiseaseCell[dcs.Length];
 			SimMessages.SimDataInitializeFromCells(Grid.WidthInCells, Grid.HeightInCells, cells, bgTemp, array);
-			int num = 300;
+			int num = 500;
 			updateProgressFn(UI.WORLDGEN.SETTLESIM.key, 0f, WorldGenProgressStages.Stages.SettleSim);
 			Vector2I vector2I = new Vector2I(0, 0);
 			Vector2I vector2I2 = new Vector2I(Grid.WidthInCells, Grid.HeightInCells);
@@ -112,6 +112,7 @@ namespace ProcGenGame
 			}
 			Sim.HandleMessage(SimMessageHashes.SettleWorldGen, 0, null);
 			bool flag2 = WorldGenSimUtil.SaveSim(data, error_cb);
+			onSettleComplete(cells, bgTemp, dcs);
 			Sim.Shutdown();
 			return flag2;
 		}

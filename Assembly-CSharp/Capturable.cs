@@ -32,6 +32,10 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 		base.OnSpawn();
 		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		if (this.markedForCapture)
+		{
+			Prioritizable.AddRef(base.gameObject);
+		}
 		this.UpdateStatusItem();
 		this.UpdateChore();
 		base.SetWorkTime(10f);
@@ -51,6 +55,14 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 
 	public void MarkForCapture(bool mark)
 	{
+		if (this.markedForCapture && !mark)
+		{
+			Prioritizable.RemoveRef(base.gameObject);
+		}
+		else if (!this.markedForCapture && mark)
+		{
+			Prioritizable.AddRef(base.gameObject);
+		}
 		this.markedForCapture = this.allowCapture && mark;
 		this.UpdateStatusItem();
 		this.UpdateChore();
@@ -150,6 +162,9 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 		descriptors.Add(new Descriptor(UI.BUILDINGEFFECTS.CAPTURE_METHOD_WRANGLE, UI.BUILDINGEFFECTS.TOOLTIPS.CAPTURE_METHOD_WRANGLE, Descriptor.DescriptorType.Effect, false));
 		return descriptors;
 	}
+
+	[MyCmpAdd]
+	private Prioritizable prioritizable;
 
 	[MyCmpReq]
 	private UserMenu userMenu;

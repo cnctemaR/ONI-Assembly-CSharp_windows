@@ -49,7 +49,7 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 		gameObject.transform.SetLocalPosition(Vector3.zero);
 		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
 		kbatchedAnimController.Offset = go.GetComponent<Building>().Def.GetVisualizerOffset();
-		kbatchedAnimController.SetAnims(new KAnimFile[] { Assets.GetAnim(new HashedString("waterpump_kanim")) }, true);
+		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim(new HashedString("waterpump_kanim")) };
 		kbatchedAnimController.initialAnim = "place_guide";
 		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.Always;
 		kbatchedAnimController.isMovable = true;
@@ -60,7 +60,6 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		LiquidPumpingStationConfig.AddGuide(go.GetComponent<Building>().Def.BuildingPreview, false);
 		LiquidPumpingStationConfig.AddGuide(go.GetComponent<Building>().Def.BuildingUnderConstruction, true);
 	}

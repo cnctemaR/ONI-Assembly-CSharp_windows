@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
@@ -54,7 +53,7 @@ public class Equipment : Assignables
 		}
 		if (equippable.def.BuildOverride != null)
 		{
-			base.StartCoroutine(this.ApplyBuildOverride(component, equippable));
+			component.GetComponent<SymbolOverrideController>().AddBuildOverride(equippable.def.BuildOverride.GetData(), equippable.def.BuildOverridePriority);
 		}
 		equippable.GetComponent<KBatchedAnimController>().enabled = false;
 		equippable.OnEquip(slot);
@@ -89,7 +88,7 @@ public class Equipment : Assignables
 		{
 			if (equippable.def.BuildOverride != null)
 			{
-				component.ClearBuildOverride(equippable.def.BuildOverride, !equippable.def.IsBody);
+				component.GetComponent<SymbolOverrideController>().TryRemoveBuildOverride(equippable.def.BuildOverride.GetData(), equippable.def.BuildOverridePriority);
 			}
 			Attributes attributes = slot.gameObject.GetAttributes();
 			foreach (AttributeModifier attributeModifier in equippable.def.AttributeModifiers)
@@ -118,13 +117,6 @@ public class Equipment : Assignables
 			}, null, null);
 		}
 		Game.Instance.Trigger(-2146166042, null);
-	}
-
-	private IEnumerator ApplyBuildOverride(KBatchedAnimController controller, Equippable equippable)
-	{
-		yield return null;
-		controller.AddBuildOverride(equippable.def.BuildOverride, true, false);
-		yield break;
 	}
 
 	public bool IsEquipped(Equippable equippable)

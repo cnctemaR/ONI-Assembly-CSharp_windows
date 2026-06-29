@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Database;
 using Klei.AI;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -15,13 +16,16 @@ public class ModifierSet : ScriptableObject
 		this.modifierInfos.Load(this.modifiersFile);
 		this.Attributes = new global::Database.Attributes(this.Root);
 		this.BuildingAttributes = new BuildingAttributes(this.Root);
+		this.CritterAttributes = new CritterAttributes(this.Root);
 		this.effects = new ResourceSet<Effect>("Effects", this.Root);
 		this.traits = new ModifierSet.TraitSet();
 		this.traitGroups = new ModifierSet.TraitGroupSet();
+		this.FertilityModifiers = new FertilityModifiers();
 		this.Amounts = new global::Database.Amounts();
 		this.Amounts.Load();
 		this.AttributeConverters = new global::Database.AttributeConverters();
 		this.LoadEffects();
+		this.LoadFertilityModifiers();
 	}
 
 	public static float ConvertValue(float value, Units units)
@@ -52,6 +56,10 @@ public class ModifierSet : ScriptableObject
 				this.effects.Add(effect);
 			}
 		}
+		Effect effect2 = new Effect("Ranched", global::STRINGS.CREATURES.MODIFIERS.RANCHED.NAME, global::STRINGS.CREATURES.MODIFIERS.RANCHED.TOOLTIP, 600f, true, true, false);
+		effect2.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, 5f, global::STRINGS.CREATURES.MODIFIERS.RANCHED.NAME, false, false, true));
+		effect2.Add(new AttributeModifier(Db.Get().Amounts.Wildness.deltaAttribute.Id, -0.09166667f, global::STRINGS.CREATURES.MODIFIERS.RANCHED.NAME, false, false, true));
+		this.effects.Add(effect2);
 	}
 
 	public Trait CreateTrait(string id, string name, string description, string group_name, bool should_save, ChoreGroup[] disabled_chore_groups, bool positive_trait, bool is_valid_starter_trait)
@@ -72,9 +80,24 @@ public class ModifierSet : ScriptableObject
 		return trait;
 	}
 
+	public FertilityModifier CreateFertilityModifier(string id, Tag targetTag, string name, string description, Func<string, string> tooltipCB, FertilityModifier.FertilityModFn applyFunction)
+	{
+		FertilityModifier fertilityModifier = new FertilityModifier(id, targetTag, name, description, tooltipCB, applyFunction);
+		this.FertilityModifiers.Add(fertilityModifier);
+		return fertilityModifier;
+	}
+
 	protected void LoadTraits()
 	{
 		TRAITS.TRAIT_CREATORS.ForEach(delegate(global::System.Action action)
+		{
+			action();
+		});
+	}
+
+	protected void LoadFertilityModifiers()
+	{
+		global::TUNING.CREATURES.EGG_CHANCE_MODIFIERS.MODIFIER_CREATORS.ForEach(delegate(global::System.Action action)
 		{
 			action();
 		});
@@ -90,9 +113,13 @@ public class ModifierSet : ScriptableObject
 
 	public ModifierSet.TraitGroupSet traitGroups;
 
+	public FertilityModifiers FertilityModifiers;
+
 	public global::Database.Attributes Attributes;
 
 	public BuildingAttributes BuildingAttributes;
+
+	public CritterAttributes CritterAttributes;
 
 	public global::Database.Amounts Amounts;
 

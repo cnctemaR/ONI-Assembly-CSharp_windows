@@ -14,8 +14,8 @@ public class MicrobeMusher : Fabricator
 		this.attributeConverter = Db.Get().AttributeConverters.CookingSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_ration" });
-		this.meter.meterController.HideSymbol(MicrobeMusher.canHash, true);
-		this.meter.meterController.HideSymbol(MicrobeMusher.meterRationHash, true);
+		this.meter.meterController.SetSymbolVisiblity(MicrobeMusher.canHash, false);
+		this.meter.meterController.SetSymbolVisiblity(MicrobeMusher.meterRationHash, false);
 		this.meter.meterController.GetComponent<KBatchedAnimTracker>().skipInitialDisable = true;
 	}
 

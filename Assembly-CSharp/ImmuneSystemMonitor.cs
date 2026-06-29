@@ -23,11 +23,11 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 		this.healthy.ParamTransition<bool>(this.isLosingImmunity, this.infecting, (ImmuneSystemMonitor.Instance smi, bool p) => p).Update(delegate(ImmuneSystemMonitor.Instance smi, float dt)
 		{
 			smi.UpdateImmuneSystem();
-		});
+		}, UpdateRate.SIM_200ms, false);
 		this.infecting.DefaultState(this.infecting.high).ParamTransition<bool>(this.isLosingImmunity, this.healthy, (ImmuneSystemMonitor.Instance smi, bool p) => !p).Update(delegate(ImmuneSystemMonitor.Instance smi, float dt)
 		{
 			smi.UpdateImmuneSystem();
-		});
+		}, UpdateRate.SIM_200ms, false);
 		this.infecting.high.Transition(this.infecting.low, (ImmuneSystemMonitor.Instance smi) => smi.IsLowImmuneLevel(), UpdateRate.SIM_200ms);
 		this.infecting.low.Transition(this.infecting.high, (ImmuneSystemMonitor.Instance smi) => !smi.IsLowImmuneLevel(), UpdateRate.SIM_200ms).Enter(delegate(ImmuneSystemMonitor.Instance smi)
 		{
@@ -36,12 +36,12 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 		this.infected.Update(delegate(ImmuneSystemMonitor.Instance smi, float dt)
 		{
 			smi.ClearInternalDisease();
-		}).ToggleAttributeModifier("suppressed by sickness", (ImmuneSystemMonitor.Instance smi) => smi.immuneSuppress, null).EventTransition(GameHashes.DiseaseCured, this.beginrecovering, (ImmuneSystemMonitor.Instance smi) => !smi.IsSick());
+		}, UpdateRate.SIM_200ms, false).ToggleAttributeModifier("suppressed by sickness", (ImmuneSystemMonitor.Instance smi) => smi.immuneSuppress, null).EventTransition(GameHashes.DiseaseCured, this.beginrecovering, (ImmuneSystemMonitor.Instance smi) => !smi.IsSick());
 		this.beginrecovering.AddEffect("PostDiseaseRecovery").GoTo(this.recovering);
 		this.recovering.Update(delegate(ImmuneSystemMonitor.Instance smi, float dt)
 		{
 			smi.ClearInternalDisease();
-		}).Transition(this.healthy, (ImmuneSystemMonitor.Instance smi) => !smi.effects.HasEffect("PostDiseaseRecovery"), UpdateRate.SIM_200ms);
+		}, UpdateRate.SIM_200ms, false).Transition(this.healthy, (ImmuneSystemMonitor.Instance smi) => !smi.effects.HasEffect("PostDiseaseRecovery"), UpdateRate.SIM_200ms);
 	}
 
 	public StateMachine<ImmuneSystemMonitor, ImmuneSystemMonitor.Instance, IStateMachineTarget, object>.BoolParameter isLosingImmunity;

@@ -39,7 +39,7 @@ public class LogicDiseaseSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim2
 		{
 			this.Toggle();
 		}
-		this.animController.HideSymbol(currentValue <= 0f, LogicDiseaseSensor.TINT_SYMBOL);
+		this.animController.SetSymbolVisiblity(LogicDiseaseSensor.TINT_SYMBOL, currentValue > 0f);
 	}
 
 	private void OnSwitchToggled(bool toggled_on)

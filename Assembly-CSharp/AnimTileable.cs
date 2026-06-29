@@ -38,6 +38,7 @@ public class AnimTileable : KMonoBehaviour
 			this.partitionerEntry.Release();
 			this.partitionerEntry = null;
 		}
+		base.OnCleanUp();
 	}
 
 	private void UpdateEndCaps()
@@ -72,19 +73,19 @@ public class AnimTileable : KMonoBehaviour
 		{
 			foreach (KAnimHashedString kanimHashedString in AnimTileable.leftSymbols)
 			{
-				kbatchedAnimController.HideSymbol(!flag, kanimHashedString);
+				kbatchedAnimController.SetSymbolVisiblity(kanimHashedString, flag);
 			}
 			foreach (KAnimHashedString kanimHashedString2 in AnimTileable.rightSymbols)
 			{
-				kbatchedAnimController.HideSymbol(!flag2, kanimHashedString2);
+				kbatchedAnimController.SetSymbolVisiblity(kanimHashedString2, flag2);
 			}
 			foreach (KAnimHashedString kanimHashedString3 in AnimTileable.topSymbols)
 			{
-				kbatchedAnimController.HideSymbol(!flag3, kanimHashedString3);
+				kbatchedAnimController.SetSymbolVisiblity(kanimHashedString3, flag3);
 			}
 			foreach (KAnimHashedString kanimHashedString4 in AnimTileable.bottomSymbols)
 			{
-				kbatchedAnimController.HideSymbol(!flag4, kanimHashedString4);
+				kbatchedAnimController.SetSymbolVisiblity(kanimHashedString4, flag4);
 			}
 		}
 	}
@@ -113,7 +114,14 @@ public class AnimTileable : KMonoBehaviour
 
 	private void OnNeighbourCellsUpdated(object data)
 	{
-		this.UpdateEndCaps();
+		if (this == null || base.gameObject == null)
+		{
+			return;
+		}
+		if (this.partitionerEntry != null)
+		{
+			this.UpdateEndCaps();
+		}
 	}
 
 	private GameScenePartitionerEntry partitionerEntry;

@@ -125,7 +125,7 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 			int num = -1;
 			if (cb != null)
 			{
-				num = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(cb)).index;
+				num = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(cb, "Moppable")).index;
 			}
 			SimMessages.ConsumeMass(cell, Grid.Element[cell].id, amount, 1, num);
 		}

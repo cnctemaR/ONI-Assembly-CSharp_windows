@@ -51,6 +51,11 @@ public class ResearchSideScreen : SideScreenContent
 		}
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<ResearchCenter>() != null;
+	}
+
 	private void RefreshDisplayState(object data = null)
 	{
 		if (SelectTool.Instance.selected == null)

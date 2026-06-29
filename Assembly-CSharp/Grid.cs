@@ -386,6 +386,25 @@ public class Grid
 		return false;
 	}
 
+	public static bool IsVisiblyInLiquid(Vector2 pos)
+	{
+		int num = Grid.PosToCell(pos);
+		if (Grid.IsValidCell(num) && Grid.IsLiquid(num))
+		{
+			if (Grid.IsLiquid(Grid.CellAbove(num)))
+			{
+				return true;
+			}
+			float num2 = Grid.Mass[num];
+			float num3 = (float)((int)pos.y) - pos.y;
+			if (num2 / 1000f <= num3)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static bool IsLiquid(int cell)
 	{
 		Element element = ElementLoader.elements[(int)Grid.ElementIdx[cell]];
@@ -526,6 +545,11 @@ public class Grid
 		int num4 = 0;
 		Grid.CellToXY(target_cell, out num3, out num4);
 		return Grid.VisibilityTest(num, num2, num3, num4, all_tiles_block, blocking_tile_visible);
+	}
+
+	public static bool IsVisible(int cell)
+	{
+		return Grid.Visible[cell] > 0 || !PropertyTextures.IsFogOfWarEnabled;
 	}
 
 	public static readonly CellOffset[] DefaultOffset = new CellOffset[] { default(CellOffset) };

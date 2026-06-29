@@ -35,7 +35,7 @@ public class FruitCakeConfig : IEntityConfig
 		gameObject.SetActive(false);
 		gameObject.transform.SetLocalPosition(Vector3.zero);
 		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
-		kbatchedAnimController.SetAnims(component.GetAnims(), true);
+		kbatchedAnimController.AnimFiles = component.AnimFiles;
 		kbatchedAnimController.initialAnim = "fabricating";
 		kbatchedAnimController.isMovable = true;
 		KBatchedAnimTracker kbatchedAnimTracker = gameObject.AddComponent<KBatchedAnimTracker>();

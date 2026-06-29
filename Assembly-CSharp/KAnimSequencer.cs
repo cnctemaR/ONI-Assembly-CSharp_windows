@@ -9,15 +9,6 @@ public class KAnimSequencer : KMonoBehaviour, ISaveLoadable
 		base.OnSpawn();
 		this.kbac = base.GetComponent<KBatchedAnimController>();
 		this.mb = base.GetComponent<MinionBrain>();
-		if (this.animFiles != null && this.animFiles.Length > 0)
-		{
-			KAnimFile[] array = new KAnimFile[this.animFiles.Length];
-			for (int i = 0; i < this.animFiles.Length; i++)
-			{
-				array[i] = Assets.GetAnim(this.animFiles[i]);
-			}
-			this.kbac.AddAnims(array);
-		}
 		if (this.autoRun)
 		{
 			this.PlaySequence();
@@ -36,11 +27,6 @@ public class KAnimSequencer : KMonoBehaviour, ISaveLoadable
 			if (this.mb != null)
 			{
 				this.mb.Suspend("AnimSequencer");
-				if (this.setBody)
-				{
-					KAnimFileData kanimFileData = KCompBuilder.Instance.GenerateDefaultPose(this.bodyData);
-					this.kbac.AddBuildOverride(kanimFileData, true, true);
-				}
 			}
 			this.kbac.onAnimComplete += this.PlayNext;
 			this.PlayNext(null);
@@ -65,16 +51,7 @@ public class KAnimSequencer : KMonoBehaviour, ISaveLoadable
 	}
 
 	[Serialize]
-	public KCompBuilder.BodyData bodyData = default(KCompBuilder.BodyData);
-
-	[Serialize]
-	public bool setBody;
-
-	[Serialize]
 	public bool autoRun;
-
-	[Serialize]
-	public string[] animFiles = new string[0];
 
 	[Serialize]
 	public KAnimSequencer.KAnimSequence[] sequence = new KAnimSequencer.KAnimSequence[0];

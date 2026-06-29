@@ -54,16 +54,19 @@ public class StandardAmountDisplayer : IAmountDisplayer, IAttributeFormatter
 	public virtual string GetTooltip(Amount master, AmountInstance instance)
 	{
 		string text = this.GetTooltipDescription(master, instance);
-		text += "\n\n";
+		text += "\n";
 		if (this.formatter.DeltaTimeSlice == GameUtil.TimeSlice.PerCycle)
 		{
+			text += "\n";
 			text += string.Format(UI.CHANGEPERCYCLE, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerCycle, null));
+			text += "\n";
 		}
-		else
+		else if (this.formatter.DeltaTimeSlice == GameUtil.TimeSlice.PerSecond)
 		{
+			text += "\n";
 			text += string.Format(UI.CHANGEPERSECOND, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerSecond, null));
+			text += "\n";
 		}
-		text += "\n";
 		foreach (AttributeInstance.AttributeModifierEntry attributeModifierEntry in instance.deltaAttribute)
 		{
 			text = text + "\n" + string.Format("{0}: {1}", attributeModifierEntry.Modifier.GetDescription(), this.formatter.GetFormattedModifier(attributeModifierEntry.Modifier, instance.gameObject));

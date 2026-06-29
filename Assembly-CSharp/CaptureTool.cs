@@ -21,12 +21,15 @@ public class CaptureTool : DragTool
 				capturable.MarkForCapture(mark);
 			}
 		}
-		foreach (NotCapturable notCapturable in Components.NotCapturables)
+		if (mark)
 		{
-			Vector2 vector2 = Grid.PosToXY(notCapturable.transform.GetPosition());
-			if (vector2.x >= min.x && vector2.x < max.x && vector2.y >= min.y && vector2.y < max.y)
+			foreach (NotCapturable notCapturable in Components.NotCapturables)
 			{
-				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.TOOLS.CAPTURE.NOT_CAPTURABLE, null, notCapturable.transform.GetPosition(), 1.5f, false, false);
+				Vector2 vector2 = Grid.PosToXY(notCapturable.transform.GetPosition());
+				if (vector2.x >= min.x && vector2.x < max.x && vector2.y >= min.y && vector2.y < max.y)
+				{
+					PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.TOOLS.CAPTURE.NOT_CAPTURABLE, null, notCapturable.transform.GetPosition(), 1.5f, false, false);
+				}
 			}
 		}
 	}

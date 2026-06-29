@@ -25,15 +25,9 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		}).Update("safe", delegate(ThreatMonitor.Instance smi, float dt)
 		{
 			smi.RefreshThreat(null);
-		}, UpdateRate.SIM_200ms, true);
+		}, UpdateRate.SIM_1000ms, true);
 		this.threatned.duplicant.Transition(this.safe, (ThreatMonitor.Instance smi) => !smi.CheckForThreats(), UpdateRate.SIM_200ms);
-		this.threatned.duplicant.ShouldFight.ToggleChore(new Func<ThreatMonitor.Instance, Chore>(this.CreateAttackChore), this.safe).Update("ShouldFight", delegate(ThreatMonitor.Instance smi, float dt)
-		{
-			if (this.GetMainThreat(smi) == null || !this.GetMainThreat(smi).GetComponent<FactionAlignment>().targeted)
-			{
-				smi.Trigger(2144432245, null);
-			}
-		}, UpdateRate.SIM_200ms, false);
+		this.threatned.duplicant.ShouldFight.ToggleChore(new Func<ThreatMonitor.Instance, Chore>(this.CreateAttackChore), this.safe).Update(new Action<ThreatMonitor.Instance, float>(ThreatMonitor.ShouldFight), UpdateRate.SIM_200ms, false);
 		this.threatned.duplicant.ShoudFlee.ToggleChore(new Func<ThreatMonitor.Instance, Chore>(this.CreateFleeChore), this.safe);
 		this.threatned.creature.ToggleBehaviour(GameTags.Creatures.Flee, (ThreatMonitor.Instance smi) => !CreatureHelpers.WillEngageNonEssentialTargets(smi.gameObject, smi.def.fleethresholdState), delegate(ThreatMonitor.Instance smi)
 		{
@@ -67,7 +61,15 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			}, UpdateRate.SIM_200ms, false);
 	}
 
-	public GameObject GetMainThreat(ThreatMonitor.Instance smi)
+	private static void ShouldFight(ThreatMonitor.Instance smi, float dt)
+	{
+		if (ThreatMonitor.GetMainThreat(smi) == null || !ThreatMonitor.GetMainThreat(smi).GetComponent<FactionAlignment>().targeted)
+		{
+			smi.Trigger(2144432245, null);
+		}
+	}
+
+	private static GameObject GetMainThreat(ThreatMonitor.Instance smi)
 	{
 		return smi.GetMainThreat;
 	}
@@ -324,26 +326,26 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			{
 				ScenePartitionerEntry scenePartitionerEntry = list[i];
 				FactionAlignment factionAlignment = scenePartitionerEntry.obj as FactionAlignment;
-				if (!this.threats.Contains(factionAlignment))
+				if (!(factionAlignment.transform == null))
 				{
-					if (!(factionAlignment.transform == null))
+					if (!(factionAlignment == this.alignment))
 					{
-						if (!(factionAlignment == this.alignment))
+						if (factionAlignment.CheckAlignmentActive)
 						{
-							if (this.navigator.CanReach(factionAlignment.attackable))
+							if (this.alignment.Alignment != FactionManager.FactionID.Duplicant || factionAlignment.targeted)
 							{
-								if (factionAlignment.CheckAlignmentActive)
+								if (flag && this.alignment.Alignment == FactionManager.FactionID.Duplicant && factionAlignment.targeted)
 								{
-									if (this.alignment.Alignment != FactionManager.FactionID.Duplicant || factionAlignment.targeted)
+									if (this.navigator.CanReach(factionAlignment.attackable))
 									{
-										if (flag && this.alignment.Alignment == FactionManager.FactionID.Duplicant && factionAlignment.targeted)
-										{
-											this.threats.Add(factionAlignment);
-										}
-										else if (FactionManager.Instance.GetDisposition(this.alignment.Alignment, factionAlignment.Alignment) == FactionManager.Disposition.Attack)
-										{
-											this.threats.Add(factionAlignment);
-										}
+										this.threats.Add(factionAlignment);
+									}
+								}
+								else if (FactionManager.Instance.GetDisposition(this.alignment.Alignment, factionAlignment.Alignment) == FactionManager.Disposition.Attack)
+								{
+									if (this.navigator.CanReach(factionAlignment.attackable))
+									{
+										this.threats.Add(factionAlignment);
 									}
 								}
 							}

@@ -47,6 +47,11 @@ public class ActiveRangeSideScreen : SideScreenContent
 		this.deactivateValueSlider.GetComponentInChildren<ToolTip>().SetSimpleTooltip(string.Format(this.target.DeactivateTooltip, this.deactivateValueSlider.value));
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<IActivationRangeTarget>() != null;
+	}
+
 	public override void SetTarget(GameObject new_target)
 	{
 		if (new_target == null)

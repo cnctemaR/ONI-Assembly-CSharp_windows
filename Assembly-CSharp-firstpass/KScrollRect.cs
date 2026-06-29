@@ -91,6 +91,23 @@ public class KScrollRect : ScrollRect
 		base.LateUpdate();
 	}
 
+	protected override void OnRectTransformDimensionsChange()
+	{
+		base.OnRectTransformDimensionsChange();
+		if (this.forceContentMatchWidth)
+		{
+			Vector2 sizeDelta = base.content.GetComponent<RectTransform>().sizeDelta;
+			sizeDelta.x = base.viewport.rectTransform().sizeDelta.x;
+			base.content.GetComponent<RectTransform>().sizeDelta = sizeDelta;
+		}
+		if (this.forceContentMatchHeight)
+		{
+			Vector2 sizeDelta2 = base.content.GetComponent<RectTransform>().sizeDelta;
+			sizeDelta2.y = base.viewport.rectTransform().sizeDelta.y;
+			base.content.GetComponent<RectTransform>().sizeDelta = sizeDelta2;
+		}
+	}
+
 	private void UpdateScrollIntertia()
 	{
 		this.scrollVelocity *= 1f - Mathf.Clamp(this.scrollDeceleration, 0f, 1f);
@@ -141,6 +158,12 @@ public class KScrollRect : ScrollRect
 	private float horizontalScrollInertiaScale = 5f;
 
 	private float scrollDeceleration = 0.25f;
+
+	[SerializeField]
+	public bool forceContentMatchWidth;
+
+	[SerializeField]
+	public bool forceContentMatchHeight;
 
 	[SerializeField]
 	public bool allowHorizontalScrollWheel = true;

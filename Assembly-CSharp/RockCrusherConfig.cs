@@ -47,7 +47,7 @@ public class RockCrusherConfig : IBuildingConfig
 				amount = 100f,
 				time = 40f,
 				description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.RECIPE_DESCRIPTION, element.name, tag.ProperName()),
-				fabricators = new List<Tag> { TagManager.Create("RockCrusher", null) }
+				fabricators = new List<Tag> { TagManager.Create("RockCrusher") }
 			}.AddResult(tag, 100f);
 		}
 		List<Element> list2 = ElementLoader.elements.FindAll((Element e) => e.IsSolid && e.HasTag(GameTags.Metal));
@@ -63,7 +63,7 @@ public class RockCrusherConfig : IBuildingConfig
 					amount = 100f,
 					time = 40f,
 					description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.METAL_RECIPE_DESCRIPTION, lowTempTransition.name, element2.name),
-					fabricators = new List<Tag> { TagManager.Create("RockCrusher", null) }
+					fabricators = new List<Tag> { TagManager.Create("RockCrusher") }
 				}.AddResult(lowTempTransition.tag, 50f).AddResult(tag, 50f);
 			}
 		}
@@ -73,6 +73,7 @@ public class RockCrusherConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
+		SymbolOverrideControllerUtil.AddToPrefab(go);
 	}
 
 	public const string ID = "RockCrusher";

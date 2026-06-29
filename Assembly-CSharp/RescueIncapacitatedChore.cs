@@ -95,7 +95,7 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 				{
 					smi.GoTo(this.holding.ditch);
 				}
-			});
+			}, UpdateRate.SIM_200ms, false);
 			this.holding.deposit.PlayAnim("place").EventHandler(GameHashes.AnimQueueComplete, delegate(RescueIncapacitatedChore.StatesInstance smi)
 			{
 				smi.master.DropIncapacitatedDuplicant();

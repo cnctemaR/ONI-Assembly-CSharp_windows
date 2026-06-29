@@ -58,6 +58,10 @@ public class MainMenu : KMonoBehaviour
 		base.OnSpawn();
 		Canvas.ForceUpdateCanvases();
 		this.ShowLanguageConfirmation();
+		if (GenericGameSettings.instance.autoResumeGame)
+		{
+			this.ResumeGame();
+		}
 	}
 
 	private void ShowLanguageConfirmation()
@@ -151,7 +155,7 @@ public class MainMenu : KMonoBehaviour
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 262109U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 266730U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}

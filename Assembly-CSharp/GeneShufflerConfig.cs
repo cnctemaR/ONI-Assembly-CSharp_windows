@@ -30,7 +30,7 @@ public class GeneShufflerConfig : IEntityConfig
 		Ownable component2 = inst.GetComponent<Ownable>();
 		component2.slotID = Db.Get().AssignableSlots.GeneShuffler.Id;
 		OccupyArea component3 = inst.GetComponent<OccupyArea>();
-		component3.objectLayer = ObjectLayer.Building;
+		component3.objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 	}
 
 	public void OnSpawn(GameObject inst)

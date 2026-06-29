@@ -153,7 +153,7 @@ namespace Database
 				Debug.LogError(text, null);
 			}
 			string text2 = string.Empty;
-			foreach (ChoreType choreType2 in this)
+			foreach (ChoreType choreType2 in this.resources)
 			{
 				if (choreType2.interruptPriority == 0)
 				{
@@ -181,7 +181,7 @@ namespace Database
 			List<Tag> list = new List<Tag>();
 			for (int i = 0; i < interrupt_exclusion.Length; i++)
 			{
-				list.Add(TagManager.Create(interrupt_exclusion[i], null));
+				list.Add(TagManager.Create(interrupt_exclusion[i]));
 			}
 			if (explicit_priority == -1)
 			{

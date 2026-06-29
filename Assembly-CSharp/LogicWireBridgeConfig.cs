@@ -1,5 +1,6 @@
 ﻿using System;
 using OverlayModes;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -13,12 +14,12 @@ public class LogicWireBridgeConfig : IBuildingConfig
 		string text2 = "logic_bridge_kanim";
 		int num3 = 30;
 		float num4 = 3f;
-		float[] tier_TINY = BUILDINGS.CONSTRUCTION_MASS_KG.TIER_TINY;
+		float[] tier_TINY = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER_TINY;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
 		float num5 = 1600f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
+		BuildLocationRule buildLocationRule = BuildLocationRule.LogicBridge;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier_TINY, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier_TINY, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
 		buildingDef.ViewMode = SimViewMode.Logic;
 		buildingDef.ObjectLayer = ObjectLayer.LogicGates;
 		buildingDef.SceneLayer = Grid.SceneLayer.WireBridges;
@@ -37,6 +38,7 @@ public class LogicWireBridgeConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 	}
 
@@ -46,6 +48,7 @@ public class LogicWireBridgeConfig : IBuildingConfig
 		LogicUtilityNetworkLink logicUtilityNetworkLink = this.AddNetworkLink(go);
 		logicUtilityNetworkLink.visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();
+		GeneratedBuildings.RegisterLogicPorts(go, LogicWireBridgeConfig.INPUT_PORTS);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
@@ -56,6 +59,7 @@ public class LogicWireBridgeConfig : IBuildingConfig
 		LogicUtilityNetworkLink logicUtilityNetworkLink = this.AddNetworkLink(go);
 		logicUtilityNetworkLink.visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();
+		GeneratedBuildings.RegisterLogicPorts(go, LogicWireBridgeConfig.INPUT_PORTS);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -64,6 +68,7 @@ public class LogicWireBridgeConfig : IBuildingConfig
 		logicUtilityNetworkLink.visualizeOnly = false;
 		go.AddOrGet<BuildingCellVisualizer>();
 		BuildingTemplates.DoPostConfigure(go);
+		GeneratedBuildings.RegisterLogicPorts(go, LogicWireBridgeConfig.INPUT_PORTS);
 	}
 
 	private LogicUtilityNetworkLink AddNetworkLink(GameObject go)
@@ -75,4 +80,12 @@ public class LogicWireBridgeConfig : IBuildingConfig
 	}
 
 	public const string ID = "LogicWireBridge";
+
+	public static readonly HashedString BRIDGE_LOGIC_IO_ID = new HashedString("BRIDGE_LOGIC_IO");
+
+	public static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
+	{
+		LogicPorts.Port.InputPort(LogicWireBridgeConfig.BRIDGE_LOGIC_IO_ID, new CellOffset(-1, 0), global::STRINGS.BUILDINGS.PREFABS.DOOR.LOGIC_PORT_DESC, false),
+		LogicPorts.Port.InputPort(LogicWireBridgeConfig.BRIDGE_LOGIC_IO_ID, new CellOffset(1, 0), global::STRINGS.BUILDINGS.PREFABS.DOOR.LOGIC_PORT_DESC, false)
+	};
 }

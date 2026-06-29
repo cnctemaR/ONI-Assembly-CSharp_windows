@@ -32,7 +32,12 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 			Deconstructable component2 = target.GetComponent<Deconstructable>();
 			if (component2 != null)
 			{
-				base.AddPrecondition(ChorePreconditions.instance.IsMarkedForDeconstruction, component2);
+				base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component2);
+			}
+			BuildingEnabledButton component3 = target.GetComponent<BuildingEnabledButton>();
+			if (component3 != null)
+			{
+				base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component3);
 			}
 		}
 		if (!ignore_building_assignment && this.smi.sm.workable.Get(this.smi).GetComponent<Assignable>() != null)

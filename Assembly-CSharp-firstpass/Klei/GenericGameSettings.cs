@@ -52,6 +52,14 @@ namespace Klei
 
 		public bool disablePopFx { get; private set; }
 
+		public bool autoResumeGame { get; private set; }
+
+		public bool disableFogOfWar { get; private set; }
+
+		public bool acceleratedLifecycle { get; private set; }
+
+		public bool enableEditorCrashReporting { get; private set; }
+
 		private static GenericGameSettings _instance;
 	}
 }

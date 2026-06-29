@@ -19,7 +19,7 @@ public class FarmStationToolsConfig : IEntityConfig
 
 	public const string ID = "FarmStationTools";
 
-	public static readonly Tag tag = TagManager.Create("FarmStationTools", null);
+	public static readonly Tag tag = TagManager.Create("FarmStationTools");
 
 	public const float MASS = 5f;
 }

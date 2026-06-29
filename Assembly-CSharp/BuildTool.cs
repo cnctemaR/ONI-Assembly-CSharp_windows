@@ -241,7 +241,7 @@ public class BuildTool : DragTool
 		this.ClearTilePreview();
 		Vector3 vector = Grid.CellToPosCBC(cell, Grid.SceneLayer.Building);
 		GameObject gameObject = null;
-		if (DebugHandler.InstantBuildMode)
+		if (DebugHandler.InstantBuildMode || (Game.Instance.SandboxModeActive && SandboxToolParameterMenu.instance.settings.InstantBuild))
 		{
 			string text;
 			if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation, out text))

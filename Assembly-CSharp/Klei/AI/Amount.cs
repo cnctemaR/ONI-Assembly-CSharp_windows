@@ -44,6 +44,13 @@ namespace Klei.AI
 			return null;
 		}
 
+		public void Copy(GameObject to, GameObject from)
+		{
+			AmountInstance amountInstance = this.Lookup(to);
+			AmountInstance amountInstance2 = this.Lookup(from);
+			amountInstance.value = amountInstance2.value;
+		}
+
 		public string GetValueString(AmountInstance instance)
 		{
 			return this.displayer.GetValueString(this, instance);

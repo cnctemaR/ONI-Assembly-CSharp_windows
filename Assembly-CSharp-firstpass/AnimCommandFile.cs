@@ -32,8 +32,6 @@ public class AnimCommandFile : YamlIO<AnimCommandFile>
 
 	public bool LookupSymbolUnderGroupName { get; private set; }
 
-	public bool MultiInstance { get; private set; }
-
 	public int MaxGroupSize { get; private set; }
 
 	public bool IsSwap(KAnimFile file)

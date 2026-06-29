@@ -11,7 +11,7 @@ public class LogicMemoryConfig : IBuildingConfig
 		string id = LogicMemoryConfig.ID;
 		int num = 2;
 		int num2 = 2;
-		string text = "logic_and_kanim";
+		string text = "logic_memory_kanim";
 		int num3 = 10;
 		float num4 = 30f;
 		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
@@ -20,15 +20,16 @@ public class LogicMemoryConfig : IBuildingConfig
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none, 0.2f);
-		buildingDef.Deprecated = true;
+		buildingDef.Deprecated = false;
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
+		buildingDef.PermittedRotations = PermittedRotations.R360;
 		buildingDef.ViewMode = SimViewMode.Logic;
 		buildingDef.AudioCategory = "Metal";
-		buildingDef.SceneLayer = Grid.SceneLayer.Building;
-		SoundEventVolumeCache.instance.AddVolume("switchpower_kanim", "PowerMemory_on", NOISE_POLLUTION.NOISY.TIER3);
-		SoundEventVolumeCache.instance.AddVolume("switchpower_kanim", "PowerMemory_off", NOISE_POLLUTION.NOISY.TIER3);
+		buildingDef.SceneLayer = Grid.SceneLayer.WireBridges;
+		SoundEventVolumeCache.instance.AddVolume("logic_memory_kanim", "PowerMemory_on", NOISE_POLLUTION.NOISY.TIER3);
+		SoundEventVolumeCache.instance.AddVolume("logic_memory_kanim", "PowerMemory_off", NOISE_POLLUTION.NOISY.TIER3);
 		GeneratedBuildings.RegisterWithOverlay(Logic.HighlightItemIDs, LogicMemoryConfig.ID);
 		return buildingDef;
 	}
@@ -45,8 +46,8 @@ public class LogicMemoryConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicMemoryConfig.INPUT_PORTS, LogicMemoryConfig.OUTPUT_PORTS);
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
+		GeneratedBuildings.RegisterLogicPorts(go, LogicMemoryConfig.INPUT_PORTS, LogicMemoryConfig.OUTPUT_PORTS);
 		go.AddOrGet<LogicMemory>();
 		BuildingTemplates.DoPostConfigure(go);
 	}
@@ -55,8 +56,8 @@ public class LogicMemoryConfig : IBuildingConfig
 
 	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
 	{
-		new LogicPorts.Port(LogicMemory.VALUE_PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICMEMORY.VALUE_PORT_DESC, true, LogicPortSpriteType.Input),
-		new LogicPorts.Port(LogicMemory.WRITE_PORT_ID, new CellOffset(1, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICMEMORY.WRITE_PORT_DESC, true, LogicPortSpriteType.ResetUpdate)
+		new LogicPorts.Port(LogicMemory.SET_PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICMEMORY.SET_PORT_DESC, true, LogicPortSpriteType.Input),
+		new LogicPorts.Port(LogicMemory.RESET_PORT_ID, new CellOffset(1, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICMEMORY.RESET_PORT_DESC, true, LogicPortSpriteType.ResetUpdate)
 	};
 
 	private static readonly LogicPorts.Port[] OUTPUT_PORTS = new LogicPorts.Port[]

@@ -16,7 +16,7 @@ public class PathFinder
 			if (Grid.Visible[j] > 0 || Grid.Spawnable[j] > 0)
 			{
 				List<int> list = ListPool<int, PathFinder>.Allocate();
-				GameUtil.FloodFillConditional(j, PathFinder.allowPathfindingFloodFillCb, list);
+				GameUtil.FloodFillConditional(j, PathFinder.allowPathfindingFloodFillCb, list, null);
 				Grid.AllowPathfinding[j] = true;
 				ListPool<int, PathFinder>.Free(list);
 			}
@@ -27,7 +27,7 @@ public class PathFinder
 	private static void OnReveal(int cell)
 	{
 		List<int> list = ListPool<int, PathFinder>.Allocate();
-		GameUtil.FloodFillConditional(cell, PathFinder.allowPathfindingFloodFillCb, list);
+		GameUtil.FloodFillConditional(cell, PathFinder.allowPathfindingFloodFillCb, list, null);
 		Grid.AllowPathfinding[cell] = true;
 		ListPool<int, PathFinder>.Free(list);
 	}
@@ -49,7 +49,7 @@ public class PathFinder
 			if (i < path.nodes.Count - 1)
 			{
 				PathFinder.Path.Node node2 = path.nodes[i + 1];
-				int num = node.cell * NavGrid.MaxLinksPerCell;
+				int num = node.cell * nav_grid.maxLinksPerCell;
 				bool flag = false;
 				NavGrid.Link link = nav_grid.Links[num];
 				while (link.link != PathFinder.InvalidHandle)
@@ -174,7 +174,7 @@ public class PathFinder
 		}
 		if (!flag)
 		{
-			PathFinder.AddPotentials(potential, cell.cost, (int)cell.underwaterCost, ref abilities, query, nav_grid.Links, potentials, query_id, path_grid, cell.parent, cell.parentNavType);
+			PathFinder.AddPotentials(potential, cell.cost, (int)cell.underwaterCost, ref abilities, query, nav_grid.maxLinksPerCell, nav_grid.Links, potentials, query_id, path_grid, cell.parent, cell.parentNavType);
 		}
 		return flag;
 	}
@@ -198,9 +198,9 @@ public class PathFinder
 		return Grid.IsValidCell(num) && Grid.Element[num].IsLiquid;
 	}
 
-	public static void AddPotentials(PathFinder.PotentialPath potential, int cost, int underwater_cost, ref PathFinderAbilities abilities, PathFinderQuery query, NavGrid.Link[] links, PathFinder.PotentialList potentials, int query_id, PathGrid path_grid, int parent_cell, NavType parent_nav_type)
+	public static void AddPotentials(PathFinder.PotentialPath potential, int cost, int underwater_cost, ref PathFinderAbilities abilities, PathFinderQuery query, int max_links_per_cell, NavGrid.Link[] links, PathFinder.PotentialList potentials, int query_id, PathGrid path_grid, int parent_cell, NavType parent_nav_type)
 	{
-		int num = potential.cell * NavGrid.MaxLinksPerCell;
+		int num = potential.cell * max_links_per_cell;
 		NavGrid.Link link = links[num];
 		for (int num2 = link.link; num2 != PathFinder.InvalidHandle; num2 = link.link)
 		{

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 
@@ -12,14 +11,6 @@ public class Farmer : RoleConfig
 		base.description = DUPLICANTS.ROLES.FARMER.DESCRIPTION;
 		base.roleGroup = "Farming";
 		base.hat = Game.Instance.roleManager.GetHat("Farmer");
-		this.preferredChoreTags.Add(GameTags.ChoreTypes.Farming);
-		this.favoredChoreTypes = new List<ChoreType>
-		{
-			Db.Get().ChoreTypes.Harvest,
-			Db.Get().ChoreTypes.CropTend,
-			Db.Get().ChoreTypes.FlipCompost,
-			Db.Get().ChoreTypes.Uproot
-		};
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Botanist };
 		base.perks = new RolePerk[]
 		{

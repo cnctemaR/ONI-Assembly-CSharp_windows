@@ -35,7 +35,7 @@ namespace Database
 		public ChoreGroup FindByHash(HashedString id)
 		{
 			ChoreGroup choreGroup = null;
-			foreach (ChoreGroup choreGroup2 in Db.Get().ChoreGroups)
+			foreach (ChoreGroup choreGroup2 in Db.Get().ChoreGroups.resources)
 			{
 				if (choreGroup2.IdHash == id)
 				{

@@ -19,7 +19,7 @@ public class PowerStationToolsConfig : IEntityConfig
 
 	public const string ID = "PowerStationTools";
 
-	public static readonly Tag tag = TagManager.Create("PowerStationTools", null);
+	public static readonly Tag tag = TagManager.Create("PowerStationTools");
 
 	public const float MASS = 5f;
 }

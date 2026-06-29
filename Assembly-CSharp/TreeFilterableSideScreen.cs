@@ -166,6 +166,11 @@ public class TreeFilterableSideScreen : SideScreenContent
 		return this.targetFilterable.ContainsTag(t);
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<TreeFilterable>() != null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		this.target = target;

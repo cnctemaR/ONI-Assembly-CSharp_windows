@@ -271,7 +271,7 @@ public class StatusItemRenderer
 				return;
 			}
 			int num = Grid.PosToCell(vector);
-			if (Grid.IsValidCell(num) && Grid.Visible[num] == 0)
+			if (Grid.IsValidCell(num) && !Grid.IsVisible(num))
 			{
 				return;
 			}

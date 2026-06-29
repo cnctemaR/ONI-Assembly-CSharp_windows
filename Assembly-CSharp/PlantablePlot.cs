@@ -76,7 +76,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 					SeedProducer component2 = component.occupyingObject.GetComponent<SeedProducer>();
 					if (component2 != null)
 					{
-						tag = TagManager.Create(component2.seedInfo.seedId, null);
+						tag = TagManager.Create(component2.seedInfo.seedId);
 					}
 				}
 				base.CancelActiveRequest();

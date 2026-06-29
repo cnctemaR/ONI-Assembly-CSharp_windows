@@ -6,6 +6,14 @@ using UnityEngine;
 
 public class KNumberInputField : KScreen
 {
+	public TMP_InputField field
+	{
+		get
+		{
+			return this.inputField;
+		}
+	}
+
 	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onEndEdit;
 

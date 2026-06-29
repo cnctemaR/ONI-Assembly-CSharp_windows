@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SpriteSheetAnimManager : MonoBehaviour
+public class SpriteSheetAnimManager : KMonoBehaviour, IRenderEveryTick
 {
-	private void Awake()
+	protected override void OnPrefabInit()
 	{
 		SpriteSheetAnimManager.instance = this;
 	}
 
-	private void Start()
+	protected override void OnSpawn()
 	{
 		for (int i = 0; i < this.sheets.Length; i++)
 		{
@@ -36,6 +36,12 @@ public class SpriteSheetAnimManager : MonoBehaviour
 		spriteSheetAnimator.Play(pos, rotation, size, colour);
 	}
 
+	public void RenderEveryTick(float dt)
+	{
+		this.UpdateAnims(dt);
+		this.Render();
+	}
+
 	public void UpdateAnims(float dt)
 	{
 		foreach (SpriteSheetAnimator spriteSheetAnimator in this.nameIndexMap.Values)
@@ -49,8 +55,13 @@ public class SpriteSheetAnimManager : MonoBehaviour
 		Vector3 zero = Vector3.zero;
 		foreach (SpriteSheetAnimator spriteSheetAnimator in this.nameIndexMap.Values)
 		{
-			spriteSheetAnimator.Render(zero, MeshUtil.vertices, MeshUtil.uvs, MeshUtil.colours32, MeshUtil.indices);
+			spriteSheetAnimator.Render();
 		}
+	}
+
+	public SpriteSheetAnimator GetSpriteSheetAnimator(HashedString name)
+	{
+		return this.nameIndexMap[name.HashValue];
 	}
 
 	public const float SECONDS_PER_FRAME = 0.033333335f;

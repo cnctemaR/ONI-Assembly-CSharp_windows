@@ -30,7 +30,7 @@ public class Snorer : StateMachineComponent<Snorer.StatesInstance>
 	{
 	}
 
-	private static readonly HashedString HeadHash = KCompBuilder.snapTo_mouth;
+	private static readonly HashedString HeadHash = "snapTo_mouth";
 
 	public class StatesInstance : GameStateMachine<Snorer.States, Snorer.StatesInstance, Snorer, object>.GameInstance
 	{

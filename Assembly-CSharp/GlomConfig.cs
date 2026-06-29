@@ -14,11 +14,12 @@ public class GlomConfig : IEntityConfig
 		string text4 = global::STRINGS.CREATURES.SPECIES.GLOM.DESC;
 		float num = 25f;
 		KAnimFile anim = Assets.GetAnim("glom_kanim");
-		string text5 = "idle";
+		string text5 = "idle_loop";
 		EffectorValues tier = DECOR.BONUS.TIER0;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text2, text3, text4, num, anim, text5, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		Trait trait = Db.Get().CreateTrait("GlomBaseTrait", text, text, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, text, false, false, true));
+		gameObject.GetComponent<KPrefabID>().AddPrefabTag(GameTags.Creatures.GroundBased);
 		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, "GlomBaseTrait", "HatchNavGrid", NavType.Floor, 32, 2f, string.Empty, 0, true, true, 30f, 293.15f, 393.15f, 273.15f, 423.15f);
 		gameObject.AddWeapon(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
 		gameObject.AddOrGet<Trappable>();
@@ -43,16 +44,16 @@ public class GlomConfig : IEntityConfig
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_jump", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_land", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_expel", NOISE_POLLUTION.CREATURES.TIER4);
-		EntityTemplates.CreateAndRegisterPreview("Glom_Preview", Assets.GetAnim("glom_kanim"), "idle", ObjectLayer.NumLayers, 1, 1);
-		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, string.Format(global::STRINGS.CREATURES.BAGGED_NAME_FMT, global::STRINGS.CREATURES.SPECIES.GLOM.NAME), string.Format(global::STRINGS.CREATURES.BAGGED_DESC_FMT, global::STRINGS.CREATURES.SPECIES.GLOM.NAME), Assets.GetAnim("creature_interacts_trap_glom_kanim"), "working_pre", new Tag("Glom_Preview"));
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def()).Add(new TrappedStates.Def()).Add(new FallStates.Def())
-			.Add(new StunnedStates.Def())
-			.Add(new DrowningStates.Def())
-			.Add(new DebugGoToStates.Def())
-			.Add(new FleeStates.Def())
-			.Add(new DropElementStates.Def())
-			.Add(new IdleStates.Def());
-		EntityTemplates.AddCreatureBrain(gameObject, builder);
+		EntityTemplates.CreateAndRegisterPreview("Glom_Preview", Assets.GetAnim("glom_kanim"), "idle_loop", ObjectLayer.NumLayers, 1, 1);
+		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, string.Format(global::STRINGS.CREATURES.BAGGED_NAME_FMT, global::STRINGS.CREATURES.SPECIES.GLOM.NAME), string.Format(global::STRINGS.CREATURES.BAGGED_DESC_FMT, global::STRINGS.CREATURES.SPECIES.GLOM.NAME), Assets.GetAnim("creature_interacts_trap_glom_kanim"), "working_pre", new Tag("Glom_Preview"), true);
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new TrappedStates.Def(), true).Add(new FallStates.Def(), true)
+			.Add(new StunnedStates.Def(), true)
+			.Add(new DrowningStates.Def(), true)
+			.Add(new DebugGoToStates.Def(), true)
+			.Add(new FleeStates.Def(), true)
+			.Add(new DropElementStates.Def(), true)
+			.Add(new IdleStates.Def(), true);
+		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.GlomSpecies, null);
 		return gameObject;
 	}
 

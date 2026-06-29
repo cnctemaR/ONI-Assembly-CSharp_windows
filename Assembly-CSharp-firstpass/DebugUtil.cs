@@ -68,6 +68,10 @@ public static class DebugUtil
 		});
 	}
 
+	public static void LogIfSelected(GameObject obj, params object[] objs)
+	{
+	}
+
 	[Conditional("ENABLE_DETAILED_PROFILING")]
 	public static void ProfileBegin(string str)
 	{

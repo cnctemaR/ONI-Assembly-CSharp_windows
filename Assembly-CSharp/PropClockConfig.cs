@@ -11,13 +11,13 @@ public class PropClockConfig : IEntityConfig
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium);
 		component.Temperature = 294.15f;
+		OccupyArea occupyArea = gameObject.AddOrGet<OccupyArea>();
+		occupyArea.objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		return gameObject;
 	}
 
 	public void OnPrefabInit(GameObject inst)
 	{
-		OccupyArea component = inst.GetComponent<OccupyArea>();
-		component.objectLayer = ObjectLayer.Building;
 	}
 
 	public void OnSpawn(GameObject inst)

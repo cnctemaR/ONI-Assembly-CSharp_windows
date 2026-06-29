@@ -5,16 +5,17 @@ using UnityEngine;
 
 public class NavGrid
 {
-	public NavGrid(string id, NavGrid.Transition[] transitions, Dictionary<NavType, string> idle_anims, CellOffset[] bounding_offsets, NavTableValidator[] validators, int update_range_x, int update_range_y)
+	public NavGrid(string id, NavGrid.Transition[] transitions, NavGrid.NavTypeData[] nav_type_data, CellOffset[] bounding_offsets, NavTableValidator[] validators, int update_range_x, int update_range_y, int max_links_per_cell)
 	{
 		this.id = id;
 		this.Validators = validators;
-		this.idleAnims = idle_anims;
+		this.navTypeData = nav_type_data;
 		this.transitions = transitions;
 		this.boundingOffsets = bounding_offsets;
 		List<NavType> list = new List<NavType>();
 		this.updateRangeX = update_range_x;
 		this.updateRangeY = update_range_y;
+		this.maxLinksPerCell = max_links_per_cell + 1;
 		for (int i = 0; i < transitions.Length; i++)
 		{
 			transitions[i].id = i;
@@ -28,7 +29,11 @@ public class NavGrid
 			}
 		}
 		this.ValidNavTypes = list.ToArray();
-		this.Links = new NavGrid.Link[NavGrid.MaxLinksPerCell * Grid.CellCount];
+		foreach (NavType navType in this.ValidNavTypes)
+		{
+			this.GetNavTypeData(navType);
+		}
+		this.Links = new NavGrid.Link[this.maxLinksPerCell * Grid.CellCount];
 		this.NavTable = new NavTable(Grid.CellCount);
 		this.transitions = transitions;
 		foreach (NavTableValidator navTableValidator in validators)
@@ -50,7 +55,9 @@ public class NavGrid
 
 	public int updateRangeY { get; private set; }
 
-	private static NavType MirrorNavType(NavType nav_type)
+	public int maxLinksPerCell { get; private set; }
+
+	public static NavType MirrorNavType(NavType nav_type)
 	{
 		if (nav_type == NavType.LeftWall)
 		{
@@ -63,14 +70,38 @@ public class NavGrid
 		return nav_type;
 	}
 
-	public string GetIdleAnim(NavType nav_type)
+	public NavGrid.NavTypeData GetNavTypeData(NavType nav_type)
 	{
-		return this.idleAnims[nav_type];
+		foreach (NavGrid.NavTypeData navTypeData in this.navTypeData)
+		{
+			if (navTypeData.navType == nav_type)
+			{
+				return navTypeData;
+			}
+		}
+		throw new Exception("Missing nav type data for nav type:" + nav_type.ToString());
+	}
+
+	public bool HasNavTypeData(NavType nav_type)
+	{
+		foreach (NavGrid.NavTypeData navTypeData in this.navTypeData)
+		{
+			if (navTypeData.navType == nav_type)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public HashedString GetIdleAnim(NavType nav_type)
+	{
+		return this.GetNavTypeData(nav_type).idleAnim;
 	}
 
 	public void InitializeGraph()
 	{
-		NavGridUpdater.InitializeNavGrid(this.NavTable, this.ValidNavTypes, this.Validators, this.boundingOffsets, this.Links, this.transitions, Grid.BitFields);
+		NavGridUpdater.InitializeNavGrid(this.NavTable, this.ValidNavTypes, this.Validators, this.boundingOffsets, this.maxLinksPerCell, this.Links, this.transitions, Grid.BitFields);
 	}
 
 	public void UpdateGraph()
@@ -96,7 +127,7 @@ public class NavGrid
 
 	public void UpdateGraph(HashSet<int> dirty_nav_cells)
 	{
-		NavGridUpdater.UpdateNavGrid(this.NavTable, this.ValidNavTypes, this.Validators, this.boundingOffsets, this.Links, this.transitions, Grid.BitFields, dirty_nav_cells);
+		NavGridUpdater.UpdateNavGrid(this.NavTable, this.ValidNavTypes, this.Validators, this.boundingOffsets, this.maxLinksPerCell, this.Links, this.transitions, Grid.BitFields, dirty_nav_cells);
 		if (this.OnNavGridUpdateComplete != null)
 		{
 			this.OnNavGridUpdateComplete(dirty_nav_cells);
@@ -140,7 +171,7 @@ public class NavGrid
 	{
 		for (int i = 0; i < Grid.CellCount; i++)
 		{
-			int num = i * NavGrid.MaxLinksPerCell;
+			int num = i * this.maxLinksPerCell;
 			for (int num2 = this.Links[num].link; num2 != NavGrid.InvalidCell; num2 = this.Links[num].link)
 			{
 				Vector3 navPos = NavTypeHelper.GetNavPos(i, this.Links[num].startNavType);
@@ -195,8 +226,6 @@ public class NavGrid
 		return this.debugColorLookup[(int)navType];
 	}
 
-	public static int MaxLinksPerCell = 22;
-
 	public bool DebugViewAllPaths;
 
 	public bool DebugViewValidCells;
@@ -217,8 +246,6 @@ public class NavGrid
 
 	private NavTableValidator[] Validators = new NavTableValidator[0];
 
-	private Dictionary<NavType, string> idleAnims;
-
 	private CellOffset[] boundingOffsets;
 
 	public string id;
@@ -226,6 +253,8 @@ public class NavGrid
 	public Action<HashSet<int>> OnNavGridUpdateComplete;
 
 	public NavType[] ValidNavTypes;
+
+	public NavGrid.NavTypeData[] navTypeData;
 
 	private Color[] debugColorLookup;
 
@@ -249,6 +278,21 @@ public class NavGrid
 		public int transitionId;
 
 		public int cost;
+	}
+
+	public struct NavTypeData
+	{
+		public NavType navType;
+
+		public Vector2 animControllerOffset;
+
+		public bool flipX;
+
+		public bool flipY;
+
+		public float rotation;
+
+		public HashedString idleAnim;
 	}
 
 	public struct Transition

@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ElementFilter : KMonoBehaviour, ISaveLoadable
+public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 {
 	public SimHashes FilteredElement
 	{
@@ -18,17 +18,10 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		ConduitType conduitType = this.conduitType;
-		if (conduitType != ConduitType.Gas)
+		this.filterable = base.GetComponent<Filterable>();
+		ConduitType conduitType = this.portInfo.conduitType;
+		if (conduitType == ConduitType.Gas)
 		{
-			if (conduitType == ConduitType.Liquid)
-			{
-				this.filterable = base.GetComponent<LiquidFilterable>();
-			}
-		}
-		else
-		{
-			this.filterable = base.GetComponent<GasFilterable>();
 			if (this.filteredTag == GameTags.Water)
 			{
 				this.filteredTag = GameTags.Oxygen;
@@ -42,24 +35,25 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable
 		base.OnSpawn();
 		this.inputCell = this.building.GetUtilityInputCell();
 		this.outputCell = this.building.GetUtilityOutputCell();
-		CellOffset rotatedOffset = this.building.GetRotatedOffset(this.filterOffset);
-		this.filteredCell = Grid.OffsetCell(this.inputCell, rotatedOffset);
-		IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.conduitType);
-		this.itemFilter = new FlowUtilityNetwork.NetworkItem(this.conduitType, Endpoint.Source, this.filteredCell);
+		int num = Grid.PosToCell(base.transform.GetPosition());
+		CellOffset rotatedOffset = this.building.GetRotatedOffset(this.portInfo.offset);
+		this.filteredCell = Grid.OffsetCell(num, rotatedOffset);
+		IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.portInfo.conduitType);
+		this.itemFilter = new FlowUtilityNetwork.NetworkItem(this.portInfo.conduitType, Endpoint.Source, this.filteredCell);
 		networkManager.AddToNetworks(this.filteredCell, this.itemFilter, true);
 		base.GetComponent<ConduitConsumer>().isConsuming = false;
 		this.OnFilterChanged(ElementLoader.FindElementByHash(this.filteredElem).tag);
 		this.filterable.onFilterChanged += this.OnFilterChanged;
-		ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
+		ConduitFlow flowManager = Conduit.GetFlowManager(this.portInfo.conduitType);
 		flowManager.AddConduitUpdater(new Action<float>(this.OnConduitTick), ConduitFlowPriority.Default);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, ElementFilter.filterStatusItem, this);
 	}
 
 	protected override void OnCleanUp()
 	{
-		IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.conduitType);
+		IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.portInfo.conduitType);
 		networkManager.RemoveFromNetworks(this.filteredCell, this.itemFilter, true);
-		ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
+		ConduitFlow flowManager = Conduit.GetFlowManager(this.portInfo.conduitType);
 		flowManager.RemoveConduitUpdater(new Action<float>(this.OnConduitTick));
 		base.OnCleanUp();
 	}
@@ -69,7 +63,7 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable
 		bool flag = false;
 		if (this.operational.IsOperational)
 		{
-			ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
+			ConduitFlow flowManager = Conduit.GetFlowManager(this.portInfo.conduitType);
 			ConduitFlow.ConduitContents contents = flowManager.GetContents(this.inputCell);
 			int num = ((contents.element != this.filteredElem) ? this.outputCell : this.filteredCell);
 			ConduitFlow.ConduitContents contents2 = flowManager.GetContents(num);
@@ -88,16 +82,15 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable
 
 	private void OnFilterChanged(Tag tag)
 	{
+		bool flag = true;
 		this.filteredTag = tag;
 		Element element = ElementLoader.GetElement(this.filteredTag);
 		if (element != null)
 		{
 			this.filteredElem = element.id;
-			bool flag = this.filteredElem == SimHashes.Void || this.filteredElem == SimHashes.Vacuum;
-			base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoFilterElementSelected, flag, null);
-			return;
+			flag = this.filteredElem == SimHashes.Void || this.filteredElem == SimHashes.Vacuum;
 		}
-		throw new ArgumentException("Invalid element to filter by");
+		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoFilterElementSelected, flag, null);
 	}
 
 	[OnDeserialized]
@@ -136,7 +129,7 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable
 	{
 		bool flag = false;
 		ElementFilter elementFilter = (ElementFilter)data;
-		ConduitType conduitType = elementFilter.conduitType;
+		ConduitType conduitType = elementFilter.portInfo.conduitType;
 		if (conduitType != ConduitType.Gas)
 		{
 			if (conduitType == ConduitType.Liquid)
@@ -151,11 +144,18 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable
 		return flag;
 	}
 
-	[SerializeField]
-	public ConduitType conduitType = ConduitType.Liquid;
+	public ConduitType GetSecondaryConduitType()
+	{
+		return this.portInfo.conduitType;
+	}
+
+	public CellOffset GetSecondaryConduitOffset()
+	{
+		return this.portInfo.offset;
+	}
 
 	[SerializeField]
-	public CellOffset filterOffset;
+	public ConduitPortInfo portInfo;
 
 	[Serialize]
 	private Tag filteredTag = GameTags.Water;

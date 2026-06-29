@@ -54,7 +54,7 @@ public class KAnimLayering
 
 	private void HideSymbolsInternal()
 	{
-		foreach (KAnimFile kanimFile in this.controller.GetAnims())
+		foreach (KAnimFile kanimFile in this.controller.AnimFiles)
 		{
 			if (!(kanimFile == null))
 			{
@@ -69,7 +69,7 @@ public class KAnimLayering
 						{
 							if (!(symbols[j].hash == KAnimLayering.UI))
 							{
-								this.controller.HideSymbol(symbols[j].hash, true);
+								this.controller.SetSymbolVisiblity(symbols[j].hash, false);
 							}
 						}
 					}
@@ -88,15 +88,15 @@ public class KAnimLayering
 		{
 			return;
 		}
-		KAnimFile[] anims = this.controller.GetAnims();
-		bool flag = KAnimLayering.IsAnimLayered(anims);
+		KAnimFile[] animFiles = this.controller.AnimFiles;
+		bool flag = KAnimLayering.IsAnimLayered(animFiles);
 		if (flag && this.foregroundController == null && this.layer != Grid.SceneLayer.NoLayer)
 		{
 			GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.ForegroundLayer, this.controller.gameObject, null);
 			gameObject.name = this.controller.name + "_fg";
 			this.foregroundController = gameObject.GetComponent<KAnimControllerBase>();
+			this.foregroundController.AnimFiles = animFiles;
 			this.foregroundController.GetLayering().SetIsForeground(true);
-			this.foregroundController.SetAnims(anims, true);
 			this.foregroundController.initialAnim = this.controller.initialAnim;
 			this.link = new KAnimLink(this.controller, this.foregroundController);
 			this.Dirty();

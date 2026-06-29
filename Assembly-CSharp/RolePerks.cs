@@ -44,6 +44,7 @@ public class RolePerks
 		this.ExosuitExpertise = new SimpleRolePerk("ExosuitExpertise", UI.ROLES_SCREEN.PERKS.EXOSUIT_EXPERTISE.DESCRIPTION);
 		this.AllowAdvancedResearch = new SimpleRolePerk("AllowAdvancedResearch", UI.ROLES_SCREEN.PERKS.ADVANCED_RESEARCH.DESCRIPTION);
 		this.CanStudyWorldObjects = new SimpleRolePerk("CanStudyWorldObjects", UI.ROLES_SCREEN.PERKS.CAN_STUDY_WORLD_OBJECTS.DESCRIPTION);
+		this.CanDoPlumbing = new SimpleRolePerk("CanDoPlumbing", UI.ROLES_SCREEN.PERKS.CAN_DO_PLUMBING.DESCRIPTION);
 	}
 
 	public RoleAttributePerk IncreaseDigSpeedSmall;
@@ -121,4 +122,6 @@ public class RolePerks
 	public SimpleRolePerk AllowAdvancedResearch;
 
 	public SimpleRolePerk CanStudyWorldObjects;
+
+	public SimpleRolePerk CanDoPlumbing;
 }

@@ -38,7 +38,7 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 					Orientation getBuildingOrientation = BuildTool.Instance.GetBuildingOrientation;
 					string text2 = "Unknown reason";
 					Vector3 vector = Grid.CellToPosCCC(num, Grid.SceneLayer.Building);
-					if (!this.currentDef.IsValidPlaceLocation(null, vector, getBuildingOrientation, out text2))
+					if (!this.currentDef.IsValidPlaceLocation(BuildTool.Instance.visualizer, vector, getBuildingOrientation, out text2))
 					{
 						hoverTextDrawer.NewLine(num2);
 						hoverTextDrawer.AddIndent(num3);

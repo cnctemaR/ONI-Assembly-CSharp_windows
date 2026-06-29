@@ -13,11 +13,14 @@ public class Ownable : Assignable, ISaveLoadable, IEffectDescriptor
 		{
 			return;
 		}
-		if (new_assignee is MinionIdentity && base.slot != null && new_assignee.GetSoleOwner().GetComponent<Ownables>().GetSlot(base.slot)
-			.assignable != null)
+		if (new_assignee is MinionIdentity && base.slot != null)
 		{
-			new_assignee.GetSoleOwner().GetComponent<Ownables>().GetSlot(base.slot)
-				.assignable.Unassign();
+			Assignable assignable = new_assignee.GetSoleOwner().GetComponent<Ownables>().GetSlot(base.slot)
+				.assignable;
+			if (assignable != null)
+			{
+				assignable.Unassign();
+			}
 		}
 		base.Assign(new_assignee);
 	}

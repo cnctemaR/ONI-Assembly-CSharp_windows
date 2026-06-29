@@ -8,7 +8,7 @@ public class Insulator : KMonoBehaviour
 	{
 		int num = Grid.PosToCell(base.transform.GetPosition());
 		num = Grid.OffsetCell(num, this.offset);
-		SimMessages.SetInsulation(num, this.building.Def.Insulation);
+		SimMessages.SetInsulation(num, this.building.Def.ThermalConductivity);
 	}
 
 	protected override void OnCleanUp()

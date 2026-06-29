@@ -123,6 +123,7 @@ public class DebugHandler : IInputHandler
 			if (ManagementMenu.Instance != null)
 			{
 				ManagementMenu.Instance.CheckResearch(null);
+				ManagementMenu.Instance.CheckRoles(null);
 			}
 		}
 		else if (e.TryConsume(global::Action.DebugExplosion))
@@ -170,7 +171,10 @@ public class DebugHandler : IInputHandler
 		else if (e.TryConsume(global::Action.DebugToggle))
 		{
 			PropertyTextures.FogOfWarScale = 1f - PropertyTextures.FogOfWarScale;
-			DebugHandler.FreeCameraMode = !DebugHandler.FreeCameraMode;
+			if (CameraController.Instance != null)
+			{
+				CameraController.Instance.FreeCameraEnabled = !CameraController.Instance.FreeCameraEnabled;
+			}
 			if (Game.Instance != null)
 			{
 				Game.Instance.UpdateGameActiveRegion(0, 0, Grid.WidthInCells, Grid.HeightInCells);
@@ -230,10 +234,19 @@ public class DebugHandler : IInputHandler
 				{
 					smi.GoToCursor();
 				}
+				CreatureDebugGoToMonitor.Instance smi2 = brain.GetSMI<CreatureDebugGoToMonitor.Instance>();
+				if (smi2 != null)
+				{
+					smi2.GoToCursor();
+				}
 			}
 		}
 		else if (e.TryConsume(global::Action.DebugTeleport))
 		{
+			if (SelectTool.Instance == null)
+			{
+				return;
+			}
 			KSelectable selected = SelectTool.Instance.selected;
 			if (selected != null)
 			{
@@ -251,11 +264,17 @@ public class DebugHandler : IInputHandler
 			{
 				if (e.TryConsume(global::Action.DebugNotification))
 				{
-					Tutorial.Instance.DebugNotification();
+					if (GenericGameSettings.instance.developerDebugEnable)
+					{
+						Tutorial.Instance.DebugNotification();
+					}
 				}
 				else if (e.TryConsume(global::Action.DebugNotificationMessage))
 				{
-					Tutorial.Instance.DebugNotificationMessage();
+					if (GenericGameSettings.instance.developerDebugEnable)
+					{
+						Tutorial.Instance.DebugNotificationMessage();
+					}
 				}
 				else if (e.TryConsume(global::Action.DebugSuperSpeed))
 				{
@@ -379,7 +398,10 @@ public class DebugHandler : IInputHandler
 	public static void ToggleScreenshotMode()
 	{
 		DebugHandler.SetHideUI(!DebugHandler.HideUI);
-		DebugHandler.FreeCameraMode = !DebugHandler.FreeCameraMode;
+		if (CameraController.Instance != null)
+		{
+			CameraController.Instance.FreeCameraEnabled = !CameraController.Instance.FreeCameraEnabled;
+		}
 	}
 
 	public static void SetHideUI(bool hide)
@@ -404,8 +426,6 @@ public class DebugHandler : IInputHandler
 	}
 
 	public static bool InstantBuildMode;
-
-	public static bool FreeCameraMode;
 
 	public static bool InvincibleMode;
 

@@ -92,7 +92,6 @@ public class KSelectable : KMonoBehaviour
 
 	private void ClearHighlight()
 	{
-		RenderUtil.RemoveMaterialBlockVector(base.gameObject.transform, "_Highlight");
 		base.Trigger(-1201923725, false);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		if (component != null)
@@ -103,7 +102,6 @@ public class KSelectable : KMonoBehaviour
 
 	private void ApplyHighlight(float highlight)
 	{
-		RenderUtil.AddMaterialBlockVector(base.gameObject.transform, "_Highlight", new Vector4(highlight, highlight, highlight, highlight));
 		base.Trigger(-1201923725, true);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		if (component != null)

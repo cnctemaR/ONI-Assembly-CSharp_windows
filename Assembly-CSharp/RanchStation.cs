@@ -1,5 +1,4 @@
 ﻿using System;
-using Klei.AI;
 using UnityEngine;
 
 public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance, IStateMachineTarget, RanchStation.Def>
@@ -20,7 +19,23 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 
 	public class Def : StateMachine.BaseDef
 	{
-		public Effect effect;
+		public Func<GameObject, RanchStation.Instance, bool> isCreatureEligibleToBeRanchedCb;
+
+		public Action<GameObject> onRanchCompleteCb;
+
+		public HashedString ranchedPreAnim = "idle_loop";
+
+		public HashedString ranchedLoopAnim = "idle_loop";
+
+		public HashedString ranchedPstAnim = "idle_loop";
+
+		public HashedString rancherInteractAnim = "anim_interacts_rancherstation_kanim";
+
+		public int interactLoopCount = 1;
+
+		public bool synchronizeBuilding;
+
+		public Func<RanchStation.Instance, int> getTargetRanchCell = (RanchStation.Instance smi) => Grid.PosToCell(smi);
 	}
 
 	public class OperationalState : GameStateMachine<RanchStation, RanchStation.Instance, IStateMachineTarget, RanchStation.Def>.State
@@ -74,7 +89,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			{
 				return false;
 			}
-			if (ranchable.GetComponent<Effects>().HasEffect(ranch_station.def.effect))
+			if (!ranch_station.def.isCreatureEligibleToBeRanchedCb(ranchable.gameObject, ranch_station))
 			{
 				return false;
 			}
@@ -132,8 +147,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 		{
 			if (this.targetRanchable != null && this.targetRanchable.IsRunning())
 			{
-				this.targetRanchable.gameObject.GetComponent<Effects>().Add(base.def.effect, true);
-				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, base.def.effect.Name, this.targetRanchable.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
+				base.def.onRanchCompleteCb(this.targetRanchable.gameObject);
 				this.targetRanchable.Trigger(1827504087, null);
 			}
 		}

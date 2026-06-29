@@ -56,7 +56,14 @@ public class CreatureFeederConfig : IBuildingConfig
 	public override void ConfigurePost(BuildingDef def)
 	{
 		List<Tag> list = new List<Tag>();
-		foreach (KeyValuePair<Tag, Diet> keyValuePair in DietManager.CollectDiets())
+		foreach (KeyValuePair<Tag, Diet> keyValuePair in DietManager.CollectDiets(new Tag[]
+		{
+			GameTags.Creatures.Species.PuftSpecies,
+			GameTags.Creatures.Species.OilFloaterSpecies,
+			GameTags.Creatures.Species.LightBugSpecies,
+			GameTags.Creatures.Species.HatchSpecies,
+			GameTags.Creatures.Species.DreckoSpecies
+		}))
 		{
 			list.Add(keyValuePair.Key);
 		}

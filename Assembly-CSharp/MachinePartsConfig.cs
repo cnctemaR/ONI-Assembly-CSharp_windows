@@ -19,7 +19,7 @@ public class MachinePartsConfig : IEntityConfig
 
 	public const string ID = "MachineParts";
 
-	public static readonly Tag TAG = TagManager.Create("MachineParts", null);
+	public static readonly Tag TAG = TagManager.Create("MachineParts");
 
 	public const float MASS = 5f;
 }

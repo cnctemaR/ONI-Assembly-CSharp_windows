@@ -9,6 +9,28 @@ public class FilteredDragTool : DragTool
 		return this.currentFilterTargets[ToolParameterMenu.FILTERLAYERS.ALL] == ToolParameterMenu.ToggleState.On || (this.currentFilterTargets.ContainsKey(layer.ToUpper()) && this.currentFilterTargets[layer.ToUpper()] == ToolParameterMenu.ToggleState.On);
 	}
 
+	public bool IsActiveLayer(ObjectLayer layer)
+	{
+		if (this.currentFilterTargets.ContainsKey(ToolParameterMenu.FILTERLAYERS.ALL) && this.currentFilterTargets[ToolParameterMenu.FILTERLAYERS.ALL] == ToolParameterMenu.ToggleState.On)
+		{
+			return true;
+		}
+		bool flag = false;
+		foreach (KeyValuePair<string, ToolParameterMenu.ToggleState> keyValuePair in this.currentFilterTargets)
+		{
+			if (keyValuePair.Value == ToolParameterMenu.ToggleState.On)
+			{
+				ObjectLayer objectLayerFromFilterLayer = this.GetObjectLayerFromFilterLayer(keyValuePair.Key);
+				if (objectLayerFromFilterLayer == layer)
+				{
+					flag = true;
+					break;
+				}
+			}
+		}
+		return flag;
+	}
+
 	protected virtual void GetDefaultFilters(Dictionary<string, ToolParameterMenu.ToggleState> filters)
 	{
 		filters.Add(ToolParameterMenu.FILTERLAYERS.ALL, ToolParameterMenu.ToggleState.On);
@@ -127,6 +149,67 @@ public class FilteredDragTool : DragTool
 		}
 		IL_0083:
 		return "GasPipes";
+	}
+
+	private ObjectLayer GetObjectLayerFromFilterLayer(string filter_layer)
+	{
+		string text = filter_layer.ToLower();
+		if (text != null)
+		{
+			if (FilteredDragTool.<>f__switch$map0 == null)
+			{
+				FilteredDragTool.<>f__switch$map0 = new Dictionary<string, int>(8)
+				{
+					{ "buildings", 0 },
+					{ "wires", 1 },
+					{ "liquidpipes", 2 },
+					{ "gaspipes", 3 },
+					{ "solidconduits", 4 },
+					{ "tiles", 5 },
+					{ "logic", 6 },
+					{ "backwall", 7 }
+				};
+			}
+			int num;
+			if (FilteredDragTool.<>f__switch$map0.TryGetValue(text, out num))
+			{
+				ObjectLayer objectLayer;
+				switch (num)
+				{
+				case 0:
+					objectLayer = ObjectLayer.Building;
+					break;
+				case 1:
+					objectLayer = ObjectLayer.Wire;
+					break;
+				case 2:
+					objectLayer = ObjectLayer.LiquidConduit;
+					break;
+				case 3:
+					objectLayer = ObjectLayer.GasConduit;
+					break;
+				case 4:
+					objectLayer = ObjectLayer.SolidConduit;
+					break;
+				case 5:
+					objectLayer = ObjectLayer.FoundationTile;
+					break;
+				case 6:
+					objectLayer = ObjectLayer.LogicWires;
+					break;
+				case 7:
+					objectLayer = ObjectLayer.Backwall;
+					break;
+				case 8:
+					goto IL_0106;
+				default:
+					goto IL_0106;
+				}
+				return objectLayer;
+			}
+		}
+		IL_0106:
+		throw new ArgumentException("Invalid filter layer: " + filter_layer);
 	}
 
 	private void OnOverlayChanged(SimViewMode overlay)

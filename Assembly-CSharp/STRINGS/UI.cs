@@ -14,14 +14,43 @@ namespace STRINGS
 		public static string StripLinkFormatting(string text)
 		{
 			string text2 = text;
-			while (text2.Contains("<link="))
+			try
 			{
-				int num = text2.IndexOf("</link>");
-				text2 = text2.Remove(num, 7);
-				int num2 = text2.IndexOf("<link=");
-				text2 = text2.Remove(num2, 7);
-				int num3 = text2.IndexOf("\">");
-				text2 = text2.Remove(num2, num3 - num2 + 2);
+				while (text2.Contains("<link="))
+				{
+					int num = text2.IndexOf("</link>");
+					if (num > -1)
+					{
+						text2 = text2.Remove(num, 7);
+					}
+					else
+					{
+						Debug.LogWarningFormat("String has no closing link tag: {0}", new object[0]);
+					}
+					int num2 = text2.IndexOf("<link=");
+					if (num2 != -1)
+					{
+						text2 = text2.Remove(num2, 7);
+					}
+					else
+					{
+						Debug.LogWarningFormat("String has no open link tag: {0}", new object[0]);
+					}
+					int num3 = text2.IndexOf("\">");
+					if (num3 != -1)
+					{
+						text2 = text2.Remove(num2, num3 - num2 + 2);
+					}
+					else
+					{
+						Debug.LogWarningFormat("String has no open link tag: {0}", new object[0]);
+					}
+				}
+			}
+			catch
+			{
+				Debug.Log("STRIP LINK FORMATTING FAILED ON: " + text, null);
+				text2 = text;
 			}
 			return text2;
 		}
@@ -194,6 +223,161 @@ namespace STRINGS
 
 		public static LocString LISTENTRYSTRINGNOLINEBREAK = "     {0}";
 
+		public class SANDBOXTOOLS
+		{
+			public class SETTINGS
+			{
+				public class INSTANT_BUILD
+				{
+					public static LocString NAME = "Instant build mode";
+
+					public static LocString TOOLTIP = "Toggle between placing construction plans and fully built buildings";
+				}
+
+				public class BRUSH_SIZE
+				{
+					public static LocString NAME = "Brush size";
+
+					public static LocString TOOLTIP = "Adjust brush size";
+				}
+
+				public class BRUSH_NOISE
+				{
+					public static LocString NAME = "Noise";
+
+					public static LocString TOOLTIP = "Adjust brush noisiness";
+				}
+
+				public class TEMPERATURE
+				{
+					public static LocString NAME = "Absolute temperature";
+
+					public static LocString TOOLTIP = "Adjust absolute temperature";
+				}
+
+				public class TEMPERATURE_ADDITIVE
+				{
+					public static LocString NAME = "Additive temperature";
+
+					public static LocString TOOLTIP = "Adjust additive temperature";
+				}
+
+				public class MASS
+				{
+					public static LocString NAME = "Absolute mass";
+
+					public static LocString TOOLTIP = "Adjust mass";
+				}
+
+				public class DISEASE_COUNT
+				{
+					public static LocString NAME = "Germ count";
+
+					public static LocString TOOLTIP = "Adjust germ count";
+				}
+
+				public class BRUSH
+				{
+					public static LocString NAME = "Brush";
+
+					public static LocString TOOLTIP = "Paint the world simulation with the brush tool";
+				}
+
+				public class SPRINKLE
+				{
+					public static LocString NAME = "Sprinkle";
+
+					public static LocString TOOLTIP = "Paint the world simulation with a noisey brush tool";
+				}
+
+				public class FLOOD
+				{
+					public static LocString NAME = "Flood";
+
+					public static LocString TOOLTIP = "Paint the world simulation with a the flood area tool";
+				}
+
+				public class SAMPLE
+				{
+					public static LocString NAME = "Sample";
+
+					public static LocString TOOLTIP = "Sample a tile's state for use with the brush tools";
+				}
+
+				public class HEATGUN
+				{
+					public static LocString NAME = "Heat Gun";
+
+					public static LocString TOOLTIP = "Inject thermal energy into the world simulation";
+				}
+
+				public class SPAWNER
+				{
+					public static LocString NAME = "Spawner";
+
+					public static LocString TOOLTIP = "Spawn food, creatures, equipment, and other entities";
+				}
+
+				public class CLEAR_FLOOR
+				{
+					public static LocString NAME = "Clear Floor";
+
+					public static LocString TOOLTIP = "Delete clutter";
+				}
+
+				public class DESTROY
+				{
+					public static LocString NAME = "Destroy";
+
+					public static LocString TOOLTIP = "Destroy everything on a cell";
+				}
+
+				public class SPAWN_ENTITY
+				{
+					public static LocString NAME = "Spawn";
+				}
+			}
+
+			public class FILTERS
+			{
+				public static LocString BACK = "Back";
+
+				public static LocString COMMON = "Common substances";
+
+				public static LocString SOLID = "Solids";
+
+				public static LocString LIQUID = "Liquids";
+
+				public static LocString GAS = "Gasses";
+
+				public class ENTITIES
+				{
+					public static LocString SPECIAL = "Special";
+
+					public static LocString PLANTS = "Plants";
+
+					public static LocString SEEDS = "Seeds";
+
+					public static LocString CREATURE = "Creatures";
+
+					public static LocString CREATURE_EGG = "Eggs";
+
+					public static LocString FOOD = "Foods";
+
+					public static LocString EQUIPMENT = "Equipment";
+
+					public static LocString GEYSERS = "Geysers";
+
+					public static LocString EXPERIMENTS = "Experimental";
+				}
+			}
+
+			public class CLEARFLOOR
+			{
+				public static LocString DELETED = "Deleted";
+			}
+		}
+
 		public class DROPDOWN
 		{
 			public static string NONE = "Unassigned";
@@ -218,6 +402,30 @@ namespace STRINGS
 			{
 				public class SETTINGS
 				{
+					public class SANDBOXMODE
+					{
+						public static LocString NAME = "Sandbox mode";
+
+						public static LocString TOOLTIP = "Allows the simulation to be manipulated with tools that ignore the regular constraints of the game";
+
+						public static class LEVELS
+						{
+							public static class DISABLED
+							{
+								public static LocString NAME = "Disabled";
+
+								public static LocString TOOLTIP = "Click to enable Sandbox mode";
+							}
+
+							public static class ENABLED
+							{
+								public static LocString NAME = "Enabled";
+
+								public static LocString TOOLTIP = "Click to disable Sandbox mode";
+							}
+						}
+					}
+
 					public class IMMUNESYSTEM
 					{
 						public static LocString NAME = "Immune Systems";
@@ -407,11 +615,11 @@ namespace STRINGS
 
 			public class PATCHNOTESSCREEN
 			{
-				public static LocString TITLE = "RANCHING UPGRADE MARK I";
+				public static LocString TITLE = "RANCHING UPGRADE MARK II";
 
-				public static LocString BODY = "<b>Welcome to the Ranching Upgrade Mark I!</b>\n\n{0}";
+				public static LocString BODY = "<b>Welcome to the Ranching Upgrade Mark II!</b>\n\n{0}";
 
-				public static LocString PATCHNOTES = "<b>Update Features:</b>\n\n• Creatures now have lifecycles and can be raised from eggs\n• Rancher job and buildings to take care of all your new creatures\n• New Duplicant Priority system for broad control of Dupe errands\n• Learn about buildings, creatures and more with the Database screen\n• Tons of bug fixes, performance enhancements, QOL additions, and more!\n\nPlease view the full patch notes for further details!";
+				public static LocString PATCHNOTES = "<b>Update Features:</b>\n\n• New \"Critter Morphs\" can be hatched through careful breeding\n• Two new creatures, Drecko and Pacu, can be found in new worlds\n• Sandbox Mode lets you become master of the asteroid\n• New automation controls, pipes and buildings\n\nPlease view the full patch notes for further details!";
 
 				public static LocString OK_BUTTON = "OK";
 			}
@@ -493,7 +701,7 @@ namespace STRINGS
 
 				public static LocString UNITS = "Temperature Units";
 
-				public static LocString METRICS = "Send Metrics Data";
+				public static LocString METRICS = "Data Collection";
 
 				public static LocString LANGUAGE = "Change Language";
 
@@ -506,6 +714,21 @@ namespace STRINGS
 				public static LocString CREDITS = "Credits";
 
 				public static LocString BACK = "Done";
+
+				public static LocString UNLOCK_SANDBOX = "Unlock Sandbox Mode";
+
+				public class TOGGLE_SANDBOX_SCREEN
+				{
+					public static LocString UNLOCK_SANDBOX_WARNING = "Sandbox mode will be enabled for this save file";
+
+					public static LocString CONFIRM = "Enable sandbox mode";
+
+					public static LocString CANCEL = "Cancel";
+
+					public static LocString CONFIRM_SAVE_BACKUP = "Enable sandbox mode, but save a backup first";
+
+					public static LocString BACKUP_SAVE_GAME_APPEND = " (BACKUP)";
+				}
 			}
 
 			public class INPUT_BINDINGS_SCREEN
@@ -558,6 +781,8 @@ namespace STRINGS
 					public static LocString ZH_KLEI = "Chinese (Klei)";
 
 					public static LocString KO_KLEI = "Korean (Klei)";
+
+					public static LocString RU_KLEI = "Russian (Klei)";
 				}
 			}
 
@@ -603,13 +828,15 @@ namespace STRINGS
 
 			public class METRICS_OPTIONS_SCREEN
 			{
-				public static LocString TITLE = "METRICS OPTIONS";
+				public static LocString TITLE = "DATA COLLECTION OPTIONS";
 
-				public static LocString ENABLE_BUTTON = "Send Metrics Data: ";
+				public static LocString ENABLE_BUTTON = "Opt-In to Data Collection: ";
+
+				public static LocString DESCRIPTION = "We require the collection of user data to assist in improving game operations. Players who opt out of data collection will no longer send crash reports and user data to the game team.\n\nFor more details on our privacy policy and how we use the data we collect, please visit our <color=blue><u><b>privacy policy</u></b></color>.";
 
 				public static LocString DONE_BUTTON = "Done";
 
-				public static LocString TOOLTIP = "If enabled, metrics data will be sent for the purpose of improving the game.";
+				public static LocString TOOLTIP = "Toggle data collection.";
 			}
 
 			public class UNIT_OPTIONS_SCREEN
@@ -691,10 +918,19 @@ namespace STRINGS
 
 				public static LocString DUPLICATE_KEY_BINDINGS = "<b>Duplicate key bindings were detected.\nThis may be because your custom key bindings conflicted with a new feature's default key.\nPlease visit the controls screen to ensure your key bindings are set how you like them.</b>\n{0}";
 
-				public static LocString SAVE_DIRECTORY_READ_ONLY = "A problem occurred while accessing your save directory.\nThis may be because your directory is set to read-only.\n\nPlease ensure your save directory is writable and re-launch the game.\n{0}";
+				public static LocString SAVE_DIRECTORY_READ_ONLY = "A problem occurred while accessing your save directory.\nThis may be because your directory is set to read-only.\n\nPlease ensure your save directory is readable as well as writable and re-launch the game.\n{0}";
 
 				public static LocString SAVE_DIRECTORY_INSUFFICIENT_SPACE = "There is insufficient disk space to write to your save directory.\n\nPlease free at least 15 MB to give your saves some room to breathe.\n{0}";
+
+				public static LocString WORLD_GEN_FILES = "A problem occurred while accessing certain game files that will prevent starting new games.\n\nPlease ensure you can modify these files and re-launch the game:\n\n{0}";
 			}
+		}
+
+		public class SANDBOX_TOGGLE
+		{
+			public static LocString TOOLTIP_LOCKED = "Sandbox mode must be unlocked in the options menu before it can be used.";
+
+			public static LocString TOOLTIP_UNLOCKED = "Toggle Sandbox mode";
 		}
 
 		public class ROLES_SCREEN
@@ -947,6 +1183,11 @@ namespace STRINGS
 				public class CONVEYOR_BUILD
 				{
 					public static LocString DESCRIPTION = "Trait: " + UI.FormatAsLink("Conveyor Rail System", UI.StripLinkFormatting(BUILDINGS.PREFABS.SOLIDCONDUIT.NAME)) + " Construction";
+				}
+
+				public class CAN_DO_PLUMBING
+				{
+					public static LocString DESCRIPTION = "Trait: Plumbing";
 				}
 			}
 
@@ -1501,6 +1742,8 @@ namespace STRINGS
 
 			public static LocString HELP_BUILDLOCATION_WIRE_OBSTRUCTION = "Obstructed by wire";
 
+			public static LocString HELP_BUILDLOCATION_LOGIC_PORTS_OBSTRUCTED = "Automation ports are obstructed";
+
 			public static LocString HELP_TUBELOCATION_NO_UTURNS = "Can't U-Turn";
 
 			public static LocString HELP_TUBELOCATION_STRAIGHT_BRIDGES = "Can't Turn Here";
@@ -1647,6 +1890,12 @@ namespace STRINGS
 
 			public static LocString DETAILS = "Details";
 
+			public static LocString RECIPE_ITEM = "{0} x {1}{2}";
+
+			public static LocString RECIPE_FABRICATOR = "{1} ({0} seconds)";
+
+			public static LocString RECIPE_FABRICATOR_HEADER = "Produced by";
+
 			public static LocString TITLE = "DATABASE";
 
 			public static LocString MANAGEMENT_BUTTON = "DATABASE";
@@ -1656,13 +1905,24 @@ namespace STRINGS
 				public static LocString DESC = "Geysers and Fumaroles emit elements at variable intervals.They provide a sustainable, though usually low volume, source of material.\n\nThe variable factors of a geyser are:\n\n    • Emission element \n    • Emission temperature \n    • Emission mass \n    • Cycle length \n    • Dormancy duration \n    • Disease emitted";
 			}
 
+			public class FOOD
+			{
+				public static LocString QUALITY = "Quality: {0}";
+
+				public static LocString SPOILPROPERTIES = "Preserve temperature: {0}\nSpoil time: {1}";
+			}
+
 			public class CATEGORYNAMES
 			{
-				public static LocString ROOT = UI.FormatAsLink("Home", "HOME");
+				public static LocString ROOT = UI.FormatAsLink("Index", "HOME");
 
 				public static LocString PLANTS = UI.FormatAsLink("Plants", "PLANTS");
 
 				public static LocString CREATURES = UI.FormatAsLink("Critters", "CREATURES");
+
+				public static LocString EMAILS = UI.FormatAsLink("E-mail", "EMAILS");
+
+				public static LocString JOURNALS = UI.FormatAsLink("Journals", "JOURNALS");
 
 				public static LocString FOOD = UI.FormatAsLink("Food", "FOOD");
 
@@ -1782,6 +2042,13 @@ namespace STRINGS
 				public static LocString FAHRENHEIT = " " + 'º'.ToString() + "F";
 
 				public static LocString KELVIN = " K";
+			}
+
+			public class HEAT
+			{
+				public static LocString THERMALCONDUCTIVITY = "(W/m)/K";
+
+				public static LocString SPECIFICHEATCAPACITY = "(J/g)/K";
 			}
 
 			public class CALORIES
@@ -2476,7 +2743,7 @@ namespace STRINGS
 
 			public static LocString ITEM_AUTO_ASSIGNED_TOOLTIP = "As a {Role}, {Name} considers {Job} Errands to be a {Priority} Priority";
 
-			public static LocString TRAIT_DISABLED = "{Name} is unable to do {Job} errands because of the {Trait} trait";
+			public static LocString TRAIT_DISABLED = "{Name} cannot do {Job} errands because they possess the {Trait} trait";
 
 			public static LocString INCREASE_ROW_PRIORITY_NEW_MINION_TOOLTIP = "Prioritize <b>All Errands</b> for <b>New Duplicants</b>";
 
@@ -3788,6 +4055,64 @@ namespace STRINGS
 
 		public class TOOLS
 		{
+			public class SANDBOX
+			{
+				public class SANDBOX_TOGGLE
+				{
+					public static LocString NAME = "SANDBOX";
+				}
+
+				public class BRUSH
+				{
+					public static LocString NAME = "Brush";
+				}
+
+				public class SPRINKLE
+				{
+					public static LocString NAME = "Sprinkle";
+				}
+
+				public class FLOOD
+				{
+					public static LocString NAME = "Flood";
+				}
+
+				public class MARQUEE
+				{
+					public static LocString NAME = "Marquee";
+				}
+
+				public class SAMPLE
+				{
+					public static LocString NAME = "Sample";
+				}
+
+				public class HEATGUN
+				{
+					public static LocString NAME = "Heat Gun";
+				}
+
+				public class SPAWNER
+				{
+					public static LocString NAME = "Spawner";
+				}
+
+				public class CLEAR_FLOOR
+				{
+					public static LocString NAME = "Clear Floor";
+				}
+
+				public class DESTROY
+				{
+					public static LocString NAME = "Destroy";
+				}
+
+				public class SPAWN_ENTITY
+				{
+					public static LocString NAME = "Spawn";
+				}
+			}
+
 			public class GENERIC
 			{
 				public static LocString BACK = "Back";
@@ -3936,6 +4261,17 @@ namespace STRINGS
 				public static LocString SPECIFIC_PRIORITY = "Set Sub-Priority: {0}";
 			}
 
+			public class EMPTY_PIPE
+			{
+				public static LocString NAME = "Empty Pipe";
+
+				public static LocString TOOLTIP = "Drag to mark pipes for emptying";
+
+				public static LocString TOOLNAME = "Empty Pipe Tool";
+
+				public static LocString TOOLACTION = "DRAG TO MARK PIPES TO EMPTY";
+			}
+
 			public class FILTERSCREEN
 			{
 				public static LocString OPTIONS = "Tool Filter";
@@ -4007,6 +4343,8 @@ namespace STRINGS
 				public static LocString GROUPNAME_RESEARCH = "RESEARCH";
 
 				public static LocString GROUPNAME_LORE = "RECOVERED FILES";
+
+				public static LocString GROUPNAME_FERTILITY = "EGG CHANCES";
 			}
 
 			public class DETAILS
@@ -4357,6 +4695,17 @@ namespace STRINGS
 
 				public static LocString NEXT_NEED_LEVEL = "Next Level: {0}";
 			}
+
+			public class EGG_CHANCES
+			{
+				public static LocString CHANCE_FORMAT = "{0}: {1}";
+
+				public static LocString CHANCE_FORMAT_TOOLTIP = "This critter has a {1} chance of laying a {0}.\n\nProbability is increased if the creature:\n{2}";
+
+				public static LocString CHANCE_MOD_FORMAT = "    • {0}\n";
+
+				public static LocString CHANCE_FORMAT_TOOLTIP_NOMOD = "This critter has a {1} chance of laying a {0}.";
+			}
 		}
 
 		public class BUILDINGEFFECTS
@@ -4508,6 +4857,20 @@ namespace STRINGS
 			public static LocString CAPTURE_METHOD_LURE = "Capture Method: Lures";
 
 			public static LocString CAPTURE_METHOD_TRAP = "Capture Method: Traps";
+
+			public static LocString DIET_HEADER = "Digestion:";
+
+			public static LocString DIET_CONSUMED = "    • Diet: {Foodlist}";
+
+			public static LocString DIET_CONSUMED_ITEM = "{Food}: {Amount}";
+
+			public static LocString DIET_PRODUCED = "    • Excretion: {Items}";
+
+			public static LocString DIET_PRODUCED_ITEM = "{Item}: {Percent} of consumed mass";
+
+			public static LocString SCALE_GROWTH = "Shearable {Item}: {Amount} per {Time}";
+
+			public static LocString SCALE_GROWTH_ATMO = "Shearable {Item}: {Amount} per {Time} ({Atmosphere})";
 
 			public static LocString ITEM_TEMPERATURE_ADJUST = "Stored " + UI.FormatAsLink("Temperature", "HEAT") + ": {0}";
 
@@ -4668,6 +5031,16 @@ namespace STRINGS
 				public static LocString NOISE_POLLUTION_DECREASE = "Dampens noise at {0} dB in a {1} tile radius";
 
 				public static LocString ITEM_TEMPERATURE_ADJUST = "Stored items will reach a temperature of {0} over time";
+
+				public static LocString DIET_HEADER = "Creatures will eat and digest only specific materials.";
+
+				public static LocString DIET_CONSUMED = "This critter can typically consume these materials at the following rates:\n\n{Foodlist}";
+
+				public static LocString DIET_PRODUCED = "This critter will \"produce\" the following materials:\n\n{Items}";
+
+				public static LocString SCALE_GROWTH = "This critter can be sheared every {Time} to produce {Amount} {Item}";
+
+				public static LocString SCALE_GROWTH_ATMO = "This critter can be sheared every {Time} to produce {Amount} {Item}\n\nAn atmosphere of {Atmosphere} is required to stimulate growth";
 			}
 		}
 

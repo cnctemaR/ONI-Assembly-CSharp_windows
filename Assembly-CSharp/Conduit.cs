@@ -33,19 +33,21 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 	protected override void OnSpawn()
 	{
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Pipe, this);
-		if (this.IsInsulated)
+		BuildingDef def = base.GetComponent<Building>().Def;
+		if (def != null && def.ThermalConductivity != 1f)
 		{
 			ConduitFlowVisualizer flowVisualizer = this.GetFlowVisualizer();
-			flowVisualizer.SetInsulated(Grid.PosToCell(base.transform.GetPosition()), true);
+			flowVisualizer.AddThermalConductivity(Grid.PosToCell(base.transform.GetPosition()), def.ThermalConductivity);
 		}
 	}
 
 	protected override void OnCleanUp()
 	{
-		if (this.IsInsulated)
+		BuildingDef def = base.GetComponent<Building>().Def;
+		if (def != null && def.ThermalConductivity != 1f)
 		{
 			ConduitFlowVisualizer flowVisualizer = this.GetFlowVisualizer();
-			flowVisualizer.SetInsulated(Grid.PosToCell(base.transform.GetPosition()), false);
+			flowVisualizer.RemoveThermalConductivity(Grid.PosToCell(base.transform.GetPosition()), def.ThermalConductivity);
 		}
 		int num = Grid.PosToCell(base.transform.GetPosition());
 		BuildingComplete component = base.GetComponent<BuildingComplete>();
@@ -55,14 +57,6 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 			this.GetFlowManager().EmptyConduit(Grid.PosToCell(base.transform.GetPosition()));
 		}
 		base.OnCleanUp();
-	}
-
-	private bool IsInsulated
-	{
-		get
-		{
-			return base.GetComponent<Building>().Def.Insulation < 1f;
-		}
 	}
 
 	private ConduitFlowVisualizer GetFlowVisualizer()

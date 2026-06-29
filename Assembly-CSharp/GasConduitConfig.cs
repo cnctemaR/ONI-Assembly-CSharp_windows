@@ -50,6 +50,7 @@ public class GasConduitConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.GetComponent<Building>().Def.BuildingUnderConstruction.GetComponent<Constructable>().isDiggingRequired = false;
+		go.AddComponent<EmptyConduitWorkable>();
 		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddComponent<KAnimGraphTileVisualizer>();
 		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Gas;
 		kanimGraphTileVisualizer.isPhysicalBuilding = true;

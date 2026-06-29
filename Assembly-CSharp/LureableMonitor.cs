@@ -8,7 +8,7 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.cooldown;
-		this.cooldown.ScheduleGoTo(10f, this.nolure);
+		this.cooldown.ScheduleGoTo((LureableMonitor.Instance smi) => smi.def.cooldown, this.nolure);
 		this.nolure.Update("FindLure", delegate(LureableMonitor.Instance smi, float dt)
 		{
 			smi.FindLure();
@@ -32,18 +32,6 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 
 	public class Def : StateMachine.BaseDef, IGameObjectEffectDescriptor
 	{
-		public Tag ActiveBaitTag
-		{
-			get
-			{
-				return this.activeBaitTag;
-			}
-			set
-			{
-				this.activeBaitTag = TagManager.Create(CreatureLure.BAIT_TAG_PREFIX + value.Name, null);
-			}
-		}
-
 		public List<Descriptor> GetDescriptors(GameObject go)
 		{
 			return new List<Descriptor>
@@ -52,7 +40,9 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 			};
 		}
 
-		private Tag activeBaitTag;
+		public float cooldown = 20f;
+
+		public Tag[] lures;
 	}
 
 	public new class Instance : GameStateMachine<LureableMonitor, LureableMonitor.Instance, IStateMachineTarget, LureableMonitor.Def>.GameInstance
@@ -64,15 +54,10 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 
 		public void FindLure()
 		{
-			Navigator component = base.GetComponent<Navigator>();
-			LureableMonitor.Instance.TagIterator tagIterator = new LureableMonitor.Instance.TagIterator(component, LureableMonitor.Instance.offsets);
-			LureableMonitor.Instance.TagIterator tagIterator2 = tagIterator.AddTag("AirborneCreatureLure").AddTag(GameTags.Operational).AddTag(base.def.ActiveBaitTag);
-			foreach (CreatureLure creatureLure in Components.Lures)
-			{
-				tagIterator2.Iterate(creatureLure);
-			}
-			tagIterator2.Cleanup();
-			base.sm.targetLure.Set(tagIterator2.result, this);
+			LureableMonitor.Instance.LureIterator lureIterator = new LureableMonitor.Instance.LureIterator(base.GetComponent<Navigator>(), base.def.lures);
+			GameScenePartitioner.Instance.Iterate<LureableMonitor.Instance.LureIterator>(Grid.PosToCell(base.smi.transform.GetPosition()), 1, GameScenePartitioner.Instance.lure, ref lureIterator);
+			lureIterator.Cleanup();
+			base.sm.targetLure.Set(lureIterator.result, this);
 		}
 
 		public bool HasLure()
@@ -85,66 +70,43 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 			return base.sm.targetLure.Get(this);
 		}
 
-		private static CellOffset[] offsets = new CellOffset[]
+		private struct LureIterator : GameScenePartitioner.Iterator
 		{
-			new CellOffset(0, 3)
-		};
-
-		private struct TagIterator : GameScenePartitioner.Iterator
-		{
-			public TagIterator(Navigator navigator, CellOffset[] offsets)
+			public LureIterator(Navigator navigator, Tag[] lures)
 			{
-				this.requiredTags = ListPool<Tag, LureableMonitor.Instance.TagIterator>.Allocate();
 				this.navigator = navigator;
+				this.lures = lures;
 				this.cost = PathProber.InvalidCost;
 				this.result = null;
-				this.offsets = offsets;
 			}
 
 			public int cost { get; private set; }
 
 			public GameObject result { get; private set; }
 
-			public CellOffset[] offsets { get; private set; }
-
 			public void Iterate(object target_obj)
 			{
-				KMonoBehaviour kmonoBehaviour = target_obj as KMonoBehaviour;
-				if (kmonoBehaviour == null)
+				Lure.Instance instance = target_obj as Lure.Instance;
+				if (instance == null || !instance.IsActive() || !instance.HasAnyLure(this.lures))
 				{
 					return;
 				}
-				KPrefabID component = kmonoBehaviour.GetComponent<KPrefabID>();
-				foreach (Tag tag in this.requiredTags)
-				{
-					if (!component.HasTag(tag))
-					{
-						return;
-					}
-				}
-				int navigationCost = this.navigator.GetNavigationCost(Grid.PosToCell(kmonoBehaviour), this.offsets);
+				int navigationCost = this.navigator.GetNavigationCost(Grid.PosToCell(instance.transform.GetPosition()), instance.def.lurePoints);
 				if (this.cost != PathProber.InvalidCost && navigationCost > this.cost)
 				{
 					return;
 				}
 				this.cost = navigationCost;
-				this.result = component.gameObject;
-			}
-
-			public LureableMonitor.Instance.TagIterator AddTag(Tag tag)
-			{
-				this.requiredTags.Add(tag);
-				return this;
+				this.result = instance.gameObject;
 			}
 
 			public void Cleanup()
 			{
-				ListPool<Tag, LureableMonitor.Instance.TagIterator>.Free(this.requiredTags);
 			}
 
 			private Navigator navigator;
 
-			private List<Tag> requiredTags;
+			private Tag[] lures;
 		}
 	}
 }

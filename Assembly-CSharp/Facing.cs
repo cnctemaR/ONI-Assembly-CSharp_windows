@@ -64,6 +64,12 @@ public class Facing : KMonoBehaviour
 		return this.facingLeft;
 	}
 
+	public void SetFacing(bool mirror_x)
+	{
+		this.facingLeft = mirror_x;
+		this.UpdateMirror();
+	}
+
 	public int GetFrontCell()
 	{
 		int num = Grid.PosToCell(this);

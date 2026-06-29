@@ -92,7 +92,7 @@ public class MaterialSelector : KScreen
 			toggle.GetComponentsInChildren<Image>()[1].material = GlobalResources.Instance().AnimUIMaterial;
 			toggle.GetComponent<ImageToggleState>().SetActive();
 		}
-		else if (WorldInventory.Instance.GetAmount(this.ElementToggles[toggle].tag) >= this.activeMass || DebugHandler.InstantBuildMode)
+		else if (WorldInventory.Instance.GetAmount(this.ElementToggles[toggle].tag) >= this.activeMass || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive)
 		{
 			toggle.GetComponentsInChildren<Image>()[1].material = GlobalResources.Instance().AnimUIMaterial;
 			toggle.GetComponentsInChildren<Image>()[1].color = Color.white;
@@ -149,7 +149,7 @@ public class MaterialSelector : KScreen
 			locText2.text = Util.FormatWholeNumber(WorldInventory.Instance.GetAmount(keyValuePair.Value.tag));
 			locText.text = Util.FormatWholeNumber(this.activeMass);
 			image.sprite = Def.GetUISpriteFromMultiObjectAnim(keyValuePair.Value.substance.anim, "ui");
-			gameObject.SetActive(WorldInventory.Instance.IsDiscovered(keyValuePair.Value.tag) || DebugHandler.InstantBuildMode);
+			gameObject.SetActive(WorldInventory.Instance.IsDiscovered(keyValuePair.Value.tag) || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive);
 			this.SetToggleBGImage(keyValuePair.Key);
 			Tag tag = keyValuePair.Value.tag;
 			toggle.soundPlayer.AcceptClickCondition = () => this.IsEnoughMass(tag);
@@ -168,7 +168,7 @@ public class MaterialSelector : KScreen
 
 	private bool IsEnoughMass(Tag t)
 	{
-		return WorldInventory.Instance.GetAmount(t) >= this.activeMass || DebugHandler.InstantBuildMode;
+		return WorldInventory.Instance.GetAmount(t) >= this.activeMass || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive;
 	}
 
 	public bool AutoSelectAvailableMaterial()
@@ -189,7 +189,7 @@ public class MaterialSelector : KScreen
 		foreach (KeyValuePair<KToggle, Element> keyValuePair2 in this.ElementToggles)
 		{
 			float amount = WorldInventory.Instance.GetAmount(keyValuePair2.Value.tag);
-			if (DebugHandler.InstantBuildMode)
+			if (DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive)
 			{
 				this.OnSelectMaterial(keyValuePair2.Key, this.activeRecipe);
 				return true;

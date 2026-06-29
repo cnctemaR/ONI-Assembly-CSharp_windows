@@ -10,7 +10,7 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 		this.healthy.TagTransition(GameTags.CaloriesDepleted, this.Incapacitated, false).TagTransition(GameTags.HitPointsDepleted, this.Incapacitated, false).Update(delegate(IncapacitationMonitor.Instance smi, float dt)
 		{
 			smi.RecoverStamina(dt, smi);
-		});
+		}, UpdateRate.SIM_200ms, false);
 		this.start_recovery.TagTransition(new Tag[]
 		{
 			GameTags.CaloriesDepleted,
@@ -26,7 +26,7 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 			.Update(delegate(IncapacitationMonitor.Instance smi, float dt)
 			{
 				smi.Bleed(dt, smi);
-			});
+			}, UpdateRate.SIM_200ms, false);
 		this.die.Enter(delegate(IncapacitationMonitor.Instance smi)
 		{
 			smi.master.gameObject.GetSMI<DeathMonitor.Instance>().Kill(smi.GetCauseOfIncapacitation());

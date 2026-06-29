@@ -29,7 +29,7 @@ namespace Database
 			this.HairAlways = new AccessorySlot("Hair_Always", this, swap_build, "hair");
 			this.Body = new AccessorySlot("Body", this, torso_swap_build, null);
 			this.Arm = new AccessorySlot("Arm", this, torso_swap_build, null);
-			foreach (AccessorySlot accessorySlot in this)
+			foreach (AccessorySlot accessorySlot in this.resources)
 			{
 				accessorySlot.AddAccessories(default_build, parent);
 			}

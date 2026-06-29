@@ -410,9 +410,9 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 	[SerializeField]
 	public LogicPorts.Port[] inputPortInfo;
 
-	private List<ILogicUIElement> outputPorts;
+	public List<ILogicUIElement> outputPorts;
 
-	private List<ILogicUIElement> inputPorts;
+	public List<ILogicUIElement> inputPorts;
 
 	private int cell = -1;
 

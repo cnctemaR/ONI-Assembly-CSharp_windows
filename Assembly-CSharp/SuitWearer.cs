@@ -24,7 +24,7 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 			: base(master)
 		{
 			master.GetComponent<Navigator>().SetFlags(PathFinder.PotentialPath.Flags.PerformSuitChecks);
-			master.GetComponent<KBatchedAnimController>().HideSymbol(new HashedString("snapto_neck"), true);
+			master.GetComponent<KBatchedAnimController>().SetSymbolVisiblity("snapto_neck", false);
 		}
 
 		public void OnPathAdvanced(object data)

@@ -150,32 +150,48 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 		{
 			return;
 		}
+		float num = 0f;
 		switch (orientation)
 		{
-		default:
-			component.offset = new Vector2(0f, 0.5f * (float)this.height);
-			component.size = new Vector2((float)this.width, (float)this.height);
-			break;
 		case Orientation.R90:
-			component.offset = new Vector2(0.5f * (float)(this.height - 1), 0.5f);
-			component.size = new Vector2((float)this.height, (float)this.width);
-			break;
+			num = -90f;
+			goto IL_011B;
 		case Orientation.R180:
-			component.offset = new Vector2(0f, -0.5f * (float)(this.height - 2));
-			component.size = new Vector2((float)this.width, (float)this.height);
-			break;
+			num = -180f;
+			goto IL_011B;
 		case Orientation.R270:
-			component.offset = new Vector2(-0.5f * (float)(this.height - 1), 0.5f);
-			component.size = new Vector2((float)this.height, (float)this.width);
-			break;
+			num = -270f;
+			goto IL_011B;
 		case Orientation.FlipH:
-			component.offset = new Vector2(0f, 0.5f * (float)this.height);
+			component.offset = new Vector2(-0.5f * (float)this.width, 0.5f * (float)this.height);
 			component.size = new Vector2((float)this.width, (float)this.height);
-			break;
+			goto IL_011B;
 		case Orientation.FlipV:
 			component.offset = new Vector2(0f, -0.5f * (float)(this.height - 2));
 			component.size = new Vector2((float)this.width, (float)this.height);
-			break;
+			goto IL_011B;
+		}
+		component.offset = new Vector2(0f, 0.5f * (float)this.height);
+		component.size = new Vector2((float)this.width, (float)this.height);
+		IL_011B:
+		if (num != 0f)
+		{
+			Matrix2x3 matrix2x = Matrix2x3.Translate(-this.pivot);
+			Matrix2x3 matrix2x2 = Matrix2x3.Rotate(num * 0.017453292f);
+			Matrix2x3 matrix2x3 = Matrix2x3.Translate(this.pivot);
+			Matrix2x3 matrix2x4 = matrix2x3 * matrix2x2 * matrix2x;
+			Vector2 vector = new Vector2(-0.5f * (float)this.width, 0f);
+			Vector2 vector2 = new Vector2(0.5f * (float)this.width, (float)this.height);
+			Vector2 vector3 = new Vector2(0f, 0.5f * (float)this.height);
+			vector = matrix2x4.MultiplyPoint(vector);
+			vector2 = matrix2x4.MultiplyPoint(vector2);
+			vector3 = matrix2x4.MultiplyPoint(vector3);
+			float num2 = Mathf.Min(vector.x, vector2.x);
+			float num3 = Mathf.Max(vector.x, vector2.x);
+			float num4 = Mathf.Min(vector.y, vector2.y);
+			float num5 = Mathf.Max(vector.y, vector2.y);
+			component.offset = vector3;
+			component.size = new Vector2(num3 - num2, num5 - num4);
 		}
 	}
 
@@ -247,6 +263,7 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 	private Building building;
 
 	[Serialize]
+	[SerializeField]
 	private Orientation orientation;
 
 	[SerializeField]

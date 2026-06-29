@@ -13,7 +13,7 @@ namespace Database
 			this.automationOverlay = this.AddTechItem("AutomationOverlay", RESEARCH.OTHER_TECH_ITEMS.AUTOMATION_OVERLAY.NAME, RESEARCH.OTHER_TECH_ITEMS.AUTOMATION_OVERLAY.DESC, this.GetSpriteFnBuilder("overlay_logic"));
 			this.suitsOverlay = this.AddTechItem("SuitsOverlay", RESEARCH.OTHER_TECH_ITEMS.SUITS_OVERLAY.NAME, RESEARCH.OTHER_TECH_ITEMS.SUITS_OVERLAY.DESC, this.GetSpriteFnBuilder("overlay_suit"));
 			this.betaResearchPoint = this.AddTechItem("BetaResearchPoint", RESEARCH.OTHER_TECH_ITEMS.BETA_RESEARCH_POINT.NAME, RESEARCH.OTHER_TECH_ITEMS.BETA_RESEARCH_POINT.DESC, this.GetSpriteFnBuilder("research_type_beta_icon"));
-			this.conveyorOverlay = this.AddTechItem("ConveyorOverlay", RESEARCH.OTHER_TECH_ITEMS.CONVEYOR_OVERLAY.NAME, RESEARCH.OTHER_TECH_ITEMS.CONVEYOR_OVERLAY.DESC, this.GetSpriteFnBuilder("overlay_logic"));
+			this.conveyorOverlay = this.AddTechItem("ConveyorOverlay", RESEARCH.OTHER_TECH_ITEMS.CONVEYOR_OVERLAY.NAME, RESEARCH.OTHER_TECH_ITEMS.CONVEYOR_OVERLAY.DESC, this.GetSpriteFnBuilder("overlay_conveyor"));
 		}
 
 		private Func<string, Sprite> GetSpriteFnBuilder(string spriteName)
@@ -41,23 +41,11 @@ namespace Database
 
 		public bool IsTechItemComplete(string id)
 		{
-			foreach (TechItem techItem in this)
+			foreach (TechItem techItem in this.resources)
 			{
 				if (techItem.Id == id)
 				{
 					return techItem.IsComplete();
-				}
-			}
-			return true;
-		}
-
-		public bool IsTechItemAvailable(string id)
-		{
-			foreach (TechItem techItem in this)
-			{
-				if (techItem.Id == id)
-				{
-					return techItem.IsComplete() || techItem.parentTech.ArePrerequisitesComplete();
 				}
 			}
 			return true;

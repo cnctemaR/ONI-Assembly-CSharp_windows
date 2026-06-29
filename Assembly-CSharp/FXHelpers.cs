@@ -7,7 +7,7 @@ public static class FXHelpers
 	{
 		KBatchedAnimController component = GameUtil.KInstantiate(EffectPrefabs.Instance.Fx, position, layer, Folder.FX, null, 0).GetComponent<KBatchedAnimController>();
 		KPrefabID component2 = component.GetComponent<KPrefabID>();
-		component2.PrefabTag = TagManager.Create(anim_file_name, null);
+		component2.PrefabTag = TagManager.Create(anim_file_name);
 		component.name = anim_file_name;
 		if (parent != null)
 		{
@@ -26,7 +26,7 @@ public static class FXHelpers
 		}
 		else
 		{
-			component.AddAnims(new KAnimFile[] { anim });
+			component.AnimFiles = new KAnimFile[] { anim };
 		}
 		if (!set_inactive)
 		{

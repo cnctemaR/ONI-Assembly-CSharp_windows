@@ -48,7 +48,7 @@ public class MinionBrain : Brain
 		{
 			return;
 		}
-		if (component.AnimFiles != null && component.AnimFiles.Count > 0 && component.AnimFiles[0] != null && component.GetComponent<Pickupable>().trackOnPickup)
+		if (component.AnimFiles != null && component.AnimFiles.Length > 0 && component.AnimFiles[0] != null && component.GetComponent<Pickupable>().trackOnPickup)
 		{
 			KBatchedAnimTracker kbatchedAnimTracker = go.AddComponent<KBatchedAnimTracker>();
 			kbatchedAnimTracker.useTargetPoint = false;

@@ -117,7 +117,7 @@ public class MaterialSelectionPanel : KScreen
 			selector.gameObject.SetActive(false);
 		});
 		TechItem techItem = Db.Get().TechItems.TryGet(this.activeRecipe.GetBuildingDef().PrefabID);
-		bool flag = !DebugHandler.InstantBuildMode && techItem != null && !techItem.IsComplete();
+		bool flag = !DebugHandler.InstantBuildMode && !Game.Instance.SandboxModeActive && techItem != null && !techItem.IsComplete();
 		if (flag)
 		{
 			this.ResearchRequired.SetActive(true);
@@ -177,7 +177,7 @@ public class MaterialSelectionPanel : KScreen
 		return true;
 	}
 
-	public static MaterialSelectionPanel.SelectedElemInfo Filter(Tag materialCategoryTag, float recipe_amount, MaterialSelectionPanel.SelectElement callback)
+	public static MaterialSelectionPanel.SelectedElemInfo Filter(Tag materialCategoryTag)
 	{
 		MaterialSelectionPanel.SelectedElemInfo selectedElemInfo = default(MaterialSelectionPanel.SelectedElemInfo);
 		selectedElemInfo.element = null;
@@ -202,11 +202,7 @@ public class MaterialSelectionPanel : KScreen
 		foreach (Element element2 in list)
 		{
 			float amount = WorldInventory.Instance.GetAmount(element2.tag);
-			if (callback != null)
-			{
-				callback(element2, amount, recipe_amount);
-			}
-			if (amount > selectedElemInfo.kgAvailable || element2.IsLiquid || selectedElemInfo.element == null)
+			if (amount > selectedElemInfo.kgAvailable)
 			{
 				selectedElemInfo.kgAvailable = amount;
 				selectedElemInfo.element = element2;

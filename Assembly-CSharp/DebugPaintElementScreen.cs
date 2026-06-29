@@ -75,6 +75,23 @@ public class DebugPaintElementScreen : KScreen
 		this.diseaseButton.onClick += this.diseasePopup.OnClick;
 	}
 
+	private void FilterElements(string filterValue)
+	{
+		if (string.IsNullOrEmpty(filterValue))
+		{
+			foreach (KButtonMenu.ButtonInfo buttonInfo in this.elementPopup.GetButtons())
+			{
+				buttonInfo.uibutton.gameObject.SetActive(true);
+			}
+			return;
+		}
+		filterValue = this.filter.ToLower();
+		foreach (KButtonMenu.ButtonInfo buttonInfo2 in this.elementPopup.GetButtons())
+		{
+			buttonInfo2.uibutton.gameObject.SetActive(buttonInfo2.text.ToLower().Contains(filterValue));
+		}
+	}
+
 	private void ConfigureElements()
 	{
 		if (this.filter != null)
@@ -262,7 +279,7 @@ public class DebugPaintElementScreen : KScreen
 	public void OnElementsFilterEdited(string new_filter)
 	{
 		this.filter = ((!string.IsNullOrEmpty(new_filter)) ? new_filter : null);
-		this.ConfigureElements();
+		this.FilterElements(new_filter);
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -318,7 +335,7 @@ public class DebugPaintElementScreen : KScreen
 
 	public void SampleCell(int cell)
 	{
-		this.massPressureInput.text = (Grid.Pressure[cell] * 0.001f).ToString();
+		this.massPressureInput.text = (Grid.Pressure[cell] * 0.010000001f).ToString();
 		this.temperatureInput.text = Grid.Temperature[cell].ToString();
 		this.OnSelectElement(ElementLoader.GetElementID(Grid.Element[cell].tag));
 		this.OnChangeMassPressure();

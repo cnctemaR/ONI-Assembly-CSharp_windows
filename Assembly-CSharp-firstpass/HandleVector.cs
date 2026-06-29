@@ -45,7 +45,7 @@ public class HandleVector<T>
 		}
 	}
 
-	public HandleVector<T>.Handle Add(T item)
+	public virtual HandleVector<T>.Handle Add(T item)
 	{
 		HandleVector<T>.Handle handle;
 		if (this.freeHandles.Count > 0)

@@ -42,7 +42,7 @@ public struct StructureTemperatureData
 	{
 		if (Sim.IsValidHandle(this.simHandle))
 		{
-			SimMessages.ModifyBuildingEnergy(this.simHandle, delta_kilojoules);
+			SimMessages.ModifyBuildingEnergy(this.simHandle, delta_kilojoules, 0f, 10000f);
 		}
 		else
 		{
@@ -66,7 +66,7 @@ public struct StructureTemperatureData
 	{
 		if (this.pendingEnergyModifications != 0f)
 		{
-			SimMessages.ModifyBuildingEnergy(this.simHandle, this.pendingEnergyModifications);
+			SimMessages.ModifyBuildingEnergy(this.simHandle, this.pendingEnergyModifications, 0f, 10000f);
 			this.pendingEnergyModifications = 0f;
 		}
 	}

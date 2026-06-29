@@ -17,13 +17,13 @@ public class SetLockerConfig : IEntityConfig
 		setLocker.dropOffset = new Vector2I(0, 1);
 		setLocker.possible_contents_ids = new string[] { "Warm_Vest", "Cool_Vest", "Funky_Vest" };
 		gameObject.AddOrGet<LoreBearer>();
+		OccupyArea occupyArea = gameObject.AddOrGet<OccupyArea>();
+		occupyArea.objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		return gameObject;
 	}
 
 	public void OnPrefabInit(GameObject inst)
 	{
-		OccupyArea component = inst.GetComponent<OccupyArea>();
-		component.objectLayer = ObjectLayer.Building;
 	}
 
 	public void OnSpawn(GameObject inst)

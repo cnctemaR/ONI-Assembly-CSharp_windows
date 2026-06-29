@@ -25,27 +25,7 @@ public class KGlobalAnimParser
 		KGlobalAnimParser.instance.commandFiles = null;
 		KGlobalAnimParser.instance.files.Clear();
 		KGlobalAnimParser.instance.files = null;
-		KGlobalAnimParser.instance.dynamicFiles.Clear();
-		KGlobalAnimParser.instance.dynamicFiles = null;
 		Singleton<KGlobalAnimParser>.Destroy();
-	}
-
-	public void ClearDynamic()
-	{
-		this.dynamicFiles.Clear();
-	}
-
-	public KAnimFileData GetDynamicFile(HashedString batchTag, string name)
-	{
-		KAnimFileData kanimFileData = null;
-		if (!this.dynamicFiles.TryGetValue(batchTag, out kanimFileData))
-		{
-			kanimFileData = new KAnimFileData(name);
-			kanimFileData.batchTag = batchTag;
-			kanimFileData.animBatchTag = batchTag;
-			this.dynamicFiles[batchTag] = kanimFileData;
-		}
-		return kanimFileData;
 	}
 
 	public KAnimFileData GetFile(KAnimFile anim_file)
@@ -111,8 +91,11 @@ public class KGlobalAnimParser
 		{
 			KAnim.Anim anim = new KAnim.Anim(animFile, data.anims.Count);
 			anim.name = reader.ReadKleiString();
-			anim.id = new HashedString(animFile.name + "." + anim.name);
-			anim.hash = new HashedString(anim.name);
+			string text = animFile.name + "." + anim.name;
+			anim.id = text;
+			HashCache.Get().Add(anim.name);
+			HashCache.Get().Add(text);
+			anim.hash = anim.name;
 			anim.rootSymbol.HashValue = reader.ReadInt32();
 			anim.frameRate = reader.ReadSingle();
 			anim.firstFrameIdx = data.animFrames.Count;
@@ -398,8 +381,6 @@ public class KGlobalAnimParser
 	public const float ANIM_SCALE = 0.005f;
 
 	private Dictionary<HashedString, AnimCommandFile> commandFiles = new Dictionary<HashedString, AnimCommandFile>();
-
-	private Dictionary<HashedString, KAnimFileData> dynamicFiles = new Dictionary<HashedString, KAnimFileData>();
 
 	private Dictionary<int, KAnimFileData> files = new Dictionary<int, KAnimFileData>();
 }

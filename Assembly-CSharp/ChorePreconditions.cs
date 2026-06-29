@@ -347,23 +347,23 @@ public class ChorePreconditions
 		};
 		this.IsOperational = precondition24;
 		Chore.Precondition precondition25 = default(Chore.Precondition);
-		precondition25.id = "IsMarkedForDeconstruction";
+		precondition25.id = "IsNotMarkedForDeconstruction";
 		precondition25.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_MARKED_FOR_DECONSTRUCTION;
 		precondition25.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Deconstructable deconstructable = data as Deconstructable;
 			return deconstructable == null || !deconstructable.IsMarkedForDeconstruction();
 		};
-		this.IsMarkedForDeconstruction = precondition25;
+		this.IsNotMarkedForDeconstruction = precondition25;
 		Chore.Precondition precondition26 = default(Chore.Precondition);
-		precondition26.id = "IsMarkedForDisable";
+		precondition26.id = "IsNotMarkedForDisable";
 		precondition26.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_MARKED_FOR_DISABLE;
 		precondition26.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			BuildingEnabledButton buildingEnabledButton = data as BuildingEnabledButton;
 			return buildingEnabledButton == null || (buildingEnabledButton.IsEnabled && !buildingEnabledButton.WaitingForDisable);
 		};
-		this.IsMarkedForDisable = precondition26;
+		this.IsNotMarkedForDisable = precondition26;
 		Chore.Precondition precondition27 = default(Chore.Precondition);
 		precondition27.id = "IsFunctional";
 		precondition27.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_FUNCTIONAL;
@@ -489,9 +489,9 @@ public class ChorePreconditions
 
 	public Chore.Precondition IsOperational;
 
-	public Chore.Precondition IsMarkedForDeconstruction;
+	public Chore.Precondition IsNotMarkedForDeconstruction;
 
-	public Chore.Precondition IsMarkedForDisable;
+	public Chore.Precondition IsNotMarkedForDisable;
 
 	public Chore.Precondition IsFunctional;
 

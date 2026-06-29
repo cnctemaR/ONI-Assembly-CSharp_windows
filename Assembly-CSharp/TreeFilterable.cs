@@ -170,19 +170,22 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 			List<GameObject> list = new List<GameObject>();
 			foreach (GameObject gameObject in this.storage.items)
 			{
-				KPrefabID component = gameObject.GetComponent<KPrefabID>();
-				bool flag = false;
-				foreach (Tag tag in this.acceptedTags)
+				if (!(gameObject == null))
 				{
-					if (component.Tags.Contains(tag))
+					KPrefabID component = gameObject.GetComponent<KPrefabID>();
+					bool flag = false;
+					foreach (Tag tag in this.acceptedTags)
 					{
-						flag = true;
-						break;
+						if (component.Tags.Contains(tag))
+						{
+							flag = true;
+							break;
+						}
 					}
-				}
-				if (!flag)
-				{
-					list.Add(gameObject);
+					if (!flag)
+					{
+						list.Add(gameObject);
+					}
 				}
 			}
 			foreach (GameObject gameObject2 in list)

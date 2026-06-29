@@ -6,6 +6,7 @@ using Klei.CustomSettings;
 using ProcGenGame;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class NewGameSettingsScreen : KModalScreen
 {
@@ -41,13 +42,17 @@ public class NewGameSettingsScreen : KModalScreen
 		};
 		this.settings = global::UnityEngine.Object.FindObjectOfType<CustomGameSettings>();
 		this.SetGameTypeToggle(false);
+		Color color = new Color(0.95f, 0.95f, 1f, 1f);
+		bool flag = true;
 		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.settings.QualitySettings)
 		{
+			flag = !flag;
 			ListSettingConfig list_setting = keyValuePair.Value as ListSettingConfig;
 			if (list_setting != null)
 			{
 				GameObject gameObject = global::Util.KInstantiateUI(this.prefab_cycle_setting, this.content.gameObject, true);
 				HierarchyReferences refs2 = gameObject.GetComponent<HierarchyReferences>();
+				refs2.GetReference<Image>("BG").color = ((!flag) ? Color.white : color);
 				refs2.GetReference<LocText>("Label").text = keyValuePair.Value.label;
 				refs2.GetReference<LocText>("Label").GetComponent<ToolTip>().toolTip = keyValuePair.Value.tooltip;
 				string key2 = keyValuePair.Key;
@@ -68,6 +73,7 @@ public class NewGameSettingsScreen : KModalScreen
 				{
 					GameObject gameObject2 = global::Util.KInstantiateUI(this.prefab_checkbox_setting, this.content.gameObject, true);
 					HierarchyReferences refs3 = gameObject2.GetComponent<HierarchyReferences>();
+					refs3.GetReference<Image>("BG").color = ((!flag) ? Color.white : color);
 					refs3.GetReference<LocText>("Label").text = keyValuePair.Value.label;
 					refs3.GetReference<LocText>("Label").GetComponent<ToolTip>().toolTip = keyValuePair.Value.tooltip;
 					string key3 = keyValuePair.Key;
@@ -85,6 +91,47 @@ public class NewGameSettingsScreen : KModalScreen
 					{
 						GameObject gameObject3 = global::Util.KInstantiateUI(this.prefab_seed_input_setting, this.content.gameObject, true);
 						HierarchyReferences refs = gameObject3.GetComponent<HierarchyReferences>();
+						TMP_InputField input = gameObject3.GetComponentInChildren<TMP_InputField>(true);
+						TMP_InputField input2 = input;
+						input2.onValidateInput = (TMP_InputField.OnValidateInput)Delegate.Combine(input2.onValidateInput, new TMP_InputField.OnValidateInput((string text, int charIndxex, char addedChar) => ('0' > addedChar || addedChar > '9') ? '\0' : addedChar));
+						input.onEndEdit.AddListener(delegate(string text)
+						{
+							int num;
+							try
+							{
+								num = Convert.ToInt32(text);
+							}
+							catch
+							{
+								num = 0;
+							}
+							num = Mathf.Min(num, int.MaxValue);
+							input.text = num.ToString();
+						});
+						input.onValueChanged.AddListener(delegate(string text)
+						{
+							int num2 = 0;
+							try
+							{
+								num2 = Convert.ToInt32(text);
+							}
+							catch
+							{
+								if (text.Length > 0)
+								{
+									input.text = text.Substring(0, text.Length - 1);
+								}
+								else
+								{
+									input.text = string.Empty;
+								}
+							}
+							if (num2 > 2147483647)
+							{
+								input.text = text.Substring(0, text.Length - 1);
+							}
+						});
+						refs.GetReference<Image>("BG").color = ((!flag) ? Color.white : color);
 						refs.GetReference<LocText>("Label").text = keyValuePair.Value.label;
 						refs.GetReference<LocText>("Label").GetComponent<ToolTip>().toolTip = keyValuePair.Value.tooltip;
 						string key = keyValuePair.Key;
@@ -225,4 +272,6 @@ public class NewGameSettingsScreen : KModalScreen
 	private GameObject prefab_seed_input_setting;
 
 	private CustomGameSettings settings;
+
+	private const int MAX_VALID_SEED = 2147483647;
 }

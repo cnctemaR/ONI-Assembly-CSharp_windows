@@ -88,7 +88,6 @@ public class BuildingTemplates
 		refinery.outStorage = go.AddComponent<Storage>();
 		refinery.outStorage.capacityKg = 20000f;
 		refinery.outStorage.showInUI = true;
-		refinery.outStorage.allowItemRemoval = true;
 		refinery.outStorage.SetDefaultStoredItemModifiers(Storage.StandardFabricatorStorage);
 	}
 

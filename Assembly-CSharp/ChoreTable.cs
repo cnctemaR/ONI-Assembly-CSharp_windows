@@ -8,7 +8,7 @@ public class ChoreTable
 		this.entries = entries;
 	}
 
-	public int GetChorePriority<StateMachineType>()
+	public int GetChorePriority<StateMachineType>(ChoreConsumer chore_consumer)
 	{
 		foreach (ChoreTable.Entry entry in this.entries)
 		{
@@ -17,7 +17,7 @@ public class ChoreTable
 				return entry.choreType.priority;
 			}
 		}
-		Debug.LogError("Chore table does not have an entry for the given state machine.", null);
+		Debug.LogError(chore_consumer.name + "'s chore table does not have an entry for: " + typeof(StateMachineType).Name, null);
 		return -1;
 	}
 
@@ -38,14 +38,17 @@ public class ChoreTable
 			return this;
 		}
 
-		public ChoreTable.Builder Add(StateMachine.BaseDef def)
+		public ChoreTable.Builder Add(StateMachine.BaseDef def, bool condition = true)
 		{
-			ChoreTable.Builder.Info info = new ChoreTable.Builder.Info
+			if (condition)
 			{
-				interruptGroupId = this.interruptGroupId,
-				def = def
-			};
-			this.infos.Add(info);
+				ChoreTable.Builder.Info info = new ChoreTable.Builder.Info
+				{
+					interruptGroupId = this.interruptGroupId,
+					def = def
+				};
+				this.infos.Add(info);
+			}
 			return this;
 		}
 

@@ -803,11 +803,11 @@ namespace STRINGS
 					BUILDINGS.PREFABS.ALGAEHABITAT.NAME,
 					" needs to be emptied of ",
 					ELEMENTS.DIRTYWATER.NAME,
-					". Consider using a ",
+					UI.HORIZONTAL_BR_RULE,
 					BUILDINGS.PREFABS.BOTTLEEMPTIER.NAME,
-					" to dispose of the ",
+					"s can be used to transport and dispose of ",
 					ELEMENTS.DIRTYWATER.NAME,
-					"."
+					" in designated areas"
 				});
 			}
 
@@ -1503,6 +1503,13 @@ namespace STRINGS
 				public static LocString NAME = "Awaiting Delivery";
 
 				public static LocString TOOLTIP = "Awaiting delivery of selected egg";
+			}
+
+			public class INCUBATORPROGRESS
+			{
+				public static LocString NAME = "Incubating: {Percent}";
+
+				public static LocString TOOLTIP = "This egg incubating cozily" + UI.HORIZONTAL_BR_RULE + "It will hatch when Incubation reaches 100%";
 			}
 		}
 

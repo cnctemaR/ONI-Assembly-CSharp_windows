@@ -9,7 +9,7 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.simEmitCBHandle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimEmitted)));
+		this.simEmitCBHandle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimEmitted), "ColdBreather"));
 		this.elementConsumer.EnableConsumption(false);
 		base.smi.animController.randomiseLoopedOffset = true;
 		base.smi.StartSM();
@@ -39,7 +39,7 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 		};
 	}
 
-	public void Exhale()
+	private void Exhale()
 	{
 		if (this.lastEmitTag != Tag.Invalid)
 		{
@@ -59,8 +59,8 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 			{
 				float num2 = Mathf.Max(component.Element.lowTemp + 5f, component.Temperature + this.deltaEmitTemperature);
 				int num3 = Grid.PosToCell(base.transform.GetPosition() + this.emitOffsetCell);
-				byte b = (byte)ElementLoader.elements.IndexOf(component.Element);
-				SimMessages.EmitMass(num3, b, component.Mass, num2, component.DiseaseIdx, component.DiseaseCount, this.simEmitCBHandle.index);
+				byte elementIndex = ElementLoader.GetElementIndex(component.Element.tag);
+				SimMessages.EmitMass(num3, elementIndex, component.Mass, num2, component.DiseaseIdx, component.DiseaseCount, this.simEmitCBHandle.index);
 				this.lastEmitTag = component.Element.tag;
 				break;
 			}
@@ -146,7 +146,7 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.mature).Update(delegate(ColdBreather.StatesInstance smi, float dt)
 			{
 				smi.master.Exhale();
-			});
+			}, UpdateRate.SIM_200ms, false);
 			this.alive.mature.EventTransition(GameHashes.Wilt, this.alive.wilting, (ColdBreather.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).PlayAnim("idle", KAnim.PlayMode.Loop).ToggleMainStatusItem(this.statusItemCooling)
 				.Enter(delegate(ColdBreather.StatesInstance smi)
 				{

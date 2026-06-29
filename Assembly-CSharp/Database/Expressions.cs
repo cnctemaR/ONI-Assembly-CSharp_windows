@@ -8,8 +8,6 @@ namespace Database
 			: base("Expressions", parent)
 		{
 			Faces faces = Db.Get().Faces;
-			this.Dead = new Expression("Dead", this, faces.Dead);
-			this.Sleep = new Expression("Sleep", this, faces.Sleep);
 			this.Angry = new Expression("Angry", this, faces.Angry);
 			this.RedAlert = new Expression("RedAlert", this, faces.Hot);
 			this.Suffocate = new Expression("Suffocate", this, faces.Suffocate);
@@ -47,8 +45,6 @@ namespace Database
 
 		public Expression Tired;
 
-		public Expression Sleep;
-
 		public Expression Hungry;
 
 		public Expression Angry;
@@ -60,8 +56,6 @@ namespace Database
 		public Expression Suffocate;
 
 		public Expression RecoverBreath;
-
-		public Expression Dead;
 
 		public Expression Sick;
 

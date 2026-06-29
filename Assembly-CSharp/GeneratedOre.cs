@@ -61,16 +61,6 @@ public class GeneratedOre
 		}
 	}
 
-	public static void ConfigureAnims(GameObject prefab, string anim_file)
-	{
-		KAnimFile anim = Assets.GetAnim(anim_file);
-		KBatchedAnimController kbatchedAnimController = prefab.AddOrGet<KBatchedAnimController>();
-		if (anim != null)
-		{
-			kbatchedAnimController.SetAnims(new KAnimFile[] { anim }, true);
-		}
-	}
-
 	public static SubstanceChunk CreateChunk(Element element, float mass, float temperature, byte diseaseIdx, int diseaseCount, Vector3 position)
 	{
 		if (temperature <= 0f)

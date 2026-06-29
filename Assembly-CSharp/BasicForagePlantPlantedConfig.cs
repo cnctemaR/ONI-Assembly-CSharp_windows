@@ -17,7 +17,7 @@ public class BasicForagePlantPlantedConfig : IEntityConfig
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, Grid.SceneLayer.BuildingBack, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		gameObject.AddOrGet<SimTemperatureTransfer>();
 		OccupyArea occupyArea = gameObject.AddOrGet<OccupyArea>();
-		occupyArea.objectLayer = ObjectLayer.Building;
+		occupyArea.objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		gameObject.AddOrGet<EntombVulnerable>();
 		DrowningMonitor drowningMonitor = gameObject.AddOrGet<DrowningMonitor>();
 		drowningMonitor.Configure(15f, 5f, 0.95f);

@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [Serializable]
-internal struct SpriteSheet
+public struct SpriteSheet
 {
 	public string name;
 

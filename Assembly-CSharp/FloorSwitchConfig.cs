@@ -59,8 +59,8 @@ public class FloorSwitchConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicSwitchConfig.OUTPUT_PORT);
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
+		GeneratedBuildings.RegisterLogicPorts(go, LogicSwitchConfig.OUTPUT_PORT);
 		LogicMassSensor logicMassSensor = go.AddOrGet<LogicMassSensor>();
 		logicMassSensor.rangeMin = 0f;
 		logicMassSensor.rangeMax = 2000f;

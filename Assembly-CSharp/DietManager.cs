@@ -6,14 +6,13 @@ public class DietManager : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.diets = DietManager.CollectDiets();
+		this.diets = DietManager.CollectDiets(null);
 		DietManager.Instance = this;
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.diets = DietManager.CollectDiets();
 		foreach (Tag tag in WorldInventory.Instance.GetDiscovered())
 		{
 			this.OnWorldInventoryDiscover(tag);
@@ -33,7 +32,7 @@ public class DietManager : KMonoBehaviour
 		}
 	}
 
-	public static Dictionary<Tag, Diet> CollectDiets()
+	public static Dictionary<Tag, Diet> CollectDiets(Tag[] target_species)
 	{
 		Dictionary<Tag, Diet> dictionary = new Dictionary<Tag, Diet>();
 		foreach (KPrefabID kprefabID in Assets.Prefabs)
@@ -41,7 +40,10 @@ public class DietManager : KMonoBehaviour
 			CreatureCalorieMonitor.Def def = kprefabID.GetDef<CreatureCalorieMonitor.Def>();
 			if (def != null)
 			{
-				dictionary[kprefabID.PrefabTag] = def.diet;
+				if (target_species == null || Array.IndexOf<Tag>(target_species, kprefabID.GetComponent<CreatureBrain>().species) >= 0)
+				{
+					dictionary[kprefabID.PrefabTag] = def.diet;
+				}
 			}
 		}
 		return dictionary;

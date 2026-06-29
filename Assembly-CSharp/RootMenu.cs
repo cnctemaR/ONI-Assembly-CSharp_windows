@@ -25,7 +25,8 @@ public class RootMenu : KScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.detailsScreen = DetailsScreen.Instance;
+		this.detailsScreen = Util.KInstantiateUI(this.detailsScreenPrefab, base.gameObject, true).GetComponent<DetailsScreen>();
+		this.detailsScreen.gameObject.SetActive(true);
 		this.userMenuParent = this.detailsScreen.UserMenuPanel.gameObject;
 		this.userMenu = Util.KInstantiateUI(this.userMenuPrefab.gameObject, this.userMenuParent, false).GetComponent<UserMenuScreen>();
 		this.detailsScreen.gameObject.SetActive(false);
@@ -213,6 +214,9 @@ public class RootMenu : KScreen
 	private DetailsScreen detailsScreen;
 
 	private UserMenuScreen userMenu;
+
+	[SerializeField]
+	private GameObject detailsScreenPrefab;
 
 	[SerializeField]
 	private UserMenuScreen userMenuPrefab;

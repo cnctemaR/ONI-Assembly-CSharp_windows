@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei;
 using UnityEngine;
 
 public class PropertyTextures : KMonoBehaviour, ISim200ms
@@ -9,6 +10,14 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		PropertyTextures.instance = this;
 		base.OnPrefabInit();
 		ShaderReloader.Register(new global::System.Action(this.OnShadersReloaded));
+	}
+
+	public static bool IsFogOfWarEnabled
+	{
+		get
+		{
+			return PropertyTextures.FogOfWarScale < 1f;
+		}
 	}
 
 	public void SetFilterMode(PropertyTextures.Property property, FilterMode mode)
@@ -28,6 +37,10 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 
 	protected override void OnSpawn()
 	{
+		if (GenericGameSettings.instance.disableFogOfWar)
+		{
+			PropertyTextures.FogOfWarScale = 1f;
+		}
 		this.WorldSizeID = Shader.PropertyToID("_WorldSizeInfo");
 		this.FogOfWarScaleID = Shader.PropertyToID("_FogOfWarScale");
 		this.PropTexWsToCsID = Shader.PropertyToID("_PropTexWsToCs");

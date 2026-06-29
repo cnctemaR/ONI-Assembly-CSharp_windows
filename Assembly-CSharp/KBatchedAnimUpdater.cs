@@ -26,8 +26,8 @@ public class KBatchedAnimUpdater
 	public void InitializeGrid()
 	{
 		this.Clear();
-		int num = (Grid.WidthInCells + 32 - 1) / 32;
-		int num2 = (Grid.HeightInCells + 32 - 1) / 32;
+		int num = ((int)((float)Grid.WidthInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.y) + 32 - 1) / 32;
+		int num2 = ((int)((float)Grid.HeightInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.y) + 32 - 1) / 32;
 		this.controllerGrid = new List<KBatchedAnimController>[num, num2];
 		for (int i = 0; i < num2; i++)
 		{
@@ -61,7 +61,6 @@ public class KBatchedAnimUpdater
 		}
 		this.alwaysUpdateList.Clear();
 		this.queuedRegistrations.Clear();
-		this.newlyVisible.Clear();
 		this.visibleChunks.Clear();
 		this.previouslyVisibleChunks.Clear();
 		this.controllerGrid = null;
@@ -108,17 +107,18 @@ public class KBatchedAnimUpdater
 		}
 	}
 
-	public void VisibilityRegister(Vector2I chunk_xy, KBatchedAnimController controller)
+	public void VisibilityRegister(KBatchedAnimController controller)
 	{
 		this.queuedRegistrations.Add(new KBatchedAnimUpdater.RegistrationInfo
 		{
-			chunkXY = chunk_xy,
+			transformId = controller.transform.GetInstanceID(),
+			controllerInstanceId = controller.GetInstanceID(),
 			controller = controller,
 			register = true
 		});
 	}
 
-	public void VisibilityUnregister(Vector2I chunk_xy, KBatchedAnimController controller)
+	public void VisibilityUnregister(KBatchedAnimController controller)
 	{
 		if (App.IsExiting)
 		{
@@ -126,7 +126,8 @@ public class KBatchedAnimUpdater
 		}
 		this.queuedRegistrations.Add(new KBatchedAnimUpdater.RegistrationInfo
 		{
-			chunkXY = chunk_xy,
+			transformId = controller.transform.GetInstanceID(),
+			controllerInstanceId = controller.GetInstanceID(),
 			controller = controller,
 			register = false
 		});
@@ -134,15 +135,17 @@ public class KBatchedAnimUpdater
 
 	private List<KBatchedAnimController> GetControllerList(Vector2I chunk_xy)
 	{
-		if (this.controllerGrid == null || chunk_xy.x < 0 || chunk_xy.x >= this.controllerGrid.GetLength(0) || chunk_xy.y < 0 || chunk_xy.y > this.controllerGrid.GetLength(1))
+		List<KBatchedAnimController> list = null;
+		if (this.controllerGrid != null && 0 <= chunk_xy.x && chunk_xy.x < this.controllerGrid.GetLength(0) && 0 <= chunk_xy.y && chunk_xy.y < this.controllerGrid.GetLength(1))
 		{
-			return null;
+			list = this.controllerGrid[chunk_xy.x, chunk_xy.y];
 		}
-		return this.controllerGrid[chunk_xy.x, chunk_xy.y];
+		return list;
 	}
 
 	public void LateUpdate()
 	{
+		this.ProcessMovingAnims();
 		this.UpdateVisibility();
 		this.ProcessRegistrations();
 		this.CleanUp();
@@ -190,19 +193,6 @@ public class KBatchedAnimUpdater
 		vis_chunk_max = this.vis_chunk_max;
 	}
 
-	private void UpdateVisibility(KBatchedAnimController controller)
-	{
-		Vector2I vector2I = KBatchedAnimUpdater.PosToChunkXY(controller.transform.GetPosition());
-		if (this.visibleChunkGrid[vector2I.x, vector2I.y])
-		{
-			controller.OnBecameVisible();
-		}
-		else
-		{
-			controller.OnBecameInvisible();
-		}
-	}
-
 	public static Vector2I PosToChunkXY(Vector3 pos)
 	{
 		Vector2I vector2I = Grid.PosToXY(pos);
@@ -244,7 +234,7 @@ public class KBatchedAnimUpdater
 						KBatchedAnimController kbatchedAnimController = list2[k];
 						if (!(kbatchedAnimController == null))
 						{
-							kbatchedAnimController.OnBecameVisible();
+							kbatchedAnimController.SetVisiblity(true);
 						}
 					}
 				}
@@ -261,7 +251,51 @@ public class KBatchedAnimUpdater
 					KBatchedAnimController kbatchedAnimController2 = list3[m];
 					if (!(kbatchedAnimController2 == null))
 					{
-						kbatchedAnimController2.OnBecameInvisible();
+						kbatchedAnimController2.SetVisiblity(false);
+					}
+				}
+			}
+		}
+	}
+
+	private void ProcessMovingAnims()
+	{
+		for (int i = 0; i < this.movingControllerInfos.Count; i++)
+		{
+			KBatchedAnimUpdater.MovingControllerInfo movingControllerInfo = this.movingControllerInfos[i];
+			if (!(movingControllerInfo.controller == null))
+			{
+				Vector2I vector2I = KBatchedAnimUpdater.PosToChunkXY(movingControllerInfo.controller.transform.GetPosition());
+				if (movingControllerInfo.chunkXY != vector2I)
+				{
+					KBatchedAnimUpdater.ControllerChunkInfo controllerChunkInfo = default(KBatchedAnimUpdater.ControllerChunkInfo);
+					bool flag = this.controllerChunkInfos.TryGetValue(movingControllerInfo.controllerInstanceId, out controllerChunkInfo);
+					DebugUtil.Assert(flag, "Assert!");
+					DebugUtil.Assert(movingControllerInfo.controller == controllerChunkInfo.controller, "Assert!");
+					DebugUtil.Assert(controllerChunkInfo.chunkXY == movingControllerInfo.chunkXY, "Assert!");
+					List<KBatchedAnimController> list = this.GetControllerList(controllerChunkInfo.chunkXY);
+					if (list != null)
+					{
+						DebugUtil.Assert(list.Contains(controllerChunkInfo.controller), "Assert!");
+						list.Remove(controllerChunkInfo.controller);
+					}
+					list = this.GetControllerList(vector2I);
+					if (list != null)
+					{
+						DebugUtil.Assert(!list.Contains(controllerChunkInfo.controller), "Assert!");
+						list.Add(controllerChunkInfo.controller);
+					}
+					movingControllerInfo.chunkXY = vector2I;
+					this.movingControllerInfos[i] = movingControllerInfo;
+					controllerChunkInfo.chunkXY = vector2I;
+					this.controllerChunkInfos[movingControllerInfo.controllerInstanceId] = controllerChunkInfo;
+					if (list != null)
+					{
+						controllerChunkInfo.controller.SetVisiblity(this.visibleChunkGrid[vector2I.x, vector2I.y]);
+					}
+					else
+					{
+						controllerChunkInfo.controller.SetVisiblity(false);
 					}
 				}
 			}
@@ -270,32 +304,101 @@ public class KBatchedAnimUpdater
 
 	private void ProcessRegistrations()
 	{
+		List<KBatchedAnimController> list = ListPool<KBatchedAnimController, KBatchedAnimUpdater>.Allocate();
 		for (int i = 0; i < this.queuedRegistrations.Count; i++)
 		{
-			KBatchedAnimUpdater.RegistrationInfo registrationInfo = this.queuedRegistrations[i];
-			if (!(registrationInfo.controller == null))
+			KBatchedAnimUpdater.RegistrationInfo info = this.queuedRegistrations[i];
+			if (info.register)
 			{
-				List<KBatchedAnimController> controllerList = this.GetControllerList(registrationInfo.chunkXY);
-				if (controllerList != null)
+				if (!(info.controller == null))
 				{
-					if (registrationInfo.register)
+					int instanceID = info.controller.GetInstanceID();
+					DebugUtil.Assert(!this.controllerChunkInfos.ContainsKey(instanceID), "Assert!");
+					KBatchedAnimUpdater.ControllerChunkInfo controllerChunkInfo = new KBatchedAnimUpdater.ControllerChunkInfo
 					{
-						controllerList.Add(registrationInfo.controller);
-						this.newlyVisible.Add(registrationInfo.controller);
-					}
-					else
+						controller = info.controller,
+						chunkXY = KBatchedAnimUpdater.PosToChunkXY(info.controller.transform.GetPosition())
+					};
+					this.controllerChunkInfos[instanceID] = controllerChunkInfo;
+					CellChangeMonitor.Instance.RegisterMovementStateChanged(info.controller.transform, new Action<Transform, bool>(this.OnMovementStateChanged));
+					List<KBatchedAnimController> controllerList = this.GetControllerList(controllerChunkInfo.chunkXY);
+					if (controllerList != null)
 					{
-						controllerList.Remove(registrationInfo.controller);
+						DebugUtil.Assert(!controllerList.Contains(info.controller), "Assert!");
+						controllerList.Add(info.controller);
 					}
+					bool flag = CellChangeMonitor.Instance.IsMoving(info.controller.transform);
+					if (flag)
+					{
+						this.movingControllerInfos.Add(new KBatchedAnimUpdater.MovingControllerInfo
+						{
+							controllerInstanceId = instanceID,
+							controller = info.controller,
+							chunkXY = controllerChunkInfo.chunkXY
+						});
+					}
+					if (this.visibleChunkGrid[controllerChunkInfo.chunkXY.x, controllerChunkInfo.chunkXY.y])
+					{
+						list.Add(info.controller);
+					}
+				}
+			}
+			else
+			{
+				KBatchedAnimUpdater.ControllerChunkInfo controllerChunkInfo2 = default(KBatchedAnimUpdater.ControllerChunkInfo);
+				if (this.controllerChunkInfos.TryGetValue(info.controllerInstanceId, out controllerChunkInfo2))
+				{
+					if (info.controller != null)
+					{
+						List<KBatchedAnimController> controllerList2 = this.GetControllerList(controllerChunkInfo2.chunkXY);
+						if (controllerList2 != null)
+						{
+							DebugUtil.Assert(controllerList2.Contains(info.controller), "Assert!");
+							controllerList2.Remove(info.controller);
+						}
+					}
+					this.movingControllerInfos.RemoveAll((KBatchedAnimUpdater.MovingControllerInfo x) => x.controllerInstanceId == info.controllerInstanceId);
+					CellChangeMonitor.Instance.UnregisterMovementStateChanged(info.transformId, new Action<Transform, bool>(this.OnMovementStateChanged));
+					this.controllerChunkInfos.Remove(info.controllerInstanceId);
+					list.Remove(info.controller);
 				}
 			}
 		}
 		this.queuedRegistrations.Clear();
-		for (int j = 0; j < this.newlyVisible.Count; j++)
+		foreach (KBatchedAnimController kbatchedAnimController in list)
 		{
-			this.UpdateVisibility(this.newlyVisible[j]);
+			if (kbatchedAnimController != null)
+			{
+				kbatchedAnimController.SetVisiblity(true);
+			}
 		}
-		this.newlyVisible.Clear();
+		ListPool<KBatchedAnimController, KBatchedAnimUpdater>.Free(list);
+	}
+
+	public void OnMovementStateChanged(Transform transform, bool is_moving)
+	{
+		if (transform == null)
+		{
+			return;
+		}
+		KBatchedAnimController component = transform.GetComponent<KBatchedAnimController>();
+		int controller_instance_id = component.GetInstanceID();
+		KBatchedAnimUpdater.ControllerChunkInfo controllerChunkInfo = default(KBatchedAnimUpdater.ControllerChunkInfo);
+		bool flag = this.controllerChunkInfos.TryGetValue(controller_instance_id, out controllerChunkInfo);
+		DebugUtil.Assert(flag, "Assert!");
+		if (is_moving)
+		{
+			this.movingControllerInfos.Add(new KBatchedAnimUpdater.MovingControllerInfo
+			{
+				controllerInstanceId = controller_instance_id,
+				controller = component,
+				chunkXY = controllerChunkInfo.chunkXY
+			});
+		}
+		else
+		{
+			this.movingControllerInfos.RemoveAll((KBatchedAnimUpdater.MovingControllerInfo x) => x.controllerInstanceId == controller_instance_id);
+		}
 	}
 
 	private void CleanUp()
@@ -323,12 +426,12 @@ public class KBatchedAnimUpdater
 		Grid.GetVisibleExtents(out min.x, out min.y, out max.x, out max.y);
 		min.x -= 4;
 		min.y -= 4;
-		min.x = Math.Min(Grid.WidthInCells - 1, Math.Max(0, min.x));
-		min.y = Math.Min(Grid.HeightInCells - 1, Math.Max(0, min.y));
+		min.x = Math.Min((int)((float)Grid.WidthInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.x) - 1, Math.Max(0, min.x));
+		min.y = Math.Min((int)((float)Grid.HeightInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.y) - 1, Math.Max(0, min.y));
 		max.x += 4;
 		max.y += 4;
-		max.x = Math.Min(Grid.WidthInCells - 1, Math.Max(0, max.x));
-		max.y = Math.Min(Grid.HeightInCells - 1, Math.Max(0, max.y));
+		max.x = Math.Min((int)((float)Grid.WidthInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.x) - 1, Math.Max(0, max.x));
+		max.y = Math.Min((int)((float)Grid.HeightInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.y) - 1, Math.Max(0, max.y));
 	}
 
 	private bool DoGridProcessing()
@@ -360,11 +463,15 @@ public class KBatchedAnimUpdater
 
 	private List<KBatchedAnimUpdater.RegistrationInfo> queuedRegistrations = new List<KBatchedAnimUpdater.RegistrationInfo>();
 
-	private List<KBatchedAnimController> newlyVisible = new List<KBatchedAnimController>();
+	private Dictionary<int, KBatchedAnimUpdater.ControllerChunkInfo> controllerChunkInfos = new Dictionary<int, KBatchedAnimUpdater.ControllerChunkInfo>();
+
+	private List<KBatchedAnimUpdater.MovingControllerInfo> movingControllerInfos = new List<KBatchedAnimUpdater.MovingControllerInfo>();
 
 	private const int CHUNKS_TO_CLEAN_PER_TICK = 16;
 
 	private int cleanUpChunkIndex;
+
+	private static Vector2 VISIBLE_RANGE_SCALE = new Vector2(1f, 1.25f);
 
 	public enum RegistrationState
 	{
@@ -377,8 +484,26 @@ public class KBatchedAnimUpdater
 	{
 		public bool register;
 
-		public Vector2I chunkXY;
+		public int transformId;
+
+		public int controllerInstanceId;
 
 		public KBatchedAnimController controller;
+	}
+
+	private struct ControllerChunkInfo
+	{
+		public KBatchedAnimController controller;
+
+		public Vector2I chunkXY;
+	}
+
+	private struct MovingControllerInfo
+	{
+		public int controllerInstanceId;
+
+		public KBatchedAnimController controller;
+
+		public Vector2I chunkXY;
 	}
 }

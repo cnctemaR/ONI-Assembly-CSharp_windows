@@ -32,7 +32,7 @@ public class MeterController
 		this.link = new KAnimLink(building_controller, meter_controller);
 		for (int i = 0; i < symbol_names.Length; i++)
 		{
-			building_controller.HideSymbol(new KAnimHashedString(symbol_names[i]), true);
+			building_controller.SetSymbolVisiblity(symbol_names[i], false);
 		}
 		KBatchedAnimTracker component = this.meterController.GetComponent<KBatchedAnimTracker>();
 		component.symbol = new HashedString(symbol_names[0]);
@@ -60,8 +60,8 @@ public class MeterController
 		}
 		gameObject.transform.SetPosition(position);
 		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
+		kbatchedAnimController.AnimFiles = new KAnimFile[] { building_controller.AnimFiles[0] };
 		kbatchedAnimController.initialAnim = meter_animation;
-		kbatchedAnimController.AddAnims(new KAnimFile[] { building_controller.GetAnims()[0] });
 		kbatchedAnimController.fgLayer = Grid.SceneLayer.NoLayer;
 		kbatchedAnimController.initialMode = KAnim.PlayMode.Paused;
 		kbatchedAnimController.isMovable = true;
@@ -72,12 +72,12 @@ public class MeterController
 		kbatchedAnimTracker.offset = tracker_offset;
 		kbatchedAnimTracker.symbol = new HashedString(meter_target);
 		gameObject.SetActive(true);
-		building_controller.HideSymbol(new KAnimHashedString(meter_target), true);
+		building_controller.SetSymbolVisiblity(meter_target, false);
 		if (symbols_to_hide != null)
 		{
 			for (int i = 0; i < symbols_to_hide.Length; i++)
 			{
-				building_controller.HideSymbol(new KAnimHashedString(symbols_to_hide[i]), true);
+				building_controller.SetSymbolVisiblity(symbols_to_hide[i], false);
 			}
 		}
 		this.link = new KAnimLink(building_controller, kbatchedAnimController);
@@ -97,20 +97,6 @@ public class MeterController
 		if (this.meterController != null)
 		{
 			this.meterController.SetSymbolTint(symbol, colour);
-		}
-	}
-
-	public void SetAllowTransformOverride(bool allow)
-	{
-		if (this.meterController == null)
-		{
-			return;
-		}
-		KBatchedAnimTracker component = this.meterController.GetComponent<KBatchedAnimTracker>();
-		component.allowTransformOverride = allow;
-		if (!allow)
-		{
-			this.meterController.GetBatchInstanceData().ClearOverrideTransformMatrix();
 		}
 	}
 

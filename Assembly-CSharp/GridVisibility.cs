@@ -16,6 +16,10 @@ public class GridVisibility : KMonoBehaviour
 			return;
 		}
 		int num = Grid.PosToCell(this);
+		if (!Grid.IsValidCell(num))
+		{
+			return;
+		}
 		if (!Grid.Revealed[num])
 		{
 			int num2;

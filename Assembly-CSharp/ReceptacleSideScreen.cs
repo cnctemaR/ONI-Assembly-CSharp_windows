@@ -272,6 +272,11 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		return Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui");
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<SingleEntityReceptacle>() != null && target.GetComponent<PlantablePlot>() == null && target.GetComponent<EggIncubator>() == null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		SingleEntityReceptacle component = target.GetComponent<SingleEntityReceptacle>();
@@ -348,7 +353,11 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		bool flag = false;
 		foreach (KeyValuePair<ReceptacleToggle, ReceptacleSideScreen.SelectableEntity> keyValuePair in this.depositObjectMap)
 		{
-			if (!keyValuePair.Key.gameObject.activeSelf)
+			if (!DebugHandler.InstantBuildMode && this.hideUndiscoveredEntities && !WorldInventory.Instance.IsDiscovered(keyValuePair.Value.tag))
+			{
+				keyValuePair.Key.gameObject.SetActive(false);
+			}
+			else if (!keyValuePair.Key.gameObject.activeSelf)
 			{
 				keyValuePair.Key.gameObject.SetActive(true);
 			}
@@ -523,6 +532,8 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 	private Dictionary<ReceptacleToggle, ReceptacleSideScreen.SelectableEntity> depositObjectMap;
 
 	private List<ReceptacleToggle> entityToggles = new List<ReceptacleToggle>();
+
+	protected bool hideUndiscoveredEntities;
 
 	private int onObjectDestroyedHandle = -1;
 

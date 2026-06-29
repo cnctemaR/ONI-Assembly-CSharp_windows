@@ -9,6 +9,10 @@ public class EntitySplitter : KMonoBehaviour
 	{
 		base.OnPrefabInit();
 		Pickupable pickupable = base.GetComponent<Pickupable>();
+		if (pickupable == null)
+		{
+			global::Debug.LogError(base.name + " does not have a pickupable component!", null);
+		}
 		Pickupable pickupable2 = pickupable;
 		pickupable2.OnTake = (Func<float, Pickupable>)Delegate.Combine(pickupable2.OnTake, new Func<float, Pickupable>((float amount) => EntitySplitter.Split(pickupable, amount, null)));
 		pickupable.CanAbsorb = delegate(Pickupable other)
@@ -19,16 +23,7 @@ public class EntitySplitter : KMonoBehaviour
 			}
 			KPrefabID component = pickupable.GetComponent<KPrefabID>();
 			KPrefabID component2 = other.GetComponent<KPrefabID>();
-			Edible component3 = this.GetComponent<Edible>();
-			if (component3 != null)
-			{
-				Edible component4 = other.GetComponent<Edible>();
-				if (component4 != null && component3.Units + component4.Units > 10f)
-				{
-					return false;
-				}
-			}
-			return component != null && component2 != null && component.PrefabTag == component2.PrefabTag;
+			return component != null && component2 != null && component.PrefabTag == component2.PrefabTag && pickupable.TotalAmount + other.TotalAmount <= this.maxStackSize;
 		};
 		base.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
 	}
@@ -94,4 +89,6 @@ public class EntitySplitter : KMonoBehaviour
 			}
 		}
 	}
+
+	public float maxStackSize = float.MaxValue;
 }

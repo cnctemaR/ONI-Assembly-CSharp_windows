@@ -149,7 +149,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		else if (e.TryConsume(global::Action.ZoomOut))
 		{
 			float num2 = this.targetOrthographicSize + this.zoomFactor * this.targetOrthographicSize;
-			this.targetOrthographicSize = Mathf.Min(num2, (!DebugHandler.FreeCameraMode) ? this.maxOrthographicSize : this.maxOrthographicSizeDebug);
+			this.targetOrthographicSize = Mathf.Min(num2, (!this.FreeCameraEnabled) ? this.maxOrthographicSize : this.maxOrthographicSizeDebug);
 			this.overrideZoomSpeed = 0f;
 		}
 		else if (e.TryConsume(global::Action.MouseMiddle) || e.IsAction(global::Action.MouseRight))
@@ -391,7 +391,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		{
 			return;
 		}
-		if (DebugHandler.FreeCameraMode)
+		if (this.FreeCameraEnabled)
 		{
 			return;
 		}
@@ -444,7 +444,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			base.transform.SetPosition(CameraSaveData.position);
 			base.transform.localScale = CameraSaveData.localScale;
 			base.transform.rotation = CameraSaveData.rotation;
-			this.targetOrthographicSize = Mathf.Clamp(CameraSaveData.orthographicsSize, this.minOrthographicSize, (!DebugHandler.FreeCameraMode) ? this.maxOrthographicSize : this.maxOrthographicSizeDebug);
+			this.targetOrthographicSize = Mathf.Clamp(CameraSaveData.orthographicsSize, this.minOrthographicSize, (!this.FreeCameraEnabled) ? this.maxOrthographicSize : this.maxOrthographicSizeDebug);
 			this.SnapTo(base.transform.GetPosition());
 		}
 	}
@@ -594,6 +594,8 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	public const float DEFAULT_MAX_ORTHO_SIZE = 20f;
 
 	private const float FIXED_Z = -100f;
+
+	public bool FreeCameraEnabled;
 
 	public float zoomSpeed;
 

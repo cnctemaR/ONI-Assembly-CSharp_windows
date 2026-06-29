@@ -50,7 +50,28 @@ public class TransitionDriver
 			component2.Play(transition.anim, KAnim.PlayMode.Once, 1f, 0f);
 			navigator.Subscribe(-1061186183, new Action<object>(this.OnAnimComplete));
 		}
-		navigator.GetComponent<Facing>().Face(this.targetPos.x);
+		if (transition.navGridTransition.y != 0)
+		{
+			if (transition.navGridTransition.start == NavType.RightWall)
+			{
+				navigator.GetComponent<Facing>().SetFacing(transition.navGridTransition.y < 0);
+			}
+			else if (transition.navGridTransition.start == NavType.LeftWall)
+			{
+				navigator.GetComponent<Facing>().SetFacing(transition.navGridTransition.y > 0);
+			}
+		}
+		if (transition.navGridTransition.x != 0)
+		{
+			if (transition.navGridTransition.start == NavType.Ceiling)
+			{
+				navigator.GetComponent<Facing>().SetFacing(transition.navGridTransition.x > 0);
+			}
+			else if (transition.navGridTransition.start != NavType.LeftWall && transition.navGridTransition.start != NavType.RightWall)
+			{
+				navigator.GetComponent<Facing>().SetFacing(transition.navGridTransition.x < 0);
+			}
+		}
 		this.brain = navigator.GetComponent<Brain>();
 	}
 

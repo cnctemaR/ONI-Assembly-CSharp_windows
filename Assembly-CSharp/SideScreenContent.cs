@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class SideScreenContent : KScreen
+public abstract class SideScreenContent : KScreen
 {
 	public virtual void SetTarget(GameObject target)
 	{
@@ -10,6 +10,8 @@ public class SideScreenContent : KScreen
 	public virtual void ClearTarget()
 	{
 	}
+
+	public abstract bool IsValidForTarget(GameObject target);
 
 	public virtual string GetTitle()
 	{

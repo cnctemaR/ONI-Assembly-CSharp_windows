@@ -28,8 +28,6 @@ public class Components
 
 	public static Components.Cmps<ITravelTubePiece> ITravelTubePieces = new Components.Cmps<ITravelTubePiece>();
 
-	public static Components.Cmps<CreatureLure> Lures = new Components.Cmps<CreatureLure>();
-
 	public static Components.Cmps<CreatureFeeder> CreatureFeeders = new Components.Cmps<CreatureFeeder>();
 
 	public static Components.Cmps<Light2D> Light2Ds = new Components.Cmps<Light2D>();

@@ -288,7 +288,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 				.Update(delegate(LiquidCooledFan.StatesInstance smi, float dt)
 				{
 					smi.master.CoolContents(dt);
-				})
+				}, UpdateRate.SIM_200ms, false)
 				.ScheduleGoTo(12f, this.workable.emitting)
 				.Exit(delegate(LiquidCooledFan.StatesInstance smi)
 				{
@@ -305,7 +305,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 				.Update(delegate(LiquidCooledFan.StatesInstance smi, float dt)
 				{
 					smi.master.CoolContents(dt);
-				})
+				}, UpdateRate.SIM_200ms, false)
 				.Update("LiquidFanEmitCooledContents", delegate(LiquidCooledFan.StatesInstance smi, float dt)
 				{
 					smi.master.EmitContents();

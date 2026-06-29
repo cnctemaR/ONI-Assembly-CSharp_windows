@@ -65,6 +65,8 @@ namespace Database
 			this.Quarantined = new StatusItem("Quarantined", "DUPLICANTS", "status_item_quarantined", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.RationsUnreachable = new StatusItem("RationsUnreachable", "DUPLICANTS", string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 			this.RationsUnreachable.AddNotification(null, null, null, 0f);
+			this.RationsNotPermitted = new StatusItem("RationsNotPermitted", "DUPLICANTS", string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
+			this.RationsNotPermitted.AddNotification(null, null, null, 0f);
 			this.Rotten = new StatusItem("Rotten", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 			this.Starving = new StatusItem("Starving", "DUPLICANTS", string.Empty, StatusItem.IconType.Exclamation, NotificationType.Bad, false, SimViewMode.None, true, 63486);
 			this.Starving.AddNotification(null, null, null, 0f);
@@ -320,6 +322,8 @@ namespace Database
 		public StatusItem NoRationsAvailable;
 
 		public StatusItem RationsUnreachable;
+
+		public StatusItem RationsNotPermitted;
 
 		public StatusItem DailyRationLimitReached;
 

@@ -14,7 +14,7 @@ public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.In
 		}).Update(delegate(HygieneMonitor.Instance smi, float dt)
 		{
 			smi.UpdateDirtiness();
-		});
+		}, UpdateRate.SIM_200ms, false);
 		this.clean.EventTransition(GameHashes.EffectAdded, this.needsshower_pre, (HygieneMonitor.Instance smi) => smi.NeedsShower());
 		this.needsshower_pre.Enter(delegate(HygieneMonitor.Instance smi)
 		{

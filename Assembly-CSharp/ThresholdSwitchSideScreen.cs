@@ -7,7 +7,6 @@ public class ThresholdSwitchSideScreen : SideScreenContent, IRender200ms
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.unitsLabel.text = this.target.ThresholdValueUnits();
 		this.aboveToggle.onClick += delegate
 		{
 			this.OnConditionButtonClicked(true);
@@ -43,46 +42,55 @@ public class ThresholdSwitchSideScreen : SideScreenContent, IRender200ms
 	{
 		if (this.target == null)
 		{
+			this.target = null;
 			return;
 		}
 		this.UpdateLabels();
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<IThresholdSwitch>() != null;
+	}
+
 	public override void SetTarget(GameObject new_target)
 	{
+		this.target = null;
 		if (new_target == null)
 		{
 			global::Debug.LogError("Invalid gameObject received", null);
 			return;
 		}
-		this.target = new_target.GetComponent<IThresholdSwitch>();
-		if (this.target == null)
+		this.target = new_target;
+		this.thresholdSwitch = this.target.GetComponent<IThresholdSwitch>();
+		if (this.thresholdSwitch == null)
 		{
+			this.target = null;
 			global::Debug.LogError("The gameObject received does not contain a IThresholdSwitch component", null);
 			return;
 		}
 		this.UpdateLabels();
-		this.thresholdSlider.minValue = this.target.RangeMin;
-		this.thresholdSlider.maxValue = this.target.RangeMax;
-		this.thresholdSlider.value = this.target.Threshold;
+		this.thresholdSlider.minValue = this.thresholdSwitch.RangeMin;
+		this.thresholdSlider.maxValue = this.thresholdSwitch.RangeMax;
+		this.thresholdSlider.value = this.thresholdSwitch.Threshold;
 		this.thresholdSlider.GetComponentInChildren<ToolTip>();
-		this.unitsLabel.text = this.target.ThresholdValueUnits();
-		this.numberInput.minValue = this.target.GetRangeMinInputField();
-		this.numberInput.maxValue = this.target.GetRangeMaxInputField();
+		this.unitsLabel.text = this.thresholdSwitch.ThresholdValueUnits();
+		this.numberInput.minValue = this.thresholdSwitch.GetRangeMinInputField();
+		this.numberInput.maxValue = this.thresholdSwitch.GetRangeMaxInputField();
 		this.numberInput.Activate();
 		this.UpdateTargetThresholdLabel();
-		this.OnConditionButtonClicked(this.target.ActivateAboveThreshold);
+		this.OnConditionButtonClicked(this.thresholdSwitch.ActivateAboveThreshold);
 	}
 
 	private void OnThresholdValueChanged(float new_value)
 	{
-		this.target.Threshold = new_value;
+		this.thresholdSwitch.Threshold = new_value;
 		this.UpdateTargetThresholdLabel();
 	}
 
 	private void OnConditionButtonClicked(bool activate_above_threshold)
 	{
-		this.target.ActivateAboveThreshold = activate_above_threshold;
+		this.thresholdSwitch.ActivateAboveThreshold = activate_above_threshold;
 		if (activate_above_threshold)
 		{
 			this.belowToggle.isOn = true;
@@ -102,51 +110,53 @@ public class ThresholdSwitchSideScreen : SideScreenContent, IRender200ms
 
 	private void UpdateTargetThresholdLabel()
 	{
-		this.numberInput.SetDisplayValue(this.target.Format(this.target.Threshold, false));
-		if (this.target.ActivateAboveThreshold)
+		this.numberInput.SetDisplayValue(this.thresholdSwitch.Format(this.thresholdSwitch.Threshold, false));
+		if (this.thresholdSwitch.ActivateAboveThreshold)
 		{
-			this.thresholdSlider.GetComponentInChildren<ToolTip>().SetSimpleTooltip(string.Format(this.target.AboveToolTip, this.target.Format(this.target.Threshold, true)));
+			this.thresholdSlider.GetComponentInChildren<ToolTip>().SetSimpleTooltip(string.Format(this.thresholdSwitch.AboveToolTip, this.thresholdSwitch.Format(this.thresholdSwitch.Threshold, true)));
 			this.thresholdSlider.GetComponentInChildren<ToolTip>().tooltipPositionOffset = new Vector2(0f, 25f);
 		}
 		else
 		{
-			this.thresholdSlider.GetComponentInChildren<ToolTip>().SetSimpleTooltip(string.Format(this.target.BelowToolTip, this.target.Format(this.target.Threshold, true)));
+			this.thresholdSlider.GetComponentInChildren<ToolTip>().SetSimpleTooltip(string.Format(this.thresholdSwitch.BelowToolTip, this.thresholdSwitch.Format(this.thresholdSwitch.Threshold, true)));
 			this.thresholdSlider.GetComponentInChildren<ToolTip>().tooltipPositionOffset = new Vector2(0f, 25f);
 		}
 	}
 
 	private void ReceiveValueFromSlider(float newValue)
 	{
-		this.UpdateThresholdValue(this.target.ProcessedSliderValue(newValue));
+		this.UpdateThresholdValue(this.thresholdSwitch.ProcessedSliderValue(newValue));
 	}
 
 	private void ReceiveValueFromInput(float newValue)
 	{
-		this.UpdateThresholdValue(this.target.ProcessedInputValue(newValue));
+		this.UpdateThresholdValue(this.thresholdSwitch.ProcessedInputValue(newValue));
 	}
 
 	private void UpdateThresholdValue(float newValue)
 	{
-		this.target.Threshold = newValue;
+		this.thresholdSwitch.Threshold = newValue;
 		this.thresholdSlider.value = newValue;
 		this.UpdateTargetThresholdLabel();
 	}
 
 	private void UpdateLabels()
 	{
-		this.currentValue.text = string.Format(UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.CURRENT_VALUE, this.target.ThresholdValueName, this.target.Format(this.target.CurrentValue, true));
+		this.currentValue.text = string.Format(UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.CURRENT_VALUE, this.thresholdSwitch.ThresholdValueName, this.thresholdSwitch.Format(this.thresholdSwitch.CurrentValue, true));
 	}
 
 	public override string GetTitle()
 	{
 		if (this.target != null)
 		{
-			return this.target.Title;
+			return this.thresholdSwitch.Title;
 		}
 		return UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.TITLE;
 	}
 
-	private IThresholdSwitch target;
+	private GameObject target;
+
+	private IThresholdSwitch thresholdSwitch;
 
 	[SerializeField]
 	private LocText currentValue;

@@ -187,7 +187,7 @@ public class BuildingHP : Workable
 
 		public void ShowProgressBar(bool show)
 		{
-			if (show && Grid.Visible[Grid.PosToCell(base.gameObject)] > 0)
+			if (show && Grid.IsVisible(Grid.PosToCell(base.gameObject)))
 			{
 				this.CreateProgressBar();
 			}

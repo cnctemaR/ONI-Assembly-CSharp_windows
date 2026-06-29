@@ -122,6 +122,7 @@ public class Element : IComparable<Element>
 			text += "\n\n";
 			text += string.Format(ELEMENTS.ELEMENTDESCGAS, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 		}
+		text = text + "\n" + string.Format(ELEMENTS.THERMALPROPERTIES, this.specificHeatCapacity, this.thermalConductivity);
 		if (this.oreTags.Length > 0 && !this.IsVacuum)
 		{
 			text += "\n\n";

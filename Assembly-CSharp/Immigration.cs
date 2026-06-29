@@ -98,7 +98,7 @@ public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPr
 	{
 		IPersonalPriorityManager instance = Immigration.Instance;
 		IPersonalPriorityManager component = minion.GetComponent<ChoreConsumer>();
-		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
+		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups.resources)
 		{
 			bool flag;
 			int personalPriority = instance.GetPersonalPriority(choreGroup, out flag);
@@ -109,7 +109,7 @@ public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPr
 	public void ResetPersonalPriorities()
 	{
 		bool advancedPersonalPriorities = Game.Instance.advancedPersonalPriorities;
-		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
+		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups.resources)
 		{
 			this.defaultPersonalPriorities[choreGroup.IdHash] = ((!advancedPersonalPriorities) ? 3 : choreGroup.DefaultPersonalPriority);
 		}

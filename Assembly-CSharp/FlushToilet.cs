@@ -274,7 +274,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 			}).ToggleMainStatusItem(Db.Get().BuildingStatusItems.FlushToiletInUse).Update(delegate(FlushToilet.SMInstance smi, float dt)
 			{
 				smi.UpdateDirtyState();
-			})
+			}, UpdateRate.SIM_200ms, false)
 				.WorkableCompleteTransition((FlushToilet.SMInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.flushing)
 				.WorkableStopTransition((FlushToilet.SMInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.flushed);
 			this.flushing.Enter(delegate(FlushToilet.SMInstance smi)

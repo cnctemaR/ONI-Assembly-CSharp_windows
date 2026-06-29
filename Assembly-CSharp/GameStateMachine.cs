@@ -341,9 +341,9 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State Update(Action<StateMachineInstanceType, float> callback)
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State Update(Action<StateMachineInstanceType, float> callback, UpdateRate update_rate = UpdateRate.SIM_200ms, bool load_balance = false)
 		{
-			return this.Update(this.name, callback, UpdateRate.SIM_200ms, false);
+			return this.Update(this.name, callback, update_rate, load_balance);
 		}
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State Enter(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.Callback callback)
@@ -494,45 +494,19 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleHideSymbol(string symbol_name)
-		{
-			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
-			KAnimHashedString symbol_hash = new KAnimHashedString(symbol_name);
-			this.Enter("HideSymbol(" + symbol_name + ")", delegate(StateMachineInstanceType smi)
-			{
-				state_target.Get<KAnimControllerBase>(smi).HideSymbol(symbol_hash, true);
-			});
-			this.Exit("ShowSymbol(" + symbol_name + ")", delegate(StateMachineInstanceType smi)
-			{
-				state_target.Get<KAnimControllerBase>(smi).ShowSymbol(symbol_hash);
-			});
-			return this;
-		}
-
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleAnims(string anim_file, float priority = 0f)
 		{
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
-			this.Enter("EnableAnims(" + anim_file + ")", delegate(StateMachineInstanceType smi)
+			this.Toggle("ToggleAnims(" + anim_file + ")", delegate(StateMachineInstanceType smi)
 			{
 				KAnimFile anim = Assets.GetAnim(anim_file);
-				if (anim == null)
-				{
-					global::Debug.LogWarning("Missing anims: " + anim_file, null);
-				}
-				else
-				{
-					KAnimControllerBase kanimControllerBase = state_target.Get<KAnimControllerBase>(smi);
-					kanimControllerBase.RemoveAnimOverrides(anim);
-					kanimControllerBase.AddAnimOverrides(anim, priority);
-				}
-			});
-			this.Exit("Disableanims(" + anim_file + ")", delegate(StateMachineInstanceType smi)
+				DebugUtil.Assert(anim != null, "Trying to add missing override anims:" + anim_file);
+				KAnimControllerBase kanimControllerBase = state_target.Get<KAnimControllerBase>(smi);
+				kanimControllerBase.AddAnimOverrides(anim, priority);
+			}, delegate(StateMachineInstanceType smi)
 			{
 				KAnimFile anim2 = Assets.GetAnim(anim_file);
-				if (anim2 != null)
-				{
-					state_target.Get<KAnimControllerBase>(smi).RemoveAnimOverrides(anim2);
-				}
+				state_target.Get<KAnimControllerBase>(smi).RemoveAnimOverrides(anim2);
 			});
 			return this;
 		}
@@ -1751,14 +1725,25 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State MoveTo(Func<StateMachineInstanceType, int> cell_callback, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state = null, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State fail_state = null, bool update_cell = false)
 		{
+			return this.MoveTo(cell_callback, null, success_state, fail_state, update_cell);
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State MoveTo(Func<StateMachineInstanceType, int> cell_callback, Func<StateMachineInstanceType, CellOffset[]> cell_offsets_callback, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state = null, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State fail_state = null, bool update_cell = false)
+		{
 			this.EventTransition(GameHashes.DestinationReached, success_state, null);
 			this.EventTransition(GameHashes.NavigationFailed, fail_state, null);
+			CellOffset[] default_offset = new CellOffset[] { default(CellOffset) };
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
 			this.Enter("MoveTo()", delegate(StateMachineInstanceType smi)
 			{
 				int num = cell_callback(smi);
 				Navigator navigator = state_target.Get<Navigator>(smi);
-				navigator.GoTo(num, null);
+				CellOffset[] array = default_offset;
+				if (cell_offsets_callback != null)
+				{
+					array = cell_offsets_callback(smi);
+				}
+				navigator.GoTo(num, array);
 			});
 			if (update_cell)
 			{
@@ -2026,6 +2011,14 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State OnAnimQueueComplete(GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state)
 		{
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
+			this.Enter("CheckIfAnimQueueIsEmpty", delegate(StateMachineInstanceType smi)
+			{
+				if (state_target.Get<KBatchedAnimController>(smi).IsStopped())
+				{
+					smi.GoTo(state);
+				}
+			});
 			return this.EventTransition(GameHashes.AnimQueueComplete, state, null);
 		}
 
@@ -2149,7 +2142,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public void GoToCursor(StateMachineInstanceType smi)
 		{
-			smi.GetComponent<Navigator>().GoTo(Grid.PosToCell(DebugHandler.GetMousePos()), Grid.DefaultOffset);
+			smi.GetComponent<Navigator>().GoTo(Grid.PosToCell(DebugHandler.GetMousePos()), new CellOffset[] { default(CellOffset) });
 		}
 	}
 

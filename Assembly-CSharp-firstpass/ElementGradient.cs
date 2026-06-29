@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using ProcGen;
 
+[DebuggerDisplay("{content} {bandSize} {maxValue}")]
 public class ElementGradient : Gradient<string>
 {
 	public ElementGradient()

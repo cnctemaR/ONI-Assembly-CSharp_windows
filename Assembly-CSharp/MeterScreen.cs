@@ -7,7 +7,7 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class MeterScreen : KScreen, IRender200ms
+public class MeterScreen : KScreen, IRender1000ms
 {
 	public static MeterScreen Instance { get; private set; }
 
@@ -61,7 +61,7 @@ public class MeterScreen : KScreen, IRender200ms
 		}
 	}
 
-	public void Render200ms(float dt)
+	public void Render1000ms(float dt)
 	{
 		this.Refresh();
 	}
@@ -118,7 +118,11 @@ public class MeterScreen : KScreen, IRender200ms
 		if (this.RationsText != null && RationTracker.Get() != null)
 		{
 			long num = (long)RationTracker.Get().CountRations(null, true);
-			this.RationsText.text = GameUtil.GetFormattedCalories((float)num, GameUtil.TimeSlice.None, true);
+			if (this.cachedCalories != num)
+			{
+				this.RationsText.text = GameUtil.GetFormattedCalories((float)num, GameUtil.TimeSlice.None, true);
+				this.cachedCalories = num;
+			}
 		}
 	}
 
@@ -297,6 +301,8 @@ public class MeterScreen : KScreen, IRender200ms
 	{
 		selectedIndex = -1
 	};
+
+	private long cachedCalories = -1L;
 
 	private Dictionary<string, float> rationsDict = new Dictionary<string, float>();
 

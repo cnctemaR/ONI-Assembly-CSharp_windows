@@ -18,7 +18,7 @@ public class CircuitSwitch : Switch
 		}
 		this.AttachWire(wire);
 		this.wasOn = this.switchedOn;
-		this.UpdateCircuit();
+		this.UpdateCircuit(true);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		component.Play((!this.switchedOn) ? "off" : "on", KAnim.PlayMode.Once, 1f, 0f);
 	}
@@ -31,7 +31,7 @@ public class CircuitSwitch : Switch
 		}
 		bool switchedOn = this.switchedOn;
 		this.switchedOn = true;
-		this.UpdateCircuit();
+		this.UpdateCircuit(false);
 		this.switchedOn = switchedOn;
 	}
 
@@ -44,7 +44,7 @@ public class CircuitSwitch : Switch
 
 	private void CircuitOnToggle(bool on)
 	{
-		this.UpdateCircuit();
+		this.UpdateCircuit(true);
 	}
 
 	public void AttachWire(Wire wire)
@@ -61,7 +61,7 @@ public class CircuitSwitch : Switch
 		if (this.attachedWire != null)
 		{
 			this.SubscribeToWire(this.attachedWire);
-			this.UpdateCircuit();
+			this.UpdateCircuit(true);
 			this.wireConnectedGUID = base.GetComponent<KSelectable>().RemoveStatusItem(this.wireConnectedGUID, false);
 		}
 		else if (this.wireConnectedGUID == Guid.Empty)
@@ -80,7 +80,7 @@ public class CircuitSwitch : Switch
 
 	private void OnWireStateChanged(object data)
 	{
-		this.UpdateCircuit();
+		this.UpdateCircuit(true);
 	}
 
 	private void SubscribeToWire(Wire wire)
@@ -97,7 +97,7 @@ public class CircuitSwitch : Switch
 		wire.Unsubscribe(774203113, new Action<object>(this.OnWireStateChanged));
 	}
 
-	private void UpdateCircuit()
+	private void UpdateCircuit(bool should_update_anim = true)
 	{
 		if (this.attachedWire != null)
 		{
@@ -110,7 +110,7 @@ public class CircuitSwitch : Switch
 				this.attachedWire.Disconnect();
 			}
 		}
-		if (this.wasOn != this.switchedOn)
+		if (should_update_anim && this.wasOn != this.switchedOn)
 		{
 			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 			component.Play((!this.switchedOn) ? "on_pst" : "on_pre", KAnim.PlayMode.Once, 1f, 0f);

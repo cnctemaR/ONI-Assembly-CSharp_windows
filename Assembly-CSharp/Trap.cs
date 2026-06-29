@@ -62,6 +62,8 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 		return this.contents.Get();
 	}
 
+	public Tag[] trappableCreatures;
+
 	[MyCmpReq]
 	private UserMenu userMenu;
 
@@ -90,7 +92,20 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 				return;
 			}
 			Trappable trappable = (Trappable)data;
+			bool flag = false;
 			KPrefabID component2 = trappable.GetComponent<KPrefabID>();
+			foreach (Tag tag in base.master.trappableCreatures)
+			{
+				if (trappable.HasTag(tag))
+				{
+					flag = true;
+					break;
+				}
+			}
+			if (!flag)
+			{
+				return;
+			}
 			Tag baggedCreatureTag = EntityTemplates.GetBaggedCreatureTag(component2.PrefabTag);
 			GameObject prefab = Assets.GetPrefab(baggedCreatureTag);
 			GameObject gameObject = Util.KInstantiate(prefab, Folder.Entities, base.master.transform.GetPosition());

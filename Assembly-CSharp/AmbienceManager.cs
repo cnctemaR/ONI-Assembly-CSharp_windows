@@ -238,7 +238,7 @@ public class AmbienceManager : KMonoBehaviour
 							int num = Grid.XYToCell(k, j);
 							if (Grid.IsValidCell(num))
 							{
-								if (Grid.Visible[num] > 0)
+								if (Grid.IsVisible(num))
 								{
 									Element element = Grid.Element[num];
 									if (element != null)

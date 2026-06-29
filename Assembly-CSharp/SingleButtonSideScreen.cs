@@ -17,6 +17,11 @@ public class SingleButtonSideScreen : SideScreenContent
 		}
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<ISidescreenButtonControl>() != null;
+	}
+
 	public override void SetTarget(GameObject new_target)
 	{
 		if (new_target == null)

@@ -20,18 +20,18 @@ public class FrontEndBackground : UIDupeRandomizer
 		}
 	}
 
-	private void WaitForABit(int minonIdx, HashedString name)
+	private void WaitForABit(int minion_idx, HashedString name)
 	{
-		base.StartCoroutine(this.WaitForTime(minonIdx));
+		base.StartCoroutine(this.WaitForTime(minion_idx));
 	}
 
-	private IEnumerator WaitForTime(int minonIdx)
+	private IEnumerator WaitForTime(int minion_idx)
 	{
-		this.anims[minonIdx].lastWaitTime = global::UnityEngine.Random.Range(this.anims[minonIdx].minSecondsBetweenAction, this.anims[minonIdx].maxSecondsBetweenAction);
-		yield return new WaitForSecondsRealtime(this.anims[minonIdx].lastWaitTime);
-		base.GetNewBody(minonIdx);
-		this.anims[minonIdx].minon.ClearQueue();
-		this.anims[minonIdx].minon.Play(this.anims[minonIdx].anim_name, KAnim.PlayMode.Once, 1f, 0f);
+		this.anims[minion_idx].lastWaitTime = global::UnityEngine.Random.Range(this.anims[minion_idx].minSecondsBetweenAction, this.anims[minion_idx].maxSecondsBetweenAction);
+		yield return new WaitForSecondsRealtime(this.anims[minion_idx].lastWaitTime);
+		base.GetNewBody(minion_idx);
+		this.anims[minion_idx].minon.ClearQueue();
+		this.anims[minion_idx].minon.Play(this.anims[minion_idx].anim_name, KAnim.PlayMode.Once, 1f, 0f);
 		yield break;
 	}
 

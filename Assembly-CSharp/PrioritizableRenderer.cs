@@ -43,7 +43,7 @@ public class PrioritizableRenderer
 						if (prioritizable != null && prioritizable.showIcon && prioritizable.IsPrioritizable())
 						{
 							int num = Grid.PosToCell(prioritizable);
-							if (Grid.Visible[num] > 0)
+							if (Grid.IsVisible(num))
 							{
 								this.prioritizables.Add(prioritizable);
 							}

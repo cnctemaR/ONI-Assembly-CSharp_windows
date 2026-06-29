@@ -39,7 +39,7 @@ public class SoundEvent : AnimEvent
 
 	public EffectorValues noiseValues { get; set; }
 
-	public bool ShouldPlaySound(AnimEventManager.EventPlayerData behaviour, bool isDynamic = false)
+	public static bool ShouldPlaySound(AnimEventManager.EventPlayerData behaviour, string sound, bool is_looping, bool is_dynamic)
 	{
 		CameraController instance = CameraController.Instance;
 		if (instance == null)
@@ -47,17 +47,17 @@ public class SoundEvent : AnimEvent
 			return true;
 		}
 		SpeedControlScreen instance2 = SpeedControlScreen.Instance;
-		if (isDynamic)
+		if (is_dynamic)
 		{
 			return (!(instance2 != null) || !instance2.IsPaused) && instance.IsAudibleSound(behaviour.position, 0f);
 		}
-		if (this.sound == null || this.IsLowPrioritySound(this.sound))
+		if (sound == null || SoundEvent.IsLowPrioritySound(sound))
 		{
 			return false;
 		}
-		if (!instance.IsAudibleSound(behaviour.position, this.sound))
+		if (!instance.IsAudibleSound(behaviour.position, sound))
 		{
-			if (!this.looping && !GlobalAssets.IsHighPriority(this.sound))
+			if (!is_looping && !GlobalAssets.IsHighPriority(sound))
 			{
 				return false;
 			}
@@ -71,13 +71,13 @@ public class SoundEvent : AnimEvent
 
 	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
-		if (this.ShouldPlaySound(behaviour, this.isDynamic))
+		if (SoundEvent.ShouldPlaySound(behaviour, this.sound, this.looping, this.isDynamic))
 		{
 			this.PlaySound(behaviour);
 		}
 	}
 
-	public virtual void PlaySound(AnimEventManager.EventPlayerData behaviour)
+	protected void PlaySound(AnimEventManager.EventPlayerData behaviour, string sound)
 	{
 		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
 		Vector3 position2 = behaviour.position;
@@ -85,7 +85,7 @@ public class SoundEvent : AnimEvent
 		if (audioDebug != null && audioDebug.debugSoundEvents)
 		{
 			Vector3 vector = ((!this.playAtTarget) ? position : position2);
-			global::Debug.Log(string.Concat(new object[] { behaviour.name, ", ", this.sound, ", ", base.frame, ", ", vector }), null);
+			global::Debug.Log(string.Concat(new object[] { behaviour.name, ", ", sound, ", ", base.frame, ", ", vector }), null);
 		}
 		try
 		{
@@ -96,22 +96,27 @@ public class SoundEvent : AnimEvent
 				{
 					global::Debug.Log(behaviour.name + " is missing LoopingSounds component. ", null);
 				}
-				else if (!component.StartSound(this.sound, behaviour, this.playAtTarget, this.noiseValues))
+				else if (!component.StartSound(sound, behaviour, this.playAtTarget, this.noiseValues))
 				{
-					Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", this.sound, behaviour.name) });
+					Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
 				}
 			}
-			else if (!SoundEvent.PlayOneShot(this.sound, behaviour, this.playAtTarget, this.noiseValues))
+			else if (!SoundEvent.PlayOneShot(sound, behaviour, this.playAtTarget, this.noiseValues))
 			{
-				Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", this.sound, behaviour.name) });
+				Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
 			}
 		}
 		catch (Exception ex)
 		{
-			string text = string.Format(("Error trying to trigger sound [{0}] in behaviour [{1}] [{2}]\n{3}" + this.sound == null) ? "null" : this.sound.ToString(), behaviour.GetType().ToString(), ex.Message, ex.StackTrace);
+			string text = string.Format(("Error trying to trigger sound [{0}] in behaviour [{1}] [{2}]\n{3}" + sound == null) ? "null" : sound.ToString(), behaviour.GetType().ToString(), ex.Message, ex.StackTrace);
 			global::Debug.LogError(text, null);
 			throw new ArgumentException(text, ex);
 		}
+	}
+
+	public virtual void PlaySound(AnimEventManager.EventPlayerData behaviour)
+	{
+		this.PlaySound(behaviour, this.sound);
 	}
 
 	public static Vector3 GetCameraScaledPosition(Vector3 pos)
@@ -182,7 +187,7 @@ public class SoundEvent : AnimEvent
 		}
 	}
 
-	protected bool IsLowPrioritySound(string sound)
+	protected static bool IsLowPrioritySound(string sound)
 	{
 		return sound != null && Camera.main.orthographicSize > AudioMixer.LOW_PRIORITY_CUTOFF_DISTANCE && !AudioMixer.instance.activeNIS && GlobalAssets.IsLowPriority(sound);
 	}
@@ -201,5 +206,5 @@ public class SoundEvent : AnimEvent
 
 	public static int IGNORE_INTERVAL = -1;
 
-	private bool isDynamic;
+	protected bool isDynamic;
 }

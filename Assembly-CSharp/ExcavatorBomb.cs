@@ -359,7 +359,7 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 					{
 						smi.GoTo(this.exploding);
 					}
-				});
+				}, UpdateRate.SIM_200ms, false);
 			this.exploding.ToggleMainStatusItem(this.statusItemExpoding).Update(delegate(ExcavatorBomb.StatesInstance smi, float dt)
 			{
 				bool flag = smi.master.Explode(dt);
@@ -367,7 +367,7 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 				{
 					smi.GoTo(this.defunct);
 				}
-			});
+			}, UpdateRate.SIM_200ms, false);
 		}
 
 		public GameStateMachine<ExcavatorBomb.States, ExcavatorBomb.StatesInstance, ExcavatorBomb, object>.State idle;

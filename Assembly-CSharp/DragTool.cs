@@ -155,7 +155,7 @@ public class DragTool : InterfaceTool
 				for (int j = num; j <= num5; j++)
 				{
 					int num7 = Grid.XYToCell(j, i);
-					if (Grid.IsValidCell(num7) && (Grid.Visible[num7] > 0 || PropertyTextures.FogOfWarScale == 1f))
+					if (Grid.IsValidCell(num7) && Grid.IsVisible(num7))
 					{
 						int num8 = i - num4;
 						int num9 = j - num3;
@@ -268,7 +268,7 @@ public class DragTool : InterfaceTool
 	private void AddDragPoint(Vector3 cursorPos)
 	{
 		int num = Grid.PosToCell(cursorPos);
-		if (Grid.IsValidCell(num) && (Grid.Visible[num] > 0 || PropertyTextures.FogOfWarScale == 1f))
+		if (Grid.IsValidCell(num) && Grid.IsVisible(num))
 		{
 			this.OnDragTool(num, 0);
 		}

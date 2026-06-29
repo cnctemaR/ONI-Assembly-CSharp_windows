@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{69BA25BE-7367-42B0-B0DA-9B9CE2CC0C7F}</ProjectGuid>
+    <ProjectGuid>{4F44E3EC-9C26-4831-8316-F182A48C7102}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -21,7 +21,6 @@
     <Compile Include="Audio.cs" />
     <Compile Include="Axis.cs" />
     <Compile Include="BaseLocation.cs" />
-    <Compile Include="BatchGroupInstance.cs" />
     <Compile Include="BatchGroupKey.cs" />
     <Compile Include="BatchKey.cs" />
     <Compile Include="BatchSet.cs" />
@@ -416,15 +415,11 @@
     <Compile Include="KAnimBatch.cs" />
     <Compile Include="KAnimBatchGroup.cs" />
     <Compile Include="KAnimBatchManager.cs" />
-    <Compile Include="KAnimBatchRenderGroup.cs" />
-    <Compile Include="KAnimCanvasRenderer.cs" />
     <Compile Include="KAnimConverter.cs" />
     <Compile Include="KAnimFile.cs" />
     <Compile Include="KAnimFileData.cs" />
     <Compile Include="KAnimGroupFile.cs" />
     <Compile Include="KAnimHashedString.cs" />
-    <Compile Include="KAnimMeshRenderer.cs" />
-    <Compile Include="KAnimRenderer.cs" />
     <Compile Include="KBasicToggle.cs" />
     <Compile Include="KBatchedAnimCanvasRenderer.cs" />
     <Compile Include="KBatchedAnimInstanceData.cs" />
@@ -472,6 +467,7 @@
     <Compile Include="KPointerImage.cs" />
     <Compile Include="KPrefabID.cs" />
     <Compile Include="KPrefabIDTracker.cs" />
+    <Compile Include="KPrivacyPrefs.cs" />
     <Compile Include="KProfiler.cs" />
     <Compile Include="KRectStretcher.cs" />
     <Compile Include="KScreen.cs" />
@@ -1054,6 +1050,7 @@
     <Compile Include="StringTable.cs" />
     <Compile Include="StructByteArray.cs" />
     <Compile Include="SymbolInstanceGpuData.cs" />
+    <Compile Include="SymbolOverrideInfoGpuData.cs" />
     <Compile Include="TabHeaderIcon.cs" />
     <Compile Include="Tag.cs" />
     <Compile Include="TagBits.cs" />
@@ -1211,51 +1208,51 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArabicSupport\ArabicSupport.csproj">
-      <Project>{69BA25BE-7367-42B0-B0DA-9B9CE2CC0C7E}</Project>
+      <Project>{4F44E3EC-9C26-4831-8316-F182A48C7101}</Project>
       <Name>ArabicSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\FileHelpers\FileHelpers.csproj">
-      <Project>{69BA25BE-7367-42B0-B0DA-9B9CE2CC0C82}</Project>
+      <Project>{4F44E3EC-9C26-4831-8316-F182A48C7105}</Project>
       <Name>FileHelpers</Name>
     </ProjectReference>
     <ProjectReference Include="..\libnoise\libnoise.csproj">
-      <Project>{69BA25BE-7367-42B0-B0DA-9B9CE2CC0C87}</Project>
+      <Project>{4F44E3EC-9C26-4831-8316-F182A48C710A}</Project>
       <Name>libnoise</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{69BA25BE-7367-42B0-B0DA-9B9CE2CC0C8B}</Project>
+      <Project>{4F44E3EC-9C26-4831-8316-F182A48C710E}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{69BA25BE-7367-42B0-B0DA-9B9CE2CC0C8C}</Project>
+      <Project>{4F44E3EC-9C26-4831-8316-F182A48C710F}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\Satsuma\Satsuma.csproj">
-      <Project>{69BA25BE-7367-42B0-B0DA-9B9CE2CC0C8E}</Project>
+      <Project>{4F44E3EC-9C26-4831-8316-F182A48C7111}</Project>
       <Name>Satsuma</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{69BA25BE-7367-42B0-B0DA-9B9CE2CC0C90}</Project>
+      <Project>{4F44E3EC-9C26-4831-8316-F182A48C7113}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{69BA25BE-7367-42B0-B0DA-9B9CE2CC0C98}</Project>
+      <Project>{4F44E3EC-9C26-4831-8316-F182A48C711B}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{69BA25BE-7367-42B0-B0DA-9B9CE2CC0C92}</Project>
+      <Project>{4F44E3EC-9C26-4831-8316-F182A48C7115}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{69BA25BE-7367-42B0-B0DA-9B9CE2CC0C9C}</Project>
+      <Project>{4F44E3EC-9C26-4831-8316-F182A48C711F}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{69BA25BE-7367-42B0-B0DA-9B9CE2CC0C9A}</Project>
+      <Project>{4F44E3EC-9C26-4831-8316-F182A48C711D}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
     <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
-      <Project>{69BA25BE-7367-42B0-B0DA-9B9CE2CC0C9D}</Project>
+      <Project>{4F44E3EC-9C26-4831-8316-F182A48C7120}</Project>
       <Name>YamlDotNet</Name>
     </ProjectReference>
   </ItemGroup>

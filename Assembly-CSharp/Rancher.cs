@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 
@@ -12,8 +11,6 @@ public class Rancher : RoleConfig
 		base.description = DUPLICANTS.ROLES.RANCHER.DESCRIPTION;
 		base.roleGroup = "Ranching";
 		base.hat = Game.Instance.roleManager.GetHat("Rancher");
-		this.preferredChoreTags.Add(GameTags.ChoreTypes.Ranching);
-		this.favoredChoreTypes = new List<ChoreType> { Db.Get().ChoreTypes.Capture };
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Ranching };
 		base.perks = new RolePerk[]
 		{

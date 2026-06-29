@@ -38,13 +38,37 @@ public class ConduitFlowVisualizer
 		return default_color;
 	}
 
-	private Color32 GetBackgroundColor(float insulation_lerp)
+	private Color32 GetTintColour()
 	{
-		if (this.showContents)
+		return (!this.showContents) ? this.visInfo.tint : this.visInfo.overlayTint;
+	}
+
+	private Color32 GetInsulatedTintColour()
+	{
+		return (!this.showContents) ? this.visInfo.insulatedTint : this.visInfo.overlayInsulatedTint;
+	}
+
+	private Color32 GetRadiantTintColour()
+	{
+		return (!this.showContents) ? this.visInfo.radiantTint : this.visInfo.overlayRadiantTint;
+	}
+
+	private Color32 GetCellTintColour(int cell)
+	{
+		Color32 color;
+		if (this.insulatedCells.Contains(cell))
 		{
-			return Color32.Lerp(this.visInfo.overlayTint, this.visInfo.overlayInsulatedTint, insulation_lerp);
+			color = this.GetInsulatedTintColour();
 		}
-		return Color32.Lerp(this.visInfo.tint, this.visInfo.insulatedTint, insulation_lerp);
+		else if (this.radiantCells.Contains(cell))
+		{
+			color = this.GetRadiantTintColour();
+		}
+		else
+		{
+			color = this.GetTintColour();
+		}
+		return color;
 	}
 
 	public void Render(float z, int render_layer, float lerp_percent, bool trigger_audio = false)
@@ -106,10 +130,9 @@ public class ConduitFlowVisualizer
 					{
 						vector = Vector2.Lerp(new Vector2((float)vector2I3.x, (float)vector2I3.y), new Vector2((float)vector2I4.x, (float)vector2I4.y), lerp_percent);
 					}
-					float num4 = ((!this.insulatedCells.Contains(cell)) ? 0f : 1f);
-					float num5 = ((!this.insulatedCells.Contains(cellFromDirection)) ? 0f : 1f);
-					float num6 = Mathf.Lerp(num4, num5, lerp_percent);
-					Color color = this.GetBackgroundColor(num6);
+					Color32 cellTintColour = this.GetCellTintColour(cell);
+					Color32 cellTintColour2 = this.GetCellTintColour(cellFromDirection);
+					Color32 color = Color32.Lerp(cellTintColour, cellTintColour2, lerp_percent);
 					Vector2I vector2I5 = new Vector2I(0, 0);
 					Vector2I vector2I6 = new Vector2I(0, 1);
 					Vector2I vector2I7 = new Vector2I(1, 0);
@@ -124,8 +147,8 @@ public class ConduitFlowVisualizer
 						vector2I8 = new Vector2I(0, 1);
 						break;
 					}
-					IL_04BB:
-					float num7 = 0f;
+					IL_047A:
+					float num4 = 0f;
 					if (this.showContents)
 					{
 						if (lastFlowInfo.contents.mass >= initialContents.mass)
@@ -140,45 +163,44 @@ public class ConduitFlowVisualizer
 					else
 					{
 						element = null;
-						int num8 = Grid.PosToCell(new Vector3(vector.x + ConduitFlowVisualizer.GRID_OFFSET.x, vector.y + ConduitFlowVisualizer.GRID_OFFSET.y, 0f));
-						if (num8 == this.highlightedCell)
+						int num5 = Grid.PosToCell(new Vector3(vector.x + ConduitFlowVisualizer.GRID_OFFSET.x, vector.y + ConduitFlowVisualizer.GRID_OFFSET.y, 0f));
+						if (num5 == this.highlightedCell)
 						{
-							num7 = 1f;
+							num4 = 1f;
 						}
 					}
 					Color32 contentsColor = this.GetContentsColor(element, color);
-					float num9 = 1f;
+					float num6 = 1f;
 					if (this.showContents || lastFlowInfo.contents.mass < initialContents.mass)
 					{
-						num9 = this.CalculateMassScale(lastFlowInfo.contents.mass);
+						num6 = this.CalculateMassScale(lastFlowInfo.contents.mass);
 					}
-					this.movingBallMesh.AddQuad(vector, contentsColor, this.tuning.size * num9, 1f, num7, vector2I5, vector2I6, vector2I7, vector2I8);
+					this.movingBallMesh.AddQuad(vector, contentsColor, this.tuning.size * num6, 1f, num4, vector2I5, vector2I6, vector2I7, vector2I8);
 					if (trigger_audio)
 					{
 						this.AddAudioSource(conduit, position);
-						goto IL_0625;
+						goto IL_05DA;
 					}
-					goto IL_0625;
-					goto IL_04BB;
+					goto IL_05DA;
+					goto IL_047A;
 				}
-				IL_0625:
+				IL_05DA:
 				if (initialContents.mass > lastFlowInfo.contents.mass && initialContents.mass > 0f)
 				{
 					int cell2 = conduit.GetCell(this.flowManager);
 					Vector2I vector2I9 = Grid.CellToXY(cell2);
 					Vector2 vector2 = vector2I9;
-					float num10 = initialContents.mass - lastFlowInfo.contents.mass;
-					float num11 = ((!this.insulatedCells.Contains(cell2)) ? 0f : 1f);
+					float num7 = initialContents.mass - lastFlowInfo.contents.mass;
 					Vector2I vector2I10 = new Vector2I(0, 0);
 					Vector2I vector2I11 = new Vector2I(0, 1);
 					Vector2I vector2I12 = new Vector2I(1, 0);
 					Vector2I vector2I13 = new Vector2I(1, 1);
-					float num12 = 0f;
-					Color color2 = this.GetBackgroundColor(num11);
-					float num13 = this.CalculateMassScale(num10);
+					float num8 = 0f;
+					Color32 cellTintColour3 = this.GetCellTintColour(cell2);
+					float num9 = this.CalculateMassScale(num7);
 					if (this.showContents)
 					{
-						this.staticBallMesh.AddQuad(vector2, color2, this.tuning.size * num13, 0f, 0f, vector2I10, vector2I11, vector2I12, vector2I13);
+						this.staticBallMesh.AddQuad(vector2, cellTintColour3, this.tuning.size * num9, 0f, 0f, vector2I10, vector2I11, vector2I12, vector2I13);
 						if (element == null || initialContents.element != element.id)
 						{
 							element = ElementLoader.FindElementByHash(initialContents.element);
@@ -189,11 +211,11 @@ public class ConduitFlowVisualizer
 						element = null;
 						if (cell2 == this.highlightedCell)
 						{
-							num12 = 1f;
+							num8 = 1f;
 						}
 					}
-					Color32 contentsColor2 = this.GetContentsColor(element, color2);
-					this.staticBallMesh.AddQuad(vector2, contentsColor2, this.tuning.size * num13, 1f, num12, vector2I10, vector2I11, vector2I12, vector2I13);
+					Color32 contentsColor2 = this.GetContentsColor(element, cellTintColour3);
+					this.staticBallMesh.AddQuad(vector2, contentsColor2, this.tuning.size * num9, 1f, num8, vector2I10, vector2I11, vector2I12, vector2I13);
 				}
 			}
 			this.movingBallMesh.End(z, this.layer);
@@ -279,15 +301,27 @@ public class ConduitFlowVisualizer
 		}
 	}
 
-	public void SetInsulated(int cell, bool insulated)
+	public void AddThermalConductivity(int cell, float conductivity)
 	{
-		if (insulated)
+		if (conductivity < 1f)
 		{
 			this.insulatedCells.Add(cell);
 		}
-		else
+		else if (conductivity > 1f)
+		{
+			this.radiantCells.Add(cell);
+		}
+	}
+
+	public void RemoveThermalConductivity(int cell, float conductivity)
+	{
+		if (conductivity < 1f)
 		{
 			this.insulatedCells.Remove(cell);
+		}
+		else if (conductivity > 1f)
+		{
+			this.radiantCells.Remove(cell);
 		}
 	}
 
@@ -311,6 +345,8 @@ public class ConduitFlowVisualizer
 	private List<ConduitFlowVisualizer.AudioInfo> audioInfo;
 
 	private HashSet<int> insulatedCells = new HashSet<int>();
+
+	private HashSet<int> radiantCells = new HashSet<int>();
 
 	private Game.ConduitVisInfo visInfo;
 

@@ -13,6 +13,12 @@ public class SingleSliderSideScreen : SideScreenContent
 		}
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		KPrefabID component = target.GetComponent<KPrefabID>();
+		return target.GetComponent<ISliderControl>() != null && target.GetComponent<IDualSliderControl>() == null && !component.HasTag("HydrogenGenerator".ToTag()) && !component.HasTag("MethaneGenerator".ToTag()) && !component.HasTag("PetroleumGenerator".ToTag());
+	}
+
 	public override void SetTarget(GameObject new_target)
 	{
 		if (new_target == null)

@@ -40,6 +40,10 @@ public class FrameDelayedHandleVector<T> : HandleVector<T>
 		this.curFrame = num;
 	}
 
+	public virtual void Reset(HandleVector<T>.Handle handle)
+	{
+	}
+
 	private List<HandleVector<T>.Handle>[] frameDelayedFreeHandles = new List<HandleVector<T>.Handle>[2];
 
 	private int curFrame;

@@ -14,6 +14,11 @@ public class TelepadSideScreen : SideScreenContent
 		};
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<Telepad>() != null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		Telepad component = target.GetComponent<Telepad>();

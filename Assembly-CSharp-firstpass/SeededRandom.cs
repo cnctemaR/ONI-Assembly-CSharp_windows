@@ -4,6 +4,10 @@ public class SeededRandom
 {
 	public SeededRandom(int seed)
 	{
+		if (seed == -2147483648)
+		{
+			seed = 0;
+		}
 		this.seed = seed;
 		this.rnd = new Random(seed);
 	}

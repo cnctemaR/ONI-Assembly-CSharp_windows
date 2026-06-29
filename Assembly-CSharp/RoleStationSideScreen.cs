@@ -12,6 +12,11 @@ public class RoleStationSideScreen : SideScreenContent
 		};
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<RoleStation>() != null;
+	}
+
 	public KButton openRolesScreenButton;
 
 	public GameObject content;

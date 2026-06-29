@@ -48,11 +48,28 @@ public class RanchStationConfig : IBuildingConfig
 		GeneratedBuildings.RegisterLogicPorts(go, RanchStationConfig.INPUT_PORTS);
 		go.AddOrGet<LogicOperationalController>();
 		BuildingTemplates.DoPostConfigure(go);
-		Effect effect = new Effect("Ranched", global::STRINGS.CREATURES.MODIFIERS.RANCHED.NAME, global::STRINGS.CREATURES.MODIFIERS.RANCHED.TOOLTIP, 600f, true, true, false);
-		effect.Add(new AttributeModifier(Db.Get().Amounts.Happiness.deltaAttribute.Id, 0.058333334f, global::STRINGS.CREATURES.MODIFIERS.RANCHED.NAME, false, false, true));
-		effect.Add(new AttributeModifier(Db.Get().Amounts.Wildness.deltaAttribute.Id, -0.09166667f, global::STRINGS.CREATURES.MODIFIERS.RANCHED.NAME, false, false, true));
 		RanchStation.Def def = go.AddOrGetDef<RanchStation.Def>();
-		def.effect = effect;
+		def.isCreatureEligibleToBeRanchedCb = (GameObject creature_go, RanchStation.Instance ranch_station_smi) => !creature_go.GetComponent<Effects>().HasEffect("Ranched");
+		def.onRanchCompleteCb = delegate(GameObject creature_go)
+		{
+			creature_go.GetComponent<Effects>().Add("Ranched", true);
+		};
+		def.ranchedPreAnim = "grooming_pre";
+		def.ranchedLoopAnim = "grooming_loop";
+		def.ranchedPstAnim = "grooming_pst";
+		def.getTargetRanchCell = delegate(RanchStation.Instance smi)
+		{
+			int num = Grid.InvalidCell;
+			if (smi != null && smi.IsRunning())
+			{
+				num = Grid.CellRight(Grid.PosToCell(smi.transform.GetPosition()));
+				if (smi.targetRanchable != null && smi.targetRanchable.HasTag(GameTags.Creatures.Flyer))
+				{
+					num = Grid.CellAbove(num);
+				}
+			}
+			return num;
+		};
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.CreaturePen.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Required;

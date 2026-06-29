@@ -53,7 +53,11 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 
 	protected override void OnCleanUp()
 	{
-		this.partitionerEntry.Release();
+		if (this.partitionerEntry != null)
+		{
+			this.partitionerEntry.Release();
+			this.partitionerEntry = null;
+		}
 		base.OnCleanUp();
 	}
 

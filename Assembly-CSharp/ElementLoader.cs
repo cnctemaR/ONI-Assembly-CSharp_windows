@@ -134,6 +134,21 @@ public class ElementLoader
 		return ElementLoader.elements.FindIndex(ElementLoader.getElementIndexCallback);
 	}
 
+	public static byte GetElementIndex(Tag element_tag)
+	{
+		byte b = byte.MaxValue;
+		for (int i = 0; i < ElementLoader.elements.Count; i++)
+		{
+			Element element = ElementLoader.elements[i];
+			if (element_tag == element.tag)
+			{
+				b = (byte)i;
+				break;
+			}
+		}
+		return b;
+	}
+
 	public static Element GetElement(Tag tag)
 	{
 		for (int i = 0; i < ElementLoader.elements.Count; i++)
@@ -244,7 +259,7 @@ public class ElementLoader
 	{
 		if (!string.IsNullOrEmpty(materialCategoryField))
 		{
-			Tag tag = TagManager.Create(materialCategoryField, null);
+			Tag tag = TagManager.Create(materialCategoryField);
 			if (!GameTags.MaterialCategories.Contains(tag) && !GameTags.IgnoredMaterialCategories.Contains(tag))
 			{
 				global::Debug.LogWarningFormat("Element {0} has category {1}, but that isn't in GameTags.MaterialCategores!", new object[] { element.id, materialCategoryField });
@@ -264,7 +279,7 @@ public class ElementLoader
 			{
 				if (!string.IsNullOrEmpty(text))
 				{
-					list.Add(TagManager.Create(text, null));
+					list.Add(TagManager.Create(text));
 				}
 			}
 		}
@@ -315,8 +330,8 @@ public class ElementLoader
 				element.maxMass = num4;
 				element.emitDistance = float.Parse(grid[18, i]);
 				element.emitIntensity = int.Parse(grid[19, i]);
-				element.materialCategory = ElementLoader.CreateMaterialCategoryTag(element, TagManager.Create("Solid", null), grid[20, i]);
-				element.oreTags = ElementLoader.CreateOreTags(element, TagManager.Create("Solid", null), grid[21, i]);
+				element.materialCategory = ElementLoader.CreateMaterialCategoryTag(element, TagManager.Create("Solid"), grid[20, i]);
+				element.oreTags = ElementLoader.CreateOreTags(element, TagManager.Create("Solid"), grid[21, i]);
 				if (!flag)
 				{
 					ElementLoader.SetOrCreateSubstanceForElement(id, ref substanceList, substanceTable);
@@ -379,8 +394,8 @@ public class ElementLoader
 				element.emitDistance = float.Parse(grid[24, i]);
 				element.emitIntensity = int.Parse(grid[25, i]);
 				element.toxicity = float.Parse(grid[26, i]);
-				element.materialCategory = ElementLoader.CreateMaterialCategoryTag(element, TagManager.Create("Liquid", null), grid[27, i]);
-				element.oreTags = ElementLoader.CreateOreTags(element, TagManager.Create("Liquid", null), grid[28, i]);
+				element.materialCategory = ElementLoader.CreateMaterialCategoryTag(element, TagManager.Create("Liquid"), grid[27, i]);
+				element.oreTags = ElementLoader.CreateOreTags(element, TagManager.Create("Liquid"), grid[28, i]);
 				if (!flag && !ElementLoader.SetOrCreateSubstanceForElement(id, ref substanceList, substanceTable))
 				{
 					Output.Log(new object[] { "no substance for", id });
@@ -455,8 +470,8 @@ public class ElementLoader
 				element.defaultValues = physicsData;
 				float num5 = 1.8f;
 				element.maxMass = num5;
-				element.materialCategory = ElementLoader.CreateMaterialCategoryTag(element, TagManager.Create("Gas", null), grid[15, i]);
-				element.oreTags = ElementLoader.CreateOreTags(element, TagManager.Create("Gas", null), grid[16, i]);
+				element.materialCategory = ElementLoader.CreateMaterialCategoryTag(element, TagManager.Create("Gas"), grid[15, i]);
+				element.oreTags = ElementLoader.CreateOreTags(element, TagManager.Create("Gas"), grid[16, i]);
 				if (!flag)
 				{
 					ElementLoader.SetOrCreateSubstanceForElement(id, ref substanceList, substanceTable);

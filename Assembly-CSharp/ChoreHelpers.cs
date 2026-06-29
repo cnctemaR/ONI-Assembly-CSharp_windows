@@ -21,5 +21,5 @@ public static class ChoreHelpers
 		}
 	}
 
-	private static Tag LocatorTag = TagManager.Create("Locator", null);
+	private static Tag LocatorTag = TagManager.Create("Locator");
 }

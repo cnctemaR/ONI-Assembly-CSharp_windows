@@ -49,6 +49,11 @@ public class DoorToggleSideScreen : SideScreenContent
 		}
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<Door>() != null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		if (this.target != null)

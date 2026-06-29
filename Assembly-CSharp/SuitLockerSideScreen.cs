@@ -9,6 +9,11 @@ public class SuitLockerSideScreen : SideScreenContent
 		base.OnSpawn();
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<SuitLocker>() != null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		this.suitLocker = target.GetComponent<SuitLocker>();

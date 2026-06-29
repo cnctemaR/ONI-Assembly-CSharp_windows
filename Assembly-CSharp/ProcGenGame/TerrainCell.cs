@@ -67,7 +67,8 @@ namespace ProcGenGame
 			if (this.allCells == null)
 			{
 				this.allCells = new List<int>();
-				this.availablePoints = new HashSet<Vector2I>();
+				this.availableTerrainPoints = new HashSet<Vector2I>();
+				this.availableSpawnPoints = new HashSet<Vector2I>();
 				for (int i = 0; i < Grid.HeightInCells; i++)
 				{
 					for (int j = 0; j < Grid.WidthInCells; j++)
@@ -75,7 +76,8 @@ namespace ProcGenGame
 						if (this.poly.Contains(new Vector2((float)j, (float)i)))
 						{
 							int num = Grid.XYToCell(j, i);
-							this.availablePoints.Add(Grid.CellToXY(num));
+							this.availableTerrainPoints.Add(Grid.CellToXY(num));
+							this.availableSpawnPoints.Add(Grid.CellToXY(num));
 							if (TerrainCell.claimedCells.Add(num))
 							{
 								this.allCells.Add(num);
@@ -88,23 +90,33 @@ namespace ProcGenGame
 			return this.allCells;
 		}
 
-		public List<int> GetAvailableCells()
+		public List<int> GetAvailableSpawnCells()
 		{
 			List<int> list = new List<int>();
-			foreach (Vector2I vector2I in this.availablePoints)
+			foreach (Vector2I vector2I in this.availableSpawnPoints)
 			{
 				list.Add(Grid.XYToCell(vector2I.x, vector2I.y));
 			}
 			return list;
 		}
 
-		private bool RemoveFromAvailableCells(int cell)
+		public List<int> GetAvailableTerrainCells()
+		{
+			List<int> list = new List<int>();
+			foreach (Vector2I vector2I in this.availableTerrainPoints)
+			{
+				list.Add(Grid.XYToCell(vector2I.x, vector2I.y));
+			}
+			return list;
+		}
+
+		private bool RemoveFromAvailableSpawnCells(int cell)
 		{
 			int num;
 			int num2;
 			Grid.CellToXY(cell, out num, out num2);
 			Vector2I vector2I = new Vector2I(num, num2);
-			return this.availablePoints.Remove(vector2I);
+			return this.availableSpawnPoints.Remove(vector2I);
 		}
 
 		public void AddMobs(IEnumerable<KeyValuePair<int, Tag>> newMobs)
@@ -127,7 +139,7 @@ namespace ProcGenGame
 				this.mobs = new List<KeyValuePair<int, Tag>>();
 			}
 			this.mobs.Add(mob);
-			bool flag = this.RemoveFromAvailableCells(mob.Key);
+			bool flag = this.RemoveFromAvailableSpawnCells(mob.Key);
 			this.LogInfo("\t\tRemoveFromAvailableCells", mob.Value.Name + ": " + ((!flag) ? "failed" : "success"), (float)mob.Key);
 			if (flag || !this.allCells.Contains(mob.Key))
 			{
@@ -549,7 +561,7 @@ namespace ProcGenGame
 						return;
 					}
 					HashSet<Vector2I> hashSet = this.DigFeature(featureSettings.shape, num, featureSettings.borders, rnd);
-					this.availablePoints.ExceptWith(hashSet);
+					this.availableTerrainPoints.ExceptWith(hashSet);
 					this.LogInfo("\t\t", "claimed points", (float)hashSet.Count);
 					this.ApplyPlaceElementForRoom(featureSettings, "RoomCenterElements", this.centerPoints, world, SetValues, temperatureMin, temperatureRange, rnd);
 					if (this.borders != null)
@@ -584,7 +596,7 @@ namespace ProcGenGame
 				this.node.tags.Add(new Tag("Infected:" + WorldGen.diseaseIds[(int)diseaseCell.diseaseIdx]));
 				diseaseCell.elementCount = rnd.RandomRange(10000, 1000000);
 			}
-			foreach (Vector2I vector2I in this.availablePoints)
+			foreach (Vector2I vector2I in this.availableTerrainPoints)
 			{
 				int num = Grid.XYToCell(vector2I.x, vector2I.y);
 				float num2 = world.overrides[num];
@@ -748,7 +760,7 @@ namespace ProcGenGame
 			this.ApplyForeground(world, SetValues, num, num2, rnd);
 			for (int i = 0; i < this.node.tags.Count; i++)
 			{
-				this.GenerateActionCells(this.node.tags[i], this.availablePoints, rnd);
+				this.GenerateActionCells(this.node.tags[i], this.availableTerrainPoints, rnd);
 			}
 			this.ApplyBackground(world, SetValues, num, num2, rnd);
 		}
@@ -802,11 +814,13 @@ namespace ProcGenGame
 
 		private List<int> allCells;
 
-		private HashSet<Vector2I> availablePoints;
+		private HashSet<Vector2I> availableTerrainPoints;
 
 		private List<Vector2I> centerPoints;
 
 		private List<List<Vector2I>> borders;
+
+		private HashSet<Vector2I> availableSpawnPoints;
 
 		private static HashSet<int> claimedCells = new HashSet<int>();
 

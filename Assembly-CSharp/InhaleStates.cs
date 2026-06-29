@@ -5,12 +5,21 @@ internal class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instan
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
-		default_state = this.inhaling;
-		GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State state = this.inhaling.DefaultState(this.inhaling.pre);
-		string text = CREATURES.STATUSITEMS.INHALING.NAME;
-		string text2 = CREATURES.STATUSITEMS.INHALING.TOOLTIP;
+		default_state = this.goingtoeat;
+		this.root.Enter("SetTarget", delegate(InhaleStates.Instance smi)
+		{
+			this.targetCell.Set(smi.GetSMI<GasAndLiquidConsumerMonitor.Instance>().targetCell, smi);
+		});
+		GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State state = this.goingtoeat.MoveTo((InhaleStates.Instance smi) => this.targetCell.Get(smi), this.inhaling, null, false);
+		string text = CREATURES.STATUSITEMS.LOOKINGFORFOOD.NAME;
+		string text2 = CREATURES.STATUSITEMS.LOOKINGFORFOOD.TOOLTIP;
 		StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
 		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
+		GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State state2 = this.inhaling.DefaultState(this.inhaling.pre);
+		text2 = CREATURES.STATUSITEMS.INHALING.NAME;
+		text = CREATURES.STATUSITEMS.INHALING.TOOLTIP;
+		statusItemCategory = Db.Get().StatusItemCategories.Main;
+		state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
 		this.inhaling.pre.PlayAnim("inhale_pre").QueueAnim("inhale_loop", true, null).Update("Consume", delegate(InhaleStates.Instance smi, float dt)
 		{
 			smi.GetSMI<GasAndLiquidConsumerMonitor.Instance>().Consume(dt);
@@ -26,25 +35,17 @@ internal class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instan
 				smi.StopInhaleSound();
 			})
 			.ScheduleGoTo((InhaleStates.Instance smi) => smi.def.maximumInhaleTime, this.inhaling.full);
-		this.inhaling.full.QueueAnim("inhale_pst", false, null).QueueAnim("idle_loop_full", true, null).ScheduleGoTo(3f, this.exhaling);
-		GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State state2 = this.exhaling;
-		text2 = CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME;
-		text = CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP;
-		statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory).DefaultState(this.exhaling.pre);
-		this.exhaling.pre.PlayAnim("poop").OnAnimQueueComplete(this.exhaling.poop);
-		this.exhaling.poop.Enter("Poop", delegate(InhaleStates.Instance smi)
-		{
-			smi.GetSMI<CreatureCalorieMonitor.Instance>().Poop();
-		}).GoTo(this.behaviourcomplete);
+		this.inhaling.full.QueueAnim("inhale_pst", false, null).QueueAnim("idle_loop", true, null).ScheduleGoTo(3f, this.behaviourcomplete);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.WantsToEat, false);
 	}
 
+	public GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State goingtoeat;
+
 	public InhaleStates.InhalingStates inhaling;
 
-	public InhaleStates.ExhalingStates exhaling;
-
 	public GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State behaviourcomplete;
+
+	public StateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.IntParameter targetCell;
 
 	public class Def : StateMachine.BaseDef
 	{
@@ -90,12 +91,5 @@ internal class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instan
 		public GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State pre;
 
 		public GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State full;
-	}
-
-	public class ExhalingStates : GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State
-	{
-		public GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State pre;
-
-		public GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State poop;
 	}
 }

@@ -31,6 +31,11 @@ public class AccessControlSideScreen : SideScreenContent
 		this.sortByPermissionToggle.onValueChanged.AddListener(new UnityAction<bool>(this.SortByPermission));
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<AccessControl>() != null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		if (this.target != null)

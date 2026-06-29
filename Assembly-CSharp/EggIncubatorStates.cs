@@ -6,7 +6,8 @@ public class EggIncubatorStates : GameStateMachine<EggIncubatorStates, EggIncuba
 	{
 		default_state = this.empty;
 		this.empty.PlayAnim("off", KAnim.PlayMode.Loop).EventTransition(GameHashes.OccupantChanged, this.occupied, (EggIncubatorStates.Instance smi) => smi.GetComponent<EggIncubator>().Occupant != null);
-		this.occupied.DefaultState(this.occupied.unpowered).EventTransition(GameHashes.OccupantChanged, this.empty, (EggIncubatorStates.Instance smi) => smi.GetComponent<EggIncubator>().Occupant == null).ParamTransition<bool>(this.readyToHatch, this.occupied.readytohatch, (EggIncubatorStates.Instance smi, bool p) => p);
+		this.occupied.DefaultState(this.occupied.unpowered).EventTransition(GameHashes.OccupantChanged, this.empty, (EggIncubatorStates.Instance smi) => smi.GetComponent<EggIncubator>().Occupant == null).ParamTransition<bool>(this.readyToHatch, this.occupied.readytohatch, (EggIncubatorStates.Instance smi, bool p) => p)
+			.ToggleStatusItem(Db.Get().BuildingStatusItems.IncubatorProgress, (EggIncubatorStates.Instance smi) => smi.master.GetComponent<EggIncubator>());
 		this.occupied.unpowered_pre.PlayAnim("no_power_pre").OnAnimQueueComplete(this.occupied.unpowered);
 		this.occupied.unpowered.PlayAnim("no_power_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.OperationalChanged, this.occupied.incubating, (EggIncubatorStates.Instance smi) => smi.GetComponent<Operational>().IsOperational);
 		this.occupied.incubating.PlayAnim("no_power_post").QueueAnim("working_loop", true, null).EventTransition(GameHashes.OperationalChanged, this.occupied.unpowered_pre, (EggIncubatorStates.Instance smi) => !smi.GetComponent<Operational>().IsOperational);

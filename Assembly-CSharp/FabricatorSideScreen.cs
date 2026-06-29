@@ -17,6 +17,11 @@ public class FabricatorSideScreen : SideScreenContent
 		return string.Format(Strings.Get(this.titleKey), this.targetFab.GetProperName());
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<Fabricator>() != null && target.GetComponent<ResearchCenter>() == null;
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		Fabricator component = target.GetComponent<Fabricator>();

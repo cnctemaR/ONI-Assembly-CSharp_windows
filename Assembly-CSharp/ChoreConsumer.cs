@@ -54,6 +54,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 			bool flag;
 			int personalPriority = this.GetPersonalPriority(choreGroup, out flag);
 			this.UpdateChoreTypePriorities(choreGroup, personalPriority);
+			this.SetPermittedByUser(choreGroup, personalPriority != 0);
 		}
 		this.consumerState = new ChoreConsumerState(this);
 	}
@@ -228,7 +229,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		for (int i = 0; i < chore_type.groups.Length; i++)
 		{
 			ChoreGroup choreGroup = chore_type.groups[i];
-			if (this.IsPermittedByTraits(choreGroup) && (this.IsPermittedByUser(choreGroup) || (this.resume != null && this.resume.IsChoreGroupInCurrentRoleGroup(choreGroup))))
+			if (this.IsPermittedByTraits(choreGroup) && this.IsPermittedByUser(choreGroup))
 			{
 				return true;
 			}
@@ -486,7 +487,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 	public bool IsChoreEqualOrAboveCurrentChorePriority<StateMachineType>()
 	{
 		Chore currentChore = this.choreDriver.GetCurrentChore();
-		return currentChore == null || currentChore.choreType.priority <= this.choreTable.GetChorePriority<StateMachineType>();
+		return currentChore == null || currentChore.choreType.priority <= this.choreTable.GetChorePriority<StateMachineType>(this);
 	}
 
 	public bool IsChoreGroupDisabled(ChoreGroup chore_group)
@@ -550,14 +551,13 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 	private ChoreConsumer.PreconditionSnapshot preconditionSnapshot = new ChoreConsumer.PreconditionSnapshot();
 
 	[Serialize]
-	private List<HashedString> userDisabledChoreGroups = new List<HashedString>();
-
-	[Serialize]
 	private Dictionary<HashedString, ChoreConsumer.PriorityInfo> choreGroupPriorities = new Dictionary<HashedString, ChoreConsumer.PriorityInfo>();
 
 	private Dictionary<HashedString, int> choreTypePriorities = new Dictionary<HashedString, int>();
 
 	private List<HashedString> traitDisabledChoreGroups = new List<HashedString>();
+
+	private List<HashedString> userDisabledChoreGroups = new List<HashedString>();
 
 	public HashSet<Tag> preferredChoreTags = new HashSet<Tag>();
 

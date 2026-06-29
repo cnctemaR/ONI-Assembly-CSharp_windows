@@ -215,29 +215,35 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPoi
 		float num2;
 		float num3;
 		this.GetAmounts(false, out num, out num2, out num3);
-		if (this.quantityString == null || this.currentQuantity != num)
+		if (num != this.cachedAvailable || num2 != this.cachedTotal || num3 != this.cachedReserved)
 		{
-			GameUtil.MeasureUnit measure = this.Measure;
-			if (measure != GameUtil.MeasureUnit.mass)
+			if (this.quantityString == null || this.currentQuantity != num)
 			{
-				if (measure != GameUtil.MeasureUnit.quantity)
+				GameUtil.MeasureUnit measure = this.Measure;
+				if (measure != GameUtil.MeasureUnit.mass)
 				{
-					if (measure == GameUtil.MeasureUnit.kcal)
+					if (measure != GameUtil.MeasureUnit.quantity)
 					{
-						this.quantityString = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
+						if (measure == GameUtil.MeasureUnit.kcal)
+						{
+							this.quantityString = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
+						}
+					}
+					else
+					{
+						this.quantityString = num.ToString();
 					}
 				}
 				else
 				{
-					this.quantityString = num.ToString();
+					this.quantityString = GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
 				}
+				this.elements.QuantityText.text = this.quantityString;
+				this.currentQuantity = num;
 			}
-			else
-			{
-				this.quantityString = GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
-			}
-			this.elements.QuantityText.text = this.quantityString;
-			this.currentQuantity = num;
+			this.cachedAvailable = num;
+			this.cachedTotal = num2;
+			this.cachedReserved = num3;
 		}
 		foreach (KeyValuePair<Tag, ResourceEntry> keyValuePair in this.ResourcesDiscovered)
 		{
@@ -317,6 +323,12 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPoi
 
 	[SerializeField]
 	private Image Background;
+
+	private float cachedAvailable = float.MinValue;
+
+	private float cachedTotal = float.MinValue;
+
+	private float cachedReserved = float.MinValue;
 
 	[Serializable]
 	public struct ElementReferences

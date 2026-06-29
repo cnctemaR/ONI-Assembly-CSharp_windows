@@ -89,7 +89,7 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 		bool flag = true;
 		foreach (Refinery.OrderSaveData orderSaveData in this.savedOrders)
 		{
-			RefinementRecipe recipe = RefineryRecipeManager.Get().GetRecipe(TagManager.Create(orderSaveData.material, null));
+			RefinementRecipe recipe = RefineryRecipeManager.Get().GetRecipe(TagManager.Create(orderSaveData.material));
 			Refinery.UserOrder userOrder = new Refinery.UserOrder(recipe, orderSaveData.infinite);
 			if (this.OnCreateOrder != null)
 			{
@@ -211,11 +211,10 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 			list.Add(gameObject2);
 		}
 		KBatchedAnimController component3 = list[0].GetComponent<KBatchedAnimController>();
-		HashedString batchTag = component3.AnimFiles[0].batchTag;
 		KAnim.Build build = component3.AnimFiles[0].GetData().build;
-		KAnim.Build.Symbol symbol = build.GetSymbol(new KAnimHashedString(build.name));
-		KBatchedAnimController component4 = base.GetComponent<KBatchedAnimController>();
-		component4.AddSymbolOverride(new KAnimHashedString("output_tracker"), batchTag, symbol, false);
+		KAnim.Build.Symbol symbol = build.GetSymbol(build.name);
+		base.GetComponent<SymbolOverrideController>().TryRemoveSymbolOverride("output_tracker", 0);
+		base.GetComponent<SymbolOverrideController>().AddSymbolOverride("output_tracker", symbol, 0);
 		if (!completed_order.infinite && this.OnOrderCancelledOrComplete != null)
 		{
 			this.OnOrderCancelledOrComplete(completed_order);

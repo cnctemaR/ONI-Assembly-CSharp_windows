@@ -59,11 +59,14 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 		{
 			return;
 		}
-		if (new_assignee is MinionIdentity && base.slot != null && new_assignee.GetSoleOwner().GetComponent<Equipment>().GetSlot(base.slot)
-			.assignable != null)
+		if (new_assignee is MinionIdentity && base.slot != null)
 		{
-			new_assignee.GetSoleOwner().GetComponent<Equipment>().GetSlot(base.slot)
-				.assignable.Unassign();
+			Equipment component = new_assignee.GetSoleOwner().GetComponent<Equipment>();
+			AssignableSlotInstance slot = component.GetSlot(base.slot);
+			if (slot.assignable != null)
+			{
+				slot.Unassign(true);
+			}
 		}
 		base.Assign(new_assignee);
 	}
@@ -111,13 +114,16 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 		base.GetComponent<KPrefabID>().RemoveTag(GameTags.Equipped);
 		base.GetComponent<KBatchedAnimController>().enabled = true;
 		base.GetComponent<KSelectable>().IsSelectable = true;
-		Effects component = this.assignee.GetSoleOwner().GetComponent<Effects>();
-		foreach (Effect effect in this.def.EffectImmunites)
+		if (this.assignee != null)
 		{
-			component.RemoveImmunity(effect);
+			Effects component = this.assignee.GetSoleOwner().GetComponent<Effects>();
+			foreach (Effect effect in this.def.EffectImmunites)
+			{
+				component.RemoveImmunity(effect);
+			}
+			base.gameObject.transform.SetPosition(this.assignee.GetSoleOwner().gameObject.transform.GetPosition() + Vector3.up / 2f);
 		}
 		base.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Misc).transform;
-		base.gameObject.transform.SetPosition(this.assignee.GetSoleOwner().gameObject.transform.GetPosition() + Vector3.up / 2f);
 		if (this.def.OnUnequipCallBack != null)
 		{
 			this.def.OnUnequipCallBack(this);

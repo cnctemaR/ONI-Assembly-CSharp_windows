@@ -14,6 +14,8 @@ namespace STRINGS
 
 		public static LocString BREATHABLEDESC = "<color=#{0}>({1})</color>";
 
+		public static LocString THERMALPROPERTIES = "\nSpecific Heat Capacity: {0} " + UI.UNITSUFFIXES.HEAT.SPECIFICHEATCAPACITY + "\nThermal Conductivity: {1} " + UI.UNITSUFFIXES.HEAT.THERMALCONDUCTIVITY;
+
 		public static LocString ELEMENTPROPERTIES = "Properties: {0}";
 
 		public class STATE

@@ -28,9 +28,7 @@ public class CellSelectionObject : KMonoBehaviour
 		this.mSelectable = base.GetComponent<KSelectable>();
 		this.SelectedDisplaySprite.transform.localScale = Vector3.one * 0.390625f;
 		this.SelectedDisplaySprite.GetComponent<SpriteRenderer>().sprite = this.Sprite_Hover;
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		base.Subscribe(Game.Instance.gameObject, 493375141, new Action<object>(this.ForceRefreshUserMenu));
-		base.Subscribe(WaterBodyProbe.Instance.gameObject, -263784810, new Action<object>(this.ForceRefreshUserMenu));
 		this.overlayFilterMap.Add(SimViewMode.OxygenMap, () => Grid.Element[this.mouseCell].IsGas);
 		this.overlayFilterMap.Add(SimViewMode.GasVentMap, () => Grid.Element[this.mouseCell].IsGas);
 		this.overlayFilterMap.Add(SimViewMode.LiquidVentMap, () => Grid.Element[this.mouseCell].IsLiquid);
@@ -60,7 +58,7 @@ public class CellSelectionObject : KMonoBehaviour
 		if (SelectTool.Instance.selected != this.mSelectable)
 		{
 			this.mouseCell = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(Input.mousePosition));
-			if (Grid.IsValidCell(this.mouseCell) && (Grid.Visible[this.mouseCell] > 0 || DebugHandler.FreeCameraMode))
+			if (Grid.IsValidCell(this.mouseCell) && Grid.IsVisible(this.mouseCell))
 			{
 				bool flag = true;
 				foreach (KeyValuePair<SimViewMode, Func<bool>> keyValuePair in this.overlayFilterMap)
@@ -213,22 +211,6 @@ public class CellSelectionObject : KMonoBehaviour
 		this.userMenu.Refresh();
 	}
 
-	public virtual void OnRefreshUserMenu(object data)
-	{
-		this.cellButtons.Clear();
-		if (SelectTool.Instance.selected == this.mSelectable && Grid.IsSubstantialLiquid(this.selectedCell, 0.35f) && WaterBodyProbe.Instance.GetBodyIfKnown(this.selectedCell))
-		{
-			BodyOfWater bodyIfKnown = WaterBodyProbe.Instance.GetBodyIfKnown(this.selectedCell);
-			if (bodyIfKnown != null)
-			{
-			}
-		}
-		foreach (KIconButtonMenu.ButtonInfo buttonInfo in this.cellButtons)
-		{
-			this.userMenu.AddButton(buttonInfo, 1f);
-		}
-	}
-
 	[HideInInspector]
 	public CellSelectionObject alternateSelectionObject;
 
@@ -272,8 +254,6 @@ public class CellSelectionObject : KMonoBehaviour
 	public int diseaseCount;
 
 	private float updateTimer;
-
-	private List<KIconButtonMenu.ButtonInfo> cellButtons = new List<KIconButtonMenu.ButtonInfo>();
 
 	private Dictionary<SimViewMode, Func<bool>> overlayFilterMap = new Dictionary<SimViewMode, Func<bool>>();
 

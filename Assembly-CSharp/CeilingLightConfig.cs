@@ -1,5 +1,4 @@
 ﻿using System;
-using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -13,12 +12,12 @@ public class CeilingLightConfig : IBuildingConfig
 		string text2 = "ceilinglight_kanim";
 		int num3 = 10;
 		float num4 = 10f;
-		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER1;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER1;
 		string[] all_METALS = MATERIALS.ALL_METALS;
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnCeiling;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 10f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0.5f;
@@ -33,12 +32,6 @@ public class CeilingLightConfig : IBuildingConfig
 		LightShapePreview lightShapePreview = go.AddComponent<LightShapePreview>();
 		lightShapePreview.radius = 8f;
 		lightShapePreview.shape = LightShape.Cone;
-		GeneratedBuildings.RegisterLogicPorts(go, CeilingLightConfig.INPUT_PORTS);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, CeilingLightConfig.INPUT_PORTS);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -53,8 +46,6 @@ public class CeilingLightConfig : IBuildingConfig
 		light2D.Offset = LIGHT2D.CEILINGLIGHT_OFFSET;
 		light2D.shape = LightShape.Cone;
 		light2D.drawOverlay = true;
-		GeneratedBuildings.RegisterLogicPorts(go, CeilingLightConfig.INPUT_PORTS);
-		go.AddOrGet<LogicOperationalController>();
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
@@ -64,6 +55,4 @@ public class CeilingLightConfig : IBuildingConfig
 	}
 
 	public const string ID = "CeilingLight";
-
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
 }

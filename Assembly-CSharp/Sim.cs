@@ -97,6 +97,8 @@ public static class Sim
 
 	public const byte InvalidDiseaseIdx = 255;
 
+	public const byte InvalidElementIdx = 255;
+
 	public const int ChunkEdgeSize = 32;
 
 	public const float StateTransitionEnergy = 3f;
@@ -408,6 +410,8 @@ public static class Sim
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	public struct GameDataUpdate
 	{
+		public int numFramesProcessed;
+
 		public unsafe byte* elementIdx;
 
 		public unsafe float* temperature;

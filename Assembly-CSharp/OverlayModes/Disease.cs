@@ -238,7 +238,7 @@ namespace OverlayModes
 							if (!this.layerTargets.Contains(kmonoBehaviour))
 							{
 								Vector3 position = kmonoBehaviour.transform.GetPosition();
-								if (Grid.Visible[Grid.PosToCell(position)] > 0 || DebugHandler.FreeCameraMode)
+								if (Grid.IsVisible(Grid.PosToCell(position)))
 								{
 									if (vector2I <= position && position <= vector2I2)
 									{

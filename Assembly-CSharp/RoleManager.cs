@@ -39,7 +39,8 @@ public class RoleManager
 			new Tuple<string, int>("OilTechnician", 128),
 			new Tuple<string, int>("PowerTechnician", 128),
 			new Tuple<string, int>(MaterialsManager.ID, 128),
-			new Tuple<string, int>("MechatronicEngineer", 128)
+			new Tuple<string, int>("MechatronicEngineer", 128),
+			new Tuple<string, int>(Plumber.ID, 128)
 		}, () => true));
 		this.SlotUnlocks = list;
 		base..ctor();
@@ -166,7 +167,8 @@ public class RoleManager
 			{
 				new Miner(),
 				new Builder(),
-				new MaterialsManager()
+				new MaterialsManager(),
+				new Plumber()
 			},
 			new List<RoleConfig>
 			{
@@ -313,33 +315,6 @@ public class RoleManager
 		{
 			text = text + "\n\n" + this.RolePerkString(roleID);
 			text = text + "\n\n" + this.RoleCriteriaString(roleID, null);
-		}
-		return text;
-	}
-
-	public string RolePriorityString(string roleID)
-	{
-		string text = string.Empty;
-		RoleConfig role = this.GetRole(roleID);
-		text = text + "<b>" + UI.ROLES_SCREEN.PRIORITY.TITLE + "</b>\n";
-		if (role.favoredChoreTypes.Count > 0 || role.preferredChoreTags.Count > 0)
-		{
-			text += string.Format("    • " + UI.ROLES_SCREEN.PRIORITY.DESCRIPTION, role.name);
-			foreach (ChoreType choreType in role.favoredChoreTypes)
-			{
-				if (!text.Contains(choreType.Name))
-				{
-					text = text + "\n         + " + choreType.Name;
-				}
-			}
-			foreach (Tag tag in role.preferredChoreTags)
-			{
-				text = text + "\n         + " + tag.ProperName();
-			}
-		}
-		else
-		{
-			text = text + "    • " + UI.ROLES_SCREEN.PRIORITY.NO_EFFECT;
 		}
 		return text;
 	}
@@ -561,14 +536,11 @@ public class RoleManager
 		}
 		else
 		{
-			controller.RemoveSymbolOverride(hat.targetSymbolId);
+			controller.GetComponent<SymbolOverrideController>().TryRemoveSymbolOverride(hat.targetSymbolId, 3);
 		}
-		controller.RemoveVisibleSymbol(hat.targetSymbolId);
-		controller.HideSymbol(hat.targetSymbolId, true);
-		controller.RemoveVisibleSymbol(Db.Get().AccessorySlots.HatHair.targetSymbolId);
-		controller.HideSymbol(Db.Get().AccessorySlots.HatHair.targetSymbolId, true);
-		controller.ShowSymbol(Db.Get().AccessorySlots.Hair.targetSymbolId);
-		controller.StopHidingSymbol(Db.Get().AccessorySlots.Hair.targetSymbolId, true);
+		controller.SetSymbolVisiblity(hat.targetSymbolId, false);
+		controller.SetSymbolVisiblity(Db.Get().AccessorySlots.HatHair.targetSymbolId, false);
+		controller.SetSymbolVisiblity(Db.Get().AccessorySlots.Hair.targetSymbolId, true);
 	}
 
 	public static void AddHat(string hat_idx, KBatchedAnimController controller)
@@ -587,15 +559,13 @@ public class RoleManager
 		}
 		else
 		{
-			controller.RemoveSymbolOverride(hat.targetSymbolId);
-			controller.AddSymbolOverride(hat.targetSymbolId, accessory.symbol.build.batchTag, accessory.symbol, false);
+			SymbolOverrideController component2 = controller.GetComponent<SymbolOverrideController>();
+			component2.TryRemoveSymbolOverride(hat.targetSymbolId, 3);
+			component2.AddSymbolOverride(hat.targetSymbolId, accessory.symbol, 3);
 		}
-		controller.ShowSymbol(hat.targetSymbolId);
-		controller.StopHidingSymbol(hat.targetSymbolId, true);
-		controller.RemoveVisibleSymbol(Db.Get().AccessorySlots.Hair.targetSymbolId);
-		controller.HideSymbol(Db.Get().AccessorySlots.Hair.targetSymbolId, true);
-		controller.ShowSymbol(Db.Get().AccessorySlots.HatHair.targetSymbolId);
-		controller.StopHidingSymbol(Db.Get().AccessorySlots.HatHair.targetSymbolId, true);
+		controller.SetSymbolVisiblity(hat.targetSymbolId, true);
+		controller.SetSymbolVisiblity(Db.Get().AccessorySlots.HatHair.targetSymbolId, true);
+		controller.SetSymbolVisiblity(Db.Get().AccessorySlots.Hair.targetSymbolId, false);
 	}
 
 	public static void ApplyRoleHat(RoleConfig role, Accessorizer accessorizer, KBatchedAnimController controller)
@@ -861,6 +831,10 @@ public class RoleManager
 		{
 			Handyman.ID,
 			"hat_role_basekeeping1"
+		},
+		{
+			Plumber.ID,
+			"hat_role_basekeeping1"
 		}
 	};
 
@@ -922,6 +896,10 @@ public class RoleManager
 		},
 		{
 			Handyman.ID,
+			9
+		},
+		{
+			Plumber.ID,
 			9
 		},
 		{

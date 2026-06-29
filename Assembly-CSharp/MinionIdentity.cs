@@ -4,10 +4,11 @@ using Klei.AI;
 using Klei.CustomSettings;
 using KSerialization;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity, IListableOption
+public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity, IListableOption, ISim1000ms
 {
 	[Serialize]
 	public string genderStringKey { get; set; }
@@ -59,12 +60,9 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		Accessorizer component2 = base.gameObject.GetComponent<Accessorizer>();
 		this.bodyData = default(KCompBuilder.BodyData);
 		component2.GetBodySlots(ref this.bodyData);
-		this.headComp = MinionStartingStats.ApplyRace(base.gameObject, this.bodyData);
-		FaceGraph component3 = base.GetComponent<FaceGraph>();
-		component3.SetHeadComp(this.headComp);
-		base.GetComponent<KBatchedAnimController>().AddBuildOverride(this.headComp.GetData(), true, true);
-		base.GetComponent<KBatchedAnimController>().RemoveVisibleSymbol(KCompBuilder.snapTo_hat);
-		base.GetComponent<KBatchedAnimController>().RemoveVisibleSymbol(KCompBuilder.snapTo_hat_hair);
+		SymbolOverrideController component3 = base.GetComponent<SymbolOverrideController>();
+		component3.AddSymbolOverride(Db.Get().AccessorySlots.HairAlways.targetSymbolId, component2.GetAccessory(Db.Get().AccessorySlots.Hair).symbol, 1);
+		component3.AddSymbolOverride(Db.Get().AccessorySlots.HatHair.targetSymbolId, Db.Get().AccessorySlots.HatHair.Lookup("hat_" + HashCache.Get().Get(component2.GetAccessory(Db.Get().AccessorySlots.Hair).symbol.hash)).symbol, 1);
 		this.voiceId = "0";
 		this.voiceId += (this.voiceIdx + 1).ToString();
 		Prioritizable component4 = base.GetComponent<Prioritizable>();
@@ -184,22 +182,27 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		return base.GetComponent<Ownables>();
 	}
 
-	[ContextMenu("TestHat")]
-	public void TestHat()
+	public void Sim1000ms(float dt)
 	{
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		AccessorySlot hat = Db.Get().AccessorySlots.Hat;
-		MinionIdentity.testIdx = (MinionIdentity.testIdx + 1) % hat.accessories.Count;
-		component.AddSymbolOverride(hat.targetSymbolId, hat.accessories[MinionIdentity.testIdx].symbol.build.batchTag, hat.accessories[MinionIdentity.testIdx].symbol, false);
-		component.ShowSymbol(hat.targetSymbolId);
-		AccessorySlot hair = Db.Get().AccessorySlots.Hair;
-		AccessorySlot hairAlways = Db.Get().AccessorySlots.HairAlways;
-		component.AddSymbolOverride(hair.targetSymbolId, hair.accessories[1].symbol.build.batchTag, hair.accessories[1].symbol, false);
-		component.ShowSymbol(hair.targetSymbolId);
-		component.AddSymbolOverride(hairAlways.targetSymbolId, hairAlways.accessories[1].symbol.build.batchTag, hairAlways.accessories[1].symbol, false);
-		component.ShowSymbol(hairAlways.targetSymbolId);
-		AccessorySlot hatHair = Db.Get().AccessorySlots.HatHair;
-		component.AddSymbolOverride(hatHair.targetSymbolId, hatHair.accessories[1].symbol.build.batchTag, hatHair.accessories[1].symbol, false);
+		if (!base.GetComponent<Navigator>().IsMoving())
+		{
+			return;
+		}
+		Chore currentChore = base.GetComponent<ChoreDriver>().GetCurrentChore();
+		if (currentChore != null)
+		{
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, dt, currentChore.choreType.Name, currentChore.driver.GetProperName());
+			if (currentChore is FetchAreaChore)
+			{
+				MinionResume component = base.GetComponent<MinionResume>();
+				if (component != null)
+				{
+					component.AddExperienceIfRole("Hauler", dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+					component.AddExperienceIfRole(MaterialsManager.ID, dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+					component.AddExperienceIfRole(Handyman.ID, dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+				}
+			}
+		}
 	}
 
 	[MyCmpReq]
@@ -229,8 +232,6 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 
 	private string voiceId;
 
-	private KCompBuildInstance headComp;
-
 	private KAnimHashedString overrideExpression;
 
 	private KAnimHashedString expression;
@@ -240,8 +241,6 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 	private static MinionIdentity.NameList maleNameList;
 
 	private static MinionIdentity.NameList femaleNameList;
-
-	private static int testIdx;
 
 	private class NameList
 	{

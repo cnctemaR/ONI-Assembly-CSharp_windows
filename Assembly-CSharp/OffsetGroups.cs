@@ -64,7 +64,7 @@ public static class OffsetGroups
 		return array4;
 	}
 
-	public static CellOffset[] Use = Grid.DefaultOffset;
+	public static CellOffset[] Use = new CellOffset[] { default(CellOffset) };
 
 	public static CellOffset[] Chat = new CellOffset[]
 	{

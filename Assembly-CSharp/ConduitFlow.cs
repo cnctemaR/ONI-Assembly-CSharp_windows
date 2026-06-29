@@ -445,7 +445,6 @@ public class ConduitFlow : IConduitFlow
 				this.UpdateConduit(conduit);
 			}
 		}
-		this.soaInfo.UpdateFlowDirection(this);
 		if (this.dirtyConduitUpdaters)
 		{
 			this.conduitUpdaters.Sort((ConduitFlow.ConduitUpdater a, ConduitFlow.ConduitUpdater b) => a.priority - b.priority);

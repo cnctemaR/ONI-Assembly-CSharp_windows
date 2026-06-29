@@ -53,7 +53,7 @@ public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 				.Update(delegate(UglyCryChore.StatesInstance smi, float dt)
 				{
 					smi.ProduceTears(dt);
-				});
+				}, UpdateRate.SIM_200ms, false);
 			this.cry.cry_pst.QueueAnim("working_pst", false, null).OnAnimQueueComplete(this.complete);
 			this.complete.AddEffect("CryFace").Enter(delegate(UglyCryChore.StatesInstance smi)
 			{

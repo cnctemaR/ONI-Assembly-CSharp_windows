@@ -6,13 +6,70 @@ public class Def : ScriptableObject
 {
 	public virtual void InitDef()
 	{
-		this.Tag = TagManager.Create(this.PrefabID, base.name);
+		this.Tag = TagManager.Create(this.PrefabID);
 	}
 
 	public virtual string Name
 	{
 		get
 		{
+			return null;
+		}
+	}
+
+	public static Tuple<Sprite, Color> GetUISprite(object item, string animName = "ui")
+	{
+		if (item is Substance)
+		{
+			return Def.GetUISprite(ElementLoader.FindElementByHash((item as Substance).elementID), "ui");
+		}
+		if (item is Element)
+		{
+			if ((item as Element).IsSolid)
+			{
+				return new Tuple<Sprite, Color>(Def.GetUISpriteFromMultiObjectAnim((item as Element).substance.anim, animName), Color.white);
+			}
+			if ((item as Element).IsLiquid)
+			{
+				return new Tuple<Sprite, Color>(Assets.GetSprite("element_liquid"), (item as Element).substance.debugColour);
+			}
+			if ((item as Element).IsGas)
+			{
+				return new Tuple<Sprite, Color>(Assets.GetSprite("element_gas"), (item as Element).substance.debugColour);
+			}
+			return new Tuple<Sprite, Color>(null, Color.clear);
+		}
+		else if (item is GameObject)
+		{
+			if (ElementLoader.GetElement((item as GameObject).PrefabID()) != null)
+			{
+				return Def.GetUISprite(ElementLoader.GetElement((item as GameObject).PrefabID()), "ui");
+			}
+			CreatureBrain component = (item as GameObject).GetComponent<CreatureBrain>();
+			if (component != null)
+			{
+				animName = component.symbolPrefix + "ui";
+			}
+			return new Tuple<Sprite, Color>(Def.GetUISpriteFromMultiObjectAnim((item as GameObject).GetComponent<KBatchedAnimController>().AnimFiles[0], animName), Color.white);
+		}
+		else
+		{
+			if (item is string)
+			{
+				return Def.GetUISprite((item as string).ToTag(), "ui");
+			}
+			if (item is Tag)
+			{
+				if (ElementLoader.GetElement((Tag)item) != null)
+				{
+					return Def.GetUISprite(ElementLoader.GetElement((Tag)item), "ui");
+				}
+				if (Assets.GetPrefab((Tag)item) != null)
+				{
+					return Def.GetUISprite(Assets.GetPrefab((Tag)item), "ui");
+				}
+			}
+			global::Debug.LogErrorFormat("Can't get sprite for type {0}", new object[] { item.ToString() });
 			return null;
 		}
 	}

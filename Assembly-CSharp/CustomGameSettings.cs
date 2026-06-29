@@ -68,6 +68,7 @@ public class CustomGameSettings : KMonoBehaviour
 		this.AddSettingConfig(CustomGameSettingConfigs.Stress);
 		this.AddSettingConfig(CustomGameSettingConfigs.StressBreaks);
 		this.AddSettingConfig(CustomGameSettingConfigs.WorldgenSeed);
+		this.AddSettingConfig(CustomGameSettingConfigs.SandboxMode);
 		if (DebugHandler.enabled)
 		{
 			CustomGameSettings.Get().InitWorldGenOptions();

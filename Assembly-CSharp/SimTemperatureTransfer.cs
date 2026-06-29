@@ -112,6 +112,11 @@ public class SimTemperatureTransfer : KMonoBehaviour
 	private void OnCellChanged()
 	{
 		int num = Grid.PosToCell(this);
+		if (!Grid.IsValidCell(num))
+		{
+			base.enabled = false;
+			return;
+		}
 		if (Sim.IsValidHandle(this.simHandle))
 		{
 			SimMessages.MoveElementChunk(this.simHandle, num);
@@ -198,7 +203,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 					HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object data)
 					{
 						SimTemperatureTransfer.OnSimRegistered(this, data);
-					}));
+					}, "SimTemperatureTransfer.SimRegister"));
 					float num2 = component.InternalTemperature;
 					KCrashReporter.Assert(num2 > 0f, "Invalid temperature");
 					KCrashReporter.Assert(component.Mass > 0f);

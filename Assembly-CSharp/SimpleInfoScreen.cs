@@ -17,8 +17,10 @@ public class SimpleInfoScreen : TargetScreen
 		this.statusItemPanel.scalerMask.hoverLock = true;
 		this.statusItemsFolder = this.statusItemPanel.Content.gameObject;
 		this.vitalsPanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.vitalsPanel.HeaderLabel.text = UI.DETAILTABS.SIMPLEINFO.GROUPNAME_CONDITION;
+		this.vitalsPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_CONDITION);
 		this.vitalsContainer = Util.KInstantiateUI(this.VitalsPanelTemplate, this.vitalsPanel.Content.gameObject, false).GetComponent<MinionVitalsPanel>();
+		this.fertilityPanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.fertilityPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_FERTILITY);
 		this.infoPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.infoPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.SIMPLEINFO.GROUPNAME_DESCRIPTION;
 		GameObject gameObject = this.infoPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject;
@@ -34,7 +36,9 @@ public class SimpleInfoScreen : TargetScreen
 		base.Subscribe(target, -1697596308, new Action<object>(this.OnStorageChange));
 		base.Subscribe(target, -1197125120, new Action<object>(this.OnStorageChange));
 		this.RefreshStorage();
-		this.vitalsPanel.HeaderLabel.text = ((!(target.GetComponent<WiltCondition>() == null)) ? UI.DETAILTABS.SIMPLEINFO.GROUPNAME_REQUIREMENTS : UI.DETAILTABS.SIMPLEINFO.GROUPNAME_CONDITION);
+		base.Subscribe(target, 1059811075, new Action<object>(this.OnBreedingChanceChanged));
+		this.RefreshBreedingChance();
+		this.vitalsPanel.SetTitle((!(target.GetComponent<WiltCondition>() == null)) ? UI.DETAILTABS.SIMPLEINFO.GROUPNAME_REQUIREMENTS : UI.DETAILTABS.SIMPLEINFO.GROUPNAME_CONDITION);
 		KSelectable component = target.GetComponent<KSelectable>();
 		if (component != null)
 		{
@@ -73,6 +77,7 @@ public class SimpleInfoScreen : TargetScreen
 		{
 			base.Unsubscribe(target, -1697596308, new Action<object>(this.OnStorageChange));
 			base.Unsubscribe(target, -1197125120, new Action<object>(this.OnStorageChange));
+			base.Unsubscribe(target, 1059811075, new Action<object>(this.OnBreedingChanceChanged));
 		}
 		KSelectable component = target.GetComponent<KSelectable>();
 		if (component != null)
@@ -102,6 +107,11 @@ public class SimpleInfoScreen : TargetScreen
 	private void OnStorageChange(object data)
 	{
 		this.RefreshStorage();
+	}
+
+	private void OnBreedingChanceChanged(object data)
+	{
+		this.RefreshBreedingChance();
 	}
 
 	private void OnAddStatusItem(StatusItemGroup.Entry status_item, StatusItemCategory category)
@@ -274,7 +284,7 @@ public class SimpleInfoScreen : TargetScreen
 		}
 		this.descriptionContainer.description.text = text;
 		this.descriptionContainer.flavour.text = text2;
-		this.infoPanel.gameObject.SetActive(!(text == string.Empty) && !(text == "\n"));
+		this.infoPanel.gameObject.SetActive(component == null);
 		this.descriptionContainer.gameObject.SetActive(this.infoPanel.activeSelf);
 		this.descriptionContainer.flavour.gameObject.SetActive(text2 != string.Empty && text2 != "\n");
 		if (this.vitalsPanel.gameObject.activeSelf && amounts.Count == 0)
@@ -316,6 +326,40 @@ public class SimpleInfoScreen : TargetScreen
 				}
 			}
 		}
+	}
+
+	private void RefreshBreedingChance()
+	{
+		if (this.selectedTarget == null)
+		{
+			this.fertilityPanel.gameObject.SetActive(false);
+			return;
+		}
+		FertilityMonitor.Instance smi = this.selectedTarget.GetSMI<FertilityMonitor.Instance>();
+		if (smi == null)
+		{
+			this.fertilityPanel.gameObject.SetActive(false);
+			return;
+		}
+		int num = 0;
+		foreach (FertilityMonitor.BreedingChance breedingChance in smi.breedingChances)
+		{
+			List<FertilityModifier> forTag = Db.Get().FertilityModifiers.GetForTag(breedingChance.egg);
+			if (forTag.Count > 0)
+			{
+				string text = string.Empty;
+				foreach (FertilityModifier fertilityModifier in forTag)
+				{
+					text += string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_MOD_FORMAT, fertilityModifier.GetTooltip());
+				}
+				this.fertilityPanel.SetLabel("breeding_" + num++, string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None)), string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT_TOOLTIP, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None), text));
+			}
+			else
+			{
+				this.fertilityPanel.SetLabel("breeding_" + num++, string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None)), string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT_TOOLTIP_NOMOD, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None)));
+			}
+		}
+		this.fertilityPanel.Commit();
 	}
 
 	private void RefreshStorage()
@@ -465,6 +509,8 @@ public class SimpleInfoScreen : TargetScreen
 	private CollapsibleDetailContentPanel statusItemPanel;
 
 	private CollapsibleDetailContentPanel vitalsPanel;
+
+	private CollapsibleDetailContentPanel fertilityPanel;
 
 	private GameObject storagePanel;
 

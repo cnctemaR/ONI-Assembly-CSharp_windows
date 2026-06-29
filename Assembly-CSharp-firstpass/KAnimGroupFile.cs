@@ -90,7 +90,6 @@ public class KAnimGroupFile : ScriptableObject
 			KAnimGroupFile.Group group = new KAnimGroupFile.Group(groupId);
 			group.commandDirectory = akf.directory;
 			group.lookupUnderGroupName = akf.LookupSymbolUnderGroupName;
-			group.isMultiInstance = akf.MultiInstance;
 			group.maxGroupSize = akf.MaxGroupSize;
 			group.renderType = akf.RendererType;
 			int num2 = this.groups.FindIndex((KAnimGroupFile.Group t) => t.commandDirectory == group.commandDirectory);
@@ -162,28 +161,28 @@ public class KAnimGroupFile : ScriptableObject
 			KBatchGroupData kbatchGroupData;
 			if (this.groups[i].target.IsValid)
 			{
-				kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[i].target, false);
+				kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[i].target);
 			}
 			else
 			{
-				kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[i].id, false);
+				kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[i].id);
 			}
 			kbatchGroupData.lookupUnderGroupName = this.groups[i].lookupUnderGroupName;
 			HashedString hashedString = this.groups[i].id;
 			if (this.groups[i].renderType != KAnimBatchGroup.RendererType.AnimOnly)
 			{
-				goto IL_0107;
+				goto IL_0104;
 			}
 			if (this.groups[i].swapTarget.IsValid)
 			{
-				kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[i].swapTarget, false);
+				kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[i].swapTarget);
 				hashedString = this.groups[i].swapTarget;
-				goto IL_0107;
+				goto IL_0104;
 			}
-			IL_024B:
+			IL_0248:
 			i++;
 			continue;
-			IL_0107:
+			IL_0104:
 			for (int j = 0; j < this.groups[i].files.Count; j++)
 			{
 				KAnimFile kanimFile = this.groups[i].files[j];
@@ -205,14 +204,14 @@ public class KAnimGroupFile : ScriptableObject
 					}
 				}
 			}
-			goto IL_024B;
+			goto IL_0248;
 		}
 		for (int k = 0; k < this.groups.Count; k++)
 		{
 			if (this.groups[k].renderType == KAnimBatchGroup.RendererType.AnimOnly)
 			{
-				KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[k].swapTarget, false);
-				KBatchGroupData batchGroupData2 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[k].animTarget, false);
+				KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[k].swapTarget);
+				KBatchGroupData batchGroupData2 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[k].animTarget);
 				for (int l = 0; l < batchGroupData.builds.Count; l++)
 				{
 					KAnim.Build build = batchGroupData.builds[l];
@@ -258,11 +257,11 @@ public class KAnimGroupFile : ScriptableObject
 				KBatchGroupData kbatchGroupData2;
 				if (this.groups[num].animTarget.IsValid)
 				{
-					kbatchGroupData2 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num].animTarget, false);
+					kbatchGroupData2 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num].animTarget);
 				}
 				else
 				{
-					kbatchGroupData2 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num].id, false);
+					kbatchGroupData2 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num].id);
 				}
 				for (int num2 = 0; num2 < this.groups[num].files.Count; num2++)
 				{
@@ -296,11 +295,11 @@ public class KAnimGroupFile : ScriptableObject
 			KBatchGroupData kbatchGroupData3;
 			if (this.groups[num3].target.IsValid)
 			{
-				kbatchGroupData3 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num3].target, false);
+				kbatchGroupData3 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num3].target);
 			}
 			else
 			{
-				kbatchGroupData3 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num3].id, false);
+				kbatchGroupData3 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num3].id);
 			}
 			KGlobalAnimParser.PostParse(kbatchGroupData3);
 		}
@@ -381,9 +380,6 @@ public class KAnimGroupFile : ScriptableObject
 
 		[SerializeField]
 		public HashedString animTarget;
-
-		[SerializeField]
-		public bool isMultiInstance;
 	}
 
 	public class GroupFile : YamlIO<KAnimGroupFile.GroupFile>

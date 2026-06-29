@@ -127,7 +127,7 @@ public class Diggable : Workable
 				}
 			}
 			return flag;
-		}, GameUtil.FloodFillVisited);
+		}, GameUtil.FloodFillVisited, null);
 		GameUtil.FloodFillVisited.Clear();
 		if (any_buildables)
 		{

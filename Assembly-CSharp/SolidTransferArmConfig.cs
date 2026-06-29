@@ -21,6 +21,7 @@ public class SolidTransferArmConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<Operational>();
+		go.AddOrGet<LoopingSounds>();
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)

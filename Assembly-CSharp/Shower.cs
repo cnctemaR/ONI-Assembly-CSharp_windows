@@ -93,7 +93,7 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 			}).Update(delegate(Shower.ShowerSM.Instance smi, float dt)
 			{
 				smi.RemoveDisease(dt);
-			})
+			}, UpdateRate.SIM_200ms, false)
 				.PlayAnims((Shower.ShowerSM.Instance smi) => Shower.ShowerSM.workingAnims, KAnim.PlayMode.Loop)
 				.Exit(delegate(Shower.ShowerSM.Instance smi)
 				{

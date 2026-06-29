@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public class StateMachineUpdater
 {
@@ -178,6 +179,7 @@ public class StateMachineUpdater
 		private int nextBucketFrame;
 	}
 
+	[DebuggerDisplay("{name}")]
 	public abstract class BaseUpdateBucket
 	{
 		public BaseUpdateBucket(string name)

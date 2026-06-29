@@ -18,7 +18,7 @@ public class InsulatedLiquidConduitConfig : IBuildingConfig
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, plumbable, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
-		buildingDef.Insulation = 0.05f;
+		buildingDef.ThermalConductivity = 0.03125f;
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;
@@ -47,21 +47,22 @@ public class InsulatedLiquidConduitConfig : IBuildingConfig
 		conduit.type = ConduitType.Liquid;
 	}
 
-	public override void DoPostConfigureComplete(GameObject go)
-	{
-		go.GetComponent<Building>().Def.BuildingUnderConstruction.GetComponent<Constructable>().isDiggingRequired = false;
-		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddComponent<KAnimGraphTileVisualizer>();
-		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Liquid;
-		kanimGraphTileVisualizer.isPhysicalBuilding = true;
-		BuildingTemplates.DoPostConfigure(go);
-		LiquidConduitConfig.CommonConduitPostConfigureComplete(go);
-	}
-
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddComponent<KAnimGraphTileVisualizer>();
 		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Liquid;
 		kanimGraphTileVisualizer.isPhysicalBuilding = false;
+	}
+
+	public override void DoPostConfigureComplete(GameObject go)
+	{
+		go.GetComponent<Building>().Def.BuildingUnderConstruction.GetComponent<Constructable>().isDiggingRequired = false;
+		go.AddComponent<EmptyConduitWorkable>();
+		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddComponent<KAnimGraphTileVisualizer>();
+		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Liquid;
+		kanimGraphTileVisualizer.isPhysicalBuilding = true;
+		BuildingTemplates.DoPostConfigure(go);
+		LiquidConduitConfig.CommonConduitPostConfigureComplete(go);
 	}
 
 	public const string ID = "InsulatedLiquidConduit";

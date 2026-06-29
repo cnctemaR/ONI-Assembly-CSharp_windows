@@ -34,18 +34,18 @@ namespace ProcGenGame
 				tc.LogInfo("PlaceAmbientMobs", "No biome MOBS", (float)node.node.Id);
 				return null;
 			}
-			List<int> availableCells = tc.GetAvailableCells();
-			tc.LogInfo("PlaceAmbientMobs", "possibleSpawnPoints", (float)availableCells.Count);
-			for (int i = availableCells.Count - 1; i > 0; i--)
+			List<int> availableSpawnCells = tc.GetAvailableSpawnCells();
+			tc.LogInfo("PlaceAmbientMobs", "possibleSpawnPoints", (float)availableSpawnCells.Count);
+			for (int i = availableSpawnCells.Count - 1; i > 0; i--)
 			{
-				int num2 = availableCells[i];
+				int num2 = availableSpawnCells[i];
 				if (ElementLoader.elements[(int)cells[num2].elementIdx].id == SimHashes.Katairite || ElementLoader.elements[(int)cells[num2].elementIdx].id == SimHashes.Unobtanium || avoidCells.Contains(num2))
 				{
-					availableCells.RemoveAt(i);
+					availableSpawnCells.RemoveAt(i);
 				}
 			}
-			tc.LogInfo("mob spawns", "Id:" + node.node.Id + " possible cells", (float)availableCells.Count);
-			if (availableCells.Count == 0)
+			tc.LogInfo("mob spawns", "Id:" + node.node.Id + " possible cells", (float)availableSpawnCells.Count);
+			if (availableSpawnCells.Count == 0)
 			{
 				if (WorldGen.isRunningDebugGen)
 				{
@@ -54,7 +54,7 @@ namespace ProcGenGame
 				return null;
 			}
 			int num3 = 0;
-			while (num3 < MobSettings.AmbientMobDensity && availableCells.Count > 0)
+			while (num3 < MobSettings.AmbientMobDensity && availableSpawnCells.Count > 0)
 			{
 				list.ShuffleSeeded<Tag>(rnd.RandomSource());
 				for (int j = 0; j < list.Count; j++)
@@ -66,7 +66,7 @@ namespace ProcGenGame
 					else
 					{
 						Mob mob = WorldGen.Settings.mobs.MobLookupTable[list[j].Name];
-						List<int> list2 = availableCells.FindAll((int cell) => MobSpawning.isSuitableMobSpawnPoint(cell, mob, cells, bgTemp, dc));
+						List<int> list2 = availableSpawnCells.FindAll((int cell) => MobSpawning.isSuitableMobSpawnPoint(cell, mob, cells, bgTemp, dc));
 						if (list2.Count == 0)
 						{
 							if (WorldGen.isRunningDebugGen)
@@ -90,7 +90,7 @@ namespace ProcGenGame
 								" mps: ",
 								list2.Count,
 								" ps:"
-							}), (float)availableCells.Count);
+							}), (float)availableSpawnCells.Count);
 							float num4 = mob.density.GetRandomValueWithinRange(rnd);
 							if (num4 > 1f)
 							{
@@ -108,7 +108,7 @@ namespace ProcGenGame
 							{
 								int num7 = list2[0];
 								list2.Remove(num7);
-								availableCells.Remove(num7);
+								availableSpawnCells.Remove(num7);
 								tc.AddMob(new KeyValuePair<int, Tag>(num7, tag2));
 								dictionary.Add(num7, tag2.Name);
 								num6++;
@@ -130,13 +130,15 @@ namespace ProcGenGame
 			switch (mob.location)
 			{
 			case Mob.Location.Floor:
-				return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)] && Grid.Solid[Grid.CellBelow(cell)];
+				return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)] && Grid.Solid[Grid.CellBelow(cell)] && !Grid.IsLiquid(cell);
 			case Mob.Location.Ceiling:
-				return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell] && Grid.Solid[Grid.CellAbove(cell)] && !Grid.Solid[Grid.CellBelow(cell)];
+				return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell] && Grid.Solid[Grid.CellAbove(cell)] && !Grid.Solid[Grid.CellBelow(cell)] && !Grid.IsLiquid(cell);
 			case Mob.Location.Air:
-				return !Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)];
+				return !Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)] && !Grid.IsLiquid(cell);
 			case Mob.Location.Solid:
 				return !MobSpawning.isNaturalCavity(cell) && Grid.Solid[cell];
+			case Mob.Location.Water:
+				return (Grid.Element[cell].id == SimHashes.Water || Grid.Element[cell].id == SimHashes.DirtyWater) && (Grid.Element[Grid.CellAbove(cell)].id == SimHashes.Water || Grid.Element[Grid.CellAbove(cell)].id == SimHashes.DirtyWater);
 			}
 			return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell];
 		}
@@ -163,7 +165,7 @@ namespace ProcGenGame
 					int num2 = allCells[j];
 					if (!Grid.Solid[num2] && !invalidCells.Contains(num2))
 					{
-						HashSet<int> hashSet = GameUtil.FloodCollectCells(num2, (int checkCell) => !invalidCells.Contains(checkCell) && !Grid.Solid[checkCell], 300, invalidCells);
+						HashSet<int> hashSet = GameUtil.FloodCollectCells(num2, (int checkCell) => !invalidCells.Contains(checkCell) && !Grid.Solid[checkCell], 300, invalidCells, true);
 						if (hashSet != null && hashSet.Count > 0)
 						{
 							MobSpawning.NaturalCavities[terrainCell].Add(hashSet);

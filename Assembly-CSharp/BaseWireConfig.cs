@@ -17,7 +17,7 @@ public abstract class BaseWireConfig : IBuildingConfig
 		float num4 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, anim, num3, construction_time, construction_mass, all_METALS, num4, buildLocationRule, decor, noise, 0.2f);
-		buildingDef.Insulation = insulation;
+		buildingDef.ThermalConductivity = insulation;
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;

@@ -72,7 +72,7 @@ namespace Klei.AI
 			{
 				foreach (ChoreGroup choreGroup in this.disabledChoreGroups)
 				{
-					component.SetEnabled(choreGroup, false);
+					component.SetPermittedByTraits(choreGroup, false);
 				}
 			}
 		}
@@ -85,7 +85,7 @@ namespace Klei.AI
 			{
 				foreach (ChoreGroup choreGroup in this.disabledChoreGroups)
 				{
-					component.SetEnabled(choreGroup, true);
+					component.SetPermittedByTraits(choreGroup, true);
 				}
 			}
 		}

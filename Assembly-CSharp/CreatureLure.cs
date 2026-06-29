@@ -23,6 +23,7 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 		else
 		{
 			this.ChangeBaitSetting(this.activeBaitSetting);
+			this.OnStorageChange(null);
 		}
 		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 	}
@@ -35,7 +36,16 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 
 	private void OnStorageChange(object data = null)
 	{
-		this.operational.SetFlag(this.baited, this.baitStorage.GetAmountAvailable(this.activeBaitSetting) > 0f);
+		bool flag = this.baitStorage.GetAmountAvailable(this.activeBaitSetting) > 0f;
+		this.operational.SetFlag(this.baited, flag);
+		if (flag)
+		{
+			base.GetComponent<KPrefabID>().AddTag(this.activeBaitTag);
+		}
+		else
+		{
+			base.GetComponent<KPrefabID>().RemoveTag(this.activeBaitTag);
+		}
 	}
 
 	public void ChangeBaitSetting(Tag baitSetting)
@@ -47,8 +57,10 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 		if (baitSetting != this.activeBaitSetting)
 		{
 			this.activeBaitSetting = baitSetting;
+			base.GetComponent<KPrefabID>().RemoveTag(this.activeBaitTag);
 			this.baitStorage.DropAll(false);
 		}
+		this.activeBaitTag = TagManager.Create(CreatureLure.BAIT_TAG_PREFIX + baitSetting.Name, null);
 		base.smi.GoTo(base.smi.sm.idle);
 		this.baitStorage.storageFilters = new List<Tag> { this.activeBaitSetting };
 		if (baitSetting != Tag.Invalid)
@@ -82,6 +94,8 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 
 	public static float CONSUMPTION_RATE = 1f;
 
+	public static readonly string BAIT_TAG_PREFIX = "Bait_";
+
 	public CellOffset[] lurePoints = new CellOffset[]
 	{
 		new CellOffset(0, 0)
@@ -99,6 +113,8 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 	private Operational operational;
 
 	private Operational.Flag baited = new Operational.Flag("Baited", Operational.Flag.Type.Requirement);
+
+	private Tag activeBaitTag;
 
 	public class StatesInstance : GameStateMachine<CreatureLure.States, CreatureLure.StatesInstance, CreatureLure, object>.GameInstance
 	{

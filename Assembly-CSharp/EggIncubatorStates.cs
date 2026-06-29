@@ -10,16 +10,14 @@ public class EggIncubatorStates : GameStateMachine<EggIncubatorStates, EggIncuba
 		this.occupied.unpowered_pre.PlayAnim("no_power_pre").OnAnimQueueComplete(this.occupied.unpowered);
 		this.occupied.unpowered.PlayAnim("no_power_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.OperationalChanged, this.occupied.incubating, (EggIncubatorStates.Instance smi) => smi.GetComponent<Operational>().IsOperational);
 		this.occupied.incubating.PlayAnim("no_power_post").QueueAnim("working_loop", true, null).EventTransition(GameHashes.OperationalChanged, this.occupied.unpowered_pre, (EggIncubatorStates.Instance smi) => !smi.GetComponent<Operational>().IsOperational);
-		this.occupied.readytohatch.PlayAnim("working_pst").QueueAnim("ready_to_hatch_loop", true, null).OnSignal(this.startHatch, this.occupied.hatch);
-		this.occupied.hatch.PlayAnim("hatching").Exit("CompleteHatch", delegate(EggIncubatorStates.Instance smi)
+		this.occupied.readytohatch.PlayAnim("working_pst").QueueAnim("ready_to_hatch_loop", true, null).WorkableStartTransition((EggIncubatorStates.Instance smi) => smi.master.GetComponent<CompleteIncubationWorkable>(), this.occupied.hatch);
+		this.occupied.hatch.WorkableStopTransition((EggIncubatorStates.Instance smi) => smi.master.GetComponent<CompleteIncubationWorkable>(), this.empty).Exit("CompleteHatch", delegate(EggIncubatorStates.Instance smi)
 		{
 			smi.GetComponent<EggIncubator>().CompleteHatch();
-		}).OnAnimQueueComplete(this.empty);
+		});
 	}
 
 	public StateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.BoolParameter readyToHatch;
-
-	public StateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.Signal startHatch;
 
 	public GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.State empty;
 

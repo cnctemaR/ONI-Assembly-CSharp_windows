@@ -179,7 +179,7 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 	{
 		foreach (CrewJobsEntry crewJobsEntry in this.EntryObjects)
 		{
-			crewJobsEntry.consumer.SetPermitted(chore_group, state);
+			crewJobsEntry.consumer.SetPermittedByUser(chore_group, state);
 		}
 	}
 
@@ -193,7 +193,7 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 		KMonoBehaviour.PlaySound(GlobalAssets.GetSound(text, false));
 		foreach (CrewJobsEntry crewJobsEntry in this.EntryObjects)
 		{
-			crewJobsEntry.consumer.SetPermitted(chore_group, this.EveryoneToggles[button] != CrewJobsScreen.everyoneToggleState.on);
+			crewJobsEntry.consumer.SetPermittedByUser(chore_group, this.EveryoneToggles[button] != CrewJobsScreen.everyoneToggleState.on);
 		}
 	}
 
@@ -251,9 +251,9 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 					for (int j = 0; j < this.EntryObjects.Count; j++)
 					{
 						ChoreConsumer consumer = this.EntryObjects[j].GetComponent<CrewJobsEntry>().consumer;
-						if (consumer.IsEnabled(choreGroup))
+						if (consumer.IsPermittedByTraits(choreGroup))
 						{
-							if (consumer.IsPermitted(choreGroup))
+							if (consumer.IsPermittedByUser(choreGroup))
 							{
 								flag3 = true;
 								flag = true;

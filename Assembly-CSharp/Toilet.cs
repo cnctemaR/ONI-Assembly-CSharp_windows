@@ -1,11 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
+using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEffectDescriptor, IGameObjectEffectDescriptor
+public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadable, IUsable, IEffectDescriptor, IGameObjectEffectDescriptor
 {
+	public int FlushesUsed
+	{
+		get
+		{
+			return this._flushesUsed;
+		}
+		set
+		{
+			base.smi.sm.flushes.Set(value, base.smi);
+			this._flushesUsed = value;
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -14,7 +28,8 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 		ToiletWorkableUse component = base.GetComponent<ToiletWorkableUse>();
 		component.trackUses = true;
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_arrow", "meter_scale" });
-		this.meter.SetPositionPercent((float)base.smi.sm.flushes.Get(base.smi) / (float)base.smi.master.maxFlushes);
+		this.meter.SetPositionPercent((float)this.FlushesUsed / (float)this.maxFlushes);
+		this.FlushesUsed = this._flushesUsed;
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 	}
 
@@ -39,8 +54,8 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 		PrimaryElement component = worker.GetComponent<PrimaryElement>();
 		component.AddDisease(index, this.diseaseOnDupePerFlush, "Toilet.Flush");
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, string.Format(DUPLICANTS.DISEASES.ADDED_POPFX, Db.Get().Diseases[(int)index].Name, this.diseasePerFlush + this.diseaseOnDupePerFlush), base.transform, Vector3.up, 1.5f, false, false);
-		base.smi.sm.flushes.Delta(1, base.smi);
-		this.meter.SetPositionPercent((float)base.smi.sm.flushes.Get(base.smi) / (float)base.smi.master.maxFlushes);
+		this.FlushesUsed++;
+		this.meter.SetPositionPercent((float)this.FlushesUsed / (float)this.maxFlushes);
 		Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_LotsOfGerms);
 	}
 
@@ -136,6 +151,9 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 	[SerializeField]
 	public int diseaseOnDupePerFlush;
 
+	[Serialize]
+	public int _flushesUsed;
+
 	private MeterController meter;
 
 	[MyCmpReq]
@@ -173,13 +191,13 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 		{
 			get
 			{
-				return base.sm.flushes.Get(base.smi) > 0;
+				return base.master.FlushesUsed > 0;
 			}
 		}
 
 		public int GetFlushesRemaining()
 		{
-			return base.master.maxFlushes - base.sm.flushes.Get(base.smi);
+			return base.master.maxFlushes - base.master.FlushesUsed;
 		}
 
 		public bool HasDirt()
@@ -250,7 +268,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 				.ToggleRecurringChore(new Func<Toilet.StatesInstance, Chore>(this.CreateUseChore), null)
 				.ToggleTag(GameTags.Usable);
 			this.ready.idle.WorkableStartTransition((Toilet.StatesInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.ready.inuse);
-			this.ready.inuse.WorkableCompleteTransition((Toilet.StatesInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.ready.flush).WorkableStopTransition((Toilet.StatesInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.ready.idle);
+			this.ready.inuse.WorkableStopTransition((Toilet.StatesInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.ready.idle).WorkableCompleteTransition((Toilet.StatesInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.ready.flush);
 			this.ready.flush.Enter(delegate(Toilet.StatesInstance smi)
 			{
 				smi.Flush();
@@ -286,7 +304,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 				});
 			this.empty.PlayAnim("off").Enter("ClearFlushes", delegate(Toilet.StatesInstance smi)
 			{
-				this.flushes.Set(0, smi);
+				smi.master.FlushesUsed = 0;
 			}).Enter("ClearDirt", delegate(Toilet.StatesInstance smi)
 			{
 				smi.master.storage.ConsumeAllIgnoringDisease();

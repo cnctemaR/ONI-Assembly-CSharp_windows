@@ -77,20 +77,20 @@ public class CrewJobsEntry : CrewListEntry
 		KMonoBehaviour.PlaySound(GlobalAssets.GetSound(text, false));
 		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
 		{
-			this.consumer.SetPermitted(choreGroup, flag);
+			this.consumer.SetPermittedByUser(choreGroup, flag);
 		}
 	}
 
 	private void OnPriorityPress(ChoreGroup chore_group)
 	{
-		bool flag = this.consumer.IsPermitted(chore_group);
+		bool flag = this.consumer.IsPermittedByUser(chore_group);
 		string text = "HUD_Click";
 		if (flag)
 		{
 			text = "HUD_Click_Deselect";
 		}
 		KMonoBehaviour.PlaySound(GlobalAssets.GetSound(text, false));
-		this.consumer.SetPermitted(chore_group, !this.consumer.IsPermitted(chore_group));
+		this.consumer.SetPermittedByUser(chore_group, !this.consumer.IsPermittedByUser(chore_group));
 	}
 
 	private void Refresh(object data = null)
@@ -105,7 +105,7 @@ public class CrewJobsEntry : CrewListEntry
 			Attributes attributes = this.identity.GetAttributes();
 			foreach (CrewJobsEntry.PriorityButton priorityButton in this.PriorityButtons)
 			{
-				bool flag = this.consumer.IsPermitted(priorityButton.choreGroup);
+				bool flag = this.consumer.IsPermittedByUser(priorityButton.choreGroup);
 				if (priorityButton.ToggleIcon.activeSelf != flag)
 				{
 					priorityButton.ToggleIcon.SetActive(flag);
@@ -122,7 +122,7 @@ public class CrewJobsEntry : CrewListEntry
 				}
 				Color color = priorityButton.baseBackgroundColor;
 				color.a = Mathf.Lerp(0f, 1f, num);
-				bool flag2 = this.consumer.IsEnabled(priorityButton.choreGroup);
+				bool flag2 = this.consumer.IsPermittedByTraits(priorityButton.choreGroup);
 				if (!flag2)
 				{
 					color = Color.clear;
@@ -139,10 +139,10 @@ public class CrewJobsEntry : CrewListEntry
 			int num3 = 0;
 			foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
 			{
-				if (this.consumer.IsEnabled(choreGroup))
+				if (this.consumer.IsPermittedByTraits(choreGroup))
 				{
 					num3++;
-					if (this.consumer.IsPermitted(choreGroup))
+					if (this.consumer.IsPermittedByUser(choreGroup))
 					{
 						num2++;
 					}
@@ -192,7 +192,7 @@ public class CrewJobsEntry : CrewListEntry
 			Attributes attributes = this.identity.GetAttributes();
 			if (attributes != null)
 			{
-				if (!this.consumer.IsEnabled(b.choreGroup))
+				if (!this.consumer.IsPermittedByTraits(b.choreGroup))
 				{
 					string text = string.Format(UI.TOOLTIPS.JOBSSCREEN_CANNOTPERFORMTASK, this.consumer.GetComponent<MinionIdentity>().GetProperName());
 					b.tooltip.AddMultiStringTooltip(text, this.TooltipTextStyle_AbilityNegativeModifier);

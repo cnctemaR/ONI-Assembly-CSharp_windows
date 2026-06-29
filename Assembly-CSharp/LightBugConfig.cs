@@ -37,7 +37,8 @@ public class LightBugConfig : IEntityConfig
 		gameObject.GetComponent<KPrefabID>().AddPrefabTag(GameTags.Creatures.Flying);
 		gameObject.AddOrGet<NotCapturable>();
 		gameObject.AddOrGet<LoopingSounds>();
-		gameObject.AddOrGetDef<LureableMonitor.Def>();
+		LureableMonitor.Def def = gameObject.AddOrGetDef<LureableMonitor.Def>();
+		def.ActiveBaitTag = GameTags.Phosphorite;
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
 		Light2D light2D = gameObject.AddOrGet<Light2D>();
 		light2D.overlayColour = LIGHT2D.LIGHTBUG_OVERLAYCOLOR;

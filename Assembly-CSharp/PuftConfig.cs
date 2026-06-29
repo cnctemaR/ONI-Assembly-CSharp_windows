@@ -25,7 +25,8 @@ public class PuftConfig : IEntityConfig
 		EntityTemplates.ExtendEntityToFertileCreature(gameObject, "egg_puft_kanim", PuftConfig.CALORIES_BURNED_PER_CYCLE_WILD, PuftConfig.CALORIES_BURNED_PER_CYCLE_TAME, PuftConfig.PEN_SPACE_REQUIRED_PER_CREATURE);
 		gameObject.GetComponent<KPrefabID>().AddPrefabTag(GameTags.Creatures.Flying);
 		gameObject.AddOrGet<LoopingSounds>();
-		gameObject.AddOrGetDef<LureableMonitor.Def>();
+		LureableMonitor.Def def = gameObject.AddOrGetDef<LureableMonitor.Def>();
+		def.ActiveBaitTag = GameTags.SlimeMold;
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
 		DiseaseSourceVisualizer diseaseSourceVisualizer = gameObject.AddOrGet<DiseaseSourceVisualizer>();
 		diseaseSourceVisualizer.alwaysShowDisease = "SlimeLung";

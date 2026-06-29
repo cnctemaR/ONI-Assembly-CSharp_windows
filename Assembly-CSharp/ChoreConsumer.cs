@@ -17,7 +17,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 			foreach (KeyValuePair<Tag, int> keyValuePair in ChoreGroupManager.instance.DefaultChorePermission)
 			{
 				bool flag = false;
-				foreach (HashedString hashedString in this.forbiddenChoreGroups)
+				foreach (HashedString hashedString in this.userDisabledChoreGroups)
 				{
 					if (hashedString.HashValue == keyValuePair.Key.GetHashCode())
 					{
@@ -27,7 +27,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 				}
 				if (!flag && keyValuePair.Value == 0)
 				{
-					this.forbiddenChoreGroups.Add(new HashedString(keyValuePair.Key.GetHashCode()));
+					this.userDisabledChoreGroups.Add(new HashedString(keyValuePair.Key.GetHashCode()));
 				}
 			}
 		}
@@ -68,44 +68,44 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		}
 	}
 
-	public bool IsPermitted(ChoreGroup chore_group)
+	public bool IsPermittedByUser(ChoreGroup chore_group)
 	{
-		return chore_group == null || !this.forbiddenChoreGroups.Contains(chore_group.IdHash);
+		return chore_group == null || !this.userDisabledChoreGroups.Contains(chore_group.IdHash);
 	}
 
-	public void SetPermitted(ChoreGroup chore_group, bool is_allowed)
+	public void SetPermittedByUser(ChoreGroup chore_group, bool is_allowed)
 	{
 		if (is_allowed)
 		{
-			if (this.forbiddenChoreGroups.Remove(chore_group.IdHash))
+			if (this.userDisabledChoreGroups.Remove(chore_group.IdHash))
 			{
 				this.choreRulesChanged.Signal();
 			}
 		}
-		else if (!this.forbiddenChoreGroups.Contains(chore_group.IdHash))
+		else if (!this.userDisabledChoreGroups.Contains(chore_group.IdHash))
 		{
-			this.forbiddenChoreGroups.Add(chore_group.IdHash);
+			this.userDisabledChoreGroups.Add(chore_group.IdHash);
 			this.choreRulesChanged.Signal();
 		}
 	}
 
-	public bool IsEnabled(ChoreGroup chore_group)
+	public bool IsPermittedByTraits(ChoreGroup chore_group)
 	{
-		return chore_group == null || !this.disabledChoreGroups.Contains(chore_group.IdHash);
+		return chore_group == null || !this.traitDisabledChoreGroups.Contains(chore_group.IdHash);
 	}
 
-	public void SetEnabled(ChoreGroup chore_group, bool is_enabled)
+	public void SetPermittedByTraits(ChoreGroup chore_group, bool is_enabled)
 	{
 		if (is_enabled)
 		{
-			if (this.disabledChoreGroups.Remove(chore_group.IdHash))
+			if (this.traitDisabledChoreGroups.Remove(chore_group.IdHash))
 			{
 				this.choreRulesChanged.Signal();
 			}
 		}
-		else if (!this.disabledChoreGroups.Contains(chore_group.IdHash))
+		else if (!this.traitDisabledChoreGroups.Contains(chore_group.IdHash))
 		{
-			this.disabledChoreGroups.Add(chore_group.IdHash);
+			this.traitDisabledChoreGroups.Add(chore_group.IdHash);
 			this.choreRulesChanged.Signal();
 		}
 	}
@@ -228,7 +228,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		for (int i = 0; i < chore_type.groups.Length; i++)
 		{
 			ChoreGroup choreGroup = chore_type.groups[i];
-			if (this.IsEnabled(choreGroup) && (this.IsPermitted(choreGroup) || (this.resume != null && this.resume.IsChoreGroupInCurrentRoleGroup(choreGroup))))
+			if (this.IsPermittedByTraits(choreGroup) && (this.IsPermittedByUser(choreGroup) || (this.resume != null && this.resume.IsChoreGroupInCurrentRoleGroup(choreGroup))))
 			{
 				return true;
 			}
@@ -404,7 +404,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 			priorityWhenAutoAssigned = ((!auto_assigned) ? (-1) : priorityInfo.priority)
 		};
 		this.UpdateChoreTypePriorities(group, value);
-		this.SetEnabled(group, value != 0);
+		this.SetPermittedByUser(group, value != 0);
 	}
 
 	public int GetAssociatedSkillLevel(ChoreGroup group)
@@ -550,14 +550,14 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 	private ChoreConsumer.PreconditionSnapshot preconditionSnapshot = new ChoreConsumer.PreconditionSnapshot();
 
 	[Serialize]
-	private List<HashedString> forbiddenChoreGroups = new List<HashedString>();
+	private List<HashedString> userDisabledChoreGroups = new List<HashedString>();
 
 	[Serialize]
 	private Dictionary<HashedString, ChoreConsumer.PriorityInfo> choreGroupPriorities = new Dictionary<HashedString, ChoreConsumer.PriorityInfo>();
 
 	private Dictionary<HashedString, int> choreTypePriorities = new Dictionary<HashedString, int>();
 
-	private List<HashedString> disabledChoreGroups = new List<HashedString>();
+	private List<HashedString> traitDisabledChoreGroups = new List<HashedString>();
 
 	public HashSet<Tag> preferredChoreTags = new HashSet<Tag>();
 

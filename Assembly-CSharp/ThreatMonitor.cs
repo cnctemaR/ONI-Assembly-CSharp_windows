@@ -235,7 +235,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 
 		public bool WillEngageNonEssentialTargets()
 		{
-			return (!(this.choreConsumer != null) || (this.choreConsumer.IsPermitted(Db.Get().ChoreGroups.Combat) && this.choreConsumer.IsEnabled(Db.Get().ChoreGroups.Combat))) && this.health.State < base.smi.def.fleethresholdState;
+			return (!(this.choreConsumer != null) || (this.choreConsumer.IsPermittedByUser(Db.Get().ChoreGroups.Combat) && this.choreConsumer.IsPermittedByTraits(Db.Get().ChoreGroups.Combat))) && this.health.State < base.smi.def.fleethresholdState;
 		}
 
 		public void OnOffended(FactionAlignment offender)

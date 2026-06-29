@@ -65,7 +65,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		ChoreGroups choreGroups = Db.Get().ChoreGroups;
 		for (int i = 0; i < choreGroups.Count; i++)
 		{
-			this.choreConsumer.SetPermitted(choreGroups[i], true);
+			this.choreConsumer.SetPermittedByUser(choreGroups[i], true);
 		}
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		base.Subscribe(1745615042, new Action<object>(this.OnEndChore));

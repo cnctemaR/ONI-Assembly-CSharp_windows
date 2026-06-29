@@ -32,6 +32,18 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 
 	public class Def : StateMachine.BaseDef, IGameObjectEffectDescriptor
 	{
+		public Tag ActiveBaitTag
+		{
+			get
+			{
+				return this.activeBaitTag;
+			}
+			set
+			{
+				this.activeBaitTag = TagManager.Create(CreatureLure.BAIT_TAG_PREFIX + value.Name, null);
+			}
+		}
+
 		public List<Descriptor> GetDescriptors(GameObject go)
 		{
 			return new List<Descriptor>
@@ -39,6 +51,8 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 				new Descriptor(UI.BUILDINGEFFECTS.CAPTURE_METHOD_LURE, UI.BUILDINGEFFECTS.TOOLTIPS.CAPTURE_METHOD_LURE, Descriptor.DescriptorType.Effect, false)
 			};
 		}
+
+		private Tag activeBaitTag;
 	}
 
 	public new class Instance : GameStateMachine<LureableMonitor, LureableMonitor.Instance, IStateMachineTarget, LureableMonitor.Def>.GameInstance
@@ -52,7 +66,7 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 		{
 			Navigator component = base.GetComponent<Navigator>();
 			LureableMonitor.Instance.TagIterator tagIterator = new LureableMonitor.Instance.TagIterator(component, LureableMonitor.Instance.offsets);
-			LureableMonitor.Instance.TagIterator tagIterator2 = tagIterator.AddTag("AirborneCreatureLure").AddTag(GameTags.Operational);
+			LureableMonitor.Instance.TagIterator tagIterator2 = tagIterator.AddTag("AirborneCreatureLure").AddTag(GameTags.Operational).AddTag(base.def.ActiveBaitTag);
 			foreach (CreatureLure creatureLure in Components.Lures)
 			{
 				tagIterator2.Iterate(creatureLure);

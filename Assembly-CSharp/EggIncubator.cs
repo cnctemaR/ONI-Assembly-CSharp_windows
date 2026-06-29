@@ -91,8 +91,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		{
 			if (this.chore == null)
 			{
-				this.chore = new CompleteIncubationChore(this);
-				base.SetWorkTime(this.workTime);
+				this.chore = new WorkChore<CompleteIncubationWorkable>(Db.Get().ChoreTypes.CreatureHatch, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 			}
 		}
 		else if (this.chore != null)
@@ -130,11 +129,6 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 			this.storage.Remove(occupyingObject);
 			occupyingObject.Trigger(1922945024, null);
 		}
-	}
-
-	public void StartHatch()
-	{
-		this.smi.sm.startHatch.Trigger(this.smi);
 	}
 
 	protected override void PositionOccupyingObject()
@@ -182,6 +176,9 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 	{
 		this.UpdateProgress();
 	}
+
+	[MyCmpAdd]
+	private CompleteIncubationWorkable completeIncubationWorkable;
 
 	private EggIncubatorStates.Instance smi;
 

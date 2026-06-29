@@ -157,6 +157,7 @@ public class EntityTemplates
 		def.wildEffect.Add(new AttributeModifier(Db.Get().Amounts.Wildness.deltaAttribute.Id, 0.008333334f, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, false, false, true));
 		def.wildEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, num, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, false, false, true));
 		def.wildEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Metabolism.Id, 25f, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, false, false, true));
+		def.wildEffect.Add(new AttributeModifier(Db.Get().Amounts.ScaleGrowth.deltaAttribute.Id, -0.75f, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, true, false, true));
 		def.tameEffect = new Effect("Tame" + prefabTag.Name, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, global::STRINGS.CREATURES.MODIFIERS.TAME.TOOLTIP, 0f, true, true, false);
 		def.tameEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -1f, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, false, false, true));
 		def.tameEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, num2, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, false, false, true));
@@ -377,7 +378,7 @@ public class EntityTemplates
 		return gameObject;
 	}
 
-	public static GameObject ExtendEntityToFood(GameObject template, EdiblesManager.FoodInfo foodInfo, bool canRot = true)
+	public static GameObject ExtendEntityToFood(GameObject template, EdiblesManager.FoodInfo foodInfo)
 	{
 		EntitySplitter entitySplitter = template.AddOrGet<EntitySplitter>();
 		entitySplitter.maxStackSize = 10f;
@@ -398,7 +399,7 @@ public class EntityTemplates
 			component.AddPrefabTag(GameTags.CookingIngredient);
 			GameTags.DisplayAsUnits.Add(component.PrefabTag);
 		}
-		if (canRot)
+		if (foodInfo.CanRot)
 		{
 			Rottable.Def def = template.AddOrGetDef<Rottable.Def>();
 			def.rotTemperature = foodInfo.RotTemperature;

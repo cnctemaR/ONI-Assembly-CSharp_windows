@@ -58,6 +58,7 @@ public class ShearingStationConfig : IBuildingConfig
 		def.interactLoopCount = 6;
 		def.rancherInteractAnim = "anim_interacts_shearingstation_kanim";
 		def.synchronizeBuilding = true;
+		Prioritizable.AddRef(go);
 	}
 
 	public const string ID = "ShearingStation";

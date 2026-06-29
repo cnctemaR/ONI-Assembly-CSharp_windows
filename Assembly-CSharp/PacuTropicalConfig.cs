@@ -16,7 +16,6 @@ public class PacuTropicalConfig : IEntityConfig
 
 	public void OnPrefabInit(GameObject prefab)
 	{
-		prefab.GetComponent<KBatchedAnimController>().TintColour = Color.red;
 	}
 
 	public void OnSpawn(GameObject inst)

@@ -315,8 +315,13 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 			{
 				return;
 			}
+			int num = Grid.PosToCell(base.gameObject);
+			if (!Grid.IsValidCell(num))
+			{
+				return;
+			}
 			KSelectable component = base.GetComponent<KSelectable>();
-			if (Grid.Solid[Grid.PosToCell(base.gameObject)])
+			if (Grid.Solid[num])
 			{
 				this.UnrefrigeratedModifier.SetValue(0f);
 				this.ContaminatedAtmosphere.SetValue(0f);

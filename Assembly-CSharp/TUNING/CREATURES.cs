@@ -167,8 +167,7 @@ namespace TUNING
 				return delegate
 				{
 					string text = CREATURES.FERTILITY_MODIFIERS.TEMPERATURE.NAME;
-					string text2 = string.Format(CREATURES.FERTILITY_MODIFIERS.TEMPERATURE.DESC, GameUtil.GetFormattedTemperature(minTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), GameUtil.GetFormattedTemperature(maxTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
-					Db.Get().CreateFertilityModifier(id, eggTag, text, text2, null, delegate(FertilityMonitor.Instance inst, Tag eggType)
+					Db.Get().CreateFertilityModifier(id, eggTag, text, null, (string src) => string.Format(CREATURES.FERTILITY_MODIFIERS.TEMPERATURE.DESC, GameUtil.GetFormattedTemperature(minTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), GameUtil.GetFormattedTemperature(maxTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true)), delegate(FertilityMonitor.Instance inst, Tag eggType)
 					{
 						TemperatureVulnerable component = inst.master.GetComponent<TemperatureVulnerable>();
 						if (component != null)

@@ -121,8 +121,13 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 				.Update(new Action<StandardCropPlant.StatesInstance, float>(StandardCropPlant.RefreshPositionPercent), UpdateRate.SIM_4000ms, false)
 				.EventHandler(GameHashes.ConsumePlant, new StateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State.Callback(StandardCropPlant.RefreshPositionPercent));
 			this.alive.pre_fruiting.PlayAnim("grow_pst", KAnim.PlayMode.Once).EventTransition(GameHashes.AnimQueueComplete, this.alive.fruiting, null);
+			this.alive.fruiting_lost.Enter(delegate(StandardCropPlant.StatesInstance smi)
+			{
+				smi.master.harvestable.SetCanBeHarvested(false);
+			}).GoTo(this.alive.idle);
 			this.alive.wilting.PlayAnim("wilt", KAnim.PlayMode.Loop, (StandardCropPlant.StatesInstance smi) => smi.WiltStage().ToString()).EventTransition(GameHashes.WiltRecover, this.alive.idle, (StandardCropPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Harvest, this.alive.fruiting.fruiting_harvest, null);
-			this.alive.fruiting.DefaultState(this.alive.fruiting.fruiting_idle).EventTransition(GameHashes.Wilt, this.alive.wilting, null).EventTransition(GameHashes.Harvest, this.alive.fruiting.fruiting_harvest, null);
+			this.alive.fruiting.DefaultState(this.alive.fruiting.fruiting_idle).EventTransition(GameHashes.Wilt, this.alive.wilting, null).EventTransition(GameHashes.Harvest, this.alive.fruiting.fruiting_harvest, null)
+				.EventTransition(GameHashes.Grow, this.alive.fruiting_lost, (StandardCropPlant.StatesInstance smi) => !smi.master.growing.ReachedNextHarvest());
 			this.alive.fruiting.fruiting_idle.PlayAnim("idle_full", KAnim.PlayMode.Loop).Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
 				smi.master.harvestable.SetCanBeHarvested(true);
@@ -162,6 +167,8 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State idle;
 
 			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State pre_fruiting;
+
+			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State fruiting_lost;
 
 			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State barren;
 

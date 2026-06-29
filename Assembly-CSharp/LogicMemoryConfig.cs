@@ -28,6 +28,7 @@ public class LogicMemoryConfig : IBuildingConfig
 		buildingDef.ViewMode = SimViewMode.Logic;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.SceneLayer = Grid.SceneLayer.WireBridges;
+		buildingDef.ObjectLayer = ObjectLayer.LogicGates;
 		SoundEventVolumeCache.instance.AddVolume("logic_memory_kanim", "PowerMemory_on", NOISE_POLLUTION.NOISY.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("logic_memory_kanim", "PowerMemory_off", NOISE_POLLUTION.NOISY.TIER3);
 		GeneratedBuildings.RegisterWithOverlay(Logic.HighlightItemIDs, LogicMemoryConfig.ID);

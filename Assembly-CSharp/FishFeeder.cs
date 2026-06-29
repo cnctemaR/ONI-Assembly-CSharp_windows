@@ -10,7 +10,7 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 		this.notoperational.TagTransition(GameTags.Operational, this.operational, false);
 		this.operational.DefaultState(this.operational.on).TagTransition(GameTags.Operational, this.notoperational, true);
 		this.operational.on.DoNothing();
-		int num = 10;
+		int num = 19;
 		FishFeeder.ballSymbols = new HashedString[num];
 		for (int i = 0; i < num; i++)
 		{
@@ -96,10 +96,21 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 		private void FillFeeder(float mass)
 		{
 			KBatchedAnimController component = this.smi.GetComponent<KBatchedAnimController>();
+			SymbolOverrideController component2 = this.smi.GetComponent<SymbolOverrideController>();
+			KAnim.Build.Symbol symbol = null;
+			Storage component3 = this.smi.GetComponent<Storage>();
+			if (component3.items.Count > 0 && component3.items[0] != null)
+			{
+				symbol = this.smi.GetComponent<Storage>().items[0].GetComponent<KBatchedAnimController>().AnimFiles[0].GetData().build.GetSymbol("algae");
+			}
 			for (int i = 0; i < this.ballSymbols.Length; i++)
 			{
 				bool flag = mass > (float)(i + 1) * this.massPerBall;
 				component.SetSymbolVisiblity(this.ballSymbols[i], flag);
+				if (symbol != null)
+				{
+					component2.AddSymbolOverride(this.ballSymbols[i], symbol, 0);
+				}
 			}
 		}
 
@@ -156,7 +167,7 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 			this.anim.transform.SetParent(smi.transform);
 			this.anim.gameObject.SetActive(true);
 			this.anim.SetSceneLayer(Grid.SceneLayer.Building);
-			this.anim.SetSymbolVisiblity("top", false);
+			this.anim.Play("ball", KAnim.PlayMode.Once, 1f, 0f);
 			foreach (HashedString hashedString in ball_symbols)
 			{
 				this.anim.SetSymbolVisiblity(hashedString, false);
@@ -181,7 +192,7 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 					num += gameObject.GetComponent<PrimaryElement>().Mass;
 					int num2 = Grid.PosToCell(this.smi.transform.GetPosition());
 					int num3 = Grid.CellBelow(Grid.CellBelow(num2));
-					gameObject.transform.SetPosition(Grid.CellToPosCBC(num3, Grid.SceneLayer.BuildingUse));
+					gameObject.transform.SetPosition(Grid.CellToPosCBC(num3, Grid.SceneLayer.BuildingBack));
 				}
 			}
 			if (num == 0f)
@@ -196,9 +207,14 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 				}
 				if (num4 > 0f)
 				{
-					this.anim.enabled = true;
+					this.anim.SetSymbolVisiblity(FishFeeder.FishFeederBot.HASH_FEEDBALL, true);
 					this.anim.Play("ball", KAnim.PlayMode.Once, 1f, 0f);
 					Pickupable pickupable = this.topStorage.items[0].GetComponent<Pickupable>().Take(this.massPerBall);
+					KAnim.Build.Symbol symbol = pickupable.GetComponent<KBatchedAnimController>().AnimFiles[0].GetData().build.GetSymbol("algae");
+					if (symbol != null)
+					{
+						this.anim.GetComponent<SymbolOverrideController>().AddSymbolOverride(FishFeeder.FishFeederBot.HASH_FEEDBALL, symbol, 0);
+					}
 					this.botStorage.Store(pickupable.gameObject, false, false, true, false);
 					int num5 = Grid.PosToCell(this.smi.transform.GetPosition());
 					int num6 = Grid.CellBelow(Grid.CellBelow(num5));
@@ -206,7 +222,7 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 				}
 				else
 				{
-					this.anim.enabled = false;
+					this.anim.SetSymbolVisiblity(FishFeeder.FishFeederBot.HASH_FEEDBALL, false);
 				}
 			}
 			this.refreshingStorage = false;
@@ -227,5 +243,7 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 		private FishFeeder.Instance smi;
 
 		private float massPerBall;
+
+		private static readonly HashedString HASH_FEEDBALL = "feedball";
 	}
 }

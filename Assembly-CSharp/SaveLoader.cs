@@ -216,14 +216,6 @@ public class SaveLoader : KMonoBehaviour
 			Sim.Shutdown();
 			return false;
 		}
-		if (KPlayerPrefs.HasKey("TemperatureUnit"))
-		{
-			GameUtil.temperatureUnit = (GameUtil.TemperatureUnit)KPlayerPrefs.GetInt("TemperatureUnit");
-		}
-		if (KPlayerPrefs.HasKey("MassUnit"))
-		{
-			GameUtil.massUnit = (GameUtil.MassUnit)KPlayerPrefs.GetInt("MassUnit");
-		}
 		SceneInitializer.Instance.PostLoadPrefabs();
 		this.mustRestartOnFail = true;
 		if (!this.saveManager.Load(reader))

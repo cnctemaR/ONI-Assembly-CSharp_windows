@@ -24,7 +24,7 @@ public class FishFeederConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.Entombable = false;
 		buildingDef.Floodable = false;
-		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingBack;
+		buildingDef.ForegroundLayer = Grid.SceneLayer.TileFront;
 		return buildingDef;
 	}
 
@@ -67,6 +67,7 @@ public class FishFeederConfig : IBuildingConfig
 		};
 		go.AddOrGetDef<FishFeeder.Def>();
 		go.AddOrGetDef<MakeBaseSolid.Def>();
+		SymbolOverrideControllerUtil.AddToPrefab(go);
 	}
 
 	public override void ConfigurePost(BuildingDef def)

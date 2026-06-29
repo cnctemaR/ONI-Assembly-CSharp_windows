@@ -18,6 +18,19 @@ public class FrontEndBackground : UIDupeRandomizer
 			};
 			this.WaitForABit(i, HashedString.Invalid);
 		}
+		this.dreckoController = base.transform.GetChild(0).Find("startmenu_drecko").GetComponent<KBatchedAnimController>();
+		this.dreckoController.enabled = false;
+		this.nextDreckoTime = global::UnityEngine.Random.Range(3f, 5f) + Time.unscaledTime;
+	}
+
+	private void Update()
+	{
+		if (Time.unscaledTime > this.nextDreckoTime)
+		{
+			this.dreckoController.enabled = true;
+			this.dreckoController.Play("idle", KAnim.PlayMode.Once, 1f, 0f);
+			this.nextDreckoTime = global::UnityEngine.Random.Range(this.minDreckoInterval, this.maxDreckoInterval) + Time.unscaledTime;
+		}
 	}
 
 	private void WaitForABit(int minion_idx, HashedString name)
@@ -47,6 +60,14 @@ public class FrontEndBackground : UIDupeRandomizer
 		this.baseCamera.transparencySortMode = TransparencySortMode.Orthographic;
 		this.baseCamera.tag = "Untagged";
 	}
+
+	private KBatchedAnimController dreckoController;
+
+	private float minDreckoInterval = 15f;
+
+	private float maxDreckoInterval = 30f;
+
+	private float nextDreckoTime;
 
 	[NonSerialized]
 	public Camera baseCamera;

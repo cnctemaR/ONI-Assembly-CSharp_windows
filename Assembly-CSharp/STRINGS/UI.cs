@@ -1740,6 +1740,8 @@ namespace STRINGS
 
 			public static LocString HELP_BUILDLOCATION_LIQUIDPORTS_OBSTRUCTED = "Liquid ports are obstructed";
 
+			public static LocString HELP_BUILDLOCATION_SOLIDPORTS_OBSTRUCTED = "Solid ports are obstructed";
+
 			public static LocString HELP_BUILDLOCATION_WIRE_OBSTRUCTION = "Obstructed by wire";
 
 			public static LocString HELP_BUILDLOCATION_LOGIC_PORTS_OBSTRUCTED = "Automation ports are obstructed";
@@ -1910,6 +1912,8 @@ namespace STRINGS
 				public static LocString QUALITY = "Quality: {0}";
 
 				public static LocString SPOILPROPERTIES = "Preserve temperature: {0}\nSpoil time: {1}";
+
+				public static LocString NON_PERISHABLE = "Spoil time: Infinite";
 			}
 
 			public class CATEGORYNAMES

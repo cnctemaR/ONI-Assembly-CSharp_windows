@@ -10,6 +10,7 @@ public class FishDeliveryPointConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.Entombable = false;
 		buildingDef.Floodable = false;
+		buildingDef.ForegroundLayer = Grid.SceneLayer.TileFront;
 		buildingDef.ViewMode = SimViewMode.Rooms;
 		return buildingDef;
 	}

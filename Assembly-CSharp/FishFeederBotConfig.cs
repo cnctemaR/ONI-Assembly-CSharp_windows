@@ -9,6 +9,7 @@ public class FishFeederBotConfig : IEntityConfig
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim("fishfeeder_kanim") };
 		kbatchedAnimController.sceneLayer = Grid.SceneLayer.BuildingBack;
+		SymbolOverrideControllerUtil.AddToPrefab(kbatchedAnimController.gameObject);
 		return gameObject;
 	}
 

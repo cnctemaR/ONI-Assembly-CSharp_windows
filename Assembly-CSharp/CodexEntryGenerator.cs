@@ -100,10 +100,10 @@ public static class CodexEntryGenerator
 				if (gameObject.GetDef<BabyMonitor.Def>() == null)
 				{
 					Sprite sprite = null;
-					GameObject prefab = Assets.GetPrefab(gameObject.PrefabID() + "Baby");
-					if (prefab != null)
+					GameObject gameObject2 = Assets.TryGetPrefab(gameObject.PrefabID() + "Baby");
+					if (gameObject2 != null)
 					{
-						sprite = Def.GetUISprite(prefab, "ui").first;
+						sprite = Def.GetUISprite(gameObject2, "ui").first;
 					}
 					CreatureBrain component = gameObject.GetComponent<CreatureBrain>();
 					if (!(component.species != speciesTag))
@@ -1042,7 +1042,7 @@ public static class CodexEntryGenerator
 				}),
 				new CodexWidget(CodexWidget.ContentType.Spacer)
 			}, ContentContainer.ContentLayout.Vertical));
-			List<Element> list = new List<Element>();
+			List<Tag> list = new List<Tag>();
 			if (def.diet.infos.Length > 0)
 			{
 				if (list.Count == 0)
@@ -1060,65 +1060,137 @@ public static class CodexEntryGenerator
 						new CodexWidget(CodexWidget.ContentType.DividerLine)
 					}, ContentContainer.ContentLayout.Vertical));
 				}
+				ContentContainer contentContainer = new ContentContainer();
+				contentContainer.contentLayout = ContentContainer.ContentLayout.Grid;
+				contentContainer.content = new List<CodexWidget>();
 				foreach (Diet.Info info in def.diet.infos)
 				{
 					List<Tag> tagsVerySlow = info.consumedTagBits.GetTagsVerySlow();
 					if (tagsVerySlow.Count > 0)
 					{
-						for (int j = 0; j < tagsVerySlow.Count; j++)
+						int j = 0;
+						while (j < tagsVerySlow.Count)
 						{
-							if (ElementLoader.GetElementID(tagsVerySlow[j]) != SimHashes.Vacuum && ElementLoader.GetElementID(tagsVerySlow[j]) != SimHashes.Void)
+							Element element = ElementLoader.FindElementByHash(ElementLoader.GetElementID(tagsVerySlow[j]));
+							GameObject gameObject2 = null;
+							if (element.id != SimHashes.Vacuum && element.id != SimHashes.Void)
 							{
-								Element element = ElementLoader.FindElementByHash(ElementLoader.GetElementID(tagsVerySlow[j]));
-								if (!list.Contains(element))
+								goto IL_03AC;
+							}
+							gameObject2 = Assets.GetPrefab(tagsVerySlow[j]);
+							if (!(gameObject2 == null))
+							{
+								goto IL_03AC;
+							}
+							IL_04EF:
+							j++;
+							continue;
+							IL_03AC:
+							if (element != null && gameObject2 == null)
+							{
+								if (list.Contains(element.tag))
 								{
-									list.Add(element);
-									containers.Add(new ContentContainer(new List<CodexWidget>
-									{
-										CodexEntryGenerator.GetIconWidget(element.substance),
-										new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string>
-										{
-											{
-												"string",
-												"• " + element.name
-											},
-											{ "style", "body" }
-										})
-									}, ContentContainer.ContentLayout.Horizontal));
+									goto IL_04EF;
 								}
+								list.Add(element.tag);
+								contentContainer.content.Add(new CodexWidget(CodexWidget.ContentType.LabelWithIcon, new Dictionary<string, string>
+								{
+									{
+										"string",
+										"    " + element.name
+									},
+									{ "style", "body" }
+								}, new Dictionary<string, object> { 
+								{
+									"coloredSprite",
+									Def.GetUISprite(element.substance, "ui")
+								} }));
+								goto IL_04EF;
+							}
+							else
+							{
+								if (!(gameObject2 != null))
+								{
+									goto IL_04EF;
+								}
+								if (list.Contains(gameObject2.PrefabID()))
+								{
+									goto IL_04EF;
+								}
+								list.Add(gameObject2.PrefabID());
+								contentContainer.content.Add(new CodexWidget(CodexWidget.ContentType.LabelWithIcon, new Dictionary<string, string>
+								{
+									{
+										"string",
+										"    " + gameObject2.GetProperName()
+									},
+									{ "style", "body" }
+								}, new Dictionary<string, object> { 
+								{
+									"coloredSprite",
+									Def.GetUISprite(gameObject2, "ui")
+								} }));
+								goto IL_04EF;
 							}
 						}
 					}
 				}
-			}
-			if (def.diet != null && def.diet.infos[0].producedElement != Tag.Invalid)
-			{
-				ContentContainer contentContainer = new ContentContainer(new List<CodexWidget>
-				{
-					new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string>
-					{
-						{
-							"string",
-							CODEX.HEADERS.PRODUCES
-						},
-						{ "style", "subtitle" }
-					}),
-					new CodexWidget(CodexWidget.ContentType.DividerLine)
-				}, ContentContainer.ContentLayout.Vertical);
 				containers.Add(contentContainer);
-				ContentContainer contentContainer2 = new ContentContainer(new List<CodexWidget>
+			}
+			bool flag = false;
+			if (def.diet != null)
+			{
+				foreach (Diet.Info info2 in def.diet.infos)
 				{
-					CodexEntryGenerator.GetIconWidget(ElementLoader.GetElement(def.diet.infos[0].producedElement).substance),
-					new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string>
+					if (info2.producedElement != null)
 					{
+						flag = true;
+						break;
+					}
+				}
+				if (flag)
+				{
+					ContentContainer contentContainer2 = new ContentContainer();
+					contentContainer2.contentLayout = ContentContainer.ContentLayout.Grid;
+					contentContainer2.content = new List<CodexWidget>();
+					ContentContainer contentContainer3 = new ContentContainer(new List<CodexWidget>
+					{
+						new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string>
 						{
-							"string",
-							"• " + def.diet.infos[0].producedElement.ProperName()
-						},
-						{ "style", "body" }
-					})
-				}, ContentContainer.ContentLayout.Horizontal);
-				containers.Add(contentContainer2);
+							{
+								"string",
+								CODEX.HEADERS.PRODUCES
+							},
+							{ "style", "subtitle" }
+						}),
+						new CodexWidget(CodexWidget.ContentType.DividerLine)
+					}, ContentContainer.ContentLayout.Vertical);
+					containers.Add(contentContainer3);
+					List<Tag> list2 = new List<Tag>();
+					for (int l = 0; l < def.diet.infos.Length; l++)
+					{
+						if (def.diet.infos[l].producedElement != Tag.Invalid)
+						{
+							if (!list2.Contains(def.diet.infos[l].producedElement))
+							{
+								list2.Add(def.diet.infos[l].producedElement);
+								contentContainer2.content.Add(new CodexWidget(CodexWidget.ContentType.LabelWithIcon, new Dictionary<string, string>
+								{
+									{
+										"string",
+										"• " + def.diet.infos[l].producedElement.ProperName()
+									},
+									{ "style", "body" }
+								}, new Dictionary<string, object> { 
+								{
+									"coloredSprite",
+									Def.GetUISprite(def.diet.infos[l].producedElement, "ui")
+								} }));
+							}
+						}
+					}
+					containers.Add(contentContainer2);
+				}
 			}
 		}
 	}
@@ -1175,7 +1247,7 @@ public static class CodexEntryGenerator
 			{
 				{
 					"string",
-					string.Format(UI.CODEX.FOOD.SPOILPROPERTIES, GameUtil.GetFormattedTemperature(food.PreserveTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), GameUtil.GetFormattedCycles(food.SpoilTime, "F1"))
+					(!food.CanRot) ? UI.CODEX.FOOD.NON_PERISHABLE.ToString() : string.Format(UI.CODEX.FOOD.SPOILPROPERTIES, GameUtil.GetFormattedTemperature(food.PreserveTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), GameUtil.GetFormattedCycles(food.SpoilTime, "F1"))
 				},
 				{ "style", "body" }
 			}),

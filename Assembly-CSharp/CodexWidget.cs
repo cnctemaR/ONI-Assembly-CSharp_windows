@@ -61,6 +61,7 @@ public class CodexWidget : YamlIO<CodexWidget>
 		Image,
 		DividerLine,
 		Spacer,
+		LabelWithIcon,
 		LENGTH
 	}
 }

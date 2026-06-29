@@ -51,13 +51,14 @@ internal class FlopStates : GameStateMachine<FlopStates, FlopStates.Instance, IS
 			{
 				return false;
 			}
-			if (Grid.Solid[Grid.CellBelow(cell)])
+			int num = Grid.CellBelow(cell);
+			if (Grid.IsValidCell(num) && Grid.Solid[num])
 			{
 				cell += delta_x;
 			}
 			else
 			{
-				cell = Grid.CellBelow(cell);
+				cell = num;
 			}
 		}
 		return false;

@@ -45,22 +45,16 @@ public class SymbolOverrideController : KMonoBehaviour
 
 	public void RemoveSymbolOverride(HashedString target_symbol, int priority = 0)
 	{
-		bool flag = false;
 		for (int i = 0; i < this.symbolOverrides.Count; i++)
 		{
 			SymbolOverrideController.SymbolEntry symbolEntry = this.symbolOverrides[i];
 			if (symbolEntry.targetSymbol == target_symbol && symbolEntry.priority == priority)
 			{
-				flag = true;
 				this.symbolOverrides.RemoveAt(i);
 				break;
 			}
 		}
 		this.MarkDirty();
-		if (!flag)
-		{
-			DebugUtil.DevAssert(false, "Tried to remove a non existant symbol override:" + target_symbol.ToString());
-		}
 	}
 
 	public void RemoveAllSymbolOverrides(int priority = 0)

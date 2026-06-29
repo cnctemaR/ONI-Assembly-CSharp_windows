@@ -523,10 +523,22 @@ public class BuildingDef : Def
 		ConduitType inputConduitType = this.InputConduitType;
 		if (inputConduitType != ConduitType.Gas)
 		{
-			if (inputConduitType == ConduitType.Liquid)
+			if (inputConduitType != ConduitType.Liquid)
 			{
-				GameObject gameObject = Grid.Objects[utility_cell, 19];
-				if (gameObject != null && gameObject != source_go)
+				if (inputConduitType == ConduitType.Solid)
+				{
+					GameObject gameObject = Grid.Objects[utility_cell, 23];
+					if (gameObject != null && gameObject != source_go)
+					{
+						flag = false;
+						fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_SOLIDPORTS_OBSTRUCTED;
+					}
+				}
+			}
+			else
+			{
+				GameObject gameObject2 = Grid.Objects[utility_cell, 19];
+				if (gameObject2 != null && gameObject2 != source_go)
 				{
 					flag = false;
 					fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_LIQUIDPORTS_OBSTRUCTED;
@@ -535,8 +547,8 @@ public class BuildingDef : Def
 		}
 		else
 		{
-			GameObject gameObject2 = Grid.Objects[utility_cell, 15];
-			if (gameObject2 != null && gameObject2 != source_go)
+			GameObject gameObject3 = Grid.Objects[utility_cell, 15];
+			if (gameObject3 != null && gameObject3 != source_go)
 			{
 				flag = false;
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_GASPORTS_OBSTRUCTED;

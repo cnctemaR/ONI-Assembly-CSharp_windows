@@ -135,6 +135,11 @@ public struct Matrix2x3
 		return matrix2x;
 	}
 
+	public override string ToString()
+	{
+		return string.Format("[{0}, {1}, {2}]  [{3}, {4}, {5}]", new object[] { this.m00, this.m01, this.m02, this.m10, this.m11, this.m12 });
+	}
+
 	public float m00;
 
 	public float m01;

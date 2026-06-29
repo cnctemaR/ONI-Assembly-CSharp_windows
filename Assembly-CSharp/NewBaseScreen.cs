@@ -135,7 +135,12 @@ public class NewBaseScreen : KScreen
 			this.minionStartingStats[i].Apply(gameObject);
 			GameScheduler.Instance.Schedule("ANewHope", 3f + 0.5f * (float)i, delegate(object m)
 			{
-				((GameObject)m).GetComponent<Effects>().Add(a_new_hope, true);
+				GameObject gameObject2 = m as GameObject;
+				if (gameObject2 == null)
+				{
+					return;
+				}
+				gameObject2.GetComponent<Effects>().Add(a_new_hope, true);
 			}, gameObject, null);
 		}
 	}

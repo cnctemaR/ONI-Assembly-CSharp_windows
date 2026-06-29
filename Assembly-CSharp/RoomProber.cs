@@ -385,6 +385,10 @@ public class RoomProber : ISim1000ms
 
 	public CavityInfo GetCavityForCell(int cell)
 	{
+		if (!Grid.IsValidCell(cell))
+		{
+			return null;
+		}
 		HandleVector<int>.Handle handle = this.CellCavityID[cell];
 		return this.GetCavityInfo(handle);
 	}

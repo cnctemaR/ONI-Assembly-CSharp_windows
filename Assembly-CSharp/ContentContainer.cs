@@ -26,6 +26,7 @@ public class ContentContainer : YamlIO<ContentContainer>
 	public enum ContentLayout
 	{
 		Vertical,
-		Horizontal
+		Horizontal,
+		Grid
 	}
 }

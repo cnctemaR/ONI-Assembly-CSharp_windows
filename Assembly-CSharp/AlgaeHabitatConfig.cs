@@ -34,7 +34,6 @@ public class AlgaeHabitatConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 450f;
 		storage.showInUI = true;
 		Storage storage2 = go.AddComponent<Storage>();
 		storage2.capacityKg = 360f;

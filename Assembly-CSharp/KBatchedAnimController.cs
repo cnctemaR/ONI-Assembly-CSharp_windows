@@ -691,10 +691,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 	public void SetSceneLayer(Grid.SceneLayer layer)
 	{
 		float layerZ = Grid.GetLayerZ(layer);
-		if (layerZ == base.transform.GetPosition().z)
-		{
-			return;
-		}
 		this.sceneLayer = layer;
 		Vector3 position = base.transform.GetPosition();
 		position.z = layerZ;

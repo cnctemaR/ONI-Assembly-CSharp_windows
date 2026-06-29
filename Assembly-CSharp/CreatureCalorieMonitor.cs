@@ -74,7 +74,8 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			{
 				WildnessMonitor.Def def = obj.GetDef<WildnessMonitor.Def>();
 				float calorie_loss_per_second = 0f;
-				foreach (AttributeModifier attributeModifier in def.tameEffect.SelfModifiers)
+				Trait trait = Db.Get().traits.Get(obj.GetComponent<Modifiers>().initialTraits[0]);
+				foreach (AttributeModifier attributeModifier in trait.SelfModifiers)
 				{
 					if (attributeModifier.AttributeId == Db.Get().Amounts.Calories.deltaAttribute.Id)
 					{
@@ -82,7 +83,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 					}
 				}
 				string text = string.Join(", ", this.diet.consumedTags.Select<KeyValuePair<Tag, float>, string>((KeyValuePair<Tag, float> t) => t.Key.ProperName()).ToArray<string>());
-				string text2 = string.Join("\n", this.diet.consumedTags.Select<KeyValuePair<Tag, float>, string>((KeyValuePair<Tag, float> t) => UI.BUILDINGEFFECTS.DIET_CONSUMED_ITEM.text.Replace("{Food}", t.Key.ProperName()).Replace("{Amount}", GameUtil.GetFormattedMass(calorie_loss_per_second / t.Value, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"))).ToArray<string>());
+				string text2 = string.Join("\n", this.diet.consumedTags.Select<KeyValuePair<Tag, float>, string>((KeyValuePair<Tag, float> t) => UI.BUILDINGEFFECTS.DIET_CONSUMED_ITEM.text.Replace("{Food}", t.Key.ProperName()).Replace("{Amount}", GameUtil.GetFormattedMass(-calorie_loss_per_second / t.Value, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"))).ToArray<string>());
 				list.Add(new Descriptor(UI.BUILDINGEFFECTS.DIET_CONSUMED.text.Replace("{Foodlist}", text), UI.BUILDINGEFFECTS.TOOLTIPS.DIET_CONSUMED.text.Replace("{Foodlist}", text2), Descriptor.DescriptorType.Effect, false));
 			}
 			if (this.diet.producedTags.Count > 0)

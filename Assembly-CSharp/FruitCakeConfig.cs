@@ -8,7 +8,7 @@ public class FruitCakeConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity("FruitCake", ITEMS.FOOD.FRUITCAKE.NAME, ITEMS.FOOD.FRUITCAKE.DESC, 1f, false, Assets.GetAnim("fruitcake_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, SimHashes.Creature, null);
-		gameObject = EntityTemplates.ExtendEntityToFood(gameObject, FOOD.FOOD_TYPES.FRUITCAKE, false);
+		gameObject = EntityTemplates.ExtendEntityToFood(gameObject, FOOD.FOOD_TYPES.FRUITCAKE);
 		string text = "FruitCake";
 		string text2 = ITEMS.FOOD.FRUITCAKE.RECIPEDESC;
 		Recipe recipe = new Recipe(text, 1f, (SimHashes)0, null, text2, 3);

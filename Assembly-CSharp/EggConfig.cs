@@ -18,8 +18,8 @@ public class EggConfig
 		def.baseIncubation = 0.055555556f;
 		OvercrowdingMonitor.Def def2 = gameObject.AddOrGetDef<OvercrowdingMonitor.Def>();
 		def2.spaceRequiredPerCreature = 0;
-		EdiblesManager.FoodInfo foodInfo = new EdiblesManager.FoodInfo(id, 0f, 0, 0f, 0f, 0f);
-		EntityTemplates.ExtendEntityToFood(gameObject, foodInfo, false);
+		EdiblesManager.FoodInfo foodInfo = new EdiblesManager.FoodInfo(id, 0f, 0, 0f, 0f, 0f, false);
+		EntityTemplates.ExtendEntityToFood(gameObject, foodInfo);
 		global::UnityEngine.Object.Destroy(gameObject.GetComponent<EntitySplitter>());
 		Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());
 		return gameObject;

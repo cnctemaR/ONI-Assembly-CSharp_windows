@@ -86,7 +86,8 @@ public class BurrowMonitor : GameStateMachine<BurrowMonitor, BurrowMonitor.Insta
 
 		public bool IsEntombed()
 		{
-			return Grid.Solid[Grid.PosToCell(base.smi.transform.GetPosition())];
+			int num = Grid.PosToCell(base.smi);
+			return Grid.IsValidCell(num) && Grid.Solid[num];
 		}
 
 		public void ExitBurrowComplete()

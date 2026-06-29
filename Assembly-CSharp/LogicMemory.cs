@@ -18,12 +18,12 @@ public class LogicMemory : KMonoBehaviour
 	public void OnLogicValueChanged(object data)
 	{
 		LogicValueChanged logicValueChanged = (LogicValueChanged)data;
-		if (logicValueChanged.portID == LogicMemory.SET_PORT_ID)
+		if (logicValueChanged.portID == LogicMemory.SET_PORT_ID && logicValueChanged.newValue != 0)
 		{
 			this.ports.SendSignal(LogicMemory.READ_PORT_ID, 1);
 			base.GetComponent<KBatchedAnimController>().Play("on", KAnim.PlayMode.Once, 1f, 0f);
 		}
-		else if (logicValueChanged.portID == LogicMemory.RESET_PORT_ID)
+		else if (logicValueChanged.portID == LogicMemory.RESET_PORT_ID && logicValueChanged.newValue != 0)
 		{
 			this.ports.SendSignal(LogicMemory.READ_PORT_ID, 0);
 			base.GetComponent<KBatchedAnimController>().Play("off", KAnim.PlayMode.Once, 1f, 0f);

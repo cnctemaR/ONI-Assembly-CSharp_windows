@@ -135,9 +135,12 @@ public class DebugHandler : IInputHandler
 		}
 		else if (e.TryConsume(global::Action.DebugDiscoverAllElements))
 		{
-			foreach (Element element in ElementLoader.elements)
+			if (WorldInventory.Instance != null)
 			{
-				WorldInventory.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
+				foreach (Element element in ElementLoader.elements)
+				{
+					WorldInventory.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
+				}
 			}
 		}
 		else if (e.TryConsume(global::Action.DebugToggleUI))

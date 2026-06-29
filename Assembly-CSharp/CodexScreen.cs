@@ -59,13 +59,14 @@ public class CodexScreen : KScreen
 		this.PopulatePools();
 		this.CategorizeEntries();
 		this.FilterSearch(string.Empty);
+		this.prefabTextWidget.transform.parent.gameObject.SetActive(false);
 	}
 
 	private void SetupPrefabs()
 	{
 		this.contentContainerPool = new UIGameObjectPool(this.prefabContentContainer);
 		this.contentContainerPool.disabledElementParent = this.widgetPool;
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < 5; i++)
 		{
 			switch (i)
 			{
@@ -80,6 +81,9 @@ public class CodexScreen : KScreen
 				break;
 			case 3:
 				this.ContentPrefabs[(CodexWidget.ContentType)i] = this.prefabSpacer;
+				break;
+			case 4:
+				this.ContentPrefabs[(CodexWidget.ContentType)i] = this.prefabLabelWithIcon;
 				break;
 			}
 		}
@@ -158,7 +162,7 @@ public class CodexScreen : KScreen
 
 	private void PopulatePools()
 	{
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < 5; i++)
 		{
 			this.ContentUIPools[(CodexWidget.ContentType)i] = new UIGameObjectPool(this.ContentPrefabs[(CodexWidget.ContentType)i]);
 			this.ContentUIPools[(CodexWidget.ContentType)i].disabledElementParent = this.widgetPool;
@@ -278,7 +282,6 @@ public class CodexScreen : KScreen
 		{
 			id = "PAGENOTFOUND";
 		}
-		this.activeText.Clear();
 		int num = 0;
 		while (this.contentContainers.transform.childCount > 0)
 		{
@@ -390,25 +393,44 @@ public class CodexScreen : KScreen
 
 	private void ConfigureContentContainer(ContentContainer container, GameObject containerGameObject, bool bgColor = false)
 	{
-		HorizontalOrVerticalLayoutGroup horizontalOrVerticalLayoutGroup = containerGameObject.GetComponent<HorizontalOrVerticalLayoutGroup>();
-		if (horizontalOrVerticalLayoutGroup != null)
+		LayoutGroup layoutGroup = containerGameObject.GetComponent<LayoutGroup>();
+		if (layoutGroup != null)
 		{
-			global::UnityEngine.Object.DestroyImmediate(horizontalOrVerticalLayoutGroup);
+			global::UnityEngine.Object.DestroyImmediate(layoutGroup);
 		}
-		if (container.contentLayout == ContentContainer.ContentLayout.Horizontal)
+		ContentContainer.ContentLayout contentLayout = container.contentLayout;
+		if (contentLayout != ContentContainer.ContentLayout.Horizontal)
 		{
-			horizontalOrVerticalLayoutGroup = containerGameObject.AddComponent<HorizontalLayoutGroup>();
-			horizontalOrVerticalLayoutGroup.childAlignment = TextAnchor.MiddleLeft;
+			if (contentLayout != ContentContainer.ContentLayout.Vertical)
+			{
+				if (contentLayout == ContentContainer.ContentLayout.Grid)
+				{
+					layoutGroup = containerGameObject.AddComponent<GridLayoutGroup>();
+					(layoutGroup as GridLayoutGroup).constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+					(layoutGroup as GridLayoutGroup).constraintCount = 3;
+					(layoutGroup as GridLayoutGroup).cellSize = new Vector2(170f, 32f);
+				}
+			}
+			else
+			{
+				layoutGroup = containerGameObject.AddComponent<VerticalLayoutGroup>();
+				HorizontalOrVerticalLayoutGroup horizontalOrVerticalLayoutGroup = layoutGroup as HorizontalOrVerticalLayoutGroup;
+				bool flag = false;
+				(layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandWidth = flag;
+				horizontalOrVerticalLayoutGroup.childForceExpandHeight = flag;
+				(layoutGroup as HorizontalOrVerticalLayoutGroup).spacing = 8f;
+			}
 		}
-		else if (container.contentLayout == ContentContainer.ContentLayout.Vertical)
+		else
 		{
-			horizontalOrVerticalLayoutGroup = containerGameObject.AddComponent<VerticalLayoutGroup>();
+			layoutGroup = containerGameObject.AddComponent<HorizontalLayoutGroup>();
+			layoutGroup.childAlignment = TextAnchor.MiddleLeft;
+			HorizontalOrVerticalLayoutGroup horizontalOrVerticalLayoutGroup2 = layoutGroup as HorizontalOrVerticalLayoutGroup;
+			bool flag = false;
+			(layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandWidth = flag;
+			horizontalOrVerticalLayoutGroup2.childForceExpandHeight = flag;
+			(layoutGroup as HorizontalOrVerticalLayoutGroup).spacing = 8f;
 		}
-		HorizontalOrVerticalLayoutGroup horizontalOrVerticalLayoutGroup2 = horizontalOrVerticalLayoutGroup;
-		bool flag = false;
-		horizontalOrVerticalLayoutGroup.childForceExpandWidth = flag;
-		horizontalOrVerticalLayoutGroup2.childForceExpandHeight = flag;
-		horizontalOrVerticalLayoutGroup.spacing = 8f;
 	}
 
 	private void ConfigureContentWidget(CodexWidget content, GameObject contentGameObject)
@@ -447,7 +469,6 @@ public class CodexScreen : KScreen
 			}
 			component.ApplySettings();
 			this.ConfigurePreferredLayout(content, contentGameObject);
-			this.activeText.Add(component);
 			break;
 		}
 		case CodexWidget.ContentType.Image:
@@ -494,6 +515,63 @@ public class CodexScreen : KScreen
 		case CodexWidget.ContentType.Spacer:
 			this.ConfigurePreferredLayout(content, contentGameObject);
 			break;
+		case CodexWidget.ContentType.LabelWithIcon:
+			this.ConfigureLabelWithIcon(content, contentGameObject);
+			break;
+		}
+	}
+
+	private void ConfigureLabelWithIcon(CodexWidget content, GameObject contentGameObject)
+	{
+		LocText componentInChildren = contentGameObject.GetComponentInChildren<LocText>();
+		componentInChildren.textStyleSetting = this.textStyleBody;
+		componentInChildren.AllowLinks = true;
+		string empty = string.Empty;
+		if (content.properties.ContainsKey("stringKey"))
+		{
+			content.properties.TryGetValue("stringKey", out empty);
+			componentInChildren.text = Strings.Get(empty);
+		}
+		else if (content.properties.ContainsKey("string"))
+		{
+			content.properties.TryGetValue("string", out empty);
+			componentInChildren.text = empty;
+		}
+		componentInChildren.ApplySettings();
+		string empty2 = string.Empty;
+		if (content.properties.ContainsKey("spriteName"))
+		{
+			content.properties.TryGetValue("spriteName", out empty2);
+			Image component = contentGameObject.GetComponent<Image>();
+			component.sprite = Assets.GetSprite(empty2);
+			component.color = Color.white;
+		}
+		else if (content.properties.ContainsKey("batchedAnimPrefabSourceID"))
+		{
+			Image componentInChildren2 = contentGameObject.GetComponentInChildren<Image>();
+			componentInChildren2.sprite = Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab(content.properties["batchedAnimPrefabSourceID"]).GetComponent<KBatchedAnimController>().AnimFiles[0], "ui");
+			componentInChildren2.color = Color.white;
+		}
+		else if (content.objectProperties.ContainsKey("coloredSprite"))
+		{
+			Tuple<Sprite, Color> tuple = (Tuple<Sprite, Color>)content.objectProperties["coloredSprite"];
+			Image componentInChildren3 = contentGameObject.GetComponentInChildren<Image>();
+			if (tuple != null)
+			{
+				componentInChildren3.sprite = tuple.first;
+				componentInChildren3.color = tuple.second;
+			}
+			else
+			{
+				componentInChildren3.sprite = null;
+				componentInChildren3.color = Color.clear;
+			}
+		}
+		else
+		{
+			Image componentInChildren4 = contentGameObject.GetComponentInChildren<Image>();
+			componentInChildren4.sprite = (Sprite)content.objectProperties["sprite"];
+			componentInChildren4.color = Color.white;
 		}
 	}
 
@@ -591,6 +669,9 @@ public class CodexScreen : KScreen
 
 	[SerializeField]
 	private GameObject prefabSpacer;
+
+	[SerializeField]
+	private GameObject prefabLabelWithIcon;
 
 	[Header("Text Styles")]
 	[SerializeField]

@@ -10,6 +10,14 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	protected override void OnPrefabInit()
 	{
 		Assets.instance = this;
+		if (KPlayerPrefs.HasKey("TemperatureUnit"))
+		{
+			GameUtil.temperatureUnit = (GameUtil.TemperatureUnit)KPlayerPrefs.GetInt("TemperatureUnit");
+		}
+		if (KPlayerPrefs.HasKey("MassUnit"))
+		{
+			GameUtil.massUnit = (GameUtil.MassUnit)KPlayerPrefs.GetInt("MassUnit");
+		}
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		RecipeManager.Destroy();
 		RecipeManager.Get();
@@ -210,12 +218,18 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public static GameObject GetPrefab(Tag tag)
 	{
-		KPrefabID kprefabID = null;
-		Assets.PrefabsByTag.TryGetValue(tag, out kprefabID);
-		if (kprefabID == null)
+		GameObject gameObject = Assets.TryGetPrefab(tag);
+		if (gameObject == null)
 		{
 			global::Debug.LogWarning("Missing prefab: " + tag, null);
 		}
+		return gameObject;
+	}
+
+	public static GameObject TryGetPrefab(Tag tag)
+	{
+		KPrefabID kprefabID = null;
+		Assets.PrefabsByTag.TryGetValue(tag, out kprefabID);
 		return (!(kprefabID != null)) ? null : kprefabID.gameObject;
 	}
 

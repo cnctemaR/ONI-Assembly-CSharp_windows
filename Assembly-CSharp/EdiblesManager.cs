@@ -27,7 +27,7 @@ public class EdiblesManager : KMonoBehaviour
 
 	public class FoodInfo : IConsumableUIItem
 	{
-		public FoodInfo(string id, float caloriesPerUnit, int quality, float preserveTemperatue, float rotTemperature, float spoilTime)
+		public FoodInfo(string id, float caloriesPerUnit, int quality, float preserveTemperatue, float rotTemperature, float spoilTime, bool can_rot)
 		{
 			this.Id = id;
 			this.CaloriesPerUnit = caloriesPerUnit;
@@ -36,6 +36,7 @@ public class EdiblesManager : KMonoBehaviour
 			this.RotTemperature = rotTemperature;
 			this.StaleTime = spoilTime / 2f;
 			this.SpoilTime = spoilTime;
+			this.CanRot = can_rot;
 			this.Name = Strings.Get("STRINGS.ITEMS.FOOD." + id.ToUpper() + ".NAME");
 			this.Description = Strings.Get("STRINGS.ITEMS.FOOD." + id.ToUpper() + ".DESC");
 			this.Effects = new List<string>();
@@ -103,6 +104,8 @@ public class EdiblesManager : KMonoBehaviour
 		public float StaleTime;
 
 		public float SpoilTime;
+
+		public bool CanRot;
 
 		public int Quality;
 

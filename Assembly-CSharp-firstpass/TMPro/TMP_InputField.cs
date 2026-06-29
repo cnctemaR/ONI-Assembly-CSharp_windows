@@ -2016,14 +2016,27 @@ namespace TMPro
 			}
 			if (this.m_isRichTextEditingAllowed || this.m_isSelectAll)
 			{
-				if (this.stringPositionInternal < this.stringSelectPositionInternal)
+				string text = this.m_Text;
+				int stringSelectPositionInternal = this.stringSelectPositionInternal;
+				try
 				{
-					this.m_Text = this.text.Substring(0, this.stringPositionInternal) + this.text.Substring(this.stringSelectPositionInternal, this.text.Length - this.stringSelectPositionInternal);
-					this.stringSelectPositionInternal = this.stringPositionInternal;
+					if (this.stringPositionInternal < this.stringSelectPositionInternal)
+					{
+						this.m_Text = this.text.Substring(0, this.stringPositionInternal) + this.text.Substring(this.stringSelectPositionInternal, this.text.Length - this.stringSelectPositionInternal);
+						this.stringSelectPositionInternal = this.stringPositionInternal;
+					}
+					else
+					{
+						this.m_Text = this.text.Substring(0, this.stringSelectPositionInternal) + this.text.Substring(this.stringPositionInternal, this.text.Length - this.stringPositionInternal);
+						this.stringPositionInternal = this.stringSelectPositionInternal;
+					}
 				}
-				else
+				catch (Exception ex)
 				{
-					this.m_Text = this.text.Substring(0, this.stringSelectPositionInternal) + this.text.Substring(this.stringPositionInternal, this.text.Length - this.stringPositionInternal);
+					global::Debug.LogWarning(ex, null);
+					global::Debug.LogWarning("m_text=" + text, null);
+					global::Debug.LogWarning("stringSelectPositionInternal=" + stringSelectPositionInternal.ToString(), null);
+					this.m_Text = string.Empty;
 					this.stringPositionInternal = this.stringSelectPositionInternal;
 				}
 				this.m_isSelectAll = false;
@@ -2512,23 +2525,39 @@ namespace TMPro
 			TMP_TextInfo textInfo = this.m_TextComponent.textInfo;
 			this.caretPositionInternal = (this.m_CaretPosition = this.GetCaretPositionFromStringIndex(this.stringPositionInternal));
 			this.caretSelectPositionInternal = (this.m_CaretSelectPosition = this.GetCaretPositionFromStringIndex(this.stringSelectPositionInternal));
+			float num = 0f;
 			Vector2 vector;
-			float num2;
 			if (this.caretSelectPositionInternal < textInfo.characterCount)
 			{
-				int num = Mathf.Min(textInfo.characterInfo.Length - 1, this.caretSelectPositionInternal);
-				TMP_CharacterInfo tmp_CharacterInfo = textInfo.characterInfo[num];
+				int num2 = Mathf.Min(textInfo.characterInfo.Length - 1, this.caretSelectPositionInternal);
+				TMP_CharacterInfo tmp_CharacterInfo = textInfo.characterInfo[num2];
 				vector = new Vector2(tmp_CharacterInfo.origin, tmp_CharacterInfo.descender);
-				num2 = textInfo.characterInfo[this.caretSelectPositionInternal].ascender - textInfo.characterInfo[this.caretSelectPositionInternal].descender;
+				num = textInfo.characterInfo[this.caretSelectPositionInternal].ascender - textInfo.characterInfo[this.caretSelectPositionInternal].descender;
 			}
 			else
 			{
 				int num3 = Mathf.Min(textInfo.characterInfo.Length - 1, this.caretSelectPositionInternal - 1);
 				TMP_CharacterInfo tmp_CharacterInfo2 = textInfo.characterInfo[num3];
 				vector = new Vector2(tmp_CharacterInfo2.xAdvance, tmp_CharacterInfo2.descender);
-				num2 = textInfo.characterInfo[this.caretSelectPositionInternal - 1].ascender - textInfo.characterInfo[this.caretSelectPositionInternal - 1].descender;
+				try
+				{
+					num = textInfo.characterInfo[this.caretSelectPositionInternal - 1].ascender - textInfo.characterInfo[this.caretSelectPositionInternal - 1].descender;
+				}
+				catch (Exception ex)
+				{
+					global::Debug.LogWarning(ex, null);
+					string text = string.Empty;
+					Transform transform = base.transform;
+					while (transform != null)
+					{
+						text = transform.name + "." + text;
+						transform = transform.parent;
+					}
+					global::Debug.LogWarning(text, null);
+					num = 0f;
+				}
 			}
-			this.AdjustRectTransformRelativeToViewport(vector, num2, true);
+			this.AdjustRectTransformRelativeToViewport(vector, num, true);
 			int num4 = Mathf.Max(0, this.caretPositionInternal);
 			int num5 = Mathf.Max(0, this.caretSelectPositionInternal);
 			if (num4 > num5)

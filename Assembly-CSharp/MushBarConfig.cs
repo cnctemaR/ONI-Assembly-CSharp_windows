@@ -8,7 +8,7 @@ public class MushBarConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity("MushBar", ITEMS.FOOD.MUSHBAR.NAME, ITEMS.FOOD.MUSHBAR.DESC, 1f, false, Assets.GetAnim("mushbar_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, SimHashes.Creature, null);
-		gameObject = EntityTemplates.ExtendEntityToFood(gameObject, FOOD.FOOD_TYPES.MUSHBAR, true);
+		gameObject = EntityTemplates.ExtendEntityToFood(gameObject, FOOD.FOOD_TYPES.MUSHBAR);
 		string text = "MushBar";
 		string text2 = ITEMS.FOOD.MUSHBAR.RECIPEDESC;
 		Recipe recipe = new Recipe(text, 1f, (SimHashes)0, null, text2, 1);

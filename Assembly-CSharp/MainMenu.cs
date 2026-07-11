@@ -48,6 +48,51 @@ public class MainMenu : KScreen
 		this.CheckDoubleBoundKeys();
 		this.topLeftAlphaMessage.gameObject.SetActive(false);
 		this.nextUpdateTimer.gameObject.SetActive(false);
+		this.m_motdServerClient = new MotdServerClient();
+		this.m_motdServerClient.GetMotd(delegate(MotdServerClient.MotdResponse response, string error)
+		{
+			if (error == null)
+			{
+				this.topLeftAlphaMessage.gameObject.SetActive(true);
+				this.nextUpdateTimer.gameObject.SetActive(true);
+				this.motdImageHeader.text = response.image_header_text;
+				this.motdNewsHeader.text = response.news_header_text;
+				this.motdNewsBody.text = response.news_body_text;
+				this.patchNotesScreen.UpdatePatchNotes(response.patch_notes_summary, response.patch_notes_link_url);
+				this.nextUpdateTimer.UpdateReleaseTimes(response.last_update_time, response.next_update_time, response.update_text_override);
+				if (response.image_texture != null)
+				{
+					this.motdImage.sprite = Sprite.Create(response.image_texture, new Rect(0f, 0f, (float)response.image_texture.width, (float)response.image_texture.height), Vector2.zero);
+				}
+				else
+				{
+					global::Debug.LogWarning("GetMotd failed to return an image texture");
+				}
+				if (this.motdImage.sprite != null && this.motdImage.sprite.rect.height != 0f)
+				{
+					AspectRatioFitter component = this.motdImage.gameObject.GetComponent<AspectRatioFitter>();
+					if (component != null)
+					{
+						float num = this.motdImage.sprite.rect.width / this.motdImage.sprite.rect.height;
+						component.aspectRatio = num;
+					}
+					else
+					{
+						global::Debug.LogWarning("Missing AspectRatioFitter on MainMenu motd image.");
+					}
+				}
+				else
+				{
+					global::Debug.LogWarning("Cannot resize motd image, missing sprite");
+				}
+				this.motdImageButton.onClick.AddListener(delegate
+				{
+					Application.OpenURL(response.image_link_url);
+				});
+				return;
+			}
+			global::Debug.LogWarning("Motd Request error: " + error);
+		});
 		this.lastUpdateTime = Time.unscaledTime;
 		this.activateOnSpawn = true;
 	}
@@ -313,7 +358,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 393722U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 394232U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}

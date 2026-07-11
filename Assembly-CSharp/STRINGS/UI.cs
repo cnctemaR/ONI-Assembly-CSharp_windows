@@ -1501,7 +1501,7 @@ namespace STRINGS
 
 			public class MOTD
 			{
-				public static LocString IMAGE_HEADER = "RECREATION PACK!";
+				public static LocString IMAGE_HEADER = "NEW SOUNDTRACK!";
 
 				public static LocString NEWS_HEADER = "JOIN THE DISCUSSION";
 

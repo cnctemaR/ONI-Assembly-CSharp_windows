@@ -377,7 +377,7 @@ public class DebugHandler : IInputHandler
 							{
 								text5 = SaveLoader.Instance.Save(validSaveFilename, false, false);
 							}
-							KCrashReporter.ReportBug("Bug Report", text5);
+							KCrashReporter.ReportBug("Bug Report", text5, GameObject.Find("ScreenSpaceOverlayCanvas"));
 						}
 						else
 						{
@@ -391,7 +391,7 @@ public class DebugHandler : IInputHandler
 							string text6 = Guid.NewGuid().ToString();
 							StackTrace stackTrace = new StackTrace(1, true);
 							text6 = text6 + "\n" + stackTrace.ToString();
-							KCrashReporter.ReportError("Debug crash with random stack", text6, null, ScreenPrefabs.Instance.ConfirmDialogScreen, string.Empty);
+							KCrashReporter.ReportError("Debug crash with random stack", text6, null, ScreenPrefabs.Instance.ConfirmDialogScreen, GameObject.Find("ScreenSpaceOverlayCanvas"), string.Empty);
 						}
 					}
 					else if (e.TryConsume(global::Action.DebugTriggerError))

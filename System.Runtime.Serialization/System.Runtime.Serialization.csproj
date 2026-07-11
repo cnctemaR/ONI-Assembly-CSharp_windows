@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{770F9222-CBB2-4024-B07F-6563F6542370}</ProjectGuid>
+    <ProjectGuid>{F40BC12C-90F0-45B5-9114-D8B283F44650}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System</RootNamespace>
     <AssemblyName>System.Runtime.Serialization</AssemblyName>
@@ -100,23 +100,23 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{770F9222-CBB2-4024-B07F-6563F6542369}</Project>
+      <Project>{F40BC12C-90F0-45B5-9114-D8B283F44649}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Configuration\System.Configuration.csproj">
-      <Project>{770F9222-CBB2-4024-B07F-6563F654236B}</Project>
+      <Project>{F40BC12C-90F0-45B5-9114-D8B283F4464B}</Project>
       <Name>System.Configuration</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{770F9222-CBB2-4024-B07F-6563F654236C}</Project>
+      <Project>{F40BC12C-90F0-45B5-9114-D8B283F4464C}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{770F9222-CBB2-4024-B07F-6563F6542373}</Project>
+      <Project>{F40BC12C-90F0-45B5-9114-D8B283F44653}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{770F9222-CBB2-4024-B07F-6563F654236E}</Project>
+      <Project>{F40BC12C-90F0-45B5-9114-D8B283F4464E}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

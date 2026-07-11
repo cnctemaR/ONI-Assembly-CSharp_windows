@@ -458,8 +458,9 @@ public class CustomGameSettings : KMonoBehaviour
 		int num = 0;
 		foreach (KeyValuePair<string, string> keyValuePair in this.CurrentQualityLevelsBySetting)
 		{
-			SettingConfig settingConfig = this.QualitySettings[keyValuePair.Key];
-			if (settingConfig.coordinate_dimension >= 0 && settingConfig.coordinate_dimension_width >= 0)
+			SettingConfig settingConfig;
+			this.QualitySettings.TryGetValue(keyValuePair.Key, out settingConfig);
+			if (settingConfig != null && settingConfig.coordinate_dimension >= 0 && settingConfig.coordinate_dimension_width >= 0)
 			{
 				SettingLevel level = settingConfig.GetLevel(keyValuePair.Value);
 				int num2 = settingConfig.coordinate_dimension * level.coordinate_offset;

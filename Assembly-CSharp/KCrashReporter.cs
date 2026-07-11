@@ -159,9 +159,9 @@ public class KCrashReporter : MonoBehaviour
 			canvas.additionalShaderChannels = AdditionalCanvasShaderChannels.TexCoord1;
 			gameObject.AddComponent<GraphicRaycaster>();
 		}
-		GameObject gameObject2 = global::UnityEngine.Object.Instantiate<GameObject>(this.reportErrorPrefab, Vector3.zero, Quaternion.identity);
-		gameObject2.transform.SetParent(gameObject.transform, false);
-		this.errorDialog = gameObject2.GetComponentInChildren<ReportErrorDialog>();
+		GameObject dlg_go = global::UnityEngine.Object.Instantiate<GameObject>(this.reportErrorPrefab, Vector3.zero, Quaternion.identity);
+		dlg_go.transform.SetParent(gameObject.transform, false);
+		this.errorDialog = dlg_go.GetComponentInChildren<ReportErrorDialog>();
 		this.errorDialog.PopupConfirmDialog(delegate
 		{
 			string text = null;
@@ -169,7 +169,7 @@ public class KCrashReporter : MonoBehaviour
 			{
 				text = KCrashReporter.UploadSaveFile(KCrashReporter.MOST_RECENT_SAVEFILE, stack_trace, null);
 			}
-			KCrashReporter.ReportError(error, stack_trace, text, this.confirmDialogPrefab, this.errorDialog.UserMessage());
+			KCrashReporter.ReportError(error, stack_trace, text, this.confirmDialogPrefab, dlg_go, this.errorDialog.UserMessage());
 		}, new global::System.Action(this.OnQuitToDesktop), new global::System.Action(this.OnCloseErrorDialog));
 		return true;
 	}
@@ -297,7 +297,7 @@ public class KCrashReporter : MonoBehaviour
 		return string.Empty;
 	}
 
-	public static void ReportError(string msg, string stack_trace, string save_file_hash, ConfirmDialogScreen confirm_prefab, string userMessage = "")
+	public static void ReportError(string msg, string stack_trace, string save_file_hash, ConfirmDialogScreen confirm_prefab, GameObject confirm_parent, string userMessage = "")
 	{
 		if (KCrashReporter.ignoreAll)
 		{
@@ -335,7 +335,7 @@ public class KCrashReporter : MonoBehaviour
 			}
 			if (string.IsNullOrEmpty(stack_trace))
 			{
-				string text3 = "LU-" + 371502U.ToString();
+				string text3 = "LU-" + 371951U.ToString();
 				stack_trace = string.Format("No stack trace {0}\n\n{1}", text3, msg);
 			}
 			List<string> list = new List<string>();
@@ -384,7 +384,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
-			error.build = 371502;
+			error.build = 371951;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = string.Join("\n", list.ToArray());
 			error.user_message = userMessage;
@@ -408,9 +408,9 @@ public class KCrashReporter : MonoBehaviour
 			{
 				global::Debug.Log(ex);
 			}
-			if (confirm_prefab != null)
+			if (confirm_prefab != null && confirm_parent != null)
 			{
-				ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, null);
+				ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, confirm_parent);
 				confirmDialogScreen.PopupConfirmDialog("Reported Error", null, null, null, null, null, null, null, null, true);
 			}
 			text7 = empty;
@@ -421,7 +421,7 @@ public class KCrashReporter : MonoBehaviour
 		}
 	}
 
-	public static void ReportBug(string msg, string save_file)
+	public static void ReportBug(string msg, string save_file, GameObject confirmParent)
 	{
 		string text = "Bug Report From: " + KCrashReporter.GetUserID() + " at " + global::System.DateTime.Now.ToString();
 		string text2 = KCrashReporter.UploadSaveFile(save_file, text, new Dictionary<string, string> { 
@@ -429,7 +429,7 @@ public class KCrashReporter : MonoBehaviour
 			"user",
 			KCrashReporter.GetUserID()
 		} });
-		KCrashReporter.ReportError(msg, text, text2, ScreenPrefabs.Instance.ConfirmDialogScreen, string.Empty);
+		KCrashReporter.ReportError(msg, text, text2, ScreenPrefabs.Instance.ConfirmDialogScreen, confirmParent, string.Empty);
 	}
 
 	public static void Assert(bool condition, string message)
@@ -437,7 +437,7 @@ public class KCrashReporter : MonoBehaviour
 		if (!condition && !KCrashReporter.hasReportedError)
 		{
 			StackTrace stackTrace = new StackTrace(1, true);
-			KCrashReporter.ReportError("ASSERT: " + message, stackTrace.ToString(), null, null, string.Empty);
+			KCrashReporter.ReportError("ASSERT: " + message, stackTrace.ToString(), null, null, null, string.Empty);
 		}
 	}
 
@@ -462,7 +462,7 @@ public class KCrashReporter : MonoBehaviour
 				KCrashReporter.GetUserID()
 			} });
 		}
-		KCrashReporter.ReportError(msg, stack_trace, text, null, string.Empty);
+		KCrashReporter.ReportError(msg, stack_trace, text, null, null, string.Empty);
 		if (dmp_filename != null)
 		{
 			File.Move(text3, text2);

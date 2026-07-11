@@ -341,6 +341,16 @@ namespace KMod
 		public void Load(Content content)
 		{
 			content &= this.available_content & ~this.loaded_content;
+			if (content > (Content)0)
+			{
+				global::Debug.Log(string.Format("Loading mod content {2} [{0}:{1}] (provides {3})", new object[]
+				{
+					this.title,
+					this.label.id,
+					content.ToString(),
+					this.available_content.ToString()
+				}));
+			}
 			if ((byte)(content & Content.Strings) != 0 && this.LoadStrings())
 			{
 				this.loaded_content |= Content.Strings;

@@ -24,12 +24,17 @@ namespace Database
 					num += reportEntry.Negative;
 				}
 			}
-			for (int j = 0; j < ReportManager.Instance.reports.Count; j++)
+			string name = Db.Get().ChoreTypes.PowerTinker.Name;
+			int count = ReportManager.Instance.reports.Count;
+			for (int j = 0; j < count; j++)
 			{
-				for (int k = 0; k < ReportManager.Instance.reports[j].GetEntry(ReportManager.ReportType.ChoreStatus).contextEntries.Count; k++)
+				ReportManager.DailyReport dailyReport = ReportManager.Instance.reports[j];
+				ReportManager.ReportEntry entry2 = dailyReport.GetEntry(ReportManager.ReportType.ChoreStatus);
+				int count2 = entry2.contextEntries.Count;
+				for (int k = 0; k < count2; k++)
 				{
-					ReportManager.ReportEntry reportEntry2 = ReportManager.Instance.reports[j].GetEntry(ReportManager.ReportType.ChoreStatus).contextEntries[k];
-					if (reportEntry2.context == Db.Get().ChoreTypes.PowerTinker.Name)
+					ReportManager.ReportEntry reportEntry2 = entry2.contextEntries[k];
+					if (reportEntry2.context == name)
 					{
 						num += reportEntry2.Negative;
 					}

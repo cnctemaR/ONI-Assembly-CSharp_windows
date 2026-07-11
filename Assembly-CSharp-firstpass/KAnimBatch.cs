@@ -104,7 +104,8 @@ public class KAnimBatch
 		}
 		int bestTextureSize = KAnimBatchGroup.GetBestTextureSize((float)(this.group.data.maxSymbolsPerBuild * this.group.maxGroupSize * 8));
 		this.symbolInstanceTex = this.group.CreateTexture("SymbolInstanceTex", bestTextureSize, KAnimBatch.ShaderProperty_symbolInstanceTex, KAnimBatch.ShaderProperty_SYMBOL_INSTANCE_TEXTURE_SIZE);
-		if (this.dataTex.width == 0)
+		int width = this.dataTex.width;
+		if (width == 0)
 		{
 			global::Debug.LogWarning(string.Concat(new object[]
 			{
@@ -115,6 +116,13 @@ public class KAnimBatch
 				" (probably just anims)"
 			}));
 			return;
+		}
+		for (int i = 0; i < width * width; i++)
+		{
+			this.dataTex.floats[i * 4] = -1f;
+			this.dataTex.floats[i * 4 + 1] = 0f;
+			this.dataTex.floats[i * 4 + 2] = 0f;
+			this.dataTex.floats[i * 4 + 3] = 0f;
 		}
 		if (this.matProperties == null)
 		{

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{2FBBD9FB-D968-48F1-AAC6-92698965523E}</ProjectGuid>
+    <ProjectGuid>{6D4BA606-D60F-4583-A004-F21242C18969}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.Physics2DModule</AssemblyName>
@@ -69,15 +69,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{2FBBD9FB-D968-48F1-AAC6-926989655214}</Project>
+      <Project>{6D4BA606-D60F-4583-A004-F21242C1893F}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{2FBBD9FB-D968-48F1-AAC6-92698965522C}</Project>
+      <Project>{6D4BA606-D60F-4583-A004-F21242C18957}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{2FBBD9FB-D968-48F1-AAC6-926989655242}</Project>
+      <Project>{6D4BA606-D60F-4583-A004-F21242C1896D}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

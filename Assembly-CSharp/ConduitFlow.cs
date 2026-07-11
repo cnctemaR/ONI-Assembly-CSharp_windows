@@ -830,10 +830,10 @@ public class ConduitFlow : IConduitFlow
 				conduitContents.diseaseIdx = Db.Get().Diseases.GetIndex(serializedContents.diseaseHash);
 				conduitContents.diseaseCount = ((conduitContents.diseaseIdx != byte.MaxValue) ? serializedContents.diseaseCount : 0);
 			}
-			if (float.IsNaN(conduitContents.temperature) || (conduitContents.temperature <= 0f && conduitContents.element != SimHashes.Vacuum))
+			if (float.IsNaN(conduitContents.temperature) || (conduitContents.temperature <= 0f && conduitContents.element != SimHashes.Vacuum) || 10000f < conduitContents.temperature)
 			{
 				Vector2I vector2I = Grid.CellToXY(num);
-				DeserializeWarnings.Instance.PipeContentsTemperatureIsNan.Warn(string.Format("NaN pipe content temperature detected. Resetting temperature. (x={0}, y={1}, cell={2})", vector2I.x, vector2I.y, num), null);
+				DeserializeWarnings.Instance.PipeContentsTemperatureIsNan.Warn(string.Format("Invalid pipe content temperature of {0} detected. Resetting temperature. (x={1}, y={2}, cell={3})", new object[] { conduitContents.temperature, vector2I.x, vector2I.y, num }), null);
 				conduitContents.temperature = ElementLoader.FindElementByHash(conduitContents.element).defaultValues.temperature;
 			}
 			conduitContents.mass = Math.Min(this.MaxMass, conduitContents.mass);

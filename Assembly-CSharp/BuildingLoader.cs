@@ -111,7 +111,7 @@ public class BuildingLoader : KMonoBehaviour
 		}
 		if (def.AnimFiles == null)
 		{
-			global::Debug.LogError(def.Name + " Def missing anim files", null);
+			global::Debug.LogError(def.Name + " Def missing anim files");
 		}
 		return flag;
 	}
@@ -170,7 +170,7 @@ public class BuildingLoader : KMonoBehaviour
 		BuildingLoader.UpdateComponentRequirement<AnimTileable>(gameObject, flag);
 		if (def.RequiresPowerInput)
 		{
-			GeneratedBuildings.RegisterLogicPorts(gameObject, LogicOperationalController.INPUT_PORTS);
+			GeneratedBuildings.RegisterLogicPorts(gameObject, LogicOperationalController.INPUT_PORTS_0_0);
 		}
 		Assets.AddPrefab(kprefabID);
 		gameObject.PreInit();
@@ -210,7 +210,7 @@ public class BuildingLoader : KMonoBehaviour
 		}
 		if (!BuildingLoader.Add2DComponents(def, go, null, false, -1))
 		{
-			global::Debug.Log(def.Name + " is not yet a 2d building!", null);
+			global::Debug.Log(def.Name + " is not yet a 2d building!");
 		}
 		BuildingLoader.UpdateComponentRequirement<EnergyConsumer>(go, def.RequiresPowerInput);
 		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(go, def.PermittedRotations != PermittedRotations.Unrotatable);
@@ -256,7 +256,7 @@ public class BuildingLoader : KMonoBehaviour
 		}
 		if (def.RequiresPowerInput)
 		{
-			GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS);
+			GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
 			go.AddOrGet<LogicOperationalController>();
 		}
 		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(go, BuildingCellVisualizer.CheckRequiresComponent(def));
@@ -307,7 +307,7 @@ public class BuildingLoader : KMonoBehaviour
 		}
 		if (def.RequiresPowerInput)
 		{
-			GeneratedBuildings.RegisterLogicPorts(gameObject, LogicOperationalController.INPUT_PORTS);
+			GeneratedBuildings.RegisterLogicPorts(gameObject, LogicOperationalController.INPUT_PORTS_0_0);
 		}
 		gameObject.PreInit();
 		Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());

@@ -64,11 +64,11 @@ public class GroundMasks : ScriptableObject
 		foreach (KeyValuePair<string, GroundMasks.BiomeMaskData> keyValuePair in this.biomeMasks)
 		{
 			GroundMasks.BiomeMaskData value = keyValuePair.Value;
-			Output.Log(new object[] { value.name });
+			DebugUtil.LogArgs(new object[] { value.name });
 			for (int i = 1; i < value.tiles.Length; i++)
 			{
 				GroundMasks.Tile tile = value.tiles[i];
-				Output.Log(new object[]
+				DebugUtil.LogArgs(new object[]
 				{
 					"Tile",
 					i,
@@ -162,7 +162,7 @@ public class GroundMasks : ScriptableObject
 							uvdata2 = new GroundMasks.UVData(uvdata.br, uvdata.tr, uvdata.bl, uvdata.tl);
 							break;
 						default:
-							Output.LogError("Unhandled rotation case");
+							global::Debug.LogError("Unhandled rotation case");
 							break;
 						}
 						array[j] = uvdata2;
@@ -181,7 +181,7 @@ public class GroundMasks : ScriptableObject
 				GroundMasks.Tile tile = this.tiles[i];
 				if (tile.variationUVs == null)
 				{
-					Output.LogError(new object[] { this.name, "has invalid tile at index", i });
+					DebugUtil.LogErrorArgs(new object[] { this.name, "has invalid tile at index", i });
 				}
 			}
 		}

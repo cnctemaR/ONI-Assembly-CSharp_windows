@@ -103,7 +103,11 @@ public class LogicCircuitNetwork : UtilityNetwork
 		this.outputValue = 0;
 		foreach (ILogicEventSender logicEventSender in this.senders)
 		{
-			int logicValue = logicEventSender.GetLogicValue();
+			logicEventSender.LogicTick();
+		}
+		foreach (ILogicEventSender logicEventSender2 in this.senders)
+		{
+			int logicValue = logicEventSender2.GetLogicValue();
 			this.outputValue |= logicValue;
 		}
 	}

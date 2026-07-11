@@ -2938,6 +2938,10 @@ namespace TMPro
 				this.SendOnEndEdit();
 				this.SendOnEndTextSelection();
 				Input.imeCompositionMode = IMECompositionMode.Auto;
+				if (!EventSystem.current.alreadySelecting && EventSystem.current.currentSelectedGameObject == base.gameObject)
+				{
+					EventSystem.current.SetSelectedGameObject(null);
+				}
 			}
 			this.MarkGeometryAsDirty();
 			this.m_IsScrollbarUpdateRequired = true;

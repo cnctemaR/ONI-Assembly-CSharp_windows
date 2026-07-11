@@ -204,6 +204,12 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 		};
 	}
 
+	[ContextMenu("Refill Power")]
+	public void DEBUG_RefillPower()
+	{
+		this.joulesAvailable = this.capacity;
+	}
+
 	[SerializeField]
 	public float capacity;
 

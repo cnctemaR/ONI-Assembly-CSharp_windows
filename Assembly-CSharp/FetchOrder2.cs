@@ -8,7 +8,7 @@ public class FetchOrder2
 	{
 		if (amount <= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
 		{
-			Output.LogWarning(new object[] { string.Format("FetchOrder2 {0} is requesting {1} {2} to {3}", new object[]
+			DebugUtil.LogWarningArgs(new object[] { string.Format("FetchOrder2 {0} is requesting {1} {2} to {3}", new object[]
 			{
 				chore_type.Id,
 				tags[0],
@@ -142,12 +142,12 @@ public class FetchOrder2
 
 	public void Suspend(string reason)
 	{
-		global::Debug.LogError("UNIMPLEMENTED!", null);
+		global::Debug.LogError("UNIMPLEMENTED!");
 	}
 
 	public void Resume(string reason)
 	{
-		global::Debug.LogError("UNIMPLEMENTED!", null);
+		global::Debug.LogError("UNIMPLEMENTED!");
 	}
 
 	public void Submit(Action<FetchOrder2, Pickupable> on_complete, bool check_storage_contents, Action<FetchOrder2, Pickupable> on_begin = null)
@@ -258,7 +258,7 @@ public class FetchOrder2
 		}
 		text = text + "\nTotal Amount: " + this.TotalAmount;
 		text = text + "\nUnfetched Amount: " + this._UnfetchedAmount;
-		global::Debug.LogError(text, null);
+		global::Debug.LogError(text);
 	}
 
 	public Action<FetchOrder2, Pickupable> OnComplete;

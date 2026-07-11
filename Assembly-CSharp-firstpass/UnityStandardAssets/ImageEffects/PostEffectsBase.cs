@@ -11,7 +11,7 @@ namespace UnityStandardAssets.ImageEffects
 		{
 			if (!s)
 			{
-				global::Debug.Log("Missing shader in " + this.ToString(), null);
+				global::Debug.Log("Missing shader in " + this.ToString());
 				base.enabled = false;
 				return null;
 			}
@@ -29,7 +29,7 @@ namespace UnityStandardAssets.ImageEffects
 					" on effect ",
 					this.ToString(),
 					" is not supported on this platform!"
-				}), null);
+				}));
 				return null;
 			}
 			m2Create = new Material(s);
@@ -45,7 +45,7 @@ namespace UnityStandardAssets.ImageEffects
 		{
 			if (!s)
 			{
-				global::Debug.Log("Missing shader in " + this.ToString(), null);
+				global::Debug.Log("Missing shader in " + this.ToString());
 				return null;
 			}
 			if (m2Create && m2Create.shader == s && s.isSupported)
@@ -77,7 +77,7 @@ namespace UnityStandardAssets.ImageEffects
 
 		public virtual bool CheckResources()
 		{
-			global::Debug.LogWarning("CheckResources () for " + this.ToString() + " should be overwritten.", null);
+			global::Debug.LogWarning("CheckResources () for " + this.ToString() + " should be overwritten.");
 			return this.isSupported;
 		}
 
@@ -129,7 +129,7 @@ namespace UnityStandardAssets.ImageEffects
 
 		protected void ReportAutoDisable()
 		{
-			global::Debug.LogWarning("The image effect " + this.ToString() + " has been disabled as it's not supported on the current platform.", null);
+			global::Debug.LogWarning("The image effect " + this.ToString() + " has been disabled as it's not supported on the current platform.");
 		}
 
 		private bool CheckShader(Shader s)
@@ -141,7 +141,7 @@ namespace UnityStandardAssets.ImageEffects
 				" on effect ",
 				this.ToString(),
 				" is not part of the Unity 3.2+ effects suite anymore. For best performance and quality, please ensure you are using the latest Standard Assets Image Effects (Pro only) package."
-			}), null);
+			}));
 			if (!s.isSupported)
 			{
 				this.NotSupported();

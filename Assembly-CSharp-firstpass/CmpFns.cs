@@ -37,10 +37,10 @@ public class CmpFns
 		}
 		catch (Exception ex)
 		{
-			global::Debug.LogError(ex, null);
+			global::Debug.LogError(ex);
 			foreach (Type type in type_array)
 			{
-				global::Debug.Log(type, null);
+				global::Debug.Log(type);
 			}
 		}
 		return (Func<KMonoBehaviour, Component>)Delegate.CreateDelegate(typeof(Func<KMonoBehaviour, Component>), methodInfo);

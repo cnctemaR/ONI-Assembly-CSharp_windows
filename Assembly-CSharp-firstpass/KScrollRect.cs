@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class KScrollRect : ScrollRect
 {
+	public bool isDragging { get; private set; }
+
 	protected override void Awake()
 	{
 		base.Awake();
@@ -79,8 +81,25 @@ public class KScrollRect : ScrollRect
 		this.currentSounds[soundType] = soundPath;
 	}
 
+	public override void OnBeginDrag(PointerEventData eventData)
+	{
+		this.startDrag = true;
+		base.OnBeginDrag(eventData);
+	}
+
+	public override void OnEndDrag(PointerEventData eventData)
+	{
+		this.stopDrag = true;
+		base.OnEndDrag(eventData);
+	}
+
 	public override void OnDrag(PointerEventData eventData)
 	{
+		if (this.allowRightMouseScroll && (eventData.button == PointerEventData.InputButton.Right || eventData.button == PointerEventData.InputButton.Middle))
+		{
+			base.content.localPosition = base.content.localPosition + new Vector3(eventData.delta.x, eventData.delta.y);
+			base.normalizedPosition = new Vector2(Mathf.Clamp(base.normalizedPosition.x, 0f, 1f), Mathf.Clamp(base.normalizedPosition.y, 0f, 1f));
+		}
 		base.OnDrag(eventData);
 		this.scrollVelocity = 0f;
 	}
@@ -88,6 +107,40 @@ public class KScrollRect : ScrollRect
 	protected override void LateUpdate()
 	{
 		this.UpdateScrollIntertia();
+		if (this.allowRightMouseScroll)
+		{
+			if (this.panUp)
+			{
+				this.keyboardScrollDelta.y = this.keyboardScrollDelta.y - this.keyboardScrollSpeed;
+			}
+			if (this.panDown)
+			{
+				this.keyboardScrollDelta.y = this.keyboardScrollDelta.y + this.keyboardScrollSpeed;
+			}
+			if (this.panLeft)
+			{
+				this.keyboardScrollDelta.x = this.keyboardScrollDelta.x + this.keyboardScrollSpeed;
+			}
+			if (this.panRight)
+			{
+				this.keyboardScrollDelta.x = this.keyboardScrollDelta.x - this.keyboardScrollSpeed;
+			}
+			if (this.panUp || this.panDown || this.panLeft || this.panRight)
+			{
+				base.content.localPosition = base.content.localPosition + this.keyboardScrollDelta;
+				base.normalizedPosition = new Vector2(Mathf.Clamp(base.normalizedPosition.x, 0f, 1f), Mathf.Clamp(base.normalizedPosition.y, 0f, 1f));
+			}
+		}
+		if (this.startDrag)
+		{
+			this.startDrag = false;
+			this.isDragging = true;
+		}
+		else if (this.stopDrag)
+		{
+			this.stopDrag = false;
+			this.isDragging = false;
+		}
 		base.LateUpdate();
 	}
 
@@ -141,6 +194,58 @@ public class KScrollRect : ScrollRect
 		}
 	}
 
+	public void OnKeyDown(KButtonEvent e)
+	{
+		if (!this.allowRightMouseScroll)
+		{
+			return;
+		}
+		if (e.TryConsume(global::Action.PanLeft))
+		{
+			this.panLeft = true;
+		}
+		else if (e.TryConsume(global::Action.PanRight))
+		{
+			this.panRight = true;
+		}
+		else if (e.TryConsume(global::Action.PanUp))
+		{
+			this.panUp = true;
+		}
+		else if (e.TryConsume(global::Action.PanDown))
+		{
+			this.panDown = true;
+		}
+	}
+
+	public void OnKeyUp(KButtonEvent e)
+	{
+		if (!this.allowRightMouseScroll)
+		{
+			return;
+		}
+		if (this.panUp && e.TryConsume(global::Action.PanUp))
+		{
+			this.panUp = false;
+			this.keyboardScrollDelta.y = 0f;
+		}
+		else if (this.panDown && e.TryConsume(global::Action.PanDown))
+		{
+			this.panDown = false;
+			this.keyboardScrollDelta.y = 0f;
+		}
+		else if (this.panRight && e.TryConsume(global::Action.PanRight))
+		{
+			this.panRight = false;
+			this.keyboardScrollDelta.x = 0f;
+		}
+		else if (this.panLeft && e.TryConsume(global::Action.PanLeft))
+		{
+			this.panLeft = false;
+			this.keyboardScrollDelta.x = 0f;
+		}
+	}
+
 	public static Dictionary<KScrollRect.SoundType, string> DefaultSounds = new Dictionary<KScrollRect.SoundType, string>();
 
 	private Dictionary<KScrollRect.SoundType, string> currentSounds = new Dictionary<KScrollRect.SoundType, string>();
@@ -170,6 +275,25 @@ public class KScrollRect : ScrollRect
 
 	[SerializeField]
 	public bool allowVerticalScrollWheel = true;
+
+	[SerializeField]
+	public bool allowRightMouseScroll;
+
+	private bool panUp;
+
+	private bool panDown;
+
+	private bool panRight;
+
+	private bool panLeft;
+
+	private Vector3 keyboardScrollDelta = default(Vector3);
+
+	private float keyboardScrollSpeed = 1f;
+
+	private bool startDrag;
+
+	private bool stopDrag;
 
 	public enum SoundType
 	{

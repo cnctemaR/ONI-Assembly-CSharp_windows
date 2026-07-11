@@ -5,7 +5,7 @@ public class DividerColumn : TableColumn
 {
 	public DividerColumn(Func<bool> revealed = null, string scrollerID = "")
 	{
-		Action<MinionIdentity, GameObject> action = delegate(MinionIdentity minion, GameObject widget_go)
+		Action<IAssignableIdentity, GameObject> action = delegate(IAssignableIdentity minion, GameObject widget_go)
 		{
 			if (revealed != null)
 			{
@@ -26,9 +26,9 @@ public class DividerColumn : TableColumn
 				widget_go.SetActive(true);
 			}
 		};
-		Comparison<MinionIdentity> comparison = null;
-		Action<MinionIdentity, GameObject, ToolTip> action2 = null;
-		Action<MinionIdentity, GameObject, ToolTip> action3 = null;
+		Comparison<IAssignableIdentity> comparison = null;
+		Action<IAssignableIdentity, GameObject, ToolTip> action2 = null;
+		Action<IAssignableIdentity, GameObject, ToolTip> action3 = null;
 		Func<bool> revealed2 = revealed;
 		base..ctor(action, comparison, action2, action3, revealed2, false, scrollerID);
 	}

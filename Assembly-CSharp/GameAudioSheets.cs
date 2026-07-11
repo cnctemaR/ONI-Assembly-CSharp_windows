@@ -71,7 +71,7 @@ public class GameAudioSheets : AudioSheets
 				}
 				else
 				{
-					global::Debug.LogWarning(sound_name + " has unknown parameter " + array[i], null);
+					global::Debug.LogWarning(sound_name + " has unknown parameter " + array[i]);
 				}
 			}
 		}

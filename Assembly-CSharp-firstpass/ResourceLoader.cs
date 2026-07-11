@@ -46,7 +46,7 @@ public class ResourceLoader<T> where T : Resource, new()
 	{
 		if (file == null)
 		{
-			global::Debug.LogWarning("Missing resource file of type: " + typeof(T).Name, null);
+			global::Debug.LogWarning("Missing resource file of type: " + typeof(T).Name);
 			return;
 		}
 		this.Load(file.text, file.name);

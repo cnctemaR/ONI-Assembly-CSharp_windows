@@ -20,7 +20,7 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 		this.simEmitCBHandle.Clear();
 		if (this.storage)
 		{
-			this.storage.DropAll(true);
+			this.storage.DropAll(true, false, default(Vector3), true);
 		}
 		base.OnCleanUp();
 	}

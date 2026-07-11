@@ -26,7 +26,7 @@ public class KFMOD
 			{
 				throw ex;
 			}
-			global::Debug.LogWarning(ex, null);
+			global::Debug.LogWarning(ex);
 		}
 		KFMOD.CollectParameterUpdaters();
 		KFMOD.CollectSoundDescriptions();
@@ -94,7 +94,7 @@ public class KFMOD
 		}
 		catch (EventNotFoundException ex)
 		{
-			global::Debug.LogWarning(ex, null);
+			global::Debug.LogWarning(ex);
 			return default(EventInstance);
 		}
 		HashedString hashedString = path;

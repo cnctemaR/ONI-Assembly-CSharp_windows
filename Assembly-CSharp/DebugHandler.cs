@@ -126,6 +126,10 @@ public class DebugHandler : IInputHandler
 		else if (e.TryConsume(global::Action.DebugInstantBuildMode))
 		{
 			DebugHandler.InstantBuildMode = !DebugHandler.InstantBuildMode;
+			if (Game.Instance == null)
+			{
+				return;
+			}
 			if (PlanScreen.Instance != null)
 			{
 				PlanScreen.Instance.Refresh();
@@ -138,11 +142,14 @@ public class DebugHandler : IInputHandler
 			{
 				OverlayMenu.Instance.Refresh();
 			}
-			ConsumerManager.instance.RefreshDiscovered(null);
+			if (ConsumerManager.instance != null)
+			{
+				ConsumerManager.instance.RefreshDiscovered(null);
+			}
 			if (ManagementMenu.Instance != null)
 			{
 				ManagementMenu.Instance.CheckResearch(null);
-				ManagementMenu.Instance.CheckRoles(null);
+				ManagementMenu.Instance.CheckSkills(null);
 				ManagementMenu.Instance.CheckStarmap(null);
 			}
 			Game.Instance.Trigger(1594320620, "all_the_things");
@@ -257,7 +264,7 @@ public class DebugHandler : IInputHandler
 		}
 		else if (e.TryConsume(global::Action.DebugGotoTarget))
 		{
-			global::Debug.Log("Debug GoTo", null);
+			global::Debug.Log("Debug GoTo");
 			Game.Instance.Trigger(775300118, null);
 			foreach (Brain brain in Components.Brains.Items)
 			{
@@ -346,7 +353,7 @@ public class DebugHandler : IInputHandler
 				else if (e.TryConsume(global::Action.DebugPathFinding))
 				{
 					DebugHandler.DebugPathFinding = !DebugHandler.DebugPathFinding;
-					global::Debug.Log("DebugPathFinding=" + DebugHandler.DebugPathFinding, null);
+					global::Debug.Log("DebugPathFinding=" + DebugHandler.DebugPathFinding);
 				}
 				else if (!e.TryConsume(global::Action.DebugFocus))
 				{
@@ -374,7 +381,7 @@ public class DebugHandler : IInputHandler
 						}
 						else
 						{
-							global::Debug.Log("Debug crash keys are not enabled.", null);
+							global::Debug.Log("Debug crash keys are not enabled.");
 						}
 					}
 					else if (e.TryConsume(global::Action.DebugTriggerException))
@@ -391,7 +398,7 @@ public class DebugHandler : IInputHandler
 					{
 						if (GenericGameSettings.instance.developerDebugEnable)
 						{
-							global::Debug.LogError("Oooops! Testing error!", null);
+							global::Debug.LogError("Oooops! Testing error!");
 						}
 					}
 					else if (e.TryConsume(global::Action.DebugDumpGCRoots))

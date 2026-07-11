@@ -22,7 +22,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 				",",
 				num2.ToString(),
 				")"
-			}), null);
+			}));
 		}
 	}
 

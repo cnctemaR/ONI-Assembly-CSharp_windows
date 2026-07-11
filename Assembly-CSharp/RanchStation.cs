@@ -116,7 +116,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 		{
 			int targetRanchCell = this.GetTargetRanchCell();
 			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(targetRanchCell);
-			if (cavityForCell == null)
+			if (cavityForCell == null || cavityForCell.room == null || cavityForCell.room.roomType != Db.Get().RoomTypes.CreaturePen)
 			{
 				this.TriggerRanchStationNoLongerAvailable();
 				return;
@@ -169,6 +169,10 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 		{
 			if (!this.targetRanchable.IsNullOrStopped())
 			{
+				global::Debug.Assert(this.targetRanchable != null, "targetRanchable was null");
+				global::Debug.Assert(this.targetRanchable.GetMaster() != null, "GetMaster was null");
+				global::Debug.Assert(base.def != null, "def was null");
+				global::Debug.Assert(base.def.onRanchCompleteCb != null, "onRanchCompleteCb cb was null");
 				base.def.onRanchCompleteCb(this.targetRanchable.gameObject);
 				this.targetRanchable.Trigger(1827504087, null);
 			}

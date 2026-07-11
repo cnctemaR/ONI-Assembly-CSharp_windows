@@ -7,6 +7,8 @@ public class GameTags
 
 	public static readonly Tag Any = TagManager.Create("Any");
 
+	public static readonly Tag SpawnsInWorld = TagManager.Create("SpawnsInWorld");
+
 	public static readonly Tag Experimental = TagManager.Create("Experimental");
 
 	public static readonly Tag Miscellaneous = TagManager.Create("Miscellaneous");
@@ -20,6 +22,8 @@ public class GameTags
 	public static readonly Tag CookingIngredient = TagManager.Create("CookingIngredient");
 
 	public static readonly Tag Medicine = TagManager.Create("Medicine");
+
+	public static readonly Tag MedicalSupplies = TagManager.Create("MedicalSupplies");
 
 	public static readonly Tag Plant = TagManager.Create("Plant");
 
@@ -73,6 +77,8 @@ public class GameTags
 
 	public static readonly Tag Artifact = TagManager.Create("Artifact");
 
+	public static readonly Tag MiscPickupable = TagManager.Create("MiscPickupable");
+
 	public static readonly Tag Incapacitated = TagManager.Create("Incapacitated");
 
 	public static readonly Tag CaloriesDepleted = TagManager.Create("CaloriesDepleted");
@@ -80,6 +86,8 @@ public class GameTags
 	public static readonly Tag HitPointsDepleted = TagManager.Create("HitPointsDepleted");
 
 	public static readonly Tag Wilting = TagManager.Create("Wilting");
+
+	public static readonly Tag PreventEmittingDisease = TagManager.Create("EmittingDisease");
 
 	public static readonly Tag Creature = TagManager.Create("Creature");
 
@@ -231,6 +239,8 @@ public class GameTags
 
 	public static readonly Tag Suit = TagManager.Create("Suit");
 
+	public static readonly Tag AirtightSuit = TagManager.Create("AirtightSuit");
+
 	public static readonly Tag AtmoSuit = TagManager.Create("Atmo_Suit");
 
 	public static readonly Tag AquaSuit = TagManager.Create("Aqua_Suit");
@@ -311,6 +321,8 @@ public class GameTags
 
 	public static readonly Tag Shaded = TagManager.Create("Shaded");
 
+	public static readonly Tag TakingMedicine = TagManager.Create("TakingMedicine");
+
 	public static readonly Tag DupeBrain = TagManager.Create("DupeBrain");
 
 	public static readonly Tag CreatureBrain = TagManager.Create("CreatureBrain");
@@ -370,6 +382,7 @@ public class GameTags
 	public static TagSet UnitCategories = new TagSet
 	{
 		GameTags.Medicine,
+		GameTags.MedicalSupplies,
 		GameTags.Seed,
 		GameTags.Egg,
 		GameTags.Clothes,
@@ -406,7 +419,8 @@ public class GameTags
 	public static TagSet OtherEntityTags = new TagSet
 	{
 		GameTags.BagableCreature,
-		GameTags.SwimmingCreature
+		GameTags.SwimmingCreature,
+		GameTags.MiscPickupable
 	};
 
 	public static TagSet AllCategories = new TagSet(new TagSet[]
@@ -520,7 +534,9 @@ public class GameTags
 
 		public static readonly Tag FishTrapLure = TagManager.Create("FishTrapLure");
 
-		public static readonly Tag GroundBased = TagManager.Create("GroundBased");
+		public static readonly Tag Walker = TagManager.Create("Walker");
+
+		public static readonly Tag Hoverer = TagManager.Create("Hoverer");
 
 		public static readonly Tag Swimmer = TagManager.Create("Swimmer");
 

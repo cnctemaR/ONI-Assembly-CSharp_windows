@@ -40,11 +40,18 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 			num = this.GetMovementSpeedMultiplier(navigator);
 		}
 		int num2 = Grid.PosToCell(navigator);
+		float num3 = 1f;
+		bool flag5 = (byte)(navigator.flags & PathFinder.PotentialPath.Flags.HasAtmoSuit) != 0;
+		if ((byte)(navigator.flags & PathFinder.PotentialPath.Flags.HasJetPack) == 0 && !flag5 && Grid.IsSubstantialLiquid(num2, 0.35f))
+		{
+			num3 = 0.5f;
+		}
+		num *= num3;
 		if (transition.x == 0 && (transition.start == NavType.Ladder || transition.start == NavType.Pole) && transition.start == transition.end)
 		{
 			if (flag)
 			{
-				transition.speed = this.downPoleSpeed;
+				transition.speed = 15f * num3;
 			}
 			else
 			{
@@ -55,20 +62,20 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 					Ladder component = gameObject.GetComponent<Ladder>();
 					if (component != null)
 					{
-						float num3 = component.upwardsMovementSpeedMultiplier;
+						float num4 = component.upwardsMovementSpeedMultiplier;
 						if (transition.y < 0)
 						{
-							num3 = component.downwardsMovementSpeedMultiplier;
+							num4 = component.downwardsMovementSpeedMultiplier;
 						}
-						transition.speed *= num3;
-						transition.animSpeed *= num3;
+						transition.speed *= num4;
+						transition.animSpeed *= num4;
 					}
 				}
 			}
 		}
 		else if (flag2)
 		{
-			transition.speed = this.tubeSpeed;
+			transition.speed = 18f;
 		}
 		else if (flag3)
 		{
@@ -78,14 +85,14 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		{
 			transition.speed = this.floorSpeed * num;
 		}
-		float num4 = num - 1f;
-		transition.animSpeed += transition.animSpeed * num4 / 2f;
+		float num5 = num - 1f;
+		transition.animSpeed += transition.animSpeed * num5 / 2f;
 		if (transition.start == NavType.Floor && transition.end == NavType.Floor)
 		{
-			int num5 = Grid.CellBelow(num2);
-			if (Grid.Foundation[num5])
+			int num6 = Grid.CellBelow(num2);
+			if (Grid.Foundation[num6])
 			{
-				GameObject gameObject2 = Grid.Objects[num5, 1];
+				GameObject gameObject2 = Grid.Objects[num6, 1];
 				if (gameObject2 != null)
 				{
 					SimCellOccupier component2 = gameObject2.GetComponent<SimCellOccupier>();
@@ -131,9 +138,11 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 
 	private float jetPackSpeed;
 
-	private float tubeSpeed = 18f;
+	private const float tubeSpeed = 18f;
 
-	private float downPoleSpeed = 15f;
+	private const float downPoleSpeed = 15f;
+
+	private const float WATER_SPEED_PENALTY = 0.5f;
 
 	private AttributeConverterInstance movementSpeed;
 

@@ -48,6 +48,7 @@ public class SuitMarker : KMonoBehaviour
 	{
 		base.OnSpawn();
 		this.OnlyTraverseIfUnequipAvailable = this.onlyTraverseIfUnequipAvailable;
+		global::Debug.Assert(this.interactAnim != null, "interactAnim is null");
 		base.Subscribe<SuitMarker>(493375141, SuitMarker.OnRefreshUserMenuDelegate);
 		this.isOperational = base.GetComponent<Operational>().IsOperational;
 		base.Subscribe<SuitMarker>(-592767678, SuitMarker.OnOperationalChangedDelegate);

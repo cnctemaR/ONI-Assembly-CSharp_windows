@@ -26,9 +26,9 @@ public class DistributionPlatform : MonoBehaviour
 			DistributionPlatform.sImpl = new GameObject("DistributionPlatform").AddComponent<SteamDistributionPlatform>();
 			if (!SteamManager.Initialized)
 			{
-				global::Debug.LogError("Steam not initialized in time.", null);
+				global::Debug.LogError("Steam not initialized in time.");
 			}
-			Output.Log(new object[] { "Distribution platform: " + DistributionPlatform.sImpl.Platform });
+			global::Debug.Log("Distribution platform: " + DistributionPlatform.sImpl.Platform);
 		}
 	}
 

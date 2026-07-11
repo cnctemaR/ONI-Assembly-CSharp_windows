@@ -73,7 +73,7 @@ public class MinionTodoChoreEntry : KMonoBehaviour
 		case PriorityScreen.PriorityClass.basic:
 			text = UI.UISIDESCREENS.MINIONTODOSIDESCREEN.TOOLTIP_IDLE;
 			goto IL_00B5;
-		case PriorityScreen.PriorityClass.emergency:
+		case PriorityScreen.PriorityClass.topPriority:
 			text = UI.UISIDESCREENS.MINIONTODOSIDESCREEN.TOOLTIP_PERSONAL;
 			goto IL_00B5;
 		case PriorityScreen.PriorityClass.compulsory:
@@ -103,8 +103,7 @@ public class MinionTodoChoreEntry : KMonoBehaviour
 			ChoreGroup choreGroup = context.chore.choreType.groups[0];
 			for (int i = 1; i < context.chore.choreType.groups.Length; i++)
 			{
-				bool flag2 = true;
-				if (choreConsumer.GetPersonalPriority(choreGroup, out flag2) < choreConsumer.GetPersonalPriority(context.chore.choreType.groups[i], out flag2))
+				if (choreConsumer.GetPersonalPriority(choreGroup) < choreConsumer.GetPersonalPriority(context.chore.choreType.groups[i]))
 				{
 					choreGroup = context.chore.choreType.groups[i];
 				}

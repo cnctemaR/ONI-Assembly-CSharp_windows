@@ -61,7 +61,7 @@ public class SocialChoreTracker
 		int num = Grid.PosToCell(this.owner);
 		int num2 = Grid.OffsetCell(num, offset);
 		int num3 = Grid.CellBelow(num2);
-		return GameNavGrids.FloorValidator.IsWalkableCell(num2, num3, false, false);
+		return GameNavGrids.FloorValidator.IsWalkableCell(num2, num3, true);
 	}
 
 	public Func<int, Chore> CreateChoreCB;

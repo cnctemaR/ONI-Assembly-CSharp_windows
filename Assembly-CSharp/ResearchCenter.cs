@@ -6,24 +6,14 @@ using UnityEngine;
 
 public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 {
-	public float Effectiveness
-	{
-		get
-		{
-			return this.effectiveness;
-		}
-		set
-		{
-			this.effectiveness = value;
-		}
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Researching;
 		this.attributeConverter = Db.Get().AttributeConverters.ResearchSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.ALL_DAY_EXPERIENCE;
+		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Research.Id;
+		this.skillExperienceMultiplier = SKILLS.ALL_DAY_EXPERIENCE;
 		ElementConverter elementConverter = this.elementConverter;
 		elementConverter.onConvertMass = (Action<float>)Delegate.Combine(elementConverter.onConvertMass, new Action<float>(this.ConvertMassToResearchPoints));
 	}
@@ -55,13 +45,6 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 				Research.Instance.AddResearchPoints(this.research_point_type_id, 1f);
 			}
 		}
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole(JuniorResearcher.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_SLOW);
-		resume.AddExperienceIfRole(Researcher.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_SLOW);
-		resume.AddExperienceIfRole(SeniorResearcher.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_SLOW);
 	}
 
 	public void Sim200ms(float dt)
@@ -109,16 +92,13 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.ALL_DAY_EXPERIENCE * this.effectiveness;
 		this.operational.SetActive(true, false);
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
 		float num = 1f + Db.Get().AttributeConverters.ResearchSpeed.Lookup(worker).Evaluate();
-		num *= this.effectiveness;
 		this.elementConverter.SetWorkSpeedMultiplier(num);
-		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.ALL_DAY_EXPERIENCE * this.effectiveness;
 		return base.OnWorkTick(worker, dt);
 	}
 
@@ -327,8 +307,6 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 
 	[SerializeField]
 	private float remainder_mass_points;
-
-	private float effectiveness = 1f;
 
 	public static readonly Operational.Flag ResearchSelectedFlag = new Operational.Flag("researchSelected", Operational.Flag.Type.Requirement);
 

@@ -18,6 +18,8 @@ public class Repairable : Workable
 		base.Subscribe<Repairable>(493375141, Repairable.OnRefreshUserMenuDelegate);
 		this.attributeConverter = Db.Get().AttributeConverters.ConstructionSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
+		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Building.Id;
+		this.skillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;
 		this.showProgressBar = false;
 		this.faceTargetWhenWorking = true;
 		this.multitoolContext = "build";
@@ -33,11 +35,6 @@ public class Repairable : Workable
 		this.smi.StartSM();
 		this.workTime = float.PositiveInfinity;
 		this.workTimeRemaining = float.PositiveInfinity;
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole(Handyman.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	private void OnProxyStorageChanged(object data)
@@ -271,7 +268,7 @@ public class Repairable : Workable
 			if (base.smi.master.storageProxy != null)
 			{
 				base.smi.master.transform.GetComponent<Prioritizable>().RemoveRef();
-				base.smi.master.storageProxy.DropAll(false);
+				base.smi.master.storageProxy.DropAll(false, false, default(Vector3), true);
 				Util.KDestroyGameObject(base.smi.master.storageProxy.gameObject);
 			}
 		}

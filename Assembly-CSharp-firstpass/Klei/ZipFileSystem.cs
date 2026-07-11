@@ -8,11 +8,16 @@ namespace Klei
 {
 	public class ZipFileSystem : IFileSystem
 	{
-		public ZipFileSystem(string id, Stream zip_data_stream, string mount_point = "")
+		public ZipFileSystem(string id, ZipFile zipfile, string mount_point = "")
 		{
 			this.id = id;
 			this.mountPoint = FSUtil.Normalize(mount_point);
-			this.zipfile = ZipFile.Read(zip_data_stream);
+			this.zipfile = zipfile;
+		}
+
+		public ZipFileSystem(string id, Stream zip_data_stream, string mount_point = "")
+			: this(id, ZipFile.Read(zip_data_stream), mount_point)
+		{
 		}
 
 		public string GetID()
@@ -54,7 +59,7 @@ namespace Klei
 			{
 				if (!zipEntry.IsDirectory)
 				{
-					string text = Path.Combine(this.mountPoint, zipEntry.FileName);
+					string text = FSUtil.Normalize(Path.Combine(this.mountPoint, zipEntry.FileName));
 					if (re.IsMatch(text))
 					{
 						result.Add(text);

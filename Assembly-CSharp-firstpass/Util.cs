@@ -89,7 +89,12 @@ public static class Util
 		Component component = go.GetComponent(name);
 		if (component == null)
 		{
-			Output.LogErrorWithObj(go, new object[] { string.Format("{0} '{1}' requires a component of type {2}!", go.GetType().ToString(), go.name, name) });
+			global::Debug.LogErrorFormat(go, "{0} '{1}' requires a component of type {2}!", new object[]
+			{
+				go.GetType().ToString(),
+				go.name,
+				name
+			});
 			return null;
 		}
 		Util.InitializeComponent(component);
@@ -101,13 +106,13 @@ public static class Util
 		T component = cmp.gameObject.GetComponent<T>();
 		if (component == null)
 		{
-			Output.LogErrorWithObj(cmp.gameObject, new object[] { string.Format("{0} '{1}' requires a component of type {2} as requested by {3}!", new object[]
+			global::Debug.LogErrorFormat(cmp.gameObject, "{0} '{1}' requires a component of type {2} as requested by {3}!", new object[]
 			{
 				cmp.gameObject.GetType().ToString(),
 				cmp.gameObject.name,
 				typeof(T).ToString(),
 				cmp.GetType().ToString()
-			}) });
+			});
 			return (T)((object)null);
 		}
 		Util.InitializeComponent(component);
@@ -119,7 +124,12 @@ public static class Util
 		T component = gameObject.GetComponent<T>();
 		if (component == null)
 		{
-			Output.LogErrorWithObj(gameObject, new object[] { string.Format("{0} '{1}' requires a component of type {2}!", gameObject.GetType().ToString(), gameObject.name, typeof(T).ToString()) });
+			global::Debug.LogErrorFormat(gameObject, "{0} '{1}' requires a component of type {2}!", new object[]
+			{
+				gameObject.GetType().ToString(),
+				gameObject.name,
+				typeof(T).ToString()
+			});
 			return (T)((object)null);
 		}
 		Util.InitializeComponent(component);
@@ -208,7 +218,7 @@ public static class Util
 		GameObject gameObject = null;
 		if (original == null)
 		{
-			Output.LogWarning(new object[] { "Missing prefab" });
+			DebugUtil.LogWarningArgs(new object[] { "Missing prefab" });
 		}
 		if (gameObject == null)
 		{
@@ -270,7 +280,7 @@ public static class Util
 		GameObject gameObject = null;
 		if (original == null)
 		{
-			Output.LogWarning(new object[] { "Missing prefab" });
+			DebugUtil.LogWarningArgs(new object[] { "Missing prefab" });
 		}
 		if (gameObject == null)
 		{

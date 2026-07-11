@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Database;
 using Klei.AI;
 using TUNING;
 using UnityEngine;
@@ -122,7 +123,7 @@ public class MinionStartingStats : ITelepadDeliverable
 					if (traitVal.requiredNonPositiveAptitudes != null)
 					{
 						bool flag2 = false;
-						foreach (KeyValuePair<HashedString, float> keyValuePair in this.roleAptitudes)
+						foreach (KeyValuePair<HashedString, float> keyValuePair in this.skillAptitudes)
 						{
 							if (flag2)
 							{
@@ -163,7 +164,7 @@ public class MinionStartingStats : ITelepadDeliverable
 						Trait trait3 = Db.Get().traits.TryGet(traitVal.id);
 						if (trait3 == null)
 						{
-							global::Debug.LogWarning("Trying to add nonexistent trait: " + traitVal.id, null);
+							global::Debug.LogWarning("Trying to add nonexistent trait: " + traitVal.id);
 						}
 						else if (!is_starter_minion || trait3.ValidStarterTrait)
 						{
@@ -207,17 +208,11 @@ public class MinionStartingStats : ITelepadDeliverable
 	private void GenerateAptitudes()
 	{
 		int num = global::UnityEngine.Random.Range(1, 4);
+		List<SkillGroup> list = new List<SkillGroup>(Db.Get().SkillGroups.resources);
+		list.Shuffle<SkillGroup>();
 		for (int i = 0; i < num; i++)
 		{
-			RoleConfig random = Game.Instance.roleManager.RolesConfigs.GetRandom<RoleConfig>();
-			if (random.id != "NoRole" && !this.roleAptitudes.ContainsKey(random.roleGroup))
-			{
-				this.roleAptitudes.Add(random.roleGroup, 1f);
-			}
-			else if (num < this.roleAptitudes.Count)
-			{
-				i--;
-			}
+			this.skillAptitudes.Add(list[i].IdHash, (float)DUPLICANTSTATS.APTITUDE_BONUS);
 		}
 	}
 
@@ -344,9 +339,9 @@ public class MinionStartingStats : ITelepadDeliverable
 	public void ApplyAptitudes(GameObject go)
 	{
 		MinionResume component = go.GetComponent<MinionResume>();
-		foreach (KeyValuePair<HashedString, float> keyValuePair in this.roleAptitudes)
+		foreach (KeyValuePair<HashedString, float> keyValuePair in this.skillAptitudes)
 		{
-			component.AddAptitude(keyValuePair.Key, keyValuePair.Value);
+			component.SetAptitude(keyValuePair.Key, keyValuePair.Value);
 		}
 	}
 
@@ -399,5 +394,5 @@ public class MinionStartingStats : ITelepadDeliverable
 
 	public List<Accessory> accessories = new List<Accessory>();
 
-	public Dictionary<HashedString, float> roleAptitudes = new Dictionary<HashedString, float>();
+	public Dictionary<HashedString, float> skillAptitudes = new Dictionary<HashedString, float>();
 }

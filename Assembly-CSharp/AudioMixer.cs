@@ -121,7 +121,8 @@ public class AudioMixer
 		this.Start(AudioMixerSnapshots.Get().DuplicantCountAttenuatorMigrated);
 		this.Start(AudioMixerSnapshots.Get().DuplicantCountMovingSnapshot);
 		this.Start(AudioMixerSnapshots.Get().DuplicantCountSleepingSnapshot);
-		this.Start(AudioMixerSnapshots.Get().SpaceVisibleSnapshot);
+		this.spaceVisibleInst = this.Start(AudioMixerSnapshots.Get().SpaceVisibleSnapshot);
+		this.facilityVisibleInst = this.Start(AudioMixerSnapshots.Get().FacilityVisibleSnapshot);
 		this.Start(AudioMixerSnapshots.Get().PulseSnapshot);
 	}
 
@@ -132,6 +133,7 @@ public class AudioMixer
 		this.Stop(AudioMixerSnapshots.Get().DuplicantCountMovingSnapshot, STOP_MODE.ALLOWFADEOUT);
 		this.Stop(AudioMixerSnapshots.Get().DuplicantCountSleepingSnapshot, STOP_MODE.ALLOWFADEOUT);
 		this.Stop(AudioMixerSnapshots.Get().SpaceVisibleSnapshot, STOP_MODE.ALLOWFADEOUT);
+		this.Stop(AudioMixerSnapshots.Get().FacilityVisibleSnapshot, STOP_MODE.ALLOWFADEOUT);
 		this.Stop(AudioMixerSnapshots.Get().PulseSnapshot, STOP_MODE.ALLOWFADEOUT);
 	}
 
@@ -169,10 +171,12 @@ public class AudioMixer
 
 	public void UpdateSpaceVisibleSnapshot(float percent)
 	{
-		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().SpaceVisibleSnapshot, out this.spaceVisibleInst))
-		{
-			this.spaceVisibleInst.setParameterValue("spaceVisible", percent);
-		}
+		this.spaceVisibleInst.setParameterValue("spaceVisible", percent);
+	}
+
+	public void UpdateFacilityVisibleSnapshot(float percent)
+	{
+		this.facilityVisibleInst.setParameterValue("facilityVisible", percent);
 	}
 
 	private void SetVisibleDuplicants()
@@ -241,7 +245,7 @@ public class AudioMixer
 	{
 		if (!this.userVolumeSettings.ContainsKey(bus))
 		{
-			global::Debug.LogError("The provided bus doesn't exist. Check yo'self fool!", null);
+			global::Debug.LogError("The provided bus doesn't exist. Check yo'self fool!");
 			return;
 		}
 		if (value > 1f)
@@ -283,6 +287,8 @@ public class AudioMixer
 
 	private const string SPACE_VISIBLE_ID = "spaceVisible";
 
+	private const string FACILITY_VISIBLE_ID = "facilityVisible";
+
 	public Dictionary<HashedString, EventInstance> activeSnapshots = new Dictionary<HashedString, EventInstance>();
 
 	public List<HashedString> SnapshotDebugLog = new List<HashedString>();
@@ -304,6 +310,8 @@ public class AudioMixer
 	private EventInstance duplicantCountSleepingInst;
 
 	private EventInstance spaceVisibleInst;
+
+	private EventInstance facilityVisibleInst;
 
 	private static readonly HashedString UserVolumeSettingsHash = new HashedString("event:/Snapshots/Mixing/Snapshot_UserVolumeSettings");
 

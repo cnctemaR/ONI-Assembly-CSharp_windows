@@ -239,7 +239,7 @@ public class BrushTool : InterfaceTool
 			ToolMenu.Instance.PriorityScreen.SetScreenPriority(new PrioritySetting(PriorityScreen.PriorityClass.basic, num), true);
 			return;
 		}
-		ToolMenu.Instance.PriorityScreen.SetScreenPriority(new PrioritySetting(PriorityScreen.PriorityClass.emergency, 1), true);
+		ToolMenu.Instance.PriorityScreen.SetScreenPriority(new PrioritySetting(PriorityScreen.PriorityClass.topPriority, 1), true);
 	}
 
 	private void HandlePriorityKeysUp(KButtonEvent e)

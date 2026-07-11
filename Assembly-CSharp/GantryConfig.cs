@@ -58,5 +58,5 @@ public class GantryConfig : IBuildingConfig
 
 	public const string ID = "Gantry";
 
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(Gantry.PORT_ID, new CellOffset(-1, 1), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(Gantry.PORT_ID, new CellOffset(-1, 1), global::STRINGS.BUILDINGS.PREFABS.GANTRY.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.GANTRY.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.GANTRY.LOGIC_PORT_INACTIVE, false) };
 }

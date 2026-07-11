@@ -22,6 +22,7 @@ public class RoomType : Resource
 		{
 			foreach (RoomType roomType in this.upgrade_paths)
 			{
+				Debug.Assert(roomType != null, name + " has a null upgrade path. Maybe it wasn't initialized yet.");
 			}
 		}
 	}

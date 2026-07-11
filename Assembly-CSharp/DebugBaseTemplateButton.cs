@@ -537,13 +537,13 @@ public class DebugBaseTemplateButton : KScreen
 		TemplateContainer selectionAsAsset = this.GetSelectionAsAsset();
 		if (this.SelectedCells.Count <= 0)
 		{
-			global::Debug.LogWarning("No cells selected. Use buttons above to select the area you want to save.", null);
+			global::Debug.LogWarning("No cells selected. Use buttons above to select the area you want to save.");
 			return;
 		}
 		this.SaveName = this.nameField.text;
 		if (this.SaveName == null || this.SaveName == string.Empty)
 		{
-			global::Debug.LogWarning("Invalid save name. Please enter a name in the input field.", null);
+			global::Debug.LogWarning("Invalid save name. Please enter a name in the input field.");
 			return;
 		}
 		selectionAsAsset.SaveToYaml(this.SaveName);

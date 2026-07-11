@@ -18,11 +18,6 @@ public class Clearable : Workable, ISaveLoadable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		Prioritizable component = base.GetComponent<Prioritizable>();
-		if (component != null && base.GetComponent<Health>() == null)
-		{
-			component.showIcon = false;
-		}
 		if (this.isMarkedForClear)
 		{
 			if (this.HasTag(GameTags.Stored))

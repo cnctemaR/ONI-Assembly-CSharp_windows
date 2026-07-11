@@ -108,7 +108,7 @@ public class NewBaseScreen : KScreen
 	{
 		if (headquartersCell == -1)
 		{
-			global::Debug.LogWarning("No headquarters in saved base template. Cannot place minions. Confirm there is a headquarters saved to the base template, or consider creating a new one.", null);
+			global::Debug.LogWarning("No headquarters in saved base template. Cannot place minions. Confirm there is a headquarters saved to the base template, or consider creating a new one.");
 			return;
 		}
 		int num;

@@ -57,12 +57,12 @@ public class BatchSet
 		int layer = controller.GetLayer();
 		if (layer != this.key.layer)
 		{
-			Debug.LogError("Registering with wrong batch set (layer) " + controller.GetName(), null);
+			Debug.LogError("Registering with wrong batch set (layer) " + controller.GetName());
 		}
 		HashedString batchGroupID = controller.GetBatchGroupID(false);
 		if (!(batchGroupID == this.key.groupID))
 		{
-			Debug.LogError("Registering with wrong batch set (groupID) " + controller.GetName(), null);
+			Debug.LogError("Registering with wrong batch set (groupID) " + controller.GetName());
 		}
 		KAnimBatchGroup.MaterialType materialType = controller.GetMaterialType();
 		for (int i = 0; i < this.batches.Count; i++)
@@ -84,6 +84,7 @@ public class BatchSet
 
 	public void RemoveBatch(KAnimBatch batch)
 	{
+		Debug.Assert(batch.batchset == this);
 		if (this.batches.Contains(batch))
 		{
 			this.group.batchCount--;
@@ -108,6 +109,8 @@ public class BatchSet
 				this.batches.Sort((KAnimBatch b0, KAnimBatch b1) => b0.position.z.CompareTo(b1.position.z));
 			}
 		}
+		Debug.Assert(batch.position.x == (float)(this.idx.x * 32));
+		Debug.Assert(batch.position.y == (float)(this.idx.y * 32));
 		this.SetDirty();
 	}
 

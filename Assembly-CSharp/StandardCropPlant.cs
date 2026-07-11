@@ -126,7 +126,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 				.Enter(new StateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State.Callback(StandardCropPlant.RefreshPositionPercent))
 				.Update(new Action<StandardCropPlant.StatesInstance, float>(StandardCropPlant.RefreshPositionPercent), UpdateRate.SIM_4000ms, false)
 				.EventHandler(GameHashes.ConsumePlant, new StateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State.Callback(StandardCropPlant.RefreshPositionPercent));
-			this.alive.pre_fruiting.PlayAnim("grow_pst", KAnim.PlayMode.Once).EventTransition(GameHashes.AnimQueueComplete, this.alive.fruiting, null);
+			this.alive.pre_fruiting.PlayAnim("grow_pst", KAnim.PlayMode.Once).TriggerOnEnter(GameHashes.BurstEmitDisease, null).EventTransition(GameHashes.AnimQueueComplete, this.alive.fruiting, null);
 			this.alive.fruiting_lost.Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
 				smi.master.harvestable.SetCanBeHarvested(false);

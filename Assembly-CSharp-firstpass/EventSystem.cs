@@ -187,7 +187,7 @@ public class EventSystem
 		{
 			if (!suppressWarnings)
 			{
-				global::Debug.LogWarning("Failed to Unsubscribe event handler: " + EventSystem.intraObjectDispatcher[eventName][subscribeHandle].ToString() + "\nNot subscribed to event", null);
+				global::Debug.LogWarning("Failed to Unsubscribe event handler: " + EventSystem.intraObjectDispatcher[eventName][subscribeHandle].ToString() + "\nNot subscribed to event");
 			}
 			return;
 		}
@@ -209,7 +209,7 @@ public class EventSystem
 		{
 			if (!suppressWarnings)
 			{
-				global::Debug.LogWarning("Failed to Unsubscribe event handler: " + handler.ToString() + "\nNo subscriptions have been made to event", null);
+				global::Debug.LogWarning("Failed to Unsubscribe event handler: " + handler.ToString() + "\nNo subscriptions have been made to event");
 			}
 			return;
 		}
@@ -218,7 +218,7 @@ public class EventSystem
 		{
 			if (!suppressWarnings)
 			{
-				global::Debug.LogWarning("Failed to Unsubscribe event handler: " + handler.ToString() + "\nNot subscribed to event", null);
+				global::Debug.LogWarning("Failed to Unsubscribe event handler: " + handler.ToString() + "\nNot subscribed to event");
 			}
 			return;
 		}
@@ -311,6 +311,7 @@ public class EventSystem
 	{
 		public IntraObjectHandler(Action<ComponentType, object> handler)
 		{
+			global::Debug.Assert(handler.Method.IsStatic);
 			this.handler = handler;
 		}
 

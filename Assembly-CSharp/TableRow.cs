@@ -27,28 +27,35 @@ public class TableRow : KMonoBehaviour
 
 	public void SelectMinion()
 	{
-		if (this.minion == null)
+		MinionIdentity minionIdentity = this.minion as MinionIdentity;
+		if (minionIdentity == null)
 		{
 			return;
 		}
-		SelectTool.Instance.Select(this.minion.GetComponent<KSelectable>(), false);
+		SelectTool.Instance.Select(minionIdentity.GetComponent<KSelectable>(), false);
 	}
 
 	public void SelectAndFocusMinion()
 	{
-		if (this.minion == null)
+		MinionIdentity minionIdentity = this.minion as MinionIdentity;
+		if (minionIdentity == null)
 		{
 			return;
 		}
-		SelectTool.Instance.SelectAndFocus(this.minion.transform.GetPosition(), this.minion.GetComponent<KSelectable>(), new Vector3(8f, 0f, 0f));
+		SelectTool.Instance.SelectAndFocus(minionIdentity.transform.GetPosition(), minionIdentity.GetComponent<KSelectable>(), new Vector3(8f, 0f, 0f));
 	}
 
-	public void ConfigureContent(MinionIdentity minion, Dictionary<string, TableColumn> columns)
+	public void ConfigureContent(IAssignableIdentity minion, Dictionary<string, TableColumn> columns)
 	{
 		this.minion = minion;
 		KImage componentInChildren = base.GetComponentInChildren<KImage>(true);
-		componentInChildren.colorStyleSetting = ((!(minion == null)) ? this.style_setting_minion : this.style_setting_default);
+		componentInChildren.colorStyleSetting = ((minion != null) ? this.style_setting_minion : this.style_setting_default);
 		componentInChildren.ColorState = KImage.ColorSelector.Inactive;
+		CanvasGroup component = base.GetComponent<CanvasGroup>();
+		if (component != null && minion as StoredMinionIdentity != null)
+		{
+			component.alpha = 0.6f;
+		}
 		using (Dictionary<string, TableColumn>.Enumerator enumerator = columns.GetEnumerator())
 		{
 			while (enumerator.MoveNext())
@@ -168,11 +175,11 @@ public class TableRow : KMonoBehaviour
 		{
 			return this.widgets[column];
 		}
-		global::Debug.LogWarning("Widget is null or row does not contain widget for column " + column, null);
+		global::Debug.LogWarning("Widget is null or row does not contain widget for column " + column);
 		return null;
 	}
 
-	public MinionIdentity GetMinionIdentity()
+	public IAssignableIdentity GetIdentity()
 	{
 		return this.minion;
 	}
@@ -193,7 +200,7 @@ public class TableRow : KMonoBehaviour
 
 	public TableRow.RowType rowType;
 
-	private MinionIdentity minion;
+	private IAssignableIdentity minion;
 
 	private Dictionary<TableColumn, GameObject> widgets = new Dictionary<TableColumn, GameObject>();
 
@@ -221,6 +228,7 @@ public class TableRow : KMonoBehaviour
 	{
 		Header,
 		Default,
-		Minion
+		Minion,
+		StoredMinon
 	}
 }

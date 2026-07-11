@@ -175,10 +175,7 @@ public class PauseScreen : KModalButtonMenu
 
 	private void OnDesktopQuitConfirm()
 	{
-		if (!Application.isEditor)
-		{
-			Application.Quit();
-		}
+		App.Quit();
 	}
 
 	public override void OnKeyDown(KButtonEvent e)

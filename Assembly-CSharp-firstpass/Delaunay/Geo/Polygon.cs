@@ -64,6 +64,7 @@ namespace Delaunay.Geo
 
 		public void Initialize()
 		{
+			global::Debug.Assert(this.vertices != null, "No verts added");
 			Vector2 vector = new Vector2(float.MaxValue, float.MaxValue);
 			Vector2 vector2 = new Vector2(float.MinValue, float.MinValue);
 			for (int i = 0; i < this.vertices.Count; i++)

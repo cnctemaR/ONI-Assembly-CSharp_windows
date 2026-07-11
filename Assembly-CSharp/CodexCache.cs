@@ -272,7 +272,7 @@ public static class CodexCache
 		id = CodexCache.FormatLinkID(id);
 		if (CodexCache.entries.ContainsKey(id))
 		{
-			global::Debug.LogError("Tried to add " + id + " to the Codex screen multiple times", null);
+			global::Debug.LogError("Tried to add " + id + " to the Codex screen multiple times");
 		}
 		CodexCache.entries.Add(id, entry);
 		entry.id = id;
@@ -362,7 +362,7 @@ public static class CodexCache
 			CodexEntry codexEntry = YamlIO<CodexEntry>.LoadFile(text + ".yaml", CodexCache.widgetTagMappings);
 			if (codexEntry == null)
 			{
-				global::Debug.LogWarning("Missing template [" + text + ".yaml]", null);
+				global::Debug.LogWarning("Missing template [" + text + ".yaml]");
 			}
 			CodexCache.entries[templatePath] = codexEntry;
 		}
@@ -380,7 +380,7 @@ public static class CodexCache
 		}
 		catch (UnauthorizedAccessException ex)
 		{
-			global::Debug.LogWarning(ex, null);
+			global::Debug.LogWarning(ex);
 		}
 		string text2 = folder.ToUpper();
 		foreach (string text3 in array)
@@ -407,7 +407,7 @@ public static class CodexCache
 		}
 		catch (UnauthorizedAccessException ex)
 		{
-			global::Debug.LogWarning(ex, null);
+			global::Debug.LogWarning(ex);
 		}
 		foreach (string text2 in array)
 		{

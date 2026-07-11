@@ -37,6 +37,10 @@ public class Uprootable : Workable
 		base.OnPrefabInit();
 		this.pendingStatusItem = Db.Get().MiscStatusItems.PendingUproot;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Uprooting;
+		this.attributeConverter = Db.Get().AttributeConverters.HarvestSpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
+		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Farming.Id;
+		this.skillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;
 		this.multitoolContext = "harvest";
 		this.multitoolHitEffectTag = "fx_harvest_splash";
 		base.Subscribe<Uprootable>(1309017699, Uprootable.OnPlanterStorageDelegate);
@@ -57,13 +61,6 @@ public class Uprootable : Workable
 		{
 			this.MarkForUproot();
 		}
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole("JuniorFarmer", work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
-		resume.AddExperienceIfRole("Farmer", work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
-		resume.AddExperienceIfRole("SeniorFarmer", work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	private void OnPlanterStorage(object data)

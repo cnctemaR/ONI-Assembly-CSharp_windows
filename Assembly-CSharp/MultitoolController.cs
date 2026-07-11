@@ -33,6 +33,7 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 
 	public static string[] GetAnimationStrings(Workable workable, Worker worker, string toolString = "dig")
 	{
+		global::Debug.Assert(toolString != "build");
 		string[][][] array;
 		if (!MultitoolController.TOOL_ANIM_SETS.TryGetValue(toolString, out array))
 		{

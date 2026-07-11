@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
+using UnityEngine;
 
 [SkipSaveFileSerialization]
 public class Ladder : KMonoBehaviour, IEffectDescriptor
@@ -8,14 +9,9 @@ public class Ladder : KMonoBehaviour, IEffectDescriptor
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		if (this.isPole)
-		{
-			Grid.HasPole[Grid.PosToCell(this)] = true;
-		}
-		else
-		{
-			Grid.HasLadder[Grid.PosToCell(this)] = true;
-		}
+		int num = Grid.PosToCell(this);
+		Grid.HasPole[num] = this.isPole;
+		Grid.HasLadder[num] = !this.isPole;
 		base.GetComponent<KPrefabID>().AddTag(GameTags.Ladders);
 		Components.Ladders.Add(this);
 	}
@@ -29,13 +25,12 @@ public class Ladder : KMonoBehaviour, IEffectDescriptor
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		if (this.isPole)
+		int num = Grid.PosToCell(this);
+		GameObject gameObject = Grid.Objects[num, 24];
+		if (gameObject == null)
 		{
-			Grid.HasPole[Grid.PosToCell(this)] = false;
-		}
-		else
-		{
-			Grid.HasLadder[Grid.PosToCell(this)] = false;
+			Grid.HasPole[num] = false;
+			Grid.HasLadder[num] = false;
 		}
 		Components.Ladders.Remove(this);
 	}

@@ -1,5 +1,4 @@
 ﻿using System;
-using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -18,7 +17,7 @@ public class BunkerDoorConfig : IBuildingConfig
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, array2, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none, 1f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, array2, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 1f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.OverheatTemperature = 1273.15f;
@@ -36,16 +35,17 @@ public class BunkerDoorConfig : IBuildingConfig
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, BunkerDoorConfig.INPUT_PORTS);
+		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_N1_0);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, BunkerDoorConfig.INPUT_PORTS);
+		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_N1_0);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_N1_0);
 		Door door = go.AddOrGet<Door>();
 		door.unpoweredAnimSpeed = 0.01f;
 		door.poweredAnimSpeed = 0.1f;
@@ -62,13 +62,10 @@ public class BunkerDoorConfig : IBuildingConfig
 		go.AddOrGet<ZoneTile>();
 		go.AddOrGet<KBoxCollider2D>();
 		Prioritizable.AddRef(go);
-		GeneratedBuildings.RegisterLogicPorts(go, BunkerDoorConfig.INPUT_PORTS);
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
 		KPrefabID component2 = go.GetComponent<KPrefabID>();
 		component2.AddTag(GameTags.Bunker);
 	}
 
 	public const string ID = "BunkerDoor";
-
-	public static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(Door.OPEN_CLOSE_PORT_ID, new CellOffset(-1, 0), global::STRINGS.BUILDINGS.PREFABS.DOOR.LOGIC_PORT_DESC, false) };
 }

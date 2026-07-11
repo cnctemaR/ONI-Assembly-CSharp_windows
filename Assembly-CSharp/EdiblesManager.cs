@@ -14,7 +14,7 @@ public class EdiblesManager : KMonoBehaviour
 				return foodInfo;
 			}
 		}
-		Debug.LogWarning("No food with ID: " + FoodID, null);
+		Debug.LogWarning("No food with ID: " + FoodID);
 		return null;
 	}
 

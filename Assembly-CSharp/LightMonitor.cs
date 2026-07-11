@@ -7,7 +7,7 @@ public class LightMonitor : GameStateMachine<LightMonitor, LightMonitor.Instance
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.unburnt;
-		this.root.EventTransition(GameHashes.DiseaseAdded, this.burnt, (LightMonitor.Instance smi) => smi.gameObject.GetDiseases().Has(Db.Get().Diseases.Sunburn)).Update(new Action<LightMonitor.Instance, float>(LightMonitor.CheckLightLevel), UpdateRate.SIM_1000ms, false);
+		this.root.EventTransition(GameHashes.SicknessAdded, this.burnt, (LightMonitor.Instance smi) => smi.gameObject.GetSicknesses().Has(Db.Get().Sicknesses.Sunburn)).Update(new Action<LightMonitor.Instance, float>(LightMonitor.CheckLightLevel), UpdateRate.SIM_1000ms, false);
 		this.unburnt.DefaultState(this.unburnt.safe).ParamTransition<float>(this.burnResistance, this.get_burnt, GameStateMachine<LightMonitor, LightMonitor.Instance, IStateMachineTarget, object>.IsLTEZero);
 		this.unburnt.safe.DefaultState(this.unburnt.safe.unlit).Update(delegate(LightMonitor.Instance smi, float dt)
 		{
@@ -22,9 +22,9 @@ public class LightMonitor : GameStateMachine<LightMonitor, LightMonitor.Instance
 		}, UpdateRate.SIM_200ms, false).ToggleEffect("Sunlight_Burning");
 		this.get_burnt.Enter(delegate(LightMonitor.Instance smi)
 		{
-			smi.gameObject.GetDiseases().Infect(new DiseaseExposureInfo(Db.Get().Diseases.Sunburn.Id, DUPLICANTS.DISEASES.SUNBURN.SUNEXPOSURE));
+			smi.gameObject.GetSicknesses().Infect(new SicknessExposureInfo(Db.Get().Sicknesses.Sunburn.Id, DUPLICANTS.DISEASES.SUNBURNSICKNESS.SUNEXPOSURE));
 		}).GoTo(this.burnt);
-		this.burnt.EventTransition(GameHashes.DiseaseCured, this.unburnt, (LightMonitor.Instance smi) => !smi.gameObject.GetDiseases().Has(Db.Get().Diseases.Sunburn)).Exit(delegate(LightMonitor.Instance smi)
+		this.burnt.EventTransition(GameHashes.SicknessCured, this.unburnt, (LightMonitor.Instance smi) => !smi.gameObject.GetSicknesses().Has(Db.Get().Sicknesses.Sunburn)).Exit(delegate(LightMonitor.Instance smi)
 		{
 			smi.sm.burnResistance.Set(120f, smi);
 		});

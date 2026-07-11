@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using FMOD.Studio;
 using Klei.CustomSettings;
+using KMod;
+using ProcGen;
 using ProcGenGame;
 using TMPro;
 using UnityEngine;
@@ -18,6 +20,8 @@ public class NewGameSettingsScreen : KModalScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		Global.Instance.modManager.Load(Content.LayerableFiles);
+		SettingsCache.Clear();
 		WorldGen.LoadSettings();
 		CustomGameSettings.Instance.LoadWorlds();
 		MultiToggle multiToggle = this.toggle_standard_game;
@@ -36,11 +40,11 @@ public class NewGameSettingsScreen : KModalScreen
 		};
 		this.button_cancel.onClick += delegate
 		{
-			this.Deactivate();
+			this.Cancel();
 		};
 		this.button_close.onClick += delegate
 		{
-			this.Deactivate();
+			this.Cancel();
 		};
 		this.settings = CustomGameSettings.Instance;
 		this.baseGameMode = this.settings.customGameMode;
@@ -153,6 +157,13 @@ public class NewGameSettingsScreen : KModalScreen
 		}
 	}
 
+	private void Cancel()
+	{
+		Global.Instance.modManager.Unload(Content.LayerableFiles);
+		SettingsCache.Clear();
+		this.Deactivate();
+	}
+
 	private void CycleSetting(ListSettingConfig setting, HierarchyReferences refs, int direction)
 	{
 		SettingLevel settingLevel = this.settings.CycleSettingLevel(setting, direction);
@@ -182,7 +193,7 @@ public class NewGameSettingsScreen : KModalScreen
 			num = 0;
 		}
 		OfflineWorldGen.SetSeed(num);
-		Output.Log(new object[] { "Set worldgen seed to", input });
+		DebugUtil.LogArgs(new object[] { "Set worldgen seed to", input });
 	}
 
 	private void GetNewRandomSeed(SeedSettingConfig setting, HierarchyReferences refs)
@@ -204,12 +215,6 @@ public class NewGameSettingsScreen : KModalScreen
 
 	private void NewGame()
 	{
-		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World);
-		if (currentQualitySetting.userdata != null)
-		{
-			ModInfo modInfo = (ModInfo)currentQualitySetting.userdata;
-			Global.Instance.modManager.ActivateWorldGenMod(modInfo);
-		}
 		this.TriggerLoadingMusic();
 		SaveLoader.SetActiveSaveFilePath(null);
 		try
@@ -218,7 +223,7 @@ public class NewGameSettingsScreen : KModalScreen
 		}
 		catch (Exception ex)
 		{
-			Output.LogWarning(new object[] { ex.ToString() });
+			DebugUtil.LogWarningArgs(new object[] { ex.ToString() });
 		}
 		global::Util.KInstantiateUI(ScreenPrefabs.Instance.WorldGenScreen.gameObject, base.transform.parent.gameObject, true);
 		global::UnityEngine.Object.FindObjectOfType<FrontEndBackground>().gameObject.SetActive(false);

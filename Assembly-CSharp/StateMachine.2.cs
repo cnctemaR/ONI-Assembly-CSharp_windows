@@ -365,7 +365,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 							".",
 							actions[this.currentActionIdx].name
 						});
-						Output.LogErrorWithObj(this.controller, new object[] { text2 + "\n" + ex.ToString() });
+						DebugUtil.LogErrorArgs(this.controller, new object[] { text2 + "\n" + ex.ToString() });
 					}
 				}
 				this.currentActionIdx++;
@@ -514,7 +514,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 					{
 						text = text + "\n" + baseState.name;
 					}
-					Output.LogError(text);
+					global::Debug.LogError(text);
 					base.Error();
 				}
 				else
@@ -582,7 +582,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 						text2,
 						")"
 					});
-					Output.LogErrorWithObj(this.controller, new object[] { text4 + "\n" + ex.ToString() });
+					DebugUtil.LogErrorArgs(this.controller, new object[] { text4 + "\n" + ex.ToString() });
 				}
 			}
 		}
@@ -1057,7 +1057,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				{
 					if (this.value.Guid == null)
 					{
-						global::Debug.LogError("Cannot serialize resource with invalid guid: " + this.value.Id, null);
+						global::Debug.LogError("Cannot serialize resource with invalid guid: " + this.value.Id);
 					}
 					else
 					{
@@ -1133,7 +1133,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				{
 					return smi2;
 				}
-				global::Debug.LogError(gameObject.name + " does not have state machine " + typeof(StateMachineType).Name, null);
+				global::Debug.LogError(gameObject.name + " does not have state machine " + typeof(StateMachineType).Name);
 			}
 			return (SMT)((object)null);
 		}
@@ -1154,7 +1154,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				{
 					return component;
 				}
-				global::Debug.LogError(gameObject.name + " does not have component " + typeof(ComponentType).Name, null);
+				global::Debug.LogError(gameObject.name + " does not have component " + typeof(ComponentType).Name);
 			}
 			return default(ComponentType);
 		}

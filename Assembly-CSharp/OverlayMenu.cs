@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
+using UnityEngine;
 
 public class OverlayMenu : KIconToggleMenu
 {
@@ -56,6 +57,11 @@ public class OverlayMenu : KIconToggleMenu
 		Game.Instance.Unsubscribe(1798162660, new Action<object>(this.OnOverlayChanged));
 	}
 
+	private void InitializeToggleGroups()
+	{
+		this.overlayToggleGroups = new List<OverlayMenu.OverlayToggleGroup>();
+	}
+
 	private void InitializeToggles()
 	{
 		this.overlayToggleInfos = new List<KIconToggleMenu.ToggleInfo>
@@ -63,7 +69,7 @@ public class OverlayMenu : KIconToggleMenu
 			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.OXYGEN.BUTTON, "overlay_oxygen", OverlayModes.Oxygen.ID, string.Empty, global::Action.Overlay1, UI.TOOLTIPS.OXYGENOVERLAYSTRING, UI.OVERLAYS.OXYGEN.BUTTON),
 			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.ELECTRICAL.BUTTON, "overlay_power", OverlayModes.Power.ID, string.Empty, global::Action.Overlay2, UI.TOOLTIPS.POWEROVERLAYSTRING, UI.OVERLAYS.ELECTRICAL.BUTTON),
 			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.TEMPERATURE.BUTTON, "overlay_temperature", OverlayModes.Temperature.ID, string.Empty, global::Action.Overlay3, UI.TOOLTIPS.TEMPERATUREOVERLAYSTRING, UI.OVERLAYS.TEMPERATURE.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.HEATFLOW.BUTTON, "overlay_heatflow", OverlayModes.HeatFlow.ID, string.Empty, global::Action.Overlay4, UI.TOOLTIPS.HEATFLOWOVERLAYSTRING, UI.OVERLAYS.HEATFLOW.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.TILEMODE.BUTTON, "overlay_materials", OverlayModes.TileMode.ID, string.Empty, global::Action.Overlay4, UI.TOOLTIPS.TILEMODE_OVERLAY_STRING, UI.OVERLAYS.TILEMODE.BUTTON),
 			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.LIGHTING.BUTTON, "overlay_lights", OverlayModes.Light.ID, string.Empty, global::Action.Overlay5, UI.TOOLTIPS.LIGHTSOVERLAYSTRING, UI.OVERLAYS.LIGHTING.BUTTON),
 			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.LIQUIDPLUMBING.BUTTON, "overlay_liquidvent", OverlayModes.LiquidConduits.ID, string.Empty, global::Action.Overlay6, UI.TOOLTIPS.LIQUIDVENTOVERLAYSTRING, UI.OVERLAYS.LIQUIDPLUMBING.BUTTON),
 			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.GASPLUMBING.BUTTON, "overlay_gasvent", OverlayModes.GasConduits.ID, string.Empty, global::Action.Overlay7, UI.TOOLTIPS.GASVENTOVERLAYSTRING, UI.OVERLAYS.GASPLUMBING.BUTTON),
@@ -133,6 +139,34 @@ public class OverlayMenu : KIconToggleMenu
 	public static OverlayMenu Instance;
 
 	private List<KIconToggleMenu.ToggleInfo> overlayToggleInfos;
+
+	private List<OverlayMenu.OverlayToggleGroup> overlayToggleGroups;
+
+	private class OverlayToggleGroup : KIconToggleMenu.ToggleInfo
+	{
+		public OverlayToggleGroup(string text, string icon_name, List<OverlayMenu.OverlayToggleInfo> toggle_group, string required_tech_item = "", global::Action hot_key = global::Action.NumActions, string tooltip = "", string tooltip_header = "")
+			: base(text, icon_name, null, hot_key, tooltip, tooltip_header)
+		{
+			this.toggleInfoGroup = toggle_group;
+		}
+
+		public bool IsUnlocked()
+		{
+			return DebugHandler.InstantBuildMode || string.IsNullOrEmpty(this.requiredTechItem) || Db.Get().Techs.IsTechItemComplete(this.requiredTechItem);
+		}
+
+		public OverlayMenu.OverlayToggleInfo GetActiveToggleInfo()
+		{
+			return this.toggleInfoGroup[this.activeToggleInfo];
+		}
+
+		public List<OverlayMenu.OverlayToggleInfo> toggleInfoGroup;
+
+		public string requiredTechItem;
+
+		[SerializeField]
+		private int activeToggleInfo;
+	}
 
 	private class OverlayToggleInfo : KIconToggleMenu.ToggleInfo
 	{

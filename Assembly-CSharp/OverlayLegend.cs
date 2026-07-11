@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei.AI;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -88,15 +87,6 @@ public class OverlayLegend : KScreen
 		base.OnLoadLevel();
 	}
 
-	private void OnChamberChanged()
-	{
-		if (this.currentMode != OverlayModes.Rooms.ID)
-		{
-			return;
-		}
-		this.SetLegend(OverlayModes.Rooms.ID, true);
-	}
-
 	private void SetLegend(OverlayLegend.OverlayInfo overlayInfo)
 	{
 		if (overlayInfo == null)
@@ -113,47 +103,24 @@ public class OverlayLegend : KScreen
 		this.title.text = overlayInfo.name;
 		if (overlayInfo.isProgrammaticallyPopulated)
 		{
-			if (overlayInfo.mode == OverlayModes.Disease.ID)
-			{
-				this.PopulateDiseaseLegend(overlayInfo);
-			}
-			else if (overlayInfo.mode == OverlayModes.Rooms.ID)
-			{
-				this.PopulateRoomsLegend(overlayInfo);
-			}
+			this.PopulateGeneratedLegend(overlayInfo, false);
 		}
 		else
 		{
-			this.PopulateOverlayInfoUnits(overlayInfo);
+			this.PopulateOverlayInfoUnits(overlayInfo, false);
 		}
 	}
 
-	public void SetLegend(HashedString mode, bool refreshing = false)
+	public void SetLegend(OverlayModes.Mode mode, bool refreshing = false)
 	{
-		if (this.currentMode == mode && !refreshing)
+		if (this.currentMode != null && this.currentMode.ViewMode() == mode.ViewMode() && !refreshing)
 		{
 			return;
 		}
 		this.ClearLegend();
-		OverlayLegend.OverlayInfo overlayInfo = this.overlayInfoList.Find((OverlayLegend.OverlayInfo ol) => ol.mode == mode);
-		if (mode == OverlayModes.Temperature.ID)
-		{
-			int num = SimDebugView.Instance.temperatureThresholds.Length - 1;
-			for (int i = 0; i < overlayInfo.infoUnits.Count; i++)
-			{
-				overlayInfo.infoUnits[i].color = SimDebugView.Instance.temperatureThresholds[num - i].color;
-				overlayInfo.infoUnits[i].tooltip = UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE;
-				overlayInfo.infoUnits[i].tooltipFormatData = GameUtil.GetFormattedTemperature(SimDebugView.Instance.temperatureThresholds[num - i].value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
-			}
-		}
-		else if (mode == OverlayModes.HeatFlow.ID)
-		{
-			overlayInfo.infoUnits[0].tooltip = UI.OVERLAYS.HEATFLOW.TOOLTIPS.HEATING;
-			overlayInfo.infoUnits[1].tooltip = UI.OVERLAYS.HEATFLOW.TOOLTIPS.NEUTRAL;
-			overlayInfo.infoUnits[2].tooltip = UI.OVERLAYS.HEATFLOW.TOOLTIPS.COOLING;
-		}
-		this.SetLegend(overlayInfo);
+		OverlayLegend.OverlayInfo overlayInfo = this.overlayInfoList.Find((OverlayLegend.OverlayInfo ol) => ol.mode == mode.ViewMode());
 		this.currentMode = mode;
+		this.SetLegend(overlayInfo);
 	}
 
 	public GameObject GetFreeUnitObject()
@@ -168,7 +135,7 @@ public class OverlayLegend : KScreen
 		return gameObject;
 	}
 
-	public void ClearLegend()
+	private void RemoveActiveObjects()
 	{
 		while (this.activeUnitObjs.Count > 0)
 		{
@@ -179,6 +146,11 @@ public class OverlayLegend : KScreen
 			this.inactiveUnitObjs.Add(this.activeUnitObjs[0]);
 			this.activeUnitObjs.RemoveAt(0);
 		}
+	}
+
+	public void ClearLegend()
+	{
+		this.RemoveActiveObjects();
 		for (int i = 0; i < this.activeDiagrams.Count; i++)
 		{
 			if (this.activeDiagrams[i] != null)
@@ -193,11 +165,11 @@ public class OverlayLegend : KScreen
 		base.Show(false);
 	}
 
-	public OverlayLegend.OverlayInfo GetOverlayInfo(HashedString mode)
+	public OverlayLegend.OverlayInfo GetOverlayInfo(OverlayModes.Mode mode)
 	{
 		for (int i = 0; i < this.overlayInfoList.Count; i++)
 		{
-			if (this.overlayInfoList[i].mode == mode)
+			if (this.overlayInfoList[i].mode == mode.ViewMode())
 			{
 				return this.overlayInfoList[i];
 			}
@@ -205,171 +177,140 @@ public class OverlayLegend : KScreen
 		return null;
 	}
 
-	private void PopulateOverlayInfoUnits(OverlayLegend.OverlayInfo overlayInfo)
+	private void PopulateOverlayInfoUnits(OverlayLegend.OverlayInfo overlayInfo, bool isRefresh = false)
 	{
-		foreach (OverlayLegend.OverlayInfoUnit overlayInfoUnit in overlayInfo.infoUnits)
+		if (overlayInfo.infoUnits != null && overlayInfo.infoUnits.Count > 0)
 		{
-			GameObject freeUnitObject = this.GetFreeUnitObject();
-			if (overlayInfoUnit.icon != null)
+			this.activeUnitsParent.SetActive(true);
+			foreach (OverlayLegend.OverlayInfoUnit overlayInfoUnit in overlayInfo.infoUnits)
 			{
-				Image component = freeUnitObject.transform.Find("Icon").GetComponent<Image>();
-				component.gameObject.SetActive(true);
-				component.sprite = overlayInfoUnit.icon;
-				component.color = overlayInfoUnit.color;
-				component.enabled = true;
-				component.type = ((!overlayInfoUnit.sliceIcon) ? Image.Type.Simple : Image.Type.Sliced);
-			}
-			else
-			{
-				freeUnitObject.transform.Find("Icon").gameObject.SetActive(false);
-			}
-			if (!string.IsNullOrEmpty(overlayInfoUnit.description))
-			{
-				LocText componentInChildren = freeUnitObject.GetComponentInChildren<LocText>();
-				componentInChildren.text = string.Format(overlayInfoUnit.description, overlayInfoUnit.formatData);
-				componentInChildren.color = overlayInfoUnit.fontColor;
-				componentInChildren.enabled = true;
-			}
-			ToolTip component2 = freeUnitObject.GetComponent<ToolTip>();
-			if (!string.IsNullOrEmpty(overlayInfoUnit.tooltip))
-			{
-				component2.toolTip = string.Format(overlayInfoUnit.tooltip, overlayInfoUnit.tooltipFormatData);
-				component2.enabled = true;
-			}
-			else
-			{
-				component2.enabled = false;
-			}
-			freeUnitObject.SetActive(true);
-			freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
-		}
-		if (overlayInfo.diagrams != null && overlayInfo.diagrams.Count > 0)
-		{
-			this.diagramsParent.SetActive(true);
-			foreach (GameObject gameObject in overlayInfo.diagrams)
-			{
-				GameObject gameObject2 = Util.KInstantiateUI(gameObject, this.diagramsParent, false);
-				this.activeDiagrams.Add(gameObject2);
+				GameObject freeUnitObject = this.GetFreeUnitObject();
+				if (overlayInfoUnit.icon != null)
+				{
+					Image component = freeUnitObject.transform.Find("Icon").GetComponent<Image>();
+					component.gameObject.SetActive(true);
+					component.sprite = overlayInfoUnit.icon;
+					component.color = overlayInfoUnit.color;
+					component.enabled = true;
+					component.type = ((!overlayInfoUnit.sliceIcon) ? Image.Type.Simple : Image.Type.Sliced);
+				}
+				else
+				{
+					freeUnitObject.transform.Find("Icon").gameObject.SetActive(false);
+				}
+				if (!string.IsNullOrEmpty(overlayInfoUnit.description))
+				{
+					LocText componentInChildren = freeUnitObject.GetComponentInChildren<LocText>();
+					componentInChildren.text = string.Format(overlayInfoUnit.description, overlayInfoUnit.formatData);
+					componentInChildren.color = overlayInfoUnit.fontColor;
+					componentInChildren.enabled = true;
+				}
+				ToolTip component2 = freeUnitObject.GetComponent<ToolTip>();
+				if (!string.IsNullOrEmpty(overlayInfoUnit.tooltip))
+				{
+					component2.toolTip = string.Format(overlayInfoUnit.tooltip, overlayInfoUnit.tooltipFormatData);
+					component2.enabled = true;
+				}
+				else
+				{
+					component2.enabled = false;
+				}
+				freeUnitObject.SetActive(true);
+				freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
 			}
 		}
 		else
 		{
-			this.diagramsParent.SetActive(false);
+			this.activeUnitsParent.SetActive(false);
+		}
+		if (!isRefresh)
+		{
+			if (overlayInfo.diagrams != null && overlayInfo.diagrams.Count > 0)
+			{
+				this.diagramsParent.SetActive(true);
+				foreach (GameObject gameObject in overlayInfo.diagrams)
+				{
+					GameObject gameObject2 = Util.KInstantiateUI(gameObject, this.diagramsParent, false);
+					this.activeDiagrams.Add(gameObject2);
+				}
+			}
+			else
+			{
+				this.diagramsParent.SetActive(false);
+			}
 		}
 	}
 
-	private static float CalculateHUE(Color32 colour)
+	private void PopulateGeneratedLegend(OverlayLegend.OverlayInfo info, bool isRefresh = false)
 	{
-		byte b = Math.Max(colour.r, Math.Max(colour.g, colour.b));
-		byte b2 = Math.Min(colour.r, Math.Min(colour.g, colour.b));
-		float num = 0f;
-		int num2 = (int)(b - b2);
-		if (num2 == 0)
+		if (isRefresh)
 		{
-			num = 0f;
+			this.RemoveActiveObjects();
 		}
-		else if (b == colour.r)
-		{
-			num = (float)(colour.g - colour.b) / (float)num2 % 6f;
-		}
-		else if (b == colour.g)
-		{
-			num = (float)(colour.b - colour.r) / (float)num2 + 2f;
-		}
-		else if (b == colour.b)
-		{
-			num = (float)(colour.r - colour.g) / (float)num2 + 4f;
-		}
-		return num;
-	}
-
-	private void PopulateDiseaseLegend(OverlayLegend.OverlayInfo info)
-	{
 		if (info.infoUnits != null && info.infoUnits.Count > 0)
 		{
-			this.PopulateOverlayInfoUnits(info);
+			this.PopulateOverlayInfoUnits(info, isRefresh);
 		}
-		List<OverlayLegend.DiseaseSortInfo> list = new List<OverlayLegend.DiseaseSortInfo>();
-		foreach (Disease disease in Db.Get().Diseases.resources)
+		List<LegendEntry> customLegendData = this.currentMode.GetCustomLegendData();
+		if (customLegendData != null)
 		{
-			list.Add(new OverlayLegend.DiseaseSortInfo(disease));
-		}
-		list.Sort((OverlayLegend.DiseaseSortInfo a, OverlayLegend.DiseaseSortInfo b) => a.sortkey.CompareTo(b.sortkey));
-		foreach (OverlayLegend.DiseaseSortInfo diseaseSortInfo in list)
-		{
-			if (diseaseSortInfo.disease.diseaseType == Disease.DiseaseType.Pathogen)
+			this.activeUnitsParent.SetActive(true);
+			foreach (LegendEntry legendEntry in customLegendData)
 			{
 				GameObject freeUnitObject = this.GetFreeUnitObject();
 				Image component = freeUnitObject.transform.Find("Icon").GetComponent<Image>();
 				component.gameObject.SetActive(true);
 				component.sprite = Assets.instance.LegendColourBox;
-				component.color = diseaseSortInfo.disease.overlayColour;
+				component.color = legendEntry.colour;
 				component.enabled = true;
 				component.type = Image.Type.Simple;
 				LocText componentInChildren = freeUnitObject.GetComponentInChildren<LocText>();
-				componentInChildren.text = diseaseSortInfo.disease.Name;
+				componentInChildren.text = legendEntry.name;
 				componentInChildren.color = Color.white;
 				componentInChildren.enabled = true;
 				ToolTip component2 = freeUnitObject.GetComponent<ToolTip>();
 				component2.enabled = true;
-				component2.toolTip = diseaseSortInfo.disease.overlayLegendHovertext.ToString();
+				component2.toolTip = legendEntry.desc;
 				freeUnitObject.SetActive(true);
 				freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
 			}
 		}
-		GameObject gameObject = Util.KInstantiateUI(this.toolParameterMenuPrefab, this.diagramsParent, false);
-		this.activeDiagrams.Add(gameObject);
-		this.diagramsParent.SetActive(true);
-		this.toolParameterMenu = gameObject.GetComponent<ToolParameterMenu>();
-		this.toolParameterMenu.PopulateMenu(this.diseaseOverlayFilters);
-		this.toolParameterMenu.onParametersChanged += this.OnDiseaseFiltersChanged;
-		this.OnDiseaseFiltersChanged();
-	}
-
-	public void DisableDiseaseOverlay()
-	{
-		this.toolParameterMenu.onParametersChanged -= this.OnDiseaseFiltersChanged;
-		this.toolParameterMenu.ClearMenu();
-		this.toolParameterMenu.gameObject.SetActive(false);
-		this.toolParameterMenu = null;
-	}
-
-	private bool InFilter(string layer, Dictionary<string, ToolParameterMenu.ToggleState> filter)
-	{
-		return (filter.ContainsKey(ToolParameterMenu.FILTERLAYERS.ALL) && filter[ToolParameterMenu.FILTERLAYERS.ALL] == ToolParameterMenu.ToggleState.On) || (filter.ContainsKey(layer) && filter[layer] == ToolParameterMenu.ToggleState.On);
-	}
-
-	private static Dictionary<string, ToolParameterMenu.ToggleState> CreateDefaultFilters()
-	{
-		return new Dictionary<string, ToolParameterMenu.ToggleState>
+		else
 		{
-			{
-				ToolParameterMenu.FILTERLAYERS.ALL,
-				ToolParameterMenu.ToggleState.On
-			},
-			{
-				ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT,
-				ToolParameterMenu.ToggleState.Off
-			},
-			{
-				ToolParameterMenu.FILTERLAYERS.GASCONDUIT,
-				ToolParameterMenu.ToggleState.Off
-			}
-		};
+			this.activeUnitsParent.SetActive(false);
+		}
+		if (!isRefresh && this.currentMode.legendFilters != null)
+		{
+			GameObject gameObject = Util.KInstantiateUI(this.toolParameterMenuPrefab, this.diagramsParent, false);
+			this.activeDiagrams.Add(gameObject);
+			this.diagramsParent.SetActive(true);
+			this.filterMenu = gameObject.GetComponent<ToolParameterMenu>();
+			this.filterMenu.PopulateMenu(this.currentMode.legendFilters);
+			this.filterMenu.onParametersChanged += this.OnFiltersChanged;
+			this.OnFiltersChanged();
+		}
 	}
 
-	private void OnDiseaseFiltersChanged()
+	private void OnFiltersChanged()
 	{
-		Game.Instance.showGasConduitDisease = this.InFilter(ToolParameterMenu.FILTERLAYERS.GASCONDUIT, this.diseaseOverlayFilters);
-		Game.Instance.showLiquidConduitDisease = this.InFilter(ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT, this.diseaseOverlayFilters);
+		this.currentMode.OnFiltersChanged();
+		this.PopulateGeneratedLegend(this.GetOverlayInfo(this.currentMode), true);
 		Game.Instance.ForceOverlayUpdate();
+	}
+
+	private void DisableOverlay()
+	{
+		this.filterMenu.onParametersChanged -= this.OnFiltersChanged;
+		this.filterMenu.ClearMenu();
+		this.filterMenu.gameObject.SetActive(false);
+		this.filterMenu = null;
 	}
 
 	private void PopulateNoiseLegend(OverlayLegend.OverlayInfo info)
 	{
 		if (info.infoUnits != null && info.infoUnits.Count > 0)
 		{
-			this.PopulateOverlayInfoUnits(info);
+			this.PopulateOverlayInfoUnits(info, false);
 		}
 		string[] names = Enum.GetNames(typeof(AudioEventManager.NoiseEffect));
 		Array values = Enum.GetValues(typeof(AudioEventManager.NoiseEffect));
@@ -393,34 +334,6 @@ public class OverlayLegend : KScreen
 			ToolTip component2 = freeUnitObject.GetComponent<ToolTip>();
 			component2.enabled = true;
 			component2.toolTip = string.Format(Strings.Get("STRINGS.UI.OVERLAYS.NOISE_POLLUTION.TOOLTIPS." + text), num, num2);
-			freeUnitObject.SetActive(true);
-			freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
-		}
-	}
-
-	private void PopulateRoomsLegend(OverlayLegend.OverlayInfo info)
-	{
-		for (int i = 0; i < Db.Get().RoomTypes.Count; i++)
-		{
-			RoomType roomType = Db.Get().RoomTypes[i];
-			GameObject freeUnitObject = this.GetFreeUnitObject();
-			LocText componentInChildren = freeUnitObject.GetComponentInChildren<LocText>();
-			componentInChildren.enabled = true;
-			componentInChildren.text = roomType.Name + "\n" + roomType.effect;
-			Image component = freeUnitObject.transform.Find("Icon").GetComponent<Image>();
-			component.gameObject.SetActive(true);
-			component.sprite = Assets.instance.LegendColourBox;
-			component.color = roomType.category.color;
-			component.enabled = true;
-			component.type = Image.Type.Simple;
-			ToolTip component2 = freeUnitObject.GetComponent<ToolTip>();
-			component2.enabled = true;
-			component2.ClearMultiStringTooltip();
-			component2.AddMultiStringTooltip(roomType.GetCriteriaString(), null);
-			if (roomType.effects != null && roomType.effects.Length > 0)
-			{
-				component2.AddMultiStringTooltip(roomType.GetRoomEffectsString(), null);
-			}
 			freeUnitObject.SetActive(true);
 			freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
 		}
@@ -452,17 +365,15 @@ public class OverlayLegend : KScreen
 	[SerializeField]
 	private GameObject toolParameterMenuPrefab;
 
-	private ToolParameterMenu toolParameterMenu;
+	private ToolParameterMenu filterMenu;
 
-	private HashedString currentMode = OverlayModes.None.ID;
+	private OverlayModes.Mode currentMode;
 
 	private List<GameObject> inactiveUnitObjs;
 
 	private List<GameObject> activeUnitObjs;
 
 	private List<GameObject> activeDiagrams = new List<GameObject>();
-
-	private Dictionary<string, ToolParameterMenu.ToggleState> diseaseOverlayFilters = OverlayLegend.CreateDefaultFilters();
 
 	[Serializable]
 	public class OverlayInfoUnit
@@ -506,18 +417,5 @@ public class OverlayLegend : KScreen
 		public List<GameObject> diagrams;
 
 		public bool isProgrammaticallyPopulated;
-	}
-
-	private struct DiseaseSortInfo
-	{
-		public DiseaseSortInfo(Disease d)
-		{
-			this.disease = d;
-			this.sortkey = OverlayLegend.CalculateHUE(d.overlayColour);
-		}
-
-		public float sortkey;
-
-		public Disease disease;
 	}
 }

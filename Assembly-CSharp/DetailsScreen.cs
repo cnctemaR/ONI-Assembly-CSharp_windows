@@ -27,6 +27,7 @@ public class DetailsScreen : KTabMenu
 		base.OnPrefabInit();
 		this.SortScreenOrder();
 		this.ConsumeMouseScroll = true;
+		global::Debug.Assert(DetailsScreen.Instance == null);
 		DetailsScreen.Instance = this;
 		UIRegistry.detailsScreen = this;
 		this.DeactivateSideContent();
@@ -58,11 +59,15 @@ public class DetailsScreen : KTabMenu
 			return;
 		}
 		MinionIdentity component = this.target.GetComponent<MinionIdentity>();
-		if (component == null)
+		StorageLocker component2 = this.target.GetComponent<StorageLocker>();
+		if (component != null)
 		{
-			return;
+			component.SetName(newName);
 		}
-		component.SetName(newName);
+		else if (component2 != null)
+		{
+			component2.SetName(newName);
+		}
 	}
 
 	protected override void OnDeactivate()
@@ -448,13 +453,20 @@ public class DetailsScreen : KTabMenu
 		{
 			this.TabTitle.SetTitle(this.target.GetProperName());
 			MinionIdentity minionIdentity = null;
+			StorageLocker storageLocker = null;
 			if (this.target != null)
 			{
 				minionIdentity = this.target.gameObject.GetComponent<MinionIdentity>();
+				storageLocker = this.target.gameObject.GetComponent<StorageLocker>();
 			}
 			if (minionIdentity != null)
 			{
-				this.TabTitle.SetSubText(minionIdentity.GetComponent<MinionResume>().GetCurrentRoleString(), minionIdentity.GetComponent<MinionResume>().GetCurrentRoleDescription());
+				this.TabTitle.SetSubText(minionIdentity.GetComponent<MinionResume>().GetSkillsSubtitle(), string.Empty);
+				this.TabTitle.SetUserEditable(true);
+			}
+			else if (storageLocker != null)
+			{
+				this.TabTitle.SetSubText(string.Empty, string.Empty);
 				this.TabTitle.SetUserEditable(true);
 			}
 			else

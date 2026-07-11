@@ -100,7 +100,7 @@ internal class NestingPoopState : GameStateMachine<NestingPoopState, NestingPoop
 			}
 			if (!Grid.IsValidCell(Grid.PosToCell(this)))
 			{
-				global::Debug.LogWarning("This is bad, how is Mole occupying an invalid cell?", null);
+				global::Debug.LogWarning("This is bad, how is Mole occupying an invalid cell?");
 			}
 			return Grid.PosToCell(this);
 		}

@@ -35,13 +35,13 @@ public class InspectSaveScreen : KModalScreen
 	{
 		if (string.IsNullOrEmpty(path))
 		{
-			global::Debug.LogError("The directory path provided is empty.", null);
+			global::Debug.LogError("The directory path provided is empty.");
 			base.Show(false);
 			return;
 		}
 		if (!Directory.Exists(path))
 		{
-			global::Debug.LogError("The directory provided does not exist.", null);
+			global::Debug.LogError("The directory provided does not exist.");
 			base.Show(false);
 			return;
 		}
@@ -90,7 +90,7 @@ public class InspectSaveScreen : KModalScreen
 	{
 		if (string.IsNullOrEmpty(this.currentPath))
 		{
-			global::Debug.LogError("The path provided is not valid and cannot be deleted.", null);
+			global::Debug.LogError("The path provided is not valid and cannot be deleted.");
 			return;
 		}
 		this.ConfirmDoAction(UI.FRONTEND.LOADSCREEN.CONFIRMDELETE, delegate

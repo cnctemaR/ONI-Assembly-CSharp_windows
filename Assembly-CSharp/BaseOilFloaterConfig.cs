@@ -13,7 +13,7 @@ public static class BaseOilFloaterConfig
 		EffectorValues tier = DECOR.BONUS.TIER1;
 		float num2 = (warnLowTemp + warnHighTemp) / 2f;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, anim, text, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, num2);
-		gameObject.GetComponent<KPrefabID>().AddTag(GameTags.Creatures.GroundBased);
+		gameObject.GetComponent<KPrefabID>().AddTag(GameTags.Creatures.Hoverer);
 		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, "FloaterNavGrid", NavType.Hover, 32, 2f, "Meat", 2, false, false, warnLowTemp, warnHighTemp, warnLowTemp - 15f, warnHighTemp + 20f);
 		if (!string.IsNullOrEmpty(symbolOverridePrefix))
 		{

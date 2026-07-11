@@ -40,6 +40,11 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 		}
 	}
 
+	public int SliderDecimalPlaces(int index)
+	{
+		return 0;
+	}
+
 	public float GetSliderMin(int index)
 	{
 		return 0f;
@@ -92,6 +97,8 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 		this.workingStatusItem = Db.Get().BuildingStatusItems.ReleasingPressure;
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
+		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Technicals.Id;
+		this.skillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		this.pressureMeter = new MeterController(component, "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new Vector3(0f, 0f, 0f), null);
 		this.smi = new OilWellCap.StatesInstance(this);
@@ -110,11 +117,6 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 	{
 		this.storage.AddGasChunk(this.gasElement, this.addGasRate * dt, this.gasTemperature, 0, 0, true, true);
 		this.UpdatePressurePercent();
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole(MachineTechnician.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	public void ReleaseGasPressure(float dt)

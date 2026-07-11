@@ -52,7 +52,7 @@ public class GeneratedOre
 				}
 				else
 				{
-					Output.LogError("Missing substance or anim for element [" + element.name + "]");
+					global::Debug.LogError("Missing substance or anim for element [" + element.name + "]");
 				}
 			}
 		}
@@ -62,12 +62,12 @@ public class GeneratedOre
 	{
 		if (temperature <= 0f)
 		{
-			Output.LogWarning(new object[] { "GeneratedOre.CreateChunk tried to create a chunk with a temperature <= 0" });
+			DebugUtil.LogWarningArgs(new object[] { "GeneratedOre.CreateChunk tried to create a chunk with a temperature <= 0" });
 		}
 		GameObject prefab = Assets.GetPrefab(element.tag);
 		if (prefab == null)
 		{
-			global::Debug.LogError("Could not find prefab for element " + element.id.ToString(), null);
+			global::Debug.LogError("Could not find prefab for element " + element.id.ToString());
 		}
 		SubstanceChunk component = GameUtil.KInstantiate(prefab, Grid.SceneLayer.Ore, null, 0).GetComponent<SubstanceChunk>();
 		component.transform.SetPosition(position);

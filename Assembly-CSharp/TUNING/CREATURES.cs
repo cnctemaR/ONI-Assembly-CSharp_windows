@@ -211,7 +211,7 @@ namespace TUNING
 						}
 						else
 						{
-							Output.LogError(new object[]
+							DebugUtil.LogErrorArgs(new object[]
 							{
 								"Ack! Trying to add temperature modifier",
 								id,

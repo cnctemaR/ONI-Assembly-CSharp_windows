@@ -12,7 +12,7 @@ public class CountedSoundEvent : SoundEvent
 			string[] array = sound_name.Split(new char[] { ':' });
 			if (array.Length != 2)
 			{
-				Output.LogError(new object[]
+				DebugUtil.LogErrorArgs(new object[]
 				{
 					"Invalid CountedSoundEvent parameter for",
 					string.Concat(new string[]
@@ -34,7 +34,7 @@ public class CountedSoundEvent : SoundEvent
 		}
 		else
 		{
-			Output.LogError(new object[]
+			DebugUtil.LogErrorArgs(new object[]
 			{
 				"CountedSoundEvent for",
 				string.Concat(new string[]

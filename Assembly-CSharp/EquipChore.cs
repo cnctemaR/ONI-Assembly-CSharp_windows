@@ -17,22 +17,22 @@ public class EquipChore : Chore<EquipChore.StatesInstance>
 	{
 		if (context.consumerState.consumer == null)
 		{
-			Debug.LogError("EquipChore null context.consumer", null);
+			Debug.LogError("EquipChore null context.consumer");
 			return;
 		}
 		if (base.smi == null)
 		{
-			Debug.LogError("EquipChore null smi", null);
+			Debug.LogError("EquipChore null smi");
 			return;
 		}
 		if (base.smi.sm == null)
 		{
-			Debug.LogError("EquipChore null smi.sm", null);
+			Debug.LogError("EquipChore null smi.sm");
 			return;
 		}
 		if (base.smi.sm.equippable_source == null)
 		{
-			Debug.LogError("EquipChore null smi.sm.equippable_source", null);
+			Debug.LogError("EquipChore null smi.sm.equippable_source");
 			return;
 		}
 		base.smi.sm.equipper.Set(context.consumerState.gameObject, base.smi);

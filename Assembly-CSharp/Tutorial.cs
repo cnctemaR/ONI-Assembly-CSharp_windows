@@ -264,6 +264,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Schedule, MISC.NOTIFICATIONS.SCHEDULEMESSAGE.NAME, MISC.NOTIFICATIONS.SCHEDULEMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.SCHEDULEMESSAGE.TOOLTIP);
 			break;
 		}
+		global::Debug.Assert(message != null, string.Format("No Tutorial message: {0}", tm.ToString()));
 		this.tutorialMessagesRemaining.Remove(tm);
 		Messenger.Instance.QueueMessage(message);
 	}
@@ -470,10 +471,14 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		int num = 0;
 		for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
 		{
-			Diseases diseases = Components.LiveMinionIdentities[i].GetDiseases();
-			if (diseases.Count > 0)
+			Sicknesses sicknesses = Components.LiveMinionIdentities[i].GetSicknesses();
+			foreach (SicknessInstance sicknessInstance in sicknesses)
 			{
-				num++;
+				if (sicknessInstance.Sickness.severity >= Sickness.Severity.Major)
+				{
+					num++;
+					break;
+				}
 			}
 		}
 		return count >= num;

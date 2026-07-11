@@ -15,6 +15,7 @@ public class LoadScreen : KModalScreen
 
 	protected override void OnPrefabInit()
 	{
+		global::Debug.Assert(LoadScreen.Instance == null);
 		LoadScreen.Instance = this;
 		base.OnPrefabInit();
 		this.savenameRowPool = new UIPool<HierarchyReferences>(this.saveButtonPrefab);
@@ -30,7 +31,7 @@ public class LoadScreen : KModalScreen
 		{
 			this.closeButton.onClick += delegate
 			{
-				base.Show(false);
+				this.Deactivate();
 			};
 		}
 		if (this.loadButton != null)
@@ -93,7 +94,7 @@ public class LoadScreen : KModalScreen
 		}
 		catch (Exception ex)
 		{
-			global::Debug.LogWarning("Corrupted save file: " + filename + "\n" + ex.ToString(), null);
+			global::Debug.LogWarning("Corrupted save file: " + filename + "\n" + ex.ToString());
 		}
 		return flag;
 	}
@@ -111,7 +112,7 @@ public class LoadScreen : KModalScreen
 		}
 		catch (Exception ex)
 		{
-			global::Debug.LogWarning(ex, null);
+			global::Debug.LogWarning(ex);
 			this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.CORRUPTEDSAVE, filename);
 		}
 		return null;
@@ -246,14 +247,14 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header)
 	{
-		return header.buildVersion > 312713U;
+		return header.buildVersion > 326232U;
 	}
 
 	private void SetSelectedGame(string filename)
 	{
 		if (string.IsNullOrEmpty(filename) || !File.Exists(filename))
 		{
-			global::Debug.LogError("The filename provided is not valid.", null);
+			global::Debug.LogError("The filename provided is not valid.");
 			this.deleteButton.isInteractable = false;
 			return;
 		}
@@ -281,13 +282,13 @@ public class LoadScreen : KModalScreen
 			this.InfoText.text = string.Empty;
 			if (LoadScreen.IsSaveFileFromUnsupportedFutureBuild(header))
 			{
-				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 312713U);
+				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 326232U);
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
 			else if (gameInfo.saveMajorVersion < 7)
 			{
-				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.UNSUPPORTED_SAVE_VERSION, new object[] { filename, gameInfo.saveMajorVersion, gameInfo.saveMinorVersion, 7, 6 });
+				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.UNSUPPORTED_SAVE_VERSION, new object[] { filename, gameInfo.saveMajorVersion, gameInfo.saveMinorVersion, 7, 8 });
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
@@ -303,7 +304,7 @@ public class LoadScreen : KModalScreen
 		}
 		catch (Exception ex)
 		{
-			global::Debug.LogWarning(ex, null);
+			global::Debug.LogWarning(ex);
 			this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.CORRUPTEDSAVE, filename);
 			if (this.loadButton.isInteractable)
 			{
@@ -333,15 +334,15 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 312713U)
+		if (header.buildVersion > 326232U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 312713U.ToString();
+			text2 = 326232U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
 			text = string.Format("v{0}.{1}", gameInfo.saveMajorVersion, gameInfo.saveMinorVersion);
-			text2 = string.Format("v{0}.{1}", 7, 6);
+			text2 = string.Format("v{0}.{1}", 7, 8);
 		}
 		if (!flag)
 		{
@@ -368,7 +369,7 @@ public class LoadScreen : KModalScreen
 	{
 		if (string.IsNullOrEmpty(this.selectedFileName))
 		{
-			global::Debug.LogError("The path provided is not valid and cannot be deleted.", null);
+			global::Debug.LogError("The path provided is not valid and cannot be deleted.");
 			return;
 		}
 		this.ConfirmDoAction(string.Format(UI.FRONTEND.LOADSCREEN.CONFIRMDELETE, Path.GetFileName(this.selectedFileName)), delegate

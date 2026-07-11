@@ -30,7 +30,7 @@ namespace Database
 			this.MoveToSafety = base.Add(new Urge("MoveToSafety"));
 			this.WarmUp = base.Add(new Urge("WarmUp"));
 			this.CoolDown = base.Add(new Urge("CoolDown"));
-			this.SwitchRole = base.Add(new Urge("SwitchRole"));
+			this.LearnSkill = base.Add(new Urge("LearnSkill"));
 			this.EmoteIdle = base.Add(new Urge("EmoteIdle"));
 		}
 
@@ -84,7 +84,7 @@ namespace Database
 
 		public Urge CoolDown;
 
-		public Urge SwitchRole;
+		public Urge LearnSkill;
 
 		public Urge EmoteIdle;
 	}

@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 public class DropUnusedInventoryChore : Chore<DropUnusedInventoryChore.StatesInstance>
 {
@@ -23,7 +24,7 @@ public class DropUnusedInventoryChore : Chore<DropUnusedInventoryChore.StatesIns
 			default_state = this.dropping;
 			this.dropping.Enter(delegate(DropUnusedInventoryChore.StatesInstance smi)
 			{
-				smi.GetComponent<Storage>().DropAll(false);
+				smi.GetComponent<Storage>().DropAll(false, false, default(Vector3), true);
 			}).GoTo(this.success);
 			this.success.ReturnSuccess();
 		}

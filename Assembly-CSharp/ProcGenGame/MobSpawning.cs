@@ -50,7 +50,7 @@ namespace ProcGenGame
 			{
 				if (isDebug)
 				{
-					global::Debug.LogWarning("No where to put mobs possibleSpawnPoints [" + tc.node.node.Id + "]", null);
+					global::Debug.LogWarning("No where to put mobs possibleSpawnPoints [" + tc.node.node.Id + "]");
 				}
 				return null;
 			}
@@ -62,7 +62,7 @@ namespace ProcGenGame
 				{
 					if (!SettingsCache.mobs.GetMobTags().Contains(list[j]))
 					{
-						global::Debug.LogError("Missing sample description for tag [" + list[j].Name + "]", null);
+						global::Debug.LogError("Missing sample description for tag [" + list[j].Name + "]");
 					}
 					else
 					{
@@ -79,7 +79,7 @@ namespace ProcGenGame
 									"] [",
 									tc.node.node.Id,
 									"]"
-								}), null);
+								}));
 							}
 						}
 						else
@@ -97,7 +97,7 @@ namespace ProcGenGame
 							{
 								if (isDebug)
 								{
-									global::Debug.LogWarning("Got a mob density greater than 1.0 for " + list[j].Name + ". Probably using density as spacing!", null);
+									global::Debug.LogWarning("Got a mob density greater than 1.0 for " + list[j].Name + ". Probably using density as spacing!");
 								}
 								num4 = 1f;
 							}

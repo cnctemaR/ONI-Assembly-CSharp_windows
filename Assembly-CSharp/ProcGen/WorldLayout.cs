@@ -76,6 +76,8 @@ namespace ProcGen
 
 		public Tree GenerateOverworld(bool usePD)
 		{
+			global::Debug.Assert(this.mapWidth != 0 && this.mapHeight != 0, "Map size has not been set");
+			global::Debug.Assert(this.worldGen.Settings.world != null, "You need to set a world");
 			Diagram.Site site = new Diagram.Site(0U, new Vector2((float)(this.mapWidth / 2), (float)(this.mapHeight / 2)), 1f);
 			this.topEdge = new LineSegment(new Vector2?(new Vector2(0f, (float)(this.mapHeight - 5))), new Vector2?(new Vector2((float)this.mapWidth, (float)(this.mapHeight - 5))));
 			this.bottomEdge = new LineSegment(new Vector2?(new Vector2(0f, 5f)), new Vector2?(new Vector2((float)this.mapWidth, 5f)));
@@ -541,10 +543,11 @@ namespace ProcGen
 					}
 					else
 					{
-						global::Debug.LogWarning("No allowed Subworld types. Using default.", null);
+						global::Debug.LogWarning("No allowed Subworld types. Using default.");
 						text = "Default";
 					}
 				}
+				global::Debug.Assert(text != "NONE", "Cant find subworld");
 				node2.SetType(text);
 				if (list2.Count > 0)
 				{
@@ -571,7 +574,7 @@ namespace ProcGen
 			{
 				string message = ex.Message;
 				string stackTrace = ex.StackTrace;
-				Output.LogError("ex: " + message + " " + stackTrace);
+				global::Debug.LogError("ex: " + message + " " + stackTrace);
 			}
 		}
 
@@ -620,6 +623,7 @@ namespace ProcGen
 						Tree tree3 = child3 as Tree;
 						ProcGen.Node node2 = this.overworldGraph.FindNodeByID(tree3.site.id);
 						Cell cell2 = this.overworldGraph.GetCell(node2.node);
+						global::Debug.Assert(cell2 != null, "cell is null: " + node2.node);
 						List<KeyValuePair<global::VoronoiTree.Node, LineSegment>> neighborsByEdge2 = tree3.GetNeighborsByEdge();
 						for (int m = 0; m < neighborsByEdge2.Count; m++)
 						{
@@ -627,18 +631,23 @@ namespace ProcGen
 							MapGraph mapGraph3 = this.overworldGraph;
 							Vector2? p3 = keyValuePair2.Value.p0;
 							Corner corner = mapGraph3.GetCorner(p3.Value, false);
+							global::Debug.Assert(corner != null, "corner0 is null: " + keyValuePair2.Value.p0);
 							MapGraph mapGraph4 = this.overworldGraph;
 							Vector2? p4 = keyValuePair2.Value.p1;
 							Corner corner2 = mapGraph4.GetCorner(p4.Value, false);
+							global::Debug.Assert(corner2 != null, "corner1 is null: " + keyValuePair2.Value.p1);
 							global::VoronoiTree.Node key = keyValuePair2.Key;
 							Edge edge;
 							if (key != null)
 							{
 								ProcGen.Node node3 = this.overworldGraph.FindNodeByID(key.site.id);
 								Cell cell3 = this.overworldGraph.GetCell(node3.node);
+								global::Debug.Assert(cell3 != null, "otherCell is null: " + node3.node);
 								edge = this.overworldGraph.GetEdge(corner, corner2, cell2, cell3, true);
 								SubWorld subWorld = this.worldGen.Settings.GetSubWorld(node2.type);
+								global::Debug.Assert(subWorld != null, "SubWorld is null: " + node2.type);
 								SubWorld subWorld2 = this.worldGen.Settings.GetSubWorld(node3.type);
+								global::Debug.Assert(subWorld2 != null, "other SubWorld is null: " + node3.type);
 								if (node2.type == node3.type || subWorld.zoneType == subWorld2.zoneType || (subWorld.zoneType == SubWorld.ZoneType.Space && subWorld2.zoneType == SubWorld.ZoneType.Space) || (cell2.tags.ContainsOne(tagSet) && cell3.tags.ContainsOne(tagSet)))
 								{
 									edge.tags.Add(WorldGenTags.EdgeOpen);
@@ -663,7 +672,7 @@ namespace ProcGen
 			{
 				string message = ex.Message;
 				string stackTrace = ex.StackTrace;
-				Output.LogError("ex: " + message + " " + stackTrace);
+				global::Debug.LogError("ex: " + message + " " + stackTrace);
 			}
 			this.UpdateEdgesAroundStart();
 		}
@@ -746,7 +755,7 @@ namespace ProcGen
 								Tree tree2 = list[l].Split(splitCommand);
 								if (tree2.ChildCount() <= 1)
 								{
-									global::Debug.LogError("split did not work.", null);
+									global::Debug.LogError("split did not work.");
 								}
 								for (int m = 0; m < tree2.ChildCount(); m++)
 								{
@@ -773,7 +782,7 @@ namespace ProcGen
 					density *= 0.8f;
 					if (this.worldGen.isRunningDebugGen)
 					{
-						global::Debug.LogWarning(string.Concat(new object[] { "Recaluclating points for ", name, " iter: ", num, " density:", density }), null);
+						global::Debug.LogWarning(string.Concat(new object[] { "Recaluclating points for ", name, " iter: ", num, " density:", density }));
 					}
 				}
 				num++;
@@ -844,6 +853,7 @@ namespace ProcGen
 				}
 				if (this.worldGen.isRunningDebugGen)
 				{
+					global::Debug.Assert(points.Count >= num, "Error not enough points " + sw.name);
 				}
 				return;
 			}
@@ -952,7 +962,7 @@ namespace ProcGen
 			{
 				for (int num2 = 0; num2 < tagSet2.Count; num2++)
 				{
-					global::Debug.Log(string.Format("Applying Moved Tag {0} to {1}", tagSet2[num2].Name, node.site.id), null);
+					global::Debug.Log(string.Format("Applying Moved Tag {0} to {1}", tagSet2[num2].Name, node.site.id));
 					global::VoronoiTree.Node child = node.GetChild(seededRandom.RandomSource().Next(node.ChildCount()));
 					child.AddTag(tagSet2[num2]);
 				}
@@ -1012,6 +1022,7 @@ namespace ProcGen
 			{
 				node = this.worldGen.WorldLayout.localGraph.FindNodeByID(tree.site.id);
 			}
+			global::Debug.Assert(node != null, "Null terrain node WTF");
 			TagSet tagSet = new TagSet(tree.tags);
 			if (cmd.dontCopyTags != null)
 			{
@@ -1076,6 +1087,13 @@ namespace ProcGen
 			{
 				if (this.worldGen.isRunningDebugGen)
 				{
+					global::Debug.Assert(points.Count >= cmd.minChildCount, string.Concat(new object[]
+					{
+						"Error not enough points [",
+						cmd.minChildCount,
+						"] for tree split ",
+						tree.site.id.ToString()
+					}));
 				}
 				if (points.Count == 0)
 				{
@@ -1289,7 +1307,7 @@ namespace ProcGen
 				List<global::VoronoiTree.Node> nodes = this.GetStartNodes();
 				if (nodes == null || nodes.Count == 0)
 				{
-					global::Debug.LogWarning("Couldnt find start node", null);
+					global::Debug.LogWarning("Couldnt find start node");
 					return new Vector2I(this.mapWidth / 2, this.mapHeight / 2);
 				}
 				node2 = this.localGraph.FindNode((ProcGen.Node node) => (uint)node.node.Id == nodes[0].site.id);
@@ -1297,7 +1315,7 @@ namespace ProcGen
 			}
 			if (node2 == null)
 			{
-				global::Debug.LogWarning("Couldnt find start node", null);
+				global::Debug.LogWarning("Couldnt find start node");
 				return new Vector2I(this.mapWidth / 2, this.mapHeight / 2);
 			}
 			return new Vector2I((int)node2.position.x, (int)node2.position.y);
@@ -1448,7 +1466,7 @@ namespace ProcGen
 				string message = ex.Message;
 				string stackTrace = ex.StackTrace;
 				WorldGenLogger.LogException(message, stackTrace);
-				global::Debug.Log("Error deserialising " + ex.Message, null);
+				global::Debug.Log("Error deserialising " + ex.Message);
 			}
 		}
 
@@ -1490,7 +1508,7 @@ namespace ProcGen
 				string message = ex.Message;
 				string stackTrace = ex.StackTrace;
 				WorldGenLogger.LogException(message, stackTrace);
-				global::Debug.Log("Error deserialising " + ex.Message, null);
+				global::Debug.Log("Error deserialising " + ex.Message);
 			}
 			this.extra = null;
 		}

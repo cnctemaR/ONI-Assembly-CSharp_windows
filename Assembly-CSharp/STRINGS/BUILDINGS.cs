@@ -139,18 +139,24 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Smart Battery", "BATTERYSMART");
 
-				public static LocString DESC = "Smart batteries can automatically turn systems off when there is no charge to sustain them.";
+				public static LocString DESC = "Smart batteries can send an automation signal while they require charging.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
 					"Stores most runoff ",
 					UI.FormatAsLink("Power", "POWER"),
-					" from generators, but loses charge over time.\n\nLogic input becomes ",
+					" from generators, but loses charge over time.\n\nSends an ",
 					UI.FormatAsLink("Active", "LOGIC"),
-					" when charged above the set threshold."
+					" or ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" signal based on the configuration of the Logic Activation Parameters."
 				});
 
-				public static LocString LOGIC_PORT_DESC = string.Empty + UI.FormatAsLink("Active", "LOGIC") + " if charge exceeds threshold";
+				public static LocString LOGIC_PORT = "Charge Parameters";
+
+				public static LocString LOGIC_PORT_ACTIVE = "Sends an " + UI.FormatAsLink("Active", "LOGIC") + " signal when the charge falls below the configured Active Parameter";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Sends a " + UI.FormatAsLink("Standby", "LOGIC") + " signal when the charge rises above the configured Standby Parameter";
 
 				public static LocString ACTIVATE_TOOLTIP = "Logic input will become " + UI.FormatAsLink("Active", "LOGIC") + " when battery is less than {0}% charged";
 
@@ -214,7 +220,19 @@ namespace STRINGS
 
 				public static LocString DESC = "At least one astronaut must be assigned to the command module to pilot a rocket.";
 
-				public static LocString EFFECT = "Contains passenger seating for Duplicant " + UI.FormatAsLink("Astronauts", "ASTRONAUT") + ".\n\nA Command Capsule must be the last module installed at the top of a rocket.";
+				public static LocString EFFECT = "Contains passenger seating for Duplicant " + UI.FormatAsLink("Astronauts", "ASTRONAUT") + ".\n\nA Command Capsule must be the last module installed at the top of a rocket";
+
+				public static LocString LOGIC_PORT_READY = "Rocket Checklist";
+
+				public static LocString LOGIC_PORT_READY_ACTIVE = "Becomes " + UI.FormatAsLink("Active", "LOGIC") + " when its rocket launch checklist is complete";
+
+				public static LocString LOGIC_PORT_READY_INACTIVE = "Goes on " + UI.FormatAsLink("Standby", "LOGIC") + " when its rocket launch checklist has unchecked items";
+
+				public static LocString LOGIC_PORT_LAUNCH = "Launch Rocket";
+
+				public static LocString LOGIC_PORT_LAUNCH_ACTIVE = "Launches rockets when receiving an " + UI.FormatAsLink("Active", "LOGIC") + " signal";
+
+				public static LocString LOGIC_PORT_LAUNCH_INACTIVE = "Awaits an Active signal when receiving a " + UI.FormatAsLink("Standby", "LOGIC") + " signal";
 			}
 
 			public class RESEARCHMODULE
@@ -249,6 +267,12 @@ namespace STRINGS
 				public static LocString DESC = "A gantry can be built over rocket pieces where ladders and tile cannot.";
 
 				public static LocString EFFECT = "Provides scaffolding across rocket modules to allow Duplicant access.";
+
+				public static LocString LOGIC_PORT = "Extend/Retract";
+
+				public static LocString LOGIC_PORT_ACTIVE = "Extends gantry when an " + UI.FormatAsLink("Active", "LOGIC") + " signal is received";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Retracts gantry when a " + UI.FormatAsLink("Standby", "LOGIC") + " signal is received";
 			}
 
 			public class WATERCOOLER
@@ -302,7 +326,11 @@ namespace STRINGS
 					"."
 				});
 
-				public static LocString LOGIC_PORT_DESC = "Duplicant Stop/Go";
+				public static LocString LOGIC_PORT = "Duplicant Stop/Go";
+
+				public static LocString LOGIC_PORT_ACTIVE = "Allows Duplicant passage while an " + UI.FormatAsLink("Active", "LOGIC") + " signal is being received";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Prevents Duplicant passage while a " + UI.FormatAsLink("Standby", "LOGIC") + " signal is being received";
 			}
 
 			public class FIREPOLE
@@ -413,18 +441,29 @@ namespace STRINGS
 
 			public class MEDICALCOT
 			{
-				public static LocString NAME = UI.FormatAsLink("Med-Bed", "MEDICALCOT");
+				public static LocString NAME = UI.FormatAsLink("Triage Cot", "MEDICALCOT");
 
-				public static LocString DESC = "Duplicants use med-beds to recover from sickness and receive medical aid from peers.";
+				public static LocString DESC = "Duplicants use triage cots to recover from physical injuries and receive aid from peers.";
 
-				public static LocString EFFECT = string.Concat(new string[]
-				{
-					"Improves recovery from ",
-					UI.FormatAsLink("Diseases", "DISEASE"),
-					".\n\nAccelerates ",
-					UI.FormatAsLink("Health", "HEALTH"),
-					" restoration and the healing of physical injuries."
-				});
+				public static LocString EFFECT = "Accelerates " + UI.FormatAsLink("Health", "HEALTH") + " restoration and the healing of physical injuries.";
+			}
+
+			public class DOCTORSTATION
+			{
+				public static LocString NAME = UI.FormatAsLink("Sick Bay", "DOCTORSTATION");
+
+				public static LocString DESC = "Duplicants can receive treatment for intermediate sicknesses by a Doctor at a Sick Bay";
+
+				public static LocString EFFECT = "Duplicants can receive treatment for intermediate sicknesses by a Doctor at a Sick Bay";
+			}
+
+			public class ADVANCEDDOCTORSTATION
+			{
+				public static LocString NAME = UI.FormatAsLink("Disease Clinic", "ADVANCEDDOCTORSTATION");
+
+				public static LocString DESC = "Duplicants can receive treatment for severe sicknesses by a Doctor at a Disease Clinic";
+
+				public static LocString EFFECT = "Duplicants can receive treatment for severe sicknesses by a Doctor at a Disease Clinic";
 			}
 
 			public class MASSAGETABLE
@@ -626,7 +665,11 @@ namespace STRINGS
 
 				public static LocString RIGHT = "on right";
 
-				public static LocString LOGIC_PORT_DESC = "Open/Close";
+				public static LocString LOGIC_OPEN = "Open/Close";
+
+				public static LocString LOGIC_OPEN_ACTIVE = "Opens with Duplicant proximity while an " + UI.FormatAsLink("Active", "LOGIC") + " signal is being received";
+
+				public static LocString LOGIC_OPEN_INACTIVE = "Closes and locks while a " + UI.FormatAsLink("Standby", "LOGIC") + " signal is being received";
 
 				public static class CONTROL_STATE
 				{
@@ -1002,12 +1045,18 @@ namespace STRINGS
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
-					"Automatically turns ",
-					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
-					" flow on or off using ",
+					"Connects to an ",
 					UI.FormatAsLink("Automation", "LOGIC"),
-					" technology."
+					" grid to automatically turn ",
+					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+					" flow on or off."
 				});
+
+				public static LocString LOGIC_PORT = "Open/Close";
+
+				public static LocString LOGIC_PORT_ACTIVE = "Allows gas flow when receiving an " + UI.FormatAsLink("Active", "LOGIC") + " signal";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Prevents gas flow when receiving a " + UI.FormatAsLink("Standby", "LOGIC") + " signal";
 			}
 
 			public class GASVENT
@@ -1046,7 +1095,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Canister Filler", "GASBOTTLER");
 
-				public static LocString DESC = "Canisters allow Duplicants to manually delivery gases from place to place.";
+				public static LocString DESC = "Canisters allow Duplicants to manually deliver gases from place to place.";
 
 				public static LocString EFFECT = "Automatically stores piped " + UI.FormatAsLink("Gases", "ELEMENTS_GAS") + " into canisters for manual transport.";
 			}
@@ -1356,6 +1405,38 @@ namespace STRINGS
 				public static LocString EFFECT = "Runs one " + UI.FormatAsLink("Liquid Pipe", "LIQUIDPIPING") + " section over another without joining them.\n\nCan be run through wall and floor tile.";
 			}
 
+			public class ICECOOLEDFAN
+			{
+				public static LocString NAME = UI.FormatAsLink("Ice-E Fan", "ICECOOLEDFAN");
+
+				public static LocString DESC = "A Duplicant can work an Ice-E fan to temporarily cool small areas as needed.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Uses ",
+					UI.FormatAsLink("Ice", "ICE"),
+					" to dissipate a small amount of the ",
+					UI.FormatAsLink("Heat", "HEAT"),
+					"."
+				});
+			}
+
+			public class ICEMACHINE
+			{
+				public static LocString NAME = UI.FormatAsLink("Ice Maker", "ICEMACHINE");
+
+				public static LocString DESC = "Ice makers can be used as a small renewable source of ice.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Converts ",
+					UI.FormatAsLink("Water", "WATER"),
+					" into ",
+					UI.FormatAsLink("Ice", "ICE"),
+					"."
+				});
+			}
+
 			public class LIQUIDCOOLEDFAN
 			{
 				public static LocString NAME = UI.FormatAsLink("Hydrofan", "LIQUIDCOOLEDFAN");
@@ -1486,12 +1567,18 @@ namespace STRINGS
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
-					"Automatically turns ",
-					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
-					" flow on or off using ",
+					"Connects to an ",
 					UI.FormatAsLink("Automation", "LOGIC"),
-					" technology."
+					" grid to automatically turn ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" flow on or off."
 				});
+
+				public static LocString LOGIC_PORT = "Open/Close";
+
+				public static LocString LOGIC_PORT_ACTIVE = "Allows liquid flow while receiving an " + UI.FormatAsLink("Active", "LOGIC") + " signal";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Prevents liquid flow while receiving a " + UI.FormatAsLink("Standby", "LOGIC") + " signal";
 			}
 
 			public class LIQUIDVENT
@@ -1535,15 +1622,6 @@ namespace STRINGS
 					UI.FormatAsLink("Critters", "CRITTERS"),
 					" cannot pass through doors."
 				});
-			}
-
-			public class MEDICALBED
-			{
-				public static LocString NAME = UI.FormatAsLink("Pharma Chamber", "MEDICALBED");
-
-				public static LocString DESC = "Pharma Chambers decrease patients' disease recovery time, but cannot heal physical injuries.";
-
-				public static LocString EFFECT = "Greatly accelerates recovery from " + UI.FormatAsLink("Diseases", "DISEASE") + ".";
 			}
 
 			public class MESHTILE
@@ -1786,23 +1864,29 @@ namespace STRINGS
 					" to prevent spoilage."
 				});
 
-				public static LocString LOGIC_PORT_DESC = "Full/Not Full";
+				public static LocString LOGIC_PORT = "Full/Not Full";
+
+				public static LocString LOGIC_PORT_ACTIVE = "Sends an " + UI.FormatAsLink("Active", "LOGIC") + " signal when full";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Sends a " + UI.FormatAsLink("Standby", "LOGIC") + " signal when not full";
 			}
 
 			public class ROLESTATION
 			{
-				public static LocString NAME = UI.FormatAsLink("Jobs Board", "ROLESTATION");
+				public static LocString NAME = UI.FormatAsLink("Skills Board", "ROLESTATION");
 
-				public static LocString DESC = "Employment can permanently improve Duplicants' skills and teach them unique traits.";
+				public static LocString DESC = "As Duplicants become more experienced, they can be given new responsibilities.";
 
-				public static LocString EFFECT = string.Concat(new string[]
-				{
-					"Allows Duplicants to be assigned to specialized ",
-					UI.FormatAsLink("Jobs", "JOBS"),
-					".\n\nUnlocks ",
-					UI.FormatAsLink("Hats", "JOBS"),
-					"."
-				});
+				public static LocString EFFECT = "Allows Duplicants to be trained in new " + UI.FormatAsLink("Skills", "JOBS") + ".";
+			}
+
+			public class RESETSKILLSSTATION
+			{
+				public static LocString NAME = UI.FormatAsLink("Skill Scrubber", "RESETSKILLSSTATION");
+
+				public static LocString DESC = "Erase skills from a Duplicant's mind, returning them to their default abilities.";
+
+				public static LocString EFFECT = "Removes specialized skills from the assigned Duplicant.";
 			}
 
 			public class RESEARCHCENTER
@@ -1825,7 +1909,7 @@ namespace STRINGS
 					"Conducts ",
 					UI.FormatAsLink("Advanced Research", "RESEARCH"),
 					" to unlock new technologies.\n\nAssigned Duplicants must possess the ",
-					UI.FormatAsLink("Super Computer Researching", UI.StripLinkFormatting(JuniorResearcher.ID)),
+					UI.FormatAsLink("Super Computer Researching", "JUNIOR_RESEARCHER"),
 					" trait."
 				});
 			}
@@ -1845,7 +1929,7 @@ namespace STRINGS
 					" and ",
 					UI.FormatAsLink("Research Modules", "RESEARCHMODULE"),
 					".\n\nAssigned Duplicants must possess the ",
-					UI.FormatAsLink("Planetarium Researching", UI.StripLinkFormatting(SeniorResearcher.ID)),
+					UI.FormatAsLink("Planetarium Researching", "SENIOR_RESEARCHER"),
 					" trait."
 				});
 			}
@@ -1856,7 +1940,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Telescopes are necessary for learning starmaps and conducting rocket missions.";
 
-				public static LocString EFFECT = "Maps Starmap destinations.\n\nAssigned Duplicants must possess the " + UI.FormatAsLink("Geographical Analysis", UI.StripLinkFormatting(Researcher.ID)) + " trait.\n\nBuilding must be exposed to space to function.";
+				public static LocString EFFECT = "Maps Starmap destinations.\n\nAssigned Duplicants must possess the " + UI.FormatAsLink("Geographical Analysis", "RESEARCHER") + " trait.\n\nBuilding must be exposed to space to function.";
 
 				public static LocString REQUIREMENT_TOOLTIP = "A steady {0} supply is required to sustain working Duplicants.";
 			}
@@ -2107,6 +2191,34 @@ namespace STRINGS
 				public static LocString DESC = "Smart storage bins allow for the automation of resource organization based on type and mass.";
 
 				public static LocString EFFECT = "Stores the resources of your choosing.\n\nLogic input becomes " + UI.FormatAsLink("Active", "LOGIC") + " when bin is filled above the set threshold.";
+
+				public static LocString LOGIC_PORT = "Full/Not Full";
+
+				public static LocString LOGIC_PORT_ACTIVE = "Sends an " + UI.FormatAsLink("Active", "LOGIC") + " signal when full";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Sends a " + UI.FormatAsLink("Standby", "LOGIC") + " signal when not full";
+			}
+
+			public class OBJECTDISPENSER
+			{
+				public static LocString NAME = UI.FormatAsLink("Automatic Dispenser", "OBJECTDISPENSER");
+
+				public static LocString DESC = "Automatic dispensers will store and drop a small amount of objects.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Stores any ",
+					UI.FormatAsLink("Solid Materials", "ELEMENTS_SOLID"),
+					" delivered to it by Duplicants.\n\nDumps stored materials back into the world when it receives an ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" logic signal."
+				});
+
+				public static LocString LOGIC_PORT = "Dump Trigger";
+
+				public static LocString LOGIC_PORT_ACTIVE = "Dumps all stored materials when it receives an " + UI.FormatAsLink("Active", "LOGIC") + " signal";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Holds materials while receiving a " + UI.FormatAsLink("Standby", "LOGIC") + " signal";
 			}
 
 			public class LIQUIDRESERVOIR
@@ -2146,7 +2258,11 @@ namespace STRINGS
 
 				public static LocString TURN_ON = "Turn On";
 
+				public static LocString TURN_ON_TOOLTIP = "Turn On {Hotkey}";
+
 				public static LocString TURN_OFF = "Turn Off";
+
+				public static LocString TURN_OFF_TOOLTIP = "Turn Off {Hotkey}";
 			}
 
 			public class LOGICPOWERRELAY
@@ -2157,14 +2273,18 @@ namespace STRINGS
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
-					"Automatically turns ",
-					UI.FormatAsLink("Power", "POWER"),
-					" on or off using ",
+					"Connects to an ",
 					UI.FormatAsLink("Automation", "LOGIC"),
-					" technology.\n\nDoes not affect circuitry preceding the switch."
+					" grid to automatically turn ",
+					UI.FormatAsLink("Power", "POWER"),
+					" on or off.\n\nDoes not affect circuitry preceding the switch."
 				});
 
-				public static LocString LOGIC_PORT_DESC = "On/Off";
+				public static LocString LOGIC_PORT = "Kill Power";
+
+				public static LocString LOGIC_PORT_ACTIVE = "Allows power through connected circuits while receiving an " + UI.FormatAsLink("Active", "LOGIC") + " signal";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Prevents power from flowing through connected circuits while receiving a " + UI.FormatAsLink("Standby", "LOGIC") + " signal";
 			}
 
 			public class TEMPERATURECONTROLLEDSWITCH
@@ -2362,7 +2482,7 @@ namespace STRINGS
 					UI.FormatAsLink("Heavi-Watt Joint Plate", "WIREBRIDGEHIGHWATTAGE"),
 					" without overloading.\n\nAllows ",
 					UI.FormatAsLink("Heavi-Watt Wire", "HIGHWATTAGEWIRE"),
-					" to be run through wall and floor tile.\n\nCan be run through wall and floor tile."
+					" to be run through wall and floor tile."
 				});
 			}
 
@@ -2429,13 +2549,13 @@ namespace STRINGS
 
 			public class STEAMTURBINE
 			{
-				public static LocString NAME = UI.FormatAsLink("Steam Turbine", "STEAMTURBINE");
+				public static LocString NAME = UI.FormatAsLink("[DEPRECATED] Steam Turbine", "STEAMTURBINE");
 
 				public static LocString DESC = "Useful for converting the geothermal energy of magma into usable power.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
-					"Generates exceptional electrical ",
+					"THIS BUILDING HAS BEEN DEPRECATED AND CANNOT BE BUILT.\n\nGenerates exceptional electrical ",
 					UI.FormatAsLink("Power", "POWER"),
 					" using pressurized, ",
 					UI.FormatAsLink("Scalding", "HEAT"),
@@ -2445,6 +2565,26 @@ namespace STRINGS
 					UI.FormatAsLink("Steam", "STEAM"),
 					" than it receives.\n\nAir pressure beneath this building must be higher than pressure above for air to flow."
 				});
+			}
+
+			public class STEAMTURBINE2
+			{
+				public static LocString NAME = UI.FormatAsLink("Steam Turbine", "STEAMTURBINE2");
+
+				public static LocString DESC = "Useful for converting the geothermal energy into usable power.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Draws in ",
+					UI.FormatAsLink("Steam", "STEAM"),
+					" from the tiles directly below the machine's foundation and uses it to generate electrical ",
+					UI.FormatAsLink("Power", "POWER"),
+					".\n\nOutputs ",
+					UI.FormatAsLink("Water", "WATER"),
+					"."
+				});
+
+				public static LocString HEAT_SOURCE = "Power Generation Waste";
 			}
 
 			public class STEAMENGINE
@@ -2635,7 +2775,7 @@ namespace STRINGS
 					" to increase the ",
 					UI.FormatAsLink("Power", "POWER"),
 					" output of generators.\n\nAssigned Duplicants must possess the ",
-					UI.FormatAsLink("Tune Up", UI.StripLinkFormatting("PowerTechnician")),
+					UI.FormatAsLink("Tune Up", "POWER_TECHNICIAN"),
 					" trait.\n\nThis building is a necessary component of the Power Plant room."
 				});
 			}
@@ -2653,7 +2793,7 @@ namespace STRINGS
 					" to increase ",
 					UI.FormatAsLink("Plant", "PLANTS"),
 					" growth rates.\n\nAssigned Duplicants must possess the ",
-					UI.FormatAsLink("Crop Tending", UI.StripLinkFormatting("Farmer")),
+					UI.FormatAsLink("Crop Tending", "FARMER"),
 					" trait.\n\nThis building is a necessary component of the Greenhouse room."
 				});
 			}
@@ -2698,7 +2838,7 @@ namespace STRINGS
 					" to care for ",
 					UI.FormatAsLink("Critters", "CRITTERS"),
 					".\n\nAssigned Duplicants must possess the ",
-					UI.FormatAsLink("Critter Wrangling", UI.StripLinkFormatting("Rancher")),
+					UI.FormatAsLink("Critter Wrangling", "RANCHER"),
 					" trait.\n\nThis building is a necessary component of the Stable room."
 				});
 			}
@@ -2728,19 +2868,25 @@ namespace STRINGS
 				public static LocString DESC = "Wire bridges allow multiple automation grids to exist in a small area without connecting.";
 
 				public static LocString EFFECT = "Runs one " + UI.FormatAsLink("Automation Wire", "LOGICWIRE") + " section over another without joining them.\n\nCan be run through wall and floor tile.";
+
+				public static LocString LOGIC_PORT = "Transmit Signal";
+
+				public static LocString LOGIC_PORT_ACTIVE = "Transmits an " + UI.FormatAsLink("Active", "LOGIC") + " signal when receiving an Active signal";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Transmits a " + UI.FormatAsLink("Standby", "LOGIC") + " signal when receiving a Standby signal";
 			}
 
 			public class LOGICGATEAND
 			{
 				public static LocString NAME = UI.FormatAsLink("AND Gate", "LOGICGATEAND");
 
-				public static LocString DESC = "This gate only turns buildings on when both the input buildings are on active the same time.";
+				public static LocString DESC = "This gate only turns buildings on when both its inputs are active at the same time.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
 					"Becomes ",
 					UI.FormatAsLink("Active", "LOGIC"),
-					" when the systems connected to its Inputs are both ",
+					" when both the systems connected to its Inputs are ",
 					UI.FormatAsLink("Active", "LOGIC"),
 					".\n\nGoes into ",
 					UI.FormatAsLink("Standby", "LOGIC"),
@@ -2748,6 +2894,12 @@ namespace STRINGS
 					UI.FormatAsLink("Standby", "LOGIC"),
 					"."
 				});
+
+				public static LocString OUTPUT_NAME = "AND Gate";
+
+				public static LocString OUTPUT_ACTIVE = "Becomes " + UI.FormatAsLink("Active", "LOGIC") + " when both the A Input and B Input are Active";
+
+				public static LocString OUTPUT_INACTIVE = "Goes on " + UI.FormatAsLink("Standby", "LOGIC") + " when either or both Inputs are on Standby";
 			}
 
 			public class LOGICGATEOR
@@ -2768,6 +2920,12 @@ namespace STRINGS
 					UI.FormatAsLink("Active", "LOGIC"),
 					"."
 				});
+
+				public static LocString OUTPUT_NAME = "OR Gate";
+
+				public static LocString OUTPUT_ACTIVE = "Becomes " + UI.FormatAsLink("Active", "LOGIC") + " when either the A Input or B Input is Active";
+
+				public static LocString OUTPUT_INACTIVE = "Goes on " + UI.FormatAsLink("Standby", "LOGIC") + " when both Inputs are on Standby";
 			}
 
 			public class LOGICGATENOT
@@ -2788,6 +2946,12 @@ namespace STRINGS
 					UI.FormatAsLink("Active", "LOGIC"),
 					"."
 				});
+
+				public static LocString OUTPUT_NAME = "NOT Gate";
+
+				public static LocString OUTPUT_ACTIVE = "Becomes " + UI.FormatAsLink("Active", "LOGIC") + " when its Input is on Standby";
+
+				public static LocString OUTPUT_INACTIVE = "Goes on " + UI.FormatAsLink("Standby", "LOGIC") + " when its Input is Active";
 			}
 
 			public class LOGICGATEXOR
@@ -2808,6 +2972,12 @@ namespace STRINGS
 					UI.FormatAsLink("Active", "LOGIC"),
 					"."
 				});
+
+				public static LocString OUTPUT_NAME = "XOR Gate";
+
+				public static LocString OUTPUT_ACTIVE = "Becomes " + UI.FormatAsLink("Active", "LOGIC") + " when one of its Inputs is Active, but not both";
+
+				public static LocString OUTPUT_INACTIVE = "Goes on " + UI.FormatAsLink("Standby", "LOGIC") + " when both Input signals match (either Active or Standby)";
 			}
 
 			public class LOGICGATEBUFFER
@@ -2828,6 +2998,12 @@ namespace STRINGS
 					UI.FormatAsLink("Standby", "LOGIC"),
 					"."
 				});
+
+				public static LocString OUTPUT_NAME = "Buffered Signal";
+
+				public static LocString OUTPUT_ACTIVE = "Becomes " + UI.FormatAsLink("Active", "LOGIC") + " when its Input is Active, or while its timer is ticking down";
+
+				public static LocString OUTPUT_INACTIVE = "Goes on " + UI.FormatAsLink("Standby", "LOGIC") + " when both its Input is on Standby and its timer has expired";
 			}
 
 			public class LOGICGATEFILTER
@@ -2848,36 +3024,52 @@ namespace STRINGS
 					UI.FormatAsLink("Active", "LOGIC"),
 					"."
 				});
+
+				public static LocString OUTPUT_NAME = "Filtered Signal";
+
+				public static LocString OUTPUT_ACTIVE = "Becomes " + UI.FormatAsLink("Active", "LOGIC") + " when both its Input is Active and its timer has expired";
+
+				public static LocString OUTPUT_INACTIVE = "Goes on " + UI.FormatAsLink("Standby", "LOGIC") + " when its Input is on Standby or when its timer is ticking down";
 			}
 
 			public class LOGICMEMORY
 			{
 				public static LocString NAME = UI.FormatAsLink("Memory Toggle", "LOGICMEMORY");
 
-				public static LocString DESC = "Once active, a memory toggle keeps buildings on until the reset port receives an active signal.";
+				public static LocString DESC = "Once active, a memory toggle keeps buildings on until the refresh port receives an active signal.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
 					"Becomes ",
 					UI.FormatAsLink("Active", "LOGIC"),
-					" when the ",
-					UI.FormatAsLink("Set", "LOGIC"),
-					" port (S) is ",
+					" when the Set Port (S) is ",
 					UI.FormatAsLink("Active", "LOGIC"),
-					".\n\nGoes to ",
+					".\n\nGoes on ",
 					UI.FormatAsLink("Standby", "LOGIC"),
-					" if the reset port (R) becomes ",
+					" if the Refresh Port (R) becomes ",
 					UI.FormatAsLink("Active", "LOGIC"),
 					"."
 				});
 
 				public static LocString STATUS_ITEM_VALUE = "Current Value: {0}";
 
-				public static LocString READ_PORT_DESC = "Current Value";
+				public static LocString READ_PORT = "Current Value";
 
-				public static LocString SET_PORT_DESC = "Make Active";
+				public static LocString READ_PORT_ACTIVE = "Becomes " + UI.FormatAsLink("Active", "LOGIC") + " when Refresh Port is Set";
 
-				public static LocString RESET_PORT_DESC = "Make Inactive";
+				public static LocString READ_PORT_INACTIVE = "Goes on " + UI.FormatAsLink("Standby", "LOGIC") + " when Refresh Port is Cleared";
+
+				public static LocString SET_PORT = "Set Active";
+
+				public static LocString SET_PORT_ACTIVE = "Sets the Refresh Port when an " + UI.FormatAsLink("Active", "LOGIC") + " signal is received";
+
+				public static LocString SET_PORT_INACTIVE = string.Empty;
+
+				public static LocString RESET_PORT = "Clear Active";
+
+				public static LocString RESET_PORT_ACTIVE = "Clears the Refresh Port when an " + UI.FormatAsLink("Active", "LOGIC") + " signal is received";
+
+				public static LocString RESET_PORT_INACTIVE = string.Empty;
 			}
 
 			public class LOGICSWITCH
@@ -2897,7 +3089,11 @@ namespace STRINGS
 					" grid.\n\nMust be manually toggled by a Duplicant."
 				});
 
-				public static LocString LOGIC_PORT_DESC = "Active/Standby";
+				public static LocString LOGIC_PORT = "Signal Toggle";
+
+				public static LocString LOGIC_PORT_ACTIVE = "Sends an " + UI.FormatAsLink("Active", "LOGIC") + " signal while toggled on";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Sends a " + UI.FormatAsLink("Standby", "LOGIC") + " signal while toggled off";
 			}
 
 			public class LOGICPRESSURESENSORGAS
@@ -2910,14 +3106,32 @@ namespace STRINGS
 				{
 					"Becomes ",
 					UI.FormatAsLink("Active", "LOGIC"),
-					" or on ",
+					" or goes on ",
 					UI.FormatAsLink("Standby", "LOGIC"),
 					" when ",
 					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
 					" pressure enters the chosen range."
 				});
 
-				public static LocString LOGIC_PORT_DESC = "Active/Standby based on ambient " + UI.FormatAsLink("Gas", "ELEMENTS_GAS") + " pressure";
+				public static LocString LOGIC_PORT = UI.FormatAsLink("Gas", "ELEMENTS_GAS") + " Pressure";
+
+				public static LocString LOGIC_PORT_ACTIVE = string.Concat(new string[]
+				{
+					"Sends an ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" signal when ",
+					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+					" pressure is within its configured Pressure Threshold range"
+				});
+
+				public static LocString LOGIC_PORT_INACTIVE = string.Concat(new string[]
+				{
+					"Sends a ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" signal when ",
+					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+					" pressure is outside its configured Pressure Threshold range"
+				});
 			}
 
 			public class LOGICPRESSURESENSORLIQUID
@@ -2930,7 +3144,7 @@ namespace STRINGS
 				{
 					"Becomes ",
 					UI.FormatAsLink("Active", "LOGIC"),
-					" or on ",
+					" or goes on ",
 					UI.FormatAsLink("Standby", "LOGIC"),
 					" when ",
 					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
@@ -2939,7 +3153,25 @@ namespace STRINGS
 					"."
 				});
 
-				public static LocString LOGIC_PORT_DESC = "Active/Standby based on ambient " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " Pressure";
+				public static LocString LOGIC_PORT = UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " Pressure";
+
+				public static LocString LOGIC_PORT_ACTIVE = string.Concat(new string[]
+				{
+					"Sends an ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" signal while ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" pressure is within its configured Pressure Threshold range"
+				});
+
+				public static LocString LOGIC_PORT_INACTIVE = string.Concat(new string[]
+				{
+					"Sends a ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" signal while ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" pressure is outside its configured Pressure Threshold range"
+				});
 			}
 
 			public class LOGICTEMPERATURESENSOR
@@ -2952,14 +3184,32 @@ namespace STRINGS
 				{
 					"Becomes ",
 					UI.FormatAsLink("Active", "LOGIC"),
-					" or on ",
+					" or goes on ",
 					UI.FormatAsLink("Standby", "LOGIC"),
 					" when ambient ",
 					UI.FormatAsLink("Temperature", "HEAT"),
 					" enters the chosen range."
 				});
 
-				public static LocString LOGIC_PORT_DESC = "Active/Standby based on Ambient " + UI.FormatAsLink("Temperature", "HEAT") + string.Empty;
+				public static LocString LOGIC_PORT = "Ambient " + UI.FormatAsLink("Temperature", "HEAT");
+
+				public static LocString LOGIC_PORT_ACTIVE = string.Concat(new string[]
+				{
+					"Sends an ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" signal while ambient ",
+					UI.FormatAsLink("Temperature", "HEAT"),
+					" is within its configured Temperature Threshold range"
+				});
+
+				public static LocString LOGIC_PORT_INACTIVE = string.Concat(new string[]
+				{
+					"Sends a ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" signal while ambient ",
+					UI.FormatAsLink("Temperature", "HEAT"),
+					" is outside its configured Temperature Threshold range"
+				});
 			}
 
 			public class LOGICTIMEOFDAYSENSOR
@@ -2976,6 +3226,12 @@ namespace STRINGS
 					UI.FormatAsLink("Standby", "LOGIC"),
 					" schedule using a timer."
 				});
+
+				public static LocString LOGIC_PORT = "Cycle Time";
+
+				public static LocString LOGIC_PORT_ACTIVE = "Sends an " + UI.FormatAsLink("Active", "LOGIC") + " signal when the current time enters its configured Time Schedule range";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Sends a " + UI.FormatAsLink("Standby", "LOGIC") + " signal when current time is not within its configured Time Schedule range";
 			}
 
 			public class LOGICCRITTERCOUNTSENSOR
@@ -2988,10 +3244,16 @@ namespace STRINGS
 				{
 					"Becomes ",
 					UI.FormatAsLink("Active", "LOGIC"),
-					" or on ",
+					" or goes on ",
 					UI.FormatAsLink("Standby", "LOGIC"),
 					" depending on the number of eggs and critters in a room."
 				});
+
+				public static LocString LOGIC_PORT = "Critter Count";
+
+				public static LocString LOGIC_PORT_ACTIVE = "Sends an " + UI.FormatAsLink("Active", "LOGIC") + " signal while the number of critters in the room is within the configured Critter Count range";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Sends a " + UI.FormatAsLink("Standby", "LOGIC") + " signal while the number of critters in the room is outside the configured Critter Count range";
 			}
 
 			public class LOGICDISEASESENSOR
@@ -3004,14 +3266,32 @@ namespace STRINGS
 				{
 					"Becomes ",
 					UI.FormatAsLink("Active", "LOGIC"),
-					" or on ",
+					" or goes on ",
 					UI.FormatAsLink("Standby", "LOGIC"),
 					" depending on quantity of surrounding ",
 					UI.FormatAsLink("Germs", "DISEASE"),
 					"."
 				});
 
-				public static LocString LOGIC_PORT_DESC = "Active/Standby based on ambient " + UI.FormatAsLink("Germs", "DISEASE");
+				public static LocString LOGIC_PORT = UI.FormatAsLink("Germ", "DISEASE") + " Count";
+
+				public static LocString LOGIC_PORT_ACTIVE = string.Concat(new string[]
+				{
+					"Sends an ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" signal when the number of ",
+					UI.FormatAsLink("Germ", "DISEASE"),
+					" enters the configured Germ Threshold range"
+				});
+
+				public static LocString LOGIC_PORT_INACTIVE = string.Concat(new string[]
+				{
+					"Sends a ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" signal when the number of ",
+					UI.FormatAsLink("Germ", "DISEASE"),
+					" is outside the configured Germ Threshold range"
+				});
 			}
 
 			public class LOGICELEMENTSENSORGAS
@@ -3033,7 +3313,25 @@ namespace STRINGS
 					" is not present."
 				});
 
-				public static LocString LOGIC_PORT_DESC = "Active/Standby based on the ambient " + UI.FormatAsLink("Gas", "ELEMENTS_GAS");
+				public static LocString LOGIC_PORT = "Specific" + UI.FormatAsLink("Gas", "ELEMENTS_GAS") + " Presence";
+
+				public static LocString LOGIC_PORT_ACTIVE = string.Concat(new string[]
+				{
+					"Sends an ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" signal while the configured ",
+					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+					" element is detected"
+				});
+
+				public static LocString LOGIC_PORT_INACTIVE = string.Concat(new string[]
+				{
+					"Sends a ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" signal while the configured ",
+					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+					" element is not detected"
+				});
 			}
 
 			public class LOGICELEMENTSENSORLIQUID
@@ -3055,7 +3353,25 @@ namespace STRINGS
 					" is not present."
 				});
 
-				public static LocString LOGIC_PORT_DESC = "Active/Standby based on the ambient " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID");
+				public static LocString LOGIC_PORT = "Specific" + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " Presence";
+
+				public static LocString LOGIC_PORT_ACTIVE = string.Concat(new string[]
+				{
+					"Sends an ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" signal while the configured ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" element is detected"
+				});
+
+				public static LocString LOGIC_PORT_INACTIVE = string.Concat(new string[]
+				{
+					"Sends a ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" signal while the configured ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" element is not detected"
+				});
 			}
 
 			public class GASCONDUITDISEASESENSOR
@@ -3068,14 +3384,32 @@ namespace STRINGS
 				{
 					"Becomes ",
 					UI.FormatAsLink("Active", "LOGIC"),
-					" or on ",
+					" or goes on ",
 					UI.FormatAsLink("Standby", "LOGIC"),
 					" depending on the internal ",
 					UI.FormatAsLink("Germ", "DISEASE"),
 					" count of the pipe."
 				});
 
-				public static LocString LOGIC_PORT_DESC = "Active/Standby based on internal " + UI.FormatAsLink("Germs", "DISEASE");
+				public static LocString LOGIC_PORT = "Internal " + UI.FormatAsLink("Germ", "DISEASE") + " Count";
+
+				public static LocString LOGIC_PORT_ACTIVE = string.Concat(new string[]
+				{
+					"Sends an ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" signal when the number of ",
+					UI.FormatAsLink("Germs", "DISEASE"),
+					" in the pipe enters the configured Germ Threshold range"
+				});
+
+				public static LocString LOGIC_PORT_INACTIVE = string.Concat(new string[]
+				{
+					"Sends a ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" signal when the number of ",
+					UI.FormatAsLink("Germs", "DISEASE"),
+					" in the pipe is outside the configured Germ Threshold range"
+				});
 			}
 
 			public class LIQUIDCONDUITDISEASESENSOR
@@ -3088,14 +3422,32 @@ namespace STRINGS
 				{
 					"Becomes ",
 					UI.FormatAsLink("Active", "LOGIC"),
-					" or on ",
+					" or goes on ",
 					UI.FormatAsLink("Standby", "LOGIC"),
 					" depending on the internal ",
 					UI.FormatAsLink("Germ", "DISEASE"),
 					" count of the pipe."
 				});
 
-				public static LocString LOGIC_PORT_DESC = "Active/Standby based on internal " + UI.FormatAsLink("Germs", "DISEASE");
+				public static LocString LOGIC_PORT = "Internal " + UI.FormatAsLink("Germ", "DISEASE") + " Count";
+
+				public static LocString LOGIC_PORT_ACTIVE = string.Concat(new string[]
+				{
+					"Sends an ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" signal when the number of ",
+					UI.FormatAsLink("Germs", "DISEASE"),
+					" in the pipe enters the configured Germ Threshold range"
+				});
+
+				public static LocString LOGIC_PORT_INACTIVE = string.Concat(new string[]
+				{
+					"Sends a ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" signal when the number of ",
+					UI.FormatAsLink("Germs", "DISEASE"),
+					" in the pipe is outside the configured Germ Threshold range"
+				});
 			}
 
 			public class GASCONDUITELEMENTSENSOR
@@ -3113,7 +3465,25 @@ namespace STRINGS
 					" is detected."
 				});
 
-				public static LocString LOGIC_PORT_DESC = "Active/Standby based on the internal " + UI.FormatAsLink("Gas", "ELEMENTS_GAS");
+				public static LocString LOGIC_PORT = "Internal " + UI.FormatAsLink("Gas", "ELEMENTS_GAS") + " Presence";
+
+				public static LocString LOGIC_PORT_ACTIVE = string.Concat(new string[]
+				{
+					"Sends an ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" signal while the configured ",
+					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+					" is detected"
+				});
+
+				public static LocString LOGIC_PORT_INACTIVE = string.Concat(new string[]
+				{
+					"Sends a ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" signal while the configured ",
+					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+					" is not detected"
+				});
 			}
 
 			public class LIQUIDCONDUITELEMENTSENSOR
@@ -3131,7 +3501,25 @@ namespace STRINGS
 					" is detected."
 				});
 
-				public static LocString LOGIC_PORT_DESC = "Active/Standby based on the internal " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID");
+				public static LocString LOGIC_PORT = "Internal " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " Presence";
+
+				public static LocString LOGIC_PORT_ACTIVE = string.Concat(new string[]
+				{
+					"Sends an ",
+					UI.FormatAsLink("Active", "LOGIC"),
+					" signal while the configured ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" is detected within the pipe"
+				});
+
+				public static LocString LOGIC_PORT_INACTIVE = string.Concat(new string[]
+				{
+					"Sends a ",
+					UI.FormatAsLink("Standby", "LOGIC"),
+					" signal while the configured ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" is not detected within the pipe"
+				});
 			}
 
 			public class GASCONDUITTEMPERATURESENSOR
@@ -3144,14 +3532,18 @@ namespace STRINGS
 				{
 					"Becomes ",
 					UI.FormatAsLink("Active", "LOGIC"),
-					" or on ",
+					" or goes on ",
 					UI.FormatAsLink("Standby", "LOGIC"),
 					" when contents enter the chosen ",
 					UI.FormatAsLink("Temperature", "HEAT"),
 					" range."
 				});
 
-				public static LocString LOGIC_PORT_DESC = "Active/Standby based on internal " + UI.FormatAsLink("Gas", "ELEMENTS_GAS") + UI.FormatAsLink("Temperature", "HEAT");
+				public static LocString LOGIC_PORT = "Internal " + UI.FormatAsLink("Gas", "ELEMENTS_GAS") + UI.FormatAsLink("Temperature", "HEAT");
+
+				public static LocString LOGIC_PORT_ACTIVE = "Sends an " + UI.FormatAsLink("Active", "LOGIC") + " signal when the contained gas's temperature matches its configuration.";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Sends a " + UI.FormatAsLink("Standby", "LOGIC") + " signal when the contained gas's temperature does not match its configuration.";
 			}
 
 			public class LIQUIDCONDUITTEMPERATURESENSOR
@@ -3164,14 +3556,18 @@ namespace STRINGS
 				{
 					"Becomes ",
 					UI.FormatAsLink("Active", "LOGIC"),
-					" or on ",
+					" or goes on ",
 					UI.FormatAsLink("Standby", "LOGIC"),
 					" when contents enter the chosen ",
 					UI.FormatAsLink("Temperature", "HEAT"),
 					" range."
 				});
 
-				public static LocString LOGIC_PORT_DESC = "Active/Standby based on internal " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + UI.FormatAsLink("Temperature", "HEAT");
+				public static LocString LOGIC_PORT = "Internal Liquid " + UI.FormatAsLink("Temperature", "HEAT");
+
+				public static LocString LOGIC_PORT_ACTIVE = "Active when the contained liquid's temperature matches its configuration.";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Standby when the contained liquid's temperature does not match its configuration.";
 			}
 
 			public class TRAVELTUBEENTRANCE
@@ -3289,6 +3685,44 @@ namespace STRINGS
 				public static LocString EFFECT = "Runs one " + UI.FormatAsLink("Conveyor Rail", "SOLIDCONDUIT") + " section over another without joining them.\n\nCan be run through wall and floor tile.";
 			}
 
+			public class SOLIDVENT
+			{
+				public static LocString NAME = UI.FormatAsLink("Conveyor Chute", "SOLIDVENT");
+
+				public static LocString DESC = "When materials reach the end of a rail they are dropped back into the world.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Unloads ",
+					UI.FormatAsLink("Solid Materials", "ELEMENTS_SOLID"),
+					" from a ",
+					UI.FormatAsLink("Conveyor Rail", "SOLIDCONDUIT"),
+					" onto the floor."
+				});
+			}
+
+			public class SOLIDLOGICVALVE
+			{
+				public static LocString NAME = UI.FormatAsLink("Conveyor Shutoff", "SOLIDLOGICVALVE");
+
+				public static LocString DESC = "Automated conveyors saves time and resources by removing the need for Duplicant management.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Connects to an ",
+					UI.FormatAsLink("Automation", "LOGIC"),
+					" grid to automatically turn ",
+					UI.FormatAsLink("Solid Material", "ELEMENTS_SOLID"),
+					" transport on or off."
+				});
+
+				public static LocString LOGIC_PORT = "Open/Close";
+
+				public static LocString LOGIC_PORT_ACTIVE = "Allows material transport while an " + UI.FormatAsLink("Active", "LOGIC") + " signal is being received";
+
+				public static LocString LOGIC_PORT_INACTIVE = "Prevents material transport while a " + UI.FormatAsLink("Standby", "LOGIC") + " signal is being received";
+			}
+
 			public class AUTOMINER
 			{
 				public static LocString NAME = UI.FormatAsLink("Robo-Miner", "AUTOMINER");
@@ -3361,7 +3795,7 @@ namespace STRINGS
 					"Incubates ",
 					UI.FormatAsLink("Critter", "CRITTERS"),
 					" eggs until ready to hatch.\n\nAssigned Duplicants must possess the ",
-					UI.FormatAsLink("Critter Wrangling", "Rancher"),
+					UI.FormatAsLink("Critter Wrangling", "RANCHER"),
 					" trait."
 				});
 			}
@@ -3388,9 +3822,9 @@ namespace STRINGS
 				public static LocString EFFECT = string.Concat(new string[]
 				{
 					"Trains Duplicants to become ",
-					UI.FormatAsLink("Astronauts", UI.StripLinkFormatting(Astronaut.ID)),
+					UI.FormatAsLink("Astronauts", "ASTRONAUT"),
 					".\n\nDuplicants must possess the ",
-					UI.FormatAsLink("Astronaut-in-Training", UI.StripLinkFormatting(AstronautTrainee.ID)),
+					UI.FormatAsLink("Astronaut-in-Training", "ASTRONAUTTRAINEE"),
 					" trait to receive training."
 				});
 			}

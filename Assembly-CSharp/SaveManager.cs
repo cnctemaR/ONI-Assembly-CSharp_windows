@@ -45,7 +45,7 @@ public class SaveManager : KMonoBehaviour
 		KPrefabID component = saver.GetComponent<KPrefabID>();
 		if (component == null)
 		{
-			Output.LogErrorWithObj(saver.gameObject, new object[]
+			DebugUtil.LogErrorArgs(saver.gameObject, new object[]
 			{
 				"All savers must also have a KPrefabID on them but",
 				saver.gameObject.name,
@@ -97,7 +97,7 @@ public class SaveManager : KMonoBehaviour
 		{
 			return gameObject;
 		}
-		Output.Log(new object[]
+		DebugUtil.LogArgs(new object[]
 		{
 			"Item not found in prefabMap",
 			"[" + tag.Name + "]"
@@ -109,7 +109,7 @@ public class SaveManager : KMonoBehaviour
 	{
 		writer.Write(SaveManager.SAVE_HEADER);
 		writer.Write(7);
-		writer.Write(6);
+		writer.Write(8);
 		int num = 0;
 		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in this.sceneObjects)
 		{
@@ -182,7 +182,7 @@ public class SaveManager : KMonoBehaviour
 			}
 			else
 			{
-				Output.LogWarning(new object[] { "Null game object when saving" });
+				DebugUtil.LogWarningArgs(new object[] { "Null game object when saving" });
 			}
 		}
 		long position3 = writer.BaseStream.Position;
@@ -208,9 +208,9 @@ public class SaveManager : KMonoBehaviour
 		}
 		int num = reader.ReadInt32();
 		int num2 = reader.ReadInt32();
-		if (num != 7 || num2 > 6)
+		if (num != 7 || num2 > 8)
 		{
-			Output.LogWarning(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 6, num, num2 }) });
+			DebugUtil.LogWarningArgs(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 8, num, num2 }) });
 			return false;
 		}
 		this.ClearScene();
@@ -226,7 +226,7 @@ public class SaveManager : KMonoBehaviour
 				GameObject gameObject;
 				if (!this.prefabMap.TryGetValue(tag, out gameObject))
 				{
-					Output.LogWarning(new object[] { "Could not find prefab '" + text + "'" });
+					DebugUtil.LogWarningArgs(new object[] { "Could not find prefab '" + text + "'" });
 					reader.SkipBytes(num5);
 				}
 				else
@@ -238,7 +238,7 @@ public class SaveManager : KMonoBehaviour
 						SaveLoadRoot saveLoadRoot = SaveLoadRoot.Load(gameObject, reader);
 						if (saveLoadRoot == null)
 						{
-							Output.LogError("Error loading data [" + text + "]");
+							global::Debug.LogError("Error loading data [" + text + "]");
 							return false;
 						}
 					}
@@ -247,7 +247,7 @@ public class SaveManager : KMonoBehaviour
 		}
 		catch (Exception ex)
 		{
-			Output.LogError(new object[]
+			DebugUtil.LogErrorArgs(new object[]
 			{
 				"Error deserializing prefabs\n\n",
 				ex.ToString()
@@ -269,9 +269,17 @@ public class SaveManager : KMonoBehaviour
 		this.sceneObjects.Clear();
 	}
 
+	public const int SAVE_MAJOR_VERSION_LAST_UNDOCUMENTED = 7;
+
 	public const int SAVE_MAJOR_VERSION = 7;
 
-	public const int SAVE_MINOR_VERSION = 6;
+	public const int SAVE_MINOR_VERSION_EXPLICIT_VALUE_TYPES = 4;
+
+	public const int SAVE_MINOR_VERSION_LAST_UNDOCUMENTED = 7;
+
+	public const int SAVE_MINOR_VERSION_MOD_IDENTIFIER = 8;
+
+	public const int SAVE_MINOR_VERSION = 8;
 
 	private Dictionary<Tag, GameObject> prefabMap = new Dictionary<Tag, GameObject>();
 

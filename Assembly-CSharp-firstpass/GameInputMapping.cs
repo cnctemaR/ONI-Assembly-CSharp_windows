@@ -50,6 +50,7 @@ public class GameInputMapping
 				return bindingEntry;
 			}
 		}
+		global::Debug.Assert(false, "Unbound action " + mAction.ToString());
 		return GameInputMapping.KeyBindings[0];
 	}
 
@@ -134,7 +135,7 @@ public class GameInputMapping
 		}
 		catch
 		{
-			Output.LogError(new object[]
+			DebugUtil.LogErrorArgs(new object[]
 			{
 				"Error parsing",
 				GameInputMapping.BindingsFilename

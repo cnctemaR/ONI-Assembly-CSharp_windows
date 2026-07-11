@@ -44,13 +44,13 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		KleiAccount.AccountReply accountReply = JsonConvert.DeserializeObject<KleiAccount.AccountReply>(text);
 		if (!accountReply.Error)
 		{
-			Debug.Log("[Account] Got login for user " + accountReply.UserID, null);
+			Debug.Log("[Account] Got login for user " + accountReply.UserID);
 			KleiAccount.KleiUserID = ((!(accountReply.UserID == string.Empty)) ? accountReply.UserID : null);
 			this.gotUserID();
 		}
 		else
 		{
-			Debug.Log("[Account] Error logging in: " + text, null);
+			Debug.Log("[Account] Error logging in: " + text);
 			this.gotUserID();
 		}
 		base.End();
@@ -78,7 +78,7 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 	{
 		if (KleiAccount.KleiUserID == null)
 		{
-			Debug.Log("[Account] Requesting auth ticket from " + DistributionPlatform.Inst.Name, null);
+			Debug.Log("[Account] Requesting auth ticket from " + DistributionPlatform.Inst.Name);
 			this.gotUserID = cb;
 			byte[] array = this.AuthTicket();
 			if (array == null || array.Length == 0)

@@ -20,7 +20,6 @@ public class SolarPanel : Generator
 			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
 			SimMessages.SetCellProperties(num3, 39);
 			Grid.Foundation[num3] = true;
-			Grid.PreviousSolid[num3] = Grid.Solid[num3];
 			Grid.SetSolid(num3, true, CellEventLogger.Instance.SimCellOccupierForceSolid);
 			World.Instance.OnSolidChanged(num3);
 			GameScenePartitioner.Instance.TriggerEvent(num3, GameScenePartitioner.Instance.solidChangedLayer, null);
@@ -40,7 +39,6 @@ public class SolarPanel : Generator
 			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
 			SimMessages.ClearCellProperties(num3, 39);
 			Grid.Foundation[num3] = false;
-			Grid.PreviousSolid[num3] = Grid.Solid[num3];
 			Grid.SetSolid(num3, false, CellEventLogger.Instance.SimCellOccupierForceSolid);
 			World.Instance.OnSolidChanged(num3);
 			GameScenePartitioner.Instance.TriggerEvent(num3, GameScenePartitioner.Instance.solidChangedLayer, null);

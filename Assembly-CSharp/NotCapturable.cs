@@ -7,7 +7,7 @@ public class NotCapturable : KMonoBehaviour
 		base.OnPrefabInit();
 		if (base.GetComponent<Capturable>() != null)
 		{
-			Output.LogErrorWithObj(this, new object[] { "Entity has both Capturable and NotCapturable!" });
+			DebugUtil.LogErrorArgs(this, new object[] { "Entity has both Capturable and NotCapturable!" });
 		}
 		Components.NotCapturables.Add(this);
 	}

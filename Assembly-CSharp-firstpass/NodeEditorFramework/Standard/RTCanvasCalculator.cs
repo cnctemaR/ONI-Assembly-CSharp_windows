@@ -84,7 +84,7 @@ namespace NodeEditorFramework.Standard
 						});
 					}
 				}
-				global::Debug.Log(text, null);
+				global::Debug.Log(text);
 			}
 		}
 

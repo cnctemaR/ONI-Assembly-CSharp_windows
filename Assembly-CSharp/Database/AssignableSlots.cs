@@ -18,6 +18,7 @@ namespace Database
 			this.Toilet = base.Add(new OwnableSlot("Toilet", MISC.TAGS.TOILET));
 			this.MassageTable = base.Add(new OwnableSlot("MassageTable", MISC.TAGS.MASSAGE_TABLE));
 			this.RocketCommandModule = base.Add(new OwnableSlot("RocketCommandModule", MISC.TAGS.COMMAND_MODULE));
+			this.ResetSkillsStation = base.Add(new OwnableSlot("ResetSkillsStation", "ResetSkillsStation"));
 			this.Suit = base.Add(new EquipmentSlot(global::TUNING.EQUIPMENT.SUITS.SLOT, MISC.TAGS.SUIT, true));
 			this.Tool = base.Add(new EquipmentSlot(global::TUNING.EQUIPMENT.TOOLS.TOOLSLOT, MISC.TAGS.MULTITOOL, false));
 			this.Outfit = base.Add(new EquipmentSlot(global::TUNING.EQUIPMENT.CLOTHING.SLOT, MISC.TAGS.CLOTHES, true));
@@ -38,6 +39,8 @@ namespace Database
 		public AssignableSlot MassageTable;
 
 		public AssignableSlot RocketCommandModule;
+
+		public AssignableSlot ResetSkillsStation;
 
 		public AssignableSlot Suit;
 

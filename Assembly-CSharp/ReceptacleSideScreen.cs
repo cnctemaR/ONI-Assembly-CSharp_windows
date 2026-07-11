@@ -18,7 +18,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 	{
 		if (target == null)
 		{
-			global::Debug.LogError("SingleObjectReceptacle provided was null.", null);
+			global::Debug.LogError("SingleObjectReceptacle provided was null.");
 			return;
 		}
 		this.targetReceptacle = target;
@@ -49,6 +49,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 					list.Add(component);
 				}
 			}
+			global::Debug.Assert(list.Count == prefabsWithTag.Count, "Not all entities in this receptacle implement IHasSortOrder!");
 			list.Sort((IHasSortOrder a, IHasSortOrder b) => a.sortOrder - b.sortOrder);
 			foreach (IHasSortOrder hasSortOrder in list)
 			{
@@ -285,7 +286,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		SingleEntityReceptacle component = target.GetComponent<SingleEntityReceptacle>();
 		if (component == null)
 		{
-			global::Debug.LogError("The object selected doesn't have a SingleObjectReceptacle!", null);
+			global::Debug.LogError("The object selected doesn't have a SingleObjectReceptacle!");
 			return;
 		}
 		this.Initialize(component);
@@ -408,7 +409,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 	{
 		if (!this.depositObjectMap.ContainsKey(toggle))
 		{
-			global::Debug.LogError("Recipe not found on recipe list.", null);
+			global::Debug.LogError("Recipe not found on recipe list.");
 			return;
 		}
 		if (this.selectedEntityToggle != null)

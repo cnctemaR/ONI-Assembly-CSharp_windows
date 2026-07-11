@@ -173,7 +173,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 		}
 		else
 		{
-			global::Debug.Log("Invalid state for sound in EnergyConsumer.", null);
+			global::Debug.Log("Invalid state for sound in EnergyConsumer.");
 		}
 		if (!CameraController.Instance.IsAudibleSound(base.transform.GetPosition()))
 		{

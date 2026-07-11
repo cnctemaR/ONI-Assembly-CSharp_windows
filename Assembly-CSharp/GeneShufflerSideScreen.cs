@@ -21,7 +21,7 @@ public class GeneShufflerSideScreen : SideScreenContent
 		GeneShuffler component = target.GetComponent<GeneShuffler>();
 		if (component == null)
 		{
-			global::Debug.LogError("Target doesn't have a GeneShuffler associated with it.", null);
+			global::Debug.LogError("Target doesn't have a GeneShuffler associated with it.");
 			return;
 		}
 		this.target = component;

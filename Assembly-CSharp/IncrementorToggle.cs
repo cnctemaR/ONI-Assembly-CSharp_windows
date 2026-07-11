@@ -56,7 +56,7 @@ public class IncrementorToggle : MultiToggle
 		}
 		if (this.states.Length - 1 < this.state)
 		{
-			global::Debug.LogWarning("Multi toggle has too few / no states", null);
+			global::Debug.LogWarning("Multi toggle has too few / no states");
 		}
 		base.RefreshHoverColor();
 	}

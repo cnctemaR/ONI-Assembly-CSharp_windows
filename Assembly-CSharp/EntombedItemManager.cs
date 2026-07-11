@@ -202,7 +202,7 @@ public class EntombedItemManager : KMonoBehaviour, ISim33ms
 			Element element = ElementLoader.FindElementByHash(elementId);
 			if (element != null)
 			{
-				element.substance.SpawnResource(Grid.CellToPosCCC(item.cell, Grid.SceneLayer.Ore), item.mass, item.temperature, item.diseaseIdx, item.diseaseCount, false, false);
+				element.substance.SpawnResource(Grid.CellToPosCCC(item.cell, Grid.SceneLayer.Ore), item.mass, item.temperature, item.diseaseIdx, item.diseaseCount, false, false, false);
 			}
 		}
 	}

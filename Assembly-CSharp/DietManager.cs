@@ -32,7 +32,7 @@ public class DietManager : KMonoBehaviour
 					GameObject prefab = Assets.GetPrefab(tag2);
 					if (prefab == null)
 					{
-						global::Debug.LogError("Could not find prefab: " + tag2, null);
+						global::Debug.LogError("Could not find prefab: " + tag2);
 					}
 				}
 			}

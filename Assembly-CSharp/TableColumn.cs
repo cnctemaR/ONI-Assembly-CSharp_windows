@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TableColumn : IRender1000ms
 {
-	public TableColumn(Action<MinionIdentity, GameObject> on_load_action, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip = null, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip = null, Func<bool> revealed = null, bool should_refresh_columns = false, string scrollerID = "")
+	public TableColumn(Action<IAssignableIdentity, GameObject> on_load_action, Comparison<IAssignableIdentity> sort_comparison, Action<IAssignableIdentity, GameObject, ToolTip> on_tooltip = null, Action<IAssignableIdentity, GameObject, ToolTip> on_sort_tooltip = null, Func<bool> revealed = null, bool should_refresh_columns = false, string scrollerID = "")
 	{
 		this.on_load_action = on_load_action;
 		this.sort_comparer = sort_comparison;
@@ -45,7 +45,7 @@ public class TableColumn : IRender1000ms
 		}
 		if (tableRow != null && this.on_tooltip != null)
 		{
-			this.on_tooltip(tableRow.GetMinionIdentity(), gameObject, tool_tip_instance);
+			this.on_tooltip(tableRow.GetIdentity(), gameObject, tool_tip_instance);
 		}
 		return string.Empty;
 	}
@@ -64,7 +64,7 @@ public class TableColumn : IRender1000ms
 		}
 		if (tableRow != null && this.on_sort_tooltip != null)
 		{
-			this.on_sort_tooltip(tableRow.GetMinionIdentity(), gameObject, sort_tooltip_instance);
+			this.on_sort_tooltip(tableRow.GetIdentity(), gameObject, sort_tooltip_instance);
 		}
 		return string.Empty;
 	}
@@ -84,19 +84,19 @@ public class TableColumn : IRender1000ms
 
 	public virtual GameObject GetMinionWidget(GameObject parent)
 	{
-		global::Debug.LogError("Table Column has no Widget prefab", null);
+		global::Debug.LogError("Table Column has no Widget prefab");
 		return null;
 	}
 
 	public virtual GameObject GetHeaderWidget(GameObject parent)
 	{
-		global::Debug.LogError("Table Column has no Widget prefab", null);
+		global::Debug.LogError("Table Column has no Widget prefab");
 		return null;
 	}
 
 	public virtual GameObject GetDefaultWidget(GameObject parent)
 	{
-		global::Debug.LogError("Table Column has no Widget prefab", null);
+		global::Debug.LogError("Table Column has no Widget prefab");
 		return null;
 	}
 
@@ -115,13 +115,13 @@ public class TableColumn : IRender1000ms
 		this.dirty = false;
 	}
 
-	public Action<MinionIdentity, GameObject> on_load_action;
+	public Action<IAssignableIdentity, GameObject> on_load_action;
 
-	public Action<MinionIdentity, GameObject, ToolTip> on_tooltip;
+	public Action<IAssignableIdentity, GameObject, ToolTip> on_tooltip;
 
-	public Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip;
+	public Action<IAssignableIdentity, GameObject, ToolTip> on_sort_tooltip;
 
-	public Comparison<MinionIdentity> sort_comparer;
+	public Comparison<IAssignableIdentity> sort_comparer;
 
 	public Dictionary<TableRow, GameObject> widgets_by_row = new Dictionary<TableRow, GameObject>();
 

@@ -28,7 +28,15 @@ public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 				return;
 			}
 			int num = Grid.PosToCell(base.smi.master.gameObject);
-			SimMessages.AddRemoveSubstance(num, SimHashes.Water, CellEventLogger.Instance.Tears, 1f * STRESS.TEARS_RATE * dt, this.bodyTemperature.value, byte.MaxValue, 0, true, -1);
+			Equippable equippable = base.GetComponent<SuitEquipper>().IsWearingAirtightSuit();
+			if (equippable != null)
+			{
+				equippable.GetComponent<Storage>().AddLiquid(SimHashes.Water, 1f * STRESS.TEARS_RATE * dt, this.bodyTemperature.value, byte.MaxValue, 0, false, true);
+			}
+			else
+			{
+				SimMessages.AddRemoveSubstance(num, SimHashes.Water, CellEventLogger.Instance.Tears, 1f * STRESS.TEARS_RATE * dt, this.bodyTemperature.value, byte.MaxValue, 0, true, -1);
+			}
 		}
 
 		private AmountInstance bodyTemperature;

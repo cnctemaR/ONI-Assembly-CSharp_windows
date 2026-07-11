@@ -184,7 +184,7 @@ public class RocketModule : KMonoBehaviour
 		}
 		else
 		{
-			global::Debug.LogWarning("Module conditionManager is null", null);
+			global::Debug.LogWarning("Module conditionManager is null");
 		}
 	}
 

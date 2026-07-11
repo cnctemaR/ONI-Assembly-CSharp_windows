@@ -7,7 +7,6 @@ using Klei;
 using Klei.CustomSettings;
 using KSerialization;
 using ProcGen;
-using Steamworks;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class CustomGameSettings : KMonoBehaviour
@@ -40,6 +39,7 @@ public class CustomGameSettings : KMonoBehaviour
 		this.AddSettingConfig(CustomGameSettingConfigs.WorldgenSeed);
 		this.AddSettingConfig(CustomGameSettingConfigs.SandboxMode);
 		this.AddSettingConfig(CustomGameSettingConfigs.World);
+		this.AddSettingConfig(CustomGameSettingConfigs.CarePackages);
 	}
 
 	public void SetSurvivalDefaults()
@@ -111,7 +111,7 @@ public class CustomGameSettings : KMonoBehaviour
 				return level.label;
 			}
 		}
-		Debug.LogWarning("No label string for setting: " + setting_id + " level: " + level_id, null);
+		Debug.LogWarning("No label string for setting: " + setting_id + " level: " + level_id);
 		return string.Empty;
 	}
 
@@ -126,7 +126,7 @@ public class CustomGameSettings : KMonoBehaviour
 				return level.tooltip;
 			}
 		}
-		Debug.LogWarning("No tooltip string for setting: " + setting_id + " level: " + level_id, null);
+		Debug.LogWarning("No tooltip string for setting: " + setting_id + " level: " + level_id);
 		return string.Empty;
 	}
 
@@ -139,7 +139,7 @@ public class CustomGameSettings : KMonoBehaviour
 		}
 	}
 
-	private static void AddModLevels(IFileSystem fs, object user_data, List<SettingLevel> levels)
+	private static void AddWorldMods(IFileSystem fs, object user_data, List<SettingLevel> levels)
 	{
 		string text = FSUtil.Normalize(global::System.IO.Path.Combine(SettingsCache.GetPath(), "worlds"));
 		ListPool<string, CustomGameSettings>.PooledList pooledList = ListPool<string, CustomGameSettings>.Allocate();
@@ -161,25 +161,6 @@ public class CustomGameSettings : KMonoBehaviour
 		{
 			list.Add(new SettingLevel(keyValuePair.Key, keyValuePair.Value.world.name, keyValuePair.Value.world.description, null));
 		}
-		if (DistributionPlatform.Initialized)
-		{
-			List<SteamUGCService.Subscribed> subscribed = SteamUGCService.Instance.GetSubscribed("worldgen");
-			foreach (SteamUGCService.Subscribed subscribed2 in subscribed)
-			{
-				ulong num;
-				string text;
-				uint num2;
-				SteamUGC.GetItemInstallInfo(subscribed2.fileId, out num, out text, 1024U, out num2);
-				string path = SettingsCache.GetPath();
-				string text2 = subscribed2.fileId.m_PublishedFileId.ToString();
-				ModInfo modInfo = new ModInfo(ModInfo.Source.Steam, ModInfo.ModType.WorldGen, text2, subscribed2.description, path, 0UL);
-				FileStream fileStream = File.OpenRead(text);
-				ZipFileSystem zipFileSystem = new ZipFileSystem(text2, fileStream, path);
-				Global.Instance.layeredFileSystem.AddFileSystem(zipFileSystem);
-				CustomGameSettings.AddModLevels(zipFileSystem, modInfo, list);
-				Global.Instance.layeredFileSystem.RemoveFileSystem(zipFileSystem);
-			}
-		}
 		CustomGameSettingConfigs.World.StompLevels(list, "worlds/Default", "worlds/Default");
 	}
 
@@ -191,7 +172,7 @@ public class CustomGameSettings : KMonoBehaviour
 			string text2 = text;
 			text = string.Concat(new string[] { text2, keyValuePair.Key, "=", keyValuePair.Value, "," });
 		}
-		Debug.Log(text, null);
+		Debug.Log(text);
 	}
 
 	private bool AllValuesMatch(Dictionary<string, string> data, CustomGameSettings.CustomGameMode mode)

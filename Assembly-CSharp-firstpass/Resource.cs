@@ -10,6 +10,7 @@ public class Resource
 
 	public Resource(string id, ResourceSet parent = null, string name = null)
 	{
+		global::Debug.Assert(id != null);
 		this.Id = id;
 		this.IdHash = new HashedString(this.Id);
 		this.Guid = new ResourceGuid(id, parent);
@@ -29,6 +30,7 @@ public class Resource
 
 	public Resource(string id, string name)
 	{
+		global::Debug.Assert(id != null);
 		this.Guid = new ResourceGuid(id, null);
 		this.Id = id;
 		this.IdHash = new HashedString(this.Id);

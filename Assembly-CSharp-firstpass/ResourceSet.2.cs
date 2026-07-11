@@ -68,6 +68,25 @@ public class ResourceSet<T> : ResourceSet where T : Resource
 		return (T)((object)null);
 	}
 
+	public T Get(HashedString id)
+	{
+		foreach (T t in this.resources)
+		{
+			if (new HashedString(t.Id) == id)
+			{
+				return t;
+			}
+		}
+		Debug.LogError(string.Concat(new object[]
+		{
+			"Could not find ",
+			typeof(T).ToString(),
+			": ",
+			id
+		}));
+		return (T)((object)null);
+	}
+
 	public T Get(string id)
 	{
 		foreach (T t in this.resources)
@@ -77,7 +96,7 @@ public class ResourceSet<T> : ResourceSet where T : Resource
 				return t;
 			}
 		}
-		Debug.LogError("Could not find " + typeof(T).ToString() + ": " + id, null);
+		Debug.LogError("Could not find " + typeof(T).ToString() + ": " + id);
 		return (T)((object)null);
 	}
 
@@ -86,7 +105,7 @@ public class ResourceSet<T> : ResourceSet where T : Resource
 		T t = resource as T;
 		if (t == null)
 		{
-			Debug.LogError("Resource type mismatch: " + resource.GetType().Name + " does not match " + typeof(T).Name, null);
+			Debug.LogError("Resource type mismatch: " + resource.GetType().Name + " does not match " + typeof(T).Name);
 		}
 		this.Add(t);
 		return resource;
@@ -96,7 +115,7 @@ public class ResourceSet<T> : ResourceSet where T : Resource
 	{
 		if (resource == null)
 		{
-			Output.LogError("Tried to add a null to the resource set");
+			Debug.LogError("Tried to add a null to the resource set");
 			return (T)((object)null);
 		}
 		this.resources.Add(resource);

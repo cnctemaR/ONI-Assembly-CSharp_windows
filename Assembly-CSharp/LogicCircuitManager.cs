@@ -89,7 +89,7 @@ public class LogicCircuitManager
 		go.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoLogicWireConnected, show_missing_wire, null);
 	}
 
-	private static float ClockTickInterval = 0.1f;
+	public static float ClockTickInterval = 0.1f;
 
 	private float elapsedTime;
 

@@ -60,8 +60,7 @@ public class BuildingChoresPanelDupeRow : KMonoBehaviour
 			ChoreGroup choreGroup = context.chore.choreType.groups[0];
 			for (int i = 1; i < context.chore.choreType.groups.Length; i++)
 			{
-				bool flag2 = true;
-				if (choreConsumer.GetPersonalPriority(choreGroup, out flag2) < choreConsumer.GetPersonalPriority(context.chore.choreType.groups[i], out flag2))
+				if (choreConsumer.GetPersonalPriority(choreGroup) < choreConsumer.GetPersonalPriority(context.chore.choreType.groups[i]))
 				{
 					choreGroup = context.chore.choreType.groups[i];
 				}

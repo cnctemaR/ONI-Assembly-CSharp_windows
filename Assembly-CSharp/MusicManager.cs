@@ -38,12 +38,12 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		MusicManager.SongInfo songInfo = null;
 		if (!this.songMap.TryGetValue(song_name, out songInfo))
 		{
-			Output.LogError(new object[] { "Unknown song:", song_name });
+			DebugUtil.LogErrorArgs(new object[] { "Unknown song:", song_name });
 			return;
 		}
 		if (this.activeSongs.ContainsKey(song_name))
 		{
-			Output.LogWarning(new object[] { "Trying to play duplicate song:", song_name });
+			DebugUtil.LogWarningArgs(new object[] { "Trying to play duplicate song:", song_name });
 			return;
 		}
 		if (this.activeSongs.Count == 0)
@@ -51,7 +51,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			songInfo.ev = KFMOD.CreateInstance(songInfo.fmodEvent);
 			if (!songInfo.ev.isValid())
 			{
-				Output.LogWarning(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
+				DebugUtil.LogWarningArgs(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
 			}
 			int num = ((songInfo.numberOfVariations <= 0) ? (-1) : global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1));
 			if (num != -1)
@@ -83,7 +83,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 				songInfo.ev = KFMOD.CreateInstance(songInfo.fmodEvent);
 				if (!songInfo.ev.isValid())
 				{
-					Output.LogWarning(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
+					DebugUtil.LogWarningArgs(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
 				}
 				songInfo.ev.start();
 				songInfo.ev.release();
@@ -117,7 +117,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 					songInfo.ev = KFMOD.CreateInstance(songInfo.fmodEvent);
 					if (!songInfo.ev.isValid())
 					{
-						Output.LogWarning(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
+						DebugUtil.LogWarningArgs(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
 					}
 					int num3 = ((songInfo.numberOfVariations <= 0) ? (-1) : global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1));
 					if (num3 != -1)
@@ -140,12 +140,12 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		MusicManager.SongInfo songInfo = null;
 		if (!this.songMap.TryGetValue(song_name, out songInfo))
 		{
-			Output.LogError(new object[] { "Unknown song:", song_name });
+			DebugUtil.LogErrorArgs(new object[] { "Unknown song:", song_name });
 			return;
 		}
 		if (!this.activeSongs.ContainsKey(song_name))
 		{
-			Output.LogWarning(new object[] { "Trying to stop a song that isn't playing:", song_name });
+			DebugUtil.LogWarningArgs(new object[] { "Trying to stop a song that isn't playing:", song_name });
 			return;
 		}
 		FMOD.Studio.EventInstance ev = songInfo.ev;
@@ -376,7 +376,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		foreach (KeyValuePair<string, MusicManager.SongInfo> keyValuePair in this.activeSongs)
 		{
 			text2 = text2 + keyValuePair.Key + ", ";
-			global::Debug.Log(text2, null);
+			global::Debug.Log(text2);
 		}
 		KCrashReporter.Assert(false, "Song failed to play: " + nextDynamicSong);
 	}

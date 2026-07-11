@@ -177,6 +177,7 @@ public class GeneShuffler : Workable
 
 	private void ActivateChore()
 	{
+		global::Debug.Assert(this.chore == null);
 		base.GetComponent<Workable>().SetWorkTime(float.PositiveInfinity);
 		ChoreType geneShuffle = Db.Get().ChoreTypes.GeneShuffle;
 		KAnimFile anim = Assets.GetAnim("anim_interacts_neuralvacillator_kanim");

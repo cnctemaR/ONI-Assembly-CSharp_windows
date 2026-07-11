@@ -91,7 +91,7 @@ namespace VoronoiTree
 				}
 				catch (Exception ex)
 				{
-					global::Debug.LogError(string.Concat(new object[] { "Error [", num, "] iters ", this.completedIterations, "/", maxIterations, " Exception:", ex.Message, "\n", ex.StackTrace }), null);
+					global::Debug.LogError(string.Concat(new object[] { "Error [", num, "] iters ", this.completedIterations, "/", maxIterations, " Exception:", ex.Message, "\n", ex.StackTrace }));
 					return;
 				}
 				num = 0f;
@@ -110,7 +110,7 @@ namespace VoronoiTree
 				i++;
 				continue;
 			}
-			global::Debug.Log(string.Concat(new object[] { "error [", num, "] iters ", this.completedIterations, "/", maxIterations }), null);
+			global::Debug.Log(string.Concat(new object[] { "error [", num, "] iters ", this.completedIterations, "/", maxIterations }));
 		}
 
 		public void ComputeVD()
@@ -525,6 +525,7 @@ namespace VoronoiTree
 			{
 				if (!dual3dSites[i].site.dummy)
 				{
+					global::Debug.Assert(dual3dSites[i].site.currentWeight != 0f);
 					for (int j = i + 1; j < dual3dSites.Count; j++)
 					{
 						if (!dual3dSites[j].site.dummy)

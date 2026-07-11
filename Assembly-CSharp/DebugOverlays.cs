@@ -39,6 +39,6 @@ public class DebugOverlays : KScreen
 				return;
 			}
 		}
-		Debug.LogError("Unknown debug view: " + str, null);
+		Debug.LogError("Unknown debug view: " + str);
 	}
 }

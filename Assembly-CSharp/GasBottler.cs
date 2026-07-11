@@ -1,5 +1,4 @@
 ﻿using System;
-using TUNING;
 using UnityEngine;
 
 public class GasBottler : Workable
@@ -19,12 +18,6 @@ public class GasBottler : Workable
 			this.smi.StopSM("OnCleanUp");
 		}
 		base.OnCleanUp();
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole("Hauler", work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
-		resume.AddExperienceIfRole(MaterialsManager.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
 	}
 
 	private void UpdateStoredItemState()

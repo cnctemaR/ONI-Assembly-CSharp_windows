@@ -89,7 +89,7 @@ public class FilteredDragTool : DragTool
 		base.OnDeactivateTool(new_tool);
 	}
 
-	protected string GetFilterLayerFromGameObject(GameObject input)
+	public virtual string GetFilterLayerFromGameObject(GameObject input)
 	{
 		BuildingComplete component = input.GetComponent<BuildingComplete>();
 		BuildingUnderConstruction component2 = input.GetComponent<BuildingUnderConstruction>();
@@ -112,44 +112,50 @@ public class FilteredDragTool : DragTool
 		return "Default";
 	}
 
-	protected string GetFilterLayerFromObjectLayer(ObjectLayer gamer_layer)
+	public string GetFilterLayerFromObjectLayer(ObjectLayer gamer_layer)
 	{
 		switch (gamer_layer)
 		{
 		case ObjectLayer.GasConduitConnection:
-			break;
+			goto IL_008C;
 		case ObjectLayer.LiquidConduit:
 		case ObjectLayer.LiquidConduitConnection:
 			return "LiquidPipes";
 		default:
-			if (gamer_layer == ObjectLayer.Building)
-			{
-				return "Buildings";
-			}
-			if (gamer_layer == ObjectLayer.Backwall)
-			{
-				return "BackWall";
-			}
 			switch (gamer_layer)
 			{
-			case ObjectLayer.FoundationTile:
-				return "Tiles";
+			case ObjectLayer.WireConnectors:
+				break;
+			case ObjectLayer.LogicGates:
+			case ObjectLayer.LogicWires:
+				return "Logic";
 			default:
-				if (gamer_layer != ObjectLayer.LogicGates && gamer_layer != ObjectLayer.LogicWires)
+				if (gamer_layer == ObjectLayer.Building)
 				{
+					return "Buildings";
+				}
+				if (gamer_layer != ObjectLayer.Backwall)
+				{
+					switch (gamer_layer)
+					{
+					case ObjectLayer.FoundationTile:
+						return "Tiles";
+					case ObjectLayer.GasConduit:
+						goto IL_008C;
+					}
 					return "Default";
 				}
-				return "Logic";
-			case ObjectLayer.GasConduit:
-				break;
+				return "BackWall";
 			}
 			break;
 		case ObjectLayer.SolidConduit:
 		case ObjectLayer.SolidConduitConnection:
 			return "SolidConduits";
 		case ObjectLayer.Wire:
-			return "Wires";
+			break;
 		}
+		return "Wires";
+		IL_008C:
 		return "GasPipes";
 	}
 

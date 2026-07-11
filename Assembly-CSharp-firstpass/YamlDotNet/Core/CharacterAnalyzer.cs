@@ -142,6 +142,7 @@ namespace YamlDotNet.Core
 
 		public bool Check(string expectedCharacters, int offset = 0)
 		{
+			Debug.Assert(expectedCharacters.Length > 1, "Use Check(char, int) instead.");
 			TBuffer tbuffer = this.buffer;
 			char c = tbuffer.Peek(offset);
 			return expectedCharacters.IndexOf(c) != -1;

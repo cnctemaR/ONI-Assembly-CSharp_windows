@@ -194,6 +194,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 				}
 				if (num8 <= 0f)
 				{
+					global::Debug.Assert(num8 <= 0f);
 				}
 			}
 		}
@@ -248,7 +249,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 						}
 						else
 						{
-							GameObject gameObject3 = element.substance.SpawnResource(base.transform.GetPosition(), num13, num14, diseaseInfo2.idx, diseaseInfo2.count, true, false);
+							GameObject gameObject3 = element.substance.SpawnResource(base.transform.GetPosition(), num13, num14, diseaseInfo2.idx, diseaseInfo2.count, true, false, false);
 							this.storage.Store(gameObject3, true, false, true, false);
 						}
 					}
@@ -268,7 +269,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 					}
 					else if (element.IsSolid)
 					{
-						element.substance.SpawnResource(vector, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, false, false);
+						element.substance.SpawnResource(vector, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, false, false, false);
 					}
 					else
 					{

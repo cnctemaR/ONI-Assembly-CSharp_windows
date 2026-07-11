@@ -16,21 +16,22 @@ public class ManagementMenu : KIconToggleMenu
 		base.OnPrefabInit();
 		ManagementMenu.Instance = this;
 		CodexCache.Init();
+		ScheduledUIInstantiation component = GameScreenManager.Instance.ssOverlayCanvas.GetComponent<ScheduledUIInstantiation>();
 		this.instantiator.Instantiate();
 		this.jobsScreen = this.instantiator.GetComponentInChildren<JobsTableScreen>(true);
 		this.consumablesScreen = this.instantiator.GetComponentInChildren<ConsumablesTableScreen>(true);
 		this.vitalsScreen = this.instantiator.GetComponentInChildren<VitalsTableScreen>(true);
-		this.starmapScreen = Resources.FindObjectsOfTypeAll(typeof(StarmapScreen))[0] as StarmapScreen;
+		this.starmapScreen = component.GetInstantiatedObject<StarmapScreen>();
 		this.codexScreen = this.instantiator.GetComponentInChildren<CodexScreen>(true);
 		this.scheduleScreen = this.instantiator.GetComponentInChildren<ScheduleScreen>(true);
-		this.rolesScreen = Resources.FindObjectsOfTypeAll(typeof(RolesScreen))[0] as RolesScreen;
+		this.skillsScreen = component.GetInstantiatedObject<SkillsScreen>();
 		base.Subscribe(Game.Instance.gameObject, 288942073, new Action<object>(this.OnUIClear));
 		this.consumablesInfo = new KIconToggleMenu.ToggleInfo(UI.CONSUMABLES, "OverviewUI_consumables_icon", null, global::Action.ManageConsumables, UI.TOOLTIPS.MANAGEMENTMENU_CONSUMABLES, string.Empty);
 		this.vitalsInfo = new KIconToggleMenu.ToggleInfo(UI.VITALS, "OverviewUI_vitals_icon", null, global::Action.ManageVitals, UI.TOOLTIPS.MANAGEMENTMENU_VITALS, string.Empty);
 		this.reportsInfo = new KIconToggleMenu.ToggleInfo(UI.REPORT, "OverviewUI_reports_icon", null, global::Action.ManageReport, UI.TOOLTIPS.MANAGEMENTMENU_DAILYREPORT, string.Empty);
 		this.researchInfo = new KIconToggleMenu.ToggleInfo(UI.RESEARCH, "OverviewUI_research_nav_icon", null, global::Action.ManageResearch, UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH, string.Empty);
 		this.jobsInfo = new KIconToggleMenu.ToggleInfo(UI.JOBS, "OverviewUI_priority_icon", null, global::Action.ManagePeople, UI.TOOLTIPS.MANAGEMENTMENU_JOBS, string.Empty);
-		this.rolesInfo = new KIconToggleMenu.ToggleInfo(UI.ROLES_SCREEN.MANAGEMENT_BUTTON, "OverviewUI_jobs_icon", null, global::Action.ManageRoles, UI.TOOLTIPS.MANAGEMENTMENU_ROLES, string.Empty);
+		this.skillsInfo = new KIconToggleMenu.ToggleInfo(UI.SKILLS, "OverviewUI_jobs_icon", null, global::Action.ManageRoles, UI.TOOLTIPS.MANAGEMENTMENU_SKILLS, string.Empty);
 		this.starmapInfo = new KIconToggleMenu.ToggleInfo(UI.STARMAP.MANAGEMENT_BUTTON, "ic_rocket", null, global::Action.ManageStarmap, UI.TOOLTIPS.MANAGEMENTMENU_STARMAP, string.Empty);
 		this.codexInfo = new KIconToggleMenu.ToggleInfo(UI.CODEX.MANAGEMENT_BUTTON, "OverviewUI_database_icon", null, global::Action.ManageCodex, UI.TOOLTIPS.MANAGEMENTMENU_CODEX, string.Empty);
 		this.codexInfo.prefabOverride = this.smallPrefab;
@@ -60,11 +61,11 @@ public class ManagementMenu : KIconToggleMenu
 			tabIdx = 1,
 			toggleInfo = this.jobsInfo
 		});
-		this.ScreenInfoMatch.Add(this.rolesInfo, new ManagementMenu.ScreenData
+		this.ScreenInfoMatch.Add(this.skillsInfo, new ManagementMenu.ScreenData
 		{
-			screen = this.rolesScreen,
+			screen = this.skillsScreen,
 			tabIdx = 0,
-			toggleInfo = this.rolesInfo
+			toggleInfo = this.skillsInfo
 		});
 		this.ScreenInfoMatch.Add(this.codexInfo, new ManagementMenu.ScreenData
 		{
@@ -84,24 +85,24 @@ public class ManagementMenu : KIconToggleMenu
 			tabIdx = 7,
 			toggleInfo = this.starmapInfo
 		});
-		base.Setup(new List<KIconToggleMenu.ToggleInfo> { this.consumablesInfo, this.vitalsInfo, this.reportsInfo, this.researchInfo, this.jobsInfo, this.rolesInfo, this.starmapInfo, this.codexInfo, this.scheduleInfo });
+		base.Setup(new List<KIconToggleMenu.ToggleInfo> { this.consumablesInfo, this.vitalsInfo, this.reportsInfo, this.researchInfo, this.jobsInfo, this.skillsInfo, this.starmapInfo, this.codexInfo, this.scheduleInfo });
 		base.onSelect += this.OnButtonClick;
 		Components.ResearchCenters.OnAdd += new Action<ResearchCenter>(this.CheckResearch);
 		Components.ResearchCenters.OnRemove += new Action<ResearchCenter>(this.CheckResearch);
-		Components.RoleStations.OnAdd += new Action<RoleStation>(this.CheckRoles);
-		Components.RoleStations.OnRemove += new Action<RoleStation>(this.CheckRoles);
+		Components.RoleStations.OnAdd += new Action<RoleStation>(this.CheckSkills);
+		Components.RoleStations.OnRemove += new Action<RoleStation>(this.CheckSkills);
 		Game.Instance.Subscribe(-809948329, new Action<object>(this.CheckResearch));
-		Game.Instance.Subscribe(-809948329, new Action<object>(this.CheckRoles));
+		Game.Instance.Subscribe(-809948329, new Action<object>(this.CheckSkills));
 		Components.Telescopes.OnAdd += new Action<Telescope>(this.CheckStarmap);
 		Components.Telescopes.OnRemove += new Action<Telescope>(this.CheckStarmap);
-		this.rolesTooltipDisabled = UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_ROLES_STATION;
-		this.rolesTooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_ROLES, global::Action.ManageRoles);
+		this.skillsTooltipDisabled = UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_SKILL_STATION;
+		this.skillsTooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_SKILLS, global::Action.ManageRoles);
 		this.researchTooltipDisabled = UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_RESEARCH;
 		this.researchTooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH, global::Action.ManageResearch);
 		this.starmapTooltipDisabled = UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_TELESCOPE;
 		this.starmapTooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_STARMAP, global::Action.ManageResearch);
 		this.CheckResearch(null);
-		this.CheckRoles(null);
+		this.CheckSkills(null);
 		this.CheckStarmap(null);
 		this.researchInfo.toggle.soundPlayer.AcceptClickCondition = () => this.ResearchAvailable() || this.activeScreen == this.ScreenInfoMatch[ManagementMenu.Instance.researchInfo];
 		foreach (KButton kbutton in this.CloseButtons)
@@ -145,16 +146,16 @@ public class ManagementMenu : KIconToggleMenu
 		this.ConfigureToggle(this.researchInfo.toggle, flag, flag2, text, this.ToggleToolTipTextStyleSetting);
 	}
 
-	public void CheckRoles(object o = null)
+	public void CheckSkills(object o = null)
 	{
-		if (this.rolesInfo.toggle == null)
+		if (this.skillsInfo == null || this.skillsInfo.toggle == null)
 		{
 			return;
 		}
 		bool flag = Components.RoleStations.Count <= 0 && !DebugHandler.InstantBuildMode;
-		bool flag2 = this.activeScreen != null && this.activeScreen.toggleInfo == this.rolesInfo;
-		string text = ((!flag) ? this.rolesTooltip : this.rolesTooltipDisabled);
-		this.ConfigureToggle(this.rolesInfo.toggle, flag, flag2, text, this.ToggleToolTipTextStyleSetting);
+		bool flag2 = this.activeScreen != null && this.activeScreen.toggleInfo == this.skillsInfo;
+		string text = ((!flag) ? this.skillsTooltip : this.skillsTooltipDisabled);
+		this.ConfigureToggle(this.skillsInfo.toggle, flag, flag2, text, this.ToggleToolTipTextStyleSetting);
 	}
 
 	public void CheckStarmap(object o = null)
@@ -215,7 +216,7 @@ public class ManagementMenu : KIconToggleMenu
 		return Components.ResearchCenters.Count > 0 || DebugHandler.InstantBuildMode;
 	}
 
-	private bool RolesAvailable()
+	private bool SkillsAvailable()
 	{
 		return Components.RoleStations.Count > 0 || DebugHandler.InstantBuildMode;
 	}
@@ -256,9 +257,9 @@ public class ManagementMenu : KIconToggleMenu
 			this.CloseActive();
 			return;
 		}
-		if (screenData.toggleInfo == this.rolesInfo && !this.RolesAvailable())
+		if (screenData.toggleInfo == this.skillsInfo && !this.SkillsAvailable())
 		{
-			this.CheckRoles(null);
+			this.CheckSkills(null);
 			this.CloseActive();
 			return;
 		}
@@ -344,11 +345,11 @@ public class ManagementMenu : KIconToggleMenu
 		this.codexScreen.ChangeArticle(id, false);
 	}
 
-	public void ToggleRoles()
+	public void ToggleSkills()
 	{
-		if ((this.RolesAvailable() || this.activeScreen == this.ScreenInfoMatch[ManagementMenu.Instance.rolesInfo]) && this.rolesInfo != null)
+		if ((this.SkillsAvailable() || this.activeScreen == this.ScreenInfoMatch[ManagementMenu.Instance.skillsInfo]) && this.skillsInfo != null)
 		{
-			this.ToggleScreen(this.ScreenInfoMatch[ManagementMenu.Instance.rolesInfo]);
+			this.ToggleScreen(this.ScreenInfoMatch[ManagementMenu.Instance.skillsInfo]);
 		}
 	}
 
@@ -397,9 +398,9 @@ public class ManagementMenu : KIconToggleMenu
 
 	public CodexScreen codexScreen;
 
-	private RolesScreen rolesScreen;
-
 	private StarmapScreen starmapScreen;
+
+	private SkillsScreen skillsScreen;
 
 	public string colourSchemeDisabled;
 
@@ -419,17 +420,17 @@ public class ManagementMenu : KIconToggleMenu
 
 	private KIconToggleMenu.ToggleInfo codexInfo;
 
-	private KIconToggleMenu.ToggleInfo rolesInfo;
-
 	private KIconToggleMenu.ToggleInfo starmapInfo;
+
+	private KIconToggleMenu.ToggleInfo skillsInfo;
 
 	private Dictionary<KIconToggleMenu.ToggleInfo, ManagementMenu.ScreenData> ScreenInfoMatch = new Dictionary<KIconToggleMenu.ToggleInfo, ManagementMenu.ScreenData>();
 
 	public KButton[] CloseButtons;
 
-	private string rolesTooltip;
+	private string skillsTooltip;
 
-	private string rolesTooltipDisabled;
+	private string skillsTooltipDisabled;
 
 	private string researchTooltip;
 

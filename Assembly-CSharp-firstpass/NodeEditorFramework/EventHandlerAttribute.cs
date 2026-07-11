@@ -43,7 +43,7 @@ namespace NodeEditorFramework
 				{
 					return true;
 				}
-				global::Debug.LogWarning("Method " + method.Name + " has incorrect signature for EventHandlerAttribute!", null);
+				global::Debug.LogWarning("Method " + method.Name + " has incorrect signature for EventHandlerAttribute!");
 			}
 			return false;
 		}

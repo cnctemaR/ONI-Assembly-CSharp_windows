@@ -16,13 +16,14 @@ namespace Database
 			this.Cook = this.Add("Cook", DUPLICANTS.CHOREGROUPS.COOK.NAME, "Cooking", 3);
 			this.Art = this.Add("Art", DUPLICANTS.CHOREGROUPS.ART.NAME, "Art", 3);
 			this.Research = this.Add("Research", DUPLICANTS.CHOREGROUPS.RESEARCH.NAME, "Learning", 3);
-			this.Operating = this.Add("MachineOperating", DUPLICANTS.CHOREGROUPS.MACHINEOPERATING.NAME, "Machinery", 3);
+			this.MachineOperating = this.Add("MachineOperating", DUPLICANTS.CHOREGROUPS.MACHINEOPERATING.NAME, "Machinery", 3);
 			this.Farming = this.Add("Farming", DUPLICANTS.CHOREGROUPS.FARMING.NAME, "Botanist", 3);
 			this.Ranching = this.Add("Ranching", DUPLICANTS.CHOREGROUPS.RANCHING.NAME, "Ranching", 3);
 			this.Build = this.Add("Build", DUPLICANTS.CHOREGROUPS.BUILD.NAME, "Construction", 2);
 			this.Dig = this.Add("Dig", DUPLICANTS.CHOREGROUPS.DIG.NAME, "Digging", 2);
 			this.Hauling = this.Add("Hauling", DUPLICANTS.CHOREGROUPS.HAULING.NAME, "Athletics", 1);
 			this.Storage = this.Add("Storage", DUPLICANTS.CHOREGROUPS.STORAGE.NAME, "Athletics", 1);
+			Debug.Assert(true);
 		}
 
 		private ChoreGroup Add(string id, string name, string attribute, int default_personal_priority)
@@ -66,7 +67,7 @@ namespace Database
 
 		public ChoreGroup Storage;
 
-		public ChoreGroup Operating;
+		public ChoreGroup MachineOperating;
 
 		public ChoreGroup MedicalAid;
 

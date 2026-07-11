@@ -194,7 +194,7 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 			this.evSys = global::UnityEngine.EventSystems.EventSystem.current;
 			if (this.evSys == null)
 			{
-				global::Debug.LogWarning("Cannot enable/disable null UI event system", null);
+				global::Debug.LogWarning("Cannot enable/disable null UI event system");
 				return;
 			}
 		}

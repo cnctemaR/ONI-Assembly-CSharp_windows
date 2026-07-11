@@ -26,7 +26,7 @@ public class GeyserGenericConfig : IMultiEntityConfig
 			}
 			else
 			{
-				global::Debug.LogWarning("Could not load global world seed for geysers", null);
+				global::Debug.LogWarning("Could not load global world seed for geysers");
 			}
 			num = num + (int)inst.transform.GetPosition().x + (int)inst.transform.GetPosition().y;
 			global::System.Random random = new global::System.Random(num);

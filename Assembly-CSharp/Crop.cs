@@ -73,7 +73,7 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 			}
 			else
 			{
-				Output.LogErrorWithObj(base.gameObject, new object[] { "tried to spawn an invalid crop prefab:", cropVal.cropId });
+				DebugUtil.LogErrorArgs(base.gameObject, new object[] { "tried to spawn an invalid crop prefab:", cropVal.cropId });
 			}
 			base.Trigger(-1072826864, null);
 		}

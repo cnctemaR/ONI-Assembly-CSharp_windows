@@ -134,7 +134,7 @@ namespace NodeEditorFramework
 			}
 			if (output.body.isChildOf(this.body) && !output.body.allowsLoopRecursion(this.body))
 			{
-				global::Debug.LogWarning("Cannot apply connection: Recursion detected!", null);
+				global::Debug.LogWarning("Cannot apply connection: Recursion detected!");
 				return false;
 			}
 			return true;

@@ -93,6 +93,8 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 			base.OnPrefabInit();
 			this.showProgressBar = false;
 			this.workerStatusItem = null;
+			this.skillExperienceSkillGroup = Db.Get().SkillGroups.Technicals.Id;
+			this.skillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
 			this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_oilrefinery_kanim") };
 		}
 
@@ -100,11 +102,6 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 		{
 			base.OnSpawn();
 			base.SetWorkTime(float.PositiveInfinity);
-		}
-
-		public override void AwardExperience(float work_dt, MinionResume resume)
-		{
-			resume.AddExperienceIfRole(MachineTechnician.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 		}
 
 		protected override void OnStartWork(Worker worker)

@@ -257,11 +257,12 @@ namespace ProcGenGame
 		{
 			if (this.wasLoaded)
 			{
-				global::Debug.LogError("Initialise called after load", null);
+				global::Debug.LogError("Initialise called after load");
 				return;
 			}
 			this.successCallbackFn = callbackFn;
 			this.errorCallback = error_cb;
+			global::Debug.Assert(this.successCallbackFn != null);
 			this.isRunningDebugGen = false;
 			this.running = false;
 			int num = global::UnityEngine.Random.Range(0, int.MaxValue);
@@ -282,7 +283,7 @@ namespace ProcGenGame
 				noiseSeed = num;
 			}
 			this.data.gameSpawnData = new GameSpawnData();
-			Output.Log(new object[] { string.Format("World seeds: [{0}/{1}/{2}/{3}]", new object[] { worldSeed, layoutSeed, terrainSeed, noiseSeed }) });
+			DebugUtil.LogArgs(new object[] { string.Format("World seeds: [{0}/{1}/{2}/{3}]", new object[] { worldSeed, layoutSeed, terrainSeed, noiseSeed }) });
 			this.InitRandom(worldSeed, layoutSeed, terrainSeed, noiseSeed);
 			TerrainCell.ClearClaimedCells();
 			this.successCallbackFn(UI.WORLDGEN.COMPLETE.key, 0f, WorldGenProgressStages.Stages.Failure);
@@ -297,9 +298,10 @@ namespace ProcGenGame
 		{
 			if (this.wasLoaded)
 			{
-				global::Debug.LogError("GenerateOfflineThreaded called after load", null);
+				global::Debug.LogError("GenerateOfflineThreaded called after load");
 				return;
 			}
+			global::Debug.Assert(this.Settings.world != null, "You need to set a world");
 			if (this.Settings.world == null)
 			{
 				return;
@@ -314,7 +316,7 @@ namespace ProcGenGame
 		{
 			if (this.wasLoaded)
 			{
-				global::Debug.LogError("RenderWorldThreaded called after load", null);
+				global::Debug.LogError("RenderWorldThreaded called after load");
 				return;
 			}
 			this.running = true;
@@ -666,6 +668,7 @@ namespace ProcGenGame
 				{
 					return false;
 				}
+				global::Debug.Assert(this.data.world.size.x != 0 && this.data.world.size.y != 0, "Map size has not been set");
 				this.data.worldLayout = new WorldLayout(this, this.data.world.size.x, this.data.world.size.y, this.data.globalWorldLayoutSeed);
 				this.running = updateProgressFn(UI.WORLDGEN.WORLDLAYOUT.key, 5f, WorldGenProgressStages.Stages.WorldLayout);
 				this.data.voronoiTree = null;
@@ -746,7 +749,7 @@ namespace ProcGenGame
 						}
 						else
 						{
-							global::Debug.LogWarning("Duplicate cell found" + terrainCell.node.node.Id, null);
+							global::Debug.LogWarning("Duplicate cell found" + terrainCell.node.node.Id);
 						}
 					}
 				}
@@ -847,6 +850,10 @@ namespace ProcGenGame
 
 		public bool RenderToMap(WorldGen.OfflineCallbackFunction updateProgressFn, ref Sim.Cell[] cells, ref float[] bgTemp, ref Sim.DiseaseCell[] dcs, ref HashSet<int> borderCells)
 		{
+			global::Debug.Assert(Grid.WidthInCells == this.Settings.world.worldsize.x);
+			global::Debug.Assert(Grid.HeightInCells == this.Settings.world.worldsize.y);
+			global::Debug.Assert(Grid.CellCount == Grid.WidthInCells * Grid.HeightInCells);
+			global::Debug.Assert(Grid.CellSizeInMeters != 0f);
 			borderCells = new HashSet<int>();
 			cells = new Sim.Cell[Grid.CellCount];
 			bgTemp = new float[Grid.CellCount];
@@ -969,7 +976,7 @@ namespace ProcGenGame
 		{
 			if (n1 is global::VoronoiTree.Tree || n2 is global::VoronoiTree.Tree)
 			{
-				global::Debug.Log("WorldGen::SwitchNodes() Skipping tree node", null);
+				global::Debug.Log("WorldGen::SwitchNodes() Skipping tree node");
 				return;
 			}
 			global::ProcGen.Node node = this.data.worldLayout.localGraph.FindNodeByID(n1.site.id);
@@ -1055,12 +1062,12 @@ namespace ProcGenGame
 			{
 				if (SettingsCache.features.TerrainFeatures[nt] == null)
 				{
-					global::Debug.LogError("TerrainFeatureLookupTable is null for [" + nt + "]", null);
+					global::Debug.LogError("TerrainFeatureLookupTable is null for [" + nt + "]");
 				}
 				string defaultBiome = SettingsCache.GetDefaultBiome(nt);
 				if (!SettingsCache.biomes.BiomeBackgroundElementBandConfigurations.ContainsKey(defaultBiome))
 				{
-					global::Debug.LogError(string.Concat(new string[] { "No biome lookup table of type ", defaultBiome, " is loaded. nt [", nt, "]" }), null);
+					global::Debug.LogError(string.Concat(new string[] { "No biome lookup table of type ", defaultBiome, " is loaded. nt [", nt, "]" }));
 					throw new Exception(string.Concat(new string[] { "No biome lookup table of type ", defaultBiome, " is loaded. nt [", nt, "]" }));
 				}
 				ElementBandConfiguration elementBandConfiguration = SettingsCache.biomes.BiomeBackgroundElementBandConfigurations[defaultBiome];
@@ -1187,7 +1194,7 @@ namespace ProcGenGame
 				string message = ex.Message;
 				string stackTrace = ex.StackTrace;
 				updateProgressFn(new StringKey("Exception in TerrainCell.Process"), -1f, WorldGenProgressStages.Stages.Failure);
-				global::Debug.LogError("Error:" + message + "\n" + stackTrace, null);
+				global::Debug.LogError("Error:" + message + "\n" + stackTrace);
 			}
 			List<WeightedSimHash> list = new List<WeightedSimHash>
 			{
@@ -1215,6 +1222,7 @@ namespace ProcGenGame
 					{
 						TerrainCell terrainCell = this.data.overworldCells.Find((TerrainCell c) => c.node.node == edge2.site0.node);
 						TerrainCell terrainCell2 = this.data.overworldCells.Find((TerrainCell c) => c.node.node == edge2.site1.node);
+						global::Debug.Assert(terrainCell != null && terrainCell2 != null, "NULL Terrainell nodes with EdgeUnpassable");
 						list4.Add(new Border(new Neighbors(terrainCell, terrainCell2), edge2.corner0.position, edge2.corner1.position)
 						{
 							element = list3,
@@ -1232,6 +1240,7 @@ namespace ProcGenGame
 						{
 							TerrainCell terrainCell3 = this.data.overworldCells.Find((TerrainCell c) => c.node.node == edge.site0.node);
 							TerrainCell terrainCell4 = this.data.overworldCells.Find((TerrainCell c) => c.node.node == edge.site1.node);
+							global::Debug.Assert(terrainCell3 != null && terrainCell4 != null, "NULL Terraincell nodes with EdgeClosed");
 							Border border = new Border(new Neighbors(terrainCell3, terrainCell4), edge.corner0.position, edge.corner1.position);
 							border.element = list2;
 							if (edge.tags.Contains(WorldGenTags.RoomBorderMixed))
@@ -1249,7 +1258,7 @@ namespace ProcGenGame
 				string message2 = ex2.Message;
 				string stackTrace2 = ex2.StackTrace;
 				updateProgressFn(new StringKey("Exception in Border creation"), -1f, WorldGenProgressStages.Stages.Failure);
-				global::Debug.LogError("Error:" + message2 + " " + stackTrace2, null);
+				global::Debug.LogError("Error:" + message2 + " " + stackTrace2);
 			}
 			try
 			{
@@ -1267,7 +1276,7 @@ namespace ProcGenGame
 				string message3 = ex3.Message;
 				string stackTrace3 = ex3.StackTrace;
 				updateProgressFn(new StringKey("Exception in border.defaultTemp"), -1f, WorldGenProgressStages.Stages.Failure);
-				global::Debug.LogError("Error:" + message3 + " " + stackTrace3, null);
+				global::Debug.LogError("Error:" + message3 + " " + stackTrace3);
 			}
 			try
 			{
@@ -1284,7 +1293,7 @@ namespace ProcGenGame
 					}
 					else
 					{
-						global::Debug.LogError(string.Concat(new object[] { "Process::SetValuesFunction Index [", index, "] is not valid. cells.Length [", map_cells.Length, "]" }), null);
+						global::Debug.LogError(string.Concat(new object[] { "Process::SetValuesFunction Index [", index, "] is not valid. cells.Length [", map_cells.Length, "]" }));
 					}
 				};
 				for (int m = 0; m < list4.Count; m++)
@@ -1304,7 +1313,7 @@ namespace ProcGenGame
 				string message4 = ex4.Message;
 				string stackTrace4 = ex4.StackTrace;
 				updateProgressFn(new StringKey("Exception in border.ConvertToMap"), -1f, WorldGenProgressStages.Stages.Failure);
-				global::Debug.LogError("Error:" + message4 + " " + stackTrace4, null);
+				global::Debug.LogError("Error:" + message4 + " " + stackTrace4);
 			}
 		}
 
@@ -1431,6 +1440,7 @@ namespace ProcGenGame
 		public NoiseMapBuilderPlane BuildNoiseSource(int width, int height, string name)
 		{
 			global::ProcGen.Noise.Tree tree = SettingsCache.noise.GetTree(name, SettingsCache.GetPath());
+			global::Debug.Assert(tree != null, name);
 			return this.BuildNoiseSource(width, height, tree);
 		}
 
@@ -1438,6 +1448,10 @@ namespace ProcGenGame
 		{
 			Vector2f lowerBound = tree.settings.lowerBound;
 			Vector2f upperBound = tree.settings.upperBound;
+			global::Debug.Assert(lowerBound.x < upperBound.x, string.Concat(new object[] { "BuildNoiseSource X range broken [l: ", lowerBound.x, " h: ", upperBound.x, "]" }));
+			global::Debug.Assert(lowerBound.y < upperBound.y, string.Concat(new object[] { "BuildNoiseSource Y range broken [l: ", lowerBound.y, " h: ", upperBound.y, "]" }));
+			global::Debug.Assert(width > 0, "BuildNoiseSource width <=0: [" + width + "]");
+			global::Debug.Assert(height > 0, "BuildNoiseSource height <=0: [" + height + "]");
 			NoiseMapBuilderPlane noiseMapBuilderPlane = new NoiseMapBuilderPlane(lowerBound.x, upperBound.x, lowerBound.y, upperBound.y, false);
 			noiseMapBuilderPlane.SetSize(width, height);
 			noiseMapBuilderPlane.SourceModule = tree.BuildFinalModule(this.data.globalNoiseSeed);
@@ -1478,6 +1492,7 @@ namespace ProcGenGame
 
 		public static void Normalise(float[] data)
 		{
+			global::Debug.Assert(data != null && data.Length > 0, "MISSING DATA FOR NORMALIZE");
 			float num = float.MaxValue;
 			float num2 = float.MinValue;
 			for (int i = 0; i < data.Length; i++)
@@ -1506,7 +1521,7 @@ namespace ProcGenGame
 			};
 			if (noiseMapBuilderCallback == null)
 			{
-				global::Debug.LogError("nupd is null", null);
+				global::Debug.LogError("nupd is null");
 			}
 			this.data.world.heatOffset = WorldGen.GenerateNoise(vector, SettingsCache.noise.GetZoomForTree("noise/Heat"), this.heatSource, this.data.world.size.x, this.data.world.size.y, noiseMapBuilderCallback);
 			this.data.world.data = new float[this.data.world.heatOffset.Length];
@@ -1533,7 +1548,7 @@ namespace ProcGenGame
 				SubWorld subWorld = this.Settings.GetSubWorld(terrainCell.node.type);
 				if (subWorld == null)
 				{
-					global::Debug.Log("Couldnt find Subworld for overworld node [" + terrainCell.node.type + "] using defaults", null);
+					global::Debug.Log("Couldnt find Subworld for overworld node [" + terrainCell.node.type + "] using defaults");
 				}
 				else
 				{
@@ -1677,6 +1692,7 @@ namespace ProcGenGame
 			}
 			for (int i = 0; i < table.Count; i++)
 			{
+				global::Debug.Assert(table[i].content != null, i.ToString());
 				if (num < table[i].maxValue)
 				{
 					return TerrainCell.GetElementOverride(table[i].content, table[i].overrides);
@@ -1705,7 +1721,7 @@ namespace ProcGenGame
 			}
 			catch (Exception ex)
 			{
-				Output.LogWarning(new object[] { "Failed to read " + fileName + "\n" + ex.ToString() });
+				DebugUtil.LogWarningArgs(new object[] { "Failed to read " + fileName + "\n" + ex.ToString() });
 				flag = false;
 			}
 			return flag;
@@ -1730,7 +1746,7 @@ namespace ProcGenGame
 						}
 						catch (Exception ex)
 						{
-							Output.LogError(new object[] { "Couldn't serialize", ex.Message, ex.StackTrace });
+							DebugUtil.LogErrorArgs(new object[] { "Couldn't serialize", ex.Message, ex.StackTrace });
 						}
 					}
 					using (BinaryWriter binaryWriter2 = new BinaryWriter(File.Open(WorldGen.WORLDGEN_SAVE_FILENAME, FileMode.Create)))
@@ -1742,7 +1758,7 @@ namespace ProcGenGame
 			}
 			catch (Exception ex2)
 			{
-				Output.LogError(new object[] { "Couldn't write", ex2.Message, ex2.StackTrace });
+				DebugUtil.LogErrorArgs(new object[] { "Couldn't write", ex2.Message, ex2.StackTrace });
 			}
 		}
 
@@ -1758,7 +1774,7 @@ namespace ProcGenGame
 				this.data = worldGenSave.data;
 				if (worldGenSave.version.x != 1 || worldGenSave.version.y > 1)
 				{
-					Output.LogError(string.Concat(new object[]
+					global::Debug.LogError(string.Concat(new object[]
 					{
 						"LoadWorldGenSim Error! Wrong save version Current: [",
 						1,
@@ -1779,7 +1795,7 @@ namespace ProcGenGame
 			}
 			catch (Exception ex)
 			{
-				Output.LogError(new object[] { "LoadWorldGenSim Error!\n", ex.Message, ex.StackTrace });
+				DebugUtil.LogErrorArgs(new object[] { "LoadWorldGenSim Error!\n", ex.Message, ex.StackTrace });
 				this.wasLoaded = false;
 			}
 			return this.wasLoaded;
@@ -1797,13 +1813,13 @@ namespace ProcGenGame
 			}
 			catch (Exception ex)
 			{
-				Output.LogError(new object[] { "LoadWorldGenSim Error!\n", ex.Message, ex.StackTrace });
+				DebugUtil.LogErrorArgs(new object[] { "LoadWorldGenSim Error!\n", ex.Message, ex.StackTrace });
 				this.wasLoaded = false;
 				return null;
 			}
 			if (simSaveFileStructure.worldDetail == null)
 			{
-				global::Debug.LogError("Detail is null", null);
+				global::Debug.LogError("Detail is null");
 			}
 			else
 			{
@@ -1846,15 +1862,7 @@ namespace ProcGenGame
 
 		public static Element unobtaniumElement;
 
-		public static List<string> diseaseIds = new List<string>
-		{
-			"FoodPoisoning",
-			string.Empty,
-			string.Empty,
-			string.Empty,
-			string.Empty,
-			"SlimeLung"
-		};
+		public static List<string> diseaseIds = new List<string> { "FoodPoisoning", "SlimeLung" };
 
 		public bool isRunningDebugGen;
 

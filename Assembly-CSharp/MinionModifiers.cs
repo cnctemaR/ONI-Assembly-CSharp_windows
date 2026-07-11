@@ -92,7 +92,7 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 		Storage component = base.GetComponent<Storage>();
 		if (component != null)
 		{
-			component.DropAll(false);
+			component.DropAll(false, false, default(Vector3), true);
 		}
 	}
 

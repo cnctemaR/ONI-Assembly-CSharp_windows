@@ -19,34 +19,34 @@ public class EatChore : Chore<EatChore.StatesInstance>
 	{
 		if (context.consumerState.consumer == null)
 		{
-			global::Debug.LogError("EATCHORE null context.consumer", null);
+			global::Debug.LogError("EATCHORE null context.consumer");
 			return;
 		}
 		RationMonitor.Instance smi = context.consumerState.consumer.GetSMI<RationMonitor.Instance>();
 		if (smi == null)
 		{
-			global::Debug.LogError("EATCHORE null RationMonitor.Instance", null);
+			global::Debug.LogError("EATCHORE null RationMonitor.Instance");
 			return;
 		}
 		Edible edible = smi.GetEdible();
 		if (edible.gameObject == null)
 		{
-			global::Debug.LogError("EATCHORE null edible.gameObject", null);
+			global::Debug.LogError("EATCHORE null edible.gameObject");
 			return;
 		}
 		if (base.smi == null)
 		{
-			global::Debug.LogError("EATCHORE null smi", null);
+			global::Debug.LogError("EATCHORE null smi");
 			return;
 		}
 		if (base.smi.sm == null)
 		{
-			global::Debug.LogError("EATCHORE null smi.sm", null);
+			global::Debug.LogError("EATCHORE null smi.sm");
 			return;
 		}
 		if (base.smi.sm.ediblesource == null)
 		{
-			global::Debug.LogError("EATCHORE null smi.sm.ediblesource", null);
+			global::Debug.LogError("EATCHORE null smi.sm.ediblesource");
 			return;
 		}
 		base.smi.sm.ediblesource.Set(edible.gameObject, base.smi);

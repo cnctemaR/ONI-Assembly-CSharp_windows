@@ -23,7 +23,7 @@ public class Compostable : KMonoBehaviour
 		Storage storage = base.GetComponent<Pickupable>().storage;
 		if (storage != null)
 		{
-			storage.Drop(base.gameObject);
+			storage.Drop(base.gameObject, true);
 		}
 	}
 
@@ -34,7 +34,7 @@ public class Compostable : KMonoBehaviour
 			Pickupable component = base.GetComponent<Pickupable>();
 			if (component.storage != null)
 			{
-				component.storage.Drop(base.gameObject);
+				component.storage.Drop(base.gameObject, true);
 			}
 			Pickupable pickupable = EntitySplitter.Split(component, component.TotalAmount, this.compostPrefab);
 			if (pickupable != null)

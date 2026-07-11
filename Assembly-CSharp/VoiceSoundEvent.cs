@@ -54,11 +54,11 @@ public class VoiceSoundEvent : SoundEvent
 				LoopingSounds component3 = controller.GetComponent<LoopingSounds>();
 				if (component3 == null)
 				{
-					global::Debug.Log(controller.name + " is missing LoopingSounds component. ", null);
+					global::Debug.Log(controller.name + " is missing LoopingSounds component. ");
 				}
 				else if (!component3.StartSound(sound))
 				{
-					Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, controller.name) });
+					DebugUtil.LogWarningArgs(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, controller.name) });
 				}
 			}
 			else
@@ -78,7 +78,7 @@ public class VoiceSoundEvent : SoundEvent
 		}
 		else if (AudioDebug.Get().debugVoiceSounds)
 		{
-			global::Debug.LogWarning("Missing voice sound: " + assetName, null);
+			global::Debug.LogWarning("Missing voice sound: " + assetName);
 		}
 		return eventInstance;
 	}

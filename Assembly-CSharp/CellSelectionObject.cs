@@ -66,11 +66,11 @@ public class CellSelectionObject : KMonoBehaviour
 				{
 					if (keyValuePair.Value == null)
 					{
-						global::Debug.LogWarning("Filter value is null", null);
+						global::Debug.LogWarning("Filter value is null");
 					}
 					else if (OverlayScreen.Instance == null)
 					{
-						global::Debug.LogWarning("Overlay screen Instance is null", null);
+						global::Debug.LogWarning("Overlay screen Instance is null");
 					}
 					else if (OverlayScreen.Instance.GetMode() == keyValuePair.Key)
 					{

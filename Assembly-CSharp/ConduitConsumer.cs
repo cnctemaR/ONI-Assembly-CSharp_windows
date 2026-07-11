@@ -193,7 +193,7 @@ public class ConduitConsumer : KMonoBehaviour
 									}
 									else
 									{
-										global::Debug.LogWarning("Gas conduit consumer consuming non gas: " + element2.id.ToString(), null);
+										global::Debug.LogWarning("Gas conduit consumer consuming non gas: " + element2.id.ToString());
 									}
 								}
 							}
@@ -203,7 +203,7 @@ public class ConduitConsumer : KMonoBehaviour
 							}
 							else
 							{
-								global::Debug.LogWarning("Liquid conduit consumer consuming non liquid: " + element2.id.ToString(), null);
+								global::Debug.LogWarning("Liquid conduit consumer consuming non liquid: " + element2.id.ToString());
 							}
 						}
 					}

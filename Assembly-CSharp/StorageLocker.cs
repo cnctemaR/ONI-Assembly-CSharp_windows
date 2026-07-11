@@ -20,6 +20,10 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 	protected override void OnSpawn()
 	{
 		this.filteredStorage.FilterChanged();
+		if (!this.lockerName.IsNullOrWhiteSpace())
+		{
+			this.SetName(this.lockerName);
+		}
 	}
 
 	protected override void OnCleanUp()
@@ -95,10 +99,26 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 		}
 	}
 
+	public void SetName(string name)
+	{
+		KSelectable component = base.GetComponent<KSelectable>();
+		base.name = name;
+		this.lockerName = name;
+		if (component != null)
+		{
+			component.SetName(name);
+		}
+		base.gameObject.name = name;
+		NameDisplayScreen.Instance.UpdateName(base.gameObject);
+	}
+
 	private LoggerFS log;
 
 	[Serialize]
 	private float userMaxCapacity = float.PositiveInfinity;
+
+	[Serialize]
+	public string lockerName = string.Empty;
 
 	protected FilteredStorage filteredStorage;
 

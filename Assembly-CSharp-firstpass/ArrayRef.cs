@@ -13,6 +13,7 @@ public struct ArrayRef<T>
 
 	public ArrayRef(T[] elements, int size)
 	{
+		Debug.Assert(size <= elements.Length);
 		this.elements = elements;
 		this.sizeImpl = size;
 		this.capacityImpl = elements.Length;
@@ -162,6 +163,8 @@ public struct ArrayRef<T>
 
 	private void ValidateIndex(int index)
 	{
+		Debug.Assert(0 <= index);
+		Debug.Assert(index < this.size);
 	}
 
 	private void MaybeGrow(int index)
@@ -178,6 +181,7 @@ public struct ArrayRef<T>
 
 	private void Reallocate(int newCapacity)
 	{
+		Debug.Assert(this.size <= newCapacity);
 		this.capacityImpl = newCapacity;
 		T[] array = new T[this.capacity];
 		for (int num = 0; num != this.size; num++)

@@ -135,7 +135,7 @@ public class FuelTank : Storage, IUserControlledCapacity
 		}
 		else
 		{
-			global::Debug.LogWarning("Fuel tank couldn't find rocket engine", null);
+			global::Debug.LogWarning("Fuel tank couldn't find rocket engine");
 		}
 	}
 

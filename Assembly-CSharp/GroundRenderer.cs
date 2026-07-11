@@ -193,7 +193,7 @@ public class GroundRenderer : KMonoBehaviour
 			{
 				if (element.substance.material == null)
 				{
-					Output.LogError(new object[] { element.name, "must have material associated with it in the substance table" });
+					DebugUtil.LogErrorArgs(new object[] { element.name, "must have material associated with it in the substance table" });
 				}
 				Material material = new Material(element.substance.material);
 				this.InitOpaqueMaterial(material, element);

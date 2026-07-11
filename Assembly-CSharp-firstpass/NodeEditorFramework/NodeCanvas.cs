@@ -12,7 +12,7 @@ namespace NodeEditorFramework
 		{
 			if (this.nodes == null)
 			{
-				global::Debug.LogWarning("NodeCanvas '" + base.name + "' nodes were erased and set to null! Automatically fixed!", null);
+				global::Debug.LogWarning("NodeCanvas '" + base.name + "' nodes were erased and set to null! Automatically fixed!");
 				this.nodes = new List<Node>();
 			}
 			for (int i = 0; i < this.nodes.Count; i++)
@@ -20,7 +20,7 @@ namespace NodeEditorFramework
 				Node node = this.nodes[i];
 				if (node == null)
 				{
-					global::Debug.LogWarning("NodeCanvas '" + base.name + "' contained broken (null) nodes! Automatically fixed!", null);
+					global::Debug.LogWarning("NodeCanvas '" + base.name + "' contained broken (null) nodes! Automatically fixed!");
 					this.nodes.RemoveAt(i);
 					i--;
 				}
@@ -31,7 +31,7 @@ namespace NodeEditorFramework
 						NodeInput nodeInput = node.Inputs[j];
 						if (nodeInput == null)
 						{
-							global::Debug.LogWarning(string.Concat(new string[] { "NodeCanvas '", base.name, "' Node '", node.name, "' contained broken (null) NodeKnobs! Automatically fixed!" }), null);
+							global::Debug.LogWarning(string.Concat(new string[] { "NodeCanvas '", base.name, "' Node '", node.name, "' contained broken (null) NodeKnobs! Automatically fixed!" }));
 							node.Inputs.RemoveAt(j);
 							j--;
 						}
@@ -45,7 +45,7 @@ namespace NodeEditorFramework
 						NodeOutput nodeOutput = node.Outputs[k];
 						if (nodeOutput == null)
 						{
-							global::Debug.LogWarning(string.Concat(new string[] { "NodeCanvas '", base.name, "' Node '", node.name, "' contained broken (null) NodeKnobs! Automatically fixed!" }), null);
+							global::Debug.LogWarning(string.Concat(new string[] { "NodeCanvas '", base.name, "' Node '", node.name, "' contained broken (null) NodeKnobs! Automatically fixed!" }));
 							node.Outputs.RemoveAt(k);
 							k--;
 						}
@@ -67,7 +67,7 @@ namespace NodeEditorFramework
 						NodeKnob nodeKnob = node.nodeKnobs[m];
 						if (nodeKnob == null)
 						{
-							global::Debug.LogWarning(string.Concat(new string[] { "NodeCanvas '", base.name, "' Node '", node.name, "' contained broken (null) NodeKnobs! Automatically fixed!" }), null);
+							global::Debug.LogWarning(string.Concat(new string[] { "NodeCanvas '", base.name, "' Node '", node.name, "' contained broken (null) NodeKnobs! Automatically fixed!" }));
 							node.nodeKnobs.RemoveAt(m);
 							m--;
 						}
@@ -97,7 +97,7 @@ namespace NodeEditorFramework
 			}
 			if (this.editorStates == null)
 			{
-				global::Debug.LogWarning("NodeCanvas '" + base.name + "' editorStates were erased! Automatically fixed!", null);
+				global::Debug.LogWarning("NodeCanvas '" + base.name + "' editorStates were erased! Automatically fixed!");
 				this.editorStates = new NodeEditorState[0];
 			}
 			this.editorStates = this.editorStates.Where<NodeEditorState>((NodeEditorState state) => state != null).ToArray<NodeEditorState>();

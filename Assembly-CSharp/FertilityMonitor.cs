@@ -57,7 +57,7 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 			this.fertility = Db.Get().Amounts.Fertility.Lookup(base.gameObject);
 			if (GenericGameSettings.instance.acceleratedLifecycle)
 			{
-				this.fertility.deltaAttribute.Add(new AttributeModifier(this.fertility.deltaAttribute.Id, 33.333332f, null, false, false, true));
+				this.fertility.deltaAttribute.Add(new AttributeModifier(this.fertility.deltaAttribute.Id, 33.333332f, "Accelerated Lifecycle", false, false, true));
 			}
 			float num = 100f / (def.baseFertileCycles * 600f);
 			this.fertileEffect = new Effect("Fertile", CREATURES.MODIFIERS.BASE_FERTILITY.NAME, CREATURES.MODIFIERS.BASE_FERTILITY.TOOLTIP, 0f, false, false, false, null, 0f, null);
@@ -145,6 +145,7 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 					}
 				}
 			}
+			global::Debug.Assert(invalid != Tag.Invalid, "Didn't pick an egg to lay. Weights weren't normalized?");
 			GameObject prefab = Assets.GetPrefab(invalid);
 			GameObject gameObject = Util.KInstantiate(prefab, position);
 			this.egg = gameObject;

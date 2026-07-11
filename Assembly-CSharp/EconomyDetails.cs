@@ -652,7 +652,7 @@ public class EconomyDetails
 
 	private static void DumpEconomyDetails()
 	{
-		global::Debug.Log("Starting Economy Details Dump...", null);
+		global::Debug.Log("Starting Economy Details Dump...");
 		EconomyDetails details = new EconomyDetails();
 		List<EconomyDetails.Scenario> list = new List<EconomyDetails.Scenario>();
 		EconomyDetails.Scenario scenario = new EconomyDetails.Scenario("default", 1, (EconomyDetails.Transformation t) => true);
@@ -855,7 +855,7 @@ public class EconomyDetails
 				streamWriter2.Write("\n");
 			}
 		}
-		global::Debug.Log("Completed economy details dump!!", null);
+		global::Debug.Log("Completed economy details dump!!");
 	}
 
 	private List<EconomyDetails.Transformation> transformations = new List<EconomyDetails.Transformation>();

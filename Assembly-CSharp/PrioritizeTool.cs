@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class PrioritizeTool : DragTool
+public class PrioritizeTool : FilteredDragTool
 {
 	public static void DestroyInstance()
 	{
@@ -15,6 +16,63 @@ public class PrioritizeTool : DragTool
 		PrioritizeTool.Instance = this;
 		this.visualizer = Util.KInstantiate(this.visualizer, null, null);
 		this.viewMode = OverlayModes.Priorities.ID;
+		Game.Instance.prioritizableRenderer.currentTool = this;
+	}
+
+	public override string GetFilterLayerFromGameObject(GameObject input)
+	{
+		bool flag = false;
+		bool flag2 = false;
+		bool flag3 = false;
+		if (input.GetComponent<Diggable>())
+		{
+			flag = true;
+		}
+		if (input.GetComponent<Constructable>() || (input.GetComponent<Deconstructable>() && input.GetComponent<Deconstructable>().IsMarkedForDeconstruction()))
+		{
+			flag2 = true;
+		}
+		if (input.GetComponent<Clearable>() || input.GetComponent<Moppable>() || input.GetComponent<StorageLocker>())
+		{
+			flag3 = true;
+		}
+		if (flag2)
+		{
+			return ToolParameterMenu.FILTERLAYERS.CONSTRUCTION;
+		}
+		if (flag)
+		{
+			return ToolParameterMenu.FILTERLAYERS.DIG;
+		}
+		if (flag3)
+		{
+			return ToolParameterMenu.FILTERLAYERS.CLEAN;
+		}
+		return ToolParameterMenu.FILTERLAYERS.OPERATE;
+	}
+
+	protected override void GetDefaultFilters(Dictionary<string, ToolParameterMenu.ToggleState> filters)
+	{
+		filters.Add(ToolParameterMenu.FILTERLAYERS.ALL, ToolParameterMenu.ToggleState.On);
+		filters.Add(ToolParameterMenu.FILTERLAYERS.CONSTRUCTION, ToolParameterMenu.ToggleState.Off);
+		filters.Add(ToolParameterMenu.FILTERLAYERS.DIG, ToolParameterMenu.ToggleState.Off);
+		filters.Add(ToolParameterMenu.FILTERLAYERS.CLEAN, ToolParameterMenu.ToggleState.Off);
+		filters.Add(ToolParameterMenu.FILTERLAYERS.OPERATE, ToolParameterMenu.ToggleState.Off);
+	}
+
+	private bool TryPrioritizeGameObject(GameObject target, PrioritySetting priority)
+	{
+		string filterLayerFromGameObject = this.GetFilterLayerFromGameObject(target);
+		if (base.IsActiveLayer(filterLayerFromGameObject))
+		{
+			Prioritizable component = target.GetComponent<Prioritizable>();
+			if (component != null && component.showIcon && component.IsPrioritizable())
+			{
+				component.SetMasterPriority(priority);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
@@ -26,10 +84,27 @@ public class PrioritizeTool : DragTool
 			GameObject gameObject = Grid.Objects[cell, i];
 			if (gameObject != null)
 			{
-				Prioritizable component = gameObject.GetComponent<Prioritizable>();
-				if (component != null && component.showIcon && component.IsPrioritizable())
+				if (gameObject.GetComponent<Pickupable>())
 				{
-					component.SetMasterPriority(lastSelectedPriority);
+					ObjectLayerListItem objectLayerListItem = gameObject.GetComponent<Pickupable>().objectLayerListItem;
+					while (objectLayerListItem != null)
+					{
+						GameObject gameObject2 = objectLayerListItem.gameObject;
+						objectLayerListItem = objectLayerListItem.nextItem;
+						if (!(gameObject2 == null))
+						{
+							if (!(gameObject2.GetComponent<MinionIdentity>() != null))
+							{
+								if (this.TryPrioritizeGameObject(gameObject2, lastSelectedPriority))
+								{
+									num++;
+								}
+							}
+						}
+					}
+				}
+				else if (this.TryPrioritizeGameObject(gameObject, lastSelectedPriority))
+				{
 					num++;
 				}
 			}
@@ -64,7 +139,7 @@ public class PrioritizeTool : DragTool
 		{
 			num += 9;
 		}
-		if (lastSelectedPriority.priority_class >= PriorityScreen.PriorityClass.emergency)
+		if (lastSelectedPriority.priority_class >= PriorityScreen.PriorityClass.topPriority)
 		{
 			num = num;
 		}

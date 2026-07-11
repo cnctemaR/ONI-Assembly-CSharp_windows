@@ -44,6 +44,7 @@ public class KAnimGroupFile : ScriptableObject
 		KAnimGroupFile.Group group = null;
 		KAnimGroupFile.GetGroupFile();
 		List<KAnimGroupFile.Group> data = KAnimGroupFile.groupfile.GetData();
+		global::Debug.Assert(data != null, data.Count > 0);
 		for (int i = 0; i < data.Count; i++)
 		{
 			KAnimGroupFile.Group group2 = data[i];
@@ -121,6 +122,9 @@ public class KAnimGroupFile : ScriptableObject
 
 	public bool AddAnimFile(KAnimGroupFile.GroupFile gf, AnimCommandFile akf, KAnimFile file)
 	{
+		global::Debug.Assert(gf != null);
+		global::Debug.Assert(file != null, gf.groupID);
+		global::Debug.Assert(akf != null, gf.groupID);
 		int num = this.AddGroup(akf, gf, file);
 		return this.AddFile(num, file);
 	}
@@ -152,6 +156,7 @@ public class KAnimGroupFile : ScriptableObject
 
 	public void LoadAll()
 	{
+		global::Debug.Assert(!KAnimGroupFile.hasCompletedLoadAll, "You cannot load all the anim data twice!");
 		this.fileData.Clear();
 		int i = 0;
 		while (i < this.groups.Count)
@@ -172,18 +177,18 @@ public class KAnimGroupFile : ScriptableObject
 			HashedString hashedString = this.groups[i].id;
 			if (this.groups[i].renderType != KAnimBatchGroup.RendererType.AnimOnly)
 			{
-				goto IL_011C;
+				goto IL_012E;
 			}
 			if (this.groups[i].swapTarget.IsValid)
 			{
 				kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[i].swapTarget);
 				hashedString = this.groups[i].swapTarget;
-				goto IL_011C;
+				goto IL_012E;
 			}
-			IL_0260:
+			IL_0271:
 			i++;
 			continue;
-			IL_011C:
+			IL_012E:
 			for (int j = 0; j < this.groups[i].files.Count; j++)
 			{
 				KAnimFile kanimFile = this.groups[i].files[j];
@@ -191,7 +196,7 @@ public class KAnimGroupFile : ScriptableObject
 				{
 					if (kanimFile.buildFile.bytes == null || kanimFile.buildFile.bytes.Length == 0)
 					{
-						global::Debug.LogWarning("Build File [" + kanimFile.buildFile.name + "] has 0 bytes", null);
+						global::Debug.LogWarning("Build File [" + kanimFile.buildFile.name + "] has 0 bytes");
 					}
 					else
 					{
@@ -205,7 +210,7 @@ public class KAnimGroupFile : ScriptableObject
 					}
 				}
 			}
-			goto IL_0260;
+			goto IL_0271;
 		}
 		for (int k = 0; k < this.groups.Count; k++)
 		{
@@ -287,7 +292,7 @@ public class KAnimGroupFile : ScriptableObject
 					{
 						if (kanimFile2.animFile.bytes == null || kanimFile2.animFile.bytes.Length == 0)
 						{
-							global::Debug.LogWarning("Anim File [" + kanimFile2.animFile.name + "] has 0 bytes", null);
+							global::Debug.LogWarning("Anim File [" + kanimFile2.animFile.name + "] has 0 bytes");
 						}
 						else
 						{

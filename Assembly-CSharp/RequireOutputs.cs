@@ -127,7 +127,7 @@ public class RequireOutputs : KMonoBehaviour
 		case ConduitType.Solid:
 			return Game.Instance.solidConduitFlow;
 		default:
-			global::Debug.LogWarning("GetConduitFlow() called with unexpected conduitType: " + this.conduitType.ToString(), null);
+			global::Debug.LogWarning("GetConduitFlow() called with unexpected conduitType: " + this.conduitType.ToString());
 			return null;
 		}
 	}

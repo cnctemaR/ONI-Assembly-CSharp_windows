@@ -72,7 +72,7 @@ public class ThreadedHttps<T> where T : class, new()
 				text,
 				"\n",
 				x509Certificate.ToString()
-			}), null);
+			}));
 		}
 		return !this.certFail;
 	}
@@ -143,7 +143,7 @@ public class ThreadedHttps<T> where T : class, new()
 						": Exception getting Request Stream:",
 						message
 					});
-					Debug.LogWarning(text, null);
+					Debug.LogWarning(text);
 					throw;
 				}
 				try
@@ -161,7 +161,7 @@ public class ThreadedHttps<T> where T : class, new()
 						": Exception writing data to Stream:",
 						message2
 					});
-					Debug.LogWarning(text, null);
+					Debug.LogWarning(text);
 					throw;
 				}
 				stream.Close();
@@ -194,7 +194,7 @@ public class ThreadedHttps<T> where T : class, new()
 						message3,
 						text
 					});
-					Debug.LogWarning(text, null);
+					Debug.LogWarning(text);
 					throw;
 				}
 				text = ((HttpWebResponse)webResponse).StatusDescription;
@@ -228,7 +228,7 @@ public class ThreadedHttps<T> where T : class, new()
 				{
 					if (this.certFail)
 					{
-						Debug.LogWarning(this.serviceName + ": Cert fail, quitting", null);
+						Debug.LogWarning(this.serviceName + ": Cert fail, quitting");
 						try
 						{
 							this.OnReplyRecieved(null);
@@ -253,7 +253,7 @@ public class ThreadedHttps<T> where T : class, new()
 							this.serviceName,
 							"..."
 						});
-						Debug.LogWarning(text, null);
+						Debug.LogWarning(text);
 						try
 						{
 							this.OnReplyRecieved(null);
@@ -279,10 +279,10 @@ public class ThreadedHttps<T> where T : class, new()
 						"\n",
 						stackTrace
 					});
-					Debug.LogWarning(text, null);
+					Debug.LogWarning(text);
 					if (isForce)
 					{
-						Debug.LogWarning(ex4.StackTrace, null);
+						Debug.LogWarning(ex4.StackTrace);
 						break;
 					}
 					Thread.Sleep(timeSpan);

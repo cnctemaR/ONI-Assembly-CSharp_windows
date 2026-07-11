@@ -23,7 +23,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 		this.AddAmountLine(Db.Get().Amounts.Breath, null);
 		this.AddAmountLine(Db.Get().Amounts.Stamina, null);
 		this.AddAmountLine(Db.Get().Amounts.Calories, null);
-		this.AddAmountLine(Db.Get().Amounts.ImmuneLevel, null);
+		this.AddAttributeLine(Db.Get().Attributes.GermSusceptibility, null);
 		this.AddAmountLine(Db.Get().Amounts.ScaleGrowth, null);
 		this.AddAmountLine(Db.Get().Amounts.Temperature, null);
 		this.AddAmountLine(Db.Get().Amounts.Decor, null);

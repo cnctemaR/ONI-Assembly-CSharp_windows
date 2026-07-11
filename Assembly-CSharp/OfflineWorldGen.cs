@@ -15,7 +15,7 @@ public class OfflineWorldGen : KMonoBehaviour
 	{
 		if (this.trackProgress)
 		{
-			global::Debug.Log(text, null);
+			global::Debug.Log(text);
 		}
 	}
 
@@ -380,7 +380,7 @@ public class OfflineWorldGen : KMonoBehaviour
 		GridSettings.Reset(worldsize.x, worldsize.y);
 		if (KPlayerPrefs.GetInt(OfflineWorldGen.USE_WORLD_SEED_KEY, 0) != 0)
 		{
-			global::Debug.Log("Using player defined seed", null);
+			global::Debug.Log("Using player defined seed");
 			this.InitSeeds();
 		}
 		this.worldGen.Initialise(new WorldGen.OfflineCallbackFunction(this.UpdateProgress), new Action<OfflineWorldGen.ErrorInfo>(this.OnError), this.worldSeed, this.layoutSeed, this.terrainSeed, this.noiseSeed);

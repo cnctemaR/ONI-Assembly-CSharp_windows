@@ -43,8 +43,11 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 
 	protected override void OnSpawn()
 	{
-		this.ValidateProxy();
-		this.CleanupLimboMinions();
+		if (this.addToIdentityList)
+		{
+			this.ValidateProxy();
+			this.CleanupLimboMinions();
+		}
 		PathProber component = base.GetComponent<PathProber>();
 		if (component != null)
 		{
@@ -108,25 +111,25 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		KPrefabID component = base.GetComponent<KPrefabID>();
 		if (component.InstanceID == -1)
 		{
-			Output.LogWarning(new object[] { "Minion with an invalid kpid! Attempting to recover...", this.name });
+			DebugUtil.LogWarningArgs(new object[] { "Minion with an invalid kpid! Attempting to recover...", this.name });
 			if (KPrefabIDTracker.Get().GetInstance(component.InstanceID) != null)
 			{
 				KPrefabIDTracker.Get().Unregister(component);
 			}
 			component.InstanceID = KPrefabID.GetUniqueID();
 			KPrefabIDTracker.Get().Register(component);
-			Output.LogWarning(new object[] { "Restored as:", component.InstanceID });
+			DebugUtil.LogWarningArgs(new object[] { "Restored as:", component.InstanceID });
 		}
 		if (component.conflicted)
 		{
-			Output.LogWarning(new object[] { "Minion with a conflicted kpid! Attempting to recover... ", component.InstanceID, this.name });
+			DebugUtil.LogWarningArgs(new object[] { "Minion with a conflicted kpid! Attempting to recover... ", component.InstanceID, this.name });
 			if (KPrefabIDTracker.Get().GetInstance(component.InstanceID) != null)
 			{
 				KPrefabIDTracker.Get().Unregister(component);
 			}
 			component.InstanceID = KPrefabID.GetUniqueID();
 			KPrefabIDTracker.Get().Register(component);
-			Output.LogWarning(new object[] { "Restored as:", component.InstanceID });
+			DebugUtil.LogWarningArgs(new object[] { "Restored as:", component.InstanceID });
 		}
 		this.assignableProxy.Get().SetTarget(this, base.gameObject);
 	}
@@ -246,9 +249,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 				MinionResume component = base.GetComponent<MinionResume>();
 				if (component != null)
 				{
-					component.AddExperienceIfRole("Hauler", dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
-					component.AddExperienceIfRole(MaterialsManager.ID, dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
-					component.AddExperienceIfRole(Handyman.ID, dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+					component.AddExperienceWithAptitude(Db.Get().SkillGroups.Hauling.Id, dt, SKILLS.ALL_DAY_EXPERIENCE);
 				}
 			}
 		}
@@ -259,22 +260,22 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ImmuneSystem);
 		if (currentQualitySetting.id == "Compromised")
 		{
-			Db.Get().Amounts.ImmuneLevel.deltaAttribute.Lookup(this).Add(new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, -0.025f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.COMPROMISED.ATTRIBUTE_MODIFIER_NAME, false, false, true));
-			Db.Get().Attributes.DiseaseCureSpeed.Lookup(this).Add(new AttributeModifier(Db.Get().Attributes.DiseaseCureSpeed.Id, -0.3333f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.STRONG.ATTRIBUTE_MODIFIER_NAME, false, false, true));
+			Db.Get().Attributes.DiseaseCureSpeed.Lookup(this).Add(new AttributeModifier(Db.Get().Attributes.DiseaseCureSpeed.Id, -0.3333f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.COMPROMISED.ATTRIBUTE_MODIFIER_NAME, false, false, true));
+			Db.Get().Attributes.GermSusceptibility.Lookup(this).Add(new AttributeModifier(Db.Get().Attributes.GermSusceptibility.Id, 1f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.COMPROMISED.ATTRIBUTE_MODIFIER_NAME, false, false, true));
 		}
 		else if (currentQualitySetting.id == "Weak")
 		{
-			Db.Get().Amounts.ImmuneLevel.deltaAttribute.Lookup(this).Add(new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, -0.008333334f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.WEAK.ATTRIBUTE_MODIFIER_NAME, false, false, true));
+			Db.Get().Attributes.GermSusceptibility.Lookup(this).Add(new AttributeModifier(Db.Get().Attributes.DiseaseCureSpeed.Id, 0.5f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.WEAK.ATTRIBUTE_MODIFIER_NAME, false, false, true));
 		}
 		else if (currentQualitySetting.id == "Strong")
 		{
-			Db.Get().Amounts.ImmuneLevel.deltaAttribute.Lookup(this).Add(new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, 0.008333334f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.STRONG.ATTRIBUTE_MODIFIER_NAME, false, false, true));
 			Db.Get().Attributes.DiseaseCureSpeed.Lookup(this).Add(new AttributeModifier(Db.Get().Attributes.DiseaseCureSpeed.Id, 2f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.STRONG.ATTRIBUTE_MODIFIER_NAME, false, false, true));
+			Db.Get().Attributes.GermSusceptibility.Lookup(this).Add(new AttributeModifier(Db.Get().Attributes.GermSusceptibility.Id, -0.5f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.STRONG.ATTRIBUTE_MODIFIER_NAME, false, false, true));
 		}
 		else if (currentQualitySetting.id == "Invincible")
 		{
-			Db.Get().Amounts.ImmuneLevel.deltaAttribute.Lookup(this).Add(new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, float.PositiveInfinity, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.INVINCIBLE.ATTRIBUTE_MODIFIER_NAME, false, false, true));
-			Db.Get().Attributes.DiseaseCureSpeed.Lookup(this).Add(new AttributeModifier(Db.Get().Attributes.DiseaseCureSpeed.Id, 100000000f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.STRONG.ATTRIBUTE_MODIFIER_NAME, false, false, true));
+			Db.Get().Attributes.DiseaseCureSpeed.Lookup(this).Add(new AttributeModifier(Db.Get().Attributes.DiseaseCureSpeed.Id, 100000000f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.INVINCIBLE.ATTRIBUTE_MODIFIER_NAME, false, false, true));
+			Db.Get().Attributes.GermSusceptibility.Lookup(this).Add(new AttributeModifier(Db.Get().Attributes.GermSusceptibility.Id, -2f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.INVINCIBLE.ATTRIBUTE_MODIFIER_NAME, false, false, true));
 		}
 		SettingLevel currentQualitySetting2 = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.Stress);
 		if (currentQualitySetting2.id == "Doomed")

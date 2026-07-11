@@ -15,11 +15,19 @@ public class LogicGateFilter : LogicGate, ISingleSliderControl, ISliderControl
 		set
 		{
 			this.delayAmount = value;
-			if (this.schedulerHandle.IsValid && this.schedulerHandle.TimeRemaining > this.delayAmount)
+			int delayAmountTicks = this.DelayAmountTicks;
+			if (this.delayTicksRemaining > delayAmountTicks)
 			{
-				this.schedulerHandle.ClearScheduler();
-				this.schedulerHandle = GameScheduler.Instance.Schedule("logic delay", this.delayAmount, new Action<object>(this.OnDelay), null, null);
+				this.delayTicksRemaining = delayAmountTicks;
 			}
+		}
+	}
+
+	private int DelayAmountTicks
+	{
+		get
+		{
+			return Mathf.RoundToInt(this.delayAmount / LogicCircuitManager.ClockTickInterval);
 		}
 	}
 
@@ -39,6 +47,11 @@ public class LogicGateFilter : LogicGate, ISingleSliderControl, ISliderControl
 		}
 	}
 
+	public int SliderDecimalPlaces(int index)
+	{
+		return 1;
+	}
+
 	public float GetSliderMin(int index)
 	{
 		return 0.1f;
@@ -51,12 +64,12 @@ public class LogicGateFilter : LogicGate, ISingleSliderControl, ISliderControl
 
 	public float GetSliderValue(int index)
 	{
-		return this.delayAmount;
+		return this.DelayAmount;
 	}
 
 	public void SetSliderValue(float value, int index)
 	{
-		this.delayAmount = value;
+		this.DelayAmount = value;
 	}
 
 	public string GetSliderTooltipKey(int index)
@@ -84,16 +97,24 @@ public class LogicGateFilter : LogicGate, ISingleSliderControl, ISliderControl
 	{
 		base.OnSpawn();
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		this.meter = new MeterController(component, "meter_target", "meter", Meter.Offset.UserSpecified, Grid.SceneLayer.LogicWireBridgesFront, Vector3.zero, null);
+		this.meter = new MeterController(component, "meter_target", "meter", Meter.Offset.UserSpecified, Grid.SceneLayer.LogicGatesFront, Vector3.zero, null);
 		this.meter.SetPositionPercent(0f);
 	}
 
 	private void Update()
 	{
-		if (this.schedulerHandle.IsValid)
+		this.meter.SetPositionPercent((float)this.delayTicksRemaining / (float)this.DelayAmountTicks);
+	}
+
+	public override void LogicTick()
+	{
+		if (!this.input_was_previously_negative && this.delayTicksRemaining > 0)
 		{
-			float timeRemaining = this.schedulerHandle.TimeRemaining;
-			this.meter.SetPositionPercent(timeRemaining / this.delayAmount);
+			this.delayTicksRemaining--;
+			if (this.delayTicksRemaining <= 0)
+			{
+				this.OnDelay();
+			}
 		}
 	}
 
@@ -102,29 +123,27 @@ public class LogicGateFilter : LogicGate, ISingleSliderControl, ISliderControl
 		if (val1 == 0)
 		{
 			this.input_was_previously_negative = true;
-			if (this.schedulerHandle.IsValid)
-			{
-				this.schedulerHandle.ClearScheduler();
-			}
+			this.delayTicksRemaining = 0;
 			this.meter.SetPositionPercent(1f);
 		}
-		else if (!this.schedulerHandle.IsValid)
+		else if (this.delayTicksRemaining <= 0)
 		{
 			if (this.input_was_previously_negative)
 			{
-				this.schedulerHandle = GameScheduler.Instance.Schedule("logic delay", this.delayAmount, new Action<object>(this.OnDelay), null, null);
+				this.delayTicksRemaining = this.DelayAmountTicks;
 			}
 			this.input_was_previously_negative = false;
 		}
-		return (val1 != 0 && this.schedulerHandle.TimeRemaining <= 0f) ? 1 : 0;
+		return (val1 != 0 && this.delayTicksRemaining <= 0) ? 1 : 0;
 	}
 
-	private void OnDelay(object data)
+	private void OnDelay()
 	{
 		if (this.cleaningUp)
 		{
 			return;
 		}
+		this.delayTicksRemaining = 0;
 		this.meter.SetPositionPercent(0f);
 		if (this.outputValue == 1)
 		{
@@ -139,13 +158,14 @@ public class LogicGateFilter : LogicGate, ISingleSliderControl, ISliderControl
 		base.RefreshAnimation();
 	}
 
-	private SchedulerHandle schedulerHandle;
-
 	[Serialize]
 	private bool input_was_previously_negative;
 
 	[Serialize]
 	private float delayAmount = 5f;
+
+	[Serialize]
+	private int delayTicksRemaining;
 
 	private MeterController meter;
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.CustomSettings;
 using UnityEngine;
 
 public class CharacterSelectionController : KModalScreen
@@ -43,7 +44,7 @@ public class CharacterSelectionController : KModalScreen
 		}
 		this.OnReplacedEvent = null;
 		this.containers = new List<ITelepadDeliverableContainer>();
-		if (this.IsStarterMinion)
+		if (this.IsStarterMinion || CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.CarePackages).id != "Enabled")
 		{
 			this.numberOfDuplicantOptions = 3;
 			this.numberOfCarePackageOptions = 0;
@@ -99,12 +100,12 @@ public class CharacterSelectionController : KModalScreen
 	{
 		if (this.selectedDeliverables.Contains(deliverable))
 		{
-			global::Debug.Log("Tried to add the same minion twice.", null);
+			global::Debug.Log("Tried to add the same minion twice.");
 			return;
 		}
 		if (this.selectedDeliverables.Count >= this.selectableCount)
 		{
-			global::Debug.LogError("Tried to add minions beyond the allowed limit", null);
+			global::Debug.LogError("Tried to add minions beyond the allowed limit");
 			return;
 		}
 		this.selectedDeliverables.Add(deliverable);

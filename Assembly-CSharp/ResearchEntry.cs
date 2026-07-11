@@ -57,7 +57,7 @@ public class ResearchEntry : KMonoBehaviour
 	{
 		if (newTech == null)
 		{
-			global::Debug.LogError("The research provided is null!", null);
+			global::Debug.LogError("The research provided is null!");
 			return;
 		}
 		if (this.targetTech == newTech)

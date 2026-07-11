@@ -24,6 +24,11 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 		int num2 = Mathf.RoundToInt((float)this.configuration.GetDiseaseCount() * this.configuration.GetEmitRate());
 		elementEmitter.outputElement = new ElementConverter.OutputElement(emitRate, element, temperature, false, num, (float)this.outputOffset.y, false, 1f, this.configuration.GetDiseaseIdx(), num2);
 		base.smi.StartSM();
+		Workable component = base.GetComponent<Studyable>();
+		if (component != null)
+		{
+			component.alwaysShowProgressBar = true;
+		}
 	}
 
 	public float RemainingPhaseTimeFrom2(float onDuration, float offDuration, float time, Geyser.Phase expectedPhase)

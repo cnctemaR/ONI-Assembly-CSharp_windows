@@ -238,7 +238,7 @@ public class EntityTemplates
 	{
 		FertilityMonitor.Def def = prefab.AddOrGetDef<FertilityMonitor.Def>();
 		def.baseFertileCycles = fertility_cycles;
-		DebugUtil.DevAssert(eggSortOrder > -1, new object[] { "Added a fertile creature without an egg sort order!" });
+		DebugUtil.DevAssert(eggSortOrder > -1, "Added a fertile creature without an egg sort order!");
 		float num = 100f / (600f * incubation_cycles);
 		GameObject gameObject = EggConfig.CreateEgg(eggId, eggName, eggDesc, baby_id, egg_anim, egg_mass, eggSortOrder, num);
 		def.eggPrefab = new Tag(eggId);

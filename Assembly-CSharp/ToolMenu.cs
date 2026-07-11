@@ -31,8 +31,25 @@ public class ToolMenu : KScreen
 	{
 		base.OnPrefabInit();
 		ToolMenu.Instance = this;
+		Game.Instance.Subscribe(1798162660, new Action<object>(this.OnOverlayChanged));
 		this.priorityScreen = Util.KInstantiateUI<PriorityScreen>(this.Prefab_priorityScreen.gameObject, base.gameObject, false);
 		this.priorityScreen.InstantiateButtons(new Action<PrioritySetting>(this.OnPriorityClicked), false);
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		Game.Instance.Unsubscribe(1798162660, new Action<object>(this.OnOverlayChanged));
+	}
+
+	private void OnOverlayChanged(object overlay_data)
+	{
+		HashedString hashedString = (HashedString)overlay_data;
+		if (PlayerController.Instance.ActiveTool != null && PlayerController.Instance.ActiveTool.ViewMode != OverlayModes.None.ID && PlayerController.Instance.ActiveTool.ViewMode != hashedString)
+		{
+			this.ChooseCollection(null, true);
+			this.ChooseTool(null);
+		}
 	}
 
 	protected override void OnSpawn()
@@ -152,7 +169,7 @@ public class ToolMenu : KScreen
 	{
 		string text = collection_name;
 		ToolMenu.ToolCollection toolCollection = new ToolMenu.ToolCollection(text, icon_name, string.Empty, false, global::Action.NumActions, largeIcon);
-		new ToolMenu.ToolInfo(collection_name, icon_name, hotkey, tool_name, toolCollection, tooltip, false, null, null);
+		new ToolMenu.ToolInfo(collection_name, icon_name, hotkey, tool_name, toolCollection, tooltip, null, null);
 		return toolCollection;
 	}
 
@@ -305,11 +322,8 @@ public class ToolMenu : KScreen
 				if (this.currentlySelectedTool.toolName == interfaceTool.name)
 				{
 					UISounds.PlaySound(UISounds.Sound.ClickObject);
+					this.activeTool = interfaceTool;
 					PlayerController.Instance.ActivateTool(interfaceTool);
-					if (tool.forceViewMode && OverlayScreen.Instance.GetMode() != tool.viewMode)
-					{
-						Game.Instance.gameObject.Trigger(1248612973, tool.viewMode);
-					}
 					break;
 				}
 			}
@@ -486,7 +500,7 @@ public class ToolMenu : KScreen
 			{
 				if (Application.isEditor)
 				{
-					Output.Log(new object[] { "Force-enabling sandbox mode because we're in editor." });
+					DebugUtil.LogArgs(new object[] { "Force-enabling sandbox mode because we're in editor." });
 					SaveGame.Instance.sandboxEnabled = true;
 				}
 				if (SaveGame.Instance.sandboxEnabled)
@@ -787,6 +801,8 @@ public class ToolMenu : KScreen
 
 	public ToolMenu.ToolInfo currentlySelectedTool;
 
+	public InterfaceTool activeTool;
+
 	private Coroutine activeOpenAnimationRoutine;
 
 	private Coroutine activeCloseAnimationRoutine;
@@ -807,7 +823,7 @@ public class ToolMenu : KScreen
 
 	public class ToolInfo
 	{
-		public ToolInfo(string text, string icon_name, global::Action hotkey, string ToolName, ToolMenu.ToolCollection toolCollection, string tooltip = "", bool forceViewMode = false, Action<object> onSelectCallback = null, object toolData = null)
+		public ToolInfo(string text, string icon_name, global::Action hotkey, string ToolName, ToolMenu.ToolCollection toolCollection, string tooltip = "", Action<object> onSelectCallback = null, object toolData = null)
 		{
 			this.text = text;
 			this.icon = icon_name;
@@ -816,10 +832,8 @@ public class ToolMenu : KScreen
 			this.collection = toolCollection;
 			toolCollection.tools.Add(this);
 			this.tooltip = tooltip;
-			this.forceViewMode = forceViewMode;
 			this.onSelectCallback = onSelectCallback;
 			this.toolData = toolData;
-			this.viewMode = OverlayModes.None.ID;
 		}
 
 		public string text;
@@ -833,10 +847,6 @@ public class ToolMenu : KScreen
 		public ToolMenu.ToolCollection collection;
 
 		public string tooltip;
-
-		public HashedString viewMode;
-
-		public bool forceViewMode;
 
 		public KToggle toggle;
 

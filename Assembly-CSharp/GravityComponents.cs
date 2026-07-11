@@ -5,7 +5,13 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 {
 	public HandleVector<int>.Handle Add(GameObject go, Vector2 initial_velocity, global::System.Action on_landed = null)
 	{
-		return base.Add(go, new GravityComponent(go.transform, on_landed, initial_velocity));
+		bool flag = false;
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		if (component != null)
+		{
+			flag = component.HasAnyTags(GravityComponents.LANDS_ON_FAKEFLOOR);
+		}
+		return base.Add(go, new GravityComponent(go.transform, on_landed, initial_velocity, flag));
 	}
 
 	public override void FixedUpdate(float dt)
@@ -67,7 +73,7 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 								}
 							}
 						}
-						if (Grid.Solid[num6] || (Grid.LiquidPumpFloor[num6] && gravityComponent.transform.GetComponent<MinionIdentity>() != null))
+						if (Grid.Solid[num6] || (gravityComponent.landOnFakeFloors && Grid.FakeFloor[num6]))
 						{
 							vector3.y = Grid.CellToPosCBC(Grid.CellAbove(num6), Grid.SceneLayer.Move).y + gravityComponent.radius;
 							gravityComponent.velocity.x = 0f;
@@ -118,6 +124,13 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 	}
 
 	private const float Acceleration = -9.8f;
+
+	private static Tag[] LANDS_ON_FAKEFLOOR = new Tag[]
+	{
+		GameTags.Minion,
+		GameTags.Creatures.Walker,
+		GameTags.Creatures.Hoverer
+	};
 
 	public class Tuning : TuningData<GravityComponents.Tuning>
 	{

@@ -90,7 +90,7 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 					}
 					else
 					{
-						Output.LogWarning(new object[] { "Couldn't emit CO2" });
+						DebugUtil.LogWarningArgs(new object[] { "Couldn't emit CO2" });
 					}
 					break;
 				}

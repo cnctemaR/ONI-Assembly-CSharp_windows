@@ -254,7 +254,7 @@ namespace NodeEditorFramework
 				}
 				else if (NodeEditor.calculationCount >= 1000)
 				{
-					global::Debug.LogError("Stopped calculation because of suspected Recursion. Maximum calculation iteration is currently at 1000!", null);
+					global::Debug.LogError("Stopped calculation because of suspected Recursion. Maximum calculation iteration is currently at 1000!");
 				}
 				return true;
 			}

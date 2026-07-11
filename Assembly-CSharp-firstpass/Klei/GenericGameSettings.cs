@@ -87,7 +87,7 @@ namespace Klei
 			}
 			catch (Exception ex)
 			{
-				global::Debug.LogWarning("Failed to save settings.yml: " + ex.ToString(), null);
+				global::Debug.LogWarning("Failed to save settings.yml: " + ex.ToString());
 			}
 		}
 

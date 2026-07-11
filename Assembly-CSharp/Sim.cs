@@ -114,7 +114,7 @@ public static class Sim
 				int line = ptr->line;
 				text2 = text3 + ":" + line;
 			}
-			KCrashReporter.ReportDLLCrash(text, text2, null);
+			KCrashReporter.ReportSimDLLCrash(text, text2, null);
 			return 0;
 		}
 		if (message_id != 0)
@@ -124,7 +124,7 @@ public static class Sim
 		Sim.DLLExceptionHandlerMessage* ptr2 = (Sim.DLLExceptionHandlerMessage*)(void*)data;
 		string text4 = Marshal.PtrToStringAnsi(ptr2->callstack);
 		string text5 = Marshal.PtrToStringAnsi(ptr2->dmpFilename);
-		KCrashReporter.ReportDLLCrash(text4, text4, text5);
+		KCrashReporter.ReportSimDLLCrash(text4, text4, text5);
 		return 0;
 	}
 

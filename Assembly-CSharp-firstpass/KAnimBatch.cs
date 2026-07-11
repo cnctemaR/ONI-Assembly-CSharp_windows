@@ -113,7 +113,7 @@ public class KAnimBatch
 				"] ",
 				this.batchset.idx,
 				" (probably just anims)"
-			}), null);
+			}));
 			return;
 		}
 		for (int i = 0; i < width * width; i++)
@@ -197,7 +197,7 @@ public class KAnimBatch
 		{
 			if (!this.controllers.Remove(controller))
 			{
-				global::Debug.LogError("Failed to remove controller [" + controller.GetName() + "]", null);
+				global::Debug.LogError("Failed to remove controller [" + controller.GetName() + "]");
 			}
 			controller.SetBatch(null);
 			this.currentOffset -= 28;
@@ -215,7 +215,7 @@ public class KAnimBatch
 		}
 		else
 		{
-			global::Debug.LogError("Deregister called for [" + controller.GetName() + "] but its not in this batch ", null);
+			global::Debug.LogError("Deregister called for [" + controller.GetName() + "] but its not in this batch ");
 		}
 		if (this.controllers.Count == 0)
 		{
@@ -254,7 +254,7 @@ public class KAnimBatch
 		int num = this.controllers.IndexOf(controller);
 		if (num < 0)
 		{
-			global::Debug.LogError("Setting controller [" + controller.GetName() + "] to dirty but its not in this batch", null);
+			global::Debug.LogError("Setting controller [" + controller.GetName() + "] to dirty but its not in this batch");
 			return;
 		}
 		this.AddToDirty(num);
@@ -340,7 +340,7 @@ public class KAnimBatch
 			}
 			else
 			{
-				global::Debug.LogError("dirtySet not written", null);
+				global::Debug.LogError("dirtySet not written");
 			}
 		}
 		this.dataTex.LoadRawTextureData();
@@ -442,7 +442,7 @@ public class KAnimBatch
 				{
 					text = text + texture2D.name + "\n";
 				}
-				global::Debug.LogError(text, null);
+				global::Debug.LogError(text);
 			}
 		}
 

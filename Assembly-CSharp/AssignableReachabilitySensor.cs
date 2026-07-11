@@ -10,7 +10,7 @@ public class AssignableReachabilitySensor : Sensor
 		Assignables[] components = minionAssignablesProxy.GetComponents<Assignables>();
 		if (components.Length == 0)
 		{
-			Debug.LogError(base.gameObject.GetProperName() + ": No 'Assignables' components found for AssignableReachabilitySensor", null);
+			Debug.LogError(base.gameObject.GetProperName() + ": No 'Assignables' components found for AssignableReachabilitySensor");
 		}
 		int num = 0;
 		foreach (Assignables assignables in components)
@@ -38,7 +38,7 @@ public class AssignableReachabilitySensor : Sensor
 				return this.slots[i].isReachable;
 			}
 		}
-		Debug.LogError("Could not find slot: " + slot, null);
+		Debug.LogError("Could not find slot: " + slot);
 		return false;
 	}
 

@@ -9,7 +9,7 @@ public abstract class Chore
 	{
 		if (priority_value == 2147483647)
 		{
-			priority_class = PriorityScreen.PriorityClass.emergency;
+			priority_class = PriorityScreen.PriorityClass.topPriority;
 			priority_value = 2;
 		}
 		if (priority_value < 1 || priority_value > 9)
@@ -183,16 +183,28 @@ public abstract class Chore
 
 	public virtual void Begin(Chore.Precondition.Context context)
 	{
-		DebugUtil.Assert(this.driver == null);
+		if (this.driver != null)
+		{
+			global::Debug.LogErrorFormat("Chore.Begin driver already set {0} {1} {2}, provider {3}, driver {4} -> {5}", new object[]
+			{
+				this.id,
+				base.GetType(),
+				this.choreType.Id,
+				this.provider,
+				this.driver,
+				context.consumerState.choreDriver
+			});
+		}
 		if (this.provider == null)
 		{
-			global::Debug.LogError(string.Concat(new object[]
+			global::Debug.LogErrorFormat("Chore.Begin provider is null {0} {1} {2}, provider {3}, driver {4}", new object[]
 			{
-				"Chore has null provider: ",
+				this.id,
 				base.GetType(),
-				" ",
-				this.choreType.Id
-			}), null);
+				this.choreType.Id,
+				this.provider,
+				this.driver
+			});
 		}
 		this.driver = context.consumerState.choreDriver;
 		StateMachine.Instance smi = this.GetSMI();
@@ -314,7 +326,6 @@ public abstract class Chore
 		if (this.provider != null)
 		{
 			this.provider.RemoveChore(this);
-			this.provider = null;
 			return true;
 		}
 		return false;
@@ -481,7 +492,11 @@ public abstract class Chore
 					{
 						return this.chore.preconditions[this.failedPreconditionId].id == ChorePreconditions.instance.IsMoreSatisfyingLate.id;
 					}
-					DebugUtil.DevAssert(false, new object[] { string.Format("failedPreconditionId out of range {0}/{1}", this.failedPreconditionId, this.chore.preconditions.Count) });
+					DebugUtil.DevLogErrorFormat("failedPreconditionId out of range {0}/{1}", new object[]
+					{
+						this.failedPreconditionId,
+						this.chore.preconditions.Count
+					});
 				}
 				return false;
 			}

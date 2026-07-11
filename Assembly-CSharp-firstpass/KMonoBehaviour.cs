@@ -54,15 +54,15 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 			}
 			catch (Exception ex)
 			{
-				Output.LogError(string.Concat(new string[]
+				string text = string.Concat(new string[]
 				{
-					"Error in: ",
+					"Error in ",
 					base.name,
 					".",
 					base.GetType().Name,
-					".OnPrefabInit\n",
-					ex.ToString()
-				}));
+					".OnPrefabInit"
+				});
+				throw new Exception(text, ex);
 			}
 		}
 	}
@@ -127,7 +127,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		}
 		if (!this.isInitialized)
 		{
-			global::Debug.LogError(base.name + "." + base.GetType().Name + " is not initialized.", null);
+			global::Debug.LogError(base.name + "." + base.GetType().Name + " is not initialized.");
 			return;
 		}
 		this.isSpawned = true;
@@ -142,15 +142,15 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		}
 		catch (Exception ex)
 		{
-			Output.LogError(string.Concat(new string[]
+			string text = string.Concat(new string[]
 			{
-				"Error in: ",
+				"Error in ",
 				base.name,
 				".",
 				base.GetType().Name,
-				".OnSpawn\n",
-				ex.ToString()
-			}));
+				".OnSpawn"
+			});
+			throw new Exception(text, ex);
 		}
 	}
 
@@ -267,7 +267,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 			}
 			catch
 			{
-				Output.LogWarning(new object[] { "AUDIOERROR: Missing [" + sound + "]" });
+				DebugUtil.LogWarningArgs(new object[] { "AUDIOERROR: Missing [" + sound + "]" });
 			}
 		}
 	}
@@ -282,7 +282,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 			}
 			catch
 			{
-				Output.LogWarning(new object[] { "AUDIOERROR: Missing [" + sound + "]" });
+				DebugUtil.LogWarningArgs(new object[] { "AUDIOERROR: Missing [" + sound + "]" });
 			}
 		}
 	}
@@ -295,7 +295,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		}
 		catch
 		{
-			Output.LogWarning(new object[] { "AUDIOERROR: Missing [" + asset + "]" });
+			DebugUtil.LogWarningArgs(new object[] { "AUDIOERROR: Missing [" + asset + "]" });
 		}
 	}
 

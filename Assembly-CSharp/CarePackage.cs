@@ -78,7 +78,7 @@ public class CarePackage : StateMachineComponent<CarePackage.SMInstance>
 	{
 		if (this.info == null)
 		{
-			global::Debug.LogWarning("CarePackage has no data to spawn from. Probably a save from before the CarePackage info data was serialized.", null);
+			global::Debug.LogWarning("CarePackage has no data to spawn from. Probably a save from before the CarePackage info data was serialized.");
 			return;
 		}
 		GameObject gameObject = null;
@@ -101,11 +101,11 @@ public class CarePackage : StateMachineComponent<CarePackage.SMInstance>
 		else if (element != null)
 		{
 			float quantity = this.info.quantity;
-			gameObject = element.substance.SpawnResource(vector, quantity, element.defaultValues.temperature, byte.MaxValue, 0, false, true);
+			gameObject = element.substance.SpawnResource(vector, quantity, element.defaultValues.temperature, byte.MaxValue, 0, false, true, false);
 		}
 		else
 		{
-			global::Debug.LogWarning("Can't find spawnable thing from tag " + this.info.id, null);
+			global::Debug.LogWarning("Can't find spawnable thing from tag " + this.info.id);
 		}
 		if (gameObject != null)
 		{

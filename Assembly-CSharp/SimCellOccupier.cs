@@ -145,8 +145,7 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 
 	private void ForceSetGameCellData(int cell)
 	{
-		Grid.PreviousSolid[cell] = Grid.Solid[cell];
-		bool flag = !Grid.ForceField[cell];
+		bool flag = !Grid.DupePassable[cell];
 		Grid.SetSolid(cell, flag, CellEventLogger.Instance.SimCellOccupierForceSolid);
 		Pathfinding.Instance.AddDirtyNavGridCell(cell);
 		GameScenePartitioner.Instance.TriggerEvent(cell, GameScenePartitioner.Instance.solidChangedLayer, null);

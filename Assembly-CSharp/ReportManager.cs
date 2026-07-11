@@ -132,7 +132,7 @@ public class ReportManager : KMonoBehaviour
 		}, null, null);
 		if (this.notifier == null)
 		{
-			Debug.LogError("Cant notify, null notifier", null);
+			Debug.LogError("Cant notify, null notifier");
 		}
 		else
 		{

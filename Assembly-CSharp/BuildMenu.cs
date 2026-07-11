@@ -379,7 +379,7 @@ public class BuildMenu : KScreen
 	{
 		if (this.selectedBuilding == null)
 		{
-			global::Debug.Log("No def!", null);
+			global::Debug.Log("No def!");
 		}
 		if (this.selectedBuilding.isKAnimTile && this.selectedBuilding.isUtility)
 		{
@@ -518,7 +518,7 @@ public class BuildMenu : KScreen
 			BuildingDef buildingDef = Assets.GetBuildingDef(techItem.Id);
 			if (buildingDef == null)
 			{
-				Output.LogWarning(new object[] { string.Format("Tech '{0}' unlocked building '{1}' but no such building exists", tech.Name, techItem.Id) });
+				DebugUtil.LogWarningArgs(new object[] { string.Format("Tech '{0}' unlocked building '{1}' but no such building exists", tech.Name, techItem.Id) });
 			}
 			else
 			{
@@ -626,7 +626,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("Refrigerator", global::Action.BuildMenuKeyF),
 				new BuildMenu.BuildingInfo("StorageLockerSmart", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("LiquidReservoir", global::Action.BuildMenuKeyQ),
-				new BuildMenu.BuildingInfo("GasReservoir", global::Action.BuildMenuKeyG)
+				new BuildMenu.BuildingInfo("GasReservoir", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("ObjectDispenser", global::Action.BuildMenuKeyO)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Research"), "icon_category_misc", global::Action.BuildCategoryResearch, KKeyCode.R, new List<BuildMenu.BuildingInfo>
 			{
@@ -671,8 +672,9 @@ public class BuildMenu : KScreen
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Medical"), "icon_category_medical", global::Action.BuildCategoryMedical, KKeyCode.C, new List<BuildMenu.BuildingInfo>
 			{
 				new BuildMenu.BuildingInfo("Apothecary", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("DoctorStation", global::Action.BuildMenuKeyD),
+				new BuildMenu.BuildingInfo("AdvancedDoctorStation", global::Action.BuildMenuKeyO),
 				new BuildMenu.BuildingInfo("MedicalCot", global::Action.BuildMenuKeyB),
-				new BuildMenu.BuildingInfo("MedicalBed", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("MassageTable", global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo("Grave", global::Action.BuildMenuKeyR)
 			}),
@@ -734,6 +736,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("MethaneGenerator", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("PetroleumGenerator", global::Action.BuildMenuKeyR),
 				new BuildMenu.BuildingInfo("SteamTurbine", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("SteamTurbine2", global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo("SolarPanel", global::Action.BuildMenuKeyS)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("PowerControl"), "icon_category_electrical", global::Action.BuildCategoryPowerControl, KKeyCode.R, new List<BuildMenu.BuildingInfo>
@@ -802,7 +805,8 @@ public class BuildMenu : KScreen
 			{
 				new BuildMenu.BuildingInfo("SpaceHeater", global::Action.BuildMenuKeyS),
 				new BuildMenu.BuildingInfo("LiquidHeater", global::Action.BuildMenuKeyT),
-				new BuildMenu.BuildingInfo("LiquidCooledFan", global::Action.BuildMenuKeyQ),
+				new BuildMenu.BuildingInfo("IceCooledFan", global::Action.BuildMenuKeyQ),
+				new BuildMenu.BuildingInfo("IceMachine", global::Action.BuildMenuKeyI),
 				new BuildMenu.BuildingInfo("AirConditioner", global::Action.BuildMenuKeyR),
 				new BuildMenu.BuildingInfo("LiquidConditioner", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("OreScrubber", global::Action.BuildMenuKeyC),
@@ -829,6 +833,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("FarmStation", global::Action.BuildMenuKeyF),
 				new BuildMenu.BuildingInfo("PowerControlStation", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("AstronautTrainingCenter", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("ResetSkillsStation", global::Action.BuildMenuKeyR),
 				new BuildMenu.BuildingInfo("ClothingFabricator", global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo("SuitFabricator", global::Action.BuildMenuKeyX),
 				new BuildMenu.BuildingInfo("SuitMarker", global::Action.BuildMenuKeyE),
@@ -867,6 +872,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("SolidConduit", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("SolidConduitInbox", global::Action.BuildMenuKeyI),
 				new BuildMenu.BuildingInfo("SolidConduitOutbox", global::Action.BuildMenuKeyO),
+				new BuildMenu.BuildingInfo("SolidVent", global::Action.BuildMenuKeyV),
+				new BuildMenu.BuildingInfo("SolidLogicValve", global::Action.BuildMenuKeyL),
 				new BuildMenu.BuildingInfo("SolidConduitBridge", global::Action.BuildMenuKeyB),
 				new BuildMenu.BuildingInfo("AutoMiner", global::Action.BuildMenuKeyM)
 			}),

@@ -7,6 +7,7 @@ using Klei;
 using Klei.CustomSettings;
 using KSerialization;
 using ProcGenGame;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
@@ -49,7 +50,7 @@ public class Game : KMonoBehaviour
 
 	protected override void OnPrefabInit()
 	{
-		Output.Log(new object[]
+		DebugUtil.LogArgs(new object[]
 		{
 			Time.realtimeSinceStartup,
 			"Level Loaded....",
@@ -105,7 +106,6 @@ public class Game : KMonoBehaviour
 		PathFinder.Initialize();
 		new GameNavGrids(Pathfinding.Instance);
 		this.screenMgr = global::Util.KInstantiate(this.screenManagerPrefab, null, null).GetComponent<GameScreenManager>();
-		this.roleManager = new RoleManager();
 		this.roomProber = new RoomProber();
 		this.fetchManager = base.gameObject.AddComponent<FetchManager>();
 		this.ediblesManager = base.gameObject.AddComponent<EdiblesManager>();
@@ -165,7 +165,7 @@ public class Game : KMonoBehaviour
 
 	protected override void OnSpawn()
 	{
-		global::Debug.Log("-- GAME --", null);
+		global::Debug.Log("-- GAME --");
 		PropertyTextures.FogOfWarScale = 0f;
 		if (CameraController.Instance != null)
 		{
@@ -214,11 +214,7 @@ public class Game : KMonoBehaviour
 		if (Global.Instance != null)
 		{
 			Global.Instance.GetComponent<PerformanceMonitor>().Reset();
-		}
-		if (Game.modLoadErrors != null)
-		{
-			ModErrorsScreen.ShowErrors(Game.modLoadErrors);
-			Game.modLoadErrors = null;
+			Global.Instance.modManager.NotifyDialog(UI.FRONTEND.MOD_DIALOGS.SAVE_GAME_MODS_DIFFER.TITLE, UI.FRONTEND.MOD_DIALOGS.SAVE_GAME_MODS_DIFFER.MESSAGE, Global.Instance.globalCanvas);
 		}
 	}
 
@@ -268,9 +264,9 @@ public class Game : KMonoBehaviour
 		return component;
 	}
 
-	public void SetForceField(int cell, bool force_field, bool solid)
+	public void SetDupePassableSolid(int cell, bool passable, bool solid)
 	{
-		Grid.ForceField[cell] = force_field;
+		Grid.DupePassable[cell] = passable;
 		this.gameSolidInfo.Add(new SolidInfo(cell, solid));
 	}
 
@@ -284,7 +280,7 @@ public class Game : KMonoBehaviour
 			{
 				if (Grid.Visible == null || Grid.Visible.Length == 0)
 				{
-					Output.LogError("Invalid Grid.Visible, what have you done?!");
+					global::Debug.LogError("Invalid Grid.Visible, what have you done?!");
 					return null;
 				}
 				intPtr = Sim.HandleMessage(SimMessageHashes.PrepareGameData, Grid.Visible.Length, Grid.Visible);
@@ -327,7 +323,6 @@ public class Game : KMonoBehaviour
 					if (!this.solidChangedFilter.Contains(solidInfo.cellIdx))
 					{
 						this.solidInfo.Add(new SolidInfo(solidInfo.cellIdx, solidInfo.isSolid != 0));
-						Grid.PreviousSolid[solidInfo.cellIdx] = Grid.Solid[solidInfo.cellIdx];
 						bool flag = solidInfo.isSolid != 0;
 						Grid.SetSolid(solidInfo.cellIdx, flag, CellEventLogger.Instance.SimMessagesSolid);
 					}
@@ -357,7 +352,7 @@ public class Game : KMonoBehaviour
 					Sim.SpawnOreInfo spawnOreInfo = ptr2->digInfo[m];
 					if (spawnOreInfo.temperature <= 0f && spawnOreInfo.mass > 0f)
 					{
-						Output.LogError("Sim is telling us to spawn a zero temperature object. This shouldn't be possible because I have asserts in the dll about this....");
+						global::Debug.LogError("Sim is telling us to spawn a zero temperature object. This shouldn't be possible because I have asserts in the dll about this....");
 					}
 					component.OnDigComplete(spawnOreInfo.cellIdx, spawnOreInfo.mass, spawnOreInfo.temperature, spawnOreInfo.elemIdx, spawnOreInfo.diseaseIdx, spawnOreInfo.diseaseCount);
 				}
@@ -369,9 +364,9 @@ public class Game : KMonoBehaviour
 					Element element2 = ElementLoader.elements[(int)spawnOreInfo2.elemIdx];
 					if (spawnOreInfo2.temperature <= 0f && spawnOreInfo2.mass > 0f)
 					{
-						Output.LogError("Sim is telling us to spawn a zero temperature object. This shouldn't be possible because I have asserts in the dll about this....");
+						global::Debug.LogError("Sim is telling us to spawn a zero temperature object. This shouldn't be possible because I have asserts in the dll about this....");
 					}
-					element2.substance.SpawnResource(vector, spawnOreInfo2.mass, spawnOreInfo2.temperature, spawnOreInfo2.diseaseIdx, spawnOreInfo2.diseaseCount, false, false);
+					element2.substance.SpawnResource(vector, spawnOreInfo2.mass, spawnOreInfo2.temperature, spawnOreInfo2.diseaseIdx, spawnOreInfo2.diseaseCount, false, false, false);
 				}
 				int numSpawnFXInfo = ptr2->numSpawnFXInfo;
 				for (int num = 0; num < numSpawnFXInfo; num++)
@@ -584,7 +579,7 @@ public class Game : KMonoBehaviour
 
 	public void ForceSimStep()
 	{
-		Output.Log(new object[] { "Force-stepping the sim" });
+		DebugUtil.LogArgs(new object[] { "Force-stepping the sim" });
 		this.simDt = 0.2f;
 	}
 
@@ -655,7 +650,7 @@ public class Game : KMonoBehaviour
 		Sim.GameDataUpdate* ptr = this.StepTheSim(dt);
 		if (ptr == null)
 		{
-			global::Debug.LogError("UNEXPECTED!", null);
+			global::Debug.LogError("UNEXPECTED!");
 			return;
 		}
 		if (ptr->numFramesProcessed <= 0)
@@ -784,7 +779,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 312713U;
+		uint num = 326232U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -793,11 +788,11 @@ public class Game : KMonoBehaviour
 		float num2 = 0.1f;
 		if (GenericGameSettings.instance.performanceCapture.gcStats)
 		{
-			global::Debug.Log("Begin GC profiling...", null);
+			global::Debug.Log("Begin GC profiling...");
 			float realtimeSinceStartup = Time.realtimeSinceStartup;
 			GC.Collect();
 			num2 = Time.realtimeSinceStartup - realtimeSinceStartup;
-			global::Debug.Log("\tGC.Collect() took " + num2.ToString() + " seconds", null);
+			global::Debug.Log("\tGC.Collect() took " + num2.ToString() + " seconds");
 			MemorySnapshot memorySnapshot = new MemorySnapshot();
 			string text5 = "{0},{1},{2},{3}";
 			string text6 = "./memory/GCTypeMetrics.csv";
@@ -821,7 +816,7 @@ public class Game : KMonoBehaviour
 					}));
 				}
 			}
-			global::Debug.Log("...end GC profiling", null);
+			global::Debug.Log("...end GC profiling");
 		}
 		float fps = Global.Instance.GetComponent<PerformanceMonitor>().FPS;
 		Directory.CreateDirectory("./memory");
@@ -839,7 +834,7 @@ public class Game : KMonoBehaviour
 			streamWriter4.WriteLine(string.Format(text7, text4, num2, fps));
 		}
 		GenericGameSettings.instance.performanceCapture.waitTime = 0f;
-		Application.Quit();
+		App.Quit();
 	}
 
 	public void Reset(GameSpawnData gsd)
@@ -1000,6 +995,7 @@ public class Game : KMonoBehaviour
 		gameSaveData.autoPrioritizeRoles = this.autoPrioritizeRoles;
 		gameSaveData.advancedPersonalPriorities = this.advancedPersonalPriorities;
 		gameSaveData.savedInfo = this.savedInfo;
+		global::Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		if (this.OnSave != null)
 		{
 			this.OnSave(gameSaveData);
@@ -1288,7 +1284,7 @@ public class Game : KMonoBehaviour
 	private void Print()
 	{
 		Console.WriteLine("This is a console writeline test");
-		global::Debug.Log("This is a debug log test", null);
+		global::Debug.Log("This is a debug log test");
 	}
 
 	private void DestroyInstances()
@@ -1341,7 +1337,7 @@ public class Game : KMonoBehaviour
 		PropertyTextures.DestroyInstance();
 		RationTracker.DestroyInstance();
 		ReportManager.DestroyInstance();
-		RedAlertManager.Instance.DestroyInstance();
+		VignetteManager.Instance.DestroyInstance();
 		Research.DestroyInstance();
 		RootMenu.DestroyInstance();
 		SaveLoader.DestroyInstance();
@@ -1436,8 +1432,6 @@ public class Game : KMonoBehaviour
 
 	public static string worldID = null;
 
-	public static List<ModError> modLoadErrors;
-
 	private PlayerController playerController;
 
 	private CameraController cameraController;
@@ -1478,8 +1472,6 @@ public class Game : KMonoBehaviour
 	public float currentSunlightIntensity;
 
 	public RoomProber roomProber;
-
-	public RoleManager roleManager;
 
 	public FetchManager fetchManager;
 
@@ -1549,6 +1541,12 @@ public class Game : KMonoBehaviour
 	public Accumulators accumulators;
 
 	public PlantElementAbsorbers plantElementAbsorbers;
+
+	public Game.TemperatureOverlayModes temperatureOverlayMode;
+
+	public bool showExpandedTemperatures;
+
+	public List<Tag> tileOverlayFilters = new List<Tag>();
 
 	public bool showGasConduitDisease;
 
@@ -1783,6 +1781,14 @@ public class Game : KMonoBehaviour
 		private HandleVector<Game.ComplexCallbackInfo<DataType>> baseMgr;
 
 		private Dictionary<int, string> releaseInfo = new Dictionary<int, string>();
+	}
+
+	public enum TemperatureOverlayModes
+	{
+		AbsoluteTemperature,
+		AdaptiveTemperature,
+		HeatFlow,
+		StateChange
 	}
 
 	[Serializable]

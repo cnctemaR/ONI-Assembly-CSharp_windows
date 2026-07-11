@@ -165,7 +165,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		int num = (int)TimeSpan.FromTicks(this.currentSessionTicks - this.startTimeTicks).TotalSeconds;
 		if (num < 0)
 		{
-			global::Debug.LogWarning("Session time is < 0", null);
+			global::Debug.LogWarning("Session time is < 0");
 		}
 		return (uint)num;
 	}
@@ -253,6 +253,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 
 	private Dictionary<string, object> GetUserSession()
 	{
+		global::Debug.Assert(this.enabled);
 		Dictionary<string, object> dictionary = new Dictionary<string, object>();
 		if (!this.sessionStarted)
 		{
@@ -281,7 +282,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 			}
 			catch (Exception ex)
 			{
-				global::Debug.LogError("Dynamic session variables may be set from a thread. " + ex.Message + "\n" + ex.StackTrace, null);
+				global::Debug.LogError("Dynamic session variables may be set from a thread. " + ex.Message + "\n" + ex.StackTrace);
 			}
 		}
 		return dictionary;

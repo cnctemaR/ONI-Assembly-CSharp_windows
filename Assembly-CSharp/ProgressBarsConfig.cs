@@ -54,12 +54,12 @@ public class ProgressBarsConfig : ScriptableObject
 	{
 		if (string.IsNullOrEmpty(barName))
 		{
-			global::Debug.LogError("The barName provided was null or empty. Don't do that.", null);
+			global::Debug.LogError("The barName provided was null or empty. Don't do that.");
 			return false;
 		}
 		if (!this.barColorMap.ContainsKey(barName))
 		{
-			global::Debug.LogError(string.Format("No BarData found for the entry [ {0} ]", barName), null);
+			global::Debug.LogError(string.Format("No BarData found for the entry [ {0} ]", barName));
 			return false;
 		}
 		return true;

@@ -44,6 +44,9 @@ public class Prioritizable : KMonoBehaviour
 			this.onPriorityChanged(this.masterPrioritySetting);
 		}
 		this.RefreshHighPriorityNotification();
+		Vector3 position = base.transform.GetPosition();
+		Extents extents = new Extents((int)position.x, (int)position.y, 1, 1);
+		this.scenePartitionerEntry = GameScenePartitioner.Instance.Add(base.name, this, extents, GameScenePartitioner.Instance.prioritizableObjects, null);
 		Components.Prioritizables.Add(this);
 	}
 
@@ -82,14 +85,15 @@ public class Prioritizable : KMonoBehaviour
 		return this.refCount > 0;
 	}
 
-	public bool IsEmergency()
+	public bool IsTopPriority()
 	{
-		return this.masterPrioritySetting.priority_class == PriorityScreen.PriorityClass.emergency && this.IsPrioritizable();
+		return this.masterPrioritySetting.priority_class == PriorityScreen.PriorityClass.topPriority && this.IsPrioritizable();
 	}
 
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
+		GameScenePartitioner.Instance.Free(ref this.scenePartitionerEntry);
 		Components.Prioritizables.Remove(this);
 	}
 
@@ -113,7 +117,7 @@ public class Prioritizable : KMonoBehaviour
 
 	private void RefreshHighPriorityNotification()
 	{
-		bool flag = this.masterPrioritySetting.priority_class == PriorityScreen.PriorityClass.emergency && this.IsPrioritizable();
+		bool flag = this.masterPrioritySetting.priority_class == PriorityScreen.PriorityClass.topPriority && this.IsPrioritizable();
 		if (flag && this.highPriorityStatusItem == Guid.Empty)
 		{
 			this.highPriorityStatusItem = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.EmergencyPriority, null);
@@ -124,7 +128,7 @@ public class Prioritizable : KMonoBehaviour
 		}
 		if (GlobalChoreProvider.Instance != null)
 		{
-			GlobalChoreProvider.Instance.RefreshEmergencyChoreStatus();
+			GlobalChoreProvider.Instance.RefreshTopPriorityChoreStatus();
 		}
 	}
 
@@ -195,6 +199,8 @@ public class Prioritizable : KMonoBehaviour
 			new PrioritySetting(PriorityScreen.PriorityClass.basic, 9)
 		}
 	};
+
+	private HandleVector<int>.Handle scenePartitionerEntry;
 
 	private Guid highPriorityStatusItem;
 }

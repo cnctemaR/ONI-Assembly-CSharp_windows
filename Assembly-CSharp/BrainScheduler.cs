@@ -177,7 +177,7 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 			}
 			else
 			{
-				Debug.LogWarning("AdjustLoad() failed", null);
+				Debug.LogWarning("AdjustLoad() failed");
 			}
 			return num != 0;
 		}

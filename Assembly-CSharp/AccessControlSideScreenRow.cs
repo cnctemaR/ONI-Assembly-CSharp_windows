@@ -33,7 +33,7 @@ public class AccessControlSideScreenRow : AccessControlSideScreenDoor
 		base.SetContent(permission, onPermissionChange);
 		if (identity == null)
 		{
-			global::Debug.LogError("Invalid data received.", null);
+			global::Debug.LogError("Invalid data received.");
 			return;
 		}
 		if (this.portraitInstance == null)

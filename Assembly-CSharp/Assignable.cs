@@ -76,18 +76,18 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 
 	public bool CanAutoAssignTo(IAssignableIdentity identity)
 	{
-		MinionIdentity minionIdentity = identity as MinionIdentity;
-		if (minionIdentity == null)
+		MinionAssignablesProxy minionAssignablesProxy = identity as MinionAssignablesProxy;
+		if (minionAssignablesProxy == null)
 		{
 			return true;
 		}
-		if (!this.CanAssignTo(minionIdentity))
+		if (!this.CanAssignTo(minionAssignablesProxy))
 		{
 			return false;
 		}
-		foreach (Func<MinionIdentity, bool> func in this.autoassignmentPreconditions)
+		foreach (Func<MinionAssignablesProxy, bool> func in this.autoassignmentPreconditions)
 		{
-			if (!func(minionIdentity))
+			if (!func(minionAssignablesProxy))
 			{
 				return false;
 			}
@@ -97,14 +97,14 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 
 	public bool CanAssignTo(IAssignableIdentity identity)
 	{
-		MinionIdentity minionIdentity = identity as MinionIdentity;
-		if (minionIdentity == null)
+		MinionAssignablesProxy minionAssignablesProxy = identity as MinionAssignablesProxy;
+		if (minionAssignablesProxy == null)
 		{
 			return true;
 		}
-		foreach (Func<MinionIdentity, bool> func in this.assignmentPreconditions)
+		foreach (Func<MinionAssignablesProxy, bool> func in this.assignmentPreconditions)
 		{
-			if (!func(minionIdentity))
+			if (!func(minionAssignablesProxy))
 			{
 				return false;
 			}
@@ -119,11 +119,14 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 
 	public bool IsAssignedTo(IAssignableIdentity identity)
 	{
+		global::Debug.Assert(identity != null, "IsAssignedTo identity is null");
 		Ownables soleOwner = identity.GetSoleOwner();
+		global::Debug.Assert(soleOwner != null, "IsAssignedTo identity sole owner is null");
 		if (this.assignee != null)
 		{
 			foreach (Ownables ownables in this.assignee.GetOwners())
 			{
+				global::Debug.Assert(ownables, "Assignable owners list contained null");
 				if (ownables.gameObject == soleOwner.gameObject)
 				{
 					return true;
@@ -231,12 +234,12 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 		this.canBeAssigned = state;
 	}
 
-	public void AddAssignPrecondition(Func<MinionIdentity, bool> precondition)
+	public void AddAssignPrecondition(Func<MinionAssignablesProxy, bool> precondition)
 	{
 		this.assignmentPreconditions.Add(precondition);
 	}
 
-	public void AddAutoassignPrecondition(Func<MinionIdentity, bool> precondition)
+	public void AddAutoassignPrecondition(Func<MinionAssignablesProxy, bool> precondition)
 	{
 		this.autoassignmentPreconditions.Add(precondition);
 	}
@@ -287,9 +290,7 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 	[Serialize]
 	private bool canBeAssigned = true;
 
-	private List<Func<MinionIdentity, bool>> autoassignmentPreconditions = new List<Func<MinionIdentity, bool>>();
+	private List<Func<MinionAssignablesProxy, bool>> autoassignmentPreconditions = new List<Func<MinionAssignablesProxy, bool>>();
 
-	private List<Func<MinionIdentity, bool>> assignmentPreconditions = new List<Func<MinionIdentity, bool>>();
-
-	public Func<MinionAssignablesProxy, bool> eligibleFilter;
+	private List<Func<MinionAssignablesProxy, bool>> assignmentPreconditions = new List<Func<MinionAssignablesProxy, bool>>();
 }

@@ -63,6 +63,7 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 		this.storage = storage;
 		if (this.storage != null && base.isSpawned)
 		{
+			global::Debug.Assert(this.onStorageChangeSubscription == -1);
 			this.onStorageChangeSubscription = this.storage.Subscribe(-1697596308, delegate(object eventData)
 			{
 				this.OnStorageChanged(this.storage);

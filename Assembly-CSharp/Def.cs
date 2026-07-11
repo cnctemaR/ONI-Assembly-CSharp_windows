@@ -107,7 +107,11 @@ public class Def : ScriptableObject
 						return new Tuple<Sprite, Color>(Assets.GetSprite(((Tag)item).Name), Color.white);
 					}
 				}
-				global::Debug.LogErrorFormat("Can't get sprite for type {0}", new object[] { item.ToString() });
+				DebugUtil.DevAssertArgs(false, new object[]
+				{
+					"Can't get sprite for type ",
+					item.ToString()
+				});
 				return null;
 			}
 			if (Db.Get().Amounts.Exists(item as string))
@@ -133,13 +137,13 @@ public class Def : ScriptableObject
 		}
 		if (animFile == null)
 		{
-			Output.LogWarning(new object[] { animName, "missing Anim File" });
+			DebugUtil.LogWarningArgs(new object[] { animName, "missing Anim File" });
 			return null;
 		}
 		KAnimFileData data = animFile.GetData();
 		if (data == null)
 		{
-			Output.LogWarning(new object[] { animName, "KAnimFileData is null" });
+			DebugUtil.LogWarningArgs(new object[] { animName, "KAnimFileData is null" });
 			return null;
 		}
 		if (data.build == null)
@@ -157,7 +161,7 @@ public class Def : ScriptableObject
 		}
 		if (!frame.IsValid())
 		{
-			Output.LogWarning(new object[] { string.Format("missing '{0}' anim in '{1}'", animName, animFile) });
+			DebugUtil.LogWarningArgs(new object[] { string.Format("missing '{0}' anim in '{1}'", animName, animFile) });
 			return null;
 		}
 		if (data.elementCount == 0)
@@ -170,13 +174,13 @@ public class Def : ScriptableObject
 		KAnim.Build.Symbol symbol = data.build.GetSymbol(frameElement.symbol);
 		if (symbol == null)
 		{
-			Output.LogWarning(new object[] { animFile.name, animName, "placeSymbol [", frameElement.symbol, "] is missing" });
+			DebugUtil.LogWarningArgs(new object[] { animFile.name, animName, "placeSymbol [", frameElement.symbol, "] is missing" });
 			return null;
 		}
 		KAnim.Build.SymbolFrame symbolFrame = symbol.GetFrame(frameElement.frame).symbolFrame;
 		if (symbolFrame == null)
 		{
-			Output.LogWarning(new object[] { animName, "SymbolFrame [", frameElement.frame, "] is missing" });
+			DebugUtil.LogWarningArgs(new object[] { animName, "SymbolFrame [", frameElement.frame, "] is missing" });
 			return null;
 		}
 		Texture2D texture = data.build.GetTexture(0);

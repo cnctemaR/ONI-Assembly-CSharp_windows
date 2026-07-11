@@ -177,6 +177,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 				return;
 			}
 			Element element = ElementLoader.GetElement(tag);
+			global::Debug.Assert(element != null, "TODO: implement non-element tag spawning");
 			int num3 = Grid.PosToCell(this.owner.transform.GetPosition());
 			float temperature = this.owner.GetComponent<PrimaryElement>().Temperature;
 			if (element.IsLiquid)
@@ -195,7 +196,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			}
 			else
 			{
-				element.substance.SpawnResource(Grid.CellToPosCCC(num3, Grid.SceneLayer.Ore), num, temperature, b, num2, false, false);
+				element.substance.SpawnResource(Grid.CellToPosCCC(num3, Grid.SceneLayer.Ore), num, temperature, b, num2, false, false, false);
 			}
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, element.name, this.owner.transform, 1.5f, false);
 		}

@@ -23,13 +23,13 @@ public class SingleSliderSideScreen : SideScreenContent
 	{
 		if (new_target == null)
 		{
-			global::Debug.LogError("Invalid gameObject received", null);
+			global::Debug.LogError("Invalid gameObject received");
 			return;
 		}
 		this.target = new_target.GetComponent<ISingleSliderControl>();
 		if (this.target == null)
 		{
-			global::Debug.LogError("The gameObject received does not contain a Manual Generator component", null);
+			global::Debug.LogError("The gameObject received does not contain a Manual Generator component");
 			return;
 		}
 		this.titleKey = this.target.SliderTitleKey;

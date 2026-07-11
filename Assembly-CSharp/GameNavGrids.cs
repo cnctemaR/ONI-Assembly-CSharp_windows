@@ -54,38 +54,41 @@ public class GameNavGrids
 			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, 1, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
-				new CellOffset(1, 1),
-				new CellOffset(1, -1)
+				new CellOffset(1, 1)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
+				new NavOffset(NavType.Floor, 1, 0),
+				new NavOffset(NavType.Ladder, 1, 0),
+				new NavOffset(NavType.Pole, 1, 0),
 				new NavOffset(NavType.Floor, 1, 1),
-				new NavOffset(NavType.Ladder, 1, 1)
+				new NavOffset(NavType.Ladder, 1, 1),
+				new NavOffset(NavType.Pole, 1, 1)
 			}, false),
 			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, 0, NavAxis.NA, false, false, true, 20, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
-				new CellOffset(1, -1),
 				new CellOffset(1, 1)
 			}, new CellOffset[0], new NavOffset[0], array, false),
 			new NavGrid.Transition(NavType.Floor, NavType.Floor, 2, -1, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
-				new CellOffset(1, -1),
-				new CellOffset(1, -2)
+				new CellOffset(1, 1)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
 			{
 				new NavOffset(NavType.Floor, 1, 0),
-				new NavOffset(NavType.Ladder, 1, 0)
+				new NavOffset(NavType.Ladder, 1, 0),
+				new NavOffset(NavType.Pole, 1, 0),
+				new NavOffset(NavType.Floor, 1, -1),
+				new NavOffset(NavType.Ladder, 1, -1),
+				new NavOffset(NavType.Pole, 1, -1)
 			}, false),
 			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, -2, NavAxis.NA, false, false, false, 20, string.Empty, new CellOffset[]
 			{
-				new CellOffset(1, 0),
-				new CellOffset(1, -1)
+				new CellOffset(1, 0)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[0], false),
 			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, -1, NavAxis.NA, false, false, false, 14, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false),
 			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 2, NavAxis.NA, false, false, true, 20, string.Empty, new CellOffset[]
 			{
-				new CellOffset(0, 1),
 				new CellOffset(0, 2)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[0], false),
 			new NavGrid.Transition(NavType.Floor, NavType.Ladder, 0, 0, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false),
@@ -108,7 +111,6 @@ public class GameNavGrids
 			new NavGrid.Transition(NavType.Floor, NavType.Ladder, 2, 0, NavAxis.NA, false, false, true, 20, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
-				new CellOffset(1, -1),
 				new CellOffset(1, 1)
 			}, new CellOffset[0], new NavOffset[0], array, false),
 			new NavGrid.Transition(NavType.Ladder, NavType.Floor, 0, 0, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false),
@@ -131,7 +133,6 @@ public class GameNavGrids
 			new NavGrid.Transition(NavType.Ladder, NavType.Floor, 2, 0, NavAxis.NA, false, false, true, 20, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
-				new CellOffset(1, -1),
 				new CellOffset(1, 1)
 			}, new CellOffset[0], new NavOffset[0], array, false),
 			new NavGrid.Transition(NavType.Ladder, NavType.Ladder, 1, 0, NavAxis.NA, false, false, true, 15, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false),
@@ -162,7 +163,6 @@ public class GameNavGrids
 			new NavGrid.Transition(NavType.Floor, NavType.Pole, 2, 0, NavAxis.NA, false, false, true, 50, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
-				new CellOffset(1, -1),
 				new CellOffset(1, 1)
 			}, new CellOffset[0], new NavOffset[0], array, false),
 			new NavGrid.Transition(NavType.Pole, NavType.Floor, 0, 0, NavAxis.NA, false, false, true, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false),
@@ -185,7 +185,6 @@ public class GameNavGrids
 			new NavGrid.Transition(NavType.Pole, NavType.Floor, 2, 0, NavAxis.NA, false, false, true, 20, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
-				new CellOffset(1, -1),
 				new CellOffset(1, 1)
 			}, new CellOffset[0], new NavOffset[0], array, false),
 			new NavGrid.Transition(NavType.Pole, NavType.Ladder, 1, 0, NavAxis.NA, false, false, false, 10, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false),
@@ -471,7 +470,7 @@ public class GameNavGrids
 		};
 		this.DuplicantGrid = new NavGrid("MinionNavGrid", array4, array5, array2, new NavTableValidator[]
 		{
-			new GameNavGrids.FloorValidator(true, true),
+			new GameNavGrids.FloorValidator(true),
 			new GameNavGrids.LadderValidator(),
 			new GameNavGrids.PoleValidator(),
 			new GameNavGrids.TubeValidator(),
@@ -525,7 +524,7 @@ public class GameNavGrids
 		};
 		this.HatchGrid = new NavGrid("HatchNavGrid", array3, array4, array, new NavTableValidator[]
 		{
-			new GameNavGrids.FloorValidator(false, false)
+			new GameNavGrids.FloorValidator(false)
 		}, 2, 3, array3.Length);
 		pathfinding.AddNavGrid(this.HatchGrid);
 	}
@@ -551,7 +550,7 @@ public class GameNavGrids
 		};
 		this.HatchBabyGrid = new NavGrid("HatchBabyNavGrid", array3, array4, array, new NavTableValidator[]
 		{
-			new GameNavGrids.FloorValidator(false, false)
+			new GameNavGrids.FloorValidator(false)
 		}, 2, 3, array3.Length);
 		pathfinding.AddNavGrid(this.HatchBabyGrid);
 	}
@@ -726,9 +725,9 @@ public class GameNavGrids
 		};
 		this.DreckoGrid = new NavGrid("DreckoNavGrid", array3, array4, array, new NavTableValidator[]
 		{
-			new GameNavGrids.FloorValidator(false, false),
-			new GameNavGrids.WallValidator(false),
-			new GameNavGrids.CeilingValidator(false)
+			new GameNavGrids.FloorValidator(false),
+			new GameNavGrids.WallValidator(),
+			new GameNavGrids.CeilingValidator()
 		}, 2, 3, array3.Length);
 		pathfinding.AddNavGrid(this.DreckoGrid);
 	}
@@ -798,9 +797,9 @@ public class GameNavGrids
 		};
 		this.DreckoBabyGrid = new NavGrid("DreckoBabyNavGrid", array3, array4, array, new NavTableValidator[]
 		{
-			new GameNavGrids.FloorValidator(false, false),
-			new GameNavGrids.WallValidator(false),
-			new GameNavGrids.CeilingValidator(false)
+			new GameNavGrids.FloorValidator(false),
+			new GameNavGrids.WallValidator(),
+			new GameNavGrids.CeilingValidator()
 		}, 2, 3, array3.Length);
 		pathfinding.AddNavGrid(this.DreckoBabyGrid);
 	}
@@ -1102,10 +1101,10 @@ public class GameNavGrids
 		};
 		this.DiggerGrid = new NavGrid("DiggerNavGrid", array3, array4, array, new NavTableValidator[]
 		{
-			new GameNavGrids.SolidValidator(false),
-			new GameNavGrids.FloorValidator(false, false),
-			new GameNavGrids.WallValidator(false),
-			new GameNavGrids.CeilingValidator(false)
+			new GameNavGrids.SolidValidator(),
+			new GameNavGrids.FloorValidator(false),
+			new GameNavGrids.WallValidator(),
+			new GameNavGrids.CeilingValidator()
 		}, 2, 3, array3.Length);
 		pathfinding.AddNavGrid(this.DiggerGrid);
 	}
@@ -1214,30 +1213,43 @@ public class GameNavGrids
 
 	public class FloorValidator : NavTableValidator
 	{
-		public FloorValidator(bool allowLadders = true, bool allow_forcefield_traversal = false)
+		public FloorValidator(bool is_dupe)
 		{
 			World instance = World.Instance;
 			instance.OnSolidChanged = (Action<int>)Delegate.Combine(instance.OnSolidChanged, new Action<int>(this.OnSolidChanged));
 			Components.Ladders.Register(new Action<Ladder>(this.OnAddLadder), new Action<Ladder>(this.OnRemoveLadder));
-			this.allowLadders = allowLadders;
-			this.allowForcefieldTraversal = allow_forcefield_traversal;
+			this.isDupe = is_dupe;
 		}
 
 		public override void UpdateCell(int cell, NavTable nav_table, CellOffset[] bounding_offsets)
 		{
-			bool flag = GameNavGrids.FloorValidator.IsWalkableCell(cell, Grid.CellBelow(cell), this.allowLadders, this.allowForcefieldTraversal);
-			nav_table.SetValid(cell, NavType.Floor, flag && base.IsClear(cell, bounding_offsets, this.allowForcefieldTraversal));
+			bool flag = GameNavGrids.FloorValidator.IsWalkableCell(cell, Grid.CellBelow(cell), this.isDupe);
+			nav_table.SetValid(cell, NavType.Floor, flag && base.IsClear(cell, bounding_offsets, this.isDupe));
 		}
 
-		public static bool IsWalkableCell(int cell, int anchor_cell, bool allowLadders, bool allow_forcefield_traversal)
+		public static bool IsWalkableCell(int cell, int anchor_cell, bool is_dupe)
 		{
-			if (Grid.IsValidCell(cell) && Grid.IsValidCell(anchor_cell))
+			if (!Grid.IsValidCell(cell))
 			{
-				bool flag = !NavTableValidator.IsCellSolid(cell, allow_forcefield_traversal);
-				bool flag2 = NavTableValidator.IsCellSolid(anchor_cell, allow_forcefield_traversal) || Grid.FakeFloor[anchor_cell] || (allowLadders && Grid.LiquidPumpFloor[anchor_cell]) || (allowLadders && (byte)(Grid.NavValidatorMasks[cell] & (Grid.NavValidatorFlags.Ladder | Grid.NavValidatorFlags.Pole)) == 0 && (byte)(Grid.NavValidatorMasks[anchor_cell] & (Grid.NavValidatorFlags.Ladder | Grid.NavValidatorFlags.Pole)) != 0);
-				return flag && flag2;
+				return false;
 			}
-			return false;
+			if (!Grid.IsValidCell(anchor_cell))
+			{
+				return false;
+			}
+			if (!NavTableValidator.IsCellPassable(cell, is_dupe))
+			{
+				return false;
+			}
+			if (Grid.FakeFloor[anchor_cell])
+			{
+				return true;
+			}
+			if (Grid.Solid[anchor_cell])
+			{
+				return !Grid.DupePassable[anchor_cell];
+			}
+			return is_dupe && (byte)(Grid.NavValidatorMasks[cell] & (Grid.NavValidatorFlags.Ladder | Grid.NavValidatorFlags.Pole)) == 0 && (byte)(Grid.NavValidatorMasks[anchor_cell] & (Grid.NavValidatorFlags.Ladder | Grid.NavValidatorFlags.Pole)) != 0;
 		}
 
 		private void OnAddLadder(Ladder ladder)
@@ -1273,35 +1285,41 @@ public class GameNavGrids
 			Components.Ladders.Unregister(new Action<Ladder>(this.OnAddLadder), new Action<Ladder>(this.OnRemoveLadder));
 		}
 
-		private bool allowLadders = true;
-
-		private bool allowForcefieldTraversal;
+		private bool isDupe;
 	}
 
 	public class WallValidator : NavTableValidator
 	{
-		public WallValidator(bool allow_forcefield_traversal = false)
+		public WallValidator()
 		{
 			World instance = World.Instance;
 			instance.OnSolidChanged = (Action<int>)Delegate.Combine(instance.OnSolidChanged, new Action<int>(this.OnSolidChanged));
-			this.allowForcefieldTraversal = allow_forcefield_traversal;
 		}
 
 		public override void UpdateCell(int cell, NavTable nav_table, CellOffset[] bounding_offsets)
 		{
-			bool flag = GameNavGrids.WallValidator.IsWalkableCell(cell, Grid.CellRight(cell), this.allowForcefieldTraversal);
-			bool flag2 = GameNavGrids.WallValidator.IsWalkableCell(cell, Grid.CellLeft(cell), this.allowForcefieldTraversal);
-			nav_table.SetValid(cell, NavType.RightWall, flag && base.IsClear(cell, bounding_offsets, this.allowForcefieldTraversal));
-			nav_table.SetValid(cell, NavType.LeftWall, flag2 && base.IsClear(cell, bounding_offsets, this.allowForcefieldTraversal));
+			bool flag = GameNavGrids.WallValidator.IsWalkableCell(cell, Grid.CellRight(cell));
+			bool flag2 = GameNavGrids.WallValidator.IsWalkableCell(cell, Grid.CellLeft(cell));
+			nav_table.SetValid(cell, NavType.RightWall, flag && base.IsClear(cell, bounding_offsets, false));
+			nav_table.SetValid(cell, NavType.LeftWall, flag2 && base.IsClear(cell, bounding_offsets, false));
 		}
 
-		private static bool IsWalkableCell(int cell, int anchor_cell, bool allow_forcefield_traversal)
+		private static bool IsWalkableCell(int cell, int anchor_cell)
 		{
 			if (Grid.IsValidCell(cell) && Grid.IsValidCell(anchor_cell))
 			{
-				bool flag = !NavTableValidator.IsCellSolid(cell, allow_forcefield_traversal);
-				bool flag2 = NavTableValidator.IsCellSolid(anchor_cell, allow_forcefield_traversal);
-				return flag && flag2;
+				if (!NavTableValidator.IsCellPassable(cell, false))
+				{
+					return false;
+				}
+				if (Grid.Solid[anchor_cell])
+				{
+					return true;
+				}
+				if (Grid.CritterImpassable[anchor_cell])
+				{
+					return true;
+				}
 			}
 			return false;
 		}
@@ -1319,32 +1337,46 @@ public class GameNavGrids
 			World instance = World.Instance;
 			instance.OnSolidChanged = (Action<int>)Delegate.Remove(instance.OnSolidChanged, new Action<int>(this.OnSolidChanged));
 		}
-
-		private bool allowForcefieldTraversal;
 	}
 
 	public class CeilingValidator : NavTableValidator
 	{
-		public CeilingValidator(bool allow_forcefield_traversal = false)
+		public CeilingValidator()
 		{
 			World instance = World.Instance;
 			instance.OnSolidChanged = (Action<int>)Delegate.Combine(instance.OnSolidChanged, new Action<int>(this.OnSolidChanged));
-			this.allowForcefieldTraversal = allow_forcefield_traversal;
 		}
 
 		public override void UpdateCell(int cell, NavTable nav_table, CellOffset[] bounding_offsets)
 		{
-			bool flag = GameNavGrids.CeilingValidator.IsWalkableCell(cell, Grid.CellAbove(cell), this.allowForcefieldTraversal);
-			nav_table.SetValid(cell, NavType.Ceiling, flag && base.IsClear(cell, bounding_offsets, this.allowForcefieldTraversal));
+			bool flag = GameNavGrids.CeilingValidator.IsWalkableCell(cell, Grid.CellAbove(cell));
+			nav_table.SetValid(cell, NavType.Ceiling, flag && base.IsClear(cell, bounding_offsets, false));
 		}
 
-		private static bool IsWalkableCell(int cell, int anchor_cell, bool allow_forcefield_traversal)
+		private static bool IsWalkableCell(int cell, int anchor_cell)
 		{
 			if (Grid.IsValidCell(cell) && Grid.IsValidCell(anchor_cell))
 			{
-				bool flag = !NavTableValidator.IsCellSolid(cell, allow_forcefield_traversal);
-				bool flag2 = NavTableValidator.IsCellSolid(anchor_cell, allow_forcefield_traversal) || Grid.FakeFloor[anchor_cell];
-				return flag && flag2;
+				if (!NavTableValidator.IsCellPassable(cell, false))
+				{
+					return false;
+				}
+				if (Grid.Solid[anchor_cell])
+				{
+					return true;
+				}
+				if (Grid.HasDoor[cell] && !Grid.FakeFloor[cell])
+				{
+					return false;
+				}
+				if (Grid.FakeFloor[anchor_cell])
+				{
+					return true;
+				}
+				if (Grid.HasDoor[anchor_cell])
+				{
+					return true;
+				}
 			}
 			return false;
 		}
@@ -1362,8 +1394,6 @@ public class GameNavGrids
 			World instance = World.Instance;
 			instance.OnSolidChanged = (Action<int>)Delegate.Remove(instance.OnSolidChanged, new Action<int>(this.OnSolidChanged));
 		}
-
-		private bool allowForcefieldTraversal;
 	}
 
 	public class LadderValidator : NavTableValidator
@@ -1530,7 +1560,7 @@ public class GameNavGrids
 			int num = Grid.CellBelow(cell);
 			if (Grid.IsValidCell(num))
 			{
-				bool flag = Grid.IsSubstantialLiquid(num, 0.35f) || NavTableValidator.IsCellSolid(num, false);
+				bool flag = Grid.Solid[num] || Grid.FakeFloor[num] || Grid.IsSubstantialLiquid(num, 0.35f);
 				nav_table.SetValid(cell, NavType.Hover, !Grid.IsSubstantialLiquid(cell, 0.35f) && flag && base.IsClear(cell, bounding_offsets, false));
 			}
 		}
@@ -1554,22 +1584,21 @@ public class GameNavGrids
 
 	public class SolidValidator : NavTableValidator
 	{
-		public SolidValidator(bool allow_forcefield_traversal = false)
+		public SolidValidator()
 		{
 			World instance = World.Instance;
 			instance.OnSolidChanged = (Action<int>)Delegate.Combine(instance.OnSolidChanged, new Action<int>(this.OnSolidChanged));
-			this.allowForcefieldTraversal = allow_forcefield_traversal;
 		}
 
 		public override void UpdateCell(int cell, NavTable nav_table, CellOffset[] bounding_offsets)
 		{
-			bool flag = GameNavGrids.SolidValidator.IsDiggable(cell, Grid.CellBelow(cell), this.allowForcefieldTraversal);
+			bool flag = GameNavGrids.SolidValidator.IsDiggable(cell, Grid.CellBelow(cell));
 			nav_table.SetValid(cell, NavType.Solid, flag);
 		}
 
-		public static bool IsDiggable(int cell, int anchor_cell, bool allow_forcefield_traversal)
+		public static bool IsDiggable(int cell, int anchor_cell)
 		{
-			if (Grid.IsValidCell(cell) && NavTableValidator.IsCellSolid(cell, allow_forcefield_traversal))
+			if (Grid.IsValidCell(cell) && Grid.Solid[cell])
 			{
 				if (!Grid.HasDoor[cell] && !Grid.Foundation[cell])
 				{
@@ -1600,7 +1629,5 @@ public class GameNavGrids
 			World instance = World.Instance;
 			instance.OnSolidChanged = (Action<int>)Delegate.Remove(instance.OnSolidChanged, new Action<int>(this.OnSolidChanged));
 		}
-
-		private bool allowForcefieldTraversal;
 	}
 }

@@ -151,7 +151,7 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 			{
 				if (this.endpoints.ContainsKey(cell))
 				{
-					Output.LogWarning(new object[]
+					DebugUtil.LogWarningArgs(new object[]
 					{
 						"Cell",
 						cell,
@@ -166,7 +166,7 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 			{
 				if (this.items.ContainsKey(cell))
 				{
-					Output.LogWarning(new object[]
+					DebugUtil.LogWarningArgs(new object[]
 					{
 						"Cell",
 						cell,

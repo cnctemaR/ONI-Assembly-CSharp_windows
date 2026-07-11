@@ -338,20 +338,18 @@ public class CircuitManager
 			CircuitManager.CircuitInfo circuitInfo2 = this.circuitInfo[num7];
 			circuitInfo2.batteries.Sort((Battery a, Battery b) => (a.Capacity - a.JoulesAvailable).CompareTo(b.Capacity - b.JoulesAvailable));
 			circuitInfo2.inputTransformers.Sort((Battery a, Battery b) => (a.Capacity - a.JoulesAvailable).CompareTo(b.Capacity - b.JoulesAvailable));
+			circuitInfo2.generators.Sort((Generator a, Generator b) => a.JoulesAvailable.CompareTo(b.JoulesAvailable));
 			float num8 = 0f;
-			foreach (Battery battery3 in circuitInfo2.inputTransformers)
-			{
-				this.ChargeTransformer<Generator>(dt, battery3, circuitInfo2.generators, ref num8);
-			}
-			this.ChargeBatteries(num7, circuitInfo2.outputTransformers, circuitInfo2.inputTransformers, ref num8);
+			this.ChargeTransformers<Generator>(circuitInfo2.inputTransformers, circuitInfo2.generators, ref num8);
+			this.ChargeBatteries(circuitInfo2.inputTransformers, circuitInfo2.outputTransformers, ref num8);
 			float num9 = 0f;
-			this.ChargeBatteries(num7, circuitInfo2.generators, circuitInfo2.batteries, ref num9);
-			this.ChargeBatteries(num7, circuitInfo2.outputTransformers, circuitInfo2.batteries, ref num9);
+			this.ChargeBatteries(circuitInfo2.batteries, circuitInfo2.generators, ref num9);
+			this.ChargeBatteries(circuitInfo2.batteries, circuitInfo2.outputTransformers, ref num9);
 			circuitInfo2.minBatteryPercentFull = 1f;
 			for (int num10 = 0; num10 < circuitInfo2.batteries.Count; num10++)
 			{
-				Battery battery4 = circuitInfo2.batteries[num10];
-				float percentFull = battery4.PercentFull;
+				Battery battery3 = circuitInfo2.batteries[num10];
+				float percentFull = battery3.PercentFull;
 				if (percentFull < circuitInfo2.minBatteryPercentFull)
 				{
 					circuitInfo2.minBatteryPercentFull = percentFull;
@@ -359,8 +357,8 @@ public class CircuitManager
 			}
 			for (int num11 = 0; num11 < circuitInfo2.inputTransformers.Count; num11++)
 			{
-				Battery battery5 = circuitInfo2.inputTransformers[num11];
-				float percentFull2 = battery5.PercentFull;
+				Battery battery4 = circuitInfo2.inputTransformers[num11];
+				float percentFull2 = battery4.PercentFull;
 				if (percentFull2 < circuitInfo2.minBatteryPercentFull)
 				{
 					circuitInfo2.minBatteryPercentFull = percentFull2;
@@ -372,43 +370,40 @@ public class CircuitManager
 		for (int num12 = 0; num12 < this.circuitInfo.Count; num12++)
 		{
 			CircuitManager.CircuitInfo circuitInfo3 = this.circuitInfo[num12];
+			circuitInfo3.batteries.Sort((Battery a, Battery b) => a.JoulesAvailable.CompareTo(b.JoulesAvailable));
 			float num13 = 0f;
-			for (int num14 = 0; num14 < circuitInfo3.inputTransformers.Count; num14++)
-			{
-				Battery battery6 = circuitInfo3.inputTransformers[num14];
-				this.ChargeTransformer<Battery>(dt, battery6, circuitInfo3.batteries, ref num13);
-			}
+			this.ChargeTransformers<Battery>(circuitInfo3.inputTransformers, circuitInfo3.batteries, ref num13);
 			circuitInfo3.wattsUsed += num13 / 0.2f;
 			this.circuitInfo[num12] = circuitInfo3;
 		}
-		for (int num15 = 0; num15 < this.circuitInfo.Count; num15++)
+		for (int num14 = 0; num14 < this.circuitInfo.Count; num14++)
 		{
-			CircuitManager.CircuitInfo circuitInfo4 = this.circuitInfo[num15];
+			CircuitManager.CircuitInfo circuitInfo4 = this.circuitInfo[num14];
 			bool flag4 = circuitInfo4.generators.Count + circuitInfo4.consumers.Count + circuitInfo4.outputTransformers.Count > 0;
-			this.UpdateBatteryConnectionStatus(circuitInfo4.batteries, flag4, num15);
+			this.UpdateBatteryConnectionStatus(circuitInfo4.batteries, flag4, num14);
 			bool flag5 = circuitInfo4.generators.Count > 0 || circuitInfo4.outputTransformers.Count > 0;
 			if (!flag5)
 			{
-				foreach (Battery battery7 in circuitInfo4.batteries)
+				foreach (Battery battery5 in circuitInfo4.batteries)
 				{
-					if (battery7.JoulesAvailable > 0f)
+					if (battery5.JoulesAvailable > 0f)
 					{
 						flag5 = true;
 						break;
 					}
 				}
 			}
-			this.UpdateBatteryConnectionStatus(circuitInfo4.inputTransformers, flag5, num15);
-			this.circuitInfo[num15] = circuitInfo4;
-			for (int num16 = 0; num16 < circuitInfo4.generators.Count; num16++)
+			this.UpdateBatteryConnectionStatus(circuitInfo4.inputTransformers, flag5, num14);
+			this.circuitInfo[num14] = circuitInfo4;
+			for (int num15 = 0; num15 < circuitInfo4.generators.Count; num15++)
 			{
-				Generator generator5 = circuitInfo4.generators[num16];
+				Generator generator5 = circuitInfo4.generators[num15];
 				ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyWasted, -generator5.JoulesAvailable, StringFormatter.Replace(BUILDINGS.PREFABS.GENERATOR.OVERPRODUCTION, "{Generator}", generator5.gameObject.GetProperName()), null);
 			}
 		}
-		for (int num17 = 0; num17 < this.circuitInfo.Count; num17++)
+		for (int num16 = 0; num16 < this.circuitInfo.Count; num16++)
 		{
-			this.CheckCircuitOverloaded(0.2f, num17, this.circuitInfo[num17].wattsUsed);
+			this.CheckCircuitOverloaded(0.2f, num16, this.circuitInfo[num16].wattsUsed);
 		}
 	}
 
@@ -442,57 +437,46 @@ public class CircuitManager
 		return joules_needed;
 	}
 
-	private float GetBatteryChargeCapacity(Generator g, List<Battery> batteries, out int num_to_charge)
+	private void ChargeBatteries(List<Battery> sink_batteries, List<Generator> source_generators, ref float joules_used)
 	{
-		float num = 0f;
-		num_to_charge = 0;
-		for (int i = 0; i < batteries.Count; i++)
-		{
-			Battery battery = batteries[i];
-			if (battery != null && g != null && battery.gameObject != g.gameObject && battery.Capacity > battery.JoulesAvailable)
-			{
-				num = battery.Capacity - battery.JoulesAvailable;
-				num_to_charge = batteries.Count - i;
-				break;
-			}
-		}
-		return num;
-	}
-
-	private void ChargeBatteries(int circuit_id, List<Generator> generators, List<Battery> batteries, ref float joules_used)
-	{
-		if (batteries.Count == 0)
+		if (sink_batteries.Count == 0)
 		{
 			return;
 		}
-		foreach (Generator generator in generators)
+		foreach (Generator generator in source_generators)
 		{
-			for (bool flag = true; flag && generator.JoulesAvailable >= 1f; flag = this.ChargeBattery(generator, batteries, ref joules_used))
+			for (bool flag = true; flag && generator.JoulesAvailable >= 1f; flag = this.ChargeBatteriesFromGenerator(sink_batteries, generator, ref joules_used))
 			{
 			}
 		}
 	}
 
-	private bool ChargeBattery(Generator g, List<Battery> batteries, ref float joules_used)
+	private bool ChargeBatteriesFromGenerator(List<Battery> sink_batteries, Generator source_generator, ref float joules_used)
 	{
-		int num;
-		float batteryChargeCapacity = this.GetBatteryChargeCapacity(g, batteries, out num);
-		if (batteryChargeCapacity <= 0f)
+		float num = source_generator.JoulesAvailable;
+		float num2 = 0f;
+		for (int i = 0; i < sink_batteries.Count; i++)
 		{
-			return false;
-		}
-		float num2 = Mathf.Min(batteryChargeCapacity, g.JoulesAvailable / (float)num);
-		g.ApplyDeltaJoules(-num2 * (float)num, false);
-		joules_used += num2 * (float)num;
-		for (int i = batteries.Count - num; i < batteries.Count; i++)
-		{
-			Battery battery = batteries[i];
-			if (g != null && battery != null && g.gameObject != battery.gameObject)
+			Battery battery = sink_batteries[i];
+			if (battery != null && source_generator != null && battery.gameObject != source_generator.gameObject)
 			{
-				battery.AddEnergy(num2);
+				float num3 = battery.Capacity - battery.JoulesAvailable;
+				if (num3 > 0f)
+				{
+					float num4 = Mathf.Min(num3, num / (float)(sink_batteries.Count - i));
+					battery.AddEnergy(num4);
+					num -= num4;
+					num2 += num4;
+				}
 			}
 		}
-		return true;
+		if (num2 > 0f)
+		{
+			source_generator.ApplyDeltaJoules(-num2, false);
+			joules_used += num2;
+			return true;
+		}
+		return false;
 	}
 
 	private void UpdateBatteryConnectionStatus(List<Battery> batteries, bool is_connected_to_something_useful, int circuit_id)
@@ -517,40 +501,39 @@ public class CircuitManager
 		}
 	}
 
-	private void ChargeTransformer<T>(float dt, Battery transformer, List<T> energy_producers, ref float joules_used) where T : IEnergyProducer
+	private void ChargeTransformer<T>(Battery sink_transformer, List<T> source_energy_producers, ref float joules_used) where T : IEnergyProducer
 	{
-		if (energy_producers.Count <= 0)
+		if (source_energy_producers.Count <= 0)
 		{
 			return;
 		}
-		float num = Mathf.Min(transformer.Capacity - transformer.JoulesAvailable, transformer.ChargeCapacity);
+		float num = Mathf.Min(sink_transformer.Capacity - sink_transformer.JoulesAvailable, sink_transformer.ChargeCapacity);
 		if (num <= 0f)
 		{
 			return;
 		}
-		float num2 = 0f;
-		int num3 = 0;
-		for (int i = 0; i < energy_producers.Count; i++)
+		float num2 = num;
+		float num3 = 0f;
+		for (int i = 0; i < source_energy_producers.Count; i++)
 		{
-			T t = energy_producers[i];
+			T t = source_energy_producers[i];
 			if (t.JoulesAvailable > 0f)
 			{
-				num3 = energy_producers.Count - i;
-				num2 = t.JoulesAvailable;
-				break;
+				float num4 = Mathf.Min(t.JoulesAvailable, num2 / (float)(source_energy_producers.Count - i));
+				t.ConsumeEnergy(num4);
+				num2 -= num4;
+				num3 += num4;
 			}
 		}
-		if (num3 <= 0)
+		sink_transformer.AddEnergy(num3);
+		joules_used += num3;
+	}
+
+	private void ChargeTransformers<T>(List<Battery> sink_transformers, List<T> source_energy_producers, ref float joules_used) where T : IEnergyProducer
+	{
+		foreach (Battery battery in sink_transformers)
 		{
-			return;
-		}
-		float num4 = Mathf.Min(num2, num / (float)num3);
-		transformer.AddEnergy(num4 * (float)num3);
-		joules_used += num4 * (float)num3;
-		for (int j = energy_producers.Count - num3; j < energy_producers.Count; j++)
-		{
-			T t2 = energy_producers[j];
-			t2.ConsumeEnergy(num4);
+			this.ChargeTransformer<T>(battery, source_energy_producers, ref joules_used);
 		}
 	}
 

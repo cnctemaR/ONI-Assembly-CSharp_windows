@@ -42,7 +42,11 @@ public class Db : EntityModifierSet
 		this.RoomTypes = new RoomTypes(this.Root);
 		this.ArtifactDropRates = new ArtifactDropRates(this.Root);
 		this.SpaceDestinationTypes = new SpaceDestinationTypes(this.Root);
-		this.Diseases = new global::Database.Diseases(this.Root);
+		this.Diseases = new Diseases(this.Root);
+		this.Sicknesses = new global::Database.Sicknesses(this.Root);
+		this.SkillPerks = new SkillPerks(this.Root);
+		this.SkillGroups = new SkillGroups(this.Root);
+		this.Skills = new Skills(this.Root);
 		this.MiscStatusItems = new MiscStatusItems(this.Root);
 		this.CreatureStatusItems = new CreatureStatusItems(this.Root);
 		this.BuildingStatusItems = new BuildingStatusItems(this.Root);
@@ -74,7 +78,7 @@ public class Db : EntityModifierSet
 		Resource resource = this.ResourceTable.FirstOrDefault<Resource>((Resource s) => s.Guid == guid);
 		if (resource == null)
 		{
-			global::Debug.LogWarning("Could not find resource: " + guid, null);
+			global::Debug.LogWarning("Could not find resource: " + guid);
 			return (ResourceType)((object)null);
 		}
 		ResourceType resourceType = (ResourceType)((object)resource);
@@ -88,7 +92,7 @@ public class Db : EntityModifierSet
 				typeof(ResourceType).Name,
 				"\nGot Type: ",
 				resource.GetType().Name
-			}), null);
+			}));
 			return (ResourceType)((object)null);
 		}
 		return resourceType;
@@ -98,7 +102,9 @@ public class Db : EntityModifierSet
 
 	public TextAsset researchTreeFile;
 
-	public global::Database.Diseases Diseases;
+	public Diseases Diseases;
+
+	public global::Database.Sicknesses Sicknesses;
 
 	public Urges Urges;
 
@@ -147,6 +153,12 @@ public class Db : EntityModifierSet
 	public ArtifactDropRates ArtifactDropRates;
 
 	public SpaceDestinationTypes SpaceDestinationTypes;
+
+	public SkillPerks SkillPerks;
+
+	public SkillGroups SkillGroups;
+
+	public Skills Skills;
 
 	[Serializable]
 	public class SlotInfo : Resource

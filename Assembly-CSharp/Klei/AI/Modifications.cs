@@ -141,7 +141,7 @@ namespace Klei.AI
 				{
 					if (text != "Condition")
 					{
-						Output.LogWarning(new object[]
+						DebugUtil.LogWarningArgs(new object[]
 						{
 							this.gameObject.name,
 							"Missing modifier: " + text
@@ -158,7 +158,7 @@ namespace Klei.AI
 					Deserializer.DeserializeTypeless(instanceType, reader);
 					if (reader.Position != position + num2)
 					{
-						Output.LogWarning(new object[]
+						DebugUtil.LogWarningArgs(new object[]
 						{
 							"Expected to be at offset",
 							position + num2,

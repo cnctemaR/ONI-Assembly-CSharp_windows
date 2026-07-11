@@ -29,6 +29,12 @@ public class AssignableSideScreen : SideScreenContent
 		{
 			this.SortByAssignment(true);
 		}));
+		base.Subscribe(Game.Instance.gameObject, 875045922, new Action<object>(this.OnRefreshData));
+	}
+
+	private void OnRefreshData(object obj)
+	{
+		this.SetTarget(this.targetAssignable.gameObject);
 	}
 
 	public override void ClearTarget()
@@ -60,7 +66,7 @@ public class AssignableSideScreen : SideScreenContent
 		this.targetAssignable = target.GetComponent<Assignable>();
 		if (this.targetAssignable == null)
 		{
-			global::Debug.LogError("Object selected has no Assignable component.", null);
+			global::Debug.LogError(string.Format("{0} selected has no Assignable component.", target.GetProperName()));
 			return;
 		}
 		if (this.rowPool == null)
@@ -104,7 +110,11 @@ public class AssignableSideScreen : SideScreenContent
 	{
 		this.ClearContent();
 		this.currentOwnerText.text = string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED, new object[0]);
-		if (this.targetAssignable != null && this.targetAssignable.GetComponent<Equippable>() == null && !this.targetAssignable.HasTag(GameTags.NotRoomAssignable))
+		if (this.targetAssignable == null)
+		{
+			return;
+		}
+		if (this.targetAssignable.GetComponent<Equippable>() == null && !this.targetAssignable.HasTag(GameTags.NotRoomAssignable))
 		{
 			Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(this.targetAssignable.gameObject);
 			if (roomOfGameObject != null)
@@ -130,13 +140,10 @@ public class AssignableSideScreen : SideScreenContent
 		}
 		foreach (MinionAssignablesProxy minionAssignablesProxy in identities)
 		{
-			if (this.targetAssignable.eligibleFilter == null || this.targetAssignable.eligibleFilter(minionAssignablesProxy))
-			{
-				AssignableSideScreenRow freeElement3 = this.rowPool.GetFreeElement(this.rowGroup, true);
-				freeElement3.sideScreen = this;
-				this.identityRowMap.Add(minionAssignablesProxy, freeElement3);
-				freeElement3.SetContent(minionAssignablesProxy, new Action<IAssignableIdentity>(this.OnRowClicked), this);
-			}
+			AssignableSideScreenRow freeElement3 = this.rowPool.GetFreeElement(this.rowGroup, true);
+			freeElement3.sideScreen = this;
+			this.identityRowMap.Add(minionAssignablesProxy, freeElement3);
+			freeElement3.SetContent(minionAssignablesProxy, new Action<IAssignableIdentity>(this.OnRowClicked), this);
 		}
 		this.ExecuteSort(this.activeSortFunction);
 	}

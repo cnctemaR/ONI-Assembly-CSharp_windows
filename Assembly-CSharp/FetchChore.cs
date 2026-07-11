@@ -10,11 +10,11 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 	{
 		if (choreType == null)
 		{
-			Output.LogError("You must specify a chore type for fetching!");
+			global::Debug.LogError("You must specify a chore type for fetching!");
 		}
 		if (amount <= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
 		{
-			Output.LogWarning(new object[] { string.Format("Chore {0} is requesting {1} {2} to {3}", new object[]
+			DebugUtil.LogWarningArgs(new object[] { string.Format("Chore {0} is requesting {1} {2} to {3}", new object[]
 			{
 				choreType.Id,
 				tags[0],
@@ -31,7 +31,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		this.requiredTagBits = new TagBits(required_tags);
 		this.forbiddenTagBits = new TagBits(forbidden_tags);
 		this.tagBitsHash = this.tagBits.GetHashCode();
-		DebugUtil.DevAssert(!this.tagBits.HasAny(ref FetchManager.disallowedTagBits), new object[] { "Fetch chore fetching invalid tags." });
+		DebugUtil.DevAssert(!this.tagBits.HasAny(ref FetchManager.disallowedTagBits), "Fetch chore fetching invalid tags.");
 		if (destination.GetOnlyFetchMarkedItems())
 		{
 			this.requiredTagBits.SetTag(GameTags.Garbage);
@@ -292,7 +292,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			{
 				if (pickupable == null)
 				{
-					global::Debug.Log(string.Format("Failed to find fetch target for {0}", fetchChore.destination), null);
+					global::Debug.Log(string.Format("Failed to find fetch target for {0}", fetchChore.destination));
 					return false;
 				}
 				context.data = pickupable;

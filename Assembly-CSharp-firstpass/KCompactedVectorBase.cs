@@ -31,7 +31,7 @@ public abstract class KCompactedVectorBase
 			int num = this.dataHandleIndices[last_idx];
 			if (this.handles.Items[num] != last_idx)
 			{
-				Output.LogError(new object[] { "KCompactedVector: Bad state after attempting to free handle", handle.index });
+				DebugUtil.LogErrorArgs(new object[] { "KCompactedVector: Bad state after attempting to free handle", handle.index });
 			}
 			this.handles.Items[num] = free_component_idx;
 			this.dataHandleIndices[free_component_idx] = num;

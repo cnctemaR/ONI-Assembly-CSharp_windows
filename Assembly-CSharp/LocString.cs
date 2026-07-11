@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
+[Serializable]
 public class LocString
 {
 	public LocString(string text)

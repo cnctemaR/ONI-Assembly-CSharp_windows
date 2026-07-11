@@ -10,6 +10,12 @@ public static class Debug
 		return DateTime.UtcNow.ToString("[HH:mm:ss.fff] [") + Thread.CurrentThread.ManagedThreadId + "] ";
 	}
 
+	private static void WriteTimeStamped(params object[] objs)
+	{
+		string text = global::Debug.TimeStamp() + DebugUtil.BuildString(objs);
+		Console.WriteLine(text);
+	}
+
 	public static bool isDebugBuild
 	{
 		get
@@ -32,7 +38,6 @@ public static class Debug
 
 	public static void Break()
 	{
-		global::UnityEngine.Debug.Break();
 	}
 
 	public static void LogException(Exception exception)
@@ -40,75 +45,137 @@ public static class Debug
 		global::UnityEngine.Debug.LogException(exception);
 	}
 
-	public static void Log(object obj, global::UnityEngine.Object context = null)
+	public static void Log(object obj)
 	{
-		Console.Out.Write(string.Concat(new object[]
+		global::Debug.WriteTimeStamped(new object[] { "[INFO]", obj });
+	}
+
+	public static void Log(object obj, global::UnityEngine.Object context)
+	{
+		global::Debug.WriteTimeStamped(new object[]
 		{
-			global::Debug.TimeStamp(),
-			"[ INFO  ] ",
-			obj,
-			"\n"
-		}));
+			"[INFO]",
+			(!(context != null)) ? "null" : context.name,
+			obj
+		});
 	}
 
 	public static void LogFormat(string format, params object[] args)
 	{
-		Console.Out.Write(global::Debug.TimeStamp() + "[ INFO  ] " + string.Format(format, args) + "\n");
+		global::Debug.WriteTimeStamped(new object[]
+		{
+			"[INFO]",
+			string.Format(format, args)
+		});
 	}
 
-	public static void LogWarning(object obj, global::UnityEngine.Object context = null)
+	public static void LogFormat(global::UnityEngine.Object context, string format, params object[] args)
 	{
-		Console.Out.Write(string.Concat(new object[]
+		global::Debug.WriteTimeStamped(new object[]
 		{
-			global::Debug.TimeStamp(),
-			"[WARNING] ",
-			obj,
-			"\n"
-		}));
+			"[INFO]",
+			(!(context != null)) ? "null" : context.name,
+			string.Format(format, args)
+		});
+	}
+
+	public static void LogWarning(object obj)
+	{
+		global::Debug.WriteTimeStamped(new object[] { "[WARNING]", obj });
+	}
+
+	public static void LogWarning(object obj, global::UnityEngine.Object context)
+	{
+		global::Debug.WriteTimeStamped(new object[]
+		{
+			"[WARNING]",
+			(!(context != null)) ? "null" : context.name,
+			obj
+		});
 	}
 
 	public static void LogWarningFormat(string format, params object[] args)
 	{
-		Console.Out.Write(global::Debug.TimeStamp() + "[WARNING] " + string.Format(format, args) + "\n");
+		global::Debug.WriteTimeStamped(new object[]
+		{
+			"[WARNING]",
+			string.Format(format, args)
+		});
 	}
 
-	public static void LogError(object obj, global::UnityEngine.Object context = null)
+	public static void LogWarningFormat(global::UnityEngine.Object context, string format, params object[] args)
 	{
-		Console.Out.Write(string.Concat(new object[]
+		global::Debug.WriteTimeStamped(new object[]
 		{
-			global::Debug.TimeStamp(),
-			"[ERROR] ",
-			obj,
-			"\n"
-		}));
-		if (context == null)
+			"[WARNING]",
+			(!(context != null)) ? "null" : context.name,
+			string.Format(format, args)
+		});
+	}
+
+	public static void LogError(object obj)
+	{
+		global::Debug.WriteTimeStamped(new object[] { "[ERROR]", obj });
+		global::UnityEngine.Debug.LogError(obj);
+	}
+
+	public static void LogError(object obj, global::UnityEngine.Object context)
+	{
+		global::Debug.WriteTimeStamped(new object[]
 		{
-			global::UnityEngine.Debug.LogError(obj);
-		}
-		else
-		{
-			global::UnityEngine.Debug.LogError(obj, context);
-		}
+			"[ERROR]",
+			(!(context != null)) ? "null" : context.name,
+			obj
+		});
+		global::UnityEngine.Debug.LogError(obj, context);
 	}
 
 	public static void LogErrorFormat(string format, params object[] args)
 	{
-		Console.Out.Write(global::Debug.TimeStamp() + "[ERROR] " + string.Format(format, args) + "\n");
+		global::Debug.WriteTimeStamped(new object[]
+		{
+			"[ERROR]",
+			string.Format(format, args)
+		});
+		global::UnityEngine.Debug.LogErrorFormat(format, args);
 	}
 
-	[Conditional("UNITY_EDITOR")]
+	public static void LogErrorFormat(global::UnityEngine.Object context, string format, params object[] args)
+	{
+		global::Debug.WriteTimeStamped(new object[]
+		{
+			"[ERROR]",
+			(!(context != null)) ? "null" : context.name,
+			string.Format(format, args)
+		});
+		global::UnityEngine.Debug.LogErrorFormat(context, format, args);
+	}
+
 	public static void Assert(bool condition)
 	{
+		if (!condition)
+		{
+			global::Debug.LogError("Assert failed");
+			global::Debug.Break();
+		}
 	}
 
-	[Conditional("UNITY_EDITOR")]
 	public static void Assert(bool condition, object message)
 	{
+		if (!condition)
+		{
+			global::Debug.LogError("Assert failed: " + message);
+			global::Debug.Break();
+		}
 	}
 
-	[Conditional("UNITY_EDITOR")]
 	public static void Assert(bool condition, object message, global::UnityEngine.Object context)
 	{
+		if (!condition)
+		{
+			global::Debug.LogError("Assert failed: " + message, context);
+			global::Debug.Break();
+		}
 	}
 
 	[Conditional("UNITY_EDITOR")]

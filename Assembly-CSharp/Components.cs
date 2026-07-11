@@ -13,6 +13,8 @@ public class Components
 
 	public static Components.Cmps<MinionStorage> MinionStorages = new Components.Cmps<MinionStorage>();
 
+	public static Components.Cmps<MinionResume> MinionResumes = new Components.Cmps<MinionResume>();
+
 	public static Components.Cmps<Sleepable> Sleepables = new Components.Cmps<Sleepable>();
 
 	public static Components.Cmps<IUsable> Toilets = new Components.Cmps<IUsable>();

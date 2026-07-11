@@ -22,7 +22,7 @@ public static class FXHelpers
 		KAnimFile anim = Assets.GetAnim(anim_file_name);
 		if (anim == null)
 		{
-			global::Debug.LogWarning("Missing effect anim: " + anim_file_name, null);
+			global::Debug.LogWarning("Missing effect anim: " + anim_file_name);
 		}
 		else
 		{

@@ -18,6 +18,7 @@ namespace Database
 			this.Suffocate = base.Add(new Face("Suffocate"));
 			this.Sick = base.Add(new Face("Sick"));
 			this.SickSpores = base.Add(new Face("Spores"));
+			this.Zombie = base.Add(new Face("Zombie"));
 			this.SickFierySkin = base.Add(new Face("Fiery"));
 			this.SickCold = base.Add(new Face("Cold"));
 			this.Dead = base.Add(new Face("Death"));
@@ -48,6 +49,8 @@ namespace Database
 		public Face Sick;
 
 		public Face SickSpores;
+
+		public Face Zombie;
 
 		public Face SickFierySkin;
 

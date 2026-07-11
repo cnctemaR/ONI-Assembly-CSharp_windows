@@ -200,7 +200,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 	public AccessControl.Permission GetPermission(Navigator minion)
 	{
 		Door.ControlState controlState = this.overrideAccess;
-		if (controlState == Door.ControlState.Closed)
+		if (controlState == Door.ControlState.Locked)
 		{
 			return AccessControl.Permission.Neither;
 		}

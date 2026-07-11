@@ -813,6 +813,26 @@ namespace STRINGS
 				public static LocString WILT_PENALTY = "Wilt Penalty";
 			}
 
+			public class EVILFLOWER
+			{
+				public static LocString NAME = UI.FormatAsLink("Sporechid", "EVILFLOWER");
+
+				public static LocString DESC = "This beautiful specemin is actually the host for a particularly nasty strain of brain fungus.";
+
+				public static LocString DOMESTICATEDDESC = string.Concat(new string[]
+				{
+					"This plant improves ",
+					UI.FormatAsLink("Decor", "DECOR"),
+					" but also produces ",
+					UI.FormatAsLink("Zombie Spores", "ZOMBIESPORES"),
+					" in abundance."
+				});
+
+				public static LocString GROWTH_BONUS = "Growth Bonus";
+
+				public static LocString WILT_PENALTY = "Wilt Penalty";
+			}
+
 			public class LEAFYPLANT
 			{
 				public static LocString NAME = UI.FormatAsLink("Mirth Leaf", "POTTED_LEAFY");
@@ -1049,6 +1069,21 @@ namespace STRINGS
 						" of a ",
 						CREATURES.SPECIES.PRICKLEGRASS.NAME,
 						".\n\nDigging up Buried Objects may uncover a Briar Seed."
+					});
+				}
+
+				public class EVILFLOWER
+				{
+					public static LocString NAME = UI.FormatAsLink("Sporechid Seed", "EVILFLOWER");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"The ",
+						UI.FormatAsLink("Seed", "PLANTS"),
+						" of a ",
+						CREATURES.SPECIES.EVILFLOWER.NAME,
+						".\n\nDigging up Buried Objects may uncover a ",
+						CREATURES.SPECIES.SEEDS.EVILFLOWER.NAME
 					});
 				}
 

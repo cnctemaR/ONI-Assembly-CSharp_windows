@@ -67,10 +67,10 @@ public class WaterCoolerChore : Chore<WaterCoolerChore.StatesInstance>, IWorkerP
 			SimUtil.DiseaseInfo diseaseInfo;
 			float num;
 			storage.ConsumeAndGetDisease(GameTags.Water, 1f, out diseaseInfo, out num);
-			ImmuneSystemMonitor.Instance smi2 = worker.GetSMI<ImmuneSystemMonitor.Instance>();
+			GermExposureMonitor.Instance smi2 = worker.GetSMI<GermExposureMonitor.Instance>();
 			if (smi2 != null)
 			{
-				smi2.TryInjectDisease(diseaseInfo.idx, diseaseInfo.count, GameTags.Water, Disease.InfectionVector.Digestion);
+				smi2.TryInjectDisease(diseaseInfo.idx, diseaseInfo.count, GameTags.Water, Sickness.InfectionVector.Digestion);
 			}
 			Effects component = worker.GetComponent<Effects>();
 			if (!string.IsNullOrEmpty(smi.master.trackingEffect))

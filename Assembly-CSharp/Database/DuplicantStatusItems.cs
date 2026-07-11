@@ -1,7 +1,6 @@
 ﻿using System;
 using Klei.AI;
 using STRINGS;
-using UnityEngine;
 
 namespace Database
 {
@@ -86,7 +85,6 @@ namespace Database
 			this.ToiletUnreachable.AddNotification(null, null, null, 0f);
 			this.NoUsableToilets = this.CreateStatusItem("NoUsableToilets", "DUPLICANTS", string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.NoUsableToilets.AddNotification(null, null, null, 0f);
-			this.NoRole = this.CreateStatusItem("NoRole", "DUPLICANTS", string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.NoToilets = this.CreateStatusItem("NoToilets", "DUPLICANTS", string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.NoToilets.AddNotification(null, null, null, 0f);
 			this.BreathingO2 = this.CreateStatusItem("BreathingO2", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 130);
@@ -155,12 +153,6 @@ namespace Database
 					return string.Format(str, tinkerable.tinkerMaterialTag.ProperName());
 				}
 				return str;
-			};
-			this.Role = this.CreateStatusItem("Role", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
-			this.Role.resolveStringCallback = delegate(string str, object data)
-			{
-				RoleConfig role = Game.Instance.roleManager.GetRole((data as MinionResume).CurrentRole);
-				return str.Replace("{Role}", role.name).Replace("{Progress}", GameUtil.GetFormattedPercent(Mathf.Floor(100f * ((data as MinionResume).ExperienceByRoleID[role.id] / Game.Instance.roleManager.GetRole(role.id).experienceRequired)), GameUtil.TimeSlice.None));
 			};
 			this.Storing = this.CreateStatusItem("Storing", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Storing.resolveStringCallback = delegate(string str, object data)
@@ -297,6 +289,14 @@ namespace Database
 			this.Dancing = this.CreateStatusItem("Dancing", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.Gaming = this.CreateStatusItem("Gaming", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.Mingling = this.CreateStatusItem("Mingling", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
+			this.ExposedToGerms = this.CreateStatusItem("ExposedToGerms", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.ExposedToGerms.resolveStringCallback = delegate(string str, object data)
+			{
+				string text4 = (string)data;
+				string name = Db.Get().Sicknesses.Get(text4).Name;
+				str = str.Replace("{Sickness}", name);
+				return str;
+			};
 		}
 
 		public StatusItem Idle;
@@ -344,8 +344,6 @@ namespace Database
 		public StatusItem Tired;
 
 		public StatusItem NervousBreakdown;
-
-		public StatusItem NoRole;
 
 		public StatusItem Unhappy;
 
@@ -467,8 +465,6 @@ namespace Database
 
 		public StatusItem LowImmunity;
 
-		public StatusItem Role;
-
 		public StatusItem Studying;
 
 		public StatusItem Socializing;
@@ -478,6 +474,8 @@ namespace Database
 		public StatusItem Gaming;
 
 		public StatusItem Mingling;
+
+		public StatusItem ExposedToGerms;
 
 		private const int NONE_OVERLAY = 0;
 	}

@@ -13,11 +13,11 @@ public class LaunchInitializer : MonoBehaviour
 		}
 		if (!SystemInfo.SupportsTextureFormat(TextureFormat.RGBAFloat))
 		{
-			global::Debug.LogError("Machine does not support RGBAFloat32", null);
+			global::Debug.LogError("Machine does not support RGBAFloat32");
 		}
 		GraphicsOptionsScreen.SetResolutionFromPrefs();
 		Util.ApplyInvariantCultureToThread(Thread.CurrentThread);
-		global::Debug.Log("Development Build: Q2-" + 312713U.ToString(), null);
+		global::Debug.Log("Development Build: Q3-" + 326232U.ToString());
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		KPlayerPrefs.instance.Load();
 		KFMOD.Initialize();
@@ -49,12 +49,12 @@ public class LaunchInitializer : MonoBehaviour
 			}
 			catch (Exception ex)
 			{
-				global::Debug.LogWarning(ex, null);
+				global::Debug.LogWarning(ex);
 			}
 		}
 	}
 
-	public const string BUILD_PREFIX = "Q2";
+	public const string BUILD_PREFIX = "Q3";
 
 	public GameObject[] SpawnPrefabs;
 

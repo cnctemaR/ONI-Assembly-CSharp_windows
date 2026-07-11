@@ -17,7 +17,7 @@ public static class TextureUtil
 			}
 			if (format != TextureFormat.RGBAFloat)
 			{
-				global::Debug.LogError("Unspecfied graphics format for texture format: " + format.ToString(), null);
+				global::Debug.LogError("Unspecfied graphics format for texture format: " + format.ToString());
 				throw new ArgumentOutOfRangeException();
 			}
 			return GraphicsFormat.R32G32B32A32_SFloat;

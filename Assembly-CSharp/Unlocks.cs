@@ -29,7 +29,7 @@ public class Unlocks : KMonoBehaviour
 	{
 		if (string.IsNullOrEmpty(unlockID))
 		{
-			DebugUtil.DevAssert(false, new object[] { "Unlock called with null or empty string" });
+			DebugUtil.DevAssert(false, "Unlock called with null or empty string");
 			return;
 		}
 		if (!this.unlocked.Contains(unlockID))
@@ -144,7 +144,7 @@ public class Unlocks : KMonoBehaviour
 		{
 			if (string.IsNullOrEmpty(text))
 			{
-				DebugUtil.DevAssert(false, new object[] { "Found null/empty string in Unlocks collection: ", collectionID });
+				DebugUtil.DevAssertArgs(false, new object[] { "Found null/empty string in Unlocks collection: ", collectionID });
 			}
 			else if (!this.IsUnlocked(text))
 			{

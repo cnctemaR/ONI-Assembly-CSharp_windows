@@ -630,6 +630,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public void AddAnimOverrides(KAnimFile kanim_file, float priority = 0f)
 	{
+		global::Debug.Assert(kanim_file != null);
 		if (kanim_file.GetData().build != null && kanim_file.GetData().build.symbols.Length > 0)
 		{
 			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
@@ -647,6 +648,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public void RemoveAnimOverrides(KAnimFile kanim_file)
 	{
+		global::Debug.Assert(kanim_file != null);
 		if (kanim_file.GetData().build != null && kanim_file.GetData().build.symbols.Length > 0)
 		{
 			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
@@ -677,7 +679,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 				KAnim.Anim anim = data.GetAnim(j);
 				if (anim.animFile.hashName != data.hashName)
 				{
-					global::Debug.LogError(string.Format("How did we get an anim from another file? [{0}] != [{1}] for anim [{2}]", data.name, anim.animFile.name, j), null);
+					global::Debug.LogError(string.Format("How did we get an anim from another file? [{0}] != [{1}] for anim [{2}]", data.name, anim.animFile.name, j));
 				}
 				KAnimControllerBase.AnimLookupData animLookupData = default(KAnimControllerBase.AnimLookupData);
 				animLookupData.animIndex = anim.index;
@@ -708,7 +710,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		KAnimFileData data = anim_file.GetData();
 		if (data == null)
 		{
-			global::Debug.LogError("AddAnims() Null animfile data", null);
+			global::Debug.LogError("AddAnims() Null animfile data");
 			return;
 		}
 		this.maxSymbols = Mathf.Max(this.maxSymbols, data.maxVisSymbolFrames);

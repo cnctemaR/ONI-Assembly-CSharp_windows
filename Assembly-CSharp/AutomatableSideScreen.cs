@@ -26,13 +26,13 @@ public class AutomatableSideScreen : SideScreenContent
 		base.SetTarget(target);
 		if (target == null)
 		{
-			global::Debug.LogError("The target object provided was null", null);
+			global::Debug.LogError("The target object provided was null");
 			return;
 		}
 		this.targetAutomatable = target.GetComponent<Automatable>();
 		if (this.targetAutomatable == null)
 		{
-			global::Debug.LogError("The target provided does not have an Automatable component", null);
+			global::Debug.LogError("The target provided does not have an Automatable component");
 			return;
 		}
 		this.allowManualToggle.isOn = !this.targetAutomatable.GetAutomationOnly();

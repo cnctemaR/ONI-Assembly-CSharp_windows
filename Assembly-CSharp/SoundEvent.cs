@@ -97,7 +97,7 @@ public class SoundEvent : AnimEvent
 		AudioDebug audioDebug = AudioDebug.Get();
 		if (audioDebug != null && audioDebug.debugSoundEvents)
 		{
-			global::Debug.Log(string.Concat(new object[] { behaviour.name, ", ", sound, ", ", base.frame, ", ", position }), null);
+			global::Debug.Log(string.Concat(new object[] { behaviour.name, ", ", sound, ", ", base.frame, ", ", position }));
 		}
 		try
 		{
@@ -106,22 +106,22 @@ public class SoundEvent : AnimEvent
 				LoopingSounds component2 = behaviour.GetComponent<LoopingSounds>();
 				if (component2 == null)
 				{
-					global::Debug.Log(behaviour.name + " is missing LoopingSounds component. ", null);
+					global::Debug.Log(behaviour.name + " is missing LoopingSounds component. ");
 				}
 				else if (!component2.StartSound(sound, behaviour, this.noiseValues, this.ignorePause, this.shouldCameraScalePosition))
 				{
-					Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
+					DebugUtil.LogWarningArgs(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
 				}
 			}
 			else if (!SoundEvent.PlayOneShot(sound, behaviour, this.noiseValues))
 			{
-				Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
+				DebugUtil.LogWarningArgs(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
 			}
 		}
 		catch (Exception ex)
 		{
 			string text = string.Format(("Error trying to trigger sound [{0}] in behaviour [{1}] [{2}]\n{3}" + sound == null) ? "null" : sound.ToString(), behaviour.GetType().ToString(), ex.Message, ex.StackTrace);
-			global::Debug.LogError(text, null);
+			global::Debug.LogError(text);
 			throw new ArgumentException(text, ex);
 		}
 	}
@@ -201,11 +201,11 @@ public class SoundEvent : AnimEvent
 	{
 		if (sound != null)
 		{
-			global::Debug.Log(string.Concat(new object[] { anim_name, ", ", sound_name, ", ", base.frame, ", ", sound_pos }), null);
+			global::Debug.Log(string.Concat(new object[] { anim_name, ", ", sound_name, ", ", base.frame, ", ", sound_pos }));
 		}
 		else
 		{
-			global::Debug.Log("Missing sound: " + anim_name + ", " + sound_name, null);
+			global::Debug.Log("Missing sound: " + anim_name + ", " + sound_name);
 		}
 	}
 

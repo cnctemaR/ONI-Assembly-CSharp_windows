@@ -33,11 +33,11 @@ public class EspressoMachineWorkable : Workable, IGameObjectEffectDescriptor, IW
 		component.ConsumeAndGetDisease(GameTags.Water, EspressoMachine.WATER_MASS_PER_USE, out diseaseInfo, out num);
 		SimUtil.DiseaseInfo diseaseInfo2;
 		component.ConsumeAndGetDisease(EspressoMachine.INGREDIENT_TAG, EspressoMachine.INGREDIENT_MASS_PER_USE, out diseaseInfo2, out num);
-		ImmuneSystemMonitor.Instance smi = worker.GetSMI<ImmuneSystemMonitor.Instance>();
+		GermExposureMonitor.Instance smi = worker.GetSMI<GermExposureMonitor.Instance>();
 		if (smi != null)
 		{
-			smi.TryInjectDisease(diseaseInfo.idx, diseaseInfo.count, GameTags.Water, Disease.InfectionVector.Digestion);
-			smi.TryInjectDisease(diseaseInfo2.idx, diseaseInfo2.count, EspressoMachine.INGREDIENT_TAG, Disease.InfectionVector.Digestion);
+			smi.TryInjectDisease(diseaseInfo.idx, diseaseInfo.count, GameTags.Water, Sickness.InfectionVector.Digestion);
+			smi.TryInjectDisease(diseaseInfo2.idx, diseaseInfo2.count, EspressoMachine.INGREDIENT_TAG, Sickness.InfectionVector.Digestion);
 		}
 		Effects component2 = worker.GetComponent<Effects>();
 		if (!string.IsNullOrEmpty(EspressoMachineWorkable.specificEffect))

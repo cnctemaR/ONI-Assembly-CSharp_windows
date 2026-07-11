@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Klei;
+using KMod;
 using Steamworks;
 using STRINGS;
 using TMPro;
@@ -101,17 +102,22 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 		}
 	}
 
-	private void ActivatePreinstalledLanguage(string code)
+	private void RequestRestartDialog()
 	{
-		Localization.LoadPreinstalledTranslation(code);
 		ConfirmDialogScreen confirmDialog = this.GetConfirmDialog();
 		confirmDialog.PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT, delegate
 		{
-			Application.Quit();
+			App.Quit();
 		}, delegate
 		{
 			App.LoadScene("frontend");
 		}, null, null, null, null, null, null);
+	}
+
+	private void ActivatePreinstalledLanguage(string code)
+	{
+		Localization.LoadPreinstalledTranslation(code);
+		this.RequestRestartDialog();
 	}
 
 	private ConfirmDialogScreen GetConfirmDialog()
@@ -128,30 +134,29 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 		{
 			return;
 		}
-		List<SteamUGCService.Subscribed> subs = SteamUGCService.Instance.GetSubscribed("language");
-		if (subs.Count != 0)
+		foreach (Mod mod in Global.Instance.modManager.mods)
 		{
-			for (int i = 0; i < subs.Count; i++)
+			if ((byte)(mod.available_content & Content.Translation) != 0)
 			{
 				GameObject gameObject = Util.KInstantiateUI(this.languageButtonPrefab, this.ugcLanguagesContainer, false);
-				gameObject.name = subs[i].title + "_button";
+				gameObject.name = mod.title + "_button";
 				HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-				TMP_FontAsset fontForLangage = LanguageOptionsScreen.GetFontForLangage(subs[i].fileId);
+				PublishedFileId_t file_id = new PublishedFileId_t(ulong.Parse(mod.label.id));
+				TMP_FontAsset fontForLangage = LanguageOptionsScreen.GetFontForLangage(file_id);
 				LocText reference = component.GetReference<LocText>("Title");
-				reference.SetText(string.Format(UI.FRONTEND.TRANSLATIONS_SCREEN.UGC_MOD_TITLE_FORMAT, subs[i].title));
+				reference.SetText(string.Format(UI.FRONTEND.TRANSLATIONS_SCREEN.UGC_MOD_TITLE_FORMAT, mod.title));
 				reference.font = fontForLangage;
-				Texture2D previewImage = SteamUGCService.Instance.GetPreviewImage(subs[i].fileId);
+				Texture2D previewImage = SteamUGCService.Instance.GetPreviewImage(file_id);
 				if (previewImage != null)
 				{
 					Image reference2 = component.GetReference<Image>("Image");
 					reference2.sprite = Sprite.Create(previewImage, new Rect(Vector2.zero, new Vector2((float)previewImage.width, (float)previewImage.height)), Vector2.one * 0.5f);
 				}
 				KButton component2 = gameObject.GetComponent<KButton>();
-				int index = i;
 				component2.onClick += delegate
 				{
-					PublishedFileId_t fileId = subs[index].fileId;
-					this.SetCurrentLanguage(fileId);
+					this.SetCurrentLanguage(file_id);
+					this.RequestRestartDialog();
 				};
 				this.buttons.Add(gameObject);
 			}
@@ -164,7 +169,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 		ConfirmDialogScreen confirmDialog = this.GetConfirmDialog();
 		confirmDialog.PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT, delegate
 		{
-			Application.Quit();
+			App.Quit();
 		}, delegate
 		{
 			App.LoadScene("frontend");
@@ -180,7 +185,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 			ConfirmDialogScreen confirmDialog2 = this.GetConfirmDialog();
 			confirmDialog2.PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT, delegate
 			{
-				Application.Quit();
+				App.Quit();
 			}, delegate
 			{
 				App.LoadScene("frontend");
@@ -200,6 +205,10 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 		Application.OpenURL("http://steamcommunity.com/workshop/browse/?appid=457140&requiredtags[]=language");
 	}
 
+	public void OnUGCItemSubscribed(RemoteStoragePublishedFileSubscribed_t pCallback)
+	{
+	}
+
 	public void OnUGCItemInstalled(ItemInstalled_t pCallback)
 	{
 	}
@@ -214,7 +223,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 		ulong currentLanguage = this.GetCurrentLanguage();
 		if (currentLanguage == pCallback.m_nPublishedFileId.m_PublishedFileId)
 		{
-			global::Debug.Log("Update detected for currently installed font [" + pCallback.m_nPublishedFileId + "]", null);
+			global::Debug.Log("Update detected for currently installed font [" + pCallback.m_nPublishedFileId + "]");
 			SteamUGCService.DoDownloadItem(pCallback.m_nPublishedFileId);
 		}
 	}
@@ -224,7 +233,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 		ulong currentLanguage = this.GetCurrentLanguage();
 		if (pCallback.m_nPublishedFileId.m_PublishedFileId == currentLanguage)
 		{
-			global::Debug.Log("Unsubscribe detected for currently installed font [" + pCallback.m_nPublishedFileId + "]", null);
+			global::Debug.Log("Unsubscribe detected for currently installed font [" + pCallback.m_nPublishedFileId + "]");
 			LanguageOptionsScreen.CleanUpCurrentModLanguage();
 		}
 	}
@@ -250,7 +259,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 		ulong currentLanguage = this.GetCurrentLanguage();
 		if (currentLanguage == pCallback.m_nPublishedFileId.m_PublishedFileId)
 		{
-			global::Debug.Log("Download complete for currently installed font [" + pCallback.m_nPublishedFileId + "] updating in background. Changes will happen next restart.", null);
+			global::Debug.Log("Download complete for currently installed font [" + pCallback.m_nPublishedFileId + "] updating in background. Changes will happen next restart.");
 			this.UpdateInstalledLanguage(pCallback.m_nPublishedFileId);
 		}
 	}
@@ -319,7 +328,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 			File.WriteAllText(Localization.GetModLocalizationFilePath(), languageFileFromSteam);
 			return;
 		}
-		global::Debug.LogWarning(string.Concat(new object[] { "Loc file was empty.. [", item, "]  [", this.currentLastModified, "]" }), null);
+		global::Debug.LogWarning(string.Concat(new object[] { "Loc file was empty.. [", item, "]  [", this.currentLastModified, "]" }));
 	}
 
 	private void InstallLanguageFile(PublishedFileId_t item, bool fromDownload = false)
@@ -349,7 +358,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 			{
 				return modLocalizationFilePath;
 			}
-			global::Debug.LogWarning(string.Concat(new object[] { "GetLanguagFile [", modLocalizationFilePath, "] missing for [", item, "]" }), null);
+			global::Debug.LogWarning(string.Concat(new object[] { "GetLanguagFile [", modLocalizationFilePath, "] missing for [", item, "]" }));
 		}
 		return null;
 	}
@@ -359,7 +368,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 		lastModified = global::System.DateTime.MinValue;
 		if (item == PublishedFileId_t.Invalid)
 		{
-			global::Debug.LogWarning("Cant get INVALID file id from Steam", null);
+			global::Debug.LogWarning("Cant get INVALID file id from Steam");
 			return null;
 		}
 		EItemState itemState = (EItemState)SteamUGC.GetItemState(item);
@@ -370,12 +379,12 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 			{
 				return Encoding.UTF8.GetString(bytesFromZip);
 			}
-			global::Debug.LogWarning("Empty bytes from Zip file, trying redownload", null);
+			global::Debug.LogWarning("Empty bytes from Zip file, trying redownload");
 			SteamUGCService.DoDownloadItem(item);
 		}
 		else
 		{
-			global::Debug.LogWarning("Steam says item not installed [" + itemState + "]", null);
+			global::Debug.LogWarning("Steam says item not installed [" + itemState + "]");
 		}
 		return null;
 	}
@@ -393,12 +402,12 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 				{
 					if (!SteamUGCService.Instance.IsSubscribedTo(publishedFileId_t))
 					{
-						global::Debug.LogWarning("It doesn't look like we are subscribed..." + publishedFileId_t, null);
+						global::Debug.LogWarning("It doesn't look like we are subscribed..." + publishedFileId_t);
 					}
 				}
 				else
 				{
-					global::Debug.LogWarning("Cant check yet..." + publishedFileId_t, null);
+					global::Debug.LogWarning("Cant check yet..." + publishedFileId_t);
 				}
 			}
 		}
@@ -485,6 +494,6 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 
 		public long LastModified { get; set; }
 
-		private static readonly string FILE_NAME = "Mods/mod_installed.dat";
+		private static readonly string FILE_NAME = "strings/mod_installed.dat";
 	}
 }

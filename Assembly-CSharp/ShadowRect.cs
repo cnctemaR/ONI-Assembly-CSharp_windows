@@ -13,7 +13,7 @@ public class ShadowRect : MonoBehaviour
 		}
 		else
 		{
-			global::Debug.LogWarning("Shadowrect is missing rectshadow: " + base.gameObject.name, null);
+			global::Debug.LogWarning("Shadowrect is missing rectshadow: " + base.gameObject.name);
 		}
 	}
 

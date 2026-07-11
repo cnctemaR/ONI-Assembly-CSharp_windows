@@ -100,7 +100,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		}
 		if (this.Mass < 0f)
 		{
-			DebugUtil.DevLogErrorWithObj(base.gameObject, "deserialized ore with less than 0 mass. Error! Destroying");
+			DebugUtil.DevLogError(base.gameObject, "deserialized ore with less than 0 mass. Error! Destroying");
 			Util.KDestroyGameObject(base.gameObject);
 			return;
 		}
@@ -139,12 +139,16 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	{
 		if (this._Temperature <= 0f)
 		{
-			DebugUtil.DevLogErrorWithObj(base.gameObject, string.Format("{0} is attempting to serialize a temperature of <= 0K. Resetting to default.", base.gameObject.name));
+			DebugUtil.DevLogErrorFormat(base.gameObject, "{0} is attempting to serialize a temperature of <= 0K. Resetting to default.", new object[] { base.gameObject.name });
 			this._Temperature = this.Element.defaultValues.temperature;
 		}
 		if (this.Mass > PrimaryElement.MAX_MASS)
 		{
-			DebugUtil.DevLogErrorWithObj(base.gameObject, string.Format("{0} is attempting to serialize very large mass {1}. Resetting to default.", base.gameObject.name, this.Mass));
+			DebugUtil.DevLogErrorFormat(base.gameObject, "{0} is attempting to serialize very large mass {1}. Resetting to default.", new object[]
+			{
+				base.gameObject.name,
+				this.Mass
+			});
 			this.Mass = this.Element.defaultValues.mass;
 		}
 	}
@@ -169,7 +173,11 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	{
 		if ((mass > PrimaryElement.MAX_MASS || mass < 0f) && this.ElementID != SimHashes.Regolith)
 		{
-			DebugUtil.DevLogErrorWithObj(base.gameObject, string.Format("{0} is getting an abnormal mass set {1}.", base.gameObject.name, this.Mass));
+			DebugUtil.DevLogErrorFormat(base.gameObject, "{0} is getting an abnormal mass set {1}.", new object[]
+			{
+				base.gameObject.name,
+				this.Mass
+			});
 		}
 		mass = Mathf.Clamp(mass, 0f, PrimaryElement.MAX_MASS);
 		this.Units = mass / this.MassPerUnit;
@@ -187,7 +195,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	{
 		if (float.IsNaN(temperature) || float.IsInfinity(temperature))
 		{
-			Output.LogErrorWithObj(base.gameObject, new object[] { "Invalid temperature [" + temperature + "]" });
+			DebugUtil.LogErrorArgs(base.gameObject, new object[] { "Invalid temperature [" + temperature + "]" });
 			return;
 		}
 		if (temperature <= 0f)
@@ -273,16 +281,9 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		if (attributes != null)
 		{
 			Element element = this.Element;
-			try
+			foreach (AttributeModifier attributeModifier in element.attributeModifiers)
 			{
-				foreach (AttributeModifier attributeModifier in element.attributeModifiers)
-				{
-					attributes.Add(attributeModifier);
-				}
-			}
-			catch
-			{
-				global::Debug.Log("!", null);
+				attributes.Add(attributeModifier);
 			}
 		}
 	}
@@ -325,7 +326,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	{
 		if (this.ElementID == (SimHashes)0)
 		{
-			Output.LogWithObj(base.gameObject, new object[] { "UpdateTags() Primary element 0" });
+			global::Debug.Log("UpdateTags() Primary element 0", base.gameObject);
 			return;
 		}
 		KPrefabID component = base.GetComponent<KPrefabID>();
@@ -413,9 +414,10 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 
 	private static void OnSetTemperature(PrimaryElement primary_element, float temperature)
 	{
+		global::Debug.Assert(!float.IsNaN(temperature));
 		if (temperature <= 0f)
 		{
-			Output.LogErrorWithObj(primary_element.gameObject, new object[] { primary_element.gameObject.name + " has a temperature of zero which has always been an error in my experience." });
+			DebugUtil.LogErrorArgs(primary_element.gameObject, new object[] { primary_element.gameObject.name + " has a temperature of zero which has always been an error in my experience." });
 		}
 		primary_element._Temperature = temperature;
 	}
@@ -458,6 +460,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	{
 		this.SetDiseaseVisualProvider(target);
 		this.diseaseRedirectTarget = ((!target) ? null : target.GetComponent<PrimaryElement>());
+		global::Debug.Assert(this.diseaseRedirectTarget != this, "Disease redirect target set to myself");
 	}
 
 	public static float MAX_MASS = 100000f;

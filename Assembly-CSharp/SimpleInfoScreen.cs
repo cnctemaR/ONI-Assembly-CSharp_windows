@@ -36,6 +36,8 @@ public class SimpleInfoScreen : TargetScreen
 		GameObject gameObject = this.infoPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject;
 		this.descriptionContainer = Util.KInstantiateUI<DescriptionContainer>(this.DescriptionContainerTemplate, gameObject, false);
 		this.storagePanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.stressPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.stressDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.stressPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
 		this.stampContainer = Util.KInstantiateUI(this.StampContainerTemplate, gameObject, false);
 		base.Subscribe<SimpleInfoScreen>(-1514841199, SimpleInfoScreen.OnRefreshDataDelegate);
 	}
@@ -222,6 +224,7 @@ public class SimpleInfoScreen : TargetScreen
 		{
 			this.vitalsContainer.Refresh();
 		}
+		this.RefreshStress();
 		this.RefreshStorage();
 	}
 
@@ -389,7 +392,7 @@ public class SimpleInfoScreen : TargetScreen
 							Storage selected_storage = storage;
 							component.onClick += delegate
 							{
-								selected_storage.Remove(select_item);
+								selected_storage.Remove(select_item, true);
 							};
 						}
 					}
@@ -456,6 +459,48 @@ public class SimpleInfoScreen : TargetScreen
 		}
 		gameObject.SetActive(true);
 		return gameObject;
+	}
+
+	private void RefreshStress()
+	{
+		MinionIdentity identity = ((!(this.selectedTarget != null)) ? null : this.selectedTarget.GetComponent<MinionIdentity>());
+		if (identity == null)
+		{
+			this.stressPanel.SetActive(false);
+			return;
+		}
+		List<ReportManager.ReportEntry.Note> stressNotes = new List<ReportManager.ReportEntry.Note>();
+		this.stressPanel.SetActive(true);
+		this.stressPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.STATS.GROUPNAME_STRESS;
+		ReportManager.ReportEntry reportEntry = ReportManager.Instance.TodaysReport.reportEntries.Find((ReportManager.ReportEntry entry) => entry.reportType == ReportManager.ReportType.StressDelta);
+		this.stressDrawer.BeginDrawing();
+		float num = 0f;
+		stressNotes.Clear();
+		int num2 = reportEntry.contextEntries.FindIndex((ReportManager.ReportEntry entry) => entry.context == identity.GetProperName());
+		ReportManager.ReportEntry reportEntry2 = ((num2 == -1) ? null : reportEntry.contextEntries[num2]);
+		if (reportEntry2 != null)
+		{
+			reportEntry2.IterateNotes(delegate(ReportManager.ReportEntry.Note note)
+			{
+				stressNotes.Add(note);
+			});
+			stressNotes.Sort((ReportManager.ReportEntry.Note a, ReportManager.ReportEntry.Note b) => a.value.CompareTo(b.value));
+			for (int i = 0; i < stressNotes.Count; i++)
+			{
+				this.stressDrawer.NewLabel(string.Concat(new string[]
+				{
+					(stressNotes[i].value <= 0f) ? string.Empty : UIConstants.ColorPrefixRed,
+					stressNotes[i].note,
+					": ",
+					Util.FormatTwoDecimalPlace(stressNotes[i].value),
+					"%",
+					(stressNotes[i].value <= 0f) ? string.Empty : UIConstants.ColorSuffix
+				}));
+				num += stressNotes[i].value;
+			}
+		}
+		this.stressDrawer.NewLabel(((num <= 0f) ? string.Empty : UIConstants.ColorPrefixRed) + string.Format(UI.DETAILTABS.DETAILS.NET_STRESS, Util.FormatTwoDecimalPlace(num)) + ((num <= 0f) ? string.Empty : UIConstants.ColorSuffix));
+		this.stressDrawer.EndDrawing();
 	}
 
 	private void ShowAttributes(GameObject target)
@@ -533,6 +578,10 @@ public class SimpleInfoScreen : TargetScreen
 	private GameObject statusItemsFolder;
 
 	public GameObject TextContainerPrefab;
+
+	private GameObject stressPanel;
+
+	private DetailsPanelDrawer stressDrawer;
 
 	private Dictionary<string, GameObject> storageLabels = new Dictionary<string, GameObject>();
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -14,12 +13,12 @@ public class PowerControlStationConfig : IBuildingConfig
 		string text2 = "electricianworkdesk_kanim";
 		int num3 = 30;
 		float num4 = 30f;
-		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER1;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		buildingDef.ViewMode = OverlayModes.Rooms.ID;
 		buildingDef.Overheatable = false;
 		buildingDef.AudioCategory = "Metal";
@@ -35,17 +34,17 @@ public class PowerControlStationConfig : IBuildingConfig
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, PowerControlStationConfig.INPUT_PORTS);
+		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, PowerControlStationConfig.INPUT_PORTS);
+		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, PowerControlStationConfig.INPUT_PORTS);
+		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
 		go.AddOrGet<LogicOperationalController>();
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 50f;
@@ -56,7 +55,7 @@ public class PowerControlStationConfig : IBuildingConfig
 		tinkerStation.inputMaterial = PowerControlStationConfig.MATERIAL_FOR_TINKER;
 		tinkerStation.massPerTinker = 5f;
 		tinkerStation.outputPrefab = PowerControlStationConfig.TINKER_TOOLS;
-		tinkerStation.requiredRolePerk = PowerControlStationConfig.ROLE_PERK;
+		tinkerStation.requiredSkillPerk = PowerControlStationConfig.ROLE_PERK;
 		tinkerStation.choreType = Db.Get().ChoreTypes.PowerFabricate.IdHash;
 		tinkerStation.useFilteredStorage = true;
 		tinkerStation.fetchChoreType = Db.Get().ChoreTypes.PowerFetch.IdHash;
@@ -64,6 +63,14 @@ public class PowerControlStationConfig : IBuildingConfig
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.PowerPlant.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Required;
 		Prioritizable.AddRef(go);
+		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
+		{
+			TinkerStation component = game_object.GetComponent<TinkerStation>();
+			component.AttributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
+			component.AttributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
+			component.SkillExperienceSkillGroup = Db.Get().SkillGroups.Technicals.Id;
+			component.SkillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
+		};
 	}
 
 	public const string ID = "PowerControlStation";
@@ -75,6 +82,4 @@ public class PowerControlStationConfig : IBuildingConfig
 	public const float MASS_PER_TINKER = 5f;
 
 	public static string ROLE_PERK = "CanPowerTinker";
-
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
 }

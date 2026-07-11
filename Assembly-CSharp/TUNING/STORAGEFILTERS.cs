@@ -33,6 +33,7 @@ namespace TUNING
 			GameTags.Liquifiable,
 			GameTags.IndustrialProduct,
 			GameTags.IndustrialIngredient,
+			GameTags.MedicalSupplies,
 			GameTags.Clothes,
 			GameTags.ManufacturedMaterial,
 			GameTags.Egg,

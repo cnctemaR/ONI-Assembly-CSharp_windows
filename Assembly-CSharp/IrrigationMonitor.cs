@@ -201,12 +201,12 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 							{
 								if (!component.Element.IsSolid)
 								{
-									goto IL_0105;
+									goto IL_0106;
 								}
 							}
 							else if (!component.Element.IsLiquid)
 							{
-								goto IL_0105;
+								goto IL_0106;
 							}
 							bool flag = false;
 							KPrefabID component2 = component.GetComponent<KPrefabID>();
@@ -223,12 +223,12 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 							}
 							if (!flag)
 							{
-								storage.Drop(gameObject);
+								storage.Drop(gameObject, true);
 							}
 						}
 					}
 				}
-				IL_0105:;
+				IL_0106:;
 			}
 		}
 

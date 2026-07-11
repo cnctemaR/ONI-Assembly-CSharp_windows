@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -14,12 +15,23 @@ public class GasConduitTemperatureSensorConfig : ConduitSensorConfig
 
 	public override BuildingDef CreateBuildingDef()
 	{
-		return base.CreateBuildingDef(GasConduitTemperatureSensorConfig.ID, "gas_temperature_sensor_kanim", BUILDINGS.CONSTRUCTION_MASS_KG.TIER0, MATERIALS.REFINED_METALS);
+		return base.CreateBuildingDef(GasConduitTemperatureSensorConfig.ID, "gas_temperature_sensor_kanim", global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER0, MATERIALS.REFINED_METALS);
+	}
+
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, GasConduitTemperatureSensorConfig.OUTPUT_PORT);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, GasConduitTemperatureSensorConfig.OUTPUT_PORT);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		base.DoPostConfigureComplete(go);
+		GeneratedBuildings.RegisterLogicPorts(go, GasConduitTemperatureSensorConfig.OUTPUT_PORT);
 		ConduitTemperatureSensor conduitTemperatureSensor = go.AddComponent<ConduitTemperatureSensor>();
 		conduitTemperatureSensor.conduitType = this.ConduitType;
 		conduitTemperatureSensor.Threshold = 280f;
@@ -31,4 +43,6 @@ public class GasConduitTemperatureSensorConfig : ConduitSensorConfig
 	}
 
 	public static string ID = "GasConduitTemperatureSensor";
+
+	public static readonly LogicPorts.Port OUTPUT_PORT = LogicPorts.Port.OutputPort(LogicSwitch.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.GASCONDUITTEMPERATURESENSOR.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.GASCONDUITTEMPERATURESENSOR.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.GASCONDUITTEMPERATURESENSOR.LOGIC_PORT_INACTIVE, false);
 }

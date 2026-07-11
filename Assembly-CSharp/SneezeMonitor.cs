@@ -7,7 +7,9 @@ public class SneezeMonitor : GameStateMachine<SneezeMonitor, SneezeMonitor.Insta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.idle;
-		this.Sneezy.idle.ScheduleGoTo(global::UnityEngine.Random.Range(45f, 90f), this.Sneezy.sneeze_pre);
+		this.idle.ParamTransition<bool>(this.isSneezy, this.Sneezy.idle, (SneezeMonitor.Instance smi, bool p) => p);
+		this.taking_medicine.TagTransition(GameTags.TakingMedicine, this.Sneezy.idle, true);
+		this.Sneezy.idle.ScheduleGoTo((SneezeMonitor.Instance smi) => smi.NextSneezeTime(), this.Sneezy.sneeze_pre).ParamTransition<bool>(this.isSneezy, this.idle, (SneezeMonitor.Instance smi, bool p) => !p).TagTransition(GameTags.TakingMedicine, this.taking_medicine, false);
 		this.Sneezy.sneeze_pre.ToggleScheduleCallback("Sneeze", (SneezeMonitor.Instance smi) => 2f, delegate(SneezeMonitor.Instance instanceObject)
 		{
 			AcousticDisturbance.Emit(instanceObject.master.gameObject, 3);
@@ -20,13 +22,17 @@ public class SneezeMonitor : GameStateMachine<SneezeMonitor, SneezeMonitor.Insta
 
 	private static readonly HashedString[] SneezeAnims = new HashedString[] { "sneeze", "sneeze_pst" };
 
+	public StateMachine<SneezeMonitor, SneezeMonitor.Instance, IStateMachineTarget, object>.BoolParameter isSneezy = new StateMachine<SneezeMonitor, SneezeMonitor.Instance, IStateMachineTarget, object>.BoolParameter(false);
+
 	public GameStateMachine<SneezeMonitor, SneezeMonitor.Instance, IStateMachineTarget, object>.State idle;
+
+	public GameStateMachine<SneezeMonitor, SneezeMonitor.Instance, IStateMachineTarget, object>.State taking_medicine;
 
 	public SneezeMonitor.SneezyStates Sneezy;
 
-	public const float SNEEZE_INTERVAL_MIN = 45f;
+	public const float SINGLE_SNEEZE_TIME = 70f;
 
-	public const float SNEEZE_INTERVAL_MAX = 90f;
+	public const float SNEEZE_TIME_VARIANCE = 0.3f;
 
 	public class SneezyStates : GameStateMachine<SneezeMonitor, SneezeMonitor.Instance, IStateMachineTarget, object>.State
 	{
@@ -56,20 +62,21 @@ public class SneezeMonitor : GameStateMachine<SneezeMonitor, SneezeMonitor.Insta
 			base.StopSM(reason);
 		}
 
+		public float NextSneezeTime()
+		{
+			AttributeInstance attributeInstance = Db.Get().Attributes.Sneezyness.Lookup(base.master.gameObject);
+			if (attributeInstance.GetTotalValue() <= 0f)
+			{
+				return 70f;
+			}
+			float num = 70f / attributeInstance.GetTotalValue();
+			return global::UnityEngine.Random.Range(num * 0.7f, num * 1.3f);
+		}
+
 		private void OnSneezyChange()
 		{
 			AttributeInstance attributeInstance = Db.Get().Attributes.Sneezyness.Lookup(base.master.gameObject);
-			if (attributeInstance.GetTotalValue() > 0f)
-			{
-				if (base.smi.GetCurrentState() != base.smi.sm.Sneezy.idle)
-				{
-					base.smi.GoTo(base.smi.sm.Sneezy.idle);
-				}
-			}
-			else if (base.smi.GetCurrentState() != base.smi.sm.idle)
-			{
-				base.smi.GoTo(base.smi.sm.idle);
-			}
+			base.smi.sm.isSneezy.Set(attributeInstance.GetTotalValue() > 0f, base.smi);
 		}
 
 		private StatusItem statusItem;

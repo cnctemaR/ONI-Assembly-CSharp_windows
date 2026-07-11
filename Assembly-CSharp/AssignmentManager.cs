@@ -30,11 +30,13 @@ public class AssignmentManager : KMonoBehaviour
 
 	public void AddToAssignmentGroup(string group_id, IAssignableIdentity member)
 	{
+		Debug.Assert(this.assignment_groups.ContainsKey(group_id));
 		this.assignment_groups[group_id].AddMember(member);
 	}
 
 	public void RemoveFromAssignmentGroup(string group_id, IAssignableIdentity member)
 	{
+		Debug.Assert(this.assignment_groups.ContainsKey(group_id));
 		this.assignment_groups[group_id].RemoveMember(member);
 	}
 

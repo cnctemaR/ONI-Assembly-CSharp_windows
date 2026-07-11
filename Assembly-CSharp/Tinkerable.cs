@@ -14,7 +14,7 @@ public class Tinkerable : Workable
 		tinkerable.tinkerMaterialTag = PowerControlStationConfig.TINKER_TOOLS;
 		tinkerable.tinkerMaterialAmount = 1f;
 		tinkerable.addedEffect = "PowerTinker";
-		tinkerable.requiredRolePerk = PowerControlStationConfig.ROLE_PERK;
+		tinkerable.requiredSkillPerk = PowerControlStationConfig.ROLE_PERK;
 		tinkerable.SetWorkTime(180f);
 		tinkerable.workerStatusItem = Db.Get().DuplicantStatusItems.Tinkering;
 		tinkerable.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
@@ -24,7 +24,7 @@ public class Tinkerable : Workable
 		tinkerable.choreTags = GameTags.ChoreTypes.PowerChores;
 		tinkerable.multitoolContext = "powertinker";
 		tinkerable.multitoolHitEffectTag = "fx_powertinker_splash";
-		tinkerable.shouldShowRolePerkStatusItem = false;
+		tinkerable.shouldShowSkillPerkStatusItem = false;
 		prefab.AddOrGet<Storage>();
 		prefab.AddOrGet<Effects>();
 		KPrefabID component = prefab.GetComponent<KPrefabID>();
@@ -44,7 +44,7 @@ public class Tinkerable : Workable
 		tinkerable.tinkerMaterialTag = FarmStationConfig.TINKER_TOOLS;
 		tinkerable.tinkerMaterialAmount = 1f;
 		tinkerable.addedEffect = "FarmTinker";
-		tinkerable.requiredRolePerk = RoleManager.rolePerks.CanFarmTinker.id;
+		tinkerable.requiredSkillPerk = Db.Get().SkillPerks.CanFarmTinker.Id;
 		tinkerable.workerStatusItem = Db.Get().DuplicantStatusItems.Tinkering;
 		tinkerable.SetWorkTime(15f);
 		tinkerable.attributeConverter = Db.Get().AttributeConverters.PlantTendSpeed;
@@ -54,7 +54,7 @@ public class Tinkerable : Workable
 		tinkerable.choreTags = GameTags.ChoreTypes.FarmingChores;
 		tinkerable.multitoolContext = "tend";
 		tinkerable.multitoolHitEffectTag = "fx_tend_splash";
-		tinkerable.shouldShowRolePerkStatusItem = false;
+		tinkerable.shouldShowSkillPerkStatusItem = false;
 		prefab.AddOrGet<Storage>();
 		prefab.AddOrGet<Effects>();
 		KPrefabID component = prefab.GetComponent<KPrefabID>();
@@ -126,7 +126,7 @@ public class Tinkerable : Workable
 			{
 				this.chore = new FetchChore(Db.Get().ChoreTypes.GetByHash(this.choreTypeFetch), this.storage, this.tinkerMaterialAmount, new Tag[] { this.tinkerMaterialTag }, null, null, null, true, new Action<Chore>(this.OnFetchComplete), null, null, FetchOrder2.OperationalRequirement.Functional, 0, this.choreTags);
 			}
-			this.chore.AddPrecondition(ChorePreconditions.instance.HasRolePerk, this.requiredRolePerk);
+			this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, this.requiredSkillPerk);
 			RoomTracker component2 = base.GetComponent<RoomTracker>();
 			if (!string.IsNullOrEmpty(component2.requiredRoomType))
 			{

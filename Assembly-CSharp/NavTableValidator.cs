@@ -2,12 +2,12 @@
 
 public class NavTableValidator
 {
-	protected bool IsClear(int cell, CellOffset[] bounding_offsets, bool allow_forcefield_traversal)
+	protected bool IsClear(int cell, CellOffset[] bounding_offsets, bool is_dupe)
 	{
 		foreach (CellOffset cellOffset in bounding_offsets)
 		{
 			int num = Grid.OffsetCell(cell, cellOffset);
-			if (!Grid.IsValidCell(num) || NavTableValidator.IsCellSolid(num, allow_forcefield_traversal))
+			if (!Grid.IsValidCell(num) || !NavTableValidator.IsCellPassable(num, is_dupe))
 			{
 				return false;
 			}
@@ -20,10 +20,18 @@ public class NavTableValidator
 		return true;
 	}
 
-	protected static bool IsCellSolid(int cell, bool allow_forcefield_traversal)
+	protected static bool IsCellPassable(int cell, bool is_dupe)
 	{
-		Grid.BuildFlags buildFlags = Grid.BuildMasks[cell] & (Grid.BuildFlags.ForceField | Grid.BuildFlags.Solid | Grid.BuildFlags.Impassable);
-		return buildFlags != ~(Grid.BuildFlags.FakeFloor | Grid.BuildFlags.ForceField | Grid.BuildFlags.Foundation | Grid.BuildFlags.Solid | Grid.BuildFlags.PreviousSolid | Grid.BuildFlags.Impassable | Grid.BuildFlags.LiquidPumpFloor | Grid.BuildFlags.Door) && (byte)(buildFlags & (Grid.BuildFlags.Solid | Grid.BuildFlags.Impassable)) != 0 && ((byte)(buildFlags & Grid.BuildFlags.ForceField) == 0 || !allow_forcefield_traversal);
+		Grid.BuildFlags buildFlags = Grid.BuildMasks[cell] & (Grid.BuildFlags.Solid | Grid.BuildFlags.DupePassable | Grid.BuildFlags.DupeImpassable | Grid.BuildFlags.CritterImpassable);
+		if (buildFlags == (Grid.BuildFlags)0)
+		{
+			return true;
+		}
+		if (is_dupe)
+		{
+			return (byte)(buildFlags & Grid.BuildFlags.DupeImpassable) == 0 && ((byte)(buildFlags & Grid.BuildFlags.Solid) == 0 || (byte)(buildFlags & Grid.BuildFlags.DupePassable) != 0);
+		}
+		return (byte)(buildFlags & (Grid.BuildFlags.Solid | Grid.BuildFlags.CritterImpassable)) == 0;
 	}
 
 	public virtual void UpdateCell(int cell, NavTable nav_table, CellOffset[] bounding_offsets)

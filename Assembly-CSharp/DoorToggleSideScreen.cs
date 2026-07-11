@@ -30,7 +30,7 @@ public class DoorToggleSideScreen : SideScreenContent
 		this.buttonList.Add(new DoorToggleSideScreen.DoorButtonInfo
 		{
 			button = this.closeButton,
-			state = Door.ControlState.Closed,
+			state = Door.ControlState.Locked,
 			currentString = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.CLOSE,
 			pendingString = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.CLOSE_PENDING
 		});

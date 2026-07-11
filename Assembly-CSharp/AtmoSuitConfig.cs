@@ -14,8 +14,8 @@ public class AtmoSuitConfig : IEquipmentConfig
 		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.ATHLETICS, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_ATHLETICS, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.THERMAL_CONDUCTIVITY_BARRIER, global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_THERMAL_CONDUCTIVITY_BARRIER, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(Db.Get().Attributes.Digging.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_DIGGING, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
-		list.Add(new AttributeModifier(Db.Get().Amounts.Bladder.deltaAttribute.Id, global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_BLADDER, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(Db.Get().Attributes.ScaldingThreshold.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_SCALDING, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
+		this.expertAthleticsModifier = new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.ATHLETICS, (float)(-(float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_ATHLETICS), Db.Get().Skills.Suits1.Name, false, false, true);
 		string text = "Atmo_Suit";
 		string slot = global::TUNING.EQUIPMENT.SUITS.SLOT;
 		SimHashes simHashes = SimHashes.Dirt;
@@ -44,9 +44,9 @@ public class AtmoSuitConfig : IEquipmentConfig
 					component.SetFlags(PathFinder.PotentialPath.Flags.HasAtmoSuit);
 				}
 				MinionResume component2 = targetGameObject.GetComponent<MinionResume>();
-				if (component2 != null && component2.HasPerk(RoleManager.rolePerks.ExosuitExpertise.id))
+				if (component2 != null && component2.HasPerk(Db.Get().SkillPerks.ExosuitExpertise.Id))
 				{
-					targetGameObject.GetAttributes().Get(Db.Get().Attributes.Athletics).Add(SuitExpert.AthleticsModifier);
+					targetGameObject.GetAttributes().Get(Db.Get().Attributes.Athletics).Add(this.expertAthleticsModifier);
 				}
 			}
 		};
@@ -63,14 +63,20 @@ public class AtmoSuitConfig : IEquipmentConfig
 						Attributes attributes = targetGameObject2.GetAttributes();
 						if (attributes != null)
 						{
-							attributes.Get(Db.Get().Attributes.Athletics).Remove(SuitExpert.AthleticsModifier);
+							attributes.Get(Db.Get().Attributes.Athletics).Remove(this.expertAthleticsModifier);
 						}
 						Navigator component3 = targetGameObject2.GetComponent<Navigator>();
 						if (component3 != null)
 						{
 							component3.ClearFlags(PathFinder.PotentialPath.Flags.HasAtmoSuit);
 						}
+						Effects component4 = targetGameObject2.GetComponent<Effects>();
+						if (component4.HasEffect("SoiledSuit"))
+						{
+							component4.Remove("SoiledSuit");
+						}
 					}
+					eq.GetComponent<Storage>().DropAll(eq.transform.GetPosition(), true, true, default(Vector3), false);
 				}
 			}
 		};
@@ -88,6 +94,11 @@ public class AtmoSuitConfig : IEquipmentConfig
 		KPrefabID component = go.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.Clothes);
 		component.AddTag(GameTags.PedestalDisplayable);
+		component.AddTag(GameTags.AirtightSuit);
+		Storage storage = go.AddOrGet<Storage>();
+		storage.SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
+		storage.showInUI = true;
+		AtmoSuit atmoSuit = go.AddOrGet<AtmoSuit>();
 		go.AddComponent<SuitDiseaseHandler>();
 	}
 
@@ -96,4 +107,6 @@ public class AtmoSuitConfig : IEquipmentConfig
 	public static ComplexRecipe recipe;
 
 	private const PathFinder.PotentialPath.Flags suit_flags = PathFinder.PotentialPath.Flags.HasAtmoSuit;
+
+	private AttributeModifier expertAthleticsModifier;
 }

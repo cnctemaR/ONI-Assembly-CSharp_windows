@@ -27,7 +27,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		ComplexFabricator component = target.GetComponent<ComplexFabricator>();
 		if (component == null)
 		{
-			global::Debug.LogError("The object selected doesn't have a ComplexFabricator!", null);
+			global::Debug.LogError("The object selected doesn't have a ComplexFabricator!");
 			return;
 		}
 		if (this.targetOrdersUpdatedSubHandle != -1)
@@ -99,7 +99,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 	{
 		if (target == null)
 		{
-			global::Debug.LogError("ComplexFabricator provided was null.", null);
+			global::Debug.LogError("ComplexFabricator provided was null.");
 			return;
 		}
 		this.targetFab = target;
@@ -120,21 +120,21 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		case ComplexFabricatorSideScreen.StyleSetting.ListInputOutput:
 			component.constraintCount = 1;
 			component.cellSize = new Vector2(262f, component.cellSize.y);
-			goto IL_01A2;
+			goto IL_01A1;
 		case ComplexFabricatorSideScreen.StyleSetting.ClassicFabricator:
 			component.constraintCount = 128;
 			component.cellSize = new Vector2(78f, 96f);
 			this.buttonScrollContainer.minHeight = 100f;
-			goto IL_01A2;
+			goto IL_01A1;
 		case ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid:
 			component.constraintCount = 1;
 			component.cellSize = new Vector2(264f, 64f);
 			this.buttonScrollContainer.minHeight = 66f;
-			goto IL_01A2;
+			goto IL_01A1;
 		}
 		component.constraintCount = 3;
 		component.cellSize = new Vector2(116f, component.cellSize.y);
-		IL_01A2:
+		IL_01A1:
 		int num = 0;
 		ComplexRecipe[] array = recipes;
 		for (int i = 0; i < array.Length; i++)
@@ -194,7 +194,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 					break;
 				}
 				case ComplexFabricatorSideScreen.StyleSetting.ClassicFabricator:
-					goto IL_0630;
+					goto IL_062F;
 				case ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid:
 				{
 					newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButtonQueueHybrid, this.recipeGrid, false);
@@ -229,9 +229,9 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 					break;
 				}
 				default:
-					goto IL_0630;
+					goto IL_062F;
 				}
-				IL_06D3:
+				IL_06D2:
 				if (this.targetFab.sideScreenStyle == ComplexFabricatorSideScreen.StyleSetting.ClassicFabricator)
 				{
 					newToggle.GetComponentInChildren<LocText>().text = <Initialize>c__AnonStorey2.recipe.results[0].material.ProperName();
@@ -254,8 +254,8 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 				};
 				entryGO.SetActive(true);
 				this.recipeToggles.Add(entryGO);
-				goto IL_083C;
-				IL_0630:
+				goto IL_083B;
+				IL_062F:
 				newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButton, this.recipeGrid, false);
 				entryGO = newToggle.gameObject;
 				Image componentInChildrenOnly = newToggle.gameObject.GetComponentInChildrenOnly<Image>();
@@ -269,9 +269,9 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 					componentInChildrenOnly.sprite = uisprite2.first;
 					componentInChildrenOnly.color = uisprite2.second;
 				}
-				goto IL_06D3;
+				goto IL_06D2;
 			}
-			IL_083C:;
+			IL_083B:;
 		}
 		if (this.recipeToggles.Count > 0)
 		{
@@ -310,7 +310,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 	{
 		if (!this.recipeMap.ContainsKey(toggle.gameObject))
 		{
-			global::Debug.LogError("Recipe not found on recipe list.", null);
+			global::Debug.LogError("Recipe not found on recipe list.");
 			return;
 		}
 		if (this.selectedToggle == toggle)

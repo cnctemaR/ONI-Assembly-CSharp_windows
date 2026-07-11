@@ -4,24 +4,24 @@ using STRINGS;
 
 namespace Klei.AI
 {
-	public class ColdBrain : Disease
+	public class ColdBrain : Sickness
 	{
 		public ColdBrain()
-			: base("ColdBrain", Disease.DiseaseType.Ailment, Disease.Severity.Minor, 0.005f, new List<Disease.InfectionVector> { Disease.InfectionVector.Inhalation }, 120f, 0, new Disease.RangeInfo(0f, 0f, 1000f, 1000f), new Disease.RangeInfo(1f, 1f, 1f, 1f), new Disease.RangeInfo(0f, 0f, 1000f, 1000f), new Disease.RangeInfo(1f, 1f, 1f, 1f))
+			: base("ColdSickness", Sickness.SicknessType.Ailment, Sickness.Severity.Minor, 0.005f, new List<Sickness.InfectionVector> { Sickness.InfectionVector.Inhalation }, 180f)
 		{
-			base.AddDiseaseComponent(new CommonSickEffectDisease());
-			base.AddDiseaseComponent(new AttributeModifierDisease(new AttributeModifier[]
+			base.AddSicknessComponent(new CommonSickEffectSickness());
+			base.AddSicknessComponent(new AttributeModifierSickness(new AttributeModifier[]
 			{
-				new AttributeModifier("Learning", -5f, DUPLICANTS.DISEASES.COLDBRAIN.NAME, false, false, true),
-				new AttributeModifier("Machinery", -5f, DUPLICANTS.DISEASES.COLDBRAIN.NAME, false, false, true),
-				new AttributeModifier("Construction", -5f, DUPLICANTS.DISEASES.COLDBRAIN.NAME, false, false, true),
-				new AttributeModifier("Cooking", -5f, DUPLICANTS.DISEASES.COLDBRAIN.NAME, false, false, true),
-				new AttributeModifier("Sneezyness", 1f, DUPLICANTS.DISEASES.COLDBRAIN.NAME, false, false, true)
+				new AttributeModifier("Learning", -5f, DUPLICANTS.DISEASES.COLDSICKNESS.NAME, false, false, true),
+				new AttributeModifier("Machinery", -5f, DUPLICANTS.DISEASES.COLDSICKNESS.NAME, false, false, true),
+				new AttributeModifier("Construction", -5f, DUPLICANTS.DISEASES.COLDSICKNESS.NAME, false, false, true),
+				new AttributeModifier("Cooking", -5f, DUPLICANTS.DISEASES.COLDSICKNESS.NAME, false, false, true),
+				new AttributeModifier("Sneezyness", 1f, DUPLICANTS.DISEASES.COLDSICKNESS.NAME, false, false, true)
 			}));
-			base.AddDiseaseComponent(new AnimatedDisease(new HashedString[] { "anim_idle_cold_kanim", "anim_loco_run_cold_kanim", "anim_loco_walk_cold_kanim" }, Db.Get().Expressions.SickCold));
-			base.AddDiseaseComponent(new PeriodicEmoteDisease("anim_idle_cold_kanim", new HashedString[] { "idle_pre", "idle_default", "idle_pst" }, 5f));
+			base.AddSicknessComponent(new AnimatedSickness(new HashedString[] { "anim_idle_cold_kanim", "anim_loco_run_cold_kanim", "anim_loco_walk_cold_kanim" }, Db.Get().Expressions.SickCold));
+			base.AddSicknessComponent(new PeriodicEmoteSickness("anim_idle_cold_kanim", new HashedString[] { "idle_pre", "idle_default", "idle_pst" }, 5f));
 		}
 
-		public const string ID = "ColdBrain";
+		public const string ID = "ColdSickness";
 	}
 }

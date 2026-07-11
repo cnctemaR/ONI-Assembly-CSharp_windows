@@ -7,7 +7,7 @@ public class SituationalAnim : KMonoBehaviour
 	{
 		base.OnSpawn();
 		SituationalAnim.Situation situation = this.GetSituation();
-		Output.Log(new object[] { "Situation is", situation });
+		DebugUtil.LogArgs(new object[] { "Situation is", situation });
 		this.SetAnimForSituation(situation);
 	}
 
@@ -17,7 +17,7 @@ public class SituationalAnim : KMonoBehaviour
 		{
 			if ((tuple.first & situation) == tuple.first)
 			{
-				Output.Log(new object[] { "Chose Anim", tuple.first, tuple.second });
+				DebugUtil.LogArgs(new object[] { "Chose Anim", tuple.first, tuple.second });
 				this.SetAnim(tuple.second);
 				break;
 			}

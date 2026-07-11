@@ -7,12 +7,14 @@ public class GameScenePartitioner : KMonoBehaviour
 	{
 		get
 		{
+			Debug.Assert(GameScenePartitioner.instance != null);
 			return GameScenePartitioner.instance;
 		}
 	}
 
 	protected override void OnPrefabInit()
 	{
+		Debug.Assert(GameScenePartitioner.instance == null);
 		GameScenePartitioner.instance = this;
 		this.partitioner = new ScenePartitioner(16, 64, Grid.WidthInCells, Grid.HeightInCells);
 		this.solidChangedLayer = this.partitioner.CreateMask("SolidChanged");
@@ -37,6 +39,8 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.lure = this.partitioner.CreateMask("Lure");
 		this.plants = this.partitioner.CreateMask("Plants");
 		this.industrialBuildings = this.partitioner.CreateMask("IndustrialBuildings");
+		this.completeBuildings = this.partitioner.CreateMask("CompleteBuildings");
+		this.prioritizableObjects = this.partitioner.CreateMask("PrioritizableObjects");
 		this.objectLayers = new ScenePartitionerLayer[39];
 		for (int i = 0; i < 39; i++)
 		{
@@ -268,6 +272,10 @@ public class GameScenePartitioner : KMonoBehaviour
 	public ScenePartitionerLayer plants;
 
 	public ScenePartitionerLayer industrialBuildings;
+
+	public ScenePartitionerLayer completeBuildings;
+
+	public ScenePartitionerLayer prioritizableObjects;
 
 	private ScenePartitioner partitioner;
 

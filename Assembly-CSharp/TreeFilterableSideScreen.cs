@@ -176,13 +176,13 @@ public class TreeFilterableSideScreen : SideScreenContent
 		this.target = target;
 		if (target == null)
 		{
-			global::Debug.LogError("The target object provided was null", null);
+			global::Debug.LogError("The target object provided was null");
 			return;
 		}
 		this.targetFilterable = target.GetComponent<TreeFilterable>();
 		if (this.targetFilterable == null)
 		{
-			global::Debug.LogError("The target provided does not have a Tree Filterable component", null);
+			global::Debug.LogError("The target provided does not have a Tree Filterable component");
 			return;
 		}
 		if (!this.targetFilterable.showUserMenu)
@@ -297,7 +297,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 		}
 		else
 		{
-			Output.LogError("If you're filtering, your storage filter should have the filters set on it");
+			global::Debug.LogError("If you're filtering, your storage filter should have the filters set on it");
 		}
 	}
 

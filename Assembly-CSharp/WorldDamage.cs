@@ -208,7 +208,7 @@ public class WorldDamage : KMonoBehaviour
 			{
 				return;
 			}
-			GameObject gameObject = element.substance.SpawnResource(vector, num, temperature, disease_idx, disease_count, false, false);
+			GameObject gameObject = element.substance.SpawnResource(vector, num, temperature, disease_idx, disease_count, false, false, false);
 			Pickupable component = gameObject.GetComponent<Pickupable>();
 			if (component != null && WorldInventory.Instance.IsReachable(gameObject.GetComponent<Pickupable>()))
 			{

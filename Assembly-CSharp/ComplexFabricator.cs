@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using Klei;
 using KSerialization;
 using STRINGS;
-using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -76,6 +76,23 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		}
 	}
 
+	[OnDeserialized]
+	private void OnDeserializedMethod()
+	{
+		List<string> list = new List<string>();
+		foreach (string text in this.recipeQueueCounts.Keys)
+		{
+			if (ComplexRecipeManager.Get().GetRecipe(text) == null)
+			{
+				list.Add(text);
+			}
+		}
+		foreach (string text2 in list)
+		{
+			this.recipeQueueCounts.Remove(text2);
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -86,9 +103,6 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		this.workable = base.GetComponent<ComplexFabricatorWorkable>();
 		if (this.duplicantOperated)
 		{
-			this.workable.WorkerStatusItem = Db.Get().DuplicantStatusItems.Processing;
-			this.workable.AttributeConvertor = Db.Get().AttributeConverters.MachinerySpeed;
-			this.workable.AttributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		}
 		Components.ComplexFabricators.Add(this);
 	}
@@ -206,7 +220,9 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 			if (keyValuePair.Value > 0 || keyValuePair.Value == ComplexFabricator.QUEUE_INFINITE)
 			{
 				num++;
-				ComplexFabricator.UserOrder userOrder = new ComplexFabricator.UserOrder(ComplexRecipeManager.Get().GetRecipe(keyValuePair.Key), true);
+				ComplexRecipe recipe = ComplexRecipeManager.Get().GetRecipe(keyValuePair.Key);
+				global::Debug.Assert(recipe != null, string.Format("{1} missing recipe: {0}", keyValuePair.Key, base.name));
+				ComplexFabricator.UserOrder userOrder = new ComplexFabricator.UserOrder(recipe, true);
 				this.userOrders.Add(userOrder);
 			}
 		}
@@ -396,7 +412,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		{
 			for (int j = this.machineOrders.Count - 1; j >= num; j--)
 			{
-				DebugUtil.DevAssertWithStack(!this.willBeSadIfMachineOrdersChanges, new object[] { "machineOrders changed when it wasn't expected. sad." });
+				global::Debug.Assert(!this.willBeSadIfMachineOrdersChanges, "machineOrders changed when it wasn't expected. sad.");
 				if (j == 0 && this.machineOrders[0].chore != null)
 				{
 					this.buildStorage.Transfer(this.inStorage, true, true);
@@ -415,7 +431,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 	{
 		for (int i = this.machineOrders.Count; i < nextMachineOrderSources.Count; i++)
 		{
-			DebugUtil.DevAssertWithStack(!this.willBeSadIfMachineOrdersChanges, new object[] { "machineOrders changed when it wasn't expected. sad." });
+			global::Debug.Assert(!this.willBeSadIfMachineOrdersChanges, "machineOrders changed when it wasn't expected. sad.");
 			ComplexFabricator.MachineOrder machineOrder = new ComplexFabricator.MachineOrder();
 			machineOrder.parentOrder = nextMachineOrderSources[i];
 			this.machineOrders.Add(machineOrder);
@@ -612,7 +628,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 
 	private void CancelMachineOrder(ComplexFabricator.MachineOrder order)
 	{
-		DebugUtil.DevAssertWithStack(!this.willBeSadIfMachineOrdersChanges, new object[] { "machineOrders changed when it wasn't expected. sad." });
+		global::Debug.Assert(!this.willBeSadIfMachineOrdersChanges, "machineOrders changed when it wasn't expected. sad.");
 		this.OnMachineOrderCancelledOrComplete(order);
 		order.Cancel();
 		this.machineOrders.Remove(order);
@@ -654,7 +670,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		{
 			this.buildStorage.Transfer(this.inStorage, true, true);
 		}
-		DebugUtil.DevAssertWithStack(this.machineOrders.Count == 0 || !this.willBeSadIfMachineOrdersChanges, new object[] { "machineOrders changed when it wasn't expected. sad." });
+		global::Debug.Assert(this.machineOrders.Count == 0 || !this.willBeSadIfMachineOrdersChanges, "machineOrders changed when it wasn't expected. sad.");
 		while (this.machineOrders.Count > 0)
 		{
 			ComplexFabricator.MachineOrder machineOrder = this.machineOrders[0];
@@ -748,7 +764,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 					}
 					else
 					{
-						global::Debug.LogWarning(component3.name + " is missing symbol " + build.name, null);
+						global::Debug.LogWarning(component3.name + " is missing symbol " + build.name);
 					}
 				}
 			}
@@ -824,7 +840,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 	{
 		if (fetchList == null || ingredients == null || ingredients.Length == 0)
 		{
-			global::Debug.LogError("Invalid parameters received for the fetch list.", null);
+			global::Debug.LogError("Invalid parameters received for the fetch list.");
 			return;
 		}
 		foreach (ComplexRecipe.RecipeElement recipeElement in ingredients)
@@ -914,7 +930,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		}
 		if (this.machineOrders.Count <= 0)
 		{
-			global::Debug.LogWarning("Somehow we tried to complete an order when there was no orders to complete. Need more info on how to reproduce this for a proper fix.", null);
+			global::Debug.LogWarning("Somehow we tried to complete an order when there was no orders to complete. Need more info on how to reproduce this for a proper fix.");
 			return;
 		}
 		this.willBeSadIfMachineOrdersChanges = true;

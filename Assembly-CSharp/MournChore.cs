@@ -70,23 +70,23 @@ public class MournChore : Chore<MournChore.StatesInstance>
 	{
 		if (context.consumerState.consumer == null)
 		{
-			global::Debug.LogError("MournChore null context.consumer", null);
+			global::Debug.LogError("MournChore null context.consumer");
 			return;
 		}
 		if (base.smi == null)
 		{
-			global::Debug.LogError("MournChore null smi", null);
+			global::Debug.LogError("MournChore null smi");
 			return;
 		}
 		if (base.smi.sm == null)
 		{
-			global::Debug.LogError("MournChore null smi.sm", null);
+			global::Debug.LogError("MournChore null smi.sm");
 			return;
 		}
 		Grave grave = MournChore.FindGraveToMournAt();
 		if (grave == null)
 		{
-			global::Debug.LogError("MournChore no grave", null);
+			global::Debug.LogError("MournChore no grave");
 			return;
 		}
 		base.smi.sm.mourner.Set(context.consumerState.gameObject, base.smi);

@@ -21,6 +21,10 @@ public class AutoDisinfectable : Workable
 	{
 		base.OnSpawn();
 		base.Subscribe<AutoDisinfectable>(493375141, AutoDisinfectable.OnRefreshUserMenuDelegate);
+		this.attributeConverter = Db.Get().AttributeConverters.TidyingSpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
+		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Basekeeping.Id;
+		this.skillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;
 		base.SetWorkTime(10f);
 		this.shouldTransferDiseaseWithWorker = false;
 	}
@@ -67,11 +71,6 @@ public class AutoDisinfectable : Workable
 	{
 		base.OnStartWork(worker);
 		this.diseasePerSecond = (float)base.GetComponent<PrimaryElement>().DiseaseCount / 10f;
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole(Handyman.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)

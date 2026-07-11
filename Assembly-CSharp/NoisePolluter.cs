@@ -118,7 +118,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 				"] radius: [",
 				this.radius,
 				"]"
-			}), null);
+			}));
 			global::UnityEngine.Object.Destroy(this);
 			return;
 		}
@@ -156,7 +156,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 				"] noise: [",
 				this.noise,
 				"]"
-			}), null);
+			}));
 		}
 		KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
 		this.isMovable = component2 != null && component2.isMovable;

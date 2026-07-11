@@ -1,0 +1,45 @@
+﻿using System;
+using System.Collections.Generic;
+using STRINGS;
+using TUNING;
+using UnityEngine;
+
+public class BasicCureConfig : IEntityConfig
+{
+	public GameObject CreatePrefab()
+	{
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("BasicCure", ITEMS.PILLS.BASICCURE.NAME, ITEMS.PILLS.BASICCURE.DESC, 1f, true, Assets.GetAnim("pill_foodpoisoning_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
+		EntityTemplates.ExtendEntityToMedicine(gameObject, MEDICINE.BASICCURE);
+		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement(SimHashes.Carbon.CreateTag(), 1f),
+			new ComplexRecipe.RecipeElement(SimHashes.Water.CreateTag(), 1f)
+		};
+		ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("BasicCure", 1f)
+		};
+		string text = ComplexRecipeManager.MakeRecipeID("Apothecary", array, array2);
+		BasicCureConfig.recipe = new ComplexRecipe(text, array, array2)
+		{
+			time = 50f,
+			description = ITEMS.PILLS.BASICCURE.RECIPEDESC,
+			useResultAsDescription = true,
+			fabricators = new List<Tag> { "Apothecary" },
+			sortOrder = 10
+		};
+		return gameObject;
+	}
+
+	public void OnPrefabInit(GameObject inst)
+	{
+	}
+
+	public void OnSpawn(GameObject inst)
+	{
+	}
+
+	public const string ID = "BasicCure";
+
+	public static ComplexRecipe recipe;
+}

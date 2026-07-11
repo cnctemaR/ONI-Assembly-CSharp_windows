@@ -261,7 +261,7 @@ public class SpeedControlScreen : KScreen
 
 	public void DebugStepFrame()
 	{
-		Output.Log(new object[] { "Stepping one frame" });
+		DebugUtil.LogArgs(new object[] { "Stepping one frame" });
 		this.Unpause(false);
 		base.StartCoroutine(this.DebugStepFrameDelay());
 	}

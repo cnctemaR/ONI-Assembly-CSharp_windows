@@ -24,6 +24,11 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 		}
 	}
 
+	public int SliderDecimalPlaces(int index)
+	{
+		return 0;
+	}
+
 	public float GetSliderMin(int index)
 	{
 		return 0f;
@@ -291,7 +296,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 			}
 			else
 			{
-				GameObject gameObject = element.substance.SpawnResource(base.transform.GetPosition(), num, root_pe.Temperature, byte.MaxValue, 0, false, false);
+				GameObject gameObject = element.substance.SpawnResource(base.transform.GetPosition(), num, root_pe.Temperature, byte.MaxValue, 0, false, false, false);
 				this.storage.Store(gameObject, true, false, true, false);
 			}
 		}
@@ -311,7 +316,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 			}
 			else
 			{
-				element.substance.SpawnResource(Grid.CellToPosCCC(num3, Grid.SceneLayer.Front), num, num4, byte.MaxValue, 0, true, false);
+				element.substance.SpawnResource(Grid.CellToPosCCC(num3, Grid.SceneLayer.Front), num, num4, byte.MaxValue, 0, true, false, false);
 			}
 		}
 	}

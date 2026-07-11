@@ -101,6 +101,13 @@ public class SubworldZoneRenderData : KMonoBehaviour
 	private Color32 GetZoneColor(SubWorld.ZoneType zone_type)
 	{
 		Color32 color = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, 3);
+		global::Debug.Assert(zone_type < (SubWorld.ZoneType)this.zoneColours.Length, string.Concat(new object[]
+		{
+			"Need to add more colours to handle this zone",
+			(int)zone_type,
+			"<",
+			this.zoneColours.Length
+		}));
 		return color;
 	}
 

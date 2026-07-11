@@ -1,0 +1,359 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using Klei;
+using Newtonsoft.Json;
+
+namespace KMod
+{
+	[JsonObject(MemberSerialization.OptIn)]
+	[DebuggerDisplay("{title}")]
+	public class Mod
+	{
+		[JsonConstructor]
+		public Mod()
+		{
+		}
+
+		public Mod(Label label, string description, IFileSource file_source, LocString manage_tooltip, global::System.Action on_managed)
+		{
+			this.enabled = false;
+			this.label = label;
+			this.status = Mod.Status.NotInstalled;
+			this.description = description;
+			this.file_source = file_source;
+			this.manage_tooltip = manage_tooltip;
+			this.on_managed = on_managed;
+			this.loaded_content = (Content)0;
+			this.available_content = (Content)0;
+			this.ScanContent();
+		}
+
+		public Content available_content { get; private set; }
+
+		public LocString manage_tooltip { get; private set; }
+
+		public global::System.Action on_managed { get; private set; }
+
+		public bool is_managed
+		{
+			get
+			{
+				return this.manage_tooltip != null;
+			}
+		}
+
+		public string title
+		{
+			get
+			{
+				return this.label.title;
+			}
+		}
+
+		public string description { get; private set; }
+
+		public Content loaded_content { get; private set; }
+
+		public void CopyPersistentDataTo(Mod other_mod)
+		{
+			other_mod.status = this.status;
+			other_mod.enabled = this.enabled;
+			other_mod.crash_count = this.crash_count;
+			other_mod.loaded_content = this.loaded_content;
+		}
+
+		public void ScanContent()
+		{
+			this.available_content = (Content)0;
+			if (this.file_source == null)
+			{
+				this.file_source = new Directory(this.label.install_path);
+			}
+			if (!this.file_source.Exists())
+			{
+				return;
+			}
+			List<FileSystemItem> list = new List<FileSystemItem>();
+			this.file_source.GetTopLevelItems(list);
+			foreach (FileSystemItem fileSystemItem in list)
+			{
+				if (fileSystemItem.type == FileSystemItem.ItemType.Directory)
+				{
+					this.AddDirectory(fileSystemItem.name.ToLower());
+				}
+				else
+				{
+					this.AddFile(fileSystemItem.name.ToLower());
+				}
+			}
+		}
+
+		public bool IsEmpty()
+		{
+			return this.available_content == (Content)0;
+		}
+
+		private void AddDirectory(string directory)
+		{
+			string text = directory.TrimEnd(new char[] { '/' });
+			if (text != null)
+			{
+				if (!(text == "strings"))
+				{
+					if (!(text == "codex"))
+					{
+						if (!(text == "elements"))
+						{
+							if (!(text == "templates"))
+							{
+								if (text == "worldgen")
+								{
+									this.available_content |= Content.LayerableFiles;
+								}
+							}
+							else
+							{
+								this.available_content |= Content.LayerableFiles;
+							}
+						}
+						else
+						{
+							this.available_content |= Content.LayerableFiles;
+						}
+					}
+					else
+					{
+						this.available_content |= Content.LayerableFiles;
+					}
+				}
+				else
+				{
+					this.available_content |= Content.Strings;
+				}
+			}
+		}
+
+		private void AddFile(string file)
+		{
+			if (file.EndsWith(".dll"))
+			{
+				this.available_content |= Content.DLL;
+			}
+			if (file.EndsWith(".po") || file.EndsWith(".pot"))
+			{
+				this.available_content |= Content.Translation;
+			}
+		}
+
+		private static void AccumulateExtensions(Content content, List<string> extensions)
+		{
+			if ((byte)(content & Content.DLL) != 0)
+			{
+				extensions.Add(".dll");
+			}
+			if ((byte)(content & (Content.Strings | Content.Translation)) != 0)
+			{
+				extensions.Add(".po");
+				extensions.Add(".pot");
+			}
+		}
+
+		[Conditional("DEBUG")]
+		private void Assert(bool condition, string failure_message)
+		{
+			if (string.IsNullOrEmpty(this.title))
+			{
+				DebugUtil.Assert(condition, string.Format("{2}\n\t{0}\n\t{1}", this.title, this.label.ToString(), failure_message));
+			}
+			else
+			{
+				DebugUtil.Assert(condition, string.Format("{1}\n\t{0}", this.label.ToString(), failure_message));
+			}
+		}
+
+		public void Install()
+		{
+			if (this.label.distribution_platform == Label.DistributionPlatform.Local || this.label.distribution_platform == Label.DistributionPlatform.Dev)
+			{
+				return;
+			}
+			this.status = Mod.Status.ReinstallPending;
+			if (this.file_source == null)
+			{
+				return;
+			}
+			if (!FileUtil.DeleteDirectory(this.label.install_path))
+			{
+				return;
+			}
+			if (!FileUtil.CreateDirectory(this.label.install_path))
+			{
+				return;
+			}
+			this.file_source.CopyTo(this.label.install_path, null);
+			this.file_source = new Directory(this.label.install_path);
+			this.status = Mod.Status.Installed;
+		}
+
+		public bool Uninstall()
+		{
+			if (this.label.distribution_platform == Label.DistributionPlatform.Local || this.label.distribution_platform == Label.DistributionPlatform.Dev)
+			{
+				return false;
+			}
+			this.enabled = false;
+			if (this.loaded_content != (Content)0)
+			{
+				global::Debug.Log(string.Format("Can't uninstall {0}: still has loaded content: {1}", this.label.ToString(), this.loaded_content.ToString()));
+				this.status = Mod.Status.UninstallPending;
+				return false;
+			}
+			if (!FileUtil.DeleteDirectory(this.label.install_path))
+			{
+				global::Debug.Log(string.Format("Can't uninstall {0}: directory deletion failed", this.label.ToString()));
+				this.status = Mod.Status.UninstallPending;
+				return false;
+			}
+			this.status = Mod.Status.NotInstalled;
+			return true;
+		}
+
+		private bool LoadStrings()
+		{
+			string[] array = new string[] { "strings.pot", "strings.po" };
+			string text = FSUtil.Normalize(Path.Combine(this.label.install_path, "strings"));
+			if (!Directory.Exists(text))
+			{
+				return false;
+			}
+			int num = 0;
+			DirectoryInfo directoryInfo = new DirectoryInfo(text);
+			foreach (FileInfo fileInfo in directoryInfo.GetFiles())
+			{
+				bool flag = false;
+				foreach (string text2 in array)
+				{
+					if (fileInfo.Name.ToLower() == text2)
+					{
+						flag = true;
+						break;
+					}
+				}
+				if (flag)
+				{
+					num++;
+					Dictionary<string, string> dictionary = Localization.LoadStringsFile(fileInfo.FullName, Path.GetExtension(fileInfo.Name.ToLower()) == ".pot");
+					Localization.OverloadStrings(dictionary);
+				}
+			}
+			return num > 0;
+		}
+
+		public void Load(Content content)
+		{
+			content &= this.available_content & ~this.loaded_content;
+			if ((byte)(content & Content.Strings) != 0 && this.LoadStrings())
+			{
+				this.loaded_content |= Content.Strings;
+			}
+			if ((byte)(content & Content.Translation) != 0)
+			{
+				this.loaded_content |= Content.Translation;
+			}
+			if ((byte)(content & Content.DLL) != 0 && DLLLoader.LoadDLLs(this.label.install_path))
+			{
+				this.loaded_content |= Content.DLL;
+			}
+			if ((byte)(content & Content.LayerableFiles) != 0)
+			{
+				Global.Instance.layeredFileSystem.AddFileSystem(this.file_source.GetFileSystem());
+				this.loaded_content |= Content.LayerableFiles;
+			}
+		}
+
+		public void Unload(Content content)
+		{
+			content &= this.loaded_content;
+			if ((byte)(content & Content.LayerableFiles) != 0)
+			{
+				Global.Instance.layeredFileSystem.RemoveFileSystem(this.file_source.GetFileSystem());
+				this.loaded_content &= ~Content.LayerableFiles;
+			}
+		}
+
+		private void SetCrashCount(int new_crash_count)
+		{
+			this.crash_count = MathUtil.Clamp(0, 3, new_crash_count);
+		}
+
+		public void Crash(bool do_disable)
+		{
+			this.SetCrashCount(this.crash_count + 1);
+			if (do_disable)
+			{
+				this.enabled = false;
+			}
+		}
+
+		public void Uncrash()
+		{
+			this.SetCrashCount((this.label.distribution_platform != Label.DistributionPlatform.Dev) ? 0 : (this.crash_count - 1));
+		}
+
+		public bool IsActive()
+		{
+			return this.loaded_content != (Content)0;
+		}
+
+		public bool AllActive(Content content)
+		{
+			return (this.loaded_content & content) == content;
+		}
+
+		public bool AllActive()
+		{
+			return (this.loaded_content & this.available_content) == this.available_content;
+		}
+
+		public bool AnyActive(Content content)
+		{
+			return (byte)(this.loaded_content & content) != 0;
+		}
+
+		public bool HasContent()
+		{
+			return this.available_content != (Content)0;
+		}
+
+		public bool HasAnyContent(Content content)
+		{
+			return (byte)(this.available_content & content) != 0;
+		}
+
+		[JsonProperty]
+		public Label label;
+
+		[JsonProperty]
+		public Mod.Status status;
+
+		[JsonProperty]
+		public bool enabled;
+
+		[JsonProperty]
+		public int crash_count;
+
+		public IFileSource file_source;
+
+		public const int MAX_CRASH_COUNT = 3;
+
+		public enum Status
+		{
+			NotInstalled,
+			Installed,
+			UninstallPending,
+			ReinstallPending
+		}
+	}
+}

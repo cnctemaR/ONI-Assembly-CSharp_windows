@@ -58,7 +58,7 @@ public class Constructable : Workable, ISaveLoadable
 		}
 		if (num <= 0f)
 		{
-			Output.LogWarningWithObj(base.gameObject, new object[]
+			DebugUtil.LogWarningArgs(base.gameObject, new object[]
 			{
 				"uhhh this constructable is about to generate a nan",
 				"Item Count: ",
@@ -106,15 +106,12 @@ public class Constructable : Workable, ISaveLoadable
 					{
 						component5.Subscribe(-21016276, delegate(object data)
 						{
-							GameScheduler.Instance.Schedule("finishConstruction", 0.001f, delegate(object data2)
-							{
-								this.FinishConstruction(connections);
-							}, null, null);
+							this.FinishConstruction(connections);
 						});
 					}
 					else
 					{
-						global::Debug.LogWarning("Why am I trying to replace a: " + gameObject2.name, null);
+						global::Debug.LogWarning("Why am I trying to replace a: " + gameObject2.name);
 						this.FinishConstruction(connections);
 					}
 				}
@@ -128,6 +125,7 @@ public class Constructable : Workable, ISaveLoadable
 				float temperature = component7.Temperature;
 				byte diseaseIdx = component7.DiseaseIdx;
 				int diseaseCount = component7.DiseaseCount;
+				global::Debug.Assert(component7.Element != null && component7.Element.tag != null);
 				Deconstructable.SpawnItem(component7.transform.GetPosition(), component7.GetComponent<Building>().Def, component7.Element.tag, mass, temperature, diseaseIdx, diseaseCount);
 				gameObject2.Trigger(1606648047, null);
 				gameObject2.DeleteObject();
@@ -138,13 +136,6 @@ public class Constructable : Workable, ISaveLoadable
 			this.FinishConstruction(connections);
 		}
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Building, base.GetComponent<KSelectable>().GetName(), base.transform, 1.5f, false);
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole(JuniorBuilder.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
-		resume.AddExperienceIfRole(Builder.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
-		resume.AddExperienceIfRole(SeniorBuilder.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	private void FinishConstruction(UtilityConnections connections)
@@ -202,8 +193,10 @@ public class Constructable : Workable, ISaveLoadable
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Building;
 		this.workingStatusItem = null;
 		this.attributeConverter = Db.Get().AttributeConverters.ConstructionSpeed;
-		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
 		this.minimumAttributeMultiplier = 0.75f;
+		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Building.Id;
+		this.skillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
 		Prioritizable.AddRef(base.gameObject);
 		this.synchronizeAnims = false;
 		this.multitoolContext = "build";
@@ -232,6 +225,7 @@ public class Constructable : Workable, ISaveLoadable
 		this.fetchList = new FetchList2(this.storage, Db.Get().ChoreTypes.BuildFetch, this.choreTags);
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		Element element = ElementLoader.GetElement(this.SelectedElementsTags[0]);
+		global::Debug.Assert(element != null, "Missing primary element for Constructable");
 		component.ElementID = element.id;
 		PrimaryElement primaryElement = component;
 		float num = 293.15f;
@@ -277,7 +271,7 @@ public class Constructable : Workable, ISaveLoadable
 			}
 			else
 			{
-				Output.LogError("multiple replacement tiles on the same cell!");
+				global::Debug.LogError("multiple replacement tiles on the same cell!");
 				Util.KDestroyGameObject(base.gameObject);
 			}
 		}
@@ -640,8 +634,10 @@ public class Constructable : Workable, ISaveLoadable
 					this.selectedElementsTags[j] = ElementLoader.FindElementByHash((SimHashes)this.ids[j]).tag;
 				}
 			}
+			global::Debug.Assert(this.selectedElements.Length == this.selectedElementsTags.Length);
 			for (int k = 0; k < this.selectedElements.Length; k++)
 			{
+				global::Debug.Assert(this.selectedElements[k].tag == this.SelectedElementsTags[k]);
 			}
 		}
 	}

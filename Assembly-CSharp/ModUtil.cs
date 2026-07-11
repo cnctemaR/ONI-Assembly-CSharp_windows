@@ -8,7 +8,7 @@ public static class ModUtil
 	public static void AddBuildingToPlanScreen(HashedString category, string building_id)
 	{
 		int num = BUILDINGS.PLANORDER.FindIndex((PlanScreen.PlanInfo x) => x.category == category);
-		if (num <= 0)
+		if (num < 0)
 		{
 			return;
 		}

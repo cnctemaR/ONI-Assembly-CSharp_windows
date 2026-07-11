@@ -19,6 +19,7 @@ public class JetSuitConfig : IEquipmentConfig
 		list.Add(new AttributeModifier(Db.Get().Attributes.Digging.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_DIGGING, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(Db.Get().Amounts.Bladder.deltaAttribute.Id, global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_BLADDER, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(Db.Get().Attributes.ScaldingThreshold.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_SCALDING, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
+		this.expertAthleticsModifier = new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.ATHLETICS, (float)(-(float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_ATHLETICS), Db.Get().Skills.Suits1.Name, false, false, true);
 		string text = "Jet_Suit";
 		string slot = global::TUNING.EQUIPMENT.SUITS.SLOT;
 		SimHashes simHashes = SimHashes.Steel;
@@ -43,9 +44,9 @@ public class JetSuitConfig : IEquipmentConfig
 					component.SetFlags(PathFinder.PotentialPath.Flags.HasJetPack);
 				}
 				MinionResume component2 = targetGameObject.GetComponent<MinionResume>();
-				if (component2 != null && component2.HasPerk(RoleManager.rolePerks.ExosuitExpertise.id))
+				if (component2 != null && component2.HasPerk(Db.Get().SkillPerks.ExosuitExpertise.Id))
 				{
-					targetGameObject.GetAttributes().Get(Db.Get().Attributes.Athletics).Add(SuitExpert.AthleticsModifier);
+					targetGameObject.GetAttributes().Get(Db.Get().Attributes.Athletics).Add(this.expertAthleticsModifier);
 				}
 				KAnimControllerBase component3 = targetGameObject.GetComponent<KAnimControllerBase>();
 				if (component3)
@@ -67,7 +68,7 @@ public class JetSuitConfig : IEquipmentConfig
 						Attributes attributes = targetGameObject2.GetAttributes();
 						if (attributes != null)
 						{
-							attributes.Get(Db.Get().Attributes.Athletics).Remove(SuitExpert.AthleticsModifier);
+							attributes.Get(Db.Get().Attributes.Athletics).Remove(this.expertAthleticsModifier);
 						}
 						Navigator component4 = targetGameObject2.GetComponent<Navigator>();
 						if (component4 != null)
@@ -107,4 +108,6 @@ public class JetSuitConfig : IEquipmentConfig
 	public static ComplexRecipe recipe;
 
 	private const PathFinder.PotentialPath.Flags suit_flags = PathFinder.PotentialPath.Flags.HasJetPack;
+
+	private AttributeModifier expertAthleticsModifier;
 }

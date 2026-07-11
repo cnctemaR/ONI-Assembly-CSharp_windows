@@ -1,5 +1,6 @@
 ﻿using System;
 
+[Serializable]
 public struct StringKey
 {
 	public StringKey(string str)

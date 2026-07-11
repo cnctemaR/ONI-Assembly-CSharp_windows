@@ -22,7 +22,7 @@ public class Diet
 					}
 					if (this.consumedTagToInfo.ContainsKey(tag))
 					{
-						Debug.LogError("Duplicate diet entry: " + tag, null);
+						Debug.LogError("Duplicate diet entry: " + tag);
 					}
 					this.consumedTagToInfo[tag] = info;
 				}

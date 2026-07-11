@@ -131,7 +131,7 @@ public class SandboxToolParameterMenu : KScreen
 			this.temperatureSlider.SetRange(Mathf.Max(SandboxToolParameterMenu.instance.settings.Element.lowTemp - 10f, 1f), SandboxToolParameterMenu.instance.settings.Element.highTemp + 10f);
 			this.massSlider.SetRange(0.1f, SandboxToolParameterMenu.instance.settings.Element.defaultValues.mass * 2f);
 			this.massSlider.SetValue(this.settings.Mass);
-			this.settings.SelectDisease(Db.Get().Diseases.FoodPoisoning);
+			this.settings.SelectDisease(Db.Get().Diseases.FoodGerms);
 			this.settings.SelectEntity(Assets.GetPrefab("MushBar".ToTag()).GetComponent<KPrefabID>());
 		}
 	}
@@ -277,9 +277,9 @@ public class SandboxToolParameterMenu : KScreen
 				return false;
 			}
 			GameObject gameObject5 = (entity as KPrefabID).gameObject;
-			return gameObject5 != null && (gameObject5.HasTag(GameTags.IndustrialIngredient) || gameObject5.HasTag(GameTags.IndustrialProduct) || gameObject5.HasTag(GameTags.Medicine));
+			return gameObject5 != null && (gameObject5.HasTag(GameTags.IndustrialIngredient) || gameObject5.HasTag(GameTags.IndustrialProduct) || gameObject5.HasTag(GameTags.Medicine) || gameObject5.HasTag(GameTags.MedicalSupplies));
 		};
-		tuple = Def.GetUISprite(Assets.GetPrefab("GenericPill"), "ui", false);
+		tuple = Def.GetUISprite(Assets.GetPrefab("BasicCure"), "ui", false);
 		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter9 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func, null, tuple);
 		list.Add(searchFilter9);
 		List<KPrefabID> list3 = new List<KPrefabID>();

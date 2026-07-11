@@ -8,7 +8,7 @@ public class RoleStationSideScreen : SideScreenContent
 		base.OnPrefabInit();
 		this.openRolesScreenButton.onClick += delegate
 		{
-			ManagementMenu.Instance.ToggleRoles();
+			ManagementMenu.Instance.ToggleSkills();
 		};
 	}
 

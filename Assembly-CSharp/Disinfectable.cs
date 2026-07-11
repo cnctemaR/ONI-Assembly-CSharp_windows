@@ -13,6 +13,8 @@ public class Disinfectable : Workable
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Disinfecting;
 		this.attributeConverter = Db.Get().AttributeConverters.TidyingSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
+		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Basekeeping.Id;
+		this.skillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;
 		this.multitoolContext = "disinfect";
 		this.multitoolHitEffectTag = "fx_disinfect_splash";
 		base.Subscribe<Disinfectable>(2127324410, Disinfectable.OnCancelDelegate);
@@ -41,11 +43,6 @@ public class Disinfectable : Workable
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		component.AddDisease(component.DiseaseIdx, -(int)(this.diseasePerSecond * dt + 0.5f), "Disinfectable.OnWorkTick");
 		return false;
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole(Handyman.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	protected override void OnCompleteWork(Worker worker)

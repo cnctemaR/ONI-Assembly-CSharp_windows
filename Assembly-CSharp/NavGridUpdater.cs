@@ -78,7 +78,7 @@ public class NavGridUpdater
 		}
 		if (num2 >= max_links_per_cell)
 		{
-			global::Debug.LogError("Out of nav links. Need to increase maxLinksPerCell:" + max_links_per_cell, null);
+			global::Debug.LogError("Out of nav links. Need to increase maxLinksPerCell:" + max_links_per_cell);
 		}
 		links[num].link = Grid.InvalidCell;
 	}

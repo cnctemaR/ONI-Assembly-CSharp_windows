@@ -43,6 +43,7 @@ public class SliderSet
 		this.maxLabel.text = target.GetSliderMax(this.index) + target.SliderUnits;
 		this.numberInput.minValue = target.GetSliderMin(this.index);
 		this.numberInput.maxValue = target.GetSliderMax(this.index);
+		this.numberInput.decimalPlaces = target.SliderDecimalPlaces(this.index);
 		this.valueSlider.minValue = target.GetSliderMin(this.index);
 		this.valueSlider.maxValue = target.GetSliderMax(this.index);
 		this.valueSlider.value = target.GetSliderValue(this.index);
@@ -55,12 +56,23 @@ public class SliderSet
 
 	private void ReceiveValueFromSlider()
 	{
-		this.SetValue(this.valueSlider.value);
+		float num = this.valueSlider.value;
+		if (this.numberInput.decimalPlaces != -1)
+		{
+			float num2 = Mathf.Pow(10f, (float)this.numberInput.decimalPlaces);
+			num = Mathf.Round(num * num2) / num2;
+		}
+		this.SetValue(num);
 	}
 
 	private void ReceiveValueFromInput()
 	{
-		float num = Mathf.Round(this.numberInput.currentValue * 10f) / 10f;
+		float num = this.numberInput.currentValue;
+		if (this.numberInput.decimalPlaces != -1)
+		{
+			float num2 = Mathf.Pow(10f, (float)this.numberInput.decimalPlaces);
+			num = Mathf.Round(num * num2) / num2;
+		}
 		this.valueSlider.value = num;
 		this.SetValue(num);
 	}

@@ -27,7 +27,7 @@ namespace Database
 		{
 			if (base.TryGet(id) != null)
 			{
-				Output.LogWarning(new object[] { "Tried adding a tech item called", id, name, "but it was already added!" });
+				DebugUtil.LogWarningArgs(new object[] { "Tried adding a tech item called", id, name, "but it was already added!" });
 				return base.Get(id);
 			}
 			Tech tech = this.LookupGroupForID(id);

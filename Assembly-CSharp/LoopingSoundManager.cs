@@ -266,7 +266,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 	{
 		if (string.IsNullOrEmpty(path))
 		{
-			global::Debug.LogWarning("Missing sound", null);
+			global::Debug.LogWarning("Missing sound");
 			return HandleVector<int>.InvalidHandle;
 		}
 		return LoopingSoundManager.Get().Add(path, pos, null, pause_on_game_pause, enable_culling, true);

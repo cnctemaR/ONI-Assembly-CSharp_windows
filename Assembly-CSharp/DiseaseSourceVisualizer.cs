@@ -44,14 +44,6 @@ public class DiseaseSourceVisualizer : KMonoBehaviour
 		if (string.IsNullOrEmpty(this.alwaysShowDisease))
 		{
 			this.visible = false;
-			MinionModifiers component = base.gameObject.GetComponent<MinionModifiers>();
-			Diseases diseases = component.diseases;
-			if (diseases.Count > 0)
-			{
-				DiseaseInstance diseaseInstance = diseases[0];
-				Disease modifier = diseaseInstance.modifier;
-				this.SetVisibleDisease(modifier);
-			}
 		}
 		else
 		{

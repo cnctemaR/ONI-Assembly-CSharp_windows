@@ -23,8 +23,8 @@ public class PriorityScreen : KScreen
 		this.buttonPrefab_basic.gameObject.SetActive(false);
 		this.button_emergency.playSelectionSound = playSelectionSound;
 		this.button_emergency.onClick = this.onClick;
-		this.button_emergency.priority = new PrioritySetting(PriorityScreen.PriorityClass.emergency, 1);
-		this.button_emergency.tooltip.SetSimpleTooltip(UI.PRIORITYSCREEN.EMERGENCY);
+		this.button_emergency.priority = new PrioritySetting(PriorityScreen.PriorityClass.topPriority, 1);
+		this.button_emergency.tooltip.SetSimpleTooltip(UI.PRIORITYSCREEN.TOP_PRIORITY);
 		this.button_toggleHigh.gameObject.SetActive(false);
 		this.PriorityMenuContainer.SetActive(true);
 		this.button_priorityMenu.gameObject.SetActive(true);
@@ -113,7 +113,7 @@ public class PriorityScreen : KScreen
 			{
 				num += 10f;
 			}
-			if (priority.priority_class >= PriorityScreen.PriorityClass.emergency)
+			if (priority.priority_class >= PriorityScreen.PriorityClass.topPriority)
 			{
 				num = num;
 			}
@@ -160,7 +160,7 @@ public class PriorityScreen : KScreen
 		basic,
 		high,
 		personalNeeds,
-		emergency,
+		topPriority,
 		compulsory
 	}
 }

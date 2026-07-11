@@ -61,9 +61,11 @@ public class Studyable : Workable, ISidescreenButtonControl
 		this.synchronizeAnims = false;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Studying;
 		this.resetProgressOnStop = false;
-		this.requiredRolePerk = RoleManager.rolePerks.CanStudyWorldObjects.id;
+		this.requiredSkillPerk = Db.Get().SkillPerks.CanStudyWorldObjects.Id;
 		this.attributeConverter = Db.Get().AttributeConverters.ResearchSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
+		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Research.Id;
+		this.skillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
 		base.SetWorkTime(3600f);
 	}
 
@@ -95,7 +97,7 @@ public class Studyable : Workable, ISidescreenButtonControl
 			this.statusItemGuid = component.ReplaceStatusItem(this.statusItemGuid, Db.Get().MiscStatusItems.Studied, null);
 			this.studiedIndicator.gameObject.SetActive(true);
 			this.studiedIndicator.meterController.Play(this.meterAnim, KAnim.PlayMode.Loop, 1f, 0f);
-			this.requiredRolePerk = HashedString.Invalid;
+			this.requiredSkillPerk = null;
 			this.UpdateStatusItem(null);
 		}
 		else
@@ -133,13 +135,6 @@ public class Studyable : Workable, ISidescreenButtonControl
 			this.markedForStudy = !this.markedForStudy;
 		}
 		this.Refresh();
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole(JuniorResearcher.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
-		resume.AddExperienceIfRole(Researcher.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
-		resume.AddExperienceIfRole(SeniorResearcher.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	protected override void OnCompleteWork(Worker worker)

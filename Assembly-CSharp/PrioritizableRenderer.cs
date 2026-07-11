@@ -17,6 +17,18 @@ public class PrioritizableRenderer
 		this.mesh.MarkDynamic();
 	}
 
+	public PrioritizeTool currentTool
+	{
+		get
+		{
+			return this.tool;
+		}
+		set
+		{
+			this.tool = value;
+		}
+	}
+
 	public void Cleanup()
 	{
 		this.material = null;
@@ -37,16 +49,20 @@ public class PrioritizableRenderer
 				if (!(SimDebugView.Instance == null) && !(SimDebugView.Instance.GetMode() != OverlayModes.Priorities.ID))
 				{
 					this.prioritizables.Clear();
-					for (int i = 0; i < Components.Prioritizables.Count; i++)
+					Vector2I vector2I;
+					Vector2I vector2I2;
+					Grid.GetVisibleExtents(out vector2I, out vector2I2);
+					int num = vector2I2.y - vector2I.y;
+					int num2 = vector2I2.x - vector2I.x;
+					Extents extents = new Extents(vector2I.x, vector2I.y, num2, num);
+					List<ScenePartitionerEntry> list = new List<ScenePartitionerEntry>();
+					GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.prioritizableObjects, list);
+					foreach (ScenePartitionerEntry scenePartitionerEntry in list)
 					{
-						Prioritizable prioritizable = Components.Prioritizables[i];
-						if (prioritizable != null && prioritizable.showIcon && prioritizable.IsPrioritizable())
+						Prioritizable prioritizable = (Prioritizable)scenePartitionerEntry.obj;
+						if (prioritizable != null && prioritizable.showIcon && prioritizable.IsPrioritizable() && this.tool.IsActiveLayer(this.tool.GetFilterLayerFromGameObject(prioritizable.gameObject)))
 						{
-							int num = Grid.PosToCell(prioritizable);
-							if (Grid.IsVisible(num))
-							{
-								this.prioritizables.Add(prioritizable);
-							}
+							this.prioritizables.Add(prioritizable);
 						}
 					}
 					if (this.prioritizableCount != this.prioritizables.Count)
@@ -58,9 +74,9 @@ public class PrioritizableRenderer
 					}
 					if (this.prioritizableCount != 0)
 					{
-						for (int j = 0; j < this.prioritizables.Count; j++)
+						for (int i = 0; i < this.prioritizables.Count; i++)
 						{
-							Prioritizable prioritizable2 = this.prioritizables[j];
+							Prioritizable prioritizable2 = this.prioritizables[i];
 							Vector3 vector = Vector3.zero;
 							KAnimControllerBase component = prioritizable2.GetComponent<KAnimControllerBase>();
 							if (component != null)
@@ -74,39 +90,39 @@ public class PrioritizableRenderer
 							vector.x += prioritizable2.iconOffset.x;
 							vector.y += prioritizable2.iconOffset.y;
 							Vector2 vector2 = new Vector2(0.2f, 0.3f) * prioritizable2.iconScale;
-							float num2 = -5f;
-							int num3 = 4 * j;
-							this.vertices[num3] = new Vector3(vector.x - vector2.x, vector.y - vector2.y, num2);
-							this.vertices[1 + num3] = new Vector3(vector.x - vector2.x, vector.y + vector2.y, num2);
-							this.vertices[2 + num3] = new Vector3(vector.x + vector2.x, vector.y - vector2.y, num2);
-							this.vertices[3 + num3] = new Vector3(vector.x + vector2.x, vector.y + vector2.y, num2);
-							float num4 = 0.1f;
+							float num3 = -5f;
+							int num4 = 4 * i;
+							this.vertices[num4] = new Vector3(vector.x - vector2.x, vector.y - vector2.y, num3);
+							this.vertices[1 + num4] = new Vector3(vector.x - vector2.x, vector.y + vector2.y, num3);
+							this.vertices[2 + num4] = new Vector3(vector.x + vector2.x, vector.y - vector2.y, num3);
+							this.vertices[3 + num4] = new Vector3(vector.x + vector2.x, vector.y + vector2.y, num3);
+							float num5 = 0.1f;
 							PrioritySetting masterPriority = prioritizable2.GetMasterPriority();
-							float num5 = -1f;
+							float num6 = -1f;
 							if (masterPriority.priority_class >= PriorityScreen.PriorityClass.high)
 							{
-								num5 += 9f;
+								num6 += 9f;
 							}
-							if (masterPriority.priority_class >= PriorityScreen.PriorityClass.emergency)
+							if (masterPriority.priority_class >= PriorityScreen.PriorityClass.topPriority)
 							{
-								num5 = num5;
+								num6 = num6;
 							}
-							num5 += (float)masterPriority.priority_value;
-							float num6 = num4 * num5;
-							float num7 = 0f;
-							float num8 = num4;
-							float num9 = 1f;
-							this.uvs[num3] = new Vector2(num6, num7);
-							this.uvs[1 + num3] = new Vector2(num6, num7 + num9);
-							this.uvs[2 + num3] = new Vector2(num6 + num8, num7);
-							this.uvs[3 + num3] = new Vector2(num6 + num8, num7 + num9);
-							int num10 = 6 * j;
-							this.triangles[num10] = num3;
-							this.triangles[1 + num10] = num3 + 1;
-							this.triangles[2 + num10] = num3 + 2;
-							this.triangles[3 + num10] = num3 + 2;
-							this.triangles[4 + num10] = num3 + 1;
-							this.triangles[5 + num10] = num3 + 3;
+							num6 += (float)masterPriority.priority_value;
+							float num7 = num5 * num6;
+							float num8 = 0f;
+							float num9 = num5;
+							float num10 = 1f;
+							this.uvs[num4] = new Vector2(num7, num8);
+							this.uvs[1 + num4] = new Vector2(num7, num8 + num10);
+							this.uvs[2 + num4] = new Vector2(num7 + num9, num8);
+							this.uvs[3 + num4] = new Vector2(num7 + num9, num8 + num10);
+							int num11 = 6 * i;
+							this.triangles[num11] = num4;
+							this.triangles[1 + num11] = num4 + 1;
+							this.triangles[2 + num11] = num4 + 2;
+							this.triangles[3 + num11] = num4 + 2;
+							this.triangles[4 + num11] = num4 + 1;
+							this.triangles[5 + num11] = num4 + 3;
 						}
 						this.mesh.Clear();
 						this.mesh.vertices = this.vertices;
@@ -135,4 +151,6 @@ public class PrioritizableRenderer
 	private int[] triangles;
 
 	private List<Prioritizable> prioritizables;
+
+	private PrioritizeTool tool;
 }

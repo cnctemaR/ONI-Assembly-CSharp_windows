@@ -23,14 +23,17 @@ public class Accessorizer : KMonoBehaviour
 
 	public void AddAccessory(Accessory accessory)
 	{
-		SymbolOverrideController component = this.animController.GetComponent<SymbolOverrideController>();
-		component.AddSymbolOverride(accessory.slot.targetSymbolId, accessory.symbol, 0);
-		if (!this.HasAccessory(accessory))
+		if (accessory != null)
 		{
-			ResourceRef<Accessory> resourceRef = new ResourceRef<Accessory>(accessory);
-			if (resourceRef != null)
+			SymbolOverrideController component = this.animController.GetComponent<SymbolOverrideController>();
+			component.AddSymbolOverride(accessory.slot.targetSymbolId, accessory.symbol, 0);
+			if (!this.HasAccessory(accessory))
 			{
-				this.accessories.Add(resourceRef);
+				ResourceRef<Accessory> resourceRef = new ResourceRef<Accessory>(accessory);
+				if (resourceRef != null)
+				{
+					this.accessories.Add(resourceRef);
+				}
 			}
 		}
 	}

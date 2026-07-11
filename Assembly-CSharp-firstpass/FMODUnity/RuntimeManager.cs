@@ -146,7 +146,7 @@ namespace FMODUnity
 						break;
 					}
 					initflags &= ~global::FMOD.Studio.INITFLAGS.LIVEUPDATE;
-					global::Debug.LogWarning("FMOD Studio: Cannot open network port for Live Update (in-use), restarting with Live Update disabled.", null);
+					global::Debug.LogWarning("FMOD Studio: Cannot open network port for Live Update (in-use), restarting with Live Update disabled.");
 					result2 = this.studioSystem.release();
 					this.CheckInitResult(result2, "FMOD.Studio.System.Release");
 				}
@@ -511,7 +511,7 @@ namespace FMODUnity
 			}
 			catch (EventNotFoundException)
 			{
-				global::Debug.LogWarning("FMOD Event not found: " + path, null);
+				global::Debug.LogWarning("FMOD Event not found: " + path);
 			}
 		}
 
@@ -531,7 +531,7 @@ namespace FMODUnity
 			}
 			catch (EventNotFoundException)
 			{
-				global::Debug.LogWarning("FMOD Event not found: " + path, null);
+				global::Debug.LogWarning("FMOD Event not found: " + path);
 			}
 		}
 

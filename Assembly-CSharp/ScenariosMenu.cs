@@ -94,7 +94,7 @@ public class ScenariosMenu : KModalScreen, SteamUGCService.IUGCEventHandler
 		string text;
 		uint num2;
 		SteamUGC.GetItemInstallInfo(item, out num, out text, 1024U, out num2);
-		Output.Log(new object[] { "LoadScenario", text, num, num2 });
+		DebugUtil.LogArgs(new object[] { "LoadScenario", text, num, num2 });
 		global::System.DateTime dateTime;
 		byte[] bytesFromZip = SteamUGCService.GetBytesFromZip(item, new string[] { ".sav" }, out dateTime, false);
 		string text2 = Path.Combine(SaveLoader.GetSavePrefix(), "scenario.sav");
@@ -146,6 +146,10 @@ public class ScenariosMenu : KModalScreen, SteamUGCService.IUGCEventHandler
 	private void OnClickOpenWorkshop()
 	{
 		Application.OpenURL("http://steamcommunity.com/workshop/browse/?appid=457140&requiredtags[]=scenario");
+	}
+
+	public void OnUGCItemSubscribed(RemoteStoragePublishedFileSubscribed_t pCallback)
+	{
 	}
 
 	public void OnUGCItemInstalled(ItemInstalled_t pCallback)

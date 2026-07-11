@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Database;
+using Klei.AI;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -41,9 +43,9 @@ public class MinionPersonalityPanel : TargetScreen
 	{
 		base.OnPrefabInit();
 		this.bioPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.resumePanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.traitsPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.bioDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.bioPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
-		this.resumeDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.resumePanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
+		this.traitsDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.traitsPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
 	}
 
 	protected override void OnCleanUp()
@@ -100,7 +102,7 @@ public class MinionPersonalityPanel : TargetScreen
 			return;
 		}
 		this.RefreshBio();
-		this.RefreshResume();
+		this.RefreshTraits();
 	}
 
 	private void RefreshBio()
@@ -117,86 +119,50 @@ public class MinionPersonalityPanel : TargetScreen
 			.Tooltip(string.Format(DUPLICANTS.ARRIVALTIME_TOOLTIP, component.arrivalTime, component.name))
 			.NewLabel(DUPLICANTS.GENDERTITLE + string.Format(Strings.Get(string.Format("STRINGS.DUPLICANTS.GENDER.{0}.NAME", component.genderStringKey.ToUpper())), component.gender))
 			.NewLabel(string.Format(Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.DESC", component.nameStringKey.ToUpper())), component.name))
-			.Tooltip(string.Format(Strings.Get(string.Format("STRINGS.DUPLICANTS.DESC_TOOLTIP", component.nameStringKey.ToUpper())), component.name))
-			.EndDrawing();
+			.Tooltip(string.Format(Strings.Get(string.Format("STRINGS.DUPLICANTS.DESC_TOOLTIP", component.nameStringKey.ToUpper())), component.name));
+		MinionResume component2 = this.selectedTarget.GetComponent<MinionResume>();
+		if (component2 != null && component2.AptitudeBySkillGroup.Count > 0)
+		{
+			this.bioDrawer.NewLabel(UI.DETAILTABS.PERSONALITY.RESUME.APTITUDES.NAME + "\n").Tooltip(string.Format(UI.DETAILTABS.PERSONALITY.RESUME.APTITUDES.TOOLTIP, this.selectedTarget.name));
+			foreach (KeyValuePair<HashedString, float> keyValuePair in component2.AptitudeBySkillGroup)
+			{
+				if (keyValuePair.Value != 0f)
+				{
+					SkillGroup skillGroup = Db.Get().SkillGroups.Get(keyValuePair.Key);
+					this.bioDrawer.NewLabel("  • " + skillGroup.Name).Tooltip(string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION, skillGroup.Name, keyValuePair.Value * ROLES.APTITUDE_EXPERIENCE_SCALE));
+				}
+			}
+		}
+		this.bioDrawer.EndDrawing();
 	}
 
-	private void RefreshResume()
+	private void RefreshTraits()
 	{
-		MinionResume component = this.selectedTarget.GetComponent<MinionResume>();
+		MinionIdentity component = this.selectedTarget.GetComponent<MinionIdentity>();
 		if (!component)
 		{
-			this.resumePanel.SetActive(false);
+			this.traitsPanel.SetActive(false);
 			return;
 		}
-		this.resumePanel.SetActive(true);
-		this.resumePanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = string.Format(UI.DETAILTABS.PERSONALITY.GROUPNAME_RESUME, this.selectedTarget.name.ToUpper());
-		this.resumeDrawer.BeginDrawing();
-		RoleConfig roleConfig = Game.Instance.roleManager.GetRole(component.CurrentRole);
-		if (roleConfig.id == "NoRole")
+		this.traitsPanel.SetActive(true);
+		this.traitsPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.STATS.GROUPNAME_TRAITS;
+		this.traitsDrawer.BeginDrawing();
+		foreach (Trait trait in this.selectedTarget.GetComponent<Traits>().TraitList)
 		{
-			this.resumeDrawer.NewLabel(string.Format(UI.DETAILTABS.PERSONALITY.RESUME.CURRENT_ROLE.NAME, roleConfig.name) + "\n").Tooltip(string.Format(UI.DETAILTABS.PERSONALITY.RESUME.CURRENT_ROLE.NOJOB_TOOLTIP, this.selectedTarget.name, roleConfig.name));
+			this.traitsDrawer.NewLabel(trait.Name).Tooltip(trait.GetTooltip());
 		}
-		else
-		{
-			this.resumeDrawer.NewLabel(string.Format(UI.DETAILTABS.PERSONALITY.RESUME.CURRENT_ROLE.NAME, roleConfig.name) + "\n").Tooltip(string.Format(UI.DETAILTABS.PERSONALITY.RESUME.CURRENT_ROLE.TOOLTIP, this.selectedTarget.name, roleConfig.name));
-		}
-		int num = 0;
-		if (num != 0)
-		{
-			this.resumeDrawer.NewLabel(UI.DETAILTABS.PERSONALITY.RESUME.MASTERED_ROLES).Tooltip(UI.DETAILTABS.PERSONALITY.RESUME.MASTERED_ROLES_TOOLTIP);
-		}
-		foreach (KeyValuePair<string, bool> keyValuePair in component.MasteryByRoleID)
-		{
-			if (keyValuePair.Value && !(keyValuePair.Key == "NoRole"))
-			{
-				roleConfig = Game.Instance.roleManager.GetRole(keyValuePair.Key);
-				this.resumeDrawer.NewLabel(roleConfig.name).Tooltip(Game.Instance.roleManager.RoleTooltip(roleConfig.id));
-				num++;
-			}
-		}
-		int num2 = 0;
-		if (num2 != 0)
-		{
-			this.resumeDrawer.NewLabel(UI.DETAILTABS.PERSONALITY.RESUME.PERKS.NAME + "\n").Tooltip(string.Format(UI.DETAILTABS.PERSONALITY.RESUME.PERKS.TOOLTIP, this.selectedTarget.name));
-		}
-		foreach (KeyValuePair<HashedString, RoleGroup> keyValuePair2 in Game.Instance.roleManager.RoleGroups)
-		{
-			foreach (RoleConfig roleConfig2 in keyValuePair2.Value.roles)
-			{
-				if (roleConfig2.id == component.CurrentRole || component.MasteryByRoleID[roleConfig2.id])
-				{
-					foreach (RolePerk rolePerk in roleConfig2.perks)
-					{
-						this.resumeDrawer.NewLabel("  • " + rolePerk.description).Tooltip(string.Format(UI.DETAILTABS.PERSONALITY.RESUME.JOBTRAINING_TOOLTIP, this.selectedTarget.name, roleConfig2.GetProperName()));
-						num2++;
-					}
-				}
-			}
-		}
-		this.resumeDrawer.NewLabel(UI.DETAILTABS.PERSONALITY.RESUME.APTITUDES.NAME + "\n").Tooltip(string.Format(UI.DETAILTABS.PERSONALITY.RESUME.APTITUDES.TOOLTIP, this.selectedTarget.name));
-		if (component.AptitudeByRoleGroup.Count > 0)
-		{
-			foreach (KeyValuePair<HashedString, float> keyValuePair3 in component.AptitudeByRoleGroup)
-			{
-				if (keyValuePair3.Value != 0f)
-				{
-					this.resumeDrawer.NewLabel("  • " + Game.Instance.roleManager.RoleGroups[keyValuePair3.Key].Name).Tooltip(string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION, Game.Instance.roleManager.RoleGroups[keyValuePair3.Key].Name, keyValuePair3.Value * ROLES.APTITUDE_EXPERIENCE_SCALE));
-				}
-			}
-		}
-		this.resumeDrawer.EndDrawing();
+		this.traitsDrawer.EndDrawing();
 	}
 
 	public GameObject attributesLabelTemplate;
 
 	private GameObject bioPanel;
 
-	private GameObject resumePanel;
+	private GameObject traitsPanel;
 
 	private DetailsPanelDrawer bioDrawer;
 
-	private DetailsPanelDrawer resumeDrawer;
+	private DetailsPanelDrawer traitsDrawer;
 
 	public MinionEquipmentPanel panel;
 

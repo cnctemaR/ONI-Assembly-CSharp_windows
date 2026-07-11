@@ -69,12 +69,12 @@ public class Ref<ReferenceType> : ISaveLoadable where ReferenceType : KMonoBehav
 						typeof(ReferenceType).Name,
 						" reference: ",
 						this.id
-					}), null);
+					}));
 				}
 			}
 			else
 			{
-				global::Debug.LogWarning("Missing KPrefabID reference: " + this.id, null);
+				global::Debug.LogWarning("Missing KPrefabID reference: " + this.id);
 				this.id = -1;
 			}
 		}

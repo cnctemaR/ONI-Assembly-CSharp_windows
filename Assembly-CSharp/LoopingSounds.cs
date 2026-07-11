@@ -21,7 +21,7 @@ public class LoopingSounds : KMonoBehaviour
 	{
 		if (asset == null || asset == string.Empty)
 		{
-			global::Debug.LogWarning("Missing sound", null);
+			global::Debug.LogWarning("Missing sound");
 			return false;
 		}
 		if (!this.IsSoundPlaying(asset))
@@ -41,7 +41,7 @@ public class LoopingSounds : KMonoBehaviour
 	{
 		if (asset == null || asset == string.Empty)
 		{
-			global::Debug.LogWarning("Missing sound", null);
+			global::Debug.LogWarning("Missing sound");
 			return false;
 		}
 		if (!this.IsSoundPlaying(asset))
@@ -51,6 +51,25 @@ public class LoopingSounds : KMonoBehaviour
 				asset = asset
 			};
 			loopingSoundEvent.handle = LoopingSoundManager.Get().Add(asset, base.transform.GetPosition(), base.transform, true, true, true);
+			this.loopingSounds.Add(loopingSoundEvent);
+		}
+		return true;
+	}
+
+	public bool StartSound(string asset, bool pause_on_game_pause = true, bool enable_culling = true, bool enable_camera_scaled_position = true)
+	{
+		if (asset == null || asset == string.Empty)
+		{
+			global::Debug.LogWarning("Missing sound");
+			return false;
+		}
+		if (!this.IsSoundPlaying(asset))
+		{
+			LoopingSounds.LoopingSoundEvent loopingSoundEvent = new LoopingSounds.LoopingSoundEvent
+			{
+				asset = asset
+			};
+			loopingSoundEvent.handle = LoopingSoundManager.Get().Add(asset, base.transform.GetPosition(), base.transform, pause_on_game_pause, enable_culling, enable_camera_scaled_position);
 			this.loopingSounds.Add(loopingSoundEvent);
 		}
 		return true;
@@ -141,7 +160,7 @@ public class LoopingSounds : KMonoBehaviour
 	{
 		if (AudioDebug.Get().debugGameEventSounds)
 		{
-			global::Debug.Log("GameSoundEvent: " + ev.Name, null);
+			global::Debug.Log("GameSoundEvent: " + ev.Name);
 		}
 		List<AnimEvent> events = GameAudioSheets.Get().GetEvents(ev.Name);
 		if (events == null)
@@ -161,7 +180,7 @@ public class LoopingSounds : KMonoBehaviour
 			{
 				if (AudioDebug.Get().debugGameEventSounds)
 				{
-					global::Debug.Log("GameSound: " + soundEvent.sound, null);
+					global::Debug.Log("GameSound: " + soundEvent.sound);
 				}
 				float num = 0f;
 				if (this.lastTimePlayed.TryGetValue(soundEvent.soundHash, out num))

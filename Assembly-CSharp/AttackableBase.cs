@@ -10,6 +10,8 @@ public class AttackableBase : Workable, IApproachable
 		base.OnSpawn();
 		this.attributeConverter = Db.Get().AttributeConverters.AttackDamage;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.BARELY_EVER_EXPERIENCE;
+		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Mining.Id;
+		this.skillExperienceMultiplier = SKILLS.BARELY_EVER_EXPERIENCE;
 		this.SetupScenePartitioner(null);
 		base.Subscribe<AttackableBase>(1088554450, AttackableBase.OnCellChangedDelegate);
 		base.Subscribe<AttackableBase>(-1506500077, AttackableBase.OnDefeatedDelegate);
@@ -41,13 +43,6 @@ public class AttackableBase : Workable, IApproachable
 	public override float GetEfficiencyMultiplier(Worker worker)
 	{
 		return 1f;
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole(JuniorMiner.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
-		resume.AddExperienceIfRole(Miner.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
-		resume.AddExperienceIfRole(SeniorMiner.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
 	}
 
 	protected override void OnCleanUp()

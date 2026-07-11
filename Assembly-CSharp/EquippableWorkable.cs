@@ -30,6 +30,7 @@ public class EquippableWorkable : Workable, ISaveLoadable
 
 	private void CreateChore()
 	{
+		Debug.Assert(this.chore == null, "chore should be null");
 		this.chore = new EquipChore(this);
 	}
 

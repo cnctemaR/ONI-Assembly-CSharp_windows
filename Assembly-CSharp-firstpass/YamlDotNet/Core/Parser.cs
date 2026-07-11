@@ -111,6 +111,7 @@ namespace YamlDotNet.Core
 			case ParserState.FlowMappingEmptyValue:
 				return this.ParseFlowMappingValue(true);
 			}
+			Debug.Assert(false, "Invalid state");
 			throw new InvalidOperationException();
 		}
 

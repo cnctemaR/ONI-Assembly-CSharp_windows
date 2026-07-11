@@ -61,7 +61,7 @@ namespace KSerialization
 					"\n"
 				});
 			}
-			Output.Log(new object[] { text });
+			DebugUtil.LogArgs(new object[] { text });
 		}
 
 		private static Dictionary<Type, Stats.StatInfo> serializationStats = new Dictionary<Type, Stats.StatInfo>();

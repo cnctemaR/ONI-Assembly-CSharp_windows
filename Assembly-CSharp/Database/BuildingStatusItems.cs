@@ -289,6 +289,7 @@ namespace Database
 			{
 				Telepad telepad = (Telepad)data;
 				ImmigrantScreen.InitializeImmigrantScreen(telepad);
+				Game.Instance.Trigger(288942073, null);
 			};
 			this.NoStorageFilterSet = this.CreateStatusItem("NoStorageFilterSet", "BUILDING", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
 			this.NoSuitMarker = this.CreateStatusItem("NoSuitMarker", "BUILDING", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
@@ -321,45 +322,24 @@ namespace Database
 				return str.Replace("{DamageInfo}", component.GetDamageSourceInfo().ToString());
 			};
 			this.PendingRepair.conditionalOverlayCallback = (HashedString mode, object data) => true;
-			this.RequiresRolePerk = this.CreateStatusItem("RequiresRolePerk", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
-			this.RequiresRolePerk.resolveStringCallback = delegate(string str, object data)
+			this.RequiresSkillPerk = this.CreateStatusItem("RequiresSkillPerk", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
+			this.RequiresSkillPerk.resolveStringCallback = delegate(string str, object data)
 			{
-				HashedString hashedString = (HashedString)data;
-				List<RoleConfig> rolesWithPerk = Game.Instance.roleManager.GetRolesWithPerk(hashedString);
+				string text11 = (string)data;
+				SkillPerk skillPerk = Db.Get().SkillPerks.Get(text11);
+				List<Skill> skillsWithPerk = Db.Get().Skills.GetSkillsWithPerk(skillPerk);
 				List<string> list = new List<string>();
-				foreach (RoleConfig roleConfig in rolesWithPerk)
+				foreach (Skill skill in skillsWithPerk)
 				{
-					list.Add(roleConfig.GetProperName());
+					list.Add(skill.Name);
 				}
-				str = str.Replace("{Roles}", string.Join(", ", list.ToArray()));
+				str = str.Replace("{Skills}", string.Join(", ", list.ToArray()));
 				return str;
 			};
-			this.DigRequiresRolePerk = this.CreateStatusItem("DigRequiresRolePerk", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
-			this.DigRequiresRolePerk.resolveStringCallback = delegate(string str, object data)
-			{
-				HashedString hashedString2 = (HashedString)data;
-				List<RoleConfig> rolesWithPerk2 = Game.Instance.roleManager.GetRolesWithPerk(hashedString2);
-				List<string> list2 = new List<string>();
-				foreach (RoleConfig roleConfig2 in rolesWithPerk2)
-				{
-					list2.Add(roleConfig2.GetProperName());
-				}
-				str = str.Replace("{Roles}", string.Join(", ", list2.ToArray()));
-				return str;
-			};
-			this.ColonyLacksRequiredRolePerk = this.CreateStatusItem("ColonyLacksRequiredRolePerk", "BUILDING", "status_item_role_required", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
-			this.ColonyLacksRequiredRolePerk.resolveStringCallback = delegate(string str, object data)
-			{
-				HashedString hashedString3 = (HashedString)data;
-				List<RoleConfig> rolesWithPerk3 = Game.Instance.roleManager.GetRolesWithPerk(hashedString3);
-				List<string> list3 = new List<string>();
-				foreach (RoleConfig roleConfig3 in rolesWithPerk3)
-				{
-					list3.Add(roleConfig3.GetProperName());
-				}
-				str = str.Replace("{Roles}", string.Join(", ", list3.ToArray()));
-				return str;
-			};
+			this.DigRequiresSkillPerk = this.CreateStatusItem("DigRequiresSkillPerk", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
+			this.DigRequiresSkillPerk.resolveStringCallback = this.RequiresSkillPerk.resolveStringCallback;
+			this.ColonyLacksRequiredSkillPerk = this.CreateStatusItem("ColonyLacksRequiredSkillPerk", "BUILDING", "status_item_role_required", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
+			this.ColonyLacksRequiredSkillPerk.resolveStringCallback = this.RequiresSkillPerk.resolveStringCallback;
 			this.SwitchStatusActive = this.CreateStatusItem("SwitchStatusActive", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
 			this.SwitchStatusInactive = this.CreateStatusItem("SwitchStatusInactive", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
 			this.PendingFish = this.CreateStatusItem("PendingFish", "BUILDING", "status_item_pending_fish", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
@@ -384,17 +364,17 @@ namespace Database
 				int num = Grid.PosToCell(conduit);
 				ConduitFlow flowManager = conduit.GetFlowManager();
 				ConduitFlow.ConduitContents contents = flowManager.GetContents(num);
-				string text11 = BUILDING.STATUSITEMS.PIPECONTENTS.EMPTY;
+				string text12 = BUILDING.STATUSITEMS.PIPECONTENTS.EMPTY;
 				if (contents.mass > 0f)
 				{
 					Element element = ElementLoader.FindElementByHash(contents.element);
-					text11 = string.Format(BUILDING.STATUSITEMS.PIPECONTENTS.CONTENTS, GameUtil.GetFormattedMass(contents.mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), element.name, GameUtil.GetFormattedTemperature(contents.temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+					text12 = string.Format(BUILDING.STATUSITEMS.PIPECONTENTS.CONTENTS, GameUtil.GetFormattedMass(contents.mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), element.name, GameUtil.GetFormattedTemperature(contents.temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 					if (OverlayScreen.Instance != null && OverlayScreen.Instance.mode == OverlayModes.Disease.ID && contents.diseaseIdx != 255)
 					{
-						text11 += string.Format(BUILDING.STATUSITEMS.PIPECONTENTS.CONTENTS_WITH_DISEASE, GameUtil.GetFormattedDisease(contents.diseaseIdx, contents.diseaseCount, true));
+						text12 += string.Format(BUILDING.STATUSITEMS.PIPECONTENTS.CONTENTS_WITH_DISEASE, GameUtil.GetFormattedDisease(contents.diseaseIdx, contents.diseaseCount, true));
 					}
 				}
-				str = str.Replace("{Contents}", text11);
+				str = str.Replace("{Contents}", text12);
 				return str;
 			};
 			this.Conveyor = this.CreateStatusItem("Conveyor", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.SolidConveyor.ID, true, 63486);
@@ -404,7 +384,7 @@ namespace Database
 				int num2 = Grid.PosToCell(solidConduit);
 				SolidConduitFlow solidConduitFlow = Game.Instance.solidConduitFlow;
 				SolidConduitFlow.ConduitContents contents2 = solidConduitFlow.GetContents(num2);
-				string text12 = BUILDING.STATUSITEMS.CONVEYOR_CONTENTS.EMPTY;
+				string text13 = BUILDING.STATUSITEMS.CONVEYOR_CONTENTS.EMPTY;
 				if (contents2.pickupableHandle.IsValid())
 				{
 					Pickupable pickupable = solidConduitFlow.GetPickupable(contents2.pickupableHandle);
@@ -415,15 +395,15 @@ namespace Database
 						if (mass > 0f)
 						{
 							Element element2 = ElementLoader.FindElementByHash(component2.ElementID);
-							text12 = string.Format(BUILDING.STATUSITEMS.CONVEYOR_CONTENTS.CONTENTS, GameUtil.GetFormattedMass(mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), element2.name, GameUtil.GetFormattedTemperature(component2.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+							text13 = string.Format(BUILDING.STATUSITEMS.CONVEYOR_CONTENTS.CONTENTS, GameUtil.GetFormattedMass(mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), element2.name, GameUtil.GetFormattedTemperature(component2.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 							if (OverlayScreen.Instance != null && OverlayScreen.Instance.mode == OverlayModes.Disease.ID && component2.DiseaseIdx != 255)
 							{
-								text12 += string.Format(BUILDING.STATUSITEMS.CONVEYOR_CONTENTS.CONTENTS_WITH_DISEASE, GameUtil.GetFormattedDisease(component2.DiseaseIdx, component2.DiseaseCount, true));
+								text13 += string.Format(BUILDING.STATUSITEMS.CONVEYOR_CONTENTS.CONTENTS_WITH_DISEASE, GameUtil.GetFormattedDisease(component2.DiseaseIdx, component2.DiseaseCount, true));
 							}
 						}
 					}
 				}
-				str = str.Replace("{Contents}", text12);
+				str = str.Replace("{Contents}", text13);
 				return str;
 			};
 			this.FabricatorEmpty = this.CreateStatusItem("FabricatorEmpty", "BUILDING", "status_item_fabricator_empty", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
@@ -444,8 +424,8 @@ namespace Database
 			StatusItem noResearchSelected = this.NoResearchSelected;
 			noResearchSelected.resolveTooltipCallback = (Func<string, object, string>)Delegate.Combine(noResearchSelected.resolveTooltipCallback, new Func<string, object, string>(delegate(string str, object data)
 			{
-				string text13 = GameInputMapping.FindEntry(global::Action.ManageResearch).mKeyCode.ToString();
-				str = str.Replace("{RESEARCH_MENU_KEY}", text13);
+				string text14 = GameInputMapping.FindEntry(global::Action.ManageResearch).mKeyCode.ToString();
+				str = str.Replace("{RESEARCH_MENU_KEY}", text14);
 				return str;
 			}));
 			this.NoApplicableResearchSelected = this.CreateStatusItem("NoApplicableResearchSelected", "BUILDING", "status_item_no_research_selected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
@@ -455,8 +435,8 @@ namespace Database
 			StatusItem noApplicableAnalysisSelected = this.NoApplicableAnalysisSelected;
 			noApplicableAnalysisSelected.resolveTooltipCallback = (Func<string, object, string>)Delegate.Combine(noApplicableAnalysisSelected.resolveTooltipCallback, new Func<string, object, string>(delegate(string str, object data)
 			{
-				string text14 = GameInputMapping.FindEntry(global::Action.ManageStarmap).mKeyCode.ToString();
-				str = str.Replace("{STARMAP_MENU_KEY}", text14);
+				string text15 = GameInputMapping.FindEntry(global::Action.ManageStarmap).mKeyCode.ToString();
+				str = str.Replace("{STARMAP_MENU_KEY}", text15);
 				return str;
 			}));
 			this.NoResearchOrDestinationSelected = this.CreateStatusItem("NoResearchOrDestinationSelected", "BUILDING", "status_item_no_research_selected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
@@ -471,8 +451,8 @@ namespace Database
 			this.EmittingLight = this.CreateStatusItem("EmittingLight", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
 			this.EmittingLight.resolveStringCallback = delegate(string str, object data)
 			{
-				string text15 = GameInputMapping.FindEntry(global::Action.Overlay5).mKeyCode.ToString();
-				str = str.Replace("{LightGridOverlay}", text15);
+				string text16 = GameInputMapping.FindEntry(global::Action.Overlay5).mKeyCode.ToString();
+				str = str.Replace("{LightGridOverlay}", text16);
 				return str;
 			};
 			this.RationBoxContents = this.CreateStatusItem("RationBoxContents", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
@@ -504,8 +484,8 @@ namespace Database
 			this.EmittingElement.resolveStringCallback = delegate(string str, object data)
 			{
 				IElementEmitter elementEmitter = (IElementEmitter)data;
-				string text16 = ElementLoader.FindElementByHash(elementEmitter.Element).tag.ProperName();
-				str = str.Replace("{ElementType}", text16);
+				string text17 = ElementLoader.FindElementByHash(elementEmitter.Element).tag.ProperName();
+				str = str.Replace("{ElementType}", text17);
 				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(elementEmitter.AverageEmitRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				return str;
 			};
@@ -541,8 +521,8 @@ namespace Database
 			this.ElementConsumer.resolveStringCallback = delegate(string str, object data)
 			{
 				ElementConsumer elementConsumer = (ElementConsumer)data;
-				string text17 = ElementLoader.FindElementByHash(elementConsumer.elementToConsume).tag.ProperName();
-				str = str.Replace("{ElementTypes}", text17);
+				string text18 = ElementLoader.FindElementByHash(elementConsumer.elementToConsume).tag.ProperName();
+				str = str.Replace("{ElementTypes}", text18);
 				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(elementConsumer.AverageConsumeRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				return str;
 			};
@@ -636,10 +616,10 @@ namespace Database
 			this.Grave.resolveStringCallback = delegate(string str, object data)
 			{
 				Grave.StatesInstance statesInstance2 = (Grave.StatesInstance)data;
-				string text18 = str.Replace("{DeadDupe}", statesInstance2.master.graveName);
+				string text19 = str.Replace("{DeadDupe}", statesInstance2.master.graveName);
 				string[] strings = LocString.GetStrings(typeof(NAMEGEN.GRAVE.EPITAPHS));
 				int num4 = statesInstance2.master.epitaphIdx % strings.Length;
-				return text18.Replace("{Epitaph}", strings[num4]);
+				return text19.Replace("{Epitaph}", strings[num4]);
 			};
 			this.GraveEmpty = this.CreateStatusItem("GraveEmpty", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
 			this.CannotCoolFurther = this.CreateStatusItem("CannotCoolFurther", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
@@ -713,10 +693,11 @@ namespace Database
 			};
 			this.InvalidPortOverlap = this.CreateStatusItem("InvalidPortOverlap", "BUILDING", "status_item_exclamation", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
 			this.InvalidPortOverlap.AddNotification(null, null, null, 0f);
-			this.EmergencyPriority = this.CreateStatusItem("EmergencyPriority", BUILDING.STATUSITEMS.EMERGENCY_PRIORITY.NAME, BUILDING.STATUSITEMS.EMERGENCY_PRIORITY.TOOLTIP, "status_item_doubleexclamation", StatusItem.IconType.Custom, NotificationType.Bad, false, OverlayModes.None.ID, 63486);
+			this.EmergencyPriority = this.CreateStatusItem("EmergencyPriority", BUILDING.STATUSITEMS.TOP_PRIORITY_CHORE.NAME, BUILDING.STATUSITEMS.TOP_PRIORITY_CHORE.TOOLTIP, "status_item_doubleexclamation", StatusItem.IconType.Custom, NotificationType.Bad, false, OverlayModes.None.ID, 63486);
 			StatusItem emergencyPriority = this.EmergencyPriority;
-			string text = BUILDING.STATUSITEMS.EMERGENCY_PRIORITY.NOTIFICATION_NAME;
-			emergencyPriority.AddNotification(null, text, BUILDING.STATUSITEMS.EMERGENCY_PRIORITY.NOTIFICATION_TOOLTIP, 0f);
+			string text = BUILDING.STATUSITEMS.TOP_PRIORITY_CHORE.NOTIFICATION_NAME;
+			emergencyPriority.AddNotification(null, text, BUILDING.STATUSITEMS.TOP_PRIORITY_CHORE.NOTIFICATION_TOOLTIP, 0f);
+			this.SkillPointsAvailable = this.CreateStatusItem("SkillPointsAvailable", BUILDING.STATUSITEMS.SKILL_POINTS_AVAILABLE.NAME, BUILDING.STATUSITEMS.SKILL_POINTS_AVAILABLE.TOOLTIP, "status_item_jobs", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, 63486);
 		}
 
 		private static bool ShowInUtilityOverlay(HashedString mode, object data)
@@ -742,6 +723,11 @@ namespace Database
 			{
 				Tag prefabTag4 = transform.GetComponent<KPrefabID>().PrefabTag;
 				flag = OverlayModes.Logic.HighlightItemIDs.Contains(prefabTag4);
+			}
+			else if (mode == OverlayModes.SolidConveyor.ID)
+			{
+				Tag prefabTag5 = transform.GetComponent<KPrefabID>().PrefabTag;
+				flag = OverlayScreen.SolidConveyorIDs.Contains(prefabTag5);
 			}
 			return flag;
 		}
@@ -810,11 +796,11 @@ namespace Database
 
 		public StatusItem PendingUpgrade;
 
-		public StatusItem RequiresRolePerk;
+		public StatusItem RequiresSkillPerk;
 
-		public StatusItem DigRequiresRolePerk;
+		public StatusItem DigRequiresSkillPerk;
 
-		public StatusItem ColonyLacksRequiredRolePerk;
+		public StatusItem ColonyLacksRequiredSkillPerk;
 
 		public StatusItem PendingWork;
 
@@ -1059,5 +1045,7 @@ namespace Database
 		public StatusItem InvalidPortOverlap;
 
 		public StatusItem EmergencyPriority;
+
+		public StatusItem SkillPointsAvailable;
 	}
 }

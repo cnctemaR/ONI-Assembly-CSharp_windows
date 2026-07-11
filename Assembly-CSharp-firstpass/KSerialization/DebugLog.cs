@@ -18,17 +18,17 @@ namespace KSerialization
 				{
 					if (msg_level == DebugLog.Level.Error)
 					{
-						global::Debug.LogError(msg, null);
+						global::Debug.LogError(msg);
 					}
 				}
 				else
 				{
-					global::Debug.LogWarning(msg, null);
+					global::Debug.LogWarning(msg);
 				}
 			}
 			else
 			{
-				global::Debug.Log(msg, null);
+				global::Debug.Log(msg);
 			}
 		}
 

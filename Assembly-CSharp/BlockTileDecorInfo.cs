@@ -32,7 +32,7 @@ public class BlockTileDecorInfo : ScriptableObject
 						}
 						if (!flag)
 						{
-							Output.LogError(new object[]
+							DebugUtil.LogErrorArgs(new object[]
 							{
 								base.name,
 								"/",

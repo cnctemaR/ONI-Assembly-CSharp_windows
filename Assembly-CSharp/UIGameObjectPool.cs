@@ -69,7 +69,7 @@ public class UIGameObjectPool
 			{
 				element.transform.SetParent(this.disabledElementParent);
 			}
-			global::Debug.LogError(text, null);
+			global::Debug.LogError(text);
 			return;
 		}
 		if (this.disabledElementParent != null)

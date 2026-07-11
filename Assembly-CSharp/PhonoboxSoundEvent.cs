@@ -16,14 +16,14 @@ public class PhonoboxSoundEvent : SoundEvent
 		AudioDebug audioDebug = AudioDebug.Get();
 		if (audioDebug != null && audioDebug.debugSoundEvents)
 		{
-			global::Debug.Log(string.Concat(new object[] { behaviour.name, ", ", base.sound, ", ", base.frame, ", ", position }), null);
+			global::Debug.Log(string.Concat(new object[] { behaviour.name, ", ", base.sound, ", ", base.frame, ", ", position }));
 		}
 		try
 		{
 			LoopingSounds component = behaviour.GetComponent<LoopingSounds>();
 			if (component == null)
 			{
-				global::Debug.Log(behaviour.name + " is missing LoopingSounds component. ", null);
+				global::Debug.Log(behaviour.name + " is missing LoopingSounds component. ");
 			}
 			else if (!component.IsSoundPlaying(base.sound))
 			{
@@ -43,14 +43,14 @@ public class PhonoboxSoundEvent : SoundEvent
 				}
 				else
 				{
-					Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", base.sound, behaviour.name) });
+					DebugUtil.LogWarningArgs(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", base.sound, behaviour.name) });
 				}
 			}
 		}
 		catch (Exception ex)
 		{
 			string text = string.Format(("Error trying to trigger sound [{0}] in behaviour [{1}] [{2}]\n{3}" + base.sound == null) ? "null" : base.sound.ToString(), behaviour.GetType().ToString(), ex.Message, ex.StackTrace);
-			global::Debug.LogError(text, null);
+			global::Debug.LogError(text);
 			throw new ArgumentException(text, ex);
 		}
 	}

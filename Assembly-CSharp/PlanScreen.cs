@@ -142,7 +142,7 @@ public class PlanScreen : KIconToggleMenu
 			this.tagOrderMap = new Dictionary<Tag, int>();
 			if (global::TUNING.BUILDINGS.PLANORDER.Count > 12)
 			{
-				Output.LogWarning(new object[]
+				DebugUtil.LogWarningArgs(new object[]
 				{
 					"Insufficient keys to cover root plan menu",
 					"Max of 12 keys supported but TUNING.BUILDINGS.PLANORDER has " + global::TUNING.BUILDINGS.PLANORDER.Count
@@ -260,7 +260,7 @@ public class PlanScreen : KIconToggleMenu
 	{
 		if (button_go == null)
 		{
-			Output.LogWithObj(base.gameObject, new object[] { "Button gameObject is null" });
+			global::Debug.Log("Button gameObject is null", base.gameObject);
 			return;
 		}
 		if (button_go == this.selectedBuildingGameObject)
@@ -865,7 +865,7 @@ public class PlanScreen : KIconToggleMenu
 				break;
 			}
 		}
-		DebugUtil.DevAssert(buildingDef, new object[] { "def is null" });
+		DebugUtil.DevAssert(buildingDef, "def is null");
 		if (buildingDef)
 		{
 			if (buildingDef.isKAnimTile && buildingDef.isUtility)

@@ -51,7 +51,7 @@ public static class GarbageProfiler
 
 	private static void Dump()
 	{
-		global::Debug.Log("Writing snapshot...", null);
+		global::Debug.Log("Writing snapshot...");
 		MemorySnapshot memorySnapshot = new MemorySnapshot();
 		GarbageProfiler.ClearFileName();
 		MemorySnapshot.TypeData[] array = new MemorySnapshot.TypeData[memorySnapshot.types.Count];
@@ -119,12 +119,12 @@ public static class GarbageProfiler
 			}
 		}
 		GarbageProfiler.previousSnapshot = memorySnapshot;
-		global::Debug.Log("Done writing snapshot!", null);
+		global::Debug.Log("Done writing snapshot!");
 	}
 
 	public static void DebugDumpGarbageStats()
 	{
-		global::Debug.Log("Writing reference stats...", null);
+		global::Debug.Log("Writing reference stats...");
 		MemorySnapshot memorySnapshot = new MemorySnapshot();
 		GarbageProfiler.ClearFileName();
 		MemorySnapshot.TypeData[] array = new MemorySnapshot.TypeData[memorySnapshot.types.Count];
@@ -203,12 +203,12 @@ public static class GarbageProfiler
 		}
 		memorySnapshot.WriteTypeDetails(GarbageProfiler.previousSnapshot);
 		GarbageProfiler.previousSnapshot = memorySnapshot;
-		global::Debug.Log("Done writing reference stats!", null);
+		global::Debug.Log("Done writing reference stats!");
 	}
 
 	public static void DebugDumpRootItems()
 	{
-		global::Debug.Log("Writing root items...", null);
+		global::Debug.Log("Writing root items...");
 		Type[] array = new Type[]
 		{
 			typeof(string),
@@ -266,7 +266,7 @@ public static class GarbageProfiler
 												Type elementType = fieldType.GetElementType();
 												if (elementType.IsPointer || Helper.IsPOD(elementType) || Array.IndexOf<Type>(array, elementType) >= 0)
 												{
-													goto IL_03BE;
+													goto IL_03BD;
 												}
 											}
 											if (fieldType.IsGenericType)
@@ -296,7 +296,7 @@ public static class GarbageProfiler
 												}
 												if (flag)
 												{
-													goto IL_03BE;
+													goto IL_03BD;
 												}
 											}
 											object value = fieldInfo.GetValue(null);
@@ -318,14 +318,14 @@ public static class GarbageProfiler
 										}
 									}
 								}
-								IL_03BE:;
+								IL_03BD:;
 							}
 						}
 					}
 				}
 			}
 		}
-		global::Debug.Log("Done writing reference stats!", null);
+		global::Debug.Log("Done writing reference stats!");
 	}
 
 	private static MemorySnapshot previousSnapshot;

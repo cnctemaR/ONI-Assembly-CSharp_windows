@@ -54,7 +54,7 @@ public class SolidConduitSerializer : KMonoBehaviour, ISaveLoadableDetails
 					}
 					else
 					{
-						Output.LogWithObj(pickupable2.gameObject, new object[] { "Tried to save obj in solid conduit but obj has no SaveLoadRoot" });
+						Debug.Log("Tried to save obj in solid conduit but obj has no SaveLoadRoot", pickupable2.gameObject);
 					}
 				}
 			}
@@ -81,7 +81,7 @@ public class SolidConduitSerializer : KMonoBehaviour, ISaveLoadableDetails
 			}
 			else
 			{
-				Output.LogWarningWithObj(base.gameObject, new object[] { "Tried to deserialize " + tag.ToString() + " into storage but failed" });
+				Debug.Log("Tried to deserialize " + tag.ToString() + " into storage but failed", base.gameObject);
 			}
 		}
 	}

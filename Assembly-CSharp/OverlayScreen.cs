@@ -16,6 +16,7 @@ public class OverlayScreen : KMonoBehaviour
 
 	protected override void OnPrefabInit()
 	{
+		global::Debug.Assert(OverlayScreen.Instance == null);
 		OverlayScreen.Instance = this;
 		this.powerLabelParent = GameObject.Find("WorldSpaceCanvas").GetComponent<Canvas>();
 	}
@@ -63,6 +64,7 @@ public class OverlayScreen : KMonoBehaviour
 		this.RegisterMode(new OverlayModes.Suit(this.powerLabelParent, this.suitOverlayPrefab));
 		this.RegisterMode(new OverlayModes.Logic(this.logicModeUIPrefab));
 		this.RegisterMode(new OverlayModes.SolidConveyor());
+		this.RegisterMode(new OverlayModes.TileMode());
 	}
 
 	private void RegisterMode(OverlayModes.Mode mode)
@@ -128,7 +130,7 @@ public class OverlayScreen : KMonoBehaviour
 		{
 			return;
 		}
-		OverlayLegend.Instance.SetLegend(this.currentModeInfo.mode.ViewMode(), false);
+		OverlayLegend.Instance.SetLegend(this.currentModeInfo.mode, false);
 	}
 
 	public void Refresh()

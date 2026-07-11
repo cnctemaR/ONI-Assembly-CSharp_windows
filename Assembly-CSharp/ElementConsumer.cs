@@ -80,6 +80,7 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 
 	private void UpdateSimData()
 	{
+		global::Debug.Assert(Sim.IsValidHandle(this.simHandle));
 		int sampleCell = this.GetSampleCell();
 		float num = ((!this.consumptionEnabled || !this.hasAvailableCapacity) ? 0f : this.consumptionRate);
 		SimMessages.SetElementConsumerData(this.simHandle, sampleCell, num);
@@ -264,6 +265,7 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 
 	protected override void OnSimUnregister()
 	{
+		global::Debug.Assert(Sim.IsValidHandle(this.simHandle));
 		ElementConsumer.handleInstanceMap.Remove(this.simHandle);
 		ElementConsumer.StaticUnregister(this.simHandle);
 	}
@@ -281,6 +283,7 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 
 	private static void StaticUnregister(int sim_handle)
 	{
+		global::Debug.Assert(Sim.IsValidHandle(sim_handle));
 		SimMessages.RemoveElementConsumer(-1, sim_handle);
 	}
 

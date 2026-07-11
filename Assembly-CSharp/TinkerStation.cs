@@ -8,11 +8,45 @@ using UnityEngine;
 
 public class TinkerStation : Workable, IEffectDescriptor, ISim1000ms
 {
+	public AttributeConverter AttributeConverter
+	{
+		set
+		{
+			this.attributeConverter = value;
+		}
+	}
+
+	public float AttributeExperienceMultiplier
+	{
+		set
+		{
+			this.attributeExperienceMultiplier = value;
+		}
+	}
+
+	public string SkillExperienceSkillGroup
+	{
+		set
+		{
+			this.skillExperienceSkillGroup = value;
+		}
+	}
+
+	public float SkillExperienceMultiplier
+	{
+		set
+		{
+			this.skillExperienceMultiplier = value;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
+		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Technicals.Id;
+		this.skillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
 		if (this.useFilteredStorage)
 		{
 			ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.fetchChoreType);
@@ -43,7 +77,7 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim1000ms
 	private bool CorrectRolePrecondition(MinionIdentity worker)
 	{
 		MinionResume component = worker.GetComponent<MinionResume>();
-		return component != null && component.HasPerk(this.requiredRolePerk);
+		return component != null && component.HasPerk(this.requiredSkillPerk);
 	}
 
 	private void OnOperationalChanged(object data)
@@ -53,13 +87,6 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim1000ms
 		{
 			component.room.RetriggerBuildings();
 		}
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole("PowerTechnician", work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
-		resume.AddExperienceIfRole("Farmer", work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
-		resume.AddExperienceIfRole("SeniorFarmer", work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	protected override void OnStartWork(Worker worker)
@@ -102,7 +129,7 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim1000ms
 			if (this.chore == null)
 			{
 				this.chore = new WorkChore<TinkerStation>(Db.Get().ChoreTypes.GetByHash(this.choreType), this, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
-				this.chore.AddPrecondition(ChorePreconditions.instance.HasRolePerk, this.requiredRolePerk);
+				this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, this.requiredSkillPerk);
 				base.SetWorkTime(this.workTime);
 			}
 		}

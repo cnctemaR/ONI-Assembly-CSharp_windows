@@ -140,7 +140,7 @@ public class ResearchScreen : KModalScreen
 	{
 		if (!this.entryMap.ContainsKey(tech))
 		{
-			global::Debug.LogError("The Tech provided was not present in the dictionary", null);
+			global::Debug.LogError("The Tech provided was not present in the dictionary");
 			return Vector3.zero;
 		}
 		return this.entryMap[tech].transform.GetPosition();
@@ -154,7 +154,7 @@ public class ResearchScreen : KModalScreen
 		}
 		if (!this.entryMap.ContainsKey(tech))
 		{
-			global::Debug.LogError("The Tech provided was not present in the dictionary", null);
+			global::Debug.LogError("The Tech provided was not present in the dictionary");
 			return null;
 		}
 		return this.entryMap[tech];
@@ -281,9 +281,19 @@ public class ResearchScreen : KModalScreen
 		this.UpdatePointDisplay();
 	}
 
+	public override void OnKeyUp(KButtonEvent e)
+	{
+		if (!e.Consumed && !this.scrollRect.isDragging && e.TryConsume(global::Action.MouseRight))
+		{
+			ManagementMenu.Instance.CloseAll();
+			return;
+		}
+		base.OnKeyUp(e);
+	}
+
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (!e.Consumed && (e.TryConsume(global::Action.MouseRight) || e.TryConsume(global::Action.Escape)))
+		if (!e.Consumed && e.TryConsume(global::Action.Escape))
 		{
 			ManagementMenu.Instance.CloseAll();
 			return;
@@ -323,6 +333,9 @@ public class ResearchScreen : KModalScreen
 
 	[SerializeField]
 	private KButton filterClearButton;
+
+	[SerializeField]
+	private KScrollRect scrollRect;
 
 	private Tech currentResearch;
 

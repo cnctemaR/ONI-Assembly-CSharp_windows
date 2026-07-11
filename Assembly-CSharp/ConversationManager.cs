@@ -107,10 +107,13 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 
 	private bool DoTalking(Conversation setup, MinionIdentity new_speaker)
 	{
+		DebugUtil.Assert(setup != null, "setup was null");
+		DebugUtil.Assert(new_speaker != null, "new_speaker was null");
 		if (setup.lastTalked != null)
 		{
 			setup.lastTalked.Trigger(25860745, setup.lastTalked.gameObject);
 		}
+		DebugUtil.Assert(setup.conversationType != null, "setup.conversationType was null");
 		Conversation.Topic nextTopic = setup.conversationType.GetNextTopic(new_speaker, setup.lastTopic);
 		if (nextTopic == null || nextTopic.mode == Conversation.ModeType.End || nextTopic.mode == Conversation.ModeType.Segue)
 		{
@@ -121,15 +124,23 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 		{
 			return false;
 		}
+		ThoughtGraph.Instance smi = new_speaker.GetSMI<ThoughtGraph.Instance>();
+		if (smi == null)
+		{
+			DebugUtil.DevAssert(false, "thought_graph was null");
+			return false;
+		}
+		smi.AddThought(thoughtForTopic);
 		setup.lastTopic = nextTopic;
 		setup.lastTalked = new_speaker;
 		setup.lastTalkedTime = GameClock.Instance.GetTime();
+		DebugUtil.Assert(this.lastConvoTimeByMinion != null, "lastConvoTimeByMinion was null");
 		this.lastConvoTimeByMinion[setup.lastTalked] = GameClock.Instance.GetTime();
-		ThoughtGraph.Instance smi = setup.lastTalked.GetSMI<ThoughtGraph.Instance>();
-		smi.AddThought(thoughtForTopic);
 		Effects component = setup.lastTalked.GetComponent<Effects>();
+		DebugUtil.Assert(component != null, "effects was null");
 		component.Add("GoodConversation", true);
 		Conversation.Mode mode = Conversation.Topic.Modes[(int)nextTopic.mode];
+		DebugUtil.Assert(mode != null, "mode was null");
 		ConversationManager.StartedTalkingEvent startedTalkingEvent = new ConversationManager.StartedTalkingEvent
 		{
 			talker = new_speaker.gameObject,
@@ -137,8 +148,11 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 		};
 		foreach (MinionIdentity minionIdentity in setup.minions)
 		{
-			DebugUtil.DevAssert(minionIdentity, new object[] { "minion in setup.minions was null" });
-			if (minionIdentity)
+			if (!minionIdentity)
+			{
+				DebugUtil.DevAssert(false, "minion in setup.minions was null");
+			}
+			else
 			{
 				minionIdentity.Trigger(-594200555, startedTalkingEvent);
 			}
@@ -162,9 +176,9 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 
 	private Thought GetThoughtForTopic(Conversation setup, Conversation.Topic topic)
 	{
-		DebugUtil.DevAssert(!string.IsNullOrEmpty(topic.topic), new object[0]);
 		if (string.IsNullOrEmpty(topic.topic))
 		{
+			DebugUtil.DevAssert(false, "topic.topic was null");
 			return null;
 		}
 		Sprite sprite = setup.conversationType.GetSprite(topic.topic);
@@ -173,7 +187,6 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 			Conversation.Mode mode = Conversation.Topic.Modes[(int)topic.mode];
 			return new Thought("Topic_" + topic.topic, null, sprite, mode.icon, mode.voice, "bubble_chatter", mode.mouth, DUPLICANTS.THOUGHTS.CONVERSATION.TOOLTIP, true, TuningData<ConversationManager.Tuning>.Get().speakTime);
 		}
-		DebugUtil.DevAssert(sprite != null, new object[] { "Couldn't find a sprite for conversation topic:", topic.topic });
 		return null;
 	}
 

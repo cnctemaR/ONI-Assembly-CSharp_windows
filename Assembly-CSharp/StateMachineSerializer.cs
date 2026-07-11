@@ -19,13 +19,13 @@ public class StateMachineSerializer
 		}
 		catch (Exception ex)
 		{
-			Debug.Log("Stream size: " + memoryStream.Length, null);
-			Debug.Log("StateMachines: ", null);
+			Debug.Log("Stream size: " + memoryStream.Length);
+			Debug.Log("StateMachines: ");
 			foreach (StateMachine.Instance instance in state_machines)
 			{
-				Debug.Log(instance.ToString(), null);
+				Debug.Log(instance.ToString());
 			}
-			Debug.LogError(ex, null);
+			Debug.LogError(ex);
 		}
 		this.WriteDataSize(position, num, writer);
 	}
@@ -98,7 +98,7 @@ public class StateMachineSerializer
 				"!=",
 				StateMachineSerializer.serializerVersion,
 				"\nDiscarding data."
-			}), null);
+			}));
 			reader.SkipBytes(num2);
 			return false;
 		}

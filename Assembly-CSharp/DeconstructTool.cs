@@ -41,7 +41,7 @@ public class DeconstructTool : FilteredDragTool
 			GameObject gameObject = Grid.Objects[cell, i];
 			if (gameObject != null)
 			{
-				string filterLayerFromGameObject = base.GetFilterLayerFromGameObject(gameObject);
+				string filterLayerFromGameObject = this.GetFilterLayerFromGameObject(gameObject);
 				if (base.IsActiveLayer(filterLayerFromGameObject))
 				{
 					gameObject.Trigger(-790448070, null);

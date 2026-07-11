@@ -5,6 +5,7 @@ using Ionic.Zlib;
 using Klei;
 using Klei.AI;
 using Klei.CustomSettings;
+using KMod;
 using KSerialization;
 using Newtonsoft.Json;
 using ProcGenGame;
@@ -73,7 +74,7 @@ public class SaveLoader : KMonoBehaviour
 			Sim.Shutdown();
 			if (!string.IsNullOrEmpty(activeSaveFilePath))
 			{
-				Output.Log(new object[] { "Couldn't load [" + activeSaveFilePath + "]" });
+				DebugUtil.LogArgs(new object[] { "Couldn't load [" + activeSaveFilePath + "]" });
 			}
 			if (this.saveFileCorrupt)
 			{
@@ -82,7 +83,7 @@ public class SaveLoader : KMonoBehaviour
 			bool flag = WorldGen.CanLoad(WorldGen.SIM_SAVE_FILENAME);
 			if (!flag || !this.LoadFromWorldGen())
 			{
-				Output.LogWarning(new object[] { "Couldn't start new game with current world gen, moving file" });
+				DebugUtil.LogWarningArgs(new object[] { "Couldn't start new game with current world gen, moving file" });
 				if (flag)
 				{
 					KMonoBehaviour.isLoadingScene = true;
@@ -165,10 +166,14 @@ public class SaveLoader : KMonoBehaviour
 			saveFileRoot.streamed["GridSpawnable"] = Grid.Spawnable;
 			saveFileRoot.streamed["GridDamage"] = this.FloatToBytes(Grid.Damage);
 		}
-		ICollection<ModInfo> activeMods = Global.Instance.modManager.ActiveMods;
-		if (activeMods != null && activeMods.Count > 0)
+		Global.Instance.modManager.SendMetricsEvent();
+		saveFileRoot.active_mods = new List<Label>();
+		foreach (Mod mod in Global.Instance.modManager.mods)
 		{
-			saveFileRoot.requiredMods = new List<ModInfo>(activeMods);
+			if (mod.enabled)
+			{
+				saveFileRoot.active_mods.Add(mod.label);
+			}
 		}
 		string text = ((Game.worldID == null) ? CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id : Game.worldID);
 		saveFileRoot.worldID = text;
@@ -196,31 +201,32 @@ public class SaveLoader : KMonoBehaviour
 	private bool Load(IReader reader)
 	{
 		string text = reader.ReadKleiString();
+		global::Debug.Assert(text == "world");
 		Deserializer deserializer = new Deserializer(reader);
 		SaveFileRoot saveFileRoot = new SaveFileRoot();
 		deserializer.Deserialize(saveFileRoot);
-		List<ModError> list = null;
-		ModManager modManager = Global.Instance.modManager;
-		if (saveFileRoot.requiredMods != null && modManager != null)
+		if ((this.GameInfo.saveMajorVersion == 7 || this.GameInfo.saveMinorVersion < 8) && saveFileRoot.requiredMods != null)
 		{
+			saveFileRoot.active_mods = new List<Label>();
 			foreach (ModInfo modInfo in saveFileRoot.requiredMods)
 			{
-				if (!modManager.ActivateMod(modInfo))
+				saveFileRoot.active_mods.Add(new Label
 				{
-					if (list == null)
-					{
-						list = new List<ModError>();
-					}
-					list.Add(new ModError
-					{
-						errorType = ModError.ErrorType.LoadError,
-						modInfo = modInfo
-					});
-					Output.LogWarning(new object[] { string.Format("Failed to load {0} mod {1} - {2}", modInfo.source, modInfo.assetID, modInfo.assetPath) });
-				}
+					id = modInfo.assetID,
+					version = modInfo.lastModifiedTime,
+					distribution_platform = Label.DistributionPlatform.Steam,
+					title = modInfo.description
+				});
 			}
+			saveFileRoot.requiredMods.Clear();
 		}
-		Game.modLoadErrors = list;
+		global::KMod.Manager modManager = Global.Instance.modManager;
+		modManager.Load(Content.LayerableFiles);
+		if (!modManager.MatchFootprint(saveFileRoot.active_mods, Content.LayerableFiles | Content.Strings | Content.DLL | Content.Translation))
+		{
+			DebugUtil.LogWarningArgs(new object[] { "Mod footprint of save file doesn't match current mod configuration" });
+		}
+		Global.Instance.modManager.SendMetricsEvent();
 		string text2 = saveFileRoot.worldID;
 		if (text2 == null)
 		{
@@ -244,7 +250,7 @@ public class SaveLoader : KMonoBehaviour
 		FastReader fastReader = new FastReader(array);
 		if (Sim.Load(fastReader) != 0)
 		{
-			Output.LogWarning(new object[] { "\n--- Error loading save ---\nSimDLL found bad data\n" });
+			DebugUtil.LogWarningArgs(new object[] { "\n--- Error loading save ---\nSimDLL found bad data\n" });
 			Sim.Shutdown();
 			return false;
 		}
@@ -253,7 +259,7 @@ public class SaveLoader : KMonoBehaviour
 		if (!this.saveManager.Load(reader))
 		{
 			Sim.Shutdown();
-			Output.LogWarning(new object[] { "\n--- Error loading save ---\n" });
+			DebugUtil.LogWarningArgs(new object[] { "\n--- Error loading save ---\n" });
 			SaveLoader.SetActiveSaveFilePath(null);
 			return false;
 		}
@@ -278,9 +284,9 @@ public class SaveLoader : KMonoBehaviour
 	public static string GetSavePrefixAndCreateFolder()
 	{
 		string savePrefix = SaveLoader.GetSavePrefix();
-		if (!Directory.Exists(savePrefix))
+		if (!global::System.IO.Directory.Exists(savePrefix))
 		{
-			Directory.CreateDirectory(savePrefix);
+			global::System.IO.Directory.CreateDirectory(savePrefix);
 		}
 		return savePrefix;
 	}
@@ -288,9 +294,9 @@ public class SaveLoader : KMonoBehaviour
 	public static string GetAutoSavePrefix()
 	{
 		string text = Path.Combine(SaveLoader.GetSavePrefixAndCreateFolder(), "auto_save/");
-		if (!Directory.Exists(text))
+		if (!global::System.IO.Directory.Exists(text))
 		{
-			Directory.CreateDirectory(text);
+			global::System.IO.Directory.CreateDirectory(text);
 		}
 		return text;
 	}
@@ -325,11 +331,11 @@ public class SaveLoader : KMonoBehaviour
 		List<string> list = new List<string>();
 		try
 		{
-			if (!Directory.Exists(save_dir))
+			if (!global::System.IO.Directory.Exists(save_dir))
 			{
-				Directory.CreateDirectory(save_dir);
+				global::System.IO.Directory.CreateDirectory(save_dir);
 			}
-			string[] files = Directory.GetFiles(save_dir, "*.sav", SearchOption.AllDirectories);
+			string[] files = global::System.IO.Directory.GetFiles(save_dir, "*.sav", SearchOption.AllDirectories);
 			List<SaveLoader.SaveFileEntry> list2 = new List<SaveLoader.SaveFileEntry>();
 			foreach (string text in files)
 			{
@@ -345,7 +351,7 @@ public class SaveLoader : KMonoBehaviour
 				}
 				catch (Exception ex)
 				{
-					global::Debug.LogWarning("Problem reading file: " + text + "\n" + ex.ToString(), null);
+					global::Debug.LogWarning("Problem reading file: " + text + "\n" + ex.ToString());
 				}
 			}
 			list2.Sort((SaveLoader.SaveFileEntry x, SaveLoader.SaveFileEntry y) => y.timeStamp.CompareTo(x.timeStamp));
@@ -407,16 +413,38 @@ public class SaveLoader : KMonoBehaviour
 
 	public string Save(string filename, bool isAutoSave = false, bool updateSavePointer = true)
 	{
-		Manager.Clear();
+		global::KSerialization.Manager.Clear();
 		this.ReportSaveMetrics(isAutoSave);
 		if (isAutoSave && !GenericGameSettings.instance.keepAllAutosaves)
 		{
 			List<string> saveFiles = SaveLoader.GetSaveFiles(Path.GetDirectoryName(filename));
-			while (saveFiles.Count >= 10)
+			for (int i = saveFiles.Count - 1; i >= 9; i--)
 			{
-				int num = saveFiles.Count - 1;
-				File.Delete(saveFiles[num]);
-				saveFiles.RemoveAt(num);
+				string text = saveFiles[i];
+				try
+				{
+					global::Debug.Log("Deleting old autosave: " + text);
+					File.Delete(text);
+				}
+				catch (Exception ex)
+				{
+					global::Debug.LogWarning("Problem deleting autosave: " + text + "\n" + ex.ToString());
+				}
+				if (GenericGameSettings.instance.takeSaveScreenshots)
+				{
+					string text2 = Path.ChangeExtension(text, ".png");
+					try
+					{
+						if (File.Exists(text2))
+						{
+							File.Delete(text2);
+						}
+					}
+					catch (Exception ex2)
+					{
+						global::Debug.LogWarning("Problem deleting autosave screenshot: " + text2 + "\n" + ex2.ToString());
+					}
+				}
 			}
 		}
 		byte[] array = null;
@@ -446,34 +474,39 @@ public class SaveLoader : KMonoBehaviour
 				binaryWriter2.Write(header.headerVersion);
 				binaryWriter2.Write(header.compression);
 				binaryWriter2.Write(saveHeader);
-				Manager.SerializeDirectory(binaryWriter2);
+				global::KSerialization.Manager.SerializeDirectory(binaryWriter2);
 				binaryWriter2.Write(array);
 				Stats.Print();
 			}
 		}
-		catch (Exception ex)
+		catch (Exception ex3)
 		{
-			if (ex is UnauthorizedAccessException)
+			if (ex3 is UnauthorizedAccessException)
 			{
-				Output.Log(new object[] { "UnauthorizedAccessException for " + filename });
+				DebugUtil.LogArgs(new object[] { "UnauthorizedAccessException for " + filename });
 				ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
 				confirmDialogScreen.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "Unauthorized Access Exception"), null, null, null, null, null, null, null, null);
 				return SaveLoader.GetActiveSaveFilePath();
 			}
-			if (ex is IOException)
+			if (ex3 is IOException)
 			{
-				Output.Log(new object[] { "IOException (probably out of disk space) for " + filename });
+				DebugUtil.LogArgs(new object[] { "IOException (probably out of disk space) for " + filename });
 				ConfirmDialogScreen confirmDialogScreen2 = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
 				confirmDialogScreen2.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "IOException. You may not have enough free space!"), null, null, null, null, null, null, null, null);
 				return SaveLoader.GetActiveSaveFilePath();
 			}
-			throw ex;
+			throw ex3;
 		}
 		if (updateSavePointer)
 		{
 			SaveLoader.SetActiveSaveFilePath(filename);
 		}
-		Output.Log(new object[]
+		if (GenericGameSettings.instance.takeSaveScreenshots)
+		{
+			string text3 = Path.ChangeExtension(filename, ".png");
+			ScreenCapture.CaptureScreenshot(text3, 1);
+		}
+		DebugUtil.LogArgs(new object[]
 		{
 			"Saved to",
 			"[" + filename + "]"
@@ -499,14 +532,14 @@ public class SaveLoader : KMonoBehaviour
 		SaveLoader.SetActiveSaveFilePath(filename);
 		try
 		{
-			Manager.Clear();
+			global::KSerialization.Manager.Clear();
 			byte[] array = File.ReadAllBytes(filename);
 			IReader reader = new FastReader(array);
 			SaveGame.Header header;
 			this.GameInfo = SaveGame.GetHeader(reader, out header);
 			this.LoadedHeader = header;
-			Output.Log(new object[] { string.Format("Loading save file: {4}\n headerVersion:{0}, buildVersion:{1}, headerSize:{2}, IsCompressed:{3}", new object[] { header.headerVersion, header.buildVersion, header.headerSize, header.IsCompressed, filename }) });
-			Output.Log(new object[] { string.Format("GameInfo: numberOfCycles:{0}, numberOfDuplicants:{1}, baseName:{2}, isAutoSave:{3}, originalSaveName:{4}, saveVersion:{5}.{6}", new object[]
+			DebugUtil.LogArgs(new object[] { string.Format("Loading save file: {4}\n headerVersion:{0}, buildVersion:{1}, headerSize:{2}, IsCompressed:{3}", new object[] { header.headerVersion, header.buildVersion, header.headerSize, header.IsCompressed, filename }) });
+			DebugUtil.LogArgs(new object[] { string.Format("GameInfo: numberOfCycles:{0}, numberOfDuplicants:{1}, baseName:{2}, isAutoSave:{3}, originalSaveName:{4}, saveVersion:{5}.{6}", new object[]
 			{
 				this.GameInfo.numberOfCycles,
 				this.GameInfo.numberOfDuplicants,
@@ -520,7 +553,7 @@ public class SaveLoader : KMonoBehaviour
 			{
 				Helper.SetTypeInfoMask((SerializationTypeInfo)191);
 			}
-			Manager.DeserializeDirectory(reader);
+			global::KSerialization.Manager.DeserializeDirectory(reader);
 			if (header.IsCompressed)
 			{
 				int num = array.Length - reader.Position;
@@ -541,18 +574,18 @@ public class SaveLoader : KMonoBehaviour
 		}
 		catch (Exception ex)
 		{
-			Output.LogWarning(new object[] { "\n--- Error loading save ---\n" + ex.Message + "\n" + ex.StackTrace });
+			DebugUtil.LogWarningArgs(new object[] { "\n--- Error loading save ---\n" + ex.Message + "\n" + ex.StackTrace });
 			Sim.Shutdown();
 			SaveLoader.SetActiveSaveFilePath(null);
 			return false;
 		}
 		Stats.Print();
-		Output.Log(new object[]
+		DebugUtil.LogArgs(new object[]
 		{
 			"Loaded",
 			"[" + filename + "]"
 		});
-		Output.Log(new object[]
+		DebugUtil.LogArgs(new object[]
 		{
 			"World Seeds",
 			string.Concat(new object[]
@@ -574,7 +607,7 @@ public class SaveLoader : KMonoBehaviour
 
 	public bool LoadFromWorldGen()
 	{
-		Output.Log(new object[] { "Attempting to start a new game with current world gen" });
+		DebugUtil.LogArgs(new object[] { "Attempting to start a new game with current world gen" });
 		WorldGen.LoadSettings();
 		string text;
 		try
@@ -589,13 +622,13 @@ public class SaveLoader : KMonoBehaviour
 		SimSaveFileStructure simSaveFileStructure = this.worldGen.LoadWorldGenSim();
 		if (simSaveFileStructure == null)
 		{
-			global::Debug.LogError("Attempt failed", null);
+			global::Debug.LogError("Attempt failed");
 			return false;
 		}
 		this.worldDetailSave = simSaveFileStructure.worldDetail;
 		if (this.worldDetailSave == null)
 		{
-			global::Debug.LogError("Detail is null", null);
+			global::Debug.LogError("Detail is null");
 		}
 		GridSettings.Reset(simSaveFileStructure.WidthInCells, simSaveFileStructure.HeightInCells);
 		Sim.SIM_Initialize(new Sim.GAME_MessageHandler(Sim.DLL_MessageHandler));
@@ -606,18 +639,18 @@ public class SaveLoader : KMonoBehaviour
 			FastReader fastReader = new FastReader(simSaveFileStructure.Sim);
 			if (Sim.Load(fastReader) != 0)
 			{
-				Output.LogWarning(new object[] { "\n--- Error loading save ---\nSimDLL found bad data\n" });
+				DebugUtil.LogWarningArgs(new object[] { "\n--- Error loading save ---\nSimDLL found bad data\n" });
 				Sim.Shutdown();
 				return false;
 			}
 		}
 		catch (Exception ex)
 		{
-			global::Debug.LogWarning("--- Error loading Sim FROM NEW WORLDGEN ---" + ex.Message + "\n" + ex.StackTrace, null);
+			global::Debug.LogWarning("--- Error loading Sim FROM NEW WORLDGEN ---" + ex.Message + "\n" + ex.StackTrace);
 			Sim.Shutdown();
 			return false;
 		}
-		global::Debug.Log("Attempt success", null);
+		global::Debug.Log("Attempt success");
 		SceneInitializer.Instance.PostLoadPrefabs();
 		SceneInitializer.Instance.NewSaveGamePrefab();
 		this.worldGen.ReplayGenerate(new WorldGen.ResetFunction(this.Reset));
@@ -686,25 +719,21 @@ public class SaveLoader : KMonoBehaviour
 					}
 				}
 				MinionResume component2 = minionIdentity.gameObject.GetComponent<MinionResume>();
-				List<SaveLoader.MinionAttrFloatData> list3 = new List<SaveLoader.MinionAttrFloatData>(component2.ExperienceByRoleID.Count);
-				foreach (KeyValuePair<string, float> keyValuePair in component2.ExperienceByRoleID)
+				float totalExperienceGained = component2.TotalExperienceGained;
+				List<string> list3 = new List<string>();
+				foreach (KeyValuePair<string, bool> keyValuePair in component2.MasteryBySkillID)
 				{
-					float value2 = keyValuePair.Value;
-					if (!float.IsNaN(value2) && !float.IsInfinity(value2))
+					if (keyValuePair.Value)
 					{
-						list3.Add(new SaveLoader.MinionAttrFloatData
-						{
-							Name = keyValuePair.Key,
-							Value = keyValuePair.Value
-						});
+						list3.Add(keyValuePair.Key);
 					}
 				}
 				list.Add(new SaveLoader.MinionMetricsData
 				{
 					Name = minionIdentity.name,
 					Modifiers = list2,
-					CurrentRole = component2.CurrentRole,
-					RoleExperience = list3
+					TotalExperienceGained = totalExperienceGained,
+					Skills = list3
 				});
 			}
 		}
@@ -814,7 +843,7 @@ public class SaveLoader : KMonoBehaviour
 	private float GetFrameTime()
 	{
 		PerformanceMonitor component = Global.Instance.GetComponent<PerformanceMonitor>();
-		Output.Log(new object[]
+		DebugUtil.LogArgs(new object[]
 		{
 			"Average frame time:",
 			1f / component.FPS
@@ -917,9 +946,9 @@ public class SaveLoader : KMonoBehaviour
 
 		public List<SaveLoader.MinionAttrFloatData> Modifiers;
 
-		public string CurrentRole;
+		public float TotalExperienceGained;
 
-		public List<SaveLoader.MinionAttrFloatData> RoleExperience;
+		public List<string> Skills;
 	}
 
 	private struct SavedPrefabMetricsData

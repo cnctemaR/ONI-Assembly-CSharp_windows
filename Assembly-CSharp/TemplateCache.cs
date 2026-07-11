@@ -45,7 +45,7 @@ public static class TemplateCache
 			TemplateContainer templateContainer = YamlIO<TemplateContainer>.LoadFile(text + ".yaml", null);
 			if (templateContainer == null)
 			{
-				global::Debug.LogWarning("Missing template [" + text + ".yaml]", null);
+				global::Debug.LogWarning("Missing template [" + text + ".yaml]");
 			}
 			TemplateCache.templates[templatePath] = templateContainer;
 		}

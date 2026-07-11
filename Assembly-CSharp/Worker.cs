@@ -83,13 +83,15 @@ public class Worker : KMonoBehaviour
 					float attributeExperienceMultiplier = this.workable.GetAttributeExperienceMultiplier();
 					base.GetComponent<AttributeLevels>().AddExperience(workAttribute.Id, dt, attributeExperienceMultiplier);
 				}
+				string skillExperienceSkillGroup = this.workable.GetSkillExperienceSkillGroup();
+				if (this.resume != null && skillExperienceSkillGroup != null)
+				{
+					float skillExperienceMultiplier = this.workable.GetSkillExperienceMultiplier();
+					this.resume.AddExperienceWithAptitude(skillExperienceSkillGroup, dt, skillExperienceMultiplier);
+				}
 				float efficiencyMultiplier = this.workable.GetEfficiencyMultiplier(this);
 				float num = dt * efficiencyMultiplier * 1f;
 				float num2 = dt * 1f;
-				if (this.resume != null)
-				{
-					this.workable.AwardExperience(num, this.resume);
-				}
 				if (this.workable.WorkTick(this, num) && this.state == Worker.State.Working)
 				{
 					this.successFullyCompleted = true;
@@ -122,7 +124,7 @@ public class Worker : KMonoBehaviour
 
 	private void StartPlayingPostAnim()
 	{
-		if (this.workable != null)
+		if (this.workable != null && !this.workable.alwaysShowProgressBar)
 		{
 			this.workable.ShowProgressBar(false);
 		}
@@ -255,7 +257,7 @@ public class Worker : KMonoBehaviour
 				text,
 				".state should be idle but instead it's:",
 				this.state.ToString()
-			}), null);
+			}));
 		}
 		string name = this.workable.GetType().Name;
 		try
@@ -307,7 +309,7 @@ public class Worker : KMonoBehaviour
 			this.workable.StartWork(this);
 			if (this.workable == null)
 			{
-				global::Debug.LogWarning("Stopped work as soon as I started. This is usually a sign that a chore is open when it shouldn't be or that it's preconditions are wrong.", null);
+				global::Debug.LogWarning("Stopped work as soon as I started. This is usually a sign that a chore is open when it shouldn't be or that it's preconditions are wrong.");
 			}
 			else
 			{
@@ -324,7 +326,7 @@ public class Worker : KMonoBehaviour
 		catch (Exception ex)
 		{
 			string text2 = "Exception in: Worker.StartWork(" + name + ")";
-			Output.LogErrorWithObj(this, new object[] { text2 + "\n" + ex.ToString() });
+			DebugUtil.LogErrorArgs(this, new object[] { text2 + "\n" + ex.ToString() });
 			throw;
 		}
 	}

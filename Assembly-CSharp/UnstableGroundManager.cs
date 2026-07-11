@@ -49,7 +49,7 @@ public class UnstableGroundManager : KMonoBehaviour
 		Vector3 vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.TileMain);
 		if (float.IsNaN(temperature) || float.IsInfinity(temperature))
 		{
-			global::Debug.LogError("Tried to spawn unstable ground with NaN temperature", null);
+			global::Debug.LogError("Tried to spawn unstable ground with NaN temperature");
 			temperature = 293f;
 		}
 		KBatchedAnimController kbatchedAnimController = this.Spawn(vector, element, mass, temperature, disease_idx, disease_count);
@@ -70,7 +70,7 @@ public class UnstableGroundManager : KMonoBehaviour
 	{
 		if (!element.IsUnstable)
 		{
-			Output.LogError("Spawning falling ground with a stable element");
+			global::Debug.LogError("Spawning falling ground with a stable element");
 		}
 		KBatchedAnimController kbatchedAnimController = this.Spawn(pos, element, mass, temperature, disease_idx, disease_count);
 		GameComps.Gravities.Add(kbatchedAnimController.gameObject, Vector2.zero, null);
@@ -83,7 +83,7 @@ public class UnstableGroundManager : KMonoBehaviour
 	{
 		if (!element.IsUnstable)
 		{
-			Output.LogError("Spawning sand puff with a stable element");
+			global::Debug.LogError("Spawning sand puff with a stable element");
 		}
 		KBatchedAnimController kbatchedAnimController = this.Spawn(pos, element, mass, temperature, disease_idx, disease_count);
 		kbatchedAnimController.Play("sandPuff", KAnim.PlayMode.Once, 1f, 0f);
@@ -96,13 +96,13 @@ public class UnstableGroundManager : KMonoBehaviour
 		UnstableGroundManager.EffectRuntimeInfo effectRuntimeInfo;
 		if (!this.runtimeInfo.TryGetValue(element.id, out effectRuntimeInfo))
 		{
-			global::Debug.LogError(element.id.ToString() + " needs unstable ground info hookup!", null);
+			global::Debug.LogError(element.id.ToString() + " needs unstable ground info hookup!");
 		}
 		GameObject instance = effectRuntimeInfo.pool.GetInstance();
 		instance.transform.SetPosition(pos);
 		if (float.IsNaN(temperature) || float.IsInfinity(temperature))
 		{
-			global::Debug.LogError("Tried to spawn unstable ground with NaN temperature", null);
+			global::Debug.LogError("Tried to spawn unstable ground with NaN temperature");
 			temperature = 293f;
 		}
 		UnstableGround component = instance.GetComponent<UnstableGround>();

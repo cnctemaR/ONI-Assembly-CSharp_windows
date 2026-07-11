@@ -274,6 +274,7 @@ public class CodexScreen : KScreen
 
 	public void ChangeArticle(string id, bool playClickSound = false)
 	{
+		global::Debug.Assert(id != null);
 		if (playClickSound)
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));

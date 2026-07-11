@@ -24,7 +24,7 @@ public class SingleCheckboxSideScreen : SideScreenContent
 		base.SetTarget(target);
 		if (target == null)
 		{
-			global::Debug.LogError("The target object provided was null", null);
+			global::Debug.LogError("The target object provided was null");
 			return;
 		}
 		this.target = target.GetComponent<ICheckboxControl>();
@@ -34,7 +34,7 @@ public class SingleCheckboxSideScreen : SideScreenContent
 		}
 		if (this.target == null)
 		{
-			global::Debug.LogError("The target provided does not have an ICheckboxControl component", null);
+			global::Debug.LogError("The target provided does not have an ICheckboxControl component");
 			return;
 		}
 		this.label.text = this.target.CheckboxLabel;

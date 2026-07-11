@@ -309,7 +309,7 @@ namespace VoronoiTree
 		{
 			if (home == null)
 			{
-				global::Debug.LogError("FilterNeighbours home == null", null);
+				global::Debug.LogError("FilterNeighbours home == null");
 			}
 			HashSet<KeyValuePair<uint, int>> hashSet = new HashSet<KeyValuePair<uint, int>>();
 			HashSet<uint>.Enumerator niter = neighbours.GetEnumerator();
@@ -320,7 +320,7 @@ namespace VoronoiTree
 				{
 					if (site.poly == null)
 					{
-						global::Debug.LogError("FilterNeighbours neighbour.poly == null", null);
+						global::Debug.LogError("FilterNeighbours neighbour.poly == null");
 					}
 					int num = -1;
 					Polygon.Commonality commonality = home.poly.SharesEdge(site.poly, ref num);

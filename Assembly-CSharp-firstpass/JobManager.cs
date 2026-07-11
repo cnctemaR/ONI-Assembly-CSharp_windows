@@ -141,7 +141,7 @@ public class JobManager
 		{
 			foreach (Exception ex in this.exceptions)
 			{
-				global::Debug.LogError(ex, null);
+				global::Debug.LogError(ex);
 			}
 		}
 

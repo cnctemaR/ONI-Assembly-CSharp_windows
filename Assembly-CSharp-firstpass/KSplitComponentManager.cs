@@ -46,7 +46,7 @@ public abstract class KSplitComponentManager<Header, Payload> : KSplitCompactedV
 		{
 			if (!this.instanceHandleMap.ContainsKey(info.instance))
 			{
-				Output.LogError(new object[]
+				DebugUtil.LogErrorArgs(new object[]
 				{
 					"Tried to remove component of type",
 					typeof(Header).ToString(),

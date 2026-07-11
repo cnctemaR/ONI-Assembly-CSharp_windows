@@ -65,7 +65,7 @@ public class ElementSplitterComponents : KGameObjectComponentManager<ElementSpli
 		Pickupable component = data.primaryElement.GetComponent<Pickupable>();
 		Storage storage = component.storage;
 		PrimaryElement component2 = component.GetComponent<PrimaryElement>();
-		Pickupable component3 = component2.Element.substance.SpawnResource(component.transform.GetPosition(), amount, component2.Temperature, byte.MaxValue, 0, true, false).GetComponent<Pickupable>();
+		Pickupable component3 = component2.Element.substance.SpawnResource(component.transform.GetPosition(), amount, component2.Temperature, byte.MaxValue, 0, true, false, false).GetComponent<Pickupable>();
 		component.TotalAmount -= amount;
 		component3.Trigger(1335436905, component);
 		ElementSplitterComponents.CopyRenderSettings(component.GetComponent<KBatchedAnimController>(), component3.GetComponent<KBatchedAnimController>());

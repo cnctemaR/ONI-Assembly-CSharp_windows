@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 public class MinionGroupProber : KMonoBehaviour, IGroupProber
 {
@@ -18,19 +17,7 @@ public class MinionGroupProber : KMonoBehaviour, IGroupProber
 	{
 		base.OnPrefabInit();
 		MinionGroupProber.Instance = this;
-		this.proberCells = new int[Grid.CellCount];
-		for (int i = 0; i < this.proberCells.Length; i++)
-		{
-			this.proberCells[i] = -1;
-		}
-		this.pathGrids = new List<PathGrid>();
-		this.pendingPathGridRemovals = new List<int>();
-	}
-
-	public bool IsReachable(Workable workable)
-	{
-		int num = Grid.PosToCell(workable);
-		return this.IsReachable(num, workable.GetOffsets());
+		this.cells = new Dictionary<object, int>[Grid.CellCount];
 	}
 
 	public bool IsReachable(int cell)
@@ -39,198 +26,104 @@ public class MinionGroupProber : KMonoBehaviour, IGroupProber
 		{
 			return false;
 		}
-		this.LaunderCells();
-		int num = this.proberCells[cell];
-		if (num == -1)
+		Dictionary<object, int> dictionary = this.cells[cell];
+		if (dictionary == null)
 		{
 			return false;
 		}
-		if (num == -2)
+		bool flag = false;
+		object obj = this.access;
+		lock (obj)
 		{
-			return true;
+			this.pending_removals.Clear();
+			foreach (KeyValuePair<object, int> keyValuePair in dictionary)
+			{
+				object key = keyValuePair.Key;
+				int value = keyValuePair.Value;
+				KeyValuePair<int, int> keyValuePair2;
+				if (this.valid_serial_nos.TryGetValue(key, out keyValuePair2) && (value == keyValuePair2.Key || value == keyValuePair2.Value))
+				{
+					flag = true;
+					break;
+				}
+				this.pending_removals.Add(key);
+			}
+			foreach (object obj2 in this.pending_removals)
+			{
+				dictionary.Remove(obj2);
+				if (dictionary.Count == 0)
+				{
+					this.cells[cell] = null;
+				}
+			}
 		}
-		DebugUtil.Assert(num < this.pathGrids.Count);
-		return this.pathGrids[num].GetCost(cell) != -1;
+		return flag;
 	}
 
 	public bool IsReachable(int cell, CellOffset[] offsets)
 	{
-		if (Grid.IsValidCell(cell))
+		if (!Grid.IsValidCell(cell))
 		{
-			int num = offsets.Length;
-			for (int i = 0; i < num; i++)
+			return false;
+		}
+		foreach (CellOffset cellOffset in offsets)
+		{
+			if (this.IsReachable(Grid.OffsetCell(cell, cellOffset)))
 			{
-				int num2 = Grid.OffsetCell(cell, offsets[i]);
-				if (this.IsReachable(num2))
-				{
-					return true;
-				}
+				return true;
 			}
 		}
 		return false;
 	}
 
-	public void SetProberCell(int cell, PathGrid pathGrid)
+	public bool IsReachable(Workable workable)
 	{
-		int num = this.pathGrids.IndexOf(pathGrid);
-		if (num == -1)
+		return this.IsReachable(Grid.PosToCell(workable), workable.GetOffsets());
+	}
+
+	public void Occupy(object prober, int serial_no, List<int> cells)
+	{
+		object obj = this.access;
+		lock (obj)
 		{
-			object obj = this.pathGrids;
-			lock (obj)
+			foreach (int num in cells)
 			{
-				this.pathGrids.Add(pathGrid);
-				num = this.pathGrids.Count - 1;
-			}
-		}
-		this.proberCells[cell] = num;
-	}
-
-	public void ProxyProberCell(int cell, bool set)
-	{
-		this.proberCells[cell] = ((!set) ? (-1) : (-2));
-	}
-
-	public bool ReleasePathGrid(PathGrid pathGrid)
-	{
-		int num = this.pathGrids.IndexOf(pathGrid);
-		if (num != -1)
-		{
-			this.pendingPathGridRemovals.Add(num);
-			return true;
-		}
-		return false;
-	}
-
-	private void LaunderCells()
-	{
-		if (this.pendingPathGridRemovals.Count == 0)
-		{
-			return;
-		}
-		this.pendingPathGridRemovals.Sort();
-		for (int num = 0; num != this.proberCells.Length; num++)
-		{
-			for (int num2 = this.pendingPathGridRemovals.Count - 1; num2 != -1; num2--)
-			{
-				if (this.pendingPathGridRemovals[num2] <= this.proberCells[num])
+				if (this.cells[num] == null)
 				{
-					this.proberCells[num] -= num2 + 1;
-					break;
+					this.cells[num] = new Dictionary<object, int>();
 				}
+				this.cells[num][prober] = serial_no;
 			}
 		}
-		for (int num3 = this.pendingPathGridRemovals.Count - 1; num3 != -1; num3--)
-		{
-			this.pathGrids.RemoveAt(this.pendingPathGridRemovals[num3]);
-		}
-		this.pendingPathGridRemovals.Clear();
 	}
 
-	[Conditional("MINION_GROUP_PROBER_UNIT_TESTS")]
-	private void TestLaunderCells()
+	public void SetValidSerialNos(object prober, int previous_serial_no, int serial_no)
 	{
-		List<PathGrid> list = new List<PathGrid>();
-		for (int num = 0; num != 10; num++)
+		object obj = this.access;
+		lock (obj)
 		{
-			PathGrid pathGrid = new PathGrid(10, 10, false, new NavType[1]);
-			list.Add(pathGrid);
-			pathGrid.SetGroupProber(this);
-			pathGrid.BeginUpdate(0, false);
-			pathGrid.EndUpdate(true);
+			this.valid_serial_nos[prober] = new KeyValuePair<int, int>(previous_serial_no, serial_no);
 		}
-		PathFinder.Cell cell = new PathFinder.Cell
+	}
+
+	public bool ReleaseProber(object prober)
+	{
+		object obj = this.access;
+		bool flag;
+		lock (obj)
 		{
-			cost = 10,
-			queryId = 1
-		};
-		for (int num2 = 0; num2 != 100; num2++)
-		{
-			list[num2 % list.Count].SetCell(new PathFinder.PotentialPath
-			{
-				cell = num2
-			}, ref cell);
+			flag = this.valid_serial_nos.Remove(prober);
 		}
-		int num3 = 0;
-		for (int num4 = 0; num4 != 100; num4++)
-		{
-			if (this.IsReachable(num4))
-			{
-				num3++;
-			}
-		}
-		DebugUtil.Assert(num3 == 100);
-		this.ReleasePathGrid(list[5]);
-		DebugUtil.Assert(this.pendingPathGridRemovals.Count == 1);
-		list[5] = null;
-		num3 = 0;
-		for (int num5 = 0; num5 != 100; num5++)
-		{
-			if (this.IsReachable(num5))
-			{
-				num3++;
-			}
-		}
-		DebugUtil.Assert(this.pendingPathGridRemovals.Count == 0);
-		DebugUtil.Assert(num3 == 90);
-		this.ReleasePathGrid(list[9]);
-		DebugUtil.Assert(this.pendingPathGridRemovals.Count == 1);
-		list[9] = null;
-		num3 = 0;
-		for (int num6 = 0; num6 != 100; num6++)
-		{
-			if (this.IsReachable(num6))
-			{
-				num3++;
-			}
-		}
-		DebugUtil.Assert(this.pendingPathGridRemovals.Count == 0);
-		DebugUtil.Assert(num3 == 80);
-		this.ReleasePathGrid(list[0]);
-		DebugUtil.Assert(this.pendingPathGridRemovals.Count == 1);
-		list[0] = null;
-		num3 = 0;
-		for (int num7 = 0; num7 != 100; num7++)
-		{
-			if (this.IsReachable(num7))
-			{
-				num3++;
-			}
-		}
-		DebugUtil.Assert(this.pendingPathGridRemovals.Count == 0);
-		DebugUtil.Assert(num3 == 70);
-		this.ReleasePathGrid(list[1]);
-		this.ReleasePathGrid(list[3]);
-		this.ReleasePathGrid(list[7]);
-		DebugUtil.Assert(this.pendingPathGridRemovals.Count == 3);
-		list[1] = null;
-		list[3] = null;
-		list[7] = null;
-		num3 = 0;
-		for (int num8 = 0; num8 != 100; num8++)
-		{
-			if (this.IsReachable(num8))
-			{
-				num3++;
-			}
-		}
-		DebugUtil.Assert(this.pendingPathGridRemovals.Count == 0);
-		DebugUtil.Assert(num3 == 40);
-		foreach (PathGrid pathGrid2 in list)
-		{
-			this.ReleasePathGrid(pathGrid2);
-		}
-		this.LaunderCells();
+		return flag;
 	}
 
 	private static MinionGroupProber Instance;
 
-	private List<PathGrid> pathGrids;
+	private Dictionary<object, int>[] cells;
 
-	private List<int> pendingPathGridRemovals;
+	private Dictionary<object, KeyValuePair<int, int>> valid_serial_nos = new Dictionary<object, KeyValuePair<int, int>>();
 
-	private int[] proberCells;
+	private List<object> pending_removals = new List<object>();
 
-	private const int InvalidIndex = -1;
-
-	private const int ProxyIndex = -2;
+	private readonly object access = new object();
 }

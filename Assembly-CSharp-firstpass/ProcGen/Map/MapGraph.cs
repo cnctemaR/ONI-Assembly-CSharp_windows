@@ -51,7 +51,7 @@ namespace ProcGen.Map
 			}
 			if (!createOK)
 			{
-				global::Debug.LogWarning("Cant create Edge but no edge found", null);
+				global::Debug.LogWarning("Cant create Edge but no edge found");
 				return null;
 			}
 			Arc arc = base.baseGraph.AddArc(corner0.node, corner1.node, Directedness.Undirected);
@@ -70,7 +70,7 @@ namespace ProcGen.Map
 			}
 			if (!createOK)
 			{
-				global::Debug.LogWarning("Cant create Edge but no edge found", null);
+				global::Debug.LogWarning("Cant create Edge but no edge found");
 				return null;
 			}
 			Arc arc = base.baseGraph.AddArc(corner0.node, corner1.node, Directedness.Undirected);
@@ -88,7 +88,7 @@ namespace ProcGen.Map
 			{
 				if (!createOK)
 				{
-					global::Debug.LogWarning("Cant create Corner but no corner found", null);
+					global::Debug.LogWarning("Cant create Corner but no corner found");
 					return null;
 				}
 				corner = new Corner(base.baseGraph.AddNode());
@@ -118,7 +118,7 @@ namespace ProcGen.Map
 			{
 				if (!createOK)
 				{
-					global::Debug.LogWarning("Cant create Cell but no cell found", null);
+					global::Debug.LogWarning("Cant create Cell but no cell found");
 					return null;
 				}
 				cell = this.cellList.Find((Cell c) => c.node == node);
@@ -130,7 +130,7 @@ namespace ProcGen.Map
 				}
 				else
 				{
-					global::Debug.LogWarning("GetCell Same node [" + node.Id + "] differnt position!", null);
+					global::Debug.LogWarning("GetCell Same node [" + node.Id + "] differnt position!");
 				}
 			}
 			return cell;
@@ -166,17 +166,17 @@ namespace ProcGen.Map
 					{
 						if (this.cellList[i] == this.cellList[j])
 						{
-							global::Debug.LogError("Duplicate cell (class)", null);
+							global::Debug.LogError("Duplicate cell (class)");
 							return;
 						}
 						if (this.cellList[i].position == this.cellList[j].position)
 						{
-							global::Debug.LogError("Duplicate cell (position)", null);
+							global::Debug.LogError("Duplicate cell (position)");
 							return;
 						}
 						if (this.cellList[i].node == this.cellList[j].node)
 						{
-							global::Debug.LogError("Duplicate cell (node)", null);
+							global::Debug.LogError("Duplicate cell (node)");
 							return;
 						}
 					}
@@ -190,17 +190,17 @@ namespace ProcGen.Map
 					{
 						if (this.cornerList[k] == this.cornerList[l])
 						{
-							global::Debug.LogError("Duplicate corner (class)", null);
+							global::Debug.LogError("Duplicate corner (class)");
 							return;
 						}
 						if (this.cornerList[k].position == this.cornerList[l].position)
 						{
-							global::Debug.LogError("Duplicate corner (position)", null);
+							global::Debug.LogError("Duplicate corner (position)");
 							return;
 						}
 						if (this.cornerList[k].node == this.cornerList[l].node)
 						{
-							global::Debug.LogError("Duplicate corner (node)", null);
+							global::Debug.LogError("Duplicate corner (node)");
 							return;
 						}
 					}
@@ -216,7 +216,7 @@ namespace ProcGen.Map
 						Edge edge2 = this.edgeList[n];
 						if (edge == edge2)
 						{
-							global::Debug.LogError("Duplicate edge (class)", null);
+							global::Debug.LogError("Duplicate edge (class)");
 							return;
 						}
 						if (edge.arc == edge2.arc)
@@ -232,17 +232,17 @@ namespace ProcGen.Map
 								"] &  [",
 								edge.site1.node.Id,
 								"]"
-							}), null);
+							}));
 							return;
 						}
 						if (edge.corner0 == edge2.corner0 && edge.corner1 == edge2.corner1)
 						{
-							global::Debug.LogError("Duplicate edge (corner same order)", null);
+							global::Debug.LogError("Duplicate edge (corner same order)");
 							return;
 						}
 						if (edge.corner0 == edge2.corner1 && edge.corner1 == edge2.corner0)
 						{
-							global::Debug.LogError("Duplicate edge (corner different order)", null);
+							global::Debug.LogError("Duplicate edge (corner different order)");
 							return;
 						}
 						if (edge.site0 != edge.site1)
@@ -251,7 +251,7 @@ namespace ProcGen.Map
 							{
 								if (edge.site0 == edge2.site0 && edge.site1 == edge2.site1)
 								{
-									global::Debug.LogError("Duplicate edge (site same order)", null);
+									global::Debug.LogError("Duplicate edge (site same order)");
 									return;
 								}
 								if (edge.site0 == edge2.site1 && edge.site1 == edge2.site0)
@@ -279,28 +279,28 @@ namespace ProcGen.Map
 										" -- ",
 										edge2.site1.node.Id,
 										"] - (site differnt order)"
-									}), null);
+									}));
 									global::Debug.Log(string.Concat(new object[]
 									{
 										"CE 0: ",
 										edge.corner0.position,
 										" 1: ",
 										edge.corner1.position
-									}), null);
+									}));
 									global::Debug.Log(string.Concat(new object[]
 									{
 										"OE 0: ",
 										edge2.corner0.position,
 										" 1: ",
 										edge2.corner1.position
-									}), null);
+									}));
 									global::Debug.Log(string.Concat(new object[]
 									{
 										"Sites C 0: ",
 										edge.site0.position,
 										" 1: ",
 										edge.site1.position
-									}), null);
+									}));
 									DebugExtension.DebugCircle2d(edge.site0.position, Color.red, 1f, 15f, true, 4f);
 									DebugExtension.DebugCircle2d(edge.site1.position, Color.magenta, 2f, 15f, true, 4f);
 									global::Debug.Log(string.Concat(new object[]
@@ -309,7 +309,7 @@ namespace ProcGen.Map
 										edge2.site0.position,
 										" 1: ",
 										edge2.site1.position
-									}), null);
+									}));
 									DebugExtension.DebugCircle2d(edge2.site0.position, Color.green, 3f, 15f, true, 4f);
 									DebugExtension.DebugCircle2d(edge2.site1.position, Color.cyan, 4f, 15f, true, 4f);
 								}
@@ -317,12 +317,12 @@ namespace ProcGen.Map
 								{
 									if (edge.site0.node == edge2.site0.node && edge.site1.node == edge2.site1.node)
 									{
-										global::Debug.LogError("Duplicate edge (site node same order)", null);
+										global::Debug.LogError("Duplicate edge (site node same order)");
 										return;
 									}
 									if (edge.site1.node == edge2.site0.node && edge.site0.node == edge2.site1.node)
 									{
-										global::Debug.LogError("Duplicate edge (site node differnt order)", null);
+										global::Debug.LogError("Duplicate edge (site node differnt order)");
 										return;
 									}
 								}
@@ -344,7 +344,7 @@ namespace ProcGen.Map
 			{
 				string message = ex.Message;
 				string stackTrace = ex.StackTrace;
-				global::Debug.Log("Error deserialising " + message + "\n" + stackTrace, null);
+				global::Debug.Log("Error deserialising " + message + "\n" + stackTrace);
 			}
 		}
 

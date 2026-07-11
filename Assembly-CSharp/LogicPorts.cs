@@ -271,6 +271,33 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 		return Grid.OffsetCell(num, offset);
 	}
 
+	public bool TryGetPortAtCell(int cell, out LogicPorts.Port port, out bool isInput)
+	{
+		foreach (LogicPorts.Port port2 in this.inputPortInfo)
+		{
+			int actualCell = this.GetActualCell(port2.cellOffset);
+			if (actualCell == cell)
+			{
+				port = port2;
+				isInput = true;
+				return true;
+			}
+		}
+		foreach (LogicPorts.Port port3 in this.outputPortInfo)
+		{
+			int actualCell2 = this.GetActualCell(port3.cellOffset);
+			if (actualCell2 == cell)
+			{
+				port = port3;
+				isInput = false;
+				return true;
+			}
+		}
+		port = default(LogicPorts.Port);
+		isInput = false;
+		return false;
+	}
+
 	public void SendSignal(HashedString port_id, int new_value)
 	{
 		foreach (ILogicUIElement logicUIElement in this.outputPorts)
@@ -305,12 +332,21 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 
 	public int GetInputValue(HashedString port_id)
 	{
-		for (int i = 0; i < this.inputPortInfo.Length; i++)
+		int i = 0;
+		while (i < this.inputPortInfo.Length)
 		{
 			if (this.inputPortInfo[i].id == port_id)
 			{
 				LogicEventHandler logicEventHandler = this.inputPorts[i] as LogicEventHandler;
+				if (logicEventHandler == null)
+				{
+					return 0;
+				}
 				return logicEventHandler.Value;
+			}
+			else
+			{
+				i++;
 			}
 		}
 		return 0;
@@ -321,6 +357,10 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 		for (int i = 0; i < this.outputPorts.Count; i++)
 		{
 			LogicEventSender logicEventSender = this.outputPorts[i] as LogicEventSender;
+			if (logicEventSender == null)
+			{
+				return 0;
+			}
 			if (logicEventSender.ID == port_id)
 			{
 				return logicEventSender.GetLogicValue();
@@ -353,45 +393,33 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
-		List<Descriptor> list = null;
+		List<Descriptor> list = new List<Descriptor>();
 		LogicPorts component = def.BuildingComplete.GetComponent<LogicPorts>();
 		if (component != null)
 		{
 			if (component.inputPortInfo != null && component.inputPortInfo.Length > 0)
 			{
-				string text = string.Empty;
-				string text2 = ((component.inputPortInfo.Length != 1) ? "\n\t\t" : string.Empty);
+				Descriptor descriptor = new Descriptor(UI.LOGIC_PORTS.INPUT_PORTS, UI.LOGIC_PORTS.INPUT_PORTS_TOOLTIP, Descriptor.DescriptorType.Effect, false);
+				list.Add(descriptor);
 				foreach (LogicPorts.Port port in component.inputPortInfo)
 				{
-					text = text + text2 + port.description;
+					string text = string.Format(UI.LOGIC_PORTS.INPUT_PORT_TOOLTIP, port.activeDescription, port.inactiveDescription);
+					descriptor = new Descriptor(port.description, text, Descriptor.DescriptorType.Effect, false);
+					descriptor.IncreaseIndent();
+					list.Add(descriptor);
 				}
-				string empty = string.Empty;
-				string text3 = string.Format(UI.LOGIC_PORTS.INPUT_PORTS, text);
-				Descriptor descriptor = default(Descriptor);
-				descriptor.SetupDescriptor(text3, empty, Descriptor.DescriptorType.Effect);
-				if (list == null)
-				{
-					list = new List<Descriptor>();
-				}
-				list.Add(descriptor);
 			}
 			if (component.outputPortInfo != null && component.outputPortInfo.Length > 0)
 			{
-				string text4 = string.Empty;
-				string text5 = ((component.outputPortInfo.Length != 1) ? "\n\t\t" : string.Empty);
+				Descriptor descriptor2 = new Descriptor(UI.LOGIC_PORTS.OUTPUT_PORTS, UI.LOGIC_PORTS.INPUT_PORTS_TOOLTIP, Descriptor.DescriptorType.Effect, false);
+				list.Add(descriptor2);
 				foreach (LogicPorts.Port port2 in component.outputPortInfo)
 				{
-					text4 = text4 + text5 + port2.description;
+					string text2 = string.Format(UI.LOGIC_PORTS.OUTPUT_PORT_TOOLTIP, port2.activeDescription, port2.inactiveDescription);
+					descriptor2 = new Descriptor(port2.description, text2, Descriptor.DescriptorType.Effect, false);
+					descriptor2.IncreaseIndent();
+					list.Add(descriptor2);
 				}
-				string empty2 = string.Empty;
-				string text6 = string.Format(UI.LOGIC_PORTS.OUTPUT_PORTS, text4);
-				Descriptor descriptor2 = default(Descriptor);
-				descriptor2.SetupDescriptor(text6, empty2, Descriptor.DescriptorType.Effect);
-				if (list == null)
-				{
-					list = new List<Descriptor>();
-				}
-				list.Add(descriptor2);
 			}
 		}
 		return list;
@@ -439,30 +467,36 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 	[Serializable]
 	public struct Port
 	{
-		public Port(HashedString id, CellOffset cell_offset, LocString description, bool show_wire_missing_icon, LogicPortSpriteType sprite_type)
+		public Port(HashedString id, CellOffset cell_offset, string description, string activeDescription, string inactiveDescription, bool show_wire_missing_icon, LogicPortSpriteType sprite_type)
 		{
 			this.id = id;
 			this.cellOffset = cell_offset;
 			this.description = description;
+			this.activeDescription = activeDescription;
+			this.inactiveDescription = inactiveDescription;
 			this.requiresConnection = show_wire_missing_icon;
 			this.spriteType = sprite_type;
 		}
 
-		public static LogicPorts.Port InputPort(HashedString id, CellOffset cell_offset, LocString description, bool show_wire_missing_icon = false)
+		public static LogicPorts.Port InputPort(HashedString id, CellOffset cell_offset, string description, string activeDescription, string inactiveDescription, bool show_wire_missing_icon = false)
 		{
-			return new LogicPorts.Port(id, cell_offset, description, show_wire_missing_icon, LogicPortSpriteType.Input);
+			return new LogicPorts.Port(id, cell_offset, description, activeDescription, inactiveDescription, show_wire_missing_icon, LogicPortSpriteType.Input);
 		}
 
-		public static LogicPorts.Port OutputPort(HashedString id, CellOffset cell_offset, LocString description, bool show_wire_missing_icon = false)
+		public static LogicPorts.Port OutputPort(HashedString id, CellOffset cell_offset, string description, string activeDescription, string inactiveDescription, bool show_wire_missing_icon = false)
 		{
-			return new LogicPorts.Port(id, cell_offset, description, show_wire_missing_icon, LogicPortSpriteType.Output);
+			return new LogicPorts.Port(id, cell_offset, description, activeDescription, inactiveDescription, show_wire_missing_icon, LogicPortSpriteType.Output);
 		}
 
 		public HashedString id;
 
 		public CellOffset cellOffset;
 
-		public LocString description;
+		public string description;
+
+		public string activeDescription;
+
+		public string inactiveDescription;
 
 		public bool requiresConnection;
 

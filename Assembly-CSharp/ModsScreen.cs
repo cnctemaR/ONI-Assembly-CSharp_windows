@@ -1,183 +1,134 @@
 ﻿using System;
 using System.Collections.Generic;
-using Steamworks;
+using KMod;
 using STRINGS;
 using UnityEngine;
 
-public class ModsScreen : KModalScreen, SteamUGCService.IUGCEventHandler
+public class ModsScreen : KModalScreen
 {
-	private static void OpenDetailsPage(string key)
-	{
-		Application.OpenURL("https://steamcommunity.com/sharedfiles/filedetails/?id=" + key);
-	}
-
 	protected override void OnActivate()
 	{
 		base.OnActivate();
 		this.closeButtonTitle.onClick += this.Exit;
 		this.closeButton.onClick += this.Exit;
-		Global.Instance.modManager.UpdateSteamCodeModSubscriptions();
-		if (SteamUGCService.Instance != null)
+		global::System.Action action = delegate
 		{
-			SteamUGCService.Instance.ugcEventHandlers.Add(this);
+			Application.OpenURL("http://steamcommunity.com/workshop/browse/?appid=457140");
+		};
+		this.workshopButton.onClick += action;
+		Global.Instance.modManager.Sanitize();
+		this.mod_footprint.Clear();
+		foreach (Mod mod in Global.Instance.modManager.mods)
+		{
+			if (mod.enabled)
+			{
+				this.mod_footprint.Add(mod.label);
+				if ((byte)(mod.loaded_content & (Content.Strings | Content.DLL | Content.Translation)) == (byte)(mod.available_content & (Content.Strings | Content.DLL | Content.Translation)))
+				{
+					mod.Uncrash();
+				}
+			}
 		}
-		this.RebuildDisplay();
+		this.BuildDisplay();
+		Manager modManager = Global.Instance.modManager;
+		modManager.on_update = (Manager.OnUpdate)Delegate.Combine(modManager.on_update, new Manager.OnUpdate(this.RebuildDisplay));
 	}
 
 	protected override void OnDeactivate()
 	{
-		if (SteamUGCService.Instance != null)
-		{
-			SteamUGCService.Instance.ugcEventHandlers.Remove(this);
-		}
+		Manager modManager = Global.Instance.modManager;
+		modManager.on_update = (Manager.OnUpdate)Delegate.Remove(modManager.on_update, new Manager.OnUpdate(this.RebuildDisplay));
 		base.OnDeactivate();
 	}
 
 	private void Exit()
 	{
-		if (this.triggerGameRestart)
+		Global.Instance.modManager.Save();
+		if (!Global.Instance.modManager.MatchFootprint(this.mod_footprint, Content.Strings | Content.DLL | Content.Translation))
 		{
-			Global.Instance.modManager.Save();
-			ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, true).GetComponent<ConfirmDialogScreen>();
-			component.PopupConfirmDialog(UI.FRONTEND.MODS.REQUIRES_RESTART.ToString(), new global::System.Action(App.instance.Restart), new global::System.Action(this.Deactivate), null, null, null, null, null, null);
+			Global.Instance.modManager.RestartDialog(UI.FRONTEND.MOD_DIALOGS.MODS_SCREEN_CHANGES.TITLE, UI.FRONTEND.MOD_DIALOGS.MODS_SCREEN_CHANGES.MESSAGE, new global::System.Action(this.Deactivate), true, base.gameObject, null);
 		}
 		else
 		{
 			this.Deactivate();
 		}
+		Global.Instance.modManager.events.Clear();
 	}
 
-	private void RebuildDisplay()
+	private void RebuildDisplay(object change_source)
 	{
-		foreach (RectTransform rectTransform in this.displayedMods)
+		if (!object.ReferenceEquals(change_source, this))
 		{
-			if (rectTransform != null)
+			this.BuildDisplay();
+		}
+	}
+
+	private void BuildDisplay()
+	{
+		foreach (ModsScreen.DisplayedMod displayedMod in this.displayedMods)
+		{
+			if (displayedMod.rect_transform != null)
 			{
-				global::UnityEngine.Object.Destroy(rectTransform.gameObject);
+				global::UnityEngine.Object.Destroy(displayedMod.rect_transform.gameObject);
 			}
 		}
 		this.displayedMods.Clear();
 		ModsScreen.ModOrderingDragListener modOrderingDragListener = new ModsScreen.ModOrderingDragListener(this, this.displayedMods);
-		ICollection<ModInfo> installedMods = Global.Instance.modManager.GetInstalledMods();
-		using (IEnumerator<ModInfo> enumerator2 = installedMods.GetEnumerator())
+		for (int num = 0; num != Global.Instance.modManager.mods.Count; num++)
 		{
-			while (enumerator2.MoveNext())
+			Mod mod = Global.Instance.modManager.mods[num];
+			if (mod.status != Mod.Status.NotInstalled && mod.status != Mod.Status.UninstallPending && mod.HasAnyContent(Content.LayerableFiles | Content.Strings | Content.DLL))
 			{
-				ModInfo mod = enumerator2.Current;
-				ModsScreen $this = this;
-				bool flag = true;
-				string text = null;
-				string text2 = null;
-				bool flag2 = true;
-				ModInfo.Source source = mod.source;
-				if (source != ModInfo.Source.Steam)
+				HierarchyReferences hierarchyReferences = Util.KInstantiateUI<HierarchyReferences>(this.entryPrefab, this.entryParent.gameObject, false);
+				this.displayedMods.Add(new ModsScreen.DisplayedMod
 				{
-					if (source == ModInfo.Source.Local)
-					{
-						flag = true;
-						text = mod.description;
-						flag2 = false;
-					}
-				}
-				else
+					rect_transform = hierarchyReferences.gameObject.GetComponent<RectTransform>(),
+					mod_index = num
+				});
+				DragMe component = hierarchyReferences.GetComponent<DragMe>();
+				component.listener = modOrderingDragListener;
+				LocText reference = hierarchyReferences.GetReference<LocText>("Title");
+				reference.text = mod.title;
+				reference.GetComponent<ToolTip>().toolTip = mod.description;
+				if (mod.crash_count != 0)
 				{
-					flag = false;
-					if (SteamUGCService.Instance != null)
-					{
-						ulong num = ulong.Parse(mod.assetID);
-						PublishedFileId_t publishedFileId_t = new PublishedFileId_t(num);
-						SteamUGCService.Subscribed subscribed = SteamUGCService.Instance.GetSubscribed(publishedFileId_t);
-						if (subscribed != null)
-						{
-							flag = true;
-							text = subscribed.title;
-							text2 = subscribed.description;
-						}
-					}
+					reference.color = Color.Lerp(Color.white, Color.red, (float)mod.crash_count / 3f);
 				}
-				if (flag)
+				KButton reference2 = hierarchyReferences.GetReference<KButton>("ManageButton");
+				reference2.isInteractable = mod.is_managed;
+				if (reference2.isInteractable)
 				{
-					HierarchyReferences hierarchyReferences = Util.KInstantiateUI<HierarchyReferences>(this.entryPrefab, this.entryParent.gameObject, false);
-					this.displayedMods.Add(hierarchyReferences.gameObject.GetComponent<RectTransform>());
-					DragMe component = hierarchyReferences.GetComponent<DragMe>();
-					component.listener = modOrderingDragListener;
-					LocText reference = hierarchyReferences.GetReference<LocText>("Title");
-					reference.text = text;
-					if (text2 != null)
-					{
-						reference.GetComponent<ToolTip>().toolTip = text2;
-					}
-					KButton reference2 = hierarchyReferences.GetReference<KButton>("ManageButton");
-					reference2.isInteractable = flag2;
-					reference2.GetComponent<ToolTip>().toolTip = UI.FRONTEND.MODS.TOOLTIPS.MANAGE_STEAM_SUBSCRIPTION;
-					reference2.onClick += delegate
-					{
-						Application.OpenURL("https://steamcommunity.com/sharedfiles/filedetails/?id=" + mod.assetID);
-					};
-					MultiToggle toggle = hierarchyReferences.GetReference<MultiToggle>("EnabledToggle");
-					toggle.ChangeState((!mod.enabled) ? 0 : 1);
-					MultiToggle toggle2 = toggle;
-					toggle2.onClick = (global::System.Action)Delegate.Combine(toggle2.onClick, new global::System.Action(delegate
-					{
-						$this.OnToggleClicked(toggle, mod);
-					}));
-					toggle.GetComponent<ToolTip>().OnToolTip = () => (!Global.Instance.modManager.IsModEnabled(mod)) ? UI.FRONTEND.MODS.TOOLTIPS.DISABLED : UI.FRONTEND.MODS.TOOLTIPS.ENABLED;
-					hierarchyReferences.gameObject.SetActive(true);
+					reference2.GetComponent<ToolTip>().toolTip = mod.manage_tooltip;
+					reference2.onClick += mod.on_managed;
 				}
-				else
+				MultiToggle toggle = hierarchyReferences.GetReference<MultiToggle>("EnabledToggle");
+				toggle.ChangeState((!mod.enabled) ? 0 : 1);
+				MultiToggle toggle2 = toggle;
+				toggle2.onClick = (global::System.Action)Delegate.Combine(toggle2.onClick, new global::System.Action(delegate
 				{
-					Global.Instance.modManager.UninstallMod(mod);
-				}
+					this.OnToggleClicked(toggle, mod.label);
+				}));
+				toggle.GetComponent<ToolTip>().OnToolTip = () => (!mod.enabled) ? UI.FRONTEND.MODS.TOOLTIPS.DISABLED : UI.FRONTEND.MODS.TOOLTIPS.ENABLED;
+				hierarchyReferences.gameObject.SetActive(true);
 			}
 		}
-		foreach (RectTransform rectTransform2 in this.displayedMods)
+		foreach (ModsScreen.DisplayedMod displayedMod2 in this.displayedMods)
 		{
-			rectTransform2.gameObject.SetActive(true);
+			displayedMod2.rect_transform.gameObject.SetActive(true);
+		}
+		if (this.displayedMods.Count == 0)
+		{
 		}
 	}
 
-	public void OnUGCItemInstalled(ItemInstalled_t pCallback)
+	private void OnToggleClicked(MultiToggle toggle, Label mod)
 	{
-	}
-
-	public void OnUGCItemUpdated(RemoteStoragePublishedFileUpdated_t pCallback)
-	{
-	}
-
-	public void OnUGCItemUnsubscribed(RemoteStoragePublishedFileUnsubscribed_t pCallback)
-	{
-		string text = pCallback.m_nPublishedFileId.m_PublishedFileId.ToString();
-		ModInfo modInfo = new ModInfo(ModInfo.Source.Steam, ModInfo.ModType.Mod, text, "UNSUBSCRIBED", string.Empty, 0UL);
-		Global.Instance.modManager.UninstallMod(modInfo);
-	}
-
-	public void OnUGCItemDownloaded(DownloadItemResult_t pCallback)
-	{
-	}
-
-	public void OnUGCRefresh()
-	{
-		this.RebuildDisplay();
-	}
-
-	private void OnToggleClicked(MultiToggle toggle, ModInfo info)
-	{
-		ModManager modManager = Global.Instance.modManager;
-		bool flag = modManager.IsModEnabled(info);
+		Manager modManager = Global.Instance.modManager;
+		bool flag = modManager.IsModEnabled(mod);
 		flag = !flag;
 		toggle.ChangeState((!flag) ? 0 : 1);
-		if (flag)
-		{
-			modManager.EnableMod(info);
-		}
-		else
-		{
-			modManager.DisableMod(info);
-		}
-		this.triggerGameRestart = true;
+		modManager.EnableMod(mod, flag, this);
 	}
-
-	public const string TAG_MOD = "mod";
 
 	[SerializeField]
 	private KButton closeButtonTitle;
@@ -186,21 +137,31 @@ public class ModsScreen : KModalScreen, SteamUGCService.IUGCEventHandler
 	private KButton closeButton;
 
 	[SerializeField]
+	private KButton workshopButton;
+
+	[SerializeField]
 	private GameObject entryPrefab;
 
 	[SerializeField]
 	private Transform entryParent;
 
-	private List<RectTransform> displayedMods = new List<RectTransform>();
+	private List<ModsScreen.DisplayedMod> displayedMods = new List<ModsScreen.DisplayedMod>();
 
-	private bool triggerGameRestart;
+	private List<Label> mod_footprint = new List<Label>();
+
+	private struct DisplayedMod
+	{
+		public RectTransform rect_transform;
+
+		public int mod_index;
+	}
 
 	private class ModOrderingDragListener : DragMe.IDragListener
 	{
-		public ModOrderingDragListener(ModsScreen screen, List<RectTransform> displayed_items)
+		public ModOrderingDragListener(ModsScreen screen, List<ModsScreen.DisplayedMod> mods)
 		{
 			this.screen = screen;
-			this.rectTransforms = displayed_items;
+			this.mods = mods;
 		}
 
 		public void OnBeginDrag(Vector2 pos)
@@ -210,23 +171,22 @@ public class ModsScreen : KModalScreen, SteamUGCService.IUGCEventHandler
 
 		public void OnEndDrag(Vector2 pos)
 		{
-			if (this.startDragIdx >= 0)
+			if (this.startDragIdx < 0)
 			{
-				int dragIdx = this.GetDragIdx(pos);
-				if (dragIdx >= 0 && dragIdx != this.startDragIdx)
-				{
-					Global.Instance.modManager.Reorder(this.startDragIdx, dragIdx);
-					this.screen.RebuildDisplay();
-				}
+				return;
 			}
+			int dragIdx = this.GetDragIdx(pos);
+			int num = ((dragIdx < 0 || dragIdx == this.startDragIdx) ? Global.Instance.modManager.mods.Count : this.mods[dragIdx].mod_index);
+			Global.Instance.modManager.Reinsert(this.mods[this.startDragIdx].mod_index, num, this);
+			this.screen.BuildDisplay();
 		}
 
 		private int GetDragIdx(Vector2 pos)
 		{
 			int num = -1;
-			for (int i = 0; i < this.rectTransforms.Count; i++)
+			for (int i = 0; i < this.mods.Count; i++)
 			{
-				if (RectTransformUtility.RectangleContainsScreenPoint(this.rectTransforms[i], pos))
+				if (RectTransformUtility.RectangleContainsScreenPoint(this.mods[i].rect_transform, pos))
 				{
 					num = i;
 					break;
@@ -235,7 +195,7 @@ public class ModsScreen : KModalScreen, SteamUGCService.IUGCEventHandler
 			return num;
 		}
 
-		private List<RectTransform> rectTransforms;
+		private List<ModsScreen.DisplayedMod> mods;
 
 		private ModsScreen screen;
 

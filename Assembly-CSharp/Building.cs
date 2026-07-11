@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
+using Database;
 using STRINGS;
 using UnityEngine;
 
@@ -101,7 +102,7 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 	{
 		if (this.Def == null)
 		{
-			global::Debug.LogError("Missing building definition on object " + base.name, null);
+			global::Debug.LogError("Missing building definition on object " + base.name);
 		}
 		KSelectable component = base.GetComponent<KSelectable>();
 		if (component != null)
@@ -118,6 +119,12 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 		if (component3.HasTag(RoomConstraints.ConstraintTags.IndustrialMachinery))
 		{
 			this.scenePartitionerEntry = GameScenePartitioner.Instance.Add(base.name, base.gameObject, this.GetExtents(), GameScenePartitioner.Instance.industrialBuildings, null);
+		}
+		if (this.Def.Deprecated && base.GetComponent<KSelectable>() != null)
+		{
+			KSelectable component4 = base.GetComponent<KSelectable>();
+			Building.deprecatedBuildingStatusItem = new StatusItem("BUILDING_DEPRECATED", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
+			component4.AddStatusItem(Building.deprecatedBuildingStatusItem, null);
 		}
 	}
 
@@ -261,21 +268,21 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 		if (def.BuildingUnderConstruction != null)
 		{
 			Constructable component2 = def.BuildingUnderConstruction.GetComponent<Constructable>();
-			if (component2 != null && component2.requiredRolePerk != HashedString.Invalid)
+			if (component2 != null && component2.requiredSkillPerk != HashedString.Invalid)
 			{
 				StringBuilder stringBuilder = new StringBuilder();
-				List<RoleConfig> rolesWithPerk = Game.Instance.roleManager.GetRolesWithPerk(component2.requiredRolePerk);
-				for (int i = 0; i < rolesWithPerk.Count; i++)
+				List<Skill> skillsWithPerk = Db.Get().Skills.GetSkillsWithPerk(component2.requiredSkillPerk);
+				for (int i = 0; i < skillsWithPerk.Count; i++)
 				{
-					RoleConfig roleConfig = rolesWithPerk[i];
-					stringBuilder.Append(roleConfig.GetProperName());
-					if (i != rolesWithPerk.Count - 1)
+					Skill skill = skillsWithPerk[i];
+					stringBuilder.Append(skill.Name);
+					if (i != skillsWithPerk.Count - 1)
 					{
 						stringBuilder.Append(", ");
 					}
 				}
 				string text = stringBuilder.ToString();
-				list.Add(new Descriptor(UI.BUILD_REQUIRES_ROLE.Replace("{ROLE}", text), UI.BUILD_REQUIRES_ROLE_TOOLTIP.Replace("{ROLE}", text), Descriptor.DescriptorType.Requirement, false));
+				list.Add(new Descriptor(UI.BUILD_REQUIRES_SKILL.Replace("{Skill}", text), UI.BUILD_REQUIRES_SKILL_TOOLTIP.Replace("{Skill}", text), Descriptor.DescriptorType.Requirement, false));
 			}
 		}
 		return list;
@@ -356,6 +363,10 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 	private int[] placementCells;
 
 	private Extents extents;
+
+	private static StatusItem deprecatedBuildingStatusItem;
+
+	private Guid deprecatedBuildingHandle = Guid.Empty;
 
 	private HandleVector<int>.Handle scenePartitionerEntry;
 }

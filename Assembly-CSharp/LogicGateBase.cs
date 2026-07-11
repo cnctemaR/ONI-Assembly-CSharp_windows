@@ -38,6 +38,39 @@ public class LogicGateBase : KMonoBehaviour
 		}
 	}
 
+	public int PortCell(LogicGateBase.PortId port)
+	{
+		switch (port)
+		{
+		case LogicGateBase.PortId.InputOne:
+			return this.InputCellOne;
+		case LogicGateBase.PortId.InputTwo:
+			return this.InputCellTwo;
+		}
+		return this.OutputCell;
+	}
+
+	public bool TryGetPortAtCell(int cell, out LogicGateBase.PortId port)
+	{
+		if (cell == this.InputCellOne)
+		{
+			port = LogicGateBase.PortId.InputOne;
+			return true;
+		}
+		if (cell == this.InputCellTwo && this.RequiresTwoInputs)
+		{
+			port = LogicGateBase.PortId.InputTwo;
+			return true;
+		}
+		if (cell == this.OutputCell)
+		{
+			port = LogicGateBase.PortId.Output;
+			return true;
+		}
+		port = LogicGateBase.PortId.InputOne;
+		return false;
+	}
+
 	public bool RequiresTwoInputs
 	{
 		get
@@ -62,6 +95,13 @@ public class LogicGateBase : KMonoBehaviour
 		new CellOffset(0, 1),
 		new CellOffset(1, 0)
 	};
+
+	public enum PortId
+	{
+		InputOne,
+		InputTwo,
+		Output
+	}
 
 	public enum Op
 	{

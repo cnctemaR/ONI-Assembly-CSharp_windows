@@ -85,10 +85,6 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 		}
 	}
 
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-	}
-
 	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();

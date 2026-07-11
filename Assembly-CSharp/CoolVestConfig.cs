@@ -46,7 +46,7 @@ public class CoolVestConfig : IEquipmentConfig
 		}
 		else
 		{
-			global::Debug.LogWarning("Clothing item cannot be equipped to assignee because they lack ClothingWearer component", null);
+			global::Debug.LogWarning("Clothing item cannot be equipped to assignee because they lack ClothingWearer component");
 		}
 	}
 

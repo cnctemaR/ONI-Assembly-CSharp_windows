@@ -7,11 +7,13 @@ public class OffsetTracker
 	{
 		if (current_cell != this.previousCell)
 		{
+			global::Debug.Assert(!OffsetTracker.isExecutingWithinJob, "OffsetTracker.GetOffsets() is making a mutating call but is currently executing within a job");
 			this.UpdateCell(this.previousCell, current_cell);
 			this.previousCell = current_cell;
 		}
 		if (this.offsets == null)
 		{
+			global::Debug.Assert(!OffsetTracker.isExecutingWithinJob, "OffsetTracker.GetOffsets() is making a mutating call but is currently executing within a job");
 			this.UpdateOffsets(this.previousCell);
 		}
 		return this.offsets;

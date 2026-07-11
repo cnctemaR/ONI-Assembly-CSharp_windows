@@ -37,7 +37,7 @@ namespace Klei.CustomSettings
 					return this.levels[j];
 				}
 			}
-			global::Debug.LogError("Unable to find setting level for setting:" + base.id + " level: " + level_id, null);
+			global::Debug.LogError("Unable to find setting level for setting:" + base.id + " level: " + level_id);
 			return null;
 		}
 

@@ -263,7 +263,7 @@ public class StatusItemRenderer
 				{
 					text += statusItem.Id;
 				}
-				global::Debug.LogWarning(text, null);
+				global::Debug.LogWarning(text);
 				return;
 			}
 			vector = this.transform.GetPosition();

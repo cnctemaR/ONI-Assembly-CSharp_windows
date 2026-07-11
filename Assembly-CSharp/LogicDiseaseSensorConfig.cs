@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -14,14 +15,14 @@ public class LogicDiseaseSensorConfig : IBuildingConfig
 		float num4 = 30f;
 		float[] array = new float[]
 		{
-			BUILDINGS.CONSTRUCTION_MASS_KG.TIER0[0],
-			BUILDINGS.CONSTRUCTION_MASS_KG.TIER1[0]
+			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER0[0],
+			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER1[0]
 		};
 		string[] array2 = new string[] { "RefinedMetal", "Plastic" };
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, array, array2, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, array, array2, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
@@ -36,18 +37,18 @@ public class LogicDiseaseSensorConfig : IBuildingConfig
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicSwitchConfig.OUTPUT_PORT);
+		GeneratedBuildings.RegisterLogicPorts(go, LogicDiseaseSensorConfig.OUTPUT_PORT);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicSwitchConfig.OUTPUT_PORT);
+		GeneratedBuildings.RegisterLogicPorts(go, LogicDiseaseSensorConfig.OUTPUT_PORT);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
-		GeneratedBuildings.RegisterLogicPorts(go, LogicSwitchConfig.OUTPUT_PORT);
+		GeneratedBuildings.RegisterLogicPorts(go, LogicDiseaseSensorConfig.OUTPUT_PORT);
 		LogicDiseaseSensor logicDiseaseSensor = go.AddOrGet<LogicDiseaseSensor>();
 		logicDiseaseSensor.Threshold = 0f;
 		logicDiseaseSensor.ActivateAboveThreshold = true;
@@ -55,4 +56,6 @@ public class LogicDiseaseSensorConfig : IBuildingConfig
 	}
 
 	public static string ID = "LogicDiseaseSensor";
+
+	public static readonly LogicPorts.Port OUTPUT_PORT = LogicPorts.Port.OutputPort(LogicSwitch.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICDISEASESENSOR.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.LOGICDISEASESENSOR.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LOGICDISEASESENSOR.LOGIC_PORT_INACTIVE, false);
 }

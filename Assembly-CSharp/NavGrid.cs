@@ -394,7 +394,7 @@ public class NavGrid
 
 	public struct Transition
 	{
-		public Transition(NavType start, NavType end, int x, int y, NavAxis start_axis, bool is_looping, bool loop_has_pre, bool is_escape, int cost, string anim, CellOffset[] void_offsets, CellOffset[] solid_offsets, NavOffset[] valid_nav_offsets, NavOffset[] invalid_nav_offsets, bool impassable_not_void = false)
+		public Transition(NavType start, NavType end, int x, int y, NavAxis start_axis, bool is_looping, bool loop_has_pre, bool is_escape, int cost, string anim, CellOffset[] void_offsets, CellOffset[] solid_offsets, NavOffset[] valid_nav_offsets, NavOffset[] invalid_nav_offsets, bool critter = false)
 		{
 			DebugUtil.Assert(x <= 127 && x >= -128);
 			DebugUtil.Assert(y <= 127 && y >= -128);
@@ -439,7 +439,7 @@ public class NavGrid
 			this.solidOffsets = solid_offsets;
 			this.validNavOffsets = valid_nav_offsets;
 			this.invalidNavOffsets = invalid_nav_offsets;
-			this.impassableNotVoid = impassable_not_void;
+			this.isCritter = critter;
 		}
 
 		public int IsValid(int cell, NavTable nav_table)
@@ -453,17 +453,24 @@ public class NavGrid
 			{
 				return Grid.InvalidCell;
 			}
-			Grid.BuildFlags buildFlags = Grid.BuildFlags.FakeFloor | Grid.BuildFlags.Solid;
-			if (this.impassableNotVoid)
+			Grid.BuildFlags buildFlags = Grid.BuildFlags.Solid | Grid.BuildFlags.DupeImpassable;
+			if (this.isCritter)
 			{
-				buildFlags |= Grid.BuildFlags.Impassable;
+				buildFlags |= Grid.BuildFlags.CritterImpassable;
 			}
 			foreach (CellOffset cellOffset in this.voidOffsets)
 			{
 				int num2 = Grid.OffsetCell(cell, cellOffset.x, cellOffset.y);
 				if (Grid.IsValidCell(num2) && (byte)(Grid.BuildMasks[num2] & buildFlags) != 0)
 				{
-					return Grid.InvalidCell;
+					if (this.isCritter)
+					{
+						return Grid.InvalidCell;
+					}
+					if ((byte)(Grid.BuildMasks[num2] & Grid.BuildFlags.DupePassable) == 0)
+					{
+						return Grid.InvalidCell;
+					}
 				}
 			}
 			foreach (CellOffset cellOffset2 in this.solidOffsets)
@@ -661,6 +668,6 @@ public class NavGrid
 
 		public NavOffset[] invalidNavOffsets;
 
-		public bool impassableNotVoid;
+		public bool isCritter;
 	}
 }

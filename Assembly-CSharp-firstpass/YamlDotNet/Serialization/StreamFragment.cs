@@ -26,6 +26,7 @@ namespace YamlDotNet.Serialization
 				num += parser.Current.NestingIncrease;
 				if (num <= 0)
 				{
+					Debug.Assert(num == 0);
 					return;
 				}
 			}

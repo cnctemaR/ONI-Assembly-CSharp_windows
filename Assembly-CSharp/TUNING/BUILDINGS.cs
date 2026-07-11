@@ -35,12 +35,6 @@ namespace TUNING
 
 		public const float GEOREFINERY_FABRICATIONTIME = 120f;
 
-		public const float PHARMACY_FABRICATIONTIME = 40f;
-
-		public const float PHARMACY_GENERIC_INPUTKG = 100f;
-
-		public const float PHARMACY_GENERIC_SINGLE = 1f;
-
 		public const float MASS_BURN_RATE_HYDROGENGENERATOR = 0.1f;
 
 		public const float COOKER_FOOD_TEMPERATURE = 368.15f;
@@ -63,7 +57,7 @@ namespace TUNING
 			{
 				"Ladder", "FirePole", "LadderFast", "Tile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile", "MetalTile", "GlassTile",
 				"BunkerTile", "CarpetTile", "Door", "ManualPressureDoor", "PressureDoor", "BunkerDoor", "StorageLocker", "StorageLockerSmart", "LiquidReservoir", "GasReservoir",
-				"TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
+				"ObjectDispenser", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
 			}),
 			new PlanScreen.PlanInfo(new HashedString("Oxygen"), false, new List<string> { "MineralDeoxidizer", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer" }),
 			new PlanScreen.PlanInfo(new HashedString("Power"), false, new List<string>
@@ -74,6 +68,7 @@ namespace TUNING
 				"MethaneGenerator",
 				"PetroleumGenerator",
 				"SteamTurbine",
+				"SteamTurbine2",
 				"SolarPanel",
 				"Wire",
 				"WireBridge",
@@ -148,7 +143,7 @@ namespace TUNING
 				"Compost", "WaterPurifier", "FertilizerMaker", "AlgaeDistillery", "RockCrusher", "Kiln", "MetalRefinery", "GlassForge", "OilRefinery", "Polymerizer",
 				"OxyliteRefinery", "SupermaterialRefinery"
 			}),
-			new PlanScreen.PlanInfo(new HashedString("Medical"), false, new List<string> { "WashBasin", "WashSink", "HandSanitizer", "Apothecary", "MedicalCot", "MedicalBed", "MassageTable", "Grave" }),
+			new PlanScreen.PlanInfo(new HashedString("Medical"), false, new List<string> { "WashBasin", "WashSink", "HandSanitizer", "Apothecary", "DoctorStation", "AdvancedDoctorStation", "MedicalCot", "MassageTable", "Grave" }),
 			new PlanScreen.PlanInfo(new HashedString("Furniture"), false, new List<string>
 			{
 				BedConfig.ID,
@@ -178,10 +173,14 @@ namespace TUNING
 			}),
 			new PlanScreen.PlanInfo(new HashedString("Equipment"), false, new List<string>
 			{
-				"ResearchCenter", "AdvancedResearchCenter", "CosmicResearchCenter", "Telescope", "PowerControlStation", "FarmStation", "RanchStation", "ShearingStation", "RoleStation", "ClothingFabricator",
-				"SuitFabricator", "SuitMarker", "SuitLocker", "JetSuitMarker", "JetSuitLocker", "AstronautTrainingCenter"
+				"ResearchCenter", "AdvancedResearchCenter", "CosmicResearchCenter", "Telescope", "PowerControlStation", "FarmStation", "RanchStation", "ShearingStation", "RoleStation", "ResetSkillsStation",
+				"ClothingFabricator", "SuitFabricator", "SuitMarker", "SuitLocker", "JetSuitMarker", "JetSuitLocker", "AstronautTrainingCenter"
 			}),
-			new PlanScreen.PlanInfo(new HashedString("Utilities"), true, new List<string> { "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock", "ExteriorWall" }),
+			new PlanScreen.PlanInfo(new HashedString("Utilities"), true, new List<string>
+			{
+				"SpaceHeater", "LiquidHeater", "LiquidCooledFan", "IceCooledFan", "IceMachine", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock",
+				"ExteriorWall"
+			}),
 			new PlanScreen.PlanInfo(new HashedString("Automation"), true, new List<string>
 			{
 				"LogicWire",
@@ -205,7 +204,7 @@ namespace TUNING
 				"Checkpoint",
 				CometDetectorConfig.ID
 			}),
-			new PlanScreen.PlanInfo(new HashedString("Conveyance"), true, new List<string> { "SolidTransferArm", "SolidConduit", "SolidConduitInbox", "SolidConduitOutbox", "SolidConduitBridge", "AutoMiner" }),
+			new PlanScreen.PlanInfo(new HashedString("Conveyance"), true, new List<string> { "SolidTransferArm", "SolidConduit", "SolidConduitInbox", "SolidConduitOutbox", "SolidVent", "SolidLogicValve", "SolidConduitBridge", "AutoMiner" }),
 			new PlanScreen.PlanInfo(new HashedString("Rocketry"), true, new List<string>
 			{
 				"Gantry", "SteamEngine", "KeroseneEngine", "SolidBooster", "LiquidFuelTank", "OxidizerTank", "OxidizerTankLiquid", "CargoBay", "GasCargoBay", "LiquidCargoBay",
@@ -282,7 +281,7 @@ namespace TUNING
 			typeof(WaterCooler),
 			typeof(Edible),
 			typeof(PlantableSeed),
-			typeof(DiseaseTrigger),
+			typeof(SicknessTrigger),
 			typeof(MedicinalPill),
 			typeof(SeedProducer),
 			typeof(Geyser),
@@ -303,8 +302,21 @@ namespace TUNING
 			typeof(LogicPorts),
 			typeof(Capturable),
 			typeof(Trappable),
+			typeof(SpaceArtifact),
 			typeof(DecorProvider)
 		};
+
+		public class PHARMACY
+		{
+			public class FABRICATIONTIME
+			{
+				public const float TIER0 = 50f;
+
+				public const float TIER1 = 100f;
+
+				public const float TIER2 = 200f;
+			}
+		}
 
 		public class OVERPRESSURE
 		{

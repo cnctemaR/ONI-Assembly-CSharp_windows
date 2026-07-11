@@ -12,6 +12,7 @@ public class World : KMonoBehaviour
 
 	protected override void OnPrefabInit()
 	{
+		global::Debug.Assert(World.Instance == null);
 		World.Instance = this;
 		this.blockTileRenderer = base.GetComponent<BlockTileRenderer>();
 	}
@@ -72,7 +73,7 @@ public class World : KMonoBehaviour
 			int cellIdx2 = solid_substance_change_info[k].cellIdx;
 			if (!Grid.IsValidCell(cellIdx2))
 			{
-				global::Debug.LogError(cellIdx2, null);
+				global::Debug.LogError(cellIdx2);
 			}
 			else
 			{

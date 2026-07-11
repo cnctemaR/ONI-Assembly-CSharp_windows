@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -18,9 +17,9 @@ public class SteamTurbineConfig : IBuildingConfig
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, new float[]
 		{
-			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER5[0],
-			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0]
-		}, array, 1600f, BuildLocationRule.Anywhere, global::TUNING.BUILDINGS.DECOR.NONE, none, 1f);
+			BUILDINGS.CONSTRUCTION_MASS_KG.TIER5[0],
+			BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0]
+		}, array, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.NONE, none, 1f);
 		buildingDef.GeneratorWattageRating = 2000f;
 		buildingDef.GeneratorBaseCapacity = 2000f;
 		buildingDef.Entombable = true;
@@ -30,25 +29,26 @@ public class SteamTurbineConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PowerOutputOffset = new CellOffset(1, 0);
 		buildingDef.OverheatTemperature = 1273.15f;
+		buildingDef.Deprecated = true;
 		return buildingDef;
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, SteamTurbineConfig.INPUT_PORTS);
+		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		base.DoPostConfigureUnderConstruction(go);
-		GeneratedBuildings.RegisterLogicPorts(go, SteamTurbineConfig.INPUT_PORTS);
+		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
 		Constructable component = go.GetComponent<Constructable>();
-		component.requiredRolePerk = RoleManager.rolePerks.CanPowerTinker.id;
+		component.requiredSkillPerk = Db.Get().SkillPerks.CanPowerTinker.Id;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, SteamTurbineConfig.INPUT_PORTS);
+		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.SetDefaultStoredItemModifiers(SteamTurbineConfig.StoredItemModifiers);
 		Turbine turbine = go.AddOrGet<Turbine>();
@@ -84,6 +84,4 @@ public class SteamTurbineConfig : IBuildingConfig
 		Storage.StoredItemModifier.Insulate,
 		Storage.StoredItemModifier.Seal
 	};
-
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
 }

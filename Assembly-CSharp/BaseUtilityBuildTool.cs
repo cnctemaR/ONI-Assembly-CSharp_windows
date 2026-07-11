@@ -138,11 +138,13 @@ public class BaseUtilityBuildTool : DragTool
 	private bool CheckForConnection(int cell, string defName, string soundName, ref BuildingCellVisualizer outBcv, bool fireEvents = true)
 	{
 		outBcv = null;
+		DebugUtil.Assert(defName != null, "defName was null");
 		Building building = this.GetBuilding(cell);
 		if (!building)
 		{
 			return false;
 		}
+		DebugUtil.Assert(building.gameObject, "targetBuilding.gameObject was null");
 		int num = -1;
 		int num2 = -1;
 		int num3 = -1;
@@ -151,20 +153,23 @@ public class BaseUtilityBuildTool : DragTool
 			LogicPorts component = building.gameObject.GetComponent<LogicPorts>();
 			if (component != null)
 			{
-				foreach (ILogicUIElement logicUIElement in component.inputPorts)
+				if (component.inputPorts != null)
 				{
-					DebugUtil.DevAssert(logicUIElement != null, new object[] { "input port was null" });
-					if (logicUIElement.GetLogicUICell() == cell)
+					foreach (ILogicUIElement logicUIElement in component.inputPorts)
 					{
-						num = cell;
-						break;
+						DebugUtil.Assert(logicUIElement != null, "input port was null");
+						if (logicUIElement.GetLogicUICell() == cell)
+						{
+							num = cell;
+							break;
+						}
 					}
 				}
-				if (num == -1)
+				if (num == -1 && component.outputPorts != null)
 				{
 					foreach (ILogicUIElement logicUIElement2 in component.outputPorts)
 					{
-						DebugUtil.DevAssert(logicUIElement2 != null, new object[] { "output port was null" });
+						DebugUtil.Assert(logicUIElement2 != null, "output port was null");
 						if (logicUIElement2.GetLogicUICell() == cell)
 						{
 							num2 = cell;
@@ -190,9 +195,13 @@ public class BaseUtilityBuildTool : DragTool
 				num2 = building.GetUtilityOutputCell();
 			}
 			ElementFilter component2 = building.GetComponent<ElementFilter>();
-			if (component2 != null && component2.portInfo.conduitType == ConduitType.Liquid)
+			if (component2 != null)
 			{
-				num3 = component2.GetFilteredCell();
+				DebugUtil.Assert(component2.portInfo != null, "elementFilter.portInfo was null A");
+				if (component2.portInfo.conduitType == ConduitType.Liquid)
+				{
+					num3 = component2.GetFilteredCell();
+				}
 			}
 		}
 		else if (defName.Contains("Gas"))
@@ -206,9 +215,13 @@ public class BaseUtilityBuildTool : DragTool
 				num2 = building.GetUtilityOutputCell();
 			}
 			ElementFilter component3 = building.GetComponent<ElementFilter>();
-			if (component3 != null && component3.portInfo.conduitType == ConduitType.Gas)
+			if (component3 != null)
 			{
-				num3 = component3.GetFilteredCell();
+				DebugUtil.Assert(component3.portInfo != null, "elementFilter.portInfo was null B");
+				if (component3.portInfo.conduitType == ConduitType.Gas)
+				{
+					num3 = component3.GetFilteredCell();
+				}
 			}
 		}
 		if (cell == num || cell == num2 || cell == num3)
@@ -335,6 +348,7 @@ public class BaseUtilityBuildTool : DragTool
 
 	protected virtual void ApplyPathToConduitSystem()
 	{
+		DebugUtil.Assert(false, "I don't think this function ever runs");
 	}
 
 	private IEnumerator VisUpdater()

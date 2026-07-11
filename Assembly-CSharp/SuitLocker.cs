@@ -149,7 +149,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 		{
 			return;
 		}
-		base.GetComponent<Storage>().Drop(storedOutfit.gameObject);
+		base.GetComponent<Storage>().Drop(storedOutfit.gameObject, true);
 	}
 
 	public void EquipTo(Equipment equipment)
@@ -159,7 +159,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 		{
 			return;
 		}
-		base.GetComponent<Storage>().Drop(storedOutfit.gameObject);
+		base.GetComponent<Storage>().Drop(storedOutfit.gameObject, true);
 		storedOutfit.GetComponent<Equippable>().Assign(equipment.GetComponent<IAssignableIdentity>());
 		storedOutfit.GetComponent<EquippableWorkable>().CancelChore();
 		equipment.Equip(storedOutfit.GetComponent<Equippable>());

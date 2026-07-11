@@ -76,7 +76,7 @@ namespace ProcGenGame
 				}
 				else
 				{
-					global::Debug.LogError(string.Concat(new object[] { "Process::SetValuesFunction Index [", index, "] is not valid. cells.Length [", cells.Length, "]" }), null);
+					global::Debug.LogError(string.Concat(new object[] { "Process::SetValuesFunction Index [", index, "] is not valid. cells.Length [", cells.Length, "]" }));
 				}
 			};
 			float num = 265f;

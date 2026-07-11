@@ -99,6 +99,7 @@ public class BuildingComplete : Building
 		Components.BuildingCompletes.Add(this);
 		BuildingConfigManager.Instance.AddBuildingCompleteKComponents(base.gameObject, this.Def.Tag);
 		this.hasSpawnedKComponents = true;
+		this.scenePartitionerEntry = GameScenePartitioner.Instance.Add(base.name, this, base.GetExtents(), GameScenePartitioner.Instance.completeBuildings, null);
 		Attributes attributes = this.GetAttributes();
 		if (attributes != null)
 		{
@@ -148,6 +149,7 @@ public class BuildingComplete : Building
 		{
 			return;
 		}
+		GameScenePartitioner.Instance.Free(ref this.scenePartitionerEntry);
 		if (this.hasSpawnedKComponents)
 		{
 			BuildingConfigManager.Instance.DestroyBuildingCompleteKComponents(base.gameObject, this.Def.Tag);
@@ -213,4 +215,6 @@ public class BuildingComplete : Building
 	{
 		component.OnObjectReplaced(data);
 	});
+
+	private HandleVector<int>.Handle scenePartitionerEntry;
 }

@@ -182,12 +182,12 @@ public class SaveLoadRoot : KMonoBehaviour
 				}
 				catch (ArgumentException ex)
 				{
-					Output.LogErrorWithObj(gameObject, new object[] { "Failed to load SaveLoadRoot ", ex.Message, "\n", ex.StackTrace });
+					DebugUtil.LogErrorArgs(gameObject, new object[] { "Failed to load SaveLoadRoot ", ex.Message, "\n", ex.StackTrace });
 				}
 			}
 			else
 			{
-				Output.LogWithObj(gameObject, new object[] { "missing SaveLoadRoot" });
+				global::Debug.Log("missing SaveLoadRoot", gameObject);
 			}
 		}
 		else
@@ -239,7 +239,7 @@ public class SaveLoadRoot : KMonoBehaviour
 				}
 				else if (kmonoBehaviour == null && !(kmonoBehaviour is ISaveLoadableDetails))
 				{
-					Output.LogError(new object[] { "Component", text, "is not ISaveLoadable" });
+					DebugUtil.LogErrorArgs(new object[] { "Component", text, "is not ISaveLoadable" });
 					reader.SkipBytes(num2);
 				}
 				else
@@ -257,7 +257,7 @@ public class SaveLoadRoot : KMonoBehaviour
 					}
 					if (reader.Position != position + num2)
 					{
-						Output.LogWarning(new object[]
+						DebugUtil.LogWarningArgs(new object[]
 						{
 							"Expected to be at offset",
 							position + num2,

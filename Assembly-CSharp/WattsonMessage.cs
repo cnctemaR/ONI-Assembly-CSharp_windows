@@ -61,7 +61,7 @@ public class WattsonMessage : KScreen
 
 	protected override void OnActivate()
 	{
-		global::Debug.Log("WattsonMessage OnActivate", null);
+		global::Debug.Log("WattsonMessage OnActivate");
 		base.OnActivate();
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().NewBaseSetupSnapshot, STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().IntroNIS);
@@ -99,7 +99,7 @@ public class WattsonMessage : KScreen
 		}
 		else
 		{
-			global::Debug.LogWarning("Failed to spawn telepad - does the starting base template lack a 'Headquarters' ?", null);
+			global::Debug.LogWarning("Failed to spawn telepad - does the starting base template lack a 'Headquarters' ?");
 		}
 		this.scheduleHandles.Add(UIScheduler.Instance.Schedule("GoHome", 0.1f, delegate(object data)
 		{

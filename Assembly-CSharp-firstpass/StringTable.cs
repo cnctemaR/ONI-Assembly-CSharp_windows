@@ -44,7 +44,7 @@ public class StringTable
 				this.KeyNames[keyValuePair.Key],
 				".",
 				keyValuePair.Value.String
-			}), null);
+			}));
 		}
 		string text = parent_path;
 		if (text != string.Empty)

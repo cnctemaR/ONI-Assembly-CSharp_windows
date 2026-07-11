@@ -13,11 +13,14 @@ public class KObjectManager : MonoBehaviour
 
 	private void Awake()
 	{
+		global::Debug.Assert(KObjectManager.Instance == null);
 		KObjectManager.Instance = this;
 	}
 
 	private void OnDestroy()
 	{
+		global::Debug.Assert(KObjectManager.Instance != null);
+		global::Debug.Assert(KObjectManager.Instance == this);
 		this.Cleanup();
 		KObjectManager.Instance = null;
 	}

@@ -34,7 +34,7 @@ namespace KSerialization
 			uint num = reader.ReadUInt32();
 			if ((uint)expected != num)
 			{
-				Output.LogError(string.Format("Expected Tag {0}(0x{1:X}) but got 0x{2:X} instead", expected.ToString(), (uint)expected, num));
+				global::Debug.LogError(string.Format("Expected Tag {0}(0x{1:X}) but got 0x{2:X} instead", expected.ToString(), (uint)expected, num));
 			}
 		}
 

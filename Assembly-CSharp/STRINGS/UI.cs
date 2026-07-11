@@ -56,7 +56,7 @@ namespace STRINGS
 			}
 			catch
 			{
-				Debug.Log("STRIP LINK FORMATTING FAILED ON: " + text, null);
+				Debug.Log("STRIP LINK FORMATTING FAILED ON: " + text);
 				text2 = text;
 			}
 			return text2;
@@ -105,6 +105,8 @@ namespace STRINGS
 		public static LocString SCHEDULE = "SCHEDULE";
 
 		public static LocString REPORT = "REPORTS";
+
+		public static LocString SKILLS = "SKILLS";
 
 		public static LocString OVERLAYSTITLE = "OVERLAYS";
 
@@ -166,9 +168,9 @@ namespace STRINGS
 
 		public static LocString JOBSCREEN_DEFAULT = "New Duplicants";
 
-		public static LocString BUILD_REQUIRES_ROLE = "{ROLE}";
+		public static LocString BUILD_REQUIRES_SKILL = "Skill: {Skill}";
 
-		public static LocString BUILD_REQUIRES_ROLE_TOOLTIP = "Duplicants must be trained in the {ROLE} job to construct this building";
+		public static LocString BUILD_REQUIRES_SKILL_TOOLTIP = "Duplicants must have the {Skill} Skill to construct this building";
 
 		public static LocString VITALSSCREEN_NAME = "Name";
 
@@ -176,7 +178,7 @@ namespace STRINGS
 
 		public static LocString VITALSSCREEN_HEALTH = "Health";
 
-		public static LocString VITALSSCREEN_IMMUNITY = "Immune System";
+		public static LocString VITALSSCREEN_SICKNESS = "Disease";
 
 		public static LocString VITALSSCREEN_CALORIES = "Fullness";
 
@@ -798,9 +800,33 @@ namespace STRINGS
 						}
 					}
 
+					public class CAREPACKAGES
+					{
+						public static LocString NAME = "Printer Pod Deliveries";
+
+						public static LocString TOOLTIP = "Affects what can be printed from the Printer Pod";
+
+						public static class LEVELS
+						{
+							public static class NORMAL
+							{
+								public static LocString NAME = "Normal";
+
+								public static LocString TOOLTIP = "Click to restrict printer pod deliveries to Duplicants only";
+							}
+
+							public static class DUPLICANTS_ONLY
+							{
+								public static LocString NAME = "Duplicants Only";
+
+								public static LocString TOOLTIP = "Click to enable all care packages";
+							}
+						}
+					}
+
 					public class IMMUNESYSTEM
 					{
-						public static LocString NAME = "Immune Systems";
+						public static LocString NAME = "Germ Resistance";
 
 						public static LocString TOOLTIP = "Affects how resistant Duplicants are to disease";
 
@@ -812,41 +838,41 @@ namespace STRINGS
 
 								public static LocString TOOLTIP = "Duplicants are exceptionally vulnerable to infection";
 
-								public static LocString ATTRIBUTE_MODIFIER_NAME = "Vulnerable Immune System";
+								public static LocString ATTRIBUTE_MODIFIER_NAME = "Very Low Germ Resistance";
 							}
 
 							public static class WEAK
 							{
 								public static LocString NAME = "Weak";
 
-								public static LocString TOOLTIP = "Duplicants have reduced immune recovery";
+								public static LocString TOOLTIP = "Duplicants have decreased germ resistance";
 
-								public static LocString ATTRIBUTE_MODIFIER_NAME = "Weak Immune System";
+								public static LocString ATTRIBUTE_MODIFIER_NAME = "Low Germ Resistance";
 							}
 
 							public static class DEFAULT
 							{
 								public static LocString NAME = "Regular";
 
-								public static LocString TOOLTIP = "Duplicants regain immunity normally";
+								public static LocString TOOLTIP = "Duplicants have normal germ resistance";
 							}
 
 							public static class STRONG
 							{
 								public static LocString NAME = "Strong";
 
-								public static LocString TOOLTIP = "Duplicants have increased immune recovery";
+								public static LocString TOOLTIP = "Duplicants have increased germ resistance";
 
-								public static LocString ATTRIBUTE_MODIFIER_NAME = "Strong Immune System";
+								public static LocString ATTRIBUTE_MODIFIER_NAME = "High Germ Resistence";
 							}
 
 							public static class INVINCIBLE
 							{
-								public static LocString NAME = "None";
+								public static LocString NAME = "Perfect";
 
 								public static LocString TOOLTIP = "Duplicants will never catch a germ-based disease";
 
-								public static LocString ATTRIBUTE_MODIFIER_NAME = "Impervious Immune System";
+								public static LocString ATTRIBUTE_MODIFIER_NAME = "Total Germ Resistence";
 							}
 						}
 					}
@@ -957,9 +983,9 @@ namespace STRINGS
 
 					public class WORLD_CHOICE
 					{
-						public static LocString NAME = "World(DEBUG)";
+						public static LocString NAME = "World";
 
-						public static LocString TOOLTIP = "(DEBUG FEATURE) Select your starting world.";
+						public static LocString TOOLTIP = "New worlds added by mods can be selected here";
 					}
 
 					public class STRESS
@@ -1108,11 +1134,11 @@ namespace STRINGS
 
 			public class PATCHNOTESSCREEN
 			{
-				public static LocString TITLE = "QUALITY OF LIFE UPGRADE MK II";
+				public static LocString TITLE = "QUALITY OF LIFE UPGRADE MK III";
 
-				public static LocString BODY = "<b>Welcome to the Quality of Life Upgrade Mk II!!</b>\n\n{0}";
+				public static LocString BODY = "<b>Welcome to the Quality of Life Upgrade Mk III!!</b>\n\n{0}";
 
-				public static LocString PATCHNOTES = "<b>Update Features:</b>\n\n• New UI tools for displaying and managing Duplicant priorities\n• New artifacts can be retrieved from Space expeditions\n• Printing Pod can now print objects other than Duplicants\n• Many, many bug fixes, optimizations, polish passes, updated animations and more!\n\nPlease view the full patch notes for further details!";
+				public static LocString PATCHNOTES = "<b>Update Features:</b>\n\n• Major disease rebalance focused on more regular and manageable sickness\n• Skills system replaces the Jobs system\n• New buildings, overlays, diseases, a new plant, and a Steam Turbine rebuild\n• Many, many bug fixes, optimizations, polish passes, updated animations and more!\n\nPlease view the full patch notes for further details!";
 
 				public static LocString OK_BUTTON = "OK";
 			}
@@ -1166,13 +1192,6 @@ namespace STRINGS
 				public static LocString DETAILS = "DETAILS";
 
 				public static LocString CLOSE = "CLOSE";
-
-				public static LocString MOD_REQUIRED = "REQUIRED";
-
-				public class TOOLTIPS
-				{
-					public static LocString MOD_REQUIRED = "The current save game couldn't load this mod. Unexpected things may happen!";
-				}
 			}
 
 			public class MODS
@@ -1180,6 +1199,8 @@ namespace STRINGS
 				public static LocString TITLE = "MODS";
 
 				public static LocString MANAGE = "Subscription";
+
+				public static LocString WORKSHOP = "STEAM WORKSHOP";
 
 				public static LocString DRAG_TO_REORDER = "Drag to reorder";
 
@@ -1196,6 +1217,154 @@ namespace STRINGS
 					public static LocString DISABLED = "Disabled";
 
 					public static LocString MANAGE_STEAM_SUBSCRIPTION = "Manage Steam Subscription";
+
+					public static LocString MANAGE_LOCAL_MOD = "Manage Local Mod";
+				}
+			}
+
+			public class MOD_EVENTS
+			{
+				public static LocString REQUIRED = "REQUIRED";
+
+				public static LocString NOT_FOUND = "NOT FOUND";
+
+				public static LocString INSTALL_INFO_INACCESSIBLE = "INACCESSIBLE";
+
+				public static LocString OUT_OF_ORDER = "ORDERING CHANGED";
+
+				public static LocString ACTIVE_DURING_CRASH = "ACTIVE DURING CRASH";
+
+				public static LocString EXPECTED_ENABLED = "NOT ENABLED";
+
+				public static LocString EXPECTED_DISABLED = "NOT DISABLED";
+
+				public static LocString VERSION_UPDATE = "VERSION UPDATE";
+
+				public static LocString CONTENT_DELETED = "CONTENT DELETED";
+
+				public static LocString INSTALL_FAILED = "INSTALL FAILED";
+
+				public static LocString INSTALLED = "INSTALLED";
+
+				public static LocString UNINSTALLED = "UNINSTALLED";
+
+				public static LocString REQUIRES_RESTART = "RESTART REQUIRED";
+
+				public class TOOLTIPS
+				{
+					public static LocString REQUIRED = "The current save game couldn't load this mod. Unexpected things may happen!";
+
+					public static LocString NOT_FOUND = "This mod isn't installed";
+
+					public static LocString INSTALL_INFO_INACCESSIBLE = "Mod files are inaccessible";
+
+					public static LocString OUT_OF_ORDER = "Active mod has changed order with respect to some other active mod";
+
+					public static LocString ACTIVE_DURING_CRASH = "Mod was active during a crash and may be the cause";
+
+					public static LocString EXPECTED_ENABLED = "This mod needs to be enabled";
+
+					public static LocString EXPECTED_DISABLED = "This mod needs to be disabled";
+
+					public static LocString VERSION_UPDATE = "New version detected";
+
+					public static LocString CONTENT_DELETED = "Missing installed content";
+
+					public static LocString INSTALL_FAILED = "Installation failed";
+
+					public static LocString INSTALLED = "Installation succeeded";
+
+					public static LocString UNINSTALLED = "Uninstalled";
+				}
+			}
+
+			public class MOD_DIALOGS
+			{
+				public class INSTALL_INFO_INACCESSIBLE
+				{
+					public static LocString TITLE = "STEAM CONTENT ERROR";
+
+					public static LocString MESSAGE = "Failed to access local Steam files for mod {0}.\nTry restarting Oxygen not Included.\nIf that doesn't work, try re-subscribing to the mod via Steam.";
+				}
+
+				public class STEAM_SUBSCRIBED
+				{
+					public static LocString TITLE = "STEAM MOD SUBSCRIBED";
+
+					public static LocString MESSAGE = "Subscribed to Steam mod: {0}";
+				}
+
+				public class STEAM_UPDATED
+				{
+					public static LocString TITLE = "STEAM MOD UPDATE";
+
+					public static LocString MESSAGE = "Updating version of Steam mod: {0}";
+				}
+
+				public class STEAM_UNSUBSCRIBED
+				{
+					public static LocString TITLE = "STEAM MOD UNSUBSCRIBED";
+
+					public static LocString MESSAGE = "Unsubscribed from Steam mod: {0}";
+				}
+
+				public class STEAM_REFRESH
+				{
+					public static LocString TITLE = "STEAM MODS REFRESHED";
+
+					public static LocString MESSAGE = "Refreshed Steam mods: {0}";
+				}
+
+				public class LOAD_FAILURE
+				{
+					public static LocString TITLE = "LOAD FAILURE";
+
+					public static LocString MESSAGE = "Failed to load one or more mods: {0}\nThey will be re-installed when the game is restarted.\nGame may be unstable until then.";
+
+					public static LocString RESTART_NOW = "Restart";
+
+					public static LocString RESTART_LATER = "Continue";
+				}
+
+				public class SAVE_GAME_MODS_DIFFER
+				{
+					public static LocString TITLE = "MOD DIFFERENCES";
+
+					public static LocString MESSAGE = "Save game mods differ from currently active mods: {0}";
+				}
+
+				public class MOD_ERRORS_ON_BOOT
+				{
+					public static LocString TITLE = "MOD ERRORS";
+
+					public static LocString MESSAGE = "Errors occurred during start-up with mods active: {0}\nAll your mods have been disabled. The game will be restarted.";
+
+					public static LocString DEV_MESSAGE = "Errors occurred during start-up with mods active: {0}\nDisable all mods and restart, or continue in an unstable state?";
+
+					public static LocString DEV_RESTART = "RESTART";
+
+					public static LocString DEV_CONTINUE = "CONTINUE";
+				}
+
+				public class MODS_SCREEN_CHANGES
+				{
+					public static LocString TITLE = "MODS CHANGED";
+
+					public static LocString MESSAGE = "Mod configuration changed.\n\nPrevious config: {0}\nRestart required to reload mods.\nGame may be unstable until then.";
+				}
+
+				public class MOD_EVENTS
+				{
+					public static LocString TITLE = "MODS CHANGED";
+
+					public static LocString MESSAGE = "Mod events:\n{0}";
+				}
+
+				public class RESTART
+				{
+					public static LocString OK = "RESTART";
+
+					public static LocString CANCEL = "CONTINUE";
 				}
 			}
 
@@ -1360,6 +1529,10 @@ namespace STRINGS
 
 				public static LocString AUTOMATION_SOUNDS_ALWAYS_TOOLTIP = "If enabled, automation sound effects will play even when outside of the Automation Overlay";
 
+				public static LocString MUTE_ON_FOCUS_LOST = "Mute when unfocused: ";
+
+				public static LocString MUTE_ON_FOCUS_LOST_TOOLTIP = "If enabled, the game will be muted while minimized or if the application loses focus";
+
 				public static LocString AUDIO_BUS_MASTER = "Master";
 
 				public static LocString AUDIO_BUS_SFX = "SFX";
@@ -1510,6 +1683,60 @@ namespace STRINGS
 			public static LocString TOOLTIP_UNLOCKED = "Toggle Sandbox mode {Hotkey}";
 		}
 
+		public class SKILLS_SCREEN
+		{
+			public static LocString CURRENT_MORALE = "Current Morale: {0}\nMorale Expectation: {1}";
+
+			public static LocString SORT_BY_DUPLICANT = "Duplicants";
+
+			public static LocString SORT_BY_MORALE = "Morale";
+
+			public static LocString SORT_BY_EXPERIENCE = "Experience";
+
+			public static LocString SORT_BY_SKILL_AVAILABLE = "Skill Points";
+
+			public static LocString SORT_BY_HAT = "Hat";
+
+			public static LocString SELECT_HAT = "<b>SELECT HAT</b>";
+
+			public static LocString POINTS_AVAILABLE = "<b>SKILL POINTS AVAILABLE</b>";
+
+			public static LocString MORALE = "<b>Morale</b>";
+
+			public static LocString MORALE_EXPECTATION = "<b>Morale expectation</b>";
+
+			public static LocString EXPERIENCE = "EXPERIENCE TO NEXT LEVEL";
+
+			public static LocString EXPERIENCE_TOOLTIP = "{0} additional experience points required to unlock the next skill point";
+
+			public static LocString NOT_AVAILABLE = "Not available";
+
+			public class ASSIGNMENT_REQUIREMENTS
+			{
+				public static LocString EXPECTATION_TARGET_SKILL = "Current Morale: {0}\nSkill Morale Needs: {1}";
+
+				public static LocString EXPECTATION_ALERT_TARGET_SKILL = "{2}'s Current: {0} Morale\n{3} Minimum Morale: {1}";
+
+				public static LocString EXPECTATION_ALERT_DESC_EXPECTATION = "This Duplicant's Morale is too low to handle the rigors of this position, which will cause them Stress over time.";
+
+				public class SKILLGROUP_ENABLED
+				{
+					public static LocString NAME = "Can perform {0}";
+
+					public static LocString DESCRIPTION = "Capable of performing <b>{0}</b> jobs";
+				}
+
+				public class MASTERY
+				{
+					public static LocString CAN_MASTER = "{0} can master {1} skill";
+
+					public static LocString HAS_MASTERED = "{0} <color=#5FDB37FF>has mastered</color> {1} skill";
+
+					public static LocString CANNOT_MASTER = "{0} <color=#F44A47FF>cannot master</color> the {1} skill";
+				}
+			}
+		}
+
 		public class ROLES_SCREEN
 		{
 			public static LocString MANAGEMENT_BUTTON = "JOBS";
@@ -1631,183 +1858,116 @@ namespace STRINGS
 
 				public static LocString NO_PERKS = "This job comes with no training";
 
+				public static LocString ATTRIBUTE_EFFECT_FMT = "{0} to {1}";
+
 				public class CAN_DIG_VERY_FIRM
 				{
-					public static LocString DESCRIPTION = "Trait: " + UI.FormatAsLink("Very Firm Material", "HARDNESS") + " Mining";
+					public static LocString DESCRIPTION = UI.FormatAsLink("Very Firm Material", "HARDNESS") + " Mining";
 				}
 
 				public class CAN_DIG_NEARLY_IMPENETRABLE
 				{
-					public static LocString DESCRIPTION = "Trait: " + UI.FormatAsLink("Abyssalite", "KATAIRITE") + " Mining";
+					public static LocString DESCRIPTION = UI.FormatAsLink("Abyssalite", "KATAIRITE") + " Mining";
 				}
 
 				public class CAN_ART
 				{
-					public static LocString DESCRIPTION = "Trait: Can produce artwork using " + BUILDINGS.PREFABS.CANVAS.NAME + " and " + BUILDINGS.PREFABS.SCULPTURE.NAME;
+					public static LocString DESCRIPTION = "Can produce artwork using " + BUILDINGS.PREFABS.CANVAS.NAME + " and " + BUILDINGS.PREFABS.SCULPTURE.NAME;
 				}
 
 				public class CAN_ART_UGLY
 				{
-					public static LocString DESCRIPTION = "Trait: Crude artwork quality";
+					public static LocString DESCRIPTION = "Crude artwork quality";
 				}
 
 				public class CAN_ART_OKAY
 				{
-					public static LocString DESCRIPTION = "Trait: Mediocre artwork quality";
+					public static LocString DESCRIPTION = "Mediocre artwork quality";
 				}
 
 				public class CAN_ART_GREAT
 				{
-					public static LocString DESCRIPTION = "Trait: Master artwork quality";
+					public static LocString DESCRIPTION = "Master artwork quality";
 				}
 
 				public class CAN_FARM_TINKER
 				{
-					public static LocString DESCRIPTION = string.Concat(new string[]
-					{
-						"Trait: ",
-						UI.FormatAsLink("Crop Tending", "PLANTS"),
-						" and ",
-						ITEMS.INDUSTRIAL_PRODUCTS.FARM_STATION_TOOLS.NAME,
-						" Crafting"
-					});
+					public static LocString DESCRIPTION = UI.FormatAsLink("Crop Tending", "PLANTS") + " and " + ITEMS.INDUSTRIAL_PRODUCTS.FARM_STATION_TOOLS.NAME + " Crafting";
 				}
 
 				public class CAN_WRANGLE_CREATURES
 				{
-					public static LocString DESCRIPTION = "Trait: Critter Wrangling";
+					public static LocString DESCRIPTION = "Critter Wrangling";
 				}
 
 				public class CAN_USE_RANCH_STATION
 				{
-					public static LocString DESCRIPTION = "Trait: Grooming Station Training";
+					public static LocString DESCRIPTION = "Grooming Station Usage";
 				}
 
 				public class CAN_POWER_TINKER
 				{
-					public static LocString DESCRIPTION = string.Concat(new string[]
-					{
-						"Trait: ",
-						UI.FormatAsLink("Generator Tuning", "POWER"),
-						" and ",
-						ITEMS.INDUSTRIAL_PRODUCTS.POWER_STATION_TOOLS.NAME,
-						" Crafting"
-					});
+					public static LocString DESCRIPTION = UI.FormatAsLink("Generator Tuning", "POWER") + " usage and " + ITEMS.INDUSTRIAL_PRODUCTS.POWER_STATION_TOOLS.NAME + " Crafting";
 				}
 
 				public class CAN_ELECTRIC_GRILL
 				{
-					public static LocString DESCRIPTION = "Trait: " + BUILDINGS.PREFABS.COOKINGSTATION.NAME + " Cooking";
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.COOKINGSTATION.NAME + " Usage";
 				}
 
 				public class ADVANCED_RESEARCH
 				{
-					public static LocString DESCRIPTION = "Trait: " + BUILDINGS.PREFABS.ADVANCEDRESEARCHCENTER.NAME + " Researching";
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.ADVANCEDRESEARCHCENTER.NAME + " Usage";
 				}
 
 				public class INTERSTELLAR_RESEARCH
 				{
-					public static LocString DESCRIPTION = "Trait: " + BUILDINGS.PREFABS.COSMICRESEARCHCENTER.NAME + " Researching";
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.COSMICRESEARCHCENTER.NAME + " Usage";
 				}
 
 				public class CAN_STUDY_WORLD_OBJECTS
 				{
-					public static LocString DESCRIPTION = "Trait: Geographical Analysis";
-				}
-
-				public class INCREASED_ART
-				{
-					public static LocString DESCRIPTION = "+{0} to Creativity";
-				}
-
-				public class INCREASED_CONSTRUCTION
-				{
-					public static LocString DESCRIPTION = "+{0} to Construction";
-				}
-
-				public class INCREASE_BOTANIST
-				{
-					public static LocString DESCRIPTION = "+{0} to Farming";
-				}
-
-				public class INCREASE_RANCHING
-				{
-					public static LocString DESCRIPTION = "+{0} to Ranching";
-				}
-
-				public class INCREASED_CARING
-				{
-					public static LocString DESCRIPTION = "+{0} to Caring";
-				}
-
-				public class INCREASED_DIG_SPEED
-				{
-					public static LocString DESCRIPTION = "+{0} to Digging";
-				}
-
-				public class INCREASED_ATHLETICS
-				{
-					public static LocString DESCRIPTION = "+{0} to Athletics";
-				}
-
-				public class INCREASED_CARRY_AMOUNT
-				{
-					public static LocString DESCRIPTION = "+{0}kg to Carrying Capacity";
-				}
-
-				public class INCREASED_MACHINERY
-				{
-					public static LocString DESCRIPTION = "+{0} to Tinkering";
-				}
-
-				public class INCREASED_COOKING
-				{
-					public static LocString DESCRIPTION = "+{0} to Cooking";
-				}
-
-				public class INCREASED_STRENGTH
-				{
-					public static LocString DESCRIPTION = "+{0} to Strength";
-				}
-
-				public class INCREASED_LEARNING
-				{
-					public static LocString DESCRIPTION = "+{0} to Learning";
-				}
-
-				public class MANAGERIAL_DUTIES
-				{
-					public static LocString DESCRIPTION = "Workload stress";
-				}
-
-				public class MANAGED_COLONY
-				{
-					public static LocString DESCRIPTION = "Colony Stress Alleviator";
+					public static LocString DESCRIPTION = "Geographical Analysis";
 				}
 
 				public class EXOSUIT_EXPERTISE
 				{
-					public static LocString DESCRIPTION = "Trait: " + UI.FormatAsLink("Exosuit", "EXOSUIT") + " Sprinting";
+					public static LocString DESCRIPTION = UI.FormatAsLink("Exosuit", "EXOSUIT") + " Penalty Reduction";
 				}
 
 				public class CONVEYOR_BUILD
 				{
-					public static LocString DESCRIPTION = "Trait: " + BUILDINGS.PREFABS.SOLIDCONDUIT.NAME + " Construction";
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.SOLIDCONDUIT.NAME + " Construction";
 				}
 
 				public class CAN_DO_PLUMBING
 				{
-					public static LocString DESCRIPTION = "Trait: Plumbing";
+					public static LocString DESCRIPTION = "Pipe Emptying";
 				}
 
 				public class CAN_USE_ROCKETS
 				{
-					public static LocString DESCRIPTION = "Trait: Astronaut";
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.COMMANDMODULE.NAME + " Usage";
 				}
 
 				public class CAN_DO_ASTRONAUT_TRAINING
 				{
-					public static LocString DESCRIPTION = "Trait: Astronaut-in-Training";
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.ASTRONAUTTRAININGCENTER.NAME + " Usage";
+				}
+
+				public class CAN_COMPOUND
+				{
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.APOTHECARY.NAME + " Usage";
+				}
+
+				public class CAN_DOCTOR
+				{
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.DOCTORSTATION.NAME + " Usage";
+				}
+
+				public class CAN_ADVANCED_MEDICINE
+				{
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.ADVANCEDDOCTORSTATION.NAME + " Usage";
 				}
 			}
 
@@ -2363,9 +2523,9 @@ namespace STRINGS
 				" can be found in the Stations Tab <color=#F44A47><b>[0]</b></color> of the Build Menu"
 			});
 
-			public static LocString MANAGEMENTMENU_ROLES = "Manage Duplicants' job assignments {Hotkey}";
+			public static LocString MANAGEMENTMENU_SKILLS = "Manage Duplicants' skill assignments {Hotkey}";
 
-			public static LocString MANAGEMENTMENU_REQUIRES_ROLES_STATION = "Build a Jobs Board to unlock" + UI.HORIZONTAL_BR_RULE + "The Jobs Board can be found in the Stations Tab <color=#F44A47><b>[0]</b></color> of the Build Menu";
+			public static LocString MANAGEMENTMENU_REQUIRES_SKILL_STATION = "Build a Skills Board to unlock" + UI.HORIZONTAL_BR_RULE + "The Skills Board can be found in the Stations Tab <color=#F44A47><b>[0]</b></color> of the Build Menu";
 
 			public static LocString OPEN_CODEX_ENTRY = "View full entry in database";
 
@@ -2377,7 +2537,7 @@ namespace STRINGS
 
 			public static LocString METERSCREEN_POPULATION = "Population: {0}";
 
-			public static LocString METERSCREEN_IMMUNITY_LEVELS = "Immune Systems: {0}";
+			public static LocString METERSCREEN_SICK_DUPES = "Sick Duplicants: {0}";
 
 			public static LocString PLAYBUTTON = "Start";
 
@@ -2502,6 +2662,8 @@ namespace STRINGS
 			public static LocString CROPS_OVERLAY_STRING = "Displays plant growth progress {Hotkey}";
 
 			public static LocString CONVEYOR_OVERLAY_STRING = "Displays conveyor transport components {Hotkey}";
+
+			public static LocString TILEMODE_OVERLAY_STRING = "Displays material information {Hotkey}";
 
 			public static LocString REACHABILITYOVERLAYSTRING = "Displays areas accessible by Duplicants";
 
@@ -2998,6 +3160,8 @@ namespace STRINGS
 				public static LocString ROLES = UI.FormatAsLink("Duplicant Jobs", "ROLES");
 
 				public static LocString DISEASE = UI.FormatAsLink("Disease", "DISEASE");
+
+				public static LocString SICKNESS = UI.FormatAsLink("Sickness", "SICKNESS");
 			}
 		}
 
@@ -3023,7 +3187,7 @@ namespace STRINGS
 
 					public static LocString PATCHNOTES = "PATCH NOTES";
 
-					public static LocString ANIMATION_HEADER = "WATCH THE ANIMATED SHORT!";
+					public static LocString ANIMATION_HEADER = "LAUNCH DATE ANNOUNCEMENT!";
 				}
 
 				public class LOADING
@@ -3159,9 +3323,9 @@ namespace STRINGS
 		{
 			public class TILEMODE
 			{
-				public static LocString NAME = "ELEMENTS OVERLAY";
+				public static LocString NAME = "MATERIALS OVERLAY";
 
-				public static LocString BUTTON = "Elements Overlay";
+				public static LocString BUTTON = "MATERIALS";
 			}
 
 			public class OXYGEN
@@ -3271,6 +3435,24 @@ namespace STRINGS
 				public class TOOLTIPS
 				{
 					public static LocString TEMPERATURE = "Temperatures reaching {0}";
+				}
+			}
+
+			public class STATECHANGE
+			{
+				public static LocString LOWPOINT = "Low energy state change";
+
+				public static LocString STABLE = "Stable";
+
+				public static LocString HIGHPOINT = "High energy state change";
+
+				public class TOOLTIPS
+				{
+					public static LocString LOWPOINT = "Nearing a low energy state change";
+
+					public static LocString STABLE = "Not near any state changes";
+
+					public static LocString HIGHPOINT = "Nearing high energy state change";
 				}
 			}
 
@@ -3704,10 +3886,6 @@ namespace STRINGS
 
 				public static LocString HOVERTITLE = "Germ";
 
-				public static LocString INTERNAL_GERMS = "Germ Host";
-
-				public static LocString INTERNAL_GERMS_TOOLTIP = "<b>Germ Host</b>\nGerm hosts may be asymptomatic and show no signs of disease" + UI.HORIZONTAL_BR_RULE + "Duplicants become hosts when germs enter their body through inhalation or ingestion\n* Unlike surface germs, internal germs cannot be washed off";
-
 				public static LocString INFECTION_SOURCE = "Germ Source";
 
 				public static LocString INFECTION_SOURCE_TOOLTIP = "<b>Germ Source</b>\nAreas where germs are produced\n* Placing Wash Basins or Hand Sanitizers near these areas may prevent disease spread";
@@ -3723,8 +3901,6 @@ namespace STRINGS
 				public static LocString DISEASE_FORMAT_NO_COLOR = "{1} [{0}]";
 
 				public static LocString CONTAINER_FORMAT = "\n    {0}: {1}";
-
-				public static LocString IMMUNITY = DUPLICANTS.STATS.IMMUNELEVEL.NAME + ": {0}";
 
 				public class DISINFECT_THRESHOLD_DIAGRAM
 				{
@@ -3771,13 +3947,17 @@ namespace STRINGS
 
 			public static LocString COLUMN_SORT_BY_HITPOINTS = "Sort by hit points";
 
-			public static LocString COLUMN_SORT_BY_IMMUNEPOINTS = "Sort by immunity strength";
+			public static LocString COLUMN_SORT_BY_SICKNESSES = "Sort by diseases";
 
 			public static LocString COLUMN_SORT_BY_FULLNESS = "Sort by fullness";
 
 			public static LocString COLUMN_SORT_BY_EATEN_TODAY = "Sort by number of calories consumed today";
 
 			public static LocString COLUMN_SORT_BY_EXPECTATIONS = "Sort by quality expectations";
+
+			public static LocString NA = "N/A";
+
+			public static LocString INFORMATION_NOT_AVAILABLE_TOOLTIP = "Information is not available because {1} is in {0}";
 		}
 
 		public class CONSUMABLESSCREEN
@@ -3809,6 +3989,8 @@ namespace STRINGS
 			public static LocString FOOD_QUALITY = "Morale: {0}";
 
 			public static LocString FOOD_QUALITY_VS_EXPECTATION = UI.HORIZONTAL_RULE + "\nThis food will give {0} Morale if {1} eats it:";
+
+			public static LocString CANNOT_ADJUST_PERMISSIONS = "Cannot adjust consumable permissions because they're in {0}";
 		}
 
 		public class JOBSSCREEN
@@ -3836,8 +4018,6 @@ namespace STRINGS
 
 			public static LocString MINION_SKILL_TOOLTIP = "{Name}'s {Attribute} skill: ";
 
-			public static LocString ITEM_AUTO_ASSIGNED_TOOLTIP = "As a {Role}, {Name} considers the {Job} Errand Type to be {Priority} Priority";
-
 			public static LocString TRAIT_DISABLED = "{Name} cannot do {Job} Errands because they possess the {Trait} trait";
 
 			public static LocString INCREASE_ROW_PRIORITY_NEW_MINION_TOOLTIP = "Prioritize <b>All Errands</b> for <b>New Duplicants</b>";
@@ -3851,6 +4031,8 @@ namespace STRINGS
 			public static LocString INCREASE_PRIORITY_TUTORIAL = "{Hotkey} Increase priority";
 
 			public static LocString DECREASE_PRIORITY_TUTORIAL = "{Hotkey} Decrease priority";
+
+			public static LocString CANNOT_ADJUST_PRIORITY = "Priorities for {0} cannot be adujusted currently because they're in {1}";
 
 			public static LocString SORT_TOOLTIP = "Sort by the {Job} Errand Type";
 
@@ -3901,11 +4083,13 @@ namespace STRINGS
 		{
 			public static LocString HEALTH = "Health";
 
-			public static LocString IMMUNITY = "Immune System";
+			public static LocString SICKNESS = "Diseases";
 
-			public static LocString IMMUNITY_DISEASE = "{0} ({1})";
+			public static LocString NO_SICKNESSES = "No diseases";
 
-			public static LocString IMMUNITY_MULTIPLE_DISEASES = "Multiple diseases ({0})";
+			public static LocString MULTIPLE_SICKNESSES = "Multiple diseases ({0})";
+
+			public static LocString SICKNESS_REMAINING = "{0} ({1})";
 
 			public static LocString STRESS = "Stress";
 
@@ -4078,6 +4262,8 @@ namespace STRINGS
 			public class THIRD_PARTY
 			{
 				public static LocString FMOD = "FMOD Sound System\nCopyright Firelight Technologies";
+
+				public static LocString HARMONY = "Harmony by Andreas Pardeike";
 			}
 		}
 
@@ -4087,7 +4273,7 @@ namespace STRINGS
 
 			public static LocString HIGH = string.Empty;
 
-			public static LocString EMERGENCY = "Emergency Priority" + UI.HORIZONTAL_BR_RULE + "This priority will override all other priorities and set the colony on Red Alert until the errand is completed.";
+			public static LocString TOP_PRIORITY = "Top Priority" + UI.HORIZONTAL_BR_RULE + "This priority will override all other priorities and set the colony on Yellow Alert until the errand is completed.";
 
 			public static LocString HIGH_TOGGLE = string.Empty;
 
@@ -4490,9 +4676,9 @@ namespace STRINGS
 
 			public class ROLESTATION
 			{
-				public static LocString TITLE = "Job Assignments";
+				public static LocString TITLE = "Duplicant Skills";
 
-				public static LocString OPENROLESBUTTON = "JOBS";
+				public static LocString OPENROLESBUTTON = "SKILLS";
 			}
 
 			public class RESEARCHSIDESCREEN
@@ -4694,7 +4880,7 @@ namespace STRINGS
 
 			public class CRITTER_COUNT_SIDE_SCREEN
 			{
-				public static LocString TITLE = "Critter Sensor";
+				public static LocString TITLE = "Critter Count";
 
 				public static LocString TOOLTIP = "This sensor will send an " + UI.FormatAsLink("Active", "LOGIC") + " signal if the number of critters and eggs in the room reaches the specified amount";
 
@@ -4911,6 +5097,13 @@ namespace STRINGS
 				public static LocString PENDING_STATUS = "A researcher is in the process of studying this feature.";
 
 				public static LocString PENDING_BUTTON = "CANCEL ANALYSIS";
+			}
+
+			public class MEDICALCOTSIDESCREEN
+			{
+				public static LocString TITLE = "Minimum Health Requirement";
+
+				public static LocString TOOLTIP = "The minimum health requirement before a Duplicant can occupy a medical bed.";
 			}
 		}
 
@@ -5804,6 +5997,8 @@ namespace STRINGS
 
 			public static LocString TOOL_LENGTH_FMT = "{0}";
 
+			public static LocString FILTER_HOVERCARD_HEADER = "   <style=\"hovercard_element\">({0})</style>";
+
 			public class SANDBOX
 			{
 				public class SANDBOX_TOGGLE
@@ -5874,6 +6069,10 @@ namespace STRINGS
 				public static LocString UNKNOWN = "UNKNOWN";
 
 				public static LocString BUILDING_HOVER_NAME_FMT = "{Name}    <style=\"hovercard_element\">({Element})</style>";
+
+				public static LocString LOGIC_INPUT_HOVER_FMT = "INPUT: {Port}    <style=\"hovercard_element\">({Name})</style>";
+
+				public static LocString LOGIC_OUTPUT_HOVER_FMT = "OUTPUT: {Port}    <style=\"hovercard_element\">({Name})</style>";
 			}
 
 			public class ATTACK
@@ -6086,6 +6285,22 @@ namespace STRINGS
 				public static LocString UNBREATHABLE = "Unbreathable Gas";
 
 				public static LocString AGRICULTURE = "Agriculture";
+
+				public static LocString ABSOLUTETEMPERATURE = "Temperature";
+
+				public static LocString ADAPTIVETEMPERATURE = "Adapt. Temperature";
+
+				public static LocString HEATFLOW = "Thermal Tolerance";
+
+				public static LocString STATECHANGE = "State Change";
+
+				public static LocString CONSTRUCTION = "Construction";
+
+				public static LocString DIG = "Digging";
+
+				public static LocString CLEAN = "Cleaning";
+
+				public static LocString OPERATE = "Duties";
 			}
 		}
 
@@ -6168,9 +6383,9 @@ namespace STRINGS
 
 				public class RESUME
 				{
-					public static LocString MASTERED_ROLES = "<b><size=13>Mastered Jobs:</size></b>";
+					public static LocString MASTERED_SKILLS = "<b><size=13>Mastered Skills:</size></b>";
 
-					public static LocString MASTERED_ROLES_TOOLTIP = "All traits and expectations a Duplicant learns on a job become permanent once that job is mastered." + UI.HORIZONTAL_BR_RULE + "Switching jobs will not remove these traits.";
+					public static LocString MASTERED_SKILLS_TOOLTIP = "All traits and expectations become permanent once a Duplicant unlocks a skill." + UI.HORIZONTAL_BR_RULE + "The skill Respeccer needs to be used to reset the Duplicant traits and expectations.";
 
 					public static LocString JOBTRAINING_TOOLTIP = "{0} gained this skill while working as a {1}";
 
@@ -6197,11 +6412,11 @@ namespace STRINGS
 						public static LocString NOJOB_TOOLTIP = "This {0} is... \"between jobs\" at present";
 					}
 
-					public class NO_MASTERED_ROLES
+					public class NO_MASTERED_SKILLS
 					{
 						public static LocString NAME = "None";
 
-						public static LocString TOOLTIP = "{0} has not mastered any jobs yet";
+						public static LocString TOOLTIP = "{0} has not mastered any skills yet";
 					}
 				}
 
@@ -6307,52 +6522,6 @@ namespace STRINGS
 				public static LocString DISEASE_INFO_POPUP_BUTTON = "FULL INFO";
 
 				public static LocString DISEASE_INFO_POPUP_TOOLTIP = "View detailed germ and infection info for {0}";
-
-				public class IMMUNE_FACTORS
-				{
-					public static LocString INTERNAL_GERMS = "{0}: {1}";
-
-					public static LocString INTERNAL_GERMS_TOOLTIP = "This Duplicant is currently fighting a {0} infection" + UI.HORIZONTAL_BR_RULE + "Their body is host to {1}";
-
-					public static LocString IMMUNE_ATTACK_RATE = "    • -{0} immunity per {1}";
-
-					public static LocString IMMUNE_ATTACK_RATE_TOOLTIP = "This Duplicant must expend {0} of their immunity to fight {1} of this disease";
-
-					public static LocString IMMUNE_ATTACK_RATE2 = "    • Immune System: {0}";
-
-					public static LocString IMMUNE_ATTACK_RATE2_TOOLTIP = "This Duplicant's immune system is being strained at a rate of {0} by the {1} present on their body";
-				}
-
-				public class INFECTION
-				{
-					public static LocString AID_SYMPTOMS = "Treatable Symptoms:";
-
-					public static LocString AID_SYMPTOMS_TOOLTIP = "These symptoms are eliminated while a Duplicant is in a Med-Bed receiving medical care";
-
-					public static LocString SYMPTOMS = "Other Symptoms:";
-
-					public static LocString SYMPTOMS_TOOLTIP = "These symptoms must run their course and cannot be alleviated by medical care";
-
-					public static LocString SOURCE_SUFFIX = "{0}";
-
-					public static LocString SOURCE_TOOLTIP_SUFFIX = "\n\nThis symptom causes Duplicants to expel germs from their body" + UI.HORIZONTAL_BR_RULE + "They may infect other Duplicants as a result";
-
-					public static LocString DISCLAIMER = "Contracting this illness will have these effects on a Duplicant:\n";
-
-					public static LocString DISCLAIMER_TOOLTIP = "A Duplicant's immune system must be overwhelmed to contract an illness";
-
-					public static LocString DURATION = "Duration:";
-
-					public static LocString DURATION_TOOLTIP = "Duration is the amount of time it takes a Duplicant to fight off this infection";
-
-					public static LocString DURATION_NORMAL = "    {0}";
-
-					public static LocString DURATION_NORMAL_TOOLTIP = "Duplicants recover from this illness in {0}";
-
-					public static LocString DURATION_AIDREQ = "    {0} (Medical care required)";
-
-					public static LocString DURATION_AIDREQ_TOOLTIP = "Treated Duplicants recover from this illness in {0}" + UI.HORIZONTAL_BR_RULE + "Without medical care, they will be infected indefinitely";
-				}
 
 				public class DETAILS
 				{
@@ -6847,11 +7016,41 @@ namespace STRINGS
 
 		public class LOGIC_PORTS
 		{
-			public static LocString INPUT_PORTS = UI.FormatAsLink("Auto Inputs", "LOGIC") + ": {0}";
+			public static LocString INPUT_PORTS = UI.FormatAsLink("Auto Inputs", "LOGIC");
 
-			public static LocString OUTPUT_PORTS = UI.FormatAsLink("Auto Outputs", "LOGIC") + ": {0}";
+			public static LocString INPUT_PORTS_TOOLTIP = "Input ports cause a change on this building when a signal is received";
 
-			public static LocString CONTROL_OPERATIONAL = "Enabled/Disabled";
+			public static LocString OUTPUT_PORTS = UI.FormatAsLink("Auto Outputs", "LOGIC");
+
+			public static LocString OUTPUT_PORTS_TOOLTIP = "Output ports send a signal when this building changes state";
+
+			public static LocString INPUT_PORT_TOOLTIP = "Input Behaviour:" + UI.HORIZONTAL_BR_RULE + "{0}\n\n{1}";
+
+			public static LocString OUTPUT_PORT_TOOLTIP = "Output Behaviour:" + UI.HORIZONTAL_BR_RULE + "{0}\n\n{1}";
+
+			public static LocString CONTROL_OPERATIONAL = "Enable/Disable";
+
+			public static LocString CONTROL_OPERATIONAL_ACTIVE = "Building turns on when Active signal received";
+
+			public static LocString CONTROL_OPERATIONAL_INACTIVE = "Building turns off when Standby signal received";
+
+			public static LocString GATE_DOUBLE_INPUT_ONE_NAME = "Input A";
+
+			public static LocString GATE_DOUBLE_INPUT_ONE_ACTIVE = "Active";
+
+			public static LocString GATE_DOUBLE_INPUT_ONE_INACTIVE = "Standby";
+
+			public static LocString GATE_DOUBLE_INPUT_TWO_NAME = "Input B";
+
+			public static LocString GATE_DOUBLE_INPUT_TWO_ACTIVE = "Active";
+
+			public static LocString GATE_DOUBLE_INPUT_TWO_INACTIVE = "Standby";
+
+			public static LocString GATE_SINGLE_INPUT_ONE_NAME = "The Input";
+
+			public static LocString GATE_SINGLE_INPUT_ONE_ACTIVE = "Active";
+
+			public static LocString GATE_SINGLE_INPUT_ONE_INACTIVE = "Standby";
 		}
 
 		public class GAMEOBJECTEFFECTS
@@ -6888,7 +7087,7 @@ namespace STRINGS
 
 			public static LocString ROTTEN = "Rotten";
 
-			public static LocString REQUIRES_ATMOSPHERE = UI.FormatAsLink("Atmosphere", "ATMOSPHERE") + ":{0}";
+			public static LocString REQUIRES_ATMOSPHERE = UI.FormatAsLink("Atmosphere", "ATMOSPHERE") + ": {0}";
 
 			public static LocString REQUIRES_PRESSURE = UI.FormatAsLink("Air", "ATMOSPHERE") + " Pressure: {0} minimum";
 

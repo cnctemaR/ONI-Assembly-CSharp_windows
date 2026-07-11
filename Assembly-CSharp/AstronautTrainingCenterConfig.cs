@@ -26,6 +26,7 @@ public class AstronautTrainingCenterConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "large";
+		buildingDef.Deprecated = true;
 		return buildingDef;
 	}
 
@@ -35,7 +36,7 @@ public class AstronautTrainingCenterConfig : IBuildingConfig
 		Prioritizable.AddRef(go);
 		AstronautTrainingCenter astronautTrainingCenter = go.AddOrGet<AstronautTrainingCenter>();
 		astronautTrainingCenter.workTime = float.PositiveInfinity;
-		astronautTrainingCenter.requiredRolePerk = RoleManager.rolePerks.CanTrainToBeAstronaut.id;
+		astronautTrainingCenter.requiredSkillPerk = Db.Get().SkillPerks.CanTrainToBeAstronaut.Id;
 		astronautTrainingCenter.daysToMasterRole = 10f;
 		astronautTrainingCenter.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_centrifuge_kanim") };
 		astronautTrainingCenter.workLayer = Grid.SceneLayer.BuildingFront;

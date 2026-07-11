@@ -35,17 +35,8 @@ public class HoverTextScreen : KScreen
 			this.drawer.SetEnabled(false);
 			return;
 		}
-		if (PlayerController.Instance.IsUsingDefaultTool())
-		{
-			KSelectable hover = SelectTool.Instance.hover;
-			bool flag = hover != null;
-			this.drawer.SetEnabled(flag);
-		}
-		else
-		{
-			bool flag2 = PlayerController.Instance.ActiveTool.ShowHoverUI();
-			this.drawer.SetEnabled(flag2);
-		}
+		bool flag = PlayerController.Instance.ActiveTool.ShowHoverUI();
+		this.drawer.SetEnabled(flag);
 	}
 
 	public Sprite GetSprite(string byName)
@@ -57,7 +48,7 @@ public class HoverTextScreen : KScreen
 				return sprite;
 			}
 		}
-		global::Debug.LogWarning("No icon named " + byName + " was found on HoverTextScreen.prefab", null);
+		global::Debug.LogWarning("No icon named " + byName + " was found on HoverTextScreen.prefab");
 		return null;
 	}
 

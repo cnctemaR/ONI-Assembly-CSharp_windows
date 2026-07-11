@@ -38,6 +38,8 @@ namespace TUNING
 
 		public const float STANDARD_STRESS_BONUS = -0.033333335f;
 
+		public const float RANCHING_DURATION_MULTIPLIER_BONUS_PER_POINT = 0.1f;
+
 		public const float STRESS_BELOW_EXPECTATIONS_FOOD = 0.25f;
 
 		public const float STRESS_ABOVE_EXPECTATIONS_FOOD = -0.5f;
@@ -75,6 +77,8 @@ namespace TUNING
 		public static int MAX_STAT_POINTS = 10;
 
 		public static int MAX_TRAITS = 4;
+
+		public static int APTITUDE_BONUS = 1;
 
 		public static readonly List<string> CONTRACTEDTRAITS_HEALING = new List<string> { "IrritableBowel", "Aggressive", "SlowLearner", "WeakImmuneSystem", "Snorer", "CantDig" };
 
@@ -142,7 +146,7 @@ namespace TUNING
 				id = "Hemophobia",
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
 				probability = DUPLICANTSTATS.PROBABILITY_LOW,
-				requiredNonPositiveAptitudes = new List<HashedString> { "Research" }
+				requiredNonPositiveAptitudes = new List<HashedString> { "MedicalAid" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -214,6 +218,12 @@ namespace TUNING
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "ScaredyCat",
+				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				probability = DUPLICANTSTATS.PROBABILITY_MED
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Allergies",
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
 				probability = DUPLICANTSTATS.PROBABILITY_MED
 			}
@@ -356,7 +366,7 @@ namespace TUNING
 				id = "Foodie",
 				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
 				probability = DUPLICANTSTATS.PROBABILITY_MED,
-				mutuallyExclusiveTraits = new List<string> { "SimpleTastes" },
+				mutuallyExclusiveTraits = new List<string> { "SimpleTastes", "CantCook" },
 				requiredNonPositiveAptitudes = new List<HashedString> { "Cooking" }
 			},
 			new DUPLICANTSTATS.TraitVal

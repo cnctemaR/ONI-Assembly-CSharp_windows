@@ -44,6 +44,11 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 		return false;
 	}
 
+	public bool ShouldStoreCO2()
+	{
+		return false;
+	}
+
 	private List<Effect> immunities = new List<Effect>();
 
 	private List<AttributeModifier> modifiers = new List<AttributeModifier>();

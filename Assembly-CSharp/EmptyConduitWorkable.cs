@@ -19,8 +19,8 @@ public class EmptyConduitWorkable : Workable
 			EmptyConduitWorkable.emptyLiquidConduitStatusItem = new StatusItem("EmptyLiquidConduit", BUILDINGS.PREFABS.CONDUIT.STATUS_ITEM.NAME, BUILDINGS.PREFABS.CONDUIT.STATUS_ITEM.TOOLTIP, "status_item_empty_pipe", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.LiquidConduits.ID, 66);
 			EmptyConduitWorkable.emptyGasConduitStatusItem = new StatusItem("EmptyGasConduit", BUILDINGS.PREFABS.CONDUIT.STATUS_ITEM.NAME, BUILDINGS.PREFABS.CONDUIT.STATUS_ITEM.TOOLTIP, "status_item_empty_pipe", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.GasConduits.ID, 130);
 		}
-		this.requiredRolePerk = RoleManager.rolePerks.CanDoPlumbing.id;
-		this.shouldShowRolePerkStatusItem = false;
+		this.requiredSkillPerk = Db.Get().SkillPerks.CanDoPlumbing.Id;
+		this.shouldShowSkillPerkStatusItem = false;
 	}
 
 	protected override void OnSpawn()
@@ -50,7 +50,7 @@ public class EmptyConduitWorkable : Workable
 		{
 			this.chore.Cancel("Cancel");
 			this.chore = null;
-			this.shouldShowRolePerkStatusItem = false;
+			this.shouldShowSkillPerkStatusItem = false;
 			this.UpdateStatusItem(null);
 		}
 	}
@@ -109,10 +109,10 @@ public class EmptyConduitWorkable : Workable
 	{
 		base.GetComponent<Prioritizable>().AddRef();
 		this.chore = new WorkChore<EmptyConduitWorkable>(Db.Get().ChoreTypes.EmptyStorage, this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
-		this.chore.AddPrecondition(ChorePreconditions.instance.HasRolePerk, RoleManager.rolePerks.CanDoPlumbing.id);
+		this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanDoPlumbing.Id);
 		this.elapsedTime = 0f;
 		this.emptiedPipe = false;
-		this.shouldShowRolePerkStatusItem = true;
+		this.shouldShowSkillPerkStatusItem = true;
 		this.UpdateStatusItem(null);
 	}
 
@@ -146,7 +146,7 @@ public class EmptyConduitWorkable : Workable
 				this.CleanUpVisualization();
 				this.chore = null;
 				flag = true;
-				this.shouldShowRolePerkStatusItem = false;
+				this.shouldShowSkillPerkStatusItem = false;
 				this.UpdateStatusItem(null);
 			}
 		}

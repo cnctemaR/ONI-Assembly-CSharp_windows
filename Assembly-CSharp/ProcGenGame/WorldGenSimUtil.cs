@@ -156,7 +156,7 @@ namespace ProcGenGame
 						}
 						catch (Exception ex)
 						{
-							Output.LogError(new object[] { "Couldn't serialize", ex.Message, ex.StackTrace });
+							DebugUtil.LogErrorArgs(new object[] { "Couldn't serialize", ex.Message, ex.StackTrace });
 						}
 					}
 					using (BinaryWriter binaryWriter3 = new BinaryWriter(File.Open(WorldGen.SIM_SAVE_FILENAME, FileMode.Create)))
@@ -174,7 +174,7 @@ namespace ProcGenGame
 					errorDesc = string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_READ_ONLY, WorldGen.SIM_SAVE_FILENAME),
 					exception = ex2
 				});
-				Output.LogError(new object[] { "Couldn't write", ex2.Message, ex2.StackTrace });
+				DebugUtil.LogErrorArgs(new object[] { "Couldn't write", ex2.Message, ex2.StackTrace });
 				flag = false;
 			}
 			return flag;

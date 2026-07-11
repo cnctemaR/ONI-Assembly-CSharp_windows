@@ -178,8 +178,8 @@ public class SelectTool : InterfaceTool
 		}
 		Game.Instance.statusItemRenderer.GetIntersections(vector3, hits);
 		ListPool<ScenePartitionerEntry, SelectTool>.PooledList pooledList = ListPool<ScenePartitionerEntry, SelectTool>.Allocate();
-		pooledList.Sort((ScenePartitionerEntry x, ScenePartitionerEntry y) => (x.obj as Transform).GetPosition().z.CompareTo((y.obj as Transform).GetPosition().z));
 		GameScenePartitioner.Instance.GatherEntries((int)vector3.x, (int)vector3.y, 1, 1, GameScenePartitioner.Instance.collisionLayer, pooledList);
+		pooledList.Sort((ScenePartitionerEntry x, ScenePartitionerEntry y) => this.SortHoverCards(x, y));
 		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 		{
 			KCollider2D kcollider2D = scenePartitionerEntry.obj as KCollider2D;
@@ -211,6 +211,31 @@ public class SelectTool : InterfaceTool
 		pooledList.Recycle();
 	}
 
+	private int SortHoverCards(ScenePartitionerEntry x, ScenePartitionerEntry y)
+	{
+		KMonoBehaviour kmonoBehaviour = x.obj as KMonoBehaviour;
+		KMonoBehaviour kmonoBehaviour2 = y.obj as KMonoBehaviour;
+		return this.SortSelectables(kmonoBehaviour, kmonoBehaviour2);
+	}
+
+	private int SortSelectables(KMonoBehaviour x, KMonoBehaviour y)
+	{
+		if (x == null && y == null)
+		{
+			return 0;
+		}
+		if (x == null)
+		{
+			return -1;
+		}
+		if (y == null)
+		{
+			return 1;
+		}
+		int num = x.transform.GetPosition().z.CompareTo(y.transform.GetPosition().z);
+		return (num != 0) ? num : x.GetInstanceID().CompareTo(y.GetInstanceID());
+	}
+
 	private static bool is_component_null(SelectTool.Intersection intersection)
 	{
 		return !intersection.component;
@@ -236,7 +261,7 @@ public class SelectTool : InterfaceTool
 			this.hitCycleCount = 0;
 			this.prevIntersectionGroup = this.curIntersectionGroup;
 		}
-		this.intersections.Sort((SelectTool.Intersection a, SelectTool.Intersection b) => (a.distance == b.distance) ? a.component.GetInstanceID().CompareTo(b.component.GetInstanceID()) : a.distance.CompareTo(b.distance));
+		this.intersections.Sort((SelectTool.Intersection a, SelectTool.Intersection b) => this.SortSelectables(a.component as KMonoBehaviour, b.component as KMonoBehaviour));
 		int num = 0;
 		if (cycleSelection)
 		{

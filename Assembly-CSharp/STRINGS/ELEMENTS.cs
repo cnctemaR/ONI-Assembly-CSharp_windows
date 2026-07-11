@@ -1285,6 +1285,22 @@ namespace STRINGS
 			});
 		}
 
+		public class TESTELEMENT
+		{
+			public static LocString NAME = UI.FormatAsLink("Test Element", "TESTELEMENT");
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"((Fe,Mn)WO<sub>4</sub>) Wolframite is a dense Metallic element in a ",
+				UI.FormatAsLink("Solid", "ELEMENTS_SOLID"),
+				" state.\n\nIt is a source of ",
+				UI.FormatAsLink("Tungsten", "TUNGSTEN"),
+				" and is suitable for building ",
+				UI.FormatAsLink("Power", "POWER"),
+				" systems."
+			});
+		}
+
 		public class POLYPROPYLENE
 		{
 			public static LocString NAME = UI.FormatAsLink("Plastic", "POLYPROPYLENE");

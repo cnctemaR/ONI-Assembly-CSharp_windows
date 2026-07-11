@@ -38,7 +38,7 @@ namespace ProcGen
 			{
 				return SettingsCache.features.TerrainFeatures[name].defaultBiome.type;
 			}
-			global::Debug.LogError("Couldn't get default biome [" + name + "]", null);
+			global::Debug.LogError("Couldn't get default biome [" + name + "]");
 			return null;
 		}
 
@@ -104,6 +104,7 @@ namespace ProcGen
 				BiomeSettings biomeSettings = YamlIO<BiomeSettings>.LoadFile(SettingsCache.GetPath() + empty + ".yaml", null);
 				if (biomeSettings != null)
 				{
+					global::Debug.Assert(biomeSettings.TerrainBiomeLookupTable.Count > 0, longName);
 					SettingsCache.biomeSettingsCache.Add(empty, biomeSettings);
 					foreach (KeyValuePair<string, ElementBandConfiguration> keyValuePair in biomeSettings.TerrainBiomeLookupTable)
 					{
@@ -116,7 +117,7 @@ namespace ProcGen
 				}
 				else
 				{
-					global::Debug.LogWarning("WorldGen: Attempting to load biome: " + empty + " failed", null);
+					global::Debug.LogWarning("WorldGen: Attempting to load biome: " + empty + " failed");
 				}
 			}
 		}
@@ -126,7 +127,7 @@ namespace ProcGen
 			string empty = string.Empty;
 			if (!SettingsCache.GetPathAndName(SettingsCache.GetPath(), longName, out empty))
 			{
-				global::Debug.LogWarning("LoadFeature GetPathAndName: Attempting to load feature: " + empty + " failed", null);
+				global::Debug.LogWarning("LoadFeature GetPathAndName: Attempting to load feature: " + empty + " failed");
 				return longName;
 			}
 			if (!SettingsCache.featuresettings.ContainsKey(empty))
@@ -138,7 +139,7 @@ namespace ProcGen
 				}
 				else
 				{
-					global::Debug.LogWarning("WorldGen: Attempting to load feature: " + empty + " failed", null);
+					global::Debug.LogWarning("WorldGen: Attempting to load feature: " + empty + " failed");
 				}
 			}
 			return empty;

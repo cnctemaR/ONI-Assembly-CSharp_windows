@@ -65,7 +65,7 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 			default_state = this.fetch;
 			base.Target(this.eater);
 			this.fetch.InitializeStates(this.eater, this.source, this.chunk, this.requestedpillcount, this.actualpillcount, this.takemedicine, null);
-			this.takemedicine.ToggleAnims("anim_eat_floor_kanim", 0f).ToggleWork("TakeMedicine", delegate(TakeMedicineChore.StatesInstance smi)
+			this.takemedicine.ToggleAnims("anim_eat_floor_kanim", 0f).ToggleTag(GameTags.TakingMedicine).ToggleWork("TakeMedicine", delegate(TakeMedicineChore.StatesInstance smi)
 			{
 				MedicinalPill medicinalPill = this.chunk.Get<MedicinalPill>(smi);
 				Worker worker = this.eater.Get<Worker>(smi);

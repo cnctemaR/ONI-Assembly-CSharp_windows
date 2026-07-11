@@ -27,7 +27,7 @@ public class KPlayerPrefs : YamlIO<KPlayerPrefs>
 				}
 				catch
 				{
-					Debug.LogWarning("Creating new KPlayerPrefs..", null);
+					Debug.LogWarning("Creating new KPlayerPrefs..");
 					KPlayerPrefs._instance = new KPlayerPrefs();
 				}
 			}
@@ -66,7 +66,7 @@ public class KPlayerPrefs : YamlIO<KPlayerPrefs>
 		}
 		catch (Exception ex)
 		{
-			Debug.LogWarning("Failed to save kplayerprefs: " + ex.ToString(), null);
+			Debug.LogWarning("Failed to save kplayerprefs: " + ex.ToString());
 		}
 	}
 

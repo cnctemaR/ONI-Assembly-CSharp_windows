@@ -837,6 +837,7 @@ public class StarmapScreen : KModalScreen
 				if (engineFuelTag.IsValid)
 				{
 					Element element = ElementLoader.GetElement(engineFuelTag);
+					global::Debug.Assert(element != null, "fuel_element");
 					breakdownListRow.ShowData(gameObject.gameObject.GetProperName() + " (" + element.name + ")", GameUtil.GetFormattedMass(component.GetAmountAvailable(engineFuelTag), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Tonne, true, "{0:0.#}"));
 				}
 				else
@@ -850,6 +851,7 @@ public class StarmapScreen : KModalScreen
 			{
 				BreakdownListRow breakdownListRow2 = this.rocketDetailsFuel.AddRow();
 				Element element2 = ElementLoader.GetElement(component2.fuelTag);
+				global::Debug.Assert(element2 != null, "fuel_element");
 				breakdownListRow2.ShowData(gameObject.gameObject.GetProperName() + " (" + element2.name + ")", GameUtil.GetFormattedMass(component2.fuelStorage.GetMassAvailable(component2.fuelTag), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Tonne, true, "{0:0.#}"));
 			}
 		}
@@ -1101,18 +1103,18 @@ public class StarmapScreen : KModalScreen
 			SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(lcmToVisualize);
 			if (spacecraftDestination == null)
 			{
-				global::Debug.Log("destination is null", null);
+				global::Debug.Log("destination is null");
 				return;
 			}
 			StarmapPlanet starmapPlanet = this.planetWidgets[spacecraftDestination];
 			if (spacecraft == null)
 			{
-				global::Debug.Log("craft is null", null);
+				global::Debug.Log("craft is null");
 				return;
 			}
 			if (starmapPlanet == null)
 			{
-				global::Debug.Log("planet is null", null);
+				global::Debug.Log("planet is null");
 				return;
 			}
 			this.UnselectAllPlanets();

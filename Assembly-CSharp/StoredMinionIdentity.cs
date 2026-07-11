@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Database;
 using Klei.AI;
 using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity, IListableOption
+public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity, IListableOption, IPersonalPriorityManager
 {
 	[Serialize]
 	public string genderStringKey { get; set; }
@@ -13,16 +14,21 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 	[Serialize]
 	public string nameStringKey { get; set; }
 
-	public bool HasPerk(RolePerk perk)
+	public bool HasPerk(SkillPerk perk)
 	{
-		foreach (RoleConfig roleConfig in Game.Instance.roleManager.RolesConfigs)
+		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryBySkillID)
 		{
-			if (roleConfig.HasPerk(perk) && this.MasteryByRoleID.ContainsKey(roleConfig.id) && this.MasteryByRoleID[roleConfig.id])
+			if (keyValuePair.Value && Db.Get().Skills.Get(keyValuePair.Key).perks.Contains(perk))
 			{
 				return true;
 			}
 		}
-		return Game.Instance.roleManager.GetRole(this.currentRole) != null && Game.Instance.roleManager.GetRole(this.currentRole).HasPerk(perk);
+		return false;
+	}
+
+	public bool HasMasteredSkill(string skillId)
+	{
+		return this.MasteryBySkillID.ContainsKey(skillId) && this.MasteryBySkillID[skillId];
 	}
 
 	protected override void OnPrefabInit()
@@ -47,7 +53,7 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 		bool flag = false;
 		if (component.InstanceID == -1)
 		{
-			Output.LogWarning(new object[] { "Stored minion with an invalid kpid! Attempting to recover...", this.storedName });
+			DebugUtil.LogWarningArgs(new object[] { "Stored minion with an invalid kpid! Attempting to recover...", this.storedName });
 			flag = true;
 			if (KPrefabIDTracker.Get().GetInstance(component.InstanceID) != null)
 			{
@@ -55,18 +61,18 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 			}
 			component.InstanceID = KPrefabID.GetUniqueID();
 			KPrefabIDTracker.Get().Register(component);
-			Output.LogWarning(new object[] { "Restored as:", component.InstanceID });
+			DebugUtil.LogWarningArgs(new object[] { "Restored as:", component.InstanceID });
 		}
 		if (component.conflicted)
 		{
-			Output.LogWarning(new object[] { "Minion with a conflicted kpid! Attempting to recover... ", component.InstanceID, this.storedName });
+			DebugUtil.LogWarningArgs(new object[] { "Minion with a conflicted kpid! Attempting to recover... ", component.InstanceID, this.storedName });
 			if (KPrefabIDTracker.Get().GetInstance(component.InstanceID) != null)
 			{
 				KPrefabIDTracker.Get().Unregister(component);
 			}
 			component.InstanceID = KPrefabID.GetUniqueID();
 			KPrefabIDTracker.Get().Register(component);
-			Output.LogWarning(new object[] { "Restored as:", component.InstanceID });
+			DebugUtil.LogWarningArgs(new object[] { "Restored as:", component.InstanceID });
 		}
 		this.assignableProxy.Get().SetTarget(this, base.gameObject);
 		bool flag2 = false;
@@ -78,7 +84,7 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 				MinionStorage.Info info = storedMinionInfo[i];
 				if (flag && info.serializedMinion != null && info.serializedMinion.GetId() == -1 && info.name == this.storedName)
 				{
-					Output.LogWarning(new object[]
+					DebugUtil.LogWarningArgs(new object[]
 					{
 						"Found a minion storage with an invalid ref, rebinding.",
 						component.InstanceID,
@@ -105,7 +111,7 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 		}
 		if (!flag2)
 		{
-			Output.LogWarning(new object[] { "Found a stored minion that wasn't in any minion storage. Respawning them at the portal.", component.InstanceID, this.storedName });
+			DebugUtil.LogWarningArgs(new object[] { "Found a stored minion that wasn't in any minion storage. Respawning them at the portal.", component.InstanceID, this.storedName });
 			GameObject telepad = GameUtil.GetTelepad();
 			if (telepad != null)
 			{
@@ -129,9 +135,97 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 		return this.assignableProxy.Get().GetComponent<Ownables>();
 	}
 
+	public Accessory GetAccessory(AccessorySlot slot)
+	{
+		for (int i = 0; i < this.accessories.Count; i++)
+		{
+			if (this.accessories[i].Get() != null)
+			{
+				if (this.accessories[i].Get().slot == slot)
+				{
+					return this.accessories[i].Get();
+				}
+			}
+		}
+		return null;
+	}
+
 	public bool IsNull()
 	{
 		return this == null;
+	}
+
+	public string GetStorageReason()
+	{
+		KPrefabID component = base.GetComponent<KPrefabID>();
+		foreach (MinionStorage minionStorage in Components.MinionStorages.Items)
+		{
+			foreach (MinionStorage.Info info in minionStorage.GetStoredMinionInfo())
+			{
+				if (info.serializedMinion.Get() == component)
+				{
+					return minionStorage.GetProperName();
+				}
+			}
+		}
+		return string.Empty;
+	}
+
+	public bool IsPermittedToConsume(string consumable)
+	{
+		foreach (Tag tag in this.forbiddenTags)
+		{
+			if (tag == consumable)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public bool IsChoreGroupDisabled(ChoreGroup chore_group)
+	{
+		foreach (string text in this.traitIDs)
+		{
+			if (Db.Get().traits.Exists(text))
+			{
+				Trait trait = Db.Get().traits.Get(text);
+				if (trait.disabledChoreGroups != null)
+				{
+					foreach (ChoreGroup choreGroup in trait.disabledChoreGroups)
+					{
+						if (choreGroup.IdHash == chore_group.IdHash)
+						{
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	public int GetPersonalPriority(ChoreGroup chore_group)
+	{
+		ChoreConsumer.PriorityInfo priorityInfo;
+		if (this.choreGroupPriorities.TryGetValue(chore_group.IdHash, out priorityInfo))
+		{
+			return priorityInfo.priority;
+		}
+		return 0;
+	}
+
+	public int GetAssociatedSkillLevel(ChoreGroup group)
+	{
+		return 0;
+	}
+
+	public void SetPersonalPriority(ChoreGroup group, int value)
+	{
+	}
+
+	public void ResetPersonalPriorities()
+	{
 	}
 
 	[Serialize]
@@ -169,19 +263,19 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 	public Ref<MinionAssignablesProxy> assignableProxy;
 
 	[Serialize]
-	public Dictionary<string, float> ExperienceByRoleID = new Dictionary<string, float>();
+	public Dictionary<string, bool> MasteryBySkillID = new Dictionary<string, bool>();
 
 	[Serialize]
-	public Dictionary<string, bool> MasteryByRoleID = new Dictionary<string, bool>();
+	public Dictionary<HashedString, float> AptitudeBySkillGroup = new Dictionary<HashedString, float>();
 
 	[Serialize]
-	public Dictionary<HashedString, float> AptitudeByRoleGroup = new Dictionary<HashedString, float>();
+	public float TotalExperienceGained;
 
 	[Serialize]
-	public string currentRole;
+	public string currentHat;
 
 	[Serialize]
-	public string targetRole;
+	public string targetHat;
 
 	[Serialize]
 	public Dictionary<HashedString, ChoreConsumer.PriorityInfo> choreGroupPriorities = new Dictionary<HashedString, ChoreConsumer.PriorityInfo>();

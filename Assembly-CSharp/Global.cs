@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using Klei;
+using KMod;
 using KSerialization;
 using Steamworks;
 using UnityEngine;
@@ -78,6 +79,7 @@ public class Global : MonoBehaviour
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F1, Modifier.Shift, global::Action.Overlay12, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F2, Modifier.Shift, global::Action.Overlay13, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F3, Modifier.Shift, global::Action.Overlay14, true, false),
+			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F4, Modifier.Shift, global::Action.Overlay15, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.KeypadPlus, Modifier.None, global::Action.SpeedUp, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.KeypadMinus, Modifier.None, global::Action.SlowDown, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Space, Modifier.None, global::Action.TogglePause, true, false),
@@ -227,10 +229,21 @@ public class Global : MonoBehaviour
 
 	private void Awake()
 	{
+		KCrashReporter crash_reporter = base.GetComponent<KCrashReporter>();
+		if ((crash_reporter != null) & (SceneInitializerLoader.ReportDeferredError == null))
+		{
+			SceneInitializerLoader.ReportDeferredError = delegate(SceneInitializerLoader.DeferredError deferred_error)
+			{
+				crash_reporter.ShowDialog(deferred_error.msg, deferred_error.stack_trace);
+			};
+		}
 		this.globalCanvas = GameObject.Find("Canvas");
 		global::UnityEngine.Object.DontDestroyOnLoad(this.globalCanvas.gameObject);
 		this.OutputSystemInfo();
+		global::Debug.Assert(Global.Instance == null);
 		Global.Instance = this;
+		global::Debug.Log("Initializing at " + global::System.DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff"));
+		global::Debug.Log("Save path: " + Util.RootFolder());
 		if (this.forcedAtlasInitializationList != null)
 		{
 			foreach (SpriteAtlas spriteAtlas in this.forcedAtlasInitializationList)
@@ -256,9 +269,10 @@ public class Global : MonoBehaviour
 		this.layeredFileSystem.AddFileSystem(this.standardFS);
 		Singleton<StateMachineUpdater>.CreateInstance();
 		Singleton<StateMachineManager>.CreateInstance();
-		this.modManager = new ModManager();
-		this.modManager.Start();
-		Manager.Initialize();
+		this.modManager = new global::KMod.Manager();
+		this.modManager.Load(Content.DLL);
+		this.modManager.Load(Content.Strings);
+		global::KSerialization.Manager.Initialize();
 		this.mInputManager = new GameInputManager(Global.GenerateDefaultBindings());
 		Audio.Get();
 		KAnimBatchManager.CreateInstance();
@@ -267,6 +281,10 @@ public class Global : MonoBehaviour
 		Singleton<KBatchedAnimUpdater>.CreateInstance();
 		DistributionPlatform.Initialize();
 		Localization.Initialize(false);
+		this.modManager.Load(Content.Translation);
+		global::Debug.Log("Register mods/Local/ and mods/Dev as mod distribution platforms");
+		this.modManager.distribution_platforms.Add(new Local("Local", Label.DistributionPlatform.Local));
+		this.modManager.distribution_platforms.Add(new Local("Dev", Label.DistributionPlatform.Dev));
 		this.mainThread = Thread.CurrentThread;
 		KProfiler.main_thread = Thread.CurrentThread;
 		this.RestoreLegacyMetricsSetting();
@@ -282,13 +300,13 @@ public class Global : MonoBehaviour
 					DistributionPlatform.Inst.LocalUser.Id,
 					", NAME:",
 					DistributionPlatform.Inst.LocalUser.Name
-				}), null);
+				}));
 				ThreadedHttps<KleiAccount>.Instance.AuthenticateUser(new KleiAccount.GetUserIDdelegate(this.OnGetUserIdKey));
 			}
 		}
 		else
 		{
-			global::Debug.LogWarning("Can't init " + DistributionPlatform.Inst.Name + " distribution platform...", null);
+			global::Debug.LogWarning("Can't init " + DistributionPlatform.Inst.Name + " distribution platform...");
 			this.OnGetUserIdKey();
 		}
 		GlobalResources.Instance();
@@ -339,10 +357,13 @@ public class Global : MonoBehaviour
 		{
 			this.mAnimEventManager.Update();
 		}
-		if (DistributionPlatform.Initialized && SteamUGCService.Instance == null)
+		if (DistributionPlatform.Initialized && !this.updated_with_initialized_distribution_platform)
 		{
+			this.updated_with_initialized_distribution_platform = true;
 			SteamUGCService.Initialize();
-			this.modManager.RegisterUGCEventHandlers(SteamUGCService.Instance);
+			Steam steam = new Steam();
+			SteamUGCService.Instance.ugcEventHandlers.Add(steam);
+			this.modManager.distribution_platforms.Add(steam);
 		}
 		if (this.gotKleiUserID)
 		{
@@ -356,7 +377,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 312713U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 326232U);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());
@@ -446,7 +467,7 @@ public class Global : MonoBehaviour
 
 	private AnimEventManager mAnimEventManager;
 
-	public ModManager modManager;
+	public global::KMod.Manager modManager;
 
 	public LayeredFileSystem layeredFileSystem;
 
@@ -457,6 +478,8 @@ public class Global : MonoBehaviour
 	private bool gotKleiUserID;
 
 	public Thread mainThread;
+
+	private bool updated_with_initialized_distribution_platform;
 
 	public static readonly string LanguagePackKey = "LanguagePack";
 

@@ -3,18 +3,14 @@ using UnityEngine;
 
 public struct GravityComponent
 {
-	public GravityComponent(Transform transform, global::System.Action on_landed)
-	{
-		this = new GravityComponent(transform, on_landed, Vector2.zero);
-	}
-
-	public GravityComponent(Transform transform, global::System.Action on_landed, Vector2 initial_velocity)
+	public GravityComponent(Transform transform, global::System.Action on_landed, Vector2 initial_velocity, bool land_on_fake_floors)
 	{
 		this.transform = transform;
 		this.elapsedTime = 0f;
 		this.velocity = initial_velocity;
 		this.onLanded = on_landed;
 		this.radius = GravityComponent.GetRadius(transform);
+		this.landOnFakeFloors = land_on_fake_floors;
 	}
 
 	public static float GetRadius(Transform transform)
@@ -41,4 +37,6 @@ public struct GravityComponent
 	public float elapsedTime;
 
 	public global::System.Action onLanded;
+
+	public bool landOnFakeFloors;
 }

@@ -60,7 +60,7 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 			}
 			else
 			{
-				global::Debug.LogWarning("Equippable trying to be equipped to missing prefab", null);
+				global::Debug.LogWarning("Equippable trying to be equipped to missing prefab");
 				this.isEquipped = false;
 			}
 		}

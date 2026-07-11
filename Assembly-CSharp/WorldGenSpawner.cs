@@ -151,6 +151,7 @@ public class WorldGenSpawner : KMonoBehaviour
 				}
 			}
 			this.cell = num;
+			global::Debug.Assert(Grid.IsValidCell(this.cell));
 			if (Grid.Spawnable[this.cell] > 0)
 			{
 				this.TrySpawn();

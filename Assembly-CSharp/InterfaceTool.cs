@@ -44,7 +44,7 @@ public class InterfaceTool : KMonoBehaviour
 
 	protected virtual void OnActivateTool()
 	{
-		if (OverlayScreen.Instance != null && this.viewMode != OverlayModes.None.ID && OverlayScreen.Instance.mode == OverlayModes.None.ID)
+		if (OverlayScreen.Instance != null && this.viewMode != OverlayModes.None.ID)
 		{
 			OverlayScreen.Instance.ToggleOverlay(this.viewMode);
 			InterfaceTool.toolActivatedViewMode = this.viewMode;
@@ -55,7 +55,7 @@ public class InterfaceTool : KMonoBehaviour
 	public void DeactivateTool(InterfaceTool new_tool = null)
 	{
 		this.OnDeactivateTool(new_tool);
-		if ((new_tool == null || new_tool == SelectTool.Instance) && InterfaceTool.toolActivatedViewMode != OverlayModes.None.ID)
+		if ((new_tool == null || new_tool == SelectTool.Instance) && InterfaceTool.toolActivatedViewMode != OverlayModes.None.ID && InterfaceTool.toolActivatedViewMode == SimDebugView.Instance.GetMode())
 		{
 			OverlayScreen.Instance.ToggleOverlay(OverlayModes.None.ID);
 			InterfaceTool.toolActivatedViewMode = OverlayModes.None.ID;

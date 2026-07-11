@@ -35,17 +35,17 @@ namespace Klei.AI
 			return null;
 		}
 
-		public static Diseases GetDiseases(this KMonoBehaviour cmp)
+		public static Sicknesses GetSicknesses(this KMonoBehaviour cmp)
 		{
-			return cmp.gameObject.GetDiseases();
+			return cmp.gameObject.GetSicknesses();
 		}
 
-		public static Diseases GetDiseases(this GameObject go)
+		public static Sicknesses GetSicknesses(this GameObject go)
 		{
 			Modifiers component = go.GetComponent<Modifiers>();
 			if (component != null)
 			{
-				return component.diseases;
+				return component.sicknesses;
 			}
 			return null;
 		}

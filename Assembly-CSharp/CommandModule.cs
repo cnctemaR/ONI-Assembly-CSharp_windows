@@ -51,17 +51,10 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 		base.OnSpawn();
 		this.storage = base.GetComponent<Storage>();
 		this.assignable = base.GetComponent<Assignable>();
-		this.assignable.eligibleFilter = delegate(MinionAssignablesProxy identity)
-		{
-			if (identity.target is MinionIdentity)
-			{
-				return (identity.target as KMonoBehaviour).GetComponent<MinionResume>().HasPerk(RoleManager.rolePerks.CanUseRockets);
-			}
-			return identity.target is StoredMinionIdentity && (identity.target as StoredMinionIdentity).HasPerk(RoleManager.rolePerks.CanUseRockets);
-		};
+		this.assignable.AddAssignPrecondition(new Func<MinionAssignablesProxy, bool>(this.CanAssignTo));
 		base.smi.StartSM();
-		int num = Grid.OffsetCell(Grid.PosToCell(base.gameObject), 0, -1);
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("CommandModule.gantryChanged", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnGantryChanged));
+		int num = Grid.PosToCell(base.gameObject);
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("CommandModule.gantryChanged", base.gameObject, num, GameScenePartitioner.Instance.validNavCellChangedLayer, new Action<object>(this.OnGantryChanged));
 		this.OnGantryChanged(null);
 		RocketModule component = base.GetComponent<RocketModule>();
 		this.reachable = (ConditionDestinationReachable)component.AddLaunchCondition(new ConditionDestinationReachable(this));
@@ -71,9 +64,19 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 		this.flightPathIsClear = (ConditionFlightPathIsClear)component.AddFlightCondition(new ConditionFlightPathIsClear(base.gameObject, 1));
 	}
 
+	private bool CanAssignTo(MinionAssignablesProxy worker)
+	{
+		if (worker.target is MinionIdentity)
+		{
+			return (worker.target as KMonoBehaviour).GetComponent<MinionResume>().HasPerk(Db.Get().SkillPerks.CanUseRockets);
+		}
+		return worker.target is StoredMinionIdentity && (worker.target as StoredMinionIdentity).HasPerk(Db.Get().SkillPerks.CanUseRockets);
+	}
+
 	private static bool HasValidGantry(GameObject go)
 	{
-		return Grid.FakeFloor[Grid.OffsetCell(Grid.PosToCell(go), 0, -1)];
+		int num = Grid.OffsetCell(Grid.PosToCell(go), 0, -1);
+		return Grid.FakeFloor[num];
 	}
 
 	private void OnGantryChanged(object data)
@@ -100,7 +103,7 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 		ChoreType astronaut = Db.Get().ChoreTypes.Astronaut;
 		KAnimFile anim = Assets.GetAnim("anim_hat_kanim");
 		WorkChore<CommandModuleWorkable> workChore = new WorkChore<CommandModuleWorkable>(astronaut, this, null, null, true, null, null, null, false, null, false, true, anim, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, true);
-		workChore.AddPrecondition(ChorePreconditions.instance.HasRolePerk, RoleManager.rolePerks.CanUseRockets);
+		workChore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanUseRockets);
 		workChore.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, this.assignable);
 		return workChore;
 	}

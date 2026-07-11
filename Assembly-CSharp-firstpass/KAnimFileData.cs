@@ -44,16 +44,18 @@ public class KAnimFileData
 
 	public KAnim.Anim GetAnim(int index)
 	{
+		global::Debug.Assert(index >= 0 && index < this.animCount);
 		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.animBatchTag);
 		if (batchGroupData == null)
 		{
-			global::Debug.LogError(string.Format("[{0}] No such batch group [{1}]", this.name, this.animBatchTag.ToString()), null);
+			global::Debug.LogError(string.Format("[{0}] No such batch group [{1}]", this.name, this.animBatchTag.ToString()));
 		}
 		return batchGroupData.GetAnim(index + this.firstAnimIndex);
 	}
 
 	public KAnim.Anim.FrameElement GetAnimFrameElement(int index)
 	{
+		global::Debug.Assert(index >= 0 && index < this.elementCount);
 		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.animBatchTag);
 		if (batchGroupData == null)
 		{

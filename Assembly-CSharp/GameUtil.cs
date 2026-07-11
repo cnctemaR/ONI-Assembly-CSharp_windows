@@ -227,7 +227,7 @@ public static class GameUtil
 		num3 = Mathf.Clamp(num3, num4, num5);
 		if (float.IsNaN(num3) || float.IsInfinity(num3))
 		{
-			global::Debug.LogError(string.Format("Calculated an invalid temperature: t1={0}, m1={1}, t2={2}, m2={3}, min_temp={4}, max_temp={5}", new object[] { t1, m1, t2, m2, num4, num5 }), null);
+			global::Debug.LogError(string.Format("Calculated an invalid temperature: t1={0}, m1={1}, t2={2}, m2={3}, min_temp={4}, max_temp={5}", new object[] { t1, m1, t2, m2, num4, num5 }));
 		}
 		return num3;
 	}
@@ -1439,7 +1439,7 @@ public static class GameUtil
 														}
 														else
 														{
-															global::Debug.LogWarning("Unable to find proper string for KKeyCode: " + key_code.ToString() + " using key_code.ToString()", null);
+															global::Debug.LogWarning("Unable to find proper string for KKeyCode: " + key_code.ToString() + " using key_code.ToString()");
 														}
 													}
 													else
@@ -1540,7 +1540,7 @@ public static class GameUtil
 	private static void GetNonSolidCells(int x, int y, List<int> cells, int min_x, int min_y, int max_x, int max_y)
 	{
 		int num = Grid.XYToCell(x, y);
-		if (Grid.IsValidCell(num) && !Grid.Solid[num] && !Grid.ForceField[num] && x >= min_x && x <= max_x && y >= min_y && y <= max_y && !cells.Contains(num))
+		if (Grid.IsValidCell(num) && !Grid.Solid[num] && !Grid.DupePassable[num] && x >= min_x && x <= max_x && y >= min_y && y <= max_y && !cells.Contains(num))
 		{
 			cells.Add(num);
 			GameUtil.GetNonSolidCells(x + 1, y, cells, min_x, min_y, max_x, max_y);
@@ -1904,6 +1904,7 @@ public static class GameUtil
 
 	public static List<Descriptor> GetEquipmentEffects(EquipmentDef def)
 	{
+		global::Debug.Assert(def != null);
 		List<Descriptor> list = new List<Descriptor>();
 		List<AttributeModifier> attributeModifiers = def.AttributeModifiers;
 		if (attributeModifiers != null)
@@ -1931,7 +1932,7 @@ public static class GameUtil
 		if (text == null)
 		{
 			text = "MISSING RECIPEDESCRIPTION";
-			global::Debug.LogWarning("Missing recipeDescription", null);
+			global::Debug.LogWarning("Missing recipeDescription");
 		}
 		return text;
 	}
@@ -2186,7 +2187,7 @@ public static class GameUtil
 		{
 			text5 = NAMEGEN.ROCKET.FMT_NOUN;
 		}
-		Output.Log(new object[]
+		DebugUtil.LogArgs(new object[]
 		{
 			"Rocket name bits:",
 			Convert.ToString(num4, 2)

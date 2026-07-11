@@ -34,7 +34,16 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 			float num2 = dt * -this.bladder.GetDelta() / this.bladder.GetMax();
 			if (num2 > 0f)
 			{
-				SimMessages.AddRemoveSubstance(num, SimHashes.DirtyWater, CellEventLogger.Instance.Vomit, 2f * num2, this.bodyTemperature.value, index, Mathf.CeilToInt(100000f * num2), true, -1);
+				float num3 = 2f * num2;
+				Equippable equippable = base.GetComponent<SuitEquipper>().IsWearingAirtightSuit();
+				if (equippable != null)
+				{
+					equippable.GetComponent<Storage>().AddLiquid(SimHashes.DirtyWater, num3, this.bodyTemperature.value, index, Mathf.CeilToInt(100000f * num2), false, true);
+				}
+				else
+				{
+					SimMessages.AddRemoveSubstance(num, SimHashes.DirtyWater, CellEventLogger.Instance.Vomit, num3, this.bodyTemperature.value, index, Mathf.CeilToInt(100000f * num2), true, -1);
+				}
 			}
 		}
 

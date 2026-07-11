@@ -85,7 +85,7 @@ public class KIconToggleMenu : KScreen
 					component2.AddMultiStringTooltip(toggleInfo.tooltipHeader, (!(this.ToggleToolTipHeaderTextStyleSetting != null)) ? this.ToggleToolTipTextStyleSetting : this.ToggleToolTipHeaderTextStyleSetting);
 					if (this.ToggleToolTipHeaderTextStyleSetting == null)
 					{
-						global::Debug.Log("!", null);
+						global::Debug.Log("!");
 					}
 				}
 				component2.AddMultiStringTooltip(GameUtil.ReplaceHotkeyString(toggleInfo.tooltip, toggleInfo.hotKey), this.ToggleToolTipTextStyleSetting);
@@ -94,17 +94,9 @@ public class KIconToggleMenu : KScreen
 			{
 				ktoggle2.fgImage.sprite = toggleInfo.getSpriteCB();
 			}
-			else
+			else if (toggleInfo.icon != null)
 			{
-				foreach (Sprite sprite in this.icons)
-				{
-					if (sprite != null && sprite.name == toggleInfo.icon)
-					{
-						Image fgImage = ktoggle2.fgImage;
-						fgImage.sprite = sprite;
-						break;
-					}
-				}
+				ktoggle2.fgImage.sprite = Assets.GetSprite(toggleInfo.icon);
 			}
 			toggleInfo.toggle = ktoggle2;
 			this.toggles.Add(ktoggle2);

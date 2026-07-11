@@ -29,7 +29,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		SaveGame.Instance = this;
 		ColonyRationMonitor.Instance instance = new ColonyRationMonitor.Instance(this);
 		instance.StartSM();
-		RedAlertManager.Instance instance2 = new RedAlertManager.Instance(this);
+		VignetteManager.Instance instance2 = new VignetteManager.Instance(this);
 		instance2.StartSM();
 		this.entombedItemManager = base.gameObject.AddComponent<EntombedItemManager>();
 		this.worldGen = SaveLoader.Instance.worldGen;
@@ -66,7 +66,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		}
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 312713U;
+		header.buildVersion = 326232U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);
@@ -178,7 +178,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			this.isAutoSave = isAutoSave;
 			this.originalSaveName = originalSaveName;
 			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 6;
+			this.saveMinorVersion = 8;
 		}
 
 		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName, bool sandboxEnabled = false)
@@ -189,7 +189,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			this.isAutoSave = false;
 			this.originalSaveName = string.Empty;
 			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 6;
+			this.saveMinorVersion = 8;
 		}
 
 		public bool IsVersionOlderThan(int major, int minor)

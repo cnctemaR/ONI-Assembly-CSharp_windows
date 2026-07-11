@@ -46,6 +46,7 @@ public class Schedule : ISaveLoadable, IListableOption
 				num++;
 			}
 		}
+		global::Debug.Assert(num == 24);
 		this.Changed();
 	}
 

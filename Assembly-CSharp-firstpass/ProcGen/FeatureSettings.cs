@@ -36,7 +36,7 @@ namespace ProcGen
 			{
 				return WeightedRandom.Choose<WeightedSimHash>(this.ElementChoiceGroups[item].choices, rnd);
 			}
-			Debug.LogError("Couldnt get SimHash [" + item + "]", null);
+			Debug.LogError("Couldnt get SimHash [" + item + "]");
 			return null;
 		}
 	}

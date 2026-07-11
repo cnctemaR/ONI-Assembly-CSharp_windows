@@ -35,7 +35,7 @@ public class UIDupeRandomizer : MonoBehaviour
 		UIDupeRandomizer.AddAccessory(dupe, this.slots.Mouth.Lookup(bodyData.mouth));
 		UIDupeRandomizer.AddAccessory(dupe, this.slots.Body.Lookup(bodyData.body));
 		UIDupeRandomizer.AddAccessory(dupe, this.slots.Arm.Lookup(bodyData.arms));
-		if (global::UnityEngine.Random.value < 0.15f)
+		if (this.applySuit && global::UnityEngine.Random.value < 0.15f)
 		{
 			component.AddBuildOverride(Assets.GetAnim("body_oxygen_kanim").GetData(), 6);
 			component.AddBuildOverride(Assets.GetAnim("helm_oxygen_kanim").GetData(), 6);
@@ -48,9 +48,9 @@ public class UIDupeRandomizer : MonoBehaviour
 		if (this.applyHat && global::UnityEngine.Random.value < 0.5f)
 		{
 			List<string> list = new List<string>();
-			foreach (KeyValuePair<string, string> keyValuePair in RoleManager.roleHatIndex)
+			foreach (Skill skill in Db.Get().Skills.resources)
 			{
-				list.Add(keyValuePair.Value);
+				list.Add(skill.hat);
 			}
 			string text = list[global::UnityEngine.Random.Range(0, list.Count)];
 			UIDupeRandomizer.AddAccessory(dupe, this.slots.Hat.Lookup(text));
@@ -101,6 +101,8 @@ public class UIDupeRandomizer : MonoBehaviour
 	public KAnimFile body_swap_anim;
 
 	public bool applyHat = true;
+
+	public bool applySuit = true;
 
 	public UIDupeRandomizer.AnimChoice[] anims;
 

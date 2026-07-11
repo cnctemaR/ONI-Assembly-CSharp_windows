@@ -8,6 +8,8 @@ public class CompostWorkable : Workable
 		base.OnPrefabInit();
 		this.attributeConverter = Db.Get().AttributeConverters.TidyingSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
+		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Basekeeping.Id;
+		this.skillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;
 	}
 
 	protected override void OnStartWork(Worker worker)
@@ -16,10 +18,5 @@ public class CompostWorkable : Workable
 
 	protected override void OnStopWork(Worker worker)
 	{
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole(Handyman.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 }

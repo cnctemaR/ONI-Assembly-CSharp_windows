@@ -1,5 +1,4 @@
 ﻿using System;
-using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -17,9 +16,9 @@ public class OxyliteRefineryConfig : IBuildingConfig
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER5;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, new float[]
 		{
-			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER5[0],
-			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0]
-		}, array, 2400f, BuildLocationRule.OnFloor, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER1, tier, 0.2f);
+			BUILDINGS.CONSTRUCTION_MASS_KG.TIER5[0],
+			BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0]
+		}, array, 2400f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, tier, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.PowerInputOffset = new CellOffset(0, 0);
@@ -73,17 +72,17 @@ public class OxyliteRefineryConfig : IBuildingConfig
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, OxyliteRefineryConfig.INPUT_PORTS);
+		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_1);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, OxyliteRefineryConfig.INPUT_PORTS);
+		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_1);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, OxyliteRefineryConfig.INPUT_PORTS);
+		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_1);
 		go.AddOrGet<LogicOperationalController>();
 		go.AddOrGetDef<PoweredActiveController.Def>();
 	}
@@ -107,6 +106,4 @@ public class OxyliteRefineryConfig : IBuildingConfig
 	public const float O2_STORAGE_AMOUNT = 6f;
 
 	public const float STORAGE_CAPACITY = 23.2f;
-
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 1), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
 }

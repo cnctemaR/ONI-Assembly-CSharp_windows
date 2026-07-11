@@ -318,6 +318,7 @@ public class ProductInfoScreen : KScreen
 
 	private void ActivateAppropriateTool(BuildingDef def)
 	{
+		global::Debug.Assert(def != null, "def was null");
 		if (this.materialSelectionPanel.AllSelectorsSelected() && this.BuildRequirementsMet(def))
 		{
 			this.onElementsFullySelected.Signal();
@@ -343,12 +344,12 @@ public class ProductInfoScreen : KScreen
 	{
 		if (recipe == null)
 		{
-			global::Debug.LogError("Trying to verify the materials on a null recipe!", null);
+			global::Debug.LogError("Trying to verify the materials on a null recipe!");
 			return false;
 		}
 		if (recipe.Ingredients == null || recipe.Ingredients.Count == 0)
 		{
-			global::Debug.LogError("Trying to verify the materials on a recipe with no MaterialCategoryTags!", null);
+			global::Debug.LogError("Trying to verify the materials on a recipe with no MaterialCategoryTags!");
 			return false;
 		}
 		for (int i = 0; i < recipe.Ingredients.Count; i++)

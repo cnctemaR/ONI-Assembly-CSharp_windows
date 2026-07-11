@@ -159,6 +159,7 @@ public class KBatchGroupData
 
 	public void AddAnim(KAnim.Anim anim)
 	{
+		global::Debug.Assert(anim.index == this.anims.Count);
 		this.anims.Add(anim);
 	}
 
@@ -166,7 +167,7 @@ public class KBatchGroupData
 	{
 		if (anim < 0 || anim >= this.anims.Count)
 		{
-			global::Debug.LogError(string.Format("Anim [{0}] out of range [{1}] in batch [{2}]", anim, this.anims.Count, this.groupID), null);
+			global::Debug.LogError(string.Format("Anim [{0}] out of range [{1}] in batch [{2}]", anim, this.anims.Count, this.groupID));
 		}
 		return this.anims[anim];
 	}
@@ -290,7 +291,7 @@ public class KBatchGroupData
 				this.symbolFrameInstances.Count,
 				" ",
 				animFrameElements.Count
-			}), null);
+			}));
 		}
 		data[start_index++] = (float)num;
 		data[start_index++] = (float)animFrames.Count;
@@ -335,7 +336,7 @@ public class KBatchGroupData
 							": ",
 							frameElement.symbol,
 							"]"
-						}), null);
+						}));
 					}
 					int frameIdx = buildSymbol.GetFrameIdx(frameElement.frame);
 					this.Write(data, start_index, frameIdx, l, frameElement);

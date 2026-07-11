@@ -1,5 +1,4 @@
 ﻿using System;
-using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -13,12 +12,12 @@ public class POIDoorInternalConfig : IBuildingConfig
 		string text = "door_poi_internal_kanim";
 		int num3 = 30;
 		float num4 = 10f;
-		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
 		string[] all_METALS = MATERIALS.ALL_METALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none, 1f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 1f);
 		buildingDef.ShowInBuildMenu = false;
 		buildingDef.Entombable = false;
 		buildingDef.Floodable = false;
@@ -44,12 +43,22 @@ public class POIDoorInternalConfig : IBuildingConfig
 		workable.workTime = 3f;
 		go.AddOrGet<KBoxCollider2D>();
 		Prioritizable.AddRef(go);
-		GeneratedBuildings.RegisterLogicPorts(go, POIDoorInternalConfig.INPUT_PORTS);
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
+	}
+
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_0_0);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_0_0);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_0_0);
 		AccessControl component = go.GetComponent<AccessControl>();
 		Door component2 = go.GetComponent<Door>();
 		component2.hasComplexUserControls = false;
@@ -60,6 +69,4 @@ public class POIDoorInternalConfig : IBuildingConfig
 	}
 
 	public static string ID = "POIDoorInternal";
-
-	public static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(Door.OPEN_CLOSE_PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.DOOR.LOGIC_PORT_DESC, false) };
 }

@@ -47,6 +47,10 @@ public class FilteredStorage
 				{
 					str = str.Replace("{Units}", component.CapacityUnits);
 				}
+				else
+				{
+					str = str.Replace("{Units}", GameUtil.GetCurrentMassUnit(false));
+				}
 				return str;
 			};
 			FilteredStorage.noFilterStatusItem = new StatusItem("NoStorageFilterSet", "BUILDING", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);

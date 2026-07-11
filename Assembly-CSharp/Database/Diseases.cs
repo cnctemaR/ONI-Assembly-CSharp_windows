@@ -8,18 +8,13 @@ namespace Database
 		public Diseases(ResourceSet parent)
 			: base("Diseases", parent)
 		{
-			this.FoodPoisoning = base.Add(new FoodPoisoning());
-			this.ColdBrain = base.Add(new ColdBrain());
-			this.HeatRash = base.Add(new HeatRash());
-			this.SlimeLung = base.Add(new SlimeLung());
-			this.Sunburn = base.Add(new Sunburn());
-			this.PutridOdour = base.Add(new PutridOdour());
-			this.PutridOdour.Disabled = true;
-			this.Spores = base.Add(new Spores());
-			this.Spores.Disabled = true;
+			this.FoodGerms = base.Add(new FoodGerms());
+			this.SlimeGerms = base.Add(new SlimeGerms());
+			this.PollenGerms = base.Add(new PollenGerms());
+			this.ZombieSpores = base.Add(new ZombieSpores());
 		}
 
-		public static bool IsValidDiseaseID(string id)
+		public static bool IsValidID(string id)
 		{
 			bool flag = false;
 			foreach (Disease disease in Db.Get().Diseases.resources)
@@ -53,22 +48,12 @@ namespace Database
 			return this.GetIndex(id.GetHashCode());
 		}
 
-		public Disease Dweebcephaly;
+		public Disease FoodGerms;
 
-		public Disease Lazibonitis;
+		public Disease SlimeGerms;
 
-		public Disease FoodPoisoning;
+		public Disease PollenGerms;
 
-		public Disease PutridOdour;
-
-		public Disease Spores;
-
-		public Disease ColdBrain;
-
-		public Disease HeatRash;
-
-		public Disease SlimeLung;
-
-		public Disease Sunburn;
+		public Disease ZombieSpores;
 	}
 }

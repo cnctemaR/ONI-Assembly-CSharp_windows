@@ -54,7 +54,7 @@ namespace ProcGenGame
 
 		public virtual void LogInfo(string evt, string param, float value)
 		{
-			global::Debug.Log(string.Concat(new object[] { evt, ":", param, "=", value }), null);
+			global::Debug.Log(string.Concat(new object[] { evt, ":", param, "=", value }));
 		}
 
 		public static void ClearClaimedCells()
@@ -141,8 +141,30 @@ namespace ProcGenGame
 			this.mobs.Add(mob);
 			bool flag = this.RemoveFromAvailableSpawnCells(mob.Key);
 			this.LogInfo("\t\tRemoveFromAvailableCells", mob.Value.Name + ": " + ((!flag) ? "failed" : "success"), (float)mob.Key);
-			if (flag || !this.allCells.Contains(mob.Key))
+			if (!flag)
 			{
+				if (!this.allCells.Contains(mob.Key))
+				{
+					global::Debug.Assert(false, string.Concat(new object[]
+					{
+						"Couldnt find cell [",
+						mob.Key,
+						"] we dont own, to remove for mob [",
+						mob.Value.Name,
+						"]"
+					}));
+				}
+				else
+				{
+					global::Debug.Assert(false, string.Concat(new object[]
+					{
+						"Couldnt find cell [",
+						mob.Key,
+						"] to remove for mob [",
+						mob.Value.Name,
+						"]"
+					}));
+				}
 			}
 		}
 
@@ -179,6 +201,7 @@ namespace ProcGenGame
 			{
 				return 0f;
 			}
+			global::Debug.Assert(world.density[cellIdx] >= 0f && world.density[cellIdx] <= 1f, "Density [" + world.density[cellIdx] + "] out of range [0-1]");
 			float num = world.density[cellIdx] - 0.5f;
 			float num2 = mass + mass * num;
 			if (num2 > 10000f)
@@ -259,7 +282,7 @@ namespace ProcGenGame
 					" ",
 					this.node.position,
 					"]"
-				}), null);
+				}));
 			}
 			else if (bordersWidths != null && bordersWidths.Count > 0 && bordersWidths[0] > 0)
 			{
@@ -278,6 +301,7 @@ namespace ProcGenGame
 
 		public static TerrainCell.ElementOverride GetElementOverride(string element, SampleDescriber.Override overrides)
 		{
+			global::Debug.Assert(element != null && element.Length > 0);
 			TerrainCell.ElementOverride elementOverride = default(TerrainCell.ElementOverride);
 			elementOverride.element = ElementLoader.FindElementByName(element);
 			elementOverride.pdelement = elementOverride.element.defaultValues;
@@ -452,7 +476,7 @@ namespace ProcGenGame
 			{
 				if (!SettingsCache.mobs.HasMob(mobTags[i].type))
 				{
-					global::Debug.LogError("Missing sample description for tag [" + mobTags[i].type + "]", null);
+					global::Debug.LogError("Missing sample description for tag [" + mobTags[i].type + "]");
 				}
 				else
 				{
@@ -551,7 +575,7 @@ namespace ProcGenGame
 								num,
 								"->",
 								(num2 - 6f).ToString()
-							}), null);
+							}));
 						}
 						num = num2 - 6f;
 					}
@@ -779,7 +803,7 @@ namespace ProcGenGame
 				}
 				else
 				{
-					global::Debug.LogError(string.Concat(new object[] { "Process::SetValuesFunction Index [", index, "] is not valid. cells.Length [", cells.Length, "]" }), null);
+					global::Debug.LogError(string.Concat(new object[] { "Process::SetValuesFunction Index [", index, "] is not valid. cells.Length [", cells.Length, "]" }));
 				}
 			};
 			this.DoProcess(worldGen, world, setValuesFunction, rnd);

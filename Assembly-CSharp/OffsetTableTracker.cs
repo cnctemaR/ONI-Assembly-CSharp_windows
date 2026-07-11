@@ -16,6 +16,7 @@ public class OffsetTableTracker : OffsetTracker
 			{
 				OffsetTableTracker.navGridImpl = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
 			}
+			Debug.Assert(OffsetTableTracker.navGridImpl == Pathfinding.Instance.GetNavGrid("MinionNavGrid"), "Cached NavGrid reference is invalid");
 			return OffsetTableTracker.navGridImpl;
 		}
 	}
@@ -62,6 +63,7 @@ public class OffsetTableTracker : OffsetTracker
 
 	private unsafe void UpdateOffsets(int cell, CellOffset[][] table)
 	{
+		Debug.Assert(table.Length <= 192, string.Format("validRowIndices[{0}] isn't big enough < {1}", 192, table.Length));
 		int* ptr = stackalloc int[checked(192 * 4)];
 		int num = 0;
 		if (Grid.IsValidCell(cell))

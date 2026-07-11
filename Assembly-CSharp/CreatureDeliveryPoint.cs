@@ -295,7 +295,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 			for (int i = count - 1; i >= 0; i--)
 			{
 				GameObject gameObject = items[i];
-				component.Drop(gameObject);
+				component.Drop(gameObject, true);
 				gameObject.transform.SetPosition(vector);
 				KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
 				component2.SetSceneLayer(Grid.SceneLayer.Creatures);

@@ -80,7 +80,7 @@ public class ScenePartitioner : ISim1000ms
 	{
 		if (entry.obj == null)
 		{
-			Debug.LogWarning("Trying to put null go into scene partitioner", null);
+			Debug.LogWarning("Trying to put null go into scene partitioner");
 			return;
 		}
 		Extents nodeExtents = this.GetNodeExtents(entry);
@@ -95,7 +95,7 @@ public class ScenePartitioner : ISim1000ms
 				nodeExtents.width,
 				" < ",
 				this.nodes.GetLength(2)
-			}), null);
+			}));
 		}
 		if (nodeExtents.y + nodeExtents.height > this.nodes.GetLength(1))
 		{
@@ -108,7 +108,7 @@ public class ScenePartitioner : ISim1000ms
 				nodeExtents.height,
 				" < ",
 				this.nodes.GetLength(1)
-			}), null);
+			}));
 		}
 		int layer = entry.layer;
 		for (int i = nodeExtents.y; i < nodeExtents.y + nodeExtents.height; i++)
@@ -143,7 +143,7 @@ public class ScenePartitioner : ISim1000ms
 				nodeExtents.width,
 				" < ",
 				this.nodes.GetLength(2)
-			}), null);
+			}));
 		}
 		if (nodeExtents.y + nodeExtents.height > this.nodes.GetLength(1))
 		{
@@ -155,7 +155,7 @@ public class ScenePartitioner : ISim1000ms
 				nodeExtents.height,
 				" < ",
 				this.nodes.GetLength(1)
-			}), null);
+			}));
 		}
 		int layer = entry.layer;
 		for (int i = nodeExtents.y; i < nodeExtents.y + nodeExtents.height; i++)
@@ -212,7 +212,7 @@ public class ScenePartitioner : ISim1000ms
 				nodeExtents.width,
 				" < ",
 				this.nodes.GetLength(2)
-			}), null);
+			}));
 		}
 		if (nodeExtents.y + nodeExtents.height > this.nodes.GetLength(1))
 		{
@@ -224,7 +224,7 @@ public class ScenePartitioner : ISim1000ms
 				nodeExtents.height,
 				" < ",
 				this.nodes.GetLength(1)
-			}), null);
+			}));
 		}
 		int layer = entry.layer;
 		for (int i = nodeExtents.y; i < nodeExtents.y + nodeExtents.height; i++)

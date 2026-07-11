@@ -9,7 +9,7 @@ public class ScheduleMinionWidget : KMonoBehaviour
 
 	public void ChangeAssignment(Schedule targetSchedule, Schedulable schedulable)
 	{
-		Output.Log(new object[]
+		DebugUtil.LogArgs(new object[]
 		{
 			"Assigning",
 			schedulable,

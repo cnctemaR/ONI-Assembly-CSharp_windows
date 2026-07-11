@@ -5,27 +5,14 @@ using UnityEngine;
 
 public static class DebugUtil
 {
-	private static void Break(string message)
-	{
-		global::Debug.LogError(message, null);
-		global::Debug.Break();
-		Debugger.Break();
-	}
-
 	public static void Assert(bool test)
 	{
-		if (!test)
-		{
-			DebugUtil.Break("Failed assertion");
-		}
+		global::Debug.Assert(test);
 	}
 
 	public static void Assert(bool test, string message)
 	{
-		if (!test)
-		{
-			DebugUtil.Break(message);
-		}
+		global::Debug.Assert(test, message);
 	}
 
 	public static void Assert(bool test, string message0, string message1)
@@ -33,7 +20,7 @@ public static class DebugUtil
 		if (!test)
 		{
 			DebugUtil.errorMessageBuilder.Length = 0;
-			DebugUtil.Break(DebugUtil.errorMessageBuilder.Append(message0).Append(" ").Append(message1)
+			global::Debug.Assert(test, DebugUtil.errorMessageBuilder.Append(message0).Append(" ").Append(message1)
 				.ToString());
 		}
 	}
@@ -43,77 +30,108 @@ public static class DebugUtil
 		if (!test)
 		{
 			DebugUtil.errorMessageBuilder.Length = 0;
-			DebugUtil.Break(DebugUtil.errorMessageBuilder.Append(message0).Append(" ").Append(message1)
+			global::Debug.Assert(test, DebugUtil.errorMessageBuilder.Append(message0).Append(" ").Append(message1)
 				.Append(" ")
 				.Append(message2)
 				.ToString());
 		}
 	}
 
-	public static void Assert(bool test, params object[] objs)
+	public static string BuildString(object[] objs)
+	{
+		string text = string.Empty;
+		if (objs.Length > 0)
+		{
+			text = ((objs[0] == null) ? "null" : objs[0].ToString());
+			for (int i = 1; i < objs.Length; i++)
+			{
+				object obj = objs[i];
+				text = text + " " + ((obj == null) ? "null" : obj.ToString());
+			}
+		}
+		return text;
+	}
+
+	public static void DevAssert(bool test, string msg)
 	{
 		if (!test)
 		{
-			global::Debug.LogError(Output.BuildString(objs), null);
-			global::Debug.Break();
-			Debugger.Break();
+			global::Debug.LogWarning(msg);
 		}
 	}
 
-	public static void DevAssert(bool test, params object[] objs)
+	public static void DevAssertArgs(bool test, params object[] objs)
 	{
 		if (!test)
 		{
-			if (Application.isEditor)
-			{
-				global::Debug.LogError(Output.BuildString(objs), null);
-				global::Debug.Break();
-				Debugger.Break();
-			}
-			else
-			{
-				global::Debug.LogWarning(Output.BuildString(objs), null);
-			}
+			global::Debug.LogWarning(DebugUtil.BuildString(objs));
 		}
 	}
 
-	public static void DevAssertWithStack(bool test, params object[] objs)
+	public static void DevAssertArgsWithStack(bool test, params object[] objs)
 	{
 		if (!test)
 		{
-			if (Application.isEditor)
-			{
-				global::Debug.LogError(Output.BuildString(objs), null);
-				global::Debug.Break();
-				Debugger.Break();
-			}
-			else
-			{
-				StackTrace stackTrace = new StackTrace(1, true);
-				string text = string.Format("{0}\n{1}", Output.BuildString(objs), stackTrace);
-				global::Debug.LogWarning(text, null);
-			}
+			StackTrace stackTrace = new StackTrace(1, true);
+			string text = string.Format("{0}\n{1}", DebugUtil.BuildString(objs), stackTrace);
+			global::Debug.LogWarning(text);
 		}
 	}
 
-	public static void DevLogErrorWithObj(GameObject gameObject, string msg)
+	public static void DevLogError(global::UnityEngine.Object context, string msg)
 	{
-		if (global::Debug.isDebugBuild)
-		{
-			Output.LogErrorWithObj(gameObject, new object[] { msg });
-		}
-		else
-		{
-			Output.LogWarningWithObj(gameObject, new object[] { msg });
-		}
+		global::Debug.LogWarningFormat(context, msg, new object[0]);
 	}
 
-	public static void SoftAssert(bool test, params object[] objs)
+	public static void DevLogError(string msg)
 	{
-		if (!test)
-		{
-			global::Debug.LogWarning(Output.BuildString(objs), null);
-		}
+		global::Debug.LogWarningFormat(msg, new object[0]);
+	}
+
+	public static void DevLogErrorFormat(global::UnityEngine.Object context, string format, params object[] args)
+	{
+		global::Debug.LogWarningFormat(context, format, args);
+	}
+
+	public static void DevLogErrorFormat(string format, params object[] args)
+	{
+		global::Debug.LogWarningFormat(format, args);
+	}
+
+	public static void LogArgs(params object[] objs)
+	{
+		string text = DebugUtil.BuildString(objs);
+		global::Debug.Log(text);
+	}
+
+	public static void LogArgs(global::UnityEngine.Object context, params object[] objs)
+	{
+		string text = DebugUtil.BuildString(objs);
+		global::Debug.Log(text, context);
+	}
+
+	public static void LogWarningArgs(params object[] objs)
+	{
+		string text = DebugUtil.BuildString(objs);
+		global::Debug.LogWarning(text);
+	}
+
+	public static void LogWarningArgs(global::UnityEngine.Object context, params object[] objs)
+	{
+		string text = DebugUtil.BuildString(objs);
+		global::Debug.LogWarning(text, context);
+	}
+
+	public static void LogErrorArgs(params object[] objs)
+	{
+		string text = DebugUtil.BuildString(objs);
+		global::Debug.LogError(text);
+	}
+
+	public static void LogErrorArgs(global::UnityEngine.Object context, params object[] objs)
+	{
+		string text = DebugUtil.BuildString(objs);
+		global::Debug.LogError(text, context);
 	}
 
 	private static void RecursiveBuildFullName(GameObject obj)
@@ -147,6 +165,7 @@ public static class DebugUtil
 			.ToString();
 	}
 
+	[Conditional("UNITY_EDITOR")]
 	public static void LogIfSelected(GameObject obj, params object[] objs)
 	{
 	}

@@ -1,6 +1,5 @@
 ﻿using System;
 using Klei;
-using TUNING;
 using UnityEngine;
 
 public class LiquidPumpingStation : Workable, ISim200ms
@@ -14,7 +13,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		for (int i = 0; i < LiquidPumpingStation.floorOffsets.Length; i++)
 		{
 			int num2 = Grid.OffsetCell(num, LiquidPumpingStation.floorOffsets[i]);
-			Grid.LiquidPumpFloor[num2] = true;
+			Grid.FakeFloor[num2] = true;
 			Pathfinding.Instance.AddDirtyNavGridCell(num2);
 		}
 	}
@@ -55,12 +54,6 @@ public class LiquidPumpingStation : Workable, ISim200ms
 			PumpingStationGuide.OccupyArea(base.gameObject, num);
 			this.depthAvailable = num;
 		}
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole("Hauler", work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
-		resume.AddExperienceIfRole(MaterialsManager.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
 	}
 
 	public void Sim200ms(float dt)
@@ -301,7 +294,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		for (int j = 0; j < LiquidPumpingStation.floorOffsets.Length; j++)
 		{
 			int num2 = Grid.OffsetCell(num, LiquidPumpingStation.floorOffsets[j]);
-			Grid.LiquidPumpFloor[num2] = false;
+			Grid.FakeFloor[num2] = false;
 			Pathfinding.Instance.AddDirtyNavGridCell(num2);
 		}
 	}
@@ -419,7 +412,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		{
 			if (this.temperature <= 0f)
 			{
-				global::Debug.LogWarning("TODO(YOG): Fix bad temperature in liquid pumping station.", null);
+				global::Debug.LogWarning("TODO(YOG): Fix bad temperature in liquid pumping station.");
 				return ElementLoader.FindElementByHash(this.element).defaultValues.temperature;
 			}
 			return this.temperature;

@@ -85,6 +85,7 @@ public class BuildingDef : Def
 		}
 		GameObject gameObject = GameUtil.KInstantiate(obj, pos, this.SceneLayer, null, 0);
 		Element element = ElementLoader.GetElement(selected_elements[0]);
+		global::Debug.Assert(element != null);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.ElementID = element.id;
 		component.Temperature = temperature;
@@ -164,6 +165,7 @@ public class BuildingDef : Def
 		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Front;
 		GameObject gameObject = GameUtil.KInstantiate(buildingUnderConstruction, vector, sceneLayer, null, layer);
 		Element element = ElementLoader.GetElement(selected_elements[0]);
+		global::Debug.Assert(element != null, "Missing primary element for BuildingDef");
 		gameObject.GetComponent<PrimaryElement>().ElementID = element.id;
 		gameObject.GetComponent<Constructable>().SelectedElementsTags = selected_elements;
 		gameObject.SetActive(true);
@@ -1138,7 +1140,7 @@ public class BuildingDef : Def
 	{
 		if (location_rule == BuildLocationRule.OnWall)
 		{
-			return BuildingDef.CheckWallFoundation(cell, width, height, true) || BuildingDef.CheckWallFoundation(cell, width, height, false);
+			return BuildingDef.CheckWallFoundation(cell, width, height, orientation != Orientation.FlipH);
 		}
 		if (location_rule == BuildLocationRule.InCorner)
 		{

@@ -98,7 +98,12 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 
 	public bool ShouldEmitCO2()
 	{
-		return false;
+		return !base.GetComponent<KPrefabID>().HasTag(GameTags.AirtightSuit);
+	}
+
+	public bool ShouldStoreCO2()
+	{
+		return base.GetComponent<KPrefabID>().HasTag(GameTags.AirtightSuit);
 	}
 
 	[ContextMenu("SetToRefillAmount")]

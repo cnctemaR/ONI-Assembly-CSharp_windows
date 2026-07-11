@@ -34,6 +34,8 @@ namespace Database
 			this.PowerTinker.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.None));
 			this.FarmTinker = base.Add(new Klei.AI.Attribute("FarmTinker", true, Klei.AI.Attribute.Display.Normal, true, 0f, null, null));
 			this.FarmTinker.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.None));
+			this.SpaceNavigation = base.Add(new Klei.AI.Attribute("SpaceNavigation", true, Klei.AI.Attribute.Display.Normal, true, 0f, null, null));
+			this.SpaceNavigation.SetFormatter(new PercentAttributeFormatter());
 			this.Immunity = base.Add(new Klei.AI.Attribute("Immunity", true, Klei.AI.Attribute.Display.Details, false, 0f, null, null));
 			this.Immunity.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.None));
 			this.ThermalConductivityBarrier = base.Add(new Klei.AI.Attribute("ThermalConductivityBarrier", false, Klei.AI.Attribute.Display.Details, false, 0f, null, null));
@@ -71,6 +73,8 @@ namespace Database
 			this.CarryAmount.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.Mass, GameUtil.TimeSlice.None));
 			this.QualityOfLife = base.Add(new Klei.AI.Attribute("QualityOfLife", false, Klei.AI.Attribute.Display.Details, false, 0f, "ui_icon_qualityoflife", "attribute_qualityoflife"));
 			this.QualityOfLife.SetFormatter(new QualityOfLifeAttributeFormatter());
+			this.GermSusceptibility = base.Add(new Klei.AI.Attribute("GermSusceptibility", false, Klei.AI.Attribute.Display.Details, false, 1f, "ui_icon_immunelevel", "attribute_immunelevel"));
+			this.GermSusceptibility.SetFormatter(new PercentAttributeFormatter());
 			this.LifeSupport = base.Add(new Klei.AI.Attribute("LifeSupport", true, Klei.AI.Attribute.Display.Never, false, 0f, null, null));
 			this.LifeSupport.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.None));
 			this.Toggle = base.Add(new Klei.AI.Attribute("Toggle", true, Klei.AI.Attribute.Display.Never, false, 0f, null, null));
@@ -107,7 +111,11 @@ namespace Database
 
 		public Klei.AI.Attribute FarmTinker;
 
+		public Klei.AI.Attribute SpaceNavigation;
+
 		public Klei.AI.Attribute Immunity;
+
+		public Klei.AI.Attribute GermSusceptibility;
 
 		public Klei.AI.Attribute Insulation;
 

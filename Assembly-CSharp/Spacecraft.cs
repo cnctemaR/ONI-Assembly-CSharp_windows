@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Database;
 using KSerialization;
 using STRINGS;
 using TUNING;
@@ -65,8 +67,33 @@ public class Spacecraft
 	public void BeginMission(SpaceDestination destination)
 	{
 		this.missionElapsed = 0f;
-		this.missionDuration = (float)destination.OneBasedDistance * ROCKETRY.MISSION_DURATION_SCALE;
+		this.missionDuration = (float)destination.OneBasedDistance * ROCKETRY.MISSION_DURATION_SCALE / this.GetPilotNavigationEfficiency();
 		this.SetState(Spacecraft.MissionState.Launching);
+	}
+
+	private float GetPilotNavigationEfficiency()
+	{
+		MinionStorage component = this.launchConditions.GetComponent<MinionStorage>();
+		List<MinionStorage.Info> storedMinionInfo = component.GetStoredMinionInfo();
+		if (storedMinionInfo.Count < 1)
+		{
+			return 1f;
+		}
+		StoredMinionIdentity component2 = storedMinionInfo[0].serializedMinion.Get().GetComponent<StoredMinionIdentity>();
+		string text = Db.Get().Attributes.SpaceNavigation.Id;
+		float num = 1f;
+		foreach (KeyValuePair<string, bool> keyValuePair in component2.MasteryBySkillID)
+		{
+			foreach (SkillPerk skillPerk in Db.Get().Skills.Get(keyValuePair.Key).perks)
+			{
+				SkillAttributePerk skillAttributePerk = skillPerk as SkillAttributePerk;
+				if (skillAttributePerk != null && skillAttributePerk.modifier.AttributeId == text)
+				{
+					num += skillAttributePerk.modifier.Value;
+				}
+			}
+		}
+		return num;
 	}
 
 	public void ForceComplete()

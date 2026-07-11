@@ -69,12 +69,12 @@ public class KCrashReporter : MonoBehaviour
 		}
 		if (KCrashReporter.ignoreAll)
 		{
-			global::Debug.Log("Ignoring crash due to mismatched hashes.json entries.", null);
+			global::Debug.Log("Ignoring crash due to mismatched hashes.json entries.");
 		}
 		if (File.Exists("ignorekcrashreporter.txt"))
 		{
 			KCrashReporter.ignoreAll = true;
-			global::Debug.Log("Ignoring crash due to ignorekcrashreporter.txt", null);
+			global::Debug.Log("Ignoring crash due to ignorekcrashreporter.txt");
 		}
 		if (Application.isEditor && !GenericGameSettings.instance.enableEditorCrashReporting)
 		{
@@ -114,42 +114,70 @@ public class KCrashReporter : MonoBehaviour
 			{
 				SpeedControlScreen.Instance.Pause(true);
 			}
-			string local_msg = msg;
-			string local_stack_trace = stack_trace;
-			if (string.IsNullOrEmpty(local_stack_trace))
+			string text = stack_trace;
+			if (string.IsNullOrEmpty(text))
 			{
 				StackTrace stackTrace = new StackTrace(5, true);
-				local_stack_trace = stackTrace.ToString();
+				text = stackTrace.ToString();
 			}
-			GameObject gameObject = GameObject.Find(KCrashReporter.error_canvas_name);
-			if (gameObject == null)
+			if (App.isLoading)
 			{
-				gameObject = new GameObject();
-				gameObject.name = KCrashReporter.error_canvas_name;
-				Canvas canvas = gameObject.AddComponent<Canvas>();
-				canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-				canvas.additionalShaderChannels = AdditionalCanvasShaderChannels.TexCoord1;
-				gameObject.AddComponent<GraphicRaycaster>();
-			}
-			GameObject gameObject2 = global::UnityEngine.Object.Instantiate<GameObject>(this.reportErrorPrefab, Vector3.zero, Quaternion.identity);
-			gameObject2.transform.SetParent(gameObject.transform, false);
-			this.errorDialog = gameObject2.GetComponentInChildren<ReportErrorDialog>();
-			this.errorDialog.PopupConfirmDialog("ERROR OCCURRED!\nDo you want to report this error?", delegate
-			{
-				string text = null;
-				if (KCrashReporter.MOST_RECENT_SAVEFILE != null)
+				if (!SceneInitializerLoader.deferred_error.IsValid)
 				{
-					text = KCrashReporter.UploadSaveFile(KCrashReporter.MOST_RECENT_SAVEFILE, local_stack_trace, null);
+					SceneInitializerLoader.deferred_error = new SceneInitializerLoader.DeferredError
+					{
+						msg = msg,
+						stack_trace = text
+					};
 				}
-				KCrashReporter.ReportError(local_msg, local_stack_trace, text, this.confirmDialogPrefab, this.errorDialog.UserMessage());
-			}, delegate
+			}
+			else
 			{
-				this.OnQuitToDesktop();
-			}, delegate
-			{
-				this.OnCloseErrorDialog();
-			});
+				this.ShowDialog(msg, text);
+			}
 		}
+	}
+
+	public bool ShowDialog(string error, string stack_trace)
+	{
+		if (Global.Instance != null && Global.Instance.modManager != null && Global.Instance.modManager.HaveLoadedMods())
+		{
+			Global.Instance.modManager.HandleCrash();
+			return true;
+		}
+		if (this.errorDialog != null)
+		{
+			return false;
+		}
+		GameObject gameObject = GameObject.Find(KCrashReporter.error_canvas_name);
+		if (gameObject == null)
+		{
+			gameObject = new GameObject();
+			gameObject.name = KCrashReporter.error_canvas_name;
+			Canvas canvas = gameObject.AddComponent<Canvas>();
+			canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+			canvas.additionalShaderChannels = AdditionalCanvasShaderChannels.TexCoord1;
+			gameObject.AddComponent<GraphicRaycaster>();
+		}
+		GameObject gameObject2 = global::UnityEngine.Object.Instantiate<GameObject>(this.reportErrorPrefab, Vector3.zero, Quaternion.identity);
+		gameObject2.transform.SetParent(gameObject.transform, false);
+		this.errorDialog = gameObject2.GetComponentInChildren<ReportErrorDialog>();
+		this.errorDialog.PopupConfirmDialog("ERROR OCCURRED!\nDo you want to report this error?", delegate
+		{
+			string text = null;
+			if (KCrashReporter.MOST_RECENT_SAVEFILE != null)
+			{
+				text = KCrashReporter.UploadSaveFile(KCrashReporter.MOST_RECENT_SAVEFILE, stack_trace, null);
+			}
+			KCrashReporter.ReportError(error, stack_trace, text, this.confirmDialogPrefab, this.errorDialog.UserMessage());
+		}, delegate
+		{
+			this.OnQuitToDesktop();
+		}, delegate
+		{
+			this.OnCloseErrorDialog();
+		});
+		return true;
 	}
 
 	private void OnCloseErrorDialog()
@@ -164,12 +192,12 @@ public class KCrashReporter : MonoBehaviour
 
 	private void OnQuitToDesktop()
 	{
-		Application.Quit();
+		App.Quit();
 	}
 
 	private static string UploadSaveFile(string save_file, string stack_trace, Dictionary<string, string> metadata = null)
 	{
-		global::Debug.Log(string.Format("Save_file: {0}", save_file), null);
+		global::Debug.Log(string.Format("Save_file: {0}", save_file));
 		if (KPrivacyPrefs.instance.disableDataCollection)
 		{
 			return string.Empty;
@@ -211,7 +239,7 @@ public class KCrashReporter : MonoBehaviour
 				}
 				catch (Exception ex)
 				{
-					global::Debug.Log(ex, null);
+					global::Debug.Log(ex);
 					return string.Empty;
 				}
 			}
@@ -281,14 +309,14 @@ public class KCrashReporter : MonoBehaviour
 		{
 			return;
 		}
-		global::Debug.Log("Reporting error.\n", null);
+		global::Debug.Log("Reporting error.\n");
 		if (msg != null)
 		{
-			global::Debug.Log(msg, null);
+			global::Debug.Log(msg);
 		}
 		if (stack_trace != null)
 		{
-			global::Debug.Log(stack_trace, null);
+			global::Debug.Log(stack_trace);
 		}
 		KCrashReporter.hasReportedError = true;
 		if (KPrivacyPrefs.instance.disableDataCollection)
@@ -357,7 +385,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
-			error.build = 312713;
+			error.build = 326232;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = string.Join("\n", list.ToArray());
 			error.user_message = userMessage;
@@ -372,14 +400,14 @@ public class KCrashReporter : MonoBehaviour
 			string text5 = JsonConvert.SerializeObject(error);
 			string empty = string.Empty;
 			Uri uri = new Uri("http://crashes.klei.ca/submitCrash");
-			global::Debug.Log("Submitting crash:", null);
+			global::Debug.Log("Submitting crash:");
 			try
 			{
 				webClient.UploadStringAsync(uri, text5);
 			}
 			catch (Exception ex)
 			{
-				global::Debug.Log(ex, null);
+				global::Debug.Log(ex);
 			}
 			if (confirm_prefab != null)
 			{
@@ -414,7 +442,7 @@ public class KCrashReporter : MonoBehaviour
 		}
 	}
 
-	public static void ReportDLLCrash(string msg, string stack_trace, string dmp_filename)
+	public static void ReportSimDLLCrash(string msg, string stack_trace, string dmp_filename)
 	{
 		if (KCrashReporter.hasReportedError)
 		{

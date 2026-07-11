@@ -45,7 +45,7 @@ public class ValveSideScreen : SideScreenContent
 		this.targetValve = target.GetComponent<Valve>();
 		if (this.targetValve == null)
 		{
-			global::Debug.LogError("The target object does not have a Valve component.", null);
+			global::Debug.LogError("The target object does not have a Valve component.");
 			return;
 		}
 		this.flowSlider.minValue = 0f;
@@ -94,7 +94,7 @@ public class ValveSideScreen : SideScreenContent
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		global::Debug.Log("ValveSideScreen OnKeyDown", null);
+		global::Debug.Log("ValveSideScreen OnKeyDown");
 		if (this.isEditing)
 		{
 			e.Consumed = true;

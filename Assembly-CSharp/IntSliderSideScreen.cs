@@ -23,7 +23,7 @@ public class IntSliderSideScreen : SideScreenContent
 	{
 		if (new_target == null)
 		{
-			global::Debug.LogError("Invalid gameObject received", null);
+			global::Debug.LogError("Invalid gameObject received");
 			return;
 		}
 		this.target = new_target.GetComponent<IIntSliderControl>();
@@ -33,7 +33,7 @@ public class IntSliderSideScreen : SideScreenContent
 		}
 		if (this.target == null)
 		{
-			global::Debug.LogError("The gameObject received does not contain a Manual Generator component", null);
+			global::Debug.LogError("The gameObject received does not contain a Manual Generator component");
 			return;
 		}
 		this.titleKey = this.target.SliderTitleKey;

@@ -27,7 +27,7 @@ public class ElementDropper : KMonoBehaviour
 			}
 			else
 			{
-				this.storage.Drop(gameObject);
+				this.storage.Drop(gameObject, true);
 				gameObject.transform.SetPosition(gameObject.transform.GetPosition() + this.emitOffset);
 			}
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, pickupable.GetComponent<PrimaryElement>().Element.name + " " + GameUtil.GetFormattedMass(pickupable.TotalAmount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), pickupable.transform, 1.5f, false);

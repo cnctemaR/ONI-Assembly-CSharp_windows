@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
+using Database;
+using Klei.AI;
 using KSerialization;
 using STRINGS;
 using TUNING;
@@ -17,135 +20,130 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		}
 	}
 
+	public float TotalExperienceGained
+	{
+		get
+		{
+			return this.totalExperienceGained;
+		}
+	}
+
+	public int TotalSkillPointsGained
+	{
+		get
+		{
+			float num = this.TotalExperienceGained / (float)SKILLS.TARGET_SKILLS_CYCLE / 600f;
+			float num2 = Mathf.Pow(num, 1f / SKILLS.EXPERIENCE_LEVEL_POWER);
+			return Mathf.FloorToInt(num2 * (float)SKILLS.TARGET_SKILLS_EARNED);
+		}
+	}
+
+	public int SkillsMastered
+	{
+		get
+		{
+			int num = 0;
+			foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryBySkillID)
+			{
+				if (keyValuePair.Value)
+				{
+					num++;
+				}
+			}
+			return num;
+		}
+	}
+
+	public int AvailableSkillpoints
+	{
+		get
+		{
+			return this.TotalSkillPointsGained - this.SkillsMastered;
+		}
+	}
+
 	[OnDeserialized]
 	private void OnDeserializedMethod()
 	{
-		if (this.currentRole != "NoRole")
+		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 7))
 		{
-			this.currentRoleConfig = Game.Instance.roleManager.GetRole(this.currentRole);
+			foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryByRoleID)
+			{
+				if (keyValuePair.Value && keyValuePair.Key != "NoRole")
+				{
+					this.ForceAddSkillPoint();
+				}
+			}
 		}
+	}
+
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		Components.MinionResumes.Add(this);
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		this.selectable = base.GetComponent<KSelectable>();
-		this.UpdateStatusItem();
-		this.ExperienceByRoleID["NoRole"] = 0f;
-		foreach (RoleConfig roleConfig in Game.Instance.roleManager.RolesConfigs)
+		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryBySkillID)
 		{
-			if (!this.MasteryByRoleID.ContainsKey(roleConfig.id))
+			if (keyValuePair.Value)
 			{
-				this.MasteryByRoleID.Add(roleConfig.id, false);
-			}
-			if (!this.ExperienceByRoleID.ContainsKey(roleConfig.id))
-			{
-				this.AddExperience(roleConfig.id, 0f, true);
-			}
-			if (this.ExperienceByRoleID[roleConfig.id] >= roleConfig.experienceRequired)
-			{
-				this.MasteryByRoleID[roleConfig.id] = true;
-			}
-			if (this.MasteryByRoleID[roleConfig.id])
-			{
-				this.ExperienceByRoleID[roleConfig.id] = roleConfig.experienceRequired;
-			}
-			if (!this.AptitudeByRoleGroup.ContainsKey(roleConfig.roleGroup))
-			{
-				this.AddAptitude(roleConfig.roleGroup, 0f);
-			}
-		}
-		this.UpgradeExperienceAndMastery();
-		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryByRoleID)
-		{
-			if (!(keyValuePair.Key == this.currentRole))
-			{
-				if (keyValuePair.Value)
+				Skill skill = Db.Get().Skills.Get(keyValuePair.Key);
+				foreach (SkillPerk skillPerk in skill.perks)
 				{
-					foreach (RolePerk rolePerk in Game.Instance.roleManager.GetRole(keyValuePair.Key).perks)
+					if (skillPerk.OnRemove != null)
 					{
-						if (rolePerk.OnRemove != null)
-						{
-							rolePerk.OnRemove(this);
-						}
-						if (rolePerk.OnApply != null)
-						{
-							rolePerk.OnApply(this);
-						}
+						skillPerk.OnRemove(this);
+					}
+					if (skillPerk.OnApply != null)
+					{
+						skillPerk.OnApply(this);
 					}
 				}
-			}
-		}
-		if (!string.IsNullOrEmpty(this.currentRole))
-		{
-			Game.Instance.roleManager.RestoreRole(this, this.currentRole);
-			if (this.currentRole != this.targetRole)
-			{
-				if (this.targetRole == "NoRole")
+				if (!this.ownedHats.ContainsKey(skill.hat))
 				{
-					Game.Instance.roleManager.Unassign(this, false);
-				}
-				else
-				{
-					Game.Instance.roleManager.AssignToRole(this.targetRole, this, false, true);
+					this.ownedHats.Add(skill.hat, true);
 				}
 			}
 		}
+		this.UpdateExpectations();
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		MinionResume.ApplyHat(this.currentHat, component);
 	}
 
-	private void UpdateStatusItem()
+	public void RestoreResume(Dictionary<string, bool> MasteryBySkillID, Dictionary<HashedString, float> AptitudeBySkillGroup, float totalExperienceGained)
 	{
-		if (string.IsNullOrEmpty(this.currentRole) || this.currentRole == "NoRole")
-		{
-			this.SetCurrentRole("NoRole");
-			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Role, Db.Get().DuplicantStatusItems.NoRole, this);
-		}
-		else
-		{
-			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Role, Db.Get().DuplicantStatusItems.Role, this);
-		}
+		this.MasteryBySkillID = MasteryBySkillID;
+		this.AptitudeBySkillGroup = AptitudeBySkillGroup;
+		this.totalExperienceGained = totalExperienceGained;
 	}
 
-	private void UpgradeExperienceAndMastery()
+	protected override void OnCleanUp()
 	{
-		List<string> list = new List<string>();
-		foreach (KeyValuePair<string, float> keyValuePair in this.ExperienceByRoleID)
-		{
-			if (keyValuePair.Value > 0f)
-			{
-				foreach (RoleAssignmentRequirement roleAssignmentRequirement in Game.Instance.roleManager.GetRole(keyValuePair.Key).requirements)
-				{
-					if (roleAssignmentRequirement is PreviousRoleAssignmentRequirement && !list.Contains((roleAssignmentRequirement as PreviousRoleAssignmentRequirement).previousRoleID))
-					{
-						list.Add((roleAssignmentRequirement as PreviousRoleAssignmentRequirement).previousRoleID);
-					}
-				}
-			}
-		}
-		foreach (string text in list)
-		{
-			this.MasteryByRoleID[text] = true;
-			this.ExperienceByRoleID[text] = Game.Instance.roleManager.GetRole(text).experienceRequired;
-		}
+		Components.MinionResumes.Remove(this);
+		base.OnCleanUp();
 	}
 
-	public bool HasMasteredRole(string roleId)
+	public bool HasMasteredSkill(string skillId)
 	{
-		return this.MasteryByRoleID[roleId];
+		return this.MasteryBySkillID.ContainsKey(skillId) && this.MasteryBySkillID[skillId];
 	}
 
 	public void UpdateUrge()
 	{
-		if (this.targetRole != this.currentRole && this.targetRole != "NoRole")
+		if (this.targetHat != this.currentHat)
 		{
-			if (!base.gameObject.GetComponent<ChoreConsumer>().HasUrge(Db.Get().Urges.SwitchRole))
+			if (!base.gameObject.GetComponent<ChoreConsumer>().HasUrge(Db.Get().Urges.LearnSkill))
 			{
-				base.gameObject.GetComponent<ChoreConsumer>().AddUrge(Db.Get().Urges.SwitchRole);
+				base.gameObject.GetComponent<ChoreConsumer>().AddUrge(Db.Get().Urges.LearnSkill);
 			}
 		}
 		else
 		{
-			base.gameObject.GetComponent<ChoreConsumer>().RemoveUrge(Db.Get().Urges.SwitchRole);
+			base.gameObject.GetComponent<ChoreConsumer>().RemoveUrge(Db.Get().Urges.LearnSkill);
 		}
 	}
 
@@ -157,22 +155,31 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		}
 	}
 
-	public RoleConfig GetCurrentRoleConfig()
+	public string CurrentHat
 	{
-		return this.currentRoleConfig;
+		get
+		{
+			return this.currentHat;
+		}
+	}
+
+	public string TargetHat
+	{
+		get
+		{
+			return this.targetHat;
+		}
+	}
+
+	public void SetHats(string current, string target)
+	{
+		this.currentHat = current;
+		this.targetHat = target;
 	}
 
 	public void SetCurrentRole(string role_id)
 	{
 		this.currentRole = role_id;
-		if (role_id == "NoRole")
-		{
-			this.currentRoleConfig = null;
-		}
-		else
-		{
-			this.currentRoleConfig = Game.Instance.roleManager.GetRole(this.currentRole);
-		}
 	}
 
 	public string TargetRole
@@ -183,280 +190,396 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		}
 	}
 
-	public bool IsChoreGroupInCurrentRoleGroup(ChoreGroup choregroup)
+	private void ApplySkillPerks(string skillId)
 	{
-		if (this.CurrentRole == "NoRole")
+		Skill skill = Db.Get().Skills.Get(skillId);
+		foreach (SkillPerk skillPerk in skill.perks)
 		{
-			return false;
-		}
-		RoleConfig role = Game.Instance.roleManager.GetRole(this.currentRole);
-		return Game.Instance.roleManager.RoleGroups[role.roleGroup].choreGroupID == choregroup.Id;
-	}
-
-	public void SetTargetRole(string newRole)
-	{
-		this.targetRole = newRole;
-		this.UpdateUrge();
-	}
-
-	public void AssumeTargetRole()
-	{
-		this.OnEnterRole(this.targetRole, true);
-	}
-
-	public void OnExitRole()
-	{
-		RoleConfig roleConfig = null;
-		if (this.CurrentRole != null && this.CurrentRole != "NoRole")
-		{
-			roleConfig = Game.Instance.roleManager.GetRole(this.CurrentRole);
-			this.SetCurrentRole("NoRole");
-		}
-		if (roleConfig == null)
-		{
-			return;
-		}
-		if (!this.MasteryByRoleID[roleConfig.id])
-		{
-			foreach (RolePerk rolePerk in roleConfig.perks)
+			if (skillPerk.OnApply != null)
 			{
-				if (rolePerk.OnRemove != null)
-				{
-					rolePerk.OnRemove(this);
-				}
+				skillPerk.OnApply(this);
 			}
 		}
-		this.UpdateStatusItem();
-		this.UpdateExpectations();
-		this.UpdateUrge();
-		Game.Instance.Trigger(-1523247426, this);
 	}
 
-	public void OnEnterRole(string newRole, bool changeTargetRole = true)
+	private void RemoveSkillPerks(string skillId)
 	{
-		if (newRole == "JuniorResearcher ")
+		Skill skill = Db.Get().Skills.Get(skillId);
+		foreach (SkillPerk skillPerk in skill.perks)
 		{
-			newRole = JuniorResearcher.ID;
-		}
-		if (newRole != "NoRole")
-		{
-			GameScheduler.Instance.Schedule("MoraleTutorial", 5f, delegate(object obj)
+			if (skillPerk.OnRemove != null)
 			{
-				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Morale);
-			}, null, null);
-		}
-		RoleManager.ApplyRoleHat(Game.Instance.roleManager.GetRole(this.targetRole), base.GetComponent<Accessorizer>(), base.GetComponent<KBatchedAnimController>());
-		if (changeTargetRole)
-		{
-			this.targetRole = newRole;
-		}
-		this.SetCurrentRole(newRole);
-		StatusItem statusItem = ((!(newRole == "NoRole")) ? Db.Get().DuplicantStatusItems.Role : Db.Get().DuplicantStatusItems.NoRole);
-		this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Role, statusItem, this);
-		RoleConfig role = Game.Instance.roleManager.GetRole(newRole);
-		base.Trigger(540773776, newRole);
-		this.AddExperience(newRole, 0f, true);
-		foreach (RolePerk rolePerk in role.perks)
-		{
-			if (rolePerk.OnApply != null)
-			{
-				rolePerk.OnApply(this);
+				skillPerk.OnRemove(this);
 			}
 		}
-		this.UpdateExpectations();
-		Game.Instance.Trigger(-1523247426, this);
-		this.UpdateStatusItem();
-		this.UpdateUrge();
-		ChoreProvider component = base.GetComponent<ChoreProvider>();
-		Chore chore = component.chores.Find((Chore test) => test is TakeOffHatChore);
-		if (chore != null)
-		{
-			chore.Cancel("User Canceled");
-		}
-	}
-
-	private string GetExperienceString()
-	{
-		return string.Empty;
-	}
-
-	public string GetCurrentRoleString()
-	{
-		string text = this.targetRole;
-		return Game.Instance.roleManager.GetRole(text).name;
-	}
-
-	public string GetCurrentRoleDescription()
-	{
-		string text = this.targetRole;
-		return Game.Instance.roleManager.GetRole(text).description;
 	}
 
 	public void Sim200ms(float dt)
 	{
-		if (!string.IsNullOrEmpty(this.CurrentRole) && this.CurrentRole != "NoRole" && !base.GetComponent<KPrefabID>().HasTag(GameTags.Dead))
+		this.DEBUG_SecondsAlive += dt;
+		if (!base.GetComponent<KPrefabID>().HasTag(GameTags.Dead))
 		{
-			this.AddExperience(this.CurrentRole, dt * ROLES.PASSIVE_EXPERIENCE_SCALE, false);
+			this.DEBUG_PassiveExperienceGained += dt * SKILLS.PASSIVE_EXPERIENCE_PORTION;
+			this.AddExperience(dt * SKILLS.PASSIVE_EXPERIENCE_PORTION);
 		}
 	}
 
-	public void AddExperience(string roleID, float amount, bool respectAptitude = true)
+	public bool CheckSkillTraitDisabled(string skillId)
 	{
-		if (roleID == "NoRole")
+		Skill skill = Db.Get().Skills.Get(skillId);
+		string choreGroupID = Db.Get().SkillGroups.Get(skill.skillGroup).choreGroupID;
+		if (!string.IsNullOrEmpty(choreGroupID))
 		{
-			return;
-		}
-		RoleConfig role = Game.Instance.roleManager.GetRole(roleID);
-		float num = 0f;
-		this.ExperienceByRoleID.TryGetValue(roleID, out num);
-		float num2 = 0f;
-		if (role.id != "NoRole" && !this.AptitudeByRoleGroup.TryGetValue(role.roleGroup, out num2))
-		{
-			this.AptitudeByRoleGroup.Add(role.roleGroup, 0f);
-		}
-		float num3 = ((!respectAptitude) ? amount : (amount * (1f + num2 * (ROLES.APTITUDE_EXPERIENCE_SCALE / 100f))));
-		bool flag = num != role.experienceRequired && num3 > 0f && num + num3 >= role.experienceRequired;
-		if (flag)
-		{
-			this.MasteryByRoleID[role.id] = true;
-		}
-		num = Mathf.Clamp(num + num3, 0f, role.experienceRequired);
-		this.ExperienceByRoleID[roleID] = num;
-		if (this.selectable == null)
-		{
-			this.selectable = base.GetComponent<KSelectable>();
-		}
-		if (num >= role.experienceRequired)
-		{
-			if (flag)
+			Traits component = base.GetComponent<Traits>();
+			foreach (Trait trait in component.TraitList)
 			{
-				this.OnRoleMastered();
+				if (trait.disabledChoreGroups != null)
+				{
+					foreach (ChoreGroup choreGroup in trait.disabledChoreGroups)
+					{
+						if (choreGroup.Id == choreGroupID)
+						{
+							return true;
+						}
+					}
+				}
 			}
+			return false;
 		}
-		if (this.currentRole == roleID)
-		{
-			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Role, Db.Get().DuplicantStatusItems.Role, this);
-		}
+		return false;
 	}
 
-	public void UpdateExpectations()
+	public bool CanMasterSkill(string skillId)
 	{
-		int num = this.HighestTierRole();
-		foreach (KeyValuePair<string, float> keyValuePair in this.ExperienceByRoleID)
+		Skill skill = Db.Get().Skills.Get(skillId);
+		if (this.CheckSkillTraitDisabled(skillId))
 		{
-			RoleConfig role = Game.Instance.roleManager.GetRole(keyValuePair.Key);
-			if (keyValuePair.Key == this.currentRole || keyValuePair.Value >= Game.Instance.roleManager.GetRole(keyValuePair.Key).experienceRequired)
+			return false;
+		}
+		if (this.AvailableSkillpoints < 1)
+		{
+			return false;
+		}
+		for (int i = 0; i < skill.priorSkills.Count; i++)
+		{
+			if (!this.HasMasteredSkill(skill.priorSkills[i]))
 			{
-				num = Math.Max(role.tier, num);
+				return false;
 			}
 		}
-		foreach (Expectation[] array in Expectations.ExpectationsByTier)
+		return true;
+	}
+
+	public bool OwnsHat(string hatId)
+	{
+		return this.ownedHats.ContainsKey(hatId) && this.ownedHats[hatId];
+	}
+
+	public void SkillLearned()
+	{
+		if (base.gameObject.GetComponent<ChoreConsumer>().HasUrge(Db.Get().Urges.LearnSkill))
 		{
-			foreach (Expectation expectation in array)
-			{
-				expectation.OnRemove(this);
-			}
+			base.gameObject.GetComponent<ChoreConsumer>().RemoveUrge(Db.Get().Urges.LearnSkill);
 		}
-		foreach (Expectation expectation2 in Expectations.ExpectationsByTier[num])
+		foreach (string text in this.ownedHats.Keys.ToList<string>())
 		{
-			expectation2.OnApply(this);
+			this.ownedHats[text] = true;
+		}
+		if (this.targetHat != null && this.currentHat != this.targetHat)
+		{
+			new PutOnHatChore(this, Db.Get().ChoreTypes.SwitchHat);
 		}
 	}
 
-	public int HighestTierRole()
+	public void MasterSkill(string skillId)
+	{
+		if (!base.gameObject.GetComponent<ChoreConsumer>().HasUrge(Db.Get().Urges.LearnSkill))
+		{
+			base.gameObject.GetComponent<ChoreConsumer>().AddUrge(Db.Get().Urges.LearnSkill);
+		}
+		this.MasteryBySkillID[skillId] = true;
+		this.ApplySkillPerks(skillId);
+		this.UpdateExpectations();
+		this.TriggerMasterSkillEvents();
+		if (!this.ownedHats.ContainsKey(Db.Get().Skills.Get(skillId).hat))
+		{
+			this.ownedHats.Add(Db.Get().Skills.Get(skillId).hat, false);
+		}
+	}
+
+	public void UnmasterSkill(string skillId)
+	{
+		if (this.MasteryBySkillID.ContainsKey(skillId))
+		{
+			this.MasteryBySkillID.Remove(skillId);
+			this.RemoveSkillPerks(skillId);
+			this.UpdateExpectations();
+			this.TriggerMasterSkillEvents();
+		}
+	}
+
+	private void TriggerMasterSkillEvents()
+	{
+		base.Trigger(540773776, null);
+		Game.Instance.Trigger(-1523247426, this);
+	}
+
+	public void ForceAddSkillPoint()
+	{
+		this.AddExperience(this.CalculateNextExperienceBar() - this.totalExperienceGained);
+	}
+
+	public float CalculateNextExperienceBar()
+	{
+		float num = (float)(this.TotalSkillPointsGained + 1) / (float)SKILLS.TARGET_SKILLS_EARNED;
+		float num2 = Mathf.Pow(num, SKILLS.EXPERIENCE_LEVEL_POWER);
+		return num2 * (float)SKILLS.TARGET_SKILLS_CYCLE * 600f;
+	}
+
+	public float CalculatePreviousExperienceBar()
+	{
+		float num = (float)this.TotalSkillPointsGained / (float)SKILLS.TARGET_SKILLS_EARNED;
+		float num2 = Mathf.Pow(num, SKILLS.EXPERIENCE_LEVEL_POWER);
+		return num2 * (float)SKILLS.TARGET_SKILLS_CYCLE * 600f;
+	}
+
+	private void UpdateExpectations()
 	{
 		int num = 0;
-		foreach (KeyValuePair<string, float> keyValuePair in this.ExperienceByRoleID)
-		{
-			RoleConfig role = Game.Instance.roleManager.GetRole(keyValuePair.Key);
-			if (keyValuePair.Key == this.currentRole || keyValuePair.Value >= Game.Instance.roleManager.GetRole(keyValuePair.Key).experienceRequired)
-			{
-				num = Math.Max(role.tier, num);
-			}
-		}
-		return num;
-	}
-
-	public int HighestTierRoleMastered()
-	{
-		int num = 0;
-		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryByRoleID)
+		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryBySkillID)
 		{
 			if (keyValuePair.Value)
 			{
-				RoleConfig role = Game.Instance.roleManager.GetRole(keyValuePair.Key);
-				num = Math.Max(role.tier, num);
+				Skill skill = Db.Get().Skills.Get(keyValuePair.Key);
+				num += skill.tier + 1;
+				float num2 = 0f;
+				if (this.AptitudeBySkillGroup.TryGetValue(new HashedString(skill.skillGroup), out num2))
+				{
+					num -= (int)num2;
+				}
 			}
 		}
-		return num;
+		AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(this);
+		if (this.skillsMoraleExpectationModifier != null)
+		{
+			attributeInstance.Remove(this.skillsMoraleExpectationModifier);
+			this.skillsMoraleExpectationModifier = null;
+		}
+		if (num > 0)
+		{
+			this.skillsMoraleExpectationModifier = new AttributeModifier(attributeInstance.Id, (float)num, DUPLICANTS.NEEDS.QUALITYOFLIFE.EXPECTATION_MOD_NAME, false, false, true);
+			attributeInstance.Add(this.skillsMoraleExpectationModifier);
+		}
 	}
 
-	private void OnRoleMastered()
+	private void OnSkillPointGained()
 	{
-		RoleMasteredMessage roleMasteredMessage = new RoleMasteredMessage(this);
+		Game.Instance.Trigger(1505456302, this);
+		SkillMasteredMessage skillMasteredMessage = new SkillMasteredMessage(this);
 		MusicManager.instance.PlaySong("Stinger_JobMastered", false);
-		Messenger.Instance.QueueMessage(roleMasteredMessage);
+		Messenger.Instance.QueueMessage(skillMasteredMessage);
 		if (PopFXManager.Instance != null)
 		{
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, DUPLICANTS.ROLES.ROLE_MASTERED, base.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, MISC.NOTIFICATIONS.SKILL_POINT_EARNED.NAME, base.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
 		}
 		StateMachine.Instance instance = new UpgradeFX.Instance(base.gameObject.GetComponent<KMonoBehaviour>(), new Vector3(0f, 0f, -0.1f));
 		instance.StartSM();
 	}
 
-	public void AddAptitude(HashedString roleGroupID, float amount)
+	public void SetAptitude(HashedString skillGroupID, float amount)
 	{
-		if (!this.AptitudeByRoleGroup.ContainsKey(roleGroupID))
-		{
-			this.AptitudeByRoleGroup.Add(roleGroupID, 0f);
-		}
-		Dictionary<HashedString, float> aptitudeByRoleGroup;
-		(aptitudeByRoleGroup = this.AptitudeByRoleGroup)[roleGroupID] = aptitudeByRoleGroup[roleGroupID] + amount;
+		this.AptitudeBySkillGroup[skillGroupID] = amount;
 	}
 
-	public void AddExperienceIfRole(string roleID, float amount)
+	public float GetAptitudeExperienceMultiplier(HashedString skillGroupId, float buildingFrequencyMultiplier)
 	{
-		if (this.CurrentRole == roleID)
+		float num = 0f;
+		this.AptitudeBySkillGroup.TryGetValue(skillGroupId, out num);
+		return 1f + num * SKILLS.APTITUDE_EXPERIENCE_MULTIPLIER * buildingFrequencyMultiplier;
+	}
+
+	public void AddExperience(float amount)
+	{
+		float num = this.totalExperienceGained;
+		float num2 = this.CalculateNextExperienceBar();
+		this.totalExperienceGained += amount;
+		if (this.totalExperienceGained >= num2 && num < num2)
 		{
-			this.AddExperience(roleID, amount, true);
+			this.OnSkillPointGained();
 		}
 	}
 
-	public bool HasPerk(HashedString perk)
+	public void AddExperienceWithAptitude(string skillGroupId, float amount, float buildingMultiplier)
 	{
-		foreach (RoleConfig roleConfig in Game.Instance.roleManager.RolesConfigs)
+		float num = amount * this.GetAptitudeExperienceMultiplier(skillGroupId, buildingMultiplier) * SKILLS.ACTIVE_EXPERIENCE_PORTION;
+		this.DEBUG_ActiveExperienceGained += num;
+		this.AddExperience(num);
+	}
+
+	public bool HasPerk(HashedString perkId)
+	{
+		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryBySkillID)
 		{
-			if (roleConfig.HasPerk(perk) && this.MasteryByRoleID[roleConfig.id])
+			if (keyValuePair.Value && Db.Get().Skills.Get(keyValuePair.Key).GivesPerk(perkId))
 			{
 				return true;
 			}
 		}
-		return this.currentRoleConfig != null && this.currentRoleConfig.HasPerk(perk);
+		return false;
 	}
 
-	public bool HasPerk(RolePerk perk)
+	public bool HasPerk(SkillPerk perk)
 	{
-		foreach (RoleConfig roleConfig in Game.Instance.roleManager.RolesConfigs)
+		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryBySkillID)
 		{
-			if (roleConfig.HasPerk(perk) && this.MasteryByRoleID.ContainsKey(roleConfig.id) && this.MasteryByRoleID[roleConfig.id])
+			if (keyValuePair.Value && Db.Get().Skills.Get(keyValuePair.Key).GivesPerk(perk))
 			{
 				return true;
 			}
 		}
-		return this.currentRoleConfig != null && this.currentRoleConfig.HasPerk(perk);
+		return false;
+	}
+
+	public void RemoveHat()
+	{
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		MinionResume.RemoveHat(component);
+	}
+
+	public static void RemoveHat(KBatchedAnimController controller)
+	{
+		AccessorySlot hat = Db.Get().AccessorySlots.Hat;
+		Accessorizer component = controller.GetComponent<Accessorizer>();
+		if (component != null)
+		{
+			Accessory accessory = component.GetAccessory(hat);
+			if (accessory != null)
+			{
+				component.RemoveAccessory(accessory);
+			}
+		}
+		else
+		{
+			controller.GetComponent<SymbolOverrideController>().TryRemoveSymbolOverride(hat.targetSymbolId, 4);
+		}
+		controller.SetSymbolVisiblity(hat.targetSymbolId, false);
+		controller.SetSymbolVisiblity(Db.Get().AccessorySlots.HatHair.targetSymbolId, false);
+		controller.SetSymbolVisiblity(Db.Get().AccessorySlots.Hair.targetSymbolId, true);
+	}
+
+	public static void AddHat(string hat_id, KBatchedAnimController controller)
+	{
+		AccessorySlot hat = Db.Get().AccessorySlots.Hat;
+		Accessory accessory = hat.Lookup(hat_id);
+		if (accessory == null)
+		{
+			global::Debug.LogWarning("Missing hat: " + hat_id);
+		}
+		Accessorizer component = controller.GetComponent<Accessorizer>();
+		if (component != null)
+		{
+			Accessory accessory2 = component.GetAccessory(Db.Get().AccessorySlots.Hat);
+			if (accessory2 != null)
+			{
+				component.RemoveAccessory(accessory2);
+			}
+			if (accessory != null)
+			{
+				component.AddAccessory(accessory);
+			}
+		}
+		else
+		{
+			SymbolOverrideController component2 = controller.GetComponent<SymbolOverrideController>();
+			component2.TryRemoveSymbolOverride(hat.targetSymbolId, 4);
+			component2.AddSymbolOverride(hat.targetSymbolId, accessory.symbol, 4);
+		}
+		controller.SetSymbolVisiblity(hat.targetSymbolId, true);
+		controller.SetSymbolVisiblity(Db.Get().AccessorySlots.HatHair.targetSymbolId, true);
+		controller.SetSymbolVisiblity(Db.Get().AccessorySlots.Hair.targetSymbolId, false);
+	}
+
+	public void ApplyTargetHat()
+	{
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		MinionResume.ApplyHat(this.targetHat, component);
+		this.currentHat = this.targetHat;
+		this.targetHat = null;
+	}
+
+	public static void ApplyHat(string hat_id, KBatchedAnimController controller)
+	{
+		if (hat_id.IsNullOrWhiteSpace())
+		{
+			MinionResume.RemoveHat(controller);
+		}
+		else
+		{
+			MinionResume.AddHat(hat_id, controller);
+		}
+	}
+
+	public string GetSkillsSubtitle()
+	{
+		return "Total Skill Points: " + this.TotalSkillPointsGained;
+	}
+
+	public static bool AnyMinionHasPerk(string perk)
+	{
+		List<MinionResume> list = new List<MinionResume>();
+		foreach (MinionResume minionResume in Components.MinionResumes.Items)
+		{
+			if (minionResume.HasPerk(perk))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static bool AnyOtherMinionHasPerk(string perk, MinionResume me)
+	{
+		List<MinionResume> list = new List<MinionResume>();
+		foreach (MinionResume minionResume in Components.MinionResumes.Items)
+		{
+			if (!(minionResume == me))
+			{
+				if (minionResume.HasPerk(perk))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public void ResetSkillLevels(bool returnSkillPoints = true)
+	{
+		List<string> list = new List<string>();
+		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryBySkillID)
+		{
+			if (keyValuePair.Value)
+			{
+				list.Add(keyValuePair.Key);
+			}
+		}
+		foreach (string text in list)
+		{
+			this.UnmasterSkill(text);
+		}
 	}
 
 	[MyCmpReq]
 	private MinionIdentity identity;
 
 	[Serialize]
-	public Dictionary<string, float> ExperienceByRoleID = new Dictionary<string, float>();
-
-	[Serialize]
 	public Dictionary<string, bool> MasteryByRoleID = new Dictionary<string, bool>();
 
 	[Serialize]
-	public Dictionary<HashedString, float> AptitudeByRoleGroup = new Dictionary<HashedString, float>();
+	public Dictionary<string, bool> MasteryBySkillID = new Dictionary<string, bool>();
+
+	[Serialize]
+	public Dictionary<HashedString, float> AptitudeBySkillGroup = new Dictionary<HashedString, float>();
 
 	[Serialize]
 	private string currentRole = "NoRole";
@@ -464,7 +587,24 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	[Serialize]
 	private string targetRole = "NoRole";
 
-	private RoleConfig currentRoleConfig;
+	[Serialize]
+	private string currentHat;
+
+	[Serialize]
+	private string targetHat;
+
+	private Dictionary<string, bool> ownedHats = new Dictionary<string, bool>();
+
+	[Serialize]
+	private float totalExperienceGained;
 
 	private KSelectable selectable;
+
+	private AttributeModifier skillsMoraleExpectationModifier;
+
+	public float DEBUG_PassiveExperienceGained;
+
+	public float DEBUG_ActiveExperienceGained;
+
+	public float DEBUG_SecondsAlive;
 }

@@ -272,13 +272,11 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 
 		public HandleVector<int>.Handle AddPickupable(Pickupable pickupable)
 		{
-			DebugUtil.DevAssert(true, new object[0]);
 			byte b = 5;
 			Edible component = pickupable.GetComponent<Edible>();
 			if (component != null)
 			{
 				b = (byte)component.GetQuality();
-				DebugUtil.DevAssert(b == b, new object[0]);
 			}
 			byte b2 = 0;
 			if (pickupable.storage != null)

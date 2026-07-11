@@ -11,7 +11,7 @@ namespace Klei.AI
 		{
 			this.AttributeId = attribute_id;
 			this.Value = value;
-			this.Description = ((description != null) ? description : string.Empty);
+			this.Description = ((description != null) ? description : attribute_id);
 			this.DescriptionCB = null;
 			this.IsMultiplier = is_multiplier;
 			this.UIOnly = uiOnly;
@@ -26,6 +26,10 @@ namespace Klei.AI
 			this.Description = null;
 			this.IsMultiplier = is_multiplier;
 			this.UIOnly = uiOnly;
+			if (description_cb == null)
+			{
+				global::Debug.LogWarning("AttributeModifier being constructed without a description callback: " + attribute_id);
+			}
 		}
 
 		public string AttributeId { get; private set; }
@@ -40,7 +44,6 @@ namespace Klei.AI
 
 		public void SetValue(float value)
 		{
-			DebugUtil.DevAssert(!this.IsReadonly, new object[0]);
 			this.Value = value;
 		}
 

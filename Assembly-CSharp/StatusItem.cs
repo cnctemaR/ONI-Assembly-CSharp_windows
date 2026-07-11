@@ -42,7 +42,7 @@ public class StatusItem : Resource
 		this.status_overlays = status_overlays;
 		if (this.sprite == null)
 		{
-			global::Debug.LogWarning("Status item '" + id + "' references a missing icon: " + icon, null);
+			global::Debug.LogWarning("Status item '" + id + "' references a missing icon: " + icon);
 		}
 	}
 
@@ -76,7 +76,7 @@ public class StatusItem : Resource
 		this.status_overlays = status_overlays;
 		if (this.sprite == null)
 		{
-			global::Debug.LogWarning("Status item '" + id + "' references a missing icon: " + icon, null);
+			global::Debug.LogWarning("Status item '" + id + "' references a missing icon: " + icon);
 		}
 	}
 
@@ -193,7 +193,7 @@ public class StatusItem : Resource
 		StatusItem.StatusItemOverlays statusItemOverlays;
 		if (!StatusItem.overlayBitfieldMap.TryGetValue(mode, out statusItemOverlays))
 		{
-			global::Debug.LogWarning("ViewMode " + mode + " has no StatusItemOverlay value", null);
+			global::Debug.LogWarning("ViewMode " + mode + " has no StatusItemOverlay value");
 			statusItemOverlays = StatusItem.StatusItemOverlays.None;
 		}
 		return statusItemOverlays;
@@ -254,10 +254,6 @@ public class StatusItem : Resource
 			StatusItem.StatusItemOverlays.Temperature
 		},
 		{
-			OverlayModes.HeatFlow.ID,
-			StatusItem.StatusItemOverlays.ThermalComfort
-		},
-		{
 			OverlayModes.ThermalConductivity.ID,
 			StatusItem.StatusItemOverlays.ThermalComfort
 		},
@@ -303,6 +299,10 @@ public class StatusItem : Resource
 		},
 		{
 			OverlayModes.Oxygen.ID,
+			StatusItem.StatusItemOverlays.None
+		},
+		{
+			OverlayModes.TileMode.ID,
 			StatusItem.StatusItemOverlays.None
 		}
 	};

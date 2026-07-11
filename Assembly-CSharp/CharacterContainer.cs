@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Database;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -215,11 +216,12 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 				locText3.GetComponent<ToolTip>().SetSimpleTooltip(tooltip);
 			}
 		}
-		foreach (KeyValuePair<HashedString, float> keyValuePair in this.stats.roleAptitudes)
+		foreach (KeyValuePair<HashedString, float> keyValuePair in this.stats.skillAptitudes)
 		{
 			if (keyValuePair.Value != 0f)
 			{
-				if (!Game.Instance.roleManager.RoleGroups.ContainsKey(keyValuePair.Key))
+				SkillGroup skillGroup = Db.Get().SkillGroups.Get(keyValuePair.Key);
+				if (skillGroup == null)
 				{
 					global::Debug.LogWarningFormat("Role group not found for aptitude: {0}", new object[] { keyValuePair.Key });
 				}
@@ -227,8 +229,8 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 				{
 					LocText locText4 = Util.KInstantiateUI<LocText>(this.aptitudeLabel.gameObject, this.aptitudeContainer.gameObject, false);
 					locText4.gameObject.SetActive(true);
-					locText4.text = Game.Instance.roleManager.RoleGroups[keyValuePair.Key].Name;
-					string text = string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION, Game.Instance.roleManager.RoleGroups[keyValuePair.Key].Name, keyValuePair.Value * ROLES.APTITUDE_EXPERIENCE_SCALE);
+					locText4.text = skillGroup.Name;
+					string text = string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION, skillGroup.Name, DUPLICANTSTATS.APTITUDE_BONUS);
 					locText4.GetComponent<ToolTip>().SetSimpleTooltip(text);
 					this.aptitudeLabels.Add(locText4);
 				}
@@ -261,7 +263,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 			global::UnityEngine.Object.Destroy(icg);
 		});
 		this.iconGroups.Clear();
-		Attributes attr = this.animController.gameObject.GetAttributes();
+		Klei.AI.Attributes attr = this.animController.gameObject.GetAttributes();
 		List<AttributeInstance> attributes = new List<AttributeInstance>(attr.AttributeTable);
 		attributes.RemoveAll((AttributeInstance at) => at.Attribute.ShowInUI != Klei.AI.Attribute.Display.Skill);
 		attributes = attributes.OrderBy<AttributeInstance, string>((AttributeInstance at) => at.Name).ToList<AttributeInstance>();
@@ -291,7 +293,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 				text += "\n";
 				foreach (AttributeConverter attributeConverter in attributeInstance.Attribute.converters)
 				{
-					AttributeConverterInstance converter = this.animController.gameObject.GetComponent<AttributeConverters>().GetConverter(attributeConverter.Id);
+					AttributeConverterInstance converter = this.animController.gameObject.GetComponent<Klei.AI.AttributeConverters>().GetConverter(attributeConverter.Id);
 					string text2 = converter.DescriptionFromAttribute();
 					if (text2 != null)
 					{

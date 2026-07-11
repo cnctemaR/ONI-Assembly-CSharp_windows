@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using FMOD.Studio;
 using STRINGS;
-using TUNING;
 using UnityEngine;
 
 public class Pickupable : Workable, IHasSortOrder
@@ -34,6 +33,8 @@ public class Pickupable : Workable, IHasSortOrder
 			return 0f;
 		}
 	}
+
+	public bool prevent_absorb_until_stored { get; set; }
 
 	public bool isKinematic { get; set; }
 
@@ -153,7 +154,7 @@ public class Pickupable : Workable, IHasSortOrder
 	{
 		foreach (Pickupable.Reservation reservation in this.reservations)
 		{
-			global::Debug.Log(reservation.ToString(), null);
+			global::Debug.Log(reservation.ToString());
 		}
 	}
 
@@ -437,6 +438,10 @@ public class Pickupable : Workable, IHasSortOrder
 		{
 			return false;
 		}
+		if (this.prevent_absorb_until_stored)
+		{
+			return false;
+		}
 		if (!allow_cross_storage && this.storage == null != (other.storage == null))
 		{
 			return false;
@@ -459,7 +464,7 @@ public class Pickupable : Workable, IHasSortOrder
 		this.RemoveFaller();
 		if (this.storage)
 		{
-			this.storage.Remove(base.gameObject);
+			this.storage.Remove(base.gameObject, true);
 		}
 		this.UnregisterListeners();
 		Components.Pickupables.Remove(this);
@@ -488,13 +493,13 @@ public class Pickupable : Workable, IHasSortOrder
 		{
 			if (this.storage != null)
 			{
-				this.storage.Remove(base.gameObject);
+				this.storage.Remove(base.gameObject, true);
 			}
 			return this;
 		}
 		if (amount >= this.TotalAmount && this.storage != null)
 		{
-			this.storage.Remove(base.gameObject);
+			this.storage.Remove(base.gameObject, true);
 		}
 		float num = Math.Min(this.TotalAmount, amount);
 		if (num <= 0f)
@@ -506,6 +511,8 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private void Absorb(Pickupable pickupable)
 	{
+		global::Debug.Assert(!this.wasAbsorbed);
+		global::Debug.Assert(!pickupable.wasAbsorbed);
 		base.Trigger(-2064133523, pickupable);
 		pickupable.Trigger(-1940207677, base.gameObject);
 		pickupable.wasAbsorbed = true;
@@ -616,12 +623,6 @@ public class Pickupable : Workable, IHasSortOrder
 			return anim;
 		}
 		return base.GetAnim(worker);
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole("Hauler", work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
-		resume.AddExperienceIfRole(MaterialsManager.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
 	}
 
 	protected override void OnCompleteWork(Worker worker)

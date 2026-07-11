@@ -100,22 +100,16 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			ListPool<Chore.Precondition.Context, FetchAreaChore>.PooledList pooledList2 = ListPool<Chore.Precondition.Context, FetchAreaChore>.Allocate();
 			if (this.rootChore.allowMultifetch)
 			{
-				if (context.consumerState.resume != null && context.consumerState.resume.CurrentRole != "NoRole")
-				{
-					RoleConfig role = Game.Instance.roleManager.GetRole(context.consumerState.resume.CurrentRole);
-					role.GatherNearbyFetchChores(this.rootChore, context, num, num2, 3, pooledList, pooledList2);
-				}
-				else
-				{
-					FetchAreaChore.GatherNearbyFetchChores(this.rootChore, context, num, num2, 3, pooledList, pooledList2);
-				}
+				FetchAreaChore.GatherNearbyFetchChores(this.rootChore, context, num, num2, 3, pooledList, pooledList2);
 			}
 			float num3 = Mathf.Max(1f, Db.Get().Attributes.CarryAmount.Lookup(context.consumerState.consumer).GetTotalValue());
 			Pickupable pickupable = context.data as Pickupable;
 			if (pickupable == null)
 			{
+				global::Debug.Assert(pooledList.Count > 0, "succeeded_contexts was empty");
 				FetchChore fetchChore = (FetchChore)pooledList[0].chore;
-				Output.LogWarning(new object[]
+				global::Debug.Assert(fetchChore != null, "fetch_chore was null");
+				DebugUtil.LogWarningArgs(new object[]
 				{
 					"Missing root_fetchable for FetchAreaChore",
 					fetchChore.destination,
@@ -123,6 +117,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				});
 				pickupable = fetchChore.FindFetchTarget(context.consumerState);
 			}
+			global::Debug.Assert(pickupable != null, "root_fetchable was null");
 			List<Pickupable> list = new List<Pickupable>();
 			list.Add(pickupable);
 			float num4 = pickupable.UnreservedAmount;
@@ -577,7 +572,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				this = default(FetchAreaChore.StatesInstance.Reservation);
 				if (reservation_amount <= 0f)
 				{
-					global::Debug.LogError("Invalid amount: " + reservation_amount, null);
+					global::Debug.LogError("Invalid amount: " + reservation_amount);
 				}
 				this.amount = reservation_amount;
 				this.pickupable = pickupable;

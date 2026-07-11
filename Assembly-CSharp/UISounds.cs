@@ -28,7 +28,7 @@ public class UISounds : KMonoBehaviour
 			{
 				if (this.logSounds)
 				{
-					Output.Log(new object[]
+					DebugUtil.LogArgs(new object[]
 					{
 						"Play sound",
 						this.soundData[i].name

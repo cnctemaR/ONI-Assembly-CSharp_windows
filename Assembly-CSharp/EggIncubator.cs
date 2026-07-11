@@ -13,7 +13,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		this.statusItemNeed = Db.Get().BuildingStatusItems.NeedEgg;
 		this.statusItemNoneAvailable = Db.Get().BuildingStatusItems.NoAvailableEgg;
 		this.statusItemAwaitingDelivery = Db.Get().BuildingStatusItems.AwaitingEggDelivery;
-		this.requiredRolePerk = RoleManager.rolePerks.CanWrangleCreatures.id;
+		this.requiredSkillPerk = Db.Get().SkillPerks.CanWrangleCreatures.Id;
 		this.occupyingObjectRelativePosition = new Vector3(0.5f, 1f, -1f);
 		this.synchronizeAnims = false;
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
@@ -70,7 +70,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 	{
 		if (!base.occupyingObject)
 		{
-			this.storage.DropAll(false);
+			this.storage.DropAll(false, false, default(Vector3), true);
 		}
 	}
 
@@ -121,7 +121,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 	{
 		global::UnityEngine.Object.Destroy(this.tracker);
 		this.tracker = null;
-		this.storage.DropAll(false);
+		this.storage.DropAll(false, false, default(Vector3), true);
 		base.occupyingObject = null;
 		this.ClearOccupant();
 	}
@@ -159,7 +159,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 	public void StoreBaby(GameObject baby)
 	{
 		this.UnsubscribeFromOccupant();
-		this.storage.DropAll(false);
+		this.storage.DropAll(false, false, default(Vector3), true);
 		this.storage.allowItemRemoval = true;
 		this.storage.Store(baby, false, false, true, false);
 		base.occupyingObject = baby;

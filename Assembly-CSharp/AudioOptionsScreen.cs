@@ -57,14 +57,27 @@ public class AudioOptionsScreen : KModalScreen
 		HierarchyReferences component2 = this.alwaysPlayAutomationButton.GetComponent<HierarchyReferences>();
 		GameObject gameObject2 = component2.GetReference("Button").gameObject;
 		gameObject2.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.AUDIO_OPTIONS_SCREEN.AUTOMATION_SOUNDS_ALWAYS_TOOLTIP);
-		component2.GetReference("CheckMark").gameObject.SetActive(MusicManager.instance.alwaysPlayMusic);
 		gameObject2.GetComponent<KButton>().onClick += delegate
 		{
 			this.ToggleAlwaysPlayAutomation();
 		};
 		LocText reference2 = component2.GetReference<LocText>("Label");
 		reference2.SetText(UI.FRONTEND.AUDIO_OPTIONS_SCREEN.AUTOMATION_SOUNDS_ALWAYS);
-		this.alwaysPlayAutomationButton.GetComponent<HierarchyReferences>().GetReference("CheckMark").gameObject.SetActive(KPlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayAutomation) == 1);
+		component2.GetReference("CheckMark").gameObject.SetActive(KPlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayAutomation) == 1);
+		if (!KPlayerPrefs.HasKey(AudioOptionsScreen.MuteOnFocusLost))
+		{
+			KPlayerPrefs.SetInt(AudioOptionsScreen.MuteOnFocusLost, 0);
+		}
+		HierarchyReferences component3 = this.muteOnFocusLostToggle.GetComponent<HierarchyReferences>();
+		GameObject gameObject3 = component3.GetReference("Button").gameObject;
+		gameObject3.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.AUDIO_OPTIONS_SCREEN.MUTE_ON_FOCUS_LOST_TOOLTIP);
+		gameObject3.GetComponent<KButton>().onClick += delegate
+		{
+			this.ToggleMuteOnFocusLost();
+		};
+		LocText reference3 = component3.GetReference<LocText>("Label");
+		reference3.SetText(UI.FRONTEND.AUDIO_OPTIONS_SCREEN.MUTE_ON_FOCUS_LOST);
+		component3.GetReference("CheckMark").gameObject.SetActive(KPlayerPrefs.GetInt(AudioOptionsScreen.MuteOnFocusLost) == 1);
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -100,6 +113,12 @@ public class AudioOptionsScreen : KModalScreen
 	{
 		KPlayerPrefs.SetInt(AudioOptionsScreen.AlwaysPlayAutomation, (KPlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayAutomation) != 1) ? 1 : 0);
 		this.alwaysPlayAutomationButton.GetComponent<HierarchyReferences>().GetReference("CheckMark").gameObject.SetActive(KPlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayAutomation) == 1);
+	}
+
+	private void ToggleMuteOnFocusLost()
+	{
+		KPlayerPrefs.SetInt(AudioOptionsScreen.MuteOnFocusLost, (KPlayerPrefs.GetInt(AudioOptionsScreen.MuteOnFocusLost) != 1) ? 1 : 0);
+		this.muteOnFocusLostToggle.GetComponent<HierarchyReferences>().GetReference("CheckMark").gameObject.SetActive(KPlayerPrefs.GetInt(AudioOptionsScreen.MuteOnFocusLost) == 1);
 	}
 
 	private void BuildAudioDeviceList()
@@ -163,6 +182,9 @@ public class AudioOptionsScreen : KModalScreen
 	private GameObject alwaysPlayAutomationButton;
 
 	[SerializeField]
+	private GameObject muteOnFocusLostToggle;
+
+	[SerializeField]
 	private Dropdown deviceDropdown;
 
 	private UIPool<SliderContainer> sliderPool;
@@ -172,6 +194,8 @@ public class AudioOptionsScreen : KModalScreen
 	public static readonly string AlwaysPlayMusicKey = "AlwaysPlayMusic";
 
 	public static readonly string AlwaysPlayAutomation = "AlwaysPlayAutomation";
+
+	public static readonly string MuteOnFocusLost = "MuteOnFocusLost";
 
 	private Dictionary<string, object> alwaysPlayMusicMetric = new Dictionary<string, object> { 
 	{

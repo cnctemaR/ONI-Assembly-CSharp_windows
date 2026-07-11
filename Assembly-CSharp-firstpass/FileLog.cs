@@ -7,6 +7,7 @@ public class FileLog
 	private FileLog(string filename)
 	{
 		this.writer = new StreamWriter(filename);
+		this.writer.AutoFlush = true;
 	}
 
 	[Conditional("ENABLE_LOG")]

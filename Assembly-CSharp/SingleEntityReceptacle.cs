@@ -183,7 +183,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	{
 		if (this.occupyingObject)
 		{
-			this.storage.DropAll(false);
+			this.storage.DropAll(false, false, default(Vector3), true);
 		}
 		this.occupyingObject = null;
 		this.UpdateActive();
@@ -248,7 +248,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		}
 		else
 		{
-			global::Debug.LogWarning(base.gameObject.name + " EntityReceptacle did not spawn occupying entity.", null);
+			global::Debug.LogWarning(base.gameObject.name + " EntityReceptacle did not spawn occupying entity.");
 		}
 		this.fetchChore = null;
 		if (!this.autoReplaceEntity)

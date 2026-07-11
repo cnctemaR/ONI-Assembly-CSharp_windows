@@ -67,19 +67,37 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 		{
 			float num = this.airConsumptionRate.GetTotalValue() * dt;
 			bool flag = this.gasProvider.ConsumeGas(this, num);
-			if (flag && this.gasProvider.ShouldEmitCO2())
+			if (flag)
 			{
-				float num2 = num * this.O2toCO2conversion;
-				Game.Instance.accumulators.Accumulate(this.co2Accumulator, num2);
-				this.accumulatedCO2 += num2;
-				if (this.accumulatedCO2 >= this.minCO2ToEmit)
+				if (this.gasProvider.ShouldEmitCO2())
 				{
-					this.accumulatedCO2 -= this.minCO2ToEmit;
-					Vector3 position = base.transform.GetPosition();
-					position.x += ((!this.facing.GetFacing()) ? this.mouthOffset.x : (-this.mouthOffset.x));
-					position.y += this.mouthOffset.y;
-					position.z -= 0.5f;
-					CO2Manager.instance.SpawnBreath(position, this.minCO2ToEmit, this.temperature.value);
+					float num2 = num * this.O2toCO2conversion;
+					Game.Instance.accumulators.Accumulate(this.co2Accumulator, num2);
+					this.accumulatedCO2 += num2;
+					if (this.accumulatedCO2 >= this.minCO2ToEmit)
+					{
+						this.accumulatedCO2 -= this.minCO2ToEmit;
+						Vector3 position = base.transform.GetPosition();
+						position.x += ((!this.facing.GetFacing()) ? this.mouthOffset.x : (-this.mouthOffset.x));
+						position.y += this.mouthOffset.y;
+						position.z -= 0.5f;
+						CO2Manager.instance.SpawnBreath(position, this.minCO2ToEmit, this.temperature.value);
+					}
+				}
+				else if (this.gasProvider.ShouldStoreCO2())
+				{
+					Equippable equippable = base.GetComponent<SuitEquipper>().IsWearingAirtightSuit();
+					if (equippable != null)
+					{
+						float num3 = num * this.O2toCO2conversion;
+						Game.Instance.accumulators.Accumulate(this.co2Accumulator, num3);
+						this.accumulatedCO2 += num3;
+						if (this.accumulatedCO2 >= this.minCO2ToEmit)
+						{
+							this.accumulatedCO2 -= this.minCO2ToEmit;
+							equippable.GetComponent<Storage>().AddGasChunk(SimHashes.CarbonDioxide, this.minCO2ToEmit, this.temperature.value, byte.MaxValue, 0, false, true);
+						}
+					}
 				}
 			}
 			if (flag != this.hasAir)
@@ -277,5 +295,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 		bool ConsumeGas(OxygenBreather oxygen_breather, float amount);
 
 		bool ShouldEmitCO2();
+
+		bool ShouldStoreCO2();
 	}
 }

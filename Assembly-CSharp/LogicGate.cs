@@ -1,5 +1,6 @@
 ﻿using System;
 using KSerialization;
+using STRINGS;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnection
@@ -119,9 +120,54 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 		this.RefreshAnimation();
 	}
 
+	public virtual void LogicTick()
+	{
+	}
+
 	protected virtual int GetCustomValue(int val1, int val2)
 	{
 		return val1;
+	}
+
+	public int GetPortValue(LogicGateBase.PortId port)
+	{
+		switch (port)
+		{
+		case LogicGateBase.PortId.InputOne:
+			return this.inputOne.Value;
+		case LogicGateBase.PortId.InputTwo:
+			return (!base.RequiresTwoInputs) ? 0 : this.inputTwo.Value;
+		}
+		return this.outputValue;
+	}
+
+	public bool GetPortConnected(LogicGateBase.PortId port)
+	{
+		if (port == LogicGateBase.PortId.InputTwo && !base.RequiresTwoInputs)
+		{
+			return false;
+		}
+		int num = base.PortCell(port);
+		LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
+		LogicCircuitNetwork networkForCell = logicCircuitManager.GetNetworkForCell(num);
+		return networkForCell != null;
+	}
+
+	public void SetPortDescriptions(LogicGate.LogicGateDescriptions descriptions)
+	{
+		this.descriptions = descriptions;
+	}
+
+	public LogicGate.LogicGateDescriptions.Description GetPortDescription(LogicGateBase.PortId port)
+	{
+		switch (port)
+		{
+		case LogicGateBase.PortId.InputOne:
+			return (this.descriptions.inputOne == null) ? ((!base.RequiresTwoInputs) ? LogicGate.INPUT_ONE_SINGLE_DESCRIPTION : LogicGate.INPUT_ONE_DOUBLE_DESCRIPTION) : this.descriptions.inputOne;
+		case LogicGateBase.PortId.InputTwo:
+			return (this.descriptions.inputTwo == null) ? LogicGate.INPUT_TWO_DESCRIPTION : this.descriptions.inputTwo;
+		}
+		return this.descriptions.output;
 	}
 
 	public int GetLogicValue()
@@ -170,6 +216,29 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 	{
 	}
 
+	private static readonly LogicGate.LogicGateDescriptions.Description INPUT_ONE_SINGLE_DESCRIPTION = new LogicGate.LogicGateDescriptions.Description
+	{
+		name = UI.LOGIC_PORTS.GATE_SINGLE_INPUT_ONE_NAME,
+		active = UI.LOGIC_PORTS.GATE_SINGLE_INPUT_ONE_ACTIVE,
+		inactive = UI.LOGIC_PORTS.GATE_SINGLE_INPUT_ONE_INACTIVE
+	};
+
+	private static readonly LogicGate.LogicGateDescriptions.Description INPUT_ONE_DOUBLE_DESCRIPTION = new LogicGate.LogicGateDescriptions.Description
+	{
+		name = UI.LOGIC_PORTS.GATE_DOUBLE_INPUT_ONE_NAME,
+		active = UI.LOGIC_PORTS.GATE_DOUBLE_INPUT_ONE_ACTIVE,
+		inactive = UI.LOGIC_PORTS.GATE_DOUBLE_INPUT_ONE_INACTIVE
+	};
+
+	private static readonly LogicGate.LogicGateDescriptions.Description INPUT_TWO_DESCRIPTION = new LogicGate.LogicGateDescriptions.Description
+	{
+		name = UI.LOGIC_PORTS.GATE_DOUBLE_INPUT_TWO_NAME,
+		active = UI.LOGIC_PORTS.GATE_DOUBLE_INPUT_TWO_ACTIVE,
+		inactive = UI.LOGIC_PORTS.GATE_DOUBLE_INPUT_TWO_INACTIVE
+	};
+
+	private LogicGate.LogicGateDescriptions descriptions;
+
 	private const bool IS_CIRCUIT_ENDPOINT = true;
 
 	private bool connected;
@@ -194,4 +263,22 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 	{
 		component.OnBuildingFullyRepaired(data);
 	});
+
+	public class LogicGateDescriptions
+	{
+		public LogicGate.LogicGateDescriptions.Description inputOne;
+
+		public LogicGate.LogicGateDescriptions.Description inputTwo;
+
+		public LogicGate.LogicGateDescriptions.Description output;
+
+		public class Description
+		{
+			public string name;
+
+			public string active;
+
+			public string inactive;
+		}
+	}
 }

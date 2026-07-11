@@ -202,6 +202,7 @@ public class AudioEventManager : KMonoBehaviour
 		if (pol != null)
 		{
 			pol.Clear();
+			global::Debug.Assert(this.inusePool[pol.radius].Contains(pol));
 			this.inusePool[pol.radius].Remove(pol);
 			this.freePool[pol.radius].Add(pol);
 		}
@@ -226,7 +227,7 @@ public class AudioEventManager : KMonoBehaviour
 
 	private static void SoundLog(long itemId, string message)
 	{
-		global::Debug.Log(string.Concat(new object[] { " [", itemId, "] \t", message }), null);
+		global::Debug.Log(string.Concat(new object[] { " [", itemId, "] \t", message }));
 	}
 
 	public const float NO_NOISE_EFFECTORS = 0f;

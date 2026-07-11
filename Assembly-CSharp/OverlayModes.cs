@@ -677,7 +677,33 @@ public abstract class OverlayModes
 		{
 			this.diseaseUIParent = diseaseUIParent;
 			this.diseaseOverlayPrefab = diseaseOverlayPrefab;
+			this.legendFilters = this.CreateDefaultFilters();
 			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
+		}
+
+		private static float CalculateHUE(Color32 colour)
+		{
+			byte b = Math.Max(colour.r, Math.Max(colour.g, colour.b));
+			byte b2 = Math.Min(colour.r, Math.Min(colour.g, colour.b));
+			float num = 0f;
+			int num2 = (int)(b - b2);
+			if (num2 == 0)
+			{
+				num = 0f;
+			}
+			else if (b == colour.r)
+			{
+				num = (float)(colour.g - colour.b) / (float)num2 % 6f;
+			}
+			else if (b == colour.g)
+			{
+				num = (float)(colour.b - colour.r) / (float)num2 + 2f;
+			}
+			else if (b == colour.b)
+			{
+				num = (float)(colour.r - colour.g) / (float)num2 + 4f;
+			}
+			return num;
 		}
 
 		public override HashedString ViewMode()
@@ -703,6 +729,31 @@ public abstract class OverlayModes
 					diseaseSourceVisualizer.Show(this.ViewMode());
 				}
 			}
+		}
+
+		public override Dictionary<string, ToolParameterMenu.ToggleState> CreateDefaultFilters()
+		{
+			return new Dictionary<string, ToolParameterMenu.ToggleState>
+			{
+				{
+					ToolParameterMenu.FILTERLAYERS.ALL,
+					ToolParameterMenu.ToggleState.On
+				},
+				{
+					ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT,
+					ToolParameterMenu.ToggleState.Off
+				},
+				{
+					ToolParameterMenu.FILTERLAYERS.GASCONDUIT,
+					ToolParameterMenu.ToggleState.Off
+				}
+			};
+		}
+
+		public override void OnFiltersChanged()
+		{
+			Game.Instance.showGasConduitDisease = base.InFilter(ToolParameterMenu.FILTERLAYERS.GASCONDUIT, this.legendFilters);
+			Game.Instance.showLiquidConduitDisease = base.InFilter(ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT, this.legendFilters);
 		}
 
 		protected override void OnSaveLoadRootRegistered(SaveLoadRoot item)
@@ -749,7 +800,6 @@ public abstract class OverlayModes
 			}
 			CameraController.Instance.ToggleColouredOverlayView(false);
 			Infrared.Instance.SetMode(Infrared.Mode.Disabled);
-			OverlayLegend.Instance.DisableDiseaseOverlay();
 			Game.Instance.showGasConduitDisease = false;
 			Game.Instance.showLiquidConduitDisease = false;
 			this.freeDiseaseUI = 0;
@@ -760,6 +810,22 @@ public abstract class OverlayModes
 			this.updateDiseaseInfo.Clear();
 			this.privateTargets.Clear();
 			this.layerTargets.Clear();
+		}
+
+		public override List<LegendEntry> GetCustomLegendData()
+		{
+			List<LegendEntry> list = new List<LegendEntry>();
+			List<OverlayModes.Disease.DiseaseSortInfo> list2 = new List<OverlayModes.Disease.DiseaseSortInfo>();
+			foreach (Klei.AI.Disease disease in Db.Get().Diseases.resources)
+			{
+				list2.Add(new OverlayModes.Disease.DiseaseSortInfo(disease));
+			}
+			list2.Sort((OverlayModes.Disease.DiseaseSortInfo a, OverlayModes.Disease.DiseaseSortInfo b) => a.sortkey.CompareTo(b.sortkey));
+			foreach (OverlayModes.Disease.DiseaseSortInfo diseaseSortInfo in list2)
+			{
+				list.Add(new LegendEntry(diseaseSortInfo.disease.Name, diseaseSortInfo.disease.overlayLegendHovertext.ToString(), diseaseSortInfo.disease.overlayColour));
+			}
+			return list;
 		}
 
 		public GameObject GetFreeDiseaseUI()
@@ -943,6 +1009,19 @@ public abstract class OverlayModes
 		private Canvas diseaseUIParent;
 
 		private GameObject diseaseOverlayPrefab;
+
+		private struct DiseaseSortInfo
+		{
+			public DiseaseSortInfo(Klei.AI.Disease d)
+			{
+				this.disease = d;
+				this.sortkey = OverlayModes.Disease.CalculateHUE(d.overlayColour);
+			}
+
+			public float sortkey;
+
+			public Klei.AI.Disease disease;
+		}
 
 		private struct UpdateDiseaseInfo
 		{
@@ -1603,6 +1682,22 @@ public abstract class OverlayModes
 			return "Rooms";
 		}
 
+		public override List<LegendEntry> GetCustomLegendData()
+		{
+			List<LegendEntry> list = new List<LegendEntry>();
+			for (int i = 0; i < Db.Get().RoomTypes.Count; i++)
+			{
+				RoomType roomType = Db.Get().RoomTypes[i];
+				string text = roomType.GetCriteriaString();
+				if (roomType.effects != null && roomType.effects.Length > 0)
+				{
+					text += roomType.GetRoomEffectsString();
+				}
+				list.Add(new LegendEntry(roomType.Name + "\n" + roomType.effect, text, roomType.category.color));
+			}
+			return list;
+		}
+
 		public static readonly HashedString ID = "Rooms";
 	}
 
@@ -1627,7 +1722,30 @@ public abstract class OverlayModes
 		{
 		}
 
+		public virtual List<LegendEntry> GetCustomLegendData()
+		{
+			return null;
+		}
+
+		public virtual Dictionary<string, ToolParameterMenu.ToggleState> CreateDefaultFilters()
+		{
+			return null;
+		}
+
+		public virtual void OnFiltersChanged()
+		{
+		}
+
+		public virtual void DisableOverlay()
+		{
+		}
+
 		public abstract string GetSoundName();
+
+		protected bool InFilter(string layer, Dictionary<string, ToolParameterMenu.ToggleState> filter)
+		{
+			return (filter.ContainsKey(ToolParameterMenu.FILTERLAYERS.ALL) && filter[ToolParameterMenu.FILTERLAYERS.ALL] == ToolParameterMenu.ToggleState.On) || (filter.ContainsKey(layer) && filter[layer] == ToolParameterMenu.ToggleState.On);
+		}
 
 		public void RegisterSaveLoadListeners()
 		{
@@ -1971,6 +2089,8 @@ public abstract class OverlayModes
 				}
 			}
 		}
+
+		public Dictionary<string, ToolParameterMenu.ToggleState> legendFilters;
 
 		private static List<KMonoBehaviour> workingTargets = new List<KMonoBehaviour>();
 	}
@@ -2951,6 +3071,17 @@ public abstract class OverlayModes
 
 	public class Temperature : OverlayModes.Mode
 	{
+		public Temperature()
+		{
+			this.legendFilters = this.CreateDefaultFilters();
+			int num = SimDebugView.Instance.temperatureThresholds.Length - 1;
+			for (int i = 0; i < this.temperatureLegend.Count; i++)
+			{
+				this.temperatureLegend[i].colour = SimDebugView.Instance.temperatureThresholds[num - i].color;
+				this.temperatureLegend[i].desc = string.Format(this.temperatureLegend[i].desc, GameUtil.GetFormattedTemperature(SimDebugView.Instance.temperatureThresholds[num - i].value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+			}
+		}
+
 		public override HashedString ViewMode()
 		{
 			return OverlayModes.Temperature.ID;
@@ -2963,9 +3094,82 @@ public abstract class OverlayModes
 
 		public override void Enable()
 		{
-			Infrared.Instance.SetMode(Infrared.Mode.Infrared);
-			CameraController.Instance.ToggleColouredOverlayView(true);
 			base.Enable();
+		}
+
+		public override Dictionary<string, ToolParameterMenu.ToggleState> CreateDefaultFilters()
+		{
+			return new Dictionary<string, ToolParameterMenu.ToggleState>
+			{
+				{
+					ToolParameterMenu.FILTERLAYERS.ABSOLUTETEMPERATURE,
+					ToolParameterMenu.ToggleState.On
+				},
+				{
+					ToolParameterMenu.FILTERLAYERS.HEATFLOW,
+					ToolParameterMenu.ToggleState.Off
+				},
+				{
+					ToolParameterMenu.FILTERLAYERS.STATECHANGE,
+					ToolParameterMenu.ToggleState.Off
+				}
+			};
+		}
+
+		public override List<LegendEntry> GetCustomLegendData()
+		{
+			switch (Game.Instance.temperatureOverlayMode)
+			{
+			case Game.TemperatureOverlayModes.AbsoluteTemperature:
+				return this.temperatureLegend;
+			case Game.TemperatureOverlayModes.AdaptiveTemperature:
+				return this.expandedTemperatureLegend;
+			case Game.TemperatureOverlayModes.HeatFlow:
+				return this.heatFlowLegend;
+			case Game.TemperatureOverlayModes.StateChange:
+				return this.stateChangeLegend;
+			default:
+				return this.temperatureLegend;
+			}
+		}
+
+		public override void OnFiltersChanged()
+		{
+			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.HEATFLOW, this.legendFilters))
+			{
+				Game.Instance.temperatureOverlayMode = Game.TemperatureOverlayModes.HeatFlow;
+			}
+			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.ABSOLUTETEMPERATURE, this.legendFilters))
+			{
+				Game.Instance.temperatureOverlayMode = Game.TemperatureOverlayModes.AbsoluteTemperature;
+			}
+			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.ADAPTIVETEMPERATURE, this.legendFilters))
+			{
+				Game.Instance.temperatureOverlayMode = Game.TemperatureOverlayModes.AdaptiveTemperature;
+			}
+			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.STATECHANGE, this.legendFilters))
+			{
+				Game.Instance.temperatureOverlayMode = Game.TemperatureOverlayModes.StateChange;
+			}
+			switch (Game.Instance.temperatureOverlayMode)
+			{
+			case Game.TemperatureOverlayModes.AbsoluteTemperature:
+				Infrared.Instance.SetMode(Infrared.Mode.Infrared);
+				CameraController.Instance.ToggleColouredOverlayView(true);
+				break;
+			case Game.TemperatureOverlayModes.AdaptiveTemperature:
+				Infrared.Instance.SetMode(Infrared.Mode.Infrared);
+				CameraController.Instance.ToggleColouredOverlayView(true);
+				break;
+			case Game.TemperatureOverlayModes.HeatFlow:
+				Infrared.Instance.SetMode(Infrared.Mode.Disabled);
+				CameraController.Instance.ToggleColouredOverlayView(false);
+				break;
+			case Game.TemperatureOverlayModes.StateChange:
+				Infrared.Instance.SetMode(Infrared.Mode.Disabled);
+				CameraController.Instance.ToggleColouredOverlayView(false);
+				break;
+			}
 		}
 
 		public override void Disable()
@@ -2976,5 +3180,249 @@ public abstract class OverlayModes
 		}
 
 		public static readonly HashedString ID = "Temperature";
+
+		public List<LegendEntry> temperatureLegend = new List<LegendEntry>
+		{
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.MAXHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.8901961f, 0.13725491f, 0.12941177f)),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMEHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9843137f, 0.3254902f, 0.3137255f)),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(1f, 0.6627451f, 0.14117648f)),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9372549f, 1f, 0f)),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.TEMPERATE, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.23137255f, 0.99607843f, 0.2901961f)),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.COLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.12156863f, 0.6313726f, 1f)),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYCOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.16862746f, 0.79607844f, 1f)),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMECOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.5019608f, 0.99607843f, 0.9411765f))
+		};
+
+		public List<LegendEntry> heatFlowLegend = new List<LegendEntry>
+		{
+			new LegendEntry(UI.OVERLAYS.HEATFLOW.HEATING, UI.OVERLAYS.HEATFLOW.TOOLTIPS.HEATING, new Color(0.9098039f, 0.25882354f, 0.14901961f)),
+			new LegendEntry(UI.OVERLAYS.HEATFLOW.NEUTRAL, UI.OVERLAYS.HEATFLOW.TOOLTIPS.NEUTRAL, new Color(0.30980393f, 0.30980393f, 0.30980393f)),
+			new LegendEntry(UI.OVERLAYS.HEATFLOW.COOLING, UI.OVERLAYS.HEATFLOW.TOOLTIPS.COOLING, new Color(0.2509804f, 0.6313726f, 0.90588236f))
+		};
+
+		public List<LegendEntry> expandedTemperatureLegend = new List<LegendEntry>
+		{
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.MAXHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.8901961f, 0.13725491f, 0.12941177f)),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMEHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9843137f, 0.3254902f, 0.3137255f)),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(1f, 0.6627451f, 0.14117648f)),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9372549f, 1f, 0f)),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.TEMPERATE, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.23137255f, 0.99607843f, 0.2901961f)),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.COLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.12156863f, 0.6313726f, 1f)),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYCOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.16862746f, 0.79607844f, 1f)),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMECOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.5019608f, 0.99607843f, 0.9411765f))
+		};
+
+		public List<LegendEntry> stateChangeLegend = new List<LegendEntry>
+		{
+			new LegendEntry(UI.OVERLAYS.STATECHANGE.HIGHPOINT, UI.OVERLAYS.STATECHANGE.TOOLTIPS.HIGHPOINT, new Color(0.8901961f, 0.13725491f, 0.12941177f)),
+			new LegendEntry(UI.OVERLAYS.STATECHANGE.STABLE, UI.OVERLAYS.STATECHANGE.TOOLTIPS.STABLE, new Color(0.23137255f, 0.99607843f, 0.2901961f)),
+			new LegendEntry(UI.OVERLAYS.STATECHANGE.LOWPOINT, UI.OVERLAYS.STATECHANGE.TOOLTIPS.LOWPOINT, new Color(0.5019608f, 0.99607843f, 0.9411765f))
+		};
+	}
+
+	public class TileMode : OverlayModes.Mode
+	{
+		public TileMode()
+		{
+			OverlayModes.ColorHighlightCondition[] array = new OverlayModes.ColorHighlightCondition[1];
+			array[0] = new OverlayModes.ColorHighlightCondition(delegate(KMonoBehaviour primary_element)
+			{
+				Color color = Color.black;
+				if (primary_element != null)
+				{
+					Element element = (primary_element as PrimaryElement).Element;
+					color = element.substance.uiColour;
+				}
+				return color;
+			}, (KMonoBehaviour primary_element) => primary_element.gameObject.GetComponent<KBatchedAnimController>().IsVisible());
+			this.highlightConditions = array;
+			base..ctor();
+			this.targetLayer = LayerMask.NameToLayer("MaskedOverlay");
+			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
+			this.legendFilters = this.CreateDefaultFilters();
+		}
+
+		public override HashedString ViewMode()
+		{
+			return OverlayModes.TileMode.ID;
+		}
+
+		public override string GetSoundName()
+		{
+			return string.Empty;
+		}
+
+		public override void Enable()
+		{
+			base.Enable();
+			List<Tag> prefabTagsWithComponent = Assets.GetPrefabTagsWithComponent<PrimaryElement>();
+			this.targetIDs.UnionWith(prefabTagsWithComponent);
+			Camera.main.cullingMask |= this.cameraLayerMask;
+			int defaultLayerMask = SelectTool.Instance.GetDefaultLayerMask();
+			int mask = LayerMask.GetMask(new string[] { "MaskedOverlay" });
+			SelectTool.Instance.SetLayerMask(defaultLayerMask | mask);
+		}
+
+		public override void Update()
+		{
+			Vector2I vector2I;
+			Vector2I vector2I2;
+			Grid.GetVisibleExtents(out vector2I, out vector2I2);
+			OverlayModes.Mode.RemoveOffscreenTargets<PrimaryElement>(this.layerTargets, vector2I, vector2I2, null);
+			int num = vector2I2.y - vector2I.y;
+			int num2 = vector2I2.x - vector2I.x;
+			Extents extents = new Extents(vector2I.x, vector2I.y, num2, num);
+			List<ScenePartitionerEntry> list = new List<ScenePartitionerEntry>();
+			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.pickupablesLayer, list);
+			foreach (ScenePartitionerEntry scenePartitionerEntry in list)
+			{
+				Pickupable pickupable = (Pickupable)scenePartitionerEntry.obj;
+				PrimaryElement component = pickupable.gameObject.GetComponent<PrimaryElement>();
+				if (component != null)
+				{
+					this.TryAddObject(component, vector2I, vector2I2);
+				}
+			}
+			list.Clear();
+			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.completeBuildings, list);
+			foreach (ScenePartitionerEntry scenePartitionerEntry2 in list)
+			{
+				BuildingComplete buildingComplete = (BuildingComplete)scenePartitionerEntry2.obj;
+				PrimaryElement component2 = buildingComplete.gameObject.GetComponent<PrimaryElement>();
+				if (component2 != null && buildingComplete.gameObject.layer == 0)
+				{
+					this.TryAddObject(component2, vector2I, vector2I2);
+				}
+			}
+			base.UpdateHighlightTypeOverlay<PrimaryElement>(vector2I, vector2I2, this.layerTargets, this.targetIDs, this.highlightConditions, OverlayModes.BringToFrontLayerSetting.Conditional, this.targetLayer);
+		}
+
+		private void TryAddObject(PrimaryElement pe, Vector2I min, Vector2I max)
+		{
+			Element element = pe.Element;
+			foreach (Tag tag in Game.Instance.tileOverlayFilters)
+			{
+				if (element.HasTag(tag))
+				{
+					base.AddTargetIfVisible<PrimaryElement>(pe, min, max, this.layerTargets, this.targetLayer, null, null);
+					break;
+				}
+			}
+		}
+
+		public override void Disable()
+		{
+			base.Disable();
+			base.DisableHighlightTypeOverlay<PrimaryElement>(this.layerTargets);
+			Camera.main.cullingMask &= ~this.cameraLayerMask;
+			this.layerTargets.Clear();
+			SelectTool.Instance.ClearLayerMask();
+		}
+
+		public override Dictionary<string, ToolParameterMenu.ToggleState> CreateDefaultFilters()
+		{
+			return new Dictionary<string, ToolParameterMenu.ToggleState>
+			{
+				{
+					ToolParameterMenu.FILTERLAYERS.ALL,
+					ToolParameterMenu.ToggleState.On
+				},
+				{
+					ToolParameterMenu.FILTERLAYERS.METAL,
+					ToolParameterMenu.ToggleState.Off
+				},
+				{
+					ToolParameterMenu.FILTERLAYERS.BUILDABLE,
+					ToolParameterMenu.ToggleState.Off
+				},
+				{
+					ToolParameterMenu.FILTERLAYERS.FILTER,
+					ToolParameterMenu.ToggleState.Off
+				},
+				{
+					ToolParameterMenu.FILTERLAYERS.CONSUMABLEORE,
+					ToolParameterMenu.ToggleState.Off
+				},
+				{
+					ToolParameterMenu.FILTERLAYERS.ORGANICS,
+					ToolParameterMenu.ToggleState.Off
+				},
+				{
+					ToolParameterMenu.FILTERLAYERS.FARMABLE,
+					ToolParameterMenu.ToggleState.Off
+				},
+				{
+					ToolParameterMenu.FILTERLAYERS.GAS,
+					ToolParameterMenu.ToggleState.Off
+				},
+				{
+					ToolParameterMenu.FILTERLAYERS.LIQUID,
+					ToolParameterMenu.ToggleState.Off
+				}
+			};
+		}
+
+		public override void OnFiltersChanged()
+		{
+			Game.Instance.tileOverlayFilters.Clear();
+			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.METAL, this.legendFilters))
+			{
+				Game.Instance.tileOverlayFilters.Add(GameTags.Metal);
+				Game.Instance.tileOverlayFilters.Add(GameTags.RefinedMetal);
+			}
+			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.BUILDABLE, this.legendFilters))
+			{
+				Game.Instance.tileOverlayFilters.Add(GameTags.BuildableRaw);
+				Game.Instance.tileOverlayFilters.Add(GameTags.BuildableProcessed);
+			}
+			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.FILTER, this.legendFilters))
+			{
+				Game.Instance.tileOverlayFilters.Add(GameTags.Filter);
+			}
+			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.LIQUIFIABLE, this.legendFilters))
+			{
+				Game.Instance.tileOverlayFilters.Add(GameTags.Liquifiable);
+			}
+			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.LIQUID, this.legendFilters))
+			{
+				Game.Instance.tileOverlayFilters.Add(GameTags.Liquid);
+			}
+			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.CONSUMABLEORE, this.legendFilters))
+			{
+				Game.Instance.tileOverlayFilters.Add(GameTags.ConsumableOre);
+			}
+			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.ORGANICS, this.legendFilters))
+			{
+				Game.Instance.tileOverlayFilters.Add(GameTags.Organics);
+			}
+			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.FARMABLE, this.legendFilters))
+			{
+				Game.Instance.tileOverlayFilters.Add(GameTags.Farmable);
+			}
+			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.GAS, this.legendFilters))
+			{
+				Game.Instance.tileOverlayFilters.Add(GameTags.Breathable);
+				Game.Instance.tileOverlayFilters.Add(GameTags.Unbreathable);
+			}
+			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.AGRICULTURE, this.legendFilters))
+			{
+				Game.Instance.tileOverlayFilters.Add(GameTags.Agriculture);
+			}
+			base.DisableHighlightTypeOverlay<PrimaryElement>(this.layerTargets);
+			this.layerTargets.Clear();
+			Game.Instance.ForceOverlayUpdate();
+		}
+
+		public static readonly HashedString ID = "TileMode";
+
+		private HashSet<PrimaryElement> layerTargets = new HashSet<PrimaryElement>();
+
+		private HashSet<Tag> targetIDs = new HashSet<Tag>();
+
+		private int targetLayer;
+
+		private int cameraLayerMask;
+
+		private OverlayModes.ColorHighlightCondition[] highlightConditions;
 	}
 }

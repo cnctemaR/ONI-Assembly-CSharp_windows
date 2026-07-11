@@ -68,7 +68,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		}
 		else
 		{
-			Output.LogWarning(new object[] { "Tried to add disease on toilet use but worker was null" });
+			DebugUtil.LogWarningArgs(new object[] { "Tried to add disease on toilet use but worker was null" });
 		}
 	}
 

@@ -46,12 +46,12 @@ public class SideDetailsScreen : KScreen
 	{
 		if (!this.screenMap.ContainsKey(screenName))
 		{
-			global::Debug.LogError("Tried to open a screen that does exist on the manager!", null);
+			global::Debug.LogError("Tried to open a screen that does exist on the manager!");
 			return;
 		}
 		if (content == null)
 		{
-			global::Debug.LogError("Tried to set " + screenName + " with null content!", null);
+			global::Debug.LogError("Tried to set " + screenName + " with null content!");
 			return;
 		}
 		if (!base.gameObject.activeInHierarchy)

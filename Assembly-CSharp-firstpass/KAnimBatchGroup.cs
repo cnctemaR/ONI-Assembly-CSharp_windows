@@ -119,6 +119,7 @@ public class KAnimBatchGroup
 
 	private void SetupMeshData()
 	{
+		global::Debug.Assert(this.maxGroupSize > 0, "Group size must be >0");
 		this.maxGroupSize = Mathf.Min(this.maxGroupSize, 30);
 		this.mesh = this.BuildMesh(this.maxGroupSize * this.data.maxVisibleSymbols);
 		float num = (float)(this.maxGroupSize * 28) / 4f;

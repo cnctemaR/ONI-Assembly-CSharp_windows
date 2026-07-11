@@ -66,7 +66,7 @@ namespace ProcGen
 					}
 					else
 					{
-						Debug.LogWarning("WorldGen: Attempting to load zone: " + weightedName.name + " failed", null);
+						Debug.LogWarning("WorldGen: Attempting to load zone: " + weightedName.name + " failed");
 					}
 				}
 			}

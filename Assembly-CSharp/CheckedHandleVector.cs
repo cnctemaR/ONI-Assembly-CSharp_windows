@@ -37,7 +37,7 @@ public class CheckedHandleVector<T> where T : new()
 	{
 		if (this.isFree[handle.index])
 		{
-			Output.LogError(new object[]
+			DebugUtil.LogErrorArgs(new object[]
 			{
 				"Tried to double free checked handle ",
 				handle.index,

@@ -29,6 +29,11 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 		}
 	}
 
+	public int SliderDecimalPlaces(int index)
+	{
+		return 0;
+	}
+
 	public float GetSliderMin(int index)
 	{
 		return 0f;
@@ -70,6 +75,8 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.GeneratingPower;
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
+		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Technicals.Id;
+		this.skillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;
 		EnergyGenerator.EnsureStatusItemAvailable();
 	}
 
@@ -105,11 +112,6 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 			KSelectable component = base.GetComponent<KSelectable>();
 			component.SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.ManualGeneratorChargingUp, null);
 		}
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole(MachineTechnician.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
 	}
 
 	public void EnergySim200ms(float dt)

@@ -16,7 +16,6 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 	protected override void Refresh(Navigator navigator)
 	{
 		this.proxyID = navigator.GetComponent<MinionIdentity>().assignableProxy.Get().GetComponent<KPrefabID>().InstanceID;
-		this.maxUnderwaterCost = ((!PathFinder.IsSubmerged(Grid.PosToCell(navigator))) ? ((int)Db.Get().Attributes.MaxUnderwaterTravelCost.Lookup(navigator).GetTotalValue()) : int.MaxValue);
 		this.out_of_fuel = navigator.HasTag(GameTags.JetSuitOutOfFuel);
 	}
 
@@ -28,6 +27,15 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 	private static bool IsAccessPermitted(int proxyID, int cell, int from_cell)
 	{
 		return !Grid.HasAccessDoor[cell] || Grid.HasPermission(cell, proxyID, from_cell);
+	}
+
+	public override int GetSubmergedPathCostPenalty(PathFinder.PotentialPath path)
+	{
+		if (!path.HasAnyFlag(PathFinder.PotentialPath.Flags.HasAtmoSuit | PathFinder.PotentialPath.Flags.HasJetPack))
+		{
+			return 128;
+		}
+		return 0;
 	}
 
 	public override bool TraversePath(ref PathFinder.PotentialPath path, int from_cell, NavType from_nav_type, int cost, int transition_id, int underwater_cost)
@@ -76,10 +84,6 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 		{
 			return false;
 		}
-		if (!path.HasFlag(PathFinder.PotentialPath.Flags.HasAtmoSuit) && !path.HasFlag(PathFinder.PotentialPath.Flags.HasJetPack) && path.navType != NavType.Tube && underwater_cost > this.maxUnderwaterCost)
-		{
-			return false;
-		}
 		if (flag)
 		{
 			if (flag2)
@@ -107,9 +111,9 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 	{
 	}
 
-	private CellOffset[][] transitionVoidOffsets;
+	private const int SUBMERGED_PATH_COST_PENALTY = 128;
 
-	public int maxUnderwaterCost;
+	private CellOffset[][] transitionVoidOffsets;
 
 	private int proxyID;
 

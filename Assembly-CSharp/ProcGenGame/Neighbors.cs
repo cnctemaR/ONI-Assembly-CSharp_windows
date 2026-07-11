@@ -8,6 +8,7 @@ namespace ProcGenGame
 	{
 		public Neighbors(TerrainCell a, TerrainCell b)
 		{
+			Debug.Assert(a != null && b != null, "NULL Neighbor");
 			this.n0 = a;
 			this.n1 = b;
 		}

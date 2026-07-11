@@ -36,12 +36,12 @@ public class PressureDoorConfig : IBuildingConfig
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS);
+		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_0_0);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS);
+		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_0_0);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -60,7 +60,7 @@ public class PressureDoorConfig : IBuildingConfig
 		copyBuildingSettings.copyGroupTag = GameTags.Door;
 		Workable workable = go.AddOrGet<Workable>();
 		workable.workTime = 5f;
-		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS);
+		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_0_0);
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
 		AccessControl component = go.GetComponent<AccessControl>();
 		component.controlEnabled = true;

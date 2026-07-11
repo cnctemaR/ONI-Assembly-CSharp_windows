@@ -22,6 +22,11 @@ public class LogicCritterCountSensor : Switch, ISaveLoadable, ISim200ms, IIntSli
 		}
 	}
 
+	public int SliderDecimalPlaces(int index)
+	{
+		return 0;
+	}
+
 	public float GetSliderMin(int index)
 	{
 		return 0f;

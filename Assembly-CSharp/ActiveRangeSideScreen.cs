@@ -60,13 +60,13 @@ public class ActiveRangeSideScreen : SideScreenContent
 	{
 		if (new_target == null)
 		{
-			global::Debug.LogError("Invalid gameObject received", null);
+			global::Debug.LogError("Invalid gameObject received");
 			return;
 		}
 		this.target = new_target.GetComponent<IActivationRangeTarget>();
 		if (this.target == null)
 		{
-			global::Debug.LogError("The gameObject received does not contain a IActivationRangeTarget component", null);
+			global::Debug.LogError("The gameObject received does not contain a IActivationRangeTarget component");
 			return;
 		}
 		this.activateLabel.text = this.target.ActivateSliderLabelText;

@@ -162,7 +162,7 @@ public class DiseaseContainers : KGameObjectSplitComponentManager<DiseaseHeader,
 	public void UpdateOverlayColours()
 	{
 		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
-		global::Database.Diseases diseases = Db.Get().Diseases;
+		Diseases diseases = Db.Get().Diseases;
 		Color32 color = new Color32(0, 0, 0, byte.MaxValue);
 		for (int i = 0; i < this.headers.Count; i++)
 		{

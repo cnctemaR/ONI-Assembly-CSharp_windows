@@ -51,7 +51,7 @@ public class Scheduler : IScheduler
 	{
 		if (group != null && group.scheduler != this)
 		{
-			global::Debug.LogError("Scheduler group mismatch!", null);
+			global::Debug.LogError("Scheduler group mismatch!");
 		}
 		SchedulerHandle schedulerHandle = this.Schedule(name, time, -1f, callback, callback_data, null);
 		if (group != null)

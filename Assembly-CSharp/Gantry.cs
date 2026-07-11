@@ -52,28 +52,24 @@ public class Gantry : Switch
 			World.Instance.OnSolidChanged(num2);
 			GameScenePartitioner.Instance.TriggerEvent(num2, GameScenePartitioner.Instance.solidChangedLayer, null);
 		}
-		foreach (CellOffset cellOffset2 in Gantry.ForcefieldOffsets)
+		foreach (CellOffset cellOffset2 in Gantry.RetractableOffsets)
 		{
 			CellOffset rotatedOffset2 = this.building.GetRotatedOffset(cellOffset2);
 			int num3 = Grid.OffsetCell(num, rotatedOffset2);
 			Grid.FakeFloor[num3] = false;
-			Grid.Impassable[num3] = false;
-			Game.Instance.SetForceField(num3, false, Grid.Solid[num3]);
 			Pathfinding.Instance.AddDirtyNavGridCell(num3);
 		}
 		base.OnCleanUp();
 	}
 
-	public void SetForceField(bool active)
+	public void SetWalkable(bool active)
 	{
 		int num = Grid.PosToCell(this);
-		foreach (CellOffset cellOffset in Gantry.ForcefieldOffsets)
+		foreach (CellOffset cellOffset in Gantry.RetractableOffsets)
 		{
 			CellOffset rotatedOffset = this.building.GetRotatedOffset(cellOffset);
 			int num2 = Grid.OffsetCell(num, rotatedOffset);
 			Grid.FakeFloor[num2] = active;
-			Grid.Impassable[num2] = active;
-			Game.Instance.SetForceField(num2, active, false);
 			Pathfinding.Instance.AddDirtyNavGridCell(num2);
 		}
 	}
@@ -115,7 +111,7 @@ public class Gantry : Switch
 		new CellOffset(-1, 1)
 	};
 
-	public static CellOffset[] ForcefieldOffsets = new CellOffset[]
+	public static CellOffset[] RetractableOffsets = new CellOffset[]
 	{
 		new CellOffset(0, 1),
 		new CellOffset(1, 1),
@@ -152,10 +148,10 @@ public class Gantry : Switch
 				.OnAnimQueueComplete(this.extended);
 			this.extended.Enter(delegate(Gantry.Instance smi)
 			{
-				smi.master.SetForceField(true);
+				smi.master.SetWalkable(true);
 			}).Exit(delegate(Gantry.Instance smi)
 			{
-				smi.master.SetForceField(false);
+				smi.master.SetWalkable(false);
 			}).PlayAnim("on")
 				.ParamTransition<bool>(this.should_extend, this.retracted_pre, GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.IsFalse);
 		}

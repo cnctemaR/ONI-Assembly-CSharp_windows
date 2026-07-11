@@ -10,12 +10,12 @@ namespace ProcGen
 		{
 			if (!SettingsCache.worlds.HasWorld(worldName))
 			{
-				Output.LogWarning(new object[] { string.Format("Failed to get worldGen data for {0}. Using {1} instead", worldName, "worlds/Default") });
+				DebugUtil.LogWarningArgs(new object[] { string.Format("Failed to get worldGen data for {0}. Using {1} instead", worldName, "worlds/Default") });
 				DebugUtil.Assert(SettingsCache.worlds.HasWorld("worlds/Default"));
 				worldName = "worlds/Default";
 			}
 			this.world = SettingsCache.worlds.GetWorldData(worldName).world;
-			Debug.Log("Set world to [" + worldName + "] " + SettingsCache.GetPath(), null);
+			Debug.Log("Set world to [" + worldName + "] " + SettingsCache.GetPath());
 		}
 
 		public World world { get; private set; }
@@ -24,7 +24,7 @@ namespace ProcGen
 		{
 			if (this.world != null && this.world.defaultsOverrides != null && this.world.defaultsOverrides.baseData != null)
 			{
-				Output.Log(new object[] { string.Format("World '{0}' is overriding baseData", this.world.name) });
+				DebugUtil.LogArgs(new object[] { string.Format("World '{0}' is overriding baseData", this.world.name) });
 				return this.world.defaultsOverrides.baseData;
 			}
 			return SettingsCache.defaults.baseData;
@@ -34,7 +34,7 @@ namespace ProcGen
 		{
 			if (this.world != null && this.world.defaultsOverrides != null && this.world.defaultsOverrides.overworldAddTags != null)
 			{
-				Output.Log(new object[] { string.Format("World '{0}' is overriding overworldAddTags", this.world.name) });
+				DebugUtil.LogArgs(new object[] { string.Format("World '{0}' is overriding overworldAddTags", this.world.name) });
 				return this.world.defaultsOverrides.overworldAddTags;
 			}
 			return SettingsCache.defaults.overworldAddTags;
@@ -44,7 +44,7 @@ namespace ProcGen
 		{
 			if (this.world != null && this.world.defaultsOverrides != null && this.world.defaultsOverrides.defaultMoveTags != null)
 			{
-				Output.Log(new object[] { string.Format("World '{0}' is overriding defaultMoveTags", this.world.name) });
+				DebugUtil.LogArgs(new object[] { string.Format("World '{0}' is overriding defaultMoveTags", this.world.name) });
 				return this.world.defaultsOverrides.defaultMoveTags;
 			}
 			return SettingsCache.defaults.defaultMoveTags;
@@ -82,12 +82,12 @@ namespace ProcGen
 				}
 				else
 				{
-					Output.Log(new object[] { string.Format("World '{0}' is overriding setting '{1}'", this.world.name, target) });
+					DebugUtil.LogArgs(new object[] { string.Format("World '{0}' is overriding setting '{1}'", this.world.name, target) });
 				}
 			}
 			else if (!this.GetSetting<T>(SettingsCache.defaults, target, parser, out t))
 			{
-				Output.LogWarning(new object[] { string.Format("Couldn't find setting '{0}' in default settings!", target) });
+				DebugUtil.LogWarningArgs(new object[] { string.Format("Couldn't find setting '{0}' in default settings!", target) });
 			}
 			return t;
 		}

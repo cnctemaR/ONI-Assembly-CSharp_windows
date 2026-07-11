@@ -11,7 +11,7 @@ public class EntitySplitter : KMonoBehaviour
 		Pickupable pickupable = base.GetComponent<Pickupable>();
 		if (pickupable == null)
 		{
-			global::Debug.LogError(base.name + " does not have a pickupable component!", null);
+			global::Debug.LogError(base.name + " does not have a pickupable component!");
 		}
 		Pickupable pickupable2 = pickupable;
 		pickupable2.OnTake = (Func<float, Pickupable>)Delegate.Combine(pickupable2.OnTake, new Func<float, Pickupable>((float amount) => EntitySplitter.Split(pickupable, amount, null)));
@@ -77,6 +77,7 @@ public class EntitySplitter : KMonoBehaviour
 			gameObject = pickupable.transform.parent.gameObject;
 		}
 		GameObject gameObject2 = GameUtil.KInstantiate(prefab, pickupable.transform.GetPosition(), Grid.SceneLayer.Ore, gameObject, null, 0);
+		global::Debug.Assert(gameObject2 != null, "WTH, the GO is null, shouldn't happen on instantiate");
 		Pickupable component = gameObject2.GetComponent<Pickupable>();
 		if (component == null)
 		{

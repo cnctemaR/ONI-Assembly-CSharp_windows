@@ -54,6 +54,7 @@ public class ReportScreen : KScreen
 
 	private void Refresh()
 	{
+		global::Debug.Assert(this.currentReport != null);
 		if (this.currentReport.day == ReportManager.Instance.TodaysReport.day)
 		{
 			this.SetTitle(string.Format(UI.ENDOFDAYREPORT.DAY_TITLE_TODAY, this.currentReport.day));
@@ -113,6 +114,7 @@ public class ReportScreen : KScreen
 	public void ShowReport(int day)
 	{
 		this.currentReport = ReportManager.Instance.FindReport(day);
+		global::Debug.Assert(this.currentReport != null, "Can't find report for day: " + day.ToString());
 		this.Refresh();
 	}
 

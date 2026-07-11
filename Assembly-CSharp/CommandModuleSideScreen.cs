@@ -29,13 +29,13 @@ public class CommandModuleSideScreen : SideScreenContent
 	{
 		if (new_target == null)
 		{
-			global::Debug.LogError("Invalid gameObject received", null);
+			global::Debug.LogError("Invalid gameObject received");
 			return;
 		}
 		this.target = new_target.GetComponent<LaunchConditionManager>();
 		if (this.target == null)
 		{
-			global::Debug.LogError("The gameObject received does not contain a LaunchConditionManager component", null);
+			global::Debug.LogError("The gameObject received does not contain a LaunchConditionManager component");
 			return;
 		}
 		this.ClearConditions();

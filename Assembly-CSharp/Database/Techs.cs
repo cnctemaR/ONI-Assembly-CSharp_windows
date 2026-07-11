@@ -144,6 +144,27 @@ namespace Database
 				new string[] { "PressureDoor", "OreScrubber", "AirFilter", "CO2Scrubber" }
 			},
 			{
+				"MedicineI",
+				new string[] { "Apothecary" }
+			},
+			{
+				"MedicineII",
+				new string[] { "DoctorStation", "HandSanitizer" }
+			},
+			{
+				"MedicineIII",
+				new string[]
+				{
+					LogicDiseaseSensorConfig.ID,
+					GasConduitDiseaseSensorConfig.ID,
+					LiquidConduitDiseaseSensorConfig.ID
+				}
+			},
+			{
+				"MedicineIV",
+				new string[] { "AdvancedDoctorStation" }
+			},
+			{
 				"LiquidPiping",
 				new string[] { "LiquidConduit", "LiquidPump", "LiquidVent", "LiquidConduitBridge" }
 			},
@@ -171,16 +192,6 @@ namespace Database
 					"FlushToilet",
 					ShowerConfig.ID,
 					"MeshTile"
-				}
-			},
-			{
-				"Medbay",
-				new string[]
-				{
-					"HandSanitizer",
-					"MedicalBed",
-					GasConduitDiseaseSensorConfig.ID,
-					LiquidConduitDiseaseSensorConfig.ID
 				}
 			},
 			{
@@ -214,7 +225,7 @@ namespace Database
 			},
 			{
 				"RenewableEnergy",
-				new string[] { "SteamTurbine", "SolarPanel" }
+				new string[] { "SteamTurbine", "SteamTurbine2", "SolarPanel" }
 			},
 			{
 				"Combustion",
@@ -276,19 +287,11 @@ namespace Database
 			},
 			{
 				"AdvancedResearch",
-				new string[] { "AdvancedResearchCenter", "BetaResearchPoint" }
+				new string[] { "AdvancedResearchCenter", "BetaResearchPoint", "ResetSkillsStation" }
 			},
 			{
 				"BasicRefinement",
 				new string[] { "RockCrusher", "Kiln" }
-			},
-			{
-				"MedicalResearch",
-				new string[]
-				{
-					"Apothecary",
-					LogicDiseaseSensorConfig.ID
-				}
 			},
 			{
 				"RefinedObjects",
@@ -304,7 +307,7 @@ namespace Database
 			},
 			{
 				"TemperatureModulation",
-				new string[] { "LiquidCooledFan", "SpaceHeater", "InsulationTile" }
+				new string[] { "LiquidCooledFan", "IceCooledFan", "IceMachine", "SpaceHeater", "InsulationTile" }
 			},
 			{
 				"HVAC",
@@ -379,11 +382,11 @@ namespace Database
 			},
 			{
 				"SmartStorage",
-				new string[] { "StorageLockerSmart", "SolidTransferArm", "ConveyorOverlay" }
+				new string[] { "StorageLockerSmart", "SolidTransferArm", "ObjectDispenser", "ConveyorOverlay" }
 			},
 			{
 				"SolidTransport",
-				new string[] { "SolidConduit", "SolidConduitBridge", "SolidConduitInbox", "SolidConduitOutbox", "AutoMiner" }
+				new string[] { "SolidConduit", "SolidConduitBridge", "SolidConduitInbox", "SolidConduitOutbox", "SolidVent", "SolidLogicValve", "AutoMiner" }
 			},
 			{
 				"BasicRocketry",

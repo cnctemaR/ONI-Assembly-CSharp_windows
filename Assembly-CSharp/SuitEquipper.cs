@@ -28,6 +28,24 @@ public class SuitEquipper : KMonoBehaviour
 		}
 	}
 
+	public Equippable IsWearingAirtightSuit()
+	{
+		Equippable equippable = null;
+		MinionIdentity component = base.GetComponent<MinionIdentity>();
+		Equipment equipment = component.GetEquipment();
+		foreach (AssignableSlotInstance assignableSlotInstance in equipment.Slots)
+		{
+			EquipmentSlotInstance equipmentSlotInstance = (EquipmentSlotInstance)assignableSlotInstance;
+			Equippable equippable2 = equipmentSlotInstance.assignable as Equippable;
+			if (equippable2 && equippable2.GetComponent<KPrefabID>().HasTag(GameTags.AirtightSuit))
+			{
+				equippable = equippable2;
+				break;
+			}
+		}
+		return equippable;
+	}
+
 	private static readonly EventSystem.IntraObjectHandler<SuitEquipper> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<SuitEquipper>(delegate(SuitEquipper component, object data)
 	{
 		component.OnRefreshUserMenu(data);

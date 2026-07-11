@@ -173,6 +173,7 @@ public class KGlobalAnimParser
 			data.AddAnim(anim);
 			animFile.animCount++;
 		}
+		global::Debug.Assert(num2 == animFile.animCount);
 		data.animCount[fileNameHash] = animFile.animCount;
 		animFile.maxVisSymbolFrames = Math.Max(animFile.maxVisSymbolFrames, reader.ReadInt32());
 		data.UpdateMaxVisibleSymbols(animFile.maxVisSymbolFrames);
@@ -198,7 +199,7 @@ public class KGlobalAnimParser
 		{
 			if (num != 9)
 			{
-				global::Debug.LogError(string.Concat(new object[] { fileNameHash, " has invalid build.bytes version [", num, "]" }), null);
+				global::Debug.LogError(string.Concat(new object[] { fileNameHash, " has invalid build.bytes version [", num, "]" }));
 				return -1;
 			}
 		}
@@ -290,7 +291,7 @@ public class KGlobalAnimParser
 			KAnim.Build.Symbol symbol = data.GetSymbol(i);
 			if (symbol == null)
 			{
-				global::Debug.LogWarning(string.Concat(new object[] { "Symbol null for [", data.groupID, "] idx: [", i, "]" }), null);
+				global::Debug.LogWarning(string.Concat(new object[] { "Symbol null for [", data.groupID, "] idx: [", i, "]" }));
 			}
 			else
 			{
@@ -318,7 +319,7 @@ public class KGlobalAnimParser
 						"] id: [",
 						symbol.hash,
 						"]"
-					}), null);
+					}));
 				}
 				else
 				{
@@ -331,7 +332,7 @@ public class KGlobalAnimParser
 						KAnim.Build.SymbolFrameInstance symbolFrameInstance2 = data.GetSymbolFrameInstance(l);
 						if (symbolFrameInstance2.symbolFrame == null)
 						{
-							global::Debug.LogWarning(string.Concat(new object[] { "No symbol frame  [", data.groupID, "] symFrameIdx: [", l, "] id: [", symbol.hash, "]" }), null);
+							global::Debug.LogWarning(string.Concat(new object[] { "No symbol frame  [", data.groupID, "] symFrameIdx: [", l, "] id: [", symbol.hash, "]" }));
 						}
 						else
 						{
@@ -352,7 +353,7 @@ public class KGlobalAnimParser
 										"] id: [",
 										symbol.hash,
 										"]"
-									}), null);
+									}));
 								}
 								else
 								{

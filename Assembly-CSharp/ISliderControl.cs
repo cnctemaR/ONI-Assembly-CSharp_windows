@@ -6,6 +6,8 @@ public interface ISliderControl
 
 	string SliderUnits { get; }
 
+	int SliderDecimalPlaces(int index);
+
 	float GetSliderMin(int index);
 
 	float GetSliderMax(int index);

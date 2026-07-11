@@ -32,6 +32,7 @@ public class ToolParameterMenu : KMonoBehaviour
 			else if (value == ToolParameterMenu.ToggleState.On)
 			{
 				toggle.ChangeState(1);
+				this.lastEnabledFilter = keyValuePair.Key;
 			}
 			else
 			{
@@ -92,6 +93,7 @@ public class ToolParameterMenu : KMonoBehaviour
 					if (toggleState == ToolParameterMenu.ToggleState.On)
 					{
 						keyValuePair.Value.GetComponentInChildren<MultiToggle>().ChangeState(1);
+						this.lastEnabledFilter = keyValuePair.Key;
 					}
 				}
 				else
@@ -110,6 +112,11 @@ public class ToolParameterMenu : KMonoBehaviour
 		}
 	}
 
+	public string GetLastEnabledFilter()
+	{
+		return this.lastEnabledFilter;
+	}
+
 	public GameObject content;
 
 	public GameObject widgetContainer;
@@ -119,6 +126,8 @@ public class ToolParameterMenu : KMonoBehaviour
 	private Dictionary<string, GameObject> widgets = new Dictionary<string, GameObject>();
 
 	private Dictionary<string, ToolParameterMenu.ToggleState> currentParameters;
+
+	private string lastEnabledFilter;
 
 	public class FILTERLAYERS
 	{
@@ -141,6 +150,42 @@ public class ToolParameterMenu : KMonoBehaviour
 		public static string LOGIC = "LOGIC";
 
 		public static string BACKWALL = "BACKWALL";
+
+		public static string CONSTRUCTION = "CONSTRUCTION";
+
+		public static string DIG = "DIG";
+
+		public static string CLEAN = "CLEAN";
+
+		public static string OPERATE = "OPERATE";
+
+		public static string METAL = "METAL";
+
+		public static string BUILDABLE = "BUILDABLE";
+
+		public static string FILTER = "FILTER";
+
+		public static string LIQUIFIABLE = "LIQUIFIABLE";
+
+		public static string LIQUID = "LIQUID";
+
+		public static string CONSUMABLEORE = "CONSUMABLEORE";
+
+		public static string ORGANICS = "ORGANICS";
+
+		public static string FARMABLE = "FARMABLE";
+
+		public static string GAS = "GAS";
+
+		public static string AGRICULTURE = "AGRICULTURE";
+
+		public static string HEATFLOW = "HEATFLOW";
+
+		public static string ABSOLUTETEMPERATURE = "ABSOLUTETEMPERATURE";
+
+		public static string ADAPTIVETEMPERATURE = "ADAPTIVETEMPERATURE";
+
+		public static string STATECHANGE = "STATECHANGE";
 
 		public static string ALL = "ALL";
 	}

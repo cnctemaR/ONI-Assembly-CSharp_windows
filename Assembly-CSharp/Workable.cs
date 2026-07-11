@@ -84,7 +84,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		base.OnPrefabInit();
 		this.workerStatusItem = Db.Get().MiscStatusItems.Using;
 		this.workingStatusItem = Db.Get().MiscStatusItems.Operating;
-		this.readyForRoleWorkStatusItem = Db.Get().BuildingStatusItems.RequiresRolePerk;
+		this.readyForSkillWorkStatusItem = Db.Get().BuildingStatusItems.RequiresSkillPerk;
 		this.workTime = this.GetWorkTime();
 		this.workTimeRemaining = Mathf.Min(this.workTimeRemaining, this.workTime);
 	}
@@ -92,16 +92,17 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		if (this.shouldShowRolePerkStatusItem && this.requiredRolePerk.IsValid)
+		if (this.shouldShowSkillPerkStatusItem && !string.IsNullOrEmpty(this.requiredSkillPerk))
 		{
-			if (this.roleUpdateHandle != -1)
+			if (this.skillsUpdateHandle != -1)
 			{
-				Game.Instance.Unsubscribe(this.roleUpdateHandle);
+				Game.Instance.Unsubscribe(this.skillsUpdateHandle);
 			}
-			this.roleUpdateHandle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateStatusItem));
+			this.skillsUpdateHandle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateStatusItem));
 		}
 		KPrefabID component = base.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.HasChores);
+		this.ShowProgressBar(this.alwaysShowProgressBar && this.workTimeRemaining < this.GetWorkTime());
 		this.UpdateStatusItem(null);
 	}
 
@@ -115,15 +116,15 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		component.RemoveStatusItem(this.workStatusItemHandle, false);
 		if (this.worker == null)
 		{
-			if (this.shouldShowRolePerkStatusItem && this.requiredRolePerk.IsValid)
+			if (this.shouldShowSkillPerkStatusItem && !string.IsNullOrEmpty(this.requiredSkillPerk))
 			{
-				if (Game.Instance.roleManager.GetRoleAssigneesWithPerk(this.requiredRolePerk).Count == 0)
+				if (!MinionResume.AnyMinionHasPerk(this.requiredSkillPerk))
 				{
-					this.workStatusItemHandle = component.AddStatusItem(Db.Get().BuildingStatusItems.ColonyLacksRequiredRolePerk, this.requiredRolePerk);
+					this.workStatusItemHandle = component.AddStatusItem(Db.Get().BuildingStatusItems.ColonyLacksRequiredSkillPerk, this.requiredSkillPerk);
 				}
 				else
 				{
-					this.workStatusItemHandle = component.AddStatusItem(this.readyForRoleWorkStatusItem, this.requiredRolePerk);
+					this.workStatusItemHandle = component.AddStatusItem(this.readyForSkillWorkStatusItem, this.requiredSkillPerk);
 				}
 			}
 		}
@@ -146,6 +147,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public void StartWork(Worker worker_to_start)
 	{
+		global::Debug.Assert(worker_to_start != null, "How did we get a null worker?");
 		this.worker = worker_to_start;
 		this.UpdateStatusItem(null);
 		if (this.showProgressBar)
@@ -204,18 +206,19 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return (!component.HasTag(GameTags.NotConversationTopic)) ? component.PrefabTag.Name : null;
 	}
 
-	public virtual void AwardExperience(float work_dt, MinionResume resume)
-	{
-	}
-
-	public void SetAttributeConverter(AttributeConverter attributeConverter)
-	{
-		this.attributeConverter = attributeConverter;
-	}
-
 	public float GetAttributeExperienceMultiplier()
 	{
 		return this.attributeExperienceMultiplier;
+	}
+
+	public string GetSkillExperienceSkillGroup()
+	{
+		return this.skillExperienceSkillGroup;
+	}
+
+	public float GetSkillExperienceMultiplier()
+	{
+		return this.skillExperienceMultiplier;
 	}
 
 	protected virtual bool OnWorkTick(Worker worker, float dt)
@@ -242,7 +245,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		{
 			this.workTimeRemaining = this.GetWorkTime();
 		}
-		this.ShowProgressBar(false);
+		this.ShowProgressBar(this.alwaysShowProgressBar && this.workTimeRemaining < this.GetWorkTime());
 		this.worker = null;
 		this.UpdateStatusItem(null);
 	}
@@ -374,9 +377,9 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		{
 			this.offsetTracker.Clear();
 		}
-		if (this.roleUpdateHandle != -1)
+		if (this.skillsUpdateHandle != -1)
 		{
-			Game.Instance.Unsubscribe(this.roleUpdateHandle);
+			Game.Instance.Unsubscribe(this.skillsUpdateHandle);
 		}
 		base.OnCleanUp();
 		this.OnWorkableEventCB = null;
@@ -480,6 +483,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	protected bool showProgressBar = true;
 
+	public bool alwaysShowProgressBar;
+
 	protected StatusItem workerStatusItem;
 
 	protected StatusItem workingStatusItem;
@@ -487,6 +492,9 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	protected Guid workStatusItemHandle;
 
 	protected OffsetTracker offsetTracker;
+
+	[SerializeField]
+	protected string attributeConverterId;
 
 	protected AttributeConverter attributeConverter;
 
@@ -496,7 +504,14 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	protected bool shouldTransferDiseaseWithWorker = true;
 
+	[SerializeField]
 	protected float attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
+
+	[SerializeField]
+	protected string skillExperienceSkillGroup;
+
+	[SerializeField]
+	protected float skillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;
 
 	public bool triggerWorkReactions = true;
 
@@ -532,14 +547,14 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public Action<Workable.WorkableEvent> OnWorkableEventCB;
 
-	private int roleUpdateHandle = -1;
+	private int skillsUpdateHandle = -1;
 
-	public HashedString requiredRolePerk;
+	public string requiredSkillPerk;
 
 	[SerializeField]
-	protected bool shouldShowRolePerkStatusItem = true;
+	protected bool shouldShowSkillPerkStatusItem = true;
 
-	protected StatusItem readyForRoleWorkStatusItem;
+	protected StatusItem readyForSkillWorkStatusItem;
 
 	public HashedString[] workAnims = new HashedString[] { "working_pre", "working_loop" };
 

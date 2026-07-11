@@ -103,7 +103,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	{
 		Hashtable hashtable = new Hashtable();
 		ElementsAudio.Instance.LoadData(AsyncLoadManager<IGlobalAsyncLoader>.AsyncLoader<ElementAudioFileLoader>.Get().entries);
-		ElementLoader.Load(ref hashtable, this.elementsFile.text, this.substanceTable);
+		ElementLoader.Load(ref hashtable, this.substanceTable);
 		Assets.SubstanceTable = this.substanceTable;
 	}
 
@@ -190,7 +190,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		prefab.UpdateSaveLoadTag();
 		if (Assets.PrefabsByTag.ContainsKey(prefab.PrefabTag))
 		{
-			global::Debug.LogWarning("Tried loading prefab with duplicate tag, ignoring: " + prefab.PrefabTag, null);
+			global::Debug.LogWarning("Tried loading prefab with duplicate tag, ignoring: " + prefab.PrefabTag);
 		}
 		Assets.PrefabsByTag[prefab.PrefabTag] = prefab;
 		foreach (Tag tag in prefab.Tags)
@@ -233,7 +233,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		GameObject gameObject = Assets.TryGetPrefab(tag);
 		if (gameObject == null)
 		{
-			global::Debug.LogWarning("Missing prefab: " + tag, null);
+			global::Debug.LogWarning("Missing prefab: " + tag);
 		}
 		return gameObject;
 	}
@@ -327,7 +327,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 				return blockTileDecorInfo;
 			}
 		}
-		Output.LogError("Could not find BlockTileDecorInfo named [" + name + "]");
+		global::Debug.LogError("Could not find BlockTileDecorInfo named [" + name + "]");
 		return null;
 	}
 
@@ -335,14 +335,14 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	{
 		if (!name.IsValid)
 		{
-			global::Debug.LogWarning("Invalid hash name", null);
+			global::Debug.LogWarning("Invalid hash name");
 			return null;
 		}
 		KAnimFile kanimFile = null;
 		Assets.AnimTable.TryGetValue(name, out kanimFile);
 		if (kanimFile == null)
 		{
-			global::Debug.LogWarning("Missing Anim: [" + name.ToString() + "]. You may have to run Collect Anim on the Assets prefab", null);
+			global::Debug.LogWarning("Missing Anim: [" + name.ToString() + "]. You may have to run Collect Anim on the Assets prefab");
 		}
 		return kanimFile;
 	}
@@ -434,9 +434,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public SubstanceTable substanceTable;
 
 	public static SubstanceTable SubstanceTable;
-
-	[SerializeField]
-	public TextAsset elementsFile;
 
 	[SerializeField]
 	public TextAsset elementAudio;

@@ -165,6 +165,7 @@ public class RoomProber : ISim1000ms
 
 	private void CreateRoom(CavityInfo cavity)
 	{
+		global::Debug.Assert(cavity.room == null);
 		Room room = new Room();
 		room.cavity = cavity;
 		cavity.room = room;
@@ -187,6 +188,7 @@ public class RoomProber : ISim1000ms
 		{
 			if (cavityInfo.dirty)
 			{
+				global::Debug.Assert(cavityInfo.room == null, "I expected info.room to always be null by this point");
 				if (cavityInfo.numCells > 0)
 				{
 					if (cavityInfo.numCells <= maxRoomSize)
@@ -206,6 +208,7 @@ public class RoomProber : ISim1000ms
 
 	private void AssignBuildingsToRoom(Room room)
 	{
+		global::Debug.Assert(room != null);
 		RoomType roomType = room.roomType;
 		if (roomType == Db.Get().RoomTypes.Neutral)
 		{
@@ -226,6 +229,7 @@ public class RoomProber : ISim1000ms
 
 	private void UnassignBuildingsToRoom(Room room)
 	{
+		global::Debug.Assert(room != null);
 		foreach (KPrefabID kprefabID in room.buildings)
 		{
 			if (!(kprefabID == null))
@@ -332,7 +336,7 @@ public class RoomProber : ISim1000ms
 
 		private static bool IsWall(int cell)
 		{
-			return (byte)(Grid.BuildMasks[cell] & (Grid.BuildFlags.Foundation | Grid.BuildFlags.Solid)) != 0 || Grid.HasDoor[cell];
+			return (byte)(Grid.BuildMasks[cell] & (Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation)) != 0 || Grid.HasDoor[cell];
 		}
 
 		public bool ShouldContinue(int flood_cell)

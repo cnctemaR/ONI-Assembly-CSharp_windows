@@ -26,11 +26,13 @@ public class Diggable : Workable
 	{
 		base.OnPrefabInit();
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Digging;
-		this.readyForRoleWorkStatusItem = Db.Get().BuildingStatusItems.DigRequiresRolePerk;
+		this.readyForSkillWorkStatusItem = Db.Get().BuildingStatusItems.DigRequiresSkillPerk;
 		this.faceTargetWhenWorking = true;
 		base.Subscribe<Diggable>(-1432940121, Diggable.OnReachableChangedDelegate);
 		this.attributeConverter = Db.Get().AttributeConverters.DiggingSpeed;
-		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
+		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Mining.Id;
+		this.skillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
 		this.multitoolContext = "dig";
 		this.multitoolHitEffectTag = "fx_dig_splash";
 		this.workingPstComplete = HashedString.Invalid;
@@ -184,13 +186,6 @@ public class Diggable : Workable
 		yield break;
 	}
 
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole(JuniorMiner.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
-		resume.AddExperienceIfRole(Miner.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
-		resume.AddExperienceIfRole(SeniorMiner.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
-	}
-
 	private void OnSolidChanged(object data)
 	{
 		if (this == null || base.gameObject == null)
@@ -206,7 +201,7 @@ public class Diggable : Workable
 			bool flag = false;
 			foreach (Chore.PreconditionInstance preconditionInstance in this.chore.GetPreconditions())
 			{
-				if (preconditionInstance.id == ChorePreconditions.instance.HasRolePerk.id)
+				if (preconditionInstance.id == ChorePreconditions.instance.HasSkillPerk.id)
 				{
 					flag = true;
 					break;
@@ -214,9 +209,9 @@ public class Diggable : Workable
 			}
 			if (!flag)
 			{
-				this.chore.AddPrecondition(ChorePreconditions.instance.HasRolePerk, RoleManager.rolePerks.CanDigNearlyImpenetrable);
+				this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanDigNearlyImpenetrable);
 			}
-			this.requiredRolePerk = RoleManager.rolePerks.CanDigNearlyImpenetrable.id;
+			this.requiredSkillPerk = Db.Get().SkillPerks.CanDigNearlyImpenetrable.Id;
 			this.materialDisplay.sharedMaterial = this.materials[2];
 		}
 		else if (Grid.Element[num].hardness >= 50)
@@ -224,7 +219,7 @@ public class Diggable : Workable
 			bool flag2 = false;
 			foreach (Chore.PreconditionInstance preconditionInstance2 in this.chore.GetPreconditions())
 			{
-				if (preconditionInstance2.id == ChorePreconditions.instance.HasRolePerk.id)
+				if (preconditionInstance2.id == ChorePreconditions.instance.HasSkillPerk.id)
 				{
 					flag2 = true;
 					break;
@@ -232,15 +227,15 @@ public class Diggable : Workable
 			}
 			if (!flag2)
 			{
-				this.chore.AddPrecondition(ChorePreconditions.instance.HasRolePerk, RoleManager.rolePerks.CanDigVeryFirm);
+				this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanDigVeryFirm);
 			}
-			this.requiredRolePerk = RoleManager.rolePerks.CanDigVeryFirm.id;
+			this.requiredSkillPerk = Db.Get().SkillPerks.CanDigVeryFirm.Id;
 			this.materialDisplay.sharedMaterial = this.materials[1];
 		}
 		else
 		{
-			this.requiredRolePerk = HashedString.Invalid;
-			this.chore.GetPreconditions().Remove(this.chore.GetPreconditions().Find((Chore.PreconditionInstance o) => o.id == ChorePreconditions.instance.HasRolePerk.id));
+			this.requiredSkillPerk = null;
+			this.chore.GetPreconditions().Remove(this.chore.GetPreconditions().Find((Chore.PreconditionInstance o) => o.id == ChorePreconditions.instance.HasSkillPerk.id));
 		}
 		this.UpdateStatusItem(null);
 		bool flag3 = false;

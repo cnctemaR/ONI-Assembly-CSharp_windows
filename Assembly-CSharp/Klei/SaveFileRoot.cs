@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using KMod;
 
 namespace Klei
 {
@@ -19,5 +20,7 @@ namespace Klei
 		public string worldID;
 
 		public List<ModInfo> requiredMods;
+
+		public List<Label> active_mods;
 	}
 }

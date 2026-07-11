@@ -64,7 +64,7 @@ public class UIPool<T> where T : MonoBehaviour
 		if (!this.activeElements.Contains(element))
 		{
 			string text = ((!this.freeElements.Contains(element)) ? "The element provided does not belong to this pool" : "The element provided is already inactive");
-			global::Debug.LogError(text, null);
+			global::Debug.LogError(text);
 			return;
 		}
 		if (this.disabledElementParent != null)

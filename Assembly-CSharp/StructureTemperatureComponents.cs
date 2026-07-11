@@ -54,9 +54,9 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 				}
 				catch (Exception ex)
 				{
-					global::Debug.LogWarning(ex, null);
-					global::Debug.LogWarning(BUILDING.STATUSITEMS.OPERATINGENERGY.TOOLTIP, null);
-					global::Debug.LogWarning(str, null);
+					global::Debug.LogWarning(ex);
+					global::Debug.LogWarning(BUILDING.STATUSITEMS.OPERATINGENERGY.TOOLTIP);
+					global::Debug.LogWarning(str);
 				}
 			}
 			else
@@ -87,7 +87,7 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 		structureTemperaturePayload.maxTemperature = ((!(structureTemperaturePayload.overheatable != null)) ? 10000f : structureTemperaturePayload.overheatable.OverheatTemperature);
 		if (structureTemperaturePayload.maxTemperature <= 0f)
 		{
-			Output.LogError("invalid max temperature");
+			global::Debug.LogError("invalid max temperature");
 		}
 		base.SetPayload(handle, ref structureTemperaturePayload);
 		this.SimRegister(handle, ref structureTemperatureHeader, ref structureTemperaturePayload);

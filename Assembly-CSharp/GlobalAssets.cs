@@ -35,7 +35,7 @@ public class GlobalAssets : MonoBehaviour
 					{
 						string text;
 						bank.getPath(out text);
-						Output.LogError(string.Format("ERROR [{0}] loading FMOD events for bank [{1}]", eventList, text));
+						global::Debug.LogError(string.Format("ERROR [{0}] loading FMOD events for bank [{1}]", eventList, text));
 					}
 					else
 					{

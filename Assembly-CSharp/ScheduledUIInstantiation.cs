@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ScheduledUIInstantiation : KMonoBehaviour
@@ -31,12 +32,25 @@ public class ScheduledUIInstantiation : KMonoBehaviour
 				GameObject gameObject2 = Util.KInstantiateUI(gameObject, instantiation.parent.gameObject, false);
 				gameObject2.rectTransform().anchoredPosition = vector;
 				gameObject2.rectTransform().localScale = Vector3.one;
+				this.instantiatedObjects.Add(gameObject2);
 			}
 		}
 		if (!this.InstantiateOnAwake)
 		{
 			base.Unsubscribe((int)this.InstantiationEvent, new Action<object>(this.InstantiateElements));
 		}
+	}
+
+	public T GetInstantiatedObject<T>() where T : Component
+	{
+		for (int i = 0; i < this.instantiatedObjects.Count; i++)
+		{
+			if (this.instantiatedObjects[i].GetComponent(typeof(T)) != null)
+			{
+				return this.instantiatedObjects[i].GetComponent(typeof(T)) as T;
+			}
+		}
+		return (T)((object)null);
 	}
 
 	public ScheduledUIInstantiation.Instantiation[] UIElements;
@@ -46,6 +60,8 @@ public class ScheduledUIInstantiation : KMonoBehaviour
 	public GameHashes InstantiationEvent = GameHashes.StartGameUser;
 
 	private bool completed;
+
+	private List<GameObject> instantiatedObjects = new List<GameObject>();
 
 	[Serializable]
 	public struct Instantiation

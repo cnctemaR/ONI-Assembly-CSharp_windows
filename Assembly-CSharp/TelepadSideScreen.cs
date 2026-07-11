@@ -24,7 +24,7 @@ public class TelepadSideScreen : SideScreenContent
 		Telepad component = target.GetComponent<Telepad>();
 		if (component == null)
 		{
-			global::Debug.LogError("Target doesn't have a telepad associated with it.", null);
+			global::Debug.LogError("Target doesn't have a telepad associated with it.");
 			return;
 		}
 		this.targetTelepad = component;

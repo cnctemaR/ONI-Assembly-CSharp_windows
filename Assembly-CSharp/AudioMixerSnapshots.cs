@@ -93,10 +93,17 @@ public class AudioMixerSnapshots : ScriptableObject
 	[EventRef]
 	public string MENUStarmapSnapshot;
 
+	[EventRef]
+	public string GameNotFocusedSnapshot;
+
+	[EventRef]
+	public string FacilityVisibleSnapshot;
+
 	[SerializeField]
 	[EventRef]
 	private string[] snapshots;
 
+	[NonSerialized]
 	public List<string> snapshotMap = new List<string>();
 
 	public static AudioMixerSnapshots instance;

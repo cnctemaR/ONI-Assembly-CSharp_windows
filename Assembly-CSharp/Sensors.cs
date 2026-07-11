@@ -18,7 +18,7 @@ public class Sensors : KMonoBehaviour
 				return (SensorType)((object)sensor);
 			}
 		}
-		Debug.LogError("Missing sensor of type: " + typeof(SensorType).Name, null);
+		Debug.LogError("Missing sensor of type: " + typeof(SensorType).Name);
 		return (SensorType)((object)null);
 	}
 

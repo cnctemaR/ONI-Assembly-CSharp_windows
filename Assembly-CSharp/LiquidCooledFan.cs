@@ -14,7 +14,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 		base.smi.master.gasStorage.Find(GameTags.Water, pooledList);
 		if (pooledList.Count > 0)
 		{
-			global::Debug.LogWarning("Liquid Cooled fan Gas storage contains water - A duplicant probably delivered to the wrong storage - moving it to liquid storage.", null);
+			global::Debug.LogWarning("Liquid Cooled fan Gas storage contains water - A duplicant probably delivered to the wrong storage - moving it to liquid storage.");
 			foreach (GameObject gameObject in pooledList)
 			{
 				base.smi.master.gasStorage.Transfer(gameObject, base.smi.master.liquidStorage, false, false);
@@ -298,11 +298,6 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 					component2.consumptionRate = 0f;
 					component2.RefreshConsumptionRate();
 				});
-			this.workable.emitting.EventTransition(GameHashes.ActiveChanged, this.unworkable, (LiquidCooledFan.StatesInstance smi) => smi.master.workable.worker == null).EventTransition(GameHashes.OperationalChanged, this.unworkable, (LiquidCooledFan.StatesInstance smi) => smi.master.workable.worker == null).ScheduleGoTo(3f, this.workable.consuming)
-				.Update("LiquidFanEmitCooledContents", delegate(LiquidCooledFan.StatesInstance smi, float dt)
-				{
-					smi.master.EmitContents();
-				}, UpdateRate.SIM_200ms, false);
 			this.workable.emitting.EventTransition(GameHashes.ActiveChanged, this.unworkable, (LiquidCooledFan.StatesInstance smi) => smi.master.workable.worker == null).EventTransition(GameHashes.OperationalChanged, this.unworkable, (LiquidCooledFan.StatesInstance smi) => smi.master.workable.worker == null).ScheduleGoTo(3f, this.workable.consuming)
 				.Update(delegate(LiquidCooledFan.StatesInstance smi, float dt)
 				{

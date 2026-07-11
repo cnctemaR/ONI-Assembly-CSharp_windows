@@ -2,40 +2,35 @@
 using System.Collections.Generic;
 using System.IO;
 using Klei;
+using KMod;
 using Steamworks;
 using STRINGS;
 using UnityEngine;
 
 public class MainMenu : KMonoBehaviour
 {
+	private KButton MakeButton(MainMenu.ButtonInfo info)
+	{
+		KButton kbutton = Util.KInstantiateUI<KButton>(this.buttonPrefab.gameObject, this.buttonParent, true);
+		kbutton.onClick += info.action;
+		LocText componentInChildren = kbutton.GetComponentInChildren<LocText>();
+		componentInChildren.text = info.text;
+		componentInChildren.fontSize = (float)info.fontSize;
+		return kbutton;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Global.Instance.modManager.DeactivateWorldGenMod();
-		List<MainMenu.ButtonInfo> list = new List<MainMenu.ButtonInfo>
+		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.NEWGAME, new global::System.Action(this.NewGame), 22));
+		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.LOADGAME, new global::System.Action(this.LoadGame), 14));
+		if (DistributionPlatform.Initialized)
 		{
-			new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.NEWGAME, new global::System.Action(this.NewGame), 22),
-			new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.LOADGAME, new global::System.Action(this.LoadGame), 14),
-			new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.TRANSLATIONS, new global::System.Action(this.Translations), 14),
-			new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.OPTIONS, new global::System.Action(this.Options), 14),
-			new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.QUITTODESKTOP, new global::System.Action(this.QuitGame), 14)
-		};
-		if (!DistributionPlatform.Initialized)
-		{
-			int num = list.FindIndex((MainMenu.ButtonInfo x) => x.text == UI.FRONTEND.MAINMENU.TRANSLATIONS);
-			if (num >= 0)
-			{
-				list.RemoveAt(num);
-			}
+			this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.TRANSLATIONS, new global::System.Action(this.Translations), 14));
+			this.mods_button = this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MODS.TITLE, new global::System.Action(this.Mods), 14));
 		}
-		foreach (MainMenu.ButtonInfo buttonInfo in list)
-		{
-			KButton kbutton = Util.KInstantiateUI<KButton>(this.buttonPrefab.gameObject, this.buttonParent, true);
-			kbutton.onClick += buttonInfo.action;
-			LocText componentInChildren = kbutton.GetComponentInChildren<LocText>();
-			componentInChildren.text = buttonInfo.text;
-			componentInChildren.fontSize = (float)buttonInfo.fontSize;
-		}
+		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.OPTIONS, new global::System.Action(this.Options), 14));
+		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.QUITTODESKTOP, new global::System.Action(this.QuitGame), 14));
 		KCrashReporter.MOST_RECENT_SAVEFILE = null;
 		this.RefreshResumeButton();
 		this.Button_ResumeGame.onClick += this.ResumeGame;
@@ -45,6 +40,8 @@ public class MainMenu : KMonoBehaviour
 			this.patchNotesScreen.SetActive(true);
 		}
 		this.CheckDoubleBoundKeys();
+		Global.Instance.modManager.Unload(Content.LayerableFiles);
+		this.OnModManagerUpdate(this);
 		this.lastUpdateTime = Time.unscaledTime;
 	}
 
@@ -65,10 +62,11 @@ public class MainMenu : KMonoBehaviour
 
 	protected override void OnSpawn()
 	{
-		global::Debug.Log("-- MAIN MENU -- ", null);
+		global::Debug.Log("-- MAIN MENU -- ");
 		base.OnSpawn();
 		Canvas.ForceUpdateCanvases();
 		this.ShowLanguageConfirmation();
+		this.SubscribeToModManager(true);
 		string savePrefix = SaveLoader.GetSavePrefix();
 		try
 		{
@@ -98,11 +96,37 @@ public class MainMenu : KMonoBehaviour
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
 			confirmDialogScreen.PopupConfirmDialog(text3, null, null, null, null, null, null, null, null);
 		}
+		Global.Instance.modManager.Report(base.gameObject);
 		if ((GenericGameSettings.instance.autoResumeGame && !MainMenu.HasAutoresumedOnce) || !string.IsNullOrEmpty(GenericGameSettings.instance.performanceCapture.saveGame))
 		{
 			MainMenu.HasAutoresumedOnce = true;
 			this.ResumeGame();
 		}
+	}
+
+	private void SubscribeToModManager(bool subscribe)
+	{
+		if (subscribe == this.subscribed_to_mod_manager)
+		{
+			return;
+		}
+		if (subscribe)
+		{
+			Manager modManager = Global.Instance.modManager;
+			modManager.on_update = (Manager.OnUpdate)Delegate.Combine(modManager.on_update, new Manager.OnUpdate(this.OnModManagerUpdate));
+		}
+		else
+		{
+			Manager modManager2 = Global.Instance.modManager;
+			modManager2.on_update = (Manager.OnUpdate)Delegate.Remove(modManager2.on_update, new Manager.OnUpdate(this.OnModManagerUpdate));
+		}
+		this.subscribed_to_mod_manager = subscribe;
+	}
+
+	protected override void OnLoadLevel()
+	{
+		this.SubscribeToModManager(false);
+		base.OnLoadLevel();
 	}
 
 	private void ShowLanguageConfirmation()
@@ -196,7 +220,7 @@ public class MainMenu : KMonoBehaviour
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 312713U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 326232U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -212,7 +236,7 @@ public class MainMenu : KMonoBehaviour
 			}
 			catch (Exception ex)
 			{
-				global::Debug.LogWarning(ex, null);
+				global::Debug.LogWarning(ex);
 				flag = false;
 			}
 		}
@@ -222,7 +246,7 @@ public class MainMenu : KMonoBehaviour
 		}
 		else
 		{
-			global::Debug.LogWarning("Why is the resume game button null?", null);
+			global::Debug.LogWarning("Why is the resume game button null?");
 		}
 	}
 
@@ -230,6 +254,16 @@ public class MainMenu : KMonoBehaviour
 	{
 		LanguageOptionsScreen languageOptionsScreen = Util.KInstantiateUI<LanguageOptionsScreen>(ScreenPrefabs.Instance.languageOptionsScreen.gameObject, base.transform.parent.gameObject, false);
 		languageOptionsScreen.SetBackgroundActive(true);
+	}
+
+	private void Mods()
+	{
+		ModsScreen modsScreen = Util.KInstantiateUI<ModsScreen>(ScreenPrefabs.Instance.modsMenu.gameObject, base.transform.parent.gameObject, false);
+		modsScreen.SetBackgroundActive(true);
+	}
+
+	private void OnModManagerUpdate(object change_source)
+	{
 	}
 
 	private void Options()
@@ -240,10 +274,7 @@ public class MainMenu : KMonoBehaviour
 
 	private void QuitGame()
 	{
-		if (!Application.isEditor)
-		{
-			Application.Quit();
-		}
+		App.Quit();
 	}
 
 	public void StartFEAudio()
@@ -362,6 +393,10 @@ public class MainMenu : KMonoBehaviour
 	private GameObject buttonParent;
 
 	private static bool HasAutoresumedOnce;
+
+	private KButton mods_button;
+
+	private bool subscribed_to_mod_manager;
 
 	private static int LANGUAGE_CONFIRMATION_VERSION = 2;
 

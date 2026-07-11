@@ -593,14 +593,14 @@ public class SolidConduitFlow : IConduitFlow
 	{
 		if (this.grid[cell_idx].conduitIdx == -1)
 		{
-			global::Debug.LogWarning("No conduit in cell: " + cell_idx, null);
+			global::Debug.LogWarning("No conduit in cell: " + cell_idx);
 			this.DumpPickupable(pickupable);
 			return;
 		}
 		SolidConduitFlow.ConduitContents contents = this.GetConduit(cell_idx).GetContents(this);
 		if (contents.pickupableHandle.IsValid())
 		{
-			global::Debug.LogWarning("Conduit already full: " + cell_idx, null);
+			global::Debug.LogWarning("Conduit already full: " + cell_idx);
 			this.DumpPickupable(pickupable);
 			return;
 		}
@@ -617,7 +617,7 @@ public class SolidConduitFlow : IConduitFlow
 		}
 		if (pickupable.storage)
 		{
-			pickupable.storage.Remove(pickupable.gameObject);
+			pickupable.storage.Remove(pickupable.gameObject, true);
 		}
 		pickupable.Trigger(856640610, true);
 		this.SetContents(cell_idx, contents);

@@ -7,7 +7,7 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 	{
 		default_state = this.healthy;
 		base.serializable = true;
-		this.healthy.TagTransition(GameTags.CaloriesDepleted, this.Incapacitated, false).TagTransition(GameTags.HitPointsDepleted, this.Incapacitated, false).Update(delegate(IncapacitationMonitor.Instance smi, float dt)
+		this.healthy.TagTransition(GameTags.CaloriesDepleted, this.incapacitated, false).TagTransition(GameTags.HitPointsDepleted, this.incapacitated, false).Update(delegate(IncapacitationMonitor.Instance smi, float dt)
 		{
 			smi.RecoverStamina(dt, smi);
 		}, UpdateRate.SIM_200ms, false);
@@ -16,7 +16,7 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 			GameTags.CaloriesDepleted,
 			GameTags.HitPointsDepleted
 		}, this.healthy, true);
-		this.Incapacitated.EventTransition(GameHashes.IncapacitationRecovery, this.start_recovery, null).ToggleTag(GameTags.Incapacitated).ToggleRecurringChore((IncapacitationMonitor.Instance smi) => new BeIncapacitatedChore(smi.master), null)
+		this.incapacitated.EventTransition(GameHashes.IncapacitationRecovery, this.start_recovery, null).ToggleTag(GameTags.Incapacitated).ToggleRecurringChore((IncapacitationMonitor.Instance smi) => new BeIncapacitatedChore(smi.master), null)
 			.ParamTransition<float>(this.bleedOutStamina, this.die, GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.IsLTEZero)
 			.ToggleUrge(Db.Get().Urges.BeIncapacitated)
 			.Enter(delegate(IncapacitationMonitor.Instance smi)
@@ -37,7 +37,7 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 
 	public GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.State start_recovery;
 
-	public GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.State Incapacitated;
+	public GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.State incapacitated;
 
 	public GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.State die;
 

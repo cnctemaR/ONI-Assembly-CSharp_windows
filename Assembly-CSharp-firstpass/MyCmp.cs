@@ -124,7 +124,7 @@ public class MyCmp
 				Component component3 = cmpFns.mRequireFn(c);
 				if (component3 == null)
 				{
-					global::Debug.LogError("The behaviour " + type.ToString() + " required but couldn't find a " + fieldInfo.FieldType.Name, null);
+					global::Debug.LogError("The behaviour " + type.ToString() + " required but couldn't find a " + fieldInfo.FieldType.Name);
 				}
 				Util.SpawnComponent(component3);
 				fieldInfo.SetValue(c, component3);

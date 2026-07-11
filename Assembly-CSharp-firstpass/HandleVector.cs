@@ -79,6 +79,8 @@ public class HandleVector<T>
 		this.UnpackHandle(handle, out b, out num);
 		b += 1;
 		this.versions[num] = b;
+		global::Debug.Assert(num >= 0);
+		global::Debug.Assert(num < 16777216);
 		handle = this.PackHandle(num);
 		this.freeHandles.Push(handle);
 		T t = this.items[num];
@@ -96,6 +98,7 @@ public class HandleVector<T>
 
 	private HandleVector<T>.Handle PackHandle(int index)
 	{
+		global::Debug.Assert(index < 16777216);
 		byte b = this.versions[index];
 		this.versions[index] = b;
 		HandleVector<T>.Handle invalidHandle = HandleVector<T>.InvalidHandle;

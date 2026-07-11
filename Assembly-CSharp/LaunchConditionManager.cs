@@ -21,12 +21,12 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 	{
 		if (this.DEBUG_ModuleDestructions == null || this.DEBUG_ModuleDestructions.Count == 0)
 		{
-			Output.Log(new object[] { "Sorry, no logged module destructions. :(" });
+			DebugUtil.LogArgs(new object[] { "Sorry, no logged module destructions. :(" });
 			return;
 		}
 		foreach (Tuple<string, string, string> tuple in this.DEBUG_ModuleDestructions)
 		{
-			Output.Log(new object[] { tuple.first, ">", tuple.second, "\n", tuple.third, "\nEND MODULE DUMP\n\n" });
+			DebugUtil.LogArgs(new object[] { tuple.first, ">", tuple.second, "\n", tuple.third, "\nEND MODULE DUMP\n\n" });
 		}
 	}
 
@@ -125,7 +125,7 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 	{
 		if (destination == null)
 		{
-			global::Debug.LogError("Null destination passed to launch", null);
+			global::Debug.LogError("Null destination passed to launch");
 		}
 		Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this);
 		if (spacecraftFromLaunchConditionManager.state != Spacecraft.MissionState.Grounded)

@@ -82,6 +82,8 @@ namespace STRINGS
 
 			public static LocString INDUSTRIALINGREDIENT = "Industrial Ingredient";
 
+			public static LocString MEDICALSUPPLIES = "Medical Supplies";
+
 			public static LocString CLOTHES = "Clothing";
 
 			public static LocString EMITSLIGHT = "Light Emitter";
@@ -763,9 +765,9 @@ namespace STRINGS
 				{
 					UI.FormatAsLink("Germs", "DISEASE"),
 					" such as ",
-					UI.FormatAsLink("Food Poisoning", "FOODPOISONING"),
+					UI.FormatAsLink("Food Poisoning", "FOODSICKNESS"),
 					" and ",
-					UI.FormatAsLink("Slimelung", "SLIMELUNG"),
+					UI.FormatAsLink("Slimelung", "SLIMESICKNESS"),
 					" can cause ",
 					UI.FormatAsLink("Disease", "DISEASE"),
 					" in my Duplicants. I can use the ",
@@ -887,15 +889,15 @@ namespace STRINGS
 				public static LocString TOOLTIP = "{0} research complete!";
 			}
 
-			public class ROLEMASTERED
+			public class SKILL_POINT_EARNED
 			{
-				public static LocString NAME = "Jobs Mastered";
+				public static LocString NAME = "Skill Point Earned";
 
-				public static LocString MESSAGEBODY = "These Duplicants have mastered their jobs and may be eligible for promotion:\n{0}";
+				public static LocString MESSAGEBODY = "These Duplicants have new Skill Points that can be assigned:\n{0}";
 
-				public static LocString LINE = "\n• <b>{0}</b> mastered the {1} job";
+				public static LocString LINE = "\n• <b>{0}</b>";
 
-				public static LocString TOOLTIP = "Job Mastered";
+				public static LocString TOOLTIP = "Skill Point Earned";
 			}
 
 			public class DUPLICANTABSORBED
@@ -926,6 +928,13 @@ namespace STRINGS
 				public static LocString NAME = "Food has become stale";
 
 				public static LocString TOOLTIP = "These " + UI.FormatAsLink("Food", "FOOD") + " items have become stale and could rot if not stored:";
+			}
+
+			public class YELLOWALERT
+			{
+				public static LocString NAME = "Yellow Alert";
+
+				public static LocString TOOLTIP = "The colony has some top priority tasks to complete before resuming a normal schedule";
 			}
 
 			public class REDALERT
@@ -1244,11 +1253,18 @@ namespace STRINGS
 
 			public class LEVELUP
 			{
-				public static LocString NAME = "Skill increase";
+				public static LocString NAME = "Attribute increase";
 
-				public static LocString TOOLTIP = "These Duplicants' skills have improved:";
+				public static LocString TOOLTIP = "These Duplicants' attributes have improved:";
 
 				public static LocString SUFFIX = " - {0} raised to {1}";
+			}
+
+			public class RESETSKILL
+			{
+				public static LocString NAME = "Reset skills";
+
+				public static LocString TOOLTIP = "Duplicants skills have been reset to defaults.";
 			}
 
 			public class SCHEDULE_CHANGED

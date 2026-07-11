@@ -1,0 +1,26 @@
+﻿using System;
+using System.Collections.Generic;
+using STRINGS;
+
+namespace Klei.AI
+{
+	public class Allergies : Sickness
+	{
+		public Allergies()
+			: base("Allergies", Sickness.SicknessType.Pathogen, Sickness.Severity.Minor, 0.00025f, new List<Sickness.InfectionVector> { Sickness.InfectionVector.Inhalation }, 60f)
+		{
+			float num = 20f / base.SicknessDuration;
+			base.AddSicknessComponent(new CommonSickEffectSickness());
+			base.AddSicknessComponent(new AnimatedSickness(new HashedString[] { "anim_idle_allergies_kanim" }, Db.Get().Expressions.Uncomfortable));
+			base.AddSicknessComponent(new AttributeModifierSickness(new AttributeModifier[]
+			{
+				new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, num, DUPLICANTS.DISEASES.ZOMBIESICKNESS.NAME, false, false, true),
+				new AttributeModifier(Db.Get().Attributes.Sneezyness.Id, 10f, DUPLICANTS.DISEASES.ZOMBIESICKNESS.NAME, false, false, true)
+			}));
+		}
+
+		public const string ID = "Allergies";
+
+		public const float STRESS_OVER_ATTACK = 20f;
+	}
+}

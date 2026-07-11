@@ -71,11 +71,8 @@ internal class GraphicsOptionsScreen : KModalScreen
 		int num = 0;
 		if (KPlayerPrefs.HasKey(GraphicsOptionsScreen.LowResKey))
 		{
-			if (QualitySettings.GetQualityLevel() != num)
-			{
-				num = KPlayerPrefs.GetInt(GraphicsOptionsScreen.LowResKey);
-				QualitySettings.SetQualityLevel(num, true);
-			}
+			num = KPlayerPrefs.GetInt(GraphicsOptionsScreen.LowResKey);
+			QualitySettings.SetQualityLevel(num, true);
 		}
 		else
 		{

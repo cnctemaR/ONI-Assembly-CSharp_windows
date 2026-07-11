@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{A3252AAE-5DD4-4E96-BF6F-3119D06CC83B}</ProjectGuid>
+    <ProjectGuid>{E1452CCE-7E43-4417-88F1-7859FDBA0289}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Data</RootNamespace>
     <AssemblyName>System.Data</AssemblyName>
@@ -287,23 +287,23 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC837}</Project>
+      <Project>{E1452CCE-7E43-4417-88F1-7859FDBA0285}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.EnterpriseServices\System.EnterpriseServices.csproj">
-      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC83D}</Project>
+      <Project>{E1452CCE-7E43-4417-88F1-7859FDBA028B}</Project>
       <Name>System.EnterpriseServices</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Transactions\System.Transactions.csproj">
-      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC840}</Project>
+      <Project>{E1452CCE-7E43-4417-88F1-7859FDBA028E}</Project>
       <Name>System.Transactions</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC841}</Project>
+      <Project>{E1452CCE-7E43-4417-88F1-7859FDBA028F}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC83C}</Project>
+      <Project>{E1452CCE-7E43-4417-88F1-7859FDBA028A}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

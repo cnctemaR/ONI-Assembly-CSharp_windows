@@ -341,7 +341,7 @@ public class KCrashReporter : MonoBehaviour
 				msg = "Debug tools were used in this game.\n\n" + msg;
 			}
 			error.fullstack = msg;
-			error.build = 279889;
+			error.build = 279899;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = msg;
 			error.user_message = userMessage;

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{A3252AAE-5DD4-4E96-BF6F-3119D06CC844}</ProjectGuid>
+    <ProjectGuid>{E1452CCE-7E43-4417-88F1-7859FDBA0292}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.AIModule</AssemblyName>
@@ -49,15 +49,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC837}</Project>
+      <Project>{E1452CCE-7E43-4417-88F1-7859FDBA0285}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC84E}</Project>
+      <Project>{E1452CCE-7E43-4417-88F1-7859FDBA029C}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC864}</Project>
+      <Project>{E1452CCE-7E43-4417-88F1-7859FDBA02B2}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

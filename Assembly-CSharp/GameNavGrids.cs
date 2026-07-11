@@ -1575,13 +1575,13 @@ public class GameNavGrids
 				{
 					byte b = Grid.ElementIdx[cell];
 					Element element = ElementLoader.elements[(int)b];
-					return element.id != SimHashes.Katairite && !element.HasTag(GameTags.RefinedMetal);
+					return Grid.Element[cell].hardness < 150 && !element.HasTag(GameTags.RefinedMetal);
 				}
 				GameObject gameObject = Grid.Objects[cell, 1];
 				if (gameObject != null)
 				{
 					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-					return component.ElementID != SimHashes.Katairite && !component.Element.HasTag(GameTags.RefinedMetal);
+					return Grid.Element[cell].hardness < 150 && !component.Element.HasTag(GameTags.RefinedMetal);
 				}
 			}
 			return false;

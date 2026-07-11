@@ -9,7 +9,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		Game.Instance.Subscribe(929158128, new Action<object>(this.UpdateWorkingState));
+		SpacecraftManager.instance.Subscribe(532901469, new Action<object>(this.UpdateWorkingState));
 		Components.Telescopes.Add(this);
 		if (Telescope.reducedVisibilityStatusItem == null)
 		{
@@ -26,7 +26,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 	protected override void OnCleanUp()
 	{
 		Components.Telescopes.Remove(this);
-		Game.Instance.Unsubscribe(929158128, new Action<object>(this.UpdateWorkingState));
+		SpacecraftManager.instance.Unsubscribe(532901469, new Action<object>(this.UpdateWorkingState));
 		base.OnCleanUp();
 	}
 

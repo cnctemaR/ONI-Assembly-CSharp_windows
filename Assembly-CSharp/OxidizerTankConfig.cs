@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -58,7 +59,12 @@ public class OxidizerTankConfig : IBuildingConfig
 		OxidizerTank oxidizerTank = go.AddOrGet<OxidizerTank>();
 		oxidizerTank.capacityKg = 2700f;
 		oxidizerTank.allowSublimation = false;
-		oxidizerTank.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
+		oxidizerTank.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>
+		{
+			Storage.StoredItemModifier.Hide,
+			Storage.StoredItemModifier.Seal,
+			Storage.StoredItemModifier.Insulate
+		});
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 10f;

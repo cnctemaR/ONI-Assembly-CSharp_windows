@@ -906,7 +906,7 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "CYCLE {0}";
 
-					public static LocString BODY = "\n\n";
+					public static LocString BODY = "The colony has finally completed research on the necessary rocketry technologies. Now we need only collect the resources to construct our interstellar project.\n\nFreedom is within reach!";
 				}
 
 				public class SURFACEBREACH

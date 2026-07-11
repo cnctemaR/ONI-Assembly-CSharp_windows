@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{970726B0-8432-45EE-8D3C-C28A3158B862}</ProjectGuid>
+    <ProjectGuid>{AD6E4EFC-901B-4197-AECE-048DCA3E16B0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -1584,63 +1584,63 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Ionic.Zip\Ionic.Zip.csproj">
-      <Project>{970726B0-8432-45EE-8D3C-C28A3158B866}</Project>
+      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16B4}</Project>
       <Name>Ionic.Zip</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{970726B0-8432-45EE-8D3C-C28A3158B869}</Project>
+      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16B7}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{970726B0-8432-45EE-8D3C-C28A3158B86A}</Project>
+      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16B8}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{970726B0-8432-45EE-8D3C-C28A3158B86C}</Project>
+      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16BA}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml.Linq\System.Xml.Linq.csproj">
-      <Project>{970726B0-8432-45EE-8D3C-C28A3158B874}</Project>
+      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16C2}</Project>
       <Name>System.Xml.Linq</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{970726B0-8432-45EE-8D3C-C28A3158B873}</Project>
+      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16C1}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{970726B0-8432-45EE-8D3C-C28A3158B86E}</Project>
+      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16BC}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AnimationModule\UnityEngine.AnimationModule.csproj">
-      <Project>{970726B0-8432-45EE-8D3C-C28A3158B877}</Project>
+      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16C5}</Project>
       <Name>UnityEngine.AnimationModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{970726B0-8432-45EE-8D3C-C28A3158B880}</Project>
+      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16CE}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{970726B0-8432-45EE-8D3C-C28A3158B88A}</Project>
+      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16D8}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.Physics2DModule\UnityEngine.Physics2DModule.csproj">
-      <Project>{970726B0-8432-45EE-8D3C-C28A3158B892}</Project>
+      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16E0}</Project>
       <Name>UnityEngine.Physics2DModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{970726B0-8432-45EE-8D3C-C28A3158B893}</Project>
+      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16E1}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{970726B0-8432-45EE-8D3C-C28A3158B89F}</Project>
+      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16ED}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIModule\UnityEngine.UIModule.csproj">
-      <Project>{970726B0-8432-45EE-8D3C-C28A3158B8A6}</Project>
+      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16F4}</Project>
       <Name>UnityEngine.UIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{970726B0-8432-45EE-8D3C-C28A3158B8A4}</Project>
+      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16F2}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
   </ItemGroup>

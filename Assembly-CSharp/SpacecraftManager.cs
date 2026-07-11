@@ -263,11 +263,6 @@ public class SpacecraftManager : KMonoBehaviour
 		return 0f;
 	}
 
-	public void EarnDestinationAnalysisPoints(SpaceDestination destination, float points)
-	{
-		this.EarnDestinationAnalysisPoints(destination.id, points);
-	}
-
 	public void EarnDestinationAnalysisPoints(int destinationID, float points)
 	{
 		if (!this.destinationAnalysisScores.ContainsKey(destinationID))
@@ -288,7 +283,7 @@ public class SpacecraftManager : KMonoBehaviour
 				{
 					SpacecraftManager.instance.SetStarmapAnalysisDestinationID(-1);
 				}
-				Game.Instance.Trigger(929158128, null);
+				base.Trigger(532901469, null);
 			}
 		}
 	}

@@ -315,7 +315,7 @@ public class GameTags
 
 	public static readonly Tag UnitChunk = TagManager.Create("UnitChunk");
 
-	public static readonly Tag NotAPrefab = TagManager.Create("NotAPrefab");
+	public static readonly Tag NotConversationTopic = TagManager.Create("NotConversationTopic");
 
 	public static readonly Tag MinionSelectPreview = TagManager.Create("MinionSelectPreview");
 

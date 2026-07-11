@@ -6,7 +6,7 @@ public class TargetLocator : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateEntity(TargetLocator.ID, TargetLocator.ID, false);
-		gameObject.AddTag(GameTags.NotAPrefab);
+		gameObject.AddTag(GameTags.NotConversationTopic);
 		return gameObject;
 	}
 

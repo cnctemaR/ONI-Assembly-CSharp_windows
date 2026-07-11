@@ -23,7 +23,7 @@ public class OneshotReactableLocator : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateEntity(OneshotReactableLocator.ID, OneshotReactableLocator.ID, false);
-		gameObject.AddTag(GameTags.NotAPrefab);
+		gameObject.AddTag(GameTags.NotConversationTopic);
 		gameObject.AddOrGet<OneshotReactableHost>();
 		return gameObject;
 	}

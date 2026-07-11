@@ -7,6 +7,7 @@ public class MopPlacerConfig : CommonPlacerConfig, IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = base.CreatePrefab(MopPlacerConfig.ID, MISC.PLACERS.MOPPLACER.NAME, Assets.instance.mopPlacerAssets.material);
+		gameObject.AddTag(GameTags.NotConversationTopic);
 		Moppable moppable = gameObject.AddOrGet<Moppable>();
 		moppable.synchronizeAnims = false;
 		moppable.amountMoppedPerTick = 20f;

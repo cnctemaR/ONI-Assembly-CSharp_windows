@@ -108,7 +108,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 			return;
 		}
 		ConduitFlow liquidConduitFlow = Game.Instance.liquidConduitFlow;
-		bool flag = liquidConduitFlow.GetContents(this.outputCell).mass > 0f;
+		bool flag = liquidConduitFlow.GetContents(this.outputCell).mass > 0f && base.smi.HasContaminatedMass();
 		base.smi.sm.outputBlocked.Set(flag, base.smi);
 	}
 
@@ -289,7 +289,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 			{
 				smi.Flush();
 			}).GoTo(this.flushed);
-			this.flushed.EventTransition(GameHashes.OnStorageChange, this.fillingInactive, (FlushToilet.SMInstance smi) => !smi.HasContaminatedMass());
+			this.flushed.EventTransition(GameHashes.OnStorageChange, this.fillingInactive, (FlushToilet.SMInstance smi) => !smi.HasContaminatedMass()).ParamTransition<bool>(this.outputBlocked, this.backedup, new StateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.Parameter<bool>.Callback(GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.IsTrue));
 		}
 
 		private Chore CreateUrgentUseChore(FlushToilet.SMInstance smi)

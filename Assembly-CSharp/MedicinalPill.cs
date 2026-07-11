@@ -11,6 +11,7 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor, IConsumableU
 		base.OnSpawn();
 		base.SetWorkTime(10f);
 		this.showProgressBar = false;
+		this.synchronizeAnims = false;
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Normal, null);
 		this.CreateChore();
 	}

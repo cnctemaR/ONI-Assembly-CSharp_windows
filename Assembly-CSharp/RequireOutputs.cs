@@ -86,6 +86,10 @@ public class RequireOutputs : KMonoBehaviour
 
 	private bool OutputPipeIsEmpty()
 	{
+		if (this.ignoreFullPipe)
+		{
+			return true;
+		}
 		bool flag = true;
 		if (this.connected)
 		{
@@ -163,6 +167,8 @@ public class RequireOutputs : KMonoBehaviour
 
 	[MyCmpReq]
 	private Operational operational;
+
+	public bool ignoreFullPipe;
 
 	private int utilityCell;
 

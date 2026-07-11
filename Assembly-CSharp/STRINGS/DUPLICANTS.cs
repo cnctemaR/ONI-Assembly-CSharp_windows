@@ -215,7 +215,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Slain";
 
-				public static LocString DESCRIPTION = "{Target} was slain in combat by a fearsome creature.";
+				public static LocString DESCRIPTION = "{Target} succumbed to their wounds after being incapacitated.";
 			}
 
 			public class FATALDISEASE

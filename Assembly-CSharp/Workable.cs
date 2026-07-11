@@ -199,7 +199,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	public virtual string GetConversationTopic()
 	{
 		KPrefabID component = base.GetComponent<KPrefabID>();
-		return (!component.HasTag(GameTags.NotAPrefab)) ? component.PrefabTag.Name : null;
+		return (!component.HasTag(GameTags.NotConversationTopic)) ? component.PrefabTag.Name : null;
 	}
 
 	public virtual void AwardExperience(float work_dt, MinionResume resume)

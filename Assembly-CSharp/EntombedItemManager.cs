@@ -75,7 +75,7 @@ public class EntombedItemManager : KMonoBehaviour, ISim33ms
 			byte diseaseIdx = component2.DiseaseIdx;
 			int diseaseCount = component2.DiseaseCount;
 			Element element = Grid.Element[num];
-			if (elementID == element.id && Grid.Mass[num] + mass < element.maxMass)
+			if (elementID == element.id && mass > 0.010000001f && Grid.Mass[num] + mass < element.maxMass)
 			{
 				SimMessages.AddRemoveSubstance(num, (int)ElementLoader.FindElementByHash(elementID).idx, CellEventLogger.Instance.ElementConsumerSimUpdate, mass, temperature, diseaseIdx, diseaseCount, true, -1);
 			}

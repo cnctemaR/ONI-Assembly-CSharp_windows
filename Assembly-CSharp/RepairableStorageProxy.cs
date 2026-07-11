@@ -7,7 +7,7 @@ public class RepairableStorageProxy : IEntityConfig
 	{
 		GameObject gameObject = EntityTemplates.CreateEntity(RepairableStorageProxy.ID, RepairableStorageProxy.ID, true);
 		gameObject.AddOrGet<Storage>();
-		gameObject.AddTag(GameTags.NotAPrefab);
+		gameObject.AddTag(GameTags.NotConversationTopic);
 		return gameObject;
 	}
 

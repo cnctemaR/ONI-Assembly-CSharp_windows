@@ -47,6 +47,8 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 	{
 		base.OnPrefabInit();
 		this.overrideAnims = Door.OVERRIDE_ANIMS;
+		this.synchronizeAnims = false;
+		base.SetWorkTime(3f);
 		this.doorClosingSound = GlobalAssets.GetSound(this.doorClosingSoundEventName, false);
 		this.doorOpeningSound = GlobalAssets.GetSound(this.doorOpeningSoundEventName, false);
 	}

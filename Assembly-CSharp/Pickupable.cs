@@ -415,27 +415,35 @@ public class Pickupable : Workable
 
 	public bool TryAbsorb(Pickupable other, bool hide_effects, bool allow_cross_storage = false)
 	{
-		if (other != null && this.CanAbsorb(other))
+		if (other == null)
 		{
-			if (!allow_cross_storage && this.storage == null != (other.storage == null))
-			{
-				return false;
-			}
-			Pickupable component = other.GetComponent<Pickupable>();
-			if (component != null && component.CanAbsorb(this))
-			{
-				this.Absorb(other);
-				if (!hide_effects && EffectPrefabs.Instance != null)
-				{
-					Vector3 position = base.transform.GetPosition();
-					position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
-					GameObject gameObject = global::Util.KInstantiate(Assets.GetPrefab(EffectConfigs.OreAbsorbId), position, Quaternion.identity, null, null, true, 0);
-					gameObject.SetActive(true);
-				}
-				return true;
-			}
+			return false;
 		}
-		return false;
+		if (other.wasAbsorbed)
+		{
+			return false;
+		}
+		if (this.wasAbsorbed)
+		{
+			return false;
+		}
+		if (!other.CanAbsorb(this))
+		{
+			return false;
+		}
+		if (!allow_cross_storage && this.storage == null != (other.storage == null))
+		{
+			return false;
+		}
+		this.Absorb(other);
+		if (!hide_effects && EffectPrefabs.Instance != null)
+		{
+			Vector3 position = base.transform.GetPosition();
+			position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
+			GameObject gameObject = global::Util.KInstantiate(Assets.GetPrefab(EffectConfigs.OreAbsorbId), position, Quaternion.identity, null, null, true, 0);
+			gameObject.SetActive(true);
+		}
+		return true;
 	}
 
 	protected override void OnCleanUp()
@@ -490,12 +498,8 @@ public class Pickupable : Workable
 		return this.OnTake(num);
 	}
 
-	public void Absorb(Pickupable pickupable)
+	private void Absorb(Pickupable pickupable)
 	{
-		if (pickupable.wasAbsorbed)
-		{
-			return;
-		}
 		base.Trigger(-2064133523, pickupable);
 		pickupable.Trigger(-1940207677, base.gameObject);
 		pickupable.wasAbsorbed = true;

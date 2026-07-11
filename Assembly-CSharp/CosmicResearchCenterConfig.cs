@@ -43,11 +43,12 @@ public class CosmicResearchCenterConfig : IBuildingConfig
 		manualDeliveryKG.choreTags = GameTags.ChoreTypes.ResearchChores;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.ResearchFetch.IdHash;
 		ResearchCenter researchCenter = go.AddOrGet<ResearchCenter>();
-		researchCenter.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_research2_kanim") };
+		researchCenter.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_research_space_kanim") };
 		researchCenter.research_point_type_id = "gamma";
 		researchCenter.inputMaterial = CosmicResearchCenterConfig.INPUT_MATERIAL;
 		researchCenter.mass_per_point = 1f;
 		researchCenter.requiredRolePerk = RoleManager.rolePerks.AllowAdvancedResearch.id;
+		researchCenter.workLayer = Grid.SceneLayer.BuildingFront;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{

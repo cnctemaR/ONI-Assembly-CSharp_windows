@@ -174,6 +174,15 @@ public class Deconstructable : Workable
 		return this.chore != null;
 	}
 
+	public void SetAllowDeconstruction(bool allow)
+	{
+		this.allowDeconstruction = allow;
+		if (!this.allowDeconstruction)
+		{
+			this.CancelDeconstruction();
+		}
+	}
+
 	public static GameObject SpawnItem(Vector3 position, BuildingDef def, SimHashes src_element, float src_mass, float src_temperature, byte disease_idx, int disease_count)
 	{
 		GameObject gameObject = null;

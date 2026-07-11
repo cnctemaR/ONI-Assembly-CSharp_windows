@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -65,7 +66,12 @@ public class SteamEngineConfig : IBuildingConfig
 		FuelTank fuelTank = go.AddOrGet<FuelTank>();
 		fuelTank.capacityKg = fuelTank.minimumLaunchMass;
 		fuelTank.FuelType = ElementLoader.FindElementByHash(SimHashes.Steam).tag;
-		fuelTank.SetDefaultStoredItemModifiers(GasReservoirConfig.ReservoirStoredItemModifiers);
+		fuelTank.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>
+		{
+			Storage.StoredItemModifier.Hide,
+			Storage.StoredItemModifier.Seal,
+			Storage.StoredItemModifier.Insulate
+		});
 		fuelTank.allowItemRemoval = true;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Gas;

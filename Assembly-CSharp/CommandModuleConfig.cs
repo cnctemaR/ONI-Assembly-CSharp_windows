@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -41,7 +42,13 @@ public class CommandModuleConfig : IBuildingConfig
 		LaunchConditionManager launchConditionManager = go.AddOrGet<LaunchConditionManager>();
 		launchConditionManager.triggerPort = "TriggerLaunch";
 		launchConditionManager.statusPort = "LaunchReady";
-		go.AddOrGet<Storage>();
+		Storage storage = go.AddOrGet<Storage>();
+		storage.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>
+		{
+			Storage.StoredItemModifier.Hide,
+			Storage.StoredItemModifier.Seal,
+			Storage.StoredItemModifier.Insulate
+		});
 		go.AddOrGet<CommandModule>();
 		go.AddOrGet<CommandModuleWorkable>();
 		go.AddOrGet<MinionStorage>();

@@ -1349,13 +1349,6 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Fish out of water!";
 			}
 
-			public class DROWNING
-			{
-				public static LocString NAME = "Drowning";
-
-				public static LocString TOOLTIP = "This {0} can't breathe in liquid!";
-			}
-
 			public class DRYINGOUT
 			{
 				public static LocString NAME = "    • Beached";
@@ -1490,6 +1483,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This {0} is trapped and needs help digging out";
 
 				public static LocString LINE_ITEM = "    • Entombed";
+			}
+
+			public class DROWNING
+			{
+				public static LocString NAME = "Drowning";
+
+				public static LocString TOOLTIP = "This critter can't breathe in liquid!";
 			}
 
 			public class WILTING

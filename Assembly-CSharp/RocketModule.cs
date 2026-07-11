@@ -38,8 +38,22 @@ public class RocketModule : KMonoBehaviour
 		{
 			component.AddStatusItem(Db.Get().BuildingStatusItems.RocketName, this);
 		}
+		if (this.conditionManager.GetComponent<KPrefabID>().HasTag(GameTags.RocketNotOnGround))
+		{
+			this.OnLaunch(null);
+		}
+		this.conditionManager.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
 		base.Subscribe<RocketModule>(-1056989049, RocketModule.OnLaunchDelegate);
 		base.Subscribe<RocketModule>(238242047, RocketModule.OnLandDelegate);
+	}
+
+	private void OnTagsChanged(object data)
+	{
+		KPrefabID component = this.conditionManager.GetComponent<KPrefabID>();
+		if (component.HasTag(GameTags.RocketNotOnGround))
+		{
+			this.OnLaunch(null);
+		}
 	}
 
 	private void OnLaunch(object data)
@@ -58,6 +72,11 @@ public class RocketModule : KMonoBehaviour
 			{
 				component2.consumptionRate = 0f;
 			}
+		}
+		Deconstructable component3 = base.GetComponent<Deconstructable>();
+		if (component3 != null)
+		{
+			component3.SetAllowDeconstruction(false);
 		}
 	}
 
@@ -79,6 +98,11 @@ public class RocketModule : KMonoBehaviour
 			{
 				base.GetComponent<ConduitConsumer>().consumptionRate = 1f;
 			}
+		}
+		Deconstructable component2 = base.GetComponent<Deconstructable>();
+		if (component2 != null)
+		{
+			component2.SetAllowDeconstruction(true);
 		}
 	}
 

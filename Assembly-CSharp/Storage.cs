@@ -48,11 +48,15 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		this.defaultStoredItemModifers = modifiers;
 	}
 
-	public int masterPriority
+	public PrioritySetting masterPriority
 	{
 		get
 		{
-			return (!(this.prioritizable != null)) ? 10 : this.prioritizable.GetMasterPriority().priority_value;
+			if (this.prioritizable)
+			{
+				return this.prioritizable.GetMasterPriority();
+			}
+			return Chore.DefaultPrioritySetting;
 		}
 	}
 

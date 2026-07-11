@@ -1,6 +1,6 @@
 ﻿using System;
 
-public struct PrioritySetting : IComparable
+public struct PrioritySetting : IComparable<PrioritySetting>
 {
 	public PrioritySetting(PriorityScreen.PriorityClass priority_class, int priority_value)
 	{
@@ -23,30 +23,46 @@ public struct PrioritySetting : IComparable
 		return !lhs.Equals(rhs);
 	}
 
+	public static bool operator <=(PrioritySetting lhs, PrioritySetting rhs)
+	{
+		return lhs.CompareTo(rhs) <= 0;
+	}
+
+	public static bool operator >=(PrioritySetting lhs, PrioritySetting rhs)
+	{
+		return lhs.CompareTo(rhs) >= 0;
+	}
+
+	public static bool operator <(PrioritySetting lhs, PrioritySetting rhs)
+	{
+		return lhs.CompareTo(rhs) < 0;
+	}
+
+	public static bool operator >(PrioritySetting lhs, PrioritySetting rhs)
+	{
+		return lhs.CompareTo(rhs) > 0;
+	}
+
 	public override bool Equals(object obj)
 	{
 		return obj is PrioritySetting && ((PrioritySetting)obj).priority_class == this.priority_class && ((PrioritySetting)obj).priority_value == this.priority_value;
 	}
 
-	public int CompareTo(object obj)
+	public int CompareTo(PrioritySetting other)
 	{
-		if (!(obj is PrioritySetting))
+		if (this.priority_class > other.priority_class)
 		{
 			return 1;
 		}
-		if (this.priority_class > ((PrioritySetting)obj).priority_class)
-		{
-			return 1;
-		}
-		if (this.priority_class < ((PrioritySetting)obj).priority_class)
+		if (this.priority_class < other.priority_class)
 		{
 			return -1;
 		}
-		if (this.priority_value > ((PrioritySetting)obj).priority_value)
+		if (this.priority_value > other.priority_value)
 		{
 			return 1;
 		}
-		if (this.priority_value < ((PrioritySetting)obj).priority_value)
+		if (this.priority_value < other.priority_value)
 		{
 			return -1;
 		}

@@ -784,7 +784,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 310952U;
+		uint num = 311032U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);

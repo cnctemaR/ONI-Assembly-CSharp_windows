@@ -2537,23 +2537,39 @@ namespace TMPro
 			TMP_TextInfo textInfo = this.m_TextComponent.textInfo;
 			this.caretPositionInternal = (this.m_CaretPosition = this.GetCaretPositionFromStringIndex(this.stringPositionInternal));
 			this.caretSelectPositionInternal = (this.m_CaretSelectPosition = this.GetCaretPositionFromStringIndex(this.stringSelectPositionInternal));
+			float num = 0f;
 			Vector2 vector;
-			float num2;
 			if (this.caretSelectPositionInternal < textInfo.characterCount)
 			{
-				int num = Mathf.Min(textInfo.characterInfo.Length - 1, this.caretSelectPositionInternal);
-				TMP_CharacterInfo tmp_CharacterInfo = textInfo.characterInfo[num];
+				int num2 = Mathf.Min(textInfo.characterInfo.Length - 1, this.caretSelectPositionInternal);
+				TMP_CharacterInfo tmp_CharacterInfo = textInfo.characterInfo[num2];
 				vector = new Vector2(tmp_CharacterInfo.origin, tmp_CharacterInfo.descender);
-				num2 = textInfo.characterInfo[this.caretSelectPositionInternal].ascender - textInfo.characterInfo[this.caretSelectPositionInternal].descender;
+				num = textInfo.characterInfo[this.caretSelectPositionInternal].ascender - textInfo.characterInfo[this.caretSelectPositionInternal].descender;
 			}
 			else
 			{
 				int num3 = Mathf.Min(textInfo.characterInfo.Length - 1, this.caretSelectPositionInternal - 1);
 				TMP_CharacterInfo tmp_CharacterInfo2 = textInfo.characterInfo[num3];
 				vector = new Vector2(tmp_CharacterInfo2.xAdvance, tmp_CharacterInfo2.descender);
-				num2 = textInfo.characterInfo[this.caretSelectPositionInternal - 1].ascender - textInfo.characterInfo[this.caretSelectPositionInternal - 1].descender;
+				try
+				{
+					num = textInfo.characterInfo[this.caretSelectPositionInternal - 1].ascender - textInfo.characterInfo[this.caretSelectPositionInternal - 1].descender;
+				}
+				catch (Exception ex)
+				{
+					Debug.LogWarning(ex);
+					string text = string.Empty;
+					Transform transform = base.transform;
+					while (transform != null)
+					{
+						text = transform.name + "." + text;
+						transform = transform.parent;
+					}
+					Debug.LogWarning(text);
+					num = tmp_CharacterInfo2.ascender - tmp_CharacterInfo2.descender;
+				}
 			}
-			this.AdjustRectTransformRelativeToViewport(vector, num2, true);
+			this.AdjustRectTransformRelativeToViewport(vector, num, true);
 			int num4 = Mathf.Max(0, this.caretPositionInternal);
 			int num5 = Mathf.Max(0, this.caretSelectPositionInternal);
 			if (num4 > num5)

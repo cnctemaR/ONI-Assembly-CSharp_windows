@@ -416,6 +416,8 @@ public abstract class Chore
 
 	public static bool ENABLE_PERSONAL_PRIORITIES = true;
 
+	public static PrioritySetting DefaultPrioritySetting = new PrioritySetting(PriorityScreen.PriorityClass.basic, 5);
+
 	private static HashedString highPriorityGroup = "HighPriorityGroup";
 
 	private Notification highPriorityNotification;

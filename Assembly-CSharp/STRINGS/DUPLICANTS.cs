@@ -2166,6 +2166,34 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is conducting a field study of a Natural Feature";
 			}
 
+			public class SOCIALIZING
+			{
+				public static LocString NAME = "Socializing";
+
+				public static LocString TOOLTIP = "This Duplicant is hanging out to chat with other Duplicants";
+			}
+
+			public class MINGLING
+			{
+				public static LocString NAME = "Mingling";
+
+				public static LocString TOOLTIP = "This Duplicant is mingling with other Duplicants in the room";
+			}
+
+			public class DANCING
+			{
+				public static LocString NAME = "Dancing!";
+
+				public static LocString TOOLTIP = "This Duplicant is getting down with their bad self";
+			}
+
+			public class GAMING
+			{
+				public static LocString NAME = "Playing Game";
+
+				public static LocString TOOLTIP = "This Duplicant is playing a video game";
+			}
+
 			public class NOISEPEACEFUL
 			{
 				public static LocString NAME = "Peace and Quiet";
@@ -2447,6 +2475,8 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Hypothermia", "COLDBRAIN");
 
+				public static LocString DESCRIPTIVE_SYMPTOMS = "Nonlethal. Duplicants experience extreme body heat loss causing chills and discomfort.";
+
 				public static LocString DESCRIPTION = "\nThis Duplicant's thought processes have been slowed to a crawl from extreme cold exposure";
 
 				public static LocString LEGEND_HOVERTEXT = "Area Causes Hypothermia\n";
@@ -2466,6 +2496,8 @@ namespace STRINGS
 			public class HEATRASH
 			{
 				public static LocString NAME = UI.FormatAsLink("Heat Stroke", "HEATRASH");
+
+				public static LocString DESCRIPTIVE_SYMPTOMS = "Nonlethal. Duplicants experience high fever and discomfort.";
 
 				public static LocString DESCRIPTION = "\nThis Duplicant's thought processes have short circuited from extreme heat exposure";
 

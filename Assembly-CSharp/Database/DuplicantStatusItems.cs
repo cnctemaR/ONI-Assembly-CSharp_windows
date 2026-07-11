@@ -294,6 +294,10 @@ namespace Database
 			this.LowImmunity = new StatusItem("LowImmunity", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 			this.LowImmunity.AddNotification(null, null, null, 0f);
 			this.Studying = new StatusItem("Studying", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.Socializing = new StatusItem("Socializing", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, SimViewMode.None, true, 63486);
+			this.Dancing = new StatusItem("Dancing", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, SimViewMode.None, true, 63486);
+			this.Gaming = new StatusItem("Gaming", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, SimViewMode.None, true, 63486);
+			this.Mingling = new StatusItem("Mingling", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, SimViewMode.None, true, 63486);
 		}
 
 		public StatusItem Idle;
@@ -467,5 +471,13 @@ namespace Database
 		public StatusItem Role;
 
 		public StatusItem Studying;
+
+		public StatusItem Socializing;
+
+		public StatusItem Dancing;
+
+		public StatusItem Gaming;
+
+		public StatusItem Mingling;
 	}
 }

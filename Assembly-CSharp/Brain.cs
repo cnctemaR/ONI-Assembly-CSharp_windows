@@ -74,6 +74,12 @@ public class Brain : KMonoBehaviour
 		this.suspend = true;
 	}
 
+	protected override void OnCmpDisable()
+	{
+		base.OnCmpDisable();
+		this.Stop("OnCmpDisable");
+	}
+
 	protected override void OnCleanUp()
 	{
 		this.Stop("OnCleanUp");

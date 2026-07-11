@@ -61,12 +61,12 @@ public class LoreBearer : KMonoBehaviour
 				if (Game.Instance.unlocks.UnlockNext("researchnotes"))
 				{
 					this.BeenClicked = true;
-					string text3 = "SEARCH1";
+					string text3 = "SEARCH" + global::UnityEngine.Random.Range(1, 3);
 					infoDialogScreen.AddPlainText(Strings.Get("STRINGS.UI.USERMENUACTIONS.READLORE.SEARCH_TECHNOLOGY_SUCCESS." + text3));
 				}
 				else
 				{
-					string text4 = "SEARCH" + global::UnityEngine.Random.Range(1, 8);
+					string text4 = "SEARCH1";
 					infoDialogScreen.AddPlainText(Strings.Get("STRINGS.UI.USERMENUACTIONS.READLORE.SEARCH_OBJECT_FAIL." + text4));
 				}
 			}

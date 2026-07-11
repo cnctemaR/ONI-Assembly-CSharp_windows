@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{FDE398CE-B454-4AC6-BC9B-0C832F3FC267}</ProjectGuid>
+    <ProjectGuid>{CB398776-6635-4EB0-91FF-143F020E0E9A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Data</RootNamespace>
     <AssemblyName>System.Data</AssemblyName>

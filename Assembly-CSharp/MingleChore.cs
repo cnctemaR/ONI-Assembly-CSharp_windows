@@ -25,6 +25,11 @@ public class MingleChore : Chore<MingleChore.StatesInstance>, IWorkerPrioritizab
 		base.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, this);
 	}
 
+	protected override StatusItem GetStatusItem()
+	{
+		return Db.Get().DuplicantStatusItems.Mingling;
+	}
+
 	public bool GetWorkerPriority(Worker worker, out int priority)
 	{
 		priority = this.basePriority;
@@ -46,7 +51,9 @@ public class MingleChore : Chore<MingleChore.StatesInstance>, IWorkerPrioritizab
 			this.walk.Transition(null, (MingleChore.StatesInstance smi) => !smi.HasMingleCell(), UpdateRate.SIM_200ms).TriggerOnEnter(GameHashes.BeginWalk, null).TriggerOnExit(GameHashes.EndWalk)
 				.ToggleAnims("anim_loco_walk_kanim", 0f)
 				.MoveTo((MingleChore.StatesInstance smi) => smi.GetMingleCell(), this.onfloor, null, false);
-			this.onfloor.PlayAnim("idle_default", KAnim.PlayMode.Loop).ScheduleGoTo((MingleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 10), this.success).ToggleTag(GameTags.AllowSpeech);
+			this.onfloor.ToggleAnims("anim_generic_convo_kanim", 0f).PlayAnim("idle", KAnim.PlayMode.Loop).ScheduleGoTo((MingleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 10), this.success)
+				.ToggleTag(GameTags.AllowSpeech)
+				.ToggleTag(GameTags.AlwaysConverse);
 			this.success.ReturnSuccess();
 		}
 

@@ -4,6 +4,18 @@ namespace STRINGS
 {
 	public class CODEX
 	{
+		public class HEADQUARTERS
+		{
+			public static LocString TITLE = "Printing Pod";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "An advanced 3D printer developed by the Gravitas Facility.\n\nThe Printing Pod is notable for its ability to print living organic material from biological blueprints.\n\nIt is capable of synthesizing its own organic material for printing, and contains an almost unfathomable amount of stored energy, allowing it to autonomously print every 3 cycles.";
+
+				public static LocString CONTAINER2 = string.Empty;
+			}
+		}
+
 		public class HEADERS
 		{
 			public static LocString FABRICATIONS = "Recipes";
@@ -61,7 +73,7 @@ namespace STRINGS
 		{
 			public static LocString TITLE = "Data Not Found";
 
-			public static LocString SUBTITLE = "This database entry is unavailable";
+			public static LocString SUBTITLE = "This database entry is under construction or unavailable";
 
 			public static LocString BODY = string.Empty;
 		}
@@ -912,102 +924,6 @@ namespace STRINGS
 				public static LocString CONTAINER1 = "[LOG BEGINS]\n\n\"Traditionally, cloning produces a subject that is genetically identical to the donor but develops independently, producing a being that is, in its own way, unique.\n\nThe pod, conversely, attempts to print an exact atomic copy. Theoretically all neural pathways should be intact and identical to the original subject.\n\nIt's fascinating, given this, that memories are not already inherent in our subjects; however, no cloned subjects as of yet have shown any signs of recognition when introduced to familiar stimuli, such as the donor subject's enclosure.\n\nRefer to Experiment 7D.\n\nRefer to Experiment 7F.";
 
 				public static LocString CONTAINER2 = "\nMemories <i>must</i> be embedded within the physical brainmaps of our subjects. The only questions remains how to activate them. Hormones? Chemical supplements? Situational triggers?\n\nThe Director seems eager to move past this problem, and I am concerned at her willingness to bypass essential stages of the research development process.\n\nWe cannot move on to the fine polish of printing systems until the core processes have been perfected - which they have not.\n\nDr. McClintock, signing off.\"\n\n[LOG ENDS.]";
-			}
-		}
-
-		public class ANALYSIS
-		{
-			public static LocString TITLE = UI.FormatAsLink("Geographical Feature Analysis", "ANALYSIS");
-
-			public static LocString SUBTITLE = "Study of world features";
-
-			public class BODY
-			{
-				public static LocString CONTAINER1 = "Description of analysis/study mechanic";
-			}
-		}
-
-		public class ATMOSPHERE
-		{
-			public static LocString TITLE = "Atmosphere";
-
-			public static LocString SUBTITLE = "Air and other gasses";
-
-			public class BODY
-			{
-				public static LocString CONTAINER1 = "Description of breath, pressure, and gas";
-			}
-		}
-
-		public class DECOR
-		{
-			public static LocString TITLE = UI.FormatAsLink("Decor", "DECOR");
-
-			public static LocString SUBTITLE = "Quality sensations";
-
-			public class BODY
-			{
-				public static LocString CONTAINER1 = "Description of decor, stress, expectations";
-			}
-		}
-
-		public class ELEMENTHARDNESS
-		{
-			public static LocString TITLE = UI.FormatAsLink("Hardness", "HARDNESS");
-
-			public static LocString SUBTITLE = "Ease of digging";
-
-			public class BODY
-			{
-				public static LocString CONTAINER1 = "Description of dig speed and miner role dig restrictions";
-			}
-		}
-
-		public class HEAT
-		{
-			public static LocString TITLE = "Heat";
-
-			public static LocString SUBTITLE = "What <i>is</i> heat?";
-
-			public class BODY
-			{
-				public static LocString CONTAINER1 = "Description of thermal energy, temperature, conduction, homeostasis, phase changes";
-			}
-		}
-
-		public class LIGHT
-		{
-			public static LocString TITLE = "Light";
-
-			public static LocString SUBTITLE = "What is light?";
-
-			public class BODY
-			{
-				public static LocString CONTAINER1 = "Description of light, stress effects, plants affected by light";
-			}
-		}
-
-		public class LOGIC
-		{
-			public static LocString TITLE = "Automation";
-
-			public static LocString SUBTITLE = "Automation";
-
-			public class BODY
-			{
-				public static LocString CONTAINER1 = "Description of automation, logic input/outputs, link to automation research";
-			}
-		}
-
-		public class POWER
-		{
-			public static LocString TITLE = "Power";
-
-			public static LocString SUBTITLE = "Electrical energy";
-
-			public class BODY
-			{
-				public static LocString CONTAINER1 = "Description of power, energy, watts, generators, consumers, etc.";
 			}
 		}
 	}

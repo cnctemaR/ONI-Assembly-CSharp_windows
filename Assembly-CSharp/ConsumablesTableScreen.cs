@@ -125,8 +125,7 @@ public class ConsumablesTableScreen : TableScreen
 
 	private string get_value_qualityoflife_expectations_label(MinionIdentity minion, GameObject widget_go)
 	{
-		string text = "{0} / {1}";
-		return string.Format(text, Db.Get().Attributes.QualityOfLife.Lookup(minion).GetFormattedValue(), Db.Get().Attributes.QualityOfLifeExpectation.Lookup(minion).GetFormattedValue());
+		return Db.Get().Attributes.QualityOfLife.Lookup(minion).GetFormattedValue();
 	}
 
 	private int compare_rows_qualityoflife_expectations(MinionIdentity a, MinionIdentity b)

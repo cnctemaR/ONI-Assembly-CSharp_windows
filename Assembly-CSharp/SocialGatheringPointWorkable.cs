@@ -11,6 +11,7 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_generic_convo_kanim") };
 		this.workAnims = new HashedString[] { "idle" };
 		this.faceTargetWhenWorking = true;
+		this.workerStatusItem = Db.Get().DuplicantStatusItems.Socializing;
 		this.synchronizeAnims = false;
 		this.showProgressBar = true;
 		this.resetProgressOnStop = true;

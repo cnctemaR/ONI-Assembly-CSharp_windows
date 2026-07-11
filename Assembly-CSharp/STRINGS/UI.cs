@@ -1113,7 +1113,7 @@ namespace STRINGS
 
 				public class CAN_STUDY_WORLD_OBJECTS
 				{
-					public static LocString DESCRIPTION = "Trait: " + STRINGS.CODEX.ANALYSIS.TITLE;
+					public static LocString DESCRIPTION = "Trait: Geographical Analysis";
 				}
 
 				public class INCREASED_ART

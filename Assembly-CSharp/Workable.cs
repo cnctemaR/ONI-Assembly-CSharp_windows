@@ -261,6 +261,11 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return this.workerStatusItem;
 	}
 
+	public void SetWorkerStatusItem(StatusItem item)
+	{
+		this.workerStatusItem = item;
+	}
+
 	public void CompleteWork(Worker worker)
 	{
 		if (this.shouldTransferDiseaseWithWorker)

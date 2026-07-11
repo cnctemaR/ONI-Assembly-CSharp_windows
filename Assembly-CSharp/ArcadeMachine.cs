@@ -18,6 +18,7 @@ public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>
 			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
 			GameObject gameObject = ChoreHelpers.CreateLocator("ArcadeMachineWorkable", vector);
 			ArcadeMachineWorkable arcadeMachineWorkable = gameObject.AddOrGet<ArcadeMachineWorkable>();
+			arcadeMachineWorkable.SetWorkerStatusItem(Db.Get().DuplicantStatusItems.Gaming);
 			arcadeMachineWorkable.owner = this;
 			arcadeMachineWorkable.basePriority = RELAXATION.PRIORITY.TIER4;
 			arcadeMachineWorkable.specificEffect = "PlayedArcade";

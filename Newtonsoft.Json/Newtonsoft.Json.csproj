@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{FDE398CE-B454-4AC6-BC9B-0C832F3FC264}</ProjectGuid>
+    <ProjectGuid>{CB398776-6635-4EB0-91FF-143F020E0E97}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Newtonsoft.Json</RootNamespace>
     <AssemblyName>Newtonsoft.Json</AssemblyName>
@@ -245,7 +245,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Data\System.Data.csproj">
-      <Project>{FDE398CE-B454-4AC6-BC9B-0C832F3FC267}</Project>
+      <Project>{CB398776-6635-4EB0-91FF-143F020E0E9A}</Project>
       <Name>System.Data</Name>
     </ProjectReference>
   </ItemGroup>

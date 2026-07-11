@@ -775,7 +775,6 @@ public class CodexScreen : KScreen
 		Food,
 		Diseases,
 		Roles,
-		Systems,
 		Buildings,
 		Elements
 	}

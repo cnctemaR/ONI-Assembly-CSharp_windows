@@ -161,12 +161,7 @@ public class Unlocks : MonoBehaviour
 	{
 		{
 			"critters",
-			new string[]
-			{
-				"critter_Puft_studied", "critter_alpha_puft", "critter_squeaky_puft", "critter_dense_puft", "critter_Hatch_studied", "critter_sage_hatch", "critter_stone_hatch", "critter_smooth_hatch", "critter_Drecko_studied", "critter_plastic_drecko",
-				"critter_LightBug_studied", "critter_orange_shinebug", "critter_pink_shinebug", "critter_blue_shinebug", "critter_purple_shinebug", "critter_black_shinebug", "critter_white_shinebug", "critter_Glom_studied", "critter_Oilfloater_studied", "critter_molten_slickster",
-				"critter_longhair_slickster", "critter_Pacu_studied", "critter_tropical_pacu", "critter_gulpfish"
-			}
+			new string[] { "critter_Puft_studied", "critter_Hatch_studied" }
 		},
 		{
 			"emails",
@@ -190,7 +185,7 @@ public class Unlocks : MonoBehaviour
 		},
 		{
 			"special_set_items",
-			new string[] { "display_prop1", "display_prop2", "display_prop3", "pod_evacuation" }
+			new string[] { "display_prop1", "display_prop2", "display_prop3", "pod_evacuation", "printingpod" }
 		}
 	};
 }

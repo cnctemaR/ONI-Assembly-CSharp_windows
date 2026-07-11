@@ -19,6 +19,7 @@ public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, ISharedW
 			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
 			GameObject gameObject = ChoreHelpers.CreateLocator("PhonoboxWorkable", vector);
 			ArcadeMachineWorkable arcadeMachineWorkable = gameObject.AddOrGet<ArcadeMachineWorkable>();
+			arcadeMachineWorkable.SetWorkerStatusItem(Db.Get().DuplicantStatusItems.Dancing);
 			arcadeMachineWorkable.owner = this;
 			arcadeMachineWorkable.basePriority = RELAXATION.PRIORITY.TIER3;
 			arcadeMachineWorkable.specificEffect = "Danced";

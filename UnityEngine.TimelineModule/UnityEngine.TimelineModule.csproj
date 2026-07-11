@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{FDE398CE-B454-4AC6-BC9B-0C832F3FC29D}</ProjectGuid>
+    <ProjectGuid>{CB398776-6635-4EB0-91FF-143F020E0ED0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.TimelineModule</RootNamespace>
     <AssemblyName>UnityEngine.TimelineModule</AssemblyName>
@@ -18,7 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{FDE398CE-B454-4AC6-BC9B-0C832F3FC291}</Project>
+      <Project>{CB398776-6635-4EB0-91FF-143F020E0EC4}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

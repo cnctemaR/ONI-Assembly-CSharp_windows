@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -74,72 +75,65 @@ public class Def : ScriptableObject
 		}
 	}
 
-	public static Sprite GetUISpriteFromMultiObjectAnim(KAnimFile AnimFile, string animName = "ui")
+	private static Sprite GetUISpriteFromMultiObjectAnim(Tuple<KAnimFile, string> animFileAndStateName)
 	{
-		if (AnimFile == null)
+		if (Def.knownUISprites.ContainsKey(animFileAndStateName.first) && Def.knownUISprites[animFileAndStateName.first].ContainsKey(animFileAndStateName.second))
 		{
-			Output.LogWarning(new object[] { animName, "missing Anim File" });
+			return Def.knownUISprites[animFileAndStateName.first][animFileAndStateName.second];
+		}
+		if (animFileAndStateName.first == null)
+		{
+			Output.LogWarning(new object[] { animFileAndStateName.second, "missing Anim File" });
 			return null;
 		}
-		if (AnimFile == null)
+		if (animFileAndStateName.first == null)
 		{
 			return null;
 		}
-		KAnimFileData data = AnimFile.GetData();
+		KAnimFileData data = animFileAndStateName.first.GetData();
 		if (data == null)
 		{
-			Output.LogWarning(new object[] { animName, "KAnimFileData is null" });
+			Output.LogWarning(new object[] { animFileAndStateName.second, "KAnimFileData is null" });
 			return null;
 		}
-		KAnim.Build build = data.build;
-		if (build == null)
+		if (data.build == null)
 		{
 			return null;
 		}
 		KAnim.Anim.Frame frame = KAnim.Anim.Frame.InvalidFrame;
-		if (data != null)
+		for (int i = 0; i < data.animCount; i++)
 		{
-			for (int i = 0; i < data.animCount; i++)
+			KAnim.Anim anim = data.GetAnim(i);
+			if (anim.name == animFileAndStateName.second)
 			{
-				KAnim.Anim anim = data.GetAnim(i);
-				if (anim.name == animName)
-				{
-					frame = anim.GetFrame(AnimFile.GetData().batchTag, 0);
-				}
+				frame = anim.GetFrame(data.batchTag, 0);
 			}
 		}
 		if (!frame.IsValid())
 		{
-			Output.LogWarning(new object[] { string.Format("missing '{0}' anim in '{1}'", animName, AnimFile) });
+			Output.LogWarning(new object[] { string.Format("missing '{0}' anim in '{1}'", animFileAndStateName.second, animFileAndStateName.first) });
 			return null;
 		}
 		if (data.elementCount == 0)
 		{
 			return null;
 		}
-		KAnim.Anim.FrameElement frameElement = data.GetAnimFrameElement(data.elementCount - 1);
-		KAnimHashedString kanimHashedString = new KAnimHashedString(animName);
-		for (int j = 0; j < data.elementCount; j++)
-		{
-			frameElement = data.GetAnimFrameElement(j);
-			if (frameElement.symbol == kanimHashedString)
-			{
-				break;
-			}
-		}
-		KAnim.Build.Symbol symbol = build.GetSymbol(frameElement.symbol);
+		KAnim.Anim.FrameElement frameElement = default(KAnim.Anim.FrameElement);
+		KAnimHashedString kanimHashedString = new KAnimHashedString(animFileAndStateName.second);
+		frameElement = data.FindAnimFrameElement(kanimHashedString);
+		KAnim.Build.Symbol symbol = data.build.GetSymbol(frameElement.symbol);
 		if (symbol == null)
 		{
-			Output.LogWarning(new object[] { animName, "placeSymbol [", frameElement.symbol, "] is missing" });
+			Output.LogWarning(new object[] { animFileAndStateName.second, "placeSymbol [", frameElement.symbol, "] is missing" });
 			return null;
 		}
 		KAnim.Build.SymbolFrame symbolFrame = symbol.GetFrame(frameElement.frame).symbolFrame;
 		if (symbolFrame == null)
 		{
-			Output.LogWarning(new object[] { animName, "SymbolFrame [", frameElement.frame, "] is missing" });
+			Output.LogWarning(new object[] { animFileAndStateName.second, "SymbolFrame [", frameElement.frame, "] is missing" });
 			return null;
 		}
-		Texture2D texture = build.GetTexture(0);
+		Texture2D texture = data.build.GetTexture(0);
 		float x = symbolFrame.uvMin.x;
 		float x2 = symbolFrame.uvMax.x;
 		float y = symbolFrame.uvMax.y;
@@ -159,10 +153,25 @@ public class Def : ScriptableObject
 		}
 		Sprite sprite = Sprite.Create(texture, rect, new Vector2(0f, 0f), num4, 0U, SpriteMeshType.FullRect);
 		sprite.name = ":" + frameElement.frame.ToString();
+		if (Def.knownUISprites.ContainsKey(animFileAndStateName.first))
+		{
+			Def.knownUISprites[animFileAndStateName.first].Add(animFileAndStateName.second, sprite);
+		}
+		else
+		{
+			Def.knownUISprites.Add(animFileAndStateName.first, new Dictionary<string, Sprite> { { animFileAndStateName.second, sprite } });
+		}
 		return sprite;
+	}
+
+	public static Sprite GetUISpriteFromMultiObjectAnim(KAnimFile AnimFile, string animName = "ui")
+	{
+		return Def.GetUISpriteFromMultiObjectAnim(new Tuple<KAnimFile, string>(AnimFile, animName));
 	}
 
 	public string PrefabID;
 
 	public Tag Tag;
+
+	private static Dictionary<KAnimFile, Dictionary<string, Sprite>> knownUISprites = new Dictionary<KAnimFile, Dictionary<string, Sprite>>();
 }

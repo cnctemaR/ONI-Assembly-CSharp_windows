@@ -80,6 +80,10 @@ public class PathFinder
 		int invalidCell = PathFinder.InvalidCell;
 		NavType navType = NavType.NumNavTypes;
 		query.ClearResult();
+		if (!Grid.IsValidCell(potential_path.cell))
+		{
+			return;
+		}
 		PathFinder.FindPaths(nav_grid, ref abilities, potential_path, PathFinder.PathGrid, query, ref PathFinder.QueryId, PathFinder.Temp.Potentials, ref invalidCell, ref navType);
 		if (invalidCell != PathFinder.InvalidCell)
 		{

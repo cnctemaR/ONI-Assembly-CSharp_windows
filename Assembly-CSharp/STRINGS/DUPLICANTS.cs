@@ -4307,6 +4307,13 @@ namespace STRINGS
 
 				public static LocString DESC = string.Empty;
 			}
+
+			public class SCALEGROWTHDELTA
+			{
+				public static LocString NAME = "Scale Growth";
+
+				public static LocString TOOLTIP = "Scale Growth" + UI.HORIZONTAL_BR_RULE + "How long until this creatures scales will grow back.";
+			}
 		}
 
 		public class OPINIONS

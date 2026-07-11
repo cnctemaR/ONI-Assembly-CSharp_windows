@@ -431,12 +431,12 @@ public static class CodexEntryGenerator
 		codexEntry2.category = text;
 		dictionary.Add(text7, codexEntry2);
 		text7 = text3;
-		codexEntry2 = CodexEntryGenerator.GenerateCategoryEntry(text7, UI.CODEX.CATEGORYNAMES.ELEMENTSLIQUID, dictionary3, Assets.GetSprite("overlay_liquidvent"));
+		codexEntry2 = CodexEntryGenerator.GenerateCategoryEntry(text7, UI.CODEX.CATEGORYNAMES.ELEMENTSLIQUID, dictionary3, null);
 		codexEntry2.parentId = text;
 		codexEntry2.category = text;
 		dictionary.Add(text7, codexEntry2);
 		text7 = text4;
-		codexEntry2 = CodexEntryGenerator.GenerateCategoryEntry(text7, UI.CODEX.CATEGORYNAMES.ELEMENTSGAS, dictionary4, Assets.GetSprite("overlay_gasvent"));
+		codexEntry2 = CodexEntryGenerator.GenerateCategoryEntry(text7, UI.CODEX.CATEGORYNAMES.ELEMENTSGAS, dictionary4, null);
 		codexEntry2.parentId = text;
 		codexEntry2.category = text;
 		dictionary.Add(text7, codexEntry2);

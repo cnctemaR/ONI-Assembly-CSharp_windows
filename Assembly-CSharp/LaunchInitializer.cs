@@ -12,7 +12,7 @@ public class LaunchInitializer : MonoBehaviour
 		{
 			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 		}
-		global::Debug.Log("Development Build: R2-" + 266962U.ToString(), null);
+		global::Debug.Log("Development Build: R2-" + 267379U.ToString(), null);
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		KPlayerPrefs.instance.Load();
 		for (int i = 0; i < this.SpawnPrefabs.Length; i++)

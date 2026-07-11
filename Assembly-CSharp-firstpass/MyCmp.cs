@@ -122,7 +122,10 @@ public class MyCmp
 			else if (fieldData.myCmpType == MyCmp.MyCmpType.Req)
 			{
 				Component component3 = cmpFns.mRequireFn(c);
-				DebugUtil.Assert(component3 != null, "The behaviour " + type.ToString() + " required but couldn't find a " + fieldInfo.FieldType.Name);
+				if (component3 == null)
+				{
+					global::Debug.LogError("The behaviour " + type.ToString() + " required but couldn't find a " + fieldInfo.FieldType.Name, null);
+				}
 				Util.SpawnComponent(component3);
 				fieldInfo.SetValue(c, component3);
 			}

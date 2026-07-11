@@ -10,6 +10,11 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		base.InitializeStates(out default_state);
 	}
 
+	public static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.ConditionCallback Not(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.ConditionCallback transition_cb)
+	{
+		return (StateMachineInstanceType smi) => !transition_cb(smi);
+	}
+
 	public override void BindStates()
 	{
 		base.BindState(null, this.root, "root");
@@ -500,7 +505,10 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.Toggle("ToggleAnims(" + anim_file + ")", delegate(StateMachineInstanceType smi)
 			{
 				KAnimFile anim = Assets.GetAnim(anim_file);
-				DebugUtil.Assert(anim != null, "Trying to add missing override anims:" + anim_file);
+				if (anim == null)
+				{
+					global::Debug.LogError("Trying to add missing override anims:" + anim_file, null);
+				}
 				KAnimControllerBase kanimControllerBase = state_target.Get<KAnimControllerBase>(smi);
 				kanimControllerBase.AddAnimOverrides(anim, priority);
 			}, delegate(StateMachineInstanceType smi)

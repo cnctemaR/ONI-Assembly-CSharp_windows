@@ -10,7 +10,10 @@ public class KButtonEvent : KInputEvent
 
 	public bool TryConsume(global::Action action)
 	{
-		DebugUtil.Assert(!base.Consumed, action.ToString() + " was already consumed");
+		if (base.Consumed)
+		{
+			Debug.LogError(action.ToString() + " was already consumed", null);
+		}
 		if (action != global::Action.NumActions && this.mIsAction[(int)action])
 		{
 			base.Consumed = true;

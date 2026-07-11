@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{32B8C981-CCE7-49C4-A087-509E82C961BC}</ProjectGuid>
+    <ProjectGuid>{076DCA07-EC3D-4C1D-9A35-9351FDAB3807}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>FMODUnityResonance</RootNamespace>
     <AssemblyName>FMODUnityResonance</AssemblyName>
@@ -20,15 +20,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FMODUnity\FMODUnity.csproj">
-      <Project>{32B8C981-CCE7-49C4-A087-509E82C961BB}</Project>
+      <Project>{076DCA07-EC3D-4C1D-9A35-9351FDAB3806}</Project>
       <Name>FMODUnity</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{32B8C981-CCE7-49C4-A087-509E82C961C3}</Project>
+      <Project>{076DCA07-EC3D-4C1D-9A35-9351FDAB380E}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{32B8C981-CCE7-49C4-A087-509E82C961DD}</Project>
+      <Project>{076DCA07-EC3D-4C1D-9A35-9351FDAB3828}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
   </ItemGroup>

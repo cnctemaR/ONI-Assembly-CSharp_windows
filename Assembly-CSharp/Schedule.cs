@@ -28,6 +28,11 @@ public class Schedule : ISaveLoadable, IListableOption
 		return (Schedule.GetBlockIdx() + 24 - 1) % 24;
 	}
 
+	public void ClearNullReferences()
+	{
+		this.assigned.RemoveAll((Ref<Schedulable> x) => x.Get() == null);
+	}
+
 	public void SetBlocksToGroupDefaults(List<ScheduleGroup> defaultGroups)
 	{
 		this.blocks.Clear();

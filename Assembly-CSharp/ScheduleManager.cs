@@ -40,6 +40,10 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 		{
 			this.SetupDefaultSchedule();
 		}
+		foreach (Schedule schedule in this.schedules)
+		{
+			schedule.ClearNullReferences();
+		}
 		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
 			Schedulable component = minionIdentity.GetComponent<Schedulable>();

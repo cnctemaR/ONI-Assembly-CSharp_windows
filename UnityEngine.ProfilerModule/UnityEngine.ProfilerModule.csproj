@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{534BA63F-EF55-47D4-8A37-3BEB512B996E}</ProjectGuid>
+    <ProjectGuid>{E9AC43D6-6AB0-484C-8247-DCC5FA7EA367}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.ProfilerModule</RootNamespace>
     <AssemblyName>UnityEngine.ProfilerModule</AssemblyName>
@@ -18,11 +18,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{534BA63F-EF55-47D4-8A37-3BEB512B9943}</Project>
+      <Project>{E9AC43D6-6AB0-484C-8247-DCC5FA7EA33C}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{534BA63F-EF55-47D4-8A37-3BEB512B9970}</Project>
+      <Project>{E9AC43D6-6AB0-484C-8247-DCC5FA7EA369}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

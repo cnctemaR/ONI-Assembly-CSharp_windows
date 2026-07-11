@@ -19,7 +19,7 @@ public class MainMenu : KMonoBehaviour
 		this.Button_Options.onClick += this.Options;
 		this.Button_QuitGame.onClick += this.QuitGame;
 		this.Button_Translations.onClick += this.Translations;
-		this.Button_Scenarios.onClick += this.Scenarios;
+		this.Button_Scenarios.gameObject.SetActive(false);
 		if (GenericGameSettings.instance != null && GenericGameSettings.instance.demoMode)
 		{
 			this.Button_ResumeGame.gameObject.SetActive(false);
@@ -187,7 +187,7 @@ public class MainMenu : KMonoBehaviour
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 284634U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 285039U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -327,12 +327,6 @@ public class MainMenu : KMonoBehaviour
 			Sprite sadDupe = GlobalResources.Instance().sadDupe;
 			confirmDialogScreen2.PopupConfirmDialog(text2, action, action2, null, null, null, null, null, sadDupe);
 		}
-	}
-
-	public void Scenarios()
-	{
-		ScenariosMenu scenariosMenu = Util.KInstantiateUI<ScenariosMenu>(ScreenPrefabs.Instance.scenariosMenu.gameObject, base.transform.parent.gameObject, false);
-		scenariosMenu.SetBackgroundActive(true);
 	}
 
 	public RectTransform LogoAndMenu;

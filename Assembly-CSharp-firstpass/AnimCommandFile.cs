@@ -8,7 +8,7 @@ public class AnimCommandFile : YamlIO<AnimCommandFile>
 {
 	public AnimCommandFile()
 	{
-		this.MaxGroupSize = 60;
+		this.MaxGroupSize = 30;
 		this.DefaultBuilds = new Dictionary<string, List<string>>();
 		this.TagGroup = AnimCommandFile.GroupBy.DontGroup;
 	}

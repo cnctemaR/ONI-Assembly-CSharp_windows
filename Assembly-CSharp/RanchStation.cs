@@ -127,10 +127,27 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			}
 			if (this.targetRanchable.IsNullOrStopped())
 			{
-				RanchStation.Instance.RanchableIterator ranchableIterator = new RanchStation.Instance.RanchableIterator(this, cavityForCell, targetRanchCell);
-				GameScenePartitioner.Instance.Iterate<RanchStation.Instance.RanchableIterator>(cavityForCell.minX, cavityForCell.minY, cavityForCell.maxX - cavityForCell.minX + 1, cavityForCell.maxY - cavityForCell.minY + 1, GameScenePartitioner.Instance.collisionLayer, ref ranchableIterator);
-				ranchableIterator.Cleanup();
-				this.targetRanchable = ranchableIterator.result;
+				CavityInfo cavityForCell2 = Game.Instance.roomProber.GetCavityForCell(targetRanchCell);
+				RanchableMonitor.Instance instance = null;
+				if (cavityForCell2 != null && cavityForCell2.creatures != null)
+				{
+					foreach (KPrefabID kprefabID in cavityForCell2.creatures)
+					{
+						if (!(kprefabID == null))
+						{
+							RanchableMonitor.Instance smi = kprefabID.GetSMI<RanchableMonitor.Instance>();
+							if (!smi.IsNullOrStopped())
+							{
+								if (RanchStation.Instance.CanRanchableBeRanchedAtRanchStation(smi, this, cavityForCell2, targetRanchCell))
+								{
+									instance = smi;
+									break;
+								}
+							}
+						}
+					}
+				}
+				this.targetRanchable = instance;
 				if (!this.targetRanchable.IsNullOrStopped())
 				{
 					this.targetRanchable.targetRanchStation = this;
@@ -155,47 +172,6 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 				base.def.onRanchCompleteCb(this.targetRanchable.gameObject);
 				this.targetRanchable.Trigger(1827504087, null);
 			}
-		}
-
-		private struct RanchableIterator : GameScenePartitioner.Iterator
-		{
-			public RanchableIterator(RanchStation.Instance ranch_station, CavityInfo ranch_cavity_info, int ranch_cell)
-			{
-				this.ranchStation = ranch_station;
-				this.ranchCavityInfo = ranch_cavity_info;
-				this.ranchCell = ranch_cell;
-				this.result = null;
-			}
-
-			public RanchableMonitor.Instance result { get; private set; }
-
-			public void Iterate(object target_obj)
-			{
-				KMonoBehaviour kmonoBehaviour = target_obj as KMonoBehaviour;
-				if (kmonoBehaviour == null)
-				{
-					return;
-				}
-				RanchableMonitor.Instance smi = kmonoBehaviour.GetSMI<RanchableMonitor.Instance>();
-				if (smi.IsNullOrStopped())
-				{
-					return;
-				}
-				if (RanchStation.Instance.CanRanchableBeRanchedAtRanchStation(smi, this.ranchStation, this.ranchCavityInfo, this.ranchCell))
-				{
-					this.result = smi;
-				}
-			}
-
-			public void Cleanup()
-			{
-			}
-
-			private CavityInfo ranchCavityInfo;
-
-			private int ranchCell;
-
-			private RanchStation.Instance ranchStation;
 		}
 	}
 }

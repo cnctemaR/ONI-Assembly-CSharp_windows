@@ -18,7 +18,7 @@ public class KAnimBatchGroup
 		this.maxGroupSize = group.maxGroupSize;
 		if (this.maxGroupSize <= 0)
 		{
-			this.maxGroupSize = 60;
+			this.maxGroupSize = 30;
 		}
 		this.SetupMeshData();
 		this.InitBuildAndAnimTex();
@@ -110,12 +110,16 @@ public class KAnimBatchGroup
 	public static int GetBestTextureSize(float cost)
 	{
 		float num = Mathf.Sqrt(cost);
-		return Mathf.CeilToInt(num);
+		int num2 = Mathf.CeilToInt(num);
+		int num3 = 32;
+		float num4 = (float)num2 / (float)num3;
+		int num5 = Mathf.CeilToInt(num4);
+		return num5 * num3;
 	}
 
 	private void SetupMeshData()
 	{
-		this.maxGroupSize = Mathf.Min(this.maxGroupSize, 60);
+		this.maxGroupSize = Mathf.Min(this.maxGroupSize, 30);
 		this.mesh = this.BuildMesh(this.maxGroupSize * this.data.maxVisibleSymbols);
 		float num = (float)(this.maxGroupSize * 28) / 4f;
 		this.float4sPerSide = KAnimBatchGroup.GetBestTextureSize(num);

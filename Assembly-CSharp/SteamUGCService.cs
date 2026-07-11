@@ -143,12 +143,11 @@ public class SteamUGCService : MonoBehaviour
 				else if ((itemState & EItemState.k_EItemStateInstalled) == EItemState.k_EItemStateInstalled && !this.previewImages.ContainsKey(nPublishedFileId))
 				{
 					global::System.DateTime dateTime;
-					byte[] array = SteamUGCService.GetBytesFromZip(nPublishedFileId, SteamUGCService.previewFileNames, out dateTime, false);
-					array = null;
-					if (array != null)
+					byte[] bytesFromZip = SteamUGCService.GetBytesFromZip(nPublishedFileId, SteamUGCService.previewFileNames, out dateTime, false);
+					if (bytesFromZip != null)
 					{
 						Texture2D texture2D = new Texture2D(2, 2);
-						texture2D.LoadImage(array);
+						texture2D.LoadImage(bytesFromZip);
 						this.previewImages.Add(nPublishedFileId, texture2D);
 						this.doClearList = true;
 					}

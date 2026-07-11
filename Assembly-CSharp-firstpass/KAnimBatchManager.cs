@@ -222,7 +222,7 @@ public class KAnimBatchManager
 		this.ready = true;
 	}
 
-	private const int DEFAULT_BATCH_SIZE = 60;
+	private const int DEFAULT_BATCH_SIZE = 30;
 
 	public const int CHUNK_SIZE = 32;
 

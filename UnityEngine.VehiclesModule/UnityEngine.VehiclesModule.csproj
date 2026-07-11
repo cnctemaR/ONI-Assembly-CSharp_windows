@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{534BA63F-EF55-47D4-8A37-3BEB512B998A}</ProjectGuid>
+    <ProjectGuid>{E9AC43D6-6AB0-484C-8247-DCC5FA7EA383}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.VehiclesModule</AssemblyName>
@@ -20,19 +20,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{534BA63F-EF55-47D4-8A37-3BEB512B9943}</Project>
+      <Project>{E9AC43D6-6AB0-484C-8247-DCC5FA7EA33C}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{534BA63F-EF55-47D4-8A37-3BEB512B995A}</Project>
+      <Project>{E9AC43D6-6AB0-484C-8247-DCC5FA7EA353}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{534BA63F-EF55-47D4-8A37-3BEB512B996D}</Project>
+      <Project>{E9AC43D6-6AB0-484C-8247-DCC5FA7EA366}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{534BA63F-EF55-47D4-8A37-3BEB512B9970}</Project>
+      <Project>{E9AC43D6-6AB0-484C-8247-DCC5FA7EA369}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

@@ -486,7 +486,7 @@ public class KBatchGroupData
 
 	private const int MAX_VISIBLE_SYMBOLS = 120;
 
-	public const int MAX_GROUP_SIZE = 60;
+	public const int MAX_GROUP_SIZE = 30;
 
 	private const int NULL_DATA_FRAME_ID = -1010;
 }

@@ -120,7 +120,15 @@ public class LoopingSoundManager : KMonoBehaviour
 		Vector3 vector = new Vector3(pos.x, pos.y, 0f);
 		eventInstance.set3DAttributes(SoundEvent.GetCameraScaledPosition(vector).To3DAttributes());
 		LoopingSoundManager.UpdateSpeed(eventInstance);
-		eventInstance.start();
+		bool flag = CameraController.Instance == null || CameraController.Instance.IsAudibleSound(KFMOD.GetInstancePosition(eventInstance), 0f);
+		if (flag)
+		{
+			eventInstance.start();
+		}
+		else
+		{
+			eventInstance.stop(STOP_MODE.IMMEDIATE);
+		}
 		if (Time.timeScale == 0f && pauseOnGamePause)
 		{
 			eventInstance.setPaused(true);

@@ -92,25 +92,5 @@ public static class BaseOilFloaterConfig
 
 	public static void OnObjectMovementStateChanged(GameObject inst, object data, string sound)
 	{
-		string sound2 = GlobalAssets.GetSound(sound, false);
-		GameHashes gameHashes = (GameHashes)data;
-		if (gameHashes == GameHashes.ObjectMovementWakeUp)
-		{
-			LoopingSounds component = inst.GetComponent<LoopingSounds>();
-			if (component != null)
-			{
-				component.AddLoopingSoundUpdater();
-				component.StartSound(sound2, inst.transform.GetPosition());
-			}
-		}
-		else
-		{
-			LoopingSounds component2 = inst.GetComponent<LoopingSounds>();
-			if (component2 != null)
-			{
-				component2.RemoveLoopingSoundUpdater();
-				component2.StopSound(sound2);
-			}
-		}
 	}
 }

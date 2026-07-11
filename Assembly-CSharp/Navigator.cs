@@ -21,7 +21,20 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	public void Deserialize(IReader reader)
 	{
 		byte b = reader.ReadByte();
-		this.CurrentNavType = (NavType)b;
+		NavType navType = (NavType)b;
+		bool flag = false;
+		foreach (NavType navType2 in this.NavGrid.ValidNavTypes)
+		{
+			if (navType2 == navType)
+			{
+				flag = true;
+				break;
+			}
+		}
+		if (flag)
+		{
+			this.CurrentNavType = navType;
+		}
 	}
 
 	protected override void OnPrefabInit()

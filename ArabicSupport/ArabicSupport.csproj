@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{0D4C75A8-06FB-4A90-B9A2-A5E5448BEB98}</ProjectGuid>
+    <ProjectGuid>{E5225633-97F9-4808-BB70-64BEE2B86BBF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>ArabicSupport</RootNamespace>
     <AssemblyName>ArabicSupport</AssemblyName>
@@ -24,7 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{0D4C75A8-06FB-4A90-B9A2-A5E5448BEBA5}</Project>
+      <Project>{E5225633-97F9-4808-BB70-64BEE2B86BCC}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
   </ItemGroup>

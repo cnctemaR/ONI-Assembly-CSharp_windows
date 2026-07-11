@@ -121,7 +121,15 @@ public class LoopingSounds : KMonoBehaviour, IRenderEveryTick
 			Vector3 vector2 = new Vector3(vector.x, vector.y, 0f);
 			eventInstance.set3DAttributes(SoundEvent.GetCameraScaledPosition(vector2).To3DAttributes());
 			LoopingSoundManager.UpdateSpeed(eventInstance);
-			eventInstance.start();
+			bool flag = CameraController.Instance == null || CameraController.Instance.IsAudibleSound(KFMOD.GetInstancePosition(eventInstance), 0f);
+			if (flag)
+			{
+				eventInstance.start();
+			}
+			else
+			{
+				eventInstance.stop(STOP_MODE.IMMEDIATE);
+			}
 			if (Time.timeScale == 0f)
 			{
 				eventInstance.setPaused(true);
@@ -164,7 +172,15 @@ public class LoopingSounds : KMonoBehaviour, IRenderEveryTick
 			Vector3 vector = new Vector3(sound_pos.x, sound_pos.y, 0f);
 			eventInstance.set3DAttributes(SoundEvent.GetCameraScaledPosition(vector).To3DAttributes());
 			LoopingSoundManager.UpdateSpeed(eventInstance);
-			eventInstance.start();
+			bool flag = CameraController.Instance == null || CameraController.Instance.IsAudibleSound(KFMOD.GetInstancePosition(eventInstance), 0f);
+			if (flag)
+			{
+				eventInstance.start();
+			}
+			else
+			{
+				eventInstance.stop(STOP_MODE.IMMEDIATE);
+			}
 			if (Time.timeScale == 0f)
 			{
 				eventInstance.setPaused(true);

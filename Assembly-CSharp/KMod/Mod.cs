@@ -47,7 +47,7 @@ namespace KMod
 		public void CopyPersistentDataTo(Mod other_mod)
 		{
 			other_mod.status = this.status;
-			other_mod.enabledForDlc = new List<string>(this.enabledForDlc);
+			other_mod.enabledForDlc = ((this.enabledForDlc != null) ? new List<string>(this.enabledForDlc) : new List<string>());
 			other_mod.crash_count = this.crash_count;
 			other_mod.loaded_content = this.loaded_content;
 			other_mod.loaded_mod_data = this.loaded_mod_data;
@@ -200,10 +200,10 @@ namespace KMod
 					}
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => this.DoesModSupportCurrentContent(v.info)).ToList<Mod.ArchivedVersion>();
 					Mod.ArchivedVersion archivedVersion = (from v in list2
-						where (long)v.info.lastWorkingBuild >= 447213L
+						where (long)v.info.lastWorkingBuild >= 447596L
 						orderby v.info.lastWorkingBuild
 						select v).Concat<Mod.ArchivedVersion>(from v in list2
-						where (long)v.info.lastWorkingBuild < 447213L
+						where (long)v.info.lastWorkingBuild < 447596L
 						orderby v.info.lastWorkingBuild descending
 						select v).First<Mod.ArchivedVersion>();
 					if (archivedVersion == null)

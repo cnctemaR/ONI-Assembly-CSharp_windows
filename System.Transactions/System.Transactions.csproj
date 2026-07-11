@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{5F905F1C-9451-4828-833F-AFFAADAF36AD}</ProjectGuid>
+    <ProjectGuid>{90802165-669C-4110-8755-E435EFD3F73F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Transactions</RootNamespace>
     <AssemblyName>System.Transactions</AssemblyName>
@@ -65,11 +65,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36A2}</Project>
+      <Project>{90802165-669C-4110-8755-E435EFD3F734}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Configuration\System.Configuration.csproj">
-      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36A4}</Project>
+      <Project>{90802165-669C-4110-8755-E435EFD3F736}</Project>
       <Name>System.Configuration</Name>
     </ProjectReference>
   </ItemGroup>

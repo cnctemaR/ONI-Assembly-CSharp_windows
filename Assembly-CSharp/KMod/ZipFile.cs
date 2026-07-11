@@ -34,12 +34,14 @@ namespace KMod
 			{
 				return false;
 			}
-			foreach (ZipEntry zipEntry in this.zipfile)
+			using (IEnumerator<ZipEntry> enumerator = this.zipfile.GetEnumerator())
 			{
-				string text = FileSystem.Normalize(zipEntry.FileName);
-				if (relative_path == text)
+				while (enumerator.MoveNext())
 				{
-					return true;
+					if (FileSystem.Normalize(enumerator.Current.FileName).StartsWith(relative_path))
+					{
+						return true;
+					}
 				}
 			}
 			return false;

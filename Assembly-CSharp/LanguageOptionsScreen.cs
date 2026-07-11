@@ -79,6 +79,10 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 
 	private void RebuildUGCButtons()
 	{
+		if (SteamUGCService.Instance == null)
+		{
+			return;
+		}
 		List<SteamUGCService.Subscribed> subs = SteamUGCService.Instance.GetSubscribed("language");
 		if (subs.Count != 0)
 		{
@@ -166,18 +170,24 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 	{
 		base.OnActivate();
 		this.currentLanguage = LanguageOptionsScreen.GetInstalledFileID(out this.currentLastModified);
-		if (!SteamUGCService.Instance.IsSubscribedTo(this.currentLanguage))
+		if (SteamUGCService.Instance != null)
 		{
-			this.currentLanguage = PublishedFileId_t.Invalid;
-			this.InstallLanguageFile(this.currentLanguage, false);
+			if (!SteamUGCService.Instance.IsSubscribedTo(this.currentLanguage))
+			{
+				this.currentLanguage = PublishedFileId_t.Invalid;
+				this.InstallLanguageFile(this.currentLanguage, false);
+			}
+			SteamUGCService.Instance.ugcEventHandlers.Add(this);
 		}
-		SteamUGCService.Instance.ugcEventHandlers.Add(this);
 	}
 
 	protected override void OnDeactivate()
 	{
 		base.OnDeactivate();
-		SteamUGCService.Instance.ugcEventHandlers.Remove(this);
+		if (SteamUGCService.Instance != null)
+		{
+			SteamUGCService.Instance.ugcEventHandlers.Remove(this);
+		}
 	}
 
 	private void OnClickUninstall()

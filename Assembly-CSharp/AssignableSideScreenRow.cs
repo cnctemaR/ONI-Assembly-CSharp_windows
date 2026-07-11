@@ -19,33 +19,36 @@ public class AssignableSideScreenRow : KMonoBehaviour
 		else
 		{
 			bool flag = false;
-			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)this.targetIdentity;
-			Ownables component = kmonoBehaviour.GetComponent<Ownables>();
-			if (component != null)
+			KMonoBehaviour kmonoBehaviour = this.targetIdentity as KMonoBehaviour;
+			if (kmonoBehaviour != null)
 			{
-				AssignableSlotInstance slot = component.GetSlot(this.sideScreen.targetAssignable.slot);
-				if (slot != null && slot.IsAssigned())
+				Ownables component = kmonoBehaviour.GetComponent<Ownables>();
+				if (component != null)
 				{
-					this.currentState = AssignableSideScreenRow.AssignableState.AssignedToOther;
-					this.assignmentText.text = slot.assignable.GetProperName();
-					flag = true;
+					AssignableSlotInstance slot = component.GetSlot(this.sideScreen.targetAssignable.slot);
+					if (slot != null && slot.IsAssigned())
+					{
+						this.currentState = AssignableSideScreenRow.AssignableState.AssignedToOther;
+						this.assignmentText.text = slot.assignable.GetProperName();
+						flag = true;
+					}
 				}
-			}
-			Equipment component2 = kmonoBehaviour.GetComponent<Equipment>();
-			if (component2 != null)
-			{
-				AssignableSlotInstance slot2 = component2.GetSlot(this.sideScreen.targetAssignable.slot);
-				if (slot2 != null && slot2.IsAssigned())
+				Equipment component2 = kmonoBehaviour.GetComponent<Equipment>();
+				if (component2 != null)
 				{
-					this.currentState = AssignableSideScreenRow.AssignableState.AssignedToOther;
-					this.assignmentText.text = slot2.assignable.GetProperName();
-					flag = true;
+					AssignableSlotInstance slot2 = component2.GetSlot(this.sideScreen.targetAssignable.slot);
+					if (slot2 != null && slot2.IsAssigned())
+					{
+						this.currentState = AssignableSideScreenRow.AssignableState.AssignedToOther;
+						this.assignmentText.text = slot2.assignable.GetProperName();
+						flag = true;
+					}
 				}
-			}
-			if (!flag)
-			{
-				this.currentState = AssignableSideScreenRow.AssignableState.Unassigned;
-				this.assignmentText.text = UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED;
+				if (!flag)
+				{
+					this.currentState = AssignableSideScreenRow.AssignableState.Unassigned;
+					this.assignmentText.text = UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED;
+				}
 			}
 		}
 		this.toggle.ChangeState((int)this.currentState);

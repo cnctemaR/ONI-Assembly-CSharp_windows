@@ -117,22 +117,6 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 
 	private void OnStorageChanged(object data = null)
 	{
-		if (this.machineOrders.Count > 0 && (this.machineOrders[0].chore != null || (!this.duplicantOperated && this.machineOrders[0].underway)))
-		{
-			if ((this.workable != null && this.workable.WorkTimeRemaining < 0f) || this.orderProgress >= this.machineOrders[0].parentOrder.recipe.time)
-			{
-				return;
-			}
-			foreach (ComplexRecipe.RecipeElement recipeElement in this.machineOrders[0].parentOrder.recipe.ingredients)
-			{
-				if (this.buildStorage.GetAmountAvailable(recipeElement.material) < recipeElement.amount)
-				{
-					this.CancelAllMachineOrders();
-					this.UpdateMachineOrders(false);
-					break;
-				}
-			}
-		}
 	}
 
 	private void OnCopySettings(object data)

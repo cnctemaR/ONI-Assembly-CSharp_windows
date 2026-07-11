@@ -72,7 +72,10 @@ public class LiquidCooledRefinery : ComplexFabricator
 	protected override void TransferCurrentRecipeIngredientsForBuild()
 	{
 		base.TransferCurrentRecipeIngredientsForBuild();
-		this.inStorage.Transfer(this.buildStorage, this.coolantTag, this.minCoolantMass, false, true);
+		while (this.buildStorage.GetAmountAvailable(this.coolantTag) < this.minCoolantMass && this.inStorage.GetAmountAvailable(this.coolantTag) > 0f)
+		{
+			this.inStorage.Transfer(this.buildStorage, this.coolantTag, this.minCoolantMass, false, true);
+		}
 	}
 
 	protected override List<GameObject> SpawnOrderProduct(ComplexFabricator.UserOrder completed_order)

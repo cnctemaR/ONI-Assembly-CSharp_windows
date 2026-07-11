@@ -51,6 +51,14 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 		base.End(reason);
 	}
 
+	private void OnTagsChanged(object data)
+	{
+		if (this.smi.sm.fetchTarget.Get(this.smi) != null)
+		{
+			this.Fail("Tags changed");
+		}
+	}
+
 	public override string GetReportName()
 	{
 		if (this.smi.deliveries.Count > 0 && this.smi.deliveries[0].destination != null)
@@ -107,6 +115,17 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			}
 			float num3 = Mathf.Max(1f, Db.Get().Attributes.CarryAmount.Lookup(context.consumerState.consumer).GetTotalValue());
 			Pickupable pickupable = context.data as Pickupable;
+			if (pickupable == null)
+			{
+				FetchChore fetchChore = (FetchChore)pooledList[0].chore;
+				Output.LogWarning(new object[]
+				{
+					"Missing root_fetchable for FetchAreaChore",
+					fetchChore.destination,
+					fetchChore.tags[0]
+				});
+				pickupable = fetchChore.FindFetchTarget(context.consumerState);
+			}
 			List<Pickupable> list = new List<Pickupable>();
 			list.Add(pickupable);
 			float num4 = pickupable.UnreservedAmount;
@@ -177,15 +196,15 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 					break;
 				}
 				Chore.Precondition.Context context2 = pooledList[j];
-				FetchChore fetchChore = context2.chore as FetchChore;
-				if (fetchChore != this.rootChore && context2.IsSuccess() && fetchChore.overrideTarget == null && fetchChore.driver == null && fetchChore.tagBits.AreEqual(ref this.rootChore.tagBits))
+				FetchChore fetchChore2 = context2.chore as FetchChore;
+				if (fetchChore2 != this.rootChore && context2.IsSuccess() && fetchChore2.overrideTarget == null && fetchChore2.driver == null && fetchChore2.tagBits.AreEqual(ref this.rootChore.tagBits))
 				{
-					num8 = Mathf.Min(fetchChore.originalAmount, num4 - num9);
+					num8 = Mathf.Min(fetchChore2.originalAmount, num4 - num9);
 					if (minTakeAmount > 0f)
 					{
 						num8 -= num8 % minTakeAmount;
 					}
-					this.chores.Add(fetchChore);
+					this.chores.Add(fetchChore2);
 					this.deliveries.Add(new FetchAreaChore.StatesInstance.Delivery(context2, num8, new Action<FetchChore>(this.OnFetchChoreCancelled)));
 					num9 += num8;
 					if (this.deliveries.Count >= 10)

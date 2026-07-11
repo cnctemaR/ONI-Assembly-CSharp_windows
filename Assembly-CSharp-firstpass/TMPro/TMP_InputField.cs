@@ -2121,13 +2121,17 @@ namespace TMPro
 			{
 				if (this.caretPositionInternal > 0)
 				{
-					this.m_Text = this.text.Remove(this.GetStringIndexFromCaretPosition(this.caretPositionInternal - 1), 1);
-					int num = this.caretPositionInternal - 1;
-					this.caretPositionInternal = num;
-					this.caretSelectPositionInternal = num;
-					num = this.GetStringIndexFromCaretPosition(this.caretPositionInternal);
-					this.stringPositionInternal = num;
-					this.stringSelectPositionInternal = num;
+					this.caretPositionInternal = Math.Min(this.stringPositionInternal, this.m_Text.Length);
+					if (this.m_Text.Length > 0)
+					{
+						this.m_Text = this.text.Remove(this.GetStringIndexFromCaretPosition(this.caretPositionInternal - 1), 1);
+						int num = this.caretPositionInternal - 1;
+						this.caretPositionInternal = num;
+						this.caretSelectPositionInternal = num;
+						num = this.GetStringIndexFromCaretPosition(this.caretPositionInternal);
+						this.stringPositionInternal = num;
+						this.stringSelectPositionInternal = num;
+					}
 				}
 				this.m_isLastKeyBackspace = true;
 				this.SendOnValueChangedAndUpdateLabel();

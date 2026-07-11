@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C6581FE8-D450-4BBA-B5F3-C25EE9B0FB01}</ProjectGuid>
+    <ProjectGuid>{B2109074-A84E-4C99-A4F3-1D9ECD3C8D2E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.UmbraModule</RootNamespace>
     <AssemblyName>UnityEngine.UmbraModule</AssemblyName>
@@ -18,11 +18,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{C6581FE8-D450-4BBA-B5F3-C25EE9B0FAC3}</Project>
+      <Project>{B2109074-A84E-4C99-A4F3-1D9ECD3C8CF0}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{C6581FE8-D450-4BBA-B5F3-C25EE9B0FAF0}</Project>
+      <Project>{B2109074-A84E-4C99-A4F3-1D9ECD3C8D1D}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

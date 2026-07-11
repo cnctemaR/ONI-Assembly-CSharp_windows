@@ -21,6 +21,15 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 		{
 			this.FindModules();
 		};
+		base.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
+	}
+
+	private void OnTagsChanged(object data)
+	{
+		foreach (RocketModule rocketModule in this.rocketModules)
+		{
+			rocketModule.OnConditionManagerTagsChanged(data);
+		}
 	}
 
 	protected override void OnCleanUp()

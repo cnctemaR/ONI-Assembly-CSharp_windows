@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C6581FE8-D450-4BBA-B5F3-C25EE9B0FAFF}</ProjectGuid>
+    <ProjectGuid>{B2109074-A84E-4C99-A4F3-1D9ECD3C8D2C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.UIElementsModule</AssemblyName>
@@ -255,35 +255,35 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{C6581FE8-D450-4BBA-B5F3-C25EE9B0FAC3}</Project>
+      <Project>{B2109074-A84E-4C99-A4F3-1D9ECD3C8CF0}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{C6581FE8-D450-4BBA-B5F3-C25EE9B0FAC6}</Project>
+      <Project>{B2109074-A84E-4C99-A4F3-1D9ECD3C8CF3}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{C6581FE8-D450-4BBA-B5F3-C25EE9B0FAC8}</Project>
+      <Project>{B2109074-A84E-4C99-A4F3-1D9ECD3C8CF5}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{C6581FE8-D450-4BBA-B5F3-C25EE9B0FADA}</Project>
+      <Project>{B2109074-A84E-4C99-A4F3-1D9ECD3C8D07}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{C6581FE8-D450-4BBA-B5F3-C25EE9B0FAE4}</Project>
+      <Project>{B2109074-A84E-4C99-A4F3-1D9ECD3C8D11}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{C6581FE8-D450-4BBA-B5F3-C25EE9B0FAF0}</Project>
+      <Project>{B2109074-A84E-4C99-A4F3-1D9ECD3C8D1D}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.StyleSheetsModule\UnityEngine.StyleSheetsModule.csproj">
-      <Project>{C6581FE8-D450-4BBA-B5F3-C25EE9B0FAF5}</Project>
+      <Project>{B2109074-A84E-4C99-A4F3-1D9ECD3C8D22}</Project>
       <Name>UnityEngine.StyleSheetsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{C6581FE8-D450-4BBA-B5F3-C25EE9B0FAF9}</Project>
+      <Project>{B2109074-A84E-4C99-A4F3-1D9ECD3C8D26}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
   </ItemGroup>

@@ -227,11 +227,15 @@ public class MinionStorage : KMonoBehaviour
 	public GameObject DeserializeMinion(Guid id, Vector3 pos)
 	{
 		int minionIndex = this.GetMinionIndex(id);
-		if (minionIndex < 0)
+		if (minionIndex < 0 || minionIndex >= this.serializedMinions.Count)
 		{
 			return null;
 		}
 		KPrefabID kprefabID = this.serializedMinions[minionIndex].serializedMinion.Get();
+		if (kprefabID == null)
+		{
+			return null;
+		}
 		GameObject gameObject = kprefabID.gameObject;
 		GameObject prefab = SaveLoader.Instance.saveManager.GetPrefab(MinionConfig.ID);
 		GameObject gameObject2 = Util.KInstantiate(prefab, pos);

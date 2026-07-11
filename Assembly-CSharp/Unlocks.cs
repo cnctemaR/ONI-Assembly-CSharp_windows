@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
+using System.Threading;
 using Newtonsoft.Json;
 using ProcGen;
 
@@ -45,6 +47,10 @@ public class Unlocks : KMonoBehaviour, ISim4000ms
 		{
 			return;
 		}
+		if (!this.locked[lockID])
+		{
+			return;
+		}
 		this.locked[lockID] = false;
 		Unlocks.SaveUnlocks(this.locked);
 		Game.Instance.Trigger(1594320620, lockID);
@@ -86,7 +92,31 @@ public class Unlocks : KMonoBehaviour, ISim4000ms
 			}
 		}
 		string text = JsonConvert.SerializeObject(list);
-		File.WriteAllText(Unlocks.UnlocksFilename, text);
+		bool flag = false;
+		int num = 0;
+		while (!flag && num < 5)
+		{
+			try
+			{
+				Thread.Sleep(num * 100);
+				using (FileStream fileStream = File.Open(Unlocks.UnlocksFilename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+				{
+					flag = true;
+					ASCIIEncoding asciiencoding = new ASCIIEncoding();
+					byte[] bytes = asciiencoding.GetBytes(text);
+					fileStream.Write(bytes, 0, bytes.Length);
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.LogWarningFormat("Failed to save Unlocks attempt {0}: {1}", new object[]
+				{
+					num + 1,
+					ex.ToString()
+				});
+			}
+			num++;
+		}
 	}
 
 	private void SetToDefaultLocks()
@@ -105,15 +135,43 @@ public class Unlocks : KMonoBehaviour, ISim4000ms
 		{
 			return;
 		}
-		string text = File.ReadAllText(Unlocks.UnlocksFilename);
-		if (text == null || text == string.Empty)
+		string text = string.Empty;
+		bool flag = false;
+		int num = 0;
+		while (!flag && num < 5)
+		{
+			try
+			{
+				Thread.Sleep(num * 100);
+				using (FileStream fileStream = File.Open(Unlocks.UnlocksFilename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+				{
+					flag = true;
+					ASCIIEncoding asciiencoding = new ASCIIEncoding();
+					byte[] array = new byte[fileStream.Length];
+					if ((long)fileStream.Read(array, 0, array.Length) == fileStream.Length)
+					{
+						text += asciiencoding.GetString(array);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.LogWarningFormat("Failed to load Unlocks attempt {0}: {1}", new object[]
+				{
+					num + 1,
+					ex.ToString()
+				});
+			}
+			num++;
+		}
+		if (string.IsNullOrEmpty(text))
 		{
 			return;
 		}
 		try
 		{
-			string[] array = JsonConvert.DeserializeObject<string[]>(text);
-			foreach (string text2 in array)
+			string[] array2 = JsonConvert.DeserializeObject<string[]>(text);
+			foreach (string text2 in array2)
 			{
 				if (this.locked.ContainsKey(text2))
 				{
@@ -277,6 +335,8 @@ public class Unlocks : KMonoBehaviour, ISim4000ms
 			}
 		}
 	}
+
+	private const int FILE_IO_RETRY_ATTEMPTS = 5;
 
 	public Dictionary<string, bool> locked = new Dictionary<string, bool>();
 

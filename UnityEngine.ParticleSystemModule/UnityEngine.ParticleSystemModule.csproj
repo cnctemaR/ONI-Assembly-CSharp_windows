@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{01CA4091-7CA7-4E22-8BB1-BEBF5B1096FB}</ProjectGuid>
+    <ProjectGuid>{F2A64EFF-428D-4B36-866D-67561DD8009D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.ParticleSystemModule</AssemblyName>
@@ -56,19 +56,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{01CA4091-7CA7-4E22-8BB1-BEBF5B1096D4}</Project>
+      <Project>{F2A64EFF-428D-4B36-866D-67561DD80076}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{01CA4091-7CA7-4E22-8BB1-BEBF5B1096D7}</Project>
+      <Project>{F2A64EFF-428D-4B36-866D-67561DD80079}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{01CA4091-7CA7-4E22-8BB1-BEBF5B1096EB}</Project>
+      <Project>{F2A64EFF-428D-4B36-866D-67561DD8008D}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{01CA4091-7CA7-4E22-8BB1-BEBF5B109701}</Project>
+      <Project>{F2A64EFF-428D-4B36-866D-67561DD800A3}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{01CA4091-7CA7-4E22-8BB1-BEBF5B1096F0}</ProjectGuid>
+    <ProjectGuid>{F2A64EFF-428D-4B36-866D-67561DD80092}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.FileSystemHttpModule</RootNamespace>
     <AssemblyName>UnityEngine.FileSystemHttpModule</AssemblyName>
@@ -18,11 +18,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{01CA4091-7CA7-4E22-8BB1-BEBF5B1096D4}</Project>
+      <Project>{F2A64EFF-428D-4B36-866D-67561DD80076}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{01CA4091-7CA7-4E22-8BB1-BEBF5B109701}</Project>
+      <Project>{F2A64EFF-428D-4B36-866D-67561DD800A3}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

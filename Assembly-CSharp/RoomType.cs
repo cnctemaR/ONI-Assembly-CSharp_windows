@@ -104,6 +104,18 @@ public class RoomType : Resource
 
 	public void TriggerRoomEffects(KPrefabID triggerer, Effects target)
 	{
+		if (this.primary_constraint == null)
+		{
+			return;
+		}
+		if (triggerer == null)
+		{
+			return;
+		}
+		if (this.effects == null)
+		{
+			return;
+		}
 		if (this.primary_constraint.building_criteria(triggerer))
 		{
 			foreach (string text in this.effects)

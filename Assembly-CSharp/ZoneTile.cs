@@ -9,9 +9,24 @@ internal class ZoneTile : KMonoBehaviour
 		{
 			SimMessages.ModifyCellWorldZone(num, 0);
 		}
+		base.Subscribe<ZoneTile>(1606648047, ZoneTile.OnObjectReplacedDelegate);
 	}
 
 	protected override void OnCleanUp()
+	{
+		if (!this.wasReplaced)
+		{
+			this.ClearZone();
+		}
+	}
+
+	private void OnObjectReplaced(object data)
+	{
+		this.ClearZone();
+		this.wasReplaced = true;
+	}
+
+	private void ClearZone()
 	{
 		foreach (int num in this.building.PlacementCells)
 		{
@@ -23,4 +38,11 @@ internal class ZoneTile : KMonoBehaviour
 
 	[MyCmpReq]
 	public Building building;
+
+	private bool wasReplaced;
+
+	private static readonly EventSystem.IntraObjectHandler<ZoneTile> OnObjectReplacedDelegate = new EventSystem.IntraObjectHandler<ZoneTile>(delegate(ZoneTile component, object data)
+	{
+		component.OnObjectReplaced(data);
+	});
 }

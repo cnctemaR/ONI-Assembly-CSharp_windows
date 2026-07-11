@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{505B7BE8-91D0-4DB8-89B0-CEAD8FD192A3}</ProjectGuid>
+    <ProjectGuid>{CBE4C01F-FF16-48FF-A965-456560CC01DF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.SharedInternalsModule</AssemblyName>
@@ -57,7 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD19275}</Project>
+      <Project>{CBE4C01F-FF16-48FF-A965-456560CC01B1}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
   </ItemGroup>

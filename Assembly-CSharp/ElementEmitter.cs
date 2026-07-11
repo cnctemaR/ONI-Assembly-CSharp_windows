@@ -14,14 +14,8 @@ public class ElementEmitter : SimComponent
 
 	protected override void OnCleanUp()
 	{
-		if (this.onBlockedHandle.IsValid())
-		{
-			Game.Instance.callbackManager.Release(this.onBlockedHandle);
-		}
-		if (this.onUnblockedHandle.IsValid())
-		{
-			Game.Instance.callbackManager.Release(this.onUnblockedHandle);
-		}
+		Game.Instance.ManualReleaseHandle(this.onBlockedHandle);
+		Game.Instance.ManualReleaseHandle(this.onUnblockedHandle);
 		base.OnCleanUp();
 	}
 

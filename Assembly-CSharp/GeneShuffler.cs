@@ -183,7 +183,7 @@ public class GeneShuffler : Workable
 		this.chore = new WorkChore<Workable>(geneShuffle, this, null, null, true, delegate(Chore o)
 		{
 			this.CompleteChore();
-		}, null, null, true, null, false, true, anim, false, true, true, PriorityScreen.PriorityClass.compulsory, 5, false, true);
+		}, null, null, true, null, false, true, anim, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
 	}
 
 	private void CancelChore()

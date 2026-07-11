@@ -339,7 +339,10 @@ public class Game : KMonoBehaviour
 					{
 						index = callbackInfo.callbackIdx
 					};
-					this.callbackInfo.Add(new global::Klei.CallbackInfo(handle));
+					if (!this.IsManuallyReleasedHandle(handle))
+					{
+						this.callbackInfo.Add(new global::Klei.CallbackInfo(handle));
+					}
 				}
 				int numSpawnFallingLiquidInfo = ptr2->numSpawnFallingLiquidInfo;
 				for (int l = 0; l < numSpawnFallingLiquidInfo; l++)
@@ -664,6 +667,7 @@ public class Game : KMonoBehaviour
 		this.gameSolidInfo.Clear();
 		this.solidInfo.Clear();
 		this.callbackInfo.Clear();
+		this.callbackManagerManuallyReleasedHandles.Clear();
 		Pathfinding.Instance.UpdateNavGrids(false);
 	}
 
@@ -780,7 +784,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 309851U;
+		uint num = 310952U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1265,6 +1269,21 @@ public class Game : KMonoBehaviour
 	{
 	}
 
+	public void ManualReleaseHandle(HandleVector<Game.CallbackInfo>.Handle handle)
+	{
+		if (!handle.IsValid())
+		{
+			return;
+		}
+		this.callbackManagerManuallyReleasedHandles.Add(handle.index);
+		this.callbackManager.Release(handle);
+	}
+
+	private bool IsManuallyReleasedHandle(HandleVector<Game.CallbackInfo>.Handle handle)
+	{
+		return !this.callbackManager.IsVersionValid(handle) && this.callbackManagerManuallyReleasedHandles.Contains(handle.index);
+	}
+
 	[ContextMenu("Print")]
 	private void Print()
 	{
@@ -1475,6 +1494,8 @@ public class Game : KMonoBehaviour
 	private bool sandboxModeActive;
 
 	public HandleVector<Game.CallbackInfo> callbackManager = new HandleVector<Game.CallbackInfo>(256);
+
+	public List<int> callbackManagerManuallyReleasedHandles = new List<int>();
 
 	public Game.ComplexCallbackHandleVector<int> simComponentCallbackManager = new Game.ComplexCallbackHandleVector<int>(256);
 

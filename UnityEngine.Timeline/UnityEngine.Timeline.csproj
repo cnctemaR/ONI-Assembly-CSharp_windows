@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{505B7BE8-91D0-4DB8-89B0-CEAD8FD192AE}</ProjectGuid>
+    <ProjectGuid>{CBE4C01F-FF16-48FF-A965-456560CC01EA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.Timeline</AssemblyName>
@@ -81,19 +81,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD19275}</Project>
+      <Project>{CBE4C01F-FF16-48FF-A965-456560CC01B1}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD19278}</Project>
+      <Project>{CBE4C01F-FF16-48FF-A965-456560CC01B4}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD1927A}</Project>
+      <Project>{CBE4C01F-FF16-48FF-A965-456560CC01B6}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD19290}</Project>
+      <Project>{CBE4C01F-FF16-48FF-A965-456560CC01CC}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
   </ItemGroup>

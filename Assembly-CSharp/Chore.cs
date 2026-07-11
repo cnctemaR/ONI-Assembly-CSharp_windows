@@ -13,6 +13,10 @@ public abstract class Chore
 			priority_class = PriorityScreen.PriorityClass.emergency;
 			priority_value = 2;
 		}
+		if (priority_value < 0 || priority_value > 9)
+		{
+			global::Debug.LogErrorFormat("Priority Value Out Of Range: {0}", new object[] { priority_value });
+		}
 		this.masterPriority = new PrioritySetting(priority_class, priority_value);
 		this.priorityMod = priority_mod;
 		this.id = ++Chore.nextId;

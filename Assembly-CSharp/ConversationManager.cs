@@ -136,7 +136,11 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 		};
 		foreach (MinionIdentity minionIdentity in setup.minions)
 		{
-			minionIdentity.Trigger(-594200555, startedTalkingEvent);
+			DebugUtil.DevAssert(minionIdentity, new object[] { "minion in setup.minions was null" });
+			if (minionIdentity)
+			{
+				minionIdentity.Trigger(-594200555, startedTalkingEvent);
+			}
 		}
 		setup.numUtterances++;
 		return true;

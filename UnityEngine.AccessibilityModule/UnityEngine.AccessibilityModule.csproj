@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{505B7BE8-91D0-4DB8-89B0-CEAD8FD19282}</ProjectGuid>
+    <ProjectGuid>{CBE4C01F-FF16-48FF-A965-456560CC01BE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Accessibility</RootNamespace>
     <AssemblyName>UnityEngine.AccessibilityModule</AssemblyName>
@@ -19,19 +19,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD19275}</Project>
+      <Project>{CBE4C01F-FF16-48FF-A965-456560CC01B1}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD19278}</Project>
+      <Project>{CBE4C01F-FF16-48FF-A965-456560CC01B4}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD1928D}</Project>
+      <Project>{CBE4C01F-FF16-48FF-A965-456560CC01C9}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD192A3}</Project>
+      <Project>{CBE4C01F-FF16-48FF-A965-456560CC01DF}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

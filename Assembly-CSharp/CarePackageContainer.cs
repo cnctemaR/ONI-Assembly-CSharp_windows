@@ -125,7 +125,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 	private void SetAnimator()
 	{
 		GameObject prefab = Assets.GetPrefab(this.info.id.ToTag());
-		EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(this.info.id);
+		EdiblesManager.FoodInfo foodInfo = EdiblesManager.GetFoodInfo(this.info.id);
 		int num;
 		if (ElementLoader.FindElementByName(this.info.id) != null)
 		{
@@ -221,7 +221,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		{
 			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_ELEMENT_COUNT_ONLY, GameUtil.GetFormattedMass(this.info.quantity, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 		}
-		if (Game.Instance.ediblesManager.GetFoodInfo(this.info.id) != null)
+		if (EdiblesManager.GetFoodInfo(this.info.id) != null)
 		{
 			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_ELEMENT_COUNT_ONLY, GameUtil.GetFormattedCaloriesForItem(this.info.id, this.info.quantity, GameUtil.TimeSlice.None, true));
 		}
@@ -235,7 +235,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 			float amount = WorldInventory.Instance.GetAmount(this.info.id.ToTag());
 			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_CURRENT_AMOUNT, GameUtil.GetFormattedMass(amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 		}
-		if (Game.Instance.ediblesManager.GetFoodInfo(this.info.id) != null)
+		if (EdiblesManager.GetFoodInfo(this.info.id) != null)
 		{
 			float num = RationTracker.Get().CountRationsByFoodType(this.info.id, true);
 			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_CURRENT_AMOUNT, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true));
@@ -250,7 +250,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		{
 			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_ELEMENT_QUANTITY, GameUtil.GetFormattedMass(this.info.quantity, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), Assets.GetPrefab(this.info.id).GetProperName());
 		}
-		if (Game.Instance.ediblesManager.GetFoodInfo(this.info.id) != null)
+		if (EdiblesManager.GetFoodInfo(this.info.id) != null)
 		{
 			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_ELEMENT_QUANTITY, GameUtil.GetFormattedCaloriesForItem(this.info.id, this.info.quantity, GameUtil.TimeSlice.None, true), Assets.GetPrefab(this.info.id).GetProperName());
 		}

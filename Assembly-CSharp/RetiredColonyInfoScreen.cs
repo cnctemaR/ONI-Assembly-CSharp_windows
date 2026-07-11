@@ -523,10 +523,13 @@ public class RetiredColonyInfoScreen : KModalScreen
 				componentInChildren.SetSymbolVisiblity("snapTo_hat_hair", false);
 				foreach (KeyValuePair<string, string> keyValuePair in retiredDuplicantData.accessories)
 				{
-					KAnim.Build.Symbol symbol = Db.Get().Accessories.Get(keyValuePair.Value).symbol;
-					AccessorySlot accessorySlot = Db.Get().AccessorySlots.Get(keyValuePair.Key);
-					reference.AddSymbolOverride(accessorySlot.targetSymbolId, symbol, 0);
-					gameObject2.GetComponentInChildren<KBatchedAnimController>().SetSymbolVisiblity(keyValuePair.Key, true);
+					if (Db.Get().Accessories.Exists(keyValuePair.Value))
+					{
+						KAnim.Build.Symbol symbol = Db.Get().Accessories.Get(keyValuePair.Value).symbol;
+						AccessorySlot accessorySlot = Db.Get().AccessorySlots.Get(keyValuePair.Key);
+						reference.AddSymbolOverride(accessorySlot.targetSymbolId, symbol, 0);
+						gameObject2.GetComponentInChildren<KBatchedAnimController>().SetSymbolVisiblity(keyValuePair.Key, true);
+					}
 				}
 				reference.ApplyOverrides();
 			}

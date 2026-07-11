@@ -24,7 +24,9 @@ public class Juicer : StateMachineComponent<Juicer.StatesInstance>, IEffectDescr
 	{
 		string text = tag.ProperName();
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
+		EdiblesManager.FoodInfo foodInfo = EdiblesManager.GetFoodInfo(tag.Name);
+		string text2 = ((foodInfo == null) ? GameUtil.GetFormattedMass(mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}") : GameUtil.GetFormattedCaloriesForItem(tag, mass, GameUtil.TimeSlice.None, true));
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, text, text2), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, text, text2), Descriptor.DescriptorType.Requirement);
 		descs.Add(descriptor);
 	}
 
@@ -35,9 +37,9 @@ public class Juicer : StateMachineComponent<Juicer.StatesInstance>, IEffectDescr
 		descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.RECREATION, UI.BUILDINGEFFECTS.TOOLTIPS.RECREATION, Descriptor.DescriptorType.Effect);
 		list.Add(descriptor);
 		Effect.AddModifierDescriptions(base.gameObject, list, this.specificEffect, true);
-		foreach (Tag tag in this.ingredient_tags)
+		for (int i = 0; i < this.ingredientTags.Length; i++)
 		{
-			this.AddRequirementDesc(list, tag, this.ingredientMassPerUse);
+			this.AddRequirementDesc(list, this.ingredientTags[i], this.ingredientMassesPerUse[i]);
 		}
 		this.AddRequirementDesc(list, GameTags.Water, this.waterMassPerUse);
 		return list;
@@ -47,9 +49,9 @@ public class Juicer : StateMachineComponent<Juicer.StatesInstance>, IEffectDescr
 
 	public string trackingEffect;
 
-	public Tag[] ingredient_tags;
+	public Tag[] ingredientTags;
 
-	public float ingredientMassPerUse;
+	public float[] ingredientMassesPerUse;
 
 	public float waterMassPerUse;
 
@@ -90,10 +92,10 @@ public class Juicer : StateMachineComponent<Juicer.StatesInstance>, IEffectDescr
 			{
 				return false;
 			}
-			foreach (Tag tag in smi.master.ingredient_tags)
+			for (int i = 0; i < smi.master.ingredientTags.Length; i++)
 			{
-				float amountAvailable = smi.GetComponent<Storage>().GetAmountAvailable(tag);
-				if (amountAvailable < smi.master.ingredientMassPerUse)
+				float amountAvailable = smi.GetComponent<Storage>().GetAmountAvailable(smi.master.ingredientTags[i]);
+				if (amountAvailable < smi.master.ingredientMassesPerUse[i])
 				{
 					return false;
 				}

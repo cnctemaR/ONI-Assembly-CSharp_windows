@@ -21,14 +21,16 @@ public struct Descriptor
 		this.type = descriptorType;
 	}
 
-	public void IncreaseIndent()
+	public Descriptor IncreaseIndent()
 	{
 		this.indent++;
+		return this;
 	}
 
-	public void DecreaseIndent()
+	public Descriptor DecreaseIndent()
 	{
 		this.indent = Mathf.Max(this.indent - 1, 0);
+		return this;
 	}
 
 	public string IndentedText()

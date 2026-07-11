@@ -269,7 +269,7 @@ public class Timelapser : KMonoBehaviour
 
 	private string previewSaveGamePath = string.Empty;
 
-	private bool screenshotToday = true;
+	private bool screenshotToday;
 
 	private HashedString activeOverlay;
 

@@ -378,7 +378,7 @@ public static class GameUtil
 
 	public static string GetFormattedCaloriesForItem(Tag tag, float amount, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool forceKcal = true)
 	{
-		EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(tag.Name);
+		EdiblesManager.FoodInfo foodInfo = EdiblesManager.GetFoodInfo(tag.Name);
 		return GameUtil.GetFormattedCalories((foodInfo == null) ? (-1f) : (foodInfo.CaloriesPerUnit * amount), timeSlice, forceKcal);
 	}
 
@@ -610,6 +610,11 @@ public static class GameUtil
 			text = GameUtil.FloatToString(num, "#,###.##");
 		}
 		return GameUtil.AddTimeSliceText(text, timeSlice);
+	}
+
+	public static string GetFormattedLux(int lux)
+	{
+		return lux.ToString() + UI.UNITSUFFIXES.LIGHT.LUX;
 	}
 
 	public static string GetLightDescription(int lux)

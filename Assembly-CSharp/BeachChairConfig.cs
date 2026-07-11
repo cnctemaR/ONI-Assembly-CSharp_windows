@@ -46,7 +46,7 @@ public class BeachChairConfig : IBuildingConfig
 
 	public const string ID = "BeachChair";
 
-	public const float TAN_LUX = 10000f;
+	public const int TAN_LUX = 10000;
 
 	private const float TANK_SIZE_KG = 20f;
 

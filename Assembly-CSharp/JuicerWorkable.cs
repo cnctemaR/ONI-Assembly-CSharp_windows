@@ -33,13 +33,13 @@ public class JuicerWorkable : Workable, IWorkerPrioritizable
 		float num;
 		component.ConsumeAndGetDisease(GameTags.Water, this.juicer.waterMassPerUse, out diseaseInfo, out num);
 		GermExposureMonitor.Instance smi = worker.GetSMI<GermExposureMonitor.Instance>();
-		foreach (Tag tag in this.juicer.ingredient_tags)
+		for (int i = 0; i < this.juicer.ingredientTags.Length; i++)
 		{
 			SimUtil.DiseaseInfo diseaseInfo2;
-			component.ConsumeAndGetDisease(tag, this.juicer.ingredientMassPerUse, out diseaseInfo2, out num);
+			component.ConsumeAndGetDisease(this.juicer.ingredientTags[i], this.juicer.ingredientMassesPerUse[i], out diseaseInfo2, out num);
 			if (smi != null)
 			{
-				smi.TryInjectDisease(diseaseInfo2.idx, diseaseInfo2.count, tag, Sickness.InfectionVector.Digestion);
+				smi.TryInjectDisease(diseaseInfo2.idx, diseaseInfo2.count, this.juicer.ingredientTags[i], Sickness.InfectionVector.Digestion);
 			}
 		}
 		if (smi != null)

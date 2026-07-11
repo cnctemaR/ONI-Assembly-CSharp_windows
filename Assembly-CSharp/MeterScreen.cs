@@ -202,13 +202,13 @@ public class MeterScreen : KScreen, IRender1000ms
 		this.RationsTooltip.AddMultiStringTooltip(string.Empty, this.ToolTipStyle_Property);
 		IOrderedEnumerable<KeyValuePair<string, float>> orderedEnumerable = this.rationsDict.OrderByDescending<KeyValuePair<string, float>, float>(delegate(KeyValuePair<string, float> x)
 		{
-			EdiblesManager.FoodInfo foodInfo2 = Game.Instance.ediblesManager.GetFoodInfo(x.Key);
+			EdiblesManager.FoodInfo foodInfo2 = EdiblesManager.GetFoodInfo(x.Key);
 			return x.Value * ((foodInfo2 == null) ? (-1f) : foodInfo2.CaloriesPerUnit);
 		});
 		Dictionary<string, float> dictionary = orderedEnumerable.ToDictionary<KeyValuePair<string, float>, string, float>((KeyValuePair<string, float> t) => t.Key, (KeyValuePair<string, float> t) => t.Value);
 		foreach (KeyValuePair<string, float> keyValuePair in dictionary)
 		{
-			EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(keyValuePair.Key);
+			EdiblesManager.FoodInfo foodInfo = EdiblesManager.GetFoodInfo(keyValuePair.Key);
 			this.RationsTooltip.AddMultiStringTooltip((foodInfo == null) ? string.Format(UI.TOOLTIPS.METERSCREEN_INVALID_FOOD_TYPE, keyValuePair.Key) : string.Format("{0}: {1}", foodInfo.Name, GameUtil.GetFormattedCalories(keyValuePair.Value * foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true)), this.ToolTipStyle_Property);
 		}
 		return string.Empty;

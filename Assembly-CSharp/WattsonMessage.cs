@@ -21,7 +21,7 @@ public class WattsonMessage : KScreen
 
 	private IEnumerator ExpandPanel()
 	{
-		yield return new WaitForSecondsRealtime(5f);
+		yield return new WaitForSecondsRealtime(0.2f);
 		float height = 0f;
 		while (height < 299f)
 		{
@@ -117,7 +117,16 @@ public class WattsonMessage : KScreen
 				UIScheduler.Instance.Schedule("DupeBirth", (float)idx * 0.5f, delegate(object data)
 				{
 					chorePre.Cancel("Done looping");
-					new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_" + idx }, null);
+					EmoteChore emoteChore = new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_" + idx }, null);
+					EmoteChore emoteChore2 = emoteChore;
+					emoteChore2.onComplete = (Action<Chore>)Delegate.Combine(emoteChore2.onComplete, new Action<Chore>(delegate(Chore param)
+					{
+						this.birthsComplete++;
+						if (this.birthsComplete == Components.LiveMinionIdentities.Count - 1)
+						{
+							this.PauseAndShowMessage();
+						}
+					}));
 				}, null, null);
 			}
 			UIScheduler.Instance.Schedule("Welcome", 6.6f, delegate(object data)
@@ -133,19 +142,20 @@ public class WattsonMessage : KScreen
 		this.scheduleHandles.Add(UIScheduler.Instance.Schedule("GoHome", 0.1f, delegate(object data)
 		{
 			CameraController.Instance.SetOrthographicsSize(TuningData<WattsonMessage.Tuning>.Get().initialOrthographicSize);
-			CameraController.Instance.CameraGoHome(1f);
+			CameraController.Instance.CameraGoHome(0.5f);
 			this.startFade = true;
-			base.StartCoroutine(this.ExpandPanel());
 			MusicManager.instance.PlaySong("Music_WattsonMessage", false);
 		}, null, null));
-		this.scheduleHandles.Add(UIScheduler.Instance.Schedule("WelcomeDialog", 7.6f, delegate(object d)
-		{
-			SpeedControlScreen.Instance.Pause(false);
-			KFMOD.PlayUISound(this.dialogSound);
-			this.dialog.GetComponent<KScreen>().Activate();
-			this.dialog.GetComponent<KScreen>().SetShouldFadeIn(true);
-			this.dialog.GetComponent<KScreen>().Show(true);
-		}, null, null));
+	}
+
+	protected void PauseAndShowMessage()
+	{
+		SpeedControlScreen.Instance.Pause(false);
+		base.StartCoroutine(this.ExpandPanel());
+		KFMOD.PlayUISound(this.dialogSound);
+		this.dialog.GetComponent<KScreen>().Activate();
+		this.dialog.GetComponent<KScreen>().SetShouldFadeIn(true);
+		this.dialog.GetComponent<KScreen>().Show(true);
 	}
 
 	protected override void OnDeactivate()
@@ -165,6 +175,17 @@ public class WattsonMessage : KScreen
 		}
 		UIScheduler.Instance.Schedule("fadeInUI", 0.5f, delegate(object d)
 		{
+			foreach (KScreen kscreen in this.hideScreensWhileActive)
+			{
+				kscreen.SetShouldFadeIn(true);
+				kscreen.Show(true);
+			}
+			CameraController.Instance.SetMaxOrthographicSize(20f);
+			Game.Instance.StartDelayedInitialSave();
+			UIScheduler.Instance.Schedule("InitialScreenshot", 1f, delegate(object data)
+			{
+				Game.Instance.timelapser.SaveScreenshot();
+			}, null, null);
 			GameScheduler.Instance.Schedule("BasicTutorial", 1.5f, delegate(object data)
 			{
 				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Basics, true);
@@ -177,13 +198,6 @@ public class WattsonMessage : KScreen
 			{
 				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Digging, true);
 			}, null, null);
-			foreach (KScreen kscreen in this.hideScreensWhileActive)
-			{
-				kscreen.SetShouldFadeIn(true);
-				kscreen.Show(true);
-			}
-			CameraController.Instance.SetMaxOrthographicSize(20f);
-			Game.Instance.timelapser.SaveScreenshot();
 		}, null, null);
 		Game.Instance.SetGameStarted();
 		if (TopLeftControlScreen.Instance != null)
@@ -243,6 +257,8 @@ public class WattsonMessage : KScreen
 	private List<SchedulerHandle> scheduleHandles = new List<SchedulerHandle>();
 
 	private static readonly HashedString[] WorkLoopAnims = new HashedString[] { "working_pre", "working_loop" };
+
+	private int birthsComplete;
 
 	public class Tuning : TuningData<WattsonMessage.Tuning>
 	{

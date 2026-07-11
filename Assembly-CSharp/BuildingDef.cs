@@ -94,10 +94,10 @@ public class BuildingDef : Def
 			{
 				if (Grid.ObjectLayers[(int)objectLayer].ContainsKey(cell))
 				{
-					BuildingComplete component = Grid.ObjectLayers[(int)objectLayer][cell].GetComponent<BuildingComplete>();
-					if (component != null)
+					GameObject gameObject = Grid.ObjectLayers[(int)objectLayer][cell];
+					if (gameObject != null && gameObject.GetComponent<BuildingComplete>() != null)
 					{
-						return Grid.ObjectLayers[(int)objectLayer][cell];
+						return gameObject;
 					}
 				}
 			}

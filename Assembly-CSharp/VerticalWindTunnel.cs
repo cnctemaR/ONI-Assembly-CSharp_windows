@@ -161,9 +161,8 @@ public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.State
 	List<Descriptor> IEffectDescriptor.GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.RECREATION, UI.BUILDINGEFFECTS.TOOLTIPS.RECREATION, Descriptor.DescriptorType.Effect);
-		list.Add(descriptor);
+		list.Add(new Descriptor(BUILDINGS.PREFABS.VERTICALWINDTUNNEL.DISPLACEMENTEFFECT.Replace("{amount}", GameUtil.GetFormattedMass(this.displacementAmount_DescriptorOnly, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), BUILDINGS.PREFABS.VERTICALWINDTUNNEL.DISPLACEMENTEFFECT_TOOLTIP.Replace("{amount}", GameUtil.GetFormattedMass(this.displacementAmount_DescriptorOnly, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false));
+		list.Add(new Descriptor(UI.BUILDINGEFFECTS.RECREATION, UI.BUILDINGEFFECTS.TOOLTIPS.RECREATION, Descriptor.DescriptorType.Effect, false));
 		Effect.AddModifierDescriptions(base.gameObject, list, this.specificEffect, true);
 		return list;
 	}
@@ -173,6 +172,8 @@ public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.State
 	public string trackingEffect;
 
 	public int basePriority;
+
+	public float displacementAmount_DescriptorOnly;
 
 	public CellOffset[] choreOffsets = new CellOffset[]
 	{

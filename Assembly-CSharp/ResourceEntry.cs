@@ -79,7 +79,7 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitH
 
 	private void GetAmounts(bool doExtras, out float available, out float total, out float reserved)
 	{
-		EdiblesManager.FoodInfo foodInfo = ((this.Measure != GameUtil.MeasureUnit.kcal) ? null : Game.Instance.ediblesManager.GetFoodInfo(this.Resource.Name));
+		EdiblesManager.FoodInfo foodInfo = ((this.Measure != GameUtil.MeasureUnit.kcal) ? null : EdiblesManager.GetFoodInfo(this.Resource.Name));
 		this.GetAmounts(foodInfo, doExtras, out available, out total, out reserved);
 	}
 

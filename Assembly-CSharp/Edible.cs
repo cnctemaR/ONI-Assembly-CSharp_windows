@@ -63,7 +63,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 			{
 				global::Debug.LogError("No food FoodID");
 			}
-			this.foodInfo = Game.Instance.ediblesManager.GetFoodInfo(this.FoodID);
+			this.foodInfo = EdiblesManager.GetFoodInfo(this.FoodID);
 		}
 		base.GetComponent<KPrefabID>().AddTag(GameTags.Edible, false);
 		base.Subscribe<Edible>(748399584, Edible.OnCraftDelegate);

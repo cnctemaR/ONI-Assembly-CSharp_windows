@@ -4,7 +4,7 @@ using TUNING;
 
 public class EdiblesManager : KMonoBehaviour
 {
-	public EdiblesManager.FoodInfo GetFoodInfo(string foodID)
+	public static EdiblesManager.FoodInfo GetFoodInfo(string foodID)
 	{
 		string text = foodID.Replace("Compost", string.Empty);
 		foreach (EdiblesManager.FoodInfo foodInfo in FOOD.FOOD_TYPES_LIST)

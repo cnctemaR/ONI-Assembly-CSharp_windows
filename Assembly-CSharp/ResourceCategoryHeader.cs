@@ -183,7 +183,7 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPoi
 			EdiblesManager.FoodInfo foodInfo = null;
 			if (this.Measure == GameUtil.MeasureUnit.kcal)
 			{
-				foodInfo = Game.Instance.ediblesManager.GetFoodInfo(tag.Name);
+				foodInfo = EdiblesManager.GetFoodInfo(tag.Name);
 				if (foodInfo == null)
 				{
 					pooledList.Add(tag);

@@ -100,7 +100,6 @@ public class NewBaseScreen : KScreen
 			this.SpawnMinions(Grid.PosToCell(telepad.gameObject));
 		}
 		Game.Instance.baseAlreadyCreated = true;
-		Game.Instance.StartDelayedInitialSave();
 		this.Deactivate();
 	}
 

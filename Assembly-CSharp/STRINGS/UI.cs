@@ -3983,6 +3983,11 @@ namespace STRINGS
 
 				public static LocString GIGABYTE = "GB";
 			}
+
+			public class LIGHT
+			{
+				public static LocString LUX = "Lux";
+			}
 		}
 
 		public class OVERLAYS

@@ -36,7 +36,6 @@ public class JuicerConfig : IBuildingConfig
 	{
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.RecBuilding, false);
 		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 20f;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardFabricatorStorage);
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
@@ -66,16 +65,24 @@ public class JuicerConfig : IBuildingConfig
 		manualDeliveryKG3.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		JuicerWorkable juicerWorkable = go.AddOrGet<JuicerWorkable>();
 		juicerWorkable.basePriority = RELAXATION.PRIORITY.TIER5;
+		EdiblesManager.FoodInfo foodInfo = EdiblesManager.GetFoodInfo(MushroomConfig.ID);
+		EdiblesManager.FoodInfo foodInfo2 = EdiblesManager.GetFoodInfo(PrickleFruitConfig.ID);
+		EdiblesManager.FoodInfo foodInfo3 = EdiblesManager.GetFoodInfo("BasicPlantFood");
 		Juicer juicer = go.AddOrGet<Juicer>();
-		juicer.ingredient_tags = new Tag[]
+		juicer.ingredientTags = new Tag[]
 		{
 			MushroomConfig.ID.ToTag(),
 			PrickleFruitConfig.ID.ToTag(),
 			"BasicPlantFood".ToTag()
 		};
+		juicer.ingredientMassesPerUse = new float[]
+		{
+			300000f / foodInfo.CaloriesPerUnit,
+			600000f / foodInfo2.CaloriesPerUnit,
+			500000f / foodInfo3.CaloriesPerUnit
+		};
 		juicer.specificEffect = "Juicer";
 		juicer.trackingEffect = "RecentlyRecDrink";
-		juicer.ingredientMassPerUse = 0.25f;
 		juicer.waterMassPerUse = 1f;
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.RecRoom.Id;
@@ -88,7 +95,11 @@ public class JuicerConfig : IBuildingConfig
 
 	public const string ID = "Juicer";
 
-	public const float INGREDIENT_MASS_PER_USE = 0.25f;
+	public const float BERRY_CALS = 600000f;
+
+	public const float MUSHROOM_CALS = 300000f;
+
+	public const float LICE_CALS = 500000f;
 
 	public const float WATER_MASS_PER_USE = 1f;
 }

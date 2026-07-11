@@ -37,6 +37,7 @@ public class VerticalWindTunnelConfig : IBuildingConfig
 		verticalWindTunnel.specificEffect = "VerticalWindTunnel";
 		verticalWindTunnel.trackingEffect = "RecentlyVerticalWindTunnel";
 		verticalWindTunnel.basePriority = RELAXATION.PRIORITY.TIER4;
+		verticalWindTunnel.displacementAmount_DescriptorOnly = 3f;
 		ElementConsumer elementConsumer = go.AddComponent<ElementConsumer>();
 		elementConsumer.configuration = ElementConsumer.Configuration.AllGas;
 		elementConsumer.consumptionRate = 3f;
@@ -44,7 +45,7 @@ public class VerticalWindTunnelConfig : IBuildingConfig
 		elementConsumer.showInStatusPanel = false;
 		elementConsumer.consumptionRadius = 2;
 		elementConsumer.sampleCellOffset = new Vector3(0f, -2f, 0f);
-		elementConsumer.isRequired = false;
+		elementConsumer.showDescriptor = false;
 		elementConsumer = go.AddComponent<ElementConsumer>();
 		elementConsumer.configuration = ElementConsumer.Configuration.AllGas;
 		elementConsumer.consumptionRate = 3f;
@@ -63,4 +64,6 @@ public class VerticalWindTunnelConfig : IBuildingConfig
 	}
 
 	public const string ID = "VerticalWindTunnel";
+
+	private const float DISPLACEMENT_AMOUNT = 3f;
 }

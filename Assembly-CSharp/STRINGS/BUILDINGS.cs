@@ -384,6 +384,14 @@ namespace STRINGS
 					UI.FormatAsLink("Water", "WATER"),
 					" gets splashed on the floor during use."
 				});
+
+				public static LocString WATER_REQUIREMENT = "{element}: {amount}";
+
+				public static LocString WATER_REQUIREMENT_TOOLTIP = "This building must be filled with {amount} {element} in order to function.";
+
+				public static LocString LEAK_REQUIREMENT = "Spillage: {amount}";
+
+				public static LocString LEAK_REQUIREMENT_TOOLTIP = "This building will spill {amount} of its contents on to the floor during use, which must be replenished.";
 			}
 
 			public class SAUNA
@@ -417,13 +425,13 @@ namespace STRINGS
 					"."
 				});
 
-				public static LocString LIGHTEFFECT_LOW = "{attrib}: {amount} (Low Lux)";
+				public static LocString LIGHTEFFECT_LOW = "{attrib}: {amount} (Dim Light)";
 
-				public static LocString LIGHTEFFECT_LOW_TOOLTIP = "Duplicants will gain {amount} {attrib} if this building is in dim light.";
+				public static LocString LIGHTEFFECT_LOW_TOOLTIP = "Duplicants will gain {amount} {attrib} if this building is in light dimmer than {lux}.";
 
-				public static LocString LIGHTEFFECT_HIGH = "{attrib}: {amount} (High Lux)";
+				public static LocString LIGHTEFFECT_HIGH = "{attrib}: {amount} (Bright Light)";
 
-				public static LocString LIGHTEFFECT_HIGH_TOOLTIP = "Duplicants will gain {amount} {attrib} if this building is in bright light.";
+				public static LocString LIGHTEFFECT_HIGH_TOOLTIP = "Duplicants will gain {amount} {attrib} if this building is in at least {lux} light.";
 			}
 
 			public class SUNLAMP
@@ -458,6 +466,10 @@ namespace STRINGS
 					UI.FormatAsLink("Morale", "MORALE"),
 					"."
 				});
+
+				public static LocString DISPLACEMENTEFFECT = "Gas Displacement: {amount}";
+
+				public static LocString DISPLACEMENTEFFECT_TOOLTIP = "This building will displace {amount} Gas while in use.";
 			}
 
 			public class CHECKPOINT
@@ -4052,9 +4064,13 @@ namespace STRINGS
 					"."
 				});
 
-				public static LocString REQUIREMENT = "Minimum {element} Temperature: {temperature}";
+				public static LocString WATER_REQUIREMENT = "{element}: {amount}";
 
-				public static LocString REQUIREMENT_TOOLTIP = "The Hot Tub will only be usable if supplied with {temperature} {element}. If the {element} gets too cold, the Hot Tub will drain and require refilling with {element}.";
+				public static LocString WATER_REQUIREMENT_TOOLTIP = "This building must be filled with {amount} {element} in order to function.";
+
+				public static LocString TEMPERATURE_REQUIREMENT = "Minimum {element} Temperature: {temperature}";
+
+				public static LocString TEMPERATURE_REQUIREMENT_TOOLTIP = "The Hot Tub will only be usable if supplied with {temperature} {element}. If the {element} gets too cold, the Hot Tub will drain and require refilling with {element}.";
 			}
 
 			public class SODAFOUNTAIN

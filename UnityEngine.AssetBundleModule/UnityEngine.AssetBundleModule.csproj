@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{45B839AF-E936-46AE-92F6-B48FC7318A4C}</ProjectGuid>
+    <ProjectGuid>{C9919799-CEC5-46C1-ADB6-8AD551B1A0A7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.AssetBundleModule</AssemblyName>
@@ -23,15 +23,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{45B839AF-E936-46AE-92F6-B48FC7318A3B}</Project>
+      <Project>{C9919799-CEC5-46C1-ADB6-8AD551B1A096}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{45B839AF-E936-46AE-92F6-B48FC7318A53}</Project>
+      <Project>{C9919799-CEC5-46C1-ADB6-8AD551B1A0AE}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{45B839AF-E936-46AE-92F6-B48FC7318A69}</Project>
+      <Project>{C9919799-CEC5-46C1-ADB6-8AD551B1A0C4}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

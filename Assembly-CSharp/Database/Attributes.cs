@@ -73,8 +73,8 @@ namespace Database
 			this.CarryAmount.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.Mass, GameUtil.TimeSlice.None));
 			this.QualityOfLife = base.Add(new Klei.AI.Attribute("QualityOfLife", false, Klei.AI.Attribute.Display.Details, false, 0f, "ui_icon_qualityoflife", "attribute_qualityoflife"));
 			this.QualityOfLife.SetFormatter(new QualityOfLifeAttributeFormatter());
-			this.GermSusceptibility = base.Add(new Klei.AI.Attribute("GermSusceptibility", false, Klei.AI.Attribute.Display.Details, false, 1f, "ui_icon_immunelevel", "attribute_immunelevel"));
-			this.GermSusceptibility.SetFormatter(new PercentAttributeFormatter());
+			this.GermResistance = base.Add(new Klei.AI.Attribute("GermResistance", false, Klei.AI.Attribute.Display.Details, false, 0f, "ui_icon_immunelevel", "attribute_immunelevel"));
+			this.GermResistance.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.None));
 			this.LifeSupport = base.Add(new Klei.AI.Attribute("LifeSupport", true, Klei.AI.Attribute.Display.Never, false, 0f, null, null));
 			this.LifeSupport.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.None));
 			this.Toggle = base.Add(new Klei.AI.Attribute("Toggle", true, Klei.AI.Attribute.Display.Never, false, 0f, null, null));
@@ -115,7 +115,7 @@ namespace Database
 
 		public Klei.AI.Attribute Immunity;
 
-		public Klei.AI.Attribute GermSusceptibility;
+		public Klei.AI.Attribute GermResistance;
 
 		public Klei.AI.Attribute Insulation;
 

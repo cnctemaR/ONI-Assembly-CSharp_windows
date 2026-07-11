@@ -26,7 +26,8 @@ public class AdvancedCureConfig : IEntityConfig
 			description = ITEMS.PILLS.ADVANCEDCURE.RECIPEDESC,
 			useResultAsDescription = true,
 			fabricators = new List<Tag> { "Apothecary" },
-			sortOrder = 20
+			sortOrder = 20,
+			requiredTech = "MedicineIV"
 		};
 		return gameObject;
 	}

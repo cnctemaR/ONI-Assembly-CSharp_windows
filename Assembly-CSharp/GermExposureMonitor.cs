@@ -28,6 +28,11 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			});
 	}
 
+	public static float GetContractionChance(float rating)
+	{
+		return 0.5f - 0.5f * (float)Math.Tanh(0.5 * (double)rating);
+	}
+
 	private const int MIN_GERM_EXPOSURE_THRESHOLD = 100;
 
 	public static GermExposureMonitor.ExposureType[] exposureTypes = new GermExposureMonitor.ExposureType[]
@@ -36,28 +41,27 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 		{
 			germ_id = "FoodPoisoning",
 			sickness_id = "FoodSickness",
-			contraction_rate = 0.3f,
-			excluded_traits = new List<string> { "IronGut" }
+			excluded_traits = new List<string> { "IronGut" },
+			base_resistance = 1
 		},
 		new GermExposureMonitor.ExposureType
 		{
 			germ_id = "SlimeLung",
 			sickness_id = "SlimeSickness",
-			contraction_rate = 0.3f
+			base_resistance = 2
 		},
 		new GermExposureMonitor.ExposureType
 		{
 			germ_id = "ZombieSpores",
 			sickness_id = "ZombieSickness",
 			exposure_threshold = 1,
-			contraction_rate = 0.9f
+			base_resistance = -1
 		},
 		new GermExposureMonitor.ExposureType
 		{
 			germ_id = "PollenGerms",
 			sickness_id = "Allergies",
 			exposure_threshold = 1,
-			contraction_rate = 0.9f,
 			infect_immediately = true,
 			required_traits = new List<string> { "Allergies" },
 			excluded_effects = new List<string> { "HistamineSuppression" }
@@ -67,7 +71,6 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			germ_id = "PollenGerms",
 			infection_effect = "SmelledFlowers",
 			exposure_threshold = 1,
-			contraction_rate = 0.9f,
 			infect_immediately = true,
 			excluded_traits = new List<string> { "Allergies" }
 		}
@@ -91,8 +94,6 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 
 		public int exposure_threshold = 100;
 
-		public float contraction_rate;
-
 		public bool infect_immediately;
 
 		public List<string> required_traits;
@@ -100,6 +101,8 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 		public List<string> excluded_traits;
 
 		public List<string> excluded_effects;
+
+		public int base_resistance;
 	}
 
 	public class ExposureStatusData
@@ -183,12 +186,13 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 						Sickness sickness = ((exposureType.sickness_id == null) ? null : Db.Get().Sicknesses.Get(exposureType.sickness_id));
 						if ((sickness == null || sickness.infectionVectors.Contains(vector)) && this.GetExposureState(exposureType.germ_id) == GermExposureMonitor.ExposureState.None)
 						{
-							AttributeInstance attributeInstance = Db.Get().Attributes.GermSusceptibility.Lookup(base.gameObject);
+							AttributeInstance attributeInstance = Db.Get().Attributes.GermResistance.Lookup(base.gameObject);
 							float totalValue = attributeInstance.GetTotalValue();
-							float num = exposureType.contraction_rate * totalValue;
-							if (num > 0f)
+							float num = (float)exposureType.base_resistance + totalValue;
+							float contractionChance = GermExposureMonitor.GetContractionChance(num);
+							if (contractionChance > 0f)
 							{
-								this.lastDiseaseSources[disease.id] = new GermExposureMonitor.Instance.DiseaseSourceInfo(source, vector, num);
+								this.lastDiseaseSources[disease.id] = new GermExposureMonitor.Instance.DiseaseSourceInfo(source, vector, contractionChance);
 								if (exposureType.infect_immediately)
 								{
 									this.InfectImmediately(exposureType);
@@ -196,7 +200,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 								else
 								{
 									this.SetExposureState(exposureType.germ_id, GermExposureMonitor.ExposureState.Exposed);
-									float num2 = Mathf.Clamp01(num);
+									float num2 = Mathf.Clamp01(contractionChance);
 									GermExposureTracker.Instance.AddExposure(exposureType, num2);
 								}
 							}
@@ -306,7 +310,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 				else if (guid != Guid.Empty && exposureState != GermExposureMonitor.ExposureState.Exposed && exposureState != GermExposureMonitor.ExposureState.Contracted)
 				{
 					KSelectable component2 = base.GetComponent<KSelectable>();
-					guid = component2.RemoveStatusItem(Db.Get().DuplicantStatusItems.ExposedToGerms, false);
+					guid = component2.RemoveStatusItem(guid, false);
 				}
 				this.statusItemHandles[exposureType.germ_id] = guid;
 			}
@@ -359,7 +363,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			}
 		}
 
-		private string GetLastDiseaseSource(string id)
+		public string GetLastDiseaseSource(string id)
 		{
 			GermExposureMonitor.Instance.DiseaseSourceInfo diseaseSourceInfo;
 			string text;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using STRINGS;
 using UnityEngine;
 
@@ -16,60 +17,153 @@ namespace Klei
 			global::UnityEngine.Object.DontDestroyOnLoad(component.gameObject);
 		}
 
-		public static FileStream Create(string filename)
+		public static T DoIOFunc<T>(Func<T> io_op, int retry_count = 0)
+		{
+			UnauthorizedAccessException ex = null;
+			IOException ex2 = null;
+			Exception ex3 = null;
+			for (int i = 0; i <= retry_count; i++)
+			{
+				try
+				{
+					return io_op();
+				}
+				catch (UnauthorizedAccessException ex4)
+				{
+					ex = ex4;
+				}
+				catch (IOException ex5)
+				{
+					ex2 = ex5;
+				}
+				catch (Exception ex6)
+				{
+					ex3 = ex6;
+				}
+				Thread.Sleep(i * 100);
+			}
+			if (ex != null)
+			{
+				throw ex;
+			}
+			if (ex2 != null)
+			{
+				throw ex2;
+			}
+			if (ex3 != null)
+			{
+				throw ex3;
+			}
+			throw new Exception("Unreachable code path in FileUtil::DoIOFunc()");
+		}
+
+		public static void DoIOAction(global::System.Action io_op, int retry_count = 0)
+		{
+			UnauthorizedAccessException ex = null;
+			IOException ex2 = null;
+			Exception ex3 = null;
+			for (int i = 0; i <= retry_count; i++)
+			{
+				try
+				{
+					io_op();
+					return;
+				}
+				catch (UnauthorizedAccessException ex4)
+				{
+					ex = ex4;
+				}
+				catch (IOException ex5)
+				{
+					ex2 = ex5;
+				}
+				catch (Exception ex6)
+				{
+					ex3 = ex6;
+				}
+				Thread.Sleep(i * 100);
+			}
+			if (ex != null)
+			{
+				throw ex;
+			}
+			if (ex2 != null)
+			{
+				throw ex2;
+			}
+			if (ex3 != null)
+			{
+				throw ex3;
+			}
+			throw new Exception("Unreachable code path in FileUtil::DoIOAction()");
+		}
+
+		public static T DoIODialog<T>(Func<T> io_op, string io_subject, T fail_result, int retry_count = 0)
 		{
 			try
 			{
-				return File.Create(filename);
+				return FileUtil.DoIOFunc<T>(io_op, retry_count);
 			}
 			catch (UnauthorizedAccessException)
 			{
-				FileUtil.ErrorDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_UNAUTHORIZED, filename));
+				FileUtil.ErrorDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_UNAUTHORIZED, io_subject));
 			}
 			catch (IOException)
 			{
-				FileUtil.ErrorDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_SUFFICIENT_SPACE, filename));
+				FileUtil.ErrorDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_SUFFICIENT_SPACE, io_subject));
 			}
-			return null;
+			catch
+			{
+				throw;
+			}
+			return fail_result;
 		}
 
-		public static bool CreateDirectory(string path)
+		public static FileStream Create(string filename, int retry_count = 0)
 		{
-			try
+			return FileUtil.DoIODialog<FileStream>(() => File.Create(filename), filename, null, retry_count);
+		}
+
+		public static bool CreateDirectory(string path, int retry_count = 0)
+		{
+			return FileUtil.DoIODialog<bool>(delegate
 			{
 				if (!Directory.Exists(path))
 				{
 					Directory.CreateDirectory(path);
 				}
 				return true;
-			}
-			catch (UnauthorizedAccessException)
-			{
-				FileUtil.ErrorDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_UNAUTHORIZED, path));
-			}
-			catch (IOException)
-			{
-				FileUtil.ErrorDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_SUFFICIENT_SPACE, path));
-			}
-			return false;
+			}, path, false, retry_count);
 		}
 
-		public static bool DeleteDirectory(string path)
+		public static bool DeleteDirectory(string path, int retry_count = 0)
 		{
-			if (!Directory.Exists(path))
+			return FileUtil.DoIODialog<bool>(delegate
 			{
-				return true;
-			}
-			try
-			{
+				if (!Directory.Exists(path))
+				{
+					return true;
+				}
 				Directory.Delete(path, true);
 				return true;
-			}
-			catch (UnauthorizedAccessException)
-			{
-				FileUtil.ErrorDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_UNAUTHORIZED, path));
-			}
-			return false;
+			}, path, false, retry_count);
+		}
+
+		public static bool FileExists(string filename, int retry_count = 0)
+		{
+			return FileUtil.DoIODialog<bool>(() => File.Exists(filename), filename, false, retry_count);
+		}
+
+		private const FileUtil.Test TEST = FileUtil.Test.NoTesting;
+
+		private const int DEFAULT_RETRY_COUNT = 0;
+
+		private const int RETRY_MILLISECONDS = 100;
+
+		private enum Test
+		{
+			NoTesting,
+			RetryOnce
 		}
 	}
 }

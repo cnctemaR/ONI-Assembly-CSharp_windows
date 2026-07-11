@@ -289,19 +289,23 @@ namespace Database
 			this.Dancing = this.CreateStatusItem("Dancing", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.Gaming = this.CreateStatusItem("Gaming", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.Mingling = this.CreateStatusItem("Mingling", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
-			this.ExposedToGerms = this.CreateStatusItem("ExposedToGerms", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.ExposedToGerms = this.CreateStatusItem("ExposedToGerms", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.None.ID, true, 2);
 			this.ExposedToGerms.resolveStringCallback = delegate(string str, object data)
 			{
 				GermExposureMonitor.ExposureStatusData exposureStatusData = (GermExposureMonitor.ExposureStatusData)data;
 				string name = Db.Get().Sicknesses.Get(exposureStatusData.exposure_type.sickness_id).Name;
-				AttributeInstance attributeInstance3 = Db.Get().Attributes.GermSusceptibility.Lookup(exposureStatusData.owner.gameObject);
-				float contraction_rate = exposureStatusData.exposure_type.contraction_rate;
-				float num5 = contraction_rate * attributeInstance3.GetTotalValue();
-				float num6 = num5 - contraction_rate;
+				AttributeInstance attributeInstance3 = Db.Get().Attributes.GermResistance.Lookup(exposureStatusData.owner.gameObject);
+				string lastDiseaseSource = exposureStatusData.owner.GetLastDiseaseSource(exposureStatusData.exposure_type.germ_id);
+				int base_resistance = exposureStatusData.exposure_type.base_resistance;
+				float totalValue = attributeInstance3.GetTotalValue();
+				float num5 = totalValue + (float)base_resistance;
+				float contractionChance = GermExposureMonitor.GetContractionChance(num5);
 				str = str.Replace("{Sickness}", name);
-				str = str.Replace("{Base}", GameUtil.GetFormattedPercent(contraction_rate * 100f, GameUtil.TimeSlice.None));
-				str = str.Replace("{Modifiers}", GameUtil.GetFormattedPercent(num6 * 100f, GameUtil.TimeSlice.None));
-				str = str.Replace("{Total}", GameUtil.GetFormattedPercent(num5 * 100f, GameUtil.TimeSlice.None));
+				str = str.Replace("{Source}", lastDiseaseSource);
+				str = str.Replace("{Base}", GameUtil.GetFormattedSimple((float)base_resistance, GameUtil.TimeSlice.None, null));
+				str = str.Replace("{Dupe}", GameUtil.GetFormattedSimple(totalValue, GameUtil.TimeSlice.None, null));
+				str = str.Replace("{Total}", GameUtil.GetFormattedSimple(num5, GameUtil.TimeSlice.None, null));
+				str = str.Replace("{Chance}", GameUtil.GetFormattedPercent(contractionChance * 100f, GameUtil.TimeSlice.None));
 				return str;
 			};
 		}

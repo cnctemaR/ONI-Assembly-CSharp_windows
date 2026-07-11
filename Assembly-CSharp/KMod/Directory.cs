@@ -90,7 +90,7 @@ namespace KMod
 			{
 				return 0;
 			}
-			if (!FileUtil.CreateDirectory(destDirName))
+			if (!FileUtil.CreateDirectory(destDirName, 0))
 			{
 				return 0;
 			}
@@ -125,7 +125,7 @@ namespace KMod
 			}
 			if (num == 0)
 			{
-				FileUtil.DeleteDirectory(destDirName);
+				FileUtil.DeleteDirectory(destDirName, 0);
 			}
 			return num;
 		}

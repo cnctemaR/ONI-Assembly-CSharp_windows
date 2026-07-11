@@ -270,7 +270,7 @@ public class Global : MonoBehaviour
 		Singleton<StateMachineUpdater>.CreateInstance();
 		Singleton<StateMachineManager>.CreateInstance();
 		this.modManager = new global::KMod.Manager();
-		this.modManager.Load(Content.DLL);
+		this.modManager.Load(Content.DLL | Content.Animation);
 		this.modManager.Load(Content.Strings);
 		global::KSerialization.Manager.Initialize();
 		this.mInputManager = new GameInputManager(Global.GenerateDefaultBindings());
@@ -377,7 +377,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 326830U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 327401U);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());

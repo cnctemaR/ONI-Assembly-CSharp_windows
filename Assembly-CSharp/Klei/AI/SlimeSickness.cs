@@ -17,7 +17,7 @@ namespace Klei.AI
 				new AttributeModifier("Athletics", -3f, DUPLICANTS.DISEASES.SLIMESICKNESS.NAME, false, false, true)
 			}));
 			base.AddSicknessComponent(new AnimatedSickness(new HashedString[] { "anim_idle_sick_kanim" }, Db.Get().Expressions.Sick));
-			base.AddSicknessComponent(new PeriodicEmoteSickness("anim_idle_sick_kanim", new HashedString[] { "idle_pre", "idle_default", "idle_pst" }, 5f));
+			base.AddSicknessComponent(new PeriodicEmoteSickness("anim_idle_sick_kanim", new HashedString[] { "idle_pre", "idle_default", "idle_pst" }, 50f));
 			base.AddSicknessComponent(new SlimeSickness.SlimeLungComponent());
 		}
 

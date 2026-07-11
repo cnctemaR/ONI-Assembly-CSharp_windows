@@ -17,7 +17,7 @@ namespace Klei.AI
 				new AttributeModifier("StaminaDelta", -0.05f, DUPLICANTS.DISEASES.FOODSICKNESS.NAME, false, false, true)
 			}));
 			base.AddSicknessComponent(new AnimatedSickness(new HashedString[] { "anim_idle_sick_kanim" }, Db.Get().Expressions.Sick));
-			base.AddSicknessComponent(new PeriodicEmoteSickness("anim_idle_sick_kanim", new HashedString[] { "idle_pre", "idle_default", "idle_pst" }, 5f));
+			base.AddSicknessComponent(new PeriodicEmoteSickness("anim_idle_sick_kanim", new HashedString[] { "idle_pre", "idle_default", "idle_pst" }, 10f));
 		}
 
 		public const string ID = "FoodSickness";

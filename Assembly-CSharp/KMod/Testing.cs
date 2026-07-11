@@ -6,11 +6,11 @@ namespace KMod
 	{
 		public static Testing.DLLLoading dll_loading;
 
-		public static Testing.SaveLoad save_load;
+		public const Testing.SaveLoad SAVE_LOAD = Testing.SaveLoad.NoTesting;
 
-		public static Testing.Install install;
+		public const Testing.Install INSTALL = Testing.Install.NoTesting;
 
-		public static Testing.Boot boot;
+		public const Testing.Boot BOOT = Testing.Boot.NoTesting;
 
 		public enum DLLLoading
 		{

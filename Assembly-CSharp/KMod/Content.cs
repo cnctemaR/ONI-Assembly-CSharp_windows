@@ -8,6 +8,7 @@ namespace KMod
 		LayerableFiles = 1,
 		Strings = 2,
 		DLL = 4,
-		Translation = 8
+		Translation = 8,
+		Animation = 16
 	}
 }

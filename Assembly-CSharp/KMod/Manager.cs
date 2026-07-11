@@ -13,91 +13,63 @@ namespace KMod
 	{
 		public Manager()
 		{
+			Manager $this = this;
 			global::Debug.Log("Load mod database");
 			string filename = this.GetFilename();
 			try
 			{
-				if (Testing.save_load == Testing.SaveLoad.FailLoad)
+				FileUtil.DoIOAction(delegate
 				{
-					throw new Exception("KMod.Testing.SaveLoad.FailLoad");
-				}
-				if (File.Exists(filename))
-				{
-					string text = File.ReadAllText(filename);
-					Manager.PersistentData persistentData = JsonConvert.DeserializeObject<Manager.PersistentData>(text);
-					this.mods = persistentData.mods;
-				}
+					if (File.Exists(filename))
+					{
+						string text = File.ReadAllText(filename);
+						Manager.PersistentData persistentData = JsonConvert.DeserializeObject<Manager.PersistentData>(text);
+						$this.mods = persistentData.mods;
+					}
+				}, 5);
 			}
 			catch (Exception ex)
 			{
-				Manager.ErrorDialog(string.Format(UI.FRONTEND.MODS.DB_CORRUPT, filename, ex.Message), null, null);
-				return;
-			}
-			Testing.Install install = Testing.install;
-			if (install != Testing.Install.ForceReinstall)
-			{
-				if (install == Testing.Install.ForceUninstall)
-				{
-					foreach (Mod mod in this.mods)
-					{
-						if (mod.status == Mod.Status.Installed)
-						{
-							mod.status = Mod.Status.UninstallPending;
-						}
-					}
-				}
-			}
-			else
-			{
-				foreach (Mod mod2 in this.mods)
-				{
-					if (mod2.status == Mod.Status.Installed)
-					{
-						mod2.status = Mod.Status.ReinstallPending;
-					}
-				}
+				global::Debug.LogWarningFormat(UI.FRONTEND.MODS.DB_CORRUPT, new object[] { filename });
+				this.mods = new List<Mod>();
 			}
 			List<Mod> list = new List<Mod>();
 			bool flag = false;
-			foreach (Mod mod3 in this.mods)
+			foreach (Mod mod in this.mods)
 			{
-				if (mod3.status == Mod.Status.UninstallPending)
+				if (mod.status == Mod.Status.UninstallPending)
 				{
 					global::Debug.LogFormat("Latent uninstall of mod {0} from {1}", new object[]
 					{
-						mod3.title,
-						mod3.label.install_path
+						mod.title,
+						mod.label.install_path
 					});
-					if (mod3.Uninstall())
+					if (mod.Uninstall())
 					{
-						list.Add(mod3);
+						list.Add(mod);
 					}
 					else
 					{
-						DebugUtil.Assert(mod3.status == Mod.Status.UninstallPending);
-						global::Debug.LogFormat("\t...failed to uninstall mod {0}", new object[] { mod3.title });
+						DebugUtil.Assert(mod.status == Mod.Status.UninstallPending);
+						global::Debug.LogFormat("\t...failed to uninstall mod {0}", new object[] { mod.title });
 					}
-					if (mod3.status != Mod.Status.UninstallPending)
+					if (mod.status != Mod.Status.UninstallPending)
 					{
 						flag = true;
 					}
 				}
 			}
-			foreach (Mod mod4 in list)
+			foreach (Mod mod2 in list)
 			{
-				this.mods.Remove(mod4);
+				this.mods.Remove(mod2);
 			}
-			foreach (Mod mod5 in this.mods)
+			foreach (Mod mod3 in this.mods)
 			{
-				mod5.ScanContent();
+				mod3.ScanContent();
 			}
 			if (flag)
 			{
 				this.Save();
-			}
-			if (Testing.boot == Testing.Boot.Crash)
-			{
-				this.HandleCrash();
 			}
 		}
 
@@ -222,7 +194,7 @@ namespace KMod
 				}
 				bool flag = mod2.label.version != mod.label.version;
 				bool flag2 = mod2.available_content != mod.available_content;
-				bool flag3 = flag || flag2 || mod2.status == Mod.Status.ReinstallPending || Testing.install == Testing.Install.ForceUpdate;
+				bool flag3 = flag || flag2 || mod2.status == Mod.Status.ReinstallPending;
 				if (flag)
 				{
 					this.events.Add(new Event
@@ -250,7 +222,7 @@ namespace KMod
 						this.Uninstall(mod);
 					}
 					this.Install(mod);
-					if (mod.enabled && (byte)(mod.available_content & (Content.Strings | Content.DLL | Content.Translation)) != 0)
+					if (mod.enabled && (byte)(mod.available_content & (Content.Strings | Content.DLL | Content.Translation | Content.Animation)) != 0)
 					{
 						this.events.Add(new Event
 						{
@@ -698,32 +670,24 @@ namespace KMod
 
 		public bool Save()
 		{
-			if (!FileUtil.CreateDirectory(Manager.GetDirectory()))
+			if (!FileUtil.CreateDirectory(Manager.GetDirectory(), 5))
 			{
 				return false;
 			}
-			using (FileStream fileStream = FileUtil.Create(this.GetFilename()))
+			using (FileStream stream = FileUtil.Create(this.GetFilename(), 5))
 			{
-				try
+				if (stream == null)
 				{
-					if (Testing.save_load == Testing.SaveLoad.FailSave)
-					{
-						throw new Exception("KMod.Testing.SaveLoad.FailSave");
-					}
-					if (fileStream == null)
+					return false;
+				}
+				using (StreamWriter streamWriter = FileUtil.DoIODialog<StreamWriter>(() => new StreamWriter(stream), this.GetFilename(), null, 5))
+				{
+					if (streamWriter == null)
 					{
 						return false;
 					}
-					using (StreamWriter streamWriter = new StreamWriter(fileStream))
-					{
-						string text = JsonConvert.SerializeObject(new Manager.PersistentData(this.current_version, this.mods), Formatting.Indented);
-						streamWriter.Write(text);
-					}
-				}
-				catch (Exception ex)
-				{
-					Manager.ErrorDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_UNAUTHORIZED, ex.Message), null, null);
-					return false;
+					string text = JsonConvert.SerializeObject(new Manager.PersistentData(this.current_version, this.mods), Formatting.Indented);
+					streamWriter.Write(text);
 				}
 			}
 			return true;
@@ -820,9 +784,9 @@ namespace KMod
 			KCrashReporter.haveActiveMods = pooledList.Count > 0;
 		}
 
-		public const Content all_content = Content.LayerableFiles | Content.Strings | Content.DLL | Content.Translation;
+		public const Content all_content = Content.LayerableFiles | Content.Strings | Content.DLL | Content.Translation | Content.Animation;
 
-		public const Content boot_content = Content.Strings | Content.DLL | Content.Translation;
+		public const Content boot_content = Content.Strings | Content.DLL | Content.Translation | Content.Animation;
 
 		public const Content install_content = Content.DLL;
 
@@ -837,6 +801,8 @@ namespace KMod
 		private bool dirty = true;
 
 		public Manager.OnUpdate on_update;
+
+		private const int IO_OP_RETRY_COUNT = 5;
 
 		private bool load_user_mod_loader_dll = true;
 

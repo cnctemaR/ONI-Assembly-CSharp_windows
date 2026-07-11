@@ -26,7 +26,6 @@ public class AmbienceManager : KMonoBehaviour
 		Vector2I min = visibleArea.Min;
 		Vector2I max = visibleArea.Max;
 		Vector2I vector2I = min + (max - min) / 2;
-		Vector2I vector2I2 = max - min;
 		Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.GetPosition().z));
 		Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.GetPosition().z));
 		Vector3 vector3 = vector2 + (vector - vector2) / 2f;

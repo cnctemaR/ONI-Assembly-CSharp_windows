@@ -33,27 +33,40 @@ namespace Klei.AI
 
 		public class StatesInstance : GameStateMachine<PeriodicEmoteSickness.States, PeriodicEmoteSickness.StatesInstance, SicknessInstance, object>.GameInstance
 		{
-			public StatesInstance(SicknessInstance master, PeriodicEmoteSickness periodicEmoteDisease)
+			public StatesInstance(SicknessInstance master, PeriodicEmoteSickness periodicEmoteSickness)
 				: base(master)
 			{
-				this.periodicEmoteDisease = periodicEmoteDisease;
+				this.periodicEmoteSickness = periodicEmoteSickness;
 			}
 
-			public PeriodicEmoteSickness periodicEmoteDisease;
+			public Reactable GetReactable()
+			{
+				GameObject gameObject = base.master.gameObject;
+				HashedString hashedString = "PeriodicEmoteSickness";
+				ChoreType emote = Db.Get().ChoreTypes.Emote;
+				HashedString hashedString2 = "anim_sneeze_kanim";
+				float cooldown = this.periodicEmoteSickness.cooldown;
+				SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(gameObject, hashedString, emote, hashedString2, 0f, cooldown, float.PositiveInfinity);
+				foreach (HashedString hashedString3 in this.periodicEmoteSickness.anims)
+				{
+					selfEmoteReactable.AddStep(new EmoteReactable.EmoteStep
+					{
+						anim = hashedString3
+					});
+				}
+				return selfEmoteReactable;
+			}
+
+			public PeriodicEmoteSickness periodicEmoteSickness;
 		}
 
 		public class States : GameStateMachine<PeriodicEmoteSickness.States, PeriodicEmoteSickness.StatesInstance, SicknessInstance>
 		{
 			public override void InitializeStates(out StateMachine.BaseState default_state)
 			{
-				default_state = this.emoting;
-				this.emoting.ToggleChore((PeriodicEmoteSickness.StatesInstance smi) => new EmoteChore(smi.master, Db.Get().ChoreTypes.Emote, smi.periodicEmoteDisease.kanim, smi.periodicEmoteDisease.anims, KAnim.PlayMode.Once, false), this.cooldown);
-				this.cooldown.ScheduleGoTo((PeriodicEmoteSickness.StatesInstance smi) => smi.periodicEmoteDisease.cooldown, this.emoting);
+				default_state = this.root;
+				this.root.ToggleReactable((PeriodicEmoteSickness.StatesInstance smi) => smi.GetReactable());
 			}
-
-			public GameStateMachine<PeriodicEmoteSickness.States, PeriodicEmoteSickness.StatesInstance, SicknessInstance, object>.State emoting;
-
-			public GameStateMachine<PeriodicEmoteSickness.States, PeriodicEmoteSickness.StatesInstance, SicknessInstance, object>.State cooldown;
 		}
 	}
 }

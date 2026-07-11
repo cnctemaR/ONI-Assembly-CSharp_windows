@@ -26,7 +26,8 @@ public class IntermediateCureConfig : IEntityConfig
 			description = ITEMS.PILLS.INTERMEDIATECURE.RECIPEDESC,
 			useResultAsDescription = true,
 			fabricators = new List<Tag> { "Apothecary" },
-			sortOrder = 10
+			sortOrder = 10,
+			requiredTech = "MedicineII"
 		};
 		return gameObject;
 	}

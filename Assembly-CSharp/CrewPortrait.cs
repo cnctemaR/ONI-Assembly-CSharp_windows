@@ -237,6 +237,7 @@ public class CrewPortrait : KMonoBehaviour
 				}
 			}
 			component.AddSymbolOverride(Db.Get().AccessorySlots.HatHair.targetSymbolId, Db.Get().AccessorySlots.HatHair.Lookup("hat_" + HashCache.Get().Get(component2.GetAccessory(Db.Get().AccessorySlots.Hair).symbol.hash)).symbol, 1);
+			CrewPortrait.RefreshHat(minionIdentity, controller);
 		}
 		else
 		{
@@ -264,8 +265,8 @@ public class CrewPortrait : KMonoBehaviour
 				}
 			}
 			component.AddSymbolOverride(Db.Get().AccessorySlots.HatHair.targetSymbolId, Db.Get().AccessorySlots.HatHair.Lookup("hat_" + HashCache.Get().Get(storedMinionIdentity.GetAccessory(Db.Get().AccessorySlots.Hair).symbol.hash)).symbol, 1);
+			CrewPortrait.RefreshHat(storedMinionIdentity, controller);
 		}
-		CrewPortrait.RefreshHat(identityObject, controller);
 		float num = 1f;
 		if (GameScreenManager.Instance != null && GameScreenManager.Instance.ssOverlayCanvas != null)
 		{

@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescriptor, IGameObjectEffectDescriptor
+public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectEffectDescriptor
 {
 	public KPrefabID plant
 	{
@@ -318,11 +318,6 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 		{
 			base.CancelActiveRequest();
 		}
-	}
-
-	public List<Descriptor> GetDescriptors(BuildingDef def)
-	{
-		return this.GetDescriptors(def.BuildingComplete);
 	}
 
 	public override List<Descriptor> GetDescriptors(GameObject go)

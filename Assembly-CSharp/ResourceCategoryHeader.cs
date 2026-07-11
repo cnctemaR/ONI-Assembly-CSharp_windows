@@ -109,20 +109,20 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IEve
 	private void Hover(bool is_hovering)
 	{
 		this.Background.color = (is_hovering ? this.BackgroundHoverColor : new Color(0f, 0f, 0f, 0f));
-		List<Pickupable> list = null;
+		ICollection<Pickupable> collection = null;
 		if (WorldInventory.Instance != null)
 		{
-			list = WorldInventory.Instance.GetPickupables(this.ResourceCategoryTag);
+			collection = WorldInventory.Instance.GetPickupables(this.ResourceCategoryTag);
 		}
-		if (list == null)
+		if (collection == null)
 		{
 			return;
 		}
-		for (int i = 0; i < list.Count; i++)
+		foreach (Pickupable pickupable in collection)
 		{
-			if (!(list[i] == null))
+			if (!(pickupable == null))
 			{
-				KAnimControllerBase component = list[i].GetComponent<KAnimControllerBase>();
+				KAnimControllerBase component = pickupable.GetComponent<KAnimControllerBase>();
 				if (!(component == null))
 				{
 					component.HighlightColour = (is_hovering ? this.highlightColour : Color.black);

@@ -8,17 +8,17 @@ public class LogicControlInputUI : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.colourOn = this.uiAsset.colourOn;
-		this.colourOff = this.uiAsset.colourOff;
+		this.colourOn = GlobalAssets.Instance.colorSet.logicOn;
+		this.colourOff = GlobalAssets.Instance.colorSet.logicOff;
 		this.colourOn.a = (this.colourOff.a = byte.MaxValue);
-		this.colourDisconnected = this.uiAsset.colourDisconnected;
+		this.colourDisconnected = GlobalAssets.Instance.colorSet.logicDisconnected;
 		this.icon.raycastTarget = false;
 		this.border.raycastTarget = false;
 	}
 
 	public void SetContent(LogicCircuitNetwork network)
 	{
-		Color32 color = ((network == null) ? this.uiAsset.colourDisconnected : (network.IsBitActive(0) ? this.colourOn : this.colourOff));
+		Color32 color = ((network == null) ? GlobalAssets.Instance.colorSet.logicDisconnected : (network.IsBitActive(0) ? this.colourOn : this.colourOff));
 		this.icon.color = color;
 	}
 

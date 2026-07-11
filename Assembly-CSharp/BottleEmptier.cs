@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>, IEffectDescriptor
+public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>, IGameObjectEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -16,7 +16,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 		base.Subscribe<BottleEmptier>(-905833192, BottleEmptier.OnCopySettingsDelegate);
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		return null;
 	}
@@ -43,6 +43,8 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 
 	[Serialize]
 	public bool allowManualPumpingStationFetching;
+
+	public bool isGasEmptier;
 
 	[SerializeField]
 	public Color noFilterTint = FilteredStorage.NO_FILTER_TINT;
@@ -205,9 +207,9 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 				}
 				if (bottleEmptier.allowManualPumpingStationFetching)
 				{
-					return BUILDING.STATUSITEMS.BOTTLE_EMPTIER.ALLOWED.NAME;
+					return bottleEmptier.isGasEmptier ? BUILDING.STATUSITEMS.CANISTER_EMPTIER.ALLOWED.NAME : BUILDING.STATUSITEMS.BOTTLE_EMPTIER.ALLOWED.NAME;
 				}
-				return BUILDING.STATUSITEMS.BOTTLE_EMPTIER.DENIED.NAME;
+				return bottleEmptier.isGasEmptier ? BUILDING.STATUSITEMS.CANISTER_EMPTIER.DENIED.NAME : BUILDING.STATUSITEMS.BOTTLE_EMPTIER.DENIED.NAME;
 			};
 			this.statusItem.resolveTooltipCallback = delegate(string str, object data)
 			{
@@ -218,9 +220,20 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 				}
 				if (bottleEmptier2.allowManualPumpingStationFetching)
 				{
+					if (bottleEmptier2.isGasEmptier)
+					{
+						return BUILDING.STATUSITEMS.CANISTER_EMPTIER.ALLOWED.TOOLTIP;
+					}
 					return BUILDING.STATUSITEMS.BOTTLE_EMPTIER.ALLOWED.TOOLTIP;
 				}
-				return BUILDING.STATUSITEMS.BOTTLE_EMPTIER.DENIED.TOOLTIP;
+				else
+				{
+					if (bottleEmptier2.isGasEmptier)
+					{
+						return BUILDING.STATUSITEMS.CANISTER_EMPTIER.DENIED.TOOLTIP;
+					}
+					return BUILDING.STATUSITEMS.BOTTLE_EMPTIER.DENIED.TOOLTIP;
+				}
 			};
 			this.root.ToggleStatusItem(this.statusItem, (BottleEmptier.StatesInstance smi) => smi.master);
 			this.unoperational.TagTransition(GameTags.Operational, this.waitingfordelivery, false).PlayAnim("off");

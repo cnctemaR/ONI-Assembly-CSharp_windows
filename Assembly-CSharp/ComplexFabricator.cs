@@ -903,7 +903,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		return list;
 	}
 
-	public virtual List<Descriptor> GetDescriptors(BuildingDef def)
+	public virtual List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		ComplexRecipe[] recipes = this.GetRecipes();

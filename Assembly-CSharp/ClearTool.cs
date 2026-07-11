@@ -34,7 +34,7 @@ public class ClearTool : DragTool
 			objectLayerListItem = objectLayerListItem.nextItem;
 			if (!(gameObject2 == null) && !(gameObject2.GetComponent<MinionIdentity>() != null) && gameObject2.GetComponent<Clearable>().isClearable)
 			{
-				gameObject2.GetComponent<Clearable>().MarkForClear(false);
+				gameObject2.GetComponent<Clearable>().MarkForClear(false, false);
 				Prioritizable component = gameObject2.GetComponent<Prioritizable>();
 				if (component != null)
 				{

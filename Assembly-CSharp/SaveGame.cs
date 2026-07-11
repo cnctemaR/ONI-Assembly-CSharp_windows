@@ -79,10 +79,10 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 
 	public byte[] GetSaveHeader(bool isAutoSave, bool isCompressed, out SaveGame.Header header)
 	{
-		string text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, isAutoSave, SaveLoader.GetActiveSaveFilePath(), SaveLoader.Instance.GameInfo.worldID, SaveLoader.Instance.GameInfo.worldTraits, this.sandboxEnabled));
+		string text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, isAutoSave, SaveLoader.GetActiveSaveFilePath(), SaveLoader.Instance.GameInfo.worldID, SaveLoader.Instance.GameInfo.worldTraits, SaveLoader.Instance.GameInfo.colonyGuid, this.sandboxEnabled));
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 399948U;
+		header.buildVersion = 408920U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = (isCompressed ? 1 : 0);
@@ -219,7 +219,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 
 	public struct GameInfo
 	{
-		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName, bool isAutoSave, string originalSaveName, string worldID, string[] worldTraits, bool sandboxEnabled = false)
+		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName, bool isAutoSave, string originalSaveName, string worldID, string[] worldTraits, Guid colonyGuid, bool sandboxEnabled = false)
 		{
 			this.numberOfCycles = numberOfCycles;
 			this.numberOfDuplicants = numberOfDuplicants;
@@ -228,9 +228,10 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			this.originalSaveName = originalSaveName;
 			this.worldID = worldID;
 			this.worldTraits = worldTraits;
+			this.colonyGuid = colonyGuid;
 			this.sandboxEnabled = sandboxEnabled;
 			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 16;
+			this.saveMinorVersion = 17;
 		}
 
 		public bool IsVersionOlderThan(int major, int minor)
@@ -262,5 +263,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		public string[] worldTraits;
 
 		public bool sandboxEnabled;
+
+		public Guid colonyGuid;
 	}
 }

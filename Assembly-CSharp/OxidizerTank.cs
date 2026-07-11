@@ -92,6 +92,7 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 		base.Subscribe<OxidizerTank>(1366341636, OxidizerTank.OnReturnRocketDelegate);
 		base.Subscribe<OxidizerTank>(-1697596308, OxidizerTank.OnStorageChangeDelegate);
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
+		this.meter.gameObject.GetComponent<KBatchedAnimTracker>().matchParentOffset = true;
 	}
 
 	public float MassStored()

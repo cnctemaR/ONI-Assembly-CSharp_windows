@@ -6,7 +6,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/scripts/AirConditioner")]
-public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, ISim200ms
+public class AirConditioner : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDescriptor, ISim200ms
 {
 	public float lastEnvTemp { get; private set; }
 
@@ -152,7 +152,7 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, 
 		}
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		string formattedTemperature = GameUtil.GetFormattedTemperature(this.temperatureDelta, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Relative, true, false);

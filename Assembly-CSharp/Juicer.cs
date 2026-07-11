@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
+using UnityEngine;
 
-public class Juicer : StateMachineComponent<Juicer.StatesInstance>, IEffectDescriptor
+public class Juicer : StateMachineComponent<Juicer.StatesInstance>, IGameObjectEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -29,7 +30,7 @@ public class Juicer : StateMachineComponent<Juicer.StatesInstance>, IEffectDescr
 		descs.Add(descriptor);
 	}
 
-	List<Descriptor> IEffectDescriptor.GetDescriptors(BuildingDef def)
+	List<Descriptor> IGameObjectEffectDescriptor.GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Descriptor descriptor = default(Descriptor);

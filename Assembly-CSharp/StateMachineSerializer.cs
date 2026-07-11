@@ -7,19 +7,32 @@ public class StateMachineSerializer
 {
 	public void Serialize(List<StateMachine.Instance> state_machines, BinaryWriter writer)
 	{
-		MemoryStream memoryStream = new MemoryStream();
-		BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
-		List<StateMachineSerializer.Entry> list = this.CreateEntries(state_machines, binaryWriter);
-		long num = this.WriteHeader(writer);
+		writer.Write(StateMachineSerializer.serializerVersion);
 		long position = writer.BaseStream.Position;
-		this.WriteEntries(list, writer);
+		writer.Write(0);
+		long position2 = writer.BaseStream.Position;
 		try
 		{
-			this.WriteEntryData(memoryStream, writer);
+			int num = (int)writer.BaseStream.Position;
+			int num2 = 0;
+			writer.Write(num2);
+			using (List<StateMachine.Instance>.Enumerator enumerator = state_machines.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					if (StateMachineSerializer.Entry.TrySerialize(enumerator.Current, writer))
+					{
+						num2++;
+					}
+				}
+			}
+			int num3 = (int)writer.BaseStream.Position;
+			writer.BaseStream.Position = (long)num;
+			writer.Write(num2);
+			writer.BaseStream.Position = (long)num3;
 		}
 		catch (Exception ex)
 		{
-			Debug.Log("Stream size: " + memoryStream.Length);
 			Debug.Log("StateMachines: ");
 			foreach (StateMachine.Instance instance in state_machines)
 			{
@@ -27,71 +40,18 @@ public class StateMachineSerializer
 			}
 			Debug.LogError(ex);
 		}
-		this.WriteDataSize(position, num, writer);
+		long position3 = writer.BaseStream.Position;
+		long num4 = position3 - position2;
+		writer.BaseStream.Position = position;
+		writer.Write((int)num4);
+		writer.BaseStream.Position = position3;
 	}
 
 	public void Deserialize(IReader reader)
 	{
-		if (!this.ReadHeader(reader))
-		{
-			return;
-		}
-		this.entries = this.ReadEntries(reader);
-		this.entryData = this.ReadEntryData(reader);
-	}
-
-	private List<StateMachineSerializer.Entry> CreateEntries(List<StateMachine.Instance> state_machines, BinaryWriter entry_writer)
-	{
-		List<StateMachineSerializer.Entry> list = new List<StateMachineSerializer.Entry>();
-		foreach (StateMachine.Instance instance in state_machines)
-		{
-			if (instance.IsRunning())
-			{
-				StateMachineSerializer.Entry entry = StateMachineSerializer.Entry.TrySerialize(instance, entry_writer);
-				if (entry != null)
-				{
-					list.Add(entry);
-				}
-			}
-		}
-		return list;
-	}
-
-	private void WriteEntryData(MemoryStream stream, BinaryWriter writer)
-	{
-		writer.Write((int)stream.Length);
-		writer.Write(stream.ToArray());
-	}
-
-	private FastReader ReadEntryData(IReader reader)
-	{
-		int num = reader.ReadInt32();
-		return new FastReader(reader.ReadBytes(num));
-	}
-
-	private void WriteDataSize(long data_start_pos, long data_size_pos, BinaryWriter writer)
-	{
-		long position = writer.BaseStream.Position;
-		long num = position - data_start_pos;
-		writer.BaseStream.Position = data_size_pos;
-		writer.Write((int)num);
-		writer.BaseStream.Position = position;
-	}
-
-	private long WriteHeader(BinaryWriter writer)
-	{
-		int num = 0;
-		writer.Write(StateMachineSerializer.serializerVersion);
-		long position = writer.BaseStream.Position;
-		writer.Write(num);
-		return position;
-	}
-
-	private bool ReadHeader(IReader reader)
-	{
 		int num = reader.ReadInt32();
 		int num2 = reader.ReadInt32();
-		if (num != StateMachineSerializer.serializerVersion)
+		if (num < 10)
 		{
 			Debug.LogWarning(string.Concat(new object[]
 			{
@@ -102,33 +62,23 @@ public class StateMachineSerializer
 				"\nDiscarding data."
 			}));
 			reader.SkipBytes(num2);
-			return false;
+			return;
 		}
-		return true;
-	}
-
-	private void WriteEntries(List<StateMachineSerializer.Entry> serialized_entries, BinaryWriter writer)
-	{
-		writer.Write(serialized_entries.Count);
-		for (int i = 0; i < serialized_entries.Count; i++)
+		if (num < 12)
 		{
-			serialized_entries[i].Serialize(writer);
+			this.entries = StateMachineSerializer.OldEntryV11.DeserializeOldEntries(reader);
+			return;
 		}
-	}
-
-	private List<StateMachineSerializer.Entry> ReadEntries(IReader reader)
-	{
-		List<StateMachineSerializer.Entry> list = new List<StateMachineSerializer.Entry>();
-		int num = reader.ReadInt32();
-		for (int i = 0; i < num; i++)
+		int num3 = reader.ReadInt32();
+		this.entries = new List<StateMachineSerializer.Entry>(num3);
+		for (int i = 0; i < num3; i++)
 		{
 			StateMachineSerializer.Entry entry = StateMachineSerializer.Entry.Deserialize(reader);
 			if (entry != null)
 			{
-				list.Add(entry);
+				this.entries.Add(entry);
 			}
 		}
-		return list;
 	}
 
 	private static string TrimAssemblyInfo(string type_name)
@@ -141,55 +91,8 @@ public class StateMachineSerializer
 		return type_name;
 	}
 
-	private bool Restore(StateMachineSerializer.Entry entry, StateMachine.Instance smi)
-	{
-		if (entry.version != smi.GetStateMachine().version)
-		{
-			return false;
-		}
-		this.entryData.Position = entry.dataPos;
-		if (Manager.HasDeserializationMapping(smi.GetType()))
-		{
-			Deserializer.DeserializeTypeless(smi, this.entryData);
-		}
-		if (!smi.GetStateMachine().serializable)
-		{
-			return false;
-		}
-		StateMachine.BaseState state = smi.GetStateMachine().GetState(entry.currentState);
-		if (state == null)
-		{
-			return false;
-		}
-		StateMachine.Parameter.Context[] parameterContexts = smi.GetParameterContexts();
-		int num = this.entryData.ReadInt32();
-		for (int i = 0; i < num; i++)
-		{
-			int num2 = this.entryData.ReadInt32();
-			int position = this.entryData.Position;
-			string text = this.entryData.ReadKleiString();
-			text = text.Replace("Version=2.0.0.0", "Version=4.0.0.0");
-			string text2 = this.entryData.ReadKleiString();
-			foreach (StateMachine.Parameter.Context context in parameterContexts)
-			{
-				if (context.parameter.name == text2 && context.GetType().FullName == text)
-				{
-					context.Deserialize(this.entryData);
-					break;
-				}
-			}
-			this.entryData.SkipBytes(num2 - (this.entryData.Position - position));
-		}
-		smi.GoTo(state);
-		return true;
-	}
-
 	public bool Restore(StateMachine.Instance instance)
 	{
-		if (this.entryData == null)
-		{
-			return false;
-		}
 		Type type = instance.GetType();
 		for (int i = 0; i < this.entries.Count; i++)
 		{
@@ -197,21 +100,135 @@ public class StateMachineSerializer
 			if (entry.type == type)
 			{
 				this.entries.RemoveAt(i);
-				return this.Restore(entry, instance);
+				return entry.Restore(instance);
 			}
 		}
 		return false;
 	}
 
-	private static int serializerVersion = 10;
+	private static int serializerVersion = 12;
 
 	private List<StateMachineSerializer.Entry> entries = new List<StateMachineSerializer.Entry>();
 
-	private FastReader entryData;
-
 	private class Entry
 	{
-		public Entry(int version, int data_pos, Type type, string current_state)
+		public static bool TrySerialize(StateMachine.Instance smi, BinaryWriter writer)
+		{
+			if (!smi.IsRunning())
+			{
+				return false;
+			}
+			int num = (int)writer.BaseStream.Position;
+			writer.Write(smi.GetStateMachine().version);
+			writer.WriteKleiString(smi.GetType().FullName);
+			writer.WriteKleiString(smi.GetCurrentState().name);
+			int num2 = (int)writer.BaseStream.Position;
+			writer.Write(0);
+			int num3 = (int)writer.BaseStream.Position;
+			Serializer.SerializeTypeless(smi, writer);
+			if (smi.GetStateMachine().serializable)
+			{
+				StateMachine.Parameter.Context[] parameterContexts = smi.GetParameterContexts();
+				writer.Write(parameterContexts.Length);
+				foreach (StateMachine.Parameter.Context context in parameterContexts)
+				{
+					long num4 = (long)((int)writer.BaseStream.Position);
+					writer.Write(0);
+					long num5 = (long)((int)writer.BaseStream.Position);
+					writer.WriteKleiString(context.GetType().FullName);
+					writer.WriteKleiString(context.parameter.name);
+					context.Serialize(writer);
+					long num6 = (long)((int)writer.BaseStream.Position);
+					writer.BaseStream.Position = num4;
+					long num7 = num6 - num5;
+					writer.Write((int)num7);
+					writer.BaseStream.Position = num6;
+				}
+			}
+			int num8 = (int)writer.BaseStream.Position - num3;
+			if (num8 > 0)
+			{
+				int num9 = (int)writer.BaseStream.Position;
+				writer.BaseStream.Position = (long)num2;
+				writer.Write(num8);
+				writer.BaseStream.Position = (long)num9;
+				return true;
+			}
+			writer.BaseStream.Position = (long)num;
+			writer.BaseStream.SetLength((long)num);
+			return false;
+		}
+
+		public static StateMachineSerializer.Entry Deserialize(IReader reader)
+		{
+			StateMachineSerializer.Entry entry = new StateMachineSerializer.Entry();
+			entry.version = reader.ReadInt32();
+			string text = reader.ReadKleiString();
+			entry.type = Type.GetType(text);
+			entry.currentState = reader.ReadKleiString();
+			int num = reader.ReadInt32();
+			entry.entryData = new FastReader(reader.ReadBytes(num));
+			if (entry.type == null)
+			{
+				return null;
+			}
+			return entry;
+		}
+
+		public bool Restore(StateMachine.Instance smi)
+		{
+			if (this.version != smi.GetStateMachine().version)
+			{
+				return false;
+			}
+			if (Manager.HasDeserializationMapping(smi.GetType()))
+			{
+				Deserializer.DeserializeTypeless(smi, this.entryData);
+			}
+			if (!smi.GetStateMachine().serializable)
+			{
+				return false;
+			}
+			StateMachine.BaseState state = smi.GetStateMachine().GetState(this.currentState);
+			if (state == null)
+			{
+				return false;
+			}
+			StateMachine.Parameter.Context[] parameterContexts = smi.GetParameterContexts();
+			int num = this.entryData.ReadInt32();
+			for (int i = 0; i < num; i++)
+			{
+				int num2 = this.entryData.ReadInt32();
+				int position = this.entryData.Position;
+				string text = this.entryData.ReadKleiString();
+				text = text.Replace("Version=2.0.0.0", "Version=4.0.0.0");
+				string text2 = this.entryData.ReadKleiString();
+				foreach (StateMachine.Parameter.Context context in parameterContexts)
+				{
+					if (context.parameter.name == text2 && context.GetType().FullName == text)
+					{
+						context.Deserialize(this.entryData);
+						break;
+					}
+				}
+				this.entryData.SkipBytes(num2 - (this.entryData.Position - position));
+			}
+			smi.GoTo(state);
+			return true;
+		}
+
+		public int version;
+
+		public Type type;
+
+		public string currentState;
+
+		public FastReader entryData;
+	}
+
+	private class OldEntryV11
+	{
+		public OldEntryV11(int version, int data_pos, Type type, string current_state)
 		{
 			this.version = version;
 			this.dataPos = data_pos;
@@ -219,15 +236,25 @@ public class StateMachineSerializer
 			this.currentState = current_state;
 		}
 
-		public void Serialize(BinaryWriter writer)
+		public static List<StateMachineSerializer.Entry> DeserializeOldEntries(IReader reader)
 		{
-			writer.Write(this.version);
-			writer.Write(this.dataPos);
-			writer.WriteKleiString(this.type.FullName);
-			writer.WriteKleiString(this.currentState);
+			List<StateMachineSerializer.OldEntryV11> list = StateMachineSerializer.OldEntryV11.ReadEntries(reader);
+			byte[] array = StateMachineSerializer.OldEntryV11.ReadEntryData(reader);
+			List<StateMachineSerializer.Entry> list2 = new List<StateMachineSerializer.Entry>(list.Count);
+			foreach (StateMachineSerializer.OldEntryV11 oldEntryV in list)
+			{
+				StateMachineSerializer.Entry entry = new StateMachineSerializer.Entry();
+				entry.version = oldEntryV.version;
+				entry.type = oldEntryV.type;
+				entry.currentState = oldEntryV.currentState;
+				entry.entryData = new FastReader(array);
+				entry.entryData.SkipBytes(oldEntryV.dataPos);
+				list2.Add(entry);
+			}
+			return list2;
 		}
 
-		public static StateMachineSerializer.Entry Deserialize(IReader reader)
+		private static StateMachineSerializer.OldEntryV11 Deserialize(IReader reader)
 		{
 			int num = reader.ReadInt32();
 			int num2 = reader.ReadInt32();
@@ -238,40 +265,28 @@ public class StateMachineSerializer
 			{
 				return null;
 			}
-			return new StateMachineSerializer.Entry(num, num2, type, text2);
+			return new StateMachineSerializer.OldEntryV11(num, num2, type, text2);
 		}
 
-		public static StateMachineSerializer.Entry TrySerialize(StateMachine.Instance smi, BinaryWriter entry_writer)
+		private static List<StateMachineSerializer.OldEntryV11> ReadEntries(IReader reader)
 		{
-			int num = smi.GetStateMachine().version;
-			int num2 = (int)entry_writer.BaseStream.Position;
-			Type type = smi.GetType();
-			string name = smi.GetCurrentState().name;
-			Serializer.SerializeTypeless(smi, entry_writer);
-			if (smi.GetStateMachine().serializable)
+			List<StateMachineSerializer.OldEntryV11> list = new List<StateMachineSerializer.OldEntryV11>();
+			int num = reader.ReadInt32();
+			for (int i = 0; i < num; i++)
 			{
-				StateMachine.Parameter.Context[] parameterContexts = smi.GetParameterContexts();
-				entry_writer.Write(parameterContexts.Length);
-				foreach (StateMachine.Parameter.Context context in parameterContexts)
+				StateMachineSerializer.OldEntryV11 oldEntryV = StateMachineSerializer.OldEntryV11.Deserialize(reader);
+				if (oldEntryV != null)
 				{
-					long num3 = (long)((int)entry_writer.BaseStream.Position);
-					entry_writer.Write(0);
-					long num4 = (long)((int)entry_writer.BaseStream.Position);
-					entry_writer.WriteKleiString(context.GetType().FullName);
-					entry_writer.WriteKleiString(context.parameter.name);
-					context.Serialize(entry_writer);
-					long num5 = (long)((int)entry_writer.BaseStream.Position);
-					entry_writer.BaseStream.Position = num3;
-					long num6 = num5 - num4;
-					entry_writer.Write((int)num6);
-					entry_writer.BaseStream.Position = num5;
+					list.Add(oldEntryV);
 				}
 			}
-			if (entry_writer.BaseStream.Position > (long)num2)
-			{
-				return new StateMachineSerializer.Entry(num, num2, type, name);
-			}
-			return null;
+			return list;
+		}
+
+		private static byte[] ReadEntryData(IReader reader)
+		{
+			int num = reader.ReadInt32();
+			return reader.ReadBytes(num);
 		}
 
 		public int version;

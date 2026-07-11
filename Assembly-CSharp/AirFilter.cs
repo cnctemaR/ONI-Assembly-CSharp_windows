@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class AirFilter : StateMachineComponent<AirFilter.StatesInstance>, IEffectDescriptor
+public class AirFilter : StateMachineComponent<AirFilter.StatesInstance>, IGameObjectEffectDescriptor
 {
 	public bool HasFilter()
 	{
@@ -21,7 +22,7 @@ public class AirFilter : StateMachineComponent<AirFilter.StatesInstance>, IEffec
 		base.smi.StartSM();
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		return null;
 	}

@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
+using UnityEngine;
 
-public class SodaFountain : StateMachineComponent<SodaFountain.StatesInstance>, IEffectDescriptor
+public class SodaFountain : StateMachineComponent<SodaFountain.StatesInstance>, IGameObjectEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -28,7 +29,7 @@ public class SodaFountain : StateMachineComponent<SodaFountain.StatesInstance>, 
 		descs.Add(descriptor);
 	}
 
-	List<Descriptor> IEffectDescriptor.GetDescriptors(BuildingDef def)
+	List<Descriptor> IGameObjectEffectDescriptor.GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Descriptor descriptor = default(Descriptor);

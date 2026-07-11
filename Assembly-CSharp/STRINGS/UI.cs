@@ -154,19 +154,19 @@ namespace STRINGS
 
 		public static string PST_RATE = "</style>";
 
-		public static string PRE_AUTOMATION_ACTIVE = "<b><color=#57b95e>";
+		public static string PRE_AUTOMATION_ACTIVE = "<b><style=\"logic_on\">";
 
-		public static string PRE_AUTOMATION_STANDBY = "<b><color=#f44a47>";
+		public static string PRE_AUTOMATION_STANDBY = "<b><style=\"logic_off\">";
 
-		public static string PST_AUTOMATION = "</b></color>";
+		public static string PST_AUTOMATION = "</style></b>";
 
 		public static string HORIZONTAL_RULE = "------------------";
 
 		public static string HORIZONTAL_BR_RULE = "\n" + UI.HORIZONTAL_RULE + "\n";
 
-		public static string POS_INFINITY = "Infinity";
+		public static LocString POS_INFINITY = "Infinity";
 
-		public static string NEG_INFINITY = "-Infinity";
+		public static LocString NEG_INFINITY = "-Infinity";
 
 		public static LocString PROCEED_BUTTON = "PROCEED";
 
@@ -1602,7 +1602,13 @@ namespace STRINGS
 
 				public static LocString MANAGE = "Subscription";
 
+				public static LocString MANAGE_LOCAL = "Browse";
+
 				public static LocString WORKSHOP = "STEAM WORKSHOP";
+
+				public static LocString ENABLE_ALL = "ENABLE ALL";
+
+				public static LocString DISABLE_ALL = "DISABLE ALL";
 
 				public static LocString DRAG_TO_REORDER = "Drag to reorder";
 
@@ -1833,6 +1839,8 @@ namespace STRINGS
 
 				public static LocString RESET_TUTORIAL_WARNING = "All tutorial messages will be reset, and\nwill show up again the next time you play the game.";
 
+				public static LocString FEEDBACK = "Feedback";
+
 				public static LocString CREDITS = "Credits";
 
 				public static LocString BACK = "Done";
@@ -2023,6 +2031,23 @@ namespace STRINGS
 				public static LocString TIMELAPSE_DISABLED_DESCRIPTION = "Disabled";
 			}
 
+			public class FEEDBACK_SCREEN
+			{
+				public static LocString TITLE = "FEEDBACK";
+
+				public static LocString HEADER = "We would love to hear from you!";
+
+				public static LocString DESCRIPTION = "Let us know if you encounter any problems or how we can improve your Oxygen Not Included experience.\n\nWhen reporting a bug, please include your log and colony save file. The buttons to the right will help you find those files on your local drive.\n\nThank you for being part of the Oxygen Not Included community!";
+
+				public static LocString BUG_FORUMS_BUTTON = "Report a Bug";
+
+				public static LocString SUGGESTION_FORUMS_BUTTON = "Suggestions Forum";
+
+				public static LocString LOGS_DIRECTORY_BUTTON = "Browse Log Files";
+
+				public static LocString SAVE_FILES_DIRECTORY_BUTTON = "Browse Save Files";
+			}
+
 			public class WORLD_GEN_OPTIONS_SCREEN
 			{
 				public static LocString TITLE = "WORLD GENERATION OPTIONS";
@@ -2044,7 +2069,7 @@ namespace STRINGS
 
 				public static LocString ENABLE_BUTTON = "Enable Data Collection";
 
-				public static LocString DESCRIPTION = "Collecting user data helps us improve the game.\nPlayers who opt out of data collection will no longer send crash reports and play data to the game team.\n\nFor more details on our privacy policy and how we use the data we collect, please visit our <color=#ECA6C9><u><b>privacy center</b></u>.";
+				public static LocString DESCRIPTION = "Collecting user data helps us improve the game.\nPlayers who opt out of data collection will no longer send crash reports and play data to the game team.\n\nFor more details on our privacy policy and how we use the data we collect, please visit our <color=#ECA6C9><u><b>privacy center</b></u></color>.";
 
 				public static LocString DONE_BUTTON = "Done";
 
@@ -2090,7 +2115,23 @@ namespace STRINGS
 
 				public static LocString HEADER_UI = "INTERFACE";
 
+				public static LocString COLORMODE = "Color Mode:";
+
+				public static LocString COLOR_MODE_DEFAULT = "Default";
+
+				public static LocString COLOR_MODE_PROTANOPIA = "Protanopia";
+
+				public static LocString COLOR_MODE_DEUTERANOPIA = "Deuteranopia";
+
+				public static LocString COLOR_MODE_TRITANOPIA = "Tritanopia";
+
 				public static LocString ACCEPT_CHANGES = "Accept Changes?";
+
+				public static LocString ACCEPT_CHANGES_STRING_COLOR = "Interface changes will be visible immediately, but applying color changes to in-game text will require a restart.\n\nAccept Changes?";
+
+				public static LocString COLORBLIND_FEEDBACK = "Color blindness options are currently in progress.\n\nIf you would benefit from an alternative color mode or have had difficulties with any of the default colors, please visit the forums and let us know about your experiences.\n\nYour feedback is extremely helpful to us!";
+
+				public static LocString COLORBLIND_FEEDBACK_BUTTON = "Provide Feedback";
 			}
 
 			public class WORLDGENSCREEN
@@ -2143,6 +2184,8 @@ namespace STRINGS
 				public static LocString SAVE_DIRECTORY_INSUFFICIENT_SPACE = "There is insufficient disk space to write to your save directory.\n\nPlease free at least 15 MB to give your saves some room to breathe.\n{0}";
 
 				public static LocString WORLD_GEN_FILES = "A problem occurred while accessing certain game files that will prevent starting new games.\n\nPlease ensure you can modify these files and re-launch the game:\n\n{0}";
+
+				public static LocString WORLD_GEN_FAILURE = "A problem occurred while generating a world from this seed: {0}. \n\nPlease try again with a different seed.";
 
 				public static LocString PLAYER_PREFS_CORRUPTED = "A problem occurred while loading your game options.\nThey have been reset to their default settings.\n\n";
 
@@ -3208,7 +3251,7 @@ namespace STRINGS
 
 			public static LocString HELP_BUILDLOCATION_INSIDEGROUND = "Must be built in the ground";
 
-			public static LocString HELP_BUILDLOCATION_ATTACHPOINT = "Must be built overlapping an {0}";
+			public static LocString HELP_BUILDLOCATION_ATTACHPOINT = "Must be built overlapping a {0}";
 
 			public static LocString HELP_BUILDLOCATION_SPACE = "Must be built on the surface in space";
 
@@ -3870,6 +3913,8 @@ namespace STRINGS
 					public static LocString MAILINGLIST = "MAILING LIST";
 
 					public static LocString PATCHNOTES = "PATCH NOTES";
+
+					public static LocString FEEDBACK = "FEEDBACK";
 				}
 
 				public class LOADING
@@ -5169,13 +5214,15 @@ namespace STRINGS
 
 		public class CRASHSCREEN
 		{
-			public static LocString TITLE = "Whoops! We're sorry, but it seems your game has encountered an error.\nIt's okay though - these errors are how we find and fix problems to make our game more fun for everyone.\nIf you use the box below to submit a crash report to us, we can use this information to get the issue sorted out.";
+			public static LocString TITLE = "\"Whoops! We're sorry, but it seems your game has encountered an error. It's okay though - these errors are how we find and fix problems to make our game more fun for everyone. If you use the box below to submit a crash report to us, we can use this information to get the issue sorted out.\"";
+
+			public static LocString TITLE_MODS = "\"Oops-a-daisy! We're sorry, but it seems your game has encountered an error. If you uncheck all of the mods below, we will be able to help the next time this happens. Any mods that could be related to this error have already been unchecked.\"";
 
 			public static LocString HEADER = "OPTIONAL CRASH DESCRIPTION";
 
-			public static LocString BODY = "Help! A black hole ate my game!";
+			public static LocString HEADER_MODS = "ACTIVE MODS";
 
-			public static LocString MODS_ACTIVE = "You have mods active.\nPlease send output_log.txt to the modders and request support from them.\nSubmit a crash report only if requested by Klei.";
+			public static LocString BODY = "Help! A black hole ate my game!";
 
 			public static LocString THANKYOU = "Thank you!\n\nYou're making our game better, one crash at a time.";
 
@@ -5187,11 +5234,17 @@ namespace STRINGS
 
 			public static LocString CONTINUEBUTTON = "CONTINUE GAME";
 
+			public static LocString MOREINFOBUTTON = "MORE INFO";
+
+			public static LocString COPYTOCLIPBOARDBUTTON = "COPY TO CLIPBOARD";
+
 			public static LocString QUITBUTTON = "QUIT TO DESKTOP";
 
 			public static LocString SAVEFAILED = "Save Failed: {0}";
 
 			public static LocString LOADFAILED = "Load Failed: {0}\nSave Version: {1}\nExpected: {2}";
+
+			public static LocString REPORTEDERROR = "Reported Error";
 		}
 
 		public class DEMOOVERSCREEN
@@ -6082,7 +6135,7 @@ namespace STRINGS
 					UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby),
 					UI.HORIZONTAL_BR_RULE,
 					"This sensor will send a ",
-					UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Active),
+					UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby),
 					" for {0}"
 				});
 
@@ -6108,6 +6161,24 @@ namespace STRINGS
 				public static LocString INCREMENT_MODE = "Mode: Increment";
 
 				public static LocString DECREMENT_MODE = "Mode: Decrement";
+
+				public static LocString ADVANCED_MODE = "Advanced Mode";
+
+				public static LocString CURRENT_COUNT_SIMPLE = "{0} of ";
+
+				public static LocString CURRENT_COUNT_ADVANCED = "{0} % ";
+
+				public class TOOLTIPS
+				{
+					public static LocString ADVANCED_MODE = string.Concat(new string[]
+					{
+						"In Advanced Mode, the ",
+						BUILDINGS.PREFABS.LOGICCOUNTER.NAME,
+						" will count from <b>0</b> rather than <b>1</b>. It will reset when the max is reached, and send a ",
+						UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
+						" as a brief pulse rather than continuously."
+					});
+				}
 			}
 
 			public class TIMEDSWITCHSIDESCREEN
@@ -6446,6 +6517,12 @@ namespace STRINGS
 					public static LocString PAUSE = "Time will pause upon notification when checked";
 
 					public static LocString ZOOM = "The view will zoom to this building upon notification when checked";
+
+					public static LocString BAD = "\"Boing boing!\"";
+
+					public static LocString NEUTRAL = "\"Pop!\"";
+
+					public static LocString DUPLICANT_THREATENING = "AHH!";
 				}
 			}
 		}

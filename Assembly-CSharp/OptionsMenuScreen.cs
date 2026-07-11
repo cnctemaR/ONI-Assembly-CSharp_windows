@@ -16,6 +16,7 @@ public class OptionsMenuScreen : KModalButtonMenu
 			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.AUDIO, global::Action.NumActions, new UnityAction(this.OnAudioOptions), null, null),
 			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.GAME, global::Action.NumActions, new UnityAction(this.OnGameOptions), null, null),
 			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.METRICS, global::Action.NumActions, new UnityAction(this.OnMetrics), null, null),
+			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.FEEDBACK, global::Action.NumActions, new UnityAction(this.OnFeedback), null, null),
 			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.CREDITS, global::Action.NumActions, new UnityAction(this.OnCredits), null, null)
 		};
 		this.closeButton.onClick += this.Deactivate;
@@ -67,6 +68,11 @@ public class OptionsMenuScreen : KModalButtonMenu
 		base.ActivateChildScreen(this.metricsScreenPrefab.gameObject);
 	}
 
+	private void OnFeedback()
+	{
+		base.ActivateChildScreen(this.feedbackScreenPrefab.gameObject);
+	}
+
 	private void OnCredits()
 	{
 		base.ActivateChildScreen(this.creditsScreenPrefab.gameObject);
@@ -94,6 +100,9 @@ public class OptionsMenuScreen : KModalButtonMenu
 
 	[SerializeField]
 	private MetricsOptionsScreen metricsScreenPrefab;
+
+	[SerializeField]
+	private FeedbackScreen feedbackScreenPrefab;
 
 	[SerializeField]
 	private LocText title;

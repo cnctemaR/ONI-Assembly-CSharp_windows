@@ -68,6 +68,14 @@ namespace TMPro
 			}
 		}
 
+		public TMP_Style(string name, string styleOpeningDefinition, string styleClosingDefinition)
+		{
+			this.m_Name = name;
+			this.m_OpeningDefinition = styleOpeningDefinition;
+			this.m_ClosingDefinition = styleClosingDefinition;
+			this.RefreshStyle();
+		}
+
 		public void RefreshStyle()
 		{
 			this.m_HashCode = TMP_TextUtilities.GetSimpleHashCode(this.m_Name);

@@ -25,7 +25,11 @@ public class LayEggStates : GameStateMachine<LayEggStates, LayEggStates.Instance
 
 	private static void ShowEgg(LayEggStates.Instance smi)
 	{
-		smi.GetSMI<FertilityMonitor.Instance>().ShowEgg();
+		FertilityMonitor.Instance smi2 = smi.GetSMI<FertilityMonitor.Instance>();
+		if (smi2 != null)
+		{
+			smi2.ShowEgg();
+		}
 	}
 
 	private static void FaceEgg(LayEggStates.Instance smi)

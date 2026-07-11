@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/Clinic")]
-public class Clinic : Workable, IEffectDescriptor, ISingleSliderControl, ISliderControl
+public class Clinic : Workable, IGameObjectEffectDescriptor, ISingleSliderControl, ISliderControl
 {
 	protected override void OnPrefabInit()
 	{
@@ -156,32 +156,32 @@ public class Clinic : Workable, IEffectDescriptor, ISingleSliderControl, ISlider
 		return this.IsValidEffect(this.doctoredDiseaseEffect) || this.IsValidEffect(this.doctoredHealthEffect);
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
-		List<Descriptor> list = new List<Descriptor>();
+		List<Descriptor> descriptors = base.GetDescriptors(go);
 		if (this.IsValidEffect(this.healthEffect))
 		{
-			Effect.AddModifierDescriptions(base.gameObject, list, this.healthEffect, false);
+			Effect.AddModifierDescriptions(base.gameObject, descriptors, this.healthEffect, false);
 		}
 		if (this.diseaseEffect != this.healthEffect && this.IsValidEffect(this.diseaseEffect))
 		{
-			Effect.AddModifierDescriptions(base.gameObject, list, this.diseaseEffect, false);
+			Effect.AddModifierDescriptions(base.gameObject, descriptors, this.diseaseEffect, false);
 		}
 		if (this.AllowDoctoring())
 		{
 			Descriptor descriptor = default(Descriptor);
 			descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.DOCTORING, UI.BUILDINGEFFECTS.TOOLTIPS.DOCTORING, Descriptor.DescriptorType.Effect);
-			list.Add(descriptor);
+			descriptors.Add(descriptor);
 			if (this.IsValidEffect(this.doctoredHealthEffect))
 			{
-				Effect.AddModifierDescriptions(base.gameObject, list, this.doctoredHealthEffect, true);
+				Effect.AddModifierDescriptions(base.gameObject, descriptors, this.doctoredHealthEffect, true);
 			}
 			if (this.doctoredDiseaseEffect != this.doctoredHealthEffect && this.IsValidEffect(this.doctoredDiseaseEffect))
 			{
-				Effect.AddModifierDescriptions(base.gameObject, list, this.doctoredDiseaseEffect, true);
+				Effect.AddModifierDescriptions(base.gameObject, descriptors, this.doctoredDiseaseEffect, true);
 			}
 		}
-		return list;
+		return descriptors;
 	}
 
 	public float MedicalAttentionMinimum
@@ -285,7 +285,7 @@ public class Clinic : Workable, IEffectDescriptor, ISingleSliderControl, ISlider
 	};
 
 	[Serialize]
-	private float sicknessSliderValue = 100f;
+	private float sicknessSliderValue = 70f;
 
 	public class ClinicSM : GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, Clinic>
 	{

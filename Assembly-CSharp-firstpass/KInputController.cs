@@ -171,7 +171,7 @@ public class KInputController : IInputHandler
 				int mKeyCode = (int)keyDef.mKeyCode;
 				if ((!this.mIgnoreKeyboard || mKeyCode >= 323) && (!this.mIgnoreMouse || ((mKeyCode < 323 || mKeyCode >= 330) && mKeyCode != 1001 && mKeyCode != 1002)))
 				{
-					if (this.GetKeyDown(keyDef.mKeyCode) && this.mActiveModifiers == keyDef.mModifier)
+					if ((!keyDef.mIsDown || keyDef.mKeyCode == KKeyCode.MouseScrollDown || keyDef.mKeyCode == KKeyCode.MouseScrollUp) && this.GetKeyDown(keyDef.mKeyCode) && this.mActiveModifiers == keyDef.mModifier)
 					{
 						this.QueueButtonEvent(keyDef, true);
 					}

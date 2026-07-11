@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class HotTub : StateMachineComponent<HotTub.StatesInstance>, IEffectDescriptor
+public class HotTub : StateMachineComponent<HotTub.StatesInstance>, IGameObjectEffectDescriptor
 {
 	public float PercentFull
 	{
@@ -119,7 +119,7 @@ public class HotTub : StateMachineComponent<HotTub.StatesInstance>, IEffectDescr
 		base.smi.sm.userCount.Set(this.occupants.Count, base.smi);
 	}
 
-	List<Descriptor> IEffectDescriptor.GetDescriptors(BuildingDef def)
+	List<Descriptor> IGameObjectEffectDescriptor.GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Element element = ElementLoader.FindElementByHash(SimHashes.Water);

@@ -5,6 +5,13 @@ using UnityEngine;
 
 public class LogicBitSelectorSideScreen : SideScreenContent, IRenderEveryTick
 {
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		this.activeColor = GlobalAssets.Instance.colorSet.logicOnText;
+		this.inactiveColor = GlobalAssets.Instance.colorSet.logicOffText;
+	}
+
 	public void SelectToggle(int bit)
 	{
 		this.target.SetBitSelection(bit);
@@ -21,7 +28,7 @@ public class LogicBitSelectorSideScreen : SideScreenContent, IRenderEveryTick
 			{
 				GameObject gameObject = Util.KInstantiateUI(this.rowPrefab, this.rowPrefab.transform.parent.gameObject, true);
 				gameObject.GetComponent<HierarchyReferences>().GetReference<LocText>("bitName").SetText(string.Format(UI.UISIDESCREENS.LOGICBITSELECTORSIDESCREEN.BIT, i + 1));
-				gameObject.GetComponent<HierarchyReferences>().GetReference<KImage>("stateIcon").color = (this.target.IsBitActive(i) ? Color.green : Color.red);
+				gameObject.GetComponent<HierarchyReferences>().GetReference<KImage>("stateIcon").color = (this.target.IsBitActive(i) ? this.activeColor : this.inactiveColor);
 				gameObject.GetComponent<HierarchyReferences>().GetReference<LocText>("stateText").SetText(this.target.IsBitActive(i) ? UI.UISIDESCREENS.LOGICBITSELECTORSIDESCREEN.STATE_ACTIVE : UI.UISIDESCREENS.LOGICBITSELECTORSIDESCREEN.STATE_INACTIVE);
 				MultiToggle component = gameObject.GetComponent<MultiToggle>();
 				this.toggles_by_int.Add(i, component);
@@ -120,7 +127,7 @@ public class LogicBitSelectorSideScreen : SideScreenContent, IRenderEveryTick
 	[NonSerialized]
 	public Dictionary<int, MultiToggle> toggles_by_int = new Dictionary<int, MultiToggle>();
 
-	private Color activeColor = new Color(0.34117648f, 0.7254902f, 0.36862746f);
+	private Color activeColor;
 
-	private Color inactiveColor = new Color(0.9529412f, 0.2901961f, 0.2784314f);
+	private Color inactiveColor;
 }

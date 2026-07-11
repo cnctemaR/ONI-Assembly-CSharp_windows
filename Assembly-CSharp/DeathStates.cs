@@ -16,16 +16,17 @@ public class DeathStates : GameStateMachine<DeathStates, DeathStates.Instance, I
 			{
 				smi.DisableGravity();
 			});
-		this.pst.TriggerOnEnter(GameHashes.DeathAnimComplete, null).Enter("Butcher", delegate(DeathStates.Instance smi)
+		this.pst.TriggerOnEnter(GameHashes.DeathAnimComplete, null).TriggerOnEnter(GameHashes.Died, null).Enter("Butcher", delegate(DeathStates.Instance smi)
 		{
 			if (smi.gameObject.GetComponent<Butcherable>() != null)
 			{
 				smi.GetComponent<Butcherable>().OnButcherComplete();
 			}
-		}).Enter("Destroy", delegate(DeathStates.Instance smi)
-		{
-			smi.gameObject.DeleteObject();
 		})
+			.Enter("Destroy", delegate(DeathStates.Instance smi)
+			{
+				smi.gameObject.DeleteObject();
+			})
 			.BehaviourComplete(GameTags.Creatures.Die, false);
 	}
 

@@ -6,9 +6,9 @@ public class ReturnToChargeStationStates : GameStateMachine<ReturnToChargeStatio
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.emote;
-		this.emote.PlayAnim("react_lobatt", KAnim.PlayMode.Once).OnAnimQueueComplete(this.movingToChargingStation);
-		this.idle.ScheduleGoTo(1f, this.movingToChargingStation);
-		this.movingToChargingStation.MoveTo(delegate(ReturnToChargeStationStates.Instance smi)
+		this.emote.ToggleStatusItem(Db.Get().RobotStatusItems.MovingToChargeStation, null, Db.Get().StatusItemCategories.Main).PlayAnim("react_lobatt", KAnim.PlayMode.Once).OnAnimQueueComplete(this.movingToChargingStation);
+		this.idle.ToggleStatusItem(Db.Get().RobotStatusItems.MovingToChargeStation, null, Db.Get().StatusItemCategories.Main).ScheduleGoTo(1f, this.movingToChargingStation);
+		this.movingToChargingStation.ToggleStatusItem(Db.Get().RobotStatusItems.MovingToChargeStation, null, Db.Get().StatusItemCategories.Main).MoveTo(delegate(ReturnToChargeStationStates.Instance smi)
 		{
 			Storage sweepLocker = this.GetSweepLocker(smi);
 			if (!(sweepLocker == null))

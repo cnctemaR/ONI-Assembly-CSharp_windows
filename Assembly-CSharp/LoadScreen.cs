@@ -75,7 +75,7 @@ public class LoadScreen : KModalScreen
 					saveGameFileDetails.FileDate = lastWriteTime;
 					saveGameFileDetails.FileHeader = first;
 					saveGameFileDetails.FileInfo = second;
-					saveGameFileDetails.UniqueID = second.baseName + "/" + second.worldID;
+					saveGameFileDetails.UniqueID = ((second.colonyGuid != Guid.Empty) ? second.colonyGuid.ToString() : (second.baseName + "/" + second.worldID));
 					if (!this.saveFiles.ContainsKey(saveGameFileDetails.UniqueID))
 					{
 						this.saveFiles.Add(saveGameFileDetails.UniqueID, new List<LoadScreen.SaveGameFileDetails>());
@@ -291,7 +291,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header)
 	{
-		return header.buildVersion > 399948U;
+		return header.buildVersion > 408920U;
 	}
 
 	private void SetSelectedGame(string filename, string savename)
@@ -335,13 +335,13 @@ public class LoadScreen : KModalScreen
 			this.InfoText.text = "";
 			if (LoadScreen.IsSaveFileFromUnsupportedFutureBuild(header))
 			{
-				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 399948U);
+				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 408920U);
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
 			else if (gameInfo.saveMajorVersion < 7)
 			{
-				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.UNSUPPORTED_SAVE_VERSION, new object[] { filename, gameInfo.saveMajorVersion, gameInfo.saveMinorVersion, 7, 16 });
+				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.UNSUPPORTED_SAVE_VERSION, new object[] { filename, gameInfo.saveMajorVersion, gameInfo.saveMinorVersion, 7, 17 });
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
@@ -398,15 +398,15 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 399948U)
+		if (header.buildVersion > 408920U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 399948U.ToString();
+			text2 = 408920U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
 			text = string.Format("v{0}.{1}", gameInfo.saveMajorVersion, gameInfo.saveMinorVersion);
-			text2 = string.Format("v{0}.{1}", 7, 16);
+			text2 = string.Format("v{0}.{1}", 7, 17);
 		}
 		if (!flag)
 		{

@@ -54,6 +54,7 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 	{
 		this.allowCapture = false;
 		this.markedForCapture = false;
+		this.UpdateChore();
 	}
 
 	private void OnTagsChanged(object data)

@@ -153,6 +153,18 @@ public class SaveLoadRoot : KMonoBehaviour
 		Quaternion quaternion = reader.ReadQuaternion();
 		Vector3 vector2 = reader.ReadVector3();
 		reader.ReadByte();
+		if (SaveManager.DEBUG_OnlyLoadThisCellsObjects > -1)
+		{
+			Vector3 vector3 = Grid.CellToPos(SaveManager.DEBUG_OnlyLoadThisCellsObjects);
+			if ((vector.x < vector3.x || vector.x >= vector3.x + 1f || vector.y < vector3.y || vector.y >= vector3.y + 1f) && prefab.name != "SaveGame")
+			{
+				prefab = null;
+			}
+			else
+			{
+				global::Debug.Log("Keeping " + prefab.name);
+			}
+		}
 		return SaveLoadRoot.Load(prefab, vector, quaternion, vector2, reader);
 	}
 

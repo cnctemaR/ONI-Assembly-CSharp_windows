@@ -27,20 +27,27 @@ namespace KMod
 			return File.Exists(this.GetRoot());
 		}
 
-		public void GetTopLevelItems(List<FileSystemItem> file_system_items)
+		public void GetTopLevelItems(List<FileSystemItem> file_system_items, string relative_root)
 		{
 			HashSetPool<string, ZipFile>.PooledHashSet pooledHashSet = HashSetPool<string, ZipFile>.Allocate();
+			relative_root = relative_root ?? "";
+			relative_root = FileSystem.Normalize(relative_root);
 			foreach (ZipEntry zipEntry in this.zipfile)
 			{
-				string[] array = FileSystem.Normalize(zipEntry.FileName).Split(new char[] { '/' });
-				string text = array[0];
-				if (pooledHashSet.Add(text))
+				string text = FileSystem.Normalize(zipEntry.FileName);
+				if (text.StartsWith(relative_root))
 				{
-					file_system_items.Add(new FileSystemItem
+					text = text.Remove(0, relative_root.Length);
+					string[] array = text.Split(new char[] { '/' });
+					string text2 = array[0];
+					if (pooledHashSet.Add(text2))
 					{
-						name = text,
-						type = ((1 < array.Length) ? FileSystemItem.ItemType.Directory : FileSystemItem.ItemType.File)
-					});
+						file_system_items.Add(new FileSystemItem
+						{
+							name = text2,
+							type = ((1 < array.Length) ? FileSystemItem.ItemType.Directory : FileSystemItem.ItemType.File)
+						});
+					}
 				}
 			}
 			pooledHashSet.Recycle();

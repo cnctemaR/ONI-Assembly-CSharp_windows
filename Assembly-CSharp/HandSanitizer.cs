@@ -5,7 +5,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IEffectDescriptor, IBasicBuilding
+public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IGameObjectEffectDescriptor, IBasicBuilding
 {
 	protected override void OnPrefabInit()
 	{
@@ -67,7 +67,7 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 		}
 	}
 
-	public List<Descriptor> RequirementDescriptors(BuildingDef def)
+	public List<Descriptor> RequirementDescriptors()
 	{
 		return new List<Descriptor>
 		{
@@ -75,7 +75,7 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 		};
 	}
 
-	public List<Descriptor> EffectDescriptors(BuildingDef def)
+	public List<Descriptor> EffectDescriptors()
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		if (this.outputElement != SimHashes.Vacuum)
@@ -86,11 +86,11 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 		return list;
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		list.AddRange(this.RequirementDescriptors(def));
-		list.AddRange(this.EffectDescriptors(def));
+		list.AddRange(this.RequirementDescriptors());
+		list.AddRange(this.EffectDescriptors());
 		return list;
 	}
 

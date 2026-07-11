@@ -4,7 +4,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-public class BeachChair : StateMachineComponent<BeachChair.StatesInstance>, IEffectDescriptor
+public class BeachChair : StateMachineComponent<BeachChair.StatesInstance>, IGameObjectEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -30,7 +30,7 @@ public class BeachChair : StateMachineComponent<BeachChair.StatesInstance>, IEff
 		}
 	}
 
-	List<Descriptor> IEffectDescriptor.GetDescriptors(BuildingDef def)
+	List<Descriptor> IGameObjectEffectDescriptor.GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		list.Add(new Descriptor(UI.BUILDINGEFFECTS.RECREATION, UI.BUILDINGEFFECTS.TOOLTIPS.RECREATION, Descriptor.DescriptorType.Effect, false));

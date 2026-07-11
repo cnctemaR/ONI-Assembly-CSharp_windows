@@ -21,6 +21,12 @@ public class SmartReservoir : KMonoBehaviour, IActivationRangeTarget, ISim200ms
 		base.Subscribe<SmartReservoir>(-592767678, SmartReservoir.UpdateLogicCircuitDelegate);
 	}
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		base.Subscribe<SmartReservoir>(-905833192, SmartReservoir.OnCopySettingsDelegate);
+	}
+
 	public void Sim200ms(float dt)
 	{
 		this.UpdateLogicCircuit(null);

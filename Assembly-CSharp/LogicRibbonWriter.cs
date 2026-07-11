@@ -7,6 +7,12 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/LogicRibbonWriter")]
 public class LogicRibbonWriter : KMonoBehaviour, ILogicRibbonBitSelector, IRender200ms
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		base.Subscribe<LogicRibbonWriter>(-905833192, LogicRibbonWriter.OnCopySettingsDelegate);
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -26,6 +32,15 @@ public class LogicRibbonWriter : KMonoBehaviour, ILogicRibbonBitSelector, IRende
 		this.currentValue = logicValueChanged.newValue;
 		this.UpdateLogicCircuit();
 		this.UpdateVisuals();
+	}
+
+	private void OnCopySettings(object data)
+	{
+		LogicRibbonWriter component = ((GameObject)data).GetComponent<LogicRibbonWriter>();
+		if (component != null)
+		{
+			this.SetBitSelection(component.selectedBit);
+		}
 	}
 
 	private void UpdateLogicCircuit()
@@ -159,9 +174,17 @@ public class LogicRibbonWriter : KMonoBehaviour, ILogicRibbonBitSelector, IRende
 
 	public static readonly HashedString OUTPUT_PORT_ID = new HashedString("LogicRibbonWriterOutput");
 
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
 	private static readonly EventSystem.IntraObjectHandler<LogicRibbonWriter> OnLogicValueChangedDelegate = new EventSystem.IntraObjectHandler<LogicRibbonWriter>(delegate(LogicRibbonWriter component, object data)
 	{
 		component.OnLogicValueChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<LogicRibbonWriter> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<LogicRibbonWriter>(delegate(LogicRibbonWriter component, object data)
+	{
+		component.OnCopySettings(data);
 	});
 
 	private LogicPorts ports;

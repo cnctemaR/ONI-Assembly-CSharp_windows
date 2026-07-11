@@ -155,21 +155,21 @@ public class BuildMenuCategoriesScreen : KIconToggleMenu
 		{
 			if (list.Count <= 0)
 			{
-				goto IL_00F3;
+				goto IL_010B;
 			}
 			using (List<BuildingDef>.Enumerator enumerator = list.GetEnumerator())
 			{
 				while (enumerator.MoveNext())
 				{
 					BuildingDef buildingDef = enumerator.Current;
-					if (buildingDef.ShowInBuildMenu && !buildingDef.Deprecated)
+					if (buildingDef.ShowInBuildMenu && !buildingDef.Deprecated && (!buildingDef.DebugOnly || Game.Instance.DebugOnlyBuildingsAllowed))
 					{
 						PlanScreen.RequirementsState requirementsState = BuildMenu.Instance.BuildableState(buildingDef);
 						flag = flag && requirementsState == PlanScreen.RequirementsState.Tech;
 						flag2 = flag2 && (requirementsState == PlanScreen.RequirementsState.Materials || requirementsState == PlanScreen.RequirementsState.Tech);
 					}
 				}
-				goto IL_00F3;
+				goto IL_010B;
 			}
 		}
 		List<HashedString> list2;
@@ -182,7 +182,7 @@ public class BuildMenuCategoriesScreen : KIconToggleMenu
 				flag2 = flag2 && (categoryRequirements == PlanScreen.RequirementsState.Materials || categoryRequirements == PlanScreen.RequirementsState.Tech);
 			}
 		}
-		IL_00F3:
+		IL_010B:
 		PlanScreen.RequirementsState requirementsState2;
 		if (flag)
 		{

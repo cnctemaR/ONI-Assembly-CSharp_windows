@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
+using UnityEngine;
 
-public class EspressoMachine : StateMachineComponent<EspressoMachine.StatesInstance>, IEffectDescriptor
+public class EspressoMachine : StateMachineComponent<EspressoMachine.StatesInstance>, IGameObjectEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -28,7 +29,7 @@ public class EspressoMachine : StateMachineComponent<EspressoMachine.StatesInsta
 		descs.Add(descriptor);
 	}
 
-	List<Descriptor> IEffectDescriptor.GetDescriptors(BuildingDef def)
+	List<Descriptor> IGameObjectEffectDescriptor.GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Descriptor descriptor = default(Descriptor);

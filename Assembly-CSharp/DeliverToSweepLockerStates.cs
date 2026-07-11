@@ -78,5 +78,17 @@ public class DeliverToSweepLockerStates : GameStateMachine<DeliverToSweepLockerS
 		{
 			chore.AddPrecondition(ChorePreconditions.instance.CheckBehaviourPrecondition, GameTags.Robots.Behaviours.UnloadBehaviour);
 		}
+
+		public override void StartSM()
+		{
+			base.StartSM();
+			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().RobotStatusItems.UnloadingStorage, null);
+		}
+
+		protected override void OnCleanUp()
+		{
+			base.OnCleanUp();
+			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().RobotStatusItems.UnloadingStorage, false);
+		}
 	}
 }

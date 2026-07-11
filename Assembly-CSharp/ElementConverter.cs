@@ -8,7 +8,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ElementConverter : StateMachineComponent<ElementConverter.StatesInstance>, IEffectDescriptor
+public class ElementConverter : StateMachineComponent<ElementConverter.StatesInstance>, IGameObjectEffectDescriptor
 {
 	public void SetWorkSpeedMultiplier(float speed)
 	{
@@ -348,7 +348,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		base.OnCleanUp();
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		if (!this.showDescriptors)

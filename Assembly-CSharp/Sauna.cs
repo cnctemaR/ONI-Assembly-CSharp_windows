@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
+using UnityEngine;
 
-public class Sauna : StateMachineComponent<Sauna.StatesInstance>, IEffectDescriptor
+public class Sauna : StateMachineComponent<Sauna.StatesInstance>, IGameObjectEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -24,7 +25,7 @@ public class Sauna : StateMachineComponent<Sauna.StatesInstance>, IEffectDescrip
 		descs.Add(descriptor);
 	}
 
-	List<Descriptor> IEffectDescriptor.GetDescriptors(BuildingDef def)
+	List<Descriptor> IGameObjectEffectDescriptor.GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		list.Add(new Descriptor(UI.BUILDINGEFFECTS.RECREATION, UI.BUILDINGEFFECTS.TOOLTIPS.RECREATION, Descriptor.DescriptorType.Effect, false));

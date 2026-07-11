@@ -113,6 +113,7 @@ public class FuelTank : Storage, IUserControlledCapacity
 		base.gameObject.Subscribe(1366341636, new Action<object>(this.OnReturn));
 		this.UserMaxCapacity = this.UserMaxCapacity;
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
+		this.meter.gameObject.GetComponent<KBatchedAnimTracker>().matchParentOffset = true;
 		base.Subscribe(-1697596308, delegate(object data)
 		{
 			this.meter.SetPositionPercent(base.MassStored() / this.capacityKg);

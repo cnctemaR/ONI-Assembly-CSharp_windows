@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using STRINGS;
 using UnityEngine;
 
@@ -78,16 +79,9 @@ public class GameOptionsScreen : KModalButtonMenu
 		};
 		global::System.Action action2 = delegate
 		{
-			string text4 = SaveLoader.GetSavePrefixAndCreateFolder();
-			text4 = string.Concat(new string[]
-			{
-				text4,
-				"\\",
-				SaveGame.Instance.BaseName,
-				UI.FRONTEND.OPTIONS_SCREEN.TOGGLE_SANDBOX_SCREEN.BACKUP_SAVE_GAME_APPEND,
-				".sav"
-			});
-			SaveLoader.Instance.Save(text4, false, false);
+			string savePrefixAndCreateFolder = SaveLoader.GetSavePrefixAndCreateFolder();
+			string text4 = SaveGame.Instance.BaseName + UI.FRONTEND.OPTIONS_SCREEN.TOGGLE_SANDBOX_SCREEN.BACKUP_SAVE_GAME_APPEND + ".sav";
+			SaveLoader.Instance.Save(Path.Combine(savePrefixAndCreateFolder, text4), false, false);
 			this.SetSandboxModeActive(SaveGame.Instance.sandboxEnabled);
 			TopLeftControlScreen.Instance.UpdateSandboxToggleState();
 			this.Deactivate();

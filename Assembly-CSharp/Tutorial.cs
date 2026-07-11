@@ -177,6 +177,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 
 	public Message TutorialMessage(Tutorial.TutorialMessages tm, bool queueMessage = true)
 	{
+		bool flag = false;
 		Message message = null;
 		switch (tm)
 		{
@@ -190,7 +191,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 			message = new TutorialMessage(Tutorial.TutorialMessages.TM_StressManagement, MISC.NOTIFICATIONS.STRESSMANAGEMENTMESSAGE.NAME, MISC.NOTIFICATIONS.STRESSMANAGEMENTMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.STRESSMANAGEMENTMESSAGE.TOOLTIP, null, null, null, "hud_stress");
 			break;
 		case Tutorial.TutorialMessages.TM_Scheduling:
-			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Scheduling, MISC.NOTIFICATIONS.SCHEDULEMESSAGE.NAME, MISC.NOTIFICATIONS.SCHEDULEMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.SCHEDULEMESSAGE.TOOLTIP, null, null, null, "OverviewUI_schedule2_icon");
+			flag = true;
 			break;
 		case Tutorial.TutorialMessages.TM_Mopping:
 			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Mopping, MISC.NOTIFICATIONS.MOPPINGMESSAGE.NAME, MISC.NOTIFICATIONS.MOPPINGMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.MOPPINGMESSAGE.TOOLTIP, null, null, null, "icon_action_mop");
@@ -238,9 +239,10 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Plumbing, MISC.NOTIFICATIONS.PLUMBING.NAME, MISC.NOTIFICATIONS.PLUMBING.MESSAGEBODY, MISC.NOTIFICATIONS.PLUMBING.TOOLTIP, "tutorials\\Piping", "Tute_Plumbing", VIDEOS.PLUMBING, "icon_category_plumbing");
 			break;
 		}
-		global::Debug.Assert(message != null, string.Format("No Tutorial message: {0}", tm.ToString()));
+		global::Debug.Assert(message != null || flag, string.Format("No Tutorial message: {0}", tm.ToString()));
 		if (queueMessage)
 		{
+			global::Debug.Assert(!flag, "Attempted to queue deprecated Tutorial Message " + tm.ToString());
 			if (!this.tutorialMessagesRemaining.Contains(tm))
 			{
 				return null;
@@ -414,22 +416,22 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		int num = 0;
 		if (WorldInventory.Instance != null)
 		{
-			List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(GameTags.Edible);
+			ICollection<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(GameTags.Edible);
 			if (pickupables == null)
 			{
 				return 0;
 			}
-			for (int i = 0; i < pickupables.Count; i++)
+			foreach (Pickupable pickupable in pickupables)
 			{
-				if (pickupables[i].storage != null && (pickupables[i].storage.GetComponent<RationBox>() != null || pickupables[i].storage.GetComponent<Refrigerator>() != null) && !Rottable.IsRefrigerated(pickupables[i].gameObject) && Rottable.AtmosphereQuality(pickupables[i].gameObject) != Rottable.RotAtmosphereQuality.Sterilizing)
+				if (pickupable.storage != null && (pickupable.storage.GetComponent<RationBox>() != null || pickupable.storage.GetComponent<Refrigerator>() != null) && !Rottable.IsRefrigerated(pickupable.gameObject) && Rottable.AtmosphereQuality(pickupable.gameObject) != Rottable.RotAtmosphereQuality.Sterilizing)
 				{
-					Rottable.Instance smi = pickupables[i].GetSMI<Rottable.Instance>();
+					Rottable.Instance smi = pickupable.GetSMI<Rottable.Instance>();
 					if (smi != null && smi.RotConstitutionPercentage < 0.8f)
 					{
 						num++;
 						if (foods != null)
 						{
-							foods.Add(pickupables[i].GetProperName());
+							foods.Add(pickupable.GetProperName());
 						}
 					}
 				}

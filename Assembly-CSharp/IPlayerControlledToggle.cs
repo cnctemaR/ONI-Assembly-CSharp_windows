@@ -9,4 +9,6 @@ public interface IPlayerControlledToggle
 	KSelectable GetSelectable();
 
 	string SideScreenTitleKey { get; }
+
+	bool ToggleRequested { get; set; }
 }

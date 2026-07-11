@@ -449,11 +449,27 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 
 	protected virtual void SetResultDescriptions(GameObject go)
 	{
-		string text = "Entity prefab has no info description component.";
+		string text = "";
 		InfoDescription component = go.GetComponent<InfoDescription>();
 		if (component)
 		{
 			text = component.description;
+		}
+		else
+		{
+			KPrefabID component2 = go.GetComponent<KPrefabID>();
+			if (component2 != null)
+			{
+				Element element = ElementLoader.GetElement(component2.PrefabID());
+				if (element != null)
+				{
+					text = element.Description();
+				}
+			}
+			else
+			{
+				text = go.GetProperName();
+			}
 		}
 		this.descriptionLabel.SetText(text);
 	}

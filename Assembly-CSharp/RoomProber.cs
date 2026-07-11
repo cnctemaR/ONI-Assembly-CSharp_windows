@@ -282,11 +282,17 @@ public class RoomProber : ISim1000ms
 		this.CreateRoom(cavity);
 		foreach (KPrefabID kprefabID in cavity.buildings)
 		{
-			kprefabID.Trigger(144050788, cavity.room);
+			if (kprefabID != null)
+			{
+				kprefabID.Trigger(144050788, cavity.room);
+			}
 		}
 		foreach (KPrefabID kprefabID2 in cavity.plants)
 		{
-			kprefabID2.Trigger(144050788, cavity.room);
+			if (kprefabID2 != null)
+			{
+				kprefabID2.Trigger(144050788, cavity.room);
+			}
 		}
 	}
 

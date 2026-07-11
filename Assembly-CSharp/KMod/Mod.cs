@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using Klei;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -51,6 +49,7 @@ namespace KMod
 			other_mod.enabled = this.enabled;
 			other_mod.crash_count = this.crash_count;
 			other_mod.loaded_content = this.loaded_content;
+			other_mod.loaded_mod_data = this.loaded_mod_data;
 			other_mod.reinstall_path = this.reinstall_path;
 		}
 
@@ -79,18 +78,86 @@ namespace KMod
 			{
 				return;
 			}
+			this.ScanContentFromSource("");
+			if (this.content_source == null)
+			{
+				this.content_source = new Directory(this.ContentPath);
+			}
+		}
+
+		private void ScanContentFromSource(string relativeRoot = "")
+		{
+			this.available_content = (Content)0;
 			List<FileSystemItem> list = new List<FileSystemItem>();
-			this.file_source.GetTopLevelItems(list);
+			this.file_source.GetTopLevelItems(list, relativeRoot);
+			bool flag = false;
 			foreach (FileSystemItem fileSystemItem in list)
 			{
 				if (fileSystemItem.type == FileSystemItem.ItemType.Directory)
 				{
-					this.AddDirectory(fileSystemItem.name.ToLower());
+					string text = fileSystemItem.name.ToLower();
+					this.AddDirectory(text);
 				}
 				else
 				{
-					this.AddFile(fileSystemItem.name.ToLower());
+					string text2 = fileSystemItem.name.ToLower();
+					if (text2 == "archived_versions.yaml")
+					{
+						flag = true;
+					}
+					else
+					{
+						this.AddFile(text2);
+					}
 				}
+			}
+			if (!flag)
+			{
+				return;
+			}
+			if (!string.IsNullOrEmpty(this.relative_root))
+			{
+				global::Debug.LogWarning("archived version at " + this.relative_root + " also has archived_versions.yaml, ignoring.");
+				return;
+			}
+			string text3 = this.file_source.Read("archived_versions.yaml");
+			if (string.IsNullOrEmpty(text3))
+			{
+				global::Debug.LogWarning("Failed to read archived_versions.yaml, skipping");
+				return;
+			}
+			Mod.ArchivedVersionArray archivedVersionArray = YamlIO.Parse<Mod.ArchivedVersionArray>(text3, default(FileHandle), null, null);
+			if (archivedVersionArray == null)
+			{
+				global::Debug.LogWarning("Failed to parse archived_versions.yaml, text is " + text3);
+				return;
+			}
+			Mod.ArchivedVersion archivedVersion = null;
+			foreach (Mod.ArchivedVersion archivedVersion2 in archivedVersionArray.archivedVersions)
+			{
+				if (408920L <= (long)archivedVersion2.lastWorkingBuild && (archivedVersion == null || archivedVersion2.lastWorkingBuild < archivedVersion.lastWorkingBuild))
+				{
+					archivedVersion = archivedVersion2;
+				}
+			}
+			if (archivedVersion != null)
+			{
+				this.relative_root = FileSystem.Normalize(archivedVersion.relativePath);
+				if (!this.relative_root.StartsWith("archived_version"))
+				{
+					global::Debug.LogError("Archived version with path: " + archivedVersion.relativePath + ". For consistency among mods, please keep all old versions in a top-level directory called \"archived_versions\"");
+					return;
+				}
+				global::Debug.Log(string.Format("Found archived version for mod {0} with lastWorkingBuild: {1}, redirecting content path to {2}", this.title, archivedVersion.lastWorkingBuild, this.relative_root));
+				this.ScanContentFromSource(this.relative_root);
+			}
+		}
+
+		public string ContentPath
+		{
+			get
+			{
+				return Path.Combine(this.label.install_path, this.relative_root);
 			}
 		}
 
@@ -171,7 +238,7 @@ namespace KMod
 
 		public void Install()
 		{
-			if (this.label.distribution_platform == Label.DistributionPlatform.Local || this.label.distribution_platform == Label.DistributionPlatform.Dev)
+			if (this.IsLocal)
 			{
 				this.status = Mod.Status.Installed;
 				return;
@@ -191,6 +258,7 @@ namespace KMod
 			}
 			this.file_source.CopyTo(this.label.install_path, null);
 			this.file_source = new Directory(this.label.install_path);
+			this.content_source = new Directory(this.ContentPath);
 			this.status = Mod.Status.Installed;
 		}
 
@@ -203,7 +271,7 @@ namespace KMod
 				this.status = Mod.Status.UninstallPending;
 				return false;
 			}
-			if (this.label.distribution_platform != Label.DistributionPlatform.Local && this.label.distribution_platform != Label.DistributionPlatform.Dev && !FileUtil.DeleteDirectory(this.label.install_path, 0))
+			if (!this.IsLocal && !FileUtil.DeleteDirectory(this.label.install_path, 0))
 			{
 				global::Debug.Log(string.Format("Can't uninstall {0}: directory deletion failed", this.label.ToString()));
 				this.status = Mod.Status.UninstallPending;
@@ -215,7 +283,7 @@ namespace KMod
 
 		private bool LoadStrings()
 		{
-			string text = FileSystem.Normalize(Path.Combine(this.label.install_path, "strings"));
+			string text = FileSystem.Normalize(Path.Combine(this.ContentPath, "strings"));
 			if (!Directory.Exists(text))
 			{
 				return false;
@@ -234,41 +302,12 @@ namespace KMod
 
 		private bool LoadTranslations()
 		{
-			string text = FileSystem.Normalize(this.label.install_path);
-			if (!Directory.Exists(text))
-			{
-				return false;
-			}
-			DirectoryInfo directoryInfo = new DirectoryInfo(text);
-			HashSetPool<Localization.Locale, Mod>.PooledHashSet pooledHashSet = HashSetPool<Localization.Locale, Mod>.Allocate();
-			foreach (FileInfo fileInfo in directoryInfo.GetFiles())
-			{
-				if (!(fileInfo.Extension.ToLower() != ".po"))
-				{
-					string[] array = File.ReadAllLines(fileInfo.FullName, Encoding.UTF8);
-					pooledHashSet.Add(Localization.GetLocale(array));
-					Localization.OverloadStrings(Localization.ExtractTranslatedStrings(array, false));
-				}
-			}
-			if (pooledHashSet.Count == 0)
-			{
-				return false;
-			}
-			Localization.Locale new_locale = pooledHashSet.First<Localization.Locale>();
-			if (!pooledHashSet.All<Localization.Locale>((Localization.Locale locale) => locale == new_locale))
-			{
-				return false;
-			}
-			Localization.SetLocale(new_locale);
-			Localization.SwapToLocalizedFont(new_locale.FontName);
-			KPlayerPrefs.SetString(Localization.SELECTED_LANGUAGE_TYPE_KEY, Localization.SelectedLanguageType.UGC.ToString());
-			KPlayerPrefs.SetString(Localization.SELECTED_LANGUAGE_CODE_KEY, new_locale.Code);
-			return true;
+			return false;
 		}
 
 		private bool LoadAnimation()
 		{
-			string text = FileSystem.Normalize(Path.Combine(this.label.install_path, "anim"));
+			string text = FileSystem.Normalize(Path.Combine(this.ContentPath, "anim"));
 			if (!Directory.Exists(text))
 			{
 				return false;
@@ -342,13 +381,18 @@ namespace KMod
 			{
 				this.loaded_content |= Content.Translation;
 			}
-			if ((content & Content.DLL) != (Content)0 && DLLLoader.LoadDLLs(this.label.id + "." + this.label.distribution_platform, this.label.install_path))
+			if ((content & Content.DLL) != (Content)0)
 			{
-				this.loaded_content |= Content.DLL;
+				this.loaded_mod_data = DLLLoader.LoadDLLs(this.label.id + "." + this.label.distribution_platform, this.ContentPath);
+				if (this.loaded_mod_data != null)
+				{
+					this.loaded_content |= Content.DLL;
+				}
 			}
 			if ((content & Content.LayerableFiles) != (Content)0)
 			{
-				FileSystem.file_sources.Insert(0, this.file_source.GetFileSystem());
+				global::Debug.Assert(this.content_source != null, "Attempting to Load layerable files with content_source not initialized");
+				FileSystem.file_sources.Insert(0, this.content_source.GetFileSystem());
 				this.loaded_content |= Content.LayerableFiles;
 			}
 			if ((content & Content.Animation) != (Content)0 && this.LoadAnimation())
@@ -362,7 +406,7 @@ namespace KMod
 			content &= this.loaded_content;
 			if ((content & Content.LayerableFiles) != (Content)0)
 			{
-				FileSystem.file_sources.Remove(this.file_source.GetFileSystem());
+				FileSystem.file_sources.Remove(this.content_source.GetFileSystem());
 				this.loaded_content &= ~Content.LayerableFiles;
 			}
 		}
@@ -372,10 +416,26 @@ namespace KMod
 			this.crash_count = MathUtil.Clamp(0, 3, new_crash_count);
 		}
 
-		public void Crash(bool do_disable)
+		public bool IsDev
+		{
+			get
+			{
+				return this.label.distribution_platform == Label.DistributionPlatform.Dev;
+			}
+		}
+
+		public bool IsLocal
+		{
+			get
+			{
+				return this.label.distribution_platform == Label.DistributionPlatform.Dev || this.label.distribution_platform == Label.DistributionPlatform.Local;
+			}
+		}
+
+		public void SetCrashed()
 		{
 			this.SetCrashCount(this.crash_count + 1);
-			if (do_disable)
+			if (!this.IsDev)
 			{
 				this.enabled = false;
 			}
@@ -383,7 +443,7 @@ namespace KMod
 
 		public void Uncrash()
 		{
-			this.SetCrashCount((this.label.distribution_platform == Label.DistributionPlatform.Dev) ? (this.crash_count - 1) : 0);
+			this.SetCrashCount(this.IsDev ? (this.crash_count - 1) : 0);
 		}
 
 		public bool IsActive()
@@ -416,6 +476,11 @@ namespace KMod
 			return (this.available_content & content) > (Content)0;
 		}
 
+		public bool HasOnlyTranslationContent()
+		{
+			return this.available_content == Content.Translation;
+		}
+
 		[JsonProperty]
 		public Label label;
 
@@ -431,9 +496,19 @@ namespace KMod
 		[JsonProperty]
 		public string reinstall_path;
 
+		public bool foundInStackTrace;
+
+		public string relative_root = "";
+
+		public LoadedModData loaded_mod_data;
+
 		public IFileSource file_source;
 
+		public IFileSource content_source;
+
 		public bool is_subscribed;
+
+		private const string ARCHIVED_VERSIONS_FILENAME = "archived_versions.yaml";
 
 		public const int MAX_CRASH_COUNT = 3;
 
@@ -443,6 +518,23 @@ namespace KMod
 			Installed,
 			UninstallPending,
 			ReinstallPending
+		}
+
+		public class ArchivedVersionArray
+		{
+			public Mod.ArchivedVersion[] archivedVersions { get; set; }
+
+			public ArchivedVersionArray()
+			{
+				this.archivedVersions = new Mod.ArchivedVersion[0];
+			}
+		}
+
+		public class ArchivedVersion
+		{
+			public string relativePath { get; set; }
+
+			public int lastWorkingBuild { get; set; }
 		}
 	}
 }

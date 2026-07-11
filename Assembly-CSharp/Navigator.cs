@@ -156,11 +156,11 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		if (this.target == null)
 		{
 			base.Trigger(-766531887, null);
-			this.Stop(false);
+			this.Stop(false, true);
 		}
 		else if (num == this.reservedCell && this.CurrentNavType != NavType.Tube)
 		{
-			this.Stop(true);
+			this.Stop(true, true);
 		}
 		else
 		{
@@ -204,7 +204,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 				this.SetReservedCell(cellPreferences);
 				if (this.reservedCell == NavigationReservations.InvalidReservation)
 				{
-					this.Stop(false);
+					this.Stop(false, true);
 				}
 				else
 				{
@@ -219,12 +219,12 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 			}
 			else if (this.path.HasArrived())
 			{
-				this.Stop(true);
+				this.Stop(true, true);
 			}
 			else
 			{
 				this.ClearReservedCell();
-				this.Stop(false);
+				this.Stop(false, true);
 			}
 		}
 		if (trigger_advance)
@@ -238,15 +238,18 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		return this.NavGrid.transitions[this.path.nodes[1].transitionId];
 	}
 
-	public void Stop(bool arrived_at_destination = false)
+	public void Stop(bool arrived_at_destination = false, bool play_idle = true)
 	{
 		this.target = null;
 		this.targetOffsets = null;
 		this.path.Clear();
 		base.smi.sm.moveTarget.Set(null, base.smi);
 		this.transitionDriver.EndTransition();
-		HashedString idleAnim = this.NavGrid.GetIdleAnim(this.CurrentNavType);
-		base.GetComponent<KAnimControllerBase>().Play(idleAnim, KAnim.PlayMode.Loop, 1f, 0f);
+		if (play_idle)
+		{
+			HashedString idleAnim = this.NavGrid.GetIdleAnim(this.CurrentNavType);
+			base.GetComponent<KAnimControllerBase>().Play(idleAnim, KAnim.PlayMode.Loop, 1f, 0f);
+		}
 		if (arrived_at_destination)
 		{
 			base.smi.GoTo(base.smi.sm.arrived);
@@ -292,7 +295,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	private void OnDefeated(object data)
 	{
 		this.ClearReservedCell();
-		this.Stop(false);
+		this.Stop(false, false);
 	}
 
 	private void ClearReservedCell()
@@ -384,7 +387,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	{
 		if (data is Storage || (data != null && (bool)data))
 		{
-			this.Stop(false);
+			this.Stop(false, true);
 		}
 	}
 

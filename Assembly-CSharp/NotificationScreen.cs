@@ -250,7 +250,7 @@ public class NotificationScreen : KScreen
 				}
 				case NotificationType.DuplicantThreatening:
 					locText.color = this.badColor;
-					componentInChildren.sprite = this.icon_bad;
+					componentInChildren.sprite = this.icon_threatening;
 					break;
 				default:
 					goto IL_03A7;
@@ -446,7 +446,7 @@ public class NotificationScreen : KScreen
 		case NotificationType.Messages:
 			return this.icon_message;
 		case NotificationType.DuplicantThreatening:
-			return this.icon_bad;
+			return this.icon_threatening;
 		}
 		return this.icon_normal;
 	}
@@ -541,6 +541,8 @@ public class NotificationScreen : KScreen
 	public Sprite icon_warning;
 
 	public Sprite icon_bad;
+
+	public Sprite icon_threatening;
 
 	public Sprite icon_message;
 

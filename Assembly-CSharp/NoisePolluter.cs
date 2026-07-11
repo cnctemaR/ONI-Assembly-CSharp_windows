@@ -243,11 +243,6 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		return list;
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
-	{
-		return this.GetEffectDescriptions();
-	}
-
 	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		return this.GetEffectDescriptions();

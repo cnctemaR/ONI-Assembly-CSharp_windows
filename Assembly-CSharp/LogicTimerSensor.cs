@@ -43,13 +43,13 @@ public class LogicTimerSensor : Switch, ISaveLoadable, ISim33ms
 			if (this.timeElapsedInCurrentState >= this.onDuration)
 			{
 				flag = false;
-				this.timeElapsedInCurrentState = Mathf.Min(this.timeElapsedInCurrentState - this.onDuration, 0f);
+				this.timeElapsedInCurrentState -= this.onDuration;
 			}
 		}
 		else if (this.timeElapsedInCurrentState >= this.offDuration)
 		{
 			flag = true;
-			this.timeElapsedInCurrentState = Mathf.Min(this.timeElapsedInCurrentState - this.offDuration, 0f);
+			this.timeElapsedInCurrentState -= this.offDuration;
 		}
 		this.SetState(flag);
 	}

@@ -56,19 +56,24 @@ public class ReportManager : KMonoBehaviour
 		ReportManager.Instance = null;
 	}
 
-	[OnSerializing]
-	private void OnSerializing()
+	[CustomSerialize]
+	private void CustomSerialize(BinaryWriter writer)
 	{
-		MemoryStream memoryStream = new MemoryStream();
-		BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
-		this.noteStorage.Serialize(binaryWriter);
-		this.noteStorageBytes = memoryStream.GetBuffer();
+		writer.Write(0);
+		this.noteStorage.Serialize(writer);
 	}
 
-	[OnSerialized]
-	private void OnSerialized()
+	[CustomDeserialize]
+	private void CustomDeserialize(IReader reader)
 	{
-		this.noteStorageBytes = null;
+		if (this.noteStorageBytes == null)
+		{
+			global::Debug.Assert(reader.ReadInt32() == 0);
+			BinaryReader binaryReader = new BinaryReader(new MemoryStream(reader.RawBytes()));
+			binaryReader.BaseStream.Position = (long)reader.Position;
+			this.noteStorage.Deserialize(binaryReader);
+			reader.SkipBytes((int)binaryReader.BaseStream.Position - reader.Position);
+		}
 	}
 
 	[OnDeserialized]
@@ -580,7 +585,7 @@ public class ReportManager : KMonoBehaviour
 					{
 						writer.Write(keyValuePair2.Key.noteHash);
 						writer.Write(keyValuePair2.Key.isPositive);
-						writer.Write(keyValuePair2.Value);
+						writer.WriteSingleFast(keyValuePair2.Value);
 					}
 				}
 			}

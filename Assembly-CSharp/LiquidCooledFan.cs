@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInstance>, IEffectDescriptor
+public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInstance>, IGameObjectEffectDescriptor
 {
 	public bool HasMaterial()
 	{
@@ -143,7 +143,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 		}
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Descriptor descriptor = default(Descriptor);

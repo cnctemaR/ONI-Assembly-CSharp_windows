@@ -192,7 +192,7 @@ namespace KSerialization
 				writer.Write((ulong)value);
 				return;
 			case SerializationTypeInfo.Single:
-				writer.Write((float)value);
+				writer.WriteSingleFast((float)value);
 				return;
 			case SerializationTypeInfo.Double:
 				writer.Write((double)value);
@@ -213,16 +213,16 @@ namespace KSerialization
 			case SerializationTypeInfo.Vector2:
 			{
 				Vector2 vector = (Vector2)value;
-				writer.Write(vector.x);
-				writer.Write(vector.y);
+				writer.WriteSingleFast(vector.x);
+				writer.WriteSingleFast(vector.y);
 				return;
 			}
 			case SerializationTypeInfo.Vector3:
 			{
 				Vector3 vector2 = (Vector3)value;
-				writer.Write(vector2.x);
-				writer.Write(vector2.y);
-				writer.Write(vector2.z);
+				writer.WriteSingleFast(vector2.x);
+				writer.WriteSingleFast(vector2.y);
+				writer.WriteSingleFast(vector2.z);
 				return;
 			}
 			case SerializationTypeInfo.Array:
@@ -342,7 +342,7 @@ namespace KSerialization
 									object obj3 = enumerator.Current;
 									serializationTemplate2.SerializeData(obj3, writer);
 								}
-								goto IL_05A9;
+								goto IL_05A4;
 							}
 						}
 						foreach (object obj4 in collection)
@@ -350,7 +350,7 @@ namespace KSerialization
 							writer.WriteValue(typeInfo6, obj4);
 						}
 					}
-					IL_05A9:
+					IL_05A4:
 					long position15 = writer.BaseStream.Position;
 					long num5 = position15 - position14;
 					writer.BaseStream.Position = position13;
@@ -382,7 +382,7 @@ namespace KSerialization
 								serializationTemplate3.SerializeData(obj5, writer);
 								num6++;
 							}
-							goto IL_045F;
+							goto IL_045A;
 						}
 					}
 					foreach (object obj6 in enumerable)
@@ -390,7 +390,7 @@ namespace KSerialization
 						writer.WriteValue(typeInfo7, obj6);
 						num6++;
 					}
-					IL_045F:
+					IL_045A:
 					long position18 = writer.BaseStream.Position;
 					long num7 = position18 - position17;
 					writer.BaseStream.Position = position16;
@@ -427,7 +427,7 @@ namespace KSerialization
 									object obj7 = enumerator.Current;
 									serializationTemplate4.SerializeData(obj7, writer);
 								}
-								goto IL_08D7;
+								goto IL_08D2;
 							}
 						}
 						foreach (object obj8 in collection2)
@@ -435,7 +435,7 @@ namespace KSerialization
 							writer.WriteValue(typeInfo8, obj8);
 						}
 					}
-					IL_08D7:
+					IL_08D2:
 					long position21 = writer.BaseStream.Position;
 					long num8 = position21 - position20;
 					writer.BaseStream.Position = position19;
@@ -535,7 +535,7 @@ namespace KSerialization
 				float[] array9 = (float[])array;
 				for (int num2 = 0; num2 < array.Length; num2++)
 				{
-					writer.Write(array9[num2]);
+					writer.WriteSingleFast(array9[num2]);
 				}
 				return;
 			}
@@ -667,7 +667,7 @@ namespace KSerialization
 				while (enumerator.MoveNext())
 				{
 					object obj9 = enumerator.Current;
-					writer.Write((float)obj9);
+					writer.WriteSingleFast((float)obj9);
 				}
 				return;
 			}
@@ -678,10 +678,11 @@ namespace KSerialization
 			}
 		}
 
-		public static void GetSerializationMethods(this Type type, Type type_a, Type type_b, out MethodInfo method_a, out MethodInfo method_b)
+		public static void GetSerializationMethods(this Type type, Type type_a, Type type_b, Type type_c, out MethodInfo method_a, out MethodInfo method_b, out MethodInfo method_c)
 		{
 			method_a = null;
 			method_b = null;
+			method_c = null;
 			foreach (MethodInfo methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
 			{
 				object[] customAttributes = methodInfo.GetCustomAttributes(false);
@@ -694,6 +695,10 @@ namespace KSerialization
 					else if (customAttributes[j].GetType() == type_b)
 					{
 						method_b = methodInfo;
+					}
+					else if (customAttributes[j].GetType() == type_c)
+					{
+						method_c = methodInfo;
 					}
 				}
 			}

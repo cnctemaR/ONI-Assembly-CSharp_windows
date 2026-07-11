@@ -34,7 +34,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	{
 		get
 		{
-			this.InitializeTags();
+			this.InitializeTags(true);
 			return this.tags;
 		}
 	}
@@ -63,8 +63,22 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
-	public void InitializeTags()
+	private void ValidateTags()
 	{
+		DebugUtil.Assert(this.PrefabTag.IsValid);
+		global::Debug.Assert(this.tags.Contains(this.PrefabTag), string.Format("PrefabTag {0} is not contained in tags", this.PrefabTag));
+		foreach (Tag tag in this.serializedTags)
+		{
+			global::Debug.Assert(this.tags.Contains(tag), string.Format("serialized tag {0} is not contained in tags", tag));
+		}
+	}
+
+	public void InitializeTags(bool force_initialize = false)
+	{
+		if (this.initialized && !force_initialize)
+		{
+			return;
+		}
 		DebugUtil.Assert(this.PrefabTag.IsValid);
 		if (this.tags.Add(this.PrefabTag))
 		{
@@ -77,6 +91,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 				this.dirtyTagBits = true;
 			}
 		}
+		this.initialized = true;
 	}
 
 	public void UpdateSaveLoadTag()
@@ -105,7 +120,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public void UpdateTagBits()
 	{
-		this.InitializeTags();
+		this.InitializeTags(false);
 		this.LaunderTagBits();
 	}
 
@@ -119,7 +134,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	{
 		base.OnPrefabInit();
 		base.Subscribe<KPrefabID>(1969584890, KPrefabID.OnObjectDestroyedDelegate);
-		this.InitializeTags();
+		this.InitializeTags(true);
 		if (this.prefabInitFn != null)
 		{
 			this.prefabInitFn(base.gameObject);
@@ -134,6 +149,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	protected override void OnSpawn()
 	{
+		this.InitializeTags(true);
 		IStateMachineControllerHack component = base.GetComponent<IStateMachineControllerHack>();
 		if (component != null)
 		{
@@ -144,6 +160,11 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 			this.prefabSpawnFn(base.gameObject);
 			this.prefabSpawnFn = null;
 		}
+	}
+
+	protected override void OnCmpEnable()
+	{
+		this.InitializeTags(true);
 	}
 
 	public void AddTag(Tag tag, bool serialize = false)
@@ -187,7 +208,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public bool HasAnyTags(List<Tag> search_tags)
 	{
-		this.InitializeTags();
+		this.InitializeTags(false);
 		foreach (Tag tag in search_tags)
 		{
 			if (this.tags.Contains(tag))
@@ -200,7 +221,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public bool HasAnyTags(Tag[] search_tags)
 	{
-		this.InitializeTags();
+		this.InitializeTags(false);
 		foreach (Tag tag in search_tags)
 		{
 			if (this.tags.Contains(tag))
@@ -267,6 +288,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	[OnDeserialized]
 	internal void OnDeserializedMethod()
 	{
+		this.InitializeTags(true);
 		KPrefabIDTracker kprefabIDTracker = KPrefabIDTracker.Get();
 		if (kprefabIDTracker.GetInstance(this.InstanceID))
 		{
@@ -290,6 +312,8 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	public Tag PrefabTag;
 
 	private TagBits tagBits;
+
+	private bool initialized;
 
 	private bool dirtyTagBits = true;
 

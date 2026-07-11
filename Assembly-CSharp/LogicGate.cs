@@ -208,9 +208,9 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 			LogicGateBase.Op op = this.op;
 			if (op == LogicGateBase.Op.Multiplexer)
 			{
-				if (num5 == 0)
+				if (!LogicCircuitNetwork.IsBitActive(0, num5))
 				{
-					if (num4 == 0)
+					if (!LogicCircuitNetwork.IsBitActive(0, num4))
 					{
 						this.outputValueOne = value;
 					}
@@ -219,7 +219,7 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 						this.outputValueOne = num;
 					}
 				}
-				else if (num4 == 0)
+				else if (!LogicCircuitNetwork.IsBitActive(0, num4))
 				{
 					this.outputValueOne = num2;
 				}
@@ -241,9 +241,9 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 			LogicGateBase.Op op = this.op;
 			if (op == LogicGateBase.Op.Demultiplexer)
 			{
-				if (num4 == 0)
+				if (!LogicCircuitNetwork.IsBitActive(0, num4))
 				{
-					if (num5 == 0)
+					if (!LogicCircuitNetwork.IsBitActive(0, num5))
 					{
 						this.outputValueOne = value;
 					}
@@ -253,7 +253,7 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 						this.outputTwoSender.SetValue(value);
 					}
 				}
-				else if (num5 == 0)
+				else if (!LogicCircuitNetwork.IsBitActive(0, num5))
 				{
 					this.outputValueThree = value;
 					this.outputThreeSender.SetValue(value);

@@ -47,48 +47,6 @@ public class SoundEvent : AnimEvent
 
 	public static bool ObjectIsSelectedAndVisible(GameObject go)
 	{
-		if (go != null && go.GetComponent<KSelectable>() != null && CameraController.Instance.IsVisiblePos(go.transform.position))
-		{
-			if (go.GetComponent<KSelectable>().IsSelected)
-			{
-				return true;
-			}
-			if (go.GetComponent<Worker>() != null && go.GetComponent<Worker>().workable != null)
-			{
-				Workable workable = go.GetComponent<Worker>().workable;
-				if (workable.GetComponent<KSelectable>() != null && workable.GetComponent<KSelectable>().IsSelected)
-				{
-					return true;
-				}
-			}
-			if (go.GetComponent<Workable>() != null)
-			{
-				Workable[] components = go.GetComponents<Workable>();
-				if (components.Length != 0)
-				{
-					for (int i = 0; i < components.Length; i++)
-					{
-						if (components[i].worker != null && components[i].GetComponent<KSelectable>().IsSelected)
-						{
-							return true;
-						}
-					}
-				}
-			}
-			if (go.transform.GetComponentInParent<KSelectable>() != null && go.transform.GetComponentInParent<KSelectable>().IsSelected)
-			{
-				return true;
-			}
-			foreach (object obj in go.transform)
-			{
-				Transform transform = (Transform)obj;
-				if (transform.GetComponent<KSelectable>() != null && transform.GetComponent<KSelectable>().IsSelected)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
 		return false;
 	}
 

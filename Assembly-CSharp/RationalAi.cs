@@ -5,11 +5,9 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
-		default_state = this.alive;
-		base.serializable = true;
-		this.root.ToggleStateMachine((RationalAi.Instance smi) => new DeathMonitor.Instance(smi.master, new DeathMonitor.Def()));
-		this.alive.TagTransition(GameTags.Dead, this.dead, false).ToggleStateMachine((RationalAi.Instance smi) => new ThoughtGraph.Instance(smi.master)).ToggleStateMachine((RationalAi.Instance smi) => new StaminaMonitor.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new StressMonitor.Instance(smi.master))
+		default_state = this.root;
+		this.root.TagTransition(GameTags.Dead, this.dead, false).TagTransition(GameTags.Dead, this.alive, true).ToggleStateMachine((RationalAi.Instance smi) => new DeathMonitor.Instance(smi.master, new DeathMonitor.Def()));
+		this.alive.ToggleStateMachine((RationalAi.Instance smi) => new ThoughtGraph.Instance(smi.master)).ToggleStateMachine((RationalAi.Instance smi) => new StaminaMonitor.Instance(smi.master)).ToggleStateMachine((RationalAi.Instance smi) => new StressMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new EmoteMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new SneezeMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new DecorMonitor.Instance(smi.master))
@@ -39,7 +37,10 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			.ToggleStateMachine((RationalAi.Instance smi) => new SuitWearer.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new TubeTraveller.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new MingleMonitor.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new MournMonitor.Instance(smi.master));
+			.ToggleStateMachine((RationalAi.Instance smi) => new MournMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new SpeechMonitor.Instance(smi.master, new SpeechMonitor.Def()))
+			.ToggleStateMachine((RationalAi.Instance smi) => new BlinkMonitor.Instance(smi.master, new BlinkMonitor.Def()))
+			.ToggleStateMachine((RationalAi.Instance smi) => new ConversationMonitor.Instance(smi.master, new ConversationMonitor.Def()));
 		this.dead.ToggleStateMachine((RationalAi.Instance smi) => new FallWhenDeadMonitor.Instance(smi.master)).ToggleBrain("dead").Enter("RefreshUserMenu", delegate(RationalAi.Instance smi)
 		{
 			smi.RefreshUserMenu();

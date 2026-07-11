@@ -102,18 +102,30 @@ public class DupeGreetingManager : KMonoBehaviour, ISim200ms
 
 	private void BeginReacting(GameObject minionGO)
 	{
+		if (minionGO == null)
+		{
+			return;
+		}
 		MinionIdentity component = minionGO.GetComponent<MinionIdentity>();
 		Vector3 vector = Vector3.zero;
 		foreach (DupeGreetingManager.GreetingSetup greetingSetup in this.activeSetups)
 		{
 			if (greetingSetup.A.minion == component)
 			{
-				vector = greetingSetup.B.minion.transform.GetPosition();
+				if (greetingSetup.B.minion != null)
+				{
+					vector = greetingSetup.B.minion.transform.GetPosition();
+					break;
+				}
 				break;
 			}
-			if (greetingSetup.B.minion == component)
+			else if (greetingSetup.B.minion == component)
 			{
-				vector = greetingSetup.A.minion.transform.GetPosition();
+				if (greetingSetup.A.minion != null)
+				{
+					vector = greetingSetup.A.minion.transform.GetPosition();
+					break;
+				}
 				break;
 			}
 		}

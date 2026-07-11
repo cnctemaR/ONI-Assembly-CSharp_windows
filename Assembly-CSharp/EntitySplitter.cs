@@ -86,6 +86,7 @@ public class EntitySplitter : KMonoBehaviour
 		}
 		gameObject2.SetActive(true);
 		component.TotalAmount = Mathf.Min(amount, pickupable.TotalAmount);
+		component.PrimaryElement.Temperature = pickupable.PrimaryElement.Temperature;
 		bool keepZeroMassObject = pickupable.PrimaryElement.KeepZeroMassObject;
 		pickupable.PrimaryElement.KeepZeroMassObject = true;
 		pickupable.TotalAmount -= amount;

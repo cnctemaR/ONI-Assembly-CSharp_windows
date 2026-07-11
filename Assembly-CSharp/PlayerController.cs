@@ -204,6 +204,19 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		}
 	}
 
+	public void CancelDragging()
+	{
+		this.queueStopDrag = true;
+		if (this.activeTool != null)
+		{
+			DragTool dragTool = this.activeTool as DragTool;
+			if (dragTool != null)
+			{
+				dragTool.CancelDragging();
+			}
+		}
+	}
+
 	public void OnKeyDown(KButtonEvent e)
 	{
 		if (e.TryConsume(global::Action.ToggleScreenshotMode))

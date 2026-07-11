@@ -107,6 +107,26 @@ public class DragTool : InterfaceTool
 		}
 	}
 
+	public void CancelDragging()
+	{
+		KScreenManager.Instance.SetEventSystemEnabled(true);
+		this.dragAxis = DragTool.DragAxis.Invalid;
+		if (!this.dragging)
+		{
+			return;
+		}
+		this.dragging = false;
+		if (this.areaVisualizerText != Guid.Empty)
+		{
+			NameDisplayScreen.Instance.RemoveWorldText(this.areaVisualizerText);
+			this.areaVisualizerText = Guid.Empty;
+		}
+		if (this.GetMode() == DragTool.Mode.Box && this.areaVisualizer != null)
+		{
+			this.areaVisualizer.SetActive(false);
+		}
+	}
+
 	public override void OnLeftClickUp(Vector3 cursor_pos)
 	{
 		cursor_pos -= this.placementPivot;
@@ -117,43 +137,42 @@ public class DragTool : InterfaceTool
 			return;
 		}
 		this.dragging = false;
-		int num = (int)this.GetMode();
 		if (this.areaVisualizerText != Guid.Empty)
 		{
 			NameDisplayScreen.Instance.RemoveWorldText(this.areaVisualizerText);
 			this.areaVisualizerText = Guid.Empty;
 		}
-		if (num == 1 && this.areaVisualizer != null)
+		if (this.GetMode() == DragTool.Mode.Box && this.areaVisualizer != null)
 		{
 			this.areaVisualizer.SetActive(false);
+			int num;
 			int num2;
-			int num3;
-			Grid.PosToXY(this.downPos, out num2, out num3);
+			Grid.PosToXY(this.downPos, out num, out num2);
+			int num3 = num;
 			int num4 = num2;
-			int num5 = num3;
+			int num5;
 			int num6;
-			int num7;
-			Grid.PosToXY(cursor_pos, out num6, out num7);
+			Grid.PosToXY(cursor_pos, out num5, out num6);
+			if (num5 < num)
+			{
+				global::Util.Swap<int>(ref num, ref num5);
+			}
 			if (num6 < num2)
 			{
 				global::Util.Swap<int>(ref num2, ref num6);
 			}
-			if (num7 < num3)
+			for (int i = num2; i <= num6; i++)
 			{
-				global::Util.Swap<int>(ref num3, ref num7);
-			}
-			for (int i = num3; i <= num7; i++)
-			{
-				for (int j = num2; j <= num6; j++)
+				for (int j = num; j <= num5; j++)
 				{
-					int num8 = Grid.XYToCell(j, i);
-					if (Grid.IsValidCell(num8) && Grid.IsVisible(num8))
+					int num7 = Grid.XYToCell(j, i);
+					if (Grid.IsValidCell(num7) && Grid.IsVisible(num7))
 					{
-						int num9 = i - num5;
-						int num10 = j - num4;
+						int num8 = i - num4;
+						int num9 = j - num3;
+						num8 = Mathf.Abs(num8);
 						num9 = Mathf.Abs(num9);
-						num10 = Mathf.Abs(num10);
-						this.OnDragTool(num8, num9 + num10);
+						this.OnDragTool(num7, num8 + num9);
 					}
 				}
 			}

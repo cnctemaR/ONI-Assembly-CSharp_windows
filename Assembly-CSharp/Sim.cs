@@ -64,7 +64,7 @@ public static class Sim
 		writer.Write(array);
 	}
 
-	public unsafe static int Load(FastReader reader)
+	public unsafe static int Load(IReader reader)
 	{
 		int num = reader.ReadInt32();
 		byte[] array;

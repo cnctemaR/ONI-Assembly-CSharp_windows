@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IEffectDescriptor
+public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IGameObjectEffectDescriptor
 {
 	public float TargetTemperature
 	{
@@ -62,7 +62,7 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IE
 		}
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Descriptor descriptor = default(Descriptor);

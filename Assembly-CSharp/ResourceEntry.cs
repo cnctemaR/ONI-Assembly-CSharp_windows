@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Klei;
 using STRINGS;
@@ -26,17 +27,22 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IEventSystemH
 
 	private void OnClick()
 	{
-		List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(this.Resource);
-		if (pickupables == null)
+		this.lastClickTime = Time.unscaledTime;
+		if (this.cachedPickupables == null)
+		{
+			this.cachedPickupables = WorldInventory.Instance.CreatePickupablesList(this.Resource);
+			base.StartCoroutine(this.ClearCachedPickupablesAfterThreshold());
+		}
+		if (this.cachedPickupables == null)
 		{
 			return;
 		}
 		Pickupable pickupable = null;
-		for (int i = 0; i < pickupables.Count; i++)
+		for (int i = 0; i < this.cachedPickupables.Count; i++)
 		{
 			this.selectionIdx++;
-			int num = this.selectionIdx % pickupables.Count;
-			pickupable = pickupables[num];
+			int num = this.selectionIdx % this.cachedPickupables.Count;
+			pickupable = this.cachedPickupables[num];
 			if (pickupable != null && !pickupable.HasTag(GameTags.StoredPrivate))
 			{
 				break;
@@ -50,9 +56,9 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IEventSystemH
 				transform = pickupable.storage.transform;
 			}
 			SelectTool.Instance.SelectAndFocus(transform.transform.GetPosition(), transform.GetComponent<KSelectable>(), Vector3.zero);
-			for (int j = 0; j < pickupables.Count; j++)
+			for (int j = 0; j < this.cachedPickupables.Count; j++)
 			{
-				Pickupable pickupable2 = pickupables[j];
+				Pickupable pickupable2 = this.cachedPickupables[j];
 				if (pickupable2 != null)
 				{
 					KAnimControllerBase component = pickupable2.GetComponent<KAnimControllerBase>();
@@ -63,6 +69,16 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IEventSystemH
 				}
 			}
 		}
+	}
+
+	private IEnumerator ClearCachedPickupablesAfterThreshold()
+	{
+		while (this.cachedPickupables != null && this.lastClickTime != 0f && Time.unscaledTime - this.lastClickTime < 10f)
+		{
+			yield return new WaitForSeconds(1f);
+		}
+		this.cachedPickupables = null;
+		yield break;
 	}
 
 	public void GetAmounts(EdiblesManager.FoodInfo food_info, bool doExtras, out float available, out float total, out float reserved)
@@ -134,6 +150,7 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IEventSystemH
 	{
 		this.Resource = t;
 		this.Measure = measure;
+		this.cachedPickupables = null;
 	}
 
 	private void Hover(bool is_hovering)
@@ -150,16 +167,16 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IEventSystemH
 		{
 			this.Background.color = new Color(0f, 0f, 0f, 0f);
 		}
-		List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(this.Resource);
+		ICollection<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(this.Resource);
 		if (pickupables == null)
 		{
 			return;
 		}
-		for (int i = 0; i < pickupables.Count; i++)
+		foreach (Pickupable pickupable in pickupables)
 		{
-			if (!(pickupables[i] == null))
+			if (!(pickupable == null))
 			{
-				KAnimControllerBase component = pickupables[i].GetComponent<KAnimControllerBase>();
+				KAnimControllerBase component = pickupable.GetComponent<KAnimControllerBase>();
 				if (!(component == null))
 				{
 					if (is_hovering)
@@ -237,7 +254,13 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IEventSystemH
 	[MyCmpReq]
 	private Button button;
 
+	private const float CLICK_RESET_TIME_THRESHOLD = 10f;
+
 	private int selectionIdx;
+
+	private float lastClickTime;
+
+	private List<Pickupable> cachedPickupables;
 
 	private float currentQuantity = float.MinValue;
 }

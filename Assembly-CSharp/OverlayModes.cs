@@ -312,17 +312,27 @@ public abstract class OverlayModes
 		public Crop(Canvas ui_root, GameObject harvestable_notification_prefab)
 		{
 			OverlayModes.ColorHighlightCondition[] array = new OverlayModes.ColorHighlightCondition[3];
-			array[0] = new OverlayModes.ColorHighlightCondition((KMonoBehaviour h) => new Color(0.95686275f, 0.2509804f, 0.2784314f, 0.75f), delegate(KMonoBehaviour h)
+			array[0] = new OverlayModes.ColorHighlightCondition((KMonoBehaviour h) => GlobalAssets.Instance.colorSet.cropHalted, delegate(KMonoBehaviour h)
 			{
 				WiltCondition component = h.GetComponent<WiltCondition>();
 				return component != null && component.IsWilting();
 			});
-			array[1] = new OverlayModes.ColorHighlightCondition((KMonoBehaviour h) => new Color(0.9843137f, 0.6901961f, 0.23137255f, 0.75f), (KMonoBehaviour h) => !(h as HarvestDesignatable).CanBeHarvested());
-			array[2] = new OverlayModes.ColorHighlightCondition((KMonoBehaviour h) => new Color(0.41960785f, 0.827451f, 0.5176471f, 0.75f), (KMonoBehaviour h) => (h as HarvestDesignatable).CanBeHarvested());
+			array[1] = new OverlayModes.ColorHighlightCondition((KMonoBehaviour h) => GlobalAssets.Instance.colorSet.cropGrowing, (KMonoBehaviour h) => !(h as HarvestDesignatable).CanBeHarvested());
+			array[2] = new OverlayModes.ColorHighlightCondition((KMonoBehaviour h) => GlobalAssets.Instance.colorSet.cropGrown, (KMonoBehaviour h) => (h as HarvestDesignatable).CanBeHarvested());
 			this.highlightConditions = array;
 			base..ctor(OverlayScreen.HarvestableIDs);
 			this.uiRoot = ui_root;
 			this.harvestableNotificationPrefab = harvestable_notification_prefab;
+		}
+
+		public override List<LegendEntry> GetCustomLegendData()
+		{
+			return new List<LegendEntry>
+			{
+				new LegendEntry(UI.OVERLAYS.CROP.FULLY_GROWN, UI.OVERLAYS.CROP.TOOLTIPS.FULLY_GROWN, GlobalAssets.Instance.colorSet.cropGrown, null, null, true),
+				new LegendEntry(UI.OVERLAYS.CROP.GROWING, UI.OVERLAYS.CROP.TOOLTIPS.GROWING, GlobalAssets.Instance.colorSet.cropGrowing, null, null, true),
+				new LegendEntry(UI.OVERLAYS.CROP.GROWTH_HALTED, UI.OVERLAYS.CROP.TOOLTIPS.GROWTH_HALTED, GlobalAssets.Instance.colorSet.cropHalted, null, null, true)
+			};
 		}
 
 		public override void Update()
@@ -561,6 +571,15 @@ public abstract class OverlayModes
 			return "Decor";
 		}
 
+		public override List<LegendEntry> GetCustomLegendData()
+		{
+			return new List<LegendEntry>
+			{
+				new LegendEntry(UI.OVERLAYS.DECOR.HIGHDECOR, UI.OVERLAYS.DECOR.TOOLTIPS.HIGHDECOR, GlobalAssets.Instance.colorSet.decorPositive, null, null, true),
+				new LegendEntry(UI.OVERLAYS.DECOR.LOWDECOR, UI.OVERLAYS.DECOR.TOOLTIPS.LOWDECOR, GlobalAssets.Instance.colorSet.decorNegative, null, null, true)
+			};
+		}
+
 		public Decor()
 		{
 			OverlayModes.ColorHighlightCondition[] array = new OverlayModes.ColorHighlightCondition[1];
@@ -574,11 +593,11 @@ public abstract class OverlayModes
 					float num2 = (dp as DecorProvider).GetDecorForCell(num);
 					if (num2 > 0f)
 					{
-						color = new Color(0f, 0.8f, 0f, 0.8f);
+						color = GlobalAssets.Instance.colorSet.decorHighlightPositive;
 					}
 					else if (num2 < 0f)
 					{
-						color = new Color(1f, 0f, 0f, 0.4f);
+						color = GlobalAssets.Instance.colorSet.decorHighlightNegative;
 					}
 					else if (dp.GetComponent<MonumentPart>() != null && dp.GetComponent<MonumentPart>().IsMonumentCompleted())
 					{
@@ -587,12 +606,12 @@ public abstract class OverlayModes
 							num2 = gameObject.GetComponent<DecorProvider>().GetDecorForCell(num);
 							if (num2 > 0f)
 							{
-								color = new Color(0f, 0.8f, 0f, 0.8f);
+								color = GlobalAssets.Instance.colorSet.decorHighlightPositive;
 								break;
 							}
 							if (num2 < 0f)
 							{
-								color = new Color(1f, 0f, 0f, 0.4f);
+								color = GlobalAssets.Instance.colorSet.decorHighlightNegative;
 								break;
 							}
 						}
@@ -858,7 +877,7 @@ public abstract class OverlayModes
 			list2.Sort((OverlayModes.Disease.DiseaseSortInfo a, OverlayModes.Disease.DiseaseSortInfo b) => a.sortkey.CompareTo(b.sortkey));
 			foreach (OverlayModes.Disease.DiseaseSortInfo diseaseSortInfo in list2)
 			{
-				list.Add(new LegendEntry(diseaseSortInfo.disease.Name, diseaseSortInfo.disease.overlayLegendHovertext.ToString(), diseaseSortInfo.disease.overlayColour, null));
+				list.Add(new LegendEntry(diseaseSortInfo.disease.Name, diseaseSortInfo.disease.overlayLegendHovertext.ToString(), diseaseSortInfo.disease.overlayColour, null, null, true));
 			}
 			return list;
 		}
@@ -1084,6 +1103,23 @@ public abstract class OverlayModes
 			return "Logic";
 		}
 
+		public override List<LegendEntry> GetCustomLegendData()
+		{
+			return new List<LegendEntry>
+			{
+				new LegendEntry(UI.OVERLAYS.LOGIC.INPUT, UI.OVERLAYS.LOGIC.TOOLTIPS.INPUT, Color.white, null, Assets.GetSprite("logicInput"), true),
+				new LegendEntry(UI.OVERLAYS.LOGIC.OUTPUT, UI.OVERLAYS.LOGIC.TOOLTIPS.OUTPUT, Color.white, null, Assets.GetSprite("logicOutput"), true),
+				new LegendEntry(UI.OVERLAYS.LOGIC.RIBBON_INPUT, UI.OVERLAYS.LOGIC.TOOLTIPS.RIBBON_INPUT, Color.white, null, Assets.GetSprite("logic_ribbon_all_in"), true),
+				new LegendEntry(UI.OVERLAYS.LOGIC.RIBBON_OUTPUT, UI.OVERLAYS.LOGIC.TOOLTIPS.RIBBON_OUTPUT, Color.white, null, Assets.GetSprite("logic_ribbon_all_out"), true),
+				new LegendEntry(UI.OVERLAYS.LOGIC.RESET_UPDATE, UI.OVERLAYS.LOGIC.TOOLTIPS.RESET_UPDATE, Color.white, null, Assets.GetSprite("logicResetUpdate"), true),
+				new LegendEntry(UI.OVERLAYS.LOGIC.CONTROL_INPUT, UI.OVERLAYS.LOGIC.TOOLTIPS.CONTROL_INPUT, Color.white, null, Assets.GetSprite("control_input_frame_legend"), true),
+				new LegendEntry(UI.OVERLAYS.LOGIC.CIRCUIT_STATUS_HEADER, null, Color.white, null, null, false),
+				new LegendEntry(UI.OVERLAYS.LOGIC.ONE, null, GlobalAssets.Instance.colorSet.logicOnText, null, null, true),
+				new LegendEntry(UI.OVERLAYS.LOGIC.ZERO, null, GlobalAssets.Instance.colorSet.logicOffText, null, null, true),
+				new LegendEntry(UI.OVERLAYS.LOGIC.DISCONNECTED, UI.OVERLAYS.LOGIC.TOOLTIPS.DISCONNECTED, GlobalAssets.Instance.colorSet.logicDisconnected, null, null, true)
+			};
+		}
+
 		public Logic(LogicModeUI ui_asset)
 		{
 			this.conduitTargetLayer = LayerMask.NameToLayer("MaskedOverlay");
@@ -1238,6 +1274,7 @@ public abstract class OverlayModes
 					if (prefabTag == ribbon_bridge_id)
 					{
 						KBatchedAnimController controller = root.GetComponent<KBatchedAnimController>();
+						this.ResetRibbonTint(controller);
 						this.ribbonBridgeControllers.RemoveWhere((OverlayModes.Logic.BridgeInfo x) => x.controller == controller);
 						return;
 					}
@@ -1373,18 +1410,18 @@ public abstract class OverlayModes
 					}
 				}
 				LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
-				Color32 colourOn = this.uiAsset.colourOn;
-				Color32 colourOff = this.uiAsset.colourOff;
-				colourOff.a = (colourOn.a = 0);
+				Color32 logicOn = GlobalAssets.Instance.colorSet.logicOn;
+				Color32 logicOff = GlobalAssets.Instance.colorSet.logicOff;
+				logicOff.a = (logicOn.a = 0);
 				foreach (KBatchedAnimController kbatchedAnimController in this.wireControllers)
 				{
 					if (!(kbatchedAnimController == null))
 					{
-						Color32 color = colourOff;
+						Color32 color = logicOff;
 						LogicCircuitNetwork networkForCell = logicCircuitManager.GetNetworkForCell(Grid.PosToCell(kbatchedAnimController.transform.GetPosition()));
 						if (networkForCell != null)
 						{
-							color = (networkForCell.IsBitActive(0) ? colourOn : colourOff);
+							color = (networkForCell.IsBitActive(0) ? logicOn : logicOff);
 						}
 						if (this.connectedNetworks.Count > 0)
 						{
@@ -1403,17 +1440,17 @@ public abstract class OverlayModes
 				{
 					if (!(kbatchedAnimController2 == null))
 					{
-						Color32 color2 = colourOff;
-						Color32 color3 = colourOff;
-						Color32 color4 = colourOff;
-						Color32 color5 = colourOff;
+						Color32 color2 = logicOff;
+						Color32 color3 = logicOff;
+						Color32 color4 = logicOff;
+						Color32 color5 = logicOff;
 						LogicCircuitNetwork networkForCell2 = logicCircuitManager.GetNetworkForCell(Grid.PosToCell(kbatchedAnimController2.transform.GetPosition()));
 						if (networkForCell2 != null)
 						{
-							color2 = (networkForCell2.IsBitActive(0) ? colourOn : colourOff);
-							color3 = (networkForCell2.IsBitActive(1) ? colourOn : colourOff);
-							color4 = (networkForCell2.IsBitActive(2) ? colourOn : colourOff);
-							color5 = (networkForCell2.IsBitActive(3) ? colourOn : colourOff);
+							color2 = (networkForCell2.IsBitActive(0) ? logicOn : logicOff);
+							color3 = (networkForCell2.IsBitActive(1) ? logicOn : logicOff);
+							color4 = (networkForCell2.IsBitActive(2) ? logicOn : logicOff);
+							color5 = (networkForCell2.IsBitActive(3) ? logicOn : logicOff);
 						}
 						if (this.connectedNetworks.Count > 0)
 						{
@@ -1444,11 +1481,11 @@ public abstract class OverlayModes
 				{
 					if (!(bridgeInfo.controller == null))
 					{
-						Color32 color6 = colourOff;
+						Color32 color6 = logicOff;
 						LogicCircuitNetwork networkForCell3 = logicCircuitManager.GetNetworkForCell(bridgeInfo.cell);
 						if (networkForCell3 != null)
 						{
-							color6 = (networkForCell3.IsBitActive(0) ? colourOn : colourOff);
+							color6 = (networkForCell3.IsBitActive(0) ? logicOn : logicOff);
 						}
 						if (this.connectedNetworks.Count > 0)
 						{
@@ -1467,17 +1504,17 @@ public abstract class OverlayModes
 				{
 					if (!(bridgeInfo2.controller == null))
 					{
-						Color32 color7 = colourOff;
-						Color32 color8 = colourOff;
-						Color32 color9 = colourOff;
-						Color32 color10 = colourOff;
+						Color32 color7 = logicOff;
+						Color32 color8 = logicOff;
+						Color32 color9 = logicOff;
+						Color32 color10 = logicOff;
 						LogicCircuitNetwork networkForCell4 = logicCircuitManager.GetNetworkForCell(bridgeInfo2.cell);
 						if (networkForCell4 != null)
 						{
-							color7 = (networkForCell4.IsBitActive(0) ? colourOn : colourOff);
-							color8 = (networkForCell4.IsBitActive(1) ? colourOn : colourOff);
-							color9 = (networkForCell4.IsBitActive(2) ? colourOn : colourOff);
-							color10 = (networkForCell4.IsBitActive(3) ? colourOn : colourOff);
+							color7 = (networkForCell4.IsBitActive(0) ? logicOn : logicOff);
+							color8 = (networkForCell4.IsBitActive(1) ? logicOn : logicOff);
+							color9 = (networkForCell4.IsBitActive(2) ? logicOn : logicOff);
+							color10 = (networkForCell4.IsBitActive(3) ? logicOn : logicOff);
 						}
 						if (this.connectedNetworks.Count > 0)
 						{
@@ -1510,14 +1547,14 @@ public abstract class OverlayModes
 
 		private void UpdateUI()
 		{
-			Color32 colourOn = this.uiAsset.colourOn;
-			Color32 colourOff = this.uiAsset.colourOff;
-			Color32 colourDisconnected = this.uiAsset.colourDisconnected;
-			colourOff.a = (colourOn.a = byte.MaxValue);
+			Color32 logicOn = GlobalAssets.Instance.colorSet.logicOn;
+			Color32 logicOff = GlobalAssets.Instance.colorSet.logicOff;
+			Color32 logicDisconnected = GlobalAssets.Instance.colorSet.logicDisconnected;
+			logicOff.a = (logicOn.a = byte.MaxValue);
 			foreach (OverlayModes.Logic.UIInfo uiinfo in this.uiInfo.GetDataList())
 			{
 				LogicCircuitNetwork networkForCell = Game.Instance.logicCircuitManager.GetNetworkForCell(uiinfo.cell);
-				Color32 color = colourDisconnected;
+				Color32 color = logicDisconnected;
 				LogicControlInputUI component = uiinfo.instance.GetComponent<LogicControlInputUI>();
 				if (component != null)
 				{
@@ -1535,7 +1572,7 @@ public abstract class OverlayModes
 				{
 					if (networkForCell != null)
 					{
-						color = (networkForCell.IsBitActive(0) ? colourOn : colourOff);
+						color = (networkForCell.IsBitActive(0) ? logicOn : logicOff);
 					}
 					if (uiinfo.image.color != color)
 					{
@@ -1942,7 +1979,7 @@ public abstract class OverlayModes
 				{
 					text = text + "\n\n" + roomType.GetRoomEffectsString();
 				}
-				list.Add(new LegendEntry(roomType.Name + "\n" + roomType.effect, text, roomType.category.color, null));
+				list.Add(new LegendEntry(roomType.Name + "\n" + roomType.effect, text, roomType.category.color, null, null, true));
 			}
 			return list;
 		}
@@ -3459,40 +3496,40 @@ public abstract class OverlayModes
 
 		public List<LegendEntry> temperatureLegend = new List<LegendEntry>
 		{
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.MAXHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.8901961f, 0.13725491f, 0.12941177f), null),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMEHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9843137f, 0.3254902f, 0.3137255f), null),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(1f, 0.6627451f, 0.14117648f), null),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9372549f, 1f, 0f), null),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.TEMPERATE, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.23137255f, 0.99607843f, 0.2901961f), null),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.COLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.12156863f, 0.6313726f, 1f), null),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYCOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.16862746f, 0.79607844f, 1f), null),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMECOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.5019608f, 0.99607843f, 0.9411765f), null)
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.MAXHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.8901961f, 0.13725491f, 0.12941177f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMEHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9843137f, 0.3254902f, 0.3137255f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(1f, 0.6627451f, 0.14117648f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9372549f, 1f, 0f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.TEMPERATE, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.23137255f, 0.99607843f, 0.2901961f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.COLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.12156863f, 0.6313726f, 1f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYCOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.16862746f, 0.79607844f, 1f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMECOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.5019608f, 0.99607843f, 0.9411765f), null, null, true)
 		};
 
 		public List<LegendEntry> heatFlowLegend = new List<LegendEntry>
 		{
-			new LegendEntry(UI.OVERLAYS.HEATFLOW.HEATING, UI.OVERLAYS.HEATFLOW.TOOLTIPS.HEATING, new Color(0.9098039f, 0.25882354f, 0.14901961f), null),
-			new LegendEntry(UI.OVERLAYS.HEATFLOW.NEUTRAL, UI.OVERLAYS.HEATFLOW.TOOLTIPS.NEUTRAL, new Color(0.30980393f, 0.30980393f, 0.30980393f), null),
-			new LegendEntry(UI.OVERLAYS.HEATFLOW.COOLING, UI.OVERLAYS.HEATFLOW.TOOLTIPS.COOLING, new Color(0.2509804f, 0.6313726f, 0.90588236f), null)
+			new LegendEntry(UI.OVERLAYS.HEATFLOW.HEATING, UI.OVERLAYS.HEATFLOW.TOOLTIPS.HEATING, new Color(0.9098039f, 0.25882354f, 0.14901961f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.HEATFLOW.NEUTRAL, UI.OVERLAYS.HEATFLOW.TOOLTIPS.NEUTRAL, new Color(0.30980393f, 0.30980393f, 0.30980393f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.HEATFLOW.COOLING, UI.OVERLAYS.HEATFLOW.TOOLTIPS.COOLING, new Color(0.2509804f, 0.6313726f, 0.90588236f), null, null, true)
 		};
 
 		public List<LegendEntry> expandedTemperatureLegend = new List<LegendEntry>
 		{
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.MAXHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.8901961f, 0.13725491f, 0.12941177f), null),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMEHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9843137f, 0.3254902f, 0.3137255f), null),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(1f, 0.6627451f, 0.14117648f), null),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9372549f, 1f, 0f), null),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.TEMPERATE, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.23137255f, 0.99607843f, 0.2901961f), null),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.COLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.12156863f, 0.6313726f, 1f), null),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYCOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.16862746f, 0.79607844f, 1f), null),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMECOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.5019608f, 0.99607843f, 0.9411765f), null)
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.MAXHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.8901961f, 0.13725491f, 0.12941177f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMEHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9843137f, 0.3254902f, 0.3137255f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(1f, 0.6627451f, 0.14117648f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9372549f, 1f, 0f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.TEMPERATE, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.23137255f, 0.99607843f, 0.2901961f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.COLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.12156863f, 0.6313726f, 1f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYCOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.16862746f, 0.79607844f, 1f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMECOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.5019608f, 0.99607843f, 0.9411765f), null, null, true)
 		};
 
 		public List<LegendEntry> stateChangeLegend = new List<LegendEntry>
 		{
-			new LegendEntry(UI.OVERLAYS.STATECHANGE.HIGHPOINT, UI.OVERLAYS.STATECHANGE.TOOLTIPS.HIGHPOINT, new Color(0.8901961f, 0.13725491f, 0.12941177f), null),
-			new LegendEntry(UI.OVERLAYS.STATECHANGE.STABLE, UI.OVERLAYS.STATECHANGE.TOOLTIPS.STABLE, new Color(0.23137255f, 0.99607843f, 0.2901961f), null),
-			new LegendEntry(UI.OVERLAYS.STATECHANGE.LOWPOINT, UI.OVERLAYS.STATECHANGE.TOOLTIPS.LOWPOINT, new Color(0.5019608f, 0.99607843f, 0.9411765f), null)
+			new LegendEntry(UI.OVERLAYS.STATECHANGE.HIGHPOINT, UI.OVERLAYS.STATECHANGE.TOOLTIPS.HIGHPOINT, new Color(0.8901961f, 0.13725491f, 0.12941177f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.STATECHANGE.STABLE, UI.OVERLAYS.STATECHANGE.TOOLTIPS.STABLE, new Color(0.23137255f, 0.99607843f, 0.2901961f), null, null, true),
+			new LegendEntry(UI.OVERLAYS.STATECHANGE.LOWPOINT, UI.OVERLAYS.STATECHANGE.TOOLTIPS.LOWPOINT, new Color(0.5019608f, 0.99607843f, 0.9411765f), null, null, true)
 		};
 	}
 

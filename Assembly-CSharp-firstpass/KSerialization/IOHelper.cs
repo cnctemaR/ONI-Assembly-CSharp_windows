@@ -10,14 +10,42 @@ namespace KSerialization
 	{
 		public static void WriteKleiString(this BinaryWriter writer, string str)
 		{
-			if (str != null)
+			if (str == null)
 			{
-				byte[] bytes = Encoding.UTF8.GetBytes(str);
-				writer.Write(bytes.Length);
-				writer.Write(bytes);
+				writer.Write(-1);
 				return;
 			}
-			writer.Write(-1);
+			Encoding utf = Encoding.UTF8;
+			int byteCount = utf.GetByteCount(str);
+			writer.Write(byteCount);
+			if (byteCount < IOHelper.s_stringBuffer.Length)
+			{
+				utf.GetBytes(str, 0, str.Length, IOHelper.s_stringBuffer, 0);
+				writer.Write(IOHelper.s_stringBuffer, 0, byteCount);
+				return;
+			}
+			global::Debug.LogWarning(string.Format("Writing large string {0} of {1} bytes", str, byteCount));
+			writer.Write(utf.GetBytes(str));
+		}
+
+		public unsafe static void WriteSingleFast(this BinaryWriter writer, float value)
+		{
+			byte* ptr = (byte*)(&value);
+			if (BitConverter.IsLittleEndian)
+			{
+				IOHelper.s_singleBuffer[0] = *ptr;
+				IOHelper.s_singleBuffer[1] = ptr[1];
+				IOHelper.s_singleBuffer[2] = ptr[2];
+				IOHelper.s_singleBuffer[3] = ptr[3];
+			}
+			else
+			{
+				IOHelper.s_singleBuffer[0] = ptr[3];
+				IOHelper.s_singleBuffer[1] = ptr[2];
+				IOHelper.s_singleBuffer[2] = ptr[1];
+				IOHelper.s_singleBuffer[3] = *ptr;
+			}
+			writer.Write(IOHelper.s_singleBuffer);
 		}
 
 		[Conditional("DEBUG_VALIDATE")]
@@ -80,5 +108,9 @@ namespace KSerialization
 			color.a = (float)b4 / 255f;
 			return color;
 		}
+
+		private static byte[] s_stringBuffer = new byte[1024];
+
+		private static byte[] s_singleBuffer = new byte[4];
 	}
 }

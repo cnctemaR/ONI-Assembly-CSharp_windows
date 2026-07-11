@@ -20,25 +20,28 @@ public static class CodexEntryGenerator
 			for (int i = 0; i < (planInfo.data as IList<string>).Count; i++)
 			{
 				BuildingDef buildingDef = Assets.GetBuildingDef((planInfo.data as IList<string>)[i]);
-				List<ContentContainer> list = new List<ContentContainer>();
-				List<ICodexWidget> list2 = new List<ICodexWidget>();
-				list2.Add(new CodexText(buildingDef.Name, CodexTextStyle.Title));
-				Tech tech = Db.Get().TechItems.LookupGroupForID(buildingDef.PrefabID);
-				if (tech != null)
+				if (!buildingDef.DebugOnly)
 				{
-					list2.Add(new CodexLabelWithIcon(tech.Name, CodexTextStyle.Body, new global::Tuple<Sprite, Color>(Assets.GetSprite("research_type_alpha_icon"), Color.white)));
+					List<ContentContainer> list = new List<ContentContainer>();
+					List<ICodexWidget> list2 = new List<ICodexWidget>();
+					list2.Add(new CodexText(buildingDef.Name, CodexTextStyle.Title));
+					Tech tech = Db.Get().TechItems.LookupGroupForID(buildingDef.PrefabID);
+					if (tech != null)
+					{
+						list2.Add(new CodexLabelWithIcon(tech.Name, CodexTextStyle.Body, new global::Tuple<Sprite, Color>(Assets.GetSprite("research_type_alpha_icon"), Color.white)));
+					}
+					list2.Add(new CodexDividerLine());
+					list.Add(new ContentContainer(list2, ContentContainer.ContentLayout.Vertical));
+					CodexEntryGenerator.GenerateImageContainers(buildingDef.GetUISprite("ui", false), list);
+					CodexEntryGenerator.GenerateBuildingDescriptionContainers(buildingDef, list);
+					CodexEntryGenerator.GenerateFabricatorContainers(buildingDef.BuildingComplete, list);
+					CodexEntryGenerator.GenerateReceptacleContainers(buildingDef.BuildingComplete, list);
+					CodexEntry codexEntry = new CodexEntry(text3, list, Strings.Get("STRINGS.BUILDINGS.PREFABS." + (planInfo.data as IList<string>)[i].ToUpper() + ".NAME"));
+					codexEntry.icon = buildingDef.GetUISprite("ui", false);
+					codexEntry.parentId = text3;
+					CodexCache.AddEntry((planInfo.data as IList<string>)[i], codexEntry, null);
+					dictionary2.Add(codexEntry.id, codexEntry);
 				}
-				list2.Add(new CodexDividerLine());
-				list.Add(new ContentContainer(list2, ContentContainer.ContentLayout.Vertical));
-				CodexEntryGenerator.GenerateImageContainers(buildingDef.GetUISprite("ui", false), list);
-				CodexEntryGenerator.GenerateBuildingDescriptionContainers(buildingDef, list);
-				CodexEntryGenerator.GenerateFabricatorContainers(buildingDef.BuildingComplete, list);
-				CodexEntryGenerator.GenerateReceptacleContainers(buildingDef.BuildingComplete, list);
-				CodexEntry codexEntry = new CodexEntry(text3, list, Strings.Get("STRINGS.BUILDINGS.PREFABS." + (planInfo.data as IList<string>)[i].ToUpper() + ".NAME"));
-				codexEntry.icon = buildingDef.GetUISprite("ui", false);
-				codexEntry.parentId = text3;
-				CodexCache.AddEntry((planInfo.data as IList<string>)[i], codexEntry, null);
-				dictionary2.Add(codexEntry.id, codexEntry);
 			}
 			CategoryEntry categoryEntry = CodexEntryGenerator.GenerateCategoryEntry(CodexCache.FormatLinkID(text3), Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2.ToUpper() + ".NAME"), dictionary2, null, true, true, null);
 			categoryEntry.parentId = "BUILDINGS";
@@ -497,43 +500,46 @@ public static class CodexEntryGenerator
 		for (int i = 0; i < 19; i++)
 		{
 			TutorialMessage tutorialMessage = (TutorialMessage)Tutorial.Instance.TutorialMessage((Tutorial.TutorialMessages)i, false);
-			if (!string.IsNullOrEmpty(tutorialMessage.videoClipId))
+			if (tutorialMessage != null)
 			{
-				List<ContentContainer> list = new List<ContentContainer>();
-				CodexEntryGenerator.GenerateTitleContainers(tutorialMessage.GetTitle(), list);
-				CodexVideo codexVideo = new CodexVideo();
-				codexVideo.videoName = tutorialMessage.videoClipId;
-				codexVideo.overlayName = tutorialMessage.videoOverlayName;
-				codexVideo.overlayTexts = new List<string>
+				if (!string.IsNullOrEmpty(tutorialMessage.videoClipId))
 				{
-					tutorialMessage.videoTitleText,
-					VIDEOS.TUTORIAL_HEADER
-				};
-				list.Add(new ContentContainer(new List<ICodexWidget> { codexVideo }, ContentContainer.ContentLayout.Vertical));
-				list.Add(new ContentContainer(new List<ICodexWidget>
+					List<ContentContainer> list = new List<ContentContainer>();
+					CodexEntryGenerator.GenerateTitleContainers(tutorialMessage.GetTitle(), list);
+					CodexVideo codexVideo = new CodexVideo();
+					codexVideo.videoName = tutorialMessage.videoClipId;
+					codexVideo.overlayName = tutorialMessage.videoOverlayName;
+					codexVideo.overlayTexts = new List<string>
+					{
+						tutorialMessage.videoTitleText,
+						VIDEOS.TUTORIAL_HEADER
+					};
+					list.Add(new ContentContainer(new List<ICodexWidget> { codexVideo }, ContentContainer.ContentLayout.Vertical));
+					list.Add(new ContentContainer(new List<ICodexWidget>
+					{
+						new CodexText(tutorialMessage.GetMessageBody(), CodexTextStyle.Body)
+					}, ContentContainer.ContentLayout.Vertical));
+					CodexEntry codexEntry2 = new CodexEntry("Videos", list, UI.FormatAsLink(tutorialMessage.GetTitle(), "videos_" + i));
+					codexEntry2.icon = Assets.GetSprite("codexVideo");
+					CodexCache.AddEntry("videos_" + i, codexEntry2, null);
+					dictionary.Add(codexEntry2.id, codexEntry2);
+				}
+				else
 				{
-					new CodexText(tutorialMessage.GetMessageBody(), CodexTextStyle.Body)
-				}, ContentContainer.ContentLayout.Vertical));
-				CodexEntry codexEntry2 = new CodexEntry("Videos", list, UI.FormatAsLink(tutorialMessage.GetTitle(), "videos_" + i));
-				codexEntry2.icon = Assets.GetSprite("codexVideo");
-				CodexCache.AddEntry("videos_" + i, codexEntry2, null);
-				dictionary.Add(codexEntry2.id, codexEntry2);
-			}
-			else
-			{
-				List<ContentContainer> list2 = new List<ContentContainer>();
-				CodexEntryGenerator.GenerateTitleContainers(tutorialMessage.GetTitle(), list2);
-				list2.Add(new ContentContainer(new List<ICodexWidget>
-				{
-					new CodexText(tutorialMessage.GetMessageBody(), CodexTextStyle.Body)
-				}, ContentContainer.ContentLayout.Vertical));
-				list2.Add(new ContentContainer(new List<ICodexWidget>
-				{
-					new CodexSpacer(),
-					new CodexSpacer()
-				}, ContentContainer.ContentLayout.Vertical));
-				SubEntry subEntry = new SubEntry("MISCELLANEOUSTIPS" + i, "MISCELLANEOUSTIPS", list2, tutorialMessage.GetTitle());
-				codexEntry.subEntries.Add(subEntry);
+					List<ContentContainer> list2 = new List<ContentContainer>();
+					CodexEntryGenerator.GenerateTitleContainers(tutorialMessage.GetTitle(), list2);
+					list2.Add(new ContentContainer(new List<ICodexWidget>
+					{
+						new CodexText(tutorialMessage.GetMessageBody(), CodexTextStyle.Body)
+					}, ContentContainer.ContentLayout.Vertical));
+					list2.Add(new ContentContainer(new List<ICodexWidget>
+					{
+						new CodexSpacer(),
+						new CodexSpacer()
+					}, ContentContainer.ContentLayout.Vertical));
+					SubEntry subEntry = new SubEntry("MISCELLANEOUSTIPS" + i, "MISCELLANEOUSTIPS", list2, tutorialMessage.GetTitle());
+					codexEntry.subEntries.Add(subEntry);
+				}
 			}
 		}
 		CodexCache.AddEntry("MISCELLANEOUSTIPS", codexEntry, null);
@@ -1075,7 +1081,7 @@ public static class CodexEntryGenerator
 		List<ICodexWidget> list = new List<ICodexWidget>();
 		list.Add(new CodexText(Strings.Get("STRINGS.BUILDINGS.PREFABS." + def.PrefabID.ToUpper() + ".EFFECT"), CodexTextStyle.Body));
 		list.Add(new CodexSpacer());
-		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(def);
+		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(def.BuildingComplete, false);
 		List<Descriptor> requirementDescriptors = GameUtil.GetRequirementDescriptors(allDescriptors);
 		if (requirementDescriptors.Count > 0)
 		{

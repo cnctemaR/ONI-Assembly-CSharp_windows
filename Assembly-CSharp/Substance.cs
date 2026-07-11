@@ -48,7 +48,16 @@ public class Substance
 		}
 		else
 		{
-			primaryElement.Mass += mass;
+			global::Debug.Assert(primaryElement != null);
+			Pickupable component4 = primaryElement.GetComponent<Pickupable>();
+			if (component4 != null)
+			{
+				component4.TotalAmount += mass / primaryElement.MassPerUnit;
+			}
+			else
+			{
+				primaryElement.Mass += mass;
+			}
 		}
 		primaryElement.InternalTemperature = temperature;
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Ore);

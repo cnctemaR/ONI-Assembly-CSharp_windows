@@ -558,11 +558,11 @@ public class SimDebugView : KMonoBehaviour
 			float num = GameUtil.GetDecorAtCell(cell) / 100f;
 			if (num > 0f)
 			{
-				color = Color.Lerp(new Color(0.15f, 0f, 0f), new Color(0f, 1f, 0f), Mathf.Abs(num));
+				color = Color.Lerp(GlobalAssets.Instance.colorSet.decorBaseline, GlobalAssets.Instance.colorSet.decorPositive, Mathf.Abs(num));
 			}
 			else
 			{
-				color = Color.Lerp(new Color(0.15f, 0f, 0f), new Color(1f, 0f, 0f), Mathf.Abs(num));
+				color = Color.Lerp(GlobalAssets.Instance.colorSet.decorBaseline, GlobalAssets.Instance.colorSet.decorNegative, Mathf.Abs(num));
 			}
 		}
 		return color;

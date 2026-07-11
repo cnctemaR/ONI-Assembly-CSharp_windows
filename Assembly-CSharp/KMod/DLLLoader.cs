@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Harmony;
 using UnityEngine;
@@ -44,25 +45,26 @@ namespace KMod
 			return false;
 		}
 
-		public static bool LoadDLLs(string harmonyId, string path)
+		public static LoadedModData LoadDLLs(string harmonyId, string path)
 		{
-			bool flag;
+			LoadedModData loadedModData = new LoadedModData();
+			LoadedModData loadedModData2;
 			try
 			{
 				if (Testing.dll_loading == Testing.DLLLoading.Fail)
 				{
-					flag = false;
+					loadedModData2 = null;
 				}
 				else if (Testing.dll_loading == Testing.DLLLoading.UseModLoaderDLLExclusively)
 				{
-					flag = false;
+					loadedModData2 = null;
 				}
 				else
 				{
 					DirectoryInfo directoryInfo = new DirectoryInfo(path);
 					if (!directoryInfo.Exists)
 					{
-						flag = false;
+						loadedModData2 = null;
 					}
 					else
 					{
@@ -81,7 +83,7 @@ namespace KMod
 						}
 						if (list.Count == 0)
 						{
-							flag = false;
+							loadedModData2 = null;
 						}
 						else
 						{
@@ -92,6 +94,7 @@ namespace KMod
 							Type[] array = new Type[0];
 							Type[] array2 = new Type[] { typeof(string) };
 							Type[] array3 = new Type[] { typeof(HarmonyInstance) };
+							loadedModData.dlls = new HashSet<Assembly>();
 							foreach (Assembly assembly2 in list)
 							{
 								foreach (Type type in assembly2.GetTypes())
@@ -120,18 +123,19 @@ namespace KMod
 										}
 									}
 								}
+								loadedModData.dlls.Add(assembly2);
 							}
-							HarmonyInstance harmonyInstance = HarmonyInstance.Create(harmonyId);
-							if (harmonyInstance != null)
+							HarmonyInstance harmony = HarmonyInstance.Create(harmonyId);
+							if (harmony != null)
 							{
-								object[] array4 = new object[] { harmonyInstance };
+								object[] array4 = new object[] { harmony };
 								foreach (MethodInfo methodInfo2 in pooledList)
 								{
 									methodInfo2.Invoke(null, array4);
 								}
 								foreach (Assembly assembly3 in list)
 								{
-									harmonyInstance.PatchAll(assembly3);
+									harmony.PatchAll(assembly3);
 								}
 								foreach (MethodInfo methodInfo3 in pooledList2)
 								{
@@ -140,6 +144,9 @@ namespace KMod
 							}
 							pooledList.Recycle();
 							pooledList2.Recycle();
+							loadedModData.patched_methods = from method in harmony.GetPatchedMethods()
+								where harmony.GetPatchInfo(method).Owners.Contains(harmonyId)
+								select method;
 							foreach (MethodInfo methodInfo4 in pooledList3)
 							{
 								methodInfo4.Invoke(null, null);
@@ -151,7 +158,7 @@ namespace KMod
 							}
 							pooledList3.Recycle();
 							pooledList4.Recycle();
-							flag = true;
+							loadedModData2 = loadedModData;
 						}
 					}
 				}
@@ -159,9 +166,9 @@ namespace KMod
 			catch (Exception ex)
 			{
 				DebugUtil.LogException(null, string.Concat(new string[] { "Exception while loading mod ", harmonyId, " at ", path, "." }), ex);
-				flag = false;
+				loadedModData2 = null;
 			}
-			return flag;
+			return loadedModData2;
 		}
 
 		private const string managed_path = "Managed";

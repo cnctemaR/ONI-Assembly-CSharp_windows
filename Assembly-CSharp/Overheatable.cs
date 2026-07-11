@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, IEffectDescriptor, IGameObjectEffectDescriptor
+public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, IGameObjectEffectDescriptor
 {
 	public void ResetTemperature()
 	{
@@ -77,11 +77,6 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 			}
 		}
 		return string.Format(MISC.NOTIFICATIONS.BUILDINGOVERHEATED.TOOLTIP, text);
-	}
-
-	public List<Descriptor> GetDescriptors(BuildingDef def)
-	{
-		return this.GetDescriptors(def.BuildingComplete);
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)

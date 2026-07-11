@@ -37,6 +37,11 @@ public class SandboxSettings
 			this.SetIntSetting(prefsKey, this.GetIntSetting(prefsKey));
 			return;
 		}
+		this.ForceDefaultIntSetting(prefsKey);
+	}
+
+	public void ForceDefaultIntSetting(string prefsKey)
+	{
 		this.SetIntSetting(prefsKey, this.intSettings.Find((SandboxSettings.Setting<int> match) => match.PrefsKey == prefsKey).defaultValue);
 	}
 
@@ -74,6 +79,11 @@ public class SandboxSettings
 			this.SetFloatSetting(prefsKey, this.GetFloatSetting(prefsKey));
 			return;
 		}
+		this.ForceDefaultFloatSetting(prefsKey);
+	}
+
+	public void ForceDefaultFloatSetting(string prefsKey)
+	{
 		this.SetFloatSetting(prefsKey, this.floatSettings.Find((SandboxSettings.Setting<float> match) => match.PrefsKey == prefsKey).defaultValue);
 	}
 
@@ -111,6 +121,11 @@ public class SandboxSettings
 			this.SetStringSetting(prefsKey, this.GetStringSetting(prefsKey));
 			return;
 		}
+		this.ForceDefaultStringSetting(prefsKey);
+	}
+
+	public void ForceDefaultStringSetting(string prefsKey)
+	{
 		this.SetStringSetting(prefsKey, this.stringSettings.Find((SandboxSettings.Setting<string> match) => match.PrefsKey == prefsKey).defaultValue);
 	}
 

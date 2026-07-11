@@ -40,14 +40,13 @@ public class SymbolOverrideInfoGpuData
 		{
 			DebugUtil.Assert(false);
 		}
-		SymbolOverrideInfoGpuData.SymbolOverrideInfo symbolOverrideInfo = this.symbolOverrideInfos[symbol_idx];
-		symbolOverrideInfo.atlas = (float)symbol_frame_instance.buildImageIdx;
-		symbolOverrideInfo.isoverriden = 1f;
-		symbolOverrideInfo.bboxMin = symbol_frame_instance.symbolFrame.bboxMin;
-		symbolOverrideInfo.bboxMax = symbol_frame_instance.symbolFrame.bboxMax;
-		symbolOverrideInfo.uvMin = symbol_frame_instance.symbolFrame.uvMin;
-		symbolOverrideInfo.uvMax = symbol_frame_instance.symbolFrame.uvMax;
-		this.symbolOverrideInfos[symbol_idx] = symbolOverrideInfo;
+		SymbolOverrideInfoGpuData.SymbolOverrideInfo[] symbolOverrideInfos = this.symbolOverrideInfos;
+		symbolOverrideInfos[symbol_idx].atlas = (float)symbol_frame_instance.buildImageIdx;
+		symbolOverrideInfos[symbol_idx].isoverriden = 1f;
+		symbolOverrideInfos[symbol_idx].bboxMin = symbol_frame_instance.symbolFrame.bboxMin;
+		symbolOverrideInfos[symbol_idx].bboxMax = symbol_frame_instance.symbolFrame.bboxMax;
+		symbolOverrideInfos[symbol_idx].uvMin = symbol_frame_instance.symbolFrame.uvMin;
+		symbolOverrideInfos[symbol_idx].uvMax = symbol_frame_instance.symbolFrame.uvMax;
 		this.MarkDirty();
 	}
 

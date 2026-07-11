@@ -4,7 +4,7 @@ using KSerialization;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/Refrigerator")]
-public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDescriptor, IGameObjectEffectDescriptor
+public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IGameObjectEffectDescriptor
 {
 	protected override void OnPrefabInit()
 	{
@@ -54,11 +54,6 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDesc
 			return;
 		}
 		this.UserMaxCapacity = component.UserMaxCapacity;
-	}
-
-	public List<Descriptor> GetDescriptors(BuildingDef def)
-	{
-		return this.GetDescriptors(def.BuildingComplete);
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)

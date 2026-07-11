@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
+using KSerialization;
 using TMPro;
 using UnityEngine;
 
@@ -420,15 +421,15 @@ public static class Util
 
 	public static void Write(this BinaryWriter writer, Vector2 v)
 	{
-		writer.Write(v.x);
-		writer.Write(v.y);
+		writer.WriteSingleFast(v.x);
+		writer.WriteSingleFast(v.y);
 	}
 
 	public static void Write(this BinaryWriter writer, Vector3 v)
 	{
-		writer.Write(v.x);
-		writer.Write(v.y);
-		writer.Write(v.z);
+		writer.WriteSingleFast(v.x);
+		writer.WriteSingleFast(v.y);
+		writer.WriteSingleFast(v.z);
 	}
 
 	public static Vector2 ReadVector2(this BinaryReader reader)
@@ -452,10 +453,10 @@ public static class Util
 
 	public static void Write(this BinaryWriter writer, Quaternion q)
 	{
-		writer.Write(q.x);
-		writer.Write(q.y);
-		writer.Write(q.z);
-		writer.Write(q.w);
+		writer.WriteSingleFast(q.x);
+		writer.WriteSingleFast(q.y);
+		writer.WriteSingleFast(q.z);
+		writer.WriteSingleFast(q.w);
 	}
 
 	public static Quaternion ReadQuaternion(this BinaryReader reader)
@@ -573,6 +574,11 @@ public static class Util
 			return Path.Combine(Util.GetKleiRootPath(), Util.GetTitleFolderName());
 		}
 		return Util.GetKleiRootPath();
+	}
+
+	public static string LogsFolder()
+	{
+		return Path.GetDirectoryName(Application.consoleLogPath);
 	}
 
 	public static string CacheFolder()

@@ -11,7 +11,7 @@ public class InitializeCheck : MonoBehaviour
 	private void Awake()
 	{
 		this.CheckForSavePathIssue();
-		if (InitializeCheck.savePathState == InitializeCheck.SavePathIssue.Ok && !ReportErrorDialog.hasCrash)
+		if (InitializeCheck.savePathState == InitializeCheck.SavePathIssue.Ok && !KCrashReporter.hasCrash)
 		{
 			AudioMixer.Create();
 			App.LoadScene("frontend");

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using KSerialization;
 using UnityEngine;
 
@@ -113,6 +114,11 @@ public struct Tag : ISerializationCallbackReceiver, IEquatable<Tag>, IComparable
 	public static implicit operator Tag(string s)
 	{
 		return new Tag(s);
+	}
+
+	public static string ArrayToString(Tag[] tags)
+	{
+		return string.Join(",", tags.Select<Tag, string>((Tag x) => x.ToString()).ToArray<string>());
 	}
 
 	public static readonly Tag Invalid;

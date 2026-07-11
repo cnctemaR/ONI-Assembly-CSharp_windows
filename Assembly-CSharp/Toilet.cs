@@ -5,7 +5,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadable, IUsable, IEffectDescriptor, IGameObjectEffectDescriptor, IBasicBuilding
+public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadable, IUsable, IGameObjectEffectDescriptor, IBasicBuilding
 {
 	public int FlushesUsed
 	{
@@ -96,25 +96,11 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		return list;
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		list.AddRange(this.RequirementDescriptors());
 		list.AddRange(this.EffectDescriptors());
-		return list;
-	}
-
-	public List<Descriptor> GetDescriptors(GameObject go)
-	{
-		List<Descriptor> list = new List<Descriptor>();
-		foreach (Descriptor descriptor in this.RequirementDescriptors())
-		{
-			list.Add(descriptor);
-		}
-		foreach (Descriptor descriptor2 in this.EffectDescriptors())
-		{
-			list.Add(descriptor2);
-		}
 		return list;
 	}
 

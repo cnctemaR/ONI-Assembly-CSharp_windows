@@ -1481,6 +1481,8 @@ public class BuildingDef : Def
 
 	public bool ShowInBuildMenu = true;
 
+	public bool DebugOnly;
+
 	public PermittedRotations PermittedRotations;
 
 	public Orientation InitialOrientation;

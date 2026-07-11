@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
+using UnityEngine;
 
-public class MechanicalSurfboard : StateMachineComponent<MechanicalSurfboard.StatesInstance>, IEffectDescriptor
+public class MechanicalSurfboard : StateMachineComponent<MechanicalSurfboard.StatesInstance>, IGameObjectEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -16,7 +17,7 @@ public class MechanicalSurfboard : StateMachineComponent<MechanicalSurfboard.Sta
 		base.OnCleanUp();
 	}
 
-	List<Descriptor> IEffectDescriptor.GetDescriptors(BuildingDef def)
+	List<Descriptor> IGameObjectEffectDescriptor.GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Element element = ElementLoader.FindElementByHash(SimHashes.Water);

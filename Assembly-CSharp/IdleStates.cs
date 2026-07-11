@@ -9,7 +9,7 @@ public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, ISta
 		default_state = this.loop;
 		this.root.Exit("StopNavigator", delegate(IdleStates.Instance smi)
 		{
-			smi.GetComponent<Navigator>().Stop(false);
+			smi.GetComponent<Navigator>().Stop(false, true);
 		}).ToggleStatusItem(CREATURES.STATUSITEMS.IDLE.NAME, CREATURES.STATUSITEMS.IDLE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).ToggleTag(GameTags.Idle);
 		this.loop.Enter(new StateMachine<IdleStates, IdleStates.Instance, IStateMachineTarget, IdleStates.Def>.State.Callback(this.PlayIdle)).ToggleScheduleCallback("IdleMove", (IdleStates.Instance smi) => (float)global::UnityEngine.Random.Range(3, 10), delegate(IdleStates.Instance smi)
 		{

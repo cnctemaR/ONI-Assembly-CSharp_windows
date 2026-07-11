@@ -32,7 +32,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		foreach (BuildMenu.BuildingInfo buildingInfo in building_infos)
 		{
 			BuildingDef def = Assets.GetBuildingDef(buildingInfo.id);
-			if (def.ShowInBuildMenu && !def.Deprecated)
+			if (def.ShowInBuildMenu && !def.Deprecated && (!def.DebugOnly || Game.Instance.DebugOnlyBuildingsAllowed))
 			{
 				KIconToggleMenu.ToggleInfo toggleInfo = new KIconToggleMenu.ToggleInfo(def.Name, new BuildMenuBuildingsScreen.UserData(def, PlanScreen.RequirementsState.Tech), def.HotKey, () => def.GetUISprite("ui", false));
 				list.Add(toggleInfo);

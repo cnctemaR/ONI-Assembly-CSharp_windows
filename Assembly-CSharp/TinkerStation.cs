@@ -7,7 +7,7 @@ using TUNING;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/TinkerStation")]
-public class TinkerStation : Workable, IEffectDescriptor, ISim1000ms
+public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 {
 	public AttributeConverter AttributeConverter
 	{
@@ -153,34 +153,34 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim1000ms
 		return MaterialNeeds.Instance.GetAmount(this.outputPrefab) > 0f && WorldInventory.Instance.GetAmount(this.outputPrefab) <= 0f;
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
 		string text = this.inputMaterial.ProperName();
-		List<Descriptor> list = new List<Descriptor>();
-		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(this.massPerTinker, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(this.massPerTinker, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false));
-		list.AddRange(GameUtil.GetAllDescriptors(Assets.GetPrefab(this.outputPrefab), false));
-		List<Tinkerable> list2 = new List<Tinkerable>();
+		List<Descriptor> descriptors = base.GetDescriptors(go);
+		descriptors.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(this.massPerTinker, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(this.massPerTinker, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false));
+		descriptors.AddRange(GameUtil.GetAllDescriptors(Assets.GetPrefab(this.outputPrefab), false));
+		List<Tinkerable> list = new List<Tinkerable>();
 		foreach (GameObject gameObject in Assets.GetPrefabsWithComponent<Tinkerable>())
 		{
 			Tinkerable component = gameObject.GetComponent<Tinkerable>();
 			if (component.tinkerMaterialTag == this.outputPrefab)
 			{
-				list2.Add(component);
+				list.Add(component);
 			}
 		}
-		if (list2.Count > 0)
+		if (list.Count > 0)
 		{
-			Effect effect = Db.Get().effects.Get(list2[0].addedEffect);
-			list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ADDED_EFFECT, effect.Name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ADDED_EFFECT, effect.Name, Effect.CreateTooltip(effect, true, "\n")), Descriptor.DescriptorType.Effect, false));
-			list.Add(new Descriptor(UI.BUILDINGEFFECTS.IMPROVED_BUILDINGS, UI.BUILDINGEFFECTS.TOOLTIPS.IMPROVED_BUILDINGS, Descriptor.DescriptorType.Effect, false));
-			foreach (Tinkerable tinkerable in list2)
+			Effect effect = Db.Get().effects.Get(list[0].addedEffect);
+			descriptors.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ADDED_EFFECT, effect.Name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ADDED_EFFECT, effect.Name, Effect.CreateTooltip(effect, true, "\n")), Descriptor.DescriptorType.Effect, false));
+			descriptors.Add(new Descriptor(UI.BUILDINGEFFECTS.IMPROVED_BUILDINGS, UI.BUILDINGEFFECTS.TOOLTIPS.IMPROVED_BUILDINGS, Descriptor.DescriptorType.Effect, false));
+			foreach (Tinkerable tinkerable in list)
 			{
 				Descriptor descriptor = new Descriptor(string.Format(UI.BUILDINGEFFECTS.IMPROVED_BUILDINGS_ITEM, tinkerable.GetProperName()), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.IMPROVED_BUILDINGS_ITEM, tinkerable.GetProperName()), Descriptor.DescriptorType.Effect, false);
 				descriptor.IncreaseIndent();
-				list.Add(descriptor);
+				descriptors.Add(descriptor);
 			}
 		}
-		return list;
+		return descriptors;
 	}
 
 	public static TinkerStation AddTinkerStation(GameObject go, string required_room_type)

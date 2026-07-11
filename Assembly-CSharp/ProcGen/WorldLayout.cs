@@ -672,6 +672,10 @@ namespace ProcGen
 			list2.ShuffleSeeded<global::VoronoiTree.Node>(this.myRandom.RandomSource());
 			foreach (Feature feature in list)
 			{
+				if (list2.Count == 0)
+				{
+					break;
+				}
 				global::VoronoiTree.Node node = list2[0];
 				list2.RemoveAt(0);
 				if (!dictionary.ContainsKey(node.site.id))

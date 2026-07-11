@@ -114,7 +114,7 @@ public class PlanScreen : KIconToggleMenu
 			return;
 		}
 		Building component = SelectTool.Instance.selected.GetComponent<Building>();
-		if (component != null && component.Def.ShowInBuildMenu && !component.Def.Deprecated)
+		if (component != null && component.Def.ShowInBuildMenu && !component.Def.Deprecated && (!component.Def.DebugOnly || Game.Instance.DebugOnlyBuildingsAllowed))
 		{
 			PlanScreen.Instance.CopyBuildingOrder(component);
 			this.copyBuildingButton.SetActive(false);
@@ -132,7 +132,7 @@ public class PlanScreen : KIconToggleMenu
 			return;
 		}
 		Building component2 = SelectTool.Instance.selected.GetComponent<Building>();
-		if (component2 != null && component2.Def.ShowInBuildMenu && !component2.Def.Deprecated)
+		if (component2 != null && component2.Def.ShowInBuildMenu && !component2.Def.Deprecated && (!component2.Def.DebugOnly || Game.Instance.DebugOnlyBuildingsAllowed))
 		{
 			global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(component2.gameObject, "ui", false);
 			component.gameObject.SetActive(true);
@@ -175,7 +175,7 @@ public class PlanScreen : KIconToggleMenu
 				foreach (BuildingDef buildingDef in Assets.BuildingDefs)
 				{
 					HashedString hashedString;
-					if (!buildingDef.Deprecated && this.tagCategoryMap.TryGetValue(buildingDef.Tag, out hashedString) && !(hashedString != planInfo.category))
+					if (!buildingDef.Deprecated && (!buildingDef.DebugOnly || Game.Instance.DebugOnlyBuildingsAllowed) && this.tagCategoryMap.TryGetValue(buildingDef.Tag, out hashedString) && !(hashedString != planInfo.category))
 					{
 						list2.Add(buildingDef);
 					}
@@ -325,7 +325,7 @@ public class PlanScreen : KIconToggleMenu
 			this.buildable_state_update_idx = (this.buildable_state_update_idx + 1) % Assets.BuildingDefs.Count;
 			BuildingDef buildingDef = Assets.BuildingDefs[this.buildable_state_update_idx];
 			HashedString hashedString;
-			if (!buildingDef.Deprecated && this.tagCategoryMap.TryGetValue(buildingDef.Tag, out hashedString))
+			if (!buildingDef.Deprecated && (!buildingDef.DebugOnly || Game.Instance.DebugOnlyBuildingsAllowed) && this.tagCategoryMap.TryGetValue(buildingDef.Tag, out hashedString))
 			{
 				PlanScreen.RequirementsState requirementsState = PlanScreen.RequirementsState.Complete;
 				if (!DebugHandler.InstantBuildMode && !Game.Instance.SandboxModeActive)
@@ -607,7 +607,7 @@ public class PlanScreen : KIconToggleMenu
 	private void BuildButtonList(HashedString plan_category, GameObject parent)
 	{
 		IEnumerable<BuildingDef> enumerable = from def in Assets.BuildingDefs
-			where this.tagCategoryMap.ContainsKey(def.Tag) && this.tagCategoryMap[def.Tag] == plan_category && !def.Deprecated
+			where this.tagCategoryMap.ContainsKey(def.Tag) && this.tagCategoryMap[def.Tag] == plan_category && !def.Deprecated && (!def.DebugOnly || Game.Instance.DebugOnlyBuildingsAllowed)
 			orderby this.tagOrderMap[def.Tag]
 			select def;
 		this.ActiveToggles.Clear();

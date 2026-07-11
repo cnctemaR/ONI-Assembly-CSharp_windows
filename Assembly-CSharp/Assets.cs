@@ -210,6 +210,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		if (Assets.PrefabsByTag.ContainsKey(prefab.PrefabTag))
 		{
 			global::Debug.LogWarning("Tried loading prefab with duplicate tag, ignoring: " + prefab.PrefabTag);
+			return;
 		}
 		Assets.PrefabsByTag[prefab.PrefabTag] = prefab;
 		foreach (Tag tag in prefab.Tags)

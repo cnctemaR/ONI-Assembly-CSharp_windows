@@ -26,11 +26,18 @@ public class Clearable : Workable, ISaveLoadable, IRender1000ms
 		{
 			if (this.HasTag(GameTags.Stored))
 			{
-				this.isMarkedForClear = false;
+				if (!base.transform.parent.GetComponent<Storage>().allowClearable)
+				{
+					this.isMarkedForClear = false;
+				}
+				else
+				{
+					this.MarkForClear(true, true);
+				}
 			}
 			else
 			{
-				this.MarkForClear(true);
+				this.MarkForClear(true, false);
 			}
 		}
 		this.RefreshClearableStatus(true);
@@ -69,13 +76,13 @@ public class Clearable : Workable, ISaveLoadable, IRender1000ms
 		}
 	}
 
-	public void MarkForClear(bool force = false)
+	public void MarkForClear(bool restoringFromSave = false, bool allowWhenStored = false)
 	{
 		if (!this.isClearable)
 		{
 			return;
 		}
-		if ((!this.isMarkedForClear || force) && !this.pickupable.IsEntombed && !this.clearHandle.IsValid() && !this.HasTag(GameTags.Stored))
+		if ((!this.isMarkedForClear || restoringFromSave) && !this.pickupable.IsEntombed && !this.clearHandle.IsValid() && (!this.HasTag(GameTags.Stored) || allowWhenStored))
 		{
 			Prioritizable.AddRef(base.gameObject);
 			base.GetComponent<KPrefabID>().AddTag(GameTags.Garbage, false);
@@ -88,7 +95,7 @@ public class Clearable : Workable, ISaveLoadable, IRender1000ms
 
 	private void OnClickClear()
 	{
-		this.MarkForClear(false);
+		this.MarkForClear(false, false);
 	}
 
 	private void OnClickCancel()
@@ -129,7 +136,7 @@ public class Clearable : Workable, ISaveLoadable, IRender1000ms
 			Clearable component = pickupable.GetComponent<Clearable>();
 			if (component != null && component.isMarkedForClear)
 			{
-				this.MarkForClear(false);
+				this.MarkForClear(false, false);
 			}
 		}
 	}

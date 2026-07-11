@@ -50,7 +50,7 @@ namespace KSerialization
 		{
 			this.serializableType = type;
 			this.typeInfo = Manager.GetTypeInfo(type);
-			type.GetSerializationMethods(typeof(OnSerializingAttribute), typeof(OnSerializedAttribute), out this.onSerializing, out this.onSerialized);
+			type.GetSerializationMethods(typeof(OnSerializingAttribute), typeof(OnSerializedAttribute), typeof(CustomSerialize), out this.onSerializing, out this.onSerialized, out this.customSerialize);
 			MemberSerialization serializationConfig = this.GetSerializationConfig(type);
 			if (serializationConfig == MemberSerialization.OptOut)
 			{
@@ -236,6 +236,10 @@ namespace KSerialization
 					throw new ArgumentException(text2, ex2);
 				}
 			}
+			if (this.customSerialize != null)
+			{
+				this.customSerialize.Invoke(obj, new object[] { writer });
+			}
 			if (this.onSerialized != null)
 			{
 				this.onSerialized.Invoke(obj, null);
@@ -253,6 +257,8 @@ namespace KSerialization
 		public MethodInfo onSerializing;
 
 		public MethodInfo onSerialized;
+
+		public MethodInfo customSerialize;
 
 		public struct SerializationField
 		{

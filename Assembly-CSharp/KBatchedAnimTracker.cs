@@ -79,7 +79,7 @@ public class KBatchedAnimTracker : MonoBehaviour
 		{
 			Matrix2x3 symbolLocalTransform = this.controller.GetSymbolLocalTransform(this.symbol, out flag);
 			Vector3 position = this.controller.transform.GetPosition();
-			if (flag && (this.previousMatrix != symbolLocalTransform || position != this.previousPosition || this.useTargetPoint))
+			if (flag && (this.previousMatrix != symbolLocalTransform || position != this.previousPosition || this.useTargetPoint || (this.matchParentOffset && this.myAnim.Offset != this.controller.Offset)))
 			{
 				this.previousMatrix = symbolLocalTransform;
 				this.previousPosition = position;
@@ -117,6 +117,10 @@ public class KBatchedAnimTracker : MonoBehaviour
 					}
 				}
 				base.transform.SetPosition(new Vector3(base.transform.GetPosition().x, base.transform.GetPosition().y, z));
+				if (this.matchParentOffset)
+				{
+					this.myAnim.Offset = this.controller.Offset;
+				}
 				this.myAnim.SetDirty();
 			}
 		}
@@ -167,6 +171,8 @@ public class KBatchedAnimTracker : MonoBehaviour
 	public bool skipInitialDisable;
 
 	public bool forceAlwaysVisible;
+
+	public bool matchParentOffset;
 
 	private bool alive = true;
 

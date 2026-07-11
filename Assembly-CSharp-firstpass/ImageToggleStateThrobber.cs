@@ -1,17 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Plugins/ImageToggleStateThrobber")]
 public class ImageToggleStateThrobber : KMonoBehaviour
 {
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-		List<ImageToggleState> list = new List<ImageToggleState>(this.targetImageToggleStates);
-		this.targetImageToggleStates = list.ToArray();
-	}
-
 	public void OnEnable()
 	{
 		this.t = 0f;

@@ -7,7 +7,7 @@ using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/Building")]
-public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, IApproachable
+public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGridObject, IApproachable
 {
 	public Orientation Orientation
 	{
@@ -235,10 +235,10 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 	public List<Descriptor> RequirementDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		BuildingComplete component = base.GetComponent<BuildingComplete>();
+		BuildingComplete component = def.BuildingComplete.GetComponent<BuildingComplete>();
 		if (def.RequiresPowerInput)
 		{
-			float wattsNeededWhenActive = base.GetComponent<IEnergyConsumer>().WattsNeededWhenActive;
+			float wattsNeededWhenActive = component.GetComponent<IEnergyConsumer>().WattsNeededWhenActive;
 			if (wattsNeededWhenActive > 0f)
 			{
 				string formattedWattage = GameUtil.GetFormattedWattage(wattsNeededWhenActive, GameUtil.WattageFormatterUnit.Automatic, true);
@@ -328,14 +328,14 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 		return list;
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		foreach (Descriptor descriptor in this.RequirementDescriptors(def))
+		foreach (Descriptor descriptor in this.RequirementDescriptors(this.Def))
 		{
 			list.Add(descriptor);
 		}
-		foreach (Descriptor descriptor2 in this.EffectDescriptors(def))
+		foreach (Descriptor descriptor2 in this.EffectDescriptors(this.Def))
 		{
 			list.Add(descriptor2);
 		}

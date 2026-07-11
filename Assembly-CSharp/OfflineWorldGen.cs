@@ -256,7 +256,7 @@ public class OfflineWorldGen : KMonoBehaviour
 		this.updateText.text = Strings.Get(this.currentConvertedCurrentStage.String);
 		if (!this.debug && this.currentConvertedCurrentStage.Hash == UI.WORLDGEN.COMPLETE.key.Hash && this.currentPercent >= 100f)
 		{
-			if (KCrashReporter.terminateOnError && ReportErrorDialog.hasCrash)
+			if (KCrashReporter.terminateOnError && KCrashReporter.hasCrash)
 			{
 				return;
 			}

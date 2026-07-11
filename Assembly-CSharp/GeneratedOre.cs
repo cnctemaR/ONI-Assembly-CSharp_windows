@@ -71,7 +71,7 @@ public class GeneratedOre
 		component2.Mass = mass;
 		component2.Temperature = temperature;
 		component2.AddDisease(diseaseIdx, diseaseCount, "GeneratedOre.CreateChunk");
-		component.GetComponent<KPrefabID>().InitializeTags();
+		component.GetComponent<KPrefabID>().InitializeTags(false);
 		return component;
 	}
 }

@@ -10,7 +10,7 @@ public class InfectedFoodDiagram : MonoBehaviour
 		List<InfectedFoodDiagram.FoodBit> list = new List<InfectedFoodDiagram.FoodBit>();
 		if (WorldInventory.Instance != null)
 		{
-			List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(GameTags.Edible);
+			ICollection<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(GameTags.Edible);
 			if (pickupables == null)
 			{
 				return;

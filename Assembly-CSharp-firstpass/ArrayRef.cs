@@ -163,8 +163,6 @@ public struct ArrayRef<T>
 
 	private void ValidateIndex(int index)
 	{
-		Debug.Assert(0 <= index);
-		Debug.Assert(index < this.size);
 	}
 
 	private void MaybeGrow(int index)

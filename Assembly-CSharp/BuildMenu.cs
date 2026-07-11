@@ -740,7 +740,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("PetroleumGenerator", global::Action.BuildMenuKeyR),
 				new BuildMenu.BuildingInfo("SteamTurbine", global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo("SteamTurbine2", global::Action.BuildMenuKeyT),
-				new BuildMenu.BuildingInfo("SolarPanel", global::Action.BuildMenuKeyS)
+				new BuildMenu.BuildingInfo("SolarPanel", global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo("DevGenerator", global::Action.BuildMenuKeyX)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("PowerControl"), "icon_category_electrical", global::Action.BuildCategoryPowerControl, KKeyCode.R, new List<BuildMenu.BuildingInfo>
 			{

@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/BuildingElementEmitter")]
-public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor, IElementEmitter, ISim200ms
+public class BuildingElementEmitter : KMonoBehaviour, IGameObjectEffectDescriptor, IElementEmitter, ISim200ms
 {
 	public float AverageEmitRate
 	{
@@ -133,7 +133,7 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor, IElemen
 		SimMessages.RemoveElementEmitter(-1, handle);
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		string text = ElementLoader.FindElementByHash(this.element).tag.ProperName();

@@ -227,7 +227,8 @@ namespace TUNING
 			{
 				id = "ScaredyCat",
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED
+				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				requiredNonPositiveAptitudes = new List<HashedString> { "Mining" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{

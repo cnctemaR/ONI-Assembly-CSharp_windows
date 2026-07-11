@@ -245,6 +245,7 @@ public class Pickupable : Workable, IHasSortOrder
 		}
 		this.UpdateEntombedVisualizer();
 		base.Subscribe<Pickupable>(-1582839653, Pickupable.OnTagsChangedDelegate);
+		this.NotifyChanged(num);
 	}
 
 	public void RegisterListeners()

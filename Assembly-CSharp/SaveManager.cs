@@ -107,7 +107,7 @@ public class SaveManager : KMonoBehaviour
 	{
 		writer.Write(SaveManager.SAVE_HEADER);
 		writer.Write(7);
-		writer.Write(16);
+		writer.Write(17);
 		int num = 0;
 		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in this.sceneObjects)
 		{
@@ -199,9 +199,9 @@ public class SaveManager : KMonoBehaviour
 		}
 		int num = reader.ReadInt32();
 		int num2 = reader.ReadInt32();
-		if (num != 7 || num2 > 16)
+		if (num != 7 || num2 > 17)
 		{
-			DebugUtil.LogWarningArgs(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 16, num, num2 }) });
+			DebugUtil.LogWarningArgs(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 17, num, num2 }) });
 			return false;
 		}
 		this.ClearScene();
@@ -226,7 +226,8 @@ public class SaveManager : KMonoBehaviour
 					this.sceneObjects[tag] = list;
 					for (int k = 0; k < num4; k++)
 					{
-						if (SaveLoadRoot.Load(gameObject, reader) == null)
+						SaveLoadRoot saveLoadRoot = SaveLoadRoot.Load(gameObject, reader);
+						if (SaveManager.DEBUG_OnlyLoadThisCellsObjects == -1 && saveLoadRoot == null)
 						{
 							global::Debug.LogError("Error loading data [" + text + "]");
 							return false;
@@ -285,11 +286,15 @@ public class SaveManager : KMonoBehaviour
 
 	public const int SAVE_MINOR_VERSION_NEW_AUTOMATION_WARNING = 16;
 
-	public const int SAVE_MINOR_VERSION = 16;
+	public const int SAVE_MINOR_VERSION_ADD_GUID_TO_HEADER = 17;
+
+	public const int SAVE_MINOR_VERSION = 17;
 
 	private Dictionary<Tag, GameObject> prefabMap = new Dictionary<Tag, GameObject>();
 
 	private Dictionary<Tag, List<SaveLoadRoot>> sceneObjects = new Dictionary<Tag, List<SaveLoadRoot>>();
+
+	public static int DEBUG_OnlyLoadThisCellsObjects = -1;
 
 	private static readonly char[] SAVE_HEADER = new char[] { 'K', 'S', 'A', 'V' };
 

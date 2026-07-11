@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using KSerialization;
 using STRINGS;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class RocketEngine : StateMachineComponent<RocketEngine.StatesInstance>, IEffectDescriptor
+public class RocketEngine : StateMachineComponent<RocketEngine.StatesInstance>
 {
 	protected override void OnSpawn()
 	{
@@ -15,11 +14,6 @@ public class RocketEngine : StateMachineComponent<RocketEngine.StatesInstance>, 
 			RequireAttachedComponent requireAttachedComponent = new RequireAttachedComponent(base.gameObject.GetComponent<AttachableBuilding>(), typeof(FuelTank), UI.STARMAP.COMPONENT.FUEL_TANK);
 			base.GetComponent<RocketModule>().AddLaunchCondition(requireAttachedComponent);
 		}
-	}
-
-	public List<Descriptor> GetDescriptors(BuildingDef def)
-	{
-		return null;
 	}
 
 	public float exhaustEmitRate = 50f;

@@ -1,6 +1,6 @@
 ﻿using System;
 
-public class PassiveElementConsumer : ElementConsumer, IEffectDescriptor
+public class PassiveElementConsumer : ElementConsumer, IGameObjectEffectDescriptor
 {
 	protected override bool IsActive()
 	{

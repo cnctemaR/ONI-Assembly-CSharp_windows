@@ -5,7 +5,7 @@ using TUNING;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/Telescope")]
-public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescriptor, ISim200ms
+public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffectDescriptor, ISim200ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -138,14 +138,14 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 		return base.OnWorkTick(worker, dt);
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
-		List<Descriptor> list = new List<Descriptor>();
+		List<Descriptor> descriptors = base.GetDescriptors(go);
 		Element element = ElementLoader.FindElementByHash(SimHashes.Oxygen);
 		Descriptor descriptor = default(Descriptor);
 		descriptor.SetupDescriptor(element.tag.ProperName(), string.Format(global::STRINGS.BUILDINGS.PREFABS.TELESCOPE.REQUIREMENT_TOOLTIP, element.tag.ProperName()), Descriptor.DescriptorType.Requirement);
-		list.Add(descriptor);
-		return list;
+		descriptors.Add(descriptor);
+		return descriptors;
 	}
 
 	protected Chore CreateChore()

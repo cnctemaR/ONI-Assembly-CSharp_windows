@@ -122,13 +122,11 @@ public class Constructable : Workable, ISaveLoadable
 				{
 					component6.skipCleanup = true;
 				}
-				PrimaryElement component7 = replacementCandidate.GetComponent<PrimaryElement>();
-				float mass = component7.Mass;
-				float temperature = component7.Temperature;
-				byte diseaseIdx = component7.DiseaseIdx;
-				int diseaseCount = component7.DiseaseCount;
-				global::Debug.Assert(component7.Element != null && component7.Element.tag != null);
-				Deconstructable.SpawnItem(component7.transform.GetPosition(), component7.GetComponent<Building>().Def, component7.Element.tag, mass, temperature, diseaseIdx, diseaseCount);
+				Deconstructable component7 = replacementCandidate.GetComponent<Deconstructable>();
+				if (component7 != null)
+				{
+					component7.SpawnItemsFromConstruction();
+				}
 				replacementCandidate.Trigger(1606648047, this.building.Def.TileLayer);
 				replacementCandidate.DeleteObject();
 			}

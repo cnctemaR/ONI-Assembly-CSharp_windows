@@ -6,7 +6,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/scripts/AccessControl")]
-public class AccessControl : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
+public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDescriptor
 {
 	public AccessControl.Permission DefaultPermission
 	{
@@ -287,7 +287,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		this.selectable.SetStatusItem(Db.Get().StatusItemCategories.AccessControl, null, null);
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Descriptor descriptor = default(Descriptor);

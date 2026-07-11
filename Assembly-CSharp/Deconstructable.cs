@@ -63,39 +63,39 @@ public class Deconstructable : Workable
 
 	protected override void OnCompleteWork(Worker worker)
 	{
-		PrimaryElement component = base.GetComponent<PrimaryElement>();
-		Building building = base.GetComponent<Building>();
+		Building component = base.GetComponent<Building>();
 		SimCellOccupier component2 = base.GetComponent<SimCellOccupier>();
 		if (DetailsScreen.Instance != null && DetailsScreen.Instance.CompareTargetWith(base.gameObject))
 		{
 			DetailsScreen.Instance.Show(false);
 		}
-		float temperature = component.Temperature;
-		byte disease_idx = component.DiseaseIdx;
-		int disease_count = component.DiseaseCount;
+		PrimaryElement component3 = base.GetComponent<PrimaryElement>();
+		float temperature = component3.Temperature;
+		byte disease_idx = component3.DiseaseIdx;
+		int disease_count = component3.DiseaseCount;
 		if (component2 != null)
 		{
-			if (building.Def.TileLayer != ObjectLayer.NumLayers)
+			if (component.Def.TileLayer != ObjectLayer.NumLayers)
 			{
 				int num = Grid.PosToCell(base.transform.GetPosition());
-				if (Grid.Objects[num, (int)building.Def.TileLayer] == base.gameObject)
+				if (Grid.Objects[num, (int)component.Def.TileLayer] == base.gameObject)
 				{
-					Grid.Objects[num, (int)building.Def.ObjectLayer] = null;
-					Grid.Objects[num, (int)building.Def.TileLayer] = null;
+					Grid.Objects[num, (int)component.Def.ObjectLayer] = null;
+					Grid.Objects[num, (int)component.Def.TileLayer] = null;
 					Grid.Foundation[num] = false;
-					TileVisualizer.RefreshCell(num, building.Def.TileLayer, building.Def.ReplacementLayer);
+					TileVisualizer.RefreshCell(num, component.Def.TileLayer, component.Def.ReplacementLayer);
 				}
 			}
 			component2.DestroySelf(delegate
 			{
-				this.TriggerDestroy(building, temperature, disease_idx, disease_count);
+				this.TriggerDestroy(temperature, disease_idx, disease_count);
 			});
 		}
 		else
 		{
-			this.TriggerDestroy(building, temperature, disease_idx, disease_count);
+			this.TriggerDestroy(temperature, disease_idx, disease_count);
 		}
-		string sound = GlobalAssets.GetSound("Finish_Deconstruction_" + building.Def.AudioSize, false);
+		string sound = GlobalAssets.GetSound("Finish_Deconstruction_" + component.Def.AudioSize, false);
 		if (sound != null)
 		{
 			KMonoBehaviour.PlaySound3DAtLocation(sound, base.gameObject.transform.GetPosition());
@@ -103,35 +103,13 @@ public class Deconstructable : Workable
 		base.Trigger(-702296337, this);
 	}
 
-	private void TriggerDestroy(Building building, float temperature, byte disease_idx, int disease_count)
+	private void TriggerDestroy(float temperature, byte disease_idx, int disease_count)
 	{
 		if (this == null || this.destroyed)
 		{
 			return;
 		}
-		int num = 0;
-		while (num < this.constructionElements.Length && building.Def.Mass.Length > num)
-		{
-			GameObject gameObject = Deconstructable.SpawnItem(base.transform.GetPosition(), building.Def, this.constructionElements[num], building.Def.Mass[num], temperature, disease_idx, disease_count);
-			gameObject.transform.SetPosition(gameObject.transform.GetPosition() + Vector3.up * 0.5f);
-			int num2 = Grid.PosToCell(gameObject.transform.GetPosition());
-			int num3 = Grid.CellAbove(num2);
-			Vector2 zero;
-			if ((Grid.IsValidCell(num2) && Grid.Solid[num2]) || (Grid.IsValidCell(num3) && Grid.Solid[num3]))
-			{
-				zero = Vector2.zero;
-			}
-			else
-			{
-				zero = new Vector2(global::UnityEngine.Random.Range(-1f, 1f) * Deconstructable.INITIAL_VELOCITY_RANGE.x, Deconstructable.INITIAL_VELOCITY_RANGE.y);
-			}
-			if (GameComps.Fallers.Has(gameObject))
-			{
-				GameComps.Fallers.Remove(gameObject);
-			}
-			GameComps.Fallers.Add(gameObject, zero);
-			num++;
-		}
+		this.SpawnItemsFromConstruction(temperature, disease_idx, disease_count);
 		this.destroyed = true;
 		base.gameObject.DeleteObject();
 	}
@@ -186,7 +164,44 @@ public class Deconstructable : Workable
 		}
 	}
 
-	public static GameObject SpawnItem(Vector3 position, BuildingDef def, Tag src_element, float src_mass, float src_temperature, byte disease_idx, int disease_count)
+	public void SpawnItemsFromConstruction()
+	{
+		PrimaryElement component = base.GetComponent<PrimaryElement>();
+		float temperature = component.Temperature;
+		byte diseaseIdx = component.DiseaseIdx;
+		int diseaseCount = component.DiseaseCount;
+		this.SpawnItemsFromConstruction(temperature, diseaseIdx, diseaseCount);
+	}
+
+	private void SpawnItemsFromConstruction(float temperature, byte disease_idx, int disease_count)
+	{
+		Building component = base.GetComponent<Building>();
+		int num = 0;
+		while (num < this.constructionElements.Length && component.Def.Mass.Length > num)
+		{
+			GameObject gameObject = Deconstructable.SpawnItem(base.transform.GetPosition(), component.Def, this.constructionElements[num], component.Def.Mass[num], temperature, disease_idx, disease_count);
+			gameObject.transform.SetPosition(gameObject.transform.GetPosition() + Vector3.up * 0.5f);
+			int num2 = Grid.PosToCell(gameObject.transform.GetPosition());
+			int num3 = Grid.CellAbove(num2);
+			Vector2 zero;
+			if ((Grid.IsValidCell(num2) && Grid.Solid[num2]) || (Grid.IsValidCell(num3) && Grid.Solid[num3]))
+			{
+				zero = Vector2.zero;
+			}
+			else
+			{
+				zero = new Vector2(global::UnityEngine.Random.Range(-1f, 1f) * Deconstructable.INITIAL_VELOCITY_RANGE.x, Deconstructable.INITIAL_VELOCITY_RANGE.y);
+			}
+			if (GameComps.Fallers.Has(gameObject))
+			{
+				GameComps.Fallers.Remove(gameObject);
+			}
+			GameComps.Fallers.Add(gameObject, zero);
+			num++;
+		}
+	}
+
+	private static GameObject SpawnItem(Vector3 position, BuildingDef def, Tag src_element, float src_mass, float src_temperature, byte disease_idx, int disease_count)
 	{
 		GameObject gameObject = null;
 		int num = Grid.PosToCell(position);

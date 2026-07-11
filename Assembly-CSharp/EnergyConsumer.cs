@@ -8,7 +8,7 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 [DebuggerDisplay("{name} {WattsUsed}W")]
 [AddComponentMenu("KMonoBehaviour/scripts/EnergyConsumer")]
-public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IEffectDescriptor
+public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IGameObjectEffectDescriptor
 {
 	public int PowerSortOrder
 	{
@@ -194,7 +194,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 		this.lastTimeSoundPlayed[state] = Time.time;
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		return null;
 	}

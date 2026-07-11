@@ -2,16 +2,16 @@
 using FMOD.Studio;
 using UnityEngine;
 
-public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Instance>
+public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, SpeechMonitor.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.satisfied;
-		this.root.Enter(new StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, object>.State.Callback(SpeechMonitor.CreateMouth)).Exit(new StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, object>.State.Callback(SpeechMonitor.DestroyMouth));
+		this.root.Enter(new StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, SpeechMonitor.Def>.State.Callback(SpeechMonitor.CreateMouth)).Exit(new StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, SpeechMonitor.Def>.State.Callback(SpeechMonitor.DestroyMouth));
 		this.satisfied.DoNothing();
-		this.talking.Enter(new StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, object>.State.Callback(SpeechMonitor.BeginTalking)).Update(new Action<SpeechMonitor.Instance, float>(SpeechMonitor.UpdateTalking), UpdateRate.RENDER_EVERY_TICK, false).Target(this.mouth)
+		this.talking.Enter(new StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, SpeechMonitor.Def>.State.Callback(SpeechMonitor.BeginTalking)).Update(new Action<SpeechMonitor.Instance, float>(SpeechMonitor.UpdateTalking), UpdateRate.RENDER_EVERY_TICK, false).Target(this.mouth)
 			.OnAnimQueueComplete(this.satisfied)
-			.Exit(new StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, object>.State.Callback(SpeechMonitor.EndTalking));
+			.Exit(new StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, SpeechMonitor.Def>.State.Callback(SpeechMonitor.EndTalking));
 	}
 
 	private static void CreateMouth(SpeechMonitor.Instance smi)
@@ -128,15 +128,15 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 		smi.Get<SymbolOverrideController>().AddSymbolOverride(SpeechMonitor.HASH_SNAPTO_MOUTH, smi.mouth.AnimFiles[0].GetData().build.GetSymbol(firstFrameElement.symbol), 3);
 	}
 
-	public GameStateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, object>.State satisfied;
+	public GameStateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, SpeechMonitor.Def>.State satisfied;
 
-	public GameStateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, object>.State talking;
+	public GameStateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, SpeechMonitor.Def>.State talking;
 
 	public static string PREFIX_SAD = "sad";
 
 	public static string PREFIX_HAPPY = "happy";
 
-	public StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, object>.TargetParameter mouth;
+	public StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, SpeechMonitor.Def>.TargetParameter mouth;
 
 	private static HashedString HASH_SNAPTO_MOUTH = "snapto_mouth";
 
@@ -153,10 +153,10 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 		public int speechCount;
 	}
 
-	public new class Instance : GameStateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, object>.GameInstance
+	public new class Instance : GameStateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, SpeechMonitor.Def>.GameInstance
 	{
 		public Instance(IStateMachineTarget master, SpeechMonitor.Def def)
-			: base(master)
+			: base(master, def)
 		{
 		}
 

@@ -4,7 +4,7 @@ using Klei.AI;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/Bed")]
-public class Bed : Workable, IEffectDescriptor, IBasicBuilding
+public class Bed : Workable, IGameObjectEffectDescriptor, IBasicBuilding
 {
 	protected override void OnPrefabInit()
 	{
@@ -80,7 +80,7 @@ public class Bed : Workable, IEffectDescriptor, IBasicBuilding
 		this.targetWorker = null;
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		if (this.effects != null)

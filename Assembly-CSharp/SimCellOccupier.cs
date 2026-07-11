@@ -5,7 +5,7 @@ using UnityEngine;
 
 [SkipSaveFileSerialization]
 [AddComponentMenu("KMonoBehaviour/scripts/SimCellOccupier")]
-public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
+public class SimCellOccupier : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	public bool IsVisuallySolid
 	{
@@ -147,7 +147,7 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 		Grid.Damage[cell] = 0f;
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = null;
 		if (this.movementSpeedMultiplier != 1f)

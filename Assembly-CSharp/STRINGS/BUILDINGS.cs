@@ -1348,6 +1348,15 @@ namespace STRINGS
 				public static LocString OVERPRODUCTION = "{Generator} overproduction";
 			}
 
+			public class DEVGENERATOR
+			{
+				public static LocString NAME = "Dev Generator";
+
+				public static LocString DESC = "Runs on coffee.";
+
+				public static LocString EFFECT = "Generates testing power for late nights.";
+			}
+
 			public class KEROSENEENGINE
 			{
 				public static LocString NAME = UI.FormatAsLink("Petroleum Engine", "KEROSENEENGINE");
@@ -2411,7 +2420,7 @@ namespace STRINGS
 					UI.FormatAsLink("Solid Materials", "ELEMENTS_SOLID"),
 					" debris from the Sweepy.\n\nRequires ",
 					UI.FormatAsLink("Power", "POWER"),
-					" to recharge the Sweepy."
+					" to recharge the Sweepy.\n\nDuplicants that can perform Supply errands will empty the debris into available storage bins."
 				});
 			}
 
@@ -4060,7 +4069,7 @@ namespace STRINGS
 					UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
 					" until it receives another ",
 					UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
-					" to start the count over."
+					", when it resets automatically and begins counting again."
 				});
 
 				public static LocString LOGIC_PORT = "Internal Counter Value";

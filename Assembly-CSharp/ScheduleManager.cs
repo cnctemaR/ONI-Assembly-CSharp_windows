@@ -151,7 +151,8 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 	public bool IsAllowed(Schedulable schedulable, ScheduleBlockType schedule_block_type)
 	{
 		int blockIdx = Schedule.GetBlockIdx();
-		return this.GetSchedule(schedulable).GetBlock(blockIdx).IsAllowed(schedule_block_type);
+		Schedule schedule = this.GetSchedule(schedulable);
+		return schedule != null && schedule.GetBlock(blockIdx).IsAllowed(schedule_block_type);
 	}
 
 	public void Sim33ms(float dt)

@@ -7,7 +7,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/scripts/LogicPorts")]
-public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
+public class LogicPorts : KMonoBehaviour, IGameObjectEffectDescriptor, IRenderEveryTick
 {
 	protected override void OnPrefabInit()
 	{
@@ -397,10 +397,10 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 		return bitDepth;
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		LogicPorts component = def.BuildingComplete.GetComponent<LogicPorts>();
+		LogicPorts component = go.GetComponent<LogicPorts>();
 		if (component != null)
 		{
 			if (component.inputPortInfo != null && component.inputPortInfo.Length != 0)

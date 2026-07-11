@@ -16,6 +16,12 @@ public class LogicRibbonReader : KMonoBehaviour, ILogicRibbonBitSelector, IRende
 		this.kbac.Play("idle", KAnim.PlayMode.Once, 1f, 0f);
 	}
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		base.Subscribe<LogicRibbonReader>(-905833192, LogicRibbonReader.OnCopySettingsDelegate);
+	}
+
 	public void OnLogicValueChanged(object data)
 	{
 		LogicValueChanged logicValueChanged = (LogicValueChanged)data;
@@ -26,6 +32,15 @@ public class LogicRibbonReader : KMonoBehaviour, ILogicRibbonBitSelector, IRende
 		this.currentValue = logicValueChanged.newValue;
 		this.UpdateLogicCircuit();
 		this.UpdateVisuals();
+	}
+
+	private void OnCopySettings(object data)
+	{
+		LogicRibbonReader component = ((GameObject)data).GetComponent<LogicRibbonReader>();
+		if (component != null)
+		{
+			this.SetBitSelection(component.selectedBit);
+		}
 	}
 
 	private void UpdateLogicCircuit()
@@ -181,9 +196,17 @@ public class LogicRibbonReader : KMonoBehaviour, ILogicRibbonBitSelector, IRende
 
 	public static readonly HashedString OUTPUT_PORT_ID = new HashedString("LogicRibbonReaderOutput");
 
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
 	private static readonly EventSystem.IntraObjectHandler<LogicRibbonReader> OnLogicValueChangedDelegate = new EventSystem.IntraObjectHandler<LogicRibbonReader>(delegate(LogicRibbonReader component, object data)
 	{
 		component.OnLogicValueChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<LogicRibbonReader> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<LogicRibbonReader>(delegate(LogicRibbonReader component, object data)
+	{
+		component.OnCopySettings(data);
 	});
 
 	private KAnimHashedString BIT_ONE_SYMBOL = "bit1_bloom";

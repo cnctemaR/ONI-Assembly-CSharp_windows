@@ -4,7 +4,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class CookingStation : ComplexFabricator, IEffectDescriptor
+public class CookingStation : ComplexFabricator, IGameObjectEffectDescriptor
 {
 	protected override void OnPrefabInit()
 	{
@@ -48,9 +48,9 @@ public class CookingStation : ComplexFabricator, IEffectDescriptor
 		return list;
 	}
 
-	public override List<Descriptor> GetDescriptors(BuildingDef def)
+	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
-		List<Descriptor> descriptors = base.GetDescriptors(def);
+		List<Descriptor> descriptors = base.GetDescriptors(go);
 		descriptors.Add(new Descriptor(UI.BUILDINGEFFECTS.REMOVES_DISEASE, UI.BUILDINGEFFECTS.TOOLTIPS.REMOVES_DISEASE, Descriptor.DescriptorType.Effect, false));
 		return descriptors;
 	}

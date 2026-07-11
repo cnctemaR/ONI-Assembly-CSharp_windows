@@ -504,6 +504,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		pos.z = -100f;
 		this.targetPos = pos;
 		this.targetOrthographicSize = orthographic_size;
+		PlayerController.Instance.CancelDragging();
 	}
 
 	public void SetMaxOrthographicSize(float size)

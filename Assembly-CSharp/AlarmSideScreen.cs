@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -69,6 +70,26 @@ public class AlarmSideScreen : SideScreenContent
 					component.GetReference<KImage>("bg").color = notificationBGColour;
 					component.GetReference<KImage>("icon").color = notificationColour;
 					component.GetReference<KImage>("icon").sprite = NotificationScreen.Instance.GetNotificationIcon(type);
+					ToolTip component2 = gameObject.GetComponent<ToolTip>();
+					NotificationType type2 = type;
+					if (type2 != NotificationType.Bad)
+					{
+						if (type2 != NotificationType.Neutral)
+						{
+							if (type2 == NotificationType.DuplicantThreatening)
+							{
+								component2.SetSimpleTooltip(UI.UISIDESCREENS.LOGICALARMSIDESCREEN.TOOLTIPS.DUPLICANT_THREATENING);
+							}
+						}
+						else
+						{
+							component2.SetSimpleTooltip(UI.UISIDESCREENS.LOGICALARMSIDESCREEN.TOOLTIPS.NEUTRAL);
+						}
+					}
+					else
+					{
+						component2.SetSimpleTooltip(UI.UISIDESCREENS.LOGICALARMSIDESCREEN.TOOLTIPS.BAD);
+					}
 					if (!this.toggles_by_type.ContainsKey(type))
 					{
 						this.toggles_by_type.Add(type, gameObject.GetComponent<MultiToggle>());

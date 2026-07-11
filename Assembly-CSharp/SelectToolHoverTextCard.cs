@@ -355,8 +355,8 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 					{
 						textStyleSetting = this.Styles_LogicActive.Standard;
 					}
-					hoverTextDrawer.DrawIcon((num4 == 1 && flag6) ? this.iconActiveAutomationPort : this.iconDash, textStyleSetting.textColor, 18, 2);
-					hoverTextDrawer.DrawText(port.activeDescription, textStyleSetting);
+					this.DrawLogicIcon(hoverTextDrawer, (num4 == 1 && flag6) ? this.iconActiveAutomationPort : this.iconDash, textStyleSetting);
+					this.DrawLogicText(hoverTextDrawer, port.activeDescription, textStyleSetting);
 					hoverTextDrawer.NewLine(26);
 					TextStyleSetting textStyleSetting2;
 					if (flag6)
@@ -367,8 +367,8 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 					{
 						textStyleSetting2 = this.Styles_LogicStandby.Standard;
 					}
-					hoverTextDrawer.DrawIcon((num4 == 0 && flag6) ? this.iconActiveAutomationPort : this.iconDash, textStyleSetting2.textColor, 18, 2);
-					hoverTextDrawer.DrawText(port.inactiveDescription, textStyleSetting2);
+					this.DrawLogicIcon(hoverTextDrawer, (num4 == 0 && flag6) ? this.iconActiveAutomationPort : this.iconDash, textStyleSetting2);
+					this.DrawLogicText(hoverTextDrawer, port.inactiveDescription, textStyleSetting2);
 					hoverTextDrawer.EndShadowBar();
 				}
 				LogicGate component3 = kselectable2.GetComponent<LogicGate>();
@@ -397,8 +397,8 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 					{
 						textStyleSetting3 = this.Styles_LogicActive.Standard;
 					}
-					hoverTextDrawer.DrawIcon((portValue == 1 && portConnected) ? this.iconActiveAutomationPort : this.iconDash, textStyleSetting3.textColor, 18, 2);
-					hoverTextDrawer.DrawText(portDescription.active, textStyleSetting3);
+					this.DrawLogicIcon(hoverTextDrawer, (portValue == 1 && portConnected) ? this.iconActiveAutomationPort : this.iconDash, textStyleSetting3);
+					this.DrawLogicText(hoverTextDrawer, portDescription.active, textStyleSetting3);
 					hoverTextDrawer.NewLine(26);
 					TextStyleSetting textStyleSetting4;
 					if (portConnected)
@@ -409,8 +409,8 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 					{
 						textStyleSetting4 = this.Styles_LogicStandby.Standard;
 					}
-					hoverTextDrawer.DrawIcon((portValue == 0 && portConnected) ? this.iconActiveAutomationPort : this.iconDash, textStyleSetting4.textColor, 18, 2);
-					hoverTextDrawer.DrawText(portDescription.inactive, textStyleSetting4);
+					this.DrawLogicIcon(hoverTextDrawer, (portValue == 0 && portConnected) ? this.iconActiveAutomationPort : this.iconDash, textStyleSetting4);
+					this.DrawLogicText(hoverTextDrawer, portDescription.inactive, textStyleSetting4);
 					hoverTextDrawer.EndShadowBar();
 				}
 			}
@@ -680,6 +680,30 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 		}
 		this.recentNumberOfDisplayedSelectables = num5 + 1;
 		hoverTextDrawer.EndDrawing();
+	}
+
+	public void DrawLogicIcon(HoverTextDrawer drawer, Sprite icon, TextStyleSetting style)
+	{
+		drawer.DrawIcon(icon, this.GetLogicColorFromStyle(style), 18, 2);
+	}
+
+	public void DrawLogicText(HoverTextDrawer drawer, string text, TextStyleSetting style)
+	{
+		drawer.DrawText(text, style, this.GetLogicColorFromStyle(style), true);
+	}
+
+	private Color GetLogicColorFromStyle(TextStyleSetting style)
+	{
+		ColorSet colorSet = GlobalAssets.Instance.colorSet;
+		if (style == this.Styles_LogicActive.Selected)
+		{
+			return colorSet.logicOnText;
+		}
+		if (style == this.Styles_LogicStandby.Selected)
+		{
+			return colorSet.logicOffText;
+		}
+		return style.textColor;
 	}
 
 	private bool ShowStatusItemInCurrentOverlay(StatusItem status)

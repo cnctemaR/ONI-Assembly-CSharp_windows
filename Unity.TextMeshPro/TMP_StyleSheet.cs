@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace TMPro
@@ -56,6 +57,16 @@ namespace TMPro
 				this.m_StyleDictionary.Add(new_key, tmp_Style);
 				this.m_StyleDictionary.Remove(old_key);
 			}
+		}
+
+		public void AddStyle(TMP_Style style)
+		{
+			TMP_Style tmp_Style = this.m_StyleList.FirstOrDefault<TMP_Style>((TMP_Style p) => p.hashCode == style.hashCode);
+			if (tmp_Style != null)
+			{
+				this.m_StyleList.Remove(tmp_Style);
+			}
+			this.m_StyleList.Add(style);
 		}
 
 		public static void RefreshStyles()

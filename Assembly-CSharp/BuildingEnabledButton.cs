@@ -40,10 +40,15 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandl
 	protected override void OnSpawn()
 	{
 		this.IsEnabled = this.buildingEnabled;
+		if (this.queuedToggle)
+		{
+			this.OnMenuToggle();
+		}
 	}
 
 	public void HandleToggle()
 	{
+		this.queuedToggle = false;
 		Prioritizable.RemoveRef(base.gameObject);
 		this.OnToggle();
 	}
@@ -67,10 +72,12 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandl
 			{
 				base.Trigger(2108245096, "BuildingDisabled");
 			}
+			this.queuedToggle = true;
 			Prioritizable.AddRef(base.gameObject);
 		}
 		else
 		{
+			this.queuedToggle = false;
 			Prioritizable.RemoveRef(base.gameObject);
 		}
 		this.Toggleable.Toggle(this.ToggleIdx);
@@ -103,6 +110,9 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandl
 
 	[Serialize]
 	private bool buildingEnabled = true;
+
+	[Serialize]
+	private bool queuedToggle;
 
 	public static readonly Operational.Flag EnabledFlag = new Operational.Flag("building_enabled", Operational.Flag.Type.Functional);
 

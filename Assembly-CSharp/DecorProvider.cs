@@ -7,7 +7,7 @@ using UnityEngine;
 
 [SkipSaveFileSerialization]
 [AddComponentMenu("KMonoBehaviour/scripts/DecorProvider")]
-public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffectDescriptor
+public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	public void Refresh()
 	{
@@ -163,11 +163,6 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 			return DECOR.LIT_BONUS;
 		}
 		return 0;
-	}
-
-	public List<Descriptor> GetDescriptors(BuildingDef def)
-	{
-		return this.GetEffectDescriptions();
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)

@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using Klei;
 using Newtonsoft.Json;
 using STRINGS;
@@ -143,16 +147,22 @@ namespace KMod
 			return false;
 		}
 
-		public bool HaveLoadedMods()
+		public List<Mod> GetAllCrashableMods()
 		{
+			List<Mod> list = new List<Mod>();
 			foreach (Mod mod in this.mods)
 			{
-				if (mod.status != Mod.Status.NotInstalled && mod.IsActive())
+				if (mod.status != Mod.Status.NotInstalled && mod.IsActive() && !mod.HasOnlyTranslationContent())
 				{
-					return true;
+					list.Add(mod);
 				}
 			}
-			return false;
+			return list;
+		}
+
+		public bool HasCrashableMods()
+		{
+			return this.GetAllCrashableMods().Count > 0;
 		}
 
 		private void Install(Mod mod)
@@ -408,14 +418,13 @@ namespace KMod
 				}
 			}
 			bool flag = false;
-			bool flag2 = this.IsInDevMode();
 			foreach (Mod mod2 in this.mods)
 			{
 				Content content2 = mod2.loaded_content & content;
 				Content content3 = mod2.available_content & content;
 				if (mod2.enabled && content2 != content3)
 				{
-					mod2.Crash(!flag2);
+					mod2.SetCrashed();
 					if (!mod2.enabled)
 					{
 						flag = true;
@@ -645,7 +654,7 @@ namespace KMod
 				{
 					foreach (Mod mod in this.mods)
 					{
-						if (mod.label.distribution_platform != Label.DistributionPlatform.Local && mod.label.distribution_platform != Label.DistributionPlatform.Dev && mod.label.Match(@event.mod))
+						if (!mod.IsLocal && mod.label.Match(@event.mod))
 						{
 							mod.status = Mod.Status.ReinstallPending;
 						}
@@ -720,32 +729,61 @@ namespace KMod
 			this.events.Clear();
 		}
 
-		public void HandleCrash()
+		public void SearchForModsInStackTrace(StackTrace stackTrace)
 		{
-			global::Debug.Log("Error occurred with mods active. Disabling all mods (unless dev mods active).");
-			bool flag = this.IsInDevMode();
-			foreach (Mod mod in this.mods)
+			foreach (StackFrame stackFrame in stackTrace.GetFrames())
 			{
-				if (mod.enabled)
+				if (stackFrame != null)
 				{
-					this.events.Add(new Event
+					Assembly assembly = null;
+					MethodBase method = stackFrame.GetMethod();
+					if (method != null)
 					{
-						event_type = EventType.ActiveDuringCrash,
-						mod = mod.label
-					});
-					mod.Crash(!flag);
-					if (!flag)
-					{
-						this.events.Add(new Event
+						Type declaringType = method.DeclaringType;
+						if (declaringType != null)
 						{
-							event_type = EventType.Deactivated,
-							mod = mod.label
-						});
+							assembly = declaringType.Assembly;
+						}
+					}
+					foreach (Mod mod in this.mods)
+					{
+						if (mod.loaded_mod_data != null && !mod.foundInStackTrace)
+						{
+							if (assembly != null && mod.loaded_mod_data.dlls.Contains(assembly))
+							{
+								global::Debug.Log(string.Format("{0}'s assembly declared the method {1}:{2} in the stack trace, adding to referenced mods list", mod.title, method.DeclaringType, method.Name));
+								mod.foundInStackTrace = true;
+							}
+							else if (method != null && mod.loaded_mod_data.patched_methods.Contains(method))
+							{
+								global::Debug.Log(string.Format("{0}'s patched_method {1}:{2} appears in the stack trace, adding to referenced mods list", mod.title, method.DeclaringType, method.Name));
+								mod.foundInStackTrace = true;
+							}
+						}
 					}
 				}
 			}
-			this.dirty = true;
-			this.Update(this);
+			string text = stackTrace.ToString();
+			this.SearchForModsInStackTrace(text);
+		}
+
+		public void SearchForModsInStackTrace(string stackStr)
+		{
+			foreach (Mod mod in this.mods)
+			{
+				if (mod.loaded_mod_data != null && !mod.foundInStackTrace)
+				{
+					foreach (MethodBase methodBase in mod.loaded_mod_data.patched_methods)
+					{
+						if (new Regex(Regex.Escape(methodBase.DeclaringType.ToString()) + "[.:]" + Regex.Escape(methodBase.Name.ToString())).Match(stackStr).Success)
+						{
+							global::Debug.Log(string.Format("{0}'s patched_method {1}.{2} matched in the stack trace, adding to referenced mods list", mod.title, methodBase.DeclaringType, methodBase.Name));
+							mod.foundInStackTrace = true;
+							break;
+						}
+					}
+				}
+			}
 		}
 
 		public void HandleErrors(List<YamlIO.Error> world_gen_errors)
@@ -773,11 +811,10 @@ namespace KMod
 					}
 				}
 			}
-			bool flag = this.IsInDevMode();
 			foreach (Mod mod2 in pooledList)
 			{
-				mod2.Crash(!flag);
-				if (!flag)
+				mod2.SetCrashed();
+				if (!mod2.IsDev)
 				{
 					this.events.Add(new Event
 					{

@@ -16,6 +16,7 @@ public class CounterSideScreen : SideScreenContent, IRender200ms
 		this.incrementMaxButton.onClick += this.IncrementMaxCount;
 		this.decrementMaxButton.onClick += this.DecrementMaxCount;
 		this.incrementModeButton.onClick += this.ToggleMode;
+		this.advancedModeToggle.onClick += this.ToggleAdvanced;
 		this.maxCountInput.onEndEdit += delegate
 		{
 			this.UpdateMaxCountFromTextInput(this.maxCountInput.currentValue);
@@ -31,11 +32,12 @@ public class CounterSideScreen : SideScreenContent, IRender200ms
 	public override void SetTarget(GameObject target)
 	{
 		base.SetTarget(target);
+		this.maxCountInput.minValue = 1f;
+		this.maxCountInput.maxValue = 10f;
 		this.targetLogicCounter = target.GetComponent<LogicCounter>();
-		this.maxCountInput.SetDisplayValue(this.targetLogicCounter.maxCount.ToString());
-		this.maxCountInput.minValue = 0f;
-		this.maxCountInput.maxValue = 9f;
-		this.incrementModeButton.GetComponentInChildren<LocText>().text = (this.targetLogicCounter.increment ? UI.UISIDESCREENS.COUNTER_SIDE_SCREEN.INCREMENT_MODE : UI.UISIDESCREENS.COUNTER_SIDE_SCREEN.DECREMENT_MODE);
+		this.UpdateCurrentCountLabel(this.targetLogicCounter.currentCount);
+		this.UpdateMaxCountLabel(this.targetLogicCounter.maxCount);
+		this.advancedModeCheckmark.enabled = this.targetLogicCounter.advancedMode;
 	}
 
 	public void Render200ms(float dt)
@@ -58,7 +60,7 @@ public class CounterSideScreen : SideScreenContent, IRender200ms
 		{
 			text = UI.FormatAsAutomationState(text, UI.AutomationState.Standby);
 		}
-		this.currentCount.text = text;
+		this.currentCount.text = (this.targetLogicCounter.advancedMode ? string.Format(UI.UISIDESCREENS.COUNTER_SIDE_SCREEN.CURRENT_COUNT_ADVANCED, text) : string.Format(UI.UISIDESCREENS.COUNTER_SIDE_SCREEN.CURRENT_COUNT_SIMPLE, text));
 	}
 
 	private void UpdateMaxCountLabel(int value)
@@ -68,29 +70,36 @@ public class CounterSideScreen : SideScreenContent, IRender200ms
 
 	private void UpdateMaxCountFromTextInput(float newValue)
 	{
-		this.targetLogicCounter.maxCount = (int)newValue;
+		this.SetMaxCount((int)newValue);
 	}
 
 	private void IncrementMaxCount()
 	{
-		int num = this.targetLogicCounter.maxCount + 1;
-		num = ((num == 10) ? 0 : num);
-		this.targetLogicCounter.maxCount = num;
-		this.targetLogicCounter.SetCounterState();
-		this.targetLogicCounter.UpdateLogicCircuit();
-		this.targetLogicCounter.UpdateVisualState(true);
-		this.UpdateMaxCountLabel(num);
+		this.SetMaxCount(this.targetLogicCounter.maxCount + 1);
 	}
 
 	private void DecrementMaxCount()
 	{
-		int num = this.targetLogicCounter.maxCount - 1;
-		num = ((num < 0) ? 9 : num);
-		this.targetLogicCounter.maxCount = num;
-		this.targetLogicCounter.SetCounterState();
-		this.targetLogicCounter.UpdateLogicCircuit();
-		this.targetLogicCounter.UpdateVisualState(true);
-		this.UpdateMaxCountLabel(num);
+		this.SetMaxCount(this.targetLogicCounter.maxCount - 1);
+	}
+
+	private void SetMaxCount(int newValue)
+	{
+		if (newValue > 10)
+		{
+			newValue = 1;
+		}
+		if (newValue < 1)
+		{
+			newValue = 10;
+		}
+		if (newValue < this.targetLogicCounter.currentCount)
+		{
+			this.targetLogicCounter.currentCount = newValue;
+		}
+		this.targetLogicCounter.maxCount = newValue;
+		this.UpdateCounterStates();
+		this.UpdateMaxCountLabel(newValue);
 	}
 
 	private void ResetCounter()
@@ -98,10 +107,24 @@ public class CounterSideScreen : SideScreenContent, IRender200ms
 		this.targetLogicCounter.ResetCounter();
 	}
 
+	private void UpdateCounterStates()
+	{
+		this.targetLogicCounter.SetCounterState();
+		this.targetLogicCounter.UpdateLogicCircuit();
+		this.targetLogicCounter.UpdateVisualState(true);
+		this.targetLogicCounter.UpdateMeter();
+	}
+
 	private void ToggleMode()
 	{
-		this.targetLogicCounter.increment = !this.targetLogicCounter.increment;
-		this.incrementModeButton.GetComponentInChildren<LocText>().text = (this.targetLogicCounter.increment ? UI.UISIDESCREENS.COUNTER_SIDE_SCREEN.INCREMENT_MODE : UI.UISIDESCREENS.COUNTER_SIDE_SCREEN.DECREMENT_MODE);
+	}
+
+	private void ToggleAdvanced()
+	{
+		this.targetLogicCounter.advancedMode = !this.targetLogicCounter.advancedMode;
+		this.advancedModeCheckmark.enabled = this.targetLogicCounter.advancedMode;
+		this.UpdateCurrentCountLabel(this.targetLogicCounter.currentCount);
+		this.UpdateCounterStates();
 	}
 
 	public LogicCounter targetLogicCounter;
@@ -113,6 +136,10 @@ public class CounterSideScreen : SideScreenContent, IRender200ms
 	public KButton decrementMaxButton;
 
 	public KButton incrementModeButton;
+
+	public KToggle advancedModeToggle;
+
+	public KImage advancedModeCheckmark;
 
 	public LocText currentCount;
 

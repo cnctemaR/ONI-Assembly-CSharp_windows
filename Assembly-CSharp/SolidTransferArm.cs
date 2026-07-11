@@ -58,9 +58,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			this.choreConsumer.SetPermittedByUser(choreGroups[i], true);
 		}
 		base.Subscribe<SolidTransferArm>(-592767678, SolidTransferArm.OnOperationalChangedDelegate);
-		base.Subscribe<SolidTransferArm>(1745615042, SolidTransferArm.OnEndChoreDelegate);
 		this.RotateArm(this.rotatable.GetRotatedOffset(Vector3.up), true, 0f);
-		this.DropLeftovers();
 		component.enabled = false;
 		component.enabled = true;
 		MinionGroupProber.Get().SetValidSerialNos(this, this.serial_no, this.serial_no);
@@ -125,6 +123,8 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			if (context.chore is FetchChore)
 			{
 				this.choreDriver.SetChore(context);
+				FetchChore fetchChore = context.chore as FetchChore;
+				this.storage.DropUnlessHasTags(fetchChore.tagBits, fetchChore.requiredTagBits, fetchChore.forbiddenTagBits, true);
 				this.arm_anim_ctrl.enabled = false;
 				this.arm_anim_ctrl.enabled = true;
 			}
@@ -254,19 +254,6 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 				this.choreDriver.StopChore();
 			}
 			this.UpdateArmAnim();
-		}
-	}
-
-	private void OnEndChore(object data)
-	{
-		this.DropLeftovers();
-	}
-
-	private void DropLeftovers()
-	{
-		if (!this.storage.IsEmpty() && !this.choreDriver.HasChore())
-		{
-			this.storage.DropAll(false, false, default(Vector3), true);
 		}
 	}
 
@@ -409,11 +396,6 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 	private static readonly EventSystem.IntraObjectHandler<SolidTransferArm> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<SolidTransferArm>(delegate(SolidTransferArm component, object data)
 	{
 		component.OnOperationalChanged(data);
-	});
-
-	private static readonly EventSystem.IntraObjectHandler<SolidTransferArm> OnEndChoreDelegate = new EventSystem.IntraObjectHandler<SolidTransferArm>(delegate(SolidTransferArm component, object data)
-	{
-		component.OnEndChore(data);
 	});
 
 	private static List<SolidTransferArm.CachedPickupable> cached_pickupables = new List<SolidTransferArm.CachedPickupable>();

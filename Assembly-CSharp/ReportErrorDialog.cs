@@ -1,32 +1,69 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using KMod;
 using STRINGS;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class ReportErrorDialog : MonoBehaviour
 {
 	private void Start()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.EndSession(true);
-		if (SpeedControlScreen.Instance)
-		{
-			SpeedControlScreen.Instance.Pause(false);
-		}
 		if (KScreenManager.Instance)
 		{
 			KScreenManager.Instance.DisableInput(true);
 		}
-		this.continueGameButton.onClick += this.OnSelect_CONTINUE;
-		this.continueGameButton.gameObject.SetActive(!KCrashReporter.terminateOnError);
+		this.StackTrace.SetActive(false);
+		this.CrashLabel.text = ((this.mode == ReportErrorDialog.Mode.SubmitError) ? UI.CRASHSCREEN.TITLE : UI.CRASHSCREEN.TITLE_MODS);
+		this.CrashDescription.SetActive(this.mode == ReportErrorDialog.Mode.SubmitError);
+		this.ModsInfo.SetActive(this.mode == ReportErrorDialog.Mode.DisableMods);
+		if (this.mode == ReportErrorDialog.Mode.DisableMods)
+		{
+			this.BuildModsList();
+		}
+		this.submitButton.gameObject.SetActive(this.submitAction != null);
 		this.submitButton.onClick += this.OnSelect_SUBMIT;
+		this.moreInfoButton.onClick += this.OnSelect_MOREINFO;
+		this.continueGameButton.gameObject.SetActive(this.continueAction != null);
+		this.continueGameButton.onClick += this.OnSelect_CONTINUE;
 		this.quitButton.onClick += this.OnSelect_QUIT;
 		this.uploadSaveButton.onClick += this.OnSelect_UPLOADSAVE;
 		this.skipUploadSaveButton.onClick += this.OnSelect_SKIPUPLOADSAVE;
 		this.messageInputField.text = UI.CRASHSCREEN.BODY;
-		ReportErrorDialog.hasCrash = true;
+	}
+
+	private void BuildModsList()
+	{
+		DebugUtil.Assert(Global.Instance != null && Global.Instance.modManager != null);
+		Manager mod_mgr = Global.Instance.modManager;
+		List<Mod> allCrashableMods = mod_mgr.GetAllCrashableMods();
+		allCrashableMods.Sort((Mod x, Mod y) => y.foundInStackTrace.CompareTo(x.foundInStackTrace));
+		foreach (Mod mod in allCrashableMods)
+		{
+			if (mod.foundInStackTrace && mod.label.distribution_platform != Label.DistributionPlatform.Dev)
+			{
+				mod_mgr.EnableMod(mod.label, false, this);
+			}
+			HierarchyReferences hierarchyReferences = Util.KInstantiateUI<HierarchyReferences>(this.modEntryPrefab, this.modEntryParent.gameObject, false);
+			LocText reference = hierarchyReferences.GetReference<LocText>("Title");
+			reference.text = mod.title;
+			reference.color = (mod.foundInStackTrace ? Color.red : Color.white);
+			MultiToggle toggle = hierarchyReferences.GetReference<MultiToggle>("EnabledToggle");
+			toggle.ChangeState(mod.enabled ? 1 : 0);
+			Label mod_label = mod.label;
+			MultiToggle toggle2 = toggle;
+			toggle2.onClick = (global::System.Action)Delegate.Combine(toggle2.onClick, new global::System.Action(delegate
+			{
+				bool flag = !mod_mgr.IsModEnabled(mod_label);
+				toggle.ChangeState(flag ? 1 : 0);
+				mod_mgr.EnableMod(mod_label, flag, this);
+			}));
+			toggle.GetComponent<ToolTip>().OnToolTip = () => mod_mgr.IsModEnabled(mod_label) ? UI.FRONTEND.MODS.TOOLTIPS.ENABLED : UI.FRONTEND.MODS.TOOLTIPS.DISABLED;
+			hierarchyReferences.gameObject.SetActive(true);
+		}
 	}
 
 	private void Update()
@@ -54,15 +91,38 @@ public class ReportErrorDialog : MonoBehaviour
 		}
 	}
 
-	public void PopupConfirmDialog(global::System.Action onConfirm, global::System.Action onQuit, global::System.Action onContinue)
+	public void PopupSubmitErrorDialog(string stackTrace, global::System.Action onSubmit, global::System.Action onQuit, global::System.Action onContinue)
 	{
-		this.confirmAction = onConfirm;
+		this.mode = ReportErrorDialog.Mode.SubmitError;
+		this.m_stackTrace = stackTrace;
+		this.submitAction = onSubmit;
 		this.quitAction = onQuit;
 		this.continueAction = onContinue;
-		this.continueGameButton.gameObject.SetActive(this.continueAction != null);
-		this.VCCrashLabel.gameObject.SetActive(false);
-		this.VCLinkButton.gameObject.SetActive(false);
-		this.quitButton.gameObject.SetActive(onQuit != null);
+	}
+
+	public void PopupDisableModsDialog(string stackTrace, global::System.Action onQuit, global::System.Action onContinue)
+	{
+		this.mode = ReportErrorDialog.Mode.DisableMods;
+		this.m_stackTrace = stackTrace;
+		this.quitAction = onQuit;
+		this.continueAction = onContinue;
+	}
+
+	public void OnSelect_MOREINFO()
+	{
+		this.StackTrace.GetComponentInChildren<LocText>().text = this.m_stackTrace;
+		this.StackTrace.SetActive(true);
+		this.moreInfoButton.GetComponentInChildren<LocText>().text = UI.CRASHSCREEN.COPYTOCLIPBOARDBUTTON;
+		this.moreInfoButton.ClearOnClick();
+		this.moreInfoButton.onClick += this.OnSelect_COPYTOCLIPBOARD;
+	}
+
+	public void OnSelect_COPYTOCLIPBOARD()
+	{
+		TextEditor textEditor = new TextEditor();
+		textEditor.text = this.m_stackTrace;
+		textEditor.SelectAll();
+		textEditor.Copy();
 	}
 
 	public void OnSelect_SUBMIT()
@@ -101,7 +161,6 @@ public class ReportErrorDialog : MonoBehaviour
 
 	public void OnSelect_CONTINUE()
 	{
-		ReportErrorDialog.hasCrash = false;
 		if (this.continueAction != null)
 		{
 			this.continueAction();
@@ -135,13 +194,13 @@ public class ReportErrorDialog : MonoBehaviour
 
 	private void Submit()
 	{
-		this.confirmAction();
+		this.submitAction();
 		this.OpenRefMessage();
 	}
 
 	public static string MOST_RECENT_SAVEFILE;
 
-	private global::System.Action confirmAction;
+	private global::System.Action submitAction;
 
 	private global::System.Action quitAction;
 
@@ -151,8 +210,13 @@ public class ReportErrorDialog : MonoBehaviour
 
 	public GameObject referenceMessage;
 
+	private string m_stackTrace;
+
 	[SerializeField]
 	private KButton submitButton;
+
+	[SerializeField]
+	private KButton moreInfoButton;
 
 	[SerializeField]
 	private KButton quitButton;
@@ -164,13 +228,13 @@ public class ReportErrorDialog : MonoBehaviour
 	private LocText CrashLabel;
 
 	[SerializeField]
-	private LocText VCCrashLabel;
+	private GameObject CrashDescription;
 
 	[SerializeField]
-	private Button VCLinkButton;
+	private GameObject ModsInfo;
 
 	[SerializeField]
-	private GameObject InfoBox;
+	private GameObject StackTrace;
 
 	[SerializeField]
 	private GameObject uploadSaveDialog;
@@ -184,5 +248,17 @@ public class ReportErrorDialog : MonoBehaviour
 	[SerializeField]
 	private LocText saveFileInfoLabel;
 
-	public static bool hasCrash;
+	[SerializeField]
+	private GameObject modEntryPrefab;
+
+	[SerializeField]
+	private Transform modEntryParent;
+
+	private ReportErrorDialog.Mode mode;
+
+	private enum Mode
+	{
+		SubmitError,
+		DisableMods
+	}
 }

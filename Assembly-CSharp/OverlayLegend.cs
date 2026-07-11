@@ -265,8 +265,8 @@ public class OverlayLegend : KScreen
 					LegendEntry legendEntry = enumerator.Current;
 					GameObject freeUnitObject = this.GetFreeUnitObject();
 					Image component = freeUnitObject.transform.Find("Icon").GetComponent<Image>();
-					component.gameObject.SetActive(true);
-					component.sprite = Assets.instance.LegendColourBox;
+					component.gameObject.SetActive(legendEntry.displaySprite);
+					component.sprite = legendEntry.sprite;
 					component.color = legendEntry.colour;
 					component.enabled = true;
 					component.type = Image.Type.Simple;
@@ -275,16 +275,16 @@ public class OverlayLegend : KScreen
 					componentInChildren.color = Color.white;
 					componentInChildren.enabled = true;
 					ToolTip component2 = freeUnitObject.GetComponent<ToolTip>();
-					component2.enabled = true;
+					component2.enabled = legendEntry.desc != null || legendEntry.desc_arg != null;
 					component2.toolTip = ((legendEntry.desc_arg == null) ? legendEntry.desc : string.Format(legendEntry.desc, legendEntry.desc_arg));
 					freeUnitObject.SetActive(true);
 					freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
 				}
-				goto IL_0143;
+				goto IL_0157;
 			}
 		}
 		this.activeUnitsParent.SetActive(false);
-		IL_0143:
+		IL_0157:
 		if (!isRefresh && this.currentMode.legendFilters != null)
 		{
 			GameObject gameObject = Util.KInstantiateUI(this.toolParameterMenuPrefab, this.diagramsParent, false);

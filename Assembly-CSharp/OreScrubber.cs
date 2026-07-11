@@ -5,7 +5,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffectDescriptor
+public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IGameObjectEffectDescriptor
 {
 	protected override void OnPrefabInit()
 	{
@@ -44,7 +44,7 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 		}
 	}
 
-	public List<Descriptor> RequirementDescriptors(BuildingDef def)
+	public List<Descriptor> RequirementDescriptors()
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		string name = ElementLoader.FindElementByHash(this.consumedElement).name;
@@ -52,7 +52,7 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 		return list;
 	}
 
-	public List<Descriptor> EffectDescriptors(BuildingDef def)
+	public List<Descriptor> EffectDescriptors()
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		if (this.outputElement != SimHashes.Vacuum)
@@ -63,11 +63,11 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 		return list;
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		list.AddRange(this.RequirementDescriptors(def));
-		list.AddRange(this.EffectDescriptors(def));
+		list.AddRange(this.RequirementDescriptors());
+		list.AddRange(this.EffectDescriptors());
 		return list;
 	}
 

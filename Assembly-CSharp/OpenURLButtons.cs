@@ -35,6 +35,12 @@ public class OpenURLButtons : KMonoBehaviour
 					this.OpenPatchNotes();
 				};
 				break;
+			case OpenURLButtons.URLButtonType.feedbackScreen:
+				gameObject.GetComponent<KButton>().onClick += delegate
+				{
+					this.OpenFeedbackScreen();
+				};
+				break;
 			}
 		}
 	}
@@ -42,6 +48,11 @@ public class OpenURLButtons : KMonoBehaviour
 	public void OpenPatchNotes()
 	{
 		this.patchNotesScreen.SetActive(true);
+	}
+
+	public void OpenFeedbackScreen()
+	{
+		Util.KInstantiateUI(this.feedbackScreenPrefab.gameObject, FrontEndManager.Instance.gameObject, true);
 	}
 
 	public void OpenURL(string URL)
@@ -71,11 +82,15 @@ public class OpenURLButtons : KMonoBehaviour
 	[SerializeField]
 	private GameObject patchNotesScreen;
 
+	[SerializeField]
+	private FeedbackScreen feedbackScreenPrefab;
+
 	public enum URLButtonType
 	{
 		url,
 		platformUrl,
-		patchNotes
+		patchNotes,
+		feedbackScreen
 	}
 
 	[Serializable]

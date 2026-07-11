@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, IEffectDescriptor
+public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, IGameObjectEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -100,7 +100,7 @@ public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, IEffectD
 		base.smi.sm.playerCount.Set(this.players.Count, base.smi);
 	}
 
-	List<Descriptor> IEffectDescriptor.GetDescriptors(BuildingDef def)
+	List<Descriptor> IGameObjectEffectDescriptor.GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Descriptor descriptor = default(Descriptor);

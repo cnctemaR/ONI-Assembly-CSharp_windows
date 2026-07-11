@@ -96,8 +96,8 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 							{
 								textStyleSetting = component2.Styles_LogicActive.Standard;
 							}
-							hoverTextDrawer.DrawIcon((num4 == 1 && flag2) ? component2.iconActiveAutomationPort : component2.iconDash, textStyleSetting.textColor, 18, 2);
-							hoverTextDrawer.DrawText(port.activeDescription, textStyleSetting);
+							component2.DrawLogicIcon(hoverTextDrawer, (num4 == 1 && flag2) ? component2.iconActiveAutomationPort : component2.iconDash, textStyleSetting);
+							component2.DrawLogicText(hoverTextDrawer, port.activeDescription, textStyleSetting);
 							hoverTextDrawer.NewLine(26);
 							TextStyleSetting textStyleSetting2;
 							if (flag2)
@@ -108,8 +108,8 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 							{
 								textStyleSetting2 = component2.Styles_LogicStandby.Standard;
 							}
-							hoverTextDrawer.DrawIcon((num4 == 0 && flag2) ? component2.iconActiveAutomationPort : component2.iconDash, textStyleSetting2.textColor, 18, 2);
-							hoverTextDrawer.DrawText(port.inactiveDescription, textStyleSetting2);
+							component2.DrawLogicIcon(hoverTextDrawer, (num4 == 0 && flag2) ? component2.iconActiveAutomationPort : component2.iconDash, textStyleSetting2);
+							component2.DrawLogicText(hoverTextDrawer, port.inactiveDescription, textStyleSetting2);
 							hoverTextDrawer.EndShadowBar();
 						}
 						LogicGate component4 = kselectable.GetComponent<LogicGate>();
@@ -138,8 +138,8 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 							{
 								textStyleSetting3 = component2.Styles_LogicActive.Standard;
 							}
-							hoverTextDrawer.DrawIcon((portValue == 1 && portConnected) ? component2.iconActiveAutomationPort : component2.iconDash, textStyleSetting3.textColor, 18, 2);
-							hoverTextDrawer.DrawText(portDescription.active, textStyleSetting3);
+							component2.DrawLogicIcon(hoverTextDrawer, (portValue == 1 && portConnected) ? component2.iconActiveAutomationPort : component2.iconDash, textStyleSetting3);
+							component2.DrawLogicText(hoverTextDrawer, portDescription.active, textStyleSetting3);
 							hoverTextDrawer.NewLine(26);
 							TextStyleSetting textStyleSetting4;
 							if (portConnected)
@@ -150,12 +150,12 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 							{
 								textStyleSetting4 = component2.Styles_LogicStandby.Standard;
 							}
-							hoverTextDrawer.DrawIcon((portValue == 0 && portConnected) ? component2.iconActiveAutomationPort : component2.iconDash, textStyleSetting4.textColor, 18, 2);
-							hoverTextDrawer.DrawText(portDescription.inactive, textStyleSetting4);
+							component2.DrawLogicIcon(hoverTextDrawer, (portValue == 0 && portConnected) ? component2.iconActiveAutomationPort : component2.iconDash, textStyleSetting4);
+							component2.DrawLogicText(hoverTextDrawer, portDescription.inactive, textStyleSetting4);
 							hoverTextDrawer.EndShadowBar();
 						}
 					}
-					goto IL_0702;
+					goto IL_06F2;
 				}
 			}
 			if (mode == OverlayModes.Power.ID)
@@ -175,7 +175,7 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 				}
 			}
 		}
-		IL_0702:
+		IL_06F2:
 		hoverTextDrawer.EndDrawing();
 	}
 

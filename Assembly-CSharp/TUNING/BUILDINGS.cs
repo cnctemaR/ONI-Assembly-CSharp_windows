@@ -62,6 +62,7 @@ namespace TUNING
 			new PlanScreen.PlanInfo(new HashedString("Oxygen"), false, new List<string> { "MineralDeoxidizer", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer", "RustDeoxidizer" }),
 			new PlanScreen.PlanInfo(new HashedString("Power"), false, new List<string>
 			{
+				"DevGenerator",
 				"ManualGenerator",
 				"Generator",
 				"WoodGasGenerator",
@@ -321,12 +322,7 @@ namespace TUNING
 			typeof(MechanicalSurfboard),
 			typeof(BottleEmptier),
 			typeof(AccessControl),
-			typeof(CommandModule),
 			typeof(FuelTank),
-			typeof(LaunchableRocket),
-			typeof(RocketEngine),
-			typeof(SolidBooster),
-			typeof(TouristModule),
 			typeof(WaterCooler),
 			typeof(Edible),
 			typeof(PlantableSeed),

@@ -22,6 +22,8 @@ public class SweepBotStation : KMonoBehaviour
 	{
 		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 		this.meter = new MeterController(base.gameObject.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_frame", "meter_level" });
+		this.botMaterialStorage = base.GetComponents<Storage>()[0];
+		this.sweepStorage = base.GetComponents<Storage>()[1];
 		if (this.sweepBot == null || this.sweepBot.Get() == null)
 		{
 			this.RequestNewSweepBot(null);
@@ -29,7 +31,7 @@ public class SweepBotStation : KMonoBehaviour
 		else
 		{
 			StorageUnloadMonitor.Instance smi = this.sweepBot.Get().GetSMI<StorageUnloadMonitor.Instance>();
-			smi.sm.sweepLocker.Set(base.GetComponent<Storage>(), smi);
+			smi.sm.sweepLocker.Set(this.sweepStorage, smi);
 			this.RefreshSweepBotSubscription();
 		}
 		this.UpdateMeter();
@@ -38,9 +40,9 @@ public class SweepBotStation : KMonoBehaviour
 
 	private void RequestNewSweepBot(object data = null)
 	{
-		if (this.storage.FindFirstWithMass(GameTags.RefinedMetal, SweepBotConfig.MASS) == null)
+		if (this.botMaterialStorage.FindFirstWithMass(GameTags.RefinedMetal, SweepBotConfig.MASS) == null)
 		{
-			FetchList2 fetchList = new FetchList2(this.storage, Db.Get().ChoreTypes.Fetch);
+			FetchList2 fetchList = new FetchList2(this.botMaterialStorage, Db.Get().ChoreTypes.Fetch);
 			fetchList.Add(GameTags.RefinedMetal, null, null, SweepBotConfig.MASS, FetchOrder2.OperationalRequirement.None);
 			fetchList.Submit(null, true);
 			return;
@@ -50,11 +52,15 @@ public class SweepBotStation : KMonoBehaviour
 
 	private void MakeNewSweepBot(object data = null)
 	{
-		if (this.storage.GetAmountAvailable(GameTags.RefinedMetal) < SweepBotConfig.MASS)
+		if (this.newSweepyHandle.IsValid)
 		{
 			return;
 		}
-		PrimaryElement primaryElement = this.storage.FindFirstWithMass(GameTags.RefinedMetal, SweepBotConfig.MASS);
+		if (this.botMaterialStorage.GetAmountAvailable(GameTags.RefinedMetal) < SweepBotConfig.MASS)
+		{
+			return;
+		}
+		PrimaryElement primaryElement = this.botMaterialStorage.FindFirstWithMass(GameTags.RefinedMetal, SweepBotConfig.MASS);
 		if (primaryElement == null)
 		{
 			return;
@@ -73,9 +79,10 @@ public class SweepBotStation : KMonoBehaviour
 			}
 			this.UpdateNameDisplay();
 			StorageUnloadMonitor.Instance smi = gameObject.GetSMI<StorageUnloadMonitor.Instance>();
-			smi.sm.sweepLocker.Set(this.GetComponent<Storage>(), smi);
+			smi.sm.sweepLocker.Set(this.sweepStorage, smi);
 			this.sweepBot.Get().GetComponent<PrimaryElement>().ElementID = sweepBotMaterial;
 			this.RefreshSweepBotSubscription();
+			this.newSweepyHandle.ClearScheduler();
 		}, null, null);
 		base.GetComponent<KBatchedAnimController>().Play("newsweepy", KAnim.PlayMode.Once, 1f, 0f);
 	}
@@ -158,6 +165,10 @@ public class SweepBotStation : KMonoBehaviour
 		{
 			base.GetComponent<KBatchedAnimController>().Play("remove", KAnim.PlayMode.Once, 1f, 0f);
 		}
+		for (int i = 0; i < this.sweepStorage.Count; i++)
+		{
+			this.sweepStorage[i].GetComponent<Clearable>().MarkForClear(false, true);
+		}
 	}
 
 	private void OnOperationalChanged(object data)
@@ -179,12 +190,12 @@ public class SweepBotStation : KMonoBehaviour
 
 	private float GetMaxCapacityMinusStorageMargin()
 	{
-		return this.storage.Capacity() - this.storage.storageFullMargin;
+		return this.sweepStorage.Capacity() - this.sweepStorage.storageFullMargin;
 	}
 
 	private float GetAmountStored()
 	{
-		return this.storage.MassStored();
+		return this.sweepStorage.MassStored();
 	}
 
 	[Serialize]
@@ -197,8 +208,9 @@ public class SweepBotStation : KMonoBehaviour
 
 	private MeterController meter;
 
-	[MyCmpGet]
-	private Storage storage;
+	private Storage sweepStorage;
+
+	private Storage botMaterialStorage;
 
 	private SchedulerHandle newSweepyHandle;
 

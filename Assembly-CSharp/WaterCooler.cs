@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IApproachable, IEffectDescriptor
+public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IApproachable, IGameObjectEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -129,7 +129,7 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 		descs.Add(descriptor);
 	}
 
-	List<Descriptor> IEffectDescriptor.GetDescriptors(BuildingDef def)
+	List<Descriptor> IGameObjectEffectDescriptor.GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Descriptor descriptor = default(Descriptor);

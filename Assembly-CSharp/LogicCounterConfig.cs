@@ -45,6 +45,7 @@ public class LogicCounterConfig : IBuildingConfig
 	{
 		go.AddOrGet<LogicCounter>().manuallyControlled = false;
 		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayInFrontOfConduits, false);
+		go.GetComponent<Switch>().defaultState = false;
 	}
 
 	public static string ID = "LogicCounter";

@@ -25,9 +25,17 @@ namespace KMod
 			return Directory.Exists(this.GetRoot());
 		}
 
-		public void GetTopLevelItems(List<FileSystemItem> file_system_items)
+		public void GetTopLevelItems(List<FileSystemItem> file_system_items, string relative_root)
 		{
-			foreach (FileSystemInfo fileSystemInfo in new DirectoryInfo(this.root).GetFileSystemInfos())
+			relative_root = relative_root ?? "";
+			string text = FileSystem.Normalize(Path.Combine(this.root, relative_root));
+			DirectoryInfo directoryInfo = new DirectoryInfo(text);
+			if (!directoryInfo.Exists)
+			{
+				global::Debug.LogError("Cannot iterate over $" + text + ", this directory does not exist");
+				return;
+			}
+			foreach (FileSystemInfo fileSystemInfo in directoryInfo.GetFileSystemInfos())
 			{
 				file_system_items.Add(new FileSystemItem
 				{

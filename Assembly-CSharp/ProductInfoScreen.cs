@@ -246,7 +246,7 @@ public class ProductInfoScreen : KScreen
 		{
 			this.productDescriptionText.text = string.Format("{0}", def.Effect);
 		}
-		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(def);
+		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(def.BuildingComplete, false);
 		List<Descriptor> requirementDescriptors = GameUtil.GetRequirementDescriptors(allDescriptors);
 		if (requirementDescriptors.Count > 0)
 		{

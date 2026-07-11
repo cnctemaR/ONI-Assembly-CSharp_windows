@@ -4,7 +4,7 @@ using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/RoomTracker")]
-public class RoomTracker : KMonoBehaviour, IEffectDescriptor
+public class RoomTracker : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	public Room room { get; private set; }
 
@@ -77,7 +77,7 @@ public class RoomTracker : KMonoBehaviour, IEffectDescriptor
 		}
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		if (!string.IsNullOrEmpty(this.requiredRoomType))

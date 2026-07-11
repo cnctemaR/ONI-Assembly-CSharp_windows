@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/Shower")]
-public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
+public class Shower : Workable, IGameObjectEffectDescriptor
 {
 	private Shower()
 	{
@@ -84,14 +84,14 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 		}
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
-		List<Descriptor> list = new List<Descriptor>();
+		List<Descriptor> descriptors = base.GetDescriptors(go);
 		if (Shower.EffectsRemoved.Length != 0)
 		{
 			Descriptor descriptor = default(Descriptor);
 			descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.REMOVESEFFECTSUBTITLE, UI.BUILDINGEFFECTS.TOOLTIPS.REMOVESEFFECTSUBTITLE, Descriptor.DescriptorType.Effect);
-			list.Add(descriptor);
+			descriptors.Add(descriptor);
 			for (int i = 0; i < Shower.EffectsRemoved.Length; i++)
 			{
 				string text = Shower.EffectsRemoved[i];
@@ -100,11 +100,11 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 				Descriptor descriptor2 = default(Descriptor);
 				descriptor2.IncreaseIndent();
 				descriptor2.SetupDescriptor("• " + string.Format(UI.BUILDINGEFFECTS.REMOVEDEFFECT, text2), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REMOVEDEFFECT, text3), Descriptor.DescriptorType.Effect);
-				list.Add(descriptor2);
+				descriptors.Add(descriptor2);
 			}
 		}
-		Effect.AddModifierDescriptions(base.gameObject, list, Shower.SHOWER_EFFECT, true);
-		return list;
+		Effect.AddModifierDescriptions(base.gameObject, descriptors, Shower.SHOWER_EFFECT, true);
+		return descriptors;
 	}
 
 	private Shower.ShowerSM.Instance smi;

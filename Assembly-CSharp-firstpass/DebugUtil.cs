@@ -19,8 +19,8 @@ public static class DebugUtil
 	{
 		if (!test)
 		{
-			DebugUtil.errorMessageBuilder.Length = 0;
-			global::Debug.Assert(test, DebugUtil.errorMessageBuilder.Append(message0).Append(" ").Append(message1)
+			DebugUtil.s_errorMessageBuilder.Length = 0;
+			global::Debug.Assert(test, DebugUtil.s_errorMessageBuilder.Append(message0).Append(" ").Append(message1)
 				.ToString());
 		}
 	}
@@ -29,8 +29,8 @@ public static class DebugUtil
 	{
 		if (!test)
 		{
-			DebugUtil.errorMessageBuilder.Length = 0;
-			global::Debug.Assert(test, DebugUtil.errorMessageBuilder.Append(message0).Append(" ").Append(message1)
+			DebugUtil.s_errorMessageBuilder.Length = 0;
+			global::Debug.Assert(test, DebugUtil.s_errorMessageBuilder.Append(message0).Append(" ").Append(message1)
 				.Append(" ")
 				.Append(message2)
 				.ToString());
@@ -129,11 +129,19 @@ public static class DebugUtil
 
 	public static void LogException(global::UnityEngine.Object context, string errorMessage, Exception e)
 	{
+		DebugUtil.s_lastExceptionLogged = e;
 		DebugUtil.LogErrorArgs(context, new object[]
 		{
 			errorMessage,
 			"\n" + e.ToString()
 		});
+	}
+
+	public static Exception RetrieveLastExceptionLogged()
+	{
+		Exception ex = DebugUtil.s_lastExceptionLogged;
+		DebugUtil.s_lastExceptionLogged = null;
+		return ex;
 	}
 
 	private static void RecursiveBuildFullName(GameObject obj)
@@ -187,7 +195,9 @@ public static class DebugUtil
 	{
 	}
 
-	private static StringBuilder errorMessageBuilder = new StringBuilder();
+	private static StringBuilder s_errorMessageBuilder = new StringBuilder();
+
+	private static Exception s_lastExceptionLogged;
 
 	private static StringBuilder fullNameBuilder = new StringBuilder();
 }

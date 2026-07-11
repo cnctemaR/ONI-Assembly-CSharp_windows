@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using KMod;
 using STRINGS;
 using UnityEngine;
@@ -16,6 +17,8 @@ public class ModsScreen : KModalScreen
 			Application.OpenURL("http://steamcommunity.com/workshop/browse/?appid=457140");
 		};
 		this.workshopButton.onClick += action;
+		this.UpdateToggleAllButton();
+		this.toggleAllButton.onClick += this.OnToggleAllClicked;
 		Global.Instance.modManager.Sanitize(base.gameObject);
 		this.mod_footprint.Clear();
 		foreach (Mod mod in Global.Instance.modManager.mods)
@@ -63,6 +66,11 @@ public class ModsScreen : KModalScreen
 		}
 	}
 
+	private bool ShouldDisplayMod(Mod mod)
+	{
+		return mod.status != Mod.Status.NotInstalled && mod.status != Mod.Status.UninstallPending && !mod.HasOnlyTranslationContent();
+	}
+
 	private void BuildDisplay()
 	{
 		foreach (ModsScreen.DisplayedMod displayedMod in this.displayedMods)
@@ -77,7 +85,7 @@ public class ModsScreen : KModalScreen
 		for (int num = 0; num != Global.Instance.modManager.mods.Count; num++)
 		{
 			Mod mod = Global.Instance.modManager.mods[num];
-			if (mod.status != Mod.Status.NotInstalled && mod.status != Mod.Status.UninstallPending && mod.HasAnyContent(Content.LayerableFiles | Content.Strings | Content.DLL | Content.Animation))
+			if (this.ShouldDisplayMod(mod))
 			{
 				HierarchyReferences hierarchyReferences = Util.KInstantiateUI<HierarchyReferences>(this.entryPrefab, this.entryParent.gameObject, false);
 				this.displayedMods.Add(new ModsScreen.DisplayedMod
@@ -94,6 +102,7 @@ public class ModsScreen : KModalScreen
 					reference.color = Color.Lerp(Color.white, Color.red, (float)mod.crash_count / 3f);
 				}
 				KButton reference2 = hierarchyReferences.GetReference<KButton>("ManageButton");
+				reference2.GetComponentInChildren<LocText>().text = (mod.IsLocal ? UI.FRONTEND.MODS.MANAGE_LOCAL : UI.FRONTEND.MODS.MANAGE);
 				reference2.isInteractable = mod.is_managed;
 				if (reference2.isInteractable)
 				{
@@ -125,6 +134,32 @@ public class ModsScreen : KModalScreen
 		flag = !flag;
 		toggle.ChangeState(flag ? 1 : 0);
 		modManager.EnableMod(mod, flag, this);
+		this.UpdateToggleAllButton();
+	}
+
+	private bool AreAnyModsDisabled()
+	{
+		return Global.Instance.modManager.mods.Any<Mod>((Mod mod) => !mod.enabled && this.ShouldDisplayMod(mod));
+	}
+
+	private void UpdateToggleAllButton()
+	{
+		this.toggleAllButton.GetComponentInChildren<LocText>().text = (this.AreAnyModsDisabled() ? UI.FRONTEND.MODS.ENABLE_ALL : UI.FRONTEND.MODS.DISABLE_ALL);
+	}
+
+	private void OnToggleAllClicked()
+	{
+		bool flag = this.AreAnyModsDisabled();
+		Manager modManager = Global.Instance.modManager;
+		foreach (Mod mod in modManager.mods)
+		{
+			if (this.ShouldDisplayMod(mod))
+			{
+				modManager.EnableMod(mod.label, flag, this);
+			}
+		}
+		this.BuildDisplay();
+		this.UpdateToggleAllButton();
 	}
 
 	[SerializeField]
@@ -132,6 +167,9 @@ public class ModsScreen : KModalScreen
 
 	[SerializeField]
 	private KButton closeButton;
+
+	[SerializeField]
+	private KButton toggleAllButton;
 
 	[SerializeField]
 	private KButton workshopButton;

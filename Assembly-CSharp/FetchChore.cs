@@ -49,13 +49,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		}
 	}
 
-	public Storage destination
-	{
-		get
-		{
-			return base.smi.sm.destination.Get<Storage>(base.smi);
-		}
-	}
+	public Storage destination { get; private set; }
 
 	public void FetchAreaBegin(Chore.Precondition.Context context, float amount_to_be_fetched)
 	{
@@ -162,7 +156,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		base.SetPrioritizable((destination.prioritizable != null) ? destination.prioritizable : destination.GetComponent<Prioritizable>());
 		base.smi = new FetchChore.StatesInstance(this);
 		base.smi.sm.requestedamount.Set(amount, base.smi);
-		base.smi.sm.destination.Set(destination, base.smi);
+		this.destination = destination;
 		this.tags = tags;
 		this.tagBits = new TagBits(tags);
 		this.requiredTagBits = new TagBits(required_tags);
@@ -216,12 +210,15 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 
 	private void OnOnlyFetchMarkedItemsSettingChanged(object data)
 	{
-		if (base.smi.sm.destination.Get<Storage>(base.smi).GetOnlyFetchMarkedItems())
+		if (this.destination != null)
 		{
-			this.requiredTagBits.SetTag(GameTags.Garbage);
-			return;
+			if (this.destination.GetOnlyFetchMarkedItems())
+			{
+				this.requiredTagBits.SetTag(GameTags.Garbage);
+				return;
+			}
+			this.requiredTagBits.Clear(GameTags.Garbage);
 		}
-		this.requiredTagBits.Clear(GameTags.Garbage);
 	}
 
 	private void OnMasterPriorityChanged(PriorityScreen.PriorityClass priorityClass, int priority_value)
@@ -243,10 +240,9 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 	{
 		base.Cleanup();
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
-		Storage storage = base.smi.sm.destination.Get<Storage>(base.smi);
-		if (storage != null)
+		if (this.destination != null)
 		{
-			storage.Unsubscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
+			this.destination.Unsubscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
 		}
 	}
 
@@ -323,8 +319,6 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		public StateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore, object>.TargetParameter source;
 
 		public StateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore, object>.TargetParameter chunk;
-
-		public StateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore, object>.TargetParameter destination;
 
 		public StateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore, object>.FloatParameter requestedamount;
 

@@ -3,7 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class LogicCounter : Switch, ISaveLoadable, ISim200ms
+public class LogicCounter : Switch, ISaveLoadable
 {
 	protected override void OnPrefabInit()
 	{
@@ -18,6 +18,7 @@ public class LogicCounter : Switch, ISaveLoadable, ISim200ms
 		{
 			this.maxCount = component.maxCount;
 			this.resetCountAtMax = component.resetCountAtMax;
+			this.advancedMode = component.advancedMode;
 		}
 	}
 
@@ -25,7 +26,12 @@ public class LogicCounter : Switch, ISaveLoadable, ISim200ms
 	{
 		base.OnSpawn();
 		base.OnToggle += this.OnSwitchToggled;
-		this.increment = true;
+		LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
+		logicCircuitManager.onLogicTick = (global::System.Action)Delegate.Combine(logicCircuitManager.onLogicTick, new global::System.Action(this.LogicTick));
+		if (this.maxCount == 0)
+		{
+			this.maxCount = 10;
+		}
 		base.Subscribe<LogicCounter>(-801688580, LogicCounter.OnLogicValueChangedDelegate);
 		this.UpdateLogicCircuit();
 		this.UpdateVisualState(true);
@@ -33,6 +39,12 @@ public class LogicCounter : Switch, ISaveLoadable, ISim200ms
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		this.meter = new MeterController(component, "meter_target", component.FlipY ? "meter_dn" : "meter_up", Meter.Offset.UserSpecified, Grid.SceneLayer.LogicGatesFront, Vector3.zero, null);
 		this.UpdateMeter();
+	}
+
+	protected override void OnCleanUp()
+	{
+		LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
+		logicCircuitManager.onLogicTick = (global::System.Action)Delegate.Remove(logicCircuitManager.onLogicTick, new global::System.Action(this.LogicTick));
 	}
 
 	private void OnSwitchToggled(bool toggled_on)
@@ -43,21 +55,35 @@ public class LogicCounter : Switch, ISaveLoadable, ISim200ms
 
 	public void UpdateLogicCircuit()
 	{
-		base.GetComponent<LogicPorts>().SendSignal(LogicCounter.OUTPUT_PORT_ID, this.switchedOn ? 1 : 0);
+		if (this.receivedFirstSignal)
+		{
+			base.GetComponent<LogicPorts>().SendSignal(LogicCounter.OUTPUT_PORT_ID, this.switchedOn ? 1 : 0);
+		}
 	}
 
 	public void UpdateMeter()
 	{
-		this.meter.SetPositionPercent((float)this.currentCount / 10f);
+		float num = (float)(this.advancedMode ? (this.currentCount % this.maxCount) : this.currentCount);
+		if (num == 10f)
+		{
+			num = 0f;
+		}
+		this.meter.SetPositionPercent(num / 10f);
 	}
 
 	public void UpdateVisualState(bool force = false)
 	{
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		if (!this.receivedFirstSignal)
+		{
+			component.Play("off", KAnim.PlayMode.Once, 1f, 0f);
+			return;
+		}
 		if (this.wasOn != this.switchedOn || force)
 		{
 			int num = (this.switchedOn ? 4 : 0) + (this.wasResetting ? 2 : 0) + (this.wasIncrementing ? 1 : 0);
 			this.wasOn = this.switchedOn;
-			base.GetComponent<KBatchedAnimController>().Play("on_" + num.ToString(), KAnim.PlayMode.Once, 1f, 0f);
+			component.Play("on_" + num.ToString(), KAnim.PlayMode.Once, 1f, 0f);
 		}
 	}
 
@@ -67,6 +93,7 @@ public class LogicCounter : Switch, ISaveLoadable, ISim200ms
 		if (logicValueChanged.portID == LogicCounter.INPUT_PORT_ID)
 		{
 			int newValue = logicValueChanged.newValue;
+			this.receivedFirstSignal = true;
 			if (LogicCircuitNetwork.IsBitActive(0, newValue))
 			{
 				if (!this.wasIncrementing)
@@ -74,26 +101,11 @@ public class LogicCounter : Switch, ISaveLoadable, ISim200ms
 					this.wasIncrementing = true;
 					if (!this.wasResetting)
 					{
-						if (this.currentCount == this.maxCount)
+						if (this.currentCount == this.maxCount || this.currentCount >= 10)
 						{
 							this.currentCount = 0;
 						}
-						if (this.increment)
-						{
-							this.currentCount++;
-							if (this.currentCount == 10)
-							{
-								this.currentCount = 0;
-							}
-						}
-						else
-						{
-							this.currentCount--;
-							if (this.currentCount == -1)
-							{
-								this.currentCount = 9;
-							}
-						}
+						this.currentCount++;
 						this.UpdateMeter();
 						this.SetCounterState();
 						if (this.currentCount == this.maxCount && this.resetCountAtMax)
@@ -115,12 +127,13 @@ public class LogicCounter : Switch, ISaveLoadable, ISim200ms
 				return;
 			}
 			int newValue2 = logicValueChanged.newValue;
+			this.receivedFirstSignal = true;
 			if (LogicCircuitNetwork.IsBitActive(0, newValue2))
 			{
 				if (!this.wasResetting)
 				{
-					this.ResetCounter();
 					this.wasResetting = true;
+					this.ResetCounter();
 				}
 			}
 			else
@@ -148,34 +161,47 @@ public class LogicCounter : Switch, ISaveLoadable, ISim200ms
 		this.UpdateLogicCircuit();
 	}
 
-	public void Sim200ms(float dt)
+	public void LogicTick()
 	{
 		if (this.resetRequested)
 		{
 			this.ResetCounter();
 		}
+		if (this.pulsingActive)
+		{
+			this.pulseTicksRemaining--;
+			if (this.pulseTicksRemaining <= 0)
+			{
+				this.pulsingActive = false;
+				this.SetState(false);
+				this.UpdateVisualState(false);
+				this.UpdateMeter();
+				this.UpdateLogicCircuit();
+			}
+		}
 	}
 
 	public void SetCounterState()
 	{
-		this.SetState(this.currentCount == this.maxCount);
+		this.SetState(this.advancedMode ? (this.currentCount % this.maxCount == 0) : (this.currentCount == this.maxCount));
+		if (this.advancedMode && this.currentCount % this.maxCount == 0)
+		{
+			this.pulsingActive = true;
+			this.pulseTicksRemaining = 2;
+		}
 	}
 
-	[SerializeField]
 	[Serialize]
 	public int maxCount;
 
-	[SerializeField]
 	[Serialize]
 	public int currentCount;
 
-	[SerializeField]
 	[Serialize]
 	public bool resetCountAtMax;
 
-	[SerializeField]
 	[Serialize]
-	public bool increment = true;
+	public bool advancedMode;
 
 	private bool wasOn;
 
@@ -205,6 +231,15 @@ public class LogicCounter : Switch, ISaveLoadable, ISim200ms
 
 	[Serialize]
 	private bool wasIncrementing;
+
+	[Serialize]
+	public bool receivedFirstSignal;
+
+	private bool pulsingActive;
+
+	private const int pulseLength = 1;
+
+	private int pulseTicksRemaining;
 
 	private MeterController meter;
 }

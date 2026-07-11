@@ -145,7 +145,13 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		private void ExecuteTransition(StateMachineInstanceType smi)
 		{
+			if (this.is_executing)
+			{
+				return;
+			}
+			this.is_executing = true;
 			smi.GoTo(this.targetState);
+			this.is_executing = false;
 		}
 
 		private void OnCallback(StateMachineInstanceType smi)
@@ -185,6 +191,8 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		private bool onRemove;
 
 		private StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter target;
+
+		private bool is_executing;
 	}
 
 	public class EventTransitionData : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition
@@ -1754,7 +1762,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter target = this.GetStateTarget();
 			this.Exit("StopMoving()", delegate(StateMachineInstanceType smi)
 			{
-				target.Get<Navigator>(smi).Stop(false);
+				target.Get<Navigator>(smi).Stop(false, true);
 			});
 			return this;
 		}
@@ -1803,7 +1811,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			}
 			this.Exit("StopMoving()", delegate(StateMachineInstanceType smi)
 			{
-				state_target.Get(smi).GetComponent<Navigator>().Stop(false);
+				state_target.Get(smi).GetComponent<Navigator>().Stop(false, true);
 			});
 			return this;
 		}
@@ -1833,7 +1841,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			});
 			this.Exit("StopMoving()", delegate(StateMachineInstanceType smi)
 			{
-				state_target.Get<Navigator>(smi).Stop(false);
+				state_target.Get<Navigator>(smi).Stop(false, true);
 			});
 			return this;
 		}

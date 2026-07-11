@@ -21,7 +21,7 @@ public class SweepBotTrappedMonitor : GameStateMachine<SweepBotTrappedMonitor, S
 				smi.GoTo(this.trapped);
 			}
 		}, UpdateRate.SIM_1000ms, false);
-		this.trapped.ToggleBehaviour(GameTags.Robots.Behaviours.TrappedBehaviour, (SweepBotTrappedMonitor.Instance data) => true, null).ToggleStatusItem(Db.Get().RobotStatusItems.CantReachStation, null).Update(delegate(SweepBotTrappedMonitor.Instance smi, float dt)
+		this.trapped.ToggleBehaviour(GameTags.Robots.Behaviours.TrappedBehaviour, (SweepBotTrappedMonitor.Instance data) => true, null).ToggleStatusItem(Db.Get().RobotStatusItems.CantReachStation, null, Db.Get().StatusItemCategories.Main).Update(delegate(SweepBotTrappedMonitor.Instance smi, float dt)
 		{
 			StorageUnloadMonitor.Instance smi3 = smi.master.gameObject.GetSMI<StorageUnloadMonitor.Instance>();
 			Storage storage2 = smi3.sm.sweepLocker.Get(smi3);

@@ -1694,16 +1694,6 @@ public static class GameUtil
 		return asset.path;
 	}
 
-	private static void SortDescriptors(List<IEffectDescriptor> descriptorList)
-	{
-		descriptorList.Sort(delegate(IEffectDescriptor e1, IEffectDescriptor e2)
-		{
-			int num = global::TUNING.BUILDINGS.COMPONENT_DESCRIPTION_ORDER.IndexOf(e1.GetType());
-			int num2 = global::TUNING.BUILDINGS.COMPONENT_DESCRIPTION_ORDER.IndexOf(e2.GetType());
-			return num.CompareTo(num2);
-		});
-	}
-
 	private static void SortGameObjectDescriptors(List<IGameObjectEffectDescriptor> descriptorList)
 	{
 		descriptorList.Sort(delegate(IGameObjectEffectDescriptor e1, IGameObjectEffectDescriptor e2)
@@ -1725,22 +1715,6 @@ public static class GameUtil
 			}
 			list[i] = descriptor;
 		}
-	}
-
-	public static List<Descriptor> GetAllDescriptors(BuildingDef def)
-	{
-		List<Descriptor> list = new List<Descriptor>();
-		List<IEffectDescriptor> list2 = new List<IEffectDescriptor>(def.BuildingComplete.GetComponents<IEffectDescriptor>());
-		GameUtil.SortDescriptors(list2);
-		foreach (IEffectDescriptor effectDescriptor in list2)
-		{
-			List<Descriptor> descriptors = effectDescriptor.GetDescriptors(def);
-			if (descriptors != null)
-			{
-				list.AddRange(descriptors);
-			}
-		}
-		return list;
 	}
 
 	public static List<Descriptor> GetAllDescriptors(GameObject go, bool simpleInfoScreen = false)

@@ -55,15 +55,15 @@ public class SweetBotReactMonitor : GameStateMachine<SweetBotReactMonitor, Sweet
 		this.reactScaryThing.Enter(delegate(SweetBotReactMonitor.Instance smi)
 		{
 			smi.master.gameObject.GetSMI<AnimInterruptMonitor.Instance>().PlayAnim("react_neg");
-		}).OnAnimQueueComplete(this.idle);
+		}).ToggleStatusItem(Db.Get().RobotStatusItems.ReactNegative, null, Db.Get().StatusItemCategories.Main).OnAnimQueueComplete(this.idle);
 		this.reactFriendlyThing.Enter(delegate(SweetBotReactMonitor.Instance smi)
 		{
 			smi.master.gameObject.GetSMI<AnimInterruptMonitor.Instance>().PlayAnim("react_pos");
-		}).OnAnimQueueComplete(this.idle);
+		}).ToggleStatusItem(Db.Get().RobotStatusItems.ReactPositive, null, Db.Get().StatusItemCategories.Main).OnAnimQueueComplete(this.idle);
 		this.reactNewOrnament.Enter(delegate(SweetBotReactMonitor.Instance smi)
 		{
 			smi.master.gameObject.GetSMI<AnimInterruptMonitor.Instance>().PlayAnim("react_ornament");
-		}).OnAnimQueueComplete(this.idle);
+		}).OnAnimQueueComplete(this.idle).ToggleStatusItem(Db.Get().RobotStatusItems.ReactPositive, null);
 	}
 
 	private GameStateMachine<SweetBotReactMonitor, SweetBotReactMonitor.Instance, IStateMachineTarget, SweetBotReactMonitor.Def>.State idle;

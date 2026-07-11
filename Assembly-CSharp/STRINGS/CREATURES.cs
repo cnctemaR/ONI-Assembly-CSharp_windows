@@ -1001,7 +1001,18 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Wheezewort", "COLDBREATHER");
 
-				public static LocString DESC = "Wheezeworts can be grown in flower pots and absorb " + UI.FormatAsLink("Heat", "Heat") + " by respiring through their porous outer membranes.";
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Wheezeworts can be planted in ",
+					UI.FormatAsLink("Planter Boxes", "PLANTERBOX"),
+					", ",
+					UI.FormatAsLink("Farm Tiles", "FARMTILE"),
+					" or ",
+					UI.FormatAsLink("Hydroponic Farms", "HYDROPONICFARM"),
+					", and absorb ",
+					UI.FormatAsLink("Heat", "Heat"),
+					" by respiring through their porous outer membranes."
+				});
 
 				public static LocString DOMESTICATEDDESC = "This plant absorbs " + UI.FormatAsLink("Heat", "Heat") + ".";
 			}

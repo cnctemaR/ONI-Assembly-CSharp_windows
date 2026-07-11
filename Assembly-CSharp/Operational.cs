@@ -7,9 +7,9 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/Operational")]
 public class Operational : KMonoBehaviour
 {
-	public bool IsOperational { get; private set; }
-
 	public bool IsFunctional { get; private set; }
+
+	public bool IsOperational { get; private set; }
 
 	public bool IsActive { get; private set; }
 

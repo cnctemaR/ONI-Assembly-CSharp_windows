@@ -13,7 +13,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 		this.standing.ParamTransition<bool>(this.isEntombed, this.entombed, GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.IsTrue).ParamTransition<bool>(this.isFalling, this.falling_pre, GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.IsTrue);
 		this.falling_pre.Enter("StopNavigator", delegate(FallMonitor.Instance smi)
 		{
-			smi.GetComponent<Navigator>().Stop(false);
+			smi.GetComponent<Navigator>().Stop(false, true);
 		}).Enter("AttemptInitialRecovery", delegate(FallMonitor.Instance smi)
 		{
 			smi.AttemptInitialRecovery();
@@ -55,7 +55,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 		});
 		this.entombed.stuck.Enter("StopNavigator", delegate(FallMonitor.Instance smi)
 		{
-			smi.GetComponent<Navigator>().Stop(false);
+			smi.GetComponent<Navigator>().Stop(false, true);
 		}).ToggleChore((FallMonitor.Instance smi) => new EntombedChore(smi.master), this.standing).ParamTransition<bool>(this.isEntombed, this.standing, GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.IsFalse);
 	}
 
@@ -218,7 +218,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 					if (this.IsValidNavCell(num2))
 					{
 						base.transform.SetPosition(Grid.CellToPosCBC(num2, Grid.SceneLayer.Move));
-						base.transform.GetComponent<Navigator>().Stop(false);
+						base.transform.GetComponent<Navigator>().Stop(false, true);
 						if (base.gameObject.HasTag(GameTags.Incapacitated))
 						{
 							base.transform.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
@@ -238,7 +238,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 					if (Grid.IsValidCell(num4) && !Grid.Solid[num3] && !Grid.Solid[num4])
 					{
 						base.transform.SetPosition(Grid.CellToPosCBC(num3, Grid.SceneLayer.Move));
-						base.transform.GetComponent<Navigator>().Stop(false);
+						base.transform.GetComponent<Navigator>().Stop(false, true);
 						base.transform.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
 						this.UpdateFalling();
 						this.GoTo(base.sm.standing);

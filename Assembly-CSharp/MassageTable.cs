@@ -5,7 +5,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRangeTarget
+public class MassageTable : RelaxationPoint, IGameObjectEffectDescriptor, IActivationRangeTarget
 {
 	public string ActivateTooltip
 	{
@@ -50,7 +50,7 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 		}
 	}
 
-	public new List<Descriptor> GetDescriptors(BuildingDef def)
+	public new List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Descriptor descriptor = default(Descriptor);

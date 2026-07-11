@@ -4,7 +4,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsable, IEffectDescriptor, IBasicBuilding
+public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsable, IGameObjectEffectDescriptor, IBasicBuilding
 {
 	protected override void OnSpawn()
 	{
@@ -72,7 +72,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		DebugUtil.LogWarningArgs(new object[] { "Tried to add disease on toilet use but worker was null" });
 	}
 
-	public List<Descriptor> RequirementDescriptors(BuildingDef def)
+	public List<Descriptor> RequirementDescriptors()
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		string text = ElementLoader.FindElementByHash(SimHashes.Water).tag.ProperName();
@@ -80,7 +80,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		return list;
 	}
 
-	public List<Descriptor> EffectDescriptors(BuildingDef def)
+	public List<Descriptor> EffectDescriptors()
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		string text = ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag.ProperName();
@@ -91,11 +91,11 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		return list;
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		list.AddRange(this.RequirementDescriptors(def));
-		list.AddRange(this.EffectDescriptors(def));
+		list.AddRange(this.RequirementDescriptors());
+		list.AddRange(this.EffectDescriptors());
 		return list;
 	}
 

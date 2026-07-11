@@ -60,6 +60,14 @@ public class Game : KMonoBehaviour
 		}
 	}
 
+	public bool DebugOnlyBuildingsAllowed
+	{
+		get
+		{
+			return DebugHandler.enabled && (this.SandboxModeActive || DebugHandler.InstantBuildMode);
+		}
+	}
+
 	public StatusItemRenderer statusItemRenderer { get; private set; }
 
 	public PrioritizableRenderer prioritizableRenderer { get; private set; }
@@ -85,8 +93,7 @@ public class Game : KMonoBehaviour
 		this.statusItemRenderer = new StatusItemRenderer();
 		this.prioritizableRenderer = new PrioritizableRenderer();
 		this.LoadEventHashes();
-		this.savedInfo.creaturePoopAmount = new Dictionary<Tag, float>();
-		this.savedInfo.powerCreatedbyGeneratorType = new Dictionary<Tag, float>();
+		this.savedInfo.InitializeEmptyVariables();
 		this.gasFlowPos = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.GasConduits) - 0.4f);
 		this.liquidFlowPos = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.LiquidConduits) - 0.4f);
 		this.solidFlowPos = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.SolidConduitContents) - 0.4f);
@@ -828,7 +835,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 399948U;
+		uint num = 408920U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1071,6 +1078,7 @@ public class Game : KMonoBehaviour
 		this.autoPrioritizeRoles = gameSaveData.autoPrioritizeRoles;
 		this.advancedPersonalPriorities = gameSaveData.advancedPersonalPriorities;
 		this.savedInfo = gameSaveData.savedInfo;
+		this.savedInfo.InitializeEmptyVariables();
 		CustomGameSettings.Instance.Print();
 		KCrashReporter.debugWasUsed = this.debugWasUsed;
 		SaveLoader.Instance.SetWorldDetail(gameSaveData.worldDetail);
@@ -1123,6 +1131,7 @@ public class Game : KMonoBehaviour
 		{
 			yield return null;
 		}
+		PlayerController.Instance.CancelDragging();
 		PlayerController.Instance.AllowDragging(false);
 		int num;
 		for (int i = 0; i < 1; i = num)
@@ -1697,6 +1706,11 @@ public class Game : KMonoBehaviour
 	{
 		[OnDeserialized]
 		private void OnDeserialized()
+		{
+			this.InitializeEmptyVariables();
+		}
+
+		public void InitializeEmptyVariables()
 		{
 			if (this.creaturePoopAmount == null)
 			{

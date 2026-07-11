@@ -159,6 +159,10 @@ namespace KSerialization
 					reader.SkipBytes(num2);
 				}
 			}
+			if (this.template.customDeserialize != null)
+			{
+				this.template.customDeserialize.Invoke(obj, new object[] { reader });
+			}
 			if (this.template.onDeserialized != null)
 			{
 				this.template.onDeserialized.Invoke(obj, null);

@@ -29,6 +29,14 @@ public class SandboxToolParameterMenu : KScreen
 
 	private void ConfigureSettings()
 	{
+		this.massSlider.clampValueLow = 0.001f;
+		this.massSlider.clampValueHigh = 10000f;
+		this.temperatureAdditiveSlider.clampValueLow = -9999f;
+		this.temperatureAdditiveSlider.clampValueHigh = 9999f;
+		this.temperatureSlider.clampValueLow = 1f;
+		this.temperatureSlider.clampValueHigh = 9999f;
+		this.brushRadiusSlider.clampValueLow = 1f;
+		this.brushRadiusSlider.clampValueHigh = 50f;
 		this.settings = new SandboxSettings();
 		SandboxSettings sandboxSettings = this.settings;
 		sandboxSettings.OnChangeElement = (Action<bool>)Delegate.Combine(sandboxSettings.OnChangeElement, new Action<bool>(delegate(bool forceElementDefaults)
@@ -85,8 +93,13 @@ public class SandboxToolParameterMenu : KScreen
 		sandboxSettings5.OnChangeEntity = (global::System.Action)Delegate.Combine(sandboxSettings5.OnChangeEntity, new global::System.Action(delegate
 		{
 			string stringSetting = SandboxToolParameterMenu.instance.settings.GetStringSetting("SandboxTools.SelectedEntity");
-			GameObject prefab = Assets.GetPrefab(stringSetting);
-			this.entitySelector.button.GetComponentInChildren<LocText>().text = prefab.GetProperName();
+			GameObject gameObject = Assets.TryGetPrefab(stringSetting);
+			if (gameObject == null)
+			{
+				this.settings.ForceDefaultStringSetting("SandboxTools.SelectedEntity");
+				return;
+			}
+			this.entitySelector.button.GetComponentInChildren<LocText>().text = gameObject.GetProperName();
 			global::Tuple<Sprite, Color> tuple;
 			if (stringSetting == MinionConfig.ID)
 			{
@@ -564,10 +577,10 @@ public class SandboxToolParameterMenu : KScreen
 		KSlider slider = component.GetReference<KSlider>("Slider");
 		KNumberInputField inputField = component.GetReference<KNumberInputField>("InputField");
 		gameObject.GetComponent<ToolTip>().SetSimpleTooltip(value.tooltip);
-		slider.minValue = value.minValue;
-		slider.maxValue = value.maxValue;
-		inputField.minValue = 0f;
-		inputField.maxValue = 99999f;
+		slider.minValue = value.slideMinValue;
+		slider.maxValue = value.slideMaxValue;
+		inputField.minValue = value.clampValueLow;
+		inputField.maxValue = value.clampValueHigh;
 		this.inputFields.Add(inputField.gameObject);
 		value.slider = slider;
 		inputField.decimalPlaces = value.roundToDecimalPlaces;
@@ -676,7 +689,7 @@ public class SandboxToolParameterMenu : KScreen
 
 	public SandboxToolParameterMenu.SliderValue brushRadiusSlider = new SandboxToolParameterMenu.SliderValue(1f, 10f, "dash", "circle_hard", "", UI.SANDBOXTOOLS.SETTINGS.BRUSH_SIZE.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.BRUSH_SIZE.NAME, delegate(float value)
 	{
-		SandboxToolParameterMenu.instance.settings.SetIntSetting("SandboxTools.BrushSize", Mathf.RoundToInt(value));
+		SandboxToolParameterMenu.instance.settings.SetIntSetting("SandboxTools.BrushSize", Mathf.Clamp(Mathf.RoundToInt(value), 1, 50));
 	}, 0);
 
 	public SandboxToolParameterMenu.SliderValue noiseScaleSlider = new SandboxToolParameterMenu.SliderValue(0f, 1f, "little", "lots", "", UI.SANDBOXTOOLS.SETTINGS.BRUSH_NOISE_SCALE.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.BRUSH_NOISE_SCALE.NAME, delegate(float value)
@@ -691,12 +704,12 @@ public class SandboxToolParameterMenu : KScreen
 
 	public SandboxToolParameterMenu.SliderValue massSlider = new SandboxToolParameterMenu.SliderValue(0.1f, 1000f, "action_pacify", "status_item_plant_solid", UI.UNITSUFFIXES.MASS.KILOGRAM, UI.SANDBOXTOOLS.SETTINGS.MASS.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.MASS.NAME, delegate(float value)
 	{
-		SandboxToolParameterMenu.instance.settings.SetFloatSetting("SandboxTools.Mass", value);
+		SandboxToolParameterMenu.instance.settings.SetFloatSetting("SandboxTools.Mass", Mathf.Clamp(value, 0.001f, 9999f));
 	}, 2);
 
 	public SandboxToolParameterMenu.SliderValue temperatureSlider = new SandboxToolParameterMenu.SliderValue(150f, 500f, "cold", "hot", GameUtil.GetTemperatureUnitSuffix(), UI.SANDBOXTOOLS.SETTINGS.TEMPERATURE.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.TEMPERATURE.NAME, delegate(float value)
 	{
-		SandboxToolParameterMenu.instance.settings.SetFloatSetting("SandbosTools.Temperature", GameUtil.GetTemperatureConvertedToKelvin(value));
+		SandboxToolParameterMenu.instance.settings.SetFloatSetting("SandbosTools.Temperature", Mathf.Clamp(GameUtil.GetTemperatureConvertedToKelvin(value), 1f, 9999f));
 	}, 0);
 
 	public SandboxToolParameterMenu.SliderValue temperatureAdditiveSlider = new SandboxToolParameterMenu.SliderValue(-15f, 15f, "cold", "hot", GameUtil.GetTemperatureUnitSuffix(), UI.SANDBOXTOOLS.SETTINGS.TEMPERATURE_ADDITIVE.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.TEMPERATURE_ADDITIVE.NAME, delegate(float value)
@@ -777,10 +790,10 @@ public class SandboxToolParameterMenu : KScreen
 
 	public class SliderValue
 	{
-		public SliderValue(float minValue, float maxValue, string bottomSprite, string topSprite, string unitString, string tooltip, string labelText, Action<float> onValueChanged, int decimalPlaces = 0)
+		public SliderValue(float slideMinValue, float slideMaxValue, string bottomSprite, string topSprite, string unitString, string tooltip, string labelText, Action<float> onValueChanged, int decimalPlaces = 0)
 		{
-			this.minValue = minValue;
-			this.maxValue = maxValue;
+			this.slideMinValue = slideMinValue;
+			this.slideMaxValue = slideMaxValue;
 			this.bottomSprite = bottomSprite;
 			this.topSprite = topSprite;
 			this.unitString = unitString;
@@ -788,25 +801,28 @@ public class SandboxToolParameterMenu : KScreen
 			this.tooltip = tooltip;
 			this.roundToDecimalPlaces = decimalPlaces;
 			this.labelText = labelText;
+			this.clampValueLow = slideMinValue;
+			this.clampValueHigh = slideMaxValue;
 		}
 
 		public void SetRange(float min, float max, bool resetCurrentValue = true)
 		{
-			this.minValue = min;
-			this.maxValue = max;
-			this.slider.minValue = this.minValue;
-			this.slider.maxValue = this.maxValue;
-			this.inputField.currentValue = this.minValue + (this.maxValue - this.minValue) / 2f;
+			this.slideMinValue = min;
+			this.slideMaxValue = max;
+			this.slider.minValue = this.slideMinValue;
+			this.slider.maxValue = this.slideMaxValue;
+			this.inputField.currentValue = this.slideMinValue + (this.slideMaxValue - this.slideMinValue) / 2f;
 			this.inputField.SetDisplayValue(this.inputField.currentValue.ToString());
 			if (resetCurrentValue)
 			{
-				this.slider.value = this.minValue + (this.maxValue - this.minValue) / 2f;
-				this.onValueChanged(this.minValue + (this.maxValue - this.minValue) / 2f);
+				this.slider.value = this.slideMinValue + (this.slideMaxValue - this.slideMinValue) / 2f;
+				this.onValueChanged(this.slideMinValue + (this.slideMaxValue - this.slideMinValue) / 2f);
 			}
 		}
 
 		public void SetValue(float value, bool runOnValueChanged = true)
 		{
+			value = Mathf.Clamp(value, this.clampValueLow, this.clampValueHigh);
 			this.slider.value = value;
 			this.inputField.currentValue = value;
 			if (runOnValueChanged)
@@ -827,9 +843,13 @@ public class SandboxToolParameterMenu : KScreen
 
 		public string topSprite;
 
-		public float minValue;
+		public float slideMinValue;
 
-		public float maxValue;
+		public float slideMaxValue;
+
+		public float clampValueLow;
+
+		public float clampValueHigh;
 
 		public string unitString;
 

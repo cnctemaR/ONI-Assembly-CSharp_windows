@@ -6,7 +6,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/scripts/Vent")]
-public class Vent : KMonoBehaviour, IEffectDescriptor
+public class Vent : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	public int SortKey
 	{
@@ -101,7 +101,7 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 		return flag;
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		string formattedMass = GameUtil.GetFormattedMass(this.overpressureMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
 		return new List<Descriptor>

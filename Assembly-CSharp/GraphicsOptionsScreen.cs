@@ -58,6 +58,16 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			this.UpdateUIScale(this.uiScaleSlider.value);
 		};
+		this.BuildColorModeOptions();
+		this.colorModeDropdown.options = this.colorModeOptions;
+		this.colorModeDropdown.onValueChanged.AddListener(new UnityAction<int>(this.OnColorModeChanged));
+		int num = 0;
+		if (KPlayerPrefs.HasKey(GraphicsOptionsScreen.ColorModeKey))
+		{
+			num = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ColorModeKey);
+		}
+		this.colorModeDropdown.value = num;
+		this.RefreshColorExamples(this.originalSettings.colorSetId);
 	}
 
 	public static void SetSettingsFromPrefs()
@@ -159,6 +169,16 @@ internal class GraphicsOptionsScreen : KModalScreen
 		Screen.SetResolution(num, num2, flag, num3);
 	}
 
+	public static void SetColorModeFromPrefs()
+	{
+		int num = 0;
+		if (KPlayerPrefs.HasKey(GraphicsOptionsScreen.ColorModeKey))
+		{
+			num = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ColorModeKey);
+		}
+		GlobalAssets.Instance.colorSet = GlobalAssets.Instance.colorSetOptions[num];
+	}
+
 	public static void OnResize()
 	{
 		GraphicsOptionsScreen.Settings settings = default(GraphicsOptionsScreen.Settings);
@@ -167,6 +187,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		settings.resolution.height = Screen.height;
 		settings.fullscreen = Screen.fullScreen;
 		settings.lowRes = QualitySettings.GetQualityLevel();
+		settings.colorSetId = Array.IndexOf<ColorSet>(GlobalAssets.Instance.colorSetOptions, GlobalAssets.Instance.colorSet);
 		GraphicsOptionsScreen.SaveSettingsToPrefs(settings);
 	}
 
@@ -184,6 +205,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		KPlayerPrefs.SetInt(GraphicsOptionsScreen.ResolutionHeightKey, settings.resolution.height);
 		KPlayerPrefs.SetInt(GraphicsOptionsScreen.RefreshRateKey, settings.resolution.refreshRate);
 		KPlayerPrefs.SetInt(GraphicsOptionsScreen.FullScreenKey, settings.fullscreen ? 1 : 0);
+		KPlayerPrefs.SetInt(GraphicsOptionsScreen.ColorModeKey, settings.colorSetId);
 	}
 
 	private void UpdateUIScale(float value)
@@ -237,6 +259,34 @@ internal class GraphicsOptionsScreen : KModalScreen
 		}
 	}
 
+	private void BuildColorModeOptions()
+	{
+		this.colorModeOptions.Clear();
+		for (int i = 0; i < GlobalAssets.Instance.colorSetOptions.Length; i++)
+		{
+			this.colorModeOptions.Add(new Dropdown.OptionData(Strings.Get(GlobalAssets.Instance.colorSetOptions[i].settingName)));
+		}
+	}
+
+	private void RefreshColorExamples(int idx)
+	{
+		Color32 logicOn = GlobalAssets.Instance.colorSetOptions[idx].logicOn;
+		Color32 logicOff = GlobalAssets.Instance.colorSetOptions[idx].logicOff;
+		Color32 cropHalted = GlobalAssets.Instance.colorSetOptions[idx].cropHalted;
+		Color32 cropGrowing = GlobalAssets.Instance.colorSetOptions[idx].cropGrowing;
+		Color32 cropGrown = GlobalAssets.Instance.colorSetOptions[idx].cropGrown;
+		logicOn.a = byte.MaxValue;
+		logicOff.a = byte.MaxValue;
+		cropHalted.a = byte.MaxValue;
+		cropGrowing.a = byte.MaxValue;
+		cropGrown.a = byte.MaxValue;
+		this.colorExampleLogicOn.color = logicOn;
+		this.colorExampleLogicOff.color = logicOff;
+		this.colorExampleCropHalted.color = cropHalted;
+		this.colorExampleCropGrowing.color = cropGrowing;
+		this.colorExampleCropGrown.color = cropGrown;
+	}
+
 	private int GetResolutionIndex(Resolution resolution)
 	{
 		int num = -1;
@@ -272,7 +322,8 @@ internal class GraphicsOptionsScreen : KModalScreen
 				height = Screen.height,
 				refreshRate = Screen.currentResolution.refreshRate
 			},
-			lowRes = QualitySettings.GetQualityLevel()
+			lowRes = QualitySettings.GetQualityLevel(),
+			colorSetId = Array.IndexOf<ColorSet>(GlobalAssets.Instance.colorSetOptions, GlobalAssets.Instance.colorSet)
 		};
 	}
 
@@ -284,9 +335,24 @@ internal class GraphicsOptionsScreen : KModalScreen
 			new_settings.resolution = this.resolutions[this.resolutionDropdown.value];
 			new_settings.fullscreen = this.fullscreenToggle.CurrentState != 0;
 			new_settings.lowRes = this.lowResToggle.CurrentState;
+			new_settings.colorSetId = this.colorModeId;
+			if (GlobalAssets.Instance.colorSetOptions[this.colorModeId] != GlobalAssets.Instance.colorSet)
+			{
+				this.colorModeChanged = true;
+			}
 			this.ApplyConfirmSettings(new_settings, delegate
 			{
 				this.applyButton.isInteractable = false;
+				if (this.colorModeChanged)
+				{
+					this.feedbackDialog = Util.KInstantiateUI(this.confirmPrefab.gameObject, this.transform.gameObject, false).GetComponent<ConfirmDialogScreen>();
+					this.feedbackDialog.PopupConfirmDialog(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.COLORBLIND_FEEDBACK.text, null, null, UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.COLORBLIND_FEEDBACK_BUTTON.text, delegate
+					{
+						Application.OpenURL("https://forums.kleientertainment.com/forums/topic/117325-color-blindness-feedback/");
+					}, null, null, null, null, true);
+					this.feedbackDialog.gameObject.SetActive(true);
+				}
+				this.colorModeChanged = false;
 				GraphicsOptionsScreen.SaveSettingsToPrefs(new_settings);
 			});
 		}
@@ -328,6 +394,11 @@ internal class GraphicsOptionsScreen : KModalScreen
 			this.applyButton.isInteractable = true;
 			return;
 		}
+		if (settings.colorSetId != this.colorModeId)
+		{
+			this.applyButton.isInteractable = true;
+			return;
+		}
 		int resolutionIndex = this.GetResolutionIndex(settings.resolution);
 		this.applyButton.isInteractable = this.resolutionDropdown.value != resolutionIndex;
 	}
@@ -341,6 +412,13 @@ internal class GraphicsOptionsScreen : KModalScreen
 	private void OnResolutionChanged(int idx)
 	{
 		this.RefreshApplyButton();
+	}
+
+	private void OnColorModeChanged(int idx)
+	{
+		this.colorModeId = idx;
+		this.RefreshApplyButton();
+		this.RefreshColorExamples(this.colorModeId);
 	}
 
 	private void OnLowResToggle()
@@ -363,7 +441,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			this.StopCoroutine(timer);
 		};
-		this.confirmDialog.PopupConfirmDialog(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.ACCEPT_CHANGES.text, on_confirm, action, null, null, null, null, null, null, true);
+		this.confirmDialog.PopupConfirmDialog(this.colorModeChanged ? UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.ACCEPT_CHANGES_STRING_COLOR.text : UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.ACCEPT_CHANGES.text, on_confirm, action, null, null, null, null, null, null, true);
 		this.confirmDialog.gameObject.SetActive(true);
 	}
 
@@ -377,6 +455,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			this.resolutionDropdown.value = resolutionIndex;
 		}
+		GlobalAssets.Instance.colorSet = GlobalAssets.Instance.colorSetOptions[new_settings.colorSetId];
 		global::Debug.Log(string.Concat(new object[]
 		{
 			"Applying low res settings ",
@@ -428,6 +507,9 @@ internal class GraphicsOptionsScreen : KModalScreen
 	private ConfirmDialogScreen confirmPrefab;
 
 	[SerializeField]
+	private ConfirmDialogScreen feedbackPrefab;
+
+	[SerializeField]
 	private KSlider uiScaleSlider;
 
 	[SerializeField]
@@ -435,6 +517,24 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	[SerializeField]
 	private LocText title;
+
+	[SerializeField]
+	private Dropdown colorModeDropdown;
+
+	[SerializeField]
+	private KImage colorExampleLogicOn;
+
+	[SerializeField]
+	private KImage colorExampleLogicOff;
+
+	[SerializeField]
+	private KImage colorExampleCropHalted;
+
+	[SerializeField]
+	private KImage colorExampleCropGrowing;
+
+	[SerializeField]
+	private KImage colorExampleCropGrown;
 
 	public static readonly string ResolutionWidthKey = "ResolutionWidth";
 
@@ -446,13 +546,23 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	public static readonly string LowResKey = "LowResTextures";
 
+	public static readonly string ColorModeKey = "ColorModeID";
+
 	private KCanvasScaler[] CanvasScalers;
 
 	private ConfirmDialogScreen confirmDialog;
 
+	private ConfirmDialogScreen feedbackDialog;
+
 	private List<Resolution> resolutions = new List<Resolution>();
 
 	private List<Dropdown.OptionData> options = new List<Dropdown.OptionData>();
+
+	private List<Dropdown.OptionData> colorModeOptions = new List<Dropdown.OptionData>();
+
+	private int colorModeId;
+
+	private bool colorModeChanged;
 
 	private GraphicsOptionsScreen.Settings originalSettings;
 
@@ -463,5 +573,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		public Resolution resolution;
 
 		public int lowRes;
+
+		public int colorSetId;
 	}
 }

@@ -3,8 +3,14 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class CircuitSwitch : Switch, IPlayerControlledToggle
+public class CircuitSwitch : Switch, IPlayerControlledToggle, ISim33ms
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		base.Subscribe<CircuitSwitch>(-905833192, CircuitSwitch.OnCopySettingsDelegate);
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -32,6 +38,16 @@ public class CircuitSwitch : Switch, IPlayerControlledToggle
 		this.switchedOn = true;
 		this.UpdateCircuit(false);
 		this.switchedOn = switchedOn;
+	}
+
+	private void OnCopySettings(object data)
+	{
+		CircuitSwitch component = ((GameObject)data).GetComponent<CircuitSwitch>();
+		if (component != null)
+		{
+			this.switchedOn = component.switchedOn;
+			this.UpdateCircuit(true);
+		}
 	}
 
 	public bool IsConnected()
@@ -120,6 +136,16 @@ public class CircuitSwitch : Switch, IPlayerControlledToggle
 		this.wasOn = this.switchedOn;
 	}
 
+	public void Sim33ms(float dt)
+	{
+		if (this.ToggleRequested)
+		{
+			this.Toggle();
+			this.ToggleRequested = false;
+			this.GetSelectable().SetStatusItem(Db.Get().StatusItemCategories.Main, null, null);
+		}
+	}
+
 	public void ToggledByPlayer()
 	{
 		this.Toggle();
@@ -143,8 +169,18 @@ public class CircuitSwitch : Switch, IPlayerControlledToggle
 		}
 	}
 
+	public bool ToggleRequested { get; set; }
+
 	[SerializeField]
 	public ObjectLayer objectLayer;
+
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
+	private static readonly EventSystem.IntraObjectHandler<CircuitSwitch> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<CircuitSwitch>(delegate(CircuitSwitch component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 
 	private Wire attachedWire;
 

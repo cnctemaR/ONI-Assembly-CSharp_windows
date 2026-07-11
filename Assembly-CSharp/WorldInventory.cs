@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using KSerialization;
 using UnityEngine;
 
@@ -91,17 +92,28 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		return num;
 	}
 
-	public List<Pickupable> GetPickupables(Tag tag)
+	public ICollection<Pickupable> GetPickupables(Tag tag)
 	{
-		List<Pickupable> list = null;
-		this.Inventory.TryGetValue(tag, out list);
-		return list;
+		HashSet<Pickupable> hashSet = null;
+		this.Inventory.TryGetValue(tag, out hashSet);
+		return hashSet;
+	}
+
+	public List<Pickupable> CreatePickupablesList(Tag tag)
+	{
+		HashSet<Pickupable> hashSet = null;
+		this.Inventory.TryGetValue(tag, out hashSet);
+		if (hashSet == null)
+		{
+			return null;
+		}
+		return hashSet.ToList<Pickupable>();
 	}
 
 	public List<Tag> GetPickupableTagsFromCategoryTag(Tag t)
 	{
 		List<Tag> list = new List<Tag>();
-		List<Pickupable> pickupables = this.GetPickupables(t);
+		ICollection<Pickupable> pickupables = this.GetPickupables(t);
 		if (pickupables != null && pickupables.Count > 0)
 		{
 			foreach (Pickupable pickupable in pickupables)
@@ -206,16 +218,15 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	private void Update()
 	{
 		int num = 0;
-		foreach (KeyValuePair<Tag, List<Pickupable>> keyValuePair in this.Inventory)
+		foreach (KeyValuePair<Tag, HashSet<Pickupable>> keyValuePair in this.Inventory)
 		{
 			if (num == this.accessibleUpdateIndex || this.firstUpdate)
 			{
 				Tag key = keyValuePair.Key;
-				List<Pickupable> value = keyValuePair.Value;
+				IEnumerable<Pickupable> value = keyValuePair.Value;
 				float num2 = 0f;
-				for (int i = 0; i < value.Count; i++)
+				foreach (Pickupable pickupable in value)
 				{
-					Pickupable pickupable = value[i];
 					if (pickupable != null && !pickupable.HasTag(GameTags.StoredPrivate))
 					{
 						num2 += pickupable.TotalAmount;
@@ -278,13 +289,13 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		}
 		foreach (Tag tag2 in component2.Tags)
 		{
-			List<Pickupable> list;
-			if (!this.Inventory.TryGetValue(tag2, out list))
+			HashSet<Pickupable> hashSet;
+			if (!this.Inventory.TryGetValue(tag2, out hashSet))
 			{
-				list = new List<Pickupable>();
-				this.Inventory[tag2] = list;
+				hashSet = new HashSet<Pickupable>();
+				this.Inventory[tag2] = hashSet;
 			}
-			list.Add(component);
+			hashSet.Add(component);
 		}
 	}
 
@@ -293,10 +304,10 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		Pickupable component = ((GameObject)data).GetComponent<Pickupable>();
 		foreach (Tag tag in component.GetComponent<KPrefabID>().Tags)
 		{
-			List<Pickupable> list;
-			if (this.Inventory.TryGetValue(tag, out list))
+			HashSet<Pickupable> hashSet;
+			if (this.Inventory.TryGetValue(tag, out hashSet))
 			{
-				list.Remove(component);
+				hashSet.Remove(component);
 			}
 		}
 	}
@@ -312,7 +323,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	[Serialize]
 	private Dictionary<Tag, HashSet<Tag>> DiscoveredCategories = new Dictionary<Tag, HashSet<Tag>>();
 
-	private Dictionary<Tag, List<Pickupable>> Inventory = new Dictionary<Tag, List<Pickupable>>();
+	private Dictionary<Tag, HashSet<Pickupable>> Inventory = new Dictionary<Tag, HashSet<Pickupable>>();
 
 	private MinionGroupProber Prober;
 

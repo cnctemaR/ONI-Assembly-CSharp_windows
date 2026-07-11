@@ -291,7 +291,7 @@ namespace STRINGS
 
 				public static LocString CONTAINER2 = "It is unknown whether their caching behavior is a compulsion or a form of entertainment, as the Pip relies primarily on bark and wood for its survival.";
 
-				public static LocString CONTAINER3 = "Although the Pip lacks truly opposable thumbs, it nonetheless has highly detexerous paws that allow it to rummage through most tight to reach spaces in search of seeds and other treasures.";
+				public static LocString CONTAINER3 = "Although the Pip lacks truly opposable thumbs, it nonetheless has highly dexterous paws that allow it to rummage through most tight to reach spaces in search of seeds and other treasures.";
 			}
 		}
 

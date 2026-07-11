@@ -219,9 +219,6 @@ public class MinionConfig : IEntityConfig
 		primaryElement.ElementID = SimHashes.Creature;
 		gameObject.AddOrGet<ChoreProvider>();
 		gameObject.AddOrGetDef<DebugGoToMonitor.Def>();
-		gameObject.AddOrGetDef<SpeechMonitor.Def>();
-		gameObject.AddOrGetDef<BlinkMonitor.Def>();
-		gameObject.AddOrGetDef<ConversationMonitor.Def>();
 		gameObject.AddOrGet<Sensors>();
 		gameObject.AddOrGet<Chattable>();
 		gameObject.AddOrGet<FaceGraph>();

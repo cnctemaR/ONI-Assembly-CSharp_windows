@@ -5,7 +5,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>, IEffectDescriptor
+public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
@@ -114,11 +114,6 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 		this.partitionerEntry.Clear();
 		this.ReleaseAstronaut(false);
 		base.smi.StopSM("cleanup");
-	}
-
-	public List<Descriptor> GetDescriptors(BuildingDef def)
-	{
-		return null;
 	}
 
 	public Storage storage;

@@ -15,7 +15,7 @@ namespace KSerialization
 			Type type = Manager.GetType(template_type_name);
 			if (type != null)
 			{
-				type.GetSerializationMethods(typeof(OnDeserializingAttribute), typeof(OnDeserializedAttribute), out this.onDeserializing, out this.onDeserialized);
+				type.GetSerializationMethods(typeof(OnDeserializingAttribute), typeof(OnDeserializedAttribute), typeof(CustomDeserialize), out this.onDeserializing, out this.onDeserialized, out this.customDeserialize);
 			}
 			int num = reader.ReadInt32();
 			int num2 = reader.ReadInt32();
@@ -203,6 +203,8 @@ namespace KSerialization
 		public MethodInfo onDeserializing;
 
 		public MethodInfo onDeserialized;
+
+		public MethodInfo customDeserialize;
 
 		public List<DeserializationTemplate.SerializedInfo> serializedMembers = new List<DeserializationTemplate.SerializedInfo>();
 

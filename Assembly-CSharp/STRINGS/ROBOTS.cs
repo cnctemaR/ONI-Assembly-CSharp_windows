@@ -10,11 +10,20 @@ namespace STRINGS
 		{
 			public class CANTREACHSTATION
 			{
-				public static LocString NAME = "Can't reach base station";
+				public static LocString NAME = "Can't Reach Sweepy Dock";
 
 				public static LocString DESC = "Something is blocking this robot from reaching its base station";
 
 				public static LocString TOOLTIP = "Something is blocking this robot from reaching its base station";
+			}
+
+			public class MOVINGTOCHARGESTATION
+			{
+				public static LocString NAME = "Travelling to Sweepy Dock";
+
+				public static LocString DESC = "This robot is on its way to a battery recharge";
+
+				public static LocString TOOLTIP = "This robot is on its way to a battery recharge";
 			}
 
 			public class LOWBATTERY
@@ -33,6 +42,51 @@ namespace STRINGS
 				public static LocString DESC = "This robot must return to its base station to unload";
 
 				public static LocString TOOLTIP = "This robot must return to its base station to unload";
+			}
+
+			public class WORKING
+			{
+				public static LocString NAME = "Working";
+
+				public static LocString DESC = "This robot is working diligently";
+
+				public static LocString TOOLTIP = "This robot is working diligently";
+			}
+
+			public class UNLOADINGSTORAGE
+			{
+				public static LocString NAME = "Unloading";
+
+				public static LocString DESC = "This robot is unloading its storage";
+
+				public static LocString TOOLTIP = "This robot unloading its storage";
+			}
+
+			public class CHARGING
+			{
+				public static LocString NAME = "Charging";
+
+				public static LocString DESC = "This robot is charging its battery";
+
+				public static LocString TOOLTIP = "This robot is charging its battery";
+			}
+
+			public class REACTPOSITIVE
+			{
+				public static LocString NAME = "Positive Reaction";
+
+				public static LocString DESC = "This robot is reacting positively to something";
+
+				public static LocString TOOLTIP = "This robot is reacting positively to something";
+			}
+
+			public class REACTNEGATIVE
+			{
+				public static LocString NAME = "Negative Reaction";
+
+				public static LocString DESC = "This robot is reacting negatively to something";
+
+				public static LocString TOOLTIP = "This robot is reacting negatively to something";
 			}
 		}
 

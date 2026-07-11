@@ -9,8 +9,8 @@ public class LogicRibbonDisplayUI : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.colourOn = this.uiAsset.colourOn;
-		this.colourOff = this.uiAsset.colourOff;
+		this.colourOn = GlobalAssets.Instance.colorSet.logicOn;
+		this.colourOff = GlobalAssets.Instance.colorSet.logicOff;
 		this.colourOn.a = (this.colourOff.a = byte.MaxValue);
 		this.wire1.raycastTarget = false;
 		this.wire2.raycastTarget = false;

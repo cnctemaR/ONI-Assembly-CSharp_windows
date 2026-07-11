@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/RelaxationPoint")]
-public class RelaxationPoint : Workable, IEffectDescriptor
+public class RelaxationPoint : Workable, IGameObjectEffectDescriptor
 {
 	public RelaxationPoint()
 	{
@@ -97,13 +97,13 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, false, null, null, null, false, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
-		List<Descriptor> list = new List<Descriptor>();
+		List<Descriptor> descriptors = base.GetDescriptors(go);
 		Descriptor descriptor = default(Descriptor);
 		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.STRESSREDUCEDPERMINUTE, GameUtil.GetFormattedPercent(this.stressModificationValue / 600f * 60f, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.STRESSREDUCEDPERMINUTE, GameUtil.GetFormattedPercent(this.stressModificationValue / 600f * 60f, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect);
-		list.Add(descriptor);
-		return list;
+		descriptors.Add(descriptor);
+		return descriptors;
 	}
 
 	[MyCmpGet]

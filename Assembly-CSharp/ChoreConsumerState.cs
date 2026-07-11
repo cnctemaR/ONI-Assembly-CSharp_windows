@@ -49,7 +49,11 @@ public class ChoreConsumerState
 		if (this.schedulable != null)
 		{
 			int blockIdx = Schedule.GetBlockIdx();
-			this.scheduleBlock = this.schedulable.GetSchedule().GetBlock(blockIdx);
+			Schedule schedule = this.schedulable.GetSchedule();
+			if (schedule != null)
+			{
+				this.scheduleBlock = schedule.GetBlock(blockIdx);
+			}
 		}
 	}
 

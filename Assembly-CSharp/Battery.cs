@@ -8,7 +8,7 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 [DebuggerDisplay("{name}")]
 [AddComponentMenu("KMonoBehaviour/scripts/Battery")]
-public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEnergyProducer
+public class Battery : KMonoBehaviour, IEnergyConsumer, IGameObjectEffectDescriptor, IEnergyProducer
 {
 	public float WattsUsed { get; private set; }
 
@@ -197,7 +197,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 		this.ConsumeEnergy(joules, false);
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		if (this.powerTransformer == null)

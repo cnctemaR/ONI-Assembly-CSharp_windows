@@ -36,7 +36,7 @@ public class RationTracker : KMonoBehaviour, ISaveLoadable
 	public float CountRations(Dictionary<string, float> unitCountByFoodType, bool excludeUnreachable = true)
 	{
 		float num = 0f;
-		List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(GameTags.Edible);
+		ICollection<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(GameTags.Edible);
 		if (pickupables != null)
 		{
 			foreach (Pickupable pickupable in pickupables)
@@ -63,7 +63,7 @@ public class RationTracker : KMonoBehaviour, ISaveLoadable
 	public float CountRationsByFoodType(string foodID, bool excludeUnreachable = true)
 	{
 		float num = 0f;
-		List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(GameTags.Edible);
+		ICollection<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(GameTags.Edible);
 		if (pickupables != null)
 		{
 			foreach (Pickupable pickupable in pickupables)

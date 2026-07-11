@@ -1,6 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -73,14 +74,27 @@ public class MotdServerClient
 		MotdServerClient.MotdResponse localResponse = this.GetLocalMotd(MotdServerClient.MotdLocalPath);
 		this.GetWebMotd(MotdServerClient.MotdServerUrl, localResponse, delegate(MotdServerClient.MotdResponse response, string err)
 		{
+			MotdServerClient.MotdResponse motdResponse;
 			if (err == null)
 			{
 				global::Debug.Assert(response.image_texture != null, "Attempting to return response with no image texture");
-				this.doCallback(response, err);
-				return;
+				motdResponse = response;
 			}
-			global::Debug.LogWarning("Could not retrieve web motd from " + MotdServerClient.MotdServerUrl + ", falling back to local - err: " + err);
-			this.doCallback(localResponse, null);
+			else
+			{
+				global::Debug.LogWarning("Could not retrieve web motd from " + MotdServerClient.MotdServerUrl + ", falling back to local - err: " + err);
+				motdResponse = localResponse;
+			}
+			if (Localization.GetSelectedLanguageType() == Localization.SelectedLanguageType.UGC)
+			{
+				global::Debug.Log("Language Mod detected, MOTD strings falling back to local file");
+				motdResponse.image_header_text = UI.FRONTEND.MOTD.IMAGE_HEADER;
+				motdResponse.news_header_text = UI.FRONTEND.MOTD.NEWS_HEADER;
+				motdResponse.news_body_text = UI.FRONTEND.MOTD.NEWS_BODY;
+				motdResponse.patch_notes_summary = UI.FRONTEND.MOTD.PATCH_NOTES_SUMMARY;
+				motdResponse.update_text_override = UI.FRONTEND.MOTD.UPDATE_TEXT;
+			}
+			this.doCallback(motdResponse, null);
 		});
 	}
 

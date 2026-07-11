@@ -4,12 +4,17 @@ using FMOD;
 using FMOD.Studio;
 using FMODUnity;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 
-public class GlobalAssets : MonoBehaviour
+public class GlobalAssets : KMonoBehaviour
 {
-	private void Awake()
+	public static GlobalAssets Instance { get; private set; }
+
+	protected override void OnPrefabInit()
 	{
+		base.OnPrefabInit();
+		GlobalAssets.Instance = this;
 		if (GlobalAssets.SoundTable.Count == 0)
 		{
 			Bank[] array = null;
@@ -62,6 +67,8 @@ public class GlobalAssets : MonoBehaviour
 			}
 		}
 		SetDefaults.Initialize();
+		GraphicsOptionsScreen.SetColorModeFromPrefs();
+		this.AddColorModeStyles();
 		LocString.CreateLocStringKeys(typeof(DUPLICANTS), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(MISC), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(UI), "STRINGS.");
@@ -74,12 +81,28 @@ public class GlobalAssets : MonoBehaviour
 		LocString.CreateLocStringKeys(typeof(INPUT_BINDINGS), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(BUILDING.STATUSITEMS), "STRINGS.BUILDING.");
 		LocString.CreateLocStringKeys(typeof(BUILDING.DETAILS), "STRINGS.BUILDING.");
+		LocString.CreateLocStringKeys(typeof(ROBOTS), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(LORE), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(CODEX), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(WORLDS), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(WORLD_TRAITS), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(COLONY_ACHIEVEMENTS), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(VIDEOS), "STRINGS.");
+	}
+
+	private void AddColorModeStyles()
+	{
+		TMP_Style tmp_Style = new TMP_Style("logic_on", string.Format("<color=#{0}>", ColorUtility.ToHtmlStringRGB(this.colorSet.logicOn)), "</color>");
+		TMP_StyleSheet.instance.AddStyle(tmp_Style);
+		TMP_Style tmp_Style2 = new TMP_Style("logic_off", string.Format("<color=#{0}>", ColorUtility.ToHtmlStringRGB(this.colorSet.logicOff)), "</color>");
+		TMP_StyleSheet.instance.AddStyle(tmp_Style2);
+		TMP_StyleSheet.RefreshStyles();
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		GlobalAssets.Instance = null;
 	}
 
 	public static string GetSound(string name, bool force_no_warning = false)
@@ -109,4 +132,8 @@ public class GlobalAssets : MonoBehaviour
 	private static HashSet<string> LowPrioritySounds = new HashSet<string>();
 
 	private static HashSet<string> HighPrioritySounds = new HashSet<string>();
+
+	public ColorSet colorSet;
+
+	public ColorSet[] colorSetOptions;
 }

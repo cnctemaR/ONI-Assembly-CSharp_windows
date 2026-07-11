@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderControl, ISliderControl
+public class EnergyGenerator : Generator, IGameObjectEffectDescriptor, ISingleSliderControl, ISliderControl
 {
 	public string SliderTitleKey
 	{
@@ -197,7 +197,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 		this.operational.SetActive(flag, false);
 	}
 
-	public List<Descriptor> RequirementDescriptors(BuildingDef def)
+	public List<Descriptor> RequirementDescriptors()
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		if (this.formula.inputs == null || this.formula.inputs.Length == 0)
@@ -215,7 +215,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 		return list;
 	}
 
-	public List<Descriptor> EffectDescriptors(BuildingDef def)
+	public List<Descriptor> EffectDescriptors()
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		if (this.formula.outputs == null || this.formula.outputs.Length == 0)
@@ -240,14 +240,14 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 		return list;
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		foreach (Descriptor descriptor in this.RequirementDescriptors(def))
+		foreach (Descriptor descriptor in this.RequirementDescriptors())
 		{
 			list.Add(descriptor);
 		}
-		foreach (Descriptor descriptor2 in this.EffectDescriptors(def))
+		foreach (Descriptor descriptor2 in this.EffectDescriptors())
 		{
 			list.Add(descriptor2);
 		}

@@ -30,7 +30,7 @@ public class LogicCircuitManager
 			this.PropagateSignals(true);
 			this.elapsedTime = 0f;
 		}
-		else if (this.conduitSystem.GetNetworks().Count > 0 && SpeedControlScreen.Instance != null && !SpeedControlScreen.Instance.IsPaused)
+		else if (SpeedControlScreen.Instance != null && !SpeedControlScreen.Instance.IsPaused)
 		{
 			this.elapsedTime += dt;
 			this.timeSinceBridgeRefresh += dt;
@@ -38,6 +38,10 @@ public class LogicCircuitManager
 			{
 				this.elapsedTime -= LogicCircuitManager.ClockTickInterval;
 				this.PropagateSignals(false);
+				if (this.onLogicTick != null)
+				{
+					this.onLogicTick();
+				}
 			}
 			if (this.timeSinceBridgeRefresh > LogicCircuitManager.BridgeRefreshInterval)
 			{
@@ -157,6 +161,8 @@ public class LogicCircuitManager
 	private bool updateEvenBridgeGroups;
 
 	private float timeSinceBridgeRefresh;
+
+	public global::System.Action onLogicTick;
 
 	public Action<ILogicUIElement> onElemAdded;
 

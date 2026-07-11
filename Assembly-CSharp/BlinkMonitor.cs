@@ -1,17 +1,17 @@
 ﻿using System;
 using UnityEngine;
 
-public class BlinkMonitor : GameStateMachine<BlinkMonitor, BlinkMonitor.Instance>
+public class BlinkMonitor : GameStateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, BlinkMonitor.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.satisfied;
-		this.root.Enter(new StateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, object>.State.Callback(BlinkMonitor.CreateEyes)).Exit(new StateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, object>.State.Callback(BlinkMonitor.DestroyEyes));
+		this.root.Enter(new StateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, BlinkMonitor.Def>.State.Callback(BlinkMonitor.CreateEyes)).Exit(new StateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, BlinkMonitor.Def>.State.Callback(BlinkMonitor.DestroyEyes));
 		this.satisfied.ScheduleGoTo(new Func<BlinkMonitor.Instance, float>(BlinkMonitor.GetRandomBlinkTime), this.blinking);
-		this.blinking.EnterTransition(this.satisfied, GameStateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, object>.Not(new StateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(BlinkMonitor.CanBlink))).Enter(new StateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, object>.State.Callback(BlinkMonitor.BeginBlinking)).Update(new Action<BlinkMonitor.Instance, float>(BlinkMonitor.UpdateBlinking), UpdateRate.RENDER_EVERY_TICK, false)
+		this.blinking.EnterTransition(this.satisfied, GameStateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, BlinkMonitor.Def>.Not(new StateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, BlinkMonitor.Def>.Transition.ConditionCallback(BlinkMonitor.CanBlink))).Enter(new StateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, BlinkMonitor.Def>.State.Callback(BlinkMonitor.BeginBlinking)).Update(new Action<BlinkMonitor.Instance, float>(BlinkMonitor.UpdateBlinking), UpdateRate.RENDER_EVERY_TICK, false)
 			.Target(this.eyes)
 			.OnAnimQueueComplete(this.satisfied)
-			.Exit(new StateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, object>.State.Callback(BlinkMonitor.EndBlinking));
+			.Exit(new StateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, BlinkMonitor.Def>.State.Callback(BlinkMonitor.EndBlinking));
 	}
 
 	private static bool CanBlink(BlinkMonitor.Instance smi)
@@ -82,11 +82,11 @@ public class BlinkMonitor : GameStateMachine<BlinkMonitor, BlinkMonitor.Instance
 		smi.GetComponent<SymbolOverrideController>().AddSymbolOverride(BlinkMonitor.HASH_SNAPTO_EYES, smi.eyes.AnimFiles[0].GetData().build.GetSymbol(hashedString), 3);
 	}
 
-	public GameStateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, object>.State satisfied;
+	public GameStateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, BlinkMonitor.Def>.State satisfied;
 
-	public GameStateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, object>.State blinking;
+	public GameStateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, BlinkMonitor.Def>.State blinking;
 
-	public StateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, object>.TargetParameter eyes;
+	public StateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, BlinkMonitor.Def>.TargetParameter eyes;
 
 	private static HashedString HASH_SNAPTO_EYES = "snapto_eyes";
 
@@ -101,10 +101,10 @@ public class BlinkMonitor : GameStateMachine<BlinkMonitor, BlinkMonitor.Instance
 		public float randomBlinkIntervalMax;
 	}
 
-	public new class Instance : GameStateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, object>.GameInstance
+	public new class Instance : GameStateMachine<BlinkMonitor, BlinkMonitor.Instance, IStateMachineTarget, BlinkMonitor.Def>.GameInstance
 	{
 		public Instance(IStateMachineTarget master, BlinkMonitor.Def def)
-			: base(master)
+			: base(master, def)
 		{
 		}
 

@@ -195,6 +195,16 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 			}
 		}
 
+		protected override void OnCleanUp()
+		{
+			base.OnCleanUp();
+			if (this.egg != null)
+			{
+				global::UnityEngine.Object.Destroy(this.egg);
+				this.egg = null;
+			}
+		}
+
 		public AmountInstance fertility;
 
 		private GameObject egg;

@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Ownable : Assignable, ISaveLoadable, IEffectDescriptor
+public class Ownable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 {
 	public override void Assign(IAssignableIdentity new_assignee)
 	{
@@ -113,7 +113,7 @@ public class Ownable : Assignable, ISaveLoadable, IEffectDescriptor
 		component.SetStatusItem(Db.Get().StatusItemCategories.Main, statusItem, this);
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Descriptor descriptor = default(Descriptor);

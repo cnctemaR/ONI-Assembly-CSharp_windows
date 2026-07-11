@@ -6,7 +6,7 @@ using UnityEngine;
 
 [SkipSaveFileSerialization]
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
+public class ElementConsumer : SimComponent, ISaveLoadable, IGameObjectEffectDescriptor
 {
 	public event Action<Sim.ConsumedMassInfo> OnElementConsumed;
 
@@ -192,7 +192,7 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 		this.UpdateStatusItem();
 	}
 
-	public List<Descriptor> RequirementDescriptors(BuildingDef def)
+	public List<Descriptor> RequirementDescriptors()
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		if (this.isRequired && this.showDescriptor)
@@ -221,7 +221,7 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 		return list;
 	}
 
-	public List<Descriptor> EffectDescriptors(BuildingDef def)
+	public List<Descriptor> EffectDescriptors()
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		if (this.showDescriptor)
@@ -250,14 +250,14 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 		return list;
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		foreach (Descriptor descriptor in this.RequirementDescriptors(def))
+		foreach (Descriptor descriptor in this.RequirementDescriptors())
 		{
 			list.Add(descriptor);
 		}
-		foreach (Descriptor descriptor2 in this.EffectDescriptors(def))
+		foreach (Descriptor descriptor2 in this.EffectDescriptors())
 		{
 			list.Add(descriptor2);
 		}

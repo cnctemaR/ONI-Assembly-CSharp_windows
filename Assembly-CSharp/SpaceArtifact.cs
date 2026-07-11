@@ -4,7 +4,7 @@ using UnityEngine;
 
 [SkipSaveFileSerialization]
 [AddComponentMenu("KMonoBehaviour/scripts/SpaceArtifact")]
-public class SpaceArtifact : KMonoBehaviour, IEffectDescriptor, IGameObjectEffectDescriptor
+public class SpaceArtifact : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	public void SetArtifactTier(ArtifactTier tier)
 	{
@@ -32,11 +32,6 @@ public class SpaceArtifact : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 		Descriptor descriptor = new Descriptor(string.Format("This is an artifact from space", Array.Empty<object>()), string.Format("This is the tooltip string", Array.Empty<object>()), Descriptor.DescriptorType.Information, false);
 		list.Add(descriptor);
 		return list;
-	}
-
-	public List<Descriptor> GetDescriptors(BuildingDef def)
-	{
-		return this.GetEffectDescriptions();
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)

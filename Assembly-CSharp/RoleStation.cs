@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/RoleStation")]
-public class RoleStation : Workable, IEffectDescriptor
+public class RoleStation : Workable, IGameObjectEffectDescriptor
 {
 	protected override void OnPrefabInit()
 	{
@@ -76,9 +76,9 @@ public class RoleStation : Workable, IEffectDescriptor
 		Components.RoleStations.Remove(this);
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
-		return new List<Descriptor>();
+		return base.GetDescriptors(go);
 	}
 
 	private Chore chore;

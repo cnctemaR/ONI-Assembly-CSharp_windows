@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Compost : StateMachineComponent<Compost.StatesInstance>, IEffectDescriptor, IGameObjectEffectDescriptor
+public class Compost : StateMachineComponent<Compost.StatesInstance>, IGameObjectEffectDescriptor
 {
 	protected override void OnPrefabInit()
 	{
@@ -26,11 +26,6 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IEffectDes
 	private void OnStorageChanged(object data)
 	{
 		(GameObject)data == null;
-	}
-
-	public List<Descriptor> GetDescriptors(BuildingDef def)
-	{
-		return this.GetDescriptors(def.BuildingComplete);
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)

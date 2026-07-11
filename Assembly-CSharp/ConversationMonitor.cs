@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
-public class ConversationMonitor : GameStateMachine<ConversationMonitor, ConversationMonitor.Instance>
+public class ConversationMonitor : GameStateMachine<ConversationMonitor, ConversationMonitor.Instance, IStateMachineTarget, ConversationMonitor.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -30,10 +30,10 @@ public class ConversationMonitor : GameStateMachine<ConversationMonitor, Convers
 	}
 
 	[SerializationConfig(MemberSerialization.OptIn)]
-	public new class Instance : GameStateMachine<ConversationMonitor, ConversationMonitor.Instance, IStateMachineTarget, object>.GameInstance
+	public new class Instance : GameStateMachine<ConversationMonitor, ConversationMonitor.Instance, IStateMachineTarget, ConversationMonitor.Def>.GameInstance
 	{
 		public Instance(IStateMachineTarget master, ConversationMonitor.Def def)
-			: base(master)
+			: base(master, def)
 		{
 			this.recentTopics = new Queue<string>();
 			this.favouriteTopics = new List<string> { ConversationMonitor.Instance.randomTopics[global::UnityEngine.Random.Range(0, ConversationMonitor.Instance.randomTopics.Count)] };

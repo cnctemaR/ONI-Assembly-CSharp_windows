@@ -4,7 +4,7 @@ using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/Light2D")]
-public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor, IEffectDescriptor
+public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	private T MaybeDirty<T>(T old_value, T new_value, ref bool dirty)
 	{
@@ -255,11 +255,6 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor, IEffectDescr
 			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.EMITS_LIGHT, this.Range), UI.GAMEOBJECTEFFECTS.TOOLTIPS.EMITS_LIGHT, Descriptor.DescriptorType.Effect, false),
 			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.EMITS_LIGHT_LUX, this.Lux), UI.GAMEOBJECTEFFECTS.TOOLTIPS.EMITS_LIGHT_LUX, Descriptor.DescriptorType.Effect, false)
 		};
-	}
-
-	public List<Descriptor> GetDescriptors(BuildingDef def)
-	{
-		return this.GetDescriptors(def.BuildingComplete);
 	}
 
 	private bool dirty_shape;

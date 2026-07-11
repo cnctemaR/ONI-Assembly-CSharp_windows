@@ -86,25 +86,13 @@ public class SaveLoader : KMonoBehaviour
 		}
 	}
 
-	public static byte[] CompressContents(byte[] uncompressed)
+	private static void CompressContents(BinaryWriter fileWriter, byte[] uncompressed, int length)
 	{
-		return SaveLoader.CompressContents(uncompressed, uncompressed.Length);
-	}
-
-	public static byte[] CompressContents(byte[] uncompressed, int length)
-	{
-		byte[] array;
-		using (MemoryStream memoryStream = new MemoryStream(length))
+		using (ZlibStream zlibStream = new ZlibStream(fileWriter.BaseStream, CompressionMode.Compress, CompressionLevel.BestSpeed))
 		{
-			using (ZlibStream zlibStream = new ZlibStream(memoryStream, CompressionMode.Compress, CompressionLevel.BestSpeed))
-			{
-				zlibStream.Write(uncompressed, 0, length);
-				zlibStream.Flush();
-			}
-			memoryStream.Flush();
-			array = memoryStream.ToArray();
+			zlibStream.Write(uncompressed, 0, length);
+			zlibStream.Flush();
 		}
-		return array;
 	}
 
 	private byte[] FloatToBytes(float[] floats)
@@ -114,7 +102,7 @@ public class SaveLoader : KMonoBehaviour
 		return array;
 	}
 
-	public static byte[] DecompressContents(byte[] compressed)
+	private static byte[] DecompressContents(byte[] compressed)
 	{
 		return ZlibStream.UncompressBuffer(compressed);
 	}
@@ -131,33 +119,9 @@ public class SaveLoader : KMonoBehaviour
 		SaveFileRoot saveFileRoot = new SaveFileRoot();
 		saveFileRoot.WidthInCells = Grid.WidthInCells;
 		saveFileRoot.HeightInCells = Grid.HeightInCells;
-		using (MemoryStream memoryStream = new MemoryStream())
-		{
-			using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
-			{
-				Sim.Save(binaryWriter);
-			}
-			if (this.zipStreams)
-			{
-				saveFileRoot.streamed["SimBZ"] = SaveLoader.CompressContents(memoryStream.ToArray());
-			}
-			else
-			{
-				saveFileRoot.streamed["Sim"] = memoryStream.ToArray();
-			}
-		}
-		if (this.zipStreams)
-		{
-			saveFileRoot.streamed["GridVisibleBZ"] = SaveLoader.CompressContents(Grid.Visible);
-			saveFileRoot.streamed["GridSpawnableBZ"] = SaveLoader.CompressContents(Grid.Spawnable);
-			saveFileRoot.streamed["GridDamageBZ"] = SaveLoader.CompressContents(this.FloatToBytes(Grid.Damage));
-		}
-		else
-		{
-			saveFileRoot.streamed["GridVisible"] = Grid.Visible;
-			saveFileRoot.streamed["GridSpawnable"] = Grid.Spawnable;
-			saveFileRoot.streamed["GridDamage"] = this.FloatToBytes(Grid.Damage);
-		}
+		saveFileRoot.streamed["GridVisible"] = Grid.Visible;
+		saveFileRoot.streamed["GridSpawnable"] = Grid.Spawnable;
+		saveFileRoot.streamed["GridDamage"] = this.FloatToBytes(Grid.Damage);
 		Global.Instance.modManager.SendMetricsEvent();
 		saveFileRoot.active_mods = new List<Label>();
 		foreach (Mod mod in Global.Instance.modManager.mods)
@@ -167,13 +131,13 @@ public class SaveLoader : KMonoBehaviour
 				saveFileRoot.active_mods.Add(mod.label);
 			}
 		}
-		using (MemoryStream memoryStream2 = new MemoryStream())
+		using (MemoryStream memoryStream = new MemoryStream())
 		{
-			using (BinaryWriter binaryWriter2 = new BinaryWriter(memoryStream2))
+			using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
 			{
-				Camera.main.transform.parent.GetComponent<CameraController>().Save(binaryWriter2);
+				Camera.main.transform.parent.GetComponent<CameraController>().Save(binaryWriter);
 			}
-			saveFileRoot.streamed["Camera"] = memoryStream2.ToArray();
+			saveFileRoot.streamed["Camera"] = memoryStream.ToArray();
 		}
 		return saveFileRoot;
 	}
@@ -183,6 +147,7 @@ public class SaveLoader : KMonoBehaviour
 		writer.WriteKleiString("world");
 		Serializer.Serialize(this.PrepSaveFile(), writer);
 		Game.SaveSettings(writer);
+		Sim.Save(writer);
 		this.saveManager.Save(writer);
 		Game.Instance.Save(writer);
 	}
@@ -250,7 +215,16 @@ public class SaveLoader : KMonoBehaviour
 		Sim.SIM_Initialize(new Sim.GAME_MessageHandler(Sim.DLL_MessageHandler));
 		SimMessages.CreateSimElementsTable(ElementLoader.elements);
 		SimMessages.CreateDiseaseTable();
-		if (Sim.Load(new FastReader(saveFileRoot.streamed["Sim"])) != 0)
+		IReader reader2;
+		if (saveFileRoot.streamed.ContainsKey("Sim"))
+		{
+			reader2 = new FastReader(saveFileRoot.streamed["Sim"]);
+		}
+		else
+		{
+			reader2 = reader;
+		}
+		if (Sim.Load(reader2) != 0)
 		{
 			DebugUtil.LogWarningArgs(new object[] { "--- Error loading save ---\nSimDLL found bad data\n" });
 			Sim.Shutdown();
@@ -444,53 +418,52 @@ public class SaveLoader : KMonoBehaviour
 				}
 			}
 		}
-		byte[] array = null;
-		using (MemoryStream memoryStream = new MemoryStream())
+		using (MemoryStream memoryStream = new MemoryStream((int)((float)this.lastUncompressedSize * 1.1f)))
 		{
 			using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
 			{
 				this.Save(binaryWriter);
-				if (this.compressSaveData)
+				this.lastUncompressedSize = (int)memoryStream.Length;
+				try
 				{
-					array = SaveLoader.CompressContents(memoryStream.GetBuffer(), (int)memoryStream.Length);
+					using (BinaryWriter binaryWriter2 = new BinaryWriter(File.Open(filename, FileMode.Create)))
+					{
+						SaveGame.Header header;
+						byte[] saveHeader = SaveGame.Instance.GetSaveHeader(isAutoSave, this.compressSaveData, out header);
+						binaryWriter2.Write(header.buildVersion);
+						binaryWriter2.Write(header.headerSize);
+						binaryWriter2.Write(header.headerVersion);
+						binaryWriter2.Write(header.compression);
+						binaryWriter2.Write(saveHeader);
+						global::KSerialization.Manager.SerializeDirectory(binaryWriter2);
+						if (this.compressSaveData)
+						{
+							SaveLoader.CompressContents(binaryWriter2, memoryStream.GetBuffer(), (int)memoryStream.Length);
+						}
+						else
+						{
+							binaryWriter2.Write(memoryStream.ToArray());
+						}
+						Stats.Print();
+					}
 				}
-				else
+				catch (Exception ex3)
 				{
-					array = memoryStream.ToArray();
+					if (ex3 is UnauthorizedAccessException)
+					{
+						DebugUtil.LogArgs(new object[] { "UnauthorizedAccessException for " + filename });
+						((ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay)).PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "Unauthorized Access Exception"), null, null, null, null, null, null, null, null, true);
+						return SaveLoader.GetActiveSaveFilePath();
+					}
+					if (ex3 is IOException)
+					{
+						DebugUtil.LogArgs(new object[] { "IOException (probably out of disk space) for " + filename });
+						((ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay)).PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "IOException. You may not have enough free space!"), null, null, null, null, null, null, null, null, true);
+						return SaveLoader.GetActiveSaveFilePath();
+					}
+					throw ex3;
 				}
 			}
-		}
-		try
-		{
-			using (BinaryWriter binaryWriter2 = new BinaryWriter(File.Open(filename, FileMode.Create)))
-			{
-				SaveGame.Header header;
-				byte[] saveHeader = SaveGame.Instance.GetSaveHeader(isAutoSave, this.compressSaveData, out header);
-				binaryWriter2.Write(header.buildVersion);
-				binaryWriter2.Write(header.headerSize);
-				binaryWriter2.Write(header.headerVersion);
-				binaryWriter2.Write(header.compression);
-				binaryWriter2.Write(saveHeader);
-				global::KSerialization.Manager.SerializeDirectory(binaryWriter2);
-				binaryWriter2.Write(array);
-				Stats.Print();
-			}
-		}
-		catch (Exception ex3)
-		{
-			if (ex3 is UnauthorizedAccessException)
-			{
-				DebugUtil.LogArgs(new object[] { "UnauthorizedAccessException for " + filename });
-				((ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay)).PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "Unauthorized Access Exception"), null, null, null, null, null, null, null, null, true);
-				return SaveLoader.GetActiveSaveFilePath();
-			}
-			if (ex3 is IOException)
-			{
-				DebugUtil.LogArgs(new object[] { "IOException (probably out of disk space) for " + filename });
-				((ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay)).PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "IOException. You may not have enough free space!"), null, null, null, null, null, null, null, null, true);
-				return SaveLoader.GetActiveSaveFilePath();
-			}
-			throw ex3;
 		}
 		if (updateSavePointer)
 		{
@@ -522,13 +495,16 @@ public class SaveLoader : KMonoBehaviour
 			SaveGame.Header header;
 			this.GameInfo = SaveGame.GetHeader(reader, out header);
 			DebugUtil.LogArgs(new object[] { string.Format("Loading save file: {4}\n headerVersion:{0}, buildVersion:{1}, headerSize:{2}, IsCompressed:{3}", new object[] { header.headerVersion, header.buildVersion, header.headerSize, header.IsCompressed, filename }) });
-			DebugUtil.LogArgs(new object[] { string.Format("GameInfo: numberOfCycles:{0}, numberOfDuplicants:{1}, baseName:{2}, isAutoSave:{3}, originalSaveName:{4}, saveVersion:{5}.{6}", new object[]
+			DebugUtil.LogArgs(new object[] { string.Format("GameInfo loaded from save header:\n  numberOfCycles:{0},\n  numberOfDuplicants:{1},\n  baseName:{2},\n  isAutoSave:{3},\n  originalSaveName:{4},\n  worldID:{5},\n  worldTraits:{6},\n  colonyGuid:{7},\n  saveVersion:{8}.{9}", new object[]
 			{
 				this.GameInfo.numberOfCycles,
 				this.GameInfo.numberOfDuplicants,
 				this.GameInfo.baseName,
 				this.GameInfo.isAutoSave,
 				this.GameInfo.originalSaveName,
+				this.GameInfo.worldID,
+				(this.GameInfo.worldTraits != null && this.GameInfo.worldTraits.Length != 0) ? string.Join(", ", this.GameInfo.worldTraits) : "<i>none</i>",
+				this.GameInfo.colonyGuid,
 				this.GameInfo.saveMajorVersion,
 				this.GameInfo.saveMinorVersion
 			}) });
@@ -542,11 +518,14 @@ public class SaveLoader : KMonoBehaviour
 				int num = array.Length - reader.Position;
 				byte[] array2 = new byte[num];
 				Array.Copy(array, reader.Position, array2, 0, num);
-				IReader reader2 = new FastReader(SaveLoader.DecompressContents(array2));
+				byte[] array3 = SaveLoader.DecompressContents(array2);
+				this.lastUncompressedSize = array3.Length;
+				IReader reader2 = new FastReader(array3);
 				this.Load(reader2);
 			}
 			else
 			{
+				this.lastUncompressedSize = array.Length;
 				this.Load(reader);
 			}
 			if (this.GameInfo.isAutoSave && !string.IsNullOrEmpty(this.GameInfo.originalSaveName))
@@ -600,6 +579,7 @@ public class SaveLoader : KMonoBehaviour
 		SaveGame.GameInfo gameInfo = this.GameInfo;
 		gameInfo.worldID = text;
 		gameInfo.worldTraits = list.ToArray();
+		gameInfo.colonyGuid = Guid.NewGuid();
 		this.GameInfo = gameInfo;
 		SimSaveFileStructure simSaveFileStructure = WorldGen.LoadWorldGenSim();
 		if (simSaveFileStructure == null)
@@ -835,9 +815,9 @@ public class SaveLoader : KMonoBehaviour
 
 	private bool compressSaveData = true;
 
-	public bool saveAsText;
+	private int lastUncompressedSize;
 
-	public bool zipStreams;
+	public bool saveAsText;
 
 	public const string MAINMENU_LEVELNAME = "launchscene";
 
@@ -853,6 +833,8 @@ public class SaveLoader : KMonoBehaviour
 	public SaveManager saveManager;
 
 	private const string CorruptFileSuffix = "_";
+
+	private const float SAVE_BUFFER_HEAD_ROOM = 0.1f;
 
 	private bool mustRestartOnFail;
 

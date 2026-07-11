@@ -5,7 +5,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>, IEffectDescriptor
+public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>
 {
 	public bool IsSuspended
 	{
@@ -123,11 +123,6 @@ public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>
 		this.ReleaseAstronaut(null, false);
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		base.smi.StopSM("cleanup");
-	}
-
-	public List<Descriptor> GetDescriptors(BuildingDef def)
-	{
-		return null;
 	}
 
 	public Storage storage;

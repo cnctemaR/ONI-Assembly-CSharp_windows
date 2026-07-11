@@ -1,12 +1,26 @@
 ﻿using System;
 using UnityEngine;
 
-public class PlayerControlledToggleSideScreen : SideScreenContent, IRenderEveryTick, ISim200ms
+public class PlayerControlledToggleSideScreen : SideScreenContent, IRenderEveryTick
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		ScreenResize instance = ScreenResize.Instance;
+		instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.RefreshScale));
+	}
+
+	protected override void OnCleanUp()
+	{
+		ScreenResize instance = ScreenResize.Instance;
+		instance.OnResize = (global::System.Action)Delegate.Remove(instance.OnResize, new global::System.Action(this.RefreshScale));
+		base.OnCleanUp();
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.toggleButton.onClick += this.RequestToggle;
+		this.toggleButton.onClick += this.ClickToggle;
 		this.togglePendingStatusItem = new StatusItem("PlayerControlledToggleSideScreen", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 	}
 
@@ -39,18 +53,20 @@ public class PlayerControlledToggleSideScreen : SideScreenContent, IRenderEveryT
 		}
 	}
 
-	public void Sim200ms(float dt)
+	private void ClickToggle()
 	{
-		if (this.toggleRequested)
+		if (SpeedControlScreen.Instance.IsPaused)
 		{
-			this.Toggle();
+			this.RequestToggle();
+			return;
 		}
+		this.Toggle();
 	}
 
 	private void RequestToggle()
 	{
-		this.toggleRequested = !this.toggleRequested;
-		if (this.toggleRequested && SpeedControlScreen.Instance.IsPaused)
+		this.target.ToggleRequested = !this.target.ToggleRequested;
+		if (this.target.ToggleRequested && SpeedControlScreen.Instance.IsPaused)
 		{
 			this.target.GetSelectable().SetStatusItem(Db.Get().StatusItemCategories.Main, this.togglePendingStatusItem, this);
 		}
@@ -58,7 +74,7 @@ public class PlayerControlledToggleSideScreen : SideScreenContent, IRenderEveryT
 		{
 			this.target.GetSelectable().SetStatusItem(Db.Get().StatusItemCategories.Main, null, null);
 		}
-		this.UpdateVisuals(this.toggleRequested, true);
+		this.UpdateVisuals(this.target.ToggleRequested ? (!this.target.ToggledOn()) : this.target.ToggledOn(), true);
 	}
 
 	public override void SetTarget(GameObject new_target)
@@ -74,7 +90,7 @@ public class PlayerControlledToggleSideScreen : SideScreenContent, IRenderEveryT
 			global::Debug.LogError("The gameObject received is not an IPlayerControlledToggle");
 			return;
 		}
-		this.UpdateVisuals(this.target.ToggledOn(), false);
+		this.UpdateVisuals(this.target.ToggleRequested ? (!this.target.ToggledOn()) : this.target.ToggledOn(), false);
 		this.titleKey = this.target.SideScreenTitleKey;
 	}
 
@@ -82,7 +98,7 @@ public class PlayerControlledToggleSideScreen : SideScreenContent, IRenderEveryT
 	{
 		this.target.ToggledByPlayer();
 		this.UpdateVisuals(this.target.ToggledOn(), true);
-		this.toggleRequested = false;
+		this.target.ToggleRequested = false;
 		this.target.GetSelectable().RemoveStatusItem(this.togglePendingStatusItem, false);
 	}
 
@@ -102,6 +118,21 @@ public class PlayerControlledToggleSideScreen : SideScreenContent, IRenderEveryT
 		this.currentState = state;
 	}
 
+	private void RefreshScale()
+	{
+		float canvasScale = base.GetComponentInParent<KCanvasScaler>().GetCanvasScale();
+		if (this.kbac != null)
+		{
+			this.kbac.animScale = this.animScaleBase * (1f / canvasScale);
+		}
+	}
+
+	protected override void OnCmpEnable()
+	{
+		base.OnCmpEnable();
+		this.RefreshScale();
+	}
+
 	public IPlayerControlledToggle target;
 
 	public KButton toggleButton;
@@ -109,6 +140,8 @@ public class PlayerControlledToggleSideScreen : SideScreenContent, IRenderEveryT
 	protected static readonly HashedString[] ON_ANIMS = new HashedString[] { "on_pre", "on" };
 
 	protected static readonly HashedString[] OFF_ANIMS = new HashedString[] { "off_pre", "off" };
+
+	public float animScaleBase = 0.25f;
 
 	private StatusItem togglePendingStatusItem;
 
@@ -120,8 +153,6 @@ public class PlayerControlledToggleSideScreen : SideScreenContent, IRenderEveryT
 	private const float KEYBOARD_COOLDOWN = 0.1f;
 
 	private bool keyDown;
-
-	private bool toggleRequested;
 
 	private bool currentState;
 }

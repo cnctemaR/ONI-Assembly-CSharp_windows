@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesInstance>, IEffectDescriptor
+public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesInstance>
 {
 	protected override void OnSpawn()
 	{
@@ -38,11 +38,6 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 	{
 		SpacecraftManager.instance.UnregisterSpacecraft(base.GetComponent<LaunchConditionManager>());
 		base.OnCleanUp();
-	}
-
-	public List<Descriptor> GetDescriptors(BuildingDef def)
-	{
-		return null;
 	}
 
 	public List<GameObject> parts = new List<GameObject>();

@@ -38,7 +38,6 @@ public class ConduitFlow : IConduitFlow
 
 	private static ConduitFlow.FlowDirections ComputeFlowDirection(int index)
 	{
-		global::Debug.Assert(0 <= index && index < 4);
 		return (ConduitFlow.FlowDirections)(1 << index);
 	}
 
@@ -98,7 +97,6 @@ public class ConduitFlow : IConduitFlow
 		{
 			flowDirections = ConduitFlow.FlowDirections.Up;
 		}
-		global::Debug.Assert((ConduitFlow.Invert(flowDirections) & directions) == directions, "computing the Opposite of multiple directions is refutable");
 		return flowDirections;
 	}
 
@@ -593,7 +591,7 @@ public class ConduitFlow : IConduitFlow
 		int conduitIdx = this.grid[cell].conduitIdx;
 		if (conduitIdx == -1)
 		{
-			return ConduitFlow.Conduit.Invalid();
+			return ConduitFlow.Conduit.Invalid;
 		}
 		return this.soaInfo.GetConduit(conduitIdx);
 	}
@@ -934,29 +932,41 @@ public class ConduitFlow : IConduitFlow
 
 		public ConduitFlow.Conduit GetConduitFromDirection(int idx, ConduitFlow.FlowDirections direction)
 		{
-			ConduitFlow.Conduit conduit = ConduitFlow.Conduit.Invalid();
 			ConduitFlow.ConduitConnections conduitConnections = this.conduitConnections[idx];
 			switch (direction)
 			{
 			case ConduitFlow.FlowDirections.Down:
-				conduit = ((conduitConnections.down != -1) ? this.conduits[conduitConnections.down] : ConduitFlow.Conduit.Invalid());
-				break;
+				if (conduitConnections.down == -1)
+				{
+					return ConduitFlow.Conduit.Invalid;
+				}
+				return this.conduits[conduitConnections.down];
 			case ConduitFlow.FlowDirections.Left:
-				conduit = ((conduitConnections.left != -1) ? this.conduits[conduitConnections.left] : ConduitFlow.Conduit.Invalid());
-				break;
+				if (conduitConnections.left == -1)
+				{
+					return ConduitFlow.Conduit.Invalid;
+				}
+				return this.conduits[conduitConnections.left];
 			case ConduitFlow.FlowDirections.Down | ConduitFlow.FlowDirections.Left:
 				break;
 			case ConduitFlow.FlowDirections.Right:
-				conduit = ((conduitConnections.right != -1) ? this.conduits[conduitConnections.right] : ConduitFlow.Conduit.Invalid());
-				break;
+				if (conduitConnections.right == -1)
+				{
+					return ConduitFlow.Conduit.Invalid;
+				}
+				return this.conduits[conduitConnections.right];
 			default:
 				if (direction == ConduitFlow.FlowDirections.Up)
 				{
-					conduit = ((conduitConnections.up != -1) ? this.conduits[conduitConnections.up] : ConduitFlow.Conduit.Invalid());
+					if (conduitConnections.up == -1)
+					{
+						return ConduitFlow.Conduit.Invalid;
+					}
+					return this.conduits[conduitConnections.up];
 				}
 				break;
 			}
-			return conduit;
+			return ConduitFlow.Conduit.Invalid;
 		}
 
 		public void BeginFrame(ConduitFlow manager)
@@ -1438,11 +1448,6 @@ public class ConduitFlow : IConduitFlow
 	[Serializable]
 	public struct Conduit : IEquatable<ConduitFlow.Conduit>
 	{
-		public static ConduitFlow.Conduit Invalid()
-		{
-			return new ConduitFlow.Conduit(-1);
-		}
-
 		public Conduit(int idx)
 		{
 			this.idx = idx;
@@ -1510,7 +1515,9 @@ public class ConduitFlow : IConduitFlow
 			return this.idx == other.idx;
 		}
 
-		public int idx;
+		public static readonly ConduitFlow.Conduit Invalid = new ConduitFlow.Conduit(-1);
+
+		public readonly int idx;
 	}
 
 	[DebuggerDisplay("{element} M:{mass} T:{temperature}")]

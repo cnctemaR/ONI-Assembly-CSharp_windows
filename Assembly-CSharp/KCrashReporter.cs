@@ -106,9 +106,9 @@ public class KCrashReporter : MonoBehaviour
 		{
 			RestartWarning.ShouldWarn = true;
 		}
-		if (this.errorDialog == null && (type == LogType.Exception || type == LogType.Error))
+		if (this.errorScreen == null && (type == LogType.Exception || type == LogType.Error))
 		{
-			if (KCrashReporter.terminateOnError && ReportErrorDialog.hasCrash)
+			if (KCrashReporter.terminateOnError && KCrashReporter.hasCrash)
 			{
 				return;
 			}
@@ -142,12 +142,7 @@ public class KCrashReporter : MonoBehaviour
 
 	public bool ShowDialog(string error, string stack_trace)
 	{
-		if (Global.Instance != null && Global.Instance.modManager != null && Global.Instance.modManager.HaveLoadedMods())
-		{
-			Global.Instance.modManager.HandleCrash();
-			return true;
-		}
-		if (this.errorDialog != null)
+		if (this.errorScreen != null)
 		{
 			return false;
 		}
@@ -159,27 +154,41 @@ public class KCrashReporter : MonoBehaviour
 			Canvas canvas = gameObject.AddComponent<Canvas>();
 			canvas.renderMode = RenderMode.ScreenSpaceOverlay;
 			canvas.additionalShaderChannels = AdditionalCanvasShaderChannels.TexCoord1;
+			canvas.sortingOrder = 32767;
 			gameObject.AddComponent<GraphicRaycaster>();
 		}
-		GameObject dlg_go = global::UnityEngine.Object.Instantiate<GameObject>(this.reportErrorPrefab, Vector3.zero, Quaternion.identity);
-		dlg_go.transform.SetParent(gameObject.transform, false);
-		this.errorDialog = dlg_go.GetComponentInChildren<ReportErrorDialog>();
-		this.errorDialog.PopupConfirmDialog(delegate
+		this.errorScreen = global::UnityEngine.Object.Instantiate<GameObject>(this.reportErrorPrefab, Vector3.zero, Quaternion.identity);
+		this.errorScreen.transform.SetParent(gameObject.transform, false);
+		ReportErrorDialog errorDialog = this.errorScreen.GetComponentInChildren<ReportErrorDialog>();
+		KCrashReporter.hasCrash = true;
+		if (Global.Instance != null && Global.Instance.modManager != null && Global.Instance.modManager.HasCrashableMods())
 		{
-			string text = null;
-			if (KCrashReporter.MOST_RECENT_SAVEFILE != null)
+			Exception ex = DebugUtil.RetrieveLastExceptionLogged();
+			StackTrace stackTrace = ((ex != null) ? new StackTrace(ex) : new StackTrace(5, true));
+			Global.Instance.modManager.SearchForModsInStackTrace(stackTrace);
+			Global.Instance.modManager.SearchForModsInStackTrace(stack_trace);
+			errorDialog.PopupDisableModsDialog(stack_trace, new global::System.Action(this.OnQuitToDesktop), (Global.Instance.modManager.IsInDevMode() || !KCrashReporter.terminateOnError) ? new global::System.Action(this.OnCloseErrorDialog) : null);
+		}
+		else
+		{
+			errorDialog.PopupSubmitErrorDialog(stack_trace, delegate
 			{
-				text = KCrashReporter.UploadSaveFile(KCrashReporter.MOST_RECENT_SAVEFILE, stack_trace, null);
-			}
-			KCrashReporter.ReportError(error, stack_trace, text, this.confirmDialogPrefab, dlg_go, this.errorDialog.UserMessage());
-		}, new global::System.Action(this.OnQuitToDesktop), new global::System.Action(this.OnCloseErrorDialog));
+				string text = null;
+				if (KCrashReporter.MOST_RECENT_SAVEFILE != null)
+				{
+					text = KCrashReporter.UploadSaveFile(KCrashReporter.MOST_RECENT_SAVEFILE, stack_trace, null);
+				}
+				KCrashReporter.ReportError(error, stack_trace, text, this.confirmDialogPrefab, this.errorScreen, errorDialog.UserMessage());
+			}, new global::System.Action(this.OnQuitToDesktop), KCrashReporter.terminateOnError ? null : new global::System.Action(this.OnCloseErrorDialog));
+		}
 		return true;
 	}
 
 	private void OnCloseErrorDialog()
 	{
-		global::UnityEngine.Object.Destroy(this.errorDialog.gameObject);
-		this.errorDialog = null;
+		global::UnityEngine.Object.Destroy(this.errorScreen);
+		this.errorScreen = null;
+		KCrashReporter.hasCrash = false;
 		if (SpeedControlScreen.Instance != null)
 		{
 			SpeedControlScreen.Instance.Unpause(true);
@@ -299,6 +308,23 @@ public class KCrashReporter : MonoBehaviour
 		return "";
 	}
 
+	public static void ReportErrorDevNotification(string notification_name, string stack_trace, string details)
+	{
+		if (KCrashReporter.previouslyReportedDevNotifications == null)
+		{
+			KCrashReporter.previouslyReportedDevNotifications = new HashSet<int>();
+		}
+		details = "DevNotification: " + notification_name + " - " + details;
+		int hashValue = new HashedString(notification_name).HashValue;
+		bool hasReportedError = KCrashReporter.hasReportedError;
+		if (!KCrashReporter.previouslyReportedDevNotifications.Contains(hashValue))
+		{
+			KCrashReporter.previouslyReportedDevNotifications.Add(hashValue);
+			KCrashReporter.ReportError(notification_name, stack_trace, null, null, null, details);
+		}
+		KCrashReporter.hasReportedError = hasReportedError;
+	}
+
 	public static void ReportError(string msg, string stack_trace, string save_file_hash, ConfirmDialogScreen confirm_prefab, GameObject confirm_parent, string userMessage = "")
 	{
 		if (KCrashReporter.ignoreAll)
@@ -337,7 +363,7 @@ public class KCrashReporter : MonoBehaviour
 			}
 			if (string.IsNullOrEmpty(stack_trace))
 			{
-				string text3 = "AP-" + 399948U.ToString();
+				string text3 = "AP-" + 408920U.ToString();
 				stack_trace = string.Format("No stack trace {0}\n\n{1}", text3, msg);
 			}
 			List<string> list = new List<string>();
@@ -386,7 +412,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
-			error.build = 399948;
+			error.build = 408920;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = string.Join("\n", list.ToArray());
 			error.user_message = userMessage;
@@ -412,7 +438,7 @@ public class KCrashReporter : MonoBehaviour
 			}
 			if (confirm_prefab != null && confirm_parent != null)
 			{
-				((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, confirm_parent)).PopupConfirmDialog("Reported Error", null, null, null, null, null, null, null, null, true);
+				((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, confirm_parent)).PopupConfirmDialog(UI.CRASHSCREEN.REPORTEDERROR, null, null, null, null, null, null, null, null, true);
 			}
 			text8 = text7;
 		}
@@ -488,6 +514,8 @@ public class KCrashReporter : MonoBehaviour
 
 	private static bool disableDeduping = false;
 
+	public static bool hasCrash = false;
+
 	private static readonly Regex failedToLoadModuleRegEx = new Regex("^Failed to load '(.*?)' with error (.*)", RegexOptions.Multiline);
 
 	[SerializeField]
@@ -499,13 +527,15 @@ public class KCrashReporter : MonoBehaviour
 	[SerializeField]
 	private ConfirmDialogScreen confirmDialogPrefab;
 
-	private ReportErrorDialog errorDialog;
+	private GameObject errorScreen;
 
 	public static bool terminateOnError = true;
 
 	private static string dataRoot;
 
 	private static readonly string[] IgnoreStrings = new string[] { "Releasing render texture whose render buffer is set as Camera's target buffer with Camera.SetTargetBuffers!", "The profiler has run out of samples for this frame. This frame will be skipped. Increase the sample limit using Profiler.maxNumberOfSamplesPerFrame", "Trying to add Text (LocText) for graphic rebuild while we are already inside a graphic rebuild loop. This is not supported." };
+
+	private static HashSet<int> previouslyReportedDevNotifications;
 
 	private class Error
 	{

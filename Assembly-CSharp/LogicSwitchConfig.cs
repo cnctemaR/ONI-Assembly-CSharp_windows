@@ -36,7 +36,7 @@ public class LogicSwitchConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
+		go.AddOrGet<BuildingComplete>().isManuallyOperated = false;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

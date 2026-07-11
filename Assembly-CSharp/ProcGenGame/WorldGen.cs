@@ -368,11 +368,13 @@ namespace ProcGenGame
 
 		public void GenerateOffline()
 		{
-			int num = 0;
-			while (num < 3 && !this.GenerateWorldData())
+			int num = 1;
+			int num2 = 0;
+			while (num2 < num && !this.GenerateWorldData())
 			{
-				this.successCallbackFn(UI.WORLDGEN.RETRYCOUNT.key, (float)num, WorldGenProgressStages.Stages.Failure);
-				num++;
+				DebugUtil.DevLogError("Failed worldgen");
+				this.successCallbackFn(UI.WORLDGEN.RETRYCOUNT.key, (float)num2, WorldGenProgressStages.Stages.Failure);
+				num2++;
 			}
 		}
 
@@ -643,6 +645,17 @@ namespace ProcGenGame
 			this.successCallbackFn(UI.WORLDGEN.PLACINGCREATURES.key, 100f, WorldGenProgressStages.Stages.PlacingCreatures);
 		}
 
+		private void ReportWorldGenError(Exception e)
+		{
+			string settingsCoordinate = CustomGameSettings.Instance.GetSettingsCoordinate();
+			this.errorCallback(new OfflineWorldGen.ErrorInfo
+			{
+				errorDesc = string.Format(UI.FRONTEND.SUPPORTWARNINGS.WORLD_GEN_FAILURE, settingsCoordinate),
+				exception = e
+			});
+			KCrashReporter.ReportErrorDevNotification("WorldgenFailure", e.StackTrace, settingsCoordinate);
+		}
+
 		public void SetWorldSize(int width, int height)
 		{
 			this.data.world = new Chunk(0, 0, width, height);
@@ -672,6 +685,7 @@ namespace ProcGenGame
 			{
 				string message = ex.Message;
 				string stackTrace = ex.StackTrace;
+				this.ReportWorldGenError(ex);
 				WorldGenLogger.LogException(message, stackTrace);
 				this.running = this.successCallbackFn(new StringKey("Exception in GenerateNoiseData"), -1f, WorldGenProgressStages.Stages.Failure);
 				return false;
@@ -705,6 +719,7 @@ namespace ProcGenGame
 					string message = ex.Message;
 					string stackTrace = ex.StackTrace;
 					WorldGenLogger.LogException(message, stackTrace);
+					this.ReportWorldGenError(ex);
 					this.running = updateProgressFn(new StringKey("Exception in InitVoronoiTree"), -1f, WorldGenProgressStages.Stages.Failure);
 					return false;
 				}
@@ -722,6 +737,7 @@ namespace ProcGenGame
 				string message2 = ex2.Message;
 				string stackTrace2 = ex2.StackTrace;
 				WorldGenLogger.LogException(message2, stackTrace2);
+				this.ReportWorldGenError(ex2);
 				this.successCallbackFn(new StringKey("Exception in GenerateLayout"), -1f, WorldGenProgressStages.Stages.Failure);
 				return false;
 			}

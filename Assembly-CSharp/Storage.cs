@@ -9,7 +9,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/Workable/Storage")]
-public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
+public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescriptor
 {
 	public bool ShouldOnlyTransferFromLowerPriority
 	{
@@ -434,7 +434,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		}
 	}
 
-	public List<GameObject> Drop(Tag t)
+	public void Drop(Tag t)
 	{
 		ListPool<GameObject, Storage>.PooledList pooledList = ListPool<GameObject, Storage>.Allocate();
 		this.Find(t, pooledList);
@@ -443,7 +443,25 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			this.Drop(gameObject, true);
 		}
 		pooledList.Recycle();
-		return pooledList;
+	}
+
+	public void DropUnlessHasTags(TagBits any_tags, TagBits required_tags, TagBits forbidden_tags, bool do_disease_transfer = true)
+	{
+		for (int i = 0; i < this.items.Count; i++)
+		{
+			KPrefabID component = this.items[i].GetComponent<KPrefabID>();
+			if (!component.HasAnyTags(ref any_tags) || !component.HasAllTags(ref required_tags) || component.HasAnyTags(ref forbidden_tags))
+			{
+				GameObject gameObject = this.items[i];
+				this.items.RemoveAt(i);
+				i--;
+				if (do_disease_transfer)
+				{
+					this.TransferDiseaseWithObject(gameObject);
+				}
+				this.MakeWorldActive(gameObject);
+			}
+		}
 	}
 
 	public GameObject Drop(GameObject go, bool do_disease_transfer = true)
@@ -951,16 +969,14 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		return false;
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
-		List<Descriptor> list = new List<Descriptor>();
+		List<Descriptor> descriptors = base.GetDescriptors(go);
 		if (this.showDescriptor)
 		{
-			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.STORAGECAPACITY, GameUtil.GetFormattedMass(this.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.STORAGECAPACITY, GameUtil.GetFormattedMass(this.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Effect);
-			list.Add(descriptor);
+			descriptors.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.STORAGECAPACITY, GameUtil.GetFormattedMass(this.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.STORAGECAPACITY, GameUtil.GetFormattedMass(this.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Effect, false));
 		}
-		return list;
+		return descriptors;
 	}
 
 	public static void MakeItemTemperatureInsulated(GameObject go, bool is_stored, bool is_initializing)
@@ -1178,6 +1194,8 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	public bool useGunForDelivery = true;
 
 	public bool sendOnStoreOnSpawn;
+
+	public bool allowClearable;
 
 	public Storage.FetchCategory fetchCategory;
 

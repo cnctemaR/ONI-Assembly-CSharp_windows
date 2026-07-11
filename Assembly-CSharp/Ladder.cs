@@ -5,7 +5,7 @@ using UnityEngine;
 
 [SkipSaveFileSerialization]
 [AddComponentMenu("KMonoBehaviour/scripts/Ladder")]
-public class Ladder : KMonoBehaviour, IEffectDescriptor
+public class Ladder : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	protected override void OnPrefabInit()
 	{
@@ -35,7 +35,7 @@ public class Ladder : KMonoBehaviour, IEffectDescriptor
 		Components.Ladders.Remove(this);
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = null;
 		if (this.upwardsMovementSpeedMultiplier != 1f)

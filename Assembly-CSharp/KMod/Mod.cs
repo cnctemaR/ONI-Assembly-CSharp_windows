@@ -187,6 +187,7 @@ namespace KMod
 		{
 			if (this.label.distribution_platform == Label.DistributionPlatform.Local || this.label.distribution_platform == Label.DistributionPlatform.Dev)
 			{
+				this.status = Mod.Status.Installed;
 				return;
 			}
 			this.status = Mod.Status.ReinstallPending;
@@ -209,10 +210,6 @@ namespace KMod
 
 		public bool Uninstall()
 		{
-			if (this.label.distribution_platform == Label.DistributionPlatform.Local || this.label.distribution_platform == Label.DistributionPlatform.Dev)
-			{
-				return false;
-			}
 			this.enabled = false;
 			if (this.loaded_content != (Content)0)
 			{
@@ -220,7 +217,7 @@ namespace KMod
 				this.status = Mod.Status.UninstallPending;
 				return false;
 			}
-			if (!FileUtil.DeleteDirectory(this.label.install_path, 0))
+			if (this.label.distribution_platform != Label.DistributionPlatform.Local && this.label.distribution_platform != Label.DistributionPlatform.Dev && !FileUtil.DeleteDirectory(this.label.install_path, 0))
 			{
 				global::Debug.Log(string.Format("Can't uninstall {0}: directory deletion failed", this.label.ToString()));
 				this.status = Mod.Status.UninstallPending;

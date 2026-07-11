@@ -223,7 +223,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 	{
 		Sprite[] array = RetireColonyUtility.LoadColonySlideshow(data.colonyName);
 		this.slideshow.SetSprites(array);
-		return array != null && array.Length > 2;
+		return array != null && array.Length > 0;
 	}
 
 	private void LoadScreenshot(RetiredColonyData data)

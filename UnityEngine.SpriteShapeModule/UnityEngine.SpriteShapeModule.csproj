@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{0A66FFBD-FFD2-43A5-A1F0-014C80DFB08C}</ProjectGuid>
+    <ProjectGuid>{158EA345-C536-487C-8712-6C52213E2282}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Experimental.U2D</RootNamespace>
     <AssemblyName>UnityEngine.SpriteShapeModule</AssemblyName>
@@ -24,15 +24,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{0A66FFBD-FFD2-43A5-A1F0-014C80DFB05B}</Project>
+      <Project>{158EA345-C536-487C-8712-6C52213E2251}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{0A66FFBD-FFD2-43A5-A1F0-014C80DFB073}</Project>
+      <Project>{158EA345-C536-487C-8712-6C52213E2269}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{0A66FFBD-FFD2-43A5-A1F0-014C80DFB089}</Project>
+      <Project>{158EA345-C536-487C-8712-6C52213E227F}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

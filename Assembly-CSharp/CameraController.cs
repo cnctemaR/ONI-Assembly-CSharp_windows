@@ -956,18 +956,30 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public void RenderForTimelapser(ref RenderTexture tex)
 	{
-		this.RenderCameraForTimelapse(this.baseCamera, ref tex);
-		this.RenderCameraForTimelapse(this.overlayNoDepthCamera, ref tex);
-		this.RenderCameraForTimelapse(this.lightBufferCamera, ref tex);
-		this.RenderCameraForTimelapse(this.simOverlayCamera, ref tex);
-		this.RenderCameraForTimelapse(this.overlayCamera, ref tex);
+		this.RenderCameraForTimelapse(this.baseCamera, ref tex, this.timelapseCameraCullingMask, -1f);
+		CameraClearFlags clearFlags = this.overlayCamera.clearFlags;
+		this.overlayCamera.clearFlags = CameraClearFlags.Nothing;
+		this.RenderCameraForTimelapse(this.overlayCamera, ref tex, this.timelapseOverlayCameraCullingMask, -1f);
+		this.overlayCamera.clearFlags = clearFlags;
 	}
 
-	private void RenderCameraForTimelapse(Camera cam, ref RenderTexture tex)
+	private void RenderCameraForTimelapse(Camera cam, ref RenderTexture tex, LayerMask mask, float overrideAspect = -1f)
 	{
+		int cullingMask = cam.cullingMask;
 		RenderTexture targetTexture = cam.targetTexture;
 		cam.targetTexture = tex;
+		cam.aspect = (float)tex.width / (float)tex.height;
+		if (overrideAspect != -1f)
+		{
+			cam.aspect = overrideAspect;
+		}
+		if (mask != -1)
+		{
+			cam.cullingMask = mask;
+		}
 		cam.Render();
+		cam.ResetAspect();
+		cam.cullingMask = cullingMask;
 		cam.targetTexture = targetTexture;
 	}
 
@@ -1014,6 +1026,12 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	private bool panning;
 
 	private Vector3 keyPanDelta;
+
+	[SerializeField]
+	private LayerMask timelapseCameraCullingMask;
+
+	[SerializeField]
+	private LayerMask timelapseOverlayCameraCullingMask;
 
 	private bool userCameraControlDisabled;
 

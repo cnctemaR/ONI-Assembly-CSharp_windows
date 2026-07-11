@@ -180,10 +180,15 @@ public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 			HarvestDesignatable component = gameObject.GetComponent<HarvestDesignatable>();
 			this.buds[num3] = new Ref<HarvestDesignatable>(component);
 			this.UpdateBudHarvestState(component);
-			if (!this.hasExtraSeedAvailable && global::UnityEngine.Random.Range(0, 100) < 5)
-			{
-				this.hasExtraSeedAvailable = true;
-			}
+			this.TryRollNewSeed();
+		}
+	}
+
+	public void TryRollNewSeed()
+	{
+		if (!this.hasExtraSeedAvailable && global::UnityEngine.Random.Range(0, 100) < 5)
+		{
+			this.hasExtraSeedAvailable = true;
 		}
 	}
 

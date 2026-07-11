@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Klei.AI;
 using KSerialization;
@@ -199,6 +200,13 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 		global::Debug.Assert(base.GetComponent<Battery>() == null);
 		this.joulesAvailable = Mathf.Clamp(joulesAvailable, 0f, (!canOverPower) ? this.Capacity : float.MaxValue);
 		ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyCreated, this.joulesAvailable, this.GetProperName(), null);
+		if (!Game.Instance.savedInfo.powerCreatedbyGeneratorType.ContainsKey(this.PrefabID()))
+		{
+			Game.Instance.savedInfo.powerCreatedbyGeneratorType.Add(this.PrefabID(), 0f);
+		}
+		Dictionary<Tag, float> powerCreatedbyGeneratorType;
+		Tag tag;
+		(powerCreatedbyGeneratorType = Game.Instance.savedInfo.powerCreatedbyGeneratorType)[tag = this.PrefabID()] = powerCreatedbyGeneratorType[tag] + this.joulesAvailable;
 	}
 
 	private void OnOperationalChanged(object data)

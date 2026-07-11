@@ -72,6 +72,7 @@ public class Game : KMonoBehaviour
 		this.prioritizableRenderer = new PrioritizableRenderer();
 		this.LoadEventHashes();
 		this.savedInfo.creaturePoopAmount = new Dictionary<Tag, float>();
+		this.savedInfo.powerCreatedbyGeneratorType = new Dictionary<Tag, float>();
 		this.gasFlowPos = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.GasConduits) - 0.4f);
 		this.liquidFlowPos = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.LiquidConduits) - 0.4f);
 		this.solidFlowPos = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.SolidConduitContents) - 0.4f);
@@ -828,7 +829,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 358267U;
+		uint num = 358820U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1730,6 +1731,10 @@ public class Game : KMonoBehaviour
 			{
 				this.creaturePoopAmount = new Dictionary<Tag, float>();
 			}
+			if (this.powerCreatedbyGeneratorType == null)
+			{
+				this.powerCreatedbyGeneratorType = new Dictionary<Tag, float>();
+			}
 		}
 
 		public bool discoveredSurface;
@@ -1738,7 +1743,11 @@ public class Game : KMonoBehaviour
 
 		public bool curedDisease;
 
+		public bool blockedCometWithBunkerDoor;
+
 		public Dictionary<Tag, float> creaturePoopAmount;
+
+		public Dictionary<Tag, float> powerCreatedbyGeneratorType;
 	}
 
 	public struct CallbackInfo

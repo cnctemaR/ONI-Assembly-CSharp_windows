@@ -11,9 +11,11 @@ public class DesalinatorWorkableEmpty : Workable
 		this.workingStatusItem = Db.Get().MiscStatusItems.Cleaning;
 		this.attributeConverter = Db.Get().AttributeConverters.TidyingSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
-		this.workAnims = DesalinatorWorkableEmpty.CLEAN_ANIMS;
+		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_desalinator_kanim") };
+		this.workAnims = DesalinatorWorkableEmpty.WORK_ANIMS;
 		this.workingPstComplete = DesalinatorWorkableEmpty.PST_ANIM;
 		this.workingPstFailed = DesalinatorWorkableEmpty.PST_ANIM;
+		this.synchronizeAnims = false;
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -25,7 +27,7 @@ public class DesalinatorWorkableEmpty : Workable
 	[Serialize]
 	public int timesCleaned;
 
-	private static readonly HashedString[] CLEAN_ANIMS = new HashedString[] { "unclog_pre", "unclog_loop" };
+	private static readonly HashedString[] WORK_ANIMS = new HashedString[] { "salt_pre", "salt_loop" };
 
-	private static readonly HashedString PST_ANIM = new HashedString("unclog_pst");
+	private static readonly HashedString PST_ANIM = new HashedString("salt_pst");
 }

@@ -28,6 +28,8 @@ public class DiggerMonitor : GameStateMachine<DiggerMonitor, DiggerMonitor.Insta
 		{
 			global::World instance = global::World.Instance;
 			instance.OnSolidChanged = (Action<int>)Delegate.Combine(instance.OnSolidChanged, new Action<int>(this.OnSolidChanged));
+			master.Subscribe(387220196, new Action<object>(this.OnDestinationReached));
+			master.Subscribe(-766531887, new Action<object>(this.OnDestinationReached));
 		}
 
 		protected override void OnCleanUp()
@@ -35,9 +37,16 @@ public class DiggerMonitor : GameStateMachine<DiggerMonitor, DiggerMonitor.Insta
 			base.OnCleanUp();
 			global::World instance = global::World.Instance;
 			instance.OnSolidChanged = (Action<int>)Delegate.Remove(instance.OnSolidChanged, new Action<int>(this.OnSolidChanged));
+			base.master.Unsubscribe(387220196, new Action<object>(this.OnDestinationReached));
+			base.master.Unsubscribe(-766531887, new Action<object>(this.OnDestinationReached));
 		}
 
-		private void CheckInSolid(int cell)
+		private void OnDestinationReached(object data)
+		{
+			this.CheckInSolid();
+		}
+
+		private void CheckInSolid()
 		{
 			Navigator component = base.gameObject.GetComponent<Navigator>();
 			if (component == null)
@@ -51,13 +60,14 @@ public class DiggerMonitor : GameStateMachine<DiggerMonitor, DiggerMonitor.Insta
 			}
 			else if (component.CurrentNavType == NavType.Solid && !Grid.IsSolidCell(num))
 			{
+				component.SetCurrentNavType(NavType.Floor);
 				base.gameObject.AddTag(GameTags.Creatures.Falling);
 			}
 		}
 
 		private void OnSolidChanged(int cell)
 		{
-			this.CheckInSolid(cell);
+			this.CheckInSolid();
 		}
 
 		public bool CanTunnel()

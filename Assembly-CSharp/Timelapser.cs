@@ -20,6 +20,10 @@ public class Timelapser : KMonoBehaviour
 		this.RefreshRenderTextureSize(null);
 		Game.Instance.Subscribe(75424175, new Action<object>(this.RefreshRenderTextureSize));
 		this.freezeCamera = CameraController.Instance.timelapseFreezeCamera;
+		if (this.CycleTimeToScreenshot() > 0f)
+		{
+			this.OnNewDay(null);
+		}
 		GameClock.Instance.Subscribe(631075836, new Action<object>(this.OnNewDay));
 		this.OnResize();
 		ScreenResize instance = ScreenResize.Instance;
@@ -38,7 +42,18 @@ public class Timelapser : KMonoBehaviour
 
 	private void RefreshRenderTextureSize(object data = null)
 	{
-		this.bufferRenderTexture = new RenderTexture(SaveGame.Instance.timelapseResolution.x, SaveGame.Instance.timelapseResolution.y, 32, RenderTextureFormat.ARGB32);
+		if (this.timelapseUserEnabled)
+		{
+			this.bufferRenderTexture = new RenderTexture(SaveGame.Instance.TimelapseResolution.x, SaveGame.Instance.TimelapseResolution.y, 32, RenderTextureFormat.ARGB32);
+		}
+	}
+
+	private bool timelapseUserEnabled
+	{
+		get
+		{
+			return SaveGame.Instance.TimelapseResolution.x > 0;
+		}
 	}
 
 	private void OnNewDay(object data = null)
@@ -65,12 +80,24 @@ public class Timelapser : KMonoBehaviour
 
 	private void Update()
 	{
-		if (this.screenshotToday && GameClock.Instance.GetTime() % 600f > 300f && !PlayerController.Instance.IsDragging())
+		if (this.screenshotToday && this.CycleTimeToScreenshot() <= 0f)
 		{
-			CameraController.Instance.ForcePanningState(false);
-			this.screenshotToday = false;
-			this.SaveScreenshot();
+			if (!this.timelapseUserEnabled)
+			{
+				this.screenshotToday = false;
+			}
+			else if (!PlayerController.Instance.IsDragging())
+			{
+				CameraController.Instance.ForcePanningState(false);
+				this.screenshotToday = false;
+				this.SaveScreenshot();
+			}
 		}
+	}
+
+	private float CycleTimeToScreenshot()
+	{
+		return 300f - GameClock.Instance.GetTime() % 600f;
 	}
 
 	private IEnumerator Render()
@@ -111,7 +138,7 @@ public class Timelapser : KMonoBehaviour
 
 	private void SetPostionAndOrtho()
 	{
-		int num = 0;
+		float num = 0f;
 		GameObject telepad = GameUtil.GetTelepad();
 		if (telepad == null)
 		{
@@ -122,13 +149,18 @@ public class Timelapser : KMonoBehaviour
 		{
 			if (Grid.Revealed[i])
 			{
-				num = Mathf.Max(num, Grid.GetCellDistance(i, num2));
+				num = Mathf.Max(new float[]
+				{
+					num,
+					(float)Grid.GetOffset(i, num2).x * (1f / ((float)Grid.WidthInCells / (float)Grid.HeightInCells)),
+					(float)Grid.GetOffset(i, num2).y * (1f / ((float)Grid.HeightInCells / (float)Grid.WidthInCells))
+				});
 			}
 		}
-		num = Mathf.Max(num, 18);
+		num = Mathf.Max(num, 18f);
 		Camera overlayCamera = CameraController.Instance.overlayCamera;
 		this.camSize = overlayCamera.orthographicSize;
-		CameraController.Instance.SetOrthographicsSize((float)num);
+		CameraController.Instance.SetOrthographicsSize(num);
 		this.camPosition = CameraController.Instance.transform.position;
 		CameraController.Instance.SetPosition(new Vector3(telepad.transform.position.x, telepad.transform.position.y, CameraController.Instance.transform.position.z));
 		CameraController.Instance.SetTargetPos(new Vector3(telepad.transform.position.x, telepad.transform.position.y, CameraController.Instance.transform.position.z), this.camSize, false);
@@ -205,7 +237,7 @@ public class Timelapser : KMonoBehaviour
 
 	private bool screenshotPending;
 
-	private bool screenshotToday;
+	private bool screenshotToday = true;
 
 	private Camera freezeCamera;
 

@@ -39,6 +39,7 @@ public class MainMenu : KScreen
 		this.Button_ResumeGame.onClick += this.ResumeGame;
 		this.StartFEAudio();
 		this.SpawnVideoScreen();
+		this.CheckPlayerPrefsCorruption();
 		if (PatchNotesScreen.ShouldShowScreen())
 		{
 			this.patchNotesScreen.SetActive(true);
@@ -232,7 +233,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 358267U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 358820U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -315,6 +316,21 @@ public class MainMenu : KScreen
 			};
 			Sprite sadDupeAudio = GlobalResources.Instance().sadDupeAudio;
 			confirmDialogScreen2.PopupConfirmDialog(text, action, action2, text2, action3, null, null, null, sadDupeAudio, true);
+		}
+	}
+
+	private void CheckPlayerPrefsCorruption()
+	{
+		if (KPlayerPrefs.HasCorruptedFlag())
+		{
+			KPlayerPrefs.ResetCorruptedFlag();
+			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
+			ConfirmDialogScreen confirmDialogScreen2 = confirmDialogScreen;
+			string text = UI.FRONTEND.SUPPORTWARNINGS.PLAYER_PREFS_CORRUPTED;
+			global::System.Action action = null;
+			global::System.Action action2 = null;
+			Sprite sadDupe = GlobalResources.Instance().sadDupe;
+			confirmDialogScreen2.PopupConfirmDialog(text, action, action2, null, null, null, null, null, sadDupe, true);
 		}
 	}
 

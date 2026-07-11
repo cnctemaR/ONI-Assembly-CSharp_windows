@@ -11,6 +11,30 @@ using UnityEngine;
 [SerializationConfig(global::KSerialization.MemberSerialization.OptIn)]
 public class SaveGame : KMonoBehaviour, ISaveLoadable
 {
+	public int AutoSaveCycleInterval
+	{
+		get
+		{
+			return this.autoSaveCycleInterval;
+		}
+		set
+		{
+			this.autoSaveCycleInterval = value;
+		}
+	}
+
+	public Vector2I TimelapseResolution
+	{
+		get
+		{
+			return this.timelapseResolution;
+		}
+		set
+		{
+			this.timelapseResolution = value;
+		}
+	}
+
 	public string BaseName
 	{
 		get
@@ -66,7 +90,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		}
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 358267U;
+		header.buildVersion = 358820U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);
@@ -137,10 +161,10 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 	public bool sandboxEnabled;
 
 	[Serialize]
-	public int autoSaveCycleInterval = 1;
+	private int autoSaveCycleInterval = 1;
 
 	[Serialize]
-	public Vector2I timelapseResolution = new Vector2I(640, 360);
+	private Vector2I timelapseResolution = new Vector2I(512, 768);
 
 	private string baseName;
 

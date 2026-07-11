@@ -19,6 +19,15 @@ public class TreeBud : KMonoBehaviour, IWiltCause
 		{
 			this.SetOccupyGridSpace(true);
 		}
+		base.Subscribe<TreeBud>(1272413801, TreeBud.OnHarvestDelegate);
+	}
+
+	private void OnHarvest(object data)
+	{
+		if (this.buddingTrunk.Get() != null)
+		{
+			this.buddingTrunk.Get().TryRollNewSeed();
+		}
 	}
 
 	protected override void OnSpawn()
@@ -233,4 +242,9 @@ public class TreeBud : KMonoBehaviour, IWiltCause
 		new Vector3(-1f, -1f, 0f),
 		new Vector3(-1f, 0f, 0f)
 	};
+
+	private static readonly EventSystem.IntraObjectHandler<TreeBud> OnHarvestDelegate = new EventSystem.IntraObjectHandler<TreeBud>(delegate(TreeBud component, object data)
+	{
+		component.OnHarvest(data);
+	});
 }

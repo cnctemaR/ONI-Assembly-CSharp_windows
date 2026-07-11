@@ -183,6 +183,10 @@ namespace Database
 			{
 				new CreaturePoopKGProduction("HatchMetal", 10000f)
 			}, string.Empty, string.Empty, string.Empty, string.Empty, null, string.Empty, string.Empty));
+			this.BunkerDoorDefense = base.Add(new ColonyAchievement("BunkerDoorDefense", "BUNKER_DOOR_DEFENSE", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BUNKER_DOOR_DEFENSE, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BUNKER_DOOR_DEFENSE_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+			{
+				new BlockedCometWithBunkerDoor()
+			}, string.Empty, string.Empty, string.Empty, string.Empty, null, string.Empty, string.Empty));
 		}
 
 		public ColonyAchievement Thriving;
@@ -248,5 +252,7 @@ namespace Database
 		public ColonyAchievement ClearFOW;
 
 		public ColonyAchievement HatchRefinement;
+
+		public ColonyAchievement BunkerDoorDefense;
 	}
 }

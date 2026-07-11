@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using KSerialization;
-using UnityEngine;
 
 namespace Database
 {
@@ -17,12 +16,27 @@ namespace Database
 
 		public override bool Success()
 		{
-			return !this.usedDisallowedBuilding && this.amountProduced / 1000f > this.amountToProduce;
+			float num = 0f;
+			foreach (KeyValuePair<Tag, float> keyValuePair in Game.Instance.savedInfo.powerCreatedbyGeneratorType)
+			{
+				if (!this.disallowedBuildings.Contains(keyValuePair.Key))
+				{
+					num += keyValuePair.Value;
+				}
+			}
+			return num / 1000f > this.amountToProduce;
 		}
 
 		public override bool Fail()
 		{
-			return this.usedDisallowedBuilding;
+			foreach (Tag tag in this.disallowedBuildings)
+			{
+				if (Game.Instance.savedInfo.powerCreatedbyGeneratorType.ContainsKey(tag))
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		public override void Serialize(BinaryWriter writer)
@@ -49,22 +63,6 @@ namespace Database
 			this.amountProduced = (float)reader.ReadDouble();
 			this.amountToProduce = (float)reader.ReadDouble();
 			this.usedDisallowedBuilding = reader.ReadByte() != 0;
-		}
-
-		public override void Update()
-		{
-			foreach (Generator generator in Game.Instance.energySim.Generators)
-			{
-				if (generator.JoulesAvailable > 0f)
-				{
-					KPrefabID component = generator.GetComponent<KPrefabID>();
-					if (component.HasAnyTags(this.disallowedBuildings))
-					{
-						this.usedDisallowedBuilding = true;
-					}
-					this.amountProduced = Mathf.Max(generator.JoulesAvailable, generator.JoulesAvailable + this.amountProduced);
-				}
-			}
 		}
 
 		private List<Tag> disallowedBuildings = new List<Tag>();

@@ -20,18 +20,21 @@ public class FogOfWarPostFX : MonoBehaviour
 
 	private void SetupUVs()
 	{
-		if (Camera.main == null)
+		if (this.myCamera == null)
 		{
-			return;
+			this.myCamera = base.GetComponent<Camera>();
+			if (this.myCamera == null)
+			{
+				return;
+			}
 		}
-		Camera main = Camera.main;
-		Ray ray = main.ViewportPointToRay(Vector3.zero);
+		Ray ray = this.myCamera.ViewportPointToRay(Vector3.zero);
 		float num = Mathf.Abs(ray.origin.z / ray.direction.z);
 		Vector3 vector = ray.GetPoint(num);
 		Vector4 vector2;
 		vector2.x = vector.x / Grid.WidthInMeters;
 		vector2.y = vector.y / Grid.HeightInMeters;
-		ray = main.ViewportPointToRay(Vector3.one);
+		ray = this.myCamera.ViewportPointToRay(Vector3.one);
 		num = Mathf.Abs(ray.origin.z / ray.direction.z);
 		vector = ray.GetPoint(num);
 		vector2.z = vector.x / Grid.WidthInMeters - vector2.x;
@@ -43,4 +46,6 @@ public class FogOfWarPostFX : MonoBehaviour
 	private Shader shader;
 
 	private Material material;
+
+	private Camera myCamera;
 }

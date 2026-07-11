@@ -272,17 +272,17 @@ public class AccessControlSideScreen : SideScreenContent
 		{
 			GameObject targetGameObject = a.GetTargetGameObject();
 			GameObject targetGameObject2 = b.GetTargetGameObject();
-			MinionResume component = targetGameObject.GetComponent<MinionResume>();
-			MinionResume component2 = targetGameObject2.GetComponent<MinionResume>();
-			if (component2 == null)
+			MinionResume minionResume = ((!targetGameObject) ? null : targetGameObject.GetComponent<MinionResume>());
+			MinionResume minionResume2 = ((!targetGameObject2) ? null : targetGameObject2.GetComponent<MinionResume>());
+			if (minionResume2 == null)
 			{
 				return 1;
 			}
-			if (component == null)
+			if (minionResume == null)
 			{
 				return -1;
 			}
-			int num = component.CurrentRole.CompareTo(component2.CurrentRole);
+			int num = minionResume.CurrentRole.CompareTo(minionResume2.CurrentRole);
 			return (num != 0) ? num : AccessControlSideScreen.MinionIdentitySort.CompareByName(a, b);
 		}
 

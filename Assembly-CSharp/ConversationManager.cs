@@ -129,10 +129,11 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 		smi.AddThought(thoughtForTopic);
 		Effects component = setup.lastTalked.GetComponent<Effects>();
 		component.Add("GoodConversation", true);
+		Conversation.Mode mode = Conversation.Topic.Modes[(int)nextTopic.mode];
 		ConversationManager.StartedTalkingEvent startedTalkingEvent = new ConversationManager.StartedTalkingEvent
 		{
 			talker = new_speaker.gameObject,
-			anim = Conversation.Topic.Modes[(int)nextTopic.mode].anim
+			anim = mode.anim
 		};
 		foreach (MinionIdentity minionIdentity in setup.minions)
 		{

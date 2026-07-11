@@ -12,7 +12,7 @@ public abstract class Chore
 			priority_class = PriorityScreen.PriorityClass.emergency;
 			priority_value = 2;
 		}
-		if (priority_value < 0 || priority_value > 9)
+		if (priority_value < 1 || priority_value > 9)
 		{
 			global::Debug.LogErrorFormat("Priority Value Out Of Range: {0}", new object[] { priority_value });
 		}
@@ -467,7 +467,23 @@ public abstract class Chore
 
 			public bool IsPotentialSuccess()
 			{
-				return this.IsSuccess() || this.chore.driver == this.consumerState.choreDriver || (this.failedPreconditionId != -1 && this.chore.preconditions[this.failedPreconditionId].id == ChorePreconditions.instance.IsMoreSatisfyingLate.id);
+				if (this.IsSuccess())
+				{
+					return true;
+				}
+				if (this.chore.driver == this.consumerState.choreDriver)
+				{
+					return true;
+				}
+				if (this.failedPreconditionId != -1)
+				{
+					if (this.failedPreconditionId >= 0 && this.failedPreconditionId < this.chore.preconditions.Count)
+					{
+						return this.chore.preconditions[this.failedPreconditionId].id == ChorePreconditions.instance.IsMoreSatisfyingLate.id;
+					}
+					DebugUtil.DevAssert(false, new object[] { string.Format("failedPreconditionId out of range {0}/{1}", this.failedPreconditionId, this.chore.preconditions.Count) });
+				}
+				return false;
 			}
 
 			public void RunPreconditions()

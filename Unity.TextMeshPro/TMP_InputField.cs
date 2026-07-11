@@ -2112,10 +2112,22 @@ namespace TMPro
 					this.stringPositionInternal = Math.Min(this.stringPositionInternal, this.m_Text.Length);
 					if (this.m_Text.Length > 0)
 					{
-						this.m_Text = this.text.Remove(this.stringPositionInternal - 1, 1);
-						int num = this.stringPositionInternal - 1;
-						this.stringPositionInternal = num;
-						this.stringSelectPositionInternal = num;
+						try
+						{
+							this.m_Text = this.text.Remove(this.stringPositionInternal - 1, 1);
+							int num = this.stringPositionInternal - 1;
+							this.stringPositionInternal = num;
+							this.stringSelectPositionInternal = num;
+						}
+						catch (Exception ex)
+						{
+							Debug.LogWarning(ex);
+							Debug.LogWarning("m_text= " + this.m_Text);
+							Debug.LogWarning("stringPositionInternal= " + this.stringPositionInternal.ToString());
+							Debug.LogWarning("m_Text.Length= " + this.m_Text.Length.ToString());
+							this.m_Text = string.Empty;
+							this.stringPositionInternal = 0;
+						}
 					}
 					this.m_isLastKeyBackspace = true;
 					this.SendOnValueChangedAndUpdateLabel();
@@ -2128,13 +2140,30 @@ namespace TMPro
 					this.caretPositionInternal = Math.Min(this.stringPositionInternal, this.m_Text.Length);
 					if (this.m_Text.Length > 0)
 					{
-						this.m_Text = this.text.Remove(this.GetStringIndexFromCaretPosition(this.caretPositionInternal - 1), 1);
-						int num = this.caretPositionInternal - 1;
-						this.caretPositionInternal = num;
-						this.caretSelectPositionInternal = num;
-						num = this.GetStringIndexFromCaretPosition(this.caretPositionInternal);
-						this.stringPositionInternal = num;
-						this.stringSelectPositionInternal = num;
+						try
+						{
+							this.m_Text = this.text.Remove(this.GetStringIndexFromCaretPosition(this.caretPositionInternal - 1), 1);
+							int num2 = this.caretPositionInternal - 1;
+							this.caretPositionInternal = num2;
+							this.caretSelectPositionInternal = num2;
+							num2 = this.GetStringIndexFromCaretPosition(this.caretPositionInternal);
+							this.stringPositionInternal = num2;
+							this.stringSelectPositionInternal = num2;
+						}
+						catch (Exception ex2)
+						{
+							Debug.LogWarning(ex2);
+							Debug.LogWarning("m_text= " + this.m_Text);
+							Debug.LogWarning("stringPositionInternal= " + this.stringPositionInternal.ToString());
+							Debug.LogWarning("m_Text.Length= " + this.m_Text.Length.ToString());
+							this.m_Text = string.Empty;
+							int num3 = 0;
+							this.caretPositionInternal = num3;
+							this.caretSelectPositionInternal = num3;
+							num3 = 0;
+							this.stringPositionInternal = num3;
+							this.stringSelectPositionInternal = num3;
+						}
 					}
 				}
 				this.m_isLastKeyBackspace = true;
@@ -2558,6 +2587,9 @@ namespace TMPro
 				catch (Exception ex)
 				{
 					Debug.LogWarning(ex);
+					Debug.LogWarning("textInfo.characterInfo= " + textInfo.characterInfo);
+					Debug.LogWarning("caretSelectPositionInternal= " + this.caretSelectPositionInternal.ToString());
+					Debug.LogWarning("textInfo.characterInfo.Length= " + textInfo.characterInfo.Length.ToString());
 					string text = string.Empty;
 					Transform transform = base.transform;
 					while (transform != null)

@@ -145,6 +145,10 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 				if (smi.master.HasTag(GameTags.Minion) && !smi.master.HasTag(GameTags.Dead))
 				{
 					Chore chore = this.currentChore.Get(smi);
+					if (chore == null)
+					{
+						return;
+					}
 					if (smi.master.GetComponent<Navigator>().IsMoving())
 					{
 						ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, dt, GameUtil.GetChoreName(chore, null), smi.master.GetProperName());

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{4FA41C1E-FE8B-40A3-A3CE-F7AA39E5D459}</ProjectGuid>
+    <ProjectGuid>{7AA19CAA-81F2-46BB-A97D-E1A047EA753F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.HotReloadModule</RootNamespace>
     <AssemblyName>UnityEngine.HotReloadModule</AssemblyName>
@@ -18,11 +18,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{4FA41C1E-FE8B-40A3-A3CE-F7AA39E5D439}</Project>
+      <Project>{7AA19CAA-81F2-46BB-A97D-E1A047EA751F}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{4FA41C1E-FE8B-40A3-A3CE-F7AA39E5D467}</Project>
+      <Project>{7AA19CAA-81F2-46BB-A97D-E1A047EA754D}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

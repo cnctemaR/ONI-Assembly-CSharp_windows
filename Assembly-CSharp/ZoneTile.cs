@@ -1,4 +1,5 @@
 ﻿using System;
+using ProcGen;
 
 internal class ZoneTile : KMonoBehaviour
 {
@@ -25,7 +26,9 @@ internal class ZoneTile : KMonoBehaviour
 			for (int j = 0; j < this.height; j++)
 			{
 				int num2 = Grid.OffsetCell(num, i, j);
-				SimMessages.ModifyCellWorldZone(num2, byte.MaxValue);
+				SubWorld.ZoneType subWorldZoneType = global::World.Instance.zoneRenderData.GetSubWorldZoneType(num2);
+				byte b = ((subWorldZoneType != SubWorld.ZoneType.Space) ? ((byte)subWorldZoneType) : byte.MaxValue);
+				SimMessages.ModifyCellWorldZone(num2, b);
 			}
 		}
 	}

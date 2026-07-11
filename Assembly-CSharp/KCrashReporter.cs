@@ -195,8 +195,7 @@ public class KCrashReporter : MonoBehaviour
 				Uri uri = new Uri("http://crashes.klei.ca/submitSave");
 				try
 				{
-					byte[] array2 = webClient.UploadData(uri, "POST", bytes);
-					string string2 = Encoding.UTF8.GetString(array2);
+					webClient.UploadData(uri, "POST", bytes);
 					return text3;
 				}
 				catch (Exception ex)
@@ -276,7 +275,15 @@ public class KCrashReporter : MonoBehaviour
 			global::Debug.Log("Ignoring crash because debug was used.", null);
 			return;
 		}
-		global::Debug.Log("Reporting error.", null);
+		global::Debug.Log("Reporting error.\n", null);
+		if (msg != null)
+		{
+			global::Debug.Log(msg, null);
+		}
+		if (stack_trace != null)
+		{
+			global::Debug.Log(stack_trace, null);
+		}
 		KCrashReporter.hasReportedError = true;
 		if (KPrivacyPrefs.instance.disableDataCollection)
 		{
@@ -302,7 +309,6 @@ public class KCrashReporter : MonoBehaviour
 			{
 				stack_trace = string.Format("No stack trace.\n\n{0}", msg);
 			}
-			int num = stack_trace.IndexOf('\n');
 			string text3 = string.Empty;
 			string[] array = new string[] { "Debug:LogError", "UnityEngine.Debug:LogError", "UnityEngine.Debug:Assert(Boolean, String)", "Output:LogError(String)", "Output:LogErrorWithObj(Object, String)", "Output:LogErrorWithObj(Object, Object[])", "DebugUtil:Assert(Boolean, String)", "KCrashReporter.Assert(Boolean condition, System.String message)", "No stack trace." };
 			foreach (string text4 in stack_trace.Split(new char[] { '\n' }))
@@ -336,7 +342,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = msg;
-			error.build = 273742;
+			error.build = 273908;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = text3;
 			error.user_message = userMessage;

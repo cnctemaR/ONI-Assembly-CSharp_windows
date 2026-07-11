@@ -24,7 +24,7 @@ public class DeserializeWarnings : KMonoBehaviour
 		{
 			if (!this.isSet)
 			{
-				global::Debug.LogError(message, obj);
+				global::Debug.LogWarning(message, obj);
 				this.isSet = true;
 			}
 		}

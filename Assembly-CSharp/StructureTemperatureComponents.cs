@@ -184,7 +184,8 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		{
 			if (data.enabled)
 			{
-				num = Game.Instance.simData.buildingTemperatures[data.simHandle].temperature;
+				int handleIndex = Sim.GetHandleIndex(data.simHandle);
+				num = Game.Instance.simData.buildingTemperatures[handleIndex].temperature;
 			}
 			else
 			{
@@ -348,6 +349,7 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 			data.simHandle = num;
 			StructureTemperatureComponents.handleInstanceMap[num] = handle;
 			GameComps.StructureTemperatures.SetData(handle, data);
+			data.primaryElement.Trigger(-1555603773, null);
 		}
 		else
 		{
@@ -367,7 +369,8 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		{
 			if (Sim.IsValidHandle(data.simHandle))
 			{
-				data.primaryElement.InternalTemperature = Game.Instance.simData.buildingTemperatures[data.simHandle].temperature;
+				int handleIndex = Sim.GetHandleIndex(data.simHandle);
+				data.primaryElement.InternalTemperature = Game.Instance.simData.buildingTemperatures[handleIndex].temperature;
 				SimMessages.RemoveBuildingHeatExchange(data.simHandle, -1);
 				StructureTemperatureComponents.handleInstanceMap.Remove(data.simHandle);
 			}

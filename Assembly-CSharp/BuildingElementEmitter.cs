@@ -63,7 +63,8 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor, IElemen
 			return;
 		}
 		this.UpdateSimState();
-		Sim.EmittedMassInfo emittedMassInfo = Game.Instance.simData.emittedMassEntries[this.simHandle];
+		int handleIndex = Sim.GetHandleIndex(this.simHandle);
+		Sim.EmittedMassInfo emittedMassInfo = Game.Instance.simData.emittedMassEntries[handleIndex];
 		if (emittedMassInfo.mass > 0f)
 		{
 			Game.Instance.accumulators.Accumulate(this.accumulator, emittedMassInfo.mass);

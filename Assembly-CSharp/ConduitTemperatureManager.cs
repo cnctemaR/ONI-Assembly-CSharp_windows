@@ -20,16 +20,17 @@ public class ConduitTemperatureManager
 		BuildingDef def = data.building.Def;
 		float num = def.MassForTemperatureModification * element.specificHeatCapacity;
 		float num2 = element.thermalConductivity * def.ThermalConductivity;
-		int num3 = ConduitTemperatureManager.ConduitTemperatureManager_Add(contents.temperature, contents.mass, (int)contents.element, conduit_structure_temperature_handle.index, num, num2, def.ThermalConductivity < 1f);
+		int num3 = ConduitTemperatureManager.ConduitTemperatureManager_Add(contents.temperature, contents.mass, (int)contents.element, data.simHandle, num, num2, def.ThermalConductivity < 1f);
 		HandleVector<int>.Handle handle = default(HandleVector<int>.Handle);
 		handle.index = num3;
-		if (num3 + 1 > this.temperatures.Length)
+		int handleIndex = Sim.GetHandleIndex(num3);
+		if (handleIndex + 1 > this.temperatures.Length)
 		{
-			Array.Resize<float>(ref this.temperatures, (num3 + 1) * 2);
-			Array.Resize<ConduitTemperatureManager.ConduitInfo>(ref this.conduitInfo, (num3 + 1) * 2);
+			Array.Resize<float>(ref this.temperatures, (handleIndex + 1) * 2);
+			Array.Resize<ConduitTemperatureManager.ConduitInfo>(ref this.conduitInfo, (handleIndex + 1) * 2);
 		}
-		this.temperatures[num3] = contents.temperature;
-		this.conduitInfo[num3] = new ConduitTemperatureManager.ConduitInfo
+		this.temperatures[handleIndex] = contents.temperature;
+		this.conduitInfo[handleIndex] = new ConduitTemperatureManager.ConduitInfo
 		{
 			type = conduit_type,
 			idx = conduit_idx
@@ -43,7 +44,7 @@ public class ConduitTemperatureManager
 		{
 			return;
 		}
-		this.temperatures[handle.index] = contents.temperature;
+		this.temperatures[Sim.GetHandleIndex(handle.index)] = contents.temperature;
 		ConduitTemperatureManager.ConduitTemperatureManager_Set(handle.index, contents.temperature, contents.mass, (int)contents.element);
 	}
 
@@ -51,8 +52,9 @@ public class ConduitTemperatureManager
 	{
 		if (handle.IsValid())
 		{
-			this.temperatures[handle.index] = -1f;
-			this.conduitInfo[handle.index] = new ConduitTemperatureManager.ConduitInfo
+			int handleIndex = Sim.GetHandleIndex(handle.index);
+			this.temperatures[handleIndex] = -1f;
+			this.conduitInfo[handleIndex] = new ConduitTemperatureManager.ConduitInfo
 			{
 				type = ConduitType.None,
 				idx = -1
@@ -78,14 +80,16 @@ public class ConduitTemperatureManager
 		for (int i = 0; i < ptr->numFrozenHandles; i++)
 		{
 			int num = ptr->frozenHandles[i];
-			ConduitTemperatureManager.ConduitInfo conduitInfo = this.conduitInfo[num];
+			int handleIndex = Sim.GetHandleIndex(num);
+			ConduitTemperatureManager.ConduitInfo conduitInfo = this.conduitInfo[handleIndex];
 			ConduitFlow flowManager = Conduit.GetFlowManager(conduitInfo.type);
 			flowManager.FreezeConduitContents(conduitInfo.idx);
 		}
 		for (int j = 0; j < ptr->numMeltedHandles; j++)
 		{
 			int num2 = ptr->meltedHandles[j];
-			ConduitTemperatureManager.ConduitInfo conduitInfo2 = this.conduitInfo[num2];
+			int handleIndex2 = Sim.GetHandleIndex(num2);
+			ConduitTemperatureManager.ConduitInfo conduitInfo2 = this.conduitInfo[handleIndex2];
 			ConduitFlow flowManager2 = Conduit.GetFlowManager(conduitInfo2.type);
 			flowManager2.MeltConduitContents(conduitInfo2.idx);
 		}
@@ -93,7 +97,7 @@ public class ConduitTemperatureManager
 
 	public float GetTemperature(HandleVector<int>.Handle handle)
 	{
-		return this.temperatures[handle.index];
+		return this.temperatures[Sim.GetHandleIndex(handle.index)];
 	}
 
 	[DllImport("SimDLL")]

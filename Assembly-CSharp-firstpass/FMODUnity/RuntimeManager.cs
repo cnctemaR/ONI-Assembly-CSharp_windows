@@ -130,7 +130,7 @@ namespace FMODUnity
 				{
 					result = result2;
 					outputtype = OUTPUTTYPE.NOSOUND;
-					global::Debug.LogErrorFormat("FMOD Studio: Studio::System::initialize returned {0}, defaulting to no-sound mode.", new object[] { result2.ToString() });
+					global::Debug.LogWarningFormat("FMOD Studio: Studio::System::initialize returned {0}, defaulting to no-sound mode.", new object[] { result2.ToString() });
 				}
 				else
 				{

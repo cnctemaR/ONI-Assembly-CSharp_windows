@@ -27,18 +27,25 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 
 	protected override void OnPrefabInit()
 	{
+		base.OnPrefabInit();
 		base.Subscribe(-1201923725, new Action<object>(this.OnHighlighted));
 		base.Subscribe(-700727624, new Action<object>(this.OnConduitFrozen));
 		base.Subscribe(-1152799878, new Action<object>(this.OnConduitBoiling));
+		base.Subscribe(-1555603773, new Action<object>(this.OnStructureTemperatureRegistered));
 	}
 
 	protected override void OnSpawn()
 	{
+		base.OnSpawn();
+		base.Subscribe(774203113, new Action<object>(this.OnBuildingBroken));
+		base.Subscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
+	}
+
+	private void OnStructureTemperatureRegistered(object data)
+	{
 		int num = Grid.PosToCell(this);
 		this.GetNetworkManager().AddToNetworks(num, this, false);
 		this.Connect();
-		base.Subscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		base.Subscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Pipe, this);
 		BuildingDef def = base.GetComponent<Building>().Def;
 		if (def != null && def.ThermalConductivity != 1f)

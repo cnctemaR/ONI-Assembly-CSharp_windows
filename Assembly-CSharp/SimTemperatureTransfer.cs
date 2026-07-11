@@ -148,8 +148,9 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		float num;
 		if (Sim.IsValidHandle(component.simHandle))
 		{
-			num = Game.Instance.simData.elementChunks[component.simHandle].temperature;
-			component.deltaKJ = Game.Instance.simData.elementChunks[component.simHandle].deltaKJ;
+			int handleIndex = Sim.GetHandleIndex(component.simHandle);
+			num = Game.Instance.simData.elementChunks[handleIndex].temperature;
+			component.deltaKJ = Game.Instance.simData.elementChunks[handleIndex].deltaKJ;
 		}
 		else
 		{
@@ -171,7 +172,8 @@ public class SimTemperatureTransfer : KMonoBehaviour
 			float mass = primary_element.Mass;
 			float num = ((mass < 0.01f) ? 0f : (mass * primary_element.Element.specificHeatCapacity));
 			SimMessages.SetElementChunkData(component.simHandle, temperature, num);
-			Game.Instance.simData.elementChunks[component.simHandle].temperature = temperature;
+			int handleIndex = Sim.GetHandleIndex(component.simHandle);
+			Game.Instance.simData.elementChunks[handleIndex].temperature = temperature;
 		}
 		else
 		{
@@ -225,7 +227,8 @@ public class SimTemperatureTransfer : KMonoBehaviour
 			PrimaryElement component = base.GetComponent<PrimaryElement>();
 			if (Sim.IsValidHandle(this.simHandle))
 			{
-				component.InternalTemperature = Game.Instance.simData.elementChunks[this.simHandle].temperature;
+				int handleIndex = Sim.GetHandleIndex(this.simHandle);
+				component.InternalTemperature = Game.Instance.simData.elementChunks[handleIndex].temperature;
 				SimMessages.RemoveElementChunk(this.simHandle, -1);
 				SimTemperatureTransfer.handleInstanceMap.Remove(this.simHandle);
 			}
@@ -239,7 +242,8 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		if (instance != null && instance.simHandle == -2)
 		{
 			instance.simHandle = num;
-			float temperature = Game.Instance.simData.elementChunks[instance.simHandle].temperature;
+			int handleIndex = Sim.GetHandleIndex(num);
+			float temperature = Game.Instance.simData.elementChunks[handleIndex].temperature;
 			if (temperature <= 0f)
 			{
 				KCrashReporter.Assert(false, "Bad temperature");

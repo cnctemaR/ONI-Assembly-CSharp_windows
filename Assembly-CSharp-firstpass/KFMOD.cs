@@ -15,6 +15,18 @@ public class KFMOD
 
 	public static void Initialize()
 	{
+		try
+		{
+			global::FMOD.Studio.System studioSystem = RuntimeManager.StudioSystem;
+		}
+		catch (Exception ex)
+		{
+			if (ex.GetType() != typeof(SystemNotInitializedException))
+			{
+				throw ex;
+			}
+			global::Debug.LogWarning(ex, null);
+		}
 		KFMOD.CollectParameterUpdaters();
 		KFMOD.CollectSoundDescriptions();
 	}

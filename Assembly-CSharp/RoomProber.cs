@@ -230,16 +230,32 @@ public class RoomProber : ISim1000ms
 			{
 				foreach (int num in door.GetComponent<Building>().PlacementCells)
 				{
-					this.SetHasDoor(this.CellCavityID[Grid.CellAbove(num)], true);
-					this.SetHasDoor(this.CellCavityID[Grid.CellBelow(num)], true);
+					int num2 = Grid.CellAbove(num);
+					if (Grid.IsValidCell(num2))
+					{
+						this.SetHasDoor(this.CellCavityID[num2], true);
+					}
+					int num3 = Grid.CellBelow(num);
+					if (Grid.IsValidCell(num3))
+					{
+						this.SetHasDoor(this.CellCavityID[num3], true);
+					}
 				}
 			}
 			else
 			{
-				foreach (int num2 in door.GetComponent<Building>().PlacementCells)
+				foreach (int num4 in door.GetComponent<Building>().PlacementCells)
 				{
-					this.SetHasDoor(this.CellCavityID[Grid.CellLeft(num2)], true);
-					this.SetHasDoor(this.CellCavityID[Grid.CellRight(num2)], true);
+					int num5 = Grid.CellLeft(num4);
+					if (Grid.IsValidCell(num5))
+					{
+						this.SetHasDoor(this.CellCavityID[num5], true);
+					}
+					int num6 = Grid.CellRight(num4);
+					if (Grid.IsValidCell(num6))
+					{
+						this.SetHasDoor(this.CellCavityID[num6], true);
+					}
 				}
 			}
 		}

@@ -87,19 +87,14 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 			this.ElementID = SimHashes.Creature;
 		}
 		this.SanitizeMassAndTemperature();
-		this.Temperature = this._Temperature;
-		if (float.IsNaN(this.Temperature))
+		float num = this._Temperature;
+		if (float.IsNaN(num) || float.IsInfinity(num) || num < 0f || 10000f < num)
 		{
-			DeserializeWarnings.Instance.PrimaryElementTemperatureIsNan.Warn(base.name + " temperature is NaN. Resetting temperature.", null);
-			this._Temperature = this.Element.defaultValues.temperature;
-			this.Temperature = this.Element.defaultValues.temperature;
+			DeserializeWarnings.Instance.PrimaryElementTemperatureIsNan.Warn(string.Format("{0} has invalid temperature of {1}. Resetting temperature.", base.name, this.Temperature), null);
+			num = this.Element.defaultValues.temperature;
 		}
-		if (this.Temperature <= 0f)
-		{
-			DeserializeWarnings.Instance.PrimaryElementTemperatureIsNan.Warn(base.name + " temperature is zero. Resetting temperature because I don't believe it", null);
-			this._Temperature = this.Element.defaultValues.temperature;
-			this.Temperature = this.Element.defaultValues.temperature;
-		}
+		this._Temperature = num;
+		this.Temperature = num;
 		if (this.Element == null)
 		{
 			DeserializeWarnings.Instance.PrimaryElementHasNoElement.Warn(base.name + "Primary element has no element.", null);

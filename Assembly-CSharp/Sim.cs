@@ -8,7 +8,12 @@ public static class Sim
 {
 	public static bool IsValidHandle(int h)
 	{
-		return h >= 0;
+		return h != -1 && h != -2;
+	}
+
+	public static int GetHandleIndex(int h)
+	{
+		return h & 16777215;
 	}
 
 	[DllImport("SimDLL")]
@@ -858,6 +863,8 @@ public static class Sim
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	public struct BuildingTemperatureInfo
 	{
+		public int handle;
+
 		public float temperature;
 	}
 

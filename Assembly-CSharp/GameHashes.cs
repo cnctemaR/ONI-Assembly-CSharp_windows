@@ -285,5 +285,6 @@ public enum GameHashes
 	ConsumePlant = -1793167409,
 	AteFromStorage = -1452790913,
 	SpawnedFrom = -2027483228,
-	UserSettingsChanged = -543130682
+	UserSettingsChanged = -543130682,
+	StructureTemperatureRegistered = -1555603773
 }

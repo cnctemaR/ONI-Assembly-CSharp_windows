@@ -191,8 +191,13 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			else if (flag)
 			{
 				Facing component = this.owner.GetComponent<Facing>();
-				int frontCell = component.GetFrontCell();
-				SimMessages.AddRemoveSubstance(frontCell, (int)element.idx, CellEventLogger.Instance.ElementConsumerSimUpdate, num, temperature, b, num2, true, -1);
+				int num4 = component.GetFrontCell();
+				if (!Grid.IsValidCell(num4))
+				{
+					global::Debug.LogWarningFormat("{0} attemping to Poop {1} on invalid cell {2} from cell {3}", new object[] { this.owner, element.name, num4, num3 });
+					num4 = num3;
+				}
+				SimMessages.AddRemoveSubstance(num4, (int)element.idx, CellEventLogger.Instance.ElementConsumerSimUpdate, num, temperature, b, num2, true, -1);
 			}
 			else
 			{

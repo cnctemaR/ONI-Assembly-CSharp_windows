@@ -3187,7 +3187,7 @@ namespace STRINGS
 
 					public static LocString PATCHNOTES = "PATCH NOTES";
 
-					public static LocString ANIMATION_HEADER = "LAUNCH DATE ANNOUNCEMENT!";
+					public static LocString ANIMATION_HEADER = "LAUNCH DATE MK. 2!";
 				}
 
 				public class LOADING
@@ -3216,6 +3216,8 @@ namespace STRINGS
 				public static LocString FINAL_WEEK = "{0} days";
 
 				public static LocString BIGGER_TIMES = "{1} weeks {0} days";
+
+				public static LocString SPECIFIC_DATE = "JULY";
 			}
 		}
 

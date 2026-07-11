@@ -8,7 +8,7 @@ public class NextUpdateTimer : KMonoBehaviour
 	{
 		base.OnPrefabInit();
 		this.currentReleaseDate = new global::System.DateTime(2019, 4, 16, 17, 0, 0, DateTimeKind.Utc);
-		this.nextReleaseDate = new global::System.DateTime(2019, 5, 28, 17, 0, 0, DateTimeKind.Utc);
+		this.nextReleaseDate = new global::System.DateTime(2019, 7, 14, 17, 0, 0, DateTimeKind.Utc);
 		this.initialAnimScale = this.UpdateAnimController.animScale;
 		ScreenResize instance = ScreenResize.Instance;
 		instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.RefreshScale));
@@ -28,8 +28,12 @@ public class NextUpdateTimer : KMonoBehaviour
 		TimeSpan timeSpan2 = this.nextReleaseDate - global::System.DateTime.UtcNow;
 		TimeSpan timeSpan3 = global::System.DateTime.UtcNow - this.currentReleaseDate;
 		string text = string.Empty;
-		string text2;
-		if (timeSpan2.TotalHours < 8.0)
+		string text2 = "1";
+		if (this.useSpecificDate)
+		{
+			text = UI.DEVELOPMENTBUILDS.UPDATES.SPECIFIC_DATE;
+		}
+		else if (timeSpan2.TotalHours < 8.0)
 		{
 			text = UI.DEVELOPMENTBUILDS.UPDATES.TWENTY_FOUR_HOURS;
 			text2 = "4";
@@ -81,6 +85,8 @@ public class NextUpdateTimer : KMonoBehaviour
 	public KBatchedAnimController UpdateAnimMeterController;
 
 	public float initialAnimScale;
+
+	private bool useSpecificDate = true;
 
 	public global::System.DateTime nextReleaseDate;
 

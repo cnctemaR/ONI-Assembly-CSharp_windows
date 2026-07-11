@@ -9,9 +9,9 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Component.bindings.h")]
 	[NativeClass("Unity::Component")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Export/Scripting/Component.bindings.h")]
 	public class Component : Object
 	{
 		public extern Transform transform
@@ -44,6 +44,18 @@ namespace UnityEngine
 			CastHelper<T> castHelper = default(CastHelper<T>);
 			this.GetComponentFastPath(typeof(T), new IntPtr((void*)(&castHelper.onePointerFurtherThanT)));
 			return castHelper.t;
+		}
+
+		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
+		public bool TryGetComponent(Type type, out Component component)
+		{
+			return this.gameObject.TryGetComponent(type, out component);
+		}
+
+		[SecuritySafeCritical]
+		public bool TryGetComponent<T>(out T component)
+		{
+			return this.gameObject.TryGetComponent<T>(out component);
 		}
 
 		[FreeFunction(HasExplicitThis = true)]

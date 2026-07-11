@@ -8,8 +8,8 @@ namespace System.Runtime.CompilerServices
 {
 	public static class ContractHelper
 	{
-		[DebuggerNonUserCode]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[DebuggerNonUserCode]
 		public static string RaiseContractFailedEvent(ContractFailureKind failureKind, string userMessage, string conditionText, Exception innerException)
 		{
 			string text = "Contract failed";
@@ -83,8 +83,8 @@ namespace System.Runtime.CompilerServices
 			resultFailureMessage = text2;
 		}
 
-		[SecuritySafeCritical]
 		[DebuggerNonUserCode]
+		[SecuritySafeCritical]
 		private static void TriggerFailureImplementation(ContractFailureKind kind, string displayMessage, string userMessage, string conditionText, Exception innerException)
 		{
 			if (Environment.IsCLRHosted)
@@ -174,9 +174,9 @@ namespace System.Runtime.CompilerServices
 			return text;
 		}
 
+		[DebuggerNonUserCode]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SecuritySafeCritical]
-		[DebuggerNonUserCode]
 		private static void TriggerCodeContractEscalationPolicy(ContractFailureKind failureKind, string message, string conditionText, Exception innerException)
 		{
 			string text = null;

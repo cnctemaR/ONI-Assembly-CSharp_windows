@@ -4,8 +4,8 @@ using System.Security;
 
 namespace System.Runtime.InteropServices
 {
-	[Guid("CCBD682C-73A5-4568-B8B0-C7007E11ABA2")]
 	[ComVisible(true)]
+	[Guid("CCBD682C-73A5-4568-B8B0-C7007E11ABA2")]
 	public interface IRegistrationServices
 	{
 		[SecurityCritical]

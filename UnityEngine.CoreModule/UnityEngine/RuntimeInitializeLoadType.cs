@@ -5,6 +5,9 @@ namespace UnityEngine
 	public enum RuntimeInitializeLoadType
 	{
 		AfterSceneLoad,
-		BeforeSceneLoad
+		BeforeSceneLoad,
+		AfterAssembliesLoaded,
+		BeforeSplashScreen,
+		SubsystemRegistration
 	}
 }

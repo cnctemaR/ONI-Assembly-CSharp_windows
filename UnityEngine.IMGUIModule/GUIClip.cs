@@ -4,9 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
+	[NativeHeader("Modules/IMGUI/GUIClip.h")]
 	[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 	[NativeHeader("Modules/IMGUI/GUIState.h")]
-	[NativeHeader("Modules/IMGUI/GUIClip.h")]
 	internal sealed class GUIClip
 	{
 		internal static extern bool enabled
@@ -29,8 +29,8 @@ namespace UnityEngine
 
 		internal static Rect topmostRect
 		{
-			[FreeFunction("GetGUIState().m_CanvasGUIState.m_GUIClipState.GetTopMostPhysicalRect")]
 			[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+			[FreeFunction("GetGUIState().m_CanvasGUIState.m_GUIClipState.GetTopMostPhysicalRect")]
 			get
 			{
 				Rect rect;
@@ -54,8 +54,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int Internal_GetCount();
 
-		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		[FreeFunction("GetGUIState().m_CanvasGUIState.m_GUIClipState.GetTopRect")]
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal static Rect GetTopRect()
 		{
 			Rect rect;
@@ -139,8 +139,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void Reapply();
 
-		[FreeFunction("GetGUIState().m_CanvasGUIState.m_GUIClipState.GetUserMatrix")]
 		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+		[FreeFunction("GetGUIState().m_CanvasGUIState.m_GUIClipState.GetUserMatrix")]
 		internal static Matrix4x4 GetMatrix()
 		{
 			Matrix4x4 matrix4x;
@@ -290,7 +290,8 @@ namespace UnityEngine
 
 			public void Dispose()
 			{
-				if (!this.m_Disposed)
+				bool disposed = this.m_Disposed;
+				if (!disposed)
 				{
 					this.m_Disposed = true;
 					GUIClip.Internal_PopParentClip();

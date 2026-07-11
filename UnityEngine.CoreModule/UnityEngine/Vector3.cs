@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
@@ -6,28 +7,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Math/Vector3.h")]
-	[ThreadAndSerializationSafe]
-	[NativeHeader("Runtime/Math/MathScripting.h")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	[NativeType(Header = "Runtime/Math/Vector3.h")]
+	[NativeHeader("Runtime/Math/MathScripting.h")]
+	[NativeHeader("Runtime/Math/Vector3.h")]
 	[NativeClass("Vector3f")]
+	[NativeType(Header = "Runtime/Math/Vector3.h")]
 	public struct Vector3 : IEquatable<Vector3>
 	{
-		public Vector3(float x, float y, float z)
-		{
-			this.x = x;
-			this.y = y;
-			this.z = z;
-		}
-
-		public Vector3(float x, float y)
-		{
-			this.x = x;
-			this.y = y;
-			this.z = 0f;
-		}
-
 		[FreeFunction("VectorScripting::Slerp", IsThreadSafe = true)]
 		public static Vector3 Slerp(Vector3 a, Vector3 b, float t)
 		{
@@ -83,18 +69,22 @@ namespace UnityEngine
 
 		public static Vector3 MoveTowards(Vector3 current, Vector3 target, float maxDistanceDelta)
 		{
-			Vector3 vector = target - current;
-			float magnitude = vector.magnitude;
-			Vector3 vector2;
-			if (magnitude <= maxDistanceDelta || magnitude < 1E-45f)
+			float num = target.x - current.x;
+			float num2 = target.y - current.y;
+			float num3 = target.z - current.z;
+			float num4 = num * num + num2 * num2 + num3 * num3;
+			bool flag = num4 == 0f || (maxDistanceDelta >= 0f && num4 <= maxDistanceDelta * maxDistanceDelta);
+			Vector3 vector;
+			if (flag)
 			{
-				vector2 = target;
+				vector = target;
 			}
 			else
 			{
-				vector2 = current + vector / magnitude * maxDistanceDelta;
+				float num5 = (float)Math.Sqrt((double)num4);
+				vector = new Vector3(current.x + num / num5 * maxDistanceDelta, current.y + num2 / num5 * maxDistanceDelta, current.z + num3 / num5 * maxDistanceDelta);
 			}
-			return vector2;
+			return vector;
 		}
 
 		[ExcludeFromDocs]
@@ -118,20 +108,50 @@ namespace UnityEngine
 			float num = 2f / smoothTime;
 			float num2 = num * deltaTime;
 			float num3 = 1f / (1f + num2 + 0.48f * num2 * num2 + 0.235f * num2 * num2 * num2);
-			Vector3 vector = current - target;
-			Vector3 vector2 = target;
-			float num4 = maxSpeed * smoothTime;
-			vector = Vector3.ClampMagnitude(vector, num4);
-			target = current - vector;
-			Vector3 vector3 = (currentVelocity + num * vector) * deltaTime;
-			currentVelocity = (currentVelocity - num * vector3) * num3;
-			Vector3 vector4 = target + (vector + vector3) * num3;
-			if (Vector3.Dot(vector2 - current, vector4 - vector2) > 0f)
+			float num4 = current.x - target.x;
+			float num5 = current.y - target.y;
+			float num6 = current.z - target.z;
+			Vector3 vector = target;
+			float num7 = maxSpeed * smoothTime;
+			float num8 = num7 * num7;
+			float num9 = num4 * num4 + num5 * num5 + num6 * num6;
+			bool flag = num9 > num8;
+			if (flag)
 			{
-				vector4 = vector2;
-				currentVelocity = (vector4 - vector2) / deltaTime;
+				float num10 = (float)Math.Sqrt((double)num9);
+				num4 = num4 / num10 * num7;
+				num5 = num5 / num10 * num7;
+				num6 = num6 / num10 * num7;
 			}
-			return vector4;
+			target.x = current.x - num4;
+			target.y = current.y - num5;
+			target.z = current.z - num6;
+			float num11 = (currentVelocity.x + num * num4) * deltaTime;
+			float num12 = (currentVelocity.y + num * num5) * deltaTime;
+			float num13 = (currentVelocity.z + num * num6) * deltaTime;
+			currentVelocity.x = (currentVelocity.x - num * num11) * num3;
+			currentVelocity.y = (currentVelocity.y - num * num12) * num3;
+			currentVelocity.z = (currentVelocity.z - num * num13) * num3;
+			float num14 = target.x + (num4 + num11) * num3;
+			float num15 = target.y + (num5 + num12) * num3;
+			float num16 = target.z + (num6 + num13) * num3;
+			float num17 = vector.x - current.x;
+			float num18 = vector.y - current.y;
+			float num19 = vector.z - current.z;
+			float num20 = num14 - vector.x;
+			float num21 = num15 - vector.y;
+			float num22 = num16 - vector.z;
+			bool flag2 = num17 * num20 + num18 * num21 + num19 * num22 > 0f;
+			if (flag2)
+			{
+				num14 = vector.x;
+				num15 = vector.y;
+				num16 = vector.z;
+				currentVelocity.x = (num14 - vector.x) / deltaTime;
+				currentVelocity.y = (num15 - vector.y) / deltaTime;
+				currentVelocity.z = (num16 - vector.z) / deltaTime;
+			}
+			return new Vector3(num14, num15, num16);
 		}
 
 		public float this[int index]
@@ -174,6 +194,20 @@ namespace UnityEngine
 			}
 		}
 
+		public Vector3(float x, float y, float z)
+		{
+			this.x = x;
+			this.y = y;
+			this.z = z;
+		}
+
+		public Vector3(float x, float y)
+		{
+			this.x = x;
+			this.y = y;
+			this.z = 0f;
+		}
+
 		public void Set(float newX, float newY, float newZ)
 		{
 			this.x = newX;
@@ -205,24 +239,27 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
-			return other is Vector3 && this.Equals((Vector3)other);
+			bool flag = !(other is Vector3);
+			return !flag && this.Equals((Vector3)other);
 		}
 
 		public bool Equals(Vector3 other)
 		{
-			return this.x.Equals(other.x) && this.y.Equals(other.y) && this.z.Equals(other.z);
+			return this.x == other.x && this.y == other.y && this.z == other.z;
 		}
 
 		public static Vector3 Reflect(Vector3 inDirection, Vector3 inNormal)
 		{
-			return -2f * Vector3.Dot(inNormal, inDirection) * inNormal + inDirection;
+			float num = -2f * Vector3.Dot(inNormal, inDirection);
+			return new Vector3(num * inNormal.x + inDirection.x, num * inNormal.y + inDirection.y, num * inNormal.z + inDirection.z);
 		}
 
 		public static Vector3 Normalize(Vector3 value)
 		{
 			float num = Vector3.Magnitude(value);
+			bool flag = num > 1E-05f;
 			Vector3 vector;
-			if (num > 1E-05f)
+			if (flag)
 			{
 				vector = value / num;
 			}
@@ -236,7 +273,8 @@ namespace UnityEngine
 		public void Normalize()
 		{
 			float num = Vector3.Magnitude(this);
-			if (num > 1E-05f)
+			bool flag = num > 1E-05f;
+			if (flag)
 			{
 				this /= num;
 			}
@@ -262,35 +300,50 @@ namespace UnityEngine
 		public static Vector3 Project(Vector3 vector, Vector3 onNormal)
 		{
 			float num = Vector3.Dot(onNormal, onNormal);
+			bool flag = num < Mathf.Epsilon;
 			Vector3 vector2;
-			if (num < Mathf.Epsilon)
+			if (flag)
 			{
 				vector2 = Vector3.zero;
 			}
 			else
 			{
-				vector2 = onNormal * Vector3.Dot(vector, onNormal) / num;
+				float num2 = Vector3.Dot(vector, onNormal);
+				vector2 = new Vector3(onNormal.x * num2 / num, onNormal.y * num2 / num, onNormal.z * num2 / num);
 			}
 			return vector2;
 		}
 
 		public static Vector3 ProjectOnPlane(Vector3 vector, Vector3 planeNormal)
 		{
-			return vector - Vector3.Project(vector, planeNormal);
+			float num = Vector3.Dot(planeNormal, planeNormal);
+			bool flag = num < Mathf.Epsilon;
+			Vector3 vector2;
+			if (flag)
+			{
+				vector2 = vector;
+			}
+			else
+			{
+				float num2 = Vector3.Dot(vector, planeNormal);
+				vector2 = new Vector3(vector.x - planeNormal.x * num2 / num, vector.y - planeNormal.y * num2 / num, vector.z - planeNormal.z * num2 / num);
+			}
+			return vector2;
 		}
 
 		public static float Angle(Vector3 from, Vector3 to)
 		{
-			float num = Mathf.Sqrt(from.sqrMagnitude * to.sqrMagnitude);
+			float num = (float)Math.Sqrt((double)(from.sqrMagnitude * to.sqrMagnitude));
+			bool flag = num < 1E-15f;
 			float num2;
-			if (num < 1E-15f)
+			if (flag)
 			{
 				num2 = 0f;
 			}
 			else
 			{
 				float num3 = Mathf.Clamp(Vector3.Dot(from, to) / num, -1f, 1f);
-				num2 = Mathf.Acos(num3) * 57.29578f;
+				num2 = (float)Math.Acos((double)num3) * 57.29578f;
 			}
 			return num2;
 		}
@@ -298,22 +351,33 @@ namespace UnityEngine
 		public static float SignedAngle(Vector3 from, Vector3 to, Vector3 axis)
 		{
 			float num = Vector3.Angle(from, to);
-			float num2 = Mathf.Sign(Vector3.Dot(axis, Vector3.Cross(from, to)));
-			return num * num2;
+			float num2 = from.y * to.z - from.z * to.y;
+			float num3 = from.z * to.x - from.x * to.z;
+			float num4 = from.x * to.y - from.y * to.x;
+			float num5 = Mathf.Sign(axis.x * num2 + axis.y * num3 + axis.z * num4);
+			return num * num5;
 		}
 
 		public static float Distance(Vector3 a, Vector3 b)
 		{
-			Vector3 vector = new Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
-			return Mathf.Sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+			float num = a.x - b.x;
+			float num2 = a.y - b.y;
+			float num3 = a.z - b.z;
+			return (float)Math.Sqrt((double)(num * num + num2 * num2 + num3 * num3));
 		}
 
 		public static Vector3 ClampMagnitude(Vector3 vector, float maxLength)
 		{
+			float sqrMagnitude = vector.sqrMagnitude;
+			bool flag = sqrMagnitude > maxLength * maxLength;
 			Vector3 vector2;
-			if (vector.sqrMagnitude > maxLength * maxLength)
+			if (flag)
 			{
-				vector2 = vector.normalized * maxLength;
+				float num = (float)Math.Sqrt((double)sqrMagnitude);
+				float num2 = vector.x / num;
+				float num3 = vector.y / num;
+				float num4 = vector.z / num;
+				vector2 = new Vector3(num2 * maxLength, num3 * maxLength, num4 * maxLength);
 			}
 			else
 			{
@@ -324,14 +388,14 @@ namespace UnityEngine
 
 		public static float Magnitude(Vector3 vector)
 		{
-			return Mathf.Sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+			return (float)Math.Sqrt((double)(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z));
 		}
 
 		public float magnitude
 		{
 			get
 			{
-				return Mathf.Sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+				return (float)Math.Sqrt((double)(this.x * this.x + this.y * this.y + this.z * this.z));
 			}
 		}
 
@@ -470,7 +534,11 @@ namespace UnityEngine
 
 		public static bool operator ==(Vector3 lhs, Vector3 rhs)
 		{
-			return Vector3.SqrMagnitude(lhs - rhs) < 9.9999994E-11f;
+			float num = lhs.x - rhs.x;
+			float num2 = lhs.y - rhs.y;
+			float num3 = lhs.z - rhs.z;
+			float num4 = num * num + num2 * num2 + num3 * num3;
+			return num4 < 9.9999994E-11f;
 		}
 
 		public static bool operator !=(Vector3 lhs, Vector3 rhs)
@@ -487,9 +555,9 @@ namespace UnityEngine
 		{
 			return UnityString.Format("({0}, {1}, {2})", new object[]
 			{
-				this.x.ToString(format),
-				this.y.ToString(format),
-				this.z.ToString(format)
+				this.x.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
+				this.y.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
+				this.z.ToString(format, CultureInfo.InvariantCulture.NumberFormat)
 			});
 		}
 
@@ -505,7 +573,7 @@ namespace UnityEngine
 		[Obsolete("Use Vector3.Angle instead. AngleBetween uses radians instead of degrees and was deprecated for this reason")]
 		public static float AngleBetween(Vector3 from, Vector3 to)
 		{
-			return Mathf.Acos(Mathf.Clamp(Vector3.Dot(from.normalized, to.normalized), -1f, 1f));
+			return (float)Math.Acos((double)Mathf.Clamp(Vector3.Dot(from.normalized, to.normalized), -1f, 1f));
 		}
 
 		[Obsolete("Use Vector3.ProjectOnPlane instead.")]

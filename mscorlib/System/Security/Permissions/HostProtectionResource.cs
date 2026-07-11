@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Security.Permissions
 {
-	[ComVisible(true)]
 	[Flags]
+	[ComVisible(true)]
 	[Serializable]
 	public enum HostProtectionResource
 	{

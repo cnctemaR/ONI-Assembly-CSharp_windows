@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.AutoDual)]
+	[ComVisible(true)]
 	[Serializable]
 	public class Object
 	{

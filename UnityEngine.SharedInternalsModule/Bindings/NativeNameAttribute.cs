@@ -6,23 +6,25 @@ namespace UnityEngine.Bindings
 	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field)]
 	internal class NativeNameAttribute : Attribute, IBindingsNameProviderAttribute, IBindingsAttribute
 	{
+		public string Name { get; set; }
+
 		public NativeNameAttribute()
 		{
 		}
 
 		public NativeNameAttribute(string name)
 		{
-			if (name == null)
+			bool flag = name == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("name");
 			}
-			if (name == "")
+			bool flag2 = name == "";
+			if (flag2)
 			{
 				throw new ArgumentException("name cannot be empty", "name");
 			}
 			this.Name = name;
 		}
-
-		public string Name { get; set; }
 	}
 }

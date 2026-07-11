@@ -7,29 +7,14 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[RequiredByNativeCode]
-	[NativeHeader("IMGUIScriptingClasses.h")]
 	[NativeHeader("Modules/IMGUI/GUIStyle.bindings.h")]
+	[NativeHeader("IMGUIScriptingClasses.h")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class GUIStyle
 	{
-		public GUIStyle()
-		{
-			this.m_Ptr = GUIStyle.Internal_Create(this);
-		}
-
-		public GUIStyle(GUIStyle other)
-		{
-			if (other == null)
-			{
-				Debug.LogError("Copied style is null. Using StyleNotFound instead.");
-				other = GUISkin.error;
-			}
-			this.m_Ptr = GUIStyle.Internal_Copy(this, other);
-		}
-
 		[NativeProperty("Name", false, TargetType.Function)]
-		public extern string name
+		internal extern string rawName
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -261,6 +246,18 @@ namespace UnityEngine
 			return this.Internal_GetCursorStringIndex_Injected(ref position, content, ref cursorPixelPosition);
 		}
 
+		[FreeFunction(Name = "GUIStyle_Bindings::Internal_GetSelectedRenderedText", HasExplicitThis = true)]
+		internal string Internal_GetSelectedRenderedText(Rect localPosition, GUIContent mContent, int selectIndex, int cursorIndex)
+		{
+			return this.Internal_GetSelectedRenderedText_Injected(ref localPosition, mContent, selectIndex, cursorIndex);
+		}
+
+		[FreeFunction(Name = "GUIStyle_Bindings::Internal_GetHyperlinksRect", HasExplicitThis = true)]
+		internal Rect[] Internal_GetHyperlinksRect(Rect localPosition, GUIContent mContent)
+		{
+			return this.Internal_GetHyperlinksRect_Injected(ref localPosition, mContent);
+		}
+
 		[FreeFunction(Name = "GUIStyle_Bindings::Internal_GetNumCharactersThatFitWithinWidth", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern int Internal_GetNumCharactersThatFitWithinWidth(string text, float width);
@@ -307,12 +304,36 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void SetDefaultFont(Font font);
 
-		~GUIStyle()
+		public GUIStyle()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			this.m_Ptr = GUIStyle.Internal_Create(this);
+		}
+
+		public GUIStyle(GUIStyle other)
+		{
+			bool flag = other == null;
+			if (flag)
 			{
-				GUIStyle.Internal_Destroy(this.m_Ptr);
-				this.m_Ptr = IntPtr.Zero;
+				Debug.LogError("Copied style is null. Using StyleNotFound instead.");
+				other = GUISkin.error;
+			}
+			this.m_Ptr = GUIStyle.Internal_Copy(this, other);
+		}
+
+		protected override void Finalize()
+		{
+			try
+			{
+				bool flag = this.m_Ptr != IntPtr.Zero;
+				if (flag)
+				{
+					GUIStyle.Internal_Destroy(this.m_Ptr);
+					this.m_Ptr = IntPtr.Zero;
+				}
+			}
+			finally
+			{
+				base.Finalize();
 			}
 		}
 
@@ -331,6 +352,24 @@ namespace UnityEngine
 			this.m_OnHover = GUIStyleState.ProduceGUIStyleStateFromDeserialization(this, this.GetStyleStatePtr(5));
 			this.m_OnActive = GUIStyleState.ProduceGUIStyleStateFromDeserialization(this, this.GetStyleStatePtr(6));
 			this.m_OnFocused = GUIStyleState.ProduceGUIStyleStateFromDeserialization(this, this.GetStyleStatePtr(7));
+		}
+
+		public string name
+		{
+			get
+			{
+				string text;
+				if ((text = this.m_Name) == null)
+				{
+					text = (this.m_Name = this.rawName);
+				}
+				return text;
+			}
+			set
+			{
+				this.m_Name = value;
+				this.rawName = value;
+			}
 		}
 
 		public GUIStyleState normal
@@ -539,7 +578,6 @@ namespace UnityEngine
 
 		public float lineHeight
 		{
-			[CompilerGenerated]
 			get
 			{
 				return Mathf.Round(GUIStyle.Internal_GetLineHeight(this.m_Ptr));
@@ -576,9 +614,15 @@ namespace UnityEngine
 			this.Draw(position, content, controlID, false, false, on, false);
 		}
 
+		public void Draw(Rect position, GUIContent content, int controlID, bool on, bool hover)
+		{
+			this.Draw(position, content, controlID, hover, GUIUtility.hotControl == controlID, on, GUIUtility.HasKeyFocus(controlID));
+		}
+
 		private void Draw(Rect position, GUIContent content, int controlId, bool isHover, bool isActive, bool on, bool hasKeyboardFocus)
 		{
-			if (controlId == -1)
+			bool flag = controlId == -1;
+			if (flag)
 			{
 				this.Internal_Draw(position, content, isHover, isActive, on, hasKeyboardFocus);
 			}
@@ -591,12 +635,14 @@ namespace UnityEngine
 		public void DrawCursor(Rect position, GUIContent content, int controlID, int character)
 		{
 			Event current = Event.current;
-			if (current.type == EventType.Repaint)
+			bool flag = current.type == EventType.Repaint;
+			if (flag)
 			{
 				Color cursorColor = new Color(0f, 0f, 0f, 0f);
 				float cursorFlashSpeed = GUI.skin.settings.cursorFlashSpeed;
 				float num = (Time.realtimeSinceStartup - GUIStyle.Internal_GetCursorFlashOffset()) % cursorFlashSpeed / cursorFlashSpeed;
-				if (cursorFlashSpeed == 0f || num < 0.5f)
+				bool flag2 = cursorFlashSpeed == 0f || num < 0.5f;
+				if (flag2)
 				{
 					cursorColor = GUI.skin.settings.cursorColor;
 				}
@@ -609,21 +655,18 @@ namespace UnityEngine
 			Color cursorColor = new Color(0f, 0f, 0f, 0f);
 			float cursorFlashSpeed = GUI.skin.settings.cursorFlashSpeed;
 			float num = (Time.realtimeSinceStartup - GUIStyle.Internal_GetCursorFlashOffset()) % cursorFlashSpeed / cursorFlashSpeed;
-			if (cursorFlashSpeed == 0f || num < 0.5f)
+			bool flag = cursorFlashSpeed == 0f || num < 0.5f;
+			if (flag)
 			{
 				cursorColor = GUI.skin.settings.cursorColor;
 			}
-			this.Internal_DrawWithTextSelection(position, content, position.Contains(Event.current.mousePosition), isActive, false, hasKeyboardFocus, drawSelectionAsComposition, firstSelectedCharacter, lastSelectedCharacter, cursorColor, selectionColor);
-		}
-
-		internal void DrawWithTextSelection(Rect position, GUIContent content, bool isActive, bool hasKeyboardFocus, int firstSelectedCharacter, int lastSelectedCharacter, bool drawSelectionAsComposition)
-		{
-			this.DrawWithTextSelection(position, content, isActive, hasKeyboardFocus, firstSelectedCharacter, lastSelectedCharacter, drawSelectionAsComposition, GUI.skin.settings.selectionColor);
+			bool flag2 = position.Contains(Event.current.mousePosition);
+			this.Internal_DrawWithTextSelection(position, content, flag2, isActive, false, hasKeyboardFocus, drawSelectionAsComposition, firstSelectedCharacter, lastSelectedCharacter, cursorColor, selectionColor);
 		}
 
 		internal void DrawWithTextSelection(Rect position, GUIContent content, int controlID, int firstSelectedCharacter, int lastSelectedCharacter, bool drawSelectionAsComposition)
 		{
-			this.DrawWithTextSelection(position, content, controlID == GUIUtility.hotControl, controlID == GUIUtility.keyboardControl && GUIStyle.showKeyboardFocus, firstSelectedCharacter, lastSelectedCharacter, drawSelectionAsComposition);
+			this.DrawWithTextSelection(position, content, controlID == GUIUtility.hotControl, controlID == GUIUtility.keyboardControl && GUIStyle.showKeyboardFocus, firstSelectedCharacter, lastSelectedCharacter, drawSelectionAsComposition, GUI.skin.settings.selectionColor);
 		}
 
 		public void DrawWithTextSelection(Rect position, GUIContent content, int controlID, int firstSelectedCharacter, int lastSelectedCharacter)
@@ -633,8 +676,9 @@ namespace UnityEngine
 
 		public static implicit operator GUIStyle(string str)
 		{
+			bool flag = GUISkin.current == null;
 			GUIStyle guistyle;
-			if (GUISkin.current == null)
+			if (flag)
 			{
 				Debug.LogError("Unable to use a named GUIStyle without a current skin. Most likely you need to move your GUIStyle initialization code to OnGUI");
 				guistyle = GUISkin.error;
@@ -648,7 +692,6 @@ namespace UnityEngine
 
 		public static GUIStyle none
 		{
-			[CompilerGenerated]
 			get
 			{
 				GUIStyle guistyle;
@@ -687,7 +730,7 @@ namespace UnityEngine
 
 		public Vector2 CalcScreenSize(Vector2 contentSize)
 		{
-			return new Vector2((this.fixedWidth == 0f) ? Mathf.Ceil(contentSize.x + (float)this.padding.left + (float)this.padding.right) : this.fixedWidth, (this.fixedHeight == 0f) ? Mathf.Ceil(contentSize.y + (float)this.padding.top + (float)this.padding.bottom) : this.fixedHeight);
+			return new Vector2((this.fixedWidth != 0f) ? this.fixedWidth : Mathf.Ceil(contentSize.x + (float)this.padding.left + (float)this.padding.right), (this.fixedHeight != 0f) ? this.fixedHeight : Mathf.Ceil(contentSize.y + (float)this.padding.top + (float)this.padding.bottom));
 		}
 
 		public float CalcHeight(GUIContent content, float width)
@@ -697,7 +740,6 @@ namespace UnityEngine
 
 		public bool isHeightDependantOnWidth
 		{
-			[CompilerGenerated]
 			get
 			{
 				return this.fixedHeight == 0f && this.wordWrap && this.imagePosition != ImagePosition.ImageOnly;
@@ -753,6 +795,12 @@ namespace UnityEngine
 		private extern int Internal_GetCursorStringIndex_Injected(ref Rect position, GUIContent content, ref Vector2 cursorPixelPosition);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern string Internal_GetSelectedRenderedText_Injected(ref Rect localPosition, GUIContent mContent, int selectIndex, int cursorIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern Rect[] Internal_GetHyperlinksRect_Injected(ref Rect localPosition, GUIContent mContent);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_CalcSize_Injected(GUIContent content, out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -802,6 +850,9 @@ namespace UnityEngine
 
 		[NonSerialized]
 		private RectOffset m_Overflow;
+
+		[NonSerialized]
+		private string m_Name;
 
 		internal static bool showKeyboardFocus = true;
 

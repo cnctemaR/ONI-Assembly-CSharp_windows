@@ -7,28 +7,32 @@ namespace UnityEngine.Experimental.GlobalIllumination
 {
 	public static class Lightmapping
 	{
+		[RequiredByNativeCode]
 		public static void SetDelegate(Lightmapping.RequestLightsDelegate del)
 		{
-			Lightmapping.s_RequestLightsDelegate = ((del == null) ? Lightmapping.s_DefaultDelegate : del);
+			Lightmapping.s_RequestLightsDelegate = ((del != null) ? del : Lightmapping.s_DefaultDelegate);
 		}
 
+		[RequiredByNativeCode]
 		public static Lightmapping.RequestLightsDelegate GetDelegate()
 		{
 			return Lightmapping.s_RequestLightsDelegate;
 		}
 
+		[RequiredByNativeCode]
 		public static void ResetDelegate()
 		{
 			Lightmapping.s_RequestLightsDelegate = Lightmapping.s_DefaultDelegate;
 		}
 
-		[UsedByNativeCode]
+		[RequiredByNativeCode]
 		internal unsafe static void RequestLights(Light[] lights, IntPtr outLightsPtr, int outLightsCount)
 		{
 			NativeArray<LightDataGI> nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<LightDataGI>((void*)outLightsPtr, outLightsCount, Allocator.None);
 			Lightmapping.s_RequestLightsDelegate(lights, nativeArray);
 		}
 
+		[RequiredByNativeCode]
 		private static readonly Lightmapping.RequestLightsDelegate s_DefaultDelegate = delegate(Light[] requests, NativeArray<LightDataGI> lightsOutput)
 		{
 			DirectionalLight directionalLight = default(DirectionalLight);
@@ -70,6 +74,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			}
 		};
 
+		[RequiredByNativeCode]
 		private static Lightmapping.RequestLightsDelegate s_RequestLightsDelegate = Lightmapping.s_DefaultDelegate;
 
 		public delegate void RequestLightsDelegate(Light[] requests, NativeArray<LightDataGI> lightsOutput);

@@ -1,29 +1,26 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
+using UnityEngine.Bindings;
 using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
 	[MovedFrom("UnityEngine")]
+	[NativeHeader("Modules/AI/Components/NavMeshObstacle.bindings.h")]
 	public sealed class NavMeshObstacle : Behaviour
 	{
 		public extern float height
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern float radius
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -33,69 +30,53 @@ namespace UnityEngine.AI
 			get
 			{
 				Vector3 vector;
-				this.INTERNAL_get_velocity(out vector);
+				this.get_velocity_Injected(out vector);
 				return vector;
 			}
 			set
 			{
-				this.INTERNAL_set_velocity(ref value);
+				this.set_velocity_Injected(ref value);
 			}
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_get_velocity(out Vector3 value);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_set_velocity(ref Vector3 value);
-
 		public extern bool carving
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern bool carveOnlyStationary
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
+		[NativeProperty("MoveThreshold")]
 		public extern float carvingMoveThreshold
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
+		[NativeProperty("TimeToStationary")]
 		public extern float carvingTimeToStationary
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern NavMeshObstacleShape shape
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -105,47 +86,51 @@ namespace UnityEngine.AI
 			get
 			{
 				Vector3 vector;
-				this.INTERNAL_get_center(out vector);
+				this.get_center_Injected(out vector);
 				return vector;
 			}
 			set
 			{
-				this.INTERNAL_set_center(ref value);
+				this.set_center_Injected(ref value);
 			}
 		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_get_center(out Vector3 value);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_set_center(ref Vector3 value);
 
 		public Vector3 size
 		{
+			[FreeFunction("NavMeshObstacleScriptBindings::GetSize", HasExplicitThis = true)]
 			get
 			{
 				Vector3 vector;
-				this.INTERNAL_get_size(out vector);
+				this.get_size_Injected(out vector);
 				return vector;
 			}
+			[FreeFunction("NavMeshObstacleScriptBindings::SetSize", HasExplicitThis = true)]
 			set
 			{
-				this.INTERNAL_set_size(ref value);
+				this.set_size_Injected(ref value);
 			}
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_get_size(out Vector3 value);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_set_size(ref Vector3 value);
-
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("NavMeshObstacleScriptBindings::FitExtents", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void FitExtents();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_velocity_Injected(out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_velocity_Injected(ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_center_Injected(out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_center_Injected(ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_size_Injected(out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_size_Injected(ref Vector3 value);
 	}
 }

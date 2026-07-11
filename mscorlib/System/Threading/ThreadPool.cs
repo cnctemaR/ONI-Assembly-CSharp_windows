@@ -52,8 +52,8 @@ namespace System.Threading
 			return ThreadPool.RegisterWaitForSingleObject(waitObject, callBack, state, millisecondsTimeOutInterval, executeOnlyOnce, ref stackCrawlMark, true);
 		}
 
-		[CLSCompliant(false)]
 		[SecurityCritical]
+		[CLSCompliant(false)]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static RegisteredWaitHandle UnsafeRegisterWaitForSingleObject(WaitHandle waitObject, WaitOrTimerCallback callBack, object state, uint millisecondsTimeOutInterval, bool executeOnlyOnce)
 		{

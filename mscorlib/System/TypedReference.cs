@@ -6,8 +6,8 @@ using System.Security;
 
 namespace System
 {
-	[ComVisible(true)]
 	[CLSCompliant(false)]
+	[ComVisible(true)]
 	public struct TypedReference
 	{
 		[CLSCompliant(false)]
@@ -35,7 +35,7 @@ namespace System
 				{
 					throw new ArgumentException(Environment.GetResourceString("FieldInfo must be a runtime FieldInfo object."));
 				}
-				if (runtimeFieldInfo.IsInitOnly || runtimeFieldInfo.IsStatic)
+				if (runtimeFieldInfo.IsStatic)
 				{
 					throw new ArgumentException(Environment.GetResourceString("Field in TypedReferences cannot be static or init only."));
 				}
@@ -104,8 +104,8 @@ namespace System
 			return __reftype(value).TypeHandle;
 		}
 
-		[CLSCompliant(false)]
 		[SecuritySafeCritical]
+		[CLSCompliant(false)]
 		public static void SetTypedReference(TypedReference target, object value)
 		{
 			throw new NotImplementedException("SetTypedReference");

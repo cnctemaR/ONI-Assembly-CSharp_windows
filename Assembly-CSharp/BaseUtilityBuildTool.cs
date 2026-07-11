@@ -81,7 +81,7 @@ public class BaseUtilityBuildTool : DragTool
 			TileVisualizer.RefreshCell(this.path[this.path.Count - 1].cell, this.def.TileLayer, this.def.ReplacementLayer);
 			this.path.RemoveAt(this.path.Count - 1);
 			this.buildingCount = ((this.buildingCount == 1) ? (this.buildingCount = 14) : (this.buildingCount - 1));
-			eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
+			eventInstance.setParameterByName("tileCount", (float)this.buildingCount, false);
 			SoundEvent.EndOneShot(eventInstance);
 		}
 		else if (!this.path.Exists((BaseUtilityBuildTool.PathNode n) => n.cell == cell))
@@ -95,7 +95,7 @@ public class BaseUtilityBuildTool : DragTool
 			});
 			this.CheckForConnection(cell, this.def.PrefabID, "OutletConnected", ref this.previousCellConnection, true);
 			this.buildingCount = this.buildingCount % 14 + 1;
-			eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
+			eventInstance.setParameterByName("tileCount", (float)this.buildingCount, false);
 			SoundEvent.EndOneShot(eventInstance);
 		}
 		this.visualizer.SetActive(this.path.Count < 2);
@@ -293,7 +293,7 @@ public class BaseUtilityBuildTool : DragTool
 			EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector, 1f, false);
 			if (this.def.AudioSize == "small")
 			{
-				eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
+				eventInstance.setParameterByName("tileCount", (float)this.buildingCount, false);
 			}
 			SoundEvent.EndOneShot(eventInstance);
 		}

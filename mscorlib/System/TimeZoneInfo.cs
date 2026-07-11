@@ -294,6 +294,10 @@ namespace System
 			{
 				return list;
 			}
+			if (dateTime.Equals(dateTime2))
+			{
+				return list;
+			}
 			DateTime dateTime3 = new DateTime(year, 1, 1, 0, 0, 0, 0);
 			DateTime dateTime4 = new DateTime(year, 12, DateTime.DaysInMonth(year, 12));
 			DateTime dateTime5 = new DateTime(year, 12, DateTime.DaysInMonth(year, 12), 23, 59, 59, 999);
@@ -578,7 +582,7 @@ namespace System
 			{
 				uint num = 0U;
 				TimeZoneInfo.DYNAMIC_TIME_ZONE_INFORMATION dynamic_TIME_ZONE_INFORMATION;
-				while (TimeZoneInfo.EnumDynamicTimeZoneInformation(num++, out dynamic_TIME_ZONE_INFORMATION) != 259U)
+				while (TimeZoneInfo.EnumDynamicTimeZoneInformation(num++, out dynamic_TIME_ZONE_INFORMATION) == 0U)
 				{
 					TimeZoneInfo timeZoneInfo = TimeZoneInfo.TryCreateTimeZone(dynamic_TIME_ZONE_INFORMATION);
 					if (timeZoneInfo != null)
@@ -592,7 +596,12 @@ namespace System
 			}
 			if (list.Count == 0)
 			{
-				list.Add(TimeZoneInfo.Local);
+				TimeZoneInfo localTimeZoneInfoWinRTFallback = TimeZoneInfo.GetLocalTimeZoneInfoWinRTFallback();
+				if (Interlocked.CompareExchange<TimeZoneInfo>(ref TimeZoneInfo.local, localTimeZoneInfoWinRTFallback, null) != null)
+				{
+					localTimeZoneInfoWinRTFallback = TimeZoneInfo.local;
+				}
+				list.Add(localTimeZoneInfoWinRTFallback);
 			}
 			return list;
 		}
@@ -2251,6 +2260,8 @@ namespace System
 		internal const uint TIME_ZONE_ID_INVALID = 4294967295U;
 
 		internal const uint ERROR_NO_MORE_ITEMS = 259U;
+
+		internal const uint ERROR_SUCCESS = 0U;
 
 		private TimeSpan baseUtcOffset;
 

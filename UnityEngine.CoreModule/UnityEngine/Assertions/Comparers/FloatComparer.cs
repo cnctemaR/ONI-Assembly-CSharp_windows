@@ -28,7 +28,7 @@ namespace UnityEngine.Assertions.Comparers
 
 		public bool Equals(float a, float b)
 		{
-			return (!this.m_Relative) ? FloatComparer.AreEqual(a, b, this.m_Error) : FloatComparer.AreEqualRelative(a, b, this.m_Error);
+			return this.m_Relative ? FloatComparer.AreEqualRelative(a, b, this.m_Error) : FloatComparer.AreEqual(a, b, this.m_Error);
 		}
 
 		public int GetHashCode(float obj)
@@ -43,19 +43,20 @@ namespace UnityEngine.Assertions.Comparers
 
 		public static bool AreEqualRelative(float expected, float actual, float error)
 		{
-			bool flag;
-			if (expected == actual)
+			bool flag = expected == actual;
+			bool flag2;
+			if (flag)
 			{
-				flag = true;
+				flag2 = true;
 			}
 			else
 			{
 				float num = Math.Abs(expected);
 				float num2 = Math.Abs(actual);
-				float num3 = Math.Abs((actual - expected) / ((num <= num2) ? num2 : num));
-				flag = num3 <= error;
+				float num3 = Math.Abs((actual - expected) / ((num > num2) ? num : num2));
+				flag2 = num3 <= error;
 			}
-			return flag;
+			return flag2;
 		}
 
 		private readonly float m_Error;

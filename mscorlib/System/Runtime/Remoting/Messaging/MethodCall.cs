@@ -8,8 +8,8 @@ using System.Security;
 
 namespace System.Runtime.Remoting.Messaging
 {
-	[CLSCompliant(false)]
 	[ComVisible(true)]
+	[CLSCompliant(false)]
 	[Serializable]
 	public class MethodCall : IMethodCallMessage, IMethodMessage, IMessage, ISerializable, IInternalMessage, ISerializationRootObject
 	{

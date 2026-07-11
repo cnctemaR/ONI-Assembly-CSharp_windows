@@ -4,7 +4,7 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Dynamics/ConfigurableJoint.h")]
+	[NativeHeader("Modules/Physics/ConfigurableJoint.h")]
 	[NativeClass("Unity::ConfigurableJoint")]
 	public class ConfigurableJoint : Joint
 	{

@@ -38,8 +38,8 @@ namespace UnityEngine.Playables
 			}
 		}
 
-		[Obsolete("sourceBindingType is no longer supported on PlayableBinding. Use outputBindingType instead to get the required output target type, and the appropriate binding create method (e.g. AnimationPlayableBinding.Create(name, key)) to create PlayableBindings", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("sourceBindingType is no longer supported on PlayableBinding. Use outputBindingType instead to get the required output target type, and the appropriate binding create method (e.g. AnimationPlayableBinding.Create(name, key)) to create PlayableBindings", true)]
 		public Type sourceBindingType
 		{
 			get
@@ -51,8 +51,8 @@ namespace UnityEngine.Playables
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("streamType is no longer supported on PlayableBinding. Use the appropriate binding create method (e.g. AnimationPlayableBinding.Create(name, key)) instead.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DataStreamType streamType
 		{
 			get
@@ -66,8 +66,9 @@ namespace UnityEngine.Playables
 
 		internal PlayableOutput CreateOutput(PlayableGraph graph)
 		{
+			bool flag = this.m_CreateOutputMethod != null;
 			PlayableOutput playableOutput;
-			if (this.m_CreateOutputMethod != null)
+			if (flag)
 			{
 				playableOutput = this.m_CreateOutputMethod(graph, this.m_StreamName);
 			}

@@ -6,11 +6,10 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Math/ColorSpaceConversion.h")]
 	[NativeHeader("Runtime/Utilities/BitUtility.h")]
 	[NativeHeader("Runtime/Math/PerlinNoise.h")]
-	[NativeHeader("Runtime/Math/ColorSpaceConversion.h")]
 	[NativeHeader("Runtime/Math/FloatConversion.h")]
-	[ThreadAndSerializationSafe]
 	public struct Mathf
 	{
 		[FreeFunction(IsThreadSafe = true)]
@@ -105,14 +104,15 @@ namespace UnityEngine
 
 		public static float Min(float a, float b)
 		{
-			return (a >= b) ? b : a;
+			return (a < b) ? a : b;
 		}
 
 		public static float Min(params float[] values)
 		{
 			int num = values.Length;
+			bool flag = num == 0;
 			float num2;
-			if (num == 0)
+			if (flag)
 			{
 				num2 = 0f;
 			}
@@ -121,7 +121,8 @@ namespace UnityEngine
 				float num3 = values[0];
 				for (int i = 1; i < num; i++)
 				{
-					if (values[i] < num3)
+					bool flag2 = values[i] < num3;
+					if (flag2)
 					{
 						num3 = values[i];
 					}
@@ -133,14 +134,15 @@ namespace UnityEngine
 
 		public static int Min(int a, int b)
 		{
-			return (a >= b) ? b : a;
+			return (a < b) ? a : b;
 		}
 
 		public static int Min(params int[] values)
 		{
 			int num = values.Length;
+			bool flag = num == 0;
 			int num2;
-			if (num == 0)
+			if (flag)
 			{
 				num2 = 0;
 			}
@@ -149,7 +151,8 @@ namespace UnityEngine
 				int num3 = values[0];
 				for (int i = 1; i < num; i++)
 				{
-					if (values[i] < num3)
+					bool flag2 = values[i] < num3;
+					if (flag2)
 					{
 						num3 = values[i];
 					}
@@ -161,14 +164,15 @@ namespace UnityEngine
 
 		public static float Max(float a, float b)
 		{
-			return (a <= b) ? b : a;
+			return (a > b) ? a : b;
 		}
 
 		public static float Max(params float[] values)
 		{
 			int num = values.Length;
+			bool flag = num == 0;
 			float num2;
-			if (num == 0)
+			if (flag)
 			{
 				num2 = 0f;
 			}
@@ -177,7 +181,8 @@ namespace UnityEngine
 				float num3 = values[0];
 				for (int i = 1; i < num; i++)
 				{
-					if (values[i] > num3)
+					bool flag2 = values[i] > num3;
+					if (flag2)
 					{
 						num3 = values[i];
 					}
@@ -189,14 +194,15 @@ namespace UnityEngine
 
 		public static int Max(int a, int b)
 		{
-			return (a <= b) ? b : a;
+			return (a > b) ? a : b;
 		}
 
 		public static int Max(params int[] values)
 		{
 			int num = values.Length;
+			bool flag = num == 0;
 			int num2;
-			if (num == 0)
+			if (flag)
 			{
 				num2 = 0;
 			}
@@ -205,7 +211,8 @@ namespace UnityEngine
 				int num3 = values[0];
 				for (int i = 1; i < num; i++)
 				{
-					if (values[i] > num3)
+					bool flag2 = values[i] > num3;
+					if (flag2)
 					{
 						num3 = values[i];
 					}
@@ -272,49 +279,64 @@ namespace UnityEngine
 
 		public static float Sign(float f)
 		{
-			return (f < 0f) ? (-1f) : 1f;
+			return (f >= 0f) ? 1f : (-1f);
 		}
 
 		public static float Clamp(float value, float min, float max)
 		{
-			if (value < min)
+			bool flag = value < min;
+			if (flag)
 			{
 				value = min;
 			}
-			else if (value > max)
+			else
 			{
-				value = max;
+				bool flag2 = value > max;
+				if (flag2)
+				{
+					value = max;
+				}
 			}
 			return value;
 		}
 
 		public static int Clamp(int value, int min, int max)
 		{
-			if (value < min)
+			bool flag = value < min;
+			if (flag)
 			{
 				value = min;
 			}
-			else if (value > max)
+			else
 			{
-				value = max;
+				bool flag2 = value > max;
+				if (flag2)
+				{
+					value = max;
+				}
 			}
 			return value;
 		}
 
 		public static float Clamp01(float value)
 		{
+			bool flag = value < 0f;
 			float num;
-			if (value < 0f)
+			if (flag)
 			{
 				num = 0f;
 			}
-			else if (value > 1f)
-			{
-				num = 1f;
-			}
 			else
 			{
-				num = value;
+				bool flag2 = value > 1f;
+				if (flag2)
+				{
+					num = 1f;
+				}
+				else
+				{
+					num = value;
+				}
 			}
 			return num;
 		}
@@ -332,7 +354,8 @@ namespace UnityEngine
 		public static float LerpAngle(float a, float b, float t)
 		{
 			float num = Mathf.Repeat(b - a, 360f);
-			if (num > 180f)
+			bool flag = num > 180f;
+			if (flag)
 			{
 				num -= 360f;
 			}
@@ -341,8 +364,9 @@ namespace UnityEngine
 
 		public static float MoveTowards(float current, float target, float maxDelta)
 		{
+			bool flag = Mathf.Abs(target - current) <= maxDelta;
 			float num;
-			if (Mathf.Abs(target - current) <= maxDelta)
+			if (flag)
 			{
 				num = target;
 			}
@@ -356,8 +380,9 @@ namespace UnityEngine
 		public static float MoveTowardsAngle(float current, float target, float maxDelta)
 		{
 			float num = Mathf.DeltaAngle(current, target);
+			bool flag = -maxDelta < num && num < maxDelta;
 			float num2;
-			if (-maxDelta < num && num < maxDelta)
+			if (flag)
 			{
 				num2 = target;
 			}
@@ -379,20 +404,22 @@ namespace UnityEngine
 		public static float Gamma(float value, float absmax, float gamma)
 		{
 			bool flag = false;
-			if (value < 0f)
+			bool flag2 = value < 0f;
+			if (flag2)
 			{
 				flag = true;
 			}
 			float num = Mathf.Abs(value);
+			bool flag3 = num > absmax;
 			float num2;
-			if (num > absmax)
+			if (flag3)
 			{
-				num2 = ((!flag) ? num : (-num));
+				num2 = (flag ? (-num) : num);
 			}
 			else
 			{
 				float num3 = Mathf.Pow(num / absmax, gamma) * absmax;
-				num2 = ((!flag) ? num3 : (-num3));
+				num2 = (flag ? (-num3) : num3);
 			}
 			return num2;
 		}
@@ -431,7 +458,8 @@ namespace UnityEngine
 			float num7 = (currentVelocity + num * num4) * deltaTime;
 			currentVelocity = (currentVelocity - num * num7) * num3;
 			float num8 = target + (num4 + num7) * num3;
-			if (num5 - current > 0f == num8 > num5)
+			bool flag = num5 - current > 0f == num8 > num5;
+			if (flag)
 			{
 				num8 = num5;
 				currentVelocity = (num8 - num5) / deltaTime;
@@ -473,8 +501,9 @@ namespace UnityEngine
 
 		public static float InverseLerp(float a, float b, float value)
 		{
+			bool flag = a != b;
 			float num;
-			if (a != b)
+			if (flag)
 			{
 				num = Mathf.Clamp01((value - a) / (b - a));
 			}
@@ -488,7 +517,8 @@ namespace UnityEngine
 		public static float DeltaAngle(float current, float target)
 		{
 			float num = Mathf.Repeat(target - current, 360f);
-			if (num > 180f)
+			bool flag = num > 180f;
+			if (flag)
 			{
 				num -= 360f;
 			}
@@ -502,20 +532,22 @@ namespace UnityEngine
 			float num3 = p4.x - p3.x;
 			float num4 = p4.y - p3.y;
 			float num5 = num * num4 - num2 * num3;
-			bool flag;
-			if (num5 == 0f)
+			bool flag = num5 == 0f;
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
 				float num6 = p3.x - p1.x;
 				float num7 = p3.y - p1.y;
 				float num8 = (num6 * num4 - num7 * num3) / num5;
-				result = new Vector2(p1.x + num8 * num, p1.y + num8 * num2);
-				flag = true;
+				result.x = p1.x + num8 * num;
+				result.y = p1.y + num8 * num2;
+				flag2 = true;
 			}
-			return flag;
+			return flag2;
 		}
 
 		internal static bool LineSegmentIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, ref Vector2 result)
@@ -525,35 +557,39 @@ namespace UnityEngine
 			float num3 = p4.x - p3.x;
 			float num4 = p4.y - p3.y;
 			float num5 = num * num4 - num2 * num3;
-			bool flag;
-			if (num5 == 0f)
+			bool flag = num5 == 0f;
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
 				float num6 = p3.x - p1.x;
 				float num7 = p3.y - p1.y;
 				float num8 = (num6 * num4 - num7 * num3) / num5;
-				if (num8 < 0f || num8 > 1f)
+				bool flag3 = num8 < 0f || num8 > 1f;
+				if (flag3)
 				{
-					flag = false;
+					flag2 = false;
 				}
 				else
 				{
 					float num9 = (num6 * num2 - num7 * num) / num5;
-					if (num9 < 0f || num9 > 1f)
+					bool flag4 = num9 < 0f || num9 > 1f;
+					if (flag4)
 					{
-						flag = false;
+						flag2 = false;
 					}
 					else
 					{
-						result = new Vector2(p1.x + num8 * num, p1.y + num8 * num2);
-						flag = true;
+						result.x = p1.x + num8 * num;
+						result.y = p1.y + num8 * num2;
+						flag2 = true;
 					}
 				}
 			}
-			return flag;
+			return flag2;
 		}
 
 		internal static long RandomToLong(Random r)
@@ -576,6 +612,6 @@ namespace UnityEngine
 
 		public const float Rad2Deg = 57.29578f;
 
-		public static readonly float Epsilon = ((!MathfInternal.IsFlushToZeroEnabled) ? MathfInternal.FloatMinDenormal : MathfInternal.FloatMinNormal);
+		public static readonly float Epsilon = (MathfInternal.IsFlushToZeroEnabled ? MathfInternal.FloatMinNormal : MathfInternal.FloatMinDenormal);
 	}
 }

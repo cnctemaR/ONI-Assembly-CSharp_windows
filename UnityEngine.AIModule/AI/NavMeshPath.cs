@@ -1,53 +1,59 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using UnityEngine.Scripting;
+using UnityEngine.Bindings;
 using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
+	[NativeHeader("Modules/AI/NavMeshPath.bindings.h")]
 	[MovedFrom("UnityEngine")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class NavMeshPath
 	{
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern NavMeshPath();
-
-		[GeneratedByOldBindingsGenerator]
-		[ThreadAndSerializationSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void DestroyNavMeshPath();
+		public NavMeshPath()
+		{
+			this.m_Ptr = NavMeshPath.InitializeNavMeshPath();
+		}
 
 		~NavMeshPath()
 		{
-			this.DestroyNavMeshPath();
+			NavMeshPath.DestroyNavMeshPath(this.m_Ptr);
 			this.m_Ptr = IntPtr.Zero;
 		}
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("NavMeshPathScriptBindings::InitializeNavMeshPath")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetCornersNonAlloc(Vector3[] results);
+		private static extern IntPtr InitializeNavMeshPath();
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("NavMeshPathScriptBindings::DestroyNavMeshPath", IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DestroyNavMeshPath(IntPtr ptr);
+
+		[FreeFunction("NavMeshPathScriptBindings::GetCornersNonAlloc", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetCornersNonAlloc([Out] Vector3[] results);
+
+		[FreeFunction("NavMeshPathScriptBindings::CalculateCornersInternal", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Vector3[] CalculateCornersInternal();
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("NavMeshPathScriptBindings::ClearCornersInternal", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ClearCornersInternal();
 
 		public void ClearCorners()
 		{
 			this.ClearCornersInternal();
-			this.m_corners = null;
+			this.m_Corners = null;
 		}
 
 		private void CalculateCorners()
 		{
-			if (this.m_corners == null)
+			bool flag = this.m_Corners == null;
+			if (flag)
 			{
-				this.m_corners = this.CalculateCornersInternal();
+				this.m_Corners = this.CalculateCornersInternal();
 			}
 		}
 
@@ -56,19 +62,18 @@ namespace UnityEngine.AI
 			get
 			{
 				this.CalculateCorners();
-				return this.m_corners;
+				return this.m_Corners;
 			}
 		}
 
 		public extern NavMeshPathStatus status
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		internal IntPtr m_Ptr;
 
-		internal Vector3[] m_corners;
+		internal Vector3[] m_Corners;
 	}
 }

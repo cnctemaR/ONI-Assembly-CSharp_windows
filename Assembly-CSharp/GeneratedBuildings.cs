@@ -18,7 +18,14 @@ public class GeneratedBuildings
 		foreach (Type type2 in list)
 		{
 			object obj = Activator.CreateInstance(type2);
-			BuildingConfigManager.Instance.RegisterBuilding(obj as IBuildingConfig);
+			try
+			{
+				BuildingConfigManager.Instance.RegisterBuilding(obj as IBuildingConfig);
+			}
+			catch (Exception ex)
+			{
+				DebugUtil.LogException(null, "Exception in RegisterBuilding for type " + type2.FullName + " from " + type2.Assembly.GetName().Name, ex);
+			}
 		}
 	}
 

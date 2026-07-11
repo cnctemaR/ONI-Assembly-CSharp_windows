@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Threading
 {
-	[Flags]
 	[ComVisible(true)]
+	[Flags]
 	[Serializable]
 	public enum ThreadState
 	{

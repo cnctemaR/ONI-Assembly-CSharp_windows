@@ -10,7 +10,8 @@ namespace UnityEngine
 	{
 		internal static Object ResolveReferenceInternal(IntPtr ptr, PropertyName name, out bool isValid)
 		{
-			if (ptr == IntPtr.Zero)
+			bool flag = ptr == IntPtr.Zero;
+			if (flag)
 			{
 				throw new ArgumentNullException("Argument \"ptr\" can't be null.");
 			}

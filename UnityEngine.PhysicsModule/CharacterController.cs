@@ -4,7 +4,7 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Dynamics/CharacterController.h")]
+	[NativeHeader("Modules/Physics/CharacterController.h")]
 	public class CharacterController : Collider
 	{
 		public bool SimpleMove(Vector3 speed)

@@ -70,8 +70,8 @@ namespace System.Runtime.InteropServices
 			}
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		[CLSCompliant(false)]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		public unsafe T Read<T>(ulong byteOffset) where T : struct
 		{
 			if (!this.inited)
@@ -86,8 +86,8 @@ namespace System.Runtime.InteropServices
 			return (T)((object)Marshal.PtrToStructure((IntPtr)((void*)ptr), typeof(T)));
 		}
 
-		[CLSCompliant(false)]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[CLSCompliant(false)]
 		public unsafe void ReadArray<T>(ulong byteOffset, T[] array, int index, int count) where T : struct
 		{
 			if (!this.inited)
@@ -103,8 +103,8 @@ namespace System.Runtime.InteropServices
 			Marshal.copy_from_unmanaged((IntPtr)((void*)ptr), index, array, count);
 		}
 
-		[CLSCompliant(false)]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[CLSCompliant(false)]
 		public unsafe void Write<T>(ulong byteOffset, T value) where T : struct
 		{
 			if (!this.inited)

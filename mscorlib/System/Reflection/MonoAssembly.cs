@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComDefaultInterface(typeof(_Assembly))]
 	[ComVisible(true)]
+	[ComDefaultInterface(typeof(_Assembly))]
 	[ClassInterface(ClassInterfaceType.None)]
 	[Serializable]
 	internal class MonoAssembly : RuntimeAssembly

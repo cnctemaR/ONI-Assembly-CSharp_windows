@@ -13,7 +13,8 @@ namespace UnityEngine.SocialPlatforms.Impl
 			this.m_Loading = false;
 			this.m_LocalUserScore = new Score("Invalid", 0L);
 			this.m_MaxRange = 0U;
-			this.m_Scores = new Score[0];
+			IScore[] array = new Score[0];
+			this.m_Scores = array;
 			this.m_Title = "Invalid";
 			this.m_UserIDs = new string[0];
 		}
@@ -32,7 +33,7 @@ namespace UnityEngine.SocialPlatforms.Impl
 				"' Title: '",
 				this.m_Title,
 				"' Loading: '",
-				this.m_Loading,
+				this.m_Loading.ToString(),
 				"' Range: [",
 				this.range.from,
 				",",

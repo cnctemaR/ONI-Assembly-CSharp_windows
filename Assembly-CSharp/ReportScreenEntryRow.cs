@@ -65,16 +65,21 @@ public class ReportScreenEntryRow : KMonoBehaviour
 			text = string.Format(UI.ENDOFDAYREPORT.NOTES.NOTE_ENTRY_LINE_ITEM, text, note2.note, text2);
 		}
 		string text3 = format_fn(total_accumulation);
-		if (group_format_fn != null && this.entry.context == null)
+		if (this.entry.context != null)
+		{
+			return string.Format(tooltip_text + "\n" + text, text3, this.entry.context);
+		}
+		if (group_format_fn != null)
 		{
 			text3 = group_format_fn(total_accumulation, num);
+			return string.Format(tooltip_text + "\n" + text, text3, UI.ENDOFDAYREPORT.MY_COLONY);
 		}
-		return string.Format(tooltip_text + "\n" + text, text3);
+		return string.Format(tooltip_text + "\n" + text, text3, UI.ENDOFDAYREPORT.MY_COLONY);
 	}
 
 	private string OnNegativeNoteTooltip()
 	{
-		return this.OnNoteTooltip(this.entry.Negative, this.reportGroup.negativeTooltip, this.reportGroup.negNoteOrder, this.reportGroup.formatfn, (ReportManager.ReportEntry.Note note) => this.IsNegativeNote(note), this.reportGroup.groupFormatfn);
+		return this.OnNoteTooltip(-this.entry.Negative, this.reportGroup.negativeTooltip, this.reportGroup.negNoteOrder, this.reportGroup.formatfn, (ReportManager.ReportEntry.Note note) => this.IsNegativeNote(note), this.reportGroup.groupFormatfn);
 	}
 
 	private string OnPositiveNoteTooltip()
@@ -170,7 +175,7 @@ public class ReportScreenEntryRow : KMonoBehaviour
 		}
 		if (this.removedValue != entry.Negative)
 		{
-			string text2 = reportGroup.formatfn(entry.Negative);
+			string text2 = reportGroup.formatfn(-entry.Negative);
 			if (reportGroup.groupFormatfn != null && entry.context == null)
 			{
 				float num2;
@@ -183,7 +188,7 @@ public class ReportScreenEntryRow : KMonoBehaviour
 					num2 = (float)neg_notes.Count;
 				}
 				num2 = Mathf.Max(num2, 1f);
-				text2 = reportGroup.groupFormatfn(entry.Negative, num2);
+				text2 = reportGroup.groupFormatfn(-entry.Negative, num2);
 			}
 			this.removed.text = text2;
 			this.removedValue = entry.Negative;

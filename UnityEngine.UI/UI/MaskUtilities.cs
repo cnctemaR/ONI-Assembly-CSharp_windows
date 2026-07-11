@@ -55,68 +55,62 @@ namespace UnityEngine.UI
 				}
 			}
 			ListPool<Canvas>.Release(list);
-			return (!(canvas != null)) ? null : canvas.transform;
+			if (!(canvas != null))
+			{
+				return null;
+			}
+			return canvas.transform;
 		}
 
 		public static int GetStencilDepth(Transform transform, Transform stopAfter)
 		{
 			int num = 0;
-			int num2;
 			if (transform == stopAfter)
 			{
-				num2 = num;
+				return num;
 			}
-			else
+			Transform transform2 = transform.parent;
+			List<Mask> list = ListPool<Mask>.Get();
+			while (transform2 != null)
 			{
-				Transform transform2 = transform.parent;
-				List<Mask> list = ListPool<Mask>.Get();
-				while (transform2 != null)
+				transform2.GetComponents<Mask>(list);
+				for (int i = 0; i < list.Count; i++)
 				{
-					transform2.GetComponents<Mask>(list);
-					for (int i = 0; i < list.Count; i++)
+					if (list[i] != null && list[i].MaskEnabled() && list[i].graphic.IsActive())
 					{
-						if (list[i] != null && list[i].MaskEnabled() && list[i].graphic.IsActive())
-						{
-							num++;
-							break;
-						}
-					}
-					if (transform2 == stopAfter)
-					{
+						num++;
 						break;
 					}
-					transform2 = transform2.parent;
 				}
-				ListPool<Mask>.Release(list);
-				num2 = num;
+				if (transform2 == stopAfter)
+				{
+					break;
+				}
+				transform2 = transform2.parent;
 			}
-			return num2;
+			ListPool<Mask>.Release(list);
+			return num;
 		}
 
 		public static bool IsDescendantOrSelf(Transform father, Transform child)
 		{
-			bool flag;
 			if (father == null || child == null)
 			{
-				flag = false;
+				return false;
 			}
-			else if (father == child)
+			if (father == child)
 			{
-				flag = true;
+				return true;
 			}
-			else
+			while (child.parent != null)
 			{
-				while (child.parent != null)
+				if (child.parent == father)
 				{
-					if (child.parent == father)
-					{
-						return true;
-					}
-					child = child.parent;
+					return true;
 				}
-				flag = false;
+				child = child.parent;
 			}
-			return flag;
+			return false;
 		}
 
 		public static RectMask2D GetRectMaskForClippable(IClippable clippable)
@@ -124,7 +118,7 @@ namespace UnityEngine.UI
 			List<RectMask2D> list = ListPool<RectMask2D>.Get();
 			List<Canvas> list2 = ListPool<Canvas>.Get();
 			RectMask2D rectMask2D = null;
-			clippable.rectTransform.GetComponentsInParent<RectMask2D>(false, list);
+			clippable.gameObject.GetComponentsInParent<RectMask2D>(false, list);
 			if (list.Count > 0)
 			{
 				for (int i = 0; i < list.Count; i++)
@@ -138,7 +132,7 @@ namespace UnityEngine.UI
 					{
 						if (rectMask2D.isActiveAndEnabled)
 						{
-							clippable.rectTransform.GetComponentsInParent<Canvas>(false, list2);
+							clippable.gameObject.GetComponentsInParent<Canvas>(false, list2);
 							for (int j = list2.Count - 1; j >= 0; j--)
 							{
 								if (!MaskUtilities.IsDescendantOrSelf(list2[j].transform, rectMask2D.transform) && list2[j].overrideSorting)

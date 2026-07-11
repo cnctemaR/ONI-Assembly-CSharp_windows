@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Interface, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class AutomationProxyAttribute : Attribute
 	{
 		public AutomationProxyAttribute(bool val)

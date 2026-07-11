@@ -19,18 +19,23 @@ namespace Unity.Collections.LowLevel.Unsafe
 
 		public static int GetFieldOffset(FieldInfo field)
 		{
+			bool isValueType = field.DeclaringType.IsValueType;
 			int num;
-			if (field.DeclaringType.IsValueType)
+			if (isValueType)
 			{
 				num = UnsafeUtility.GetFieldOffsetInStruct(field);
 			}
-			else if (field.DeclaringType.IsClass)
-			{
-				num = UnsafeUtility.GetFieldOffsetInClass(field);
-			}
 			else
 			{
-				num = -1;
+				bool isClass = field.DeclaringType.IsClass;
+				if (isClass)
+				{
+					num = UnsafeUtility.GetFieldOffsetInClass(field);
+				}
+				else
+				{
+					num = -1;
+				}
 			}
 			return num;
 		}
@@ -97,7 +102,12 @@ namespace Unity.Collections.LowLevel.Unsafe
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public unsafe static extern void MemClear(void* destination, long size);
+		public unsafe static extern void MemSet(void* destination, byte value, long size);
+
+		public unsafe static void MemClear(void* destination, long size)
+		{
+			UnsafeUtility.MemSet(destination, 0, size);
+		}
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -113,45 +123,49 @@ namespace Unity.Collections.LowLevel.Unsafe
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool IsUnmanaged(Type type);
+
+		[ThreadSafe]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool IsValidNativeContainerElementType(Type type);
+
+		[ThreadSafe]
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void LogError(string msg, string filename, int linenumber);
-
-		private static bool IsValueType(Type t)
-		{
-			return t.IsValueType;
-		}
-
-		private static bool IsPrimitive(Type t)
-		{
-			return t.IsPrimitive;
-		}
 
 		private static bool IsBlittableValueType(Type t)
 		{
-			return UnsafeUtility.IsValueType(t) && UnsafeUtility.IsBlittable(t);
+			return t.IsValueType && UnsafeUtility.IsBlittable(t);
 		}
 
 		private static string GetReasonForTypeNonBlittableImpl(Type t, string name)
 		{
+			bool flag = !t.IsValueType;
 			string text;
-			if (!UnsafeUtility.IsValueType(t))
+			if (flag)
 			{
 				text = string.Format("{0} is not blittable because it is not of value type ({1})\n", name, t);
 			}
-			else if (UnsafeUtility.IsPrimitive(t))
-			{
-				text = string.Format("{0} is not blittable ({1})\n", name, t);
-			}
 			else
 			{
-				string text2 = "";
-				foreach (FieldInfo fieldInfo in t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+				bool isPrimitive = t.IsPrimitive;
+				if (isPrimitive)
 				{
-					if (!UnsafeUtility.IsBlittableValueType(fieldInfo.FieldType))
-					{
-						text2 += UnsafeUtility.GetReasonForTypeNonBlittableImpl(fieldInfo.FieldType, string.Format("{0}.{1}", name, fieldInfo.Name));
-					}
+					text = string.Format("{0} is not blittable ({1})\n", name, t);
 				}
-				text = text2;
+				else
+				{
+					string text2 = "";
+					foreach (FieldInfo fieldInfo in t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+					{
+						bool flag2 = !UnsafeUtility.IsBlittableValueType(fieldInfo.FieldType);
+						if (flag2)
+						{
+							text2 += UnsafeUtility.GetReasonForTypeNonBlittableImpl(fieldInfo.FieldType, string.Format("{0}.{1}", name, fieldInfo.Name));
+						}
+					}
+					text = text2;
+				}
 			}
 			return text;
 		}
@@ -189,34 +203,93 @@ namespace Unity.Collections.LowLevel.Unsafe
 			return UnsafeUtility.GetReasonForTypeNonBlittableImpl(typeFromHandle, typeFromHandle.Name);
 		}
 
+		public static bool IsUnmanaged<T>()
+		{
+			int num = UnsafeUtility.IsUnmanagedCache<T>.value;
+			bool flag = num == 1;
+			bool flag2;
+			if (flag)
+			{
+				flag2 = true;
+			}
+			else
+			{
+				bool flag3 = num == 0;
+				if (flag3)
+				{
+					num = (UnsafeUtility.IsUnmanagedCache<T>.value = (UnsafeUtility.IsUnmanaged(typeof(T)) ? 1 : (-1)));
+				}
+				flag2 = num == 1;
+			}
+			return flag2;
+		}
+
+		public static bool IsValidNativeContainerElementType<T>()
+		{
+			int num = UnsafeUtility.IsValidNativeContainerElementTypeCache<T>.value;
+			bool flag = num == -1;
+			bool flag2;
+			if (flag)
+			{
+				flag2 = false;
+			}
+			else
+			{
+				bool flag3 = num == 0;
+				if (flag3)
+				{
+					num = (UnsafeUtility.IsValidNativeContainerElementTypeCache<T>.value = (UnsafeUtility.IsValidNativeContainerElementType(typeof(T)) ? 1 : (-1)));
+				}
+				flag2 = num == 1;
+			}
+			return flag2;
+		}
+
+		public static int AlignOf<T>() where T : struct
+		{
+			return UnsafeUtility.SizeOf<UnsafeUtility.AlignOfHelper<T>>() - UnsafeUtility.SizeOf<T>();
+		}
+
+		[MethodImpl((MethodImplOptions)256)]
 		public unsafe static void CopyPtrToStructure<T>(void* ptr, out T output) where T : struct
+		{
+			UnsafeUtility.InternalCopyPtrToStructure<T>(ptr, out output);
+		}
+
+		private unsafe static void InternalCopyPtrToStructure<T>(void* ptr, out T output) where T : struct
 		{
 			output = *(T*)ptr;
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public unsafe static void CopyStructureToPtr<T>(ref T input, void* ptr) where T : struct
+		{
+			UnsafeUtility.InternalCopyStructureToPtr<T>(ref input, ptr);
+		}
+
+		private unsafe static void InternalCopyStructureToPtr<T>(ref T input, void* ptr) where T : struct
 		{
 			*(T*)ptr = input;
 		}
 
 		public unsafe static T ReadArrayElement<T>(void* source, int index)
 		{
-			return *(T*)((byte*)source + index * sizeof(T));
+			return *(T*)((byte*)source + (long)index * (long)sizeof(T));
 		}
 
 		public unsafe static T ReadArrayElementWithStride<T>(void* source, int index, int stride)
 		{
-			return *(T*)((byte*)source + index * stride);
+			return *(T*)((byte*)source + (long)index * (long)stride);
 		}
 
 		public unsafe static void WriteArrayElement<T>(void* destination, int index, T value)
 		{
-			*(T*)((byte*)destination + index * sizeof(T)) = value;
+			*(T*)((byte*)destination + (long)index * (long)sizeof(T)) = value;
 		}
 
 		public unsafe static void WriteArrayElementWithStride<T>(void* destination, int index, int stride, T value)
 		{
-			*(T*)((byte*)destination + index * stride) = value;
+			*(T*)((byte*)destination + (long)index * (long)stride) = value;
 		}
 
 		public unsafe static void* AddressOf<T>(ref T output) where T : struct
@@ -229,9 +302,33 @@ namespace Unity.Collections.LowLevel.Unsafe
 			return sizeof(T);
 		}
 
-		public static int AlignOf<T>() where T : struct
+		public static int EnumToInt<T>(T enumValue) where T : struct, IConvertible
 		{
-			return 4;
+			int num = 0;
+			UnsafeUtility.InternalEnumToInt<T>(ref enumValue, ref num);
+			return num;
+		}
+
+		private static void InternalEnumToInt<T>(ref T enumValue, ref int intValue)
+		{
+			intValue = enumValue;
+		}
+
+		internal struct IsUnmanagedCache<T>
+		{
+			internal static int value;
+		}
+
+		internal struct IsValidNativeContainerElementTypeCache<T>
+		{
+			internal static int value;
+		}
+
+		private struct AlignOfHelper<T> where T : struct
+		{
+			public byte dummy;
+
+			public T data;
 		}
 	}
 }

@@ -40,9 +40,10 @@ namespace UnityEngine
 		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal static GUILayoutUtility.LayoutCache SelectIDList(int instanceID, bool isWindow)
 		{
-			Dictionary<int, GUILayoutUtility.LayoutCache> dictionary = ((!isWindow) ? GUILayoutUtility.s_StoredLayouts : GUILayoutUtility.s_StoredWindows);
+			Dictionary<int, GUILayoutUtility.LayoutCache> dictionary = (isWindow ? GUILayoutUtility.s_StoredWindows : GUILayoutUtility.s_StoredLayouts);
 			GUILayoutUtility.LayoutCache layoutCache;
-			if (!dictionary.TryGetValue(instanceID, out layoutCache))
+			bool flag = !dictionary.TryGetValue(instanceID, out layoutCache);
+			if (flag)
 			{
 				layoutCache = new GUILayoutUtility.LayoutCache();
 				dictionary[instanceID] = layoutCache;
@@ -56,7 +57,8 @@ namespace UnityEngine
 		internal static void Begin(int instanceID)
 		{
 			GUILayoutUtility.LayoutCache layoutCache = GUILayoutUtility.SelectIDList(instanceID, false);
-			if (Event.current.type == EventType.Layout)
+			bool flag = Event.current.type == EventType.Layout;
+			if (flag)
 			{
 				GUILayoutUtility.current.topLevel = (layoutCache.topLevel = new GUILayoutGroup());
 				GUILayoutUtility.current.layoutGroups.Clear();
@@ -74,7 +76,8 @@ namespace UnityEngine
 		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal static void BeginContainer(GUILayoutUtility.LayoutCache cache)
 		{
-			if (Event.current.type == EventType.Layout)
+			bool flag = Event.current.type == EventType.Layout;
+			if (flag)
 			{
 				cache.topLevel = new GUILayoutGroup();
 				cache.layoutGroups.Clear();
@@ -89,12 +92,14 @@ namespace UnityEngine
 		internal static void BeginWindow(int windowID, GUIStyle style, GUILayoutOption[] options)
 		{
 			GUILayoutUtility.LayoutCache layoutCache = GUILayoutUtility.SelectIDList(windowID, true);
-			if (Event.current.type == EventType.Layout)
+			bool flag = Event.current.type == EventType.Layout;
+			if (flag)
 			{
 				GUILayoutUtility.current.topLevel = (layoutCache.topLevel = new GUILayoutGroup());
 				GUILayoutUtility.current.topLevel.style = style;
 				GUILayoutUtility.current.topLevel.windowID = windowID;
-				if (options != null)
+				bool flag2 = options != null;
+				if (flag2)
 				{
 					GUILayoutUtility.current.topLevel.ApplyOptions(options);
 				}
@@ -122,7 +127,8 @@ namespace UnityEngine
 
 		internal static void Layout()
 		{
-			if (GUILayoutUtility.current.topLevel.windowID == -1)
+			bool flag = GUILayoutUtility.current.topLevel.windowID == -1;
+			if (flag)
 			{
 				GUILayoutUtility.current.topLevel.CalcWidth();
 				GUILayoutUtility.current.topLevel.SetHorizontal(0f, Mathf.Min((float)Screen.width / GUIUtility.pixelsPerPoint, GUILayoutUtility.current.topLevel.maxWidth));
@@ -139,7 +145,8 @@ namespace UnityEngine
 
 		internal static void LayoutFromEditorWindow()
 		{
-			if (GUILayoutUtility.current.topLevel != null)
+			bool flag = GUILayoutUtility.current.topLevel != null;
+			if (flag)
 			{
 				GUILayoutUtility.current.topLevel.CalcWidth();
 				GUILayoutUtility.current.topLevel.SetHorizontal(0f, (float)Screen.width / GUIUtility.pixelsPerPoint);
@@ -156,7 +163,8 @@ namespace UnityEngine
 		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal static void LayoutFromContainer(float w, float h)
 		{
-			if (GUILayoutUtility.current.topLevel != null)
+			bool flag = GUILayoutUtility.current.topLevel != null;
+			if (flag)
 			{
 				GUILayoutUtility.current.topLevel.CalcWidth();
 				GUILayoutUtility.current.topLevel.SetHorizontal(0f, w);
@@ -172,8 +180,9 @@ namespace UnityEngine
 
 		internal static float LayoutFromInspector(float width)
 		{
+			bool flag = GUILayoutUtility.current.topLevel != null && GUILayoutUtility.current.topLevel.windowID == -1;
 			float num;
-			if (GUILayoutUtility.current.topLevel != null && GUILayoutUtility.current.topLevel.windowID == -1)
+			if (flag)
 			{
 				GUILayoutUtility.current.topLevel.CalcWidth();
 				GUILayoutUtility.current.topLevel.SetHorizontal(0f, width);
@@ -185,7 +194,8 @@ namespace UnityEngine
 			}
 			else
 			{
-				if (GUILayoutUtility.current.topLevel != null)
+				bool flag2 = GUILayoutUtility.current.topLevel != null;
+				if (flag2)
 				{
 					GUILayoutUtility.LayoutSingleGroup(GUILayoutUtility.current.topLevel);
 				}
@@ -206,7 +216,8 @@ namespace UnityEngine
 
 		private static void LayoutSingleGroup(GUILayoutGroup i)
 		{
-			if (!i.isWindow)
+			bool flag = !i.isWindow;
+			if (flag)
 			{
 				float minWidth = i.minWidth;
 				float maxWidth = i.maxWidth;
@@ -231,9 +242,10 @@ namespace UnityEngine
 		[SecuritySafeCritical]
 		private static GUILayoutGroup CreateGUILayoutGroupInstanceOfType(Type LayoutType)
 		{
-			if (!typeof(GUILayoutGroup).IsAssignableFrom(LayoutType))
+			bool flag = !typeof(GUILayoutGroup).IsAssignableFrom(LayoutType);
+			if (flag)
 			{
-				throw new ArgumentException("LayoutType needs to be of type GUILayoutGroup");
+				throw new ArgumentException("LayoutType needs to be of type GUILayoutGroup", "LayoutType");
 			}
 			return (GUILayoutGroup)Activator.CreateInstance(LayoutType);
 		}
@@ -242,12 +254,13 @@ namespace UnityEngine
 		{
 			EventType type = Event.current.type;
 			GUILayoutGroup guilayoutGroup;
-			if (type != EventType.Used && type != EventType.Layout)
+			if (type != EventType.Layout && type != EventType.Used)
 			{
 				guilayoutGroup = GUILayoutUtility.current.topLevel.GetNext() as GUILayoutGroup;
-				if (guilayoutGroup == null)
+				bool flag = guilayoutGroup == null;
+				if (flag)
 				{
-					throw new ArgumentException("GUILayout: Mismatched LayoutGroup." + Event.current.type);
+					throw new ExitGUIException("GUILayout: Mismatched LayoutGroup." + Event.current.type);
 				}
 				guilayoutGroup.ResetCursor();
 			}
@@ -255,7 +268,8 @@ namespace UnityEngine
 			{
 				guilayoutGroup = GUILayoutUtility.CreateGUILayoutGroupInstanceOfType(layoutType);
 				guilayoutGroup.style = style;
-				if (options != null)
+				bool flag2 = options != null;
+				if (flag2)
 				{
 					guilayoutGroup.ApplyOptions(options);
 				}
@@ -268,14 +282,16 @@ namespace UnityEngine
 
 		internal static void EndLayoutGroup()
 		{
-			if (GUILayoutUtility.current.layoutGroups.Count == 0)
+			bool flag = GUILayoutUtility.current.layoutGroups.Count == 0;
+			if (flag)
 			{
 				Debug.LogError("EndLayoutGroup: BeginLayoutGroup must be called first.");
 			}
 			else
 			{
 				GUILayoutUtility.current.layoutGroups.Pop();
-				if (0 < GUILayoutUtility.current.layoutGroups.Count)
+				bool flag2 = 0 < GUILayoutUtility.current.layoutGroups.Count;
+				if (flag2)
 				{
 					GUILayoutUtility.current.topLevel = (GUILayoutGroup)GUILayoutUtility.current.layoutGroups.Peek();
 				}
@@ -290,12 +306,13 @@ namespace UnityEngine
 		{
 			EventType type = Event.current.type;
 			GUILayoutGroup guilayoutGroup;
-			if (type != EventType.Used && type != EventType.Layout)
+			if (type != EventType.Layout && type != EventType.Used)
 			{
 				guilayoutGroup = GUILayoutUtility.current.windows.GetNext() as GUILayoutGroup;
-				if (guilayoutGroup == null)
+				bool flag = guilayoutGroup == null;
+				if (flag)
 				{
-					throw new ArgumentException("GUILayout: Mismatched LayoutGroup." + Event.current.type);
+					throw new ExitGUIException("GUILayout: Mismatched LayoutGroup." + Event.current.type);
 				}
 				guilayoutGroup.ResetCursor();
 			}
@@ -317,7 +334,6 @@ namespace UnityEngine
 
 		internal static GUILayoutGroup topLevel
 		{
-			[CompilerGenerated]
 			get
 			{
 				return GUILayoutUtility.current.topLevel;
@@ -353,32 +369,36 @@ namespace UnityEngine
 			}
 			else
 			{
-				if (style.isHeightDependantOnWidth)
+				bool isHeightDependantOnWidth = style.isHeightDependantOnWidth;
+				if (isHeightDependantOnWidth)
 				{
 					GUILayoutUtility.current.topLevel.Add(new GUIWordWrapSizer(style, content, options));
 				}
 				else
 				{
 					Vector2 vector = new Vector2(0f, 0f);
-					if (options != null)
+					bool flag = options != null;
+					if (flag)
 					{
 						foreach (GUILayoutOption guilayoutOption in options)
 						{
 							GUILayoutOption.Type type2 = guilayoutOption.type;
-							if (type2 != GUILayoutOption.Type.maxHeight)
+							if (type2 != GUILayoutOption.Type.maxWidth)
 							{
-								if (type2 == GUILayoutOption.Type.maxWidth)
+								if (type2 == GUILayoutOption.Type.maxHeight)
 								{
-									vector.x = (float)guilayoutOption.value;
+									vector.y = (float)guilayoutOption.value;
 								}
 							}
 							else
 							{
-								vector.y = (float)guilayoutOption.value;
+								vector.x = (float)guilayoutOption.value;
 							}
 						}
 					}
 					Vector2 vector2 = style.CalcSizeWithConstraints(content, vector);
+					vector2.x = Mathf.Ceil(vector2.x);
+					vector2.y = Mathf.Ceil(vector2.y);
 					GUILayoutUtility.current.topLevel.Add(new GUILayoutEntry(vector2.x, vector2.x, vector2.y, vector2.y, style, options));
 				}
 				rect = GUILayoutUtility.kDummyRect;
@@ -511,7 +531,8 @@ namespace UnityEngine
 		{
 			get
 			{
-				if (GUILayoutUtility.s_SpaceStyle == null)
+				bool flag = GUILayoutUtility.s_SpaceStyle == null;
+				if (flag)
 				{
 					GUILayoutUtility.s_SpaceStyle = new GUIStyle();
 				}

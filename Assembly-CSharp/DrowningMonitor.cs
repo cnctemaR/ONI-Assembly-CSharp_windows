@@ -182,9 +182,9 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISlicedSim1000ms
 		{
 			if (this.livesUnderWater)
 			{
-				return CREATURES.STATUSITEMS.SATURATED.NAME;
+				return "    • " + CREATURES.STATUSITEMS.SATURATED.NAME;
 			}
-			return CREATURES.STATUSITEMS.DROWNING.NAME;
+			return "    • " + CREATURES.STATUSITEMS.DROWNING.NAME;
 		}
 	}
 

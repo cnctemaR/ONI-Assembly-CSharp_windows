@@ -51,7 +51,7 @@ public static class BaseLightBugConfig
 			light2D.Angle = 0f;
 			light2D.Direction = LIGHT2D.LIGHTBUG_DIRECTION;
 			light2D.Offset = LIGHT2D.LIGHTBUG_OFFSET;
-			light2D.shape = LightShape.Circle;
+			light2D.shape = global::LightShape.Circle;
 			light2D.drawOverlay = true;
 			light2D.Lux = 1800;
 			gameObject.AddOrGet<LightSymbolTracker>().targetSymbol = "snapTo_light_locator";

@@ -10,17 +10,17 @@ namespace UnityEngine.Networking
 	[StructLayout(LayoutKind.Sequential)]
 	public class CertificateHandler : IDisposable
 	{
-		protected CertificateHandler()
-		{
-			this.m_Ptr = CertificateHandler.Create(this);
-		}
-
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr Create(CertificateHandler obj);
 
 		[NativeMethod(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Release();
+
+		protected CertificateHandler()
+		{
+			this.m_Ptr = CertificateHandler.Create(this);
+		}
 
 		~CertificateHandler()
 		{
@@ -40,7 +40,8 @@ namespace UnityEngine.Networking
 
 		public void Dispose()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				this.Release();
 				this.m_Ptr = IntPtr.Zero;

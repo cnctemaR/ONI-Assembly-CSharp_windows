@@ -16,7 +16,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		return old_value;
 	}
 
-	public LightShape shape
+	public global::LightShape shape
 	{
 		get
 		{
@@ -24,7 +24,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		}
 		set
 		{
-			this.pending_emitter_state.shape = this.MaybeDirty<LightShape>(this.pending_emitter_state.shape, value, ref this.dirty_shape);
+			this.pending_emitter_state.shape = this.MaybeDirty<global::LightShape>(this.pending_emitter_state.shape, value, ref this.dirty_shape);
 		}
 	}
 
@@ -173,7 +173,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		int num = (int)this.Range;
 		Vector2I vector2I2 = new Vector2I(vector2I.x - num, vector2I.y - num);
 		int num2 = 2 * num;
-		int num3 = ((this.shape == LightShape.Circle) ? (2 * num) : num);
+		int num3 = ((this.shape == global::LightShape.Circle) ? (2 * num) : num);
 		this.solidPartitionerEntry = this.AddToLayer(vector2I2, num2, num3, GameScenePartitioner.Instance.solidChangedLayer);
 		this.liquidPartitionerEntry = this.AddToLayer(vector2I2, num2, num3, GameScenePartitioner.Instance.liquidChangedLayer);
 	}

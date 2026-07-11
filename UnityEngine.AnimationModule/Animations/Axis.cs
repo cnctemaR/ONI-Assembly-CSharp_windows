@@ -3,7 +3,7 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Animations
 {
-	[NativeType("Runtime/Animation/Constraints/ConstraintEnums.h")]
+	[NativeType("Modules/Animation/Constraints/ConstraintEnums.h")]
 	[Flags]
 	public enum Axis
 	{

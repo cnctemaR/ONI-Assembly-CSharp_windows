@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.Serialization
 {
-	[CLSCompliant(false)]
 	[ComVisible(true)]
+	[CLSCompliant(false)]
 	public interface IFormatterConverter
 	{
 		object Convert(object value, Type type);

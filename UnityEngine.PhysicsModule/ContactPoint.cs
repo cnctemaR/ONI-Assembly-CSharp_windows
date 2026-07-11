@@ -5,7 +5,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Dynamics/MessageParameters.h")]
+	[NativeHeader("Modules/Physics/MessageParameters.h")]
 	[UsedByNativeCode]
 	public struct ContactPoint
 	{

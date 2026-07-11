@@ -8,16 +8,6 @@ namespace UnityEngine
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class TreePrototype
 	{
-		public TreePrototype()
-		{
-		}
-
-		public TreePrototype(TreePrototype other)
-		{
-			this.prefab = other.prefab;
-			this.bendFactor = other.bendFactor;
-		}
-
 		public GameObject prefab
 		{
 			get
@@ -42,6 +32,16 @@ namespace UnityEngine
 			}
 		}
 
+		public TreePrototype()
+		{
+		}
+
+		public TreePrototype(TreePrototype other)
+		{
+			this.prefab = other.prefab;
+			this.bendFactor = other.bendFactor;
+		}
+
 		public override bool Equals(object obj)
 		{
 			return this.Equals(obj as TreePrototype);
@@ -54,25 +54,34 @@ namespace UnityEngine
 
 		private bool Equals(TreePrototype other)
 		{
-			bool flag;
-			if (object.ReferenceEquals(other, null))
+			bool flag = other == null;
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
-			}
-			else if (object.ReferenceEquals(other, this))
-			{
-				flag = true;
-			}
-			else if (base.GetType() != other.GetType())
-			{
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
-				bool flag2 = this.prefab == other.prefab && this.bendFactor == other.bendFactor;
-				flag = flag2;
+				bool flag3 = other == this;
+				if (flag3)
+				{
+					flag2 = true;
+				}
+				else
+				{
+					bool flag4 = base.GetType() != other.GetType();
+					if (flag4)
+					{
+						flag2 = false;
+					}
+					else
+					{
+						bool flag5 = this.prefab == other.prefab && this.bendFactor == other.bendFactor;
+						flag2 = flag5;
+					}
+				}
 			}
-			return flag;
+			return flag2;
 		}
 
 		internal GameObject m_Prefab;

@@ -188,8 +188,9 @@ namespace System
 			}
 		}
 
-		private static extern PlatformID Platform
+		internal static extern PlatformID Platform
 		{
+			[CompilerGenerated]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}

@@ -8,6 +8,8 @@ namespace UnityEngine.Experimental.GlobalIllumination
 		Point,
 		Spot,
 		Rectangle,
-		Disc
+		Disc,
+		SpotPyramidShape,
+		SpotBoxShape
 	}
 }

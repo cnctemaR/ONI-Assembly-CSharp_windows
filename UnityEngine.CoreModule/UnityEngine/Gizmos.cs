@@ -5,7 +5,7 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Gizmos.bindings.h")]
+	[NativeHeader("Runtime/Export/Gizmos/Gizmos.bindings.h")]
 	[StaticAccessor("GizmoBindings", StaticAccessorType.DoubleColon)]
 	public sealed class Gizmos
 	{
@@ -54,7 +54,13 @@ namespace UnityEngine
 		[NativeThrows]
 		public static void DrawIcon(Vector3 center, string name, [DefaultValue("true")] bool allowScaling)
 		{
-			Gizmos.DrawIcon_Injected(ref center, name, allowScaling);
+			Gizmos.DrawIcon(center, name, allowScaling, Color.white);
+		}
+
+		[NativeThrows]
+		public static void DrawIcon(Vector3 center, string name, [DefaultValue("true")] bool allowScaling, [DefaultValue("Color(255,255,255,255)")] Color tint)
+		{
+			Gizmos.DrawIcon_Injected(ref center, name, allowScaling, ref tint);
 		}
 
 		[NativeThrows]
@@ -89,6 +95,14 @@ namespace UnityEngine
 			{
 				Gizmos.set_matrix_Injected(ref value);
 			}
+		}
+
+		public static extern Texture exposure
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
 		}
 
 		public static void DrawFrustum(Vector3 center, float fov, float maxRange, float minRange, float aspect)
@@ -260,7 +274,7 @@ namespace UnityEngine
 		private static extern void DrawWireMesh_Injected(Mesh mesh, int submeshIndex, [DefaultValue("Vector3.zero")] ref Vector3 position, [DefaultValue("Quaternion.identity")] ref Quaternion rotation, [DefaultValue("Vector3.one")] ref Vector3 scale);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DrawIcon_Injected(ref Vector3 center, string name, [DefaultValue("true")] bool allowScaling);
+		private static extern void DrawIcon_Injected(ref Vector3 center, string name, [DefaultValue("true")] bool allowScaling, [DefaultValue("Color(255,255,255,255)")] ref Color tint);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void DrawGUITexture_Injected(ref Rect screenRect, Texture texture, int leftBorder, int rightBorder, int topBorder, int bottomBorder, [DefaultValue("null")] Material mat);

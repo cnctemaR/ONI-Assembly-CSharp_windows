@@ -5,9 +5,9 @@ using Unity;
 
 namespace System.Reflection.Emit
 {
+	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_FieldBuilder))]
-	[ClassInterface(ClassInterfaceType.None)]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class FieldBuilder : FieldInfo, _FieldBuilder
 	{

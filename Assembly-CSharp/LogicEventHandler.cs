@@ -91,9 +91,9 @@ internal class LogicEventHandler : ILogicEventReceiver, ILogicNetworkConnection,
 			}
 			float num = (Time.time - logicSoundPair.lastPlayed) / 3f;
 			EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound(text, false), Grid.CellToPos(this.cell), 1f);
-			eventInstance.setParameterValue("logic_volumeModifer", num);
-			eventInstance.setParameterValue("wireCount", (float)(networkForCell.WireCount % 24));
-			eventInstance.setParameterValue("enabled", (float)new_value);
+			eventInstance.setParameterByName("logic_volumeModifer", num, false);
+			eventInstance.setParameterByName("wireCount", (float)(networkForCell.WireCount % 24), false);
+			eventInstance.setParameterByName("enabled", (float)new_value, false);
 			KFMOD.EndOneShot(eventInstance);
 		}
 	}

@@ -5,11 +5,6 @@ namespace UnityEngine.SceneManagement
 	[Serializable]
 	public struct CreateSceneParameters
 	{
-		public CreateSceneParameters(LocalPhysicsMode physicsMode)
-		{
-			this.m_LocalPhysicsMode = physicsMode;
-		}
-
 		public LocalPhysicsMode localPhysicsMode
 		{
 			get
@@ -20,6 +15,11 @@ namespace UnityEngine.SceneManagement
 			{
 				this.m_LocalPhysicsMode = value;
 			}
+		}
+
+		public CreateSceneParameters(LocalPhysicsMode physicsMode)
+		{
+			this.m_LocalPhysicsMode = physicsMode;
 		}
 
 		[SerializeField]

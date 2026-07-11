@@ -10,6 +10,16 @@ public class FileNameDialog : KModalScreen
 		return 1000f;
 	}
 
+	public void SetTextAndSelect(string text)
+	{
+		if (this.inputField == null)
+		{
+			return;
+		}
+		this.inputField.text = text;
+		this.inputField.Select();
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();

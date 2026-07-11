@@ -8,9 +8,9 @@ using System.Security.Permissions;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_Module))]
+	[ClassInterface(ClassInterfaceType.None)]
+	[ComVisible(true)]
 	[Serializable]
 	internal class MonoModule : RuntimeModule
 	{

@@ -7,24 +7,6 @@ namespace UnityEngine
 	[NativeHeader("Runtime/Scripting/TextAsset.h")]
 	public class TextAsset : Object
 	{
-		public TextAsset()
-			: this(TextAsset.CreateOptions.CreateNativeObject, null)
-		{
-		}
-
-		public TextAsset(string text)
-			: this(TextAsset.CreateOptions.CreateNativeObject, text)
-		{
-		}
-
-		internal TextAsset(TextAsset.CreateOptions options, string text)
-		{
-			if (options == TextAsset.CreateOptions.CreateNativeObject)
-			{
-				TextAsset.Internal_CreateInstance(this, text);
-			}
-		}
-
 		public extern string text
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -40,6 +22,25 @@ namespace UnityEngine
 		public override string ToString()
 		{
 			return this.text;
+		}
+
+		public TextAsset()
+			: this(TextAsset.CreateOptions.CreateNativeObject, null)
+		{
+		}
+
+		public TextAsset(string text)
+			: this(TextAsset.CreateOptions.CreateNativeObject, text)
+		{
+		}
+
+		internal TextAsset(TextAsset.CreateOptions options, string text)
+		{
+			bool flag = options == TextAsset.CreateOptions.CreateNativeObject;
+			if (flag)
+			{
+				TextAsset.Internal_CreateInstance(this, text);
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

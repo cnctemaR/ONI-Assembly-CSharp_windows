@@ -2,26 +2,27 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
 using UnityEngine.Internal;
 
 namespace Unity.Collections
 {
-	[NativeContainerSupportsDeallocateOnJobCompletion]
-	[DebuggerTypeProxy(typeof(NativeArrayDebugView<>))]
-	[NativeContainerSupportsDeferredConvertListToArray]
-	[DebuggerDisplay("Length = {Length}")]
-	[NativeContainerSupportsMinMaxWriteRestriction]
 	[NativeContainer]
-	public struct NativeArray<T> : IDisposable, IEnumerable<T>, IEquatable<NativeArray<T>>, IEnumerable where T : struct
+	[DebuggerTypeProxy(typeof(NativeArrayDebugView<>))]
+	[DebuggerDisplay("Length = {Length}")]
+	[NativeContainerSupportsDeallocateOnJobCompletion]
+	[NativeContainerSupportsDeferredConvertListToArray]
+	[NativeContainerSupportsMinMaxWriteRestriction]
+	public struct NativeArray<T> : IDisposable, IEnumerable<T>, IEnumerable, IEquatable<NativeArray<T>> where T : struct
 	{
 		public NativeArray(int length, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.ClearMemory)
 		{
 			NativeArray<T>.Allocate(length, allocator, out this);
-			if ((options & NativeArrayOptions.ClearMemory) == NativeArrayOptions.ClearMemory)
+			bool flag = (options & NativeArrayOptions.ClearMemory) == NativeArrayOptions.ClearMemory;
+			if (flag)
 			{
 				UnsafeUtility.MemClear(this.m_Buffer, (long)this.Length * (long)UnsafeUtility.SizeOf<T>());
 			}
@@ -42,6 +43,7 @@ namespace Unity.Collections
 		private static void Allocate(int length, Allocator allocator, out NativeArray<T> array)
 		{
 			long num = (long)UnsafeUtility.SizeOf<T>() * (long)length;
+			array = default(NativeArray<T>);
 			array.m_Buffer = UnsafeUtility.Malloc(num, UnsafeUtility.AlignOf<T>(), allocator);
 			array.m_Length = length;
 			array.m_AllocatorLabel = allocator;
@@ -49,7 +51,6 @@ namespace Unity.Collections
 
 		public int Length
 		{
-			[CompilerGenerated]
 			get
 			{
 				return this.m_Length;
@@ -57,11 +58,12 @@ namespace Unity.Collections
 		}
 
 		[BurstDiscard]
-		internal static void IsBlittableAndThrow()
+		internal static void IsUnmanagedAndThrow()
 		{
-			if (!UnsafeUtility.IsBlittable<T>())
+			bool flag = !UnsafeUtility.IsValidNativeContainerElementType<T>();
+			if (flag)
 			{
-				throw new InvalidOperationException(string.Format("{0} used in NativeArray<{1}> must be blittable.\n{2}", typeof(T), typeof(T), UnsafeUtility.GetReasonForValueTypeNonBlittable<T>()));
+				throw new InvalidOperationException(string.Format("{0} used in NativeArray<{1}> must be unmanaged (contain no managed types) and cannot itself be a native container type.", typeof(T), typeof(T)));
 			}
 		}
 
@@ -90,19 +92,34 @@ namespace Unity.Collections
 
 		public bool IsCreated
 		{
-			[CompilerGenerated]
 			get
 			{
 				return this.m_Buffer != null;
 			}
 		}
 
-		[WriteAccessRequired]
-		public void Dispose()
+		private void Deallocate()
 		{
 			UnsafeUtility.Free(this.m_Buffer, this.m_AllocatorLabel);
 			this.m_Buffer = null;
 			this.m_Length = 0;
+		}
+
+		[WriteAccessRequired]
+		public void Dispose()
+		{
+			this.Deallocate();
+		}
+
+		public JobHandle Dispose(JobHandle inputDeps)
+		{
+			JobHandle jobHandle = new NativeArray<T>.DisposeJob
+			{
+				Container = this
+			}.Schedule(inputDeps);
+			this.m_Buffer = null;
+			this.m_Length = 0;
+			return jobHandle;
 		}
 
 		[WriteAccessRequired]
@@ -156,7 +173,8 @@ namespace Unity.Collections
 
 		public override bool Equals(object obj)
 		{
-			return !object.ReferenceEquals(null, obj) && obj is NativeArray<T> && this.Equals((NativeArray<T>)obj);
+			bool flag = obj == null;
+			return !flag && obj is NativeArray<T> && this.Equals((NativeArray<T>)obj);
 		}
 
 		public override int GetHashCode()
@@ -225,12 +243,68 @@ namespace Unity.Collections
 			gchandle.Free();
 		}
 
+		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+		private void CheckReinterpretLoadRange<U>(int sourceIndex) where U : struct
+		{
+		}
+
+		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+		private void CheckReinterpretStoreRange<U>(int destIndex) where U : struct
+		{
+		}
+
+		public unsafe U ReinterpretLoad<U>(int sourceIndex) where U : struct
+		{
+			byte* ptr = (byte*)this.m_Buffer + (long)UnsafeUtility.SizeOf<T>() * (long)sourceIndex;
+			return UnsafeUtility.ReadArrayElement<U>((void*)ptr, 0);
+		}
+
+		public unsafe void ReinterpretStore<U>(int destIndex, U data) where U : struct
+		{
+			byte* ptr = (byte*)this.m_Buffer + (long)UnsafeUtility.SizeOf<T>() * (long)destIndex;
+			UnsafeUtility.WriteArrayElement<U>((void*)ptr, 0, data);
+		}
+
+		private NativeArray<U> InternalReinterpret<U>(int length) where U : struct
+		{
+			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<U>(this.m_Buffer, length, this.m_AllocatorLabel);
+		}
+
+		public NativeArray<U> Reinterpret<U>() where U : struct
+		{
+			return this.InternalReinterpret<U>(this.Length);
+		}
+
+		public NativeArray<U> Reinterpret<U>(int expectedTypeSize) where U : struct
+		{
+			long num = (long)UnsafeUtility.SizeOf<T>();
+			long num2 = (long)UnsafeUtility.SizeOf<U>();
+			long num3 = (long)this.Length * num;
+			long num4 = num3 / num2;
+			return this.InternalReinterpret<U>((int)num4);
+		}
+
+		public unsafe NativeArray<T> GetSubArray(int start, int length)
+		{
+			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)((byte*)this.m_Buffer + (long)UnsafeUtility.SizeOf<T>() * (long)start), length, Allocator.Invalid);
+		}
+
 		[NativeDisableUnsafePtrRestriction]
 		internal unsafe void* m_Buffer;
 
 		internal int m_Length;
 
 		internal Allocator m_AllocatorLabel;
+
+		private struct DisposeJob : IJob
+		{
+			public void Execute()
+			{
+				this.Container.Deallocate();
+			}
+
+			public NativeArray<T> Container;
+		}
 
 		[ExcludeFromDocs]
 		public struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
@@ -258,7 +332,6 @@ namespace Unity.Collections
 
 			public T Current
 			{
-				[CompilerGenerated]
 				get
 				{
 					return this.m_Array[this.m_Index];
@@ -267,7 +340,6 @@ namespace Unity.Collections
 
 			object IEnumerator.Current
 			{
-				[CompilerGenerated]
 				get
 				{
 					return this.Current;

@@ -30,8 +30,8 @@ namespace System.Threading
 			throw new ArgumentException(Environment.GetResourceString("Argument must be initialized to false"), "lockTaken");
 		}
 
-		[SecuritySafeCritical]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[SecuritySafeCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Exit(object obj);
 

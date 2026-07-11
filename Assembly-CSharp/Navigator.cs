@@ -442,15 +442,12 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	public int GetNavigationCost(int cell, CellOffset[] offsets)
 	{
 		int num = -1;
-		foreach (CellOffset cellOffset in offsets)
+		int num2 = offsets.Length;
+		for (int i = 0; i < num2; i++)
 		{
-			int num2 = Grid.OffsetCell(cell, cellOffset);
-			int navigationCost = this.GetNavigationCost(num2);
-			if (num == -1)
-			{
-				num = navigationCost;
-			}
-			else if (navigationCost != -1 && navigationCost < num)
+			int num3 = Grid.OffsetCell(cell, offsets[i]);
+			int navigationCost = this.GetNavigationCost(num3);
+			if (navigationCost != -1 && (num == -1 || navigationCost < num))
 			{
 				num = navigationCost;
 			}

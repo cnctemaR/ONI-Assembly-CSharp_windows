@@ -5,18 +5,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/BootConfig.bindings.h")]
+	[NativeHeader("Runtime/Export/Bootstrap/BootConfig.bindings.h")]
 	internal class BootConfigData
 	{
-		private BootConfigData(IntPtr nativeHandle)
-		{
-			if (nativeHandle == IntPtr.Zero)
-			{
-				throw new ArgumentException("native handle can not be null");
-			}
-			this.m_Ptr = nativeHandle;
-		}
-
 		public void AddKey(string key)
 		{
 			this.Append(key, null);
@@ -45,6 +36,16 @@ namespace UnityEngine
 		private static BootConfigData WrapBootConfigData(IntPtr nativeHandle)
 		{
 			return new BootConfigData(nativeHandle);
+		}
+
+		private BootConfigData(IntPtr nativeHandle)
+		{
+			bool flag = nativeHandle == IntPtr.Zero;
+			if (flag)
+			{
+				throw new ArgumentException("native handle can not be null");
+			}
+			this.m_Ptr = nativeHandle;
 		}
 
 		private IntPtr m_Ptr;

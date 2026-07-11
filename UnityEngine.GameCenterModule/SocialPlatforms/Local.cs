@@ -10,7 +10,8 @@ namespace UnityEngine.SocialPlatforms
 		{
 			get
 			{
-				if (Local.m_LocalUser == null)
+				bool flag = Local.m_LocalUser == null;
+				if (flag)
 				{
 					Local.m_LocalUser = new LocalUser();
 				}
@@ -28,7 +29,8 @@ namespace UnityEngine.SocialPlatforms
 			localUser.SetUserID("1000");
 			localUser.SetUserName("Lerpz");
 			localUser.SetImage(this.m_DefaultTexture);
-			if (callback != null)
+			bool flag = callback != null;
+			if (flag)
 			{
 				callback(true);
 			}
@@ -44,10 +46,14 @@ namespace UnityEngine.SocialPlatforms
 
 		void ISocialPlatform.LoadFriends(ILocalUser user, Action<bool> callback)
 		{
-			if (this.VerifyUser())
+			bool flag = !this.VerifyUser();
+			if (!flag)
 			{
-				((LocalUser)user).SetFriends(this.m_Friends.ToArray());
-				if (callback != null)
+				LocalUser localUser = (LocalUser)user;
+				IUserProfile[] array = this.m_Friends.ToArray();
+				localUser.SetFriends(array);
+				bool flag2 = callback != null;
+				if (flag2)
 				{
 					callback(true);
 				}
@@ -57,45 +63,53 @@ namespace UnityEngine.SocialPlatforms
 		public void LoadUsers(string[] userIDs, Action<IUserProfile[]> callback)
 		{
 			List<UserProfile> list = new List<UserProfile>();
-			if (this.VerifyUser())
+			bool flag = !this.VerifyUser();
+			if (!flag)
 			{
 				foreach (string text in userIDs)
 				{
 					foreach (UserProfile userProfile in this.m_Users)
 					{
-						if (userProfile.id == text)
+						bool flag2 = userProfile.id == text;
+						if (flag2)
 						{
 							list.Add(userProfile);
 						}
 					}
 					foreach (UserProfile userProfile2 in this.m_Friends)
 					{
-						if (userProfile2.id == text)
+						bool flag3 = userProfile2.id == text;
+						if (flag3)
 						{
 							list.Add(userProfile2);
 						}
 					}
 				}
-				callback(list.ToArray());
+				IUserProfile[] array = list.ToArray();
+				callback(array);
 			}
 		}
 
 		public void ReportProgress(string id, double progress, Action<bool> callback)
 		{
-			if (this.VerifyUser())
+			bool flag = !this.VerifyUser();
+			if (!flag)
 			{
 				foreach (Achievement achievement in this.m_Achievements)
 				{
-					if (achievement.id == id && achievement.percentCompleted <= progress)
+					bool flag2 = achievement.id == id && achievement.percentCompleted <= progress;
+					if (flag2)
 					{
-						if (progress >= 100.0)
+						bool flag3 = progress >= 100.0;
+						if (flag3)
 						{
 							achievement.SetCompleted(true);
 						}
 						achievement.SetHidden(false);
 						achievement.SetLastReportedDate(DateTime.Now);
 						achievement.percentCompleted = progress;
-						if (callback != null)
+						bool flag4 = callback != null;
+						if (flag4)
 						{
 							callback(true);
 						}
@@ -104,12 +118,14 @@ namespace UnityEngine.SocialPlatforms
 				}
 				foreach (AchievementDescription achievementDescription in this.m_AchievementDescriptions)
 				{
-					if (achievementDescription.id == id)
+					bool flag5 = achievementDescription.id == id;
+					if (flag5)
 					{
-						bool flag = progress >= 100.0;
-						Achievement achievement2 = new Achievement(id, progress, flag, false, DateTime.Now);
+						bool flag6 = progress >= 100.0;
+						Achievement achievement2 = new Achievement(id, progress, flag6, false, DateTime.Now);
 						this.m_Achievements.Add(achievement2);
-						if (callback != null)
+						bool flag7 = callback != null;
+						if (flag7)
 						{
 							callback(true);
 						}
@@ -117,7 +133,8 @@ namespace UnityEngine.SocialPlatforms
 					}
 				}
 				Debug.LogError("Achievement ID not found");
-				if (callback != null)
+				bool flag8 = callback != null;
+				if (flag8)
 				{
 					callback(false);
 				}
@@ -126,39 +143,49 @@ namespace UnityEngine.SocialPlatforms
 
 		public void LoadAchievementDescriptions(Action<IAchievementDescription[]> callback)
 		{
-			if (this.VerifyUser())
+			bool flag = !this.VerifyUser();
+			if (!flag)
 			{
-				if (callback != null)
+				bool flag2 = callback != null;
+				if (flag2)
 				{
-					callback(this.m_AchievementDescriptions.ToArray());
+					IAchievementDescription[] array = this.m_AchievementDescriptions.ToArray();
+					callback(array);
 				}
 			}
 		}
 
 		public void LoadAchievements(Action<IAchievement[]> callback)
 		{
-			if (this.VerifyUser())
+			bool flag = !this.VerifyUser();
+			if (!flag)
 			{
-				if (callback != null)
+				bool flag2 = callback != null;
+				if (flag2)
 				{
-					callback(this.m_Achievements.ToArray());
+					IAchievement[] array = this.m_Achievements.ToArray();
+					callback(array);
 				}
 			}
 		}
 
 		public void ReportScore(long score, string board, Action<bool> callback)
 		{
-			if (this.VerifyUser())
+			bool flag = !this.VerifyUser();
+			if (!flag)
 			{
 				foreach (Leaderboard leaderboard in this.m_Leaderboards)
 				{
-					if (leaderboard.id == board)
+					bool flag2 = leaderboard.id == board;
+					if (flag2)
 					{
-						leaderboard.SetScores(new List<Score>((Score[])leaderboard.scores)
-						{
-							new Score(board, score, this.localUser.id, DateTime.Now, score + " points", 0)
-						}.ToArray());
-						if (callback != null)
+						List<Score> list = new List<Score>((Score[])leaderboard.scores);
+						list.Add(new Score(board, score, this.localUser.id, DateTime.Now, score + " points", 0));
+						Leaderboard leaderboard2 = leaderboard;
+						IScore[] array = list.ToArray();
+						leaderboard2.SetScores(array);
+						bool flag3 = callback != null;
+						if (flag3)
 						{
 							callback(true);
 						}
@@ -166,7 +193,8 @@ namespace UnityEngine.SocialPlatforms
 					}
 				}
 				Debug.LogError("Leaderboard not found");
-				if (callback != null)
+				bool flag4 = callback != null;
+				if (flag4)
 				{
 					callback(false);
 				}
@@ -175,14 +203,17 @@ namespace UnityEngine.SocialPlatforms
 
 		public void LoadScores(string leaderboardID, Action<IScore[]> callback)
 		{
-			if (this.VerifyUser())
+			bool flag = !this.VerifyUser();
+			if (!flag)
 			{
 				foreach (Leaderboard leaderboard in this.m_Leaderboards)
 				{
-					if (leaderboard.id == leaderboardID)
+					bool flag2 = leaderboard.id == leaderboardID;
+					if (flag2)
 					{
 						this.SortScores(leaderboard);
-						if (callback != null)
+						bool flag3 = callback != null;
+						if (flag3)
 						{
 							callback(leaderboard.scores);
 						}
@@ -190,21 +221,25 @@ namespace UnityEngine.SocialPlatforms
 					}
 				}
 				Debug.LogError("Leaderboard not found");
-				if (callback != null)
+				bool flag4 = callback != null;
+				if (flag4)
 				{
-					callback(new Score[0]);
+					IScore[] array = new Score[0];
+					callback(array);
 				}
 			}
 		}
 
 		void ISocialPlatform.LoadScores(ILeaderboard board, Action<bool> callback)
 		{
-			if (this.VerifyUser())
+			bool flag = !this.VerifyUser();
+			if (!flag)
 			{
 				Leaderboard leaderboard = (Leaderboard)board;
 				foreach (Leaderboard leaderboard2 in this.m_Leaderboards)
 				{
-					if (leaderboard2.id == leaderboard.id)
+					bool flag2 = leaderboard2.id == leaderboard.id;
+					if (flag2)
 					{
 						leaderboard.SetTitle(leaderboard2.title);
 						leaderboard.SetScores(leaderboard2.scores);
@@ -213,7 +248,8 @@ namespace UnityEngine.SocialPlatforms
 				}
 				this.SortScores(leaderboard);
 				this.SetLocalPlayerScore(leaderboard);
-				if (callback != null)
+				bool flag3 = callback != null;
+				if (flag3)
 				{
 					callback(true);
 				}
@@ -222,7 +258,8 @@ namespace UnityEngine.SocialPlatforms
 
 		bool ISocialPlatform.GetLoading(ILeaderboard board)
 		{
-			return this.VerifyUser() && ((Leaderboard)board).loading;
+			bool flag = !this.VerifyUser();
+			return !flag && ((Leaderboard)board).loading;
 		}
 
 		private void SortScores(Leaderboard board)
@@ -239,7 +276,8 @@ namespace UnityEngine.SocialPlatforms
 		{
 			foreach (Score score in board.scores)
 			{
-				if (score.userID == this.localUser.id)
+				bool flag = score.userID == this.localUser.id;
+				if (flag)
 				{
 					board.SetLocalUserScore(score);
 					break;
@@ -269,17 +307,18 @@ namespace UnityEngine.SocialPlatforms
 
 		private bool VerifyUser()
 		{
-			bool flag;
-			if (!this.localUser.authenticated)
+			bool flag = !this.localUser.authenticated;
+			bool flag2;
+			if (flag)
 			{
 				Debug.LogError("Must authenticate first");
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
-				flag = true;
+				flag2 = true;
 			}
-			return flag;
+			return flag2;
 		}
 
 		private void PopulateStaticData()
@@ -295,13 +334,14 @@ namespace UnityEngine.SocialPlatforms
 			Leaderboard leaderboard = new Leaderboard();
 			leaderboard.SetTitle("High Scores");
 			leaderboard.id = "Leaderboard01";
-			leaderboard.SetScores(new List<Score>
-			{
-				new Score("Leaderboard01", 300L, "1001", DateTime.Now.AddDays(-1.0), "300 points", 1),
-				new Score("Leaderboard01", 255L, "1002", DateTime.Now.AddDays(-1.0), "255 points", 2),
-				new Score("Leaderboard01", 55L, "1003", DateTime.Now.AddDays(-1.0), "55 points", 3),
-				new Score("Leaderboard01", 10L, "1004", DateTime.Now.AddDays(-1.0), "10 points", 4)
-			}.ToArray());
+			List<Score> list = new List<Score>();
+			list.Add(new Score("Leaderboard01", 300L, "1001", DateTime.Now.AddDays(-1.0), "300 points", 1));
+			list.Add(new Score("Leaderboard01", 255L, "1002", DateTime.Now.AddDays(-1.0), "255 points", 2));
+			list.Add(new Score("Leaderboard01", 55L, "1003", DateTime.Now.AddDays(-1.0), "55 points", 3));
+			list.Add(new Score("Leaderboard01", 10L, "1004", DateTime.Now.AddDays(-1.0), "10 points", 4));
+			Leaderboard leaderboard2 = leaderboard;
+			IScore[] array = list.ToArray();
+			leaderboard2.SetScores(array);
 			this.m_Leaderboards.Add(leaderboard);
 		}
 
@@ -312,7 +352,7 @@ namespace UnityEngine.SocialPlatforms
 			{
 				for (int j = 0; j < width; j++)
 				{
-					Color color = (((j & i) <= 0) ? Color.gray : Color.white);
+					Color color = (((j & i) > 0) ? Color.white : Color.gray);
 					texture2D.SetPixel(j, i, color);
 				}
 			}

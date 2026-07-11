@@ -30,7 +30,6 @@ public class ModeSelectScreen : NewGameFlowScreen
 		MultiToggle multiToggle6 = this.nosweatButton;
 		multiToggle6.onClick = (global::System.Action)Delegate.Combine(multiToggle6.onClick, new global::System.Action(this.OnClickNosweat));
 		this.closeButton.onClick += base.NavigateBackward;
-		this.SetAnimScale();
 	}
 
 	private void OnHoverEnterSurvival()
@@ -88,19 +87,6 @@ public class ModeSelectScreen : NewGameFlowScreen
 		this.LoadWorldsData();
 		CustomGameSettings.Instance.SetNosweatDefaults();
 		base.NavigateForward();
-	}
-
-	private void SetAnimScale()
-	{
-		float canvasScale = base.GetComponentInParent<KCanvasScaler>().GetCanvasScale();
-		if (this.nosweatAnim != null)
-		{
-			this.nosweatAnim.animScale = this.nosweatAnim.animScale * (1f / canvasScale);
-		}
-		if (this.survivalAnim != null)
-		{
-			this.survivalAnim.animScale = this.survivalAnim.animScale * (1f / canvasScale);
-		}
 	}
 
 	[SerializeField]

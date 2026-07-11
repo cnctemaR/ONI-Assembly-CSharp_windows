@@ -19,9 +19,9 @@ namespace UnityEngine
 			GUIDebugger.LogLayoutGroupEntry_Injected(ref rect, left, right, top, bottom, style, isVertical);
 		}
 
+		[NativeConditional("UNITY_EDITOR")]
 		[StaticAccessor("GetGUIDebuggerManager()", StaticAccessorType.Dot)]
 		[NativeMethod("LogEndGroup")]
-		[NativeConditional("UNITY_EDITOR")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void LogLayoutEndGroup();
 

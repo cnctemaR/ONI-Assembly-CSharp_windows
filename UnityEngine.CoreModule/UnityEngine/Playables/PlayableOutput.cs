@@ -7,18 +7,18 @@ namespace UnityEngine.Playables
 	[RequiredByNativeCode]
 	public struct PlayableOutput : IPlayableOutput, IEquatable<PlayableOutput>
 	{
-		[VisibleToOtherModules]
-		internal PlayableOutput(PlayableOutputHandle handle)
-		{
-			this.m_Handle = handle;
-		}
-
 		public static PlayableOutput Null
 		{
 			get
 			{
 				return PlayableOutput.m_NullPlayableOutput;
 			}
+		}
+
+		[VisibleToOtherModules]
+		internal PlayableOutput(PlayableOutputHandle handle)
+		{
+			this.m_Handle = handle;
 		}
 
 		public PlayableOutputHandle GetHandle()

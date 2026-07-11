@@ -11,23 +11,23 @@ namespace UnityEngine.Assertions
 	{
 		private static void Fail(string message, string userMessage)
 		{
-			if (Debugger.IsAttached)
+			bool flag = !Assert.raiseExceptions;
+			if (flag)
 			{
-				throw new AssertionException(message, userMessage);
+				bool flag2 = message == null;
+				if (flag2)
+				{
+					message = "Assertion has failed\n";
+				}
+				bool flag3 = userMessage != null;
+				if (flag3)
+				{
+					message = userMessage + "\n" + message;
+				}
+				Debug.LogAssertion(message);
+				return;
 			}
-			if (Assert.raiseExceptions)
-			{
-				throw new AssertionException(message, userMessage);
-			}
-			if (message == null)
-			{
-				message = "Assertion has failed\n";
-			}
-			if (userMessage != null)
-			{
-				message = userMessage + '\n' + message;
-			}
-			Debug.LogAssertion(message);
+			throw new AssertionException(message, userMessage);
 		}
 
 		[Obsolete("Assert.Equals should not be used for Assertions", true)]
@@ -37,8 +37,8 @@ namespace UnityEngine.Assertions
 			throw new InvalidOperationException("Assert.Equals should not be used for Assertions");
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Assert.ReferenceEquals should not be used for Assertions", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public new static bool ReferenceEquals(object obj1, object obj2)
 		{
 			throw new InvalidOperationException("Assert.ReferenceEquals should not be used for Assertions");
@@ -47,7 +47,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void IsTrue(bool condition)
 		{
-			if (!condition)
+			bool flag = !condition;
+			if (flag)
 			{
 				Assert.IsTrue(condition, null);
 			}
@@ -56,7 +57,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void IsTrue(bool condition, string message)
 		{
-			if (!condition)
+			bool flag = !condition;
+			if (flag)
 			{
 				Assert.Fail(AssertionMessageUtil.BooleanFailureMessage(true), message);
 			}
@@ -143,20 +145,26 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual<T>(T expected, T actual, string message, IEqualityComparer<T> comparer)
 		{
-			if (typeof(Object).IsAssignableFrom(typeof(T)))
+			bool flag = typeof(Object).IsAssignableFrom(typeof(T));
+			if (flag)
 			{
 				Assert.AreEqual(expected as Object, actual as Object, message);
 			}
-			else if (!comparer.Equals(actual, expected))
+			else
 			{
-				Assert.Fail(AssertionMessageUtil.GetEqualityMessage(actual, expected, true), message);
+				bool flag2 = !comparer.Equals(actual, expected);
+				if (flag2)
+				{
+					Assert.Fail(AssertionMessageUtil.GetEqualityMessage(actual, expected, true), message);
+				}
 			}
 		}
 
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(Object expected, Object actual, string message)
 		{
-			if (actual != expected)
+			bool flag = actual != expected;
+			if (flag)
 			{
 				Assert.Fail(AssertionMessageUtil.GetEqualityMessage(actual, expected, true), message);
 			}
@@ -177,20 +185,26 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual<T>(T expected, T actual, string message, IEqualityComparer<T> comparer)
 		{
-			if (typeof(Object).IsAssignableFrom(typeof(T)))
+			bool flag = typeof(Object).IsAssignableFrom(typeof(T));
+			if (flag)
 			{
 				Assert.AreNotEqual(expected as Object, actual as Object, message);
 			}
-			else if (comparer.Equals(actual, expected))
+			else
 			{
-				Assert.Fail(AssertionMessageUtil.GetEqualityMessage(actual, expected, false), message);
+				bool flag2 = comparer.Equals(actual, expected);
+				if (flag2)
+				{
+					Assert.Fail(AssertionMessageUtil.GetEqualityMessage(actual, expected, false), message);
+				}
 			}
 		}
 
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(Object expected, Object actual, string message)
 		{
-			if (actual == expected)
+			bool flag = actual == expected;
+			if (flag)
 			{
 				Assert.Fail(AssertionMessageUtil.GetEqualityMessage(actual, expected, false), message);
 			}
@@ -205,20 +219,26 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void IsNull<T>(T value, string message) where T : class
 		{
-			if (typeof(Object).IsAssignableFrom(typeof(T)))
+			bool flag = typeof(Object).IsAssignableFrom(typeof(T));
+			if (flag)
 			{
 				Assert.IsNull(value as Object, message);
 			}
-			else if (value != null)
+			else
 			{
-				Assert.Fail(AssertionMessageUtil.NullFailureMessage(value, true), message);
+				bool flag2 = value != null;
+				if (flag2)
+				{
+					Assert.Fail(AssertionMessageUtil.NullFailureMessage(value, true), message);
+				}
 			}
 		}
 
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void IsNull(Object value, string message)
 		{
-			if (value != null)
+			bool flag = value != null;
+			if (flag)
 			{
 				Assert.Fail(AssertionMessageUtil.NullFailureMessage(value, true), message);
 			}
@@ -233,20 +253,26 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void IsNotNull<T>(T value, string message) where T : class
 		{
-			if (typeof(Object).IsAssignableFrom(typeof(T)))
+			bool flag = typeof(Object).IsAssignableFrom(typeof(T));
+			if (flag)
 			{
 				Assert.IsNotNull(value as Object, message);
 			}
-			else if (value == null)
+			else
 			{
-				Assert.Fail(AssertionMessageUtil.NullFailureMessage(value, false), message);
+				bool flag2 = value == null;
+				if (flag2)
+				{
+					Assert.Fail(AssertionMessageUtil.NullFailureMessage(value, false), message);
+				}
 			}
 		}
 
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void IsNotNull(Object value, string message)
 		{
-			if (value == null)
+			bool flag = value == null;
+			if (flag)
 			{
 				Assert.Fail(AssertionMessageUtil.NullFailureMessage(value, false), message);
 			}
@@ -255,7 +281,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(sbyte expected, sbyte actual)
 		{
-			if ((int)expected != (int)actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<sbyte>(expected, actual, null);
 			}
@@ -264,7 +291,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(sbyte expected, sbyte actual, string message)
 		{
-			if ((int)expected != (int)actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<sbyte>(expected, actual, message);
 			}
@@ -273,7 +301,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(sbyte expected, sbyte actual)
 		{
-			if ((int)expected == (int)actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<sbyte>(expected, actual, null);
 			}
@@ -282,7 +311,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(sbyte expected, sbyte actual, string message)
 		{
-			if ((int)expected == (int)actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<sbyte>(expected, actual, message);
 			}
@@ -291,7 +321,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(byte expected, byte actual)
 		{
-			if (expected != actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<byte>(expected, actual, null);
 			}
@@ -300,7 +331,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(byte expected, byte actual, string message)
 		{
-			if (expected != actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<byte>(expected, actual, message);
 			}
@@ -309,7 +341,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(byte expected, byte actual)
 		{
-			if (expected == actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<byte>(expected, actual, null);
 			}
@@ -318,7 +351,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(byte expected, byte actual, string message)
 		{
-			if (expected == actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<byte>(expected, actual, message);
 			}
@@ -327,7 +361,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(char expected, char actual)
 		{
-			if (expected != actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<char>(expected, actual, null);
 			}
@@ -336,7 +371,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(char expected, char actual, string message)
 		{
-			if (expected != actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<char>(expected, actual, message);
 			}
@@ -345,7 +381,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(char expected, char actual)
 		{
-			if (expected == actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<char>(expected, actual, null);
 			}
@@ -354,7 +391,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(char expected, char actual, string message)
 		{
-			if (expected == actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<char>(expected, actual, message);
 			}
@@ -363,7 +401,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(short expected, short actual)
 		{
-			if (expected != actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<short>(expected, actual, null);
 			}
@@ -372,7 +411,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(short expected, short actual, string message)
 		{
-			if (expected != actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<short>(expected, actual, message);
 			}
@@ -381,7 +421,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(short expected, short actual)
 		{
-			if (expected == actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<short>(expected, actual, null);
 			}
@@ -390,7 +431,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(short expected, short actual, string message)
 		{
-			if (expected == actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<short>(expected, actual, message);
 			}
@@ -399,7 +441,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(ushort expected, ushort actual)
 		{
-			if (expected != actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<ushort>(expected, actual, null);
 			}
@@ -408,7 +451,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(ushort expected, ushort actual, string message)
 		{
-			if (expected != actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<ushort>(expected, actual, message);
 			}
@@ -417,7 +461,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(ushort expected, ushort actual)
 		{
-			if (expected == actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<ushort>(expected, actual, null);
 			}
@@ -426,7 +471,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(ushort expected, ushort actual, string message)
 		{
-			if (expected == actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<ushort>(expected, actual, message);
 			}
@@ -435,7 +481,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(int expected, int actual)
 		{
-			if (expected != actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<int>(expected, actual, null);
 			}
@@ -444,7 +491,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(int expected, int actual, string message)
 		{
-			if (expected != actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<int>(expected, actual, message);
 			}
@@ -453,7 +501,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(int expected, int actual)
 		{
-			if (expected == actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<int>(expected, actual, null);
 			}
@@ -462,7 +511,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(int expected, int actual, string message)
 		{
-			if (expected == actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<int>(expected, actual, message);
 			}
@@ -471,7 +521,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(uint expected, uint actual)
 		{
-			if (expected != actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<uint>(expected, actual, null);
 			}
@@ -480,7 +531,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(uint expected, uint actual, string message)
 		{
-			if (expected != actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<uint>(expected, actual, message);
 			}
@@ -489,7 +541,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(uint expected, uint actual)
 		{
-			if (expected == actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<uint>(expected, actual, null);
 			}
@@ -498,7 +551,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(uint expected, uint actual, string message)
 		{
-			if (expected == actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<uint>(expected, actual, message);
 			}
@@ -507,7 +561,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(long expected, long actual)
 		{
-			if (expected != actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<long>(expected, actual, null);
 			}
@@ -516,7 +571,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(long expected, long actual, string message)
 		{
-			if (expected != actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<long>(expected, actual, message);
 			}
@@ -525,7 +581,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(long expected, long actual)
 		{
-			if (expected == actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<long>(expected, actual, null);
 			}
@@ -534,7 +591,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(long expected, long actual, string message)
 		{
-			if (expected == actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<long>(expected, actual, message);
 			}
@@ -543,7 +601,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(ulong expected, ulong actual)
 		{
-			if (expected != actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<ulong>(expected, actual, null);
 			}
@@ -552,7 +611,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual(ulong expected, ulong actual, string message)
 		{
-			if (expected != actual)
+			bool flag = expected != actual;
+			if (flag)
 			{
 				Assert.AreEqual<ulong>(expected, actual, message);
 			}
@@ -561,7 +621,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(ulong expected, ulong actual)
 		{
-			if (expected == actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<ulong>(expected, actual, null);
 			}
@@ -570,7 +631,8 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual(ulong expected, ulong actual, string message)
 		{
-			if (expected == actual)
+			bool flag = expected == actual;
+			if (flag)
 			{
 				Assert.AreNotEqual<ulong>(expected, actual, message);
 			}
@@ -578,6 +640,7 @@ namespace UnityEngine.Assertions
 
 		internal const string UNITY_ASSERTIONS = "UNITY_ASSERTIONS";
 
-		public static bool raiseExceptions = false;
+		[Obsolete("Future versions of Unity are expected to always throw exceptions and not have this field.")]
+		public static bool raiseExceptions = true;
 	}
 }

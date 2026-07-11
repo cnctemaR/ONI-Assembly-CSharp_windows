@@ -6,25 +6,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[NativeHeader("Runtime/Animation/Director/AnimationMixerPlayable.h")]
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationMixerPlayable.bindings.h")]
+	[RequiredByNativeCode]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationMixerPlayable.bindings.h")]
+	[NativeHeader("Modules/Animation/Director/AnimationMixerPlayable.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("AnimationMixerPlayableBindings", StaticAccessorType.DoubleColon)]
-	[RequiredByNativeCode]
 	public struct AnimationMixerPlayable : IPlayable, IEquatable<AnimationMixerPlayable>
 	{
-		internal AnimationMixerPlayable(PlayableHandle handle)
-		{
-			if (handle.IsValid())
-			{
-				if (!handle.IsPlayableOfType<AnimationMixerPlayable>())
-				{
-					throw new InvalidCastException("Can't set handle: the playable is not an AnimationMixerPlayable.");
-				}
-			}
-			this.m_Handle = handle;
-		}
-
 		public static AnimationMixerPlayable Null
 		{
 			get
@@ -42,8 +30,9 @@ namespace UnityEngine.Animations
 		private static PlayableHandle CreateHandle(PlayableGraph graph, int inputCount = 0, bool normalizeWeights = false)
 		{
 			PlayableHandle @null = PlayableHandle.Null;
+			bool flag = !AnimationMixerPlayable.CreateHandleInternal(graph, normalizeWeights, ref @null);
 			PlayableHandle playableHandle;
-			if (!AnimationMixerPlayable.CreateHandleInternal(graph, inputCount, normalizeWeights, ref @null))
+			if (flag)
 			{
 				playableHandle = PlayableHandle.Null;
 			}
@@ -53,6 +42,20 @@ namespace UnityEngine.Animations
 				playableHandle = @null;
 			}
 			return playableHandle;
+		}
+
+		internal AnimationMixerPlayable(PlayableHandle handle)
+		{
+			bool flag = handle.IsValid();
+			if (flag)
+			{
+				bool flag2 = !handle.IsPlayableOfType<AnimationMixerPlayable>();
+				if (flag2)
+				{
+					throw new InvalidCastException("Can't set handle: the playable is not an AnimationMixerPlayable.");
+				}
+			}
+			this.m_Handle = handle;
 		}
 
 		public PlayableHandle GetHandle()
@@ -76,13 +79,13 @@ namespace UnityEngine.Animations
 		}
 
 		[NativeThrows]
-		private static bool CreateHandleInternal(PlayableGraph graph, int inputCount, bool normalizeWeights, ref PlayableHandle handle)
+		private static bool CreateHandleInternal(PlayableGraph graph, bool normalizeWeights, ref PlayableHandle handle)
 		{
-			return AnimationMixerPlayable.CreateHandleInternal_Injected(ref graph, inputCount, normalizeWeights, ref handle);
+			return AnimationMixerPlayable.CreateHandleInternal_Injected(ref graph, normalizeWeights, ref handle);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool CreateHandleInternal_Injected(ref PlayableGraph graph, int inputCount, bool normalizeWeights, ref PlayableHandle handle);
+		private static extern bool CreateHandleInternal_Injected(ref PlayableGraph graph, bool normalizeWeights, ref PlayableHandle handle);
 
 		private PlayableHandle m_Handle;
 

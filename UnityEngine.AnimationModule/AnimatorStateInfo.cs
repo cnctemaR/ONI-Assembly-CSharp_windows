@@ -4,7 +4,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Animation/AnimatorInfo.h")]
+	[NativeHeader("Modules/Animation/AnimatorInfo.h")]
 	[RequiredByNativeCode]
 	public struct AnimatorStateInfo
 	{

@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
+	[RequireComponent(typeof(Transform))]
 	[NativeType(Header = "Modules/Grid/Public/Grid.h")]
 	public sealed class Grid : GridLayout
 	{

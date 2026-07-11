@@ -6,13 +6,6 @@ namespace UnityEngine
 	[UsedByNativeCode]
 	public struct Vector3Int : IEquatable<Vector3Int>
 	{
-		public Vector3Int(int x, int y, int z)
-		{
-			this.m_X = x;
-			this.m_Y = y;
-			this.m_Z = z;
-		}
-
 		public int x
 		{
 			get
@@ -47,6 +40,13 @@ namespace UnityEngine
 			{
 				this.m_Z = value;
 			}
+		}
+
+		public Vector3Int(int x, int y, int z)
+		{
+			this.m_X = x;
+			this.m_Y = y;
+			this.m_Z = z;
 		}
 
 		public void Set(int x, int y, int z)
@@ -189,9 +189,24 @@ namespace UnityEngine
 			return new Vector3Int(a.x * b.x, a.y * b.y, a.z * b.z);
 		}
 
+		public static Vector3Int operator -(Vector3Int a)
+		{
+			return new Vector3Int(-a.x, -a.y, -a.z);
+		}
+
 		public static Vector3Int operator *(Vector3Int a, int b)
 		{
 			return new Vector3Int(a.x * b, a.y * b, a.z * b);
+		}
+
+		public static Vector3Int operator *(int a, Vector3Int b)
+		{
+			return new Vector3Int(a * b.x, a * b.y, a * b.z);
+		}
+
+		public static Vector3Int operator /(Vector3Int a, int b)
+		{
+			return new Vector3Int(a.x / b, a.y / b, a.z / b);
 		}
 
 		public static bool operator ==(Vector3Int lhs, Vector3Int rhs)
@@ -206,7 +221,8 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
-			return other is Vector3Int && this.Equals((Vector3Int)other);
+			bool flag = !(other is Vector3Int);
+			return !flag && this.Equals((Vector3Int)other);
 		}
 
 		public bool Equals(Vector3Int other)

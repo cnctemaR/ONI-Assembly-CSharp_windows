@@ -9,12 +9,14 @@ namespace UnityEngine
 	{
 		public static PhysicsScene GetPhysicsScene(this Scene scene)
 		{
-			if (!scene.IsValid())
+			bool flag = !scene.IsValid();
+			if (flag)
 			{
 				throw new ArgumentException("Cannot get physics scene; Unity scene is invalid.", "scene");
 			}
 			PhysicsScene physicsScene_Internal = PhysicsSceneExtensions.GetPhysicsScene_Internal(scene);
-			if (physicsScene_Internal.IsValid())
+			bool flag2 = physicsScene_Internal.IsValid();
+			if (flag2)
 			{
 				return physicsScene_Internal;
 			}

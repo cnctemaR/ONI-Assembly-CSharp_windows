@@ -13,5 +13,7 @@ namespace UnityEngine.UI
 		void Cull(Rect clipRect, bool validRect);
 
 		void SetClipRect(Rect value, bool validRect);
+
+		void SetClipSoftness(Vector2 clipSoftness);
 	}
 }

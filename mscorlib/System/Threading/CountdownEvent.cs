@@ -5,8 +5,8 @@ using System.Security.Permissions;
 
 namespace System.Threading
 {
-	[ComVisible(false)]
 	[DebuggerDisplay("Initial Count={InitialCount}, Current Count={CurrentCount}")]
+	[ComVisible(false)]
 	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class CountdownEvent : IDisposable
 	{

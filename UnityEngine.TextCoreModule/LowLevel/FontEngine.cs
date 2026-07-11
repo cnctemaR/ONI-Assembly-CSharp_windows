@@ -13,11 +13,6 @@ namespace UnityEngine.TextCore.LowLevel
 		{
 		}
 
-		internal static FontEngine GetInstance()
-		{
-			return FontEngine.s_Instance;
-		}
-
 		public static FontEngineError InitializeFontEngine()
 		{
 			return (FontEngineError)FontEngine.InitializeFontEngine_Internal();
@@ -79,8 +74,9 @@ namespace UnityEngine.TextCore.LowLevel
 
 		public static FontEngineError LoadFontFace(byte[] sourceFontFile)
 		{
+			bool flag = sourceFontFile.Length == 0;
 			FontEngineError fontEngineError;
-			if (sourceFontFile.Length == 0)
+			if (flag)
 			{
 				fontEngineError = FontEngineError.Invalid_File;
 			}
@@ -97,8 +93,9 @@ namespace UnityEngine.TextCore.LowLevel
 
 		public static FontEngineError LoadFontFace(byte[] sourceFontFile, int pointSize)
 		{
+			bool flag = sourceFontFile.Length == 0;
 			FontEngineError fontEngineError;
-			if (sourceFontFile.Length == 0)
+			if (flag)
 			{
 				fontEngineError = FontEngineError.Invalid_File;
 			}
@@ -171,18 +168,19 @@ namespace UnityEngine.TextCore.LowLevel
 		public static bool TryGetGlyphWithUnicodeValue(uint unicode, GlyphLoadFlags flags, out Glyph glyph)
 		{
 			GlyphMarshallingStruct glyphMarshallingStruct = default(GlyphMarshallingStruct);
-			bool flag;
-			if (FontEngine.TryGetGlyphWithUnicodeValue_Internal(unicode, flags, ref glyphMarshallingStruct))
+			bool flag = FontEngine.TryGetGlyphWithUnicodeValue_Internal(unicode, flags, ref glyphMarshallingStruct);
+			bool flag2;
+			if (flag)
 			{
 				glyph = new Glyph(glyphMarshallingStruct);
-				flag = true;
+				flag2 = true;
 			}
 			else
 			{
 				glyph = null;
-				flag = false;
+				flag2 = false;
 			}
-			return flag;
+			return flag2;
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::TryGetGlyphWithUnicodeValue", IsThreadSafe = true, IsFreeFunction = true)]
@@ -192,18 +190,19 @@ namespace UnityEngine.TextCore.LowLevel
 		public static bool TryGetGlyphWithIndexValue(uint glyphIndex, GlyphLoadFlags flags, out Glyph glyph)
 		{
 			GlyphMarshallingStruct glyphMarshallingStruct = default(GlyphMarshallingStruct);
-			bool flag;
-			if (FontEngine.TryGetGlyphWithIndexValue_Internal(glyphIndex, flags, ref glyphMarshallingStruct))
+			bool flag = FontEngine.TryGetGlyphWithIndexValue_Internal(glyphIndex, flags, ref glyphMarshallingStruct);
+			bool flag2;
+			if (flag)
 			{
 				glyph = new Glyph(glyphMarshallingStruct);
-				flag = true;
+				flag2 = true;
 			}
 			else
 			{
 				glyph = null;
-				flag = false;
+				flag2 = false;
 			}
-			return flag;
+			return flag2;
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::TryGetGlyphWithIndexValue", IsThreadSafe = true, IsFreeFunction = true)]
@@ -216,7 +215,8 @@ namespace UnityEngine.TextCore.LowLevel
 			int count = freeGlyphRects.Count;
 			int count2 = usedGlyphRects.Count;
 			int num = count + count2;
-			if (FontEngine.s_FreeGlyphRects.Length < num || FontEngine.s_UsedGlyphRects.Length < num)
+			bool flag = FontEngine.s_FreeGlyphRects.Length < num || FontEngine.s_UsedGlyphRects.Length < num;
+			if (flag)
 			{
 				int num2 = Mathf.NextPowerOfTwo(num + 1);
 				FontEngine.s_FreeGlyphRects = new GlyphRect[num2];
@@ -225,17 +225,20 @@ namespace UnityEngine.TextCore.LowLevel
 			int num3 = Mathf.Max(count, count2);
 			for (int i = 0; i < num3; i++)
 			{
-				if (i < count)
+				bool flag2 = i < count;
+				if (flag2)
 				{
 					FontEngine.s_FreeGlyphRects[i] = freeGlyphRects[i];
 				}
-				if (i < count2)
+				bool flag3 = i < count2;
+				if (flag3)
 				{
 					FontEngine.s_UsedGlyphRects[i] = usedGlyphRects[i];
 				}
 			}
-			bool flag;
-			if (FontEngine.TryPackGlyphInAtlas_Internal(ref glyphMarshallingStruct, padding, packingMode, renderMode, width, height, FontEngine.s_FreeGlyphRects, ref count, FontEngine.s_UsedGlyphRects, ref count2))
+			bool flag4 = FontEngine.TryPackGlyphInAtlas_Internal(ref glyphMarshallingStruct, padding, packingMode, renderMode, width, height, FontEngine.s_FreeGlyphRects, ref count, FontEngine.s_UsedGlyphRects, ref count2);
+			bool flag7;
+			if (flag4)
 			{
 				glyph.glyphRect = glyphMarshallingStruct.glyphRect;
 				freeGlyphRects.Clear();
@@ -243,22 +246,24 @@ namespace UnityEngine.TextCore.LowLevel
 				num3 = Mathf.Max(count, count2);
 				for (int j = 0; j < num3; j++)
 				{
-					if (j < count)
+					bool flag5 = j < count;
+					if (flag5)
 					{
 						freeGlyphRects.Add(FontEngine.s_FreeGlyphRects[j]);
 					}
-					if (j < count2)
+					bool flag6 = j < count2;
+					if (flag6)
 					{
 						usedGlyphRects.Add(FontEngine.s_UsedGlyphRects[j]);
 					}
 				}
-				flag = true;
+				flag7 = true;
 			}
 			else
 			{
-				flag = false;
+				flag7 = false;
 			}
-			return flag;
+			return flag7;
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::TryPackGlyph", IsThreadSafe = true, IsFreeFunction = true)]
@@ -272,7 +277,8 @@ namespace UnityEngine.TextCore.LowLevel
 			int count3 = freeGlyphRects.Count;
 			int count4 = usedGlyphRects.Count;
 			int num = count + count2 + count3 + count4;
-			if (FontEngine.s_GlyphMarshallingStruct_IN.Length < num || FontEngine.s_GlyphMarshallingStruct_OUT.Length < num || FontEngine.s_FreeGlyphRects.Length < num || FontEngine.s_UsedGlyphRects.Length < num)
+			bool flag = FontEngine.s_GlyphMarshallingStruct_IN.Length < num || FontEngine.s_GlyphMarshallingStruct_OUT.Length < num || FontEngine.s_FreeGlyphRects.Length < num || FontEngine.s_UsedGlyphRects.Length < num;
+			if (flag)
 			{
 				int num2 = Mathf.NextPowerOfTwo(num + 1);
 				FontEngine.s_GlyphMarshallingStruct_IN = new GlyphMarshallingStruct[num2];
@@ -283,41 +289,48 @@ namespace UnityEngine.TextCore.LowLevel
 			FontEngine.s_GlyphLookupDictionary.Clear();
 			for (int i = 0; i < num; i++)
 			{
-				if (i < count)
+				bool flag2 = i < count;
+				if (flag2)
 				{
 					GlyphMarshallingStruct glyphMarshallingStruct = new GlyphMarshallingStruct(glyphsToAdd[i]);
 					FontEngine.s_GlyphMarshallingStruct_IN[i] = glyphMarshallingStruct;
-					if (!FontEngine.s_GlyphLookupDictionary.ContainsKey(glyphMarshallingStruct.index))
+					bool flag3 = !FontEngine.s_GlyphLookupDictionary.ContainsKey(glyphMarshallingStruct.index);
+					if (flag3)
 					{
 						FontEngine.s_GlyphLookupDictionary.Add(glyphMarshallingStruct.index, glyphsToAdd[i]);
 					}
 				}
-				if (i < count2)
+				bool flag4 = i < count2;
+				if (flag4)
 				{
 					GlyphMarshallingStruct glyphMarshallingStruct2 = new GlyphMarshallingStruct(glyphsAdded[i]);
 					FontEngine.s_GlyphMarshallingStruct_OUT[i] = glyphMarshallingStruct2;
-					if (!FontEngine.s_GlyphLookupDictionary.ContainsKey(glyphMarshallingStruct2.index))
+					bool flag5 = !FontEngine.s_GlyphLookupDictionary.ContainsKey(glyphMarshallingStruct2.index);
+					if (flag5)
 					{
 						FontEngine.s_GlyphLookupDictionary.Add(glyphMarshallingStruct2.index, glyphsAdded[i]);
 					}
 				}
-				if (i < count3)
+				bool flag6 = i < count3;
+				if (flag6)
 				{
 					FontEngine.s_FreeGlyphRects[i] = freeGlyphRects[i];
 				}
-				if (i < count4)
+				bool flag7 = i < count4;
+				if (flag7)
 				{
 					FontEngine.s_UsedGlyphRects[i] = usedGlyphRects[i];
 				}
 			}
-			bool flag = FontEngine.TryPackGlyphsInAtlas_Internal(FontEngine.s_GlyphMarshallingStruct_IN, ref count, FontEngine.s_GlyphMarshallingStruct_OUT, ref count2, padding, packingMode, renderMode, width, height, FontEngine.s_FreeGlyphRects, ref count3, FontEngine.s_UsedGlyphRects, ref count4);
+			bool flag8 = FontEngine.TryPackGlyphsInAtlas_Internal(FontEngine.s_GlyphMarshallingStruct_IN, ref count, FontEngine.s_GlyphMarshallingStruct_OUT, ref count2, padding, packingMode, renderMode, width, height, FontEngine.s_FreeGlyphRects, ref count3, FontEngine.s_UsedGlyphRects, ref count4);
 			glyphsToAdd.Clear();
 			glyphsAdded.Clear();
 			freeGlyphRects.Clear();
 			usedGlyphRects.Clear();
 			for (int j = 0; j < num; j++)
 			{
-				if (j < count)
+				bool flag9 = j < count;
+				if (flag9)
 				{
 					GlyphMarshallingStruct glyphMarshallingStruct3 = FontEngine.s_GlyphMarshallingStruct_IN[j];
 					Glyph glyph = FontEngine.s_GlyphLookupDictionary[glyphMarshallingStruct3.index];
@@ -327,7 +340,8 @@ namespace UnityEngine.TextCore.LowLevel
 					glyph.atlasIndex = glyphMarshallingStruct3.atlasIndex;
 					glyphsToAdd.Add(glyph);
 				}
-				if (j < count2)
+				bool flag10 = j < count2;
+				if (flag10)
 				{
 					GlyphMarshallingStruct glyphMarshallingStruct4 = FontEngine.s_GlyphMarshallingStruct_OUT[j];
 					Glyph glyph2 = FontEngine.s_GlyphLookupDictionary[glyphMarshallingStruct4.index];
@@ -337,16 +351,18 @@ namespace UnityEngine.TextCore.LowLevel
 					glyph2.atlasIndex = glyphMarshallingStruct4.atlasIndex;
 					glyphsAdded.Add(glyph2);
 				}
-				if (j < count3)
+				bool flag11 = j < count3;
+				if (flag11)
 				{
 					freeGlyphRects.Add(FontEngine.s_FreeGlyphRects[j]);
 				}
-				if (j < count4)
+				bool flag12 = j < count4;
+				if (flag12)
 				{
 					usedGlyphRects.Add(FontEngine.s_UsedGlyphRects[j]);
 				}
 			}
-			return flag;
+			return flag8;
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::TryPackGlyphs", IsThreadSafe = true, IsFreeFunction = true)]
@@ -368,7 +384,8 @@ namespace UnityEngine.TextCore.LowLevel
 		internal static FontEngineError RenderGlyphsToTexture(List<Glyph> glyphs, int padding, GlyphRenderMode renderMode, Texture2D texture)
 		{
 			int count = glyphs.Count;
-			if (FontEngine.s_GlyphMarshallingStruct_IN.Length < count)
+			bool flag = FontEngine.s_GlyphMarshallingStruct_IN.Length < count;
+			if (flag)
 			{
 				int num = Mathf.NextPowerOfTwo(count + 1);
 				FontEngine.s_GlyphMarshallingStruct_IN = new GlyphMarshallingStruct[num];
@@ -387,7 +404,8 @@ namespace UnityEngine.TextCore.LowLevel
 		internal static FontEngineError RenderGlyphsToTexture(List<Glyph> glyphs, int padding, GlyphRenderMode renderMode, byte[] texBuffer, int texWidth, int texHeight)
 		{
 			int count = glyphs.Count;
-			if (FontEngine.s_GlyphMarshallingStruct_IN.Length < count)
+			bool flag = FontEngine.s_GlyphMarshallingStruct_IN.Length < count;
+			if (flag)
 			{
 				int num = Mathf.NextPowerOfTwo(count + 1);
 				FontEngine.s_GlyphMarshallingStruct_IN = new GlyphMarshallingStruct[num];
@@ -406,7 +424,8 @@ namespace UnityEngine.TextCore.LowLevel
 		internal static FontEngineError RenderGlyphsToSharedTexture(List<Glyph> glyphs, int padding, GlyphRenderMode renderMode)
 		{
 			int count = glyphs.Count;
-			if (FontEngine.s_GlyphMarshallingStruct_IN.Length < count)
+			bool flag = FontEngine.s_GlyphMarshallingStruct_IN.Length < count;
+			if (flag)
 			{
 				int num = Mathf.NextPowerOfTwo(count + 1);
 				FontEngine.s_GlyphMarshallingStruct_IN = new GlyphMarshallingStruct[num];
@@ -435,7 +454,8 @@ namespace UnityEngine.TextCore.LowLevel
 			int count = freeGlyphRects.Count;
 			int count2 = usedGlyphRects.Count;
 			int num = count + count2;
-			if (FontEngine.s_FreeGlyphRects.Length < num || FontEngine.s_UsedGlyphRects.Length < num)
+			bool flag = FontEngine.s_FreeGlyphRects.Length < num || FontEngine.s_UsedGlyphRects.Length < num;
+			if (flag)
 			{
 				int num2 = Mathf.NextPowerOfTwo(num + 1);
 				FontEngine.s_FreeGlyphRects = new GlyphRect[num2];
@@ -444,18 +464,21 @@ namespace UnityEngine.TextCore.LowLevel
 			int num3 = Mathf.Max(count, count2);
 			for (int i = 0; i < num3; i++)
 			{
-				if (i < count)
+				bool flag2 = i < count;
+				if (flag2)
 				{
 					FontEngine.s_FreeGlyphRects[i] = freeGlyphRects[i];
 				}
-				if (i < count2)
+				bool flag3 = i < count2;
+				if (flag3)
 				{
 					FontEngine.s_UsedGlyphRects[i] = usedGlyphRects[i];
 				}
 			}
 			GlyphMarshallingStruct glyphMarshallingStruct;
-			bool flag;
-			if (FontEngine.TryAddGlyphToTexture_Internal(glyphIndex, padding, packingMode, FontEngine.s_FreeGlyphRects, ref count, FontEngine.s_UsedGlyphRects, ref count2, renderMode, texture, out glyphMarshallingStruct))
+			bool flag4 = FontEngine.TryAddGlyphToTexture_Internal(glyphIndex, padding, packingMode, FontEngine.s_FreeGlyphRects, ref count, FontEngine.s_UsedGlyphRects, ref count2, renderMode, texture, out glyphMarshallingStruct);
+			bool flag7;
+			if (flag4)
 			{
 				glyph = new Glyph(glyphMarshallingStruct);
 				freeGlyphRects.Clear();
@@ -463,62 +486,184 @@ namespace UnityEngine.TextCore.LowLevel
 				num3 = Mathf.Max(count, count2);
 				for (int j = 0; j < num3; j++)
 				{
-					if (j < count)
+					bool flag5 = j < count;
+					if (flag5)
 					{
 						freeGlyphRects.Add(FontEngine.s_FreeGlyphRects[j]);
 					}
-					if (j < count2)
+					bool flag6 = j < count2;
+					if (flag6)
 					{
 						usedGlyphRects.Add(FontEngine.s_UsedGlyphRects[j]);
 					}
 				}
-				flag = true;
+				flag7 = true;
 			}
 			else
 			{
 				glyph = null;
-				flag = false;
+				flag7 = false;
 			}
-			return flag;
+			return flag7;
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::TryAddGlyphToTexture", IsThreadSafe = true, IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool TryAddGlyphToTexture_Internal(uint glyphIndex, int padding, GlyphPackingMode packingMode, [Out] GlyphRect[] freeGlyphRects, ref int freeGlyphRectCount, [Out] GlyphRect[] usedGlyphRects, ref int usedGlyphRectCount, GlyphRenderMode renderMode, Texture2D texture, out GlyphMarshallingStruct glyph);
 
+		internal static bool TryAddGlyphsToTexture(List<Glyph> glyphsToAdd, List<Glyph> glyphsAdded, int padding, GlyphPackingMode packingMode, List<GlyphRect> freeGlyphRects, List<GlyphRect> usedGlyphRects, GlyphRenderMode renderMode, Texture2D texture)
+		{
+			int count = glyphsToAdd.Count;
+			int num = 0;
+			bool flag = FontEngine.s_GlyphMarshallingStruct_IN.Length < count || FontEngine.s_GlyphMarshallingStruct_OUT.Length < count;
+			if (flag)
+			{
+				int num2 = Mathf.NextPowerOfTwo(count + 1);
+				bool flag2 = FontEngine.s_GlyphMarshallingStruct_IN.Length < count;
+				if (flag2)
+				{
+					Array.Resize<GlyphMarshallingStruct>(ref FontEngine.s_GlyphMarshallingStruct_IN, num2);
+				}
+				bool flag3 = FontEngine.s_GlyphMarshallingStruct_OUT.Length < count;
+				if (flag3)
+				{
+					Array.Resize<GlyphMarshallingStruct>(ref FontEngine.s_GlyphMarshallingStruct_OUT, num2);
+				}
+			}
+			int count2 = freeGlyphRects.Count;
+			int count3 = usedGlyphRects.Count;
+			int num3 = count2 + count3 + count;
+			bool flag4 = FontEngine.s_FreeGlyphRects.Length < num3 || FontEngine.s_UsedGlyphRects.Length < num3;
+			if (flag4)
+			{
+				int num4 = Mathf.NextPowerOfTwo(num3 + 1);
+				bool flag5 = FontEngine.s_FreeGlyphRects.Length < num3;
+				if (flag5)
+				{
+					Array.Resize<GlyphRect>(ref FontEngine.s_FreeGlyphRects, num4);
+				}
+				bool flag6 = FontEngine.s_UsedGlyphRects.Length < num3;
+				if (flag6)
+				{
+					Array.Resize<GlyphRect>(ref FontEngine.s_UsedGlyphRects, num4);
+				}
+			}
+			FontEngine.s_GlyphLookupDictionary.Clear();
+			int num5 = 0;
+			bool flag7 = true;
+			while (flag7)
+			{
+				flag7 = false;
+				bool flag8 = num5 < count;
+				if (flag8)
+				{
+					Glyph glyph = glyphsToAdd[num5];
+					FontEngine.s_GlyphMarshallingStruct_IN[num5] = new GlyphMarshallingStruct(glyph);
+					FontEngine.s_GlyphLookupDictionary.Add(glyph.index, glyph);
+					flag7 = true;
+				}
+				bool flag9 = num5 < count2;
+				if (flag9)
+				{
+					FontEngine.s_FreeGlyphRects[num5] = freeGlyphRects[num5];
+					flag7 = true;
+				}
+				bool flag10 = num5 < count3;
+				if (flag10)
+				{
+					FontEngine.s_UsedGlyphRects[num5] = usedGlyphRects[num5];
+					flag7 = true;
+				}
+				num5++;
+			}
+			bool flag11 = FontEngine.TryAddGlyphsToTexture_Internal_MultiThread(FontEngine.s_GlyphMarshallingStruct_IN, ref count, FontEngine.s_GlyphMarshallingStruct_OUT, ref num, padding, packingMode, FontEngine.s_FreeGlyphRects, ref count2, FontEngine.s_UsedGlyphRects, ref count3, renderMode, texture);
+			glyphsToAdd.Clear();
+			glyphsAdded.Clear();
+			freeGlyphRects.Clear();
+			usedGlyphRects.Clear();
+			num5 = 0;
+			flag7 = true;
+			while (flag7)
+			{
+				flag7 = false;
+				bool flag12 = num5 < count;
+				if (flag12)
+				{
+					uint index = FontEngine.s_GlyphMarshallingStruct_IN[num5].index;
+					glyphsToAdd.Add(FontEngine.s_GlyphLookupDictionary[index]);
+					flag7 = true;
+				}
+				bool flag13 = num5 < num;
+				if (flag13)
+				{
+					uint index2 = FontEngine.s_GlyphMarshallingStruct_OUT[num5].index;
+					Glyph glyph2 = FontEngine.s_GlyphLookupDictionary[index2];
+					glyph2.atlasIndex = FontEngine.s_GlyphMarshallingStruct_OUT[num5].atlasIndex;
+					glyph2.scale = FontEngine.s_GlyphMarshallingStruct_OUT[num5].scale;
+					glyph2.glyphRect = FontEngine.s_GlyphMarshallingStruct_OUT[num5].glyphRect;
+					glyph2.metrics = FontEngine.s_GlyphMarshallingStruct_OUT[num5].metrics;
+					glyphsAdded.Add(glyph2);
+					flag7 = true;
+				}
+				bool flag14 = num5 < count2;
+				if (flag14)
+				{
+					freeGlyphRects.Add(FontEngine.s_FreeGlyphRects[num5]);
+					flag7 = true;
+				}
+				bool flag15 = num5 < count3;
+				if (flag15)
+				{
+					usedGlyphRects.Add(FontEngine.s_UsedGlyphRects[num5]);
+					flag7 = true;
+				}
+				num5++;
+			}
+			return flag11;
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::TryAddGlyphsToTexture", IsThreadSafe = true, IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryAddGlyphsToTexture_Internal_MultiThread([Out] GlyphMarshallingStruct[] glyphsToAdd, ref int glyphsToAddCount, [Out] GlyphMarshallingStruct[] glyphsAdded, ref int glyphsAddedCount, int padding, GlyphPackingMode packingMode, [Out] GlyphRect[] freeGlyphRects, ref int freeGlyphRectCount, [Out] GlyphRect[] usedGlyphRects, ref int usedGlyphRectCount, GlyphRenderMode renderMode, Texture2D texture);
+
 		internal static bool TryAddGlyphsToTexture(List<uint> glyphIndexes, int padding, GlyphPackingMode packingMode, List<GlyphRect> freeGlyphRects, List<GlyphRect> usedGlyphRects, GlyphRenderMode renderMode, Texture2D texture, out Glyph[] glyphs)
 		{
 			glyphs = null;
-			bool flag;
-			if (glyphIndexes == null || glyphIndexes.Count == 0)
+			bool flag = glyphIndexes == null || glyphIndexes.Count == 0;
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
 				int count = glyphIndexes.Count;
-				if (FontEngine.s_GlyphIndexes_MarshallingArray == null || FontEngine.s_GlyphIndexes_MarshallingArray.Length < count)
+				bool flag3 = FontEngine.s_GlyphIndexes_MarshallingArray_A == null || FontEngine.s_GlyphIndexes_MarshallingArray_A.Length < count;
+				if (flag3)
 				{
-					if (FontEngine.s_GlyphIndexes_MarshallingArray == null)
+					bool flag4 = FontEngine.s_GlyphIndexes_MarshallingArray_A == null;
+					if (flag4)
 					{
-						FontEngine.s_GlyphIndexes_MarshallingArray = new uint[count];
+						FontEngine.s_GlyphIndexes_MarshallingArray_A = new uint[count];
 					}
 					else
 					{
 						int num = Mathf.NextPowerOfTwo(count + 1);
-						FontEngine.s_GlyphIndexes_MarshallingArray = new uint[num];
+						FontEngine.s_GlyphIndexes_MarshallingArray_A = new uint[num];
 					}
 				}
 				int count2 = freeGlyphRects.Count;
 				int count3 = usedGlyphRects.Count;
 				int num2 = count2 + count3 + count;
-				if (FontEngine.s_FreeGlyphRects.Length < num2 || FontEngine.s_UsedGlyphRects.Length < num2)
+				bool flag5 = FontEngine.s_FreeGlyphRects.Length < num2 || FontEngine.s_UsedGlyphRects.Length < num2;
+				if (flag5)
 				{
 					int num3 = Mathf.NextPowerOfTwo(num2 + 1);
 					FontEngine.s_FreeGlyphRects = new GlyphRect[num3];
 					FontEngine.s_UsedGlyphRects = new GlyphRect[num3];
 				}
-				if (FontEngine.s_GlyphMarshallingStruct_OUT.Length < count)
+				bool flag6 = FontEngine.s_GlyphMarshallingStruct_OUT.Length < count;
+				if (flag6)
 				{
 					int num4 = Mathf.NextPowerOfTwo(count + 1);
 					FontEngine.s_GlyphMarshallingStruct_OUT = new GlyphMarshallingStruct[num4];
@@ -526,21 +671,25 @@ namespace UnityEngine.TextCore.LowLevel
 				int num5 = FontEngineUtilities.MaxValue(count2, count3, count);
 				for (int i = 0; i < num5; i++)
 				{
-					if (i < count)
+					bool flag7 = i < count;
+					if (flag7)
 					{
-						FontEngine.s_GlyphIndexes_MarshallingArray[i] = glyphIndexes[i];
+						FontEngine.s_GlyphIndexes_MarshallingArray_A[i] = glyphIndexes[i];
 					}
-					if (i < count2)
+					bool flag8 = i < count2;
+					if (flag8)
 					{
 						FontEngine.s_FreeGlyphRects[i] = freeGlyphRects[i];
 					}
-					if (i < count3)
+					bool flag9 = i < count3;
+					if (flag9)
 					{
 						FontEngine.s_UsedGlyphRects[i] = usedGlyphRects[i];
 					}
 				}
-				bool flag2 = FontEngine.TryAddGlyphsToTexture_Internal(FontEngine.s_GlyphIndexes_MarshallingArray, padding, packingMode, FontEngine.s_FreeGlyphRects, ref count2, FontEngine.s_UsedGlyphRects, ref count3, renderMode, texture, FontEngine.s_GlyphMarshallingStruct_OUT, ref count);
-				if (FontEngine.s_Glyphs == null || FontEngine.s_Glyphs.Length <= count)
+				bool flag10 = FontEngine.TryAddGlyphsToTexture_Internal(FontEngine.s_GlyphIndexes_MarshallingArray_A, padding, packingMode, FontEngine.s_FreeGlyphRects, ref count2, FontEngine.s_UsedGlyphRects, ref count3, renderMode, texture, FontEngine.s_GlyphMarshallingStruct_OUT, ref count);
+				bool flag11 = FontEngine.s_Glyphs == null || FontEngine.s_Glyphs.Length <= count;
+				if (flag11)
 				{
 					FontEngine.s_Glyphs = new Glyph[Mathf.NextPowerOfTwo(count + 1)];
 				}
@@ -550,50 +699,52 @@ namespace UnityEngine.TextCore.LowLevel
 				num5 = FontEngineUtilities.MaxValue(count2, count3, count);
 				for (int j = 0; j < num5; j++)
 				{
-					if (j < count)
+					bool flag12 = j < count;
+					if (flag12)
 					{
 						FontEngine.s_Glyphs[j] = new Glyph(FontEngine.s_GlyphMarshallingStruct_OUT[j]);
 					}
-					if (j < count2)
+					bool flag13 = j < count2;
+					if (flag13)
 					{
 						freeGlyphRects.Add(FontEngine.s_FreeGlyphRects[j]);
 					}
-					if (j < count3)
+					bool flag14 = j < count3;
+					if (flag14)
 					{
 						usedGlyphRects.Add(FontEngine.s_UsedGlyphRects[j]);
 					}
 				}
 				glyphs = FontEngine.s_Glyphs;
-				flag = flag2;
+				flag2 = flag10;
 			}
-			return flag;
+			return flag2;
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::TryAddGlyphsToTexture", IsThreadSafe = true, IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool TryAddGlyphsToTexture_Internal(uint[] glyphIndex, int padding, GlyphPackingMode packingMode, [Out] GlyphRect[] freeGlyphRects, ref int freeGlyphRectCount, [Out] GlyphRect[] usedGlyphRects, ref int usedGlyphRectCount, GlyphRenderMode renderMode, Texture2D texture, [Out] GlyphMarshallingStruct[] glyphs, ref int glyphCount);
 
+		[NativeMethod(Name = "TextCore::FontEngine::GetOpenTypeFontFeatures", IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern int GetOpenTypeFontFeatureTable();
+
 		internal static GlyphPairAdjustmentRecord[] GetGlyphPairAdjustmentTable(uint[] glyphIndexes)
 		{
-			int num = glyphIndexes.Length * glyphIndexes.Length;
-			if (FontEngine.s_GlyphPairAdjustmentRecords_MarshallingArray == null || FontEngine.s_GlyphPairAdjustmentRecords_MarshallingArray.Length < num)
-			{
-				FontEngine.s_GlyphPairAdjustmentRecords_MarshallingArray = new GlyphPairAdjustmentRecord[num];
-			}
-			int num2;
+			int num;
+			FontEngine.PopulatePairAdjustmentRecordMarshallingArray_from_GlyphIndexes(glyphIndexes, out num);
+			bool flag = num == 0;
 			GlyphPairAdjustmentRecord[] array;
-			if (FontEngine.GetGlyphPairAdjustmentTable_Internal(glyphIndexes, FontEngine.s_GlyphPairAdjustmentRecords_MarshallingArray, out num2) != 0)
+			if (flag)
 			{
 				array = null;
 			}
 			else
 			{
-				GlyphPairAdjustmentRecord[] array2 = new GlyphPairAdjustmentRecord[num2];
-				for (int i = 0; i < num2; i++)
-				{
-					array2[i] = FontEngine.s_GlyphPairAdjustmentRecords_MarshallingArray[i];
-				}
-				array = array2;
+				FontEngine.SetMarshallingArraySize<GlyphPairAdjustmentRecord>(ref FontEngine.s_PairAdjustmentRecords_MarshallingArray, num);
+				FontEngine.GetGlyphPairAdjustmentRecordsFromMarshallingArray(FontEngine.s_PairAdjustmentRecords_MarshallingArray);
+				FontEngine.s_PairAdjustmentRecords_MarshallingArray[num] = default(GlyphPairAdjustmentRecord);
+				array = FontEngine.s_PairAdjustmentRecords_MarshallingArray;
 			}
 			return array;
 		}
@@ -601,6 +752,133 @@ namespace UnityEngine.TextCore.LowLevel
 		[NativeMethod(Name = "TextCore::FontEngine::GetGlyphPairAdjustmentTable", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetGlyphPairAdjustmentTable_Internal(uint[] glyphIndexes, [Out] GlyphPairAdjustmentRecord[] glyphPairAdjustmentRecords, out int adjustmentRecordCount);
+
+		[NativeMethod(Name = "TextCore::FontEngine::GetGlyphPairAdjustmentRecord", IsFreeFunction = true)]
+		internal static GlyphPairAdjustmentRecord GetGlyphPairAdjustmentRecord(uint firstGlyphIndex, uint secondGlyphIndex)
+		{
+			GlyphPairAdjustmentRecord glyphPairAdjustmentRecord;
+			FontEngine.GetGlyphPairAdjustmentRecord_Injected(firstGlyphIndex, secondGlyphIndex, out glyphPairAdjustmentRecord);
+			return glyphPairAdjustmentRecord;
+		}
+
+		internal static GlyphPairAdjustmentRecord[] GetGlyphPairAdjustmentRecords(List<uint> newGlyphIndexes, List<uint> allGlyphIndexes)
+		{
+			FontEngine.GenericListToMarshallingArray<uint>(ref newGlyphIndexes, ref FontEngine.s_GlyphIndexes_MarshallingArray_A);
+			FontEngine.GenericListToMarshallingArray<uint>(ref allGlyphIndexes, ref FontEngine.s_GlyphIndexes_MarshallingArray_B);
+			int num;
+			FontEngine.PopulatePairAdjustmentRecordMarshallingArray_for_NewlyAddedGlyphIndexes(FontEngine.s_GlyphIndexes_MarshallingArray_A, FontEngine.s_GlyphIndexes_MarshallingArray_B, out num);
+			bool flag = num == 0;
+			GlyphPairAdjustmentRecord[] array;
+			if (flag)
+			{
+				array = null;
+			}
+			else
+			{
+				FontEngine.SetMarshallingArraySize<GlyphPairAdjustmentRecord>(ref FontEngine.s_PairAdjustmentRecords_MarshallingArray, num);
+				FontEngine.GetGlyphPairAdjustmentRecordsFromMarshallingArray(FontEngine.s_PairAdjustmentRecords_MarshallingArray);
+				FontEngine.s_PairAdjustmentRecords_MarshallingArray[num] = default(GlyphPairAdjustmentRecord);
+				array = FontEngine.s_PairAdjustmentRecords_MarshallingArray;
+			}
+			return array;
+		}
+
+		internal static GlyphPairAdjustmentRecord[] GetGlyphPairAdjustmentRecords(List<uint> glyphIndexes, out int recordCount)
+		{
+			FontEngine.GenericListToMarshallingArray<uint>(ref glyphIndexes, ref FontEngine.s_GlyphIndexes_MarshallingArray_A);
+			FontEngine.PopulatePairAdjustmentRecordMarshallingArray_from_GlyphIndexes(FontEngine.s_GlyphIndexes_MarshallingArray_A, out recordCount);
+			bool flag = recordCount == 0;
+			GlyphPairAdjustmentRecord[] array;
+			if (flag)
+			{
+				array = null;
+			}
+			else
+			{
+				FontEngine.SetMarshallingArraySize<GlyphPairAdjustmentRecord>(ref FontEngine.s_PairAdjustmentRecords_MarshallingArray, recordCount);
+				FontEngine.GetGlyphPairAdjustmentRecordsFromMarshallingArray(FontEngine.s_PairAdjustmentRecords_MarshallingArray);
+				FontEngine.s_PairAdjustmentRecords_MarshallingArray[recordCount] = default(GlyphPairAdjustmentRecord);
+				array = FontEngine.s_PairAdjustmentRecords_MarshallingArray;
+			}
+			return array;
+		}
+
+		internal static GlyphPairAdjustmentRecord[] GetGlyphPairAdjustmentRecords(uint glyphIndex, out int recordCount)
+		{
+			FontEngine.PopulatePairAdjustmentRecordMarshallingArray_from_GlyphIndex(glyphIndex, out recordCount);
+			bool flag = recordCount == 0;
+			GlyphPairAdjustmentRecord[] array;
+			if (flag)
+			{
+				array = null;
+			}
+			else
+			{
+				FontEngine.SetMarshallingArraySize<GlyphPairAdjustmentRecord>(ref FontEngine.s_PairAdjustmentRecords_MarshallingArray, recordCount);
+				FontEngine.GetGlyphPairAdjustmentRecordsFromMarshallingArray(FontEngine.s_PairAdjustmentRecords_MarshallingArray);
+				FontEngine.s_PairAdjustmentRecords_MarshallingArray[recordCount] = default(GlyphPairAdjustmentRecord);
+				array = FontEngine.s_PairAdjustmentRecords_MarshallingArray;
+			}
+			return array;
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::PopulatePairAdjustmentRecordMarshallingArray", IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulatePairAdjustmentRecordMarshallingArray_from_GlyphIndexes(uint[] glyphIndexes, out int recordCount);
+
+		[NativeMethod(Name = "TextCore::FontEngine::PopulatePairAdjustmentRecordMarshallingArray", IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulatePairAdjustmentRecordMarshallingArray_for_NewlyAddedGlyphIndexes(uint[] newGlyphIndexes, uint[] allGlyphIndexes, out int recordCount);
+
+		[NativeMethod(Name = "TextCore::FontEngine::PopulatePairAdjustmentRecordMarshallingArray", IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulatePairAdjustmentRecordMarshallingArray_from_GlyphIndex(uint glyphIndex, out int recordCount);
+
+		[NativeMethod(Name = "TextCore::FontEngine::GetGlyphPairAdjustmentRecordsFromMarshallingArray", IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetGlyphPairAdjustmentRecordsFromMarshallingArray([Out] GlyphPairAdjustmentRecord[] glyphPairAdjustmentRecords);
+
+		private static void GenericListToMarshallingArray<T>(ref List<T> srcList, ref T[] dstArray)
+		{
+			int count = srcList.Count;
+			bool flag = dstArray == null || dstArray.Length <= count;
+			if (flag)
+			{
+				int num = Mathf.NextPowerOfTwo(count + 1);
+				bool flag2 = dstArray == null;
+				if (flag2)
+				{
+					dstArray = new T[num];
+				}
+				else
+				{
+					Array.Resize<T>(ref dstArray, num);
+				}
+			}
+			for (int i = 0; i < count; i++)
+			{
+				dstArray[i] = srcList[i];
+			}
+			dstArray[count] = default(T);
+		}
+
+		private static void SetMarshallingArraySize<T>(ref T[] marshallingArray, int recordCount)
+		{
+			bool flag = marshallingArray == null || marshallingArray.Length <= recordCount;
+			if (flag)
+			{
+				int num = Mathf.NextPowerOfTwo(recordCount + 1);
+				bool flag2 = marshallingArray == null;
+				if (flag2)
+				{
+					marshallingArray = new T[num];
+				}
+				else
+				{
+					Array.Resize<T>(ref marshallingArray, num);
+				}
+			}
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::ResetAtlasTexture", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -613,11 +891,14 @@ namespace UnityEngine.TextCore.LowLevel
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int RenderGlyphToTexture_Internal_Injected(ref GlyphMarshallingStruct glyphStruct, int padding, GlyphRenderMode renderMode, Texture2D texture);
 
-		private static readonly FontEngine s_Instance = new FontEngine();
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetGlyphPairAdjustmentRecord_Injected(uint firstGlyphIndex, uint secondGlyphIndex, out GlyphPairAdjustmentRecord ret);
 
 		private static Glyph[] s_Glyphs = new Glyph[16];
 
-		private static uint[] s_GlyphIndexes_MarshallingArray = new uint[16];
+		private static uint[] s_GlyphIndexes_MarshallingArray_A;
+
+		private static uint[] s_GlyphIndexes_MarshallingArray_B;
 
 		private static GlyphMarshallingStruct[] s_GlyphMarshallingStruct_IN = new GlyphMarshallingStruct[16];
 
@@ -627,7 +908,7 @@ namespace UnityEngine.TextCore.LowLevel
 
 		private static GlyphRect[] s_UsedGlyphRects = new GlyphRect[16];
 
-		private static GlyphPairAdjustmentRecord[] s_GlyphPairAdjustmentRecords_MarshallingArray;
+		private static GlyphPairAdjustmentRecord[] s_PairAdjustmentRecords_MarshallingArray;
 
 		private static Dictionary<uint, Glyph> s_GlyphLookupDictionary = new Dictionary<uint, Glyph>();
 	}

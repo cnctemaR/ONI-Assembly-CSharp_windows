@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Scripting/DelayedCallUtility.h")]
 	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
+	[NativeHeader("Runtime/Scripting/DelayedCallUtility.h")]
 	[ExtensionOfNativeClass]
 	[RequiredByNativeCode]
 	public class MonoBehaviour : Behaviour
@@ -30,7 +30,8 @@ namespace UnityEngine
 
 		public void InvokeRepeating(string methodName, float time, float repeatRate)
 		{
-			if (repeatRate <= 1E-05f && repeatRate != 0f)
+			bool flag = repeatRate <= 1E-05f && repeatRate != 0f;
+			if (flag)
 			{
 				throw new UnityException("Invoke repeat rate has to be larger than 0.00001F)");
 			}
@@ -56,11 +57,13 @@ namespace UnityEngine
 
 		public Coroutine StartCoroutine(string methodName, [DefaultValue("null")] object value)
 		{
-			if (string.IsNullOrEmpty(methodName))
+			bool flag = string.IsNullOrEmpty(methodName);
+			if (flag)
 			{
 				throw new NullReferenceException("methodName is null or empty");
 			}
-			if (!MonoBehaviour.IsObjectMonoBehaviour(this))
+			bool flag2 = !MonoBehaviour.IsObjectMonoBehaviour(this);
+			if (flag2)
 			{
 				throw new ArgumentException("Coroutines can only be stopped on a MonoBehaviour");
 			}
@@ -69,11 +72,13 @@ namespace UnityEngine
 
 		public Coroutine StartCoroutine(IEnumerator routine)
 		{
-			if (routine == null)
+			bool flag = routine == null;
+			if (flag)
 			{
 				throw new NullReferenceException("routine is null");
 			}
-			if (!MonoBehaviour.IsObjectMonoBehaviour(this))
+			bool flag2 = !MonoBehaviour.IsObjectMonoBehaviour(this);
+			if (flag2)
 			{
 				throw new ArgumentException("Coroutines can only be stopped on a MonoBehaviour");
 			}
@@ -88,11 +93,13 @@ namespace UnityEngine
 
 		public void StopCoroutine(IEnumerator routine)
 		{
-			if (routine == null)
+			bool flag = routine == null;
+			if (flag)
 			{
 				throw new NullReferenceException("routine is null");
 			}
-			if (!MonoBehaviour.IsObjectMonoBehaviour(this))
+			bool flag2 = !MonoBehaviour.IsObjectMonoBehaviour(this);
+			if (flag2)
 			{
 				throw new ArgumentException("Coroutines can only be stopped on a MonoBehaviour");
 			}
@@ -101,11 +108,13 @@ namespace UnityEngine
 
 		public void StopCoroutine(Coroutine routine)
 		{
-			if (routine == null)
+			bool flag = routine == null;
+			if (flag)
 			{
 				throw new NullReferenceException("routine is null");
 			}
-			if (!MonoBehaviour.IsObjectMonoBehaviour(this))
+			bool flag2 = !MonoBehaviour.IsObjectMonoBehaviour(this);
+			if (flag2)
 			{
 				throw new ArgumentException("Coroutines can only be stopped on a MonoBehaviour");
 			}

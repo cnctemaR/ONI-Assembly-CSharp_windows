@@ -4,8 +4,8 @@ using System.Runtime.Remoting.Metadata;
 
 namespace System.Runtime.Serialization.Formatters
 {
-	[SoapType(Embedded = true)]
 	[ComVisible(true)]
+	[SoapType(Embedded = true)]
 	[Serializable]
 	public sealed class ServerFault
 	{

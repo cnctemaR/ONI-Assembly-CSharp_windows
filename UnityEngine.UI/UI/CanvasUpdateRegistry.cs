@@ -25,8 +25,7 @@ namespace UnityEngine.UI
 		private bool ObjectValidForUpdate(ICanvasElement element)
 		{
 			bool flag = element != null;
-			bool flag2 = element is Object;
-			if (flag2)
+			if (element is Object)
 			{
 				flag = element as Object != null;
 			}
@@ -93,6 +92,8 @@ namespace UnityEngine.UI
 			}
 			CanvasUpdateRegistry.instance.m_LayoutRebuildQueue.Clear();
 			this.m_PerformingLayoutUpdate = false;
+			UISystemProfilerApi.EndSample(UISystemProfilerApi.SampleType.Layout);
+			UISystemProfilerApi.BeginSample(UISystemProfilerApi.SampleType.Render);
 			ClipperRegistry.instance.Cull();
 			this.m_PerformingGraphicUpdate = true;
 			for (int l = 3; l < 5; l++)
@@ -119,26 +120,21 @@ namespace UnityEngine.UI
 			}
 			CanvasUpdateRegistry.instance.m_GraphicRebuildQueue.Clear();
 			this.m_PerformingGraphicUpdate = false;
-			UISystemProfilerApi.EndSample(UISystemProfilerApi.SampleType.Layout);
+			UISystemProfilerApi.EndSample(UISystemProfilerApi.SampleType.Render);
 		}
 
 		private static int ParentCount(Transform child)
 		{
-			int num;
 			if (child == null)
 			{
-				num = 0;
+				return 0;
 			}
-			else
+			Transform transform = child.parent;
+			int num = 0;
+			while (transform != null)
 			{
-				Transform transform = child.parent;
-				int num2 = 0;
-				while (transform != null)
-				{
-					num2++;
-					transform = transform.parent;
-				}
-				num = num2;
+				num++;
+				transform = transform.parent;
 			}
 			return num;
 		}
@@ -177,17 +173,12 @@ namespace UnityEngine.UI
 
 		private bool InternalRegisterCanvasElementForGraphicRebuild(ICanvasElement element)
 		{
-			bool flag;
 			if (this.m_PerformingGraphicUpdate)
 			{
 				Debug.LogError(string.Format("Trying to add {0} for graphic rebuild while we are already inside a graphic rebuild loop. This is not supported.", element));
-				flag = false;
+				return false;
 			}
-			else
-			{
-				flag = this.m_GraphicRebuildQueue.AddUnique(element);
-			}
-			return flag;
+			return this.m_GraphicRebuildQueue.AddUnique(element);
 		}
 
 		public static void UnRegisterCanvasElementForRebuild(ICanvasElement element)
@@ -201,12 +192,10 @@ namespace UnityEngine.UI
 			if (this.m_PerformingLayoutUpdate)
 			{
 				Debug.LogError(string.Format("Trying to remove {0} from rebuild list while we are already inside a rebuild loop. This is not supported.", element));
+				return;
 			}
-			else
-			{
-				element.LayoutComplete();
-				CanvasUpdateRegistry.instance.m_LayoutRebuildQueue.Remove(element);
-			}
+			element.LayoutComplete();
+			CanvasUpdateRegistry.instance.m_LayoutRebuildQueue.Remove(element);
 		}
 
 		private void InternalUnRegisterCanvasElementForGraphicRebuild(ICanvasElement element)
@@ -214,12 +203,10 @@ namespace UnityEngine.UI
 			if (this.m_PerformingGraphicUpdate)
 			{
 				Debug.LogError(string.Format("Trying to remove {0} from rebuild list while we are already inside a rebuild loop. This is not supported.", element));
+				return;
 			}
-			else
-			{
-				element.GraphicUpdateComplete();
-				CanvasUpdateRegistry.instance.m_GraphicRebuildQueue.Remove(element);
-			}
+			element.GraphicUpdateComplete();
+			CanvasUpdateRegistry.instance.m_GraphicRebuildQueue.Remove(element);
 		}
 
 		public static bool IsRebuildingLayout()
@@ -237,6 +224,10 @@ namespace UnityEngine.UI
 		private bool m_PerformingLayoutUpdate;
 
 		private bool m_PerformingGraphicUpdate;
+
+		private string[] m_CanvasUpdateProfilerStrings = new string[] { "CanvasUpdate.Prelayout", "CanvasUpdate.Layout", "CanvasUpdate.PostLayout", "CanvasUpdate.PreRender", "CanvasUpdate.LatePreRender" };
+
+		private const string m_CullingUpdateProfilerString = "ClipperRegistry.Cull";
 
 		private readonly IndexedSet<ICanvasElement> m_LayoutRebuildQueue = new IndexedSet<ICanvasElement>();
 

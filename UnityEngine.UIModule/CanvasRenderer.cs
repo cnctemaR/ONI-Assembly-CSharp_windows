@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/UI/CanvasRenderer.h")]
 	[NativeClass("UI::CanvasRenderer")]
+	[NativeHeader("Modules/UI/CanvasRenderer.h")]
 	public sealed class CanvasRenderer : Component
 	{
 		public extern bool hasPopInstruction
@@ -94,6 +94,20 @@ namespace UnityEngine
 		public void EnableRectClipping(Rect rect)
 		{
 			this.EnableRectClipping_Injected(ref rect);
+		}
+
+		public Vector2 clippingSoftness
+		{
+			get
+			{
+				Vector2 vector;
+				this.get_clippingSoftness_Injected(out vector);
+				return vector;
+			}
+			set
+			{
+				this.set_clippingSoftness_Injected(ref value);
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -253,5 +267,11 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void EnableRectClipping_Injected(ref Rect rect);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_clippingSoftness_Injected(out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_clippingSoftness_Injected(ref Vector2 value);
 	}
 }

@@ -7,9 +7,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Transform/Transform.h")]
 	[NativeHeader("Configuration/UnityConfigure.h")]
+	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Transform/ScriptBindings/TransformScriptBindings.h")]
 	public class Transform : Component, IEnumerable
 	{
@@ -164,13 +164,13 @@ namespace UnityEngine
 			}
 		}
 
-		[NativeMethod("GetRotationOrder")]
 		[NativeConditional("UNITY_EDITOR")]
+		[NativeMethod("GetRotationOrder")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern int GetRotationOrderInternal();
 
-		[NativeMethod("SetRotationOrder")]
 		[NativeConditional("UNITY_EDITOR")]
+		[NativeMethod("SetRotationOrder")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void SetRotationOrderInternal(RotationOrder rotationOrder);
 
@@ -196,7 +196,8 @@ namespace UnityEngine
 			}
 			set
 			{
-				if (this is RectTransform)
+				bool flag = this is RectTransform;
+				if (flag)
 				{
 					Debug.LogWarning("Parent of RectTransform is being set with parent property. Consider using the SetParent method instead, with the worldPositionStays argument set to false. This will retain local orientation and scale rather than world orientation and scale, which can prevent common UI scaling issues.", this);
 				}
@@ -255,7 +256,8 @@ namespace UnityEngine
 
 		public void Translate(Vector3 translation, [DefaultValue("Space.Self")] Space relativeTo)
 		{
-			if (relativeTo == Space.World)
+			bool flag = relativeTo == Space.World;
+			if (flag)
 			{
 				this.position += translation;
 			}
@@ -282,7 +284,8 @@ namespace UnityEngine
 
 		public void Translate(Vector3 translation, Transform relativeTo)
 		{
-			if (relativeTo)
+			bool flag = relativeTo;
+			if (flag)
 			{
 				this.position += relativeTo.TransformDirection(translation);
 			}
@@ -300,7 +303,8 @@ namespace UnityEngine
 		public void Rotate(Vector3 eulers, [DefaultValue("Space.Self")] Space relativeTo)
 		{
 			Quaternion quaternion = Quaternion.Euler(eulers.x, eulers.y, eulers.z);
-			if (relativeTo == Space.Self)
+			bool flag = relativeTo == Space.Self;
+			if (flag)
 			{
 				this.localRotation *= quaternion;
 			}
@@ -333,7 +337,8 @@ namespace UnityEngine
 
 		public void Rotate(Vector3 axis, float angle, [DefaultValue("Space.Self")] Space relativeTo)
 		{
-			if (relativeTo == Space.Self)
+			bool flag = relativeTo == Space.Self;
+			if (flag)
 			{
 				this.RotateAroundInternal(base.transform.TransformDirection(axis), angle * 0.017453292f);
 			}
@@ -361,7 +366,8 @@ namespace UnityEngine
 
 		public void LookAt(Transform target, [DefaultValue("Vector3.up")] Vector3 worldUp)
 		{
-			if (target)
+			bool flag = target;
+			if (flag)
 			{
 				this.LookAt(target.position, worldUp);
 			}
@@ -369,7 +375,8 @@ namespace UnityEngine
 
 		public void LookAt(Transform target)
 		{
-			if (target)
+			bool flag = target;
+			if (flag)
 			{
 				this.LookAt(target.position, Vector3.up);
 			}
@@ -503,7 +510,8 @@ namespace UnityEngine
 
 		public Transform Find(string n)
 		{
-			if (n == null)
+			bool flag = n == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("Name cannot be null");
 			}
@@ -561,8 +569,8 @@ namespace UnityEngine
 			this.RotateAroundLocal_Injected(ref axis, angle);
 		}
 
-		[FreeFunction("GetChild", HasExplicitThis = true)]
 		[NativeThrows]
+		[FreeFunction("GetChild", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Transform GetChild(int index);
 
@@ -707,7 +715,9 @@ namespace UnityEngine
 			public bool MoveNext()
 			{
 				int childCount = this.outer.childCount;
-				return ++this.currentIndex < childCount;
+				int num = this.currentIndex + 1;
+				this.currentIndex = num;
+				return num < childCount;
 			}
 
 			public void Reset()

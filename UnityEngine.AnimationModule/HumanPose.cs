@@ -6,17 +6,21 @@ namespace UnityEngine
 	{
 		internal void Init()
 		{
-			if (this.muscles != null)
+			bool flag = this.muscles != null;
+			if (flag)
 			{
-				if (this.muscles.Length != HumanTrait.MuscleCount)
+				bool flag2 = this.muscles.Length != HumanTrait.MuscleCount;
+				if (flag2)
 				{
 					throw new InvalidOperationException("Bad array size for HumanPose.muscles. Size must equal HumanTrait.MuscleCount");
 				}
 			}
-			if (this.muscles == null)
+			bool flag3 = this.muscles == null;
+			if (flag3)
 			{
 				this.muscles = new float[HumanTrait.MuscleCount];
-				if (this.bodyRotation.x == 0f && this.bodyRotation.y == 0f && this.bodyRotation.z == 0f && this.bodyRotation.w == 0f)
+				bool flag4 = this.bodyRotation.x == 0f && this.bodyRotation.y == 0f && this.bodyRotation.z == 0f && this.bodyRotation.w == 0f;
+				if (flag4)
 				{
 					this.bodyRotation.w = 1f;
 				}

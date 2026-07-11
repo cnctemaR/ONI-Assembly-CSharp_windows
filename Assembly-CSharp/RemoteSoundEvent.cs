@@ -33,7 +33,7 @@ public class RemoteSoundEvent : SoundEvent
 				if (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, base.sound, base.soundHash, base.looping, this.isDynamic))
 				{
 					EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible), false);
-					eventInstance.setParameterValue("State", num);
+					eventInstance.setParameterByName("State", num, false);
 					SoundEvent.EndOneShot(eventInstance);
 				}
 			}

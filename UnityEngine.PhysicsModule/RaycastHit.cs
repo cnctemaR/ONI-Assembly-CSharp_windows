@@ -7,8 +7,8 @@ namespace UnityEngine
 {
 	[NativeHeader("Runtime/Interfaces/IRaycast.h")]
 	[NativeHeader("PhysicsScriptingClasses.h")]
+	[NativeHeader("Modules/Physics/RaycastHit.h")]
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Dynamics/RaycastHit.h")]
 	public struct RaycastHit
 	{
 		public Collider collider
@@ -113,18 +113,23 @@ namespace UnityEngine
 			get
 			{
 				Rigidbody rigidbody = this.rigidbody;
+				bool flag = rigidbody != null;
 				Transform transform;
-				if (rigidbody != null)
+				if (flag)
 				{
 					transform = rigidbody.transform;
 				}
-				else if (this.collider != null)
-				{
-					transform = this.collider.transform;
-				}
 				else
 				{
-					transform = null;
+					bool flag2 = this.collider != null;
+					if (flag2)
+					{
+						transform = this.collider.transform;
+					}
+					else
+					{
+						transform = null;
+					}
 				}
 				return transform;
 			}
@@ -134,7 +139,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (!(this.collider != null)) ? null : this.collider.attachedRigidbody;
+				return (this.collider != null) ? this.collider.attachedRigidbody : null;
 			}
 		}
 
@@ -143,7 +148,8 @@ namespace UnityEngine
 			get
 			{
 				Vector2 vector = RaycastHit.CalculateRaycastTexCoord(this.collider, this.m_UV, this.m_Point, this.m_FaceID, 1);
-				if (this.collider.GetComponent<Renderer>() != null)
+				bool flag = this.collider.GetComponent<Renderer>() != null;
+				if (flag)
 				{
 					Vector4 lightmapScaleOffset = this.collider.GetComponent<Renderer>().lightmapScaleOffset;
 					vector.x = vector.x * lightmapScaleOffset.x + lightmapScaleOffset.z;

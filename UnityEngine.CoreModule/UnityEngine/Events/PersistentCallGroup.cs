@@ -115,7 +115,8 @@ namespace UnityEngine.Events
 			List<PersistentCall> list = new List<PersistentCall>();
 			for (int i = 0; i < this.m_Calls.Count; i++)
 			{
-				if (this.m_Calls[i].target == target && this.m_Calls[i].methodName == methodName)
+				bool flag = this.m_Calls[i].target == target && this.m_Calls[i].methodName == methodName;
+				if (flag)
 				{
 					list.Add(this.m_Calls[i]);
 				}
@@ -127,10 +128,12 @@ namespace UnityEngine.Events
 		{
 			foreach (PersistentCall persistentCall in this.m_Calls)
 			{
-				if (persistentCall.IsValid())
+				bool flag = !persistentCall.IsValid();
+				if (!flag)
 				{
 					BaseInvokableCall runtimeCall = persistentCall.GetRuntimeCall(unityEventBase);
-					if (runtimeCall != null)
+					bool flag2 = runtimeCall != null;
+					if (flag2)
 					{
 						invokableList.AddPersistentInvokableCall(runtimeCall);
 					}

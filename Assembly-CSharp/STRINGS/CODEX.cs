@@ -791,6 +791,26 @@ namespace STRINGS
 			}
 		}
 
+		public class B3_RETEMPORALBOWUPDATE
+		{
+			public static LocString TITLE = "RE: To Otto (Spec Changes)";
+
+			public static LocString SUBTITLE = "UNENCRYPTED";
+
+			public class BODY
+			{
+				public static LocString TITLEALT = "To Otto (Spec Changes)";
+
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Dr. Sklodowska</b><size=10><alpha=#AA> <msklodowska@gravitas.nova></size></color>\nFrom: <b>Mr. Kraus</b><alpha=#AA><size=10> <okraus@gravitas.nova></size></color></smallcaps>\n------------------\n";
+
+				public static LocString EMAILHEADER2 = "<smallcaps>To: <b>Mr. Kraus</b><alpha=#AA><size=10> <okraus@gravitas.nova></size></color>\nFrom: <b>Dr. Sklodowska</b><size=10><alpha=#AA> <msklodowska@gravitas.nova></size></color></smallcaps>\n------------------\n";
+
+				public static LocString CONTAINER1 = "Thanks Doctor.\n\nPS, if you hit the \"Reply\" button instead of composing a new e-mail it makes it easier for people to tell what you're replying to. :)\n\nI appreciate it!\n\nMr. Kraus\n<size=11>Physics Department\nThe Gravitas Facility</size>\n------------------\n";
+
+				public static LocString CONTAINER2 = "Try not to take it too personally, it's probably just stress.\n\nThe Facility started going through a major overhaul not long before you got here, so I imagine the Director is having quite a time getting it all sorted out.\n\nThings will calm down once all the new departments are settled.\n\nDr. Sklodowska\n<size=11>Physics Department\nThe Gravitas Facility</size>\n------------------\n";
+			}
+		}
+
 		public class A1_RESEARCHGIANTARTICLE
 		{
 			public static LocString TITLE = "Re: Have you seen this?";
@@ -814,26 +834,6 @@ namespace STRINGS
 				public static LocString SIGNATURE1 = "\n[REDACTED]\n<size=11>Personnel Coordinator\nThe Gravitas Facility</size>\n------------------\n";
 
 				public static LocString SIGNATURE2 = "\n-Director Stern\n<size=11>The Gravitas Facility</size>\n------------------\n";
-			}
-		}
-
-		public class B3_RETEMPORALBOWUPDATE
-		{
-			public static LocString TITLE = "RE: To Otto (Spec Changes)";
-
-			public static LocString SUBTITLE = "UNENCRYPTED";
-
-			public class BODY
-			{
-				public static LocString TITLEALT = "To Otto (Spec Changes)";
-
-				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Dr. Sklodowska</b><size=10><alpha=#AA> <msklodowska@gravitas.nova></size></color>\nFrom: <b>Mr. Kraus</b><alpha=#AA><size=10> <okraus@gravitas.nova></size></color></smallcaps>\n------------------\n";
-
-				public static LocString EMAILHEADER2 = "<smallcaps>To: <b>Mr. Kraus</b><alpha=#AA><size=10> <okraus@gravitas.nova></size></color>\nFrom: <b>Dr. Sklodowska</b><size=10><alpha=#AA> <msklodowska@gravitas.nova></size></color></smallcaps>\n------------------\n";
-
-				public static LocString CONTAINER1 = "Thanks Doctor.\n\nPS, if you hit the \"Reply\" button instead of composing a new e-mail it makes it easier for people to tell what you're replying to. :)\n\nI appreciate it!\n\nMr. Kraus\n<size=11>Physics Department\nThe Gravitas Facility</size>\n------------------\n";
-
-				public static LocString CONTAINER2 = "Try not to take it too personally, it's probably just stress.\n\nThe Facility started going through a major overhaul not long before you got here, so I imagine the Director is having quite a time getting it all sorted out.\n\nThings will calm down once all the new departments are settled.\n\nDr. Sklodowska\n<size=11>Physics Department\nThe Gravitas Facility</size>\n------------------\n";
 			}
 		}
 

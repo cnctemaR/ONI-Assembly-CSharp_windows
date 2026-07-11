@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.CompilerServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter, Inherited = false)]
+	[ComVisible(true)]
 	[Serializable]
 	public sealed class DecimalConstantAttribute : Attribute
 	{

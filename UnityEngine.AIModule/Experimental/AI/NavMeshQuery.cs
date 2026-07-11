@@ -8,10 +8,10 @@ using UnityEngine.Bindings;
 namespace UnityEngine.Experimental.AI
 {
 	[NativeHeader("Modules/AI/NavMeshExperimental.bindings.h")]
+	[NativeHeader("Modules/AI/Public/NavMeshBindingTypes.h")]
+	[NativeHeader("Runtime/Math/Matrix4x4.h")]
 	[StaticAccessor("NavMeshQueryBindings", StaticAccessorType.DoubleColon)]
 	[NativeContainer]
-	[NativeHeader("Runtime/Math/Matrix4x4.h")]
-	[NativeHeader("Modules/AI/Public/NavMeshBindingTypes.h")]
 	public struct NavMeshQuery : IDisposable
 	{
 		public NavMeshQuery(NavMeshWorld world, Allocator allocator, int pathNodePoolSize = 0)
@@ -35,7 +35,7 @@ namespace UnityEngine.Experimental.AI
 
 		public unsafe PathQueryStatus BeginFindPath(NavMeshLocation start, NavMeshLocation end, int areaMask = -1, NativeArray<float> costs = default(NativeArray<float>))
 		{
-			void* ptr = ((costs.Length <= 0) ? null : costs.GetUnsafePtr<float>());
+			void* ptr = ((costs.Length > 0) ? costs.GetUnsafePtr<float>() : null);
 			return NavMeshQuery.BeginFindPath(this.m_NavMeshQuery, start, end, areaMask, ptr);
 		}
 
@@ -115,7 +115,7 @@ namespace UnityEngine.Experimental.AI
 		{
 			Vector3 vector;
 			PathQueryStatus closestPointOnPoly = NavMeshQuery.GetClosestPointOnPoly(this.m_NavMeshQuery, polygon, position, out vector);
-			return ((closestPointOnPoly & PathQueryStatus.Success) == (PathQueryStatus)0) ? default(NavMeshLocation) : new NavMeshLocation(vector, polygon);
+			return ((closestPointOnPoly & PathQueryStatus.Success) != (PathQueryStatus)0) ? new NavMeshLocation(vector, polygon) : default(NavMeshLocation);
 		}
 
 		[ThreadSafe]
@@ -218,7 +218,7 @@ namespace UnityEngine.Experimental.AI
 
 		public unsafe PathQueryStatus Raycast(out NavMeshHit hit, NavMeshLocation start, Vector3 targetPosition, int areaMask = -1, NativeArray<float> costs = default(NativeArray<float>))
 		{
-			void* ptr = ((costs.Length != 32) ? null : costs.GetUnsafePtr<float>());
+			void* ptr = ((costs.Length == 32) ? costs.GetUnsafePtr<float>() : null);
 			int num;
 			PathQueryStatus pathQueryStatus = NavMeshQuery.Raycast(this.m_NavMeshQuery, start, targetPosition, areaMask, ptr, out hit, null, out num, 0);
 			return pathQueryStatus & ~PathQueryStatus.BufferTooSmall;
@@ -226,10 +226,26 @@ namespace UnityEngine.Experimental.AI
 
 		public unsafe PathQueryStatus Raycast(out NavMeshHit hit, NativeSlice<PolygonId> path, out int pathCount, NavMeshLocation start, Vector3 targetPosition, int areaMask = -1, NativeArray<float> costs = default(NativeArray<float>))
 		{
-			void* ptr = ((costs.Length != 32) ? null : costs.GetUnsafePtr<float>());
-			void* ptr2 = ((path.Length <= 0) ? null : path.GetUnsafePtr<PolygonId>());
-			int num = ((ptr2 == null) ? 0 : path.Length);
+			void* ptr = ((costs.Length == 32) ? costs.GetUnsafePtr<float>() : null);
+			void* ptr2 = ((path.Length > 0) ? path.GetUnsafePtr<PolygonId>() : null);
+			int num = ((ptr2 != null) ? path.Length : 0);
 			return NavMeshQuery.Raycast(this.m_NavMeshQuery, start, targetPosition, areaMask, ptr, out hit, ptr2, out pathCount, num);
+		}
+
+		[ThreadSafe]
+		private unsafe static PathQueryStatus GetEdgesAndNeighbors(IntPtr navMeshQuery, PolygonId node, int maxVerts, int maxNei, void* verts, void* neighbors, void* edgeIndices, out int vertCount, out int neighborsCount)
+		{
+			return NavMeshQuery.GetEdgesAndNeighbors_Injected(navMeshQuery, ref node, maxVerts, maxNei, verts, neighbors, edgeIndices, out vertCount, out neighborsCount);
+		}
+
+		public unsafe PathQueryStatus GetEdgesAndNeighbors(PolygonId node, NativeSlice<Vector3> edgeVertices, NativeSlice<PolygonId> neighbors, NativeSlice<byte> edgeIndices, out int verticesCount, out int neighborsCount)
+		{
+			void* ptr = ((edgeVertices.Length > 0) ? edgeVertices.GetUnsafePtr<Vector3>() : null);
+			void* ptr2 = ((neighbors.Length > 0) ? neighbors.GetUnsafePtr<PolygonId>() : null);
+			void* ptr3 = ((edgeIndices.Length > 0) ? edgeIndices.GetUnsafePtr<byte>() : null);
+			int length = edgeVertices.Length;
+			int num = ((neighbors.Length > 0) ? neighbors.Length : edgeIndices.Length);
+			return NavMeshQuery.GetEdgesAndNeighbors(this.m_NavMeshQuery, node, length, num, ptr, ptr2, ptr3, out verticesCount, out neighborsCount);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -270,6 +286,9 @@ namespace UnityEngine.Experimental.AI
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern PathQueryStatus Raycast_Injected(IntPtr navMeshQuery, ref NavMeshLocation start, ref Vector3 targetPosition, int areaMask, void* costs, out NavMeshHit hit, void* path, out int pathCount, int maxPath);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern PathQueryStatus GetEdgesAndNeighbors_Injected(IntPtr navMeshQuery, ref PolygonId node, int maxVerts, int maxNei, void* verts, void* neighbors, void* edgeIndices, out int vertCount, out int neighborsCount);
 
 		[NativeDisableUnsafePtrRestriction]
 		internal IntPtr m_NavMeshQuery;

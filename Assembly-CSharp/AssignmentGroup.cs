@@ -65,6 +65,31 @@ public class AssignmentGroup : IAssignableIdentity
 		return null;
 	}
 
+	public bool HasOwner(Assignables owner)
+	{
+		using (List<IAssignableIdentity>.Enumerator enumerator = this.members.GetEnumerator())
+		{
+			while (enumerator.MoveNext())
+			{
+				if (enumerator.Current.HasOwner(owner))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public int NumOwners()
+	{
+		int num = 0;
+		foreach (IAssignableIdentity assignableIdentity in this.members)
+		{
+			num += assignableIdentity.NumOwners();
+		}
+		return num;
+	}
+
 	private List<IAssignableIdentity> members = new List<IAssignableIdentity>();
 
 	public List<Ownables> current_owners = new List<Ownables>();

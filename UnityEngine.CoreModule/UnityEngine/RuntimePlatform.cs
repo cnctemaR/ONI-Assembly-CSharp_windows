@@ -54,6 +54,8 @@ namespace UnityEngine
 		WiiU = 30,
 		tvOS,
 		Switch,
-		Lumin
+		Lumin,
+		Stadia,
+		CloudRendering
 	}
 }

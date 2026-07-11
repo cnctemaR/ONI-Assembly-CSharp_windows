@@ -24,7 +24,7 @@ public class LightShapePreview : KMonoBehaviour
 
 	public int lux;
 
-	public LightShape shape;
+	public global::LightShape shape;
 
 	public CellOffset offset;
 

@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Resources
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
+	[ComVisible(true)]
 	public sealed class SatelliteContractVersionAttribute : Attribute
 	{
 		public SatelliteContractVersionAttribute(string version)

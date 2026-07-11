@@ -42,7 +42,7 @@ public class UserNavigation : KMonoBehaviour
 			orthoSize = ortho_size
 		};
 		EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("UserNavPoint_set", false), Vector3.zero, 1f);
-		eventInstance.setParameterValue("userNavPoint_ID", (float)index);
+		eventInstance.setParameterByName("userNavPoint_ID", (float)index, false);
 		KFMOD.EndOneShot(eventInstance);
 	}
 
@@ -58,7 +58,7 @@ public class UserNavigation : KMonoBehaviour
 		{
 			CameraController.Instance.SetTargetPos(navPoint.pos, navPoint.orthoSize, true);
 			EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("UserNavPoint_recall", false), Vector3.zero, 1f);
-			eventInstance.setParameterValue("userNavPoint_ID", (float)index);
+			eventInstance.setParameterByName("userNavPoint_ID", (float)index, false);
 			KFMOD.EndOneShot(eventInstance);
 		}
 	}

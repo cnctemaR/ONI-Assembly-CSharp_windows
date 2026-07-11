@@ -10,10 +10,10 @@ using System.Security.Principal;
 
 namespace System
 {
-	[Guid("05F696DC-2B29-3663-AD8B-C4389CF2A713")]
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[CLSCompliant(false)]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[ComVisible(true)]
+	[Guid("05F696DC-2B29-3663-AD8B-C4389CF2A713")]
 	public interface _AppDomain
 	{
 		void GetTypeInfoCount(out uint pcTInfo);

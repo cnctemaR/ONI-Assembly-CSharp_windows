@@ -6,8 +6,8 @@ using System.Threading;
 
 namespace System.Collections.ObjectModel
 {
-	[DebuggerTypeProxy(typeof(Mscorlib_CollectionDebugView<>))]
 	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(Mscorlib_CollectionDebugView<>))]
 	[ComVisible(false)]
 	[Serializable]
 	public class ReadOnlyCollection<T> : IList<T>, ICollection<T>, IEnumerable<T>, IEnumerable, IList, ICollection, IReadOnlyList<T>, IReadOnlyCollection<T>

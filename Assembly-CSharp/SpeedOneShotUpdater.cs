@@ -9,6 +9,6 @@ public class SpeedOneShotUpdater : OneShotSoundParameterUpdater
 
 	public override void Play(OneShotSoundParameterUpdater.Sound sound)
 	{
-		sound.ev.setParameterValueByIndex(sound.description.GetParameterIdx(base.parameter), SpeedLoopingSoundUpdater.GetSpeedParameterValue());
+		sound.ev.setParameterByID(sound.description.GetParameterId(base.parameter), SpeedLoopingSoundUpdater.GetSpeedParameterValue(), false);
 	}
 }

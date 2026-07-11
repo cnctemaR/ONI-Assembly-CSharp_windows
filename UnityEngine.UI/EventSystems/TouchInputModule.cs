@@ -59,26 +59,19 @@ namespace UnityEngine.EventSystems
 
 		public override bool ShouldActivateModule()
 		{
-			bool flag;
 			if (!base.ShouldActivateModule())
 			{
-				flag = false;
+				return false;
 			}
-			else if (this.m_ForceModuleActive)
+			if (this.m_ForceModuleActive)
 			{
-				flag = true;
+				return true;
 			}
-			else if (this.UseFakeInput())
+			if (this.UseFakeInput())
 			{
-				bool flag2 = base.input.GetMouseButtonDown(0);
-				flag2 |= (this.m_MousePosition - this.m_LastMousePosition).sqrMagnitude > 0f;
-				flag = flag2;
+				return base.input.GetMouseButtonDown(0) | ((this.m_MousePosition - this.m_LastMousePosition).sqrMagnitude > 0f);
 			}
-			else
-			{
-				flag = base.input.touchCount > 0;
-			}
-			return flag;
+			return base.input.touchCount > 0;
 		}
 
 		private bool UseFakeInput()
@@ -91,17 +84,14 @@ namespace UnityEngine.EventSystems
 			if (this.UseFakeInput())
 			{
 				this.FakeTouches();
+				return;
 			}
-			else
-			{
-				this.ProcessTouchEvents();
-			}
+			this.ProcessTouchEvents();
 		}
 
 		private void FakeTouches()
 		{
-			PointerInputModule.MouseState mousePointerEventData = this.GetMousePointerEventData(0);
-			PointerInputModule.MouseButtonEventData eventData = mousePointerEventData.GetButtonState(PointerEventData.InputButton.Left).eventData;
+			PointerInputModule.MouseButtonEventData eventData = this.GetMousePointerEventData(0).GetButtonState(PointerEventData.InputButton.Left).eventData;
 			if (eventData.PressedThisFrame())
 			{
 				eventData.buttonData.delta = Vector2.zero;
@@ -163,10 +153,10 @@ namespace UnityEngine.EventSystems
 				float unscaledTime = Time.unscaledTime;
 				if (gameObject2 == pointerEvent.lastPress)
 				{
-					float num = unscaledTime - pointerEvent.clickTime;
-					if (num < 0.3f)
+					if (unscaledTime - pointerEvent.clickTime < 0.3f)
 					{
-						pointerEvent.clickCount++;
+						int num = pointerEvent.clickCount + 1;
+						pointerEvent.clickCount = num;
 					}
 					else
 					{
@@ -224,7 +214,7 @@ namespace UnityEngine.EventSystems
 		public override string ToString()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine((!this.UseFakeInput()) ? "Input: Touch" : "Input: Faked");
+			stringBuilder.AppendLine(this.UseFakeInput() ? "Input: Faked" : "Input: Touch");
 			if (this.UseFakeInput())
 			{
 				PointerEventData lastPointerEventData = base.GetLastPointerEventData(-1);

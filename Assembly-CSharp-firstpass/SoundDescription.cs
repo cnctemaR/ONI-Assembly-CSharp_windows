@@ -1,17 +1,18 @@
 ﻿using System;
+using FMOD.Studio;
 
 public struct SoundDescription
 {
-	public int GetParameterIdx(HashedString name)
+	public PARAMETER_ID GetParameterId(HashedString name)
 	{
 		foreach (SoundDescription.Parameter parameter in this.parameters)
 		{
 			if (parameter.name == name)
 			{
-				return parameter.idx;
+				return parameter.id;
 			}
 		}
-		return -1;
+		return SoundDescription.Parameter.INVALID_ID;
 	}
 
 	public string path;
@@ -26,8 +27,8 @@ public struct SoundDescription
 	{
 		public HashedString name;
 
-		public int idx;
+		public PARAMETER_ID id;
 
-		public const int INVALID_IDX = -1;
+		public static readonly PARAMETER_ID INVALID_ID;
 	}
 }

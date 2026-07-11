@@ -43,24 +43,28 @@ public class FaceGraph : KMonoBehaviour
 
 	public void ApplyShape()
 	{
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		Accessorizer component2 = base.GetComponent<Accessorizer>();
-		KAnimFile anim = Assets.GetAnim("head_master_swap_kanim");
-		bool flag = this.ShouldUseSidewaysSymbol(component);
-		BlinkMonitor.Instance smi = component2.GetSMI<BlinkMonitor.Instance>();
-		if (smi.IsNullOrStopped() || !smi.IsBlinking())
+		KAnimFile anim = Assets.GetAnim(FaceGraph.HASH_HEAD_MASTER_SWAP_KANIM);
+		bool flag = this.ShouldUseSidewaysSymbol(this.m_controller);
+		if (this.m_blinkMonitor == null)
 		{
-			KAnim.Build.Symbol symbol = component2.GetAccessory(Db.Get().AccessorySlots.Eyes).symbol;
-			this.ApplyShape(symbol, component, anim, "snapto_eyes", flag);
+			this.m_blinkMonitor = this.m_accessorizer.GetSMI<BlinkMonitor.Instance>();
 		}
-		SpeechMonitor.Instance smi2 = component2.GetSMI<SpeechMonitor.Instance>();
-		if (smi2.IsNullOrStopped() || !smi2.IsPlayingSpeech())
+		if (this.m_speechMonitor == null)
 		{
-			KAnim.Build.Symbol symbol2 = component2.GetAccessory(Db.Get().AccessorySlots.Mouth).symbol;
-			this.ApplyShape(symbol2, component, anim, "snapto_mouth", flag);
+			this.m_speechMonitor = this.m_accessorizer.GetSMI<SpeechMonitor.Instance>();
+		}
+		if (this.m_blinkMonitor.IsNullOrStopped() || !this.m_blinkMonitor.IsBlinking())
+		{
+			KAnim.Build.Symbol symbol = this.m_accessorizer.GetAccessory(Db.Get().AccessorySlots.Eyes).symbol;
+			this.ApplyShape(symbol, this.m_controller, anim, FaceGraph.ANIM_HASH_SNAPTO_EYES, flag);
+		}
+		if (this.m_speechMonitor.IsNullOrStopped() || !this.m_speechMonitor.IsPlayingSpeech())
+		{
+			KAnim.Build.Symbol symbol2 = this.m_accessorizer.GetAccessory(Db.Get().AccessorySlots.Mouth).symbol;
+			this.ApplyShape(symbol2, this.m_controller, anim, FaceGraph.ANIM_HASH_SNAPTO_MOUTH, flag);
 			return;
 		}
-		smi2.DrawMouth();
+		this.m_speechMonitor.DrawMouth();
 	}
 
 	private bool ShouldUseSidewaysSymbol(KBatchedAnimController controller)
@@ -80,7 +84,7 @@ public class FaceGraph : KMonoBehaviour
 		for (int i = 0; i < frame.numElements; i++)
 		{
 			KAnim.Anim.FrameElement frameElement = batchGroupData.GetFrameElement(frame.firstElementIdx + i);
-			if (frameElement.symbol == FaceGraph.HASH_SNAPTO_EYES && frameElement.frame >= FaceGraph.FIRST_SIDEWAYS_FRAME)
+			if (frameElement.symbol == FaceGraph.ANIM_HASH_SNAPTO_EYES && frameElement.frame >= FaceGraph.FIRST_SIDEWAYS_FRAME)
 			{
 				return true;
 			}
@@ -88,9 +92,9 @@ public class FaceGraph : KMonoBehaviour
 		return false;
 	}
 
-	private void ApplyShape(KAnim.Build.Symbol variation_symbol, KBatchedAnimController controller, KAnimFile shapes_file, HashedString symbol_name_in_shape_file, bool should_use_sideways_symbol)
+	private void ApplyShape(KAnim.Build.Symbol variation_symbol, KBatchedAnimController controller, KAnimFile shapes_file, KAnimHashedString symbol_name_in_shape_file, bool should_use_sideways_symbol)
 	{
-		HashedString hashedString = FaceGraph.HASH_NEUTRAL;
+		HashedString hashedString = FaceGraph.ANIM_HASH_NEUTRAL;
 		if (this.currentExpression != null)
 		{
 			hashedString = this.currentExpression.face.hash;
@@ -133,8 +137,8 @@ public class FaceGraph : KMonoBehaviour
 		}
 		KAnim.Build.Symbol symbol = KAnimBatchManager.Instance().GetBatchGroupData(controller.batchGroupID).GetSymbol(symbol_name_in_shape_file);
 		KAnim.Build.SymbolFrameInstance symbolFrameInstance = KAnimBatchManager.Instance().GetBatchGroupData(variation_symbol.build.batchTag).symbolFrameInstances[variation_symbol.firstFrameIdx + frameElement.frame];
-		symbolFrameInstance.buildImageIdx = base.GetComponent<SymbolOverrideController>().GetAtlasIdx(variation_symbol.build.GetTexture(0));
-		controller.SetSymbolOverride(symbol.firstFrameIdx, symbolFrameInstance);
+		symbolFrameInstance.buildImageIdx = this.m_symbolOverrideController.GetAtlasIdx(variation_symbol.build.GetTexture(0));
+		controller.SetSymbolOverride(symbol.firstFrameIdx, ref symbolFrameInstance);
 	}
 
 	private void UpdateFace()
@@ -152,7 +156,7 @@ public class FaceGraph : KMonoBehaviour
 		if (expression != this.currentExpression || expression == null)
 		{
 			this.currentExpression = expression;
-			base.GetComponent<SymbolOverrideController>().MarkDirty();
+			this.m_symbolOverrideController.MarkDirty();
 		}
 	}
 
@@ -163,9 +167,26 @@ public class FaceGraph : KMonoBehaviour
 
 	private List<Expression> expressions = new List<Expression>();
 
-	private static KAnimHashedString HASH_SNAPTO_EYES = "snapto_eyes";
+	[MyCmpGet]
+	private KBatchedAnimController m_controller;
 
-	private static KAnimHashedString HASH_NEUTRAL = "neutral";
+	[MyCmpGet]
+	private Accessorizer m_accessorizer;
+
+	[MyCmpGet]
+	private SymbolOverrideController m_symbolOverrideController;
+
+	private BlinkMonitor.Instance m_blinkMonitor;
+
+	private SpeechMonitor.Instance m_speechMonitor;
+
+	private static HashedString HASH_HEAD_MASTER_SWAP_KANIM = "head_master_swap_kanim";
+
+	private static KAnimHashedString ANIM_HASH_SNAPTO_EYES = "snapto_eyes";
+
+	private static KAnimHashedString ANIM_HASH_SNAPTO_MOUTH = "snapto_mouth";
+
+	private static KAnimHashedString ANIM_HASH_NEUTRAL = "neutral";
 
 	private static int FIRST_SIDEWAYS_FRAME = 29;
 }

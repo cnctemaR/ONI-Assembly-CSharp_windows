@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[StaticAccessor("GeometryUtilityScripting", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[StaticAccessor("GeometryUtilityScripting", StaticAccessorType.DoubleColon)]
 	public sealed class GeometryUtility
 	{
 		public static Plane[] CalculateFrustumPlanes(Camera camera)
@@ -30,11 +30,13 @@ namespace UnityEngine
 
 		public static void CalculateFrustumPlanes(Matrix4x4 worldToProjectionMatrix, Plane[] planes)
 		{
-			if (planes == null)
+			bool flag = planes == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("planes");
 			}
-			if (planes.Length != 6)
+			bool flag2 = planes.Length != 6;
+			if (flag2)
 			{
 				throw new ArgumentException("Planes array must be of length 6.", "planes");
 			}
@@ -43,11 +45,13 @@ namespace UnityEngine
 
 		public static Bounds CalculateBounds(Vector3[] positions, Matrix4x4 transform)
 		{
-			if (positions == null)
+			bool flag = positions == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("positions");
 			}
-			if (positions.Length == 0)
+			bool flag2 = positions.Length == 0;
+			if (flag2)
 			{
 				throw new ArgumentException("Zero-sized array is not allowed.", "positions");
 			}
@@ -56,43 +60,48 @@ namespace UnityEngine
 
 		public static bool TryCreatePlaneFromPolygon(Vector3[] vertices, out Plane plane)
 		{
-			bool flag;
-			if (vertices == null || vertices.Length < 3)
+			bool flag = vertices == null || vertices.Length < 3;
+			bool flag2;
+			if (flag)
 			{
 				plane = new Plane(Vector3.up, 0f);
-				flag = false;
-			}
-			else if (vertices.Length == 3)
-			{
-				Vector3 vector = vertices[0];
-				Vector3 vector2 = vertices[1];
-				Vector3 vector3 = vertices[2];
-				plane = new Plane(vector, vector2, vector3);
-				flag = plane.normal.sqrMagnitude > 0f;
+				flag2 = false;
 			}
 			else
 			{
-				Vector3 zero = Vector3.zero;
-				int num = vertices.Length - 1;
-				Vector3 vector4 = vertices[num];
-				foreach (Vector3 vector5 in vertices)
+				bool flag3 = vertices.Length == 3;
+				if (flag3)
 				{
-					zero.x += (vector4.y - vector5.y) * (vector4.z + vector5.z);
-					zero.y += (vector4.z - vector5.z) * (vector4.x + vector5.x);
-					zero.z += (vector4.x - vector5.x) * (vector4.y + vector5.y);
-					vector4 = vector5;
+					Vector3 vector = vertices[0];
+					Vector3 vector2 = vertices[1];
+					Vector3 vector3 = vertices[2];
+					plane = new Plane(vector, vector2, vector3);
+					flag2 = plane.normal.sqrMagnitude > 0f;
 				}
-				zero.Normalize();
-				float num2 = 0f;
-				foreach (Vector3 vector6 in vertices)
+				else
 				{
-					num2 -= Vector3.Dot(zero, vector6);
+					Vector3 zero = Vector3.zero;
+					int num = vertices.Length - 1;
+					Vector3 vector4 = vertices[num];
+					foreach (Vector3 vector5 in vertices)
+					{
+						zero.x += (vector4.y - vector5.y) * (vector4.z + vector5.z);
+						zero.y += (vector4.z - vector5.z) * (vector4.x + vector5.x);
+						zero.z += (vector4.x - vector5.x) * (vector4.y + vector5.y);
+						vector4 = vector5;
+					}
+					zero.Normalize();
+					float num2 = 0f;
+					foreach (Vector3 vector6 in vertices)
+					{
+						num2 -= Vector3.Dot(zero, vector6);
+					}
+					num2 /= (float)vertices.Length;
+					plane = new Plane(zero, num2);
+					flag2 = plane.normal.sqrMagnitude > 0f;
 				}
-				num2 /= (float)vertices.Length;
-				plane = new Plane(zero, num2);
-				flag = plane.normal.sqrMagnitude > 0f;
 			}
-			return flag;
+			return flag2;
 		}
 
 		public static bool TestPlanesAABB(Plane[] planes, Bounds bounds)

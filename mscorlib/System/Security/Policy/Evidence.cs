@@ -11,8 +11,8 @@ using Unity;
 
 namespace System.Security.Policy
 {
-	[ComVisible(true)]
 	[MonoTODO("Serialization format not compatible with .NET")]
+	[ComVisible(true)]
 	[Serializable]
 	public sealed class Evidence : ICollection, IEnumerable
 	{

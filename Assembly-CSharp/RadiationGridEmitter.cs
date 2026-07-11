@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class RadiationGridEmitter
 {
-	public RadiationGridEmitter(int cell, List<int> lit_cells, int intensity, float radius, LightShape shape, float falloffRate = 0.5f)
+	public RadiationGridEmitter(int cell, List<int> lit_cells, int intensity, float radius, global::LightShape shape, float falloffRate = 0.5f)
 	{
 		this.cell = cell;
 		this.radius = radius;
@@ -42,7 +42,7 @@ public class RadiationGridEmitter
 
 	public int cell = -1;
 
-	public LightShape shape;
+	public global::LightShape shape;
 
 	public float radius = 4f;
 

@@ -35,14 +35,17 @@ namespace UnityEngine
 		private static int GetGUITargetAttrValue(Type klass, string methodName)
 		{
 			MethodInfo method = klass.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-			if (method != null)
+			bool flag = method != null;
+			if (flag)
 			{
 				object[] customAttributes = method.GetCustomAttributes(true);
-				if (customAttributes != null)
+				bool flag2 = customAttributes != null;
+				if (flag2)
 				{
 					for (int i = 0; i < customAttributes.Length; i++)
 					{
-						if (customAttributes[i].GetType() == typeof(GUITargetAttribute))
+						bool flag3 = customAttributes[i].GetType() != typeof(GUITargetAttribute);
+						if (!flag3)
 						{
 							GUITargetAttribute guitargetAttribute = customAttributes[i] as GUITargetAttribute;
 							return guitargetAttribute.displayMask;

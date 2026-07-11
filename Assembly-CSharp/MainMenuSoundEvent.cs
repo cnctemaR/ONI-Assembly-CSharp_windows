@@ -14,7 +14,7 @@ public class MainMenuSoundEvent : SoundEvent
 		EventInstance eventInstance = KFMOD.BeginOneShot(base.sound, Vector3.zero, 1f);
 		if (eventInstance.isValid())
 		{
-			eventInstance.setParameterValue("frame", (float)base.frame);
+			eventInstance.setParameterByName("frame", (float)base.frame, false);
 			KFMOD.EndOneShot(eventInstance);
 		}
 	}

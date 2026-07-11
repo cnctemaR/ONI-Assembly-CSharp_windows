@@ -7,8 +7,8 @@ using System.Text;
 
 namespace System.Diagnostics
 {
-	[ComVisible(true)]
 	[MonoTODO("Serialized objects are not compatible with MS.NET")]
+	[ComVisible(true)]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public class StackFrame

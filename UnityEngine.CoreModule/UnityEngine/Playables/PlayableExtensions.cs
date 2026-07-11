@@ -27,20 +27,21 @@ namespace UnityEngine.Playables
 		[Obsolete("SetPlayState() has been deprecated. Use Play(), Pause() or SetDelay() instead", false)]
 		public static void SetPlayState<U>(this U playable, PlayState value) where U : struct, IPlayable
 		{
-			if (value == PlayState.Delayed)
+			bool flag = value == PlayState.Delayed;
+			if (flag)
 			{
 				throw new ArgumentException("Can't set Delayed: use SetDelay() instead");
 			}
-			if (value != PlayState.Playing)
+			if (value != PlayState.Paused)
 			{
-				if (value == PlayState.Paused)
+				if (value == PlayState.Playing)
 				{
-					playable.GetHandle().Pause();
+					playable.GetHandle().Play();
 				}
 			}
 			else
 			{
-				playable.GetHandle().Play();
+				playable.GetHandle().Pause();
 			}
 		}
 
@@ -198,16 +199,19 @@ namespace UnityEngine.Playables
 			return inputCount;
 		}
 
+		[Obsolete("SetDelay is obsolete; use a custom ScriptPlayable to implement this feature", false)]
 		public static void SetDelay<U>(this U playable, double delay) where U : struct, IPlayable
 		{
 			playable.GetHandle().SetDelay(delay);
 		}
 
+		[Obsolete("GetDelay is obsolete; use a custom ScriptPlayable to implement this feature", false)]
 		public static double GetDelay<U>(this U playable) where U : struct, IPlayable
 		{
 			return playable.GetHandle().GetDelay();
 		}
 
+		[Obsolete("IsDelayed is obsolete; use a custom ScriptPlayable to implement this feature", false)]
 		public static bool IsDelayed<U>(this U playable) where U : struct, IPlayable
 		{
 			return playable.GetHandle().IsDelayed();

@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-	[AttributeUsage(AttributeTargets.Field, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Field, Inherited = false)]
 	[Serializable]
 	public class ContextStaticAttribute : Attribute
 	{

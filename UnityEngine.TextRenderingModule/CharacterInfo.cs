@@ -184,11 +184,12 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (!this.flipped) ? this.uvBottomRightUnFlipped : this.uvTopLeftUnFlipped;
+				return this.flipped ? this.uvTopLeftUnFlipped : this.uvBottomRightUnFlipped;
 			}
 			set
 			{
-				if (this.flipped)
+				bool flag = this.flipped;
+				if (flag)
 				{
 					this.uvTopLeftUnFlipped = value;
 				}
@@ -215,11 +216,12 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (!this.flipped) ? this.uvTopLeftUnFlipped : this.uvBottomRightUnFlipped;
+				return this.flipped ? this.uvBottomRightUnFlipped : this.uvTopLeftUnFlipped;
 			}
 			set
 			{
-				if (this.flipped)
+				bool flag = this.flipped;
+				if (flag)
 				{
 					this.uvBottomRightUnFlipped = value;
 				}

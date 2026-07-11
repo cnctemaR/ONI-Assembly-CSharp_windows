@@ -93,8 +93,8 @@ namespace System.Reflection.Emit
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
 		[CLSCompliant(false)]
+		[MonoTODO]
 		public unsafe void SetExceptions(byte* exceptions, int exceptionsSize)
 		{
 			throw new NotImplementedException();

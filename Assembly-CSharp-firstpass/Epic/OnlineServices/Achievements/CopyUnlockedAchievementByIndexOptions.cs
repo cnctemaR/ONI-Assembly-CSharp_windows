@@ -1,0 +1,19 @@
+﻿using System;
+
+namespace Epic.OnlineServices.Achievements
+{
+	public class CopyUnlockedAchievementByIndexOptions
+	{
+		public int ApiVersion
+		{
+			get
+			{
+				return 1;
+			}
+		}
+
+		public ProductUserId UserId { get; set; }
+
+		public uint AchievementIndex { get; set; }
+	}
+}

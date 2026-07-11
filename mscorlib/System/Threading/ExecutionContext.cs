@@ -120,8 +120,8 @@ namespace System.Threading
 			}
 		}
 
-		[HandleProcessCorruptedStateExceptions]
 		[SecurityCritical]
+		[HandleProcessCorruptedStateExceptions]
 		internal static void OnAsyncLocalContextChanged(ExecutionContext previous, ExecutionContext current)
 		{
 			List<IAsyncLocal> list = ((previous == null) ? null : previous._localChangeNotifications);
@@ -311,8 +311,8 @@ namespace System.Threading
 			ecsw.thread = currentThread;
 		}
 
-		[SecurityCritical]
 		[HandleProcessCorruptedStateExceptions]
+		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		internal static ExecutionContextSwitcher SetExecutionContext(ExecutionContext executionContext, bool preserveSyncCtx)
 		{

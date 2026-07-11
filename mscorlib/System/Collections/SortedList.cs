@@ -7,9 +7,9 @@ using System.Threading;
 
 namespace System.Collections
 {
+	[ComVisible(true)]
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(SortedList.SortedListDebugView))]
-	[ComVisible(true)]
 	[Serializable]
 	public class SortedList : IDictionary, ICollection, IEnumerable, ICloneable
 	{

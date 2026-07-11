@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Animation/AnimatorInfo.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Modules/Animation/AnimatorInfo.h")]
 	public struct AnimatorTransitionInfo
 	{
 		public bool IsName(string name)
@@ -46,7 +46,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (!this.m_HasFixedDuration) ? DurationUnit.Normalized : DurationUnit.Fixed;
+				return this.m_HasFixedDuration ? DurationUnit.Fixed : DurationUnit.Normalized;
 			}
 		}
 

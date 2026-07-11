@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
+using System.Globalization;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeClass("Rectf", "template<typename T> class RectT; typedef RectT<float> Rectf;")]
 	[NativeHeader("Runtime/Math/Rect.h")]
+	[NativeClass("Rectf", "template<typename T> class RectT; typedef RectT<float> Rectf;")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	public struct Rect : IEquatable<Rect>
 	{
@@ -36,7 +36,6 @@ namespace UnityEngine
 
 		public static Rect zero
 		{
-			[CompilerGenerated]
 			get
 			{
 				return new Rect(0f, 0f, 0f, 0f);
@@ -233,32 +232,37 @@ namespace UnityEngine
 
 		public bool Contains(Vector3 point, bool allowInverse)
 		{
-			bool flag;
-			if (!allowInverse)
+			bool flag = !allowInverse;
+			bool flag2;
+			if (flag)
 			{
-				flag = this.Contains(point);
+				flag2 = this.Contains(point);
 			}
 			else
 			{
-				bool flag2 = false;
-				if ((this.width < 0f && point.x <= this.xMin && point.x > this.xMax) || (this.width >= 0f && point.x >= this.xMin && point.x < this.xMax))
+				bool flag3 = false;
+				bool flag4 = (this.width < 0f && point.x <= this.xMin && point.x > this.xMax) || (this.width >= 0f && point.x >= this.xMin && point.x < this.xMax);
+				if (flag4)
 				{
-					flag2 = true;
+					flag3 = true;
 				}
-				flag = flag2 && ((this.height < 0f && point.y <= this.yMin && point.y > this.yMax) || (this.height >= 0f && point.y >= this.yMin && point.y < this.yMax));
+				bool flag5 = flag3 && ((this.height < 0f && point.y <= this.yMin && point.y > this.yMax) || (this.height >= 0f && point.y >= this.yMin && point.y < this.yMax));
+				flag2 = flag5;
 			}
-			return flag;
+			return flag2;
 		}
 
 		private static Rect OrderMinMax(Rect rect)
 		{
-			if (rect.xMin > rect.xMax)
+			bool flag = rect.xMin > rect.xMax;
+			if (flag)
 			{
 				float xMin = rect.xMin;
 				rect.xMin = rect.xMax;
 				rect.xMax = xMin;
 			}
-			if (rect.yMin > rect.yMax)
+			bool flag2 = rect.yMin > rect.yMax;
+			if (flag2)
 			{
 				float yMin = rect.yMin;
 				rect.yMin = rect.yMax;
@@ -310,7 +314,8 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
-			return other is Rect && this.Equals((Rect)other);
+			bool flag = !(other is Rect);
+			return !flag && this.Equals((Rect)other);
 		}
 
 		public bool Equals(Rect other)
@@ -327,10 +332,10 @@ namespace UnityEngine
 		{
 			return UnityString.Format("(x:{0}, y:{1}, width:{2}, height:{3})", new object[]
 			{
-				this.x.ToString(format),
-				this.y.ToString(format),
-				this.width.ToString(format),
-				this.height.ToString(format)
+				this.x.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
+				this.y.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
+				this.width.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
+				this.height.ToString(format, CultureInfo.InvariantCulture.NumberFormat)
 			});
 		}
 

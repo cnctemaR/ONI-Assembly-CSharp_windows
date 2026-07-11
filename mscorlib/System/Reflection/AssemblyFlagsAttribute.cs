@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class AssemblyFlagsAttribute : Attribute
 	{
 		[Obsolete("This constructor has been deprecated. Please use AssemblyFlagsAttribute(AssemblyNameFlags) instead. http://go.microsoft.com/fwlink/?linkid=14202")]

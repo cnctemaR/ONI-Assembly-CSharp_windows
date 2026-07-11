@@ -8,10 +8,6 @@ namespace UnityEngine.UI
 	[ExecuteAlways]
 	public class LayoutElement : UIBehaviour, ILayoutElement, ILayoutIgnorer
 	{
-		protected LayoutElement()
-		{
-		}
-
 		public virtual bool ignoreLayout
 		{
 			get
@@ -140,6 +136,10 @@ namespace UnityEngine.UI
 			}
 		}
 
+		protected LayoutElement()
+		{
+		}
+
 		protected override void OnEnable()
 		{
 			base.OnEnable();
@@ -169,14 +169,15 @@ namespace UnityEngine.UI
 
 		protected void SetDirty()
 		{
-			if (this.IsActive())
+			if (!this.IsActive())
 			{
-				LayoutRebuilder.MarkLayoutForRebuild(base.transform as RectTransform);
+				return;
 			}
+			LayoutRebuilder.MarkLayoutForRebuild(base.transform as RectTransform);
 		}
 
 		[SerializeField]
-		private bool m_IgnoreLayout = false;
+		private bool m_IgnoreLayout;
 
 		[SerializeField]
 		private float m_MinWidth = -1f;

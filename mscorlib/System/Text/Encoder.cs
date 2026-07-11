@@ -79,8 +79,8 @@ namespace System.Text
 		public abstract int GetByteCount(char[] chars, int index, int count, bool flush);
 
 		[SecurityCritical]
-		[ComVisible(false)]
 		[CLSCompliant(false)]
+		[ComVisible(false)]
 		public unsafe virtual int GetByteCount(char* chars, int count, bool flush)
 		{
 			if (chars == null)
@@ -101,9 +101,9 @@ namespace System.Text
 
 		public abstract int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex, bool flush);
 
-		[SecurityCritical]
-		[CLSCompliant(false)]
 		[ComVisible(false)]
+		[CLSCompliant(false)]
+		[SecurityCritical]
 		public unsafe virtual int GetBytes(char* chars, int charCount, byte* bytes, int byteCount, bool flush)
 		{
 			if (bytes == null || chars == null)
@@ -168,9 +168,9 @@ namespace System.Text
 			throw new ArgumentException(Environment.GetResourceString("Conversion buffer overflow."));
 		}
 
+		[CLSCompliant(false)]
 		[SecurityCritical]
 		[ComVisible(false)]
-		[CLSCompliant(false)]
 		public unsafe virtual void Convert(char* chars, int charCount, byte* bytes, int byteCount, bool flush, out int charsUsed, out int bytesUsed, out bool completed)
 		{
 			if (bytes == null || chars == null)

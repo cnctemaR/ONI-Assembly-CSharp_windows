@@ -9,6 +9,24 @@ namespace UnityEngine.Networking
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class DownloadHandlerAssetBundle : DownloadHandler
 	{
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr Create(DownloadHandlerAssetBundle obj, string url, uint crc);
+
+		private static IntPtr CreateCached(DownloadHandlerAssetBundle obj, string url, string name, Hash128 hash, uint crc)
+		{
+			return DownloadHandlerAssetBundle.CreateCached_Injected(obj, url, name, ref hash, crc);
+		}
+
+		private void InternalCreateAssetBundle(string url, uint crc)
+		{
+			this.m_Ptr = DownloadHandlerAssetBundle.Create(this, url, crc);
+		}
+
+		private void InternalCreateAssetBundleCached(string url, string name, Hash128 hash, uint crc)
+		{
+			this.m_Ptr = DownloadHandlerAssetBundle.CreateCached(this, url, name, hash, crc);
+		}
+
 		public DownloadHandlerAssetBundle(string url, uint crc)
 		{
 			this.InternalCreateAssetBundle(url, crc);
@@ -32,24 +50,6 @@ namespace UnityEngine.Networking
 		public DownloadHandlerAssetBundle(string url, CachedAssetBundle cachedBundle, uint crc)
 		{
 			this.InternalCreateAssetBundleCached(url, cachedBundle.name, cachedBundle.hash, crc);
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr Create(DownloadHandlerAssetBundle obj, string url, uint crc);
-
-		private static IntPtr CreateCached(DownloadHandlerAssetBundle obj, string url, string name, Hash128 hash, uint crc)
-		{
-			return DownloadHandlerAssetBundle.CreateCached_Injected(obj, url, name, ref hash, crc);
-		}
-
-		private void InternalCreateAssetBundle(string url, uint crc)
-		{
-			this.m_Ptr = DownloadHandlerAssetBundle.Create(this, url, crc);
-		}
-
-		private void InternalCreateAssetBundleCached(string url, string name, Hash128 hash, uint crc)
-		{
-			this.m_Ptr = DownloadHandlerAssetBundle.CreateCached(this, url, name, hash, crc);
 		}
 
 		protected override byte[] GetData()

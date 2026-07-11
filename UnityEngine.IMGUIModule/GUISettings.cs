@@ -51,8 +51,9 @@ namespace UnityEngine
 		{
 			get
 			{
+				bool flag = this.m_CursorFlashSpeed >= 0f;
 				float num;
-				if (this.m_CursorFlashSpeed >= 0f)
+				if (flag)
 				{
 					num = this.m_CursorFlashSpeed;
 				}

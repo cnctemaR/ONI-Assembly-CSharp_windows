@@ -6,13 +6,10 @@ using UnityEngine.EventSystems;
 namespace UnityEngine.UI
 {
 	[AddComponentMenu("UI/Scrollbar", 34)]
+	[ExecuteAlways]
 	[RequireComponent(typeof(RectTransform))]
-	public class Scrollbar : Selectable, IBeginDragHandler, IDragHandler, IInitializePotentialDragHandler, ICanvasElement, IEventSystemHandler
+	public class Scrollbar : Selectable, IBeginDragHandler, IEventSystemHandler, IDragHandler, IInitializePotentialDragHandler, ICanvasElement
 	{
-		protected Scrollbar()
-		{
-		}
-
 		public RectTransform handleRect
 		{
 			get
@@ -44,6 +41,10 @@ namespace UnityEngine.UI
 			}
 		}
 
+		protected Scrollbar()
+		{
+		}
+
 		public float value
 		{
 			get
@@ -57,8 +58,13 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				this.Set(value);
+				this.Set(value, true);
 			}
+		}
+
+		public virtual void SetValueWithoutNotify(float input)
+		{
+			this.Set(input, false);
 		}
 
 		public float size
@@ -86,7 +92,7 @@ namespace UnityEngine.UI
 			{
 				if (SetPropertyUtility.SetStruct<int>(ref this.m_NumberOfSteps, value))
 				{
-					this.Set(this.m_Value);
+					this.Set(this.m_Value, true);
 					this.UpdateVisuals();
 				}
 			}
@@ -108,7 +114,11 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				return (this.m_NumberOfSteps <= 1) ? 0.1f : (1f / (float)(this.m_NumberOfSteps - 1));
+				if (this.m_NumberOfSteps <= 1)
+				{
+					return 0.1f;
+				}
+				return 1f / (float)(this.m_NumberOfSteps - 1);
 			}
 		}
 
@@ -138,52 +148,60 @@ namespace UnityEngine.UI
 			base.OnDisable();
 		}
 
+		protected virtual void Update()
+		{
+			if (this.m_DelayedUpdateVisuals)
+			{
+				this.m_DelayedUpdateVisuals = false;
+				this.UpdateVisuals();
+			}
+		}
+
 		private void UpdateCachedReferences()
 		{
 			if (this.m_HandleRect && this.m_HandleRect.parent != null)
 			{
 				this.m_ContainerRect = this.m_HandleRect.parent.GetComponent<RectTransform>();
+				return;
 			}
-			else
-			{
-				this.m_ContainerRect = null;
-			}
+			this.m_ContainerRect = null;
 		}
 
-		private void Set(float input)
-		{
-			this.Set(input, true);
-		}
-
-		private void Set(float input, bool sendCallback)
+		private void Set(float input, bool sendCallback = true)
 		{
 			float value = this.m_Value;
-			this.m_Value = Mathf.Clamp01(input);
-			if (value != this.value)
+			this.m_Value = input;
+			if (value == this.value)
 			{
-				this.UpdateVisuals();
-				if (sendCallback)
-				{
-					UISystemProfilerApi.AddMarker("Scrollbar.value", this);
-					this.m_OnValueChanged.Invoke(this.value);
-				}
+				return;
+			}
+			this.UpdateVisuals();
+			if (sendCallback)
+			{
+				UISystemProfilerApi.AddMarker("Scrollbar.value", this);
+				this.m_OnValueChanged.Invoke(this.value);
 			}
 		}
 
 		protected override void OnRectTransformDimensionsChange()
 		{
 			base.OnRectTransformDimensionsChange();
-			if (this.IsActive())
+			if (!this.IsActive())
 			{
-				this.UpdateVisuals();
+				return;
 			}
+			this.UpdateVisuals();
 		}
 
 		private Scrollbar.Axis axis
 		{
 			get
 			{
-				return (this.m_Direction != Scrollbar.Direction.LeftToRight && this.m_Direction != Scrollbar.Direction.RightToLeft) ? Scrollbar.Axis.Vertical : Scrollbar.Axis.Horizontal;
+				if (this.m_Direction != Scrollbar.Direction.LeftToRight && this.m_Direction != Scrollbar.Direction.RightToLeft)
+				{
+					return Scrollbar.Axis.Vertical;
+				}
+				return Scrollbar.Axis.Horizontal;
 			}
 		}
 
@@ -203,7 +221,7 @@ namespace UnityEngine.UI
 				this.m_Tracker.Add(this, this.m_HandleRect, DrivenTransformProperties.Anchors);
 				Vector2 zero = Vector2.zero;
 				Vector2 one = Vector2.one;
-				float num = this.value * (1f - this.size);
+				float num = Mathf.Clamp01(this.value) * (1f - this.size);
 				if (this.reverseValue)
 				{
 					zero[(int)this.axis] = 1f - num - this.size;
@@ -221,41 +239,51 @@ namespace UnityEngine.UI
 
 		private void UpdateDrag(PointerEventData eventData)
 		{
-			if (eventData.button == PointerEventData.InputButton.Left)
+			if (eventData.button != PointerEventData.InputButton.Left)
 			{
-				if (!(this.m_ContainerRect == null))
-				{
-					Vector2 zero = Vector2.zero;
-					if (MultipleDisplayUtilities.GetRelativeMousePositionForDrag(eventData, ref zero))
-					{
-						Vector2 vector;
-						if (RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_ContainerRect, zero, eventData.pressEventCamera, out vector))
-						{
-							Vector2 vector2 = vector - this.m_Offset - this.m_ContainerRect.rect.position;
-							Vector2 vector3 = vector2 - (this.m_HandleRect.rect.size - this.m_HandleRect.sizeDelta) * 0.5f;
-							float num = ((this.axis != Scrollbar.Axis.Horizontal) ? this.m_ContainerRect.rect.height : this.m_ContainerRect.rect.width);
-							float num2 = num * (1f - this.size);
-							if (num2 > 0f)
-							{
-								switch (this.m_Direction)
-								{
-								case Scrollbar.Direction.LeftToRight:
-									this.Set(vector3.x / num2);
-									break;
-								case Scrollbar.Direction.RightToLeft:
-									this.Set(1f - vector3.x / num2);
-									break;
-								case Scrollbar.Direction.BottomToTop:
-									this.Set(vector3.y / num2);
-									break;
-								case Scrollbar.Direction.TopToBottom:
-									this.Set(1f - vector3.y / num2);
-									break;
-								}
-							}
-						}
-					}
-				}
+				return;
+			}
+			if (this.m_ContainerRect == null)
+			{
+				return;
+			}
+			Vector2 zero = Vector2.zero;
+			if (!MultipleDisplayUtilities.GetRelativeMousePositionForDrag(eventData, ref zero))
+			{
+				return;
+			}
+			Vector2 vector;
+			if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_ContainerRect, zero, eventData.pressEventCamera, out vector))
+			{
+				return;
+			}
+			Vector2 vector2 = vector - this.m_Offset - this.m_ContainerRect.rect.position - (this.m_HandleRect.rect.size - this.m_HandleRect.sizeDelta) * 0.5f;
+			float num = ((this.axis == Scrollbar.Axis.Horizontal) ? this.m_ContainerRect.rect.width : this.m_ContainerRect.rect.height) * (1f - this.size);
+			if (num <= 0f)
+			{
+				return;
+			}
+			this.DoUpdateDrag(vector2, num);
+		}
+
+		private void DoUpdateDrag(Vector2 handleCorner, float remainingSize)
+		{
+			switch (this.m_Direction)
+			{
+			case Scrollbar.Direction.LeftToRight:
+				this.Set(Mathf.Clamp01(handleCorner.x / remainingSize), true);
+				return;
+			case Scrollbar.Direction.RightToLeft:
+				this.Set(Mathf.Clamp01(1f - handleCorner.x / remainingSize), true);
+				return;
+			case Scrollbar.Direction.BottomToTop:
+				this.Set(Mathf.Clamp01(handleCorner.y / remainingSize), true);
+				return;
+			case Scrollbar.Direction.TopToBottom:
+				this.Set(Mathf.Clamp01(1f - handleCorner.y / remainingSize), true);
+				return;
+			default:
+				return;
 			}
 		}
 
@@ -267,63 +295,59 @@ namespace UnityEngine.UI
 		public virtual void OnBeginDrag(PointerEventData eventData)
 		{
 			this.isPointerDownAndNotDragging = false;
-			if (this.MayDrag(eventData))
+			if (!this.MayDrag(eventData))
 			{
-				if (!(this.m_ContainerRect == null))
-				{
-					this.m_Offset = Vector2.zero;
-					if (RectTransformUtility.RectangleContainsScreenPoint(this.m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera))
-					{
-						Vector2 vector;
-						if (RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.pressEventCamera, out vector))
-						{
-							this.m_Offset = vector - this.m_HandleRect.rect.center;
-						}
-					}
-				}
+				return;
+			}
+			if (this.m_ContainerRect == null)
+			{
+				return;
+			}
+			this.m_Offset = Vector2.zero;
+			Vector2 vector;
+			if (RectTransformUtility.RectangleContainsScreenPoint(this.m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera) && RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.pressEventCamera, out vector))
+			{
+				this.m_Offset = vector - this.m_HandleRect.rect.center;
 			}
 		}
 
 		public virtual void OnDrag(PointerEventData eventData)
 		{
-			if (this.MayDrag(eventData))
+			if (!this.MayDrag(eventData))
 			{
-				if (this.m_ContainerRect != null)
-				{
-					this.UpdateDrag(eventData);
-				}
+				return;
+			}
+			if (this.m_ContainerRect != null)
+			{
+				this.UpdateDrag(eventData);
 			}
 		}
 
 		public override void OnPointerDown(PointerEventData eventData)
 		{
-			if (this.MayDrag(eventData))
+			if (!this.MayDrag(eventData))
 			{
-				base.OnPointerDown(eventData);
-				this.isPointerDownAndNotDragging = true;
-				this.m_PointerDownRepeat = base.StartCoroutine(this.ClickRepeat(eventData));
+				return;
 			}
+			base.OnPointerDown(eventData);
+			this.isPointerDownAndNotDragging = true;
+			this.m_PointerDownRepeat = base.StartCoroutine(this.ClickRepeat(eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera));
 		}
 
 		protected IEnumerator ClickRepeat(PointerEventData eventData)
 		{
+			return this.ClickRepeat(eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera);
+		}
+
+		protected IEnumerator ClickRepeat(Vector2 screenPosition, Camera camera)
+		{
 			while (this.isPointerDownAndNotDragging)
 			{
-				if (!RectTransformUtility.RectangleContainsScreenPoint(this.m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera))
+				Vector2 vector;
+				if (!RectTransformUtility.RectangleContainsScreenPoint(this.m_HandleRect, screenPosition, camera) && RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_HandleRect, screenPosition, camera, out vector))
 				{
-					Vector2 vector;
-					if (RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.pressEventCamera, out vector))
-					{
-						float num = ((this.axis != Scrollbar.Axis.Horizontal) ? vector.y : vector.x);
-						if (num < 0f)
-						{
-							this.value -= this.size;
-						}
-						else
-						{
-							this.value += this.size;
-						}
-					}
+					float num = ((((this.axis == Scrollbar.Axis.Horizontal) ? vector.x : vector.y) < 0f) ? this.size : (-this.size));
+					this.value += (this.reverseValue ? num : (-num));
 				}
 				yield return new WaitForEndOfFrame();
 			}
@@ -342,109 +366,81 @@ namespace UnityEngine.UI
 			if (!this.IsActive() || !this.IsInteractable())
 			{
 				base.OnMove(eventData);
+				return;
 			}
-			else
+			switch (eventData.moveDir)
 			{
-				switch (eventData.moveDir)
+			case MoveDirection.Left:
+				if (this.axis == Scrollbar.Axis.Horizontal && this.FindSelectableOnLeft() == null)
 				{
-				case MoveDirection.Left:
-					if (this.axis == Scrollbar.Axis.Horizontal && this.FindSelectableOnLeft() == null)
-					{
-						this.Set((!this.reverseValue) ? (this.value - this.stepSize) : (this.value + this.stepSize));
-					}
-					else
-					{
-						base.OnMove(eventData);
-					}
-					break;
-				case MoveDirection.Up:
-					if (this.axis == Scrollbar.Axis.Vertical && this.FindSelectableOnUp() == null)
-					{
-						this.Set((!this.reverseValue) ? (this.value + this.stepSize) : (this.value - this.stepSize));
-					}
-					else
-					{
-						base.OnMove(eventData);
-					}
-					break;
-				case MoveDirection.Right:
-					if (this.axis == Scrollbar.Axis.Horizontal && this.FindSelectableOnRight() == null)
-					{
-						this.Set((!this.reverseValue) ? (this.value + this.stepSize) : (this.value - this.stepSize));
-					}
-					else
-					{
-						base.OnMove(eventData);
-					}
-					break;
-				case MoveDirection.Down:
-					if (this.axis == Scrollbar.Axis.Vertical && this.FindSelectableOnDown() == null)
-					{
-						this.Set((!this.reverseValue) ? (this.value - this.stepSize) : (this.value + this.stepSize));
-					}
-					else
-					{
-						base.OnMove(eventData);
-					}
-					break;
+					this.Set(Mathf.Clamp01(this.reverseValue ? (this.value + this.stepSize) : (this.value - this.stepSize)), true);
+					return;
 				}
+				base.OnMove(eventData);
+				return;
+			case MoveDirection.Up:
+				if (this.axis == Scrollbar.Axis.Vertical && this.FindSelectableOnUp() == null)
+				{
+					this.Set(Mathf.Clamp01(this.reverseValue ? (this.value - this.stepSize) : (this.value + this.stepSize)), true);
+					return;
+				}
+				base.OnMove(eventData);
+				return;
+			case MoveDirection.Right:
+				if (this.axis == Scrollbar.Axis.Horizontal && this.FindSelectableOnRight() == null)
+				{
+					this.Set(Mathf.Clamp01(this.reverseValue ? (this.value - this.stepSize) : (this.value + this.stepSize)), true);
+					return;
+				}
+				base.OnMove(eventData);
+				return;
+			case MoveDirection.Down:
+				if (this.axis == Scrollbar.Axis.Vertical && this.FindSelectableOnDown() == null)
+				{
+					this.Set(Mathf.Clamp01(this.reverseValue ? (this.value + this.stepSize) : (this.value - this.stepSize)), true);
+					return;
+				}
+				base.OnMove(eventData);
+				return;
+			default:
+				return;
 			}
 		}
 
 		public override Selectable FindSelectableOnLeft()
 		{
-			Selectable selectable;
 			if (base.navigation.mode == Navigation.Mode.Automatic && this.axis == Scrollbar.Axis.Horizontal)
 			{
-				selectable = null;
+				return null;
 			}
-			else
-			{
-				selectable = base.FindSelectableOnLeft();
-			}
-			return selectable;
+			return base.FindSelectableOnLeft();
 		}
 
 		public override Selectable FindSelectableOnRight()
 		{
-			Selectable selectable;
 			if (base.navigation.mode == Navigation.Mode.Automatic && this.axis == Scrollbar.Axis.Horizontal)
 			{
-				selectable = null;
+				return null;
 			}
-			else
-			{
-				selectable = base.FindSelectableOnRight();
-			}
-			return selectable;
+			return base.FindSelectableOnRight();
 		}
 
 		public override Selectable FindSelectableOnUp()
 		{
-			Selectable selectable;
 			if (base.navigation.mode == Navigation.Mode.Automatic && this.axis == Scrollbar.Axis.Vertical)
 			{
-				selectable = null;
+				return null;
 			}
-			else
-			{
-				selectable = base.FindSelectableOnUp();
-			}
-			return selectable;
+			return base.FindSelectableOnUp();
 		}
 
 		public override Selectable FindSelectableOnDown()
 		{
-			Selectable selectable;
 			if (base.navigation.mode == Navigation.Mode.Automatic && this.axis == Scrollbar.Axis.Vertical)
 			{
-				selectable = null;
+				return null;
 			}
-			else
-			{
-				selectable = base.FindSelectableOnDown();
-			}
-			return selectable;
+			return base.FindSelectableOnDown();
 		}
 
 		public virtual void OnInitializePotentialDrag(PointerEventData eventData)
@@ -457,16 +453,17 @@ namespace UnityEngine.UI
 			Scrollbar.Axis axis = this.axis;
 			bool reverseValue = this.reverseValue;
 			this.direction = direction;
-			if (includeRectLayouts)
+			if (!includeRectLayouts)
 			{
-				if (this.axis != axis)
-				{
-					RectTransformUtility.FlipLayoutAxes(base.transform as RectTransform, true, true);
-				}
-				if (this.reverseValue != reverseValue)
-				{
-					RectTransformUtility.FlipLayoutOnAxis(base.transform as RectTransform, (int)this.axis, true, true);
-				}
+				return;
+			}
+			if (this.axis != axis)
+			{
+				RectTransformUtility.FlipLayoutAxes(base.transform as RectTransform, true, true);
+			}
+			if (this.reverseValue != reverseValue)
+			{
+				RectTransformUtility.FlipLayoutOnAxis(base.transform as RectTransform, (int)this.axis, true, true);
 			}
 		}
 
@@ -479,7 +476,7 @@ namespace UnityEngine.UI
 		private RectTransform m_HandleRect;
 
 		[SerializeField]
-		private Scrollbar.Direction m_Direction = Scrollbar.Direction.LeftToRight;
+		private Scrollbar.Direction m_Direction;
 
 		[Range(0f, 1f)]
 		[SerializeField]
@@ -491,7 +488,7 @@ namespace UnityEngine.UI
 
 		[Range(0f, 11f)]
 		[SerializeField]
-		private int m_NumberOfSteps = 0;
+		private int m_NumberOfSteps;
 
 		[Space(6f)]
 		[SerializeField]
@@ -505,7 +502,9 @@ namespace UnityEngine.UI
 
 		private Coroutine m_PointerDownRepeat;
 
-		private bool isPointerDownAndNotDragging = false;
+		private bool isPointerDownAndNotDragging;
+
+		private bool m_DelayedUpdateVisuals;
 
 		public enum Direction
 		{

@@ -31,8 +31,8 @@ namespace System.Reflection
 			RuntimeFieldHandle.SetValue(this, obj, value, null, this.Attributes, null, ref flag);
 		}
 
-		[DebuggerStepThrough]
 		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public unsafe override void SetValueDirect(TypedReference obj, object value)
 		{
 			if (obj.IsNull)
@@ -42,8 +42,8 @@ namespace System.Reflection
 			RuntimeFieldHandle.SetValueDirect(this, (RuntimeType)this.FieldType, (void*)(&obj), value, (RuntimeType)this.DeclaringType);
 		}
 
-		[DebuggerStepThrough]
 		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public unsafe override object GetValueDirect(TypedReference obj)
 		{
 			if (obj.IsNull)

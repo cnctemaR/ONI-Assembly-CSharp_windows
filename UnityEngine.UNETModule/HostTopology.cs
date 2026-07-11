@@ -9,15 +9,18 @@ namespace UnityEngine.Networking
 	{
 		public HostTopology(ConnectionConfig defaultConfig, int maxDefaultConnections)
 		{
-			if (defaultConfig == null)
+			bool flag = defaultConfig == null;
+			if (flag)
 			{
 				throw new NullReferenceException("config is not defined");
 			}
-			if (maxDefaultConnections <= 0)
+			bool flag2 = maxDefaultConnections <= 0;
+			if (flag2)
 			{
 				throw new ArgumentOutOfRangeException("maxConnections", "Number of connections should be > 0");
 			}
-			if (maxDefaultConnections >= 65535)
+			bool flag3 = maxDefaultConnections >= 65535;
+			if (flag3)
 			{
 				throw new ArgumentOutOfRangeException("maxConnections", "Number of connections should be < 65535");
 			}
@@ -64,7 +67,8 @@ namespace UnityEngine.Networking
 
 		public ConnectionConfig GetSpecialConnectionConfig(int i)
 		{
-			if (i > this.m_SpecialConnections.Count || i == 0)
+			bool flag = i > this.m_SpecialConnections.Count || i == 0;
+			if (flag)
 			{
 				throw new ArgumentException("special configuration index is out of valid range");
 			}
@@ -103,7 +107,8 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if ((double)value <= 0.5 || (double)value > 1.0)
+				bool flag = (double)value <= 0.5 || (double)value > 1.0;
+				if (flag)
 				{
 					throw new ArgumentException("pool growth factor should be varied between 0.5 and 1.0");
 				}
@@ -113,7 +118,8 @@ namespace UnityEngine.Networking
 
 		public int AddSpecialConnectionConfig(ConnectionConfig config)
 		{
-			if (this.m_MaxDefConnections + this.m_SpecialConnections.Count + 1 >= 65535)
+			bool flag = this.m_MaxDefConnections + this.m_SpecialConnections.Count + 1 >= 65535;
+			if (flag)
 			{
 				throw new ArgumentOutOfRangeException("maxConnections", "Number of connections should be < 65535");
 			}

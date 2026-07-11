@@ -62,6 +62,13 @@ namespace UnityEngine.Video
 			get;
 		}
 
+		public extern bool sRGB
+		{
+			[NativeName("IssRGB")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		public extern ushort audioTrackCount
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

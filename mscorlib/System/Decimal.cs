@@ -206,8 +206,8 @@ namespace System
 			return decimal.FCallCompare(ref d1, ref d2);
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SecurityCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int FCallCompare(ref decimal d1, ref decimal d2);
 
@@ -437,8 +437,8 @@ namespace System
 			d.flags = ((decimalCount << 16) & 16711680) | (d.flags & int.MinValue);
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SecuritySafeCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		internal static decimal Max(decimal d1, decimal d2)
 		{
 			if (decimal.FCallCompare(ref d1, ref d2) < 0)
@@ -448,8 +448,8 @@ namespace System
 			return d1;
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SecuritySafeCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		internal static decimal Min(decimal d1, decimal d2)
 		{
 			if (decimal.FCallCompare(ref d1, ref d2) >= 0)

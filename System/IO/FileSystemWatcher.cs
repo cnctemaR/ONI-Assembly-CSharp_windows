@@ -206,9 +206,9 @@ namespace System.IO
 		}
 
 		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[DefaultValue("*.*")]
-		[IODescription("File name filter pattern")]
 		[SettingsBindable(true)]
+		[IODescription("File name filter pattern")]
+		[DefaultValue("*.*")]
 		public string Filter
 		{
 			get
@@ -280,8 +280,8 @@ namespace System.IO
 			}
 		}
 
-		[IODescription("Flag to indicate which change event we want to monitor")]
 		[DefaultValue(NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite)]
+		[IODescription("Flag to indicate which change event we want to monitor")]
 		public NotifyFilters NotifyFilter
 		{
 			get
@@ -303,11 +303,11 @@ namespace System.IO
 			}
 		}
 
-		[SettingsBindable(true)]
-		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[Editor("System.Diagnostics.Design.FSWPathEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		[DefaultValue("")]
 		[IODescription("The directory to monitor")]
+		[SettingsBindable(true)]
+		[Editor("System.Diagnostics.Design.FSWPathEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public string Path
 		{
 			get
@@ -360,9 +360,9 @@ namespace System.IO
 			}
 		}
 
-		[Browsable(false)]
-		[IODescription("The object used to marshal the event handler calls resulting from a directory change")]
 		[DefaultValue(null)]
+		[IODescription("The object used to marshal the event handler calls resulting from a directory change")]
+		[Browsable(false)]
 		public ISynchronizeInvoke SynchronizingObject
 		{
 			get

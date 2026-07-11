@@ -922,8 +922,8 @@ namespace System.Collections.Generic
 			private TValue _currentValue;
 		}
 
-		[DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<, >))]
 		[DebuggerDisplay("Count = {Count}")]
+		[DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<, >))]
 		[Serializable]
 		private sealed class KeyList : IList<TKey>, ICollection<TKey>, IEnumerable<TKey>, IEnumerable, ICollection
 		{

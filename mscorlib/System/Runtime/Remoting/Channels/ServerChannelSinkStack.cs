@@ -47,8 +47,8 @@ namespace System.Runtime.Remoting.Channels
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
 		[SecurityCritical]
+		[MonoTODO]
 		public void Store(IServerChannelSink sink, object state)
 		{
 			throw new NotImplementedException();

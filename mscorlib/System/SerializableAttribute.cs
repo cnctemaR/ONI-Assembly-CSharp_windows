@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Delegate, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Delegate, Inherited = false)]
 	public sealed class SerializableAttribute : Attribute
 	{
 		internal static Attribute GetCustomAttribute(RuntimeType type)

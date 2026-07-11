@@ -112,8 +112,8 @@ namespace System
 			GC.InternalCollect(generation);
 		}
 
-		[SecuritySafeCritical]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[SecuritySafeCritical]
 		public static int CollectionCount(int generation)
 		{
 			if (generation < 0)
@@ -152,13 +152,13 @@ namespace System
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void WaitForPendingFinalizers();
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SecurityCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _SuppressFinalize(object o);
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SecuritySafeCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		public static void SuppressFinalize(object obj)
 		{
 			if (obj == null)

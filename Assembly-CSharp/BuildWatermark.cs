@@ -19,7 +19,7 @@ public class BuildWatermark : KScreen
 
 	public void RefreshText()
 	{
-		string text = "AP-";
+		string text = "CS-";
 		bool flag = true;
 		bool flag2 = DistributionPlatform.Initialized && DistributionPlatform.Inst.IsArchiveBranch;
 		this.button.ClearOnClick();
@@ -29,7 +29,7 @@ public class BuildWatermark : KScreen
 		}
 		else
 		{
-			text += 420700U.ToString();
+			text += 442154U.ToString();
 			if (DebugHandler.enabled)
 			{
 				text += "-D";

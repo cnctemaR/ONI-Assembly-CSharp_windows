@@ -209,16 +209,18 @@ namespace UnityEngine
 		{
 			int controlID = GUIUtility.GetControlID(FocusType.Keyboard);
 			GUIContent guicontent = GUIContent.Temp(text);
-			if (GUIUtility.keyboardControl != controlID)
+			bool flag = GUIUtility.keyboardControl != controlID;
+			if (flag)
 			{
 				guicontent = GUIContent.Temp(text);
 			}
 			else
 			{
-				guicontent = GUIContent.Temp(text + Input.compositionString);
+				guicontent = GUIContent.Temp(text + GUIUtility.compositionString);
 			}
 			Rect rect = GUILayoutUtility.GetRect(guicontent, style, options);
-			if (GUIUtility.keyboardControl == controlID)
+			bool flag2 = GUIUtility.keyboardControl == controlID;
+			if (flag2)
 			{
 				guicontent = GUIContent.Temp(text);
 			}
@@ -303,19 +305,30 @@ namespace UnityEngine
 
 		public static int Toolbar(int selected, GUIContent[] contents, GUIStyle style, GUI.ToolbarButtonSize buttonSize, params GUILayoutOption[] options)
 		{
+			return GUILayout.Toolbar(selected, contents, null, style, buttonSize, options);
+		}
+
+		public static int Toolbar(int selected, GUIContent[] contents, bool[] enabled, GUIStyle style, params GUILayoutOption[] options)
+		{
+			return GUILayout.Toolbar(selected, contents, enabled, style, GUI.ToolbarButtonSize.Fixed, options);
+		}
+
+		public static int Toolbar(int selected, GUIContent[] contents, bool[] enabled, GUIStyle style, GUI.ToolbarButtonSize buttonSize, params GUILayoutOption[] options)
+		{
 			GUIStyle guistyle;
 			GUIStyle guistyle2;
 			GUIStyle guistyle3;
 			GUI.FindStyles(ref style, out guistyle, out guistyle2, out guistyle3, "left", "mid", "right");
 			Vector2 vector = default(Vector2);
 			int num = contents.Length;
-			GUIStyle guistyle4 = ((num <= 1) ? style : guistyle);
-			GUIStyle guistyle5 = ((num <= 1) ? style : guistyle2);
-			GUIStyle guistyle6 = ((num <= 1) ? style : guistyle3);
+			GUIStyle guistyle4 = ((num > 1) ? guistyle : style);
+			GUIStyle guistyle5 = ((num > 1) ? guistyle2 : style);
+			GUIStyle guistyle6 = ((num > 1) ? guistyle3 : style);
 			float num2 = 0f;
 			for (int i = 0; i < contents.Length; i++)
 			{
-				if (i == num - 2)
+				bool flag = i == num - 2;
+				if (flag)
 				{
 					guistyle5 = guistyle6;
 				}
@@ -327,15 +340,21 @@ namespace UnityEngine
 						vector.x += vector2.x;
 					}
 				}
-				else if (vector2.x > vector.x)
+				else
 				{
-					vector.x = vector2.x;
+					bool flag2 = vector2.x > vector.x;
+					if (flag2)
+					{
+						vector.x = vector2.x;
+					}
 				}
-				if (vector2.y > vector.y)
+				bool flag3 = vector2.y > vector.y;
+				if (flag3)
 				{
 					vector.y = vector2.y;
 				}
-				if (i == num - 1)
+				bool flag4 = i == num - 1;
+				if (flag4)
 				{
 					num2 += (float)guistyle4.margin.right;
 				}
@@ -356,7 +375,7 @@ namespace UnityEngine
 			{
 				vector.x = vector.x * (float)contents.Length + num2;
 			}
-			return GUI.Toolbar(GUILayoutUtility.GetRect(vector.x, vector.y, style, options), selected, contents, style, buttonSize);
+			return GUI.Toolbar(GUILayoutUtility.GetRect(vector.x, vector.y, style, options), selected, contents, null, style, buttonSize, enabled);
 		}
 
 		public static int SelectionGrid(int selected, string[] texts, int xCount, params GUILayoutOption[] options)
@@ -442,7 +461,8 @@ namespace UnityEngine
 		public static void Space(float pixels)
 		{
 			GUIUtility.CheckOnGUI();
-			if (GUILayoutUtility.current.topLevel.isVertical)
+			bool isVertical = GUILayoutUtility.current.topLevel.isVertical;
+			if (isVertical)
 			{
 				GUILayoutUtility.GetRect(0f, pixels, GUILayoutUtility.spaceStyle, new GUILayoutOption[] { GUILayout.Height(pixels) });
 			}
@@ -450,7 +470,8 @@ namespace UnityEngine
 			{
 				GUILayoutUtility.GetRect(pixels, 0f, GUILayoutUtility.spaceStyle, new GUILayoutOption[] { GUILayout.Width(pixels) });
 			}
-			if (Event.current.type == EventType.Layout)
+			bool flag = Event.current.type == EventType.Layout;
+			if (flag)
 			{
 				GUILayoutUtility.current.topLevel.entries[GUILayoutUtility.current.topLevel.entries.Count - 1].consideredForMargin = false;
 			}
@@ -459,8 +480,9 @@ namespace UnityEngine
 		public static void FlexibleSpace()
 		{
 			GUIUtility.CheckOnGUI();
+			bool isVertical = GUILayoutUtility.current.topLevel.isVertical;
 			GUILayoutOption guilayoutOption;
-			if (GUILayoutUtility.current.topLevel.isVertical)
+			if (isVertical)
 			{
 				guilayoutOption = GUILayout.ExpandHeight(true);
 			}
@@ -470,7 +492,8 @@ namespace UnityEngine
 			}
 			guilayoutOption.value = 10000;
 			GUILayoutUtility.GetRect(0f, 0f, GUILayoutUtility.spaceStyle, new GUILayoutOption[] { guilayoutOption });
-			if (Event.current.type == EventType.Layout)
+			bool flag = Event.current.type == EventType.Layout;
+			if (flag)
 			{
 				GUILayoutUtility.current.topLevel.entries[GUILayoutUtility.current.topLevel.entries.Count - 1].consideredForMargin = false;
 			}
@@ -500,7 +523,8 @@ namespace UnityEngine
 		{
 			GUILayoutGroup guilayoutGroup = GUILayoutUtility.BeginLayoutGroup(style, options, typeof(GUILayoutGroup));
 			guilayoutGroup.isVertical = false;
-			if (style != GUIStyle.none || content != GUIContent.none)
+			bool flag = style != GUIStyle.none || content != GUIContent.none;
+			if (flag)
 			{
 				GUI.Box(guilayoutGroup.rect, content, style);
 			}
@@ -535,7 +559,8 @@ namespace UnityEngine
 		{
 			GUILayoutGroup guilayoutGroup = GUILayoutUtility.BeginLayoutGroup(style, options, typeof(GUILayoutGroup));
 			guilayoutGroup.isVertical = true;
-			if (style != GUIStyle.none || content != GUIContent.none)
+			bool flag = style != GUIStyle.none || content != GUIContent.none;
+			if (flag)
 			{
 				GUI.Box(guilayoutGroup.rect, content, style);
 			}
@@ -585,7 +610,8 @@ namespace UnityEngine
 		{
 			GUIUtility.CheckOnGUI();
 			GUILayoutGroup guilayoutGroup = GUILayoutUtility.BeginLayoutArea(style, typeof(GUILayoutGroup));
-			if (Event.current.type == EventType.Layout)
+			bool flag = Event.current.type == EventType.Layout;
+			if (flag)
 			{
 				guilayoutGroup.resetCoords = true;
 				guilayoutGroup.minWidth = (guilayoutGroup.maxWidth = screenRect.width);
@@ -598,7 +624,8 @@ namespace UnityEngine
 		public static void EndArea()
 		{
 			GUIUtility.CheckOnGUI();
-			if (Event.current.type != EventType.Used)
+			bool flag = Event.current.type == EventType.Used;
+			if (!flag)
 			{
 				GUILayoutUtility.current.layoutGroups.Pop();
 				GUILayoutUtility.current.topLevel = (GUILayoutGroup)GUILayoutUtility.current.layoutGroups.Peek();
@@ -631,12 +658,14 @@ namespace UnityEngine
 		{
 			string name = style.name;
 			GUIStyle guistyle = GUI.skin.FindStyle(name + "VerticalScrollbar");
-			if (guistyle == null)
+			bool flag = guistyle == null;
+			if (flag)
 			{
 				guistyle = GUI.skin.verticalScrollbar;
 			}
 			GUIStyle guistyle2 = GUI.skin.FindStyle(name + "HorizontalScrollbar");
-			if (guistyle2 == null)
+			bool flag2 = guistyle2 == null;
+			if (flag2)
 			{
 				guistyle2 = GUI.skin.horizontalScrollbar;
 			}
@@ -748,12 +777,12 @@ namespace UnityEngine
 
 		public static GUILayoutOption ExpandWidth(bool expand)
 		{
-			return new GUILayoutOption(GUILayoutOption.Type.stretchWidth, (!expand) ? 0 : 1);
+			return new GUILayoutOption(GUILayoutOption.Type.stretchWidth, expand ? 1 : 0);
 		}
 
 		public static GUILayoutOption ExpandHeight(bool expand)
 		{
-			return new GUILayoutOption(GUILayoutOption.Type.stretchHeight, (!expand) ? 0 : 1);
+			return new GUILayoutOption(GUILayoutOption.Type.stretchHeight, expand ? 1 : 0);
 		}
 
 		private sealed class LayoutedWindow
@@ -778,7 +807,8 @@ namespace UnityEngine
 				{
 					topLevel.resetCoords = true;
 					topLevel.rect = this.m_ScreenRect;
-					if (this.m_Options != null)
+					bool flag = this.m_Options != null;
+					if (flag)
 					{
 						topLevel.ApplyOptions(this.m_Options);
 					}
@@ -909,6 +939,10 @@ namespace UnityEngine
 
 		public class ScrollViewScope : GUI.Scope
 		{
+			public Vector2 scrollPosition { get; private set; }
+
+			public bool handleScrollWheel { get; set; }
+
 			public ScrollViewScope(Vector2 scrollPosition, params GUILayoutOption[] options)
 			{
 				this.handleScrollWheel = true;
@@ -944,10 +978,6 @@ namespace UnityEngine
 				this.handleScrollWheel = true;
 				this.scrollPosition = GUILayout.BeginScrollView(scrollPosition, alwaysShowHorizontal, alwaysShowVertical, horizontalScrollbar, verticalScrollbar, background, options);
 			}
-
-			public Vector2 scrollPosition { get; private set; }
-
-			public bool handleScrollWheel { get; set; }
 
 			protected override void CloseScope()
 			{

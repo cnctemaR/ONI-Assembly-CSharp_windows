@@ -67,21 +67,22 @@ namespace UnityEngine.UI.CoroutineTween
 
 		public void TweenValue(float floatPercentage)
 		{
-			if (this.ValidTarget())
+			if (!this.ValidTarget())
 			{
-				Color color = Color.Lerp(this.m_StartColor, this.m_TargetColor, floatPercentage);
-				if (this.m_TweenMode == ColorTween.ColorTweenMode.Alpha)
-				{
-					color.r = this.m_StartColor.r;
-					color.g = this.m_StartColor.g;
-					color.b = this.m_StartColor.b;
-				}
-				else if (this.m_TweenMode == ColorTween.ColorTweenMode.RGB)
-				{
-					color.a = this.m_StartColor.a;
-				}
-				this.m_Target.Invoke(color);
+				return;
 			}
+			Color color = Color.Lerp(this.m_StartColor, this.m_TargetColor, floatPercentage);
+			if (this.m_TweenMode == ColorTween.ColorTweenMode.Alpha)
+			{
+				color.r = this.m_StartColor.r;
+				color.g = this.m_StartColor.g;
+				color.b = this.m_StartColor.b;
+			}
+			else if (this.m_TweenMode == ColorTween.ColorTweenMode.RGB)
+			{
+				color.a = this.m_StartColor.a;
+			}
+			this.m_Target.Invoke(color);
 		}
 
 		public void AddOnChangedCallback(UnityAction<Color> callback)

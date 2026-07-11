@@ -106,9 +106,9 @@ public class OverlayScreen : KMonoBehaviour
 		}
 		if (OverlayModes.None.ID == this.currentModeInfo.mode.ViewMode())
 		{
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().TechFilterOnMigrated, STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().TechFilterOnMigrated, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 			MusicManager.instance.SetDynamicMusicOverlayInactive();
-			this.techViewSound.stop(STOP_MODE.ALLOWFADEOUT);
+			this.techViewSound.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 			this.techViewSoundPlaying = false;
 		}
 		else if (!this.techViewSoundPlaying)

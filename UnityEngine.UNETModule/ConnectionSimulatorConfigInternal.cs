@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Networking
 {
+	[NativeHeader("Modules/UNET/UNETConfiguration.h")]
 	[NativeConditional("ENABLE_NETWORK && ENABLE_UNET", true)]
-	[NativeHeader("Runtime/Networking/UNETConfiguration.h")]
 	internal class ConnectionSimulatorConfigInternal : IDisposable
 	{
 		public ConnectionSimulatorConfigInternal(ConnectionSimulatorConfig config)
@@ -15,7 +15,8 @@ namespace UnityEngine.Networking
 
 		protected virtual void Dispose(bool disposing)
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				ConnectionSimulatorConfigInternal.InternalDestroy(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;
@@ -30,7 +31,8 @@ namespace UnityEngine.Networking
 
 		public void Dispose()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				ConnectionSimulatorConfigInternal.InternalDestroy(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;

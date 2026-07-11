@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{507D4E6D-F27A-4B63-8D6B-A2E9C354A22A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UnityEngine</RootNamespace>
+    <AssemblyName>UnityEngine.AndroidJNIModule</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net35</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="AndroidJavaClass.cs" />
+    <Compile Include="AndroidJavaException.cs" />
+    <Compile Include="AndroidJavaObject.cs" />
+    <Compile Include="AndroidJavaProxy.cs" />
+    <Compile Include="AndroidJavaRunnable.cs" />
+    <Compile Include="AndroidJavaRunnableProxy.cs" />
+    <Compile Include="AndroidJNI.cs" />
+    <Compile Include="AndroidJNIHelper.cs" />
+    <Compile Include="AndroidJNISafe.cs" />
+    <Compile Include="AndroidReflection.cs" />
+    <Compile Include="GlobalJavaObjectRef.cs" />
+    <Compile Include="jvalue.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="_AndroidJNIHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{507D4E6D-F27A-4B63-8D6B-A2E9C354A232}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
+      <Project>{507D4E6D-F27A-4B63-8D6B-A2E9C354A246}</Project>
+      <Name>UnityEngine.SharedInternalsModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

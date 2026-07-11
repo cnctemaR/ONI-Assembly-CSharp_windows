@@ -27,12 +27,29 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (value != this.m_Maskable)
+				if (value == this.m_Maskable)
 				{
-					this.m_Maskable = value;
-					this.m_ShouldRecalculateStencil = true;
-					this.SetMaterialDirty();
+					return;
 				}
+				this.m_Maskable = value;
+				this.m_ShouldRecalculateStencil = true;
+				this.SetMaterialDirty();
+			}
+		}
+
+		public bool isMaskingGraphic
+		{
+			get
+			{
+				return this.m_IsMaskingGraphic;
+			}
+			set
+			{
+				if (value == this.m_IsMaskingGraphic)
+				{
+					return;
+				}
+				this.m_IsMaskingGraphic = value;
 			}
 		}
 
@@ -42,11 +59,10 @@ namespace UnityEngine.UI
 			if (this.m_ShouldRecalculateStencil)
 			{
 				Transform transform = MaskUtilities.FindRootSortOverrideCanvas(base.transform);
-				this.m_StencilValue = ((!this.maskable) ? 0 : MaskUtilities.GetStencilDepth(base.transform, transform));
+				this.m_StencilValue = (this.maskable ? MaskUtilities.GetStencilDepth(base.transform, transform) : 0);
 				this.m_ShouldRecalculateStencil = false;
 			}
-			Mask component = base.GetComponent<Mask>();
-			if (this.m_StencilValue > 0 && (component == null || !component.IsActive()))
+			if (this.m_StencilValue > 0 && !this.isMaskingGraphic)
 			{
 				Material material2 = StencilMaterial.Add(material, (1 << this.m_StencilValue) - 1, StencilOp.Keep, CompareFunction.Equal, ColorWriteMask.All, (1 << this.m_StencilValue) - 1, 0);
 				StencilMaterial.Remove(this.m_MaskMaterial);
@@ -78,11 +94,14 @@ namespace UnityEngine.UI
 			if (validRect)
 			{
 				base.canvasRenderer.EnableRectClipping(clipRect);
+				return;
 			}
-			else
-			{
-				base.canvasRenderer.DisableRectClipping();
-			}
+			base.canvasRenderer.DisableRectClipping();
+		}
+
+		public virtual void SetClipSoftness(Vector2 clipSoftness)
+		{
+			base.canvasRenderer.clippingSoftness = clipSoftness;
 		}
 
 		protected override void OnEnable()
@@ -91,7 +110,7 @@ namespace UnityEngine.UI
 			this.m_ShouldRecalculateStencil = true;
 			this.UpdateClipParent();
 			this.SetMaterialDirty();
-			if (base.GetComponent<Mask>() != null)
+			if (this.isMaskingGraphic)
 			{
 				MaskUtilities.NotifyStencilStateChanged(this);
 			}
@@ -105,7 +124,7 @@ namespace UnityEngine.UI
 			this.UpdateClipParent();
 			StencilMaterial.Remove(this.m_MaskMaterial);
 			this.m_MaskMaterial = null;
-			if (base.GetComponent<Mask>() != null)
+			if (this.isMaskingGraphic)
 			{
 				MaskUtilities.NotifyStencilStateChanged(this);
 			}
@@ -114,12 +133,13 @@ namespace UnityEngine.UI
 		protected override void OnTransformParentChanged()
 		{
 			base.OnTransformParentChanged();
-			if (base.isActiveAndEnabled)
+			if (!base.isActiveAndEnabled)
 			{
-				this.m_ShouldRecalculateStencil = true;
-				this.UpdateClipParent();
-				this.SetMaterialDirty();
+				return;
 			}
+			this.m_ShouldRecalculateStencil = true;
+			this.UpdateClipParent();
+			this.SetMaterialDirty();
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -131,12 +151,13 @@ namespace UnityEngine.UI
 		protected override void OnCanvasHierarchyChanged()
 		{
 			base.OnCanvasHierarchyChanged();
-			if (base.isActiveAndEnabled)
+			if (!base.isActiveAndEnabled)
 			{
-				this.m_ShouldRecalculateStencil = true;
-				this.UpdateClipParent();
-				this.SetMaterialDirty();
+				return;
 			}
+			this.m_ShouldRecalculateStencil = true;
+			this.UpdateClipParent();
+			this.SetMaterialDirty();
 		}
 
 		private Rect rootCanvasRect
@@ -152,13 +173,22 @@ namespace UnityEngine.UI
 						this.m_Corners[i] = worldToLocalMatrix.MultiplyPoint(this.m_Corners[i]);
 					}
 				}
-				return new Rect(this.m_Corners[0].x, this.m_Corners[0].y, this.m_Corners[2].x - this.m_Corners[0].x, this.m_Corners[2].y - this.m_Corners[0].y);
+				Vector2 vector = this.m_Corners[0];
+				Vector2 vector2 = this.m_Corners[0];
+				for (int j = 1; j < 4; j++)
+				{
+					vector.x = Mathf.Min(this.m_Corners[j].x, vector.x);
+					vector.y = Mathf.Min(this.m_Corners[j].y, vector.y);
+					vector2.x = Mathf.Max(this.m_Corners[j].x, vector2.x);
+					vector2.y = Mathf.Max(this.m_Corners[j].y, vector2.y);
+				}
+				return new Rect(vector, vector2 - vector);
 			}
 		}
 
 		private void UpdateClipParent()
 		{
-			RectMask2D rectMask2D = ((!this.maskable || !this.IsActive()) ? null : MaskUtilities.GetRectMaskForClippable(this));
+			RectMask2D rectMask2D = ((this.maskable && this.IsActive()) ? MaskUtilities.GetRectMaskForClippable(this) : null);
 			if (this.m_ParentMask != null && (rectMask2D != this.m_ParentMask || !rectMask2D.IsActive()))
 			{
 				this.m_ParentMask.RemoveClippable(this);
@@ -198,13 +228,15 @@ namespace UnityEngine.UI
 		[NonSerialized]
 		private RectMask2D m_ParentMask;
 
-		[NonSerialized]
+		[SerializeField]
 		private bool m_Maskable = true;
+
+		private bool m_IsMaskingGraphic;
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Not used anymore.", true)]
 		[NonSerialized]
-		protected bool m_IncludeForMasking = false;
+		protected bool m_IncludeForMasking;
 
 		[SerializeField]
 		private MaskableGraphic.CullStateChangedEvent m_OnCullStateChanged = new MaskableGraphic.CullStateChangedEvent();

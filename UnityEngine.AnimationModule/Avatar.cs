@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Animation/Avatar.h")]
+	[NativeHeader("Modules/Animation/Avatar.h")]
 	public class Avatar : Object
 	{
 		private Avatar()
@@ -25,6 +25,16 @@ namespace UnityEngine
 			[NativeMethod("IsHuman")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+		}
+
+		public HumanDescription humanDescription
+		{
+			get
+			{
+				HumanDescription humanDescription;
+				this.get_humanDescription_Injected(out humanDescription);
+				return humanDescription;
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -106,6 +116,9 @@ namespace UnityEngine
 			this.Internal_GetLimitSign_Injected(humanId, out vector);
 			return vector;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_humanDescription_Injected(out HumanDescription ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_GetPreRotation_Injected(int humanId, out Quaternion ret);

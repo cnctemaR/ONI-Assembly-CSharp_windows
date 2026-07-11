@@ -7,9 +7,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[UsedByNativeCode]
 	[NativeHeader("Runtime/Graphics/Texture.h")]
 	[NativeHeader("Runtime/Streaming/TextureStreamingManager.h")]
-	[UsedByNativeCode]
 	public class Texture : Object
 	{
 		protected Texture()
@@ -24,6 +24,13 @@ namespace UnityEngine
 			set;
 		}
 
+		public extern int mipmapCount
+		{
+			[NativeName("GetMipmapCount")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		[NativeProperty("AnisoLimit")]
 		public static extern AnisotropicFiltering anisotropicFiltering
 		{
@@ -36,6 +43,14 @@ namespace UnityEngine
 		[NativeName("SetGlobalAnisoLimits")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetGlobalAnisotropicFilteringLimits(int forcedMin, int globalMax);
+
+		public virtual GraphicsFormat graphicsFormat
+		{
+			get
+			{
+				return GraphicsFormatUtility.GetFormat(this);
+			}
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int GetDataWidth();
@@ -174,6 +189,19 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void IncrementUpdateCount();
 
+		[NativeMethod("GetActiveTextureColorSpace")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int Internal_GetActiveTextureColorSpace();
+
+		internal ColorSpace activeTextureColorSpace
+		{
+			[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+			get
+			{
+				return (this.Internal_GetActiveTextureColorSpace() == 0) ? ColorSpace.Linear : ColorSpace.Gamma;
+			}
+		}
+
 		public static extern ulong totalTextureMemory
 		{
 			[FreeFunction("GetTextureStreamingManager().GetTotalTextureMemory")]
@@ -275,54 +303,71 @@ namespace UnityEngine
 			set;
 		}
 
+		public static extern bool allowThreadedTextureCreation
+		{
+			[FreeFunction(Name = "Texture2DScripting::IsCreateTextureThreadedEnabled")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[FreeFunction(Name = "Texture2DScripting::EnableCreateTextureThreaded")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		internal bool ValidateFormat(RenderTextureFormat format)
 		{
-			bool flag;
-			if (SystemInfo.SupportsRenderTextureFormat(format))
+			bool flag = SystemInfo.SupportsRenderTextureFormat(format);
+			bool flag2;
+			if (flag)
 			{
-				flag = true;
+				flag2 = true;
 			}
 			else
 			{
 				Debug.LogError(string.Format("RenderTexture creation failed. '{0}' is not supported on this platform. Use 'SystemInfo.SupportsRenderTextureFormat' C# API to check format support.", format.ToString()), this);
-				flag = false;
+				flag2 = false;
 			}
-			return flag;
+			return flag2;
 		}
 
 		internal bool ValidateFormat(TextureFormat format)
 		{
-			bool flag;
-			if (SystemInfo.SupportsTextureFormat(format))
+			bool flag = SystemInfo.SupportsTextureFormat(format);
+			bool flag2;
+			if (flag)
 			{
-				flag = true;
-			}
-			else if (GraphicsFormatUtility.IsCompressedTextureFormat(format))
-			{
-				Debug.LogWarning(string.Format("'{0}' is not supported on this platform. Decompressing texture. Use 'SystemInfo.SupportsTextureFormat' C# API to check format support.", format.ToString()), this);
-				flag = true;
+				flag2 = true;
 			}
 			else
 			{
-				Debug.LogError(string.Format("Texture creation failed. '{0}' is not supported on this platform. Use 'SystemInfo.SupportsTextureFormat' C# API to check format support.", format.ToString()), this);
-				flag = false;
+				bool flag3 = GraphicsFormatUtility.IsCompressedTextureFormat(format);
+				if (flag3)
+				{
+					Debug.LogWarning(string.Format("'{0}' is not supported on this platform. Decompressing texture. Use 'SystemInfo.SupportsTextureFormat' C# API to check format support.", format.ToString()), this);
+					flag2 = true;
+				}
+				else
+				{
+					Debug.LogError(string.Format("Texture creation failed. '{0}' is not supported on this platform. Use 'SystemInfo.SupportsTextureFormat' C# API to check format support.", format.ToString()), this);
+					flag2 = false;
+				}
 			}
-			return flag;
+			return flag2;
 		}
 
 		internal bool ValidateFormat(GraphicsFormat format, FormatUsage usage)
 		{
-			bool flag;
-			if (SystemInfo.IsFormatSupported(format, usage))
+			bool flag = SystemInfo.IsFormatSupported(format, usage);
+			bool flag2;
+			if (flag)
 			{
-				flag = true;
+				flag2 = true;
 			}
 			else
 			{
 				Debug.LogError(string.Format("Texture creation failed. '{0}' is not supported for {1} usage on this platform. Use 'SystemInfo.IsFormatSupported' C# API to check format support.", format.ToString(), usage.ToString()), this);
-				flag = false;
+				flag2 = false;
 			}
-			return flag;
+			return flag2;
 		}
 
 		internal UnityException CreateNonReadableException(Texture t)
@@ -332,5 +377,7 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_texelSize_Injected(out Vector2 ret);
+
+		public static readonly int GenerateAllMips = -1;
 	}
 }

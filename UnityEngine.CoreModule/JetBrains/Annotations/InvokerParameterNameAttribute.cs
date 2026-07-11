@@ -2,7 +2,7 @@
 
 namespace JetBrains.Annotations
 {
-	[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
+	[AttributeUsage(AttributeTargets.Parameter)]
 	public sealed class InvokerParameterNameAttribute : Attribute
 	{
 	}

@@ -69,7 +69,7 @@ public class AchievementWidget : KMonoBehaviour
 		bool colorChanged = false;
 		EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("AchievementUnlocked", false), Vector3.zero, 1f);
 		int num2 = Mathf.RoundToInt(MathUtil.Clamp(1f, 7f, startDelay - startDelay % 1f / 1f)) - 1;
-		eventInstance.setParameterValue("num_achievements", (float)num2);
+		eventInstance.setParameterByName("num_achievements", (float)num2, false);
 		KFMOD.EndOneShot(eventInstance);
 		for (float i = 0f; i < 1.2f; i += Time.unscaledDeltaTime)
 		{

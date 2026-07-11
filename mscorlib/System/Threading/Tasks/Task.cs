@@ -5,8 +5,8 @@ using System.Security.Permissions;
 
 namespace System.Threading.Tasks
 {
-	[DebuggerTypeProxy(typeof(SystemThreadingTasks_FutureDebugView<>))]
 	[DebuggerDisplay("Id = {Id}, Status = {Status}, Method = {DebuggerDisplayMethodDescription}, Result = {DebuggerDisplayResultDescription}")]
+	[DebuggerTypeProxy(typeof(SystemThreadingTasks_FutureDebugView<>))]
 	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class Task<TResult> : Task
 	{

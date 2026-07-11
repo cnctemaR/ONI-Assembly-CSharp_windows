@@ -9,6 +9,14 @@ namespace UnityEngine.Networking
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class DownloadHandlerTexture : DownloadHandler
 	{
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr Create(DownloadHandlerTexture obj, bool readable);
+
+		private void InternalCreateTexture(bool readable)
+		{
+			this.m_Ptr = DownloadHandlerTexture.Create(this, readable);
+		}
+
 		public DownloadHandlerTexture()
 		{
 			this.InternalCreateTexture(true);
@@ -18,14 +26,6 @@ namespace UnityEngine.Networking
 		{
 			this.InternalCreateTexture(readable);
 			this.mNonReadable = !readable;
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr Create(DownloadHandlerTexture obj, bool readable);
-
-		private void InternalCreateTexture(bool readable)
-		{
-			this.m_Ptr = DownloadHandlerTexture.Create(this, readable);
 		}
 
 		protected override byte[] GetData()
@@ -43,18 +43,24 @@ namespace UnityEngine.Networking
 
 		private Texture2D InternalGetTexture()
 		{
-			if (this.mHasTexture)
+			bool flag = this.mHasTexture;
+			if (flag)
 			{
-				if (this.mTexture == null)
+				bool flag2 = this.mTexture == null;
+				if (flag2)
 				{
 					this.mTexture = new Texture2D(2, 2);
 					this.mTexture.LoadImage(this.GetData(), this.mNonReadable);
 				}
 			}
-			else if (this.mTexture == null)
+			else
 			{
-				this.mTexture = this.InternalGetTextureNative();
-				this.mHasTexture = true;
+				bool flag3 = this.mTexture == null;
+				if (flag3)
+				{
+					this.mTexture = this.InternalGetTextureNative();
+					this.mHasTexture = true;
+				}
 			}
 			return this.mTexture;
 		}

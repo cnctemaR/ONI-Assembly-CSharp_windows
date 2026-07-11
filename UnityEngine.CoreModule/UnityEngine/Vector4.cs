@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
@@ -9,30 +10,6 @@ namespace UnityEngine
 	[NativeHeader("Runtime/Math/Vector4.h")]
 	public struct Vector4 : IEquatable<Vector4>
 	{
-		public Vector4(float x, float y, float z, float w)
-		{
-			this.x = x;
-			this.y = y;
-			this.z = z;
-			this.w = w;
-		}
-
-		public Vector4(float x, float y, float z)
-		{
-			this.x = x;
-			this.y = y;
-			this.z = z;
-			this.w = 0f;
-		}
-
-		public Vector4(float x, float y)
-		{
-			this.x = x;
-			this.y = y;
-			this.z = 0f;
-			this.w = 0f;
-		}
-
 		public float this[int index]
 		{
 			get
@@ -79,6 +56,30 @@ namespace UnityEngine
 			}
 		}
 
+		public Vector4(float x, float y, float z, float w)
+		{
+			this.x = x;
+			this.y = y;
+			this.z = z;
+			this.w = w;
+		}
+
+		public Vector4(float x, float y, float z)
+		{
+			this.x = x;
+			this.y = y;
+			this.z = z;
+			this.w = 0f;
+		}
+
+		public Vector4(float x, float y)
+		{
+			this.x = x;
+			this.y = y;
+			this.z = 0f;
+			this.w = 0f;
+		}
+
 		public void Set(float newX, float newY, float newZ, float newW)
 		{
 			this.x = newX;
@@ -100,18 +101,23 @@ namespace UnityEngine
 
 		public static Vector4 MoveTowards(Vector4 current, Vector4 target, float maxDistanceDelta)
 		{
-			Vector4 vector = target - current;
-			float magnitude = vector.magnitude;
-			Vector4 vector2;
-			if (magnitude <= maxDistanceDelta || magnitude == 0f)
+			float num = target.x - current.x;
+			float num2 = target.y - current.y;
+			float num3 = target.z - current.z;
+			float num4 = target.w - current.w;
+			float num5 = num * num + num2 * num2 + num3 * num3 + num4 * num4;
+			bool flag = num5 == 0f || (maxDistanceDelta >= 0f && num5 <= maxDistanceDelta * maxDistanceDelta);
+			Vector4 vector;
+			if (flag)
 			{
-				vector2 = target;
+				vector = target;
 			}
 			else
 			{
-				vector2 = current + vector / magnitude * maxDistanceDelta;
+				float num6 = (float)Math.Sqrt((double)num5);
+				vector = new Vector4(current.x + num / num6 * maxDistanceDelta, current.y + num2 / num6 * maxDistanceDelta, current.z + num3 / num6 * maxDistanceDelta, current.w + num4 / num6 * maxDistanceDelta);
 			}
-			return vector2;
+			return vector;
 		}
 
 		public static Vector4 Scale(Vector4 a, Vector4 b)
@@ -134,19 +140,21 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
-			return other is Vector4 && this.Equals((Vector4)other);
+			bool flag = !(other is Vector4);
+			return !flag && this.Equals((Vector4)other);
 		}
 
 		public bool Equals(Vector4 other)
 		{
-			return this.x.Equals(other.x) && this.y.Equals(other.y) && this.z.Equals(other.z) && this.w.Equals(other.w);
+			return this.x == other.x && this.y == other.y && this.z == other.z && this.w == other.w;
 		}
 
 		public static Vector4 Normalize(Vector4 a)
 		{
 			float num = Vector4.Magnitude(a);
+			bool flag = num > 1E-05f;
 			Vector4 vector;
-			if (num > 1E-05f)
+			if (flag)
 			{
 				vector = a / num;
 			}
@@ -160,7 +168,8 @@ namespace UnityEngine
 		public void Normalize()
 		{
 			float num = Vector4.Magnitude(this);
-			if (num > 1E-05f)
+			bool flag = num > 1E-05f;
+			if (flag)
 			{
 				this /= num;
 			}
@@ -185,7 +194,7 @@ namespace UnityEngine
 
 		public static Vector4 Project(Vector4 a, Vector4 b)
 		{
-			return b * Vector4.Dot(a, b) / Vector4.Dot(b, b);
+			return b * (Vector4.Dot(a, b) / Vector4.Dot(b, b));
 		}
 
 		public static float Distance(Vector4 a, Vector4 b)
@@ -195,14 +204,14 @@ namespace UnityEngine
 
 		public static float Magnitude(Vector4 a)
 		{
-			return Mathf.Sqrt(Vector4.Dot(a, a));
+			return (float)Math.Sqrt((double)Vector4.Dot(a, a));
 		}
 
 		public float magnitude
 		{
 			get
 			{
-				return Mathf.Sqrt(Vector4.Dot(this, this));
+				return (float)Math.Sqrt((double)Vector4.Dot(this, this));
 			}
 		}
 
@@ -288,7 +297,12 @@ namespace UnityEngine
 
 		public static bool operator ==(Vector4 lhs, Vector4 rhs)
 		{
-			return Vector4.SqrMagnitude(lhs - rhs) < 9.9999994E-11f;
+			float num = lhs.x - rhs.x;
+			float num2 = lhs.y - rhs.y;
+			float num3 = lhs.z - rhs.z;
+			float num4 = lhs.w - rhs.w;
+			float num5 = num * num + num2 * num2 + num3 * num3 + num4 * num4;
+			return num5 < 9.9999994E-11f;
 		}
 
 		public static bool operator !=(Vector4 lhs, Vector4 rhs)
@@ -325,10 +339,10 @@ namespace UnityEngine
 		{
 			return UnityString.Format("({0}, {1}, {2}, {3})", new object[]
 			{
-				this.x.ToString(format),
-				this.y.ToString(format),
-				this.z.ToString(format),
-				this.w.ToString(format)
+				this.x.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
+				this.y.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
+				this.z.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
+				this.w.ToString(format, CultureInfo.InvariantCulture.NumberFormat)
 			});
 		}
 

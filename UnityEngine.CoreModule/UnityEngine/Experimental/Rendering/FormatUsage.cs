@@ -6,11 +6,17 @@ namespace UnityEngine.Experimental.Rendering
 	{
 		Sample,
 		Linear,
-		Render = 3,
+		Sparse,
+		Render = 4,
 		Blend,
-		LoadStore = 8,
+		GetPixels,
+		SetPixels,
+		SetPixels32,
+		ReadPixels,
+		LoadStore,
 		MSAA2x,
 		MSAA4x,
-		MSAA8x
+		MSAA8x,
+		StencilSampling = 15
 	}
 }

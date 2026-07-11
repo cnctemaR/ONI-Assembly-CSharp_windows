@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeClass("ScriptingContactPoint2D", "struct ScriptingContactPoint2D;")]
 	[NativeHeader("Modules/Physics2D/Public/PhysicsScripting2D.h")]
+	[NativeClass("ScriptingContactPoint2D", "struct ScriptingContactPoint2D;")]
 	[RequiredByNativeCode(Optional = false, GenerateProxy = true)]
 	public struct ContactPoint2D
 	{

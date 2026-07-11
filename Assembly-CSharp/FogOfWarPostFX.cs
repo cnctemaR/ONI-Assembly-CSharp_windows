@@ -5,7 +5,6 @@ public class FogOfWarPostFX : MonoBehaviour
 {
 	private void Awake()
 	{
-		base.enabled = SystemInfo.supportsImageEffects;
 		if (this.shader != null)
 		{
 			this.material = new Material(this.shader);

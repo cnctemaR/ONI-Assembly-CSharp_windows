@@ -36,7 +36,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.m_FreeSpin = ((!value) ? 0 : 1);
+				this.m_FreeSpin = (value ? 1 : 0);
 			}
 		}
 

@@ -7,8 +7,8 @@ using System.Threading;
 
 namespace System.Collections.Concurrent
 {
-	[DebuggerTypeProxy(typeof(IDictionaryDebugView<, >))]
 	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(IDictionaryDebugView<, >))]
 	[Serializable]
 	public class ConcurrentDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable, IDictionary, ICollection, IReadOnlyDictionary<TKey, TValue>, IReadOnlyCollection<KeyValuePair<TKey, TValue>>
 	{

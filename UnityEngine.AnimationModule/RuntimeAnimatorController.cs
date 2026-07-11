@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Animation/RuntimeAnimatorController.h")]
 	[ExcludeFromObjectFactory]
+	[NativeHeader("Modules/Animation/RuntimeAnimatorController.h")]
 	[UsedByNativeCode]
 	public class RuntimeAnimatorController : Object
 	{

@@ -9,15 +9,10 @@ namespace UnityEngine
 {
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[NativeHeader("Runtime/Shaders/ShaderPropertySheet.h")]
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	[NativeHeader("Runtime/Math/SphericalHarmonicsL2.h")]
+	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	public sealed class MaterialPropertyBlock
 	{
-		public MaterialPropertyBlock()
-		{
-			this.m_Ptr = MaterialPropertyBlock.CreateImpl();
-		}
-
 		[Obsolete("Use SetFloat instead (UnityUpgradable) -> SetFloat(*)", false)]
 		public void AddFloat(string name, float value)
 		{
@@ -136,9 +131,17 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetTextureImpl(int name, [NotNull] Texture value);
 
+		[NativeName("SetRenderTextureFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetRenderTextureImpl(int name, [NotNull] RenderTexture value, RenderTextureSubElement element);
+
 		[NativeName("SetBufferFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetBufferImpl(int name, ComputeBuffer value);
+
+		[NativeName("SetConstantBufferFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetConstantBufferImpl(int name, ComputeBuffer value, int offset, int size);
 
 		[NativeName("SetFloatArrayFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -221,15 +224,18 @@ namespace UnityEngine
 
 		private void SetFloatArray(int name, float[] values, int count)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
-			if (values.Length == 0)
+			bool flag2 = values.Length == 0;
+			if (flag2)
 			{
 				throw new ArgumentException("Zero-sized array is not allowed.");
 			}
-			if (values.Length < count)
+			bool flag3 = values.Length < count;
+			if (flag3)
 			{
 				throw new ArgumentException("array has less elements than passed count.");
 			}
@@ -238,15 +244,18 @@ namespace UnityEngine
 
 		private void SetVectorArray(int name, Vector4[] values, int count)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
-			if (values.Length == 0)
+			bool flag2 = values.Length == 0;
+			if (flag2)
 			{
 				throw new ArgumentException("Zero-sized array is not allowed.");
 			}
-			if (values.Length < count)
+			bool flag3 = values.Length < count;
+			if (flag3)
 			{
 				throw new ArgumentException("array has less elements than passed count.");
 			}
@@ -255,15 +264,18 @@ namespace UnityEngine
 
 		private void SetMatrixArray(int name, Matrix4x4[] values, int count)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
-			if (values.Length == 0)
+			bool flag2 = values.Length == 0;
+			if (flag2)
 			{
 				throw new ArgumentException("Zero-sized array is not allowed.");
 			}
-			if (values.Length < count)
+			bool flag3 = values.Length < count;
+			if (flag3)
 			{
 				throw new ArgumentException("array has less elements than passed count.");
 			}
@@ -272,13 +284,15 @@ namespace UnityEngine
 
 		private void ExtractFloatArray(int name, List<float> values)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
 			values.Clear();
 			int floatArrayCountImpl = this.GetFloatArrayCountImpl(name);
-			if (floatArrayCountImpl > 0)
+			bool flag2 = floatArrayCountImpl > 0;
+			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<float>(values, floatArrayCountImpl);
 				this.ExtractFloatArrayImpl(name, (float[])NoAllocHelpers.ExtractArrayFromList(values));
@@ -287,13 +301,15 @@ namespace UnityEngine
 
 		private void ExtractVectorArray(int name, List<Vector4> values)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
 			values.Clear();
 			int vectorArrayCountImpl = this.GetVectorArrayCountImpl(name);
-			if (vectorArrayCountImpl > 0)
+			bool flag2 = vectorArrayCountImpl > 0;
+			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<Vector4>(values, vectorArrayCountImpl);
 				this.ExtractVectorArrayImpl(name, (Vector4[])NoAllocHelpers.ExtractArrayFromList(values));
@@ -302,17 +318,24 @@ namespace UnityEngine
 
 		private void ExtractMatrixArray(int name, List<Matrix4x4> values)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
 			values.Clear();
 			int matrixArrayCountImpl = this.GetMatrixArrayCountImpl(name);
-			if (matrixArrayCountImpl > 0)
+			bool flag2 = matrixArrayCountImpl > 0;
+			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<Matrix4x4>(values, matrixArrayCountImpl);
 				this.ExtractMatrixArrayImpl(name, (Matrix4x4[])NoAllocHelpers.ExtractArrayFromList(values));
 			}
+		}
+
+		public MaterialPropertyBlock()
+		{
+			this.m_Ptr = MaterialPropertyBlock.CreateImpl();
 		}
 
 		~MaterialPropertyBlock()
@@ -322,7 +345,8 @@ namespace UnityEngine
 
 		private void Dispose()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				MaterialPropertyBlock.DestroyImpl(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;
@@ -398,6 +422,26 @@ namespace UnityEngine
 		public void SetTexture(int nameID, Texture value)
 		{
 			this.SetTextureImpl(nameID, value);
+		}
+
+		public void SetTexture(string name, RenderTexture value, RenderTextureSubElement element)
+		{
+			this.SetRenderTextureImpl(Shader.PropertyToID(name), value, element);
+		}
+
+		public void SetTexture(int nameID, RenderTexture value, RenderTextureSubElement element)
+		{
+			this.SetRenderTextureImpl(nameID, value, element);
+		}
+
+		public void SetConstantBuffer(string name, ComputeBuffer value, int offset, int size)
+		{
+			this.SetConstantBufferImpl(Shader.PropertyToID(name), value, offset, size);
+		}
+
+		public void SetConstantBuffer(int nameID, ComputeBuffer value, int offset, int size)
+		{
+			this.SetConstantBufferImpl(nameID, value, offset, size);
 		}
 
 		public void SetFloatArray(string name, List<float> values)
@@ -527,7 +571,7 @@ namespace UnityEngine
 
 		public float[] GetFloatArray(int nameID)
 		{
-			return (this.GetFloatArrayCountImpl(nameID) == 0) ? null : this.GetFloatArrayImpl(nameID);
+			return (this.GetFloatArrayCountImpl(nameID) != 0) ? this.GetFloatArrayImpl(nameID) : null;
 		}
 
 		public Vector4[] GetVectorArray(string name)
@@ -537,7 +581,7 @@ namespace UnityEngine
 
 		public Vector4[] GetVectorArray(int nameID)
 		{
-			return (this.GetVectorArrayCountImpl(nameID) == 0) ? null : this.GetVectorArrayImpl(nameID);
+			return (this.GetVectorArrayCountImpl(nameID) != 0) ? this.GetVectorArrayImpl(nameID) : null;
 		}
 
 		public Matrix4x4[] GetMatrixArray(string name)
@@ -547,7 +591,7 @@ namespace UnityEngine
 
 		public Matrix4x4[] GetMatrixArray(int nameID)
 		{
-			return (this.GetMatrixArrayCountImpl(nameID) == 0) ? null : this.GetMatrixArrayImpl(nameID);
+			return (this.GetMatrixArrayCountImpl(nameID) != 0) ? this.GetMatrixArrayImpl(nameID) : null;
 		}
 
 		public void GetFloatArray(string name, List<float> values)
@@ -582,7 +626,8 @@ namespace UnityEngine
 
 		public void CopySHCoefficientArraysFrom(List<SphericalHarmonicsL2> lightProbes)
 		{
-			if (lightProbes == null)
+			bool flag = lightProbes == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("lightProbes");
 			}
@@ -591,7 +636,8 @@ namespace UnityEngine
 
 		public void CopySHCoefficientArraysFrom(SphericalHarmonicsL2[] lightProbes)
 		{
-			if (lightProbes == null)
+			bool flag = lightProbes == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("lightProbes");
 			}
@@ -605,23 +651,28 @@ namespace UnityEngine
 
 		public void CopySHCoefficientArraysFrom(SphericalHarmonicsL2[] lightProbes, int sourceStart, int destStart, int count)
 		{
-			if (lightProbes == null)
+			bool flag = lightProbes == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("lightProbes");
 			}
-			if (sourceStart < 0)
+			bool flag2 = sourceStart < 0;
+			if (flag2)
 			{
 				throw new ArgumentOutOfRangeException("sourceStart", "Argument sourceStart must not be negative.");
 			}
-			if (destStart < 0)
+			bool flag3 = destStart < 0;
+			if (flag3)
 			{
 				throw new ArgumentOutOfRangeException("sourceStart", "Argument destStart must not be negative.");
 			}
-			if (count < 0)
+			bool flag4 = count < 0;
+			if (flag4)
 			{
 				throw new ArgumentOutOfRangeException("count", "Argument count must not be negative.");
 			}
-			if (lightProbes.Length < sourceStart + count)
+			bool flag5 = lightProbes.Length < sourceStart + count;
+			if (flag5)
 			{
 				throw new ArgumentOutOfRangeException("The specified source start index or count is out of the range.");
 			}
@@ -630,7 +681,8 @@ namespace UnityEngine
 
 		public void CopyProbeOcclusionArrayFrom(List<Vector4> occlusionProbes)
 		{
-			if (occlusionProbes == null)
+			bool flag = occlusionProbes == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("occlusionProbes");
 			}
@@ -639,7 +691,8 @@ namespace UnityEngine
 
 		public void CopyProbeOcclusionArrayFrom(Vector4[] occlusionProbes)
 		{
-			if (occlusionProbes == null)
+			bool flag = occlusionProbes == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("occlusionProbes");
 			}
@@ -653,23 +706,28 @@ namespace UnityEngine
 
 		public void CopyProbeOcclusionArrayFrom(Vector4[] occlusionProbes, int sourceStart, int destStart, int count)
 		{
-			if (occlusionProbes == null)
+			bool flag = occlusionProbes == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("occlusionProbes");
 			}
-			if (sourceStart < 0)
+			bool flag2 = sourceStart < 0;
+			if (flag2)
 			{
 				throw new ArgumentOutOfRangeException("sourceStart", "Argument sourceStart must not be negative.");
 			}
-			if (destStart < 0)
+			bool flag3 = destStart < 0;
+			if (flag3)
 			{
 				throw new ArgumentOutOfRangeException("sourceStart", "Argument destStart must not be negative.");
 			}
-			if (count < 0)
+			bool flag4 = count < 0;
+			if (flag4)
 			{
 				throw new ArgumentOutOfRangeException("count", "Argument count must not be negative.");
 			}
-			if (occlusionProbes.Length < sourceStart + count)
+			bool flag5 = occlusionProbes.Length < sourceStart + count;
+			if (flag5)
 			{
 				throw new ArgumentOutOfRangeException("The specified source start index or count is out of the range.");
 			}

@@ -34,12 +34,27 @@ public class SymbolOverrideInfoGpuData
 		this.version = num;
 	}
 
-	public void SetSymbolOverrideInfo(int symbol_idx, KAnim.Build.SymbolFrameInstance symbol_frame_instance)
+	public void SetSymbolOverrideInfo(int symbol_start_idx, int symbol_num_frames, int atlas_idx, KBatchGroupData source_data, int source_start_idx, int source_num_frames)
 	{
-		if (symbol_idx >= this.symbolCount)
+		for (int i = 0; i < symbol_num_frames; i++)
 		{
-			DebugUtil.Assert(false);
+			int num = symbol_start_idx + i;
+			int num2 = source_start_idx + Math.Min(source_num_frames - 1, i);
+			KAnim.Build.SymbolFrameInstance symbolFrameInstance = source_data.symbolFrameInstances[num2];
+			SymbolOverrideInfoGpuData.SymbolOverrideInfo[] symbolOverrideInfos = this.symbolOverrideInfos;
+			int num3 = num;
+			symbolOverrideInfos[num3].atlas = (float)atlas_idx;
+			symbolOverrideInfos[num3].isoverriden = 1f;
+			symbolOverrideInfos[num3].bboxMin = symbolFrameInstance.symbolFrame.bboxMin;
+			symbolOverrideInfos[num3].bboxMax = symbolFrameInstance.symbolFrame.bboxMax;
+			symbolOverrideInfos[num3].uvMin = symbolFrameInstance.symbolFrame.uvMin;
+			symbolOverrideInfos[num3].uvMax = symbolFrameInstance.symbolFrame.uvMax;
 		}
+		this.MarkDirty();
+	}
+
+	public void SetSymbolOverrideInfo(int symbol_idx, ref KAnim.Build.SymbolFrameInstance symbol_frame_instance)
+	{
 		SymbolOverrideInfoGpuData.SymbolOverrideInfo[] symbolOverrideInfos = this.symbolOverrideInfos;
 		symbolOverrideInfos[symbol_idx].atlas = (float)symbol_frame_instance.buildImageIdx;
 		symbolOverrideInfos[symbol_idx].isoverriden = 1f;

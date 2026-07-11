@@ -57,6 +57,16 @@ public class Room : IAssignableIdentity
 		return owners[0];
 	}
 
+	public bool HasOwner(Assignables owner)
+	{
+		return this.GetOwners().Find((Ownables x) => x == owner) != null;
+	}
+
+	public int NumOwners()
+	{
+		return this.GetOwners().Count;
+	}
+
 	public List<KPrefabID> GetPrimaryEntities()
 	{
 		this.primary_buildings.Clear();

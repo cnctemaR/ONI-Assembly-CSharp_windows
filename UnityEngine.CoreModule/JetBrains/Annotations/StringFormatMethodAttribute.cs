@@ -2,14 +2,15 @@
 
 namespace JetBrains.Annotations
 {
-	[AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+	[AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Delegate)]
 	public sealed class StringFormatMethodAttribute : Attribute
 	{
-		public StringFormatMethodAttribute(string formatParameterName)
+		public StringFormatMethodAttribute([NotNull] string formatParameterName)
 		{
 			this.FormatParameterName = formatParameterName;
 		}
 
-		public string FormatParameterName { get; private set; }
+		[NotNull]
+		public string FormatParameterName { get; }
 	}
 }

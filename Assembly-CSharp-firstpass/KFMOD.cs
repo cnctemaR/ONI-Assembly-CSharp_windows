@@ -135,17 +135,17 @@ public class KFMOD
 				soundDescription.falloffDistanceSq = num * num;
 				List<OneShotSoundParameterUpdater> list = new List<OneShotSoundParameterUpdater>();
 				int num2 = 0;
-				eventDescription.getParameterCount(out num2);
+				eventDescription.getParameterDescriptionCount(out num2);
 				SoundDescription.Parameter[] array4 = new SoundDescription.Parameter[num2];
 				for (int k = 0; k < num2; k++)
 				{
 					PARAMETER_DESCRIPTION parameter_DESCRIPTION;
-					eventDescription.getParameterByIndex(k, out parameter_DESCRIPTION);
+					eventDescription.getParameterDescriptionByIndex(k, out parameter_DESCRIPTION);
 					string text2 = parameter_DESCRIPTION.name;
 					array4[k] = new SoundDescription.Parameter
 					{
 						name = new HashedString(text2),
-						idx = k
+						id = parameter_DESCRIPTION.id
 					};
 					OneShotSoundParameterUpdater oneShotSoundParameterUpdater = null;
 					if (KFMOD.parameterUpdaters.TryGetValue(text2, out oneShotSoundParameterUpdater))

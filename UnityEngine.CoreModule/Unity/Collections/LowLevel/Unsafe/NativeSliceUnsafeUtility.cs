@@ -6,11 +6,13 @@ namespace Unity.Collections.LowLevel.Unsafe
 	{
 		public unsafe static NativeSlice<T> ConvertExistingDataToNativeSlice<T>(void* dataPointer, int stride, int length) where T : struct
 		{
-			if (length < 0)
+			bool flag = length < 0;
+			if (flag)
 			{
 				throw new ArgumentException(string.Format("Invalid length of '{0}'. It must be greater than 0.", length), "length");
 			}
-			if (stride < 0)
+			bool flag2 = stride < 0;
+			if (flag2)
 			{
 				throw new ArgumentException(string.Format("Invalid stride '{0}'. It must be greater than 0.", stride), "stride");
 			}

@@ -8,8 +8,8 @@ using System.Threading;
 namespace System.Collections
 {
 	[ComVisible(true)]
-	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(ArrayList.ArrayListDebugView))]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
 	public class ArrayList : IList, ICollection, IEnumerable, ICloneable
 	{

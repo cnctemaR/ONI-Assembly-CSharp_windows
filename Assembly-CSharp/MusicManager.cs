@@ -57,7 +57,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			int num = ((songInfo.numberOfVariations > 0) ? global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1) : (-1));
 			if (num != -1)
 			{
-				songInfo.ev.setParameterValue("variation", (float)num);
+				songInfo.ev.setParameterByName("variation", (float)num, false);
 			}
 			songInfo.ev.start();
 			this.activeSongs[song_name] = songInfo;
@@ -77,7 +77,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 					if (!this.activeSongs[list[i]].interruptsActiveMusic)
 					{
 						MusicManager.SongInfo songInfo2 = this.activeSongs[list[i]];
-						songInfo2.ev.setParameterValue("interrupted_dimmed", 1f);
+						songInfo2.ev.setParameterByName("interrupted_dimmed", 1f, false);
 						this.Log("Dimming: " + Assets.GetSimpleSoundEventName(songInfo2.fmodEvent));
 						songInfo.songsOnHold.Add(list[i]);
 					}
@@ -109,8 +109,8 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 					FMOD.Studio.EventInstance ev = songInfo4.ev;
 					if (!songInfo4.interruptsActiveMusic)
 					{
-						ev.setParameterValue("interrupted_dimmed", 1f);
-						ev.stop(STOP_MODE.ALLOWFADEOUT);
+						ev.setParameterByName("interrupted_dimmed", 1f, false);
+						ev.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 						this.activeSongs.Remove(list[j]);
 						list.Remove(list[j]);
 					}
@@ -123,7 +123,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 				int num3 = ((songInfo.numberOfVariations > 0) ? global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1) : (-1));
 				if (num3 != -1)
 				{
-					songInfo.ev.setParameterValue("variation", (float)num3);
+					songInfo.ev.setParameterByName("variation", (float)num3, false);
 				}
 				songInfo.ev.start();
 				this.activeSongs[song_name] = songInfo;
@@ -131,7 +131,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		}
 	}
 
-	public void StopSong(string song_name, bool shouldLog = true, STOP_MODE stopMode = STOP_MODE.ALLOWFADEOUT)
+	public void StopSong(string song_name, bool shouldLog = true, FMOD.Studio.STOP_MODE stopMode = FMOD.Studio.STOP_MODE.ALLOWFADEOUT)
 	{
 		if (shouldLog)
 		{
@@ -164,7 +164,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 				{
 					FMOD.Studio.EventInstance ev2 = songInfo2.ev;
 					this.Log("Undimming: " + Assets.GetSimpleSoundEventName(songInfo2.fmodEvent));
-					ev2.setParameterValue("interrupted_dimmed", 0f);
+					ev2.setParameterByName("interrupted_dimmed", 0f, false);
 					songInfo.songsOnHold.Remove(songInfo.songsOnHold[i]);
 				}
 				else
@@ -176,7 +176,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		this.activeSongs.Remove(song_name);
 	}
 
-	public void KillAllSongs(STOP_MODE stop_mode = STOP_MODE.IMMEDIATE)
+	public void KillAllSongs(FMOD.Studio.STOP_MODE stop_mode = FMOD.Studio.STOP_MODE.IMMEDIATE)
 	{
 		this.Log("Kill All Songs");
 		if (this.DynamicMusicIsActive())
@@ -186,7 +186,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		List<string> list = new List<string>(this.activeSongs.Keys);
 		for (int i = 0; i < list.Count; i++)
 		{
-			this.StopSong(list[i], true, STOP_MODE.ALLOWFADEOUT);
+			this.StopSong(list[i], true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		}
 	}
 
@@ -204,7 +204,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		FMOD.Studio.EventInstance ev = songInfo.ev;
 		if (ev.isValid())
 		{
-			ev.setParameterValue(parameter_name, parameter_value);
+			ev.setParameterByName(parameter_name, parameter_value, false);
 		}
 	}
 
@@ -381,11 +381,11 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	{
 		if (this.activeDynamicSong != null)
 		{
-			STOP_MODE stop_MODE = (stopImmediate ? STOP_MODE.IMMEDIATE : STOP_MODE.ALLOWFADEOUT);
+			FMOD.Studio.STOP_MODE stop_MODE = (stopImmediate ? FMOD.Studio.STOP_MODE.IMMEDIATE : FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 			this.Log("Stop DynamicMusic: " + Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent));
 			this.StopSong(Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent), true, stop_MODE);
 			this.activeDynamicSong = null;
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot, STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		}
 	}
 

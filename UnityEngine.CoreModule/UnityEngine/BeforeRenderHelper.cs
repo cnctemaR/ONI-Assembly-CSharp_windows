@@ -9,20 +9,21 @@ namespace UnityEngine
 		private static int GetUpdateOrder(UnityAction callback)
 		{
 			object[] customAttributes = callback.Method.GetCustomAttributes(typeof(BeforeRenderOrderAttribute), true);
-			BeforeRenderOrderAttribute beforeRenderOrderAttribute = ((customAttributes == null || customAttributes.Length <= 0) ? null : (customAttributes[0] as BeforeRenderOrderAttribute));
-			return (beforeRenderOrderAttribute == null) ? 0 : beforeRenderOrderAttribute.order;
+			BeforeRenderOrderAttribute beforeRenderOrderAttribute = ((customAttributes != null && customAttributes.Length != 0) ? (customAttributes[0] as BeforeRenderOrderAttribute) : null);
+			return (beforeRenderOrderAttribute != null) ? beforeRenderOrderAttribute.order : 0;
 		}
 
 		public static void RegisterCallback(UnityAction callback)
 		{
 			int updateOrder = BeforeRenderHelper.GetUpdateOrder(callback);
-			object obj = BeforeRenderHelper.s_OrderBlocks;
-			lock (obj)
+			List<BeforeRenderHelper.OrderBlock> list = BeforeRenderHelper.s_OrderBlocks;
+			lock (list)
 			{
 				int num = 0;
 				while (num < BeforeRenderHelper.s_OrderBlocks.Count && BeforeRenderHelper.s_OrderBlocks[num].order <= updateOrder)
 				{
-					if (BeforeRenderHelper.s_OrderBlocks[num].order == updateOrder)
+					bool flag = BeforeRenderHelper.s_OrderBlocks[num].order == updateOrder;
+					if (flag)
 					{
 						BeforeRenderHelper.OrderBlock orderBlock = BeforeRenderHelper.s_OrderBlocks[num];
 						orderBlock.callback = (UnityAction)Delegate.Combine(orderBlock.callback, callback);
@@ -41,18 +42,20 @@ namespace UnityEngine
 		public static void UnregisterCallback(UnityAction callback)
 		{
 			int updateOrder = BeforeRenderHelper.GetUpdateOrder(callback);
-			object obj = BeforeRenderHelper.s_OrderBlocks;
-			lock (obj)
+			List<BeforeRenderHelper.OrderBlock> list = BeforeRenderHelper.s_OrderBlocks;
+			lock (list)
 			{
 				int num = 0;
 				while (num < BeforeRenderHelper.s_OrderBlocks.Count && BeforeRenderHelper.s_OrderBlocks[num].order <= updateOrder)
 				{
-					if (BeforeRenderHelper.s_OrderBlocks[num].order == updateOrder)
+					bool flag = BeforeRenderHelper.s_OrderBlocks[num].order == updateOrder;
+					if (flag)
 					{
 						BeforeRenderHelper.OrderBlock orderBlock = BeforeRenderHelper.s_OrderBlocks[num];
 						orderBlock.callback = (UnityAction)Delegate.Remove(orderBlock.callback, callback);
 						BeforeRenderHelper.s_OrderBlocks[num] = orderBlock;
-						if (orderBlock.callback == null)
+						bool flag2 = orderBlock.callback == null;
+						if (flag2)
 						{
 							BeforeRenderHelper.s_OrderBlocks.RemoveAt(num);
 						}
@@ -65,13 +68,14 @@ namespace UnityEngine
 
 		public static void Invoke()
 		{
-			object obj = BeforeRenderHelper.s_OrderBlocks;
-			lock (obj)
+			List<BeforeRenderHelper.OrderBlock> list = BeforeRenderHelper.s_OrderBlocks;
+			lock (list)
 			{
 				for (int i = 0; i < BeforeRenderHelper.s_OrderBlocks.Count; i++)
 				{
 					UnityAction callback = BeforeRenderHelper.s_OrderBlocks[i].callback;
-					if (callback != null)
+					bool flag = callback != null;
+					if (flag)
 					{
 						callback();
 					}

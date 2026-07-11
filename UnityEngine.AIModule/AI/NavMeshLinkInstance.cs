@@ -8,21 +8,11 @@ namespace UnityEngine.AI
 		{
 			get
 			{
-				return this.m_Handle != 0 && NavMesh.IsValidLinkHandle(this.m_Handle);
+				return this.id != 0 && NavMesh.IsValidLinkHandle(this.id);
 			}
 		}
 
-		internal int id
-		{
-			get
-			{
-				return this.m_Handle;
-			}
-			set
-			{
-				this.m_Handle = value;
-			}
-		}
+		internal int id { get; set; }
 
 		public void Remove()
 		{
@@ -37,14 +27,13 @@ namespace UnityEngine.AI
 			}
 			set
 			{
-				int num = ((!(value != null)) ? 0 : value.GetInstanceID());
-				if (!NavMesh.InternalSetLinkOwner(this.id, num))
+				int num = ((value != null) ? value.GetInstanceID() : 0);
+				bool flag = !NavMesh.InternalSetLinkOwner(this.id, num);
+				if (flag)
 				{
 					Debug.LogError("Cannot set 'owner' on an invalid NavMeshLinkInstance");
 				}
 			}
 		}
-
-		private int m_Handle;
 	}
 }

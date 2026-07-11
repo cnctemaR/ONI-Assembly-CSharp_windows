@@ -18,6 +18,28 @@ namespace UnityEngine
 			this.depthStore = depthStore;
 		}
 
+		internal static RenderBufferLoadAction[] LoadActions(RenderBuffer[] buf)
+		{
+			RenderBufferLoadAction[] array = new RenderBufferLoadAction[buf.Length];
+			for (int i = 0; i < buf.Length; i++)
+			{
+				array[i] = buf[i].loadAction;
+				buf[i].loadAction = RenderBufferLoadAction.Load;
+			}
+			return array;
+		}
+
+		internal static RenderBufferStoreAction[] StoreActions(RenderBuffer[] buf)
+		{
+			RenderBufferStoreAction[] array = new RenderBufferStoreAction[buf.Length];
+			for (int i = 0; i < buf.Length; i++)
+			{
+				array[i] = buf[i].storeAction;
+				buf[i].storeAction = RenderBufferStoreAction.Store;
+			}
+			return array;
+		}
+
 		public RenderTargetSetup(RenderBuffer color, RenderBuffer depth)
 		{
 			this = new RenderTargetSetup(new RenderBuffer[] { color }, depth);
@@ -52,28 +74,6 @@ namespace UnityEngine
 		public RenderTargetSetup(RenderBuffer[] color, RenderBuffer depth, int mip, CubemapFace face)
 		{
 			this = new RenderTargetSetup(color, depth, mip, face, RenderTargetSetup.LoadActions(color), RenderTargetSetup.StoreActions(color), depth.loadAction, depth.storeAction);
-		}
-
-		internal static RenderBufferLoadAction[] LoadActions(RenderBuffer[] buf)
-		{
-			RenderBufferLoadAction[] array = new RenderBufferLoadAction[buf.Length];
-			for (int i = 0; i < buf.Length; i++)
-			{
-				array[i] = buf[i].loadAction;
-				buf[i].loadAction = RenderBufferLoadAction.Load;
-			}
-			return array;
-		}
-
-		internal static RenderBufferStoreAction[] StoreActions(RenderBuffer[] buf)
-		{
-			RenderBufferStoreAction[] array = new RenderBufferStoreAction[buf.Length];
-			for (int i = 0; i < buf.Length; i++)
-			{
-				array[i] = buf[i].storeAction;
-				buf[i].storeAction = RenderBufferStoreAction.Store;
-			}
-			return array;
 		}
 
 		public RenderBuffer[] color;

@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeHeader("Modules/Physics/Collider.h")]
 	[RequireComponent(typeof(Transform))]
-	[NativeHeader("Runtime/Dynamics/Collider.h")]
 	[RequiredByNativeCode]
 	public class Collider : Component
 	{

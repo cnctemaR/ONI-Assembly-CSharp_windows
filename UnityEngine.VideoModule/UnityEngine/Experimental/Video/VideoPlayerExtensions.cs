@@ -8,32 +8,37 @@ namespace UnityEngine.Experimental.Video
 {
 	[StaticAccessor("VideoPlayerExtensionsBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("VideoScriptingClasses.h")]
-	[NativeHeader("Modules/Video/Public/ScriptBindings/VideoPlayerExtensions.bindings.h")]
 	[NativeHeader("Modules/Video/Public/VideoPlayer.h")]
+	[NativeHeader("Modules/Video/Public/ScriptBindings/VideoPlayerExtensions.bindings.h")]
 	public static class VideoPlayerExtensions
 	{
 		public static AudioSampleProvider GetAudioSampleProvider(this VideoPlayer vp, ushort trackIndex)
 		{
 			ushort controlledAudioTrackCount = vp.controlledAudioTrackCount;
-			if (trackIndex >= controlledAudioTrackCount)
+			bool flag = trackIndex >= controlledAudioTrackCount;
+			if (flag)
 			{
 				throw new ArgumentOutOfRangeException("trackIndex", trackIndex, "VideoPlayer is currently configured with " + controlledAudioTrackCount + " tracks.");
 			}
 			VideoAudioOutputMode audioOutputMode = vp.audioOutputMode;
-			if (audioOutputMode != VideoAudioOutputMode.APIOnly)
+			bool flag2 = audioOutputMode != VideoAudioOutputMode.APIOnly;
+			if (flag2)
 			{
 				throw new InvalidOperationException("VideoPlayer.GetAudioSampleProvider requires audioOutputMode to be APIOnly. Current: " + audioOutputMode);
 			}
-			AudioSampleProvider audioSampleProvider = AudioSampleProvider.Lookup(VideoPlayerExtensions.InternalGetAudioSampleProviderId(vp, trackIndex), vp, trackIndex);
-			if (audioSampleProvider == null)
+			AudioSampleProvider audioSampleProvider = AudioSampleProvider.Lookup(vp.InternalGetAudioSampleProviderId(trackIndex), vp, trackIndex);
+			bool flag3 = audioSampleProvider == null;
+			if (flag3)
 			{
 				throw new InvalidOperationException("VideoPlayer.GetAudioSampleProvider got null provider.");
 			}
-			if (audioSampleProvider.owner != vp)
+			bool flag4 = audioSampleProvider.owner != vp;
+			if (flag4)
 			{
 				throw new InvalidOperationException("Internal error: VideoPlayer.GetAudioSampleProvider got provider used by another object.");
 			}
-			if (audioSampleProvider.trackIndex != trackIndex)
+			bool flag5 = audioSampleProvider.trackIndex != trackIndex;
+			if (flag5)
 			{
 				throw new InvalidOperationException(string.Concat(new object[] { "Internal error: VideoPlayer.GetAudioSampleProvider got provider for track ", audioSampleProvider.trackIndex, " instead of ", trackIndex }));
 			}
@@ -41,6 +46,6 @@ namespace UnityEngine.Experimental.Video
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern uint InternalGetAudioSampleProviderId(VideoPlayer vp, ushort trackIndex);
+		internal static extern uint InternalGetAudioSampleProviderId(this VideoPlayer vp, ushort trackIndex);
 	}
 }

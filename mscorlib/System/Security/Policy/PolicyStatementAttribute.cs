@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Security.Policy
 {
-	[ComVisible(true)]
 	[Flags]
+	[ComVisible(true)]
 	[Serializable]
 	public enum PolicyStatementAttribute
 	{

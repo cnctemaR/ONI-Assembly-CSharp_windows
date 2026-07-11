@@ -24,13 +24,16 @@ namespace UnityEngine
 
 		public bool IsLogTypeAllowed(LogType logType)
 		{
-			if (this.logEnabled)
+			bool logEnabled = this.logEnabled;
+			if (logEnabled)
 			{
-				if (logType == LogType.Exception)
+				bool flag = logType == LogType.Exception;
+				if (flag)
 				{
 					return true;
 				}
-				if (this.filterLogType != LogType.Exception)
+				bool flag2 = this.filterLogType != LogType.Exception;
+				if (flag2)
 				{
 					return logType <= this.filterLogType;
 				}
@@ -40,15 +43,17 @@ namespace UnityEngine
 
 		private static string GetString(object message)
 		{
+			bool flag = message == null;
 			string text;
-			if (message == null)
+			if (flag)
 			{
 				text = "Null";
 			}
 			else
 			{
 				IFormattable formattable = message as IFormattable;
-				if (formattable != null)
+				bool flag2 = formattable != null;
+				if (flag2)
 				{
 					text = formattable.ToString(null, CultureInfo.InvariantCulture);
 				}
@@ -62,7 +67,8 @@ namespace UnityEngine
 
 		public void Log(LogType logType, object message)
 		{
-			if (this.IsLogTypeAllowed(logType))
+			bool flag = this.IsLogTypeAllowed(logType);
+			if (flag)
 			{
 				this.logHandler.LogFormat(logType, null, "{0}", new object[] { Logger.GetString(message) });
 			}
@@ -70,7 +76,8 @@ namespace UnityEngine
 
 		public void Log(LogType logType, object message, Object context)
 		{
-			if (this.IsLogTypeAllowed(logType))
+			bool flag = this.IsLogTypeAllowed(logType);
+			if (flag)
 			{
 				this.logHandler.LogFormat(logType, context, "{0}", new object[] { Logger.GetString(message) });
 			}
@@ -78,7 +85,8 @@ namespace UnityEngine
 
 		public void Log(LogType logType, string tag, object message)
 		{
-			if (this.IsLogTypeAllowed(logType))
+			bool flag = this.IsLogTypeAllowed(logType);
+			if (flag)
 			{
 				this.logHandler.LogFormat(logType, null, "{0}: {1}", new object[]
 				{
@@ -90,7 +98,8 @@ namespace UnityEngine
 
 		public void Log(LogType logType, string tag, object message, Object context)
 		{
-			if (this.IsLogTypeAllowed(logType))
+			bool flag = this.IsLogTypeAllowed(logType);
+			if (flag)
 			{
 				this.logHandler.LogFormat(logType, context, "{0}: {1}", new object[]
 				{
@@ -102,7 +111,8 @@ namespace UnityEngine
 
 		public void Log(object message)
 		{
-			if (this.IsLogTypeAllowed(LogType.Log))
+			bool flag = this.IsLogTypeAllowed(LogType.Log);
+			if (flag)
 			{
 				this.logHandler.LogFormat(LogType.Log, null, "{0}", new object[] { Logger.GetString(message) });
 			}
@@ -110,7 +120,8 @@ namespace UnityEngine
 
 		public void Log(string tag, object message)
 		{
-			if (this.IsLogTypeAllowed(LogType.Log))
+			bool flag = this.IsLogTypeAllowed(LogType.Log);
+			if (flag)
 			{
 				this.logHandler.LogFormat(LogType.Log, null, "{0}: {1}", new object[]
 				{
@@ -122,7 +133,8 @@ namespace UnityEngine
 
 		public void Log(string tag, object message, Object context)
 		{
-			if (this.IsLogTypeAllowed(LogType.Log))
+			bool flag = this.IsLogTypeAllowed(LogType.Log);
+			if (flag)
 			{
 				this.logHandler.LogFormat(LogType.Log, context, "{0}: {1}", new object[]
 				{
@@ -134,7 +146,8 @@ namespace UnityEngine
 
 		public void LogWarning(string tag, object message)
 		{
-			if (this.IsLogTypeAllowed(LogType.Warning))
+			bool flag = this.IsLogTypeAllowed(LogType.Warning);
+			if (flag)
 			{
 				this.logHandler.LogFormat(LogType.Warning, null, "{0}: {1}", new object[]
 				{
@@ -146,7 +159,8 @@ namespace UnityEngine
 
 		public void LogWarning(string tag, object message, Object context)
 		{
-			if (this.IsLogTypeAllowed(LogType.Warning))
+			bool flag = this.IsLogTypeAllowed(LogType.Warning);
+			if (flag)
 			{
 				this.logHandler.LogFormat(LogType.Warning, context, "{0}: {1}", new object[]
 				{
@@ -158,7 +172,8 @@ namespace UnityEngine
 
 		public void LogError(string tag, object message)
 		{
-			if (this.IsLogTypeAllowed(LogType.Error))
+			bool flag = this.IsLogTypeAllowed(LogType.Error);
+			if (flag)
 			{
 				this.logHandler.LogFormat(LogType.Error, null, "{0}: {1}", new object[]
 				{
@@ -170,7 +185,8 @@ namespace UnityEngine
 
 		public void LogError(string tag, object message, Object context)
 		{
-			if (this.IsLogTypeAllowed(LogType.Error))
+			bool flag = this.IsLogTypeAllowed(LogType.Error);
+			if (flag)
 			{
 				this.logHandler.LogFormat(LogType.Error, context, "{0}: {1}", new object[]
 				{
@@ -182,7 +198,8 @@ namespace UnityEngine
 
 		public void LogFormat(LogType logType, string format, params object[] args)
 		{
-			if (this.IsLogTypeAllowed(logType))
+			bool flag = this.IsLogTypeAllowed(logType);
+			if (flag)
 			{
 				this.logHandler.LogFormat(logType, null, format, args);
 			}
@@ -190,7 +207,8 @@ namespace UnityEngine
 
 		public void LogException(Exception exception)
 		{
-			if (this.logEnabled)
+			bool logEnabled = this.logEnabled;
+			if (logEnabled)
 			{
 				this.logHandler.LogException(exception, null);
 			}
@@ -198,7 +216,8 @@ namespace UnityEngine
 
 		public void LogFormat(LogType logType, Object context, string format, params object[] args)
 		{
-			if (this.IsLogTypeAllowed(logType))
+			bool flag = this.IsLogTypeAllowed(logType);
+			if (flag)
 			{
 				this.logHandler.LogFormat(logType, context, format, args);
 			}
@@ -206,7 +225,8 @@ namespace UnityEngine
 
 		public void LogException(Exception exception, Object context)
 		{
-			if (this.logEnabled)
+			bool logEnabled = this.logEnabled;
+			if (logEnabled)
 			{
 				this.logHandler.LogException(exception, context);
 			}

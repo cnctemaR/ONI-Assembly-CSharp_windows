@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
 using ProcGen;
 using ProcGenGame;
 using STRINGS;
@@ -22,14 +24,10 @@ public class LoadScreen : KModalScreen
 		global::Debug.Assert(LoadScreen.Instance == null);
 		LoadScreen.Instance = this;
 		base.OnPrefabInit();
-		this.savenameRowPool = new UIPool<HierarchyReferences>(this.saveButtonPrefab);
+		this.colonyListPool = new UIPool<HierarchyReferences>(this.saveButtonPrefab);
 		if (SpeedControlScreen.Instance != null)
 		{
 			SpeedControlScreen.Instance.Pause(false);
-		}
-		if (this.onClick == null)
-		{
-			this.onClick = new Action<string, string>(this.SetSelectedGame);
 		}
 		if (this.closeButton != null)
 		{
@@ -38,52 +36,122 @@ public class LoadScreen : KModalScreen
 				this.Deactivate();
 			};
 		}
-		if (this.loadButton != null)
+		if (this.colonyCloudButton != null)
 		{
-			this.loadButton.onClick += this.Load;
+			this.colonyCloudButton.onClick += delegate
+			{
+				this.ConvertAllToCloud();
+			};
 		}
-		if (this.deleteButton != null)
+		if (this.colonyLocalButton != null)
 		{
-			this.deleteButton.onClick += this.Delete;
-			this.deleteButton.isInteractable = false;
+			this.colonyLocalButton.onClick += delegate
+			{
+				this.ConvertAllToLocal();
+			};
 		}
+		if (this.colonyInfoButton != null)
+		{
+			this.colonyInfoButton.onClick += delegate
+			{
+				this.ShowSaveInfo();
+			};
+		}
+	}
+
+	private bool IsInMenu()
+	{
+		return App.GetCurrentSceneName() == "frontend";
+	}
+
+	private bool CloudSavesVisible()
+	{
+		return SaveLoader.GetCloudSavesAvailable() && this.IsInMenu();
 	}
 
 	protected override void OnActivate()
 	{
 		base.OnActivate();
-		this.RefreshFiles();
+		WorldGen.LoadSettings();
+		this.SetCloudSaveInfoActive(this.CloudSavesVisible());
+		this.RefreshColonyList();
+		this.ShowColonyList();
+		bool cloudSavesAvailable = SaveLoader.GetCloudSavesAvailable();
+		this.cloudTutorialBouncer.gameObject.SetActive(cloudSavesAvailable);
+		if (cloudSavesAvailable && !this.cloudTutorialBouncer.IsBouncing())
+		{
+			int @int = KPlayerPrefs.GetInt("LoadScreenCloudTutorialTimes", 0);
+			if (@int < 5)
+			{
+				this.cloudTutorialBouncer.Bounce();
+				KPlayerPrefs.SetInt("LoadScreenCloudTutorialTimes", @int + 1);
+				KPlayerPrefs.GetInt("LoadScreenCloudTutorialTimes", 0);
+				return;
+			}
+			this.cloudTutorialBouncer.gameObject.SetActive(false);
+		}
 	}
 
-	private void GetFilesList()
+	private Dictionary<string, List<LoadScreen.SaveGameFileDetails>> GetColonies(List<string> files)
 	{
-		this.saveFiles = new Dictionary<string, List<LoadScreen.SaveGameFileDetails>>();
-		List<string> allFiles = SaveLoader.GetAllFiles();
-		if (allFiles.Count > 0)
+		Dictionary<string, List<LoadScreen.SaveGameFileDetails>> dictionary = new Dictionary<string, List<LoadScreen.SaveGameFileDetails>>();
+		if (files.Count <= 0)
 		{
-			for (int i = 0; i < allFiles.Count; i++)
+			return dictionary;
+		}
+		for (int i = 0; i < files.Count; i++)
+		{
+			if (this.IsFileValid(files[i]))
 			{
-				if (this.IsFileValid(allFiles[i]))
+				global::Tuple<SaveGame.Header, SaveGame.GameInfo> fileInfo = SaveGame.GetFileInfo(files[i]);
+				SaveGame.Header first = fileInfo.first;
+				SaveGame.GameInfo second = fileInfo.second;
+				global::System.DateTime lastWriteTime = File.GetLastWriteTime(files[i]);
+				long num = 0L;
+				try
 				{
-					global::Tuple<SaveGame.Header, SaveGame.GameInfo> fileInfo = this.GetFileInfo(allFiles[i]);
-					SaveGame.Header first = fileInfo.first;
-					SaveGame.GameInfo second = fileInfo.second;
-					global::System.DateTime lastWriteTime = File.GetLastWriteTime(allFiles[i]);
-					LoadScreen.SaveGameFileDetails saveGameFileDetails = default(LoadScreen.SaveGameFileDetails);
-					saveGameFileDetails.BaseName = second.baseName;
-					saveGameFileDetails.FileName = allFiles[i];
-					saveGameFileDetails.FileDate = lastWriteTime;
-					saveGameFileDetails.FileHeader = first;
-					saveGameFileDetails.FileInfo = second;
-					saveGameFileDetails.UniqueID = ((second.colonyGuid != Guid.Empty) ? second.colonyGuid.ToString() : (second.baseName + "/" + second.worldID));
-					if (!this.saveFiles.ContainsKey(saveGameFileDetails.UniqueID))
-					{
-						this.saveFiles.Add(saveGameFileDetails.UniqueID, new List<LoadScreen.SaveGameFileDetails>());
-					}
-					this.saveFiles[saveGameFileDetails.UniqueID].Add(saveGameFileDetails);
+					num = new FileInfo(files[i]).Length;
 				}
+				catch (Exception ex)
+				{
+					global::Debug.LogWarning("Failed to get size for file: " + files[i] + "\n" + ex.ToString());
+				}
+				LoadScreen.SaveGameFileDetails saveGameFileDetails = new LoadScreen.SaveGameFileDetails
+				{
+					BaseName = second.baseName,
+					FileName = files[i],
+					FileDate = lastWriteTime,
+					FileHeader = first,
+					FileInfo = second,
+					Size = num,
+					UniqueID = SaveGame.GetSaveUniqueID(second)
+				};
+				if (!dictionary.ContainsKey(saveGameFileDetails.UniqueID))
+				{
+					dictionary.Add(saveGameFileDetails.UniqueID, new List<LoadScreen.SaveGameFileDetails>());
+				}
+				dictionary[saveGameFileDetails.UniqueID].Add(saveGameFileDetails);
 			}
 		}
+		return dictionary;
+	}
+
+	private Dictionary<string, List<LoadScreen.SaveGameFileDetails>> GetColonies()
+	{
+		List<string> allFiles = SaveLoader.GetAllFiles(SaveLoader.SaveType.both);
+		return this.GetColonies(allFiles);
+	}
+
+	private Dictionary<string, List<LoadScreen.SaveGameFileDetails>> GetLocalColonies()
+	{
+		List<string> allFiles = SaveLoader.GetAllFiles(SaveLoader.SaveType.local);
+		return this.GetColonies(allFiles);
+	}
+
+	private Dictionary<string, List<LoadScreen.SaveGameFileDetails>> GetCloudColonies()
+	{
+		List<string> allFiles = SaveLoader.GetAllFiles(SaveLoader.SaveType.cloud);
+		return this.GetColonies(allFiles);
 	}
 
 	private bool IsFileValid(string filename)
@@ -101,57 +169,601 @@ public class LoadScreen : KModalScreen
 		return flag;
 	}
 
-	private global::Tuple<SaveGame.Header, SaveGame.GameInfo> GetFileInfo(string filename)
+	private void CheckCloudLocalOverlap()
 	{
+		if (!SaveLoader.GetCloudSavesAvailable())
+		{
+			return;
+		}
+		string cloudSavePrefix = SaveLoader.GetCloudSavePrefix();
+		if (cloudSavePrefix == null)
+		{
+			return;
+		}
+		foreach (KeyValuePair<string, List<LoadScreen.SaveGameFileDetails>> keyValuePair in this.GetColonies())
+		{
+			bool flag = false;
+			List<LoadScreen.SaveGameFileDetails> list = new List<LoadScreen.SaveGameFileDetails>();
+			foreach (LoadScreen.SaveGameFileDetails saveGameFileDetails in keyValuePair.Value)
+			{
+				if (SaveLoader.IsSaveCloud(saveGameFileDetails.FileName))
+				{
+					flag = true;
+				}
+				else
+				{
+					list.Add(saveGameFileDetails);
+				}
+			}
+			if (flag && list.Count != 0)
+			{
+				string baseName = list[0].BaseName;
+				string text = global::System.IO.Path.Combine(SaveLoader.GetSavePrefix(), baseName);
+				string text2 = global::System.IO.Path.Combine(cloudSavePrefix, baseName);
+				if (!Directory.Exists(text2))
+				{
+					Directory.CreateDirectory(text2);
+				}
+				global::Debug.Log("Saves / Found overlapped cloud/local saves for colony '" + baseName + "', moving to cloud...");
+				foreach (LoadScreen.SaveGameFileDetails saveGameFileDetails2 in list)
+				{
+					string fileName = saveGameFileDetails2.FileName;
+					string text3 = global::System.IO.Path.ChangeExtension(fileName, "png");
+					string text4 = text2;
+					if (SaveLoader.IsSaveAuto(fileName))
+					{
+						string text5 = global::System.IO.Path.Combine(text4, "auto_save");
+						if (!Directory.Exists(text5))
+						{
+							Directory.CreateDirectory(text5);
+						}
+						text4 = text5;
+					}
+					string text6 = global::System.IO.Path.Combine(text4, global::System.IO.Path.GetFileName(fileName));
+					global::Tuple<bool, bool> tuple;
+					if (this.FileMatch(fileName, text6, out tuple))
+					{
+						global::Debug.Log("Saves / file match found for `" + fileName + "`...");
+						this.MigrateFile(fileName, text6, false);
+						string text7 = global::System.IO.Path.ChangeExtension(text6, "png");
+						this.MigrateFile(text3, text7, true);
+					}
+					else
+					{
+						global::Debug.Log("Saves / no file match found for `" + fileName + "`... move as copy");
+						string nextUsableSavePath = SaveLoader.GetNextUsableSavePath(text6);
+						this.MigrateFile(fileName, nextUsableSavePath, false);
+						string text8 = global::System.IO.Path.ChangeExtension(nextUsableSavePath, "png");
+						this.MigrateFile(text3, text8, true);
+					}
+				}
+				this.RemoveEmptyFolder(text);
+			}
+		}
+	}
+
+	private void DeleteFileAndEmptyFolder(string file)
+	{
+		if (File.Exists(file))
+		{
+			File.Delete(file);
+		}
+		this.RemoveEmptyFolder(global::System.IO.Path.GetDirectoryName(file));
+	}
+
+	private void RemoveEmptyFolder(string path)
+	{
+		if (!Directory.Exists(path))
+		{
+			return;
+		}
+		if (!File.GetAttributes(path).HasFlag(FileAttributes.Directory))
+		{
+			return;
+		}
+		if (Directory.EnumerateFileSystemEntries(path).Any<string>())
+		{
+			return;
+		}
 		try
 		{
-			SaveGame.Header header;
-			SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
-			if (gameInfo.saveMajorVersion >= 7)
-			{
-				return new global::Tuple<SaveGame.Header, SaveGame.GameInfo>(header, gameInfo);
-			}
+			Directory.Delete(path);
 		}
 		catch (Exception ex)
 		{
+			global::Debug.LogWarning("Failed to remove empty directory `" + path + "`...");
 			global::Debug.LogWarning(ex);
-			this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.CORRUPTEDSAVE, filename);
 		}
-		return null;
 	}
 
-	private void RefreshFiles()
+	private void RefreshColonyList()
 	{
-		if (this.savenameRowPool != null)
+		if (this.colonyListPool != null)
 		{
-			this.savenameRowPool.ClearAll();
+			this.colonyListPool.ClearAll();
 		}
-		if (this.fileButtonMap != null)
+		this.CheckCloudLocalOverlap();
+		Dictionary<string, List<LoadScreen.SaveGameFileDetails>> colonies = this.GetColonies();
+		if (colonies.Count > 0)
 		{
-			this.fileButtonMap.Clear();
-		}
-		this.GetFilesList();
-		if (this.saveFiles.Count > 0)
-		{
-			foreach (KeyValuePair<string, List<LoadScreen.SaveGameFileDetails>> keyValuePair in this.saveFiles)
+			foreach (KeyValuePair<string, List<LoadScreen.SaveGameFileDetails>> keyValuePair in colonies)
 			{
-				this.AddExistingSaveFile(keyValuePair.Key, keyValuePair.Value);
+				this.AddColonyToList(keyValuePair.Value);
 			}
 		}
-		this.InfoText.text = "";
-		this.CyclesSurvivedValue.text = "-";
-		this.DuplicantsAliveValue.text = "-";
-		this.WorldValue.text = "-";
-		this.deleteButton.isInteractable = false;
-		this.loadButton.isInteractable = false;
 	}
 
-	protected override void OnShow(bool show)
+	private string GetFileHash(string path)
 	{
-		base.OnShow(show);
-		if (show)
+		string text;
+		using (MD5 md = MD5.Create())
 		{
-			this.RefreshFiles();
+			using (FileStream fileStream = File.OpenRead(path))
+			{
+				text = BitConverter.ToString(md.ComputeHash(fileStream)).Replace("-", "").ToLowerInvariant();
+			}
+		}
+		return text;
+	}
+
+	private bool FileMatch(string file, string other_file, out global::Tuple<bool, bool> matches)
+	{
+		matches = new global::Tuple<bool, bool>(false, false);
+		if (!File.Exists(file))
+		{
+			return false;
+		}
+		if (!File.Exists(other_file))
+		{
+			return false;
+		}
+		bool flag = false;
+		bool flag2 = false;
+		try
+		{
+			string fileHash = this.GetFileHash(file);
+			string fileHash2 = this.GetFileHash(other_file);
+			FileInfo fileInfo = new FileInfo(file);
+			FileInfo fileInfo2 = new FileInfo(other_file);
+			flag = fileInfo.Length == fileInfo2.Length;
+			flag2 = fileHash == fileHash2;
+		}
+		catch (Exception ex)
+		{
+			global::Debug.LogWarning(string.Concat(new string[] { "FileMatch / file match failed for `", file, "` vs `", other_file, "`!" }));
+			global::Debug.LogWarning(ex);
+			return false;
+		}
+		matches.first = flag;
+		matches.second = flag2;
+		return flag && flag2;
+	}
+
+	private bool MigrateFile(string source, string dest, bool ignoreMissing = false)
+	{
+		global::Debug.Log(string.Concat(new string[] { "Migration / moving `", source, "` to `", dest, "` ..." }));
+		if (dest == source)
+		{
+			global::Debug.Log(string.Concat(new string[] { "Migration / ignored `", source, "` to `", dest, "` ... same location" }));
+			return true;
+		}
+		global::Tuple<bool, bool> tuple;
+		if (this.FileMatch(source, dest, out tuple))
+		{
+			global::Debug.Log("Migration / dest and source are identical size + hash ... removing original");
+			try
+			{
+				this.DeleteFileAndEmptyFolder(source);
+			}
+			catch (Exception ex)
+			{
+				global::Debug.LogWarning("Migration / removing original failed for `" + source + "`!");
+				global::Debug.LogWarning(ex);
+				throw ex;
+			}
+			return true;
+		}
+		try
+		{
+			global::Debug.Log("Migration / copying...");
+			File.Copy(source, dest, false);
+		}
+		catch (FileNotFoundException obj) when (ignoreMissing)
+		{
+			global::Debug.Log("Migration / File `" + source + "` wasn't found but we're ignoring that.");
+			return true;
+		}
+		catch (Exception ex2)
+		{
+			global::Debug.LogWarning("Migration / copy failed for `" + source + "`! Leaving it alone");
+			global::Debug.LogWarning(ex2);
+			global::Debug.LogWarning("failed to convert colony: " + ex2.ToString());
+			throw ex2;
+		}
+		global::Debug.Log("Migration / copy ok ...");
+		global::Tuple<bool, bool> tuple2;
+		if (!this.FileMatch(source, dest, out tuple2))
+		{
+			global::Debug.LogWarning("Migration / failed to match dest file for `" + source + "`!");
+			global::Debug.LogWarning(string.Format("Migration / did hash match? {0} did size match? {1}", tuple2.second, tuple2.first));
+			throw new Exception("Hash/Size didn't match for source and destination");
+		}
+		global::Debug.Log("Migration / hash validation ok ... removing original");
+		try
+		{
+			this.DeleteFileAndEmptyFolder(source);
+		}
+		catch (Exception ex3)
+		{
+			global::Debug.LogWarning("Migration / removing original failed for `" + source + "`!");
+			global::Debug.LogWarning(ex3);
+			throw ex3;
+		}
+		global::Debug.Log("Migration / moved ok for `" + source + "`!");
+		return true;
+	}
+
+	private bool MigrateSave(string dest_root, string file, bool is_auto_save, out string saveError)
+	{
+		saveError = null;
+		global::Tuple<SaveGame.Header, SaveGame.GameInfo> fileInfo = SaveGame.GetFileInfo(file);
+		SaveGame.Header first = fileInfo.first;
+		string baseName = fileInfo.second.baseName;
+		string fileName = global::System.IO.Path.GetFileName(file);
+		string text = global::System.IO.Path.Combine(dest_root, baseName);
+		if (!Directory.Exists(text))
+		{
+			Directory.CreateDirectory(text);
+		}
+		string text2 = text;
+		if (is_auto_save)
+		{
+			string text3 = global::System.IO.Path.Combine(text, "auto_save");
+			if (!Directory.Exists(text3))
+			{
+				Directory.CreateDirectory(text3);
+			}
+			text2 = text3;
+		}
+		string text4 = global::System.IO.Path.Combine(text2, fileName);
+		string text5 = global::System.IO.Path.ChangeExtension(file, "png");
+		string text6 = global::System.IO.Path.ChangeExtension(text4, "png");
+		try
+		{
+			this.MigrateFile(file, text4, false);
+			this.MigrateFile(text5, text6, true);
+		}
+		catch (Exception ex)
+		{
+			saveError = ex.Message;
+			return false;
+		}
+		return true;
+	}
+
+	private ValueTuple<int, int, ulong> GetSavesSizeAndCounts(List<LoadScreen.SaveGameFileDetails> list)
+	{
+		ulong num = 0UL;
+		int num2 = 0;
+		int num3 = 0;
+		for (int i = 0; i < list.Count; i++)
+		{
+			LoadScreen.SaveGameFileDetails saveGameFileDetails = list[i];
+			num += (ulong)saveGameFileDetails.Size;
+			if (saveGameFileDetails.FileInfo.isAutoSave)
+			{
+				num3++;
+			}
+			else
+			{
+				num2++;
+			}
+		}
+		return new ValueTuple<int, int, ulong>(num2, num3, num);
+	}
+
+	private int CountValidSaves(string path, SearchOption searchType = SearchOption.AllDirectories)
+	{
+		int num = 0;
+		List<string> saveFiles = SaveLoader.GetSaveFiles(path, searchType);
+		for (int i = 0; i < saveFiles.Count; i++)
+		{
+			if (this.IsFileValid(saveFiles[i]))
+			{
+				num++;
+			}
+		}
+		return num;
+	}
+
+	private ValueTuple<int, int> GetMigrationSaveCounts()
+	{
+		int num = this.CountValidSaves(SaveLoader.GetSavePrefixAndCreateFolder(), SearchOption.TopDirectoryOnly);
+		int num2 = this.CountValidSaves(SaveLoader.GetAutoSavePrefix(), SearchOption.AllDirectories);
+		return new ValueTuple<int, int>(num, num2);
+	}
+
+	private ValueTuple<int, int> MigrateSaves(out string errorColony, out string errorMessage)
+	{
+		errorColony = null;
+		errorMessage = null;
+		int num = 0;
+		string savePrefixAndCreateFolder = SaveLoader.GetSavePrefixAndCreateFolder();
+		List<string> saveFiles = SaveLoader.GetSaveFiles(savePrefixAndCreateFolder, SearchOption.TopDirectoryOnly);
+		for (int i = 0; i < saveFiles.Count; i++)
+		{
+			string text = saveFiles[i];
+			if (this.IsFileValid(text))
+			{
+				string text2;
+				if (this.MigrateSave(savePrefixAndCreateFolder, text, false, out text2))
+				{
+					num++;
+				}
+				else if (errorColony == null)
+				{
+					errorColony = text;
+					errorMessage = text2;
+				}
+			}
+		}
+		int num2 = 0;
+		List<string> saveFiles2 = SaveLoader.GetSaveFiles(SaveLoader.GetAutoSavePrefix(), SearchOption.AllDirectories);
+		for (int j = 0; j < saveFiles2.Count; j++)
+		{
+			string text3 = saveFiles2[j];
+			if (this.IsFileValid(text3))
+			{
+				string text4;
+				if (this.MigrateSave(savePrefixAndCreateFolder, text3, true, out text4))
+				{
+					num2++;
+				}
+				else if (errorColony == null)
+				{
+					errorColony = text3;
+					errorMessage = text4;
+				}
+			}
+		}
+		return new ValueTuple<int, int>(num, num2);
+	}
+
+	public void ShowMigrationIfNecessary(bool fromMainMenu)
+	{
+		ValueTuple<int, int> migrationSaveCounts = this.GetMigrationSaveCounts();
+		int saveCount = migrationSaveCounts.Item1;
+		int autoCount = migrationSaveCounts.Item2;
+		if (saveCount == 0 && autoCount == 0)
+		{
+			if (fromMainMenu)
+			{
+				this.Deactivate();
+			}
+			return;
+		}
+		base.Activate();
+		this.migrationPanelRefs.gameObject.SetActive(true);
+		KButton migrateButton = this.migrationPanelRefs.GetReference<RectTransform>("MigrateSaves").GetComponent<KButton>();
+		KButton continueButton = this.migrationPanelRefs.GetReference<RectTransform>("Continue").GetComponent<KButton>();
+		KButton moreInfoButton = this.migrationPanelRefs.GetReference<RectTransform>("MoreInfo").GetComponent<KButton>();
+		KButton component = this.migrationPanelRefs.GetReference<RectTransform>("OpenSaves").GetComponent<KButton>();
+		LocText statsText = this.migrationPanelRefs.GetReference<RectTransform>("CountText").GetComponent<LocText>();
+		LocText infoText = this.migrationPanelRefs.GetReference<RectTransform>("InfoText").GetComponent<LocText>();
+		migrateButton.gameObject.SetActive(true);
+		continueButton.gameObject.SetActive(false);
+		moreInfoButton.gameObject.SetActive(false);
+		statsText.text = string.Format(UI.FRONTEND.LOADSCREEN.MIGRATE_COUNT, saveCount, autoCount);
+		component.ClearOnClick();
+		component.onClick += delegate
+		{
+			Application.OpenURL(SaveLoader.GetSavePrefixAndCreateFolder());
+		};
+		migrateButton.ClearOnClick();
+		migrateButton.onClick += delegate
+		{
+			migrateButton.gameObject.SetActive(false);
+			string text;
+			string text2;
+			ValueTuple<int, int> valueTuple = this.MigrateSaves(out text, out text2);
+			int item = valueTuple.Item1;
+			int item2 = valueTuple.Item2;
+			bool flag = text == null;
+			string text3 = (flag ? UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT.text : UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES.Replace("{ErrorColony}", text).Replace("{ErrorMessage}", text2));
+			statsText.text = string.Format(text3, new object[] { item, saveCount, item2, autoCount });
+			infoText.gameObject.SetActive(false);
+			if (flag)
+			{
+				continueButton.gameObject.SetActive(true);
+			}
+			else
+			{
+				moreInfoButton.gameObject.SetActive(true);
+			}
+			MainMenu.Instance.RefreshResumeButton();
+		};
+		continueButton.ClearOnClick();
+		continueButton.onClick += delegate
+		{
+			this.migrationPanelRefs.gameObject.SetActive(false);
+			this.cloudTutorialBouncer.Bounce();
+		};
+		moreInfoButton.ClearOnClick();
+		Action<InfoDialogScreen> <>9__5;
+		moreInfoButton.onClick += delegate
+		{
+			InfoDialogScreen infoDialogScreen = global::Util.KInstantiateUI<InfoDialogScreen>(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, this.gameObject, false).SetHeader(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_TITLE).AddPlainText(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_PRE)
+				.AddLineItem(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_ITEM1, "")
+				.AddLineItem(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_ITEM2, "")
+				.AddLineItem(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_ITEM3, "")
+				.AddPlainText(UI.FRONTEND.LOADSCREEN.MIGRATE_RESULT_FAILURES_MORE_INFO_POST)
+				.AddOption(UI.FRONTEND.LOADSCREEN.MIGRATE_FAILURES_FORUM_BUTTON, delegate(InfoDialogScreen d)
+				{
+					Application.OpenURL("https://forums.kleientertainment.com/klei-bug-tracker/oni/");
+				}, false);
+			string text4 = UI.CONFIRMDIALOG.OK;
+			Action<InfoDialogScreen> action;
+			if ((action = <>9__5) == null)
+			{
+				action = (<>9__5 = delegate(InfoDialogScreen d)
+				{
+					this.migrationPanelRefs.gameObject.SetActive(false);
+					this.cloudTutorialBouncer.Bounce();
+					d.Deactivate();
+				});
+			}
+			infoDialogScreen.AddOption(text4, action, true).Activate();
+		};
+	}
+
+	private void SetCloudSaveInfoActive(bool active)
+	{
+		this.colonyCloudButton.gameObject.SetActive(active);
+		this.colonyLocalButton.gameObject.SetActive(active);
+	}
+
+	private bool ConvertToLocalOrCloud(string fromRoot, string destRoot, string colonyName)
+	{
+		string text = global::System.IO.Path.Combine(fromRoot, colonyName);
+		string text2 = global::System.IO.Path.Combine(destRoot, colonyName);
+		global::Debug.Log(string.Concat(new string[] { "Convert / Colony '", colonyName, "' from `", text, "` => `", text2, "`" }));
+		try
+		{
+			Directory.Move(text, text2);
+			return true;
+		}
+		catch (Exception ex)
+		{
+			global::Debug.LogWarning("failed to convert colony: " + ex.ToString());
+			string text3 = UI.FRONTEND.LOADSCREEN.CONVERT_ERROR.Replace("{Colony}", colonyName).Replace("{Error}", ex.Message);
+			this.ShowConvertError(text3);
+		}
+		return false;
+	}
+
+	private bool ConvertColonyToCloud(string colonyName)
+	{
+		string savePrefix = SaveLoader.GetSavePrefix();
+		string cloudSavePrefix = SaveLoader.GetCloudSavePrefix();
+		if (cloudSavePrefix == null)
+		{
+			global::Debug.LogWarning("Failed to move colony to cloud, no cloud save prefix found (usually a userID is missing, not logged in?)");
+			return false;
+		}
+		return this.ConvertToLocalOrCloud(savePrefix, cloudSavePrefix, colonyName);
+	}
+
+	private bool ConvertColonyToLocal(string colonyName)
+	{
+		string savePrefix = SaveLoader.GetSavePrefix();
+		string cloudSavePrefix = SaveLoader.GetCloudSavePrefix();
+		if (cloudSavePrefix == null)
+		{
+			global::Debug.LogWarning("Failed to move colony from cloud, no cloud save prefix found (usually a userID is missing, not logged in?)");
+			return false;
+		}
+		return this.ConvertToLocalOrCloud(cloudSavePrefix, savePrefix, colonyName);
+	}
+
+	private void DoConvertAllToLocal()
+	{
+		Dictionary<string, List<LoadScreen.SaveGameFileDetails>> cloudColonies = this.GetCloudColonies();
+		if (cloudColonies.Count == 0)
+		{
+			return;
+		}
+		bool flag = true;
+		foreach (KeyValuePair<string, List<LoadScreen.SaveGameFileDetails>> keyValuePair in cloudColonies)
+		{
+			flag &= this.ConvertColonyToLocal(keyValuePair.Value[0].BaseName);
+		}
+		if (flag)
+		{
+			string text = UI.PLATFORMS.STEAM;
+			this.ShowSimpleDialog(UI.FRONTEND.LOADSCREEN.CONVERT_TO_LOCAL, UI.FRONTEND.LOADSCREEN.CONVERT_ALL_TO_LOCAL_SUCCESS.Replace("{Client}", text));
+		}
+		this.RefreshColonyList();
+		MainMenu.Instance.RefreshResumeButton();
+		SaveLoader.SetCloudSavesDefault(false);
+	}
+
+	private void DoConvertAllToCloud()
+	{
+		Dictionary<string, List<LoadScreen.SaveGameFileDetails>> localColonies = this.GetLocalColonies();
+		if (localColonies.Count == 0)
+		{
+			return;
+		}
+		List<string> list = new List<string>();
+		foreach (KeyValuePair<string, List<LoadScreen.SaveGameFileDetails>> keyValuePair in localColonies)
+		{
+			string baseName = keyValuePair.Value[0].BaseName;
+			if (!list.Contains(baseName))
+			{
+				list.Add(baseName);
+			}
+		}
+		bool flag = true;
+		foreach (string text in list)
+		{
+			flag &= this.ConvertColonyToCloud(text);
+		}
+		if (flag)
+		{
+			string text2 = UI.PLATFORMS.STEAM;
+			this.ShowSimpleDialog(UI.FRONTEND.LOADSCREEN.CONVERT_TO_CLOUD, UI.FRONTEND.LOADSCREEN.CONVERT_ALL_TO_CLOUD_SUCCESS.Replace("{Client}", text2));
+		}
+		this.RefreshColonyList();
+		MainMenu.Instance.RefreshResumeButton();
+		SaveLoader.SetCloudSavesDefault(true);
+	}
+
+	private void ConvertAllToCloud()
+	{
+		string text = string.Format("{0}\n{1}\n", UI.FRONTEND.LOADSCREEN.CONVERT_TO_CLOUD_DETAILS, UI.FRONTEND.LOADSCREEN.CONVERT_ALL_WARNING);
+		KPlayerPrefs.SetInt("LoadScreenCloudTutorialTimes", 5);
+		this.ConfirmCloudSaveMigrations(text, UI.FRONTEND.LOADSCREEN.CONVERT_TO_CLOUD, UI.FRONTEND.LOADSCREEN.CONVERT_ALL_COLONIES, UI.FRONTEND.LOADSCREEN.OPEN_SAVE_FOLDER, delegate
+		{
+			this.DoConvertAllToCloud();
+		}, delegate
+		{
+			Application.OpenURL(SaveLoader.GetSavePrefix());
+		}, this.localToCloudSprite);
+	}
+
+	private void ConvertAllToLocal()
+	{
+		string text = string.Format("{0}\n{1}\n", UI.FRONTEND.LOADSCREEN.CONVERT_TO_LOCAL_DETAILS, UI.FRONTEND.LOADSCREEN.CONVERT_ALL_WARNING);
+		KPlayerPrefs.SetInt("LoadScreenCloudTutorialTimes", 5);
+		this.ConfirmCloudSaveMigrations(text, UI.FRONTEND.LOADSCREEN.CONVERT_TO_LOCAL, UI.FRONTEND.LOADSCREEN.CONVERT_ALL_COLONIES, UI.FRONTEND.LOADSCREEN.OPEN_SAVE_FOLDER, delegate
+		{
+			this.DoConvertAllToLocal();
+		}, delegate
+		{
+			Application.OpenURL(SaveLoader.GetCloudSavePrefix());
+		}, this.cloudToLocalSprite);
+	}
+
+	private void ShowSaveInfo()
+	{
+		if (this.infoScreen == null)
+		{
+			this.infoScreen = global::Util.KInstantiateUI<InfoDialogScreen>(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, base.gameObject, false).SetHeader(UI.FRONTEND.LOADSCREEN.SAVE_INFO_DIALOG_TITLE).AddSprite(this.infoSprite)
+				.AddPlainText(UI.FRONTEND.LOADSCREEN.SAVE_INFO_DIALOG_TEXT)
+				.AddOption(UI.FRONTEND.LOADSCREEN.OPEN_SAVE_FOLDER, delegate(InfoDialogScreen d)
+				{
+					Application.OpenURL(SaveLoader.GetSavePrefix());
+				}, true)
+				.AddDefaultCancel();
+			string cloudRoot = SaveLoader.GetCloudSavePrefix();
+			if (cloudRoot != null && this.CloudSavesVisible())
+			{
+				this.infoScreen.AddOption(UI.FRONTEND.LOADSCREEN.OPEN_CLOUDSAVE_FOLDER, delegate(InfoDialogScreen d)
+				{
+					Application.OpenURL(cloudRoot);
+				}, true);
+			}
+			this.infoScreen.gameObject.SetActive(true);
 		}
 	}
 
@@ -161,124 +773,317 @@ public class LoadScreen : KModalScreen
 		{
 			SpeedControlScreen.Instance.Unpause(false);
 		}
-		this.selectedFileName = null;
+		this.selectedSave = null;
 		base.OnDeactivate();
 	}
 
-	private void SetHeaderButtonActive(KButton headerButton, bool activeState)
+	private void ShowColonyList()
 	{
-		ImageToggleState component = headerButton.GetComponent<ImageToggleState>();
-		if (component != null)
-		{
-			component.SetActiveState(activeState);
-		}
+		this.colonyListRoot.SetActive(true);
+		this.colonyViewRoot.SetActive(false);
+		this.currentColony = null;
+		this.selectedSave = null;
 	}
 
-	private void SetChildrenActive(HierarchyReferences hierarchy, bool state)
+	private bool CheckSave(LoadScreen.SaveGameFileDetails save, LocText display)
 	{
-		for (int i = 0; i < hierarchy.transform.childCount; i++)
+		if (LoadScreen.IsSaveFileFromUnsupportedFutureBuild(save.FileHeader, save.FileInfo))
 		{
-			GameObject gameObject = hierarchy.transform.GetChild(i).gameObject;
-			if (gameObject != null)
+			if (display != null)
 			{
-				gameObject.SetActive(state);
+				display.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, new object[]
+				{
+					save.FileName,
+					save.FileHeader.buildVersion,
+					save.FileInfo.saveMinorVersion,
+					442154U,
+					17
+				});
 			}
+			return false;
 		}
+		if (save.FileInfo.saveMajorVersion < 7)
+		{
+			if (display != null)
+			{
+				display.text = string.Format(UI.FRONTEND.LOADSCREEN.UNSUPPORTED_SAVE_VERSION, new object[]
+				{
+					save.FileName,
+					save.FileInfo.saveMajorVersion,
+					save.FileInfo.saveMinorVersion,
+					7,
+					17
+				});
+			}
+			return false;
+		}
+		return true;
 	}
 
-	private void AddExistingSaveFile(string saveID, List<LoadScreen.SaveGameFileDetails> fileDetailsList)
+	private void ShowColonySave(LoadScreen.SaveGameFileDetails save)
 	{
-		HierarchyReferences savenameRow = this.savenameRowPool.GetFreeElement(this.saveButtonRoot, true);
-		KButton headerButton = savenameRow.GetReference<RectTransform>("Button").GetComponent<KButton>();
-		headerButton.ClearOnClick();
-		LocText headerTitle = savenameRow.GetReference<RectTransform>("HeaderTitle").GetComponent<LocText>();
-		LocText component = savenameRow.GetReference<RectTransform>("SaveTitle").GetComponent<LocText>();
-		LocText headerDate = savenameRow.GetReference<RectTransform>("HeaderDate").GetComponent<LocText>();
-		RectTransform saveDetailsRow = savenameRow.GetReference<RectTransform>("SaveDetailsRow");
-		TMP_Text component2 = savenameRow.GetReference<RectTransform>("SaveDetailsBaseName").GetComponent<LocText>();
-		RectTransform savefileRowTemplate = savenameRow.GetReference<RectTransform>("SavefileRowTemplate");
-		this.defaultDateColor = headerDate.color;
-		fileDetailsList.Sort((LoadScreen.SaveGameFileDetails x, LoadScreen.SaveGameFileDetails y) => y.FileDate.CompareTo(x.FileDate));
-		string savename = fileDetailsList[0].FileName;
-		savename = global::System.IO.Path.GetFileNameWithoutExtension(savename);
-		headerTitle.text = fileDetailsList[0].BaseName;
-		component.text = savename;
-		headerDate.text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), fileDetailsList[0].FileDate);
-		component2.text = string.Format("{0}: {1}", UI.FRONTEND.LOADSCREEN.BASE_NAME, fileDetailsList[0].BaseName);
-		for (int i = 0; i < savenameRow.transform.childCount; i++)
+		HierarchyReferences component = this.colonyViewRoot.GetComponent<HierarchyReferences>();
+		component.GetReference<RectTransform>("Title").GetComponent<LocText>().text = save.BaseName;
+		component.GetReference<RectTransform>("Date").GetComponent<LocText>().text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), save.FileDate);
+		TMP_Text component2 = component.GetReference<RectTransform>("Info").GetComponent<LocText>();
+		string text = save.FileInfo.worldID;
+		if (text == null)
 		{
-			GameObject gameObject = savenameRow.transform.GetChild(i).gameObject;
-			if (gameObject != null && gameObject.name.Contains("Clone"))
+			text = "worlds/SandstoneDefault";
+		}
+		global::ProcGen.World worldData = SettingsCache.worlds.GetWorldData(text);
+		string text2 = ((worldData != null) ? Strings.Get(worldData.name) : " - ");
+		component2.text = string.Format("{0}: {1}\n{2}: {3}\n{4}: {5}", new object[]
+		{
+			UI.FRONTEND.LOADSCREEN.WORLD_NAME,
+			text2,
+			UI.FRONTEND.LOADSCREEN.CYCLES_SURVIVED,
+			save.FileInfo.numberOfCycles,
+			UI.FRONTEND.LOADSCREEN.DUPLICANTS_ALIVE,
+			save.FileInfo.numberOfDuplicants
+		});
+		TMP_Text component3 = component.GetReference<RectTransform>("FileSize").GetComponent<LocText>();
+		string formattedBytes = GameUtil.GetFormattedBytes((ulong)save.Size);
+		component3.text = string.Format(UI.FRONTEND.LOADSCREEN.COLONY_FILE_SIZE, formattedBytes);
+		component.GetReference<RectTransform>("Filename").GetComponent<LocText>().text = string.Format(UI.FRONTEND.LOADSCREEN.COLONY_FILE_NAME, global::System.IO.Path.GetFileName(save.FileName));
+		LocText component4 = component.GetReference<RectTransform>("AutoInfo").GetComponent<LocText>();
+		component4.gameObject.SetActive(!this.CheckSave(save, component4));
+		Image component5 = component.GetReference<RectTransform>("Preview").GetComponent<Image>();
+		this.SetPreview(save.FileName, save.BaseName, component5, false);
+		KButton component6 = component.GetReference<RectTransform>("DeleteButton").GetComponent<KButton>();
+		component6.ClearOnClick();
+		global::System.Action <>9__1;
+		component6.onClick += delegate
+		{
+			LoadScreen <>4__this = this;
+			global::System.Action action;
+			if ((action = <>9__1) == null)
 			{
-				global::UnityEngine.Object.Destroy(gameObject);
+				action = (<>9__1 = delegate
+				{
+					int num = this.currentColony.IndexOf(save);
+					this.currentColony.Remove(save);
+					this.ShowColony(this.currentColony, num - 1);
+				});
+			}
+			<>4__this.Delete(action);
+		};
+	}
+
+	private void ShowColony(List<LoadScreen.SaveGameFileDetails> saves, int selectIndex = -1)
+	{
+		if (saves.Count <= 0)
+		{
+			this.RefreshColonyList();
+			this.ShowColonyList();
+			return;
+		}
+		this.currentColony = saves;
+		this.colonyListRoot.SetActive(false);
+		this.colonyViewRoot.SetActive(true);
+		string baseName = saves[0].BaseName;
+		HierarchyReferences component = this.colonyViewRoot.GetComponent<HierarchyReferences>();
+		KButton component2 = component.GetReference<RectTransform>("Back").GetComponent<KButton>();
+		component2.ClearOnClick();
+		component2.onClick += delegate
+		{
+			this.ShowColonyList();
+		};
+		component.GetReference<RectTransform>("ColonyTitle").GetComponent<LocText>().text = string.Format(UI.FRONTEND.LOADSCREEN.COLONY_TITLE, baseName);
+		GameObject gameObject = component.GetReference<RectTransform>("Content").gameObject;
+		RectTransform reference = component.GetReference<RectTransform>("SaveTemplate");
+		for (int i = 0; i < gameObject.transform.childCount; i++)
+		{
+			GameObject gameObject2 = gameObject.transform.GetChild(i).gameObject;
+			if (gameObject2 != null && gameObject2.name.Contains("Clone"))
+			{
+				global::UnityEngine.Object.Destroy(gameObject2);
 			}
 		}
-		bool flag = true;
-		using (List<LoadScreen.SaveGameFileDetails>.Enumerator enumerator = fileDetailsList.GetEnumerator())
+		if (selectIndex < 0)
 		{
-			while (enumerator.MoveNext())
+			selectIndex = 0;
+		}
+		if (selectIndex > saves.Count - 1)
+		{
+			selectIndex = saves.Count - 1;
+		}
+		for (int j = 0; j < saves.Count; j++)
+		{
+			LoadScreen.SaveGameFileDetails save = saves[j];
+			RectTransform rectTransform = global::UnityEngine.Object.Instantiate<RectTransform>(reference, gameObject.transform);
+			HierarchyReferences component3 = rectTransform.GetComponent<HierarchyReferences>();
+			rectTransform.gameObject.SetActive(true);
+			component3.GetReference<RectTransform>("AutoLabel").gameObject.SetActive(save.FileInfo.isAutoSave);
+			component3.GetReference<RectTransform>("SaveText").GetComponent<LocText>().text = global::System.IO.Path.GetFileNameWithoutExtension(save.FileName);
+			component3.GetReference<RectTransform>("DateText").GetComponent<LocText>().text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), save.FileDate);
+			component3.GetReference<RectTransform>("NewestLabel").gameObject.SetActive(j == 0);
+			bool flag = this.CheckSave(save, null);
+			KButton button = rectTransform.GetComponent<KButton>();
+			button.ClearOnClick();
+			button.onClick += delegate
 			{
-				LoadScreen.SaveGameFileDetails fileDetails = enumerator.Current;
-				RectTransform rectTransform = global::UnityEngine.Object.Instantiate<RectTransform>(savefileRowTemplate, savenameRow.transform);
-				HierarchyReferences component3 = rectTransform.GetComponent<HierarchyReferences>();
-				KButton component4 = rectTransform.GetComponent<KButton>();
-				RectTransform reference = component3.GetReference<RectTransform>("NewestLabel");
-				RectTransform reference2 = component3.GetReference<RectTransform>("AutoLabel");
-				LocText component5 = component3.GetReference<RectTransform>("SaveText").GetComponent<LocText>();
-				LocText component6 = component3.GetReference<RectTransform>("DateText").GetComponent<LocText>();
-				reference.gameObject.SetActive(flag);
-				flag = false;
-				reference2.gameObject.SetActive(fileDetails.FileInfo.isAutoSave);
-				component5.text = global::System.IO.Path.GetFileNameWithoutExtension(fileDetails.FileName);
-				component6.text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), fileDetails.FileDate);
-				component4.onClick += delegate
+				this.UpdateSelected(button, save.FileName);
+				this.ShowColonySave(save);
+			};
+			if (flag)
+			{
+				button.onDoubleClick += delegate
 				{
-					this.onClick(fileDetails.FileName, savename);
-				};
-				component4.onDoubleClick += delegate
-				{
-					this.onClick(fileDetails.FileName, savename);
+					this.UpdateSelected(button, save.FileName);
 					this.Load();
 				};
-				LoadScreen.FileButton fileButton = new LoadScreen.FileButton
+			}
+			KButton component4 = component3.GetReference<RectTransform>("LoadButton").GetComponent<KButton>();
+			component4.ClearOnClick();
+			if (!flag)
+			{
+				component4.isInteractable = false;
+				component4.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
+			}
+			else
+			{
+				component4.onClick += delegate
 				{
-					button = component4,
-					date = component6
+					this.UpdateSelected(button, save.FileName);
+					this.Load();
 				};
-				this.fileButtonMap.Add(fileDetails.FileName, fileButton);
+			}
+			if (j == selectIndex)
+			{
+				this.UpdateSelected(button, save.FileName);
+				this.ShowColonySave(save);
 			}
 		}
-		headerButton.onClick += delegate
+	}
+
+	private void AddColonyToList(List<LoadScreen.SaveGameFileDetails> saves)
+	{
+		if (saves.Count == 0)
 		{
-			bool activeSelf = saveDetailsRow.gameObject.activeSelf;
-			bool flag2 = headerButton == this.currentExpandedHeader;
-			if (flag2)
-			{
-				this.SetChildrenActive(savenameRow, !activeSelf);
-			}
-			else if (!activeSelf && !flag2)
-			{
-				this.SetChildrenActive(savenameRow, true);
-			}
-			if (this.currentExpandedHeader != null && !flag2)
-			{
-				this.SetHeaderButtonActive(this.currentExpandedHeader, false);
-				this.currentDateHeader.color = this.defaultDateColor;
-			}
-			this.currentExpandedHeader = headerButton;
-			this.currentDateHeader = headerDate;
-			this.currentDateHeader.color = Color.white;
-			this.SetHeaderButtonActive(this.currentExpandedHeader, true);
-			headerTitle.transform.parent.gameObject.SetActive(true);
-			savefileRowTemplate.gameObject.SetActive(false);
-			this.onClick(fileDetailsList[0].FileName, savename);
-		};
-		headerButton.onDoubleClick += delegate
+			return;
+		}
+		HierarchyReferences freeElement = this.colonyListPool.GetFreeElement(this.saveButtonRoot, true);
+		saves.Sort((LoadScreen.SaveGameFileDetails x, LoadScreen.SaveGameFileDetails y) => y.FileDate.CompareTo(x.FileDate));
+		LoadScreen.SaveGameFileDetails firstSave = saves[0];
+		string colonyName = firstSave.BaseName;
+		ValueTuple<int, int, ulong> savesSizeAndCounts = this.GetSavesSizeAndCounts(saves);
+		int item = savesSizeAndCounts.Item1;
+		int item2 = savesSizeAndCounts.Item2;
+		string formattedBytes = GameUtil.GetFormattedBytes(savesSizeAndCounts.Item3);
+		freeElement.GetReference<RectTransform>("HeaderTitle").GetComponent<LocText>().text = colonyName;
+		freeElement.GetReference<RectTransform>("HeaderDate").GetComponent<LocText>().text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), firstSave.FileDate);
+		freeElement.GetReference<RectTransform>("SaveTitle").GetComponent<LocText>().text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_INFO, item, item2, formattedBytes);
+		Image component = freeElement.GetReference<RectTransform>("Preview").GetComponent<Image>();
+		this.SetPreview(firstSave.FileName, colonyName, component, true);
+		Component reference = freeElement.GetReference<RectTransform>("LocationIcons");
+		bool flag = this.CloudSavesVisible();
+		reference.gameObject.SetActive(flag);
+		if (flag)
 		{
-			this.onClick(fileDetailsList[0].FileName, savename);
-			LoadingOverlay.Load(new global::System.Action(this.DoLoad));
+			LocText locationText = freeElement.GetReference<RectTransform>("LocationText").GetComponent<LocText>();
+			bool isLocal = SaveLoader.IsSaveLocal(firstSave.FileName);
+			locationText.text = (isLocal ? UI.FRONTEND.LOADSCREEN.LOCAL_SAVE : UI.FRONTEND.LOADSCREEN.CLOUD_SAVE);
+			KButton cloudButton = freeElement.GetReference<RectTransform>("CloudButton").GetComponent<KButton>();
+			KButton localButton = freeElement.GetReference<RectTransform>("LocalButton").GetComponent<KButton>();
+			cloudButton.gameObject.SetActive(!isLocal);
+			cloudButton.ClearOnClick();
+			global::System.Action <>9__5;
+			cloudButton.onClick += delegate
+			{
+				string text = string.Format("{0}\n", UI.FRONTEND.LOADSCREEN.CONVERT_TO_LOCAL_DETAILS);
+				LoadScreen <>4__this = this;
+				string text2 = text;
+				string text3 = UI.FRONTEND.LOADSCREEN.CONVERT_TO_LOCAL;
+				string text4 = UI.FRONTEND.LOADSCREEN.CONVERT_COLONY;
+				string text5 = null;
+				global::System.Action action;
+				if ((action = <>9__5) == null)
+				{
+					action = (<>9__5 = delegate
+					{
+						cloudButton.gameObject.SetActive(false);
+						isLocal = true;
+						locationText.text = (isLocal ? UI.FRONTEND.LOADSCREEN.LOCAL_SAVE : UI.FRONTEND.LOADSCREEN.CLOUD_SAVE);
+						this.ConvertColonyToLocal(colonyName);
+						this.RefreshColonyList();
+						MainMenu.Instance.RefreshResumeButton();
+					});
+				}
+				<>4__this.ConfirmCloudSaveMigrations(text2, text3, text4, text5, action, null, this.cloudToLocalSprite);
+			};
+			localButton.gameObject.SetActive(isLocal);
+			localButton.ClearOnClick();
+			global::System.Action <>9__6;
+			localButton.onClick += delegate
+			{
+				string text6 = string.Format("{0}\n", UI.FRONTEND.LOADSCREEN.CONVERT_TO_CLOUD_DETAILS);
+				LoadScreen <>4__this2 = this;
+				string text7 = text6;
+				string text8 = UI.FRONTEND.LOADSCREEN.CONVERT_TO_CLOUD;
+				string text9 = UI.FRONTEND.LOADSCREEN.CONVERT_COLONY;
+				string text10 = null;
+				global::System.Action action2;
+				if ((action2 = <>9__6) == null)
+				{
+					action2 = (<>9__6 = delegate
+					{
+						localButton.gameObject.SetActive(false);
+						isLocal = false;
+						locationText.text = (isLocal ? UI.FRONTEND.LOADSCREEN.LOCAL_SAVE : UI.FRONTEND.LOADSCREEN.CLOUD_SAVE);
+						this.ConvertColonyToCloud(colonyName);
+						this.RefreshColonyList();
+						MainMenu.Instance.RefreshResumeButton();
+					});
+				}
+				<>4__this2.ConfirmCloudSaveMigrations(text7, text8, text9, text10, action2, null, this.localToCloudSprite);
+			};
+		}
+		KButton component2 = freeElement.GetReference<RectTransform>("Button").GetComponent<KButton>();
+		component2.ClearOnClick();
+		component2.onClick += delegate
+		{
+			this.ShowColony(saves, -1);
 		};
-		savenameRow.transform.SetAsLastSibling();
+		if (this.CheckSave(firstSave, null))
+		{
+			component2.onDoubleClick += delegate
+			{
+				this.UpdateSelected(null, firstSave.FileName);
+				this.Load();
+			};
+		}
+		freeElement.transform.SetAsLastSibling();
+	}
+
+	private void SetPreview(string filename, string basename, Image preview, bool fallbackToTimelapse = false)
+	{
+		preview.color = Color.black;
+		preview.gameObject.SetActive(false);
+		try
+		{
+			Sprite sprite = RetireColonyUtility.LoadColonyPreview(filename, basename, fallbackToTimelapse);
+			if (!(sprite == null))
+			{
+				Rect rect = preview.rectTransform.parent.rectTransform().rect;
+				preview.sprite = sprite;
+				preview.color = (sprite ? Color.white : Color.black);
+				float num = sprite.bounds.size.x / sprite.bounds.size.y;
+				if ((double)num >= 1.77777777777778)
+				{
+					preview.rectTransform.sizeDelta = new Vector2(rect.height * num, rect.height);
+				}
+				else
+				{
+					preview.rectTransform.sizeDelta = new Vector2(rect.width, rect.width / num);
+				}
+				preview.gameObject.SetActive(true);
+			}
+		}
+		catch (Exception ex)
+		{
+			global::Debug.Log(ex);
+		}
 	}
 
 	public static void ForceStopGame()
@@ -289,93 +1094,26 @@ public class LoadScreen : KModalScreen
 		Sim.Shutdown();
 	}
 
-	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header)
+	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header, SaveGame.GameInfo gameInfo)
 	{
-		return header.buildVersion > 420700U;
+		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 17) || header.buildVersion > 442154U;
 	}
 
-	private void SetSelectedGame(string filename, string savename)
+	private void UpdateSelected(KButton button, string filename)
 	{
-		if (string.IsNullOrEmpty(filename) || !File.Exists(filename))
+		if (this.selectedSave != null && this.selectedSave.button != null)
 		{
-			global::Debug.LogError("The filename provided is not valid.");
-			this.deleteButton.isInteractable = false;
-			return;
+			this.selectedSave.button.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
 		}
-		this.deleteButton.isInteractable = true;
-		LoadScreen.FileButton fileButton = ((this.selectedFileName != null) ? this.fileButtonMap[this.selectedFileName] : null);
-		KButton kbutton = ((fileButton != null) ? fileButton.button : null);
-		if (kbutton != null)
+		if (this.selectedSave == null)
 		{
-			kbutton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
-			fileButton.date.color = this.defaultDateColor;
+			this.selectedSave = new LoadScreen.SelectedSave();
 		}
-		this.selectedFileName = filename;
-		this.FileName.text = global::System.IO.Path.GetFileName(this.selectedFileName);
-		fileButton = this.fileButtonMap[this.selectedFileName];
-		kbutton = fileButton.button;
-		kbutton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Active);
-		fileButton.date.color = Color.white;
-		try
+		this.selectedSave.button = button;
+		this.selectedSave.filename = filename;
+		if (this.selectedSave.button != null)
 		{
-			SaveGame.Header header;
-			SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
-			WorldGen.LoadSettings();
-			string text = global::System.IO.Path.GetFileName(filename);
-			if (gameInfo.isAutoSave)
-			{
-				text = text + "\n" + UI.FRONTEND.LOADSCREEN.AUTOSAVEWARNING;
-			}
-			string worldID = gameInfo.worldID;
-			global::ProcGen.World world = ((worldID != null) ? SettingsCache.worlds.GetWorldData(worldID) : null);
-			string text2 = ((world != null) ? Strings.Get(world.name) : " - ");
-			this.CyclesSurvivedValue.text = gameInfo.numberOfCycles.ToString();
-			this.DuplicantsAliveValue.text = gameInfo.numberOfDuplicants.ToString();
-			this.WorldValue.text = text2;
-			this.InfoText.text = "";
-			if (LoadScreen.IsSaveFileFromUnsupportedFutureBuild(header))
-			{
-				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 420700U);
-				this.loadButton.isInteractable = false;
-				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
-			}
-			else if (gameInfo.saveMajorVersion < 7)
-			{
-				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.UNSUPPORTED_SAVE_VERSION, new object[] { filename, gameInfo.saveMajorVersion, gameInfo.saveMinorVersion, 7, 17 });
-				this.loadButton.isInteractable = false;
-				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
-			}
-			else if (!this.loadButton.isInteractable)
-			{
-				this.loadButton.isInteractable = true;
-				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
-			}
-			if (this.InfoText.text == "" && gameInfo.isAutoSave)
-			{
-				this.InfoText.text = UI.FRONTEND.LOADSCREEN.AUTOSAVEWARNING;
-			}
-		}
-		catch (Exception ex)
-		{
-			global::Debug.LogWarning("EXCEPTION LOADING SAVE " + filename + "\n" + ex.ToString());
-			this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.CORRUPTEDSAVE, filename);
-			if (this.loadButton.isInteractable)
-			{
-				this.loadButton.isInteractable = false;
-				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
-			}
-			this.deleteButton.isInteractable = false;
-		}
-		try
-		{
-			Sprite sprite = RetireColonyUtility.LoadColonyPreview(this.selectedFileName, savename);
-			Image component = this.previewImageRoot.GetComponent<Image>();
-			component.sprite = sprite;
-			component.color = (sprite ? Color.white : Color.black);
-		}
-		catch (Exception ex2)
-		{
-			global::Debug.Log(ex2);
+			this.selectedSave.button.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Active);
 		}
 	}
 
@@ -386,7 +1124,11 @@ public class LoadScreen : KModalScreen
 
 	private void DoLoad()
 	{
-		LoadScreen.DoLoad(this.selectedFileName);
+		if (this.selectedSave == null)
+		{
+			return;
+		}
+		LoadScreen.DoLoad(this.selectedSave.filename);
 		this.Deactivate();
 	}
 
@@ -398,10 +1140,10 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 420700U)
+		if (header.buildVersion > 442154U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 420700U.ToString();
+			text2 = 442154U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
@@ -428,21 +1170,65 @@ public class LoadScreen : KModalScreen
 		Application.OpenURL("http://support.kleientertainment.com/customer/portal/articles/2776550");
 	}
 
-	private void Delete()
+	private void Delete(global::System.Action onDelete)
 	{
-		if (string.IsNullOrEmpty(this.selectedFileName))
+		if (this.selectedSave == null || string.IsNullOrEmpty(this.selectedSave.filename))
 		{
 			global::Debug.LogError("The path provided is not valid and cannot be deleted.");
 			return;
 		}
-		this.ConfirmDoAction(string.Format(UI.FRONTEND.LOADSCREEN.CONFIRMDELETE, global::System.IO.Path.GetFileName(this.selectedFileName)), delegate
+		this.ConfirmDoAction(string.Format(UI.FRONTEND.LOADSCREEN.CONFIRMDELETE, global::System.IO.Path.GetFileName(this.selectedSave.filename)), delegate
 		{
-			this.fileButtonMap[this.selectedFileName].button.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
-			this.fileButtonMap[this.selectedFileName].button.isInteractable = true;
-			File.Delete(this.selectedFileName);
-			this.selectedFileName = null;
-			this.RefreshFiles();
+			try
+			{
+				this.DeleteFileAndEmptyFolder(this.selectedSave.filename);
+				string text = global::System.IO.Path.ChangeExtension(this.selectedSave.filename, "png");
+				this.DeleteFileAndEmptyFolder(text);
+				if (onDelete != null)
+				{
+					onDelete();
+				}
+			}
+			catch (SystemException ex)
+			{
+				global::Debug.LogError(ex.ToString());
+			}
 		});
+	}
+
+	private void ShowSimpleDialog(string title, string message)
+	{
+		global::Util.KInstantiateUI<InfoDialogScreen>(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, base.gameObject, false).SetHeader(title).AddPlainText(message)
+			.AddDefaultOK()
+			.Activate();
+	}
+
+	private void ConfirmCloudSaveMigrations(string message, string title, string confirmText, string backupText, global::System.Action commitAction, global::System.Action backupAction, Sprite sprite)
+	{
+		global::Util.KInstantiateUI<InfoDialogScreen>(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, base.gameObject, false).SetHeader(title).AddSprite(sprite)
+			.AddPlainText(message)
+			.AddDefaultCancel()
+			.AddOption(confirmText, delegate(InfoDialogScreen d)
+			{
+				d.Deactivate();
+				commitAction();
+			}, true)
+			.Activate();
+	}
+
+	private void ShowConvertError(string message)
+	{
+		if (this.errorInfoScreen == null)
+		{
+			this.errorInfoScreen = global::Util.KInstantiateUI<InfoDialogScreen>(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, base.gameObject, false).SetHeader(UI.FRONTEND.LOADSCREEN.CONVERT_ERROR_TITLE).AddSprite(this.errorSprite)
+				.AddPlainText(message)
+				.AddOption(UI.FRONTEND.LOADSCREEN.MIGRATE_FAILURES_FORUM_BUTTON, delegate(InfoDialogScreen d)
+				{
+					Application.OpenURL("https://forums.kleientertainment.com/klei-bug-tracker/oni/");
+				}, false)
+				.AddDefaultOK();
+			this.errorInfoScreen.Activate();
+		}
 	}
 
 	private void ConfirmDoAction(string message, global::System.Action action)
@@ -457,80 +1243,79 @@ public class LoadScreen : KModalScreen
 		}
 	}
 
-	public override void OnKeyUp(KButtonEvent e)
+	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (e.TryConsume(global::Action.Escape))
+		if (this.currentColony != null && e.TryConsume(global::Action.Escape))
 		{
-			this.Deactivate();
+			this.ShowColonyList();
 		}
-		base.OnKeyUp(e);
+		base.OnKeyDown(e);
 	}
 
-	private InspectSaveScreen inspectScreenInstance;
+	private const int MAX_CLOUD_TUTORIALS = 5;
 
-	[SerializeField]
-	private HierarchyReferences saveButtonPrefab;
-
-	[SerializeField]
-	private GameObject saveButtonRoot;
-
-	[SerializeField]
-	private LocText saveDetails;
+	private const string CLOUD_TUTORIAL_KEY = "LoadScreenCloudTutorialTimes";
 
 	[SerializeField]
 	private KButton closeButton;
 
 	[SerializeField]
-	private KButton loadButton;
+	private GameObject saveButtonRoot;
 
 	[SerializeField]
-	private KButton deleteButton;
+	private GameObject colonyListRoot;
 
 	[SerializeField]
-	private GameObject previewImageRoot;
+	private GameObject colonyViewRoot;
 
 	[SerializeField]
-	private ColorStyleSetting validSaveFileStyle;
+	private HierarchyReferences migrationPanelRefs;
 
 	[SerializeField]
-	private ColorStyleSetting invalidSaveFileStyle;
+	private HierarchyReferences saveButtonPrefab;
 
-	public LocText FileName;
+	[Space]
+	[SerializeField]
+	private KButton colonyCloudButton;
 
-	public LocText CyclesSurvivedValue;
+	[SerializeField]
+	private KButton colonyLocalButton;
 
-	public LocText DuplicantsAliveValue;
+	[SerializeField]
+	private KButton colonyInfoButton;
 
-	public LocText WorldValue;
+	[SerializeField]
+	private Sprite localToCloudSprite;
 
-	public LocText InfoText;
+	[SerializeField]
+	private Sprite cloudToLocalSprite;
 
-	public Action<string, string> onClick;
+	[SerializeField]
+	private Sprite errorSprite;
+
+	[SerializeField]
+	private Sprite infoSprite;
+
+	[SerializeField]
+	private Bouncer cloudTutorialBouncer;
 
 	public bool requireConfirmation = true;
 
-	private UIPool<HierarchyReferences> savenameRowPool;
+	private LoadScreen.SelectedSave selectedSave;
 
-	private Dictionary<string, LoadScreen.FileButton> fileButtonMap = new Dictionary<string, LoadScreen.FileButton>();
+	private List<LoadScreen.SaveGameFileDetails> currentColony;
+
+	private UIPool<HierarchyReferences> colonyListPool;
 
 	private ConfirmDialogScreen confirmScreen;
 
-	private string selectedFileName;
+	private InfoDialogScreen infoScreen;
 
-	private KButton currentExpandedHeader;
+	private InfoDialogScreen errorInfoScreen;
 
-	private LocText currentDateHeader;
+	private ConfirmDialogScreen errorScreen;
 
-	private Color defaultDateColor = Color.white;
-
-	private Dictionary<string, List<LoadScreen.SaveGameFileDetails>> saveFiles;
-
-	private class FileButton
-	{
-		public KButton button;
-
-		public LocText date;
-	}
+	private InspectSaveScreen inspectScreenInstance;
 
 	private struct SaveGameFileDetails
 	{
@@ -545,5 +1330,14 @@ public class LoadScreen : KModalScreen
 		public SaveGame.Header FileHeader;
 
 		public SaveGame.GameInfo FileInfo;
+
+		public long Size;
+	}
+
+	private class SelectedSave
+	{
+		public string filename;
+
+		public KButton button;
 	}
 }

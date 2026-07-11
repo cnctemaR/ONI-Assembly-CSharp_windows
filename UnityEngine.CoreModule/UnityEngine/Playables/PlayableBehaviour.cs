@@ -27,6 +27,7 @@ namespace UnityEngine.Playables
 		{
 		}
 
+		[Obsolete("OnBehaviourDelay is obsolete; use a custom ScriptPlayable to implement this feature", false)]
 		public virtual void OnBehaviourDelay(Playable playable, FrameData info)
 		{
 		}

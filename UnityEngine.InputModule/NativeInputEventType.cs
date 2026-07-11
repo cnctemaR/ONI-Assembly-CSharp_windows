@@ -2,7 +2,7 @@
 
 namespace UnityEngineInternal.Input
 {
-	public enum NativeInputEventType
+	internal enum NativeInputEventType
 	{
 		DeviceRemoved = 1146242381,
 		DeviceConfigChanged = 1145259591,

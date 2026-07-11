@@ -70,6 +70,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	private void CreatePrefabs()
 	{
+		Db.Get();
 		LegacyModMain.Load();
 	}
 

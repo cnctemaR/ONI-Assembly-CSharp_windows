@@ -6,10 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngineInternal.Input
 {
-	[NativeConditional("ENABLE_NEW_INPUT_SYSTEM")]
 	[NativeHeader("Modules/Input/Private/InputInternal.h")]
 	[NativeHeader("Modules/Input/Private/InputModuleBindings.h")]
-	public class NativeInputSystem
+	internal class NativeInputSystem
 	{
 		public static Action<int, string> onDeviceDiscovered
 		{
@@ -28,7 +27,8 @@ namespace UnityEngineInternal.Input
 		internal static void NotifyBeforeUpdate(NativeInputUpdateType updateType)
 		{
 			Action<NativeInputUpdateType> action = NativeInputSystem.onBeforeUpdate;
-			if (action != null)
+			bool flag = action != null;
+			if (flag)
 			{
 				action(updateType);
 			}
@@ -39,7 +39,8 @@ namespace UnityEngineInternal.Input
 		{
 			NativeUpdateCallback nativeUpdateCallback = NativeInputSystem.onUpdate;
 			NativeInputEventBuffer* ptr = (NativeInputEventBuffer*)eventBuffer.ToPointer();
-			if (nativeUpdateCallback == null)
+			bool flag = nativeUpdateCallback == null;
+			if (flag)
 			{
 				ptr->eventCount = 0;
 				ptr->sizeInBytes = 0;
@@ -54,10 +55,18 @@ namespace UnityEngineInternal.Input
 		internal static void NotifyDeviceDiscovered(int deviceId, string deviceDescriptor)
 		{
 			Action<int, string> action = NativeInputSystem.s_OnDeviceDiscoveredCallback;
-			if (action != null)
+			bool flag = action != null;
+			if (flag)
 			{
 				action(deviceId, deviceDescriptor);
 			}
+		}
+
+		[RequiredByNativeCode]
+		internal static void ShouldRunUpdate(NativeInputUpdateType updateType, out bool retval)
+		{
+			Func<NativeInputUpdateType, bool> func = NativeInputSystem.onShouldRunUpdate;
+			retval = func == null || func(updateType);
 		}
 
 		internal static extern bool hasDeviceDiscoveredCallback
@@ -99,12 +108,16 @@ namespace UnityEngineInternal.Input
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Update(NativeInputUpdateType updateType);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetUpdateMask(NativeInputUpdateType mask);
+		[Obsolete("This is not needed any longer.")]
+		public static void SetUpdateMask(NativeInputUpdateType mask)
+		{
+		}
 
 		public static NativeUpdateCallback onUpdate;
 
 		public static Action<NativeInputUpdateType> onBeforeUpdate;
+
+		public static Func<NativeInputUpdateType, bool> onShouldRunUpdate;
 
 		private static Action<int, string> s_OnDeviceDiscoveredCallback;
 	}

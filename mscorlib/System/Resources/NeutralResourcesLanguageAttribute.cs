@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Resources
 {
-	[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
 	public sealed class NeutralResourcesLanguageAttribute : Attribute
 	{
 		public NeutralResourcesLanguageAttribute(string cultureName)

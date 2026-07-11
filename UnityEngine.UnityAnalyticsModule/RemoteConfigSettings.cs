@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -14,6 +15,9 @@ namespace UnityEngine
 	[StructLayout(LayoutKind.Sequential)]
 	public class RemoteConfigSettings : IDisposable
 	{
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public event Action<bool> Updated;
+
 		private RemoteConfigSettings()
 		{
 		}
@@ -24,9 +28,6 @@ namespace UnityEngine
 			this.Updated = null;
 		}
 
-		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public event Action<bool> Updated;
-
 		~RemoteConfigSettings()
 		{
 			this.Destroy();
@@ -34,7 +35,8 @@ namespace UnityEngine
 
 		private void Destroy()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				RemoteConfigSettings.Internal_Destroy(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;
@@ -58,7 +60,8 @@ namespace UnityEngine
 		internal static void RemoteConfigSettingsUpdated(RemoteConfigSettings rcs, bool wasLastUpdatedFromServer)
 		{
 			Action<bool> updated = rcs.Updated;
-			if (updated != null)
+			bool flag = updated != null;
+			if (flag)
 			{
 				updated(wasLastUpdatedFromServer);
 			}
@@ -69,6 +72,9 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool SendDeviceInfoInConfigRequest();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void AddSessionTag(string tag);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void ForceUpdate();
@@ -130,6 +136,53 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern string[] GetKeys();
 
+		public T GetObject<T>(string key = "")
+		{
+			return (T)((object)this.GetObject(typeof(T), key));
+		}
+
+		public object GetObject(Type type, string key = "")
+		{
+			bool flag = type == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("type");
+			}
+			bool flag2 = type.IsAbstract || type.IsSubclassOf(typeof(Object));
+			if (flag2)
+			{
+				throw new ArgumentException("Cannot deserialize to new instances of type '" + type.Name + ".'");
+			}
+			return this.GetAsScriptingObject(type, null, key);
+		}
+
+		public object GetObject(string key, object defaultValue)
+		{
+			bool flag = defaultValue == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("defaultValue");
+			}
+			Type type = defaultValue.GetType();
+			bool flag2 = type.IsAbstract || type.IsSubclassOf(typeof(Object));
+			if (flag2)
+			{
+				throw new ArgumentException("Cannot deserialize to new instances of type '" + type.Name + ".'");
+			}
+			return this.GetAsScriptingObject(type, defaultValue, key);
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern object GetAsScriptingObject(Type t, object defaultValue, string key);
+
+		public IDictionary<string, object> GetDictionary(string key = "")
+		{
+			this.UseSafeLock();
+			IDictionary<string, object> dictionary = RemoteConfigSettingsHelper.GetDictionary(this.GetSafeTopMap(), key);
+			this.ReleaseSafeLock();
+			return dictionary;
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void UseSafeLock();
 
@@ -138,21 +191,6 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern IntPtr GetSafeTopMap();
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern IntPtr GetSafeMap(IntPtr m, string key);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern long GetSafeNumber(IntPtr m, string key, long defaultValue);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern float GetSafeFloat(IntPtr m, string key, float defaultValue);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool GetSafeBool(IntPtr m, string key, bool defaultValue);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern string GetSafeStringValue(IntPtr m, string key, string defaultValue);
 
 		[NonSerialized]
 		internal IntPtr m_Ptr;

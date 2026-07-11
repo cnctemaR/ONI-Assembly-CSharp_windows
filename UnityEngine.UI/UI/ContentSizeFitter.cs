@@ -8,10 +8,6 @@ namespace UnityEngine.UI
 	[RequireComponent(typeof(RectTransform))]
 	public class ContentSizeFitter : UIBehaviour, ILayoutSelfController, ILayoutController
 	{
-		protected ContentSizeFitter()
-		{
-		}
-
 		public ContentSizeFitter.FitMode horizontalFit
 		{
 			get
@@ -54,6 +50,10 @@ namespace UnityEngine.UI
 			}
 		}
 
+		protected ContentSizeFitter()
+		{
+		}
+
 		protected override void OnEnable()
 		{
 			base.OnEnable();
@@ -74,23 +74,19 @@ namespace UnityEngine.UI
 
 		private void HandleSelfFittingAlongAxis(int axis)
 		{
-			ContentSizeFitter.FitMode fitMode = ((axis != 0) ? this.verticalFit : this.horizontalFit);
+			ContentSizeFitter.FitMode fitMode = ((axis == 0) ? this.horizontalFit : this.verticalFit);
 			if (fitMode == ContentSizeFitter.FitMode.Unconstrained)
 			{
 				this.m_Tracker.Add(this, this.rectTransform, DrivenTransformProperties.None);
+				return;
 			}
-			else
+			this.m_Tracker.Add(this, this.rectTransform, (axis == 0) ? DrivenTransformProperties.SizeDeltaX : DrivenTransformProperties.SizeDeltaY);
+			if (fitMode == ContentSizeFitter.FitMode.MinSize)
 			{
-				this.m_Tracker.Add(this, this.rectTransform, (axis != 0) ? DrivenTransformProperties.SizeDeltaY : DrivenTransformProperties.SizeDeltaX);
-				if (fitMode == ContentSizeFitter.FitMode.MinSize)
-				{
-					this.rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)axis, LayoutUtility.GetMinSize(this.m_Rect, axis));
-				}
-				else
-				{
-					this.rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)axis, LayoutUtility.GetPreferredSize(this.m_Rect, axis));
-				}
+				this.rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)axis, LayoutUtility.GetMinSize(this.m_Rect, axis));
+				return;
 			}
+			this.rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)axis, LayoutUtility.GetPreferredSize(this.m_Rect, axis));
 		}
 
 		public virtual void SetLayoutHorizontal()
@@ -106,17 +102,18 @@ namespace UnityEngine.UI
 
 		protected void SetDirty()
 		{
-			if (this.IsActive())
+			if (!this.IsActive())
 			{
-				LayoutRebuilder.MarkLayoutForRebuild(this.rectTransform);
+				return;
 			}
+			LayoutRebuilder.MarkLayoutForRebuild(this.rectTransform);
 		}
 
 		[SerializeField]
-		protected ContentSizeFitter.FitMode m_HorizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+		protected ContentSizeFitter.FitMode m_HorizontalFit;
 
 		[SerializeField]
-		protected ContentSizeFitter.FitMode m_VerticalFit = ContentSizeFitter.FitMode.Unconstrained;
+		protected ContentSizeFitter.FitMode m_VerticalFit;
 
 		[NonSerialized]
 		private RectTransform m_Rect;

@@ -3,8 +3,8 @@ using System.Reflection;
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class OptionalAttribute : Attribute
 	{
 		internal static Attribute GetCustomAttribute(RuntimeParameterInfo parameter)

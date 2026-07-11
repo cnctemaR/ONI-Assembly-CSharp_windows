@@ -9,6 +9,16 @@ public class ScenePartitioner : ISim1000ms
 		int num = scene_width / node_size;
 		int num2 = scene_height / node_size;
 		this.nodes = new ScenePartitioner.ScenePartitionerNode[layer_count, num2, num];
+		for (int i = 0; i < this.nodes.GetLength(0); i++)
+		{
+			for (int j = 0; j < this.nodes.GetLength(1); j++)
+			{
+				for (int k = 0; k < this.nodes.GetLength(2); k++)
+				{
+					this.nodes[i, j, k].entries = new HashSet<ScenePartitionerEntry>();
+				}
+			}
+		}
 		SimAndRenderScheduler.instance.Add(this, false);
 	}
 
@@ -20,9 +30,8 @@ public class ScenePartitioner : ISim1000ms
 			{
 				for (int k = 0; k < this.nodes.GetLength(2); k++)
 				{
-					for (int l = 0; l < this.nodes[i, j, k].entries.Count; l++)
+					foreach (ScenePartitionerEntry scenePartitionerEntry in this.nodes[i, j, k].entries)
 					{
-						ScenePartitionerEntry scenePartitionerEntry = this.nodes[i, j, k].entries[l];
 						if (scenePartitionerEntry != null)
 						{
 							scenePartitionerEntry.partitioner = null;
@@ -162,24 +171,15 @@ public class ScenePartitioner : ISim1000ms
 		{
 			for (int j = nodeExtents.x; j < nodeExtents.x + nodeExtents.width; j++)
 			{
-				int count = this.nodes[layer, i, j].entries.Count;
-				for (int k = 0; k < count; k++)
+				if (this.nodes[layer, i, j].entries.Remove(entry) && !this.nodes[layer, i, j].dirty)
 				{
-					if (this.nodes[layer, i, j].entries[k] == entry)
+					this.nodes[layer, i, j].dirty = true;
+					this.dirtyNodes.Add(new ScenePartitioner.DirtyNode
 					{
-						if (!this.nodes[layer, i, j].dirty)
-						{
-							this.nodes[layer, i, j].dirty = true;
-							this.dirtyNodes.Add(new ScenePartitioner.DirtyNode
-							{
-								layer = layer,
-								x = j,
-								y = i
-							});
-						}
-						this.nodes[layer, i, j].entries[k] = null;
-						break;
-					}
+						layer = layer,
+						x = j,
+						y = i
+					});
 				}
 			}
 		}
@@ -250,7 +250,7 @@ public class ScenePartitioner : ISim1000ms
 	{
 		foreach (ScenePartitioner.DirtyNode dirtyNode in this.dirtyNodes)
 		{
-			this.nodes[dirtyNode.layer, dirtyNode.y, dirtyNode.x].entries.RemoveAllSwap(ScenePartitioner.removeCallback);
+			this.nodes[dirtyNode.layer, dirtyNode.y, dirtyNode.x].entries.RemoveWhere(ScenePartitioner.removeCallback);
 			this.nodes[dirtyNode.layer, dirtyNode.y, dirtyNode.x].dirty = false;
 		}
 		this.dirtyNodes.Clear();
@@ -368,15 +368,14 @@ public class ScenePartitioner : ISim1000ms
 		{
 			for (int j = num3; j < num4; j++)
 			{
-				int count = this.nodes[layer2, i, j].entries.Count;
-				for (int k = 0; k < count; k++)
+				ListPool<ScenePartitionerEntry, ScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, ScenePartitioner>.Allocate();
+				foreach (ScenePartitionerEntry scenePartitionerEntry in this.nodes[layer2, i, j].entries)
 				{
-					ScenePartitionerEntry scenePartitionerEntry = this.nodes[layer2, i, j].entries[k];
 					if (scenePartitionerEntry != null && scenePartitionerEntry.queryId != this.queryId)
 					{
 						if (scenePartitionerEntry.obj == null)
 						{
-							this.nodes[layer2, i, j].entries[k] = null;
+							pooledList.Add(scenePartitionerEntry);
 						}
 						else if (x + width - 1 >= scenePartitionerEntry.x && x <= scenePartitionerEntry.x + scenePartitionerEntry.width - 1 && y + height - 1 >= scenePartitionerEntry.y && y <= scenePartitionerEntry.y + scenePartitionerEntry.height - 1)
 						{
@@ -385,6 +384,8 @@ public class ScenePartitioner : ISim1000ms
 						}
 					}
 				}
+				this.nodes[layer2, i, j].entries.ExceptWith(pooledList);
+				pooledList.Recycle();
 			}
 		}
 	}
@@ -408,7 +409,7 @@ public class ScenePartitioner : ISim1000ms
 
 	private struct ScenePartitionerNode
 	{
-		public ArrayRef<ScenePartitionerEntry> entries;
+		public HashSet<ScenePartitionerEntry> entries;
 
 		public bool dirty;
 	}

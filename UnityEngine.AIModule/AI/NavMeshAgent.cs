@@ -1,50 +1,38 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
+using UnityEngine.Bindings;
 using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
 	[MovedFrom("UnityEngine")]
+	[NativeHeader("Modules/AI/NavMesh/NavMesh.bindings.h")]
+	[NativeHeader("Modules/AI/Components/NavMeshAgent.bindings.h")]
 	public sealed class NavMeshAgent : Behaviour
 	{
 		public bool SetDestination(Vector3 target)
 		{
-			return NavMeshAgent.INTERNAL_CALL_SetDestination(this, ref target);
+			return this.SetDestination_Injected(ref target);
 		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool INTERNAL_CALL_SetDestination(NavMeshAgent self, ref Vector3 target);
 
 		public Vector3 destination
 		{
 			get
 			{
 				Vector3 vector;
-				this.INTERNAL_get_destination(out vector);
+				this.get_destination_Injected(out vector);
 				return vector;
 			}
 			set
 			{
-				this.INTERNAL_set_destination(ref value);
+				this.set_destination_Injected(ref value);
 			}
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_get_destination(out Vector3 value);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_set_destination(ref Vector3 value);
-
 		public extern float stoppingDistance
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -54,98 +42,71 @@ namespace UnityEngine.AI
 			get
 			{
 				Vector3 vector;
-				this.INTERNAL_get_velocity(out vector);
+				this.get_velocity_Injected(out vector);
 				return vector;
 			}
 			set
 			{
-				this.INTERNAL_set_velocity(ref value);
+				this.set_velocity_Injected(ref value);
 			}
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_get_velocity(out Vector3 value);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_set_velocity(ref Vector3 value);
-
+		[NativeProperty("Position")]
 		public Vector3 nextPosition
 		{
 			get
 			{
 				Vector3 vector;
-				this.INTERNAL_get_nextPosition(out vector);
+				this.get_nextPosition_Injected(out vector);
 				return vector;
 			}
 			set
 			{
-				this.INTERNAL_set_nextPosition(ref value);
+				this.set_nextPosition_Injected(ref value);
 			}
 		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_get_nextPosition(out Vector3 value);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_set_nextPosition(ref Vector3 value);
 
 		public Vector3 steeringTarget
 		{
 			get
 			{
 				Vector3 vector;
-				this.INTERNAL_get_steeringTarget(out vector);
+				this.get_steeringTarget_Injected(out vector);
 				return vector;
 			}
 		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_get_steeringTarget(out Vector3 value);
 
 		public Vector3 desiredVelocity
 		{
 			get
 			{
 				Vector3 vector;
-				this.INTERNAL_get_desiredVelocity(out vector);
+				this.get_desiredVelocity_Injected(out vector);
 				return vector;
 			}
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_get_desiredVelocity(out Vector3 value);
-
 		public extern float remainingDistance
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern float baseOffset
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern bool isOnOffMeshLink
 		{
-			[GeneratedByOldBindingsGenerator]
+			[NativeName("IsOnOffMeshLink")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void ActivateCurrentOffMeshLink(bool activated);
 
@@ -157,9 +118,13 @@ namespace UnityEngine.AI
 			}
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern OffMeshLinkData GetCurrentOffMeshLinkDataInternal();
+		[FreeFunction("NavMeshAgentScriptBindings::GetCurrentOffMeshLinkDataInternal", HasExplicitThis = true)]
+		internal OffMeshLinkData GetCurrentOffMeshLinkDataInternal()
+		{
+			OffMeshLinkData offMeshLinkData;
+			this.GetCurrentOffMeshLinkDataInternal_Injected(out offMeshLinkData);
+			return offMeshLinkData;
+		}
 
 		public OffMeshLinkData nextOffMeshLinkData
 		{
@@ -169,142 +134,118 @@ namespace UnityEngine.AI
 			}
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern OffMeshLinkData GetNextOffMeshLinkDataInternal();
+		[FreeFunction("NavMeshAgentScriptBindings::GetNextOffMeshLinkDataInternal", HasExplicitThis = true)]
+		internal OffMeshLinkData GetNextOffMeshLinkDataInternal()
+		{
+			OffMeshLinkData offMeshLinkData;
+			this.GetNextOffMeshLinkDataInternal_Injected(out offMeshLinkData);
+			return offMeshLinkData;
+		}
 
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void CompleteOffMeshLink();
 
 		public extern bool autoTraverseOffMeshLink
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern bool autoBraking
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern bool autoRepath
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern bool hasPath
 		{
-			[GeneratedByOldBindingsGenerator]
+			[NativeName("HasPath")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern bool pathPending
 		{
-			[GeneratedByOldBindingsGenerator]
+			[NativeName("PathPending")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern bool isPathStale
 		{
-			[GeneratedByOldBindingsGenerator]
+			[NativeName("IsPathStale")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern NavMeshPathStatus pathStatus
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
+		[NativeProperty("EndPositionOfCurrentPath")]
 		public Vector3 pathEndPosition
 		{
 			get
 			{
 				Vector3 vector;
-				this.INTERNAL_get_pathEndPosition(out vector);
+				this.get_pathEndPosition_Injected(out vector);
 				return vector;
 			}
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_get_pathEndPosition(out Vector3 value);
-
 		public bool Warp(Vector3 newPosition)
 		{
-			return NavMeshAgent.INTERNAL_CALL_Warp(this, ref newPosition);
+			return this.Warp_Injected(ref newPosition);
 		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool INTERNAL_CALL_Warp(NavMeshAgent self, ref Vector3 newPosition);
 
 		public void Move(Vector3 offset)
 		{
-			NavMeshAgent.INTERNAL_CALL_Move(this, ref offset);
+			this.Move_Injected(ref offset);
 		}
 
-		[GeneratedByOldBindingsGenerator]
+		[Obsolete("Set isStopped to true instead.")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void INTERNAL_CALL_Move(NavMeshAgent self, ref Vector3 offset);
+		public extern void Stop();
 
-		[Obsolete("Set isStopped to true instead")]
-		public void Stop()
-		{
-			this.StopInternal();
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void StopInternal();
-
-		[Obsolete("Set isStopped to true instead")]
+		[Obsolete("Set isStopped to true instead.")]
 		public void Stop(bool stopUpdates)
 		{
-			this.StopInternal();
+			this.Stop();
 		}
 
-		[Obsolete("Set isStopped to false instead")]
-		[GeneratedByOldBindingsGenerator]
+		[Obsolete("Set isStopped to false instead.")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Resume();
 
 		public extern bool isStopped
 		{
-			[GeneratedByOldBindingsGenerator]
+			[FreeFunction("NavMeshAgentScriptBindings::GetIsStopped", HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
+			[FreeFunction("NavMeshAgentScriptBindings::SetIsStopped", HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void ResetPath();
 
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool SetPath(NavMeshPath path);
+		public extern bool SetPath([NotNull] NavMeshPath path);
 
 		public NavMeshPath path
 		{
@@ -316,7 +257,8 @@ namespace UnityEngine.AI
 			}
 			set
 			{
-				if (value == null)
+				bool flag = value == null;
+				if (flag)
 				{
 					throw new NullReferenceException();
 				}
@@ -324,22 +266,18 @@ namespace UnityEngine.AI
 			}
 		}
 
-		[GeneratedByOldBindingsGenerator]
+		[NativeMethod("CopyPath")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void CopyPathTo(NavMeshPath path);
+		internal extern void CopyPathTo([NotNull] NavMeshPath path);
 
-		[GeneratedByOldBindingsGenerator]
+		[NativeName("DistanceToEdge")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool FindClosestEdge(out NavMeshHit hit);
 
 		public bool Raycast(Vector3 targetPosition, out NavMeshHit hit)
 		{
-			return NavMeshAgent.INTERNAL_CALL_Raycast(this, ref targetPosition, out hit);
+			return this.Raycast_Injected(ref targetPosition, out hit);
 		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool INTERNAL_CALL_Raycast(NavMeshAgent self, ref Vector3 targetPosition, out NavMeshHit hit);
 
 		public bool CalculatePath(Vector3 targetPosition, NavMeshPath path)
 		{
@@ -347,34 +285,28 @@ namespace UnityEngine.AI
 			return this.CalculatePathInternal(targetPosition, path);
 		}
 
-		private bool CalculatePathInternal(Vector3 targetPosition, NavMeshPath path)
+		[FreeFunction("NavMeshAgentScriptBindings::CalculatePathInternal", HasExplicitThis = true)]
+		private bool CalculatePathInternal(Vector3 targetPosition, [NotNull] NavMeshPath path)
 		{
-			return NavMeshAgent.INTERNAL_CALL_CalculatePathInternal(this, ref targetPosition, path);
+			return this.CalculatePathInternal_Injected(ref targetPosition, path);
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool INTERNAL_CALL_CalculatePathInternal(NavMeshAgent self, ref Vector3 targetPosition, NavMeshPath path);
-
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool SamplePathPosition(int areaMask, float maxDistance, out NavMeshHit hit);
 
-		[GeneratedByOldBindingsGenerator]
 		[Obsolete("Use SetAreaCost instead.")]
+		[NativeMethod("SetAreaCost")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetLayerCost(int layer, float cost);
 
 		[Obsolete("Use GetAreaCost instead.")]
-		[GeneratedByOldBindingsGenerator]
+		[NativeMethod("GetAreaCost")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern float GetLayerCost(int layer);
 
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetAreaCost(int areaIndex, float areaCost);
 
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern float GetAreaCost(int areaIndex);
 
@@ -388,144 +320,170 @@ namespace UnityEngine.AI
 
 		public extern int agentTypeID
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
-		[GeneratedByOldBindingsGenerator]
+		[NativeName("GetCurrentPolygonOwner")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Object GetOwnerInternal();
 
 		[Obsolete("Use areaMask instead.")]
-		public extern int walkableMask
+		public int walkableMask
 		{
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				return this.areaMask;
+			}
+			set
+			{
+				this.areaMask = value;
+			}
 		}
 
 		public extern int areaMask
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern float speed
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern float angularSpeed
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern float acceleration
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern bool updatePosition
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern bool updateRotation
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern bool updateUpAxis
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern float radius
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern float height
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern ObstacleAvoidanceType obstacleAvoidanceType
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern int avoidancePriority
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern bool isOnNavMesh
 		{
-			[GeneratedByOldBindingsGenerator]
+			[NativeName("InCrowdSystem")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool SetDestination_Injected(ref Vector3 target);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_destination_Injected(out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_destination_Injected(ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_velocity_Injected(out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_velocity_Injected(ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_nextPosition_Injected(out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_nextPosition_Injected(ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_steeringTarget_Injected(out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_desiredVelocity_Injected(out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void GetCurrentOffMeshLinkDataInternal_Injected(out OffMeshLinkData ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void GetNextOffMeshLinkDataInternal_Injected(out OffMeshLinkData ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_pathEndPosition_Injected(out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool Warp_Injected(ref Vector3 newPosition);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void Move_Injected(ref Vector3 offset);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool Raycast_Injected(ref Vector3 targetPosition, out NavMeshHit hit);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool CalculatePathInternal_Injected(ref Vector3 targetPosition, NavMeshPath path);
 	}
 }

@@ -10,4 +10,8 @@ public interface IAssignableIdentity
 	Ownables GetSoleOwner();
 
 	bool IsNull();
+
+	bool HasOwner(Assignables owner);
+
+	int NumOwners();
 }

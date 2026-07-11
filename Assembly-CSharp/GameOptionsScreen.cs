@@ -29,6 +29,15 @@ public class GameOptionsScreen : KModalButtonMenu
 		this.sandboxButton.onClick += this.OnUnlockSandboxMode;
 		this.doneButton.onClick += this.Deactivate;
 		this.closeButton.onClick += this.Deactivate;
+		if (this.defaultToCloudSaveToggle != null)
+		{
+			this.RefreshCloudSaveToggle();
+			this.defaultToCloudSaveToggle.GetComponentInChildren<KButton>().onClick += this.OnDefaultToCloudSaveToggle;
+		}
+		if (this.cloudSavesPanel != null)
+		{
+			this.cloudSavesPanel.SetActive(SaveLoader.GetCloudSavesAvailable());
+		}
 	}
 
 	protected override void OnShow(bool show)
@@ -42,6 +51,18 @@ public class GameOptionsScreen : KModalButtonMenu
 			return;
 		}
 		this.savePanel.SetActive(false);
+	}
+
+	private void OnDefaultToCloudSaveToggle()
+	{
+		SaveLoader.SetCloudSavesDefault(!SaveLoader.GetCloudSavesDefault());
+		this.RefreshCloudSaveToggle();
+	}
+
+	private void RefreshCloudSaveToggle()
+	{
+		bool cloudSavesDefault = SaveLoader.GetCloudSavesDefault();
+		this.defaultToCloudSaveToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(cloudSavesDefault);
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -126,6 +147,12 @@ public class GameOptionsScreen : KModalButtonMenu
 
 	[SerializeField]
 	private KButton closeButton;
+
+	[SerializeField]
+	private GameObject cloudSavesPanel;
+
+	[SerializeField]
+	private GameObject defaultToCloudSaveToggle;
 
 	[SerializeField]
 	private GameObject savePanel;

@@ -6,19 +6,17 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
-	[MovedFrom("UnityEngine")]
 	[NativeHeader("Modules/AI/NavMeshManager.h")]
+	[StaticAccessor("NavMeshBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Modules/AI/NavMesh/NavMesh.bindings.h")]
+	[MovedFrom("UnityEngine")]
 	public static class NavMesh
 	{
-		[StaticAccessor("GetNavMeshManager()")]
-		[NativeName("CleanupAfterCarving")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void RemoveAllNavMeshData();
-
 		[RequiredByNativeCode]
 		private static void Internal_CallOnNavMeshPreUpdate()
 		{
-			if (NavMesh.onPreUpdate != null)
+			bool flag = NavMesh.onPreUpdate != null;
+			if (flag)
 			{
 				NavMesh.onPreUpdate();
 			}
@@ -26,12 +24,8 @@ namespace UnityEngine.AI
 
 		public static bool Raycast(Vector3 sourcePosition, Vector3 targetPosition, out NavMeshHit hit, int areaMask)
 		{
-			return NavMesh.INTERNAL_CALL_Raycast(ref sourcePosition, ref targetPosition, out hit, areaMask);
+			return NavMesh.Raycast_Injected(ref sourcePosition, ref targetPosition, out hit, areaMask);
 		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool INTERNAL_CALL_Raycast(ref Vector3 sourcePosition, ref Vector3 targetPosition, out NavMeshHit hit, int areaMask);
 
 		public static bool CalculatePath(Vector3 sourcePosition, Vector3 targetPosition, int areaMask, NavMeshPath path)
 		{
@@ -39,127 +33,101 @@ namespace UnityEngine.AI
 			return NavMesh.CalculatePathInternal(sourcePosition, targetPosition, areaMask, path);
 		}
 
-		internal static bool CalculatePathInternal(Vector3 sourcePosition, Vector3 targetPosition, int areaMask, NavMeshPath path)
+		private static bool CalculatePathInternal(Vector3 sourcePosition, Vector3 targetPosition, int areaMask, NavMeshPath path)
 		{
-			return NavMesh.INTERNAL_CALL_CalculatePathInternal(ref sourcePosition, ref targetPosition, areaMask, path);
+			return NavMesh.CalculatePathInternal_Injected(ref sourcePosition, ref targetPosition, areaMask, path);
 		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool INTERNAL_CALL_CalculatePathInternal(ref Vector3 sourcePosition, ref Vector3 targetPosition, int areaMask, NavMeshPath path);
 
 		public static bool FindClosestEdge(Vector3 sourcePosition, out NavMeshHit hit, int areaMask)
 		{
-			return NavMesh.INTERNAL_CALL_FindClosestEdge(ref sourcePosition, out hit, areaMask);
+			return NavMesh.FindClosestEdge_Injected(ref sourcePosition, out hit, areaMask);
 		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool INTERNAL_CALL_FindClosestEdge(ref Vector3 sourcePosition, out NavMeshHit hit, int areaMask);
 
 		public static bool SamplePosition(Vector3 sourcePosition, out NavMeshHit hit, float maxDistance, int areaMask)
 		{
-			return NavMesh.INTERNAL_CALL_SamplePosition(ref sourcePosition, out hit, maxDistance, areaMask);
+			return NavMesh.SamplePosition_Injected(ref sourcePosition, out hit, maxDistance, areaMask);
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool INTERNAL_CALL_SamplePosition(ref Vector3 sourcePosition, out NavMeshHit hit, float maxDistance, int areaMask);
-
 		[Obsolete("Use SetAreaCost instead.")]
-		[GeneratedByOldBindingsGenerator]
+		[NativeName("SetAreaCost")]
+		[StaticAccessor("GetNavMeshProjectSettings()")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetLayerCost(int layer, float cost);
 
+		[StaticAccessor("GetNavMeshProjectSettings()")]
+		[NativeName("GetAreaCost")]
 		[Obsolete("Use GetAreaCost instead.")]
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float GetLayerCost(int layer);
 
-		[GeneratedByOldBindingsGenerator]
 		[Obsolete("Use GetAreaFromName instead.")]
+		[StaticAccessor("GetNavMeshProjectSettings()")]
+		[NativeName("GetAreaFromName")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetNavMeshLayerFromName(string layerName);
 
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("GetNavMeshProjectSettings()")]
+		[NativeName("SetAreaCost")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetAreaCost(int areaIndex, float cost);
 
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("GetNavMeshProjectSettings()")]
+		[NativeName("GetAreaCost")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float GetAreaCost(int areaIndex);
 
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("GetNavMeshProjectSettings()")]
+		[NativeName("GetAreaFromName")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetAreaFromName(string areaName);
 
 		public static NavMeshTriangulation CalculateTriangulation()
 		{
-			return (NavMeshTriangulation)NavMesh.TriangulateInternal();
+			NavMeshTriangulation navMeshTriangulation;
+			NavMesh.CalculateTriangulation_Injected(out navMeshTriangulation);
+			return navMeshTriangulation;
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern object TriangulateInternal();
-
-		[Obsolete("use NavMesh.CalculateTriangulation () instead.")]
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void Triangulate(out Vector3[] vertices, out int[] indices);
+		[Obsolete("use NavMesh.CalculateTriangulation() instead.")]
+		public static void Triangulate(out Vector3[] vertices, out int[] indices)
+		{
+			NavMeshTriangulation navMeshTriangulation = NavMesh.CalculateTriangulation();
+			vertices = navMeshTriangulation.vertices;
+			indices = navMeshTriangulation.indices;
+		}
 
 		[Obsolete("AddOffMeshLinks has no effect and is deprecated.")]
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void AddOffMeshLinks();
+		public static void AddOffMeshLinks()
+		{
+		}
 
 		[Obsolete("RestoreNavMesh has no effect and is deprecated.")]
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void RestoreNavMesh();
-
-		public static float avoidancePredictionTime
+		public static void RestoreNavMesh()
 		{
-			get
-			{
-				return NavMesh.GetAvoidancePredictionTime();
-			}
-			set
-			{
-				NavMesh.SetAvoidancePredictionTime(value);
-			}
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void SetAvoidancePredictionTime(float t);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern float GetAvoidancePredictionTime();
-
-		public static int pathfindingIterationsPerFrame
+		[StaticAccessor("GetNavMeshManager()")]
+		public static extern float avoidancePredictionTime
 		{
-			get
-			{
-				return NavMesh.GetPathfindingIterationsPerFrame();
-			}
-			set
-			{
-				NavMesh.SetPathfindingIterationsPerFrame(value);
-			}
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void SetPathfindingIterationsPerFrame(int iter);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern int GetPathfindingIterationsPerFrame();
+		[StaticAccessor("GetNavMeshManager()")]
+		public static extern int pathfindingIterationsPerFrame
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
 
 		public static NavMeshDataInstance AddNavMeshData(NavMeshData navMeshData)
 		{
-			if (navMeshData == null)
+			bool flag = navMeshData == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("navMeshData");
 			}
@@ -171,7 +139,8 @@ namespace UnityEngine.AI
 
 		public static NavMeshDataInstance AddNavMeshData(NavMeshData navMeshData, Vector3 position, Quaternion rotation)
 		{
-			if (navMeshData == null)
+			bool flag = navMeshData == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("navMeshData");
 			}
@@ -186,44 +155,45 @@ namespace UnityEngine.AI
 			NavMesh.RemoveNavMeshDataInternal(handle.id);
 		}
 
-		[GeneratedByOldBindingsGenerator]
+		[NativeName("IsValidSurfaceID")]
+		[StaticAccessor("GetNavMeshManager()")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool IsValidNavMeshDataHandle(int handle);
 
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("GetNavMeshManager()")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool IsValidLinkHandle(int handle);
 
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Object InternalGetOwner(int dataID);
 
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("GetNavMeshManager()")]
+		[NativeName("SetSurfaceUserID")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool InternalSetOwner(int dataID, int ownerID);
 
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Object InternalGetLinkOwner(int linkID);
 
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("GetNavMeshManager()")]
+		[NativeName("SetLinkUserID")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool InternalSetLinkOwner(int linkID, int ownerID);
 
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("GetNavMeshManager()")]
+		[NativeName("LoadData")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int AddNavMeshDataInternal(NavMeshData navMeshData);
 
+		[StaticAccessor("GetNavMeshManager()")]
+		[NativeName("LoadData")]
 		internal static int AddNavMeshDataTransformedInternal(NavMeshData navMeshData, Vector3 position, Quaternion rotation)
 		{
-			return NavMesh.INTERNAL_CALL_AddNavMeshDataTransformedInternal(navMeshData, ref position, ref rotation);
+			return NavMesh.AddNavMeshDataTransformedInternal_Injected(navMeshData, ref position, ref rotation);
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int INTERNAL_CALL_AddNavMeshDataTransformedInternal(NavMeshData navMeshData, ref Vector3 position, ref Quaternion rotation);
-
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("GetNavMeshManager()")]
+		[NativeName("UnloadData")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void RemoveNavMeshDataInternal(int handle);
 
@@ -248,16 +218,15 @@ namespace UnityEngine.AI
 			NavMesh.RemoveLinkInternal(handle.id);
 		}
 
+		[StaticAccessor("GetNavMeshManager()")]
+		[NativeName("AddLink")]
 		internal static int AddLinkInternal(NavMeshLinkData link, Vector3 position, Quaternion rotation)
 		{
-			return NavMesh.INTERNAL_CALL_AddLinkInternal(ref link, ref position, ref rotation);
+			return NavMesh.AddLinkInternal_Injected(ref link, ref position, ref rotation);
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int INTERNAL_CALL_AddLinkInternal(ref NavMeshLinkData link, ref Vector3 position, ref Quaternion rotation);
-
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("GetNavMeshManager()")]
+		[NativeName("RemoveLink")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void RemoveLinkInternal(int handle);
 
@@ -268,12 +237,8 @@ namespace UnityEngine.AI
 
 		private static bool SamplePositionFilter(Vector3 sourcePosition, out NavMeshHit hit, float maxDistance, int type, int mask)
 		{
-			return NavMesh.INTERNAL_CALL_SamplePositionFilter(ref sourcePosition, out hit, maxDistance, type, mask);
+			return NavMesh.SamplePositionFilter_Injected(ref sourcePosition, out hit, maxDistance, type, mask);
 		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool INTERNAL_CALL_SamplePositionFilter(ref Vector3 sourcePosition, out NavMeshHit hit, float maxDistance, int type, int mask);
 
 		public static bool FindClosestEdge(Vector3 sourcePosition, out NavMeshHit hit, NavMeshQueryFilter filter)
 		{
@@ -282,12 +247,8 @@ namespace UnityEngine.AI
 
 		private static bool FindClosestEdgeFilter(Vector3 sourcePosition, out NavMeshHit hit, int type, int mask)
 		{
-			return NavMesh.INTERNAL_CALL_FindClosestEdgeFilter(ref sourcePosition, out hit, type, mask);
+			return NavMesh.FindClosestEdgeFilter_Injected(ref sourcePosition, out hit, type, mask);
 		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool INTERNAL_CALL_FindClosestEdgeFilter(ref Vector3 sourcePosition, out NavMeshHit hit, int type, int mask);
 
 		public static bool Raycast(Vector3 sourcePosition, Vector3 targetPosition, out NavMeshHit hit, NavMeshQueryFilter filter)
 		{
@@ -296,12 +257,8 @@ namespace UnityEngine.AI
 
 		private static bool RaycastFilter(Vector3 sourcePosition, Vector3 targetPosition, out NavMeshHit hit, int type, int mask)
 		{
-			return NavMesh.INTERNAL_CALL_RaycastFilter(ref sourcePosition, ref targetPosition, out hit, type, mask);
+			return NavMesh.RaycastFilter_Injected(ref sourcePosition, ref targetPosition, out hit, type, mask);
 		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool INTERNAL_CALL_RaycastFilter(ref Vector3 sourcePosition, ref Vector3 targetPosition, out NavMeshHit hit, int type, int mask);
 
 		public static bool CalculatePath(Vector3 sourcePosition, Vector3 targetPosition, NavMeshQueryFilter filter, NavMeshPath path)
 		{
@@ -309,63 +266,94 @@ namespace UnityEngine.AI
 			return NavMesh.CalculatePathFilterInternal(sourcePosition, targetPosition, path, filter.agentTypeID, filter.areaMask, filter.costs);
 		}
 
-		internal static bool CalculatePathFilterInternal(Vector3 sourcePosition, Vector3 targetPosition, NavMeshPath path, int type, int mask, float[] costs)
+		private static bool CalculatePathFilterInternal(Vector3 sourcePosition, Vector3 targetPosition, NavMeshPath path, int type, int mask, float[] costs)
 		{
-			return NavMesh.INTERNAL_CALL_CalculatePathFilterInternal(ref sourcePosition, ref targetPosition, path, type, mask, costs);
+			return NavMesh.CalculatePathFilterInternal_Injected(ref sourcePosition, ref targetPosition, path, type, mask, costs);
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool INTERNAL_CALL_CalculatePathFilterInternal(ref Vector3 sourcePosition, ref Vector3 targetPosition, NavMeshPath path, int type, int mask, float[] costs);
-
+		[StaticAccessor("GetNavMeshProjectSettings()")]
 		public static NavMeshBuildSettings CreateSettings()
 		{
 			NavMeshBuildSettings navMeshBuildSettings;
-			NavMesh.INTERNAL_CALL_CreateSettings(out navMeshBuildSettings);
+			NavMesh.CreateSettings_Injected(out navMeshBuildSettings);
 			return navMeshBuildSettings;
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void INTERNAL_CALL_CreateSettings(out NavMeshBuildSettings value);
-
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("GetNavMeshProjectSettings()")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void RemoveSettings(int agentTypeID);
 
 		public static NavMeshBuildSettings GetSettingsByID(int agentTypeID)
 		{
 			NavMeshBuildSettings navMeshBuildSettings;
-			NavMesh.INTERNAL_CALL_GetSettingsByID(agentTypeID, out navMeshBuildSettings);
+			NavMesh.GetSettingsByID_Injected(agentTypeID, out navMeshBuildSettings);
 			return navMeshBuildSettings;
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void INTERNAL_CALL_GetSettingsByID(int agentTypeID, out NavMeshBuildSettings value);
-
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("GetNavMeshProjectSettings()")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetSettingsCount();
 
 		public static NavMeshBuildSettings GetSettingsByIndex(int index)
 		{
 			NavMeshBuildSettings navMeshBuildSettings;
-			NavMesh.INTERNAL_CALL_GetSettingsByIndex(index, out navMeshBuildSettings);
+			NavMesh.GetSettingsByIndex_Injected(index, out navMeshBuildSettings);
 			return navMeshBuildSettings;
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void INTERNAL_CALL_GetSettingsByIndex(int index, out NavMeshBuildSettings value);
-
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string GetSettingsNameFromID(int agentTypeID);
 
-		public static NavMesh.OnNavMeshPreUpdate onPreUpdate;
+		[StaticAccessor("GetNavMeshManager()")]
+		[NativeName("CleanupAfterCarving")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void RemoveAllNavMeshData();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool Raycast_Injected(ref Vector3 sourcePosition, ref Vector3 targetPosition, out NavMeshHit hit, int areaMask);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool CalculatePathInternal_Injected(ref Vector3 sourcePosition, ref Vector3 targetPosition, int areaMask, NavMeshPath path);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool FindClosestEdge_Injected(ref Vector3 sourcePosition, out NavMeshHit hit, int areaMask);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SamplePosition_Injected(ref Vector3 sourcePosition, out NavMeshHit hit, float maxDistance, int areaMask);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CalculateTriangulation_Injected(out NavMeshTriangulation ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int AddNavMeshDataTransformedInternal_Injected(NavMeshData navMeshData, ref Vector3 position, ref Quaternion rotation);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int AddLinkInternal_Injected(ref NavMeshLinkData link, ref Vector3 position, ref Quaternion rotation);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SamplePositionFilter_Injected(ref Vector3 sourcePosition, out NavMeshHit hit, float maxDistance, int type, int mask);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool FindClosestEdgeFilter_Injected(ref Vector3 sourcePosition, out NavMeshHit hit, int type, int mask);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool RaycastFilter_Injected(ref Vector3 sourcePosition, ref Vector3 targetPosition, out NavMeshHit hit, int type, int mask);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool CalculatePathFilterInternal_Injected(ref Vector3 sourcePosition, ref Vector3 targetPosition, NavMeshPath path, int type, int mask, float[] costs);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CreateSettings_Injected(out NavMeshBuildSettings ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetSettingsByID_Injected(int agentTypeID, out NavMeshBuildSettings ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetSettingsByIndex_Injected(int index, out NavMeshBuildSettings ret);
 
 		public const int AllAreas = -1;
+
+		public static NavMesh.OnNavMeshPreUpdate onPreUpdate;
 
 		public delegate void OnNavMeshPreUpdate();
 	}

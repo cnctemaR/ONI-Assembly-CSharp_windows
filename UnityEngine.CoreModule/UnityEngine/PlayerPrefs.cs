@@ -21,7 +21,8 @@ namespace UnityEngine
 
 		public static void SetInt(string key, int value)
 		{
-			if (!PlayerPrefs.TrySetInt(key, value))
+			bool flag = !PlayerPrefs.TrySetInt(key, value);
+			if (flag)
 			{
 				throw new PlayerPrefsException("Could not store preference value");
 			}
@@ -37,7 +38,8 @@ namespace UnityEngine
 
 		public static void SetFloat(string key, float value)
 		{
-			if (!PlayerPrefs.TrySetFloat(key, value))
+			bool flag = !PlayerPrefs.TrySetFloat(key, value);
+			if (flag)
 			{
 				throw new PlayerPrefsException("Could not store preference value");
 			}
@@ -53,7 +55,8 @@ namespace UnityEngine
 
 		public static void SetString(string key, string value)
 		{
-			if (!PlayerPrefs.TrySetSetString(key, value))
+			bool flag = !PlayerPrefs.TrySetSetString(key, value);
+			if (flag)
 			{
 				throw new PlayerPrefsException("Could not store preference value");
 			}

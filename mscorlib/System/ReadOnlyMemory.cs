@@ -6,8 +6,8 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-	[DebuggerTypeProxy(typeof(MemoryDebugView<>))]
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
+	[DebuggerTypeProxy(typeof(MemoryDebugView<>))]
 	public readonly struct ReadOnlyMemory<T>
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

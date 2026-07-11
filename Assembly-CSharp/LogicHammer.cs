@@ -146,7 +146,7 @@ public class LogicHammer : Switch
 			EventInstance eventInstance = KFMOD.BeginOneShot(text2, position, 1f);
 			if (!float.IsNaN(num))
 			{
-				eventInstance.setParameterValue(LogicHammer.PARAMETER_NAME, num);
+				eventInstance.setParameterByName(LogicHammer.PARAMETER_NAME, num, false);
 			}
 			KFMOD.EndOneShot(eventInstance);
 			return true;

@@ -6,25 +6,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[StaticAccessor("AnimationRemoveScalePlayableBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[NativeHeader("Runtime/Animation/Director/AnimationRemoveScalePlayable.h")]
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationRemoveScalePlayable.bindings.h")]
+	[NativeHeader("Modules/Animation/Director/AnimationRemoveScalePlayable.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationRemoveScalePlayable.bindings.h")]
+	[StaticAccessor("AnimationRemoveScalePlayableBindings", StaticAccessorType.DoubleColon)]
 	[RequiredByNativeCode]
 	internal struct AnimationRemoveScalePlayable : IPlayable, IEquatable<AnimationRemoveScalePlayable>
 	{
-		internal AnimationRemoveScalePlayable(PlayableHandle handle)
-		{
-			if (handle.IsValid())
-			{
-				if (!handle.IsPlayableOfType<AnimationRemoveScalePlayable>())
-				{
-					throw new InvalidCastException("Can't set handle: the playable is not an AnimationRemoveScalePlayable.");
-				}
-			}
-			this.m_Handle = handle;
-		}
-
 		public static AnimationRemoveScalePlayable Null
 		{
 			get
@@ -42,8 +30,9 @@ namespace UnityEngine.Animations
 		private static PlayableHandle CreateHandle(PlayableGraph graph, int inputCount)
 		{
 			PlayableHandle @null = PlayableHandle.Null;
+			bool flag = !AnimationRemoveScalePlayable.CreateHandleInternal(graph, ref @null);
 			PlayableHandle playableHandle;
-			if (!AnimationRemoveScalePlayable.CreateHandleInternal(graph, ref @null))
+			if (flag)
 			{
 				playableHandle = PlayableHandle.Null;
 			}
@@ -53,6 +42,20 @@ namespace UnityEngine.Animations
 				playableHandle = @null;
 			}
 			return playableHandle;
+		}
+
+		internal AnimationRemoveScalePlayable(PlayableHandle handle)
+		{
+			bool flag = handle.IsValid();
+			if (flag)
+			{
+				bool flag2 = !handle.IsPlayableOfType<AnimationRemoveScalePlayable>();
+				if (flag2)
+				{
+					throw new InvalidCastException("Can't set handle: the playable is not an AnimationRemoveScalePlayable.");
+				}
+			}
+			this.m_Handle = handle;
 		}
 
 		public PlayableHandle GetHandle()

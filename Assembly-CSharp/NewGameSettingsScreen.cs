@@ -22,8 +22,8 @@ public class NewGameSettingsScreen : NewGameFlowScreen
 	{
 		if (AudioDebug.Get().musicEnabled && !MusicManager.instance.SongIsPlaying("Music_FrontEnd"))
 		{
-			MusicManager.instance.StopSong("Music_TitleTheme", true, STOP_MODE.ALLOWFADEOUT);
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSnapshot, STOP_MODE.ALLOWFADEOUT);
+			MusicManager.instance.StopSong("Music_TitleTheme", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 			AudioMixer.instance.Start(AudioMixerSnapshots.Get().FrontEndWorldGenerationSnapshot);
 			MusicManager.instance.PlaySong("Music_FrontEnd", false);
 			MusicManager.instance.SetSongParameter("Music_FrontEnd", "songSection", 1f, true);

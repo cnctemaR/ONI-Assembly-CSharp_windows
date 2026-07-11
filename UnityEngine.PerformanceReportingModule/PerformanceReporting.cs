@@ -8,7 +8,6 @@ namespace UnityEngine.Analytics
 	[NativeHeader("Modules/PerformanceReporting/PerformanceReportingManager.h")]
 	public static class PerformanceReporting
 	{
-		[ThreadAndSerializationSafe]
 		public static extern bool enabled
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

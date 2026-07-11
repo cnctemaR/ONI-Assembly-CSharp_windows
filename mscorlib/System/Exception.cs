@@ -10,9 +10,9 @@ using System.Security;
 
 namespace System
 {
-	[ComVisible(true)]
-	[ComDefaultInterface(typeof(_Exception))]
 	[ClassInterface(ClassInterfaceType.None)]
+	[ComDefaultInterface(typeof(_Exception))]
+	[ComVisible(true)]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public class Exception : ISerializable, _Exception
@@ -499,6 +499,9 @@ namespace System
 			this._stackTraceString = null;
 			return this;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void ReportUnhandledException(Exception exception);
 
 		[OptionalField]
 		private static object s_EDILock = new object();

@@ -6,9 +6,9 @@ using System.Security.Permissions;
 
 namespace System.Runtime.InteropServices
 {
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
 	[Guid("f1c3bf79-c3e4-11d3-88e7-00902754c43a")]
+	[ClassInterface(ClassInterfaceType.None)]
 	public sealed class TypeLibConverter : ITypeLibConverter
 	{
 		[SecuritySafeCritical]
@@ -20,16 +20,16 @@ namespace System.Runtime.InteropServices
 			throw new NotImplementedException();
 		}
 
-		[SecuritySafeCritical]
 		[MonoTODO("implement")]
+		[SecuritySafeCritical]
 		[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 		public AssemblyBuilder ConvertTypeLibToAssembly([MarshalAs(UnmanagedType.Interface)] object typeLib, string asmFileName, int flags, ITypeLibImporterNotifySink notifySink, byte[] publicKey, StrongNameKeyPair keyPair, bool unsafeInterfaces)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO("implement")]
 		[SecuritySafeCritical]
+		[MonoTODO("implement")]
 		[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 		public AssemblyBuilder ConvertTypeLibToAssembly([MarshalAs(UnmanagedType.Interface)] object typeLib, string asmFileName, TypeLibImporterFlags flags, ITypeLibImporterNotifySink notifySink, byte[] publicKey, StrongNameKeyPair keyPair, string asmNamespace, Version asmVersion)
 		{

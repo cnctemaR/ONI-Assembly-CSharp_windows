@@ -4,8 +4,8 @@ using System.Security;
 
 namespace System.Threading
 {
-	[ComVisible(true)]
-	[SecurityCritical]
 	[CLSCompliant(false)]
+	[SecurityCritical]
+	[ComVisible(true)]
 	public unsafe delegate void IOCompletionCallback(uint errorCode, uint numBytes, NativeOverlapped* pOVERLAP);
 }

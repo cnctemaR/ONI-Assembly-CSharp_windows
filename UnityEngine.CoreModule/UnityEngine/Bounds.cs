@@ -5,14 +5,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Geometry/Ray.h")]
-	[NativeHeader("Runtime/Geometry/Intersection.h")]
-	[ThreadAndSerializationSafe]
-	[NativeType(Header = "Runtime/Geometry/AABB.h")]
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	[NativeClass("AABB")]
 	[NativeHeader("Runtime/Geometry/AABB.h")]
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[NativeHeader("Runtime/Geometry/Intersection.h")]
+	[NativeType(Header = "Runtime/Geometry/AABB.h")]
 	[NativeHeader("Runtime/Math/MathScripting.h")]
+	[NativeClass("AABB")]
+	[NativeHeader("Runtime/Geometry/Ray.h")]
 	public struct Bounds : IEquatable<Bounds>
 	{
 		public Bounds(Vector3 center, Vector3 size)
@@ -28,7 +27,8 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
-			return other is Bounds && this.Equals((Bounds)other);
+			bool flag = !(other is Bounds);
+			return !flag && this.Equals((Bounds)other);
 		}
 
 		public bool Equals(Bounds other)

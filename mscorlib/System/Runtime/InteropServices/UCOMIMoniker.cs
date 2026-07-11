@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Guid("0000000f-0000-0000-c000-000000000046")]
 	[Obsolete]
+	[Guid("0000000f-0000-0000-c000-000000000046")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[ComImport]
 	public interface UCOMIMoniker

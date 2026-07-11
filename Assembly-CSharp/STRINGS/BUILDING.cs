@@ -10,7 +10,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "{0} Bait";
 
-				public static LocString TOOLTIP = "This lure is baited with {0}";
+				public static LocString TOOLTIP = "This lure is baited with {0}\n\nBait material is set during the construction of the building";
 			}
 
 			public class ANGERDAMAGE
@@ -1352,14 +1352,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Requires Emptying";
 
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This building is full of ",
-					UI.FormatAsLink("Salt", "SALT"),
-					" and can no longer operate.",
-					UI.HORIZONTAL_BR_RULE,
-					"A Duplicant must empty it for operation to continue."
-				});
+				public static LocString TOOLTIP = "This building needs to be emptied of " + UI.FormatAsLink("Salt", "SALT") + " to resume function";
 			}
 
 			public class HABITATNEEDSEMPTYING

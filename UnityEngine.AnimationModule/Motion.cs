@@ -5,7 +5,7 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Animation/Motion.h")]
+	[NativeHeader("Modules/Animation/Motion.h")]
 	public class Motion : Object
 	{
 		protected Motion()

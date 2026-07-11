@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class ComRegisterFunctionAttribute : Attribute
 	{
 	}

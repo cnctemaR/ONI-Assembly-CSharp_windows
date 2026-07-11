@@ -6,11 +6,12 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Utilities/CopyPaste.h")]
+	[NativeHeader("Modules/IMGUI/GUIUtility.h")]
+	[NativeHeader("Modules/IMGUI/GUIManager.h")]
+	[NativeHeader("Runtime/Input/InputBindings.h")]
 	[NativeHeader("Runtime/Input/InputManager.h")]
 	[NativeHeader("Runtime/Camera/RenderLayers/GUITexture.h")]
-	[NativeHeader("Modules/IMGUI/GUIManager.h")]
-	[NativeHeader("Modules/IMGUI/GUIUtility.h")]
+	[NativeHeader("Runtime/Utilities/CopyPaste.h")]
 	public class GUIUtility
 	{
 		public static extern bool hasModalWindow
@@ -75,8 +76,8 @@ namespace UnityEngine
 			[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 			[FreeFunction("GUITexture::SetManualTex2SRGBEnabled")]
+			[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -129,11 +130,40 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool HasFocusableControls();
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool OwnsId(int id);
+
 		public static Rect AlignRectToDevice(Rect rect, out int widthInPixels, out int heightInPixels)
 		{
 			Rect rect2;
 			GUIUtility.AlignRectToDevice_Injected(ref rect, out widthInPixels, out heightInPixels, out rect2);
 			return rect2;
+		}
+
+		[StaticAccessor("InputBindings", StaticAccessorType.DoubleColon)]
+		internal static extern string compositionString
+		{
+			[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		[StaticAccessor("InputBindings", StaticAccessorType.DoubleColon)]
+		internal static Vector2 compositionCursorPos
+		{
+			[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+			get
+			{
+				Vector2 vector;
+				GUIUtility.get_compositionCursorPos_Injected(out vector);
+				return vector;
+			}
+			[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+			set
+			{
+				GUIUtility.set_compositionCursorPos_Injected(ref value);
+			}
 		}
 
 		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
@@ -191,9 +221,10 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		private static void MarkGUIChanged()
 		{
-			if (GUIUtility.enabledStateChanged != null)
+			Action action = GUIUtility.guiChanged;
+			if (action != null)
 			{
-				GUIUtility.enabledStateChanged();
+				action();
 			}
 		}
 
@@ -249,18 +280,20 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		internal static void TakeCapture()
 		{
-			if (GUIUtility.takeCapture != null)
+			Action action = GUIUtility.takeCapture;
+			if (action != null)
 			{
-				GUIUtility.takeCapture();
+				action();
 			}
 		}
 
 		[RequiredByNativeCode]
 		internal static void RemoveCapture()
 		{
-			if (GUIUtility.releaseCapture != null)
+			Action action = GUIUtility.releaseCapture;
+			if (action != null)
 			{
-				GUIUtility.releaseCapture();
+				action();
 			}
 		}
 
@@ -276,9 +309,13 @@ namespace UnityEngine
 			}
 		}
 
+		internal static bool HasKeyFocus(int controlID)
+		{
+			return controlID == GUIUtility.keyboardControl && (GUIUtility.s_HasCurrentWindowKeyFocusFunc == null || GUIUtility.s_HasCurrentWindowKeyFocusFunc());
+		}
+
 		public static void ExitGUI()
 		{
-			GUIUtility.guiIsExiting = true;
 			throw new ExitGUIException();
 		}
 
@@ -300,7 +337,8 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		internal static bool ProcessEvent(int instanceID, IntPtr nativeEventPtr)
 		{
-			return GUIUtility.processEvent != null && GUIUtility.processEvent(instanceID, nativeEventPtr);
+			bool flag = GUIUtility.processEvent != null;
+			return flag && GUIUtility.processEvent(instanceID, nativeEventPtr);
 		}
 
 		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
@@ -312,9 +350,10 @@ namespace UnityEngine
 
 		internal static void CleanupRoots()
 		{
-			if (GUIUtility.cleanupRoots != null)
+			Action action = GUIUtility.cleanupRoots;
+			if (action != null)
 			{
-				GUIUtility.cleanupRoots();
+				action();
 			}
 		}
 
@@ -324,7 +363,8 @@ namespace UnityEngine
 			GUIUtility.s_SkinMode = skinMode;
 			GUIUtility.s_OriginalID = instanceID;
 			GUIUtility.ResetGlobalState();
-			if (useGUILayout != 0)
+			bool flag = useGUILayout != 0;
+			if (flag)
 			{
 				GUILayoutUtility.Begin(instanceID);
 			}
@@ -335,21 +375,17 @@ namespace UnityEngine
 		{
 			try
 			{
-				if (Event.current.type == EventType.Layout)
+				bool flag = Event.current.type == EventType.Layout;
+				if (flag)
 				{
-					if (layoutType != 0)
+					switch (layoutType)
 					{
-						if (layoutType != 1)
-						{
-							if (layoutType == 2)
-							{
-								GUILayoutUtility.LayoutFromEditorWindow();
-							}
-						}
-						else
-						{
-							GUILayoutUtility.Layout();
-						}
+					case 1:
+						GUILayoutUtility.Layout();
+						break;
+					case 2:
+						GUILayoutUtility.LayoutFromEditorWindow();
+						break;
 					}
 				}
 				GUILayoutUtility.SelectIDList(GUIUtility.s_OriginalID, false);
@@ -371,7 +407,8 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		internal static bool EndContainerGUIFromException(Exception exception)
 		{
-			return GUIUtility.endContainerGUIFromException != null && GUIUtility.endContainerGUIFromException(exception);
+			bool flag = GUIUtility.endContainerGUIFromException != null;
+			return flag && GUIUtility.endContainerGUIFromException(exception);
 		}
 
 		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
@@ -380,6 +417,7 @@ namespace UnityEngine
 			GUI.skin = null;
 			GUIUtility.guiIsExiting = false;
 			GUI.changed = false;
+			GUI.scrollViewStates.Clear();
 		}
 
 		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
@@ -400,10 +438,17 @@ namespace UnityEngine
 
 		internal static void CheckOnGUI()
 		{
-			if (GUIUtility.guiDepth <= 0)
+			bool flag = GUIUtility.guiDepth <= 0;
+			if (flag)
 			{
 				throw new ArgumentException("You can only call GUI functions from inside OnGUI.");
 			}
+		}
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+		internal static float RoundToPixelGrid(float v)
+		{
+			return Mathf.Floor(v * GUIUtility.pixelsPerPoint + 0.48f) / GUIUtility.pixelsPerPoint;
 		}
 
 		public static Vector2 GUIToScreenPoint(Vector2 guiPoint)
@@ -411,7 +456,7 @@ namespace UnityEngine
 			return GUIUtility.InternalWindowToScreenPoint(GUIClip.UnclipToWindow(guiPoint));
 		}
 
-		internal static Rect GUIToScreenRect(Rect guiRect)
+		public static Rect GUIToScreenRect(Rect guiRect)
 		{
 			Vector2 vector = GUIUtility.GUIToScreenPoint(new Vector2(guiRect.x, guiRect.y));
 			guiRect.x = vector.x;
@@ -456,6 +501,22 @@ namespace UnityEngine
 			return GUIUtility.AlignRectToDevice(rect, out num, out num2);
 		}
 
+		internal static bool HitTest(Rect rect, Vector2 point, int offset)
+		{
+			return point.x >= rect.xMin - (float)offset && point.x < rect.xMax + (float)offset && point.y >= rect.yMin - (float)offset && point.y < rect.yMax + (float)offset;
+		}
+
+		internal static bool HitTest(Rect rect, Vector2 point, bool isDirectManipulationDevice)
+		{
+			int num = (isDirectManipulationDevice ? 3 : 0);
+			return GUIUtility.HitTest(rect, point, num);
+		}
+
+		internal static bool HitTest(Rect rect, Event evt)
+		{
+			return GUIUtility.HitTest(rect, evt.mousePosition, evt.isDirectManipulationDevice);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_s_EditorScreenPointOffset_Injected(out Vector2 ret);
 
@@ -467,6 +528,12 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void AlignRectToDevice_Injected(ref Rect rect, out int widthInPixels, out int heightInPixels, out Rect ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_compositionCursorPos_Injected(out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_compositionCursorPos_Injected(ref Vector2 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_MultiplyPoint_Injected(ref Vector3 point, ref Matrix4x4 transform, out Vector3 ret);
@@ -499,6 +566,8 @@ namespace UnityEngine
 		internal static Func<Exception, bool> endContainerGUIFromException;
 
 		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
-		internal static Action enabledStateChanged;
+		internal static Action guiChanged;
+
+		internal static Func<bool> s_HasCurrentWindowKeyFocusFunc;
 	}
 }

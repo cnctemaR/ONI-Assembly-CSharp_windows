@@ -288,8 +288,9 @@ namespace UnityEngine
 		public AnimationClip GetClip(string name)
 		{
 			AnimationState state = this.GetState(name);
+			bool flag = state;
 			AnimationClip animationClip;
-			if (state)
+			if (flag)
 			{
 				animationClip = state.clip;
 			}

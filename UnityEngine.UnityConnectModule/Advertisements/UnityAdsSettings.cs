@@ -8,11 +8,12 @@ namespace UnityEngine.Advertisements
 	internal static class UnityAdsSettings
 	{
 		[StaticAccessor("GetUnityAdsSettings()", StaticAccessorType.Dot)]
-		[ThreadAndSerializationSafe]
 		public static extern bool enabled
 		{
+			[ThreadSafe]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[ThreadSafe]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}

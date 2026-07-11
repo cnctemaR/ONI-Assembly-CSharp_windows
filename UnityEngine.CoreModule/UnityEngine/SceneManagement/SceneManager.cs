@@ -14,9 +14,9 @@ namespace UnityEngine.SceneManagement
 	{
 		public static extern int sceneCount
 		{
-			[NativeHeader("Runtime/SceneManager/SceneManager.h")]
 			[StaticAccessor("GetSceneManager()", StaticAccessorType.Dot)]
 			[NativeMethod("GetSceneCount")]
+			[NativeHeader("Runtime/SceneManager/SceneManager.h")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -37,8 +37,8 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[NativeThrows]
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		[NativeThrows]
 		public static bool SetActiveScene(Scene scene)
 		{
 			return SceneManager.SetActiveScene_Injected(ref scene);
@@ -60,8 +60,8 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
+		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		public static Scene GetSceneByBuildIndex(int buildIndex)
 		{
 			Scene scene;
@@ -69,8 +69,8 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[NativeThrows]
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		[NativeThrows]
 		public static Scene GetSceneAt(int index)
 		{
 			Scene scene;
@@ -78,8 +78,8 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[NativeThrows]
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		[NativeThrows]
 		public static Scene CreateScene([NotNull] string sceneName, CreateSceneParameters parameters)
 		{
 			Scene scene;
@@ -87,8 +87,8 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[NativeThrows]
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		[NativeThrows]
 		private static bool UnloadSceneInternal(Scene scene, UnloadSceneOptions options)
 		{
 			return SceneManager.UnloadSceneInternal_Injected(ref scene, options);
@@ -101,17 +101,36 @@ namespace UnityEngine.SceneManagement
 			return SceneManager.UnloadSceneAsyncInternal_Injected(ref scene, options);
 		}
 
-		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
-		[NativeThrows]
 		private static AsyncOperation LoadSceneAsyncNameIndexInternal(string sceneName, int sceneBuildIndex, LoadSceneParameters parameters, bool mustCompleteNextFrame)
 		{
-			return SceneManager.LoadSceneAsyncNameIndexInternal_Injected(sceneName, sceneBuildIndex, ref parameters, mustCompleteNextFrame);
+			bool flag = !SceneManager.s_AllowLoadScene;
+			AsyncOperation asyncOperation;
+			if (flag)
+			{
+				asyncOperation = null;
+			}
+			else
+			{
+				asyncOperation = SceneManagerAPIInternal.LoadSceneAsyncNameIndexInternal(sceneName, sceneBuildIndex, parameters, mustCompleteNextFrame);
+			}
+			return asyncOperation;
 		}
 
-		[NativeThrows]
-		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern AsyncOperation UnloadSceneNameIndexInternal(string sceneName, int sceneBuildIndex, bool immediately, UnloadSceneOptions options, out bool outSuccess);
+		private static AsyncOperation UnloadSceneNameIndexInternal(string sceneName, int sceneBuildIndex, bool immediately, UnloadSceneOptions options, out bool outSuccess)
+		{
+			bool flag = !SceneManager.s_AllowLoadScene;
+			AsyncOperation asyncOperation;
+			if (flag)
+			{
+				outSuccess = false;
+				asyncOperation = null;
+			}
+			else
+			{
+				asyncOperation = SceneManagerAPIInternal.UnloadSceneNameIndexInternal(sceneName, sceneBuildIndex, immediately, options, out outSuccess);
+			}
+			return asyncOperation;
+		}
 
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
@@ -286,7 +305,8 @@ namespace UnityEngine.SceneManagement
 		[RequiredByNativeCode]
 		private static void Internal_SceneLoaded(Scene scene, LoadSceneMode mode)
 		{
-			if (SceneManager.sceneLoaded != null)
+			bool flag = SceneManager.sceneLoaded != null;
+			if (flag)
 			{
 				SceneManager.sceneLoaded(scene, mode);
 			}
@@ -295,7 +315,8 @@ namespace UnityEngine.SceneManagement
 		[RequiredByNativeCode]
 		private static void Internal_SceneUnloaded(Scene scene)
 		{
-			if (SceneManager.sceneUnloaded != null)
+			bool flag = SceneManager.sceneUnloaded != null;
+			if (flag)
 			{
 				SceneManager.sceneUnloaded(scene);
 			}
@@ -304,7 +325,8 @@ namespace UnityEngine.SceneManagement
 		[RequiredByNativeCode]
 		private static void Internal_ActiveSceneChanged(Scene previousActiveScene, Scene newActiveScene)
 		{
-			if (SceneManager.activeSceneChanged != null)
+			bool flag = SceneManager.activeSceneChanged != null;
+			if (flag)
 			{
 				SceneManager.activeSceneChanged(previousActiveScene, newActiveScene);
 			}
@@ -338,12 +360,11 @@ namespace UnityEngine.SceneManagement
 		private static extern AsyncOperation UnloadSceneAsyncInternal_Injected(ref Scene scene, UnloadSceneOptions options);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern AsyncOperation LoadSceneAsyncNameIndexInternal_Injected(string sceneName, int sceneBuildIndex, ref LoadSceneParameters parameters, bool mustCompleteNextFrame);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void MergeScenes_Injected(ref Scene sourceScene, ref Scene destinationScene);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void MoveGameObjectToScene_Injected(GameObject go, ref Scene scene);
+
+		internal static bool s_AllowLoadScene = true;
 	}
 }

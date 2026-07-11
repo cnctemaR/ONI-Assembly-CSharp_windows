@@ -15,7 +15,7 @@ internal class UpdateConsumedMassParameter : LoopingSoundParameterUpdater
 		{
 			creatureCalorieMonitor = sound.transform.GetSMI<CreatureCalorieMonitor.Instance>(),
 			ev = sound.ev,
-			parameterIdx = sound.description.GetParameterIdx(base.parameter)
+			parameterId = sound.description.GetParameterId(base.parameter)
 		};
 		this.entries.Add(entry);
 	}
@@ -28,7 +28,7 @@ internal class UpdateConsumedMassParameter : LoopingSoundParameterUpdater
 			{
 				float fullness = entry.creatureCalorieMonitor.stomach.GetFullness();
 				EventInstance ev = entry.ev;
-				ev.setParameterValueByIndex(entry.parameterIdx, fullness);
+				ev.setParameterByID(entry.parameterId, fullness, false);
 			}
 		}
 	}
@@ -53,6 +53,6 @@ internal class UpdateConsumedMassParameter : LoopingSoundParameterUpdater
 
 		public EventInstance ev;
 
-		public int parameterIdx;
+		public PARAMETER_ID parameterId;
 	}
 }

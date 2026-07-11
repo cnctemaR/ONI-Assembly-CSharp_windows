@@ -255,6 +255,22 @@ public class SaveLoader : KMonoBehaviour
 		return Path.Combine(Util.RootFolder(), "save_files/");
 	}
 
+	public static string GetCloudSavePrefix()
+	{
+		string text = Path.Combine(Util.RootFolder(), "cloud_save_files/");
+		string userID = SaveLoader.GetUserID();
+		if (string.IsNullOrEmpty(userID))
+		{
+			return null;
+		}
+		text = Path.Combine(text, userID);
+		if (!global::System.IO.Directory.Exists(text))
+		{
+			global::System.IO.Directory.CreateDirectory(text);
+		}
+		return text;
+	}
+
 	public static string GetSavePrefixAndCreateFolder()
 	{
 		string savePrefix = SaveLoader.GetSavePrefix();
@@ -263,6 +279,56 @@ public class SaveLoader : KMonoBehaviour
 			global::System.IO.Directory.CreateDirectory(savePrefix);
 		}
 		return savePrefix;
+	}
+
+	public static string GetUserID()
+	{
+		DistributionPlatform.User localUser = DistributionPlatform.Inst.LocalUser;
+		if (localUser == null)
+		{
+			return null;
+		}
+		return localUser.Id.ToString();
+	}
+
+	public static string GetNextUsableSavePath(string filename)
+	{
+		int num = 0;
+		string text = Path.ChangeExtension(filename, null);
+		while (File.Exists(filename))
+		{
+			filename = SaveScreen.GetValidSaveFilename(string.Format("{0} ({1})", text, num));
+			num++;
+		}
+		return filename;
+	}
+
+	public static string GetOriginalSaveFileName(string filename)
+	{
+		if (!filename.Contains("/") && !filename.Contains("\\"))
+		{
+			return filename;
+		}
+		filename.Replace('\\', '/');
+		return Path.GetFileName(filename);
+	}
+
+	public static bool IsSaveAuto(string filename)
+	{
+		filename = filename.Replace('\\', '/');
+		return filename.Contains("/auto_save/");
+	}
+
+	public static bool IsSaveLocal(string filename)
+	{
+		filename = filename.Replace('\\', '/');
+		return filename.Contains("/save_files/");
+	}
+
+	public static bool IsSaveCloud(string filename)
+	{
+		filename = filename.Replace('\\', '/');
+		return filename.Contains("/cloud_save_files/");
 	}
 
 	public static string GetAutoSavePrefix()
@@ -285,9 +351,29 @@ public class SaveLoader : KMonoBehaviour
 		return KPlayerPrefs.GetString("SaveFilenameKey/");
 	}
 
+	public static string GetActiveAutoSavePath()
+	{
+		string activeSaveFilePath = SaveLoader.GetActiveSaveFilePath();
+		if (activeSaveFilePath == null)
+		{
+			return SaveLoader.GetAutoSavePrefix();
+		}
+		return Path.Combine(Path.GetDirectoryName(activeSaveFilePath), "auto_save");
+	}
+
 	public static string GetAutosaveFilePath()
 	{
 		return SaveLoader.GetAutoSavePrefix() + "AutoSave Cycle 1.sav";
+	}
+
+	public static string GetActiveSaveColonyFolder()
+	{
+		string text = SaveLoader.GetActiveSaveFolder();
+		if (text == null)
+		{
+			text = Path.Combine(SaveLoader.GetSavePrefix(), SaveLoader.Instance.GameInfo.baseName);
+		}
+		return text;
 	}
 
 	public static string GetActiveSaveFolder()
@@ -300,16 +386,20 @@ public class SaveLoader : KMonoBehaviour
 		return null;
 	}
 
-	public static List<string> GetSaveFiles(string save_dir)
+	public static List<string> GetSaveFiles(string save_dir, SearchOption search = SearchOption.AllDirectories)
 	{
 		List<string> list = new List<string>();
+		if (string.IsNullOrEmpty(save_dir))
+		{
+			return list;
+		}
 		try
 		{
 			if (!global::System.IO.Directory.Exists(save_dir))
 			{
 				global::System.IO.Directory.CreateDirectory(save_dir);
 			}
-			string[] files = global::System.IO.Directory.GetFiles(save_dir, "*.sav", SearchOption.AllDirectories);
+			string[] files = global::System.IO.Directory.GetFiles(save_dir, "*.sav", search);
 			List<SaveLoader.SaveFileEntry> list2 = new List<SaveLoader.SaveFileEntry>();
 			foreach (string text in files)
 			{
@@ -355,14 +445,77 @@ public class SaveLoader : KMonoBehaviour
 		return list;
 	}
 
-	public static List<string> GetAllFiles()
+	public static List<string> GetAllFiles(SaveLoader.SaveType type = SaveLoader.SaveType.both)
 	{
-		return SaveLoader.GetSaveFiles(SaveLoader.GetSavePrefixAndCreateFolder());
+		switch (type)
+		{
+		case SaveLoader.SaveType.local:
+			return SaveLoader.GetSaveFiles(SaveLoader.GetSavePrefixAndCreateFolder(), SearchOption.AllDirectories);
+		case SaveLoader.SaveType.cloud:
+			return SaveLoader.GetSaveFiles(SaveLoader.GetCloudSavePrefix(), SearchOption.AllDirectories);
+		case SaveLoader.SaveType.both:
+		{
+			List<string> saveFiles = SaveLoader.GetSaveFiles(SaveLoader.GetSavePrefixAndCreateFolder(), SearchOption.AllDirectories);
+			List<string> saveFiles2 = SaveLoader.GetSaveFiles(SaveLoader.GetCloudSavePrefix(), SearchOption.AllDirectories);
+			for (int i = 0; i < saveFiles2.Count; i++)
+			{
+				saveFiles.Add(saveFiles2[i]);
+			}
+			saveFiles.Sort(delegate(string x, string y)
+			{
+				global::System.DateTime lastWriteTime = File.GetLastWriteTime(x);
+				return File.GetLastWriteTime(y).CompareTo(lastWriteTime);
+			});
+			return saveFiles;
+		}
+		default:
+			return new List<string>();
+		}
+	}
+
+	public static List<string> GetAllColonyFiles(SearchOption search = SearchOption.TopDirectoryOnly)
+	{
+		return SaveLoader.GetSaveFiles(SaveLoader.GetActiveSaveColonyFolder(), search);
+	}
+
+	public static bool GetCloudSavesDefault()
+	{
+		return !(SaveLoader.GetCloudSavesDefaultPref() == "Disabled");
+	}
+
+	public static string GetCloudSavesDefaultPref()
+	{
+		string text = KPlayerPrefs.GetString("SavesDefaultToCloud", "Enabled");
+		if (text != "Enabled" && text != "Disabled")
+		{
+			text = "Enabled";
+		}
+		return text;
+	}
+
+	public static void SetCloudSavesDefault(bool value)
+	{
+		SaveLoader.SetCloudSavesDefaultPref(value ? "Enabled" : "Disabled");
+	}
+
+	public static void SetCloudSavesDefaultPref(string pref)
+	{
+		if (pref != "Enabled" && pref != "Disabled")
+		{
+			global::Debug.LogWarning("Ignoring cloud saves default pref `" + pref + "` as it's not valid, expected `Enabled` or `Disabled`");
+			return;
+		}
+		KPlayerPrefs.SetString("SavesDefaultToCloud", pref);
+	}
+
+	public static bool GetCloudSavesAvailable()
+	{
+		return !string.IsNullOrEmpty(SaveLoader.GetUserID()) && SaveLoader.GetCloudSavePrefix() != null;
 	}
 
 	public static string GetLatestSaveFile()
 	{
-		List<string> allFiles = SaveLoader.GetAllFiles();
+		List<string> allFiles = SaveLoader.GetAllFiles(SaveLoader.SaveType.both);
 		if (allFiles.Count == 0)
 		{
 			return null;
@@ -387,34 +540,55 @@ public class SaveLoader : KMonoBehaviour
 	public string Save(string filename, bool isAutoSave = false, bool updateSavePointer = true)
 	{
 		global::KSerialization.Manager.Clear();
+		string directoryName = Path.GetDirectoryName(filename);
+		try
+		{
+			if (directoryName != null && !global::System.IO.Directory.Exists(directoryName))
+			{
+				global::System.IO.Directory.CreateDirectory(directoryName);
+			}
+		}
+		catch (Exception ex)
+		{
+			global::Debug.LogWarning("Problem creating save folder for " + filename + "!\n" + ex.ToString());
+		}
 		this.ReportSaveMetrics(isAutoSave);
 		RetireColonyUtility.SaveColonySummaryData();
 		if (isAutoSave && !GenericGameSettings.instance.keepAllAutosaves)
 		{
-			List<string> saveFiles = SaveLoader.GetSaveFiles(Path.GetDirectoryName(filename));
-			for (int i = saveFiles.Count - 1; i >= 9; i--)
+			List<string> saveFiles = SaveLoader.GetSaveFiles(SaveLoader.GetActiveAutoSavePath(), SearchOption.AllDirectories);
+			List<string> list = new List<string>();
+			foreach (string text in saveFiles)
 			{
-				string text = saveFiles[i];
+				global::Tuple<SaveGame.Header, SaveGame.GameInfo> fileInfo = SaveGame.GetFileInfo(text);
+				if (fileInfo != null && SaveGame.GetSaveUniqueID(fileInfo.second) == SaveLoader.Instance.GameInfo.colonyGuid.ToString())
+				{
+					list.Add(text);
+				}
+			}
+			for (int i = list.Count - 1; i >= 9; i--)
+			{
+				string text2 = list[i];
 				try
 				{
-					global::Debug.Log("Deleting old autosave: " + text);
-					File.Delete(text);
-				}
-				catch (Exception ex)
-				{
-					global::Debug.LogWarning("Problem deleting autosave: " + text + "\n" + ex.ToString());
-				}
-				string text2 = Path.ChangeExtension(text, ".png");
-				try
-				{
-					if (File.Exists(text2))
-					{
-						File.Delete(text2);
-					}
+					global::Debug.Log("Deleting old autosave: " + text2);
+					File.Delete(text2);
 				}
 				catch (Exception ex2)
 				{
-					global::Debug.LogWarning("Problem deleting autosave screenshot: " + text2 + "\n" + ex2.ToString());
+					global::Debug.LogWarning("Problem deleting autosave: " + text2 + "\n" + ex2.ToString());
+				}
+				string text3 = Path.ChangeExtension(text2, ".png");
+				try
+				{
+					if (File.Exists(text3))
+					{
+						File.Delete(text3);
+					}
+				}
+				catch (Exception ex3)
+				{
+					global::Debug.LogWarning("Problem deleting autosave screenshot: " + text3 + "\n" + ex3.ToString());
 				}
 			}
 		}
@@ -447,21 +621,21 @@ public class SaveLoader : KMonoBehaviour
 						Stats.Print();
 					}
 				}
-				catch (Exception ex3)
+				catch (Exception ex4)
 				{
-					if (ex3 is UnauthorizedAccessException)
+					if (ex4 is UnauthorizedAccessException)
 					{
 						DebugUtil.LogArgs(new object[] { "UnauthorizedAccessException for " + filename });
 						((ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay)).PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "Unauthorized Access Exception"), null, null, null, null, null, null, null, null);
 						return SaveLoader.GetActiveSaveFilePath();
 					}
-					if (ex3 is IOException)
+					if (ex4 is IOException)
 					{
 						DebugUtil.LogArgs(new object[] { "IOException (probably out of disk space) for " + filename });
 						((ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay)).PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "IOException. You may not have enough free space!"), null, null, null, null, null, null, null, null);
 						return SaveLoader.GetActiveSaveFilePath();
 					}
-					throw ex3;
+					throw ex4;
 				}
 			}
 		}
@@ -508,6 +682,22 @@ public class SaveLoader : KMonoBehaviour
 				this.GameInfo.saveMajorVersion,
 				this.GameInfo.saveMinorVersion
 			}) });
+			string originalSaveName = this.GameInfo.originalSaveName;
+			if (originalSaveName.Contains("/") || originalSaveName.Contains("\\"))
+			{
+				string originalSaveFileName = SaveLoader.GetOriginalSaveFileName(originalSaveName);
+				SaveGame.GameInfo gameInfo = this.GameInfo;
+				gameInfo.originalSaveName = originalSaveFileName;
+				this.GameInfo = gameInfo;
+				global::Debug.Log(string.Concat(new string[]
+				{
+					"Migration / Save originalSaveName updated from: `",
+					originalSaveName,
+					"` => `",
+					this.GameInfo.originalSaveName,
+					"`"
+				}));
+			}
 			if (this.GameInfo.saveMajorVersion == 7 && this.GameInfo.saveMinorVersion < 4)
 			{
 				Helper.SetTypeInfoMask((SerializationTypeInfo)191);
@@ -530,7 +720,28 @@ public class SaveLoader : KMonoBehaviour
 			}
 			if (this.GameInfo.isAutoSave && !string.IsNullOrEmpty(this.GameInfo.originalSaveName))
 			{
-				SaveLoader.SetActiveSaveFilePath(this.GameInfo.originalSaveName);
+				string originalSaveFileName2 = SaveLoader.GetOriginalSaveFileName(this.GameInfo.originalSaveName);
+				string text;
+				if (SaveLoader.IsSaveCloud(filename))
+				{
+					string cloudSavePrefix = SaveLoader.GetCloudSavePrefix();
+					if (cloudSavePrefix != null)
+					{
+						text = Path.Combine(cloudSavePrefix, this.GameInfo.baseName, originalSaveFileName2);
+					}
+					else
+					{
+						text = Path.Combine(Path.GetDirectoryName(filename).Replace("auto_save", ""), this.GameInfo.baseName, originalSaveFileName2);
+					}
+				}
+				else
+				{
+					text = Path.Combine(SaveLoader.GetSavePrefix(), this.GameInfo.baseName, originalSaveFileName2);
+				}
+				if (text != null)
+				{
+					SaveLoader.SetActiveSaveFilePath(text);
+				}
 			}
 		}
 		catch (Exception ex)
@@ -827,6 +1038,12 @@ public class SaveLoader : KMonoBehaviour
 
 	public const string SAVE_EXTENSION = ".sav";
 
+	public const string AUTOSAVE_FOLDER = "auto_save";
+
+	public const string CLOUDSAVE_FOLDER = "cloud_save_files";
+
+	public const string SAVE_FOLDER = "save_files";
+
 	public const int MAX_AUTOSAVE_FILES = 10;
 
 	[NonSerialized]
@@ -892,6 +1109,13 @@ public class SaveLoader : KMonoBehaviour
 		public string path;
 
 		public global::System.DateTime timeStamp;
+	}
+
+	public enum SaveType
+	{
+		local,
+		cloud,
+		both
 	}
 
 	private struct MinionAttrFloatData

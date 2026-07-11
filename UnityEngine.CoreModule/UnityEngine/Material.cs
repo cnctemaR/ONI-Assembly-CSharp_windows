@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
+using UnityEngine.Rendering;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
@@ -12,24 +13,6 @@ namespace UnityEngine
 	[NativeHeader("Runtime/Shaders/Material.h")]
 	public class Material : Object
 	{
-		public Material(Shader shader)
-		{
-			Material.CreateWithShader(this, shader);
-		}
-
-		[RequiredByNativeCode]
-		public Material(Material source)
-		{
-			Material.CreateWithMaterial(this, source);
-		}
-
-		[Obsolete("Creating materials from shader source string is no longer supported. Use Shader assets instead.", false)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public Material(string contents)
-		{
-			Material.CreateWithString(this);
-		}
-
 		[Obsolete("Creating materials from shader source string will be removed in the future. Use Shader assets instead.", false)]
 		public static Material Create(string scriptContents)
 		{
@@ -47,6 +30,24 @@ namespace UnityEngine
 		[FreeFunction("MaterialScripting::CreateWithString")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void CreateWithString([Writable] Material self);
+
+		public Material(Shader shader)
+		{
+			Material.CreateWithShader(this, shader);
+		}
+
+		[RequiredByNativeCode]
+		public Material(Material source)
+		{
+			Material.CreateWithMaterial(this, source);
+		}
+
+		[Obsolete("Creating materials from shader source string is no longer supported. Use Shader assets instead.", false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public Material(string contents)
+		{
+			Material.CreateWithString(this);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Material GetDefaultMaterial();
@@ -69,11 +70,31 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.GetColor("_Color");
+				int firstPropertyNameIdByAttribute = this.GetFirstPropertyNameIdByAttribute(ShaderPropertyFlags.MainColor);
+				bool flag = firstPropertyNameIdByAttribute >= 0;
+				Color color;
+				if (flag)
+				{
+					color = this.GetColor(firstPropertyNameIdByAttribute);
+				}
+				else
+				{
+					color = this.GetColor("_Color");
+				}
+				return color;
 			}
 			set
 			{
-				this.SetColor("_Color", value);
+				int firstPropertyNameIdByAttribute = this.GetFirstPropertyNameIdByAttribute(ShaderPropertyFlags.MainColor);
+				bool flag = firstPropertyNameIdByAttribute >= 0;
+				if (flag)
+				{
+					this.SetColor(firstPropertyNameIdByAttribute, value);
+				}
+				else
+				{
+					this.SetColor("_Color", value);
+				}
 			}
 		}
 
@@ -81,11 +102,31 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.GetTexture("_MainTex");
+				int firstPropertyNameIdByAttribute = this.GetFirstPropertyNameIdByAttribute(ShaderPropertyFlags.MainTexture);
+				bool flag = firstPropertyNameIdByAttribute >= 0;
+				Texture texture;
+				if (flag)
+				{
+					texture = this.GetTexture(firstPropertyNameIdByAttribute);
+				}
+				else
+				{
+					texture = this.GetTexture("_MainTex");
+				}
+				return texture;
 			}
 			set
 			{
-				this.SetTexture("_MainTex", value);
+				int firstPropertyNameIdByAttribute = this.GetFirstPropertyNameIdByAttribute(ShaderPropertyFlags.MainTexture);
+				bool flag = firstPropertyNameIdByAttribute >= 0;
+				if (flag)
+				{
+					this.SetTexture(firstPropertyNameIdByAttribute, value);
+				}
+				else
+				{
+					this.SetTexture("_MainTex", value);
+				}
 			}
 		}
 
@@ -93,11 +134,31 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.GetTextureOffset("_MainTex");
+				int firstPropertyNameIdByAttribute = this.GetFirstPropertyNameIdByAttribute(ShaderPropertyFlags.MainTexture);
+				bool flag = firstPropertyNameIdByAttribute >= 0;
+				Vector2 vector;
+				if (flag)
+				{
+					vector = this.GetTextureOffset(firstPropertyNameIdByAttribute);
+				}
+				else
+				{
+					vector = this.GetTextureOffset("_MainTex");
+				}
+				return vector;
 			}
 			set
 			{
-				this.SetTextureOffset("_MainTex", value);
+				int firstPropertyNameIdByAttribute = this.GetFirstPropertyNameIdByAttribute(ShaderPropertyFlags.MainTexture);
+				bool flag = firstPropertyNameIdByAttribute >= 0;
+				if (flag)
+				{
+					this.SetTextureOffset(firstPropertyNameIdByAttribute, value);
+				}
+				else
+				{
+					this.SetTextureOffset("_MainTex", value);
+				}
 			}
 		}
 
@@ -105,13 +166,37 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.GetTextureScale("_MainTex");
+				int firstPropertyNameIdByAttribute = this.GetFirstPropertyNameIdByAttribute(ShaderPropertyFlags.MainTexture);
+				bool flag = firstPropertyNameIdByAttribute >= 0;
+				Vector2 vector;
+				if (flag)
+				{
+					vector = this.GetTextureScale(firstPropertyNameIdByAttribute);
+				}
+				else
+				{
+					vector = this.GetTextureScale("_MainTex");
+				}
+				return vector;
 			}
 			set
 			{
-				this.SetTextureScale("_MainTex", value);
+				int firstPropertyNameIdByAttribute = this.GetFirstPropertyNameIdByAttribute(ShaderPropertyFlags.MainTexture);
+				bool flag = firstPropertyNameIdByAttribute >= 0;
+				if (flag)
+				{
+					this.SetTextureScale(firstPropertyNameIdByAttribute, value);
+				}
+				else
+				{
+					this.SetTextureScale("_MainTex", value);
+				}
 			}
 		}
+
+		[NativeName("GetFirstPropertyNameIdByAttributeFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetFirstPropertyNameIdByAttribute(ShaderPropertyFlags attributeFlag);
 
 		[NativeName("HasPropertyFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -210,9 +295,10 @@ namespace UnityEngine
 			return this.GetTagImpl(tag, !searchFallbacks, "");
 		}
 
+		[NativeThrows]
 		[FreeFunction("MaterialScripting::Lerp", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Lerp([NotNull] Material start, [NotNull] Material end, float t);
+		public extern void Lerp(Material start, Material end, float t);
 
 		[FreeFunction("MaterialScripting::SetPass", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -241,6 +327,9 @@ namespace UnityEngine
 				this.SetShaderKeywords(value);
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int ComputeCRC();
 
 		[FreeFunction("MaterialScripting::GetTexturePropertyNames", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -288,9 +377,17 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetTextureImpl(int name, Texture value);
 
+		[NativeName("SetRenderTextureFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetRenderTextureImpl(int name, RenderTexture value, RenderTextureSubElement element);
+
 		[NativeName("SetBufferFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetBufferImpl(int name, ComputeBuffer value);
+
+		[NativeName("SetConstantBufferFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetConstantBufferImpl(int name, ComputeBuffer value, int offset, int size);
 
 		[NativeName("GetFloatFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -402,15 +499,18 @@ namespace UnityEngine
 
 		private void SetFloatArray(int name, float[] values, int count)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
-			if (values.Length == 0)
+			bool flag2 = values.Length == 0;
+			if (flag2)
 			{
 				throw new ArgumentException("Zero-sized array is not allowed.");
 			}
-			if (values.Length < count)
+			bool flag3 = values.Length < count;
+			if (flag3)
 			{
 				throw new ArgumentException("array has less elements than passed count.");
 			}
@@ -419,15 +519,18 @@ namespace UnityEngine
 
 		private void SetVectorArray(int name, Vector4[] values, int count)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
-			if (values.Length == 0)
+			bool flag2 = values.Length == 0;
+			if (flag2)
 			{
 				throw new ArgumentException("Zero-sized array is not allowed.");
 			}
-			if (values.Length < count)
+			bool flag3 = values.Length < count;
+			if (flag3)
 			{
 				throw new ArgumentException("array has less elements than passed count.");
 			}
@@ -436,15 +539,18 @@ namespace UnityEngine
 
 		private void SetColorArray(int name, Color[] values, int count)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
-			if (values.Length == 0)
+			bool flag2 = values.Length == 0;
+			if (flag2)
 			{
 				throw new ArgumentException("Zero-sized array is not allowed.");
 			}
-			if (values.Length < count)
+			bool flag3 = values.Length < count;
+			if (flag3)
 			{
 				throw new ArgumentException("array has less elements than passed count.");
 			}
@@ -453,15 +559,18 @@ namespace UnityEngine
 
 		private void SetMatrixArray(int name, Matrix4x4[] values, int count)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
-			if (values.Length == 0)
+			bool flag2 = values.Length == 0;
+			if (flag2)
 			{
 				throw new ArgumentException("Zero-sized array is not allowed.");
 			}
-			if (values.Length < count)
+			bool flag3 = values.Length < count;
+			if (flag3)
 			{
 				throw new ArgumentException("array has less elements than passed count.");
 			}
@@ -470,13 +579,15 @@ namespace UnityEngine
 
 		private void ExtractFloatArray(int name, List<float> values)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
 			values.Clear();
 			int floatArrayCountImpl = this.GetFloatArrayCountImpl(name);
-			if (floatArrayCountImpl > 0)
+			bool flag2 = floatArrayCountImpl > 0;
+			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<float>(values, floatArrayCountImpl);
 				this.ExtractFloatArrayImpl(name, (float[])NoAllocHelpers.ExtractArrayFromList(values));
@@ -485,13 +596,15 @@ namespace UnityEngine
 
 		private void ExtractVectorArray(int name, List<Vector4> values)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
 			values.Clear();
 			int vectorArrayCountImpl = this.GetVectorArrayCountImpl(name);
-			if (vectorArrayCountImpl > 0)
+			bool flag2 = vectorArrayCountImpl > 0;
+			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<Vector4>(values, vectorArrayCountImpl);
 				this.ExtractVectorArrayImpl(name, (Vector4[])NoAllocHelpers.ExtractArrayFromList(values));
@@ -500,13 +613,15 @@ namespace UnityEngine
 
 		private void ExtractColorArray(int name, List<Color> values)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
 			values.Clear();
 			int colorArrayCountImpl = this.GetColorArrayCountImpl(name);
-			if (colorArrayCountImpl > 0)
+			bool flag2 = colorArrayCountImpl > 0;
+			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<Color>(values, colorArrayCountImpl);
 				this.ExtractColorArrayImpl(name, (Color[])NoAllocHelpers.ExtractArrayFromList(values));
@@ -515,13 +630,15 @@ namespace UnityEngine
 
 		private void ExtractMatrixArray(int name, List<Matrix4x4> values)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
 			values.Clear();
 			int matrixArrayCountImpl = this.GetMatrixArrayCountImpl(name);
-			if (matrixArrayCountImpl > 0)
+			bool flag2 = matrixArrayCountImpl > 0;
+			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<Matrix4x4>(values, matrixArrayCountImpl);
 				this.ExtractMatrixArrayImpl(name, (Matrix4x4[])NoAllocHelpers.ExtractArrayFromList(values));
@@ -588,6 +705,16 @@ namespace UnityEngine
 			this.SetTextureImpl(nameID, value);
 		}
 
+		public void SetTexture(string name, RenderTexture value, RenderTextureSubElement element)
+		{
+			this.SetRenderTextureImpl(Shader.PropertyToID(name), value, element);
+		}
+
+		public void SetTexture(int nameID, RenderTexture value, RenderTextureSubElement element)
+		{
+			this.SetRenderTextureImpl(nameID, value, element);
+		}
+
 		public void SetBuffer(string name, ComputeBuffer value)
 		{
 			this.SetBufferImpl(Shader.PropertyToID(name), value);
@@ -596,6 +723,16 @@ namespace UnityEngine
 		public void SetBuffer(int nameID, ComputeBuffer value)
 		{
 			this.SetBufferImpl(nameID, value);
+		}
+
+		public void SetConstantBuffer(string name, ComputeBuffer value, int offset, int size)
+		{
+			this.SetConstantBufferImpl(Shader.PropertyToID(name), value, offset, size);
+		}
+
+		public void SetConstantBuffer(int nameID, ComputeBuffer value, int offset, int size)
+		{
+			this.SetConstantBufferImpl(nameID, value, offset, size);
 		}
 
 		public void SetFloatArray(string name, List<float> values)
@@ -745,7 +882,7 @@ namespace UnityEngine
 
 		public float[] GetFloatArray(int nameID)
 		{
-			return (this.GetFloatArrayCountImpl(nameID) == 0) ? null : this.GetFloatArrayImpl(nameID);
+			return (this.GetFloatArrayCountImpl(nameID) != 0) ? this.GetFloatArrayImpl(nameID) : null;
 		}
 
 		public Color[] GetColorArray(string name)
@@ -755,7 +892,7 @@ namespace UnityEngine
 
 		public Color[] GetColorArray(int nameID)
 		{
-			return (this.GetColorArrayCountImpl(nameID) == 0) ? null : this.GetColorArrayImpl(nameID);
+			return (this.GetColorArrayCountImpl(nameID) != 0) ? this.GetColorArrayImpl(nameID) : null;
 		}
 
 		public Vector4[] GetVectorArray(string name)
@@ -765,7 +902,7 @@ namespace UnityEngine
 
 		public Vector4[] GetVectorArray(int nameID)
 		{
-			return (this.GetVectorArrayCountImpl(nameID) == 0) ? null : this.GetVectorArrayImpl(nameID);
+			return (this.GetVectorArrayCountImpl(nameID) != 0) ? this.GetVectorArrayImpl(nameID) : null;
 		}
 
 		public Matrix4x4[] GetMatrixArray(string name)
@@ -775,7 +912,7 @@ namespace UnityEngine
 
 		public Matrix4x4[] GetMatrixArray(int nameID)
 		{
-			return (this.GetMatrixArrayCountImpl(nameID) == 0) ? null : this.GetMatrixArrayImpl(nameID);
+			return (this.GetMatrixArrayCountImpl(nameID) != 0) ? this.GetMatrixArrayImpl(nameID) : null;
 		}
 
 		public void GetFloatArray(string name, List<float> values)

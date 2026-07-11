@@ -27,5 +27,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 		public float innerConeAngle;
 
 		public FalloffType falloff;
+
+		public AngularFalloffType angularFalloff;
 	}
 }

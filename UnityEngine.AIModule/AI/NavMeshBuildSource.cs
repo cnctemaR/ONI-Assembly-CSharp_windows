@@ -65,7 +65,7 @@ namespace UnityEngine.AI
 			}
 			set
 			{
-				this.m_InstanceID = ((!(value != null)) ? 0 : value.GetInstanceID());
+				this.m_InstanceID = ((value != null) ? value.GetInstanceID() : 0);
 			}
 		}
 
@@ -77,7 +77,7 @@ namespace UnityEngine.AI
 			}
 			set
 			{
-				this.m_ComponentID = ((!(value != null)) ? 0 : value.GetInstanceID());
+				this.m_ComponentID = ((value != null) ? value.GetInstanceID() : 0);
 			}
 		}
 

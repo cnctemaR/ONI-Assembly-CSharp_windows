@@ -5,7 +5,7 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Dynamics/PhysicMaterial.h")]
+	[NativeHeader("Modules/Physics/PhysicMaterial.h")]
 	public class PhysicMaterial : Object
 	{
 		public PhysicMaterial()

@@ -6,10 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[NativeHeader("Runtime/Animation/Constraints/ScaleConstraint.h")]
-	[UsedByNativeCode]
-	[NativeHeader("Runtime/Animation/Constraints/Constraint.bindings.h")]
 	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Modules/Animation/Constraints/ScaleConstraint.h")]
+	[NativeHeader("Modules/Animation/Constraints/Constraint.bindings.h")]
+	[UsedByNativeCode]
 	public sealed class ScaleConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private ScaleConstraint()
@@ -98,7 +98,8 @@ namespace UnityEngine.Animations
 
 		public void SetSources(List<ConstraintSource> sources)
 		{
-			if (sources == null)
+			bool flag = sources == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("sources");
 			}
@@ -152,11 +153,13 @@ namespace UnityEngine.Animations
 
 		private void ValidateSourceIndex(int index)
 		{
-			if (this.sourceCount == 0)
+			bool flag = this.sourceCount == 0;
+			if (flag)
 			{
 				throw new InvalidOperationException("The ScaleConstraint component has no sources.");
 			}
-			if (index < 0 || index >= this.sourceCount)
+			bool flag2 = index < 0 || index >= this.sourceCount;
+			if (flag2)
 			{
 				throw new ArgumentOutOfRangeException("index", string.Format("Constraint source index {0} is out of bounds (0-{1}).", index, this.sourceCount));
 			}

@@ -7194,9 +7194,19 @@ namespace STRINGS
 
 			public class SENIOR_MINER
 			{
-				public static LocString NAME = UI.FormatAsLink("Superduperhard Digging", "SENIOR_MINER");
+				public static LocString NAME = UI.FormatAsLink("Super-Duperhard Digging", "SENIOR_MINER");
 
-				public static LocString DESCRIPTION = "Allows excavation of extremely hard materials like " + ELEMENTS.DIAMOND.NAME + " and " + ELEMENTS.OBSIDIAN.NAME;
+				public static LocString DESCRIPTION = string.Concat(new string[]
+				{
+					"Allows the excavation of ",
+					UI.PRE_KEYWORD,
+					ELEMENTS.HARDNESS.HARDNESS_DESCRIPTOR.NEARLYIMPENETRABLE,
+					UI.PST_KEYWORD,
+					" elements, including ",
+					ELEMENTS.DIAMOND.NAME,
+					" and ",
+					ELEMENTS.OBSIDIAN.NAME
+				});
 			}
 
 			public class SUIT_EXPERT

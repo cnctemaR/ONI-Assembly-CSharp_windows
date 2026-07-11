@@ -15,7 +15,7 @@ namespace UnityEngine.Events
 			set
 			{
 				this.m_ObjectArgument = value;
-				this.m_ObjectArgumentAssemblyTypeName = ((!(value != null)) ? string.Empty : value.GetType().AssemblyQualifiedName);
+				this.m_ObjectArgumentAssemblyTypeName = ((value != null) ? value.GetType().AssemblyQualifiedName : string.Empty);
 			}
 		}
 
@@ -77,30 +77,36 @@ namespace UnityEngine.Events
 
 		private void TidyAssemblyTypeName()
 		{
-			if (!string.IsNullOrEmpty(this.m_ObjectArgumentAssemblyTypeName))
+			bool flag = string.IsNullOrEmpty(this.m_ObjectArgumentAssemblyTypeName);
+			if (!flag)
 			{
 				int num = int.MaxValue;
 				int num2 = this.m_ObjectArgumentAssemblyTypeName.IndexOf(", Version=");
-				if (num2 != -1)
+				bool flag2 = num2 != -1;
+				if (flag2)
 				{
 					num = Math.Min(num2, num);
 				}
 				num2 = this.m_ObjectArgumentAssemblyTypeName.IndexOf(", Culture=");
-				if (num2 != -1)
+				bool flag3 = num2 != -1;
+				if (flag3)
 				{
 					num = Math.Min(num2, num);
 				}
 				num2 = this.m_ObjectArgumentAssemblyTypeName.IndexOf(", PublicKeyToken=");
-				if (num2 != -1)
+				bool flag4 = num2 != -1;
+				if (flag4)
 				{
 					num = Math.Min(num2, num);
 				}
-				if (num != 2147483647)
+				bool flag5 = num != int.MaxValue;
+				if (flag5)
 				{
 					this.m_ObjectArgumentAssemblyTypeName = this.m_ObjectArgumentAssemblyTypeName.Substring(0, num);
 				}
 				num2 = this.m_ObjectArgumentAssemblyTypeName.IndexOf(", UnityEngine.");
-				if (num2 != -1 && this.m_ObjectArgumentAssemblyTypeName.EndsWith("Module"))
+				bool flag6 = num2 != -1 && this.m_ObjectArgumentAssemblyTypeName.EndsWith("Module");
+				if (flag6)
 				{
 					this.m_ObjectArgumentAssemblyTypeName = this.m_ObjectArgumentAssemblyTypeName.Substring(0, num2) + ", UnityEngine";
 				}
@@ -117,16 +123,16 @@ namespace UnityEngine.Events
 			this.TidyAssemblyTypeName();
 		}
 
-		[FormerlySerializedAs("objectArgument")]
 		[SerializeField]
+		[FormerlySerializedAs("objectArgument")]
 		private Object m_ObjectArgument;
 
-		[FormerlySerializedAs("objectArgumentAssemblyTypeName")]
 		[SerializeField]
+		[FormerlySerializedAs("objectArgumentAssemblyTypeName")]
 		private string m_ObjectArgumentAssemblyTypeName;
 
-		[SerializeField]
 		[FormerlySerializedAs("intArgument")]
+		[SerializeField]
 		private int m_IntArgument;
 
 		[FormerlySerializedAs("floatArgument")]

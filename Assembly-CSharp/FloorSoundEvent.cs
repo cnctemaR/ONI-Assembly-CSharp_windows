@@ -57,7 +57,7 @@ public class FloorSoundEvent : SoundEvent
 				FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible), false);
 				if (num2 > 0f)
 				{
-					eventInstance.setParameterValue("liquidDepth", num2);
+					eventInstance.setParameterByName("liquidDepth", num2, false);
 				}
 				SoundEvent.EndOneShot(eventInstance);
 			}
@@ -69,7 +69,7 @@ public class FloorSoundEvent : SoundEvent
 			{
 				if (num2 > 0f)
 				{
-					eventInstance2.setParameterValue("liquidDepth", num2);
+					eventInstance2.setParameterByName("liquidDepth", num2, false);
 				}
 				if (behaviour.currentAnimFile != null && behaviour.currentAnimFile.Contains("anim_loco_walk"))
 				{

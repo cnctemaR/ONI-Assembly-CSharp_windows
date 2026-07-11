@@ -223,6 +223,16 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		return this.assignableProxy.Get().GetComponent<Ownables>();
 	}
 
+	public bool HasOwner(Assignables owner)
+	{
+		return this.GetOwners().Contains(owner as Ownables);
+	}
+
+	public int NumOwners()
+	{
+		return this.GetOwners().Count;
+	}
+
 	public Equipment GetEquipment()
 	{
 		return this.assignableProxy.Get().GetComponent<Equipment>();

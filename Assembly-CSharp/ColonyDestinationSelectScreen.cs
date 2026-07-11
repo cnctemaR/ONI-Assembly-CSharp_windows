@@ -1,6 +1,7 @@
 ﻿using System;
 using Klei.CustomSettings;
 using ProcGen;
+using STRINGS;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -18,12 +19,19 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		TMP_InputField tmp_InputField = this.coordinate;
 		tmp_InputField.onFocus = (global::System.Action)Delegate.Combine(tmp_InputField.onFocus, new global::System.Action(this.CoordinateEditStarted));
 		this.coordinate.onEndEdit.AddListener(new UnityAction<string>(this.CoordinateEditFinished));
+		if (this.locationIcons != null)
+		{
+			bool cloudSavesAvailable = SaveLoader.GetCloudSavesAvailable();
+			this.locationIcons.gameObject.SetActive(cloudSavesAvailable);
+		}
 		this.random = new global::System.Random();
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.RefreshCloudSavePref();
+		this.RefreshCloudLocalIcon();
 		this.newGameSettings.Init();
 		this.newGameSettings.SetCloseAction(new global::System.Action(this.CustomizeClose));
 		CustomGameSettings.Instance.OnSettingChanged += this.SettingChanged;
@@ -34,6 +42,58 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 	{
 		CustomGameSettings.Instance.OnSettingChanged -= this.SettingChanged;
 		base.OnCleanUp();
+	}
+
+	private void RefreshCloudLocalIcon()
+	{
+		if (this.locationIcons == null)
+		{
+			return;
+		}
+		if (!SaveLoader.GetCloudSavesAvailable())
+		{
+			return;
+		}
+		HierarchyReferences component = this.locationIcons.GetComponent<HierarchyReferences>();
+		LocText component2 = component.GetReference<RectTransform>("LocationText").GetComponent<LocText>();
+		KButton component3 = component.GetReference<RectTransform>("CloudButton").GetComponent<KButton>();
+		KButton component4 = component.GetReference<RectTransform>("LocalButton").GetComponent<KButton>();
+		ToolTip component5 = component3.GetComponent<ToolTip>();
+		ToolTip component6 = component4.GetComponent<ToolTip>();
+		component5.toolTip = string.Format("{0}\n{1}", UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.SAVETOCLOUD.TOOLTIP, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.SAVETOCLOUD.TOOLTIP_EXTRA);
+		component6.toolTip = string.Format("{0}\n{1}", UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.SAVETOCLOUD.TOOLTIP_LOCAL, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.SAVETOCLOUD.TOOLTIP_EXTRA);
+		bool flag = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.SaveToCloud).id == "Enabled";
+		component2.text = (flag ? UI.FRONTEND.LOADSCREEN.CLOUD_SAVE : UI.FRONTEND.LOADSCREEN.LOCAL_SAVE);
+		component3.gameObject.SetActive(flag);
+		component3.ClearOnClick();
+		if (flag)
+		{
+			component3.onClick += delegate
+			{
+				CustomGameSettings.Instance.SetQualitySetting(CustomGameSettingConfigs.SaveToCloud, "Disabled");
+				this.RefreshCloudLocalIcon();
+			};
+		}
+		component4.gameObject.SetActive(!flag);
+		component4.ClearOnClick();
+		if (!flag)
+		{
+			component4.onClick += delegate
+			{
+				CustomGameSettings.Instance.SetQualitySetting(CustomGameSettingConfigs.SaveToCloud, "Enabled");
+				this.RefreshCloudLocalIcon();
+			};
+		}
+	}
+
+	private void RefreshCloudSavePref()
+	{
+		if (!SaveLoader.GetCloudSavesAvailable())
+		{
+			return;
+		}
+		string cloudSavesDefaultPref = SaveLoader.GetCloudSavesDefaultPref();
+		CustomGameSettings.Instance.SetQualitySetting(CustomGameSettingConfigs.SaveToCloud, cloudSavesDefaultPref);
 	}
 
 	private void BackClicked()
@@ -102,6 +162,10 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 
 	private void SettingChanged(SettingConfig config, SettingLevel level)
 	{
+		if (config == CustomGameSettingConfigs.SaveToCloud)
+		{
+			this.RefreshCloudLocalIcon();
+		}
 		if (!this.isEditingCoordinate)
 		{
 			this.coordinate.text = CustomGameSettings.Instance.GetSettingsCoordinate();
@@ -158,6 +222,9 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 
 	[SerializeField]
 	private KButton shuffleButton;
+
+	[SerializeField]
+	private HierarchyReferences locationIcons;
 
 	[SerializeField]
 	private AsteroidDescriptorPanel destinationProperties;

@@ -119,7 +119,7 @@ public class PriorityScreen : KScreen
 				num += 0f;
 			}
 			num += (float)priority.priority_value;
-			eventInstance.setParameterValue("priority", num);
+			eventInstance.setParameterByName("priority", num, false);
 			KFMOD.EndOneShot(eventInstance);
 		}
 	}

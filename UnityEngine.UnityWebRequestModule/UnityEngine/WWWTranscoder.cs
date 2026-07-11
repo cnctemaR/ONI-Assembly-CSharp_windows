@@ -15,19 +15,29 @@ namespace UnityEngine
 			{
 				b2 *= 16;
 				int num = (int)b[i];
-				if (num >= 48 && num <= 57)
+				bool flag = num >= 48 && num <= 57;
+				if (flag)
 				{
 					num -= 48;
 				}
-				else if (num >= 65 && num <= 75)
+				else
 				{
-					num -= 55;
+					bool flag2 = num >= 65 && num <= 75;
+					if (flag2)
+					{
+						num -= 55;
+					}
+					else
+					{
+						bool flag3 = num >= 97 && num <= 102;
+						if (flag3)
+						{
+							num -= 87;
+						}
+					}
 				}
-				else if (num >= 97 && num <= 102)
-				{
-					num -= 87;
-				}
-				if (num > 15)
+				bool flag4 = num > 15;
+				if (flag4)
 				{
 					return 63;
 				}
@@ -100,18 +110,23 @@ namespace UnityEngine
 			{
 				for (int i = 0; i < input.Length; i++)
 				{
-					if (input[i] == 32)
+					bool flag = input[i] == 32;
+					if (flag)
 					{
 						memoryStream.Write(space, 0, space.Length);
 					}
-					else if (input[i] < 32 || input[i] > 126 || WWWTranscoder.ByteArrayContains(forbidden, input[i]))
-					{
-						memoryStream.WriteByte(escapeChar);
-						memoryStream.Write(WWWTranscoder.Byte2Hex(input[i], (!uppercase) ? WWWTranscoder.lcHexChars : WWWTranscoder.ucHexChars), 0, 2);
-					}
 					else
 					{
-						memoryStream.WriteByte(input[i]);
+						bool flag2 = input[i] < 32 || input[i] > 126 || WWWTranscoder.ByteArrayContains(forbidden, input[i]);
+						if (flag2)
+						{
+							memoryStream.WriteByte(escapeChar);
+							memoryStream.Write(WWWTranscoder.Byte2Hex(input[i], uppercase ? WWWTranscoder.ucHexChars : WWWTranscoder.lcHexChars), 0, 2);
+						}
+						else
+						{
+							memoryStream.WriteByte(input[i]);
+						}
 					}
 				}
 				array = memoryStream.ToArray();
@@ -124,7 +139,8 @@ namespace UnityEngine
 			int num = array.Length;
 			for (int i = 0; i < num; i++)
 			{
-				if (array[i] == b)
+				bool flag = array[i] == b;
+				if (flag)
 				{
 					return true;
 				}
@@ -182,23 +198,25 @@ namespace UnityEngine
 
 		private static bool ByteSubArrayEquals(byte[] array, int index, byte[] comperand)
 		{
-			bool flag;
-			if (array.Length - index < comperand.Length)
+			bool flag = array.Length - index < comperand.Length;
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
 				for (int i = 0; i < comperand.Length; i++)
 				{
-					if (array[index + i] != comperand[i])
+					bool flag3 = array[index + i] != comperand[i];
+					if (flag3)
 					{
 						return false;
 					}
 				}
-				flag = true;
+				flag2 = true;
 			}
-			return flag;
+			return flag2;
 		}
 
 		public static byte[] Decode(byte[] input, byte escapeChar, byte[] space)
@@ -208,19 +226,24 @@ namespace UnityEngine
 			{
 				for (int i = 0; i < input.Length; i++)
 				{
-					if (WWWTranscoder.ByteSubArrayEquals(input, i, space))
+					bool flag = WWWTranscoder.ByteSubArrayEquals(input, i, space);
+					if (flag)
 					{
 						i += space.Length - 1;
 						memoryStream.WriteByte(32);
 					}
-					else if (input[i] == escapeChar && i + 2 < input.Length)
-					{
-						i++;
-						memoryStream.WriteByte(WWWTranscoder.Hex2Byte(input, i++));
-					}
 					else
 					{
-						memoryStream.WriteByte(input[i]);
+						bool flag2 = input[i] == escapeChar && i + 2 < input.Length;
+						if (flag2)
+						{
+							i++;
+							memoryStream.WriteByte(WWWTranscoder.Hex2Byte(input, i++));
+						}
+						else
+						{
+							memoryStream.WriteByte(input[i]);
+						}
 					}
 				}
 				array = memoryStream.ToArray();
@@ -242,7 +265,8 @@ namespace UnityEngine
 		{
 			for (int i = 0; i < input.Length; i++)
 			{
-				if (input[i] < 32 || input[i] > 126)
+				bool flag = input[i] < 32 || input[i] > 126;
+				if (flag)
 				{
 					return false;
 				}

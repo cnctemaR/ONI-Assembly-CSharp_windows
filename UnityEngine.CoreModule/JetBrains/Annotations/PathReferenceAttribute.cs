@@ -3,18 +3,18 @@
 namespace JetBrains.Annotations
 {
 	[AttributeUsage(AttributeTargets.Parameter)]
-	public class PathReferenceAttribute : Attribute
+	public sealed class PathReferenceAttribute : Attribute
 	{
 		public PathReferenceAttribute()
 		{
 		}
 
-		public PathReferenceAttribute([PathReference] string basePath)
+		public PathReferenceAttribute([NotNull] [PathReference] string basePath)
 		{
 			this.BasePath = basePath;
 		}
 
-		[NotNull]
-		public string BasePath { get; private set; }
+		[CanBeNull]
+		public string BasePath { get; }
 	}
 }

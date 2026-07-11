@@ -10,23 +10,29 @@ namespace UnityEngine.Networking
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class DownloadHandlerFile : DownloadHandler
 	{
-		public DownloadHandlerFile(string path)
-		{
-			this.InternalCreateVFS(path);
-		}
-
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr Create(DownloadHandlerFile obj, string path);
+		private static extern IntPtr Create(DownloadHandlerFile obj, string path, bool append);
 
-		private void InternalCreateVFS(string path)
+		private void InternalCreateVFS(string path, bool append)
 		{
 			string directoryName = Path.GetDirectoryName(path);
-			if (!Directory.Exists(directoryName))
+			bool flag = !Directory.Exists(directoryName);
+			if (flag)
 			{
 				Directory.CreateDirectory(directoryName);
 			}
-			this.m_Ptr = DownloadHandlerFile.Create(this, path);
+			this.m_Ptr = DownloadHandlerFile.Create(this, path, append);
+		}
+
+		public DownloadHandlerFile(string path)
+		{
+			this.InternalCreateVFS(path, false);
+		}
+
+		public DownloadHandlerFile(string path, bool append)
+		{
+			this.InternalCreateVFS(path, append);
 		}
 
 		protected override byte[] GetData()

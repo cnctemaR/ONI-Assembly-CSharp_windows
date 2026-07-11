@@ -8,7 +8,6 @@ namespace UnityEngine.EventSystems
 	{
 		protected bool GetPointerData(int id, out PointerEventData data, bool create)
 		{
-			bool flag;
 			if (!this.m_PointerData.TryGetValue(id, out data) && create)
 			{
 				data = new PointerEventData(base.eventSystem)
@@ -16,13 +15,9 @@ namespace UnityEngine.EventSystems
 					pointerId = id
 				};
 				this.m_PointerData.Add(id, data);
-				flag = true;
+				return true;
 			}
-			else
-			{
-				flag = false;
-			}
-			return flag;
+			return false;
 		}
 
 		protected void RemovePointerData(PointerEventData data)
@@ -78,24 +73,19 @@ namespace UnityEngine.EventSystems
 		{
 			bool mouseButtonDown = base.input.GetMouseButtonDown(buttonId);
 			bool mouseButtonUp = base.input.GetMouseButtonUp(buttonId);
-			PointerEventData.FramePressState framePressState;
 			if (mouseButtonDown && mouseButtonUp)
 			{
-				framePressState = PointerEventData.FramePressState.PressedAndReleased;
+				return PointerEventData.FramePressState.PressedAndReleased;
 			}
-			else if (mouseButtonDown)
+			if (mouseButtonDown)
 			{
-				framePressState = PointerEventData.FramePressState.Pressed;
+				return PointerEventData.FramePressState.Pressed;
 			}
-			else if (mouseButtonUp)
+			if (mouseButtonUp)
 			{
-				framePressState = PointerEventData.FramePressState.Released;
+				return PointerEventData.FramePressState.Released;
 			}
-			else
-			{
-				framePressState = PointerEventData.FramePressState.NotChanged;
-			}
-			return framePressState;
+			return PointerEventData.FramePressState.NotChanged;
 		}
 
 		protected virtual PointerInputModule.MouseState GetMousePointerEventData()
@@ -157,30 +147,31 @@ namespace UnityEngine.EventSystems
 
 		protected virtual void ProcessMove(PointerEventData pointerEvent)
 		{
-			GameObject gameObject = ((Cursor.lockState != CursorLockMode.Locked) ? pointerEvent.pointerCurrentRaycast.gameObject : null);
+			GameObject gameObject = ((Cursor.lockState == CursorLockMode.Locked) ? null : pointerEvent.pointerCurrentRaycast.gameObject);
 			base.HandlePointerExitAndEnter(pointerEvent, gameObject);
 		}
 
 		protected virtual void ProcessDrag(PointerEventData pointerEvent)
 		{
-			if (pointerEvent.IsPointerMoving() && Cursor.lockState != CursorLockMode.Locked && !(pointerEvent.pointerDrag == null))
+			if (!pointerEvent.IsPointerMoving() || Cursor.lockState == CursorLockMode.Locked || pointerEvent.pointerDrag == null)
 			{
-				if (!pointerEvent.dragging && PointerInputModule.ShouldStartDrag(pointerEvent.pressPosition, pointerEvent.position, (float)base.eventSystem.pixelDragThreshold, pointerEvent.useDragThreshold))
+				return;
+			}
+			if (!pointerEvent.dragging && PointerInputModule.ShouldStartDrag(pointerEvent.pressPosition, pointerEvent.position, (float)base.eventSystem.pixelDragThreshold, pointerEvent.useDragThreshold))
+			{
+				ExecuteEvents.Execute<IBeginDragHandler>(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.beginDragHandler);
+				pointerEvent.dragging = true;
+			}
+			if (pointerEvent.dragging)
+			{
+				if (pointerEvent.pointerPress != pointerEvent.pointerDrag)
 				{
-					ExecuteEvents.Execute<IBeginDragHandler>(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.beginDragHandler);
-					pointerEvent.dragging = true;
+					ExecuteEvents.Execute<IPointerUpHandler>(pointerEvent.pointerPress, pointerEvent, ExecuteEvents.pointerUpHandler);
+					pointerEvent.eligibleForClick = false;
+					pointerEvent.pointerPress = null;
+					pointerEvent.rawPointerPress = null;
 				}
-				if (pointerEvent.dragging)
-				{
-					if (pointerEvent.pointerPress != pointerEvent.pointerDrag)
-					{
-						ExecuteEvents.Execute<IPointerUpHandler>(pointerEvent.pointerPress, pointerEvent, ExecuteEvents.pointerUpHandler);
-						pointerEvent.eligibleForClick = false;
-						pointerEvent.pointerPress = null;
-						pointerEvent.rawPointerPress = null;
-					}
-					ExecuteEvents.Execute<IDragHandler>(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.dragHandler);
-				}
+				ExecuteEvents.Execute<IDragHandler>(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.dragHandler);
 			}
 		}
 
@@ -218,8 +209,7 @@ namespace UnityEngine.EventSystems
 
 		protected void DeselectIfSelectionChanged(GameObject currentOverGo, BaseEventData pointerEvent)
 		{
-			GameObject eventHandler = ExecuteEvents.GetEventHandler<ISelectHandler>(currentOverGo);
-			if (eventHandler != base.eventSystem.currentSelectedGameObject)
+			if (ExecuteEvents.GetEventHandler<ISelectHandler>(currentOverGo) != base.eventSystem.currentSelectedGameObject)
 			{
 				base.eventSystem.SetSelectedGameObject(null, pointerEvent);
 			}
@@ -263,7 +253,7 @@ namespace UnityEngine.EventSystems
 				}
 			}
 
-			private PointerEventData.InputButton m_Button = PointerEventData.InputButton.Left;
+			private PointerEventData.InputButton m_Button;
 
 			private PointerInputModule.MouseButtonEventData m_EventData;
 		}

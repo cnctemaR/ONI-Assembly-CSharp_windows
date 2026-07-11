@@ -8,6 +8,14 @@ namespace UnityEngine
 {
 	public class WWWForm
 	{
+		internal static Encoding DefaultEncoding
+		{
+			get
+			{
+				return Encoding.ASCII;
+			}
+		}
+
 		public WWWForm()
 		{
 			this.formData = new List<byte[]>();
@@ -18,23 +26,17 @@ namespace UnityEngine
 			for (int i = 0; i < 40; i++)
 			{
 				int num = Random.Range(48, 110);
-				if (num > 57)
+				bool flag = num > 57;
+				if (flag)
 				{
 					num += 7;
 				}
-				if (num > 90)
+				bool flag2 = num > 90;
+				if (flag2)
 				{
 					num += 6;
 				}
 				this.boundary[i] = (byte)num;
-			}
-		}
-
-		internal static Encoding DefaultEncoding
-		{
-			get
-			{
-				return Encoding.ASCII;
 			}
 		}
 
@@ -72,13 +74,16 @@ namespace UnityEngine
 		{
 			this.containsFiles = true;
 			bool flag = contents.Length > 8 && contents[0] == 137 && contents[1] == 80 && contents[2] == 78 && contents[3] == 71 && contents[4] == 13 && contents[5] == 10 && contents[6] == 26 && contents[7] == 10;
-			if (fileName == null)
+			bool flag2 = fileName == null;
+			if (flag2)
 			{
-				fileName = fieldName + ((!flag) ? ".dat" : ".png");
+				fileName = fieldName + (flag ? ".png" : ".dat");
 			}
-			if (mimeType == null)
+			bool flag3 = mimeType == null;
+			if (flag3)
 			{
-				if (flag)
+				bool flag4 = flag;
+				if (flag4)
 				{
 					mimeType = "image/png";
 				}
@@ -98,7 +103,8 @@ namespace UnityEngine
 			get
 			{
 				Dictionary<string, string> dictionary = new Dictionary<string, string>();
-				if (this.containsFiles)
+				bool flag = this.containsFiles;
+				if (flag)
 				{
 					dictionary["Content-Type"] = "multipart/form-data; boundary=\"" + Encoding.UTF8.GetString(this.boundary, 0, this.boundary.Length) + "\"";
 				}
@@ -114,7 +120,8 @@ namespace UnityEngine
 		{
 			get
 			{
-				if (this.containsFiles)
+				bool flag = this.containsFiles;
+				if (flag)
 				{
 					byte[] bytes = WWWForm.DefaultEncoding.GetBytes("--");
 					byte[] bytes2 = WWWForm.DefaultEncoding.GetBytes("\r\n");
@@ -137,7 +144,8 @@ namespace UnityEngine
 							memoryStream.Write(bytes4, 0, bytes4.Length);
 							string headerName = Encoding.UTF8.HeaderName;
 							string text = this.fieldNames[i];
-							if (!WWWTranscoder.SevenBitClean(text, Encoding.UTF8) || text.IndexOf("=?") > -1)
+							bool flag2 = !WWWTranscoder.SevenBitClean(text, Encoding.UTF8) || text.IndexOf("=?") > -1;
+							if (flag2)
 							{
 								text = string.Concat(new string[]
 								{
@@ -151,10 +159,12 @@ namespace UnityEngine
 							byte[] bytes8 = Encoding.UTF8.GetBytes(text);
 							memoryStream.Write(bytes8, 0, bytes8.Length);
 							memoryStream.Write(bytes5, 0, bytes5.Length);
-							if (this.fileNames[i] != null)
+							bool flag3 = this.fileNames[i] != null;
+							if (flag3)
 							{
 								string text2 = this.fileNames[i];
-								if (!WWWTranscoder.SevenBitClean(text2, Encoding.UTF8) || text2.IndexOf("=?") > -1)
+								bool flag4 = !WWWTranscoder.SevenBitClean(text2, Encoding.UTF8) || text2.IndexOf("=?") > -1;
+								if (flag4)
 								{
 									text2 = string.Concat(new string[]
 									{
@@ -193,7 +203,8 @@ namespace UnityEngine
 						byte[] array2 = WWWTranscoder.DataEncode(Encoding.UTF8.GetBytes(this.fieldNames[j]));
 						byte[] array3 = this.formData[j];
 						byte[] array4 = WWWTranscoder.DataEncode(array3);
-						if (j > 0)
+						bool flag5 = j > 0;
+						if (flag5)
 						{
 							memoryStream2.Write(bytes10, 0, bytes10.Length);
 						}

@@ -8,15 +8,18 @@ namespace UnityEngine.Serialization
 	{
 		public ISerializationSurrogate GetSurrogate(Type type, StreamingContext context, out ISurrogateSelector selector)
 		{
-			if (type.IsGenericType)
+			bool isGenericType = type.IsGenericType;
+			if (isGenericType)
 			{
 				Type genericTypeDefinition = type.GetGenericTypeDefinition();
-				if (genericTypeDefinition == typeof(List<>))
+				bool flag = genericTypeDefinition == typeof(List<>);
+				if (flag)
 				{
 					selector = this;
 					return ListSerializationSurrogate.Default;
 				}
-				if (genericTypeDefinition == typeof(Dictionary<, >))
+				bool flag2 = genericTypeDefinition == typeof(Dictionary<, >);
+				if (flag2)
 				{
 					selector = this;
 					Type type2 = typeof(DictionarySerializationSurrogate<, >).MakeGenericType(type.GetGenericArguments());

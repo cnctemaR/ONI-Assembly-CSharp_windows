@@ -29,8 +29,9 @@ namespace UnityEngine.Networking.Match
 
 		public Coroutine CreateMatch(string matchName, uint matchSize, bool matchAdvertise, string matchPassword, string publicClientAddress, string privateClientAddress, int eloScoreForMatch, int requestDomain, NetworkMatch.DataResponseDelegate<MatchInfo> callback)
 		{
+			bool flag = Application.platform == RuntimePlatform.WebGLPlayer;
 			Coroutine coroutine;
-			if (Application.platform == RuntimePlatform.WebGLPlayer)
+			if (flag)
 			{
 				Debug.LogError("Matchmaking is not supported on WebGL player.");
 				coroutine = null;
@@ -54,8 +55,9 @@ namespace UnityEngine.Networking.Match
 
 		internal Coroutine CreateMatch(CreateMatchRequest req, NetworkMatch.DataResponseDelegate<MatchInfo> callback)
 		{
+			bool flag = callback == null;
 			Coroutine coroutine;
-			if (callback == null)
+			if (flag)
 			{
 				Debug.Log("callback supplied is null, aborting CreateMatch Request.");
 				coroutine = null;
@@ -86,7 +88,8 @@ namespace UnityEngine.Networking.Match
 
 		internal virtual void OnMatchCreate(CreateMatchResponse response, NetworkMatch.DataResponseDelegate<MatchInfo> userCallback)
 		{
-			if (response.success)
+			bool success = response.success;
+			if (success)
 			{
 				Utility.SetAccessTokenForNetwork((NetworkID)response.networkId, new NetworkAccessToken(response.accessTokenString));
 			}
@@ -108,8 +111,9 @@ namespace UnityEngine.Networking.Match
 
 		internal Coroutine JoinMatch(JoinMatchRequest req, NetworkMatch.DataResponseDelegate<MatchInfo> callback)
 		{
+			bool flag = callback == null;
 			Coroutine coroutine;
-			if (callback == null)
+			if (flag)
 			{
 				Debug.Log("callback supplied is null, aborting JoinMatch Request.");
 				coroutine = null;
@@ -138,7 +142,8 @@ namespace UnityEngine.Networking.Match
 
 		internal void OnMatchJoined(JoinMatchResponse response, NetworkMatch.DataResponseDelegate<MatchInfo> userCallback)
 		{
-			if (response.success)
+			bool success = response.success;
+			if (success)
 			{
 				Utility.SetAccessTokenForNetwork((NetworkID)response.networkId, new NetworkAccessToken(response.accessTokenString));
 			}
@@ -156,8 +161,9 @@ namespace UnityEngine.Networking.Match
 
 		internal Coroutine DestroyMatch(DestroyMatchRequest req, NetworkMatch.BasicResponseDelegate callback)
 		{
+			bool flag = callback == null;
 			Coroutine coroutine;
-			if (callback == null)
+			if (flag)
 			{
 				Debug.Log("callback supplied is null, aborting DestroyMatch Request.");
 				coroutine = null;
@@ -197,8 +203,9 @@ namespace UnityEngine.Networking.Match
 
 		internal Coroutine DropConnection(DropConnectionRequest req, NetworkMatch.BasicResponseDelegate callback)
 		{
+			bool flag = callback == null;
 			Coroutine coroutine;
-			if (callback == null)
+			if (flag)
 			{
 				Debug.Log("callback supplied is null, aborting DropConnection Request.");
 				coroutine = null;
@@ -229,8 +236,9 @@ namespace UnityEngine.Networking.Match
 
 		public Coroutine ListMatches(int startPageNumber, int resultPageSize, string matchNameFilter, bool filterOutPrivateMatchesFromResults, int eloScoreTarget, int requestDomain, NetworkMatch.DataResponseDelegate<List<MatchInfoSnapshot>> callback)
 		{
+			bool flag = Application.platform == RuntimePlatform.WebGLPlayer;
 			Coroutine coroutine;
-			if (Application.platform == RuntimePlatform.WebGLPlayer)
+			if (flag)
 			{
 				Debug.LogError("Matchmaking is not supported on WebGL player.");
 				coroutine = null;
@@ -252,8 +260,9 @@ namespace UnityEngine.Networking.Match
 
 		internal Coroutine ListMatches(ListMatchRequest req, NetworkMatch.DataResponseDelegate<List<MatchInfoSnapshot>> callback)
 		{
+			bool flag = callback == null;
 			Coroutine coroutine;
-			if (callback == null)
+			if (flag)
 			{
 				Debug.Log("callback supplied is null, aborting ListMatch Request.");
 				coroutine = null;
@@ -302,8 +311,9 @@ namespace UnityEngine.Networking.Match
 
 		internal Coroutine SetMatchAttributes(SetMatchAttributesRequest req, NetworkMatch.BasicResponseDelegate callback)
 		{
+			bool flag = callback == null;
 			Coroutine coroutine;
-			if (callback == null)
+			if (flag)
 			{
 				Debug.Log("callback supplied is null, aborting SetMatchAttributes Request.");
 				coroutine = null;
@@ -336,7 +346,8 @@ namespace UnityEngine.Networking.Match
 		{
 			yield return client.SendWebRequest();
 			JSONRESPONSE jsonInterface = new JSONRESPONSE();
-			if (!client.isNetworkError && !client.isHttpError)
+			bool flag = !client.isNetworkError && !client.isHttpError;
+			if (flag)
 			{
 				try
 				{
@@ -344,7 +355,8 @@ namespace UnityEngine.Networking.Match
 				}
 				catch (ArgumentException ex)
 				{
-					jsonInterface.SetFailure(UnityString.Format("ArgumentException:[{0}] ", new object[] { ex.ToString() }));
+					ArgumentException exception = ex;
+					jsonInterface.SetFailure(UnityString.Format("ArgumentException:[{0}] ", new object[] { exception.ToString() }));
 				}
 			}
 			else

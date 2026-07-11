@@ -364,6 +364,17 @@ namespace STRINGS
 
 		public static LocString LISTENTRYSTRINGNOLINEBREAK = "     {0}";
 
+		public static class PLATFORMS
+		{
+			public static LocString UNKNOWN = "Your game client";
+
+			public static LocString STEAM = "Steam";
+
+			public static LocString EPIC = "Epic Games Store";
+
+			public static LocString WEGAME = "Wegame";
+		}
+
 		private enum KeywordType
 		{
 			Hotkey,
@@ -1154,6 +1165,34 @@ namespace STRINGS
 						}
 					}
 
+					public class SAVETOCLOUD
+					{
+						public static LocString NAME = "Save To Cloud";
+
+						public static LocString TOOLTIP = "This colony will be created in the cloud saves folder, and synced by the game platform.";
+
+						public static LocString TOOLTIP_LOCAL = "This colony will be created in the local saves folder. It will not be a cloud save and will not be synced by the game platform.";
+
+						public static LocString TOOLTIP_EXTRA = "This can be changed later with the colony management options in the load screen, from the main menu.";
+
+						public static class LEVELS
+						{
+							public static class DISABLED
+							{
+								public static LocString NAME = "Disabled";
+
+								public static LocString TOOLTIP = "Unchecked: This colony will be a local save";
+							}
+
+							public static class ENABLED
+							{
+								public static LocString NAME = "Enabled";
+
+								public static LocString TOOLTIP = "Checked: This colony will be a cloud save (Default)";
+							}
+						}
+					}
+
 					public class CAREPACKAGES
 					{
 						public static LocString NAME = "Care Packages";
@@ -1528,7 +1567,7 @@ namespace STRINGS
 
 				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
 
-				public static LocString PATCH_NOTES_SUMMARY = "<b>New Bugfix Patch for July 2020</b>\n\n • Fixed multiple simulation heat creation/destruction bugs\n • Fixed Duplicants getting stuck digging forever\n • Continued work on alternate color sets\n • Dozens of other fixes and improvements\n\nPlease check out the full patch notes for more details!";
+				public static LocString PATCH_NOTES_SUMMARY = "<b>Cloud Save Update for Nov 2020</b>\n\n • Added support for cloud saves. Click \"Load Game\" to open the saves menu and manage your local and cloud saves!\n • Lots of performance improvements, especially for colonies with lots of Duplicants\n • Upgraded the Unity game engine to the latest LTS version\n\nCheck out the full patch notes for more details!";
 
 				public static LocString UPDATE_TEXT = "LAUNCHED!";
 			}
@@ -1541,6 +1580,8 @@ namespace STRINGS
 
 				public static LocString DELETEBUTTON = "DELETE";
 
+				public static LocString BACKBUTTON = "< BACK";
+
 				public static LocString CONFIRMDELETE = "Are you sure you want to delete {0}?\nYou cannot undo this action.";
 
 				public static LocString SAVEDETAILS = "<b>File:</b> {0}\n\n<b>Save Date:</b>\n{1}\n\n<b>Base Name:</b> {2}\n<b>Duplicants Alive:</b> {3}\n<b>Cycle(s) Survived:</b> {4}";
@@ -1549,7 +1590,7 @@ namespace STRINGS
 
 				public static LocString CORRUPTEDSAVE = "<b><color=#ff0000>Could not load file {0}. Its data may be corrupted.</color></b>";
 
-				public static LocString SAVE_TOO_NEW = "<b><color=#ff0000>Could not load file {0}. File is using build {1}. This build is {2}.</color></b>";
+				public static LocString SAVE_TOO_NEW = "<b><color=#ff0000>Could not load file {0}. File is using build {1}, v{2}. This build is {3}, v{4}.</color></b>";
 
 				public static LocString UNSUPPORTED_SAVE_VERSION = "<b><color=#ff0000>This save file is from a previous version of the game and is no longer supported.</color></b>";
 
@@ -1566,6 +1607,174 @@ namespace STRINGS
 				public static LocString WORLD_NAME = "Asteroid Type";
 
 				public static LocString NO_FILE_SELECTED = "No file selected";
+
+				public static LocString SAVE_INFO = "{0} saves  {1} autosaves  {2}";
+
+				public static LocString COLONIES_TITLE = "Colony View";
+
+				public static LocString COLONY_TITLE = "Viewing colony '{0}'";
+
+				public static LocString COLONY_FILE_SIZE = "Size: {0}";
+
+				public static LocString COLONY_FILE_NAME = "File: '{0}'";
+
+				public static LocString NO_PREVIEW = "NO PREVIEW";
+
+				public static LocString LOCAL_SAVE = "local";
+
+				public static LocString CLOUD_SAVE = "cloud";
+
+				public static LocString CONVERT_COLONY = "CONVERT COLONY";
+
+				public static LocString CONVERT_ALL_COLONIES = "CONVERT ALL";
+
+				public static LocString CONVERT_ALL_WARNING = UI.PRE_KEYWORD + "\nWarning:" + UI.PST_KEYWORD + " Converting all colonies may take some time.";
+
+				public static LocString SAVE_INFO_DIALOG_TITLE = "SAVE INFORMATION";
+
+				public static LocString SAVE_INFO_DIALOG_TEXT = "Access your save files using the options below.";
+
+				public static LocString SAVE_INFO_DIALOG_TOOLTIP = "Access your save file locations from here.";
+
+				public static LocString CONVERT_ERROR_TITLE = "SAVE CONVERSION UNSUCCESSFUL";
+
+				public static LocString CONVERT_ERROR = string.Concat(new string[]
+				{
+					"Converting the colony ",
+					UI.PRE_KEYWORD,
+					"{Colony}",
+					UI.PST_KEYWORD,
+					" was unsuccessful!\nThe error was:\n\n<b>{Error}</b>\n\nPlease try again, or post a bug in the forums if this problem keeps happening."
+				});
+
+				public static LocString CONVERT_TO_CLOUD = "CONVERT TO CLOUD SAVES";
+
+				public static LocString CONVERT_TO_LOCAL = "CONVERT TO LOCAL SAVES";
+
+				public static LocString CONVERT_COLONY_TO_CLOUD = "Convert colony to use cloud saves";
+
+				public static LocString CONVERT_COLONY_TO_LOCAL = "Convert to colony to use local saves";
+
+				public static LocString CONVERT_ALL_TO_CLOUD = "Convert <b>all</b> colonies below to use cloud saves";
+
+				public static LocString CONVERT_ALL_TO_LOCAL = "Convert <b>all</b> colonies below to use local saves";
+
+				public static LocString CONVERT_ALL_TO_CLOUD_SUCCESS = string.Concat(new string[]
+				{
+					UI.PRE_KEYWORD,
+					"SUCCESS!",
+					UI.PST_KEYWORD,
+					"\nAll existing colonies have been converted into ",
+					UI.PRE_KEYWORD,
+					"cloud",
+					UI.PST_KEYWORD,
+					" saves.\nNew colonies will use ",
+					UI.PRE_KEYWORD,
+					"cloud",
+					UI.PST_KEYWORD,
+					" saves by default.\n\n{Client} may take longer than usual to sync the next time you exit the game as a result of this change."
+				});
+
+				public static LocString CONVERT_ALL_TO_LOCAL_SUCCESS = string.Concat(new string[]
+				{
+					UI.PRE_KEYWORD,
+					"SUCCESS!",
+					UI.PST_KEYWORD,
+					"\nAll existing colonies have been converted into ",
+					UI.PRE_KEYWORD,
+					"local",
+					UI.PST_KEYWORD,
+					" saves.\nNew colonies will use ",
+					UI.PRE_KEYWORD,
+					"local",
+					UI.PST_KEYWORD,
+					" saves by default.\n\n{Client} may take longer than usual to sync the next time you exit the game as a result of this change."
+				});
+
+				public static LocString CONVERT_TO_CLOUD_DETAILS = "Converting a colony to use cloud saves will move all of the save files for that colony into the cloud saves folder.\n\nThis allows your game platform to sync this colony to the cloud for your account, so it can be played on multiple machines.";
+
+				public static LocString CONVERT_TO_LOCAL_DETAILS = "Converting a colony to NOT use cloud saves will move all of the save files for that colony into the local saves folder.\n\n" + UI.PRE_KEYWORD + "These save files will no longer be synced to the cloud." + UI.PST_KEYWORD;
+
+				public static LocString OPEN_SAVE_FOLDER = "LOCAL SAVES";
+
+				public static LocString OPEN_CLOUDSAVE_FOLDER = "CLOUD SAVES";
+
+				public static LocString MIGRATE_TITLE = "SAVE FILE MIGRATION";
+
+				public static LocString MIGRATE_SAVE_FILES = "MIGRATE SAVE FILES";
+
+				public static LocString MIGRATE_COUNT = string.Concat(new string[]
+				{
+					"\nFound ",
+					UI.PRE_KEYWORD,
+					"{0}",
+					UI.PST_KEYWORD,
+					" saves and ",
+					UI.PRE_KEYWORD,
+					"{1}",
+					UI.PST_KEYWORD,
+					" autosaves that require migration."
+				});
+
+				public static LocString MIGRATE_RESULT = string.Concat(new string[]
+				{
+					UI.PRE_KEYWORD,
+					"SUCCESS!",
+					UI.PST_KEYWORD,
+					"\nMigration moved ",
+					UI.PRE_KEYWORD,
+					"{0}/{1}",
+					UI.PST_KEYWORD,
+					" saves and ",
+					UI.PRE_KEYWORD,
+					"{2}/{3}",
+					UI.PST_KEYWORD,
+					" autosaves",
+					UI.PST_KEYWORD,
+					"."
+				});
+
+				public static LocString MIGRATE_RESULT_FAILURES = string.Concat(new string[]
+				{
+					UI.PRE_KEYWORD,
+					"<b>WARNING:</b> Not all saves could be migrated.",
+					UI.PST_KEYWORD,
+					"\nMigration moved ",
+					UI.PRE_KEYWORD,
+					"{0}/{1}",
+					UI.PST_KEYWORD,
+					" saves and ",
+					UI.PRE_KEYWORD,
+					"{2}/{3}",
+					UI.PST_KEYWORD,
+					" autosaves.\n\nThe file ",
+					UI.PRE_KEYWORD,
+					"{ErrorColony}",
+					UI.PST_KEYWORD,
+					" encountered this error:\n\n<b>{ErrorMessage}</b>"
+				});
+
+				public static LocString MIGRATE_RESULT_FAILURES_MORE_INFO_TITLE = "MIGRATION INCOMPLETE";
+
+				public static LocString MIGRATE_RESULT_FAILURES_MORE_INFO_PRE = "<b>The game was unable to move all save files to their new location.\nTo fix this, please:</b>\n\n";
+
+				public static LocString MIGRATE_RESULT_FAILURES_MORE_INFO_ITEM1 = "    1. Try temporarily disabling virus scanners and malware\n         protection programs.";
+
+				public static LocString MIGRATE_RESULT_FAILURES_MORE_INFO_ITEM2 = "    2. Turn off file sync services such as OneDrive and DropBox.";
+
+				public static LocString MIGRATE_RESULT_FAILURES_MORE_INFO_ITEM3 = "    3. Restart the game to retry file migration.";
+
+				public static LocString MIGRATE_RESULT_FAILURES_MORE_INFO_POST = "\n<b>If this still doesn't solve the problem, please post a bug in the forums and we will attempt to assist with your issue.</b>";
+
+				public static LocString MIGRATE_INFO = "We've changed how save files are organized!\nPlease click the button below to automatically update your save file storage.";
+
+				public static LocString MIGRATE_DONE = "CONTINUE";
+
+				public static LocString MIGRATE_FAILURES_FORUM_BUTTON = "VISIT FORUMS";
+
+				public static LocString MIGRATE_FAILURES_DONE = "MORE INFO";
+
+				public static LocString CLOUD_TUTORIAL_BOUNCER = "Upload Saves to Cloud";
 			}
 
 			public class SAVESCREEN
@@ -1776,7 +1985,7 @@ namespace STRINGS
 
 					public static LocString MESSAGE = "{0}";
 
-					public static LocString DEV_MESSAGE = "{0}\nCheck output_log.txt for details.";
+					public static LocString DEV_MESSAGE = "{0}\nCheck Player.log for details.";
 				}
 
 				public class RESTART
@@ -2000,6 +2209,10 @@ namespace STRINGS
 				public static LocString GENERAL_GAME_OPTIONS = "GENERAL";
 
 				public static LocString DISABLED_WARNING = "More options available in-game";
+
+				public static LocString DEFAULT_TO_CLOUD_SAVES = "Default to cloud saves";
+
+				public static LocString DEFAULT_TO_CLOUD_SAVES_TOOLTIP = "When a new colony is created, this controls whether it will be saved into the cloud saves folder for syncing or not.";
 
 				public static LocString RESET_TUTORIAL_DESCRIPTION = "Mark all tutorial messages \"unread\"";
 
@@ -3909,11 +4122,11 @@ namespace STRINGS
 
 			public static LocString TESTING_WATERMARK = "TESTING BUILD: {0}";
 
-			public static LocString TESTING_TOOLTIP = "The game is currently running a Test version\n\nClick for more info.";
+			public static LocString TESTING_TOOLTIP = "This game is currently running a Test version.\n\nClick for more info.";
 
 			public static LocString TESTING_MESSAGE_TITLE = "TESTING BUILD";
 
-			public static LocString TESTING_MESSAGE = "This game is running a Test version of Oxygen Not Included. This means that some features may be in development or buggier than normal, and not quite ready to go to the Release version of the game.\n\nIf you encounter any bugs or strange behavior, we'd appreciate if you took the time to add a report to the bug forums.";
+			public static LocString TESTING_MESSAGE = "This game is running a Test version of Oxygen Not Included. This means that some features may be in development or buggier than normal, and require more testing before they can be moved into the Release build.\n\nIf you encounter any bugs or strange behavior, please add a report to the bug forums. We appreciate it!";
 
 			public static LocString TESTING_MORE_INFO = "BUG FORUMS";
 
@@ -4067,11 +4280,15 @@ namespace STRINGS
 
 			public class INFORMATION
 			{
+				public static LocString BYTE = "B";
+
 				public static LocString KILOBYTE = "kB";
 
 				public static LocString MEGABYTE = "MB";
 
 				public static LocString GIGABYTE = "GB";
+
+				public static LocString TERABYTE = "TB";
 			}
 
 			public class LIGHT
@@ -9562,6 +9779,10 @@ namespace STRINGS
 
 			public static LocString AVERAGE_TIME_DETAILS_HEADER = "Average Time Details:";
 
+			public static LocString MY_COLONY = "my colony";
+
+			public static LocString NONE = "None";
+
 			public class OXYGEN_CREATED
 			{
 				public static LocString NAME = UI.FormatAsLink("Oxygen", "OXYGEN") + " Generation:";
@@ -9584,27 +9805,27 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Domesticated Critters:";
 
-				public static LocString POSITIVE_TOOLTIP = "My colony has {0} critters";
+				public static LocString POSITIVE_TOOLTIP = "{0} domestic critters live in {1}";
 
-				public static LocString NEGATIVE_TOOLTIP = "My colony has {0} critters";
+				public static LocString NEGATIVE_TOOLTIP = "{0} domestic critters live in {1}";
 			}
 
 			public class NUMBER_OF_WILD_CRITTERS
 			{
 				public static LocString NAME = "Wild Critters:";
 
-				public static LocString POSITIVE_TOOLTIP = "There are {0} wild critters around my colony";
+				public static LocString POSITIVE_TOOLTIP = "{0} domestic critters live in {1}";
 
-				public static LocString NEGATIVE_TOOLTIP = "There are {0} wild critters around my colony";
+				public static LocString NEGATIVE_TOOLTIP = "{0} domestic critters live in {1}";
 			}
 
 			public class ROCKETS_IN_FLIGHT
 			{
 				public static LocString NAME = "Rocket Missions Underway:";
 
-				public static LocString POSITIVE_TOOLTIP = "There are {0} Rockets currently flying missions";
+				public static LocString POSITIVE_TOOLTIP = "{0} rockets are currently flying missions for {1}";
 
-				public static LocString NEGATIVE_TOOLTIP = "There are {0} Rockets currently flying missions";
+				public static LocString NEGATIVE_TOOLTIP = "{0} rockets are currently flying missions for {1}";
 			}
 
 			public class STRESS_DELTA
@@ -10048,6 +10269,8 @@ namespace STRINGS
 			public static LocString CARE_PACKAGE_ELEMENT_COUNT_ONLY = "x {0}";
 
 			public static LocString CARE_PACKAGE_CURRENT_AMOUNT = "Available: {0}";
+
+			public static LocString DUPLICATE_COLONY_NAME = "A colony named \"{0}\" already exists!";
 		}
 
 		public class METERS

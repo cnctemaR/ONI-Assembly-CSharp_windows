@@ -2,20 +2,28 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
+using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
+using UnityEngine.ParticleSystemJobs;
 using UnityEngine.Rendering;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/ParticleSystem/ParticleSystem.h")]
-	[NativeHeader("Runtime/ParticleSystem/ScriptBindings/ParticleSystemScriptBindings.h")]
-	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Modules/ParticleSystem/ParticleSystem.h")]
+	[NativeHeader("Modules/ParticleSystem/ScriptBindings/ParticleSystemModulesScriptBindings.h")]
 	[RequireComponent(typeof(Transform))]
 	[UsedByNativeCode]
+	[NativeHeader("Modules/ParticleSystem/ScriptBindings/ParticleSystemScriptBindings.h")]
+	[NativeHeader("Modules/ParticleSystem/ParticleSystemGeometryJob.h")]
+	[NativeHeader("Modules/ParticleSystem/ParticleSystem.h")]
+	[NativeHeader("Modules/ParticleSystem/ScriptBindings/ParticleSystemScriptBindings.h")]
 	[NativeHeader("ParticleSystemScriptingClasses.h")]
-	[NativeHeader("Runtime/ParticleSystem/ParticleSystemGeometryJob.h")]
+	[NativeHeader("ParticleSystemScriptingClasses.h")]
 	public sealed class ParticleSystem : Component
 	{
 		[Obsolete("Emit with specific parameters is deprecated. Pass a ParticleSystem.EmitParams parameter instead, which allows you to override some/all of the emission properties", false)]
@@ -31,13 +39,13 @@ namespace UnityEngine
 			particle.angularVelocity3D = Vector3.zero;
 			particle.startColor = color;
 			particle.randomSeed = 5U;
-			this.Internal_EmitOld(ref particle);
+			this.EmitOld_Internal(ref particle);
 		}
 
 		[Obsolete("Emit with a single particle structure is deprecated. Pass a ParticleSystem.EmitParams parameter instead, which allows you to override some/all of the emission properties", false)]
 		public void Emit(ParticleSystem.Particle particle)
 		{
-			this.Internal_EmitOld(ref particle);
+			this.EmitOld_Internal(ref particle);
 		}
 
 		[Obsolete("startDelay property is deprecated. Use main.startDelay or main.startDelayMultiplier instead.", false)]
@@ -360,6 +368,259 @@ namespace UnityEngine
 			return color;
 		}
 
+		[FreeFunction(Name = "ParticleSystemScriptBindings::GetParticleMeshIndex", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern int GetParticleMeshIndex(ref ParticleSystem.Particle particle);
+
+		[FreeFunction(Name = "ParticleSystemScriptBindings::SetParticles", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SetParticles([Out] ParticleSystem.Particle[] particles, int size, int offset);
+
+		public void SetParticles([Out] ParticleSystem.Particle[] particles, int size)
+		{
+			this.SetParticles(particles, size, 0);
+		}
+
+		public void SetParticles([Out] ParticleSystem.Particle[] particles)
+		{
+			this.SetParticles(particles, -1);
+		}
+
+		[FreeFunction(Name = "ParticleSystemScriptBindings::SetParticlesWithNativeArray", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetParticlesWithNativeArray(IntPtr particles, int particlesLength, int size, int offset);
+
+		public void SetParticles([Out] NativeArray<ParticleSystem.Particle> particles, int size, int offset)
+		{
+			this.SetParticlesWithNativeArray((IntPtr)particles.GetUnsafeReadOnlyPtr<ParticleSystem.Particle>(), particles.Length, size, 0);
+		}
+
+		public void SetParticles([Out] NativeArray<ParticleSystem.Particle> particles, int size)
+		{
+			this.SetParticles(particles, size, 0);
+		}
+
+		public void SetParticles([Out] NativeArray<ParticleSystem.Particle> particles)
+		{
+			this.SetParticles(particles, -1);
+		}
+
+		[FreeFunction(Name = "ParticleSystemScriptBindings::GetParticles", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetParticles([NotNull] [Out] ParticleSystem.Particle[] particles, int size, int offset);
+
+		public int GetParticles([Out] ParticleSystem.Particle[] particles, int size)
+		{
+			return this.GetParticles(particles, size, 0);
+		}
+
+		public int GetParticles([Out] ParticleSystem.Particle[] particles)
+		{
+			return this.GetParticles(particles, -1);
+		}
+
+		[FreeFunction(Name = "ParticleSystemScriptBindings::GetParticlesWithNativeArray", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetParticlesWithNativeArray(IntPtr particles, int particlesLength, int size, int offset);
+
+		public int GetParticles([Out] NativeArray<ParticleSystem.Particle> particles, int size, int offset)
+		{
+			return this.GetParticlesWithNativeArray((IntPtr)particles.GetUnsafeReadOnlyPtr<ParticleSystem.Particle>(), particles.Length, size, 0);
+		}
+
+		public int GetParticles([Out] NativeArray<ParticleSystem.Particle> particles, int size)
+		{
+			return this.GetParticles(particles, size, 0);
+		}
+
+		public int GetParticles([Out] NativeArray<ParticleSystem.Particle> particles)
+		{
+			return this.GetParticles(particles, -1);
+		}
+
+		[FreeFunction(Name = "ParticleSystemScriptBindings::SetCustomParticleData", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SetCustomParticleData([NotNull] List<Vector4> customData, ParticleSystemCustomData streamIndex);
+
+		[FreeFunction(Name = "ParticleSystemScriptBindings::GetCustomParticleData", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetCustomParticleData([NotNull] List<Vector4> customData, ParticleSystemCustomData streamIndex);
+
+		public ParticleSystem.PlaybackState GetPlaybackState()
+		{
+			ParticleSystem.PlaybackState playbackState;
+			this.GetPlaybackState_Injected(out playbackState);
+			return playbackState;
+		}
+
+		public void SetPlaybackState(ParticleSystem.PlaybackState playbackState)
+		{
+			this.SetPlaybackState_Injected(ref playbackState);
+		}
+
+		[FreeFunction(Name = "ParticleSystemScriptBindings::GetTrailData", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void GetTrailDataInternal(ref ParticleSystem.Trails trailData);
+
+		public ParticleSystem.Trails GetTrails()
+		{
+			ParticleSystem.Trails trails = new ParticleSystem.Trails
+			{
+				positions = new List<Vector4>(),
+				frontPositions = new List<int>(),
+				backPositions = new List<int>(),
+				positionCounts = new List<int>()
+			};
+			this.GetTrailDataInternal(ref trails);
+			return trails;
+		}
+
+		[FreeFunction(Name = "ParticleSystemScriptBindings::SetTrailData", HasExplicitThis = true)]
+		public void SetTrails(ParticleSystem.Trails trailData)
+		{
+			this.SetTrails_Injected(ref trailData);
+		}
+
+		[FreeFunction(Name = "ParticleSystemScriptBindings::Simulate", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void Simulate(float t, [DefaultValue("true")] bool withChildren, [DefaultValue("true")] bool restart, [DefaultValue("true")] bool fixedTimeStep);
+
+		public void Simulate(float t, [DefaultValue("true")] bool withChildren, [DefaultValue("true")] bool restart)
+		{
+			this.Simulate(t, withChildren, restart, true);
+		}
+
+		public void Simulate(float t, [DefaultValue("true")] bool withChildren)
+		{
+			this.Simulate(t, withChildren, true);
+		}
+
+		public void Simulate(float t)
+		{
+			this.Simulate(t, true);
+		}
+
+		[FreeFunction(Name = "ParticleSystemScriptBindings::Play", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void Play([DefaultValue("true")] bool withChildren);
+
+		public void Play()
+		{
+			this.Play(true);
+		}
+
+		[FreeFunction(Name = "ParticleSystemScriptBindings::Pause", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void Pause([DefaultValue("true")] bool withChildren);
+
+		public void Pause()
+		{
+			this.Pause(true);
+		}
+
+		[FreeFunction(Name = "ParticleSystemScriptBindings::Stop", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void Stop([DefaultValue("true")] bool withChildren, [DefaultValue("ParticleSystemStopBehavior.StopEmitting")] ParticleSystemStopBehavior stopBehavior);
+
+		public void Stop([DefaultValue("true")] bool withChildren)
+		{
+			this.Stop(withChildren, ParticleSystemStopBehavior.StopEmitting);
+		}
+
+		public void Stop()
+		{
+			this.Stop(true);
+		}
+
+		[FreeFunction(Name = "ParticleSystemScriptBindings::Clear", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void Clear([DefaultValue("true")] bool withChildren);
+
+		public void Clear()
+		{
+			this.Clear(true);
+		}
+
+		[FreeFunction(Name = "ParticleSystemScriptBindings::IsAlive", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern bool IsAlive([DefaultValue("true")] bool withChildren);
+
+		public bool IsAlive()
+		{
+			return this.IsAlive(true);
+		}
+
+		[RequiredByNativeCode]
+		public void Emit(int count)
+		{
+			this.Emit_Internal(count);
+		}
+
+		[NativeName("SyncJobs()->Emit")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void Emit_Internal(int count);
+
+		[NativeName("SyncJobs()->EmitParticlesExternal")]
+		public void Emit(ParticleSystem.EmitParams emitParams, int count)
+		{
+			this.Emit_Injected(ref emitParams, count);
+		}
+
+		[NativeName("SyncJobs()->EmitParticleExternal")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void EmitOld_Internal(ref ParticleSystem.Particle particle);
+
+		public void TriggerSubEmitter(int subEmitterIndex)
+		{
+			this.TriggerSubEmitter(subEmitterIndex, null);
+		}
+
+		public void TriggerSubEmitter(int subEmitterIndex, ref ParticleSystem.Particle particle)
+		{
+			this.TriggerSubEmitterForParticle(subEmitterIndex, particle);
+		}
+
+		[FreeFunction(Name = "ParticleSystemScriptBindings::TriggerSubEmitterForParticle", HasExplicitThis = true)]
+		internal void TriggerSubEmitterForParticle(int subEmitterIndex, ParticleSystem.Particle particle)
+		{
+			this.TriggerSubEmitterForParticle_Injected(subEmitterIndex, ref particle);
+		}
+
+		[FreeFunction(Name = "ParticleSystemScriptBindings::TriggerSubEmitter", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void TriggerSubEmitter(int subEmitterIndex, List<ParticleSystem.Particle> particles);
+
+		[FreeFunction(Name = "ParticleSystemGeometryJob::ResetPreMappedBufferMemory")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void ResetPreMappedBufferMemory();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal unsafe extern void* GetManagedJobData();
+
+		internal JobHandle GetManagedJobHandle()
+		{
+			JobHandle jobHandle;
+			this.GetManagedJobHandle_Injected(out jobHandle);
+			return jobHandle;
+		}
+
+		internal void SetManagedJobHandle(JobHandle handle)
+		{
+			this.SetManagedJobHandle_Injected(ref handle);
+		}
+
+		[FreeFunction("ScheduleManagedJob")]
+		internal unsafe static JobHandle ScheduleManagedJob(ref JobsUtility.JobScheduleParameters parameters, void* additionalData)
+		{
+			JobHandle jobHandle;
+			ParticleSystem.ScheduleManagedJob_Injected(ref parameters, additionalData, out jobHandle);
+			return jobHandle;
+		}
+
+		[ThreadSafe]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal unsafe static extern void CopyManagedJobData(void* systemPtr, out NativeParticleData particleData);
+
 		public ParticleSystem.MainModule main
 		{
 			get
@@ -536,163 +797,6 @@ namespace UnityEngine
 			}
 		}
 
-		[FreeFunction(Name = "ParticleSystemScriptBindings::SetParticles", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetParticles([Out] ParticleSystem.Particle[] particles, int size, int offset);
-
-		public void SetParticles([Out] ParticleSystem.Particle[] particles, int size)
-		{
-			this.SetParticles(particles, size, 0);
-		}
-
-		public void SetParticles([Out] ParticleSystem.Particle[] particles)
-		{
-			this.SetParticles(particles, -1);
-		}
-
-		[FreeFunction(Name = "ParticleSystemScriptBindings::GetParticles", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetParticles([NotNull] [Out] ParticleSystem.Particle[] particles, int size, int offset);
-
-		public int GetParticles([Out] ParticleSystem.Particle[] particles, int size)
-		{
-			return this.GetParticles(particles, size, 0);
-		}
-
-		public int GetParticles([Out] ParticleSystem.Particle[] particles)
-		{
-			return this.GetParticles(particles, -1);
-		}
-
-		[FreeFunction(Name = "ParticleSystemScriptBindings::Simulate", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Simulate(float t, bool withChildren, bool restart, bool fixedTimeStep);
-
-		public void Simulate(float t, bool withChildren, bool restart)
-		{
-			this.Simulate(t, withChildren, restart, true);
-		}
-
-		public void Simulate(float t, bool withChildren)
-		{
-			this.Simulate(t, withChildren, true);
-		}
-
-		public void Simulate(float t)
-		{
-			this.Simulate(t, true);
-		}
-
-		[FreeFunction(Name = "ParticleSystemScriptBindings::Play", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Play(bool withChildren);
-
-		public void Play()
-		{
-			this.Play(true);
-		}
-
-		[FreeFunction(Name = "ParticleSystemScriptBindings::Pause", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Pause(bool withChildren);
-
-		public void Pause()
-		{
-			this.Pause(true);
-		}
-
-		[FreeFunction(Name = "ParticleSystemScriptBindings::Stop", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Stop(bool withChildren, ParticleSystemStopBehavior stopBehavior);
-
-		public void Stop(bool withChildren)
-		{
-			this.Stop(withChildren, ParticleSystemStopBehavior.StopEmitting);
-		}
-
-		public void Stop()
-		{
-			this.Stop(true);
-		}
-
-		[FreeFunction(Name = "ParticleSystemScriptBindings::Clear", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Clear(bool withChildren);
-
-		public void Clear()
-		{
-			this.Clear(true);
-		}
-
-		[FreeFunction(Name = "ParticleSystemScriptBindings::IsAlive", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool IsAlive(bool withChildren);
-
-		public bool IsAlive()
-		{
-			return this.IsAlive(true);
-		}
-
-		[RequiredByNativeCode]
-		public void Emit(int count)
-		{
-			this.Emit_Internal(count);
-		}
-
-		[NativeName("SyncJobs()->Emit")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Emit_Internal(int count);
-
-		[NativeName("SyncJobs()->EmitParticlesExternal")]
-		public void Emit(ParticleSystem.EmitParams emitParams, int count)
-		{
-			this.Emit_Injected(ref emitParams, count);
-		}
-
-		[FreeFunction(Name = "ParticleSystemGeometryJob::ResetPreMappedBufferMemory")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void ResetPreMappedBufferMemory();
-
-		public void SetCustomParticleData(List<Vector4> customData, ParticleSystemCustomData streamIndex)
-		{
-			this.SetCustomParticleDataInternal(customData, (int)streamIndex);
-		}
-
-		public int GetCustomParticleData(List<Vector4> customData, ParticleSystemCustomData streamIndex)
-		{
-			return this.GetCustomParticleDataInternal(customData, (int)streamIndex);
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SetCustomParticleDataInternal(object customData, int streamIndex);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern int GetCustomParticleDataInternal(object customData, int streamIndex);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_EmitOld(ref ParticleSystem.Particle particle);
-
-		public void TriggerSubEmitter(int subEmitterIndex)
-		{
-			this.Internal_TriggerSubEmitter(subEmitterIndex, null);
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void TriggerSubEmitter(int subEmitterIndex, ref ParticleSystem.Particle particle);
-
-		public void TriggerSubEmitter(int subEmitterIndex, List<ParticleSystem.Particle> particles)
-		{
-			this.Internal_TriggerSubEmitter(subEmitterIndex, particles);
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void Internal_TriggerSubEmitter(int subEmitterIndex, object particles);
-
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void GetParticleCurrentSize3D_Injected(ref ParticleSystem.Particle particle, out Vector3 ret);
 
@@ -700,15 +804,31 @@ namespace UnityEngine
 		private extern void GetParticleCurrentColor_Injected(ref ParticleSystem.Particle particle, out Color32 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void GetPlaybackState_Injected(out ParticleSystem.PlaybackState ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetPlaybackState_Injected(ref ParticleSystem.PlaybackState playbackState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetTrails_Injected(ref ParticleSystem.Trails trailData);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Emit_Injected(ref ParticleSystem.EmitParams emitParams, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void TriggerSubEmitterForParticle_Injected(int subEmitterIndex, ref ParticleSystem.Particle particle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void GetManagedJobHandle_Injected(out JobHandle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetManagedJobHandle_Injected(ref JobHandle handle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void ScheduleManagedJob_Injected(ref JobsUtility.JobScheduleParameters parameters, void* additionalData, out JobHandle ret);
 
 		public struct MainModule
 		{
-			internal MainModule(ParticleSystem particleSystem)
-			{
-				this.m_ParticleSystem = particleSystem;
-			}
-
 			[Obsolete("Please use flipRotation instead. (UnityUpgradable) -> UnityEngine.ParticleSystem/MainModule.flipRotation", false)]
 			public float randomizeRotationDirection
 			{
@@ -722,15 +842,20 @@ namespace UnityEngine
 				}
 			}
 
+			internal MainModule(ParticleSystem particleSystem)
+			{
+				this.m_ParticleSystem = particleSystem;
+			}
+
 			public float duration
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetDuration(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_duration_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetDuration(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_duration_Injected(ref this, value);
 				}
 			}
 
@@ -738,11 +863,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetLoop(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_loop_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetLoop(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_loop_Injected(ref this, value);
 				}
 			}
 
@@ -750,11 +875,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetPrewarm(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_prewarm_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetPrewarm(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_prewarm_Injected(ref this, value);
 				}
 			}
 
@@ -762,13 +887,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.MainModule.GetStartDelay(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.MainModule.get_startDelay_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartDelay(this.m_ParticleSystem, ref value);
+					ParticleSystem.MainModule.set_startDelay_Injected(ref this, ref value);
 				}
 			}
 
@@ -776,11 +901,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetStartDelayMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_startDelayMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartDelayMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_startDelayMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -788,13 +913,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.MainModule.GetStartLifetime(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.MainModule.get_startLifetime_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartLifetime(this.m_ParticleSystem, ref value);
+					ParticleSystem.MainModule.set_startLifetime_Injected(ref this, ref value);
 				}
 			}
 
@@ -802,11 +927,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetStartLifetimeMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_startLifetimeMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartLifetimeMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_startLifetimeMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -814,13 +939,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.MainModule.GetStartSpeed(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.MainModule.get_startSpeed_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartSpeed(this.m_ParticleSystem, ref value);
+					ParticleSystem.MainModule.set_startSpeed_Injected(ref this, ref value);
 				}
 			}
 
@@ -828,11 +953,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetStartSpeedMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_startSpeedMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartSpeedMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_startSpeedMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -840,37 +965,39 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetStartSize3D(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_startSize3D_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartSize3D(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_startSize3D_Injected(ref this, value);
 				}
 			}
 
+			[NativeName("StartSizeX")]
 			public ParticleSystem.MinMaxCurve startSize
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.MainModule.GetStartSizeX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.MainModule.get_startSize_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartSizeX(this.m_ParticleSystem, ref value);
+					ParticleSystem.MainModule.set_startSize_Injected(ref this, ref value);
 				}
 			}
 
+			[NativeName("StartSizeXMultiplier")]
 			public float startSizeMultiplier
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetStartSizeXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_startSizeMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartSizeXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_startSizeMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -878,13 +1005,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.MainModule.GetStartSizeX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.MainModule.get_startSizeX_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartSizeX(this.m_ParticleSystem, ref value);
+					ParticleSystem.MainModule.set_startSizeX_Injected(ref this, ref value);
 				}
 			}
 
@@ -892,11 +1019,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetStartSizeXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_startSizeXMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartSizeXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_startSizeXMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -904,13 +1031,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.MainModule.GetStartSizeY(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.MainModule.get_startSizeY_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartSizeY(this.m_ParticleSystem, ref value);
+					ParticleSystem.MainModule.set_startSizeY_Injected(ref this, ref value);
 				}
 			}
 
@@ -918,11 +1045,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetStartSizeYMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_startSizeYMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartSizeYMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_startSizeYMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -930,13 +1057,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.MainModule.GetStartSizeZ(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.MainModule.get_startSizeZ_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartSizeZ(this.m_ParticleSystem, ref value);
+					ParticleSystem.MainModule.set_startSizeZ_Injected(ref this, ref value);
 				}
 			}
 
@@ -944,11 +1071,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetStartSizeZMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_startSizeZMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartSizeZMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_startSizeZMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -956,37 +1083,39 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetStartRotation3D(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_startRotation3D_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartRotation3D(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_startRotation3D_Injected(ref this, value);
 				}
 			}
 
+			[NativeName("StartRotationZ")]
 			public ParticleSystem.MinMaxCurve startRotation
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.MainModule.GetStartRotationZ(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.MainModule.get_startRotation_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartRotationZ(this.m_ParticleSystem, ref value);
+					ParticleSystem.MainModule.set_startRotation_Injected(ref this, ref value);
 				}
 			}
 
+			[NativeName("StartRotationZMultiplier")]
 			public float startRotationMultiplier
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetStartRotationZMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_startRotationMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartRotationZMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_startRotationMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -994,13 +1123,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.MainModule.GetStartRotationX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.MainModule.get_startRotationX_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartRotationX(this.m_ParticleSystem, ref value);
+					ParticleSystem.MainModule.set_startRotationX_Injected(ref this, ref value);
 				}
 			}
 
@@ -1008,11 +1137,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetStartRotationXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_startRotationXMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartRotationXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_startRotationXMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -1020,13 +1149,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.MainModule.GetStartRotationY(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.MainModule.get_startRotationY_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartRotationY(this.m_ParticleSystem, ref value);
+					ParticleSystem.MainModule.set_startRotationY_Injected(ref this, ref value);
 				}
 			}
 
@@ -1034,11 +1163,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetStartRotationYMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_startRotationYMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartRotationYMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_startRotationYMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -1046,13 +1175,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.MainModule.GetStartRotationZ(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.MainModule.get_startRotationZ_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartRotationZ(this.m_ParticleSystem, ref value);
+					ParticleSystem.MainModule.set_startRotationZ_Injected(ref this, ref value);
 				}
 			}
 
@@ -1060,11 +1189,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetStartRotationZMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_startRotationZMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartRotationZMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_startRotationZMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -1072,11 +1201,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetFlipRotation(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_flipRotation_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetFlipRotation(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_flipRotation_Injected(ref this, value);
 				}
 			}
 
@@ -1084,13 +1213,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxGradient minMaxGradient = default(ParticleSystem.MinMaxGradient);
-					ParticleSystem.MainModule.GetStartColor(this.m_ParticleSystem, ref minMaxGradient);
+					ParticleSystem.MinMaxGradient minMaxGradient;
+					ParticleSystem.MainModule.get_startColor_Injected(ref this, out minMaxGradient);
 					return minMaxGradient;
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStartColor(this.m_ParticleSystem, ref value);
+					ParticleSystem.MainModule.set_startColor_Injected(ref this, ref value);
 				}
 			}
 
@@ -1098,13 +1227,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.MainModule.GetGravityModifier(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.MainModule.get_gravityModifier_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetGravityModifier(this.m_ParticleSystem, ref value);
+					ParticleSystem.MainModule.set_gravityModifier_Injected(ref this, ref value);
 				}
 			}
 
@@ -1112,11 +1241,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetGravityModifierMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_gravityModifierMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetGravityModifierMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_gravityModifierMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -1124,11 +1253,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetSimulationSpace(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_simulationSpace_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetSimulationSpace(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_simulationSpace_Injected(ref this, value);
 				}
 			}
 
@@ -1136,11 +1265,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetCustomSimulationSpace(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_customSimulationSpace_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetCustomSimulationSpace(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_customSimulationSpace_Injected(ref this, value);
 				}
 			}
 
@@ -1148,11 +1277,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetSimulationSpeed(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_simulationSpeed_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetSimulationSpeed(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_simulationSpeed_Injected(ref this, value);
 				}
 			}
 
@@ -1160,11 +1289,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetUseUnscaledTime(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_useUnscaledTime_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetUseUnscaledTime(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_useUnscaledTime_Injected(ref this, value);
 				}
 			}
 
@@ -1172,11 +1301,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetScalingMode(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_scalingMode_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetScalingMode(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_scalingMode_Injected(ref this, value);
 				}
 			}
 
@@ -1184,11 +1313,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetPlayOnAwake(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_playOnAwake_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetPlayOnAwake(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_playOnAwake_Injected(ref this, value);
 				}
 			}
 
@@ -1196,11 +1325,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetMaxParticles(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_maxParticles_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetMaxParticles(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_maxParticles_Injected(ref this, value);
 				}
 			}
 
@@ -1208,11 +1337,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return (!ParticleSystem.MainModule.GetUseRigidbodyForVelocity(this.m_ParticleSystem)) ? ParticleSystemEmitterVelocityMode.Transform : ParticleSystemEmitterVelocityMode.Rigidbody;
+					return ParticleSystem.MainModule.get_emitterVelocityMode_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetUseRigidbodyForVelocity(this.m_ParticleSystem, value == ParticleSystemEmitterVelocityMode.Rigidbody);
+					ParticleSystem.MainModule.set_emitterVelocityMode_Injected(ref this, value);
 				}
 			}
 
@@ -1220,23 +1349,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetStopAction(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_stopAction_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetStopAction(this.m_ParticleSystem, value);
-				}
-			}
-
-			public ParticleSystemCullingMode cullingMode
-			{
-				get
-				{
-					return ParticleSystem.MainModule.GetCullingMode(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.MainModule.SetCullingMode(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_stopAction_Injected(ref this, value);
 				}
 			}
 
@@ -1244,11 +1361,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetRingBufferMode(this.m_ParticleSystem);
+					return ParticleSystem.MainModule.get_ringBufferMode_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetRingBufferMode(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_ringBufferMode_Injected(ref this, value);
 				}
 			}
 
@@ -1256,356 +1373,291 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.MainModule.GetRingBufferLoopRange(this.m_ParticleSystem);
+					Vector2 vector;
+					ParticleSystem.MainModule.get_ringBufferLoopRange_Injected(ref this, out vector);
+					return vector;
 				}
 				set
 				{
-					ParticleSystem.MainModule.SetRingBufferLoopRange(this.m_ParticleSystem, value);
+					ParticleSystem.MainModule.set_ringBufferLoopRange_Injected(ref this, ref value);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetDuration(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetDuration(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetLoop(ParticleSystem system, bool value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetLoop(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetPrewarm(ParticleSystem system, bool value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetPrewarm(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartDelay(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetStartDelay(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartDelayMultiplier(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetStartDelayMultiplier(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartLifetime(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetStartLifetime(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartLifetimeMultiplier(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetStartLifetimeMultiplier(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartSpeed(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetStartSpeed(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartSpeedMultiplier(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetStartSpeedMultiplier(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartSize3D(ParticleSystem system, bool value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetStartSize3D(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartSizeX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetStartSizeX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartSizeXMultiplier(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetStartSizeXMultiplier(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartSizeY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetStartSizeY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartSizeYMultiplier(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetStartSizeYMultiplier(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartSizeZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetStartSizeZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartSizeZMultiplier(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetStartSizeZMultiplier(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartRotation3D(ParticleSystem system, bool value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetStartRotation3D(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartRotationX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetStartRotationX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartRotationXMultiplier(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetStartRotationXMultiplier(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartRotationY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetStartRotationY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartRotationYMultiplier(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetStartRotationYMultiplier(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartRotationZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetStartRotationZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartRotationZMultiplier(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetStartRotationZMultiplier(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetFlipRotation(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetFlipRotation(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartColor(ParticleSystem system, ref ParticleSystem.MinMaxGradient gradient);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetStartColor(ParticleSystem system, ref ParticleSystem.MinMaxGradient gradient);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetGravityModifier(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetGravityModifier(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetGravityModifierMultiplier(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetGravityModifierMultiplier(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSimulationSpace(ParticleSystem system, ParticleSystemSimulationSpace value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemSimulationSpace GetSimulationSpace(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetCustomSimulationSpace(ParticleSystem system, Transform value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern Transform GetCustomSimulationSpace(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSimulationSpeed(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetSimulationSpeed(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetUseUnscaledTime(ParticleSystem system, bool value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetUseUnscaledTime(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetScalingMode(ParticleSystem system, ParticleSystemScalingMode value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemScalingMode GetScalingMode(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetPlayOnAwake(ParticleSystem system, bool value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetPlayOnAwake(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMaxParticles(ParticleSystem system, int value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetMaxParticles(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetUseRigidbodyForVelocity(ParticleSystem system, bool value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetUseRigidbodyForVelocity(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStopAction(ParticleSystem system, ParticleSystemStopAction value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemStopAction GetStopAction(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetCullingMode(ParticleSystem system, ParticleSystemCullingMode value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemCullingMode GetCullingMode(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRingBufferMode(ParticleSystem system, ParticleSystemRingBufferMode value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemRingBufferMode GetRingBufferMode(ParticleSystem system);
-
-			private static void SetRingBufferLoopRange(ParticleSystem system, Vector2 value)
+			public ParticleSystemCullingMode cullingMode
 			{
-				ParticleSystem.MainModule.INTERNAL_CALL_SetRingBufferLoopRange(system, ref value);
+				get
+				{
+					return ParticleSystem.MainModule.get_cullingMode_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.MainModule.set_cullingMode_Injected(ref this, value);
+				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_SetRingBufferLoopRange(ParticleSystem system, ref Vector2 value);
+			private static extern float get_duration_Injected(ref ParticleSystem.MainModule _unity_self);
 
-			private static Vector2 GetRingBufferLoopRange(ParticleSystem system)
-			{
-				Vector2 vector;
-				ParticleSystem.MainModule.INTERNAL_CALL_GetRingBufferLoopRange(system, out vector);
-				return vector;
-			}
-
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_GetRingBufferLoopRange(ParticleSystem system, out Vector2 value);
+			private static extern void set_duration_Injected(ref ParticleSystem.MainModule _unity_self, float value);
 
-			private ParticleSystem m_ParticleSystem;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool get_loop_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_loop_Injected(ref ParticleSystem.MainModule _unity_self, bool value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool get_prewarm_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_prewarm_Injected(ref ParticleSystem.MainModule _unity_self, bool value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_startDelay_Injected(ref ParticleSystem.MainModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startDelay_Injected(ref ParticleSystem.MainModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_startDelayMultiplier_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startDelayMultiplier_Injected(ref ParticleSystem.MainModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_startLifetime_Injected(ref ParticleSystem.MainModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startLifetime_Injected(ref ParticleSystem.MainModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_startLifetimeMultiplier_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startLifetimeMultiplier_Injected(ref ParticleSystem.MainModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_startSpeed_Injected(ref ParticleSystem.MainModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startSpeed_Injected(ref ParticleSystem.MainModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_startSpeedMultiplier_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startSpeedMultiplier_Injected(ref ParticleSystem.MainModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool get_startSize3D_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startSize3D_Injected(ref ParticleSystem.MainModule _unity_self, bool value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_startSize_Injected(ref ParticleSystem.MainModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startSize_Injected(ref ParticleSystem.MainModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_startSizeMultiplier_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startSizeMultiplier_Injected(ref ParticleSystem.MainModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_startSizeX_Injected(ref ParticleSystem.MainModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startSizeX_Injected(ref ParticleSystem.MainModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_startSizeXMultiplier_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startSizeXMultiplier_Injected(ref ParticleSystem.MainModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_startSizeY_Injected(ref ParticleSystem.MainModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startSizeY_Injected(ref ParticleSystem.MainModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_startSizeYMultiplier_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startSizeYMultiplier_Injected(ref ParticleSystem.MainModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_startSizeZ_Injected(ref ParticleSystem.MainModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startSizeZ_Injected(ref ParticleSystem.MainModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_startSizeZMultiplier_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startSizeZMultiplier_Injected(ref ParticleSystem.MainModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool get_startRotation3D_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startRotation3D_Injected(ref ParticleSystem.MainModule _unity_self, bool value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_startRotation_Injected(ref ParticleSystem.MainModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startRotation_Injected(ref ParticleSystem.MainModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_startRotationMultiplier_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startRotationMultiplier_Injected(ref ParticleSystem.MainModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_startRotationX_Injected(ref ParticleSystem.MainModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startRotationX_Injected(ref ParticleSystem.MainModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_startRotationXMultiplier_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startRotationXMultiplier_Injected(ref ParticleSystem.MainModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_startRotationY_Injected(ref ParticleSystem.MainModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startRotationY_Injected(ref ParticleSystem.MainModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_startRotationYMultiplier_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startRotationYMultiplier_Injected(ref ParticleSystem.MainModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_startRotationZ_Injected(ref ParticleSystem.MainModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startRotationZ_Injected(ref ParticleSystem.MainModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_startRotationZMultiplier_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startRotationZMultiplier_Injected(ref ParticleSystem.MainModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_flipRotation_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_flipRotation_Injected(ref ParticleSystem.MainModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_startColor_Injected(ref ParticleSystem.MainModule _unity_self, out ParticleSystem.MinMaxGradient ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_startColor_Injected(ref ParticleSystem.MainModule _unity_self, ref ParticleSystem.MinMaxGradient value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_gravityModifier_Injected(ref ParticleSystem.MainModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_gravityModifier_Injected(ref ParticleSystem.MainModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_gravityModifierMultiplier_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_gravityModifierMultiplier_Injected(ref ParticleSystem.MainModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern ParticleSystemSimulationSpace get_simulationSpace_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_simulationSpace_Injected(ref ParticleSystem.MainModule _unity_self, ParticleSystemSimulationSpace value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern Transform get_customSimulationSpace_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_customSimulationSpace_Injected(ref ParticleSystem.MainModule _unity_self, Transform value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_simulationSpeed_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_simulationSpeed_Injected(ref ParticleSystem.MainModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool get_useUnscaledTime_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_useUnscaledTime_Injected(ref ParticleSystem.MainModule _unity_self, bool value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern ParticleSystemScalingMode get_scalingMode_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_scalingMode_Injected(ref ParticleSystem.MainModule _unity_self, ParticleSystemScalingMode value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool get_playOnAwake_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_playOnAwake_Injected(ref ParticleSystem.MainModule _unity_self, bool value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern int get_maxParticles_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_maxParticles_Injected(ref ParticleSystem.MainModule _unity_self, int value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern ParticleSystemEmitterVelocityMode get_emitterVelocityMode_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_emitterVelocityMode_Injected(ref ParticleSystem.MainModule _unity_self, ParticleSystemEmitterVelocityMode value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern ParticleSystemStopAction get_stopAction_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_stopAction_Injected(ref ParticleSystem.MainModule _unity_self, ParticleSystemStopAction value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern ParticleSystemRingBufferMode get_ringBufferMode_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_ringBufferMode_Injected(ref ParticleSystem.MainModule _unity_self, ParticleSystemRingBufferMode value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_ringBufferLoopRange_Injected(ref ParticleSystem.MainModule _unity_self, out Vector2 ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_ringBufferLoopRange_Injected(ref ParticleSystem.MainModule _unity_self, ref Vector2 value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern ParticleSystemCullingMode get_cullingMode_Injected(ref ParticleSystem.MainModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_cullingMode_Injected(ref ParticleSystem.MainModule _unity_self, ParticleSystemCullingMode value);
+
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct EmissionModule
 		{
-			internal EmissionModule(ParticleSystem particleSystem)
-			{
-				this.m_ParticleSystem = particleSystem;
-			}
-
 			[Obsolete("ParticleSystemEmissionType no longer does anything. Time and Distance based emission are now both always active.", false)]
 			public ParticleSystemEmissionType type
 			{
@@ -1644,15 +1696,20 @@ namespace UnityEngine
 				}
 			}
 
+			internal EmissionModule(ParticleSystem particleSystem)
+			{
+				this.m_ParticleSystem = particleSystem;
+			}
+
 			public bool enabled
 			{
 				get
 				{
-					return ParticleSystem.EmissionModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.EmissionModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.EmissionModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.EmissionModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -1660,13 +1717,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.EmissionModule.GetRateOverTime(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.EmissionModule.get_rateOverTime_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.EmissionModule.SetRateOverTime(this.m_ParticleSystem, ref value);
+					ParticleSystem.EmissionModule.set_rateOverTime_Injected(ref this, ref value);
 				}
 			}
 
@@ -1674,11 +1731,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.EmissionModule.GetRateOverTimeMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.EmissionModule.get_rateOverTimeMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.EmissionModule.SetRateOverTimeMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.EmissionModule.set_rateOverTimeMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -1686,13 +1743,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.EmissionModule.GetRateOverDistance(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.EmissionModule.get_rateOverDistance_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.EmissionModule.SetRateOverDistance(this.m_ParticleSystem, ref value);
+					ParticleSystem.EmissionModule.set_rateOverDistance_Injected(ref this, ref value);
 				}
 			}
 
@@ -1700,11 +1757,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.EmissionModule.GetRateOverDistanceMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.EmissionModule.get_rateOverDistanceMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.EmissionModule.SetRateOverDistanceMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.EmissionModule.set_rateOverDistanceMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -1718,7 +1775,7 @@ namespace UnityEngine
 				this.burstCount = size;
 				for (int i = 0; i < size; i++)
 				{
-					ParticleSystem.EmissionModule.SetBurst(this.m_ParticleSystem, i, bursts[i]);
+					this.SetBurst(i, bursts[i]);
 				}
 			}
 
@@ -1727,121 +1784,92 @@ namespace UnityEngine
 				int burstCount = this.burstCount;
 				for (int i = 0; i < burstCount; i++)
 				{
-					bursts[i] = ParticleSystem.EmissionModule.GetBurst(this.m_ParticleSystem, i);
+					bursts[i] = this.GetBurst(i);
 				}
 				return burstCount;
 			}
 
 			public void SetBurst(int index, ParticleSystem.Burst burst)
 			{
-				ParticleSystem.EmissionModule.SetBurst(this.m_ParticleSystem, index, burst);
+				ParticleSystem.EmissionModule.SetBurst_Injected(ref this, index, ref burst);
 			}
 
 			public ParticleSystem.Burst GetBurst(int index)
 			{
-				return ParticleSystem.EmissionModule.GetBurst(this.m_ParticleSystem, index);
+				ParticleSystem.Burst burst;
+				ParticleSystem.EmissionModule.GetBurst_Injected(ref this, index, out burst);
+				return burst;
 			}
 
 			public int burstCount
 			{
 				get
 				{
-					return ParticleSystem.EmissionModule.GetBurstCount(this.m_ParticleSystem);
+					return ParticleSystem.EmissionModule.get_burstCount_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.EmissionModule.SetBurstCount(this.m_ParticleSystem, value);
+					ParticleSystem.EmissionModule.set_burstCount_Injected(ref this, value);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.EmissionModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.EmissionModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetBurstCount(ParticleSystem system);
+			private static extern void get_rateOverTime_Injected(ref ParticleSystem.EmissionModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRateOverTime(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_rateOverTime_Injected(ref ParticleSystem.EmissionModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetRateOverTime(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern float get_rateOverTimeMultiplier_Injected(ref ParticleSystem.EmissionModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRateOverTimeMultiplier(ParticleSystem system, float value);
+			private static extern void set_rateOverTimeMultiplier_Injected(ref ParticleSystem.EmissionModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRateOverTimeMultiplier(ParticleSystem system);
+			private static extern void get_rateOverDistance_Injected(ref ParticleSystem.EmissionModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRateOverDistance(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_rateOverDistance_Injected(ref ParticleSystem.EmissionModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetRateOverDistance(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern float get_rateOverDistanceMultiplier_Injected(ref ParticleSystem.EmissionModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRateOverDistanceMultiplier(ParticleSystem system, float value);
+			private static extern void set_rateOverDistanceMultiplier_Injected(ref ParticleSystem.EmissionModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRateOverDistanceMultiplier(ParticleSystem system);
+			private static extern void SetBurst_Injected(ref ParticleSystem.EmissionModule _unity_self, int index, ref ParticleSystem.Burst burst);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetBurstCount(ParticleSystem system, int value);
+			private static extern void GetBurst_Injected(ref ParticleSystem.EmissionModule _unity_self, int index, out ParticleSystem.Burst ret);
 
-			private static void SetBurst(ParticleSystem system, int index, ParticleSystem.Burst burst)
-			{
-				ParticleSystem.EmissionModule.INTERNAL_CALL_SetBurst(system, index, ref burst);
-			}
-
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_SetBurst(ParticleSystem system, int index, ref ParticleSystem.Burst burst);
+			private static extern int get_burstCount_Injected(ref ParticleSystem.EmissionModule _unity_self);
 
-			private static ParticleSystem.Burst GetBurst(ParticleSystem system, int index)
-			{
-				ParticleSystem.Burst burst;
-				ParticleSystem.EmissionModule.INTERNAL_CALL_GetBurst(system, index, out burst);
-				return burst;
-			}
-
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_GetBurst(ParticleSystem system, int index, out ParticleSystem.Burst value);
+			private static extern void set_burstCount_Injected(ref ParticleSystem.EmissionModule _unity_self, int value);
 
-			private ParticleSystem m_ParticleSystem;
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct ShapeModule
 		{
-			internal ShapeModule(ParticleSystem particleSystem)
-			{
-				this.m_ParticleSystem = particleSystem;
-			}
-
 			[Obsolete("Please use scale instead. (UnityUpgradable) -> UnityEngine.ParticleSystem/ShapeModule.scale", false)]
 			public Vector3 box
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetScale(this.m_ParticleSystem);
+					return this.scale;
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetScale(this.m_ParticleSystem, value);
+					this.scale = value;
 				}
 			}
 
@@ -1867,19 +1895,24 @@ namespace UnityEngine
 				}
 				set
 				{
-					this.randomDirectionAmount = ((!value) ? 0f : 1f);
+					this.randomDirectionAmount = (value ? 1f : 0f);
 				}
+			}
+
+			internal ShapeModule(ParticleSystem particleSystem)
+			{
+				this.m_ParticleSystem = particleSystem;
 			}
 
 			public bool enabled
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -1887,11 +1920,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetShapeType(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_shapeType_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetShapeType(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_shapeType_Injected(ref this, value);
 				}
 			}
 
@@ -1899,11 +1932,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetRandomDirectionAmount(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_randomDirectionAmount_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetRandomDirectionAmount(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_randomDirectionAmount_Injected(ref this, value);
 				}
 			}
 
@@ -1911,11 +1944,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetSphericalDirectionAmount(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_sphericalDirectionAmount_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetSphericalDirectionAmount(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_sphericalDirectionAmount_Injected(ref this, value);
 				}
 			}
 
@@ -1923,11 +1956,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetRandomPositionAmount(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_randomPositionAmount_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetRandomPositionAmount(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_randomPositionAmount_Injected(ref this, value);
 				}
 			}
 
@@ -1935,11 +1968,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetAlignToDirection(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_alignToDirection_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetAlignToDirection(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_alignToDirection_Injected(ref this, value);
 				}
 			}
 
@@ -1947,11 +1980,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetRadius(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_radius_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetRadius(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_radius_Injected(ref this, value);
 				}
 			}
 
@@ -1959,11 +1992,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetRadiusMode(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_radiusMode_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetRadiusMode(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_radiusMode_Injected(ref this, value);
 				}
 			}
 
@@ -1971,11 +2004,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetRadiusSpread(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_radiusSpread_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetRadiusSpread(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_radiusSpread_Injected(ref this, value);
 				}
 			}
 
@@ -1983,13 +2016,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.ShapeModule.GetRadiusSpeed(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.ShapeModule.get_radiusSpeed_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetRadiusSpeed(this.m_ParticleSystem, ref value);
+					ParticleSystem.ShapeModule.set_radiusSpeed_Injected(ref this, ref value);
 				}
 			}
 
@@ -1997,11 +2030,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetRadiusSpeedMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_radiusSpeedMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetRadiusSpeedMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_radiusSpeedMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -2009,11 +2042,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetRadiusThickness(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_radiusThickness_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetRadiusThickness(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_radiusThickness_Injected(ref this, value);
 				}
 			}
 
@@ -2021,11 +2054,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetAngle(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_angle_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetAngle(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_angle_Injected(ref this, value);
 				}
 			}
 
@@ -2033,11 +2066,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetLength(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_length_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetLength(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_length_Injected(ref this, value);
 				}
 			}
 
@@ -2045,11 +2078,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetBoxThickness(this.m_ParticleSystem);
+					Vector3 vector;
+					ParticleSystem.ShapeModule.get_boxThickness_Injected(ref this, out vector);
+					return vector;
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetBoxThickness(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_boxThickness_Injected(ref this, ref value);
 				}
 			}
 
@@ -2057,11 +2092,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetMeshShapeType(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_meshShapeType_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetMeshShapeType(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_meshShapeType_Injected(ref this, value);
 				}
 			}
 
@@ -2069,11 +2104,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetMesh(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_mesh_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetMesh(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_mesh_Injected(ref this, value);
 				}
 			}
 
@@ -2081,11 +2116,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetMeshRenderer(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_meshRenderer_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetMeshRenderer(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_meshRenderer_Injected(ref this, value);
 				}
 			}
 
@@ -2093,11 +2128,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetSkinnedMeshRenderer(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_skinnedMeshRenderer_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetSkinnedMeshRenderer(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_skinnedMeshRenderer_Injected(ref this, value);
 				}
 			}
 
@@ -2105,11 +2140,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetSprite(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_sprite_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetSprite(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_sprite_Injected(ref this, value);
 				}
 			}
 
@@ -2117,11 +2152,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetSpriteRenderer(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_spriteRenderer_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetSpriteRenderer(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_spriteRenderer_Injected(ref this, value);
 				}
 			}
 
@@ -2129,11 +2164,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetUseMeshMaterialIndex(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_useMeshMaterialIndex_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetUseMeshMaterialIndex(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_useMeshMaterialIndex_Injected(ref this, value);
 				}
 			}
 
@@ -2141,11 +2176,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetMeshMaterialIndex(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_meshMaterialIndex_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetMeshMaterialIndex(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_meshMaterialIndex_Injected(ref this, value);
 				}
 			}
 
@@ -2153,11 +2188,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetUseMeshColors(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_useMeshColors_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetUseMeshColors(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_useMeshColors_Injected(ref this, value);
 				}
 			}
 
@@ -2165,11 +2200,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetNormalOffset(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_normalOffset_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetNormalOffset(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_normalOffset_Injected(ref this, value);
 				}
 			}
 
@@ -2177,11 +2212,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetMeshSpawnMode(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_meshSpawnMode_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetMeshSpawnMode(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_meshSpawnMode_Injected(ref this, value);
 				}
 			}
 
@@ -2189,11 +2224,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetMeshSpawnSpread(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_meshSpawnSpread_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetMeshSpawnSpread(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_meshSpawnSpread_Injected(ref this, value);
 				}
 			}
 
@@ -2201,13 +2236,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.ShapeModule.GetMeshSpawnSpeed(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.ShapeModule.get_meshSpawnSpeed_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetMeshSpawnSpeed(this.m_ParticleSystem, ref value);
+					ParticleSystem.ShapeModule.set_meshSpawnSpeed_Injected(ref this, ref value);
 				}
 			}
 
@@ -2215,11 +2250,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetMeshSpawnSpeedMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_meshSpawnSpeedMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetMeshSpawnSpeedMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_meshSpawnSpeedMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -2227,11 +2262,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetArc(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_arc_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetArc(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_arc_Injected(ref this, value);
 				}
 			}
 
@@ -2239,11 +2274,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetArcMode(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_arcMode_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetArcMode(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_arcMode_Injected(ref this, value);
 				}
 			}
 
@@ -2251,11 +2286,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetArcSpread(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_arcSpread_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetArcSpread(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_arcSpread_Injected(ref this, value);
 				}
 			}
 
@@ -2263,13 +2298,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.ShapeModule.GetArcSpeed(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.ShapeModule.get_arcSpeed_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetArcSpeed(this.m_ParticleSystem, ref value);
+					ParticleSystem.ShapeModule.set_arcSpeed_Injected(ref this, ref value);
 				}
 			}
 
@@ -2277,11 +2312,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetArcSpeedMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_arcSpeedMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetArcSpeedMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_arcSpeedMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -2289,11 +2324,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetDonutRadius(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_donutRadius_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetDonutRadius(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_donutRadius_Injected(ref this, value);
 				}
 			}
 
@@ -2301,11 +2336,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetPosition(this.m_ParticleSystem);
+					Vector3 vector;
+					ParticleSystem.ShapeModule.get_position_Injected(ref this, out vector);
+					return vector;
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetPosition(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_position_Injected(ref this, ref value);
 				}
 			}
 
@@ -2313,11 +2350,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetRotation(this.m_ParticleSystem);
+					Vector3 vector;
+					ParticleSystem.ShapeModule.get_rotation_Injected(ref this, out vector);
+					return vector;
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetRotation(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_rotation_Injected(ref this, ref value);
 				}
 			}
 
@@ -2325,11 +2364,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetScale(this.m_ParticleSystem);
+					Vector3 vector;
+					ParticleSystem.ShapeModule.get_scale_Injected(ref this, out vector);
+					return vector;
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetScale(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_scale_Injected(ref this, ref value);
 				}
 			}
 
@@ -2337,11 +2378,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetTexture(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_texture_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetTexture(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_texture_Injected(ref this, value);
 				}
 			}
 
@@ -2349,11 +2390,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return (ParticleSystemShapeTextureChannel)ParticleSystem.ShapeModule.GetTextureClipChannel(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_textureClipChannel_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetTextureClipChannel(this.m_ParticleSystem, (int)value);
+					ParticleSystem.ShapeModule.set_textureClipChannel_Injected(ref this, value);
 				}
 			}
 
@@ -2361,11 +2402,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetTextureClipThreshold(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_textureClipThreshold_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetTextureClipThreshold(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_textureClipThreshold_Injected(ref this, value);
 				}
 			}
 
@@ -2373,11 +2414,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetTextureColorAffectsParticles(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_textureColorAffectsParticles_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetTextureColorAffectsParticles(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_textureColorAffectsParticles_Injected(ref this, value);
 				}
 			}
 
@@ -2385,11 +2426,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetTextureAlphaAffectsParticles(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_textureAlphaAffectsParticles_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetTextureAlphaAffectsParticles(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_textureAlphaAffectsParticles_Injected(ref this, value);
 				}
 			}
 
@@ -2397,11 +2438,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetTextureBilinearFiltering(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_textureBilinearFiltering_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetTextureBilinearFiltering(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_textureBilinearFiltering_Injected(ref this, value);
 				}
 			}
 
@@ -2409,949 +2450,300 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ShapeModule.GetTextureUVChannel(this.m_ParticleSystem);
+					return ParticleSystem.ShapeModule.get_textureUVChannel_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ShapeModule.SetTextureUVChannel(this.m_ParticleSystem, value);
+					ParticleSystem.ShapeModule.set_textureUVChannel_Injected(ref this, value);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.ShapeModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetShapeType(ParticleSystem system, ParticleSystemShapeType value);
+			private static extern ParticleSystemShapeType get_shapeType_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemShapeType GetShapeType(ParticleSystem system);
+			private static extern void set_shapeType_Injected(ref ParticleSystem.ShapeModule _unity_self, ParticleSystemShapeType value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRandomDirectionAmount(ParticleSystem system, float value);
+			private static extern float get_randomDirectionAmount_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRandomDirectionAmount(ParticleSystem system);
+			private static extern void set_randomDirectionAmount_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSphericalDirectionAmount(ParticleSystem system, float value);
+			private static extern float get_sphericalDirectionAmount_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetSphericalDirectionAmount(ParticleSystem system);
+			private static extern void set_sphericalDirectionAmount_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRandomPositionAmount(ParticleSystem system, float value);
+			private static extern float get_randomPositionAmount_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRandomPositionAmount(ParticleSystem system);
+			private static extern void set_randomPositionAmount_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetAlignToDirection(ParticleSystem system, bool value);
+			private static extern bool get_alignToDirection_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetAlignToDirection(ParticleSystem system);
+			private static extern void set_alignToDirection_Injected(ref ParticleSystem.ShapeModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRadius(ParticleSystem system, float value);
+			private static extern float get_radius_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRadius(ParticleSystem system);
+			private static extern void set_radius_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRadiusMode(ParticleSystem system, ParticleSystemShapeMultiModeValue value);
+			private static extern ParticleSystemShapeMultiModeValue get_radiusMode_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemShapeMultiModeValue GetRadiusMode(ParticleSystem system);
+			private static extern void set_radiusMode_Injected(ref ParticleSystem.ShapeModule _unity_self, ParticleSystemShapeMultiModeValue value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRadiusSpread(ParticleSystem system, float value);
+			private static extern float get_radiusSpread_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRadiusSpread(ParticleSystem system);
+			private static extern void set_radiusSpread_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRadiusSpeed(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_radiusSpeed_Injected(ref ParticleSystem.ShapeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetRadiusSpeed(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_radiusSpeed_Injected(ref ParticleSystem.ShapeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRadiusSpeedMultiplier(ParticleSystem system, float value);
+			private static extern float get_radiusSpeedMultiplier_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRadiusSpeedMultiplier(ParticleSystem system);
+			private static extern void set_radiusSpeedMultiplier_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRadiusThickness(ParticleSystem system, float value);
+			private static extern float get_radiusThickness_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRadiusThickness(ParticleSystem system);
+			private static extern void set_radiusThickness_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetAngle(ParticleSystem system, float value);
+			private static extern float get_angle_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetAngle(ParticleSystem system);
+			private static extern void set_angle_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetLength(ParticleSystem system, float value);
+			private static extern float get_length_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetLength(ParticleSystem system);
+			private static extern void set_length_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			private static void SetBoxThickness(ParticleSystem system, Vector3 value)
-			{
-				ParticleSystem.ShapeModule.INTERNAL_CALL_SetBoxThickness(system, ref value);
-			}
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_SetBoxThickness(ParticleSystem system, ref Vector3 value);
-
-			private static Vector3 GetBoxThickness(ParticleSystem system)
-			{
-				Vector3 vector;
-				ParticleSystem.ShapeModule.INTERNAL_CALL_GetBoxThickness(system, out vector);
-				return vector;
-			}
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_GetBoxThickness(ParticleSystem system, out Vector3 value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMeshShapeType(ParticleSystem system, ParticleSystemMeshShapeType value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemMeshShapeType GetMeshShapeType(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMesh(ParticleSystem system, Mesh value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern Mesh GetMesh(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMeshRenderer(ParticleSystem system, MeshRenderer value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern MeshRenderer GetMeshRenderer(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSkinnedMeshRenderer(ParticleSystem system, SkinnedMeshRenderer value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern SkinnedMeshRenderer GetSkinnedMeshRenderer(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSprite(ParticleSystem system, Sprite value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern Sprite GetSprite(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSpriteRenderer(ParticleSystem system, SpriteRenderer value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern SpriteRenderer GetSpriteRenderer(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetUseMeshMaterialIndex(ParticleSystem system, bool value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetUseMeshMaterialIndex(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMeshMaterialIndex(ParticleSystem system, int value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetMeshMaterialIndex(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetUseMeshColors(ParticleSystem system, bool value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetUseMeshColors(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetNormalOffset(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetNormalOffset(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMeshSpawnMode(ParticleSystem system, ParticleSystemShapeMultiModeValue value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemShapeMultiModeValue GetMeshSpawnMode(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMeshSpawnSpread(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetMeshSpawnSpread(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMeshSpawnSpeed(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetMeshSpawnSpeed(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMeshSpawnSpeedMultiplier(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetMeshSpawnSpeedMultiplier(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetArc(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetArc(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetArcMode(ParticleSystem system, ParticleSystemShapeMultiModeValue value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemShapeMultiModeValue GetArcMode(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetArcSpread(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetArcSpread(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetArcSpeed(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetArcSpeed(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetArcSpeedMultiplier(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetArcSpeedMultiplier(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetDonutRadius(ParticleSystem system, float value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetDonutRadius(ParticleSystem system);
-
-			private static void SetPosition(ParticleSystem system, Vector3 value)
-			{
-				ParticleSystem.ShapeModule.INTERNAL_CALL_SetPosition(system, ref value);
-			}
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_SetPosition(ParticleSystem system, ref Vector3 value);
-
-			private static Vector3 GetPosition(ParticleSystem system)
-			{
-				Vector3 vector;
-				ParticleSystem.ShapeModule.INTERNAL_CALL_GetPosition(system, out vector);
-				return vector;
-			}
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_GetPosition(ParticleSystem system, out Vector3 value);
-
-			private static void SetRotation(ParticleSystem system, Vector3 value)
-			{
-				ParticleSystem.ShapeModule.INTERNAL_CALL_SetRotation(system, ref value);
-			}
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_SetRotation(ParticleSystem system, ref Vector3 value);
-
-			private static Vector3 GetRotation(ParticleSystem system)
-			{
-				Vector3 vector;
-				ParticleSystem.ShapeModule.INTERNAL_CALL_GetRotation(system, out vector);
-				return vector;
-			}
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_GetRotation(ParticleSystem system, out Vector3 value);
-
-			private static void SetScale(ParticleSystem system, Vector3 value)
-			{
-				ParticleSystem.ShapeModule.INTERNAL_CALL_SetScale(system, ref value);
-			}
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_SetScale(ParticleSystem system, ref Vector3 value);
-
-			private static Vector3 GetScale(ParticleSystem system)
-			{
-				Vector3 vector;
-				ParticleSystem.ShapeModule.INTERNAL_CALL_GetScale(system, out vector);
-				return vector;
-			}
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_GetScale(ParticleSystem system, out Vector3 value);
-
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetTexture(ParticleSystem system, Texture2D value);
+			private static extern void get_boxThickness_Injected(ref ParticleSystem.ShapeModule _unity_self, out Vector3 ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern Texture2D GetTexture(ParticleSystem system);
+			private static extern void set_boxThickness_Injected(ref ParticleSystem.ShapeModule _unity_self, ref Vector3 value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetTextureClipChannel(ParticleSystem system, int value);
+			private static extern ParticleSystemMeshShapeType get_meshShapeType_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetTextureClipChannel(ParticleSystem system);
+			private static extern void set_meshShapeType_Injected(ref ParticleSystem.ShapeModule _unity_self, ParticleSystemMeshShapeType value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetTextureClipThreshold(ParticleSystem system, float value);
+			private static extern Mesh get_mesh_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetTextureClipThreshold(ParticleSystem system);
+			private static extern void set_mesh_Injected(ref ParticleSystem.ShapeModule _unity_self, Mesh value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetTextureColorAffectsParticles(ParticleSystem system, bool value);
+			private static extern MeshRenderer get_meshRenderer_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetTextureColorAffectsParticles(ParticleSystem system);
+			private static extern void set_meshRenderer_Injected(ref ParticleSystem.ShapeModule _unity_self, MeshRenderer value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetTextureAlphaAffectsParticles(ParticleSystem system, bool value);
+			private static extern SkinnedMeshRenderer get_skinnedMeshRenderer_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetTextureAlphaAffectsParticles(ParticleSystem system);
+			private static extern void set_skinnedMeshRenderer_Injected(ref ParticleSystem.ShapeModule _unity_self, SkinnedMeshRenderer value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetTextureBilinearFiltering(ParticleSystem system, bool value);
+			private static extern Sprite get_sprite_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetTextureBilinearFiltering(ParticleSystem system);
+			private static extern void set_sprite_Injected(ref ParticleSystem.ShapeModule _unity_self, Sprite value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetTextureUVChannel(ParticleSystem system, int value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetTextureUVChannel(ParticleSystem system);
-
-			private ParticleSystem m_ParticleSystem;
-		}
-
-		public struct CollisionModule
-		{
-			internal CollisionModule(ParticleSystem particleSystem)
-			{
-				this.m_ParticleSystem = particleSystem;
-			}
-
-			[Obsolete("enableInteriorCollisions property is deprecated and is no longer required and has no effect on the particle system.", false)]
-			public bool enableInteriorCollisions
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetEnableInteriorCollisions(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetEnableInteriorCollisions(this.m_ParticleSystem, value);
-				}
-			}
-
-			public bool enabled
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetEnabled(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetEnabled(this.m_ParticleSystem, value);
-				}
-			}
-
-			public ParticleSystemCollisionType type
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetType(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetType(this.m_ParticleSystem, value);
-				}
-			}
-
-			public ParticleSystemCollisionMode mode
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetMode(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetMode(this.m_ParticleSystem, value);
-				}
-			}
-
-			public ParticleSystem.MinMaxCurve dampen
-			{
-				get
-				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.CollisionModule.GetDampen(this.m_ParticleSystem, ref minMaxCurve);
-					return minMaxCurve;
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetDampen(this.m_ParticleSystem, ref value);
-				}
-			}
-
-			public float dampenMultiplier
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetDampenMultiplier(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetDampenMultiplier(this.m_ParticleSystem, value);
-				}
-			}
-
-			public ParticleSystem.MinMaxCurve bounce
-			{
-				get
-				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.CollisionModule.GetBounce(this.m_ParticleSystem, ref minMaxCurve);
-					return minMaxCurve;
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetBounce(this.m_ParticleSystem, ref value);
-				}
-			}
-
-			public float bounceMultiplier
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetBounceMultiplier(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetBounceMultiplier(this.m_ParticleSystem, value);
-				}
-			}
-
-			public ParticleSystem.MinMaxCurve lifetimeLoss
-			{
-				get
-				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.CollisionModule.GetLifetimeLoss(this.m_ParticleSystem, ref minMaxCurve);
-					return minMaxCurve;
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetLifetimeLoss(this.m_ParticleSystem, ref value);
-				}
-			}
-
-			public float lifetimeLossMultiplier
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetLifetimeLossMultiplier(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetLifetimeLossMultiplier(this.m_ParticleSystem, value);
-				}
-			}
-
-			public float minKillSpeed
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetMinKillSpeed(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetMinKillSpeed(this.m_ParticleSystem, value);
-				}
-			}
-
-			public float maxKillSpeed
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetMaxKillSpeed(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetMaxKillSpeed(this.m_ParticleSystem, value);
-				}
-			}
-
-			public LayerMask collidesWith
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetCollidesWith(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetCollidesWith(this.m_ParticleSystem, value);
-				}
-			}
-
-			public bool enableDynamicColliders
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetEnableDynamicColliders(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetEnableDynamicColliders(this.m_ParticleSystem, value);
-				}
-			}
-
-			public int maxCollisionShapes
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetMaxCollisionShapes(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetMaxCollisionShapes(this.m_ParticleSystem, value);
-				}
-			}
-
-			public ParticleSystemCollisionQuality quality
-			{
-				get
-				{
-					return (ParticleSystemCollisionQuality)ParticleSystem.CollisionModule.GetQuality(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetQuality(this.m_ParticleSystem, (int)value);
-				}
-			}
-
-			public float voxelSize
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetVoxelSize(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetVoxelSize(this.m_ParticleSystem, value);
-				}
-			}
-
-			public float radiusScale
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetRadiusScale(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetRadiusScale(this.m_ParticleSystem, value);
-				}
-			}
-
-			public bool sendCollisionMessages
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetUsesCollisionMessages(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetUsesCollisionMessages(this.m_ParticleSystem, value);
-				}
-			}
-
-			public float colliderForce
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetColliderForce(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetColliderForce(this.m_ParticleSystem, value);
-				}
-			}
-
-			public bool multiplyColliderForceByCollisionAngle
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetMultiplyColliderForceByCollisionAngle(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetMultiplyColliderForceByCollisionAngle(this.m_ParticleSystem, value);
-				}
-			}
-
-			public bool multiplyColliderForceByParticleSpeed
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetMultiplyColliderForceByParticleSpeed(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetMultiplyColliderForceByParticleSpeed(this.m_ParticleSystem, value);
-				}
-			}
-
-			public bool multiplyColliderForceByParticleSize
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetMultiplyColliderForceByParticleSize(this.m_ParticleSystem);
-				}
-				set
-				{
-					ParticleSystem.CollisionModule.SetMultiplyColliderForceByParticleSize(this.m_ParticleSystem, value);
-				}
-			}
-
-			public void SetPlane(int index, Transform transform)
-			{
-				ParticleSystem.CollisionModule.SetPlane(this.m_ParticleSystem, index, transform);
-			}
-
-			public Transform GetPlane(int index)
-			{
-				return ParticleSystem.CollisionModule.GetPlane(this.m_ParticleSystem, index);
-			}
-
-			public int maxPlaneCount
-			{
-				get
-				{
-					return ParticleSystem.CollisionModule.GetMaxPlaneCount(this.m_ParticleSystem);
-				}
-			}
+			private static extern SpriteRenderer get_spriteRenderer_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern void set_spriteRenderer_Injected(ref ParticleSystem.ShapeModule _unity_self, SpriteRenderer value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern bool get_useMeshMaterialIndex_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetType(ParticleSystem system, ParticleSystemCollisionType value);
+			private static extern void set_useMeshMaterialIndex_Injected(ref ParticleSystem.ShapeModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemCollisionType GetType(ParticleSystem system);
+			private static extern int get_meshMaterialIndex_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMode(ParticleSystem system, ParticleSystemCollisionMode value);
+			private static extern void set_meshMaterialIndex_Injected(ref ParticleSystem.ShapeModule _unity_self, int value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemCollisionMode GetMode(ParticleSystem system);
+			private static extern bool get_useMeshColors_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetDampen(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_useMeshColors_Injected(ref ParticleSystem.ShapeModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetDampen(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern float get_normalOffset_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetDampenMultiplier(ParticleSystem system, float value);
+			private static extern void set_normalOffset_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetDampenMultiplier(ParticleSystem system);
+			private static extern ParticleSystemShapeMultiModeValue get_meshSpawnMode_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetBounce(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_meshSpawnMode_Injected(ref ParticleSystem.ShapeModule _unity_self, ParticleSystemShapeMultiModeValue value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetBounce(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern float get_meshSpawnSpread_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetBounceMultiplier(ParticleSystem system, float value);
+			private static extern void set_meshSpawnSpread_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetBounceMultiplier(ParticleSystem system);
+			private static extern void get_meshSpawnSpeed_Injected(ref ParticleSystem.ShapeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetLifetimeLoss(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_meshSpawnSpeed_Injected(ref ParticleSystem.ShapeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetLifetimeLoss(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern float get_meshSpawnSpeedMultiplier_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetLifetimeLossMultiplier(ParticleSystem system, float value);
+			private static extern void set_meshSpawnSpeedMultiplier_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetLifetimeLossMultiplier(ParticleSystem system);
+			private static extern float get_arc_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMinKillSpeed(ParticleSystem system, float value);
+			private static extern void set_arc_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetMinKillSpeed(ParticleSystem system);
+			private static extern ParticleSystemShapeMultiModeValue get_arcMode_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMaxKillSpeed(ParticleSystem system, float value);
+			private static extern void set_arcMode_Injected(ref ParticleSystem.ShapeModule _unity_self, ParticleSystemShapeMultiModeValue value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetMaxKillSpeed(ParticleSystem system);
+			private static extern float get_arcSpread_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetCollidesWith(ParticleSystem system, int value);
+			private static extern void set_arcSpread_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetCollidesWith(ParticleSystem system);
+			private static extern void get_arcSpeed_Injected(ref ParticleSystem.ShapeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnableDynamicColliders(ParticleSystem system, bool value);
+			private static extern void set_arcSpeed_Injected(ref ParticleSystem.ShapeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnableDynamicColliders(ParticleSystem system);
+			private static extern float get_arcSpeedMultiplier_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnableInteriorCollisions(ParticleSystem system, bool value);
+			private static extern void set_arcSpeedMultiplier_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnableInteriorCollisions(ParticleSystem system);
+			private static extern float get_donutRadius_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMaxCollisionShapes(ParticleSystem system, int value);
+			private static extern void set_donutRadius_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetMaxCollisionShapes(ParticleSystem system);
+			private static extern void get_position_Injected(ref ParticleSystem.ShapeModule _unity_self, out Vector3 ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetQuality(ParticleSystem system, int value);
+			private static extern void set_position_Injected(ref ParticleSystem.ShapeModule _unity_self, ref Vector3 value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetQuality(ParticleSystem system);
+			private static extern void get_rotation_Injected(ref ParticleSystem.ShapeModule _unity_self, out Vector3 ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetVoxelSize(ParticleSystem system, float value);
+			private static extern void set_rotation_Injected(ref ParticleSystem.ShapeModule _unity_self, ref Vector3 value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetVoxelSize(ParticleSystem system);
+			private static extern void get_scale_Injected(ref ParticleSystem.ShapeModule _unity_self, out Vector3 ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRadiusScale(ParticleSystem system, float value);
+			private static extern void set_scale_Injected(ref ParticleSystem.ShapeModule _unity_self, ref Vector3 value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRadiusScale(ParticleSystem system);
+			private static extern Texture2D get_texture_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetUsesCollisionMessages(ParticleSystem system, bool value);
+			private static extern void set_texture_Injected(ref ParticleSystem.ShapeModule _unity_self, Texture2D value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetUsesCollisionMessages(ParticleSystem system);
+			private static extern ParticleSystemShapeTextureChannel get_textureClipChannel_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetColliderForce(ParticleSystem system, float value);
+			private static extern void set_textureClipChannel_Injected(ref ParticleSystem.ShapeModule _unity_self, ParticleSystemShapeTextureChannel value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetColliderForce(ParticleSystem system);
+			private static extern float get_textureClipThreshold_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMultiplyColliderForceByCollisionAngle(ParticleSystem system, bool value);
+			private static extern void set_textureClipThreshold_Injected(ref ParticleSystem.ShapeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetMultiplyColliderForceByCollisionAngle(ParticleSystem system);
+			private static extern bool get_textureColorAffectsParticles_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMultiplyColliderForceByParticleSpeed(ParticleSystem system, bool value);
+			private static extern void set_textureColorAffectsParticles_Injected(ref ParticleSystem.ShapeModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetMultiplyColliderForceByParticleSpeed(ParticleSystem system);
+			private static extern bool get_textureAlphaAffectsParticles_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMultiplyColliderForceByParticleSize(ParticleSystem system, bool value);
+			private static extern void set_textureAlphaAffectsParticles_Injected(ref ParticleSystem.ShapeModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetMultiplyColliderForceByParticleSize(ParticleSystem system);
+			private static extern bool get_textureBilinearFiltering_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetPlane(ParticleSystem system, int index, Transform transform);
+			private static extern void set_textureBilinearFiltering_Injected(ref ParticleSystem.ShapeModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern Transform GetPlane(ParticleSystem system, int index);
+			private static extern int get_textureUVChannel_Injected(ref ParticleSystem.ShapeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetMaxPlaneCount(ParticleSystem system);
+			private static extern void set_textureUVChannel_Injected(ref ParticleSystem.ShapeModule _unity_self, int value);
 
-			private ParticleSystem m_ParticleSystem;
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct SubEmittersModule
 		{
-			internal SubEmittersModule(ParticleSystem particleSystem)
-			{
-				this.m_ParticleSystem = particleSystem;
-			}
-
 			[Obsolete("birth0 property is deprecated. Use AddSubEmitter, RemoveSubEmitter, SetSubEmitterSystem and GetSubEmitterSystem instead.", false)]
 			public ParticleSystem birth0
 			{
 				get
 				{
-					return ParticleSystem.SubEmittersModule.GetBirth(this.m_ParticleSystem, 0);
+					ParticleSystem.SubEmittersModule.ThrowNotImplemented();
+					return null;
 				}
 				set
 				{
-					ParticleSystem.SubEmittersModule.SetBirth(this.m_ParticleSystem, 0, value);
+					ParticleSystem.SubEmittersModule.ThrowNotImplemented();
 				}
 			}
 
@@ -3360,11 +2752,12 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SubEmittersModule.GetBirth(this.m_ParticleSystem, 1);
+					ParticleSystem.SubEmittersModule.ThrowNotImplemented();
+					return null;
 				}
 				set
 				{
-					ParticleSystem.SubEmittersModule.SetBirth(this.m_ParticleSystem, 1, value);
+					ParticleSystem.SubEmittersModule.ThrowNotImplemented();
 				}
 			}
 
@@ -3373,11 +2766,12 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SubEmittersModule.GetCollision(this.m_ParticleSystem, 0);
+					ParticleSystem.SubEmittersModule.ThrowNotImplemented();
+					return null;
 				}
 				set
 				{
-					ParticleSystem.SubEmittersModule.SetCollision(this.m_ParticleSystem, 0, value);
+					ParticleSystem.SubEmittersModule.ThrowNotImplemented();
 				}
 			}
 
@@ -3386,11 +2780,12 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SubEmittersModule.GetCollision(this.m_ParticleSystem, 1);
+					ParticleSystem.SubEmittersModule.ThrowNotImplemented();
+					return null;
 				}
 				set
 				{
-					ParticleSystem.SubEmittersModule.SetCollision(this.m_ParticleSystem, 1, value);
+					ParticleSystem.SubEmittersModule.ThrowNotImplemented();
 				}
 			}
 
@@ -3399,11 +2794,12 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SubEmittersModule.GetDeath(this.m_ParticleSystem, 0);
+					ParticleSystem.SubEmittersModule.ThrowNotImplemented();
+					return null;
 				}
 				set
 				{
-					ParticleSystem.SubEmittersModule.SetDeath(this.m_ParticleSystem, 0, value);
+					ParticleSystem.SubEmittersModule.ThrowNotImplemented();
 				}
 			}
 
@@ -3412,23 +2808,34 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SubEmittersModule.GetDeath(this.m_ParticleSystem, 1);
+					ParticleSystem.SubEmittersModule.ThrowNotImplemented();
+					return null;
 				}
 				set
 				{
-					ParticleSystem.SubEmittersModule.SetDeath(this.m_ParticleSystem, 1, value);
+					ParticleSystem.SubEmittersModule.ThrowNotImplemented();
 				}
+			}
+
+			private static void ThrowNotImplemented()
+			{
+				throw new NotImplementedException();
+			}
+
+			internal SubEmittersModule(ParticleSystem particleSystem)
+			{
+				this.m_ParticleSystem = particleSystem;
 			}
 
 			public bool enabled
 			{
 				get
 				{
-					return ParticleSystem.SubEmittersModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.SubEmittersModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.SubEmittersModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.SubEmittersModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -3436,158 +2843,109 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SubEmittersModule.GetSubEmittersCount(this.m_ParticleSystem);
+					return ParticleSystem.SubEmittersModule.get_subEmittersCount_Injected(ref this);
 				}
-			}
-
-			public void AddSubEmitter(ParticleSystem subEmitter, ParticleSystemSubEmitterType type, ParticleSystemSubEmitterProperties properties)
-			{
-				ParticleSystem.SubEmittersModule.AddSubEmitter(this.m_ParticleSystem, subEmitter, (int)type, (int)properties);
 			}
 
 			public void AddSubEmitter(ParticleSystem subEmitter, ParticleSystemSubEmitterType type, ParticleSystemSubEmitterProperties properties, float emitProbability)
 			{
-				ParticleSystem.SubEmittersModule.AddSubEmitter(this.m_ParticleSystem, subEmitter, (int)type, (int)properties, emitProbability);
+				ParticleSystem.SubEmittersModule.AddSubEmitter_Injected(ref this, subEmitter, type, properties, emitProbability);
+			}
+
+			public void AddSubEmitter(ParticleSystem subEmitter, ParticleSystemSubEmitterType type, ParticleSystemSubEmitterProperties properties)
+			{
+				this.AddSubEmitter(subEmitter, type, properties, 1f);
 			}
 
 			public void RemoveSubEmitter(int index)
 			{
-				ParticleSystem.SubEmittersModule.RemoveSubEmitter(this.m_ParticleSystem, index);
+				ParticleSystem.SubEmittersModule.RemoveSubEmitter_Injected(ref this, index);
 			}
 
 			public void SetSubEmitterSystem(int index, ParticleSystem subEmitter)
 			{
-				ParticleSystem.SubEmittersModule.SetSubEmitterSystem(this.m_ParticleSystem, index, subEmitter);
+				ParticleSystem.SubEmittersModule.SetSubEmitterSystem_Injected(ref this, index, subEmitter);
 			}
 
 			public void SetSubEmitterType(int index, ParticleSystemSubEmitterType type)
 			{
-				ParticleSystem.SubEmittersModule.SetSubEmitterType(this.m_ParticleSystem, index, (int)type);
-			}
-
-			public void SetSubEmitterEmitProbability(int index, float emitProbability)
-			{
-				ParticleSystem.SubEmittersModule.SetSubEmitterEmitProbability(this.m_ParticleSystem, index, emitProbability);
+				ParticleSystem.SubEmittersModule.SetSubEmitterType_Injected(ref this, index, type);
 			}
 
 			public void SetSubEmitterProperties(int index, ParticleSystemSubEmitterProperties properties)
 			{
-				ParticleSystem.SubEmittersModule.SetSubEmitterProperties(this.m_ParticleSystem, index, (int)properties);
+				ParticleSystem.SubEmittersModule.SetSubEmitterProperties_Injected(ref this, index, properties);
+			}
+
+			public void SetSubEmitterEmitProbability(int index, float emitProbability)
+			{
+				ParticleSystem.SubEmittersModule.SetSubEmitterEmitProbability_Injected(ref this, index, emitProbability);
 			}
 
 			public ParticleSystem GetSubEmitterSystem(int index)
 			{
-				return ParticleSystem.SubEmittersModule.GetSubEmitterSystem(this.m_ParticleSystem, index);
+				return ParticleSystem.SubEmittersModule.GetSubEmitterSystem_Injected(ref this, index);
 			}
 
 			public ParticleSystemSubEmitterType GetSubEmitterType(int index)
 			{
-				return (ParticleSystemSubEmitterType)ParticleSystem.SubEmittersModule.GetSubEmitterType(this.m_ParticleSystem, index);
-			}
-
-			public float GetSubEmitterEmitProbability(int index)
-			{
-				return ParticleSystem.SubEmittersModule.GetSubEmitterEmitProbability(this.m_ParticleSystem, index);
+				return ParticleSystem.SubEmittersModule.GetSubEmitterType_Injected(ref this, index);
 			}
 
 			public ParticleSystemSubEmitterProperties GetSubEmitterProperties(int index)
 			{
-				return (ParticleSystemSubEmitterProperties)ParticleSystem.SubEmittersModule.GetSubEmitterProperties(this.m_ParticleSystem, index);
+				return ParticleSystem.SubEmittersModule.GetSubEmitterProperties_Injected(ref this, index);
 			}
 
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetSubEmittersCount(ParticleSystem system);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetBirth(ParticleSystem system, int index, ParticleSystem value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystem GetBirth(ParticleSystem system, int index);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetCollision(ParticleSystem system, int index, ParticleSystem value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystem GetCollision(ParticleSystem system, int index);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetDeath(ParticleSystem system, int index, ParticleSystem value);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystem GetDeath(ParticleSystem system, int index);
-
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void AddSubEmitter(ParticleSystem system, ParticleSystem subEmitter, int type, int properties, [DefaultValue("1")] float emitProbability);
-
-			[ExcludeFromDocs]
-			private static void AddSubEmitter(ParticleSystem system, ParticleSystem subEmitter, int type, int properties)
+			public float GetSubEmitterEmitProbability(int index)
 			{
-				float num = 1f;
-				ParticleSystem.SubEmittersModule.AddSubEmitter(system, subEmitter, type, properties, num);
+				return ParticleSystem.SubEmittersModule.GetSubEmitterEmitProbability_Injected(ref this, index);
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void RemoveSubEmitter(ParticleSystem system, int index);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.SubEmittersModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSubEmitterSystem(ParticleSystem system, int index, ParticleSystem subEmitter);
+			private static extern void set_enabled_Injected(ref ParticleSystem.SubEmittersModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSubEmitterType(ParticleSystem system, int index, int type);
+			private static extern int get_subEmittersCount_Injected(ref ParticleSystem.SubEmittersModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSubEmitterEmitProbability(ParticleSystem system, int index, float emitProbability);
+			private static extern void AddSubEmitter_Injected(ref ParticleSystem.SubEmittersModule _unity_self, ParticleSystem subEmitter, ParticleSystemSubEmitterType type, ParticleSystemSubEmitterProperties properties, float emitProbability);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSubEmitterProperties(ParticleSystem system, int index, int properties);
+			private static extern void RemoveSubEmitter_Injected(ref ParticleSystem.SubEmittersModule _unity_self, int index);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystem GetSubEmitterSystem(ParticleSystem system, int index);
+			private static extern void SetSubEmitterSystem_Injected(ref ParticleSystem.SubEmittersModule _unity_self, int index, ParticleSystem subEmitter);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetSubEmitterType(ParticleSystem system, int index);
+			private static extern void SetSubEmitterType_Injected(ref ParticleSystem.SubEmittersModule _unity_self, int index, ParticleSystemSubEmitterType type);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetSubEmitterEmitProbability(ParticleSystem system, int index);
+			private static extern void SetSubEmitterProperties_Injected(ref ParticleSystem.SubEmittersModule _unity_self, int index, ParticleSystemSubEmitterProperties properties);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetSubEmitterProperties(ParticleSystem system, int index);
+			private static extern void SetSubEmitterEmitProbability_Injected(ref ParticleSystem.SubEmittersModule _unity_self, int index, float emitProbability);
 
-			private ParticleSystem m_ParticleSystem;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern ParticleSystem GetSubEmitterSystem_Injected(ref ParticleSystem.SubEmittersModule _unity_self, int index);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern ParticleSystemSubEmitterType GetSubEmitterType_Injected(ref ParticleSystem.SubEmittersModule _unity_self, int index);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern ParticleSystemSubEmitterProperties GetSubEmitterProperties_Injected(ref ParticleSystem.SubEmittersModule _unity_self, int index);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float GetSubEmitterEmitProbability_Injected(ref ParticleSystem.SubEmittersModule _unity_self, int index);
+
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct TextureSheetAnimationModule
 		{
-			internal TextureSheetAnimationModule(ParticleSystem particleSystem)
-			{
-				this.m_ParticleSystem = particleSystem;
-			}
-
 			[Obsolete("flipU property is deprecated. Use ParticleSystemRenderer.flip.x instead.", false)]
 			public float flipU
 			{
@@ -3620,15 +2978,33 @@ namespace UnityEngine
 				}
 			}
 
+			[Obsolete("useRandomRow property is deprecated. Use rowMode instead.", false)]
+			public bool useRandomRow
+			{
+				get
+				{
+					return this.rowMode == ParticleSystemAnimationRowMode.Random;
+				}
+				set
+				{
+					this.rowMode = (value ? ParticleSystemAnimationRowMode.Random : ParticleSystemAnimationRowMode.Custom);
+				}
+			}
+
+			internal TextureSheetAnimationModule(ParticleSystem particleSystem)
+			{
+				this.m_ParticleSystem = particleSystem;
+			}
+
 			public bool enabled
 			{
 				get
 				{
-					return ParticleSystem.TextureSheetAnimationModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.TextureSheetAnimationModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TextureSheetAnimationModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.TextureSheetAnimationModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -3636,11 +3012,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TextureSheetAnimationModule.GetMode(this.m_ParticleSystem);
+					return ParticleSystem.TextureSheetAnimationModule.get_mode_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TextureSheetAnimationModule.SetMode(this.m_ParticleSystem, value);
+					ParticleSystem.TextureSheetAnimationModule.set_mode_Injected(ref this, value);
 				}
 			}
 
@@ -3648,11 +3024,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TextureSheetAnimationModule.GetTimeMode(this.m_ParticleSystem);
+					return ParticleSystem.TextureSheetAnimationModule.get_timeMode_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TextureSheetAnimationModule.SetTimeMode(this.m_ParticleSystem, value);
+					ParticleSystem.TextureSheetAnimationModule.set_timeMode_Injected(ref this, value);
 				}
 			}
 
@@ -3660,11 +3036,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TextureSheetAnimationModule.GetFPS(this.m_ParticleSystem);
+					return ParticleSystem.TextureSheetAnimationModule.get_fps_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TextureSheetAnimationModule.SetFPS(this.m_ParticleSystem, value);
+					ParticleSystem.TextureSheetAnimationModule.set_fps_Injected(ref this, value);
 				}
 			}
 
@@ -3672,11 +3048,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TextureSheetAnimationModule.GetNumTilesX(this.m_ParticleSystem);
+					return ParticleSystem.TextureSheetAnimationModule.get_numTilesX_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TextureSheetAnimationModule.SetNumTilesX(this.m_ParticleSystem, value);
+					ParticleSystem.TextureSheetAnimationModule.set_numTilesX_Injected(ref this, value);
 				}
 			}
 
@@ -3684,11 +3060,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TextureSheetAnimationModule.GetNumTilesY(this.m_ParticleSystem);
+					return ParticleSystem.TextureSheetAnimationModule.get_numTilesY_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TextureSheetAnimationModule.SetNumTilesY(this.m_ParticleSystem, value);
+					ParticleSystem.TextureSheetAnimationModule.set_numTilesY_Injected(ref this, value);
 				}
 			}
 
@@ -3696,23 +3072,23 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TextureSheetAnimationModule.GetAnimationType(this.m_ParticleSystem);
+					return ParticleSystem.TextureSheetAnimationModule.get_animation_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TextureSheetAnimationModule.SetAnimationType(this.m_ParticleSystem, value);
+					ParticleSystem.TextureSheetAnimationModule.set_animation_Injected(ref this, value);
 				}
 			}
 
-			public bool useRandomRow
+			public ParticleSystemAnimationRowMode rowMode
 			{
 				get
 				{
-					return ParticleSystem.TextureSheetAnimationModule.GetUseRandomRow(this.m_ParticleSystem);
+					return ParticleSystem.TextureSheetAnimationModule.get_rowMode_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TextureSheetAnimationModule.SetUseRandomRow(this.m_ParticleSystem, value);
+					ParticleSystem.TextureSheetAnimationModule.set_rowMode_Injected(ref this, value);
 				}
 			}
 
@@ -3720,13 +3096,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.TextureSheetAnimationModule.GetFrameOverTime(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.TextureSheetAnimationModule.get_frameOverTime_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.TextureSheetAnimationModule.SetFrameOverTime(this.m_ParticleSystem, ref value);
+					ParticleSystem.TextureSheetAnimationModule.set_frameOverTime_Injected(ref this, ref value);
 				}
 			}
 
@@ -3734,11 +3110,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TextureSheetAnimationModule.GetFrameOverTimeMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.TextureSheetAnimationModule.get_frameOverTimeMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TextureSheetAnimationModule.SetFrameOverTimeMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.TextureSheetAnimationModule.set_frameOverTimeMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -3746,13 +3122,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.TextureSheetAnimationModule.GetStartFrame(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.TextureSheetAnimationModule.get_startFrame_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.TextureSheetAnimationModule.SetStartFrame(this.m_ParticleSystem, ref value);
+					ParticleSystem.TextureSheetAnimationModule.set_startFrame_Injected(ref this, ref value);
 				}
 			}
 
@@ -3760,11 +3136,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TextureSheetAnimationModule.GetStartFrameMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.TextureSheetAnimationModule.get_startFrameMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TextureSheetAnimationModule.SetStartFrameMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.TextureSheetAnimationModule.set_startFrameMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -3772,11 +3148,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TextureSheetAnimationModule.GetCycleCount(this.m_ParticleSystem);
+					return ParticleSystem.TextureSheetAnimationModule.get_cycleCount_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TextureSheetAnimationModule.SetCycleCount(this.m_ParticleSystem, value);
+					ParticleSystem.TextureSheetAnimationModule.set_cycleCount_Injected(ref this, value);
 				}
 			}
 
@@ -3784,11 +3160,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TextureSheetAnimationModule.GetRowIndex(this.m_ParticleSystem);
+					return ParticleSystem.TextureSheetAnimationModule.get_rowIndex_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TextureSheetAnimationModule.SetRowIndex(this.m_ParticleSystem, value);
+					ParticleSystem.TextureSheetAnimationModule.set_rowIndex_Injected(ref this, value);
 				}
 			}
 
@@ -3796,11 +3172,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return (UVChannelFlags)ParticleSystem.TextureSheetAnimationModule.GetUVChannelMask(this.m_ParticleSystem);
+					return ParticleSystem.TextureSheetAnimationModule.get_uvChannelMask_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TextureSheetAnimationModule.SetUVChannelMask(this.m_ParticleSystem, (int)value);
+					ParticleSystem.TextureSheetAnimationModule.set_uvChannelMask_Injected(ref this, value);
 				}
 			}
 
@@ -3808,7 +3184,7 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TextureSheetAnimationModule.GetSpriteCount(this.m_ParticleSystem);
+					return ParticleSystem.TextureSheetAnimationModule.get_spriteCount_Injected(ref this);
 				}
 			}
 
@@ -3816,195 +3192,148 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TextureSheetAnimationModule.GetSpeedRange(this.m_ParticleSystem);
+					Vector2 vector;
+					ParticleSystem.TextureSheetAnimationModule.get_speedRange_Injected(ref this, out vector);
+					return vector;
 				}
 				set
 				{
-					ParticleSystem.TextureSheetAnimationModule.SetSpeedRange(this.m_ParticleSystem, value);
+					ParticleSystem.TextureSheetAnimationModule.set_speedRange_Injected(ref this, ref value);
 				}
 			}
 
 			public void AddSprite(Sprite sprite)
 			{
-				ParticleSystem.TextureSheetAnimationModule.AddSprite(this.m_ParticleSystem, sprite);
+				ParticleSystem.TextureSheetAnimationModule.AddSprite_Injected(ref this, sprite);
 			}
 
 			public void RemoveSprite(int index)
 			{
-				ParticleSystem.TextureSheetAnimationModule.RemoveSprite(this.m_ParticleSystem, index);
+				ParticleSystem.TextureSheetAnimationModule.RemoveSprite_Injected(ref this, index);
 			}
 
 			public void SetSprite(int index, Sprite sprite)
 			{
-				ParticleSystem.TextureSheetAnimationModule.SetSprite(this.m_ParticleSystem, index, sprite);
+				ParticleSystem.TextureSheetAnimationModule.SetSprite_Injected(ref this, index, sprite);
 			}
 
 			public Sprite GetSprite(int index)
 			{
-				return ParticleSystem.TextureSheetAnimationModule.GetSprite(this.m_ParticleSystem, index);
+				return ParticleSystem.TextureSheetAnimationModule.GetSprite_Injected(ref this, index);
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMode(ParticleSystem system, ParticleSystemAnimationMode value);
+			private static extern ParticleSystemAnimationMode get_mode_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemAnimationMode GetMode(ParticleSystem system);
+			private static extern void set_mode_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, ParticleSystemAnimationMode value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetTimeMode(ParticleSystem system, ParticleSystemAnimationTimeMode value);
+			private static extern ParticleSystemAnimationTimeMode get_timeMode_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemAnimationTimeMode GetTimeMode(ParticleSystem system);
+			private static extern void set_timeMode_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, ParticleSystemAnimationTimeMode value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetFPS(ParticleSystem system, float value);
+			private static extern float get_fps_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetFPS(ParticleSystem system);
+			private static extern void set_fps_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetNumTilesX(ParticleSystem system, int value);
+			private static extern int get_numTilesX_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetNumTilesX(ParticleSystem system);
+			private static extern void set_numTilesX_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, int value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetNumTilesY(ParticleSystem system, int value);
+			private static extern int get_numTilesY_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetNumTilesY(ParticleSystem system);
+			private static extern void set_numTilesY_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, int value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetAnimationType(ParticleSystem system, ParticleSystemAnimationType value);
+			private static extern ParticleSystemAnimationType get_animation_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemAnimationType GetAnimationType(ParticleSystem system);
+			private static extern void set_animation_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, ParticleSystemAnimationType value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetUseRandomRow(ParticleSystem system, bool value);
+			private static extern ParticleSystemAnimationRowMode get_rowMode_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetUseRandomRow(ParticleSystem system);
+			private static extern void set_rowMode_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, ParticleSystemAnimationRowMode value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetFrameOverTime(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_frameOverTime_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetFrameOverTime(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_frameOverTime_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetFrameOverTimeMultiplier(ParticleSystem system, float value);
+			private static extern float get_frameOverTimeMultiplier_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetFrameOverTimeMultiplier(ParticleSystem system);
+			private static extern void set_frameOverTimeMultiplier_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartFrame(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_startFrame_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetStartFrame(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_startFrame_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStartFrameMultiplier(ParticleSystem system, float value);
+			private static extern float get_startFrameMultiplier_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetStartFrameMultiplier(ParticleSystem system);
+			private static extern void set_startFrameMultiplier_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetCycleCount(ParticleSystem system, int value);
+			private static extern int get_cycleCount_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetCycleCount(ParticleSystem system);
+			private static extern void set_cycleCount_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, int value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRowIndex(ParticleSystem system, int value);
+			private static extern int get_rowIndex_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetRowIndex(ParticleSystem system);
+			private static extern void set_rowIndex_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, int value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetUVChannelMask(ParticleSystem system, int value);
+			private static extern UVChannelFlags get_uvChannelMask_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetUVChannelMask(ParticleSystem system);
+			private static extern void set_uvChannelMask_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, UVChannelFlags value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetSpriteCount(ParticleSystem system);
+			private static extern int get_spriteCount_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self);
 
-			private static void SetSpeedRange(ParticleSystem system, Vector2 value)
-			{
-				ParticleSystem.TextureSheetAnimationModule.INTERNAL_CALL_SetSpeedRange(system, ref value);
-			}
-
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_SetSpeedRange(ParticleSystem system, ref Vector2 value);
+			private static extern void get_speedRange_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, out Vector2 ret);
 
-			private static Vector2 GetSpeedRange(ParticleSystem system)
-			{
-				Vector2 vector;
-				ParticleSystem.TextureSheetAnimationModule.INTERNAL_CALL_GetSpeedRange(system, out vector);
-				return vector;
-			}
-
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_GetSpeedRange(ParticleSystem system, out Vector2 value);
+			private static extern void set_speedRange_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, ref Vector2 value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void AddSprite(ParticleSystem system, Object sprite);
+			private static extern void AddSprite_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, Sprite sprite);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void RemoveSprite(ParticleSystem system, int index);
+			private static extern void RemoveSprite_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, int index);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSprite(ParticleSystem system, int index, Object sprite);
+			private static extern void SetSprite_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, int index, Sprite sprite);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern Sprite GetSprite(ParticleSystem system, int index);
+			private static extern Sprite GetSprite_Injected(ref ParticleSystem.TextureSheetAnimationModule _unity_self, int index);
 
-			private ParticleSystem m_ParticleSystem;
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		[RequiredByNativeCode("particleSystemParticle", Optional = true)]
@@ -4252,6 +3581,17 @@ namespace UnityEngine
 				return system.GetParticleCurrentColor(ref this);
 			}
 
+			public void SetMeshIndex(int index)
+			{
+				this.m_MeshIndex = index;
+				this.m_Flags |= 4U;
+			}
+
+			public int GetMeshIndex(ParticleSystem system)
+			{
+				return system.GetParticleMeshIndex(ref this);
+			}
+
 			private Vector3 m_Position;
 
 			private Vector3 m_Velocity;
@@ -4272,9 +3612,13 @@ namespace UnityEngine
 
 			private uint m_RandomSeed;
 
+			private uint m_ParentRandomSeed;
+
 			private float m_Lifetime;
 
 			private float m_StartLifetime;
+
+			private int m_MeshIndex;
 
 			private float m_EmitAccumulator0;
 
@@ -4286,10 +3630,12 @@ namespace UnityEngine
 			private enum Flags
 			{
 				Size3D = 1,
-				Rotation3D = 2
+				Rotation3D = 2,
+				MeshIndex = 4
 			}
 		}
 
+		[NativeType(CodegenOptions.Custom, "MonoBurst", Header = "Runtime/Scripting/ScriptingCommonStructDefinitions.h")]
 		public struct Burst
 		{
 			public Burst(float _time, short _count)
@@ -4393,7 +3739,8 @@ namespace UnityEngine
 				}
 				set
 				{
-					if (value < 0)
+					bool flag = value < 0;
+					if (flag)
 					{
 						throw new ArgumentOutOfRangeException("cycleCount", "cycleCount must be at least 0: " + value);
 					}
@@ -4409,7 +3756,8 @@ namespace UnityEngine
 				}
 				set
 				{
-					if (value <= 0f)
+					bool flag = value <= 0f;
+					if (flag)
 					{
 						throw new ArgumentOutOfRangeException("repeatInterval", "repeatInterval must be greater than 0.0f: " + value);
 					}
@@ -4425,7 +3773,8 @@ namespace UnityEngine
 				}
 				set
 				{
-					if (value < 0f || value > 1f)
+					bool flag = value < 0f || value > 1f;
+					if (flag)
 					{
 						throw new ArgumentOutOfRangeException("probability", "probability must be between 0.0f and 1.0f: " + value);
 					}
@@ -4627,6 +3976,7 @@ namespace UnityEngine
 			private float m_ConstantMax;
 		}
 
+		[NativeType(CodegenOptions.Custom, "MonoMinMaxGradient", Header = "Runtime/Scripting/ScriptingCommonStructDefinitions.h")]
 		[Serializable]
 		public struct MinMaxGradient
 		{
@@ -4799,6 +4149,28 @@ namespace UnityEngine
 
 		public struct EmitParams
 		{
+			public ParticleSystem.Particle particle
+			{
+				get
+				{
+					return this.m_Particle;
+				}
+				set
+				{
+					this.m_Particle = value;
+					this.m_PositionSet = true;
+					this.m_VelocitySet = true;
+					this.m_AxisOfRotationSet = true;
+					this.m_RotationSet = true;
+					this.m_AngularVelocitySet = true;
+					this.m_StartSizeSet = true;
+					this.m_StartColorSet = true;
+					this.m_RandomSeedSet = true;
+					this.m_StartLifetimeSet = true;
+					this.m_MeshIndexSet = true;
+				}
+			}
+
 			public Vector3 position
 			{
 				get
@@ -4967,6 +4339,15 @@ namespace UnityEngine
 				}
 			}
 
+			public int meshIndex
+			{
+				set
+				{
+					this.m_Particle.SetMeshIndex(value);
+					this.m_MeshIndexSet = true;
+				}
+			}
+
 			public void ResetPosition()
 			{
 				this.m_PositionSet = false;
@@ -5012,6 +4393,11 @@ namespace UnityEngine
 				this.m_StartLifetimeSet = false;
 			}
 
+			public void ResetMeshIndex()
+			{
+				this.m_MeshIndexSet = false;
+			}
+
 			[NativeName("particle")]
 			private ParticleSystem.Particle m_Particle;
 
@@ -5042,8 +4428,136 @@ namespace UnityEngine
 			[NativeName("startLifetimeSet")]
 			private bool m_StartLifetimeSet;
 
+			[NativeName("meshIndexSet")]
+			private bool m_MeshIndexSet;
+
 			[NativeName("applyShapeToPosition")]
 			private bool m_ApplyShapeToPosition;
+		}
+
+		public struct PlaybackState
+		{
+			internal float m_AccumulatedDt;
+
+			internal float m_StartDelay;
+
+			internal float m_PlaybackTime;
+
+			internal int m_RingBufferIndex;
+
+			internal ParticleSystem.PlaybackState.Emission m_Emission;
+
+			internal ParticleSystem.PlaybackState.Initial m_Initial;
+
+			internal ParticleSystem.PlaybackState.Shape m_Shape;
+
+			internal ParticleSystem.PlaybackState.Force m_Force;
+
+			internal ParticleSystem.PlaybackState.Collision m_Collision;
+
+			internal ParticleSystem.PlaybackState.Noise m_Noise;
+
+			internal ParticleSystem.PlaybackState.Lights m_Lights;
+
+			internal ParticleSystem.PlaybackState.Trail m_Trail;
+
+			internal struct Seed
+			{
+				public uint x;
+
+				public uint y;
+
+				public uint z;
+
+				public uint w;
+			}
+
+			internal struct Seed4
+			{
+				public ParticleSystem.PlaybackState.Seed x;
+
+				public ParticleSystem.PlaybackState.Seed y;
+
+				public ParticleSystem.PlaybackState.Seed z;
+
+				public ParticleSystem.PlaybackState.Seed w;
+			}
+
+			internal struct Emission
+			{
+				public float m_ParticleSpacing;
+
+				public float m_ToEmitAccumulator;
+
+				public ParticleSystem.PlaybackState.Seed m_Random;
+			}
+
+			internal struct Initial
+			{
+				public ParticleSystem.PlaybackState.Seed4 m_Random;
+			}
+
+			internal struct Shape
+			{
+				public ParticleSystem.PlaybackState.Seed4 m_Random;
+
+				public float m_RadiusTimer;
+
+				public float m_RadiusTimerPrev;
+
+				public float m_ArcTimer;
+
+				public float m_ArcTimerPrev;
+
+				public float m_MeshSpawnTimer;
+
+				public float m_MeshSpawnTimerPrev;
+
+				public int m_OrderedMeshVertexIndex;
+			}
+
+			internal struct Force
+			{
+				public ParticleSystem.PlaybackState.Seed4 m_Random;
+			}
+
+			internal struct Collision
+			{
+				public ParticleSystem.PlaybackState.Seed4 m_Random;
+			}
+
+			internal struct Noise
+			{
+				public float m_ScrollOffset;
+			}
+
+			internal struct Lights
+			{
+				public ParticleSystem.PlaybackState.Seed m_Random;
+
+				public float m_ParticleEmissionCounter;
+			}
+
+			internal struct Trail
+			{
+				public float m_Timer;
+			}
+		}
+
+		[NativeType(CodegenOptions.Custom, "MonoParticleTrails")]
+		public struct Trails
+		{
+			internal List<Vector4> positions;
+
+			internal List<int> frontPositions;
+
+			internal List<int> backPositions;
+
+			internal List<int> positionCounts;
+
+			internal int maxTrailCount;
+
+			internal int maxPositionsPerTrailCount;
 		}
 
 		public struct VelocityOverLifetimeModule
@@ -5057,11 +4571,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.VelocityOverLifetimeModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.VelocityOverLifetimeModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.VelocityOverLifetimeModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -5069,13 +4583,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.VelocityOverLifetimeModule.GetX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.VelocityOverLifetimeModule.get_x_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetX(this.m_ParticleSystem, ref value);
+					ParticleSystem.VelocityOverLifetimeModule.set_x_Injected(ref this, ref value);
 				}
 			}
 
@@ -5083,13 +4597,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.VelocityOverLifetimeModule.GetY(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.VelocityOverLifetimeModule.get_y_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetY(this.m_ParticleSystem, ref value);
+					ParticleSystem.VelocityOverLifetimeModule.set_y_Injected(ref this, ref value);
 				}
 			}
 
@@ -5097,13 +4611,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.VelocityOverLifetimeModule.GetZ(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.VelocityOverLifetimeModule.get_z_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetZ(this.m_ParticleSystem, ref value);
+					ParticleSystem.VelocityOverLifetimeModule.set_z_Injected(ref this, ref value);
 				}
 			}
 
@@ -5111,11 +4625,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.VelocityOverLifetimeModule.GetXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.VelocityOverLifetimeModule.get_xMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.VelocityOverLifetimeModule.set_xMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -5123,11 +4637,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.VelocityOverLifetimeModule.GetYMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.VelocityOverLifetimeModule.get_yMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetYMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.VelocityOverLifetimeModule.set_yMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -5135,11 +4649,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.VelocityOverLifetimeModule.GetZMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.VelocityOverLifetimeModule.get_zMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetZMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.VelocityOverLifetimeModule.set_zMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -5147,13 +4661,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.VelocityOverLifetimeModule.GetOrbitalX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.VelocityOverLifetimeModule.get_orbitalX_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetOrbitalX(this.m_ParticleSystem, ref value);
+					ParticleSystem.VelocityOverLifetimeModule.set_orbitalX_Injected(ref this, ref value);
 				}
 			}
 
@@ -5161,13 +4675,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.VelocityOverLifetimeModule.GetOrbitalY(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.VelocityOverLifetimeModule.get_orbitalY_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetOrbitalY(this.m_ParticleSystem, ref value);
+					ParticleSystem.VelocityOverLifetimeModule.set_orbitalY_Injected(ref this, ref value);
 				}
 			}
 
@@ -5175,13 +4689,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.VelocityOverLifetimeModule.GetOrbitalZ(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.VelocityOverLifetimeModule.get_orbitalZ_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetOrbitalZ(this.m_ParticleSystem, ref value);
+					ParticleSystem.VelocityOverLifetimeModule.set_orbitalZ_Injected(ref this, ref value);
 				}
 			}
 
@@ -5189,11 +4703,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.VelocityOverLifetimeModule.GetOrbitalXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.VelocityOverLifetimeModule.get_orbitalXMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetOrbitalXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.VelocityOverLifetimeModule.set_orbitalXMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -5201,11 +4715,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.VelocityOverLifetimeModule.GetOrbitalYMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.VelocityOverLifetimeModule.get_orbitalYMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetOrbitalYMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.VelocityOverLifetimeModule.set_orbitalYMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -5213,11 +4727,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.VelocityOverLifetimeModule.GetOrbitalZMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.VelocityOverLifetimeModule.get_orbitalZMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetOrbitalZMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.VelocityOverLifetimeModule.set_orbitalZMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -5225,13 +4739,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.VelocityOverLifetimeModule.GetOrbitalOffsetX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.VelocityOverLifetimeModule.get_orbitalOffsetX_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetOrbitalOffsetX(this.m_ParticleSystem, ref value);
+					ParticleSystem.VelocityOverLifetimeModule.set_orbitalOffsetX_Injected(ref this, ref value);
 				}
 			}
 
@@ -5239,13 +4753,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.VelocityOverLifetimeModule.GetOrbitalOffsetY(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.VelocityOverLifetimeModule.get_orbitalOffsetY_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetOrbitalOffsetY(this.m_ParticleSystem, ref value);
+					ParticleSystem.VelocityOverLifetimeModule.set_orbitalOffsetY_Injected(ref this, ref value);
 				}
 			}
 
@@ -5253,13 +4767,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.VelocityOverLifetimeModule.GetOrbitalOffsetZ(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.VelocityOverLifetimeModule.get_orbitalOffsetZ_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetOrbitalOffsetZ(this.m_ParticleSystem, ref value);
+					ParticleSystem.VelocityOverLifetimeModule.set_orbitalOffsetZ_Injected(ref this, ref value);
 				}
 			}
 
@@ -5267,11 +4781,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.VelocityOverLifetimeModule.GetOrbitalOffsetXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.VelocityOverLifetimeModule.get_orbitalOffsetXMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetOrbitalOffsetXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.VelocityOverLifetimeModule.set_orbitalOffsetXMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -5279,11 +4793,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.VelocityOverLifetimeModule.GetOrbitalOffsetYMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.VelocityOverLifetimeModule.get_orbitalOffsetYMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetOrbitalOffsetYMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.VelocityOverLifetimeModule.set_orbitalOffsetYMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -5291,11 +4805,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.VelocityOverLifetimeModule.GetOrbitalOffsetZMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.VelocityOverLifetimeModule.get_orbitalOffsetZMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetOrbitalOffsetZMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.VelocityOverLifetimeModule.set_orbitalOffsetZMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -5303,13 +4817,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.VelocityOverLifetimeModule.GetRadial(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.VelocityOverLifetimeModule.get_radial_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetRadial(this.m_ParticleSystem, ref value);
+					ParticleSystem.VelocityOverLifetimeModule.set_radial_Injected(ref this, ref value);
 				}
 			}
 
@@ -5317,11 +4831,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.VelocityOverLifetimeModule.GetRadialMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.VelocityOverLifetimeModule.get_radialMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetRadialMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.VelocityOverLifetimeModule.set_radialMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -5329,13 +4843,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.VelocityOverLifetimeModule.GetSpeedModifier(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.VelocityOverLifetimeModule.get_speedModifier_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetSpeedModifier(this.m_ParticleSystem, ref value);
+					ParticleSystem.VelocityOverLifetimeModule.set_speedModifier_Injected(ref this, ref value);
 				}
 			}
 
@@ -5343,11 +4857,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.VelocityOverLifetimeModule.GetSpeedModifierMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.VelocityOverLifetimeModule.get_speedModifierMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetSpeedModifierMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.VelocityOverLifetimeModule.set_speedModifierMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -5355,207 +4869,159 @@ namespace UnityEngine
 			{
 				get
 				{
-					return (!ParticleSystem.VelocityOverLifetimeModule.GetWorldSpace(this.m_ParticleSystem)) ? ParticleSystemSimulationSpace.Local : ParticleSystemSimulationSpace.World;
+					return ParticleSystem.VelocityOverLifetimeModule.get_space_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.VelocityOverLifetimeModule.SetWorldSpace(this.m_ParticleSystem, value == ParticleSystemSimulationSpace.World);
+					ParticleSystem.VelocityOverLifetimeModule.set_space_Injected(ref this, value);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_x_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_x_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_y_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_y_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_z_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_z_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetXMultiplier(ParticleSystem system, float value);
+			private static extern float get_xMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetXMultiplier(ParticleSystem system);
+			private static extern void set_xMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetYMultiplier(ParticleSystem system, float value);
+			private static extern float get_yMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetYMultiplier(ParticleSystem system);
+			private static extern void set_yMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetZMultiplier(ParticleSystem system, float value);
+			private static extern float get_zMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetZMultiplier(ParticleSystem system);
+			private static extern void set_zMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetOrbitalX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_orbitalX_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetOrbitalX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_orbitalX_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetOrbitalY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_orbitalY_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetOrbitalY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_orbitalY_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetOrbitalZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_orbitalZ_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetOrbitalZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_orbitalZ_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetOrbitalXMultiplier(ParticleSystem system, float value);
+			private static extern float get_orbitalXMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetOrbitalXMultiplier(ParticleSystem system);
+			private static extern void set_orbitalXMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetOrbitalYMultiplier(ParticleSystem system, float value);
+			private static extern float get_orbitalYMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetOrbitalYMultiplier(ParticleSystem system);
+			private static extern void set_orbitalYMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetOrbitalZMultiplier(ParticleSystem system, float value);
+			private static extern float get_orbitalZMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetOrbitalZMultiplier(ParticleSystem system);
+			private static extern void set_orbitalZMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetOrbitalOffsetX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_orbitalOffsetX_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetOrbitalOffsetX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_orbitalOffsetX_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetOrbitalOffsetY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_orbitalOffsetY_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetOrbitalOffsetY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_orbitalOffsetY_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetOrbitalOffsetZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_orbitalOffsetZ_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetOrbitalOffsetZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_orbitalOffsetZ_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetOrbitalOffsetXMultiplier(ParticleSystem system, float value);
+			private static extern float get_orbitalOffsetXMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetOrbitalOffsetXMultiplier(ParticleSystem system);
+			private static extern void set_orbitalOffsetXMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetOrbitalOffsetYMultiplier(ParticleSystem system, float value);
+			private static extern float get_orbitalOffsetYMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetOrbitalOffsetYMultiplier(ParticleSystem system);
+			private static extern void set_orbitalOffsetYMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetOrbitalOffsetZMultiplier(ParticleSystem system, float value);
+			private static extern float get_orbitalOffsetZMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetOrbitalOffsetZMultiplier(ParticleSystem system);
+			private static extern void set_orbitalOffsetZMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRadial(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_radial_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetRadial(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_radial_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRadialMultiplier(ParticleSystem system, float value);
+			private static extern float get_radialMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRadialMultiplier(ParticleSystem system);
+			private static extern void set_radialMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSpeedModifier(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_speedModifier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetSpeedModifier(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_speedModifier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSpeedModifierMultiplier(ParticleSystem system, float value);
+			private static extern float get_speedModifierMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetSpeedModifierMultiplier(ParticleSystem system);
+			private static extern void set_speedModifierMultiplier_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetWorldSpace(ParticleSystem system, bool value);
+			private static extern ParticleSystemSimulationSpace get_space_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetWorldSpace(ParticleSystem system);
+			private static extern void set_space_Injected(ref ParticleSystem.VelocityOverLifetimeModule _unity_self, ParticleSystemSimulationSpace value);
 
-			private ParticleSystem m_ParticleSystem;
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct LimitVelocityOverLifetimeModule
@@ -5569,11 +5035,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LimitVelocityOverLifetimeModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.LimitVelocityOverLifetimeModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LimitVelocityOverLifetimeModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.LimitVelocityOverLifetimeModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -5581,13 +5047,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.LimitVelocityOverLifetimeModule.GetX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.LimitVelocityOverLifetimeModule.get_limitX_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.LimitVelocityOverLifetimeModule.SetX(this.m_ParticleSystem, ref value);
+					ParticleSystem.LimitVelocityOverLifetimeModule.set_limitX_Injected(ref this, ref value);
 				}
 			}
 
@@ -5595,11 +5061,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LimitVelocityOverLifetimeModule.GetXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.LimitVelocityOverLifetimeModule.get_limitXMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LimitVelocityOverLifetimeModule.SetXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.LimitVelocityOverLifetimeModule.set_limitXMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -5607,13 +5073,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.LimitVelocityOverLifetimeModule.GetY(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.LimitVelocityOverLifetimeModule.get_limitY_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.LimitVelocityOverLifetimeModule.SetY(this.m_ParticleSystem, ref value);
+					ParticleSystem.LimitVelocityOverLifetimeModule.set_limitY_Injected(ref this, ref value);
 				}
 			}
 
@@ -5621,11 +5087,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LimitVelocityOverLifetimeModule.GetYMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.LimitVelocityOverLifetimeModule.get_limitYMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LimitVelocityOverLifetimeModule.SetYMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.LimitVelocityOverLifetimeModule.set_limitYMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -5633,13 +5099,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.LimitVelocityOverLifetimeModule.GetZ(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.LimitVelocityOverLifetimeModule.get_limitZ_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.LimitVelocityOverLifetimeModule.SetZ(this.m_ParticleSystem, ref value);
+					ParticleSystem.LimitVelocityOverLifetimeModule.set_limitZ_Injected(ref this, ref value);
 				}
 			}
 
@@ -5647,37 +5113,39 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LimitVelocityOverLifetimeModule.GetZMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.LimitVelocityOverLifetimeModule.get_limitZMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LimitVelocityOverLifetimeModule.SetZMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.LimitVelocityOverLifetimeModule.set_limitZMultiplier_Injected(ref this, value);
 				}
 			}
 
+			[NativeName("Magnitude")]
 			public ParticleSystem.MinMaxCurve limit
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.LimitVelocityOverLifetimeModule.GetMagnitude(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.LimitVelocityOverLifetimeModule.get_limit_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.LimitVelocityOverLifetimeModule.SetMagnitude(this.m_ParticleSystem, ref value);
+					ParticleSystem.LimitVelocityOverLifetimeModule.set_limit_Injected(ref this, ref value);
 				}
 			}
 
+			[NativeName("MagnitudeMultiplier")]
 			public float limitMultiplier
 			{
 				get
 				{
-					return ParticleSystem.LimitVelocityOverLifetimeModule.GetMagnitudeMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.LimitVelocityOverLifetimeModule.get_limitMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LimitVelocityOverLifetimeModule.SetMagnitudeMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.LimitVelocityOverLifetimeModule.set_limitMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -5685,11 +5153,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LimitVelocityOverLifetimeModule.GetDampen(this.m_ParticleSystem);
+					return ParticleSystem.LimitVelocityOverLifetimeModule.get_dampen_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LimitVelocityOverLifetimeModule.SetDampen(this.m_ParticleSystem, value);
+					ParticleSystem.LimitVelocityOverLifetimeModule.set_dampen_Injected(ref this, value);
 				}
 			}
 
@@ -5697,11 +5165,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LimitVelocityOverLifetimeModule.GetSeparateAxes(this.m_ParticleSystem);
+					return ParticleSystem.LimitVelocityOverLifetimeModule.get_separateAxes_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LimitVelocityOverLifetimeModule.SetSeparateAxes(this.m_ParticleSystem, value);
+					ParticleSystem.LimitVelocityOverLifetimeModule.set_separateAxes_Injected(ref this, value);
 				}
 			}
 
@@ -5709,11 +5177,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return (!ParticleSystem.LimitVelocityOverLifetimeModule.GetWorldSpace(this.m_ParticleSystem)) ? ParticleSystemSimulationSpace.Local : ParticleSystemSimulationSpace.World;
+					return ParticleSystem.LimitVelocityOverLifetimeModule.get_space_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LimitVelocityOverLifetimeModule.SetWorldSpace(this.m_ParticleSystem, value == ParticleSystemSimulationSpace.World);
+					ParticleSystem.LimitVelocityOverLifetimeModule.set_space_Injected(ref this, value);
 				}
 			}
 
@@ -5721,13 +5189,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.LimitVelocityOverLifetimeModule.GetDrag(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.LimitVelocityOverLifetimeModule.get_drag_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.LimitVelocityOverLifetimeModule.SetDrag(this.m_ParticleSystem, ref value);
+					ParticleSystem.LimitVelocityOverLifetimeModule.set_drag_Injected(ref this, ref value);
 				}
 			}
 
@@ -5735,11 +5203,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LimitVelocityOverLifetimeModule.GetDragMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.LimitVelocityOverLifetimeModule.get_dragMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LimitVelocityOverLifetimeModule.SetDragMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.LimitVelocityOverLifetimeModule.set_dragMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -5747,11 +5215,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LimitVelocityOverLifetimeModule.GetMultiplyDragByParticleSize(this.m_ParticleSystem);
+					return ParticleSystem.LimitVelocityOverLifetimeModule.get_multiplyDragByParticleSize_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LimitVelocityOverLifetimeModule.SetMultiplyDragByParticleSize(this.m_ParticleSystem, value);
+					ParticleSystem.LimitVelocityOverLifetimeModule.set_multiplyDragByParticleSize_Injected(ref this, value);
 				}
 			}
 
@@ -5759,143 +5227,111 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LimitVelocityOverLifetimeModule.GetMultiplyDragByParticleVelocity(this.m_ParticleSystem);
+					return ParticleSystem.LimitVelocityOverLifetimeModule.get_multiplyDragByParticleVelocity_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LimitVelocityOverLifetimeModule.SetMultiplyDragByParticleVelocity(this.m_ParticleSystem, value);
+					ParticleSystem.LimitVelocityOverLifetimeModule.set_multiplyDragByParticleVelocity_Injected(ref this, value);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_limitX_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_limitX_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetXMultiplier(ParticleSystem system, float value);
+			private static extern float get_limitXMultiplier_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetXMultiplier(ParticleSystem system);
+			private static extern void set_limitXMultiplier_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_limitY_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_limitY_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetYMultiplier(ParticleSystem system, float value);
+			private static extern float get_limitYMultiplier_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetYMultiplier(ParticleSystem system);
+			private static extern void set_limitYMultiplier_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_limitZ_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_limitZ_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetZMultiplier(ParticleSystem system, float value);
+			private static extern float get_limitZMultiplier_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetZMultiplier(ParticleSystem system);
+			private static extern void set_limitZMultiplier_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMagnitude(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_limit_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetMagnitude(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_limit_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMagnitudeMultiplier(ParticleSystem system, float value);
+			private static extern float get_limitMultiplier_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetMagnitudeMultiplier(ParticleSystem system);
+			private static extern void set_limitMultiplier_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetDampen(ParticleSystem system, float value);
+			private static extern float get_dampen_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetDampen(ParticleSystem system);
+			private static extern void set_dampen_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSeparateAxes(ParticleSystem system, bool value);
+			private static extern bool get_separateAxes_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetSeparateAxes(ParticleSystem system);
+			private static extern void set_separateAxes_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetWorldSpace(ParticleSystem system, bool value);
+			private static extern ParticleSystemSimulationSpace get_space_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetWorldSpace(ParticleSystem system);
+			private static extern void set_space_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, ParticleSystemSimulationSpace value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetDrag(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_drag_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetDrag(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_drag_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetDragMultiplier(ParticleSystem system, float value);
+			private static extern float get_dragMultiplier_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetDragMultiplier(ParticleSystem system);
+			private static extern void set_dragMultiplier_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMultiplyDragByParticleSize(ParticleSystem system, bool value);
+			private static extern bool get_multiplyDragByParticleSize_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetMultiplyDragByParticleSize(ParticleSystem system);
+			private static extern void set_multiplyDragByParticleSize_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMultiplyDragByParticleVelocity(ParticleSystem system, bool value);
+			private static extern bool get_multiplyDragByParticleVelocity_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetMultiplyDragByParticleVelocity(ParticleSystem system);
+			private static extern void set_multiplyDragByParticleVelocity_Injected(ref ParticleSystem.LimitVelocityOverLifetimeModule _unity_self, bool value);
 
-			private ParticleSystem m_ParticleSystem;
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct InheritVelocityModule
@@ -5909,11 +5345,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.InheritVelocityModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.InheritVelocityModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.InheritVelocityModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.InheritVelocityModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -5921,11 +5357,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.InheritVelocityModule.GetMode(this.m_ParticleSystem);
+					return ParticleSystem.InheritVelocityModule.get_mode_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.InheritVelocityModule.SetMode(this.m_ParticleSystem, value);
+					ParticleSystem.InheritVelocityModule.set_mode_Injected(ref this, value);
 				}
 			}
 
@@ -5933,13 +5369,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.InheritVelocityModule.GetCurve(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.InheritVelocityModule.get_curve_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.InheritVelocityModule.SetCurve(this.m_ParticleSystem, ref value);
+					ParticleSystem.InheritVelocityModule.set_curve_Injected(ref this, ref value);
 				}
 			}
 
@@ -5947,47 +5383,39 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.InheritVelocityModule.GetCurveMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.InheritVelocityModule.get_curveMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.InheritVelocityModule.SetCurveMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.InheritVelocityModule.set_curveMultiplier_Injected(ref this, value);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.InheritVelocityModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.InheritVelocityModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMode(ParticleSystem system, ParticleSystemInheritVelocityMode value);
+			private static extern ParticleSystemInheritVelocityMode get_mode_Injected(ref ParticleSystem.InheritVelocityModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemInheritVelocityMode GetMode(ParticleSystem system);
+			private static extern void set_mode_Injected(ref ParticleSystem.InheritVelocityModule _unity_self, ParticleSystemInheritVelocityMode value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetCurve(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_curve_Injected(ref ParticleSystem.InheritVelocityModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetCurve(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_curve_Injected(ref ParticleSystem.InheritVelocityModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetCurveMultiplier(ParticleSystem system, float value);
+			private static extern float get_curveMultiplier_Injected(ref ParticleSystem.InheritVelocityModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetCurveMultiplier(ParticleSystem system);
+			private static extern void set_curveMultiplier_Injected(ref ParticleSystem.InheritVelocityModule _unity_self, float value);
 
-			private ParticleSystem m_ParticleSystem;
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct ForceOverLifetimeModule
@@ -6001,11 +5429,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ForceOverLifetimeModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.ForceOverLifetimeModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ForceOverLifetimeModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.ForceOverLifetimeModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -6013,13 +5441,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.ForceOverLifetimeModule.GetX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.ForceOverLifetimeModule.get_x_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.ForceOverLifetimeModule.SetX(this.m_ParticleSystem, ref value);
+					ParticleSystem.ForceOverLifetimeModule.set_x_Injected(ref this, ref value);
 				}
 			}
 
@@ -6027,13 +5455,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.ForceOverLifetimeModule.GetY(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.ForceOverLifetimeModule.get_y_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.ForceOverLifetimeModule.SetY(this.m_ParticleSystem, ref value);
+					ParticleSystem.ForceOverLifetimeModule.set_y_Injected(ref this, ref value);
 				}
 			}
 
@@ -6041,13 +5469,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.ForceOverLifetimeModule.GetZ(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.ForceOverLifetimeModule.get_z_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.ForceOverLifetimeModule.SetZ(this.m_ParticleSystem, ref value);
+					ParticleSystem.ForceOverLifetimeModule.set_z_Injected(ref this, ref value);
 				}
 			}
 
@@ -6055,11 +5483,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ForceOverLifetimeModule.GetXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.ForceOverLifetimeModule.get_xMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ForceOverLifetimeModule.SetXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.ForceOverLifetimeModule.set_xMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -6067,11 +5495,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ForceOverLifetimeModule.GetYMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.ForceOverLifetimeModule.get_yMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ForceOverLifetimeModule.SetYMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.ForceOverLifetimeModule.set_yMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -6079,11 +5507,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ForceOverLifetimeModule.GetZMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.ForceOverLifetimeModule.get_zMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ForceOverLifetimeModule.SetZMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.ForceOverLifetimeModule.set_zMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -6091,11 +5519,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return (!ParticleSystem.ForceOverLifetimeModule.GetWorldSpace(this.m_ParticleSystem)) ? ParticleSystemSimulationSpace.Local : ParticleSystemSimulationSpace.World;
+					return ParticleSystem.ForceOverLifetimeModule.get_space_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ForceOverLifetimeModule.SetWorldSpace(this.m_ParticleSystem, value == ParticleSystemSimulationSpace.World);
+					ParticleSystem.ForceOverLifetimeModule.set_space_Injected(ref this, value);
 				}
 			}
 
@@ -6103,87 +5531,69 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ForceOverLifetimeModule.GetRandomized(this.m_ParticleSystem);
+					return ParticleSystem.ForceOverLifetimeModule.get_randomized_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ForceOverLifetimeModule.SetRandomized(this.m_ParticleSystem, value);
+					ParticleSystem.ForceOverLifetimeModule.set_randomized_Injected(ref this, value);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_x_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_x_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_y_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_y_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_z_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_z_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetXMultiplier(ParticleSystem system, float value);
+			private static extern float get_xMultiplier_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetXMultiplier(ParticleSystem system);
+			private static extern void set_xMultiplier_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetYMultiplier(ParticleSystem system, float value);
+			private static extern float get_yMultiplier_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetYMultiplier(ParticleSystem system);
+			private static extern void set_yMultiplier_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetZMultiplier(ParticleSystem system, float value);
+			private static extern float get_zMultiplier_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetZMultiplier(ParticleSystem system);
+			private static extern void set_zMultiplier_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetWorldSpace(ParticleSystem system, bool value);
+			private static extern ParticleSystemSimulationSpace get_space_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetWorldSpace(ParticleSystem system);
+			private static extern void set_space_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self, ParticleSystemSimulationSpace value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRandomized(ParticleSystem system, bool value);
+			private static extern bool get_randomized_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetRandomized(ParticleSystem system);
+			private static extern void set_randomized_Injected(ref ParticleSystem.ForceOverLifetimeModule _unity_self, bool value);
 
-			private ParticleSystem m_ParticleSystem;
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct ColorOverLifetimeModule
@@ -6197,11 +5607,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ColorOverLifetimeModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.ColorOverLifetimeModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ColorOverLifetimeModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.ColorOverLifetimeModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -6209,33 +5619,29 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxGradient minMaxGradient = default(ParticleSystem.MinMaxGradient);
-					ParticleSystem.ColorOverLifetimeModule.GetColor(this.m_ParticleSystem, ref minMaxGradient);
+					ParticleSystem.MinMaxGradient minMaxGradient;
+					ParticleSystem.ColorOverLifetimeModule.get_color_Injected(ref this, out minMaxGradient);
 					return minMaxGradient;
 				}
 				set
 				{
-					ParticleSystem.ColorOverLifetimeModule.SetColor(this.m_ParticleSystem, ref value);
+					ParticleSystem.ColorOverLifetimeModule.set_color_Injected(ref this, ref value);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.ColorOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.ColorOverLifetimeModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetColor(ParticleSystem system, ref ParticleSystem.MinMaxGradient gradient);
+			private static extern void get_color_Injected(ref ParticleSystem.ColorOverLifetimeModule _unity_self, out ParticleSystem.MinMaxGradient ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetColor(ParticleSystem system, ref ParticleSystem.MinMaxGradient gradient);
+			private static extern void set_color_Injected(ref ParticleSystem.ColorOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxGradient value);
 
-			private ParticleSystem m_ParticleSystem;
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct ColorBySpeedModule
@@ -6249,11 +5655,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ColorBySpeedModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.ColorBySpeedModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ColorBySpeedModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.ColorBySpeedModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -6261,13 +5667,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxGradient minMaxGradient = default(ParticleSystem.MinMaxGradient);
-					ParticleSystem.ColorBySpeedModule.GetColor(this.m_ParticleSystem, ref minMaxGradient);
+					ParticleSystem.MinMaxGradient minMaxGradient;
+					ParticleSystem.ColorBySpeedModule.get_color_Injected(ref this, out minMaxGradient);
 					return minMaxGradient;
 				}
 				set
 				{
-					ParticleSystem.ColorBySpeedModule.SetColor(this.m_ParticleSystem, ref value);
+					ParticleSystem.ColorBySpeedModule.set_color_Injected(ref this, ref value);
 				}
 			}
 
@@ -6275,51 +5681,35 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ColorBySpeedModule.GetRange(this.m_ParticleSystem);
+					Vector2 vector;
+					ParticleSystem.ColorBySpeedModule.get_range_Injected(ref this, out vector);
+					return vector;
 				}
 				set
 				{
-					ParticleSystem.ColorBySpeedModule.SetRange(this.m_ParticleSystem, value);
+					ParticleSystem.ColorBySpeedModule.set_range_Injected(ref this, ref value);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.ColorBySpeedModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.ColorBySpeedModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetColor(ParticleSystem system, ref ParticleSystem.MinMaxGradient gradient);
+			private static extern void get_color_Injected(ref ParticleSystem.ColorBySpeedModule _unity_self, out ParticleSystem.MinMaxGradient ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetColor(ParticleSystem system, ref ParticleSystem.MinMaxGradient gradient);
+			private static extern void set_color_Injected(ref ParticleSystem.ColorBySpeedModule _unity_self, ref ParticleSystem.MinMaxGradient value);
 
-			private static void SetRange(ParticleSystem system, Vector2 value)
-			{
-				ParticleSystem.ColorBySpeedModule.INTERNAL_CALL_SetRange(system, ref value);
-			}
-
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_SetRange(ParticleSystem system, ref Vector2 value);
+			private static extern void get_range_Injected(ref ParticleSystem.ColorBySpeedModule _unity_self, out Vector2 ret);
 
-			private static Vector2 GetRange(ParticleSystem system)
-			{
-				Vector2 vector;
-				ParticleSystem.ColorBySpeedModule.INTERNAL_CALL_GetRange(system, out vector);
-				return vector;
-			}
-
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_GetRange(ParticleSystem system, out Vector2 value);
+			private static extern void set_range_Injected(ref ParticleSystem.ColorBySpeedModule _unity_self, ref Vector2 value);
 
-			private ParticleSystem m_ParticleSystem;
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct SizeOverLifetimeModule
@@ -6333,37 +5723,39 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SizeOverLifetimeModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.SizeOverLifetimeModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.SizeOverLifetimeModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.SizeOverLifetimeModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
+			[NativeName("X")]
 			public ParticleSystem.MinMaxCurve size
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.SizeOverLifetimeModule.GetX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.SizeOverLifetimeModule.get_size_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.SizeOverLifetimeModule.SetX(this.m_ParticleSystem, ref value);
+					ParticleSystem.SizeOverLifetimeModule.set_size_Injected(ref this, ref value);
 				}
 			}
 
+			[NativeName("XMultiplier")]
 			public float sizeMultiplier
 			{
 				get
 				{
-					return ParticleSystem.SizeOverLifetimeModule.GetXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.SizeOverLifetimeModule.get_sizeMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.SizeOverLifetimeModule.SetXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.SizeOverLifetimeModule.set_sizeMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -6371,13 +5763,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.SizeOverLifetimeModule.GetX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.SizeOverLifetimeModule.get_x_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.SizeOverLifetimeModule.SetX(this.m_ParticleSystem, ref value);
+					ParticleSystem.SizeOverLifetimeModule.set_x_Injected(ref this, ref value);
 				}
 			}
 
@@ -6385,11 +5777,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SizeOverLifetimeModule.GetXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.SizeOverLifetimeModule.get_xMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.SizeOverLifetimeModule.SetXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.SizeOverLifetimeModule.set_xMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -6397,13 +5789,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.SizeOverLifetimeModule.GetY(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.SizeOverLifetimeModule.get_y_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.SizeOverLifetimeModule.SetY(this.m_ParticleSystem, ref value);
+					ParticleSystem.SizeOverLifetimeModule.set_y_Injected(ref this, ref value);
 				}
 			}
 
@@ -6411,11 +5803,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SizeOverLifetimeModule.GetYMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.SizeOverLifetimeModule.get_yMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.SizeOverLifetimeModule.SetYMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.SizeOverLifetimeModule.set_yMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -6423,13 +5815,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.SizeOverLifetimeModule.GetZ(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.SizeOverLifetimeModule.get_z_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.SizeOverLifetimeModule.SetZ(this.m_ParticleSystem, ref value);
+					ParticleSystem.SizeOverLifetimeModule.set_z_Injected(ref this, ref value);
 				}
 			}
 
@@ -6437,11 +5829,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SizeOverLifetimeModule.GetZMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.SizeOverLifetimeModule.get_zMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.SizeOverLifetimeModule.SetZMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.SizeOverLifetimeModule.set_zMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -6449,79 +5841,75 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SizeOverLifetimeModule.GetSeparateAxes(this.m_ParticleSystem);
+					return ParticleSystem.SizeOverLifetimeModule.get_separateAxes_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.SizeOverLifetimeModule.SetSeparateAxes(this.m_ParticleSystem, value);
+					ParticleSystem.SizeOverLifetimeModule.set_separateAxes_Injected(ref this, value);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_size_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_size_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern float get_sizeMultiplier_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_sizeMultiplier_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_x_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_x_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetXMultiplier(ParticleSystem system, float value);
+			private static extern float get_xMultiplier_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetXMultiplier(ParticleSystem system);
+			private static extern void set_xMultiplier_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetYMultiplier(ParticleSystem system, float value);
+			private static extern void get_y_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetYMultiplier(ParticleSystem system);
+			private static extern void set_y_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetZMultiplier(ParticleSystem system, float value);
+			private static extern float get_yMultiplier_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetZMultiplier(ParticleSystem system);
+			private static extern void set_yMultiplier_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSeparateAxes(ParticleSystem system, bool value);
+			private static extern void get_z_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetSeparateAxes(ParticleSystem system);
+			private static extern void set_z_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			private ParticleSystem m_ParticleSystem;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_zMultiplier_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_zMultiplier_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool get_separateAxes_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_separateAxes_Injected(ref ParticleSystem.SizeOverLifetimeModule _unity_self, bool value);
+
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct SizeBySpeedModule
@@ -6535,37 +5923,39 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SizeBySpeedModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.SizeBySpeedModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.SizeBySpeedModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.SizeBySpeedModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
+			[NativeName("X")]
 			public ParticleSystem.MinMaxCurve size
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.SizeBySpeedModule.GetX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.SizeBySpeedModule.get_size_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.SizeBySpeedModule.SetX(this.m_ParticleSystem, ref value);
+					ParticleSystem.SizeBySpeedModule.set_size_Injected(ref this, ref value);
 				}
 			}
 
+			[NativeName("XMultiplier")]
 			public float sizeMultiplier
 			{
 				get
 				{
-					return ParticleSystem.SizeBySpeedModule.GetXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.SizeBySpeedModule.get_sizeMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.SizeBySpeedModule.SetXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.SizeBySpeedModule.set_sizeMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -6573,13 +5963,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.SizeBySpeedModule.GetX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.SizeBySpeedModule.get_x_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.SizeBySpeedModule.SetX(this.m_ParticleSystem, ref value);
+					ParticleSystem.SizeBySpeedModule.set_x_Injected(ref this, ref value);
 				}
 			}
 
@@ -6587,11 +5977,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SizeBySpeedModule.GetXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.SizeBySpeedModule.get_xMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.SizeBySpeedModule.SetXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.SizeBySpeedModule.set_xMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -6599,13 +5989,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.SizeBySpeedModule.GetY(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.SizeBySpeedModule.get_y_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.SizeBySpeedModule.SetY(this.m_ParticleSystem, ref value);
+					ParticleSystem.SizeBySpeedModule.set_y_Injected(ref this, ref value);
 				}
 			}
 
@@ -6613,11 +6003,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SizeBySpeedModule.GetYMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.SizeBySpeedModule.get_yMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.SizeBySpeedModule.SetYMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.SizeBySpeedModule.set_yMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -6625,13 +6015,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.SizeBySpeedModule.GetZ(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.SizeBySpeedModule.get_z_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.SizeBySpeedModule.SetZ(this.m_ParticleSystem, ref value);
+					ParticleSystem.SizeBySpeedModule.set_z_Injected(ref this, ref value);
 				}
 			}
 
@@ -6639,11 +6029,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SizeBySpeedModule.GetZMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.SizeBySpeedModule.get_zMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.SizeBySpeedModule.SetZMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.SizeBySpeedModule.set_zMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -6651,11 +6041,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SizeBySpeedModule.GetSeparateAxes(this.m_ParticleSystem);
+					return ParticleSystem.SizeBySpeedModule.get_separateAxes_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.SizeBySpeedModule.SetSeparateAxes(this.m_ParticleSystem, value);
+					ParticleSystem.SizeBySpeedModule.set_separateAxes_Injected(ref this, value);
 				}
 			}
 
@@ -6663,99 +6053,83 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.SizeBySpeedModule.GetRange(this.m_ParticleSystem);
+					Vector2 vector;
+					ParticleSystem.SizeBySpeedModule.get_range_Injected(ref this, out vector);
+					return vector;
 				}
 				set
 				{
-					ParticleSystem.SizeBySpeedModule.SetRange(this.m_ParticleSystem, value);
+					ParticleSystem.SizeBySpeedModule.set_range_Injected(ref this, ref value);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_size_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_size_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern float get_sizeMultiplier_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_sizeMultiplier_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_x_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_x_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetXMultiplier(ParticleSystem system, float value);
+			private static extern float get_xMultiplier_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetXMultiplier(ParticleSystem system);
+			private static extern void set_xMultiplier_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetYMultiplier(ParticleSystem system, float value);
+			private static extern void get_y_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetYMultiplier(ParticleSystem system);
+			private static extern void set_y_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetZMultiplier(ParticleSystem system, float value);
+			private static extern float get_yMultiplier_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetZMultiplier(ParticleSystem system);
+			private static extern void set_yMultiplier_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSeparateAxes(ParticleSystem system, bool value);
+			private static extern void get_z_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetSeparateAxes(ParticleSystem system);
+			private static extern void set_z_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			private static void SetRange(ParticleSystem system, Vector2 value)
-			{
-				ParticleSystem.SizeBySpeedModule.INTERNAL_CALL_SetRange(system, ref value);
-			}
-
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_SetRange(ParticleSystem system, ref Vector2 value);
+			private static extern float get_zMultiplier_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self);
 
-			private static Vector2 GetRange(ParticleSystem system)
-			{
-				Vector2 vector;
-				ParticleSystem.SizeBySpeedModule.INTERNAL_CALL_GetRange(system, out vector);
-				return vector;
-			}
-
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_GetRange(ParticleSystem system, out Vector2 value);
+			private static extern void set_zMultiplier_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self, float value);
 
-			private ParticleSystem m_ParticleSystem;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool get_separateAxes_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_separateAxes_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self, bool value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_range_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self, out Vector2 ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_range_Injected(ref ParticleSystem.SizeBySpeedModule _unity_self, ref Vector2 value);
+
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct RotationOverLifetimeModule
@@ -6769,11 +6143,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.RotationOverLifetimeModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.RotationOverLifetimeModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.RotationOverLifetimeModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.RotationOverLifetimeModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -6781,13 +6155,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.RotationOverLifetimeModule.GetX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.RotationOverLifetimeModule.get_x_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.RotationOverLifetimeModule.SetX(this.m_ParticleSystem, ref value);
+					ParticleSystem.RotationOverLifetimeModule.set_x_Injected(ref this, ref value);
 				}
 			}
 
@@ -6795,11 +6169,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.RotationOverLifetimeModule.GetXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.RotationOverLifetimeModule.get_xMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.RotationOverLifetimeModule.SetXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.RotationOverLifetimeModule.set_xMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -6807,13 +6181,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.RotationOverLifetimeModule.GetY(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.RotationOverLifetimeModule.get_y_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.RotationOverLifetimeModule.SetY(this.m_ParticleSystem, ref value);
+					ParticleSystem.RotationOverLifetimeModule.set_y_Injected(ref this, ref value);
 				}
 			}
 
@@ -6821,11 +6195,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.RotationOverLifetimeModule.GetYMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.RotationOverLifetimeModule.get_yMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.RotationOverLifetimeModule.SetYMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.RotationOverLifetimeModule.set_yMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -6833,13 +6207,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.RotationOverLifetimeModule.GetZ(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.RotationOverLifetimeModule.get_z_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.RotationOverLifetimeModule.SetZ(this.m_ParticleSystem, ref value);
+					ParticleSystem.RotationOverLifetimeModule.set_z_Injected(ref this, ref value);
 				}
 			}
 
@@ -6847,11 +6221,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.RotationOverLifetimeModule.GetZMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.RotationOverLifetimeModule.get_zMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.RotationOverLifetimeModule.SetZMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.RotationOverLifetimeModule.set_zMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -6859,79 +6233,63 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.RotationOverLifetimeModule.GetSeparateAxes(this.m_ParticleSystem);
+					return ParticleSystem.RotationOverLifetimeModule.get_separateAxes_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.RotationOverLifetimeModule.SetSeparateAxes(this.m_ParticleSystem, value);
+					ParticleSystem.RotationOverLifetimeModule.set_separateAxes_Injected(ref this, value);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.RotationOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.RotationOverLifetimeModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_x_Injected(ref ParticleSystem.RotationOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_x_Injected(ref ParticleSystem.RotationOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern float get_xMultiplier_Injected(ref ParticleSystem.RotationOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_xMultiplier_Injected(ref ParticleSystem.RotationOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_y_Injected(ref ParticleSystem.RotationOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_y_Injected(ref ParticleSystem.RotationOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetXMultiplier(ParticleSystem system, float value);
+			private static extern float get_yMultiplier_Injected(ref ParticleSystem.RotationOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetXMultiplier(ParticleSystem system);
+			private static extern void set_yMultiplier_Injected(ref ParticleSystem.RotationOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetYMultiplier(ParticleSystem system, float value);
+			private static extern void get_z_Injected(ref ParticleSystem.RotationOverLifetimeModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetYMultiplier(ParticleSystem system);
+			private static extern void set_z_Injected(ref ParticleSystem.RotationOverLifetimeModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetZMultiplier(ParticleSystem system, float value);
+			private static extern float get_zMultiplier_Injected(ref ParticleSystem.RotationOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetZMultiplier(ParticleSystem system);
+			private static extern void set_zMultiplier_Injected(ref ParticleSystem.RotationOverLifetimeModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSeparateAxes(ParticleSystem system, bool value);
+			private static extern bool get_separateAxes_Injected(ref ParticleSystem.RotationOverLifetimeModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetSeparateAxes(ParticleSystem system);
+			private static extern void set_separateAxes_Injected(ref ParticleSystem.RotationOverLifetimeModule _unity_self, bool value);
 
-			private ParticleSystem m_ParticleSystem;
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct RotationBySpeedModule
@@ -6945,11 +6303,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.RotationBySpeedModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.RotationBySpeedModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.RotationBySpeedModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.RotationBySpeedModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -6957,13 +6315,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.RotationBySpeedModule.GetX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.RotationBySpeedModule.get_x_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.RotationBySpeedModule.SetX(this.m_ParticleSystem, ref value);
+					ParticleSystem.RotationBySpeedModule.set_x_Injected(ref this, ref value);
 				}
 			}
 
@@ -6971,11 +6329,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.RotationBySpeedModule.GetXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.RotationBySpeedModule.get_xMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.RotationBySpeedModule.SetXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.RotationBySpeedModule.set_xMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -6983,13 +6341,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.RotationBySpeedModule.GetY(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.RotationBySpeedModule.get_y_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.RotationBySpeedModule.SetY(this.m_ParticleSystem, ref value);
+					ParticleSystem.RotationBySpeedModule.set_y_Injected(ref this, ref value);
 				}
 			}
 
@@ -6997,11 +6355,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.RotationBySpeedModule.GetYMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.RotationBySpeedModule.get_yMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.RotationBySpeedModule.SetYMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.RotationBySpeedModule.set_yMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -7009,13 +6367,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.RotationBySpeedModule.GetZ(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.RotationBySpeedModule.get_z_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.RotationBySpeedModule.SetZ(this.m_ParticleSystem, ref value);
+					ParticleSystem.RotationBySpeedModule.set_z_Injected(ref this, ref value);
 				}
 			}
 
@@ -7023,11 +6381,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.RotationBySpeedModule.GetZMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.RotationBySpeedModule.get_zMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.RotationBySpeedModule.SetZMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.RotationBySpeedModule.set_zMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -7035,11 +6393,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.RotationBySpeedModule.GetSeparateAxes(this.m_ParticleSystem);
+					return ParticleSystem.RotationBySpeedModule.get_separateAxes_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.RotationBySpeedModule.SetSeparateAxes(this.m_ParticleSystem, value);
+					ParticleSystem.RotationBySpeedModule.set_separateAxes_Injected(ref this, value);
 				}
 			}
 
@@ -7047,99 +6405,71 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.RotationBySpeedModule.GetRange(this.m_ParticleSystem);
+					Vector2 vector;
+					ParticleSystem.RotationBySpeedModule.get_range_Injected(ref this, out vector);
+					return vector;
 				}
 				set
 				{
-					ParticleSystem.RotationBySpeedModule.SetRange(this.m_ParticleSystem, value);
+					ParticleSystem.RotationBySpeedModule.set_range_Injected(ref this, ref value);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_x_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_x_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern float get_xMultiplier_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_xMultiplier_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_y_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_y_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetXMultiplier(ParticleSystem system, float value);
+			private static extern float get_yMultiplier_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetXMultiplier(ParticleSystem system);
+			private static extern void set_yMultiplier_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetYMultiplier(ParticleSystem system, float value);
+			private static extern void get_z_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetYMultiplier(ParticleSystem system);
+			private static extern void set_z_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetZMultiplier(ParticleSystem system, float value);
+			private static extern float get_zMultiplier_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetZMultiplier(ParticleSystem system);
+			private static extern void set_zMultiplier_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSeparateAxes(ParticleSystem system, bool value);
+			private static extern bool get_separateAxes_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetSeparateAxes(ParticleSystem system);
+			private static extern void set_separateAxes_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self, bool value);
 
-			private static void SetRange(ParticleSystem system, Vector2 value)
-			{
-				ParticleSystem.RotationBySpeedModule.INTERNAL_CALL_SetRange(system, ref value);
-			}
-
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_SetRange(ParticleSystem system, ref Vector2 value);
+			private static extern void get_range_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self, out Vector2 ret);
 
-			private static Vector2 GetRange(ParticleSystem system)
-			{
-				Vector2 vector;
-				ParticleSystem.RotationBySpeedModule.INTERNAL_CALL_GetRange(system, out vector);
-				return vector;
-			}
-
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void INTERNAL_CALL_GetRange(ParticleSystem system, out Vector2 value);
+			private static extern void set_range_Injected(ref ParticleSystem.RotationBySpeedModule _unity_self, ref Vector2 value);
 
-			private ParticleSystem m_ParticleSystem;
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct ExternalForcesModule
@@ -7153,11 +6483,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ExternalForcesModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.ExternalForcesModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ExternalForcesModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.ExternalForcesModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -7165,11 +6495,25 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ExternalForcesModule.GetMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.ExternalForcesModule.get_multiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ExternalForcesModule.SetMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.ExternalForcesModule.set_multiplier_Injected(ref this, value);
+				}
+			}
+
+			public ParticleSystem.MinMaxCurve multiplierCurve
+			{
+				get
+				{
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.ExternalForcesModule.get_multiplierCurve_Injected(ref this, out minMaxCurve);
+					return minMaxCurve;
+				}
+				set
+				{
+					ParticleSystem.ExternalForcesModule.set_multiplierCurve_Injected(ref this, ref value);
 				}
 			}
 
@@ -7177,11 +6521,25 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ExternalForcesModule.GetInfluenceFilter(this.m_ParticleSystem);
+					return ParticleSystem.ExternalForcesModule.get_influenceFilter_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.ExternalForcesModule.SetInfluenceFilter(this.m_ParticleSystem, value);
+					ParticleSystem.ExternalForcesModule.set_influenceFilter_Injected(ref this, value);
+				}
+			}
+
+			public LayerMask influenceMask
+			{
+				get
+				{
+					LayerMask layerMask;
+					ParticleSystem.ExternalForcesModule.get_influenceMask_Injected(ref this, out layerMask);
+					return layerMask;
+				}
+				set
+				{
+					ParticleSystem.ExternalForcesModule.set_influenceMask_Injected(ref this, ref value);
 				}
 			}
 
@@ -7189,93 +6547,105 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.ExternalForcesModule.GetInfluenceCount(this.m_ParticleSystem);
+					return ParticleSystem.ExternalForcesModule.get_influenceCount_Injected(ref this);
 				}
-			}
-
-			public void AddInfluence(ParticleSystemForceField field)
-			{
-				ParticleSystem.ExternalForcesModule.AddInfluence(this.m_ParticleSystem, field);
-			}
-
-			public void RemoveInfluence(int index)
-			{
-				ParticleSystem.ExternalForcesModule.RemoveInfluenceAtIndex(this.m_ParticleSystem, index);
-			}
-
-			public void RemoveInfluence(ParticleSystemForceField field)
-			{
-				ParticleSystem.ExternalForcesModule.RemoveInfluence(this.m_ParticleSystem, field);
-			}
-
-			public void SetInfluence(int index, ParticleSystemForceField field)
-			{
-				ParticleSystem.ExternalForcesModule.SetInfluence(this.m_ParticleSystem, index, field);
-			}
-
-			public ParticleSystemForceField GetInfluence(int index)
-			{
-				return ParticleSystem.ExternalForcesModule.GetInfluence(this.m_ParticleSystem, index);
 			}
 
 			public bool IsAffectedBy(ParticleSystemForceField field)
 			{
-				return ParticleSystem.ExternalForcesModule.IsAffectedBy_Internal(this.m_ParticleSystem, field);
+				return ParticleSystem.ExternalForcesModule.IsAffectedBy_Injected(ref this, field);
 			}
 
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool IsAffectedBy_Internal(ParticleSystem system, ParticleSystemForceField field);
+			public void AddInfluence([NotNull] ParticleSystemForceField field)
+			{
+				ParticleSystem.ExternalForcesModule.AddInfluence_Injected(ref this, field);
+			}
 
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private void RemoveInfluenceAtIndex(int index)
+			{
+				ParticleSystem.ExternalForcesModule.RemoveInfluenceAtIndex_Injected(ref this, index);
+			}
 
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			public void RemoveInfluence(int index)
+			{
+				this.RemoveInfluenceAtIndex(index);
+			}
 
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMultiplier(ParticleSystem system, float value);
+			public void RemoveInfluence([NotNull] ParticleSystemForceField field)
+			{
+				ParticleSystem.ExternalForcesModule.RemoveInfluence_Injected(ref this, field);
+			}
 
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetMultiplier(ParticleSystem system);
+			public void RemoveAllInfluences()
+			{
+				ParticleSystem.ExternalForcesModule.RemoveAllInfluences_Injected(ref this);
+			}
 
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetInfluenceFilter(ParticleSystem system, ParticleSystemGameObjectFilter value);
+			public void SetInfluence(int index, [NotNull] ParticleSystemForceField field)
+			{
+				ParticleSystem.ExternalForcesModule.SetInfluence_Injected(ref this, index, field);
+			}
 
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemGameObjectFilter GetInfluenceFilter(ParticleSystem system);
+			public ParticleSystemForceField GetInfluence(int index)
+			{
+				return ParticleSystem.ExternalForcesModule.GetInfluence_Injected(ref this, index);
+			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetInfluenceCount(ParticleSystem system);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.ExternalForcesModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void AddInfluence(ParticleSystem system, ParticleSystemForceField field);
+			private static extern void set_enabled_Injected(ref ParticleSystem.ExternalForcesModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void RemoveInfluence(ParticleSystem system, ParticleSystemForceField field);
+			private static extern float get_multiplier_Injected(ref ParticleSystem.ExternalForcesModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void RemoveInfluenceAtIndex(ParticleSystem system, int index);
+			private static extern void set_multiplier_Injected(ref ParticleSystem.ExternalForcesModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetInfluence(ParticleSystem system, int index, ParticleSystemForceField field);
+			private static extern void get_multiplierCurve_Injected(ref ParticleSystem.ExternalForcesModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemForceField GetInfluence(ParticleSystem system, int index);
+			private static extern void set_multiplierCurve_Injected(ref ParticleSystem.ExternalForcesModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			private ParticleSystem m_ParticleSystem;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern ParticleSystemGameObjectFilter get_influenceFilter_Injected(ref ParticleSystem.ExternalForcesModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_influenceFilter_Injected(ref ParticleSystem.ExternalForcesModule _unity_self, ParticleSystemGameObjectFilter value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_influenceMask_Injected(ref ParticleSystem.ExternalForcesModule _unity_self, out LayerMask ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_influenceMask_Injected(ref ParticleSystem.ExternalForcesModule _unity_self, ref LayerMask value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern int get_influenceCount_Injected(ref ParticleSystem.ExternalForcesModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool IsAffectedBy_Injected(ref ParticleSystem.ExternalForcesModule _unity_self, ParticleSystemForceField field);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void AddInfluence_Injected(ref ParticleSystem.ExternalForcesModule _unity_self, ParticleSystemForceField field);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void RemoveInfluenceAtIndex_Injected(ref ParticleSystem.ExternalForcesModule _unity_self, int index);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void RemoveInfluence_Injected(ref ParticleSystem.ExternalForcesModule _unity_self, ParticleSystemForceField field);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void RemoveAllInfluences_Injected(ref ParticleSystem.ExternalForcesModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void SetInfluence_Injected(ref ParticleSystem.ExternalForcesModule _unity_self, int index, ParticleSystemForceField field);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern ParticleSystemForceField GetInfluence_Injected(ref ParticleSystem.ExternalForcesModule _unity_self, int index);
+
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct NoiseModule
@@ -7289,11 +6659,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -7301,37 +6671,39 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetSeparateAxes(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_separateAxes_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetSeparateAxes(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_separateAxes_Injected(ref this, value);
 				}
 			}
 
+			[NativeName("StrengthX")]
 			public ParticleSystem.MinMaxCurve strength
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.NoiseModule.GetStrengthX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.NoiseModule.get_strength_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetStrengthX(this.m_ParticleSystem, ref value);
+					ParticleSystem.NoiseModule.set_strength_Injected(ref this, ref value);
 				}
 			}
 
+			[NativeName("StrengthXMultiplier")]
 			public float strengthMultiplier
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetStrengthXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_strengthMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetStrengthXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_strengthMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -7339,13 +6711,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.NoiseModule.GetStrengthX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.NoiseModule.get_strengthX_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetStrengthX(this.m_ParticleSystem, ref value);
+					ParticleSystem.NoiseModule.set_strengthX_Injected(ref this, ref value);
 				}
 			}
 
@@ -7353,11 +6725,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetStrengthXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_strengthXMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetStrengthXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_strengthXMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -7365,13 +6737,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.NoiseModule.GetStrengthY(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.NoiseModule.get_strengthY_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetStrengthY(this.m_ParticleSystem, ref value);
+					ParticleSystem.NoiseModule.set_strengthY_Injected(ref this, ref value);
 				}
 			}
 
@@ -7379,11 +6751,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetStrengthYMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_strengthYMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetStrengthYMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_strengthYMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -7391,13 +6763,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.NoiseModule.GetStrengthZ(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.NoiseModule.get_strengthZ_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetStrengthZ(this.m_ParticleSystem, ref value);
+					ParticleSystem.NoiseModule.set_strengthZ_Injected(ref this, ref value);
 				}
 			}
 
@@ -7405,11 +6777,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetStrengthZMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_strengthZMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetStrengthZMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_strengthZMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -7417,11 +6789,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetFrequency(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_frequency_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetFrequency(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_frequency_Injected(ref this, value);
 				}
 			}
 
@@ -7429,11 +6801,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetDamping(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_damping_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetDamping(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_damping_Injected(ref this, value);
 				}
 			}
 
@@ -7441,11 +6813,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetOctaveCount(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_octaveCount_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetOctaveCount(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_octaveCount_Injected(ref this, value);
 				}
 			}
 
@@ -7453,11 +6825,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetOctaveMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_octaveMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetOctaveMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_octaveMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -7465,11 +6837,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetOctaveScale(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_octaveScale_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetOctaveScale(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_octaveScale_Injected(ref this, value);
 				}
 			}
 
@@ -7477,11 +6849,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return (ParticleSystemNoiseQuality)ParticleSystem.NoiseModule.GetQuality(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_quality_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetQuality(this.m_ParticleSystem, (int)value);
+					ParticleSystem.NoiseModule.set_quality_Injected(ref this, value);
 				}
 			}
 
@@ -7489,13 +6861,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.NoiseModule.GetScrollSpeed(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.NoiseModule.get_scrollSpeed_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetScrollSpeed(this.m_ParticleSystem, ref value);
+					ParticleSystem.NoiseModule.set_scrollSpeed_Injected(ref this, ref value);
 				}
 			}
 
@@ -7503,11 +6875,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetScrollSpeedMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_scrollSpeedMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetScrollSpeedMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_scrollSpeedMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -7515,37 +6887,39 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetRemapEnabled(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_remapEnabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetRemapEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_remapEnabled_Injected(ref this, value);
 				}
 			}
 
+			[NativeName("RemapX")]
 			public ParticleSystem.MinMaxCurve remap
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.NoiseModule.GetRemapX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.NoiseModule.get_remap_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetRemapX(this.m_ParticleSystem, ref value);
+					ParticleSystem.NoiseModule.set_remap_Injected(ref this, ref value);
 				}
 			}
 
+			[NativeName("RemapXMultiplier")]
 			public float remapMultiplier
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetRemapXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_remapMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetRemapXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_remapMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -7553,13 +6927,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.NoiseModule.GetRemapX(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.NoiseModule.get_remapX_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetRemapX(this.m_ParticleSystem, ref value);
+					ParticleSystem.NoiseModule.set_remapX_Injected(ref this, ref value);
 				}
 			}
 
@@ -7567,11 +6941,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetRemapXMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_remapXMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetRemapXMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_remapXMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -7579,13 +6953,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.NoiseModule.GetRemapY(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.NoiseModule.get_remapY_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetRemapY(this.m_ParticleSystem, ref value);
+					ParticleSystem.NoiseModule.set_remapY_Injected(ref this, ref value);
 				}
 			}
 
@@ -7593,11 +6967,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetRemapYMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_remapYMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetRemapYMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_remapYMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -7605,13 +6979,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.NoiseModule.GetRemapZ(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.NoiseModule.get_remapZ_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetRemapZ(this.m_ParticleSystem, ref value);
+					ParticleSystem.NoiseModule.set_remapZ_Injected(ref this, ref value);
 				}
 			}
 
@@ -7619,11 +6993,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.NoiseModule.GetRemapZMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.NoiseModule.get_remapZMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetRemapZMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.NoiseModule.set_remapZMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -7631,13 +7005,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.NoiseModule.GetPositionAmount(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.NoiseModule.get_positionAmount_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetPositionAmount(this.m_ParticleSystem, ref value);
+					ParticleSystem.NoiseModule.set_positionAmount_Injected(ref this, ref value);
 				}
 			}
 
@@ -7645,13 +7019,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.NoiseModule.GetRotationAmount(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.NoiseModule.get_rotationAmount_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetRotationAmount(this.m_ParticleSystem, ref value);
+					ParticleSystem.NoiseModule.set_rotationAmount_Injected(ref this, ref value);
 				}
 			}
 
@@ -7659,225 +7033,657 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.NoiseModule.GetSizeAmount(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.NoiseModule.get_sizeAmount_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.NoiseModule.SetSizeAmount(this.m_ParticleSystem, ref value);
+					ParticleSystem.NoiseModule.set_sizeAmount_Injected(ref this, ref value);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.NoiseModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSeparateAxes(ParticleSystem system, bool value);
+			private static extern bool get_separateAxes_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetSeparateAxes(ParticleSystem system);
+			private static extern void set_separateAxes_Injected(ref ParticleSystem.NoiseModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStrengthX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_strength_Injected(ref ParticleSystem.NoiseModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetStrengthX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_strength_Injected(ref ParticleSystem.NoiseModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStrengthY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern float get_strengthMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetStrengthY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_strengthMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStrengthZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_strengthX_Injected(ref ParticleSystem.NoiseModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetStrengthZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_strengthX_Injected(ref ParticleSystem.NoiseModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStrengthXMultiplier(ParticleSystem system, float value);
+			private static extern float get_strengthXMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetStrengthXMultiplier(ParticleSystem system);
+			private static extern void set_strengthXMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStrengthYMultiplier(ParticleSystem system, float value);
+			private static extern void get_strengthY_Injected(ref ParticleSystem.NoiseModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetStrengthYMultiplier(ParticleSystem system);
+			private static extern void set_strengthY_Injected(ref ParticleSystem.NoiseModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetStrengthZMultiplier(ParticleSystem system, float value);
+			private static extern float get_strengthYMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetStrengthZMultiplier(ParticleSystem system);
+			private static extern void set_strengthYMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetFrequency(ParticleSystem system, float value);
+			private static extern void get_strengthZ_Injected(ref ParticleSystem.NoiseModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetFrequency(ParticleSystem system);
+			private static extern void set_strengthZ_Injected(ref ParticleSystem.NoiseModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetDamping(ParticleSystem system, bool value);
+			private static extern float get_strengthZMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetDamping(ParticleSystem system);
+			private static extern void set_strengthZMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetOctaveCount(ParticleSystem system, int value);
+			private static extern float get_frequency_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetOctaveCount(ParticleSystem system);
+			private static extern void set_frequency_Injected(ref ParticleSystem.NoiseModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetOctaveMultiplier(ParticleSystem system, float value);
+			private static extern bool get_damping_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetOctaveMultiplier(ParticleSystem system);
+			private static extern void set_damping_Injected(ref ParticleSystem.NoiseModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetOctaveScale(ParticleSystem system, float value);
+			private static extern int get_octaveCount_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetOctaveScale(ParticleSystem system);
+			private static extern void set_octaveCount_Injected(ref ParticleSystem.NoiseModule _unity_self, int value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetQuality(ParticleSystem system, int value);
+			private static extern float get_octaveMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetQuality(ParticleSystem system);
+			private static extern void set_octaveMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetScrollSpeed(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern float get_octaveScale_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetScrollSpeed(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_octaveScale_Injected(ref ParticleSystem.NoiseModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetScrollSpeedMultiplier(ParticleSystem system, float value);
+			private static extern ParticleSystemNoiseQuality get_quality_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetScrollSpeedMultiplier(ParticleSystem system);
+			private static extern void set_quality_Injected(ref ParticleSystem.NoiseModule _unity_self, ParticleSystemNoiseQuality value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRemapEnabled(ParticleSystem system, bool value);
+			private static extern void get_scrollSpeed_Injected(ref ParticleSystem.NoiseModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetRemapEnabled(ParticleSystem system);
+			private static extern void set_scrollSpeed_Injected(ref ParticleSystem.NoiseModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRemapX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern float get_scrollSpeedMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetRemapX(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_scrollSpeedMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRemapY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern bool get_remapEnabled_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetRemapY(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_remapEnabled_Injected(ref ParticleSystem.NoiseModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRemapZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_remap_Injected(ref ParticleSystem.NoiseModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetRemapZ(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_remap_Injected(ref ParticleSystem.NoiseModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRemapXMultiplier(ParticleSystem system, float value);
+			private static extern float get_remapMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRemapXMultiplier(ParticleSystem system);
+			private static extern void set_remapMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRemapYMultiplier(ParticleSystem system, float value);
+			private static extern void get_remapX_Injected(ref ParticleSystem.NoiseModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRemapYMultiplier(ParticleSystem system);
+			private static extern void set_remapX_Injected(ref ParticleSystem.NoiseModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRemapZMultiplier(ParticleSystem system, float value);
+			private static extern float get_remapXMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRemapZMultiplier(ParticleSystem system);
+			private static extern void set_remapXMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetPositionAmount(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_remapY_Injected(ref ParticleSystem.NoiseModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetPositionAmount(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_remapY_Injected(ref ParticleSystem.NoiseModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRotationAmount(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern float get_remapYMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetRotationAmount(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_remapYMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSizeAmount(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_remapZ_Injected(ref ParticleSystem.NoiseModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetSizeAmount(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_remapZ_Injected(ref ParticleSystem.NoiseModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			private ParticleSystem m_ParticleSystem;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_remapZMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_remapZMultiplier_Injected(ref ParticleSystem.NoiseModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_positionAmount_Injected(ref ParticleSystem.NoiseModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_positionAmount_Injected(ref ParticleSystem.NoiseModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_rotationAmount_Injected(ref ParticleSystem.NoiseModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_rotationAmount_Injected(ref ParticleSystem.NoiseModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_sizeAmount_Injected(ref ParticleSystem.NoiseModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_sizeAmount_Injected(ref ParticleSystem.NoiseModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			internal ParticleSystem m_ParticleSystem;
+		}
+
+		public struct CollisionModule
+		{
+			internal CollisionModule(ParticleSystem particleSystem)
+			{
+				this.m_ParticleSystem = particleSystem;
+			}
+
+			public bool enabled
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_enabled_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_enabled_Injected(ref this, value);
+				}
+			}
+
+			public ParticleSystemCollisionType type
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_type_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_type_Injected(ref this, value);
+				}
+			}
+
+			public ParticleSystemCollisionMode mode
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_mode_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_mode_Injected(ref this, value);
+				}
+			}
+
+			public ParticleSystem.MinMaxCurve dampen
+			{
+				get
+				{
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.CollisionModule.get_dampen_Injected(ref this, out minMaxCurve);
+					return minMaxCurve;
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_dampen_Injected(ref this, ref value);
+				}
+			}
+
+			public float dampenMultiplier
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_dampenMultiplier_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_dampenMultiplier_Injected(ref this, value);
+				}
+			}
+
+			public ParticleSystem.MinMaxCurve bounce
+			{
+				get
+				{
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.CollisionModule.get_bounce_Injected(ref this, out minMaxCurve);
+					return minMaxCurve;
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_bounce_Injected(ref this, ref value);
+				}
+			}
+
+			public float bounceMultiplier
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_bounceMultiplier_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_bounceMultiplier_Injected(ref this, value);
+				}
+			}
+
+			public ParticleSystem.MinMaxCurve lifetimeLoss
+			{
+				get
+				{
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.CollisionModule.get_lifetimeLoss_Injected(ref this, out minMaxCurve);
+					return minMaxCurve;
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_lifetimeLoss_Injected(ref this, ref value);
+				}
+			}
+
+			public float lifetimeLossMultiplier
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_lifetimeLossMultiplier_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_lifetimeLossMultiplier_Injected(ref this, value);
+				}
+			}
+
+			public float minKillSpeed
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_minKillSpeed_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_minKillSpeed_Injected(ref this, value);
+				}
+			}
+
+			public float maxKillSpeed
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_maxKillSpeed_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_maxKillSpeed_Injected(ref this, value);
+				}
+			}
+
+			public LayerMask collidesWith
+			{
+				get
+				{
+					LayerMask layerMask;
+					ParticleSystem.CollisionModule.get_collidesWith_Injected(ref this, out layerMask);
+					return layerMask;
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_collidesWith_Injected(ref this, ref value);
+				}
+			}
+
+			public bool enableDynamicColliders
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_enableDynamicColliders_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_enableDynamicColliders_Injected(ref this, value);
+				}
+			}
+
+			public int maxCollisionShapes
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_maxCollisionShapes_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_maxCollisionShapes_Injected(ref this, value);
+				}
+			}
+
+			public ParticleSystemCollisionQuality quality
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_quality_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_quality_Injected(ref this, value);
+				}
+			}
+
+			public float voxelSize
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_voxelSize_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_voxelSize_Injected(ref this, value);
+				}
+			}
+
+			public float radiusScale
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_radiusScale_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_radiusScale_Injected(ref this, value);
+				}
+			}
+
+			public bool sendCollisionMessages
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_sendCollisionMessages_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_sendCollisionMessages_Injected(ref this, value);
+				}
+			}
+
+			public float colliderForce
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_colliderForce_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_colliderForce_Injected(ref this, value);
+				}
+			}
+
+			public bool multiplyColliderForceByCollisionAngle
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_multiplyColliderForceByCollisionAngle_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_multiplyColliderForceByCollisionAngle_Injected(ref this, value);
+				}
+			}
+
+			public bool multiplyColliderForceByParticleSpeed
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_multiplyColliderForceByParticleSpeed_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_multiplyColliderForceByParticleSpeed_Injected(ref this, value);
+				}
+			}
+
+			public bool multiplyColliderForceByParticleSize
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_multiplyColliderForceByParticleSize_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_multiplyColliderForceByParticleSize_Injected(ref this, value);
+				}
+			}
+
+			public void SetPlane(int index, Transform transform)
+			{
+				ParticleSystem.CollisionModule.SetPlane_Injected(ref this, index, transform);
+			}
+
+			public Transform GetPlane(int index)
+			{
+				return ParticleSystem.CollisionModule.GetPlane_Injected(ref this, index);
+			}
+
+			public int maxPlaneCount
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_maxPlaneCount_Injected(ref this);
+				}
+			}
+
+			[Obsolete("enableInteriorCollisions property is deprecated and is no longer required and has no effect on the particle system.", false)]
+			public bool enableInteriorCollisions
+			{
+				get
+				{
+					return ParticleSystem.CollisionModule.get_enableInteriorCollisions_Injected(ref this);
+				}
+				set
+				{
+					ParticleSystem.CollisionModule.set_enableInteriorCollisions_Injected(ref this, value);
+				}
+			}
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool get_enabled_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_enabled_Injected(ref ParticleSystem.CollisionModule _unity_self, bool value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern ParticleSystemCollisionType get_type_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_type_Injected(ref ParticleSystem.CollisionModule _unity_self, ParticleSystemCollisionType value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern ParticleSystemCollisionMode get_mode_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_mode_Injected(ref ParticleSystem.CollisionModule _unity_self, ParticleSystemCollisionMode value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_dampen_Injected(ref ParticleSystem.CollisionModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_dampen_Injected(ref ParticleSystem.CollisionModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_dampenMultiplier_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_dampenMultiplier_Injected(ref ParticleSystem.CollisionModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_bounce_Injected(ref ParticleSystem.CollisionModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_bounce_Injected(ref ParticleSystem.CollisionModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_bounceMultiplier_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_bounceMultiplier_Injected(ref ParticleSystem.CollisionModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_lifetimeLoss_Injected(ref ParticleSystem.CollisionModule _unity_self, out ParticleSystem.MinMaxCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_lifetimeLoss_Injected(ref ParticleSystem.CollisionModule _unity_self, ref ParticleSystem.MinMaxCurve value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_lifetimeLossMultiplier_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_lifetimeLossMultiplier_Injected(ref ParticleSystem.CollisionModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_minKillSpeed_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_minKillSpeed_Injected(ref ParticleSystem.CollisionModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_maxKillSpeed_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_maxKillSpeed_Injected(ref ParticleSystem.CollisionModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void get_collidesWith_Injected(ref ParticleSystem.CollisionModule _unity_self, out LayerMask ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_collidesWith_Injected(ref ParticleSystem.CollisionModule _unity_self, ref LayerMask value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool get_enableDynamicColliders_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_enableDynamicColliders_Injected(ref ParticleSystem.CollisionModule _unity_self, bool value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern int get_maxCollisionShapes_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_maxCollisionShapes_Injected(ref ParticleSystem.CollisionModule _unity_self, int value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern ParticleSystemCollisionQuality get_quality_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_quality_Injected(ref ParticleSystem.CollisionModule _unity_self, ParticleSystemCollisionQuality value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_voxelSize_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_voxelSize_Injected(ref ParticleSystem.CollisionModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_radiusScale_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_radiusScale_Injected(ref ParticleSystem.CollisionModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool get_sendCollisionMessages_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_sendCollisionMessages_Injected(ref ParticleSystem.CollisionModule _unity_self, bool value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern float get_colliderForce_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_colliderForce_Injected(ref ParticleSystem.CollisionModule _unity_self, float value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool get_multiplyColliderForceByCollisionAngle_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_multiplyColliderForceByCollisionAngle_Injected(ref ParticleSystem.CollisionModule _unity_self, bool value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool get_multiplyColliderForceByParticleSpeed_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_multiplyColliderForceByParticleSpeed_Injected(ref ParticleSystem.CollisionModule _unity_self, bool value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool get_multiplyColliderForceByParticleSize_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_multiplyColliderForceByParticleSize_Injected(ref ParticleSystem.CollisionModule _unity_self, bool value);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void SetPlane_Injected(ref ParticleSystem.CollisionModule _unity_self, int index, Transform transform);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern Transform GetPlane_Injected(ref ParticleSystem.CollisionModule _unity_self, int index);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern int get_maxPlaneCount_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool get_enableInteriorCollisions_Injected(ref ParticleSystem.CollisionModule _unity_self);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void set_enableInteriorCollisions_Injected(ref ParticleSystem.CollisionModule _unity_self, bool value);
+
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct TriggerModule
@@ -7891,11 +7697,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TriggerModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.TriggerModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TriggerModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.TriggerModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -7903,11 +7709,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TriggerModule.GetInside(this.m_ParticleSystem);
+					return ParticleSystem.TriggerModule.get_inside_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TriggerModule.SetInside(this.m_ParticleSystem, value);
+					ParticleSystem.TriggerModule.set_inside_Injected(ref this, value);
 				}
 			}
 
@@ -7915,11 +7721,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TriggerModule.GetOutside(this.m_ParticleSystem);
+					return ParticleSystem.TriggerModule.get_outside_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TriggerModule.SetOutside(this.m_ParticleSystem, value);
+					ParticleSystem.TriggerModule.set_outside_Injected(ref this, value);
 				}
 			}
 
@@ -7927,11 +7733,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TriggerModule.GetEnter(this.m_ParticleSystem);
+					return ParticleSystem.TriggerModule.get_enter_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TriggerModule.SetEnter(this.m_ParticleSystem, value);
+					ParticleSystem.TriggerModule.set_enter_Injected(ref this, value);
 				}
 			}
 
@@ -7939,11 +7745,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TriggerModule.GetExit(this.m_ParticleSystem);
+					return ParticleSystem.TriggerModule.get_exit_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TriggerModule.SetExit(this.m_ParticleSystem, value);
+					ParticleSystem.TriggerModule.set_exit_Injected(ref this, value);
 				}
 			}
 
@@ -7951,93 +7757,78 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TriggerModule.GetRadiusScale(this.m_ParticleSystem);
+					return ParticleSystem.TriggerModule.get_radiusScale_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TriggerModule.SetRadiusScale(this.m_ParticleSystem, value);
+					ParticleSystem.TriggerModule.set_radiusScale_Injected(ref this, value);
 				}
 			}
 
 			public void SetCollider(int index, Component collider)
 			{
-				ParticleSystem.TriggerModule.SetCollider(this.m_ParticleSystem, index, collider);
+				ParticleSystem.TriggerModule.SetCollider_Injected(ref this, index, collider);
 			}
 
 			public Component GetCollider(int index)
 			{
-				return ParticleSystem.TriggerModule.GetCollider(this.m_ParticleSystem, index);
+				return ParticleSystem.TriggerModule.GetCollider_Injected(ref this, index);
 			}
 
 			public int maxColliderCount
 			{
 				get
 				{
-					return ParticleSystem.TriggerModule.GetMaxColliderCount(this.m_ParticleSystem);
+					return ParticleSystem.TriggerModule.get_maxColliderCount_Injected(ref this);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.TriggerModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.TriggerModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetInside(ParticleSystem system, ParticleSystemOverlapAction value);
+			private static extern ParticleSystemOverlapAction get_inside_Injected(ref ParticleSystem.TriggerModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemOverlapAction GetInside(ParticleSystem system);
+			private static extern void set_inside_Injected(ref ParticleSystem.TriggerModule _unity_self, ParticleSystemOverlapAction value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetOutside(ParticleSystem system, ParticleSystemOverlapAction value);
+			private static extern ParticleSystemOverlapAction get_outside_Injected(ref ParticleSystem.TriggerModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemOverlapAction GetOutside(ParticleSystem system);
+			private static extern void set_outside_Injected(ref ParticleSystem.TriggerModule _unity_self, ParticleSystemOverlapAction value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnter(ParticleSystem system, ParticleSystemOverlapAction value);
+			private static extern ParticleSystemOverlapAction get_enter_Injected(ref ParticleSystem.TriggerModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemOverlapAction GetEnter(ParticleSystem system);
+			private static extern void set_enter_Injected(ref ParticleSystem.TriggerModule _unity_self, ParticleSystemOverlapAction value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetExit(ParticleSystem system, ParticleSystemOverlapAction value);
+			private static extern ParticleSystemOverlapAction get_exit_Injected(ref ParticleSystem.TriggerModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemOverlapAction GetExit(ParticleSystem system);
+			private static extern void set_exit_Injected(ref ParticleSystem.TriggerModule _unity_self, ParticleSystemOverlapAction value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRadiusScale(ParticleSystem system, float value);
+			private static extern float get_radiusScale_Injected(ref ParticleSystem.TriggerModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRadiusScale(ParticleSystem system);
+			private static extern void set_radiusScale_Injected(ref ParticleSystem.TriggerModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetCollider(ParticleSystem system, int index, Component collider);
+			private static extern void SetCollider_Injected(ref ParticleSystem.TriggerModule _unity_self, int index, Component collider);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern Component GetCollider(ParticleSystem system, int index);
+			private static extern Component GetCollider_Injected(ref ParticleSystem.TriggerModule _unity_self, int index);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetMaxColliderCount(ParticleSystem system);
+			private static extern int get_maxColliderCount_Injected(ref ParticleSystem.TriggerModule _unity_self);
 
-			private ParticleSystem m_ParticleSystem;
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct LightsModule
@@ -8051,11 +7842,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LightsModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.LightsModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LightsModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.LightsModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -8063,11 +7854,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LightsModule.GetRatio(this.m_ParticleSystem);
+					return ParticleSystem.LightsModule.get_ratio_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LightsModule.SetRatio(this.m_ParticleSystem, value);
+					ParticleSystem.LightsModule.set_ratio_Injected(ref this, value);
 				}
 			}
 
@@ -8075,11 +7866,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LightsModule.GetUseRandomDistribution(this.m_ParticleSystem);
+					return ParticleSystem.LightsModule.get_useRandomDistribution_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LightsModule.SetUseRandomDistribution(this.m_ParticleSystem, value);
+					ParticleSystem.LightsModule.set_useRandomDistribution_Injected(ref this, value);
 				}
 			}
 
@@ -8087,11 +7878,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LightsModule.GetLightPrefab(this.m_ParticleSystem);
+					return ParticleSystem.LightsModule.get_light_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LightsModule.SetLightPrefab(this.m_ParticleSystem, value);
+					ParticleSystem.LightsModule.set_light_Injected(ref this, value);
 				}
 			}
 
@@ -8099,11 +7890,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LightsModule.GetUseParticleColor(this.m_ParticleSystem);
+					return ParticleSystem.LightsModule.get_useParticleColor_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LightsModule.SetUseParticleColor(this.m_ParticleSystem, value);
+					ParticleSystem.LightsModule.set_useParticleColor_Injected(ref this, value);
 				}
 			}
 
@@ -8111,11 +7902,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LightsModule.GetSizeAffectsRange(this.m_ParticleSystem);
+					return ParticleSystem.LightsModule.get_sizeAffectsRange_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LightsModule.SetSizeAffectsRange(this.m_ParticleSystem, value);
+					ParticleSystem.LightsModule.set_sizeAffectsRange_Injected(ref this, value);
 				}
 			}
 
@@ -8123,11 +7914,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LightsModule.GetAlphaAffectsIntensity(this.m_ParticleSystem);
+					return ParticleSystem.LightsModule.get_alphaAffectsIntensity_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LightsModule.SetAlphaAffectsIntensity(this.m_ParticleSystem, value);
+					ParticleSystem.LightsModule.set_alphaAffectsIntensity_Injected(ref this, value);
 				}
 			}
 
@@ -8135,13 +7926,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.LightsModule.GetRange(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.LightsModule.get_range_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.LightsModule.SetRange(this.m_ParticleSystem, ref value);
+					ParticleSystem.LightsModule.set_range_Injected(ref this, ref value);
 				}
 			}
 
@@ -8149,11 +7940,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LightsModule.GetRangeMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.LightsModule.get_rangeMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LightsModule.SetRangeMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.LightsModule.set_rangeMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -8161,13 +7952,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.LightsModule.GetIntensity(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.LightsModule.get_intensity_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.LightsModule.SetIntensity(this.m_ParticleSystem, ref value);
+					ParticleSystem.LightsModule.set_intensity_Injected(ref this, ref value);
 				}
 			}
 
@@ -8175,11 +7966,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LightsModule.GetIntensityMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.LightsModule.get_intensityMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LightsModule.SetIntensityMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.LightsModule.set_intensityMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -8187,111 +7978,87 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.LightsModule.GetMaxLights(this.m_ParticleSystem);
+					return ParticleSystem.LightsModule.get_maxLights_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.LightsModule.SetMaxLights(this.m_ParticleSystem, value);
+					ParticleSystem.LightsModule.set_maxLights_Injected(ref this, value);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.LightsModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.LightsModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRatio(ParticleSystem system, float value);
+			private static extern float get_ratio_Injected(ref ParticleSystem.LightsModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRatio(ParticleSystem system);
+			private static extern void set_ratio_Injected(ref ParticleSystem.LightsModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetUseRandomDistribution(ParticleSystem system, bool value);
+			private static extern bool get_useRandomDistribution_Injected(ref ParticleSystem.LightsModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetUseRandomDistribution(ParticleSystem system);
+			private static extern void set_useRandomDistribution_Injected(ref ParticleSystem.LightsModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetLightPrefab(ParticleSystem system, Light value);
+			private static extern Light get_light_Injected(ref ParticleSystem.LightsModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern Light GetLightPrefab(ParticleSystem system);
+			private static extern void set_light_Injected(ref ParticleSystem.LightsModule _unity_self, Light value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetUseParticleColor(ParticleSystem system, bool value);
+			private static extern bool get_useParticleColor_Injected(ref ParticleSystem.LightsModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetUseParticleColor(ParticleSystem system);
+			private static extern void set_useParticleColor_Injected(ref ParticleSystem.LightsModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSizeAffectsRange(ParticleSystem system, bool value);
+			private static extern bool get_sizeAffectsRange_Injected(ref ParticleSystem.LightsModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetSizeAffectsRange(ParticleSystem system);
+			private static extern void set_sizeAffectsRange_Injected(ref ParticleSystem.LightsModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetAlphaAffectsIntensity(ParticleSystem system, bool value);
+			private static extern bool get_alphaAffectsIntensity_Injected(ref ParticleSystem.LightsModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetAlphaAffectsIntensity(ParticleSystem system);
+			private static extern void set_alphaAffectsIntensity_Injected(ref ParticleSystem.LightsModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRange(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_range_Injected(ref ParticleSystem.LightsModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetRange(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_range_Injected(ref ParticleSystem.LightsModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRangeMultiplier(ParticleSystem system, float value);
+			private static extern float get_rangeMultiplier_Injected(ref ParticleSystem.LightsModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRangeMultiplier(ParticleSystem system);
+			private static extern void set_rangeMultiplier_Injected(ref ParticleSystem.LightsModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetIntensity(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_intensity_Injected(ref ParticleSystem.LightsModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetIntensity(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_intensity_Injected(ref ParticleSystem.LightsModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetIntensityMultiplier(ParticleSystem system, float value);
+			private static extern float get_intensityMultiplier_Injected(ref ParticleSystem.LightsModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetIntensityMultiplier(ParticleSystem system);
+			private static extern void set_intensityMultiplier_Injected(ref ParticleSystem.LightsModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMaxLights(ParticleSystem system, int value);
+			private static extern int get_maxLights_Injected(ref ParticleSystem.LightsModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetMaxLights(ParticleSystem system);
+			private static extern void set_maxLights_Injected(ref ParticleSystem.LightsModule _unity_self, int value);
 
-			private ParticleSystem m_ParticleSystem;
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct TrailModule
@@ -8305,11 +8072,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
@@ -8317,11 +8084,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetMode(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_mode_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetMode(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_mode_Injected(ref this, value);
 				}
 			}
 
@@ -8329,11 +8096,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetRatio(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_ratio_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetRatio(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_ratio_Injected(ref this, value);
 				}
 			}
 
@@ -8341,13 +8108,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.TrailModule.GetLifetime(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.TrailModule.get_lifetime_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetLifetime(this.m_ParticleSystem, ref value);
+					ParticleSystem.TrailModule.set_lifetime_Injected(ref this, ref value);
 				}
 			}
 
@@ -8355,11 +8122,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetLifetimeMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_lifetimeMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetLifetimeMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_lifetimeMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -8367,11 +8134,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetMinVertexDistance(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_minVertexDistance_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetMinVertexDistance(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_minVertexDistance_Injected(ref this, value);
 				}
 			}
 
@@ -8379,11 +8146,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetTextureMode(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_textureMode_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetTextureMode(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_textureMode_Injected(ref this, value);
 				}
 			}
 
@@ -8391,11 +8158,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetWorldSpace(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_worldSpace_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetWorldSpace(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_worldSpace_Injected(ref this, value);
 				}
 			}
 
@@ -8403,11 +8170,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetDieWithParticles(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_dieWithParticles_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetDieWithParticles(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_dieWithParticles_Injected(ref this, value);
 				}
 			}
 
@@ -8415,11 +8182,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetSizeAffectsWidth(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_sizeAffectsWidth_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetSizeAffectsWidth(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_sizeAffectsWidth_Injected(ref this, value);
 				}
 			}
 
@@ -8427,11 +8194,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetSizeAffectsLifetime(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_sizeAffectsLifetime_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetSizeAffectsLifetime(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_sizeAffectsLifetime_Injected(ref this, value);
 				}
 			}
 
@@ -8439,11 +8206,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetInheritParticleColor(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_inheritParticleColor_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetInheritParticleColor(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_inheritParticleColor_Injected(ref this, value);
 				}
 			}
 
@@ -8451,13 +8218,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxGradient minMaxGradient = default(ParticleSystem.MinMaxGradient);
-					ParticleSystem.TrailModule.GetColorOverLifetime(this.m_ParticleSystem, ref minMaxGradient);
+					ParticleSystem.MinMaxGradient minMaxGradient;
+					ParticleSystem.TrailModule.get_colorOverLifetime_Injected(ref this, out minMaxGradient);
 					return minMaxGradient;
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetColorOverLifetime(this.m_ParticleSystem, ref value);
+					ParticleSystem.TrailModule.set_colorOverLifetime_Injected(ref this, ref value);
 				}
 			}
 
@@ -8465,13 +8232,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-					ParticleSystem.TrailModule.GetWidthOverTrail(this.m_ParticleSystem, ref minMaxCurve);
+					ParticleSystem.MinMaxCurve minMaxCurve;
+					ParticleSystem.TrailModule.get_widthOverTrail_Injected(ref this, out minMaxCurve);
 					return minMaxCurve;
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetWidthOverTrail(this.m_ParticleSystem, ref value);
+					ParticleSystem.TrailModule.set_widthOverTrail_Injected(ref this, ref value);
 				}
 			}
 
@@ -8479,11 +8246,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetWidthOverTrailMultiplier(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_widthOverTrailMultiplier_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetWidthOverTrailMultiplier(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_widthOverTrailMultiplier_Injected(ref this, value);
 				}
 			}
 
@@ -8491,13 +8258,13 @@ namespace UnityEngine
 			{
 				get
 				{
-					ParticleSystem.MinMaxGradient minMaxGradient = default(ParticleSystem.MinMaxGradient);
-					ParticleSystem.TrailModule.GetColorOverTrail(this.m_ParticleSystem, ref minMaxGradient);
+					ParticleSystem.MinMaxGradient minMaxGradient;
+					ParticleSystem.TrailModule.get_colorOverTrail_Injected(ref this, out minMaxGradient);
 					return minMaxGradient;
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetColorOverTrail(this.m_ParticleSystem, ref value);
+					ParticleSystem.TrailModule.set_colorOverTrail_Injected(ref this, ref value);
 				}
 			}
 
@@ -8505,11 +8272,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetGenerateLightingData(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_generateLightingData_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetGenerateLightingData(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_generateLightingData_Injected(ref this, value);
 				}
 			}
 
@@ -8517,11 +8284,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetRibbonCount(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_ribbonCount_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetRibbonCount(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_ribbonCount_Injected(ref this, value);
 				}
 			}
 
@@ -8529,11 +8296,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetShadowBias(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_shadowBias_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetShadowBias(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_shadowBias_Injected(ref this, value);
 				}
 			}
 
@@ -8541,11 +8308,11 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetSplitSubEmitterRibbons(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_splitSubEmitterRibbons_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetSplitSubEmitterRibbons(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_splitSubEmitterRibbons_Injected(ref this, value);
 				}
 			}
 
@@ -8553,183 +8320,141 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.TrailModule.GetAttachRibbonsToTransform(this.m_ParticleSystem);
+					return ParticleSystem.TrailModule.get_attachRibbonsToTransform_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.TrailModule.SetAttachRibbonsToTransform(this.m_ParticleSystem, value);
+					ParticleSystem.TrailModule.set_attachRibbonsToTransform_Injected(ref this, value);
 				}
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.TrailModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMode(ParticleSystem system, ParticleSystemTrailMode value);
+			private static extern ParticleSystemTrailMode get_mode_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemTrailMode GetMode(ParticleSystem system);
+			private static extern void set_mode_Injected(ref ParticleSystem.TrailModule _unity_self, ParticleSystemTrailMode value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRatio(ParticleSystem system, float value);
+			private static extern float get_ratio_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetRatio(ParticleSystem system);
+			private static extern void set_ratio_Injected(ref ParticleSystem.TrailModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetLifetime(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_lifetime_Injected(ref ParticleSystem.TrailModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetLifetime(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_lifetime_Injected(ref ParticleSystem.TrailModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetLifetimeMultiplier(ParticleSystem system, float value);
+			private static extern float get_lifetimeMultiplier_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetLifetimeMultiplier(ParticleSystem system);
+			private static extern void set_lifetimeMultiplier_Injected(ref ParticleSystem.TrailModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMinVertexDistance(ParticleSystem system, float value);
+			private static extern float get_minVertexDistance_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetMinVertexDistance(ParticleSystem system);
+			private static extern void set_minVertexDistance_Injected(ref ParticleSystem.TrailModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetTextureMode(ParticleSystem system, ParticleSystemTrailTextureMode value);
+			private static extern ParticleSystemTrailTextureMode get_textureMode_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemTrailTextureMode GetTextureMode(ParticleSystem system);
+			private static extern void set_textureMode_Injected(ref ParticleSystem.TrailModule _unity_self, ParticleSystemTrailTextureMode value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetWorldSpace(ParticleSystem system, bool value);
+			private static extern bool get_worldSpace_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetWorldSpace(ParticleSystem system);
+			private static extern void set_worldSpace_Injected(ref ParticleSystem.TrailModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetDieWithParticles(ParticleSystem system, bool value);
+			private static extern bool get_dieWithParticles_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetDieWithParticles(ParticleSystem system);
+			private static extern void set_dieWithParticles_Injected(ref ParticleSystem.TrailModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSizeAffectsWidth(ParticleSystem system, bool value);
+			private static extern bool get_sizeAffectsWidth_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetSizeAffectsWidth(ParticleSystem system);
+			private static extern void set_sizeAffectsWidth_Injected(ref ParticleSystem.TrailModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSizeAffectsLifetime(ParticleSystem system, bool value);
+			private static extern bool get_sizeAffectsLifetime_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetSizeAffectsLifetime(ParticleSystem system);
+			private static extern void set_sizeAffectsLifetime_Injected(ref ParticleSystem.TrailModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetInheritParticleColor(ParticleSystem system, bool value);
+			private static extern bool get_inheritParticleColor_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetInheritParticleColor(ParticleSystem system);
+			private static extern void set_inheritParticleColor_Injected(ref ParticleSystem.TrailModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetColorOverLifetime(ParticleSystem system, ref ParticleSystem.MinMaxGradient gradient);
+			private static extern void get_colorOverLifetime_Injected(ref ParticleSystem.TrailModule _unity_self, out ParticleSystem.MinMaxGradient ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetColorOverLifetime(ParticleSystem system, ref ParticleSystem.MinMaxGradient gradient);
+			private static extern void set_colorOverLifetime_Injected(ref ParticleSystem.TrailModule _unity_self, ref ParticleSystem.MinMaxGradient value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetWidthOverTrail(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void get_widthOverTrail_Injected(ref ParticleSystem.TrailModule _unity_self, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetWidthOverTrail(ParticleSystem system, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void set_widthOverTrail_Injected(ref ParticleSystem.TrailModule _unity_self, ref ParticleSystem.MinMaxCurve value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetWidthOverTrailMultiplier(ParticleSystem system, float value);
+			private static extern float get_widthOverTrailMultiplier_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetWidthOverTrailMultiplier(ParticleSystem system);
+			private static extern void set_widthOverTrailMultiplier_Injected(ref ParticleSystem.TrailModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetColorOverTrail(ParticleSystem system, ref ParticleSystem.MinMaxGradient gradient);
+			private static extern void get_colorOverTrail_Injected(ref ParticleSystem.TrailModule _unity_self, out ParticleSystem.MinMaxGradient ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetColorOverTrail(ParticleSystem system, ref ParticleSystem.MinMaxGradient gradient);
+			private static extern void set_colorOverTrail_Injected(ref ParticleSystem.TrailModule _unity_self, ref ParticleSystem.MinMaxGradient value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetGenerateLightingData(ParticleSystem system, bool value);
+			private static extern bool get_generateLightingData_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetGenerateLightingData(ParticleSystem system);
+			private static extern void set_generateLightingData_Injected(ref ParticleSystem.TrailModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetRibbonCount(ParticleSystem system, int value);
+			private static extern int get_ribbonCount_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetRibbonCount(ParticleSystem system);
+			private static extern void set_ribbonCount_Injected(ref ParticleSystem.TrailModule _unity_self, int value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetShadowBias(ParticleSystem system, float value);
+			private static extern float get_shadowBias_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern float GetShadowBias(ParticleSystem system);
+			private static extern void set_shadowBias_Injected(ref ParticleSystem.TrailModule _unity_self, float value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSplitSubEmitterRibbons(ParticleSystem system, bool value);
+			private static extern bool get_splitSubEmitterRibbons_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetSplitSubEmitterRibbons(ParticleSystem system);
+			private static extern void set_splitSubEmitterRibbons_Injected(ref ParticleSystem.TrailModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetAttachRibbonsToTransform(ParticleSystem system, bool value);
+			private static extern bool get_attachRibbonsToTransform_Injected(ref ParticleSystem.TrailModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetAttachRibbonsToTransform(ParticleSystem system);
+			private static extern void set_attachRibbonsToTransform_Injected(ref ParticleSystem.TrailModule _unity_self, bool value);
 
-			private ParticleSystem m_ParticleSystem;
+			internal ParticleSystem m_ParticleSystem;
 		}
 
 		public struct CustomDataModule
@@ -8743,99 +8468,89 @@ namespace UnityEngine
 			{
 				get
 				{
-					return ParticleSystem.CustomDataModule.GetEnabled(this.m_ParticleSystem);
+					return ParticleSystem.CustomDataModule.get_enabled_Injected(ref this);
 				}
 				set
 				{
-					ParticleSystem.CustomDataModule.SetEnabled(this.m_ParticleSystem, value);
+					ParticleSystem.CustomDataModule.set_enabled_Injected(ref this, value);
 				}
 			}
 
 			public void SetMode(ParticleSystemCustomData stream, ParticleSystemCustomDataMode mode)
 			{
-				ParticleSystem.CustomDataModule.SetMode(this.m_ParticleSystem, (int)stream, mode);
+				ParticleSystem.CustomDataModule.SetMode_Injected(ref this, stream, mode);
 			}
 
 			public ParticleSystemCustomDataMode GetMode(ParticleSystemCustomData stream)
 			{
-				return ParticleSystem.CustomDataModule.GetMode(this.m_ParticleSystem, (int)stream);
+				return ParticleSystem.CustomDataModule.GetMode_Injected(ref this, stream);
 			}
 
 			public void SetVectorComponentCount(ParticleSystemCustomData stream, int count)
 			{
-				ParticleSystem.CustomDataModule.SetVectorComponentCount(this.m_ParticleSystem, (int)stream, count);
+				ParticleSystem.CustomDataModule.SetVectorComponentCount_Injected(ref this, stream, count);
 			}
 
 			public int GetVectorComponentCount(ParticleSystemCustomData stream)
 			{
-				return ParticleSystem.CustomDataModule.GetVectorComponentCount(this.m_ParticleSystem, (int)stream);
+				return ParticleSystem.CustomDataModule.GetVectorComponentCount_Injected(ref this, stream);
 			}
 
 			public void SetVector(ParticleSystemCustomData stream, int component, ParticleSystem.MinMaxCurve curve)
 			{
-				ParticleSystem.CustomDataModule.SetVector(this.m_ParticleSystem, (int)stream, component, ref curve);
+				ParticleSystem.CustomDataModule.SetVector_Injected(ref this, stream, component, ref curve);
 			}
 
 			public ParticleSystem.MinMaxCurve GetVector(ParticleSystemCustomData stream, int component)
 			{
-				ParticleSystem.MinMaxCurve minMaxCurve = default(ParticleSystem.MinMaxCurve);
-				ParticleSystem.CustomDataModule.GetVector(this.m_ParticleSystem, (int)stream, component, ref minMaxCurve);
+				ParticleSystem.MinMaxCurve minMaxCurve;
+				ParticleSystem.CustomDataModule.GetVector_Injected(ref this, stream, component, out minMaxCurve);
 				return minMaxCurve;
 			}
 
 			public void SetColor(ParticleSystemCustomData stream, ParticleSystem.MinMaxGradient gradient)
 			{
-				ParticleSystem.CustomDataModule.SetColor(this.m_ParticleSystem, (int)stream, ref gradient);
+				ParticleSystem.CustomDataModule.SetColor_Injected(ref this, stream, ref gradient);
 			}
 
 			public ParticleSystem.MinMaxGradient GetColor(ParticleSystemCustomData stream)
 			{
-				ParticleSystem.MinMaxGradient minMaxGradient = default(ParticleSystem.MinMaxGradient);
-				ParticleSystem.CustomDataModule.GetColor(this.m_ParticleSystem, (int)stream, ref minMaxGradient);
+				ParticleSystem.MinMaxGradient minMaxGradient;
+				ParticleSystem.CustomDataModule.GetColor_Injected(ref this, stream, out minMaxGradient);
 				return minMaxGradient;
 			}
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetEnabled(ParticleSystem system, bool value);
+			private static extern bool get_enabled_Injected(ref ParticleSystem.CustomDataModule _unity_self);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool GetEnabled(ParticleSystem system);
+			private static extern void set_enabled_Injected(ref ParticleSystem.CustomDataModule _unity_self, bool value);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetMode(ParticleSystem system, int stream, ParticleSystemCustomDataMode mode);
+			private static extern void SetMode_Injected(ref ParticleSystem.CustomDataModule _unity_self, ParticleSystemCustomData stream, ParticleSystemCustomDataMode mode);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetVectorComponentCount(ParticleSystem system, int stream, int count);
+			private static extern ParticleSystemCustomDataMode GetMode_Injected(ref ParticleSystem.CustomDataModule _unity_self, ParticleSystemCustomData stream);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetVector(ParticleSystem system, int stream, int component, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void SetVectorComponentCount_Injected(ref ParticleSystem.CustomDataModule _unity_self, ParticleSystemCustomData stream, int count);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetColor(ParticleSystem system, int stream, ref ParticleSystem.MinMaxGradient gradient);
+			private static extern int GetVectorComponentCount_Injected(ref ParticleSystem.CustomDataModule _unity_self, ParticleSystemCustomData stream);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ParticleSystemCustomDataMode GetMode(ParticleSystem system, int stream);
+			private static extern void SetVector_Injected(ref ParticleSystem.CustomDataModule _unity_self, ParticleSystemCustomData stream, int component, ref ParticleSystem.MinMaxCurve curve);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetVectorComponentCount(ParticleSystem system, int stream);
+			private static extern void GetVector_Injected(ref ParticleSystem.CustomDataModule _unity_self, ParticleSystemCustomData stream, int component, out ParticleSystem.MinMaxCurve ret);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetVector(ParticleSystem system, int stream, int component, ref ParticleSystem.MinMaxCurve curve);
+			private static extern void SetColor_Injected(ref ParticleSystem.CustomDataModule _unity_self, ParticleSystemCustomData stream, ref ParticleSystem.MinMaxGradient gradient);
 
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetColor(ParticleSystem system, int stream, ref ParticleSystem.MinMaxGradient gradient);
+			private static extern void GetColor_Injected(ref ParticleSystem.CustomDataModule _unity_self, ParticleSystemCustomData stream, out ParticleSystem.MinMaxGradient ret);
 
-			private ParticleSystem m_ParticleSystem;
+			internal ParticleSystem m_ParticleSystem;
 		}
 	}
 }

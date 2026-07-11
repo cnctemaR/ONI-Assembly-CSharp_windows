@@ -143,6 +143,10 @@ namespace KSerialization
 
 		private void AddValidProperty(PropertyInfo property)
 		{
+			if (property.GetIndexParameters().Length != 0)
+			{
+				return;
+			}
 			object[] customAttributes = property.GetCustomAttributes(typeof(NonSerializedAttribute), false);
 			if ((customAttributes == null || customAttributes.Length == 0) && property.GetSetMethod() != null)
 			{

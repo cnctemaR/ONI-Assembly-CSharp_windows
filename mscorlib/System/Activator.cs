@@ -15,9 +15,9 @@ using Unity;
 
 namespace System
 {
+	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_Activator))]
-	[ClassInterface(ClassInterfaceType.None)]
 	public sealed class Activator : _Activator
 	{
 		private Activator()
@@ -142,8 +142,8 @@ namespace System
 			return Activator.CreateInstanceFrom(assemblyFile, typeName, false, BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, null, null, activationAttributes);
 		}
 
-		[Obsolete("Methods which use evidence to sandbox are obsolete and will be removed in a future release of the .NET Framework. Please use an overload of CreateInstance which does not take an Evidence parameter. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
 		[SecuritySafeCritical]
+		[Obsolete("Methods which use evidence to sandbox are obsolete and will be removed in a future release of the .NET Framework. Please use an overload of CreateInstance which does not take an Evidence parameter. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static ObjectHandle CreateInstance(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityInfo)
 		{

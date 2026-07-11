@@ -15,23 +15,15 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				Texture texture;
-				if (this.m_Texture == null)
+				if (!(this.m_Texture == null))
 				{
-					if (this.material != null && this.material.mainTexture != null)
-					{
-						texture = this.material.mainTexture;
-					}
-					else
-					{
-						texture = Graphic.s_WhiteTexture;
-					}
+					return this.m_Texture;
 				}
-				else
+				if (this.material != null && this.material.mainTexture != null)
 				{
-					texture = this.m_Texture;
+					return this.material.mainTexture;
 				}
-				return texture;
+				return Graphic.s_WhiteTexture;
 			}
 		}
 
@@ -43,12 +35,13 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (!(this.m_Texture == value))
+				if (this.m_Texture == value)
 				{
-					this.m_Texture = value;
-					this.SetVerticesDirty();
-					this.SetMaterialDirty();
+					return;
 				}
+				this.m_Texture = value;
+				this.SetVerticesDirty();
+				this.SetMaterialDirty();
 			}
 		}
 
@@ -60,11 +53,12 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (!(this.m_UVRect == value))
+				if (this.m_UVRect == value)
 				{
-					this.m_UVRect = value;
-					this.SetVerticesDirty();
+					return;
 				}
+				this.m_UVRect = value;
+				this.SetVerticesDirty();
 			}
 		}
 
@@ -98,6 +92,12 @@ namespace UnityEngine.UI
 				vh.AddTriangle(0, 1, 2);
 				vh.AddTriangle(2, 3, 0);
 			}
+		}
+
+		protected override void OnDidApplyAnimationProperties()
+		{
+			this.SetMaterialDirty();
+			this.SetVerticesDirty();
 		}
 
 		[FormerlySerializedAs("m_Tex")]

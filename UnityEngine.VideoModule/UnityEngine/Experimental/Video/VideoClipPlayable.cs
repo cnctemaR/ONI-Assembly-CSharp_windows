@@ -9,30 +9,19 @@ using UnityEngine.Video;
 namespace UnityEngine.Experimental.Video
 {
 	[NativeHeader("Modules/Video/Public/ScriptBindings/VideoClipPlayable.bindings.h")]
-	[RequiredByNativeCode]
-	[StaticAccessor("VideoClipPlayableBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[NativeHeader("Modules/Video/Public/VideoClip.h")]
 	[NativeHeader("Modules/Video/Public/Director/VideoClipPlayable.h")]
+	[NativeHeader("Modules/Video/Public/VideoClip.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[StaticAccessor("VideoClipPlayableBindings", StaticAccessorType.DoubleColon)]
+	[RequiredByNativeCode]
 	public struct VideoClipPlayable : IPlayable, IEquatable<VideoClipPlayable>
 	{
-		internal VideoClipPlayable(PlayableHandle handle)
-		{
-			if (handle.IsValid())
-			{
-				if (!handle.IsPlayableOfType<VideoClipPlayable>())
-				{
-					throw new InvalidCastException("Can't set handle: the playable is not an VideoClipPlayable.");
-				}
-			}
-			this.m_Handle = handle;
-		}
-
 		public static VideoClipPlayable Create(PlayableGraph graph, VideoClip clip, bool looping)
 		{
 			PlayableHandle playableHandle = VideoClipPlayable.CreateHandle(graph, clip, looping);
 			VideoClipPlayable videoClipPlayable = new VideoClipPlayable(playableHandle);
-			if (clip != null)
+			bool flag = clip != null;
+			if (flag)
 			{
 				videoClipPlayable.SetDuration(clip.length);
 			}
@@ -42,8 +31,9 @@ namespace UnityEngine.Experimental.Video
 		private static PlayableHandle CreateHandle(PlayableGraph graph, VideoClip clip, bool looping)
 		{
 			PlayableHandle @null = PlayableHandle.Null;
+			bool flag = !VideoClipPlayable.InternalCreateVideoClipPlayable(ref graph, clip, looping, ref @null);
 			PlayableHandle playableHandle;
-			if (!VideoClipPlayable.InternalCreateVideoClipPlayable(ref graph, clip, looping, ref @null))
+			if (flag)
 			{
 				playableHandle = PlayableHandle.Null;
 			}
@@ -52,6 +42,20 @@ namespace UnityEngine.Experimental.Video
 				playableHandle = @null;
 			}
 			return playableHandle;
+		}
+
+		internal VideoClipPlayable(PlayableHandle handle)
+		{
+			bool flag = handle.IsValid();
+			if (flag)
+			{
+				bool flag2 = !handle.IsPlayableOfType<VideoClipPlayable>();
+				if (flag2)
+				{
+					throw new InvalidCastException("Can't set handle: the playable is not an VideoClipPlayable.");
+				}
+			}
+			this.m_Handle = handle;
 		}
 
 		public PlayableHandle GetHandle()
@@ -118,7 +122,8 @@ namespace UnityEngine.Experimental.Video
 		internal void GetPauseDelay(double value)
 		{
 			double pauseDelayInternal = VideoClipPlayable.GetPauseDelayInternal(ref this.m_Handle);
-			if (this.m_Handle.GetPlayState() == PlayState.Playing && (value < 0.05 || (pauseDelayInternal != 0.0 && pauseDelayInternal < 0.05)))
+			bool flag = this.m_Handle.GetPlayState() == PlayState.Playing && (value < 0.05 || (pauseDelayInternal != 0.0 && pauseDelayInternal < 0.05));
+			if (flag)
 			{
 				throw new ArgumentException("VideoClipPlayable.pauseDelay: Setting new delay when existing delay is too small or 0.0 (" + pauseDelayInternal + "), Video system will not be able to change in time");
 			}
@@ -134,7 +139,8 @@ namespace UnityEngine.Experimental.Video
 		{
 			this.ValidateStartDelayInternal(startDelay);
 			VideoClipPlayable.SetStartDelayInternal(ref this.m_Handle, startDelay);
-			if (duration > 0.0)
+			bool flag = duration > 0.0;
+			if (flag)
 			{
 				this.m_Handle.SetDuration(duration + startTime);
 				VideoClipPlayable.SetPauseDelayInternal(ref this.m_Handle, startDelay + duration);
@@ -151,7 +157,8 @@ namespace UnityEngine.Experimental.Video
 		private void ValidateStartDelayInternal(double startDelay)
 		{
 			double startDelayInternal = VideoClipPlayable.GetStartDelayInternal(ref this.m_Handle);
-			if (this.IsPlaying() && (startDelay < 0.05 || (startDelayInternal >= 1E-05 && startDelayInternal < 0.05)))
+			bool flag = this.IsPlaying() && (startDelay < 0.05 || (startDelayInternal >= 1E-05 && startDelayInternal < 0.05));
+			if (flag)
 			{
 				Debug.LogWarning("VideoClipPlayable.StartDelay: Setting new delay when existing delay is too small or 0.0 (" + startDelayInternal + "), Video system will not be able to change in time");
 			}

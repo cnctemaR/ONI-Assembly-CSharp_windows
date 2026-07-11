@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 using UnityEngine.Scripting.APIUpdating;
@@ -8,12 +11,12 @@ using UnityEngine.Scripting.APIUpdating;
 namespace UnityEngine.Profiling
 {
 	[NativeHeader("Runtime/Utilities/MemoryUtilities.h")]
-	[NativeHeader("Runtime/Profiler/Profiler.h")]
-	[NativeHeader("Runtime/Profiler/ScriptBindings/Profiler.bindings.h")]
-	[NativeHeader("Runtime/Allocator/MemoryManager.h")]
-	[UsedByNativeCode]
 	[MovedFrom("UnityEngine")]
+	[NativeHeader("Runtime/Profiler/Profiler.h")]
+	[NativeHeader("Runtime/Allocator/MemoryManager.h")]
 	[NativeHeader("Runtime/ScriptingBackend/ScriptingApi.h")]
+	[UsedByNativeCode]
+	[NativeHeader("Runtime/Profiler/ScriptBindings/Profiler.bindings.h")]
 	public sealed class Profiler
 	{
 		private Profiler()
@@ -58,8 +61,8 @@ namespace UnityEngine.Profiling
 
 		public static extern bool enabled
 		{
-			[NativeMethod(Name = "profiler_is_enabled", IsFreeFunction = true)]
 			[NativeConditional("ENABLE_PROFILER")]
+			[NativeMethod(Name = "profiler_is_enabled", IsFreeFunction = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 			[NativeMethod(Name = "ProfilerBindings::SetProfilerEnabled", IsFreeFunction = true)]
@@ -67,8 +70,18 @@ namespace UnityEngine.Profiling
 			set;
 		}
 
-		[Conditional("ENABLE_PROFILER")]
+		public static extern bool enableAllocationCallstacks
+		{
+			[NativeMethod(Name = "ProfilerBindings::IsAllocationCallstackCaptureEnabled", IsFreeFunction = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[NativeMethod(Name = "ProfilerBindings::SetAllocationCallstackCaptureEnabled", IsFreeFunction = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		[FreeFunction("profiler_set_area_enabled")]
+		[Conditional("ENABLE_PROFILER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetAreaEnabled(ProfilerArea area, bool enabled);
 
@@ -88,7 +101,8 @@ namespace UnityEngine.Profiling
 		[Conditional("UNITY_EDITOR")]
 		public static void AddFramesFromFile(string file)
 		{
-			if (string.IsNullOrEmpty(file))
+			bool flag = string.IsNullOrEmpty(file);
+			if (flag)
 			{
 				Debug.LogError("AddFramesFromFile: Invalid or empty path");
 			}
@@ -98,21 +112,23 @@ namespace UnityEngine.Profiling
 			}
 		}
 
+		[NativeHeader("Modules/ProfilerEditor/Public/ProfilerSession.h")]
+		[NativeConditional("ENABLE_PROFILER && UNITY_EDITOR")]
 		[NativeMethod(Name = "LoadFromFile")]
 		[StaticAccessor("profiling::GetProfilerSessionPtr()", StaticAccessorType.Arrow)]
-		[NativeConditional("ENABLE_PROFILER && UNITY_EDITOR")]
-		[NativeHeader("Modules/ProfilerEditor/Public/ProfilerSession.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void AddFramesFromFile_Internal(string file, bool keepExistingFrames);
 
 		[Conditional("ENABLE_PROFILER")]
 		public static void BeginThreadProfiling(string threadGroupName, string threadName)
 		{
-			if (string.IsNullOrEmpty(threadGroupName))
+			bool flag = string.IsNullOrEmpty(threadGroupName);
+			if (flag)
 			{
 				throw new ArgumentException("Argument should be a valid string", "threadGroupName");
 			}
-			if (string.IsNullOrEmpty(threadName))
+			bool flag2 = string.IsNullOrEmpty(threadName);
+			if (flag2)
 			{
 				throw new ArgumentException("Argument should be a valid string", "threadName");
 			}
@@ -130,23 +146,37 @@ namespace UnityEngine.Profiling
 		public static extern void EndThreadProfiling();
 
 		[Conditional("ENABLE_PROFILER")]
+		[MethodImpl((MethodImplOptions)256)]
 		public static void BeginSample(string name)
 		{
+			Profiler.ValidateArguments(name);
 			Profiler.BeginSampleImpl(name, null);
 		}
 
 		[Conditional("ENABLE_PROFILER")]
+		[MethodImpl((MethodImplOptions)256)]
 		public static void BeginSample(string name, Object targetObject)
 		{
+			Profiler.ValidateArguments(name);
 			Profiler.BeginSampleImpl(name, targetObject);
+		}
+
+		[MethodImpl((MethodImplOptions)256)]
+		private static void ValidateArguments(string name)
+		{
+			bool flag = string.IsNullOrEmpty(name);
+			if (flag)
+			{
+				throw new ArgumentException("Argument should be a valid string.", "name");
+			}
 		}
 
 		[NativeMethod(Name = "ProfilerBindings::BeginSample", IsFreeFunction = true, IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void BeginSampleImpl(string name, Object targetObject);
 
-		[Conditional("ENABLE_PROFILER")]
 		[NativeMethod(Name = "ProfilerBindings::EndSample", IsFreeFunction = true, IsThreadSafe = true)]
+		[Conditional("ENABLE_PROFILER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void EndSample();
 
@@ -184,10 +214,9 @@ namespace UnityEngine.Profiling
 			return (int)Profiler.GetRuntimeMemorySizeLong(o);
 		}
 
-		[NativeConditional("ENABLE_PROFILER")]
 		[NativeMethod(Name = "ProfilerBindings::GetRuntimeMemorySizeLong", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern long GetRuntimeMemorySizeLong(Object o);
+		public static extern long GetRuntimeMemorySizeLong([NotNull] Object o);
 
 		[Obsolete("GetMonoHeapSize has been deprecated since it is limited to 4GB. Please use GetMonoHeapSizeLong() instead.")]
 		public static uint GetMonoHeapSize()
@@ -209,13 +238,13 @@ namespace UnityEngine.Profiling
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long GetMonoUsedSizeLong();
 
-		[StaticAccessor("GetMemoryManager()", StaticAccessorType.Dot)]
 		[NativeConditional("ENABLE_MEMORY_MANAGER")]
+		[StaticAccessor("GetMemoryManager()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool SetTempAllocatorRequestedSize(uint size);
 
-		[NativeConditional("ENABLE_MEMORY_MANAGER")]
 		[StaticAccessor("GetMemoryManager()", StaticAccessorType.Dot)]
+		[NativeConditional("ENABLE_MEMORY_MANAGER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern uint GetTempAllocatorSize();
 
@@ -225,9 +254,9 @@ namespace UnityEngine.Profiling
 			return (uint)Profiler.GetTotalAllocatedMemoryLong();
 		}
 
+		[NativeConditional("ENABLE_MEMORY_MANAGER")]
 		[StaticAccessor("GetMemoryManager()", StaticAccessorType.Dot)]
 		[NativeMethod(Name = "GetTotalAllocatedMemory")]
-		[NativeConditional("ENABLE_MEMORY_MANAGER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long GetTotalAllocatedMemoryLong();
 
@@ -237,9 +266,9 @@ namespace UnityEngine.Profiling
 			return (uint)Profiler.GetTotalUnusedReservedMemoryLong();
 		}
 
-		[NativeConditional("ENABLE_MEMORY_MANAGER")]
 		[NativeMethod(Name = "GetTotalUnusedReservedMemory")]
 		[StaticAccessor("GetMemoryManager()", StaticAccessorType.Dot)]
+		[NativeConditional("ENABLE_MEMORY_MANAGER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long GetTotalUnusedReservedMemoryLong();
 
@@ -255,11 +284,63 @@ namespace UnityEngine.Profiling
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long GetTotalReservedMemoryLong();
 
+		[NativeConditional("ENABLE_PROFILER")]
 		[NativeMethod(Name = "GetRegisteredGFXDriverMemory")]
 		[StaticAccessor("GetMemoryManager()", StaticAccessorType.Dot)]
-		[NativeConditional("ENABLE_PROFILER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long GetAllocatedMemoryForGraphicsDriver();
+
+		[Conditional("ENABLE_PROFILER")]
+		public static void EmitFrameMetaData(Guid id, int tag, Array data)
+		{
+			bool flag = data == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("data");
+			}
+			Type elementType = data.GetType().GetElementType();
+			bool flag2 = !UnsafeUtility.IsBlittable(elementType);
+			if (flag2)
+			{
+				throw new ArgumentException(string.Format("{0} type used in Profiler.ReportFrameStats must be blittable", elementType));
+			}
+			Profiler.Internal_EmitFrameMetaData_Array(id.ToByteArray(), tag, data, data.Length, UnsafeUtility.SizeOf(elementType));
+		}
+
+		[Conditional("ENABLE_PROFILER")]
+		public static void EmitFrameMetaData<T>(Guid id, int tag, List<T> data) where T : struct
+		{
+			bool flag = data == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("data");
+			}
+			Type typeFromHandle = typeof(T);
+			bool flag2 = !UnsafeUtility.IsBlittable(typeof(T));
+			if (flag2)
+			{
+				throw new ArgumentException(string.Format("{0} type used in Profiler.ReportFrameStats must be blittable", typeFromHandle));
+			}
+			Profiler.Internal_EmitFrameMetaData_Array(id.ToByteArray(), tag, NoAllocHelpers.ExtractArrayFromList(data), data.Count, UnsafeUtility.SizeOf(typeFromHandle));
+		}
+
+		[Conditional("ENABLE_PROFILER")]
+		public static void EmitFrameMetaData<T>(Guid id, int tag, NativeArray<T> data) where T : struct
+		{
+			Profiler.Internal_EmitFrameMetaData_Native(id.ToByteArray(), tag, (IntPtr)data.GetUnsafeReadOnlyPtr<T>(), data.Length, UnsafeUtility.SizeOf<T>());
+		}
+
+		[NativeMethod(Name = "ProfilerBindings::Internal_EmitFrameMetaData_Array", IsFreeFunction = true)]
+		[ThreadSafe]
+		[NativeConditional("ENABLE_PROFILER")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_EmitFrameMetaData_Array(byte[] id, int tag, Array data, int count, int elementSize);
+
+		[NativeConditional("ENABLE_PROFILER")]
+		[NativeMethod(Name = "ProfilerBindings::Internal_EmitFrameMetaData_Native", IsFreeFunction = true)]
+		[ThreadSafe]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_EmitFrameMetaData_Native(byte[] id, int tag, IntPtr data, int count, int elementSize);
 
 		internal const uint invalidProfilerArea = 4294967295U;
 	}

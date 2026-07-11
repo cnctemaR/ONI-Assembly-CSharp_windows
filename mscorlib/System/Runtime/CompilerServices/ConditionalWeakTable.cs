@@ -278,8 +278,8 @@ namespace System.Runtime.CompilerServices
 			return tvalue;
 		}
 
-		[SecuritySafeCritical]
 		[FriendAccessAllowed]
+		[SecuritySafeCritical]
 		internal TKey FindEquivalentKeyUnsafe(TKey key, out TValue value)
 		{
 			object @lock = this._lock;

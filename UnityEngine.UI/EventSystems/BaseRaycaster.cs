@@ -34,6 +34,22 @@ namespace UnityEngine.EventSystems
 			}
 		}
 
+		public BaseRaycaster rootRaycaster
+		{
+			get
+			{
+				if (this.m_RootRaycaster == null)
+				{
+					BaseRaycaster[] componentsInParent = base.GetComponentsInParent<BaseRaycaster>();
+					if (componentsInParent.Length != 0)
+					{
+						this.m_RootRaycaster = componentsInParent[componentsInParent.Length - 1];
+					}
+				}
+				return this.m_RootRaycaster;
+			}
+		}
+
 		public override string ToString()
 		{
 			return string.Concat(new object[] { "Name: ", base.gameObject, "\neventCamera: ", this.eventCamera, "\nsortOrderPriority: ", this.sortOrderPriority, "\nrenderOrderPriority: ", this.renderOrderPriority });
@@ -50,5 +66,19 @@ namespace UnityEngine.EventSystems
 			RaycasterManager.RemoveRaycasters(this);
 			base.OnDisable();
 		}
+
+		protected override void OnCanvasHierarchyChanged()
+		{
+			base.OnCanvasHierarchyChanged();
+			this.m_RootRaycaster = null;
+		}
+
+		protected override void OnTransformParentChanged()
+		{
+			base.OnTransformParentChanged();
+			this.m_RootRaycaster = null;
+		}
+
+		private BaseRaycaster m_RootRaycaster;
 	}
 }

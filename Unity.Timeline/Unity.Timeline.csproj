@@ -1,0 +1,137 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{507D4E6D-F27A-4B63-8D6B-A2E9C354A227}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UnityEngine.Timeline</RootNamespace>
+    <AssemblyName>Unity.Timeline</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="ActivationControlPlayable.cs" />
+    <Compile Include="ActivationMixerPlayable.cs" />
+    <Compile Include="ActivationPlayableAsset.cs" />
+    <Compile Include="ActivationTrack.cs" />
+    <Compile Include="AnimationOutputWeightProcessor.cs" />
+    <Compile Include="AnimationPlayableAsset.cs" />
+    <Compile Include="AnimationPreviewUpdateCallback.cs" />
+    <Compile Include="AnimationTrack.cs" />
+    <Compile Include="AppliedOffsetMode.cs" />
+    <Compile Include="AudioClipProperties.cs" />
+    <Compile Include="AudioMixerProperties.cs" />
+    <Compile Include="AudioPlayableAsset.cs" />
+    <Compile Include="AudioTrack.cs" />
+    <Compile Include="BasicPlayableBehaviour.cs" />
+    <Compile Include="ClipCaps.cs" />
+    <Compile Include="ControlPlayableAsset.cs" />
+    <Compile Include="ControlTrack.cs" />
+    <Compile Include="CustomSignalEventDrawer.cs" />
+    <Compile Include="CustomStyleAttribute.cs" />
+    <Compile Include="DirectorControlPlayable.cs" />
+    <Compile Include="DiscreteTime.cs" />
+    <Compile Include="Extrapolation.cs" />
+    <Compile Include="GroupTrack.cs" />
+    <Compile Include="HashUtility.cs" />
+    <Compile Include="HideInMenuAttribute.cs" />
+    <Compile Include="ICurvesOwner.cs" />
+    <Compile Include="IgnoreOnPlayableTrackAttribute.cs" />
+    <Compile Include="IInterval.cs" />
+    <Compile Include="ILayerable.cs" />
+    <Compile Include="IMarker.cs" />
+    <Compile Include="InfiniteRuntimeClip.cs" />
+    <Compile Include="INotificationOptionProvider.cs" />
+    <Compile Include="IntervalTree.cs" />
+    <Compile Include="IntervalTreeNode.cs" />
+    <Compile Include="IPropertyCollector.cs" />
+    <Compile Include="IPropertyPreview.cs" />
+    <Compile Include="ITimeControl.cs" />
+    <Compile Include="ITimelineClipAsset.cs" />
+    <Compile Include="ITimelineEvaluateCallback.cs" />
+    <Compile Include="Marker.cs" />
+    <Compile Include="MarkerList.cs" />
+    <Compile Include="MarkerTrack.cs" />
+    <Compile Include="MatchTargetFieldConstants.cs" />
+    <Compile Include="MatchTargetFields.cs" />
+    <Compile Include="MenuCategoryAttribute.cs" />
+    <Compile Include="NotificationFlags.cs" />
+    <Compile Include="NotificationUtilities.cs" />
+    <Compile Include="NotKeyableAttribute.cs" />
+    <Compile Include="ParticleControlPlayable.cs" />
+    <Compile Include="PlayableTrack.cs" />
+    <Compile Include="PrefabControlPlayable.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RuntimeClip.cs" />
+    <Compile Include="RuntimeClipBase.cs" />
+    <Compile Include="RuntimeElement.cs" />
+    <Compile Include="ScheduleRuntimeClip.cs" />
+    <Compile Include="SignalAsset.cs" />
+    <Compile Include="SignalEmitter.cs" />
+    <Compile Include="SignalReceiver.cs" />
+    <Compile Include="SignalTrack.cs" />
+    <Compile Include="SupportsChildTracksAttribute.cs" />
+    <Compile Include="TimeControlPlayable.cs" />
+    <Compile Include="TimeFieldAttribute.cs" />
+    <Compile Include="TimelineAsset.cs" />
+    <Compile Include="TimelineClip.cs" />
+    <Compile Include="TimelineClipCapsExtensions.cs" />
+    <Compile Include="TimelineCreateUtilities.cs" />
+    <Compile Include="TimelinePlayable.cs" />
+    <Compile Include="TimelineUndo.cs" />
+    <Compile Include="TimeNotificationBehaviour.cs" />
+    <Compile Include="TimeUtility.cs" />
+    <Compile Include="TrackAsset.cs" />
+    <Compile Include="TrackAssetExtensions.cs" />
+    <Compile Include="TrackBindingFlags.cs" />
+    <Compile Include="TrackBindingTypeAttribute.cs" />
+    <Compile Include="TrackClipTypeAttribute.cs" />
+    <Compile Include="TrackColorAttribute.cs" />
+    <Compile Include="TrackMediaType.cs" />
+    <Compile Include="TrackOffset.cs" />
+    <Compile Include="WeightUtility.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{507D4E6D-F27A-4B63-8D6B-A2E9C354A218}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Core\System.Core.csproj">
+      <Project>{507D4E6D-F27A-4B63-8D6B-A2E9C354A21B}</Project>
+      <Name>System.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System\System.csproj">
+      <Project>{507D4E6D-F27A-4B63-8D6B-A2E9C354A21D}</Project>
+      <Name>System</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.AnimationModule\UnityEngine.AnimationModule.csproj">
+      <Project>{507D4E6D-F27A-4B63-8D6B-A2E9C354A22B}</Project>
+      <Name>UnityEngine.AnimationModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.AudioModule\UnityEngine.AudioModule.csproj">
+      <Project>{507D4E6D-F27A-4B63-8D6B-A2E9C354A22E}</Project>
+      <Name>UnityEngine.AudioModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{507D4E6D-F27A-4B63-8D6B-A2E9C354A232}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.DirectorModule\UnityEngine.DirectorModule.csproj">
+      <Project>{507D4E6D-F27A-4B63-8D6B-A2E9C354A234}</Project>
+      <Name>UnityEngine.DirectorModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.ParticleSystemModule\UnityEngine.ParticleSystemModule.csproj">
+      <Project>{507D4E6D-F27A-4B63-8D6B-A2E9C354A240}</Project>
+      <Name>UnityEngine.ParticleSystemModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
+      <Project>{507D4E6D-F27A-4B63-8D6B-A2E9C354A246}</Project>
+      <Name>UnityEngine.SharedInternalsModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

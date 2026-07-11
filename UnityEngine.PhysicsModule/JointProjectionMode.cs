@@ -7,8 +7,8 @@ namespace UnityEngine
 	{
 		None,
 		PositionAndRotation,
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("JointProjectionMode.PositionOnly is no longer supported", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		PositionOnly
 	}
 }

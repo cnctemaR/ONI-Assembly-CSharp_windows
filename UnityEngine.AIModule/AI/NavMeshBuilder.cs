@@ -5,17 +5,19 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.AI
 {
-	[NativeHeader("Modules/AI/Builder/NavMeshBuilder.bindings.h")]
 	[StaticAccessor("NavMeshBuilderBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Modules/AI/Builder/NavMeshBuilder.bindings.h")]
 	public static class NavMeshBuilder
 	{
 		public static void CollectSources(Bounds includedWorldBounds, int includedLayerMask, NavMeshCollectGeometry geometry, int defaultArea, List<NavMeshBuildMarkup> markups, List<NavMeshBuildSource> results)
 		{
-			if (markups == null)
+			bool flag = markups == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("markups");
 			}
-			if (results == null)
+			bool flag2 = results == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("results");
 			}
@@ -27,11 +29,13 @@ namespace UnityEngine.AI
 
 		public static void CollectSources(Transform root, int includedLayerMask, NavMeshCollectGeometry geometry, int defaultArea, List<NavMeshBuildMarkup> markups, List<NavMeshBuildSource> results)
 		{
-			if (markups == null)
+			bool flag = markups == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("markups");
 			}
-			if (results == null)
+			bool flag2 = results == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("results");
 			}
@@ -47,7 +51,8 @@ namespace UnityEngine.AI
 
 		public static NavMeshData BuildNavMeshData(NavMeshBuildSettings buildSettings, List<NavMeshBuildSource> sources, Bounds localBounds, Vector3 position, Quaternion rotation)
 		{
-			if (sources == null)
+			bool flag = sources == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("sources");
 			}
@@ -62,11 +67,13 @@ namespace UnityEngine.AI
 
 		public static bool UpdateNavMeshData(NavMeshData data, NavMeshBuildSettings buildSettings, List<NavMeshBuildSource> sources, Bounds localBounds)
 		{
-			if (data == null)
+			bool flag = data == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("data");
 			}
-			if (sources == null)
+			bool flag2 = sources == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("sources");
 			}
@@ -80,11 +87,13 @@ namespace UnityEngine.AI
 
 		public static AsyncOperation UpdateNavMeshDataAsync(NavMeshData data, NavMeshBuildSettings buildSettings, List<NavMeshBuildSource> sources, Bounds localBounds)
 		{
-			if (data == null)
+			bool flag = data == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("data");
 			}
-			if (sources == null)
+			bool flag2 = sources == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("sources");
 			}

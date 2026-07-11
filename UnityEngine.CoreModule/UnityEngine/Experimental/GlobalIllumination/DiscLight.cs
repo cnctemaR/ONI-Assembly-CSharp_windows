@@ -21,5 +21,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 		public float range;
 
 		public float radius;
+
+		public FalloffType falloff;
 	}
 }

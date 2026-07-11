@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
+using UnityEngine.Bindings;
 
 namespace UnityEngine.AI
 {
+	[NativeHeader("Modules/AI/NavMesh/NavMesh.bindings.h")]
 	public sealed class NavMeshData : Object
 	{
 		public NavMeshData()
@@ -16,7 +17,7 @@ namespace UnityEngine.AI
 			NavMeshData.Internal_Create(this, agentTypeID);
 		}
 
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("NavMeshDataBindings", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Create([Writable] NavMeshData mono, int agentTypeID);
 
@@ -25,57 +26,52 @@ namespace UnityEngine.AI
 			get
 			{
 				Bounds bounds;
-				this.INTERNAL_get_sourceBounds(out bounds);
+				this.get_sourceBounds_Injected(out bounds);
 				return bounds;
 			}
 		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_get_sourceBounds(out Bounds value);
 
 		public Vector3 position
 		{
 			get
 			{
 				Vector3 vector;
-				this.INTERNAL_get_position(out vector);
+				this.get_position_Injected(out vector);
 				return vector;
 			}
 			set
 			{
-				this.INTERNAL_set_position(ref value);
+				this.set_position_Injected(ref value);
 			}
 		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_get_position(out Vector3 value);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_set_position(ref Vector3 value);
 
 		public Quaternion rotation
 		{
 			get
 			{
 				Quaternion quaternion;
-				this.INTERNAL_get_rotation(out quaternion);
+				this.get_rotation_Injected(out quaternion);
 				return quaternion;
 			}
 			set
 			{
-				this.INTERNAL_set_rotation(ref value);
+				this.set_rotation_Injected(ref value);
 			}
 		}
 
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_get_rotation(out Quaternion value);
+		private extern void get_sourceBounds_Injected(out Bounds ret);
 
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_set_rotation(ref Quaternion value);
+		private extern void get_position_Injected(out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_position_Injected(ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_rotation_Injected(out Quaternion ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_rotation_Injected(ref Quaternion value);
 	}
 }

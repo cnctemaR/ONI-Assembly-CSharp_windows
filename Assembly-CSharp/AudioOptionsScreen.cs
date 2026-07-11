@@ -120,12 +120,12 @@ public class AudioOptionsScreen : KModalScreen
 		this.audioDevices.Clear();
 		this.audioDeviceOptions.Clear();
 		int num;
-		RuntimeManager.LowlevelSystem.getNumDrivers(out num);
+		RuntimeManager.CoreSystem.getNumDrivers(out num);
 		for (int i = 0; i < num; i++)
 		{
 			KFMOD.AudioDevice audioDevice = default(KFMOD.AudioDevice);
 			string text;
-			RuntimeManager.LowlevelSystem.getDriverInfo(i, out text, 64, out audioDevice.guid, out audioDevice.systemRate, out audioDevice.speakerMode, out audioDevice.speakerModeChannels);
+			RuntimeManager.CoreSystem.getDriverInfo(i, out text, 64, out audioDevice.guid, out audioDevice.systemRate, out audioDevice.speakerMode, out audioDevice.speakerModeChannels);
 			audioDevice.name = text;
 			audioDevice.fmod_id = i;
 			this.audioDevices.Add(audioDevice);
@@ -135,7 +135,7 @@ public class AudioOptionsScreen : KModalScreen
 
 	private void OnAudioDeviceChanged(int idx)
 	{
-		RuntimeManager.LowlevelSystem.setDriver(idx);
+		RuntimeManager.CoreSystem.setDriver(idx);
 		for (int i = 0; i < this.audioDevices.Count; i++)
 		{
 			if (idx == this.audioDevices[i].fmod_id)

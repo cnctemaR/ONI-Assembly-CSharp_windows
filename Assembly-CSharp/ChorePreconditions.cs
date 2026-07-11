@@ -73,6 +73,7 @@ public class ChorePreconditions
 		precondition = default(Chore.Precondition);
 		precondition.id = "IsAssignedToMe";
 		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_ASSIGNED_TO_ME;
+		precondition.sortOrder = 10;
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Assignable assignable = (Assignable)data;
@@ -136,6 +137,7 @@ public class ChorePreconditions
 		precondition = default(Chore.Precondition);
 		precondition.id = "IsPreferredAssignable";
 		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_PREFERRED_ASSIGNABLE;
+		precondition.sortOrder = 10;
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Assignable assignable2 = (Assignable)data;
@@ -145,10 +147,11 @@ public class ChorePreconditions
 		precondition = default(Chore.Precondition);
 		precondition.id = "IsPreferredAssignableOrUrgent";
 		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_PREFERRED_ASSIGNABLE_OR_URGENT_BLADDER;
+		precondition.sortOrder = 10;
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Assignable assignable3 = (Assignable)data;
-			if (Game.Instance.assignmentManager.GetPreferredAssignables(context.consumerState.assignables, assignable3.slot).Contains(assignable3))
+			if (Game.Instance.assignmentManager.IsPreferredAssignable(context.consumerState.assignables, assignable3))
 			{
 				return true;
 			}

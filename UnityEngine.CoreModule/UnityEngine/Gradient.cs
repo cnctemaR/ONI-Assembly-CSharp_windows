@@ -6,17 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Gradient.bindings.h")]
+	[NativeHeader("Runtime/Export/Math/Gradient.bindings.h")]
 	[RequiredByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public class Gradient : IEquatable<Gradient>
 	{
-		[RequiredByNativeCode]
-		public Gradient()
-		{
-			this.m_Ptr = Gradient.Init();
-		}
-
 		[FreeFunction(Name = "Gradient_Bindings::Init", IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr Init();
@@ -28,6 +22,12 @@ namespace UnityEngine
 		[FreeFunction("Gradient_Bindings::Internal_Equals", IsThreadSafe = true, HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool Internal_Equals(IntPtr other);
+
+		[RequiredByNativeCode]
+		public Gradient()
+		{
+			this.m_Ptr = Gradient.Init();
+		}
 
 		~Gradient()
 		{
@@ -76,12 +76,50 @@ namespace UnityEngine
 
 		public override bool Equals(object o)
 		{
-			return !object.ReferenceEquals(null, o) && (object.ReferenceEquals(this, o) || (o.GetType() == base.GetType() && this.Equals((Gradient)o)));
+			bool flag = o == null;
+			bool flag2;
+			if (flag)
+			{
+				flag2 = false;
+			}
+			else
+			{
+				bool flag3 = this == o;
+				if (flag3)
+				{
+					flag2 = true;
+				}
+				else
+				{
+					bool flag4 = o.GetType() != base.GetType();
+					flag2 = !flag4 && this.Equals((Gradient)o);
+				}
+			}
+			return flag2;
 		}
 
 		public bool Equals(Gradient other)
 		{
-			return !object.ReferenceEquals(null, other) && (object.ReferenceEquals(this, other) || this.m_Ptr.Equals(other.m_Ptr) || this.Internal_Equals(other.m_Ptr));
+			bool flag = other == null;
+			bool flag2;
+			if (flag)
+			{
+				flag2 = false;
+			}
+			else
+			{
+				bool flag3 = this == other;
+				if (flag3)
+				{
+					flag2 = true;
+				}
+				else
+				{
+					bool flag4 = this.m_Ptr.Equals(other.m_Ptr);
+					flag2 = flag4 || this.Internal_Equals(other.m_Ptr);
+				}
+			}
+			return flag2;
 		}
 
 		public override int GetHashCode()

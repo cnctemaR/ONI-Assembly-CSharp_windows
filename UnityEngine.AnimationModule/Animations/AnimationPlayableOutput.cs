@@ -7,31 +7,20 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Animations
 {
 	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationPlayableOutput.bindings.h")]
 	[StaticAccessor("AnimationPlayableOutputBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Animation/Animator.h")]
-	[NativeHeader("Runtime/Animation/Director/AnimationPlayableOutput.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
+	[NativeHeader("Modules/Animation/Animator.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationPlayableOutput.bindings.h")]
+	[NativeHeader("Modules/Animation/Director/AnimationPlayableOutput.h")]
 	public struct AnimationPlayableOutput : IPlayableOutput
 	{
-		internal AnimationPlayableOutput(PlayableOutputHandle handle)
-		{
-			if (handle.IsValid())
-			{
-				if (!handle.IsPlayableOutputOfType<AnimationPlayableOutput>())
-				{
-					throw new InvalidCastException("Can't set handle: the playable is not an AnimationPlayableOutput.");
-				}
-			}
-			this.m_Handle = handle;
-		}
-
 		public static AnimationPlayableOutput Create(PlayableGraph graph, string name, Animator target)
 		{
 			PlayableOutputHandle playableOutputHandle;
+			bool flag = !AnimationPlayableGraphExtensions.InternalCreateAnimationOutput(ref graph, name, out playableOutputHandle);
 			AnimationPlayableOutput animationPlayableOutput;
-			if (!AnimationPlayableGraphExtensions.InternalCreateAnimationOutput(ref graph, name, out playableOutputHandle))
+			if (flag)
 			{
 				animationPlayableOutput = AnimationPlayableOutput.Null;
 			}
@@ -42,6 +31,20 @@ namespace UnityEngine.Animations
 				animationPlayableOutput = animationPlayableOutput2;
 			}
 			return animationPlayableOutput;
+		}
+
+		internal AnimationPlayableOutput(PlayableOutputHandle handle)
+		{
+			bool flag = handle.IsValid();
+			if (flag)
+			{
+				bool flag2 = !handle.IsPlayableOutputOfType<AnimationPlayableOutput>();
+				if (flag2)
+				{
+					throw new InvalidCastException("Can't set handle: the playable is not an AnimationPlayableOutput.");
+				}
+			}
+			this.m_Handle = handle;
 		}
 
 		public static AnimationPlayableOutput Null

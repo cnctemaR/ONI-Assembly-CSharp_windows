@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Interface, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class TypeLibTypeAttribute : Attribute
 	{
 		public TypeLibTypeAttribute(TypeLibTypeFlags flags)

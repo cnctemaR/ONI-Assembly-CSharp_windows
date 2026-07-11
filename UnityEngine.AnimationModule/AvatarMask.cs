@@ -7,9 +7,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine
 {
-	[MovedFrom("UnityEditor.Animations", true)]
-	[NativeHeader("Runtime/Animation/AvatarMask.h")]
-	[NativeHeader("Runtime/Animation/ScriptBindings/Animation.bindings.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/Animation.bindings.h")]
+	[MovedFrom(true, "UnityEditor.Animations", "UnityEditor", null)]
+	[NativeHeader("Modules/Animation/AvatarMask.h")]
 	[UsedByNativeCode]
 	public sealed class AvatarMask : Object
 	{
@@ -82,7 +82,7 @@ namespace UnityEngine
 
 		public void SetTransformActive(int index, bool value)
 		{
-			this.SetTransformWeight(index, (!value) ? 0f : 1f);
+			this.SetTransformWeight(index, value ? 1f : 0f);
 		}
 
 		internal extern bool hasFeetIK

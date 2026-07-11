@@ -4,18 +4,16 @@ namespace Unity.Jobs.LowLevel.Unsafe
 {
 	public struct JobRanges
 	{
-		public int BatchSize;
+		internal int BatchSize;
 
-		public int NumJobs;
+		internal int NumJobs;
 
 		public int TotalIterationCount;
 
-		public int NumPhases;
+		internal int NumPhases;
 
-		public int IndicesPerPhase;
+		internal IntPtr StartEndIndex;
 
-		public IntPtr StartEndIndex;
-
-		public IntPtr PhaseData;
+		internal IntPtr PhaseData;
 	}
 }

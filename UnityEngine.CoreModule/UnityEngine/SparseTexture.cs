@@ -8,30 +8,6 @@ namespace UnityEngine
 	[NativeHeader("Runtime/Graphics/SparseTexture.h")]
 	public sealed class SparseTexture : Texture
 	{
-		public SparseTexture(int width, int height, GraphicsFormat format, int mipCount)
-		{
-			if (base.ValidateFormat(format, FormatUsage.Sample))
-			{
-				SparseTexture.Internal_Create(this, width, height, GraphicsFormatUtility.GetTextureFormat(format), GraphicsFormatUtility.IsSRGBFormat(format), mipCount);
-			}
-		}
-
-		public SparseTexture(int width, int height, TextureFormat format, int mipCount)
-		{
-			if (base.ValidateFormat(format))
-			{
-				SparseTexture.Internal_Create(this, width, height, format, false, mipCount);
-			}
-		}
-
-		public SparseTexture(int width, int height, TextureFormat format, int mipCount, bool linear)
-		{
-			if (base.ValidateFormat(format))
-			{
-				SparseTexture.Internal_Create(this, width, height, format, linear, mipCount);
-			}
-		}
-
 		public extern int tileWidth
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -53,7 +29,7 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "SparseTextureScripting::Create", ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_Create([Writable] SparseTexture mono, int width, int height, TextureFormat format, bool linear, int mipCount);
+		private static extern void Internal_Create([Writable] SparseTexture mono, int width, int height, GraphicsFormat format, int mipCount);
 
 		[FreeFunction(Name = "SparseTextureScripting::UpdateTile", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -66,6 +42,59 @@ namespace UnityEngine
 		public void UnloadTile(int tileX, int tileY, int miplevel)
 		{
 			this.UpdateTileRaw(tileX, tileY, miplevel, null);
+		}
+
+		internal bool ValidateSize(int width, int height, GraphicsFormat format)
+		{
+			bool flag = (ulong)GraphicsFormatUtility.GetBlockSize(format) * (ulong)((long)width / (long)((ulong)GraphicsFormatUtility.GetBlockWidth(format))) * (ulong)((long)height / (long)((ulong)GraphicsFormatUtility.GetBlockHeight(format))) < 65536UL;
+			bool flag2;
+			if (flag)
+			{
+				Debug.LogError(string.Format("SparseTexture creation failed. The minimum size in bytes of a SparseTexture is 64KB.", new object[0]), this);
+				flag2 = false;
+			}
+			else
+			{
+				flag2 = true;
+			}
+			return flag2;
+		}
+
+		public SparseTexture(int width, int height, DefaultFormat format, int mipCount)
+			: this(width, height, SystemInfo.GetGraphicsFormat(format), mipCount)
+		{
+		}
+
+		public SparseTexture(int width, int height, GraphicsFormat format, int mipCount)
+		{
+			bool flag = !base.ValidateFormat(format, FormatUsage.Sample);
+			if (!flag)
+			{
+				bool flag2 = !this.ValidateSize(width, height, format);
+				if (!flag2)
+				{
+					SparseTexture.Internal_Create(this, width, height, format, mipCount);
+				}
+			}
+		}
+
+		public SparseTexture(int width, int height, TextureFormat textureFormat, int mipCount)
+			: this(width, height, textureFormat, mipCount, false)
+		{
+		}
+
+		public SparseTexture(int width, int height, TextureFormat textureFormat, int mipCount, bool linear)
+		{
+			bool flag = !base.ValidateFormat(textureFormat);
+			if (!flag)
+			{
+				GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(textureFormat, !linear);
+				bool flag2 = !this.ValidateSize(width, height, graphicsFormat);
+				if (!flag2)
+				{
+					SparseTexture.Internal_Create(this, width, height, graphicsFormat, mipCount);
+				}
+			}
 		}
 	}
 }

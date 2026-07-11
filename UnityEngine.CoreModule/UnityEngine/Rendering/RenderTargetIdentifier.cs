@@ -72,21 +72,26 @@ namespace UnityEngine.Rendering
 
 		public RenderTargetIdentifier(Texture tex)
 		{
-			if (tex == null)
+			bool flag = tex == null;
+			if (flag)
 			{
 				this.m_Type = BuiltinRenderTextureType.None;
 			}
-			else if (tex is RenderTexture)
-			{
-				this.m_Type = BuiltinRenderTextureType.RenderTexture;
-			}
 			else
 			{
-				this.m_Type = BuiltinRenderTextureType.BindableTexture;
+				bool flag2 = tex is RenderTexture;
+				if (flag2)
+				{
+					this.m_Type = BuiltinRenderTextureType.RenderTexture;
+				}
+				else
+				{
+					this.m_Type = BuiltinRenderTextureType.BindableTexture;
+				}
 			}
 			this.m_BufferPointer = IntPtr.Zero;
 			this.m_NameID = -1;
-			this.m_InstanceID = ((!tex) ? 0 : tex.GetInstanceID());
+			this.m_InstanceID = (tex ? tex.GetInstanceID() : 0);
 			this.m_MipLevel = 0;
 			this.m_CubeFace = CubemapFace.Unknown;
 			this.m_DepthSlice = 0;
@@ -94,21 +99,26 @@ namespace UnityEngine.Rendering
 
 		public RenderTargetIdentifier(Texture tex, int mipLevel = 0, CubemapFace cubeFace = CubemapFace.Unknown, int depthSlice = 0)
 		{
-			if (tex == null)
+			bool flag = tex == null;
+			if (flag)
 			{
 				this.m_Type = BuiltinRenderTextureType.None;
 			}
-			else if (tex is RenderTexture)
-			{
-				this.m_Type = BuiltinRenderTextureType.RenderTexture;
-			}
 			else
 			{
-				this.m_Type = BuiltinRenderTextureType.BindableTexture;
+				bool flag2 = tex is RenderTexture;
+				if (flag2)
+				{
+					this.m_Type = BuiltinRenderTextureType.RenderTexture;
+				}
+				else
+				{
+					this.m_Type = BuiltinRenderTextureType.BindableTexture;
+				}
 			}
 			this.m_BufferPointer = IntPtr.Zero;
 			this.m_NameID = -1;
-			this.m_InstanceID = ((!tex) ? 0 : tex.GetInstanceID());
+			this.m_InstanceID = (tex ? tex.GetInstanceID() : 0);
 			this.m_MipLevel = mipLevel;
 			this.m_CubeFace = cubeFace;
 			this.m_DepthSlice = depthSlice;
@@ -167,17 +177,18 @@ namespace UnityEngine.Rendering
 
 		public override bool Equals(object obj)
 		{
-			bool flag;
-			if (!(obj is RenderTargetIdentifier))
+			bool flag = !(obj is RenderTargetIdentifier);
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
 				RenderTargetIdentifier renderTargetIdentifier = (RenderTargetIdentifier)obj;
-				flag = this.Equals(renderTargetIdentifier);
+				flag2 = this.Equals(renderTargetIdentifier);
 			}
-			return flag;
+			return flag2;
 		}
 
 		public static bool operator ==(RenderTargetIdentifier lhs, RenderTargetIdentifier rhs)

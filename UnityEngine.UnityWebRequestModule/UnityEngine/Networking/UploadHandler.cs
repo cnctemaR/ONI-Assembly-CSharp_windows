@@ -9,13 +9,13 @@ namespace UnityEngine.Networking
 	[StructLayout(LayoutKind.Sequential)]
 	public class UploadHandler : IDisposable
 	{
-		internal UploadHandler()
-		{
-		}
-
 		[NativeMethod(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Release();
+
+		internal UploadHandler()
+		{
+		}
 
 		~UploadHandler()
 		{
@@ -24,7 +24,8 @@ namespace UnityEngine.Networking
 
 		public void Dispose()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				this.Release();
 				this.m_Ptr = IntPtr.Zero;
@@ -66,17 +67,30 @@ namespace UnityEngine.Networking
 
 		internal virtual string GetContentType()
 		{
-			return "text/plain";
+			return this.InternalGetContentType();
 		}
 
 		internal virtual void SetContentType(string newContentType)
 		{
+			this.InternalSetContentType(newContentType);
 		}
 
 		internal virtual float GetProgress()
 		{
-			return 0.5f;
+			return this.InternalGetProgress();
 		}
+
+		[NativeMethod("GetContentType")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern string InternalGetContentType();
+
+		[NativeMethod("SetContentType")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void InternalSetContentType(string newContentType);
+
+		[NativeMethod("GetProgress")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern float InternalGetProgress();
 
 		[NonSerialized]
 		internal IntPtr m_Ptr;

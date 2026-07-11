@@ -14,7 +14,8 @@ namespace UnityEngine
 		{
 			float minWidth = this.minWidth;
 			float maxWidth = this.maxWidth;
-			if (this.allowHorizontalScroll)
+			bool flag = this.allowHorizontalScroll;
+			if (flag)
 			{
 				this.minWidth = 0f;
 				this.maxWidth = 0f;
@@ -22,17 +23,21 @@ namespace UnityEngine
 			base.CalcWidth();
 			this.calcMinWidth = this.minWidth;
 			this.calcMaxWidth = this.maxWidth;
-			if (this.allowHorizontalScroll)
+			bool flag2 = this.allowHorizontalScroll;
+			if (flag2)
 			{
-				if (this.minWidth > 32f)
+				bool flag3 = this.minWidth > 32f;
+				if (flag3)
 				{
 					this.minWidth = 32f;
 				}
-				if (minWidth != 0f)
+				bool flag4 = minWidth != 0f;
+				if (flag4)
 				{
 					this.minWidth = minWidth;
 				}
-				if (maxWidth != 0f)
+				bool flag5 = maxWidth != 0f;
+				if (flag5)
 				{
 					this.maxWidth = maxWidth;
 					this.stretchWidth = 0;
@@ -42,8 +47,9 @@ namespace UnityEngine
 
 		public override void SetHorizontal(float x, float width)
 		{
-			float num = ((!this.needsVerticalScrollbar) ? width : (width - this.verticalScrollbar.fixedWidth - (float)this.verticalScrollbar.margin.left));
-			if (this.allowHorizontalScroll && num < this.calcMinWidth)
+			float num = (this.needsVerticalScrollbar ? (width - this.verticalScrollbar.fixedWidth - (float)this.verticalScrollbar.margin.left) : width);
+			bool flag = this.allowHorizontalScroll && num < this.calcMinWidth;
+			if (flag)
 			{
 				this.needsHorizontalScrollbar = true;
 				this.minWidth = this.calcMinWidth;
@@ -55,7 +61,8 @@ namespace UnityEngine
 			else
 			{
 				this.needsHorizontalScrollbar = false;
-				if (this.allowHorizontalScroll)
+				bool flag2 = this.allowHorizontalScroll;
+				if (flag2)
 				{
 					this.minWidth = this.calcMinWidth;
 					this.maxWidth = this.calcMaxWidth;
@@ -70,7 +77,8 @@ namespace UnityEngine
 		{
 			float minHeight = this.minHeight;
 			float maxHeight = this.maxHeight;
-			if (this.allowVerticalScroll)
+			bool flag = this.allowVerticalScroll;
+			if (flag)
 			{
 				this.minHeight = 0f;
 				this.maxHeight = 0f;
@@ -78,23 +86,28 @@ namespace UnityEngine
 			base.CalcHeight();
 			this.calcMinHeight = this.minHeight;
 			this.calcMaxHeight = this.maxHeight;
-			if (this.needsHorizontalScrollbar)
+			bool flag2 = this.needsHorizontalScrollbar;
+			if (flag2)
 			{
 				float num = this.horizontalScrollbar.fixedHeight + (float)this.horizontalScrollbar.margin.top;
 				this.minHeight += num;
 				this.maxHeight += num;
 			}
-			if (this.allowVerticalScroll)
+			bool flag3 = this.allowVerticalScroll;
+			if (flag3)
 			{
-				if (this.minHeight > 32f)
+				bool flag4 = this.minHeight > 32f;
+				if (flag4)
 				{
 					this.minHeight = 32f;
 				}
-				if (minHeight != 0f)
+				bool flag5 = minHeight != 0f;
+				if (flag5)
 				{
 					this.minHeight = minHeight;
 				}
-				if (maxHeight != 0f)
+				bool flag6 = maxHeight != 0f;
+				if (flag6)
 				{
 					this.maxHeight = maxHeight;
 					this.stretchHeight = 0;
@@ -105,16 +118,20 @@ namespace UnityEngine
 		public override void SetVertical(float y, float height)
 		{
 			float num = height;
-			if (this.needsHorizontalScrollbar)
+			bool flag = this.needsHorizontalScrollbar;
+			if (flag)
 			{
 				num -= this.horizontalScrollbar.fixedHeight + (float)this.horizontalScrollbar.margin.top;
 			}
-			if (this.allowVerticalScroll && num < this.calcMinHeight)
+			bool flag2 = this.allowVerticalScroll && num < this.calcMinHeight;
+			if (flag2)
 			{
-				if (!this.needsHorizontalScrollbar && !this.needsVerticalScrollbar)
+				bool flag3 = !this.needsHorizontalScrollbar && !this.needsVerticalScrollbar;
+				if (flag3)
 				{
 					this.clientWidth = this.rect.width - this.verticalScrollbar.fixedWidth - (float)this.verticalScrollbar.margin.left;
-					if (this.clientWidth < this.calcMinWidth)
+					bool flag4 = this.clientWidth < this.calcMinWidth;
+					if (flag4)
 					{
 						this.clientWidth = this.calcMinWidth;
 					}
@@ -135,7 +152,8 @@ namespace UnityEngine
 			}
 			else
 			{
-				if (this.allowVerticalScroll)
+				bool flag5 = this.allowVerticalScroll;
+				if (flag5)
 				{
 					this.minHeight = this.calcMinHeight;
 					this.maxHeight = this.calcMaxHeight;

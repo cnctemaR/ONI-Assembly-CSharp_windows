@@ -7,7 +7,8 @@ namespace UnityEngine.Yoga
 		private YogaConfig(IntPtr ygConfig)
 		{
 			this._ygConfig = ygConfig;
-			if (this._ygConfig == IntPtr.Zero)
+			bool flag = this._ygConfig == IntPtr.Zero;
+			if (flag)
 			{
 				throw new InvalidOperationException("Failed to allocate native memory");
 			}
@@ -18,11 +19,19 @@ namespace UnityEngine.Yoga
 		{
 		}
 
-		~YogaConfig()
+		protected override void Finalize()
 		{
-			if (this.Handle != YogaConfig.Default.Handle)
+			try
 			{
-				Native.YGConfigFree(this.Handle);
+				bool flag = this.Handle != YogaConfig.Default.Handle;
+				if (flag)
+				{
+					Native.YGConfigFree(this.Handle);
+				}
+			}
+			finally
+			{
+				base.Finalize();
 			}
 		}
 

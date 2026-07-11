@@ -12,8 +12,8 @@ using Unity;
 namespace System.Reflection.Emit
 {
 	[ComVisible(true)]
-	[ComDefaultInterface(typeof(_TypeBuilder))]
 	[ClassInterface(ClassInterfaceType.None)]
+	[ComDefaultInterface(typeof(_TypeBuilder))]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class TypeBuilder : TypeInfo, _TypeBuilder
 	{

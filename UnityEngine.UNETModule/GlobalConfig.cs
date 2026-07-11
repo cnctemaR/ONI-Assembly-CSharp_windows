@@ -31,7 +31,8 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (value == 0U)
+				bool flag = value == 0U;
+				if (flag)
 				{
 					throw new ArgumentOutOfRangeException("Minimal thread awake timeout should be > 0");
 				}
@@ -95,11 +96,13 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (value == 0)
+				bool flag = value == 0;
+				if (flag)
 				{
 					throw new ArgumentOutOfRangeException("MaxHosts", "Maximum hosts number should be > 0");
 				}
-				if (value > 128)
+				bool flag2 = value > 128;
+				if (flag2)
 				{
 					throw new ArgumentOutOfRangeException("MaxHosts", "Maximum hosts number should be <= " + 128.ToString());
 				}
@@ -127,11 +130,13 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (value > this.MaxTimerTimeout)
+				bool flag = value > this.MaxTimerTimeout;
+				if (flag)
 				{
 					throw new ArgumentOutOfRangeException("MinTimerTimeout should be < MaxTimerTimeout");
 				}
-				if (value == 0U)
+				bool flag2 = value == 0U;
+				if (flag2)
 				{
 					throw new ArgumentOutOfRangeException("MinTimerTimeout should be > 0");
 				}
@@ -147,11 +152,13 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (value == 0U)
+				bool flag = value == 0U;
+				if (flag)
 				{
 					throw new ArgumentOutOfRangeException("MaxTimerTimeout should be > 0");
 				}
-				if (value > 12000U)
+				bool flag2 = value > 12000U;
+				if (flag2)
 				{
 					throw new ArgumentOutOfRangeException("MaxTimerTimeout should be <=" + 12000U.ToString());
 				}
@@ -167,11 +174,13 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (value > this.MaxNetSimulatorTimeout)
+				bool flag = value > this.MaxNetSimulatorTimeout;
+				if (flag)
 				{
 					throw new ArgumentOutOfRangeException("MinNetSimulatorTimeout should be < MaxTimerTimeout");
 				}
-				if (value == 0U)
+				bool flag2 = value == 0U;
+				if (flag2)
 				{
 					throw new ArgumentOutOfRangeException("MinNetSimulatorTimeout should be > 0");
 				}
@@ -187,11 +196,13 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (value == 0U)
+				bool flag = value == 0U;
+				if (flag)
 				{
 					throw new ArgumentOutOfRangeException("MaxNetSimulatorTimeout should be > 0");
 				}
-				if (value > 12000U)
+				bool flag2 = value > 12000U;
+				if (flag2)
 				{
 					throw new ArgumentOutOfRangeException("MaxNetSimulatorTimeout should be <=" + 12000U.ToString());
 				}

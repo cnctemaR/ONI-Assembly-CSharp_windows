@@ -4,11 +4,11 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Random.bindings.h")]
+	[NativeHeader("Runtime/Export/Random/Random.bindings.h")]
 	public sealed class Random
 	{
-		[Obsolete("Deprecated. Use InitState() function or Random.state property instead.")]
 		[StaticAccessor("GetScriptingRand()", StaticAccessorType.Dot)]
+		[Obsolete("Deprecated. Use InitState() function or Random.state property instead.")]
 		public static extern int seed
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -17,8 +17,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[NativeMethod("SetSeed")]
 		[StaticAccessor("GetScriptingRand()", StaticAccessorType.Dot)]
+		[NativeMethod("SetSeed")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void InitState(int seed);
 

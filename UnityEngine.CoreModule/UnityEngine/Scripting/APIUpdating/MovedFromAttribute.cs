@@ -5,19 +5,32 @@ namespace UnityEngine.Scripting.APIUpdating
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Interface | AttributeTargets.Delegate)]
 	public class MovedFromAttribute : Attribute
 	{
+		public MovedFromAttribute(bool autoUpdateAPI, string sourceNamespace = null, string sourceAssembly = null, string sourceClassName = null)
+		{
+			this.data.Set(autoUpdateAPI, sourceNamespace, sourceAssembly, sourceClassName);
+		}
+
 		public MovedFromAttribute(string sourceNamespace)
-			: this(sourceNamespace, false)
 		{
+			this.data.Set(true, sourceNamespace, null, null);
 		}
 
-		public MovedFromAttribute(string sourceNamespace, bool isInDifferentAssembly)
+		internal bool AffectsAPIUpdater
 		{
-			this.Namespace = sourceNamespace;
-			this.IsInDifferentAssembly = isInDifferentAssembly;
+			get
+			{
+				return !this.data.classHasChanged && !this.data.assemblyHasChanged;
+			}
 		}
 
-		public string Namespace { get; private set; }
+		public bool IsInDifferentAssembly
+		{
+			get
+			{
+				return this.data.assemblyHasChanged;
+			}
+		}
 
-		public bool IsInDifferentAssembly { get; private set; }
+		internal MovedFromAttributeData data;
 	}
 }

@@ -6,25 +6,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Playables
 {
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[RequiredByNativeCode]
-	[StaticAccessor("MaterialEffectPlayableBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Shaders/Director/MaterialEffectPlayable.h")]
 	[NativeHeader("Runtime/Export/Director/MaterialEffectPlayable.bindings.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[StaticAccessor("MaterialEffectPlayableBindings", StaticAccessorType.DoubleColon)]
 	public struct MaterialEffectPlayable : IPlayable, IEquatable<MaterialEffectPlayable>
 	{
-		internal MaterialEffectPlayable(PlayableHandle handle)
-		{
-			if (handle.IsValid())
-			{
-				if (!handle.IsPlayableOfType<MaterialEffectPlayable>())
-				{
-					throw new InvalidCastException("Can't set handle: the playable is not an MaterialEffectPlayable.");
-				}
-			}
-			this.m_Handle = handle;
-		}
-
 		public static MaterialEffectPlayable Create(PlayableGraph graph, Material material, int pass = -1)
 		{
 			PlayableHandle playableHandle = MaterialEffectPlayable.CreateHandle(graph, material, pass);
@@ -34,8 +22,9 @@ namespace UnityEngine.Experimental.Playables
 		private static PlayableHandle CreateHandle(PlayableGraph graph, Material material, int pass)
 		{
 			PlayableHandle @null = PlayableHandle.Null;
+			bool flag = !MaterialEffectPlayable.InternalCreateMaterialEffectPlayable(ref graph, material, pass, ref @null);
 			PlayableHandle playableHandle;
-			if (!MaterialEffectPlayable.InternalCreateMaterialEffectPlayable(ref graph, material, pass, ref @null))
+			if (flag)
 			{
 				playableHandle = PlayableHandle.Null;
 			}
@@ -44,6 +33,20 @@ namespace UnityEngine.Experimental.Playables
 				playableHandle = @null;
 			}
 			return playableHandle;
+		}
+
+		internal MaterialEffectPlayable(PlayableHandle handle)
+		{
+			bool flag = handle.IsValid();
+			if (flag)
+			{
+				bool flag2 = !handle.IsPlayableOfType<MaterialEffectPlayable>();
+				if (flag2)
+				{
+					throw new InvalidCastException("Can't set handle: the playable is not an MaterialEffectPlayable.");
+				}
+			}
+			this.m_Handle = handle;
 		}
 
 		public PlayableHandle GetHandle()

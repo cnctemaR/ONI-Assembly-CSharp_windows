@@ -2,8 +2,8 @@
 
 namespace JetBrains.Annotations
 {
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 	[BaseTypeRequired(typeof(Attribute))]
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
 	public sealed class BaseTypeRequiredAttribute : Attribute
 	{
 		public BaseTypeRequiredAttribute([NotNull] Type baseType)
@@ -12,6 +12,6 @@ namespace JetBrains.Annotations
 		}
 
 		[NotNull]
-		public Type BaseType { get; private set; }
+		public Type BaseType { get; }
 	}
 }

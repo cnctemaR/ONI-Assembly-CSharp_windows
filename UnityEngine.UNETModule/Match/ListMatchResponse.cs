@@ -21,7 +21,7 @@ namespace UnityEngine.Networking.Match
 			return UnityString.Format("[{0}]-matches.Count:{1}", new object[]
 			{
 				base.ToString(),
-				(this.matches != null) ? this.matches.Count : 0
+				(this.matches == null) ? 0 : this.matches.Count
 			});
 		}
 

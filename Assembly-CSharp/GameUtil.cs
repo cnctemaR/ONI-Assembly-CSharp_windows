@@ -676,6 +676,22 @@ public static class GameUtil
 		return string.Format(locString, GameUtil.adjectives[num], GameUtil.AddPositiveSign(quality.ToString(), quality > 0));
 	}
 
+	public static string GetFormattedBytes(ulong amount)
+	{
+		string[] array = new string[]
+		{
+			UI.UNITSUFFIXES.INFORMATION.BYTE,
+			UI.UNITSUFFIXES.INFORMATION.KILOBYTE,
+			UI.UNITSUFFIXES.INFORMATION.MEGABYTE,
+			UI.UNITSUFFIXES.INFORMATION.GIGABYTE,
+			UI.UNITSUFFIXES.INFORMATION.TERABYTE
+		};
+		int num = ((amount == 0UL) ? 0 : ((int)Math.Floor(Math.Floor(Math.Log(amount)) / Math.Log(1024.0))));
+		double num2 = amount / Math.Pow(1024.0, (double)num);
+		global::Debug.Assert(num >= 0 && num < array.Length);
+		return string.Format("{0:F} {1}", num2, array[num]);
+	}
+
 	public static string GetFormattedInfomation(float amount, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
 	{
 		amount = GameUtil.ApplyTimeSlice(amount, timeSlice);
@@ -1268,7 +1284,7 @@ public static class GameUtil
 	public static string GetWireLoadColor(float load, float maxLoad, float potentialLoad)
 	{
 		Color color;
-		if (load > maxLoad)
+		if (load > maxLoad + POWER.FLOAT_FUDGE_FACTOR)
 		{
 			color = GameUtil.WireLoadValues.negativeColor;
 		}

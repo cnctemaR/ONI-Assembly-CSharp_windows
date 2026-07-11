@@ -26,11 +26,6 @@ public class BloomEffect : MonoBehaviour
 
 	protected void Start()
 	{
-		if (!SystemInfo.supportsImageEffects)
-		{
-			base.enabled = false;
-			return;
-		}
 		if (!this.blurShader || !this.material.shader.isSupported)
 		{
 			base.enabled = false;

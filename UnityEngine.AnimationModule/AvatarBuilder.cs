@@ -4,12 +4,13 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Animation/ScriptBindings/AvatarBuilder.bindings.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AvatarBuilder.bindings.h")]
 	public class AvatarBuilder
 	{
 		public static Avatar BuildHumanAvatar(GameObject go, HumanDescription humanDescription)
 		{
-			if (go == null)
+			bool flag = go == null;
+			if (flag)
 			{
 				throw new NullReferenceException();
 			}

@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Android
 {
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Export/AndroidPermissions.bindings.h")]
+	[NativeHeader("Runtime/Export/Android/AndroidPermissions.bindings.h")]
 	public struct Permission
 	{
 		[StaticAccessor("PermissionsBindings", StaticAccessorType.DoubleColon)]

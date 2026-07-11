@@ -160,8 +160,8 @@ namespace System.Security.Claims
 			return new ClaimsIdentity(reader);
 		}
 
-		[OnSerializing]
 		[SecurityCritical]
+		[OnSerializing]
 		private void OnSerializingMethod(StreamingContext context)
 		{
 			if (this is ISerializable)
@@ -171,8 +171,8 @@ namespace System.Security.Claims
 			this.m_serializedClaimsIdentities = this.SerializeIdentities();
 		}
 
-		[SecurityCritical]
 		[OnDeserialized]
+		[SecurityCritical]
 		private void OnDeserializedMethod(StreamingContext context)
 		{
 			if (this is ISerializable)

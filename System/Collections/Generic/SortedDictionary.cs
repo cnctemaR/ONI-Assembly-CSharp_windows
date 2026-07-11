@@ -3,8 +3,8 @@ using System.Diagnostics;
 
 namespace System.Collections.Generic
 {
-	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(IDictionaryDebugView<, >))]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
 	public class SortedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable, IDictionary, ICollection, IReadOnlyDictionary<TKey, TValue>, IReadOnlyCollection<KeyValuePair<TKey, TValue>>
 	{
@@ -554,8 +554,8 @@ namespace System.Collections.Generic
 			internal const int DictEntry = 2;
 		}
 
-		[DebuggerDisplay("Count = {Count}")]
 		[DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<, >))]
+		[DebuggerDisplay("Count = {Count}")]
 		[Serializable]
 		public sealed class KeyCollection : ICollection<TKey>, IEnumerable<TKey>, IEnumerable, ICollection, IReadOnlyCollection<TKey>
 		{
@@ -754,8 +754,8 @@ namespace System.Collections.Generic
 			}
 		}
 
-		[DebuggerDisplay("Count = {Count}")]
 		[DebuggerTypeProxy(typeof(DictionaryValueCollectionDebugView<, >))]
+		[DebuggerDisplay("Count = {Count}")]
 		[Serializable]
 		public sealed class ValueCollection : ICollection<TValue>, IEnumerable<TValue>, IEnumerable, ICollection, IReadOnlyCollection<TValue>
 		{

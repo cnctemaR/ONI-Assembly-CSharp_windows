@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Class, Inherited = true)]
+	[ComVisible(true)]
 	[Serializable]
 	public sealed class AttributeUsageAttribute : Attribute
 	{

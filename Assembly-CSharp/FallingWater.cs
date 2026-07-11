@@ -433,8 +433,8 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 				if (flag2)
 				{
 					EventInstance eventInstance = SoundEvent.BeginOneShot(this.liquid_splash_initial, vector, 1f, false);
-					eventInstance.setParameterValue("liquidDepth", SoundUtil.GetLiquidDepth(cell));
-					eventInstance.setParameterValue("liquidVolume", this.GetParticleVolume(particleProperties.mass));
+					eventInstance.setParameterByName("liquidDepth", SoundUtil.GetLiquidDepth(cell), false);
+					eventInstance.setParameterByName("liquidVolume", this.GetParticleVolume(particleProperties.mass), false);
 					SoundEvent.EndOneShot(eventInstance);
 				}
 			}

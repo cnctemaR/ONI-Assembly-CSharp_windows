@@ -69,7 +69,7 @@ public class VoiceSoundEvent : SoundEvent
 				eventInstance = SoundEvent.BeginOneShot(sound, vector, 1f, false);
 				if (sound.Contains("sleep_") && controller.GetComponent<Traits>().HasTrait("Snorer"))
 				{
-					eventInstance.setParameterValue("snoring", 1f);
+					eventInstance.setParameterByName("snoring", 1f, false);
 				}
 				SoundEvent.EndOneShot(eventInstance);
 				component.timeLastSpoke = Time.time;

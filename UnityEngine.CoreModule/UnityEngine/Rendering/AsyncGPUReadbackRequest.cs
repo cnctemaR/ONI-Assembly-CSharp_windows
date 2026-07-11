@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Graphics/Texture.h")]
 	[NativeHeader("Runtime/Graphics/AsyncGPUReadbackManaged.h")]
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Graphics/Texture.h")]
 	public struct AsyncGPUReadbackRequest
 	{
 		public void Update()
@@ -25,11 +25,13 @@ namespace UnityEngine.Rendering
 
 		public unsafe NativeArray<T> GetData<T>(int layer = 0) where T : struct
 		{
-			if (!this.done || this.hasError)
+			bool flag = !this.done || this.hasError;
+			if (flag)
 			{
 				throw new InvalidOperationException("Cannot access the data as it is not available");
 			}
-			if (layer < 0 || layer >= this.layerCount)
+			bool flag2 = layer < 0 || layer >= this.layerCount;
+			if (flag2)
 			{
 				throw new ArgumentException(string.Format("Layer index is out of range {0} / {1}", layer, this.layerCount));
 			}

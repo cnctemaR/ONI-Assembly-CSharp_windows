@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine.Scripting;
-using UnityEngineInternal;
 
 namespace UnityEngine.Events
 {
@@ -21,7 +20,7 @@ namespace UnityEngine.Events
 
 		public void RemoveListener(UnityAction<T0, T1, T2> call)
 		{
-			base.RemoveListener(call.Target, call.GetMethodInfo());
+			base.RemoveListener(call.Target, call.Method);
 		}
 
 		protected override MethodInfo FindMethod_Impl(string name, object targetObj)
@@ -50,21 +49,24 @@ namespace UnityEngine.Events
 			for (int i = 0; i < list.Count; i++)
 			{
 				InvokableCall<T0, T1, T2> invokableCall = list[i] as InvokableCall<T0, T1, T2>;
-				if (invokableCall != null)
+				bool flag = invokableCall != null;
+				if (flag)
 				{
 					invokableCall.Invoke(arg0, arg1, arg2);
 				}
 				else
 				{
 					InvokableCall invokableCall2 = list[i] as InvokableCall;
-					if (invokableCall2 != null)
+					bool flag2 = invokableCall2 != null;
+					if (flag2)
 					{
 						invokableCall2.Invoke();
 					}
 					else
 					{
 						BaseInvokableCall baseInvokableCall = list[i];
-						if (this.m_InvokeArray == null)
+						bool flag3 = this.m_InvokeArray == null;
+						if (flag3)
 						{
 							this.m_InvokeArray = new object[3];
 						}

@@ -6,12 +6,6 @@ namespace UnityEngine.UI
 {
 	internal class ObjectPool<T> where T : new()
 	{
-		public ObjectPool(UnityAction<T> actionOnGet, UnityAction<T> actionOnRelease)
-		{
-			this.m_ActionOnGet = actionOnGet;
-			this.m_ActionOnRelease = actionOnRelease;
-		}
-
 		public int countAll { get; private set; }
 
 		public int countActive
@@ -30,13 +24,20 @@ namespace UnityEngine.UI
 			}
 		}
 
+		public ObjectPool(UnityAction<T> actionOnGet, UnityAction<T> actionOnRelease)
+		{
+			this.m_ActionOnGet = actionOnGet;
+			this.m_ActionOnRelease = actionOnRelease;
+		}
+
 		public T Get()
 		{
 			T t;
 			if (this.m_Stack.Count == 0)
 			{
 				t = new T();
-				this.countAll++;
+				int countAll = this.countAll;
+				this.countAll = countAll + 1;
 			}
 			else
 			{
@@ -51,7 +52,7 @@ namespace UnityEngine.UI
 
 		public void Release(T element)
 		{
-			if (this.m_Stack.Count > 0 && object.ReferenceEquals(this.m_Stack.Peek(), element))
+			if (this.m_Stack.Count > 0 && this.m_Stack.Peek() == element)
 			{
 				Debug.LogError("Internal error. Trying to destroy object that is already released to pool.");
 			}

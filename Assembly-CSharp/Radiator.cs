@@ -83,13 +83,13 @@ public class Radiator : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			Vector2I vector2I = Grid.CellToXY(num);
 			int num2 = (int)this.Range;
-			if (this.shape == LightShape.Circle)
+			if (this.shape == global::LightShape.Circle)
 			{
 				Vector2I vector2I2 = new Vector2I(vector2I.x - num2, vector2I.y - num2);
 				this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Radiator", base.gameObject, vector2I2.x, vector2I2.y, 2 * num2, 2 * num2, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.TriggerRefresh));
 				this.liquidPartitionerEntry = GameScenePartitioner.Instance.Add("Radiator", base.gameObject, vector2I2.x, vector2I2.y, 2 * num2, 2 * num2, GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.TriggerRefresh));
 			}
-			else if (this.shape == LightShape.Cone)
+			else if (this.shape == global::LightShape.Cone)
 			{
 				Vector2I vector2I3 = new Vector2I(vector2I.x - num2, vector2I.y - num2);
 				this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Radiator", base.gameObject, vector2I3.x, vector2I3.y, 2 * num2, num2, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.TriggerRefresh));
@@ -138,7 +138,7 @@ public class Radiator : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public Color overlayColour;
 
-	public LightShape shape;
+	public global::LightShape shape;
 
 	private int cell = Grid.InvalidCell;
 

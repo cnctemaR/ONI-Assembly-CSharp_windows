@@ -3,8 +3,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Animation/ScriptBindings/AvatarBuilder.bindings.h")]
-	[NativeHeader("Runtime/Animation/HumanDescription.h")]
+	[NativeHeader("Modules/Animation/HumanDescription.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AvatarBuilder.bindings.h")]
 	public struct HumanDescription
 	{
 		public float upperArmTwist
@@ -122,6 +122,8 @@ namespace UnityEngine
 		internal float m_LegStretch;
 
 		internal float m_FeetSpacing;
+
+		internal float m_GlobalScale;
 
 		internal string m_RootMotionBoneName;
 

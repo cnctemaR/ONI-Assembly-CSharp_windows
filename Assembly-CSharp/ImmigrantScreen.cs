@@ -45,10 +45,10 @@ public class ImmigrantScreen : CharacterSelectionController
 		}
 		else
 		{
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 			if (MusicManager.instance.SongIsPlaying("Music_SelectDuplicant"))
 			{
-				MusicManager.instance.StopSong("Music_SelectDuplicant", true, STOP_MODE.ALLOWFADEOUT);
+				MusicManager.instance.StopSong("Music_SelectDuplicant", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 			}
 			if (Immigration.Instance.ImmigrantsAvailable && this.hasShown)
 			{
@@ -102,8 +102,8 @@ public class ImmigrantScreen : CharacterSelectionController
 			global::UnityEngine.Object.Destroy(cc.GetGameObject());
 		});
 		this.containers.Clear();
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, STOP_MODE.ALLOWFADEOUT);
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().PortalLPDimmedSnapshot, STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().PortalLPDimmedSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		MusicManager.instance.PlaySong("Stinger_NewDuplicant", false);
 	}
 
@@ -128,8 +128,8 @@ public class ImmigrantScreen : CharacterSelectionController
 		this.containers.Clear();
 		this.rejectConfirmationScreen.SetActive(false);
 		base.Show(false);
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, STOP_MODE.ALLOWFADEOUT);
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().PortalLPDimmedSnapshot, STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().PortalLPDimmedSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 	}
 
 	[SerializeField]

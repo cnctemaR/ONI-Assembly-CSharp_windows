@@ -7,6 +7,24 @@ namespace UnityEngine.Networking.Match
 	[Obsolete("The matchmaker and relay feature will be removed in the future, minimal support will continue until this can be safely done.")]
 	public class MatchInfoSnapshot
 	{
+		public NetworkID networkId { get; private set; }
+
+		public NodeID hostNodeId { get; private set; }
+
+		public string name { get; private set; }
+
+		public int averageEloScore { get; private set; }
+
+		public int maxSize { get; private set; }
+
+		public int currentSize { get; private set; }
+
+		public bool isPrivate { get; private set; }
+
+		public Dictionary<string, long> matchAttributes { get; private set; }
+
+		public List<MatchInfoSnapshot.MatchInfoDirectConnectSnapshot> directConnectInfos { get; private set; }
+
 		public MatchInfoSnapshot()
 		{
 		}
@@ -28,26 +46,16 @@ namespace UnityEngine.Networking.Match
 			}
 		}
 
-		public NetworkID networkId { get; private set; }
-
-		public NodeID hostNodeId { get; private set; }
-
-		public string name { get; private set; }
-
-		public int averageEloScore { get; private set; }
-
-		public int maxSize { get; private set; }
-
-		public int currentSize { get; private set; }
-
-		public bool isPrivate { get; private set; }
-
-		public Dictionary<string, long> matchAttributes { get; private set; }
-
-		public List<MatchInfoSnapshot.MatchInfoDirectConnectSnapshot> directConnectInfos { get; private set; }
-
 		public class MatchInfoDirectConnectSnapshot
 		{
+			public NodeID nodeId { get; private set; }
+
+			public string publicAddress { get; private set; }
+
+			public string privateAddress { get; private set; }
+
+			public HostPriority hostPriority { get; private set; }
+
 			public MatchInfoDirectConnectSnapshot()
 			{
 			}
@@ -59,14 +67,6 @@ namespace UnityEngine.Networking.Match
 				this.privateAddress = matchDirectConnectInfo.privateAddress;
 				this.hostPriority = matchDirectConnectInfo.hostPriority;
 			}
-
-			public NodeID nodeId { get; private set; }
-
-			public string publicAddress { get; private set; }
-
-			public string privateAddress { get; private set; }
-
-			public HostPriority hostPriority { get; private set; }
 		}
 	}
 }

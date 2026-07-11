@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Dynamics/ConstantForce.h")]
 	[RequireComponent(typeof(Rigidbody))]
+	[NativeHeader("Modules/Physics/ConstantForce.h")]
 	public class ConstantForce : Behaviour
 	{
 		public Vector3 force

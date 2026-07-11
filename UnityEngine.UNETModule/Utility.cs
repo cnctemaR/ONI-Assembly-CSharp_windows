@@ -7,10 +7,6 @@ namespace UnityEngine.Networking
 {
 	public class Utility
 	{
-		private Utility()
-		{
-		}
-
 		[Obsolete("This property is unused and should not be referenced in code.", true)]
 		public static bool useRandomSourceID
 		{
@@ -23,13 +19,17 @@ namespace UnityEngine.Networking
 			}
 		}
 
+		private Utility()
+		{
+		}
+
 		public static SourceID GetSourceID()
 		{
 			return (SourceID)((long)SystemInfo.deviceUniqueIdentifier.GetHashCode());
 		}
 
-		[Obsolete("This function is unused and should not be referenced in code. Please sign in and setup your project in the editor instead.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("This function is unused and should not be referenced in code. Please sign in and setup your project in the editor instead.", true)]
 		public static void SetAppID(AppID newAppID)
 		{
 		}
@@ -43,7 +43,8 @@ namespace UnityEngine.Networking
 
 		public static void SetAccessTokenForNetwork(NetworkID netId, NetworkAccessToken accessToken)
 		{
-			if (Utility.s_dictTokens.ContainsKey(netId))
+			bool flag = Utility.s_dictTokens.ContainsKey(netId);
+			if (flag)
 			{
 				Utility.s_dictTokens.Remove(netId);
 			}
@@ -53,7 +54,8 @@ namespace UnityEngine.Networking
 		public static NetworkAccessToken GetAccessTokenForNetwork(NetworkID netId)
 		{
 			NetworkAccessToken networkAccessToken;
-			if (!Utility.s_dictTokens.TryGetValue(netId, out networkAccessToken))
+			bool flag = !Utility.s_dictTokens.TryGetValue(netId, out networkAccessToken);
+			if (flag)
 			{
 				networkAccessToken = new NetworkAccessToken();
 			}

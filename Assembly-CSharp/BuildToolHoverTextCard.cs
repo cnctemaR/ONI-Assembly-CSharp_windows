@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class BuildToolHoverTextCard : HoverTextConfiguration
@@ -155,7 +156,7 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 							hoverTextDrawer.EndShadowBar();
 						}
 					}
-					goto IL_06F2;
+					goto IL_06FB;
 				}
 			}
 			if (mode == OverlayModes.Power.ID)
@@ -168,14 +169,14 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 					float num5 = circuitManager.GetWattsNeededWhenActive(circuitID);
 					num5 += this.currentDef.EnergyConsumptionWhenActive;
 					float maxSafeWattageForCircuit = circuitManager.GetMaxSafeWattageForCircuit(circuitID);
-					Color color = ((num5 >= maxSafeWattageForCircuit) ? Color.red : Color.white);
+					Color color = ((num5 >= maxSafeWattageForCircuit + POWER.FLOAT_FUDGE_FACTOR) ? Color.red : Color.white);
 					hoverTextDrawer.AddIndent(num3);
 					hoverTextDrawer.DrawText(string.Format(UI.DETAILTABS.ENERGYGENERATOR.POTENTIAL_WATTAGE_CONSUMED, GameUtil.GetFormattedWattage(num5, GameUtil.WattageFormatterUnit.Automatic, true)), this.Styles_BodyText.Standard, color, true);
 					hoverTextDrawer.EndShadowBar();
 				}
 			}
 		}
-		IL_06F2:
+		IL_06FB:
 		hoverTextDrawer.EndDrawing();
 	}
 

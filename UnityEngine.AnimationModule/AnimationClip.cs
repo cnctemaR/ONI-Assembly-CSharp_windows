@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeType("Runtime/Animation/AnimationClip.h")]
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationClip.bindings.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationClip.bindings.h")]
+	[NativeType("Modules/Animation/AnimationClip.h")]
 	public sealed class AnimationClip : Motion
 	{
 		public AnimationClip()
@@ -23,8 +23,8 @@ namespace UnityEngine
 			AnimationClip.SampleAnimation(go, this, time, this.wrapMode);
 		}
 
+		[NativeHeader("Modules/Animation/AnimationUtility.h")]
 		[FreeFunction]
-		[NativeHeader("Runtime/Animation/AnimationUtility.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void SampleAnimation([NotNull] GameObject go, [NotNull] AnimationClip clip, float inTime, WrapMode wrapMode);
 
@@ -153,7 +153,8 @@ namespace UnityEngine
 
 		public void AddEvent(AnimationEvent evt)
 		{
-			if (evt == null)
+			bool flag = evt == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("evt");
 			}

@@ -101,25 +101,16 @@ public class SymbolOverrideController : KMonoBehaviour
 			this.symbolOverrides.Sort((SymbolOverrideController.SymbolEntry x, SymbolOverrideController.SymbolEntry y) => x.priority - y.priority);
 			this.requiresSorting = false;
 		}
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		KAnimBatch batch = component.GetBatch();
+		KAnimBatch batch = this.animController.GetBatch();
 		DebugUtil.Assert(batch != null);
-		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(component.batchGroupID);
+		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.animController.batchGroupID);
 		int count = batch.atlases.Count;
 		this.atlases.Clear(count);
-		ListPool<SymbolOverrideController.SymbolToOverride, SymbolOverrideController>.PooledList pooledList = ListPool<SymbolOverrideController.SymbolToOverride, SymbolOverrideController>.Allocate();
-		ListPool<SymbolOverrideController.BatchGroupInfo, SymbolOverrideController>.PooledList pooledList2 = ListPool<SymbolOverrideController.BatchGroupInfo, SymbolOverrideController>.Allocate();
+		DictionaryPool<KAnim.Build, SymbolOverrideController.BatchGroupInfo, SymbolOverrideController>.PooledDictionary pooledDictionary = DictionaryPool<KAnim.Build, SymbolOverrideController.BatchGroupInfo, SymbolOverrideController>.Allocate();
 		foreach (SymbolOverrideController.SymbolEntry symbolEntry in this.symbolOverrides)
 		{
-			SymbolOverrideController.BatchGroupInfo batchGroupInfo = default(SymbolOverrideController.BatchGroupInfo);
-			foreach (SymbolOverrideController.BatchGroupInfo batchGroupInfo2 in pooledList2)
-			{
-				if (symbolEntry.sourceSymbol.build == batchGroupInfo2.build)
-				{
-					batchGroupInfo = batchGroupInfo2;
-				}
-			}
-			if (batchGroupInfo.build == null)
+			SymbolOverrideController.BatchGroupInfo batchGroupInfo;
+			if (!pooledDictionary.TryGetValue(symbolEntry.sourceSymbol.build, out batchGroupInfo))
 			{
 				batchGroupInfo = new SymbolOverrideController.BatchGroupInfo
 				{
@@ -129,33 +120,15 @@ public class SymbolOverrideController : KMonoBehaviour
 				Texture2D texture = symbolEntry.sourceSymbol.build.GetTexture(0);
 				int num = this.atlases.Add(texture);
 				batchGroupInfo.atlasIdx = num;
-				pooledList2.Add(batchGroupInfo);
+				pooledDictionary[batchGroupInfo.build] = batchGroupInfo;
 			}
-			pooledList.Add(new SymbolOverrideController.SymbolToOverride
-			{
-				sourceSymbol = symbolEntry.sourceSymbol,
-				targetSymbol = symbolEntry.targetSymbol,
-				data = batchGroupInfo.data,
-				atlasIdx = batchGroupInfo.atlasIdx
-			});
-		}
-		pooledList2.Recycle();
-		foreach (SymbolOverrideController.SymbolToOverride symbolToOverride in pooledList)
-		{
-			KAnim.Build.Symbol symbol = batchGroupData.GetSymbol(symbolToOverride.targetSymbol);
+			KAnim.Build.Symbol symbol = batchGroupData.GetSymbol(symbolEntry.targetSymbol);
 			if (symbol != null)
 			{
-				KAnim.Build.Symbol sourceSymbol = symbolToOverride.sourceSymbol;
-				for (int i = 0; i < symbol.numFrames; i++)
-				{
-					int num2 = Math.Min(sourceSymbol.numFrames - 1, i);
-					KAnim.Build.SymbolFrameInstance symbolFrameInstance = symbolToOverride.data.symbolFrameInstances[sourceSymbol.firstFrameIdx + num2];
-					symbolFrameInstance.buildImageIdx = symbolToOverride.atlasIdx;
-					component.SetSymbolOverride(symbol.firstFrameIdx + i, symbolFrameInstance);
-				}
+				this.animController.SetSymbolOverrides(symbol.firstFrameIdx, symbol.numFrames, batchGroupInfo.atlasIdx, batchGroupInfo.data, symbolEntry.sourceSymbol.firstFrameIdx, symbolEntry.sourceSymbol.numFrames);
 			}
 		}
-		pooledList.Recycle();
+		pooledDictionary.Recycle();
 		if (this.faceGraph != null)
 		{
 			this.faceGraph.ApplyShape();
@@ -218,7 +191,7 @@ public class SymbolOverrideController : KMonoBehaviour
 		public int atlasIdx;
 	}
 
-	private struct BatchGroupInfo
+	private class BatchGroupInfo
 	{
 		public KAnim.Build build;
 

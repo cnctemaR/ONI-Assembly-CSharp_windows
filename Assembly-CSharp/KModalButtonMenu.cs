@@ -12,6 +12,8 @@ public class KModalButtonMenu : KButtonMenu
 	protected override void OnCmpEnable()
 	{
 		KModalScreen.ResizeBackground(this.modalBackground);
+		ScreenResize instance = ScreenResize.Instance;
+		instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.OnResize));
 	}
 
 	protected override void OnCmpDisable()
@@ -21,6 +23,13 @@ public class KModalButtonMenu : KButtonMenu
 		{
 			base.Trigger(476357528, null);
 		}
+		ScreenResize instance = ScreenResize.Instance;
+		instance.OnResize = (global::System.Action)Delegate.Remove(instance.OnResize, new global::System.Action(this.OnResize));
+	}
+
+	private void OnResize()
+	{
+		KModalScreen.ResizeBackground(this.modalBackground);
 	}
 
 	public override bool IsModal()

@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace UnityEngineInternal.Input
 {
 	[StructLayout(LayoutKind.Explicit, Pack = 1, Size = 20)]
-	public struct NativeInputEvent
+	internal struct NativeInputEvent
 	{
 		public NativeInputEvent(NativeInputEventType type, int sizeInBytes, int deviceId, double time)
 		{
@@ -14,6 +14,8 @@ namespace UnityEngineInternal.Input
 			this.eventId = 0;
 			this.time = time;
 		}
+
+		public const int structSize = 20;
 
 		[FieldOffset(0)]
 		public NativeInputEventType type;
@@ -25,9 +27,9 @@ namespace UnityEngineInternal.Input
 		public ushort deviceId;
 
 		[FieldOffset(8)]
-		public int eventId;
-
-		[FieldOffset(12)]
 		public double time;
+
+		[FieldOffset(16)]
+		public int eventId;
 	}
 }

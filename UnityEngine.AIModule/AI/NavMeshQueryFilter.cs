@@ -4,44 +4,20 @@ namespace UnityEngine.AI
 {
 	public struct NavMeshQueryFilter
 	{
-		internal float[] costs
-		{
-			get
-			{
-				return this.m_AreaCost;
-			}
-		}
+		internal float[] costs { get; private set; }
 
-		public int areaMask
-		{
-			get
-			{
-				return this.m_AreaMask;
-			}
-			set
-			{
-				this.m_AreaMask = value;
-			}
-		}
+		public int areaMask { get; set; }
 
-		public int agentTypeID
-		{
-			get
-			{
-				return this.m_AgentTypeID;
-			}
-			set
-			{
-				this.m_AgentTypeID = value;
-			}
-		}
+		public int agentTypeID { get; set; }
 
 		public float GetAreaCost(int areaIndex)
 		{
+			bool flag = this.costs == null;
 			float num;
-			if (this.m_AreaCost == null)
+			if (flag)
 			{
-				if (areaIndex < 0 || areaIndex >= 32)
+				bool flag2 = areaIndex < 0 || areaIndex >= 32;
+				if (flag2)
 				{
 					string text = string.Format("The valid range is [0:{0}]", 31);
 					throw new IndexOutOfRangeException(text);
@@ -50,30 +26,25 @@ namespace UnityEngine.AI
 			}
 			else
 			{
-				num = this.m_AreaCost[areaIndex];
+				num = this.costs[areaIndex];
 			}
 			return num;
 		}
 
 		public void SetAreaCost(int areaIndex, float cost)
 		{
-			if (this.m_AreaCost == null)
+			bool flag = this.costs == null;
+			if (flag)
 			{
-				this.m_AreaCost = new float[32];
+				this.costs = new float[32];
 				for (int i = 0; i < 32; i++)
 				{
-					this.m_AreaCost[i] = 1f;
+					this.costs[i] = 1f;
 				}
 			}
-			this.m_AreaCost[areaIndex] = cost;
+			this.costs[areaIndex] = cost;
 		}
 
-		private const int AREA_COST_ELEMENT_COUNT = 32;
-
-		private int m_AreaMask;
-
-		private int m_AgentTypeID;
-
-		private float[] m_AreaCost;
+		private const int k_AreaCostElementCount = 32;
 	}
 }

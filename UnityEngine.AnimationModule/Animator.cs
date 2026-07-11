@@ -9,10 +9,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Animation/Animator.h")]
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimatorControllerParameter.bindings.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimatorControllerParameter.bindings.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/Animator.bindings.h")]
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Animation/ScriptBindings/Animator.bindings.h")]
+	[NativeHeader("Modules/Animation/Animator.h")]
 	public class Animator : Behaviour
 	{
 		public extern bool isOptimizable
@@ -254,7 +254,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.updateMode = ((!value) ? AnimatorUpdateMode.Normal : AnimatorUpdateMode.AnimatePhysics);
+				this.updateMode = (value ? AnimatorUpdateMode.AnimatePhysics : AnimatorUpdateMode.Normal);
 			}
 		}
 
@@ -540,8 +540,9 @@ namespace UnityEngine
 
 		private static T[] ConvertStateMachineBehaviour<T>(ScriptableObject[] rawObjects) where T : StateMachineBehaviour
 		{
+			bool flag = rawObjects == null;
 			T[] array;
-			if (rawObjects == null)
+			if (flag)
 			{
 				array = null;
 			}
@@ -651,7 +652,8 @@ namespace UnityEngine
 
 		public void GetCurrentAnimatorClipInfo(int layerIndex, List<AnimatorClipInfo> clips)
 		{
-			if (clips == null)
+			bool flag = clips == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("clips");
 			}
@@ -662,14 +664,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void GetAnimatorClipInfoInternal(int layerIndex, bool isCurrent, object clips);
 
-		[FreeFunction(Name = "AnimatorBindings::GetAnimatorClipInfoInternalWinRT", HasExplicitThis = true)]
-		[NativeConditional("ENABLE_DOTNET")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern AnimatorClipInfo[] GetAnimatorClipInfoInternalWinRT(int layerIndex, bool isCurrent);
-
 		public void GetNextAnimatorClipInfo(int layerIndex, List<AnimatorClipInfo> clips)
 		{
-			if (clips == null)
+			bool flag = clips == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("clips");
 			}
@@ -695,7 +693,8 @@ namespace UnityEngine
 		public AnimatorControllerParameter GetParameter(int index)
 		{
 			AnimatorControllerParameter[] parameters = this.parameters;
-			if (index < 0 || index >= this.parameters.Length)
+			bool flag = index < 0 || index >= this.parameters.Length;
+			if (flag)
 			{
 				throw new IndexOutOfRangeException("Index must be between 0 and " + this.parameters.Length);
 			}
@@ -726,19 +725,24 @@ namespace UnityEngine
 			}
 		}
 
-		private void MatchTarget(Vector3 matchPosition, Quaternion matchRotation, int targetBodyPart, MatchTargetWeightMask weightMask, float startNormalizedTime, float targetNormalizedTime)
+		private void MatchTarget(Vector3 matchPosition, Quaternion matchRotation, int targetBodyPart, MatchTargetWeightMask weightMask, float startNormalizedTime, float targetNormalizedTime, bool completeMatch)
 		{
-			this.MatchTarget_Injected(ref matchPosition, ref matchRotation, targetBodyPart, ref weightMask, startNormalizedTime, targetNormalizedTime);
+			this.MatchTarget_Injected(ref matchPosition, ref matchRotation, targetBodyPart, ref weightMask, startNormalizedTime, targetNormalizedTime, completeMatch);
 		}
 
 		public void MatchTarget(Vector3 matchPosition, Quaternion matchRotation, AvatarTarget targetBodyPart, MatchTargetWeightMask weightMask, float startNormalizedTime)
 		{
-			this.MatchTarget(matchPosition, matchRotation, (int)targetBodyPart, weightMask, startNormalizedTime, 1f);
+			this.MatchTarget(matchPosition, matchRotation, (int)targetBodyPart, weightMask, startNormalizedTime, 1f, true);
 		}
 
 		public void MatchTarget(Vector3 matchPosition, Quaternion matchRotation, AvatarTarget targetBodyPart, MatchTargetWeightMask weightMask, float startNormalizedTime, [UnityEngine.Internal.DefaultValue("1")] float targetNormalizedTime)
 		{
-			this.MatchTarget(matchPosition, matchRotation, (int)targetBodyPart, weightMask, startNormalizedTime, targetNormalizedTime);
+			this.MatchTarget(matchPosition, matchRotation, (int)targetBodyPart, weightMask, startNormalizedTime, targetNormalizedTime, true);
+		}
+
+		public void MatchTarget(Vector3 matchPosition, Quaternion matchRotation, AvatarTarget targetBodyPart, MatchTargetWeightMask weightMask, float startNormalizedTime, [UnityEngine.Internal.DefaultValue("1")] float targetNormalizedTime, [UnityEngine.Internal.DefaultValue("true")] bool completeMatch)
+		{
+			this.MatchTarget(matchPosition, matchRotation, (int)targetBodyPart, weightMask, startNormalizedTime, targetNormalizedTime, completeMatch);
 		}
 
 		public void InterruptMatchTarget()
@@ -969,8 +973,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use mask and layers to control subset of transfroms in a skeleton.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool IsControlled(Transform transform)
 		{
 			return false;
@@ -987,7 +991,8 @@ namespace UnityEngine
 
 		public Transform GetBoneTransform(HumanBodyBones humanBoneId)
 		{
-			if (humanBoneId < HumanBodyBones.Hips || humanBoneId >= HumanBodyBones.LastBone)
+			bool flag = humanBoneId < HumanBodyBones.Hips || humanBoneId >= HumanBodyBones.LastBone;
+			if (flag)
 			{
 				throw new IndexOutOfRangeException("humanBoneId must be between 0 and " + HumanBodyBones.LastBone);
 			}
@@ -1112,7 +1117,8 @@ namespace UnityEngine
 
 		private void CheckIfInIKPass()
 		{
-			if (this.logWarnings && !this.IsInIKPass())
+			bool flag = this.logWarnings && !this.IsInIKPass();
+			if (flag)
 			{
 				Debug.LogWarning("Setting and getting Body Position/Rotation, IK Goals, Lookat and BoneLocalRotation should only be done in OnAnimatorIK or OnStateIK");
 			}
@@ -1416,7 +1422,7 @@ namespace UnityEngine
 		private extern void get_pivotPosition_Injected(out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void MatchTarget_Injected(ref Vector3 matchPosition, ref Quaternion matchRotation, int targetBodyPart, ref MatchTargetWeightMask weightMask, float startNormalizedTime, float targetNormalizedTime);
+		private extern void MatchTarget_Injected(ref Vector3 matchPosition, ref Quaternion matchRotation, int targetBodyPart, ref MatchTargetWeightMask weightMask, float startNormalizedTime, float targetNormalizedTime, bool completeMatch);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_targetPosition_Injected(out Vector3 ret);

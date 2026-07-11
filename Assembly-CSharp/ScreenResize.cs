@@ -17,10 +17,15 @@ public class ScreenResize : MonoBehaviour
 			this.Width = Screen.width;
 			this.Height = Screen.height;
 			this.isFullscreen = Screen.fullScreen;
-			if (this.OnResize != null)
-			{
-				this.OnResize();
-			}
+			this.TriggerResize();
+		}
+	}
+
+	public void TriggerResize()
+	{
+		if (this.OnResize != null)
+		{
+			this.OnResize();
 		}
 	}
 

@@ -31,7 +31,8 @@ namespace UnityEngine.Events
 			List<BaseInvokableCall> list = new List<BaseInvokableCall>();
 			for (int i = 0; i < this.m_RuntimeCalls.Count; i++)
 			{
-				if (this.m_RuntimeCalls[i].Find(targetObj, method))
+				bool flag = this.m_RuntimeCalls[i].Find(targetObj, method);
+				if (flag)
 				{
 					list.Add(this.m_RuntimeCalls[i]);
 				}
@@ -54,7 +55,8 @@ namespace UnityEngine.Events
 
 		public List<BaseInvokableCall> PrepareInvoke()
 		{
-			if (this.m_NeedsUpdate)
+			bool needsUpdate = this.m_NeedsUpdate;
+			if (needsUpdate)
 			{
 				this.m_ExecutingCalls.Clear();
 				this.m_ExecutingCalls.AddRange(this.m_PersistentCalls);

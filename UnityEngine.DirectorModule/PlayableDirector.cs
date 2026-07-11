@@ -70,7 +70,8 @@ namespace UnityEngine.Playables
 
 		public void Play(PlayableAsset asset)
 		{
-			if (asset == null)
+			bool flag = asset == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("asset");
 			}
@@ -79,7 +80,8 @@ namespace UnityEngine.Playables
 
 		public void Play(PlayableAsset asset, DirectorWrapMode mode)
 		{
-			if (asset == null)
+			bool flag = asset == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("asset");
 			}
@@ -217,15 +219,16 @@ namespace UnityEngine.Playables
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public event Action<PlayableDirector> stopped;
 
-		[StaticAccessor("GetDirectorManager()", StaticAccessorType.Dot)]
 		[NativeHeader("Runtime/Director/Core/DirectorManager.h")]
+		[StaticAccessor("GetDirectorManager()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void ResetFrameTiming();
 
 		[RequiredByNativeCode]
 		private void SendOnPlayableDirectorPlay()
 		{
-			if (this.played != null)
+			bool flag = this.played != null;
+			if (flag)
 			{
 				this.played(this);
 			}
@@ -234,7 +237,8 @@ namespace UnityEngine.Playables
 		[RequiredByNativeCode]
 		private void SendOnPlayableDirectorPause()
 		{
-			if (this.paused != null)
+			bool flag = this.paused != null;
+			if (flag)
 			{
 				this.paused(this);
 			}
@@ -243,7 +247,8 @@ namespace UnityEngine.Playables
 		[RequiredByNativeCode]
 		private void SendOnPlayableDirectorStop()
 		{
-			if (this.stopped != null)
+			bool flag = this.stopped != null;
+			if (flag)
 			{
 				this.stopped(this);
 			}

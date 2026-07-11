@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, Inherited = true)]
 	[RequiredByNativeCode]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, Inherited = true)]
 	internal sealed class ExtensionOfNativeClassAttribute : Attribute
 	{
 	}

@@ -51,7 +51,7 @@ public class HeadquartersConfig : IBuildingConfig
 		light2D.Range = 5f;
 		light2D.Offset = LIGHT2D.HEADQUARTERS_OFFSET;
 		light2D.overlayColour = LIGHT2D.HEADQUARTERS_OVERLAYCOLOR;
-		light2D.shape = LightShape.Circle;
+		light2D.shape = global::LightShape.Circle;
 		light2D.drawOverlay = true;
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.LightSource, false);
 		go.GetComponent<KPrefabID>().AddTag(GameTags.Experimental, false);

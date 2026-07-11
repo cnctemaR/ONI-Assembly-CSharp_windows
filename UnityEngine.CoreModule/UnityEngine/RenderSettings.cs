@@ -5,16 +5,12 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/QualitySettingsTypes.h")]
-	[NativeHeader("Runtime/Camera/RenderSettings.h")]
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[StaticAccessor("GetRenderSettings()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/Camera/RenderSettings.h")]
+	[NativeHeader("Runtime/Graphics/QualitySettingsTypes.h")]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	public sealed class RenderSettings : Object
 	{
-		private RenderSettings()
-		{
-		}
-
 		[Obsolete("Use RenderSettings.ambientIntensity instead (UnityUpgradable) -> ambientIntensity", false)]
 		public static float ambientSkyboxAmount
 		{
@@ -26,6 +22,10 @@ namespace UnityEngine
 			{
 				RenderSettings.ambientIntensity = value;
 			}
+		}
+
+		private RenderSettings()
+		{
 		}
 
 		[NativeProperty("UseFog")]

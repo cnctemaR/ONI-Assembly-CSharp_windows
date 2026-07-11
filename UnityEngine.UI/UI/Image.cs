@@ -9,11 +9,6 @@ namespace UnityEngine.UI
 	[AddComponentMenu("UI/Image", 11)]
 	public class Image : MaskableGraphic, ISerializationCallbackReceiver, ILayoutElement, ICanvasRaycastFilter
 	{
-		protected Image()
-		{
-			base.useLegacyMeshGeneration = false;
-		}
-
 		public Sprite sprite
 		{
 			get
@@ -22,12 +17,33 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (SetPropertyUtility.SetClass<Sprite>(ref this.m_Sprite, value))
+				if (this.m_Sprite != null)
 				{
+					if (this.m_Sprite != value)
+					{
+						this.m_SkipLayoutUpdate = this.m_Sprite.rect.size.Equals(value ? value.rect.size : Vector2.zero);
+						this.m_SkipMaterialUpdate = this.m_Sprite.texture == (value ? value.texture : null);
+						this.m_Sprite = value;
+						this.SetAllDirty();
+						this.TrackSprite();
+						return;
+					}
+				}
+				else if (value != null)
+				{
+					this.m_SkipLayoutUpdate = value.rect.size == Vector2.zero;
+					this.m_SkipMaterialUpdate = value.texture == null;
+					this.m_Sprite = value;
 					this.SetAllDirty();
 					this.TrackSprite();
 				}
 			}
+		}
+
+		public void DisableSpriteOptimizations()
+		{
+			this.m_SkipLayoutUpdate = false;
+			this.m_SkipMaterialUpdate = false;
 		}
 
 		public Sprite overrideSprite
@@ -50,7 +66,11 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				return (!(this.m_OverrideSprite != null)) ? this.sprite : this.m_OverrideSprite;
+				if (!(this.m_OverrideSprite != null))
+				{
+					return this.sprite;
+				}
+				return this.m_OverrideSprite;
 			}
 		}
 
@@ -200,6 +220,11 @@ namespace UnityEngine.UI
 			}
 		}
 
+		protected Image()
+		{
+			base.useLegacyMeshGeneration = false;
+		}
+
 		public static Material defaultETC1GraphicMaterial
 		{
 			get
@@ -216,23 +241,15 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				Texture texture;
-				if (this.activeSprite == null)
+				if (!(this.activeSprite == null))
 				{
-					if (this.material != null && this.material.mainTexture != null)
-					{
-						texture = this.material.mainTexture;
-					}
-					else
-					{
-						texture = Graphic.s_WhiteTexture;
-					}
+					return this.activeSprite.texture;
 				}
-				else
+				if (this.material != null && this.material.mainTexture != null)
 				{
-					texture = this.activeSprite.texture;
+					return this.material.mainTexture;
 				}
-				return texture;
+				return Graphic.s_WhiteTexture;
 			}
 		}
 
@@ -241,6 +258,18 @@ namespace UnityEngine.UI
 			get
 			{
 				return this.activeSprite != null && this.activeSprite.border.sqrMagnitude > 0f;
+			}
+		}
+
+		public float pixelsPerUnitMultiplier
+		{
+			get
+			{
+				return this.m_PixelsPerUnitMultiplier;
+			}
+			set
+			{
+				this.m_PixelsPerUnitMultiplier = Mathf.Max(0.01f, value);
 			}
 		}
 
@@ -253,12 +282,19 @@ namespace UnityEngine.UI
 				{
 					num = this.activeSprite.pixelsPerUnit;
 				}
-				float num2 = 100f;
 				if (base.canvas)
 				{
-					num2 = base.canvas.referencePixelsPerUnit;
+					this.m_CachedReferencePixelsPerUnit = base.canvas.referencePixelsPerUnit;
 				}
-				return num / num2;
+				return num / this.m_CachedReferencePixelsPerUnit;
+			}
+		}
+
+		protected float multipliedPixelsPerUnit
+		{
+			get
+			{
+				return this.pixelsPerUnit * this.m_PixelsPerUnitMultiplier;
 			}
 		}
 
@@ -266,20 +302,15 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				Material material;
 				if (this.m_Material != null)
 				{
-					material = this.m_Material;
+					return this.m_Material;
 				}
-				else if (this.activeSprite && this.activeSprite.associatedAlphaSplitTexture != null)
+				if (this.activeSprite && this.activeSprite.associatedAlphaSplitTexture != null)
 				{
-					material = Image.defaultETC1GraphicMaterial;
+					return Image.defaultETC1GraphicMaterial;
 				}
-				else
-				{
-					material = this.defaultMaterial;
-				}
-				return material;
+				return this.defaultMaterial;
 			}
 			set
 			{
@@ -321,19 +352,17 @@ namespace UnityEngine.UI
 				float height = rect.height;
 				rect.height = rect.width * (1f / num);
 				rect.y += (height - rect.height) * base.rectTransform.pivot.y;
+				return;
 			}
-			else
-			{
-				float width = rect.width;
-				rect.width = rect.height * num;
-				rect.x += (width - rect.width) * base.rectTransform.pivot.x;
-			}
+			float width = rect.width;
+			rect.width = rect.height * num;
+			rect.x += (width - rect.width) * base.rectTransform.pivot.x;
 		}
 
 		private Vector4 GetDrawingDimensions(bool shouldPreserveAspect)
 		{
-			Vector4 vector = ((!(this.activeSprite == null)) ? DataUtility.GetPadding(this.activeSprite) : Vector4.zero);
-			Vector2 vector2 = ((!(this.activeSprite == null)) ? new Vector2(this.activeSprite.rect.width, this.activeSprite.rect.height) : Vector2.zero);
+			Vector4 vector = ((this.activeSprite == null) ? Vector4.zero : DataUtility.GetPadding(this.activeSprite));
+			Vector2 vector2 = ((this.activeSprite == null) ? Vector2.zero : new Vector2(this.activeSprite.rect.width, this.activeSprite.rect.height));
 			Rect pixelAdjustedRect = base.GetPixelAdjustedRect();
 			int num = Mathf.RoundToInt(vector2.x);
 			int num2 = Mathf.RoundToInt(vector2.y);
@@ -363,31 +392,29 @@ namespace UnityEngine.UI
 			if (this.activeSprite == null)
 			{
 				base.OnPopulateMesh(toFill);
+				return;
 			}
-			else
+			switch (this.type)
 			{
-				switch (this.type)
+			case Image.Type.Simple:
+				if (!this.useSpriteMesh)
 				{
-				case Image.Type.Simple:
-					if (!this.useSpriteMesh)
-					{
-						this.GenerateSimpleSprite(toFill, this.m_PreserveAspect);
-					}
-					else
-					{
-						this.GenerateSprite(toFill, this.m_PreserveAspect);
-					}
-					break;
-				case Image.Type.Sliced:
-					this.GenerateSlicedSprite(toFill);
-					break;
-				case Image.Type.Tiled:
-					this.GenerateTiledSprite(toFill);
-					break;
-				case Image.Type.Filled:
-					this.GenerateFilledSprite(toFill, this.m_PreserveAspect);
-					break;
+					this.GenerateSimpleSprite(toFill, this.m_PreserveAspect);
+					return;
 				}
+				this.GenerateSprite(toFill, this.m_PreserveAspect);
+				return;
+			case Image.Type.Sliced:
+				this.GenerateSlicedSprite(toFill);
+				return;
+			case Image.Type.Tiled:
+				this.GenerateTiledSprite(toFill);
+				return;
+			case Image.Type.Filled:
+				this.GenerateFilledSprite(toFill, this.m_PreserveAspect);
+				return;
+			default:
+				return;
 			}
 		}
 
@@ -421,13 +448,30 @@ namespace UnityEngine.UI
 			if (this.activeSprite == null)
 			{
 				base.canvasRenderer.SetAlphaTexture(null);
+				return;
 			}
-			else
+			Texture2D associatedAlphaSplitTexture = this.activeSprite.associatedAlphaSplitTexture;
+			if (associatedAlphaSplitTexture != null)
 			{
-				Texture2D associatedAlphaSplitTexture = this.activeSprite.associatedAlphaSplitTexture;
-				if (associatedAlphaSplitTexture != null)
+				base.canvasRenderer.SetAlphaTexture(associatedAlphaSplitTexture);
+			}
+		}
+
+		protected override void OnCanvasHierarchyChanged()
+		{
+			base.OnCanvasHierarchyChanged();
+			if (base.canvas == null)
+			{
+				this.m_CachedReferencePixelsPerUnit = 100f;
+				return;
+			}
+			if (base.canvas.referencePixelsPerUnit != this.m_CachedReferencePixelsPerUnit)
+			{
+				this.m_CachedReferencePixelsPerUnit = base.canvas.referencePixelsPerUnit;
+				if (this.type == Image.Type.Sliced || this.type == Image.Type.Tiled)
 				{
-					base.canvasRenderer.SetAlphaTexture(associatedAlphaSplitTexture);
+					this.SetVerticesDirty();
+					this.SetLayoutDirty();
 				}
 			}
 		}
@@ -435,7 +479,7 @@ namespace UnityEngine.UI
 		private void GenerateSimpleSprite(VertexHelper vh, bool lPreserveAspect)
 		{
 			Vector4 drawingDimensions = this.GetDrawingDimensions(lPreserveAspect);
-			Vector4 vector = ((!(this.activeSprite != null)) ? Vector4.zero : DataUtility.GetOuterUV(this.activeSprite));
+			Vector4 vector = ((this.activeSprite != null) ? DataUtility.GetOuterUV(this.activeSprite) : Vector4.zero);
 			Color color = this.color;
 			vh.Clear();
 			vh.AddVert(new Vector3(drawingDimensions.x, drawingDimensions.y), color, new Vector2(vector.x, vector.y));
@@ -479,60 +523,58 @@ namespace UnityEngine.UI
 			if (!this.hasBorder)
 			{
 				this.GenerateSimpleSprite(toFill, false);
+				return;
+			}
+			Vector4 vector;
+			Vector4 vector2;
+			Vector4 vector3;
+			Vector4 vector4;
+			if (this.activeSprite != null)
+			{
+				vector = DataUtility.GetOuterUV(this.activeSprite);
+				vector2 = DataUtility.GetInnerUV(this.activeSprite);
+				vector3 = DataUtility.GetPadding(this.activeSprite);
+				vector4 = this.activeSprite.border;
 			}
 			else
 			{
-				Vector4 vector;
-				Vector4 vector2;
-				Vector4 vector3;
-				Vector4 vector4;
-				if (this.activeSprite != null)
+				vector = Vector4.zero;
+				vector2 = Vector4.zero;
+				vector3 = Vector4.zero;
+				vector4 = Vector4.zero;
+			}
+			Rect pixelAdjustedRect = base.GetPixelAdjustedRect();
+			Vector4 adjustedBorders = this.GetAdjustedBorders(vector4 / this.multipliedPixelsPerUnit, pixelAdjustedRect);
+			vector3 /= this.multipliedPixelsPerUnit;
+			Image.s_VertScratch[0] = new Vector2(vector3.x, vector3.y);
+			Image.s_VertScratch[3] = new Vector2(pixelAdjustedRect.width - vector3.z, pixelAdjustedRect.height - vector3.w);
+			Image.s_VertScratch[1].x = adjustedBorders.x;
+			Image.s_VertScratch[1].y = adjustedBorders.y;
+			Image.s_VertScratch[2].x = pixelAdjustedRect.width - adjustedBorders.z;
+			Image.s_VertScratch[2].y = pixelAdjustedRect.height - adjustedBorders.w;
+			for (int i = 0; i < 4; i++)
+			{
+				Vector2[] array = Image.s_VertScratch;
+				int num = i;
+				array[num].x = array[num].x + pixelAdjustedRect.x;
+				Vector2[] array2 = Image.s_VertScratch;
+				int num2 = i;
+				array2[num2].y = array2[num2].y + pixelAdjustedRect.y;
+			}
+			Image.s_UVScratch[0] = new Vector2(vector.x, vector.y);
+			Image.s_UVScratch[1] = new Vector2(vector2.x, vector2.y);
+			Image.s_UVScratch[2] = new Vector2(vector2.z, vector2.w);
+			Image.s_UVScratch[3] = new Vector2(vector.z, vector.w);
+			toFill.Clear();
+			for (int j = 0; j < 3; j++)
+			{
+				int num3 = j + 1;
+				for (int k = 0; k < 3; k++)
 				{
-					vector = DataUtility.GetOuterUV(this.activeSprite);
-					vector2 = DataUtility.GetInnerUV(this.activeSprite);
-					vector3 = DataUtility.GetPadding(this.activeSprite);
-					vector4 = this.activeSprite.border;
-				}
-				else
-				{
-					vector = Vector4.zero;
-					vector2 = Vector4.zero;
-					vector3 = Vector4.zero;
-					vector4 = Vector4.zero;
-				}
-				Rect pixelAdjustedRect = base.GetPixelAdjustedRect();
-				Vector4 adjustedBorders = this.GetAdjustedBorders(vector4 / this.pixelsPerUnit, pixelAdjustedRect);
-				vector3 /= this.pixelsPerUnit;
-				Image.s_VertScratch[0] = new Vector2(vector3.x, vector3.y);
-				Image.s_VertScratch[3] = new Vector2(pixelAdjustedRect.width - vector3.z, pixelAdjustedRect.height - vector3.w);
-				Image.s_VertScratch[1].x = adjustedBorders.x;
-				Image.s_VertScratch[1].y = adjustedBorders.y;
-				Image.s_VertScratch[2].x = pixelAdjustedRect.width - adjustedBorders.z;
-				Image.s_VertScratch[2].y = pixelAdjustedRect.height - adjustedBorders.w;
-				for (int i = 0; i < 4; i++)
-				{
-					Vector2[] array = Image.s_VertScratch;
-					int num = i;
-					array[num].x = array[num].x + pixelAdjustedRect.x;
-					Vector2[] array2 = Image.s_VertScratch;
-					int num2 = i;
-					array2[num2].y = array2[num2].y + pixelAdjustedRect.y;
-				}
-				Image.s_UVScratch[0] = new Vector2(vector.x, vector.y);
-				Image.s_UVScratch[1] = new Vector2(vector2.x, vector2.y);
-				Image.s_UVScratch[2] = new Vector2(vector2.z, vector2.w);
-				Image.s_UVScratch[3] = new Vector2(vector.z, vector.w);
-				toFill.Clear();
-				for (int j = 0; j < 3; j++)
-				{
-					int num3 = j + 1;
-					for (int k = 0; k < 3; k++)
+					if (this.m_FillCenter || j != 1 || k != 1)
 					{
-						if (this.m_FillCenter || j != 1 || k != 1)
-						{
-							int num4 = k + 1;
-							Image.AddQuad(toFill, new Vector2(Image.s_VertScratch[j].x, Image.s_VertScratch[k].y), new Vector2(Image.s_VertScratch[num3].x, Image.s_VertScratch[num4].y), this.color, new Vector2(Image.s_UVScratch[j].x, Image.s_UVScratch[k].y), new Vector2(Image.s_UVScratch[num3].x, Image.s_UVScratch[num4].y));
-						}
+						int num4 = k + 1;
+						Image.AddQuad(toFill, new Vector2(Image.s_VertScratch[j].x, Image.s_VertScratch[k].y), new Vector2(Image.s_VertScratch[num3].x, Image.s_VertScratch[num4].y), this.color, new Vector2(Image.s_UVScratch[j].x, Image.s_UVScratch[k].y), new Vector2(Image.s_UVScratch[num3].x, Image.s_UVScratch[num4].y));
 					}
 				}
 			}
@@ -559,9 +601,9 @@ namespace UnityEngine.UI
 				vector4 = Vector2.one * 100f;
 			}
 			Rect pixelAdjustedRect = base.GetPixelAdjustedRect();
-			float num = (vector4.x - vector3.x - vector3.z) / this.pixelsPerUnit;
-			float num2 = (vector4.y - vector3.y - vector3.w) / this.pixelsPerUnit;
-			vector3 = this.GetAdjustedBorders(vector3 / this.pixelsPerUnit, pixelAdjustedRect);
+			float num = (vector4.x - vector3.x - vector3.z) / this.multipliedPixelsPerUnit;
+			float num2 = (vector4.y - vector3.y - vector3.w) / this.multipliedPixelsPerUnit;
+			vector3 = this.GetAdjustedBorders(vector3 / this.multipliedPixelsPerUnit, pixelAdjustedRect);
 			Vector2 vector5 = new Vector2(vector2.x, vector2.y);
 			Vector2 vector6 = new Vector2(vector2.z, vector2.w);
 			float x = vector3.x;
@@ -597,7 +639,7 @@ namespace UnityEngine.UI
 					}
 					if (num7 > 65000.0)
 					{
-						Debug.LogError("Too many sprite tiles on Image \"" + base.name + "\". The tile size will be increased. To remove the limit on the number of tiles, convert the Sprite to an Advanced texture, remove the borders, clear the Packing tag and set the Wrap mode to Repeat.", this);
+						Debug.LogError("Too many sprite tiles on Image \"" + base.name + "\". The tile size will be increased. To remove the limit on the number of tiles, set the Wrap mode to Repeat in the Image Import Settings", this);
 						double num8 = 16250.0;
 						double num9;
 						if (this.hasBorder)
@@ -625,16 +667,15 @@ namespace UnityEngine.UI
 				{
 					num5 = (long)Math.Ceiling((double)((num3 - x) / num));
 					num6 = (long)Math.Ceiling((double)((num4 - y) / num2));
-					double num12 = ((double)(num6 + num5) + 2.0) * 2.0 * 4.0;
-					if (num12 > 65000.0)
+					if (((double)(num6 + num5) + 2.0) * 2.0 * 4.0 > 65000.0)
 					{
-						Debug.LogError("Too many sprite tiles on Image \"" + base.name + "\". The tile size will be increased. To remove the limit on the number of tiles, convert the Sprite to an Advanced texture, remove the borders, clear the Packing tag and set the Wrap mode to Repeat.", this);
-						double num13 = 16250.0;
-						double num14 = (double)num5 / (double)num6;
-						double num15 = (num13 - 4.0) / (2.0 * (1.0 + num14));
-						double num16 = num15 * num14;
-						num5 = (long)Math.Floor(num15);
-						num6 = (long)Math.Floor(num16);
+						Debug.LogError("Too many sprite tiles on Image \"" + base.name + "\". The tile size will be increased. To remove the limit on the number of tiles, set the Wrap mode to Repeat in the Image Import Settings", this);
+						double num12 = 16250.0;
+						double num13 = (double)num5 / (double)num6;
+						double num14 = (num12 - 4.0) / (2.0 * (1.0 + num13));
+						double num15 = num14 * num13;
+						num5 = (long)Math.Floor(num14);
+						num6 = (long)Math.Floor(num15);
 						num = (num3 - x) / (float)num5;
 						num2 = (num4 - y) / (float)num6;
 					}
@@ -645,61 +686,62 @@ namespace UnityEngine.UI
 				}
 				if (this.m_FillCenter)
 				{
-					for (long num17 = 0L; num17 < num6; num17 += 1L)
+					for (long num16 = 0L; num16 < num6; num16 += 1L)
 					{
-						float num18 = y + (float)num17 * num2;
-						float num19 = y + (float)(num17 + 1L) * num2;
-						if (num19 > num4)
+						float num17 = y + (float)num16 * num2;
+						float num18 = y + (float)(num16 + 1L) * num2;
+						if (num18 > num4)
 						{
-							vector7.y = vector5.y + (vector6.y - vector5.y) * (num4 - num18) / (num19 - num18);
-							num19 = num4;
+							vector7.y = vector5.y + (vector6.y - vector5.y) * (num4 - num17) / (num18 - num17);
+							num18 = num4;
 						}
 						vector7.x = vector6.x;
-						for (long num20 = 0L; num20 < num5; num20 += 1L)
+						for (long num19 = 0L; num19 < num5; num19 += 1L)
 						{
-							float num21 = x + (float)num20 * num;
-							float num22 = x + (float)(num20 + 1L) * num;
-							if (num22 > num3)
+							float num20 = x + (float)num19 * num;
+							float num21 = x + (float)(num19 + 1L) * num;
+							if (num21 > num3)
 							{
-								vector7.x = vector5.x + (vector6.x - vector5.x) * (num3 - num21) / (num22 - num21);
-								num22 = num3;
+								vector7.x = vector5.x + (vector6.x - vector5.x) * (num3 - num20) / (num21 - num20);
+								num21 = num3;
 							}
-							Image.AddQuad(toFill, new Vector2(num21, num18) + pixelAdjustedRect.position, new Vector2(num22, num19) + pixelAdjustedRect.position, this.color, vector5, vector7);
+							Image.AddQuad(toFill, new Vector2(num20, num17) + pixelAdjustedRect.position, new Vector2(num21, num18) + pixelAdjustedRect.position, this.color, vector5, vector7);
 						}
 					}
 				}
 				if (this.hasBorder)
 				{
 					vector7 = vector6;
-					for (long num23 = 0L; num23 < num6; num23 += 1L)
+					for (long num22 = 0L; num22 < num6; num22 += 1L)
 					{
-						float num24 = y + (float)num23 * num2;
-						float num25 = y + (float)(num23 + 1L) * num2;
-						if (num25 > num4)
+						float num23 = y + (float)num22 * num2;
+						float num24 = y + (float)(num22 + 1L) * num2;
+						if (num24 > num4)
 						{
-							vector7.y = vector5.y + (vector6.y - vector5.y) * (num4 - num24) / (num25 - num24);
-							num25 = num4;
+							vector7.y = vector5.y + (vector6.y - vector5.y) * (num4 - num23) / (num24 - num23);
+							num24 = num4;
 						}
-						Image.AddQuad(toFill, new Vector2(0f, num24) + pixelAdjustedRect.position, new Vector2(x, num25) + pixelAdjustedRect.position, this.color, new Vector2(vector.x, vector5.y), new Vector2(vector5.x, vector7.y));
-						Image.AddQuad(toFill, new Vector2(num3, num24) + pixelAdjustedRect.position, new Vector2(pixelAdjustedRect.width, num25) + pixelAdjustedRect.position, this.color, new Vector2(vector6.x, vector5.y), new Vector2(vector.z, vector7.y));
+						Image.AddQuad(toFill, new Vector2(0f, num23) + pixelAdjustedRect.position, new Vector2(x, num24) + pixelAdjustedRect.position, this.color, new Vector2(vector.x, vector5.y), new Vector2(vector5.x, vector7.y));
+						Image.AddQuad(toFill, new Vector2(num3, num23) + pixelAdjustedRect.position, new Vector2(pixelAdjustedRect.width, num24) + pixelAdjustedRect.position, this.color, new Vector2(vector6.x, vector5.y), new Vector2(vector.z, vector7.y));
 					}
 					vector7 = vector6;
-					for (long num26 = 0L; num26 < num5; num26 += 1L)
+					for (long num25 = 0L; num25 < num5; num25 += 1L)
 					{
-						float num27 = x + (float)num26 * num;
-						float num28 = x + (float)(num26 + 1L) * num;
-						if (num28 > num3)
+						float num26 = x + (float)num25 * num;
+						float num27 = x + (float)(num25 + 1L) * num;
+						if (num27 > num3)
 						{
-							vector7.x = vector5.x + (vector6.x - vector5.x) * (num3 - num27) / (num28 - num27);
-							num28 = num3;
+							vector7.x = vector5.x + (vector6.x - vector5.x) * (num3 - num26) / (num27 - num26);
+							num27 = num3;
 						}
-						Image.AddQuad(toFill, new Vector2(num27, 0f) + pixelAdjustedRect.position, new Vector2(num28, y) + pixelAdjustedRect.position, this.color, new Vector2(vector5.x, vector.y), new Vector2(vector7.x, vector5.y));
-						Image.AddQuad(toFill, new Vector2(num27, num4) + pixelAdjustedRect.position, new Vector2(num28, pixelAdjustedRect.height) + pixelAdjustedRect.position, this.color, new Vector2(vector5.x, vector6.y), new Vector2(vector7.x, vector.w));
+						Image.AddQuad(toFill, new Vector2(num26, 0f) + pixelAdjustedRect.position, new Vector2(num27, y) + pixelAdjustedRect.position, this.color, new Vector2(vector5.x, vector.y), new Vector2(vector7.x, vector5.y));
+						Image.AddQuad(toFill, new Vector2(num26, num4) + pixelAdjustedRect.position, new Vector2(num27, pixelAdjustedRect.height) + pixelAdjustedRect.position, this.color, new Vector2(vector5.x, vector6.y), new Vector2(vector7.x, vector.w));
 					}
 					Image.AddQuad(toFill, new Vector2(0f, 0f) + pixelAdjustedRect.position, new Vector2(x, y) + pixelAdjustedRect.position, this.color, new Vector2(vector.x, vector.y), new Vector2(vector5.x, vector5.y));
 					Image.AddQuad(toFill, new Vector2(num3, 0f) + pixelAdjustedRect.position, new Vector2(pixelAdjustedRect.width, y) + pixelAdjustedRect.position, this.color, new Vector2(vector6.x, vector.y), new Vector2(vector.z, vector5.y));
 					Image.AddQuad(toFill, new Vector2(0f, num4) + pixelAdjustedRect.position, new Vector2(x, pixelAdjustedRect.height) + pixelAdjustedRect.position, this.color, new Vector2(vector.x, vector6.y), new Vector2(vector5.x, vector.w));
 					Image.AddQuad(toFill, new Vector2(num3, num4) + pixelAdjustedRect.position, new Vector2(pixelAdjustedRect.width, pixelAdjustedRect.height) + pixelAdjustedRect.position, this.color, new Vector2(vector6.x, vector6.y), new Vector2(vector.z, vector.w));
+					return;
 				}
 			}
 			else
@@ -743,22 +785,22 @@ namespace UnityEngine.UI
 				{
 					float num = adjustedRect.size[i] / rect.size[i];
 					ref Vector4 ptr = ref border;
-					int num2;
-					border[num2 = i] = ptr[num2] * num;
+					int num2 = i;
+					ptr[num2] *= num;
 					ptr = ref border;
-					int num3;
-					border[num3 = i + 2] = ptr[num3] * num;
+					num2 = i + 2;
+					ptr[num2] *= num;
 				}
-				float num4 = border[i] + border[i + 2];
-				if (adjustedRect.size[i] < num4 && num4 != 0f)
+				float num3 = border[i] + border[i + 2];
+				if (adjustedRect.size[i] < num3 && num3 != 0f)
 				{
-					float num = adjustedRect.size[i] / num4;
+					float num = adjustedRect.size[i] / num3;
 					ref Vector4 ptr = ref border;
-					int num5;
-					border[num5 = i] = ptr[num5] * num;
+					int num2 = i;
+					ptr[num2] *= num;
 					ptr = ref border;
-					int num6;
-					border[num6 = i + 2] = ptr[num6] * num;
+					num2 = i + 2;
+					ptr[num2] *= num;
 				}
 			}
 			return border;
@@ -767,69 +809,75 @@ namespace UnityEngine.UI
 		private void GenerateFilledSprite(VertexHelper toFill, bool preserveAspect)
 		{
 			toFill.Clear();
-			if (this.m_FillAmount >= 0.001f)
+			if (this.m_FillAmount < 0.001f)
 			{
-				Vector4 drawingDimensions = this.GetDrawingDimensions(preserveAspect);
-				Vector4 vector = ((!(this.activeSprite != null)) ? Vector4.zero : DataUtility.GetOuterUV(this.activeSprite));
-				UIVertex simpleVert = UIVertex.simpleVert;
-				simpleVert.color = this.color;
-				float num = vector.x;
-				float num2 = vector.y;
-				float num3 = vector.z;
-				float num4 = vector.w;
-				if (this.m_FillMethod == Image.FillMethod.Horizontal || this.m_FillMethod == Image.FillMethod.Vertical)
+				return;
+			}
+			Vector4 drawingDimensions = this.GetDrawingDimensions(preserveAspect);
+			object obj = ((this.activeSprite != null) ? DataUtility.GetOuterUV(this.activeSprite) : Vector4.zero);
+			UIVertex simpleVert = UIVertex.simpleVert;
+			simpleVert.color = this.color;
+			object obj2 = obj;
+			float num = obj2.x;
+			float num2 = obj2.y;
+			float num3 = obj2.z;
+			float num4 = obj2.w;
+			if (this.m_FillMethod == Image.FillMethod.Horizontal || this.m_FillMethod == Image.FillMethod.Vertical)
+			{
+				if (this.fillMethod == Image.FillMethod.Horizontal)
 				{
-					if (this.fillMethod == Image.FillMethod.Horizontal)
+					float num5 = (num3 - num) * this.m_FillAmount;
+					if (this.m_FillOrigin == 1)
 					{
-						float num5 = (num3 - num) * this.m_FillAmount;
-						if (this.m_FillOrigin == 1)
-						{
-							drawingDimensions.x = drawingDimensions.z - (drawingDimensions.z - drawingDimensions.x) * this.m_FillAmount;
-							num = num3 - num5;
-						}
-						else
-						{
-							drawingDimensions.z = drawingDimensions.x + (drawingDimensions.z - drawingDimensions.x) * this.m_FillAmount;
-							num3 = num + num5;
-						}
+						drawingDimensions.x = drawingDimensions.z - (drawingDimensions.z - drawingDimensions.x) * this.m_FillAmount;
+						num = num3 - num5;
 					}
-					else if (this.fillMethod == Image.FillMethod.Vertical)
+					else
 					{
-						float num6 = (num4 - num2) * this.m_FillAmount;
-						if (this.m_FillOrigin == 1)
-						{
-							drawingDimensions.y = drawingDimensions.w - (drawingDimensions.w - drawingDimensions.y) * this.m_FillAmount;
-							num2 = num4 - num6;
-						}
-						else
-						{
-							drawingDimensions.w = drawingDimensions.y + (drawingDimensions.w - drawingDimensions.y) * this.m_FillAmount;
-							num4 = num2 + num6;
-						}
+						drawingDimensions.z = drawingDimensions.x + (drawingDimensions.z - drawingDimensions.x) * this.m_FillAmount;
+						num3 = num + num5;
 					}
 				}
-				Image.s_Xy[0] = new Vector2(drawingDimensions.x, drawingDimensions.y);
-				Image.s_Xy[1] = new Vector2(drawingDimensions.x, drawingDimensions.w);
-				Image.s_Xy[2] = new Vector2(drawingDimensions.z, drawingDimensions.w);
-				Image.s_Xy[3] = new Vector2(drawingDimensions.z, drawingDimensions.y);
-				Image.s_Uv[0] = new Vector2(num, num2);
-				Image.s_Uv[1] = new Vector2(num, num4);
-				Image.s_Uv[2] = new Vector2(num3, num4);
-				Image.s_Uv[3] = new Vector2(num3, num2);
-				if (this.m_FillAmount < 1f && this.m_FillMethod != Image.FillMethod.Horizontal && this.m_FillMethod != Image.FillMethod.Vertical)
+				else if (this.fillMethod == Image.FillMethod.Vertical)
 				{
-					if (this.fillMethod == Image.FillMethod.Radial90)
+					float num6 = (num4 - num2) * this.m_FillAmount;
+					if (this.m_FillOrigin == 1)
 					{
-						if (Image.RadialCut(Image.s_Xy, Image.s_Uv, this.m_FillAmount, this.m_FillClockwise, this.m_FillOrigin))
-						{
-							Image.AddQuad(toFill, Image.s_Xy, this.color, Image.s_Uv);
-						}
+						drawingDimensions.y = drawingDimensions.w - (drawingDimensions.w - drawingDimensions.y) * this.m_FillAmount;
+						num2 = num4 - num6;
 					}
-					else if (this.fillMethod == Image.FillMethod.Radial180)
+					else
+					{
+						drawingDimensions.w = drawingDimensions.y + (drawingDimensions.w - drawingDimensions.y) * this.m_FillAmount;
+						num4 = num2 + num6;
+					}
+				}
+			}
+			Image.s_Xy[0] = new Vector2(drawingDimensions.x, drawingDimensions.y);
+			Image.s_Xy[1] = new Vector2(drawingDimensions.x, drawingDimensions.w);
+			Image.s_Xy[2] = new Vector2(drawingDimensions.z, drawingDimensions.w);
+			Image.s_Xy[3] = new Vector2(drawingDimensions.z, drawingDimensions.y);
+			Image.s_Uv[0] = new Vector2(num, num2);
+			Image.s_Uv[1] = new Vector2(num, num4);
+			Image.s_Uv[2] = new Vector2(num3, num4);
+			Image.s_Uv[3] = new Vector2(num3, num2);
+			if (this.m_FillAmount < 1f && this.m_FillMethod != Image.FillMethod.Horizontal && this.m_FillMethod != Image.FillMethod.Vertical)
+			{
+				if (this.fillMethod == Image.FillMethod.Radial90)
+				{
+					if (Image.RadialCut(Image.s_Xy, Image.s_Uv, this.m_FillAmount, this.m_FillClockwise, this.m_FillOrigin))
+					{
+						Image.AddQuad(toFill, Image.s_Xy, this.color, Image.s_Uv);
+						return;
+					}
+				}
+				else
+				{
+					if (this.fillMethod == Image.FillMethod.Radial180)
 					{
 						for (int i = 0; i < 2; i++)
 						{
-							int num7 = ((this.m_FillOrigin <= 1) ? 0 : 1);
+							int num7 = ((this.m_FillOrigin > 1) ? 1 : 0);
 							float num8;
 							float num9;
 							float num10;
@@ -880,14 +928,15 @@ namespace UnityEngine.UI
 							Image.s_Uv[1].y = Mathf.Lerp(num2, num4, num9);
 							Image.s_Uv[2].y = Image.s_Uv[1].y;
 							Image.s_Uv[3].y = Image.s_Uv[0].y;
-							float num12 = ((!this.m_FillClockwise) ? (this.m_FillAmount * 2f - (float)(1 - i)) : (this.fillAmount * 2f - (float)i));
+							float num12 = (this.m_FillClockwise ? (this.fillAmount * 2f - (float)i) : (this.m_FillAmount * 2f - (float)(1 - i)));
 							if (Image.RadialCut(Image.s_Xy, Image.s_Uv, Mathf.Clamp01(num12), this.m_FillClockwise, (i + this.m_FillOrigin + 3) % 4))
 							{
 								Image.AddQuad(toFill, Image.s_Xy, this.color, Image.s_Uv);
 							}
 						}
+						return;
 					}
-					else if (this.fillMethod == Image.FillMethod.Radial360)
+					if (this.fillMethod == Image.FillMethod.Radial360)
 					{
 						for (int j = 0; j < 4; j++)
 						{
@@ -931,54 +980,47 @@ namespace UnityEngine.UI
 							Image.s_Uv[1].y = Mathf.Lerp(num2, num4, num16);
 							Image.s_Uv[2].y = Image.s_Uv[1].y;
 							Image.s_Uv[3].y = Image.s_Uv[0].y;
-							float num17 = ((!this.m_FillClockwise) ? (this.m_FillAmount * 4f - (float)(3 - (j + this.m_FillOrigin) % 4)) : (this.m_FillAmount * 4f - (float)((j + this.m_FillOrigin) % 4)));
+							float num17 = (this.m_FillClockwise ? (this.m_FillAmount * 4f - (float)((j + this.m_FillOrigin) % 4)) : (this.m_FillAmount * 4f - (float)(3 - (j + this.m_FillOrigin) % 4)));
 							if (Image.RadialCut(Image.s_Xy, Image.s_Uv, Mathf.Clamp01(num17), this.m_FillClockwise, (j + 2) % 4))
 							{
 								Image.AddQuad(toFill, Image.s_Xy, this.color, Image.s_Uv);
 							}
 						}
+						return;
 					}
 				}
-				else
-				{
-					Image.AddQuad(toFill, Image.s_Xy, this.color, Image.s_Uv);
-				}
+			}
+			else
+			{
+				Image.AddQuad(toFill, Image.s_Xy, this.color, Image.s_Uv);
 			}
 		}
 
 		private static bool RadialCut(Vector3[] xy, Vector3[] uv, float fill, bool invert, int corner)
 		{
-			bool flag;
 			if (fill < 0.001f)
 			{
-				flag = false;
+				return false;
 			}
-			else
+			if ((corner & 1) == 1)
 			{
-				if ((corner & 1) == 1)
-				{
-					invert = !invert;
-				}
-				if (!invert && fill > 0.999f)
-				{
-					flag = true;
-				}
-				else
-				{
-					float num = Mathf.Clamp01(fill);
-					if (invert)
-					{
-						num = 1f - num;
-					}
-					num *= 1.5707964f;
-					float num2 = Mathf.Cos(num);
-					float num3 = Mathf.Sin(num);
-					Image.RadialCut(xy, num2, num3, invert, corner);
-					Image.RadialCut(uv, num2, num3, invert, corner);
-					flag = true;
-				}
+				invert = !invert;
 			}
-			return flag;
+			if (!invert && fill > 0.999f)
+			{
+				return true;
+			}
+			float num = Mathf.Clamp01(fill);
+			if (invert)
+			{
+				num = 1f - num;
+			}
+			num *= 1.5707964f;
+			float num2 = Mathf.Cos(num);
+			float num3 = Mathf.Sin(num);
+			Image.RadialCut(xy, num2, num3, invert, corner);
+			Image.RadialCut(uv, num2, num3, invert, corner);
+			return true;
 		}
 
 		private static void RadialCut(Vector3[] xy, float cos, float sin, bool invert, int corner)
@@ -1016,11 +1058,10 @@ namespace UnityEngine.UI
 				if (!invert)
 				{
 					xy[num3].x = Mathf.Lerp(xy[corner].x, xy[num2].x, cos);
+					return;
 				}
-				else
-				{
-					xy[num].y = Mathf.Lerp(xy[corner].y, xy[num2].y, sin);
-				}
+				xy[num].y = Mathf.Lerp(xy[corner].y, xy[num2].y, sin);
+				return;
 			}
 			else
 			{
@@ -1052,11 +1093,10 @@ namespace UnityEngine.UI
 				if (invert)
 				{
 					xy[num3].y = Mathf.Lerp(xy[corner].y, xy[num2].y, sin);
+					return;
 				}
-				else
-				{
-					xy[num].x = Mathf.Lerp(xy[corner].x, xy[num2].x, cos);
-				}
+				xy[num].x = Mathf.Lerp(xy[corner].x, xy[num2].x, cos);
+				return;
 			}
 		}
 
@@ -1080,20 +1120,15 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				float num;
 				if (this.activeSprite == null)
 				{
-					num = 0f;
+					return 0f;
 				}
-				else if (this.type == Image.Type.Sliced || this.type == Image.Type.Tiled)
+				if (this.type == Image.Type.Sliced || this.type == Image.Type.Tiled)
 				{
-					num = DataUtility.GetMinSize(this.activeSprite).x / this.pixelsPerUnit;
+					return DataUtility.GetMinSize(this.activeSprite).x / this.pixelsPerUnit;
 				}
-				else
-				{
-					num = this.activeSprite.rect.size.x / this.pixelsPerUnit;
-				}
-				return num;
+				return this.activeSprite.rect.size.x / this.pixelsPerUnit;
 			}
 		}
 
@@ -1117,20 +1152,15 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				float num;
 				if (this.activeSprite == null)
 				{
-					num = 0f;
+					return 0f;
 				}
-				else if (this.type == Image.Type.Sliced || this.type == Image.Type.Tiled)
+				if (this.type == Image.Type.Sliced || this.type == Image.Type.Tiled)
 				{
-					num = DataUtility.GetMinSize(this.activeSprite).y / this.pixelsPerUnit;
+					return DataUtility.GetMinSize(this.activeSprite).y / this.pixelsPerUnit;
 				}
-				else
-				{
-					num = this.activeSprite.rect.size.y / this.pixelsPerUnit;
-				}
-				return num;
+				return this.activeSprite.rect.size.y / this.pixelsPerUnit;
 			}
 		}
 
@@ -1152,43 +1182,39 @@ namespace UnityEngine.UI
 
 		public virtual bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
 		{
-			bool flag;
-			Vector2 vector;
 			if (this.alphaHitTestMinimumThreshold <= 0f)
 			{
+				return true;
+			}
+			if (this.alphaHitTestMinimumThreshold > 1f)
+			{
+				return false;
+			}
+			if (this.activeSprite == null)
+			{
+				return true;
+			}
+			Vector2 vector;
+			if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(base.rectTransform, screenPoint, eventCamera, out vector))
+			{
+				return false;
+			}
+			Rect pixelAdjustedRect = base.GetPixelAdjustedRect();
+			vector.x += base.rectTransform.pivot.x * pixelAdjustedRect.width;
+			vector.y += base.rectTransform.pivot.y * pixelAdjustedRect.height;
+			vector = this.MapCoordinate(vector, pixelAdjustedRect);
+			Rect textureRect = this.activeSprite.textureRect;
+			float num = (textureRect.x + vector.x) / (float)this.activeSprite.texture.width;
+			float num2 = (textureRect.y + vector.y) / (float)this.activeSprite.texture.height;
+			bool flag;
+			try
+			{
+				flag = this.activeSprite.texture.GetPixelBilinear(num, num2).a >= this.alphaHitTestMinimumThreshold;
+			}
+			catch (UnityException ex)
+			{
+				Debug.LogError("Using alphaHitTestMinimumThreshold greater than 0 on Image whose sprite texture cannot be read. " + ex.Message + " Also make sure to disable sprite packing for this sprite.", this);
 				flag = true;
-			}
-			else if (this.alphaHitTestMinimumThreshold > 1f)
-			{
-				flag = false;
-			}
-			else if (this.activeSprite == null)
-			{
-				flag = true;
-			}
-			else if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(base.rectTransform, screenPoint, eventCamera, out vector))
-			{
-				flag = false;
-			}
-			else
-			{
-				Rect pixelAdjustedRect = base.GetPixelAdjustedRect();
-				vector.x += base.rectTransform.pivot.x * pixelAdjustedRect.width;
-				vector.y += base.rectTransform.pivot.y * pixelAdjustedRect.height;
-				vector = this.MapCoordinate(vector, pixelAdjustedRect);
-				Rect textureRect = this.activeSprite.textureRect;
-				Vector2 vector2 = new Vector2(vector.x / textureRect.width, vector.y / textureRect.height);
-				float num = Mathf.Lerp(textureRect.x, textureRect.xMax, vector2.x) / (float)this.activeSprite.texture.width;
-				float num2 = Mathf.Lerp(textureRect.y, textureRect.yMax, vector2.y) / (float)this.activeSprite.texture.height;
-				try
-				{
-					flag = this.activeSprite.texture.GetPixelBilinear(num, num2).a >= this.alphaHitTestMinimumThreshold;
-				}
-				catch (UnityException ex)
-				{
-					Debug.LogError("Using alphaHitTestMinimumThreshold greater than 0 on Image whose sprite texture cannot be read. " + ex.Message + " Also make sure to disable sprite packing for this sprite.", this);
-					flag = true;
-				}
 			}
 			return flag;
 		}
@@ -1196,45 +1222,40 @@ namespace UnityEngine.UI
 		private Vector2 MapCoordinate(Vector2 local, Rect rect)
 		{
 			Rect rect2 = this.activeSprite.rect;
-			Vector2 vector;
 			if (this.type == Image.Type.Simple || this.type == Image.Type.Filled)
 			{
-				vector = new Vector2(local.x * rect2.width / rect.width, local.y * rect2.height / rect.height);
+				return new Vector2(local.x * rect2.width / rect.width, local.y * rect2.height / rect.height);
 			}
-			else
+			Vector4 border = this.activeSprite.border;
+			Vector4 adjustedBorders = this.GetAdjustedBorders(border / this.pixelsPerUnit, rect);
+			for (int i = 0; i < 2; i++)
 			{
-				Vector4 border = this.activeSprite.border;
-				Vector4 adjustedBorders = this.GetAdjustedBorders(border / this.pixelsPerUnit, rect);
-				for (int i = 0; i < 2; i++)
+				if (local[i] > adjustedBorders[i])
 				{
-					if (local[i] > adjustedBorders[i])
+					if (rect.size[i] - local[i] <= adjustedBorders[i + 2])
 					{
-						if (rect.size[i] - local[i] <= adjustedBorders[i + 2])
-						{
-							ref Vector2 ptr = ref local;
-							int num;
-							local[num = i] = ptr[num] - (rect.size[i] - rect2.size[i]);
-						}
-						else if (this.type == Image.Type.Sliced)
-						{
-							float num2 = Mathf.InverseLerp(adjustedBorders[i], rect.size[i] - adjustedBorders[i + 2], local[i]);
-							local[i] = Mathf.Lerp(border[i], rect2.size[i] - border[i + 2], num2);
-						}
-						else
-						{
-							ref Vector2 ptr = ref local;
-							int num3;
-							local[num3 = i] = ptr[num3] - adjustedBorders[i];
-							local[i] = Mathf.Repeat(local[i], rect2.size[i] - border[i] - border[i + 2]);
-							ptr = ref local;
-							int num4;
-							local[num4 = i] = ptr[num4] + border[i];
-						}
+						ref Vector2 ptr = ref local;
+						int num = i;
+						ptr[num] -= rect.size[i] - rect2.size[i];
+					}
+					else if (this.type == Image.Type.Sliced)
+					{
+						float num2 = Mathf.InverseLerp(adjustedBorders[i], rect.size[i] - adjustedBorders[i + 2], local[i]);
+						local[i] = Mathf.Lerp(border[i], rect2.size[i] - border[i + 2], num2);
+					}
+					else
+					{
+						ref Vector2 ptr = ref local;
+						int num = i;
+						ptr[num] -= adjustedBorders[i];
+						local[i] = Mathf.Repeat(local[i], rect2.size[i] - border[i] - border[i + 2]);
+						ptr = ref local;
+						num = i;
+						ptr[num] += border[i];
 					}
 				}
-				vector = local;
 			}
-			return vector;
+			return local;
 		}
 
 		private static void RebuildImage(SpriteAtlas spriteAtlas)
@@ -1265,6 +1286,12 @@ namespace UnityEngine.UI
 			Image.m_TrackedTexturelessImages.Remove(g);
 		}
 
+		protected override void OnDidApplyAnimationProperties()
+		{
+			this.SetMaterialDirty();
+			this.SetVerticesDirty();
+		}
+
 		protected static Material s_ETC1DefaultUI = null;
 
 		[FormerlySerializedAs("m_Frame")]
@@ -1275,10 +1302,10 @@ namespace UnityEngine.UI
 		private Sprite m_OverrideSprite;
 
 		[SerializeField]
-		private Image.Type m_Type = Image.Type.Simple;
+		private Image.Type m_Type;
 
 		[SerializeField]
-		private bool m_PreserveAspect = false;
+		private bool m_PreserveAspect;
 
 		[SerializeField]
 		private bool m_FillCenter = true;
@@ -1296,12 +1323,17 @@ namespace UnityEngine.UI
 		[SerializeField]
 		private int m_FillOrigin;
 
-		private float m_AlphaHitTestMinimumThreshold = 0f;
+		private float m_AlphaHitTestMinimumThreshold;
 
-		private bool m_Tracked = false;
+		private bool m_Tracked;
 
 		[SerializeField]
 		private bool m_UseSpriteMesh;
+
+		[SerializeField]
+		private float m_PixelsPerUnitMultiplier = 1f;
+
+		private float m_CachedReferencePixelsPerUnit = 100f;
 
 		private static readonly Vector2[] s_VertScratch = new Vector2[4];
 

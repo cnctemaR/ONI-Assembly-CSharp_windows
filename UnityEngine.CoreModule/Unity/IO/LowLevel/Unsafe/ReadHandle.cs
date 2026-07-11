@@ -16,11 +16,13 @@ namespace Unity.IO.LowLevel.Unsafe
 
 		public void Dispose()
 		{
-			if (!ReadHandle.IsReadHandleValid(this))
+			bool flag = !ReadHandle.IsReadHandleValid(this);
+			if (flag)
 			{
 				throw new InvalidOperationException("ReadHandle.Dispose cannot be called twice on the same ReadHandle");
 			}
-			if (this.Status == ReadStatus.InProgress)
+			bool flag2 = this.Status == ReadStatus.InProgress;
+			if (flag2)
 			{
 				throw new InvalidOperationException("ReadHandle.Dispose cannot be called until the read operation completes");
 			}
@@ -31,7 +33,8 @@ namespace Unity.IO.LowLevel.Unsafe
 		{
 			get
 			{
-				if (!ReadHandle.IsReadHandleValid(this))
+				bool flag = !ReadHandle.IsReadHandleValid(this);
+				if (flag)
 				{
 					throw new InvalidOperationException("ReadHandle.JobHandle cannot be called after the ReadHandle has been disposed");
 				}
@@ -43,7 +46,8 @@ namespace Unity.IO.LowLevel.Unsafe
 		{
 			get
 			{
-				if (!ReadHandle.IsReadHandleValid(this))
+				bool flag = !ReadHandle.IsReadHandleValid(this);
+				if (flag)
 				{
 					throw new InvalidOperationException("ReadHandle.Status cannot be called after the ReadHandle has been disposed");
 				}
@@ -58,15 +62,15 @@ namespace Unity.IO.LowLevel.Unsafe
 			return ReadHandle.GetReadStatus_Injected(ref handle);
 		}
 
-		[FreeFunction("AsyncReadManagerManaged::ReleaseReadHandle", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::ReleaseReadHandle", IsThreadSafe = true)]
 		private static void ReleaseReadHandle(ReadHandle handle)
 		{
 			ReadHandle.ReleaseReadHandle_Injected(ref handle);
 		}
 
-		[ThreadAndSerializationSafe]
 		[FreeFunction("AsyncReadManagerManaged::IsReadHandleValid", IsThreadSafe = true)]
+		[ThreadAndSerializationSafe]
 		private static bool IsReadHandleValid(ReadHandle handle)
 		{
 			return ReadHandle.IsReadHandleValid_Injected(ref handle);

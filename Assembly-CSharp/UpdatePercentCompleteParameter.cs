@@ -15,7 +15,7 @@ internal class UpdatePercentCompleteParameter : LoopingSoundParameterUpdater
 		{
 			worker = sound.transform.GetComponent<Worker>(),
 			ev = sound.ev,
-			parameterIdx = sound.description.GetParameterIdx(base.parameter)
+			parameterId = sound.description.GetParameterId(base.parameter)
 		};
 		this.entries.Add(entry);
 	}
@@ -31,7 +31,7 @@ internal class UpdatePercentCompleteParameter : LoopingSoundParameterUpdater
 				{
 					float percentComplete = workable.GetPercentComplete();
 					EventInstance ev = entry.ev;
-					ev.setParameterValueByIndex(entry.parameterIdx, percentComplete);
+					ev.setParameterByID(entry.parameterId, percentComplete, false);
 				}
 			}
 		}
@@ -57,6 +57,6 @@ internal class UpdatePercentCompleteParameter : LoopingSoundParameterUpdater
 
 		public EventInstance ev;
 
-		public int parameterIdx;
+		public PARAMETER_ID parameterId;
 	}
 }

@@ -70,6 +70,7 @@ public class ConfirmDialogScreen : KModalScreen
 		}
 		if (title_text != null)
 		{
+			this.titleText.key = "";
 			this.titleText.text = title_text;
 		}
 		this.popupMessage.text = text;
@@ -77,7 +78,10 @@ public class ConfirmDialogScreen : KModalScreen
 
 	public void OnSelect_OK()
 	{
-		this.Deactivate();
+		if (this.deactivateOnConfirmAction)
+		{
+			this.Deactivate();
+		}
 		if (this.confirmAction != null)
 		{
 			this.confirmAction();
@@ -86,7 +90,10 @@ public class ConfirmDialogScreen : KModalScreen
 
 	public void OnSelect_CANCEL()
 	{
-		this.Deactivate();
+		if (this.deactivateOnCancelAction)
+		{
+			this.Deactivate();
+		}
 		if (this.cancelAction != null)
 		{
 			this.cancelAction();
@@ -95,7 +102,10 @@ public class ConfirmDialogScreen : KModalScreen
 
 	public void OnSelect_third()
 	{
-		this.Deactivate();
+		if (this.deactivateOnConfigurableAction)
+		{
+			this.Deactivate();
+		}
 		if (this.configurableAction != null)
 		{
 			this.configurableAction();
@@ -116,6 +126,12 @@ public class ConfirmDialogScreen : KModalScreen
 	private global::System.Action cancelAction;
 
 	private global::System.Action configurableAction;
+
+	public bool deactivateOnConfigurableAction = true;
+
+	public bool deactivateOnConfirmAction = true;
+
+	public bool deactivateOnCancelAction = true;
 
 	public global::System.Action onDeactivateCB;
 

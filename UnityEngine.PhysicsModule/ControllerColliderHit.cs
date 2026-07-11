@@ -88,7 +88,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.m_Push = ((!value) ? 0 : 1);
+				this.m_Push = (value ? 1 : 0);
 			}
 		}
 

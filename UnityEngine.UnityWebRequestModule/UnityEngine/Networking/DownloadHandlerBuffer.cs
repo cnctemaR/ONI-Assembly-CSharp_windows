@@ -9,17 +9,17 @@ namespace UnityEngine.Networking
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class DownloadHandlerBuffer : DownloadHandler
 	{
-		public DownloadHandlerBuffer()
-		{
-			this.InternalCreateBuffer();
-		}
-
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr Create(DownloadHandlerBuffer obj);
 
 		private void InternalCreateBuffer()
 		{
 			this.m_Ptr = DownloadHandlerBuffer.Create(this);
+		}
+
+		public DownloadHandlerBuffer()
+		{
+			this.InternalCreateBuffer();
 		}
 
 		protected override byte[] GetData()

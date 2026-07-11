@@ -139,7 +139,8 @@ namespace UnityEngine
 		{
 			get
 			{
-				if (!this.isFiredByLegacy)
+				bool flag = !this.isFiredByLegacy;
+				if (flag)
 				{
 					Debug.LogError("AnimationEvent was not fired by Animation component, you shouldn't use AnimationEvent.animationState");
 				}
@@ -151,7 +152,8 @@ namespace UnityEngine
 		{
 			get
 			{
-				if (!this.isFiredByAnimator)
+				bool flag = !this.isFiredByAnimator;
+				if (flag)
 				{
 					Debug.LogError("AnimationEvent was not fired by Animator component, you shouldn't use AnimationEvent.animatorStateInfo");
 				}
@@ -163,7 +165,8 @@ namespace UnityEngine
 		{
 			get
 			{
-				if (!this.isFiredByAnimator)
+				bool flag = !this.isFiredByAnimator;
+				if (flag)
 				{
 					Debug.LogError("AnimationEvent was not fired by Animator component, you shouldn't use AnimationEvent.animatorClipInfo");
 				}

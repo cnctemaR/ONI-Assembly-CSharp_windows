@@ -15,18 +15,21 @@ namespace UnityEngine
 
 		public override void CalcWidth()
 		{
-			if (this.minWidth == 0f || this.maxWidth == 0f)
+			bool flag = this.minWidth == 0f || this.maxWidth == 0f;
+			if (flag)
 			{
 				float num;
 				float num2;
 				base.style.CalcMinMaxWidth(this.m_Content, out num, out num2);
 				num = Mathf.Ceil(num);
 				num2 = Mathf.Ceil(num2);
-				if (this.minWidth == 0f)
+				bool flag2 = this.minWidth == 0f;
+				if (flag2)
 				{
 					this.minWidth = num;
 				}
-				if (this.maxWidth == 0f)
+				bool flag3 = this.maxWidth == 0f;
+				if (flag3)
 				{
 					this.maxWidth = num2;
 				}
@@ -35,10 +38,12 @@ namespace UnityEngine
 
 		public override void CalcHeight()
 		{
-			if (this.m_ForcedMinHeight == 0f || this.m_ForcedMaxHeight == 0f)
+			bool flag = this.m_ForcedMinHeight == 0f || this.m_ForcedMaxHeight == 0f;
+			if (flag)
 			{
 				float num = base.style.CalcHeight(this.m_Content, this.rect.width);
-				if (this.m_ForcedMinHeight == 0f)
+				bool flag2 = this.m_ForcedMinHeight == 0f;
+				if (flag2)
 				{
 					this.minHeight = num;
 				}
@@ -46,7 +51,8 @@ namespace UnityEngine
 				{
 					this.minHeight = this.m_ForcedMinHeight;
 				}
-				if (this.m_ForcedMaxHeight == 0f)
+				bool flag3 = this.m_ForcedMaxHeight == 0f;
+				if (flag3)
 				{
 					this.maxHeight = num;
 				}

@@ -5,7 +5,7 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Dynamics/Rigidbody.h")]
+	[NativeHeader("Modules/Physics/Rigidbody.h")]
 	[RequireComponent(typeof(Transform))]
 	public class Rigidbody : Component
 	{
@@ -481,20 +481,21 @@ namespace UnityEngine
 		public bool SweepTest(Vector3 direction, out RaycastHit hitInfo, [DefaultValue("Mathf.Infinity")] float maxDistance, [DefaultValue("QueryTriggerInteraction.UseGlobal")] QueryTriggerInteraction queryTriggerInteraction)
 		{
 			float magnitude = direction.magnitude;
-			bool flag2;
-			if (magnitude > 1E-45f)
+			bool flag = magnitude > float.Epsilon;
+			bool flag3;
+			if (flag)
 			{
 				Vector3 vector = direction / magnitude;
-				bool flag = false;
-				hitInfo = this.SweepTest(vector, maxDistance, queryTriggerInteraction, ref flag);
-				flag2 = flag;
+				bool flag2 = false;
+				hitInfo = this.SweepTest(vector, maxDistance, queryTriggerInteraction, ref flag2);
+				flag3 = flag2;
 			}
 			else
 			{
 				hitInfo = default(RaycastHit);
-				flag2 = false;
+				flag3 = false;
 			}
-			return flag2;
+			return flag3;
 		}
 
 		[ExcludeFromDocs]
@@ -518,8 +519,9 @@ namespace UnityEngine
 		public RaycastHit[] SweepTestAll(Vector3 direction, [DefaultValue("Mathf.Infinity")] float maxDistance, [DefaultValue("QueryTriggerInteraction.UseGlobal")] QueryTriggerInteraction queryTriggerInteraction)
 		{
 			float magnitude = direction.magnitude;
+			bool flag = magnitude > float.Epsilon;
 			RaycastHit[] array;
-			if (magnitude > 1E-45f)
+			if (flag)
 			{
 				Vector3 vector = direction / magnitude;
 				array = this.Internal_SweepTestAll(vector, maxDistance, queryTriggerInteraction);

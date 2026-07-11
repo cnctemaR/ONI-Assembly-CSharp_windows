@@ -27,6 +27,28 @@ public class MinionSelectScreen : CharacterSelectionController
 		this.InitializeContainers();
 	}
 
+	public void SetProceedButtonActive(bool state, string tooltip = null)
+	{
+		if (state)
+		{
+			base.EnableProceedButton();
+		}
+		else
+		{
+			base.DisableProceedButton();
+		}
+		ToolTip component = this.proceedButton.GetComponent<ToolTip>();
+		if (component != null)
+		{
+			if (tooltip != null)
+			{
+				component.toolTip = tooltip;
+				return;
+			}
+			component.ClearMultiStringTooltip();
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		this.OnDeliverableAdded();
@@ -45,9 +67,9 @@ public class MinionSelectScreen : CharacterSelectionController
 	protected override void OnProceed()
 	{
 		global::Util.KInstantiateUI(this.newBasePrefab.gameObject, GameScreenManager.Instance.ssOverlayCanvas, false);
-		MusicManager.instance.StopSong("Music_FrontEnd", true, STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.StopSong("Music_FrontEnd", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().NewBaseSetupSnapshot);
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndWorldGenerationSnapshot, STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndWorldGenerationSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		this.selectedDeliverables.Clear();
 		foreach (ITelepadDeliverableContainer telepadDeliverableContainer in this.containers)
 		{

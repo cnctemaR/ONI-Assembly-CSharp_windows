@@ -6,12 +6,6 @@ namespace UnityEngine
 	[UsedByNativeCode]
 	public struct Vector2Int : IEquatable<Vector2Int>
 	{
-		public Vector2Int(int x, int y)
-		{
-			this.m_X = x;
-			this.m_Y = y;
-		}
-
 		public int x
 		{
 			get
@@ -34,6 +28,12 @@ namespace UnityEngine
 			{
 				this.m_Y = value;
 			}
+		}
+
+		public Vector2Int(int x, int y)
+		{
+			this.m_X = x;
+			this.m_Y = y;
 		}
 
 		public void Set(int x, int y)
@@ -96,7 +96,9 @@ namespace UnityEngine
 
 		public static float Distance(Vector2Int a, Vector2Int b)
 		{
-			return (a - b).magnitude;
+			float num = (float)(a.x - b.x);
+			float num2 = (float)(a.y - b.y);
+			return (float)Math.Sqrt((double)(num * num + num2 * num2));
 		}
 
 		public static Vector2Int Min(Vector2Int lhs, Vector2Int rhs)
@@ -153,6 +155,11 @@ namespace UnityEngine
 			return new Vector2Int(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y));
 		}
 
+		public static Vector2Int operator -(Vector2Int v)
+		{
+			return new Vector2Int(-v.x, -v.y);
+		}
+
 		public static Vector2Int operator +(Vector2Int a, Vector2Int b)
 		{
 			return new Vector2Int(a.x + b.x, a.y + b.y);
@@ -168,9 +175,19 @@ namespace UnityEngine
 			return new Vector2Int(a.x * b.x, a.y * b.y);
 		}
 
+		public static Vector2Int operator *(int a, Vector2Int b)
+		{
+			return new Vector2Int(a * b.x, a * b.y);
+		}
+
 		public static Vector2Int operator *(Vector2Int a, int b)
 		{
 			return new Vector2Int(a.x * b, a.y * b);
+		}
+
+		public static Vector2Int operator /(Vector2Int a, int b)
+		{
+			return new Vector2Int(a.x / b, a.y / b);
 		}
 
 		public static bool operator ==(Vector2Int lhs, Vector2Int rhs)
@@ -185,7 +202,8 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
-			return other is Vector2Int && this.Equals((Vector2Int)other);
+			bool flag = !(other is Vector2Int);
+			return !flag && this.Equals((Vector2Int)other);
 		}
 
 		public bool Equals(Vector2Int other)

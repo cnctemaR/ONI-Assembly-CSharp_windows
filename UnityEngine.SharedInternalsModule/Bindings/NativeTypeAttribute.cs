@@ -2,10 +2,16 @@
 
 namespace UnityEngine.Bindings
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum)]
 	[VisibleToOtherModules]
-	internal class NativeTypeAttribute : Attribute, IBindingsHeaderProviderAttribute, IBindingsGenerateMarshallingTypeAttribute, IBindingsAttribute
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum)]
+	internal class NativeTypeAttribute : Attribute, IBindingsHeaderProviderAttribute, IBindingsAttribute, IBindingsGenerateMarshallingTypeAttribute
 	{
+		public string Header { get; set; }
+
+		public string IntermediateScriptingStructName { get; set; }
+
+		public CodegenOptions CodegenOptions { get; set; }
+
 		public NativeTypeAttribute()
 		{
 			this.CodegenOptions = CodegenOptions.Auto;
@@ -18,11 +24,13 @@ namespace UnityEngine.Bindings
 
 		public NativeTypeAttribute(string header)
 		{
-			if (header == null)
+			bool flag = header == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("header");
 			}
-			if (header == "")
+			bool flag2 = header == "";
+			if (flag2)
 			{
 				throw new ArgumentException("header cannot be empty", "header");
 			}
@@ -41,11 +49,5 @@ namespace UnityEngine.Bindings
 		{
 			this.IntermediateScriptingStructName = intermediateStructName;
 		}
-
-		public string Header { get; set; }
-
-		public string IntermediateScriptingStructName { get; set; }
-
-		public CodegenOptions CodegenOptions { get; set; }
 	}
 }

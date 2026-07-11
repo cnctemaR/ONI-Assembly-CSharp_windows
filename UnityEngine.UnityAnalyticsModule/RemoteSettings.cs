@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -8,8 +9,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("UnityAnalyticsScriptingClasses.h")]
 	[NativeHeader("Modules/UnityAnalytics/RemoteSettings/RemoteSettings.h")]
+	[NativeHeader("UnityAnalyticsScriptingClasses.h")]
 	public static class RemoteSettings
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -25,7 +26,8 @@ namespace UnityEngine
 		internal static void RemoteSettingsUpdated(bool wasLastUpdatedFromServer)
 		{
 			RemoteSettings.UpdatedEventHandler updated = RemoteSettings.Updated;
-			if (updated != null)
+			bool flag = updated != null;
+			if (flag)
 			{
 				updated();
 			}
@@ -35,7 +37,8 @@ namespace UnityEngine
 		internal static void RemoteSettingsBeforeFetchFromServer()
 		{
 			Action beforeFetchFromServer = RemoteSettings.BeforeFetchFromServer;
-			if (beforeFetchFromServer != null)
+			bool flag = beforeFetchFromServer != null;
+			if (flag)
 			{
 				beforeFetchFromServer();
 			}
@@ -45,14 +48,15 @@ namespace UnityEngine
 		internal static void RemoteSettingsUpdateCompleted(bool wasLastUpdatedFromServer, bool settingsChanged, int response)
 		{
 			Action<bool, bool, int> completed = RemoteSettings.Completed;
-			if (completed != null)
+			bool flag = completed != null;
+			if (flag)
 			{
 				completed(wasLastUpdatedFromServer, settingsChanged, response);
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Calling CallOnUpdate() is not necessary any more and should be removed. Use RemoteSettingsUpdated instead", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static void CallOnUpdate()
 		{
 			throw new NotSupportedException("Calling CallOnUpdate() is not necessary any more and should be removed.");
@@ -117,6 +121,62 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string[] GetKeys();
+
+		public static T GetObject<T>(string key = "")
+		{
+			return (T)((object)RemoteSettings.GetObject(typeof(T), key));
+		}
+
+		public static object GetObject(Type type, string key = "")
+		{
+			bool flag = type == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("type");
+			}
+			bool flag2 = type.IsAbstract || type.IsSubclassOf(typeof(Object));
+			if (flag2)
+			{
+				throw new ArgumentException("Cannot deserialize to new instances of type '" + type.Name + ".'");
+			}
+			return RemoteSettings.GetAsScriptingObject(type, null, key);
+		}
+
+		public static object GetObject(string key, object defaultValue)
+		{
+			bool flag = defaultValue == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("defaultValue");
+			}
+			Type type = defaultValue.GetType();
+			bool flag2 = type.IsAbstract || type.IsSubclassOf(typeof(Object));
+			if (flag2)
+			{
+				throw new ArgumentException("Cannot deserialize to new instances of type '" + type.Name + ".'");
+			}
+			return RemoteSettings.GetAsScriptingObject(type, defaultValue, key);
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern object GetAsScriptingObject(Type t, object defaultValue, string key);
+
+		public static IDictionary<string, object> GetDictionary(string key = "")
+		{
+			RemoteSettings.UseSafeLock();
+			IDictionary<string, object> dictionary = RemoteConfigSettingsHelper.GetDictionary(RemoteSettings.GetSafeTopMap(), key);
+			RemoteSettings.ReleaseSafeLock();
+			return dictionary;
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void UseSafeLock();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void ReleaseSafeLock();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern IntPtr GetSafeTopMap();
 
 		public delegate void UpdatedEventHandler();
 	}

@@ -9,11 +9,13 @@ namespace UnityEngine
 	{
 		public T Resolve(IExposedPropertyTable resolver)
 		{
-			if (resolver != null)
+			bool flag = resolver != null;
+			if (flag)
 			{
-				bool flag;
-				Object referenceValue = resolver.GetReferenceValue(this.exposedName, out flag);
-				if (flag)
+				bool flag2;
+				Object referenceValue = resolver.GetReferenceValue(this.exposedName, out flag2);
+				bool flag3 = flag2;
+				if (flag3)
 				{
 					return referenceValue as T;
 				}

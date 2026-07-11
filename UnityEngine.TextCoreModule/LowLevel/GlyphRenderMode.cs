@@ -10,10 +10,10 @@ namespace UnityEngine.TextCore.LowLevel
 		SMOOTH = 4117,
 		RASTER_HINTED = 4122,
 		RASTER = 4118,
-		SDF = 4138,
-		SDF8 = 8234,
-		SDF16 = 16426,
-		SDF32 = 32810,
+		SDF = 4134,
+		SDF8 = 8230,
+		SDF16 = 16422,
+		SDF32 = 32806,
 		SDFAA_HINTED = 4169,
 		SDFAA = 4165
 	}

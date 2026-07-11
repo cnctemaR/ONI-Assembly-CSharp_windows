@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Export/SphericalHarmonicsL2.bindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Export/Math/SphericalHarmonicsL2.bindings.h")]
 	public struct SphericalHarmonicsL2 : IEquatable<SphericalHarmonicsL2>
 	{
 		public void Clear()
@@ -39,17 +39,21 @@ namespace UnityEngine.Rendering
 
 		public void Evaluate(Vector3[] directions, Color[] results)
 		{
-			if (directions == null)
+			bool flag = directions == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("directions");
 			}
-			if (results == null)
+			bool flag2 = results == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("results");
 			}
-			if (directions.Length != 0)
+			bool flag3 = directions.Length == 0;
+			if (!flag3)
 			{
-				if (directions.Length != results.Length)
+				bool flag4 = directions.Length != results.Length;
+				if (flag4)
 				{
 					throw new ArgumentException("Length of the directions array and the results array must match.");
 				}

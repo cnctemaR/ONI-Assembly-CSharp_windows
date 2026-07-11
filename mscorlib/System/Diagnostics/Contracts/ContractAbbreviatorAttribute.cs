@@ -2,8 +2,8 @@
 
 namespace System.Diagnostics.Contracts
 {
-	[Conditional("CONTRACTS_FULL")]
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+	[Conditional("CONTRACTS_FULL")]
 	public sealed class ContractAbbreviatorAttribute : Attribute
 	{
 	}

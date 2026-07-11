@@ -44,6 +44,7 @@ public class FloorSwitchConfig : IBuildingConfig
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
 		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT.BONUS_2;
+		simCellOccupier.notifyOnMelt = true;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

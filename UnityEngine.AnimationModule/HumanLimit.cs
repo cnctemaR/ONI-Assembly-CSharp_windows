@@ -3,9 +3,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
+	[NativeHeader("Modules/Animation/ScriptBindings/AvatarBuilder.bindings.h")]
 	[NativeType(CodegenOptions.Custom, "MonoHumanLimit")]
-	[NativeHeader("Runtime/Animation/HumanDescription.h")]
-	[NativeHeader("Runtime/Animation/ScriptBindings/AvatarBuilder.bindings.h")]
+	[NativeHeader("Modules/Animation/HumanDescription.h")]
 	public struct HumanLimit
 	{
 		public bool useDefaultValues
@@ -16,7 +16,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.m_UseDefaultValues = ((!value) ? 0 : 1);
+				this.m_UseDefaultValues = (value ? 1 : 0);
 			}
 		}
 

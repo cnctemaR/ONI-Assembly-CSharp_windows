@@ -32,8 +32,8 @@ namespace UnityEngine.Networking.Match
 				this.privateAddress,
 				this.eloScore,
 				this.advertise,
-				(!string.IsNullOrEmpty(this.password)) ? "YES" : "NO",
-				(this.matchAttributes != null) ? this.matchAttributes.Count : 0
+				string.IsNullOrEmpty(this.password) ? "NO" : "YES",
+				(this.matchAttributes == null) ? 0 : this.matchAttributes.Count
 			});
 		}
 

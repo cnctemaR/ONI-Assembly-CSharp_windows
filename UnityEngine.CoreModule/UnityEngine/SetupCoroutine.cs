@@ -13,7 +13,8 @@ namespace UnityEngine
 		[SecuritySafeCritical]
 		public unsafe static void InvokeMoveNext(IEnumerator enumerator, IntPtr returnValueAddress)
 		{
-			if (returnValueAddress == IntPtr.Zero)
+			bool flag = returnValueAddress == IntPtr.Zero;
+			if (flag)
 			{
 				throw new ArgumentException("Return value address cannot be 0.", "returnValueAddress");
 			}
@@ -24,7 +25,8 @@ namespace UnityEngine
 		public static object InvokeMember(object behaviour, string name, object variable)
 		{
 			object[] array = null;
-			if (variable != null)
+			bool flag = variable != null;
+			if (flag)
 			{
 				array = new object[] { variable };
 			}
@@ -34,7 +36,8 @@ namespace UnityEngine
 		public static object InvokeStatic(Type klass, string name, object variable)
 		{
 			object[] array = null;
-			if (variable != null)
+			bool flag = variable != null;
+			if (flag)
 			{
 				array = new object[] { variable };
 			}

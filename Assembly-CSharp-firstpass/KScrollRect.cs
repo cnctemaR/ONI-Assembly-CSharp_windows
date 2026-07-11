@@ -36,7 +36,7 @@ public class KScrollRect : ScrollRect
 		{
 			EventInstance eventInstance = KFMOD.BeginOneShot(this.currentSounds[KScrollRect.SoundType.OnMouseScroll], Vector3.zero, 1f);
 			float boundsExceedAmount = this.GetBoundsExceedAmount();
-			eventInstance.setParameterValue("scrollbarPosition", boundsExceedAmount);
+			eventInstance.setParameterByName("scrollbarPosition", boundsExceedAmount, false);
 			KFMOD.EndOneShot(eventInstance);
 		}
 	}

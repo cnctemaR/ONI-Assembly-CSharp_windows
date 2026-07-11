@@ -8,8 +8,8 @@ namespace System.IO.IsolatedStorage
 	[ComVisible(true)]
 	public abstract class IsolatedStorage : MarshalByRefObject
 	{
-		[MonoTODO("Does not currently use the manifest support")]
 		[ComVisible(false)]
+		[MonoTODO("Does not currently use the manifest support")]
 		public object ApplicationIdentity
 		{
 			[SecurityPermission(SecurityAction.Demand, ControlPolicy = true)]
@@ -44,8 +44,8 @@ namespace System.IO.IsolatedStorage
 			}
 		}
 
-		[CLSCompliant(false)]
 		[Obsolete]
+		[CLSCompliant(false)]
 		public virtual ulong CurrentSize
 		{
 			get

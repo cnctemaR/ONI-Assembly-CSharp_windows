@@ -39,7 +39,8 @@ namespace UnityEngine
 
 		public static bool ClearCachedVersion(string assetBundleName, Hash128 hash)
 		{
-			if (string.IsNullOrEmpty(assetBundleName))
+			bool flag = string.IsNullOrEmpty(assetBundleName);
+			if (flag)
 			{
 				throw new ArgumentException("Input AssetBundle name cannot be null or empty.");
 			}
@@ -54,7 +55,8 @@ namespace UnityEngine
 
 		public static bool ClearOtherCachedVersions(string assetBundleName, Hash128 hash)
 		{
-			if (string.IsNullOrEmpty(assetBundleName))
+			bool flag = string.IsNullOrEmpty(assetBundleName);
+			if (flag)
 			{
 				throw new ArgumentException("Input AssetBundle name cannot be null or empty.");
 			}
@@ -63,7 +65,8 @@ namespace UnityEngine
 
 		public static bool ClearAllCachedVersions(string assetBundleName)
 		{
-			if (string.IsNullOrEmpty(assetBundleName))
+			bool flag = string.IsNullOrEmpty(assetBundleName);
+			if (flag)
 			{
 				throw new ArgumentException("Input AssetBundle name cannot be null or empty.");
 			}
@@ -80,11 +83,13 @@ namespace UnityEngine
 
 		public static void GetCachedVersions(string assetBundleName, List<Hash128> outCachedVersions)
 		{
-			if (string.IsNullOrEmpty(assetBundleName))
+			bool flag = string.IsNullOrEmpty(assetBundleName);
+			if (flag)
 			{
 				throw new ArgumentException("Input AssetBundle name cannot be null or empty.");
 			}
-			if (outCachedVersions == null)
+			bool flag2 = outCachedVersions == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("Input outCachedVersions cannot be null.");
 			}
@@ -99,7 +104,8 @@ namespace UnityEngine
 
 		public static bool IsVersionCached(string url, Hash128 hash)
 		{
-			if (string.IsNullOrEmpty(url))
+			bool flag = string.IsNullOrEmpty(url);
+			if (flag)
 			{
 				throw new ArgumentException("Input AssetBundle url cannot be null or empty.");
 			}
@@ -108,7 +114,8 @@ namespace UnityEngine
 
 		public static bool IsVersionCached(CachedAssetBundle cachedBundle)
 		{
-			if (string.IsNullOrEmpty(cachedBundle.name))
+			bool flag = string.IsNullOrEmpty(cachedBundle.name);
+			if (flag)
 			{
 				throw new ArgumentException("Input AssetBundle name cannot be null or empty.");
 			}
@@ -129,7 +136,8 @@ namespace UnityEngine
 
 		public static bool MarkAsUsed(string url, Hash128 hash)
 		{
-			if (string.IsNullOrEmpty(url))
+			bool flag = string.IsNullOrEmpty(url);
+			if (flag)
 			{
 				throw new ArgumentException("Input AssetBundle url cannot be null or empty.");
 			}
@@ -138,7 +146,8 @@ namespace UnityEngine
 
 		public static bool MarkAsUsed(CachedAssetBundle cachedBundle)
 		{
-			if (string.IsNullOrEmpty(cachedBundle.name))
+			bool flag = string.IsNullOrEmpty(cachedBundle.name);
+			if (flag)
 			{
 				throw new ArgumentException("Input AssetBundle name cannot be null or empty.");
 			}
@@ -192,8 +201,8 @@ namespace UnityEngine
 			get;
 		}
 
-		[Obsolete("This property is only used for the current cache, use Cache.maximumAvailableStorageSpace to access the maximum available storage space per cache.")]
 		[StaticAccessor("GetCachingManager().GetCurrentCache()", StaticAccessorType.Dot)]
+		[Obsolete("This property is only used for the current cache, use Cache.maximumAvailableStorageSpace to access the maximum available storage space per cache.")]
 		public static extern long maximumAvailableDiskSpace
 		{
 			[NativeName("GetMaximumDiskSpaceAvailable")]
@@ -204,8 +213,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[Obsolete("This property is only used for the current cache, use Cache.expirationDelay to access the expiration delay per cache.")]
 		[StaticAccessor("GetCachingManager().GetCurrentCache()", StaticAccessorType.Dot)]
+		[Obsolete("This property is only used for the current cache, use Cache.expirationDelay to access the expiration delay per cache.")]
 		public static extern int expirationDelay
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -216,31 +225,36 @@ namespace UnityEngine
 
 		public static Cache AddCache(string cachePath)
 		{
-			if (string.IsNullOrEmpty(cachePath))
+			bool flag = string.IsNullOrEmpty(cachePath);
+			if (flag)
 			{
 				throw new ArgumentNullException("Cache path cannot be null or empty.");
 			}
-			bool flag = false;
-			if (cachePath.Replace('\\', '/').StartsWith(Application.streamingAssetsPath))
+			bool flag2 = false;
+			bool flag3 = cachePath.Replace('\\', '/').StartsWith(Application.streamingAssetsPath);
+			if (flag3)
 			{
-				flag = true;
+				flag2 = true;
 			}
 			else
 			{
-				if (!Directory.Exists(cachePath))
+				bool flag4 = !Directory.Exists(cachePath);
+				if (flag4)
 				{
 					throw new ArgumentException("Cache path '" + cachePath + "' doesn't exist.");
 				}
-				if ((File.GetAttributes(cachePath) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+				bool flag5 = (File.GetAttributes(cachePath) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly;
+				if (flag5)
 				{
-					flag = true;
+					flag2 = true;
 				}
 			}
-			if (Caching.GetCacheByPath(cachePath).valid)
+			bool valid = Caching.GetCacheByPath(cachePath).valid;
+			if (valid)
 			{
 				throw new InvalidOperationException("Cache with path '" + cachePath + "' has already been added.");
 			}
-			return Caching.AddCache(cachePath, flag);
+			return Caching.AddCache(cachePath, flag2);
 		}
 
 		[NativeName("AddCachePath")]
@@ -261,8 +275,8 @@ namespace UnityEngine
 			return cache;
 		}
 
-		[NativeThrows]
 		[NativeName("Caching_GetCacheHandleByPath")]
+		[NativeThrows]
 		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		public static Cache GetCacheByPath(string cachePath)
 		{
@@ -280,9 +294,9 @@ namespace UnityEngine
 			}
 		}
 
-		[NativeName("Caching_RemoveCacheByHandle")]
-		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
+		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
+		[NativeName("Caching_RemoveCacheByHandle")]
 		public static bool RemoveCache(Cache cache)
 		{
 			return Caching.RemoveCache_Injected(ref cache);
@@ -296,9 +310,9 @@ namespace UnityEngine
 			Caching.MoveCacheBefore_Injected(ref src, ref dst);
 		}
 
-		[NativeThrows]
 		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeName("Caching_MoveCacheAfterByHandle")]
+		[NativeThrows]
 		public static void MoveCacheAfter(Cache src, Cache dst)
 		{
 			Caching.MoveCacheAfter_Injected(ref src, ref dst);
@@ -332,8 +346,8 @@ namespace UnityEngine
 				Caching.get_currentCacheForWriting_Injected(out cache);
 				return cache;
 			}
-			[NativeName("Caching_SetCurrentCacheByHandle")]
 			[NativeThrows]
+			[NativeName("Caching_SetCurrentCacheByHandle")]
 			set
 			{
 				Caching.set_currentCacheForWriting_Injected(ref value);

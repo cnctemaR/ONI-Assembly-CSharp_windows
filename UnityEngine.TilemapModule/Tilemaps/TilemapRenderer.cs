@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
+using UnityEngine.Scripting;
+using UnityEngine.U2D;
 
 namespace UnityEngine.Tilemaps
 {
@@ -89,6 +91,21 @@ namespace UnityEngine.Tilemaps
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
+
+		[RequiredByNativeCode]
+		internal void RegisterSpriteAtlasRegistered()
+		{
+			SpriteAtlasManager.atlasRegistered += this.OnSpriteAtlasRegistered;
+		}
+
+		[RequiredByNativeCode]
+		internal void UnregisterSpriteAtlasRegistered()
+		{
+			SpriteAtlasManager.atlasRegistered -= this.OnSpriteAtlasRegistered;
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void OnSpriteAtlasRegistered(SpriteAtlas atlas);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_chunkSize_Injected(out Vector3Int ret);

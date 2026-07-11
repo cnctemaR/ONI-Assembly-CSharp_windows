@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Diagnostics
 {
-	[MonoTODO("The Debugger class is not functional")]
 	[ComVisible(true)]
+	[MonoTODO("The Debugger class is not functional")]
 	public sealed class Debugger
 	{
 		public static bool IsAttached

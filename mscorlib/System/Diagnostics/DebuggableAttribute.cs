@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Diagnostics
 {
-	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Module, AllowMultiple = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Module, AllowMultiple = false)]
 	public sealed class DebuggableAttribute : Attribute
 	{
 		public DebuggableAttribute(bool isJITTrackingEnabled, bool isJITOptimizerDisabled)

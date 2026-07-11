@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class BestFitMappingAttribute : Attribute
 	{
 		public BestFitMappingAttribute(bool BestFitMapping)

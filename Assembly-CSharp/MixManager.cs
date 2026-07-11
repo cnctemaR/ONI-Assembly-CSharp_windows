@@ -23,6 +23,6 @@ public class MixManager : MonoBehaviour
 			AudioMixer.instance.Start(AudioMixerSnapshots.Get().GameNotFocusedSnapshot);
 			return;
 		}
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().GameNotFocusedSnapshot, STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().GameNotFocusedSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 	}
 }

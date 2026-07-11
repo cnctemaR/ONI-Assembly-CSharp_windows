@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Runtime/Graphics/Mesh/MeshFilter.h")]
+	[RequireComponent(typeof(Transform))]
 	public sealed class MeshFilter : Component
 	{
 		[RequiredByNativeCode]

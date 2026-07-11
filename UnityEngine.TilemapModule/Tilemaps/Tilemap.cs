@@ -4,13 +4,13 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Tilemaps
 {
-	[NativeHeader("Modules/Grid/Public/Grid.h")]
-	[NativeHeader("Runtime/Graphics/SpriteFrame.h")]
 	[NativeHeader("Modules/Tilemap/Public/TilemapTile.h")]
 	[NativeHeader("Modules/Tilemap/Public/TilemapMarshalling.h")]
 	[NativeType(Header = "Modules/Tilemap/Public/Tilemap.h")]
 	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
 	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Runtime/Graphics/SpriteFrame.h")]
+	[NativeHeader("Modules/Grid/Public/Grid.h")]
 	public sealed class Tilemap : GridLayout
 	{
 		public extern Grid layoutGrid
@@ -156,7 +156,7 @@ namespace UnityEngine.Tilemaps
 
 		public TileBase GetTile(Vector3Int position)
 		{
-			return (TileBase)this.GetTileAsset(position);
+			return this.GetTileAsset(position) as TileBase;
 		}
 
 		public T GetTile<T>(Vector3Int position) where T : TileBase
@@ -309,6 +309,12 @@ namespace UnityEngine.Tilemaps
 			return this.GetInstantiatedObject_Injected(ref position);
 		}
 
+		[NativeMethod(Name = "GetTileObjectToInstantiate")]
+		internal GameObject GetObjectToInstantiate(Vector3Int position)
+		{
+			return this.GetObjectToInstantiate_Injected(ref position);
+		}
+
 		[NativeMethod(Name = "SetTileColliderType")]
 		public void SetColliderType(Vector3Int position, Tile.ColliderType colliderType)
 		{
@@ -432,6 +438,9 @@ namespace UnityEngine.Tilemaps
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern GameObject GetInstantiatedObject_Injected(ref Vector3Int position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern GameObject GetObjectToInstantiate_Injected(ref Vector3Int position);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetColliderType_Injected(ref Vector3Int position, Tile.ColliderType colliderType);

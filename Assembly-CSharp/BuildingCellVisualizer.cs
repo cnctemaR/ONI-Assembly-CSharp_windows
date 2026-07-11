@@ -86,7 +86,7 @@ public class BuildingCellVisualizer : KMonoBehaviour
 			Vector3 position = base.transform.GetPosition();
 			position.z = 0f;
 			EventInstance eventInstance = SoundEvent.BeginOneShot(sound, position, 1f, false);
-			eventInstance.setParameterValue("connectedCount", (float)connectionCount);
+			eventInstance.setParameterByName("connectedCount", (float)connectionCount, false);
 			SoundEvent.EndOneShot(eventInstance);
 		}
 		yield break;

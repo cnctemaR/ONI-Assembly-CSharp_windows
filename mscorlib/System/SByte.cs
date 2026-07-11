@@ -5,8 +5,8 @@ using System.Security;
 
 namespace System
 {
-	[ComVisible(true)]
 	[CLSCompliant(false)]
+	[ComVisible(true)]
 	[Serializable]
 	public struct SByte : IComparable, IFormattable, IConvertible, IComparable<sbyte>, IEquatable<sbyte>
 	{

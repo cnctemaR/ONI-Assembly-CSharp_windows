@@ -8,18 +8,6 @@ namespace UnityEngine
 	[UsedByNativeCode]
 	public struct BoundsInt : IEquatable<BoundsInt>
 	{
-		public BoundsInt(int xMin, int yMin, int zMin, int sizeX, int sizeY, int sizeZ)
-		{
-			this.m_Position = new Vector3Int(xMin, yMin, zMin);
-			this.m_Size = new Vector3Int(sizeX, sizeY, sizeZ);
-		}
-
-		public BoundsInt(Vector3Int position, Vector3Int size)
-		{
-			this.m_Position = position;
-			this.m_Size = size;
-		}
-
 		public int x
 		{
 			get
@@ -194,6 +182,18 @@ namespace UnityEngine
 			}
 		}
 
+		public BoundsInt(int xMin, int yMin, int zMin, int sizeX, int sizeY, int sizeZ)
+		{
+			this.m_Position = new Vector3Int(xMin, yMin, zMin);
+			this.m_Size = new Vector3Int(sizeX, sizeY, sizeZ);
+		}
+
+		public BoundsInt(Vector3Int position, Vector3Int size)
+		{
+			this.m_Position = position;
+			this.m_Size = size;
+		}
+
 		public void SetMinMax(Vector3Int minPosition, Vector3Int maxPosition)
 		{
 			this.min = minPosition;
@@ -228,7 +228,8 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
-			return other is BoundsInt && this.Equals((BoundsInt)other);
+			bool flag = !(other is BoundsInt);
+			return !flag && this.Equals((BoundsInt)other);
 		}
 
 		public bool Equals(BoundsInt other)
@@ -270,37 +271,45 @@ namespace UnityEngine
 
 			public bool MoveNext()
 			{
-				bool flag;
-				if (this._current.z >= this._max.z)
+				bool flag = this._current.z >= this._max.z;
+				bool flag2;
+				if (flag)
 				{
-					flag = false;
+					flag2 = false;
 				}
 				else
 				{
-					this._current.x = this._current.x + 1;
-					if (this._current.x >= this._max.x)
+					int num = this._current.x;
+					this._current.x = num + 1;
+					bool flag3 = this._current.x >= this._max.x;
+					if (flag3)
 					{
 						this._current.x = this._min.x;
-						this._current.y = this._current.y + 1;
-						if (this._current.y >= this._max.y)
+						num = this._current.y;
+						this._current.y = num + 1;
+						bool flag4 = this._current.y >= this._max.y;
+						if (flag4)
 						{
 							this._current.y = this._min.y;
-							this._current.z = this._current.z + 1;
-							if (this._current.z >= this._max.z)
+							num = this._current.z;
+							this._current.z = num + 1;
+							bool flag5 = this._current.z >= this._max.z;
+							if (flag5)
 							{
 								return false;
 							}
 						}
 					}
-					flag = true;
+					flag2 = true;
 				}
-				return flag;
+				return flag2;
 			}
 
 			public void Reset()
 			{
 				this._current = this._min;
-				this._current.x = this._current.x - 1;
+				int x = this._current.x;
+				this._current.x = x - 1;
 			}
 
 			public Vector3Int Current

@@ -250,8 +250,8 @@ namespace System
 			}
 		}
 
-		[Obsolete("AppDomain.AppendPrivatePath has been deprecated. Please investigate the use of AppDomainSetup.PrivateBinPath instead.")]
 		[SecurityCritical]
+		[Obsolete("AppDomain.AppendPrivatePath has been deprecated. Please investigate the use of AppDomainSetup.PrivateBinPath instead.")]
 		[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 		public void AppendPrivatePath(string path)
 		{
@@ -274,16 +274,16 @@ namespace System
 			setupInformationNoCopy.PrivateBinPath = text + path;
 		}
 
-		[Obsolete("AppDomain.ClearPrivatePath has been deprecated. Please investigate the use of AppDomainSetup.PrivateBinPath instead.")]
 		[SecurityCritical]
+		[Obsolete("AppDomain.ClearPrivatePath has been deprecated. Please investigate the use of AppDomainSetup.PrivateBinPath instead.")]
 		[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 		public void ClearPrivatePath()
 		{
 			this.SetupInformationNoCopy.PrivateBinPath = string.Empty;
 		}
 
-		[Obsolete("Use AppDomainSetup.ShadowCopyDirectories")]
 		[SecurityCritical]
+		[Obsolete("Use AppDomainSetup.ShadowCopyDirectories")]
 		[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 		public void ClearShadowCopyPath()
 		{
@@ -495,8 +495,8 @@ namespace System
 			return this.DefineDynamicAssembly(name, access, dir, null, null, null, null, false);
 		}
 
-		[Obsolete("Declarative security for assembly level is no longer enforced")]
 		[SecuritySafeCritical]
+		[Obsolete("Declarative security for assembly level is no longer enforced")]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, string dir, Evidence evidence)
 		{
 			return this.DefineDynamicAssembly(name, access, dir, evidence, null, null, null, false);
@@ -509,22 +509,22 @@ namespace System
 			return this.DefineDynamicAssembly(name, access, null, null, requiredPermissions, optionalPermissions, refusedPermissions, false);
 		}
 
-		[SecuritySafeCritical]
 		[Obsolete("Declarative security for assembly level is no longer enforced")]
+		[SecuritySafeCritical]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, Evidence evidence, PermissionSet requiredPermissions, PermissionSet optionalPermissions, PermissionSet refusedPermissions)
 		{
 			return this.DefineDynamicAssembly(name, access, null, evidence, requiredPermissions, optionalPermissions, refusedPermissions, false);
 		}
 
-		[SecuritySafeCritical]
 		[Obsolete("Declarative security for assembly level is no longer enforced")]
+		[SecuritySafeCritical]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, string dir, PermissionSet requiredPermissions, PermissionSet optionalPermissions, PermissionSet refusedPermissions)
 		{
 			return this.DefineDynamicAssembly(name, access, dir, null, requiredPermissions, optionalPermissions, refusedPermissions, false);
 		}
 
-		[SecuritySafeCritical]
 		[Obsolete("Declarative security for assembly level is no longer enforced")]
+		[SecuritySafeCritical]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, string dir, Evidence evidence, PermissionSet requiredPermissions, PermissionSet optionalPermissions, PermissionSet refusedPermissions)
 		{
 			return this.DefineDynamicAssembly(name, access, dir, evidence, requiredPermissions, optionalPermissions, refusedPermissions, false);
@@ -761,8 +761,8 @@ namespace System
 			return this.Load(assemblyString, null, false);
 		}
 
-		[SecuritySafeCritical]
 		[Obsolete("Use an overload that does not take an Evidence parameter")]
+		[SecuritySafeCritical]
 		public Assembly Load(string assemblyString, Evidence assemblySecurity)
 		{
 			return this.Load(assemblyString, assemblySecurity, false);
@@ -801,8 +801,8 @@ namespace System
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern Assembly LoadAssemblyRaw(byte[] rawAssembly, byte[] rawSymbolStore, Evidence securityEvidence, bool refonly);
 
-		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		[SecuritySafeCritical]
+		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		[SecurityPermission(SecurityAction.Demand, ControlEvidence = true)]
 		public Assembly Load(byte[] rawAssembly, byte[] rawSymbolStore, Evidence securityEvidence)
 		{
@@ -820,8 +820,8 @@ namespace System
 			return assembly;
 		}
 
-		[Obsolete("AppDomain policy levels are obsolete")]
 		[SecurityCritical]
+		[Obsolete("AppDomain policy levels are obsolete")]
 		[SecurityPermission(SecurityAction.Demand, ControlPolicy = true)]
 		public void SetAppDomainPolicy(PolicyLevel domainPolicy)
 		{
@@ -841,8 +841,8 @@ namespace System
 			this._granted = policyStatement.PermissionSet;
 		}
 
-		[Obsolete("Use AppDomainSetup.SetCachePath")]
 		[SecurityCritical]
+		[Obsolete("Use AppDomainSetup.SetCachePath")]
 		[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 		public void SetCachePath(string path)
 		{
@@ -868,8 +868,8 @@ namespace System
 			this.SetupInformationNoCopy.ShadowCopyFiles = "true";
 		}
 
-		[SecurityCritical]
 		[Obsolete("Use AppDomainSetup.ShadowCopyDirectories")]
+		[SecurityCritical]
 		[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 		public void SetShadowCopyPath(string path)
 		{

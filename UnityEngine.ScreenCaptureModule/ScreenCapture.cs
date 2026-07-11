@@ -39,6 +39,9 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void CaptureScreenshotIntoRenderTexture(RenderTexture renderTexture);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void CaptureScreenshot(string filename, [DefaultValue("1")] int superSize, [DefaultValue("1")] ScreenCapture.StereoScreenCaptureMode CaptureMode);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

@@ -3,10 +3,10 @@ using System.Reflection.Emit;
 
 namespace System.Runtime.InteropServices
 {
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[ComVisible(true)]
 	[Guid("4E6350D1-A08B-3DEC-9A3E-C465F9AEEC0C")]
 	[TypeLibImportClass(typeof(LocalBuilder))]
+	[ComVisible(true)]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[CLSCompliant(false)]
 	public interface _LocalBuilder
 	{

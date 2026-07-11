@@ -7,8 +7,8 @@ using System.Security;
 
 namespace System.Runtime.Remoting.Messaging
 {
-	[CLSCompliant(false)]
 	[ComVisible(true)]
+	[CLSCompliant(false)]
 	[Serializable]
 	public class ConstructionResponse : MethodResponse, IConstructionReturnMessage, IMethodReturnMessage, IMethodMessage, IMessage
 	{

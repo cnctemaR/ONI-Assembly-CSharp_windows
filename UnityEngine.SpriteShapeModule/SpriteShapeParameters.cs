@@ -1,7 +1,9 @@
 ﻿using System;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace UnityEngine.Experimental.U2D
+namespace UnityEngine.U2D
 {
+	[MovedFrom("UnityEngine.Experimental.U2D")]
 	public struct SpriteShapeParameters
 	{
 		public Matrix4x4 transform;
@@ -27,5 +29,7 @@ namespace UnityEngine.Experimental.U2D
 		public bool adaptiveUV;
 
 		public bool spriteBorders;
+
+		public bool stretchUV;
 	}
 }

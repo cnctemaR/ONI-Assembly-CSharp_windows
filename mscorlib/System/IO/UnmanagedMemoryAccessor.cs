@@ -315,8 +315,8 @@ namespace System.IO
 			return b;
 		}
 
-		[SecuritySafeCritical]
 		[CLSCompliant(false)]
+		[SecuritySafeCritical]
 		public unsafe ushort ReadUInt16(long position)
 		{
 			int num = 2;
@@ -340,8 +340,8 @@ namespace System.IO
 			return num2;
 		}
 
-		[SecuritySafeCritical]
 		[CLSCompliant(false)]
+		[SecuritySafeCritical]
 		public unsafe uint ReadUInt32(long position)
 		{
 			int num = 4;
@@ -664,8 +664,8 @@ namespace System.IO
 			}
 		}
 
-		[CLSCompliant(false)]
 		[SecuritySafeCritical]
+		[CLSCompliant(false)]
 		public unsafe void Write(long position, ushort value)
 		{
 			int num = 2;

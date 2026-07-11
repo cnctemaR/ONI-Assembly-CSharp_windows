@@ -18,11 +18,21 @@ namespace UnityEngine
 
 		public int bottomBorder;
 
+		public Color leftBorderColor;
+
+		public Color rightBorderColor;
+
+		public Color topBorderColor;
+
+		public Color bottomBorderColor;
+
 		public Color color;
 
 		public Vector4 borderWidths;
 
 		public Vector4 cornerRadiuses;
+
+		public bool smoothCorners;
 
 		public int pass;
 

@@ -41,24 +41,17 @@ namespace UnityEngine.Playables
 
 		public static void SetSourcePlayable<U, V>(this U output, V value) where U : struct, IPlayableOutput where V : struct, IPlayable
 		{
-			output.GetHandle().SetSourcePlayable(value.GetHandle());
+			output.GetHandle().SetSourcePlayable(value.GetHandle(), output.GetSourceOutputPort<U>());
 		}
 
 		public static void SetSourcePlayable<U, V>(this U output, V value, int port) where U : struct, IPlayableOutput where V : struct, IPlayable
 		{
-			PlayableOutputHandle handle = output.GetHandle();
-			handle.SetSourcePlayable(value.GetHandle());
-			handle.SetSourceOutputPort(port);
+			output.GetHandle().SetSourcePlayable(value.GetHandle(), port);
 		}
 
 		public static int GetSourceOutputPort<U>(this U output) where U : struct, IPlayableOutput
 		{
 			return output.GetHandle().GetSourceOutputPort();
-		}
-
-		public static void SetSourceOutputPort<U>(this U output, int value) where U : struct, IPlayableOutput
-		{
-			output.GetHandle().SetSourceOutputPort(value);
 		}
 
 		public static float GetWeight<U>(this U output) where U : struct, IPlayableOutput
@@ -97,10 +90,16 @@ namespace UnityEngine.Playables
 			return output.GetHandle().GetSourceOutputPort();
 		}
 
-		[Obsolete("Method SetSourceInputPort has been renamed to SetSourceOutputPort (UnityUpgradable) -> SetSourceOutputPort<U>(*)", false)]
+		[Obsolete("Method SetSourceInputPort has been deprecated. Use SetSourcePlayable(Playable, Port) instead.", false)]
 		public static void SetSourceInputPort<U>(this U output, int value) where U : struct, IPlayableOutput
 		{
-			output.GetHandle().SetSourceOutputPort(value);
+			output.SetSourcePlayable(output.GetSourcePlayable<U>(), value);
+		}
+
+		[Obsolete("Method SetSourceOutputPort has been deprecated. Use SetSourcePlayable(Playable, Port) instead.", false)]
+		public static void SetSourceOutputPort<U>(this U output, int value) where U : struct, IPlayableOutput
+		{
+			output.SetSourcePlayable(output.GetSourcePlayable<U>(), value);
 		}
 	}
 }

@@ -340,7 +340,7 @@ public class BuildTool : DragTool
 					EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector2, 1f, false);
 					if (this.def.AudioSize == "small")
 					{
-						eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
+						eventInstance.setParameterByName("tileCount", (float)this.buildingCount, false);
 					}
 					SoundEvent.EndOneShot(eventInstance);
 				}

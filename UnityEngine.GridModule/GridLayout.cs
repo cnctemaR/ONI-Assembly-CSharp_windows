@@ -5,9 +5,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequireComponent(typeof(Transform))]
 	[NativeType(Header = "Modules/Grid/Public/Grid.h")]
 	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
+	[RequireComponent(typeof(Transform))]
 	public class GridLayout : Behaviour
 	{
 		public Vector3 cellSize

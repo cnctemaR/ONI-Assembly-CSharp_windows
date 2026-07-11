@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Internal;
@@ -10,38 +13,6 @@ namespace UnityEngine
 	[NativeHeader("Runtime/Graphics/CubemapArrayTexture.h")]
 	public sealed class CubemapArray : Texture
 	{
-		[RequiredByNativeCode]
-		public CubemapArray(int width, int cubemapCount, GraphicsFormat format, TextureCreationFlags flags)
-		{
-			if (base.ValidateFormat(format, FormatUsage.Sample))
-			{
-				CubemapArray.Internal_Create(this, width, cubemapCount, format, flags);
-			}
-		}
-
-		public CubemapArray(int width, int cubemapCount, TextureFormat textureFormat, bool mipChain, [DefaultValue("false")] bool linear)
-		{
-			if (base.ValidateFormat(textureFormat))
-			{
-				GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(textureFormat, !linear);
-				TextureCreationFlags textureCreationFlags = TextureCreationFlags.None;
-				if (mipChain)
-				{
-					textureCreationFlags |= TextureCreationFlags.MipChain;
-				}
-				if (GraphicsFormatUtility.IsCrunchFormat(textureFormat))
-				{
-					textureCreationFlags |= TextureCreationFlags.Crunch;
-				}
-				CubemapArray.Internal_Create(this, width, cubemapCount, graphicsFormat, textureCreationFlags);
-			}
-		}
-
-		public CubemapArray(int width, int cubemapCount, TextureFormat textureFormat, bool mipChain)
-			: this(width, cubemapCount, textureFormat, mipChain, false)
-		{
-		}
-
 		public extern int cubemapCount
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -63,11 +34,12 @@ namespace UnityEngine
 
 		[FreeFunction("CubemapArrayScripting::Create")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Internal_CreateImpl([Writable] CubemapArray mono, int ext, int count, GraphicsFormat format, TextureCreationFlags flags);
+		private static extern bool Internal_CreateImpl([Writable] CubemapArray mono, int ext, int count, int mipCount, GraphicsFormat format, TextureCreationFlags flags);
 
-		private static void Internal_Create([Writable] CubemapArray mono, int ext, int count, GraphicsFormat format, TextureCreationFlags flags)
+		private static void Internal_Create([Writable] CubemapArray mono, int ext, int count, int mipCount, GraphicsFormat format, TextureCreationFlags flags)
 		{
-			if (!CubemapArray.Internal_CreateImpl(mono, ext, count, format, flags))
+			bool flag = !CubemapArray.Internal_CreateImpl(mono, ext, count, mipCount, format, flags);
+			if (flag)
 			{
 				throw new UnityException("Failed to create cubemap array texture because of invalid parameters.");
 			}
@@ -113,9 +85,64 @@ namespace UnityEngine
 			this.SetPixels32(colors, face, arrayElement, 0);
 		}
 
+		[FreeFunction(Name = "CubemapArrayScripting::SetPixelDataArray", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool SetPixelDataImplArray(Array data, int mipLevel, int face, int element, int elementSize, int dataArraySize, int sourceDataStartIndex = 0);
+
+		[FreeFunction(Name = "CubemapArrayScripting::SetPixelData", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool SetPixelDataImpl(IntPtr data, int mipLevel, int face, int element, int elementSize, int dataArraySize, int sourceDataStartIndex = 0);
+
+		public CubemapArray(int width, int cubemapCount, DefaultFormat format, TextureCreationFlags flags)
+			: this(width, cubemapCount, SystemInfo.GetGraphicsFormat(format), flags)
+		{
+		}
+
+		[RequiredByNativeCode]
+		public CubemapArray(int width, int cubemapCount, GraphicsFormat format, TextureCreationFlags flags)
+			: this(width, cubemapCount, format, flags, Texture.GenerateAllMips)
+		{
+		}
+
+		public CubemapArray(int width, int cubemapCount, GraphicsFormat format, TextureCreationFlags flags, int mipCount)
+		{
+			bool flag = base.ValidateFormat(format, FormatUsage.Sample);
+			if (flag)
+			{
+				CubemapArray.Internal_Create(this, width, cubemapCount, mipCount, format, flags);
+			}
+		}
+
+		public CubemapArray(int width, int cubemapCount, TextureFormat textureFormat, int mipCount, [DefaultValue("true")] bool linear)
+		{
+			bool flag = !base.ValidateFormat(textureFormat);
+			if (!flag)
+			{
+				GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(textureFormat, !linear);
+				TextureCreationFlags textureCreationFlags = ((mipCount != 1) ? TextureCreationFlags.MipChain : TextureCreationFlags.None);
+				bool flag2 = GraphicsFormatUtility.IsCrunchFormat(textureFormat);
+				if (flag2)
+				{
+					textureCreationFlags |= TextureCreationFlags.Crunch;
+				}
+				CubemapArray.Internal_Create(this, width, cubemapCount, mipCount, graphicsFormat, textureCreationFlags);
+			}
+		}
+
+		public CubemapArray(int width, int cubemapCount, TextureFormat textureFormat, bool mipChain, [DefaultValue("true")] bool linear)
+			: this(width, cubemapCount, textureFormat, mipChain ? (-1) : 1, linear)
+		{
+		}
+
+		public CubemapArray(int width, int cubemapCount, TextureFormat textureFormat, bool mipChain)
+			: this(width, cubemapCount, textureFormat, mipChain ? (-1) : 1, false)
+		{
+		}
+
 		public void Apply([DefaultValue("true")] bool updateMipmaps, [DefaultValue("false")] bool makeNoLongerReadable)
 		{
-			if (!this.isReadable)
+			bool flag = !this.isReadable;
+			if (flag)
 			{
 				throw base.CreateNonReadableException(this);
 			}
@@ -130,6 +157,46 @@ namespace UnityEngine
 		public void Apply()
 		{
 			this.Apply(true, false);
+		}
+
+		public void SetPixelData<T>(T[] data, int mipLevel, CubemapFace face, int element, int sourceDataStartIndex = 0)
+		{
+			bool flag = sourceDataStartIndex < 0;
+			if (flag)
+			{
+				throw new UnityException("SetPixelData: sourceDataStartIndex cannot be less than 0.");
+			}
+			bool flag2 = !this.isReadable;
+			if (flag2)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			bool flag3 = data == null || data.Length == 0;
+			if (flag3)
+			{
+				throw new UnityException("No texture data provided to SetPixelData.");
+			}
+			this.SetPixelDataImplArray(data, mipLevel, (int)face, element, Marshal.SizeOf(data[0]), data.Length, sourceDataStartIndex);
+		}
+
+		public void SetPixelData<T>(NativeArray<T> data, int mipLevel, CubemapFace face, int element, int sourceDataStartIndex = 0) where T : struct
+		{
+			bool flag = sourceDataStartIndex < 0;
+			if (flag)
+			{
+				throw new UnityException("SetPixelData: sourceDataStartIndex cannot be less than 0.");
+			}
+			bool flag2 = !this.isReadable;
+			if (flag2)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			bool flag3 = !data.IsCreated || data.Length == 0;
+			if (flag3)
+			{
+				throw new UnityException("No texture data provided to SetPixelData.");
+			}
+			this.SetPixelDataImpl((IntPtr)data.GetUnsafeReadOnlyPtr<T>(), mipLevel, (int)face, element, UnsafeUtility.SizeOf<T>(), data.Length, sourceDataStartIndex);
 		}
 	}
 }

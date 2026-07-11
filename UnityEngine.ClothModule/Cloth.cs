@@ -3,15 +3,58 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
-using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequireComponent(typeof(Transform), typeof(SkinnedMeshRenderer))]
-	[NativeHeader("Runtime/Cloth/Cloth.h")]
 	[NativeClass("Unity::Cloth")]
+	[NativeHeader("Modules/Cloth/Cloth.h")]
+	[RequireComponent(typeof(Transform), typeof(SkinnedMeshRenderer))]
 	public sealed class Cloth : Component
 	{
+		public extern Vector3[] vertices
+		{
+			[NativeName("GetPositions")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public extern Vector3[] normals
+		{
+			[NativeName("GetNormals")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public extern ClothSkinningCoefficient[] coefficients
+		{
+			[NativeName("GetCoefficients")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[NativeName("SetCoefficients")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern CapsuleCollider[] capsuleColliders
+		{
+			[NativeName("GetCapsuleColliders")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[NativeName("SetCapsuleColliders")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern ClothSphereColliderPair[] sphereColliders
+		{
+			[NativeName("GetSphereColliders")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[NativeName("SetSphereColliders")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		public extern float sleepThreshold
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -144,6 +187,19 @@ namespace UnityEngine
 			set;
 		}
 
+		[Obsolete("Parameter solverFrequency is obsolete and no longer supported. Please use clothSolverFrequency instead.")]
+		public bool solverFrequency
+		{
+			get
+			{
+				return this.clothSolverFrequency > 0f;
+			}
+			set
+			{
+				this.clothSolverFrequency = (value ? 120f : 0f);
+			}
+		}
+
 		public extern bool useTethers
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -176,182 +232,151 @@ namespace UnityEngine
 			set;
 		}
 
-		public void GetVirtualParticleIndices(List<uint> indices)
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void ClearTransformMotion();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern uint[] GetSelfAndInterCollisionIndices();
+
+		internal void Internal_GetSelfAndInterCollisionIndices(List<uint> indicesOutList)
 		{
-			if (indices == null)
-			{
-				throw new ArgumentNullException("indices");
-			}
-			this.GetVirtualParticleIndicesMono(indices);
+			uint[] selfAndInterCollisionIndices = this.GetSelfAndInterCollisionIndices();
+			indicesOutList.Clear();
+			indicesOutList.AddRange(selfAndInterCollisionIndices);
 		}
 
-		public void SetVirtualParticleIndices(List<uint> indices)
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetSelfAndInterCollisionIndices(uint[] indicesIn);
+
+		internal void Internal_SetSelfAndInterCollisionIndices(List<uint> indicesInList)
 		{
-			if (indices == null)
-			{
-				throw new ArgumentNullException("indices");
-			}
-			this.SetVirtualParticleIndicesMono(indices);
+			this.SetSelfAndInterCollisionIndices(indicesInList.ToArray());
 		}
 
-		public void GetVirtualParticleWeights(List<Vector3> weights)
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern uint[] GetVirtualParticleIndices();
+
+		internal void Internal_GetVirtualParticleIndices(List<uint> indicesOutList)
 		{
-			if (weights == null)
-			{
-				throw new ArgumentNullException("weights");
-			}
-			this.GetVirtualParticleWeightsMono(weights);
+			uint[] virtualParticleIndices = this.GetVirtualParticleIndices();
+			indicesOutList.Clear();
+			indicesOutList.AddRange(virtualParticleIndices);
 		}
 
-		public void SetVirtualParticleWeights(List<Vector3> weights)
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetVirtualParticleIndices(uint[] indicesIn);
+
+		internal void Internal_SetVirtualParticleIndices(List<uint> indicesInList)
 		{
-			if (weights == null)
-			{
-				throw new ArgumentNullException("weights");
-			}
-			this.SetVirtualParticleWeightsMono(weights);
+			this.SetVirtualParticleIndices(indicesInList.ToArray());
 		}
 
-		public void GetSelfAndInterCollisionIndices(List<uint> indices)
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern Vector3[] GetVirtualParticleWeights();
+
+		internal void Internal_GetVirtualParticleWeights(List<Vector3> weightsOutList)
 		{
-			if (indices == null)
-			{
-				throw new ArgumentNullException("indices");
-			}
-			this.GetSelfAndInterCollisionIndicesMono(indices);
+			Vector3[] virtualParticleWeights = this.GetVirtualParticleWeights();
+			weightsOutList.Clear();
+			weightsOutList.AddRange(virtualParticleWeights);
 		}
 
-		public void SetSelfAndInterCollisionIndices(List<uint> indices)
-		{
-			if (indices == null)
-			{
-				throw new ArgumentNullException("indices");
-			}
-			this.SetSelfAndInterCollisionIndicesMono(indices);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetVirtualParticleWeights(Vector3[] weightsIn);
 
-		[Obsolete("Deprecated. Cloth.selfCollisions is no longer supported since Unity 5.0.", true)]
-		public extern bool selfCollision
+		internal void Internal_SetVirtualParticleWeights(List<Vector3> weightsInList)
 		{
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
-
-		public extern Vector3[] vertices
-		{
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-		}
-
-		public extern Vector3[] normals
-		{
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			this.SetVirtualParticleWeights(weightsInList.ToArray());
 		}
 
 		[Obsolete("useContinuousCollision is no longer supported, use enableContinuousCollision instead")]
-		public extern float useContinuousCollision
-		{
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
+		public float useContinuousCollision { get; set; }
 
-		public void ClearTransformMotion()
-		{
-			Cloth.INTERNAL_CALL_ClearTransformMotion(this);
-		}
+		[Obsolete("Deprecated.Cloth.selfCollisions is no longer supported since Unity 5.0.", true)]
+		public bool selfCollision { get; }
 
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void INTERNAL_CALL_ClearTransformMotion(Cloth self);
-
-		public extern ClothSkinningCoefficient[] coefficients
-		{
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetEnabledFading(bool enabled, [DefaultValue("0.5f")] float interpolationTime);
+		public extern void SetEnabledFading(bool enabled, float interpolationTime);
 
 		[ExcludeFromDocs]
 		public void SetEnabledFading(bool enabled)
 		{
-			float num = 0.5f;
-			this.SetEnabledFading(enabled, num);
+			this.SetEnabledFading(enabled, 0.5f);
 		}
 
-		[Obsolete("Parameter solverFrequency is obsolete and no longer supported. Please use clothSolverFrequency instead.")]
-		public bool solverFrequency
+		private RaycastHit Raycast(Ray ray, float maxDistance, ref bool hasHit)
 		{
-			get
+			RaycastHit raycastHit;
+			this.Raycast_Injected(ref ray, maxDistance, ref hasHit, out raycastHit);
+			return raycastHit;
+		}
+
+		internal bool Raycast(Ray ray, out RaycastHit hitInfo, float maxDistance)
+		{
+			bool flag = false;
+			hitInfo = this.Raycast(ray, maxDistance, ref flag);
+			return flag;
+		}
+
+		public void GetVirtualParticleIndices(List<uint> indices)
+		{
+			bool flag = indices == null;
+			if (flag)
 			{
-				return this.clothSolverFrequency > 0f;
+				throw new ArgumentNullException("indices");
 			}
-			set
+			this.Internal_GetVirtualParticleIndices(indices);
+		}
+
+		public void SetVirtualParticleIndices(List<uint> indices)
+		{
+			bool flag = indices == null;
+			if (flag)
 			{
-				this.clothSolverFrequency = ((!value) ? 0f : 120f);
+				throw new ArgumentNullException("indices");
 			}
+			this.Internal_SetVirtualParticleIndices(indices);
 		}
 
-		public extern CapsuleCollider[] capsuleColliders
+		public void GetVirtualParticleWeights(List<Vector3> weights)
 		{
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			bool flag = weights == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("weights");
+			}
+			this.Internal_GetVirtualParticleWeights(weights);
 		}
 
-		public extern ClothSphereColliderPair[] sphereColliders
+		public void SetVirtualParticleWeights(List<Vector3> weights)
 		{
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			bool flag = weights == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("weights");
+			}
+			this.Internal_SetVirtualParticleWeights(weights);
 		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void GetVirtualParticleIndicesMono(object indicesOutList);
+		public void GetSelfAndInterCollisionIndices(List<uint> indices)
+		{
+			bool flag = indices == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("indices");
+			}
+			this.Internal_GetSelfAndInterCollisionIndices(indices);
+		}
 
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SetVirtualParticleIndicesMono(object indicesInList);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void GetVirtualParticleWeightsMono(object weightsOutList);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SetVirtualParticleWeightsMono(object weightsInList);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void GetSelfAndInterCollisionIndicesMono(object indicesOutList);
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SetSelfAndInterCollisionIndicesMono(object indicesInList);
+		public void SetSelfAndInterCollisionIndices(List<uint> indices)
+		{
+			bool flag = indices == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("indices");
+			}
+			this.Internal_SetSelfAndInterCollisionIndices(indices);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_externalAcceleration_Injected(out Vector3 ret);
@@ -364,5 +389,8 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void set_randomAcceleration_Injected(ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void Raycast_Injected(ref Ray ray, float maxDistance, ref bool hasHit, out RaycastHit ret);
 	}
 }

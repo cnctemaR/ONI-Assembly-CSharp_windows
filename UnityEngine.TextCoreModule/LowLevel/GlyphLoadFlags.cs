@@ -4,11 +4,12 @@ using UnityEngine.Scripting;
 namespace UnityEngine.TextCore.LowLevel
 {
 	[UsedByNativeCode]
+	[Flags]
 	public enum GlyphLoadFlags
 	{
-		LOAD_DEFAULT,
-		LOAD_NO_SCALE,
-		LOAD_NO_HINTING,
+		LOAD_DEFAULT = 0,
+		LOAD_NO_SCALE = 1,
+		LOAD_NO_HINTING = 2,
 		LOAD_RENDER = 4,
 		LOAD_NO_BITMAP = 8,
 		LOAD_FORCE_AUTOHINT = 32,

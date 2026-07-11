@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[NativeHeader("Runtime/Graphics/LineRenderer.h")]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	public sealed class LineRenderer : Renderer
 	{
 		[Obsolete("Use startWidth, endWidth or widthCurve instead.", false)]

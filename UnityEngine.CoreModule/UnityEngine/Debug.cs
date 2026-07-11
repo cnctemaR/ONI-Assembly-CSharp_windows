@@ -5,10 +5,11 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Debug.bindings.h")]
+	[NativeHeader("Runtime/Export/Debug/Debug.bindings.h")]
 	public class Debug
 	{
 		public static ILogger unityLogger
@@ -105,6 +106,20 @@ namespace UnityEngine
 			Debug.unityLogger.LogFormat(LogType.Log, context, format, args);
 		}
 
+		public static void LogFormat(LogType logType, LogOption logOptions, Object context, string format, params object[] args)
+		{
+			DebugLogHandler debugLogHandler = Debug.unityLogger.logHandler as DebugLogHandler;
+			bool flag = debugLogHandler == null;
+			if (flag)
+			{
+				Debug.unityLogger.LogFormat(logType, context, format, args);
+			}
+			else
+			{
+				debugLogHandler.LogFormat(logType, logOptions, context, format, args);
+			}
+		}
+
 		public static void LogError(object message)
 		{
 			Debug.unityLogger.Log(LogType.Error, message);
@@ -169,7 +184,8 @@ namespace UnityEngine
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void Assert(bool condition)
 		{
-			if (!condition)
+			bool flag = !condition;
+			if (flag)
 			{
 				Debug.unityLogger.Log(LogType.Assert, "Assertion failed");
 			}
@@ -178,7 +194,8 @@ namespace UnityEngine
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void Assert(bool condition, Object context)
 		{
-			if (!condition)
+			bool flag = !condition;
+			if (flag)
 			{
 				Debug.unityLogger.Log(LogType.Assert, "Assertion failed", context);
 			}
@@ -187,7 +204,8 @@ namespace UnityEngine
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void Assert(bool condition, object message)
 		{
-			if (!condition)
+			bool flag = !condition;
+			if (flag)
 			{
 				Debug.unityLogger.Log(LogType.Assert, message);
 			}
@@ -196,7 +214,8 @@ namespace UnityEngine
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void Assert(bool condition, string message)
 		{
-			if (!condition)
+			bool flag = !condition;
+			if (flag)
 			{
 				Debug.unityLogger.Log(LogType.Assert, message);
 			}
@@ -205,7 +224,8 @@ namespace UnityEngine
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void Assert(bool condition, object message, Object context)
 		{
-			if (!condition)
+			bool flag = !condition;
+			if (flag)
 			{
 				Debug.unityLogger.Log(LogType.Assert, message, context);
 			}
@@ -214,7 +234,8 @@ namespace UnityEngine
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void Assert(bool condition, string message, Object context)
 		{
-			if (!condition)
+			bool flag = !condition;
+			if (flag)
 			{
 				Debug.unityLogger.Log(LogType.Assert, message, context);
 			}
@@ -223,7 +244,8 @@ namespace UnityEngine
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AssertFormat(bool condition, string format, params object[] args)
 		{
-			if (!condition)
+			bool flag = !condition;
+			if (flag)
 			{
 				Debug.unityLogger.LogFormat(LogType.Assert, format, args);
 			}
@@ -232,7 +254,8 @@ namespace UnityEngine
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AssertFormat(bool condition, Object context, string format, params object[] args)
 		{
-			if (!condition)
+			bool flag = !condition;
+			if (flag)
 			{
 				Debug.unityLogger.LogFormat(LogType.Assert, context, format, args);
 			}
@@ -285,19 +308,37 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void SetDiagnosticSwitch(string name, object value, bool setPersistent);
 
+		[RequiredByNativeCode]
+		internal static bool CallOverridenDebugHandler(Exception exception, Object obj)
+		{
+			bool flag = Debug.s_Logger.logHandler is DebugLogHandler;
+			bool flag2;
+			if (flag)
+			{
+				flag2 = false;
+			}
+			else
+			{
+				Debug.s_Logger.LogException(exception, obj);
+				flag2 = true;
+			}
+			return flag2;
+		}
+
 		[Obsolete("Assert(bool, string, params object[]) is obsolete. Use AssertFormat(bool, string, params object[]) (UnityUpgradable) -> AssertFormat(*)", true)]
 		[Conditional("UNITY_ASSERTIONS")]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static void Assert(bool condition, string format, params object[] args)
 		{
-			if (!condition)
+			bool flag = !condition;
+			if (flag)
 			{
 				Debug.unityLogger.LogFormat(LogType.Assert, format, args);
 			}
 		}
 
-		[Obsolete("Debug.logger is obsolete. Please use Debug.unityLogger instead (UnityUpgradable) -> unityLogger")]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Debug.logger is obsolete. Please use Debug.unityLogger instead (UnityUpgradable) -> unityLogger")]
 		public static ILogger logger
 		{
 			get

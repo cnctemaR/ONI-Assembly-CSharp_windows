@@ -4,19 +4,33 @@ namespace UnityEngine.Bindings
 {
 	[VisibleToOtherModules]
 	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property)]
-	internal class NativeMethodAttribute : Attribute, IBindingsNameProviderAttribute, IBindingsIsThreadSafeProviderAttribute, IBindingsIsFreeFunctionProviderAttribute, IBindingsThrowsProviderAttribute, IBindingsAttribute
+	internal class NativeMethodAttribute : Attribute, IBindingsNameProviderAttribute, IBindingsAttribute, IBindingsIsThreadSafeProviderAttribute, IBindingsIsFreeFunctionProviderAttribute, IBindingsThrowsProviderAttribute
 	{
+		public string Name { get; set; }
+
+		public bool IsThreadSafe { get; set; }
+
+		public bool IsFreeFunction { get; set; }
+
+		public bool ThrowsException { get; set; }
+
+		public bool HasExplicitThis { get; set; }
+
+		public bool WritableSelf { get; set; }
+
 		public NativeMethodAttribute()
 		{
 		}
 
 		public NativeMethodAttribute(string name)
 		{
-			if (name == null)
+			bool flag = name == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("name");
 			}
-			if (name == "")
+			bool flag2 = name == "";
+			if (flag2)
 			{
 				throw new ArgumentException("name cannot be empty", "name");
 			}
@@ -40,17 +54,5 @@ namespace UnityEngine.Bindings
 		{
 			this.ThrowsException = throws;
 		}
-
-		public string Name { get; set; }
-
-		public bool IsThreadSafe { get; set; }
-
-		public bool IsFreeFunction { get; set; }
-
-		public bool ThrowsException { get; set; }
-
-		public bool HasExplicitThis { get; set; }
-
-		public bool WritableSelf { get; set; }
 	}
 }

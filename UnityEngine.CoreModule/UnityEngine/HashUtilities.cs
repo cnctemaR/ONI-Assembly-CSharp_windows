@@ -9,9 +9,11 @@ namespace UnityEngine
 		{
 			fixed (Hash128* ptr = &outHash)
 			{
-				fixed (Hash128* ptr2 = &inHash)
+				Hash128* ptr2 = ptr;
+				fixed (Hash128* ptr3 = &inHash)
 				{
-					HashUnsafeUtilities.ComputeHash128((void*)ptr2, (ulong)((long)sizeof(Hash128)), ptr);
+					Hash128* ptr4 = ptr3;
+					HashUnsafeUtilities.ComputeHash128((void*)ptr4, (ulong)((long)sizeof(Hash128)), ptr2);
 				}
 			}
 		}
@@ -20,12 +22,13 @@ namespace UnityEngine
 		{
 			fixed (Hash128* ptr = &hash)
 			{
-				int* ptr2 = stackalloc int[checked(16 * 4)];
+				Hash128* ptr2 = ptr;
+				int* ptr3 = stackalloc int[(UIntPtr)64];
 				for (int i = 0; i < 16; i++)
 				{
-					ptr2[i] = (int)(value[i] * 1000f + 0.5f);
+					ptr3[i] = (int)(value[i] * 1000f + 0.5f);
 				}
-				HashUnsafeUtilities.ComputeHash128((void*)ptr2, 64UL, ptr);
+				HashUnsafeUtilities.ComputeHash128((void*)ptr3, 64UL, ptr2);
 			}
 		}
 
@@ -33,12 +36,13 @@ namespace UnityEngine
 		{
 			fixed (Hash128* ptr = &hash)
 			{
-				int* ptr2 = stackalloc int[checked(3 * 4)];
+				Hash128* ptr2 = ptr;
+				int* ptr3 = stackalloc int[(UIntPtr)12];
 				for (int i = 0; i < 3; i++)
 				{
-					ptr2[i] = (int)(value[i] * 1000f + 0.5f);
+					ptr3[i] = (int)(value[i] * 1000f + 0.5f);
 				}
-				HashUnsafeUtilities.ComputeHash128((void*)ptr2, 12UL, ptr);
+				HashUnsafeUtilities.ComputeHash128((void*)ptr3, 12UL, ptr2);
 			}
 		}
 
@@ -48,6 +52,17 @@ namespace UnityEngine
 			ulong num = (ulong)((long)UnsafeUtility.SizeOf<T>());
 			Hash128* ptr2 = (Hash128*)UnsafeUtility.AddressOf<Hash128>(ref hash);
 			HashUnsafeUtilities.ComputeHash128(ptr, num, ptr2);
+		}
+
+		public unsafe static void ComputeHash128(byte[] value, ref Hash128 hash)
+		{
+			fixed (byte* ptr = &value[0])
+			{
+				byte* ptr2 = ptr;
+				ulong num = (ulong)((long)value.Length);
+				Hash128* ptr3 = (Hash128*)UnsafeUtility.AddressOf<Hash128>(ref hash);
+				HashUnsafeUtilities.ComputeHash128((void*)ptr2, num, ptr3);
+			}
 		}
 	}
 }

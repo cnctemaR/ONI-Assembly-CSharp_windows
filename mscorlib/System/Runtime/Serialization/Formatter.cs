@@ -6,8 +6,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.Serialization
 {
-	[CLSCompliant(false)]
 	[ComVisible(true)]
+	[CLSCompliant(false)]
 	[Serializable]
 	public abstract class Formatter : IFormatter
 	{

@@ -106,8 +106,8 @@ public class AmbienceManager : KMonoBehaviour
 			}
 			Vector3 vector = new Vector3(emitter_position.x, emitter_position.y, 0f);
 			this.soundEvent.set3DAttributes(vector.To3DAttributes());
-			this.soundEvent.setParameterValue("tilePercentage", this.tilePercentage);
-			this.soundEvent.setParameterValue("averageTemperature", this.averageTemperature);
+			this.soundEvent.setParameterByName("tilePercentage", this.tilePercentage, false);
+			this.soundEvent.setParameterByName("averageTemperature", this.averageTemperature, false);
 		}
 
 		public int CompareTo(AmbienceManager.Layer layer)
@@ -119,7 +119,7 @@ public class AmbienceManager : KMonoBehaviour
 		{
 			if (this.soundEvent.isValid())
 			{
-				this.soundEvent.stop(STOP_MODE.ALLOWFADEOUT);
+				this.soundEvent.stop(global::FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 				this.soundEvent.release();
 			}
 			this.isRunning = false;

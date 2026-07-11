@@ -6,10 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeClass(null)]
-	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
 	[RequiredByNativeCode]
 	[ExtensionOfNativeClass]
+	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
+	[NativeClass(null)]
 	[StructLayout(LayoutKind.Sequential)]
 	public class ScriptableObject : Object
 	{
@@ -18,8 +18,8 @@ namespace UnityEngine
 			ScriptableObject.CreateScriptableObject(this);
 		}
 
-		[Obsolete("Use EditorUtility.SetDirty instead")]
 		[NativeConditional("ENABLE_MONO")]
+		[Obsolete("Use EditorUtility.SetDirty instead")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetDirty();
 
@@ -30,7 +30,7 @@ namespace UnityEngine
 
 		public static ScriptableObject CreateInstance(Type type)
 		{
-			return ScriptableObject.CreateScriptableObjectInstanceFromType(type);
+			return ScriptableObject.CreateScriptableObjectInstanceFromType(type, true);
 		}
 
 		public static T CreateInstance<T>() where T : ScriptableObject
@@ -48,6 +48,10 @@ namespace UnityEngine
 
 		[FreeFunction("Scripting::CreateScriptableObjectWithType")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern ScriptableObject CreateScriptableObjectInstanceFromType(Type type);
+		internal static extern ScriptableObject CreateScriptableObjectInstanceFromType(Type type, bool applyDefaultsAndReset);
+
+		[FreeFunction("Scripting::ResetAndApplyDefaultInstances")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void ResetAndApplyDefaultInstances(Object obj);
 	}
 }

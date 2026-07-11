@@ -413,8 +413,8 @@ namespace System.Security.Cryptography.X509Certificates
 			this.Import(rawData, null, X509KeyStorageFlags.DefaultKeySet);
 		}
 
-		[ComVisible(false)]
 		[MonoTODO("missing KeyStorageFlags support")]
+		[ComVisible(false)]
 		public virtual void Import(byte[] rawData, string password, X509KeyStorageFlags keyStorageFlags)
 		{
 			this.Reset();

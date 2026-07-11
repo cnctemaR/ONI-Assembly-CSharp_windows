@@ -6,23 +6,12 @@ namespace UnityEngine.Playables
 	[RequiredByNativeCode]
 	public struct ScriptPlayableOutput : IPlayableOutput
 	{
-		internal ScriptPlayableOutput(PlayableOutputHandle handle)
-		{
-			if (handle.IsValid())
-			{
-				if (!handle.IsPlayableOutputOfType<ScriptPlayableOutput>())
-				{
-					throw new InvalidCastException("Can't set handle: the playable is not a ScriptPlayableOutput.");
-				}
-			}
-			this.m_Handle = handle;
-		}
-
 		public static ScriptPlayableOutput Create(PlayableGraph graph, string name)
 		{
 			PlayableOutputHandle playableOutputHandle;
+			bool flag = !graph.CreateScriptOutputInternal(name, out playableOutputHandle);
 			ScriptPlayableOutput scriptPlayableOutput;
-			if (!graph.CreateScriptOutputInternal(name, out playableOutputHandle))
+			if (flag)
 			{
 				scriptPlayableOutput = ScriptPlayableOutput.Null;
 			}
@@ -31,6 +20,20 @@ namespace UnityEngine.Playables
 				scriptPlayableOutput = new ScriptPlayableOutput(playableOutputHandle);
 			}
 			return scriptPlayableOutput;
+		}
+
+		internal ScriptPlayableOutput(PlayableOutputHandle handle)
+		{
+			bool flag = handle.IsValid();
+			if (flag)
+			{
+				bool flag2 = !handle.IsPlayableOutputOfType<ScriptPlayableOutput>();
+				if (flag2)
+				{
+					throw new InvalidCastException("Can't set handle: the playable is not a ScriptPlayableOutput.");
+				}
+			}
+			this.m_Handle = handle;
 		}
 
 		public static ScriptPlayableOutput Null

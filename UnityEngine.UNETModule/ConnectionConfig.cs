@@ -39,7 +39,8 @@ namespace UnityEngine.Networking
 
 		public ConnectionConfig(ConnectionConfig config)
 		{
-			if (config == null)
+			bool flag = config == null;
+			if (flag)
 			{
 				throw new NullReferenceException("config is not defined");
 			}
@@ -63,7 +64,8 @@ namespace UnityEngine.Networking
 			this.m_AcksType = config.m_AcksType;
 			this.m_UsePlatformSpecificProtocols = config.m_UsePlatformSpecificProtocols;
 			this.m_InitialBandwidth = config.m_InitialBandwidth;
-			if (this.m_InitialBandwidth == 0U)
+			bool flag2 = this.m_InitialBandwidth == 0U;
+			if (flag2)
 			{
 				this.m_InitialBandwidth = (uint)(this.m_PacketSize * 1000) / this.m_MinUpdateTimeout;
 			}
@@ -85,15 +87,18 @@ namespace UnityEngine.Networking
 
 		public static void Validate(ConnectionConfig config)
 		{
-			if (config.m_PacketSize < 128)
+			bool flag = config.m_PacketSize < 128;
+			if (flag)
 			{
 				throw new ArgumentOutOfRangeException("PacketSize should be > " + 128.ToString());
 			}
-			if (config.m_FragmentSize >= config.m_PacketSize - 128)
+			bool flag2 = config.m_FragmentSize >= config.m_PacketSize - 128;
+			if (flag2)
 			{
 				throw new ArgumentOutOfRangeException("FragmentSize should be < PacketSize - " + 128.ToString());
 			}
-			if (config.m_Channels.Count > 255)
+			bool flag3 = config.m_Channels.Count > 255;
+			if (flag3)
 			{
 				throw new ArgumentOutOfRangeException("Channels number should be less than 256");
 			}
@@ -167,7 +172,8 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (value == 0U)
+				bool flag = value == 0U;
+				if (flag)
 				{
 					throw new ArgumentOutOfRangeException("Minimal update timeout should be > 0");
 				}
@@ -328,13 +334,18 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (value && this.m_AcksType == ConnectionAcksType.Acks32)
+				bool flag = value && this.m_AcksType == ConnectionAcksType.Acks32;
+				if (flag)
 				{
 					this.m_AcksType = ConnectionAcksType.Acks64;
 				}
-				else if (!value)
+				else
 				{
-					this.m_AcksType = ConnectionAcksType.Acks32;
+					bool flag2 = !value;
+					if (flag2)
+					{
+						this.m_AcksType = ConnectionAcksType.Acks32;
+					}
 				}
 			}
 		}
@@ -347,7 +358,8 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (value && Application.platform != RuntimePlatform.PS4)
+				bool flag = value && Application.platform != RuntimePlatform.PS4;
+				if (flag)
 				{
 					throw new ArgumentOutOfRangeException("Platform specific protocols are not supported on this platform");
 				}
@@ -457,11 +469,13 @@ namespace UnityEngine.Networking
 
 		public byte AddChannel(QosType value)
 		{
-			if (this.m_Channels.Count > 255)
+			bool flag = this.m_Channels.Count > 255;
+			if (flag)
 			{
 				throw new ArgumentOutOfRangeException("Channels Count should be less than 256");
 			}
-			if (!Enum.IsDefined(typeof(QosType), value))
+			bool flag2 = !Enum.IsDefined(typeof(QosType), value);
+			if (flag2)
 			{
 				throw new ArgumentOutOfRangeException("requested qos type doesn't exist: " + (int)value);
 			}
@@ -472,11 +486,13 @@ namespace UnityEngine.Networking
 
 		public void MakeChannelsSharedOrder(List<byte> channelIndices)
 		{
-			if (channelIndices == null)
+			bool flag = channelIndices == null;
+			if (flag)
 			{
 				throw new NullReferenceException("channelIndices must not be null");
 			}
-			if (channelIndices.Count == 0)
+			bool flag2 = channelIndices.Count == 0;
+			if (flag2)
 			{
 				throw new ArgumentOutOfRangeException("Received empty list of shared order channel indexes");
 			}
@@ -484,16 +500,19 @@ namespace UnityEngine.Networking
 			while ((int)b < channelIndices.Count)
 			{
 				byte b2 = channelIndices[(int)b];
-				if ((int)b2 >= this.m_Channels.Count)
+				bool flag3 = (int)b2 >= this.m_Channels.Count;
+				if (flag3)
 				{
 					throw new ArgumentOutOfRangeException("Shared order channel list contains wrong channel index " + b2);
 				}
 				ChannelQOS channelQOS = this.m_Channels[(int)b2];
-				if (channelQOS.BelongsToSharedOrderChannel)
+				bool belongsToSharedOrderChannel = channelQOS.BelongsToSharedOrderChannel;
+				if (belongsToSharedOrderChannel)
 				{
 					throw new ArgumentException("Channel with index " + b2 + " has been already included to other shared order channel");
 				}
-				if (channelQOS.QOS != QosType.Reliable && channelQOS.QOS != QosType.Unreliable)
+				bool flag4 = channelQOS.QOS != QosType.Reliable && channelQOS.QOS > QosType.Unreliable;
+				if (flag4)
 				{
 					throw new ArgumentException("Only Reliable and Unreliable QoS are allowed for shared order channel, wrong channel is with index " + b2);
 				}
@@ -512,7 +531,8 @@ namespace UnityEngine.Networking
 
 		public QosType GetChannel(byte idx)
 		{
-			if ((int)idx >= this.m_Channels.Count)
+			bool flag = (int)idx >= this.m_Channels.Count;
+			if (flag)
 			{
 				throw new ArgumentOutOfRangeException("requested index greater than maximum channels count");
 			}
@@ -521,7 +541,8 @@ namespace UnityEngine.Networking
 
 		public IList<byte> GetSharedOrderChannels(byte idx)
 		{
-			if ((int)idx >= this.m_SharedOrderChannels.Count)
+			bool flag = (int)idx >= this.m_SharedOrderChannels.Count;
+			if (flag)
 			{
 				throw new ArgumentOutOfRangeException("requested index greater than maximum shared order channels count");
 			}

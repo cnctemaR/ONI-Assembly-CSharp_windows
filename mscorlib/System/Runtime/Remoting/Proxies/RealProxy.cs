@@ -222,8 +222,8 @@ namespace System.Runtime.Remoting.Proxies
 			return this._objTP;
 		}
 
-		[ComVisible(true)]
 		[MonoTODO]
+		[ComVisible(true)]
 		public IConstructionReturnMessage InitializeServerObject(IConstructionCallMessage ctorMsg)
 		{
 			throw new NotImplementedException();

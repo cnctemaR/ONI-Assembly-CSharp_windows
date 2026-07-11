@@ -9,29 +9,20 @@ namespace UnityEngine.UI
 		{
 			int displayIndex = eventData.pointerPressRaycast.displayIndex;
 			Vector3 vector = Display.RelativeMouseAt(eventData.position);
-			int num = (int)vector.z;
-			bool flag;
-			if (num != displayIndex)
+			if ((int)vector.z != displayIndex)
 			{
-				flag = false;
+				return false;
 			}
-			else
-			{
-				position = ((displayIndex == 0) ? eventData.position : vector);
-				flag = true;
-			}
-			return flag;
+			position = ((displayIndex != 0) ? vector : eventData.position);
+			return true;
 		}
 
 		public static Vector2 GetMousePositionRelativeToMainDisplayResolution()
 		{
 			Vector3 mousePosition = Input.mousePosition;
-			if (Display.main.renderingHeight != Display.main.systemHeight)
+			if (Display.main.renderingHeight != Display.main.systemHeight && (mousePosition.y < 0f || mousePosition.y > (float)Display.main.renderingHeight || mousePosition.x < 0f || mousePosition.x > (float)Display.main.renderingWidth) && Screen.fullScreenMode != FullScreenMode.Windowed)
 			{
-				if (mousePosition.y < 0f || mousePosition.y > (float)Display.main.renderingHeight || mousePosition.x < 0f || mousePosition.x > (float)Display.main.renderingWidth)
-				{
-					mousePosition.y += (float)(Display.main.systemHeight - Display.main.renderingHeight);
-				}
+				mousePosition.y += (float)(Display.main.systemHeight - Display.main.renderingHeight);
 			}
 			return mousePosition;
 		}

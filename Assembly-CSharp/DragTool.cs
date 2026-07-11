@@ -259,7 +259,7 @@ public class DragTool : InterfaceTool
 						Vector3 position = this.areaVisualizer.transform.GetPosition();
 						position.z = 0f;
 						EventInstance eventInstance = SoundEvent.BeginOneShot(sound, position, 1f, false);
-						eventInstance.setParameterValue("tileCount", (float)num);
+						eventInstance.setParameterByName("tileCount", (float)num, false);
 						SoundEvent.EndOneShot(eventInstance);
 					}
 				}

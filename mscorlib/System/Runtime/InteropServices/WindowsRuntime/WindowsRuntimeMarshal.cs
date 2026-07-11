@@ -181,8 +181,8 @@ namespace System.Runtime.InteropServices.WindowsRuntime
 			}
 		}
 
-		[SecuritySafeCritical]
 		[FriendAccessAllowed]
+		[SecuritySafeCritical]
 		internal static bool ReportUnhandledError(Exception e)
 		{
 			if (!AppDomain.IsAppXModel())

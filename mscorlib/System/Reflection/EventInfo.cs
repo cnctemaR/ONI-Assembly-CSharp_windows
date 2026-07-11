@@ -6,8 +6,8 @@ using Mono;
 
 namespace System.Reflection
 {
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_EventInfo))]
+	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
@@ -52,8 +52,8 @@ namespace System.Reflection
 			}
 		}
 
-		[DebuggerStepThrough]
 		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public virtual void AddEventHandler(object target, Delegate handler)
 		{
 			if (this.cached_add_event == null)

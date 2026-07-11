@@ -30,8 +30,9 @@ namespace UnityEngine.Playables
 		[RequiredByNativeCode]
 		internal unsafe static void Internal_CreatePlayable(PlayableAsset asset, PlayableGraph graph, GameObject go, IntPtr ptr)
 		{
+			bool flag = asset == null;
 			Playable playable;
-			if (asset == null)
+			if (flag)
 			{
 				playable = Playable.Null;
 			}

@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
+	[NativeHeader("Modules/UI/CanvasGroup.h")]
 	[NativeClass("UI::CanvasGroup")]
-	[NativeHeader("Runtime/UI/CanvasGroup.h")]
 	public sealed class CanvasGroup : Behaviour, ICanvasRaycastFilter
 	{
 		[NativeProperty("Alpha", false, TargetType.Function)]

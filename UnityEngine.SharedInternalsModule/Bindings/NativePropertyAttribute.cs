@@ -6,6 +6,8 @@ namespace UnityEngine.Bindings
 	[VisibleToOtherModules]
 	internal class NativePropertyAttribute : NativeMethodAttribute
 	{
+		public TargetType TargetType { get; set; }
+
 		public NativePropertyAttribute()
 		{
 		}
@@ -32,7 +34,5 @@ namespace UnityEngine.Bindings
 		{
 			this.TargetType = targetType;
 		}
-
-		public TargetType TargetType { get; set; }
 	}
 }

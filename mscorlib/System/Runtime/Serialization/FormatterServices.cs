@@ -353,8 +353,8 @@ namespace System.Runtime.Serialization
 			return array;
 		}
 
-		[SecurityCritical]
 		[ComVisible(false)]
+		[SecurityCritical]
 		public static ISerializationSurrogate GetSurrogateForCyclicalReference(ISerializationSurrogate innerSurrogate)
 		{
 			if (innerSurrogate == null)

@@ -32,7 +32,8 @@ namespace UnityEngine.Events
 		internal MethodInfo FindMethod(PersistentCall call)
 		{
 			Type type = typeof(Object);
-			if (!string.IsNullOrEmpty(call.arguments.unityObjectArgumentAssemblyTypeName))
+			bool flag = !string.IsNullOrEmpty(call.arguments.unityObjectArgumentAssemblyTypeName);
+			if (flag)
 			{
 				type = Type.GetType(call.arguments.unityObjectArgumentAssemblyTypeName, false) ?? typeof(Object);
 			}
@@ -80,13 +81,13 @@ namespace UnityEngine.Events
 		public Object GetPersistentTarget(int index)
 		{
 			PersistentCall listener = this.m_PersistentCalls.GetListener(index);
-			return (listener == null) ? null : listener.target;
+			return (listener != null) ? listener.target : null;
 		}
 
 		public string GetPersistentMethodName(int index)
 		{
 			PersistentCall listener = this.m_PersistentCalls.GetListener(index);
-			return (listener == null) ? string.Empty : listener.methodName;
+			return (listener != null) ? listener.methodName : string.Empty;
 		}
 
 		private void DirtyPersistentCalls()
@@ -97,7 +98,8 @@ namespace UnityEngine.Events
 
 		private void RebuildPersistentCallsIfNeeded()
 		{
-			if (this.m_CallsDirty)
+			bool callsDirty = this.m_CallsDirty;
+			if (callsDirty)
 			{
 				this.m_PersistentCalls.Initialize(this.m_Calls, this);
 				this.m_CallsDirty = false;
@@ -107,7 +109,8 @@ namespace UnityEngine.Events
 		public void SetPersistentListenerState(int index, UnityEventCallState state)
 		{
 			PersistentCall listener = this.m_PersistentCalls.GetListener(index);
-			if (listener != null)
+			bool flag = listener != null;
+			if (flag)
 			{
 				listener.callState = state;
 			}
@@ -160,23 +163,26 @@ namespace UnityEngine.Events
 			while (type != typeof(object) && type != null)
 			{
 				MethodInfo method = type.GetMethod(functionName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, argumentTypes, null);
-				if (method != null)
+				bool flag = method != null;
+				if (flag)
 				{
 					ParameterInfo[] parameters = method.GetParameters();
-					bool flag = true;
+					bool flag2 = true;
 					int num = 0;
 					foreach (ParameterInfo parameterInfo in parameters)
 					{
 						Type type2 = argumentTypes[num];
 						Type parameterType = parameterInfo.ParameterType;
-						flag = type2.IsPrimitive == parameterType.IsPrimitive;
-						if (!flag)
+						flag2 = type2.IsPrimitive == parameterType.IsPrimitive;
+						bool flag3 = !flag2;
+						if (flag3)
 						{
 							break;
 						}
 						num++;
 					}
-					if (flag)
+					bool flag4 = flag2;
+					if (flag4)
 					{
 						return method;
 					}
@@ -188,8 +194,8 @@ namespace UnityEngine.Events
 
 		private InvokableCallList m_Calls;
 
-		[FormerlySerializedAs("m_PersistentListeners")]
 		[SerializeField]
+		[FormerlySerializedAs("m_PersistentListeners")]
 		private PersistentCallGroup m_PersistentCalls;
 
 		private bool m_CallsDirty = true;

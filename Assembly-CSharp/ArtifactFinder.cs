@@ -62,7 +62,7 @@ public class ArtifactFinder : KMonoBehaviour
 			return null;
 		}
 		List<string> artifactsOfTier = this.GetArtifactsOfTier(artifactDropTier);
-		return artifactsOfTier[global::UnityEngine.Random.Range(0, artifactsOfTier.Count - 1)];
+		return artifactsOfTier[global::UnityEngine.Random.Range(0, artifactsOfTier.Count)];
 	}
 
 	public void OnLand(object data)

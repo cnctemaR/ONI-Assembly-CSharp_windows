@@ -185,7 +185,7 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 			KAnim.Build.Symbol symbol2 = KAnimBatchManager.Instance().GetBatchGroupData(component.batchGroupID).GetSymbol(SpeechMonitor.HASH_SNAPTO_MOUTH);
 			KAnim.Build.SymbolFrameInstance symbolFrameInstance = KAnimBatchManager.Instance().GetBatchGroupData(symbol.build.batchTag).symbolFrameInstances[symbol.firstFrameIdx + firstFrameElement.frame];
 			symbolFrameInstance.buildImageIdx = base.GetComponent<SymbolOverrideController>().GetAtlasIdx(symbol.build.GetTexture(0));
-			component.SetSymbolOverride(symbol2.firstFrameIdx, symbolFrameInstance);
+			component.SetSymbolOverride(symbol2.firstFrameIdx, ref symbolFrameInstance);
 		}
 
 		public KBatchedAnimController mouth;

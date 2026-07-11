@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Ionic.Zip;
 using Klei;
@@ -38,14 +39,16 @@ namespace KMod
 				if (text.StartsWith(relative_root))
 				{
 					text = text.Remove(0, relative_root.Length);
-					string[] array = text.Split(new char[] { '/' });
-					string text2 = array[0];
+					List<string> list = (from part in text.Split(new char[] { '/' })
+						where !string.IsNullOrEmpty(part)
+						select part).ToList<string>();
+					string text2 = list[0];
 					if (pooledHashSet.Add(text2))
 					{
 						file_system_items.Add(new FileSystemItem
 						{
 							name = text2,
-							type = ((1 < array.Length) ? FileSystemItem.ItemType.Directory : FileSystemItem.ItemType.File)
+							type = ((1 < list.Count) ? FileSystemItem.ItemType.Directory : FileSystemItem.ItemType.File)
 						});
 					}
 				}

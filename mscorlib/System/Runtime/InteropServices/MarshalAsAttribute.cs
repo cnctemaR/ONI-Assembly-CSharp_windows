@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.ReturnValue, Inherited = false)]
+	[ComVisible(true)]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class MarshalAsAttribute : Attribute
 	{

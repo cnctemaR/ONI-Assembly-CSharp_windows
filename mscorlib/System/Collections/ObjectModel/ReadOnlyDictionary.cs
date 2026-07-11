@@ -6,8 +6,8 @@ using Unity;
 
 namespace System.Collections.ObjectModel
 {
-	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Mscorlib_DictionaryDebugView<, >))]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
 	public class ReadOnlyDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable, IDictionary, ICollection, IReadOnlyDictionary<TKey, TValue>, IReadOnlyCollection<KeyValuePair<TKey, TValue>>
 	{
@@ -423,8 +423,8 @@ namespace System.Collections.ObjectModel
 			private IEnumerator<KeyValuePair<TKey, TValue>> m_enumerator;
 		}
 
-		[DebuggerTypeProxy(typeof(Mscorlib_CollectionDebugView<>))]
 		[DebuggerDisplay("Count = {Count}")]
+		[DebuggerTypeProxy(typeof(Mscorlib_CollectionDebugView<>))]
 		[Serializable]
 		public sealed class KeyCollection : ICollection<TKey>, IEnumerable<TKey>, IEnumerable, ICollection, IReadOnlyCollection<TKey>
 		{

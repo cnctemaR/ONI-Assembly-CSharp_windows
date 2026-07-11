@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using Mono;
 
 namespace System.Runtime.InteropServices
@@ -16,20 +15,16 @@ namespace System.Runtime.InteropServices
 
 		public static bool IsOSPlatform(OSPlatform osPlatform)
 		{
-			PlatformID platform = Environment.OSVersion.Platform;
-			if (platform == PlatformID.Win32NT)
+			switch (Environment.Platform)
 			{
+			case PlatformID.Win32NT:
 				return osPlatform == OSPlatform.Windows;
-			}
-			if (platform != PlatformID.Unix)
-			{
-				return false;
-			}
-			if (File.Exists("/usr/lib/libc.dylib"))
-			{
+			case PlatformID.Unix:
+				return osPlatform == OSPlatform.Linux;
+			case PlatformID.MacOSX:
 				return osPlatform == OSPlatform.OSX;
 			}
-			return osPlatform == OSPlatform.Linux;
+			return false;
 		}
 
 		public static string OSDescription

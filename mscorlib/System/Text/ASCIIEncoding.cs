@@ -222,8 +222,8 @@ namespace System.Text
 		}
 
 		[CLSCompliant(false)]
-		[ComVisible(false)]
 		[SecurityCritical]
+		[ComVisible(false)]
 		public unsafe override int GetCharCount(byte* bytes, int count)
 		{
 			if (bytes == null)
@@ -288,8 +288,8 @@ namespace System.Text
 		}
 
 		[ComVisible(false)]
-		[CLSCompliant(false)]
 		[SecurityCritical]
+		[CLSCompliant(false)]
 		public unsafe override int GetChars(byte* bytes, int byteCount, char* chars, int charCount)
 		{
 			if (bytes == null || chars == null)

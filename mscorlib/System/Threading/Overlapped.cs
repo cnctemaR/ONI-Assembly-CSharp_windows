@@ -53,9 +53,9 @@ namespace System.Threading
 			};
 		}
 
-		[CLSCompliant(false)]
-		[MonoTODO("Security - we need to propagate the call stack")]
 		[Obsolete("Use Pack(iocb, userData) instead")]
+		[MonoTODO("Security - we need to propagate the call stack")]
+		[CLSCompliant(false)]
 		public unsafe NativeOverlapped* Pack(IOCompletionCallback iocb)
 		{
 			NativeOverlapped* ptr = (NativeOverlapped*)(void*)Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeOverlapped)));
@@ -66,8 +66,8 @@ namespace System.Threading
 		}
 
 		[ComVisible(false)]
-		[MonoTODO("handle userData")]
 		[CLSCompliant(false)]
+		[MonoTODO("handle userData")]
 		public unsafe NativeOverlapped* Pack(IOCompletionCallback iocb, object userData)
 		{
 			NativeOverlapped* ptr = (NativeOverlapped*)(void*)Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeOverlapped)));

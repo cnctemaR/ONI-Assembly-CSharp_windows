@@ -10,9 +10,9 @@ using System.Text;
 
 namespace System.Reflection
 {
+	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_MethodBase))]
-	[ClassInterface(ClassInterfaceType.None)]
 	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	[Serializable]
 	public abstract class MethodBase : MemberInfo, _MethodBase

@@ -532,18 +532,12 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 				"GPUsupportsComputeShaders",
 				SystemInfo.supportsComputeShaders
 			},
-			{
-				"GPUsupportsImageEffects",
-				SystemInfo.supportsImageEffects
-			},
+			{ "GPUsupportsImageEffects", true },
 			{
 				"GPUsupportsInstancing",
 				SystemInfo.supportsInstancing
 			},
-			{
-				"GPUsupportsRenderToCubemap",
-				SystemInfo.supportsRenderToCubemap
-			},
+			{ "GPUsupportsRenderToCubemap", true },
 			{
 				"GPUsupportsShadows",
 				SystemInfo.supportsShadows

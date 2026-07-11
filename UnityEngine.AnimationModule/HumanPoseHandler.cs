@@ -5,32 +5,10 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Animation/HumanPoseHandler.h")]
-	[NativeHeader("Runtime/Animation/ScriptBindings/Animation.bindings.h")]
+	[NativeHeader("Modules/Animation/HumanPoseHandler.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/Animation.bindings.h")]
 	public class HumanPoseHandler : IDisposable
 	{
-		public HumanPoseHandler(Avatar avatar, Transform root)
-		{
-			this.m_Ptr = IntPtr.Zero;
-			if (root == null)
-			{
-				throw new ArgumentNullException("HumanPoseHandler root Transform is null");
-			}
-			if (avatar == null)
-			{
-				throw new ArgumentNullException("HumanPoseHandler avatar is null");
-			}
-			if (!avatar.isValid)
-			{
-				throw new ArgumentException("HumanPoseHandler avatar is invalid");
-			}
-			if (!avatar.isHuman)
-			{
-				throw new ArgumentException("HumanPoseHandler avatar is not human");
-			}
-			this.m_Ptr = HumanPoseHandler.Internal_Create(avatar, root);
-		}
-
 		[FreeFunction("AnimationBindings::CreateHumanPoseHandler")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr Internal_Create(Avatar avatar, Transform root);
@@ -47,7 +25,8 @@ namespace UnityEngine
 
 		public void Dispose()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				HumanPoseHandler.Internal_Destroy(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;
@@ -55,9 +34,36 @@ namespace UnityEngine
 			GC.SuppressFinalize(this);
 		}
 
+		public HumanPoseHandler(Avatar avatar, Transform root)
+		{
+			this.m_Ptr = IntPtr.Zero;
+			bool flag = root == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("HumanPoseHandler root Transform is null");
+			}
+			bool flag2 = avatar == null;
+			if (flag2)
+			{
+				throw new ArgumentNullException("HumanPoseHandler avatar is null");
+			}
+			bool flag3 = !avatar.isValid;
+			if (flag3)
+			{
+				throw new ArgumentException("HumanPoseHandler avatar is invalid");
+			}
+			bool flag4 = !avatar.isHuman;
+			if (flag4)
+			{
+				throw new ArgumentException("HumanPoseHandler avatar is not human");
+			}
+			this.m_Ptr = HumanPoseHandler.Internal_Create(avatar, root);
+		}
+
 		public void GetHumanPose(ref HumanPose humanPose)
 		{
-			if (this.m_Ptr == IntPtr.Zero)
+			bool flag = this.m_Ptr == IntPtr.Zero;
+			if (flag)
 			{
 				throw new NullReferenceException("HumanPoseHandler is not initialized properly");
 			}
@@ -67,7 +73,8 @@ namespace UnityEngine
 
 		public void SetHumanPose(ref HumanPose humanPose)
 		{
-			if (this.m_Ptr == IntPtr.Zero)
+			bool flag = this.m_Ptr == IntPtr.Zero;
+			if (flag)
 			{
 				throw new NullReferenceException("HumanPoseHandler is not initialized properly");
 			}

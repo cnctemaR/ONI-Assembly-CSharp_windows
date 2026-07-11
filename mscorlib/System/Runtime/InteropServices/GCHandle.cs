@@ -4,8 +4,8 @@ using System.Threading;
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[MonoTODO("Struct should be [StructLayout(LayoutKind.Sequential)] but will need to be reordered for that.")]
+	[ComVisible(true)]
 	public struct GCHandle
 	{
 		private GCHandle(IntPtr h)

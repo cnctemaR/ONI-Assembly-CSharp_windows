@@ -8,8 +8,8 @@ using Mono.Xml;
 
 namespace System.Security.Permissions
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+	[ComVisible(true)]
 	[Serializable]
 	public sealed class PermissionSetAttribute : CodeAccessSecurityAttribute
 	{

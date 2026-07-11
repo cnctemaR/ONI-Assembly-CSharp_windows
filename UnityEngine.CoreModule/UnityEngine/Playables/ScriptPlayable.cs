@@ -4,18 +4,6 @@ namespace UnityEngine.Playables
 {
 	public struct ScriptPlayable<T> : IPlayable, IEquatable<ScriptPlayable<T>> where T : class, IPlayableBehaviour, new()
 	{
-		internal ScriptPlayable(PlayableHandle handle)
-		{
-			if (handle.IsValid())
-			{
-				if (!typeof(T).IsAssignableFrom(handle.GetPlayableType()))
-				{
-					throw new InvalidCastException(string.Format("Incompatible handle: Trying to assign a playable data of type `{0}` that is not compatible with the PlayableBehaviour of type `{1}`.", handle.GetPlayableType(), typeof(T)));
-				}
-			}
-			this.m_Handle = handle;
-		}
-
 		public static ScriptPlayable<T> Null
 		{
 			get
@@ -26,7 +14,7 @@ namespace UnityEngine.Playables
 
 		public static ScriptPlayable<T> Create(PlayableGraph graph, int inputCount = 0)
 		{
-			PlayableHandle playableHandle = ScriptPlayable<T>.CreateHandle(graph, (T)((object)null), inputCount);
+			PlayableHandle playableHandle = ScriptPlayable<T>.CreateHandle(graph, default(T), inputCount);
 			return new ScriptPlayable<T>(playableHandle);
 		}
 
@@ -38,8 +26,9 @@ namespace UnityEngine.Playables
 
 		private static PlayableHandle CreateHandle(PlayableGraph graph, T template, int inputCount)
 		{
+			bool flag = template == null;
 			object obj;
-			if (template == null)
+			if (flag)
 			{
 				obj = ScriptPlayable<T>.CreateScriptInstance();
 			}
@@ -47,8 +36,9 @@ namespace UnityEngine.Playables
 			{
 				obj = ScriptPlayable<T>.CloneScriptInstance(template);
 			}
+			bool flag2 = obj == null;
 			PlayableHandle playableHandle;
-			if (obj == null)
+			if (flag2)
 			{
 				Debug.LogError("Could not create a ScriptPlayable of Type " + typeof(T).ToString());
 				playableHandle = PlayableHandle.Null;
@@ -56,7 +46,8 @@ namespace UnityEngine.Playables
 			else
 			{
 				PlayableHandle playableHandle2 = graph.CreatePlayableHandle();
-				if (!playableHandle2.IsValid())
+				bool flag3 = !playableHandle2.IsValid();
+				if (flag3)
 				{
 					playableHandle = PlayableHandle.Null;
 				}
@@ -72,8 +63,9 @@ namespace UnityEngine.Playables
 
 		private static object CreateScriptInstance()
 		{
+			bool flag = typeof(ScriptableObject).IsAssignableFrom(typeof(T));
 			IPlayableBehaviour playableBehaviour;
-			if (typeof(ScriptableObject).IsAssignableFrom(typeof(T)))
+			if (flag)
 			{
 				playableBehaviour = ScriptableObject.CreateInstance(typeof(T)) as T;
 			}
@@ -87,15 +79,17 @@ namespace UnityEngine.Playables
 		private static object CloneScriptInstance(IPlayableBehaviour source)
 		{
 			Object @object = source as Object;
+			bool flag = @object != null;
 			object obj;
-			if (@object != null)
+			if (flag)
 			{
 				obj = ScriptPlayable<T>.CloneScriptInstanceFromEngineObject(@object);
 			}
 			else
 			{
 				ICloneable cloneable = source as ICloneable;
-				if (cloneable != null)
+				bool flag2 = cloneable != null;
+				if (flag2)
 				{
 					obj = ScriptPlayable<T>.CloneScriptInstanceFromIClonable(cloneable);
 				}
@@ -110,7 +104,8 @@ namespace UnityEngine.Playables
 		private static object CloneScriptInstanceFromEngineObject(Object source)
 		{
 			Object @object = Object.Instantiate(source);
-			if (@object != null)
+			bool flag = @object != null;
+			if (flag)
 			{
 				@object.hideFlags |= HideFlags.DontSave;
 			}
@@ -120,6 +115,20 @@ namespace UnityEngine.Playables
 		private static object CloneScriptInstanceFromIClonable(ICloneable source)
 		{
 			return source.Clone();
+		}
+
+		internal ScriptPlayable(PlayableHandle handle)
+		{
+			bool flag = handle.IsValid();
+			if (flag)
+			{
+				bool flag2 = !typeof(T).IsAssignableFrom(handle.GetPlayableType());
+				if (flag2)
+				{
+					throw new InvalidCastException(string.Format("Incompatible handle: Trying to assign a playable data of type `{0}` that is not compatible with the PlayableBehaviour of type `{1}`.", handle.GetPlayableType(), typeof(T)));
+				}
+			}
+			this.m_Handle = handle;
 		}
 
 		public PlayableHandle GetHandle()

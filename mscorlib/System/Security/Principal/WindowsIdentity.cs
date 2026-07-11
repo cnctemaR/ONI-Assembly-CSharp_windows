@@ -222,8 +222,8 @@ namespace System.Security.Principal
 			}
 		}
 
-		[ComVisible(false)]
 		[MonoTODO("not implemented")]
+		[ComVisible(false)]
 		public TokenImpersonationLevel ImpersonationLevel
 		{
 			get

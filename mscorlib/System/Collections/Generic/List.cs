@@ -7,8 +7,8 @@ using System.Threading;
 
 namespace System.Collections.Generic
 {
-	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Mscorlib_CollectionDebugView<>))]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
 	public class List<T> : IList<T>, ICollection<T>, IEnumerable<T>, IEnumerable, IList, ICollection, IReadOnlyList<T>, IReadOnlyCollection<T>
 	{

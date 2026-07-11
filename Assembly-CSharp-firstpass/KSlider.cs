@@ -156,8 +156,8 @@ public class KSlider : Slider
 			this.lastMoveTime = Time.unscaledTime;
 			this.lastMoveValue = num2;
 			EventInstance eventInstance = KFMOD.BeginOneShot(text, Vector3.zero, 1f);
-			eventInstance.setParameterValue("sliderValue", num2);
-			eventInstance.setParameterValue("timeSinceLast", num);
+			eventInstance.setParameterByName("sliderValue", num2, false);
+			eventInstance.setParameterByName("timeSinceLast", num, false);
 			KFMOD.EndOneShot(eventInstance);
 		}
 	}
@@ -176,7 +176,7 @@ public class KSlider : Slider
 		if (text != null && text.Length > 0)
 		{
 			EventInstance eventInstance = KFMOD.BeginOneShot(text, Vector3.zero, 1f);
-			eventInstance.setParameterValue("sliderValue", this.value);
+			eventInstance.setParameterByName("sliderValue", this.value, false);
 			KFMOD.EndOneShot(eventInstance);
 		}
 	}

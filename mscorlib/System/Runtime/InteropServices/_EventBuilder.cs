@@ -3,11 +3,11 @@ using System.Reflection.Emit;
 
 namespace System.Runtime.InteropServices
 {
-	[Guid("AADABA99-895D-3D65-9760-B1F12621FAE8")]
+	[ComVisible(true)]
 	[CLSCompliant(false)]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[TypeLibImportClass(typeof(EventBuilder))]
-	[ComVisible(true)]
+	[Guid("AADABA99-895D-3D65-9760-B1F12621FAE8")]
 	public interface _EventBuilder
 	{
 		void GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId);

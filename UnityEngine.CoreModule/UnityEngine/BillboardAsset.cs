@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Export/Graphics/BillboardRenderer.bindings.h")]
 	[NativeHeader("Runtime/Graphics/Billboard/BillboardAsset.h")]
-	[NativeHeader("Runtime/Export/BillboardRenderer.bindings.h")]
 	public sealed class BillboardAsset : Object
 	{
 		public BillboardAsset()
@@ -73,7 +73,8 @@ namespace UnityEngine
 
 		public void GetImageTexCoords(List<Vector4> imageTexCoords)
 		{
-			if (imageTexCoords == null)
+			bool flag = imageTexCoords == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("imageTexCoords");
 			}
@@ -90,7 +91,8 @@ namespace UnityEngine
 
 		public void SetImageTexCoords(List<Vector4> imageTexCoords)
 		{
-			if (imageTexCoords == null)
+			bool flag = imageTexCoords == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("imageTexCoords");
 			}
@@ -107,7 +109,8 @@ namespace UnityEngine
 
 		public void GetVertices(List<Vector2> vertices)
 		{
-			if (vertices == null)
+			bool flag = vertices == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("vertices");
 			}
@@ -124,7 +127,8 @@ namespace UnityEngine
 
 		public void SetVertices(List<Vector2> vertices)
 		{
-			if (vertices == null)
+			bool flag = vertices == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("vertices");
 			}
@@ -141,7 +145,8 @@ namespace UnityEngine
 
 		public void GetIndices(List<ushort> indices)
 		{
-			if (indices == null)
+			bool flag = indices == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("indices");
 			}
@@ -158,7 +163,8 @@ namespace UnityEngine
 
 		public void SetIndices(List<ushort> indices)
 		{
-			if (indices == null)
+			bool flag = indices == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("indices");
 			}

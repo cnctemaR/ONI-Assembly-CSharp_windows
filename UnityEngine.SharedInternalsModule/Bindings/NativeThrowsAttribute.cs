@@ -2,10 +2,12 @@
 
 namespace UnityEngine.Bindings
 {
-	[VisibleToOtherModules]
 	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property)]
+	[VisibleToOtherModules]
 	internal class NativeThrowsAttribute : Attribute, IBindingsThrowsProviderAttribute, IBindingsAttribute
 	{
+		public bool ThrowsException { get; set; }
+
 		public NativeThrowsAttribute()
 		{
 			this.ThrowsException = true;
@@ -15,7 +17,5 @@ namespace UnityEngine.Bindings
 		{
 			this.ThrowsException = throwsException;
 		}
-
-		public bool ThrowsException { get; set; }
 	}
 }

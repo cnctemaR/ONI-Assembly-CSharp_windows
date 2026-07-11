@@ -5,8 +5,8 @@ using System.Threading;
 
 namespace System.Collections.Concurrent
 {
-	[DebuggerTypeProxy(typeof(IProducerConsumerCollectionDebugView<>))]
 	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(IProducerConsumerCollectionDebugView<>))]
 	[Serializable]
 	public class ConcurrentBag<T> : IProducerConsumerCollection<T>, IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>
 	{
@@ -99,13 +99,16 @@ namespace System.Collections.Concurrent
 
 		private bool TrySteal(out T result, bool take)
 		{
-			if (take)
+			if (CDSCollectionETWBCLProvider.Log.IsEnabled())
 			{
-				CDSCollectionETWBCLProvider.Log.ConcurrentBag_TryTakeSteals();
-			}
-			else
-			{
-				CDSCollectionETWBCLProvider.Log.ConcurrentBag_TryPeekSteals();
+				if (take)
+				{
+					CDSCollectionETWBCLProvider.Log.ConcurrentBag_TryTakeSteals();
+				}
+				else
+				{
+					CDSCollectionETWBCLProvider.Log.ConcurrentBag_TryPeekSteals();
+				}
 			}
 			ConcurrentBag<T>.WorkStealingQueue currentThreadWorkStealingQueue = this.GetCurrentThreadWorkStealingQueue(false);
 			if (currentThreadWorkStealingQueue == null)

@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
+using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
@@ -10,10 +11,6 @@ namespace UnityEngine
 	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
 	public sealed class QualitySettings : Object
 	{
-		private QualitySettings()
-		{
-		}
-
 		public static void IncreaseLevel([DefaultValue("false")] bool applyExpensiveChanges)
 		{
 			QualitySettings.SetQualityLevel(QualitySettings.GetQualityLevel() + 1, applyExpensiveChanges);
@@ -50,6 +47,10 @@ namespace UnityEngine
 			{
 				QualitySettings.SetQualityLevel((int)value, true);
 			}
+		}
+
+		private QualitySettings()
+		{
 		}
 
 		public static extern int pixelLightCount
@@ -263,7 +264,53 @@ namespace UnityEngine
 			set;
 		}
 
+		[NativeName("RenderPipeline")]
+		private static extern ScriptableObject INTERNAL_renderPipeline
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public static RenderPipelineAsset renderPipeline
+		{
+			get
+			{
+				return QualitySettings.INTERNAL_renderPipeline as RenderPipelineAsset;
+			}
+			set
+			{
+				QualitySettings.INTERNAL_renderPipeline = value;
+			}
+		}
+
+		[NativeName("GetRenderPipelineAssetAt")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern ScriptableObject InternalGetRenderPipelineAssetAt(int index);
+
+		public static RenderPipelineAsset GetRenderPipelineAssetAt(int index)
+		{
+			bool flag = index < 0 || index >= QualitySettings.names.Length;
+			if (flag)
+			{
+				throw new IndexOutOfRangeException(string.Format("{0} is out of range [0..{1}[", "index", QualitySettings.names.Length));
+			}
+			return QualitySettings.InternalGetRenderPipelineAssetAt(index) as RenderPipelineAsset;
+		}
+
+		[Obsolete("blendWeights is obsolete. Use skinWeights instead (UnityUpgradable) -> skinWeights", true)]
 		public static extern BlendWeights blendWeights
+		{
+			[NativeName("GetSkinWeights")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[NativeName("SetSkinWeights")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public static extern SkinWeights skinWeights
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -351,8 +398,8 @@ namespace UnityEngine
 
 		public static extern ColorSpace activeColorSpace
 		{
-			[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
 			[NativeName("GetColorSpace")]
+			[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}

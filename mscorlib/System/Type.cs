@@ -10,8 +10,8 @@ using System.Threading;
 
 namespace System
 {
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_Type))]
 	[Serializable]
 	public abstract class Type : MemberInfo, _Type, IReflect
@@ -188,15 +188,15 @@ namespace System
 
 		public abstract object InvokeMember(string name, BindingFlags invokeAttr, Binder binder, object target, object[] args, ParameterModifier[] modifiers, CultureInfo culture, string[] namedParameters);
 
-		[DebuggerStepThrough]
 		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public object InvokeMember(string name, BindingFlags invokeAttr, Binder binder, object target, object[] args, CultureInfo culture)
 		{
 			return this.InvokeMember(name, invokeAttr, binder, target, args, null, culture, null);
 		}
 
-		[DebuggerHidden]
 		[DebuggerStepThrough]
+		[DebuggerHidden]
 		public object InvokeMember(string name, BindingFlags invokeAttr, Binder binder, object target, object[] args)
 		{
 			return this.InvokeMember(name, invokeAttr, binder, target, args, null, null, null);

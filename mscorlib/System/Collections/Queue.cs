@@ -6,9 +6,9 @@ using System.Threading;
 
 namespace System.Collections
 {
+	[ComVisible(true)]
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Queue.QueueDebugView))]
-	[ComVisible(true)]
 	[Serializable]
 	public class Queue : ICollection, IEnumerable, ICloneable
 	{

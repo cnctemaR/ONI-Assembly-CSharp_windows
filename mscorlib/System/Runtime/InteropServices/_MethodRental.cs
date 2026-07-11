@@ -4,10 +4,10 @@ using System.Reflection.Emit;
 namespace System.Runtime.InteropServices
 {
 	[ComVisible(true)]
-	[CLSCompliant(false)]
-	[TypeLibImportClass(typeof(MethodRental))]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[Guid("C2323C25-F57F-3880-8A4D-12EBEA7A5852")]
+	[CLSCompliant(false)]
+	[TypeLibImportClass(typeof(MethodRental))]
 	public interface _MethodRental
 	{
 		void GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId);

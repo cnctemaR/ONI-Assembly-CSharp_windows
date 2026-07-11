@@ -33,8 +33,8 @@ namespace UnityEngine
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use MouseMove instead (UnityUpgradable) -> MouseMove", true)]
 		mouseMove,
-		[Obsolete("Use MouseDrag instead (UnityUpgradable) -> MouseDrag", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Use MouseDrag instead (UnityUpgradable) -> MouseDrag", true)]
 		mouseDrag,
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use KeyDown instead (UnityUpgradable) -> KeyDown", true)]
@@ -45,8 +45,8 @@ namespace UnityEngine
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use ScrollWheel instead (UnityUpgradable) -> ScrollWheel", true)]
 		scrollWheel,
-		[Obsolete("Use Repaint instead (UnityUpgradable) -> Repaint", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Use Repaint instead (UnityUpgradable) -> Repaint", true)]
 		repaint,
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use Layout instead (UnityUpgradable) -> Layout", true)]
@@ -60,8 +60,8 @@ namespace UnityEngine
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use Ignore instead (UnityUpgradable) -> Ignore", true)]
 		ignore,
-		[Obsolete("Use Used instead (UnityUpgradable) -> Used", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Use Used instead (UnityUpgradable) -> Used", true)]
 		used
 	}
 }

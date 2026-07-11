@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using UnityEngine.Internal;
 using UnityEngine.Scripting;
 
@@ -8,12 +9,6 @@ namespace UnityEngine
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	public struct Vector2 : IEquatable<Vector2>
 	{
-		public Vector2(float x, float y)
-		{
-			this.x = x;
-			this.y = y;
-		}
-
 		public float this[int index]
 		{
 			get
@@ -50,6 +45,12 @@ namespace UnityEngine
 			}
 		}
 
+		public Vector2(float x, float y)
+		{
+			this.x = x;
+			this.y = y;
+		}
+
 		public void Set(float newX, float newY)
 		{
 			this.x = newX;
@@ -69,18 +70,21 @@ namespace UnityEngine
 
 		public static Vector2 MoveTowards(Vector2 current, Vector2 target, float maxDistanceDelta)
 		{
-			Vector2 vector = target - current;
-			float magnitude = vector.magnitude;
-			Vector2 vector2;
-			if (magnitude <= maxDistanceDelta || magnitude == 0f)
+			float num = target.x - current.x;
+			float num2 = target.y - current.y;
+			float num3 = num * num + num2 * num2;
+			bool flag = num3 == 0f || (maxDistanceDelta >= 0f && num3 <= maxDistanceDelta * maxDistanceDelta);
+			Vector2 vector;
+			if (flag)
 			{
-				vector2 = target;
+				vector = target;
 			}
 			else
 			{
-				vector2 = current + vector / magnitude * maxDistanceDelta;
+				float num4 = (float)Math.Sqrt((double)num3);
+				vector = new Vector2(current.x + num / num4 * maxDistanceDelta, current.y + num2 / num4 * maxDistanceDelta);
 			}
-			return vector2;
+			return vector;
 		}
 
 		public static Vector2 Scale(Vector2 a, Vector2 b)
@@ -97,7 +101,8 @@ namespace UnityEngine
 		public void Normalize()
 		{
 			float magnitude = this.magnitude;
-			if (magnitude > 1E-05f)
+			bool flag = magnitude > 1E-05f;
+			if (flag)
 			{
 				this /= magnitude;
 			}
@@ -126,8 +131,8 @@ namespace UnityEngine
 		{
 			return UnityString.Format("({0}, {1})", new object[]
 			{
-				this.x.ToString(format),
-				this.y.ToString(format)
+				this.x.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
+				this.y.ToString(format, CultureInfo.InvariantCulture.NumberFormat)
 			});
 		}
 
@@ -138,17 +143,19 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
-			return other is Vector2 && this.Equals((Vector2)other);
+			bool flag = !(other is Vector2);
+			return !flag && this.Equals((Vector2)other);
 		}
 
 		public bool Equals(Vector2 other)
 		{
-			return this.x.Equals(other.x) && this.y.Equals(other.y);
+			return this.x == other.x && this.y == other.y;
 		}
 
 		public static Vector2 Reflect(Vector2 inDirection, Vector2 inNormal)
 		{
-			return -2f * Vector2.Dot(inNormal, inDirection) * inNormal + inDirection;
+			float num = -2f * Vector2.Dot(inNormal, inDirection);
+			return new Vector2(num * inNormal.x + inDirection.x, num * inNormal.y + inDirection.y);
 		}
 
 		public static Vector2 Perpendicular(Vector2 inDirection)
@@ -165,7 +172,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return Mathf.Sqrt(this.x * this.x + this.y * this.y);
+				return (float)Math.Sqrt((double)(this.x * this.x + this.y * this.y));
 			}
 		}
 
@@ -179,16 +186,17 @@ namespace UnityEngine
 
 		public static float Angle(Vector2 from, Vector2 to)
 		{
-			float num = Mathf.Sqrt(from.sqrMagnitude * to.sqrMagnitude);
+			float num = (float)Math.Sqrt((double)(from.sqrMagnitude * to.sqrMagnitude));
+			bool flag = num < 1E-15f;
 			float num2;
-			if (num < 1E-15f)
+			if (flag)
 			{
 				num2 = 0f;
 			}
 			else
 			{
 				float num3 = Mathf.Clamp(Vector2.Dot(from, to) / num, -1f, 1f);
-				num2 = Mathf.Acos(num3) * 57.29578f;
+				num2 = (float)Math.Acos((double)num3) * 57.29578f;
 			}
 			return num2;
 		}
@@ -202,15 +210,22 @@ namespace UnityEngine
 
 		public static float Distance(Vector2 a, Vector2 b)
 		{
-			return (a - b).magnitude;
+			float num = a.x - b.x;
+			float num2 = a.y - b.y;
+			return (float)Math.Sqrt((double)(num * num + num2 * num2));
 		}
 
 		public static Vector2 ClampMagnitude(Vector2 vector, float maxLength)
 		{
+			float sqrMagnitude = vector.sqrMagnitude;
+			bool flag = sqrMagnitude > maxLength * maxLength;
 			Vector2 vector2;
-			if (vector.sqrMagnitude > maxLength * maxLength)
+			if (flag)
 			{
-				vector2 = vector.normalized * maxLength;
+				float num = (float)Math.Sqrt((double)sqrMagnitude);
+				float num2 = vector.x / num;
+				float num3 = vector.y / num;
+				vector2 = new Vector2(num2 * maxLength, num3 * maxLength);
 			}
 			else
 			{
@@ -260,20 +275,40 @@ namespace UnityEngine
 			float num = 2f / smoothTime;
 			float num2 = num * deltaTime;
 			float num3 = 1f / (1f + num2 + 0.48f * num2 * num2 + 0.235f * num2 * num2 * num2);
-			Vector2 vector = current - target;
-			Vector2 vector2 = target;
-			float num4 = maxSpeed * smoothTime;
-			vector = Vector2.ClampMagnitude(vector, num4);
-			target = current - vector;
-			Vector2 vector3 = (currentVelocity + num * vector) * deltaTime;
-			currentVelocity = (currentVelocity - num * vector3) * num3;
-			Vector2 vector4 = target + (vector + vector3) * num3;
-			if (Vector2.Dot(vector2 - current, vector4 - vector2) > 0f)
+			float num4 = current.x - target.x;
+			float num5 = current.y - target.y;
+			Vector2 vector = target;
+			float num6 = maxSpeed * smoothTime;
+			float num7 = num6 * num6;
+			float num8 = num4 * num4 + num5 * num5;
+			bool flag = num8 > num7;
+			if (flag)
 			{
-				vector4 = vector2;
-				currentVelocity = (vector4 - vector2) / deltaTime;
+				float num9 = (float)Math.Sqrt((double)num8);
+				num4 = num4 / num9 * num6;
+				num5 = num5 / num9 * num6;
 			}
-			return vector4;
+			target.x = current.x - num4;
+			target.y = current.y - num5;
+			float num10 = (currentVelocity.x + num * num4) * deltaTime;
+			float num11 = (currentVelocity.y + num * num5) * deltaTime;
+			currentVelocity.x = (currentVelocity.x - num * num10) * num3;
+			currentVelocity.y = (currentVelocity.y - num * num11) * num3;
+			float num12 = target.x + (num4 + num10) * num3;
+			float num13 = target.y + (num5 + num11) * num3;
+			float num14 = vector.x - current.x;
+			float num15 = vector.y - current.y;
+			float num16 = num12 - vector.x;
+			float num17 = num13 - vector.y;
+			bool flag2 = num14 * num16 + num15 * num17 > 0f;
+			if (flag2)
+			{
+				num12 = vector.x;
+				num13 = vector.y;
+				currentVelocity.x = (num12 - vector.x) / deltaTime;
+				currentVelocity.y = (num13 - vector.y) / deltaTime;
+			}
+			return new Vector2(num12, num13);
 		}
 
 		public static Vector2 operator +(Vector2 a, Vector2 b)
@@ -318,7 +353,9 @@ namespace UnityEngine
 
 		public static bool operator ==(Vector2 lhs, Vector2 rhs)
 		{
-			return (lhs - rhs).sqrMagnitude < 9.9999994E-11f;
+			float num = lhs.x - rhs.x;
+			float num2 = lhs.y - rhs.y;
+			return num * num + num2 * num2 < 9.9999994E-11f;
 		}
 
 		public static bool operator !=(Vector2 lhs, Vector2 rhs)

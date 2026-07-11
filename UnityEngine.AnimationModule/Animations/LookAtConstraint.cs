@@ -8,8 +8,8 @@ namespace UnityEngine.Animations
 {
 	[UsedByNativeCode]
 	[RequireComponent(typeof(Transform))]
-	[NativeHeader("Runtime/Animation/Constraints/LookAtConstraint.h")]
-	[NativeHeader("Runtime/Animation/Constraints/Constraint.bindings.h")]
+	[NativeHeader("Modules/Animation/Constraints/LookAtConstraint.h")]
+	[NativeHeader("Modules/Animation/Constraints/Constraint.bindings.h")]
 	public sealed class LookAtConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private LookAtConstraint()
@@ -114,7 +114,8 @@ namespace UnityEngine.Animations
 
 		public void SetSources(List<ConstraintSource> sources)
 		{
-			if (sources == null)
+			bool flag = sources == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("sources");
 			}
@@ -168,11 +169,13 @@ namespace UnityEngine.Animations
 
 		private void ValidateSourceIndex(int index)
 		{
-			if (this.sourceCount == 0)
+			bool flag = this.sourceCount == 0;
+			if (flag)
 			{
 				throw new InvalidOperationException("The LookAtConstraint component has no sources.");
 			}
-			if (index < 0 || index >= this.sourceCount)
+			bool flag2 = index < 0 || index >= this.sourceCount;
+			if (flag2)
 			{
 				throw new ArgumentOutOfRangeException("index", string.Format("Constraint source index {0} is out of bounds (0-{1}).", index, this.sourceCount));
 			}

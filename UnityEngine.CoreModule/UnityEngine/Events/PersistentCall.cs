@@ -62,15 +62,17 @@ namespace UnityEngine.Events
 
 		public BaseInvokableCall GetRuntimeCall(UnityEventBase theEvent)
 		{
+			bool flag = this.m_CallState == UnityEventCallState.Off || theEvent == null;
 			BaseInvokableCall baseInvokableCall;
-			if (this.m_CallState == UnityEventCallState.Off || theEvent == null)
+			if (flag)
 			{
 				baseInvokableCall = null;
 			}
 			else
 			{
 				MethodInfo methodInfo = theEvent.FindMethod(this);
-				if (methodInfo == null)
+				bool flag2 = methodInfo == null;
+				if (flag2)
 				{
 					baseInvokableCall = null;
 				}
@@ -111,7 +113,8 @@ namespace UnityEngine.Events
 		private static BaseInvokableCall GetObjectCall(Object target, MethodInfo method, ArgumentCache arguments)
 		{
 			Type type = typeof(Object);
-			if (!string.IsNullOrEmpty(arguments.unityObjectArgumentAssemblyTypeName))
+			bool flag = !string.IsNullOrEmpty(arguments.unityObjectArgumentAssemblyTypeName);
+			if (flag)
 			{
 				type = Type.GetType(arguments.unityObjectArgumentAssemblyTypeName, false) ?? typeof(Object);
 			}
@@ -124,7 +127,8 @@ namespace UnityEngine.Events
 				type
 			});
 			Object @object = arguments.unityObjectArgument;
-			if (@object != null && !type.IsAssignableFrom(@object.GetType()))
+			bool flag2 = @object != null && !type.IsAssignableFrom(@object.GetType());
+			if (flag2)
 			{
 				@object = null;
 			}
@@ -143,25 +147,25 @@ namespace UnityEngine.Events
 			this.m_Target = null;
 		}
 
-		[FormerlySerializedAs("instance")]
 		[SerializeField]
+		[FormerlySerializedAs("instance")]
 		private Object m_Target;
 
-		[FormerlySerializedAs("methodName")]
 		[SerializeField]
+		[FormerlySerializedAs("methodName")]
 		private string m_MethodName;
 
 		[SerializeField]
 		[FormerlySerializedAs("mode")]
 		private PersistentListenerMode m_Mode = PersistentListenerMode.EventDefined;
 
-		[SerializeField]
 		[FormerlySerializedAs("arguments")]
+		[SerializeField]
 		private ArgumentCache m_Arguments = new ArgumentCache();
 
-		[SerializeField]
-		[FormerlySerializedAs("enabled")]
 		[FormerlySerializedAs("m_Enabled")]
+		[FormerlySerializedAs("enabled")]
+		[SerializeField]
 		private UnityEventCallState m_CallState = UnityEventCallState.RuntimeOnly;
 	}
 }

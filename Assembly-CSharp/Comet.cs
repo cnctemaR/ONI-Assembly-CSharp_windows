@@ -425,7 +425,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 			float volume = this.GetVolume(base.gameObject);
 			pos.z = 0f;
 			EventInstance eventInstance = KFMOD.BeginOneShot(sound, pos, volume);
-			eventInstance.setParameterValue("userVolume_SFX", KPlayerPrefs.GetFloat("Volume_SFX"));
+			eventInstance.setParameterByName("userVolume_SFX", KPlayerPrefs.GetFloat("Volume_SFX"), false);
 			KFMOD.EndOneShot(eventInstance);
 		}
 	}

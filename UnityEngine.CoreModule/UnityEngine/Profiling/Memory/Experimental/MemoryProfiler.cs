@@ -1,38 +1,51 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Assertions;
 using UnityEngine.Bindings;
+using UnityEngine.Profiling.Experimental;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.Profiling.Memory.Experimental
 {
-	[NativeHeader("Modules/Profiler/Public/ProfilerConnection.h")]
+	[NativeHeader("Modules/Profiler/Runtime/MemorySnapshotManager.h")]
 	public sealed class MemoryProfiler
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private static event Action<string, bool> snapshotFinished;
+		private static event Action<string, bool> m_SnapshotFinished;
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private static event Action<string, bool, DebugScreenCapture> m_SaveScreenshotToDisk;
 
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action<MetaData> createMetaData;
 
-		[StaticAccessor("ProfilerConnection::Get()", StaticAccessorType.Dot)]
-		[NativeMethod("TakeMemorySnapshot")]
-		[NativeConditional("ENABLE_PLAYERCONNECTION")]
+		[NativeConditional("ENABLE_PROFILER")]
+		[NativeMethod("StartOperation")]
+		[StaticAccessor("profiling::memory::GetMemorySnapshotManager()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void TakeSnapshotInternal(string path, uint captureFlag);
+		private static extern void StartOperation(uint captureFlag, bool requestScreenshot, string path, bool isRemote);
 
 		public static void TakeSnapshot(string path, Action<string, bool> finishCallback, CaptureFlags captureFlags = CaptureFlags.ManagedObjects | CaptureFlags.NativeObjects)
 		{
-			if (MemoryProfiler.snapshotFinished != null)
+			MemoryProfiler.TakeSnapshot(path, finishCallback, null, captureFlags);
+		}
+
+		public static void TakeSnapshot(string path, Action<string, bool> finishCallback, Action<string, bool, DebugScreenCapture> screenshotCallback, CaptureFlags captureFlags = CaptureFlags.ManagedObjects | CaptureFlags.NativeObjects)
+		{
+			bool flag = MemoryProfiler.m_SnapshotFinished != null;
+			if (flag)
 			{
-				Debug.LogWarning("Canceling taking the snapshot. There is already ongoing capture.");
+				Debug.LogWarning("Canceling snapshot, there is another snapshot in progress.");
 				finishCallback(path, false);
 			}
 			else
 			{
-				MemoryProfiler.snapshotFinished += finishCallback;
-				MemoryProfiler.TakeSnapshotInternal(path, (uint)captureFlags);
+				MemoryProfiler.m_SnapshotFinished += finishCallback;
+				MemoryProfiler.m_SaveScreenshotToDisk += screenshotCallback;
+				MemoryProfiler.StartOperation((uint)captureFlags, MemoryProfiler.m_SaveScreenshotToDisk != null, path, false);
 			}
 		}
 
@@ -47,8 +60,9 @@ namespace UnityEngine.Profiling.Memory.Experimental
 		[RequiredByNativeCode]
 		private static byte[] PrepareMetadata()
 		{
+			bool flag = MemoryProfiler.createMetaData == null;
 			byte[] array;
-			if (MemoryProfiler.createMetaData == null)
+			if (flag)
 			{
 				array = new byte[0];
 			}
@@ -56,64 +70,54 @@ namespace UnityEngine.Profiling.Memory.Experimental
 			{
 				MetaData metaData = new MetaData();
 				MemoryProfiler.createMetaData(metaData);
-				if (metaData.content == null)
+				bool flag2 = metaData.content == null;
+				if (flag2)
 				{
 					metaData.content = "";
 				}
-				if (metaData.platform == null)
+				bool flag3 = metaData.platform == null;
+				if (flag3)
 				{
 					metaData.platform = "";
 				}
 				int num = 2 * metaData.content.Length;
 				int num2 = 2 * metaData.platform.Length;
 				int num3 = num + num2 + 12;
-				byte[] array2 = null;
-				if (metaData.screenshot != null)
-				{
-					array2 = metaData.screenshot.GetRawTextureData();
-					num3 += array2.Length + 12;
-				}
-				byte[] array3 = new byte[num3];
+				byte[] array2 = new byte[num3];
 				int num4 = 0;
-				num4 = MemoryProfiler.WriteIntToByteArray(array3, num4, metaData.content.Length);
-				num4 = MemoryProfiler.WriteStringToByteArray(array3, num4, metaData.content);
-				num4 = MemoryProfiler.WriteIntToByteArray(array3, num4, metaData.platform.Length);
-				num4 = MemoryProfiler.WriteStringToByteArray(array3, num4, metaData.platform);
-				if (metaData.screenshot != null)
-				{
-					num4 = MemoryProfiler.WriteIntToByteArray(array3, num4, array2.Length);
-					Array.Copy(array2, 0, array3, num4, array2.Length);
-					num4 += array2.Length;
-					num4 = MemoryProfiler.WriteIntToByteArray(array3, num4, metaData.screenshot.width);
-					num4 = MemoryProfiler.WriteIntToByteArray(array3, num4, metaData.screenshot.height);
-					num4 = MemoryProfiler.WriteIntToByteArray(array3, num4, (int)metaData.screenshot.format);
-				}
-				else
-				{
-					num4 = MemoryProfiler.WriteIntToByteArray(array3, num4, 0);
-				}
-				Assert.AreEqual(array3.Length, num4);
-				array = array3;
+				num4 = MemoryProfiler.WriteIntToByteArray(array2, num4, metaData.content.Length);
+				num4 = MemoryProfiler.WriteStringToByteArray(array2, num4, metaData.content);
+				num4 = MemoryProfiler.WriteIntToByteArray(array2, num4, metaData.platform.Length);
+				num4 = MemoryProfiler.WriteStringToByteArray(array2, num4, metaData.platform);
+				num4 = MemoryProfiler.WriteIntToByteArray(array2, num4, 0);
+				Assert.AreEqual(array2.Length, num4);
+				array = array2;
 			}
 			return array;
 		}
 
 		internal unsafe static int WriteIntToByteArray(byte[] array, int offset, int value)
 		{
-			array[offset++] = (byte)value;
-			array[offset++] = *((ref value) + 1);
-			array[offset++] = *((ref value) + 2);
-			array[offset++] = *((ref value) + 3);
+			byte* ptr = (byte*)(&value);
+			array[offset++] = *ptr;
+			array[offset++] = ptr[1];
+			array[offset++] = ptr[2];
+			array[offset++] = ptr[3];
 			return offset;
 		}
 
 		internal unsafe static int WriteStringToByteArray(byte[] array, int offset, string value)
 		{
-			if (value.Length != 0)
+			bool flag = value.Length != 0;
+			if (flag)
 			{
 				fixed (string text = value)
 				{
-					char* ptr = text + RuntimeHelpers.OffsetToStringData / 2;
+					char* ptr = text;
+					if (ptr != null)
+					{
+						ptr += RuntimeHelpers.OffsetToStringData / 2;
+					}
 					char* ptr2 = ptr;
 					char* ptr3 = ptr + value.Length;
 					while (ptr2 != ptr3)
@@ -132,11 +136,33 @@ namespace UnityEngine.Profiling.Memory.Experimental
 		[RequiredByNativeCode]
 		private static void FinalizeSnapshot(string path, bool result)
 		{
-			if (MemoryProfiler.snapshotFinished != null)
+			bool flag = MemoryProfiler.m_SnapshotFinished != null;
+			if (flag)
 			{
-				Action<string, bool> action = MemoryProfiler.snapshotFinished;
-				MemoryProfiler.snapshotFinished = null;
-				action(path, result);
+				Action<string, bool> snapshotFinished = MemoryProfiler.m_SnapshotFinished;
+				MemoryProfiler.m_SnapshotFinished = null;
+				snapshotFinished(path, result);
+			}
+		}
+
+		[RequiredByNativeCode]
+		private static void SaveScreenshotToDisk(string path, bool result, IntPtr pixelsPtr, int pixelsCount, TextureFormat format, int width, int height)
+		{
+			bool flag = MemoryProfiler.m_SaveScreenshotToDisk != null;
+			if (flag)
+			{
+				Action<string, bool, DebugScreenCapture> saveScreenshotToDisk = MemoryProfiler.m_SaveScreenshotToDisk;
+				MemoryProfiler.m_SaveScreenshotToDisk = null;
+				DebugScreenCapture debugScreenCapture = default(DebugScreenCapture);
+				if (result)
+				{
+					NativeArray<byte> nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<byte>(pixelsPtr.ToPointer(), pixelsCount, Allocator.Persistent);
+					debugScreenCapture.rawImageDataReference = nativeArray;
+					debugScreenCapture.height = height;
+					debugScreenCapture.width = width;
+					debugScreenCapture.imageFormat = format;
+				}
+				saveScreenshotToDisk(path, result, debugScreenCapture);
 			}
 		}
 	}

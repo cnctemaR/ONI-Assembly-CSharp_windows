@@ -6,24 +6,12 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationClipPlayable.bindings.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationClipPlayable.bindings.h")]
+	[NativeHeader("Modules/Animation/Director/AnimationClipPlayable.h")]
 	[RequiredByNativeCode]
 	[StaticAccessor("AnimationClipPlayableBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Animation/Director/AnimationClipPlayable.h")]
 	public struct AnimationClipPlayable : IPlayable, IEquatable<AnimationClipPlayable>
 	{
-		internal AnimationClipPlayable(PlayableHandle handle)
-		{
-			if (handle.IsValid())
-			{
-				if (!handle.IsPlayableOfType<AnimationClipPlayable>())
-				{
-					throw new InvalidCastException("Can't set handle: the playable is not an AnimationClipPlayable.");
-				}
-			}
-			this.m_Handle = handle;
-		}
-
 		public static AnimationClipPlayable Create(PlayableGraph graph, AnimationClip clip)
 		{
 			PlayableHandle playableHandle = AnimationClipPlayable.CreateHandle(graph, clip);
@@ -33,8 +21,9 @@ namespace UnityEngine.Animations
 		private static PlayableHandle CreateHandle(PlayableGraph graph, AnimationClip clip)
 		{
 			PlayableHandle @null = PlayableHandle.Null;
+			bool flag = !AnimationClipPlayable.CreateHandleInternal(graph, clip, ref @null);
 			PlayableHandle playableHandle;
-			if (!AnimationClipPlayable.CreateHandleInternal(graph, clip, ref @null))
+			if (flag)
 			{
 				playableHandle = PlayableHandle.Null;
 			}
@@ -43,6 +32,20 @@ namespace UnityEngine.Animations
 				playableHandle = @null;
 			}
 			return playableHandle;
+		}
+
+		internal AnimationClipPlayable(PlayableHandle handle)
+		{
+			bool flag = handle.IsValid();
+			if (flag)
+			{
+				bool flag2 = !handle.IsPlayableOfType<AnimationClipPlayable>();
+				if (flag2)
+				{
+					throw new InvalidCastException("Can't set handle: the playable is not an AnimationClipPlayable.");
+				}
+			}
+			this.m_Handle = handle;
 		}
 
 		public PlayableHandle GetHandle()
@@ -100,6 +103,36 @@ namespace UnityEngine.Animations
 			AnimationClipPlayable.SetRemoveStartOffsetInternal(ref this.m_Handle, value);
 		}
 
+		internal bool GetOverrideLoopTime()
+		{
+			return AnimationClipPlayable.GetOverrideLoopTimeInternal(ref this.m_Handle);
+		}
+
+		internal void SetOverrideLoopTime(bool value)
+		{
+			AnimationClipPlayable.SetOverrideLoopTimeInternal(ref this.m_Handle, value);
+		}
+
+		internal bool GetLoopTime()
+		{
+			return AnimationClipPlayable.GetLoopTimeInternal(ref this.m_Handle);
+		}
+
+		internal void SetLoopTime(bool value)
+		{
+			AnimationClipPlayable.SetLoopTimeInternal(ref this.m_Handle, value);
+		}
+
+		internal float GetSampleRate()
+		{
+			return AnimationClipPlayable.GetSampleRateInternal(ref this.m_Handle);
+		}
+
+		internal void SetSampleRate(float value)
+		{
+			AnimationClipPlayable.SetSampleRateInternal(ref this.m_Handle, value);
+		}
+
 		[NativeThrows]
 		private static bool CreateHandleInternal(PlayableGraph graph, AnimationClip clip, ref PlayableHandle handle)
 		{
@@ -133,6 +166,30 @@ namespace UnityEngine.Animations
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetRemoveStartOffsetInternal(ref PlayableHandle handle, bool value);
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetOverrideLoopTimeInternal(ref PlayableHandle handle);
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetOverrideLoopTimeInternal(ref PlayableHandle handle, bool value);
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetLoopTimeInternal(ref PlayableHandle handle);
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetLoopTimeInternal(ref PlayableHandle handle, bool value);
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float GetSampleRateInternal(ref PlayableHandle handle);
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetSampleRateInternal(ref PlayableHandle handle, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool CreateHandleInternal_Injected(ref PlayableGraph graph, AnimationClip clip, ref PlayableHandle handle);

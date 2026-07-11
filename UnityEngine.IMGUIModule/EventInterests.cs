@@ -13,13 +13,13 @@ namespace UnityEngine
 		public bool WantsEvent(EventType type)
 		{
 			bool flag;
-			if (type != EventType.MouseEnterWindow && type != EventType.MouseLeaveWindow)
+			if (type != EventType.MouseMove)
 			{
-				flag = type != EventType.MouseMove || this.wantsMouseMove;
+				flag = type - EventType.MouseEnterWindow > 1 || this.wantsMouseEnterLeaveWindow;
 			}
 			else
 			{
-				flag = this.wantsMouseEnterLeaveWindow;
+				flag = this.wantsMouseMove;
 			}
 			return flag;
 		}

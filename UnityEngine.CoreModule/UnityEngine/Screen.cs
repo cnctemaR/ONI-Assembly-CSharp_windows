@@ -6,9 +6,9 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[StaticAccessor("GetScreenManager()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[NativeHeader("Runtime/Graphics/ScreenManager.h")]
+	[StaticAccessor("GetScreenManager()", StaticAccessorType.Dot)]
 	public sealed class Screen
 	{
 		public static extern int width
@@ -46,7 +46,8 @@ namespace UnityEngine
 			}
 			set
 			{
-				if (value == ScreenOrientation.Unknown)
+				bool flag = value == ScreenOrientation.Unknown;
+				if (flag)
 				{
 					Debug.Log("ScreenOrientation.Unknown is deprecated. Please use ScreenOrientation.AutoRotation");
 					value = ScreenOrientation.AutoRotation;
@@ -160,6 +161,13 @@ namespace UnityEngine
 			}
 		}
 
+		public static extern Rect[] cutouts
+		{
+			[FreeFunction("ScreenScripting::GetCutouts")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		[NativeName("RequestResolution")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetResolution(int width, int height, FullScreenMode fullscreenMode, [UnityEngine.Internal.DefaultValue("0")] int preferredRefreshRate);
@@ -171,7 +179,7 @@ namespace UnityEngine
 
 		public static void SetResolution(int width, int height, bool fullscreen, [UnityEngine.Internal.DefaultValue("0")] int preferredRefreshRate)
 		{
-			Screen.SetResolution(width, height, (!fullscreen) ? FullScreenMode.Windowed : FullScreenMode.FullScreenWindow, preferredRefreshRate);
+			Screen.SetResolution(width, height, fullscreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed, preferredRefreshRate);
 		}
 
 		public static void SetResolution(int width, int height, bool fullscreen)
@@ -184,6 +192,14 @@ namespace UnityEngine
 			[FreeFunction("ScreenScripting::GetResolutions")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+		}
+
+		public static extern float brightness
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]

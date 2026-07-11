@@ -4,7 +4,7 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Animation/HumanTrait.h")]
+	[NativeHeader("Modules/Animation/HumanTrait.h")]
 	public class HumanTrait
 	{
 		public static extern int MuscleCount
@@ -87,7 +87,7 @@ namespace UnityEngine
 		public static int GetParentBone(int i)
 		{
 			int num = HumanTrait.Internal_GetParent(HumanTrait.GetBoneIndexFromMono(i));
-			return (num == -1) ? (-1) : HumanTrait.GetBoneIndexToMono(num);
+			return (num != -1) ? HumanTrait.GetBoneIndexToMono(num) : (-1);
 		}
 
 		[NativeMethod("GetBoneHierarchyMass")]

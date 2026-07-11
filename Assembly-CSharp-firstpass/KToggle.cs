@@ -165,7 +165,7 @@ public class KToggle : Toggle
 			{
 				((KToggle)toggle).Deselect();
 			}
-			base.group.SetAllTogglesOff();
+			base.group.SetAllTogglesOff(true);
 		}
 		base.OnSelect(eventData);
 	}

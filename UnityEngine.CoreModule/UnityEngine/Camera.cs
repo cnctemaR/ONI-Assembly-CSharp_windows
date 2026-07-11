@@ -9,15 +9,15 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Camera/RenderManager.h")]
 	[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
+	[NativeHeader("Runtime/Camera/Camera.h")]
 	[NativeHeader("Runtime/Misc/GameObjectUtility.h")]
-	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
 	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
+	[NativeHeader("Runtime/Camera/RenderManager.h")]
+	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
 	[NativeHeader("Runtime/Shaders/Shader.h")]
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
-	[NativeHeader("Runtime/Camera/Camera.h")]
 	public sealed class Camera : Behaviour
 	{
 		[NativeProperty("Near")]
@@ -38,7 +38,7 @@ namespace UnityEngine
 			set;
 		}
 
-		[NativeProperty("Fov")]
+		[NativeProperty("VerticalFieldOfView")]
 		public extern float fieldOfView
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -208,6 +208,15 @@ namespace UnityEngine
 			set;
 		}
 
+		[NativeConditional("UNITY_EDITOR")]
+		public extern ulong overrideSceneCullingMask
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		[FreeFunction("CameraScripting::GetLayerCullDistances", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern float[] GetLayerCullDistances();
@@ -224,7 +233,8 @@ namespace UnityEngine
 			}
 			set
 			{
-				if (value.Length != 32)
+				bool flag = value.Length != 32;
+				if (flag)
 				{
 					throw new UnityException("Array needs to contain exactly 32 floats for layerCullDistances.");
 				}
@@ -364,6 +374,16 @@ namespace UnityEngine
 			get;
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern float GetGateFittedFieldOfView();
+
+		public Vector2 GetGateFittedLensShift()
+		{
+			Vector2 vector;
+			this.GetGateFittedLensShift_Injected(out vector);
+			return vector;
 		}
 
 		internal Vector3 GetLocalSpaceAim()
@@ -667,18 +687,6 @@ namespace UnityEngine
 			return this.ScreenPointToRay(pos, Camera.MonoOrStereoscopicEye.Mono);
 		}
 
-		[FreeFunction("CameraScripting::RaycastTry", HasExplicitThis = true)]
-		internal GameObject RaycastTry(Ray ray, float distance, int layerMask)
-		{
-			return this.RaycastTry_Injected(ref ray, distance, layerMask);
-		}
-
-		[FreeFunction("CameraScripting::RaycastTry2D", HasExplicitThis = true)]
-		internal GameObject RaycastTry2D(Ray ray, float distance, int layerMask)
-		{
-			return this.RaycastTry2D_Injected(ref ray, distance, layerMask);
-		}
-
 		[FreeFunction("CameraScripting::CalculateViewportRayVectors", HasExplicitThis = true)]
 		private void CalculateFrustumCornersInternal(Rect viewport, float z, Camera.MonoOrStereoscopicEye eye, [Out] Vector3[] outCorners)
 		{
@@ -687,11 +695,13 @@ namespace UnityEngine
 
 		public void CalculateFrustumCorners(Rect viewport, float z, Camera.MonoOrStereoscopicEye eye, Vector3[] outCorners)
 		{
-			if (outCorners == null)
+			bool flag = outCorners == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("outCorners");
 			}
-			if (outCorners.Length < 4)
+			bool flag2 = outCorners.Length < 4;
+			if (flag2)
 			{
 				throw new ArgumentException("outCorners minimum size is 4", "outCorners");
 			}
@@ -709,11 +719,20 @@ namespace UnityEngine
 			Camera.CalculateProjectionMatrixFromPhysicalPropertiesInternal(out output, focalLength, sensorSize, lensShift, nearClip, farClip, gateFitParameters.aspect, gateFitParameters.mode);
 		}
 
+		[NativeName("FocalLengthToFieldOfView_Safe")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern float FocalLengthToFOV(float focalLength, float sensorSize);
+		public static extern float FocalLengthToFieldOfView(float focalLength, float sensorSize);
+
+		[NativeName("FieldOfViewToFocalLength_Safe")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern float FieldOfViewToFocalLength(float fieldOfView, float sensorSize);
+
+		[NativeName("HorizontalToVerticalFieldOfView_Safe")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern float HorizontalToVerticalFieldOfView(float horizontalFieldOfView, float aspectRatio);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern float FOVToFocalLength(float fov, float sensorSize);
+		public static extern float VerticalToHorizontalFieldOfView(float verticalFieldOfView, float aspectRatio);
 
 		public static extern Camera main
 		{
@@ -796,6 +815,7 @@ namespace UnityEngine
 			return matrix4x;
 		}
 
+		[FreeFunction("CameraScripting::GetStereoViewMatrix", HasExplicitThis = true)]
 		public Matrix4x4 GetStereoViewMatrix(Camera.StereoscopicEye eye)
 		{
 			Matrix4x4 matrix4x;
@@ -806,6 +826,7 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void CopyStereoDeviceProjectionMatrixToNonJittered(Camera.StereoscopicEye eye);
 
+		[FreeFunction("CameraScripting::GetStereoProjectionMatrix", HasExplicitThis = true)]
 		public Matrix4x4 GetStereoProjectionMatrix(Camera.StereoscopicEye eye)
 		{
 			Matrix4x4 matrix4x;
@@ -857,11 +878,13 @@ namespace UnityEngine
 
 		public static int GetAllCameras(Camera[] cameras)
 		{
-			if (cameras == null)
+			bool flag = cameras == null;
+			if (flag)
 			{
 				throw new NullReferenceException();
 			}
-			if (cameras.Length < Camera.allCamerasCount)
+			bool flag2 = cameras.Length < Camera.allCamerasCount;
+			if (flag2)
 			{
 				throw new ArgumentException("Passed in array to fill with cameras is to small to hold the number of cameras. Use Camera.allCamerasCount to get the needed size.");
 			}
@@ -947,11 +970,13 @@ namespace UnityEngine
 
 		public void AddCommandBuffer(CameraEvent evt, CommandBuffer buffer)
 		{
-			if (!CameraEventUtils.IsValid(evt))
+			bool flag = !CameraEventUtils.IsValid(evt);
+			if (flag)
 			{
 				throw new ArgumentException(string.Format("Invalid CameraEvent value \"{0}\".", (int)evt), "evt");
 			}
-			if (buffer == null)
+			bool flag2 = buffer == null;
+			if (flag2)
 			{
 				throw new NullReferenceException("buffer is null");
 			}
@@ -960,11 +985,13 @@ namespace UnityEngine
 
 		public void AddCommandBufferAsync(CameraEvent evt, CommandBuffer buffer, ComputeQueueType queueType)
 		{
-			if (!CameraEventUtils.IsValid(evt))
+			bool flag = !CameraEventUtils.IsValid(evt);
+			if (flag)
 			{
 				throw new ArgumentException(string.Format("Invalid CameraEvent value \"{0}\".", (int)evt), "evt");
 			}
-			if (buffer == null)
+			bool flag2 = buffer == null;
+			if (flag2)
 			{
 				throw new NullReferenceException("buffer is null");
 			}
@@ -973,11 +1000,13 @@ namespace UnityEngine
 
 		public void RemoveCommandBuffer(CameraEvent evt, CommandBuffer buffer)
 		{
-			if (!CameraEventUtils.IsValid(evt))
+			bool flag = !CameraEventUtils.IsValid(evt);
+			if (flag)
 			{
 				throw new ArgumentException(string.Format("Invalid CameraEvent value \"{0}\".", (int)evt), "evt");
 			}
-			if (buffer == null)
+			bool flag2 = buffer == null;
+			if (flag2)
 			{
 				throw new NullReferenceException("buffer is null");
 			}
@@ -991,7 +1020,8 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		private static void FireOnPreCull(Camera cam)
 		{
-			if (Camera.onPreCull != null)
+			bool flag = Camera.onPreCull != null;
+			if (flag)
 			{
 				Camera.onPreCull(cam);
 			}
@@ -1000,7 +1030,8 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		private static void FireOnPreRender(Camera cam)
 		{
-			if (Camera.onPreRender != null)
+			bool flag = Camera.onPreRender != null;
+			if (flag)
 			{
 				Camera.onPreRender(cam);
 			}
@@ -1009,7 +1040,8 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		private static void FireOnPostRender(Camera cam)
 		{
-			if (Camera.onPostRender != null)
+			bool flag = Camera.onPostRender != null;
+			if (flag)
 			{
 				Camera.onPostRender(cam);
 			}
@@ -1022,6 +1054,21 @@ namespace UnityEngine
 		internal void OnlyUsedForTesting2()
 		{
 		}
+
+		public unsafe bool TryGetCullingParameters(out ScriptableCullingParameters cullingParameters)
+		{
+			return Camera.GetCullingParameters_Internal(this, false, out cullingParameters, sizeof(ScriptableCullingParameters));
+		}
+
+		public unsafe bool TryGetCullingParameters(bool stereoAware, out ScriptableCullingParameters cullingParameters)
+		{
+			return Camera.GetCullingParameters_Internal(this, stereoAware, out cullingParameters, sizeof(ScriptableCullingParameters));
+		}
+
+		[FreeFunction("ScriptableRenderPipeline_Bindings::GetCullingParameters_Internal")]
+		[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderPipeline.bindings.h")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetCullingParameters_Internal(Camera camera, bool stereoAware, out ScriptableCullingParameters cullingParameters, int managedCullingParametersSize);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_transparencySortAxis_Injected(out Vector3 ret);
@@ -1055,6 +1102,9 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void set_lensShift_Injected(ref Vector2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void GetGateFittedLensShift_Injected(out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void GetLocalSpaceAim_Injected(out Vector3 ret);
@@ -1132,12 +1182,6 @@ namespace UnityEngine
 		private extern void ScreenPointToRay_Injected(ref Vector2 pos, Camera.MonoOrStereoscopicEye eye, out Ray ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern GameObject RaycastTry_Injected(ref Ray ray, float distance, int layerMask);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern GameObject RaycastTry2D_Injected(ref Ray ray, float distance, int layerMask);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void CalculateFrustumCornersInternal_Injected(ref Rect viewport, float z, Camera.MonoOrStereoscopicEye eye, [Out] Vector3[] outCorners);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1186,17 +1230,23 @@ namespace UnityEngine
 			None = 0
 		}
 
+		public enum FieldOfViewAxis
+		{
+			Vertical,
+			Horizontal
+		}
+
 		public struct GateFitParameters
 		{
+			public Camera.GateFitMode mode { get; set; }
+
+			public float aspect { get; set; }
+
 			public GateFitParameters(Camera.GateFitMode mode, float aspect)
 			{
 				this.mode = mode;
 				this.aspect = aspect;
 			}
-
-			public Camera.GateFitMode mode { get; set; }
-
-			public float aspect { get; set; }
 		}
 
 		public enum StereoscopicEye

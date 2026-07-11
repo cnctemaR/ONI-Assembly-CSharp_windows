@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Obsolete("Use System.Runtime.InteropServices.ComTypes.IMPLTYPEFLAGS instead. http://go.microsoft.com/fwlink/?linkid=14202", false)]
 	[Flags]
+	[Obsolete("Use System.Runtime.InteropServices.ComTypes.IMPLTYPEFLAGS instead. http://go.microsoft.com/fwlink/?linkid=14202", false)]
 	[Serializable]
 	public enum IMPLTYPEFLAGS
 	{

@@ -6,6 +6,7 @@ using UnityEngine.Bindings;
 namespace Unity.Jobs.LowLevel.Unsafe
 {
 	[NativeType(Header = "Runtime/Jobs/ScriptBindings/JobsBindings.h")]
+	[NativeHeader("Runtime/Jobs/JobSystem.h")]
 	public static class JobsUtility
 	{
 		public unsafe static void GetJobRange(ref JobRanges ranges, int jobIndex, out int beginIndex, out int endIndex)
@@ -51,8 +52,8 @@ namespace Unity.Jobs.LowLevel.Unsafe
 			return jobHandle;
 		}
 
-		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
 		[NativeMethod(IsThreadSafe = true, IsFreeFunction = true)]
+		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void PatchBufferMinMaxRanges(IntPtr bufferRangePatchData, void* jobdata, int startIndex, int rangeSize);
 
@@ -68,6 +69,13 @@ namespace Unity.Jobs.LowLevel.Unsafe
 		public static IntPtr CreateJobReflectionData(Type wrapperJobType, Type userJobType, JobType jobType, object managedJobFunction0)
 		{
 			return JobsUtility.CreateJobReflectionData(wrapperJobType, userJobType, jobType, managedJobFunction0, null, null);
+		}
+
+		public static extern bool IsExecutingJob
+		{
+			[NativeMethod(IsFreeFunction = true, IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
 		}
 
 		public static extern bool JobDebuggerEnabled
@@ -88,6 +96,42 @@ namespace Unity.Jobs.LowLevel.Unsafe
 			[FreeFunction]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
+		}
+
+		[FreeFunction("JobSystem::GetJobQueueWorkerThreadCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetJobQueueWorkerThreadCount();
+
+		[FreeFunction("JobSystem::ForceSetJobQueueWorkerThreadCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetJobQueueMaximumActiveThreadCount(int count);
+
+		public static extern int JobWorkerMaximumCount
+		{
+			[FreeFunction("JobSystem::GetJobQueueMaximumThreadCount")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		[FreeFunction("JobSystem::ResetJobQueueWorkerThreadCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void ResetJobWorkerCount();
+
+		public static int JobWorkerCount
+		{
+			get
+			{
+				return JobsUtility.GetJobQueueWorkerThreadCount();
+			}
+			set
+			{
+				bool flag = value < 1 || value > JobsUtility.JobWorkerMaximumCount;
+				if (flag)
+				{
+					throw new ArgumentOutOfRangeException("JobWorkerCount", string.Format("Invalid JobWorkerCount {0} must be in the range 1 -> {1}", value, JobsUtility.JobWorkerMaximumCount));
+				}
+				JobsUtility.SetJobQueueMaximumActiveThreadCount(value);
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

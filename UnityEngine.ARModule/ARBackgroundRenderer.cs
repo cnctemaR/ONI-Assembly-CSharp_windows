@@ -17,11 +17,13 @@ namespace UnityEngine.XR
 			}
 			set
 			{
-				if (!(this.m_BackgroundMaterial == value))
+				bool flag = this.m_BackgroundMaterial == value;
+				if (!flag)
 				{
 					this.RemoveCommandBuffersIfNeeded();
 					this.m_BackgroundMaterial = value;
-					if (this.backgroundRendererChanged != null)
+					bool flag2 = this.backgroundRendererChanged != null;
+					if (flag2)
 					{
 						this.backgroundRendererChanged();
 					}
@@ -39,11 +41,13 @@ namespace UnityEngine.XR
 			set
 			{
 				this.m_BackgroundTexture = value;
-				if (!value)
+				bool flag = value;
+				if (!flag)
 				{
 					this.RemoveCommandBuffersIfNeeded();
 					this.m_BackgroundTexture = value;
-					if (this.backgroundRendererChanged != null)
+					bool flag2 = this.backgroundRendererChanged != null;
+					if (flag2)
 					{
 						this.backgroundRendererChanged();
 					}
@@ -56,15 +60,17 @@ namespace UnityEngine.XR
 		{
 			get
 			{
-				return (!(this.m_Camera != null)) ? Camera.main : this.m_Camera;
+				return (this.m_Camera != null) ? this.m_Camera : Camera.main;
 			}
 			set
 			{
-				if (!(this.m_Camera == value))
+				bool flag = this.m_Camera == value;
+				if (!flag)
 				{
 					this.RemoveCommandBuffersIfNeeded();
 					this.m_Camera = value;
-					if (this.backgroundRendererChanged != null)
+					bool flag2 = this.backgroundRendererChanged != null;
+					if (flag2)
 					{
 						this.backgroundRendererChanged();
 					}
@@ -81,7 +87,8 @@ namespace UnityEngine.XR
 			}
 			set
 			{
-				if (value != this.m_RenderMode)
+				bool flag = value == this.m_RenderMode;
+				if (!flag)
 				{
 					this.m_RenderMode = value;
 					ARRenderMode renderMode = this.m_RenderMode;
@@ -97,7 +104,8 @@ namespace UnityEngine.XR
 					{
 						this.DisableARBackgroundRendering();
 					}
-					if (this.backgroundRendererChanged != null)
+					bool flag2 = this.backgroundRendererChanged != null;
+					if (flag2)
 					{
 						this.backgroundRendererChanged();
 					}
@@ -107,15 +115,17 @@ namespace UnityEngine.XR
 
 		protected bool EnableARBackgroundRendering()
 		{
-			bool flag;
-			if (this.m_BackgroundMaterial == null)
+			bool flag = this.m_BackgroundMaterial == null;
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
+				bool flag3 = this.m_Camera != null;
 				Camera camera;
-				if (this.m_Camera != null)
+				if (flag3)
 				{
 					camera = this.m_Camera;
 				}
@@ -123,9 +133,10 @@ namespace UnityEngine.XR
 				{
 					camera = Camera.main;
 				}
-				if (camera == null)
+				bool flag4 = camera == null;
+				if (flag4)
 				{
-					flag = false;
+					flag2 = false;
 				}
 				else
 				{
@@ -133,9 +144,11 @@ namespace UnityEngine.XR
 					camera.clearFlags = CameraClearFlags.Depth;
 					this.m_CommandBuffer = new CommandBuffer();
 					Texture texture = this.m_BackgroundTexture;
-					if (texture == null)
+					bool flag5 = texture == null;
+					if (flag5)
 					{
-						if (this.m_BackgroundMaterial.HasProperty("_MainTex"))
+						bool flag6 = this.m_BackgroundMaterial.HasProperty("_MainTex");
+						if (flag6)
 						{
 							texture = this.m_BackgroundMaterial.GetTexture("_MainTex");
 						}
@@ -143,18 +156,20 @@ namespace UnityEngine.XR
 					this.m_CommandBuffer.Blit(texture, BuiltinRenderTextureType.CameraTarget, this.m_BackgroundMaterial);
 					camera.AddCommandBuffer(CameraEvent.BeforeForwardOpaque, this.m_CommandBuffer);
 					camera.AddCommandBuffer(CameraEvent.BeforeGBuffer, this.m_CommandBuffer);
-					flag = true;
+					flag2 = true;
 				}
 			}
-			return flag;
+			return flag2;
 		}
 
 		protected void DisableARBackgroundRendering()
 		{
-			if (this.m_CommandBuffer != null)
+			bool flag = this.m_CommandBuffer == null;
+			if (!flag)
 			{
 				Camera camera = this.m_Camera ?? Camera.main;
-				if (!(camera == null))
+				bool flag2 = camera == null;
+				if (!flag2)
 				{
 					camera.clearFlags = this.m_CameraClearFlags;
 					camera.RemoveCommandBuffer(CameraEvent.BeforeForwardOpaque, this.m_CommandBuffer);
@@ -165,32 +180,34 @@ namespace UnityEngine.XR
 
 		private bool ReapplyCommandBuffersIfNeeded()
 		{
-			bool flag;
-			if (this.m_RenderMode != ARRenderMode.MaterialAsBackground)
+			bool flag = this.m_RenderMode != ARRenderMode.MaterialAsBackground;
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
 				this.EnableARBackgroundRendering();
-				flag = true;
+				flag2 = true;
 			}
-			return flag;
+			return flag2;
 		}
 
 		private bool RemoveCommandBuffersIfNeeded()
 		{
-			bool flag;
-			if (this.m_RenderMode != ARRenderMode.MaterialAsBackground)
+			bool flag = this.m_RenderMode != ARRenderMode.MaterialAsBackground;
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
 				this.DisableARBackgroundRendering();
-				flag = true;
+				flag2 = true;
 			}
-			return flag;
+			return flag2;
 		}
 
 		protected Camera m_Camera = null;

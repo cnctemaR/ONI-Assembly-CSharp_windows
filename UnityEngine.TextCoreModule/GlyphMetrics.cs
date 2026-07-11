@@ -8,15 +8,6 @@ namespace UnityEngine.TextCore
 	[Serializable]
 	public struct GlyphMetrics : IEquatable<GlyphMetrics>
 	{
-		public GlyphMetrics(float width, float height, float bearingX, float bearingY, float advance)
-		{
-			this.m_Width = width;
-			this.m_Height = height;
-			this.m_HorizontalBearingX = bearingX;
-			this.m_HorizontalBearingY = bearingY;
-			this.m_HorizontalAdvance = advance;
-		}
-
 		public float width
 		{
 			get
@@ -77,6 +68,15 @@ namespace UnityEngine.TextCore
 			}
 		}
 
+		public GlyphMetrics(float width, float height, float bearingX, float bearingY, float advance)
+		{
+			this.m_Width = width;
+			this.m_Height = height;
+			this.m_HorizontalBearingX = bearingX;
+			this.m_HorizontalBearingY = bearingY;
+			this.m_HorizontalAdvance = advance;
+		}
+
 		public override int GetHashCode()
 		{
 			return base.GetHashCode();
@@ -118,8 +118,8 @@ namespace UnityEngine.TextCore
 		[NativeName("horizontalBearingY")]
 		private float m_HorizontalBearingY;
 
-		[NativeName("horizontalAdvance")]
 		[SerializeField]
+		[NativeName("horizontalAdvance")]
 		private float m_HorizontalAdvance;
 	}
 }

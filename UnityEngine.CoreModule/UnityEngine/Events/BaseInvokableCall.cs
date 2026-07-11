@@ -11,11 +11,13 @@ namespace UnityEngine.Events
 
 		protected BaseInvokableCall(object target, MethodInfo function)
 		{
-			if (target == null)
+			bool flag = target == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("target");
 			}
-			if (function == null)
+			bool flag2 = function == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("function");
 			}
@@ -25,7 +27,8 @@ namespace UnityEngine.Events
 
 		protected static void ThrowOnInvalidArg<T>(object arg)
 		{
-			if (arg != null && !(arg is T))
+			bool flag = arg != null && !(arg is T);
+			if (flag)
 			{
 				throw new ArgumentException(UnityString.Format("Passed argument 'args[0]' is of the wrong type. Type:{0} Expected:{1}", new object[]
 				{
@@ -38,17 +41,19 @@ namespace UnityEngine.Events
 		protected static bool AllowInvoke(Delegate @delegate)
 		{
 			object target = @delegate.Target;
-			bool flag;
-			if (target == null)
+			bool flag = target == null;
+			bool flag2;
+			if (flag)
 			{
-				flag = true;
+				flag2 = true;
 			}
 			else
 			{
 				Object @object = target as Object;
-				flag = object.ReferenceEquals(@object, null) || @object != null;
+				bool flag3 = @object != null;
+				flag2 = !flag3 || @object != null;
 			}
-			return flag;
+			return flag2;
 		}
 
 		public abstract bool Find(object targetObj, MethodInfo method);

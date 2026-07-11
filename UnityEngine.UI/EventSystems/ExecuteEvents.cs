@@ -239,14 +239,15 @@ namespace UnityEngine.EventSystems
 		private static void GetEventChain(GameObject root, IList<Transform> eventChain)
 		{
 			eventChain.Clear();
-			if (!(root == null))
+			if (root == null)
 			{
-				Transform transform = root.transform;
-				while (transform != null)
-				{
-					eventChain.Add(transform);
-					transform = transform.parent;
-				}
+				return;
+			}
+			Transform transform = root.transform;
+			while (transform != null)
+			{
+				eventChain.Add(transform);
+				transform = transform.parent;
 			}
 		}
 
@@ -266,13 +267,13 @@ namespace UnityEngine.EventSystems
 				{
 					IEventSystemHandler eventSystemHandler = list[i];
 					Debug.LogException(new Exception(string.Format("Type {0} expected {1} received.", typeof(T).Name, eventSystemHandler.GetType().Name), ex));
-					goto IL_008F;
+					goto IL_0074;
 				}
-				goto Block_2;
-				IL_008F:
+				goto IL_0062;
+				IL_0074:
 				i++;
 				continue;
-				Block_2:
+				IL_0062:
 				try
 				{
 					functor(t, eventData);
@@ -281,7 +282,7 @@ namespace UnityEngine.EventSystems
 				{
 					Debug.LogException(ex2);
 				}
-				goto IL_008F;
+				goto IL_0074;
 			}
 			int count = list.Count;
 			ExecuteEvents.s_HandlerListPool.Release(list);
@@ -304,17 +305,12 @@ namespace UnityEngine.EventSystems
 
 		private static bool ShouldSendToComponent<T>(Component component) where T : IEventSystemHandler
 		{
-			bool flag;
 			if (!(component is T))
 			{
-				flag = false;
+				return false;
 			}
-			else
-			{
-				Behaviour behaviour = component as Behaviour;
-				flag = !(behaviour != null) || behaviour.isActiveAndEnabled;
-			}
-			return flag;
+			Behaviour behaviour = component as Behaviour;
+			return !(behaviour != null) || behaviour.isActiveAndEnabled;
 		}
 
 		private static void GetEventList<T>(GameObject go, IList<IEventSystemHandler> results) where T : IEventSystemHandler
@@ -323,19 +319,20 @@ namespace UnityEngine.EventSystems
 			{
 				throw new ArgumentException("Results array is null", "results");
 			}
-			if (!(go == null) && go.activeInHierarchy)
+			if (go == null || !go.activeInHierarchy)
 			{
-				List<Component> list = ListPool<Component>.Get();
-				go.GetComponents<Component>(list);
-				for (int i = 0; i < list.Count; i++)
-				{
-					if (ExecuteEvents.ShouldSendToComponent<T>(list[i]))
-					{
-						results.Add(list[i] as IEventSystemHandler);
-					}
-				}
-				ListPool<Component>.Release(list);
+				return;
 			}
+			List<Component> list = ListPool<Component>.Get();
+			go.GetComponents<Component>(list);
+			for (int i = 0; i < list.Count; i++)
+			{
+				if (ExecuteEvents.ShouldSendToComponent<T>(list[i]))
+				{
+					results.Add(list[i] as IEventSystemHandler);
+				}
+			}
+			ListPool<Component>.Release(list);
 		}
 
 		public static bool CanHandleEvent<T>(GameObject go) where T : IEventSystemHandler
@@ -349,25 +346,20 @@ namespace UnityEngine.EventSystems
 
 		public static GameObject GetEventHandler<T>(GameObject root) where T : IEventSystemHandler
 		{
-			GameObject gameObject;
 			if (root == null)
 			{
-				gameObject = null;
+				return null;
 			}
-			else
+			Transform transform = root.transform;
+			while (transform != null)
 			{
-				Transform transform = root.transform;
-				while (transform != null)
+				if (ExecuteEvents.CanHandleEvent<T>(transform.gameObject))
 				{
-					if (ExecuteEvents.CanHandleEvent<T>(transform.gameObject))
-					{
-						return transform.gameObject;
-					}
-					transform = transform.parent;
+					return transform.gameObject;
 				}
-				gameObject = null;
+				transform = transform.parent;
 			}
-			return gameObject;
+			return null;
 		}
 
 		private static readonly ExecuteEvents.EventFunction<IPointerEnterHandler> s_PointerEnterHandler = new ExecuteEvents.EventFunction<IPointerEnterHandler>(ExecuteEvents.Execute);

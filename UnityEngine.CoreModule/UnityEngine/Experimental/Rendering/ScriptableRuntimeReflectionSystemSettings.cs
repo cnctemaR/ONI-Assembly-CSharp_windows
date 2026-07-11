@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Rendering
 {
-	[NativeHeader("Runtime/Camera/ScriptableRuntimeReflectionSystem.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Camera/ScriptableRuntimeReflectionSystem.h")]
 	public static class ScriptableRuntimeReflectionSystemSettings
 	{
 		public static IScriptableRuntimeReflectionSystem system
@@ -17,13 +17,15 @@ namespace UnityEngine.Experimental.Rendering
 			}
 			set
 			{
-				if (value == null || value.Equals(null))
+				bool flag = value == null || value.Equals(null);
+				if (flag)
 				{
 					Debug.LogError("'null' cannot be assigned to ScriptableRuntimeReflectionSystemSettings.system");
 				}
 				else
 				{
-					if (!(ScriptableRuntimeReflectionSystemSettings.system is BuiltinRuntimeReflectionSystem) && !(value is BuiltinRuntimeReflectionSystem) && ScriptableRuntimeReflectionSystemSettings.system != value)
+					bool flag2 = !(ScriptableRuntimeReflectionSystemSettings.system is BuiltinRuntimeReflectionSystem) && !(value is BuiltinRuntimeReflectionSystem) && ScriptableRuntimeReflectionSystemSettings.system != value;
+					if (flag2)
 					{
 						Debug.LogWarningFormat("ScriptableRuntimeReflectionSystemSettings.system is assigned more than once. Only a the last instance will be used. (Last instance {0}, New instance {1})", new object[]
 						{
@@ -45,9 +47,11 @@ namespace UnityEngine.Experimental.Rendering
 			[RequiredByNativeCode]
 			set
 			{
-				if (ScriptableRuntimeReflectionSystemSettings.s_Instance.implementation != value)
+				bool flag = ScriptableRuntimeReflectionSystemSettings.s_Instance.implementation != value;
+				if (flag)
 				{
-					if (ScriptableRuntimeReflectionSystemSettings.s_Instance.implementation != null)
+					bool flag2 = ScriptableRuntimeReflectionSystemSettings.s_Instance.implementation != null;
+					if (flag2)
 					{
 						ScriptableRuntimeReflectionSystemSettings.s_Instance.implementation.Dispose();
 					}
@@ -65,8 +69,8 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		[StaticAccessor("ScriptableRuntimeReflectionSystem", StaticAccessorType.DoubleColon)]
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+		[StaticAccessor("ScriptableRuntimeReflectionSystem", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void ScriptingDirtyReflectionSystemInstance();
 

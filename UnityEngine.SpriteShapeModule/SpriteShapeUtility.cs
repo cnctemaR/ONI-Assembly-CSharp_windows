@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace UnityEngine.Experimental.U2D
+namespace UnityEngine.U2D
 {
 	[NativeHeader("Modules/SpriteShape/Public/SpriteShapeUtility.h")]
+	[MovedFrom("UnityEngine.Experimental.U2D")]
 	public class SpriteShapeUtility
 	{
 		[FreeFunction("SpriteShapeUtility::Generate")]

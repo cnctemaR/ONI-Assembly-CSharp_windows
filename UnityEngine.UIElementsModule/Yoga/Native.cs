@@ -18,7 +18,8 @@ namespace UnityEngine.Yoga
 
 		public static void YGNodeFree(IntPtr ygNode)
 		{
-			if (!(ygNode == IntPtr.Zero))
+			bool flag = ygNode == IntPtr.Zero;
+			if (!flag)
 			{
 				Native.YGNodeFreeInternal(ygNode);
 			}
@@ -46,7 +47,8 @@ namespace UnityEngine.Yoga
 
 		public static void YGConfigFree(IntPtr config)
 		{
-			if (!(config == IntPtr.Zero))
+			bool flag = config == IntPtr.Zero;
+			if (!flag)
 			{
 				Native.YGConfigFreeInternal(config);
 			}
@@ -267,6 +269,10 @@ namespace UnityEngine.Yoga
 			Native.YGNodeStyleGetFlexBasis_Injected(node, out yogaValue);
 			return yogaValue;
 		}
+
+		[FreeFunction]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern float YGNodeGetComputedFlexBasis(IntPtr node);
 
 		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]

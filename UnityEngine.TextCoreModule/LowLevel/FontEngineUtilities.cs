@@ -11,7 +11,7 @@ namespace UnityEngine.TextCore.LowLevel
 
 		internal static int MaxValue(int a, int b, int c)
 		{
-			return (a >= b) ? ((a >= c) ? a : c) : ((b >= c) ? b : c);
+			return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a);
 		}
 	}
 }

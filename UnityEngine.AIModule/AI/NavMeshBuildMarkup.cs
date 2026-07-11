@@ -15,7 +15,7 @@ namespace UnityEngine.AI
 			}
 			set
 			{
-				this.m_OverrideArea = ((!value) ? 0 : 1);
+				this.m_OverrideArea = (value ? 1 : 0);
 			}
 		}
 
@@ -39,7 +39,7 @@ namespace UnityEngine.AI
 			}
 			set
 			{
-				this.m_IgnoreFromBuild = ((!value) ? 0 : 1);
+				this.m_IgnoreFromBuild = (value ? 1 : 0);
 			}
 		}
 
@@ -51,7 +51,7 @@ namespace UnityEngine.AI
 			}
 			set
 			{
-				this.m_InstanceID = ((!(value != null)) ? 0 : value.GetInstanceID());
+				this.m_InstanceID = ((value != null) ? value.GetInstanceID() : 0);
 			}
 		}
 

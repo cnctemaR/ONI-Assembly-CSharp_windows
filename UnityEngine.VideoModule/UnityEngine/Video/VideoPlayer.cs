@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Video
 {
 	[RequiredByNativeCode]
-	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Modules/Video/Public/VideoPlayer.h")]
+	[RequireComponent(typeof(Transform))]
 	public sealed class VideoPlayer : Behaviour
 	{
 		public extern VideoSource source
@@ -344,7 +344,8 @@ namespace UnityEngine.Video
 			set
 			{
 				int controlledAudioTrackMaxCount = (int)VideoPlayer.controlledAudioTrackMaxCount;
-				if ((int)value > controlledAudioTrackMaxCount)
+				bool flag = (int)value > controlledAudioTrackMaxCount;
+				if (flag)
 				{
 					throw new ArgumentException(string.Format("Cannot control more than {0} tracks.", controlledAudioTrackMaxCount), "value");
 				}
@@ -435,7 +436,8 @@ namespace UnityEngine.Video
 		[RequiredByNativeCode]
 		private static void InvokePrepareCompletedCallback_Internal(VideoPlayer source)
 		{
-			if (source.prepareCompleted != null)
+			bool flag = source.prepareCompleted != null;
+			if (flag)
 			{
 				source.prepareCompleted(source);
 			}
@@ -444,7 +446,8 @@ namespace UnityEngine.Video
 		[RequiredByNativeCode]
 		private static void InvokeFrameReadyCallback_Internal(VideoPlayer source, long frameIdx)
 		{
-			if (source.frameReady != null)
+			bool flag = source.frameReady != null;
+			if (flag)
 			{
 				source.frameReady(source, frameIdx);
 			}
@@ -453,7 +456,8 @@ namespace UnityEngine.Video
 		[RequiredByNativeCode]
 		private static void InvokeLoopPointReachedCallback_Internal(VideoPlayer source)
 		{
-			if (source.loopPointReached != null)
+			bool flag = source.loopPointReached != null;
+			if (flag)
 			{
 				source.loopPointReached(source);
 			}
@@ -462,7 +466,8 @@ namespace UnityEngine.Video
 		[RequiredByNativeCode]
 		private static void InvokeStartedCallback_Internal(VideoPlayer source)
 		{
-			if (source.started != null)
+			bool flag = source.started != null;
+			if (flag)
 			{
 				source.started(source);
 			}
@@ -471,7 +476,8 @@ namespace UnityEngine.Video
 		[RequiredByNativeCode]
 		private static void InvokeFrameDroppedCallback_Internal(VideoPlayer source)
 		{
-			if (source.frameDropped != null)
+			bool flag = source.frameDropped != null;
+			if (flag)
 			{
 				source.frameDropped(source);
 			}
@@ -480,7 +486,8 @@ namespace UnityEngine.Video
 		[RequiredByNativeCode]
 		private static void InvokeErrorReceivedCallback_Internal(VideoPlayer source, string errorStr)
 		{
-			if (source.errorReceived != null)
+			bool flag = source.errorReceived != null;
+			if (flag)
 			{
 				source.errorReceived(source, errorStr);
 			}
@@ -489,7 +496,8 @@ namespace UnityEngine.Video
 		[RequiredByNativeCode]
 		private static void InvokeSeekCompletedCallback_Internal(VideoPlayer source)
 		{
-			if (source.seekCompleted != null)
+			bool flag = source.seekCompleted != null;
+			if (flag)
 			{
 				source.seekCompleted(source);
 			}
@@ -498,7 +506,8 @@ namespace UnityEngine.Video
 		[RequiredByNativeCode]
 		private static void InvokeClockResyncOccurredCallback_Internal(VideoPlayer source, double seconds)
 		{
-			if (source.clockResyncOccurred != null)
+			bool flag = source.clockResyncOccurred != null;
+			if (flag)
 			{
 				source.clockResyncOccurred(source, seconds);
 			}

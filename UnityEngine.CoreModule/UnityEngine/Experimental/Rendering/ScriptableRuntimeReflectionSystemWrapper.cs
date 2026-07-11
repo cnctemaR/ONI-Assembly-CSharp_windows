@@ -9,9 +9,9 @@ namespace UnityEngine.Experimental.Rendering
 		internal IScriptableRuntimeReflectionSystem implementation { get; set; }
 
 		[RequiredByNativeCode]
-		private unsafe void Internal_ScriptableRuntimeReflectionSystemWrapper_TickRealtimeProbes(IntPtr result)
+		private void Internal_ScriptableRuntimeReflectionSystemWrapper_TickRealtimeProbes(out bool result)
 		{
-			*(byte*)(void*)result = ((this.implementation != null && this.implementation.TickRealtimeProbes()) ? 1 : 0);
+			result = this.implementation != null && this.implementation.TickRealtimeProbes();
 		}
 	}
 }

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{FDEFE812-C689-4EDB-B9F2-D100FD020EED}</ProjectGuid>
+    <ProjectGuid>{507D4E6D-F27A-4B63-8D6B-A2E9C354A245}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.ScreenCaptureModule</AssemblyName>
@@ -19,11 +19,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{FDEFE812-C689-4EDB-B9F2-D100FD020EDA}</Project>
+      <Project>{507D4E6D-F27A-4B63-8D6B-A2E9C354A232}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{FDEFE812-C689-4EDB-B9F2-D100FD020EEE}</Project>
+      <Project>{507D4E6D-F27A-4B63-8D6B-A2E9C354A246}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

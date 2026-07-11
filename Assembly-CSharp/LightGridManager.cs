@@ -29,7 +29,7 @@ public static class LightGridManager
 		LightGridManager.previewLightCells.Clear();
 	}
 
-	public static void CreatePreview(int origin_cell, float radius, LightShape shape, int lux)
+	public static void CreatePreview(int origin_cell, float radius, global::LightShape shape, int lux)
 	{
 		LightGridManager.previewLightCells.Clear();
 		ListPool<int, LightGridManager.LightGridEmitter>.PooledList pooledList = ListPool<int, LightGridManager.LightGridEmitter>.Allocate();
@@ -121,7 +121,7 @@ public static class LightGridManager
 
 			public int origin;
 
-			public LightShape shape;
+			public global::LightShape shape;
 
 			public float radius;
 
@@ -134,7 +134,7 @@ public static class LightGridManager
 			public static readonly LightGridManager.LightGridEmitter.State DEFAULT = new LightGridManager.LightGridEmitter.State
 			{
 				origin = Grid.InvalidCell,
-				shape = LightShape.Circle,
+				shape = global::LightShape.Circle,
 				radius = 4f,
 				intensity = 1,
 				falloffRate = 0.5f,

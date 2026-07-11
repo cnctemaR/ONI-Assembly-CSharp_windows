@@ -64,7 +64,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.m_IsValid = ((!value) ? 0 : 1);
+				this.m_IsValid = (value ? 1 : 0);
 			}
 		}
 

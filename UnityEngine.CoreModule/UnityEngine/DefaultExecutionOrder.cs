@@ -9,9 +9,17 @@ namespace UnityEngine
 	{
 		public DefaultExecutionOrder(int order)
 		{
-			this.order = order;
+			this.m_Order = order;
 		}
 
-		public int order { get; private set; }
+		public int order
+		{
+			get
+			{
+				return this.m_Order;
+			}
+		}
+
+		private int m_Order;
 	}
 }

@@ -4,9 +4,9 @@ using Unity;
 
 namespace System.Reflection.Emit
 {
+	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_ParameterBuilder))]
-	[ClassInterface(ClassInterfaceType.None)]
 	[StructLayout(LayoutKind.Sequential)]
 	public class ParameterBuilder : _ParameterBuilder
 	{

@@ -7,19 +7,6 @@ using Newtonsoft.Json;
 
 public class KleiAccount : ThreadedHttps<KleiAccount>
 {
-	private Dictionary<string, object> BuildLoginRequest(byte[] ticket)
-	{
-		return new Dictionary<string, object>
-		{
-			{
-				"SteamTicket",
-				this.EncodeToAsciiHEX(ticket)
-			},
-			{ "Game", this.CLIENT_KEY },
-			{ "NoEmail", true }
-		};
-	}
-
 	public KleiAccount()
 	{
 		this.CLIENT_KEY = "ONI";
@@ -128,7 +115,18 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		this.authTicket = null;
 	}
 
-	private const string TicketFieldName = "SteamTicket";
+	private Dictionary<string, object> BuildLoginRequest(byte[] ticket)
+	{
+		return new Dictionary<string, object>
+		{
+			{
+				"SteamTicket",
+				this.EncodeToAsciiHEX(ticket)
+			},
+			{ "Game", this.CLIENT_KEY },
+			{ "NoEmail", true }
+		};
+	}
 
 	public const string KleiAccountKey = "KleiAccount";
 
@@ -147,6 +145,8 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 	private const string AuthTicketKey = "AUTH_TICKET";
 
 	private byte[] authTicket;
+
+	private const string TicketFieldName = "SteamTicket";
 
 	private struct AccountReply
 	{

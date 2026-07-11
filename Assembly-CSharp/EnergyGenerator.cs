@@ -101,17 +101,9 @@ public class EnergyGenerator : Generator, IGameObjectEffectDescriptor, ISingleSl
 		bool flag = true;
 		foreach (EnergyGenerator.InputItem inputItem in this.formula.inputs)
 		{
-			GameObject gameObject = this.storage.FindFirst(inputItem.tag);
-			if (gameObject != null)
-			{
-				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				float num = inputItem.consumptionRate * dt;
-				flag = flag && component.Mass >= num;
-			}
-			else
-			{
-				flag = false;
-			}
+			float massAvailable = this.storage.GetMassAvailable(inputItem.tag);
+			float num = inputItem.consumptionRate * dt;
+			flag = flag && massAvailable >= num;
 			if (!flag)
 			{
 				break;
@@ -126,12 +118,7 @@ public class EnergyGenerator : Generator, IGameObjectEffectDescriptor, ISingleSl
 		if (this.hasMeter)
 		{
 			EnergyGenerator.InputItem inputItem = this.formula.inputs[0];
-			float num = 0f;
-			GameObject gameObject = this.storage.FindFirst(inputItem.tag);
-			if (gameObject != null)
-			{
-				num = gameObject.GetComponent<PrimaryElement>().Mass / inputItem.maxStoredMass;
-			}
+			float num = this.storage.GetMassAvailable(inputItem.tag) / inputItem.maxStoredMass;
 			this.meter.SetPositionPercent(num);
 		}
 		ushort circuitID = base.CircuitID;
@@ -159,11 +146,11 @@ public class EnergyGenerator : Generator, IGameObjectEffectDescriptor, ISingleSl
 							break;
 						}
 					}
-					goto IL_0123;
+					goto IL_0105;
 				}
 			}
 			flag2 = true;
-			IL_0123:
+			IL_0105:
 			if (!this.ignoreBatteryRefillPercent)
 			{
 				this.selectable.ToggleStatusItem(EnergyGenerator.batteriesSufficientlyFull, !flag2, null);

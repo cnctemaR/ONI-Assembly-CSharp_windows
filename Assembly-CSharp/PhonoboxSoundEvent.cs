@@ -32,10 +32,10 @@ public class PhonoboxSoundEvent : SoundEvent
 				{
 					EventDescription eventDescription = RuntimeManager.GetEventDescription(base.sound);
 					PARAMETER_DESCRIPTION parameter_DESCRIPTION;
-					eventDescription.getParameter("jukeboxSong", out parameter_DESCRIPTION);
+					eventDescription.getParameterDescriptionByName("jukeboxSong", out parameter_DESCRIPTION);
 					int num = (int)parameter_DESCRIPTION.maximum;
 					PARAMETER_DESCRIPTION parameter_DESCRIPTION2;
-					eventDescription.getParameter("jukeboxPitch", out parameter_DESCRIPTION2);
+					eventDescription.getParameterDescriptionByName("jukeboxPitch", out parameter_DESCRIPTION2);
 					int num2 = (int)parameter_DESCRIPTION2.maximum;
 					this.song = global::UnityEngine.Random.Range(0, num + 1);
 					this.pitch = global::UnityEngine.Random.Range(0, num2 + 1);

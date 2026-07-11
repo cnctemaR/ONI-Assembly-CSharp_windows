@@ -4,7 +4,7 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/UnityEventQueueSystem.bindings.h")]
+	[NativeHeader("Runtime/Export/UnityEvent/UnityEventQueueSystem.bindings.h")]
 	public class UnityEventQueueSystem
 	{
 		public static string GenerateEventIdForPayload(string eventPayloadName)

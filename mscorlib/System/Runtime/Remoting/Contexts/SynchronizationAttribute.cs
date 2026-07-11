@@ -105,8 +105,8 @@ namespace System.Runtime.Remoting.Contexts
 			}
 		}
 
-		[SecurityCritical]
 		[ComVisible(true)]
+		[SecurityCritical]
 		public override void GetPropertiesForNewContext(IConstructionCallMessage ctorMsg)
 		{
 			if (this._flavor != 1)
@@ -127,8 +127,8 @@ namespace System.Runtime.Remoting.Contexts
 			return new SynchronizedServerContextSink(nextSink, this);
 		}
 
-		[ComVisible(true)]
 		[SecurityCritical]
+		[ComVisible(true)]
 		public override bool IsContextOK(Context ctx, IConstructionCallMessage msg)
 		{
 			SynchronizationAttribute synchronizationAttribute = ctx.GetProperty("Synchronization") as SynchronizationAttribute;

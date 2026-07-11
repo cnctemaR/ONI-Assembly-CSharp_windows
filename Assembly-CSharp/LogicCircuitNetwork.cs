@@ -233,9 +233,9 @@ public class LogicCircuitNetwork : UtilityNetwork
 					}
 					float num3 = (Time.time - logicSoundPair.lastPlayed) / 3f;
 					EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound(text, false), position, 1f);
-					eventInstance.setParameterValue("logic_volumeModifer", num3);
-					eventInstance.setParameterValue("wireCount", (float)(num % 24));
-					eventInstance.setParameterValue("enabled", (float)this.outputValue);
+					eventInstance.setParameterByName("logic_volumeModifer", num3, false);
+					eventInstance.setParameterByName("wireCount", (float)(num % 24), false);
+					eventInstance.setParameterByName("enabled", (float)this.outputValue, false);
 					KFMOD.EndOneShot(eventInstance);
 				}
 			}

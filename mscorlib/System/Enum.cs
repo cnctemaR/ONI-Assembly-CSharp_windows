@@ -695,9 +695,9 @@ namespace System
 			return Convert.DefaultToType(this, type, provider);
 		}
 
-		[SecuritySafeCritical]
 		[CLSCompliant(false)]
 		[ComVisible(true)]
+		[SecuritySafeCritical]
 		public static object ToObject(Type enumType, sbyte value)
 		{
 			if (enumType == null)
@@ -716,8 +716,8 @@ namespace System
 			return Enum.InternalBoxEnum(runtimeType, (long)value);
 		}
 
-		[SecuritySafeCritical]
 		[ComVisible(true)]
+		[SecuritySafeCritical]
 		public static object ToObject(Type enumType, short value)
 		{
 			if (enumType == null)
@@ -736,8 +736,8 @@ namespace System
 			return Enum.InternalBoxEnum(runtimeType, (long)value);
 		}
 
-		[SecuritySafeCritical]
 		[ComVisible(true)]
+		[SecuritySafeCritical]
 		public static object ToObject(Type enumType, int value)
 		{
 			if (enumType == null)
@@ -798,8 +798,8 @@ namespace System
 		}
 
 		[CLSCompliant(false)]
-		[SecuritySafeCritical]
 		[ComVisible(true)]
+		[SecuritySafeCritical]
 		public static object ToObject(Type enumType, uint value)
 		{
 			if (enumType == null)
@@ -818,8 +818,8 @@ namespace System
 			return Enum.InternalBoxEnum(runtimeType, (long)((ulong)value));
 		}
 
-		[SecuritySafeCritical]
 		[ComVisible(true)]
+		[SecuritySafeCritical]
 		public static object ToObject(Type enumType, long value)
 		{
 			if (enumType == null)
@@ -838,8 +838,8 @@ namespace System
 			return Enum.InternalBoxEnum(runtimeType, value);
 		}
 
-		[SecuritySafeCritical]
 		[ComVisible(true)]
+		[SecuritySafeCritical]
 		[CLSCompliant(false)]
 		public static object ToObject(Type enumType, ulong value)
 		{

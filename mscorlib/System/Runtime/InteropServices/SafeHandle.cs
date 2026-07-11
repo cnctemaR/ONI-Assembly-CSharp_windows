@@ -64,15 +64,15 @@ namespace System.Runtime.InteropServices
 			this.Dispose(true);
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SecuritySafeCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		public void Dispose()
 		{
 			this.Dispose(true);
 		}
 
-		[SecurityCritical]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[SecurityCritical]
 		protected virtual void Dispose(bool disposing)
 		{
 			if (disposing)

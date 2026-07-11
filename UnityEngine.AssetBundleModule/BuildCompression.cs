@@ -8,14 +8,6 @@ namespace UnityEngine
 	[Serializable]
 	public struct BuildCompression
 	{
-		private BuildCompression(CompressionType in_compression, CompressionLevel in_level, uint in_blockSize)
-		{
-			this = default(BuildCompression);
-			this.compression = in_compression;
-			this.level = in_level;
-			this.blockSize = in_blockSize;
-		}
-
 		public CompressionType compression
 		{
 			get
@@ -50,6 +42,14 @@ namespace UnityEngine
 			{
 				this._blockSize = value;
 			}
+		}
+
+		private BuildCompression(CompressionType in_compression, CompressionLevel in_level, uint in_blockSize)
+		{
+			this = default(BuildCompression);
+			this.compression = in_compression;
+			this.level = in_level;
+			this.blockSize = in_blockSize;
 		}
 
 		public static readonly BuildCompression Uncompressed = new BuildCompression(CompressionType.None, CompressionLevel.Maximum, 131072U);

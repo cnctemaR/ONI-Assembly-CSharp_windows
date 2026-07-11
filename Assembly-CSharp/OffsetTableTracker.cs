@@ -60,37 +60,34 @@ public class OffsetTableTracker : OffsetTracker
 		return true;
 	}
 
-	private unsafe void UpdateOffsets(int cell, CellOffset[][] table)
+	private void UpdateOffsets(int cell, CellOffset[][] table)
 	{
-		Debug.Assert(table.Length <= 192, string.Format("validRowIndices[{0}] isn't big enough < {1}", 192, table.Length));
-		int* ptr = stackalloc int[(UIntPtr)768];
-		int num = 0;
+		HashSetPool<CellOffset, OffsetTableTracker>.PooledHashSet pooledHashSet = HashSetPool<CellOffset, OffsetTableTracker>.Allocate();
 		if (Grid.IsValidCell(cell))
 		{
-			for (int i = 0; i < table.Length; i++)
+			foreach (CellOffset[] array in table)
 			{
-				CellOffset[] array = table[i];
-				int num2 = Grid.OffsetCell(cell, array[0]);
-				for (int j = 0; j < OffsetTableTracker.navGrid.ValidNavTypes.Length; j++)
+				if (!pooledHashSet.Contains(array[0]))
 				{
-					NavType navType = OffsetTableTracker.navGrid.ValidNavTypes[j];
-					if (navType != NavType.Tube && OffsetTableTracker.navGrid.NavTable.IsValid(num2, navType) && OffsetTableTracker.IsValidRow(cell, array))
+					int num = Grid.OffsetCell(cell, array[0]);
+					for (int j = 0; j < OffsetTableTracker.navGrid.ValidNavTypes.Length; j++)
 					{
-						ptr[num] = i;
-						num++;
-						break;
+						NavType navType = OffsetTableTracker.navGrid.ValidNavTypes[j];
+						if (navType != NavType.Tube && OffsetTableTracker.navGrid.NavTable.IsValid(num, navType) && OffsetTableTracker.IsValidRow(cell, array))
+						{
+							pooledHashSet.Add(array[0]);
+							break;
+						}
 					}
 				}
 			}
 		}
-		if (this.offsets == null || this.offsets.Length != num)
+		if (this.offsets == null || this.offsets.Length != pooledHashSet.Count)
 		{
-			this.offsets = new CellOffset[num];
+			this.offsets = new CellOffset[pooledHashSet.Count];
 		}
-		for (int num3 = 0; num3 != num; num3++)
-		{
-			this.offsets[num3] = table[ptr[num3]][0];
-		}
+		pooledHashSet.CopyTo(this.offsets);
+		pooledHashSet.Recycle();
 	}
 
 	protected override void UpdateOffsets(int current_cell)

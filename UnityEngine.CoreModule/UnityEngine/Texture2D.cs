@@ -11,64 +11,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Graphics/Texture2D.h")]
 	[NativeHeader("Runtime/Graphics/GeneratedTextures.h")]
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Graphics/Texture2D.h")]
 	public sealed class Texture2D : Texture
 	{
-		internal Texture2D(int width, int height, GraphicsFormat format, TextureCreationFlags flags, IntPtr nativeTex)
-		{
-			if (base.ValidateFormat(format, FormatUsage.Sample))
-			{
-				Texture2D.Internal_Create(this, width, height, format, flags, nativeTex);
-			}
-		}
-
-		public Texture2D(int width, int height, GraphicsFormat format, TextureCreationFlags flags)
-			: this(width, height, format, flags, IntPtr.Zero)
-		{
-		}
-
-		internal Texture2D(int width, int height, TextureFormat textureFormat, bool mipChain, bool linear, IntPtr nativeTex)
-		{
-			if (base.ValidateFormat(textureFormat))
-			{
-				GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(textureFormat, !linear);
-				TextureCreationFlags textureCreationFlags = TextureCreationFlags.None;
-				if (mipChain)
-				{
-					textureCreationFlags |= TextureCreationFlags.MipChain;
-				}
-				if (GraphicsFormatUtility.IsCrunchFormat(textureFormat))
-				{
-					textureCreationFlags |= TextureCreationFlags.Crunch;
-				}
-				Texture2D.Internal_Create(this, width, height, graphicsFormat, textureCreationFlags, nativeTex);
-			}
-		}
-
-		public Texture2D(int width, int height, [DefaultValue("TextureFormat.RGBA32")] TextureFormat textureFormat, [DefaultValue("true")] bool mipChain, [DefaultValue("false")] bool linear)
-			: this(width, height, textureFormat, mipChain, linear, IntPtr.Zero)
-		{
-		}
-
-		public Texture2D(int width, int height, TextureFormat textureFormat, bool mipChain)
-			: this(width, height, textureFormat, mipChain, false, IntPtr.Zero)
-		{
-		}
-
-		public Texture2D(int width, int height)
-			: this(width, height, TextureFormat.RGBA32, true, false, IntPtr.Zero)
-		{
-		}
-
-		public extern int mipmapCount
-		{
-			[NativeName("CountDataMipmaps")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-		}
-
 		public extern TextureFormat format
 		{
 			[NativeName("GetTextureFormat")]
@@ -90,16 +37,45 @@ namespace UnityEngine
 			get;
 		}
 
+		[StaticAccessor("builtintex", StaticAccessorType.DoubleColon)]
+		public static extern Texture2D redTexture
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		[StaticAccessor("builtintex", StaticAccessorType.DoubleColon)]
+		public static extern Texture2D grayTexture
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		[StaticAccessor("builtintex", StaticAccessorType.DoubleColon)]
+		public static extern Texture2D linearGrayTexture
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		[StaticAccessor("builtintex", StaticAccessorType.DoubleColon)]
+		public static extern Texture2D normalTexture
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Compress(bool highQuality);
 
 		[FreeFunction("Texture2DScripting::Create")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Internal_CreateImpl([Writable] Texture2D mono, int w, int h, GraphicsFormat format, TextureCreationFlags flags, IntPtr nativeTex);
+		private static extern bool Internal_CreateImpl([Writable] Texture2D mono, int w, int h, int mipCount, GraphicsFormat format, TextureCreationFlags flags, IntPtr nativeTex);
 
-		private static void Internal_Create([Writable] Texture2D mono, int w, int h, GraphicsFormat format, TextureCreationFlags flags, IntPtr nativeTex)
+		private static void Internal_Create([Writable] Texture2D mono, int w, int h, int mipCount, GraphicsFormat format, TextureCreationFlags flags, IntPtr nativeTex)
 		{
-			if (!Texture2D.Internal_CreateImpl(mono, w, h, format, flags, nativeTex))
+			bool flag = !Texture2D.Internal_CreateImpl(mono, w, h, mipCount, format, flags, nativeTex);
+			if (flag)
 			{
 				throw new UnityException("Failed to create texture because of invalid parameters.");
 			}
@@ -134,10 +110,10 @@ namespace UnityEngine
 		}
 
 		[NativeName("GetPixelBilinear")]
-		private Color GetPixelBilinearImpl(int image, float x, float y)
+		private Color GetPixelBilinearImpl(int image, float u, float v)
 		{
 			Color color;
-			this.GetPixelBilinearImpl_Injected(image, x, y, out color);
+			this.GetPixelBilinearImpl_Injected(image, u, v, out color);
 			return color;
 		}
 
@@ -163,6 +139,14 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool LoadRawTextureDataImplArray(byte[] data);
 
+		[FreeFunction(Name = "Texture2DScripting::SetPixelDataArray", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool SetPixelDataImplArray(Array data, int mipLevel, int elementSize, int dataArraySize, int sourceDataStartIndex = 0);
+
+		[FreeFunction(Name = "Texture2DScripting::SetPixelData", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool SetPixelDataImpl(IntPtr data, int mipLevel, int elementSize, int dataArraySize, int sourceDataStartIndex = 0);
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern IntPtr GetWritableImageData(int frame);
 
@@ -172,6 +156,12 @@ namespace UnityEngine
 		[FreeFunction("Texture2DScripting::GenerateAtlas")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GenerateAtlasImpl(Vector2[] sizes, int padding, int atlasSize, [Out] Rect[] rect);
+
+		internal extern bool isPreProcessed
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
 
 		public extern bool streamingMipmaps
 		{
@@ -193,6 +183,33 @@ namespace UnityEngine
 			[FreeFunction(Name = "GetTextureStreamingManager().SetRequestedMipmapLevel", HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
+		}
+
+		public extern int minimumMipmapLevel
+		{
+			[FreeFunction(Name = "GetTextureStreamingManager().GetMinimumMipmapLevel", HasExplicitThis = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[FreeFunction(Name = "GetTextureStreamingManager().SetMinimumMipmapLevel", HasExplicitThis = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		internal extern bool loadAllMips
+		{
+			[FreeFunction(Name = "GetTextureStreamingManager().GetLoadAllMips", HasExplicitThis = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[FreeFunction(Name = "GetTextureStreamingManager().SetLoadAllMips", HasExplicitThis = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern int calculatedMipmapLevel
+		{
+			[FreeFunction(Name = "GetTextureStreamingManager().GetCalculatedMipmapLevel", HasExplicitThis = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
 		}
 
 		public extern int desiredMipmapLevel
@@ -223,6 +240,10 @@ namespace UnityEngine
 		[FreeFunction(Name = "GetTextureStreamingManager().IsRequestedMipmapLevelLoaded", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool IsRequestedMipmapLevelLoaded();
+
+		[FreeFunction(Name = "GetTextureStreamingManager().ClearMinimumMipmapLevel", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void ClearMinimumMipmapLevel();
 
 		[FreeFunction("Texture2DScripting::UpdateExternalTexture", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -272,27 +293,100 @@ namespace UnityEngine
 			return this.PackTextures(textures, padding, 2048);
 		}
 
+		internal Texture2D(int width, int height, GraphicsFormat format, TextureCreationFlags flags, int mipCount, IntPtr nativeTex)
+		{
+			bool flag = base.ValidateFormat(format, FormatUsage.Sample);
+			if (flag)
+			{
+				Texture2D.Internal_Create(this, width, height, mipCount, format, flags, nativeTex);
+			}
+		}
+
+		public Texture2D(int width, int height, DefaultFormat format, TextureCreationFlags flags)
+			: this(width, height, SystemInfo.GetGraphicsFormat(format), flags)
+		{
+		}
+
+		public Texture2D(int width, int height, GraphicsFormat format, TextureCreationFlags flags)
+			: this(width, height, format, flags, Texture.GenerateAllMips, IntPtr.Zero)
+		{
+		}
+
+		public Texture2D(int width, int height, GraphicsFormat format, int mipCount, TextureCreationFlags flags)
+			: this(width, height, format, flags, mipCount, IntPtr.Zero)
+		{
+		}
+
+		internal Texture2D(int width, int height, TextureFormat textureFormat, int mipCount, bool linear, IntPtr nativeTex)
+		{
+			bool flag = !base.ValidateFormat(textureFormat);
+			if (!flag)
+			{
+				GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(textureFormat, !linear);
+				TextureCreationFlags textureCreationFlags = ((mipCount != 1) ? TextureCreationFlags.MipChain : TextureCreationFlags.None);
+				bool flag2 = GraphicsFormatUtility.IsCrunchFormat(textureFormat);
+				if (flag2)
+				{
+					textureCreationFlags |= TextureCreationFlags.Crunch;
+				}
+				Texture2D.Internal_Create(this, width, height, mipCount, graphicsFormat, textureCreationFlags, nativeTex);
+			}
+		}
+
+		public Texture2D(int width, int height, [DefaultValue("TextureFormat.RGBA32")] TextureFormat textureFormat, [DefaultValue("-1")] int mipCount, [DefaultValue("false")] bool linear)
+			: this(width, height, textureFormat, mipCount, linear, IntPtr.Zero)
+		{
+		}
+
+		public Texture2D(int width, int height, [DefaultValue("TextureFormat.RGBA32")] TextureFormat textureFormat, [DefaultValue("true")] bool mipChain, [DefaultValue("false")] bool linear)
+			: this(width, height, textureFormat, mipChain ? (-1) : 1, linear, IntPtr.Zero)
+		{
+		}
+
+		public Texture2D(int width, int height, TextureFormat textureFormat, bool mipChain)
+			: this(width, height, textureFormat, mipChain ? (-1) : 1, false, IntPtr.Zero)
+		{
+		}
+
+		public Texture2D(int width, int height)
+			: this(width, height, TextureFormat.RGBA32, Texture.GenerateAllMips, false, IntPtr.Zero)
+		{
+		}
+
 		public static Texture2D CreateExternalTexture(int width, int height, TextureFormat format, bool mipChain, bool linear, IntPtr nativeTex)
 		{
-			if (nativeTex == IntPtr.Zero)
+			bool flag = nativeTex == IntPtr.Zero;
+			if (flag)
 			{
 				throw new ArgumentException("nativeTex can not be null");
 			}
-			return new Texture2D(width, height, format, mipChain, linear, nativeTex);
+			return new Texture2D(width, height, format, mipChain ? (-1) : 1, linear, nativeTex);
 		}
 
 		public void SetPixel(int x, int y, Color color)
 		{
-			if (!this.isReadable)
+			bool flag = !this.isReadable;
+			if (flag)
 			{
 				throw base.CreateNonReadableException(this);
 			}
 			this.SetPixelImpl(0, x, y, color);
 		}
 
+		public void SetPixel(int x, int y, Color color, int mipLevel)
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			this.SetPixelImpl(mipLevel, x, y, color);
+		}
+
 		public void SetPixels(int x, int y, int blockWidth, int blockHeight, Color[] colors, [DefaultValue("0")] int miplevel)
 		{
-			if (!this.isReadable)
+			bool flag = !this.isReadable;
+			if (flag)
 			{
 				throw base.CreateNonReadableException(this);
 			}
@@ -307,12 +401,14 @@ namespace UnityEngine
 		public void SetPixels(Color[] colors, [DefaultValue("0")] int miplevel)
 		{
 			int num = this.width >> miplevel;
-			if (num < 1)
+			bool flag = num < 1;
+			if (flag)
 			{
 				num = 1;
 			}
 			int num2 = this.height >> miplevel;
-			if (num2 < 1)
+			bool flag2 = num2 < 1;
+			if (flag2)
 			{
 				num2 = 1;
 			}
@@ -326,73 +422,151 @@ namespace UnityEngine
 
 		public Color GetPixel(int x, int y)
 		{
-			if (!this.isReadable)
+			bool flag = !this.isReadable;
+			if (flag)
 			{
 				throw base.CreateNonReadableException(this);
 			}
 			return this.GetPixelImpl(0, x, y);
 		}
 
-		public Color GetPixelBilinear(float x, float y)
+		public Color GetPixel(int x, int y, int mipLevel)
 		{
-			if (!this.isReadable)
+			bool flag = !this.isReadable;
+			if (flag)
 			{
 				throw base.CreateNonReadableException(this);
 			}
-			return this.GetPixelBilinearImpl(0, x, y);
+			return this.GetPixelImpl(mipLevel, x, y);
+		}
+
+		public Color GetPixelBilinear(float u, float v)
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			return this.GetPixelBilinearImpl(0, u, v);
+		}
+
+		public Color GetPixelBilinear(float u, float v, int mipLevel)
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			return this.GetPixelBilinearImpl(mipLevel, u, v);
 		}
 
 		public void LoadRawTextureData(IntPtr data, int size)
 		{
-			if (!this.isReadable)
+			bool flag = !this.isReadable;
+			if (flag)
 			{
 				throw base.CreateNonReadableException(this);
 			}
-			if (data == IntPtr.Zero || size == 0)
+			bool flag2 = data == IntPtr.Zero || size == 0;
+			if (flag2)
 			{
 				Debug.LogError("No texture data provided to LoadRawTextureData", this);
 			}
-			else if (!this.LoadRawTextureDataImpl(data, size))
+			else
 			{
-				throw new UnityException("LoadRawTextureData: not enough data provided (will result in overread).");
+				bool flag3 = !this.LoadRawTextureDataImpl(data, size);
+				if (flag3)
+				{
+					throw new UnityException("LoadRawTextureData: not enough data provided (will result in overread).");
+				}
 			}
 		}
 
 		public void LoadRawTextureData(byte[] data)
 		{
-			if (!this.isReadable)
+			bool flag = !this.isReadable;
+			if (flag)
 			{
 				throw base.CreateNonReadableException(this);
 			}
-			if (data == null || data.Length == 0)
+			bool flag2 = data == null || data.Length == 0;
+			if (flag2)
 			{
 				Debug.LogError("No texture data provided to LoadRawTextureData", this);
 			}
-			else if (!this.LoadRawTextureDataImplArray(data))
+			else
 			{
-				throw new UnityException("LoadRawTextureData: not enough data provided (will result in overread).");
+				bool flag3 = !this.LoadRawTextureDataImplArray(data);
+				if (flag3)
+				{
+					throw new UnityException("LoadRawTextureData: not enough data provided (will result in overread).");
+				}
 			}
 		}
 
 		public void LoadRawTextureData<T>(NativeArray<T> data) where T : struct
 		{
-			if (!this.isReadable)
+			bool flag = !this.isReadable;
+			if (flag)
 			{
 				throw base.CreateNonReadableException(this);
 			}
-			if (!data.IsCreated || data.Length == 0)
+			bool flag2 = !data.IsCreated || data.Length == 0;
+			if (flag2)
 			{
 				throw new UnityException("No texture data provided to LoadRawTextureData");
 			}
-			if (!this.LoadRawTextureDataImpl((IntPtr)data.GetUnsafeReadOnlyPtr<T>(), data.Length * UnsafeUtility.SizeOf<T>()))
+			bool flag3 = !this.LoadRawTextureDataImpl((IntPtr)data.GetUnsafeReadOnlyPtr<T>(), data.Length * UnsafeUtility.SizeOf<T>());
+			if (flag3)
 			{
 				throw new UnityException("LoadRawTextureData: not enough data provided (will result in overread).");
 			}
 		}
 
+		public void SetPixelData<T>(T[] data, int mipLevel, int sourceDataStartIndex = 0)
+		{
+			bool flag = sourceDataStartIndex < 0;
+			if (flag)
+			{
+				throw new UnityException("SetPixelData: sourceDataStartIndex cannot be less than 0.");
+			}
+			bool flag2 = !this.isReadable;
+			if (flag2)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			bool flag3 = data == null || data.Length == 0;
+			if (flag3)
+			{
+				throw new UnityException("No texture data provided to SetPixelData.");
+			}
+			this.SetPixelDataImplArray(data, mipLevel, Marshal.SizeOf(data[0]), data.Length, sourceDataStartIndex);
+		}
+
+		public void SetPixelData<T>(NativeArray<T> data, int mipLevel, int sourceDataStartIndex = 0) where T : struct
+		{
+			bool flag = sourceDataStartIndex < 0;
+			if (flag)
+			{
+				throw new UnityException("SetPixelData: sourceDataStartIndex cannot be less than 0.");
+			}
+			bool flag2 = !this.isReadable;
+			if (flag2)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			bool flag3 = !data.IsCreated || data.Length == 0;
+			if (flag3)
+			{
+				throw new UnityException("No texture data provided to SetPixelData.");
+			}
+			this.SetPixelDataImpl((IntPtr)data.GetUnsafeReadOnlyPtr<T>(), mipLevel, UnsafeUtility.SizeOf<T>(), data.Length, sourceDataStartIndex);
+		}
+
 		public unsafe NativeArray<T> GetRawTextureData<T>() where T : struct
 		{
-			if (!this.isReadable)
+			bool flag = !this.isReadable;
+			if (flag)
 			{
 				throw base.CreateNonReadableException(this);
 			}
@@ -402,7 +576,8 @@ namespace UnityEngine
 
 		public void Apply([DefaultValue("true")] bool updateMipmaps, [DefaultValue("false")] bool makeNoLongerReadable)
 		{
-			if (!this.isReadable)
+			bool flag = !this.isReadable;
+			if (flag)
 			{
 				throw base.CreateNonReadableException(this);
 			}
@@ -421,7 +596,8 @@ namespace UnityEngine
 
 		public bool Resize(int width, int height)
 		{
-			if (!this.isReadable)
+			bool flag = !this.isReadable;
+			if (flag)
 			{
 				throw base.CreateNonReadableException(this);
 			}
@@ -430,7 +606,8 @@ namespace UnityEngine
 
 		public bool Resize(int width, int height, TextureFormat format, bool hasMipMap)
 		{
-			if (!this.isReadable)
+			bool flag = !this.isReadable;
+			if (flag)
 			{
 				throw base.CreateNonReadableException(this);
 			}
@@ -439,7 +616,8 @@ namespace UnityEngine
 
 		public void ReadPixels(Rect source, int destX, int destY, [DefaultValue("true")] bool recalculateMipMaps)
 		{
-			if (!this.isReadable)
+			bool flag = !this.isReadable;
+			if (flag)
 			{
 				throw base.CreateNonReadableException(this);
 			}
@@ -454,35 +632,40 @@ namespace UnityEngine
 
 		public static bool GenerateAtlas(Vector2[] sizes, int padding, int atlasSize, List<Rect> results)
 		{
-			if (sizes == null)
+			bool flag = sizes == null;
+			if (flag)
 			{
 				throw new ArgumentException("sizes array can not be null");
 			}
-			if (results == null)
+			bool flag2 = results == null;
+			if (flag2)
 			{
 				throw new ArgumentException("results list cannot be null");
 			}
-			if (padding < 0)
+			bool flag3 = padding < 0;
+			if (flag3)
 			{
 				throw new ArgumentException("padding can not be negative");
 			}
-			if (atlasSize <= 0)
+			bool flag4 = atlasSize <= 0;
+			if (flag4)
 			{
 				throw new ArgumentException("atlas size must be positive");
 			}
 			results.Clear();
-			bool flag;
-			if (sizes.Length == 0)
+			bool flag5 = sizes.Length == 0;
+			bool flag6;
+			if (flag5)
 			{
-				flag = true;
+				flag6 = true;
 			}
 			else
 			{
 				NoAllocHelpers.EnsureListElemCount<Rect>(results, sizes.Length);
 				Texture2D.GenerateAtlasImpl(sizes, padding, atlasSize, NoAllocHelpers.ExtractArrayFromListT<Rect>(results));
-				flag = results.Count != 0;
+				flag6 = results.Count != 0;
 			}
-			return flag;
+			return flag6;
 		}
 
 		public void SetPixels32(Color32[] colors, int miplevel)
@@ -508,12 +691,14 @@ namespace UnityEngine
 		public Color[] GetPixels(int miplevel)
 		{
 			int num = this.width >> miplevel;
-			if (num < 1)
+			bool flag = num < 1;
+			if (flag)
 			{
 				num = 1;
 			}
 			int num2 = this.height >> miplevel;
-			if (num2 < 1)
+			bool flag2 = num2 < 1;
+			if (flag2)
 			{
 				num2 = 1;
 			}
@@ -532,7 +717,7 @@ namespace UnityEngine
 		private extern void GetPixelImpl_Injected(int image, int x, int y, out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetPixelBilinearImpl_Injected(int image, float x, float y, out Color ret);
+		private extern void GetPixelBilinearImpl_Injected(int image, float u, float v, out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ReadPixelsImpl_Injected(ref Rect source, int destX, int destY, bool recalculateMipMaps);

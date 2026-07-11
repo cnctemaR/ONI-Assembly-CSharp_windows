@@ -10,7 +10,8 @@ namespace UnityEngine
 		internal static object GetStateObject(Type t, int controlID)
 		{
 			object obj;
-			if (!GUIStateObjects.s_StateCache.TryGetValue(controlID, out obj) || obj.GetType() != t)
+			bool flag = !GUIStateObjects.s_StateCache.TryGetValue(controlID, out obj) || obj.GetType() != t;
+			if (flag)
 			{
 				obj = Activator.CreateInstance(t);
 				GUIStateObjects.s_StateCache[controlID] = obj;
@@ -21,8 +22,9 @@ namespace UnityEngine
 		internal static object QueryStateObject(Type t, int controlID)
 		{
 			object obj = GUIStateObjects.s_StateCache[controlID];
+			bool flag = t.IsInstanceOfType(obj);
 			object obj2;
-			if (t.IsInstanceOfType(obj))
+			if (flag)
 			{
 				obj2 = obj;
 			}

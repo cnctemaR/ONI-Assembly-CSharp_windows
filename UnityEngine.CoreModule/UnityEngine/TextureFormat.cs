@@ -41,7 +41,27 @@ namespace UnityEngine
 		ETC2_RGB,
 		ETC2_RGBA1,
 		ETC2_RGBA8,
-		ASTC_RGB_4x4,
+		ASTC_4x4,
+		ASTC_5x5,
+		ASTC_6x6,
+		ASTC_8x8,
+		ASTC_10x10,
+		ASTC_12x12,
+		[Obsolete("Nintendo 3DS is no longer supported.")]
+		ETC_RGB4_3DS = 60,
+		[Obsolete("Nintendo 3DS is no longer supported.")]
+		ETC_RGBA8_3DS,
+		RG16,
+		R8,
+		ETC_RGB4Crunched,
+		ETC2_RGBA8Crunched,
+		ASTC_HDR_4x4,
+		ASTC_HDR_5x5,
+		ASTC_HDR_6x6,
+		ASTC_HDR_8x8,
+		ASTC_HDR_10x10,
+		ASTC_HDR_12x12,
+		ASTC_RGB_4x4 = 48,
 		ASTC_RGB_5x5,
 		ASTC_RGB_6x6,
 		ASTC_RGB_8x8,
@@ -52,14 +72,6 @@ namespace UnityEngine
 		ASTC_RGBA_6x6,
 		ASTC_RGBA_8x8,
 		ASTC_RGBA_10x10,
-		ASTC_RGBA_12x12,
-		[Obsolete("Nintendo 3DS is no longer supported.")]
-		ETC_RGB4_3DS,
-		[Obsolete("Nintendo 3DS is no longer supported.")]
-		ETC_RGBA8_3DS,
-		RG16,
-		R8,
-		ETC_RGB4Crunched,
-		ETC2_RGBA8Crunched
+		ASTC_RGBA_12x12
 	}
 }

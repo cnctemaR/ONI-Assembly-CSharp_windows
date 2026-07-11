@@ -4,9 +4,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Animation/HumanDescription.h")]
 	[NativeType(CodegenOptions.Custom, "MonoHumanBone")]
+	[RequiredByNativeCode]
+	[NativeHeader("Modules/Animation/HumanDescription.h")]
 	public struct HumanBone
 	{
 		public string boneName

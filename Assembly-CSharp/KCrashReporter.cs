@@ -160,6 +160,7 @@ public class KCrashReporter : MonoBehaviour
 		this.errorScreen = global::UnityEngine.Object.Instantiate<GameObject>(this.reportErrorPrefab, Vector3.zero, Quaternion.identity);
 		this.errorScreen.transform.SetParent(gameObject.transform, false);
 		ReportErrorDialog errorDialog = this.errorScreen.GetComponentInChildren<ReportErrorDialog>();
+		string text = error + "\n\n" + stack_trace;
 		KCrashReporter.hasCrash = true;
 		if (Global.Instance != null && Global.Instance.modManager != null && Global.Instance.modManager.HasCrashableMods())
 		{
@@ -167,18 +168,18 @@ public class KCrashReporter : MonoBehaviour
 			StackTrace stackTrace = ((ex != null) ? new StackTrace(ex) : new StackTrace(5, true));
 			Global.Instance.modManager.SearchForModsInStackTrace(stackTrace);
 			Global.Instance.modManager.SearchForModsInStackTrace(stack_trace);
-			errorDialog.PopupDisableModsDialog(stack_trace, new global::System.Action(this.OnQuitToDesktop), (Global.Instance.modManager.IsInDevMode() || !KCrashReporter.terminateOnError) ? new global::System.Action(this.OnCloseErrorDialog) : null);
+			errorDialog.PopupDisableModsDialog(text, new global::System.Action(this.OnQuitToDesktop), (Global.Instance.modManager.IsInDevMode() || !KCrashReporter.terminateOnError) ? new global::System.Action(this.OnCloseErrorDialog) : null);
 		}
 		else
 		{
-			errorDialog.PopupSubmitErrorDialog(stack_trace, delegate
+			errorDialog.PopupSubmitErrorDialog(text, delegate
 			{
-				string text = null;
+				string text2 = null;
 				if (KCrashReporter.MOST_RECENT_SAVEFILE != null)
 				{
-					text = KCrashReporter.UploadSaveFile(KCrashReporter.MOST_RECENT_SAVEFILE, stack_trace, null);
+					text2 = KCrashReporter.UploadSaveFile(KCrashReporter.MOST_RECENT_SAVEFILE, stack_trace, null);
 				}
-				KCrashReporter.ReportError(error, stack_trace, text, this.confirmDialogPrefab, this.errorScreen, errorDialog.UserMessage());
+				KCrashReporter.ReportError(error, stack_trace, text2, this.confirmDialogPrefab, this.errorScreen, errorDialog.UserMessage());
 			}, new global::System.Action(this.OnQuitToDesktop), KCrashReporter.terminateOnError ? null : new global::System.Action(this.OnCloseErrorDialog));
 		}
 		return true;
@@ -270,31 +271,7 @@ public class KCrashReporter : MonoBehaviour
 
 	private static string GetLogContents()
 	{
-		string text;
-		if (Application.platform == RuntimePlatform.WindowsEditor)
-		{
-			text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Unity/Editor/Editor.log");
-		}
-		else if (Application.platform == RuntimePlatform.WindowsPlayer)
-		{
-			text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "../LocalLow/Klei/Oxygen Not Included/output_log.txt");
-		}
-		else if (Application.platform == RuntimePlatform.OSXEditor)
-		{
-			text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Library/Logs/Unity/Editor.log");
-		}
-		else if (Application.platform == RuntimePlatform.OSXPlayer)
-		{
-			text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Library/Logs/Unity/Player.log");
-		}
-		else
-		{
-			if (Application.platform != RuntimePlatform.LinuxPlayer)
-			{
-				return "";
-			}
-			text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "unity3d/Klei/Oxygen Not Included/Player.log");
-		}
+		string text = Util.LogFilePath();
 		if (File.Exists(text))
 		{
 			using (FileStream fileStream = File.Open(text, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -363,7 +340,7 @@ public class KCrashReporter : MonoBehaviour
 			}
 			if (string.IsNullOrEmpty(stack_trace))
 			{
-				string text3 = "AP-" + 420700U.ToString();
+				string text3 = "CS-" + 442154U.ToString();
 				stack_trace = string.Format("No stack trace {0}\n\n{1}", text3, msg);
 			}
 			List<string> list = new List<string>();
@@ -412,7 +389,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
-			error.build = 420700;
+			error.build = 442154;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = string.Join("\n", list.ToArray());
 			error.user_message = userMessage;

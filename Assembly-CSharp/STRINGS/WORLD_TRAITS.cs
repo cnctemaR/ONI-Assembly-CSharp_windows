@@ -10,40 +10,40 @@ namespace STRINGS
 		{
 			public static LocString NAME = "<i>This world is stable and has no unusual features.</i>";
 
-			public static LocString DESCRIPTION = "This world exists in a particularly stable configuration each time it is encountered.";
+			public static LocString DESCRIPTION = "This world exists in a particularly stable configuration each time it is encountered";
 		}
 
 		public static class BOULDERS_LARGE
 		{
 			public static LocString NAME = "Large Boulders";
 
-			public static LocString DESCRIPTION = "A number of large but hard-to-dig boulders are scattered around this world";
+			public static LocString DESCRIPTION = "Huge boulders make digging through this world more difficult";
 		}
 
 		public static class BOULDERS_MEDIUM
 		{
 			public static LocString NAME = "Medium Boulders";
 
-			public static LocString DESCRIPTION = "A number of moderately-sized but hard-to-dig boulders are scattered around this world";
+			public static LocString DESCRIPTION = "Mid-sized boulders make digging through this world more difficult";
 		}
 
 		public static class BOULDERS_MIXED
 		{
 			public static LocString NAME = "Mixed Boulders";
 
-			public static LocString DESCRIPTION = "A number of hard-to-dig boulders of various sizes are scattered around this world";
+			public static LocString DESCRIPTION = "Boulders of various sizes make digging through this world more difficult";
 		}
 
 		public static class BOULDERS_SMALL
 		{
 			public static LocString NAME = "Small Boulders";
 
-			public static LocString DESCRIPTION = "A number of small but hard-to-dig boulders are scattered around this world";
+			public static LocString DESCRIPTION = "Tiny boulders make digging through this world more difficult";
 		}
 
 		public static class DEEP_OIL
 		{
-			public static LocString NAME = "Buried Oil";
+			public static LocString NAME = "Trapped Oil";
 
 			public static LocString DESCRIPTION = string.Concat(new string[]
 			{
@@ -51,7 +51,7 @@ namespace STRINGS
 				UI.PRE_KEYWORD,
 				"Oil",
 				UI.PST_KEYWORD,
-				" in this world remains inside the rock and must be extracted with ",
+				" in this world will need to be extracted with ",
 				BUILDINGS.PREFABS.OILWELLCAP.NAME,
 				"s"
 			});
@@ -61,7 +61,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Frozen Core";
 
-			public static LocString DESCRIPTION = ("The core of this world is a block of " + ELEMENTS.ICE.NAME) ?? "";
+			public static LocString DESCRIPTION = "This world has a chilly core of solid " + ELEMENTS.ICE.NAME;
 		}
 
 		public static class GEOACTIVE
@@ -86,7 +86,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Geodes";
 
-			public static LocString DESCRIPTION = "A number of large geodes containing caches of rare material have been deposited around this asteroid";
+			public static LocString DESCRIPTION = "Large geodes containing rare material caches are deposited across this world";
 		}
 
 		public static class GEODORMANT
@@ -111,7 +111,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Large Glaciers";
 
-			public static LocString DESCRIPTION = "Huge chunks of primordial " + ELEMENTS.ICE.NAME + " have been captured in this world";
+			public static LocString DESCRIPTION = "Huge chunks of primordial " + ELEMENTS.ICE.NAME + " are scattered across this world";
 		}
 
 		public static class IRREGULAR_OIL
@@ -132,7 +132,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Magma Channels";
 
-			public static LocString DESCRIPTION = "The " + ELEMENTS.MAGMA.NAME + " of the core has spread up in to the body of this world";
+			public static LocString DESCRIPTION = "The " + ELEMENTS.MAGMA.NAME + " from this world's core has leaked into the mantle and crust";
 		}
 
 		public static class METAL_POOR
@@ -141,11 +141,11 @@ namespace STRINGS
 
 			public static LocString DESCRIPTION = string.Concat(new string[]
 			{
-				"There is less ",
+				"There is a reduced amount of ",
 				UI.PRE_KEYWORD,
 				"Metal Ore",
 				UI.PST_KEYWORD,
-				" than expected here, proceed with caution!"
+				" on this world, proceed with caution!"
 			});
 		}
 
@@ -158,16 +158,16 @@ namespace STRINGS
 
 		public static class MISALIGNED_START
 		{
-			public static LocString NAME = "Miscalculated Pod Location";
+			public static LocString NAME = "Alternate Pod Location";
 
-			public static LocString DESCRIPTION = "The " + BUILDINGS.PREFABS.HEADQUARTERSCOMPLETE.NAME + " failed to land in the center of this world";
+			public static LocString DESCRIPTION = "The " + BUILDINGS.PREFABS.HEADQUARTERSCOMPLETE.NAME + " didn't end up in the asteroid's exact center this time... but it's still nowhere near the surface";
 		}
 
 		public static class SLIME_SPLATS
 		{
 			public static LocString NAME = "Slime Molds";
 
-			public static LocString DESCRIPTION = "Sickly " + ELEMENTS.SLIMEMOLD.NAME + " growths have been located all over this world";
+			public static LocString DESCRIPTION = "Sickly " + ELEMENTS.SLIMEMOLD.NAME + " growths have crept all over this world";
 		}
 
 		public static class SUBSURFACE_OCEAN
@@ -179,7 +179,7 @@ namespace STRINGS
 
 		public static class VOLCANOES
 		{
-			public static LocString NAME = "Volcanoes";
+			public static LocString NAME = "Volcanic Activity";
 
 			public static LocString DESCRIPTION = string.Concat(new string[]
 			{

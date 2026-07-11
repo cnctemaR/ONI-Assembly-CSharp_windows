@@ -3,7 +3,7 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Vehicles/WheelCollider.h")]
+	[NativeHeader("Modules/Vehicles/WheelCollider.h")]
 	public struct WheelHit
 	{
 		public Collider collider

@@ -8,8 +8,8 @@ namespace System
 	internal class CLRConfig
 	{
 		[SecurityCritical]
-		[SuppressUnmanagedCodeSecurity]
 		[FriendAccessAllowed]
+		[SuppressUnmanagedCodeSecurity]
 		internal static bool CheckLegacyManagedDeflateStream()
 		{
 			return false;

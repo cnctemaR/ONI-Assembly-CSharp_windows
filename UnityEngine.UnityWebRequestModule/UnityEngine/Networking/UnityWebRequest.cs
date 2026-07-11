@@ -13,6 +13,74 @@ namespace UnityEngine.Networking
 	[StructLayout(LayoutKind.Sequential)]
 	public class UnityWebRequest : IDisposable
 	{
+		[NativeMethod(IsThreadSafe = true)]
+		[NativeConditional("ENABLE_UNITYWEBREQUEST")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string GetWebErrorString(UnityWebRequest.UnityWebRequestError err);
+
+		[VisibleToOtherModules]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern string GetHTTPStatusString(long responseCode);
+
+		public bool disposeCertificateHandlerOnDispose { get; set; }
+
+		public bool disposeDownloadHandlerOnDispose { get; set; }
+
+		public bool disposeUploadHandlerOnDispose { get; set; }
+
+		public static void ClearCookieCache()
+		{
+			UnityWebRequest.ClearCookieCache(null, null);
+		}
+
+		public static void ClearCookieCache(Uri uri)
+		{
+			bool flag = uri == null;
+			if (flag)
+			{
+				UnityWebRequest.ClearCookieCache(null, null);
+			}
+			else
+			{
+				string host = uri.Host;
+				string text = uri.AbsolutePath;
+				bool flag2 = text == "/";
+				if (flag2)
+				{
+					text = null;
+				}
+				UnityWebRequest.ClearCookieCache(host, text);
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ClearCookieCache(string domain, string path);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern IntPtr Create();
+
+		[NativeMethod(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void Release();
+
+		internal void InternalDestroy()
+		{
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
+			{
+				this.Abort();
+				this.Release();
+				this.m_Ptr = IntPtr.Zero;
+			}
+		}
+
+		private void InternalSetDefaults()
+		{
+			this.disposeDownloadHandlerOnDispose = true;
+			this.disposeUploadHandlerOnDispose = true;
+			this.disposeCertificateHandlerOnDispose = true;
+		}
+
 		public UnityWebRequest()
 		{
 			this.m_Ptr = UnityWebRequest.Create();
@@ -69,71 +137,6 @@ namespace UnityEngine.Networking
 			this.uploadHandler = uploadHandler;
 		}
 
-		[NativeMethod(IsThreadSafe = true)]
-		[NativeConditional("ENABLE_UNITYWEBREQUEST")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetWebErrorString(UnityWebRequest.UnityWebRequestError err);
-
-		[VisibleToOtherModules]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern string GetHTTPStatusString(long responseCode);
-
-		public bool disposeCertificateHandlerOnDispose { get; set; }
-
-		public bool disposeDownloadHandlerOnDispose { get; set; }
-
-		public bool disposeUploadHandlerOnDispose { get; set; }
-
-		public static void ClearCookieCache()
-		{
-			UnityWebRequest.ClearCookieCache(null, null);
-		}
-
-		public static void ClearCookieCache(Uri uri)
-		{
-			if (uri == null)
-			{
-				UnityWebRequest.ClearCookieCache(null, null);
-			}
-			else
-			{
-				string host = uri.Host;
-				string text = uri.AbsolutePath;
-				if (text == "/")
-				{
-					text = null;
-				}
-				UnityWebRequest.ClearCookieCache(host, text);
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ClearCookieCache(string domain, string path);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern IntPtr Create();
-
-		[NativeMethod(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Release();
-
-		internal void InternalDestroy()
-		{
-			if (this.m_Ptr != IntPtr.Zero)
-			{
-				this.Abort();
-				this.Release();
-				this.m_Ptr = IntPtr.Zero;
-			}
-		}
-
-		private void InternalSetDefaults()
-		{
-			this.disposeDownloadHandlerOnDispose = true;
-			this.disposeUploadHandlerOnDispose = true;
-			this.disposeCertificateHandlerOnDispose = true;
-		}
-
 		~UnityWebRequest()
 		{
 			this.DisposeHandlers();
@@ -149,26 +152,32 @@ namespace UnityEngine.Networking
 
 		private void DisposeHandlers()
 		{
-			if (this.disposeDownloadHandlerOnDispose)
+			bool disposeDownloadHandlerOnDispose = this.disposeDownloadHandlerOnDispose;
+			if (disposeDownloadHandlerOnDispose)
 			{
 				DownloadHandler downloadHandler = this.downloadHandler;
-				if (downloadHandler != null)
+				bool flag = downloadHandler != null;
+				if (flag)
 				{
 					downloadHandler.Dispose();
 				}
 			}
-			if (this.disposeUploadHandlerOnDispose)
+			bool disposeUploadHandlerOnDispose = this.disposeUploadHandlerOnDispose;
+			if (disposeUploadHandlerOnDispose)
 			{
 				UploadHandler uploadHandler = this.uploadHandler;
-				if (uploadHandler != null)
+				bool flag2 = uploadHandler != null;
+				if (flag2)
 				{
 					uploadHandler.Dispose();
 				}
 			}
-			if (this.disposeCertificateHandlerOnDispose)
+			bool disposeCertificateHandlerOnDispose = this.disposeCertificateHandlerOnDispose;
+			if (disposeCertificateHandlerOnDispose)
 			{
 				CertificateHandler certificateHandler = this.certificateHandler;
-				if (certificateHandler != null)
+				bool flag3 = certificateHandler != null;
+				if (flag3)
 				{
 					certificateHandler.Dispose();
 				}
@@ -188,7 +197,8 @@ namespace UnityEngine.Networking
 		public UnityWebRequestAsyncOperation SendWebRequest()
 		{
 			UnityWebRequestAsyncOperation unityWebRequestAsyncOperation = this.BeginWebRequest();
-			if (unityWebRequestAsyncOperation != null)
+			bool flag = unityWebRequestAsyncOperation != null;
+			if (flag)
 			{
 				unityWebRequestAsyncOperation.webRequest = this;
 			}
@@ -204,12 +214,14 @@ namespace UnityEngine.Networking
 
 		internal void InternalSetMethod(UnityWebRequest.UnityWebRequestMethod methodType)
 		{
-			if (!this.isModifiable)
+			bool flag = !this.isModifiable;
+			if (flag)
 			{
 				throw new InvalidOperationException("UnityWebRequest has already been sent and its request method can no longer be altered");
 			}
 			UnityWebRequest.UnityWebRequestError unityWebRequestError = this.SetMethod(methodType);
-			if (unityWebRequestError != UnityWebRequest.UnityWebRequestError.OK)
+			bool flag2 = unityWebRequestError > UnityWebRequest.UnityWebRequestError.OK;
+			if (flag2)
 			{
 				throw new InvalidOperationException(UnityWebRequest.GetWebErrorString(unityWebRequestError));
 			}
@@ -220,12 +232,14 @@ namespace UnityEngine.Networking
 
 		internal void InternalSetCustomMethod(string customMethodName)
 		{
-			if (!this.isModifiable)
+			bool flag = !this.isModifiable;
+			if (flag)
 			{
 				throw new InvalidOperationException("UnityWebRequest has already been sent and its request method can no longer be altered");
 			}
 			UnityWebRequest.UnityWebRequestError unityWebRequestError = this.SetCustomMethod(customMethodName);
-			if (unityWebRequestError != UnityWebRequest.UnityWebRequestError.OK)
+			bool flag2 = unityWebRequestError > UnityWebRequest.UnityWebRequestError.OK;
+			if (flag2)
 			{
 				throw new InvalidOperationException(UnityWebRequest.GetWebErrorString(unityWebRequestError));
 			}
@@ -264,35 +278,41 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (string.IsNullOrEmpty(value))
+				bool flag = string.IsNullOrEmpty(value);
+				if (flag)
 				{
 					throw new ArgumentException("Cannot set a UnityWebRequest's method to an empty or null string");
 				}
 				string text = value.ToUpper();
-				if (text != null)
+				if (!(text == "GET"))
 				{
-					if (text == "GET")
+					if (!(text == "POST"))
 					{
-						this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Get);
-						return;
+						if (!(text == "PUT"))
+						{
+							if (!(text == "HEAD"))
+							{
+								this.InternalSetCustomMethod(value.ToUpper());
+							}
+							else
+							{
+								this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Head);
+							}
+						}
+						else
+						{
+							this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Put);
+						}
 					}
-					if (text == "POST")
+					else
 					{
 						this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Post);
-						return;
-					}
-					if (text == "PUT")
-					{
-						this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Put);
-						return;
-					}
-					if (text == "HEAD")
-					{
-						this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Head);
-						return;
 					}
 				}
-				this.InternalSetCustomMethod(value.ToUpper());
+				else
+				{
+					this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Get);
+				}
 			}
 		}
 
@@ -303,19 +323,24 @@ namespace UnityEngine.Networking
 		{
 			get
 			{
+				bool flag = !this.isNetworkError && !this.isHttpError;
 				string text;
-				if (!this.isNetworkError && !this.isHttpError)
+				if (flag)
 				{
 					text = null;
 				}
-				else if (this.isHttpError)
-				{
-					string httpstatusString = UnityWebRequest.GetHTTPStatusString(this.responseCode);
-					text = string.Format("HTTP/1.1 {0} {1}", this.responseCode, httpstatusString);
-				}
 				else
 				{
-					text = UnityWebRequest.GetWebErrorString(this.GetError());
+					bool isHttpError = this.isHttpError;
+					if (isHttpError)
+					{
+						string httpstatusString = UnityWebRequest.GetHTTPStatusString(this.responseCode);
+						text = string.Format("HTTP/1.1 {0} {1}", this.responseCode, httpstatusString);
+					}
+					else
+					{
+						text = UnityWebRequest.GetWebErrorString(this.GetError());
+					}
 				}
 				return text;
 			}
@@ -337,7 +362,8 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (!this.isModifiable)
+				bool flag = !this.isModifiable;
+				if (flag)
 				{
 					throw new InvalidOperationException("UnityWebRequest has already been sent and its 100-Continue setting cannot be altered");
 				}
@@ -366,7 +392,8 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (!value.IsAbsoluteUri)
+				bool flag = !value.IsAbsoluteUri;
+				if (flag)
 				{
 					throw new ArgumentException("URI must be absolute");
 				}
@@ -383,12 +410,14 @@ namespace UnityEngine.Networking
 
 		private void InternalSetUrl(string url)
 		{
-			if (!this.isModifiable)
+			bool flag = !this.isModifiable;
+			if (flag)
 			{
 				throw new InvalidOperationException("UnityWebRequest has already been sent and its URL cannot be altered");
 			}
 			UnityWebRequest.UnityWebRequestError unityWebRequestError = this.SetUrl(url);
-			if (unityWebRequestError != UnityWebRequest.UnityWebRequestError.OK)
+			bool flag2 = unityWebRequestError > UnityWebRequest.UnityWebRequestError.OK;
+			if (flag2)
 			{
 				throw new InvalidOperationException(UnityWebRequest.GetWebErrorString(unityWebRequestError));
 			}
@@ -410,8 +439,9 @@ namespace UnityEngine.Networking
 		{
 			get
 			{
+				bool flag = !this.IsExecuting() && !this.isDone;
 				float num;
-				if (!this.IsExecuting() && !this.isDone)
+				if (flag)
 				{
 					num = -1f;
 				}
@@ -458,8 +488,9 @@ namespace UnityEngine.Networking
 		{
 			get
 			{
+				bool flag = !this.IsExecuting() && !this.isDone;
 				float num;
-				if (!this.IsExecuting() && !this.isDone)
+				if (flag)
 				{
 					num = -1f;
 				}
@@ -508,6 +539,7 @@ namespace UnityEngine.Networking
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern UnityWebRequest.UnityWebRequestError SetChunked(bool chunked);
 
+		[Obsolete("HTTP/2 and many HTTP/1.1 servers don't support this; we recommend leaving it set to false (default).", false)]
 		public bool chunkedTransfer
 		{
 			get
@@ -516,12 +548,14 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (!this.isModifiable)
+				bool flag = !this.isModifiable;
+				if (flag)
 				{
 					throw new InvalidOperationException("UnityWebRequest has already been sent and its chunked transfer encoding setting cannot be altered");
 				}
 				UnityWebRequest.UnityWebRequestError unityWebRequestError = this.SetChunked(value);
-				if (unityWebRequestError != UnityWebRequest.UnityWebRequestError.OK)
+				bool flag2 = unityWebRequestError > UnityWebRequest.UnityWebRequestError.OK;
+				if (flag2)
 				{
 					throw new InvalidOperationException(UnityWebRequest.GetWebErrorString(unityWebRequestError));
 				}
@@ -537,20 +571,24 @@ namespace UnityEngine.Networking
 
 		public void SetRequestHeader(string name, string value)
 		{
-			if (string.IsNullOrEmpty(name))
+			bool flag = string.IsNullOrEmpty(name);
+			if (flag)
 			{
 				throw new ArgumentException("Cannot set a Request Header with a null or empty name");
 			}
-			if (value == null)
+			bool flag2 = value == null;
+			if (flag2)
 			{
 				throw new ArgumentException("Cannot set a Request header with a null");
 			}
-			if (!this.isModifiable)
+			bool flag3 = !this.isModifiable;
+			if (flag3)
 			{
 				throw new InvalidOperationException("UnityWebRequest has already been sent and its request headers cannot be altered");
 			}
 			UnityWebRequest.UnityWebRequestError unityWebRequestError = this.InternalSetRequestHeader(name, value);
-			if (unityWebRequestError != UnityWebRequest.UnityWebRequestError.OK)
+			bool flag4 = unityWebRequestError > UnityWebRequest.UnityWebRequestError.OK;
+			if (flag4)
 			{
 				throw new InvalidOperationException(UnityWebRequest.GetWebErrorString(unityWebRequestError));
 			}
@@ -565,8 +603,9 @@ namespace UnityEngine.Networking
 		public Dictionary<string, string> GetResponseHeaders()
 		{
 			string[] responseHeaderKeys = this.GetResponseHeaderKeys();
+			bool flag = responseHeaderKeys == null || responseHeaderKeys.Length == 0;
 			Dictionary<string, string> dictionary;
-			if (responseHeaderKeys == null || responseHeaderKeys.Length == 0)
+			if (flag)
 			{
 				dictionary = null;
 			}
@@ -594,12 +633,14 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (!this.isModifiable)
+				bool flag = !this.isModifiable;
+				if (flag)
 				{
 					throw new InvalidOperationException("UnityWebRequest has already been sent; cannot modify the upload handler");
 				}
 				UnityWebRequest.UnityWebRequestError unityWebRequestError = this.SetUploadHandler(value);
-				if (unityWebRequestError != UnityWebRequest.UnityWebRequestError.OK)
+				bool flag2 = unityWebRequestError > UnityWebRequest.UnityWebRequestError.OK;
+				if (flag2)
 				{
 					throw new InvalidOperationException(UnityWebRequest.GetWebErrorString(unityWebRequestError));
 				}
@@ -618,12 +659,14 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (!this.isModifiable)
+				bool flag = !this.isModifiable;
+				if (flag)
 				{
 					throw new InvalidOperationException("UnityWebRequest has already been sent; cannot modify the download handler");
 				}
 				UnityWebRequest.UnityWebRequestError unityWebRequestError = this.SetDownloadHandler(value);
-				if (unityWebRequestError != UnityWebRequest.UnityWebRequestError.OK)
+				bool flag2 = unityWebRequestError > UnityWebRequest.UnityWebRequestError.OK;
+				if (flag2)
 				{
 					throw new InvalidOperationException(UnityWebRequest.GetWebErrorString(unityWebRequestError));
 				}
@@ -642,12 +685,14 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (!this.isModifiable)
+				bool flag = !this.isModifiable;
+				if (flag)
 				{
 					throw new InvalidOperationException("UnityWebRequest has already been sent; cannot modify the certificate handler");
 				}
 				UnityWebRequest.UnityWebRequestError unityWebRequestError = this.SetCertificateHandler(value);
-				if (unityWebRequestError != UnityWebRequest.UnityWebRequestError.OK)
+				bool flag2 = unityWebRequestError > UnityWebRequest.UnityWebRequestError.OK;
+				if (flag2)
 				{
 					throw new InvalidOperationException(UnityWebRequest.GetWebErrorString(unityWebRequestError));
 				}
@@ -669,13 +714,43 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				if (!this.isModifiable)
+				bool flag = !this.isModifiable;
+				if (flag)
 				{
 					throw new InvalidOperationException("UnityWebRequest has already been sent; cannot modify the timeout");
 				}
 				value = Math.Max(value, 0);
 				UnityWebRequest.UnityWebRequestError unityWebRequestError = this.SetTimeoutMsec(value * 1000);
-				if (unityWebRequestError != UnityWebRequest.UnityWebRequestError.OK)
+				bool flag2 = unityWebRequestError > UnityWebRequest.UnityWebRequestError.OK;
+				if (flag2)
+				{
+					throw new InvalidOperationException(UnityWebRequest.GetWebErrorString(unityWebRequestError));
+				}
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool GetSuppressErrorsToConsole();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern UnityWebRequest.UnityWebRequestError SetSuppressErrorsToConsole(bool suppress);
+
+		internal bool suppressErrorsToConsole
+		{
+			get
+			{
+				return this.GetSuppressErrorsToConsole();
+			}
+			set
+			{
+				bool flag = !this.isModifiable;
+				if (flag)
+				{
+					throw new InvalidOperationException("UnityWebRequest has already been sent; cannot modify the timeout");
+				}
+				UnityWebRequest.UnityWebRequestError unityWebRequestError = this.SetSuppressErrorsToConsole(value);
+				bool flag2 = unityWebRequestError > UnityWebRequest.UnityWebRequestError.OK;
+				if (flag2)
 				{
 					throw new InvalidOperationException(UnityWebRequest.GetWebErrorString(unityWebRequestError));
 				}
@@ -712,15 +787,15 @@ namespace UnityEngine.Networking
 			return new UnityWebRequest(uri, "HEAD");
 		}
 
-		[Obsolete("UnityWebRequest.GetTexture is obsolete. Use UnityWebRequestTexture.GetTexture instead (UnityUpgradable) -> [UnityEngine] UnityWebRequestTexture.GetTexture(*)", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("UnityWebRequest.GetTexture is obsolete. Use UnityWebRequestTexture.GetTexture instead (UnityUpgradable) -> [UnityEngine] UnityWebRequestTexture.GetTexture(*)", true)]
 		public static UnityWebRequest GetTexture(string uri)
 		{
 			throw new NotSupportedException("UnityWebRequest.GetTexture is obsolete. Use UnityWebRequestTexture.GetTexture instead.");
 		}
 
-		[Obsolete("UnityWebRequest.GetTexture is obsolete. Use UnityWebRequestTexture.GetTexture instead (UnityUpgradable) -> [UnityEngine] UnityWebRequestTexture.GetTexture(*)", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("UnityWebRequest.GetTexture is obsolete. Use UnityWebRequestTexture.GetTexture instead (UnityUpgradable) -> [UnityEngine] UnityWebRequestTexture.GetTexture(*)", true)]
 		public static UnityWebRequest GetTexture(string uri, bool nonReadable)
 		{
 			throw new NotSupportedException("UnityWebRequest.GetTexture is obsolete. Use UnityWebRequestTexture.GetTexture instead.");
@@ -805,7 +880,8 @@ namespace UnityEngine.Networking
 		private static void SetupPost(UnityWebRequest request, string postData)
 		{
 			byte[] array = null;
-			if (!string.IsNullOrEmpty(postData))
+			bool flag = !string.IsNullOrEmpty(postData);
+			if (flag)
 			{
 				string text = WWWTranscoder.DataEncode(postData, Encoding.UTF8);
 				array = Encoding.UTF8.GetBytes(text);
@@ -832,17 +908,20 @@ namespace UnityEngine.Networking
 		private static void SetupPost(UnityWebRequest request, WWWForm formData)
 		{
 			byte[] array = null;
-			if (formData != null)
+			bool flag = formData != null;
+			if (flag)
 			{
 				array = formData.data;
-				if (array.Length == 0)
+				bool flag2 = array.Length == 0;
+				if (flag2)
 				{
 					array = null;
 				}
 			}
 			request.uploadHandler = new UploadHandlerRaw(array);
 			request.downloadHandler = new DownloadHandlerBuffer();
-			if (formData != null)
+			bool flag3 = formData != null;
+			if (flag3)
 			{
 				Dictionary<string, string> headers = formData.headers;
 				foreach (KeyValuePair<string, string> keyValuePair in headers)
@@ -881,7 +960,8 @@ namespace UnityEngine.Networking
 		private static void SetupPost(UnityWebRequest request, List<IMultipartFormSection> multipartFormSections, byte[] boundary)
 		{
 			byte[] array = null;
-			if (multipartFormSections != null && multipartFormSections.Count != 0)
+			bool flag = multipartFormSections != null && multipartFormSections.Count != 0;
+			if (flag)
 			{
 				array = UnityWebRequest.SerializeFormSections(multipartFormSections, boundary);
 			}
@@ -909,7 +989,8 @@ namespace UnityEngine.Networking
 		private static void SetupPost(UnityWebRequest request, Dictionary<string, string> formFields)
 		{
 			byte[] array = null;
-			if (formFields != null && formFields.Count != 0)
+			bool flag = formFields != null && formFields.Count != 0;
+			if (flag)
 			{
 				array = UnityWebRequest.SerializeSimpleForm(formFields);
 			}
@@ -927,24 +1008,33 @@ namespace UnityEngine.Networking
 
 		public static string EscapeURL(string s, Encoding e)
 		{
+			bool flag = s == null;
 			string text;
-			if (s == null)
-			{
-				text = null;
-			}
-			else if (s == "")
-			{
-				text = "";
-			}
-			else if (e == null)
+			if (flag)
 			{
 				text = null;
 			}
 			else
 			{
-				byte[] bytes = e.GetBytes(s);
-				byte[] array = WWWTranscoder.URLEncode(bytes);
-				text = e.GetString(array);
+				bool flag2 = s == "";
+				if (flag2)
+				{
+					text = "";
+				}
+				else
+				{
+					bool flag3 = e == null;
+					if (flag3)
+					{
+						text = null;
+					}
+					else
+					{
+						byte[] bytes = e.GetBytes(s);
+						byte[] array = WWWTranscoder.URLEncode(bytes);
+						text = e.GetString(array);
+					}
+				}
 			}
 			return text;
 		}
@@ -956,28 +1046,34 @@ namespace UnityEngine.Networking
 
 		public static string UnEscapeURL(string s, Encoding e)
 		{
+			bool flag = s == null;
 			string text;
-			if (s == null)
+			if (flag)
 			{
 				text = null;
 			}
-			else if (s.IndexOf('%') == -1 && s.IndexOf('+') == -1)
-			{
-				text = s;
-			}
 			else
 			{
-				byte[] bytes = e.GetBytes(s);
-				byte[] array = WWWTranscoder.URLDecode(bytes);
-				text = e.GetString(array);
+				bool flag2 = s.IndexOf('%') == -1 && s.IndexOf('+') == -1;
+				if (flag2)
+				{
+					text = s;
+				}
+				else
+				{
+					byte[] bytes = e.GetBytes(s);
+					byte[] array = WWWTranscoder.URLDecode(bytes);
+					text = e.GetString(array);
+				}
 			}
 			return text;
 		}
 
 		public static byte[] SerializeFormSections(List<IMultipartFormSection> multipartFormSections, byte[] boundary)
 		{
+			bool flag = multipartFormSections == null || multipartFormSections.Count == 0;
 			byte[] array;
-			if (multipartFormSections == null || multipartFormSections.Count == 0)
+			if (flag)
 			{
 				array = null;
 			}
@@ -997,17 +1093,20 @@ namespace UnityEngine.Networking
 					string sectionName = multipartFormSection2.sectionName;
 					string fileName = multipartFormSection2.fileName;
 					string text2 = "Content-Disposition: " + text;
-					if (!string.IsNullOrEmpty(sectionName))
+					bool flag2 = !string.IsNullOrEmpty(sectionName);
+					if (flag2)
 					{
 						text2 = text2 + "; name=\"" + sectionName + "\"";
 					}
-					if (!string.IsNullOrEmpty(fileName))
+					bool flag3 = !string.IsNullOrEmpty(fileName);
+					if (flag3)
 					{
 						text2 = text2 + "; filename=\"" + fileName + "\"";
 					}
 					text2 += "\r\n";
 					string contentType = multipartFormSection2.contentType;
-					if (!string.IsNullOrEmpty(contentType))
+					bool flag4 = !string.IsNullOrEmpty(contentType);
+					if (flag4)
 					{
 						text2 = text2 + "Content-Type: " + contentType + "\r\n";
 					}
@@ -1035,11 +1134,13 @@ namespace UnityEngine.Networking
 			for (int i = 0; i < 40; i++)
 			{
 				int num = Random.Range(48, 110);
-				if (num > 57)
+				bool flag = num > 57;
+				if (flag)
 				{
 					num += 7;
 				}
-				if (num > 90)
+				bool flag2 = num > 90;
+				if (flag2)
 				{
 					num += 6;
 				}
@@ -1053,7 +1154,8 @@ namespace UnityEngine.Networking
 			string text = "";
 			foreach (KeyValuePair<string, string> keyValuePair in formFields)
 			{
-				if (text.Length > 0)
+				bool flag = text.Length > 0;
+				if (flag)
 				{
 					text += "&";
 				}

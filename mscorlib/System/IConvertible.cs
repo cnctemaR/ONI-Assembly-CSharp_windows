@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-	[ComVisible(true)]
 	[CLSCompliant(false)]
+	[ComVisible(true)]
 	public interface IConvertible
 	{
 		TypeCode GetTypeCode();

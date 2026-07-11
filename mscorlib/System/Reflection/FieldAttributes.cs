@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[Flags]
 	[ComVisible(true)]
+	[Flags]
 	[Serializable]
 	public enum FieldAttributes
 	{

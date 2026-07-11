@@ -20,7 +20,7 @@ namespace UnityEngine
 
 		public static implicit operator Color32(Color c)
 		{
-			return new Color32((byte)(Mathf.Clamp01(c.r) * 255f), (byte)(Mathf.Clamp01(c.g) * 255f), (byte)(Mathf.Clamp01(c.b) * 255f), (byte)(Mathf.Clamp01(c.a) * 255f));
+			return new Color32((byte)Mathf.Round(Mathf.Clamp01(c.r) * 255f), (byte)Mathf.Round(Mathf.Clamp01(c.g) * 255f), (byte)Mathf.Round(Mathf.Clamp01(c.b) * 255f), (byte)Mathf.Round(Mathf.Clamp01(c.a) * 255f));
 		}
 
 		public static implicit operator Color(Color32 c)
@@ -37,6 +37,58 @@ namespace UnityEngine
 		public static Color32 LerpUnclamped(Color32 a, Color32 b, float t)
 		{
 			return new Color32((byte)((float)a.r + (float)(b.r - a.r) * t), (byte)((float)a.g + (float)(b.g - a.g) * t), (byte)((float)a.b + (float)(b.b - a.b) * t), (byte)((float)a.a + (float)(b.a - a.a) * t));
+		}
+
+		public byte this[int index]
+		{
+			get
+			{
+				byte b;
+				switch (index)
+				{
+				case 0:
+					b = this.r;
+					break;
+				case 1:
+					b = this.g;
+					break;
+				case 2:
+					b = this.b;
+					break;
+				case 3:
+					b = this.a;
+					break;
+				default:
+					throw new IndexOutOfRangeException("Invalid Color32 index(" + index + ")!");
+				}
+				return b;
+			}
+			set
+			{
+				switch (index)
+				{
+				case 0:
+					this.r = value;
+					break;
+				case 1:
+					this.g = value;
+					break;
+				case 2:
+					this.b = value;
+					break;
+				case 3:
+					this.a = value;
+					break;
+				default:
+					throw new IndexOutOfRangeException("Invalid Color32 index(" + index + ")!");
+				}
+			}
+		}
+
+		[VisibleToOtherModules]
+		internal bool InternalEquals(Color32 other)
+		{
+			return this.rgba == other.rgba;
 		}
 
 		public override string ToString()

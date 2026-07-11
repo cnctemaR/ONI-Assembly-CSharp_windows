@@ -31,7 +31,7 @@ public class CeilingLightConfig : IBuildingConfig
 		LightShapePreview lightShapePreview = go.AddComponent<LightShapePreview>();
 		lightShapePreview.lux = 1800;
 		lightShapePreview.radius = 8f;
-		lightShapePreview.shape = LightShape.Cone;
+		lightShapePreview.shape = global::LightShape.Cone;
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
@@ -49,7 +49,7 @@ public class CeilingLightConfig : IBuildingConfig
 		light2D.Angle = 2.6f;
 		light2D.Direction = LIGHT2D.CEILINGLIGHT_DIRECTION;
 		light2D.Offset = LIGHT2D.CEILINGLIGHT_OFFSET;
-		light2D.shape = LightShape.Cone;
+		light2D.shape = global::LightShape.Cone;
 		light2D.drawOverlay = true;
 		light2D.Lux = 1800;
 		go.AddOrGetDef<LightController.Def>();

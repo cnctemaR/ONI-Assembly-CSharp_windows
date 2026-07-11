@@ -50,6 +50,7 @@ namespace UnityEngine
 		NoiseSumXYZ,
 		NoiseImpulseX,
 		NoiseImpulseXY,
-		NoiseImpulseXYZ
+		NoiseImpulseXYZ,
+		MeshIndex
 	}
 }

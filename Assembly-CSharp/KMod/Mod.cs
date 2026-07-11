@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Klei;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -78,19 +79,29 @@ namespace KMod
 			{
 				return;
 			}
-			this.ScanContentFromSource("");
-			if (this.content_source == null)
+			if (this.ScanContentFromSource(""))
 			{
-				this.content_source = new Directory(this.ContentPath);
+				if (this.content_source == null)
+				{
+					this.content_source = new Directory(this.ContentPath);
+					return;
+				}
+			}
+			else
+			{
+				global::Debug.LogWarning(string.Format("No supported content for mod: {0}, skipping content.", this.label));
+				this.available_content = (Content)0;
+				this.enabled = false;
 			}
 		}
 
-		private void ScanContentFromSource(string relativeRoot = "")
+		private bool ScanContentFromSource(string relativeRoot = "")
 		{
 			this.available_content = (Content)0;
 			List<FileSystemItem> list = new List<FileSystemItem>();
 			this.file_source.GetTopLevelItems(list, relativeRoot);
 			bool flag = false;
+			bool flag2 = false;
 			foreach (FileSystemItem fileSystemItem in list)
 			{
 				if (fileSystemItem.type == FileSystemItem.ItemType.Directory)
@@ -105,52 +116,99 @@ namespace KMod
 					{
 						flag = true;
 					}
+					else if (text2 == "mod_info.yaml")
+					{
+						flag2 = true;
+					}
 					else
 					{
 						this.AddFile(text2);
 					}
 				}
 			}
-			if (!flag)
+			bool flag3 = true;
+			if (flag2)
 			{
-				return;
+				string text3 = this.file_source.Read(Path.Combine(relativeRoot, "mod_info.yaml"));
+				if (!string.IsNullOrEmpty(text3))
+				{
+					Mod.PackagedModInfo packagedModInfo = YamlIO.Parse<Mod.PackagedModInfo>(text3, default(FileHandle), null, null);
+					if (packagedModInfo != null)
+					{
+						string text4 = (string.IsNullOrEmpty(this.relative_root) ? "root" : this.relative_root);
+						if (packagedModInfo.supportedContent != null)
+						{
+							string text5 = packagedModInfo.supportedContent.ToLower();
+							if (!text5.Contains("vanilla_id") && !text5.Contains("all"))
+							{
+								global::Debug.Log(string.Format("Skipping mod {0} at {1} because it does not support vanilla content.", this.label, text4));
+								flag3 = false;
+							}
+						}
+					}
+					else
+					{
+						global::Debug.LogWarning("Failed to parse mod_info.yaml, text is " + text3);
+					}
+				}
+				else
+				{
+					global::Debug.LogWarning("Failed to read mod_info.yaml, skipping");
+				}
 			}
 			if (!string.IsNullOrEmpty(this.relative_root))
 			{
-				global::Debug.LogWarning("archived version at " + this.relative_root + " also has archived_versions.yaml, ignoring.");
-				return;
+				return flag3;
 			}
-			string text3 = this.file_source.Read("archived_versions.yaml");
-			if (string.IsNullOrEmpty(text3))
+			if (!flag)
+			{
+				return flag3;
+			}
+			string text6 = this.file_source.Read("archived_versions.yaml");
+			if (string.IsNullOrEmpty(text6))
 			{
 				global::Debug.LogWarning("Failed to read archived_versions.yaml, skipping");
-				return;
+				return flag3;
 			}
-			Mod.ArchivedVersionArray archivedVersionArray = YamlIO.Parse<Mod.ArchivedVersionArray>(text3, default(FileHandle), null, null);
+			Mod.ArchivedVersionArray archivedVersionArray = YamlIO.Parse<Mod.ArchivedVersionArray>(text6, default(FileHandle), null, null);
 			if (archivedVersionArray == null)
 			{
-				global::Debug.LogWarning("Failed to parse archived_versions.yaml, text is " + text3);
-				return;
+				global::Debug.LogWarning("Failed to parse archived_versions.yaml, text is " + text6);
+				return flag3;
 			}
-			Mod.ArchivedVersion archivedVersion = null;
-			foreach (Mod.ArchivedVersion archivedVersion2 in archivedVersionArray.archivedVersions)
+			List<Mod.ArchivedVersion> list2;
+			if (flag3)
 			{
-				if (420700L <= (long)archivedVersion2.lastWorkingBuild && (archivedVersion == null || archivedVersion2.lastWorkingBuild < archivedVersion.lastWorkingBuild))
-				{
-					archivedVersion = archivedVersion2;
-				}
+				list2 = archivedVersionArray.archivedVersions.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion versionInfo) => (long)versionInfo.lastWorkingBuild == 442154L).ToList<Mod.ArchivedVersion>();
 			}
-			if (archivedVersion != null)
+			else
+			{
+				list2 = (from versionInfo in archivedVersionArray.archivedVersions
+					where (long)versionInfo.lastWorkingBuild >= 442154L
+					orderby versionInfo.lastWorkingBuild
+					select versionInfo).Concat<Mod.ArchivedVersion>(from versionInfo in archivedVersionArray.archivedVersions
+					where (long)versionInfo.lastWorkingBuild < 442154L
+					orderby versionInfo.lastWorkingBuild descending
+					select versionInfo).ToList<Mod.ArchivedVersion>();
+			}
+			foreach (Mod.ArchivedVersion archivedVersion in list2)
 			{
 				this.relative_root = FileSystem.Normalize(archivedVersion.relativePath);
 				if (!this.relative_root.StartsWith("archived_version"))
 				{
 					global::Debug.LogError("Archived version with path: " + archivedVersion.relativePath + ". For consistency among mods, please keep all old versions in a top-level directory called \"archived_versions\"");
-					return;
+					return false;
 				}
-				global::Debug.Log(string.Format("Found archived version for mod {0} with lastWorkingBuild: {1}, redirecting content path to {2}", this.title, archivedVersion.lastWorkingBuild, this.relative_root));
-				this.ScanContentFromSource(this.relative_root);
+				Content available_content = this.available_content;
+				if (this.ScanContentFromSource(this.relative_root))
+				{
+					global::Debug.Log(string.Format("Found archived version for mod {0} with lastWorkingBuild: {1}, redirected content path to {2}", this.title, archivedVersion.lastWorkingBuild, this.relative_root));
+					return true;
+				}
+				this.relative_root = null;
+				this.available_content = available_content;
 			}
+			return flag3;
 		}
 
 		public string ContentPath
@@ -510,6 +568,8 @@ namespace KMod
 
 		private const string ARCHIVED_VERSIONS_FILENAME = "archived_versions.yaml";
 
+		private const string MOD_INFO_FILENAME = "mod_info.yaml";
+
 		public const int MAX_CRASH_COUNT = 3;
 
 		public enum Status
@@ -533,6 +593,13 @@ namespace KMod
 		public class ArchivedVersion
 		{
 			public string relativePath { get; set; }
+
+			public int lastWorkingBuild { get; set; }
+		}
+
+		public class PackagedModInfo
+		{
+			public string supportedContent { get; set; }
 
 			public int lastWorkingBuild { get; set; }
 		}

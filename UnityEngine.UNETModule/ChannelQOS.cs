@@ -20,7 +20,8 @@ namespace UnityEngine.Networking
 
 		public ChannelQOS(ChannelQOS channel)
 		{
-			if (channel == null)
+			bool flag = channel == null;
+			if (flag)
 			{
 				throw new NullReferenceException("channel is not defined");
 			}

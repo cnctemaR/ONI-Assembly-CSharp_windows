@@ -4,7 +4,7 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Cursor.bindings.h")]
+	[NativeHeader("Runtime/Export/Input/Cursor.bindings.h")]
 	public class Cursor
 	{
 		private static void SetCursor(Texture2D texture, CursorMode cursorMode)

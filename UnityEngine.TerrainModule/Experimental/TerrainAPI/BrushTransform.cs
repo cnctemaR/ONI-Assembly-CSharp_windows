@@ -4,21 +4,6 @@ namespace UnityEngine.Experimental.TerrainAPI
 {
 	public struct BrushTransform
 	{
-		public BrushTransform(Vector2 brushOrigin, Vector2 brushU, Vector2 brushV)
-		{
-			float num = brushU.x * brushV.y - brushU.y * brushV.x;
-			float num2 = ((!Mathf.Approximately(num, 0f)) ? (1f / num) : 1f);
-			Vector2 vector = new Vector2(brushV.y, -brushU.y) * num2;
-			Vector2 vector2 = new Vector2(-brushV.x, brushU.x) * num2;
-			Vector2 vector3 = -brushOrigin.x * vector - brushOrigin.y * vector2;
-			this.brushOrigin = brushOrigin;
-			this.brushU = brushU;
-			this.brushV = brushV;
-			this.targetOrigin = vector3;
-			this.targetX = vector;
-			this.targetY = vector2;
-		}
-
 		public Vector2 brushOrigin { get; }
 
 		public Vector2 brushU { get; }
@@ -30,6 +15,21 @@ namespace UnityEngine.Experimental.TerrainAPI
 		public Vector2 targetX { get; }
 
 		public Vector2 targetY { get; }
+
+		public BrushTransform(Vector2 brushOrigin, Vector2 brushU, Vector2 brushV)
+		{
+			float num = brushU.x * brushV.y - brushU.y * brushV.x;
+			float num2 = (Mathf.Approximately(num, 0f) ? 1f : (1f / num));
+			Vector2 vector = new Vector2(brushV.y, -brushU.y) * num2;
+			Vector2 vector2 = new Vector2(-brushV.x, brushU.x) * num2;
+			Vector2 vector3 = -brushOrigin.x * vector - brushOrigin.y * vector2;
+			this.brushOrigin = brushOrigin;
+			this.brushU = brushU;
+			this.brushV = brushV;
+			this.targetOrigin = vector3;
+			this.targetX = vector;
+			this.targetY = vector2;
+		}
 
 		public Rect GetBrushXYBounds()
 		{

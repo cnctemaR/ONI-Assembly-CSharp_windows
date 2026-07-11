@@ -407,7 +407,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 				num2 *= this.rt.rect.size.x / this.animOverrideSize.x;
 				num3 *= this.rt.rect.size.y / this.animOverrideSize.y;
 			}
-			vector2 = new Vector3(this.rt.lossyScale.x * num2, -this.rt.lossyScale.y * num3, this.rt.lossyScale.z);
+			vector2 = new Vector3(this.rt.lossyScale.x * num2 * num, -this.rt.lossyScale.y * num3 * num, this.rt.lossyScale.z * num);
 			this.pivot = this.rt.pivot;
 		}
 		Matrix2x3 matrix2x = Matrix2x3.Scale(vector2);
@@ -628,10 +628,14 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		return false;
 	}
 
-	public void SetSymbolOverride(int symbol_idx, KAnim.Build.SymbolFrameInstance symbol_frame_instance)
+	public void SetSymbolOverrides(int symbol_start_idx, int symbol_num_frames, int atlas_idx, KBatchGroupData source_data, int source_start_idx, int source_num_frames)
 	{
-		DebugUtil.Assert(this.usingNewSymbolOverrideSystem, "KBatchedAnimController requires usingNewSymbolOverrideSystem to bet to true to enable symbol overrides.");
-		base.symbolOverrideInfoGpuData.SetSymbolOverrideInfo(symbol_idx, symbol_frame_instance);
+		base.symbolOverrideInfoGpuData.SetSymbolOverrideInfo(symbol_start_idx, symbol_num_frames, atlas_idx, source_data, source_start_idx, source_num_frames);
+	}
+
+	public void SetSymbolOverride(int symbol_idx, ref KAnim.Build.SymbolFrameInstance symbol_frame_instance)
+	{
+		base.symbolOverrideInfoGpuData.SetSymbolOverrideInfo(symbol_idx, ref symbol_frame_instance);
 	}
 
 	protected override void Register()

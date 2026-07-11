@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
-using UnityEngine.Experimental.Rendering;
 
 namespace UnityEngine.Rendering
 {
@@ -33,6 +33,14 @@ namespace UnityEngine.Rendering
 			{
 				GraphicsSettings.set_transparencySortAxis_Injected(ref value);
 			}
+		}
+
+		public static extern bool realtimeDirectRectangularAreaLights
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
 		}
 
 		public static extern bool lightsUseLinearIntensity
@@ -68,6 +76,9 @@ namespace UnityEngine.Rendering
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool AllowEnlightenSupportForUpgradedProject();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool HasShaderDefine(GraphicsTier tier, BuiltinShaderDefine defineHash);
 
 		public static bool HasShaderDefine(BuiltinShaderDefine defineHash)
@@ -75,8 +86,35 @@ namespace UnityEngine.Rendering
 			return GraphicsSettings.HasShaderDefine(Graphics.activeTier, defineHash);
 		}
 
-		[NativeName("RenderPipeline")]
-		private static extern ScriptableObject INTERNAL_renderPipelineAsset
+		[NativeName("CurrentRenderPipeline")]
+		private static extern ScriptableObject INTERNAL_currentRenderPipeline
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public static RenderPipelineAsset currentRenderPipeline
+		{
+			get
+			{
+				return GraphicsSettings.INTERNAL_currentRenderPipeline as RenderPipelineAsset;
+			}
+		}
+
+		public static RenderPipelineAsset renderPipelineAsset
+		{
+			get
+			{
+				return GraphicsSettings.defaultRenderPipeline;
+			}
+			set
+			{
+				GraphicsSettings.defaultRenderPipeline = value;
+			}
+		}
+
+		[NativeName("DefaultRenderPipeline")]
+		private static extern ScriptableObject INTERNAL_defaultRenderPipeline
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -84,15 +122,27 @@ namespace UnityEngine.Rendering
 			set;
 		}
 
-		public static RenderPipelineAsset renderPipelineAsset
+		public static RenderPipelineAsset defaultRenderPipeline
 		{
 			get
 			{
-				return GraphicsSettings.INTERNAL_renderPipelineAsset as RenderPipelineAsset;
+				return GraphicsSettings.INTERNAL_defaultRenderPipeline as RenderPipelineAsset;
 			}
 			set
 			{
-				GraphicsSettings.INTERNAL_renderPipelineAsset = value;
+				GraphicsSettings.INTERNAL_defaultRenderPipeline = value;
+			}
+		}
+
+		[NativeName("GetAllConfiguredRenderPipelinesForScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ScriptableObject[] GetAllConfiguredRenderPipelines();
+
+		public static RenderPipelineAsset[] allConfiguredRenderPipelines
+		{
+			get
+			{
+				return GraphicsSettings.GetAllConfiguredRenderPipelines().Cast<RenderPipelineAsset>().ToArray<RenderPipelineAsset>();
 			}
 		}
 

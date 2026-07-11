@@ -48,7 +48,7 @@ namespace UnityEngine.AI
 			}
 			set
 			{
-				this.m_Bidirectional = ((!value) ? 0 : 1);
+				this.m_Bidirectional = (value ? 1 : 0);
 			}
 		}
 

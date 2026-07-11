@@ -5,17 +5,28 @@ namespace UnityEngine.Networking
 {
 	public class MultipartFormFileSection : IMultipartFormSection
 	{
+		private void Init(string name, byte[] data, string fileName, string contentType)
+		{
+			this.name = name;
+			this.data = data;
+			this.file = fileName;
+			this.content = contentType;
+		}
+
 		public MultipartFormFileSection(string name, byte[] data, string fileName, string contentType)
 		{
-			if (data == null || data.Length < 1)
+			bool flag = data == null || data.Length < 1;
+			if (flag)
 			{
 				throw new ArgumentException("Cannot create a multipart form file section without body data");
 			}
-			if (string.IsNullOrEmpty(fileName))
+			bool flag2 = string.IsNullOrEmpty(fileName);
+			if (flag2)
 			{
 				fileName = "file.dat";
 			}
-			if (string.IsNullOrEmpty(contentType))
+			bool flag3 = string.IsNullOrEmpty(contentType);
+			if (flag3)
 			{
 				contentType = "application/octet-stream";
 			}
@@ -34,20 +45,24 @@ namespace UnityEngine.Networking
 
 		public MultipartFormFileSection(string name, string data, Encoding dataEncoding, string fileName)
 		{
-			if (data == null || data.Length < 1)
+			bool flag = data == null || data.Length < 1;
+			if (flag)
 			{
 				throw new ArgumentException("Cannot create a multipart form file section without body data");
 			}
-			if (dataEncoding == null)
+			bool flag2 = dataEncoding == null;
+			if (flag2)
 			{
 				dataEncoding = Encoding.UTF8;
 			}
 			byte[] bytes = dataEncoding.GetBytes(data);
-			if (string.IsNullOrEmpty(fileName))
+			bool flag3 = string.IsNullOrEmpty(fileName);
+			if (flag3)
 			{
 				fileName = "file.txt";
 			}
-			if (string.IsNullOrEmpty(this.content))
+			bool flag4 = string.IsNullOrEmpty(this.content);
+			if (flag4)
 			{
 				this.content = "text/plain; charset=" + dataEncoding.WebName;
 			}
@@ -62,14 +77,6 @@ namespace UnityEngine.Networking
 		public MultipartFormFileSection(string data, string fileName)
 			: this(data, null, fileName)
 		{
-		}
-
-		private void Init(string name, byte[] data, string fileName, string contentType)
-		{
-			this.name = name;
-			this.data = data;
-			this.file = fileName;
-			this.content = contentType;
 		}
 
 		public string sectionName

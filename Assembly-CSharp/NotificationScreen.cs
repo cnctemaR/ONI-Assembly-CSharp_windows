@@ -142,27 +142,26 @@ public class NotificationScreen : KScreen
 	{
 		this.notifications.Add(notification);
 		Notification notification2 = notification;
-		int i = this.notificationIncrement;
-		this.notificationIncrement = i + 1;
-		notification2.Idx = i;
+		int num = this.notificationIncrement;
+		this.notificationIncrement = num + 1;
+		notification2.Idx = num;
 		NotificationScreen.Entry entry = null;
 		this.entriesByMessage.TryGetValue(notification.titleText, out entry);
 		if (entry == null)
 		{
-			GameObject label;
+			HierarchyReferences hierarchyReferences;
 			if (notification.Type == NotificationType.Messages)
 			{
-				label = global::Util.KInstantiateUI(this.MessagesPrefab, this.MessagesFolder, false);
+				hierarchyReferences = global::Util.KInstantiateUI<HierarchyReferences>(this.MessagesPrefab, this.MessagesFolder, false);
 			}
 			else
 			{
-				label = global::Util.KInstantiateUI(this.LabelPrefab, this.LabelsFolder, false);
+				hierarchyReferences = global::Util.KInstantiateUI<HierarchyReferences>(this.LabelPrefab, this.LabelsFolder, false);
 			}
-			label.GetComponentInChildren<NotificationAnimator>().Init();
-			label.gameObject.SetActive(true);
-			KImage componentInChildren = label.GetComponentInChildren<KImage>(true);
-			Button[] componentsInChildren = label.gameObject.GetComponentsInChildren<Button>();
-			ColorBlock colors = componentsInChildren[0].colors;
+			hierarchyReferences.GetReference<NotificationAnimator>("Animator").Init();
+			hierarchyReferences.gameObject.SetActive(true);
+			Button reference = hierarchyReferences.GetReference<Button>("MainButton");
+			ColorBlock colors = reference.colors;
 			if (notification.Type == NotificationType.Bad || notification.Type == NotificationType.DuplicantThreatening)
 			{
 				colors.normalColor = this.badColorBG;
@@ -171,14 +170,14 @@ public class NotificationScreen : KScreen
 			{
 				colors.normalColor = this.messageColorBG;
 				global::Debug.Assert(notification.GetType() == typeof(MessageNotification), string.Format("Notification: \"{0}\" is not of type MessageNotification", notification.titleText));
-				Predicate<Notification> <>9__3;
-				componentsInChildren[1].onClick.AddListener(delegate
+				Predicate<Notification> <>9__2;
+				hierarchyReferences.GetReference<Button>("DismissButton").onClick.AddListener(delegate
 				{
 					List<Notification> list = this.notifications;
 					Predicate<Notification> predicate;
-					if ((predicate = <>9__3) == null)
+					if ((predicate = <>9__2) == null)
 					{
-						predicate = (<>9__3 = (Notification n) => n.titleText == notification.titleText);
+						predicate = (<>9__2 = (Notification n) => n.titleText == notification.titleText);
 					}
 					foreach (Notification notification3 in list.FindAll(predicate))
 					{
@@ -196,86 +195,74 @@ public class NotificationScreen : KScreen
 			{
 				colors.normalColor = this.normalColorBG;
 			}
-			componentsInChildren[0].colors = colors;
-			componentsInChildren[0].onClick.AddListener(delegate
+			reference.colors = colors;
+			reference.onClick.AddListener(delegate
 			{
 				this.OnClick(entry);
 			});
 			if (notification.ToolTip != null)
 			{
-				label.GetComponentInChildren<ToolTip>().OnToolTip = delegate
+				ToolTip tooltip = hierarchyReferences.GetReference<ToolTip>("ToolTip");
+				tooltip.OnToolTip = delegate
 				{
-					ToolTip componentInChildren2 = label.GetComponentInChildren<ToolTip>();
-					componentInChildren2.ClearMultiStringTooltip();
-					componentInChildren2.AddMultiStringTooltip(notification.ToolTip(entry.notifications, notification.tooltipData), this.TooltipTextStyle);
+					tooltip.ClearMultiStringTooltip();
+					tooltip.AddMultiStringTooltip(notification.ToolTip(entry.notifications, notification.tooltipData), this.TooltipTextStyle);
 					return "";
 				};
 			}
-			entry = new NotificationScreen.Entry(label);
+			entry = new NotificationScreen.Entry(hierarchyReferences.gameObject);
 			this.entriesByMessage[notification.titleText] = entry;
 			this.entries.Add(entry);
-			LocText[] componentsInChildren2 = label.GetComponentsInChildren<LocText>();
-			i = 0;
-			while (i < componentsInChildren2.Length)
+			KImage reference2 = hierarchyReferences.GetReference<KImage>("Icon");
+			LocText reference3 = hierarchyReferences.GetReference<LocText>("Text");
+			switch (notification.Type)
 			{
-				LocText locText = componentsInChildren2[i];
-				switch (notification.Type)
+			case NotificationType.Bad:
+				reference3.color = this.badColor;
+				reference2.sprite = this.icon_bad;
+				goto IL_035F;
+			case NotificationType.Tutorial:
+				reference3.color = this.warningColor;
+				reference2.sprite = this.icon_warning;
+				goto IL_035F;
+			case NotificationType.Messages:
+			{
+				reference3.color = this.messageColor;
+				reference2.sprite = this.icon_message;
+				MessageNotification messageNotification = notification as MessageNotification;
+				if (messageNotification == null)
 				{
-				case NotificationType.Bad:
-					locText.color = this.badColor;
-					componentInChildren.sprite = this.icon_bad;
-					break;
-				case NotificationType.Good:
-				case NotificationType.BadMinor:
-				case NotificationType.Neutral:
-					goto IL_03A7;
-				case NotificationType.Tutorial:
-					locText.color = this.warningColor;
-					componentInChildren.sprite = this.icon_warning;
-					break;
-				case NotificationType.Messages:
+					goto IL_035F;
+				}
+				TutorialMessage tutorialMessage = messageNotification.message as TutorialMessage;
+				if (tutorialMessage != null && !string.IsNullOrEmpty(tutorialMessage.videoClipId))
 				{
-					locText.color = this.messageColor;
-					componentInChildren.sprite = this.icon_message;
-					MessageNotification messageNotification = notification as MessageNotification;
-					if (messageNotification != null)
-					{
-						TutorialMessage tutorialMessage = messageNotification.message as TutorialMessage;
-						if (tutorialMessage != null && !string.IsNullOrEmpty(tutorialMessage.videoClipId))
-						{
-							componentInChildren.sprite = this.icon_video;
-						}
-					}
-					break;
+					reference2.sprite = this.icon_video;
+					goto IL_035F;
 				}
-				case NotificationType.DuplicantThreatening:
-					locText.color = this.badColor;
-					componentInChildren.sprite = this.icon_threatening;
-					break;
-				default:
-					goto IL_03A7;
-				}
-				IL_03C0:
-				componentInChildren.color = locText.color;
-				string text = "";
-				if (KTime.Instance.UnscaledGameTime - this.initTime > 5f && notification.playSound)
-				{
-					this.PlayDingSound(notification, 0);
-				}
-				else
-				{
-					text = "too early";
-				}
-				if (AudioDebug.Get().debugNotificationSounds)
-				{
-					global::Debug.Log("Notification(" + notification.titleText + "):" + text);
-				}
-				i++;
-				continue;
-				IL_03A7:
-				locText.color = this.normalColor;
-				componentInChildren.sprite = this.icon_normal;
-				goto IL_03C0;
+				goto IL_035F;
+			}
+			case NotificationType.DuplicantThreatening:
+				reference3.color = this.badColor;
+				reference2.sprite = this.icon_threatening;
+				goto IL_035F;
+			}
+			reference3.color = this.normalColor;
+			reference2.sprite = this.icon_normal;
+			IL_035F:
+			reference2.color = reference3.color;
+			string text = "";
+			if (KTime.Instance.UnscaledGameTime - this.initTime > 5f && notification.playSound)
+			{
+				this.PlayDingSound(notification, 0);
+			}
+			else
+			{
+				text = "too early";
+			}
+			if (AudioDebug.Get().debugNotificationSounds)
+			{
+				global::Debug.Log("Notification(" + notification.titleText + "):" + text);
 			}
 		}
 		entry.Add(notification);
@@ -335,7 +322,7 @@ public class NotificationScreen : KScreen
 		if (notification.playSound)
 		{
 			EventInstance eventInstance = KFMOD.BeginOneShot(text2, Vector3.zero, 1f);
-			eventInstance.setParameterValue("timeSinceLast", num2);
+			eventInstance.setParameterByName("timeSinceLast", num2, false);
 			KFMOD.EndOneShot(eventInstance);
 		}
 	}
@@ -598,9 +585,9 @@ public class NotificationScreen : KScreen
 				}
 				this.message = this.message + " (" + this.notifications.Count.ToString() + ")";
 			}
-			if (this.label.gameObject != null)
+			if (this.label != null)
 			{
-				this.label.GetComponentInChildren<LocText>().text = this.message;
+				this.label.GetComponent<HierarchyReferences>().GetReference<LocText>("Text").text = this.message;
 			}
 		}
 

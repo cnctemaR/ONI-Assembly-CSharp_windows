@@ -179,9 +179,9 @@ namespace System.Security
 			}
 		}
 
-		[Obsolete("Deny is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
 		[MonoTODO("CAS support is experimental (and unsupported). Imperative mode is not implemented.")]
 		[SecuritySafeCritical]
+		[Obsolete("Deny is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
 		public void Deny()
 		{
 			if (!SecurityManager.SecurityEnabled)
@@ -280,8 +280,8 @@ namespace System.Security
 			return true;
 		}
 
-		[MonoTODO("CAS support is experimental (and unsupported). Imperative mode is not implemented.")]
 		[SecuritySafeCritical]
+		[MonoTODO("CAS support is experimental (and unsupported). Imperative mode is not implemented.")]
 		public void PermitOnly()
 		{
 			if (!SecurityManager.SecurityEnabled)

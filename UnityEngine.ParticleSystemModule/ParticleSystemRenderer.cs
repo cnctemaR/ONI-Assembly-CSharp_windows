@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/ParticleSystem/ParticleSystemRenderer.h")]
+	[RequireComponent(typeof(Transform))]
 	[NativeHeader("ParticleSystemScriptingClasses.h")]
-	[RequireComponent(typeof(Transform))]
-	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Modules/ParticleSystem/ParticleSystemRenderer.h")]
+	[NativeHeader("Modules/ParticleSystem/ScriptBindings/ParticleSystemRendererScriptBindings.h")]
 	public sealed class ParticleSystemRenderer : Renderer
 	{
 		[Obsolete("EnableVertexStreams is deprecated.Use SetActiveVertexStreams instead.", false)]
@@ -43,104 +44,132 @@ namespace UnityEngine
 			this.GetActiveVertexStreams(list);
 			if (enabled)
 			{
-				if ((streams & ParticleSystemVertexStreams.Position) != ParticleSystemVertexStreams.None)
+				bool flag = (streams & ParticleSystemVertexStreams.Position) > ParticleSystemVertexStreams.None;
+				if (flag)
 				{
-					if (!list.Contains(ParticleSystemVertexStream.Position))
+					bool flag2 = !list.Contains(ParticleSystemVertexStream.Position);
+					if (flag2)
 					{
 						list.Add(ParticleSystemVertexStream.Position);
 					}
 				}
-				if ((streams & ParticleSystemVertexStreams.Normal) != ParticleSystemVertexStreams.None)
+				bool flag3 = (streams & ParticleSystemVertexStreams.Normal) > ParticleSystemVertexStreams.None;
+				if (flag3)
 				{
-					if (!list.Contains(ParticleSystemVertexStream.Normal))
+					bool flag4 = !list.Contains(ParticleSystemVertexStream.Normal);
+					if (flag4)
 					{
 						list.Add(ParticleSystemVertexStream.Normal);
 					}
 				}
-				if ((streams & ParticleSystemVertexStreams.Tangent) != ParticleSystemVertexStreams.None)
+				bool flag5 = (streams & ParticleSystemVertexStreams.Tangent) > ParticleSystemVertexStreams.None;
+				if (flag5)
 				{
-					if (!list.Contains(ParticleSystemVertexStream.Tangent))
+					bool flag6 = !list.Contains(ParticleSystemVertexStream.Tangent);
+					if (flag6)
 					{
 						list.Add(ParticleSystemVertexStream.Tangent);
 					}
 				}
-				if ((streams & ParticleSystemVertexStreams.Color) != ParticleSystemVertexStreams.None)
+				bool flag7 = (streams & ParticleSystemVertexStreams.Color) > ParticleSystemVertexStreams.None;
+				if (flag7)
 				{
-					if (!list.Contains(ParticleSystemVertexStream.Color))
+					bool flag8 = !list.Contains(ParticleSystemVertexStream.Color);
+					if (flag8)
 					{
 						list.Add(ParticleSystemVertexStream.Color);
 					}
 				}
-				if ((streams & ParticleSystemVertexStreams.UV) != ParticleSystemVertexStreams.None)
+				bool flag9 = (streams & ParticleSystemVertexStreams.UV) > ParticleSystemVertexStreams.None;
+				if (flag9)
 				{
-					if (!list.Contains(ParticleSystemVertexStream.UV))
+					bool flag10 = !list.Contains(ParticleSystemVertexStream.UV);
+					if (flag10)
 					{
 						list.Add(ParticleSystemVertexStream.UV);
 					}
 				}
-				if ((streams & ParticleSystemVertexStreams.UV2BlendAndFrame) != ParticleSystemVertexStreams.None)
+				bool flag11 = (streams & ParticleSystemVertexStreams.UV2BlendAndFrame) > ParticleSystemVertexStreams.None;
+				if (flag11)
 				{
-					if (!list.Contains(ParticleSystemVertexStream.UV2))
+					bool flag12 = !list.Contains(ParticleSystemVertexStream.UV2);
+					if (flag12)
 					{
 						list.Add(ParticleSystemVertexStream.UV2);
 						list.Add(ParticleSystemVertexStream.AnimBlend);
 						list.Add(ParticleSystemVertexStream.AnimFrame);
 					}
 				}
-				if ((streams & ParticleSystemVertexStreams.CenterAndVertexID) != ParticleSystemVertexStreams.None)
+				bool flag13 = (streams & ParticleSystemVertexStreams.CenterAndVertexID) > ParticleSystemVertexStreams.None;
+				if (flag13)
 				{
-					if (!list.Contains(ParticleSystemVertexStream.Center))
+					bool flag14 = !list.Contains(ParticleSystemVertexStream.Center);
+					if (flag14)
 					{
 						list.Add(ParticleSystemVertexStream.Center);
 						list.Add(ParticleSystemVertexStream.VertexID);
 					}
 				}
-				if ((streams & ParticleSystemVertexStreams.Size) != ParticleSystemVertexStreams.None)
+				bool flag15 = (streams & ParticleSystemVertexStreams.Size) > ParticleSystemVertexStreams.None;
+				if (flag15)
 				{
-					if (!list.Contains(ParticleSystemVertexStream.SizeXYZ))
+					bool flag16 = !list.Contains(ParticleSystemVertexStream.SizeXYZ);
+					if (flag16)
 					{
 						list.Add(ParticleSystemVertexStream.SizeXYZ);
 					}
 				}
-				if ((streams & ParticleSystemVertexStreams.Rotation) != ParticleSystemVertexStreams.None)
+				bool flag17 = (streams & ParticleSystemVertexStreams.Rotation) > ParticleSystemVertexStreams.None;
+				if (flag17)
 				{
-					if (!list.Contains(ParticleSystemVertexStream.Rotation3D))
+					bool flag18 = !list.Contains(ParticleSystemVertexStream.Rotation3D);
+					if (flag18)
 					{
 						list.Add(ParticleSystemVertexStream.Rotation3D);
 					}
 				}
-				if ((streams & ParticleSystemVertexStreams.Velocity) != ParticleSystemVertexStreams.None)
+				bool flag19 = (streams & ParticleSystemVertexStreams.Velocity) > ParticleSystemVertexStreams.None;
+				if (flag19)
 				{
-					if (!list.Contains(ParticleSystemVertexStream.Velocity))
+					bool flag20 = !list.Contains(ParticleSystemVertexStream.Velocity);
+					if (flag20)
 					{
 						list.Add(ParticleSystemVertexStream.Velocity);
 					}
 				}
-				if ((streams & ParticleSystemVertexStreams.Lifetime) != ParticleSystemVertexStreams.None)
+				bool flag21 = (streams & ParticleSystemVertexStreams.Lifetime) > ParticleSystemVertexStreams.None;
+				if (flag21)
 				{
-					if (!list.Contains(ParticleSystemVertexStream.AgePercent))
+					bool flag22 = !list.Contains(ParticleSystemVertexStream.AgePercent);
+					if (flag22)
 					{
 						list.Add(ParticleSystemVertexStream.AgePercent);
 						list.Add(ParticleSystemVertexStream.InvStartLifetime);
 					}
 				}
-				if ((streams & ParticleSystemVertexStreams.Custom1) != ParticleSystemVertexStreams.None)
+				bool flag23 = (streams & ParticleSystemVertexStreams.Custom1) > ParticleSystemVertexStreams.None;
+				if (flag23)
 				{
-					if (!list.Contains(ParticleSystemVertexStream.Custom1XYZW))
+					bool flag24 = !list.Contains(ParticleSystemVertexStream.Custom1XYZW);
+					if (flag24)
 					{
 						list.Add(ParticleSystemVertexStream.Custom1XYZW);
 					}
 				}
-				if ((streams & ParticleSystemVertexStreams.Custom2) != ParticleSystemVertexStreams.None)
+				bool flag25 = (streams & ParticleSystemVertexStreams.Custom2) > ParticleSystemVertexStreams.None;
+				if (flag25)
 				{
-					if (!list.Contains(ParticleSystemVertexStream.Custom2XYZW))
+					bool flag26 = !list.Contains(ParticleSystemVertexStream.Custom2XYZW);
+					if (flag26)
 					{
 						list.Add(ParticleSystemVertexStream.Custom2XYZW);
 					}
 				}
-				if ((streams & ParticleSystemVertexStreams.Random) != ParticleSystemVertexStreams.None)
+				bool flag27 = (streams & ParticleSystemVertexStreams.Random) > ParticleSystemVertexStreams.None;
+				if (flag27)
 				{
-					if (!list.Contains(ParticleSystemVertexStream.StableRandomXYZ))
+					bool flag28 = !list.Contains(ParticleSystemVertexStream.StableRandomXYZ);
+					if (flag28)
 					{
 						list.Add(ParticleSystemVertexStream.StableRandomXYZ);
 						list.Add(ParticleSystemVertexStream.VaryingRandomX);
@@ -149,63 +178,77 @@ namespace UnityEngine
 			}
 			else
 			{
-				if ((streams & ParticleSystemVertexStreams.Position) != ParticleSystemVertexStreams.None)
+				bool flag29 = (streams & ParticleSystemVertexStreams.Position) > ParticleSystemVertexStreams.None;
+				if (flag29)
 				{
 					list.Remove(ParticleSystemVertexStream.Position);
 				}
-				if ((streams & ParticleSystemVertexStreams.Normal) != ParticleSystemVertexStreams.None)
+				bool flag30 = (streams & ParticleSystemVertexStreams.Normal) > ParticleSystemVertexStreams.None;
+				if (flag30)
 				{
 					list.Remove(ParticleSystemVertexStream.Normal);
 				}
-				if ((streams & ParticleSystemVertexStreams.Tangent) != ParticleSystemVertexStreams.None)
+				bool flag31 = (streams & ParticleSystemVertexStreams.Tangent) > ParticleSystemVertexStreams.None;
+				if (flag31)
 				{
 					list.Remove(ParticleSystemVertexStream.Tangent);
 				}
-				if ((streams & ParticleSystemVertexStreams.Color) != ParticleSystemVertexStreams.None)
+				bool flag32 = (streams & ParticleSystemVertexStreams.Color) > ParticleSystemVertexStreams.None;
+				if (flag32)
 				{
 					list.Remove(ParticleSystemVertexStream.Color);
 				}
-				if ((streams & ParticleSystemVertexStreams.UV) != ParticleSystemVertexStreams.None)
+				bool flag33 = (streams & ParticleSystemVertexStreams.UV) > ParticleSystemVertexStreams.None;
+				if (flag33)
 				{
 					list.Remove(ParticleSystemVertexStream.UV);
 				}
-				if ((streams & ParticleSystemVertexStreams.UV2BlendAndFrame) != ParticleSystemVertexStreams.None)
+				bool flag34 = (streams & ParticleSystemVertexStreams.UV2BlendAndFrame) > ParticleSystemVertexStreams.None;
+				if (flag34)
 				{
 					list.Remove(ParticleSystemVertexStream.UV2);
 					list.Remove(ParticleSystemVertexStream.AnimBlend);
 					list.Remove(ParticleSystemVertexStream.AnimFrame);
 				}
-				if ((streams & ParticleSystemVertexStreams.CenterAndVertexID) != ParticleSystemVertexStreams.None)
+				bool flag35 = (streams & ParticleSystemVertexStreams.CenterAndVertexID) > ParticleSystemVertexStreams.None;
+				if (flag35)
 				{
 					list.Remove(ParticleSystemVertexStream.Center);
 					list.Remove(ParticleSystemVertexStream.VertexID);
 				}
-				if ((streams & ParticleSystemVertexStreams.Size) != ParticleSystemVertexStreams.None)
+				bool flag36 = (streams & ParticleSystemVertexStreams.Size) > ParticleSystemVertexStreams.None;
+				if (flag36)
 				{
 					list.Remove(ParticleSystemVertexStream.SizeXYZ);
 				}
-				if ((streams & ParticleSystemVertexStreams.Rotation) != ParticleSystemVertexStreams.None)
+				bool flag37 = (streams & ParticleSystemVertexStreams.Rotation) > ParticleSystemVertexStreams.None;
+				if (flag37)
 				{
 					list.Remove(ParticleSystemVertexStream.Rotation3D);
 				}
-				if ((streams & ParticleSystemVertexStreams.Velocity) != ParticleSystemVertexStreams.None)
+				bool flag38 = (streams & ParticleSystemVertexStreams.Velocity) > ParticleSystemVertexStreams.None;
+				if (flag38)
 				{
 					list.Remove(ParticleSystemVertexStream.Velocity);
 				}
-				if ((streams & ParticleSystemVertexStreams.Lifetime) != ParticleSystemVertexStreams.None)
+				bool flag39 = (streams & ParticleSystemVertexStreams.Lifetime) > ParticleSystemVertexStreams.None;
+				if (flag39)
 				{
 					list.Remove(ParticleSystemVertexStream.AgePercent);
 					list.Remove(ParticleSystemVertexStream.InvStartLifetime);
 				}
-				if ((streams & ParticleSystemVertexStreams.Custom1) != ParticleSystemVertexStreams.None)
+				bool flag40 = (streams & ParticleSystemVertexStreams.Custom1) > ParticleSystemVertexStreams.None;
+				if (flag40)
 				{
 					list.Remove(ParticleSystemVertexStream.Custom1XYZW);
 				}
-				if ((streams & ParticleSystemVertexStreams.Custom2) != ParticleSystemVertexStreams.None)
+				bool flag41 = (streams & ParticleSystemVertexStreams.Custom2) > ParticleSystemVertexStreams.None;
+				if (flag41)
 				{
 					list.Remove(ParticleSystemVertexStream.Custom2XYZW);
 				}
-				if ((streams & ParticleSystemVertexStreams.Random) != ParticleSystemVertexStreams.None)
+				bool flag42 = (streams & ParticleSystemVertexStreams.Random) > ParticleSystemVertexStreams.None;
+				if (flag42)
 				{
 					list.Remove(ParticleSystemVertexStream.StableRandomXYZW);
 					list.Remove(ParticleSystemVertexStream.VaryingRandomX);
@@ -220,59 +263,73 @@ namespace UnityEngine
 			List<ParticleSystemVertexStream> list = new List<ParticleSystemVertexStream>(this.activeVertexStreamsCount);
 			this.GetActiveVertexStreams(list);
 			ParticleSystemVertexStreams particleSystemVertexStreams = ParticleSystemVertexStreams.None;
-			if (list.Contains(ParticleSystemVertexStream.Position))
+			bool flag = list.Contains(ParticleSystemVertexStream.Position);
+			if (flag)
 			{
 				particleSystemVertexStreams |= ParticleSystemVertexStreams.Position;
 			}
-			if (list.Contains(ParticleSystemVertexStream.Normal))
+			bool flag2 = list.Contains(ParticleSystemVertexStream.Normal);
+			if (flag2)
 			{
 				particleSystemVertexStreams |= ParticleSystemVertexStreams.Normal;
 			}
-			if (list.Contains(ParticleSystemVertexStream.Tangent))
+			bool flag3 = list.Contains(ParticleSystemVertexStream.Tangent);
+			if (flag3)
 			{
 				particleSystemVertexStreams |= ParticleSystemVertexStreams.Tangent;
 			}
-			if (list.Contains(ParticleSystemVertexStream.Color))
+			bool flag4 = list.Contains(ParticleSystemVertexStream.Color);
+			if (flag4)
 			{
 				particleSystemVertexStreams |= ParticleSystemVertexStreams.Color;
 			}
-			if (list.Contains(ParticleSystemVertexStream.UV))
+			bool flag5 = list.Contains(ParticleSystemVertexStream.UV);
+			if (flag5)
 			{
 				particleSystemVertexStreams |= ParticleSystemVertexStreams.UV;
 			}
-			if (list.Contains(ParticleSystemVertexStream.UV2))
+			bool flag6 = list.Contains(ParticleSystemVertexStream.UV2);
+			if (flag6)
 			{
 				particleSystemVertexStreams |= ParticleSystemVertexStreams.UV2BlendAndFrame;
 			}
-			if (list.Contains(ParticleSystemVertexStream.Center))
+			bool flag7 = list.Contains(ParticleSystemVertexStream.Center);
+			if (flag7)
 			{
 				particleSystemVertexStreams |= ParticleSystemVertexStreams.CenterAndVertexID;
 			}
-			if (list.Contains(ParticleSystemVertexStream.SizeXYZ))
+			bool flag8 = list.Contains(ParticleSystemVertexStream.SizeXYZ);
+			if (flag8)
 			{
 				particleSystemVertexStreams |= ParticleSystemVertexStreams.Size;
 			}
-			if (list.Contains(ParticleSystemVertexStream.Rotation3D))
+			bool flag9 = list.Contains(ParticleSystemVertexStream.Rotation3D);
+			if (flag9)
 			{
 				particleSystemVertexStreams |= ParticleSystemVertexStreams.Rotation;
 			}
-			if (list.Contains(ParticleSystemVertexStream.Velocity))
+			bool flag10 = list.Contains(ParticleSystemVertexStream.Velocity);
+			if (flag10)
 			{
 				particleSystemVertexStreams |= ParticleSystemVertexStreams.Velocity;
 			}
-			if (list.Contains(ParticleSystemVertexStream.AgePercent))
+			bool flag11 = list.Contains(ParticleSystemVertexStream.AgePercent);
+			if (flag11)
 			{
 				particleSystemVertexStreams |= ParticleSystemVertexStreams.Lifetime;
 			}
-			if (list.Contains(ParticleSystemVertexStream.Custom1XYZW))
+			bool flag12 = list.Contains(ParticleSystemVertexStream.Custom1XYZW);
+			if (flag12)
 			{
 				particleSystemVertexStreams |= ParticleSystemVertexStreams.Custom1;
 			}
-			if (list.Contains(ParticleSystemVertexStream.Custom2XYZW))
+			bool flag13 = list.Contains(ParticleSystemVertexStream.Custom2XYZW);
+			if (flag13)
 			{
 				particleSystemVertexStreams |= ParticleSystemVertexStreams.Custom2;
 			}
-			if (list.Contains(ParticleSystemVertexStream.StableRandomXYZ))
+			bool flag14 = list.Contains(ParticleSystemVertexStream.StableRandomXYZ);
+			if (flag14)
 			{
 				particleSystemVertexStreams |= ParticleSystemVertexStreams.Random;
 			}
@@ -428,6 +485,36 @@ namespace UnityEngine
 			set;
 		}
 
+		public extern Mesh mesh
+		{
+			[FreeFunction(Name = "ParticleSystemRendererScriptBindings::GetMesh", HasExplicitThis = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[FreeFunction(Name = "ParticleSystemRendererScriptBindings::SetMesh", HasExplicitThis = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		[FreeFunction(Name = "ParticleSystemRendererScriptBindings::GetMeshes", HasExplicitThis = true)]
+		[RequiredByNativeCode]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetMeshes([NotNull] [Out] Mesh[] meshes);
+
+		[FreeFunction(Name = "ParticleSystemRendererScriptBindings::SetMeshes", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SetMeshes([NotNull] Mesh[] meshes, int size);
+
+		public void SetMeshes(Mesh[] meshes)
+		{
+			this.SetMeshes(meshes, meshes.Length);
+		}
+
+		public extern int meshCount
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		public void BakeMesh(Mesh mesh, bool useTransform = false)
 		{
 			this.BakeMesh(mesh, Camera.main, useTransform);
@@ -444,74 +531,19 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void BakeTrailsMesh([NotNull] Mesh mesh, [NotNull] Camera camera, bool useTransform = false);
 
-		public extern Mesh mesh
-		{
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
-
-		public int meshCount
-		{
-			get
-			{
-				return this.Internal_GetMeshCount();
-			}
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[RequiredByNativeCode]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int Internal_GetMeshCount();
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetMeshes(Mesh[] meshes);
-
-		public void SetMeshes(Mesh[] meshes)
-		{
-			this.SetMeshes(meshes, meshes.Length);
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetMeshes(Mesh[] meshes, int size);
-
 		public extern int activeVertexStreamsCount
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		public void SetActiveVertexStreams(List<ParticleSystemVertexStream> streams)
-		{
-			if (streams == null)
-			{
-				throw new ArgumentNullException("streams");
-			}
-			this.SetActiveVertexStreamsInternal(streams);
-		}
-
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "ParticleSystemRendererScriptBindings::SetActiveVertexStreams", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SetActiveVertexStreamsInternal(object streams);
+		public extern void SetActiveVertexStreams([NotNull] List<ParticleSystemVertexStream> streams);
 
-		public void GetActiveVertexStreams(List<ParticleSystemVertexStream> streams)
-		{
-			if (streams == null)
-			{
-				throw new ArgumentNullException("streams");
-			}
-			this.GetActiveVertexStreamsInternal(streams);
-		}
-
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "ParticleSystemRendererScriptBindings::GetActiveVertexStreams", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void GetActiveVertexStreamsInternal(object streams);
+		public extern void GetActiveVertexStreams([NotNull] List<ParticleSystemVertexStream> streams);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_pivot_Injected(out Vector3 ret);

@@ -6,25 +6,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[NativeHeader("Runtime/Animation/Director/AnimationPosePlayable.h")]
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationPosePlayable.bindings.h")]
 	[RequiredByNativeCode]
 	[StaticAccessor("AnimationPosePlayableBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Modules/Animation/Director/AnimationPosePlayable.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationPosePlayable.bindings.h")]
 	internal struct AnimationPosePlayable : IPlayable, IEquatable<AnimationPosePlayable>
 	{
-		internal AnimationPosePlayable(PlayableHandle handle)
-		{
-			if (handle.IsValid())
-			{
-				if (!handle.IsPlayableOfType<AnimationPosePlayable>())
-				{
-					throw new InvalidCastException("Can't set handle: the playable is not an AnimationPosePlayable.");
-				}
-			}
-			this.m_Handle = handle;
-		}
-
 		public static AnimationPosePlayable Null
 		{
 			get
@@ -42,8 +30,9 @@ namespace UnityEngine.Animations
 		private static PlayableHandle CreateHandle(PlayableGraph graph)
 		{
 			PlayableHandle @null = PlayableHandle.Null;
+			bool flag = !AnimationPosePlayable.CreateHandleInternal(graph, ref @null);
 			PlayableHandle playableHandle;
-			if (!AnimationPosePlayable.CreateHandleInternal(graph, ref @null))
+			if (flag)
 			{
 				playableHandle = PlayableHandle.Null;
 			}
@@ -52,6 +41,20 @@ namespace UnityEngine.Animations
 				playableHandle = @null;
 			}
 			return playableHandle;
+		}
+
+		internal AnimationPosePlayable(PlayableHandle handle)
+		{
+			bool flag = handle.IsValid();
+			if (flag)
+			{
+				bool flag2 = !handle.IsPlayableOfType<AnimationPosePlayable>();
+				if (flag2)
+				{
+					throw new InvalidCastException("Can't set handle: the playable is not an AnimationPosePlayable.");
+				}
+			}
+			this.m_Handle = handle;
 		}
 
 		public PlayableHandle GetHandle()

@@ -2,10 +2,14 @@
 
 namespace UnityEngine.Bindings
 {
-	[VisibleToOtherModules]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property)]
+	[VisibleToOtherModules]
 	internal class StaticAccessorAttribute : Attribute, IBindingsAttribute
 	{
+		public string Name { get; set; }
+
+		public StaticAccessorType Type { get; set; }
+
 		public StaticAccessorAttribute()
 		{
 		}
@@ -26,9 +30,5 @@ namespace UnityEngine.Bindings
 			this.Name = name;
 			this.Type = type;
 		}
-
-		public string Name { get; set; }
-
-		public StaticAccessorType Type { get; set; }
 	}
 }

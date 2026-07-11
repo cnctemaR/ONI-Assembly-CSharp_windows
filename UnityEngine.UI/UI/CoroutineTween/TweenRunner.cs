@@ -14,9 +14,9 @@ namespace UnityEngine.UI.CoroutineTween
 			float elapsedTime = 0f;
 			while (elapsedTime < tweenInfo.duration)
 			{
-				elapsedTime += ((!tweenInfo.ignoreTimeScale) ? Time.deltaTime : Time.unscaledDeltaTime);
-				float percentage = Mathf.Clamp01(elapsedTime / tweenInfo.duration);
-				tweenInfo.TweenValue(percentage);
+				elapsedTime += (tweenInfo.ignoreTimeScale ? Time.unscaledDeltaTime : Time.deltaTime);
+				float num = Mathf.Clamp01(elapsedTime / tweenInfo.duration);
+				tweenInfo.TweenValue(num);
 				yield return null;
 			}
 			tweenInfo.TweenValue(1f);
@@ -33,20 +33,16 @@ namespace UnityEngine.UI.CoroutineTween
 			if (this.m_CoroutineContainer == null)
 			{
 				Debug.LogWarning("Coroutine container not configured... did you forget to call Init?");
+				return;
 			}
-			else
+			this.StopTween();
+			if (!this.m_CoroutineContainer.gameObject.activeInHierarchy)
 			{
-				this.StopTween();
-				if (!this.m_CoroutineContainer.gameObject.activeInHierarchy)
-				{
-					info.TweenValue(1f);
-				}
-				else
-				{
-					this.m_Tween = TweenRunner<T>.Start(info);
-					this.m_CoroutineContainer.StartCoroutine(this.m_Tween);
-				}
+				info.TweenValue(1f);
+				return;
 			}
+			this.m_Tween = TweenRunner<T>.Start(info);
+			this.m_CoroutineContainer.StartCoroutine(this.m_Tween);
 		}
 
 		public void StopTween()

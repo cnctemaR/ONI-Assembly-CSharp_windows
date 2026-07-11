@@ -8,26 +8,6 @@ namespace UnityEngine
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class DetailPrototype
 	{
-		public DetailPrototype()
-		{
-		}
-
-		public DetailPrototype(DetailPrototype other)
-		{
-			this.m_Prototype = other.m_Prototype;
-			this.m_PrototypeTexture = other.m_PrototypeTexture;
-			this.m_HealthyColor = other.m_HealthyColor;
-			this.m_DryColor = other.m_DryColor;
-			this.m_MinWidth = other.m_MinWidth;
-			this.m_MaxWidth = other.m_MaxWidth;
-			this.m_MinHeight = other.m_MinHeight;
-			this.m_MaxHeight = other.m_MaxHeight;
-			this.m_NoiseSpread = other.m_NoiseSpread;
-			this.m_BendFactor = other.m_BendFactor;
-			this.m_RenderMode = other.m_RenderMode;
-			this.m_UsePrototypeMesh = other.m_UsePrototypeMesh;
-		}
-
 		public GameObject prototype
 		{
 			get
@@ -168,8 +148,28 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.m_UsePrototypeMesh = ((!value) ? 0 : 1);
+				this.m_UsePrototypeMesh = (value ? 1 : 0);
 			}
+		}
+
+		public DetailPrototype()
+		{
+		}
+
+		public DetailPrototype(DetailPrototype other)
+		{
+			this.m_Prototype = other.m_Prototype;
+			this.m_PrototypeTexture = other.m_PrototypeTexture;
+			this.m_HealthyColor = other.m_HealthyColor;
+			this.m_DryColor = other.m_DryColor;
+			this.m_MinWidth = other.m_MinWidth;
+			this.m_MaxWidth = other.m_MaxWidth;
+			this.m_MinHeight = other.m_MinHeight;
+			this.m_MaxHeight = other.m_MaxHeight;
+			this.m_NoiseSpread = other.m_NoiseSpread;
+			this.m_BendFactor = other.m_BendFactor;
+			this.m_RenderMode = other.m_RenderMode;
+			this.m_UsePrototypeMesh = other.m_UsePrototypeMesh;
 		}
 
 		public override bool Equals(object obj)
@@ -184,25 +184,34 @@ namespace UnityEngine
 
 		private bool Equals(DetailPrototype other)
 		{
-			bool flag;
-			if (object.ReferenceEquals(other, null))
+			bool flag = other == null;
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
-			}
-			else if (object.ReferenceEquals(other, this))
-			{
-				flag = true;
-			}
-			else if (base.GetType() != other.GetType())
-			{
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
-				bool flag2 = this.m_Prototype == other.m_Prototype && this.m_PrototypeTexture == other.m_PrototypeTexture && this.m_HealthyColor == other.m_HealthyColor && this.m_DryColor == other.m_DryColor && this.m_MinWidth == other.m_MinWidth && this.m_MaxWidth == other.m_MaxWidth && this.m_MinHeight == other.m_MinHeight && this.m_MaxHeight == other.m_MaxHeight && this.m_NoiseSpread == other.m_NoiseSpread && this.m_BendFactor == other.m_BendFactor && this.m_RenderMode == other.m_RenderMode && this.m_UsePrototypeMesh == other.m_UsePrototypeMesh;
-				flag = flag2;
+				bool flag3 = other == this;
+				if (flag3)
+				{
+					flag2 = true;
+				}
+				else
+				{
+					bool flag4 = base.GetType() != other.GetType();
+					if (flag4)
+					{
+						flag2 = false;
+					}
+					else
+					{
+						bool flag5 = this.m_Prototype == other.m_Prototype && this.m_PrototypeTexture == other.m_PrototypeTexture && this.m_HealthyColor == other.m_HealthyColor && this.m_DryColor == other.m_DryColor && this.m_MinWidth == other.m_MinWidth && this.m_MaxWidth == other.m_MaxWidth && this.m_MinHeight == other.m_MinHeight && this.m_MaxHeight == other.m_MaxHeight && this.m_NoiseSpread == other.m_NoiseSpread && this.m_BendFactor == other.m_BendFactor && this.m_RenderMode == other.m_RenderMode && this.m_UsePrototypeMesh == other.m_UsePrototypeMesh;
+						flag2 = flag5;
+					}
+				}
 			}
-			return flag;
+			return flag2;
 		}
 
 		internal GameObject m_Prototype = null;

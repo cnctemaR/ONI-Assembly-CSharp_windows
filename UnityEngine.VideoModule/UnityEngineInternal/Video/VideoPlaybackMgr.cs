@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngineInternal.Video
 {
-	[UsedByNativeCode]
 	[NativeHeader("Modules/Video/Public/Base/VideoMediaPlayback.h")]
+	[UsedByNativeCode]
 	internal class VideoPlaybackMgr : IDisposable
 	{
 		public VideoPlaybackMgr()
@@ -16,7 +16,8 @@ namespace UnityEngineInternal.Video
 
 		public void Dispose()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				VideoPlaybackMgr.Internal_Destroy(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;
@@ -31,7 +32,7 @@ namespace UnityEngineInternal.Video
 		private static extern void Internal_Destroy(IntPtr ptr);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern VideoPlayback CreateVideoPlayback(string fileName, VideoPlaybackMgr.MessageCallback errorCallback, VideoPlaybackMgr.Callback readyCallback, VideoPlaybackMgr.Callback reachedEndCallback);
+		public extern VideoPlayback CreateVideoPlayback(string fileName, VideoPlaybackMgr.MessageCallback errorCallback, VideoPlaybackMgr.Callback readyCallback, VideoPlaybackMgr.Callback reachedEndCallback, bool splitAlpha = false);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void ReleaseVideoPlayback(VideoPlayback playback);

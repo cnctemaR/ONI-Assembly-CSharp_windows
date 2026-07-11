@@ -20,14 +20,14 @@ namespace UnityEngine
 			DrivenPropertyManager.UnregisterPropertyPartial(driver, target, propertyPath);
 		}
 
-		[NativeConditional("UNITY_EDITOR")]
-		[Conditional("UNITY_EDITOR")]
 		[StaticAccessor("GetDrivenPropertyManager()", StaticAccessorType.Dot)]
+		[Conditional("UNITY_EDITOR")]
+		[NativeConditional("UNITY_EDITOR")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void UnregisterProperties([NotNull] Object driver);
 
-		[NativeConditional("UNITY_EDITOR")]
 		[StaticAccessor("GetDrivenPropertyManager()", StaticAccessorType.Dot)]
+		[NativeConditional("UNITY_EDITOR")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void RegisterPropertyPartial([NotNull] Object driver, [NotNull] Object target, [NotNull] string propertyPath);
 

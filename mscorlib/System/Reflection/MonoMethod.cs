@@ -92,8 +92,8 @@ namespace System.Reflection
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern object InternalInvoke(object obj, object[] parameters, out Exception exc);
 
-		[DebuggerStepThrough]
 		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public override object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
 		{
 			if (binder == null)

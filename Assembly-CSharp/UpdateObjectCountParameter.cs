@@ -37,7 +37,7 @@ internal class UpdateObjectCountParameter : LoopingSoundParameterUpdater
 			{
 				settings.useExponentialCurve = true;
 			}
-			settings.parameterIdx = description.GetParameterIdx(UpdateObjectCountParameter.parameterHash);
+			settings.parameterId = description.GetParameterId(UpdateObjectCountParameter.parameterHash);
 			settings.path = path_hash;
 			UpdateObjectCountParameter.settings[path_hash] = settings;
 		}
@@ -56,7 +56,7 @@ internal class UpdateObjectCountParameter : LoopingSoundParameterUpdater
 		{
 			num *= num;
 		}
-		ev.setParameterValueByIndex(settings.parameterIdx, num);
+		ev.setParameterByID(settings.parameterId, num, false);
 	}
 
 	public UpdateObjectCountParameter()
@@ -126,7 +126,7 @@ internal class UpdateObjectCountParameter : LoopingSoundParameterUpdater
 	{
 		public HashedString path;
 
-		public int parameterIdx;
+		public PARAMETER_ID parameterId;
 
 		public float minObjects;
 

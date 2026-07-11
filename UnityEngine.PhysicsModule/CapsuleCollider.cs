@@ -5,7 +5,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Dynamics/CapsuleCollider.h")]
+	[NativeHeader("Modules/Physics/CapsuleCollider.h")]
 	[RequiredByNativeCode]
 	public class CapsuleCollider : Collider
 	{

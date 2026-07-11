@@ -194,8 +194,8 @@ namespace System.Text
 			return this.GetBytes(ptr + charIndex, charCount, ptr2 + byteIndex, num, null);
 		}
 
-		[SecurityCritical]
 		[CLSCompliant(false)]
+		[SecurityCritical]
 		public unsafe override int GetBytes(char* chars, int charCount, byte* bytes, int byteCount)
 		{
 			if (bytes == null || chars == null)
@@ -240,8 +240,8 @@ namespace System.Text
 			return this.GetCharCount(ptr + index, count, null);
 		}
 
-		[SecurityCritical]
 		[CLSCompliant(false)]
+		[SecurityCritical]
 		public unsafe override int GetCharCount(byte* bytes, int count)
 		{
 			if (bytes == null)

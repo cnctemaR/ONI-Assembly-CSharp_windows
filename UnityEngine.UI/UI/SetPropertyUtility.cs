@@ -7,47 +7,32 @@ namespace UnityEngine.UI
 	{
 		public static bool SetColor(ref Color currentValue, Color newValue)
 		{
-			bool flag;
 			if (currentValue.r == newValue.r && currentValue.g == newValue.g && currentValue.b == newValue.b && currentValue.a == newValue.a)
 			{
-				flag = false;
+				return false;
 			}
-			else
-			{
-				currentValue = newValue;
-				flag = true;
-			}
-			return flag;
+			currentValue = newValue;
+			return true;
 		}
 
 		public static bool SetStruct<T>(ref T currentValue, T newValue) where T : struct
 		{
-			bool flag;
 			if (EqualityComparer<T>.Default.Equals(currentValue, newValue))
 			{
-				flag = false;
+				return false;
 			}
-			else
-			{
-				currentValue = newValue;
-				flag = true;
-			}
-			return flag;
+			currentValue = newValue;
+			return true;
 		}
 
 		public static bool SetClass<T>(ref T currentValue, T newValue) where T : class
 		{
-			bool flag;
 			if ((currentValue == null && newValue == null) || (currentValue != null && currentValue.Equals(newValue)))
 			{
-				flag = false;
+				return false;
 			}
-			else
-			{
-				currentValue = newValue;
-				flag = true;
-			}
-			return flag;
+			currentValue = newValue;
+			return true;
 		}
 	}
 }

@@ -2,7 +2,7 @@
 
 namespace JetBrains.Annotations
 {
-	[AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = true)]
+	[AttributeUsage(AttributeTargets.All)]
 	public sealed class LocalizationRequiredAttribute : Attribute
 	{
 		public LocalizationRequiredAttribute()
@@ -15,6 +15,6 @@ namespace JetBrains.Annotations
 			this.Required = required;
 		}
 
-		public bool Required { get; private set; }
+		public bool Required { get; }
 	}
 }

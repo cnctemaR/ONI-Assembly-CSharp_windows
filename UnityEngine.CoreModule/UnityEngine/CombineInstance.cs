@@ -12,7 +12,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.m_MeshInstanceID = ((!(value != null)) ? 0 : value.GetInstanceID());
+				this.m_MeshInstanceID = ((value != null) ? value.GetInstanceID() : 0);
 			}
 		}
 

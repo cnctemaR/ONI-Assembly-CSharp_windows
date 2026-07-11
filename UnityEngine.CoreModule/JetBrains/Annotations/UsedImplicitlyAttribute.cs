@@ -2,7 +2,7 @@
 
 namespace JetBrains.Annotations
 {
-	[AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = true)]
+	[AttributeUsage(AttributeTargets.All, Inherited = false)]
 	public sealed class UsedImplicitlyAttribute : Attribute
 	{
 		public UsedImplicitlyAttribute()
@@ -26,8 +26,8 @@ namespace JetBrains.Annotations
 			this.TargetFlags = targetFlags;
 		}
 
-		public ImplicitUseKindFlags UseKindFlags { get; private set; }
+		public ImplicitUseKindFlags UseKindFlags { get; }
 
-		public ImplicitUseTargetFlags TargetFlags { get; private set; }
+		public ImplicitUseTargetFlags TargetFlags { get; }
 	}
 }

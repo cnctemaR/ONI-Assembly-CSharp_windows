@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
-	[ComDefaultInterface(typeof(_FieldInfo))]
 	[ClassInterface(ClassInterfaceType.None)]
+	[ComDefaultInterface(typeof(_FieldInfo))]
+	[ComVisible(true)]
 	[Serializable]
 	public abstract class FieldInfo : MemberInfo, _FieldInfo
 	{

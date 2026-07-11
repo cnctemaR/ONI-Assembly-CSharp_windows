@@ -91,7 +91,7 @@ public class CountedSoundEvent : SoundEvent
 			{
 				if (num >= 0)
 				{
-					eventInstance.setParameterValue("eventCount", (float)num);
+					eventInstance.setParameterByName("eventCount", (float)num, false);
 				}
 				SoundEvent.EndOneShot(eventInstance);
 			}

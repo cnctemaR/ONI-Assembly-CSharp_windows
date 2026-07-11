@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.U2D
 {
-	[NativeType(Header = "Runtime/2D/SpriteAtlas/SpriteAtlas.h")]
 	[NativeHeader("Runtime/Graphics/SpriteFrame.h")]
+	[NativeType(Header = "Runtime/2D/SpriteAtlas/SpriteAtlas.h")]
 	public class SpriteAtlas : Object
 	{
 		public extern bool isVariant
@@ -28,7 +28,7 @@ namespace UnityEngine.U2D
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool CanBindTo(Sprite sprite);
+		public extern bool CanBindTo([NotNull] Sprite sprite);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Sprite GetSprite(string name);

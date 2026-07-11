@@ -10,34 +10,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[NativeHeader("Runtime/Export/ComputeShader.bindings.h")]
+	[NativeHeader("Runtime/Export/Shaders/ComputeShader.bindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	public sealed class ComputeBuffer : IDisposable
 	{
-		public ComputeBuffer(int count, int stride)
-			: this(count, stride, ComputeBufferType.Default, 3)
-		{
-		}
-
-		public ComputeBuffer(int count, int stride, ComputeBufferType type)
-			: this(count, stride, type, 3)
-		{
-		}
-
-		internal ComputeBuffer(int count, int stride, ComputeBufferType type, int stackDepth)
-		{
-			if (count <= 0)
-			{
-				throw new ArgumentException("Attempting to create a zero length compute buffer", "count");
-			}
-			if (stride <= 0)
-			{
-				throw new ArgumentException("Attempting to create a compute buffer with a negative or null stride", "stride");
-			}
-			this.m_Ptr = ComputeBuffer.InitBuffer(count, stride, type);
-		}
-
 		~ComputeBuffer()
 		{
 			this.Dispose(false);
@@ -55,20 +32,54 @@ namespace UnityEngine
 			{
 				ComputeBuffer.DestroyBuffer(this);
 			}
-			else if (this.m_Ptr != IntPtr.Zero)
+			else
 			{
-				Debug.LogWarning("GarbageCollector disposing of ComputeBuffer. Please use ComputeBuffer.Release() or .Dispose() to manually release the buffer.");
+				bool flag = this.m_Ptr != IntPtr.Zero;
+				if (flag)
+				{
+					Debug.LogWarning("GarbageCollector disposing of ComputeBuffer. Please use ComputeBuffer.Release() or .Dispose() to manually release the buffer.");
+				}
 			}
 			this.m_Ptr = IntPtr.Zero;
 		}
 
 		[FreeFunction("ComputeShader_Bindings::InitBuffer")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr InitBuffer(int count, int stride, ComputeBufferType type);
+		private static extern IntPtr InitBuffer(int count, int stride, ComputeBufferType type, ComputeBufferMode usage);
 
 		[FreeFunction("ComputeShader_Bindings::DestroyBuffer")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void DestroyBuffer(ComputeBuffer buf);
+
+		public ComputeBuffer(int count, int stride)
+			: this(count, stride, ComputeBufferType.Default, ComputeBufferMode.Immutable, 3)
+		{
+		}
+
+		public ComputeBuffer(int count, int stride, ComputeBufferType type)
+			: this(count, stride, type, ComputeBufferMode.Immutable, 3)
+		{
+		}
+
+		public ComputeBuffer(int count, int stride, ComputeBufferType type, ComputeBufferMode usage)
+			: this(count, stride, type, usage, 3)
+		{
+		}
+
+		internal ComputeBuffer(int count, int stride, ComputeBufferType type, ComputeBufferMode usage, int stackDepth)
+		{
+			bool flag = count <= 0;
+			if (flag)
+			{
+				throw new ArgumentException("Attempting to create a zero length compute buffer", "count");
+			}
+			bool flag2 = stride <= 0;
+			if (flag2)
+			{
+				throw new ArgumentException("Attempting to create a compute buffer with a negative or null stride", "stride");
+			}
+			this.m_Ptr = ComputeBuffer.InitBuffer(count, stride, type, usage);
+		}
 
 		public void Release()
 		{
@@ -95,11 +106,13 @@ namespace UnityEngine
 		[SecuritySafeCritical]
 		public void SetData(Array data)
 		{
-			if (data == null)
+			bool flag = data == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("data");
 			}
-			if (!UnsafeUtility.IsArrayBlittable(data))
+			bool flag2 = !UnsafeUtility.IsArrayBlittable(data);
+			if (flag2)
 			{
 				throw new ArgumentException(string.Format("Array passed to ComputeBuffer.SetData(array) must be blittable.\n{0}", UnsafeUtility.GetReasonForArrayNonBlittable(data)));
 			}
@@ -109,11 +122,13 @@ namespace UnityEngine
 		[SecuritySafeCritical]
 		public void SetData<T>(List<T> data) where T : struct
 		{
-			if (data == null)
+			bool flag = data == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("data");
 			}
-			if (!UnsafeUtility.IsGenericListBlittable<T>())
+			bool flag2 = !UnsafeUtility.IsGenericListBlittable<T>();
+			if (flag2)
 			{
 				throw new ArgumentException(string.Format("List<{0}> passed to ComputeBuffer.SetData(List<>) must be blittable.\n{1}", typeof(T), UnsafeUtility.GetReasonForGenericListNonBlittable<T>()));
 			}
@@ -129,15 +144,18 @@ namespace UnityEngine
 		[SecuritySafeCritical]
 		public void SetData(Array data, int managedBufferStartIndex, int computeBufferStartIndex, int count)
 		{
-			if (data == null)
+			bool flag = data == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("data");
 			}
-			if (!UnsafeUtility.IsArrayBlittable(data))
+			bool flag2 = !UnsafeUtility.IsArrayBlittable(data);
+			if (flag2)
 			{
 				throw new ArgumentException(string.Format("Array passed to ComputeBuffer.SetData(array) must be blittable.\n{0}", UnsafeUtility.GetReasonForArrayNonBlittable(data)));
 			}
-			if (managedBufferStartIndex < 0 || computeBufferStartIndex < 0 || count < 0 || managedBufferStartIndex + count > data.Length)
+			bool flag3 = managedBufferStartIndex < 0 || computeBufferStartIndex < 0 || count < 0 || managedBufferStartIndex + count > data.Length;
+			if (flag3)
 			{
 				throw new ArgumentOutOfRangeException(string.Format("Bad indices/count arguments (managedBufferStartIndex:{0} computeBufferStartIndex:{1} count:{2})", managedBufferStartIndex, computeBufferStartIndex, count));
 			}
@@ -147,15 +165,18 @@ namespace UnityEngine
 		[SecuritySafeCritical]
 		public void SetData<T>(List<T> data, int managedBufferStartIndex, int computeBufferStartIndex, int count) where T : struct
 		{
-			if (data == null)
+			bool flag = data == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("data");
 			}
-			if (!UnsafeUtility.IsGenericListBlittable<T>())
+			bool flag2 = !UnsafeUtility.IsGenericListBlittable<T>();
+			if (flag2)
 			{
 				throw new ArgumentException(string.Format("List<{0}> passed to ComputeBuffer.SetData(List<>) must be blittable.\n{1}", typeof(T), UnsafeUtility.GetReasonForGenericListNonBlittable<T>()));
 			}
-			if (managedBufferStartIndex < 0 || computeBufferStartIndex < 0 || count < 0 || managedBufferStartIndex + count > data.Count)
+			bool flag3 = managedBufferStartIndex < 0 || computeBufferStartIndex < 0 || count < 0 || managedBufferStartIndex + count > data.Count;
+			if (flag3)
 			{
 				throw new ArgumentOutOfRangeException(string.Format("Bad indices/count arguments (managedBufferStartIndex:{0} computeBufferStartIndex:{1} count:{2})", managedBufferStartIndex, computeBufferStartIndex, count));
 			}
@@ -165,7 +186,8 @@ namespace UnityEngine
 		[SecuritySafeCritical]
 		public void SetData<T>(NativeArray<T> data, int nativeBufferStartIndex, int computeBufferStartIndex, int count) where T : struct
 		{
-			if (nativeBufferStartIndex < 0 || computeBufferStartIndex < 0 || count < 0 || nativeBufferStartIndex + count > data.Length)
+			bool flag = nativeBufferStartIndex < 0 || computeBufferStartIndex < 0 || count < 0 || nativeBufferStartIndex + count > data.Length;
+			if (flag)
 			{
 				throw new ArgumentOutOfRangeException(string.Format("Bad indices/count arguments (nativeBufferStartIndex:{0} computeBufferStartIndex:{1} count:{2})", nativeBufferStartIndex, computeBufferStartIndex, count));
 			}
@@ -185,11 +207,13 @@ namespace UnityEngine
 		[SecurityCritical]
 		public void GetData(Array data)
 		{
-			if (data == null)
+			bool flag = data == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("data");
 			}
-			if (!UnsafeUtility.IsArrayBlittable(data))
+			bool flag2 = !UnsafeUtility.IsArrayBlittable(data);
+			if (flag2)
 			{
 				throw new ArgumentException(string.Format("Array passed to ComputeBuffer.GetData(array) must be blittable.\n{0}", UnsafeUtility.GetReasonForArrayNonBlittable(data)));
 			}
@@ -199,15 +223,18 @@ namespace UnityEngine
 		[SecurityCritical]
 		public void GetData(Array data, int managedBufferStartIndex, int computeBufferStartIndex, int count)
 		{
-			if (data == null)
+			bool flag = data == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("data");
 			}
-			if (!UnsafeUtility.IsArrayBlittable(data))
+			bool flag2 = !UnsafeUtility.IsArrayBlittable(data);
+			if (flag2)
 			{
 				throw new ArgumentException(string.Format("Array passed to ComputeBuffer.GetData(array) must be blittable.\n{0}", UnsafeUtility.GetReasonForArrayNonBlittable(data)));
 			}
-			if (managedBufferStartIndex < 0 || computeBufferStartIndex < 0 || count < 0 || managedBufferStartIndex + count > data.Length)
+			bool flag3 = managedBufferStartIndex < 0 || computeBufferStartIndex < 0 || count < 0 || managedBufferStartIndex + count > data.Length;
+			if (flag3)
 			{
 				throw new ArgumentOutOfRangeException(string.Format("Bad indices/count argument (managedBufferStartIndex:{0} computeBufferStartIndex:{1} count:{2})", managedBufferStartIndex, computeBufferStartIndex, count));
 			}
@@ -218,6 +245,18 @@ namespace UnityEngine
 		[FreeFunction(Name = "ComputeShader_Bindings::InternalGetData", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalGetData(Array data, int managedBufferStartIndex, int computeBufferStartIndex, int count, int elemSize);
+
+		public string name
+		{
+			set
+			{
+				this.SetName(value);
+			}
+		}
+
+		[FreeFunction(Name = "ComputeShader_Bindings::SetName", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetName(string name);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetCounterValue(uint counterValue);

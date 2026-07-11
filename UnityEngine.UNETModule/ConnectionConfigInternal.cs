@@ -6,21 +6,23 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Networking
 {
-	[NativeHeader("Runtime/Networking/UNETManager.h")]
-	[NativeHeader("Runtime/Networking/UNETConfiguration.h")]
 	[NativeConditional("ENABLE_NETWORK && ENABLE_UNET", true)]
-	[NativeHeader("Runtime/Networking/UNetTypes.h")]
+	[NativeHeader("Modules/UNET/UNETConfiguration.h")]
+	[NativeHeader("Modules/UNET/UNetTypes.h")]
+	[NativeHeader("Modules/UNET/UNETManager.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	internal class ConnectionConfigInternal : IDisposable
 	{
 		public ConnectionConfigInternal(ConnectionConfig config)
 		{
-			if (config == null)
+			bool flag = config == null;
+			if (flag)
 			{
 				throw new NullReferenceException("config is not defined");
 			}
 			this.m_Ptr = ConnectionConfigInternal.InternalCreate();
-			if (!this.SetPacketSize(config.PacketSize))
+			bool flag2 = !this.SetPacketSize(config.PacketSize);
+			if (flag2)
 			{
 				throw new ArgumentOutOfRangeException("PacketSize is too small");
 			}
@@ -46,26 +48,32 @@ namespace UnityEngine.Networking
 			this.BandwidthPeakFactor = config.BandwidthPeakFactor;
 			this.WebSocketReceiveBufferMaxSize = config.WebSocketReceiveBufferMaxSize;
 			this.UdpSocketReceiveBufferMaxSize = config.UdpSocketReceiveBufferMaxSize;
-			if (config.SSLCertFilePath != null)
+			bool flag3 = config.SSLCertFilePath != null;
+			if (flag3)
 			{
 				int num = this.SetSSLCertFilePath(config.SSLCertFilePath);
-				if (num != 0)
+				bool flag4 = num != 0;
+				if (flag4)
 				{
 					throw new ArgumentOutOfRangeException("SSLCertFilePath cannot be > than " + num.ToString());
 				}
 			}
-			if (config.SSLPrivateKeyFilePath != null)
+			bool flag5 = config.SSLPrivateKeyFilePath != null;
+			if (flag5)
 			{
 				int num2 = this.SetSSLPrivateKeyFilePath(config.SSLPrivateKeyFilePath);
-				if (num2 != 0)
+				bool flag6 = num2 != 0;
+				if (flag6)
 				{
 					throw new ArgumentOutOfRangeException("SSLPrivateKeyFilePath cannot be > than " + num2.ToString());
 				}
 			}
-			if (config.SSLCAFilePath != null)
+			bool flag7 = config.SSLCAFilePath != null;
+			if (flag7)
 			{
 				int num3 = this.SetSSLCAFilePath(config.SSLCAFilePath);
-				if (num3 != 0)
+				bool flag8 = num3 != 0;
+				if (flag8)
 				{
 					throw new ArgumentOutOfRangeException("SSLCAFilePath cannot be > than " + num3.ToString());
 				}
@@ -89,7 +97,8 @@ namespace UnityEngine.Networking
 
 		protected virtual void Dispose(bool disposing)
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				ConnectionConfigInternal.InternalDestroy(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;
@@ -103,7 +112,8 @@ namespace UnityEngine.Networking
 
 		public void Dispose()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				ConnectionConfigInternal.InternalDestroy(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;

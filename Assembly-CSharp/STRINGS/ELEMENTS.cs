@@ -136,6 +136,21 @@ namespace STRINGS
 			public static LocString NEARLYIMPENETRABLE = "{0} (Nearly Impenetrable)";
 
 			public static LocString IMPENETRABLE = "{0} (Impenetrable)";
+
+			public class HARDNESS_DESCRIPTOR
+			{
+				public static LocString SOFT = "Soft";
+
+				public static LocString VERYSOFT = "Very Soft";
+
+				public static LocString FIRM = "Firm";
+
+				public static LocString VERYFIRM = "Very Firm";
+
+				public static LocString NEARLYIMPENETRABLE = "Nearly Impenetrable";
+
+				public static LocString IMPENETRABLE = "Impenetrable";
+			}
 		}
 
 		public class AEROGEL

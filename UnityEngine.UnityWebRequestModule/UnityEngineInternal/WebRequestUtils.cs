@@ -11,8 +11,9 @@ namespace UnityEngineInternal
 		[RequiredByNativeCode]
 		internal static string RedirectTo(string baseUri, string redirectUri)
 		{
+			bool flag = redirectUri[0] == '/';
 			Uri uri;
-			if (redirectUri[0] == '/')
+			if (flag)
 			{
 				uri = new Uri(redirectUri, UriKind.Relative);
 			}
@@ -20,8 +21,9 @@ namespace UnityEngineInternal
 			{
 				uri = new Uri(redirectUri, UriKind.RelativeOrAbsolute);
 			}
+			bool isAbsoluteUri = uri.IsAbsoluteUri;
 			string text;
-			if (uri.IsAbsoluteUri)
+			if (isAbsoluteUri)
 			{
 				text = uri.AbsoluteUri;
 			}
@@ -36,30 +38,34 @@ namespace UnityEngineInternal
 
 		internal static string MakeInitialUrl(string targetUrl, string localUrl)
 		{
+			bool flag = string.IsNullOrEmpty(targetUrl);
 			string text;
-			if (string.IsNullOrEmpty(targetUrl))
+			if (flag)
 			{
 				text = "";
 			}
 			else
 			{
-				bool flag = false;
+				bool flag2 = false;
 				Uri uri = new Uri(localUrl);
 				Uri uri2 = null;
-				if (targetUrl[0] == '/')
+				bool flag3 = targetUrl[0] == '/';
+				if (flag3)
 				{
 					uri2 = new Uri(uri, targetUrl);
-					flag = true;
+					flag2 = true;
 				}
-				if (uri2 == null && WebRequestUtils.domainRegex.IsMatch(targetUrl))
+				bool flag4 = uri2 == null && WebRequestUtils.domainRegex.IsMatch(targetUrl);
+				if (flag4)
 				{
 					targetUrl = uri.Scheme + "://" + targetUrl;
-					flag = true;
+					flag2 = true;
 				}
 				FormatException ex = null;
 				try
 				{
-					if (uri2 == null && targetUrl[0] != '.')
+					bool flag5 = uri2 == null && targetUrl[0] != '.';
+					if (flag5)
 					{
 						uri2 = new Uri(targetUrl);
 					}
@@ -68,42 +74,47 @@ namespace UnityEngineInternal
 				{
 					ex = ex2;
 				}
-				if (uri2 == null)
+				bool flag6 = uri2 == null;
+				if (flag6)
 				{
 					try
 					{
 						uri2 = new Uri(uri, targetUrl);
-						flag = true;
+						flag2 = true;
 					}
 					catch (FormatException)
 					{
 						throw ex;
 					}
 				}
-				text = WebRequestUtils.MakeUriString(uri2, targetUrl, flag);
+				text = WebRequestUtils.MakeUriString(uri2, targetUrl, flag2);
 			}
 			return text;
 		}
 
 		internal static string MakeUriString(Uri targetUri, string targetUrl, bool prependProtocol)
 		{
+			bool isFile = targetUri.IsFile;
 			string text;
-			if (targetUri.IsFile)
+			if (isFile)
 			{
-				if (!targetUri.IsLoopback)
+				bool flag = !targetUri.IsLoopback;
+				if (flag)
 				{
 					text = targetUri.OriginalString;
 				}
 				else
 				{
 					string text2 = targetUri.AbsolutePath;
-					if (text2.Contains("%"))
+					bool flag2 = text2.Contains("%");
+					if (flag2)
 					{
 						text2 = WebRequestUtils.URLDecode(text2);
 					}
-					if (text2.Length > 0 && text2[0] != '/')
+					bool flag3 = text2.Length > 0 && text2[0] != '/';
+					if (flag3)
 					{
-						text2 = '/' + text2;
+						text2 = "/" + text2;
 					}
 					text = "file://" + text2;
 				}
@@ -111,18 +122,22 @@ namespace UnityEngineInternal
 			else
 			{
 				string scheme = targetUri.Scheme;
-				if (!prependProtocol && targetUrl.Length >= scheme.Length + 2 && targetUrl[scheme.Length + 1] != '/')
+				bool flag4 = !prependProtocol && targetUrl.Length >= scheme.Length + 2 && targetUrl[scheme.Length + 1] != '/';
+				if (flag4)
 				{
 					StringBuilder stringBuilder = new StringBuilder(scheme, targetUrl.Length);
 					stringBuilder.Append(':');
-					if (scheme == "jar")
+					bool flag5 = scheme == "jar";
+					if (flag5)
 					{
 						string text3 = targetUri.AbsolutePath;
-						if (text3.Contains("%"))
+						bool flag6 = text3.Contains("%");
+						if (flag6)
 						{
 							text3 = WebRequestUtils.URLDecode(text3);
 						}
-						if (text3.StartsWith("file:/") && text3.Length > 6 && text3[6] != '/')
+						bool flag7 = text3.StartsWith("file:/") && text3.Length > 6 && text3[6] != '/';
+						if (flag7)
 						{
 							stringBuilder.Append("file://");
 							stringBuilder.Append(text3.Substring(5));
@@ -140,13 +155,17 @@ namespace UnityEngineInternal
 						text = stringBuilder.ToString();
 					}
 				}
-				else if (targetUrl.Contains("%"))
-				{
-					text = targetUri.OriginalString;
-				}
 				else
 				{
-					text = targetUri.AbsoluteUri;
+					bool flag8 = targetUrl.Contains("%");
+					if (flag8)
+					{
+						text = targetUri.OriginalString;
+					}
+					else
+					{
+						text = targetUri.AbsoluteUri;
+					}
 				}
 			}
 			return text;

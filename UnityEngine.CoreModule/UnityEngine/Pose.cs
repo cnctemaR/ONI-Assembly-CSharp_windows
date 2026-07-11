@@ -13,12 +13,20 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return string.Format("({0}, {1})", this.position.ToString(), this.rotation.ToString());
+			return UnityString.Format("({0}, {1})", new object[]
+			{
+				this.position.ToString(),
+				this.rotation.ToString()
+			});
 		}
 
 		public string ToString(string format)
 		{
-			return string.Format("({0}, {1})", this.position.ToString(format), this.rotation.ToString(format));
+			return UnityString.Format("({0}, {1})", new object[]
+			{
+				this.position.ToString(format),
+				this.rotation.ToString(format)
+			});
 		}
 
 		public Pose GetTransformedBy(Pose lhs)
@@ -73,7 +81,8 @@ namespace UnityEngine
 
 		public override bool Equals(object obj)
 		{
-			return obj is Pose && this.Equals((Pose)obj);
+			bool flag = !(obj is Pose);
+			return !flag && this.Equals((Pose)obj);
 		}
 
 		public bool Equals(Pose other)

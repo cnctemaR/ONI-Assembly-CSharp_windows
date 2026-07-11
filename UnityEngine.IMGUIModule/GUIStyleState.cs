@@ -10,17 +10,6 @@ namespace UnityEngine
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class GUIStyleState
 	{
-		public GUIStyleState()
-		{
-			this.m_Ptr = GUIStyleState.Init();
-		}
-
-		private GUIStyleState(GUIStyle sourceStyle, IntPtr source)
-		{
-			this.m_SourceStyle = sourceStyle;
-			this.m_Ptr = source;
-		}
-
 		[NativeProperty("Background", false, TargetType.Function)]
 		public extern Texture2D background
 		{
@@ -53,6 +42,17 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Cleanup();
 
+		public GUIStyleState()
+		{
+			this.m_Ptr = GUIStyleState.Init();
+		}
+
+		private GUIStyleState(GUIStyle sourceStyle, IntPtr source)
+		{
+			this.m_SourceStyle = sourceStyle;
+			this.m_Ptr = source;
+		}
+
 		internal static GUIStyleState ProduceGUIStyleStateFromDeserialization(GUIStyle sourceStyle, IntPtr source)
 		{
 			return new GUIStyleState(sourceStyle, source);
@@ -63,12 +63,20 @@ namespace UnityEngine
 			return new GUIStyleState(sourceStyle, source);
 		}
 
-		~GUIStyleState()
+		protected override void Finalize()
 		{
-			if (this.m_SourceStyle == null)
+			try
 			{
-				this.Cleanup();
-				this.m_Ptr = IntPtr.Zero;
+				bool flag = this.m_SourceStyle == null;
+				if (flag)
+				{
+					this.Cleanup();
+					this.m_Ptr = IntPtr.Zero;
+				}
+			}
+			finally
+			{
+				base.Finalize();
 			}
 		}
 

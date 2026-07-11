@@ -27,8 +27,8 @@ namespace Microsoft.Win32.SafeHandles
 			return SafeRegistryHandle.RegCloseKey(this.handle) == 0;
 		}
 
-		[SuppressUnmanagedCodeSecurity]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[SuppressUnmanagedCodeSecurity]
 		[DllImport("advapi32.dll")]
 		internal static extern int RegCloseKey(IntPtr hKey);
 	}

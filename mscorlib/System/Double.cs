@@ -33,8 +33,8 @@ namespace System
 			return (*(long*)(&d) & long.MinValue) == long.MinValue;
 		}
 
-		[SecuritySafeCritical]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[SecuritySafeCritical]
 		public unsafe static bool IsNaN(double d)
 		{
 			return (*(long*)(&d) & long.MaxValue) > 9218868437227405312L;

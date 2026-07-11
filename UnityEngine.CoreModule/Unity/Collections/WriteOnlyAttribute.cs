@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace Unity.Collections
 {
-	[RequiredByNativeCode]
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
+	[RequiredByNativeCode]
 	public sealed class WriteOnlyAttribute : Attribute
 	{
 	}

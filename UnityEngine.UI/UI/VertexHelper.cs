@@ -86,7 +86,11 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				return (this.m_Positions == null) ? 0 : this.m_Positions.Count;
+				if (this.m_Positions == null)
+				{
+					return 0;
+				}
+				return this.m_Positions.Count;
 			}
 		}
 
@@ -94,7 +98,11 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				return (this.m_Indices == null) ? 0 : this.m_Indices.Count;
+				if (this.m_Indices == null)
+				{
+					return 0;
+				}
+				return this.m_Indices.Count;
 			}
 		}
 
@@ -144,7 +152,7 @@ namespace UnityEngine.UI
 			mesh.RecalculateBounds();
 		}
 
-		internal void AddVert(Vector3 position, Color32 color, Vector2 uv0, Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector3 normal, Vector4 tangent)
+		public void AddVert(Vector3 position, Color32 color, Vector2 uv0, Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector3 normal, Vector4 tangent)
 		{
 			this.InitializeListIfRequired();
 			this.m_Positions.Add(position);
@@ -169,7 +177,7 @@ namespace UnityEngine.UI
 
 		public void AddVert(UIVertex v)
 		{
-			this.AddVert(v.position, v.color, v.uv0, v.uv1, v.normal, v.tangent);
+			this.AddVert(v.position, v.color, v.uv0, v.uv1, v.uv2, v.uv3, v.normal, v.tangent);
 		}
 
 		public void AddTriangle(int idx0, int idx1, int idx2)
@@ -206,20 +214,22 @@ namespace UnityEngine.UI
 
 		public void AddUIVertexTriangleStream(List<UIVertex> verts)
 		{
-			if (verts != null)
+			if (verts == null)
 			{
-				this.InitializeListIfRequired();
-				CanvasRenderer.SplitUIVertexStreams(verts, this.m_Positions, this.m_Colors, this.m_Uv0S, this.m_Uv1S, this.m_Uv2S, this.m_Uv3S, this.m_Normals, this.m_Tangents, this.m_Indices);
+				return;
 			}
+			this.InitializeListIfRequired();
+			CanvasRenderer.SplitUIVertexStreams(verts, this.m_Positions, this.m_Colors, this.m_Uv0S, this.m_Uv1S, this.m_Uv2S, this.m_Uv3S, this.m_Normals, this.m_Tangents, this.m_Indices);
 		}
 
 		public void GetUIVertexStream(List<UIVertex> stream)
 		{
-			if (stream != null)
+			if (stream == null)
 			{
-				this.InitializeListIfRequired();
-				CanvasRenderer.CreateUIVertexStream(stream, this.m_Positions, this.m_Colors, this.m_Uv0S, this.m_Uv1S, this.m_Uv2S, this.m_Uv3S, this.m_Normals, this.m_Tangents, this.m_Indices);
+				return;
 			}
+			this.InitializeListIfRequired();
+			CanvasRenderer.CreateUIVertexStream(stream, this.m_Positions, this.m_Colors, this.m_Uv0S, this.m_Uv1S, this.m_Uv2S, this.m_Uv3S, this.m_Normals, this.m_Tangents, this.m_Indices);
 		}
 
 		private List<Vector3> m_Positions;
@@ -244,6 +254,6 @@ namespace UnityEngine.UI
 
 		private static readonly Vector3 s_DefaultNormal = Vector3.back;
 
-		private bool m_ListsInitalized = false;
+		private bool m_ListsInitalized;
 	}
 }

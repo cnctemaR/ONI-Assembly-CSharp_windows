@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	public sealed class AssemblyKeyNameAttribute : Attribute
 	{
 		public AssemblyKeyNameAttribute(string keyName)

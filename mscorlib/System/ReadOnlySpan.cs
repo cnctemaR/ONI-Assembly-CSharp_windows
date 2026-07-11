@@ -4,8 +4,9 @@ using System.Runtime.CompilerServices;
 
 namespace System
 {
-	[DebuggerDisplay("{DebuggerDisplay,nq}")]
+	[Obsolete("Types with embedded references are not supported in this version of your compiler.", true)]
 	[DebuggerTypeProxy(typeof(SpanDebugView<>))]
+	[DebuggerDisplay("{DebuggerDisplay,nq}")]
 	public readonly ref struct ReadOnlySpan<T>
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

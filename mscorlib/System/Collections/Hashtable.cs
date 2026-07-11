@@ -9,9 +9,9 @@ using System.Threading;
 
 namespace System.Collections
 {
-	[DebuggerTypeProxy(typeof(Hashtable.HashtableDebugView))]
 	[DebuggerDisplay("Count = {Count}")]
 	[ComVisible(true)]
+	[DebuggerTypeProxy(typeof(Hashtable.HashtableDebugView))]
 	[Serializable]
 	public class Hashtable : IDictionary, ICollection, IEnumerable, ISerializable, IDeserializationCallback, ICloneable
 	{

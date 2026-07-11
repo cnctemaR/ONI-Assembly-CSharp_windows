@@ -4,8 +4,8 @@ using System.Runtime.Serialization;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Obsolete("This type previously indicated an unspecified fatal error in the runtime. The runtime no longer raises this exception so this type is obsolete.")]
+	[ComVisible(true)]
 	[Serializable]
 	public sealed class ExecutionEngineException : SystemException
 	{

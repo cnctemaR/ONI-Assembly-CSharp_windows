@@ -2,7 +2,7 @@
 
 namespace JetBrains.Annotations
 {
-	[AttributeUsage(AttributeTargets.Parameter, Inherited = true)]
+	[AttributeUsage(AttributeTargets.Parameter)]
 	public sealed class InstantHandleAttribute : Attribute
 	{
 	}

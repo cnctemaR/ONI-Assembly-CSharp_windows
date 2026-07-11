@@ -5,9 +5,9 @@ using Unity;
 
 namespace System.Reflection.Emit
 {
-	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_PropertyBuilder))]
+	[ComVisible(true)]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class PropertyBuilder : PropertyInfo, _PropertyBuilder
 	{

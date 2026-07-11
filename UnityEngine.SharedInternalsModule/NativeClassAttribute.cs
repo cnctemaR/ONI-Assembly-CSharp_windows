@@ -7,6 +7,10 @@ namespace UnityEngine
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
 	internal sealed class NativeClassAttribute : Attribute
 	{
+		public string QualifiedNativeName { get; private set; }
+
+		public string Declaration { get; private set; }
+
 		public NativeClassAttribute(string qualifiedCppName)
 		{
 			this.QualifiedNativeName = qualifiedCppName;
@@ -18,9 +22,5 @@ namespace UnityEngine
 			this.QualifiedNativeName = qualifiedCppName;
 			this.Declaration = declaration;
 		}
-
-		public string QualifiedNativeName { get; private set; }
-
-		public string Declaration { get; private set; }
 	}
 }

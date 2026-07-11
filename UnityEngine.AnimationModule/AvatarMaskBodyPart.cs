@@ -3,7 +3,7 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine
 {
-	[MovedFrom("UnityEditor.Animations", true)]
+	[MovedFrom(true, "UnityEditor.Animations", "UnityEditor", null)]
 	public enum AvatarMaskBodyPart
 	{
 		Root,

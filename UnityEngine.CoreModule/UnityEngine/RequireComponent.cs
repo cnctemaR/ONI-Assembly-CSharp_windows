@@ -1,8 +1,10 @@
 ﻿using System;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+	[RequiredByNativeCode]
 	public sealed class RequireComponent : Attribute
 	{
 		public RequireComponent(Type requiredComponent)

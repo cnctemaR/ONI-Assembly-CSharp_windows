@@ -63,9 +63,9 @@ namespace System.Threading
 		{
 		}
 
+		[CLSCompliant(false)]
 		[PrePrepareMethod]
 		[SecurityCritical]
-		[CLSCompliant(false)]
 		public virtual int Wait(IntPtr[] waitHandles, bool waitAll, int millisecondsTimeout)
 		{
 			if (waitHandles == null)

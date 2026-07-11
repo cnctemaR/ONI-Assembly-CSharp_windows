@@ -5,18 +5,6 @@ namespace UnityEngine.SceneManagement
 	[Serializable]
 	public struct LoadSceneParameters
 	{
-		public LoadSceneParameters(LoadSceneMode mode)
-		{
-			this.m_LoadSceneMode = mode;
-			this.m_LocalPhysicsMode = LocalPhysicsMode.None;
-		}
-
-		public LoadSceneParameters(LoadSceneMode mode, LocalPhysicsMode physicsMode)
-		{
-			this.m_LoadSceneMode = mode;
-			this.m_LocalPhysicsMode = physicsMode;
-		}
-
 		public LoadSceneMode loadSceneMode
 		{
 			get
@@ -39,6 +27,18 @@ namespace UnityEngine.SceneManagement
 			{
 				this.m_LocalPhysicsMode = value;
 			}
+		}
+
+		public LoadSceneParameters(LoadSceneMode mode)
+		{
+			this.m_LoadSceneMode = mode;
+			this.m_LocalPhysicsMode = LocalPhysicsMode.None;
+		}
+
+		public LoadSceneParameters(LoadSceneMode mode, LocalPhysicsMode physicsMode)
+		{
+			this.m_LoadSceneMode = mode;
+			this.m_LocalPhysicsMode = physicsMode;
 		}
 
 		[SerializeField]

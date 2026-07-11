@@ -585,8 +585,8 @@ namespace System.Security.Claims
 			this.m_serializedRoleType = this.m_roleType;
 		}
 
-		[OnDeserialized]
 		[SecurityCritical]
+		[OnDeserialized]
 		private void OnDeserializedMethod(StreamingContext context)
 		{
 			if (this is ISerializable)

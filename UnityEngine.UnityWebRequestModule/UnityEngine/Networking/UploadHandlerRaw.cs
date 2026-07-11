@@ -9,9 +9,13 @@ namespace UnityEngine.Networking
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class UploadHandlerRaw : UploadHandler
 	{
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr Create(UploadHandlerRaw self, byte[] data);
+
 		public UploadHandlerRaw(byte[] data)
 		{
-			if (data != null && data.Length == 0)
+			bool flag = data != null && data.Length == 0;
+			if (flag)
 			{
 				throw new ArgumentException("Cannot create a data handler without payload data");
 			}
@@ -19,41 +23,11 @@ namespace UnityEngine.Networking
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr Create(UploadHandlerRaw self, byte[] data);
-
-		[NativeMethod("GetContentType")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern string InternalGetContentType();
-
-		[NativeMethod("SetContentType")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalSetContentType(string newContentType);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern byte[] InternalGetData();
-
-		[NativeMethod("GetProgress")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern float InternalGetProgress();
-
-		internal override string GetContentType()
-		{
-			return this.InternalGetContentType();
-		}
-
-		internal override void SetContentType(string newContentType)
-		{
-			this.InternalSetContentType(newContentType);
-		}
 
 		internal override byte[] GetData()
 		{
 			return this.InternalGetData();
-		}
-
-		internal override float GetProgress()
-		{
-			return this.InternalGetProgress();
 		}
 	}
 }

@@ -14,7 +14,14 @@ namespace Mono.Net.Security
 		{
 			this.Offset = (this.Size = 0);
 			this.TotalBytes = 0;
-			this.Buffer = new byte[this.InitialSize];
+			if (this.Buffer.Length <= this.InitialSize)
+			{
+				Array.Clear(this.Buffer, 0, this.Buffer.Length);
+			}
+			else
+			{
+				this.Buffer = new byte[this.InitialSize];
+			}
 			this.Complete = false;
 		}
 

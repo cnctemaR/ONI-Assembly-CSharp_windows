@@ -6,10 +6,10 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
+	[RequireComponent(typeof(Transform))]
+	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Runtime/Export/Graphics/Light.bindings.h")]
 	[NativeHeader("Runtime/Camera/Light.h")]
-	[RequireComponent(typeof(Transform))]
-	[NativeHeader("Runtime/Export/Light.bindings.h")]
-	[RequireComponent(typeof(Transform))]
 	public sealed class Light : Behaviour
 	{
 		[NativeProperty("LightType")]
@@ -21,7 +21,24 @@ namespace UnityEngine
 			set;
 		}
 
+		[NativeProperty("LightShape")]
+		public extern LightShape shape
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		public extern float spotAngle
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern float innerSpotAngle
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -51,6 +68,14 @@ namespace UnityEngine
 			set;
 		}
 
+		public extern bool useColorTemperature
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		public extern float intensity
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -65,6 +90,28 @@ namespace UnityEngine
 			get;
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
+		}
+
+		public extern bool useBoundingSphereOverride
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public Vector4 boundingSphereOverride
+		{
+			get
+			{
+				Vector4 vector;
+				this.get_boundingSphereOverride_Injected(out vector);
+				return vector;
+			}
+			set
+			{
+				this.set_boundingSphereOverride_Injected(ref value);
+			}
 		}
 
 		public extern int shadowCustomResolution
@@ -99,6 +146,28 @@ namespace UnityEngine
 			set;
 		}
 
+		public extern bool useShadowMatrixOverride
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public Matrix4x4 shadowMatrixOverride
+		{
+			get
+			{
+				Matrix4x4 matrix4x;
+				this.get_shadowMatrixOverride_Injected(out matrix4x);
+				return matrix4x;
+			}
+			set
+			{
+				this.set_shadowMatrixOverride_Injected(ref value);
+			}
+		}
+
 		public extern float range
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -130,6 +199,14 @@ namespace UnityEngine
 		}
 
 		public extern int cullingMask
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern int renderingLayerMask
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -176,8 +253,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Shadow softness is removed in Unity 5.0+", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public float shadowSoftness
 		{
 			get
@@ -250,18 +327,6 @@ namespace UnityEngine
 				this.m_BakedIndex = value;
 			}
 		}
-
-		[FreeFunction("Light_Bindings::SetFalloffTable", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetFalloffTable([NotNull] float[] input);
-
-		[FreeFunction("Light_Bindings::SetAllLightsFalloffToInverseSquared")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetAllLightsFalloffToInverseSquared();
-
-		[FreeFunction("Light_Bindings::SetAllLightsFalloffToUnityLegacy")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetAllLightsFalloffToUnityLegacy();
 
 		public void AddCommandBuffer(LightEvent evt, CommandBuffer buffer)
 		{
@@ -358,6 +423,18 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void set_color_Injected(ref Color value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_boundingSphereOverride_Injected(out Vector4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_boundingSphereOverride_Injected(ref Vector4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_shadowMatrixOverride_Injected(out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_shadowMatrixOverride_Injected(ref Matrix4x4 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_bakingOutput_Injected(out LightBakingOutput ret);

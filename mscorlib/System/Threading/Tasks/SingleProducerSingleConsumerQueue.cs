@@ -6,8 +6,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Threading.Tasks
 {
-	[DebuggerTypeProxy(typeof(SingleProducerSingleConsumerQueue<>.SingleProducerSingleConsumerQueue_DebugView))]
 	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(SingleProducerSingleConsumerQueue<>.SingleProducerSingleConsumerQueue_DebugView))]
 	internal sealed class SingleProducerSingleConsumerQueue<T> : IProducerConsumerQueue<T>, IEnumerable<T>, IEnumerable
 	{
 		internal SingleProducerSingleConsumerQueue()

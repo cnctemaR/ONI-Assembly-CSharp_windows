@@ -5,7 +5,6 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Scripting
 {
-	[VisibleToOtherModules]
 	[NativeHeader("Runtime/Scripting/GarbageCollector.h")]
 	public static class GarbageCollector
 	{
@@ -20,10 +19,12 @@ namespace UnityEngine.Scripting
 			}
 			set
 			{
-				if (value != GarbageCollector.GetMode())
+				bool flag = value == GarbageCollector.GetMode();
+				if (!flag)
 				{
 					GarbageCollector.SetMode(value);
-					if (GarbageCollector.GCModeChanged != null)
+					bool flag2 = GarbageCollector.GCModeChanged != null;
+					if (flag2)
 					{
 						GarbageCollector.GCModeChanged(value);
 					}
@@ -35,9 +36,28 @@ namespace UnityEngine.Scripting
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetMode(GarbageCollector.Mode mode);
 
-		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern GarbageCollector.Mode GetMode();
+
+		public static extern bool isIncremental
+		{
+			[NativeMethod("GetIncrementalEnabled")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public static extern ulong incrementalTimeSliceNanoseconds
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		[NativeMethod("CollectIncrementalWrapper")]
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool CollectIncremental(ulong nanoseconds);
 
 		public enum Mode
 		{

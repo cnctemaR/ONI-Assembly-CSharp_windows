@@ -10,9 +10,10 @@ namespace UnityEngine.Yoga
 	{
 		public YogaNode(YogaConfig config = null)
 		{
-			this._config = ((config != null) ? config : YogaConfig.Default);
+			this._config = ((config == null) ? YogaConfig.Default : config);
 			this._ygNode = Native.YGNodeNewWithConfig(this._config.Handle);
-			if (this._ygNode == IntPtr.Zero)
+			bool flag = this._ygNode == IntPtr.Zero;
+			if (flag)
 			{
 				throw new InvalidOperationException("Failed to allocate native memory");
 			}
@@ -68,7 +69,7 @@ namespace UnityEngine.Yoga
 		{
 			get
 			{
-				return (this._parent == null) ? null : (this._parent.Target as YogaNode);
+				return (this._parent != null) ? (this._parent.Target as YogaNode) : null;
 			}
 		}
 
@@ -241,17 +242,22 @@ namespace UnityEngine.Yoga
 			}
 			set
 			{
-				if (value.Unit == YogaUnit.Percent)
+				bool flag = value.Unit == YogaUnit.Percent;
+				if (flag)
 				{
 					Native.YGNodeStyleSetFlexBasisPercent(this._ygNode, value.Value);
 				}
-				else if (value.Unit == YogaUnit.Auto)
-				{
-					Native.YGNodeStyleSetFlexBasisAuto(this._ygNode);
-				}
 				else
 				{
-					Native.YGNodeStyleSetFlexBasis(this._ygNode, value.Value);
+					bool flag2 = value.Unit == YogaUnit.Auto;
+					if (flag2)
+					{
+						Native.YGNodeStyleSetFlexBasisAuto(this._ygNode);
+					}
+					else
+					{
+						Native.YGNodeStyleSetFlexBasis(this._ygNode, value.Value);
+					}
 				}
 			}
 		}
@@ -264,17 +270,22 @@ namespace UnityEngine.Yoga
 			}
 			set
 			{
-				if (value.Unit == YogaUnit.Percent)
+				bool flag = value.Unit == YogaUnit.Percent;
+				if (flag)
 				{
 					Native.YGNodeStyleSetWidthPercent(this._ygNode, value.Value);
 				}
-				else if (value.Unit == YogaUnit.Auto)
-				{
-					Native.YGNodeStyleSetWidthAuto(this._ygNode);
-				}
 				else
 				{
-					Native.YGNodeStyleSetWidth(this._ygNode, value.Value);
+					bool flag2 = value.Unit == YogaUnit.Auto;
+					if (flag2)
+					{
+						Native.YGNodeStyleSetWidthAuto(this._ygNode);
+					}
+					else
+					{
+						Native.YGNodeStyleSetWidth(this._ygNode, value.Value);
+					}
 				}
 			}
 		}
@@ -287,17 +298,22 @@ namespace UnityEngine.Yoga
 			}
 			set
 			{
-				if (value.Unit == YogaUnit.Percent)
+				bool flag = value.Unit == YogaUnit.Percent;
+				if (flag)
 				{
 					Native.YGNodeStyleSetHeightPercent(this._ygNode, value.Value);
 				}
-				else if (value.Unit == YogaUnit.Auto)
-				{
-					Native.YGNodeStyleSetHeightAuto(this._ygNode);
-				}
 				else
 				{
-					Native.YGNodeStyleSetHeight(this._ygNode, value.Value);
+					bool flag2 = value.Unit == YogaUnit.Auto;
+					if (flag2)
+					{
+						Native.YGNodeStyleSetHeightAuto(this._ygNode);
+					}
+					else
+					{
+						Native.YGNodeStyleSetHeight(this._ygNode, value.Value);
+					}
 				}
 			}
 		}
@@ -310,7 +326,8 @@ namespace UnityEngine.Yoga
 			}
 			set
 			{
-				if (value.Unit == YogaUnit.Percent)
+				bool flag = value.Unit == YogaUnit.Percent;
+				if (flag)
 				{
 					Native.YGNodeStyleSetMaxWidthPercent(this._ygNode, value.Value);
 				}
@@ -329,7 +346,8 @@ namespace UnityEngine.Yoga
 			}
 			set
 			{
-				if (value.Unit == YogaUnit.Percent)
+				bool flag = value.Unit == YogaUnit.Percent;
+				if (flag)
 				{
 					Native.YGNodeStyleSetMaxHeightPercent(this._ygNode, value.Value);
 				}
@@ -348,7 +366,8 @@ namespace UnityEngine.Yoga
 			}
 			set
 			{
-				if (value.Unit == YogaUnit.Percent)
+				bool flag = value.Unit == YogaUnit.Percent;
+				if (flag)
 				{
 					Native.YGNodeStyleSetMinWidthPercent(this._ygNode, value.Value);
 				}
@@ -367,7 +386,8 @@ namespace UnityEngine.Yoga
 			}
 			set
 			{
-				if (value.Unit == YogaUnit.Percent)
+				bool flag = value.Unit == YogaUnit.Percent;
+				if (flag)
 				{
 					Native.YGNodeStyleSetMinHeightPercent(this._ygNode, value.Value);
 				}
@@ -403,6 +423,22 @@ namespace UnityEngine.Yoga
 			get
 			{
 				return Native.YGNodeLayoutGetTop(this._ygNode);
+			}
+		}
+
+		public float LayoutRight
+		{
+			get
+			{
+				return Native.YGNodeLayoutGetRight(this._ygNode);
+			}
+		}
+
+		public float LayoutBottom
+		{
+			get
+			{
+				return Native.YGNodeLayoutGetBottom(this._ygNode);
 			}
 		}
 
@@ -466,7 +502,7 @@ namespace UnityEngine.Yoga
 		{
 			get
 			{
-				return (this._children == null) ? 0 : this._children.Count;
+				return (this._children != null) ? this._children.Count : 0;
 			}
 		}
 
@@ -477,21 +513,23 @@ namespace UnityEngine.Yoga
 
 		public bool ValuesEqual(float f1, float f2)
 		{
-			bool flag;
-			if (float.IsNaN(f1) || float.IsNaN(f2))
+			bool flag = float.IsNaN(f1) || float.IsNaN(f2);
+			bool flag2;
+			if (flag)
 			{
-				flag = float.IsNaN(f1) && float.IsNaN(f2);
+				flag2 = float.IsNaN(f1) && float.IsNaN(f2);
 			}
 			else
 			{
-				flag = Math.Abs(f2 - f1) < float.Epsilon;
+				flag2 = Math.Abs(f2 - f1) < float.Epsilon;
 			}
-			return flag;
+			return flag2;
 		}
 
 		public void Insert(int index, YogaNode node)
 		{
-			if (this._children == null)
+			bool flag = this._children == null;
+			if (flag)
 			{
 				this._children = new List<YogaNode>(4);
 			}
@@ -516,7 +554,8 @@ namespace UnityEngine.Yoga
 		public void RemoveChild(YogaNode child)
 		{
 			int num = this.IndexOf(child);
-			if (num >= 0)
+			bool flag = num >= 0;
+			if (flag)
 			{
 				this.RemoveAt(num);
 			}
@@ -524,7 +563,8 @@ namespace UnityEngine.Yoga
 
 		public void Clear()
 		{
-			if (this._children != null)
+			bool flag = this._children != null;
+			if (flag)
 			{
 				while (this._children.Count > 0)
 				{
@@ -535,15 +575,17 @@ namespace UnityEngine.Yoga
 
 		public int IndexOf(YogaNode node)
 		{
-			return (this._children == null) ? (-1) : this._children.IndexOf(node);
+			return (this._children != null) ? this._children.IndexOf(node) : (-1);
 		}
 
 		public void SetMeasureFunction(MeasureFunction measureFunction)
 		{
 			this._measureFunction = measureFunction;
-			if (measureFunction == null)
+			bool flag = measureFunction == null;
+			if (flag)
 			{
-				if (!this.IsBaselineDefined)
+				bool flag2 = !this.IsBaselineDefined;
+				if (flag2)
 				{
 					Native.YGSetManagedObject(this._ygNode, null);
 				}
@@ -559,9 +601,11 @@ namespace UnityEngine.Yoga
 		public void SetBaselineFunction(BaselineFunction baselineFunction)
 		{
 			this._baselineFunction = baselineFunction;
-			if (baselineFunction == null)
+			bool flag = baselineFunction == null;
+			if (flag)
 			{
-				if (!this.IsMeasureDefined)
+				bool flag2 = !this.IsMeasureDefined;
+				if (flag2)
 				{
 					Native.YGSetManagedObject(this._ygNode, null);
 				}
@@ -581,7 +625,8 @@ namespace UnityEngine.Yoga
 
 		public static YogaSize MeasureInternal(YogaNode node, float width, YogaMeasureMode widthMode, float height, YogaMeasureMode heightMode)
 		{
-			if (node == null || node._measureFunction == null)
+			bool flag = node == null || node._measureFunction == null;
+			if (flag)
 			{
 				throw new InvalidOperationException("Measure function is not defined.");
 			}
@@ -590,7 +635,8 @@ namespace UnityEngine.Yoga
 
 		public static float BaselineInternal(YogaNode node, float width, float height)
 		{
-			if (node == null || node._baselineFunction == null)
+			bool flag = node == null || node._baselineFunction == null;
+			if (flag)
 			{
 				throw new InvalidOperationException("Baseline function is not defined.");
 			}
@@ -612,12 +658,12 @@ namespace UnityEngine.Yoga
 
 		public IEnumerator<YogaNode> GetEnumerator()
 		{
-			return (this._children == null) ? Enumerable.Empty<YogaNode>().GetEnumerator() : ((IEnumerable<YogaNode>)this._children).GetEnumerator();
+			return (this._children != null) ? ((IEnumerable<YogaNode>)this._children).GetEnumerator() : Enumerable.Empty<YogaNode>().GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return (this._children == null) ? Enumerable.Empty<YogaNode>().GetEnumerator() : ((IEnumerable<YogaNode>)this._children).GetEnumerator();
+			return (this._children != null) ? ((IEnumerable<YogaNode>)this._children).GetEnumerator() : Enumerable.Empty<YogaNode>().GetEnumerator();
 		}
 
 		public static int GetInstanceCount()
@@ -699,7 +745,8 @@ namespace UnityEngine.Yoga
 
 		private void SetStylePosition(YogaEdge edge, YogaValue value)
 		{
-			if (value.Unit == YogaUnit.Percent)
+			bool flag = value.Unit == YogaUnit.Percent;
+			if (flag)
 			{
 				Native.YGNodeStyleSetPositionPercent(this._ygNode, edge, value.Value);
 			}
@@ -819,17 +866,22 @@ namespace UnityEngine.Yoga
 
 		private void SetStyleMargin(YogaEdge edge, YogaValue value)
 		{
-			if (value.Unit == YogaUnit.Percent)
+			bool flag = value.Unit == YogaUnit.Percent;
+			if (flag)
 			{
 				Native.YGNodeStyleSetMarginPercent(this._ygNode, edge, value.Value);
 			}
-			else if (value.Unit == YogaUnit.Auto)
-			{
-				Native.YGNodeStyleSetMarginAuto(this._ygNode, edge);
-			}
 			else
 			{
-				Native.YGNodeStyleSetMargin(this._ygNode, edge, value.Value);
+				bool flag2 = value.Unit == YogaUnit.Auto;
+				if (flag2)
+				{
+					Native.YGNodeStyleSetMarginAuto(this._ygNode, edge);
+				}
+				else
+				{
+					Native.YGNodeStyleSetMargin(this._ygNode, edge, value.Value);
+				}
 			}
 		}
 
@@ -943,7 +995,8 @@ namespace UnityEngine.Yoga
 
 		private void SetStylePadding(YogaEdge edge, YogaValue value)
 		{
-			if (value.Unit == YogaUnit.Percent)
+			bool flag = value.Unit == YogaUnit.Percent;
+			if (flag)
 			{
 				Native.YGNodeStyleSetPaddingPercent(this._ygNode, edge, value.Value);
 			}
@@ -1130,6 +1183,14 @@ namespace UnityEngine.Yoga
 			get
 			{
 				return Native.YGNodeLayoutGetPadding(this._ygNode, YogaEdge.End);
+			}
+		}
+
+		public float ComputedFlexBasis
+		{
+			get
+			{
+				return Native.YGNodeGetComputedFlexBasis(this._ygNode);
 			}
 		}
 

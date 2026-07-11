@@ -7,7 +7,7 @@ public class KModalScreen : KScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		KModalScreen.MakeScreenModal(this);
+		this.backgroundRectTransform = KModalScreen.MakeScreenModal(this);
 	}
 
 	public static RectTransform MakeScreenModal(KScreen screen)
@@ -31,8 +31,17 @@ public class KModalScreen : KScreen
 		rectTransform.SetAsFirstSibling();
 		rectTransform.SetLocalPosition(Vector3.zero);
 		rectTransform.localScale = Vector3.one;
-		Vector3 lossyScale = rectTransform.lossyScale;
-		rectTransform.localScale = new Vector3(1f / lossyScale.x, 1f / lossyScale.y, 1f / lossyScale.z);
+		KCanvasScaler componentInParent = rectTransform.GetComponentInParent<KCanvasScaler>();
+		float num;
+		if (componentInParent != null)
+		{
+			num = componentInParent.GetCanvasScale();
+		}
+		else
+		{
+			num = rectTransform.lossyScale.x;
+		}
+		rectTransform.localScale = new Vector3(1f / num, 1f / num, 1f / num);
 		rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
 		rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
 		rectTransform.sizeDelta = new Vector2((float)Screen.width, (float)Screen.height);
@@ -45,6 +54,8 @@ public class KModalScreen : KScreen
 		{
 			CameraController.Instance.DisableUserCameraControl = true;
 		}
+		ScreenResize instance = ScreenResize.Instance;
+		instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.OnResize));
 	}
 
 	protected override void OnCmpDisable()
@@ -55,6 +66,13 @@ public class KModalScreen : KScreen
 			CameraController.Instance.DisableUserCameraControl = false;
 		}
 		base.Trigger(476357528, null);
+		ScreenResize instance = ScreenResize.Instance;
+		instance.OnResize = (global::System.Action)Delegate.Remove(instance.OnResize, new global::System.Action(this.OnResize));
+	}
+
+	private void OnResize()
+	{
+		KModalScreen.ResizeBackground(this.backgroundRectTransform);
 	}
 
 	public override bool IsModal()
@@ -131,6 +149,8 @@ public class KModalScreen : KScreen
 	private bool shown;
 
 	public bool pause = true;
+
+	private RectTransform backgroundRectTransform;
 
 	public const float SCREEN_SORT_KEY = 100f;
 }

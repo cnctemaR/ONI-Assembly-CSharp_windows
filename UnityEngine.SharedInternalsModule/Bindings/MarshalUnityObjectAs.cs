@@ -2,15 +2,15 @@
 
 namespace UnityEngine.Bindings
 {
-	[AttributeUsage(AttributeTargets.Class)]
 	[VisibleToOtherModules]
+	[AttributeUsage(AttributeTargets.Class)]
 	internal class MarshalUnityObjectAs : Attribute, IBindingsAttribute
 	{
+		public Type MarshalAsType { get; set; }
+
 		public MarshalUnityObjectAs(Type marshalAsType)
 		{
 			this.MarshalAsType = marshalAsType;
 		}
-
-		public Type MarshalAsType { get; set; }
 	}
 }

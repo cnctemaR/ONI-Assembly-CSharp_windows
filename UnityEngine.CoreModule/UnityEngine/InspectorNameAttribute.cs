@@ -3,7 +3,7 @@
 namespace UnityEngine
 {
 	[AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
-	internal class InspectorNameAttribute : PropertyAttribute
+	public class InspectorNameAttribute : PropertyAttribute
 	{
 		public InspectorNameAttribute(string displayName)
 		{

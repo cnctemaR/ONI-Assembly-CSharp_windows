@@ -97,8 +97,8 @@ namespace Microsoft.Win32
 			}
 		}
 
-		[ComVisible(false)]
 		[MonoTODO("Not implemented in Unix")]
+		[ComVisible(false)]
 		public SafeRegistryHandle Handle
 		{
 			get
@@ -113,8 +113,8 @@ namespace Microsoft.Win32
 			}
 		}
 
-		[ComVisible(false)]
 		[MonoLimitation("View is ignored in Mono.")]
+		[ComVisible(false)]
 		public RegistryView View
 		{
 			get
@@ -212,8 +212,8 @@ namespace Microsoft.Win32
 			return RegistryKey.RegistryApi.CreateSubKey(this, subkey);
 		}
 
-		[ComVisible(false)]
 		[MonoLimitation("permissionCheck is ignored in Mono")]
+		[ComVisible(false)]
 		public RegistryKey CreateSubKey(string subkey, RegistryKeyPermissionCheck permissionCheck)
 		{
 			return this.CreateSubKey(subkey);
@@ -226,8 +226,8 @@ namespace Microsoft.Win32
 			return this.CreateSubKey(subkey);
 		}
 
-		[ComVisible(false)]
 		[MonoLimitation("permissionCheck is ignored in Mono")]
+		[ComVisible(false)]
 		public RegistryKey CreateSubKey(string subkey, RegistryKeyPermissionCheck permissionCheck, RegistryOptions options)
 		{
 			this.AssertKeyStillValid();
@@ -240,8 +240,8 @@ namespace Microsoft.Win32
 			return RegistryKey.RegistryApi.CreateSubKey(this, subkey, options);
 		}
 
-		[ComVisible(false)]
 		[MonoLimitation("permissionCheck and registrySecurity are ignored in Mono")]
+		[ComVisible(false)]
 		public RegistryKey CreateSubKey(string subkey, RegistryKeyPermissionCheck permissionCheck, RegistryOptions registryOptions, RegistrySecurity registrySecurity)
 		{
 			return this.CreateSubKey(subkey, permissionCheck, registryOptions);
@@ -372,8 +372,8 @@ namespace Microsoft.Win32
 			return RegistryKey.RegistryApi.FromHandle(handle);
 		}
 
-		[MonoTODO("Not implemented on unix")]
 		[ComVisible(false)]
+		[MonoTODO("Not implemented on unix")]
 		[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 		public static RegistryKey FromHandle(SafeRegistryHandle handle, RegistryView view)
 		{
@@ -390,8 +390,8 @@ namespace Microsoft.Win32
 			return RegistryKey.RegistryApi.OpenRemoteBaseKey(hKey, machineName);
 		}
 
-		[MonoTODO("Not implemented on unix")]
 		[ComVisible(false)]
+		[MonoTODO("Not implemented on unix")]
 		public static RegistryKey OpenRemoteBaseKey(RegistryHive hKey, string machineName, RegistryView view)
 		{
 			if (machineName == null)
@@ -401,8 +401,8 @@ namespace Microsoft.Win32
 			return RegistryKey.RegistryApi.OpenRemoteBaseKey(hKey, machineName);
 		}
 
-		[ComVisible(false)]
 		[MonoLimitation("View is ignored in Mono")]
+		[ComVisible(false)]
 		public static RegistryKey OpenBaseKey(RegistryHive hKey, RegistryView view)
 		{
 			switch (hKey)
@@ -432,8 +432,8 @@ namespace Microsoft.Win32
 			return this.OpenSubKey(name, permissionCheck == RegistryKeyPermissionCheck.ReadWriteSubTree);
 		}
 
-		[ComVisible(false)]
 		[MonoLimitation("rights are ignored in Mono")]
+		[ComVisible(false)]
 		public RegistryKey OpenSubKey(string name, RegistryRights rights)
 		{
 			return this.OpenSubKey(name);

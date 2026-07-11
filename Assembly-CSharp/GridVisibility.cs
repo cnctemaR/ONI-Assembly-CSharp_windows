@@ -32,28 +32,28 @@ public class GridVisibility : KMonoBehaviour
 		FogOfWarMask.ClearMask(num);
 	}
 
-	public static void Reveal(int baseX, int baseY, float radius, float innerRadius)
+	public static void Reveal(int baseX, int baseY, int radius, float innerRadius)
 	{
-		for (float num = -radius; num <= radius; num += 1f)
+		for (int i = -radius; i <= radius; i++)
 		{
-			for (float num2 = -radius; num2 <= radius; num2 += 1f)
+			for (int j = -radius; j <= radius; j++)
 			{
-				float num3 = (float)baseY + num;
-				float num4 = (float)baseX + num2;
-				if (num3 >= 0f && (float)(Grid.HeightInCells - 1) >= num3 && num4 >= 0f && (float)(Grid.WidthInCells - 1) >= num4)
+				int num = baseY + i;
+				int num2 = baseX + j;
+				if (num >= 0 && Grid.HeightInCells - 1 >= num && num2 >= 0 && Grid.WidthInCells - 1 >= num2)
 				{
-					int num5 = (int)(num3 * (float)Grid.WidthInCells + num4);
-					if (Grid.Visible[num5] < 255)
+					int num3 = num * Grid.WidthInCells + num2;
+					if (Grid.Visible[num3] < 255)
 					{
-						Vector2 vector = new Vector2(num2, num);
-						float num6 = Mathf.Lerp(1f, 0f, (vector.magnitude - innerRadius) / (radius - innerRadius));
-						Grid.Reveal(num5, (byte)(255f * num6));
+						Vector2 vector = new Vector2((float)j, (float)i);
+						float num4 = Mathf.Lerp(1f, 0f, (vector.magnitude - innerRadius) / ((float)radius - innerRadius));
+						Grid.Reveal(num3, (byte)(255f * num4));
 					}
 				}
 			}
 		}
-		int num7 = Mathf.CeilToInt(radius);
-		Game.Instance.UpdateGameActiveRegion(baseX - num7, baseY - num7, baseX + num7, baseY + num7);
+		int num5 = Mathf.CeilToInt((float)radius);
+		Game.Instance.UpdateGameActiveRegion(baseX - num5, baseY - num5, baseX + num5, baseY + num5);
 	}
 
 	protected override void OnCleanUp()
@@ -61,7 +61,7 @@ public class GridVisibility : KMonoBehaviour
 		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 	}
 
-	public float radius = 18f;
+	public int radius = 18;
 
 	public float innerRadius = 16.5f;
 }

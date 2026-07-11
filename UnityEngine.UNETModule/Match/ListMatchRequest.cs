@@ -31,17 +31,17 @@ namespace UnityEngine.Networking.Match
 				this.nameFilter,
 				this.filterOutPrivateMatches,
 				this.eloScore,
-				(this.matchAttributeFilterLessThan != null) ? this.matchAttributeFilterLessThan.Count : 0,
-				(this.matchAttributeFilterEqualTo != null) ? this.matchAttributeFilterEqualTo.Count : 0,
-				(this.matchAttributeFilterGreaterThan != null) ? this.matchAttributeFilterGreaterThan.Count : 0
+				(this.matchAttributeFilterLessThan == null) ? 0 : this.matchAttributeFilterLessThan.Count,
+				(this.matchAttributeFilterEqualTo == null) ? 0 : this.matchAttributeFilterEqualTo.Count,
+				(this.matchAttributeFilterGreaterThan == null) ? 0 : this.matchAttributeFilterGreaterThan.Count
 			});
 		}
 
 		public override bool IsValid()
 		{
-			int num = ((this.matchAttributeFilterLessThan != null) ? this.matchAttributeFilterLessThan.Count : 0);
-			num += ((this.matchAttributeFilterEqualTo != null) ? this.matchAttributeFilterEqualTo.Count : 0);
-			num += ((this.matchAttributeFilterGreaterThan != null) ? this.matchAttributeFilterGreaterThan.Count : 0);
+			int num = ((this.matchAttributeFilterLessThan == null) ? 0 : this.matchAttributeFilterLessThan.Count);
+			num += ((this.matchAttributeFilterEqualTo == null) ? 0 : this.matchAttributeFilterEqualTo.Count);
+			num += ((this.matchAttributeFilterGreaterThan == null) ? 0 : this.matchAttributeFilterGreaterThan.Count);
 			return base.IsValid() && this.pageSize >= 1 && this.pageSize <= 1000 && num <= 10;
 		}
 

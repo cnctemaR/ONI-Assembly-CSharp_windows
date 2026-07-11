@@ -18,7 +18,7 @@ namespace UnityEngine.Networking.Match
 				this.maxSize,
 				this.currentSize,
 				this.isPrivate,
-				(this.matchAttributes != null) ? this.matchAttributes.Count : 0,
+				(this.matchAttributes == null) ? 0 : this.matchAttributes.Count,
 				this.hostNodeId,
 				this.directConnectInfos.Count
 			});

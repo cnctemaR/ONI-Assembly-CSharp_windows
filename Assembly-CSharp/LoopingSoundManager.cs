@@ -61,7 +61,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		data.firstParameter = parameter;
 		if (data.IsPlaying)
 		{
-			data.ev.setParameterValueByIndex(this.GetSoundDescription(data.path).GetParameterIdx(parameter), value);
+			data.ev.setParameterByID(this.GetSoundDescription(data.path).GetParameterId(parameter), value, false);
 		}
 		this.sounds.SetData(handle, data);
 	}
@@ -73,7 +73,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		data.secondParameter = parameter;
 		if (data.IsPlaying)
 		{
-			data.ev.setParameterValueByIndex(this.GetSoundDescription(data.path).GetParameterIdx(parameter), value);
+			data.ev.setParameterByID(this.GetSoundDescription(data.path).GetParameterId(parameter), value, false);
 		}
 		this.sounds.SetData(handle, data);
 	}
@@ -167,11 +167,11 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 			sound2.flags |= LoopingSoundManager.Sound.Flags.PLAYING;
 			if (sound2.firstParameter != HashedString.Invalid)
 			{
-				sound2.ev.setParameterValueByIndex(soundDescription2.GetParameterIdx(sound2.firstParameter), sound2.firstParameterValue);
+				sound2.ev.setParameterByID(soundDescription2.GetParameterId(sound2.firstParameter), sound2.firstParameterValue, false);
 			}
 			if (sound2.secondParameter != HashedString.Invalid)
 			{
-				sound2.ev.setParameterValueByIndex(soundDescription2.GetParameterIdx(sound2.secondParameter), sound2.secondParameterValue);
+				sound2.ev.setParameterByID(soundDescription2.GetParameterId(sound2.secondParameter), sound2.secondParameterValue, false);
 			}
 			LoopingSoundParameterUpdater.Sound sound3 = new LoopingSoundParameterUpdater.Sound
 			{
@@ -214,11 +214,11 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 			}
 			if (sound4.ShouldCameraScalePosition)
 			{
-				sound4.ev.stop(STOP_MODE.IMMEDIATE);
+				sound4.ev.stop(global::FMOD.Studio.STOP_MODE.IMMEDIATE);
 			}
 			else
 			{
-				sound4.ev.stop(STOP_MODE.ALLOWFADEOUT);
+				sound4.ev.stop(global::FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 			}
 			sound4.flags &= ~LoopingSoundManager.Sound.Flags.PLAYING;
 			sound4.ev.release();
@@ -252,7 +252,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 			if (sound.IsPlaying)
 			{
 				EventInstance eventInstance = sound.ev;
-				eventInstance.stop(STOP_MODE.IMMEDIATE);
+				eventInstance.stop(global::FMOD.Studio.STOP_MODE.IMMEDIATE);
 				eventInstance = sound.ev;
 				eventInstance.release();
 			}
@@ -320,7 +320,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		LoopingSoundManager.Sound data = LoopingSoundManager.Get().sounds.GetData(handle);
 		if (data.IsPlaying)
 		{
-			data.ev.stop(STOP_MODE.ALLOWFADEOUT);
+			data.ev.stop(global::FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 			data.ev.release();
 			SoundDescription soundEventDescription = KFMOD.GetSoundEventDescription(data.path);
 			foreach (SoundDescription.Parameter parameter in soundEventDescription.parameters)

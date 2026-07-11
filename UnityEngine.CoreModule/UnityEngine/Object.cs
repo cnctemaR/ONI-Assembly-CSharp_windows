@@ -10,23 +10,25 @@ using UnityEngineInternal;
 namespace UnityEngine
 {
 	[RequiredByNativeCode(GenerateProxy = true)]
-	[NativeHeader("Runtime/Export/UnityEngineObject.bindings.h")]
-	[NativeHeader("Runtime/GameCode/CloneObject.h")]
 	[NativeHeader("Runtime/SceneManager/SceneManager.h")]
+	[NativeHeader("Runtime/Export/Scripting/UnityEngineObject.bindings.h")]
+	[NativeHeader("Runtime/GameCode/CloneObject.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class Object
 	{
 		[SecuritySafeCritical]
 		public unsafe int GetInstanceID()
 		{
+			bool flag = this.m_CachedPtr == IntPtr.Zero;
 			int num;
-			if (this.m_CachedPtr == IntPtr.Zero)
+			if (flag)
 			{
 				num = 0;
 			}
 			else
 			{
-				if (Object.OffsetOfInstanceIDInCPlusPlusObject == -1)
+				bool flag2 = Object.OffsetOfInstanceIDInCPlusPlusObject == -1;
+				if (flag2)
 				{
 					Object.OffsetOfInstanceIDInCPlusPlusObject = Object.GetOffsetOfInstanceIDInCPlusPlusObject();
 				}
@@ -43,7 +45,8 @@ namespace UnityEngine
 		public override bool Equals(object other)
 		{
 			Object @object = other as Object;
-			return (!(@object == null) || other == null || other is Object) && Object.CompareBaseObjects(this, @object);
+			bool flag = @object == null && other != null && !(other is Object);
+			return !flag && Object.CompareBaseObjects(this, @object);
 		}
 
 		public static implicit operator bool(Object exists)
@@ -55,29 +58,39 @@ namespace UnityEngine
 		{
 			bool flag = lhs == null;
 			bool flag2 = rhs == null;
-			bool flag3;
-			if (flag2 && flag)
+			bool flag3 = flag2 && flag;
+			bool flag4;
+			if (flag3)
 			{
-				flag3 = true;
-			}
-			else if (flag2)
-			{
-				flag3 = !Object.IsNativeObjectAlive(lhs);
-			}
-			else if (flag)
-			{
-				flag3 = !Object.IsNativeObjectAlive(rhs);
+				flag4 = true;
 			}
 			else
 			{
-				flag3 = object.ReferenceEquals(lhs, rhs);
+				bool flag5 = flag2;
+				if (flag5)
+				{
+					flag4 = !Object.IsNativeObjectAlive(lhs);
+				}
+				else
+				{
+					bool flag6 = flag;
+					if (flag6)
+					{
+						flag4 = !Object.IsNativeObjectAlive(rhs);
+					}
+					else
+					{
+						flag4 = lhs == rhs;
+					}
+				}
 			}
-			return flag3;
+			return flag4;
 		}
 
 		private void EnsureRunningOnMainThread()
 		{
-			if (!Object.CurrentThreadIsMainThread())
+			bool flag = !Object.CurrentThreadIsMainThread();
+			if (flag)
 			{
 				throw new InvalidOperationException("EnsureRunningOnMainThread can only be called from the main thread");
 			}
@@ -109,12 +122,14 @@ namespace UnityEngine
 		public static Object Instantiate(Object original, Vector3 position, Quaternion rotation)
 		{
 			Object.CheckNullArgument(original, "The Object you want to instantiate is null.");
-			if (original is ScriptableObject)
+			bool flag = original is ScriptableObject;
+			if (flag)
 			{
 				throw new ArgumentException("Cannot instantiate a ScriptableObject with a position and rotation");
 			}
 			Object @object = Object.Internal_InstantiateSingle(original, position, rotation);
-			if (@object == null)
+			bool flag2 = @object == null;
+			if (flag2)
 			{
 				throw new UnityException("Instantiate failed because the clone was destroyed during creation. This can happen if DestroyImmediate is called in MonoBehaviour.Awake.");
 			}
@@ -124,8 +139,9 @@ namespace UnityEngine
 		[TypeInferenceRule(TypeInferenceRules.TypeOfFirstArgument)]
 		public static Object Instantiate(Object original, Vector3 position, Quaternion rotation, Transform parent)
 		{
+			bool flag = parent == null;
 			Object @object;
-			if (parent == null)
+			if (flag)
 			{
 				@object = Object.Instantiate(original, position, rotation);
 			}
@@ -133,7 +149,8 @@ namespace UnityEngine
 			{
 				Object.CheckNullArgument(original, "The Object you want to instantiate is null.");
 				Object object2 = Object.Internal_InstantiateSingleWithParent(original, parent, position, rotation);
-				if (object2 == null)
+				bool flag2 = object2 == null;
+				if (flag2)
 				{
 					throw new UnityException("Instantiate failed because the clone was destroyed during creation. This can happen if DestroyImmediate is called in MonoBehaviour.Awake.");
 				}
@@ -147,7 +164,8 @@ namespace UnityEngine
 		{
 			Object.CheckNullArgument(original, "The Object you want to instantiate is null.");
 			Object @object = Object.Internal_CloneSingle(original);
-			if (@object == null)
+			bool flag = @object == null;
+			if (flag)
 			{
 				throw new UnityException("Instantiate failed because the clone was destroyed during creation. This can happen if DestroyImmediate is called in MonoBehaviour.Awake.");
 			}
@@ -163,8 +181,9 @@ namespace UnityEngine
 		[TypeInferenceRule(TypeInferenceRules.TypeOfFirstArgument)]
 		public static Object Instantiate(Object original, Transform parent, bool instantiateInWorldSpace)
 		{
+			bool flag = parent == null;
 			Object @object;
-			if (parent == null)
+			if (flag)
 			{
 				@object = Object.Instantiate(original);
 			}
@@ -172,7 +191,8 @@ namespace UnityEngine
 			{
 				Object.CheckNullArgument(original, "The Object you want to instantiate is null.");
 				Object object2 = Object.Internal_CloneSingleWithParent(original, parent, instantiateInWorldSpace);
-				if (object2 == null)
+				bool flag2 = object2 == null;
+				if (flag2)
 				{
 					throw new UnityException("Instantiate failed because the clone was destroyed during creation. This can happen if DestroyImmediate is called in MonoBehaviour.Awake.");
 				}
@@ -185,7 +205,8 @@ namespace UnityEngine
 		{
 			Object.CheckNullArgument(original, "The Object you want to instantiate is null.");
 			T t = (T)((object)Object.Internal_CloneSingle(original));
-			if (t == null)
+			bool flag = t == null;
+			if (flag)
 			{
 				throw new UnityException("Instantiate failed because the clone was destroyed during creation. This can happen if DestroyImmediate is called in MonoBehaviour.Awake.");
 			}
@@ -257,8 +278,8 @@ namespace UnityEngine
 			Object.Destroy(obj, t);
 		}
 
-		[Obsolete("use Object.Destroy instead.")]
 		[ExcludeFromDocs]
+		[Obsolete("use Object.Destroy instead.")]
 		public static void DestroyObject(Object obj)
 		{
 			float num = 0f;
@@ -293,7 +314,8 @@ namespace UnityEngine
 
 		private static void CheckNullArgument(object arg, string message)
 		{
-			if (arg == null)
+			bool flag = arg == null;
+			if (flag)
 			{
 				throw new ArgumentException(message);
 			}
@@ -303,8 +325,9 @@ namespace UnityEngine
 		public static Object FindObjectOfType(Type type)
 		{
 			Object[] array = Object.FindObjectsOfType(type);
+			bool flag = array.Length != 0;
 			Object @object;
-			if (array.Length > 0)
+			if (flag)
 			{
 				@object = array[0];
 			}
@@ -366,6 +389,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string GetName(Object obj);
 
+		[FreeFunction("UnityEngineObjectBindings::IsPersistent")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool IsPersistent(Object obj);
+
 		[FreeFunction("UnityEngineObjectBindings::SetName")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetName(Object obj, string name);
@@ -374,10 +401,15 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool DoesObjectWithInstanceIDExist(int instanceID);
 
-		[FreeFunction("UnityEngineObjectBindings::FindObjectFromInstanceID")]
 		[VisibleToOtherModules]
+		[FreeFunction("UnityEngineObjectBindings::FindObjectFromInstanceID")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Object FindObjectFromInstanceID(int instanceID);
+
+		[FreeFunction("UnityEngineObjectBindings::ForceLoadFromInstanceID")]
+		[VisibleToOtherModules]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern Object ForceLoadFromInstanceID(int instanceID);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Object Internal_InstantiateSingle_Injected(Object data, ref Vector3 pos, ref Quaternion rot);

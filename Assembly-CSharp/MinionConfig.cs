@@ -37,7 +37,7 @@ public class MinionConfig : IEntityConfig
 		gameObject.AddOrGet<WarmBlooded>();
 		gameObject.AddOrGet<MinionIdentity>();
 		GridVisibility gridVisibility = gameObject.AddOrGet<GridVisibility>();
-		gridVisibility.radius = 30f;
+		gridVisibility.radius = 30;
 		gridVisibility.innerRadius = 20f;
 		gameObject.AddOrGet<MiningSounds>();
 		gameObject.AddOrGet<SaveLoadRoot>();

@@ -11,47 +11,9 @@ namespace UnityEngine
 	[NativeHeader("Runtime/Graphics/CustomRenderTexture.h")]
 	public sealed class CustomRenderTexture : RenderTexture
 	{
-		public CustomRenderTexture(int width, int height, RenderTextureFormat format, RenderTextureReadWrite readWrite)
-		{
-			if (base.ValidateFormat(format))
-			{
-				CustomRenderTexture.Internal_CreateCustomRenderTexture(this, readWrite);
-				this.width = width;
-				this.height = height;
-				base.format = format;
-			}
-		}
-
-		public CustomRenderTexture(int width, int height, RenderTextureFormat format)
-		{
-			if (base.ValidateFormat(format))
-			{
-				CustomRenderTexture.Internal_CreateCustomRenderTexture(this, RenderTextureReadWrite.Default);
-				this.width = width;
-				this.height = height;
-				base.format = format;
-			}
-		}
-
-		public CustomRenderTexture(int width, int height)
-		{
-			CustomRenderTexture.Internal_CreateCustomRenderTexture(this, RenderTextureReadWrite.Default);
-			this.width = width;
-			this.height = height;
-			base.format = RenderTextureFormat.Default;
-		}
-
-		public CustomRenderTexture(int width, int height, GraphicsFormat format)
-		{
-			CustomRenderTexture.Internal_CreateCustomRenderTexture(this, (!GraphicsFormatUtility.IsSRGBFormat(format)) ? RenderTextureReadWrite.Linear : RenderTextureReadWrite.sRGB);
-			this.width = width;
-			this.height = height;
-			base.format = GraphicsFormatUtility.GetRenderTextureFormat(format);
-		}
-
 		[FreeFunction(Name = "CustomRenderTextureScripting::Create")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_CreateCustomRenderTexture([Writable] CustomRenderTexture rt, RenderTextureReadWrite readWrite);
+		private static extern void Internal_CreateCustomRenderTexture([Writable] CustomRenderTexture rt);
 
 		[NativeName("TriggerUpdate")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -108,7 +70,8 @@ namespace UnityEngine
 
 		public void SetUpdateZones(CustomRenderTextureUpdateZone[] updateZones)
 		{
-			if (updateZones == null)
+			bool flag = updateZones == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("updateZones");
 			}
@@ -193,24 +156,37 @@ namespace UnityEngine
 			set;
 		}
 
-		private bool IsCubemapFaceEnabled(CubemapFace face)
+		public CustomRenderTexture(int width, int height, RenderTextureFormat format, RenderTextureReadWrite readWrite)
+			: this(width, height, RenderTexture.GetCompatibleFormat(format, readWrite))
 		{
-			return ((ulong)this.cubemapFaceMask & (ulong)(1L << (int)(face & (CubemapFace)31))) != 0UL;
 		}
 
-		private void EnableCubemapFace(CubemapFace face, bool value)
+		public CustomRenderTexture(int width, int height, RenderTextureFormat format)
+			: this(width, height, RenderTexture.GetCompatibleFormat(format, RenderTextureReadWrite.Default))
 		{
-			uint num = this.cubemapFaceMask;
-			uint num2 = 1U << (int)face;
-			if (value)
+		}
+
+		public CustomRenderTexture(int width, int height)
+			: this(width, height, SystemInfo.GetGraphicsFormat(DefaultFormat.LDR))
+		{
+		}
+
+		public CustomRenderTexture(int width, int height, DefaultFormat defaultFormat)
+			: this(width, height, SystemInfo.GetGraphicsFormat(defaultFormat))
+		{
+		}
+
+		public CustomRenderTexture(int width, int height, GraphicsFormat format)
+		{
+			bool flag = !base.ValidateFormat(format, FormatUsage.Render);
+			if (!flag)
 			{
-				num |= num2;
+				CustomRenderTexture.Internal_CreateCustomRenderTexture(this);
+				this.width = width;
+				this.height = height;
+				base.graphicsFormat = format;
+				base.SetSRGBReadWrite(GraphicsFormatUtility.IsSRGBFormat(format));
 			}
-			else
-			{
-				num &= ~num2;
-			}
-			this.cubemapFaceMask = num;
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

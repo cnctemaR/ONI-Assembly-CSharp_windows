@@ -6,10 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequireComponent(typeof(RectTransform))]
+	[NativeHeader("Modules/UI/UIStructs.h")]
+	[NativeHeader("Modules/UI/Canvas.h")]
 	[NativeClass("UI::Canvas")]
-	[NativeHeader("Runtime/UI/Canvas.h")]
-	[NativeHeader("Runtime/UI/UIStructs.h")]
+	[RequireComponent(typeof(RectTransform))]
 	public sealed class Canvas : Behaviour
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -194,9 +194,10 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		private static void SendWillRenderCanvases()
 		{
-			if (Canvas.willRenderCanvases != null)
+			Canvas.WillRenderCanvases willRenderCanvases = Canvas.willRenderCanvases;
+			if (willRenderCanvases != null)
 			{
-				Canvas.willRenderCanvases();
+				willRenderCanvases();
 			}
 		}
 

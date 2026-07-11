@@ -305,7 +305,7 @@ public class ManagementMenu : KIconToggleMenu
 		}
 		this.activeScreen.screen.Show(false);
 		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MenuOpenMigrated, STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MenuOpenMigrated, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		this.activeScreen.toggleInfo.toggle.ActivateFlourish(false);
 		this.activeScreen = null;
 		screenData.toggleInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetInactive();

@@ -23,10 +23,12 @@ namespace Mono.Unity
 				min = UnityTlsConversions.GetMinProtocol(enabledProtocols),
 				max = UnityTlsConversions.GetMaxProtocol(enabledProtocols)
 			};
+			this.readCallback = new UnityTls.unitytls_tlsctx_read_callback(UnityTlsContext.ReadCallback);
+			this.writeCallback = new UnityTls.unitytls_tlsctx_write_callback(UnityTlsContext.WriteCallback);
 			UnityTls.unitytls_tlsctx_callbacks unitytls_tlsctx_callbacks = new UnityTls.unitytls_tlsctx_callbacks
 			{
-				write = new UnityTls.unitytls_tlsctx_write_callback(UnityTlsContext.WriteCallback),
-				read = new UnityTls.unitytls_tlsctx_read_callback(UnityTlsContext.ReadCallback),
+				write = this.writeCallback,
+				read = this.readCallback,
 				data = (void*)((IntPtr)this.handle)
 			};
 			if (serverMode)
@@ -54,7 +56,7 @@ namespace Mono.Unity
 							UnityTls.NativeInterface.unitytls_x509list_free(ptr3);
 						}
 					}
-					goto IL_023A;
+					goto IL_025E;
 				}
 				finally
 				{
@@ -75,9 +77,11 @@ namespace Mono.Unity
 			}
 			this.tlsContext = UnityTls.NativeInterface.unitytls_tlsctx_create_client(unitytls_tlsctx_protocolrange, unitytls_tlsctx_callbacks, ptr4, (IntPtr)bytes.Length, &unitytls_errorstate);
 			array = null;
-			UnityTls.NativeInterface.unitytls_tlsctx_set_certificate_callback(this.tlsContext, new UnityTls.unitytls_tlsctx_certificate_callback(UnityTlsContext.CertificateCallback), (void*)((IntPtr)this.handle), &unitytls_errorstate);
-			IL_023A:
-			UnityTls.NativeInterface.unitytls_tlsctx_set_x509verify_callback(this.tlsContext, new UnityTls.unitytls_tlsctx_x509verify_callback(UnityTlsContext.VerifyCallback), (void*)((IntPtr)this.handle), &unitytls_errorstate);
+			this.certificateCallback = new UnityTls.unitytls_tlsctx_certificate_callback(UnityTlsContext.CertificateCallback);
+			UnityTls.NativeInterface.unitytls_tlsctx_set_certificate_callback(this.tlsContext, this.certificateCallback, (void*)((IntPtr)this.handle), &unitytls_errorstate);
+			IL_025E:
+			this.verifyCallback = new UnityTls.unitytls_tlsctx_x509verify_callback(UnityTlsContext.VerifyCallback);
+			UnityTls.NativeInterface.unitytls_tlsctx_set_x509verify_callback(this.tlsContext, this.verifyCallback, (void*)((IntPtr)this.handle), &unitytls_errorstate);
 			Mono.Unity.Debug.CheckAndThrow(unitytls_errorstate, "Failed to create UnityTls context", AlertDescription.InternalError);
 			this.hasContext = true;
 		}
@@ -561,6 +565,16 @@ namespace Mono.Unity
 		private unsafe UnityTls.unitytls_x509list* requestedClientCertChain = null;
 
 		private unsafe UnityTls.unitytls_key* requestedClientKey = null;
+
+		private UnityTls.unitytls_tlsctx_read_callback readCallback;
+
+		private UnityTls.unitytls_tlsctx_write_callback writeCallback;
+
+		private UnityTls.unitytls_tlsctx_trace_callback traceCallback;
+
+		private UnityTls.unitytls_tlsctx_certificate_callback certificateCallback;
+
+		private UnityTls.unitytls_tlsctx_x509verify_callback verifyCallback;
 
 		private X509Certificate localClientCertificate;
 

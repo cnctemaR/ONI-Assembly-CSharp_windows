@@ -379,7 +379,7 @@ public class PlanScreen : KIconToggleMenu
 										if (sound2 != null)
 										{
 											EventInstance eventInstance = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.GetPosition(), 1f, false);
-											eventInstance.setParameterValue("playCount", (float)this.notificationPingCount);
+											eventInstance.setParameterByName("playCount", (float)this.notificationPingCount, false);
 											SoundEvent.EndOneShot(eventInstance);
 										}
 									}

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
@@ -7,29 +6,6 @@ namespace UnityEngine
 	[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 	internal class GUILayoutEntry
 	{
-		public GUILayoutEntry(float _minWidth, float _maxWidth, float _minHeight, float _maxHeight, GUIStyle _style)
-		{
-			this.minWidth = _minWidth;
-			this.maxWidth = _maxWidth;
-			this.minHeight = _minHeight;
-			this.maxHeight = _maxHeight;
-			if (_style == null)
-			{
-				_style = GUIStyle.none;
-			}
-			this.style = _style;
-		}
-
-		public GUILayoutEntry(float _minWidth, float _maxWidth, float _minHeight, float _maxHeight, GUIStyle _style, GUILayoutOption[] options)
-		{
-			this.minWidth = _minWidth;
-			this.maxWidth = _maxWidth;
-			this.minHeight = _minHeight;
-			this.maxHeight = _maxHeight;
-			this.style = _style;
-			this.ApplyOptions(options);
-		}
-
 		public GUIStyle style
 		{
 			get
@@ -45,7 +21,6 @@ namespace UnityEngine
 
 		public virtual int marginLeft
 		{
-			[CompilerGenerated]
 			get
 			{
 				return this.style.margin.left;
@@ -54,7 +29,6 @@ namespace UnityEngine
 
 		public virtual int marginRight
 		{
-			[CompilerGenerated]
 			get
 			{
 				return this.style.margin.right;
@@ -63,7 +37,6 @@ namespace UnityEngine
 
 		public virtual int marginTop
 		{
-			[CompilerGenerated]
 			get
 			{
 				return this.style.margin.top;
@@ -72,7 +45,6 @@ namespace UnityEngine
 
 		public virtual int marginBottom
 		{
-			[CompilerGenerated]
 			get
 			{
 				return this.style.margin.bottom;
@@ -81,7 +53,6 @@ namespace UnityEngine
 
 		public int marginHorizontal
 		{
-			[CompilerGenerated]
 			get
 			{
 				return this.marginLeft + this.marginRight;
@@ -90,11 +61,34 @@ namespace UnityEngine
 
 		public int marginVertical
 		{
-			[CompilerGenerated]
 			get
 			{
 				return this.marginBottom + this.marginTop;
 			}
+		}
+
+		public GUILayoutEntry(float _minWidth, float _maxWidth, float _minHeight, float _maxHeight, GUIStyle _style)
+		{
+			this.minWidth = _minWidth;
+			this.maxWidth = _maxWidth;
+			this.minHeight = _minHeight;
+			this.maxHeight = _maxHeight;
+			bool flag = _style == null;
+			if (flag)
+			{
+				_style = GUIStyle.none;
+			}
+			this.style = _style;
+		}
+
+		public GUILayoutEntry(float _minWidth, float _maxWidth, float _minHeight, float _maxHeight, GUIStyle _style, GUILayoutOption[] options)
+		{
+			this.minWidth = _minWidth;
+			this.maxWidth = _maxWidth;
+			this.minHeight = _minHeight;
+			this.maxHeight = _maxHeight;
+			this.style = _style;
+			this.ApplyOptions(options);
 		}
 
 		public virtual void CalcWidth()
@@ -119,14 +113,15 @@ namespace UnityEngine
 
 		protected virtual void ApplyStyleSettings(GUIStyle style)
 		{
-			this.stretchWidth = ((style.fixedWidth != 0f || !style.stretchWidth) ? 0 : 1);
-			this.stretchHeight = ((style.fixedHeight != 0f || !style.stretchHeight) ? 0 : 1);
+			this.stretchWidth = ((style.fixedWidth == 0f && style.stretchWidth) ? 1 : 0);
+			this.stretchHeight = ((style.fixedHeight == 0f && style.stretchHeight) ? 1 : 0);
 			this.m_Style = style;
 		}
 
 		public virtual void ApplyOptions(GUILayoutOption[] options)
 		{
-			if (options != null)
+			bool flag = options == null;
+			if (!flag)
 			{
 				foreach (GUILayoutOption guilayoutOption in options)
 				{
@@ -141,35 +136,47 @@ namespace UnityEngine
 						this.stretchHeight = 0;
 						break;
 					case GUILayoutOption.Type.minWidth:
+					{
 						this.minWidth = (float)guilayoutOption.value;
-						if (this.maxWidth < this.minWidth)
+						bool flag2 = this.maxWidth < this.minWidth;
+						if (flag2)
 						{
 							this.maxWidth = this.minWidth;
 						}
 						break;
+					}
 					case GUILayoutOption.Type.maxWidth:
+					{
 						this.maxWidth = (float)guilayoutOption.value;
-						if (this.minWidth > this.maxWidth)
+						bool flag3 = this.minWidth > this.maxWidth;
+						if (flag3)
 						{
 							this.minWidth = this.maxWidth;
 						}
 						this.stretchWidth = 0;
 						break;
+					}
 					case GUILayoutOption.Type.minHeight:
+					{
 						this.minHeight = (float)guilayoutOption.value;
-						if (this.maxHeight < this.minHeight)
+						bool flag4 = this.maxHeight < this.minHeight;
+						if (flag4)
 						{
 							this.maxHeight = this.minHeight;
 						}
 						break;
+					}
 					case GUILayoutOption.Type.maxHeight:
+					{
 						this.maxHeight = (float)guilayoutOption.value;
-						if (this.minHeight > this.maxHeight)
+						bool flag5 = this.minHeight > this.maxHeight;
+						if (flag5)
 						{
 							this.minHeight = this.maxHeight;
 						}
 						this.stretchHeight = 0;
 						break;
+					}
 					case GUILayoutOption.Type.stretchWidth:
 						this.stretchWidth = (int)guilayoutOption.value;
 						break;
@@ -178,11 +185,13 @@ namespace UnityEngine
 						break;
 					}
 				}
-				if (this.maxWidth != 0f && this.maxWidth < this.minWidth)
+				bool flag6 = this.maxWidth != 0f && this.maxWidth < this.minWidth;
+				if (flag6)
 				{
 					this.maxWidth = this.minWidth;
 				}
-				if (this.maxHeight != 0f && this.maxHeight < this.minHeight)
+				bool flag7 = this.maxHeight != 0f && this.maxHeight < this.minHeight;
+				if (flag7)
 				{
 					this.maxHeight = this.minHeight;
 				}
@@ -201,7 +210,7 @@ namespace UnityEngine
 				text,
 				UnityString.Format("{1}-{0} (x:{2}-{3}, y:{4}-{5})", new object[]
 				{
-					(this.style == null) ? "NULL" : this.style.name,
+					(this.style != null) ? this.style.name : "NULL",
 					base.GetType(),
 					this.rect.x,
 					this.rect.xMax,
@@ -212,12 +221,12 @@ namespace UnityEngine
 				this.minWidth,
 				"-",
 				this.maxWidth,
-				(this.stretchWidth == 0) ? "" : "+",
+				(this.stretchWidth != 0) ? "+" : "",
 				", H: ",
 				this.minHeight,
 				"-",
 				this.maxHeight,
-				(this.stretchHeight == 0) ? "" : "+"
+				(this.stretchHeight != 0) ? "+" : ""
 			});
 		}
 

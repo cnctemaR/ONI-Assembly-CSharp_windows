@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class ElectricalUtilityNetwork : UtilityNetwork
@@ -55,8 +56,9 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 		{
 			List<Wire> list3 = this.wireGroups[i];
 			List<WireUtilityNetworkLink> list4 = bridgeGroups[i];
-			float maxWattageAsFloat = Wire.GetMaxWattageAsFloat((Wire.WattageRating)i);
-			if (watts_used > maxWattageAsFloat && ((list4 != null && list4.Count > 0) || (list3 != null && list3.Count > 0)))
+			float num = Wire.GetMaxWattageAsFloat((Wire.WattageRating)i);
+			num += POWER.FLOAT_FUDGE_FACTOR;
+			if (watts_used > num && ((list4 != null && list4.Count > 0) || (list3 != null && list3.Count > 0)))
 			{
 				flag = true;
 				list = list3;
@@ -82,13 +84,13 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 				{
 					if (list2 != null && list2.Count > 0)
 					{
-						int num = global::UnityEngine.Random.Range(0, list2.Count);
-						this.targetOverloadedWire = list2[num].gameObject;
+						int num2 = global::UnityEngine.Random.Range(0, list2.Count);
+						this.targetOverloadedWire = list2[num2].gameObject;
 					}
 					else if (list != null && list.Count > 0)
 					{
-						int num2 = global::UnityEngine.Random.Range(0, list.Count);
-						this.targetOverloadedWire = list[num2].gameObject;
+						int num3 = global::UnityEngine.Random.Range(0, list.Count);
+						this.targetOverloadedWire = list[num3].gameObject;
 					}
 				}
 				if (this.targetOverloadedWire != null)
@@ -96,7 +98,7 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 					this.targetOverloadedWire.Trigger(-794517298, new BuildingHP.DamageSourceInfo
 					{
 						damage = 1,
-						source = BUILDINGS.DAMAGESOURCES.CIRCUIT_OVERLOADED,
+						source = global::STRINGS.BUILDINGS.DAMAGESOURCES.CIRCUIT_OVERLOADED,
 						popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.CIRCUIT_OVERLOADED,
 						takeDamageEffect = SpawnFXHashes.BuildingSpark,
 						fullDamageEffectName = "spark_damage_kanim",

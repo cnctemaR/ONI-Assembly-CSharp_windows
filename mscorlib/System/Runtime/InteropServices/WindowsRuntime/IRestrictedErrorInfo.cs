@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices.WindowsRuntime
 {
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[Guid("82BA7092-4C88-427D-A7BC-16DD93FEB67E")]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[ComImport]
 	internal interface IRestrictedErrorInfo
 	{

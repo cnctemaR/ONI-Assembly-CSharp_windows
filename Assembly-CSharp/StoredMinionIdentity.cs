@@ -208,6 +208,16 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 		return this.assignableProxy.Get().GetComponent<Ownables>();
 	}
 
+	public bool HasOwner(Assignables owner)
+	{
+		return this.GetOwners().Contains(owner as Ownables);
+	}
+
+	public int NumOwners()
+	{
+		return this.GetOwners().Count;
+	}
+
 	public Accessory GetAccessory(AccessorySlot slot)
 	{
 		for (int i = 0; i < this.accessories.Count; i++)

@@ -8,22 +8,6 @@ namespace UnityEngine
 	[UsedByNativeCode]
 	public struct RectInt : IEquatable<RectInt>
 	{
-		public RectInt(int xMin, int yMin, int width, int height)
-		{
-			this.m_XMin = xMin;
-			this.m_YMin = yMin;
-			this.m_Width = width;
-			this.m_Height = height;
-		}
-
-		public RectInt(Vector2Int position, Vector2Int size)
-		{
-			this.m_XMin = position.x;
-			this.m_YMin = position.y;
-			this.m_Width = size.x;
-			this.m_Height = size.y;
-		}
-
 		public int x
 		{
 			get
@@ -190,6 +174,22 @@ namespace UnityEngine
 			this.max = maxPosition;
 		}
 
+		public RectInt(int xMin, int yMin, int width, int height)
+		{
+			this.m_XMin = xMin;
+			this.m_YMin = yMin;
+			this.m_Width = width;
+			this.m_Height = height;
+		}
+
+		public RectInt(Vector2Int position, Vector2Int size)
+		{
+			this.m_XMin = position.x;
+			this.m_YMin = position.y;
+			this.m_Width = size.x;
+			this.m_Height = size.y;
+		}
+
 		public void ClampToBounds(RectInt bounds)
 		{
 			this.position = new Vector2Int(Math.Max(Math.Min(bounds.xMax, this.position.x), bounds.xMin), Math.Max(Math.Min(bounds.yMax, this.position.y), bounds.yMin));
@@ -199,6 +199,11 @@ namespace UnityEngine
 		public bool Contains(Vector2Int position)
 		{
 			return position.x >= this.xMin && position.y >= this.yMin && position.x < this.xMax && position.y < this.yMax;
+		}
+
+		public bool Overlaps(RectInt other)
+		{
+			return other.xMin < this.xMax && other.xMax > this.xMin && other.yMin < this.yMax && other.yMax > this.yMin;
 		}
 
 		public override string ToString()
@@ -244,32 +249,38 @@ namespace UnityEngine
 
 			public bool MoveNext()
 			{
-				bool flag;
-				if (this._current.y >= this._max.y)
+				bool flag = this._current.y >= this._max.y;
+				bool flag2;
+				if (flag)
 				{
-					flag = false;
+					flag2 = false;
 				}
 				else
 				{
-					this._current.x = this._current.x + 1;
-					if (this._current.x >= this._max.x)
+					int num = this._current.x;
+					this._current.x = num + 1;
+					bool flag3 = this._current.x >= this._max.x;
+					if (flag3)
 					{
 						this._current.x = this._min.x;
-						this._current.y = this._current.y + 1;
-						if (this._current.y >= this._max.y)
+						num = this._current.y;
+						this._current.y = num + 1;
+						bool flag4 = this._current.y >= this._max.y;
+						if (flag4)
 						{
 							return false;
 						}
 					}
-					flag = true;
+					flag2 = true;
 				}
-				return flag;
+				return flag2;
 			}
 
 			public void Reset()
 			{
 				this._current = this._min;
-				this._current.x = this._current.x - 1;
+				int x = this._current.x;
+				this._current.x = x - 1;
 			}
 
 			public Vector2Int Current

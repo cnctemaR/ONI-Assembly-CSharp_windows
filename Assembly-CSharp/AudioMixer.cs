@@ -27,7 +27,7 @@ public class AudioMixer
 
 	public static void Destroy()
 	{
-		AudioMixer._instance.StopAll(STOP_MODE.IMMEDIATE);
+		AudioMixer._instance.StopAll(FMOD.Studio.STOP_MODE.IMMEDIATE);
 		AudioMixer._instance = null;
 	}
 
@@ -41,7 +41,7 @@ public class AudioMixer
 				eventInstance = KFMOD.CreateInstance(snapshot);
 				this.activeSnapshots[snapshot] = eventInstance;
 				eventInstance.start();
-				eventInstance.setParameterValue("snapshotActive", 1f);
+				eventInstance.setParameterByName("snapshotActive", 1f, false);
 			}
 			else
 			{
@@ -52,13 +52,13 @@ public class AudioMixer
 		return eventInstance;
 	}
 
-	public bool Stop(HashedString snapshot, STOP_MODE stop_mode = STOP_MODE.ALLOWFADEOUT)
+	public bool Stop(HashedString snapshot, FMOD.Studio.STOP_MODE stop_mode = FMOD.Studio.STOP_MODE.ALLOWFADEOUT)
 	{
 		bool flag = false;
 		EventInstance eventInstance;
 		if (this.activeSnapshots.TryGetValue(snapshot, out eventInstance))
 		{
-			eventInstance.setParameterValue("snapshotActive", 0f);
+			eventInstance.setParameterByName("snapshotActive", 0f, false);
 			eventInstance.stop(stop_mode);
 			eventInstance.release();
 			this.activeSnapshots.Remove(snapshot);
@@ -74,10 +74,10 @@ public class AudioMixer
 
 	public void Reset()
 	{
-		this.StopAll(STOP_MODE.IMMEDIATE);
+		this.StopAll(FMOD.Studio.STOP_MODE.IMMEDIATE);
 	}
 
-	public void StopAll(STOP_MODE stop_mode = STOP_MODE.IMMEDIATE)
+	public void StopAll(FMOD.Studio.STOP_MODE stop_mode = FMOD.Studio.STOP_MODE.IMMEDIATE)
 	{
 		List<HashedString> list = new List<HashedString>();
 		foreach (KeyValuePair<HashedString, EventInstance> keyValuePair in this.activeSnapshots)
@@ -107,7 +107,7 @@ public class AudioMixer
 		EventInstance eventInstance;
 		if (this.activeSnapshots.TryGetValue(snapshot_name, out eventInstance))
 		{
-			eventInstance.setParameterValue(parameter_name, parameter_value);
+			eventInstance.setParameterByName(parameter_name, parameter_value, false);
 			return;
 		}
 		this.Log(string.Concat(new object[] { "Tried to set [", parameter_name, "] to [", parameter_value, "] but [", snapshot_name, "] is not active." }));
@@ -127,12 +127,12 @@ public class AudioMixer
 	public void StopPersistentSnapshots()
 	{
 		this.persistentSnapshotsActive = false;
-		this.Stop(AudioMixerSnapshots.Get().DuplicantCountAttenuatorMigrated, STOP_MODE.ALLOWFADEOUT);
-		this.Stop(AudioMixerSnapshots.Get().DuplicantCountMovingSnapshot, STOP_MODE.ALLOWFADEOUT);
-		this.Stop(AudioMixerSnapshots.Get().DuplicantCountSleepingSnapshot, STOP_MODE.ALLOWFADEOUT);
-		this.Stop(AudioMixerSnapshots.Get().SpaceVisibleSnapshot, STOP_MODE.ALLOWFADEOUT);
-		this.Stop(AudioMixerSnapshots.Get().FacilityVisibleSnapshot, STOP_MODE.ALLOWFADEOUT);
-		this.Stop(AudioMixerSnapshots.Get().PulseSnapshot, STOP_MODE.ALLOWFADEOUT);
+		this.Stop(AudioMixerSnapshots.Get().DuplicantCountAttenuatorMigrated, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		this.Stop(AudioMixerSnapshots.Get().DuplicantCountMovingSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		this.Stop(AudioMixerSnapshots.Get().DuplicantCountSleepingSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		this.Stop(AudioMixerSnapshots.Get().SpaceVisibleSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		this.Stop(AudioMixerSnapshots.Get().FacilityVisibleSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		this.Stop(AudioMixerSnapshots.Get().PulseSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 	}
 
 	public void UpdatePersistentSnapshotParameters()
@@ -140,15 +140,15 @@ public class AudioMixer
 		this.SetVisibleDuplicants();
 		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().DuplicantCountMovingSnapshot, out this.duplicantCountMovingInst))
 		{
-			this.duplicantCountMovingInst.setParameterValue("duplicantCount", (float)Mathf.Max(0, this.visibleDupes["moving"] - AudioMixer.VISIBLE_DUPLICANTS_BEFORE_ATTENUATION));
+			this.duplicantCountMovingInst.setParameterByName("duplicantCount", (float)Mathf.Max(0, this.visibleDupes["moving"] - AudioMixer.VISIBLE_DUPLICANTS_BEFORE_ATTENUATION), false);
 		}
 		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().DuplicantCountSleepingSnapshot, out this.duplicantCountSleepingInst))
 		{
-			this.duplicantCountSleepingInst.setParameterValue("duplicantCount", (float)Mathf.Max(0, this.visibleDupes["sleeping"] - AudioMixer.VISIBLE_DUPLICANTS_BEFORE_ATTENUATION));
+			this.duplicantCountSleepingInst.setParameterByName("duplicantCount", (float)Mathf.Max(0, this.visibleDupes["sleeping"] - AudioMixer.VISIBLE_DUPLICANTS_BEFORE_ATTENUATION), false);
 		}
 		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().DuplicantCountAttenuatorMigrated, out this.duplicantCountInst))
 		{
-			this.duplicantCountInst.setParameterValue("duplicantCount", (float)Mathf.Max(0, this.visibleDupes["visible"] - AudioMixer.VISIBLE_DUPLICANTS_BEFORE_ATTENUATION));
+			this.duplicantCountInst.setParameterByName("duplicantCount", (float)Mathf.Max(0, this.visibleDupes["visible"] - AudioMixer.VISIBLE_DUPLICANTS_BEFORE_ATTENUATION), false);
 		}
 		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().PulseSnapshot, out this.pulseInst))
 		{
@@ -163,18 +163,18 @@ public class AudioMixer
 				num /= 3f;
 			}
 			float num2 = Mathf.Abs(Mathf.Sin(Time.time * 3.1415927f * num));
-			this.pulseInst.setParameterValue("Pulse", num2);
+			this.pulseInst.setParameterByName("Pulse", num2, false);
 		}
 	}
 
 	public void UpdateSpaceVisibleSnapshot(float percent)
 	{
-		this.spaceVisibleInst.setParameterValue("spaceVisible", percent);
+		this.spaceVisibleInst.setParameterByName("spaceVisible", percent, false);
 	}
 
 	public void UpdateFacilityVisibleSnapshot(float percent)
 	{
-		this.facilityVisibleInst.setParameterValue("facilityVisible", percent);
+		this.facilityVisibleInst.setParameterByName("facilityVisible", percent, false);
 	}
 
 	private void SetVisibleDuplicants()
@@ -258,7 +258,7 @@ public class AudioMixer
 		EventInstance eventInstance;
 		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().UserVolumeSettingsSnapshot, out eventInstance))
 		{
-			eventInstance.setParameterValue("userVolume_" + bus, this.userVolumeSettings[bus].busLevel);
+			eventInstance.setParameterByName("userVolume_" + bus, this.userVolumeSettings[bus].busLevel, false);
 		}
 		else
 		{

@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimatorControllerParameter.bindings.h")]
-	[NativeHeader("Runtime/Animation/AnimatorControllerParameter.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimatorControllerParameter.bindings.h")]
+	[NativeHeader("Modules/Animation/AnimatorControllerParameter.h")]
 	[NativeAsStruct]
 	[UsedByNativeCode]
 	[NativeType(CodegenOptions.Custom, "MonoAnimatorControllerParameter")]

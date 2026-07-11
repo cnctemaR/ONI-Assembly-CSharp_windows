@@ -19,8 +19,17 @@ namespace UnityEngine.SocialPlatforms.Impl
 		{
 			return string.Concat(new object[]
 			{
-				this.id, " - ", this.title, " - ", this.achievedDescription, " - ", this.unachievedDescription, " - ", this.points, " - ",
-				this.hidden
+				this.id,
+				" - ",
+				this.title,
+				" - ",
+				this.achievedDescription,
+				" - ",
+				this.unachievedDescription,
+				" - ",
+				this.points,
+				" - ",
+				this.hidden.ToString()
 			});
 		}
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
@@ -29,6 +30,18 @@ namespace UnityEngine.UI
 			}
 		}
 
+		public Sprite selectedSprite
+		{
+			get
+			{
+				return this.m_SelectedSprite;
+			}
+			set
+			{
+				this.m_SelectedSprite = value;
+			}
+		}
+
 		public Sprite disabledSprite
 		{
 			get
@@ -43,7 +56,7 @@ namespace UnityEngine.UI
 
 		public bool Equals(SpriteState other)
 		{
-			return this.highlightedSprite == other.highlightedSprite && this.pressedSprite == other.pressedSprite && this.disabledSprite == other.disabledSprite;
+			return this.highlightedSprite == other.highlightedSprite && this.pressedSprite == other.pressedSprite && this.selectedSprite == other.selectedSprite && this.disabledSprite == other.disabledSprite;
 		}
 
 		[SerializeField]
@@ -51,6 +64,10 @@ namespace UnityEngine.UI
 
 		[SerializeField]
 		private Sprite m_PressedSprite;
+
+		[FormerlySerializedAs("m_HighlightedSprite")]
+		[SerializeField]
+		private Sprite m_SelectedSprite;
 
 		[SerializeField]
 		private Sprite m_DisabledSprite;

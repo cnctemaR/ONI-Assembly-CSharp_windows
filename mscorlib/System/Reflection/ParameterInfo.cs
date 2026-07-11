@@ -9,9 +9,9 @@ using System.Text;
 
 namespace System.Reflection
 {
-	[ComDefaultInterface(typeof(_ParameterInfo))]
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.None)]
+	[ComDefaultInterface(typeof(_ParameterInfo))]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public class ParameterInfo : ICustomAttributeProvider, _ParameterInfo, IObjectReference

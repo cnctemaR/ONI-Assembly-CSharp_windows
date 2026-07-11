@@ -25,7 +25,7 @@ public class CreatureChewSoundEvent : SoundEvent
 			EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible), false);
 			if (behaviour.controller.gameObject.GetDef<BabyMonitor.Def>() != null)
 			{
-				eventInstance.setParameterValue("isBaby", 1f);
+				eventInstance.setParameterByName("isBaby", 1f, false);
 			}
 			SoundEvent.EndOneShot(eventInstance);
 		}

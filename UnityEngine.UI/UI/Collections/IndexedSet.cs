@@ -14,34 +14,24 @@ namespace UnityEngine.UI.Collections
 
 		public bool AddUnique(T item)
 		{
-			bool flag;
 			if (this.m_Dictionary.ContainsKey(item))
 			{
-				flag = false;
+				return false;
 			}
-			else
-			{
-				this.m_List.Add(item);
-				this.m_Dictionary.Add(item, this.m_List.Count - 1);
-				flag = true;
-			}
-			return flag;
+			this.m_List.Add(item);
+			this.m_Dictionary.Add(item, this.m_List.Count - 1);
+			return true;
 		}
 
 		public bool Remove(T item)
 		{
 			int num = -1;
-			bool flag;
 			if (!this.m_Dictionary.TryGetValue(item, out num))
 			{
-				flag = false;
+				return false;
 			}
-			else
-			{
-				this.RemoveAt(num);
-				flag = true;
-			}
-			return flag;
+			this.RemoveAt(num);
+			return true;
 		}
 
 		public IEnumerator<T> GetEnumerator()
@@ -89,8 +79,11 @@ namespace UnityEngine.UI.Collections
 		public int IndexOf(T item)
 		{
 			int num = -1;
-			this.m_Dictionary.TryGetValue(item, out num);
-			return num;
+			if (this.m_Dictionary.TryGetValue(item, out num))
+			{
+				return num;
+			}
+			return -1;
 		}
 
 		public void Insert(int index, T item)
@@ -105,15 +98,13 @@ namespace UnityEngine.UI.Collections
 			if (index == this.m_List.Count - 1)
 			{
 				this.m_List.RemoveAt(index);
+				return;
 			}
-			else
-			{
-				int num = this.m_List.Count - 1;
-				T t2 = this.m_List[num];
-				this.m_List[index] = t2;
-				this.m_Dictionary[t2] = index;
-				this.m_List.RemoveAt(num);
-			}
+			int num = this.m_List.Count - 1;
+			T t2 = this.m_List[num];
+			this.m_List[index] = t2;
+			this.m_Dictionary[t2] = index;
+			this.m_List.RemoveAt(num);
 		}
 
 		public T this[int index]

@@ -4,7 +4,8 @@ namespace Unity.Collections
 {
 	public enum NativeLeakDetectionMode
 	{
-		Enabled,
-		Disabled
+		EnabledWithStackTrace = 3,
+		Enabled = 2,
+		Disabled = 1
 	}
 }

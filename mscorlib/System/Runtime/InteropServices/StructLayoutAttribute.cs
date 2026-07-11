@@ -4,8 +4,8 @@ using System.Security;
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class StructLayoutAttribute : Attribute
 	{
 		[SecurityCritical]

@@ -77,6 +77,26 @@ namespace UnityEngine.Jobs
 			}
 		}
 
+		public Matrix4x4 localToWorldMatrix
+		{
+			get
+			{
+				Matrix4x4 matrix4x;
+				TransformAccess.GetLocalToWorldMatrix(ref this, out matrix4x);
+				return matrix4x;
+			}
+		}
+
+		public Matrix4x4 worldToLocalMatrix
+		{
+			get
+			{
+				Matrix4x4 matrix4x;
+				TransformAccess.GetWorldToLocalMatrix(ref this, out matrix4x);
+				return matrix4x;
+			}
+		}
+
 		[NativeMethod(Name = "TransformAccessBindings::GetPosition", IsThreadSafe = true, IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetPosition(ref TransformAccess access, out Vector3 p);
@@ -116,6 +136,14 @@ namespace UnityEngine.Jobs
 		[NativeMethod(Name = "TransformAccessBindings::SetLocalScale", IsThreadSafe = true, IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetLocalScale(ref TransformAccess access, ref Vector3 r);
+
+		[NativeMethod(Name = "TransformAccessBindings::GetLocalToWorldMatrix", IsThreadSafe = true, IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetLocalToWorldMatrix(ref TransformAccess access, out Matrix4x4 m);
+
+		[NativeMethod(Name = "TransformAccessBindings::GetWorldToLocalMatrix", IsThreadSafe = true, IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetWorldToLocalMatrix(ref TransformAccess access, out Matrix4x4 m);
 
 		private IntPtr hierarchy;
 

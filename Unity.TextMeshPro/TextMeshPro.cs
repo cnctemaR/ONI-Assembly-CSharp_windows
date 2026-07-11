@@ -12,384 +12,6 @@ namespace TMPro
 	[AddComponentMenu("Mesh/TextMeshPro - Text")]
 	public class TextMeshPro : TMP_Text, ILayoutElement
 	{
-		public int sortingLayerID
-		{
-			get
-			{
-				return this.m_renderer.sortingLayerID;
-			}
-			set
-			{
-				this.m_renderer.sortingLayerID = value;
-			}
-		}
-
-		public int sortingOrder
-		{
-			get
-			{
-				return this.m_renderer.sortingOrder;
-			}
-			set
-			{
-				this.m_renderer.sortingOrder = value;
-			}
-		}
-
-		public override bool autoSizeTextContainer
-		{
-			get
-			{
-				return this.m_autoSizeTextContainer;
-			}
-			set
-			{
-				if (this.m_autoSizeTextContainer == value)
-				{
-					return;
-				}
-				this.m_autoSizeTextContainer = value;
-				if (this.m_autoSizeTextContainer)
-				{
-					TMP_UpdateManager.RegisterTextElementForLayoutRebuild(this);
-					this.SetLayoutDirty();
-				}
-			}
-		}
-
-		[Obsolete("The TextContainer is now obsolete. Use the RectTransform instead.")]
-		public TextContainer textContainer
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		public new Transform transform
-		{
-			get
-			{
-				if (this.m_transform == null)
-				{
-					this.m_transform = base.GetComponent<Transform>();
-				}
-				return this.m_transform;
-			}
-		}
-
-		public Renderer renderer
-		{
-			get
-			{
-				if (this.m_renderer == null)
-				{
-					this.m_renderer = base.GetComponent<Renderer>();
-				}
-				return this.m_renderer;
-			}
-		}
-
-		public override Mesh mesh
-		{
-			get
-			{
-				if (this.m_mesh == null)
-				{
-					this.m_mesh = new Mesh();
-					this.m_mesh.name = "TextMeshPro";
-					this.m_mesh.hideFlags = HideFlags.HideAndDontSave;
-					this.meshFilter.mesh = this.m_mesh;
-				}
-				return this.m_mesh;
-			}
-		}
-
-		public MeshFilter meshFilter
-		{
-			get
-			{
-				if (this.m_meshFilter == null)
-				{
-					this.m_meshFilter = base.GetComponent<MeshFilter>();
-				}
-				return this.m_meshFilter;
-			}
-		}
-
-		public MaskingTypes maskType
-		{
-			get
-			{
-				return this.m_maskType;
-			}
-			set
-			{
-				this.m_maskType = value;
-				this.SetMask(this.m_maskType);
-			}
-		}
-
-		public void SetMask(MaskingTypes type, Vector4 maskCoords)
-		{
-			this.SetMask(type);
-			this.SetMaskCoordinates(maskCoords);
-		}
-
-		public void SetMask(MaskingTypes type, Vector4 maskCoords, float softnessX, float softnessY)
-		{
-			this.SetMask(type);
-			this.SetMaskCoordinates(maskCoords, softnessX, softnessY);
-		}
-
-		public override void SetVerticesDirty()
-		{
-			if (this.m_verticesAlreadyDirty || this == null || !this.IsActive())
-			{
-				return;
-			}
-			TMP_UpdateManager.RegisterTextElementForGraphicRebuild(this);
-			this.m_verticesAlreadyDirty = true;
-		}
-
-		public override void SetLayoutDirty()
-		{
-			this.m_isPreferredWidthDirty = true;
-			this.m_isPreferredHeightDirty = true;
-			if (this.m_layoutAlreadyDirty || this == null || !this.IsActive())
-			{
-				return;
-			}
-			this.m_layoutAlreadyDirty = true;
-			this.m_isLayoutDirty = true;
-		}
-
-		public override void SetMaterialDirty()
-		{
-			this.UpdateMaterial();
-		}
-
-		public override void SetAllDirty()
-		{
-			this.m_isInputParsingRequired = true;
-			this.SetLayoutDirty();
-			this.SetVerticesDirty();
-			this.SetMaterialDirty();
-		}
-
-		public override void Rebuild(CanvasUpdate update)
-		{
-			if (this == null)
-			{
-				return;
-			}
-			if (update == CanvasUpdate.Prelayout)
-			{
-				if (this.m_autoSizeTextContainer)
-				{
-					this.m_rectTransform.sizeDelta = base.GetPreferredValues(float.PositiveInfinity, float.PositiveInfinity);
-					return;
-				}
-			}
-			else if (update == CanvasUpdate.PreRender)
-			{
-				this.OnPreRenderObject();
-				this.m_verticesAlreadyDirty = false;
-				this.m_layoutAlreadyDirty = false;
-				if (!this.m_isMaterialDirty)
-				{
-					return;
-				}
-				this.UpdateMaterial();
-				this.m_isMaterialDirty = false;
-			}
-		}
-
-		protected override void UpdateMaterial()
-		{
-			if (this.m_sharedMaterial == null)
-			{
-				return;
-			}
-			if (this.m_renderer == null)
-			{
-				this.m_renderer = this.renderer;
-			}
-			if (this.m_renderer.sharedMaterial.GetInstanceID() != this.m_sharedMaterial.GetInstanceID())
-			{
-				this.m_renderer.sharedMaterial = this.m_sharedMaterial;
-			}
-		}
-
-		public override void UpdateMeshPadding()
-		{
-			this.m_padding = ShaderUtilities.GetPadding(this.m_sharedMaterial, this.m_enableExtraPadding, this.m_isUsingBold);
-			this.m_isMaskingEnabled = ShaderUtilities.IsMaskingEnabled(this.m_sharedMaterial);
-			this.m_havePropertiesChanged = true;
-			this.checkPaddingRequired = false;
-			if (this.m_textInfo == null)
-			{
-				return;
-			}
-			for (int i = 1; i < this.m_textInfo.materialCount; i++)
-			{
-				this.m_subTextObjects[i].UpdateMeshPadding(this.m_enableExtraPadding, this.m_isUsingBold);
-			}
-		}
-
-		public override void ForceMeshUpdate()
-		{
-			this.m_havePropertiesChanged = true;
-			this.OnPreRenderObject();
-		}
-
-		public override void ForceMeshUpdate(bool ignoreInactive)
-		{
-			this.m_havePropertiesChanged = true;
-			this.m_ignoreActiveState = true;
-			this.OnPreRenderObject();
-		}
-
-		public override TMP_TextInfo GetTextInfo(string text)
-		{
-			base.StringToCharArray(text, ref this.m_char_buffer);
-			this.SetArraySizes(this.m_char_buffer);
-			this.m_renderMode = TextRenderFlags.DontRender;
-			this.ComputeMarginSize();
-			this.GenerateTextMesh();
-			this.m_renderMode = TextRenderFlags.Render;
-			return base.textInfo;
-		}
-
-		public override void ClearMesh(bool updateMesh)
-		{
-			if (this.m_textInfo.meshInfo[0].mesh == null)
-			{
-				this.m_textInfo.meshInfo[0].mesh = this.m_mesh;
-			}
-			this.m_textInfo.ClearMeshInfo(updateMesh);
-		}
-
-		public override void UpdateGeometry(Mesh mesh, int index)
-		{
-			mesh.RecalculateBounds();
-		}
-
-		public override void UpdateVertexData(TMP_VertexDataUpdateFlags flags)
-		{
-			int materialCount = this.m_textInfo.materialCount;
-			for (int i = 0; i < materialCount; i++)
-			{
-				Mesh mesh;
-				if (i == 0)
-				{
-					mesh = this.m_mesh;
-				}
-				else
-				{
-					mesh = this.m_subTextObjects[i].mesh;
-				}
-				if ((flags & TMP_VertexDataUpdateFlags.Vertices) == TMP_VertexDataUpdateFlags.Vertices)
-				{
-					mesh.vertices = this.m_textInfo.meshInfo[i].vertices;
-				}
-				if ((flags & TMP_VertexDataUpdateFlags.Uv0) == TMP_VertexDataUpdateFlags.Uv0)
-				{
-					mesh.uv = this.m_textInfo.meshInfo[i].uvs0;
-				}
-				if ((flags & TMP_VertexDataUpdateFlags.Uv2) == TMP_VertexDataUpdateFlags.Uv2)
-				{
-					mesh.uv2 = this.m_textInfo.meshInfo[i].uvs2;
-				}
-				if ((flags & TMP_VertexDataUpdateFlags.Colors32) == TMP_VertexDataUpdateFlags.Colors32)
-				{
-					mesh.colors32 = this.m_textInfo.meshInfo[i].colors32;
-				}
-				mesh.RecalculateBounds();
-			}
-		}
-
-		public override void UpdateVertexData()
-		{
-			int materialCount = this.m_textInfo.materialCount;
-			for (int i = 0; i < materialCount; i++)
-			{
-				Mesh mesh;
-				if (i == 0)
-				{
-					mesh = this.m_mesh;
-				}
-				else
-				{
-					this.m_textInfo.meshInfo[i].ClearUnusedVertices();
-					mesh = this.m_subTextObjects[i].mesh;
-				}
-				mesh.vertices = this.m_textInfo.meshInfo[i].vertices;
-				mesh.uv = this.m_textInfo.meshInfo[i].uvs0;
-				mesh.uv2 = this.m_textInfo.meshInfo[i].uvs2;
-				mesh.colors32 = this.m_textInfo.meshInfo[i].colors32;
-				mesh.RecalculateBounds();
-			}
-		}
-
-		public void UpdateFontAsset()
-		{
-			this.LoadFontAsset();
-		}
-
-		public void CalculateLayoutInputHorizontal()
-		{
-			if (!base.gameObject.activeInHierarchy)
-			{
-				return;
-			}
-			this.m_currentAutoSizeMode = this.m_enableAutoSizing;
-			if (this.m_isCalculateSizeRequired || this.m_rectTransform.hasChanged)
-			{
-				this.m_minWidth = 0f;
-				this.m_flexibleWidth = 0f;
-				if (this.m_enableAutoSizing)
-				{
-					this.m_fontSize = this.m_fontSizeMax;
-				}
-				this.m_marginWidth = TMP_Text.k_LargePositiveFloat;
-				this.m_marginHeight = TMP_Text.k_LargePositiveFloat;
-				if (this.m_isInputParsingRequired || this.m_isTextTruncated)
-				{
-					base.ParseInputText();
-				}
-				this.GenerateTextMesh();
-				this.m_renderMode = TextRenderFlags.Render;
-				this.ComputeMarginSize();
-				this.m_isLayoutDirty = true;
-			}
-		}
-
-		public void CalculateLayoutInputVertical()
-		{
-			if (!base.gameObject.activeInHierarchy)
-			{
-				return;
-			}
-			if (this.m_isCalculateSizeRequired || this.m_rectTransform.hasChanged)
-			{
-				this.m_minHeight = 0f;
-				this.m_flexibleHeight = 0f;
-				if (this.m_enableAutoSizing)
-				{
-					this.m_currentAutoSizeMode = true;
-					this.m_enableAutoSizing = false;
-				}
-				this.m_marginHeight = TMP_Text.k_LargePositiveFloat;
-				this.GenerateTextMesh();
-				this.m_enableAutoSizing = this.m_currentAutoSizeMode;
-				this.m_renderMode = TextRenderFlags.Render;
-				this.ComputeMarginSize();
-				this.m_isLayoutDirty = true;
-			}
-			this.m_isCalculateSizeRequired = false;
-		}
-
 		protected override void Awake()
 		{
 			this.m_renderer = base.GetComponent<Renderer>();
@@ -3375,7 +2997,383 @@ namespace TMPro
 			}
 		}
 
-		private bool m_currentAutoSizeMode;
+		public int sortingLayerID
+		{
+			get
+			{
+				return this.m_renderer.sortingLayerID;
+			}
+			set
+			{
+				this.m_renderer.sortingLayerID = value;
+			}
+		}
+
+		public int sortingOrder
+		{
+			get
+			{
+				return this.m_renderer.sortingOrder;
+			}
+			set
+			{
+				this.m_renderer.sortingOrder = value;
+			}
+		}
+
+		public override bool autoSizeTextContainer
+		{
+			get
+			{
+				return this.m_autoSizeTextContainer;
+			}
+			set
+			{
+				if (this.m_autoSizeTextContainer == value)
+				{
+					return;
+				}
+				this.m_autoSizeTextContainer = value;
+				if (this.m_autoSizeTextContainer)
+				{
+					TMP_UpdateManager.RegisterTextElementForLayoutRebuild(this);
+					this.SetLayoutDirty();
+				}
+			}
+		}
+
+		[Obsolete("The TextContainer is now obsolete. Use the RectTransform instead.")]
+		public TextContainer textContainer
+		{
+			get
+			{
+				return null;
+			}
+		}
+
+		public new Transform transform
+		{
+			get
+			{
+				if (this.m_transform == null)
+				{
+					this.m_transform = base.GetComponent<Transform>();
+				}
+				return this.m_transform;
+			}
+		}
+
+		public Renderer renderer
+		{
+			get
+			{
+				if (this.m_renderer == null)
+				{
+					this.m_renderer = base.GetComponent<Renderer>();
+				}
+				return this.m_renderer;
+			}
+		}
+
+		public override Mesh mesh
+		{
+			get
+			{
+				if (this.m_mesh == null)
+				{
+					this.m_mesh = new Mesh();
+					this.m_mesh.name = "TextMeshPro";
+					this.m_mesh.hideFlags = HideFlags.HideAndDontSave;
+					this.meshFilter.mesh = this.m_mesh;
+				}
+				return this.m_mesh;
+			}
+		}
+
+		public MeshFilter meshFilter
+		{
+			get
+			{
+				if (this.m_meshFilter == null)
+				{
+					this.m_meshFilter = base.GetComponent<MeshFilter>();
+				}
+				return this.m_meshFilter;
+			}
+		}
+
+		public MaskingTypes maskType
+		{
+			get
+			{
+				return this.m_maskType;
+			}
+			set
+			{
+				this.m_maskType = value;
+				this.SetMask(this.m_maskType);
+			}
+		}
+
+		public void SetMask(MaskingTypes type, Vector4 maskCoords)
+		{
+			this.SetMask(type);
+			this.SetMaskCoordinates(maskCoords);
+		}
+
+		public void SetMask(MaskingTypes type, Vector4 maskCoords, float softnessX, float softnessY)
+		{
+			this.SetMask(type);
+			this.SetMaskCoordinates(maskCoords, softnessX, softnessY);
+		}
+
+		public override void SetVerticesDirty()
+		{
+			if (this.m_verticesAlreadyDirty || this == null || !this.IsActive())
+			{
+				return;
+			}
+			TMP_UpdateManager.RegisterTextElementForGraphicRebuild(this);
+			this.m_verticesAlreadyDirty = true;
+		}
+
+		public override void SetLayoutDirty()
+		{
+			this.m_isPreferredWidthDirty = true;
+			this.m_isPreferredHeightDirty = true;
+			if (this.m_layoutAlreadyDirty || this == null || !this.IsActive())
+			{
+				return;
+			}
+			this.m_layoutAlreadyDirty = true;
+			this.m_isLayoutDirty = true;
+		}
+
+		public override void SetMaterialDirty()
+		{
+			this.UpdateMaterial();
+		}
+
+		public override void SetAllDirty()
+		{
+			this.m_isInputParsingRequired = true;
+			this.SetLayoutDirty();
+			this.SetVerticesDirty();
+			this.SetMaterialDirty();
+		}
+
+		public override void Rebuild(CanvasUpdate update)
+		{
+			if (this == null)
+			{
+				return;
+			}
+			if (update == CanvasUpdate.Prelayout)
+			{
+				if (this.m_autoSizeTextContainer)
+				{
+					this.m_rectTransform.sizeDelta = base.GetPreferredValues(float.PositiveInfinity, float.PositiveInfinity);
+					return;
+				}
+			}
+			else if (update == CanvasUpdate.PreRender)
+			{
+				this.OnPreRenderObject();
+				this.m_verticesAlreadyDirty = false;
+				this.m_layoutAlreadyDirty = false;
+				if (!this.m_isMaterialDirty)
+				{
+					return;
+				}
+				this.UpdateMaterial();
+				this.m_isMaterialDirty = false;
+			}
+		}
+
+		protected override void UpdateMaterial()
+		{
+			if (this.m_sharedMaterial == null)
+			{
+				return;
+			}
+			if (this.m_renderer == null)
+			{
+				this.m_renderer = this.renderer;
+			}
+			if (this.m_renderer.sharedMaterial.GetInstanceID() != this.m_sharedMaterial.GetInstanceID())
+			{
+				this.m_renderer.sharedMaterial = this.m_sharedMaterial;
+			}
+		}
+
+		public override void UpdateMeshPadding()
+		{
+			this.m_padding = ShaderUtilities.GetPadding(this.m_sharedMaterial, this.m_enableExtraPadding, this.m_isUsingBold);
+			this.m_isMaskingEnabled = ShaderUtilities.IsMaskingEnabled(this.m_sharedMaterial);
+			this.m_havePropertiesChanged = true;
+			this.checkPaddingRequired = false;
+			if (this.m_textInfo == null)
+			{
+				return;
+			}
+			for (int i = 1; i < this.m_textInfo.materialCount; i++)
+			{
+				this.m_subTextObjects[i].UpdateMeshPadding(this.m_enableExtraPadding, this.m_isUsingBold);
+			}
+		}
+
+		public override void ForceMeshUpdate()
+		{
+			this.m_havePropertiesChanged = true;
+			this.OnPreRenderObject();
+		}
+
+		public override void ForceMeshUpdate(bool ignoreInactive)
+		{
+			this.m_havePropertiesChanged = true;
+			this.m_ignoreActiveState = true;
+			this.OnPreRenderObject();
+		}
+
+		public override TMP_TextInfo GetTextInfo(string text)
+		{
+			base.StringToCharArray(text, ref this.m_char_buffer);
+			this.SetArraySizes(this.m_char_buffer);
+			this.m_renderMode = TextRenderFlags.DontRender;
+			this.ComputeMarginSize();
+			this.GenerateTextMesh();
+			this.m_renderMode = TextRenderFlags.Render;
+			return base.textInfo;
+		}
+
+		public override void ClearMesh(bool updateMesh)
+		{
+			if (this.m_textInfo.meshInfo[0].mesh == null)
+			{
+				this.m_textInfo.meshInfo[0].mesh = this.m_mesh;
+			}
+			this.m_textInfo.ClearMeshInfo(updateMesh);
+		}
+
+		public override void UpdateGeometry(Mesh mesh, int index)
+		{
+			mesh.RecalculateBounds();
+		}
+
+		public override void UpdateVertexData(TMP_VertexDataUpdateFlags flags)
+		{
+			int materialCount = this.m_textInfo.materialCount;
+			for (int i = 0; i < materialCount; i++)
+			{
+				Mesh mesh;
+				if (i == 0)
+				{
+					mesh = this.m_mesh;
+				}
+				else
+				{
+					mesh = this.m_subTextObjects[i].mesh;
+				}
+				if ((flags & TMP_VertexDataUpdateFlags.Vertices) == TMP_VertexDataUpdateFlags.Vertices)
+				{
+					mesh.vertices = this.m_textInfo.meshInfo[i].vertices;
+				}
+				if ((flags & TMP_VertexDataUpdateFlags.Uv0) == TMP_VertexDataUpdateFlags.Uv0)
+				{
+					mesh.uv = this.m_textInfo.meshInfo[i].uvs0;
+				}
+				if ((flags & TMP_VertexDataUpdateFlags.Uv2) == TMP_VertexDataUpdateFlags.Uv2)
+				{
+					mesh.uv2 = this.m_textInfo.meshInfo[i].uvs2;
+				}
+				if ((flags & TMP_VertexDataUpdateFlags.Colors32) == TMP_VertexDataUpdateFlags.Colors32)
+				{
+					mesh.colors32 = this.m_textInfo.meshInfo[i].colors32;
+				}
+				mesh.RecalculateBounds();
+			}
+		}
+
+		public override void UpdateVertexData()
+		{
+			int materialCount = this.m_textInfo.materialCount;
+			for (int i = 0; i < materialCount; i++)
+			{
+				Mesh mesh;
+				if (i == 0)
+				{
+					mesh = this.m_mesh;
+				}
+				else
+				{
+					this.m_textInfo.meshInfo[i].ClearUnusedVertices();
+					mesh = this.m_subTextObjects[i].mesh;
+				}
+				mesh.vertices = this.m_textInfo.meshInfo[i].vertices;
+				mesh.uv = this.m_textInfo.meshInfo[i].uvs0;
+				mesh.uv2 = this.m_textInfo.meshInfo[i].uvs2;
+				mesh.colors32 = this.m_textInfo.meshInfo[i].colors32;
+				mesh.RecalculateBounds();
+			}
+		}
+
+		public void UpdateFontAsset()
+		{
+			this.LoadFontAsset();
+		}
+
+		public void CalculateLayoutInputHorizontal()
+		{
+			if (!base.gameObject.activeInHierarchy)
+			{
+				return;
+			}
+			this.m_currentAutoSizeMode = this.m_enableAutoSizing;
+			if (this.m_isCalculateSizeRequired || this.m_rectTransform.hasChanged)
+			{
+				this.m_minWidth = 0f;
+				this.m_flexibleWidth = 0f;
+				if (this.m_enableAutoSizing)
+				{
+					this.m_fontSize = this.m_fontSizeMax;
+				}
+				this.m_marginWidth = TMP_Text.k_LargePositiveFloat;
+				this.m_marginHeight = TMP_Text.k_LargePositiveFloat;
+				if (this.m_isInputParsingRequired || this.m_isTextTruncated)
+				{
+					base.ParseInputText();
+				}
+				this.GenerateTextMesh();
+				this.m_renderMode = TextRenderFlags.Render;
+				this.ComputeMarginSize();
+				this.m_isLayoutDirty = true;
+			}
+		}
+
+		public void CalculateLayoutInputVertical()
+		{
+			if (!base.gameObject.activeInHierarchy)
+			{
+				return;
+			}
+			if (this.m_isCalculateSizeRequired || this.m_rectTransform.hasChanged)
+			{
+				this.m_minHeight = 0f;
+				this.m_flexibleHeight = 0f;
+				if (this.m_enableAutoSizing)
+				{
+					this.m_currentAutoSizeMode = true;
+					this.m_enableAutoSizing = false;
+				}
+				this.m_marginHeight = TMP_Text.k_LargePositiveFloat;
+				this.GenerateTextMesh();
+				this.m_enableAutoSizing = this.m_currentAutoSizeMode;
+				this.m_renderMode = TextRenderFlags.Render;
+				this.ComputeMarginSize();
+				this.m_isLayoutDirty = true;
+			}
+			this.m_isCalculateSizeRequired = false;
+		}
 
 		[SerializeField]
 		private bool m_hasFontAssetChanged;
@@ -3413,5 +3411,7 @@ namespace TMPro
 		private bool m_isRegisteredForEvents;
 
 		private int loopCountA;
+
+		private bool m_currentAutoSizeMode;
 	}
 }

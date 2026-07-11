@@ -75,7 +75,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		}
 		else
 		{
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FabricatorSideScreenOpenSnapshot, STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FabricatorSideScreenOpenSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 			DetailsScreen.Instance.ClearSecondarySideScreen();
 			this.selectedRecipe = null;
 			this.selectedToggle = null;

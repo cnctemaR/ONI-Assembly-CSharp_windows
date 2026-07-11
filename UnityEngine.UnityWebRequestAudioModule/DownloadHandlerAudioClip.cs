@@ -9,6 +9,14 @@ namespace UnityEngine.Networking
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class DownloadHandlerAudioClip : DownloadHandler
 	{
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr Create(DownloadHandlerAudioClip obj, string url, AudioType audioType);
+
+		private void InternalCreateAudioClip(string url, AudioType audioType)
+		{
+			this.m_Ptr = DownloadHandlerAudioClip.Create(this, url, audioType);
+		}
+
 		public DownloadHandlerAudioClip(string url, AudioType audioType)
 		{
 			this.InternalCreateAudioClip(url, audioType);
@@ -17,14 +25,6 @@ namespace UnityEngine.Networking
 		public DownloadHandlerAudioClip(Uri uri, AudioType audioType)
 		{
 			this.InternalCreateAudioClip(uri.AbsoluteUri, audioType);
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr Create(DownloadHandlerAudioClip obj, string url, AudioType audioType);
-
-		private void InternalCreateAudioClip(string url, AudioType audioType)
-		{
-			this.m_Ptr = DownloadHandlerAudioClip.Create(this, url, audioType);
 		}
 
 		protected override byte[] GetData()

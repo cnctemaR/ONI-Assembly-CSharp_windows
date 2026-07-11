@@ -37,7 +37,7 @@ public class ArtifactConfig : IMultiEntityConfig
 			light2D.Angle = 0f;
 			light2D.Direction = LIGHT2D.BIOLUMROCK_DIRECTION;
 			light2D.Offset = LIGHT2D.BIOLUMROCK_OFFSET;
-			light2D.shape = LightShape.Cone;
+			light2D.shape = global::LightShape.Cone;
 			light2D.drawOverlay = true;
 		}, SimHashes.Creature));
 		list.Add(ArtifactConfig.CreateArtifact("Stethoscope", UI.SPACEARTIFACTS.STETHOSCOPE.NAME, UI.SPACEARTIFACTS.STETHOSCOPE.DESCRIPTION, "idle_stethocope", "ui_stethoscope", DECOR.SPACEARTIFACT.TIER3, null, SimHashes.Creature));
@@ -54,7 +54,7 @@ public class ArtifactConfig : IMultiEntityConfig
 			light2D2.Angle = 0f;
 			light2D2.Direction = LIGHT2D.MAGMALAMP_DIRECTION;
 			light2D2.Offset = LIGHT2D.MAGMALAMP_OFFSET;
-			light2D2.shape = LightShape.Cone;
+			light2D2.shape = global::LightShape.Cone;
 			light2D2.drawOverlay = true;
 		}, SimHashes.Creature));
 		list.Add(ArtifactConfig.CreateArtifact("DNAModel", UI.SPACEARTIFACTS.DNAMODEL.NAME, UI.SPACEARTIFACTS.DNAMODEL.DESCRIPTION, "idle_dna", "ui_dna", DECOR.SPACEARTIFACT.TIER4, null, SimHashes.Creature));
@@ -69,7 +69,7 @@ public class ArtifactConfig : IMultiEntityConfig
 			light2D3.Angle = 0f;
 			light2D3.Direction = LIGHT2D.PLASMALAMP_DIRECTION;
 			light2D3.Offset = LIGHT2D.PLASMALAMP_OFFSET;
-			light2D3.shape = LightShape.Circle;
+			light2D3.shape = global::LightShape.Circle;
 			light2D3.drawOverlay = true;
 		}, SimHashes.Creature));
 		list.Add(ArtifactConfig.CreateArtifact("SolarSystem", UI.SPACEARTIFACTS.SOLARSYSTEM.NAME, UI.SPACEARTIFACTS.SOLARSYSTEM.DESCRIPTION, "idle_solar_system_loop", "ui_solar_system", DECOR.SPACEARTIFACT.TIER5, delegate(GameObject go)

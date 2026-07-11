@@ -25,6 +25,7 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER5, none, 0.2f);
 		BuildingTemplates.CreateFoundationTileDef(buildingDef);
 		buildingDef.Overheatable = false;
+		buildingDef.UseStructureTemperature = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.ViewMode = OverlayModes.Power.ID;
@@ -48,6 +49,7 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
 		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT.PENALTY_3;
+		simCellOccupier.notifyOnMelt = true;
 		go.AddOrGet<BuildingHP>().destroyOnDamaged = true;
 		go.AddOrGet<TileTemperature>();
 	}

@@ -1,7 +1,9 @@
 ﻿using System;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace UnityEngine.Experimental.U2D
+namespace UnityEngine.U2D
 {
+	[MovedFrom("UnityEngine.Experimental.U2D")]
 	public struct SpriteShapeMetaData
 	{
 		public float height;

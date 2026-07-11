@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[AttributeUsage(AttributeTargets.Class, Inherited = true)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Class, Inherited = true)]
 	public sealed class ComSourceInterfacesAttribute : Attribute
 	{
 		public ComSourceInterfacesAttribute(string sourceInterfaces)

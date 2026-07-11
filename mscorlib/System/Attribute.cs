@@ -8,8 +8,8 @@ namespace System
 {
 	[AttributeUsage(AttributeTargets.All, Inherited = true, AllowMultiple = false)]
 	[ComVisible(true)]
-	[ComDefaultInterface(typeof(_Attribute))]
 	[ClassInterface(ClassInterfaceType.None)]
+	[ComDefaultInterface(typeof(_Attribute))]
 	[Serializable]
 	public abstract class Attribute : _Attribute
 	{

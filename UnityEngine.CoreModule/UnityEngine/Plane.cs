@@ -6,24 +6,6 @@ namespace UnityEngine
 	[UsedByNativeCode]
 	public struct Plane
 	{
-		public Plane(Vector3 inNormal, Vector3 inPoint)
-		{
-			this.m_Normal = Vector3.Normalize(inNormal);
-			this.m_Distance = -Vector3.Dot(this.m_Normal, inPoint);
-		}
-
-		public Plane(Vector3 inNormal, float d)
-		{
-			this.m_Normal = Vector3.Normalize(inNormal);
-			this.m_Distance = d;
-		}
-
-		public Plane(Vector3 a, Vector3 b, Vector3 c)
-		{
-			this.m_Normal = Vector3.Normalize(Vector3.Cross(b - a, c - a));
-			this.m_Distance = -Vector3.Dot(this.m_Normal, a);
-		}
-
 		public Vector3 normal
 		{
 			get
@@ -46,6 +28,24 @@ namespace UnityEngine
 			{
 				this.m_Distance = value;
 			}
+		}
+
+		public Plane(Vector3 inNormal, Vector3 inPoint)
+		{
+			this.m_Normal = Vector3.Normalize(inNormal);
+			this.m_Distance = -Vector3.Dot(this.m_Normal, inPoint);
+		}
+
+		public Plane(Vector3 inNormal, float d)
+		{
+			this.m_Normal = Vector3.Normalize(inNormal);
+			this.m_Distance = d;
+		}
+
+		public Plane(Vector3 a, Vector3 b, Vector3 c)
+		{
+			this.m_Normal = Vector3.Normalize(Vector3.Cross(b - a, c - a));
+			this.m_Distance = -Vector3.Dot(this.m_Normal, a);
 		}
 
 		public void SetNormalAndPosition(Vector3 inNormal, Vector3 inPoint)
@@ -111,18 +111,19 @@ namespace UnityEngine
 		{
 			float num = Vector3.Dot(ray.direction, this.m_Normal);
 			float num2 = -Vector3.Dot(ray.origin, this.m_Normal) - this.m_Distance;
-			bool flag;
-			if (Mathf.Approximately(num, 0f))
+			bool flag = Mathf.Approximately(num, 0f);
+			bool flag2;
+			if (flag)
 			{
 				enter = 0f;
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
 				enter = num2 / num;
-				flag = enter > 0f;
+				flag2 = enter > 0f;
 			}
-			return flag;
+			return flag2;
 		}
 
 		public override string ToString()
@@ -146,6 +147,8 @@ namespace UnityEngine
 				this.m_Distance.ToString(format)
 			});
 		}
+
+		internal const int size = 16;
 
 		private Vector3 m_Normal;
 

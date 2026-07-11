@@ -33,25 +33,27 @@ namespace UnityEngine.Networking.Types
 
 		public bool IsValid()
 		{
-			bool flag;
-			if (this.array == null || this.array.Length != 64)
+			bool flag = this.array == null || this.array.Length != 64;
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
-				bool flag2 = false;
+				bool flag3 = false;
 				foreach (byte b in this.array)
 				{
-					if (b != 0)
+					bool flag4 = b > 0;
+					if (flag4)
 					{
-						flag2 = true;
+						flag3 = true;
 						break;
 					}
 				}
-				flag = flag2;
+				flag2 = flag3;
 			}
-			return flag;
+			return flag2;
 		}
 
 		private const int NETWORK_ACCESS_TOKEN_SIZE = 64;

@@ -9,7 +9,7 @@ using UnityEngine.Bindings;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Jobs/ScriptBindings/JobsBindingsTypes.h")]
-	[NativeHeader("Runtime/Dynamics/BatchCommands/SpherecastCommand.h")]
+	[NativeHeader("Modules/Physics/BatchCommands/SpherecastCommand.h")]
 	public struct SpherecastCommand
 	{
 		public SpherecastCommand(Vector3 origin, float radius, Vector3 direction, float distance = 3.4028235E+38f, int layerMask = -5)

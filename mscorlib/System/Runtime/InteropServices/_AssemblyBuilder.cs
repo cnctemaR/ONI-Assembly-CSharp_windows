@@ -3,9 +3,9 @@ using System.Reflection.Emit;
 
 namespace System.Runtime.InteropServices
 {
-	[CLSCompliant(false)]
-	[ComVisible(true)]
 	[TypeLibImportClass(typeof(AssemblyBuilder))]
+	[ComVisible(true)]
+	[CLSCompliant(false)]
 	[Guid("BEBB2505-8B54-3443-AEAD-142A16DD9CC7")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	public interface _AssemblyBuilder

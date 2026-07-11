@@ -216,6 +216,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 			kcanvasScaler.SetUserScale(num);
 			KPlayerPrefs.SetFloat(KCanvasScaler.UIScalePrefKey, value);
 		}
+		ScreenResize.Instance.TriggerResize();
 		this.UpdateSliderLabel();
 	}
 

@@ -6,16 +6,8 @@ namespace UnityEngine.TextCore.LowLevel
 {
 	[UsedByNativeCode]
 	[Serializable]
-	internal struct GlyphValueRecord
+	public struct GlyphValueRecord : IEquatable<GlyphValueRecord>
 	{
-		public GlyphValueRecord(float xPlacement, float yPlacement, float xAdvance, float yAdvance)
-		{
-			this.m_XPlacement = xPlacement;
-			this.m_YPlacement = yPlacement;
-			this.m_XAdvance = xAdvance;
-			this.m_YAdvance = yAdvance;
-		}
-
 		public float xPlacement
 		{
 			get
@@ -64,6 +56,14 @@ namespace UnityEngine.TextCore.LowLevel
 			}
 		}
 
+		public GlyphValueRecord(float xPlacement, float yPlacement, float xAdvance, float yAdvance)
+		{
+			this.m_XPlacement = xPlacement;
+			this.m_YPlacement = yPlacement;
+			this.m_XAdvance = xAdvance;
+			this.m_YAdvance = yAdvance;
+		}
+
 		public static GlyphValueRecord operator +(GlyphValueRecord a, GlyphValueRecord b)
 		{
 			GlyphValueRecord glyphValueRecord;
@@ -72,6 +72,31 @@ namespace UnityEngine.TextCore.LowLevel
 			glyphValueRecord.m_XAdvance = a.xAdvance + b.xAdvance;
 			glyphValueRecord.m_YAdvance = a.yAdvance + b.yAdvance;
 			return glyphValueRecord;
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
+		public override bool Equals(object obj)
+		{
+			return base.Equals(obj);
+		}
+
+		public bool Equals(GlyphValueRecord other)
+		{
+			return base.Equals(other);
+		}
+
+		public static bool operator ==(GlyphValueRecord lhs, GlyphValueRecord rhs)
+		{
+			return lhs.m_XPlacement == rhs.m_XPlacement && lhs.m_YPlacement == rhs.m_YPlacement && lhs.m_XAdvance == rhs.m_XAdvance && lhs.m_YAdvance == rhs.m_YAdvance;
+		}
+
+		public static bool operator !=(GlyphValueRecord lhs, GlyphValueRecord rhs)
+		{
+			return !(lhs == rhs);
 		}
 
 		[SerializeField]
@@ -86,8 +111,8 @@ namespace UnityEngine.TextCore.LowLevel
 		[NativeName("xAdvance")]
 		private float m_XAdvance;
 
-		[SerializeField]
 		[NativeName("yAdvance")]
+		[SerializeField]
 		private float m_YAdvance;
 	}
 }

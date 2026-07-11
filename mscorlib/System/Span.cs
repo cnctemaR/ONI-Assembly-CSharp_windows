@@ -4,8 +4,8 @@ using System.Runtime.CompilerServices;
 
 namespace System
 {
-	[DebuggerTypeProxy(typeof(SpanDebugView<>))]
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
+	[DebuggerTypeProxy(typeof(SpanDebugView<>))]
 	public readonly ref struct Span<T>
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

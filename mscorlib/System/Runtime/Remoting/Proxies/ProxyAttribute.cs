@@ -21,8 +21,8 @@ namespace System.Runtime.Remoting.Proxies
 			return RemotingServices.GetRealProxy(RemotingServices.GetProxyForRemoteObject(objRef, serverType));
 		}
 
-		[SecurityCritical]
 		[ComVisible(true)]
+		[SecurityCritical]
 		public void GetPropertiesForNewContext(IConstructionCallMessage msg)
 		{
 		}

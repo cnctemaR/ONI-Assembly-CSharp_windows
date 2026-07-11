@@ -13,7 +13,7 @@ public class SplashMessageScreen : KMonoBehaviour
 		this.confirmButton.onClick += delegate
 		{
 			base.gameObject.SetActive(false);
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndWelcomeScreenSnapshot, STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndWelcomeScreenSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		};
 	}
 

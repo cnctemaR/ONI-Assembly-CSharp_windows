@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class ClassInterfaceAttribute : Attribute
 	{
 		public ClassInterfaceAttribute(ClassInterfaceType classInterfaceType)

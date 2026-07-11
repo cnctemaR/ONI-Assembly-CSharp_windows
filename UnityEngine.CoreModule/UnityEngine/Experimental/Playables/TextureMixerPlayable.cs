@@ -6,25 +6,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Playables
 {
-	[NativeHeader("Runtime/Graphics/Director/TextureMixerPlayable.h")]
-	[NativeHeader("Runtime/Export/Director/TextureMixerPlayable.bindings.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Graphics/Director/TextureMixerPlayable.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("TextureMixerPlayableBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Export/Director/TextureMixerPlayable.bindings.h")]
 	public struct TextureMixerPlayable : IPlayable, IEquatable<TextureMixerPlayable>
 	{
-		internal TextureMixerPlayable(PlayableHandle handle)
-		{
-			if (handle.IsValid())
-			{
-				if (!handle.IsPlayableOfType<TextureMixerPlayable>())
-				{
-					throw new InvalidCastException("Can't set handle: the playable is not an TextureMixerPlayable.");
-				}
-			}
-			this.m_Handle = handle;
-		}
-
 		public static TextureMixerPlayable Create(PlayableGraph graph)
 		{
 			PlayableHandle playableHandle = TextureMixerPlayable.CreateHandle(graph);
@@ -34,8 +22,9 @@ namespace UnityEngine.Experimental.Playables
 		private static PlayableHandle CreateHandle(PlayableGraph graph)
 		{
 			PlayableHandle @null = PlayableHandle.Null;
+			bool flag = !TextureMixerPlayable.CreateTextureMixerPlayableInternal(ref graph, ref @null);
 			PlayableHandle playableHandle;
-			if (!TextureMixerPlayable.CreateTextureMixerPlayableInternal(ref graph, ref @null))
+			if (flag)
 			{
 				playableHandle = PlayableHandle.Null;
 			}
@@ -44,6 +33,20 @@ namespace UnityEngine.Experimental.Playables
 				playableHandle = @null;
 			}
 			return playableHandle;
+		}
+
+		internal TextureMixerPlayable(PlayableHandle handle)
+		{
+			bool flag = handle.IsValid();
+			if (flag)
+			{
+				bool flag2 = !handle.IsPlayableOfType<TextureMixerPlayable>();
+				if (flag2)
+				{
+					throw new InvalidCastException("Can't set handle: the playable is not an TextureMixerPlayable.");
+				}
+			}
+			this.m_Handle = handle;
 		}
 
 		public PlayableHandle GetHandle()

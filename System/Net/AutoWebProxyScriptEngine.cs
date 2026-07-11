@@ -133,50 +133,54 @@ namespace System.Net
 
 		private WebProxyData InitializeRegistryGlobalProxy()
 		{
-			if ((int)Registry.GetValue("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "ProxyEnable", 0) > 0)
+			if ((int)Registry.GetValue("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "ProxyEnable", 0) <= 0)
 			{
-				string text = "";
-				bool flag = false;
-				ArrayList arrayList = new ArrayList();
-				string text2 = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "ProxyServer", null);
-				string text3 = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "ProxyOverride", null);
-				if (text2.Contains("="))
-				{
-					foreach (string text4 in text2.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
-					{
-						if (text4.StartsWith("http="))
-						{
-							text = text4.Substring(5);
-							break;
-						}
-					}
-				}
-				else
-				{
-					text = text2;
-				}
-				if (text3 != null)
-				{
-					foreach (string text5 in text3.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
-					{
-						if (text5 != "<local>")
-						{
-							arrayList.Add(text5);
-						}
-						else
-						{
-							flag = true;
-						}
-					}
-				}
-				return new WebProxyData
-				{
-					proxyAddress = AutoWebProxyScriptEngine.ToUri(text),
-					bypassOnLocal = flag,
-					bypassList = AutoWebProxyScriptEngine.CreateBypassList(arrayList)
-				};
+				return null;
 			}
-			return null;
+			string text = "";
+			bool flag = false;
+			ArrayList arrayList = new ArrayList();
+			string text2 = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "ProxyServer", null);
+			string text3 = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "ProxyOverride", null);
+			if (text2 == null)
+			{
+				return null;
+			}
+			if (text2.Contains("="))
+			{
+				foreach (string text4 in text2.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+				{
+					if (text4.StartsWith("http="))
+					{
+						text = text4.Substring(5);
+						break;
+					}
+				}
+			}
+			else
+			{
+				text = text2;
+			}
+			if (text3 != null)
+			{
+				foreach (string text5 in text3.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+				{
+					if (text5 != "<local>")
+					{
+						arrayList.Add(text5);
+					}
+					else
+					{
+						flag = true;
+					}
+				}
+			}
+			return new WebProxyData
+			{
+				proxyAddress = AutoWebProxyScriptEngine.ToUri(text),
+				bypassOnLocal = flag,
+				bypassList = AutoWebProxyScriptEngine.CreateBypassList(arrayList)
+			};
 		}
 
 		private static Uri ToUri(string address)

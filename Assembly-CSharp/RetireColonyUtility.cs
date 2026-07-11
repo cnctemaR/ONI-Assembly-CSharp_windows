@@ -400,7 +400,7 @@ public static class RetireColonyUtility
 		return null;
 	}
 
-	public static Sprite LoadColonyPreview(string savePath, string colonyName)
+	public static Sprite LoadColonyPreview(string savePath, string colonyName, bool fallbackToTimelapse = false)
 	{
 		string text = Path.ChangeExtension(savePath, ".png");
 		if (File.Exists(text))
@@ -415,6 +415,10 @@ public static class RetireColonyUtility
 			{
 				global::Debug.Log("failed to load preview image!? " + ex);
 			}
+		}
+		if (!fallbackToTimelapse)
+		{
+			return null;
 		}
 		return RetireColonyUtility.LoadRetiredColonyPreview(colonyName);
 	}

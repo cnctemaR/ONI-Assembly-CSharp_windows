@@ -13,7 +13,7 @@ namespace UnityEngine.Rendering
 
 		public bool IsEnabled(BuiltinShaderDefine define)
 		{
-			return (this.m_Bits & this.ComputeKeywordMask(define)) != 0U;
+			return (this.m_Bits & this.ComputeKeywordMask(define)) > 0U;
 		}
 
 		public void Enable(BuiltinShaderDefine define)

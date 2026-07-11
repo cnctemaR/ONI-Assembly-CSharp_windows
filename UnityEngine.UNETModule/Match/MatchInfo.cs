@@ -6,6 +6,20 @@ namespace UnityEngine.Networking.Match
 	[Obsolete("The matchmaker and relay feature will be removed in the future, minimal support will continue until this can be safely done.")]
 	public class MatchInfo
 	{
+		public string address { get; private set; }
+
+		public int port { get; private set; }
+
+		public int domain { get; private set; }
+
+		public NetworkID networkId { get; private set; }
+
+		public NetworkAccessToken accessToken { get; private set; }
+
+		public NodeID nodeId { get; private set; }
+
+		public bool usingRelay { get; private set; }
+
 		public MatchInfo()
 		{
 		}
@@ -31,20 +45,6 @@ namespace UnityEngine.Networking.Match
 			this.nodeId = matchResponse.nodeId;
 			this.usingRelay = matchResponse.usingRelay;
 		}
-
-		public string address { get; private set; }
-
-		public int port { get; private set; }
-
-		public int domain { get; private set; }
-
-		public NetworkID networkId { get; private set; }
-
-		public NetworkAccessToken accessToken { get; private set; }
-
-		public NodeID nodeId { get; private set; }
-
-		public bool usingRelay { get; private set; }
 
 		public override string ToString()
 		{

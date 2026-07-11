@@ -4,13 +4,32 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/UI/RectTransformUtil.h")]
-	[NativeHeader("Runtime/Transform/RectTransform.h")]
-	[NativeHeader("Runtime/UI/Canvas.h")]
-	[StaticAccessor("UI", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Modules/UI/RectTransformUtil.h")]
 	[NativeHeader("Runtime/Camera/Camera.h")]
+	[NativeHeader("Modules/UI/Canvas.h")]
+	[NativeHeader("Runtime/Transform/RectTransform.h")]
+	[StaticAccessor("UI", StaticAccessorType.DoubleColon)]
 	public sealed class RectTransformUtility
 	{
+		public static Vector2 PixelAdjustPoint(Vector2 point, Transform elementTransform, Canvas canvas)
+		{
+			Vector2 vector;
+			RectTransformUtility.PixelAdjustPoint_Injected(ref point, elementTransform, canvas, out vector);
+			return vector;
+		}
+
+		public static Rect PixelAdjustRect(RectTransform rectTransform, Canvas canvas)
+		{
+			Rect rect;
+			RectTransformUtility.PixelAdjustRect_Injected(rectTransform, canvas, out rect);
+			return rect;
+		}
+
+		private static bool PointInRectangle(Vector2 screenPoint, RectTransform rect, Camera cam, Vector4 offset)
+		{
+			return RectTransformUtility.PointInRectangle_Injected(ref screenPoint, rect, cam, ref offset);
+		}
+
 		private RectTransformUtility()
 		{
 		}
@@ -22,7 +41,12 @@ namespace UnityEngine
 
 		public static bool RectangleContainsScreenPoint(RectTransform rect, Vector2 screenPoint, Camera cam)
 		{
-			return RectTransformUtility.PointInRectangle(screenPoint, rect, cam);
+			return RectTransformUtility.RectangleContainsScreenPoint(rect, screenPoint, cam, Vector4.zero);
+		}
+
+		public static bool RectangleContainsScreenPoint(RectTransform rect, Vector2 screenPoint, Camera cam, Vector4 offset)
+		{
+			return RectTransformUtility.PointInRectangle(screenPoint, rect, cam, offset);
 		}
 
 		public static bool ScreenPointToWorldPointInRectangle(RectTransform rect, Vector2 screenPoint, Camera cam, out Vector3 worldPoint)
@@ -31,40 +55,43 @@ namespace UnityEngine
 			Ray ray = RectTransformUtility.ScreenPointToRay(cam, screenPoint);
 			Plane plane = new Plane(rect.rotation * Vector3.back, rect.position);
 			float num;
-			bool flag;
-			if (!plane.Raycast(ray, out num))
+			bool flag = !plane.Raycast(ray, out num);
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
 				worldPoint = ray.GetPoint(num);
-				flag = true;
+				flag2 = true;
 			}
-			return flag;
+			return flag2;
 		}
 
 		public static bool ScreenPointToLocalPointInRectangle(RectTransform rect, Vector2 screenPoint, Camera cam, out Vector2 localPoint)
 		{
 			localPoint = Vector2.zero;
 			Vector3 vector;
-			bool flag;
-			if (RectTransformUtility.ScreenPointToWorldPointInRectangle(rect, screenPoint, cam, out vector))
+			bool flag = RectTransformUtility.ScreenPointToWorldPointInRectangle(rect, screenPoint, cam, out vector);
+			bool flag2;
+			if (flag)
 			{
 				localPoint = rect.InverseTransformPoint(vector);
-				flag = true;
+				flag2 = true;
 			}
 			else
 			{
-				flag = false;
+				flag2 = false;
 			}
-			return flag;
+			return flag2;
 		}
 
 		public static Ray ScreenPointToRay(Camera cam, Vector2 screenPos)
 		{
+			bool flag = cam != null;
 			Ray ray;
-			if (cam != null)
+			if (flag)
 			{
 				ray = cam.ScreenPointToRay(screenPos);
 			}
@@ -79,8 +106,9 @@ namespace UnityEngine
 
 		public static Vector2 WorldToScreenPoint(Camera cam, Vector3 worldPoint)
 		{
+			bool flag = cam == null;
 			Vector2 vector;
-			if (cam == null)
+			if (flag)
 			{
 				vector = new Vector2(worldPoint.x, worldPoint.y);
 			}
@@ -94,8 +122,9 @@ namespace UnityEngine
 		public static Bounds CalculateRelativeRectTransformBounds(Transform root, Transform child)
 		{
 			RectTransform[] componentsInChildren = child.GetComponentsInChildren<RectTransform>(false);
+			bool flag = componentsInChildren.Length != 0;
 			Bounds bounds2;
-			if (componentsInChildren.Length > 0)
+			if (flag)
 			{
 				Vector3 vector = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
 				Vector3 vector2 = new Vector3(float.MinValue, float.MinValue, float.MinValue);
@@ -131,14 +160,16 @@ namespace UnityEngine
 
 		public static void FlipLayoutOnAxis(RectTransform rect, int axis, bool keepPositioning, bool recursive)
 		{
-			if (!(rect == null))
+			bool flag = rect == null;
+			if (!flag)
 			{
 				if (recursive)
 				{
 					for (int i = 0; i < rect.childCount; i++)
 					{
 						RectTransform rectTransform = rect.GetChild(i) as RectTransform;
-						if (rectTransform != null)
+						bool flag2 = rectTransform != null;
+						if (flag2)
 						{
 							RectTransformUtility.FlipLayoutOnAxis(rectTransform, axis, false, true);
 						}
@@ -165,14 +196,16 @@ namespace UnityEngine
 
 		public static void FlipLayoutAxes(RectTransform rect, bool keepPositioning, bool recursive)
 		{
-			if (!(rect == null))
+			bool flag = rect == null;
+			if (!flag)
 			{
 				if (recursive)
 				{
 					for (int i = 0; i < rect.childCount; i++)
 					{
 						RectTransform rectTransform = rect.GetChild(i) as RectTransform;
-						if (rectTransform != null)
+						bool flag2 = rectTransform != null;
+						if (flag2)
 						{
 							RectTransformUtility.FlipLayoutAxes(rectTransform, false, true);
 						}
@@ -194,25 +227,6 @@ namespace UnityEngine
 			return new Vector2(input.y, input.x);
 		}
 
-		public static Vector2 PixelAdjustPoint(Vector2 point, Transform elementTransform, Canvas canvas)
-		{
-			Vector2 vector;
-			RectTransformUtility.PixelAdjustPoint_Injected(ref point, elementTransform, canvas, out vector);
-			return vector;
-		}
-
-		public static Rect PixelAdjustRect(RectTransform rectTransform, Canvas canvas)
-		{
-			Rect rect;
-			RectTransformUtility.PixelAdjustRect_Injected(rectTransform, canvas, out rect);
-			return rect;
-		}
-
-		private static bool PointInRectangle(Vector2 screenPoint, RectTransform rect, Camera cam)
-		{
-			return RectTransformUtility.PointInRectangle_Injected(ref screenPoint, rect, cam);
-		}
-
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void PixelAdjustPoint_Injected(ref Vector2 point, Transform elementTransform, Canvas canvas, out Vector2 ret);
 
@@ -220,7 +234,7 @@ namespace UnityEngine
 		private static extern void PixelAdjustRect_Injected(RectTransform rectTransform, Canvas canvas, out Rect ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool PointInRectangle_Injected(ref Vector2 screenPoint, RectTransform rect, Camera cam);
+		private static extern bool PointInRectangle_Injected(ref Vector2 screenPoint, RectTransform rect, Camera cam, ref Vector4 offset);
 
 		private static readonly Vector3[] s_Corners = new Vector3[4];
 	}

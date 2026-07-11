@@ -693,8 +693,8 @@ namespace System
 			return true;
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		[SecuritySafeCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		public unsafe override int GetHashCode()
 		{
 			char* ptr = this;
@@ -720,8 +720,8 @@ namespace System
 			return num + num2 * 1566083941;
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		[SecuritySafeCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		internal unsafe int GetLegacyNonRandomizedHashCode()
 		{
 			char* ptr = this;
@@ -1095,8 +1095,8 @@ namespace System
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe extern String(sbyte* value);
 
-		[CLSCompliant(false)]
 		[SecurityCritical]
+		[CLSCompliant(false)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe extern String(sbyte* value, int startIndex, int length);
 
@@ -1759,8 +1759,8 @@ namespace System
 			return this.EndsWith(value, StringComparison.CurrentCulture);
 		}
 
-		[ComVisible(false)]
 		[SecuritySafeCritical]
+		[ComVisible(false)]
 		public bool EndsWith(string value, StringComparison comparisonType)
 		{
 			if (value == null)
@@ -2056,8 +2056,8 @@ namespace System
 			return this.StartsWith(value, StringComparison.CurrentCulture);
 		}
 
-		[ComVisible(false)]
 		[SecuritySafeCritical]
+		[ComVisible(false)]
 		public bool StartsWith(string value, StringComparison comparisonType)
 		{
 			if (value == null)

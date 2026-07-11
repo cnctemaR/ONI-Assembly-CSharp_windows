@@ -6,13 +6,14 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/UnityLogWriter.bindings.h")]
+	[NativeHeader("Runtime/Export/Logging/UnityLogWriter.bindings.h")]
 	internal class UnityLogWriter : TextWriter
 	{
 		[ThreadAndSerializationSafe]
 		public static void WriteStringToUnityLog(string s)
 		{
-			if (s != null)
+			bool flag = s == null;
+			if (!flag)
 			{
 				UnityLogWriter.WriteStringToUnityLogImpl(s);
 			}

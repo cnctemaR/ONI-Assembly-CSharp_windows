@@ -90,7 +90,23 @@ namespace UnityEngine
 		{
 			get
 			{
-				return Display.GetActiveImp(this.nativeDisplay);
+				return Display.GetActiveImpl(this.nativeDisplay);
+			}
+		}
+
+		public bool requiresBlitToBackbuffer
+		{
+			get
+			{
+				return Display.RequiresBlitToBackbufferImpl(this.nativeDisplay);
+			}
+		}
+
+		public bool requiresSrgbBlitToBackbuffer
+		{
+			get
+			{
+				return Display.RequiresSrgbBlitToBackbufferImpl(this.nativeDisplay);
 			}
 		}
 
@@ -144,7 +160,8 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		private static void RecreateDisplayList(IntPtr[] nativeDisplay)
 		{
-			if (nativeDisplay.Length != 0)
+			bool flag = nativeDisplay.Length == 0;
+			if (!flag)
 			{
 				Display.displays = new Display[nativeDisplay.Length];
 				for (int i = 0; i < nativeDisplay.Length; i++)
@@ -158,7 +175,8 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		private static void FireDisplaysUpdated()
 		{
-			if (Display.onDisplaysUpdated != null)
+			bool flag = Display.onDisplaysUpdated != null;
+			if (flag)
 			{
 				Display.onDisplaysUpdated();
 			}
@@ -197,7 +215,15 @@ namespace UnityEngine
 
 		[FreeFunction("UnityDisplayManager_DisplayActive")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetActiveImp(IntPtr nativeDisplay);
+		private static extern bool GetActiveImpl(IntPtr nativeDisplay);
+
+		[FreeFunction("UnityDisplayManager_RequiresBlitToBackbuffer")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool RequiresBlitToBackbufferImpl(IntPtr nativeDisplay);
+
+		[FreeFunction("UnityDisplayManager_RequiresSRGBBlitToBackbuffer")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool RequiresSrgbBlitToBackbufferImpl(IntPtr nativeDisplay);
 
 		// Note: this type is marked as 'beforefieldinit'.
 		static Display()

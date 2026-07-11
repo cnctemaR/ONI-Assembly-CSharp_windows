@@ -7,8 +7,22 @@ using UnityEngine.Serialization;
 namespace UnityEngine.EventSystems
 {
 	[AddComponentMenu("Event/Event Trigger")]
-	public class EventTrigger : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler, IInitializePotentialDragHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler, IScrollHandler, IUpdateSelectedHandler, ISelectHandler, IDeselectHandler, IMoveHandler, ISubmitHandler, ICancelHandler, IEventSystemHandler
+	public class EventTrigger : MonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler, IInitializePotentialDragHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler, IScrollHandler, IUpdateSelectedHandler, ISelectHandler, IDeselectHandler, IMoveHandler, ISubmitHandler, ICancelHandler
 	{
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Please use triggers instead (UnityUpgradable) -> triggers", true)]
+		public List<EventTrigger.Entry> delegates
+		{
+			get
+			{
+				return this.triggers;
+			}
+			set
+			{
+				this.triggers = value;
+			}
+		}
+
 		protected EventTrigger()
 		{
 		}
@@ -132,10 +146,6 @@ namespace UnityEngine.EventSystems
 		[FormerlySerializedAs("delegates")]
 		[SerializeField]
 		private List<EventTrigger.Entry> m_Delegates;
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("Please use triggers instead (UnityUpgradable) -> triggers", true)]
-		public List<EventTrigger.Entry> delegates;
 
 		[Serializable]
 		public class TriggerEvent : UnityEvent<BaseEventData>

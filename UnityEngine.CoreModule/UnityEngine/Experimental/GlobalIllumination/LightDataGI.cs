@@ -20,7 +20,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			this.shape1 = 0f;
 			this.type = LightType.Directional;
 			this.mode = light.mode;
-			this.shadow = ((!light.shadow) ? 0 : 1);
+			this.shadow = (light.shadow ? 1 : 0);
 			this.falloff = FalloffType.Undefined;
 		}
 
@@ -38,7 +38,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			this.shape1 = 0f;
 			this.type = LightType.Point;
 			this.mode = light.mode;
-			this.shadow = ((!light.shadow) ? 0 : 1);
+			this.shadow = (light.shadow ? 1 : 0);
 			this.falloff = light.falloff;
 		}
 
@@ -53,10 +53,10 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			this.coneAngle = light.coneAngle;
 			this.innerConeAngle = light.innerConeAngle;
 			this.shape0 = light.sphereRadius;
-			this.shape1 = 0f;
+			this.shape1 = (float)light.angularFalloff;
 			this.type = LightType.Spot;
 			this.mode = light.mode;
-			this.shadow = ((!light.shadow) ? 0 : 1);
+			this.shadow = (light.shadow ? 1 : 0);
 			this.falloff = light.falloff;
 		}
 
@@ -74,8 +74,8 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			this.shape1 = light.height;
 			this.type = LightType.Rectangle;
 			this.mode = light.mode;
-			this.shadow = ((!light.shadow) ? 0 : 1);
-			this.falloff = FalloffType.Undefined;
+			this.shadow = (light.shadow ? 1 : 0);
+			this.falloff = light.falloff;
 		}
 
 		public void Init(ref DiscLight light)
@@ -92,8 +92,44 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			this.shape1 = 0f;
 			this.type = LightType.Disc;
 			this.mode = light.mode;
-			this.shadow = ((!light.shadow) ? 0 : 1);
+			this.shadow = (light.shadow ? 1 : 0);
+			this.falloff = light.falloff;
+		}
+
+		public void Init(ref SpotLightBoxShape light)
+		{
+			this.instanceID = light.instanceID;
+			this.color = light.color;
+			this.indirectColor = light.indirectColor;
+			this.orientation = light.orientation;
+			this.position = light.position;
+			this.range = light.range;
+			this.coneAngle = 0f;
+			this.innerConeAngle = 0f;
+			this.shape0 = light.width;
+			this.shape1 = light.height;
+			this.type = LightType.SpotBoxShape;
+			this.mode = light.mode;
+			this.shadow = (light.shadow ? 1 : 0);
 			this.falloff = FalloffType.Undefined;
+		}
+
+		public void Init(ref SpotLightPyramidShape light)
+		{
+			this.instanceID = light.instanceID;
+			this.color = light.color;
+			this.indirectColor = light.indirectColor;
+			this.orientation = light.orientation;
+			this.position = light.position;
+			this.range = light.range;
+			this.coneAngle = light.angle;
+			this.innerConeAngle = 0f;
+			this.shape0 = light.aspectRatio;
+			this.shape1 = 0f;
+			this.type = LightType.SpotPyramidShape;
+			this.mode = light.mode;
+			this.shadow = (light.shadow ? 1 : 0);
+			this.falloff = light.falloff;
 		}
 
 		public void InitNoBake(int lightInstanceID)

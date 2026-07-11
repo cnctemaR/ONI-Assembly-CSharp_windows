@@ -24,14 +24,16 @@ namespace UnityEngine
 
 		public static string ToJson(object obj, bool prettyPrint)
 		{
+			bool flag = obj == null;
 			string text;
-			if (obj == null)
+			if (flag)
 			{
 				text = "";
 			}
 			else
 			{
-				if (obj is Object && !(obj is MonoBehaviour) && !(obj is ScriptableObject))
+				bool flag2 = obj is Object && !(obj is MonoBehaviour) && !(obj is ScriptableObject);
+				if (flag2)
 				{
 					throw new ArgumentException("JsonUtility.ToJson does not support engine types.");
 				}
@@ -47,18 +49,21 @@ namespace UnityEngine
 
 		public static object FromJson(string json, Type type)
 		{
+			bool flag = string.IsNullOrEmpty(json);
 			object obj;
-			if (string.IsNullOrEmpty(json))
+			if (flag)
 			{
 				obj = null;
 			}
 			else
 			{
-				if (type == null)
+				bool flag2 = type == null;
+				if (flag2)
 				{
 					throw new ArgumentNullException("type");
 				}
-				if (type.IsAbstract || type.IsSubclassOf(typeof(Object)))
+				bool flag3 = type.IsAbstract || type.IsSubclassOf(typeof(Object));
+				if (flag3)
 				{
 					throw new ArgumentException("Cannot deserialize JSON to new instances of type '" + type.Name + ".'");
 				}
@@ -69,13 +74,16 @@ namespace UnityEngine
 
 		public static void FromJsonOverwrite(string json, object objectToOverwrite)
 		{
-			if (!string.IsNullOrEmpty(json))
+			bool flag = string.IsNullOrEmpty(json);
+			if (!flag)
 			{
-				if (objectToOverwrite == null)
+				bool flag2 = objectToOverwrite == null;
+				if (flag2)
 				{
 					throw new ArgumentNullException("objectToOverwrite");
 				}
-				if (objectToOverwrite is Object && !(objectToOverwrite is MonoBehaviour) && !(objectToOverwrite is ScriptableObject))
+				bool flag3 = objectToOverwrite is Object && !(objectToOverwrite is MonoBehaviour) && !(objectToOverwrite is ScriptableObject);
+				if (flag3)
 				{
 					throw new ArgumentException("Engine types cannot be overwritten from JSON outside of the Editor.");
 				}

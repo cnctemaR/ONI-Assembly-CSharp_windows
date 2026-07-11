@@ -53,6 +53,10 @@ public class CustomGameSettings : KMonoBehaviour
 		this.AddSettingConfig(CustomGameSettingConfigs.CarePackages);
 		this.AddSettingConfig(CustomGameSettingConfigs.SandboxMode);
 		this.AddSettingConfig(CustomGameSettingConfigs.FastWorkersMode);
+		if (SaveLoader.GetCloudSavesAvailable())
+		{
+			this.AddSettingConfig(CustomGameSettingConfigs.SaveToCloud);
+		}
 		this.VerifySettingCoordinates();
 	}
 

@@ -5,7 +5,7 @@ using UnityEngine.Bindings;
 namespace UnityEngine.Networking
 {
 	[NativeConditional("ENABLE_NETWORK && ENABLE_UNET", true)]
-	[NativeHeader("Runtime/Networking/UNETConfiguration.h")]
+	[NativeHeader("Modules/UNET/UNETConfiguration.h")]
 	internal class HostTopologyInternal : IDisposable
 	{
 		public HostTopologyInternal(HostTopology topology)
@@ -25,7 +25,8 @@ namespace UnityEngine.Networking
 
 		protected virtual void Dispose(bool disposing)
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				HostTopologyInternal.InternalDestroy(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;
@@ -39,7 +40,8 @@ namespace UnityEngine.Networking
 
 		public void Dispose()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				HostTopologyInternal.InternalDestroy(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;

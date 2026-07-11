@@ -10,8 +10,8 @@ using Unity;
 
 namespace System.Reflection.Emit
 {
-	[ComDefaultInterface(typeof(_MethodBuilder))]
 	[ComVisible(true)]
+	[ComDefaultInterface(typeof(_MethodBuilder))]
 	[ClassInterface(ClassInterfaceType.None)]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class MethodBuilder : MethodInfo, _MethodBuilder

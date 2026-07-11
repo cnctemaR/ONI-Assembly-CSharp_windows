@@ -15,7 +15,7 @@ public class SpeedLoopingSoundUpdater : LoopingSoundParameterUpdater
 		SpeedLoopingSoundUpdater.Entry entry = new SpeedLoopingSoundUpdater.Entry
 		{
 			ev = sound.ev,
-			parameterIdx = sound.description.GetParameterIdx(base.parameter)
+			parameterId = sound.description.GetParameterId(base.parameter)
 		};
 		this.entries.Add(entry);
 	}
@@ -26,7 +26,7 @@ public class SpeedLoopingSoundUpdater : LoopingSoundParameterUpdater
 		foreach (SpeedLoopingSoundUpdater.Entry entry in this.entries)
 		{
 			EventInstance ev = entry.ev;
-			ev.setParameterValueByIndex(entry.parameterIdx, speedParameterValue);
+			ev.setParameterByID(entry.parameterId, speedParameterValue, false);
 		}
 	}
 
@@ -53,6 +53,6 @@ public class SpeedLoopingSoundUpdater : LoopingSoundParameterUpdater
 	{
 		public EventInstance ev;
 
-		public int parameterIdx;
+		public PARAMETER_ID parameterId;
 	}
 }

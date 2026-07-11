@@ -11,6 +11,42 @@ namespace UnityEngine
 	[StructLayout(LayoutKind.Sequential)]
 	public class GUIContent
 	{
+		public string text
+		{
+			get
+			{
+				return this.m_Text;
+			}
+			set
+			{
+				this.m_Text = value;
+			}
+		}
+
+		public Texture image
+		{
+			get
+			{
+				return this.m_Image;
+			}
+			set
+			{
+				this.m_Image = value;
+			}
+		}
+
+		public string tooltip
+		{
+			get
+			{
+				return this.m_Tooltip;
+			}
+			set
+			{
+				this.m_Tooltip = value;
+			}
+		}
+
 		public GUIContent()
 		{
 		}
@@ -54,48 +90,13 @@ namespace UnityEngine
 			this.tooltip = src.m_Tooltip;
 		}
 
-		public string text
-		{
-			get
-			{
-				return this.m_Text;
-			}
-			set
-			{
-				this.m_Text = value;
-			}
-		}
-
-		public Texture image
-		{
-			get
-			{
-				return this.m_Image;
-			}
-			set
-			{
-				this.m_Image = value;
-			}
-		}
-
-		public string tooltip
-		{
-			get
-			{
-				return this.m_Tooltip;
-			}
-			set
-			{
-				this.m_Tooltip = value;
-			}
-		}
-
 		internal int hash
 		{
 			get
 			{
 				int num = 0;
-				if (!string.IsNullOrEmpty(this.m_Text))
+				bool flag = !string.IsNullOrEmpty(this.m_Text);
+				if (flag)
 				{
 					num = this.m_Text.GetHashCode() * 37;
 				}

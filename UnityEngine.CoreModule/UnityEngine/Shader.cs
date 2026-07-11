@@ -8,17 +8,14 @@ using UnityEngine.Rendering;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Shaders/GpuPrograms/ShaderVariantCollection.h")]
-	[NativeHeader("Runtime/Shaders/Shader.h")]
-	[NativeHeader("Runtime/Shaders/ShaderNameRegistry.h")]
-	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[NativeHeader("Runtime/Misc/ResourceManager.h")]
+	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
+	[NativeHeader("Runtime/Shaders/Shader.h")]
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
+	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
+	[NativeHeader("Runtime/Shaders/ShaderNameRegistry.h")]
 	public sealed class Shader : Object
 	{
-		private Shader()
-		{
-		}
-
 		[Obsolete("Use Graphics.activeTier instead (UnityUpgradable) -> UnityEngine.Graphics.activeTier", false)]
 		public static ShaderHardwareTier globalShaderHardwareTier
 		{
@@ -115,6 +112,34 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int PropertyToID(string name);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern Shader GetDependency(string name);
+
+		public extern int passCount
+		{
+			[FreeFunction(Name = "ShaderScripting::GetPassCount", HasExplicitThis = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public ShaderTagId FindPassTagValue(int passIndex, ShaderTagId tagName)
+		{
+			bool flag = passIndex < 0 || passIndex >= this.passCount;
+			if (flag)
+			{
+				throw new ArgumentOutOfRangeException("passIndex");
+			}
+			int num = this.Internal_FindPassTagValue(passIndex, tagName.id);
+			return new ShaderTagId
+			{
+				id = num
+			};
+		}
+
+		[FreeFunction(Name = "ShaderScripting::FindPassTagValue", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int Internal_FindPassTagValue(int passIndex, int tagName);
+
 		[FreeFunction("ShaderScripting::SetGlobalFloat")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetGlobalFloatImpl(int name, float value);
@@ -135,9 +160,17 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetGlobalTextureImpl(int name, Texture value);
 
+		[FreeFunction("ShaderScripting::SetGlobalRenderTexture")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalRenderTextureImpl(int name, RenderTexture value, RenderTextureSubElement element);
+
 		[FreeFunction("ShaderScripting::SetGlobalBuffer")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetGlobalBufferImpl(int name, ComputeBuffer value);
+
+		[FreeFunction("ShaderScripting::SetGlobalConstantBuffer")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalConstantBufferImpl(int name, ComputeBuffer value, int offset, int size);
 
 		[FreeFunction("ShaderScripting::GetGlobalFloat")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -213,15 +246,18 @@ namespace UnityEngine
 
 		private static void SetGlobalFloatArray(int name, float[] values, int count)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
-			if (values.Length == 0)
+			bool flag2 = values.Length == 0;
+			if (flag2)
 			{
 				throw new ArgumentException("Zero-sized array is not allowed.");
 			}
-			if (values.Length < count)
+			bool flag3 = values.Length < count;
+			if (flag3)
 			{
 				throw new ArgumentException("array has less elements than passed count.");
 			}
@@ -230,15 +266,18 @@ namespace UnityEngine
 
 		private static void SetGlobalVectorArray(int name, Vector4[] values, int count)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
-			if (values.Length == 0)
+			bool flag2 = values.Length == 0;
+			if (flag2)
 			{
 				throw new ArgumentException("Zero-sized array is not allowed.");
 			}
-			if (values.Length < count)
+			bool flag3 = values.Length < count;
+			if (flag3)
 			{
 				throw new ArgumentException("array has less elements than passed count.");
 			}
@@ -247,15 +286,18 @@ namespace UnityEngine
 
 		private static void SetGlobalMatrixArray(int name, Matrix4x4[] values, int count)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
-			if (values.Length == 0)
+			bool flag2 = values.Length == 0;
+			if (flag2)
 			{
 				throw new ArgumentException("Zero-sized array is not allowed.");
 			}
-			if (values.Length < count)
+			bool flag3 = values.Length < count;
+			if (flag3)
 			{
 				throw new ArgumentException("array has less elements than passed count.");
 			}
@@ -264,13 +306,15 @@ namespace UnityEngine
 
 		private static void ExtractGlobalFloatArray(int name, List<float> values)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
 			values.Clear();
 			int globalFloatArrayCountImpl = Shader.GetGlobalFloatArrayCountImpl(name);
-			if (globalFloatArrayCountImpl > 0)
+			bool flag2 = globalFloatArrayCountImpl > 0;
+			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<float>(values, globalFloatArrayCountImpl);
 				Shader.ExtractGlobalFloatArrayImpl(name, (float[])NoAllocHelpers.ExtractArrayFromList(values));
@@ -279,13 +323,15 @@ namespace UnityEngine
 
 		private static void ExtractGlobalVectorArray(int name, List<Vector4> values)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
 			values.Clear();
 			int globalVectorArrayCountImpl = Shader.GetGlobalVectorArrayCountImpl(name);
-			if (globalVectorArrayCountImpl > 0)
+			bool flag2 = globalVectorArrayCountImpl > 0;
+			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<Vector4>(values, globalVectorArrayCountImpl);
 				Shader.ExtractGlobalVectorArrayImpl(name, (Vector4[])NoAllocHelpers.ExtractArrayFromList(values));
@@ -294,13 +340,15 @@ namespace UnityEngine
 
 		private static void ExtractGlobalMatrixArray(int name, List<Matrix4x4> values)
 		{
-			if (values == null)
+			bool flag = values == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("values");
 			}
 			values.Clear();
 			int globalMatrixArrayCountImpl = Shader.GetGlobalMatrixArrayCountImpl(name);
-			if (globalMatrixArrayCountImpl > 0)
+			bool flag2 = globalMatrixArrayCountImpl > 0;
+			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<Matrix4x4>(values, globalMatrixArrayCountImpl);
 				Shader.ExtractGlobalMatrixArrayImpl(name, (Matrix4x4[])NoAllocHelpers.ExtractArrayFromList(values));
@@ -367,6 +415,16 @@ namespace UnityEngine
 			Shader.SetGlobalTextureImpl(nameID, value);
 		}
 
+		public static void SetGlobalTexture(string name, RenderTexture value, RenderTextureSubElement element)
+		{
+			Shader.SetGlobalRenderTextureImpl(Shader.PropertyToID(name), value, element);
+		}
+
+		public static void SetGlobalTexture(int nameID, RenderTexture value, RenderTextureSubElement element)
+		{
+			Shader.SetGlobalRenderTextureImpl(nameID, value, element);
+		}
+
 		public static void SetGlobalBuffer(string name, ComputeBuffer value)
 		{
 			Shader.SetGlobalBufferImpl(Shader.PropertyToID(name), value);
@@ -375,6 +433,11 @@ namespace UnityEngine
 		public static void SetGlobalBuffer(int nameID, ComputeBuffer value)
 		{
 			Shader.SetGlobalBufferImpl(nameID, value);
+		}
+
+		public static void SetGlobalConstantBuffer(int nameID, ComputeBuffer value, int offset, int size)
+		{
+			Shader.SetGlobalConstantBufferImpl(nameID, value, offset, size);
 		}
 
 		public static void SetGlobalFloatArray(string name, List<float> values)
@@ -504,7 +567,7 @@ namespace UnityEngine
 
 		public static float[] GetGlobalFloatArray(int nameID)
 		{
-			return (Shader.GetGlobalFloatArrayCountImpl(nameID) == 0) ? null : Shader.GetGlobalFloatArrayImpl(nameID);
+			return (Shader.GetGlobalFloatArrayCountImpl(nameID) != 0) ? Shader.GetGlobalFloatArrayImpl(nameID) : null;
 		}
 
 		public static Vector4[] GetGlobalVectorArray(string name)
@@ -514,7 +577,7 @@ namespace UnityEngine
 
 		public static Vector4[] GetGlobalVectorArray(int nameID)
 		{
-			return (Shader.GetGlobalVectorArrayCountImpl(nameID) == 0) ? null : Shader.GetGlobalVectorArrayImpl(nameID);
+			return (Shader.GetGlobalVectorArrayCountImpl(nameID) != 0) ? Shader.GetGlobalVectorArrayImpl(nameID) : null;
 		}
 
 		public static Matrix4x4[] GetGlobalMatrixArray(string name)
@@ -524,7 +587,7 @@ namespace UnityEngine
 
 		public static Matrix4x4[] GetGlobalMatrixArray(int nameID)
 		{
-			return (Shader.GetGlobalMatrixArrayCountImpl(nameID) == 0) ? null : Shader.GetGlobalMatrixArrayImpl(nameID);
+			return (Shader.GetGlobalMatrixArrayCountImpl(nameID) != 0) ? Shader.GetGlobalMatrixArrayImpl(nameID) : null;
 		}
 
 		public static void GetGlobalFloatArray(string name, List<float> values)
@@ -557,6 +620,160 @@ namespace UnityEngine
 			Shader.ExtractGlobalMatrixArray(nameID, values);
 		}
 
+		private Shader()
+		{
+		}
+
+		[FreeFunction("ShaderScripting::GetPropertyName")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string GetPropertyName([NotNull] Shader shader, int propertyIndex);
+
+		[FreeFunction("ShaderScripting::GetPropertyNameId")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetPropertyNameId([NotNull] Shader shader, int propertyIndex);
+
+		[FreeFunction("ShaderScripting::GetPropertyType")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ShaderPropertyType GetPropertyType([NotNull] Shader shader, int propertyIndex);
+
+		[FreeFunction("ShaderScripting::GetPropertyDescription")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string GetPropertyDescription([NotNull] Shader shader, int propertyIndex);
+
+		[FreeFunction("ShaderScripting::GetPropertyFlags")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ShaderPropertyFlags GetPropertyFlags([NotNull] Shader shader, int propertyIndex);
+
+		[FreeFunction("ShaderScripting::GetPropertyAttributes")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string[] GetPropertyAttributes([NotNull] Shader shader, int propertyIndex);
+
+		[FreeFunction("ShaderScripting::GetPropertyDefaultValue")]
+		private static Vector4 GetPropertyDefaultValue([NotNull] Shader shader, int propertyIndex)
+		{
+			Vector4 vector;
+			Shader.GetPropertyDefaultValue_Injected(shader, propertyIndex, out vector);
+			return vector;
+		}
+
+		[FreeFunction("ShaderScripting::GetPropertyTextureDimension")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TextureDimension GetPropertyTextureDimension([NotNull] Shader shader, int propertyIndex);
+
+		[FreeFunction("ShaderScripting::GetPropertyTextureDefaultName")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string GetPropertyTextureDefaultName([NotNull] Shader shader, int propertyIndex);
+
+		private static void CheckPropertyIndex(Shader s, int propertyIndex)
+		{
+			bool flag = propertyIndex < 0 || propertyIndex >= s.GetPropertyCount();
+			if (flag)
+			{
+				throw new ArgumentOutOfRangeException("propertyIndex");
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetPropertyCount();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int FindPropertyIndex(string propertyName);
+
+		public string GetPropertyName(int propertyIndex)
+		{
+			Shader.CheckPropertyIndex(this, propertyIndex);
+			return Shader.GetPropertyName(this, propertyIndex);
+		}
+
+		public int GetPropertyNameId(int propertyIndex)
+		{
+			Shader.CheckPropertyIndex(this, propertyIndex);
+			return Shader.GetPropertyNameId(this, propertyIndex);
+		}
+
+		public ShaderPropertyType GetPropertyType(int propertyIndex)
+		{
+			Shader.CheckPropertyIndex(this, propertyIndex);
+			return Shader.GetPropertyType(this, propertyIndex);
+		}
+
+		public string GetPropertyDescription(int propertyIndex)
+		{
+			Shader.CheckPropertyIndex(this, propertyIndex);
+			return Shader.GetPropertyDescription(this, propertyIndex);
+		}
+
+		public ShaderPropertyFlags GetPropertyFlags(int propertyIndex)
+		{
+			Shader.CheckPropertyIndex(this, propertyIndex);
+			return Shader.GetPropertyFlags(this, propertyIndex);
+		}
+
+		public string[] GetPropertyAttributes(int propertyIndex)
+		{
+			Shader.CheckPropertyIndex(this, propertyIndex);
+			return Shader.GetPropertyAttributes(this, propertyIndex);
+		}
+
+		public float GetPropertyDefaultFloatValue(int propertyIndex)
+		{
+			Shader.CheckPropertyIndex(this, propertyIndex);
+			ShaderPropertyType propertyType = this.GetPropertyType(propertyIndex);
+			bool flag = propertyType != ShaderPropertyType.Float && propertyType != ShaderPropertyType.Range;
+			if (flag)
+			{
+				throw new ArgumentException("Property type is not Float or Range.");
+			}
+			return Shader.GetPropertyDefaultValue(this, propertyIndex)[0];
+		}
+
+		public Vector4 GetPropertyDefaultVectorValue(int propertyIndex)
+		{
+			Shader.CheckPropertyIndex(this, propertyIndex);
+			ShaderPropertyType propertyType = this.GetPropertyType(propertyIndex);
+			bool flag = propertyType != ShaderPropertyType.Color && propertyType != ShaderPropertyType.Vector;
+			if (flag)
+			{
+				throw new ArgumentException("Property type is not Color or Vector.");
+			}
+			return Shader.GetPropertyDefaultValue(this, propertyIndex);
+		}
+
+		public Vector2 GetPropertyRangeLimits(int propertyIndex)
+		{
+			Shader.CheckPropertyIndex(this, propertyIndex);
+			bool flag = this.GetPropertyType(propertyIndex) != ShaderPropertyType.Range;
+			if (flag)
+			{
+				throw new ArgumentException("Property type is not Range.");
+			}
+			Vector4 propertyDefaultValue = Shader.GetPropertyDefaultValue(this, propertyIndex);
+			return new Vector2(propertyDefaultValue[1], propertyDefaultValue[2]);
+		}
+
+		public TextureDimension GetPropertyTextureDimension(int propertyIndex)
+		{
+			Shader.CheckPropertyIndex(this, propertyIndex);
+			bool flag = this.GetPropertyType(propertyIndex) != ShaderPropertyType.Texture;
+			if (flag)
+			{
+				throw new ArgumentException("Property type is not TexEnv.");
+			}
+			return Shader.GetPropertyTextureDimension(this, propertyIndex);
+		}
+
+		public string GetPropertyTextureDefaultName(int propertyIndex)
+		{
+			Shader.CheckPropertyIndex(this, propertyIndex);
+			ShaderPropertyType propertyType = this.GetPropertyType(propertyIndex);
+			bool flag = propertyType != ShaderPropertyType.Texture;
+			if (flag)
+			{
+				throw new ArgumentException("Property type is not Texture.");
+			}
+			return Shader.GetPropertyTextureDefaultName(this, propertyIndex);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetGlobalVectorImpl_Injected(int name, ref Vector4 value);
 
@@ -568,5 +785,8 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetGlobalMatrixImpl_Injected(int name, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetPropertyDefaultValue_Injected(Shader shader, int propertyIndex, out Vector4 ret);
 	}
 }

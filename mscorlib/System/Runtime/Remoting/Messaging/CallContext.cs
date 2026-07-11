@@ -6,8 +6,8 @@ using System.Threading;
 
 namespace System.Runtime.Remoting.Messaging
 {
-	[SecurityCritical]
 	[ComVisible(true)]
+	[SecurityCritical]
 	[Serializable]
 	public sealed class CallContext
 	{

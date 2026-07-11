@@ -42,6 +42,18 @@ namespace UnityEngine.UI
 			}
 		}
 
+		public string selectedTrigger
+		{
+			get
+			{
+				return this.m_SelectedTrigger;
+			}
+			set
+			{
+				this.m_SelectedTrigger = value;
+			}
+		}
+
 		public string disabledTrigger
 		{
 			get
@@ -56,9 +68,11 @@ namespace UnityEngine.UI
 
 		private const string kDefaultNormalAnimName = "Normal";
 
-		private const string kDefaultSelectedAnimName = "Highlighted";
+		private const string kDefaultHighlightedAnimName = "Highlighted";
 
 		private const string kDefaultPressedAnimName = "Pressed";
+
+		private const string kDefaultSelectedAnimName = "Selected";
 
 		private const string kDefaultDisabledAnimName = "Disabled";
 
@@ -67,13 +81,16 @@ namespace UnityEngine.UI
 		private string m_NormalTrigger = "Normal";
 
 		[FormerlySerializedAs("highlightedTrigger")]
-		[FormerlySerializedAs("m_SelectedTrigger")]
 		[SerializeField]
 		private string m_HighlightedTrigger = "Highlighted";
 
 		[FormerlySerializedAs("pressedTrigger")]
 		[SerializeField]
 		private string m_PressedTrigger = "Pressed";
+
+		[FormerlySerializedAs("m_HighlightedTrigger")]
+		[SerializeField]
+		private string m_SelectedTrigger = "Selected";
 
 		[FormerlySerializedAs("disabledTrigger")]
 		[SerializeField]

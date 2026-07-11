@@ -254,7 +254,7 @@ public class KIconButtonMenu : KScreen
 		ToggleGroup component4 = base.GetComponent<ToggleGroup>();
 		if (component4 != null)
 		{
-			component4.SetAllTogglesOff();
+			component4.SetAllTogglesOff(true);
 		}
 		this.SelectToggle(null);
 	}

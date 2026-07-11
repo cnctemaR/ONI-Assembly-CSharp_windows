@@ -6,7 +6,8 @@ namespace Unity.Jobs.LowLevel.Unsafe
 	{
 		public static IntPtr Initialize()
 		{
-			if (BatchQueryJobStruct<T>.jobReflectionData == IntPtr.Zero)
+			bool flag = BatchQueryJobStruct<T>.jobReflectionData == IntPtr.Zero;
+			if (flag)
 			{
 				BatchQueryJobStruct<T>.jobReflectionData = JobsUtility.CreateJobReflectionData(typeof(T), JobType.ParallelFor, null, null, null);
 			}

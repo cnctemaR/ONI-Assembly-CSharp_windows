@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Flags]
+	[ComVisible(true)]
 	public enum AppDomainManagerInitializationOptions
 	{
 		None = 0,

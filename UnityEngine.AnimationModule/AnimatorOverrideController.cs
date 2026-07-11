@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Animation/AnimatorOverrideController.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/Animation.bindings.h")]
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Animation/ScriptBindings/Animation.bindings.h")]
+	[NativeHeader("Modules/Animation/AnimatorOverrideController.h")]
 	public class AnimatorOverrideController : RuntimeAnimatorController
 	{
 		public AnimatorOverrideController()
@@ -93,12 +93,14 @@ namespace UnityEngine
 
 		public void GetOverrides(List<KeyValuePair<AnimationClip, AnimationClip>> overrides)
 		{
-			if (overrides == null)
+			bool flag = overrides == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("overrides");
 			}
 			int overridesCount = this.overridesCount;
-			if (overrides.Capacity < overridesCount)
+			bool flag2 = overrides.Capacity < overridesCount;
+			if (flag2)
 			{
 				overrides.Capacity = overridesCount;
 			}
@@ -112,7 +114,8 @@ namespace UnityEngine
 
 		public void ApplyOverrides(IList<KeyValuePair<AnimationClip, AnimationClip>> overrides)
 		{
-			if (overrides == null)
+			bool flag = overrides == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("overrides");
 			}
@@ -152,11 +155,12 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void PerformOverrideClipListCleanup();
 
-		[NativeConditional("UNITY_EDITOR")]
 		[RequiredByNativeCode]
+		[NativeConditional("UNITY_EDITOR")]
 		internal static void OnInvalidateOverrideController(AnimatorOverrideController controller)
 		{
-			if (controller.OnOverrideControllerDirty != null)
+			bool flag = controller.OnOverrideControllerDirty != null;
+			if (flag)
 			{
 				controller.OnOverrideControllerDirty();
 			}

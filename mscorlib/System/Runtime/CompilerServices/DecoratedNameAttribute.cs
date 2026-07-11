@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.CompilerServices
 {
-	[ComVisible(false)]
 	[AttributeUsage(AttributeTargets.All)]
+	[ComVisible(false)]
 	internal sealed class DecoratedNameAttribute : Attribute
 	{
 		public DecoratedNameAttribute(string decoratedName)

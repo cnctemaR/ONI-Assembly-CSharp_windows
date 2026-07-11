@@ -7,14 +7,13 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[RequiredByNativeCode]
-	[ThreadAndSerializationSafe]
-	[NativeHeader("Runtime/Export/AsyncOperation.bindings.h")]
 	[NativeHeader("Runtime/Misc/AsyncOperation.h")]
+	[NativeHeader("Runtime/Export/Scripting/AsyncOperation.bindings.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class AsyncOperation : YieldInstruction
 	{
-		[StaticAccessor("AsyncOperationBindings", StaticAccessorType.DoubleColon)]
 		[NativeMethod(IsThreadSafe = true)]
+		[StaticAccessor("AsyncOperationBindings", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void InternalDestroy(IntPtr ptr);
 
@@ -60,7 +59,8 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		internal void InvokeCompletionEvent()
 		{
-			if (this.m_completeCallback != null)
+			bool flag = this.m_completeCallback != null;
+			if (flag)
 			{
 				this.m_completeCallback(this);
 				this.m_completeCallback = null;
@@ -71,7 +71,8 @@ namespace UnityEngine
 		{
 			add
 			{
-				if (this.isDone)
+				bool isDone = this.isDone;
+				if (isDone)
 				{
 					value(this);
 				}

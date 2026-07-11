@@ -7,7 +7,6 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[NativeHeader("Modules/IMGUI/GUIStyle.h")]
-	[NativeHeader("Runtime/Camera/RenderLayers/GUILayer.h")]
 	[UsedByNativeCode]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
@@ -25,6 +24,22 @@ namespace UnityEngine
 			this.m_Ptr = source;
 		}
 
+		protected override void Finalize()
+		{
+			try
+			{
+				bool flag = this.m_SourceStyle == null;
+				if (flag)
+				{
+					this.Destroy();
+				}
+			}
+			finally
+			{
+				base.Finalize();
+			}
+		}
+
 		public RectOffset(int left, int right, int top, int bottom)
 		{
 			this.m_Ptr = RectOffset.InternalCreate();
@@ -32,6 +47,21 @@ namespace UnityEngine
 			this.right = right;
 			this.top = top;
 			this.bottom = bottom;
+		}
+
+		public override string ToString()
+		{
+			return UnityString.Format("RectOffset (l:{0} r:{1} t:{2} b:{3})", new object[] { this.left, this.right, this.top, this.bottom });
+		}
+
+		private void Destroy()
+		{
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
+			{
+				RectOffset.InternalDestroy(this.m_Ptr);
+				this.m_Ptr = IntPtr.Zero;
+			}
 		}
 
 		[ThreadAndSerializationSafe]
@@ -102,28 +132,6 @@ namespace UnityEngine
 			Rect rect2;
 			this.Remove_Injected(ref rect, out rect2);
 			return rect2;
-		}
-
-		~RectOffset()
-		{
-			if (this.m_SourceStyle == null)
-			{
-				this.Destroy();
-			}
-		}
-
-		public override string ToString()
-		{
-			return UnityString.Format("RectOffset (l:{0} r:{1} t:{2} b:{3})", new object[] { this.left, this.right, this.top, this.bottom });
-		}
-
-		private void Destroy()
-		{
-			if (this.m_Ptr != IntPtr.Zero)
-			{
-				RectOffset.InternalDestroy(this.m_Ptr);
-				this.m_Ptr = IntPtr.Zero;
-			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

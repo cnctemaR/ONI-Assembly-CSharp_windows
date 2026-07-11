@@ -8,8 +8,8 @@ namespace System.Threading
 	internal struct ExecutionContextSwitcher
 	{
 		[SecurityCritical]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		[HandleProcessCorruptedStateExceptions]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		internal bool UndoNoThrow()
 		{
 			try
@@ -23,8 +23,8 @@ namespace System.Threading
 			return true;
 		}
 
-		[SecurityCritical]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[SecurityCritical]
 		internal void Undo()
 		{
 			if (this.thread == null)

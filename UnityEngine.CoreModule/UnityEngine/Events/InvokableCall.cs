@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Reflection;
-using UnityEngineInternal;
 
 namespace UnityEngine.Events
 {
 	internal class InvokableCall : BaseInvokableCall
 	{
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private event UnityAction Delegate;
+
 		public InvokableCall(object target, MethodInfo theFunction)
 			: base(target, theFunction)
 		{
-			this.Delegate += (UnityAction)theFunction.CreateDelegate(typeof(UnityAction), target);
+			this.Delegate += (UnityAction)global::System.Delegate.CreateDelegate(typeof(UnityAction), target, theFunction);
 		}
 
 		public InvokableCall(UnityAction action)
@@ -18,12 +20,10 @@ namespace UnityEngine.Events
 			this.Delegate += action;
 		}
 
-		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private event UnityAction Delegate;
-
 		public override void Invoke(object[] args)
 		{
-			if (BaseInvokableCall.AllowInvoke(this.Delegate))
+			bool flag = BaseInvokableCall.AllowInvoke(this.Delegate);
+			if (flag)
 			{
 				this.Delegate();
 			}
@@ -31,7 +31,8 @@ namespace UnityEngine.Events
 
 		public void Invoke()
 		{
-			if (BaseInvokableCall.AllowInvoke(this.Delegate))
+			bool flag = BaseInvokableCall.AllowInvoke(this.Delegate);
+			if (flag)
 			{
 				this.Delegate();
 			}
@@ -39,7 +40,7 @@ namespace UnityEngine.Events
 
 		public override bool Find(object targetObj, MethodInfo method)
 		{
-			return this.Delegate.Target == targetObj && this.Delegate.GetMethodInfo().Equals(method);
+			return this.Delegate.Target == targetObj && this.Delegate.Method.Equals(method);
 		}
 	}
 }

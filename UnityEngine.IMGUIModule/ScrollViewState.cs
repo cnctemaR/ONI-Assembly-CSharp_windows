@@ -18,26 +18,32 @@ namespace UnityEngine
 		public bool ScrollTowards(Rect pos, float maxDelta)
 		{
 			Vector2 vector = this.ScrollNeeded(pos);
-			bool flag;
-			if (vector.sqrMagnitude < 0.0001f)
+			bool flag = vector.sqrMagnitude < 0.0001f;
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
-			}
-			else if (maxDelta == 0f)
-			{
-				flag = true;
+				flag2 = false;
 			}
 			else
 			{
-				if (vector.magnitude > maxDelta)
+				bool flag3 = maxDelta == 0f;
+				if (flag3)
 				{
-					vector = vector.normalized * maxDelta;
+					flag2 = true;
 				}
-				this.scrollPosition += vector;
-				this.apply = true;
-				flag = true;
+				else
+				{
+					bool flag4 = vector.magnitude > maxDelta;
+					if (flag4)
+					{
+						vector = vector.normalized * maxDelta;
+					}
+					this.scrollPosition += vector;
+					this.apply = true;
+					flag2 = true;
+				}
 			}
-			return flag;
+			return flag2;
 		}
 
 		private Vector2 ScrollNeeded(Rect pos)
@@ -46,33 +52,45 @@ namespace UnityEngine
 			rect.x += this.scrollPosition.x;
 			rect.y += this.scrollPosition.y;
 			float num = pos.width - this.visibleRect.width;
-			if (num > 0f)
+			bool flag = num > 0f;
+			if (flag)
 			{
 				pos.width -= num;
 				pos.x += num * 0.5f;
 			}
 			num = pos.height - this.visibleRect.height;
-			if (num > 0f)
+			bool flag2 = num > 0f;
+			if (flag2)
 			{
 				pos.height -= num;
 				pos.y += num * 0.5f;
 			}
 			Vector2 zero = Vector2.zero;
-			if (pos.xMax > rect.xMax)
+			bool flag3 = pos.xMax > rect.xMax;
+			if (flag3)
 			{
 				zero.x += pos.xMax - rect.xMax;
 			}
-			else if (pos.xMin < rect.xMin)
+			else
 			{
-				zero.x -= rect.xMin - pos.xMin;
+				bool flag4 = pos.xMin < rect.xMin;
+				if (flag4)
+				{
+					zero.x -= rect.xMin - pos.xMin;
+				}
 			}
-			if (pos.yMax > rect.yMax)
+			bool flag5 = pos.yMax > rect.yMax;
+			if (flag5)
 			{
 				zero.y += pos.yMax - rect.yMax;
 			}
-			else if (pos.yMin < rect.yMin)
+			else
 			{
-				zero.y -= rect.yMin - pos.yMin;
+				bool flag6 = pos.yMin < rect.yMin;
+				if (flag6)
+				{
+					zero.y -= rect.yMin - pos.yMin;
+				}
 			}
 			Rect rect2 = this.viewRect;
 			rect2.width = Mathf.Max(rect2.width, this.visibleRect.width);

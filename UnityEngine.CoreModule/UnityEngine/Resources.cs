@@ -5,14 +5,15 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Export/Resources/Resources.bindings.h")]
 	[NativeHeader("Runtime/Misc/ResourceManagerUtility.h")]
-	[NativeHeader("Runtime/Export/Resources.bindings.h")]
 	public sealed class Resources
 	{
 		internal static T[] ConvertObjects<T>(Object[] rawObjects) where T : Object
 		{
+			bool flag = rawObjects == null;
 			T[] array;
-			if (rawObjects == null)
+			if (flag)
 			{
 				array = null;
 			}
@@ -28,8 +29,8 @@ namespace UnityEngine
 			return array;
 		}
 
-		[FreeFunction("Resources_Bindings::FindObjectsOfTypeAll")]
 		[TypeInferenceRule(TypeInferenceRules.ArrayOfTypeReferencedByFirstArgument)]
+		[FreeFunction("Resources_Bindings::FindObjectsOfTypeAll")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Object[] FindObjectsOfTypeAll(Type type);
 
@@ -48,9 +49,9 @@ namespace UnityEngine
 			return (T)((object)Resources.Load(path, typeof(T)));
 		}
 
-		[TypeInferenceRule(TypeInferenceRules.TypeReferencedBySecondArgument)]
 		[NativeThrows]
 		[FreeFunction("Resources_Bindings::Load")]
+		[TypeInferenceRule(TypeInferenceRules.TypeReferencedBySecondArgument)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Object Load(string path, [NotNull] Type systemTypeInstance);
 

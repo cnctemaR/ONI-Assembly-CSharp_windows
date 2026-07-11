@@ -322,7 +322,7 @@ public class DetailsScreen : KTabMenu
 				}
 			});
 		}
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MenuOpenHalfEffect, STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MenuOpenHalfEffect, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		this.sideScreen.SetActive(false);
 	}
 

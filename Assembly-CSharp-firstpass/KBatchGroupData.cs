@@ -184,14 +184,12 @@ public class KBatchGroupData
 
 	public KAnim.Build.Symbol GetSymbol(KAnimHashedString symbol_name)
 	{
-		foreach (KAnim.Build.Symbol symbol in this.frameElementSymbols)
+		int num = 0;
+		if (!this.frameElementSymbolIndices.TryGetValue(symbol_name, out num))
 		{
-			if (symbol.hash == symbol_name)
-			{
-				return symbol;
-			}
+			return null;
 		}
-		return null;
+		return this.frameElementSymbols[num];
 	}
 
 	public KAnim.Build.Symbol GetSymbol(int index)

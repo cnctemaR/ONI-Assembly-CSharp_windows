@@ -2070,8 +2070,8 @@ namespace System.Net
 			return stringBuilder;
 		}
 
-		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
 		public HttpWebRequest()
 		{
 			global::Unity.ThrowStub.ThrowNotSupportedException();

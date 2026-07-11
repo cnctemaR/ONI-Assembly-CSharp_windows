@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Input/TimeManager.h")]
 	[StaticAccessor("GetTimeManager()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/Input/TimeManager.h")]
 	public class Time
 	{
 		[NativeProperty("CurTime")]
@@ -116,12 +116,24 @@ namespace UnityEngine
 			get;
 		}
 
-		public static extern int captureFramerate
+		public static extern float captureDeltaTime
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
+		}
+
+		public static int captureFramerate
+		{
+			get
+			{
+				return (Time.captureDeltaTime == 0f) ? 0 : ((int)Mathf.Round(1f / Time.captureDeltaTime));
+			}
+			set
+			{
+				Time.captureDeltaTime = ((value == 0) ? 0f : (1f / (float)value));
+			}
 		}
 
 		public static extern bool inFixedTimeStep

@@ -4,13 +4,14 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Networking
 {
+	[NativeHeader("Modules/UNET/UNETConfiguration.h")]
 	[NativeConditional("ENABLE_NETWORK && ENABLE_UNET", true)]
-	[NativeHeader("Runtime/Networking/UNETConfiguration.h")]
 	internal class GlobalConfigInternal : IDisposable
 	{
 		public GlobalConfigInternal(GlobalConfig config)
 		{
-			if (config == null)
+			bool flag = config == null;
+			if (flag)
 			{
 				throw new NullReferenceException("config is not defined");
 			}
@@ -21,12 +22,14 @@ namespace UnityEngine.Networking
 			this.ReactorMaximumSentMessages = config.ReactorMaximumSentMessages;
 			this.MaxPacketSize = config.MaxPacketSize;
 			this.MaxHosts = config.MaxHosts;
-			if (config.ThreadPoolSize == 0 || config.ThreadPoolSize > 254)
+			bool flag2 = config.ThreadPoolSize == 0 || config.ThreadPoolSize > 254;
+			if (flag2)
 			{
 				throw new ArgumentOutOfRangeException("Worker thread pool size should be >= 1 && < 254 (for server only)");
 			}
 			byte b = config.ThreadPoolSize;
-			if (config.ThreadPoolSize > 1)
+			bool flag3 = config.ThreadPoolSize > 1;
+			if (flag3)
 			{
 				Debug.LogWarning("Worker thread pool size can be > 1 only for server platforms: Win, OSX or Linux");
 				b = 1;
@@ -40,7 +43,8 @@ namespace UnityEngine.Networking
 
 		protected virtual void Dispose(bool disposing)
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				GlobalConfigInternal.InternalDestroy(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;
@@ -54,7 +58,8 @@ namespace UnityEngine.Networking
 
 		public void Dispose()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				GlobalConfigInternal.InternalDestroy(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;

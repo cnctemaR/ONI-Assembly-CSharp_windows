@@ -8,35 +8,12 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/TextRendering/Public/FontImpl.h")]
-	[NativeHeader("Modules/TextRendering/Public/Font.h")]
 	[StaticAccessor("TextRenderingPrivate", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Modules/TextRendering/Public/FontImpl.h")]
 	[NativeClass("TextRendering::Font")]
+	[NativeHeader("Modules/TextRendering/Public/Font.h")]
 	public sealed class Font : Object
 	{
-		public Font()
-		{
-			Font.Internal_CreateFont(this, null);
-		}
-
-		public Font(string name)
-		{
-			bool flag = Path.GetDirectoryName(name) == string.Empty;
-			if (flag)
-			{
-				Font.Internal_CreateFont(this, name);
-			}
-			else
-			{
-				Font.Internal_CreateFontFromPath(this, name);
-			}
-		}
-
-		private Font(string[] names, int size)
-		{
-			Font.Internal_CreateDynamicFont(this, names, size);
-		}
-
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action<Font> textureRebuilt;
 
@@ -107,6 +84,30 @@ namespace UnityEngine
 			}
 		}
 
+		public Font()
+		{
+			Font.Internal_CreateFont(this, null);
+		}
+
+		public Font(string name)
+		{
+			bool flag = Path.GetDirectoryName(name) == string.Empty;
+			bool flag2 = flag;
+			if (flag2)
+			{
+				Font.Internal_CreateFont(this, name);
+			}
+			else
+			{
+				Font.Internal_CreateFontFromPath(this, name);
+			}
+		}
+
+		private Font(string[] names, int size)
+		{
+			Font.Internal_CreateDynamicFont(this, names, size);
+		}
+
 		public static Font CreateDynamicFontFromOSFont(string fontname, int size)
 		{
 			return new Font(new string[] { fontname }, size);
@@ -120,9 +121,10 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		internal static void InvokeTextureRebuilt_Internal(Font font)
 		{
-			if (Font.textureRebuilt != null)
+			Action<Font> action = Font.textureRebuilt;
+			if (action != null)
 			{
-				Font.textureRebuilt(font);
+				action(font);
 			}
 			Font.FontTextureRebuildCallback fontTextureRebuildCallback = font.m_FontTextureRebuildCallback;
 			if (fontTextureRebuildCallback != null)

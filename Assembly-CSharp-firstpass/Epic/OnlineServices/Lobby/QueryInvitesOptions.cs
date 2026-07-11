@@ -1,0 +1,17 @@
+﻿using System;
+
+namespace Epic.OnlineServices.Lobby
+{
+	public class QueryInvitesOptions
+	{
+		public int ApiVersion
+		{
+			get
+			{
+				return 1;
+			}
+		}
+
+		public ProductUserId LocalUserId { get; set; }
+	}
+}

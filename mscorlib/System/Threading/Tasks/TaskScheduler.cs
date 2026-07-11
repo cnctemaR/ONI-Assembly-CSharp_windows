@@ -7,8 +7,8 @@ using System.Security.Permissions;
 
 namespace System.Threading.Tasks
 {
-	[DebuggerDisplay("Id={Id}")]
 	[DebuggerTypeProxy(typeof(TaskScheduler.SystemThreadingTasks_TaskSchedulerDebugView))]
+	[DebuggerDisplay("Id={Id}")]
 	[PermissionSet(SecurityAction.InheritanceDemand, Unrestricted = true)]
 	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public abstract class TaskScheduler

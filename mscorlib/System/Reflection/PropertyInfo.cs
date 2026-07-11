@@ -76,8 +76,8 @@ namespace System.Reflection
 
 		public abstract MethodInfo GetSetMethod(bool nonPublic);
 
-		[DebuggerHidden]
 		[DebuggerStepThrough]
+		[DebuggerHidden]
 		public virtual object GetValue(object obj, object[] index)
 		{
 			return this.GetValue(obj, BindingFlags.Default, null, index, null);

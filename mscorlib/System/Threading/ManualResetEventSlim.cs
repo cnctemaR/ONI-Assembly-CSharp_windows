@@ -5,8 +5,8 @@ using System.Security.Permissions;
 
 namespace System.Threading
 {
-	[ComVisible(false)]
 	[DebuggerDisplay("Set = {IsSet}")]
+	[ComVisible(false)]
 	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class ManualResetEventSlim : IDisposable
 	{

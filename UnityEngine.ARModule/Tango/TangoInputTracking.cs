@@ -5,7 +5,7 @@ using UnityEngine.Bindings;
 namespace UnityEngine.XR.Tango
 {
 	[NativeConditional("PLATFORM_ANDROID")]
-	[NativeHeader("Runtime/AR/Tango/TangoScriptApi.h")]
+	[NativeHeader("Modules/AR/Tango/TangoScriptApi.h")]
 	internal static class TangoInputTracking
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]

@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeClass("ContactFilter", "struct ContactFilter;")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeHeader("Modules/Physics2D/Public/Collider2D.h")]
-	[NativeClass("ContactFilter", "struct ContactFilter;")]
 	[Serializable]
 	public struct ContactFilter2D
 	{
@@ -28,22 +29,7 @@ namespace UnityEngine
 
 		private void CheckConsistency()
 		{
-			this.minDepth = ((this.minDepth != float.NegativeInfinity && this.minDepth != float.PositiveInfinity && !float.IsNaN(this.minDepth)) ? this.minDepth : float.MinValue);
-			this.maxDepth = ((this.maxDepth != float.NegativeInfinity && this.maxDepth != float.PositiveInfinity && !float.IsNaN(this.maxDepth)) ? this.maxDepth : float.MaxValue);
-			if (this.minDepth > this.maxDepth)
-			{
-				float num = this.minDepth;
-				this.minDepth = this.maxDepth;
-				this.maxDepth = num;
-			}
-			this.minNormalAngle = ((!float.IsNaN(this.minNormalAngle)) ? Mathf.Clamp(this.minNormalAngle, 0f, 359.9999f) : 0f);
-			this.maxNormalAngle = ((!float.IsNaN(this.maxNormalAngle)) ? Mathf.Clamp(this.maxNormalAngle, 0f, 359.9999f) : 359.9999f);
-			if (this.minNormalAngle > this.maxNormalAngle)
-			{
-				float num2 = this.minNormalAngle;
-				this.minNormalAngle = this.maxNormalAngle;
-				this.maxNormalAngle = num2;
-			}
+			ContactFilter2D.CheckConsistency_Injected(ref this);
 		}
 
 		public void ClearLayerMask()
@@ -103,61 +89,49 @@ namespace UnityEngine
 
 		public bool IsFilteringDepth(GameObject obj)
 		{
-			bool flag;
-			if (!this.useDepth)
+			bool flag = !this.useDepth;
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
-				if (this.minDepth > this.maxDepth)
+				bool flag3 = this.minDepth > this.maxDepth;
+				if (flag3)
 				{
 					float num = this.minDepth;
 					this.minDepth = this.maxDepth;
 					this.maxDepth = num;
 				}
 				float z = obj.transform.position.z;
-				bool flag2 = z < this.minDepth || z > this.maxDepth;
-				if (this.useOutsideDepth)
+				bool flag4 = z < this.minDepth || z > this.maxDepth;
+				bool flag5 = this.useOutsideDepth;
+				if (flag5)
 				{
-					flag = !flag2;
+					flag2 = !flag4;
 				}
 				else
 				{
-					flag = flag2;
+					flag2 = flag4;
 				}
 			}
-			return flag;
+			return flag2;
 		}
 
 		public bool IsFilteringNormalAngle(Vector2 normal)
 		{
-			float num = Mathf.Atan2(normal.y, normal.x) * 57.29578f;
-			return this.IsFilteringNormalAngle(num);
+			return ContactFilter2D.IsFilteringNormalAngle_Injected(ref this, ref normal);
 		}
 
 		public bool IsFilteringNormalAngle(float angle)
 		{
-			angle -= Mathf.Floor(angle / 359.9999f) * 359.9999f;
-			float num = Mathf.Clamp(this.minNormalAngle, 0f, 359.9999f);
-			float num2 = Mathf.Clamp(this.maxNormalAngle, 0f, 359.9999f);
-			if (num > num2)
-			{
-				float num3 = num;
-				num = num2;
-				num2 = num3;
-			}
-			bool flag = angle < num || angle > num2;
-			bool flag2;
-			if (this.useOutsideNormalAngle)
-			{
-				flag2 = !flag;
-			}
-			else
-			{
-				flag2 = flag;
-			}
-			return flag2;
+			return this.IsFilteringNormalAngleUsingAngle(angle);
+		}
+
+		private bool IsFilteringNormalAngleUsingAngle(float angle)
+		{
+			return ContactFilter2D.IsFilteringNormalAngleUsingAngle_Injected(ref this, angle);
 		}
 
 		internal static ContactFilter2D CreateLegacyFilter(int layerMask, float minDepth, float maxDepth)
@@ -168,6 +142,15 @@ namespace UnityEngine
 			contactFilter2D.SetDepth(minDepth, maxDepth);
 			return contactFilter2D;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CheckConsistency_Injected(ref ContactFilter2D _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsFilteringNormalAngle_Injected(ref ContactFilter2D _unity_self, ref Vector2 normal);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsFilteringNormalAngleUsingAngle_Injected(ref ContactFilter2D _unity_self, float angle);
 
 		[NativeName("m_UseTriggers")]
 		public bool useTriggers;

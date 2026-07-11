@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeType("Runtime/Graphics/SpriteFrame.h")]
+	[ExcludeFromPreset]
 	[NativeHeader("Runtime/Graphics/SpriteUtility.h")]
+	[NativeType("Runtime/Graphics/SpriteFrame.h")]
 	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
 	[NativeHeader("Runtime/2D/Common/ScriptBindings/SpritesMarshalling.h")]
-	[ExcludeFromPreset]
 	public sealed class Sprite : Object
 	{
 		[RequiredByNativeCode]
@@ -117,6 +117,13 @@ namespace UnityEngine
 			get;
 		}
 
+		public extern float spriteAtlasTextureScale
+		{
+			[NativeMethod("GetSpriteAtlasTextureScale")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		public extern Texture2D associatedAlphaSplitTexture
 		{
 			[NativeMethod("GetAlphaTexture")]
@@ -163,8 +170,9 @@ namespace UnityEngine
 		{
 			get
 			{
+				bool flag = this.packed && this.packingMode != SpritePackingMode.Rectangle;
 				Rect rect;
-				if (this.packed && this.packingMode != SpritePackingMode.Rectangle)
+				if (flag)
 				{
 					rect = Rect.zero;
 				}
@@ -180,8 +188,9 @@ namespace UnityEngine
 		{
 			get
 			{
+				bool flag = this.packed && this.packingMode != SpritePackingMode.Rectangle;
 				Vector2 vector;
-				if (this.packed && this.packingMode != SpritePackingMode.Rectangle)
+				if (flag)
 				{
 					vector = Vector2.zero;
 				}
@@ -220,7 +229,8 @@ namespace UnityEngine
 		public int GetPhysicsShapePointCount(int shapeIdx)
 		{
 			int physicsShapeCount = this.GetPhysicsShapeCount();
-			if (shapeIdx < 0 || shapeIdx >= physicsShapeCount)
+			bool flag = shapeIdx < 0 || shapeIdx >= physicsShapeCount;
+			if (flag)
 			{
 				throw new IndexOutOfRangeException(string.Format("Index({0}) is out of bounds(0 - {1})", shapeIdx, physicsShapeCount - 1));
 			}
@@ -234,7 +244,8 @@ namespace UnityEngine
 		public int GetPhysicsShape(int shapeIdx, List<Vector2> physicsShape)
 		{
 			int physicsShapeCount = this.GetPhysicsShapeCount();
-			if (shapeIdx < 0 || shapeIdx >= physicsShapeCount)
+			bool flag = shapeIdx < 0 || shapeIdx >= physicsShapeCount;
+			if (flag)
 			{
 				throw new IndexOutOfRangeException(string.Format("Index({0}) is out of bounds(0 - {1})", shapeIdx, physicsShapeCount - 1));
 			}
@@ -251,11 +262,13 @@ namespace UnityEngine
 			for (int i = 0; i < physicsShapes.Count; i++)
 			{
 				Vector2[] array = physicsShapes[i];
-				if (array == null)
+				bool flag = array == null;
+				if (flag)
 				{
 					throw new ArgumentNullException(string.Format("Physics Shape at {0} is null.", i));
 				}
-				if (array.Length < 3)
+				bool flag2 = array.Length < 3;
+				if (flag2)
 				{
 					throw new ArgumentException(string.Format("Physics Shape at {0} has less than 3 vertices ({1}).", i, array.Length));
 				}
@@ -291,18 +304,21 @@ namespace UnityEngine
 
 		public static Sprite Create(Texture2D texture, Rect rect, Vector2 pivot, float pixelsPerUnit, uint extrude, SpriteMeshType meshType, Vector4 border, bool generateFallbackPhysicsShape)
 		{
+			bool flag = texture == null;
 			Sprite sprite;
-			if (texture == null)
+			if (flag)
 			{
 				sprite = null;
 			}
 			else
 			{
-				if (rect.xMax > (float)texture.width || rect.yMax > (float)texture.height)
+				bool flag2 = rect.xMax > (float)texture.width || rect.yMax > (float)texture.height;
+				if (flag2)
 				{
 					throw new ArgumentException(string.Format("Could not create sprite ({0}, {1}, {2}, {3}) from a {4}x{5} texture.", new object[] { rect.x, rect.y, rect.width, rect.height, texture.width, texture.height }));
 				}
-				if (pixelsPerUnit <= 0f)
+				bool flag3 = pixelsPerUnit <= 0f;
+				if (flag3)
 				{
 					throw new ArgumentException("pixelsPerUnit must be set to a positive non-zero value.");
 				}

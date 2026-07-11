@@ -5,16 +5,18 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/LineUtility.bindings.h")]
+	[NativeHeader("Runtime/Export/Graphics/LineUtility.bindings.h")]
 	public sealed class LineUtility
 	{
 		public static void Simplify(List<Vector3> points, float tolerance, List<int> pointsToKeep)
 		{
-			if (points == null)
+			bool flag = points == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("points");
 			}
-			if (pointsToKeep == null)
+			bool flag2 = pointsToKeep == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("pointsToKeep");
 			}
@@ -23,11 +25,13 @@ namespace UnityEngine
 
 		public static void Simplify(List<Vector3> points, float tolerance, List<Vector3> simplifiedPoints)
 		{
-			if (points == null)
+			bool flag = points == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("points");
 			}
-			if (simplifiedPoints == null)
+			bool flag2 = simplifiedPoints == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("simplifiedPoints");
 			}
@@ -36,11 +40,13 @@ namespace UnityEngine
 
 		public static void Simplify(List<Vector2> points, float tolerance, List<int> pointsToKeep)
 		{
-			if (points == null)
+			bool flag = points == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("points");
 			}
-			if (pointsToKeep == null)
+			bool flag2 = pointsToKeep == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("pointsToKeep");
 			}
@@ -49,11 +55,13 @@ namespace UnityEngine
 
 		public static void Simplify(List<Vector2> points, float tolerance, List<Vector2> simplifiedPoints)
 		{
-			if (points == null)
+			bool flag = points == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("points");
 			}
-			if (simplifiedPoints == null)
+			bool flag2 = simplifiedPoints == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("simplifiedPoints");
 			}

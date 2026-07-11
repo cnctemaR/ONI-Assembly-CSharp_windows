@@ -32,6 +32,14 @@ namespace UnityEngine.SceneManagement
 
 		[StaticAccessor("SceneBindings", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsSubScene(int sceneHandle);
+
+		[StaticAccessor("SceneBindings", StaticAccessorType.DoubleColon)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetIsSubScene(int sceneHandle, bool value);
+
+		[StaticAccessor("SceneBindings", StaticAccessorType.DoubleColon)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetIsLoadedInternal(int sceneHandle);
 
 		[StaticAccessor("SceneBindings", StaticAccessorType.DoubleColon)]
@@ -147,6 +155,18 @@ namespace UnityEngine.SceneManagement
 			}
 		}
 
+		public bool isSubScene
+		{
+			get
+			{
+				return Scene.IsSubScene(this.handle);
+			}
+			set
+			{
+				Scene.SetIsSubScene(this.handle, value);
+			}
+		}
+
 		public GameObject[] GetRootGameObjects()
 		{
 			List<GameObject> list = new List<GameObject>(this.rootCount);
@@ -156,20 +176,24 @@ namespace UnityEngine.SceneManagement
 
 		public void GetRootGameObjects(List<GameObject> rootGameObjects)
 		{
-			if (rootGameObjects.Capacity < this.rootCount)
+			bool flag = rootGameObjects.Capacity < this.rootCount;
+			if (flag)
 			{
 				rootGameObjects.Capacity = this.rootCount;
 			}
 			rootGameObjects.Clear();
-			if (!this.IsValid())
+			bool flag2 = !this.IsValid();
+			if (flag2)
 			{
 				throw new ArgumentException("The scene is invalid.");
 			}
-			if (!Application.isPlaying && !this.isLoaded)
+			bool flag3 = !Application.isPlaying && !this.isLoaded;
+			if (flag3)
 			{
 				throw new ArgumentException("The scene is not loaded.");
 			}
-			if (this.rootCount != 0)
+			bool flag4 = this.rootCount == 0;
+			if (!flag4)
 			{
 				Scene.GetRootGameObjectsInternal(this.handle, rootGameObjects);
 			}
@@ -192,17 +216,18 @@ namespace UnityEngine.SceneManagement
 
 		public override bool Equals(object other)
 		{
-			bool flag;
-			if (!(other is Scene))
+			bool flag = !(other is Scene);
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
 				Scene scene = (Scene)other;
-				flag = this.handle == scene.handle;
+				flag2 = this.handle == scene.handle;
 			}
-			return flag;
+			return flag2;
 		}
 
 		[SerializeField]

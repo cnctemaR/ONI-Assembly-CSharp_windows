@@ -26,7 +26,8 @@ namespace UnityEngine
 
 		private void Destroy()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				ObjectGUIState.Internal_Destroy(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;

@@ -37,7 +37,9 @@ public class HydroponicFarmConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.AddOrGet<SimCellOccupier>().doReplaceElement = true;
+		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
+		simCellOccupier.doReplaceElement = true;
+		simCellOccupier.notifyOnMelt = true;
 		go.AddOrGet<TileTemperature>();
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;

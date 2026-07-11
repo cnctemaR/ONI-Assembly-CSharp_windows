@@ -8,7 +8,8 @@ namespace UnityEngine.SocialPlatforms
 		{
 			get
 			{
-				if (ActivePlatform._active == null)
+				bool flag = ActivePlatform._active == null;
+				if (flag)
 				{
 					ActivePlatform._active = ActivePlatform.SelectSocialPlatform();
 				}

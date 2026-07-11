@@ -16,8 +16,8 @@ namespace System.Runtime
 		{
 		}
 
-		[SecuritySafeCritical]
 		[MonoTODO]
+		[SecuritySafeCritical]
 		public void Dispose()
 		{
 			throw new NotImplementedException();

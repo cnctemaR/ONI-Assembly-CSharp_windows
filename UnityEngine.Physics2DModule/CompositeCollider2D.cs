@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Physics2D/Public/CompositeCollider2D.h")]
 	[RequireComponent(typeof(Rigidbody2D))]
+	[NativeHeader("Modules/Physics2D/Public/CompositeCollider2D.h")]
 	public sealed class CompositeCollider2D : Collider2D
 	{
 		public extern CompositeCollider2D.GeometryType geometryType
@@ -41,13 +41,22 @@ namespace UnityEngine
 			set;
 		}
 
+		public extern float offsetDistance
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void GenerateGeometry();
 
 		public int GetPathPointCount(int index)
 		{
 			int num = this.pathCount - 1;
-			if (index < 0 || index > num)
+			bool flag = index < 0 || index > num;
+			if (flag)
 			{
 				throw new ArgumentOutOfRangeException("index", string.Format("Path index {0} must be in the range of 0 to {1}.", index, num));
 			}
@@ -72,20 +81,41 @@ namespace UnityEngine
 
 		public int GetPath(int index, Vector2[] points)
 		{
-			if (index < 0 || index >= this.pathCount)
+			bool flag = index < 0 || index >= this.pathCount;
+			if (flag)
 			{
 				throw new ArgumentOutOfRangeException("index", string.Format("Path index {0} must be in the range of 0 to {1}.", index, this.pathCount - 1));
 			}
-			if (points == null)
+			bool flag2 = points == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("points");
 			}
-			return this.GetPath_Internal(index, points);
+			return this.GetPathArray_Internal(index, points);
 		}
 
-		[NativeMethod("GetPath_Binding")]
+		[NativeMethod("GetPathArray_Binding")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetPath_Internal(int index, [Out] Vector2[] points);
+		private extern int GetPathArray_Internal(int index, [NotNull] Vector2[] points);
+
+		public int GetPath(int index, List<Vector2> points)
+		{
+			bool flag = index < 0 || index >= this.pathCount;
+			if (flag)
+			{
+				throw new ArgumentOutOfRangeException("index", string.Format("Path index {0} must be in the range of 0 to {1}.", index, this.pathCount - 1));
+			}
+			bool flag2 = points == null;
+			if (flag2)
+			{
+				throw new ArgumentNullException("points");
+			}
+			return this.GetPathList_Internal(index, points);
+		}
+
+		[NativeMethod("GetPathList_Binding")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetPathList_Internal(int index, [NotNull] List<Vector2> points);
 
 		public enum GeometryType
 		{

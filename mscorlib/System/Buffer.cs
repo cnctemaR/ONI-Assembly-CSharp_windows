@@ -102,8 +102,8 @@ namespace System
 			}
 		}
 
-		[SecurityCritical]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[SecurityCritical]
 		internal unsafe static void Memcpy(byte[] dest, int destIndex, byte* src, int srcIndex, int len)
 		{
 			if (len == 0)

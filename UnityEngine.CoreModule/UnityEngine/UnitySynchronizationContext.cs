@@ -22,7 +22,8 @@ namespace UnityEngine
 
 		public override void Send(SendOrPostCallback callback, object state)
 		{
-			if (this.m_MainThreadID == Thread.CurrentThread.ManagedThreadId)
+			bool flag = this.m_MainThreadID == Thread.CurrentThread.ManagedThreadId;
+			if (flag)
 			{
 				callback(state);
 			}
@@ -30,7 +31,7 @@ namespace UnityEngine
 			{
 				using (ManualResetEvent manualResetEvent = new ManualResetEvent(false))
 				{
-					object asyncWorkQueue = this.m_AsyncWorkQueue;
+					List<UnitySynchronizationContext.WorkRequest> asyncWorkQueue = this.m_AsyncWorkQueue;
 					lock (asyncWorkQueue)
 					{
 						this.m_AsyncWorkQueue.Add(new UnitySynchronizationContext.WorkRequest(callback, state, manualResetEvent));
@@ -52,7 +53,7 @@ namespace UnityEngine
 
 		public override void Post(SendOrPostCallback callback, object state)
 		{
-			object asyncWorkQueue = this.m_AsyncWorkQueue;
+			List<UnitySynchronizationContext.WorkRequest> asyncWorkQueue = this.m_AsyncWorkQueue;
 			lock (asyncWorkQueue)
 			{
 				this.m_AsyncWorkQueue.Add(new UnitySynchronizationContext.WorkRequest(callback, state, null));
@@ -66,17 +67,18 @@ namespace UnityEngine
 
 		private void Exec()
 		{
-			object asyncWorkQueue = this.m_AsyncWorkQueue;
+			List<UnitySynchronizationContext.WorkRequest> asyncWorkQueue = this.m_AsyncWorkQueue;
 			lock (asyncWorkQueue)
 			{
 				this.m_CurrentFrameWork.AddRange(this.m_AsyncWorkQueue);
 				this.m_AsyncWorkQueue.Clear();
 			}
-			foreach (UnitySynchronizationContext.WorkRequest workRequest in this.m_CurrentFrameWork)
+			while (this.m_CurrentFrameWork.Count > 0)
 			{
+				UnitySynchronizationContext.WorkRequest workRequest = this.m_CurrentFrameWork[0];
+				this.m_CurrentFrameWork.Remove(workRequest);
 				workRequest.Invoke();
 			}
-			this.m_CurrentFrameWork.Clear();
 		}
 
 		private bool HasPendingTasks()
@@ -87,17 +89,15 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		private static void InitializeSynchronizationContext()
 		{
-			if (SynchronizationContext.Current == null)
-			{
-				SynchronizationContext.SetSynchronizationContext(new UnitySynchronizationContext(Thread.CurrentThread.ManagedThreadId));
-			}
+			SynchronizationContext.SetSynchronizationContext(new UnitySynchronizationContext(Thread.CurrentThread.ManagedThreadId));
 		}
 
 		[RequiredByNativeCode]
 		private static void ExecuteTasks()
 		{
 			UnitySynchronizationContext unitySynchronizationContext = SynchronizationContext.Current as UnitySynchronizationContext;
-			if (unitySynchronizationContext != null)
+			bool flag = unitySynchronizationContext != null;
+			if (flag)
 			{
 				unitySynchronizationContext.Exec();
 			}
@@ -107,10 +107,11 @@ namespace UnityEngine
 		private static bool ExecutePendingTasks(long millisecondsTimeout)
 		{
 			UnitySynchronizationContext unitySynchronizationContext = SynchronizationContext.Current as UnitySynchronizationContext;
-			bool flag;
-			if (unitySynchronizationContext == null)
+			bool flag = unitySynchronizationContext == null;
+			bool flag2;
+			if (flag)
 			{
-				flag = true;
+				flag2 = true;
 			}
 			else
 			{
@@ -118,16 +119,17 @@ namespace UnityEngine
 				stopwatch.Start();
 				while (unitySynchronizationContext.HasPendingTasks())
 				{
-					if (stopwatch.ElapsedMilliseconds > millisecondsTimeout)
+					bool flag3 = stopwatch.ElapsedMilliseconds > millisecondsTimeout;
+					if (flag3)
 					{
 						break;
 					}
 					unitySynchronizationContext.Exec();
 					Thread.Sleep(1);
 				}
-				flag = !unitySynchronizationContext.HasPendingTasks();
+				flag2 = !unitySynchronizationContext.HasPendingTasks();
 			}
-			return flag;
+			return flag2;
 		}
 
 		private const int kAwqInitialCapacity = 20;
@@ -159,7 +161,8 @@ namespace UnityEngine
 				{
 					Debug.LogException(ex);
 				}
-				if (this.m_WaitHandle != null)
+				bool flag = this.m_WaitHandle != null;
+				if (flag)
 				{
 					this.m_WaitHandle.Set();
 				}

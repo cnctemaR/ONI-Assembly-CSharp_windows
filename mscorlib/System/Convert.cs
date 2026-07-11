@@ -2466,8 +2466,8 @@ namespace System
 			return Convert.ToBase64String(inArray, offset, length, Base64FormattingOptions.None);
 		}
 
-		[SecuritySafeCritical]
 		[ComVisible(false)]
+		[SecuritySafeCritical]
 		public unsafe static string ToBase64String(byte[] inArray, int offset, int length, Base64FormattingOptions options)
 		{
 			if (inArray == null)

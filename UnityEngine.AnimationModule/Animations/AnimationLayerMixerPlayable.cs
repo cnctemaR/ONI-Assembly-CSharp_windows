@@ -6,25 +6,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
+	[NativeHeader("Modules/Animation/Director/AnimationLayerMixerPlayable.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("AnimationLayerMixerPlayableBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationLayerMixerPlayable.bindings.h")]
-	[NativeHeader("Runtime/Animation/Director/AnimationLayerMixerPlayable.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationLayerMixerPlayable.bindings.h")]
 	public struct AnimationLayerMixerPlayable : IPlayable, IEquatable<AnimationLayerMixerPlayable>
 	{
-		internal AnimationLayerMixerPlayable(PlayableHandle handle)
-		{
-			if (handle.IsValid())
-			{
-				if (!handle.IsPlayableOfType<AnimationLayerMixerPlayable>())
-				{
-					throw new InvalidCastException("Can't set handle: the playable is not an AnimationLayerMixerPlayable.");
-				}
-			}
-			this.m_Handle = handle;
-		}
-
 		public static AnimationLayerMixerPlayable Null
 		{
 			get
@@ -42,8 +30,9 @@ namespace UnityEngine.Animations
 		private static PlayableHandle CreateHandle(PlayableGraph graph, int inputCount = 0)
 		{
 			PlayableHandle @null = PlayableHandle.Null;
+			bool flag = !AnimationLayerMixerPlayable.CreateHandleInternal(graph, ref @null);
 			PlayableHandle playableHandle;
-			if (!AnimationLayerMixerPlayable.CreateHandleInternal(graph, ref @null))
+			if (flag)
 			{
 				playableHandle = PlayableHandle.Null;
 			}
@@ -53,6 +42,20 @@ namespace UnityEngine.Animations
 				playableHandle = @null;
 			}
 			return playableHandle;
+		}
+
+		internal AnimationLayerMixerPlayable(PlayableHandle handle)
+		{
+			bool flag = handle.IsValid();
+			if (flag)
+			{
+				bool flag2 = !handle.IsPlayableOfType<AnimationLayerMixerPlayable>();
+				if (flag2)
+				{
+					throw new InvalidCastException("Can't set handle: the playable is not an AnimationLayerMixerPlayable.");
+				}
+			}
+			this.m_Handle = handle;
 		}
 
 		public PlayableHandle GetHandle()
@@ -77,7 +80,8 @@ namespace UnityEngine.Animations
 
 		public bool IsLayerAdditive(uint layerIndex)
 		{
-			if ((ulong)layerIndex >= (ulong)((long)this.m_Handle.GetInputCount()))
+			bool flag = (ulong)layerIndex >= (ulong)((long)this.m_Handle.GetInputCount());
+			if (flag)
 			{
 				throw new ArgumentOutOfRangeException("layerIndex", string.Format("layerIndex {0} must be in the range of 0 to {1}.", layerIndex, this.m_Handle.GetInputCount() - 1));
 			}
@@ -86,7 +90,8 @@ namespace UnityEngine.Animations
 
 		public void SetLayerAdditive(uint layerIndex, bool value)
 		{
-			if ((ulong)layerIndex >= (ulong)((long)this.m_Handle.GetInputCount()))
+			bool flag = (ulong)layerIndex >= (ulong)((long)this.m_Handle.GetInputCount());
+			if (flag)
 			{
 				throw new ArgumentOutOfRangeException("layerIndex", string.Format("layerIndex {0} must be in the range of 0 to {1}.", layerIndex, this.m_Handle.GetInputCount() - 1));
 			}
@@ -95,11 +100,13 @@ namespace UnityEngine.Animations
 
 		public void SetLayerMaskFromAvatarMask(uint layerIndex, AvatarMask mask)
 		{
-			if ((ulong)layerIndex >= (ulong)((long)this.m_Handle.GetInputCount()))
+			bool flag = (ulong)layerIndex >= (ulong)((long)this.m_Handle.GetInputCount());
+			if (flag)
 			{
 				throw new ArgumentOutOfRangeException("layerIndex", string.Format("layerIndex {0} must be in the range of 0 to {1}.", layerIndex, this.m_Handle.GetInputCount() - 1));
 			}
-			if (mask == null)
+			bool flag2 = mask == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("mask");
 			}

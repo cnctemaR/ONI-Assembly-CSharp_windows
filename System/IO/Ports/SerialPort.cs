@@ -64,8 +64,8 @@ namespace System.IO.Ports
 			return "COM1";
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public Stream BaseStream
 		{
 			get
@@ -163,8 +163,8 @@ namespace System.IO.Ports
 		}
 
 		[Browsable(true)]
-		[DefaultValue(8)]
 		[MonitoringDescription("")]
+		[DefaultValue(8)]
 		public int DataBits
 		{
 			get
@@ -185,10 +185,10 @@ namespace System.IO.Ports
 			}
 		}
 
-		[DefaultValue(false)]
+		[MonoTODO("Not implemented")]
 		[Browsable(true)]
 		[MonitoringDescription("")]
-		[MonoTODO("Not implemented")]
+		[DefaultValue(false)]
 		public bool DiscardNull
 		{
 			get
@@ -212,8 +212,8 @@ namespace System.IO.Ports
 			}
 		}
 
-		[Browsable(true)]
 		[DefaultValue(false)]
+		[Browsable(true)]
 		[MonitoringDescription("")]
 		public bool DtrEnable
 		{
@@ -235,9 +235,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("")]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public Encoding Encoding
 		{
 			get
@@ -255,8 +255,8 @@ namespace System.IO.Ports
 		}
 
 		[DefaultValue(Handshake.None)]
-		[MonitoringDescription("")]
 		[Browsable(true)]
+		[MonitoringDescription("")]
 		public Handshake Handshake
 		{
 			get
@@ -287,8 +287,8 @@ namespace System.IO.Ports
 		}
 
 		[MonitoringDescription("")]
-		[Browsable(false)]
 		[DefaultValue("\n")]
+		[Browsable(false)]
 		public string NewLine
 		{
 			get
@@ -309,8 +309,8 @@ namespace System.IO.Ports
 			}
 		}
 
-		[DefaultValue(Parity.None)]
 		[MonitoringDescription("")]
+		[DefaultValue(Parity.None)]
 		[Browsable(true)]
 		public Parity Parity
 		{
@@ -333,8 +333,8 @@ namespace System.IO.Ports
 		}
 
 		[MonoTODO("Not implemented")]
-		[MonitoringDescription("")]
 		[Browsable(true)]
+		[MonitoringDescription("")]
 		[DefaultValue(63)]
 		public byte ParityReplace
 		{
@@ -348,9 +348,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[DefaultValue("COM1")]
-		[MonitoringDescription("")]
 		[Browsable(true)]
+		[MonitoringDescription("")]
+		[DefaultValue("COM1")]
 		public string PortName
 		{
 			get
@@ -402,8 +402,8 @@ namespace System.IO.Ports
 			}
 		}
 
-		[DefaultValue(-1)]
 		[Browsable(true)]
+		[DefaultValue(-1)]
 		[MonitoringDescription("")]
 		public int ReadTimeout
 		{
@@ -425,10 +425,10 @@ namespace System.IO.Ports
 			}
 		}
 
-		[MonitoringDescription("")]
-		[Browsable(true)]
-		[MonoTODO("Not implemented")]
 		[DefaultValue(1)]
+		[Browsable(true)]
+		[MonitoringDescription("")]
+		[MonoTODO("Not implemented")]
 		public int ReceivedBytesThreshold
 		{
 			get
@@ -445,9 +445,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[MonitoringDescription("")]
 		[DefaultValue(false)]
 		[Browsable(true)]
+		[MonitoringDescription("")]
 		public bool RtsEnable
 		{
 			get
@@ -491,9 +491,9 @@ namespace System.IO.Ports
 			}
 		}
 
+		[MonitoringDescription("")]
 		[Browsable(true)]
 		[DefaultValue(2048)]
-		[MonitoringDescription("")]
 		public int WriteBufferSize
 		{
 			get
@@ -518,9 +518,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[Browsable(true)]
 		[DefaultValue(-1)]
 		[MonitoringDescription("")]
+		[Browsable(true)]
 		public int WriteTimeout
 		{
 			get

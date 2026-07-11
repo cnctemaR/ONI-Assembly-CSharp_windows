@@ -31,17 +31,18 @@ namespace UnityEngine.Experimental.AI
 
 		public override bool Equals(object obj)
 		{
-			bool flag;
-			if (obj == null || !(obj is PolygonId))
+			bool flag = obj == null || !(obj is PolygonId);
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
 				PolygonId polygonId = (PolygonId)obj;
-				flag = polygonId == this;
+				flag2 = polygonId == this;
 			}
-			return flag;
+			return flag2;
 		}
 
 		internal ulong polyRef;

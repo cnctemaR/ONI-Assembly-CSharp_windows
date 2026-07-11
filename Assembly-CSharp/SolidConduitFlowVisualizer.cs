@@ -247,8 +247,8 @@ public class SolidConduitFlowVisualizer
 				Vector3 position = audioInfo.position;
 				position.z = 0f;
 				EventInstance eventInstance = SoundEvent.BeginOneShot(this.overlaySound, position, 1f, false);
-				eventInstance.setParameterValue("blobCount", (float)audioInfo.blobCount);
-				eventInstance.setParameterValue("networkCount", (float)num);
+				eventInstance.setParameterByName("blobCount", (float)audioInfo.blobCount, false);
+				eventInstance.setParameterByName("networkCount", (float)num, false);
 				SoundEvent.EndOneShot(eventInstance);
 			}
 		}

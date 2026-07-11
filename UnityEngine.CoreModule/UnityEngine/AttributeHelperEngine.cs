@@ -12,7 +12,8 @@ namespace UnityEngine
 			Type type2 = null;
 			while (type != null && type != typeof(MonoBehaviour))
 			{
-				if (Attribute.IsDefined(type, typeof(DisallowMultipleComponent)))
+				bool flag = Attribute.IsDefined(type, typeof(DisallowMultipleComponent));
+				if (flag)
 				{
 					type2 = type;
 				}
@@ -31,30 +32,36 @@ namespace UnityEngine
 				Type baseType = klass.BaseType;
 				foreach (RequireComponent requireComponent in array)
 				{
-					if (list == null && array.Length == 1 && baseType == typeof(MonoBehaviour))
+					bool flag = list == null && array.Length == 1 && baseType == typeof(MonoBehaviour);
+					if (flag)
 					{
 						return new Type[] { requireComponent.m_Type0, requireComponent.m_Type1, requireComponent.m_Type2 };
 					}
-					if (list == null)
+					bool flag2 = list == null;
+					if (flag2)
 					{
 						list = new List<Type>();
 					}
-					if (requireComponent.m_Type0 != null)
+					bool flag3 = requireComponent.m_Type0 != null;
+					if (flag3)
 					{
 						list.Add(requireComponent.m_Type0);
 					}
-					if (requireComponent.m_Type1 != null)
+					bool flag4 = requireComponent.m_Type1 != null;
+					if (flag4)
 					{
 						list.Add(requireComponent.m_Type1);
 					}
-					if (requireComponent.m_Type2 != null)
+					bool flag5 = requireComponent.m_Type2 != null;
+					if (flag5)
 					{
 						list.Add(requireComponent.m_Type2);
 					}
 				}
 				klass = baseType;
 			}
-			if (list == null)
+			bool flag6 = list == null;
+			if (flag6)
 			{
 				return null;
 			}
@@ -64,15 +71,17 @@ namespace UnityEngine
 		private static int GetExecuteMode(Type klass)
 		{
 			object[] customAttributes = klass.GetCustomAttributes(typeof(ExecuteAlways), false);
+			bool flag = customAttributes.Length != 0;
 			int num;
-			if (customAttributes.Length != 0)
+			if (flag)
 			{
 				num = 2;
 			}
 			else
 			{
 				object[] customAttributes2 = klass.GetCustomAttributes(typeof(ExecuteInEditMode), false);
-				if (customAttributes2.Length != 0)
+				bool flag2 = customAttributes2.Length != 0;
+				if (flag2)
 				{
 					num = 1;
 				}
@@ -90,7 +99,8 @@ namespace UnityEngine
 			while (klass != null && klass != typeof(MonoBehaviour))
 			{
 				int executeMode = AttributeHelperEngine.GetExecuteMode(klass);
-				if (executeMode > 0)
+				bool flag = executeMode > 0;
+				if (flag)
 				{
 					return executeMode;
 				}
@@ -103,8 +113,9 @@ namespace UnityEngine
 		private static int GetDefaultExecutionOrderFor(Type klass)
 		{
 			DefaultExecutionOrder customAttributeOfType = AttributeHelperEngine.GetCustomAttributeOfType<DefaultExecutionOrder>(klass);
+			bool flag = customAttributeOfType == null;
 			int num;
-			if (customAttributeOfType == null)
+			if (flag)
 			{
 				num = 0;
 			}
@@ -119,14 +130,15 @@ namespace UnityEngine
 		{
 			Type typeFromHandle = typeof(T);
 			object[] customAttributes = klass.GetCustomAttributes(typeFromHandle, true);
+			bool flag = customAttributes != null && customAttributes.Length != 0;
 			T t;
-			if (customAttributes != null && customAttributes.Length != 0)
+			if (flag)
 			{
 				t = (T)((object)customAttributes[0]);
 			}
 			else
 			{
-				t = (T)((object)null);
+				t = default(T);
 			}
 			return t;
 		}

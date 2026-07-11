@@ -3,7 +3,7 @@
 namespace UnityEngineInternal.Input
 {
 	[Flags]
-	public enum NativeInputUpdateType
+	internal enum NativeInputUpdateType
 	{
 		Dynamic = 1,
 		Fixed = 2,

@@ -6,9 +6,9 @@ using Unity;
 
 namespace System.Reflection.Emit
 {
-	[ClassInterface(ClassInterfaceType.None)]
-	[ComDefaultInterface(typeof(_EnumBuilder))]
 	[ComVisible(true)]
+	[ComDefaultInterface(typeof(_EnumBuilder))]
+	[ClassInterface(ClassInterfaceType.None)]
 	public sealed class EnumBuilder : TypeInfo, _EnumBuilder
 	{
 		internal EnumBuilder(ModuleBuilder mb, string name, TypeAttributes visibility, Type underlyingType)

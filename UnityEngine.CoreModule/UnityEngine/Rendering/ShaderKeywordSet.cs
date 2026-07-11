@@ -10,17 +10,18 @@ namespace UnityEngine.Rendering
 	{
 		private void ComputeSliceAndMask(ShaderKeyword keyword, out uint slice, out uint mask)
 		{
-			int keywordIndex = keyword.GetKeywordIndex();
-			slice = (uint)(keywordIndex / 32);
-			mask = 1U << keywordIndex % 32;
+			int index = keyword.index;
+			slice = (uint)(index / 32);
+			mask = 1U << index % 32;
 		}
 
 		public unsafe bool IsEnabled(ShaderKeyword keyword)
 		{
-			bool flag;
-			if (!keyword.IsValid())
+			bool flag = !keyword.IsValid();
+			bool flag2;
+			if (flag)
 			{
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
@@ -29,48 +30,54 @@ namespace UnityEngine.Rendering
 				this.ComputeSliceAndMask(keyword, out num, out num2);
 				fixed (uint* ptr = &this.m_Bits.FixedElementField)
 				{
-					flag = (ptr[(UIntPtr)num * 4] & num2) != 0U;
+					uint* ptr2 = ptr;
+					flag2 = (ptr2[(ulong)num * 4UL / 4UL] & num2) > 0U;
 				}
 			}
-			return flag;
+			return flag2;
 		}
 
 		public unsafe void Enable(ShaderKeyword keyword)
 		{
-			if (keyword.IsValid())
+			bool flag = !keyword.IsValid();
+			if (!flag)
 			{
 				uint num;
 				uint num2;
 				this.ComputeSliceAndMask(keyword, out num, out num2);
 				fixed (uint* ptr = &this.m_Bits.FixedElementField)
 				{
-					ptr[(UIntPtr)num * 4] |= num2;
+					uint* ptr2 = ptr;
+					ptr2[(ulong)num * 4UL / 4UL] |= num2;
 				}
 			}
 		}
 
 		public unsafe void Disable(ShaderKeyword keyword)
 		{
-			if (keyword.IsValid())
+			bool flag = !keyword.IsValid();
+			if (!flag)
 			{
 				uint num;
 				uint num2;
 				this.ComputeSliceAndMask(keyword, out num, out num2);
 				fixed (uint* ptr = &this.m_Bits.FixedElementField)
 				{
-					ptr[(UIntPtr)num * 4] &= ~num2;
+					uint* ptr2 = ptr;
+					ptr2[(ulong)num * 4UL / 4UL] &= ~num2;
 				}
 			}
 		}
 
 		public ShaderKeyword[] GetShaderKeywords()
 		{
-			ShaderKeyword[] array = new ShaderKeyword[256];
+			ShaderKeyword[] array = new ShaderKeyword[320];
 			int num = 0;
-			for (int i = 0; i < 256; i++)
+			for (int i = 0; i < 320; i++)
 			{
 				ShaderKeyword shaderKeyword = new ShaderKeyword(i);
-				if (this.IsEnabled(shaderKeyword))
+				bool flag = this.IsEnabled(shaderKeyword);
+				if (flag)
 				{
 					array[num] = shaderKeyword;
 					num++;
@@ -82,13 +89,13 @@ namespace UnityEngine.Rendering
 
 		private const int k_SizeInBits = 32;
 
-		[FixedBuffer(typeof(uint), 8)]
-		internal ShaderKeywordSet.<m_Bits>__FixedBuffer0 m_Bits;
+		[FixedBuffer(typeof(uint), 10)]
+		internal ShaderKeywordSet.<m_Bits>e__FixedBuffer m_Bits;
 
-		[UnsafeValueType]
 		[CompilerGenerated]
-		[StructLayout(LayoutKind.Sequential, Size = 32)]
-		public struct <m_Bits>__FixedBuffer0
+		[UnsafeValueType]
+		[StructLayout(LayoutKind.Sequential, Size = 40)]
+		public struct <m_Bits>e__FixedBuffer
 		{
 			public uint FixedElementField;
 		}

@@ -12,15 +12,12 @@ namespace UnityEngine.UI
 				{
 					if (obj is GameObject)
 					{
-						GameObject gameObject = obj as GameObject;
-						gameObject.transform.parent = null;
+						(obj as GameObject).transform.parent = null;
 					}
 					Object.Destroy(obj);
+					return;
 				}
-				else
-				{
-					Object.DestroyImmediate(obj);
-				}
+				Object.DestroyImmediate(obj);
 			}
 		}
 
@@ -31,11 +28,9 @@ namespace UnityEngine.UI
 				if (Application.isEditor)
 				{
 					Object.DestroyImmediate(obj);
+					return;
 				}
-				else
-				{
-					Object.Destroy(obj);
-				}
+				Object.Destroy(obj);
 			}
 		}
 	}

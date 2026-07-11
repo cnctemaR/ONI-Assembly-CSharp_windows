@@ -2,18 +2,19 @@
 
 namespace JetBrains.Annotations
 {
-	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+	[AttributeUsage(AttributeTargets.Method)]
 	public sealed class NotifyPropertyChangedInvocatorAttribute : Attribute
 	{
 		public NotifyPropertyChangedInvocatorAttribute()
 		{
 		}
 
-		public NotifyPropertyChangedInvocatorAttribute(string parameterName)
+		public NotifyPropertyChangedInvocatorAttribute([NotNull] string parameterName)
 		{
 			this.ParameterName = parameterName;
 		}
 
-		public string ParameterName { get; private set; }
+		[CanBeNull]
+		public string ParameterName { get; }
 	}
 }

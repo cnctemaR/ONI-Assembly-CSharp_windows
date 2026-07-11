@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
@@ -39,16 +40,16 @@ namespace UnityEngine
 			}
 		}
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "ParticleSystemScriptBindings::InstanceIDToColliderComponent")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Component InstanceIDToColliderComponent(int instanceID);
 
-		private Vector3 m_Intersection;
+		internal Vector3 m_Intersection;
 
-		private Vector3 m_Normal;
+		internal Vector3 m_Normal;
 
-		private Vector3 m_Velocity;
+		internal Vector3 m_Velocity;
 
-		private int m_ColliderInstanceID;
+		internal int m_ColliderInstanceID;
 	}
 }

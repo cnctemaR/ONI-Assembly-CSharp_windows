@@ -10,6 +10,7 @@ namespace Unity.Collections
 		None,
 		Temp,
 		TempJob,
-		Persistent
+		Persistent,
+		AudioKernel
 	}
 }

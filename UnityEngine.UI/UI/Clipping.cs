@@ -7,52 +7,44 @@ namespace UnityEngine.UI
 	{
 		public static Rect FindCullAndClipWorldRect(List<RectMask2D> rectMaskParents, out bool validRect)
 		{
-			Rect rect;
 			if (rectMaskParents.Count == 0)
 			{
 				validRect = false;
-				rect = default(Rect);
+				return default(Rect);
 			}
-			else
+			Rect rect = rectMaskParents[0].canvasRect;
+			Vector4 vector = rectMaskParents[0].padding;
+			float num = rect.xMin + vector.x;
+			float num2 = rect.xMax - vector.z;
+			float num3 = rect.yMin + vector.y;
+			float num4 = rect.yMax - vector.w;
+			for (int i = 1; i < rectMaskParents.Count; i++)
 			{
-				Rect rect2 = rectMaskParents[0].canvasRect;
-				for (int i = 0; i < rectMaskParents.Count; i++)
+				rect = rectMaskParents[i].canvasRect;
+				vector = rectMaskParents[i].padding;
+				if (num < rect.xMin + vector.x)
 				{
-					rect2 = Clipping.RectIntersect(rect2, rectMaskParents[i].canvasRect);
+					num = rect.xMin + vector.x;
 				}
-				bool flag = rect2.width <= 0f || rect2.height <= 0f;
-				if (flag)
+				if (num3 < rect.yMin + vector.y)
 				{
-					validRect = false;
-					rect = default(Rect);
+					num3 = rect.yMin + vector.y;
 				}
-				else
+				if (num2 > rect.xMax - vector.z)
 				{
-					Vector3 vector = new Vector3(rect2.x, rect2.y, 0f);
-					Vector3 vector2 = new Vector3(rect2.x + rect2.width, rect2.y + rect2.height, 0f);
-					validRect = true;
-					rect = new Rect(vector.x, vector.y, vector2.x - vector.x, vector2.y - vector.y);
+					num2 = rect.xMax - vector.z;
+				}
+				if (num4 > rect.yMax - vector.w)
+				{
+					num4 = rect.yMax - vector.w;
 				}
 			}
-			return rect;
-		}
-
-		private static Rect RectIntersect(Rect a, Rect b)
-		{
-			float num = Mathf.Max(a.x, b.x);
-			float num2 = Mathf.Min(a.x + a.width, b.x + b.width);
-			float num3 = Mathf.Max(a.y, b.y);
-			float num4 = Mathf.Min(a.y + a.height, b.y + b.height);
-			Rect rect;
-			if (num2 >= num && num4 >= num3)
+			validRect = num2 > num && num4 > num3;
+			if (validRect)
 			{
-				rect = new Rect(num, num3, num2 - num, num4 - num3);
+				return new Rect(num, num3, num2 - num, num4 - num3);
 			}
-			else
-			{
-				rect = new Rect(0f, 0f, 0f, 0f);
-			}
-			return rect;
+			return default(Rect);
 		}
 	}
 }

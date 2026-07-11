@@ -6,7 +6,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 	{
 		public static LightMode Extract(LightmapBakeType baketype)
 		{
-			return (baketype != LightmapBakeType.Realtime) ? ((baketype != LightmapBakeType.Mixed) ? LightMode.Baked : LightMode.Mixed) : LightMode.Realtime;
+			return (baketype == LightmapBakeType.Realtime) ? LightMode.Realtime : ((baketype == LightmapBakeType.Mixed) ? LightMode.Mixed : LightMode.Baked);
 		}
 
 		public static LinearColor ExtractIndirect(Light l)
@@ -23,7 +23,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 		{
 			dir.instanceID = l.GetInstanceID();
 			dir.mode = LightMode.Realtime;
-			dir.shadow = l.shadows != LightShadows.None;
+			dir.shadow = l.shadows > LightShadows.None;
 			dir.direction = l.transform.forward;
 			dir.color = LinearColor.Convert(l.color, l.intensity);
 			dir.indirectColor = LightmapperUtils.ExtractIndirect(l);
@@ -34,7 +34,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 		{
 			point.instanceID = l.GetInstanceID();
 			point.mode = LightMode.Realtime;
-			point.shadow = l.shadows != LightShadows.None;
+			point.shadow = l.shadows > LightShadows.None;
 			point.position = l.transform.position;
 			point.color = LinearColor.Convert(l.color, l.intensity);
 			point.indirectColor = LightmapperUtils.ExtractIndirect(l);
@@ -47,7 +47,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 		{
 			spot.instanceID = l.GetInstanceID();
 			spot.mode = LightMode.Realtime;
-			spot.shadow = l.shadows != LightShadows.None;
+			spot.shadow = l.shadows > LightShadows.None;
 			spot.position = l.transform.position;
 			spot.orientation = l.transform.rotation;
 			spot.color = LinearColor.Convert(l.color, l.intensity);
@@ -57,13 +57,14 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			spot.coneAngle = l.spotAngle * 0.017453292f;
 			spot.innerConeAngle = LightmapperUtils.ExtractInnerCone(l);
 			spot.falloff = FalloffType.Legacy;
+			spot.angularFalloff = AngularFalloffType.LUT;
 		}
 
 		public static void Extract(Light l, ref RectangleLight rect)
 		{
 			rect.instanceID = l.GetInstanceID();
 			rect.mode = LightMode.Realtime;
-			rect.shadow = l.shadows != LightShadows.None;
+			rect.shadow = l.shadows > LightShadows.None;
 			rect.position = l.transform.position;
 			rect.orientation = l.transform.rotation;
 			rect.color = LinearColor.Convert(l.color, l.intensity);
@@ -71,19 +72,21 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			rect.range = l.range;
 			rect.width = 0f;
 			rect.height = 0f;
+			rect.falloff = FalloffType.Legacy;
 		}
 
 		public static void Extract(Light l, ref DiscLight disc)
 		{
 			disc.instanceID = l.GetInstanceID();
 			disc.mode = LightMode.Realtime;
-			disc.shadow = l.shadows != LightShadows.None;
+			disc.shadow = l.shadows > LightShadows.None;
 			disc.position = l.transform.position;
 			disc.orientation = l.transform.rotation;
 			disc.color = LinearColor.Convert(l.color, l.intensity);
 			disc.indirectColor = LightmapperUtils.ExtractIndirect(l);
 			disc.range = l.range;
 			disc.radius = 0f;
+			disc.falloff = FalloffType.Legacy;
 		}
 	}
 }

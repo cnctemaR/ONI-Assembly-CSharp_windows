@@ -8,17 +8,13 @@ namespace UnityEngine.Windows.Speech
 {
 	public abstract class PhraseRecognizer : IDisposable
 	{
-		internal PhraseRecognizer()
-		{
-		}
-
-		[NativeThrows]
 		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		protected static extern IntPtr CreateFromKeywords(object self, string[] keywords, ConfidenceLevel minimumConfidence);
 
-		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[NativeThrows]
+		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		protected static extern IntPtr CreateFromGrammarFile(object self, string grammarFilePath, ConfidenceLevel minimumConfidence);
 
@@ -46,19 +42,32 @@ namespace UnityEngine.Windows.Speech
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public event PhraseRecognizer.PhraseRecognizedDelegate OnPhraseRecognized;
 
-		~PhraseRecognizer()
+		internal PhraseRecognizer()
 		{
-			if (this.m_Recognizer != IntPtr.Zero)
+		}
+
+		protected override void Finalize()
+		{
+			try
 			{
-				PhraseRecognizer.DestroyThreaded(this.m_Recognizer);
-				this.m_Recognizer = IntPtr.Zero;
-				GC.SuppressFinalize(this);
+				bool flag = this.m_Recognizer != IntPtr.Zero;
+				if (flag)
+				{
+					PhraseRecognizer.DestroyThreaded(this.m_Recognizer);
+					this.m_Recognizer = IntPtr.Zero;
+					GC.SuppressFinalize(this);
+				}
+			}
+			finally
+			{
+				base.Finalize();
 			}
 		}
 
 		public void Start()
 		{
-			if (!(this.m_Recognizer == IntPtr.Zero))
+			bool flag = this.m_Recognizer == IntPtr.Zero;
+			if (!flag)
 			{
 				PhraseRecognizer.Start_Internal(this.m_Recognizer);
 			}
@@ -66,7 +75,8 @@ namespace UnityEngine.Windows.Speech
 
 		public void Stop()
 		{
-			if (!(this.m_Recognizer == IntPtr.Zero))
+			bool flag = this.m_Recognizer == IntPtr.Zero;
+			if (!flag)
 			{
 				PhraseRecognizer.Stop_Internal(this.m_Recognizer);
 			}
@@ -74,7 +84,8 @@ namespace UnityEngine.Windows.Speech
 
 		public void Dispose()
 		{
-			if (this.m_Recognizer != IntPtr.Zero)
+			bool flag = this.m_Recognizer != IntPtr.Zero;
+			if (flag)
 			{
 				PhraseRecognizer.Destroy(this.m_Recognizer);
 				this.m_Recognizer = IntPtr.Zero;
@@ -94,7 +105,8 @@ namespace UnityEngine.Windows.Speech
 		private void InvokePhraseRecognizedEvent(string text, ConfidenceLevel confidence, SemanticMeaning[] semanticMeanings, long phraseStartFileTime, long phraseDurationTicks)
 		{
 			PhraseRecognizer.PhraseRecognizedDelegate onPhraseRecognized = this.OnPhraseRecognized;
-			if (onPhraseRecognized != null)
+			bool flag = onPhraseRecognized != null;
+			if (flag)
 			{
 				onPhraseRecognized(new PhraseRecognizedEventArgs(text, confidence, semanticMeanings, DateTime.FromFileTime(phraseStartFileTime), TimeSpan.FromTicks(phraseDurationTicks)));
 			}

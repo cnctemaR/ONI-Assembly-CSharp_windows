@@ -23,8 +23,8 @@ namespace System.Runtime.CompilerServices
 			};
 		}
 
-		[DebuggerStepThrough]
 		[SecuritySafeCritical]
+		[DebuggerStepThrough]
 		public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine
 		{
 			if (stateMachine == null)

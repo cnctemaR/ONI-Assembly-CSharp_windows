@@ -66,40 +66,60 @@ public class AssignmentManager : KMonoBehaviour
 		int num = int.MaxValue;
 		foreach (Assignable assignable in this.assignables)
 		{
-			if (assignable.slot == slot && assignable.assignee != null)
+			if (assignable.slot == slot && assignable.assignee != null && assignable.assignee.HasOwner(owner))
 			{
-				List<Ownables> owners = assignable.assignee.GetOwners();
-				if (owners.Count > 0)
+				Room room = assignable.assignee as Room;
+				if (room != null && room.roomType.priority_building_use)
 				{
-					using (List<Ownables>.Enumerator enumerator2 = owners.GetEnumerator())
-					{
-						while (enumerator2.MoveNext())
-						{
-							if (enumerator2.Current.gameObject == owner.gameObject)
-							{
-								if (assignable.assignee is Room && (assignable.assignee as Room).roomType.priority_building_use)
-								{
-									this.PreferredAssignableResults.Clear();
-									this.PreferredAssignableResults.Add(assignable);
-									return this.PreferredAssignableResults;
-								}
-								if (owners.Count == num)
-								{
-									this.PreferredAssignableResults.Add(assignable);
-								}
-								else if (owners.Count < num)
-								{
-									num = owners.Count;
-									this.PreferredAssignableResults.Clear();
-									this.PreferredAssignableResults.Add(assignable);
-								}
-							}
-						}
-					}
+					this.PreferredAssignableResults.Clear();
+					this.PreferredAssignableResults.Add(assignable);
+					return this.PreferredAssignableResults;
+				}
+				int num2 = assignable.assignee.NumOwners();
+				if (num2 == num)
+				{
+					this.PreferredAssignableResults.Add(assignable);
+				}
+				else if (num2 < num)
+				{
+					num = num2;
+					this.PreferredAssignableResults.Clear();
+					this.PreferredAssignableResults.Add(assignable);
 				}
 			}
 		}
 		return this.PreferredAssignableResults;
+	}
+
+	public bool IsPreferredAssignable(Assignables owner, Assignable candidate)
+	{
+		IAssignableIdentity assignee = candidate.assignee;
+		if (assignee == null || !assignee.HasOwner(owner))
+		{
+			return false;
+		}
+		int num = assignee.NumOwners();
+		Room room = assignee as Room;
+		if (room != null && room.roomType.priority_building_use)
+		{
+			return true;
+		}
+		foreach (Assignable assignable in this.assignables)
+		{
+			if (assignable.slot == candidate.slot && assignable.assignee != assignee)
+			{
+				Room room2 = assignable.assignee as Room;
+				if (room2 != null && room2.roomType.priority_building_use && assignable.assignee.HasOwner(owner))
+				{
+					return false;
+				}
+				if (assignable.assignee.NumOwners() < num && assignable.assignee.HasOwner(owner))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	private List<Assignable> assignables = new List<Assignable>();

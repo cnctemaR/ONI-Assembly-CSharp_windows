@@ -112,9 +112,9 @@ namespace System.Text
 			return this.GetChars(bytes, byteIndex, byteCount, chars, charIndex);
 		}
 
-		[ComVisible(false)]
 		[CLSCompliant(false)]
 		[SecurityCritical]
+		[ComVisible(false)]
 		public unsafe virtual int GetChars(byte* bytes, int byteCount, char* chars, int charCount, bool flush)
 		{
 			if (chars == null || bytes == null)

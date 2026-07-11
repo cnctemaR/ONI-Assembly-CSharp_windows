@@ -10,82 +10,6 @@ namespace UnityEngine
 	[Obsolete("Use UnityWebRequest, a fully featured replacement which is more efficient and has additional features")]
 	public class WWW : CustomYieldInstruction, IDisposable
 	{
-		public WWW(string url)
-		{
-			this._uwr = UnityWebRequest.Get(url);
-			this._uwr.SendWebRequest();
-		}
-
-		public WWW(string url, WWWForm form)
-		{
-			this._uwr = UnityWebRequest.Post(url, form);
-			this._uwr.chunkedTransfer = false;
-			this._uwr.SendWebRequest();
-		}
-
-		public WWW(string url, byte[] postData)
-		{
-			this._uwr = new UnityWebRequest(url, "POST");
-			this._uwr.chunkedTransfer = false;
-			UploadHandler uploadHandler = new UploadHandlerRaw(postData);
-			uploadHandler.contentType = "application/x-www-form-urlencoded";
-			this._uwr.uploadHandler = uploadHandler;
-			this._uwr.downloadHandler = new DownloadHandlerBuffer();
-			this._uwr.SendWebRequest();
-		}
-
-		[Obsolete("This overload is deprecated. Use UnityEngine.WWW.WWW(string, byte[], System.Collections.Generic.Dictionary<string, string>) instead.")]
-		public WWW(string url, byte[] postData, Hashtable headers)
-		{
-			string text = ((postData != null) ? "POST" : "GET");
-			this._uwr = new UnityWebRequest(url, text);
-			this._uwr.chunkedTransfer = false;
-			UploadHandler uploadHandler = new UploadHandlerRaw(postData);
-			uploadHandler.contentType = "application/x-www-form-urlencoded";
-			this._uwr.uploadHandler = uploadHandler;
-			this._uwr.downloadHandler = new DownloadHandlerBuffer();
-			IEnumerator enumerator = headers.Keys.GetEnumerator();
-			try
-			{
-				while (enumerator.MoveNext())
-				{
-					object obj = enumerator.Current;
-					this._uwr.SetRequestHeader((string)obj, (string)headers[obj]);
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
-				}
-			}
-			this._uwr.SendWebRequest();
-		}
-
-		public WWW(string url, byte[] postData, Dictionary<string, string> headers)
-		{
-			string text = ((postData != null) ? "POST" : "GET");
-			this._uwr = new UnityWebRequest(url, text);
-			this._uwr.chunkedTransfer = false;
-			UploadHandler uploadHandler = new UploadHandlerRaw(postData);
-			uploadHandler.contentType = "application/x-www-form-urlencoded";
-			this._uwr.uploadHandler = uploadHandler;
-			this._uwr.downloadHandler = new DownloadHandlerBuffer();
-			foreach (KeyValuePair<string, string> keyValuePair in headers)
-			{
-				this._uwr.SetRequestHeader(keyValuePair.Key, keyValuePair.Value);
-			}
-			this._uwr.SendWebRequest();
-		}
-
-		internal WWW(string url, string name, Hash128 hash, uint crc)
-		{
-			this._uwr = UnityWebRequestAssetBundle.GetAssetBundle(url, new CachedAssetBundle(name, hash), crc);
-			this._uwr.SendWebRequest();
-		}
-
 		public static string EscapeURL(string s)
 		{
 			return WWW.EscapeURL(s, Encoding.UTF8);
@@ -132,29 +56,97 @@ namespace UnityEngine
 			return new WWW(url, cachedBundle.name, cachedBundle.hash, crc);
 		}
 
+		public WWW(string url)
+		{
+			this._uwr = UnityWebRequest.Get(url);
+			this._uwr.SendWebRequest();
+		}
+
+		public WWW(string url, WWWForm form)
+		{
+			this._uwr = UnityWebRequest.Post(url, form);
+			this._uwr.chunkedTransfer = false;
+			this._uwr.SendWebRequest();
+		}
+
+		public WWW(string url, byte[] postData)
+		{
+			this._uwr = new UnityWebRequest(url, "POST");
+			this._uwr.chunkedTransfer = false;
+			UploadHandler uploadHandler = new UploadHandlerRaw(postData);
+			uploadHandler.contentType = "application/x-www-form-urlencoded";
+			this._uwr.uploadHandler = uploadHandler;
+			this._uwr.downloadHandler = new DownloadHandlerBuffer();
+			this._uwr.SendWebRequest();
+		}
+
+		[Obsolete("This overload is deprecated. Use UnityEngine.WWW.WWW(string, byte[], System.Collections.Generic.Dictionary<string, string>) instead.")]
+		public WWW(string url, byte[] postData, Hashtable headers)
+		{
+			string text = ((postData == null) ? "GET" : "POST");
+			this._uwr = new UnityWebRequest(url, text);
+			this._uwr.chunkedTransfer = false;
+			UploadHandler uploadHandler = new UploadHandlerRaw(postData);
+			uploadHandler.contentType = "application/x-www-form-urlencoded";
+			this._uwr.uploadHandler = uploadHandler;
+			this._uwr.downloadHandler = new DownloadHandlerBuffer();
+			foreach (object obj in headers.Keys)
+			{
+				this._uwr.SetRequestHeader((string)obj, (string)headers[obj]);
+			}
+			this._uwr.SendWebRequest();
+		}
+
+		public WWW(string url, byte[] postData, Dictionary<string, string> headers)
+		{
+			string text = ((postData == null) ? "GET" : "POST");
+			this._uwr = new UnityWebRequest(url, text);
+			this._uwr.chunkedTransfer = false;
+			UploadHandler uploadHandler = new UploadHandlerRaw(postData);
+			uploadHandler.contentType = "application/x-www-form-urlencoded";
+			this._uwr.uploadHandler = uploadHandler;
+			this._uwr.downloadHandler = new DownloadHandlerBuffer();
+			foreach (KeyValuePair<string, string> keyValuePair in headers)
+			{
+				this._uwr.SetRequestHeader(keyValuePair.Key, keyValuePair.Value);
+			}
+			this._uwr.SendWebRequest();
+		}
+
+		internal WWW(string url, string name, Hash128 hash, uint crc)
+		{
+			this._uwr = UnityWebRequestAssetBundle.GetAssetBundle(url, new CachedAssetBundle(name, hash), crc);
+			this._uwr.SendWebRequest();
+		}
+
 		public AssetBundle assetBundle
 		{
 			get
 			{
-				if (this._assetBundle == null)
+				bool flag = this._assetBundle == null;
+				if (flag)
 				{
-					if (!this.WaitUntilDoneIfPossible())
+					bool flag2 = !this.WaitUntilDoneIfPossible();
+					if (flag2)
 					{
 						return null;
 					}
-					if (this._uwr.isNetworkError)
+					bool isNetworkError = this._uwr.isNetworkError;
+					if (isNetworkError)
 					{
 						return null;
 					}
 					DownloadHandlerAssetBundle downloadHandlerAssetBundle = this._uwr.downloadHandler as DownloadHandlerAssetBundle;
-					if (downloadHandlerAssetBundle != null)
+					bool flag3 = downloadHandlerAssetBundle != null;
+					if (flag3)
 					{
 						this._assetBundle = downloadHandlerAssetBundle.assetBundle;
 					}
 					else
 					{
 						byte[] bytes = this.bytes;
-						if (bytes == null)
+						bool flag4 = bytes == null;
+						if (flag4)
 						{
 							return null;
 						}
@@ -179,25 +171,31 @@ namespace UnityEngine
 		{
 			get
 			{
+				bool flag = !this.WaitUntilDoneIfPossible();
 				byte[] array;
-				if (!this.WaitUntilDoneIfPossible())
-				{
-					array = new byte[0];
-				}
-				else if (this._uwr.isNetworkError)
+				if (flag)
 				{
 					array = new byte[0];
 				}
 				else
 				{
-					DownloadHandler downloadHandler = this._uwr.downloadHandler;
-					if (downloadHandler == null)
+					bool isNetworkError = this._uwr.isNetworkError;
+					if (isNetworkError)
 					{
 						array = new byte[0];
 					}
 					else
 					{
-						array = downloadHandler.data;
+						DownloadHandler downloadHandler = this._uwr.downloadHandler;
+						bool flag2 = downloadHandler == null;
+						if (flag2)
+						{
+							array = new byte[0];
+						}
+						else
+						{
+							array = downloadHandler.data;
+						}
 					}
 				}
 				return array;
@@ -235,23 +233,32 @@ namespace UnityEngine
 		{
 			get
 			{
+				bool flag = !this._uwr.isDone;
 				string text;
-				if (!this._uwr.isDone)
+				if (flag)
 				{
 					text = null;
-				}
-				else if (this._uwr.isNetworkError)
-				{
-					text = this._uwr.error;
-				}
-				else if (this._uwr.responseCode >= 400L)
-				{
-					string httpstatusString = UnityWebRequest.GetHTTPStatusString(this._uwr.responseCode);
-					text = string.Format("{0} {1}", this._uwr.responseCode, httpstatusString);
 				}
 				else
 				{
-					text = null;
+					bool isNetworkError = this._uwr.isNetworkError;
+					if (isNetworkError)
+					{
+						text = this._uwr.error;
+					}
+					else
+					{
+						bool flag2 = this._uwr.responseCode >= 400L;
+						if (flag2)
+						{
+							string httpstatusString = UnityWebRequest.GetHTTPStatusString(this._uwr.responseCode);
+							text = string.Format("{0} {1}", this._uwr.responseCode, httpstatusString);
+						}
+						else
+						{
+							text = null;
+						}
+					}
 				}
 				return text;
 			}
@@ -270,7 +277,8 @@ namespace UnityEngine
 			get
 			{
 				float num = this._uwr.downloadProgress;
-				if (num < 0f)
+				bool flag = num < 0f;
+				if (flag)
 				{
 					num = 0f;
 				}
@@ -282,17 +290,20 @@ namespace UnityEngine
 		{
 			get
 			{
+				bool flag = !this.isDone;
 				Dictionary<string, string> dictionary;
-				if (!this.isDone)
+				if (flag)
 				{
 					dictionary = new Dictionary<string, string>();
 				}
 				else
 				{
-					if (this._responseHeaders == null)
+					bool flag2 = this._responseHeaders == null;
+					if (flag2)
 					{
 						this._responseHeaders = this._uwr.GetResponseHeaders();
-						if (this._responseHeaders != null)
+						bool flag3 = this._responseHeaders != null;
+						if (flag3)
 						{
 							string httpstatusString = UnityWebRequest.GetHTTPStatusString(this._uwr.responseCode);
 							this._responseHeaders["STATUS"] = string.Format("HTTP/1.1 {0} {1}", this._uwr.responseCode, httpstatusString);
@@ -308,8 +319,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Please use WWW.text instead. (UnityUpgradable) -> text", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public string data
 		{
 			get
@@ -322,25 +333,31 @@ namespace UnityEngine
 		{
 			get
 			{
+				bool flag = !this.WaitUntilDoneIfPossible();
 				string text;
-				if (!this.WaitUntilDoneIfPossible())
-				{
-					text = "";
-				}
-				else if (this._uwr.isNetworkError)
+				if (flag)
 				{
 					text = "";
 				}
 				else
 				{
-					DownloadHandler downloadHandler = this._uwr.downloadHandler;
-					if (downloadHandler == null)
+					bool isNetworkError = this._uwr.isNetworkError;
+					if (isNetworkError)
 					{
 						text = "";
 					}
 					else
 					{
-						text = downloadHandler.text;
+						DownloadHandler downloadHandler = this._uwr.downloadHandler;
+						bool flag2 = downloadHandler == null;
+						if (flag2)
+						{
+							text = "";
+						}
+						else
+						{
+							text = downloadHandler.text;
+						}
 					}
 				}
 				return text;
@@ -349,27 +366,33 @@ namespace UnityEngine
 
 		private Texture2D CreateTextureFromDownloadedData(bool markNonReadable)
 		{
+			bool flag = !this.WaitUntilDoneIfPossible();
 			Texture2D texture2D;
-			if (!this.WaitUntilDoneIfPossible())
+			if (flag)
 			{
 				texture2D = new Texture2D(2, 2);
 			}
-			else if (this._uwr.isNetworkError)
-			{
-				texture2D = null;
-			}
 			else
 			{
-				DownloadHandler downloadHandler = this._uwr.downloadHandler;
-				if (downloadHandler == null)
+				bool isNetworkError = this._uwr.isNetworkError;
+				if (isNetworkError)
 				{
 					texture2D = null;
 				}
 				else
 				{
-					Texture2D texture2D2 = new Texture2D(2, 2);
-					texture2D2.LoadImage(downloadHandler.data, markNonReadable);
-					texture2D = texture2D2;
+					DownloadHandler downloadHandler = this._uwr.downloadHandler;
+					bool flag2 = downloadHandler == null;
+					if (flag2)
+					{
+						texture2D = null;
+					}
+					else
+					{
+						Texture2D texture2D2 = new Texture2D(2, 2);
+						texture2D2.LoadImage(downloadHandler.data, markNonReadable);
+						texture2D = texture2D2;
+					}
 				}
 			}
 			return texture2D;
@@ -393,16 +416,19 @@ namespace UnityEngine
 
 		public void LoadImageIntoTexture(Texture2D texture)
 		{
-			if (this.WaitUntilDoneIfPossible())
+			bool flag = !this.WaitUntilDoneIfPossible();
+			if (!flag)
 			{
-				if (this._uwr.isNetworkError)
+				bool isNetworkError = this._uwr.isNetworkError;
+				if (isNetworkError)
 				{
 					Debug.LogError("Cannot load image: download failed");
 				}
 				else
 				{
 					DownloadHandler downloadHandler = this._uwr.downloadHandler;
-					if (downloadHandler == null)
+					bool flag2 = downloadHandler == null;
+					if (flag2)
 					{
 						Debug.LogError("Cannot load image: internal error");
 					}
@@ -421,7 +447,8 @@ namespace UnityEngine
 			get
 			{
 				float num = this._uwr.uploadProgress;
-				if (num < 0f)
+				bool flag = num < 0f;
+				if (flag)
 				{
 					num = 0f;
 				}
@@ -447,7 +474,8 @@ namespace UnityEngine
 
 		public void Dispose()
 		{
-			if (this._uwr != null)
+			bool flag = this._uwr != null;
+			if (flag)
 			{
 				this._uwr.Dispose();
 				this._uwr = null;
@@ -457,12 +485,6 @@ namespace UnityEngine
 		internal Object GetAudioClipInternal(bool threeD, bool stream, bool compressed, AudioType audioType)
 		{
 			return WebRequestWWW.InternalCreateAudioClipUsingDH(this._uwr.downloadHandler, this._uwr.url, stream, compressed, audioType);
-		}
-
-		[Obsolete("MovieTexture is deprecated. Use VideoPlayer instead.", false)]
-		internal object GetMovieTextureInternal()
-		{
-			return WebRequestWWW.InternalCreateMovieTextureUsingDH(this._uwr.downloadHandler);
 		}
 
 		public AudioClip GetAudioClip()
@@ -500,30 +522,36 @@ namespace UnityEngine
 			return (AudioClip)this.GetAudioClipInternal(threeD, false, true, audioType);
 		}
 
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("MovieTexture is deprecated. Use VideoPlayer instead.", false)]
 		public MovieTexture GetMovieTexture()
 		{
-			return (MovieTexture)this.GetMovieTextureInternal();
+			throw new Exception("MovieTexture has been removed from Unity. Use VideoPlayer instead.");
 		}
 
 		private bool WaitUntilDoneIfPossible()
 		{
+			bool isDone = this._uwr.isDone;
 			bool flag;
-			if (this._uwr.isDone)
+			if (isDone)
 			{
-				flag = true;
-			}
-			else if (this.url.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
-			{
-				while (!this._uwr.isDone)
-				{
-				}
 				flag = true;
 			}
 			else
 			{
-				Debug.LogError("You are trying to load data from a www stream which has not completed the download yet.\nYou need to yield the download or wait until isDone returns true.");
-				flag = false;
+				bool flag2 = this.url.StartsWith("file://", StringComparison.OrdinalIgnoreCase);
+				if (flag2)
+				{
+					while (!this._uwr.isDone)
+					{
+					}
+					flag = true;
+				}
+				else
+				{
+					Debug.LogError("You are trying to load data from a www stream which has not completed the download yet.\nYou need to yield the download or wait until isDone returns true.");
+					flag = false;
+				}
 			}
 			return flag;
 		}

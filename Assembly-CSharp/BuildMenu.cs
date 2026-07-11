@@ -310,7 +310,7 @@ public class BuildMenu : KScreen
 			if (sound2 != null)
 			{
 				EventInstance eventInstance = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.GetPosition(), 1f, false);
-				eventInstance.setParameterValue("playCount", (float)BuildMenu.Instance.notificationPingCount);
+				eventInstance.setParameterByName("playCount", (float)BuildMenu.Instance.notificationPingCount, false);
 				SoundEvent.EndOneShot(eventInstance);
 			}
 		}

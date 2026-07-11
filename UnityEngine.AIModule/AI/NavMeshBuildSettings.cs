@@ -87,7 +87,7 @@ namespace UnityEngine.AI
 			}
 			set
 			{
-				this.m_OverrideVoxelSize = ((!value) ? 0 : 1);
+				this.m_OverrideVoxelSize = (value ? 1 : 0);
 			}
 		}
 
@@ -111,7 +111,7 @@ namespace UnityEngine.AI
 			}
 			set
 			{
-				this.m_OverrideTileSize = ((!value) ? 0 : 1);
+				this.m_OverrideTileSize = (value ? 1 : 0);
 			}
 		}
 
@@ -144,8 +144,8 @@ namespace UnityEngine.AI
 			return NavMeshBuildSettings.InternalValidationReport(this, buildBounds);
 		}
 
-		[NativeHeader("Modules/AI/Public/NavMeshBuildSettings.h")]
 		[FreeFunction]
+		[NativeHeader("Modules/AI/Public/NavMeshBuildSettings.h")]
 		private static string[] InternalValidationReport(NavMeshBuildSettings buildSettings, Bounds buildBounds)
 		{
 			return NavMeshBuildSettings.InternalValidationReport_Injected(ref buildSettings, ref buildBounds);

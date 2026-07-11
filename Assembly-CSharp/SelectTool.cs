@@ -119,7 +119,7 @@ public class SelectTool : InterfaceTool
 						else
 						{
 							EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("Select_full", false), Vector3.zero, 1f);
-							eventInstance.setParameterValue("selection", (float)num);
+							eventInstance.setParameterByName("selection", (float)num, false);
 							SoundEvent.EndOneShot(eventInstance);
 						}
 						this.playedSoundThisFrame = true;

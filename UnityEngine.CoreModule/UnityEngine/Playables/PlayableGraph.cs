@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
-	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[NativeHeader("Runtime/Export/Director/PlayableGraph.bindings.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
 	[UsedByNativeCode]
 	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	public struct PlayableGraph
 	{
 		public Playable GetRootPlayable(int index)
@@ -52,8 +52,9 @@ namespace UnityEngine.Playables
 		public PlayableOutput GetOutput(int index)
 		{
 			PlayableOutputHandle playableOutputHandle;
+			bool flag = !this.GetOutputInternal(index, out playableOutputHandle);
 			PlayableOutput playableOutput;
-			if (!this.GetOutputInternal(index, out playableOutputHandle))
+			if (flag)
 			{
 				playableOutput = PlayableOutput.Null;
 			}
@@ -67,8 +68,9 @@ namespace UnityEngine.Playables
 		public PlayableOutput GetOutputByType<T>(int index) where T : struct, IPlayableOutput
 		{
 			PlayableOutputHandle playableOutputHandle;
+			bool flag = !this.GetOutputByTypeInternal(typeof(T), index, out playableOutputHandle);
 			PlayableOutput playableOutput;
-			if (!this.GetOutputByTypeInternal(typeof(T), index, out playableOutputHandle))
+			if (flag)
 			{
 				playableOutput = PlayableOutput.Null;
 			}

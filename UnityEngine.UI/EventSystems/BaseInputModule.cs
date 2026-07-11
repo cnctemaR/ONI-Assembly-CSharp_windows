@@ -10,32 +10,26 @@ namespace UnityEngine.EventSystems
 		{
 			get
 			{
-				BaseInput baseInput;
 				if (this.m_InputOverride != null)
 				{
-					baseInput = this.m_InputOverride;
+					return this.m_InputOverride;
 				}
-				else
+				if (this.m_DefaultInput == null)
 				{
-					if (this.m_DefaultInput == null)
+					foreach (BaseInput baseInput in base.GetComponents<BaseInput>())
 					{
-						BaseInput[] components = base.GetComponents<BaseInput>();
-						foreach (BaseInput baseInput2 in components)
+						if (baseInput != null && baseInput.GetType() == typeof(BaseInput))
 						{
-							if (baseInput2 != null && baseInput2.GetType() == typeof(BaseInput))
-							{
-								this.m_DefaultInput = baseInput2;
-								break;
-							}
-						}
-						if (this.m_DefaultInput == null)
-						{
-							this.m_DefaultInput = base.gameObject.AddComponent<BaseInput>();
+							this.m_DefaultInput = baseInput;
+							break;
 						}
 					}
-					baseInput = this.m_DefaultInput;
+					if (this.m_DefaultInput == null)
+					{
+						this.m_DefaultInput = base.gameObject.AddComponent<BaseInput>();
+					}
 				}
-				return baseInput;
+				return this.m_DefaultInput;
 			}
 		}
 
@@ -93,60 +87,49 @@ namespace UnityEngine.EventSystems
 
 		protected static MoveDirection DetermineMoveDirection(float x, float y, float deadZone)
 		{
-			Vector2 vector = new Vector2(x, y);
-			MoveDirection moveDirection;
-			if (vector.sqrMagnitude < deadZone * deadZone)
+			if (new Vector2(x, y).sqrMagnitude < deadZone * deadZone)
 			{
-				moveDirection = MoveDirection.None;
+				return MoveDirection.None;
 			}
-			else if (Mathf.Abs(x) > Mathf.Abs(y))
+			if (Mathf.Abs(x) > Mathf.Abs(y))
 			{
 				if (x > 0f)
 				{
-					moveDirection = MoveDirection.Right;
+					return MoveDirection.Right;
 				}
-				else
-				{
-					moveDirection = MoveDirection.Left;
-				}
-			}
-			else if (y > 0f)
-			{
-				moveDirection = MoveDirection.Up;
+				return MoveDirection.Left;
 			}
 			else
 			{
-				moveDirection = MoveDirection.Down;
+				if (y > 0f)
+				{
+					return MoveDirection.Up;
+				}
+				return MoveDirection.Down;
 			}
-			return moveDirection;
 		}
 
 		protected static GameObject FindCommonRoot(GameObject g1, GameObject g2)
 		{
-			GameObject gameObject;
 			if (g1 == null || g2 == null)
 			{
-				gameObject = null;
+				return null;
 			}
-			else
+			Transform transform = g1.transform;
+			while (transform != null)
 			{
-				Transform transform = g1.transform;
-				while (transform != null)
+				Transform transform2 = g2.transform;
+				while (transform2 != null)
 				{
-					Transform transform2 = g2.transform;
-					while (transform2 != null)
+					if (transform == transform2)
 					{
-						if (transform == transform2)
-						{
-							return transform.gameObject;
-						}
-						transform2 = transform2.parent;
+						return transform.gameObject;
 					}
-					transform = transform.parent;
+					transform2 = transform2.parent;
 				}
-				gameObject = null;
+				transform = transform.parent;
 			}
-			return gameObject;
+			return null;
 		}
 
 		protected void HandlePointerExitAndEnter(PointerEventData currentPointerData, GameObject newEnterTarget)
@@ -164,33 +147,30 @@ namespace UnityEngine.EventSystems
 					return;
 				}
 			}
-			if (!(currentPointerData.pointerEnter == newEnterTarget) || !newEnterTarget)
+			if (currentPointerData.pointerEnter == newEnterTarget && newEnterTarget)
 			{
-				GameObject gameObject = BaseInputModule.FindCommonRoot(currentPointerData.pointerEnter, newEnterTarget);
-				if (currentPointerData.pointerEnter != null)
+				return;
+			}
+			GameObject gameObject = BaseInputModule.FindCommonRoot(currentPointerData.pointerEnter, newEnterTarget);
+			if (currentPointerData.pointerEnter != null)
+			{
+				Transform transform = currentPointerData.pointerEnter.transform;
+				while (transform != null && (!(gameObject != null) || !(gameObject.transform == transform)))
 				{
-					Transform transform = currentPointerData.pointerEnter.transform;
-					while (transform != null)
-					{
-						if (gameObject != null && gameObject.transform == transform)
-						{
-							break;
-						}
-						ExecuteEvents.Execute<IPointerExitHandler>(transform.gameObject, currentPointerData, ExecuteEvents.pointerExitHandler);
-						currentPointerData.hovered.Remove(transform.gameObject);
-						transform = transform.parent;
-					}
+					ExecuteEvents.Execute<IPointerExitHandler>(transform.gameObject, currentPointerData, ExecuteEvents.pointerExitHandler);
+					currentPointerData.hovered.Remove(transform.gameObject);
+					transform = transform.parent;
 				}
-				currentPointerData.pointerEnter = newEnterTarget;
-				if (newEnterTarget != null)
+			}
+			currentPointerData.pointerEnter = newEnterTarget;
+			if (newEnterTarget != null)
+			{
+				Transform transform2 = newEnterTarget.transform;
+				while (transform2 != null && transform2.gameObject != gameObject)
 				{
-					Transform transform2 = newEnterTarget.transform;
-					while (transform2 != null && transform2.gameObject != gameObject)
-					{
-						ExecuteEvents.Execute<IPointerEnterHandler>(transform2.gameObject, currentPointerData, ExecuteEvents.pointerEnterHandler);
-						currentPointerData.hovered.Add(transform2.gameObject);
-						transform2 = transform2.parent;
-					}
+					ExecuteEvents.Execute<IPointerEnterHandler>(transform2.gameObject, currentPointerData, ExecuteEvents.pointerEnterHandler);
+					currentPointerData.hovered.Add(transform2.gameObject);
+					transform2 = transform2.parent;
 				}
 			}
 		}

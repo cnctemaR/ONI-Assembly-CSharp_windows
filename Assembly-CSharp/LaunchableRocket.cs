@@ -330,7 +330,7 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 			{
 				rocketModule = sound.transform.GetComponent<RocketModule>(),
 				ev = sound.ev,
-				parameterIdx = sound.description.GetParameterIdx(base.parameter)
+				parameterId = sound.description.GetParameterId(base.parameter)
 			};
 			this.entries.Add(entry);
 		}
@@ -350,12 +350,12 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 							if (component.isLanding)
 							{
 								EventInstance eventInstance = entry.ev;
-								eventInstance.setParameterValueByIndex(entry.parameterIdx, 1f);
+								eventInstance.setParameterByID(entry.parameterId, 1f, false);
 							}
 							else
 							{
 								EventInstance eventInstance = entry.ev;
-								eventInstance.setParameterValueByIndex(entry.parameterIdx, 0f);
+								eventInstance.setParameterByID(entry.parameterId, 0f, false);
 							}
 						}
 					}
@@ -383,7 +383,7 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 
 			public EventInstance ev;
 
-			public int parameterIdx;
+			public PARAMETER_ID parameterId;
 		}
 	}
 
@@ -400,7 +400,7 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 			{
 				rocketModule = sound.transform.GetComponent<RocketModule>(),
 				ev = sound.ev,
-				parameterIdx = sound.description.GetParameterIdx(base.parameter)
+				parameterId = sound.description.GetParameterId(base.parameter)
 			};
 			this.entries.Add(entry);
 		}
@@ -418,7 +418,7 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 						if (!(component == null))
 						{
 							EventInstance ev = entry.ev;
-							ev.setParameterValueByIndex(entry.parameterIdx, component.rocketSpeed);
+							ev.setParameterByID(entry.parameterId, component.rocketSpeed, false);
 						}
 					}
 				}
@@ -445,7 +445,7 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 
 			public EventInstance ev;
 
-			public int parameterIdx;
+			public PARAMETER_ID parameterId;
 		}
 	}
 }

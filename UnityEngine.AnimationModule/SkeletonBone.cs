@@ -5,13 +5,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Animation/HumanDescription.h")]
 	[NativeType(CodegenOptions.Custom, "MonoSkeletonBone")]
+	[NativeHeader("Modules/Animation/HumanDescription.h")]
+	[RequiredByNativeCode]
 	public struct SkeletonBone
 	{
-		[Obsolete("transformModified is no longer used and has been deprecated.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("transformModified is no longer used and has been deprecated.", true)]
 		public int transformModified
 		{
 			get

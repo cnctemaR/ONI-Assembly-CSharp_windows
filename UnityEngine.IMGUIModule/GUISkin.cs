@@ -5,9 +5,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[ExecuteInEditMode]
 	[AssetFileNameExtension("guiskin", new string[] { })]
 	[RequiredByNativeCode]
+	[ExecuteInEditMode]
 	[Serializable]
 	public sealed class GUISkin : ScriptableObject
 	{
@@ -36,7 +36,8 @@ namespace UnityEngine
 			set
 			{
 				this.m_Font = value;
-				if (GUISkin.current == this)
+				bool flag = GUISkin.current == this;
+				if (flag)
 				{
 					GUIStyle.SetDefaultFont(this.m_Font);
 				}
@@ -161,6 +162,19 @@ namespace UnityEngine
 			}
 		}
 
+		internal GUIStyle horizontalSliderThumbExtent
+		{
+			get
+			{
+				return this.m_horizontalSliderThumbExtent;
+			}
+			set
+			{
+				this.m_horizontalSliderThumbExtent = value;
+				this.Apply();
+			}
+		}
+
 		public GUIStyle verticalSlider
 		{
 			get
@@ -183,6 +197,19 @@ namespace UnityEngine
 			set
 			{
 				this.m_verticalSliderThumb = value;
+				this.Apply();
+			}
+		}
+
+		internal GUIStyle verticalSliderThumbExtent
+		{
+			get
+			{
+				return this.m_verticalSliderThumbExtent;
+			}
+			set
+			{
+				this.m_verticalSliderThumbExtent = value;
 				this.Apply();
 			}
 		}
@@ -329,7 +356,8 @@ namespace UnityEngine
 		{
 			get
 			{
-				if (GUISkin.ms_Error == null)
+				bool flag = GUISkin.ms_Error == null;
+				if (flag)
 				{
 					GUISkin.ms_Error = new GUIStyle();
 					GUISkin.ms_Error.name = "StyleNotFoundError";
@@ -340,7 +368,8 @@ namespace UnityEngine
 
 		internal void Apply()
 		{
-			if (this.m_CustomStyles == null)
+			bool flag = this.m_CustomStyles == null;
+			if (flag)
 			{
 				Debug.Log("custom styles is null");
 			}
@@ -349,83 +378,103 @@ namespace UnityEngine
 
 		private void BuildStyleCache()
 		{
-			if (this.m_box == null)
+			bool flag = this.m_box == null;
+			if (flag)
 			{
 				this.m_box = new GUIStyle();
 			}
-			if (this.m_button == null)
+			bool flag2 = this.m_button == null;
+			if (flag2)
 			{
 				this.m_button = new GUIStyle();
 			}
-			if (this.m_toggle == null)
+			bool flag3 = this.m_toggle == null;
+			if (flag3)
 			{
 				this.m_toggle = new GUIStyle();
 			}
-			if (this.m_label == null)
+			bool flag4 = this.m_label == null;
+			if (flag4)
 			{
 				this.m_label = new GUIStyle();
 			}
-			if (this.m_window == null)
+			bool flag5 = this.m_window == null;
+			if (flag5)
 			{
 				this.m_window = new GUIStyle();
 			}
-			if (this.m_textField == null)
+			bool flag6 = this.m_textField == null;
+			if (flag6)
 			{
 				this.m_textField = new GUIStyle();
 			}
-			if (this.m_textArea == null)
+			bool flag7 = this.m_textArea == null;
+			if (flag7)
 			{
 				this.m_textArea = new GUIStyle();
 			}
-			if (this.m_horizontalSlider == null)
+			bool flag8 = this.m_horizontalSlider == null;
+			if (flag8)
 			{
 				this.m_horizontalSlider = new GUIStyle();
 			}
-			if (this.m_horizontalSliderThumb == null)
+			bool flag9 = this.m_horizontalSliderThumb == null;
+			if (flag9)
 			{
 				this.m_horizontalSliderThumb = new GUIStyle();
 			}
-			if (this.m_verticalSlider == null)
+			bool flag10 = this.m_verticalSlider == null;
+			if (flag10)
 			{
 				this.m_verticalSlider = new GUIStyle();
 			}
-			if (this.m_verticalSliderThumb == null)
+			bool flag11 = this.m_verticalSliderThumb == null;
+			if (flag11)
 			{
 				this.m_verticalSliderThumb = new GUIStyle();
 			}
-			if (this.m_horizontalScrollbar == null)
+			bool flag12 = this.m_horizontalScrollbar == null;
+			if (flag12)
 			{
 				this.m_horizontalScrollbar = new GUIStyle();
 			}
-			if (this.m_horizontalScrollbarThumb == null)
+			bool flag13 = this.m_horizontalScrollbarThumb == null;
+			if (flag13)
 			{
 				this.m_horizontalScrollbarThumb = new GUIStyle();
 			}
-			if (this.m_horizontalScrollbarLeftButton == null)
+			bool flag14 = this.m_horizontalScrollbarLeftButton == null;
+			if (flag14)
 			{
 				this.m_horizontalScrollbarLeftButton = new GUIStyle();
 			}
-			if (this.m_horizontalScrollbarRightButton == null)
+			bool flag15 = this.m_horizontalScrollbarRightButton == null;
+			if (flag15)
 			{
 				this.m_horizontalScrollbarRightButton = new GUIStyle();
 			}
-			if (this.m_verticalScrollbar == null)
+			bool flag16 = this.m_verticalScrollbar == null;
+			if (flag16)
 			{
 				this.m_verticalScrollbar = new GUIStyle();
 			}
-			if (this.m_verticalScrollbarThumb == null)
+			bool flag17 = this.m_verticalScrollbarThumb == null;
+			if (flag17)
 			{
 				this.m_verticalScrollbarThumb = new GUIStyle();
 			}
-			if (this.m_verticalScrollbarUpButton == null)
+			bool flag18 = this.m_verticalScrollbarUpButton == null;
+			if (flag18)
 			{
 				this.m_verticalScrollbarUpButton = new GUIStyle();
 			}
-			if (this.m_verticalScrollbarDownButton == null)
+			bool flag19 = this.m_verticalScrollbarDownButton == null;
+			if (flag19)
 			{
 				this.m_verticalScrollbarDownButton = new GUIStyle();
 			}
-			if (this.m_ScrollView == null)
+			bool flag20 = this.m_ScrollView == null;
+			if (flag20)
 			{
 				this.m_ScrollView = new GUIStyle();
 			}
@@ -470,15 +519,31 @@ namespace UnityEngine
 			this.m_verticalScrollbarDownButton.name = "verticalscrollbardownbutton";
 			this.m_Styles["scrollview"] = this.m_ScrollView;
 			this.m_ScrollView.name = "scrollview";
-			if (this.m_CustomStyles != null)
+			bool flag21 = this.m_CustomStyles != null;
+			if (flag21)
 			{
 				for (int i = 0; i < this.m_CustomStyles.Length; i++)
 				{
-					if (this.m_CustomStyles[i] != null)
+					bool flag22 = this.m_CustomStyles[i] == null;
+					if (!flag22)
 					{
 						this.m_Styles[this.m_CustomStyles[i].name] = this.m_CustomStyles[i];
 					}
 				}
+			}
+			bool flag23 = !this.m_Styles.TryGetValue("HorizontalSliderThumbExtent", out this.m_horizontalSliderThumbExtent);
+			if (flag23)
+			{
+				this.m_horizontalSliderThumbExtent = new GUIStyle();
+				this.m_horizontalSliderThumbExtent.name = "horizontalsliderthumbextent";
+				this.m_Styles["HorizontalSliderThumbExtent"] = this.m_horizontalSliderThumbExtent;
+			}
+			bool flag24 = !this.m_Styles.TryGetValue("VerticalSliderThumbExtent", out this.m_verticalSliderThumbExtent);
+			if (flag24)
+			{
+				this.m_verticalSliderThumbExtent = new GUIStyle();
+				this.m_Styles["VerticalSliderThumbExtent"] = this.m_verticalSliderThumbExtent;
+				this.m_verticalSliderThumbExtent.name = "verticalsliderthumbextent";
 			}
 			GUISkin.error.stretchHeight = true;
 			GUISkin.error.normal.textColor = Color.red;
@@ -487,8 +552,9 @@ namespace UnityEngine
 		public GUIStyle GetStyle(string styleName)
 		{
 			GUIStyle guistyle = this.FindStyle(styleName);
+			bool flag = guistyle != null;
 			GUIStyle guistyle2;
-			if (guistyle != null)
+			if (flag)
 			{
 				guistyle2 = guistyle;
 			}
@@ -501,7 +567,7 @@ namespace UnityEngine
 					"' in skin '",
 					base.name,
 					"' ",
-					(Event.current == null) ? "<called outside OnGUI>" : Event.current.type.ToString()
+					(Event.current != null) ? Event.current.type.ToString() : "<called outside OnGUI>"
 				}));
 				guistyle2 = GUISkin.error;
 			}
@@ -510,36 +576,31 @@ namespace UnityEngine
 
 		public GUIStyle FindStyle(string styleName)
 		{
-			GUIStyle guistyle;
-			if (this == null)
+			bool flag = this.m_Styles == null;
+			if (flag)
 			{
-				Debug.LogError("GUISkin is NULL");
-				guistyle = null;
+				this.BuildStyleCache();
+			}
+			GUIStyle guistyle;
+			bool flag2 = this.m_Styles.TryGetValue(styleName, out guistyle);
+			GUIStyle guistyle2;
+			if (flag2)
+			{
+				guistyle2 = guistyle;
 			}
 			else
 			{
-				if (this.m_Styles == null)
-				{
-					this.BuildStyleCache();
-				}
-				GUIStyle guistyle2;
-				if (this.m_Styles.TryGetValue(styleName, out guistyle2))
-				{
-					guistyle = guistyle2;
-				}
-				else
-				{
-					guistyle = null;
-				}
+				guistyle2 = null;
 			}
-			return guistyle;
+			return guistyle2;
 		}
 
 		internal void MakeCurrent()
 		{
 			GUISkin.current = this;
 			GUIStyle.SetDefaultFont(this.font);
-			if (GUISkin.m_SkinChanged != null)
+			bool flag = GUISkin.m_SkinChanged != null;
+			if (flag)
 			{
 				GUISkin.m_SkinChanged();
 			}
@@ -547,7 +608,8 @@ namespace UnityEngine
 
 		public IEnumerator GetEnumerator()
 		{
-			if (this.m_Styles == null)
+			bool flag = this.m_Styles == null;
+			if (flag)
 			{
 				this.BuildStyleCache();
 			}
@@ -584,11 +646,17 @@ namespace UnityEngine
 		[SerializeField]
 		private GUIStyle m_horizontalSliderThumb;
 
+		[NonSerialized]
+		private GUIStyle m_horizontalSliderThumbExtent;
+
 		[SerializeField]
 		private GUIStyle m_verticalSlider;
 
 		[SerializeField]
 		private GUIStyle m_verticalSliderThumb;
+
+		[NonSerialized]
+		private GUIStyle m_verticalSliderThumbExtent;
 
 		[SerializeField]
 		private GUIStyle m_horizontalScrollbar;

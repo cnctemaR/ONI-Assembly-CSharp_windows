@@ -661,8 +661,8 @@ namespace System.Text
 			return this.Append(Environment.NewLine);
 		}
 
-		[SecuritySafeCritical]
 		[ComVisible(false)]
+		[SecuritySafeCritical]
 		public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count)
 		{
 			if (destination == null)
@@ -1482,8 +1482,8 @@ namespace System.Text
 			return this;
 		}
 
-		[SecurityCritical]
 		[CLSCompliant(false)]
+		[SecurityCritical]
 		public unsafe StringBuilder Append(char* value, int valueCount)
 		{
 			if (valueCount < 0)

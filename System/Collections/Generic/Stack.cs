@@ -5,8 +5,8 @@ using System.Threading;
 
 namespace System.Collections.Generic
 {
-	[DebuggerTypeProxy(typeof(StackDebugView<>))]
 	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(StackDebugView<>))]
 	[Serializable]
 	public class Stack<T> : IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>
 	{

@@ -8,21 +8,15 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimatorControllerPlayable.bindings.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimatorControllerPlayable.bindings.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/Animator.bindings.h")]
+	[NativeHeader("Modules/Animation/Director/AnimatorControllerPlayable.h")]
+	[NativeHeader("Modules/Animation/RuntimeAnimatorController.h")]
+	[NativeHeader("Modules/Animation/AnimatorInfo.h")]
 	[StaticAccessor("AnimatorControllerPlayableBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Animation/ScriptBindings/Animator.bindings.h")]
 	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Animation/Director/AnimatorControllerPlayable.h")]
-	[NativeHeader("Runtime/Animation/AnimatorInfo.h")]
-	[NativeHeader("Runtime/Animation/RuntimeAnimatorController.h")]
 	public struct AnimatorControllerPlayable : IPlayable, IEquatable<AnimatorControllerPlayable>
 	{
-		internal AnimatorControllerPlayable(PlayableHandle handle)
-		{
-			this.m_Handle = PlayableHandle.Null;
-			this.SetHandle(handle);
-		}
-
 		public static AnimatorControllerPlayable Null
 		{
 			get
@@ -40,8 +34,9 @@ namespace UnityEngine.Animations
 		private static PlayableHandle CreateHandle(PlayableGraph graph, RuntimeAnimatorController controller)
 		{
 			PlayableHandle @null = PlayableHandle.Null;
+			bool flag = !AnimatorControllerPlayable.CreateHandleInternal(graph, controller, ref @null);
 			PlayableHandle playableHandle;
-			if (!AnimatorControllerPlayable.CreateHandleInternal(graph, controller, ref @null))
+			if (flag)
 			{
 				playableHandle = PlayableHandle.Null;
 			}
@@ -52,6 +47,12 @@ namespace UnityEngine.Animations
 			return playableHandle;
 		}
 
+		internal AnimatorControllerPlayable(PlayableHandle handle)
+		{
+			this.m_Handle = PlayableHandle.Null;
+			this.SetHandle(handle);
+		}
+
 		public PlayableHandle GetHandle()
 		{
 			return this.m_Handle;
@@ -59,13 +60,16 @@ namespace UnityEngine.Animations
 
 		public void SetHandle(PlayableHandle handle)
 		{
-			if (this.m_Handle.IsValid())
+			bool flag = this.m_Handle.IsValid();
+			if (flag)
 			{
 				throw new InvalidOperationException("Cannot call IPlayable.SetHandle on an instance that already contains a valid handle.");
 			}
-			if (handle.IsValid())
+			bool flag2 = handle.IsValid();
+			if (flag2)
 			{
-				if (!handle.IsPlayableOfType<AnimatorControllerPlayable>())
+				bool flag3 = !handle.IsPlayableOfType<AnimatorControllerPlayable>();
+				if (flag3)
 				{
 					throw new InvalidCastException("Can't set handle: the playable is not an AnimatorControllerPlayable.");
 				}
@@ -225,7 +229,8 @@ namespace UnityEngine.Animations
 
 		public void GetCurrentAnimatorClipInfo(int layerIndex, List<AnimatorClipInfo> clips)
 		{
-			if (clips == null)
+			bool flag = clips == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("clips");
 			}
@@ -234,7 +239,8 @@ namespace UnityEngine.Animations
 
 		public void GetNextAnimatorClipInfo(int layerIndex, List<AnimatorClipInfo> clips)
 		{
-			if (clips == null)
+			bool flag = clips == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("clips");
 			}
@@ -273,7 +279,8 @@ namespace UnityEngine.Animations
 		public AnimatorControllerParameter GetParameter(int index)
 		{
 			AnimatorControllerParameter[] parametersArrayInternal = AnimatorControllerPlayable.GetParametersArrayInternal(ref this.m_Handle);
-			if (index < 0 || index >= parametersArrayInternal.Length)
+			bool flag = index < 0 || index >= parametersArrayInternal.Length;
+			if (flag)
 			{
 				throw new IndexOutOfRangeException("Invalid parameter index.");
 			}

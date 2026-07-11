@@ -22,7 +22,8 @@ namespace Unity.Jobs
 		{
 			public static IntPtr Initialize()
 			{
-				if (IJobParallelForExtensions.ParallelForJobStruct<T>.jobReflectionData == IntPtr.Zero)
+				bool flag = IJobParallelForExtensions.ParallelForJobStruct<T>.jobReflectionData == IntPtr.Zero;
+				if (flag)
 				{
 					IJobParallelForExtensions.ParallelForJobStruct<T>.jobReflectionData = JobsUtility.CreateJobReflectionData(typeof(T), JobType.ParallelFor, new IJobParallelForExtensions.ParallelForJobStruct<T>.ExecuteJobFunction(IJobParallelForExtensions.ParallelForJobStruct<T>.Execute), null, null);
 				}
@@ -31,11 +32,17 @@ namespace Unity.Jobs
 
 			public static void Execute(ref T jobData, IntPtr additionalPtr, IntPtr bufferRangePatchData, ref JobRanges ranges, int jobIndex)
 			{
-				int num;
-				int num2;
-				while (JobsUtility.GetWorkStealingRange(ref ranges, jobIndex, out num, out num2))
+				for (;;)
 				{
-					for (int i = num; i < num2; i++)
+					int num;
+					int num2;
+					bool flag = !JobsUtility.GetWorkStealingRange(ref ranges, jobIndex, out num, out num2);
+					if (flag)
+					{
+						break;
+					}
+					int num3 = num2;
+					for (int i = num; i < num3; i++)
 					{
 						jobData.Execute(i);
 					}

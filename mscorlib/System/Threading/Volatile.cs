@@ -50,8 +50,8 @@ namespace System.Threading
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern IntPtr Read(ref IntPtr location);
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[CLSCompliant(false)]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern UIntPtr Read(ref UIntPtr location);
 

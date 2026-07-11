@@ -29,7 +29,7 @@ public static class RadiationGridManager
 		RadiationGridManager.previewLightCells.Clear();
 	}
 
-	public static void CreatePreview(int origin_cell, float radius, LightShape shape, int lux)
+	public static void CreatePreview(int origin_cell, float radius, global::LightShape shape, int lux)
 	{
 		RadiationGridManager.previewLightCells.Clear();
 		ListPool<int, RadiationGridEmitter>.PooledList pooledList = ListPool<int, RadiationGridEmitter>.Allocate();

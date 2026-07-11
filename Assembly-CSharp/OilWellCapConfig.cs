@@ -41,13 +41,14 @@ public class OilWellCapConfig : IBuildingConfig
 		BuildingTemplates.CreateDefaultStorage(go, false).showInUI = true;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
-		conduitConsumer.consumptionRate = 1f;
+		conduitConsumer.consumptionRate = 2f;
 		conduitConsumer.capacityKG = 10f;
-		conduitConsumer.capacityTag = GameTags.Liquid;
+		conduitConsumer.capacityTag = OilWellCapConfig.INPUT_WATER_TAG;
+		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(new Tag("Water"), 1f)
+			new ElementConverter.ConsumedElement(OilWellCapConfig.INPUT_WATER_TAG, 1f)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
@@ -79,6 +80,8 @@ public class OilWellCapConfig : IBuildingConfig
 	private const float PRESSURE_RELEASE_TIME = 180f;
 
 	private const float PRESSURE_RELEASE_RATE = 0.44444448f;
+
+	private static readonly Tag INPUT_WATER_TAG = SimHashes.Water.CreateTag();
 
 	public const string ID = "OilWellCap";
 }

@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
+	[NativeHeader("Modules/Physics/HingeJoint.h")]
 	[NativeClass("Unity::HingeJoint")]
-	[NativeHeader("Runtime/Dynamics/HingeJoint.h")]
 	public class HingeJoint : Joint
 	{
 		public JointMotor motor

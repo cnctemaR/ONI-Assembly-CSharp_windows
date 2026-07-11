@@ -5,10 +5,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
-	[UsedByNativeCode]
+	[NativeHeader("Runtime/Export/Director/PlayableOutputHandle.bindings.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[NativeHeader("Runtime/Export/Director/PlayableOutputHandle.bindings.h")]
+	[UsedByNativeCode]
 	public struct PlayableOutputHandle : IEquatable<PlayableOutputHandle>
 	{
 		public static PlayableOutputHandle Null
@@ -106,21 +106,15 @@ namespace UnityEngine.Playables
 		}
 
 		[FreeFunction("PlayableOutputHandleBindings::SetSourcePlayable", HasExplicitThis = true, ThrowsException = true)]
-		internal void SetSourcePlayable(PlayableHandle target)
+		internal void SetSourcePlayable(PlayableHandle target, int port)
 		{
-			PlayableOutputHandle.SetSourcePlayable_Injected(ref this, ref target);
+			PlayableOutputHandle.SetSourcePlayable_Injected(ref this, ref target, port);
 		}
 
 		[FreeFunction("PlayableOutputHandleBindings::GetSourceOutputPort", HasExplicitThis = true, ThrowsException = true)]
 		internal int GetSourceOutputPort()
 		{
 			return PlayableOutputHandle.GetSourceOutputPort_Injected(ref this);
-		}
-
-		[FreeFunction("PlayableOutputHandleBindings::SetSourceOutputPort", HasExplicitThis = true, ThrowsException = true)]
-		internal void SetSourceOutputPort(int port)
-		{
-			PlayableOutputHandle.SetSourceOutputPort_Injected(ref this, port);
 		}
 
 		[FreeFunction("PlayableOutputHandleBindings::GetWeight", HasExplicitThis = true, ThrowsException = true)]
@@ -184,13 +178,10 @@ namespace UnityEngine.Playables
 		private static extern void GetSourcePlayable_Injected(ref PlayableOutputHandle _unity_self, out PlayableHandle ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetSourcePlayable_Injected(ref PlayableOutputHandle _unity_self, ref PlayableHandle target);
+		private static extern void SetSourcePlayable_Injected(ref PlayableOutputHandle _unity_self, ref PlayableHandle target, int port);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetSourceOutputPort_Injected(ref PlayableOutputHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetSourceOutputPort_Injected(ref PlayableOutputHandle _unity_self, int port);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern float GetWeight_Injected(ref PlayableOutputHandle _unity_self);

@@ -246,16 +246,18 @@ public class OilWellCap : Workable, ISingleSliderControl, ISliderControl, IEleme
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			default_state = this.idle;
+			default_state = this.inoperational;
 			this.root.ToggleRecurringChore((OilWellCap.StatesInstance smi) => smi.master.CreateWorkChore(), null);
-			this.idle.PlayAnim("off").ToggleStatusItem(Db.Get().BuildingStatusItems.WellPressurizing, null).ParamTransition<float>(this.pressurePercent, this.overpressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsGTEOne)
-				.ParamTransition<bool>(this.working, this.releasing_pressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsTrue)
-				.EventTransition(GameHashes.OperationalChanged, this.active, (OilWellCap.StatesInstance smi) => smi.master.operational.IsOperational);
-			this.active.DefaultState(this.active.pre).ToggleStatusItem(Db.Get().BuildingStatusItems.WellPressurizing, null).EventTransition(GameHashes.OperationalChanged, this.idle, (OilWellCap.StatesInstance smi) => !smi.master.operational.IsOperational)
-				.Enter(delegate(OilWellCap.StatesInstance smi)
-				{
-					smi.master.operational.SetActive(true, false);
-				})
+			this.inoperational.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.operational, new StateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.Transition.ConditionCallback(this.IsOperational));
+			this.operational.DefaultState(this.operational.idle);
+			this.operational.idle.PlayAnim("off").ToggleStatusItem(Db.Get().BuildingStatusItems.WellPressurizing, null).ParamTransition<float>(this.pressurePercent, this.operational.overpressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsGTEOne)
+				.ParamTransition<bool>(this.working, this.operational.releasing_pressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsTrue)
+				.EventTransition(GameHashes.OperationalChanged, this.inoperational, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.Not(new StateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.Transition.ConditionCallback(this.IsOperational)))
+				.EventTransition(GameHashes.OnStorageChange, this.operational.active, new StateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.Transition.ConditionCallback(this.IsAbleToPump));
+			this.operational.active.DefaultState(this.operational.active.pre).ToggleStatusItem(Db.Get().BuildingStatusItems.WellPressurizing, null).Enter(delegate(OilWellCap.StatesInstance smi)
+			{
+				smi.master.operational.SetActive(true, false);
+			})
 				.Exit(delegate(OilWellCap.StatesInstance smi)
 				{
 					smi.master.operational.SetActive(false, false);
@@ -264,34 +266,57 @@ public class OilWellCap : Workable, ISingleSliderControl, ISliderControl, IEleme
 				{
 					smi.master.AddGasPressure(dt);
 				}, UpdateRate.SIM_200ms, false);
-			this.active.pre.PlayAnim("working_pre").ParamTransition<float>(this.pressurePercent, this.overpressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsGTEOne).ParamTransition<bool>(this.working, this.releasing_pressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsTrue)
-				.OnAnimQueueComplete(this.active.loop);
-			this.active.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).ParamTransition<float>(this.pressurePercent, this.active.pst, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsGTEOne).ParamTransition<bool>(this.working, this.active.pst, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsTrue)
-				.EventTransition(GameHashes.OperationalChanged, this.active.pst, (OilWellCap.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational);
-			this.active.pst.PlayAnim("working_pst").OnAnimQueueComplete(this.idle);
-			this.overpressure.PlayAnim("over_pressured_pre", KAnim.PlayMode.Once).QueueAnim("over_pressured_loop", true, null).ToggleStatusItem(Db.Get().BuildingStatusItems.WellOverpressure, null)
-				.ParamTransition<float>(this.pressurePercent, this.idle, (OilWellCap.StatesInstance smi, float p) => p <= 0f)
-				.ParamTransition<bool>(this.working, this.releasing_pressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsTrue);
-			this.releasing_pressure.DefaultState(this.releasing_pressure.pre).ToggleStatusItem(Db.Get().BuildingStatusItems.EmittingElement, (OilWellCap.StatesInstance smi) => smi.master).ParamTransition<bool>(this.working, this.idle, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsFalse)
+			this.operational.active.pre.PlayAnim("working_pre").ParamTransition<float>(this.pressurePercent, this.operational.overpressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsGTEOne).ParamTransition<bool>(this.working, this.operational.releasing_pressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsTrue)
+				.OnAnimQueueComplete(this.operational.active.loop);
+			this.operational.active.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).ParamTransition<float>(this.pressurePercent, this.operational.active.pst, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsGTEOne).ParamTransition<bool>(this.working, this.operational.active.pst, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsTrue)
+				.EventTransition(GameHashes.OperationalChanged, this.operational.active.pst, new StateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.Transition.ConditionCallback(this.MustStopPumping))
+				.EventTransition(GameHashes.OnStorageChange, this.operational.active.pst, new StateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.Transition.ConditionCallback(this.MustStopPumping));
+			this.operational.active.pst.PlayAnim("working_pst").OnAnimQueueComplete(this.operational.idle);
+			this.operational.overpressure.PlayAnim("over_pressured_pre", KAnim.PlayMode.Once).QueueAnim("over_pressured_loop", true, null).ToggleStatusItem(Db.Get().BuildingStatusItems.WellOverpressure, null)
+				.ParamTransition<float>(this.pressurePercent, this.operational.idle, (OilWellCap.StatesInstance smi, float p) => p <= 0f)
+				.ParamTransition<bool>(this.working, this.operational.releasing_pressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsTrue);
+			this.operational.releasing_pressure.DefaultState(this.operational.releasing_pressure.pre).ToggleStatusItem(Db.Get().BuildingStatusItems.EmittingElement, (OilWellCap.StatesInstance smi) => smi.master);
+			this.operational.releasing_pressure.pre.PlayAnim("steam_out_pre").OnAnimQueueComplete(this.operational.releasing_pressure.loop);
+			this.operational.releasing_pressure.loop.PlayAnim("steam_out_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.OperationalChanged, this.operational.releasing_pressure.pst, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.Not(new StateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.Transition.ConditionCallback(this.IsOperational))).ParamTransition<bool>(this.working, this.operational.releasing_pressure.pst, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsFalse)
 				.Update(delegate(OilWellCap.StatesInstance smi, float dt)
 				{
 					smi.master.ReleaseGasPressure(dt);
 				}, UpdateRate.SIM_200ms, false);
-			this.releasing_pressure.pre.PlayAnim("steam_out_pre").OnAnimQueueComplete(this.releasing_pressure.loop);
-			this.releasing_pressure.loop.PlayAnim("steam_out_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.OperationalChanged, this.releasing_pressure.pst, (OilWellCap.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational);
-			this.releasing_pressure.pst.PlayAnim("steam_out_pst").OnAnimQueueComplete(this.active);
+			this.operational.releasing_pressure.pst.PlayAnim("steam_out_pst").OnAnimQueueComplete(this.operational.idle);
+		}
+
+		private bool IsOperational(OilWellCap.StatesInstance smi)
+		{
+			return smi.master.operational.IsOperational;
+		}
+
+		private bool IsAbleToPump(OilWellCap.StatesInstance smi)
+		{
+			return smi.master.operational.IsOperational && smi.GetComponent<ElementConverter>().HasEnoughMassToStartConverting();
+		}
+
+		private bool MustStopPumping(OilWellCap.StatesInstance smi)
+		{
+			return !smi.master.operational.IsOperational || !smi.GetComponent<ElementConverter>().CanConvertAtAll();
 		}
 
 		public StateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.FloatParameter pressurePercent;
 
 		public StateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.BoolParameter working;
 
-		public GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.State idle;
+		public GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.State inoperational;
 
-		public GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.PreLoopPostState active;
+		public OilWellCap.States.OperationalStates operational;
 
-		public GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.State overpressure;
+		public class OperationalStates : GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.State
+		{
+			public GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.State idle;
 
-		public GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.PreLoopPostState releasing_pressure;
+			public GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.PreLoopPostState active;
+
+			public GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.State overpressure;
+
+			public GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.PreLoopPostState releasing_pressure;
+		}
 	}
 }

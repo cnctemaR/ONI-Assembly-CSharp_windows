@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
@@ -8,7 +9,7 @@ namespace UnityEngine
 	{
 		public static string Format(string fmt, params object[] args)
 		{
-			return string.Format(fmt, args);
+			return string.Format(CultureInfo.InvariantCulture.NumberFormat, fmt, args);
 		}
 	}
 }

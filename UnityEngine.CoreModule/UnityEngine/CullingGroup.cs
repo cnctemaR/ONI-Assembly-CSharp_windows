@@ -7,7 +7,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/CullingGroup.bindings.h")]
+	[NativeHeader("Runtime/Export/Camera/CullingGroup.bindings.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class CullingGroup : IDisposable
 	{
@@ -16,11 +16,19 @@ namespace UnityEngine
 			this.m_Ptr = CullingGroup.Init(this);
 		}
 
-		~CullingGroup()
+		protected override void Finalize()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			try
 			{
-				this.FinalizerFailure();
+				bool flag = this.m_Ptr != IntPtr.Zero;
+				if (flag)
+				{
+					this.FinalizerFailure();
+				}
+			}
+			finally
+			{
+				base.Finalize();
 			}
 		}
 
@@ -97,13 +105,13 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int QueryIndices(bool visible, int distanceIndex, CullingQueryOptions options, int[] result, int firstIndex);
 
-		[FreeFunction("CullingGroup_Bindings::IsVisible", HasExplicitThis = true)]
 		[NativeThrows]
+		[FreeFunction("CullingGroup_Bindings::IsVisible", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool IsVisible(int index);
 
-		[FreeFunction("CullingGroup_Bindings::GetDistance", HasExplicitThis = true)]
 		[NativeThrows]
+		[FreeFunction("CullingGroup_Bindings::GetDistance", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetDistance(int index);
 
@@ -131,12 +139,13 @@ namespace UnityEngine
 			this.SetDistanceReferencePoint_InternalTransform(transform);
 		}
 
-		[RequiredByNativeCode]
 		[SecuritySafeCritical]
+		[RequiredByNativeCode]
 		private unsafe static void SendEvents(CullingGroup cullingGroup, IntPtr eventsPtr, int count)
 		{
 			CullingGroupEvent* ptr = (CullingGroupEvent*)eventsPtr.ToPointer();
-			if (cullingGroup.m_OnStateChanged != null)
+			bool flag = cullingGroup.m_OnStateChanged == null;
+			if (!flag)
 			{
 				for (int i = 0; i < count; i++)
 				{

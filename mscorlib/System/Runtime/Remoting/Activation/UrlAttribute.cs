@@ -33,14 +33,14 @@ namespace System.Runtime.Remoting.Activation
 			return this.url.GetHashCode();
 		}
 
-		[SecurityCritical]
 		[ComVisible(true)]
+		[SecurityCritical]
 		public override void GetPropertiesForNewContext(IConstructionCallMessage ctorMsg)
 		{
 		}
 
-		[ComVisible(true)]
 		[SecurityCritical]
+		[ComVisible(true)]
 		public override bool IsContextOK(Context ctx, IConstructionCallMessage msg)
 		{
 			return true;

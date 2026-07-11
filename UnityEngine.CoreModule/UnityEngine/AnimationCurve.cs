@@ -6,23 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[ThreadAndSerializationSafe]
 	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Math/AnimationCurve.bindings.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class AnimationCurve : IEquatable<AnimationCurve>
 	{
-		public AnimationCurve(params Keyframe[] keys)
-		{
-			this.m_Ptr = AnimationCurve.Internal_Create(keys);
-		}
-
-		[RequiredByNativeCode]
-		public AnimationCurve()
-		{
-			this.m_Ptr = AnimationCurve.Internal_Create(null);
-		}
-
 		[FreeFunction("AnimationCurveBindings::Internal_Destroy", IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Destroy(IntPtr ptr);
@@ -31,7 +19,7 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr Internal_Create(Keyframe[] keys);
 
-		[FreeFunction("AnimationCurveBindings::Internal_Equals", HasExplicitThis = true)]
+		[FreeFunction("AnimationCurveBindings::Internal_Equals", HasExplicitThis = true, IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool Internal_Equals(IntPtr other);
 
@@ -71,15 +59,15 @@ namespace UnityEngine
 			return this.AddKey_Internal_Injected(ref key);
 		}
 
-		[FreeFunction("AnimationCurveBindings::MoveKey", HasExplicitThis = true, IsThreadSafe = true)]
 		[NativeThrows]
+		[FreeFunction("AnimationCurveBindings::MoveKey", HasExplicitThis = true, IsThreadSafe = true)]
 		public int MoveKey(int index, Keyframe key)
 		{
 			return this.MoveKey_Injected(index, ref key);
 		}
 
-		[NativeThrows]
 		[FreeFunction("AnimationCurveBindings::RemoveKey", HasExplicitThis = true, IsThreadSafe = true)]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void RemoveKey(int index);
 
@@ -102,8 +90,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetKeys(Keyframe[] keys);
 
-		[NativeThrows]
 		[FreeFunction("AnimationCurveBindings::GetKey", HasExplicitThis = true, IsThreadSafe = true)]
+		[NativeThrows]
 		private Keyframe GetKey(int index)
 		{
 			Keyframe keyframe;
@@ -115,8 +103,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Keyframe[] GetKeys();
 
-		[NativeThrows]
 		[FreeFunction("AnimationCurveBindings::SmoothTangents", HasExplicitThis = true, IsThreadSafe = true)]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SmoothTangents(int index, float weight);
 
@@ -127,8 +115,9 @@ namespace UnityEngine
 
 		public static AnimationCurve Linear(float timeStart, float valueStart, float timeEnd, float valueEnd)
 		{
+			bool flag = timeStart == timeEnd;
 			AnimationCurve animationCurve;
-			if (timeStart == timeEnd)
+			if (flag)
 			{
 				Keyframe keyframe = new Keyframe(timeStart, valueStart);
 				animationCurve = new AnimationCurve(new Keyframe[] { keyframe });
@@ -148,8 +137,9 @@ namespace UnityEngine
 
 		public static AnimationCurve EaseInOut(float timeStart, float valueStart, float timeEnd, float valueEnd)
 		{
+			bool flag = timeStart == timeEnd;
 			AnimationCurve animationCurve;
-			if (timeStart == timeEnd)
+			if (flag)
 			{
 				Keyframe keyframe = new Keyframe(timeStart, valueStart);
 				animationCurve = new AnimationCurve(new Keyframe[] { keyframe });
@@ -186,14 +176,63 @@ namespace UnityEngine
 			set;
 		}
 
+		public AnimationCurve(params Keyframe[] keys)
+		{
+			this.m_Ptr = AnimationCurve.Internal_Create(keys);
+		}
+
+		[RequiredByNativeCode]
+		public AnimationCurve()
+		{
+			this.m_Ptr = AnimationCurve.Internal_Create(null);
+		}
+
 		public override bool Equals(object o)
 		{
-			return !object.ReferenceEquals(null, o) && (object.ReferenceEquals(this, o) || (o.GetType() == base.GetType() && this.Equals((AnimationCurve)o)));
+			bool flag = o == null;
+			bool flag2;
+			if (flag)
+			{
+				flag2 = false;
+			}
+			else
+			{
+				bool flag3 = this == o;
+				if (flag3)
+				{
+					flag2 = true;
+				}
+				else
+				{
+					bool flag4 = o.GetType() != base.GetType();
+					flag2 = !flag4 && this.Equals((AnimationCurve)o);
+				}
+			}
+			return flag2;
 		}
 
 		public bool Equals(AnimationCurve other)
 		{
-			return !object.ReferenceEquals(null, other) && (object.ReferenceEquals(this, other) || this.m_Ptr.Equals(other.m_Ptr) || this.Internal_Equals(other.m_Ptr));
+			bool flag = other == null;
+			bool flag2;
+			if (flag)
+			{
+				flag2 = false;
+			}
+			else
+			{
+				bool flag3 = this == other;
+				if (flag3)
+				{
+					flag2 = true;
+				}
+				else
+				{
+					bool flag4 = this.m_Ptr.Equals(other.m_Ptr);
+					flag2 = flag4 || this.Internal_Equals(other.m_Ptr);
+				}
+			}
+			return flag2;
 		}
 
 		public override int GetHashCode()

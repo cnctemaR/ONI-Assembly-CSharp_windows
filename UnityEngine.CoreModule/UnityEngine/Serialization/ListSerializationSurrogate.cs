@@ -18,8 +18,9 @@ namespace UnityEngine.Serialization
 		{
 			IList list = (IList)Activator.CreateInstance(obj.GetType());
 			int @int = info.GetInt32("_size");
+			bool flag = @int == 0;
 			object obj2;
-			if (@int == 0)
+			if (flag)
 			{
 				obj2 = list;
 			}
@@ -28,7 +29,8 @@ namespace UnityEngine.Serialization
 				IEnumerator enumerator = ((IEnumerable)info.GetValue("_items", typeof(IEnumerable))).GetEnumerator();
 				for (int i = 0; i < @int; i++)
 				{
-					if (!enumerator.MoveNext())
+					bool flag2 = !enumerator.MoveNext();
+					if (flag2)
 					{
 						throw new InvalidOperationException();
 					}

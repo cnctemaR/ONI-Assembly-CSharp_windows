@@ -15,9 +15,10 @@ namespace UnityEngine.Assertions
 			get
 			{
 				string text = base.Message;
-				if (this.m_UserMessage != null)
+				bool flag = this.m_UserMessage != null;
+				if (flag)
 				{
-					text = text + '\n' + this.m_UserMessage;
+					text = text + "\n" + this.m_UserMessage;
 				}
 				return text;
 			}

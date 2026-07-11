@@ -6,23 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationMotionXToDeltaPlayable.bindings.h")]
-	[StaticAccessor("AnimationMotionXToDeltaPlayableBindings", StaticAccessorType.DoubleColon)]
 	[RequiredByNativeCode]
+	[StaticAccessor("AnimationMotionXToDeltaPlayableBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationMotionXToDeltaPlayable.bindings.h")]
 	internal struct AnimationMotionXToDeltaPlayable : IPlayable, IEquatable<AnimationMotionXToDeltaPlayable>
 	{
-		private AnimationMotionXToDeltaPlayable(PlayableHandle handle)
-		{
-			if (handle.IsValid())
-			{
-				if (!handle.IsPlayableOfType<AnimationMotionXToDeltaPlayable>())
-				{
-					throw new InvalidCastException("Can't set handle: the playable is not an AnimationMotionXToDeltaPlayable.");
-				}
-			}
-			this.m_Handle = handle;
-		}
-
 		public static AnimationMotionXToDeltaPlayable Null
 		{
 			get
@@ -40,8 +28,9 @@ namespace UnityEngine.Animations
 		private static PlayableHandle CreateHandle(PlayableGraph graph)
 		{
 			PlayableHandle @null = PlayableHandle.Null;
+			bool flag = !AnimationMotionXToDeltaPlayable.CreateHandleInternal(graph, ref @null);
 			PlayableHandle playableHandle;
-			if (!AnimationMotionXToDeltaPlayable.CreateHandleInternal(graph, ref @null))
+			if (flag)
 			{
 				playableHandle = PlayableHandle.Null;
 			}
@@ -51,6 +40,20 @@ namespace UnityEngine.Animations
 				playableHandle = @null;
 			}
 			return playableHandle;
+		}
+
+		private AnimationMotionXToDeltaPlayable(PlayableHandle handle)
+		{
+			bool flag = handle.IsValid();
+			if (flag)
+			{
+				bool flag2 = !handle.IsPlayableOfType<AnimationMotionXToDeltaPlayable>();
+				if (flag2)
+				{
+					throw new InvalidCastException("Can't set handle: the playable is not an AnimationMotionXToDeltaPlayable.");
+				}
+			}
+			this.m_Handle = handle;
 		}
 
 		public PlayableHandle GetHandle()

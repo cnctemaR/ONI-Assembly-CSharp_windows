@@ -5,8 +5,8 @@ using System.Security;
 
 namespace System
 {
-	[CLSCompliant(false)]
 	[ComVisible(true)]
+	[CLSCompliant(false)]
 	[Serializable]
 	public struct UInt64 : IComparable, IFormattable, IConvertible, IComparable<ulong>, IEquatable<ulong>
 	{

@@ -408,8 +408,8 @@ namespace System.Runtime.InteropServices
 			return e._HResult;
 		}
 
-		[MonoTODO]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[MonoTODO]
 		public static int GetHRForLastWin32Error()
 		{
 			throw new NotImplementedException();
@@ -443,8 +443,8 @@ namespace System.Runtime.InteropServices
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
 		[Obsolete("This method has been deprecated")]
+		[MonoTODO]
 		public static IntPtr GetManagedThunkForUnmanagedMethodPtr(IntPtr pfnMethodToWrap, IntPtr pbSignature, int cbSignature)
 		{
 			throw new NotImplementedException();
@@ -535,8 +535,8 @@ namespace System.Runtime.InteropServices
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
 		[Obsolete("This method has been deprecated")]
+		[MonoTODO]
 		public static Thread GetThreadFromFiberCookie(int cookie)
 		{
 			throw new NotImplementedException();
@@ -561,8 +561,8 @@ namespace System.Runtime.InteropServices
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
 		[Obsolete]
+		[MonoTODO]
 		public static string GetTypeInfoName(UCOMITypeInfo pTI)
 		{
 			throw new NotImplementedException();
@@ -587,8 +587,8 @@ namespace System.Runtime.InteropServices
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
 		[Obsolete]
+		[MonoTODO]
 		public static int GetTypeLibLcid(UCOMITypeLib pTLB)
 		{
 			throw new NotImplementedException();
@@ -600,8 +600,8 @@ namespace System.Runtime.InteropServices
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
 		[Obsolete]
+		[MonoTODO]
 		public static string GetTypeLibName(UCOMITypeLib pTLB)
 		{
 			throw new NotImplementedException();
@@ -854,9 +854,9 @@ namespace System.Runtime.InteropServices
 			return num;
 		}
 
+		[MonoTODO]
 		[SuppressUnmanagedCodeSecurity]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		[MonoTODO]
 		public static long ReadInt64([MarshalAs(UnmanagedType.AsAny)] [In] object ptr, int ofs)
 		{
 			throw new NotImplementedException();
@@ -925,8 +925,8 @@ namespace System.Runtime.InteropServices
 			return Marshal.ReleaseComObjectInternal(o);
 		}
 
-		[MonoTODO]
 		[Obsolete]
+		[MonoTODO]
 		public static void ReleaseThreadCache()
 		{
 			throw new NotImplementedException();
@@ -1198,8 +1198,8 @@ namespace System.Runtime.InteropServices
 			*(byte*)(void*)IntPtr.Add(ptr, ofs) = val;
 		}
 
-		[SuppressUnmanagedCodeSecurity]
 		[MonoTODO]
+		[SuppressUnmanagedCodeSecurity]
 		public static void WriteByte([MarshalAs(UnmanagedType.AsAny)] [In] [Out] object ptr, int ofs, byte val)
 		{
 			throw new NotImplementedException();
@@ -1227,8 +1227,8 @@ namespace System.Runtime.InteropServices
 			Buffer.Memcpy(ptr2, (byte*)(&val), 2);
 		}
 
-		[MonoTODO]
 		[SuppressUnmanagedCodeSecurity]
+		[MonoTODO]
 		public static void WriteInt16([MarshalAs(UnmanagedType.AsAny)] [In] [Out] object ptr, int ofs, short val)
 		{
 			throw new NotImplementedException();
@@ -1272,8 +1272,8 @@ namespace System.Runtime.InteropServices
 			Buffer.Memcpy(ptr2, (byte*)(&val), 4);
 		}
 
-		[SuppressUnmanagedCodeSecurity]
 		[MonoTODO]
+		[SuppressUnmanagedCodeSecurity]
 		public static void WriteInt32([MarshalAs(UnmanagedType.AsAny)] [In] [Out] object ptr, int ofs, int val)
 		{
 			throw new NotImplementedException();

@@ -5,7 +5,7 @@ using UnityEngine.Bindings;
 namespace UnityEngine
 {
 	[NativeClass("Unity::SpringJoint")]
-	[NativeHeader("Runtime/Dynamics/SpringJoint.h")]
+	[NativeHeader("Modules/Physics/SpringJoint.h")]
 	public class SpringJoint : Joint
 	{
 		public extern float spring

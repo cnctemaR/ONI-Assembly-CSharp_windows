@@ -1,0 +1,22 @@
+﻿using System;
+
+namespace FMOD
+{
+	public enum THREAD_TYPE
+	{
+		MIXER,
+		FEEDER,
+		STREAM,
+		FILE,
+		NONBLOCKING,
+		RECORD,
+		GEOMETRY,
+		PROFILER,
+		STUDIO_UPDATE,
+		STUDIO_LOAD_BANK,
+		STUDIO_LOAD_SAMPLE,
+		CONVOLUTION1,
+		CONVOLUTION2,
+		MAX
+	}
+}

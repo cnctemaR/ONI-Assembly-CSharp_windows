@@ -2,7 +2,7 @@
 
 namespace JetBrains.Annotations
 {
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Parameter | AttributeTargets.GenericParameter)]
 	public sealed class MeansImplicitUseAttribute : Attribute
 	{
 		public MeansImplicitUseAttribute()
@@ -27,9 +27,9 @@ namespace JetBrains.Annotations
 		}
 
 		[UsedImplicitly]
-		public ImplicitUseKindFlags UseKindFlags { get; private set; }
+		public ImplicitUseKindFlags UseKindFlags { get; }
 
 		[UsedImplicitly]
-		public ImplicitUseTargetFlags TargetFlags { get; private set; }
+		public ImplicitUseTargetFlags TargetFlags { get; }
 	}
 }

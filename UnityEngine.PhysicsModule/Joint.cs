@@ -4,9 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeClass("Unity::Joint")]
 	[RequireComponent(typeof(Rigidbody))]
-	[NativeHeader("Runtime/Dynamics/Joint.h")]
+	[NativeHeader("Modules/Physics/Joint.h")]
+	[NativeClass("Unity::Joint")]
 	public class Joint : Component
 	{
 		public extern Rigidbody connectedBody

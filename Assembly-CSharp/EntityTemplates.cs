@@ -308,6 +308,7 @@ public class EntityTemplates
 		template.AddOrGetDef<CreatureDebugGoToMonitor.Def>();
 		template.AddOrGetDef<DeathMonitor.Def>();
 		template.AddOrGetDef<AnimInterruptMonitor.Def>();
+		template.AddOrGet<AnimEventHandler>();
 		SymbolOverrideControllerUtil.AddToPrefab(template);
 		template.AddOrGet<TemperatureVulnerable>().Configure(warningLowTemperature, lethalLowTemperature, warningHighTemperature, lethalHighTemperature);
 		if (drownVulnerable)

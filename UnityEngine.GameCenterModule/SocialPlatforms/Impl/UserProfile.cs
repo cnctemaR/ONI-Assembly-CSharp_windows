@@ -8,6 +8,7 @@ namespace UnityEngine.SocialPlatforms.Impl
 		{
 			this.m_UserName = "Uninitialized";
 			this.m_ID = "0";
+			this.m_legacyID = "0";
 			this.m_IsFriend = false;
 			this.m_State = UserState.Offline;
 			this.m_Image = new Texture2D(32, 32);
@@ -19,9 +20,15 @@ namespace UnityEngine.SocialPlatforms.Impl
 		}
 
 		public UserProfile(string name, string id, bool friend, UserState state, Texture2D image)
+			: this(name, id, id, friend, state, image)
+		{
+		}
+
+		public UserProfile(string name, string teamId, string gameId, bool friend, UserState state, Texture2D image)
 		{
 			this.m_UserName = name;
-			this.m_ID = id;
+			this.m_ID = teamId;
+			this.m_gameID = gameId;
 			this.m_IsFriend = friend;
 			this.m_State = state;
 			this.m_Image = image;
@@ -29,7 +36,16 @@ namespace UnityEngine.SocialPlatforms.Impl
 
 		public override string ToString()
 		{
-			return string.Concat(new object[] { this.id, " - ", this.userName, " - ", this.isFriend, " - ", this.state });
+			return string.Concat(new object[]
+			{
+				this.id,
+				" - ",
+				this.userName,
+				" - ",
+				this.isFriend.ToString(),
+				" - ",
+				this.state
+			});
 		}
 
 		public void SetUserName(string name)
@@ -40,6 +56,16 @@ namespace UnityEngine.SocialPlatforms.Impl
 		public void SetUserID(string id)
 		{
 			this.m_ID = id;
+		}
+
+		public void SetLegacyUserID(string id)
+		{
+			this.m_legacyID = id;
+		}
+
+		public void SetUserGameID(string id)
+		{
+			this.m_gameID = id;
 		}
 
 		public void SetImage(Texture2D image)
@@ -73,6 +99,22 @@ namespace UnityEngine.SocialPlatforms.Impl
 			}
 		}
 
+		public string legacyId
+		{
+			get
+			{
+				return this.m_legacyID;
+			}
+		}
+
+		public string gameId
+		{
+			get
+			{
+				return this.m_gameID;
+			}
+		}
+
 		public bool isFriend
 		{
 			get
@@ -101,10 +143,14 @@ namespace UnityEngine.SocialPlatforms.Impl
 
 		protected string m_ID;
 
+		private string m_legacyID;
+
 		protected bool m_IsFriend;
 
 		protected UserState m_State;
 
 		protected Texture2D m_Image;
+
+		private string m_gameID;
 	}
 }

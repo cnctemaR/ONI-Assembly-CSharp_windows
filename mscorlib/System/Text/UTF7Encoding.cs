@@ -121,8 +121,8 @@ namespace System.Text
 			return this.GetByteCount(ptr + index, count, null);
 		}
 
-		[ComVisible(false)]
 		[SecuritySafeCritical]
+		[ComVisible(false)]
 		public unsafe override int GetByteCount(string s)
 		{
 			if (s == null)
@@ -137,9 +137,9 @@ namespace System.Text
 			return this.GetByteCount(ptr, s.Length, null);
 		}
 
+		[ComVisible(false)]
 		[SecurityCritical]
 		[CLSCompliant(false)]
-		[ComVisible(false)]
 		public unsafe override int GetByteCount(char* chars, int count)
 		{
 			if (chars == null)
@@ -293,9 +293,9 @@ namespace System.Text
 			return this.GetCharCount(ptr + index, count, null);
 		}
 
-		[ComVisible(false)]
-		[CLSCompliant(false)]
 		[SecurityCritical]
+		[CLSCompliant(false)]
+		[ComVisible(false)]
 		public unsafe override int GetCharCount(byte* bytes, int count)
 		{
 			if (bytes == null)
@@ -360,8 +360,8 @@ namespace System.Text
 		}
 
 		[CLSCompliant(false)]
-		[SecurityCritical]
 		[ComVisible(false)]
+		[SecurityCritical]
 		public unsafe override int GetChars(byte* bytes, int byteCount, char* chars, int charCount)
 		{
 			if (bytes == null || chars == null)

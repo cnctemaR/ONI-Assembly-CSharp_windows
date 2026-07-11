@@ -6,7 +6,8 @@ namespace UnityEngine.SocialPlatforms.Impl
 	{
 		public LocalUser()
 		{
-			this.m_Friends = new UserProfile[0];
+			IUserProfile[] array = new UserProfile[0];
+			this.m_Friends = array;
 			this.m_Authenticated = false;
 			this.m_Underage = false;
 		}

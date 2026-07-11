@@ -55,11 +55,12 @@ namespace UnityEngine.UI.CoroutineTween
 
 		public void TweenValue(float floatPercentage)
 		{
-			if (this.ValidTarget())
+			if (!this.ValidTarget())
 			{
-				float num = Mathf.Lerp(this.m_StartValue, this.m_TargetValue, floatPercentage);
-				this.m_Target.Invoke(num);
+				return;
 			}
+			float num = Mathf.Lerp(this.m_StartValue, this.m_TargetValue, floatPercentage);
+			this.m_Target.Invoke(num);
 		}
 
 		public void AddOnChangedCallback(UnityAction<float> callback)

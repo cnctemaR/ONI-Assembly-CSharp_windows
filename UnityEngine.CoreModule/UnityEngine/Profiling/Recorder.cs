@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Profiling
 {
+	[UsedByNativeCode]
 	[NativeHeader("Runtime/Profiler/ScriptBindings/Recorder.bindings.h")]
 	[NativeHeader("Runtime/Profiler/Recorder.h")]
-	[UsedByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class Recorder
 	{
@@ -21,19 +21,28 @@ namespace UnityEngine.Profiling
 			this.m_Ptr = ptr;
 		}
 
-		~Recorder()
+		protected override void Finalize()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			try
 			{
-				Recorder.DisposeNative(this.m_Ptr);
+				bool flag = this.m_Ptr != IntPtr.Zero;
+				if (flag)
+				{
+					Recorder.DisposeNative(this.m_Ptr);
+				}
+			}
+			finally
+			{
+				base.Finalize();
 			}
 		}
 
 		public static Recorder Get(string samplerName)
 		{
 			IntPtr @internal = Recorder.GetInternal(samplerName);
+			bool flag = @internal == IntPtr.Zero;
 			Recorder recorder;
-			if (@internal == IntPtr.Zero)
+			if (flag)
 			{
 				recorder = Recorder.s_InvalidRecorder;
 			}
@@ -68,7 +77,8 @@ namespace UnityEngine.Profiling
 			}
 			set
 			{
-				if (this.isValid)
+				bool isValid = this.isValid;
+				if (isValid)
 				{
 					this.SetEnabled(value);
 				}
@@ -87,11 +97,10 @@ namespace UnityEngine.Profiling
 		{
 			get
 			{
-				return (!this.isValid) ? 0L : this.GetElapsedNanoseconds();
+				return this.isValid ? this.GetElapsedNanoseconds() : 0L;
 			}
 		}
 
-		[NativeConditional("ENABLE_PROFILER")]
 		[NativeMethod(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern long GetElapsedNanoseconds();
@@ -100,12 +109,11 @@ namespace UnityEngine.Profiling
 		{
 			get
 			{
-				return (!this.isValid) ? 0 : this.GetSampleBlockCount();
+				return this.isValid ? this.GetSampleBlockCount() : 0;
 			}
 		}
 
 		[NativeMethod(IsThreadSafe = true)]
-		[NativeConditional("ENABLE_PROFILER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int GetSampleBlockCount();
 

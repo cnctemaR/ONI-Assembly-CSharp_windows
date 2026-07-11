@@ -6,10 +6,11 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Shaders/GraphicsCapsScriptBindings.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsFormatUtility.bindings.h")]
 	[NativeHeader("Runtime/Input/GetInput.h")]
+	[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
 	[NativeHeader("Runtime/Camera/RenderLoops/MotionVectorRenderLoop.h")]
-	[NativeHeader("Runtime/Shaders/GraphicsCapsScriptBindings.h")]
 	[NativeHeader("Runtime/Misc/SystemInfo.h")]
 	public sealed class SystemInfo
 	{
@@ -230,6 +231,14 @@ namespace UnityEngine
 			}
 		}
 
+		public static RenderingThreadingMode renderingThreadingMode
+		{
+			get
+			{
+				return SystemInfo.GetRenderingThreadingMode();
+			}
+		}
+
 		public static bool hasHiddenSurfaceRemovalOnGPU
 		{
 			get
@@ -279,19 +288,21 @@ namespace UnityEngine
 			}
 		}
 
+		[Obsolete("supportsRenderToCubemap always returns true, no need to call it")]
 		public static bool supportsRenderToCubemap
 		{
 			get
 			{
-				return SystemInfo.SupportsRenderToCubemap();
+				return true;
 			}
 		}
 
+		[Obsolete("supportsImageEffects always returns true, no need to call it")]
 		public static bool supportsImageEffects
 		{
 			get
 			{
-				return SystemInfo.SupportsImageEffects();
+				return true;
 			}
 		}
 
@@ -343,6 +354,22 @@ namespace UnityEngine
 			}
 		}
 
+		public static bool supportsGeometryShaders
+		{
+			get
+			{
+				return SystemInfo.SupportsGeometryShaders();
+			}
+		}
+
+		public static bool supportsTessellationShaders
+		{
+			get
+			{
+				return SystemInfo.SupportsTessellationShaders();
+			}
+		}
+
 		public static bool supportsInstancing
 		{
 			get
@@ -391,7 +418,7 @@ namespace UnityEngine
 			}
 		}
 
-		internal static int supportedRandomWriteTargetCount
+		public static int supportedRandomWriteTargetCount
 		{
 			get
 			{
@@ -442,12 +469,14 @@ namespace UnityEngine
 
 		private static bool IsValidEnumValue(Enum value)
 		{
-			return Enum.IsDefined(value.GetType(), value);
+			bool flag = !Enum.IsDefined(value.GetType(), value);
+			return !flag;
 		}
 
 		public static bool SupportsRenderTextureFormat(RenderTextureFormat format)
 		{
-			if (!SystemInfo.IsValidEnumValue(format))
+			bool flag = !SystemInfo.IsValidEnumValue(format);
+			if (flag)
 			{
 				throw new ArgumentException("Failed SupportsRenderTextureFormat; format is not a valid RenderTextureFormat");
 			}
@@ -456,7 +485,8 @@ namespace UnityEngine
 
 		public static bool SupportsBlendingOnRenderTextureFormat(RenderTextureFormat format)
 		{
-			if (!SystemInfo.IsValidEnumValue(format))
+			bool flag = !SystemInfo.IsValidEnumValue(format);
+			if (flag)
 			{
 				throw new ArgumentException("Failed SupportsBlendingOnRenderTextureFormat; format is not a valid RenderTextureFormat");
 			}
@@ -465,11 +495,27 @@ namespace UnityEngine
 
 		public static bool SupportsTextureFormat(TextureFormat format)
 		{
-			if (!SystemInfo.IsValidEnumValue(format))
+			bool flag = !SystemInfo.IsValidEnumValue(format);
+			if (flag)
 			{
 				throw new ArgumentException("Failed SupportsTextureFormat; format is not a valid TextureFormat");
 			}
 			return SystemInfo.SupportsTextureFormatNative(format);
+		}
+
+		public static bool SupportsVertexAttributeFormat(VertexAttributeFormat format, int dimension)
+		{
+			bool flag = !SystemInfo.IsValidEnumValue(format);
+			if (flag)
+			{
+				throw new ArgumentException("Failed SupportsVertexAttributeFormat; format is not a valid VertexAttributeFormat");
+			}
+			bool flag2 = dimension < 1 || dimension > 4;
+			if (flag2)
+			{
+				throw new ArgumentException("Failed SupportsVertexAttributeFormat; dimension must be in 1..4 range");
+			}
+			return SystemInfo.SupportsVertexAttributeFormatNative(format, dimension);
 		}
 
 		public static NPOTSupport npotSupport
@@ -504,6 +550,86 @@ namespace UnityEngine
 			}
 		}
 
+		public static int maxComputeBufferInputsVertex
+		{
+			get
+			{
+				return SystemInfo.MaxComputeBufferInputsVertex();
+			}
+		}
+
+		public static int maxComputeBufferInputsFragment
+		{
+			get
+			{
+				return SystemInfo.MaxComputeBufferInputsFragment();
+			}
+		}
+
+		public static int maxComputeBufferInputsGeometry
+		{
+			get
+			{
+				return SystemInfo.MaxComputeBufferInputsGeometry();
+			}
+		}
+
+		public static int maxComputeBufferInputsDomain
+		{
+			get
+			{
+				return SystemInfo.MaxComputeBufferInputsDomain();
+			}
+		}
+
+		public static int maxComputeBufferInputsHull
+		{
+			get
+			{
+				return SystemInfo.MaxComputeBufferInputsHull();
+			}
+		}
+
+		public static int maxComputeBufferInputsCompute
+		{
+			get
+			{
+				return SystemInfo.MaxComputeBufferInputsCompute();
+			}
+		}
+
+		public static int maxComputeWorkGroupSize
+		{
+			get
+			{
+				return SystemInfo.GetMaxComputeWorkGroupSize();
+			}
+		}
+
+		public static int maxComputeWorkGroupSizeX
+		{
+			get
+			{
+				return SystemInfo.GetMaxComputeWorkGroupSizeX();
+			}
+		}
+
+		public static int maxComputeWorkGroupSizeY
+		{
+			get
+			{
+				return SystemInfo.GetMaxComputeWorkGroupSizeY();
+			}
+		}
+
+		public static int maxComputeWorkGroupSizeZ
+		{
+			get
+			{
+				return SystemInfo.GetMaxComputeWorkGroupSizeZ();
+			}
+		}
+
 		public static bool supportsAsyncCompute
 		{
 			get
@@ -512,7 +638,7 @@ namespace UnityEngine
 			}
 		}
 
-		public static bool supportsGPUFence
+		public static bool supportsGraphicsFence
 		{
 			get
 			{
@@ -525,6 +651,38 @@ namespace UnityEngine
 			get
 			{
 				return SystemInfo.SupportsAsyncGPUReadback();
+			}
+		}
+
+		public static bool supportsRayTracing
+		{
+			get
+			{
+				return SystemInfo.SupportsRayTracing();
+			}
+		}
+
+		public static bool supportsSetConstantBuffer
+		{
+			get
+			{
+				return SystemInfo.SupportsSetConstantBuffer();
+			}
+		}
+
+		public static bool minConstantBufferOffsetAlignment
+		{
+			get
+			{
+				return SystemInfo.MinConstantBufferOffsetAlignment();
+			}
+		}
+
+		public static bool hasMipMaxLevel
+		{
+			get
+			{
+				return SystemInfo.HasMipMaxLevel();
 			}
 		}
 
@@ -542,6 +700,14 @@ namespace UnityEngine
 			get
 			{
 				return -1;
+			}
+		}
+
+		public static bool usesLoadStoreActions
+		{
+			get
+			{
+				return SystemInfo.UsesLoadStoreActions();
 			}
 		}
 
@@ -662,6 +828,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetGraphicsMultiThreaded();
 
+		[FreeFunction("ScriptingGraphicsCaps::GetRenderingThreadingMode")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern RenderingThreadingMode GetRenderingThreadingMode();
+
 		[FreeFunction("ScriptingGraphicsCaps::HasHiddenSurfaceRemovalOnGPU")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool HasHiddenSurfaceRemovalOnGPU();
@@ -681,14 +851,6 @@ namespace UnityEngine
 		[FreeFunction("SupportsMotionVectors")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsMotionVectors();
-
-		[FreeFunction("ScriptingGraphicsCaps::SupportsRenderToCubemap")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool SupportsRenderToCubemap();
-
-		[FreeFunction("ScriptingGraphicsCaps::SupportsImageEffects")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool SupportsImageEffects();
 
 		[FreeFunction("ScriptingGraphicsCaps::Supports3DTextures")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -713,6 +875,14 @@ namespace UnityEngine
 		[FreeFunction("ScriptingGraphicsCaps::SupportsComputeShaders")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsComputeShaders();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsGeometryShaders")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsGeometryShaders();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsTessellationShaders")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsTessellationShaders();
 
 		[FreeFunction("ScriptingGraphicsCaps::SupportsInstancing")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -742,6 +912,30 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int SupportedRandomWriteTargetCount();
 
+		[FreeFunction("ScriptingGraphicsCaps::MaxComputeBufferInputsVertex")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int MaxComputeBufferInputsVertex();
+
+		[FreeFunction("ScriptingGraphicsCaps::MaxComputeBufferInputsFragment")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int MaxComputeBufferInputsFragment();
+
+		[FreeFunction("ScriptingGraphicsCaps::MaxComputeBufferInputsGeometry")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int MaxComputeBufferInputsGeometry();
+
+		[FreeFunction("ScriptingGraphicsCaps::MaxComputeBufferInputsDomain")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int MaxComputeBufferInputsDomain();
+
+		[FreeFunction("ScriptingGraphicsCaps::MaxComputeBufferInputsHull")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int MaxComputeBufferInputsHull();
+
+		[FreeFunction("ScriptingGraphicsCaps::MaxComputeBufferInputsCompute")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int MaxComputeBufferInputsCompute();
+
 		[FreeFunction("ScriptingGraphicsCaps::SupportsMultisampledTextures")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int SupportsMultisampledTextures();
@@ -770,6 +964,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsTextureFormatNative(TextureFormat format);
 
+		[FreeFunction("ScriptingGraphicsCaps::SupportsVertexAttributeFormat")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsVertexAttributeFormatNative(VertexAttributeFormat format, int dimension);
+
 		[FreeFunction("ScriptingGraphicsCaps::GetNPOTSupport")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern NPOTSupport GetNPOTSupport();
@@ -786,6 +984,22 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetMaxRenderTextureSize();
 
+		[FreeFunction("ScriptingGraphicsCaps::GetMaxComputeWorkGroupSize")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMaxComputeWorkGroupSize();
+
+		[FreeFunction("ScriptingGraphicsCaps::GetMaxComputeWorkGroupSizeX")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMaxComputeWorkGroupSizeX();
+
+		[FreeFunction("ScriptingGraphicsCaps::GetMaxComputeWorkGroupSizeY")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMaxComputeWorkGroupSizeY();
+
+		[FreeFunction("ScriptingGraphicsCaps::GetMaxComputeWorkGroupSizeZ")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMaxComputeWorkGroupSizeZ();
+
 		[FreeFunction("ScriptingGraphicsCaps::SupportsAsyncCompute")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsAsyncCompute();
@@ -798,6 +1012,22 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsAsyncGPUReadback();
 
+		[FreeFunction("ScriptingGraphicsCaps::SupportsRayTracing")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsRayTracing();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsSetConstantBuffer")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsSetConstantBuffer();
+
+		[FreeFunction("ScriptingGraphicsCaps::MinConstantBufferOffsetAlignment")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool MinConstantBufferOffsetAlignment();
+
+		[FreeFunction("ScriptingGraphicsCaps::HasMipMaxLevel")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasMipMaxLevel();
+
 		[FreeFunction("ScriptingGraphicsCaps::SupportsMipStreaming")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsMipStreaming();
@@ -805,6 +1035,27 @@ namespace UnityEngine
 		[FreeFunction("ScriptingGraphicsCaps::IsFormatSupported")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsFormatSupported(GraphicsFormat format, FormatUsage usage);
+
+		[FreeFunction("ScriptingGraphicsCaps::GetCompatibleFormat")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern GraphicsFormat GetCompatibleFormat(GraphicsFormat format, FormatUsage usage);
+
+		[FreeFunction("ScriptingGraphicsCaps::GetGraphicsFormat")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern GraphicsFormat GetGraphicsFormat(DefaultFormat format);
+
+		[FreeFunction("ScriptingGraphicsCaps::UsesLoadStoreActions")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool UsesLoadStoreActions();
+
+		[Obsolete("SystemInfo.supportsGPUFence has been deprecated, use SystemInfo.supportsGraphicsFence instead (UnityUpgradable) ->  supportsGraphicsFence", true)]
+		public static bool supportsGPUFence
+		{
+			get
+			{
+				return false;
+			}
+		}
 
 		public const string unsupportedIdentifier = "n/a";
 	}

@@ -560,8 +560,8 @@ namespace System.Security.Cryptography
 			}
 		}
 
-		[ComVisible(false)]
 		[SecuritySafeCritical]
+		[ComVisible(false)]
 		public byte[] ExportCspBlob(bool includePrivateParameters)
 		{
 			byte[] array;

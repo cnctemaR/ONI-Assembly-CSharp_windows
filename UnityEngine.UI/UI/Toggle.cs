@@ -6,12 +6,8 @@ namespace UnityEngine.UI
 {
 	[AddComponentMenu("UI/Toggle", 31)]
 	[RequireComponent(typeof(RectTransform))]
-	public class Toggle : Selectable, IPointerClickHandler, ISubmitHandler, ICanvasElement, IEventSystemHandler
+	public class Toggle : Selectable, IPointerClickHandler, IEventSystemHandler, ISubmitHandler, ICanvasElement
 	{
-		protected Toggle()
-		{
-		}
-
 		public ToggleGroup group
 		{
 			get
@@ -20,10 +16,13 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				this.m_Group = value;
-				this.SetToggleGroup(this.m_Group, true);
+				this.SetToggleGroup(value, true);
 				this.PlayEffect(true);
 			}
+		}
+
+		protected Toggle()
+		{
 		}
 
 		public virtual void Rebuild(CanvasUpdate executing)
@@ -36,6 +35,15 @@ namespace UnityEngine.UI
 
 		public virtual void GraphicUpdateComplete()
 		{
+		}
+
+		protected override void OnDestroy()
+		{
+			if (this.m_Group != null)
+			{
+				this.m_Group.EnsureValidState();
+			}
+			base.OnDestroy();
 		}
 
 		protected override void OnEnable()
@@ -59,7 +67,7 @@ namespace UnityEngine.UI
 				if (this.m_IsOn != flag)
 				{
 					this.m_IsOn = flag;
-					this.Set(!flag);
+					this.Set(!flag, true);
 				}
 			}
 			base.OnDidApplyAnimationProperties();
@@ -67,7 +75,6 @@ namespace UnityEngine.UI
 
 		private void SetToggleGroup(ToggleGroup newGroup, bool setMemberValue)
 		{
-			ToggleGroup group = this.m_Group;
 			if (this.m_Group != null)
 			{
 				this.m_Group.UnregisterToggle(this);
@@ -80,9 +87,9 @@ namespace UnityEngine.UI
 			{
 				newGroup.RegisterToggle(this);
 			}
-			if (newGroup != null && newGroup != group && this.isOn && this.IsActive())
+			if (newGroup != null && this.isOn && this.IsActive())
 			{
-				newGroup.NotifyToggleOn(this);
+				newGroup.NotifyToggleOn(this, true);
 			}
 		}
 
@@ -94,43 +101,42 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				this.Set(value);
+				this.Set(value, true);
 			}
 		}
 
-		private void Set(bool value)
+		public void SetIsOnWithoutNotify(bool value)
 		{
-			this.Set(value, true);
+			this.Set(value, false);
 		}
 
-		private void Set(bool value, bool sendCallback)
+		private void Set(bool value, bool sendCallback = true)
 		{
-			if (this.m_IsOn != value)
+			if (this.m_IsOn == value)
 			{
-				this.m_IsOn = value;
-				if (this.m_Group != null && this.IsActive())
-				{
-					if (this.m_IsOn || (!this.m_Group.AnyTogglesOn() && !this.m_Group.allowSwitchOff))
-					{
-						this.m_IsOn = true;
-						this.m_Group.NotifyToggleOn(this);
-					}
-				}
-				this.PlayEffect(this.toggleTransition == Toggle.ToggleTransition.None);
-				if (sendCallback)
-				{
-					UISystemProfilerApi.AddMarker("Toggle.value", this);
-					this.onValueChanged.Invoke(this.m_IsOn);
-				}
+				return;
+			}
+			this.m_IsOn = value;
+			if (this.m_Group != null && this.IsActive() && (this.m_IsOn || (!this.m_Group.AnyTogglesOn() && !this.m_Group.allowSwitchOff)))
+			{
+				this.m_IsOn = true;
+				this.m_Group.NotifyToggleOn(this, sendCallback);
+			}
+			this.PlayEffect(this.toggleTransition == Toggle.ToggleTransition.None);
+			if (sendCallback)
+			{
+				UISystemProfilerApi.AddMarker("Toggle.value", this);
+				this.onValueChanged.Invoke(this.m_IsOn);
 			}
 		}
 
 		private void PlayEffect(bool instant)
 		{
-			if (!(this.graphic == null))
+			if (this.graphic == null)
 			{
-				this.graphic.CrossFadeAlpha((!this.m_IsOn) ? 0f : 1f, (!instant) ? 0.1f : 0f, true);
+				return;
 			}
+			this.graphic.CrossFadeAlpha(this.m_IsOn ? 1f : 0f, instant ? 0f : 0.1f, true);
 		}
 
 		protected override void Start()
@@ -140,18 +146,20 @@ namespace UnityEngine.UI
 
 		private void InternalToggle()
 		{
-			if (this.IsActive() && this.IsInteractable())
+			if (!this.IsActive() || !this.IsInteractable())
 			{
-				this.isOn = !this.isOn;
+				return;
 			}
+			this.isOn = !this.isOn;
 		}
 
 		public virtual void OnPointerClick(PointerEventData eventData)
 		{
-			if (eventData.button == PointerEventData.InputButton.Left)
+			if (eventData.button != PointerEventData.InputButton.Left)
 			{
-				this.InternalToggle();
+				return;
 			}
+			this.InternalToggle();
 		}
 
 		public virtual void OnSubmit(BaseEventData eventData)

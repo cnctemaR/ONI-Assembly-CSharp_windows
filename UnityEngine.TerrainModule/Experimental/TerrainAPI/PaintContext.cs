@@ -1,24 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.TerrainAPI
 {
 	public class PaintContext
 	{
-		public PaintContext(Terrain terrain, RectInt pixelRect, int targetTextureWidth, int targetTextureHeight)
-		{
-			this.originTerrain = terrain;
-			this.pixelRect = pixelRect;
-			this.targetTextureWidth = targetTextureWidth;
-			this.targetTextureHeight = targetTextureHeight;
-			TerrainData terrainData = terrain.terrainData;
-			this.pixelSize = new Vector2(terrainData.size.x / ((float)targetTextureWidth - 1f), terrainData.size.z / ((float)targetTextureHeight - 1f));
-			this.FindTerrainTiles();
-			this.ClipTerrainTiles();
-		}
-
 		public Terrain originTerrain { get; }
 
 		public RectInt pixelRect { get; }
@@ -29,29 +16,11 @@ namespace UnityEngine.Experimental.TerrainAPI
 
 		public Vector2 pixelSize { get; }
 
-		public RenderTexture sourceRenderTexture
-		{
-			get
-			{
-				return this.m_SourceRenderTexture;
-			}
-		}
+		public RenderTexture sourceRenderTexture { get; private set; }
 
-		public RenderTexture destinationRenderTexture
-		{
-			get
-			{
-				return this.m_DestinationRenderTexture;
-			}
-		}
+		public RenderTexture destinationRenderTexture { get; private set; }
 
-		public RenderTexture oldRenderTexture
-		{
-			get
-			{
-				return this.m_OldRenderTexture;
-			}
-		}
+		public RenderTexture oldRenderTexture { get; private set; }
 
 		public int terrainCount
 		{
@@ -68,7 +37,7 @@ namespace UnityEngine.Experimental.TerrainAPI
 
 		public RectInt GetClippedPixelRectInTerrainPixels(int terrainIndex)
 		{
-			return this.m_TerrainTiles[terrainIndex].clippedLocalPixels;
+			return this.m_TerrainTiles[terrainIndex].clippedTerrainPixels;
 		}
 
 		public RectInt GetClippedPixelRectInRenderTexturePixels(int terrainIndex)
@@ -76,297 +45,373 @@ namespace UnityEngine.Experimental.TerrainAPI
 			return this.m_TerrainTiles[terrainIndex].clippedPCPixels;
 		}
 
-		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		internal static event Action<PaintContext.TerrainTile, PaintContext.ToolAction, string> onTerrainTileBeforePaint;
-
-		public static PaintContext CreateFromBounds(Terrain terrain, Rect boundsInTerrainSpace, int inputTextureWidth, int inputTextureHeight, int extraBorderPixels = 0)
+		public float heightWorldSpaceMin
 		{
-			return new PaintContext(terrain, TerrainPaintUtility.CalcPixelRectFromBounds(terrain, boundsInTerrainSpace, inputTextureWidth, inputTextureHeight, extraBorderPixels), inputTextureWidth, inputTextureHeight);
+			get
+			{
+				return this.m_HeightWorldSpaceMin;
+			}
 		}
 
-		internal void FindTerrainTiles()
+		public float heightWorldSpaceSize
 		{
+			get
+			{
+				return this.m_HeightWorldSpaceMax - this.m_HeightWorldSpaceMin;
+			}
+		}
+
+		public static float kNormalizedHeightScale
+		{
+			get
+			{
+				return 0.4999771f;
+			}
+		}
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		internal static event Action<PaintContext.ITerrainInfo, PaintContext.ToolAction, string> onTerrainTileBeforePaint;
+
+		public PaintContext(Terrain terrain, RectInt pixelRect, int targetTextureWidth, int targetTextureHeight, bool texelPadding = true)
+		{
+			this.originTerrain = terrain;
+			this.pixelRect = pixelRect;
+			this.targetTextureWidth = targetTextureWidth;
+			this.targetTextureHeight = targetTextureHeight;
+			TerrainData terrainData = terrain.terrainData;
+			this.pixelSize = new Vector2(terrainData.size.x / ((float)targetTextureWidth - (texelPadding ? 1f : 0f)), terrainData.size.z / ((float)targetTextureHeight - (texelPadding ? 1f : 0f)));
+			this.FindTerrainTilesUnlimited(texelPadding);
+		}
+
+		public static PaintContext CreateFromBounds(Terrain terrain, Rect boundsInTerrainSpace, int inputTextureWidth, int inputTextureHeight, int extraBorderPixels = 0, bool texelPadding = true)
+		{
+			return new PaintContext(terrain, TerrainPaintUtility.CalcPixelRectFromBounds(terrain, boundsInTerrainSpace, inputTextureWidth, inputTextureHeight, extraBorderPixels, texelPadding), inputTextureWidth, inputTextureHeight, texelPadding);
+		}
+
+		private void FindTerrainTilesUnlimited(bool texelPadding)
+		{
+			float minX = this.originTerrain.transform.position.x + this.pixelSize.x * (float)this.pixelRect.xMin;
+			float minZ = this.originTerrain.transform.position.z + this.pixelSize.y * (float)this.pixelRect.yMin;
+			float maxX = this.originTerrain.transform.position.x + this.pixelSize.x * (float)(this.pixelRect.xMax - 1);
+			float maxZ = this.originTerrain.transform.position.z + this.pixelSize.y * (float)(this.pixelRect.yMax - 1);
+			this.m_HeightWorldSpaceMin = this.originTerrain.GetPosition().y;
+			this.m_HeightWorldSpaceMax = this.m_HeightWorldSpaceMin + this.originTerrain.terrainData.size.y;
+			TerrainUtility.TerrainMap.TerrainFilter terrainFilter = delegate(Terrain t)
+			{
+				float x = t.transform.position.x;
+				float z = t.transform.position.z;
+				float num3 = t.transform.position.x + t.terrainData.size.x;
+				float num4 = t.transform.position.z + t.terrainData.size.z;
+				return x <= maxX && num3 >= minX && z <= maxZ && num4 >= minZ;
+			};
+			TerrainUtility.TerrainMap terrainMap = TerrainUtility.TerrainMap.CreateFromConnectedNeighbors(this.originTerrain, terrainFilter, false);
 			this.m_TerrainTiles = new List<PaintContext.TerrainTile>();
-			Terrain leftNeighbor = this.originTerrain.leftNeighbor;
-			Terrain rightNeighbor = this.originTerrain.rightNeighbor;
-			Terrain topNeighbor = this.originTerrain.topNeighbor;
-			Terrain bottomNeighbor = this.originTerrain.bottomNeighbor;
-			bool flag = this.pixelRect.x < 0;
-			bool flag2 = this.pixelRect.xMax > this.targetTextureWidth - 1;
-			bool flag3 = this.pixelRect.yMax > this.targetTextureHeight - 1;
-			bool flag4 = this.pixelRect.y < 0;
-			if (flag && flag2)
-			{
-				Debug.LogWarning("PaintContext pixelRect is too large!  It should touch a maximum of 2 Terrains horizontally.");
-				flag2 = false;
-			}
-			if (flag3 && flag4)
-			{
-				Debug.LogWarning("PaintContext pixelRect is too large!  It should touch a maximum of 2 Terrains vertically.");
-				flag4 = false;
-			}
-			PaintContext.TerrainTile terrainTile = new PaintContext.TerrainTile(this.originTerrain, 0, 0);
-			this.m_TerrainTiles.Add(terrainTile);
-			Terrain terrain = null;
-			Terrain terrain2 = null;
-			Terrain terrain3 = null;
-			int num = 0;
-			int num2 = 0;
+			bool flag = terrainMap != null;
 			if (flag)
 			{
-				num = -1;
-				terrain = leftNeighbor;
-			}
-			else if (flag2)
-			{
-				num = 1;
-				terrain = rightNeighbor;
-			}
-			if (flag3)
-			{
-				num2 = 1;
-				terrain2 = topNeighbor;
-			}
-			else if (flag4)
-			{
-				num2 = -1;
-				terrain2 = bottomNeighbor;
-			}
-			if (terrain)
-			{
-				terrainTile = new PaintContext.TerrainTile(terrain, num * (this.targetTextureWidth - 1), 0);
-				this.m_TerrainTiles.Add(terrainTile);
-				if (flag3 && terrain.topNeighbor)
+				foreach (KeyValuePair<TerrainUtility.TerrainMap.TileCoord, Terrain> keyValuePair in terrainMap.m_terrainTiles)
 				{
-					terrain3 = terrain.topNeighbor;
+					TerrainUtility.TerrainMap.TileCoord key = keyValuePair.Key;
+					Terrain value = keyValuePair.Value;
+					int num = key.tileX * (this.targetTextureWidth - (texelPadding ? 1 : 0));
+					int num2 = key.tileZ * (this.targetTextureHeight - (texelPadding ? 1 : 0));
+					RectInt rectInt = new RectInt(num, num2, this.targetTextureWidth, this.targetTextureHeight);
+					bool flag2 = this.pixelRect.Overlaps(rectInt);
+					if (flag2)
+					{
+						this.m_TerrainTiles.Add(PaintContext.TerrainTile.Make(value, num, num2, this.pixelRect, this.targetTextureWidth, this.targetTextureHeight));
+						this.m_HeightWorldSpaceMin = Mathf.Min(this.m_HeightWorldSpaceMin, value.GetPosition().y);
+						this.m_HeightWorldSpaceMax = Mathf.Max(this.m_HeightWorldSpaceMax, value.GetPosition().y + value.terrainData.size.y);
+					}
 				}
-				else if (flag4 && terrain.bottomNeighbor)
-				{
-					terrain3 = terrain.bottomNeighbor;
-				}
-			}
-			if (terrain2)
-			{
-				terrainTile = new PaintContext.TerrainTile(terrain2, 0, num2 * (this.targetTextureHeight - 1));
-				this.m_TerrainTiles.Add(terrainTile);
-				if (flag && terrain2.leftNeighbor)
-				{
-					terrain3 = terrain2.leftNeighbor;
-				}
-				else if (flag2 && terrain2.rightNeighbor)
-				{
-					terrain3 = terrain2.rightNeighbor;
-				}
-			}
-			if (terrain3 != null)
-			{
-				terrainTile = new PaintContext.TerrainTile(terrain3, num * (this.targetTextureWidth - 1), num2 * (this.targetTextureHeight - 1));
-				this.m_TerrainTiles.Add(terrainTile);
-			}
-		}
-
-		internal void ClipTerrainTiles()
-		{
-			for (int i = 0; i < this.m_TerrainTiles.Count; i++)
-			{
-				PaintContext.TerrainTile terrainTile = this.m_TerrainTiles[i];
-				terrainTile.clippedLocalPixels = default(RectInt);
-				terrainTile.clippedLocalPixels.x = Mathf.Max(0, this.pixelRect.x - terrainTile.tileOriginPixels.x);
-				terrainTile.clippedLocalPixels.y = Mathf.Max(0, this.pixelRect.y - terrainTile.tileOriginPixels.y);
-				terrainTile.clippedLocalPixels.xMax = Mathf.Min(this.targetTextureWidth, this.pixelRect.xMax - terrainTile.tileOriginPixels.x);
-				terrainTile.clippedLocalPixels.yMax = Mathf.Min(this.targetTextureHeight, this.pixelRect.yMax - terrainTile.tileOriginPixels.y);
-				terrainTile.clippedPCPixels = new RectInt(terrainTile.clippedLocalPixels.x + terrainTile.tileOriginPixels.x - this.pixelRect.x, terrainTile.clippedLocalPixels.y + terrainTile.tileOriginPixels.y - this.pixelRect.y, terrainTile.clippedLocalPixels.width, terrainTile.clippedLocalPixels.height);
 			}
 		}
 
 		public void CreateRenderTargets(RenderTextureFormat colorFormat)
 		{
-			this.m_SourceRenderTexture = RenderTexture.GetTemporary(this.pixelRect.width, this.pixelRect.height, 0, colorFormat, RenderTextureReadWrite.Linear);
-			this.m_DestinationRenderTexture = RenderTexture.GetTemporary(this.pixelRect.width, this.pixelRect.height, 0, colorFormat, RenderTextureReadWrite.Linear);
-			this.m_SourceRenderTexture.wrapMode = TextureWrapMode.Clamp;
-			this.m_SourceRenderTexture.filterMode = FilterMode.Point;
-			this.m_OldRenderTexture = RenderTexture.active;
+			this.sourceRenderTexture = RenderTexture.GetTemporary(this.pixelRect.width, this.pixelRect.height, 0, colorFormat, RenderTextureReadWrite.Linear);
+			this.destinationRenderTexture = RenderTexture.GetTemporary(this.pixelRect.width, this.pixelRect.height, 0, colorFormat, RenderTextureReadWrite.Linear);
+			this.sourceRenderTexture.wrapMode = TextureWrapMode.Clamp;
+			this.sourceRenderTexture.filterMode = FilterMode.Point;
+			this.oldRenderTexture = RenderTexture.active;
 		}
 
 		public void Cleanup(bool restoreRenderTexture = true)
 		{
 			if (restoreRenderTexture)
 			{
-				RenderTexture.active = this.m_OldRenderTexture;
+				RenderTexture.active = this.oldRenderTexture;
 			}
-			RenderTexture.ReleaseTemporary(this.m_SourceRenderTexture);
-			RenderTexture.ReleaseTemporary(this.m_DestinationRenderTexture);
-			this.m_SourceRenderTexture = null;
-			this.m_DestinationRenderTexture = null;
-			this.m_OldRenderTexture = null;
+			RenderTexture.ReleaseTemporary(this.sourceRenderTexture);
+			RenderTexture.ReleaseTemporary(this.destinationRenderTexture);
+			this.sourceRenderTexture = null;
+			this.destinationRenderTexture = null;
+			this.oldRenderTexture = null;
+		}
+
+		private void GatherInternal(Func<PaintContext.ITerrainInfo, Texture> terrainToTexture, Color defaultColor, string operationName, Material blitMaterial = null, int blitPass = 0, Action<PaintContext.ITerrainInfo> beforeBlit = null, Action<PaintContext.ITerrainInfo> afterBlit = null)
+		{
+			bool flag = blitMaterial == null;
+			if (flag)
+			{
+				blitMaterial = TerrainPaintUtility.GetBlitMaterial();
+			}
+			RenderTexture.active = this.sourceRenderTexture;
+			GL.Clear(false, true, defaultColor);
+			GL.PushMatrix();
+			GL.LoadPixelMatrix(0f, (float)this.pixelRect.width, 0f, (float)this.pixelRect.height);
+			for (int i = 0; i < this.m_TerrainTiles.Count; i++)
+			{
+				PaintContext.TerrainTile terrainTile = this.m_TerrainTiles[i];
+				bool flag2 = !terrainTile.gatherEnable;
+				if (!flag2)
+				{
+					Texture texture = terrainToTexture(terrainTile);
+					bool flag3 = texture == null || !terrainTile.gatherEnable;
+					if (!flag3)
+					{
+						bool flag4 = texture.width != this.targetTextureWidth || texture.height != this.targetTextureHeight;
+						if (flag4)
+						{
+							Debug.LogWarning(operationName + " requires the same resolution texture for all Terrains - mismatched Terrains are ignored.", terrainTile.terrain);
+						}
+						else
+						{
+							if (beforeBlit != null)
+							{
+								beforeBlit(terrainTile);
+							}
+							bool flag5 = !terrainTile.gatherEnable;
+							if (!flag5)
+							{
+								FilterMode filterMode = texture.filterMode;
+								texture.filterMode = FilterMode.Point;
+								blitMaterial.SetTexture("_MainTex", texture);
+								blitMaterial.SetPass(blitPass);
+								TerrainPaintUtility.DrawQuad(terrainTile.clippedPCPixels, terrainTile.clippedTerrainPixels, texture);
+								texture.filterMode = filterMode;
+								if (afterBlit != null)
+								{
+									afterBlit(terrainTile);
+								}
+							}
+						}
+					}
+				}
+			}
+			GL.PopMatrix();
+			RenderTexture.active = this.oldRenderTexture;
+		}
+
+		private void ScatterInternal(Func<PaintContext.ITerrainInfo, RenderTexture> terrainToRT, string operationName, Material blitMaterial = null, int blitPass = 0, Action<PaintContext.ITerrainInfo> beforeBlit = null, Action<PaintContext.ITerrainInfo> afterBlit = null)
+		{
+			RenderTexture active = RenderTexture.active;
+			bool flag = blitMaterial == null;
+			if (flag)
+			{
+				blitMaterial = TerrainPaintUtility.GetBlitMaterial();
+			}
+			for (int i = 0; i < this.m_TerrainTiles.Count; i++)
+			{
+				PaintContext.TerrainTile terrainTile = this.m_TerrainTiles[i];
+				bool flag2 = !terrainTile.scatterEnable;
+				if (!flag2)
+				{
+					RenderTexture renderTexture = terrainToRT(terrainTile);
+					bool flag3 = renderTexture == null || !terrainTile.scatterEnable;
+					if (!flag3)
+					{
+						bool flag4 = renderTexture.width != this.targetTextureWidth || renderTexture.height != this.targetTextureHeight;
+						if (flag4)
+						{
+							Debug.LogWarning(operationName + " requires the same resolution for all Terrains - mismatched Terrains are ignored.", terrainTile.terrain);
+						}
+						else
+						{
+							if (beforeBlit != null)
+							{
+								beforeBlit(terrainTile);
+							}
+							bool flag5 = !terrainTile.scatterEnable;
+							if (!flag5)
+							{
+								RenderTexture.active = renderTexture;
+								GL.PushMatrix();
+								GL.LoadPixelMatrix(0f, (float)renderTexture.width, 0f, (float)renderTexture.height);
+								FilterMode filterMode = this.destinationRenderTexture.filterMode;
+								this.destinationRenderTexture.filterMode = FilterMode.Point;
+								blitMaterial.SetTexture("_MainTex", this.destinationRenderTexture);
+								blitMaterial.SetPass(blitPass);
+								TerrainPaintUtility.DrawQuad(terrainTile.clippedTerrainPixels, terrainTile.clippedPCPixels, this.destinationRenderTexture);
+								this.destinationRenderTexture.filterMode = filterMode;
+								GL.PopMatrix();
+								if (afterBlit != null)
+								{
+									afterBlit(terrainTile);
+								}
+							}
+						}
+					}
+				}
+			}
+			RenderTexture.active = active;
+		}
+
+		public void Gather(Func<PaintContext.ITerrainInfo, Texture> terrainSource, Color defaultColor, Material blitMaterial = null, int blitPass = 0, Action<PaintContext.ITerrainInfo> beforeBlit = null, Action<PaintContext.ITerrainInfo> afterBlit = null)
+		{
+			bool flag = terrainSource != null;
+			if (flag)
+			{
+				this.GatherInternal(terrainSource, defaultColor, "PaintContext.Gather", blitMaterial, blitPass, beforeBlit, afterBlit);
+			}
+		}
+
+		public void Scatter(Func<PaintContext.ITerrainInfo, RenderTexture> terrainDest, Material blitMaterial = null, int blitPass = 0, Action<PaintContext.ITerrainInfo> beforeBlit = null, Action<PaintContext.ITerrainInfo> afterBlit = null)
+		{
+			bool flag = terrainDest != null;
+			if (flag)
+			{
+				this.ScatterInternal(terrainDest, "PaintContext.Scatter", blitMaterial, blitPass, beforeBlit, afterBlit);
+			}
 		}
 
 		public void GatherHeightmap()
 		{
-			Material blitMaterial = TerrainPaintUtility.GetBlitMaterial();
-			RenderTexture.active = this.sourceRenderTexture;
-			GL.Clear(false, true, new Color(0f, 0f, 0f, 0f));
-			GL.PushMatrix();
-			GL.LoadPixelMatrix(0f, (float)this.pixelRect.width, 0f, (float)this.pixelRect.height);
-			for (int i = 0; i < this.m_TerrainTiles.Count; i++)
+			Material blitMaterial = TerrainPaintUtility.GetHeightBlitMaterial();
+			blitMaterial.SetFloat("_Height_Offset", 0f);
+			blitMaterial.SetFloat("_Height_Scale", 1f);
+			this.GatherInternal((PaintContext.ITerrainInfo t) => t.terrain.terrainData.heightmapTexture, new Color(0f, 0f, 0f, 0f), "PaintContext.GatherHeightmap", blitMaterial, 0, delegate(PaintContext.ITerrainInfo t)
 			{
-				PaintContext.TerrainTile terrainTile = this.m_TerrainTiles[i];
-				if (terrainTile.clippedLocalPixels.width != 0 && terrainTile.clippedLocalPixels.height != 0)
-				{
-					Texture heightmapTexture = terrainTile.terrain.terrainData.heightmapTexture;
-					if (heightmapTexture.width != this.targetTextureWidth || heightmapTexture.height != this.targetTextureHeight)
-					{
-						Debug.LogWarning("PaintContext heightmap operations must use the same resolution for all Terrains - mismatched Terrains are ignored.", terrainTile.terrain);
-					}
-					else
-					{
-						FilterMode filterMode = heightmapTexture.filterMode;
-						heightmapTexture.filterMode = FilterMode.Point;
-						blitMaterial.SetTexture("_MainTex", heightmapTexture);
-						blitMaterial.SetPass(0);
-						TerrainPaintUtility.DrawQuad(terrainTile.clippedPCPixels, terrainTile.clippedLocalPixels, heightmapTexture);
-						heightmapTexture.filterMode = filterMode;
-					}
-				}
-			}
-			GL.PopMatrix();
-			RenderTexture.active = this.oldRenderTexture;
+				blitMaterial.SetFloat("_Height_Offset", (t.terrain.GetPosition().y - this.heightWorldSpaceMin) / this.heightWorldSpaceSize * PaintContext.kNormalizedHeightScale);
+				blitMaterial.SetFloat("_Height_Scale", t.terrain.terrainData.size.y / this.heightWorldSpaceSize);
+			}, null);
 		}
 
 		public void ScatterHeightmap(string editorUndoName)
 		{
-			Material blitMaterial = TerrainPaintUtility.GetBlitMaterial();
-			for (int i = 0; i < this.m_TerrainTiles.Count; i++)
+			Material blitMaterial = TerrainPaintUtility.GetHeightBlitMaterial();
+			blitMaterial.SetFloat("_Height_Offset", 0f);
+			blitMaterial.SetFloat("_Height_Scale", 1f);
+			this.ScatterInternal((PaintContext.ITerrainInfo t) => t.terrain.terrainData.heightmapTexture, "PaintContext.ScatterHeightmap", blitMaterial, 0, delegate(PaintContext.ITerrainInfo t)
 			{
-				PaintContext.TerrainTile terrainTile = this.m_TerrainTiles[i];
-				if (terrainTile.clippedLocalPixels.width != 0 && terrainTile.clippedLocalPixels.height != 0)
+				Action<PaintContext.ITerrainInfo, PaintContext.ToolAction, string> action = PaintContext.onTerrainTileBeforePaint;
+				if (action != null)
 				{
-					RenderTexture heightmapTexture = terrainTile.terrain.terrainData.heightmapTexture;
-					if (heightmapTexture.width != this.targetTextureWidth || heightmapTexture.height != this.targetTextureHeight)
-					{
-						Debug.LogWarning("PaintContext heightmap operations must use the same resolution for all Terrains - mismatched Terrains are ignored.", terrainTile.terrain);
-					}
-					else
-					{
-						if (PaintContext.onTerrainTileBeforePaint != null)
-						{
-							PaintContext.onTerrainTileBeforePaint(terrainTile, PaintContext.ToolAction.PaintHeightmap, editorUndoName);
-						}
-						RenderTexture.active = heightmapTexture;
-						GL.PushMatrix();
-						GL.LoadPixelMatrix(0f, (float)heightmapTexture.width, 0f, (float)heightmapTexture.height);
-						this.destinationRenderTexture.filterMode = FilterMode.Point;
-						blitMaterial.SetTexture("_MainTex", this.destinationRenderTexture);
-						blitMaterial.SetPass(0);
-						TerrainPaintUtility.DrawQuad(terrainTile.clippedLocalPixels, terrainTile.clippedPCPixels, this.destinationRenderTexture);
-						GL.PopMatrix();
-						terrainTile.terrain.terrainData.UpdateDirtyRegion(terrainTile.clippedLocalPixels.x, terrainTile.clippedLocalPixels.y, terrainTile.clippedLocalPixels.width, terrainTile.clippedLocalPixels.height, !terrainTile.terrain.drawInstanced);
-						PaintContext.OnTerrainPainted(terrainTile, PaintContext.ToolAction.PaintHeightmap);
-					}
+					action(t, PaintContext.ToolAction.PaintHeightmap, editorUndoName);
 				}
-			}
+				blitMaterial.SetFloat("_Height_Offset", (this.heightWorldSpaceMin - t.terrain.GetPosition().y) / t.terrain.terrainData.size.y * PaintContext.kNormalizedHeightScale);
+				blitMaterial.SetFloat("_Height_Scale", this.heightWorldSpaceSize / t.terrain.terrainData.size.y);
+			}, delegate(PaintContext.ITerrainInfo t)
+			{
+				t.terrain.terrainData.DirtyHeightmapRegion(t.clippedTerrainPixels, t.terrain.drawInstanced ? TerrainHeightmapSyncControl.None : TerrainHeightmapSyncControl.HeightOnly);
+				PaintContext.OnTerrainPainted(t, PaintContext.ToolAction.PaintHeightmap);
+			});
+		}
+
+		public void GatherHoles()
+		{
+			this.GatherInternal((PaintContext.ITerrainInfo t) => t.terrain.terrainData.holesTexture, new Color(0f, 0f, 0f, 0f), "PaintContext.GatherHoles", null, 0, null, null);
+		}
+
+		public void ScatterHoles(string editorUndoName)
+		{
+			this.ScatterInternal(delegate(PaintContext.ITerrainInfo t)
+			{
+				Action<PaintContext.ITerrainInfo, PaintContext.ToolAction, string> action = PaintContext.onTerrainTileBeforePaint;
+				if (action != null)
+				{
+					action(t, PaintContext.ToolAction.PaintHoles, editorUndoName);
+				}
+				t.terrain.terrainData.CopyActiveRenderTextureToTexture(TerrainData.HolesTextureName, 0, t.clippedPCPixels, t.clippedTerrainPixels.min, true);
+				PaintContext.OnTerrainPainted(t, PaintContext.ToolAction.PaintHoles);
+				return null;
+			}, "PaintContext.ScatterHoles", null, 0, null, null);
 		}
 
 		public void GatherNormals()
 		{
-			RenderTexture normalmapTexture = this.originTerrain.normalmapTexture;
-			Material blitMaterial = TerrainPaintUtility.GetBlitMaterial();
-			RenderTexture.active = this.sourceRenderTexture;
-			GL.Clear(false, true, new Color(0.5f, 0.5f, 0.5f, 0.5f));
-			GL.PushMatrix();
-			GL.LoadPixelMatrix(0f, (float)this.pixelRect.width, 0f, (float)this.pixelRect.height);
-			for (int i = 0; i < this.m_TerrainTiles.Count; i++)
+			this.GatherInternal((PaintContext.ITerrainInfo t) => t.terrain.normalmapTexture, new Color(0.5f, 0.5f, 0.5f, 0.5f), "PaintContext.GatherNormals", null, 0, null, null);
+		}
+
+		private PaintContext.SplatmapUserData GetTerrainLayerUserData(PaintContext.ITerrainInfo context, TerrainLayer terrainLayer = null, bool addLayerIfDoesntExist = false)
+		{
+			PaintContext.SplatmapUserData splatmapUserData = context.userData as PaintContext.SplatmapUserData;
+			bool flag = splatmapUserData != null;
+			if (flag)
 			{
-				PaintContext.TerrainTile terrainTile = this.m_TerrainTiles[i];
-				if (terrainTile.clippedLocalPixels.width != 0 && terrainTile.clippedLocalPixels.height != 0)
+				bool flag2 = terrainLayer == null || terrainLayer == splatmapUserData.terrainLayer;
+				if (flag2)
 				{
-					Texture normalmapTexture2 = terrainTile.terrain.normalmapTexture;
-					if (normalmapTexture2.width != this.targetTextureWidth || normalmapTexture2.height != this.targetTextureHeight)
+					return splatmapUserData;
+				}
+				splatmapUserData = null;
+			}
+			bool flag3 = splatmapUserData == null;
+			if (flag3)
+			{
+				int num = -1;
+				bool flag4 = terrainLayer != null;
+				if (flag4)
+				{
+					num = TerrainPaintUtility.FindTerrainLayerIndex(context.terrain, terrainLayer);
+					bool flag5 = num == -1 && addLayerIfDoesntExist;
+					if (flag5)
 					{
-						Debug.LogWarning("PaintContext normalmap operations must use the same resolution for all Terrains - mismatched Terrains are ignored.", terrainTile.terrain);
-					}
-					else
-					{
-						FilterMode filterMode = normalmapTexture2.filterMode;
-						normalmapTexture2.filterMode = FilterMode.Point;
-						blitMaterial.SetTexture("_MainTex", normalmapTexture2);
-						blitMaterial.SetPass(0);
-						TerrainPaintUtility.DrawQuad(terrainTile.clippedPCPixels, terrainTile.clippedLocalPixels, normalmapTexture2);
-						normalmapTexture2.filterMode = filterMode;
+						num = TerrainPaintUtility.AddTerrainLayer(context.terrain, terrainLayer);
 					}
 				}
+				bool flag6 = num != -1;
+				if (flag6)
+				{
+					splatmapUserData = new PaintContext.SplatmapUserData();
+					splatmapUserData.terrainLayer = terrainLayer;
+					splatmapUserData.terrainLayerIndex = num;
+					splatmapUserData.mapIndex = num >> 2;
+					splatmapUserData.channelIndex = num & 3;
+				}
+				context.userData = splatmapUserData;
 			}
-			GL.PopMatrix();
-			RenderTexture.active = this.oldRenderTexture;
+			return splatmapUserData;
 		}
 
 		public void GatherAlphamap(TerrainLayer inputLayer, bool addLayerIfDoesntExist = true)
 		{
-			if (!(inputLayer == null))
+			bool flag = inputLayer == null;
+			if (!flag)
 			{
-				int num = TerrainPaintUtility.FindTerrainLayerIndex(this.originTerrain, inputLayer);
-				if (num == -1 && addLayerIfDoesntExist)
-				{
-					num = TerrainPaintUtility.AddTerrainLayer(this.originTerrain, inputLayer);
-				}
-				RenderTexture.active = this.sourceRenderTexture;
-				GL.Clear(false, true, new Color(0f, 0f, 0f, 0f));
-				GL.PushMatrix();
-				GL.LoadPixelMatrix(0f, (float)this.pixelRect.width, 0f, (float)this.pixelRect.height);
-				Vector4[] array = new Vector4[]
+				Material copyTerrainLayerMaterial = TerrainPaintUtility.GetCopyTerrainLayerMaterial();
+				Vector4[] layerMasks = new Vector4[]
 				{
 					new Vector4(1f, 0f, 0f, 0f),
 					new Vector4(0f, 1f, 0f, 0f),
 					new Vector4(0f, 0f, 1f, 0f),
 					new Vector4(0f, 0f, 0f, 1f)
 				};
-				Material copyTerrainLayerMaterial = TerrainPaintUtility.GetCopyTerrainLayerMaterial();
-				for (int i = 0; i < this.m_TerrainTiles.Count; i++)
+				this.GatherInternal(delegate(PaintContext.ITerrainInfo t)
 				{
-					PaintContext.TerrainTile terrainTile = this.m_TerrainTiles[i];
-					if (terrainTile.clippedLocalPixels.width != 0 && terrainTile.clippedLocalPixels.height != 0)
+					PaintContext.SplatmapUserData terrainLayerUserData = this.GetTerrainLayerUserData(t, inputLayer, addLayerIfDoesntExist);
+					bool flag2 = terrainLayerUserData != null;
+					Texture texture;
+					if (flag2)
 					{
-						int num2 = TerrainPaintUtility.FindTerrainLayerIndex(terrainTile.terrain, inputLayer);
-						if (num2 == -1)
-						{
-							if (!addLayerIfDoesntExist)
-							{
-								terrainTile.clippedLocalPixels.width = 0;
-								terrainTile.clippedLocalPixels.height = 0;
-								terrainTile.clippedPCPixels.width = 0;
-								terrainTile.clippedPCPixels.height = 0;
-								goto IL_0313;
-							}
-							num2 = TerrainPaintUtility.AddTerrainLayer(terrainTile.terrain, inputLayer);
-						}
-						terrainTile.mapIndex = num2 >> 2;
-						terrainTile.channelIndex = num2 & 3;
-						Texture terrainAlphaMapChecked = TerrainPaintUtility.GetTerrainAlphaMapChecked(terrainTile.terrain, terrainTile.mapIndex);
-						if (terrainAlphaMapChecked.width != this.targetTextureWidth || terrainAlphaMapChecked.height != this.targetTextureHeight)
-						{
-							Debug.LogWarning(string.Concat(new object[] { "PaintContext alphamap operations must use the same resolution for all Terrains - mismatched Terrains are ignored. (", terrainAlphaMapChecked.width, " x ", terrainAlphaMapChecked.height, ") != (", this.targetTextureWidth, " x ", this.targetTextureHeight, ")" }), terrainTile.terrain);
-						}
-						else
-						{
-							FilterMode filterMode = terrainAlphaMapChecked.filterMode;
-							terrainAlphaMapChecked.filterMode = FilterMode.Point;
-							copyTerrainLayerMaterial.SetVector("_LayerMask", array[terrainTile.channelIndex]);
-							copyTerrainLayerMaterial.SetTexture("_MainTex", terrainAlphaMapChecked);
-							copyTerrainLayerMaterial.SetPass(0);
-							TerrainPaintUtility.DrawQuad(terrainTile.clippedPCPixels, terrainTile.clippedLocalPixels, terrainAlphaMapChecked);
-							terrainAlphaMapChecked.filterMode = filterMode;
-						}
+						texture = TerrainPaintUtility.GetTerrainAlphaMapChecked(t.terrain, terrainLayerUserData.mapIndex);
 					}
-					IL_0313:;
-				}
-				GL.PopMatrix();
-				RenderTexture.active = this.oldRenderTexture;
+					else
+					{
+						texture = null;
+					}
+					return texture;
+				}, new Color(0f, 0f, 0f, 0f), "PaintContext.GatherAlphamap", copyTerrainLayerMaterial, 0, delegate(PaintContext.ITerrainInfo t)
+				{
+					PaintContext.SplatmapUserData terrainLayerUserData2 = this.GetTerrainLayerUserData(t, null, false);
+					copyTerrainLayerMaterial.SetVector("_LayerMask", layerMasks[terrainLayerUserData2.channelIndex]);
+				}, null);
 			}
 		}
 
 		public void ScatterAlphamap(string editorUndoName)
 		{
-			Vector4[] array = new Vector4[]
+			Vector4[] layerMasks = new Vector4[]
 			{
 				new Vector4(1f, 0f, 0f, 0f),
 				new Vector4(0f, 1f, 0f, 0f),
@@ -374,110 +419,76 @@ namespace UnityEngine.Experimental.TerrainAPI
 				new Vector4(0f, 0f, 0f, 1f)
 			};
 			Material copyTerrainLayerMaterial = TerrainPaintUtility.GetCopyTerrainLayerMaterial();
-			for (int i = 0; i < this.m_TerrainTiles.Count; i++)
+			RenderTexture tempTarget = RenderTexture.GetTemporary(new RenderTextureDescriptor(this.destinationRenderTexture.width, this.destinationRenderTexture.height, RenderTextureFormat.ARGB32)
 			{
-				PaintContext.TerrainTile terrainTile = this.m_TerrainTiles[i];
-				if (terrainTile.clippedLocalPixels.width != 0 && terrainTile.clippedLocalPixels.height != 0)
+				sRGB = false,
+				useMipMap = false,
+				autoGenerateMips = false
+			});
+			this.ScatterInternal(delegate(PaintContext.ITerrainInfo t)
+			{
+				PaintContext.SplatmapUserData terrainLayerUserData = this.GetTerrainLayerUserData(t, null, false);
+				bool flag = terrainLayerUserData != null;
+				if (flag)
 				{
-					if (PaintContext.onTerrainTileBeforePaint != null)
+					Action<PaintContext.ITerrainInfo, PaintContext.ToolAction, string> action = PaintContext.onTerrainTileBeforePaint;
+					if (action != null)
 					{
-						PaintContext.onTerrainTileBeforePaint(terrainTile, PaintContext.ToolAction.PaintTexture, editorUndoName);
+						action(t, PaintContext.ToolAction.PaintTexture, editorUndoName);
 					}
-					RenderTexture temporary = RenderTexture.GetTemporary(new RenderTextureDescriptor(this.destinationRenderTexture.width, this.destinationRenderTexture.height, RenderTextureFormat.ARGB32)
-					{
-						sRGB = false,
-						useMipMap = false,
-						autoGenerateMips = false
-					});
-					RenderTexture.active = temporary;
-					RectInt clippedPCPixels = terrainTile.clippedPCPixels;
-					Rect rect = new Rect((float)clippedPCPixels.x / (float)this.pixelRect.width, (float)clippedPCPixels.y / (float)this.pixelRect.height, (float)clippedPCPixels.width / (float)this.pixelRect.width, (float)clippedPCPixels.height / (float)this.pixelRect.height);
+					int mapIndex = terrainLayerUserData.mapIndex;
+					int channelIndex = terrainLayerUserData.channelIndex;
+					Texture2D texture2D = t.terrain.terrainData.alphamapTextures[mapIndex];
 					this.destinationRenderTexture.filterMode = FilterMode.Point;
-					int mapIndex = terrainTile.mapIndex;
-					int channelIndex = terrainTile.channelIndex;
-					Texture2D texture2D = terrainTile.terrain.terrainData.alphamapTextures[mapIndex];
-					for (int j = 0; j < terrainTile.terrain.terrainData.alphamapTextureCount; j++)
+					this.sourceRenderTexture.filterMode = FilterMode.Point;
+					for (int i = 0; i <= t.terrain.terrainData.alphamapTextureCount; i++)
 					{
-						Texture2D texture2D2 = terrainTile.terrain.terrainData.alphamapTextures[j];
-						if (texture2D2.width != this.targetTextureWidth || texture2D2.height != this.targetTextureHeight)
+						bool flag2 = i == mapIndex;
+						if (!flag2)
 						{
-							Debug.LogWarning("PaintContext alphamap operations must use the same resolution for all Terrains - mismatched Terrains are ignored.", terrainTile.terrain);
-						}
-						else
-						{
-							Rect rect2 = new Rect((float)terrainTile.clippedLocalPixels.x / (float)texture2D2.width, (float)terrainTile.clippedLocalPixels.y / (float)texture2D2.height, (float)terrainTile.clippedLocalPixels.width / (float)texture2D2.width, (float)terrainTile.clippedLocalPixels.height / (float)texture2D2.height);
-							copyTerrainLayerMaterial.SetTexture("_MainTex", this.destinationRenderTexture);
-							copyTerrainLayerMaterial.SetTexture("_OldAlphaMapTexture", this.sourceRenderTexture);
-							copyTerrainLayerMaterial.SetTexture("_OriginalTargetAlphaMap", texture2D);
-							copyTerrainLayerMaterial.SetTexture("_AlphaMapTexture", texture2D2);
-							copyTerrainLayerMaterial.SetVector("_LayerMask", (j != mapIndex) ? Vector4.zero : array[channelIndex]);
-							copyTerrainLayerMaterial.SetVector("_OriginalTargetAlphaMask", array[channelIndex]);
-							copyTerrainLayerMaterial.SetPass(1);
-							GL.PushMatrix();
-							GL.LoadPixelMatrix(0f, (float)temporary.width, 0f, (float)temporary.height);
-							GL.Begin(7);
-							GL.Color(new Color(1f, 1f, 1f, 1f));
-							GL.MultiTexCoord2(0, rect.x, rect.y);
-							GL.MultiTexCoord2(1, rect2.x, rect2.y);
-							GL.Vertex3((float)clippedPCPixels.x, (float)clippedPCPixels.y, 0f);
-							GL.MultiTexCoord2(0, rect.x, rect.yMax);
-							GL.MultiTexCoord2(1, rect2.x, rect2.yMax);
-							GL.Vertex3((float)clippedPCPixels.x, (float)clippedPCPixels.yMax, 0f);
-							GL.MultiTexCoord2(0, rect.xMax, rect.yMax);
-							GL.MultiTexCoord2(1, rect2.xMax, rect2.yMax);
-							GL.Vertex3((float)clippedPCPixels.xMax, (float)clippedPCPixels.yMax, 0f);
-							GL.MultiTexCoord2(0, rect.xMax, rect.y);
-							GL.MultiTexCoord2(1, rect2.xMax, rect2.y);
-							GL.Vertex3((float)clippedPCPixels.xMax, (float)clippedPCPixels.y, 0f);
-							GL.End();
-							GL.PopMatrix();
-							if (TerrainPaintUtility.paintTextureUsesCopyTexture)
+							int num = ((i == t.terrain.terrainData.alphamapTextureCount) ? mapIndex : i);
+							Texture2D texture2D2 = t.terrain.terrainData.alphamapTextures[num];
+							bool flag3 = texture2D2.width != this.targetTextureWidth || texture2D2.height != this.targetTextureHeight;
+							if (flag3)
 							{
-								RenderTexture temporary2 = RenderTexture.GetTemporary(new RenderTextureDescriptor(texture2D2.width, texture2D2.height, RenderTextureFormat.ARGB32)
-								{
-									sRGB = false,
-									useMipMap = true,
-									autoGenerateMips = false
-								});
-								if (!temporary2.IsCreated())
-								{
-									temporary2.Create();
-								}
-								Graphics.CopyTexture(texture2D2, 0, 0, temporary2, 0, 0);
-								Graphics.CopyTexture(temporary, 0, 0, clippedPCPixels.x, clippedPCPixels.y, clippedPCPixels.width, clippedPCPixels.height, temporary2, 0, 0, terrainTile.clippedLocalPixels.x, terrainTile.clippedLocalPixels.y);
-								temporary2.GenerateMips();
-								Graphics.CopyTexture(temporary2, texture2D2);
-								RenderTexture.ReleaseTemporary(temporary2);
+								Debug.LogWarning("PaintContext alphamap operations must use the same resolution for all Terrains - mismatched Terrains are ignored.", t.terrain);
 							}
 							else
 							{
-								GraphicsDeviceType graphicsDeviceType = SystemInfo.graphicsDeviceType;
-								if (graphicsDeviceType == GraphicsDeviceType.Metal || graphicsDeviceType == GraphicsDeviceType.OpenGLCore)
-								{
-									texture2D2.ReadPixels(new Rect((float)clippedPCPixels.x, (float)clippedPCPixels.y, (float)clippedPCPixels.width, (float)clippedPCPixels.height), terrainTile.clippedLocalPixels.x, terrainTile.clippedLocalPixels.y);
-								}
-								else
-								{
-									texture2D2.ReadPixels(new Rect((float)clippedPCPixels.x, (float)(temporary.height - clippedPCPixels.y - clippedPCPixels.height), (float)clippedPCPixels.width, (float)clippedPCPixels.height), terrainTile.clippedLocalPixels.x, terrainTile.clippedLocalPixels.y);
-								}
-								texture2D2.Apply();
+								RenderTexture.active = tempTarget;
+								GL.PushMatrix();
+								GL.LoadPixelMatrix(0f, (float)tempTarget.width, 0f, (float)tempTarget.height);
+								copyTerrainLayerMaterial.SetTexture("_MainTex", this.destinationRenderTexture);
+								copyTerrainLayerMaterial.SetTexture("_OldAlphaMapTexture", this.sourceRenderTexture);
+								copyTerrainLayerMaterial.SetTexture("_OriginalTargetAlphaMap", texture2D);
+								copyTerrainLayerMaterial.SetTexture("_AlphaMapTexture", texture2D2);
+								copyTerrainLayerMaterial.SetVector("_LayerMask", (num == mapIndex) ? layerMasks[channelIndex] : Vector4.zero);
+								copyTerrainLayerMaterial.SetVector("_OriginalTargetAlphaMask", layerMasks[channelIndex]);
+								copyTerrainLayerMaterial.SetPass(1);
+								TerrainPaintUtility.DrawQuad2(t.clippedPCPixels, t.clippedPCPixels, this.destinationRenderTexture, t.clippedTerrainPixels, texture2D2);
+								GL.PopMatrix();
+								t.terrain.terrainData.CopyActiveRenderTextureToTexture(TerrainData.AlphamapTextureName, num, t.clippedPCPixels, t.clippedTerrainPixels.min, true);
 							}
 						}
 					}
 					RenderTexture.active = null;
-					RenderTexture.ReleaseTemporary(temporary);
-					PaintContext.OnTerrainPainted(terrainTile, PaintContext.ToolAction.PaintTexture);
+					PaintContext.OnTerrainPainted(t, PaintContext.ToolAction.PaintTexture);
 				}
-			}
+				return null;
+			}, "PaintContext.ScatterAlphamap", copyTerrainLayerMaterial, 0, null, null);
+			RenderTexture.ReleaseTemporary(tempTarget);
 		}
 
-		private static void OnTerrainPainted(PaintContext.TerrainTile tile, PaintContext.ToolAction action)
+		private static void OnTerrainPainted(PaintContext.ITerrainInfo tile, PaintContext.ToolAction action)
 		{
 			for (int i = 0; i < PaintContext.s_PaintedTerrain.Count; i++)
 			{
-				if (tile.terrain == PaintContext.s_PaintedTerrain[i].terrain)
+				bool flag = tile.terrain == PaintContext.s_PaintedTerrain[i].terrain;
+				if (flag)
 				{
-					PaintContext.s_PaintedTerrain[i].action |= action;
+					PaintContext.PaintedTerrain paintedTerrain = PaintContext.s_PaintedTerrain[i];
+					paintedTerrain.action |= action;
+					PaintContext.s_PaintedTerrain[i] = paintedTerrain;
 					return;
 				}
 			}
@@ -490,75 +501,167 @@ namespace UnityEngine.Experimental.TerrainAPI
 
 		public static void ApplyDelayedActions()
 		{
-			int i = 0;
-			while (i < PaintContext.s_PaintedTerrain.Count)
+			for (int i = 0; i < PaintContext.s_PaintedTerrain.Count; i++)
 			{
 				PaintContext.PaintedTerrain paintedTerrain = PaintContext.s_PaintedTerrain[i];
-				if ((paintedTerrain.action & PaintContext.ToolAction.PaintHeightmap) != PaintContext.ToolAction.None)
+				TerrainData terrainData = paintedTerrain.terrain.terrainData;
+				bool flag = terrainData == null;
+				if (!flag)
 				{
-					paintedTerrain.terrain.ApplyDelayedHeightmapModification();
-				}
-				if ((paintedTerrain.action & PaintContext.ToolAction.PaintTexture) != PaintContext.ToolAction.None)
-				{
-					TerrainData terrainData = paintedTerrain.terrain.terrainData;
-					if (!(terrainData == null))
+					bool flag2 = (paintedTerrain.action & PaintContext.ToolAction.PaintHeightmap) > PaintContext.ToolAction.None;
+					if (flag2)
+					{
+						terrainData.SyncHeightmap();
+					}
+					bool flag3 = (paintedTerrain.action & PaintContext.ToolAction.PaintHoles) > PaintContext.ToolAction.None;
+					if (flag3)
+					{
+						terrainData.SyncTexture(TerrainData.HolesTextureName);
+					}
+					bool flag4 = (paintedTerrain.action & PaintContext.ToolAction.PaintTexture) > PaintContext.ToolAction.None;
+					if (flag4)
 					{
 						terrainData.SetBaseMapDirty();
-						if (TerrainPaintUtility.paintTextureUsesCopyTexture)
-						{
-							RenderTextureDescriptor renderTextureDescriptor = new RenderTextureDescriptor(terrainData.alphamapResolution, terrainData.alphamapResolution, RenderTextureFormat.ARGB32)
-							{
-								sRGB = false,
-								useMipMap = false,
-								autoGenerateMips = false
-							};
-							RenderTexture temporary = RenderTexture.GetTemporary(renderTextureDescriptor);
-							for (int j = 0; j < terrainData.alphamapTextureCount; j++)
-							{
-								Graphics.Blit(terrainData.alphamapTextures[j], temporary);
-								terrainData.alphamapTextures[j].ReadPixels(new Rect(0f, 0f, (float)renderTextureDescriptor.width, (float)renderTextureDescriptor.height), 0, 0, true);
-							}
-							RenderTexture.ReleaseTemporary(temporary);
-						}
+						terrainData.SyncTexture(TerrainData.AlphamapTextureName);
 					}
+					paintedTerrain.terrain.editorRenderFlags = TerrainRenderFlags.all;
 				}
-				IL_0106:
-				i++;
-				continue;
-				goto IL_0106;
 			}
 			PaintContext.s_PaintedTerrain.Clear();
 		}
 
 		private List<PaintContext.TerrainTile> m_TerrainTiles;
 
-		private RenderTexture m_SourceRenderTexture;
+		private float m_HeightWorldSpaceMin;
 
-		private RenderTexture m_DestinationRenderTexture;
-
-		private RenderTexture m_OldRenderTexture;
+		private float m_HeightWorldSpaceMax;
 
 		private static List<PaintContext.PaintedTerrain> s_PaintedTerrain = new List<PaintContext.PaintedTerrain>();
 
-		internal class TerrainTile
+		public interface ITerrainInfo
 		{
-			public TerrainTile()
+			Terrain terrain { get; }
+
+			RectInt clippedTerrainPixels { get; }
+
+			RectInt clippedPCPixels { get; }
+
+			bool gatherEnable { get; set; }
+
+			bool scatterEnable { get; set; }
+
+			object userData { get; set; }
+		}
+
+		private class TerrainTile : PaintContext.ITerrainInfo
+		{
+			Terrain PaintContext.ITerrainInfo.terrain
 			{
+				get
+				{
+					return this.terrain;
+				}
 			}
 
-			public TerrainTile(Terrain newTerrain, int tileOriginPixelsX, int tileOriginPixelsY)
+			RectInt PaintContext.ITerrainInfo.clippedTerrainPixels
 			{
-				this.terrain = newTerrain;
-				this.tileOriginPixels = new Vector2Int(tileOriginPixelsX, tileOriginPixelsY);
+				get
+				{
+					return this.clippedTerrainPixels;
+				}
+			}
+
+			RectInt PaintContext.ITerrainInfo.clippedPCPixels
+			{
+				get
+				{
+					return this.clippedPCPixels;
+				}
+			}
+
+			bool PaintContext.ITerrainInfo.gatherEnable
+			{
+				get
+				{
+					return this.gatherEnable;
+				}
+				set
+				{
+					this.gatherEnable = value;
+				}
+			}
+
+			bool PaintContext.ITerrainInfo.scatterEnable
+			{
+				get
+				{
+					return this.scatterEnable;
+				}
+				set
+				{
+					this.scatterEnable = value;
+				}
+			}
+
+			object PaintContext.ITerrainInfo.userData
+			{
+				get
+				{
+					return this.userData;
+				}
+				set
+				{
+					this.userData = value;
+				}
+			}
+
+			public static PaintContext.TerrainTile Make(Terrain terrain, int tileOriginPixelsX, int tileOriginPixelsY, RectInt pixelRect, int targetTextureWidth, int targetTextureHeight)
+			{
+				PaintContext.TerrainTile terrainTile = new PaintContext.TerrainTile
+				{
+					terrain = terrain,
+					gatherEnable = true,
+					scatterEnable = true,
+					tileOriginPixels = new Vector2Int(tileOriginPixelsX, tileOriginPixelsY),
+					clippedTerrainPixels = new RectInt
+					{
+						x = Mathf.Max(0, pixelRect.x - tileOriginPixelsX),
+						y = Mathf.Max(0, pixelRect.y - tileOriginPixelsY),
+						xMax = Mathf.Min(targetTextureWidth, pixelRect.xMax - tileOriginPixelsX),
+						yMax = Mathf.Min(targetTextureHeight, pixelRect.yMax - tileOriginPixelsY)
+					}
+				};
+				terrainTile.clippedPCPixels = new RectInt(terrainTile.clippedTerrainPixels.x + terrainTile.tileOriginPixels.x - pixelRect.x, terrainTile.clippedTerrainPixels.y + terrainTile.tileOriginPixels.y - pixelRect.y, terrainTile.clippedTerrainPixels.width, terrainTile.clippedTerrainPixels.height);
+				bool flag = terrainTile.clippedTerrainPixels.width == 0 || terrainTile.clippedTerrainPixels.height == 0;
+				if (flag)
+				{
+					terrainTile.gatherEnable = false;
+					terrainTile.scatterEnable = false;
+					Debug.LogError("PaintContext.ClipTerrainTiles found 0 content rect");
+				}
+				return terrainTile;
 			}
 
 			public Terrain terrain;
 
 			public Vector2Int tileOriginPixels;
 
-			public RectInt clippedLocalPixels;
+			public RectInt clippedTerrainPixels;
 
 			public RectInt clippedPCPixels;
+
+			public object userData;
+
+			public bool gatherEnable;
+
+			public bool scatterEnable;
+		}
+
+		private class SplatmapUserData
+		{
+			public TerrainLayer terrainLayer;
+
+			public int terrainLayerIndex;
 
 			public int mapIndex;
 
@@ -570,10 +673,11 @@ namespace UnityEngine.Experimental.TerrainAPI
 		{
 			None = 0,
 			PaintHeightmap = 1,
-			PaintTexture = 2
+			PaintTexture = 2,
+			PaintHoles = 4
 		}
 
-		private class PaintedTerrain
+		private struct PaintedTerrain
 		{
 			public Terrain terrain;
 

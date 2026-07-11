@@ -166,7 +166,8 @@ public static class CodexEntryGenerator
 		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
 		foreach (EdiblesManager.FoodInfo foodInfo in FOOD.FOOD_TYPES_LIST)
 		{
-			if (!Assets.GetPrefab(foodInfo.Id).HasTag(GameTags.IncubatableEgg))
+			GameObject prefab = Assets.GetPrefab(foodInfo.Id);
+			if (!prefab.HasTag(GameTags.DeprecatedContent) && !prefab.HasTag(GameTags.IncubatableEgg))
 			{
 				List<ContentContainer> list = new List<ContentContainer>();
 				CodexEntryGenerator.GenerateTitleContainers(foodInfo.Name, list);

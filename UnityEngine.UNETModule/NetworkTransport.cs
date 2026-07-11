@@ -8,23 +8,21 @@ using UnityEngine.Networking.Types;
 
 namespace UnityEngine.Networking
 {
-	[NativeHeader("Runtime/Networking/UNETManager.h")]
-	[NativeHeader("Runtime/Networking/UNetTypes.h")]
-	[NativeConditional("ENABLE_NETWORK && ENABLE_UNET", true)]
-	[NativeHeader("Runtime/Networking/UNETConfiguration.h")]
 	[Obsolete("The UNET transport will be removed in the future as soon a replacement is ready.")]
+	[NativeHeader("Modules/UNET/UNetTypes.h")]
+	[NativeHeader("Modules/UNET/UNETConfiguration.h")]
+	[NativeHeader("Modules/UNET/UNETManager.h")]
+	[NativeConditional("ENABLE_NETWORK && ENABLE_UNET", true)]
 	public sealed class NetworkTransport
 	{
-		private NetworkTransport()
+		public static bool DoesEndPointUsePlatformProtocols(EndPoint endPoint)
 		{
-		}
-
-		internal static bool DoesEndPointUsePlatformProtocols(EndPoint endPoint)
-		{
-			if (endPoint.GetType().FullName == "UnityEngine.PS4.SceEndPoint")
+			bool flag = endPoint.GetType().FullName == "UnityEngine.PS4.SceEndPoint";
+			if (flag)
 			{
 				SocketAddress socketAddress = endPoint.Serialize();
-				if (socketAddress[8] != 0 || socketAddress[9] != 0)
+				bool flag2 = socketAddress[8] != 0 || socketAddress[9] > 0;
+				if (flag2)
 				{
 					return true;
 				}
@@ -36,31 +34,38 @@ namespace UnityEngine.Networking
 		{
 			error = 0;
 			byte[] array = new byte[] { 95, 36, 19, 246 };
-			if (endPoint == null)
+			bool flag = endPoint == null;
+			if (flag)
 			{
 				throw new NullReferenceException("Null EndPoint provided");
 			}
-			if (endPoint.GetType().FullName != "UnityEngine.XboxOne.XboxOneEndPoint" && endPoint.GetType().FullName != "UnityEngine.PS4.SceEndPoint")
+			bool flag2 = endPoint.GetType().FullName != "UnityEngine.XboxOne.XboxOneEndPoint" && endPoint.GetType().FullName != "UnityEngine.PS4.SceEndPoint" && endPoint.GetType().FullName != "UnityEngine.PSVita.SceEndPoint";
+			if (flag2)
 			{
 				throw new ArgumentException("Endpoint of type XboxOneEndPoint or SceEndPoint  required");
 			}
+			bool flag3 = endPoint.GetType().FullName == "UnityEngine.XboxOne.XboxOneEndPoint";
 			int num;
-			if (endPoint.GetType().FullName == "UnityEngine.XboxOne.XboxOneEndPoint")
+			if (flag3)
 			{
-				if (endPoint.AddressFamily != AddressFamily.InterNetworkV6)
+				bool flag4 = endPoint.AddressFamily != AddressFamily.InterNetworkV6;
+				if (flag4)
 				{
 					throw new ArgumentException("XboxOneEndPoint has an invalid family");
 				}
 				SocketAddress socketAddress = endPoint.Serialize();
-				if (socketAddress.Size != 14)
+				bool flag5 = socketAddress.Size != 14;
+				if (flag5)
 				{
 					throw new ArgumentException("XboxOneEndPoint has an invalid size");
 				}
-				if (socketAddress[0] != 0 || socketAddress[1] != 0)
+				bool flag6 = socketAddress[0] != 0 || socketAddress[1] > 0;
+				if (flag6)
 				{
 					throw new ArgumentException("XboxOneEndPoint has an invalid family signature");
 				}
-				if (socketAddress[2] != array[0] || socketAddress[3] != array[1] || socketAddress[4] != array[2] || socketAddress[5] != array[3])
+				bool flag7 = socketAddress[2] != array[0] || socketAddress[3] != array[1] || socketAddress[4] != array[2] || socketAddress[5] != array[3];
+				if (flag7)
 				{
 					throw new ArgumentException("XboxOneEndPoint has an invalid signature");
 				}
@@ -70,14 +75,16 @@ namespace UnityEngine.Networking
 					array2[i] = socketAddress[6 + i];
 				}
 				IntPtr intPtr = new IntPtr(BitConverter.ToInt64(array2, 0));
-				if (intPtr == IntPtr.Zero)
+				bool flag8 = intPtr == IntPtr.Zero;
+				if (flag8)
 				{
 					throw new ArgumentException("XboxOneEndPoint has an invalid SOCKET_STORAGE pointer");
 				}
 				byte[] array3 = new byte[2];
 				Marshal.Copy(intPtr, array3, 0, array3.Length);
 				AddressFamily addressFamily = (AddressFamily)(((int)array3[1] << 8) + (int)array3[0]);
-				if (addressFamily != AddressFamily.InterNetworkV6)
+				bool flag9 = addressFamily != AddressFamily.InterNetworkV6;
+				if (flag9)
 				{
 					throw new ArgumentException("XboxOneEndPoint has corrupt or invalid SOCKET_STORAGE pointer");
 				}
@@ -86,15 +93,18 @@ namespace UnityEngine.Networking
 			else
 			{
 				SocketAddress socketAddress2 = endPoint.Serialize();
-				if (socketAddress2.Size != 16)
+				bool flag10 = socketAddress2.Size != 16;
+				if (flag10)
 				{
 					throw new ArgumentException("EndPoint has an invalid size");
 				}
-				if ((int)socketAddress2[0] != socketAddress2.Size)
+				bool flag11 = (int)socketAddress2[0] != socketAddress2.Size;
+				if (flag11)
 				{
 					throw new ArgumentException("EndPoint has an invalid size value");
 				}
-				if (socketAddress2[1] != 2)
+				bool flag12 = socketAddress2[1] != 2;
+				if (flag12)
 				{
 					throw new ArgumentException("EndPoint has an invalid family value");
 				}
@@ -109,6 +119,10 @@ namespace UnityEngine.Networking
 			return num;
 		}
 
+		private NetworkTransport()
+		{
+		}
+
 		public static void Init()
 		{
 			NetworkTransport.InitializeClass();
@@ -116,11 +130,13 @@ namespace UnityEngine.Networking
 
 		public static void Init(GlobalConfig config)
 		{
-			if (config.NetworkEventAvailable != null)
+			bool flag = config.NetworkEventAvailable != null;
+			if (flag)
 			{
 				NetworkTransport.SetNetworkEventAvailableCallback(config.NetworkEventAvailable);
 			}
-			if (config.ConnectionReadyForSend != null)
+			bool flag2 = config.ConnectionReadyForSend != null;
+			if (flag2)
 			{
 				NetworkTransport.SetConnectionReadyForSendCallback(config.ConnectionReadyForSend);
 			}
@@ -148,7 +164,8 @@ namespace UnityEngine.Networking
 
 		public static void AddSceneId(int id)
 		{
-			if (id > NetworkTransport.s_nextSceneId)
+			bool flag = id > NetworkTransport.s_nextSceneId;
+			if (flag)
 			{
 				NetworkTransport.s_nextSceneId = id + 1;
 			}
@@ -161,7 +178,8 @@ namespace UnityEngine.Networking
 
 		public static int AddHostWithSimulator(HostTopology topology, int minTimeout, int maxTimeout, int port, string ip)
 		{
-			if (topology == null)
+			bool flag = topology == null;
+			if (flag)
 			{
 				throw new NullReferenceException("topology is not defined");
 			}
@@ -200,14 +218,17 @@ namespace UnityEngine.Networking
 
 		public static int AddWebsocketHost(HostTopology topology, int port, string ip)
 		{
-			if (port != 0)
+			bool flag = port != 0;
+			if (flag)
 			{
-				if (NetworkTransport.IsPortOpen(ip, port))
+				bool flag2 = NetworkTransport.IsPortOpen(ip, port);
+				if (flag2)
 				{
 					throw new InvalidOperationException("Cannot open web socket on port " + port + " It has been already occupied.");
 				}
 			}
-			if (topology == null)
+			bool flag3 = topology == null;
+			if (flag3)
 			{
 				throw new NullReferenceException("topology is not defined");
 			}
@@ -227,13 +248,15 @@ namespace UnityEngine.Networking
 		private static bool IsPortOpen(string ip, int port)
 		{
 			TimeSpan timeSpan = TimeSpan.FromMilliseconds(500.0);
-			string text = ((ip != null) ? ip : "127.0.0.1");
+			string text = ((ip == null) ? "127.0.0.1" : ip);
 			try
 			{
 				using (TcpClient tcpClient = new TcpClient())
 				{
 					IAsyncResult asyncResult = tcpClient.BeginConnect(text, port, null, null);
-					if (!asyncResult.AsyncWaitHandle.WaitOne(timeSpan))
+					bool flag = asyncResult.AsyncWaitHandle.WaitOne(timeSpan);
+					bool flag2 = !flag;
+					if (flag2)
 					{
 						return false;
 					}
@@ -519,7 +542,8 @@ namespace UnityEngine.Networking
 
 		public static bool Send(int hostId, int connectionId, int channelId, byte[] buffer, int size, out byte error)
 		{
-			if (buffer == null)
+			bool flag = buffer == null;
+			if (flag)
 			{
 				throw new NullReferenceException("send buffer is not initialized");
 			}
@@ -532,7 +556,8 @@ namespace UnityEngine.Networking
 
 		public static bool QueueMessageForSending(int hostId, int connectionId, int channelId, byte[] buffer, int size, out byte error)
 		{
-			if (buffer == null)
+			bool flag = buffer == null;
+			if (flag)
 			{
 				throw new NullReferenceException("send buffer is not initialized");
 			}
@@ -601,27 +626,31 @@ namespace UnityEngine.Networking
 
 		public static bool StartBroadcastDiscovery(int hostId, int broadcastPort, int key, int version, int subversion, byte[] buffer, int size, int timeout, out byte error)
 		{
-			if (buffer != null)
+			bool flag = buffer != null;
+			if (flag)
 			{
-				if (buffer.Length < size)
+				bool flag2 = buffer.Length < size;
+				if (flag2)
 				{
 					throw new ArgumentOutOfRangeException(string.Concat(new object[] { "Size: ", size, " > buffer.Length ", buffer.Length }));
 				}
-				if (size == 0)
+				bool flag3 = size == 0;
+				if (flag3)
 				{
 					throw new ArgumentOutOfRangeException("Size is zero while buffer exists, please pass null and 0 as buffer and size parameters");
 				}
 			}
-			bool flag;
-			if (buffer == null)
+			bool flag4 = buffer == null;
+			bool flag5;
+			if (flag4)
 			{
-				flag = NetworkTransport.StartBroadcastDiscoveryWithoutData(hostId, broadcastPort, key, version, subversion, timeout, out error);
+				flag5 = NetworkTransport.StartBroadcastDiscoveryWithoutData(hostId, broadcastPort, key, version, subversion, timeout, out error);
 			}
 			else
 			{
-				flag = NetworkTransport.StartBroadcastDiscoveryWithData(hostId, broadcastPort, key, version, subversion, buffer, size, timeout, out error);
+				flag5 = NetworkTransport.StartBroadcastDiscoveryWithData(hostId, broadcastPort, key, version, subversion, buffer, size, timeout, out error);
 			}
-			return flag;
+			return flag5;
 		}
 
 		[FreeFunction("UNETManager::Get()->StopBroadcastDiscovery")]
@@ -650,6 +679,10 @@ namespace UnityEngine.Networking
 			NetworkTransport.GetBroadcastConnectionMessageInternal(hostId, buffer, bufferSize, out receivedSize, out error);
 		}
 
+		[FreeFunction("UNETManager::SetMulticastLock")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetMulticastLock(bool enabled);
+
 		[FreeFunction("UNETManager::Get()->GetBroadcastConnectionMessage")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetBroadcastConnectionMessageInternal(int hostId, [Out] byte[] buffer, int bufferSize, out int receivedSize, out byte error);
@@ -657,17 +690,55 @@ namespace UnityEngine.Networking
 		private static void CheckTopology(HostTopology topology)
 		{
 			int maxPacketSize = NetworkTransport.GetMaxPacketSize();
-			if ((int)topology.DefaultConfig.PacketSize > maxPacketSize)
+			bool flag = (int)topology.DefaultConfig.PacketSize > maxPacketSize;
+			if (flag)
 			{
 				throw new ArgumentOutOfRangeException("Default config: packet size should be less than packet size defined in global config: " + maxPacketSize.ToString());
 			}
 			for (int i = 0; i < topology.SpecialConnectionConfigs.Count; i++)
 			{
-				if ((int)topology.SpecialConnectionConfigs[i].PacketSize > maxPacketSize)
+				bool flag2 = (int)topology.SpecialConnectionConfigs[i].PacketSize > maxPacketSize;
+				if (flag2)
 				{
 					throw new ArgumentOutOfRangeException("Special config " + i.ToString() + ": packet size should be less than packet size defined in global config: " + maxPacketSize.ToString());
 				}
 			}
+		}
+
+		[FreeFunction("UNETManager::Get()->LoadEncryptionLibrary")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool LoadEncryptionLibraryInternal(string libraryName);
+
+		public static bool LoadEncryptionLibrary(string libraryName)
+		{
+			return NetworkTransport.LoadEncryptionLibraryInternal(libraryName);
+		}
+
+		[FreeFunction("UNETManager::Get()->UnloadEncryptionLibrary")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void UnloadEncryptionLibraryInternal();
+
+		public static void UnloadEncryptionLibrary()
+		{
+			NetworkTransport.UnloadEncryptionLibraryInternal();
+		}
+
+		[FreeFunction("UNETManager::Get()->IsEncryptionActive")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsEncryptionActiveInternal();
+
+		public static bool IsEncryptionActive()
+		{
+			return NetworkTransport.IsEncryptionActiveInternal();
+		}
+
+		[FreeFunction("UNETManager::Get()->GetEncryptionSafeMaxPacketSize")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern short GetEncryptionSafeMaxPacketSizeInternal(short maxPacketSize);
+
+		public static short GetEncryptionSafeMaxPacketSize(short maxPacketSize)
+		{
+			return NetworkTransport.GetEncryptionSafeMaxPacketSizeInternal(maxPacketSize);
 		}
 
 		private static int s_nextSceneId = 1;

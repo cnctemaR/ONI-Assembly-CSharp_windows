@@ -4,16 +4,17 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Scripting;
 using UnityEngineInternal;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Graphics/Renderer.h")]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[UsedByNativeCode]
 	[RequireComponent(typeof(Transform))]
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
-	[NativeHeader("Runtime/Graphics/Renderer.h")]
 	public class Renderer : Component
 	{
 		[Obsolete("Use shadowCastingMode instead.", false)]
@@ -22,11 +23,11 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.shadowCastingMode != ShadowCastingMode.Off;
+				return this.shadowCastingMode > ShadowCastingMode.Off;
 			}
 			set
 			{
-				this.shadowCastingMode = ((!value) ? ShadowCastingMode.Off : ShadowCastingMode.On);
+				this.shadowCastingMode = (value ? ShadowCastingMode.On : ShadowCastingMode.Off);
 			}
 		}
 
@@ -39,7 +40,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.motionVectorGenerationMode = ((!value) ? MotionVectorGenerationMode.Camera : MotionVectorGenerationMode.Object);
+				this.motionVectorGenerationMode = (value ? MotionVectorGenerationMode.Object : MotionVectorGenerationMode.Camera);
 			}
 		}
 
@@ -48,11 +49,11 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.lightProbeUsage != LightProbeUsage.Off;
+				return this.lightProbeUsage > LightProbeUsage.Off;
 			}
 			set
 			{
-				this.lightProbeUsage = ((!value) ? LightProbeUsage.Off : LightProbeUsage.BlendProbes);
+				this.lightProbeUsage = (value ? LightProbeUsage.BlendProbes : LightProbeUsage.Off);
 			}
 		}
 
@@ -176,6 +177,14 @@ namespace UnityEngine
 			set;
 		}
 
+		public extern bool forceRenderingOff
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		public extern MotionVectorGenerationMode motionVectorGenerationMode
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -209,6 +218,14 @@ namespace UnityEngine
 		}
 
 		public extern int rendererPriority
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern RayTracingMode rayTracingMode
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -453,7 +470,8 @@ namespace UnityEngine
 
 		public void GetMaterials(List<Material> m)
 		{
-			if (m == null)
+			bool flag = m == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("The result material list cannot be null.", "m");
 			}
@@ -463,7 +481,8 @@ namespace UnityEngine
 
 		public void GetSharedMaterials(List<Material> m)
 		{
-			if (m == null)
+			bool flag = m == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("The result material list cannot be null.", "m");
 			}

@@ -147,7 +147,7 @@ namespace System.Reflection.Emit
 				return this.deleg;
 			}
 			this.CreateDynMethod();
-			this.deleg = Delegate.CreateDelegate(delegateType, this);
+			this.deleg = Delegate.CreateDelegate(delegateType, null, this);
 			return this.deleg;
 		}
 

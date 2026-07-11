@@ -13,7 +13,8 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			}
 			set
 			{
-				if (value < 0f || value > 1f)
+				bool flag = value < 0f || value > 1f;
+				if (flag)
 				{
 					throw new ArgumentOutOfRangeException("Red color (" + value + ") must be in range [0;1].");
 				}
@@ -29,7 +30,8 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			}
 			set
 			{
-				if (value < 0f || value > 1f)
+				bool flag = value < 0f || value > 1f;
+				if (flag)
 				{
 					throw new ArgumentOutOfRangeException("Green color (" + value + ") must be in range [0;1].");
 				}
@@ -45,7 +47,8 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			}
 			set
 			{
-				if (value < 0f || value > 1f)
+				bool flag = value < 0f || value > 1f;
+				if (flag)
 				{
 					throw new ArgumentOutOfRangeException("Blue color (" + value + ") must be in range [0;1].");
 				}
@@ -61,7 +64,8 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			}
 			set
 			{
-				if (value < 0f)
+				bool flag = value < 0f;
+				if (flag)
 				{
 					throw new ArgumentOutOfRangeException("Intensity (" + value + ") must be positive.");
 				}
@@ -71,10 +75,11 @@ namespace UnityEngine.Experimental.GlobalIllumination
 
 		public static LinearColor Convert(Color color, float intensity)
 		{
-			Color color2 = ((!GraphicsSettings.lightsUseLinearIntensity) ? color.RGBMultiplied(intensity).linear : color.linear.RGBMultiplied(intensity));
+			Color color2 = (GraphicsSettings.lightsUseLinearIntensity ? color.linear.RGBMultiplied(intensity) : color.RGBMultiplied(intensity).linear);
 			float maxColorComponent = color2.maxColorComponent;
+			bool flag = maxColorComponent <= 0f;
 			LinearColor linearColor;
-			if (maxColorComponent <= 0f)
+			if (flag)
 			{
 				linearColor = LinearColor.Black();
 			}

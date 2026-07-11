@@ -7,12 +7,6 @@ namespace UnityEngine.Playables
 	[RequiredByNativeCode]
 	public struct Playable : IPlayable, IEquatable<Playable>
 	{
-		[VisibleToOtherModules]
-		internal Playable(PlayableHandle handle)
-		{
-			this.m_Handle = handle;
-		}
-
 		public static Playable Null
 		{
 			get
@@ -26,6 +20,12 @@ namespace UnityEngine.Playables
 			Playable playable = new Playable(graph.CreatePlayableHandle());
 			playable.SetInputCount(inputCount);
 			return playable;
+		}
+
+		[VisibleToOtherModules]
+		internal Playable(PlayableHandle handle)
+		{
+			this.m_Handle = handle;
 		}
 
 		public PlayableHandle GetHandle()

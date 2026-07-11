@@ -7,8 +7,8 @@ using UnityEngine.Bindings;
 
 namespace Unity.Burst.LowLevel
 {
-	[StaticAccessor("BurstCompilerService::Get()", StaticAccessorType.Arrow)]
 	[NativeHeader("Runtime/Burst/BurstDelegateCache.h")]
+	[StaticAccessor("BurstCompilerService::Get()", StaticAccessorType.Arrow)]
 	[NativeHeader("Runtime/Burst/Burst.h")]
 	internal static class BurstCompilerService
 	{
@@ -16,6 +16,7 @@ namespace Unity.Burst.LowLevel
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string InitializeInternal(string path, BurstCompilerService.ExtractCompilerFlags extractCompilerFlags);
 
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string GetDisassembly(MethodInfo m, string compilerOptions);
 
@@ -27,6 +28,11 @@ namespace Unity.Burst.LowLevel
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void* GetAsyncCompiledAsyncDelegateMethod(int userID);
 
+		[ThreadSafe]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe static extern void* GetOrCreateSharedMemory(ref Hash128 key, uint size_of, uint alignment);
+
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string GetMethodSignature(MethodInfo method);
 
@@ -36,26 +42,38 @@ namespace Unity.Burst.LowLevel
 			get;
 		}
 
+		[ThreadSafe]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetCurrentExecutionMode(uint environment);
+
+		[ThreadSafe]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern uint GetCurrentExecutionMode();
+
 		public static void Initialize(string folderRuntime, BurstCompilerService.ExtractCompilerFlags extractCompilerFlags)
 		{
-			if (folderRuntime == null)
+			bool flag = folderRuntime == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("folderRuntime");
 			}
-			if (extractCompilerFlags == null)
+			bool flag2 = extractCompilerFlags == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("extractCompilerFlags");
 			}
-			if (!Directory.Exists(folderRuntime))
+			bool flag3 = !Directory.Exists(folderRuntime);
+			if (flag3)
 			{
-				Debug.LogError(string.Format("Unable to initialize the burst JIT compiler. The folder `{0}` does not exist", folderRuntime));
+				Debug.LogError("Unable to initialize the burst JIT compiler. The folder `" + folderRuntime + "` does not exist");
 			}
 			else
 			{
 				string text = BurstCompilerService.InitializeInternal(folderRuntime, extractCompilerFlags);
-				if (!string.IsNullOrEmpty(text))
+				bool flag4 = !string.IsNullOrEmpty(text);
+				if (flag4)
 				{
-					Debug.LogError(string.Format("Unexpected error while trying to initialize the burst JIT compiler: {0}", text));
+					Debug.LogError("Unexpected error while trying to initialize the burst JIT compiler: " + text);
 				}
 			}
 		}

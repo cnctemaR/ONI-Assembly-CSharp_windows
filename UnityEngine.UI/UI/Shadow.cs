@@ -50,13 +50,14 @@ namespace UnityEngine.UI
 				{
 					value.y = -600f;
 				}
-				if (!(this.m_EffectDistance == value))
+				if (this.m_EffectDistance == value)
 				{
-					this.m_EffectDistance = value;
-					if (base.graphic != null)
-					{
-						base.graphic.SetVerticesDirty();
-					}
+					return;
+				}
+				this.m_EffectDistance = value;
+				if (base.graphic != null)
+				{
+					base.graphic.SetVerticesDirty();
 				}
 			}
 		}
@@ -109,15 +110,16 @@ namespace UnityEngine.UI
 
 		public override void ModifyMesh(VertexHelper vh)
 		{
-			if (this.IsActive())
+			if (!this.IsActive())
 			{
-				List<UIVertex> list = ListPool<UIVertex>.Get();
-				vh.GetUIVertexStream(list);
-				this.ApplyShadow(list, this.effectColor, 0, list.Count, this.effectDistance.x, this.effectDistance.y);
-				vh.Clear();
-				vh.AddUIVertexTriangleStream(list);
-				ListPool<UIVertex>.Release(list);
+				return;
 			}
+			List<UIVertex> list = ListPool<UIVertex>.Get();
+			vh.GetUIVertexStream(list);
+			this.ApplyShadow(list, this.effectColor, 0, list.Count, this.effectDistance.x, this.effectDistance.y);
+			vh.Clear();
+			vh.AddUIVertexTriangleStream(list);
+			ListPool<UIVertex>.Release(list);
 		}
 
 		[SerializeField]

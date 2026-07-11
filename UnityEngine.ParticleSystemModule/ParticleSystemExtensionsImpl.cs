@@ -1,33 +1,35 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
+using System.Runtime.InteropServices;
+using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	internal sealed class ParticleSystemExtensionsImpl
+	internal class ParticleSystemExtensionsImpl
 	{
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "ParticleSystemScriptBindings::GetSafeCollisionEventSize")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern int GetSafeCollisionEventSize(ParticleSystem ps);
+		internal static extern int GetSafeCollisionEventSize([NotNull] ParticleSystem ps);
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "ParticleSystemScriptBindings::GetCollisionEventsDeprecated")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern int GetCollisionEventsDeprecated(ParticleSystem ps, GameObject go, ParticleCollisionEvent[] collisionEvents);
+		internal static extern int GetCollisionEventsDeprecated([NotNull] ParticleSystem ps, GameObject go, [Out] ParticleCollisionEvent[] collisionEvents);
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "ParticleSystemScriptBindings::GetSafeTriggerParticlesSize")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern int GetSafeTriggerParticlesSize(ParticleSystem ps, int type);
+		internal static extern int GetSafeTriggerParticlesSize([NotNull] ParticleSystem ps, int type);
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "ParticleSystemScriptBindings::GetCollisionEvents")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern int GetCollisionEvents(ParticleSystem ps, GameObject go, object collisionEvents);
+		internal static extern int GetCollisionEvents([NotNull] ParticleSystem ps, [NotNull] GameObject go, [NotNull] List<ParticleCollisionEvent> collisionEvents);
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "ParticleSystemScriptBindings::GetTriggerParticles")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern int GetTriggerParticles(ParticleSystem ps, int type, object particles);
+		internal static extern int GetTriggerParticles([NotNull] ParticleSystem ps, int type, [NotNull] List<ParticleSystem.Particle> particles);
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction(Name = "ParticleSystemScriptBindings::SetTriggerParticles")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void SetTriggerParticles(ParticleSystem ps, int type, object particles, int offset, int count);
+		internal static extern void SetTriggerParticles([NotNull] ParticleSystem ps, int type, [NotNull] List<ParticleSystem.Particle> particles, int offset, int count);
 	}
 }

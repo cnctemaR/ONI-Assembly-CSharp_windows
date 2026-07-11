@@ -9,29 +9,6 @@ namespace UnityEngine.TextCore
 	[Serializable]
 	public struct FaceInfo
 	{
-		internal FaceInfo(string familyName, string styleName, int pointSize, float scale, float lineHeight, float ascentLine, float capLine, float meanLine, float baseline, float descentLine, float superscriptOffset, float superscriptSize, float subscriptOffset, float subscriptSize, float underlineOffset, float underlineThickness, float strikethroughOffset, float strikethroughThickness, float tabWidth)
-		{
-			this.m_FamilyName = familyName;
-			this.m_StyleName = styleName;
-			this.m_PointSize = pointSize;
-			this.m_Scale = scale;
-			this.m_LineHeight = lineHeight;
-			this.m_AscentLine = ascentLine;
-			this.m_CapLine = capLine;
-			this.m_MeanLine = meanLine;
-			this.m_Baseline = baseline;
-			this.m_DescentLine = descentLine;
-			this.m_SuperscriptOffset = superscriptOffset;
-			this.m_SuperscriptSize = superscriptSize;
-			this.m_SubscriptOffset = subscriptOffset;
-			this.m_SubscriptSize = subscriptSize;
-			this.m_UnderlineOffset = underlineOffset;
-			this.m_UnderlineThickness = underlineThickness;
-			this.m_StrikethroughOffset = strikethroughOffset;
-			this.m_StrikethroughThickness = strikethroughThickness;
-			this.m_TabWidth = tabWidth;
-		}
-
 		public string familyName
 		{
 			get
@@ -260,6 +237,29 @@ namespace UnityEngine.TextCore
 			}
 		}
 
+		internal FaceInfo(string familyName, string styleName, int pointSize, float scale, float lineHeight, float ascentLine, float capLine, float meanLine, float baseline, float descentLine, float superscriptOffset, float superscriptSize, float subscriptOffset, float subscriptSize, float underlineOffset, float underlineThickness, float strikethroughOffset, float strikethroughThickness, float tabWidth)
+		{
+			this.m_FamilyName = familyName;
+			this.m_StyleName = styleName;
+			this.m_PointSize = pointSize;
+			this.m_Scale = scale;
+			this.m_LineHeight = lineHeight;
+			this.m_AscentLine = ascentLine;
+			this.m_CapLine = capLine;
+			this.m_MeanLine = meanLine;
+			this.m_Baseline = baseline;
+			this.m_DescentLine = descentLine;
+			this.m_SuperscriptOffset = superscriptOffset;
+			this.m_SuperscriptSize = superscriptSize;
+			this.m_SubscriptOffset = subscriptOffset;
+			this.m_SubscriptSize = subscriptSize;
+			this.m_UnderlineOffset = underlineOffset;
+			this.m_UnderlineThickness = underlineThickness;
+			this.m_StrikethroughOffset = strikethroughOffset;
+			this.m_StrikethroughThickness = strikethroughThickness;
+			this.m_TabWidth = tabWidth;
+		}
+
 		public bool Compare(FaceInfo other)
 		{
 			return this.familyName == other.familyName && this.styleName == other.styleName && this.pointSize == other.pointSize && FontEngineUtilities.Approximately(this.scale, other.scale) && FontEngineUtilities.Approximately(this.lineHeight, other.lineHeight) && FontEngineUtilities.Approximately(this.ascentLine, other.ascentLine) && FontEngineUtilities.Approximately(this.capLine, other.capLine) && FontEngineUtilities.Approximately(this.meanLine, other.meanLine) && FontEngineUtilities.Approximately(this.baseline, other.baseline) && FontEngineUtilities.Approximately(this.descentLine, other.descentLine) && FontEngineUtilities.Approximately(this.superscriptOffset, other.superscriptOffset) && FontEngineUtilities.Approximately(this.superscriptSize, other.superscriptSize) && FontEngineUtilities.Approximately(this.subscriptOffset, other.subscriptOffset) && FontEngineUtilities.Approximately(this.subscriptSize, other.subscriptSize) && FontEngineUtilities.Approximately(this.underlineOffset, other.underlineOffset) && FontEngineUtilities.Approximately(this.underlineThickness, other.underlineThickness) && FontEngineUtilities.Approximately(this.strikethroughOffset, other.strikethroughOffset) && FontEngineUtilities.Approximately(this.strikethroughThickness, other.strikethroughThickness) && FontEngineUtilities.Approximately(this.tabWidth, other.tabWidth);
@@ -277,24 +277,24 @@ namespace UnityEngine.TextCore
 		[NativeName("pointSize")]
 		private int m_PointSize;
 
-		[SerializeField]
 		[NativeName("scale")]
+		[SerializeField]
 		private float m_Scale;
 
-		[SerializeField]
 		[NativeName("lineHeight")]
+		[SerializeField]
 		private float m_LineHeight;
 
 		[NativeName("ascentLine")]
 		[SerializeField]
 		private float m_AscentLine;
 
-		[SerializeField]
 		[NativeName("capLine")]
+		[SerializeField]
 		private float m_CapLine;
 
-		[SerializeField]
 		[NativeName("meanLine")]
+		[SerializeField]
 		private float m_MeanLine;
 
 		[SerializeField]
@@ -305,36 +305,36 @@ namespace UnityEngine.TextCore
 		[SerializeField]
 		private float m_DescentLine;
 
-		[SerializeField]
 		[NativeName("superscriptOffset")]
+		[SerializeField]
 		private float m_SuperscriptOffset;
 
-		[NativeName("superscriptSize")]
 		[SerializeField]
+		[NativeName("superscriptSize")]
 		private float m_SuperscriptSize;
 
-		[NativeName("subscriptOffset")]
 		[SerializeField]
+		[NativeName("subscriptOffset")]
 		private float m_SubscriptOffset;
 
-		[NativeName("subscriptSize")]
 		[SerializeField]
+		[NativeName("subscriptSize")]
 		private float m_SubscriptSize;
 
-		[NativeName("underlineOffset")]
 		[SerializeField]
+		[NativeName("underlineOffset")]
 		private float m_UnderlineOffset;
 
-		[NativeName("underlineThickness")]
 		[SerializeField]
+		[NativeName("underlineThickness")]
 		private float m_UnderlineThickness;
 
 		[SerializeField]
 		[NativeName("strikethroughOffset")]
 		private float m_StrikethroughOffset;
 
-		[NativeName("strikethroughThickness")]
 		[SerializeField]
+		[NativeName("strikethroughThickness")]
 		private float m_StrikethroughThickness;
 
 		[SerializeField]

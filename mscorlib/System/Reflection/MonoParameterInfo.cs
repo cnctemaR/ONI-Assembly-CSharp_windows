@@ -7,8 +7,8 @@ using System.Runtime.InteropServices;
 namespace System.Reflection
 {
 	[ComDefaultInterface(typeof(_ParameterInfo))]
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.None)]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	internal class MonoParameterInfo : RuntimeParameterInfo

@@ -6,6 +6,7 @@ namespace UnityEngine
 	{
 		None,
 		OneEye,
-		TwoEyes
+		TwoEyes,
+		DeviceSpecific
 	}
 }

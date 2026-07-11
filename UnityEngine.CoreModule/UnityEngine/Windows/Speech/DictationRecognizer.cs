@@ -8,28 +8,8 @@ namespace UnityEngine.Windows.Speech
 {
 	public sealed class DictationRecognizer : IDisposable
 	{
-		public DictationRecognizer()
-			: this(ConfidenceLevel.Medium, DictationTopicConstraint.Dictation)
-		{
-		}
-
-		public DictationRecognizer(ConfidenceLevel confidenceLevel)
-			: this(confidenceLevel, DictationTopicConstraint.Dictation)
-		{
-		}
-
-		public DictationRecognizer(DictationTopicConstraint topic)
-			: this(ConfidenceLevel.Medium, topic)
-		{
-		}
-
-		public DictationRecognizer(ConfidenceLevel minimumConfidence, DictationTopicConstraint topic)
-		{
-			this.m_Recognizer = DictationRecognizer.Create(this, minimumConfidence, topic);
-		}
-
-		[NativeThrows]
 		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr Create(object self, ConfidenceLevel minimumConfidence, DictationTopicConstraint topicConstraint);
 
@@ -45,8 +25,8 @@ namespace UnityEngine.Windows.Speech
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Destroy(IntPtr self);
 
-		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[ThreadSafe]
+		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void DestroyThreaded(IntPtr self);
 
@@ -86,7 +66,7 @@ namespace UnityEngine.Windows.Speech
 		{
 			get
 			{
-				return (!(this.m_Recognizer != IntPtr.Zero)) ? SpeechSystemStatus.Stopped : DictationRecognizer.GetStatus(this.m_Recognizer);
+				return (this.m_Recognizer != IntPtr.Zero) ? DictationRecognizer.GetStatus(this.m_Recognizer) : SpeechSystemStatus.Stopped;
 			}
 		}
 
@@ -94,8 +74,9 @@ namespace UnityEngine.Windows.Speech
 		{
 			get
 			{
+				bool flag = this.m_Recognizer == IntPtr.Zero;
 				float num;
-				if (this.m_Recognizer == IntPtr.Zero)
+				if (flag)
 				{
 					num = 0f;
 				}
@@ -107,7 +88,8 @@ namespace UnityEngine.Windows.Speech
 			}
 			set
 			{
-				if (!(this.m_Recognizer == IntPtr.Zero))
+				bool flag = this.m_Recognizer == IntPtr.Zero;
+				if (!flag)
 				{
 					DictationRecognizer.SetAutoSilenceTimeoutSeconds(this.m_Recognizer, value);
 				}
@@ -118,8 +100,9 @@ namespace UnityEngine.Windows.Speech
 		{
 			get
 			{
+				bool flag = this.m_Recognizer == IntPtr.Zero;
 				float num;
-				if (this.m_Recognizer == IntPtr.Zero)
+				if (flag)
 				{
 					num = 0f;
 				}
@@ -131,26 +114,56 @@ namespace UnityEngine.Windows.Speech
 			}
 			set
 			{
-				if (!(this.m_Recognizer == IntPtr.Zero))
+				bool flag = this.m_Recognizer == IntPtr.Zero;
+				if (!flag)
 				{
 					DictationRecognizer.SetInitialSilenceTimeoutSeconds(this.m_Recognizer, value);
 				}
 			}
 		}
 
-		~DictationRecognizer()
+		public DictationRecognizer()
+			: this(ConfidenceLevel.Medium, DictationTopicConstraint.Dictation)
 		{
-			if (this.m_Recognizer != IntPtr.Zero)
+		}
+
+		public DictationRecognizer(ConfidenceLevel confidenceLevel)
+			: this(confidenceLevel, DictationTopicConstraint.Dictation)
+		{
+		}
+
+		public DictationRecognizer(DictationTopicConstraint topic)
+			: this(ConfidenceLevel.Medium, topic)
+		{
+		}
+
+		public DictationRecognizer(ConfidenceLevel minimumConfidence, DictationTopicConstraint topic)
+		{
+			this.m_Recognizer = DictationRecognizer.Create(this, minimumConfidence, topic);
+		}
+
+		protected override void Finalize()
+		{
+			try
 			{
-				DictationRecognizer.DestroyThreaded(this.m_Recognizer);
-				this.m_Recognizer = IntPtr.Zero;
-				GC.SuppressFinalize(this);
+				bool flag = this.m_Recognizer != IntPtr.Zero;
+				if (flag)
+				{
+					DictationRecognizer.DestroyThreaded(this.m_Recognizer);
+					this.m_Recognizer = IntPtr.Zero;
+					GC.SuppressFinalize(this);
+				}
+			}
+			finally
+			{
+				base.Finalize();
 			}
 		}
 
 		public void Start()
 		{
-			if (!(this.m_Recognizer == IntPtr.Zero))
+			bool flag = this.m_Recognizer == IntPtr.Zero;
+			if (!flag)
 			{
 				DictationRecognizer.Start(this.m_Recognizer);
 			}
@@ -158,7 +171,8 @@ namespace UnityEngine.Windows.Speech
 
 		public void Stop()
 		{
-			if (!(this.m_Recognizer == IntPtr.Zero))
+			bool flag = this.m_Recognizer == IntPtr.Zero;
+			if (!flag)
 			{
 				DictationRecognizer.Stop(this.m_Recognizer);
 			}
@@ -166,7 +180,8 @@ namespace UnityEngine.Windows.Speech
 
 		public void Dispose()
 		{
-			if (this.m_Recognizer != IntPtr.Zero)
+			bool flag = this.m_Recognizer != IntPtr.Zero;
+			if (flag)
 			{
 				DictationRecognizer.Destroy(this.m_Recognizer);
 				this.m_Recognizer = IntPtr.Zero;
@@ -178,7 +193,8 @@ namespace UnityEngine.Windows.Speech
 		private void DictationRecognizer_InvokeHypothesisGeneratedEvent(string keyword)
 		{
 			DictationRecognizer.DictationHypothesisDelegate dictationHypothesis = this.DictationHypothesis;
-			if (dictationHypothesis != null)
+			bool flag = dictationHypothesis != null;
+			if (flag)
 			{
 				dictationHypothesis(keyword);
 			}
@@ -188,7 +204,8 @@ namespace UnityEngine.Windows.Speech
 		private void DictationRecognizer_InvokeResultGeneratedEvent(string keyword, ConfidenceLevel minimumConfidence)
 		{
 			DictationRecognizer.DictationResultDelegate dictationResult = this.DictationResult;
-			if (dictationResult != null)
+			bool flag = dictationResult != null;
+			if (flag)
 			{
 				dictationResult(keyword, minimumConfidence);
 			}
@@ -198,7 +215,8 @@ namespace UnityEngine.Windows.Speech
 		private void DictationRecognizer_InvokeCompletedEvent(DictationCompletionCause cause)
 		{
 			DictationRecognizer.DictationCompletedDelegate dictationComplete = this.DictationComplete;
-			if (dictationComplete != null)
+			bool flag = dictationComplete != null;
+			if (flag)
 			{
 				dictationComplete(cause);
 			}
@@ -208,7 +226,8 @@ namespace UnityEngine.Windows.Speech
 		private void DictationRecognizer_InvokeErrorEvent(string error, int hresult)
 		{
 			DictationRecognizer.DictationErrorHandler dictationError = this.DictationError;
-			if (dictationError != null)
+			bool flag = dictationError != null;
+			if (flag)
 			{
 				dictationError(error, hresult);
 			}

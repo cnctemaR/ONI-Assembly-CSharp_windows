@@ -500,7 +500,11 @@ namespace System.Runtime.Serialization.Json
 				this.context.IncrementItemCount(1);
 				string jsonMemberName = XmlObjectSerializerReadContextComplexJson.GetJsonMemberName(this.xmlReader);
 				object obj = null;
-				if (keyParseMode == JsonFormatReaderInterpreter.KeyParseMode.UsingParseEnum)
+				if (keyParseMode == JsonFormatReaderInterpreter.KeyParseMode.AsString)
+				{
+					obj = jsonMemberName;
+				}
+				else if (keyParseMode == JsonFormatReaderInterpreter.KeyParseMode.UsingParseEnum)
 				{
 					obj = Enum.Parse(type, jsonMemberName);
 				}

@@ -6,6 +6,12 @@ namespace UnityEngine.Bindings
 	[VisibleToOtherModules]
 	internal class NativeConditionalAttribute : Attribute, IBindingsAttribute
 	{
+		public string Condition { get; set; }
+
+		public string StubReturnStatement { get; set; }
+
+		public bool Enabled { get; set; }
+
 		public NativeConditionalAttribute()
 		{
 		}
@@ -38,11 +44,5 @@ namespace UnityEngine.Bindings
 		{
 			this.StubReturnStatement = stubReturnStatement;
 		}
-
-		public string Condition { get; set; }
-
-		public string StubReturnStatement { get; set; }
-
-		public bool Enabled { get; set; }
 	}
 }

@@ -9,12 +9,8 @@ namespace UnityEngine.UI
 	[ExecuteAlways]
 	[DisallowMultipleComponent]
 	[RequireComponent(typeof(RectTransform))]
-	public class ScrollRect : UIBehaviour, IInitializePotentialDragHandler, IBeginDragHandler, IEndDragHandler, IDragHandler, IScrollHandler, ICanvasElement, ILayoutElement, ILayoutGroup, IEventSystemHandler, ILayoutController
+	public class ScrollRect : UIBehaviour, IInitializePotentialDragHandler, IEventSystemHandler, IBeginDragHandler, IEndDragHandler, IDragHandler, IScrollHandler, ICanvasElement, ILayoutElement, ILayoutGroup, ILayoutController
 	{
-		protected ScrollRect()
-		{
-		}
-
 		public RectTransform content
 		{
 			get
@@ -270,6 +266,10 @@ namespace UnityEngine.UI
 			}
 		}
 
+		protected ScrollRect()
+		{
+		}
+
 		public virtual void Rebuild(CanvasUpdate executing)
 		{
 			if (executing == CanvasUpdate.Prelayout)
@@ -296,16 +296,16 @@ namespace UnityEngine.UI
 		private void UpdateCachedData()
 		{
 			Transform transform = base.transform;
-			this.m_HorizontalScrollbarRect = ((!(this.m_HorizontalScrollbar == null)) ? (this.m_HorizontalScrollbar.transform as RectTransform) : null);
-			this.m_VerticalScrollbarRect = ((!(this.m_VerticalScrollbar == null)) ? (this.m_VerticalScrollbar.transform as RectTransform) : null);
+			this.m_HorizontalScrollbarRect = ((this.m_HorizontalScrollbar == null) ? null : (this.m_HorizontalScrollbar.transform as RectTransform));
+			this.m_VerticalScrollbarRect = ((this.m_VerticalScrollbar == null) ? null : (this.m_VerticalScrollbar.transform as RectTransform));
 			bool flag = this.viewRect.parent == transform;
 			bool flag2 = !this.m_HorizontalScrollbarRect || this.m_HorizontalScrollbarRect.parent == transform;
 			bool flag3 = !this.m_VerticalScrollbarRect || this.m_VerticalScrollbarRect.parent == transform;
 			bool flag4 = flag && flag2 && flag3;
 			this.m_HSliderExpand = flag4 && this.m_HorizontalScrollbarRect && this.horizontalScrollbarVisibility == ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
 			this.m_VSliderExpand = flag4 && this.m_VerticalScrollbarRect && this.verticalScrollbarVisibility == ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
-			this.m_HSliderHeight = ((!(this.m_HorizontalScrollbarRect == null)) ? this.m_HorizontalScrollbarRect.rect.height : 0f);
-			this.m_VSliderWidth = ((!(this.m_VerticalScrollbarRect == null)) ? this.m_VerticalScrollbarRect.rect.width : 0f);
+			this.m_HSliderHeight = ((this.m_HorizontalScrollbarRect == null) ? 0f : this.m_HorizontalScrollbarRect.rect.height);
+			this.m_VSliderWidth = ((this.m_VerticalScrollbarRect == null) ? 0f : this.m_VerticalScrollbarRect.rect.width);
 		}
 
 		protected override void OnEnable()
@@ -334,6 +334,7 @@ namespace UnityEngine.UI
 			{
 				this.m_VerticalScrollbar.onValueChanged.RemoveListener(new UnityAction<float>(this.SetVerticalNormalizedPosition));
 			}
+			this.m_Dragging = false;
 			this.m_Scrolling = false;
 			this.m_HasRebuiltLayout = false;
 			this.m_Tracker.Clear();
@@ -362,103 +363,115 @@ namespace UnityEngine.UI
 
 		public virtual void OnScroll(PointerEventData data)
 		{
-			if (this.IsActive())
+			if (!this.IsActive())
 			{
-				this.EnsureLayoutHasRebuilt();
-				this.UpdateBounds();
-				Vector2 scrollDelta = data.scrollDelta;
-				scrollDelta.y *= -1f;
-				if (this.vertical && !this.horizontal)
-				{
-					if (Mathf.Abs(scrollDelta.x) > Mathf.Abs(scrollDelta.y))
-					{
-						scrollDelta.y = scrollDelta.x;
-					}
-					scrollDelta.x = 0f;
-				}
-				if (this.horizontal && !this.vertical)
-				{
-					if (Mathf.Abs(scrollDelta.y) > Mathf.Abs(scrollDelta.x))
-					{
-						scrollDelta.x = scrollDelta.y;
-					}
-					scrollDelta.y = 0f;
-				}
-				if (data.IsScrolling())
-				{
-					this.m_Scrolling = true;
-				}
-				Vector2 vector = this.m_Content.anchoredPosition;
-				vector += scrollDelta * this.m_ScrollSensitivity;
-				if (this.m_MovementType == ScrollRect.MovementType.Clamped)
-				{
-					vector += this.CalculateOffset(vector - this.m_Content.anchoredPosition);
-				}
-				this.SetContentAnchoredPosition(vector);
-				this.UpdateBounds();
+				return;
 			}
+			this.EnsureLayoutHasRebuilt();
+			this.UpdateBounds();
+			Vector2 scrollDelta = data.scrollDelta;
+			scrollDelta.y *= -1f;
+			if (this.vertical && !this.horizontal)
+			{
+				if (Mathf.Abs(scrollDelta.x) > Mathf.Abs(scrollDelta.y))
+				{
+					scrollDelta.y = scrollDelta.x;
+				}
+				scrollDelta.x = 0f;
+			}
+			if (this.horizontal && !this.vertical)
+			{
+				if (Mathf.Abs(scrollDelta.y) > Mathf.Abs(scrollDelta.x))
+				{
+					scrollDelta.x = scrollDelta.y;
+				}
+				scrollDelta.y = 0f;
+			}
+			if (data.IsScrolling())
+			{
+				this.m_Scrolling = true;
+			}
+			Vector2 vector = this.m_Content.anchoredPosition;
+			vector += scrollDelta * this.m_ScrollSensitivity;
+			if (this.m_MovementType == ScrollRect.MovementType.Clamped)
+			{
+				vector += this.CalculateOffset(vector - this.m_Content.anchoredPosition);
+			}
+			this.SetContentAnchoredPosition(vector);
+			this.UpdateBounds();
 		}
 
 		public virtual void OnInitializePotentialDrag(PointerEventData eventData)
 		{
-			if (eventData.button == PointerEventData.InputButton.Left)
+			if (eventData.button != PointerEventData.InputButton.Left)
 			{
-				this.m_Velocity = Vector2.zero;
+				return;
 			}
+			this.m_Velocity = Vector2.zero;
 		}
 
 		public virtual void OnBeginDrag(PointerEventData eventData)
 		{
-			if (eventData.button == PointerEventData.InputButton.Left)
+			if (eventData.button != PointerEventData.InputButton.Left)
 			{
-				if (this.IsActive())
-				{
-					this.UpdateBounds();
-					this.m_PointerStartLocalCursor = Vector2.zero;
-					RectTransformUtility.ScreenPointToLocalPointInRectangle(this.viewRect, eventData.position, eventData.pressEventCamera, out this.m_PointerStartLocalCursor);
-					this.m_ContentStartPosition = this.m_Content.anchoredPosition;
-					this.m_Dragging = true;
-				}
+				return;
 			}
+			if (!this.IsActive())
+			{
+				return;
+			}
+			this.UpdateBounds();
+			this.m_PointerStartLocalCursor = Vector2.zero;
+			RectTransformUtility.ScreenPointToLocalPointInRectangle(this.viewRect, eventData.position, eventData.pressEventCamera, out this.m_PointerStartLocalCursor);
+			this.m_ContentStartPosition = this.m_Content.anchoredPosition;
+			this.m_Dragging = true;
 		}
 
 		public virtual void OnEndDrag(PointerEventData eventData)
 		{
-			if (eventData.button == PointerEventData.InputButton.Left)
+			if (eventData.button != PointerEventData.InputButton.Left)
 			{
-				this.m_Dragging = false;
+				return;
 			}
+			this.m_Dragging = false;
 		}
 
 		public virtual void OnDrag(PointerEventData eventData)
 		{
-			if (eventData.button == PointerEventData.InputButton.Left)
+			if (!this.m_Dragging)
 			{
-				if (this.IsActive())
+				return;
+			}
+			if (eventData.button != PointerEventData.InputButton.Left)
+			{
+				return;
+			}
+			if (!this.IsActive())
+			{
+				return;
+			}
+			Vector2 vector;
+			if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(this.viewRect, eventData.position, eventData.pressEventCamera, out vector))
+			{
+				return;
+			}
+			this.UpdateBounds();
+			Vector2 vector2 = vector - this.m_PointerStartLocalCursor;
+			Vector2 vector3 = this.m_ContentStartPosition + vector2;
+			Vector2 vector4 = this.CalculateOffset(vector3 - this.m_Content.anchoredPosition);
+			vector3 += vector4;
+			if (this.m_MovementType == ScrollRect.MovementType.Elastic)
+			{
+				if (vector4.x != 0f)
 				{
-					Vector2 vector;
-					if (RectTransformUtility.ScreenPointToLocalPointInRectangle(this.viewRect, eventData.position, eventData.pressEventCamera, out vector))
-					{
-						this.UpdateBounds();
-						Vector2 vector2 = vector - this.m_PointerStartLocalCursor;
-						Vector2 vector3 = this.m_ContentStartPosition + vector2;
-						Vector2 vector4 = this.CalculateOffset(vector3 - this.m_Content.anchoredPosition);
-						vector3 += vector4;
-						if (this.m_MovementType == ScrollRect.MovementType.Elastic)
-						{
-							if (vector4.x != 0f)
-							{
-								vector3.x -= ScrollRect.RubberDelta(vector4.x, this.m_ViewBounds.size.x);
-							}
-							if (vector4.y != 0f)
-							{
-								vector3.y -= ScrollRect.RubberDelta(vector4.y, this.m_ViewBounds.size.y);
-							}
-						}
-						this.SetContentAnchoredPosition(vector3);
-					}
+					vector3.x -= ScrollRect.RubberDelta(vector4.x, this.m_ViewBounds.size.x);
+				}
+				if (vector4.y != 0f)
+				{
+					vector3.y -= ScrollRect.RubberDelta(vector4.y, this.m_ViewBounds.size.y);
 				}
 			}
+			this.SetContentAnchoredPosition(vector3);
 		}
 
 		protected virtual void SetContentAnchoredPosition(Vector2 position)
@@ -480,72 +493,73 @@ namespace UnityEngine.UI
 
 		protected virtual void LateUpdate()
 		{
-			if (this.m_Content)
+			if (!this.m_Content)
 			{
-				this.EnsureLayoutHasRebuilt();
-				this.UpdateBounds();
-				float unscaledDeltaTime = Time.unscaledDeltaTime;
-				Vector2 vector = this.CalculateOffset(Vector2.zero);
-				if (!this.m_Dragging && (vector != Vector2.zero || this.m_Velocity != Vector2.zero))
+				return;
+			}
+			this.EnsureLayoutHasRebuilt();
+			this.UpdateBounds();
+			float unscaledDeltaTime = Time.unscaledDeltaTime;
+			Vector2 vector = this.CalculateOffset(Vector2.zero);
+			if (!this.m_Dragging && (vector != Vector2.zero || this.m_Velocity != Vector2.zero))
+			{
+				Vector2 vector2 = this.m_Content.anchoredPosition;
+				for (int i = 0; i < 2; i++)
 				{
-					Vector2 vector2 = this.m_Content.anchoredPosition;
-					for (int i = 0; i < 2; i++)
+					if (this.m_MovementType == ScrollRect.MovementType.Elastic && vector[i] != 0f)
 					{
-						if (this.m_MovementType == ScrollRect.MovementType.Elastic && vector[i] != 0f)
+						float num = this.m_Velocity[i];
+						float num2 = this.m_Elasticity;
+						if (this.m_Scrolling)
 						{
-							float num = this.m_Velocity[i];
-							float num2 = this.m_Elasticity;
-							if (this.m_Scrolling)
-							{
-								num2 *= 3f;
-							}
-							vector2[i] = Mathf.SmoothDamp(this.m_Content.anchoredPosition[i], this.m_Content.anchoredPosition[i] + vector[i], ref num, num2, float.PositiveInfinity, unscaledDeltaTime);
-							if (Mathf.Abs(num) < 1f)
-							{
-								num = 0f;
-							}
-							this.m_Velocity[i] = num;
+							num2 *= 3f;
 						}
-						else if (this.m_Inertia)
+						vector2[i] = Mathf.SmoothDamp(this.m_Content.anchoredPosition[i], this.m_Content.anchoredPosition[i] + vector[i], ref num, num2, float.PositiveInfinity, unscaledDeltaTime);
+						if (Mathf.Abs(num) < 1f)
 						{
-							ref Vector2 ptr = ref this.m_Velocity;
-							int num3;
-							this.m_Velocity[num3 = i] = ptr[num3] * Mathf.Pow(this.m_DecelerationRate, unscaledDeltaTime);
-							if (Mathf.Abs(this.m_Velocity[i]) < 1f)
-							{
-								this.m_Velocity[i] = 0f;
-							}
-							ptr = ref vector2;
-							int num4;
-							vector2[num4 = i] = ptr[num4] + this.m_Velocity[i] * unscaledDeltaTime;
+							num = 0f;
 						}
-						else
+						this.m_Velocity[i] = num;
+					}
+					else if (this.m_Inertia)
+					{
+						ref Vector2 ptr = ref this.m_Velocity;
+						int num3 = i;
+						ptr[num3] *= Mathf.Pow(this.m_DecelerationRate, unscaledDeltaTime);
+						if (Mathf.Abs(this.m_Velocity[i]) < 1f)
 						{
 							this.m_Velocity[i] = 0f;
 						}
+						ptr = ref vector2;
+						num3 = i;
+						ptr[num3] += this.m_Velocity[i] * unscaledDeltaTime;
 					}
-					if (this.m_MovementType == ScrollRect.MovementType.Clamped)
+					else
 					{
-						vector = this.CalculateOffset(vector2 - this.m_Content.anchoredPosition);
-						vector2 += vector;
+						this.m_Velocity[i] = 0f;
 					}
-					this.SetContentAnchoredPosition(vector2);
 				}
-				if (this.m_Dragging && this.m_Inertia)
+				if (this.m_MovementType == ScrollRect.MovementType.Clamped)
 				{
-					Vector3 vector3 = (this.m_Content.anchoredPosition - this.m_PrevPosition) / unscaledDeltaTime;
-					this.m_Velocity = Vector3.Lerp(this.m_Velocity, vector3, unscaledDeltaTime * 10f);
+					vector = this.CalculateOffset(vector2 - this.m_Content.anchoredPosition);
+					vector2 += vector;
 				}
-				if (this.m_ViewBounds != this.m_PrevViewBounds || this.m_ContentBounds != this.m_PrevContentBounds || this.m_Content.anchoredPosition != this.m_PrevPosition)
-				{
-					this.UpdateScrollbars(vector);
-					UISystemProfilerApi.AddMarker("ScrollRect.value", this);
-					this.m_OnValueChanged.Invoke(this.normalizedPosition);
-					this.UpdatePrevData();
-				}
-				this.UpdateScrollbarVisibility();
-				this.m_Scrolling = false;
+				this.SetContentAnchoredPosition(vector2);
 			}
+			if (this.m_Dragging && this.m_Inertia)
+			{
+				Vector3 vector3 = (this.m_Content.anchoredPosition - this.m_PrevPosition) / unscaledDeltaTime;
+				this.m_Velocity = Vector3.Lerp(this.m_Velocity, vector3, unscaledDeltaTime * 10f);
+			}
+			if (this.m_ViewBounds != this.m_PrevViewBounds || this.m_ContentBounds != this.m_PrevContentBounds || this.m_Content.anchoredPosition != this.m_PrevPosition)
+			{
+				this.UpdateScrollbars(vector);
+				UISystemProfilerApi.AddMarker("ScrollRect.value", this);
+				this.m_OnValueChanged.Invoke(this.normalizedPosition);
+				this.UpdatePrevData();
+			}
+			this.UpdateScrollbarVisibility();
+			this.m_Scrolling = false;
 		}
 
 		protected void UpdatePrevData()
@@ -608,16 +622,11 @@ namespace UnityEngine.UI
 			get
 			{
 				this.UpdateBounds();
-				float num;
 				if (this.m_ContentBounds.size.x <= this.m_ViewBounds.size.x || Mathf.Approximately(this.m_ContentBounds.size.x, this.m_ViewBounds.size.x))
 				{
-					num = (float)((this.m_ViewBounds.min.x <= this.m_ContentBounds.min.x) ? 0 : 1);
+					return (float)((this.m_ViewBounds.min.x > this.m_ContentBounds.min.x) ? 1 : 0);
 				}
-				else
-				{
-					num = (this.m_ViewBounds.min.x - this.m_ContentBounds.min.x) / (this.m_ContentBounds.size.x - this.m_ViewBounds.size.x);
-				}
-				return num;
+				return (this.m_ViewBounds.min.x - this.m_ContentBounds.min.x) / (this.m_ContentBounds.size.x - this.m_ViewBounds.size.x);
 			}
 			set
 			{
@@ -630,16 +639,11 @@ namespace UnityEngine.UI
 			get
 			{
 				this.UpdateBounds();
-				float num;
 				if (this.m_ContentBounds.size.y <= this.m_ViewBounds.size.y || Mathf.Approximately(this.m_ContentBounds.size.y, this.m_ViewBounds.size.y))
 				{
-					num = (float)((this.m_ViewBounds.min.y <= this.m_ContentBounds.min.y) ? 0 : 1);
+					return (float)((this.m_ViewBounds.min.y > this.m_ContentBounds.min.y) ? 1 : 0);
 				}
-				else
-				{
-					num = (this.m_ViewBounds.min.y - this.m_ContentBounds.min.y) / (this.m_ContentBounds.size.y - this.m_ViewBounds.size.y);
-				}
-				return num;
+				return (this.m_ViewBounds.min.y - this.m_ContentBounds.min.y) / (this.m_ContentBounds.size.y - this.m_ViewBounds.size.y);
 			}
 			set
 			{
@@ -819,6 +823,7 @@ namespace UnityEngine.UI
 					if (scrollbar.gameObject.activeSelf != xAxisEnabled)
 					{
 						scrollbar.gameObject.SetActive(xAxisEnabled);
+						return;
 					}
 				}
 				else if (scrollbar.gameObject.activeSelf != xScrollingNeeded)
@@ -854,11 +859,9 @@ namespace UnityEngine.UI
 				if (this.hScrollingNeeded)
 				{
 					this.m_VerticalScrollbarRect.sizeDelta = new Vector2(this.m_VerticalScrollbarRect.sizeDelta.x, -(this.m_HSliderHeight + this.m_HorizontalScrollbarSpacing));
+					return;
 				}
-				else
-				{
-					this.m_VerticalScrollbarRect.sizeDelta = new Vector2(this.m_VerticalScrollbarRect.sizeDelta.x, 0f);
-				}
+				this.m_VerticalScrollbarRect.sizeDelta = new Vector2(this.m_VerticalScrollbarRect.sizeDelta.x, 0f);
 			}
 		}
 
@@ -866,46 +869,47 @@ namespace UnityEngine.UI
 		{
 			this.m_ViewBounds = new Bounds(this.viewRect.rect.center, this.viewRect.rect.size);
 			this.m_ContentBounds = this.GetBounds();
-			if (!(this.m_Content == null))
+			if (this.m_Content == null)
 			{
-				Vector3 size = this.m_ContentBounds.size;
-				Vector3 vector = this.m_ContentBounds.center;
-				Vector2 pivot = this.m_Content.pivot;
-				ScrollRect.AdjustBounds(ref this.m_ViewBounds, ref pivot, ref size, ref vector);
-				this.m_ContentBounds.size = size;
-				this.m_ContentBounds.center = vector;
-				if (this.movementType == ScrollRect.MovementType.Clamped)
+				return;
+			}
+			Vector3 size = this.m_ContentBounds.size;
+			Vector3 vector = this.m_ContentBounds.center;
+			Vector2 pivot = this.m_Content.pivot;
+			ScrollRect.AdjustBounds(ref this.m_ViewBounds, ref pivot, ref size, ref vector);
+			this.m_ContentBounds.size = size;
+			this.m_ContentBounds.center = vector;
+			if (this.movementType == ScrollRect.MovementType.Clamped)
+			{
+				Vector2 zero = Vector2.zero;
+				if (this.m_ViewBounds.max.x > this.m_ContentBounds.max.x)
 				{
-					Vector2 zero = Vector2.zero;
-					if (this.m_ViewBounds.max.x > this.m_ContentBounds.max.x)
+					zero.x = Math.Min(this.m_ViewBounds.min.x - this.m_ContentBounds.min.x, this.m_ViewBounds.max.x - this.m_ContentBounds.max.x);
+				}
+				else if (this.m_ViewBounds.min.x < this.m_ContentBounds.min.x)
+				{
+					zero.x = Math.Max(this.m_ViewBounds.min.x - this.m_ContentBounds.min.x, this.m_ViewBounds.max.x - this.m_ContentBounds.max.x);
+				}
+				if (this.m_ViewBounds.min.y < this.m_ContentBounds.min.y)
+				{
+					zero.y = Math.Max(this.m_ViewBounds.min.y - this.m_ContentBounds.min.y, this.m_ViewBounds.max.y - this.m_ContentBounds.max.y);
+				}
+				else if (this.m_ViewBounds.max.y > this.m_ContentBounds.max.y)
+				{
+					zero.y = Math.Min(this.m_ViewBounds.min.y - this.m_ContentBounds.min.y, this.m_ViewBounds.max.y - this.m_ContentBounds.max.y);
+				}
+				if (zero.sqrMagnitude > 1E-45f)
+				{
+					vector = this.m_Content.anchoredPosition + zero;
+					if (!this.m_Horizontal)
 					{
-						zero.x = Math.Min(this.m_ViewBounds.min.x - this.m_ContentBounds.min.x, this.m_ViewBounds.max.x - this.m_ContentBounds.max.x);
+						vector.x = this.m_Content.anchoredPosition.x;
 					}
-					else if (this.m_ViewBounds.min.x < this.m_ContentBounds.min.x)
+					if (!this.m_Vertical)
 					{
-						zero.x = Math.Max(this.m_ViewBounds.min.x - this.m_ContentBounds.min.x, this.m_ViewBounds.max.x - this.m_ContentBounds.max.x);
+						vector.y = this.m_Content.anchoredPosition.y;
 					}
-					if (this.m_ViewBounds.min.y < this.m_ContentBounds.min.y)
-					{
-						zero.y = Math.Max(this.m_ViewBounds.min.y - this.m_ContentBounds.min.y, this.m_ViewBounds.max.y - this.m_ContentBounds.max.y);
-					}
-					else if (this.m_ViewBounds.max.y > this.m_ContentBounds.max.y)
-					{
-						zero.y = Math.Min(this.m_ViewBounds.min.y - this.m_ContentBounds.min.y, this.m_ViewBounds.max.y - this.m_ContentBounds.max.y);
-					}
-					if (zero.sqrMagnitude > 1E-45f)
-					{
-						vector = this.m_Content.anchoredPosition + zero;
-						if (!this.m_Horizontal)
-						{
-							vector.x = this.m_Content.anchoredPosition.x;
-						}
-						if (!this.m_Vertical)
-						{
-							vector.y = this.m_Content.anchoredPosition.y;
-						}
-						ScrollRect.AdjustBounds(ref this.m_ViewBounds, ref pivot, ref size, ref vector);
-					}
+					ScrollRect.AdjustBounds(ref this.m_ViewBounds, ref pivot, ref size, ref vector);
 				}
 			}
 		}
@@ -927,18 +931,13 @@ namespace UnityEngine.UI
 
 		private Bounds GetBounds()
 		{
-			Bounds bounds;
 			if (this.m_Content == null)
 			{
-				bounds = default(Bounds);
+				return default(Bounds);
 			}
-			else
-			{
-				this.m_Content.GetWorldCorners(this.m_Corners);
-				Matrix4x4 worldToLocalMatrix = this.viewRect.worldToLocalMatrix;
-				bounds = ScrollRect.InternalGetBounds(this.m_Corners, ref worldToLocalMatrix);
-			}
-			return bounds;
+			this.m_Content.GetWorldCorners(this.m_Corners);
+			Matrix4x4 worldToLocalMatrix = this.viewRect.worldToLocalMatrix;
+			return ScrollRect.InternalGetBounds(this.m_Corners, ref worldToLocalMatrix);
 		}
 
 		internal static Bounds InternalGetBounds(Vector3[] corners, ref Matrix4x4 viewWorldToLocalMatrix)
@@ -964,61 +963,63 @@ namespace UnityEngine.UI
 		internal static Vector2 InternalCalculateOffset(ref Bounds viewBounds, ref Bounds contentBounds, bool horizontal, bool vertical, ScrollRect.MovementType movementType, ref Vector2 delta)
 		{
 			Vector2 zero = Vector2.zero;
-			Vector2 vector;
 			if (movementType == ScrollRect.MovementType.Unrestricted)
 			{
-				vector = zero;
+				return zero;
 			}
-			else
+			Vector2 vector = contentBounds.min;
+			Vector2 vector2 = contentBounds.max;
+			if (horizontal)
 			{
-				Vector2 vector2 = contentBounds.min;
-				Vector2 vector3 = contentBounds.max;
-				if (horizontal)
+				vector.x += delta.x;
+				vector2.x += delta.x;
+				float num = viewBounds.max.x - vector2.x;
+				float num2 = viewBounds.min.x - vector.x;
+				if (num2 < -0.001f)
 				{
-					vector2.x += delta.x;
-					vector3.x += delta.x;
-					if (vector2.x > viewBounds.min.x)
-					{
-						zero.x = viewBounds.min.x - vector2.x;
-					}
-					else if (vector3.x < viewBounds.max.x)
-					{
-						zero.x = viewBounds.max.x - vector3.x;
-					}
+					zero.x = num2;
 				}
-				if (vertical)
+				else if (num > 0.001f)
 				{
-					vector2.y += delta.y;
-					vector3.y += delta.y;
-					if (vector3.y < viewBounds.max.y)
-					{
-						zero.y = viewBounds.max.y - vector3.y;
-					}
-					else if (vector2.y > viewBounds.min.y)
-					{
-						zero.y = viewBounds.min.y - vector2.y;
-					}
+					zero.x = num;
 				}
-				vector = zero;
 			}
-			return vector;
+			if (vertical)
+			{
+				vector.y += delta.y;
+				vector2.y += delta.y;
+				float num3 = viewBounds.max.y - vector2.y;
+				float num4 = viewBounds.min.y - vector.y;
+				if (num3 > 0.001f)
+				{
+					zero.y = num3;
+				}
+				else if (num4 < -0.001f)
+				{
+					zero.y = num4;
+				}
+			}
+			return zero;
 		}
 
 		protected void SetDirty()
 		{
-			if (this.IsActive())
+			if (!this.IsActive())
 			{
-				LayoutRebuilder.MarkLayoutForRebuild(this.rectTransform);
+				return;
 			}
+			LayoutRebuilder.MarkLayoutForRebuild(this.rectTransform);
 		}
 
 		protected void SetDirtyCaching()
 		{
-			if (this.IsActive())
+			if (!this.IsActive())
 			{
-				CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(this);
-				LayoutRebuilder.MarkLayoutForRebuild(this.rectTransform);
+				return;
 			}
+			CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(this);
+			LayoutRebuilder.MarkLayoutForRebuild(this.rectTransform);
+			this.m_ViewRect = null;
 		}
 
 		Transform ICanvasElement.get_transform()
@@ -1097,7 +1098,7 @@ namespace UnityEngine.UI
 		private Bounds m_PrevViewBounds;
 
 		[NonSerialized]
-		private bool m_HasRebuiltLayout = false;
+		private bool m_HasRebuiltLayout;
 
 		private bool m_HSliderExpand;
 

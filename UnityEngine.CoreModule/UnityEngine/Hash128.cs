@@ -20,10 +20,12 @@ namespace UnityEngine
 
 		public unsafe Hash128(ulong u64_0, ulong u64_1)
 		{
-			this.m_u32_0 = (uint)u64_0;
-			this.m_u32_1 = *((ref u64_0) + 4);
-			this.m_u32_2 = (uint)u64_1;
-			this.m_u32_3 = *((ref u64_1) + 4);
+			uint* ptr = (uint*)(&u64_0);
+			uint* ptr2 = (uint*)(&u64_1);
+			this.m_u32_0 = *ptr;
+			this.m_u32_1 = ptr[1];
+			this.m_u32_2 = *ptr2;
+			this.m_u32_3 = ptr2[1];
 		}
 
 		internal unsafe ulong u64_0
@@ -32,7 +34,8 @@ namespace UnityEngine
 			{
 				fixed (uint* ptr = &this.m_u32_0)
 				{
-					return (ulong)(*(long*)ptr);
+					uint* ptr2 = ptr;
+					return (ulong)(*(long*)ptr2);
 				}
 			}
 		}
@@ -41,9 +44,10 @@ namespace UnityEngine
 		{
 			get
 			{
-				fixed (uint* ptr = &this.m_u32_1)
+				fixed (uint* ptr = &this.m_u32_2)
 				{
-					return (ulong)(*(long*)ptr);
+					uint* ptr2 = ptr;
+					return (ulong)(*(long*)ptr2);
 				}
 			}
 		}
@@ -52,24 +56,29 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.m_u32_0 != 0U || this.m_u32_1 != 0U || this.m_u32_2 != 0U || this.m_u32_3 != 0U;
+				return this.m_u32_0 != 0U || this.m_u32_1 != 0U || this.m_u32_2 != 0U || this.m_u32_3 > 0U;
 			}
 		}
 
 		public int CompareTo(Hash128 rhs)
 		{
+			bool flag = this < rhs;
 			int num;
-			if (this < rhs)
+			if (flag)
 			{
 				num = -1;
 			}
-			else if (this > rhs)
-			{
-				num = 1;
-			}
 			else
 			{
-				num = 0;
+				bool flag2 = this > rhs;
+				if (flag2)
+				{
+					num = 1;
+				}
+				else
+				{
+					num = 0;
+				}
 			}
 			return num;
 		}
@@ -79,7 +88,7 @@ namespace UnityEngine
 			return Hash128.Internal_Hash128ToString(this);
 		}
 
-		[FreeFunction("StringToHash128")]
+		[FreeFunction("StringToHash128", IsThreadSafe = true)]
 		public static Hash128 Parse(string hashString)
 		{
 			Hash128 hash;
@@ -87,13 +96,13 @@ namespace UnityEngine
 			return hash;
 		}
 
-		[FreeFunction("Hash128ToString")]
+		[FreeFunction("Hash128ToString", IsThreadSafe = true)]
 		internal static string Internal_Hash128ToString(Hash128 hash128)
 		{
 			return Hash128.Internal_Hash128ToString_Injected(ref hash128);
 		}
 
-		[FreeFunction("ComputeHash128FromString")]
+		[FreeFunction("ComputeHash128FromString", IsThreadSafe = true)]
 		public static Hash128 Compute(string hashString)
 		{
 			Hash128 hash;
@@ -118,8 +127,9 @@ namespace UnityEngine
 
 		public int CompareTo(object obj)
 		{
+			bool flag = obj == null || !(obj is Hash128);
 			int num;
-			if (obj == null || !(obj is Hash128))
+			if (flag)
 			{
 				num = 1;
 			}
@@ -143,29 +153,49 @@ namespace UnityEngine
 
 		public static bool operator <(Hash128 x, Hash128 y)
 		{
-			bool flag;
-			if (x.m_u32_0 != y.m_u32_0)
+			bool flag = x.m_u32_0 != y.m_u32_0;
+			bool flag2;
+			if (flag)
 			{
-				flag = x.m_u32_0 < y.m_u32_0;
-			}
-			else if (x.m_u32_1 != y.m_u32_1)
-			{
-				flag = x.m_u32_1 < y.m_u32_1;
-			}
-			else if (x.m_u32_2 != y.m_u32_2)
-			{
-				flag = x.m_u32_2 < y.m_u32_2;
+				flag2 = x.m_u32_0 < y.m_u32_0;
 			}
 			else
 			{
-				flag = x.m_u32_3 < y.m_u32_3;
+				bool flag3 = x.m_u32_1 != y.m_u32_1;
+				if (flag3)
+				{
+					flag2 = x.m_u32_1 < y.m_u32_1;
+				}
+				else
+				{
+					bool flag4 = x.m_u32_2 != y.m_u32_2;
+					if (flag4)
+					{
+						flag2 = x.m_u32_2 < y.m_u32_2;
+					}
+					else
+					{
+						flag2 = x.m_u32_3 < y.m_u32_3;
+					}
+				}
 			}
-			return flag;
+			return flag2;
 		}
 
 		public static bool operator >(Hash128 x, Hash128 y)
 		{
-			return !(x < y) && !(x == y);
+			bool flag = x < y;
+			bool flag2;
+			if (flag)
+			{
+				flag2 = false;
+			}
+			else
+			{
+				bool flag3 = x == y;
+				flag2 = !flag3;
+			}
+			return flag2;
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

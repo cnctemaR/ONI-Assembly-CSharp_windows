@@ -5,8 +5,8 @@ using Mono.Security.Cryptography;
 
 namespace System.Security.Permissions
 {
-	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
 	[Serializable]
 	public sealed class PublisherIdentityPermissionAttribute : CodeAccessSecurityAttribute
 	{

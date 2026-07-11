@@ -1,36 +1,11 @@
 ﻿using System;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
 	public struct RenderTextureDescriptor
 	{
-		public RenderTextureDescriptor(int width, int height)
-		{
-			this = new RenderTextureDescriptor(width, height, RenderTextureFormat.Default, 0);
-		}
-
-		public RenderTextureDescriptor(int width, int height, RenderTextureFormat colorFormat)
-		{
-			this = new RenderTextureDescriptor(width, height, colorFormat, 0);
-		}
-
-		public RenderTextureDescriptor(int width, int height, RenderTextureFormat colorFormat, int depthBufferBits)
-		{
-			this = default(RenderTextureDescriptor);
-			this.width = width;
-			this.height = height;
-			this.volumeDepth = 1;
-			this.msaaSamples = 1;
-			this.colorFormat = colorFormat;
-			this.depthBufferBits = depthBufferBits;
-			this.dimension = TextureDimension.Tex2D;
-			this.shadowSamplingMode = ShadowSamplingMode.None;
-			this.vrUsage = VRTextureUsage.None;
-			this._flags = RenderTextureCreationFlags.AutoGenerateMips | RenderTextureCreationFlags.AllowVerticalFlip;
-			this.memoryless = RenderTextureMemoryless.None;
-		}
-
 		public int width { get; set; }
 
 		public int height { get; set; }
@@ -39,7 +14,46 @@ namespace UnityEngine
 
 		public int volumeDepth { get; set; }
 
-		public RenderTextureFormat colorFormat { get; set; }
+		public int mipCount { get; set; }
+
+		public GraphicsFormat graphicsFormat
+		{
+			get
+			{
+				return this._graphicsFormat;
+			}
+			set
+			{
+				this._graphicsFormat = value;
+				this.SetOrClearRenderTextureCreationFlag(GraphicsFormatUtility.IsSRGBFormat(value), RenderTextureCreationFlags.SRGB);
+			}
+		}
+
+		public GraphicsFormat stencilFormat { get; set; }
+
+		public RenderTextureFormat colorFormat
+		{
+			get
+			{
+				return GraphicsFormatUtility.GetRenderTextureFormat(this.graphicsFormat);
+			}
+			set
+			{
+				this.graphicsFormat = SystemInfo.GetCompatibleFormat(GraphicsFormatUtility.GetGraphicsFormat(value, this.sRGB), FormatUsage.Render);
+			}
+		}
+
+		public bool sRGB
+		{
+			get
+			{
+				return GraphicsFormatUtility.IsSRGBFormat(this.graphicsFormat);
+			}
+			set
+			{
+				this.graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(this.colorFormat, value);
+			}
+		}
 
 		public int depthBufferBits
 		{
@@ -49,17 +63,22 @@ namespace UnityEngine
 			}
 			set
 			{
-				if (value <= 0)
+				bool flag = value <= 0;
+				if (flag)
 				{
 					this._depthBufferBits = 0;
 				}
-				else if (value <= 16)
-				{
-					this._depthBufferBits = 1;
-				}
 				else
 				{
-					this._depthBufferBits = 2;
+					bool flag2 = value <= 16;
+					if (flag2)
+					{
+						this._depthBufferBits = 1;
+					}
+					else
+					{
+						this._depthBufferBits = 2;
+					}
 				}
 			}
 		}
@@ -80,6 +99,48 @@ namespace UnityEngine
 
 		public RenderTextureMemoryless memoryless { get; set; }
 
+		public RenderTextureDescriptor(int width, int height)
+		{
+			this = new RenderTextureDescriptor(width, height, SystemInfo.GetGraphicsFormat(DefaultFormat.LDR), 0, Texture.GenerateAllMips);
+		}
+
+		public RenderTextureDescriptor(int width, int height, RenderTextureFormat colorFormat)
+		{
+			this = new RenderTextureDescriptor(width, height, colorFormat, 0);
+		}
+
+		public RenderTextureDescriptor(int width, int height, RenderTextureFormat colorFormat, int depthBufferBits)
+		{
+			this = new RenderTextureDescriptor(width, height, SystemInfo.GetCompatibleFormat(GraphicsFormatUtility.GetGraphicsFormat(colorFormat, false), FormatUsage.Render), depthBufferBits);
+		}
+
+		public RenderTextureDescriptor(int width, int height, GraphicsFormat colorFormat, int depthBufferBits)
+		{
+			this = new RenderTextureDescriptor(width, height, colorFormat, depthBufferBits, Texture.GenerateAllMips);
+		}
+
+		public RenderTextureDescriptor(int width, int height, RenderTextureFormat colorFormat, int depthBufferBits, int mipCount)
+		{
+			this = new RenderTextureDescriptor(width, height, SystemInfo.GetCompatibleFormat(GraphicsFormatUtility.GetGraphicsFormat(colorFormat, false), FormatUsage.Render), depthBufferBits, mipCount);
+		}
+
+		public RenderTextureDescriptor(int width, int height, GraphicsFormat colorFormat, int depthBufferBits, int mipCount)
+		{
+			this = default(RenderTextureDescriptor);
+			this._flags = RenderTextureCreationFlags.AutoGenerateMips | RenderTextureCreationFlags.AllowVerticalFlip;
+			this.width = width;
+			this.height = height;
+			this.volumeDepth = 1;
+			this.msaaSamples = 1;
+			this.graphicsFormat = colorFormat;
+			this.depthBufferBits = depthBufferBits;
+			this.mipCount = mipCount;
+			this.dimension = TextureDimension.Tex2D;
+			this.shadowSamplingMode = ShadowSamplingMode.None;
+			this.vrUsage = VRTextureUsage.None;
+			this.memoryless = RenderTextureMemoryless.None;
+		}
+
 		private void SetOrClearRenderTextureCreationFlag(bool value, RenderTextureCreationFlags flag)
 		{
 			if (value)
@@ -92,23 +153,11 @@ namespace UnityEngine
 			}
 		}
 
-		public bool sRGB
-		{
-			get
-			{
-				return (this._flags & RenderTextureCreationFlags.SRGB) != (RenderTextureCreationFlags)0;
-			}
-			set
-			{
-				this.SetOrClearRenderTextureCreationFlag(value, RenderTextureCreationFlags.SRGB);
-			}
-		}
-
 		public bool useMipMap
 		{
 			get
 			{
-				return (this._flags & RenderTextureCreationFlags.MipMap) != (RenderTextureCreationFlags)0;
+				return (this._flags & RenderTextureCreationFlags.MipMap) > (RenderTextureCreationFlags)0;
 			}
 			set
 			{
@@ -120,7 +169,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (this._flags & RenderTextureCreationFlags.AutoGenerateMips) != (RenderTextureCreationFlags)0;
+				return (this._flags & RenderTextureCreationFlags.AutoGenerateMips) > (RenderTextureCreationFlags)0;
 			}
 			set
 			{
@@ -132,7 +181,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (this._flags & RenderTextureCreationFlags.EnableRandomWrite) != (RenderTextureCreationFlags)0;
+				return (this._flags & RenderTextureCreationFlags.EnableRandomWrite) > (RenderTextureCreationFlags)0;
 			}
 			set
 			{
@@ -144,7 +193,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (this._flags & RenderTextureCreationFlags.BindMS) != (RenderTextureCreationFlags)0;
+				return (this._flags & RenderTextureCreationFlags.BindMS) > (RenderTextureCreationFlags)0;
 			}
 			set
 			{
@@ -156,7 +205,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (this._flags & RenderTextureCreationFlags.CreatedFromScript) != (RenderTextureCreationFlags)0;
+				return (this._flags & RenderTextureCreationFlags.CreatedFromScript) > (RenderTextureCreationFlags)0;
 			}
 			set
 			{
@@ -164,17 +213,19 @@ namespace UnityEngine
 			}
 		}
 
-		internal bool useDynamicScale
+		public bool useDynamicScale
 		{
 			get
 			{
-				return (this._flags & RenderTextureCreationFlags.DynamicallyScalable) != (RenderTextureCreationFlags)0;
+				return (this._flags & RenderTextureCreationFlags.DynamicallyScalable) > (RenderTextureCreationFlags)0;
 			}
 			set
 			{
 				this.SetOrClearRenderTextureCreationFlag(value, RenderTextureCreationFlags.DynamicallyScalable);
 			}
 		}
+
+		private GraphicsFormat _graphicsFormat;
 
 		private int _depthBufferBits;
 

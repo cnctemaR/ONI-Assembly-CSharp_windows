@@ -223,6 +223,18 @@ public class MinionAssignablesProxy : KMonoBehaviour, IAssignableIdentity
 		return this.target.GetSoleOwner();
 	}
 
+	public bool HasOwner(Assignables owner)
+	{
+		this.CheckTarget();
+		return this.target.HasOwner(owner);
+	}
+
+	public int NumOwners()
+	{
+		this.CheckTarget();
+		return this.target.NumOwners();
+	}
+
 	public bool IsNull()
 	{
 		this.CheckTarget();

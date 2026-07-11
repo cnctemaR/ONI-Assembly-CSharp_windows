@@ -15,8 +15,8 @@ namespace System.Runtime.CompilerServices
 			return default(AsyncTaskMethodBuilder);
 		}
 
-		[SecuritySafeCritical]
 		[DebuggerStepThrough]
+		[SecuritySafeCritical]
 		public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine
 		{
 			if (stateMachine == null)

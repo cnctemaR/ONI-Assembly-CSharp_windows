@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
@@ -6,20 +7,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[ThreadAndSerializationSafe]
 	[NativeType(Header = "Runtime/Math/Quaternion.h")]
 	[NativeHeader("Runtime/Math/MathScripting.h")]
 	[UsedByNativeCode]
 	public struct Quaternion : IEquatable<Quaternion>
 	{
-		public Quaternion(float x, float y, float z, float w)
-		{
-			this.x = x;
-			this.y = y;
-			this.z = z;
-			this.w = w;
-		}
-
 		[FreeFunction("FromToQuaternionSafe", IsThreadSafe = true)]
 		public static Quaternion FromToRotation(Vector3 fromDirection, Vector3 toDirection)
 		{
@@ -158,6 +150,14 @@ namespace UnityEngine
 			}
 		}
 
+		public Quaternion(float x, float y, float z, float w)
+		{
+			this.x = x;
+			this.y = y;
+			this.z = z;
+			this.w = w;
+		}
+
 		public void Set(float newX, float newY, float newZ, float newW)
 		{
 			this.x = newX;
@@ -235,36 +235,51 @@ namespace UnityEngine
 		public static float Angle(Quaternion a, Quaternion b)
 		{
 			float num = Quaternion.Dot(a, b);
-			return (!Quaternion.IsEqualUsingDot(num)) ? (Mathf.Acos(Mathf.Min(Mathf.Abs(num), 1f)) * 2f * 57.29578f) : 0f;
+			return Quaternion.IsEqualUsingDot(num) ? 0f : (Mathf.Acos(Mathf.Min(Mathf.Abs(num), 1f)) * 2f * 57.29578f);
 		}
 
 		private static Vector3 Internal_MakePositive(Vector3 euler)
 		{
 			float num = -0.005729578f;
 			float num2 = 360f + num;
-			if (euler.x < num)
+			bool flag = euler.x < num;
+			if (flag)
 			{
 				euler.x += 360f;
 			}
-			else if (euler.x > num2)
+			else
 			{
-				euler.x -= 360f;
+				bool flag2 = euler.x > num2;
+				if (flag2)
+				{
+					euler.x -= 360f;
+				}
 			}
-			if (euler.y < num)
+			bool flag3 = euler.y < num;
+			if (flag3)
 			{
 				euler.y += 360f;
 			}
-			else if (euler.y > num2)
+			else
 			{
-				euler.y -= 360f;
+				bool flag4 = euler.y > num2;
+				if (flag4)
+				{
+					euler.y -= 360f;
+				}
 			}
-			if (euler.z < num)
+			bool flag5 = euler.z < num;
+			if (flag5)
 			{
 				euler.z += 360f;
 			}
-			else if (euler.z > num2)
+			else
 			{
-				euler.z -= 360f;
+				bool flag6 = euler.z > num2;
+				if (flag6)
+				{
+					euler.z -= 360f;
+				}
 			}
 			return euler;
 		}
@@ -305,8 +320,9 @@ namespace UnityEngine
 		public static Quaternion RotateTowards(Quaternion from, Quaternion to, float maxDegreesDelta)
 		{
 			float num = Quaternion.Angle(from, to);
+			bool flag = num == 0f;
 			Quaternion quaternion;
-			if (num == 0f)
+			if (flag)
 			{
 				quaternion = to;
 			}
@@ -320,8 +336,9 @@ namespace UnityEngine
 		public static Quaternion Normalize(Quaternion q)
 		{
 			float num = Mathf.Sqrt(Quaternion.Dot(q, q));
+			bool flag = num < Mathf.Epsilon;
 			Quaternion quaternion;
-			if (num < Mathf.Epsilon)
+			if (flag)
 			{
 				quaternion = Quaternion.identity;
 			}
@@ -352,7 +369,8 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
-			return other is Quaternion && this.Equals((Quaternion)other);
+			bool flag = !(other is Quaternion);
+			return !flag && this.Equals((Quaternion)other);
 		}
 
 		public bool Equals(Quaternion other)
@@ -369,10 +387,10 @@ namespace UnityEngine
 		{
 			return UnityString.Format("({0}, {1}, {2}, {3})", new object[]
 			{
-				this.x.ToString(format),
-				this.y.ToString(format),
-				this.z.ToString(format),
-				this.w.ToString(format)
+				this.x.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
+				this.y.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
+				this.z.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
+				this.w.ToString(format, CultureInfo.InvariantCulture.NumberFormat)
 			});
 		}
 

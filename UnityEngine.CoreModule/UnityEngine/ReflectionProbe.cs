@@ -12,9 +12,9 @@ namespace UnityEngine
 	[NativeHeader("Runtime/Camera/ReflectionProbes.h")]
 	public sealed class ReflectionProbe : Behaviour
 	{
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[NativeName("ProbeType")]
 		[Obsolete("type property has been deprecated. Starting with Unity 5.4, the only supported reflection probe type is Cube.", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		public extern ReflectionProbeType type
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -254,8 +254,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int ScheduleRender(ReflectionProbeTimeSlicingMode timeSlicingMode, RenderTexture targetTexture);
 
-		[NativeHeader("Runtime/Camera/CubemapGPUUtility.h")]
 		[FreeFunction("CubemapGPUBlend")]
+		[NativeHeader("Runtime/Camera/CubemapGPUUtility.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool BlendCubemap(Texture src, Texture dst, float blend, RenderTexture target);
 
@@ -301,7 +301,8 @@ namespace UnityEngine
 		private static void CallReflectionProbeEvent(ReflectionProbe probe, ReflectionProbe.ReflectionProbeEvent probeEvent)
 		{
 			Action<ReflectionProbe, ReflectionProbe.ReflectionProbeEvent> action = ReflectionProbe.reflectionProbeChanged;
-			if (action != null)
+			bool flag = action != null;
+			if (flag)
 			{
 				action(probe, probeEvent);
 			}
@@ -311,7 +312,8 @@ namespace UnityEngine
 		private static void CallSetDefaultReflection(Cubemap defaultReflectionCubemap)
 		{
 			Action<Cubemap> action = ReflectionProbe.defaultReflectionSet;
-			if (action != null)
+			bool flag = action != null;
+			if (flag)
 			{
 				action(defaultReflectionCubemap);
 			}

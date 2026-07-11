@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(false)]
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Method, AllowMultiple = false)]
+	[ComVisible(false)]
 	public sealed class DefaultDllImportSearchPathsAttribute : Attribute
 	{
 		public DefaultDllImportSearchPathsAttribute(DllImportSearchPath paths)

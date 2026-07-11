@@ -16,7 +16,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (this.m_ThisState & 128) != 0;
+				return (this.m_ThisState & 128) > 0;
 			}
 		}
 
@@ -24,7 +24,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (this.m_PrevState & 128) != 0;
+				return (this.m_PrevState & 128) > 0;
 			}
 		}
 

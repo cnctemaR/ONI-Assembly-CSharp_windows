@@ -164,7 +164,7 @@ public class SpeedControlScreen : KScreen
 					SoundListenerController.Instance.SetLoopingVolume(1f);
 				}
 			}
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().SpeedPausedMigrated, STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().SpeedPausedMigrated, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 			MusicManager.instance.SetDynamicMusicUnpaused();
 			this.pauseButtonWidget.GetComponent<ToolTip>().ClearMultiStringTooltip();
 			this.pauseButtonWidget.GetComponent<ToolTip>().AddMultiStringTooltip(GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.PAUSE, global::Action.TogglePause), this.TooltipTextStyle);
@@ -251,7 +251,7 @@ public class SpeedControlScreen : KScreen
 		if (sound != null)
 		{
 			EventInstance eventInstance = SoundEvent.BeginOneShot(sound, Vector3.zero, 1f, false);
-			eventInstance.setParameterValue("Speed", speed);
+			eventInstance.setParameterByName("Speed", speed, false);
 			SoundEvent.EndOneShot(eventInstance);
 		}
 	}

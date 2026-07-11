@@ -5,8 +5,8 @@ using System.Security.Permissions;
 namespace System.Reflection
 {
 	[ComDefaultInterface(typeof(_MethodInfo))]
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.None)]
 	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	[Serializable]
 	public abstract class MethodInfo : MethodBase, _MethodInfo

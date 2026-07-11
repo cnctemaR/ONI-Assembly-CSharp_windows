@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class TypeLibVersionAttribute : Attribute
 	{
 		public TypeLibVersionAttribute(int major, int minor)

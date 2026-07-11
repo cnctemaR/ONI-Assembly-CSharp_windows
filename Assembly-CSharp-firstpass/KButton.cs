@@ -246,10 +246,6 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler
 	[SerializeField]
 	public ButtonSoundPlayer soundPlayer;
 
-	[HideInInspector]
-	[Tooltip("Don't use this field it is misleading, you need to specify the color style setting on the associate bg image")]
-	public ColorStyleSetting colorStyleSetting;
-
 	public KImage bgImage;
 
 	public Image fgImage;

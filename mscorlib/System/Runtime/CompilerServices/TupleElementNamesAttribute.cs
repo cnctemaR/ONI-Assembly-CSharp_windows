@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 namespace System.Runtime.CompilerServices
 {
-	[CLSCompliant(false)]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event | AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
+	[CLSCompliant(false)]
 	public sealed class TupleElementNamesAttribute : Attribute
 	{
 		public TupleElementNamesAttribute(string[] transformNames)

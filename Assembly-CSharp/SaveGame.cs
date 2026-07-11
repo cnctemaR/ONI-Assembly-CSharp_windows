@@ -79,14 +79,42 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 
 	public byte[] GetSaveHeader(bool isAutoSave, bool isCompressed, out SaveGame.Header header)
 	{
-		string text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, isAutoSave, SaveLoader.GetActiveSaveFilePath(), SaveLoader.Instance.GameInfo.worldID, SaveLoader.Instance.GameInfo.worldTraits, SaveLoader.Instance.GameInfo.colonyGuid, this.sandboxEnabled));
+		string originalSaveFileName = SaveLoader.GetOriginalSaveFileName(SaveLoader.GetActiveSaveFilePath());
+		string text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, isAutoSave, originalSaveFileName, SaveLoader.Instance.GameInfo.worldID, SaveLoader.Instance.GameInfo.worldTraits, SaveLoader.Instance.GameInfo.colonyGuid, this.sandboxEnabled));
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 420700U;
+		header.buildVersion = 442154U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = (isCompressed ? 1 : 0);
 		return bytes;
+	}
+
+	public static string GetSaveUniqueID(SaveGame.GameInfo info)
+	{
+		if (!(info.colonyGuid != Guid.Empty))
+		{
+			return info.baseName + "/" + info.worldID;
+		}
+		return info.colonyGuid.ToString();
+	}
+
+	public static global::Tuple<SaveGame.Header, SaveGame.GameInfo> GetFileInfo(string filename)
+	{
+		try
+		{
+			SaveGame.Header header;
+			SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
+			if (gameInfo.saveMajorVersion >= 7)
+			{
+				return new global::Tuple<SaveGame.Header, SaveGame.GameInfo>(header, gameInfo);
+			}
+		}
+		catch (Exception ex)
+		{
+			global::Debug.LogWarning(ex);
+		}
+		return null;
 	}
 
 	public static SaveGame.GameInfo GetHeader(IReader br, out SaveGame.Header header)

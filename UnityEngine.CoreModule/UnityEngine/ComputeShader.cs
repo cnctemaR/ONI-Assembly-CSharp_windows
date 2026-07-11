@@ -2,20 +2,17 @@
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
+using UnityEngine.Rendering;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
+	[UsedByNativeCode]
 	public sealed class ComputeShader : Object
 	{
-		private ComputeShader()
-		{
-		}
-
-		[NativeMethod(Name = "ComputeShaderScripting::FindKernel", HasExplicitThis = true, IsFreeFunction = true, ThrowsException = true)]
 		[RequiredByNativeCode]
+		[NativeMethod(Name = "ComputeShaderScripting::FindKernel", HasExplicitThis = true, IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int FindKernel(string name);
 
@@ -63,6 +60,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetTexture(int kernelIndex, int nameID, [NotNull] Texture texture, int mipLevel);
 
+		[NativeMethod(Name = "ComputeShaderScripting::SetRenderTexture", HasExplicitThis = true, IsFreeFunction = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetRenderTexture(int kernelIndex, int nameID, [NotNull] RenderTexture texture, int mipLevel, RenderTextureSubElement element);
+
 		[NativeMethod(Name = "ComputeShaderScripting::SetTextureFromGlobal", HasExplicitThis = true, IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetTextureFromGlobal(int kernelIndex, int nameID, int globalTextureNameID);
@@ -82,6 +83,10 @@ namespace UnityEngine
 		[FreeFunction(Name = "ComputeShaderScripting::DispatchIndirect", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_DispatchIndirect(int kernelIndex, [NotNull] ComputeBuffer argsBuffer, uint argsOffset);
+
+		private ComputeShader()
+		{
+		}
 
 		public void SetFloat(string name, float val)
 		{
@@ -135,12 +140,12 @@ namespace UnityEngine
 
 		public void SetBool(string name, bool val)
 		{
-			this.SetInt(Shader.PropertyToID(name), (!val) ? 0 : 1);
+			this.SetInt(Shader.PropertyToID(name), val ? 1 : 0);
 		}
 
 		public void SetBool(int nameID, bool val)
 		{
-			this.SetInt(nameID, (!val) ? 0 : 1);
+			this.SetInt(nameID, val ? 1 : 0);
 		}
 
 		public void SetTexture(int kernelIndex, int nameID, Texture texture)
@@ -158,6 +163,16 @@ namespace UnityEngine
 			this.SetTexture(kernelIndex, Shader.PropertyToID(name), texture, mipLevel);
 		}
 
+		public void SetTexture(int kernelIndex, int nameID, RenderTexture texture, int mipLevel, RenderTextureSubElement element)
+		{
+			this.SetRenderTexture(kernelIndex, nameID, texture, mipLevel, element);
+		}
+
+		public void SetTexture(int kernelIndex, string name, RenderTexture texture, int mipLevel, RenderTextureSubElement element)
+		{
+			this.SetRenderTexture(kernelIndex, Shader.PropertyToID(name), texture, mipLevel, element);
+		}
+
 		public void SetTextureFromGlobal(int kernelIndex, string name, string globalTextureName)
 		{
 			this.SetTextureFromGlobal(kernelIndex, Shader.PropertyToID(name), Shader.PropertyToID(globalTextureName));
@@ -170,11 +185,13 @@ namespace UnityEngine
 
 		public void DispatchIndirect(int kernelIndex, ComputeBuffer argsBuffer, [DefaultValue("0")] uint argsOffset)
 		{
-			if (argsBuffer == null)
+			bool flag = argsBuffer == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("argsBuffer");
 			}
-			if (argsBuffer.m_Ptr == IntPtr.Zero)
+			bool flag2 = argsBuffer.m_Ptr == IntPtr.Zero;
+			if (flag2)
 			{
 				throw new ObjectDisposedException("argsBuffer");
 			}

@@ -5,10 +5,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/BaseClasses/TagManager.h")]
 	[NativeClass("BitField", "struct BitField;")]
-	[NativeHeader("Runtime/BaseClasses/BitField.h")]
+	[NativeHeader("Runtime/BaseClasses/TagManager.h")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[NativeHeader("Runtime/BaseClasses/BitField.h")]
 	public struct LayerMask
 	{
 		public static implicit operator int(LayerMask mask)
@@ -35,19 +35,20 @@ namespace UnityEngine
 			}
 		}
 
-		[NativeMethod("LayerToString")]
 		[StaticAccessor("GetTagManager()", StaticAccessorType.Dot)]
+		[NativeMethod("LayerToString")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string LayerToName(int layer);
 
-		[StaticAccessor("GetTagManager()", StaticAccessorType.Dot)]
 		[NativeMethod("StringToLayer")]
+		[StaticAccessor("GetTagManager()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int NameToLayer(string layerName);
 
 		public static int GetMask(params string[] layerNames)
 		{
-			if (layerNames == null)
+			bool flag = layerNames == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("layerNames");
 			}
@@ -55,7 +56,8 @@ namespace UnityEngine
 			foreach (string text in layerNames)
 			{
 				int num2 = LayerMask.NameToLayer(text);
-				if (num2 != -1)
+				bool flag2 = num2 != -1;
+				if (flag2)
 				{
 					num |= 1 << num2;
 				}

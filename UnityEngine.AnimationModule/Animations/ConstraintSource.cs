@@ -4,9 +4,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[NativeHeader("Runtime/Animation/Constraints/Constraint.bindings.h")]
-	[NativeType(CodegenOptions = CodegenOptions.Custom, Header = "Runtime/Animation/Constraints/ConstraintSource.h", IntermediateScriptingStructName = "MonoConstraintSource")]
 	[UsedByNativeCode]
+	[NativeType(CodegenOptions = CodegenOptions.Custom, Header = "Modules/Animation/Constraints/ConstraintSource.h", IntermediateScriptingStructName = "MonoConstraintSource")]
+	[NativeHeader("Modules/Animation/Constraints/Constraint.bindings.h")]
 	[Serializable]
 	public struct ConstraintSource
 	{

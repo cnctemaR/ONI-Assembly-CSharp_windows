@@ -9,9 +9,9 @@ using System.Security.Permissions;
 
 namespace System.Reflection
 {
-	[ClassInterface(ClassInterfaceType.None)]
-	[ComDefaultInterface(typeof(_Module))]
 	[ComVisible(true)]
+	[ComDefaultInterface(typeof(_Module))]
+	[ClassInterface(ClassInterfaceType.None)]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public abstract class Module : ISerializable, ICustomAttributeProvider, _Module

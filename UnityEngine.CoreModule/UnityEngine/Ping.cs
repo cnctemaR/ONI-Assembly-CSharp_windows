@@ -4,7 +4,7 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Ping.bindings.h")]
+	[NativeHeader("Runtime/Export/Networking/Ping.bindings.h")]
 	public sealed class Ping
 	{
 		public Ping(string address)
@@ -20,7 +20,8 @@ namespace UnityEngine
 		[ThreadAndSerializationSafe]
 		public void DestroyPing()
 		{
-			if (!(this.m_Ptr == IntPtr.Zero))
+			bool flag = this.m_Ptr == IntPtr.Zero;
+			if (!flag)
 			{
 				Ping.Internal_Destroy(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;
@@ -39,7 +40,8 @@ namespace UnityEngine
 		{
 			get
 			{
-				return !(this.m_Ptr == IntPtr.Zero) && this.Internal_IsDone();
+				bool flag = this.m_Ptr == IntPtr.Zero;
+				return !flag && this.Internal_IsDone();
 			}
 		}
 

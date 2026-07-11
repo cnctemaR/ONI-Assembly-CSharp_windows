@@ -11,14 +11,14 @@ namespace UnityEngine.Networking
 	[StructLayout(LayoutKind.Sequential)]
 	public class DownloadHandler : IDisposable
 	{
+		[NativeMethod(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void Release();
+
 		[VisibleToOtherModules]
 		internal DownloadHandler()
 		{
 		}
-
-		[NativeMethod(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Release();
 
 		~DownloadHandler()
 		{
@@ -27,7 +27,8 @@ namespace UnityEngine.Networking
 
 		public void Dispose()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				this.Release();
 				this.m_Ptr = IntPtr.Zero;
@@ -69,8 +70,9 @@ namespace UnityEngine.Networking
 		protected virtual string GetText()
 		{
 			byte[] data = this.GetData();
+			bool flag = data != null && data.Length != 0;
 			string text;
-			if (data != null && data.Length > 0)
+			if (flag)
 			{
 				text = this.GetTextEncoder().GetString(data, 0, data.Length);
 			}
@@ -84,18 +86,22 @@ namespace UnityEngine.Networking
 		private Encoding GetTextEncoder()
 		{
 			string contentType = this.GetContentType();
-			if (!string.IsNullOrEmpty(contentType))
+			bool flag = !string.IsNullOrEmpty(contentType);
+			if (flag)
 			{
 				int num = contentType.IndexOf("charset", StringComparison.OrdinalIgnoreCase);
-				if (num > -1)
+				bool flag2 = num > -1;
+				if (flag2)
 				{
 					int num2 = contentType.IndexOf('=', num);
-					if (num2 > -1)
+					bool flag3 = num2 > -1;
+					if (flag3)
 					{
 						string text = contentType.Substring(num2 + 1).Trim().Trim(new char[] { '\'', '"' })
 							.Trim();
 						int num3 = text.IndexOf(';');
-						if (num3 > -1)
+						bool flag4 = num3 > -1;
+						if (flag4)
 						{
 							text = text.Substring(0, num3);
 						}
@@ -123,6 +129,12 @@ namespace UnityEngine.Networking
 		}
 
 		[UsedByNativeCode]
+		protected virtual void ReceiveContentLengthHeader(ulong contentLength)
+		{
+			this.ReceiveContentLength((int)contentLength);
+		}
+
+		[Obsolete("Use ReceiveContentLengthHeader")]
 		protected virtual void ReceiveContentLength(int contentLength)
 		{
 		}
@@ -140,15 +152,18 @@ namespace UnityEngine.Networking
 
 		protected static T GetCheckedDownloader<T>(UnityWebRequest www) where T : DownloadHandler
 		{
-			if (www == null)
+			bool flag = www == null;
+			if (flag)
 			{
 				throw new NullReferenceException("Cannot get content from a null UnityWebRequest object");
 			}
-			if (!www.isDone)
+			bool flag2 = !www.isDone;
+			if (flag2)
 			{
 				throw new InvalidOperationException("Cannot get content from an unfinished UnityWebRequest object");
 			}
-			if (www.isNetworkError)
+			bool isNetworkError = www.isNetworkError;
+			if (isNetworkError)
 			{
 				throw new InvalidOperationException(www.error);
 			}

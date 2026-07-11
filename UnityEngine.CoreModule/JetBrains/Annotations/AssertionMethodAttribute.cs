@@ -2,7 +2,7 @@
 
 namespace JetBrains.Annotations
 {
-	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+	[AttributeUsage(AttributeTargets.Method)]
 	public sealed class AssertionMethodAttribute : Attribute
 	{
 	}

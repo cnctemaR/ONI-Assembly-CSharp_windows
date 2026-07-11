@@ -2,17 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Internal;
 
 namespace Unity.Collections
 {
-	[NativeContainer]
-	[NativeContainerSupportsMinMaxWriteRestriction]
-	[DebuggerDisplay("Length = {Length}")]
 	[DebuggerTypeProxy(typeof(NativeSliceDebugView<>))]
-	public struct NativeSlice<T> : IEnumerable<T>, IEquatable<NativeSlice<T>>, IEnumerable where T : struct
+	[NativeContainerSupportsMinMaxWriteRestriction]
+	[NativeContainer]
+	[DebuggerDisplay("Length = {Length}")]
+	public struct NativeSlice<T> : IEnumerable<T>, IEnumerable, IEquatable<NativeSlice<T>> where T : struct
 	{
 		public NativeSlice(NativeSlice<T> slice, int start)
 		{
@@ -36,17 +36,17 @@ namespace Unity.Collections
 			this = new NativeSlice<T>(array, start, array.Length - start);
 		}
 
+		public static implicit operator NativeSlice<T>(NativeArray<T> array)
+		{
+			return new NativeSlice<T>(array);
+		}
+
 		public unsafe NativeSlice(NativeArray<T> array, int start, int length)
 		{
 			this.m_Stride = UnsafeUtility.SizeOf<T>();
 			byte* ptr = (byte*)array.m_Buffer + this.m_Stride * start;
 			this.m_Buffer = ptr;
 			this.m_Length = length;
-		}
-
-		public static implicit operator NativeSlice<T>(NativeArray<T> array)
-		{
-			return new NativeSlice<T>(array);
 		}
 
 		public NativeSlice<U> SliceConvert<U>() where U : struct
@@ -103,12 +103,13 @@ namespace Unity.Collections
 		}
 
 		[WriteAccessRequired]
-		public void CopyFrom(T[] array)
+		public unsafe void CopyFrom(T[] array)
 		{
-			for (int num = 0; num != this.m_Length; num++)
-			{
-				this[num] = array[num];
-			}
+			GCHandle gchandle = GCHandle.Alloc(array, GCHandleType.Pinned);
+			IntPtr intPtr = gchandle.AddrOfPinnedObject();
+			int num = UnsafeUtility.SizeOf<T>();
+			UnsafeUtility.MemCpyStride(this.GetUnsafePtr<T>(), this.Stride, (void*)intPtr, num, num, this.m_Length);
+			gchandle.Free();
 		}
 
 		public void CopyTo(NativeArray<T> array)
@@ -117,12 +118,13 @@ namespace Unity.Collections
 			UnsafeUtility.MemCpyStride(array.GetUnsafePtr<T>(), num, this.GetUnsafeReadOnlyPtr<T>(), this.Stride, num, this.m_Length);
 		}
 
-		public void CopyTo(T[] array)
+		public unsafe void CopyTo(T[] array)
 		{
-			for (int num = 0; num != this.m_Length; num++)
-			{
-				array[num] = this[num];
-			}
+			GCHandle gchandle = GCHandle.Alloc(array, GCHandleType.Pinned);
+			IntPtr intPtr = gchandle.AddrOfPinnedObject();
+			int num = UnsafeUtility.SizeOf<T>();
+			UnsafeUtility.MemCpyStride((void*)intPtr, num, this.GetUnsafeReadOnlyPtr<T>(), this.Stride, num, this.m_Length);
+			gchandle.Free();
 		}
 
 		public T[] ToArray()
@@ -134,7 +136,6 @@ namespace Unity.Collections
 
 		public int Stride
 		{
-			[CompilerGenerated]
 			get
 			{
 				return this.m_Stride;
@@ -143,7 +144,6 @@ namespace Unity.Collections
 
 		public int Length
 		{
-			[CompilerGenerated]
 			get
 			{
 				return this.m_Length;
@@ -172,7 +172,8 @@ namespace Unity.Collections
 
 		public override bool Equals(object obj)
 		{
-			return !object.ReferenceEquals(null, obj) && obj is NativeSlice<T> && this.Equals((NativeSlice<T>)obj);
+			bool flag = obj == null;
+			return !flag && obj is NativeSlice<T> && this.Equals((NativeSlice<T>)obj);
 		}
 
 		public override int GetHashCode()
@@ -225,7 +226,6 @@ namespace Unity.Collections
 
 			public T Current
 			{
-				[CompilerGenerated]
 				get
 				{
 					return this.m_Array[this.m_Index];
@@ -234,7 +234,6 @@ namespace Unity.Collections
 
 			object IEnumerator.Current
 			{
-				[CompilerGenerated]
 				get
 				{
 					return this.Current;

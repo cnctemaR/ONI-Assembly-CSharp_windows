@@ -4,8 +4,8 @@ using System.Security;
 
 namespace System.Runtime.InteropServices
 {
-	[AttributeUsage(AttributeTargets.Field, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Field, Inherited = false)]
 	public sealed class FieldOffsetAttribute : Attribute
 	{
 		[SecurityCritical]

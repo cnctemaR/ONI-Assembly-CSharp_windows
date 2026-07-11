@@ -5,10 +5,6 @@ namespace UnityEngine.UI
 	[AddComponentMenu("Layout/Grid Layout Group", 152)]
 	public class GridLayoutGroup : LayoutGroup
 	{
-		protected GridLayoutGroup()
-		{
-		}
-
 		public GridLayoutGroup.Corner startCorner
 		{
 			get
@@ -81,6 +77,10 @@ namespace UnityEngine.UI
 			}
 		}
 
+		protected GridLayoutGroup()
+		{
+		}
+
 		public override void CalculateLayoutInputHorizontal()
 		{
 			base.CalculateLayoutInputHorizontal();
@@ -115,8 +115,8 @@ namespace UnityEngine.UI
 			}
 			else
 			{
-				float x = base.rectTransform.rect.size.x;
-				int num2 = Mathf.Max(1, Mathf.FloorToInt((x - (float)base.padding.horizontal + this.spacing.x + 0.001f) / (this.cellSize.x + this.spacing.x)));
+				float width = base.rectTransform.rect.width;
+				int num2 = Mathf.Max(1, Mathf.FloorToInt((width - (float)base.padding.horizontal + this.spacing.x + 0.001f) / (this.cellSize.x + this.spacing.x)));
 				num = Mathf.CeilToInt((float)base.rectChildren.Count / (float)num2);
 			}
 			float num3 = (float)base.padding.vertical + (this.cellSize.y + this.spacing.y) * (float)num - this.spacing.y;
@@ -145,94 +145,98 @@ namespace UnityEngine.UI
 					rectTransform.anchorMax = Vector2.up;
 					rectTransform.sizeDelta = this.cellSize;
 				}
+				return;
+			}
+			float x = base.rectTransform.rect.size.x;
+			float y = base.rectTransform.rect.size.y;
+			int num = 1;
+			int num2 = 1;
+			if (this.m_Constraint == GridLayoutGroup.Constraint.FixedColumnCount)
+			{
+				num = this.m_ConstraintCount;
+				if (base.rectChildren.Count > num)
+				{
+					num2 = base.rectChildren.Count / num + ((base.rectChildren.Count % num > 0) ? 1 : 0);
+				}
+			}
+			else if (this.m_Constraint == GridLayoutGroup.Constraint.FixedRowCount)
+			{
+				num2 = this.m_ConstraintCount;
+				if (base.rectChildren.Count > num2)
+				{
+					num = base.rectChildren.Count / num2 + ((base.rectChildren.Count % num2 > 0) ? 1 : 0);
+				}
 			}
 			else
 			{
-				float x = base.rectTransform.rect.size.x;
-				float y = base.rectTransform.rect.size.y;
-				int num;
-				int num2;
-				if (this.m_Constraint == GridLayoutGroup.Constraint.FixedColumnCount)
+				if (this.cellSize.x + this.spacing.x <= 0f)
 				{
-					num = this.m_ConstraintCount;
-					num2 = Mathf.CeilToInt((float)base.rectChildren.Count / (float)num - 0.001f);
-				}
-				else if (this.m_Constraint == GridLayoutGroup.Constraint.FixedRowCount)
-				{
-					num2 = this.m_ConstraintCount;
-					num = Mathf.CeilToInt((float)base.rectChildren.Count / (float)num2 - 0.001f);
+					num = int.MaxValue;
 				}
 				else
 				{
-					if (this.cellSize.x + this.spacing.x <= 0f)
-					{
-						num = int.MaxValue;
-					}
-					else
-					{
-						num = Mathf.Max(1, Mathf.FloorToInt((x - (float)base.padding.horizontal + this.spacing.x + 0.001f) / (this.cellSize.x + this.spacing.x)));
-					}
-					if (this.cellSize.y + this.spacing.y <= 0f)
-					{
-						num2 = int.MaxValue;
-					}
-					else
-					{
-						num2 = Mathf.Max(1, Mathf.FloorToInt((y - (float)base.padding.vertical + this.spacing.y + 0.001f) / (this.cellSize.y + this.spacing.y)));
-					}
+					num = Mathf.Max(1, Mathf.FloorToInt((x - (float)base.padding.horizontal + this.spacing.x + 0.001f) / (this.cellSize.x + this.spacing.x)));
 				}
-				int num3 = (int)(this.startCorner % GridLayoutGroup.Corner.LowerLeft);
-				int num4 = (int)(this.startCorner / GridLayoutGroup.Corner.LowerLeft);
-				int num5;
-				int num6;
-				int num7;
+				if (this.cellSize.y + this.spacing.y <= 0f)
+				{
+					num2 = int.MaxValue;
+				}
+				else
+				{
+					num2 = Mathf.Max(1, Mathf.FloorToInt((y - (float)base.padding.vertical + this.spacing.y + 0.001f) / (this.cellSize.y + this.spacing.y)));
+				}
+			}
+			int num3 = (int)(this.startCorner % GridLayoutGroup.Corner.LowerLeft);
+			int num4 = (int)(this.startCorner / GridLayoutGroup.Corner.LowerLeft);
+			int num5;
+			int num6;
+			int num7;
+			if (this.startAxis == GridLayoutGroup.Axis.Horizontal)
+			{
+				num5 = num;
+				num6 = Mathf.Clamp(num, 1, base.rectChildren.Count);
+				num7 = Mathf.Clamp(num2, 1, Mathf.CeilToInt((float)base.rectChildren.Count / (float)num5));
+			}
+			else
+			{
+				num5 = num2;
+				num7 = Mathf.Clamp(num2, 1, base.rectChildren.Count);
+				num6 = Mathf.Clamp(num, 1, Mathf.CeilToInt((float)base.rectChildren.Count / (float)num5));
+			}
+			Vector2 vector = new Vector2((float)num6 * this.cellSize.x + (float)(num6 - 1) * this.spacing.x, (float)num7 * this.cellSize.y + (float)(num7 - 1) * this.spacing.y);
+			Vector2 vector2 = new Vector2(base.GetStartOffset(0, vector.x), base.GetStartOffset(1, vector.y));
+			for (int j = 0; j < base.rectChildren.Count; j++)
+			{
+				int num8;
+				int num9;
 				if (this.startAxis == GridLayoutGroup.Axis.Horizontal)
 				{
-					num5 = num;
-					num6 = Mathf.Clamp(num, 1, base.rectChildren.Count);
-					num7 = Mathf.Clamp(num2, 1, Mathf.CeilToInt((float)base.rectChildren.Count / (float)num5));
+					num8 = j % num5;
+					num9 = j / num5;
 				}
 				else
 				{
-					num5 = num2;
-					num7 = Mathf.Clamp(num2, 1, base.rectChildren.Count);
-					num6 = Mathf.Clamp(num, 1, Mathf.CeilToInt((float)base.rectChildren.Count / (float)num5));
+					num8 = j / num5;
+					num9 = j % num5;
 				}
-				Vector2 vector = new Vector2((float)num6 * this.cellSize.x + (float)(num6 - 1) * this.spacing.x, (float)num7 * this.cellSize.y + (float)(num7 - 1) * this.spacing.y);
-				Vector2 vector2 = new Vector2(base.GetStartOffset(0, vector.x), base.GetStartOffset(1, vector.y));
-				for (int j = 0; j < base.rectChildren.Count; j++)
+				if (num3 == 1)
 				{
-					int num8;
-					int num9;
-					if (this.startAxis == GridLayoutGroup.Axis.Horizontal)
-					{
-						num8 = j % num5;
-						num9 = j / num5;
-					}
-					else
-					{
-						num8 = j / num5;
-						num9 = j % num5;
-					}
-					if (num3 == 1)
-					{
-						num8 = num6 - 1 - num8;
-					}
-					if (num4 == 1)
-					{
-						num9 = num7 - 1 - num9;
-					}
-					base.SetChildAlongAxis(base.rectChildren[j], 0, vector2.x + (this.cellSize[0] + this.spacing[0]) * (float)num8, this.cellSize[0]);
-					base.SetChildAlongAxis(base.rectChildren[j], 1, vector2.y + (this.cellSize[1] + this.spacing[1]) * (float)num9, this.cellSize[1]);
+					num8 = num6 - 1 - num8;
 				}
+				if (num4 == 1)
+				{
+					num9 = num7 - 1 - num9;
+				}
+				base.SetChildAlongAxis(base.rectChildren[j], 0, vector2.x + (this.cellSize[0] + this.spacing[0]) * (float)num8, this.cellSize[0]);
+				base.SetChildAlongAxis(base.rectChildren[j], 1, vector2.y + (this.cellSize[1] + this.spacing[1]) * (float)num9, this.cellSize[1]);
 			}
 		}
 
 		[SerializeField]
-		protected GridLayoutGroup.Corner m_StartCorner = GridLayoutGroup.Corner.UpperLeft;
+		protected GridLayoutGroup.Corner m_StartCorner;
 
 		[SerializeField]
-		protected GridLayoutGroup.Axis m_StartAxis = GridLayoutGroup.Axis.Horizontal;
+		protected GridLayoutGroup.Axis m_StartAxis;
 
 		[SerializeField]
 		protected Vector2 m_CellSize = new Vector2(100f, 100f);
@@ -241,7 +245,7 @@ namespace UnityEngine.UI
 		protected Vector2 m_Spacing = Vector2.zero;
 
 		[SerializeField]
-		protected GridLayoutGroup.Constraint m_Constraint = GridLayoutGroup.Constraint.Flexible;
+		protected GridLayoutGroup.Constraint m_Constraint;
 
 		[SerializeField]
 		protected int m_ConstraintCount = 2;

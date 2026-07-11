@@ -21,7 +21,7 @@ namespace UnityEngine.Networking.Match
 
 		public override bool IsValid()
 		{
-			return base.IsValid() && this.networkId != NetworkID.Invalid && this.nodeId != NodeID.Invalid;
+			return base.IsValid() && this.networkId != NetworkID.Invalid && this.nodeId > NodeID.Invalid;
 		}
 	}
 }

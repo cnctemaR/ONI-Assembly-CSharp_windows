@@ -40,8 +40,8 @@ namespace System.Reflection
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern object InternalInvoke(object obj, object[] parameters, out Exception exc);
 
-		[DebuggerHidden]
 		[DebuggerStepThrough]
+		[DebuggerHidden]
 		public override object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
 		{
 			if (obj == null)
@@ -100,8 +100,8 @@ namespace System.Reflection
 			return obj2;
 		}
 
-		[DebuggerHidden]
 		[DebuggerStepThrough]
+		[DebuggerHidden]
 		public override object Invoke(BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
 		{
 			return this.DoInvoke(null, invokeAttr, binder, parameters, culture);

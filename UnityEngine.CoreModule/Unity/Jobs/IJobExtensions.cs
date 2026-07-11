@@ -22,7 +22,8 @@ namespace Unity.Jobs
 		{
 			public static IntPtr Initialize()
 			{
-				if (IJobExtensions.JobStruct<T>.jobReflectionData == IntPtr.Zero)
+				bool flag = IJobExtensions.JobStruct<T>.jobReflectionData == IntPtr.Zero;
+				if (flag)
 				{
 					IJobExtensions.JobStruct<T>.jobReflectionData = JobsUtility.CreateJobReflectionData(typeof(T), JobType.Single, new IJobExtensions.JobStruct<T>.ExecuteJobFunction(IJobExtensions.JobStruct<T>.Execute), null, null);
 				}

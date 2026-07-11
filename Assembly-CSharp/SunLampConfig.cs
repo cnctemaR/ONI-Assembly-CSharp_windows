@@ -32,7 +32,7 @@ public class SunLampConfig : IBuildingConfig
 		LightShapePreview lightShapePreview = go.AddComponent<LightShapePreview>();
 		lightShapePreview.lux = 40000;
 		lightShapePreview.radius = 16f;
-		lightShapePreview.shape = LightShape.Cone;
+		lightShapePreview.shape = global::LightShape.Cone;
 		lightShapePreview.offset = new CellOffset((int)LIGHT2D.SUNLAMP_OFFSET.x, (int)LIGHT2D.SUNLAMP_OFFSET.y);
 	}
 
@@ -53,7 +53,7 @@ public class SunLampConfig : IBuildingConfig
 		light2D.Angle = 5.2f;
 		light2D.Direction = LIGHT2D.SUNLAMP_DIRECTION;
 		light2D.Offset = LIGHT2D.SUNLAMP_OFFSET;
-		light2D.shape = LightShape.Cone;
+		light2D.shape = global::LightShape.Cone;
 		light2D.drawOverlay = true;
 		go.AddOrGetDef<LightController.Def>();
 	}

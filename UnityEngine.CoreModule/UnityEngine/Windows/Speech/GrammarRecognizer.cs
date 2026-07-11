@@ -4,6 +4,8 @@ namespace UnityEngine.Windows.Speech
 {
 	public sealed class GrammarRecognizer : PhraseRecognizer
 	{
+		public string GrammarFilePath { get; private set; }
+
 		public GrammarRecognizer(string grammarFilePath)
 			: this(grammarFilePath, ConfidenceLevel.Medium)
 		{
@@ -11,18 +13,18 @@ namespace UnityEngine.Windows.Speech
 
 		public GrammarRecognizer(string grammarFilePath, ConfidenceLevel minimumConfidence)
 		{
-			if (grammarFilePath == null)
+			bool flag = grammarFilePath == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("grammarFilePath");
 			}
-			if (grammarFilePath.Length == 0)
+			bool flag2 = grammarFilePath.Length == 0;
+			if (flag2)
 			{
 				throw new ArgumentException("Grammar file path cannot be empty.");
 			}
 			this.GrammarFilePath = grammarFilePath;
 			this.m_Recognizer = PhraseRecognizer.CreateFromGrammarFile(this, grammarFilePath, minimumConfidence);
 		}
-
-		public string GrammarFilePath { get; private set; }
 	}
 }

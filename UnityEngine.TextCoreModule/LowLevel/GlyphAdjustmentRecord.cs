@@ -6,14 +6,8 @@ namespace UnityEngine.TextCore.LowLevel
 {
 	[UsedByNativeCode]
 	[Serializable]
-	internal struct GlyphAdjustmentRecord
+	public struct GlyphAdjustmentRecord
 	{
-		public GlyphAdjustmentRecord(uint glyphIndex, GlyphValueRecord glyphValueRecord)
-		{
-			this.m_GlyphIndex = glyphIndex;
-			this.m_GlyphValueRecord = glyphValueRecord;
-		}
-
 		public uint glyphIndex
 		{
 			get
@@ -38,12 +32,18 @@ namespace UnityEngine.TextCore.LowLevel
 			}
 		}
 
-		[SerializeField]
+		public GlyphAdjustmentRecord(uint glyphIndex, GlyphValueRecord glyphValueRecord)
+		{
+			this.m_GlyphIndex = glyphIndex;
+			this.m_GlyphValueRecord = glyphValueRecord;
+		}
+
 		[NativeName("glyphIndex")]
+		[SerializeField]
 		private uint m_GlyphIndex;
 
-		[NativeName("glyphValueRecord")]
 		[SerializeField]
+		[NativeName("glyphValueRecord")]
 		private GlyphValueRecord m_GlyphValueRecord;
 	}
 }

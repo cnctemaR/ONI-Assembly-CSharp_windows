@@ -3,7 +3,7 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Animation/Animator.h")]
+	[NativeHeader("Modules/Animation/Animator.h")]
 	public struct MatchTargetWeightMask
 	{
 		public MatchTargetWeightMask(Vector3 positionXYZWeight, float rotationWeight)

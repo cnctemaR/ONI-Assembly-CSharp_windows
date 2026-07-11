@@ -1,37 +1,17 @@
 ﻿using System;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeType(Header = "Runtime/Math/Matrix4x4.h")]
 	[NativeHeader("Runtime/Math/MathScripting.h")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	[ThreadAndSerializationSafe]
 	[NativeClass("Matrix4x4f")]
-	[NativeType(Header = "Runtime/Math/Matrix4x4.h")]
 	public struct Matrix4x4 : IEquatable<Matrix4x4>
 	{
-		public Matrix4x4(Vector4 column0, Vector4 column1, Vector4 column2, Vector4 column3)
-		{
-			this.m00 = column0.x;
-			this.m01 = column1.x;
-			this.m02 = column2.x;
-			this.m03 = column3.x;
-			this.m10 = column0.y;
-			this.m11 = column1.y;
-			this.m12 = column2.y;
-			this.m13 = column3.y;
-			this.m20 = column0.z;
-			this.m21 = column1.z;
-			this.m22 = column2.z;
-			this.m23 = column3.z;
-			this.m30 = column0.w;
-			this.m31 = column1.w;
-			this.m32 = column2.w;
-			this.m33 = column3.w;
-		}
-
 		[ThreadSafe]
 		private Quaternion GetRotation()
 		{
@@ -132,6 +112,12 @@ namespace UnityEngine
 			this = Matrix4x4.TRS(pos, q, s);
 		}
 
+		[FreeFunction("MatrixScripting::Inverse3DAffine", IsThreadSafe = true)]
+		public static bool Inverse3DAffine(Matrix4x4 input, ref Matrix4x4 result)
+		{
+			return Matrix4x4.Inverse3DAffine_Injected(ref input, ref result);
+		}
+
 		[FreeFunction("MatrixScripting::Inverse", IsThreadSafe = true)]
 		public static Matrix4x4 Inverse(Matrix4x4 m)
 		{
@@ -199,6 +185,26 @@ namespace UnityEngine
 		public static Matrix4x4 Frustum(FrustumPlanes fp)
 		{
 			return Matrix4x4.Frustum(fp.left, fp.right, fp.bottom, fp.top, fp.zNear, fp.zFar);
+		}
+
+		public Matrix4x4(Vector4 column0, Vector4 column1, Vector4 column2, Vector4 column3)
+		{
+			this.m00 = column0.x;
+			this.m01 = column1.x;
+			this.m02 = column2.x;
+			this.m03 = column3.x;
+			this.m10 = column0.y;
+			this.m11 = column1.y;
+			this.m12 = column2.y;
+			this.m13 = column3.y;
+			this.m20 = column0.z;
+			this.m21 = column1.z;
+			this.m22 = column2.z;
+			this.m23 = column3.z;
+			this.m30 = column0.w;
+			this.m31 = column1.w;
+			this.m32 = column2.w;
+			this.m33 = column3.w;
 		}
 
 		public float this[int row, int column]
@@ -338,7 +344,8 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
-			return other is Matrix4x4 && this.Equals((Matrix4x4)other);
+			bool flag = !(other is Matrix4x4);
+			return !flag && this.Equals((Matrix4x4)other);
 		}
 
 		public bool Equals(Matrix4x4 other)
@@ -603,23 +610,28 @@ namespace UnityEngine
 		{
 			return UnityString.Format("{0}\t{1}\t{2}\t{3}\n{4}\t{5}\t{6}\t{7}\n{8}\t{9}\t{10}\t{11}\n{12}\t{13}\t{14}\t{15}\n", new object[]
 			{
-				this.m00.ToString(format),
-				this.m01.ToString(format),
-				this.m02.ToString(format),
-				this.m03.ToString(format),
-				this.m10.ToString(format),
-				this.m11.ToString(format),
-				this.m12.ToString(format),
-				this.m13.ToString(format),
-				this.m20.ToString(format),
-				this.m21.ToString(format),
-				this.m22.ToString(format),
-				this.m23.ToString(format),
-				this.m30.ToString(format),
-				this.m31.ToString(format),
-				this.m32.ToString(format),
-				this.m33.ToString(format)
+				this.ToInvariantString(format, this.m00),
+				this.ToInvariantString(format, this.m01),
+				this.ToInvariantString(format, this.m02),
+				this.ToInvariantString(format, this.m03),
+				this.ToInvariantString(format, this.m10),
+				this.ToInvariantString(format, this.m11),
+				this.ToInvariantString(format, this.m12),
+				this.ToInvariantString(format, this.m13),
+				this.ToInvariantString(format, this.m20),
+				this.ToInvariantString(format, this.m21),
+				this.ToInvariantString(format, this.m22),
+				this.ToInvariantString(format, this.m23),
+				this.ToInvariantString(format, this.m30),
+				this.ToInvariantString(format, this.m31),
+				this.ToInvariantString(format, this.m32),
+				this.ToInvariantString(format, this.m33)
 			});
+		}
+
+		private string ToInvariantString(string format, float val)
+		{
+			return val.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -642,6 +654,9 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void TRS_Injected(ref Vector3 pos, ref Quaternion q, ref Vector3 s, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool Inverse3DAffine_Injected(ref Matrix4x4 input, ref Matrix4x4 result);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Inverse_Injected(ref Matrix4x4 m, out Matrix4x4 ret);

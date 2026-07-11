@@ -10,30 +10,11 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/GameObject.bindings.h")]
 	[ExcludeFromPreset]
+	[NativeHeader("Runtime/Export/Scripting/GameObject.bindings.h")]
 	[UsedByNativeCode]
 	public sealed class GameObject : Object
 	{
-		public GameObject(string name)
-		{
-			GameObject.Internal_CreateGameObject(this, name);
-		}
-
-		public GameObject()
-		{
-			GameObject.Internal_CreateGameObject(this, null);
-		}
-
-		public GameObject(string name, params Type[] components)
-		{
-			GameObject.Internal_CreateGameObject(this, name);
-			foreach (Type type in components)
-			{
-				this.AddComponent(type);
-			}
-		}
-
 		[FreeFunction("GameObjectBindings::CreatePrimitive")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern GameObject CreatePrimitive(PrimitiveType type);
@@ -88,8 +69,8 @@ namespace UnityEngine
 			return (T)((object)this.GetComponentInChildren(typeof(T), includeInactive));
 		}
 
-		[FreeFunction(Name = "GameObjectBindings::GetComponentInParent", HasExplicitThis = true, ThrowsException = true)]
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
+		[FreeFunction(Name = "GameObjectBindings::GetComponentInParent", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Component GetComponentInParent(Type type);
 
@@ -181,6 +162,31 @@ namespace UnityEngine
 			return this.GetComponentsInParent<T>(false);
 		}
 
+		[SecuritySafeCritical]
+		public unsafe bool TryGetComponent<T>(out T component)
+		{
+			CastHelper<T> castHelper = default(CastHelper<T>);
+			this.TryGetComponentFastPath(typeof(T), new IntPtr((void*)(&castHelper.onePointerFurtherThanT)));
+			component = castHelper.t;
+			return castHelper.t != null;
+		}
+
+		public bool TryGetComponent(Type type, out Component component)
+		{
+			component = this.TryGetComponentInternal(type);
+			return component != null;
+		}
+
+		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
+		[FreeFunction(Name = "GameObjectBindings::TryGetComponentFromType", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern Component TryGetComponentInternal(Type type);
+
+		[FreeFunction(Name = "GameObjectBindings::TryGetComponentFastPath", HasExplicitThis = true, ThrowsException = true)]
+		[NativeWritableSelf]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void TryGetComponentFastPath(Type type, IntPtr oneFurtherThanResultValue);
+
 		public static GameObject FindWithTag(string tag)
 		{
 			return GameObject.FindGameObjectWithTag(tag);
@@ -264,8 +270,8 @@ namespace UnityEngine
 			get;
 		}
 
-		[Obsolete("gameObject.SetActiveRecursively() is obsolete. Use GameObject.SetActive(), which is now inherited by children.")]
 		[NativeMethod(Name = "SetActiveRecursivelyDeprecated")]
+		[Obsolete("gameObject.SetActiveRecursively() is obsolete. Use GameObject.SetActive(), which is now inherited by children.")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetActiveRecursively(bool state);
 
@@ -288,7 +294,7 @@ namespace UnityEngine
 
 		public extern string tag
 		{
-			[FreeFunction("GameObjectBindings::GetTag", HasExplicitThis = true, ThrowsException = true)]
+			[FreeFunction("GameObjectBindings::GetTag", HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 			[FreeFunction("GameObjectBindings::SetTag", HasExplicitThis = true)]
@@ -365,6 +371,25 @@ namespace UnityEngine
 			this.BroadcastMessage(methodName, obj, sendMessageOptions);
 		}
 
+		public GameObject(string name)
+		{
+			GameObject.Internal_CreateGameObject(this, name);
+		}
+
+		public GameObject()
+		{
+			GameObject.Internal_CreateGameObject(this, null);
+		}
+
+		public GameObject(string name, params Type[] components)
+		{
+			GameObject.Internal_CreateGameObject(this, name);
+			foreach (Type type in components)
+			{
+				this.AddComponent(type);
+			}
+		}
+
 		[FreeFunction(Name = "GameObjectBindings::Internal_CreateGameObject")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_CreateGameObject([Writable] GameObject self, string name);
@@ -382,6 +407,13 @@ namespace UnityEngine
 				this.get_scene_Injected(out scene);
 				return scene;
 			}
+		}
+
+		public extern ulong sceneCullingMask
+		{
+			[FreeFunction(Name = "GameObjectBindings::GetSceneCullingMask", HasExplicitThis = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
 		}
 
 		public GameObject gameObject

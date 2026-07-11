@@ -8,14 +8,22 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Export/Graphics/Graphics.bindings.h")]
 	[NativeAsStruct]
-	[NativeHeader("Runtime/Export/Graphics.bindings.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class LightProbes : Object
 	{
 		private LightProbes()
 		{
 		}
+
+		[FreeFunction]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void Tetrahedralize();
+
+		[FreeFunction]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void TetrahedralizeAsync();
 
 		[FreeFunction]
 		public static void GetInterpolatedProbe(Vector3 position, Renderer renderer, out SphericalHarmonicsL2 probe)
@@ -29,19 +37,23 @@ namespace UnityEngine
 
 		public static void CalculateInterpolatedLightAndOcclusionProbes(Vector3[] positions, SphericalHarmonicsL2[] lightProbes, Vector4[] occlusionProbes)
 		{
-			if (positions == null)
+			bool flag = positions == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("positions");
 			}
-			if (lightProbes == null && occlusionProbes == null)
+			bool flag2 = lightProbes == null && occlusionProbes == null;
+			if (flag2)
 			{
 				throw new ArgumentException("Argument lightProbes and occlusionProbes cannot both be null.");
 			}
-			if (lightProbes != null && lightProbes.Length < positions.Length)
+			bool flag3 = lightProbes != null && lightProbes.Length < positions.Length;
+			if (flag3)
 			{
 				throw new ArgumentException("lightProbes", "Argument lightProbes has less elements than positions");
 			}
-			if (occlusionProbes != null && occlusionProbes.Length < positions.Length)
+			bool flag4 = occlusionProbes != null && occlusionProbes.Length < positions.Length;
+			if (flag4)
 			{
 				throw new ArgumentException("occlusionProbes", "Argument occlusionProbes has less elements than positions");
 			}
@@ -50,32 +62,40 @@ namespace UnityEngine
 
 		public static void CalculateInterpolatedLightAndOcclusionProbes(List<Vector3> positions, List<SphericalHarmonicsL2> lightProbes, List<Vector4> occlusionProbes)
 		{
-			if (positions == null)
+			bool flag = positions == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("positions");
 			}
-			if (lightProbes == null && occlusionProbes == null)
+			bool flag2 = lightProbes == null && occlusionProbes == null;
+			if (flag2)
 			{
 				throw new ArgumentException("Argument lightProbes and occlusionProbes cannot both be null.");
 			}
-			if (lightProbes != null)
+			bool flag3 = lightProbes != null;
+			if (flag3)
 			{
-				if (lightProbes.Capacity < positions.Count)
+				bool flag4 = lightProbes.Capacity < positions.Count;
+				if (flag4)
 				{
 					lightProbes.Capacity = positions.Count;
 				}
-				if (lightProbes.Count < positions.Count)
+				bool flag5 = lightProbes.Count < positions.Count;
+				if (flag5)
 				{
 					NoAllocHelpers.ResizeList<SphericalHarmonicsL2>(lightProbes, positions.Count);
 				}
 			}
-			if (occlusionProbes != null)
+			bool flag6 = occlusionProbes != null;
+			if (flag6)
 			{
-				if (occlusionProbes.Capacity < positions.Count)
+				bool flag7 = occlusionProbes.Capacity < positions.Count;
+				if (flag7)
 				{
 					occlusionProbes.Capacity = positions.Count;
 				}
-				if (occlusionProbes.Count < positions.Count)
+				bool flag8 = occlusionProbes.Count < positions.Count;
+				if (flag8)
 				{
 					NoAllocHelpers.ResizeList<Vector4>(occlusionProbes, positions.Count);
 				}
@@ -90,41 +110,53 @@ namespace UnityEngine
 
 		public extern Vector3[] positions
 		{
+			[NativeName("GetLightProbePositions")]
+			[FreeFunction(HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern SphericalHarmonicsL2[] bakedProbes
 		{
+			[FreeFunction(HasExplicitThis = true)]
 			[NativeName("GetBakedCoefficients")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 			[NativeName("SetBakedCoefficients")]
+			[FreeFunction(HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern int count
 		{
+			[NativeName("GetLightProbeCount")]
+			[FreeFunction(HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern int cellCount
 		{
+			[FreeFunction(HasExplicitThis = true)]
 			[NativeName("GetTetrahedraSize")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
+		[NativeName("GetLightProbeCount")]
+		[FreeFunction]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern int GetCount();
+
 		[Obsolete("Use GetInterpolatedProbe instead.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public void GetInterpolatedLightProbe(Vector3 position, Renderer renderer, float[] coefficients)
 		{
 		}
 
-		[Obsolete("Use bakedProbes instead.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Use bakedProbes instead.", true)]
 		public float[] coefficients
 		{
 			get

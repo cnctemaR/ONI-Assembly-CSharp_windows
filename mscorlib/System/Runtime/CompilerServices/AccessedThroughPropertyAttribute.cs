@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.CompilerServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Field)]
+	[ComVisible(true)]
 	public sealed class AccessedThroughPropertyAttribute : Attribute
 	{
 		public AccessedThroughPropertyAttribute(string propertyName)

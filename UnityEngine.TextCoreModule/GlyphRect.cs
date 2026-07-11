@@ -8,22 +8,6 @@ namespace UnityEngine.TextCore
 	[Serializable]
 	public struct GlyphRect : IEquatable<GlyphRect>
 	{
-		public GlyphRect(int x, int y, int width, int height)
-		{
-			this.m_X = x;
-			this.m_Y = y;
-			this.m_Width = width;
-			this.m_Height = height;
-		}
-
-		public GlyphRect(Rect rect)
-		{
-			this.m_X = (int)rect.x;
-			this.m_Y = (int)rect.y;
-			this.m_Width = (int)rect.width;
-			this.m_Height = (int)rect.height;
-		}
-
 		public int x
 		{
 			get
@@ -80,6 +64,22 @@ namespace UnityEngine.TextCore
 			}
 		}
 
+		public GlyphRect(int x, int y, int width, int height)
+		{
+			this.m_X = x;
+			this.m_Y = y;
+			this.m_Width = width;
+			this.m_Height = height;
+		}
+
+		public GlyphRect(Rect rect)
+		{
+			this.m_X = (int)rect.x;
+			this.m_Y = (int)rect.y;
+			this.m_Width = (int)rect.width;
+			this.m_Height = (int)rect.height;
+		}
+
 		public override int GetHashCode()
 		{
 			return base.GetHashCode();
@@ -105,8 +105,8 @@ namespace UnityEngine.TextCore
 			return !(lhs == rhs);
 		}
 
-		[NativeName("x")]
 		[SerializeField]
+		[NativeName("x")]
 		private int m_X;
 
 		[SerializeField]

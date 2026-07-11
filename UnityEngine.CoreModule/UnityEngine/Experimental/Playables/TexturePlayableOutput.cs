@@ -6,30 +6,19 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Playables
 {
-	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
 	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Export/Director/TexturePlayableOutput.bindings.h")]
 	[NativeHeader("Runtime/Graphics/Director/TexturePlayableOutput.h")]
 	[StaticAccessor("TexturePlayableOutputBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
 	public struct TexturePlayableOutput : IPlayableOutput
 	{
-		internal TexturePlayableOutput(PlayableOutputHandle handle)
-		{
-			if (handle.IsValid())
-			{
-				if (!handle.IsPlayableOutputOfType<TexturePlayableOutput>())
-				{
-					throw new InvalidCastException("Can't set handle: the playable is not an TexturePlayableOutput.");
-				}
-			}
-			this.m_Handle = handle;
-		}
-
 		public static TexturePlayableOutput Create(PlayableGraph graph, string name, RenderTexture target)
 		{
 			PlayableOutputHandle playableOutputHandle;
+			bool flag = !TexturePlayableGraphExtensions.InternalCreateTextureOutput(ref graph, name, out playableOutputHandle);
 			TexturePlayableOutput texturePlayableOutput;
-			if (!TexturePlayableGraphExtensions.InternalCreateTextureOutput(ref graph, name, out playableOutputHandle))
+			if (flag)
 			{
 				texturePlayableOutput = TexturePlayableOutput.Null;
 			}
@@ -40,6 +29,20 @@ namespace UnityEngine.Experimental.Playables
 				texturePlayableOutput = texturePlayableOutput2;
 			}
 			return texturePlayableOutput;
+		}
+
+		internal TexturePlayableOutput(PlayableOutputHandle handle)
+		{
+			bool flag = handle.IsValid();
+			if (flag)
+			{
+				bool flag2 = !handle.IsPlayableOutputOfType<TexturePlayableOutput>();
+				if (flag2)
+				{
+					throw new InvalidCastException("Can't set handle: the playable is not an TexturePlayableOutput.");
+				}
+			}
+			this.m_Handle = handle;
 		}
 
 		public static TexturePlayableOutput Null

@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	[NativeClass("RaycastHit2D", "struct RaycastHit2D;")]
 	[NativeHeader("Runtime/Interfaces/IPhysics2D.h")]
+	[NativeClass("RaycastHit2D", "struct RaycastHit2D;")]
 	public struct RaycastHit2D
 	{
 		public Vector2 centroid
@@ -81,7 +81,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (!(this.collider != null)) ? null : this.collider.attachedRigidbody;
+				return (this.collider != null) ? this.collider.attachedRigidbody : null;
 			}
 		}
 
@@ -90,18 +90,23 @@ namespace UnityEngine
 			get
 			{
 				Rigidbody2D rigidbody = this.rigidbody;
+				bool flag = rigidbody != null;
 				Transform transform;
-				if (rigidbody != null)
+				if (flag)
 				{
 					transform = rigidbody.transform;
 				}
-				else if (this.collider != null)
-				{
-					transform = this.collider.transform;
-				}
 				else
 				{
-					transform = null;
+					bool flag2 = this.collider != null;
+					if (flag2)
+					{
+						transform = this.collider.transform;
+					}
+					else
+					{
+						transform = null;
+					}
 				}
 				return transform;
 			}
@@ -114,18 +119,23 @@ namespace UnityEngine
 
 		public int CompareTo(RaycastHit2D other)
 		{
+			bool flag = this.collider == null;
 			int num;
-			if (this.collider == null)
+			if (flag)
 			{
 				num = 1;
 			}
-			else if (other.collider == null)
-			{
-				num = -1;
-			}
 			else
 			{
-				num = this.fraction.CompareTo(other.fraction);
+				bool flag2 = other.collider == null;
+				if (flag2)
+				{
+					num = -1;
+				}
+				else
+				{
+					num = this.fraction.CompareTo(other.fraction);
+				}
 			}
 			return num;
 		}

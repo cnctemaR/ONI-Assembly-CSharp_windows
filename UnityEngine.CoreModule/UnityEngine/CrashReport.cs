@@ -5,32 +5,30 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/CrashReport.bindings.h")]
+	[NativeHeader("Runtime/Export/CrashReport/CrashReport.bindings.h")]
 	public sealed class CrashReport
 	{
-		private CrashReport(string id, DateTime time, string text)
-		{
-			this.id = id;
-			this.time = time;
-			this.text = text;
-		}
-
 		private static int Compare(CrashReport c1, CrashReport c2)
 		{
 			long ticks = c1.time.Ticks;
 			long ticks2 = c2.time.Ticks;
+			bool flag = ticks > ticks2;
 			int num;
-			if (ticks > ticks2)
+			if (flag)
 			{
 				num = 1;
 			}
-			else if (ticks < ticks2)
-			{
-				num = -1;
-			}
 			else
 			{
-				num = 0;
+				bool flag2 = ticks < ticks2;
+				if (flag2)
+				{
+					num = -1;
+				}
+				else
+				{
+					num = 0;
+				}
 			}
 			return num;
 		}
@@ -40,7 +38,8 @@ namespace UnityEngine
 			object obj = CrashReport.reportsLock;
 			lock (obj)
 			{
-				if (CrashReport.internalReports == null)
+				bool flag = CrashReport.internalReports != null;
+				if (!flag)
 				{
 					string[] reports = CrashReport.GetReports();
 					CrashReport.internalReports = new List<CrashReport>(reports.Length);
@@ -48,9 +47,8 @@ namespace UnityEngine
 					{
 						double num;
 						string reportData = CrashReport.GetReportData(text, out num);
-						DateTime dateTime = new DateTime(1970, 1, 1);
-						DateTime dateTime2 = dateTime.AddSeconds(num);
-						CrashReport.internalReports.Add(new CrashReport(text, dateTime2, reportData));
+						DateTime dateTime = new DateTime(1970, 1, 1).AddSeconds(num);
+						CrashReport.internalReports.Add(new CrashReport(text, dateTime, reportData));
 					}
 					CrashReport.internalReports.Sort(new Comparison<CrashReport>(CrashReport.Compare));
 				}
@@ -80,7 +78,8 @@ namespace UnityEngine
 				object obj = CrashReport.reportsLock;
 				lock (obj)
 				{
-					if (CrashReport.internalReports.Count > 0)
+					bool flag = CrashReport.internalReports.Count > 0;
+					if (flag)
 					{
 						return CrashReport.internalReports[CrashReport.internalReports.Count - 1];
 					}
@@ -97,9 +96,17 @@ namespace UnityEngine
 			}
 		}
 
+		private CrashReport(string id, DateTime time, string text)
+		{
+			this.id = id;
+			this.time = time;
+			this.text = text;
+		}
+
 		public void Remove()
 		{
-			if (CrashReport.RemoveReport(this.id))
+			bool flag = CrashReport.RemoveReport(this.id);
+			if (flag)
 			{
 				object obj = CrashReport.reportsLock;
 				lock (obj)

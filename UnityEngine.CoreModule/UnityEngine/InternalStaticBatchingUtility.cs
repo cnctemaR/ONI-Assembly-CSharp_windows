@@ -15,15 +15,32 @@ namespace UnityEngine
 		{
 			GameObject[] array = (GameObject[])Object.FindObjectsOfType(typeof(GameObject));
 			List<GameObject> list = new List<GameObject>();
-			foreach (GameObject gameObject in array)
+			GameObject[] array2 = array;
+			int i = 0;
+			while (i < array2.Length)
 			{
-				if (!(staticBatchRoot != null) || gameObject.transform.IsChildOf(staticBatchRoot.transform))
+				GameObject gameObject = array2[i];
+				bool flag = staticBatchRoot != null;
+				if (!flag)
 				{
-					if (!combineOnlyStatic || gameObject.isStaticBatchable)
-					{
-						list.Add(gameObject);
-					}
+					goto IL_0053;
 				}
+				bool flag2 = !gameObject.transform.IsChildOf(staticBatchRoot.transform);
+				if (!flag2)
+				{
+					goto IL_0053;
+				}
+				IL_0075:
+				i++;
+				continue;
+				IL_0053:
+				bool flag3 = combineOnlyStatic && !gameObject.isStaticBatchable;
+				if (flag3)
+				{
+					goto IL_0075;
+				}
+				list.Add(gameObject);
+				goto IL_0075;
 			}
 			array = list.ToArray();
 			InternalStaticBatchingUtility.CombineGameObjects(array, staticBatchRoot, isEditorPostprocessScene, sorter);
@@ -52,7 +69,8 @@ namespace UnityEngine
 		{
 			Matrix4x4 matrix4x = Matrix4x4.identity;
 			Transform transform = null;
-			if (staticBatchRoot)
+			bool flag = staticBatchRoot;
+			if (flag)
 			{
 				matrix4x = staticBatchRoot.transform.worldToLocalMatrix;
 				transform = staticBatchRoot.transform;
@@ -64,31 +82,40 @@ namespace UnityEngine
 			foreach (GameObject gameObject in gos)
 			{
 				MeshFilter meshFilter = gameObject.GetComponent(typeof(MeshFilter)) as MeshFilter;
-				if (!(meshFilter == null))
+				bool flag2 = meshFilter == null;
+				if (!flag2)
 				{
 					Mesh sharedMesh = meshFilter.sharedMesh;
-					if (!(sharedMesh == null) && (isEditorPostprocessScene || sharedMesh.canAccess))
+					bool flag3 = sharedMesh == null || (!isEditorPostprocessScene && !sharedMesh.canAccess);
+					if (!flag3)
 					{
 						Renderer component = meshFilter.GetComponent<Renderer>();
-						if (!(component == null) && component.enabled)
+						bool flag4 = component == null || !component.enabled;
+						if (!flag4)
 						{
-							if (component.staticBatchIndex == 0)
+							bool flag5 = component.staticBatchIndex != 0;
+							if (!flag5)
 							{
 								Material[] array2 = component.sharedMaterials;
-								if (!array2.Any<Material>((Material m) => m != null && m.shader != null && m.shader.disableBatching != DisableBatchingType.False))
+								bool flag6 = array2.Any<Material>((Material m) => m != null && m.shader != null && m.shader.disableBatching > DisableBatchingType.False);
+								if (!flag6)
 								{
 									int vertexCount = sharedMesh.vertexCount;
-									if (vertexCount != 0)
+									bool flag7 = vertexCount == 0;
+									if (!flag7)
 									{
 										MeshRenderer meshRenderer = component as MeshRenderer;
-										if (meshRenderer != null && meshRenderer.additionalVertexStreams != null)
+										bool flag8 = meshRenderer != null && meshRenderer.additionalVertexStreams != null;
+										if (flag8)
 										{
-											if (vertexCount != meshRenderer.additionalVertexStreams.vertexCount)
+											bool flag9 = vertexCount != meshRenderer.additionalVertexStreams.vertexCount;
+											if (flag9)
 											{
-												goto IL_0391;
+												goto IL_03BA;
 											}
 										}
-										if (num2 + vertexCount > 64000)
+										bool flag10 = num2 + vertexCount > 64000;
+										if (flag10)
 										{
 											InternalStaticBatchingUtility.MakeBatch(list, transform, num++);
 											list.Clear();
@@ -97,7 +124,8 @@ namespace UnityEngine
 										MeshSubsetCombineUtility.MeshInstance meshInstance = default(MeshSubsetCombineUtility.MeshInstance);
 										meshInstance.meshInstanceID = sharedMesh.GetInstanceID();
 										meshInstance.rendererInstanceID = component.GetInstanceID();
-										if (meshRenderer != null && meshRenderer.additionalVertexStreams != null)
+										bool flag11 = meshRenderer != null && meshRenderer.additionalVertexStreams != null;
+										if (flag11)
 										{
 											meshInstance.additionalVertexStreamsMeshInstanceID = meshRenderer.additionalVertexStreams.GetInstanceID();
 										}
@@ -111,7 +139,8 @@ namespace UnityEngine
 											subMeshInstances = new List<MeshSubsetCombineUtility.SubMeshInstance>()
 										};
 										list.Add(meshContainer);
-										if (array2.Length > sharedMesh.subMeshCount)
+										bool flag12 = array2.Length > sharedMesh.subMeshCount;
+										if (flag12)
 										{
 											Debug.LogWarning(string.Concat(new object[] { "Mesh '", sharedMesh.name, "' has more materials (", array2.Length, ") than subsets (", sharedMesh.subMeshCount, ")" }), component);
 											Material[] array3 = new Material[sharedMesh.subMeshCount];
@@ -139,14 +168,15 @@ namespace UnityEngine
 						}
 					}
 				}
-				IL_0391:;
+				IL_03BA:;
 			}
 			InternalStaticBatchingUtility.MakeBatch(list, transform, num);
 		}
 
 		private static void MakeBatch(List<MeshSubsetCombineUtility.MeshContainer> meshes, Transform staticBatchRootTransform, int batchIndex)
 		{
-			if (meshes.Count >= 2)
+			bool flag = meshes.Count < 2;
+			if (!flag)
 			{
 				List<MeshSubsetCombineUtility.MeshInstance> list = new List<MeshSubsetCombineUtility.MeshInstance>();
 				List<MeshSubsetCombineUtility.SubMeshInstance> list2 = new List<MeshSubsetCombineUtility.SubMeshInstance>();
@@ -156,8 +186,9 @@ namespace UnityEngine
 					list2.AddRange(meshContainer.subMeshInstances);
 				}
 				string text = "Combined Mesh";
-				text = text + " (root: " + ((!(staticBatchRootTransform != null)) ? "scene" : staticBatchRootTransform.name) + ")";
-				if (batchIndex > 0)
+				text = text + " (root: " + ((staticBatchRootTransform != null) ? staticBatchRootTransform.name : "scene") + ")";
+				bool flag2 = batchIndex > 0;
+				if (flag2)
 				{
 					text = text + " " + (batchIndex + 1);
 				}
@@ -175,7 +206,8 @@ namespace UnityEngine
 					component.enabled = false;
 					component.enabled = true;
 					MeshRenderer meshRenderer = component as MeshRenderer;
-					if (meshRenderer != null)
+					bool flag3 = meshRenderer != null;
+					if (flag3)
 					{
 						meshRenderer.additionalVertexStreams = null;
 					}
@@ -192,8 +224,9 @@ namespace UnityEngine
 		{
 			public virtual long GetMaterialId(Renderer renderer)
 			{
+				bool flag = renderer == null || renderer.sharedMaterial == null;
 				long num;
-				if (renderer == null || renderer.sharedMaterial == null)
+				if (flag)
 				{
 					num = 0L;
 				}
@@ -206,8 +239,9 @@ namespace UnityEngine
 
 			public int GetLightmapIndex(Renderer renderer)
 			{
+				bool flag = renderer == null;
 				int num;
-				if (renderer == null)
+				if (flag)
 				{
 					num = -1;
 				}
@@ -220,15 +254,17 @@ namespace UnityEngine
 
 			public static Renderer GetRenderer(GameObject go)
 			{
+				bool flag = go == null;
 				Renderer renderer;
-				if (go == null)
+				if (flag)
 				{
 					renderer = null;
 				}
 				else
 				{
 					MeshFilter meshFilter = go.GetComponent(typeof(MeshFilter)) as MeshFilter;
-					if (meshFilter == null)
+					bool flag2 = meshFilter == null;
+					if (flag2)
 					{
 						renderer = null;
 					}
@@ -242,8 +278,9 @@ namespace UnityEngine
 
 			public virtual long GetRendererId(Renderer renderer)
 			{
+				bool flag = renderer == null;
 				long num;
-				if (renderer == null)
+				if (flag)
 				{
 					num = -1L;
 				}

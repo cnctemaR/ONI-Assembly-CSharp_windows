@@ -4,9 +4,9 @@ using System.Security.Permissions;
 
 namespace System.Reflection.Emit
 {
+	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_MethodRental))]
 	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.None)]
 	public sealed class MethodRental : _MethodRental
 	{
 		private MethodRental()

@@ -4,9 +4,9 @@ using System.Security;
 
 namespace System.Runtime.InteropServices
 {
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
 	[Guid("475e398f-8afa-43a7-a3be-f4ef8d6787c9")]
+	[ClassInterface(ClassInterfaceType.None)]
 	public class RegistrationServices : IRegistrationServices
 	{
 		public virtual Guid GetManagedCategoryGuid()
@@ -20,15 +20,15 @@ namespace System.Runtime.InteropServices
 			return Marshal.GenerateProgIdForType(type);
 		}
 
-		[MonoTODO("implement")]
 		[SecurityCritical]
+		[MonoTODO("implement")]
 		public virtual Type[] GetRegistrableTypesInAssembly(Assembly assembly)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO("implement")]
 		[SecurityCritical]
+		[MonoTODO("implement")]
 		public virtual bool RegisterAssembly(Assembly assembly, AssemblyRegistrationFlags flags)
 		{
 			throw new NotImplementedException();
@@ -55,8 +55,8 @@ namespace System.Runtime.InteropServices
 			throw new NotImplementedException();
 		}
 
-		[SecurityCritical]
 		[MonoTODO("implement")]
+		[SecurityCritical]
 		public virtual bool UnregisterAssembly(Assembly assembly)
 		{
 			throw new NotImplementedException();
@@ -69,8 +69,8 @@ namespace System.Runtime.InteropServices
 			throw new NotImplementedException();
 		}
 
-		[ComVisible(false)]
 		[MonoTODO("implement")]
+		[ComVisible(false)]
 		public virtual void UnregisterTypeForComClients(int cookie)
 		{
 			throw new NotImplementedException();

@@ -31,7 +31,7 @@ public class FloorLampConfig : IBuildingConfig
 		LightShapePreview lightShapePreview = go.AddComponent<LightShapePreview>();
 		lightShapePreview.lux = 1000;
 		lightShapePreview.radius = 4f;
-		lightShapePreview.shape = LightShape.Circle;
+		lightShapePreview.shape = global::LightShape.Circle;
 		lightShapePreview.offset = new CellOffset((int)def.BuildingComplete.GetComponent<Light2D>().Offset.x, (int)def.BuildingComplete.GetComponent<Light2D>().Offset.y);
 	}
 
@@ -51,7 +51,7 @@ public class FloorLampConfig : IBuildingConfig
 		light2D.Angle = 0f;
 		light2D.Direction = LIGHT2D.FLOORLAMP_DIRECTION;
 		light2D.Offset = LIGHT2D.FLOORLAMP_OFFSET;
-		light2D.shape = LightShape.Circle;
+		light2D.shape = global::LightShape.Circle;
 		light2D.drawOverlay = true;
 		go.AddOrGetDef<LightController.Def>();
 	}

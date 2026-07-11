@@ -14,8 +14,9 @@ namespace UnityEngine.Networking.PlayerConnection
 		{
 			get
 			{
+				bool flag = PlayerConnection.s_Instance == null;
 				PlayerConnection playerConnection;
-				if (PlayerConnection.s_Instance == null)
+				if (flag)
 				{
 					playerConnection = PlayerConnection.CreateInstance();
 				}
@@ -44,7 +45,8 @@ namespace UnityEngine.Networking.PlayerConnection
 
 		public void OnEnable()
 		{
-			if (!this.m_IsInitilized)
+			bool isInitilized = this.m_IsInitilized;
+			if (!isInitilized)
 			{
 				this.m_IsInitilized = true;
 				this.GetConnectionNativeApi().Initialize();
@@ -58,11 +60,13 @@ namespace UnityEngine.Networking.PlayerConnection
 
 		public void Register(Guid messageId, UnityAction<MessageEventArgs> callback)
 		{
-			if (messageId == Guid.Empty)
+			bool flag = messageId == Guid.Empty;
+			if (flag)
 			{
 				throw new ArgumentException("Cant be Guid.Empty", "messageId");
 			}
-			if (!this.m_PlayerEditorConnectionEvents.messageTypeSubscribers.Any<PlayerEditorConnectionEvents.MessageTypeSubscribers>((PlayerEditorConnectionEvents.MessageTypeSubscribers x) => x.MessageTypeId == messageId))
+			bool flag2 = !this.m_PlayerEditorConnectionEvents.messageTypeSubscribers.Any<PlayerEditorConnectionEvents.MessageTypeSubscribers>((PlayerEditorConnectionEvents.MessageTypeSubscribers x) => x.MessageTypeId == messageId);
+			if (flag2)
 			{
 				this.GetConnectionNativeApi().RegisterInternal(messageId);
 			}
@@ -72,7 +76,8 @@ namespace UnityEngine.Networking.PlayerConnection
 		public void Unregister(Guid messageId, UnityAction<MessageEventArgs> callback)
 		{
 			this.m_PlayerEditorConnectionEvents.UnregisterManagedCallback(messageId, callback);
-			if (!this.m_PlayerEditorConnectionEvents.messageTypeSubscribers.Any<PlayerEditorConnectionEvents.MessageTypeSubscribers>((PlayerEditorConnectionEvents.MessageTypeSubscribers x) => x.MessageTypeId == messageId))
+			bool flag = !this.m_PlayerEditorConnectionEvents.messageTypeSubscribers.Any<PlayerEditorConnectionEvents.MessageTypeSubscribers>((PlayerEditorConnectionEvents.MessageTypeSubscribers x) => x.MessageTypeId == messageId);
+			if (flag)
 			{
 				this.GetConnectionNativeApi().UnregisterInternal(messageId);
 			}
@@ -92,9 +97,20 @@ namespace UnityEngine.Networking.PlayerConnection
 			this.m_PlayerEditorConnectionEvents.disconnectionEvent.AddListener(callback);
 		}
 
+		public void UnregisterConnection(UnityAction<int> callback)
+		{
+			this.m_PlayerEditorConnectionEvents.connectionEvent.RemoveListener(callback);
+		}
+
+		public void UnregisterDisconnection(UnityAction<int> callback)
+		{
+			this.m_PlayerEditorConnectionEvents.disconnectionEvent.RemoveListener(callback);
+		}
+
 		public void Send(Guid messageId, byte[] data)
 		{
-			if (messageId == Guid.Empty)
+			bool flag = messageId == Guid.Empty;
+			if (flag)
 			{
 				throw new ArgumentException("Cant be Guid.Empty", "messageId");
 			}
@@ -103,7 +119,8 @@ namespace UnityEngine.Networking.PlayerConnection
 
 		public bool TrySend(Guid messageId, byte[] data)
 		{
-			if (messageId == Guid.Empty)
+			bool flag = messageId == Guid.Empty;
+			if (flag)
 			{
 				throw new ArgumentException("Cant be Guid.Empty", "messageId");
 			}
@@ -136,7 +153,8 @@ namespace UnityEngine.Networking.PlayerConnection
 		private static void MessageCallbackInternal(IntPtr data, ulong size, ulong guid, string messageId)
 		{
 			byte[] array = null;
-			if (size > 0UL)
+			bool flag = size > 0UL;
+			if (flag)
 			{
 				array = new byte[size];
 				Marshal.Copy(data, array, 0, (int)size);

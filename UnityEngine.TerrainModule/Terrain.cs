@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Scripting;
 
@@ -10,9 +11,9 @@ namespace UnityEngine
 {
 	[NativeHeader("TerrainScriptingClasses.h")]
 	[NativeHeader("Runtime/Interfaces/ITerrainManager.h")]
+	[StaticAccessor("GetITerrainManager()", StaticAccessorType.Arrow)]
 	[NativeHeader("Modules/Terrain/Public/Terrain.h")]
 	[UsedByNativeCode]
-	[StaticAccessor("GetITerrainManager()", StaticAccessorType.Arrow)]
 	public sealed class Terrain : Behaviour
 	{
 		public extern TerrainData terrainData
@@ -95,20 +96,6 @@ namespace UnityEngine
 			set;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("splatmapDistance is deprecated, please use basemapDistance instead. (UnityUpgradable) -> basemapDistance", true)]
-		public float splatmapDistance
-		{
-			get
-			{
-				return this.basemapDistance;
-			}
-			set
-			{
-				this.basemapDistance = value;
-			}
-		}
-
 		[NativeProperty("StaticLightmapIndexInt")]
 		public extern int lightmapIndex
 		{
@@ -166,7 +153,7 @@ namespace UnityEngine
 			set;
 		}
 
-		public extern bool castShadows
+		public extern ShadowCastingMode shadowCastingMode
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -185,37 +172,7 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void GetClosestReflectionProbes(List<ReflectionProbeBlendInfo> result);
 
-		public extern Terrain.MaterialType materialType
-		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
-
 		public extern Material materialTemplate
-		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
-
-		public Color legacySpecular
-		{
-			get
-			{
-				Color color;
-				this.get_legacySpecular_Injected(out color);
-				return color;
-			}
-			set
-			{
-				this.set_legacySpecular_Injected(ref value);
-			}
-		}
-
-		public extern float legacyShininess
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -289,9 +246,6 @@ namespace UnityEngine
 			return this.SampleHeight_Injected(ref worldPosition);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ApplyDelayedHeightmapModification();
-
 		public void AddTreeInstance(TreeInstance instance)
 		{
 			this.AddTreeInstance_Injected(ref instance);
@@ -345,7 +299,8 @@ namespace UnityEngine
 
 		public void GetSplatMaterialPropertyBlock(MaterialPropertyBlock dest)
 		{
-			if (dest == null)
+			bool flag = dest == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("dest");
 			}
@@ -365,17 +320,79 @@ namespace UnityEngine
 		}
 
 		[StaticAccessor("Terrain", StaticAccessorType.DoubleColon)]
-		public static extern TextureFormat heightmapTextureFormat
+		public static extern GraphicsFormat heightmapFormat
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
+		public static TextureFormat heightmapTextureFormat
+		{
+			get
+			{
+				return GraphicsFormatUtility.GetTextureFormat(Terrain.heightmapFormat);
+			}
+		}
+
+		public static RenderTextureFormat heightmapRenderTextureFormat
+		{
+			get
+			{
+				return GraphicsFormatUtility.GetRenderTextureFormat(Terrain.heightmapFormat);
+			}
+		}
+
 		[StaticAccessor("Terrain", StaticAccessorType.DoubleColon)]
-		public static extern RenderTextureFormat heightmapRenderTextureFormat
+		public static extern GraphicsFormat normalmapFormat
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+		}
+
+		public static TextureFormat normalmapTextureFormat
+		{
+			get
+			{
+				return GraphicsFormatUtility.GetTextureFormat(Terrain.normalmapFormat);
+			}
+		}
+
+		public static RenderTextureFormat normalmapRenderTextureFormat
+		{
+			get
+			{
+				return GraphicsFormatUtility.GetRenderTextureFormat(Terrain.normalmapFormat);
+			}
+		}
+
+		[StaticAccessor("Terrain", StaticAccessorType.DoubleColon)]
+		public static extern GraphicsFormat holesFormat
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public static RenderTextureFormat holesRenderTextureFormat
+		{
+			get
+			{
+				return GraphicsFormatUtility.GetRenderTextureFormat(Terrain.holesFormat);
+			}
+		}
+
+		[StaticAccessor("Terrain", StaticAccessorType.DoubleColon)]
+		public static extern GraphicsFormat compressedHolesFormat
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public static TextureFormat compressedHolesTextureFormat
+		{
+			get
+			{
+				return GraphicsFormatUtility.GetTextureFormat(Terrain.compressedHolesFormat);
+			}
 		}
 
 		public static extern Terrain activeTerrain
@@ -422,6 +439,87 @@ namespace UnityEngine
 			get;
 		}
 
+		public extern uint renderingLayerMask
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		[Obsolete("splatmapDistance is deprecated, please use basemapDistance instead. (UnityUpgradable) -> basemapDistance", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public float splatmapDistance
+		{
+			get
+			{
+				return this.basemapDistance;
+			}
+			set
+			{
+				this.basemapDistance = value;
+			}
+		}
+
+		[Obsolete("castShadows is deprecated, please use shadowCastingMode instead.")]
+		public bool castShadows
+		{
+			get
+			{
+				return this.shadowCastingMode > ShadowCastingMode.Off;
+			}
+			set
+			{
+				this.shadowCastingMode = (value ? ShadowCastingMode.TwoSided : ShadowCastingMode.Off);
+			}
+		}
+
+		[Obsolete("Property materialType is not used any more. Set materialTemplate directly.", false)]
+		public Terrain.MaterialType materialType
+		{
+			get
+			{
+				return Terrain.MaterialType.Custom;
+			}
+			set
+			{
+			}
+		}
+
+		[Obsolete("Property legacySpecular is not used any more. Set materialTemplate directly.", false)]
+		public Color legacySpecular
+		{
+			get
+			{
+				return Color.gray;
+			}
+			set
+			{
+			}
+		}
+
+		[Obsolete("Property legacyShininess is not used any more. Set materialTemplate directly.", false)]
+		public float legacyShininess
+		{
+			get
+			{
+				return 0.078125f;
+			}
+			set
+			{
+			}
+		}
+
+		[Obsolete("Use TerrainData.SyncHeightmap to notify all Terrain instances using the TerrainData.", false)]
+		public void ApplyDelayedHeightmapModification()
+		{
+			TerrainData terrainData = this.terrainData;
+			if (terrainData != null)
+			{
+				terrainData.SyncHeightmap();
+			}
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_lightmapScaleOffset_Injected(out Vector4 ret);
 
@@ -433,12 +531,6 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void set_realtimeLightmapScaleOffset_Injected(ref Vector4 value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_legacySpecular_Injected(out Color ret);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_legacySpecular_Injected(ref Color value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_patchBoundsMultiplier_Injected(out Vector3 ret);
@@ -458,6 +550,7 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void RemoveTrees_Injected(ref Vector2 position, float radius, int prototypeIndex);
 
+		[Obsolete("Enum type MaterialType is not used any more.", false)]
 		public enum MaterialType
 		{
 			BuiltInStandard,

@@ -146,10 +146,10 @@ public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 				text = text.Substring(0, num2);
 			}
 		}
-		text = text.Replace(".sav", "");
+		text = Path.ChangeExtension(text, null);
 		text = text + " Cycle " + day.ToString();
 		text = SaveScreen.GetValidSaveFilename(text);
-		text = Path.Combine(SaveLoader.GetAutoSavePrefix(), Path.GetFileName(text));
+		text = Path.Combine(SaveLoader.GetActiveAutoSavePath(), Path.GetFileName(text));
 		string text2 = text;
 		int num3 = 1;
 		while (File.Exists(text))

@@ -242,8 +242,8 @@ namespace System.Threading
 			return WaitHandle.WaitAll(waitHandles, timeout, true);
 		}
 
-		[SecuritySafeCritical]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[SecuritySafeCritical]
 		public static int WaitAny(WaitHandle[] waitHandles, int millisecondsTimeout, bool exitContext)
 		{
 			if (waitHandles == null)

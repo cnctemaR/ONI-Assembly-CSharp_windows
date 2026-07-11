@@ -4,12 +4,13 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/PlayerConnectionInternal.bindings.h")]
+	[NativeHeader("Runtime/Export/PlayerConnection/PlayerConnectionInternal.bindings.h")]
 	internal class PlayerConnectionInternal : IPlayerEditorConnectionNative
 	{
 		void IPlayerEditorConnectionNative.SendMessage(Guid messageId, byte[] data, int playerId)
 		{
-			if (messageId == Guid.Empty)
+			bool flag = messageId == Guid.Empty;
+			if (flag)
 			{
 				throw new ArgumentException("messageId must not be empty");
 			}
@@ -18,7 +19,8 @@ namespace UnityEngine
 
 		bool IPlayerEditorConnectionNative.TrySendMessage(Guid messageId, byte[] data, int playerId)
 		{
-			if (messageId == Guid.Empty)
+			bool flag = messageId == Guid.Empty;
+			if (flag)
 			{
 				throw new ArgumentException("messageId must not be empty");
 			}

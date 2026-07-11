@@ -4,8 +4,8 @@ using Unity;
 
 namespace System.Reflection.Emit
 {
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_LocalBuilder))]
+	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class LocalBuilder : LocalVariableInfo, _LocalBuilder

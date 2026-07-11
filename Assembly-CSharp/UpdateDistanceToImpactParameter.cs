@@ -15,7 +15,7 @@ internal class UpdateDistanceToImpactParameter : LoopingSoundParameterUpdater
 		{
 			comet = sound.transform.GetComponent<Comet>(),
 			ev = sound.ev,
-			parameterIdx = sound.description.GetParameterIdx(base.parameter)
+			parameterId = sound.description.GetParameterId(base.parameter)
 		};
 		this.entries.Add(entry);
 	}
@@ -28,7 +28,7 @@ internal class UpdateDistanceToImpactParameter : LoopingSoundParameterUpdater
 			{
 				float soundDistance = entry.comet.GetSoundDistance();
 				EventInstance ev = entry.ev;
-				ev.setParameterValueByIndex(entry.parameterIdx, soundDistance);
+				ev.setParameterByID(entry.parameterId, soundDistance, false);
 			}
 		}
 	}
@@ -53,6 +53,6 @@ internal class UpdateDistanceToImpactParameter : LoopingSoundParameterUpdater
 
 		public EventInstance ev;
 
-		public int parameterIdx;
+		public PARAMETER_ID parameterId;
 	}
 }

@@ -131,7 +131,7 @@ public class StoryMessageScreen : KScreen
 	{
 		base.IsActive();
 		base.OnDeactivate();
-		MusicManager.instance.StopSong("Music_Victory_01_Message", true, STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.StopSong("Music_Victory_01_Message", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		if (this.restoreInterfaceOnClose)
 		{
 			CameraController.Instance.DisableUserCameraControl = false;

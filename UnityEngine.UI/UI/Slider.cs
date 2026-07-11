@@ -5,13 +5,10 @@ using UnityEngine.EventSystems;
 namespace UnityEngine.UI
 {
 	[AddComponentMenu("UI/Slider", 33)]
+	[ExecuteAlways]
 	[RequireComponent(typeof(RectTransform))]
-	public class Slider : Selectable, IDragHandler, IInitializePotentialDragHandler, ICanvasElement, IEventSystemHandler
+	public class Slider : Selectable, IDragHandler, IEventSystemHandler, IInitializePotentialDragHandler, ICanvasElement
 	{
-		protected Slider()
-		{
-		}
-
 		public RectTransform fillRect
 		{
 			get
@@ -69,7 +66,7 @@ namespace UnityEngine.UI
 			{
 				if (SetPropertyUtility.SetStruct<float>(ref this.m_MinValue, value))
 				{
-					this.Set(this.m_Value);
+					this.Set(this.m_Value, true);
 					this.UpdateVisuals();
 				}
 			}
@@ -85,7 +82,7 @@ namespace UnityEngine.UI
 			{
 				if (SetPropertyUtility.SetStruct<float>(ref this.m_MaxValue, value))
 				{
-					this.Set(this.m_Value);
+					this.Set(this.m_Value, true);
 					this.UpdateVisuals();
 				}
 			}
@@ -101,7 +98,7 @@ namespace UnityEngine.UI
 			{
 				if (SetPropertyUtility.SetStruct<bool>(ref this.m_WholeNumbers, value))
 				{
-					this.Set(this.m_Value);
+					this.Set(this.m_Value, true);
 					this.UpdateVisuals();
 				}
 			}
@@ -111,37 +108,32 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				float num;
 				if (this.wholeNumbers)
 				{
-					num = Mathf.Round(this.m_Value);
+					return Mathf.Round(this.m_Value);
 				}
-				else
-				{
-					num = this.m_Value;
-				}
-				return num;
+				return this.m_Value;
 			}
 			set
 			{
-				this.Set(value);
+				this.Set(value, true);
 			}
+		}
+
+		public virtual void SetValueWithoutNotify(float input)
+		{
+			this.Set(input, false);
 		}
 
 		public float normalizedValue
 		{
 			get
 			{
-				float num;
 				if (Mathf.Approximately(this.minValue, this.maxValue))
 				{
-					num = 0f;
+					return 0f;
 				}
-				else
-				{
-					num = Mathf.InverseLerp(this.minValue, this.maxValue, this.value);
-				}
-				return num;
+				return Mathf.InverseLerp(this.minValue, this.maxValue, this.value);
 			}
 			set
 			{
@@ -165,8 +157,16 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				return (!this.wholeNumbers) ? ((this.maxValue - this.minValue) * 0.1f) : 1f;
+				if (!this.wholeNumbers)
+				{
+					return (this.maxValue - this.minValue) * 0.1f;
+				}
+				return 1f;
 			}
+		}
+
+		protected Slider()
+		{
 		}
 
 		public virtual void Rebuild(CanvasUpdate executing)
@@ -195,6 +195,16 @@ namespace UnityEngine.UI
 			base.OnDisable();
 		}
 
+		protected virtual void Update()
+		{
+			if (this.m_DelayedUpdateVisuals)
+			{
+				this.m_DelayedUpdateVisuals = false;
+				this.Set(this.m_Value, false);
+				this.UpdateVisuals();
+			}
+		}
+
 		protected override void OnDidApplyAnimationProperties()
 		{
 			this.m_Value = this.ClampValue(this.m_Value);
@@ -207,12 +217,12 @@ namespace UnityEngine.UI
 				}
 				else
 				{
-					num = ((!this.reverseValue) ? this.m_FillRect.anchorMax[(int)this.axis] : (1f - this.m_FillRect.anchorMin[(int)this.axis]));
+					num = (this.reverseValue ? (1f - this.m_FillRect.anchorMin[(int)this.axis]) : this.m_FillRect.anchorMax[(int)this.axis]);
 				}
 			}
 			else if (this.m_HandleContainerRect != null)
 			{
-				num = ((!this.reverseValue) ? this.m_HandleRect.anchorMin[(int)this.axis] : (1f - this.m_HandleRect.anchorMin[(int)this.axis]));
+				num = (this.reverseValue ? (1f - this.m_HandleRect.anchorMin[(int)this.axis]) : this.m_HandleRect.anchorMin[(int)this.axis]);
 			}
 			this.UpdateVisuals();
 			if (num != this.normalizedValue)
@@ -245,6 +255,7 @@ namespace UnityEngine.UI
 				if (this.m_HandleTransform.parent != null)
 				{
 					this.m_HandleContainerRect = this.m_HandleTransform.parent.GetComponent<RectTransform>();
+					return;
 				}
 			}
 			else
@@ -264,40 +275,41 @@ namespace UnityEngine.UI
 			return num;
 		}
 
-		private void Set(float input)
-		{
-			this.Set(input, true);
-		}
-
-		protected virtual void Set(float input, bool sendCallback)
+		protected virtual void Set(float input, bool sendCallback = true)
 		{
 			float num = this.ClampValue(input);
-			if (this.m_Value != num)
+			if (this.m_Value == num)
 			{
-				this.m_Value = num;
-				this.UpdateVisuals();
-				if (sendCallback)
-				{
-					UISystemProfilerApi.AddMarker("Slider.value", this);
-					this.m_OnValueChanged.Invoke(num);
-				}
+				return;
+			}
+			this.m_Value = num;
+			this.UpdateVisuals();
+			if (sendCallback)
+			{
+				UISystemProfilerApi.AddMarker("Slider.value", this);
+				this.m_OnValueChanged.Invoke(num);
 			}
 		}
 
 		protected override void OnRectTransformDimensionsChange()
 		{
 			base.OnRectTransformDimensionsChange();
-			if (this.IsActive())
+			if (!this.IsActive())
 			{
-				this.UpdateVisuals();
+				return;
 			}
+			this.UpdateVisuals();
 		}
 
 		private Slider.Axis axis
 		{
 			get
 			{
-				return (this.m_Direction != Slider.Direction.LeftToRight && this.m_Direction != Slider.Direction.RightToLeft) ? Slider.Axis.Vertical : Slider.Axis.Horizontal;
+				if (this.m_Direction != Slider.Direction.LeftToRight && this.m_Direction != Slider.Direction.RightToLeft)
+				{
+					return Slider.Axis.Vertical;
+				}
+				return Slider.Axis.Horizontal;
 			}
 		}
 
@@ -337,10 +349,7 @@ namespace UnityEngine.UI
 				this.m_Tracker.Add(this, this.m_HandleRect, DrivenTransformProperties.Anchors);
 				Vector2 zero2 = Vector2.zero;
 				Vector2 one2 = Vector2.one;
-				int axis = (int)this.axis;
-				float num = ((!this.reverseValue) ? this.normalizedValue : (1f - this.normalizedValue));
-				one2[(int)this.axis] = num;
-				zero2[axis] = num;
+				zero2[(int)this.axis] = (one2[(int)this.axis] = (this.reverseValue ? (1f - this.normalizedValue) : this.normalizedValue));
 				this.m_HandleRect.anchorMin = zero2;
 				this.m_HandleRect.anchorMax = one2;
 			}
@@ -352,16 +361,18 @@ namespace UnityEngine.UI
 			if (rectTransform != null && rectTransform.rect.size[(int)this.axis] > 0f)
 			{
 				Vector2 zero = Vector2.zero;
-				if (MultipleDisplayUtilities.GetRelativeMousePositionForDrag(eventData, ref zero))
+				if (!MultipleDisplayUtilities.GetRelativeMousePositionForDrag(eventData, ref zero))
 				{
-					Vector2 vector;
-					if (RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, zero, cam, out vector))
-					{
-						vector -= rectTransform.rect.position;
-						float num = Mathf.Clamp01((vector - this.m_Offset)[(int)this.axis] / rectTransform.rect.size[(int)this.axis]);
-						this.normalizedValue = ((!this.reverseValue) ? num : (1f - num));
-					}
+					return;
 				}
+				Vector2 vector;
+				if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, zero, cam, out vector))
+				{
+					return;
+				}
+				vector -= rectTransform.rect.position;
+				float num = Mathf.Clamp01((vector - this.m_Offset)[(int)this.axis] / rectTransform.rect.size[(int)this.axis]);
+				this.normalizedValue = (this.reverseValue ? (1f - num) : num);
 			}
 		}
 
@@ -372,31 +383,34 @@ namespace UnityEngine.UI
 
 		public override void OnPointerDown(PointerEventData eventData)
 		{
-			if (this.MayDrag(eventData))
+			if (!this.MayDrag(eventData))
 			{
-				base.OnPointerDown(eventData);
-				this.m_Offset = Vector2.zero;
-				if (this.m_HandleContainerRect != null && RectTransformUtility.RectangleContainsScreenPoint(this.m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera))
+				return;
+			}
+			base.OnPointerDown(eventData);
+			this.m_Offset = Vector2.zero;
+			if (this.m_HandleContainerRect != null && RectTransformUtility.RectangleContainsScreenPoint(this.m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera))
+			{
+				Vector2 vector;
+				if (RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.pressEventCamera, out vector))
 				{
-					Vector2 vector;
-					if (RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.pressEventCamera, out vector))
-					{
-						this.m_Offset = vector;
-					}
+					this.m_Offset = vector;
+					return;
 				}
-				else
-				{
-					this.UpdateDrag(eventData, eventData.pressEventCamera);
-				}
+			}
+			else
+			{
+				this.UpdateDrag(eventData, eventData.pressEventCamera);
 			}
 		}
 
 		public virtual void OnDrag(PointerEventData eventData)
 		{
-			if (this.MayDrag(eventData))
+			if (!this.MayDrag(eventData))
 			{
-				this.UpdateDrag(eventData, eventData.pressEventCamera);
+				return;
 			}
+			this.UpdateDrag(eventData, eventData.pressEventCamera);
 		}
 
 		public override void OnMove(AxisEventData eventData)
@@ -404,109 +418,81 @@ namespace UnityEngine.UI
 			if (!this.IsActive() || !this.IsInteractable())
 			{
 				base.OnMove(eventData);
+				return;
 			}
-			else
+			switch (eventData.moveDir)
 			{
-				switch (eventData.moveDir)
+			case MoveDirection.Left:
+				if (this.axis == Slider.Axis.Horizontal && this.FindSelectableOnLeft() == null)
 				{
-				case MoveDirection.Left:
-					if (this.axis == Slider.Axis.Horizontal && this.FindSelectableOnLeft() == null)
-					{
-						this.Set((!this.reverseValue) ? (this.value - this.stepSize) : (this.value + this.stepSize));
-					}
-					else
-					{
-						base.OnMove(eventData);
-					}
-					break;
-				case MoveDirection.Up:
-					if (this.axis == Slider.Axis.Vertical && this.FindSelectableOnUp() == null)
-					{
-						this.Set((!this.reverseValue) ? (this.value + this.stepSize) : (this.value - this.stepSize));
-					}
-					else
-					{
-						base.OnMove(eventData);
-					}
-					break;
-				case MoveDirection.Right:
-					if (this.axis == Slider.Axis.Horizontal && this.FindSelectableOnRight() == null)
-					{
-						this.Set((!this.reverseValue) ? (this.value + this.stepSize) : (this.value - this.stepSize));
-					}
-					else
-					{
-						base.OnMove(eventData);
-					}
-					break;
-				case MoveDirection.Down:
-					if (this.axis == Slider.Axis.Vertical && this.FindSelectableOnDown() == null)
-					{
-						this.Set((!this.reverseValue) ? (this.value - this.stepSize) : (this.value + this.stepSize));
-					}
-					else
-					{
-						base.OnMove(eventData);
-					}
-					break;
+					this.Set(this.reverseValue ? (this.value + this.stepSize) : (this.value - this.stepSize), true);
+					return;
 				}
+				base.OnMove(eventData);
+				return;
+			case MoveDirection.Up:
+				if (this.axis == Slider.Axis.Vertical && this.FindSelectableOnUp() == null)
+				{
+					this.Set(this.reverseValue ? (this.value - this.stepSize) : (this.value + this.stepSize), true);
+					return;
+				}
+				base.OnMove(eventData);
+				return;
+			case MoveDirection.Right:
+				if (this.axis == Slider.Axis.Horizontal && this.FindSelectableOnRight() == null)
+				{
+					this.Set(this.reverseValue ? (this.value - this.stepSize) : (this.value + this.stepSize), true);
+					return;
+				}
+				base.OnMove(eventData);
+				return;
+			case MoveDirection.Down:
+				if (this.axis == Slider.Axis.Vertical && this.FindSelectableOnDown() == null)
+				{
+					this.Set(this.reverseValue ? (this.value + this.stepSize) : (this.value - this.stepSize), true);
+					return;
+				}
+				base.OnMove(eventData);
+				return;
+			default:
+				return;
 			}
 		}
 
 		public override Selectable FindSelectableOnLeft()
 		{
-			Selectable selectable;
 			if (base.navigation.mode == Navigation.Mode.Automatic && this.axis == Slider.Axis.Horizontal)
 			{
-				selectable = null;
+				return null;
 			}
-			else
-			{
-				selectable = base.FindSelectableOnLeft();
-			}
-			return selectable;
+			return base.FindSelectableOnLeft();
 		}
 
 		public override Selectable FindSelectableOnRight()
 		{
-			Selectable selectable;
 			if (base.navigation.mode == Navigation.Mode.Automatic && this.axis == Slider.Axis.Horizontal)
 			{
-				selectable = null;
+				return null;
 			}
-			else
-			{
-				selectable = base.FindSelectableOnRight();
-			}
-			return selectable;
+			return base.FindSelectableOnRight();
 		}
 
 		public override Selectable FindSelectableOnUp()
 		{
-			Selectable selectable;
 			if (base.navigation.mode == Navigation.Mode.Automatic && this.axis == Slider.Axis.Vertical)
 			{
-				selectable = null;
+				return null;
 			}
-			else
-			{
-				selectable = base.FindSelectableOnUp();
-			}
-			return selectable;
+			return base.FindSelectableOnUp();
 		}
 
 		public override Selectable FindSelectableOnDown()
 		{
-			Selectable selectable;
 			if (base.navigation.mode == Navigation.Mode.Automatic && this.axis == Slider.Axis.Vertical)
 			{
-				selectable = null;
+				return null;
 			}
-			else
-			{
-				selectable = base.FindSelectableOnDown();
-			}
-			return selectable;
+			return base.FindSelectableOnDown();
 		}
 
 		public virtual void OnInitializePotentialDrag(PointerEventData eventData)
@@ -519,16 +505,17 @@ namespace UnityEngine.UI
 			Slider.Axis axis = this.axis;
 			bool reverseValue = this.reverseValue;
 			this.direction = direction;
-			if (includeRectLayouts)
+			if (!includeRectLayouts)
 			{
-				if (this.axis != axis)
-				{
-					RectTransformUtility.FlipLayoutAxes(base.transform as RectTransform, true, true);
-				}
-				if (this.reverseValue != reverseValue)
-				{
-					RectTransformUtility.FlipLayoutOnAxis(base.transform as RectTransform, (int)this.axis, true, true);
-				}
+				return;
+			}
+			if (this.axis != axis)
+			{
+				RectTransformUtility.FlipLayoutAxes(base.transform as RectTransform, true, true);
+			}
+			if (this.reverseValue != reverseValue)
+			{
+				RectTransformUtility.FlipLayoutOnAxis(base.transform as RectTransform, (int)this.axis, true, true);
 			}
 		}
 
@@ -545,16 +532,16 @@ namespace UnityEngine.UI
 
 		[Space]
 		[SerializeField]
-		private Slider.Direction m_Direction = Slider.Direction.LeftToRight;
+		private Slider.Direction m_Direction;
 
 		[SerializeField]
-		private float m_MinValue = 0f;
+		private float m_MinValue;
 
 		[SerializeField]
 		private float m_MaxValue = 1f;
 
 		[SerializeField]
-		private bool m_WholeNumbers = false;
+		private bool m_WholeNumbers;
 
 		[SerializeField]
 		protected float m_Value;
@@ -576,6 +563,8 @@ namespace UnityEngine.UI
 		private Vector2 m_Offset = Vector2.zero;
 
 		private DrivenRectTransformTracker m_Tracker;
+
+		private bool m_DelayedUpdateVisuals;
 
 		public enum Direction
 		{

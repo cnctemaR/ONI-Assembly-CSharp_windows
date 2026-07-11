@@ -7,11 +7,6 @@ namespace UnityEngine
 {
 	public sealed class ShaderVariantCollection : Object
 	{
-		public ShaderVariantCollection()
-		{
-			ShaderVariantCollection.Internal_Create(this);
-		}
-
 		public extern int shaderCount
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -52,6 +47,11 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Create([Writable] ShaderVariantCollection svc);
 
+		public ShaderVariantCollection()
+		{
+			ShaderVariantCollection.Internal_Create(this);
+		}
+
 		public bool Add(ShaderVariantCollection.ShaderVariant variant)
 		{
 			return this.AddVariant(variant.shader, variant.passType, variant.keywords);
@@ -69,17 +69,17 @@ namespace UnityEngine
 
 		public struct ShaderVariant
 		{
+			[NativeConditional("UNITY_EDITOR")]
+			[FreeFunction]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern string CheckShaderVariant(Shader shader, PassType passType, string[] keywords);
+
 			public ShaderVariant(Shader shader, PassType passType, params string[] keywords)
 			{
 				this.shader = shader;
 				this.passType = passType;
 				this.keywords = keywords;
 			}
-
-			[NativeConditional("UNITY_EDITOR")]
-			[FreeFunction]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern string CheckShaderVariant(Shader shader, PassType passType, string[] keywords);
 
 			public Shader shader;
 

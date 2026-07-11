@@ -4,7 +4,7 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Animation/OptimizeTransformHierarchy.h")]
+	[NativeHeader("Modules/Animation/OptimizeTransformHierarchy.h")]
 	public class AnimatorUtility
 	{
 		[FreeFunction]

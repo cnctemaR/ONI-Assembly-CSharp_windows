@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 
 public class InfoDialogScreen : KModalScreen
@@ -8,7 +9,6 @@ public class InfoDialogScreen : KModalScreen
 	{
 		base.OnPrefabInit();
 		base.gameObject.SetActive(false);
-		this.confirmButton.GetComponent<KButton>().onClick += this.OnSelect_OK;
 	}
 
 	public override bool IsModal()
@@ -18,27 +18,47 @@ public class InfoDialogScreen : KModalScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (e.TryConsume(global::Action.Escape))
+		if (e.TryConsume(global::Action.Escape) && this.escapeCloses)
 		{
-			this.OnSelect_OK();
+			this.Deactivate();
 			return;
 		}
-		if (PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
+		if (PlayerController.Instance != null && PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight) && this.escapeCloses)
 		{
-			this.OnSelect_OK();
+			this.Deactivate();
 			return;
 		}
 		base.OnKeyDown(e);
 	}
 
-	public void AddOption(string text, Action<InfoDialogScreen> action)
+	public InfoDialogScreen AddDefaultOK()
 	{
-		GameObject gameObject = Util.KInstantiateUI(this.buttonPrefab, this.buttonPanel, true);
+		this.AddOption(UI.CONFIRMDIALOG.OK, delegate(InfoDialogScreen d)
+		{
+			d.Deactivate();
+		}, true);
+		return this;
+	}
+
+	public InfoDialogScreen AddDefaultCancel()
+	{
+		this.AddOption(UI.CONFIRMDIALOG.CANCEL, delegate(InfoDialogScreen d)
+		{
+			d.Deactivate();
+		}, false);
+		this.escapeCloses = true;
+		return this;
+	}
+
+	public InfoDialogScreen AddOption(string text, Action<InfoDialogScreen> action, bool rightSide = false)
+	{
+		GameObject gameObject = Util.KInstantiateUI(rightSide ? this.rightButtonPrefab : this.leftButtonPrefab, rightSide ? this.rightButtonPanel : this.leftButtonPanel, true);
 		gameObject.gameObject.GetComponentInChildren<LocText>().text = text;
 		gameObject.gameObject.GetComponent<KButton>().onClick += delegate
 		{
 			action(this);
 		};
+		return this;
 	}
 
 	public InfoDialogScreen SetHeader(string header)
@@ -47,23 +67,29 @@ public class InfoDialogScreen : KModalScreen
 		return this;
 	}
 
+	public InfoDialogScreen AddSprite(Sprite sprite)
+	{
+		Util.KInstantiateUI<InfoScreenSpriteItem>(this.spriteItemTemplate.gameObject, this.contentContainer, false).SetSprite(sprite);
+		return this;
+	}
+
 	public InfoDialogScreen AddPlainText(string text)
 	{
-		Util.KInstantiateUI(this.plainTextTemplate.gameObject, this.contentContainer, false).GetComponent<InfoScreenPlainText>().SetText(text);
+		Util.KInstantiateUI<InfoScreenPlainText>(this.plainTextTemplate.gameObject, this.contentContainer, false).SetText(text);
 		return this;
 	}
 
 	public InfoDialogScreen AddLineItem(string text, string tooltip)
 	{
-		InfoScreenLineItem component = Util.KInstantiateUI(this.lineItemTemplate.gameObject, this.contentContainer, false).GetComponent<InfoScreenLineItem>();
-		component.SetText(text);
-		component.SetTooltip(tooltip);
+		InfoScreenLineItem infoScreenLineItem = Util.KInstantiateUI<InfoScreenLineItem>(this.lineItemTemplate.gameObject, this.contentContainer, false);
+		infoScreenLineItem.SetText(text);
+		infoScreenLineItem.SetTooltip(tooltip);
 		return this;
 	}
 
 	public InfoDialogScreen AddSubHeader(string text)
 	{
-		Util.KInstantiateUI(this.subHeaderTemplate.gameObject, this.contentContainer, false).GetComponent<InfoScreenPlainText>().SetText(text);
+		Util.KInstantiateUI<InfoScreenPlainText>(this.subHeaderTemplate.gameObject, this.contentContainer, false).SetText(text);
 		return this;
 	}
 
@@ -76,11 +102,6 @@ public class InfoDialogScreen : KModalScreen
 		return this;
 	}
 
-	public void OnSelect_OK()
-	{
-		this.Deactivate();
-	}
-
 	[SerializeField]
 	private InfoScreenPlainText subHeaderTemplate;
 
@@ -90,6 +111,9 @@ public class InfoDialogScreen : KModalScreen
 	[SerializeField]
 	private InfoScreenLineItem lineItemTemplate;
 
+	[SerializeField]
+	private InfoScreenSpriteItem spriteItemTemplate;
+
 	[Space(10f)]
 	[SerializeField]
 	private LocText header;
@@ -98,11 +122,16 @@ public class InfoDialogScreen : KModalScreen
 	private GameObject contentContainer;
 
 	[SerializeField]
-	private GameObject confirmButton;
+	private GameObject leftButtonPrefab;
 
 	[SerializeField]
-	private GameObject buttonPrefab;
+	private GameObject rightButtonPrefab;
 
 	[SerializeField]
-	private GameObject buttonPanel;
+	private GameObject leftButtonPanel;
+
+	[SerializeField]
+	private GameObject rightButtonPanel;
+
+	private bool escapeCloses;
 }

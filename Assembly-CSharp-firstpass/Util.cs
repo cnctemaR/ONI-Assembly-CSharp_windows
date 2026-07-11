@@ -576,6 +576,11 @@ public static class Util
 		return Util.GetKleiRootPath();
 	}
 
+	public static string LogFilePath()
+	{
+		return Application.consoleLogPath;
+	}
+
 	public static string LogsFolder()
 	{
 		return Path.GetDirectoryName(Application.consoleLogPath);

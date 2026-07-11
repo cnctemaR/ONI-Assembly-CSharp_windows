@@ -2,8 +2,8 @@
 
 namespace System.Diagnostics.Contracts
 {
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	[Conditional("CONTRACTS_FULL")]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	public sealed class ContractClassForAttribute : Attribute
 	{
 		public ContractClassForAttribute(Type typeContractsAreFor)

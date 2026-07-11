@@ -8,18 +8,18 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
+	[ExcludeFromPreset]
+	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadAssetUtility.h")]
 	[NativeHeader("Modules/AssetBundle/Public/AssetBundleUtility.h")]
 	[NativeHeader("Modules/AssetBundle/Public/AssetBundleSaveAndLoadHelper.h")]
-	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadAssetUtility.h")]
-	[ExcludeFromPreset]
+	[NativeHeader("AssetBundleScriptingClasses.h")]
+	[NativeHeader("Runtime/Scripting/ScriptingUtility.h")]
 	[NativeHeader("Runtime/Scripting/ScriptingObjectWithIntPtrField.h")]
 	[NativeHeader("Runtime/Scripting/ScriptingExportUtility.h")]
 	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadAssetOperation.h")]
 	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadFromManagedStreamAsyncOperation.h")]
-	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadFromFileAsyncOperation.h")]
-	[NativeHeader("AssetBundleScriptingClasses.h")]
-	[NativeHeader("Runtime/Scripting/ScriptingUtility.h")]
 	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadFromMemoryAsyncOperation.h")]
+	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadFromFileAsyncOperation.h")]
 	public class AssetBundle : Object
 	{
 		private AssetBundle()
@@ -120,15 +120,18 @@ namespace UnityEngine
 
 		internal static void ValidateLoadFromStream(Stream stream)
 		{
-			if (stream == null)
+			bool flag = stream == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("ManagedStream object must be non-null", "stream");
 			}
-			if (!stream.CanRead)
+			bool flag2 = !stream.CanRead;
+			if (flag2)
 			{
 				throw new ArgumentException("ManagedStream object must be readable (stream.CanRead must return true)", "stream");
 			}
-			if (!stream.CanSeek)
+			bool flag3 = !stream.CanSeek;
+			if (flag3)
 			{
 				throw new ArgumentException("ManagedStream object must be seekable (stream.CanSeek must return true)", "stream");
 			}
@@ -189,50 +192,50 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool Contains(string name);
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Method Load has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAsset instead and check the documentation for details.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public Object Load(string name)
 		{
 			return null;
 		}
 
-		[Obsolete("Method Load has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAsset instead and check the documentation for details.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Method Load has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAsset instead and check the documentation for details.", true)]
 		public Object Load<T>(string name)
 		{
 			return null;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Method Load has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAsset instead and check the documentation for details.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		private Object Load(string name, Type type)
 		{
 			return null;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Method LoadAsync has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAssetAsync instead and check the documentation for details.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		private AssetBundleRequest LoadAsync(string name, Type type)
 		{
 			return null;
 		}
 
-		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
 		private Object[] LoadAll(Type type)
 		{
 			return null;
 		}
 
-		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
 		public Object[] LoadAll()
 		{
 			return null;
 		}
 
-		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
 		public T[] LoadAll<T>() where T : Object
 		{
 			return null;
@@ -251,24 +254,27 @@ namespace UnityEngine
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedBySecondArgument)]
 		public Object LoadAsset(string name, Type type)
 		{
-			if (name == null)
+			bool flag = name == null;
+			if (flag)
 			{
 				throw new NullReferenceException("The input asset name cannot be null.");
 			}
-			if (name.Length == 0)
+			bool flag2 = name.Length == 0;
+			if (flag2)
 			{
 				throw new ArgumentException("The input asset name cannot be empty.");
 			}
-			if (type == null)
+			bool flag3 = type == null;
+			if (flag3)
 			{
 				throw new NullReferenceException("The input type cannot be null.");
 			}
 			return this.LoadAsset_Internal(name, type);
 		}
 
-		[TypeInferenceRule(TypeInferenceRules.TypeReferencedBySecondArgument)]
-		[NativeMethod("LoadAsset_Internal")]
 		[NativeThrows]
+		[NativeMethod("LoadAsset_Internal")]
+		[TypeInferenceRule(TypeInferenceRules.TypeReferencedBySecondArgument)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Object LoadAsset_Internal(string name, Type type);
 
@@ -284,15 +290,18 @@ namespace UnityEngine
 
 		public AssetBundleRequest LoadAssetAsync(string name, Type type)
 		{
-			if (name == null)
+			bool flag = name == null;
+			if (flag)
 			{
 				throw new NullReferenceException("The input asset name cannot be null.");
 			}
-			if (name.Length == 0)
+			bool flag2 = name.Length == 0;
+			if (flag2)
 			{
 				throw new ArgumentException("The input asset name cannot be empty.");
 			}
-			if (type == null)
+			bool flag3 = type == null;
+			if (flag3)
 			{
 				throw new NullReferenceException("The input type cannot be null.");
 			}
@@ -306,8 +315,9 @@ namespace UnityEngine
 
 		internal static T[] ConvertObjects<T>(Object[] rawObjects) where T : Object
 		{
+			bool flag = rawObjects == null;
 			T[] array;
-			if (rawObjects == null)
+			if (flag)
 			{
 				array = null;
 			}
@@ -330,15 +340,18 @@ namespace UnityEngine
 
 		public Object[] LoadAssetWithSubAssets(string name, Type type)
 		{
-			if (name == null)
+			bool flag = name == null;
+			if (flag)
 			{
 				throw new NullReferenceException("The input asset name cannot be null.");
 			}
-			if (name.Length == 0)
+			bool flag2 = name.Length == 0;
+			if (flag2)
 			{
 				throw new ArgumentException("The input asset name cannot be empty.");
 			}
-			if (type == null)
+			bool flag3 = type == null;
+			if (flag3)
 			{
 				throw new NullReferenceException("The input type cannot be null.");
 			}
@@ -357,15 +370,18 @@ namespace UnityEngine
 
 		public AssetBundleRequest LoadAssetWithSubAssetsAsync(string name, Type type)
 		{
-			if (name == null)
+			bool flag = name == null;
+			if (flag)
 			{
 				throw new NullReferenceException("The input asset name cannot be null.");
 			}
-			if (name.Length == 0)
+			bool flag2 = name.Length == 0;
+			if (flag2)
 			{
 				throw new ArgumentException("The input asset name cannot be empty.");
 			}
-			if (type == null)
+			bool flag3 = type == null;
+			if (flag3)
 			{
 				throw new NullReferenceException("The input type cannot be null.");
 			}
@@ -384,7 +400,8 @@ namespace UnityEngine
 
 		public Object[] LoadAllAssets(Type type)
 		{
-			if (type == null)
+			bool flag = type == null;
+			if (flag)
 			{
 				throw new NullReferenceException("The input type cannot be null.");
 			}
@@ -403,7 +420,8 @@ namespace UnityEngine
 
 		public AssetBundleRequest LoadAllAssetsAsync(Type type)
 		{
-			if (type == null)
+			bool flag = type == null;
+			if (flag)
 			{
 				throw new NullReferenceException("The input type cannot be null.");
 			}
@@ -416,8 +434,8 @@ namespace UnityEngine
 			return this.GetAllAssetNames();
 		}
 
-		[NativeMethod("LoadAssetAsync_Internal")]
 		[NativeThrows]
+		[NativeMethod("LoadAssetAsync_Internal")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern AssetBundleRequest LoadAssetAsync_Internal(string name, Type type);
 

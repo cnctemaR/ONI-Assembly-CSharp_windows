@@ -8,7 +8,8 @@ namespace UnityEngine
 	{
 		public static void UpdateGIMaterials(this Terrain terrain)
 		{
-			if (terrain.terrainData == null)
+			bool flag = terrain.terrainData == null;
+			if (flag)
 			{
 				throw new ArgumentException("Invalid terrainData.");
 			}
@@ -17,7 +18,8 @@ namespace UnityEngine
 
 		public static void UpdateGIMaterials(this Terrain terrain, int x, int y, int width, int height)
 		{
-			if (terrain.terrainData == null)
+			bool flag = terrain.terrainData == null;
+			if (flag)
 			{
 				throw new ArgumentException("Invalid terrainData.");
 			}
@@ -26,8 +28,8 @@ namespace UnityEngine
 			TerrainExtensions.UpdateGIMaterialsForTerrain(terrain.GetInstanceID(), new Rect((float)x / num, (float)y / num2, (float)width / num, (float)height / num2));
 		}
 
-		[NativeConditional("INCLUDE_DYNAMIC_GI && ENABLE_RUNTIME_GI")]
 		[FreeFunction]
+		[NativeConditional("INCLUDE_DYNAMIC_GI && ENABLE_RUNTIME_GI")]
 		internal static void UpdateGIMaterialsForTerrain(int terrainInstanceID, Rect uvBounds)
 		{
 			TerrainExtensions.UpdateGIMaterialsForTerrain_Injected(terrainInstanceID, ref uvBounds);

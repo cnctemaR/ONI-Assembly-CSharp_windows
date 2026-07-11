@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using FMOD.Studio;
 using Klei.AI;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -1150,7 +1151,7 @@ public abstract class OverlayModes
 			logicCircuitManager.onElemAdded = (Action<ILogicUIElement>)Delegate.Remove(logicCircuitManager.onElemAdded, new Action<ILogicUIElement>(this.OnUIElemAdded));
 			LogicCircuitManager logicCircuitManager2 = Game.Instance.logicCircuitManager;
 			logicCircuitManager2.onElemRemoved = (Action<ILogicUIElement>)Delegate.Remove(logicCircuitManager2.onElemRemoved, new Action<ILogicUIElement>(this.OnUIElemRemoved));
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().TechFilterLogicOn, STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().TechFilterLogicOn, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 			foreach (SaveLoadRoot saveLoadRoot in this.gameObjTargets)
 			{
 				float defaultDepth = OverlayModes.Mode.GetDefaultDepth(saveLoadRoot);
@@ -2499,18 +2500,19 @@ public abstract class OverlayModes
 							UtilityNetwork networkForCell = Game.Instance.electricalConduitSystem.GetNetworkForCell(networkCell2);
 							ushort num2 = ((networkForCell != null) ? ((ushort)networkForCell.id) : ushort.MaxValue);
 							float wattsUsedByCircuit = circuitManager.GetWattsUsedByCircuit(num2);
-							float maxSafeWattageForCircuit = circuitManager.GetMaxSafeWattageForCircuit(num2);
+							float num3 = circuitManager.GetMaxSafeWattageForCircuit(num2);
+							num3 += POWER.FLOAT_FUDGE_FACTOR;
 							float wattsNeededWhenActive = circuitManager.GetWattsNeededWhenActive(num2);
 							Color32 color;
 							if (wattsUsedByCircuit <= 0f)
 							{
 								color = GlobalAssets.Instance.colorSet.powerCircuitUnpowered;
 							}
-							else if (wattsUsedByCircuit > maxSafeWattageForCircuit)
+							else if (wattsUsedByCircuit > num3)
 							{
 								color = GlobalAssets.Instance.colorSet.powerCircuitOverloading;
 							}
-							else if (wattsNeededWhenActive > maxSafeWattageForCircuit && maxSafeWattageForCircuit > 0f && wattsUsedByCircuit / maxSafeWattageForCircuit >= 0.75f)
+							else if (wattsNeededWhenActive > num3 && num3 > 0f && wattsUsedByCircuit / num3 >= 0.75f)
 							{
 								color = GlobalAssets.Instance.colorSet.powerCircuitStraining;
 							}

@@ -41,7 +41,8 @@ namespace UnityEngine.Windows.Speech
 		private static void PhraseRecognitionSystem_InvokeErrorEvent(SpeechError errorCode)
 		{
 			PhraseRecognitionSystem.ErrorDelegate onError = PhraseRecognitionSystem.OnError;
-			if (onError != null)
+			bool flag = onError != null;
+			if (flag)
 			{
 				onError(errorCode);
 			}
@@ -51,7 +52,8 @@ namespace UnityEngine.Windows.Speech
 		private static void PhraseRecognitionSystem_InvokeStatusChangedEvent(SpeechSystemStatus status)
 		{
 			PhraseRecognitionSystem.StatusDelegate onStatusChanged = PhraseRecognitionSystem.OnStatusChanged;
-			if (onStatusChanged != null)
+			bool flag = onStatusChanged != null;
+			if (flag)
 			{
 				onStatusChanged(status);
 			}

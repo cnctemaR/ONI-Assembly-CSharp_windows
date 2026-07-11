@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-	[AttributeUsage(AttributeTargets.Method)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Method)]
 	public sealed class LoaderOptimizationAttribute : Attribute
 	{
 		public LoaderOptimizationAttribute(byte value)

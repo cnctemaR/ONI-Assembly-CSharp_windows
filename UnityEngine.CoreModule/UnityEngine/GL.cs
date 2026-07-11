@@ -5,11 +5,11 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
-	[StaticAccessor("GetGfxDevice()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/Camera/Camera.h")]
-	[NativeHeader("Runtime/Camera/CameraUtil.h")]
 	[NativeHeader("Runtime/GfxDevice/GfxDevice.h")]
+	[StaticAccessor("GetGfxDevice()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[NativeHeader("Runtime/Camera/CameraUtil.h")]
 	public sealed class GL
 	{
 		[NativeName("ImmediateVertex")]
@@ -182,7 +182,8 @@ namespace UnityEngine
 
 		public static void IssuePluginEvent(IntPtr callback, int eventID)
 		{
-			if (callback == IntPtr.Zero)
+			bool flag = callback == IntPtr.Zero;
+			if (flag)
 			{
 				throw new ArgumentException("Null callback specified.", "callback");
 			}

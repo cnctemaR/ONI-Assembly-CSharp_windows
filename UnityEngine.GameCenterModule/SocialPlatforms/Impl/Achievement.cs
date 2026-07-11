@@ -29,7 +29,18 @@ namespace UnityEngine.SocialPlatforms.Impl
 
 		public override string ToString()
 		{
-			return string.Concat(new object[] { this.id, " - ", this.percentCompleted, " - ", this.completed, " - ", this.hidden, " - ", this.lastReportedDate });
+			return string.Concat(new object[]
+			{
+				this.id,
+				" - ",
+				this.percentCompleted,
+				" - ",
+				this.completed.ToString(),
+				" - ",
+				this.hidden.ToString(),
+				" - ",
+				this.lastReportedDate
+			});
 		}
 
 		public void ReportProgress(Action<bool> callback)

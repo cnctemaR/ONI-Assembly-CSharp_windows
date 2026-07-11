@@ -92,7 +92,7 @@ public class WattsonMessage : KScreen
 	{
 		global::Debug.Log("WattsonMessage OnActivate");
 		base.OnActivate();
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().NewBaseSetupSnapshot, STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().NewBaseSetupSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().IntroNIS);
 		AudioMixer.instance.activeNIS = true;
 		this.button.onClick += delegate
@@ -160,9 +160,9 @@ public class WattsonMessage : KScreen
 	protected override void OnDeactivate()
 	{
 		base.OnDeactivate();
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().IntroNIS, STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().IntroNIS, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.StartPersistentSnapshots();
-		MusicManager.instance.StopSong("Music_WattsonMessage", true, STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.StopSong("Music_WattsonMessage", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		MusicManager.instance.PlayDynamicMusic();
 		AudioMixer.instance.activeNIS = false;
 		DemoTimer.Instance.CountdownActive = true;

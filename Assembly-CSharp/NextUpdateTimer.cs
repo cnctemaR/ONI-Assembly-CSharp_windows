@@ -9,14 +9,10 @@ public class NextUpdateTimer : KMonoBehaviour
 	{
 		base.OnPrefabInit();
 		this.initialAnimScale = this.UpdateAnimController.animScale;
-		ScreenResize instance = ScreenResize.Instance;
-		instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.RefreshScale));
 	}
 
 	protected override void OnCleanUp()
 	{
-		ScreenResize instance = ScreenResize.Instance;
-		instance.OnResize = (global::System.Action)Delegate.Remove(instance.OnResize, new global::System.Action(this.RefreshScale));
 		base.OnCleanUp();
 	}
 
@@ -38,7 +34,6 @@ public class NextUpdateTimer : KMonoBehaviour
 		}
 		this.m_releaseTextOverride = textOverride;
 		this.RefreshReleaseTimes();
-		this.RefreshScale();
 	}
 
 	private void RefreshReleaseTimes()
@@ -81,19 +76,6 @@ public class NextUpdateTimer : KMonoBehaviour
 		this.UpdateAnimController.Play(text, KAnim.PlayMode.Loop, 1f, 0f);
 		float num3 = Mathf.Clamp01((float)(timeSpan3.TotalSeconds / timeSpan.TotalSeconds));
 		this.UpdateAnimMeterController.SetPositionPercent(num3);
-	}
-
-	private void RefreshScale()
-	{
-		float canvasScale = base.GetComponentInParent<KCanvasScaler>().GetCanvasScale();
-		if (this.UpdateAnimController != null)
-		{
-			this.UpdateAnimController.animScale = this.initialAnimScale * (1f / canvasScale);
-		}
-		if (this.UpdateAnimMeterController != null)
-		{
-			this.UpdateAnimMeterController.animScale = this.initialAnimScale * (1f / canvasScale);
-		}
 	}
 
 	public LocText TimerText;

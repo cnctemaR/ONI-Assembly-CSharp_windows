@@ -24,7 +24,7 @@ namespace UnityEngine.Networking.Match
 				this.publicAddress,
 				this.privateAddress,
 				this.eloScore,
-				(!string.IsNullOrEmpty(this.password)) ? "YES" : "NO"
+				string.IsNullOrEmpty(this.password) ? "NO" : "YES"
 			});
 		}
 

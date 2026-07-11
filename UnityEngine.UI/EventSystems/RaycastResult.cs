@@ -40,42 +40,37 @@ namespace UnityEngine.EventSystems
 
 		public override string ToString()
 		{
-			string text;
 			if (!this.isValid)
 			{
-				text = "";
+				return "";
 			}
-			else
+			return string.Concat(new object[]
 			{
-				text = string.Concat(new object[]
-				{
-					"Name: ",
-					this.gameObject,
-					"\nmodule: ",
-					this.module,
-					"\ndistance: ",
-					this.distance,
-					"\nindex: ",
-					this.index,
-					"\ndepth: ",
-					this.depth,
-					"\nworldNormal: ",
-					this.worldNormal,
-					"\nworldPosition: ",
-					this.worldPosition,
-					"\nscreenPosition: ",
-					this.screenPosition,
-					"\nmodule.sortOrderPriority: ",
-					this.module.sortOrderPriority,
-					"\nmodule.renderOrderPriority: ",
-					this.module.renderOrderPriority,
-					"\nsortingLayer: ",
-					this.sortingLayer,
-					"\nsortingOrder: ",
-					this.sortingOrder
-				});
-			}
-			return text;
+				"Name: ",
+				this.gameObject,
+				"\nmodule: ",
+				this.module,
+				"\ndistance: ",
+				this.distance,
+				"\nindex: ",
+				this.index,
+				"\ndepth: ",
+				this.depth,
+				"\nworldNormal: ",
+				this.worldNormal,
+				"\nworldPosition: ",
+				this.worldPosition,
+				"\nscreenPosition: ",
+				this.screenPosition,
+				"\nmodule.sortOrderPriority: ",
+				this.module.sortOrderPriority,
+				"\nmodule.renderOrderPriority: ",
+				this.module.renderOrderPriority,
+				"\nsortingLayer: ",
+				this.sortingLayer,
+				"\nsortingOrder: ",
+				this.sortingOrder
+			});
 		}
 
 		private GameObject m_GameObject;
@@ -98,6 +93,6 @@ namespace UnityEngine.EventSystems
 
 		public Vector2 screenPosition;
 
-		internal int displayIndex;
+		public int displayIndex;
 	}
 }

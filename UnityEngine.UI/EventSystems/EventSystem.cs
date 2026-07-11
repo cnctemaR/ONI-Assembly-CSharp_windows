@@ -8,15 +8,15 @@ namespace UnityEngine.EventSystems
 	[AddComponentMenu("Event/Event System")]
 	public class EventSystem : UIBehaviour
 	{
-		protected EventSystem()
-		{
-		}
-
 		public static EventSystem current
 		{
 			get
 			{
-				return (EventSystem.m_EventSystems.Count <= 0) ? null : EventSystem.m_EventSystems[0];
+				if (EventSystem.m_EventSystems.Count <= 0)
+				{
+					return null;
+				}
+				return EventSystem.m_EventSystems[0];
 			}
 			set
 			{
@@ -98,6 +98,10 @@ namespace UnityEngine.EventSystems
 			}
 		}
 
+		protected EventSystem()
+		{
+		}
+
 		public void UpdateModules()
 		{
 			base.GetComponents<BaseInputModule>(this.m_SystemInputModules);
@@ -123,22 +127,18 @@ namespace UnityEngine.EventSystems
 			if (this.m_SelectionGuard)
 			{
 				Debug.LogError("Attempting to select " + selected + "while already selecting an object.");
+				return;
 			}
-			else
+			this.m_SelectionGuard = true;
+			if (selected == this.m_CurrentSelected)
 			{
-				this.m_SelectionGuard = true;
-				if (selected == this.m_CurrentSelected)
-				{
-					this.m_SelectionGuard = false;
-				}
-				else
-				{
-					ExecuteEvents.Execute<IDeselectHandler>(this.m_CurrentSelected, pointer, ExecuteEvents.deselectHandler);
-					this.m_CurrentSelected = selected;
-					ExecuteEvents.Execute<ISelectHandler>(this.m_CurrentSelected, pointer, ExecuteEvents.selectHandler);
-					this.m_SelectionGuard = false;
-				}
+				this.m_SelectionGuard = false;
+				return;
 			}
+			ExecuteEvents.Execute<IDeselectHandler>(this.m_CurrentSelected, pointer, ExecuteEvents.deselectHandler);
+			this.m_CurrentSelected = selected;
+			ExecuteEvents.Execute<ISelectHandler>(this.m_CurrentSelected, pointer, ExecuteEvents.selectHandler);
+			this.m_SelectionGuard = false;
 		}
 
 		private BaseEventData baseEventDataCache
@@ -188,30 +188,25 @@ namespace UnityEngine.EventSystems
 					}
 				}
 			}
-			int num;
 			if (lhs.sortingLayer != rhs.sortingLayer)
 			{
 				int layerValueFromID = SortingLayer.GetLayerValueFromID(rhs.sortingLayer);
 				int layerValueFromID2 = SortingLayer.GetLayerValueFromID(lhs.sortingLayer);
-				num = layerValueFromID.CompareTo(layerValueFromID2);
+				return layerValueFromID.CompareTo(layerValueFromID2);
 			}
-			else if (lhs.sortingOrder != rhs.sortingOrder)
+			if (lhs.sortingOrder != rhs.sortingOrder)
 			{
-				num = rhs.sortingOrder.CompareTo(lhs.sortingOrder);
+				return rhs.sortingOrder.CompareTo(lhs.sortingOrder);
 			}
-			else if (lhs.depth != rhs.depth)
+			if (lhs.depth != rhs.depth && lhs.module.rootRaycaster == rhs.module.rootRaycaster)
 			{
-				num = rhs.depth.CompareTo(lhs.depth);
+				return rhs.depth.CompareTo(lhs.depth);
 			}
-			else if (lhs.distance != rhs.distance)
+			if (lhs.distance != rhs.distance)
 			{
-				num = lhs.distance.CompareTo(rhs.distance);
+				return lhs.distance.CompareTo(rhs.distance);
 			}
-			else
-			{
-				num = lhs.index.CompareTo(rhs.index);
-			}
-			return num;
+			return lhs.index.CompareTo(rhs.index);
 		}
 
 		public void RaycastAll(PointerEventData eventData, List<RaycastResult> raycastResults)
@@ -274,57 +269,65 @@ namespace UnityEngine.EventSystems
 
 		protected virtual void Update()
 		{
-			if (!(EventSystem.current != this))
+			if (EventSystem.current != this)
 			{
-				this.TickModules();
-				bool flag = false;
-				for (int i = 0; i < this.m_SystemInputModules.Count; i++)
+				return;
+			}
+			this.TickModules();
+			bool flag = false;
+			int i = 0;
+			while (i < this.m_SystemInputModules.Count)
+			{
+				BaseInputModule baseInputModule = this.m_SystemInputModules[i];
+				if (baseInputModule.IsModuleSupported() && baseInputModule.ShouldActivateModule())
 				{
-					BaseInputModule baseInputModule = this.m_SystemInputModules[i];
-					if (baseInputModule.IsModuleSupported() && baseInputModule.ShouldActivateModule())
+					if (this.m_CurrentInputModule != baseInputModule)
 					{
-						if (this.m_CurrentInputModule != baseInputModule)
-						{
-							this.ChangeEventModule(baseInputModule);
-							flag = true;
-						}
+						this.ChangeEventModule(baseInputModule);
+						flag = true;
+						break;
+					}
+					break;
+				}
+				else
+				{
+					i++;
+				}
+			}
+			if (this.m_CurrentInputModule == null)
+			{
+				for (int j = 0; j < this.m_SystemInputModules.Count; j++)
+				{
+					BaseInputModule baseInputModule2 = this.m_SystemInputModules[j];
+					if (baseInputModule2.IsModuleSupported())
+					{
+						this.ChangeEventModule(baseInputModule2);
+						flag = true;
 						break;
 					}
 				}
-				if (this.m_CurrentInputModule == null)
-				{
-					for (int j = 0; j < this.m_SystemInputModules.Count; j++)
-					{
-						BaseInputModule baseInputModule2 = this.m_SystemInputModules[j];
-						if (baseInputModule2.IsModuleSupported())
-						{
-							this.ChangeEventModule(baseInputModule2);
-							flag = true;
-							break;
-						}
-					}
-				}
-				if (!flag && this.m_CurrentInputModule != null)
-				{
-					this.m_CurrentInputModule.Process();
-				}
+			}
+			if (!flag && this.m_CurrentInputModule != null)
+			{
+				this.m_CurrentInputModule.Process();
 			}
 		}
 
 		private void ChangeEventModule(BaseInputModule module)
 		{
-			if (!(this.m_CurrentInputModule == module))
+			if (this.m_CurrentInputModule == module)
 			{
-				if (this.m_CurrentInputModule != null)
-				{
-					this.m_CurrentInputModule.DeactivateModule();
-				}
-				if (module != null)
-				{
-					module.ActivateModule();
-				}
-				this.m_CurrentInputModule = module;
+				return;
 			}
+			if (this.m_CurrentInputModule != null)
+			{
+				this.m_CurrentInputModule.DeactivateModule();
+			}
+			if (module != null)
+			{
+				module.ActivateModule();
+			}
+			this.m_CurrentInputModule = module;
 		}
 
 		public override string ToString()
@@ -333,7 +336,7 @@ namespace UnityEngine.EventSystems
 			stringBuilder.AppendLine("<b>Selected:</b>" + this.currentSelectedGameObject);
 			stringBuilder.AppendLine();
 			stringBuilder.AppendLine();
-			stringBuilder.AppendLine((!(this.m_CurrentInputModule != null)) ? "No module" : this.m_CurrentInputModule.ToString());
+			stringBuilder.AppendLine((this.m_CurrentInputModule != null) ? this.m_CurrentInputModule.ToString() : "No module");
 			return stringBuilder.ToString();
 		}
 

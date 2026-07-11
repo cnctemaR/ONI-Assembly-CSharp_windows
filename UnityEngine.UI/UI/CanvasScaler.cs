@@ -6,12 +6,9 @@ namespace UnityEngine.UI
 	[RequireComponent(typeof(Canvas))]
 	[ExecuteAlways]
 	[AddComponentMenu("Layout/Canvas Scaler", 101)]
+	[DisallowMultipleComponent]
 	public class CanvasScaler : UIBehaviour
 	{
-		protected CanvasScaler()
-		{
-		}
-
 		public CanvasScaler.ScaleMode uiScaleMode
 		{
 			get
@@ -140,6 +137,10 @@ namespace UnityEngine.UI
 			}
 		}
 
+		protected CanvasScaler()
+		{
+		}
+
 		protected override void OnEnable()
 		{
 			base.OnEnable();
@@ -161,34 +162,28 @@ namespace UnityEngine.UI
 
 		protected virtual void Handle()
 		{
-			if (!(this.m_Canvas == null) && this.m_Canvas.isRootCanvas)
+			if (this.m_Canvas == null || !this.m_Canvas.isRootCanvas)
 			{
-				if (this.m_Canvas.renderMode == RenderMode.WorldSpace)
-				{
-					this.HandleWorldCanvas();
-				}
-				else
-				{
-					CanvasScaler.ScaleMode uiScaleMode = this.m_UiScaleMode;
-					if (uiScaleMode != CanvasScaler.ScaleMode.ConstantPixelSize)
-					{
-						if (uiScaleMode != CanvasScaler.ScaleMode.ScaleWithScreenSize)
-						{
-							if (uiScaleMode == CanvasScaler.ScaleMode.ConstantPhysicalSize)
-							{
-								this.HandleConstantPhysicalSize();
-							}
-						}
-						else
-						{
-							this.HandleScaleWithScreenSize();
-						}
-					}
-					else
-					{
-						this.HandleConstantPixelSize();
-					}
-				}
+				return;
+			}
+			if (this.m_Canvas.renderMode == RenderMode.WorldSpace)
+			{
+				this.HandleWorldCanvas();
+				return;
+			}
+			switch (this.m_UiScaleMode)
+			{
+			case CanvasScaler.ScaleMode.ConstantPixelSize:
+				this.HandleConstantPixelSize();
+				return;
+			case CanvasScaler.ScaleMode.ScaleWithScreenSize:
+				this.HandleScaleWithScreenSize();
+				return;
+			case CanvasScaler.ScaleMode.ConstantPhysicalSize:
+				this.HandleConstantPhysicalSize();
+				return;
+			default:
+				return;
 			}
 		}
 
@@ -214,27 +209,22 @@ namespace UnityEngine.UI
 				vector = new Vector2((float)display.renderingWidth, (float)display.renderingHeight);
 			}
 			float num = 0f;
-			CanvasScaler.ScreenMatchMode screenMatchMode = this.m_ScreenMatchMode;
-			if (screenMatchMode != CanvasScaler.ScreenMatchMode.MatchWidthOrHeight)
+			switch (this.m_ScreenMatchMode)
 			{
-				if (screenMatchMode != CanvasScaler.ScreenMatchMode.Expand)
-				{
-					if (screenMatchMode == CanvasScaler.ScreenMatchMode.Shrink)
-					{
-						num = Mathf.Max(vector.x / this.m_ReferenceResolution.x, vector.y / this.m_ReferenceResolution.y);
-					}
-				}
-				else
-				{
-					num = Mathf.Min(vector.x / this.m_ReferenceResolution.x, vector.y / this.m_ReferenceResolution.y);
-				}
-			}
-			else
+			case CanvasScaler.ScreenMatchMode.MatchWidthOrHeight:
 			{
 				float num2 = Mathf.Log(vector.x / this.m_ReferenceResolution.x, 2f);
 				float num3 = Mathf.Log(vector.y / this.m_ReferenceResolution.y, 2f);
 				float num4 = Mathf.Lerp(num2, num3, this.m_MatchWidthOrHeight);
 				num = Mathf.Pow(2f, num4);
+				break;
+			}
+			case CanvasScaler.ScreenMatchMode.Expand:
+				num = Mathf.Min(vector.x / this.m_ReferenceResolution.x, vector.y / this.m_ReferenceResolution.y);
+				break;
+			case CanvasScaler.ScreenMatchMode.Shrink:
+				num = Mathf.Max(vector.x / this.m_ReferenceResolution.x, vector.y / this.m_ReferenceResolution.y);
+				break;
 			}
 			this.SetScaleFactor(num);
 			this.SetReferencePixelsPerUnit(this.m_ReferencePixelsPerUnit);
@@ -243,7 +233,7 @@ namespace UnityEngine.UI
 		protected virtual void HandleConstantPhysicalSize()
 		{
 			float dpi = Screen.dpi;
-			float num = ((dpi != 0f) ? dpi : this.m_FallbackScreenDPI);
+			float num = ((dpi == 0f) ? this.m_FallbackScreenDPI : dpi);
 			float num2 = 1f;
 			switch (this.m_PhysicalUnit)
 			{
@@ -269,25 +259,27 @@ namespace UnityEngine.UI
 
 		protected void SetScaleFactor(float scaleFactor)
 		{
-			if (scaleFactor != this.m_PrevScaleFactor)
+			if (scaleFactor == this.m_PrevScaleFactor)
 			{
-				this.m_Canvas.scaleFactor = scaleFactor;
-				this.m_PrevScaleFactor = scaleFactor;
+				return;
 			}
+			this.m_Canvas.scaleFactor = scaleFactor;
+			this.m_PrevScaleFactor = scaleFactor;
 		}
 
 		protected void SetReferencePixelsPerUnit(float referencePixelsPerUnit)
 		{
-			if (referencePixelsPerUnit != this.m_PrevReferencePixelsPerUnit)
+			if (referencePixelsPerUnit == this.m_PrevReferencePixelsPerUnit)
 			{
-				this.m_Canvas.referencePixelsPerUnit = referencePixelsPerUnit;
-				this.m_PrevReferencePixelsPerUnit = referencePixelsPerUnit;
+				return;
 			}
+			this.m_Canvas.referencePixelsPerUnit = referencePixelsPerUnit;
+			this.m_PrevReferencePixelsPerUnit = referencePixelsPerUnit;
 		}
 
 		[Tooltip("Determines how UI elements in the Canvas are scaled.")]
 		[SerializeField]
-		private CanvasScaler.ScaleMode m_UiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
+		private CanvasScaler.ScaleMode m_UiScaleMode;
 
 		[Tooltip("If a sprite has this 'Pixels Per Unit' setting, then one pixel in the sprite will cover one unit in the UI.")]
 		[SerializeField]
@@ -303,12 +295,12 @@ namespace UnityEngine.UI
 
 		[Tooltip("A mode used to scale the canvas area if the aspect ratio of the current resolution doesn't fit the reference resolution.")]
 		[SerializeField]
-		protected CanvasScaler.ScreenMatchMode m_ScreenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+		protected CanvasScaler.ScreenMatchMode m_ScreenMatchMode;
 
 		[Tooltip("Determines if the scaling is using the width or height as reference, or a mix in between.")]
 		[Range(0f, 1f)]
 		[SerializeField]
-		protected float m_MatchWidthOrHeight = 0f;
+		protected float m_MatchWidthOrHeight;
 
 		private const float kLogBase = 2f;
 

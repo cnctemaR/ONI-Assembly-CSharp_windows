@@ -4,8 +4,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
-	[UsedByNativeCode]
 	[MovedFrom("UnityEngine")]
+	[UsedByNativeCode]
 	public struct NavMeshTriangulation
 	{
 		[Obsolete("Use areas instead.")]

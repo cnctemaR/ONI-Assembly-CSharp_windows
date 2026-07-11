@@ -11,51 +11,6 @@ namespace UnityEngine.TextCore
 	[StructLayout(LayoutKind.Sequential)]
 	public class Glyph
 	{
-		public Glyph()
-		{
-			this.m_Index = 0U;
-			this.m_Metrics = default(GlyphMetrics);
-			this.m_GlyphRect = default(GlyphRect);
-			this.m_Scale = 1f;
-			this.m_AtlasIndex = 0;
-		}
-
-		public Glyph(Glyph glyph)
-		{
-			this.m_Index = glyph.index;
-			this.m_Metrics = glyph.metrics;
-			this.m_GlyphRect = glyph.glyphRect;
-			this.m_Scale = glyph.scale;
-			this.m_AtlasIndex = glyph.atlasIndex;
-		}
-
-		internal Glyph(GlyphMarshallingStruct glyphStruct)
-		{
-			this.m_Index = glyphStruct.index;
-			this.m_Metrics = glyphStruct.metrics;
-			this.m_GlyphRect = glyphStruct.glyphRect;
-			this.m_Scale = glyphStruct.scale;
-			this.m_AtlasIndex = glyphStruct.atlasIndex;
-		}
-
-		public Glyph(uint index, GlyphMetrics metrics, GlyphRect glyphRect)
-		{
-			this.m_Index = index;
-			this.m_Metrics = metrics;
-			this.m_GlyphRect = glyphRect;
-			this.m_Scale = 1f;
-			this.m_AtlasIndex = 0;
-		}
-
-		public Glyph(uint index, GlyphMetrics metrics, GlyphRect glyphRect, float scale, int atlasIndex)
-		{
-			this.m_Index = index;
-			this.m_Metrics = metrics;
-			this.m_GlyphRect = glyphRect;
-			this.m_Scale = scale;
-			this.m_AtlasIndex = atlasIndex;
-		}
-
 		public uint index
 		{
 			get
@@ -116,13 +71,58 @@ namespace UnityEngine.TextCore
 			}
 		}
 
+		public Glyph()
+		{
+			this.m_Index = 0U;
+			this.m_Metrics = default(GlyphMetrics);
+			this.m_GlyphRect = default(GlyphRect);
+			this.m_Scale = 1f;
+			this.m_AtlasIndex = 0;
+		}
+
+		public Glyph(Glyph glyph)
+		{
+			this.m_Index = glyph.index;
+			this.m_Metrics = glyph.metrics;
+			this.m_GlyphRect = glyph.glyphRect;
+			this.m_Scale = glyph.scale;
+			this.m_AtlasIndex = glyph.atlasIndex;
+		}
+
+		internal Glyph(GlyphMarshallingStruct glyphStruct)
+		{
+			this.m_Index = glyphStruct.index;
+			this.m_Metrics = glyphStruct.metrics;
+			this.m_GlyphRect = glyphStruct.glyphRect;
+			this.m_Scale = glyphStruct.scale;
+			this.m_AtlasIndex = glyphStruct.atlasIndex;
+		}
+
+		public Glyph(uint index, GlyphMetrics metrics, GlyphRect glyphRect)
+		{
+			this.m_Index = index;
+			this.m_Metrics = metrics;
+			this.m_GlyphRect = glyphRect;
+			this.m_Scale = 1f;
+			this.m_AtlasIndex = 0;
+		}
+
+		public Glyph(uint index, GlyphMetrics metrics, GlyphRect glyphRect, float scale, int atlasIndex)
+		{
+			this.m_Index = index;
+			this.m_Metrics = metrics;
+			this.m_GlyphRect = glyphRect;
+			this.m_Scale = scale;
+			this.m_AtlasIndex = atlasIndex;
+		}
+
 		public bool Compare(Glyph other)
 		{
 			return this.index == other.index && this.metrics == other.metrics && this.glyphRect == other.glyphRect && this.scale == other.scale && this.atlasIndex == other.atlasIndex;
 		}
 
-		[NativeName("index")]
 		[SerializeField]
+		[NativeName("index")]
 		private uint m_Index;
 
 		[SerializeField]
@@ -133,8 +133,8 @@ namespace UnityEngine.TextCore
 		[NativeName("glyphRect")]
 		private GlyphRect m_GlyphRect;
 
-		[SerializeField]
 		[NativeName("scale")]
+		[SerializeField]
 		private float m_Scale;
 
 		[SerializeField]

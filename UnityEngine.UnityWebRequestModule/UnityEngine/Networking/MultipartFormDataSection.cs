@@ -7,7 +7,8 @@ namespace UnityEngine.Networking
 	{
 		public MultipartFormDataSection(string name, byte[] data, string contentType)
 		{
-			if (data == null || data.Length < 1)
+			bool flag = data == null || data.Length < 1;
+			if (flag)
 			{
 				throw new ArgumentException("Cannot create a multipart form data section without body data");
 			}
@@ -28,14 +29,16 @@ namespace UnityEngine.Networking
 
 		public MultipartFormDataSection(string name, string data, Encoding encoding, string contentType)
 		{
-			if (data == null || data.Length < 1)
+			bool flag = data == null || data.Length < 1;
+			if (flag)
 			{
 				throw new ArgumentException("Cannot create a multipart form data section without body data");
 			}
 			byte[] bytes = encoding.GetBytes(data);
 			this.name = name;
 			this.data = bytes;
-			if (contentType != null && !contentType.Contains("encoding="))
+			bool flag2 = contentType != null && !contentType.Contains("encoding=");
+			if (flag2)
 			{
 				contentType = contentType.Trim() + "; encoding=" + encoding.WebName;
 			}

@@ -6,25 +6,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[StaticAccessor("AnimationOffsetPlayableBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationOffsetPlayable.bindings.h")]
-	[NativeHeader("Runtime/Animation/Director/AnimationOffsetPlayable.h")]
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Modules/Animation/Director/AnimationOffsetPlayable.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/AnimationOffsetPlayable.bindings.h")]
+	[StaticAccessor("AnimationOffsetPlayableBindings", StaticAccessorType.DoubleColon)]
+	[RequiredByNativeCode]
 	internal struct AnimationOffsetPlayable : IPlayable, IEquatable<AnimationOffsetPlayable>
 	{
-		internal AnimationOffsetPlayable(PlayableHandle handle)
-		{
-			if (handle.IsValid())
-			{
-				if (!handle.IsPlayableOfType<AnimationOffsetPlayable>())
-				{
-					throw new InvalidCastException("Can't set handle: the playable is not an AnimationOffsetPlayable.");
-				}
-			}
-			this.m_Handle = handle;
-		}
-
 		public static AnimationOffsetPlayable Null
 		{
 			get
@@ -42,8 +30,9 @@ namespace UnityEngine.Animations
 		private static PlayableHandle CreateHandle(PlayableGraph graph, Vector3 position, Quaternion rotation, int inputCount)
 		{
 			PlayableHandle @null = PlayableHandle.Null;
+			bool flag = !AnimationOffsetPlayable.CreateHandleInternal(graph, position, rotation, ref @null);
 			PlayableHandle playableHandle;
-			if (!AnimationOffsetPlayable.CreateHandleInternal(graph, position, rotation, ref @null))
+			if (flag)
 			{
 				playableHandle = PlayableHandle.Null;
 			}
@@ -53,6 +42,20 @@ namespace UnityEngine.Animations
 				playableHandle = @null;
 			}
 			return playableHandle;
+		}
+
+		internal AnimationOffsetPlayable(PlayableHandle handle)
+		{
+			bool flag = handle.IsValid();
+			if (flag)
+			{
+				bool flag2 = !handle.IsPlayableOfType<AnimationOffsetPlayable>();
+				if (flag2)
+				{
+					throw new InvalidCastException("Can't set handle: the playable is not an AnimationOffsetPlayable.");
+				}
+			}
+			this.m_Handle = handle;
 		}
 
 		public PlayableHandle GetHandle()

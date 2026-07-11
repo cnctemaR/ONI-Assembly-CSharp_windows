@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class AssemblyTrademarkAttribute : Attribute
 	{
 		public AssemblyTrademarkAttribute(string trademark)

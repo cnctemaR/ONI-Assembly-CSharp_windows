@@ -380,8 +380,8 @@ namespace System
 			return val1;
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[CLSCompliant(false)]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		public static ulong Max(ulong val1, ulong val2)
 		{
 			if (val1 < val2)
@@ -425,8 +425,8 @@ namespace System
 			return decimal.Max(val1, val2);
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[CLSCompliant(false)]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		public static sbyte Min(sbyte val1, sbyte val2)
 		{
 			if (val1 > val2)

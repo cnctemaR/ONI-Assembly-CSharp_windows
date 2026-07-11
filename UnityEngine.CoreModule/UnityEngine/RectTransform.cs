@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeClass("UI::RectTransform")]
 	[NativeHeader("Runtime/Transform/RectTransform.h")]
+	[NativeClass("UI::RectTransform")]
 	public sealed class RectTransform : Transform
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -159,7 +159,8 @@ namespace UnityEngine
 
 		public void GetLocalCorners(Vector3[] fourCornersArray)
 		{
-			if (fourCornersArray == null || fourCornersArray.Length < 4)
+			bool flag = fourCornersArray == null || fourCornersArray.Length < 4;
+			if (flag)
 			{
 				Debug.LogError("Calling GetLocalCorners with an array that is null or has less than 4 elements.");
 			}
@@ -179,7 +180,8 @@ namespace UnityEngine
 
 		public void GetWorldCorners(Vector3[] fourCornersArray)
 		{
-			if (fourCornersArray == null || fourCornersArray.Length < 4)
+			bool flag = fourCornersArray == null || fourCornersArray.Length < 4;
+			if (flag)
 			{
 				Debug.LogError("Calling GetWorldCorners with an array that is null or has less than 4 elements.");
 			}
@@ -196,9 +198,9 @@ namespace UnityEngine
 
 		public void SetInsetAndSizeFromParentEdge(RectTransform.Edge edge, float inset, float size)
 		{
-			int num = ((edge != RectTransform.Edge.Top && edge != RectTransform.Edge.Bottom) ? 0 : 1);
+			int num = ((edge == RectTransform.Edge.Top || edge == RectTransform.Edge.Bottom) ? 1 : 0);
 			bool flag = edge == RectTransform.Edge.Top || edge == RectTransform.Edge.Right;
-			float num2 = (float)((!flag) ? 0 : 1);
+			float num2 = (float)(flag ? 1 : 0);
 			Vector2 vector = this.anchorMin;
 			vector[num] = num2;
 			this.anchorMin = vector;
@@ -209,7 +211,7 @@ namespace UnityEngine
 			sizeDelta[num] = size;
 			this.sizeDelta = sizeDelta;
 			Vector2 anchoredPosition = this.anchoredPosition;
-			anchoredPosition[num] = ((!flag) ? (inset + size * this.pivot[num]) : (-inset - size * (1f - this.pivot[num])));
+			anchoredPosition[num] = (flag ? (-inset - size * (1f - this.pivot[num])) : (inset + size * this.pivot[num]));
 			this.anchoredPosition = anchoredPosition;
 		}
 
@@ -223,9 +225,10 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		internal static void SendReapplyDrivenProperties(RectTransform driven)
 		{
-			if (RectTransform.reapplyDrivenProperties != null)
+			RectTransform.ReapplyDrivenProperties reapplyDrivenProperties = RectTransform.reapplyDrivenProperties;
+			if (reapplyDrivenProperties != null)
 			{
-				RectTransform.reapplyDrivenProperties(driven);
+				reapplyDrivenProperties(driven);
 			}
 		}
 
@@ -233,10 +236,12 @@ namespace UnityEngine
 		{
 			Rect rect = this.rect;
 			Vector2 vector = this.offsetMin + Vector2.Scale(this.pivot, rect.size);
-			if (base.transform.parent)
+			bool flag = base.transform.parent;
+			if (flag)
 			{
 				RectTransform component = base.transform.parent.GetComponent<RectTransform>();
-				if (component)
+				bool flag2 = component;
+				if (flag2)
 				{
 					vector += Vector2.Scale(this.anchorMin, component.rect.size);
 				}
@@ -249,8 +254,9 @@ namespace UnityEngine
 		private Vector2 GetParentSize()
 		{
 			RectTransform rectTransform = base.parent as RectTransform;
+			bool flag = !rectTransform;
 			Vector2 vector;
-			if (!rectTransform)
+			if (flag)
 			{
 				vector = Vector2.zero;
 			}

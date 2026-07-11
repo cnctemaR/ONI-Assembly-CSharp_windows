@@ -91,11 +91,6 @@ namespace UnityStandardAssets.ImageEffects
 			this.isSupported = true;
 			this.supportHDRTextures = SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf);
 			this.supportDX11 = SystemInfo.graphicsShaderLevel >= 50 && SystemInfo.supportsComputeShaders;
-			if (!SystemInfo.supportsImageEffects)
-			{
-				this.NotSupported();
-				return false;
-			}
 			if (needDepth && !SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth))
 			{
 				this.NotSupported();

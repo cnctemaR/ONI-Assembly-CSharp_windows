@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using STRINGS;
 using TMPro;
 using UnityEngine;
@@ -11,12 +12,38 @@ public class BaseNaming : KMonoBehaviour
 	{
 		base.OnSpawn();
 		this.GenerateBaseName();
-		this.inputField.onValueChanged.AddListener(delegate
-		{
-			Util.ScrubInputField(this.inputField, false);
-		});
 		this.shuffleBaseNameButton.onClick += this.GenerateBaseName;
 		this.inputField.onEndEdit.AddListener(new UnityAction<string>(this.OnEndEdit));
+		this.inputField.onValueChanged.AddListener(new UnityAction<string>(this.OnEditing));
+		this.minionSelectScreen = base.GetComponent<MinionSelectScreen>();
+	}
+
+	private bool CheckBaseName(string newName)
+	{
+		if (string.IsNullOrEmpty(newName))
+		{
+			return true;
+		}
+		string savePrefixAndCreateFolder = SaveLoader.GetSavePrefixAndCreateFolder();
+		string cloudSavePrefix = SaveLoader.GetCloudSavePrefix();
+		if (this.minionSelectScreen != null)
+		{
+			bool flag = Directory.Exists(Path.Combine(savePrefixAndCreateFolder, newName));
+			bool flag2 = cloudSavePrefix != null && Directory.Exists(Path.Combine(cloudSavePrefix, newName));
+			if (flag || flag2)
+			{
+				this.minionSelectScreen.SetProceedButtonActive(false, string.Format(UI.IMMIGRANTSCREEN.DUPLICATE_COLONY_NAME, newName));
+				return false;
+			}
+			this.minionSelectScreen.SetProceedButtonActive(true, null);
+		}
+		return true;
+	}
+
+	private void OnEditing(string newName)
+	{
+		Util.ScrubInputField(this.inputField, false);
+		this.CheckBaseName(newName);
 	}
 
 	private void OnEndEdit(string newName)
@@ -30,19 +57,21 @@ public class BaseNaming : KMonoBehaviour
 		{
 			return;
 		}
+		if (!this.CheckBaseName(newName))
+		{
+			return;
+		}
 		this.inputField.text = newName;
 		SaveGame.Instance.SetBaseName(newName);
-		string text = newName;
-		if (!text.Contains(".sav"))
-		{
-			text += ".sav";
-		}
+		string text = Path.ChangeExtension(newName, ".sav");
 		string savePrefixAndCreateFolder = SaveLoader.GetSavePrefixAndCreateFolder();
-		if (!text.Contains(savePrefixAndCreateFolder))
+		string cloudSavePrefix = SaveLoader.GetCloudSavePrefix();
+		string text2 = savePrefixAndCreateFolder;
+		if (SaveLoader.GetCloudSavesAvailable() && Game.Instance.SaveToCloudActive && cloudSavePrefix != null)
 		{
-			text = savePrefixAndCreateFolder + text;
+			text2 = cloudSavePrefix;
 		}
-		SaveLoader.SetActiveSaveFilePath(text);
+		SaveLoader.SetActiveSaveFilePath(Path.Combine(text2, newName, text));
 	}
 
 	private void GenerateBaseName()
@@ -78,4 +107,6 @@ public class BaseNaming : KMonoBehaviour
 
 	[SerializeField]
 	private KButton shuffleBaseNameButton;
+
+	private MinionSelectScreen minionSelectScreen;
 }

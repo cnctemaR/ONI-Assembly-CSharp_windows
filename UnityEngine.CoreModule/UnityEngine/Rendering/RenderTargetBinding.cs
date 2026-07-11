@@ -4,35 +4,6 @@ namespace UnityEngine.Rendering
 {
 	public struct RenderTargetBinding
 	{
-		public RenderTargetBinding(RenderTargetIdentifier[] colorRenderTargets, RenderBufferLoadAction[] colorLoadActions, RenderBufferStoreAction[] colorStoreActions, RenderTargetIdentifier depthRenderTarget, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction)
-		{
-			this.m_ColorRenderTargets = colorRenderTargets;
-			this.m_DepthRenderTarget = depthRenderTarget;
-			this.m_ColorLoadActions = colorLoadActions;
-			this.m_ColorStoreActions = colorStoreActions;
-			this.m_DepthLoadAction = depthLoadAction;
-			this.m_DepthStoreAction = depthStoreAction;
-		}
-
-		public RenderTargetBinding(RenderTargetIdentifier colorRenderTarget, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction, RenderTargetIdentifier depthRenderTarget, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction)
-		{
-			this = new RenderTargetBinding(new RenderTargetIdentifier[] { colorRenderTarget }, new RenderBufferLoadAction[] { colorLoadAction }, new RenderBufferStoreAction[] { colorStoreAction }, depthRenderTarget, depthLoadAction, depthStoreAction);
-		}
-
-		public RenderTargetBinding(RenderTargetSetup setup)
-		{
-			this.m_ColorRenderTargets = new RenderTargetIdentifier[setup.color.Length];
-			for (int i = 0; i < this.m_ColorRenderTargets.Length; i++)
-			{
-				this.m_ColorRenderTargets[i] = new RenderTargetIdentifier(setup.color[i], setup.mipLevel, setup.cubemapFace, setup.depthSlice);
-			}
-			this.m_DepthRenderTarget = setup.depth;
-			this.m_ColorLoadActions = (RenderBufferLoadAction[])setup.colorLoad.Clone();
-			this.m_ColorStoreActions = (RenderBufferStoreAction[])setup.colorStore.Clone();
-			this.m_DepthLoadAction = setup.depthLoad;
-			this.m_DepthStoreAction = setup.depthStore;
-		}
-
 		public RenderTargetIdentifier[] colorRenderTargets
 		{
 			get
@@ -103,6 +74,35 @@ namespace UnityEngine.Rendering
 			{
 				this.m_DepthStoreAction = value;
 			}
+		}
+
+		public RenderTargetBinding(RenderTargetIdentifier[] colorRenderTargets, RenderBufferLoadAction[] colorLoadActions, RenderBufferStoreAction[] colorStoreActions, RenderTargetIdentifier depthRenderTarget, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction)
+		{
+			this.m_ColorRenderTargets = colorRenderTargets;
+			this.m_DepthRenderTarget = depthRenderTarget;
+			this.m_ColorLoadActions = colorLoadActions;
+			this.m_ColorStoreActions = colorStoreActions;
+			this.m_DepthLoadAction = depthLoadAction;
+			this.m_DepthStoreAction = depthStoreAction;
+		}
+
+		public RenderTargetBinding(RenderTargetIdentifier colorRenderTarget, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction, RenderTargetIdentifier depthRenderTarget, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction)
+		{
+			this = new RenderTargetBinding(new RenderTargetIdentifier[] { colorRenderTarget }, new RenderBufferLoadAction[] { colorLoadAction }, new RenderBufferStoreAction[] { colorStoreAction }, depthRenderTarget, depthLoadAction, depthStoreAction);
+		}
+
+		public RenderTargetBinding(RenderTargetSetup setup)
+		{
+			this.m_ColorRenderTargets = new RenderTargetIdentifier[setup.color.Length];
+			for (int i = 0; i < this.m_ColorRenderTargets.Length; i++)
+			{
+				this.m_ColorRenderTargets[i] = new RenderTargetIdentifier(setup.color[i], setup.mipLevel, setup.cubemapFace, setup.depthSlice);
+			}
+			this.m_DepthRenderTarget = setup.depth;
+			this.m_ColorLoadActions = (RenderBufferLoadAction[])setup.colorLoad.Clone();
+			this.m_ColorStoreActions = (RenderBufferStoreAction[])setup.colorStore.Clone();
+			this.m_DepthLoadAction = setup.depthLoad;
+			this.m_DepthStoreAction = setup.depthStore;
 		}
 
 		private RenderTargetIdentifier[] m_ColorRenderTargets;

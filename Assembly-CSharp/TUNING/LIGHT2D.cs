@@ -23,7 +23,7 @@ namespace TUNING
 
 		public const float FLOORLAMP_ANGLE = 0f;
 
-		public const LightShape FLOORLAMP_SHAPE = LightShape.Circle;
+		public const global::LightShape FLOORLAMP_SHAPE = global::LightShape.Circle;
 
 		public static readonly Color FLOORLAMP_COLOR = LIGHT2D.LIGHT_YELLOW;
 
@@ -37,7 +37,7 @@ namespace TUNING
 
 		public const float CEILINGLIGHT_ANGLE = 2.6f;
 
-		public const LightShape CEILINGLIGHT_SHAPE = LightShape.Cone;
+		public const global::LightShape CEILINGLIGHT_SHAPE = global::LightShape.Cone;
 
 		public static readonly Color CEILINGLIGHT_COLOR = LIGHT2D.LIGHT_YELLOW;
 
@@ -55,7 +55,7 @@ namespace TUNING
 
 		public const float SUNLAMP_ANGLE = 5.2f;
 
-		public const LightShape SUNLAMP_SHAPE = LightShape.Cone;
+		public const global::LightShape SUNLAMP_SHAPE = global::LightShape.Cone;
 
 		public static readonly Color SUNLAMP_COLOR = LIGHT2D.LIGHT_YELLOW;
 
@@ -69,7 +69,7 @@ namespace TUNING
 
 		public const float HEADQUARTERS_RANGE = 5f;
 
-		public const LightShape HEADQUARTERS_SHAPE = LightShape.Circle;
+		public const global::LightShape HEADQUARTERS_SHAPE = global::LightShape.Circle;
 
 		public static readonly Color HEADQUARTERS_COLOR = LIGHT2D.LIGHT_YELLOW;
 
@@ -81,7 +81,7 @@ namespace TUNING
 
 		public const float WALLLIGHT_ANGLE = 0f;
 
-		public const LightShape WALLLIGHT_SHAPE = LightShape.Circle;
+		public const global::LightShape WALLLIGHT_SHAPE = global::LightShape.Circle;
 
 		public static readonly Color WALLLIGHT_COLOR = LIGHT2D.LIGHT_YELLOW;
 
@@ -95,7 +95,7 @@ namespace TUNING
 
 		public const float LIGHTBUG_ANGLE = 0f;
 
-		public const LightShape LIGHTBUG_SHAPE = LightShape.Circle;
+		public const global::LightShape LIGHTBUG_SHAPE = global::LightShape.Circle;
 
 		public const int LIGHTBUG_LUX = 1800;
 
@@ -123,7 +123,7 @@ namespace TUNING
 
 		public const float PLASMALAMP_ANGLE = 0f;
 
-		public const LightShape PLASMALAMP_SHAPE = LightShape.Circle;
+		public const global::LightShape PLASMALAMP_SHAPE = global::LightShape.Circle;
 
 		public static readonly Color PLASMALAMP_COLOR = LIGHT2D.LIGHT_PURPLE;
 
@@ -139,7 +139,7 @@ namespace TUNING
 
 		public const float MAGMALAMP_ANGLE = 0f;
 
-		public const LightShape MAGMALAMP_SHAPE = LightShape.Cone;
+		public const global::LightShape MAGMALAMP_SHAPE = global::LightShape.Cone;
 
 		public static readonly Color MAGMALAMP_COLOR = LIGHT2D.LIGHT_YELLOW;
 
@@ -155,7 +155,7 @@ namespace TUNING
 
 		public const float BIOLUMROCK_ANGLE = 0f;
 
-		public const LightShape BIOLUMROCK_SHAPE = LightShape.Cone;
+		public const global::LightShape BIOLUMROCK_SHAPE = global::LightShape.Cone;
 
 		public static readonly Color BIOLUMROCK_COLOR = LIGHT2D.LIGHT_BLUE;
 

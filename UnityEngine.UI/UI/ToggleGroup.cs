@@ -9,10 +9,6 @@ namespace UnityEngine.UI
 	[DisallowMultipleComponent]
 	public class ToggleGroup : UIBehaviour
 	{
-		protected ToggleGroup()
-		{
-		}
-
 		public bool allowSwitchOff
 		{
 			get
@@ -25,6 +21,16 @@ namespace UnityEngine.UI
 			}
 		}
 
+		protected ToggleGroup()
+		{
+		}
+
+		protected override void Start()
+		{
+			this.EnsureValidState();
+			base.Start();
+		}
+
 		private void ValidateToggleIsInGroup(Toggle toggle)
 		{
 			if (toggle == null || !this.m_Toggles.Contains(toggle))
@@ -33,14 +39,21 @@ namespace UnityEngine.UI
 			}
 		}
 
-		public void NotifyToggleOn(Toggle toggle)
+		public void NotifyToggleOn(Toggle toggle, bool sendCallback = true)
 		{
 			this.ValidateToggleIsInGroup(toggle);
 			for (int i = 0; i < this.m_Toggles.Count; i++)
 			{
 				if (!(this.m_Toggles[i] == toggle))
 				{
-					this.m_Toggles[i].isOn = false;
+					if (sendCallback)
+					{
+						this.m_Toggles[i].isOn = false;
+					}
+					else
+					{
+						this.m_Toggles[i].SetIsOnWithoutNotify(false);
+					}
 				}
 			}
 		}
@@ -61,6 +74,15 @@ namespace UnityEngine.UI
 			}
 		}
 
+		public void EnsureValidState()
+		{
+			if (!this.allowSwitchOff && !this.AnyTogglesOn() && this.m_Toggles.Count != 0)
+			{
+				this.m_Toggles[0].isOn = true;
+				this.NotifyToggleOn(this.m_Toggles[0], true);
+			}
+		}
+
 		public bool AnyTogglesOn()
 		{
 			return this.m_Toggles.Find((Toggle x) => x.isOn) != null;
@@ -71,20 +93,30 @@ namespace UnityEngine.UI
 			return this.m_Toggles.Where<Toggle>((Toggle x) => x.isOn);
 		}
 
-		public void SetAllTogglesOff()
+		public void SetAllTogglesOff(bool sendCallback = true)
 		{
 			bool allowSwitchOff = this.m_AllowSwitchOff;
 			this.m_AllowSwitchOff = true;
-			for (int i = 0; i < this.m_Toggles.Count; i++)
+			if (sendCallback)
 			{
-				this.m_Toggles[i].isOn = false;
+				for (int i = 0; i < this.m_Toggles.Count; i++)
+				{
+					this.m_Toggles[i].isOn = false;
+				}
+			}
+			else
+			{
+				for (int j = 0; j < this.m_Toggles.Count; j++)
+				{
+					this.m_Toggles[j].SetIsOnWithoutNotify(false);
+				}
 			}
 			this.m_AllowSwitchOff = allowSwitchOff;
 		}
 
 		[SerializeField]
-		private bool m_AllowSwitchOff = false;
+		private bool m_AllowSwitchOff;
 
-		private List<Toggle> m_Toggles = new List<Toggle>();
+		protected List<Toggle> m_Toggles = new List<Toggle>();
 	}
 }

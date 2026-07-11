@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Profiling
 {
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Profiler/ScriptBindings/Sampler.bindings.h")]
+	[UsedByNativeCode]
 	[NativeHeader("Runtime/Profiler/Marker.h")]
 	public sealed class CustomSampler : Sampler
 	{
@@ -23,8 +23,9 @@ namespace UnityEngine.Profiling
 		public static CustomSampler Create(string name)
 		{
 			IntPtr intPtr = CustomSampler.CreateInternal(name);
+			bool flag = intPtr == IntPtr.Zero;
 			CustomSampler customSampler;
-			if (intPtr == IntPtr.Zero)
+			if (flag)
 			{
 				customSampler = CustomSampler.s_InvalidCustomSampler;
 			}
@@ -54,8 +55,8 @@ namespace UnityEngine.Profiling
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void BeginWithObject(Object targetObject);
 
-		[Conditional("ENABLE_PROFILER")]
 		[NativeMethod(Name = "ProfilerBindings::CustomSampler_End", IsFreeFunction = true, HasExplicitThis = true, IsThreadSafe = true)]
+		[Conditional("ENABLE_PROFILER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void End();
 

@@ -8,11 +8,13 @@ namespace UnityEngine
 		[Obsolete("GetCollisionEvents function using ParticleCollisionEvent[] is deprecated. Use List<ParticleCollisionEvent> instead.", false)]
 		public static int GetCollisionEvents(this ParticleSystem ps, GameObject go, ParticleCollisionEvent[] collisionEvents)
 		{
-			if (go == null)
+			bool flag = go == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("go");
 			}
-			if (collisionEvents == null)
+			bool flag2 = collisionEvents == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("collisionEvents");
 			}
@@ -26,14 +28,6 @@ namespace UnityEngine
 
 		public static int GetCollisionEvents(this ParticleSystem ps, GameObject go, List<ParticleCollisionEvent> collisionEvents)
 		{
-			if (go == null)
-			{
-				throw new ArgumentNullException("go");
-			}
-			if (collisionEvents == null)
-			{
-				throw new ArgumentNullException("collisionEvents");
-			}
 			return ParticleSystemExtensionsImpl.GetCollisionEvents(ps, go, collisionEvents);
 		}
 
@@ -44,24 +38,23 @@ namespace UnityEngine
 
 		public static int GetTriggerParticles(this ParticleSystem ps, ParticleSystemTriggerEventType type, List<ParticleSystem.Particle> particles)
 		{
-			if (particles == null)
-			{
-				throw new ArgumentNullException("particles");
-			}
 			return ParticleSystemExtensionsImpl.GetTriggerParticles(ps, (int)type, particles);
 		}
 
 		public static void SetTriggerParticles(this ParticleSystem ps, ParticleSystemTriggerEventType type, List<ParticleSystem.Particle> particles, int offset, int count)
 		{
-			if (particles == null)
+			bool flag = particles == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("particles");
 			}
-			if (offset >= particles.Count)
+			bool flag2 = offset >= particles.Count;
+			if (flag2)
 			{
 				throw new ArgumentOutOfRangeException("offset", "offset should be smaller than the size of the particles list.");
 			}
-			if (offset + count >= particles.Count)
+			bool flag3 = offset + count >= particles.Count;
+			if (flag3)
 			{
 				throw new ArgumentOutOfRangeException("count", "offset+count should be smaller than the size of the particles list.");
 			}
@@ -70,10 +63,6 @@ namespace UnityEngine
 
 		public static void SetTriggerParticles(this ParticleSystem ps, ParticleSystemTriggerEventType type, List<ParticleSystem.Particle> particles)
 		{
-			if (particles == null)
-			{
-				throw new ArgumentNullException("particles");
-			}
 			ParticleSystemExtensionsImpl.SetTriggerParticles(ps, (int)type, particles, 0, particles.Count);
 		}
 	}

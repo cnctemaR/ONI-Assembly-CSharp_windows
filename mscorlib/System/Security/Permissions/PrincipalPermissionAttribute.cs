@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Security.Permissions
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+	[ComVisible(true)]
 	[Serializable]
 	public sealed class PrincipalPermissionAttribute : CodeAccessSecurityAttribute
 	{

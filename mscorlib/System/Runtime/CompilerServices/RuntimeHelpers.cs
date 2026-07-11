@@ -90,14 +90,14 @@ namespace System.Runtime.CompilerServices
 		{
 		}
 
-		[MonoTODO("Currently a no-op")]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[MonoTODO("Currently a no-op")]
 		public static void PrepareConstrainedRegionsNoOP()
 		{
 		}
 
-		[MonoTODO("Currently a no-op")]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[MonoTODO("Currently a no-op")]
 		public static void ProbeForSufficientStack()
 		{
 		}

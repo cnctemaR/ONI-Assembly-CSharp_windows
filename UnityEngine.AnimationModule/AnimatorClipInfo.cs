@@ -5,16 +5,16 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Animation/AnimatorInfo.h")]
+	[NativeHeader("Modules/Animation/AnimatorInfo.h")]
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Animation/ScriptBindings/Animation.bindings.h")]
+	[NativeHeader("Modules/Animation/ScriptBindings/Animation.bindings.h")]
 	public struct AnimatorClipInfo
 	{
 		public AnimationClip clip
 		{
 			get
 			{
-				return (this.m_ClipInstanceID == 0) ? null : AnimatorClipInfo.InstanceIDToAnimationClipPPtr(this.m_ClipInstanceID);
+				return (this.m_ClipInstanceID != 0) ? AnimatorClipInfo.InstanceIDToAnimationClipPPtr(this.m_ClipInstanceID) : null;
 			}
 		}
 

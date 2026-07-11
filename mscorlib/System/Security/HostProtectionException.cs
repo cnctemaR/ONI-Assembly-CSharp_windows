@@ -52,8 +52,8 @@ namespace System.Security
 			}
 		}
 
-		[SecurityCritical]
 		[MonoTODO]
+		[SecurityCritical]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			if (info == null)

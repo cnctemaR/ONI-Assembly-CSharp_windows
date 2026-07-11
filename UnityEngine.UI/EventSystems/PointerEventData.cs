@@ -6,22 +6,6 @@ namespace UnityEngine.EventSystems
 {
 	public class PointerEventData : BaseEventData
 	{
-		public PointerEventData(EventSystem eventSystem)
-			: base(eventSystem)
-		{
-			this.eligibleForClick = false;
-			this.pointerId = -1;
-			this.position = Vector2.zero;
-			this.delta = Vector2.zero;
-			this.pressPosition = Vector2.zero;
-			this.clickTime = 0f;
-			this.clickCount = 0;
-			this.scrollDelta = Vector2.zero;
-			this.useDragThreshold = true;
-			this.dragging = false;
-			this.button = PointerEventData.InputButton.Left;
-		}
-
 		public GameObject pointerEnter { get; set; }
 
 		public GameObject lastPress { get; private set; }
@@ -62,6 +46,22 @@ namespace UnityEngine.EventSystems
 
 		public PointerEventData.InputButton button { get; set; }
 
+		public PointerEventData(EventSystem eventSystem)
+			: base(eventSystem)
+		{
+			this.eligibleForClick = false;
+			this.pointerId = -1;
+			this.position = Vector2.zero;
+			this.delta = Vector2.zero;
+			this.pressPosition = Vector2.zero;
+			this.clickTime = 0f;
+			this.clickCount = 0;
+			this.scrollDelta = Vector2.zero;
+			this.useDragThreshold = true;
+			this.dragging = false;
+			this.button = PointerEventData.InputButton.Left;
+		}
+
 		public bool IsPointerMoving()
 		{
 			return this.delta.sqrMagnitude > 0f;
@@ -76,7 +76,11 @@ namespace UnityEngine.EventSystems
 		{
 			get
 			{
-				return (!(this.pointerCurrentRaycast.module == null)) ? this.pointerCurrentRaycast.module.eventCamera : null;
+				if (!(this.pointerCurrentRaycast.module == null))
+				{
+					return this.pointerCurrentRaycast.module.eventCamera;
+				}
+				return null;
 			}
 		}
 
@@ -84,7 +88,11 @@ namespace UnityEngine.EventSystems
 		{
 			get
 			{
-				return (!(this.pointerPressRaycast.module == null)) ? this.pointerPressRaycast.module.eventCamera : null;
+				if (!(this.pointerPressRaycast.module == null))
+				{
+					return this.pointerPressRaycast.module.eventCamera;
+				}
+				return null;
 			}
 		}
 
@@ -96,11 +104,12 @@ namespace UnityEngine.EventSystems
 			}
 			set
 			{
-				if (!(this.m_PointerPress == value))
+				if (this.m_PointerPress == value)
 				{
-					this.lastPress = this.m_PointerPress;
-					this.m_PointerPress = value;
+					return;
 				}
+				this.lastPress = this.m_PointerPress;
+				this.m_PointerPress = value;
 			}
 		}
 
@@ -109,15 +118,15 @@ namespace UnityEngine.EventSystems
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.AppendLine("<b>Position</b>: " + this.position);
 			stringBuilder.AppendLine("<b>delta</b>: " + this.delta);
-			stringBuilder.AppendLine("<b>eligibleForClick</b>: " + this.eligibleForClick);
+			stringBuilder.AppendLine("<b>eligibleForClick</b>: " + this.eligibleForClick.ToString());
 			stringBuilder.AppendLine("<b>pointerEnter</b>: " + this.pointerEnter);
 			stringBuilder.AppendLine("<b>pointerPress</b>: " + this.pointerPress);
 			stringBuilder.AppendLine("<b>lastPointerPress</b>: " + this.lastPress);
 			stringBuilder.AppendLine("<b>pointerDrag</b>: " + this.pointerDrag);
-			stringBuilder.AppendLine("<b>Use Drag Threshold</b>: " + this.useDragThreshold);
-			stringBuilder.AppendLine("<b>Current Rayast:</b>");
+			stringBuilder.AppendLine("<b>Use Drag Threshold</b>: " + this.useDragThreshold.ToString());
+			stringBuilder.AppendLine("<b>Current Raycast:</b>");
 			stringBuilder.AppendLine(this.pointerCurrentRaycast.ToString());
-			stringBuilder.AppendLine("<b>Press Rayast:</b>");
+			stringBuilder.AppendLine("<b>Press Raycast:</b>");
 			stringBuilder.AppendLine(this.pointerPressRaycast.ToString());
 			return stringBuilder.ToString();
 		}

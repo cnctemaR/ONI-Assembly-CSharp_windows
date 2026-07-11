@@ -69,10 +69,10 @@ public class LightBuffer : MonoBehaviour
 				if (light2D.drawOverlay)
 				{
 					materialPropertyBlock.SetColor(this.TintColorTag, light2D.overlayColour);
-					LightShape shape = light2D.shape;
-					if (shape != LightShape.Circle)
+					global::LightShape shape = light2D.shape;
+					if (shape != global::LightShape.Circle)
 					{
-						if (shape == LightShape.Cone)
+						if (shape == global::LightShape.Cone)
 						{
 							matrix4x.SetTRS(position - Vector3.up * (light2D.Range * 0.5f), Quaternion.identity, new Vector3(1f, 0.5f, 1f) * light2D.Range);
 							Graphics.DrawMesh(this.Mesh, matrix4x, this.ConeMaterial, this.Layer, this.Camera, 0, materialPropertyBlock);

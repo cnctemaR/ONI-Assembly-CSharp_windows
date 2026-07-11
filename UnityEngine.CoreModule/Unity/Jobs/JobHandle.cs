@@ -11,7 +11,8 @@ namespace Unity.Jobs
 	{
 		public void Complete()
 		{
-			if (!(this.jobGroup == IntPtr.Zero))
+			bool flag = this.jobGroup == IntPtr.Zero;
+			if (!flag)
 			{
 				JobHandle.ScheduleBatchedJobsAndComplete(ref this);
 			}
@@ -19,8 +20,12 @@ namespace Unity.Jobs
 
 		public unsafe static void CompleteAll(ref JobHandle job0, ref JobHandle job1)
 		{
-			JobHandle* ptr = stackalloc JobHandle[checked(2 * sizeof(JobHandle))];
-			*ptr = job0;
+			JobHandle* ptr;
+			checked
+			{
+				ptr = stackalloc JobHandle[unchecked((UIntPtr)2) * (UIntPtr)sizeof(JobHandle)];
+				*ptr = job0;
+			}
 			ptr[1] = job1;
 			JobHandle.ScheduleBatchedJobsAndCompleteAll((void*)ptr, 2);
 			job0 = default(JobHandle);
@@ -29,10 +34,14 @@ namespace Unity.Jobs
 
 		public unsafe static void CompleteAll(ref JobHandle job0, ref JobHandle job1, ref JobHandle job2)
 		{
-			JobHandle* ptr = stackalloc JobHandle[checked(3 * sizeof(JobHandle))];
-			*ptr = job0;
+			JobHandle* ptr;
+			checked
+			{
+				ptr = stackalloc JobHandle[unchecked((UIntPtr)3) * (UIntPtr)sizeof(JobHandle)];
+				*ptr = job0;
+			}
 			ptr[1] = job1;
-			ptr[sizeof(JobHandle) * 2 / sizeof(JobHandle)] = job2;
+			ptr[2] = job2;
 			JobHandle.ScheduleBatchedJobsAndCompleteAll((void*)ptr, 3);
 			job0 = default(JobHandle);
 			job1 = default(JobHandle);
@@ -79,6 +88,11 @@ namespace Unity.Jobs
 		}
 
 		public static JobHandle CombineDependencies(NativeArray<JobHandle> jobs)
+		{
+			return JobHandle.CombineDependenciesInternalPtr(jobs.GetUnsafeReadOnlyPtr<JobHandle>(), jobs.Length);
+		}
+
+		public static JobHandle CombineDependencies(NativeSlice<JobHandle> jobs)
 		{
 			return JobHandle.CombineDependenciesInternalPtr(jobs.GetUnsafeReadOnlyPtr<JobHandle>(), jobs.Length);
 		}

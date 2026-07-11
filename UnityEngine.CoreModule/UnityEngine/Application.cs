@@ -15,23 +15,24 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Application.bindings.h")]
-	[NativeHeader("Runtime/Logging/LogSystem.h")]
-	[NativeHeader("Runtime/PreloadManager/PreloadManager.h")]
 	[NativeHeader("Runtime/Input/GetInput.h")]
-	[NativeHeader("Runtime/Application/ApplicationInfo.h")]
-	[NativeHeader("Runtime/Application/AdsIdHandler.h")]
 	[NativeHeader("Runtime/File/ApplicationSpecificPersistentDataPath.h")]
-	[NativeHeader("Runtime/Network/NetworkUtility.h")]
-	[NativeHeader("Runtime/Input/InputManager.h")]
-	[NativeHeader("Runtime/Utilities/Argv.h")]
+	[NativeHeader("Runtime/Application/ApplicationInfo.h")]
 	[NativeHeader("Runtime/BaseClasses/IsPlaying.h")]
-	[NativeHeader("Runtime/PreloadManager/LoadSceneOperation.h")]
-	[NativeHeader("Runtime/Utilities/URLUtility.h")]
+	[NativeHeader("Runtime/Application/AdsIdHandler.h")]
+	[NativeHeader("Runtime/Misc/Player.h")]
+	[NativeHeader("Runtime/Export/Application/Application.bindings.h")]
+	[NativeHeader("Runtime/Input/InputManager.h")]
+	[NativeHeader("Runtime/Misc/BuildSettings.h")]
+	[NativeHeader("Runtime/Logging/LogSystem.h")]
 	[NativeHeader("Runtime/Misc/SystemInfo.h")]
 	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
-	[NativeHeader("Runtime/Misc/Player.h")]
-	[NativeHeader("Runtime/Misc/BuildSettings.h")]
+	[NativeHeader("Runtime/Network/NetworkUtility.h")]
+	[NativeHeader("Runtime/PreloadManager/LoadSceneOperation.h")]
+	[NativeHeader("Runtime/Utilities/Argv.h")]
+	[NativeHeader("Runtime/Utilities/URLUtility.h")]
+	[NativeHeader("Runtime/Input/TargetFrameRate.h")]
+	[NativeHeader("Runtime/PreloadManager/PreloadManager.h")]
 	public class Application
 	{
 		[FreeFunction("GetInputManager().QuitApplication")]
@@ -63,8 +64,9 @@ namespace UnityEngine
 		[Obsolete("Streaming was a Unity Web Player feature, and is removed. This function is deprecated and always returns 1.0 for valid level indices.")]
 		public static float GetStreamProgressForLevel(int levelIndex)
 		{
+			bool flag = levelIndex >= 0 && levelIndex < SceneManager.sceneCountInBuildSettings;
 			float num;
-			if (levelIndex >= 0 && levelIndex < SceneManager.sceneCountInBuildSettings)
+			if (flag)
 			{
 				num = 1f;
 			}
@@ -90,8 +92,8 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("Application.webSecurityEnabled is no longer supported, since the Unity Web Player is no longer supported by Unity", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Application.webSecurityEnabled is no longer supported, since the Unity Web Player is no longer supported by Unity", true)]
 		public static bool webSecurityEnabled
 		{
 			get
@@ -127,13 +129,6 @@ namespace UnityEngine
 			get;
 		}
 
-		public static extern RuntimePlatform platform
-		{
-			[FreeFunction("systeminfo::GetRuntimePlatform", IsThreadSafe = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-		}
-
 		[FreeFunction("GetBuildSettings().GetBuildTags")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string[] GetBuildTags();
@@ -147,42 +142,6 @@ namespace UnityEngine
 			[FreeFunction("Application_Bindings::GetBuildGUID")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-		}
-
-		public static bool isMobilePlatform
-		{
-			get
-			{
-				RuntimePlatform platform = Application.platform;
-				bool flag;
-				switch (platform)
-				{
-				case RuntimePlatform.MetroPlayerX86:
-				case RuntimePlatform.MetroPlayerX64:
-				case RuntimePlatform.MetroPlayerARM:
-					flag = SystemInfo.deviceType == DeviceType.Handheld;
-					break;
-				default:
-					switch (platform)
-					{
-					case RuntimePlatform.IPhonePlayer:
-					case RuntimePlatform.Android:
-						return true;
-					}
-					flag = false;
-					break;
-				}
-				return flag;
-			}
-		}
-
-		public static bool isConsolePlatform
-		{
-			get
-			{
-				RuntimePlatform platform = Application.platform;
-				return platform == RuntimePlatform.PS4 || platform == RuntimePlatform.XboxOne;
-			}
 		}
 
 		public static extern bool runInBackground
@@ -267,9 +226,10 @@ namespace UnityEngine
 		[Obsolete("Application.ExternalEval is deprecated. See https://docs.unity3d.com/Manual/webgl-interactingwithbrowserscripting.html for alternatives.")]
 		public static void ExternalEval(string script)
 		{
-			if (script.Length > 0 && script[script.Length - 1] != ';')
+			bool flag = script.Length > 0 && script[script.Length - 1] != ';';
+			if (flag)
 			{
-				script += ';';
+				script += ";";
 			}
 			Application.Internal_ExternalCall(script);
 		}
@@ -280,7 +240,7 @@ namespace UnityEngine
 
 		public static extern string unityVersion
 		{
-			[FreeFunction("Application_Bindings::GetUnityVersion")]
+			[FreeFunction("Application_Bindings::GetUnityVersion", IsThreadSafe = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -365,13 +325,6 @@ namespace UnityEngine
 			set;
 		}
 
-		public static extern SystemLanguage systemLanguage
-		{
-			[FreeFunction("(SystemLanguage)systeminfo::GetSystemLanguage")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-		}
-
 		[FreeFunction("Application_Bindings::SetLogCallbackDefined")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetLogCallbackDefined(bool defined);
@@ -412,13 +365,6 @@ namespace UnityEngine
 			set;
 		}
 
-		public static extern NetworkReachability internetReachability
-		{
-			[FreeFunction("GetInternetReachability")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-		}
-
 		public static extern bool genuine
 		{
 			[FreeFunction("IsApplicationGenuine")]
@@ -457,14 +403,54 @@ namespace UnityEngine
 			}
 		}
 
+		public static extern RuntimePlatform platform
+		{
+			[FreeFunction("systeminfo::GetRuntimePlatform", IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public static bool isMobilePlatform
+		{
+			get
+			{
+				RuntimePlatform platform = Application.platform;
+				return platform == RuntimePlatform.IPhonePlayer || platform == RuntimePlatform.Android || (platform - RuntimePlatform.MetroPlayerX86 <= 2 && SystemInfo.deviceType == DeviceType.Handheld);
+			}
+		}
+
+		public static bool isConsolePlatform
+		{
+			get
+			{
+				RuntimePlatform platform = Application.platform;
+				return platform == RuntimePlatform.PS4 || platform == RuntimePlatform.XboxOne;
+			}
+		}
+
+		public static extern SystemLanguage systemLanguage
+		{
+			[FreeFunction("(SystemLanguage)systeminfo::GetSystemLanguage")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public static extern NetworkReachability internetReachability
+		{
+			[FreeFunction("GetInternetReachability")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Application.LowMemoryCallback lowMemory;
 
 		[RequiredByNativeCode]
-		private static void CallLowMemory()
+		internal static void CallLowMemory()
 		{
 			Application.LowMemoryCallback lowMemoryCallback = Application.lowMemory;
-			if (lowMemoryCallback != null)
+			bool flag = lowMemoryCallback != null;
+			if (flag)
 			{
 				lowMemoryCallback();
 			}
@@ -502,13 +488,15 @@ namespace UnityEngine
 			if (invokedOnMainThread)
 			{
 				Application.LogCallback logCallback = Application.s_LogCallbackHandler;
-				if (logCallback != null)
+				bool flag = logCallback != null;
+				if (flag)
 				{
 					logCallback(logString, stackTrace, type);
 				}
 			}
 			Application.LogCallback logCallback2 = Application.s_LogCallbackHandlerThreaded;
-			if (logCallback2 != null)
+			bool flag2 = logCallback2 != null;
+			if (flag2)
 			{
 				logCallback2(logString, stackTrace, type);
 			}
@@ -516,7 +504,8 @@ namespace UnityEngine
 
 		internal static void InvokeOnAdvertisingIdentifierCallback(string advertisingId, bool trackingEnabled)
 		{
-			if (Application.OnAdvertisingIdentifierCallback != null)
+			bool flag = Application.OnAdvertisingIdentifierCallback != null;
+			if (flag)
 			{
 				Application.OnAdvertisingIdentifierCallback(advertisingId, trackingEnabled, string.Empty);
 			}
@@ -524,67 +513,94 @@ namespace UnityEngine
 
 		private static string ObjectToJSString(object o)
 		{
+			bool flag = o == null;
 			string text;
-			if (o == null)
+			if (flag)
 			{
 				text = "null";
 			}
-			else if (o is string)
+			else
 			{
-				string text2 = o.ToString().Replace("\\", "\\\\");
-				text2 = text2.Replace("\"", "\\\"");
-				text2 = text2.Replace("\n", "\\n");
-				text2 = text2.Replace("\r", "\\r");
-				text2 = text2.Replace("\0", "");
-				text2 = text2.Replace("\u2028", "");
-				text2 = text2.Replace("\u2029", "");
-				text = '"' + text2 + '"';
-			}
-			else if (o is int || o is short || o is uint || o is ushort || o is byte)
-			{
-				text = o.ToString();
-			}
-			else if (o is float)
-			{
-				NumberFormatInfo numberFormat = CultureInfo.InvariantCulture.NumberFormat;
-				text = ((float)o).ToString(numberFormat);
-			}
-			else if (o is double)
-			{
-				NumberFormatInfo numberFormat2 = CultureInfo.InvariantCulture.NumberFormat;
-				text = ((double)o).ToString(numberFormat2);
-			}
-			else if (o is char)
-			{
-				if ((char)o == '"')
+				bool flag2 = o is string;
+				if (flag2)
 				{
-					text = "\"\\\"\"";
+					string text2 = o.ToString().Replace("\\", "\\\\");
+					text2 = text2.Replace("\"", "\\\"");
+					text2 = text2.Replace("\n", "\\n");
+					text2 = text2.Replace("\r", "\\r");
+					text2 = text2.Replace("\0", "");
+					text2 = text2.Replace("\u2028", "");
+					text2 = text2.Replace("\u2029", "");
+					text = "\"" + text2 + "\"";
 				}
 				else
 				{
-					text = '"' + o.ToString() + '"';
-				}
-			}
-			else if (o is IList)
-			{
-				IList list = (IList)o;
-				StringBuilder stringBuilder = new StringBuilder();
-				stringBuilder.Append("new Array(");
-				int count = list.Count;
-				for (int i = 0; i < count; i++)
-				{
-					if (i != 0)
+					bool flag3 = o is int || o is short || o is uint || o is ushort || o is byte;
+					if (flag3)
 					{
-						stringBuilder.Append(", ");
+						text = o.ToString();
 					}
-					stringBuilder.Append(Application.ObjectToJSString(list[i]));
+					else
+					{
+						bool flag4 = o is float;
+						if (flag4)
+						{
+							NumberFormatInfo numberFormat = CultureInfo.InvariantCulture.NumberFormat;
+							text = ((float)o).ToString(numberFormat);
+						}
+						else
+						{
+							bool flag5 = o is double;
+							if (flag5)
+							{
+								NumberFormatInfo numberFormat2 = CultureInfo.InvariantCulture.NumberFormat;
+								text = ((double)o).ToString(numberFormat2);
+							}
+							else
+							{
+								bool flag6 = o is char;
+								if (flag6)
+								{
+									bool flag7 = (char)o == '"';
+									if (flag7)
+									{
+										text = "\"\\\"\"";
+									}
+									else
+									{
+										text = "\"" + o.ToString() + "\"";
+									}
+								}
+								else
+								{
+									bool flag8 = o is IList;
+									if (flag8)
+									{
+										IList list = (IList)o;
+										StringBuilder stringBuilder = new StringBuilder();
+										stringBuilder.Append("new Array(");
+										int count = list.Count;
+										for (int i = 0; i < count; i++)
+										{
+											bool flag9 = i != 0;
+											if (flag9)
+											{
+												stringBuilder.Append(", ");
+											}
+											stringBuilder.Append(Application.ObjectToJSString(list[i]));
+										}
+										stringBuilder.Append(")");
+										text = stringBuilder.ToString();
+									}
+									else
+									{
+										text = Application.ObjectToJSString(o.ToString());
+									}
+								}
+							}
+						}
+					}
 				}
-				stringBuilder.Append(")");
-				text = stringBuilder.ToString();
-			}
-			else
-			{
-				text = Application.ObjectToJSString(o.ToString());
 			}
 			return text;
 		}
@@ -603,7 +619,8 @@ namespace UnityEngine
 			int num = args.Length;
 			for (int i = 0; i < num; i++)
 			{
-				if (i != 0)
+				bool flag = i != 0;
+				if (flag)
 				{
 					stringBuilder.Append(", ");
 				}
@@ -623,18 +640,11 @@ namespace UnityEngine
 			}
 		}
 
-		public static bool isEditor
-		{
-			get
-			{
-				return false;
-			}
-		}
-
 		[Obsolete("Use Object.DontDestroyOnLoad instead")]
 		public static void DontDestroyOnLoad(Object o)
 		{
-			if (o != null)
+			bool flag = o != null;
+			if (flag)
 			{
 				Object.DontDestroyOnLoad(o);
 			}
@@ -668,6 +678,9 @@ namespace UnityEngine
 		public static event Action<bool> focusChanged;
 
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Action<string> deepLinkActivated;
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Func<bool> wantsToQuit;
 
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -676,13 +689,15 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		private static bool Internal_ApplicationWantsToQuit()
 		{
-			if (Application.wantsToQuit != null)
+			bool flag = Application.wantsToQuit != null;
+			if (flag)
 			{
 				foreach (Func<bool> func in Application.wantsToQuit.GetInvocationList())
 				{
 					try
 					{
-						if (!func())
+						bool flag2 = !func();
+						if (flag2)
 						{
 							return false;
 						}
@@ -699,7 +714,8 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		private static void Internal_ApplicationQuit()
 		{
-			if (Application.quitting != null)
+			bool flag = Application.quitting != null;
+			if (flag)
 			{
 				Application.quitting();
 			}
@@ -714,9 +730,20 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		internal static void InvokeFocusChanged(bool focus)
 		{
-			if (Application.focusChanged != null)
+			bool flag = Application.focusChanged != null;
+			if (flag)
 			{
 				Application.focusChanged(focus);
+			}
+		}
+
+		[RequiredByNativeCode]
+		internal static void InvokeDeepLinkActivated(string url)
+		{
+			bool flag = Application.deepLinkActivated != null;
+			if (flag)
+			{
+				Application.deepLinkActivated(url);
 			}
 		}
 
@@ -734,13 +761,15 @@ namespace UnityEngine
 
 		private static void RegisterLogCallback(Application.LogCallback handler, bool threaded)
 		{
-			if (Application.s_RegisterLogCallbackDeprecated != null)
+			bool flag = Application.s_RegisterLogCallbackDeprecated != null;
+			if (flag)
 			{
 				Application.logMessageReceived -= Application.s_RegisterLogCallbackDeprecated;
 				Application.logMessageReceivedThreaded -= Application.s_RegisterLogCallbackDeprecated;
 			}
 			Application.s_RegisterLogCallbackDeprecated = handler;
-			if (handler != null)
+			bool flag2 = handler != null;
+			if (flag2)
 			{
 				if (threaded)
 				{
@@ -838,6 +867,14 @@ namespace UnityEngine
 		public static bool UnloadLevel(string scenePath)
 		{
 			return SceneManager.UnloadScene(scenePath);
+		}
+
+		public static bool isEditor
+		{
+			get
+			{
+				return false;
+			}
 		}
 
 		private static Application.LogCallback s_LogCallbackHandler;

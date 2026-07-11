@@ -41,6 +41,7 @@ namespace UnityEngine.Playables
 			}
 		}
 
+		[Obsolete("effectiveParentDelay is obsolete; use a custom ScriptPlayable to implement this feature", false)]
 		public double effectiveParentDelay
 		{
 			get
@@ -69,7 +70,7 @@ namespace UnityEngine.Playables
 		{
 			get
 			{
-				return (!this.HasFlags(FrameData.Flags.Evaluate)) ? FrameData.EvaluationType.Playback : FrameData.EvaluationType.Evaluate;
+				return this.HasFlags(FrameData.Flags.Evaluate) ? FrameData.EvaluationType.Evaluate : FrameData.EvaluationType.Playback;
 			}
 		}
 
@@ -109,18 +110,23 @@ namespace UnityEngine.Playables
 		{
 			get
 			{
+				bool flag = this.HasFlags(FrameData.Flags.EffectivePlayStateDelayed);
 				PlayState playState;
-				if (this.HasFlags(FrameData.Flags.EffectivePlayStateDelayed))
+				if (flag)
 				{
 					playState = PlayState.Delayed;
 				}
-				else if (this.HasFlags(FrameData.Flags.EffectivePlayStatePlaying))
-				{
-					playState = PlayState.Playing;
-				}
 				else
 				{
-					playState = PlayState.Paused;
+					bool flag2 = this.HasFlags(FrameData.Flags.EffectivePlayStatePlaying);
+					if (flag2)
+					{
+						playState = PlayState.Playing;
+					}
+					else
+					{
+						playState = PlayState.Paused;
+					}
 				}
 				return playState;
 			}

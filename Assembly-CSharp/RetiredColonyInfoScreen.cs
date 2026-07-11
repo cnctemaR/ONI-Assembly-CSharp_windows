@@ -175,7 +175,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 			{
 				if (MusicManager.instance.SongIsPlaying("Music_Victory_03_StoryAndSummary"))
 				{
-					MusicManager.instance.StopSong("Music_Victory_03_StoryAndSummary", true, STOP_MODE.ALLOWFADEOUT);
+					MusicManager.instance.StopSong("Music_Victory_03_StoryAndSummary", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 				}
 			}
 			else

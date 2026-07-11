@@ -32,7 +32,8 @@ namespace UnityEngine
 
 		void IDisposable.Dispose()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				TextGenerator.Internal_Destroy(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;
@@ -41,7 +42,6 @@ namespace UnityEngine
 
 		public int characterCountVisible
 		{
-			[CompilerGenerated]
 			get
 			{
 				return this.characterCount - 1;
@@ -50,25 +50,30 @@ namespace UnityEngine
 
 		private TextGenerationSettings ValidatedSettings(TextGenerationSettings settings)
 		{
+			bool flag = settings.font != null && settings.font.dynamic;
 			TextGenerationSettings textGenerationSettings;
-			if (settings.font != null && settings.font.dynamic)
+			if (flag)
 			{
 				textGenerationSettings = settings;
 			}
 			else
 			{
-				if (settings.fontSize != 0 || settings.fontStyle != FontStyle.Normal)
+				bool flag2 = settings.fontSize != 0 || settings.fontStyle > FontStyle.Normal;
+				if (flag2)
 				{
-					if (settings.font != null)
+					bool flag3 = settings.font != null;
+					if (flag3)
 					{
 						Debug.LogWarningFormat(settings.font, "Font size and style overrides are only supported for dynamic fonts. Font '{0}' is not dynamic.", new object[] { settings.font.name });
 					}
 					settings.fontSize = 0;
 					settings.fontStyle = FontStyle.Normal;
 				}
-				if (settings.resizeTextForBestFit)
+				bool resizeTextForBestFit = settings.resizeTextForBestFit;
+				if (resizeTextForBestFit)
 				{
-					if (settings.font != null)
+					bool flag4 = settings.font != null;
+					if (flag4)
 					{
 						Debug.LogWarningFormat(settings.font, "BestFit is only supported for dynamic fonts. Font '{0}' is not dynamic.", new object[] { settings.font.name });
 					}
@@ -119,24 +124,27 @@ namespace UnityEngine
 		public bool PopulateWithErrors(string str, TextGenerationSettings settings, GameObject context)
 		{
 			TextGenerationError textGenerationError = this.PopulateWithError(str, settings);
-			bool flag;
-			if (textGenerationError == TextGenerationError.None)
+			bool flag = textGenerationError == TextGenerationError.None;
+			bool flag2;
+			if (flag)
 			{
-				flag = true;
+				flag2 = true;
 			}
 			else
 			{
-				if ((textGenerationError & TextGenerationError.CustomSizeOnNonDynamicFont) != TextGenerationError.None)
+				bool flag3 = (textGenerationError & TextGenerationError.CustomSizeOnNonDynamicFont) > TextGenerationError.None;
+				if (flag3)
 				{
 					Debug.LogErrorFormat(context, "Font '{0}' is not dynamic, which is required to override its size", new object[] { settings.font });
 				}
-				if ((textGenerationError & TextGenerationError.CustomStyleOnNonDynamicFont) != TextGenerationError.None)
+				bool flag4 = (textGenerationError & TextGenerationError.CustomStyleOnNonDynamicFont) > TextGenerationError.None;
+				if (flag4)
 				{
 					Debug.LogErrorFormat(context, "Font '{0}' is not dynamic, which is required to override its style", new object[] { settings.font });
 				}
-				flag = false;
+				flag2 = false;
 			}
-			return flag;
+			return flag2;
 		}
 
 		public bool Populate(string str, TextGenerationSettings settings)
@@ -147,8 +155,9 @@ namespace UnityEngine
 
 		private TextGenerationError PopulateWithError(string str, TextGenerationSettings settings)
 		{
+			bool flag = this.m_HasGenerated && str == this.m_LastString && settings.Equals(this.m_LastSettings);
 			TextGenerationError textGenerationError;
-			if (this.m_HasGenerated && str == this.m_LastString && settings.Equals(this.m_LastSettings))
+			if (flag)
 			{
 				textGenerationError = this.m_LastValid;
 			}
@@ -179,7 +188,8 @@ namespace UnityEngine
 		{
 			get
 			{
-				if (!this.m_CachedVerts)
+				bool flag = !this.m_CachedVerts;
+				if (flag)
 				{
 					this.GetVertices(this.m_Verts);
 					this.m_CachedVerts = true;
@@ -192,7 +202,8 @@ namespace UnityEngine
 		{
 			get
 			{
-				if (!this.m_CachedCharacters)
+				bool flag = !this.m_CachedCharacters;
+				if (flag)
 				{
 					this.GetCharacters(this.m_Characters);
 					this.m_CachedCharacters = true;
@@ -205,7 +216,8 @@ namespace UnityEngine
 		{
 			get
 			{
-				if (!this.m_CachedLines)
+				bool flag = !this.m_CachedLines;
+				if (flag)
 				{
 					this.GetLines(this.m_Lines);
 					this.m_CachedLines = true;
@@ -264,20 +276,21 @@ namespace UnityEngine
 
 		internal bool Populate_Internal(string str, Font font, Color color, int fontSize, float scaleFactor, float lineSpacing, FontStyle style, bool richText, bool resizeTextForBestFit, int resizeTextMinSize, int resizeTextMaxSize, VerticalWrapMode verticalOverFlow, HorizontalWrapMode horizontalOverflow, bool updateBounds, TextAnchor anchor, Vector2 extents, Vector2 pivot, bool generateOutOfBounds, bool alignByGeometry, out TextGenerationError error)
 		{
-			bool flag;
-			if (font == null)
+			bool flag = font == null;
+			bool flag2;
+			if (flag)
 			{
 				error = TextGenerationError.NoFont;
-				flag = false;
+				flag2 = false;
 			}
 			else
 			{
 				uint num = 0U;
-				bool flag2 = this.Populate_Internal(str, font, color, fontSize, scaleFactor, lineSpacing, style, richText, resizeTextForBestFit, resizeTextMinSize, resizeTextMaxSize, (int)verticalOverFlow, (int)horizontalOverflow, updateBounds, anchor, extents.x, extents.y, pivot.x, pivot.y, generateOutOfBounds, alignByGeometry, out num);
+				bool flag3 = this.Populate_Internal(str, font, color, fontSize, scaleFactor, lineSpacing, style, richText, resizeTextForBestFit, resizeTextMinSize, resizeTextMaxSize, (int)verticalOverFlow, (int)horizontalOverflow, updateBounds, anchor, extents.x, extents.y, pivot.x, pivot.y, generateOutOfBounds, alignByGeometry, out num);
 				error = (TextGenerationError)num;
-				flag = flag2;
+				flag2 = flag3;
 			}
-			return flag;
+			return flag2;
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

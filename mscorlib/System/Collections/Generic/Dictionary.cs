@@ -1228,8 +1228,8 @@ namespace System.Collections.Generic
 			}
 		}
 
-		[DebuggerTypeProxy(typeof(DictionaryValueCollectionDebugView<, >))]
 		[DebuggerDisplay("Count = {Count}")]
+		[DebuggerTypeProxy(typeof(DictionaryValueCollectionDebugView<, >))]
 		[Serializable]
 		public sealed class ValueCollection : ICollection<TValue>, IEnumerable<TValue>, IEnumerable, ICollection, IReadOnlyCollection<TValue>
 		{

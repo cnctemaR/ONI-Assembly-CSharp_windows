@@ -1465,26 +1465,6 @@ namespace STRINGS
 				});
 			}
 
-			public class ETHANOLGENERATOR
-			{
-				public static LocString NAME = UI.FormatAsLink("Ethanol Generator", "ETHANOLGENERATOR");
-
-				public static LocString DESC = "Ethanol generators require less Duplicant operation, but produce significant waste.";
-
-				public static LocString EFFECT = string.Concat(new string[]
-				{
-					"Converts ",
-					UI.FormatAsLink("Ethanol", "ETHANOL"),
-					" into electrical ",
-					UI.FormatAsLink("Power", "POWER"),
-					".\n\nProduces ",
-					UI.FormatAsLink("Carbon Dioxide", "CARBONDIOXIDE"),
-					" and ",
-					UI.FormatAsLink("Polluted Water", "DIRTYWATER"),
-					"."
-				});
-			}
-
 			public class PETROLEUMGENERATOR
 			{
 				public static LocString NAME = UI.FormatAsLink("Petroleum Generator", "PETROLEUMGENERATOR");
@@ -1493,8 +1473,10 @@ namespace STRINGS
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
-					"Converts ",
+					"Converts either ",
 					UI.FormatAsLink("Petroleum", "PETROLEUM"),
+					" or ",
+					UI.FormatAsLink("Ethanol", "ETHANOL"),
 					" into electrical ",
 					UI.FormatAsLink("Power", "POWER"),
 					".\n\nProduces ",

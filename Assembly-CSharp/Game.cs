@@ -26,6 +26,19 @@ public class Game : KMonoBehaviour
 
 	public static Game Instance { get; private set; }
 
+	public bool SaveToCloudActive
+	{
+		get
+		{
+			return CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.SaveToCloud).id == "Enabled";
+		}
+		set
+		{
+			string text = (value ? "Enabled" : "Disabled");
+			CustomGameSettings.Instance.SetQualitySetting(CustomGameSettingConfigs.SaveToCloud, text);
+		}
+	}
+
 	public bool FastWorkersModeActive
 	{
 		get
@@ -276,7 +289,7 @@ public class Game : KMonoBehaviour
 			MusicManager.instance.PlaySong("Music_FrontEnd", false);
 			return;
 		}
-		MusicManager.instance.StopSong("Music_FrontEnd", true, STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.StopSong("Music_FrontEnd", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 	}
 
 	private Player SpawnPlayer()
@@ -835,7 +848,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 420700U;
+		uint num = 442154U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1204,14 +1217,14 @@ public class Game : KMonoBehaviour
 		{
 			SteamUGCService.Instance.enabled = false;
 		}
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSnapshot, STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		if (MusicManager.instance.SongIsPlaying("Music_FrontEnd"))
 		{
-			MusicManager.instance.StopSong("Music_FrontEnd", true, STOP_MODE.ALLOWFADEOUT);
+			MusicManager.instance.StopSong("Music_FrontEnd", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		}
 		if (MusicManager.instance.SongIsPlaying("Music_TitleTheme"))
 		{
-			MusicManager.instance.StopSong("Music_TitleTheme", true, STOP_MODE.ALLOWFADEOUT);
+			MusicManager.instance.StopSong("Music_TitleTheme", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		}
 	}
 
@@ -1242,7 +1255,7 @@ public class Game : KMonoBehaviour
 		{
 			loopingSoundManager.StopAllSounds();
 		}
-		MusicManager.instance.KillAllSongs(STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.KillAllSongs(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.StopPersistentSnapshots();
 		foreach (List<SaveLoadRoot> list in SaveLoader.Instance.saveManager.GetLists().Values)
 		{

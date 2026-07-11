@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Diagnostics;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.TextCore.LowLevel
 {
+	[DebuggerDisplay("First glyphIndex = {m_FirstAdjustmentRecord.m_GlyphIndex},  Second glyphIndex = {m_SecondAdjustmentRecord.m_GlyphIndex}")]
 	[UsedByNativeCode]
 	[Serializable]
-	internal struct GlyphPairAdjustmentRecord
+	public struct GlyphPairAdjustmentRecord
 	{
 		public GlyphAdjustmentRecord firstAdjustmentRecord
 		{
@@ -32,6 +34,25 @@ namespace UnityEngine.TextCore.LowLevel
 			}
 		}
 
+		public FontFeatureLookupFlags featureLookupFlags
+		{
+			get
+			{
+				return this.m_FeatureLookupFlags;
+			}
+			set
+			{
+				this.m_FeatureLookupFlags = value;
+			}
+		}
+
+		public GlyphPairAdjustmentRecord(GlyphAdjustmentRecord firstAdjustmentRecord, GlyphAdjustmentRecord secondAdjustmentRecord)
+		{
+			this.m_FirstAdjustmentRecord = firstAdjustmentRecord;
+			this.m_SecondAdjustmentRecord = secondAdjustmentRecord;
+			this.m_FeatureLookupFlags = FontFeatureLookupFlags.None;
+		}
+
 		[SerializeField]
 		[NativeName("firstAdjustmentRecord")]
 		private GlyphAdjustmentRecord m_FirstAdjustmentRecord;
@@ -39,5 +60,8 @@ namespace UnityEngine.TextCore.LowLevel
 		[SerializeField]
 		[NativeName("secondAdjustmentRecord")]
 		private GlyphAdjustmentRecord m_SecondAdjustmentRecord;
+
+		[SerializeField]
+		private FontFeatureLookupFlags m_FeatureLookupFlags;
 	}
 }

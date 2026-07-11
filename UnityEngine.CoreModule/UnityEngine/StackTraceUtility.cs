@@ -13,7 +13,8 @@ namespace UnityEngine
 		internal static void SetProjectFolder(string folder)
 		{
 			StackTraceUtility.projectFolder = folder;
-			if (!string.IsNullOrEmpty(StackTraceUtility.projectFolder))
+			bool flag = !string.IsNullOrEmpty(StackTraceUtility.projectFolder);
+			if (flag)
 			{
 				StackTraceUtility.projectFolder = StackTraceUtility.projectFolder.Replace("\\", "/");
 			}
@@ -35,25 +36,28 @@ namespace UnityEngine
 			return text + "\n" + text2;
 		}
 
-		[SecuritySafeCritical]
 		[RequiredByNativeCode]
+		[SecuritySafeCritical]
 		internal static void ExtractStringFromExceptionInternal(object exceptiono, out string message, out string stackTrace)
 		{
-			if (exceptiono == null)
+			bool flag = exceptiono == null;
+			if (flag)
 			{
 				throw new ArgumentException("ExtractStringFromExceptionInternal called with null exception");
 			}
 			Exception ex = exceptiono as Exception;
-			if (ex == null)
+			bool flag2 = ex == null;
+			if (flag2)
 			{
 				throw new ArgumentException("ExtractStringFromExceptionInternal called with an exceptoin that was not of type System.Exception");
 			}
-			StringBuilder stringBuilder = new StringBuilder((ex.StackTrace != null) ? (ex.StackTrace.Length * 2) : 512);
+			StringBuilder stringBuilder = new StringBuilder((ex.StackTrace == null) ? 512 : (ex.StackTrace.Length * 2));
 			message = "";
 			string text = "";
 			while (ex != null)
 			{
-				if (text.Length == 0)
+				bool flag3 = text.Length == 0;
+				if (flag3)
 				{
 					text = ex.StackTrace;
 				}
@@ -63,17 +67,20 @@ namespace UnityEngine
 				}
 				string text2 = ex.GetType().Name;
 				string text3 = "";
-				if (ex.Message != null)
+				bool flag4 = ex.Message != null;
+				if (flag4)
 				{
 					text3 = ex.Message;
 				}
-				if (text3.Trim().Length != 0)
+				bool flag5 = text3.Trim().Length != 0;
+				if (flag5)
 				{
 					text2 += ": ";
 					text2 += text3;
 				}
 				message = text2;
-				if (ex.InnerException != null)
+				bool flag6 = ex.InnerException != null;
+				if (flag6)
 				{
 					text = "Rethrow as " + text2 + "\n" + text;
 				}
@@ -93,13 +100,16 @@ namespace UnityEngine
 			{
 				StackFrame frame = stackTrace.GetFrame(i);
 				MethodBase method = frame.GetMethod();
-				if (method != null)
+				bool flag = method == null;
+				if (!flag)
 				{
 					Type declaringType = method.DeclaringType;
-					if (declaringType != null)
+					bool flag2 = declaringType == null;
+					if (!flag2)
 					{
 						string @namespace = declaringType.Namespace;
-						if (@namespace != null && @namespace.Length != 0)
+						bool flag3 = @namespace != null && @namespace.Length != 0;
+						if (flag3)
 						{
 							stringBuilder.Append(@namespace);
 							stringBuilder.Append(".");
@@ -110,30 +120,36 @@ namespace UnityEngine
 						stringBuilder.Append("(");
 						int j = 0;
 						ParameterInfo[] parameters = method.GetParameters();
-						bool flag = true;
+						bool flag4 = true;
 						while (j < parameters.Length)
 						{
-							if (!flag)
+							bool flag5 = !flag4;
+							if (flag5)
 							{
 								stringBuilder.Append(", ");
 							}
 							else
 							{
-								flag = false;
+								flag4 = false;
 							}
 							stringBuilder.Append(parameters[j].ParameterType.Name);
 							j++;
 						}
 						stringBuilder.Append(")");
 						string text = frame.GetFileName();
-						if (text != null)
+						bool flag6 = text != null;
+						if (flag6)
 						{
-							if ((!(declaringType.Name == "Debug") || !(declaringType.Namespace == "UnityEngine")) && (!(declaringType.Name == "Logger") || !(declaringType.Namespace == "UnityEngine")) && (!(declaringType.Name == "DebugLogHandler") || !(declaringType.Namespace == "UnityEngine")) && (!(declaringType.Name == "Assert") || !(declaringType.Namespace == "UnityEngine.Assertions")) && (!(method.Name == "print") || !(declaringType.Name == "MonoBehaviour") || !(declaringType.Namespace == "UnityEngine")))
+							bool flag7 = (declaringType.Name == "Debug" && declaringType.Namespace == "UnityEngine") || (declaringType.Name == "Logger" && declaringType.Namespace == "UnityEngine") || (declaringType.Name == "DebugLogHandler" && declaringType.Namespace == "UnityEngine") || (declaringType.Name == "Assert" && declaringType.Namespace == "UnityEngine.Assertions") || (method.Name == "print" && declaringType.Name == "MonoBehaviour" && declaringType.Namespace == "UnityEngine");
+							bool flag8 = !flag7;
+							if (flag8)
 							{
 								stringBuilder.Append(" (at ");
-								if (!string.IsNullOrEmpty(StackTraceUtility.projectFolder))
+								bool flag9 = !string.IsNullOrEmpty(StackTraceUtility.projectFolder);
+								if (flag9)
 								{
-									if (text.Replace("\\", "/").StartsWith(StackTraceUtility.projectFolder))
+									bool flag10 = text.Replace("\\", "/").StartsWith(StackTraceUtility.projectFolder);
+									if (flag10)
 									{
 										text = text.Substring(StackTraceUtility.projectFolder.Length, text.Length - StackTraceUtility.projectFolder.Length);
 									}

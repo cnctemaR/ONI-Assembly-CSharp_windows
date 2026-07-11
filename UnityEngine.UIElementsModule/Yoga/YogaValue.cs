@@ -25,7 +25,7 @@ namespace UnityEngine.Yoga
 			return new YogaValue
 			{
 				value = value,
-				unit = ((!YogaConstants.IsUndefined(value)) ? YogaUnit.Point : YogaUnit.Undefined)
+				unit = (YogaConstants.IsUndefined(value) ? YogaUnit.Undefined : YogaUnit.Point)
 			};
 		}
 
@@ -36,7 +36,8 @@ namespace UnityEngine.Yoga
 
 		public override bool Equals(object obj)
 		{
-			return !object.ReferenceEquals(null, obj) && obj is YogaValue && this.Equals((YogaValue)obj);
+			bool flag = obj == null;
+			return !flag && obj is YogaValue && this.Equals((YogaValue)obj);
 		}
 
 		public override int GetHashCode()
@@ -57,7 +58,7 @@ namespace UnityEngine.Yoga
 		{
 			return new YogaValue
 			{
-				value = 0f,
+				value = float.NaN,
 				unit = YogaUnit.Auto
 			};
 		}
@@ -67,7 +68,7 @@ namespace UnityEngine.Yoga
 			return new YogaValue
 			{
 				value = value,
-				unit = ((!YogaConstants.IsUndefined(value)) ? YogaUnit.Percent : YogaUnit.Undefined)
+				unit = (YogaConstants.IsUndefined(value) ? YogaUnit.Undefined : YogaUnit.Percent)
 			};
 		}
 

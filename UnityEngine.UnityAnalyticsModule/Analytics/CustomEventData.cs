@@ -26,7 +26,8 @@ namespace UnityEngine.Analytics
 
 		private void Destroy()
 		{
-			if (this.m_Ptr != IntPtr.Zero)
+			bool flag = this.m_Ptr != IntPtr.Zero;
+			if (flag)
 			{
 				CustomEventData.Internal_Destroy(this.m_Ptr);
 				this.m_Ptr = IntPtr.Zero;
@@ -73,76 +74,131 @@ namespace UnityEngine.Analytics
 			{
 				string key = keyValuePair.Key;
 				object value = keyValuePair.Value;
-				if (value == null)
+				bool flag = value == null;
+				if (flag)
 				{
 					this.AddString(key, "null");
 				}
 				else
 				{
 					Type type = value.GetType();
-					if (type == typeof(string))
+					bool flag2 = type == typeof(string);
+					if (flag2)
 					{
 						this.AddString(key, (string)value);
 					}
-					else if (type == typeof(char))
-					{
-						this.AddString(key, char.ToString((char)value));
-					}
-					else if (type == typeof(sbyte))
-					{
-						this.AddInt32(key, (int)((sbyte)value));
-					}
-					else if (type == typeof(byte))
-					{
-						this.AddInt32(key, (int)((byte)value));
-					}
-					else if (type == typeof(short))
-					{
-						this.AddInt32(key, (int)((short)value));
-					}
-					else if (type == typeof(ushort))
-					{
-						this.AddUInt32(key, (uint)((ushort)value));
-					}
-					else if (type == typeof(int))
-					{
-						this.AddInt32(key, (int)value);
-					}
-					else if (type == typeof(uint))
-					{
-						this.AddUInt32(keyValuePair.Key, (uint)value);
-					}
-					else if (type == typeof(long))
-					{
-						this.AddInt64(key, (long)value);
-					}
-					else if (type == typeof(ulong))
-					{
-						this.AddUInt64(key, (ulong)value);
-					}
-					else if (type == typeof(bool))
-					{
-						this.AddBool(key, (bool)value);
-					}
-					else if (type == typeof(float))
-					{
-						this.AddDouble(key, (double)Convert.ToDecimal((float)value));
-					}
-					else if (type == typeof(double))
-					{
-						this.AddDouble(key, (double)value);
-					}
-					else if (type == typeof(decimal))
-					{
-						this.AddDouble(key, (double)Convert.ToDecimal((decimal)value));
-					}
 					else
 					{
-						if (!type.IsValueType)
+						bool flag3 = type == typeof(char);
+						if (flag3)
 						{
-							throw new ArgumentException(string.Format("Invalid type: {0} passed", type));
+							this.AddString(key, char.ToString((char)value));
 						}
-						this.AddString(key, value.ToString());
+						else
+						{
+							bool flag4 = type == typeof(sbyte);
+							if (flag4)
+							{
+								this.AddInt32(key, (int)((sbyte)value));
+							}
+							else
+							{
+								bool flag5 = type == typeof(byte);
+								if (flag5)
+								{
+									this.AddInt32(key, (int)((byte)value));
+								}
+								else
+								{
+									bool flag6 = type == typeof(short);
+									if (flag6)
+									{
+										this.AddInt32(key, (int)((short)value));
+									}
+									else
+									{
+										bool flag7 = type == typeof(ushort);
+										if (flag7)
+										{
+											this.AddUInt32(key, (uint)((ushort)value));
+										}
+										else
+										{
+											bool flag8 = type == typeof(int);
+											if (flag8)
+											{
+												this.AddInt32(key, (int)value);
+											}
+											else
+											{
+												bool flag9 = type == typeof(uint);
+												if (flag9)
+												{
+													this.AddUInt32(keyValuePair.Key, (uint)value);
+												}
+												else
+												{
+													bool flag10 = type == typeof(long);
+													if (flag10)
+													{
+														this.AddInt64(key, (long)value);
+													}
+													else
+													{
+														bool flag11 = type == typeof(ulong);
+														if (flag11)
+														{
+															this.AddUInt64(key, (ulong)value);
+														}
+														else
+														{
+															bool flag12 = type == typeof(bool);
+															if (flag12)
+															{
+																this.AddBool(key, (bool)value);
+															}
+															else
+															{
+																bool flag13 = type == typeof(float);
+																if (flag13)
+																{
+																	this.AddDouble(key, (double)Convert.ToDecimal((float)value));
+																}
+																else
+																{
+																	bool flag14 = type == typeof(double);
+																	if (flag14)
+																	{
+																		this.AddDouble(key, (double)value);
+																	}
+																	else
+																	{
+																		bool flag15 = type == typeof(decimal);
+																		if (flag15)
+																		{
+																			this.AddDouble(key, (double)Convert.ToDecimal((decimal)value));
+																		}
+																		else
+																		{
+																			bool isValueType = type.IsValueType;
+																			if (!isValueType)
+																			{
+																				throw new ArgumentException(string.Format("Invalid type: {0} passed", type));
+																			}
+																			this.AddString(key, value.ToString());
+																		}
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 			}

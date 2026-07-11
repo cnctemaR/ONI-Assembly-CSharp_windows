@@ -3,11 +3,11 @@ using System.Reflection;
 
 namespace System.Runtime.InteropServices
 {
-	[TypeLibImportClass(typeof(Module))]
-	[Guid("D002E9BA-D9E3-3749-B1D3-D565A08B13E7")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[ComVisible(true)]
+	[Guid("D002E9BA-D9E3-3749-B1D3-D565A08B13E7")]
 	[CLSCompliant(false)]
+	[TypeLibImportClass(typeof(Module))]
 	public interface _Module
 	{
 		void GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId);

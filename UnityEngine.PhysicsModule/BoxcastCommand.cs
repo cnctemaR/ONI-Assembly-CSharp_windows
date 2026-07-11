@@ -9,7 +9,7 @@ using UnityEngine.Bindings;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Jobs/ScriptBindings/JobsBindingsTypes.h")]
-	[NativeHeader("Runtime/Dynamics/BatchCommands/BoxcastCommand.h")]
+	[NativeHeader("Modules/Physics/BatchCommands/BoxcastCommand.h")]
 	public struct BoxcastCommand
 	{
 		public BoxcastCommand(Vector3 center, Vector3 halfExtents, Quaternion orientation, Vector3 direction, float distance = 3.4028235E+38f, int layerMask = -5)

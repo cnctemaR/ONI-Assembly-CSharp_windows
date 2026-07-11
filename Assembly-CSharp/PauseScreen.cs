@@ -86,11 +86,11 @@ public class PauseScreen : KModalButtonMenu
 			return;
 		}
 		ToolTipScreen.Instance.ClearToolTip(this.closeButton.GetComponent<ToolTip>());
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().ESCPauseSnapshot, STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().ESCPauseSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		MusicManager.instance.OnEscapeMenu(false);
 		if (MusicManager.instance.SongIsPlaying("Music_ESC_Menu"))
 		{
-			MusicManager.instance.StopSong("Music_ESC_Menu", true, STOP_MODE.ALLOWFADEOUT);
+			MusicManager.instance.StopSong("Music_ESC_Menu", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		}
 	}
 

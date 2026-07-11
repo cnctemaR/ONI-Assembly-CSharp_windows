@@ -66,8 +66,6 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		base.OnCmpDisable();
 		if (this.animController != null)
 		{
-			ScreenResize instance = ScreenResize.Instance;
-			instance.OnResize = (global::System.Action)Delegate.Remove(instance.OnResize, new global::System.Action(this.OnResize));
 			this.animController.gameObject.DeleteObject();
 			this.animController = null;
 		}
@@ -84,11 +82,6 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 			characterSelectionController2.OnLimitUnreachedEvent = (global::System.Action)Delegate.Remove(characterSelectionController2.OnLimitUnreachedEvent, new global::System.Action(this.OnCharacterSelectionLimitUnReached));
 			CharacterSelectionController characterSelectionController3 = this.controller;
 			characterSelectionController3.OnReshuffleEvent = (Action<bool>)Delegate.Remove(characterSelectionController3.OnReshuffleEvent, new Action<bool>(this.Reshuffle));
-		}
-		if (this.animController != null)
-		{
-			ScreenResize instance = ScreenResize.Instance;
-			instance.OnResize = (global::System.Action)Delegate.Remove(instance.OnResize, new global::System.Action(this.OnResize));
 		}
 	}
 
@@ -128,8 +121,6 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		while (this.IsCharacterRedundant() && num < 20);
 		if (this.animController != null)
 		{
-			ScreenResize instance = ScreenResize.Instance;
-			instance.OnResize = (global::System.Action)Delegate.Remove(instance.OnResize, new global::System.Action(this.OnResize));
 			global::UnityEngine.Object.Destroy(this.animController.gameObject);
 			this.animController = null;
 		}
@@ -147,34 +138,13 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		}
 	}
 
-	private void OnResize()
-	{
-		KCanvasScaler kcanvasScaler = global::UnityEngine.Object.FindObjectOfType<KCanvasScaler>();
-		this.animController.animScale = this.baseCharacterScale * (1f / kcanvasScaler.GetCanvasScale());
-		Transform transform = this.animController.transform.parent.gameObject.transform.Find("BG");
-		KBatchedAnimController kbatchedAnimController = ((transform != null) ? transform.gameObject.GetComponent<KBatchedAnimController>() : null);
-		if (kbatchedAnimController != null)
-		{
-			kbatchedAnimController.animScale = this.baseCharacterScale * (1f / kcanvasScaler.GetCanvasScale());
-		}
-	}
-
 	private void SetAnimator()
 	{
 		if (this.animController == null)
 		{
 			this.animController = Util.KInstantiateUI(Assets.GetPrefab(new Tag("MinionSelectPreview")), this.contentBody.gameObject, false).GetComponent<KBatchedAnimController>();
 			this.animController.gameObject.SetActive(true);
-			KCanvasScaler kcanvasScaler = global::UnityEngine.Object.FindObjectOfType<KCanvasScaler>();
-			this.animController.animScale = this.baseCharacterScale * (1f / kcanvasScaler.GetCanvasScale());
-			ScreenResize instance = ScreenResize.Instance;
-			instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.OnResize));
-			Transform transform = this.animController.transform.parent.gameObject.transform.Find("BG");
-			KBatchedAnimController kbatchedAnimController = ((transform != null) ? transform.gameObject.GetComponent<KBatchedAnimController>() : null);
-			if (kbatchedAnimController != null)
-			{
-				kbatchedAnimController.animScale = this.baseCharacterScale * (1f / kcanvasScaler.GetCanvasScale());
-			}
+			this.animController.animScale = this.baseCharacterScale;
 		}
 		this.stats.ApplyTraits(this.animController.gameObject);
 		this.stats.ApplyRace(this.animController.gameObject);

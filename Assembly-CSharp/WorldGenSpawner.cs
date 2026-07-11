@@ -123,7 +123,7 @@ public class WorldGenSpawner : KMonoBehaviour
 			Grid.Spawnable[i] = 0;
 		}
 		float num = 16.5f;
-		float num2 = 18f;
+		int num2 = 18;
 		Vector2I baseStartPos = SaveGame.Instance.worldGen.SpawnData.baseStartPos;
 		GridVisibility.Reveal(baseStartPos.x, baseStartPos.y, num2, num);
 	}

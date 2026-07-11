@@ -189,7 +189,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IG
 		Vector3 position = base.transform.GetPosition();
 		position.z = 0f;
 		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(position, false), 1f);
-		eventInstance.setParameterValue("timeSinceLast", num2);
+		eventInstance.setParameterByName("timeSinceLast", num2, false);
 		KFMOD.EndOneShot(eventInstance);
 		this.lastTimeSoundPlayed[state] = Time.time;
 	}

@@ -6,25 +6,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Playables
 {
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Runtime/Camera//Director/CameraPlayable.h")]
 	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Export/Director/CameraPlayable.bindings.h")]
-	[NativeHeader("Runtime/Camera//Director/CameraPlayable.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("CameraPlayableBindings", StaticAccessorType.DoubleColon)]
 	public struct CameraPlayable : IPlayable, IEquatable<CameraPlayable>
 	{
-		internal CameraPlayable(PlayableHandle handle)
-		{
-			if (handle.IsValid())
-			{
-				if (!handle.IsPlayableOfType<CameraPlayable>())
-				{
-					throw new InvalidCastException("Can't set handle: the playable is not an CameraPlayable.");
-				}
-			}
-			this.m_Handle = handle;
-		}
-
 		public static CameraPlayable Create(PlayableGraph graph, Camera camera)
 		{
 			PlayableHandle playableHandle = CameraPlayable.CreateHandle(graph, camera);
@@ -34,8 +22,9 @@ namespace UnityEngine.Experimental.Playables
 		private static PlayableHandle CreateHandle(PlayableGraph graph, Camera camera)
 		{
 			PlayableHandle @null = PlayableHandle.Null;
+			bool flag = !CameraPlayable.InternalCreateCameraPlayable(ref graph, camera, ref @null);
 			PlayableHandle playableHandle;
-			if (!CameraPlayable.InternalCreateCameraPlayable(ref graph, camera, ref @null))
+			if (flag)
 			{
 				playableHandle = PlayableHandle.Null;
 			}
@@ -44,6 +33,20 @@ namespace UnityEngine.Experimental.Playables
 				playableHandle = @null;
 			}
 			return playableHandle;
+		}
+
+		internal CameraPlayable(PlayableHandle handle)
+		{
+			bool flag = handle.IsValid();
+			if (flag)
+			{
+				bool flag2 = !handle.IsPlayableOfType<CameraPlayable>();
+				if (flag2)
+				{
+					throw new InvalidCastException("Can't set handle: the playable is not an CameraPlayable.");
+				}
+			}
+			this.m_Handle = handle;
 		}
 
 		public PlayableHandle GetHandle()

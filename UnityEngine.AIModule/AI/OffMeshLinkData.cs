@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
+using UnityEngine.Bindings;
 using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
 	[MovedFrom("UnityEngine")]
+	[NativeHeader("Modules/AI/Components/OffMeshLink.bindings.h")]
 	public struct OffMeshLinkData
 	{
 		public bool valid
@@ -52,24 +53,24 @@ namespace UnityEngine.AI
 		{
 			get
 			{
-				return this.GetOffMeshLinkInternal(this.m_InstanceID);
+				return OffMeshLinkData.GetOffMeshLinkInternal(this.m_InstanceID);
 			}
 		}
 
-		[GeneratedByOldBindingsGenerator]
+		[FreeFunction("OffMeshLinkScriptBindings::GetOffMeshLinkInternal")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern OffMeshLink GetOffMeshLinkInternal(int instanceID);
+		internal static extern OffMeshLink GetOffMeshLinkInternal(int instanceID);
 
-		private int m_Valid;
+		internal int m_Valid;
 
-		private int m_Activated;
+		internal int m_Activated;
 
-		private int m_InstanceID;
+		internal int m_InstanceID;
 
-		private OffMeshLinkType m_LinkType;
+		internal OffMeshLinkType m_LinkType;
 
-		private Vector3 m_StartPos;
+		internal Vector3 m_StartPos;
 
-		private Vector3 m_EndPos;
+		internal Vector3 m_EndPos;
 	}
 }

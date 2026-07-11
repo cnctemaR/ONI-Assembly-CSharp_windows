@@ -16,7 +16,7 @@ public class SaveScreen : KModalScreen
 
 	protected override void OnCmpEnable()
 	{
-		foreach (string text in SaveLoader.GetAllFiles())
+		foreach (string text in SaveLoader.GetAllColonyFiles(SearchOption.TopDirectoryOnly))
 		{
 			this.AddExistingSaveFile(text);
 		}
@@ -92,9 +92,17 @@ public class SaveScreen : KModalScreen
 
 	public void OnClickNewSave()
 	{
-		((FileNameDialog)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.FileNameDialog.gameObject, base.transform.parent.gameObject)).onConfirm = delegate(string filename)
+		FileNameDialog fileNameDialog = (FileNameDialog)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.FileNameDialog.gameObject, base.transform.parent.gameObject);
+		string activeSaveFilePath = SaveLoader.GetActiveSaveFilePath();
+		if (activeSaveFilePath != null)
 		{
-			filename = Path.Combine(SaveLoader.GetSavePrefixAndCreateFolder(), filename);
+			string text = SaveLoader.GetOriginalSaveFileName(activeSaveFilePath);
+			text = Path.GetFileNameWithoutExtension(text);
+			fileNameDialog.SetTextAndSelect(text);
+		}
+		fileNameDialog.onConfirm = delegate(string filename)
+		{
+			filename = Path.Combine(SaveLoader.GetActiveSaveColonyFolder(), filename);
 			this.Save(filename);
 		};
 	}

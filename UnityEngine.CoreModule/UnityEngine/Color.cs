@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Globalization;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeClass("ColorRGBAf")]
-	[NativeHeader("Runtime/Math/Color.h")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[NativeHeader("Runtime/Math/Color.h")]
+	[NativeClass("ColorRGBAf")]
 	public struct Color : IEquatable<Color>
 	{
 		public Color(float r, float g, float b, float a)
@@ -34,10 +35,10 @@ namespace UnityEngine
 		{
 			return UnityString.Format("RGBA({0}, {1}, {2}, {3})", new object[]
 			{
-				this.r.ToString(format),
-				this.g.ToString(format),
-				this.b.ToString(format),
-				this.a.ToString(format)
+				this.r.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
+				this.g.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
+				this.b.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
+				this.a.ToString(format, CultureInfo.InvariantCulture.NumberFormat)
 			});
 		}
 
@@ -48,7 +49,8 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
-			return other is Color && this.Equals((Color)other);
+			bool flag = !(other is Color);
+			return !flag && this.Equals((Color)other);
 		}
 
 		public bool Equals(Color other)
@@ -272,7 +274,7 @@ namespace UnityEngine
 					num = this.a;
 					break;
 				default:
-					throw new IndexOutOfRangeException("Invalid Vector3 index!");
+					throw new IndexOutOfRangeException("Invalid Color index(" + index + ")!");
 				}
 				return num;
 			}
@@ -293,34 +295,41 @@ namespace UnityEngine
 					this.a = value;
 					break;
 				default:
-					throw new IndexOutOfRangeException("Invalid Vector3 index!");
+					throw new IndexOutOfRangeException("Invalid Color index(" + index + ")!");
 				}
 			}
 		}
 
 		public static void RGBToHSV(Color rgbColor, out float H, out float S, out float V)
 		{
-			if (rgbColor.b > rgbColor.g && rgbColor.b > rgbColor.r)
+			bool flag = rgbColor.b > rgbColor.g && rgbColor.b > rgbColor.r;
+			if (flag)
 			{
 				Color.RGBToHSVHelper(4f, rgbColor.b, rgbColor.r, rgbColor.g, out H, out S, out V);
 			}
-			else if (rgbColor.g > rgbColor.r)
-			{
-				Color.RGBToHSVHelper(2f, rgbColor.g, rgbColor.b, rgbColor.r, out H, out S, out V);
-			}
 			else
 			{
-				Color.RGBToHSVHelper(0f, rgbColor.r, rgbColor.g, rgbColor.b, out H, out S, out V);
+				bool flag2 = rgbColor.g > rgbColor.r;
+				if (flag2)
+				{
+					Color.RGBToHSVHelper(2f, rgbColor.g, rgbColor.b, rgbColor.r, out H, out S, out V);
+				}
+				else
+				{
+					Color.RGBToHSVHelper(0f, rgbColor.r, rgbColor.g, rgbColor.b, out H, out S, out V);
+				}
 			}
 		}
 
 		private static void RGBToHSVHelper(float offset, float dominantcolor, float colorone, float colortwo, out float H, out float S, out float V)
 		{
 			V = dominantcolor;
-			if (V != 0f)
+			bool flag = V != 0f;
+			if (flag)
 			{
+				bool flag2 = colorone > colortwo;
 				float num;
-				if (colorone > colortwo)
+				if (flag2)
 				{
 					num = colortwo;
 				}
@@ -329,7 +338,8 @@ namespace UnityEngine
 					num = colorone;
 				}
 				float num2 = V - num;
-				if (num2 != 0f)
+				bool flag3 = num2 != 0f;
+				if (flag3)
 				{
 					S = num2 / V;
 					H = offset + (colorone - colortwo) / num2;
@@ -340,7 +350,8 @@ namespace UnityEngine
 					H = offset + (colorone - colortwo);
 				}
 				H /= 6f;
-				if (H < 0f)
+				bool flag4 = H < 0f;
+				if (flag4)
 				{
 					H += 1f;
 				}
@@ -360,77 +371,83 @@ namespace UnityEngine
 		public static Color HSVToRGB(float H, float S, float V, bool hdr)
 		{
 			Color white = Color.white;
-			if (S == 0f)
+			bool flag = S == 0f;
+			if (flag)
 			{
 				white.r = V;
 				white.g = V;
 				white.b = V;
 			}
-			else if (V == 0f)
-			{
-				white.r = 0f;
-				white.g = 0f;
-				white.b = 0f;
-			}
 			else
 			{
-				white.r = 0f;
-				white.g = 0f;
-				white.b = 0f;
-				float num = H * 6f;
-				int num2 = (int)Mathf.Floor(num);
-				float num3 = num - (float)num2;
-				float num4 = V * (1f - S);
-				float num5 = V * (1f - S * num3);
-				float num6 = V * (1f - S * (1f - num3));
-				switch (num2 + 1)
+				bool flag2 = V == 0f;
+				if (flag2)
 				{
-				case 0:
-					white.r = V;
-					white.g = num4;
-					white.b = num5;
-					break;
-				case 1:
-					white.r = V;
-					white.g = num6;
-					white.b = num4;
-					break;
-				case 2:
-					white.r = num5;
-					white.g = V;
-					white.b = num4;
-					break;
-				case 3:
-					white.r = num4;
-					white.g = V;
-					white.b = num6;
-					break;
-				case 4:
-					white.r = num4;
-					white.g = num5;
-					white.b = V;
-					break;
-				case 5:
-					white.r = num6;
-					white.g = num4;
-					white.b = V;
-					break;
-				case 6:
-					white.r = V;
-					white.g = num4;
-					white.b = num5;
-					break;
-				case 7:
-					white.r = V;
-					white.g = num6;
-					white.b = num4;
-					break;
+					white.r = 0f;
+					white.g = 0f;
+					white.b = 0f;
 				}
-				if (!hdr)
+				else
 				{
-					white.r = Mathf.Clamp(white.r, 0f, 1f);
-					white.g = Mathf.Clamp(white.g, 0f, 1f);
-					white.b = Mathf.Clamp(white.b, 0f, 1f);
+					white.r = 0f;
+					white.g = 0f;
+					white.b = 0f;
+					float num = H * 6f;
+					int num2 = (int)Mathf.Floor(num);
+					float num3 = num - (float)num2;
+					float num4 = V * (1f - S);
+					float num5 = V * (1f - S * num3);
+					float num6 = V * (1f - S * (1f - num3));
+					switch (num2)
+					{
+					case -1:
+						white.r = V;
+						white.g = num4;
+						white.b = num5;
+						break;
+					case 0:
+						white.r = V;
+						white.g = num6;
+						white.b = num4;
+						break;
+					case 1:
+						white.r = num5;
+						white.g = V;
+						white.b = num4;
+						break;
+					case 2:
+						white.r = num4;
+						white.g = V;
+						white.b = num6;
+						break;
+					case 3:
+						white.r = num4;
+						white.g = num5;
+						white.b = V;
+						break;
+					case 4:
+						white.r = num6;
+						white.g = num4;
+						white.b = V;
+						break;
+					case 5:
+						white.r = V;
+						white.g = num4;
+						white.b = num5;
+						break;
+					case 6:
+						white.r = V;
+						white.g = num6;
+						white.b = num4;
+						break;
+					}
+					bool flag3 = !hdr;
+					if (flag3)
+					{
+						white.r = Mathf.Clamp(white.r, 0f, 1f);
+						white.g = Mathf.Clamp(white.g, 0f, 1f);
+						white.b = Mathf.Clamp(white.b, 0f, 1f);
+					}
 				}
 			}
 			return white;

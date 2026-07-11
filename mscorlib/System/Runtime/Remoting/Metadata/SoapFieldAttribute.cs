@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.Remoting.Metadata
 {
-	[AttributeUsage(AttributeTargets.Field)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Field)]
 	public sealed class SoapFieldAttribute : SoapAttribute
 	{
 		public int Order

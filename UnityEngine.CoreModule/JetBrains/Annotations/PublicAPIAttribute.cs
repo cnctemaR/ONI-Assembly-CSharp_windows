@@ -2,7 +2,8 @@
 
 namespace JetBrains.Annotations
 {
-	[MeansImplicitUse]
+	[MeansImplicitUse(ImplicitUseTargetFlags.WithMembers)]
+	[AttributeUsage(AttributeTargets.All, Inherited = false)]
 	public sealed class PublicAPIAttribute : Attribute
 	{
 		public PublicAPIAttribute()
@@ -14,7 +15,7 @@ namespace JetBrains.Annotations
 			this.Comment = comment;
 		}
 
-		[NotNull]
-		public string Comment { get; private set; }
+		[CanBeNull]
+		public string Comment { get; }
 	}
 }

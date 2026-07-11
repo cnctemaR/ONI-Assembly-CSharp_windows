@@ -11,7 +11,8 @@ namespace UnityEngine.Networking.PlayerConnection
 		public void InvokeMessageIdSubscribers(Guid messageId, byte[] data, int playerId)
 		{
 			IEnumerable<PlayerEditorConnectionEvents.MessageTypeSubscribers> enumerable = this.messageTypeSubscribers.Where<PlayerEditorConnectionEvents.MessageTypeSubscribers>((PlayerEditorConnectionEvents.MessageTypeSubscribers x) => x.MessageTypeId == messageId);
-			if (!enumerable.Any<PlayerEditorConnectionEvents.MessageTypeSubscribers>())
+			bool flag = !enumerable.Any<PlayerEditorConnectionEvents.MessageTypeSubscribers>();
+			if (flag)
 			{
 				Debug.LogError("No actions found for messageId: " + messageId);
 			}
@@ -32,7 +33,8 @@ namespace UnityEngine.Networking.PlayerConnection
 		public UnityEvent<MessageEventArgs> AddAndCreate(Guid messageId)
 		{
 			PlayerEditorConnectionEvents.MessageTypeSubscribers messageTypeSubscribers = this.messageTypeSubscribers.SingleOrDefault<PlayerEditorConnectionEvents.MessageTypeSubscribers>((PlayerEditorConnectionEvents.MessageTypeSubscribers x) => x.MessageTypeId == messageId);
-			if (messageTypeSubscribers == null)
+			bool flag = messageTypeSubscribers == null;
+			if (flag)
 			{
 				messageTypeSubscribers = new PlayerEditorConnectionEvents.MessageTypeSubscribers
 				{
@@ -48,11 +50,13 @@ namespace UnityEngine.Networking.PlayerConnection
 		public void UnregisterManagedCallback(Guid messageId, UnityAction<MessageEventArgs> callback)
 		{
 			PlayerEditorConnectionEvents.MessageTypeSubscribers messageTypeSubscribers = this.messageTypeSubscribers.SingleOrDefault<PlayerEditorConnectionEvents.MessageTypeSubscribers>((PlayerEditorConnectionEvents.MessageTypeSubscribers x) => x.MessageTypeId == messageId);
-			if (messageTypeSubscribers != null)
+			bool flag = messageTypeSubscribers == null;
+			if (!flag)
 			{
 				messageTypeSubscribers.subscriberCount--;
 				messageTypeSubscribers.messageCallback.RemoveListener(callback);
-				if (messageTypeSubscribers.subscriberCount <= 0)
+				bool flag2 = messageTypeSubscribers.subscriberCount <= 0;
+				if (flag2)
 				{
 					this.messageTypeSubscribers.Remove(messageTypeSubscribers);
 				}

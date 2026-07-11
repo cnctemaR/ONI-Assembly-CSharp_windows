@@ -15,7 +15,7 @@ internal abstract class UserVolumeLoopingUpdater : LoopingSoundParameterUpdater
 		UserVolumeLoopingUpdater.Entry entry = new UserVolumeLoopingUpdater.Entry
 		{
 			ev = sound.ev,
-			parameterIdx = sound.description.GetParameterIdx(base.parameter)
+			parameterId = sound.description.GetParameterId(base.parameter)
 		};
 		this.entries.Add(entry);
 	}
@@ -30,7 +30,7 @@ internal abstract class UserVolumeLoopingUpdater : LoopingSoundParameterUpdater
 		foreach (UserVolumeLoopingUpdater.Entry entry in this.entries)
 		{
 			EventInstance ev = entry.ev;
-			ev.setParameterValueByIndex(entry.parameterIdx, @float);
+			ev.setParameterByID(entry.parameterId, @float, false);
 		}
 	}
 
@@ -54,6 +54,6 @@ internal abstract class UserVolumeLoopingUpdater : LoopingSoundParameterUpdater
 	{
 		public EventInstance ev;
 
-		public int parameterIdx;
+		public PARAMETER_ID parameterId;
 	}
 }

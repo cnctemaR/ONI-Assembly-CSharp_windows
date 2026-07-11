@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Dynamics/BoxCollider.h")]
+	[NativeHeader("Modules/Physics/BoxCollider.h")]
 	public class BoxCollider : Collider
 	{
 		public Vector3 center

@@ -7,8 +7,8 @@ using System.Text;
 namespace System.Reflection.Emit
 {
 	[ClassInterface(ClassInterfaceType.None)]
-	[ComDefaultInterface(typeof(_CustomAttributeBuilder))]
 	[ComVisible(true)]
+	[ComDefaultInterface(typeof(_CustomAttributeBuilder))]
 	[StructLayout(LayoutKind.Sequential)]
 	public class CustomAttributeBuilder : _CustomAttributeBuilder
 	{

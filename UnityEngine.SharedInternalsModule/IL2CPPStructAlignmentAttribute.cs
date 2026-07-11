@@ -3,8 +3,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[VisibleToOtherModules]
 	[AttributeUsage(AttributeTargets.Struct)]
+	[VisibleToOtherModules]
 	internal class IL2CPPStructAlignmentAttribute : Attribute
 	{
 		public IL2CPPStructAlignmentAttribute()

@@ -7,11 +7,29 @@ namespace UnityEngine.Experimental.TerrainAPI
 	{
 		public static Material GetBuiltinPaintMaterial()
 		{
-			if (TerrainPaintUtility.s_BuiltinPaintMaterial == null)
+			bool flag = TerrainPaintUtility.s_BuiltinPaintMaterial == null;
+			if (flag)
 			{
 				TerrainPaintUtility.s_BuiltinPaintMaterial = new Material(Shader.Find("Hidden/TerrainEngine/PaintHeight"));
 			}
 			return TerrainPaintUtility.s_BuiltinPaintMaterial;
+		}
+
+		public static void GetBrushWorldSizeLimits(out float minBrushWorldSize, out float maxBrushWorldSize, float terrainTileWorldSize, int terrainTileTextureResolutionPixels, int minBrushResolutionPixels = 1, int maxBrushResolutionPixels = 8192)
+		{
+			bool flag = terrainTileTextureResolutionPixels <= 0;
+			if (flag)
+			{
+				minBrushWorldSize = terrainTileWorldSize;
+				maxBrushWorldSize = terrainTileWorldSize;
+			}
+			else
+			{
+				float num = terrainTileWorldSize / (float)terrainTileTextureResolutionPixels;
+				minBrushWorldSize = (float)minBrushResolutionPixels * num;
+				float num2 = (float)Mathf.Min(maxBrushResolutionPixels, SystemInfo.maxTextureSize);
+				maxBrushWorldSize = num2 * num;
+			}
 		}
 
 		public static BrushTransform CalculateBrushTransform(Terrain terrain, Vector2 brushCenterTerrainUV, float brushSize, float brushRotationDegrees)
@@ -62,9 +80,9 @@ namespace UnityEngine.Experimental.TerrainAPI
 			}
 		}
 
-		private static PaintContext InitializePaintContext(Terrain terrain, Texture target, RenderTextureFormat pcFormat, Rect boundsInTerrainSpace, int extraBorderPixels = 0)
+		internal static PaintContext InitializePaintContext(Terrain terrain, int targetWidth, int targetHeight, RenderTextureFormat pcFormat, Rect boundsInTerrainSpace, int extraBorderPixels = 0, bool texelPadding = true)
 		{
-			PaintContext paintContext = PaintContext.CreateFromBounds(terrain, boundsInTerrainSpace, target.width, target.height, extraBorderPixels);
+			PaintContext paintContext = PaintContext.CreateFromBounds(terrain, boundsInTerrainSpace, targetWidth, targetHeight, extraBorderPixels, texelPadding);
 			paintContext.CreateRenderTargets(pcFormat);
 			return paintContext;
 		}
@@ -76,8 +94,8 @@ namespace UnityEngine.Experimental.TerrainAPI
 
 		public static PaintContext BeginPaintHeightmap(Terrain terrain, Rect boundsInTerrainSpace, int extraBorderPixels = 0)
 		{
-			RenderTexture heightmapTexture = terrain.terrainData.heightmapTexture;
-			PaintContext paintContext = TerrainPaintUtility.InitializePaintContext(terrain, heightmapTexture, heightmapTexture.format, boundsInTerrainSpace, extraBorderPixels);
+			int heightmapResolution = terrain.terrainData.heightmapResolution;
+			PaintContext paintContext = TerrainPaintUtility.InitializePaintContext(terrain, heightmapResolution, heightmapResolution, Terrain.heightmapRenderTextureFormat, boundsInTerrainSpace, extraBorderPixels, true);
 			paintContext.GatherHeightmap();
 			return paintContext;
 		}
@@ -88,30 +106,40 @@ namespace UnityEngine.Experimental.TerrainAPI
 			ctx.Cleanup(true);
 		}
 
+		public static PaintContext BeginPaintHoles(Terrain terrain, Rect boundsInTerrainSpace, int extraBorderPixels = 0)
+		{
+			int holesResolution = terrain.terrainData.holesResolution;
+			PaintContext paintContext = TerrainPaintUtility.InitializePaintContext(terrain, holesResolution, holesResolution, Terrain.holesRenderTextureFormat, boundsInTerrainSpace, extraBorderPixels, false);
+			paintContext.GatherHoles();
+			return paintContext;
+		}
+
+		public static void EndPaintHoles(PaintContext ctx, string editorUndoName)
+		{
+			ctx.ScatterHoles(editorUndoName);
+			ctx.Cleanup(true);
+		}
+
 		public static PaintContext CollectNormals(Terrain terrain, Rect boundsInTerrainSpace, int extraBorderPixels = 0)
 		{
-			RenderTexture normalmapTexture = terrain.normalmapTexture;
-			PaintContext paintContext = TerrainPaintUtility.InitializePaintContext(terrain, normalmapTexture, normalmapTexture.format, boundsInTerrainSpace, extraBorderPixels);
+			int heightmapResolution = terrain.terrainData.heightmapResolution;
+			PaintContext paintContext = TerrainPaintUtility.InitializePaintContext(terrain, heightmapResolution, heightmapResolution, Terrain.normalmapRenderTextureFormat, boundsInTerrainSpace, extraBorderPixels, true);
 			paintContext.GatherNormals();
 			return paintContext;
 		}
 
 		public static PaintContext BeginPaintTexture(Terrain terrain, Rect boundsInTerrainSpace, TerrainLayer inputLayer, int extraBorderPixels = 0)
 		{
+			bool flag = inputLayer == null;
 			PaintContext paintContext;
-			if (inputLayer == null)
+			if (flag)
 			{
 				paintContext = null;
 			}
 			else
 			{
-				int num = TerrainPaintUtility.FindTerrainLayerIndex(terrain, inputLayer);
-				if (num == -1)
-				{
-					num = TerrainPaintUtility.AddTerrainLayer(terrain, inputLayer);
-				}
-				Texture2D terrainAlphaMapChecked = TerrainPaintUtility.GetTerrainAlphaMapChecked(terrain, num >> 2);
-				PaintContext paintContext2 = TerrainPaintUtility.InitializePaintContext(terrain, terrainAlphaMapChecked, RenderTextureFormat.R8, boundsInTerrainSpace, extraBorderPixels);
+				int alphamapResolution = terrain.terrainData.alphamapResolution;
+				PaintContext paintContext2 = TerrainPaintUtility.InitializePaintContext(terrain, alphamapResolution, alphamapResolution, RenderTextureFormat.R8, boundsInTerrainSpace, extraBorderPixels, true);
 				paintContext2.GatherAlphamap(inputLayer, true);
 				paintContext = paintContext2;
 			}
@@ -126,45 +154,68 @@ namespace UnityEngine.Experimental.TerrainAPI
 
 		public static Material GetBlitMaterial()
 		{
-			if (!TerrainPaintUtility.m_BlitMaterial)
+			bool flag = !TerrainPaintUtility.s_BlitMaterial;
+			if (flag)
 			{
-				TerrainPaintUtility.m_BlitMaterial = new Material(Shader.Find("Hidden/BlitCopy"));
+				TerrainPaintUtility.s_BlitMaterial = new Material(Shader.Find("Hidden/BlitCopy"));
 			}
-			return TerrainPaintUtility.m_BlitMaterial;
+			return TerrainPaintUtility.s_BlitMaterial;
+		}
+
+		public static Material GetHeightBlitMaterial()
+		{
+			bool flag = !TerrainPaintUtility.s_HeightBlitMaterial;
+			if (flag)
+			{
+				TerrainPaintUtility.s_HeightBlitMaterial = new Material(Shader.Find("Hidden/TerrainEngine/HeightBlitCopy"));
+			}
+			return TerrainPaintUtility.s_HeightBlitMaterial;
 		}
 
 		public static Material GetCopyTerrainLayerMaterial()
 		{
-			if (!TerrainPaintUtility.m_CopyTerrainLayerMaterial)
+			bool flag = !TerrainPaintUtility.s_CopyTerrainLayerMaterial;
+			if (flag)
 			{
-				TerrainPaintUtility.m_CopyTerrainLayerMaterial = new Material(Shader.Find("Hidden/TerrainEngine/TerrainLayerUtils"));
+				TerrainPaintUtility.s_CopyTerrainLayerMaterial = new Material(Shader.Find("Hidden/TerrainEngine/TerrainLayerUtils"));
 			}
-			return TerrainPaintUtility.m_CopyTerrainLayerMaterial;
+			return TerrainPaintUtility.s_CopyTerrainLayerMaterial;
 		}
 
 		internal static void DrawQuad(RectInt destinationPixels, RectInt sourcePixels, Texture sourceTexture)
 		{
-			if (destinationPixels.width > 0 && destinationPixels.height > 0)
+			TerrainPaintUtility.DrawQuad2(destinationPixels, sourcePixels, sourceTexture, sourcePixels, sourceTexture);
+		}
+
+		internal static void DrawQuad2(RectInt destinationPixels, RectInt sourcePixels, Texture sourceTexture, RectInt sourcePixels2, Texture sourceTexture2)
+		{
+			bool flag = destinationPixels.width > 0 && destinationPixels.height > 0;
+			if (flag)
 			{
 				Rect rect = new Rect((float)sourcePixels.x / (float)sourceTexture.width, (float)sourcePixels.y / (float)sourceTexture.height, (float)sourcePixels.width / (float)sourceTexture.width, (float)sourcePixels.height / (float)sourceTexture.height);
+				Rect rect2 = new Rect((float)sourcePixels2.x / (float)sourceTexture2.width, (float)sourcePixels2.y / (float)sourceTexture2.height, (float)sourcePixels2.width / (float)sourceTexture2.width, (float)sourcePixels2.height / (float)sourceTexture2.height);
 				GL.Begin(7);
 				GL.Color(new Color(1f, 1f, 1f, 1f));
-				GL.TexCoord2(rect.x, rect.y);
+				GL.MultiTexCoord2(0, rect.x, rect.y);
+				GL.MultiTexCoord2(1, rect2.x, rect2.y);
 				GL.Vertex3((float)destinationPixels.x, (float)destinationPixels.y, 0f);
-				GL.TexCoord2(rect.x, rect.yMax);
+				GL.MultiTexCoord2(0, rect.x, rect.yMax);
+				GL.MultiTexCoord2(1, rect2.x, rect2.yMax);
 				GL.Vertex3((float)destinationPixels.x, (float)destinationPixels.yMax, 0f);
-				GL.TexCoord2(rect.xMax, rect.yMax);
+				GL.MultiTexCoord2(0, rect.xMax, rect.yMax);
+				GL.MultiTexCoord2(1, rect2.xMax, rect2.yMax);
 				GL.Vertex3((float)destinationPixels.xMax, (float)destinationPixels.yMax, 0f);
-				GL.TexCoord2(rect.xMax, rect.y);
+				GL.MultiTexCoord2(0, rect.xMax, rect.y);
+				GL.MultiTexCoord2(1, rect2.xMax, rect2.y);
 				GL.Vertex3((float)destinationPixels.xMax, (float)destinationPixels.y, 0f);
 				GL.End();
 			}
 		}
 
-		internal static RectInt CalcPixelRectFromBounds(Terrain terrain, Rect boundsInTerrainSpace, int textureWidth, int textureHeight, int extraBorderPixels)
+		internal static RectInt CalcPixelRectFromBounds(Terrain terrain, Rect boundsInTerrainSpace, int textureWidth, int textureHeight, int extraBorderPixels, bool texelPadding)
 		{
-			float num = ((float)textureWidth - 1f) / terrain.terrainData.size.x;
-			float num2 = ((float)textureHeight - 1f) / terrain.terrainData.size.z;
+			float num = ((float)textureWidth - (texelPadding ? 1f : 0f)) / terrain.terrainData.size.x;
+			float num2 = ((float)textureHeight - (texelPadding ? 1f : 0f)) / terrain.terrainData.size.z;
 			int num3 = Mathf.FloorToInt(boundsInTerrainSpace.xMin * num) - extraBorderPixels;
 			int num4 = Mathf.FloorToInt(boundsInTerrainSpace.yMin * num2) - extraBorderPixels;
 			int num5 = Mathf.CeilToInt(boundsInTerrainSpace.xMax * num) + extraBorderPixels;
@@ -174,18 +225,21 @@ namespace UnityEngine.Experimental.TerrainAPI
 
 		public static Texture2D GetTerrainAlphaMapChecked(Terrain terrain, int mapIndex)
 		{
-			if (mapIndex >= terrain.terrainData.alphamapTextureCount)
+			bool flag = mapIndex >= terrain.terrainData.alphamapTextureCount;
+			if (flag)
 			{
 				throw new ArgumentException("Trying to access out-of-bounds terrain alphamap information.");
 			}
-			return terrain.terrainData.alphamapTextures[mapIndex];
+			return terrain.terrainData.GetAlphamapTexture(mapIndex);
 		}
 
 		public static int FindTerrainLayerIndex(Terrain terrain, TerrainLayer inputLayer)
 		{
-			for (int i = 0; i < terrain.terrainData.terrainLayers.Length; i++)
+			TerrainLayer[] terrainLayers = terrain.terrainData.terrainLayers;
+			for (int i = 0; i < terrainLayers.Length; i++)
 			{
-				if (terrain.terrainData.terrainLayers[i] == inputLayer)
+				bool flag = terrainLayers[i] == inputLayer;
+				if (flag)
 				{
 					return i;
 				}
@@ -195,9 +249,10 @@ namespace UnityEngine.Experimental.TerrainAPI
 
 		internal static int AddTerrainLayer(Terrain terrain, TerrainLayer inputLayer)
 		{
-			int num = terrain.terrainData.terrainLayers.Length;
+			TerrainLayer[] terrainLayers = terrain.terrainData.terrainLayers;
+			int num = terrainLayers.Length;
 			TerrainLayer[] array = new TerrainLayer[num + 1];
-			Array.Copy(terrain.terrainData.terrainLayers, 0, array, 0, num);
+			Array.Copy(terrainLayers, 0, array, 0, num);
 			array[num] = inputLayer;
 			terrain.terrainData.terrainLayers = array;
 			return num;
@@ -205,9 +260,11 @@ namespace UnityEngine.Experimental.TerrainAPI
 
 		private static Material s_BuiltinPaintMaterial = null;
 
-		private static Material m_BlitMaterial = null;
+		private static Material s_BlitMaterial = null;
 
-		private static Material m_CopyTerrainLayerMaterial = null;
+		private static Material s_HeightBlitMaterial = null;
+
+		private static Material s_CopyTerrainLayerMaterial = null;
 
 		public enum BuiltinPaintMaterialPasses
 		{
@@ -215,7 +272,8 @@ namespace UnityEngine.Experimental.TerrainAPI
 			StampHeight,
 			SetHeights,
 			SmoothHeights,
-			PaintTexture
+			PaintTexture,
+			PaintHoles
 		}
 	}
 }

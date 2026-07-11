@@ -5,20 +5,23 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/NoAllocHelpers.bindings.h")]
+	[NativeHeader("Runtime/Export/Scripting/NoAllocHelpers.bindings.h")]
 	internal sealed class NoAllocHelpers
 	{
 		public static void ResizeList<T>(List<T> list, int size)
 		{
-			if (list == null)
+			bool flag = list == null;
+			if (flag)
 			{
 				throw new ArgumentNullException("list");
 			}
-			if (size < 0 || size > list.Capacity)
+			bool flag2 = size < 0 || size > list.Capacity;
+			if (flag2)
 			{
 				throw new ArgumentException("invalid size to resize.", "list");
 			}
-			if (size != list.Count)
+			bool flag3 = size != list.Count;
+			if (flag3)
 			{
 				NoAllocHelpers.Internal_ResizeList(list, size);
 			}
@@ -27,7 +30,8 @@ namespace UnityEngine
 		public static void EnsureListElemCount<T>(List<T> list, int count)
 		{
 			list.Clear();
-			if (list.Capacity < count)
+			bool flag = list.Capacity < count;
+			if (flag)
 			{
 				list.Capacity = count;
 			}
@@ -36,12 +40,12 @@ namespace UnityEngine
 
 		public static int SafeLength(Array values)
 		{
-			return (values == null) ? 0 : values.Length;
+			return (values != null) ? values.Length : 0;
 		}
 
 		public static int SafeLength<T>(List<T> values)
 		{
-			return (values == null) ? 0 : values.Count;
+			return (values != null) ? values.Count : 0;
 		}
 
 		public static T[] ExtractArrayFromListT<T>(List<T> list)

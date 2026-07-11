@@ -14,9 +14,9 @@ using System.Security.Principal;
 
 namespace System.Threading
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_Thread))]
+	[ClassInterface(ClassInterfaceType.None)]
+	[ComVisible(true)]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class Thread : CriticalFinalizerObject, _Thread
 	{
@@ -166,16 +166,16 @@ namespace System.Threading
 			return this.m_ExecutionContext;
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SecurityCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		internal void SetExecutionContext(ExecutionContext value, bool belongsToCurrentScope)
 		{
 			this.m_ExecutionContext = value;
 			this.ExecutionContextBelongsToCurrentScope = belongsToCurrentScope;
 		}
 
-		[SecurityCritical]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[SecurityCritical]
 		internal void SetExecutionContext(ExecutionContext.Reader value, bool belongsToCurrentScope)
 		{
 			this.m_ExecutionContext = value.DangerousGetRawExecutionContext();
@@ -329,15 +329,15 @@ namespace System.Threading
 			Thread.Sleep((int)num);
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SecurityCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SuppressUnmanagedCodeSecurity]
 		[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool YieldInternal();
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SecuritySafeCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 		public static bool Yield()
 		{

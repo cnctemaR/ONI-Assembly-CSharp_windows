@@ -9,8 +9,8 @@ namespace Microsoft.Win32
 	[SecurityCritical]
 	internal static class UnsafeNativeMethods
 	{
-		[SuppressUnmanagedCodeSecurity]
 		[SecurityCritical]
+		[SuppressUnmanagedCodeSecurity]
 		internal static class ManifestEtw
 		{
 			[SecurityCritical]

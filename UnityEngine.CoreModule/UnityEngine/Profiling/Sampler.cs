@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Profiling
 {
-	[NativeHeader("Runtime/Profiler/Marker.h")]
 	[NativeHeader("Runtime/Profiler/ScriptBindings/Sampler.bindings.h")]
+	[NativeHeader("Runtime/Profiler/Marker.h")]
 	[UsedByNativeCode]
 	public class Sampler
 	{
@@ -31,8 +31,9 @@ namespace UnityEngine.Profiling
 		public Recorder GetRecorder()
 		{
 			IntPtr recorderInternal = Sampler.GetRecorderInternal(this.m_Ptr);
+			bool flag = recorderInternal == IntPtr.Zero;
 			Recorder recorder;
-			if (recorderInternal == IntPtr.Zero)
+			if (flag)
 			{
 				recorder = Recorder.s_InvalidRecorder;
 			}
@@ -46,8 +47,9 @@ namespace UnityEngine.Profiling
 		public static Sampler Get(string name)
 		{
 			IntPtr samplerInternal = Sampler.GetSamplerInternal(name);
+			bool flag = samplerInternal == IntPtr.Zero;
 			Sampler sampler;
-			if (samplerInternal == IntPtr.Zero)
+			if (flag)
 			{
 				sampler = Sampler.s_InvalidSampler;
 			}
@@ -72,7 +74,7 @@ namespace UnityEngine.Profiling
 		{
 			get
 			{
-				return (!this.isValid) ? null : this.GetSamplerName();
+				return this.isValid ? this.GetSamplerName() : null;
 			}
 		}
 

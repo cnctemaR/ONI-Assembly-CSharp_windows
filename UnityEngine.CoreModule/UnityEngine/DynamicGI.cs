@@ -61,6 +61,14 @@ namespace UnityEngine
 			get;
 		}
 
+		internal static extern bool asyncMaterialUpdates
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void UpdateEnvironment();
 

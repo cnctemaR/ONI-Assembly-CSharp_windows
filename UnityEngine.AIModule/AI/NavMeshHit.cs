@@ -62,7 +62,7 @@ namespace UnityEngine.AI
 			}
 			set
 			{
-				this.m_Hit = ((!value) ? 0 : 1);
+				this.m_Hit = (value ? 1 : 0);
 			}
 		}
 

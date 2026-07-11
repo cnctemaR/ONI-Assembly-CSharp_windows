@@ -4,8 +4,8 @@ using System.Runtime.Serialization;
 
 namespace System
 {
-	[ComVisible(true)]
 	[CLSCompliant(false)]
+	[ComVisible(true)]
 	[Serializable]
 	public struct UIntPtr : ISerializable
 	{

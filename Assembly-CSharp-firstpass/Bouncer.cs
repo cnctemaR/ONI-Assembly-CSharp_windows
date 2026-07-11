@@ -21,18 +21,47 @@ public class Bouncer : MonoBehaviour
 	{
 		this.m_bouncing = true;
 		float completion = 0f;
-		Vector3 position = new Vector3(base.gameObject.transform.position.x, base.gameObject.transform.position.y, base.gameObject.transform.position.z);
-		float startPos = base.gameObject.transform.position.y;
-		while (completion < 1f)
+		int bouncesCompleted = 0;
+		Vector3 startPos = base.gameObject.transform.position;
+		yield return new WaitForEndOfFrame();
+		while (bouncesCompleted < this.numBounces)
 		{
-			completion = Mathf.Min(completion + Time.unscaledDeltaTime / this.durationSecs, 1f);
-			float num = Bouncer.BounceSpline(completion) * this.height;
-			position.y = startPos + num;
-			base.gameObject.transform.position = position;
-			yield return new WaitForEndOfFrame();
+			float num = 1f / Mathf.Pow(2f, (float)bouncesCompleted);
+			Vector3 iterationTarget = this.bounceTarget * num;
+			float num2 = 1f / (float)(bouncesCompleted + 1);
+			float iterationDuration = this.durationSecs * num2;
+			completion = 0f;
+			while (completion < 1f)
+			{
+				Vector3 position = base.gameObject.transform.position;
+				float num3 = Mathf.Min(Time.unscaledDeltaTime, 0.3f);
+				completion = Mathf.Min(completion + num3 / iterationDuration, 1f);
+				Vector3 vector = Bouncer.BounceSpline(completion) * iterationTarget;
+				if (this.bounceTarget.x != 0f)
+				{
+					position.x = startPos.x + vector.x;
+				}
+				if (this.bounceTarget.y != 0f)
+				{
+					position.y = startPos.y + vector.y;
+				}
+				base.gameObject.transform.SetPosition(position);
+				yield return new WaitForEndOfFrame();
+			}
+			int num4 = bouncesCompleted;
+			bouncesCompleted = num4 + 1;
+			iterationTarget = default(Vector3);
 		}
-		position.y = startPos;
-		base.gameObject.transform.position = position;
+		Vector3 position2 = base.gameObject.transform.position;
+		if (this.bounceTarget.x != 0f)
+		{
+			position2.x = startPos.x;
+		}
+		if (this.bounceTarget.y != 0f)
+		{
+			position2.y = startPos.y;
+		}
+		base.gameObject.transform.SetPosition(position2);
 		this.m_bouncing = false;
 		yield break;
 	}
@@ -60,5 +89,7 @@ public class Bouncer : MonoBehaviour
 
 	public float durationSecs = 0.3f;
 
-	public float height = 20f;
+	public Vector3 bounceTarget;
+
+	public int numBounces = 1;
 }

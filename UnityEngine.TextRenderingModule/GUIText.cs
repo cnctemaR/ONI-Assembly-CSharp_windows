@@ -1,134 +1,185 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using UnityEngine.Bindings;
+using System.ComponentModel;
 
 namespace UnityEngine
 {
-	[Obsolete("This component is part of the legacy UI system and will be removed in a future release.", false)]
-	[NativeClass("TextRenderingPrivate::GUIText")]
-	[NativeHeader("Runtime/Shaders/Material.h")]
-	[NativeHeader("Modules/TextRendering/Public/GUIText.h")]
-	public sealed class GUIText : GUIElement
+	[Obsolete("GUIText has been removed. Use UI.Text instead.", true)]
+	[ExcludeFromPreset]
+	[ExcludeFromObjectFactory]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public sealed class GUIText
 	{
-		public extern string text
+		private static void FeatureRemoved()
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			throw new Exception("GUIText has been removed from Unity. Use UI.Text instead.");
 		}
 
-		public extern Material material
+		[Obsolete("GUIText has been removed. Use UI.Text instead.", true)]
+		public bool text
 		{
-			[FreeFunction("TextRenderingPrivate::GetGUITextMaterialWithFallback", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				GUIText.FeatureRemoved();
+				return false;
+			}
+			set
+			{
+				GUIText.FeatureRemoved();
+			}
 		}
 
-		public extern Font font
+		[Obsolete("GUIText has been removed. Use UI.Text instead.", true)]
+		public Material material
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				GUIText.FeatureRemoved();
+				return null;
+			}
+			set
+			{
+				GUIText.FeatureRemoved();
+			}
 		}
 
-		public extern TextAlignment alignment
+		[Obsolete("GUIText has been removed. Use UI.Text instead.", true)]
+		public Font font
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				GUIText.FeatureRemoved();
+				return null;
+			}
+			set
+			{
+				GUIText.FeatureRemoved();
+			}
 		}
 
-		public extern TextAnchor anchor
+		[Obsolete("GUIText has been removed. Use UI.Text instead.", true)]
+		public TextAlignment alignment
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				GUIText.FeatureRemoved();
+				return TextAlignment.Left;
+			}
+			set
+			{
+				GUIText.FeatureRemoved();
+			}
 		}
 
-		public extern float lineSpacing
+		[Obsolete("GUIText has been removed. Use UI.Text instead.", true)]
+		public TextAnchor anchor
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				GUIText.FeatureRemoved();
+				return TextAnchor.UpperLeft;
+			}
+			set
+			{
+				GUIText.FeatureRemoved();
+			}
 		}
 
-		public extern float tabSize
+		[Obsolete("GUIText has been removed. Use UI.Text instead.", true)]
+		public float lineSpacing
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				GUIText.FeatureRemoved();
+				return 0f;
+			}
+			set
+			{
+				GUIText.FeatureRemoved();
+			}
 		}
 
-		public extern int fontSize
+		[Obsolete("GUIText has been removed. Use UI.Text instead.", true)]
+		public float tabSize
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				GUIText.FeatureRemoved();
+				return 0f;
+			}
+			set
+			{
+				GUIText.FeatureRemoved();
+			}
 		}
 
-		public extern FontStyle fontStyle
+		[Obsolete("GUIText has been removed. Use UI.Text instead.", true)]
+		public int fontSize
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				GUIText.FeatureRemoved();
+				return 0;
+			}
+			set
+			{
+				GUIText.FeatureRemoved();
+			}
 		}
 
-		public extern bool richText
+		[Obsolete("GUIText has been removed. Use UI.Text instead.", true)]
+		public FontStyle fontStyle
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				GUIText.FeatureRemoved();
+				return FontStyle.Normal;
+			}
+			set
+			{
+				GUIText.FeatureRemoved();
+			}
 		}
 
+		[Obsolete("GUIText has been removed. Use UI.Text instead.", true)]
+		public bool richText
+		{
+			get
+			{
+				GUIText.FeatureRemoved();
+				return false;
+			}
+			set
+			{
+				GUIText.FeatureRemoved();
+			}
+		}
+
+		[Obsolete("GUIText has been removed. Use UI.Text instead.", true)]
 		public Color color
 		{
 			get
 			{
-				Color color;
-				this.get_color_Injected(out color);
-				return color;
+				GUIText.FeatureRemoved();
+				return new Color(0f, 0f, 0f);
 			}
 			set
 			{
-				this.set_color_Injected(ref value);
+				GUIText.FeatureRemoved();
 			}
 		}
 
+		[Obsolete("GUIText has been removed. Use UI.Text instead.", true)]
 		public Vector2 pixelOffset
 		{
 			get
 			{
-				Vector2 vector;
-				this.get_pixelOffset_Injected(out vector);
-				return vector;
+				GUIText.FeatureRemoved();
+				return new Vector2(0f, 0f);
 			}
 			set
 			{
-				this.set_pixelOffset_Injected(ref value);
+				GUIText.FeatureRemoved();
 			}
 		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_color_Injected(out Color ret);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_color_Injected(ref Color value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_pixelOffset_Injected(out Vector2 ret);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_pixelOffset_Injected(ref Vector2 value);
 	}
 }

@@ -29,8 +29,8 @@ namespace System
 			return *(int*)(&f) == -8388608;
 		}
 
-		[SecuritySafeCritical]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[SecuritySafeCritical]
 		public unsafe static bool IsNaN(float f)
 		{
 			return (*(int*)(&f) & int.MaxValue) > 2139095040;

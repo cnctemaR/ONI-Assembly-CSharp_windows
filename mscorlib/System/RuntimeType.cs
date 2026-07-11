@@ -1963,8 +1963,8 @@ namespace System
 		}
 
 		[DebuggerHidden]
-		[SecuritySafeCritical]
 		[DebuggerStepThrough]
+		[SecuritySafeCritical]
 		internal object CreateInstanceDefaultCtor(bool publicOnly, bool skipCheckThis, bool fillCache, ref StackCrawlMark stackMark)
 		{
 			if (base.GetType() == typeof(ReflectionOnlyType))

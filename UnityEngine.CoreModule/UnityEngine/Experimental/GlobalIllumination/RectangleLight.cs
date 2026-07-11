@@ -23,5 +23,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 		public float width;
 
 		public float height;
+
+		public FalloffType falloff;
 	}
 }

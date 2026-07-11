@@ -18,7 +18,7 @@ namespace UnityEngine.UI
 				TextGenerator textGenerator;
 				if ((textGenerator = this.m_TextCache) == null)
 				{
-					textGenerator = (this.m_TextCache = ((this.m_Text.Length == 0) ? new TextGenerator() : new TextGenerator(this.m_Text.Length)));
+					textGenerator = (this.m_TextCache = ((this.m_Text.Length != 0) ? new TextGenerator(this.m_Text.Length) : new TextGenerator()));
 				}
 				return textGenerator;
 			}
@@ -41,43 +41,39 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				Texture texture;
 				if (this.font != null && this.font.material != null && this.font.material.mainTexture != null)
 				{
-					texture = this.font.material.mainTexture;
+					return this.font.material.mainTexture;
 				}
-				else if (this.m_Material != null)
+				if (this.m_Material != null)
 				{
-					texture = this.m_Material.mainTexture;
+					return this.m_Material.mainTexture;
 				}
-				else
-				{
-					texture = base.mainTexture;
-				}
-				return texture;
+				return base.mainTexture;
 			}
 		}
 
 		public void FontTextureChanged()
 		{
-			if (this)
+			if (!this)
 			{
-				if (!this.m_DisableFontTextureRebuiltCallback)
-				{
-					this.cachedTextGenerator.Invalidate();
-					if (this.IsActive())
-					{
-						if (CanvasUpdateRegistry.IsRebuildingGraphics() || CanvasUpdateRegistry.IsRebuildingLayout())
-						{
-							this.UpdateGeometry();
-						}
-						else
-						{
-							this.SetAllDirty();
-						}
-					}
-				}
+				return;
 			}
+			if (this.m_DisableFontTextureRebuiltCallback)
+			{
+				return;
+			}
+			this.cachedTextGenerator.Invalidate();
+			if (!this.IsActive())
+			{
+				return;
+			}
+			if (CanvasUpdateRegistry.IsRebuildingGraphics() || CanvasUpdateRegistry.IsRebuildingLayout())
+			{
+				this.UpdateGeometry();
+				return;
+			}
+			this.SetAllDirty();
 		}
 
 		public Font font
@@ -88,13 +84,14 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (!(this.m_FontData.font == value))
+				if (this.m_FontData.font == value)
 				{
-					FontUpdateTracker.UntrackText(this);
-					this.m_FontData.font = value;
-					FontUpdateTracker.TrackText(this);
-					this.SetAllDirty();
+					return;
 				}
+				FontUpdateTracker.UntrackText(this);
+				this.m_FontData.font = value;
+				FontUpdateTracker.TrackText(this);
+				this.SetAllDirty();
 			}
 		}
 
@@ -106,20 +103,22 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (string.IsNullOrEmpty(value))
+				if (!string.IsNullOrEmpty(value))
 				{
-					if (!string.IsNullOrEmpty(this.m_Text))
+					if (this.m_Text != value)
 					{
-						this.m_Text = "";
+						this.m_Text = value;
 						this.SetVerticesDirty();
+						this.SetLayoutDirty();
 					}
+					return;
 				}
-				else if (this.m_Text != value)
+				if (string.IsNullOrEmpty(this.m_Text))
 				{
-					this.m_Text = value;
-					this.SetVerticesDirty();
-					this.SetLayoutDirty();
+					return;
 				}
+				this.m_Text = "";
+				this.SetVerticesDirty();
 			}
 		}
 
@@ -131,12 +130,13 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (this.m_FontData.richText != value)
+				if (this.m_FontData.richText == value)
 				{
-					this.m_FontData.richText = value;
-					this.SetVerticesDirty();
-					this.SetLayoutDirty();
+					return;
 				}
+				this.m_FontData.richText = value;
+				this.SetVerticesDirty();
+				this.SetLayoutDirty();
 			}
 		}
 
@@ -148,12 +148,13 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (this.m_FontData.bestFit != value)
+				if (this.m_FontData.bestFit == value)
 				{
-					this.m_FontData.bestFit = value;
-					this.SetVerticesDirty();
-					this.SetLayoutDirty();
+					return;
 				}
+				this.m_FontData.bestFit = value;
+				this.SetVerticesDirty();
+				this.SetLayoutDirty();
 			}
 		}
 
@@ -165,12 +166,13 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (this.m_FontData.minSize != value)
+				if (this.m_FontData.minSize == value)
 				{
-					this.m_FontData.minSize = value;
-					this.SetVerticesDirty();
-					this.SetLayoutDirty();
+					return;
 				}
+				this.m_FontData.minSize = value;
+				this.SetVerticesDirty();
+				this.SetLayoutDirty();
 			}
 		}
 
@@ -182,12 +184,13 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (this.m_FontData.maxSize != value)
+				if (this.m_FontData.maxSize == value)
 				{
-					this.m_FontData.maxSize = value;
-					this.SetVerticesDirty();
-					this.SetLayoutDirty();
+					return;
 				}
+				this.m_FontData.maxSize = value;
+				this.SetVerticesDirty();
+				this.SetLayoutDirty();
 			}
 		}
 
@@ -199,12 +202,13 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (this.m_FontData.alignment != value)
+				if (this.m_FontData.alignment == value)
 				{
-					this.m_FontData.alignment = value;
-					this.SetVerticesDirty();
-					this.SetLayoutDirty();
+					return;
 				}
+				this.m_FontData.alignment = value;
+				this.SetVerticesDirty();
+				this.SetLayoutDirty();
 			}
 		}
 
@@ -216,11 +220,12 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (this.m_FontData.alignByGeometry != value)
+				if (this.m_FontData.alignByGeometry == value)
 				{
-					this.m_FontData.alignByGeometry = value;
-					this.SetVerticesDirty();
+					return;
 				}
+				this.m_FontData.alignByGeometry = value;
+				this.SetVerticesDirty();
 			}
 		}
 
@@ -232,12 +237,13 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (this.m_FontData.fontSize != value)
+				if (this.m_FontData.fontSize == value)
 				{
-					this.m_FontData.fontSize = value;
-					this.SetVerticesDirty();
-					this.SetLayoutDirty();
+					return;
 				}
+				this.m_FontData.fontSize = value;
+				this.SetVerticesDirty();
+				this.SetLayoutDirty();
 			}
 		}
 
@@ -249,12 +255,13 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (this.m_FontData.horizontalOverflow != value)
+				if (this.m_FontData.horizontalOverflow == value)
 				{
-					this.m_FontData.horizontalOverflow = value;
-					this.SetVerticesDirty();
-					this.SetLayoutDirty();
+					return;
 				}
+				this.m_FontData.horizontalOverflow = value;
+				this.SetVerticesDirty();
+				this.SetLayoutDirty();
 			}
 		}
 
@@ -266,12 +273,13 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (this.m_FontData.verticalOverflow != value)
+				if (this.m_FontData.verticalOverflow == value)
 				{
-					this.m_FontData.verticalOverflow = value;
-					this.SetVerticesDirty();
-					this.SetLayoutDirty();
+					return;
 				}
+				this.m_FontData.verticalOverflow = value;
+				this.SetVerticesDirty();
+				this.SetLayoutDirty();
 			}
 		}
 
@@ -283,12 +291,13 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (this.m_FontData.lineSpacing != value)
+				if (this.m_FontData.lineSpacing == value)
 				{
-					this.m_FontData.lineSpacing = value;
-					this.SetVerticesDirty();
-					this.SetLayoutDirty();
+					return;
 				}
+				this.m_FontData.lineSpacing = value;
+				this.SetVerticesDirty();
+				this.SetLayoutDirty();
 			}
 		}
 
@@ -300,12 +309,13 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (this.m_FontData.fontStyle != value)
+				if (this.m_FontData.fontStyle == value)
 				{
-					this.m_FontData.fontStyle = value;
-					this.SetVerticesDirty();
-					this.SetLayoutDirty();
+					return;
 				}
+				this.m_FontData.fontStyle = value;
+				this.SetVerticesDirty();
+				this.SetLayoutDirty();
 			}
 		}
 
@@ -314,24 +324,19 @@ namespace UnityEngine.UI
 			get
 			{
 				Canvas canvas = base.canvas;
-				float num;
 				if (!canvas)
 				{
-					num = 1f;
+					return 1f;
 				}
-				else if (!this.font || this.font.dynamic)
+				if (!this.font || this.font.dynamic)
 				{
-					num = canvas.scaleFactor;
+					return canvas.scaleFactor;
 				}
-				else if (this.m_FontData.fontSize <= 0 || this.font.fontSize <= 0)
+				if (this.m_FontData.fontSize <= 0 || this.font.fontSize <= 0)
 				{
-					num = 1f;
+					return 1f;
 				}
-				else
-				{
-					num = (float)this.font.fontSize / (float)this.m_FontData.fontSize;
-				}
-				return num;
+				return (float)this.font.fontSize / (float)this.m_FontData.fontSize;
 			}
 		}
 
@@ -389,102 +394,89 @@ namespace UnityEngine.UI
 
 		public static Vector2 GetTextAnchorPivot(TextAnchor anchor)
 		{
-			Vector2 vector;
 			switch (anchor)
 			{
 			case TextAnchor.UpperLeft:
-				vector = new Vector2(0f, 1f);
-				break;
+				return new Vector2(0f, 1f);
 			case TextAnchor.UpperCenter:
-				vector = new Vector2(0.5f, 1f);
-				break;
+				return new Vector2(0.5f, 1f);
 			case TextAnchor.UpperRight:
-				vector = new Vector2(1f, 1f);
-				break;
+				return new Vector2(1f, 1f);
 			case TextAnchor.MiddleLeft:
-				vector = new Vector2(0f, 0.5f);
-				break;
+				return new Vector2(0f, 0.5f);
 			case TextAnchor.MiddleCenter:
-				vector = new Vector2(0.5f, 0.5f);
-				break;
+				return new Vector2(0.5f, 0.5f);
 			case TextAnchor.MiddleRight:
-				vector = new Vector2(1f, 0.5f);
-				break;
+				return new Vector2(1f, 0.5f);
 			case TextAnchor.LowerLeft:
-				vector = new Vector2(0f, 0f);
-				break;
+				return new Vector2(0f, 0f);
 			case TextAnchor.LowerCenter:
-				vector = new Vector2(0.5f, 0f);
-				break;
+				return new Vector2(0.5f, 0f);
 			case TextAnchor.LowerRight:
-				vector = new Vector2(1f, 0f);
-				break;
+				return new Vector2(1f, 0f);
 			default:
-				vector = Vector2.zero;
-				break;
+				return Vector2.zero;
 			}
-			return vector;
 		}
 
 		protected override void OnPopulateMesh(VertexHelper toFill)
 		{
-			if (!(this.font == null))
+			if (this.font == null)
 			{
-				this.m_DisableFontTextureRebuiltCallback = true;
-				Vector2 size = base.rectTransform.rect.size;
-				TextGenerationSettings generationSettings = this.GetGenerationSettings(size);
-				this.cachedTextGenerator.PopulateWithErrors(this.text, generationSettings, base.gameObject);
-				IList<UIVertex> verts = this.cachedTextGenerator.verts;
-				float num = 1f / this.pixelsPerUnit;
-				int num2 = verts.Count - 4;
-				if (num2 <= 0)
+				return;
+			}
+			this.m_DisableFontTextureRebuiltCallback = true;
+			Vector2 size = base.rectTransform.rect.size;
+			TextGenerationSettings generationSettings = this.GetGenerationSettings(size);
+			this.cachedTextGenerator.PopulateWithErrors(this.text, generationSettings, base.gameObject);
+			IList<UIVertex> verts = this.cachedTextGenerator.verts;
+			float num = 1f / this.pixelsPerUnit;
+			int count = verts.Count;
+			if (count <= 0)
+			{
+				toFill.Clear();
+				return;
+			}
+			Vector2 vector = new Vector2(verts[0].position.x, verts[0].position.y) * num;
+			vector = base.PixelAdjustPoint(vector) - vector;
+			toFill.Clear();
+			if (vector != Vector2.zero)
+			{
+				for (int i = 0; i < count; i++)
 				{
-					toFill.Clear();
-				}
-				else
-				{
-					Vector2 vector = new Vector2(verts[0].position.x, verts[0].position.y) * num;
-					vector = base.PixelAdjustPoint(vector) - vector;
-					toFill.Clear();
-					if (vector != Vector2.zero)
+					int num2 = i & 3;
+					this.m_TempVerts[num2] = verts[i];
+					UIVertex[] tempVerts = this.m_TempVerts;
+					int num3 = num2;
+					tempVerts[num3].position = tempVerts[num3].position * num;
+					UIVertex[] tempVerts2 = this.m_TempVerts;
+					int num4 = num2;
+					tempVerts2[num4].position.x = tempVerts2[num4].position.x + vector.x;
+					UIVertex[] tempVerts3 = this.m_TempVerts;
+					int num5 = num2;
+					tempVerts3[num5].position.y = tempVerts3[num5].position.y + vector.y;
+					if (num2 == 3)
 					{
-						for (int i = 0; i < num2; i++)
-						{
-							int num3 = i & 3;
-							this.m_TempVerts[num3] = verts[i];
-							UIVertex[] tempVerts = this.m_TempVerts;
-							int num4 = num3;
-							tempVerts[num4].position = tempVerts[num4].position * num;
-							UIVertex[] tempVerts2 = this.m_TempVerts;
-							int num5 = num3;
-							tempVerts2[num5].position.x = tempVerts2[num5].position.x + vector.x;
-							UIVertex[] tempVerts3 = this.m_TempVerts;
-							int num6 = num3;
-							tempVerts3[num6].position.y = tempVerts3[num6].position.y + vector.y;
-							if (num3 == 3)
-							{
-								toFill.AddUIVertexQuad(this.m_TempVerts);
-							}
-						}
+						toFill.AddUIVertexQuad(this.m_TempVerts);
 					}
-					else
-					{
-						for (int j = 0; j < num2; j++)
-						{
-							int num7 = j & 3;
-							this.m_TempVerts[num7] = verts[j];
-							UIVertex[] tempVerts4 = this.m_TempVerts;
-							int num8 = num7;
-							tempVerts4[num8].position = tempVerts4[num8].position * num;
-							if (num7 == 3)
-							{
-								toFill.AddUIVertexQuad(this.m_TempVerts);
-							}
-						}
-					}
-					this.m_DisableFontTextureRebuiltCallback = false;
 				}
 			}
+			else
+			{
+				for (int j = 0; j < count; j++)
+				{
+					int num6 = j & 3;
+					this.m_TempVerts[num6] = verts[j];
+					UIVertex[] tempVerts4 = this.m_TempVerts;
+					int num7 = num6;
+					tempVerts4[num7].position = tempVerts4[num7].position * num;
+					if (num6 == 3)
+					{
+						toFill.AddUIVertexQuad(this.m_TempVerts);
+					}
+				}
+			}
+			this.m_DisableFontTextureRebuiltCallback = false;
 		}
 
 		public virtual void CalculateLayoutInputHorizontal()
@@ -564,10 +556,10 @@ namespace UnityEngine.UI
 
 		private TextGenerator m_TextCacheForLayout;
 
-		protected static Material s_DefaultText = null;
+		protected static Material s_DefaultText;
 
 		[NonSerialized]
-		protected bool m_DisableFontTextureRebuiltCallback = false;
+		protected bool m_DisableFontTextureRebuiltCallback;
 
 		private readonly UIVertex[] m_TempVerts = new UIVertex[4];
 	}

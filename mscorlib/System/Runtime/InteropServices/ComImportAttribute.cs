@@ -3,8 +3,8 @@ using System.Reflection;
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class ComImportAttribute : Attribute
 	{
 		internal static Attribute GetCustomAttribute(RuntimeType type)

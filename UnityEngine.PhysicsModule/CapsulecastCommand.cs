@@ -8,7 +8,7 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Dynamics/BatchCommands/CapsulecastCommand.h")]
+	[NativeHeader("Modules/Physics/BatchCommands/CapsulecastCommand.h")]
 	[NativeHeader("Runtime/Jobs/ScriptBindings/JobsBindingsTypes.h")]
 	public struct CapsulecastCommand
 	{

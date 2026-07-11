@@ -17,17 +17,18 @@ namespace UnityEngine.U2D
 		[RequiredByNativeCode]
 		private static bool RequestAtlas(string tag)
 		{
-			bool flag;
-			if (SpriteAtlasManager.atlasRequested != null)
+			bool flag = SpriteAtlasManager.atlasRequested != null;
+			bool flag2;
+			if (flag)
 			{
 				SpriteAtlasManager.atlasRequested(tag, new Action<SpriteAtlas>(SpriteAtlasManager.Register));
-				flag = true;
+				flag2 = true;
 			}
 			else
 			{
-				flag = false;
+				flag2 = false;
 			}
-			return flag;
+			return flag2;
 		}
 
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -36,9 +37,10 @@ namespace UnityEngine.U2D
 		[RequiredByNativeCode]
 		private static void PostRegisteredAtlas(SpriteAtlas spriteAtlas)
 		{
-			if (SpriteAtlasManager.atlasRegistered != null)
+			Action<SpriteAtlas> action = SpriteAtlasManager.atlasRegistered;
+			if (action != null)
 			{
-				SpriteAtlasManager.atlasRegistered(spriteAtlas);
+				action(spriteAtlas);
 			}
 		}
 

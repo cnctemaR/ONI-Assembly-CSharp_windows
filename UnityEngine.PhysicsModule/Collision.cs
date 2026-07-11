@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine.Scripting;
 
@@ -11,7 +12,7 @@ namespace UnityEngine
 	{
 		private ContactPoint[] GetContacts_Internal()
 		{
-			return (this.m_LegacyContacts != null) ? this.m_LegacyContacts : this.m_RecycledContacts;
+			return (this.m_LegacyContacts == null) ? this.m_ReusedContacts : this.m_LegacyContacts;
 		}
 
 		public Vector3 relativeVelocity
@@ -42,7 +43,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (!(this.rigidbody != null)) ? this.collider.transform : this.rigidbody.transform;
+				return (this.rigidbody != null) ? this.rigidbody.transform : this.collider.transform;
 			}
 		}
 
@@ -50,7 +51,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (!(this.m_Rigidbody != null)) ? this.m_Collider.gameObject : this.m_Rigidbody.gameObject;
+				return (this.m_Rigidbody != null) ? this.m_Rigidbody.gameObject : this.m_Collider.gameObject;
 			}
 		}
 
@@ -66,10 +67,11 @@ namespace UnityEngine
 		{
 			get
 			{
-				if (this.m_LegacyContacts == null)
+				bool flag = this.m_LegacyContacts == null;
+				if (flag)
 				{
 					this.m_LegacyContacts = new ContactPoint[this.m_ContactCount];
-					Array.Copy(this.m_RecycledContacts, this.m_LegacyContacts, this.m_ContactCount);
+					Array.Copy(this.m_ReusedContacts, this.m_LegacyContacts, this.m_ContactCount);
 				}
 				return this.m_LegacyContacts;
 			}
@@ -77,7 +79,8 @@ namespace UnityEngine
 
 		public ContactPoint GetContact(int index)
 		{
-			if (index < 0 || index >= this.m_ContactCount)
+			bool flag = index < 0 || index >= this.m_ContactCount;
+			if (flag)
 			{
 				throw new ArgumentOutOfRangeException(string.Format("Cannot get contact at index {0}. There are {1} contact(s).", index, this.m_ContactCount));
 			}
@@ -86,7 +89,8 @@ namespace UnityEngine
 
 		public int GetContacts(ContactPoint[] contacts)
 		{
-			if (contacts == null)
+			bool flag = contacts == null;
+			if (flag)
 			{
 				throw new NullReferenceException("Cannot get contacts as the provided array is NULL.");
 			}
@@ -95,6 +99,19 @@ namespace UnityEngine
 			return num;
 		}
 
+		public int GetContacts(List<ContactPoint> contacts)
+		{
+			bool flag = contacts == null;
+			if (flag)
+			{
+				throw new NullReferenceException("Cannot get contacts as the provided list is NULL.");
+			}
+			contacts.Clear();
+			contacts.AddRange(this.GetContacts_Internal());
+			return this.contactCount;
+		}
+
+		[Obsolete("Do not use Collision.GetEnumerator(), enumerate using non-allocating array returned by Collision.GetContacts() or enumerate using Collision.GetContact(index) instead.", false)]
 		public virtual IEnumerator GetEnumerator()
 		{
 			return this.contacts.GetEnumerator();
@@ -131,7 +148,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (!(this.m_Rigidbody != null)) ? this.m_Collider : this.m_Rigidbody;
+				return (this.m_Rigidbody != null) ? this.m_Rigidbody : this.m_Collider;
 			}
 		}
 
@@ -145,7 +162,7 @@ namespace UnityEngine
 
 		internal int m_ContactCount;
 
-		internal ContactPoint[] m_RecycledContacts;
+		internal ContactPoint[] m_ReusedContacts;
 
 		internal ContactPoint[] m_LegacyContacts;
 	}

@@ -407,8 +407,8 @@ namespace System.IO.IsolatedStorage
 			}
 		}
 
-		[CLSCompliant(false)]
 		[Obsolete]
+		[CLSCompliant(false)]
 		public override ulong CurrentSize
 		{
 			get
@@ -417,8 +417,8 @@ namespace System.IO.IsolatedStorage
 			}
 		}
 
-		[CLSCompliant(false)]
 		[Obsolete]
+		[CLSCompliant(false)]
 		public override ulong MaximumSize
 		{
 			get

@@ -9,10 +9,21 @@ using UnityEngine.UI;
 
 public class MainMenu : KScreen
 {
+	public static MainMenu Instance
+	{
+		get
+		{
+			return MainMenu._instance;
+		}
+	}
+
 	private KButton MakeButton(MainMenu.ButtonInfo info)
 	{
 		KButton kbutton = Util.KInstantiateUI<KButton>(this.buttonPrefab.gameObject, this.buttonParent, true);
 		kbutton.onClick += info.action;
+		KImage component = kbutton.GetComponent<KImage>();
+		component.colorStyleSetting = info.style;
+		component.ApplyColorStyleSetting();
 		LocText componentInChildren = kbutton.GetComponentInChildren<LocText>();
 		componentInChildren.text = info.text;
 		componentInChildren.fontSize = (float)info.fontSize;
@@ -22,19 +33,20 @@ public class MainMenu : KScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.NEWGAME, new global::System.Action(this.NewGame), 22));
-		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.LOADGAME, new global::System.Action(this.LoadGame), 14));
+		MainMenu._instance = this;
+		this.Button_NewGame = this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.NEWGAME, new global::System.Action(this.NewGame), 22, this.topButtonStyle));
+		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.LOADGAME, new global::System.Action(this.LoadGame), 22, this.normalButtonStyle));
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.RETIREDCOLONIES, delegate
 		{
 			MainMenu.ActivateRetiredColoniesScreen(base.transform.gameObject, "");
-		}, 14));
+		}, 14, this.normalButtonStyle));
 		if (DistributionPlatform.Initialized)
 		{
-			this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.TRANSLATIONS, new global::System.Action(this.Translations), 14));
-			this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MODS.TITLE, new global::System.Action(this.Mods), 14));
+			this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.TRANSLATIONS, new global::System.Action(this.Translations), 14, this.normalButtonStyle));
+			this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MODS.TITLE, new global::System.Action(this.Mods), 14, this.normalButtonStyle));
 		}
-		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.OPTIONS, new global::System.Action(this.Options), 14));
-		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.QUITTODESKTOP, new global::System.Action(this.QuitGame), 14));
+		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.OPTIONS, new global::System.Action(this.Options), 14, this.normalButtonStyle));
+		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.QUITTODESKTOP, new global::System.Action(this.QuitGame), 14, this.normalButtonStyle));
 		KCrashReporter.MOST_RECENT_SAVEFILE = null;
 		this.RefreshResumeButton();
 		this.Button_ResumeGame.onClick += this.ResumeGame;
@@ -176,6 +188,8 @@ public class MainMenu : KScreen
 		this.m_cheatInputCounter = 0;
 		Canvas.ForceUpdateCanvases();
 		this.ShowLanguageConfirmation();
+		this.InitLoadScreen();
+		LoadScreen.Instance.ShowMigrationIfNecessary(true);
 		string savePrefix = SaveLoader.GetSavePrefix();
 		try
 		{
@@ -274,13 +288,18 @@ public class MainMenu : KScreen
 		base.GetComponent<NewGameFlow>().BeginFlow();
 	}
 
-	private void LoadGame()
+	private void InitLoadScreen()
 	{
 		if (LoadScreen.Instance == null)
 		{
 			Util.KInstantiateUI(ScreenPrefabs.Instance.LoadScreen.gameObject, base.gameObject, true).GetComponent<LoadScreen>().requireConfirmation = false;
 		}
-		LoadScreen.Instance.gameObject.SetActive(true);
+	}
+
+	private void LoadGame()
+	{
+		this.InitLoadScreen();
+		LoadScreen.Instance.Activate();
 	}
 
 	public static void ActivateRetiredColoniesScreen(GameObject parent, string colonyID = "")
@@ -324,7 +343,7 @@ public class MainMenu : KScreen
 		}
 	}
 
-	private void RefreshResumeButton()
+	public void RefreshResumeButton()
 	{
 		string latestSaveFile = SaveLoader.GetLatestSaveFile();
 		bool flag = !string.IsNullOrEmpty(latestSaveFile) && File.Exists(latestSaveFile);
@@ -356,7 +375,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 420700U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 442154U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 17)
 				{
 					flag = false;
 				}
@@ -379,6 +398,9 @@ public class MainMenu : KScreen
 		if (this.Button_ResumeGame != null && this.Button_ResumeGame.gameObject != null)
 		{
 			this.Button_ResumeGame.gameObject.SetActive(flag);
+			KImage component = this.Button_NewGame.GetComponent<KImage>();
+			component.colorStyleSetting = (flag ? this.normalButtonStyle : this.topButtonStyle);
+			component.ApplyColorStyleSetting();
 			return;
 		}
 		global::Debug.LogWarning("Why is the resume game button null?");
@@ -489,9 +511,13 @@ public class MainMenu : KScreen
 		App.instance.Restart();
 	}
 
+	private static MainMenu _instance;
+
 	public RectTransform LogoAndMenu;
 
 	public KButton Button_ResumeGame;
+
+	private KButton Button_NewGame;
 
 	public GameObject topLeftAlphaMessage;
 
@@ -506,6 +532,12 @@ public class MainMenu : KScreen
 
 	[SerializeField]
 	private GameObject buttonParent;
+
+	[SerializeField]
+	private ColorStyleSetting topButtonStyle;
+
+	[SerializeField]
+	private ColorStyleSetting normalButtonStyle;
 
 	[SerializeField]
 	private LocText motdImageHeader;
@@ -543,11 +575,12 @@ public class MainMenu : KScreen
 
 	private struct ButtonInfo
 	{
-		public ButtonInfo(LocString text, global::System.Action action, int font_size)
+		public ButtonInfo(LocString text, global::System.Action action, int font_size, ColorStyleSetting style)
 		{
 			this.text = text;
 			this.action = action;
 			this.fontSize = font_size;
+			this.style = style;
 		}
 
 		public LocString text;
@@ -555,6 +588,8 @@ public class MainMenu : KScreen
 		public global::System.Action action;
 
 		public int fontSize;
+
+		public ColorStyleSetting style;
 	}
 
 	private struct SaveFileEntry

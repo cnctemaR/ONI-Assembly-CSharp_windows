@@ -101,10 +101,10 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 	{
 		if (new_region == TimeOfDay.TimeRegion.Day)
 		{
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().NightStartedMigrated, STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().NightStartedMigrated, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 			if (MusicManager.instance.SongIsPlaying("Stinger_Loop_Night"))
 			{
-				MusicManager.instance.StopSong("Stinger_Loop_Night", true, STOP_MODE.ALLOWFADEOUT);
+				MusicManager.instance.StopSong("Stinger_Loop_Night", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 			}
 			MusicManager.instance.PlaySong("Stinger_Day", false);
 			MusicManager.instance.PlayDynamicMusic();

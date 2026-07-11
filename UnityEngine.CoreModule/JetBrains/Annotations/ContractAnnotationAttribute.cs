@@ -2,7 +2,7 @@
 
 namespace JetBrains.Annotations
 {
-	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 	public sealed class ContractAnnotationAttribute : Attribute
 	{
 		public ContractAnnotationAttribute([NotNull] string contract)
@@ -16,8 +16,9 @@ namespace JetBrains.Annotations
 			this.ForceFullStates = forceFullStates;
 		}
 
-		public string Contract { get; private set; }
+		[NotNull]
+		public string Contract { get; }
 
-		public bool ForceFullStates { get; private set; }
+		public bool ForceFullStates { get; }
 	}
 }

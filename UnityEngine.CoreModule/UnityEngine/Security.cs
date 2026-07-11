@@ -21,8 +21,8 @@ namespace UnityEngine
 			return null;
 		}
 
-		[ExcludeFromDocs]
 		[Obsolete("Security.PrefetchSocketPolicy is no longer supported, since the Unity Web Player is no longer supported by Unity.", true)]
+		[ExcludeFromDocs]
 		public static bool PrefetchSocketPolicy(string ip, int atPort)
 		{
 			int num = 3000;

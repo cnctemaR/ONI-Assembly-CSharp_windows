@@ -10,6 +10,7 @@ namespace UnityEngine
 		InflateConvexMesh = 1,
 		CookForFasterSimulation = 2,
 		EnableMeshCleaning = 4,
-		WeldColocatedVertices = 8
+		WeldColocatedVertices = 8,
+		UseFastMidphase = 16
 	}
 }

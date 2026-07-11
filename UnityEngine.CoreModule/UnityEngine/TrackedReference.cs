@@ -14,24 +14,33 @@ namespace UnityEngine
 
 		public static bool operator ==(TrackedReference x, TrackedReference y)
 		{
-			bool flag;
-			if (y == null && x == null)
+			bool flag = y == null && x == null;
+			bool flag2;
+			if (flag)
 			{
-				flag = true;
-			}
-			else if (y == null)
-			{
-				flag = x.m_Ptr == IntPtr.Zero;
-			}
-			else if (x == null)
-			{
-				flag = y.m_Ptr == IntPtr.Zero;
+				flag2 = true;
 			}
 			else
 			{
-				flag = x.m_Ptr == y.m_Ptr;
+				bool flag3 = y == null;
+				if (flag3)
+				{
+					flag2 = x.m_Ptr == IntPtr.Zero;
+				}
+				else
+				{
+					bool flag4 = x == null;
+					if (flag4)
+					{
+						flag2 = y.m_Ptr == IntPtr.Zero;
+					}
+					else
+					{
+						flag2 = x.m_Ptr == y.m_Ptr;
+					}
+				}
 			}
-			return flag;
+			return flag2;
 		}
 
 		public static bool operator !=(TrackedReference x, TrackedReference y)

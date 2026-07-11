@@ -44,7 +44,11 @@ public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>
 				if (applyBuff)
 				{
 					gameObject.GetComponent<Effects>().Add(Db.Get().effects.Get("SpaceTourist"), true);
-					gameObject.GetSMI<JoyBehaviourMonitor.Instance>().GoToOverjoyed();
+					JoyBehaviourMonitor.Instance smi = gameObject.GetSMI<JoyBehaviourMonitor.Instance>();
+					if (smi != null)
+					{
+						smi.GoToOverjoyed();
+					}
 				}
 			}
 		}

@@ -486,6 +486,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		{
 			this.Queue(anim_names[i], KAnim.PlayMode.Once, 1f, 0f);
 		}
+		global::Debug.Assert(anim_names.Length != 0, "Play was called with an empty anim array");
 		this.Queue(anim_names[anim_names.Length - 1], mode, 1f, 0f);
 	}
 

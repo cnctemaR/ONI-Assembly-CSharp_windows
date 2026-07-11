@@ -241,7 +241,7 @@ public class Worker : KMonoBehaviour
 					if (component != null)
 					{
 						HashedString[] workPstAnims = this.workable.GetWorkPstAnims(this, false);
-						if (workPstAnims != null)
+						if (workPstAnims != null && workPstAnims.Length != 0)
 						{
 							component.Play(workPstAnims, KAnim.PlayMode.Once);
 							component.SetPositionPercent(1f);

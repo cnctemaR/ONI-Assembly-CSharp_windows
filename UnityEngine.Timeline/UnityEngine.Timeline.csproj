@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{449AC545-362B-47E0-B441-E4124D5C98C6}</ProjectGuid>
+    <ProjectGuid>{B45CD94C-ED43-4C93-88B6-64A991F9242C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.Timeline</AssemblyName>
@@ -79,7 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{449AC545-362B-47E0-B441-E4124D5C98A9}</Project>
+      <Project>{B45CD94C-ED43-4C93-88B6-64A991F9240F}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
   </ItemGroup>

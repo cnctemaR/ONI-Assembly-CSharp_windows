@@ -77,10 +77,6 @@ public class Unlocks : KMonoBehaviour, ISim4000ms
 		{
 			Directory.CreateDirectory(global::Util.RootFolder());
 		}
-		if (File.Exists(Unlocks.UnlocksFilename))
-		{
-			File.Delete(Unlocks.UnlocksFilename);
-		}
 		List<string> list = new List<string>();
 		foreach (KeyValuePair<string, bool> keyValuePair in locks)
 		{

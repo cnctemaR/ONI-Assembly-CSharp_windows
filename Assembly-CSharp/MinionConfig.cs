@@ -63,7 +63,7 @@ public class MinionConfig : IEntityConfig
 		GridVisibility gridVisibility = gameObject.AddOrGet<GridVisibility>();
 		gridVisibility.radius = 30f;
 		gridVisibility.innerRadius = 20f;
-		gameObject.AddOrGet<MinionSounds>();
+		gameObject.AddOrGet<MiningSounds>();
 		gameObject.AddOrGet<SaveLoadRoot>();
 		gameObject.AddOrGet<AntiCluster>();
 		Navigator navigator = gameObject.AddOrGet<Navigator>();

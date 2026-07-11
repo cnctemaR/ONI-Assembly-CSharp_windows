@@ -23,6 +23,7 @@ public class AutoMinerConfig : IBuildingConfig
 	{
 		go.AddOrGet<Operational>();
 		go.AddOrGet<LoopingSounds>();
+		go.AddOrGet<MiningSounds>();
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)

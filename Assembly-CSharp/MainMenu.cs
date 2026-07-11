@@ -12,7 +12,7 @@ public class MainMenu : KMonoBehaviour
 	{
 		base.OnPrefabInit();
 		Global.Instance.modManager.DeactivateWorldGenMod();
-		MainMenu.ButtonInfo[] array = new MainMenu.ButtonInfo[]
+		List<MainMenu.ButtonInfo> list = new List<MainMenu.ButtonInfo>
 		{
 			new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.NEWGAME, new global::System.Action(this.NewGame), 22),
 			new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.LOADGAME, new global::System.Action(this.LoadGame), 14),
@@ -20,7 +20,15 @@ public class MainMenu : KMonoBehaviour
 			new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.OPTIONS, new global::System.Action(this.Options), 14),
 			new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.QUITTODESKTOP, new global::System.Action(this.QuitGame), 14)
 		};
-		foreach (MainMenu.ButtonInfo buttonInfo in array)
+		if (!DistributionPlatform.Initialized)
+		{
+			int num = list.FindIndex((MainMenu.ButtonInfo x) => x.text == UI.FRONTEND.MAINMENU.TRANSLATIONS);
+			if (num >= 0)
+			{
+				list.RemoveAt(num);
+			}
+		}
+		foreach (MainMenu.ButtonInfo buttonInfo in list)
 		{
 			KButton kbutton = Util.KInstantiateUI<KButton>(this.buttonPrefab.gameObject, this.buttonParent, true);
 			kbutton.onClick += buttonInfo.action;
@@ -187,7 +195,7 @@ public class MainMenu : KMonoBehaviour
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 290148U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 290261U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}

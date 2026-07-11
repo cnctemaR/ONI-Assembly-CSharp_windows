@@ -97,14 +97,26 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 		}
 	}
 
+	private Element GetTargetElement()
+	{
+		if (this.HasDigCell)
+		{
+			return Grid.Element[this.dig_cell];
+		}
+		return null;
+	}
+
 	public void StartDig()
 	{
+		Element targetElement = this.GetTargetElement();
+		base.Trigger(-1762453998, targetElement);
 		this.CreateHitEffect();
 		this.arm_anim_ctrl.Play("gun_digging", KAnim.PlayMode.Loop, 1f, 0f);
 	}
 
 	public void StopDig()
 	{
+		base.Trigger(939543986, null);
 		this.DestroyHitEffect();
 		this.arm_anim_ctrl.Play("gun", KAnim.PlayMode.Loop, 1f, 0f);
 	}

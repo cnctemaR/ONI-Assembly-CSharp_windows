@@ -897,7 +897,7 @@ namespace STRINGS
 					public static LocString DESC = string.Concat(new string[]
 					{
 						"The ",
-						UI.FormatAsLink("seed", "Seeds"),
+						UI.FormatAsLink("Seed", "PLANTS"),
 						" of a ",
 						CREATURES.SPECIES.COLDWHEAT.NAME,
 						" plant.\n\nGrain can be sown to cultivate more Sleet Wheat, or processed into ",
@@ -913,7 +913,7 @@ namespace STRINGS
 					public static LocString DESC = string.Concat(new string[]
 					{
 						"The ",
-						UI.FormatAsLink("seed", "Seeds"),
+						UI.FormatAsLink("Seed", "PLANTS"),
 						" of a ",
 						CREATURES.SPECIES.GASGRASS.NAME,
 						" plant.\n\nUsed as feed for",

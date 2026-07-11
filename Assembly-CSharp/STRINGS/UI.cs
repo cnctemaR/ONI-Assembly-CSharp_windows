@@ -2349,19 +2349,19 @@ namespace STRINGS
 
 			public static LocString MODULE_STORAGE = "{0} / {1}";
 
-			public static LocString ANALYSIS_DESCRIPTION = "Use telescopes to complete a destination analysis.\nCompleting a destination analysis will allow rockets to visit this destination.";
+			public static LocString ANALYSIS_DESCRIPTION = "Use a Telescope to analyze space destinations.\n\nCompleting analysis on an object will unlock rocket missions to that destination.";
 
-			public static LocString RESEARCH_DESCRIPTION = "Gather Interstellar Research Data on a Research Module.\nResearch Modules Equipped: {0}.";
+			public static LocString RESEARCH_DESCRIPTION = "Gather Interstellar Research Data using Research Modules.\n\nResearch Modules Installed: {0}";
 
 			public static LocString ROCKET_RENAME_BUTTON_TOOLTIP = "Rename this rocket";
 
 			public static LocString NO_ROCKETS_HELP_TEXT = "Rockets allow you to visit nearby celestial bodies.\n\nEach rocket must have a Command Module, an Engine, and Fuel.\n\nYou can also carry other modules that allow you to gather specific resources from the places you visit.\n\nRemember the more weight a rocket has, the more limited it'll be on the distance it can travel. You can add more fuel to fix that, but fuel will add weight as well.";
 
-			public static LocString CONTAINER_REQUIRED = "{0} required.";
+			public static LocString CONTAINER_REQUIRED = "{0} installation required to retrieve material";
 
 			public static LocString CAN_CARRY_ELEMENT = "Gathered by: {1}";
 
-			public static LocString CANT_CARRY_ELEMENT = "{0} required.";
+			public static LocString CANT_CARRY_ELEMENT = "{0} installation required to retrieve material";
 
 			public static LocString STATUS = "SELECTED";
 
@@ -2369,11 +2369,11 @@ namespace STRINGS
 
 			public static LocString COMPOSITION_UNDISCOVERED = "?????????";
 
-			public static LocString COMPOSITION_UNDISCOVERED_TOOLTIP = "Further research of this destination is required. Send a research module.";
+			public static LocString COMPOSITION_UNDISCOVERED_TOOLTIP = "Further research required to identify resource" + UI.HORIZONTAL_BR_RULE + "Send a Research Module to this destination for more information";
 
 			public static LocString COMPOSITION_UNDISCOVERED_AMOUNT = "???";
 
-			public static LocString COMPOSITION_SMALL_AMOUNT = "Trace Amounts";
+			public static LocString COMPOSITION_SMALL_AMOUNT = "Trace Amount";
 
 			public static LocString ROCKETLIST = "Rocket Hangar";
 
@@ -2396,6 +2396,19 @@ namespace STRINGS
 			public static LocString SUSPEND_DESTINATION_ANALYSIS = "PAUSE ANALYSIS";
 
 			public static LocString DESTINATIONTITLE = "Destination Status";
+
+			public class DESTINATIONSTUDY
+			{
+				public static LocString UPPERATMO = "Study upper atmosphere";
+
+				public static LocString LOWERATMO = "Study lower atmosphere";
+
+				public static LocString MAGNETICFIELD = "Study magnetic field";
+
+				public static LocString SURFACE = "Study surface";
+
+				public static LocString SUBSURFACE = "Study subsurface";
+			}
 
 			public class COMPONENT
 			{
@@ -6430,11 +6443,11 @@ namespace STRINGS
 
 			public static LocString SEED_PRODUCTION_DIG_ONLY = "Consumes 1 " + UI.FormatAsLink("Seed", "PLANTS");
 
-			public static LocString SEED_PRODUCTION_HARVEST = "Harvest yields " + UI.FormatAsLink("seed", "PLANTS");
+			public static LocString SEED_PRODUCTION_HARVEST = "Harvest yields " + UI.FormatAsLink("Seeds", "PLANTS");
 
-			public static LocString SEED_PRODUCTION_FINAL_HARVEST = "Final harvest yields " + UI.FormatAsLink("seed", "PLANTS");
+			public static LocString SEED_PRODUCTION_FINAL_HARVEST = "Final harvest yields " + UI.FormatAsLink("Seeds", "PLANTS");
 
-			public static LocString SEED_PRODUCTION_FRUIT = "Fruit produces " + UI.FormatAsLink("seed", "PLANTS");
+			public static LocString SEED_PRODUCTION_FRUIT = "Fruit produces " + UI.FormatAsLink("Seeds", "PLANTS");
 
 			public static LocString SEED_REQUIREMENT_CEILING = "Plot Orientation: Downward";
 

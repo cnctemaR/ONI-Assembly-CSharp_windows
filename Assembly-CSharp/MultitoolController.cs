@@ -196,7 +196,12 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 			{
 				worker.Trigger(-673283254, null);
 			}
-			worker.Trigger(-1762453998, null);
+			Diggable diggable = workable as Diggable;
+			if (diggable)
+			{
+				Element targetElement = diggable.GetTargetElement();
+				worker.Trigger(-1762453998, targetElement);
+			}
 			if (this.hitEffectPrefab == null)
 			{
 				return;

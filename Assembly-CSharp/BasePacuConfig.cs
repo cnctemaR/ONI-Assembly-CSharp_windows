@@ -24,7 +24,7 @@ public static class BasePacuConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 25f, name, false, false, true));
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, false, false);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, base_trait_id, "SwimmerNavGrid", NavType.Swim, 32, 2f, "Meat", 1, false, true, warnLowTemp, warnHighTemp, warnLowTemp - 20f, warnHighTemp + 20f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, base_trait_id, "SwimmerNavGrid", NavType.Swim, 32, 2f, "Meat", 1, false, false, warnLowTemp, warnHighTemp, warnLowTemp - 20f, warnHighTemp + 20f);
 		if (is_baby)
 		{
 			KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();

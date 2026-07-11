@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{AF68B1E6-00A9-4090-92F5-C9FDDAF629A0}</ProjectGuid>
+    <ProjectGuid>{483C13BE-B4A6-4745-976E-E79DF1D8F8BC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Analytics</RootNamespace>
     <AssemblyName>UnityEngine.PerformanceReportingModule</AssemblyName>
@@ -19,11 +19,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{AF68B1E6-00A9-4090-92F5-C9FDDAF62978}</Project>
+      <Project>{483C13BE-B4A6-4745-976E-E79DF1D8F894}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{AF68B1E6-00A9-4090-92F5-C9FDDAF629A5}</Project>
+      <Project>{483C13BE-B4A6-4745-976E-E79DF1D8F8C1}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

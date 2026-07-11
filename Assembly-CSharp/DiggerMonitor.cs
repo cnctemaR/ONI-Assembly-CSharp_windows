@@ -27,6 +27,13 @@ public class DiggerMonitor : GameStateMachine<DiggerMonitor, DiggerMonitor.Insta
 			instance.OnSolidChanged = (Action<int>)Delegate.Combine(instance.OnSolidChanged, new Action<int>(this.OnSolidChanged));
 		}
 
+		protected override void OnCleanUp()
+		{
+			base.OnCleanUp();
+			global::World instance = global::World.Instance;
+			instance.OnSolidChanged = (Action<int>)Delegate.Remove(instance.OnSolidChanged, new Action<int>(this.OnSolidChanged));
+		}
+
 		private void CheckInSolid(int cell)
 		{
 			int num = Grid.PosToCell(base.gameObject);

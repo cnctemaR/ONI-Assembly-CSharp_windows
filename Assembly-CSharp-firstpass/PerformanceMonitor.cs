@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PerformanceMonitor : MonoBehaviour
@@ -14,6 +15,19 @@ public class PerformanceMonitor : MonoBehaviour
 		{
 			this.numFramesBelow30 += 1UL;
 		}
+		if (this.frameTimes.Count == PerformanceMonitor.frameRateWindowSize)
+		{
+			LinkedListNode<float> first = this.frameTimes.First;
+			this.frameTimeTotal -= first.Value;
+			this.frameTimes.RemoveFirst();
+			first.Value = deltaTime;
+			this.frameTimes.AddLast(first);
+		}
+		else
+		{
+			this.frameTimes.AddLast(deltaTime);
+		}
+		this.frameTimeTotal += deltaTime;
 	}
 
 	public void Reset()
@@ -38,9 +52,23 @@ public class PerformanceMonitor : MonoBehaviour
 		}
 	}
 
+	public float FPS
+	{
+		get
+		{
+			return (this.frameTimeTotal != 0f) ? ((float)this.frameTimes.Count / this.frameTimeTotal) : 0f;
+		}
+	}
+
 	private ulong numFramesAbove30;
 
 	private ulong numFramesBelow30;
+
+	private LinkedList<float> frameTimes = new LinkedList<float>();
+
+	private float frameTimeTotal;
+
+	private static readonly int frameRateWindowSize = 150;
 
 	private const float GOOD_FRAME_TIME = 0.033333335f;
 }

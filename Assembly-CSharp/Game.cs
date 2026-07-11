@@ -794,22 +794,23 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
+		float fps = Global.Instance.GetComponent<PerformanceMonitor>().FPS;
 		global::Debug.Log("Begin GC profiling...", null);
 		float realtimeSinceStartup = Time.realtimeSinceStartup;
 		GC.Collect();
 		float num = Time.realtimeSinceStartup - realtimeSinceStartup;
 		global::Debug.Log("\tGC.Collect() took " + num.ToString() + " seconds", null);
-		uint num2 = 290148U;
+		uint num2 = 290261U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(SaveLoader.GetLatestSaveFile());
 		string text3 = "Version,Date,Time,SaveGame";
 		string text4 = string.Format("{0},{1},{2},{3}", new object[] { num2, text, text2, fileName });
-		using (StreamWriter streamWriter = new StreamWriter("./memory/GCDuration.csv"))
+		using (StreamWriter streamWriter = new StreamWriter("./memory/GeneralMetrics.csv"))
 		{
-			string text5 = "{0},{1}";
-			streamWriter.WriteLine(string.Format(text5, text3, "GCDuration"));
-			streamWriter.WriteLine(string.Format(text5, text4, num));
+			string text5 = "{0},{1},{2}";
+			streamWriter.WriteLine(string.Format(text5, text3, "GCDuration", "FPS"));
+			streamWriter.WriteLine(string.Format(text5, text4, num, fps));
 		}
 		MemorySnapshot memorySnapshot = new MemorySnapshot();
 		using (StreamWriter streamWriter2 = new StreamWriter("./memory/GCTypeMetrics.csv"))

@@ -43,6 +43,7 @@ public class GeneShuffler : Workable
 
 	private void RefreshConsumedState()
 	{
+		this.assignable.SetCanBeAssigned(!this.IsConsumed);
 		if (!this.IsConsumed)
 		{
 			if (this.assignable.assignee != null)

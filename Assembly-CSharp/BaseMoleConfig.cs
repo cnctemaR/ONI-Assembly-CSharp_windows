@@ -13,7 +13,7 @@ public static class BaseMoleConfig
 		string text = "idle_loop";
 		EffectorValues none = global::TUNING.BUILDINGS.DECOR.NONE;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, anim, text, Grid.SceneLayer.Creatures, 1, 1, none, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, "DiggerNavGrid", NavType.Floor, 32, 2f, "Meat", 10, true, true, 123.149994f, 673.15f, 73.149994f, 773.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, "DiggerNavGrid", NavType.Floor, 32, 2f, "Meat", 10, true, false, 123.149994f, 673.15f, 73.149994f, 773.15f);
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGetDef<DiggerMonitor.Def>();
@@ -62,8 +62,7 @@ public static class BaseMoleConfig
 			int num2 = global::UnityEngine.Random.Range(0, BaseMoleConfig.SolidIdleAnims.Length);
 			return BaseMoleConfig.SolidIdleAnims[num2];
 		}
-		CreatureCalorieMonitor.Instance smi2 = smi.GetSMI<CreatureCalorieMonitor.Instance>();
-		return (smi2 == null || !smi2.stomach.IsReadyToPoop()) ? "idle_loop" : "idle_loop_full";
+		return "idle_loop";
 	}
 
 	private static readonly string[] SolidIdleAnims = new string[] { "idle1", "idle2", "idle3", "idle4" };

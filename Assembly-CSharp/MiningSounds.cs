@@ -1,24 +1,22 @@
 ﻿using System;
 using FMODUnity;
 
-public class MinionSounds : KMonoBehaviour
+public class MiningSounds : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
-		base.Subscribe<MinionSounds>(-1762453998, MinionSounds.OnStartMiningSoundDelegate);
-		base.Subscribe<MinionSounds>(939543986, MinionSounds.OnStopMiningSoundDelegate);
+		base.Subscribe<MiningSounds>(-1762453998, MiningSounds.OnStartMiningSoundDelegate);
+		base.Subscribe<MiningSounds>(939543986, MiningSounds.OnStopMiningSoundDelegate);
 	}
 
 	private void OnStartMiningSound(object data)
 	{
 		if (this.miningSound == null)
 		{
-			Workable workable = this.worker.workable;
-			Diggable diggable = workable as Diggable;
-			if (diggable != null)
+			Element element = data as Element;
+			if (element != null)
 			{
-				Element targetElement = diggable.GetTargetElement();
-				string text = targetElement.substance.GetMiningSound();
+				string text = element.substance.GetMiningSound();
 				if (text == null || text == string.Empty)
 				{
 					return;
@@ -42,9 +40,6 @@ public class MinionSounds : KMonoBehaviour
 		}
 	}
 
-	[MyCmpReq]
-	private Worker worker;
-
 	[MyCmpGet]
 	private LoopingSounds loopingSounds;
 
@@ -53,12 +48,12 @@ public class MinionSounds : KMonoBehaviour
 	[EventRef]
 	private string miningSoundMigrated;
 
-	private static readonly EventSystem.IntraObjectHandler<MinionSounds> OnStartMiningSoundDelegate = new EventSystem.IntraObjectHandler<MinionSounds>(delegate(MinionSounds component, object data)
+	private static readonly EventSystem.IntraObjectHandler<MiningSounds> OnStartMiningSoundDelegate = new EventSystem.IntraObjectHandler<MiningSounds>(delegate(MiningSounds component, object data)
 	{
 		component.OnStartMiningSound(data);
 	});
 
-	private static readonly EventSystem.IntraObjectHandler<MinionSounds> OnStopMiningSoundDelegate = new EventSystem.IntraObjectHandler<MinionSounds>(delegate(MinionSounds component, object data)
+	private static readonly EventSystem.IntraObjectHandler<MiningSounds> OnStopMiningSoundDelegate = new EventSystem.IntraObjectHandler<MiningSounds>(delegate(MiningSounds component, object data)
 	{
 		component.OnStopMiningSound(data);
 	});

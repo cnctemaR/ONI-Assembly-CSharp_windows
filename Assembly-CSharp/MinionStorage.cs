@@ -18,13 +18,8 @@ public class MinionStorage : KMonoBehaviour
 		return gameObject.GetComponent<KPrefabID>();
 	}
 
-	private void CopyMinionCommon(KMonoBehaviour src, KMonoBehaviour dest)
-	{
-	}
-
 	private void CopyMinion(MinionIdentity src_id, StoredMinionIdentity dest_id)
 	{
-		this.CopyMinionCommon(src_id, dest_id);
 		dest_id.storedName = src_id.name;
 		dest_id.nameStringKey = src_id.nameStringKey;
 		dest_id.gender = src_id.gender;
@@ -107,7 +102,6 @@ public class MinionStorage : KMonoBehaviour
 
 	private void CopyMinion(StoredMinionIdentity src_id, MinionIdentity dest_id)
 	{
-		this.CopyMinionCommon(src_id, dest_id);
 		dest_id.SetName(src_id.storedName);
 		dest_id.nameStringKey = src_id.nameStringKey;
 		dest_id.gender = src_id.gender;
@@ -167,6 +161,38 @@ public class MinionStorage : KMonoBehaviour
 			ChoreConsumer component7 = dest_id.GetComponent<ChoreConsumer>();
 			component7.SetChoreGroupPriorities(src_id.choreGroupPriorities);
 		}
+		AttributeLevels component8 = dest_id.GetComponent<AttributeLevels>();
+		if (src_id.attributeLevels != null)
+		{
+			component8.SaveLoadLevels = src_id.attributeLevels.ToArray();
+			component8.OnDeserialized();
+		}
+		dest_id.GetComponent<Accessorizer>().ApplyAccessories();
+		List<Ref<KPrefabID>> equippedItems = src_id.equippedItems;
+		Equipment component9 = dest_id.GetComponent<Equipment>();
+		if (equippedItems != null)
+		{
+			foreach (Ref<KPrefabID> ref3 in equippedItems)
+			{
+				Equippable component10 = ref3.Get().GetComponent<Equippable>();
+				component10.Unassign();
+			}
+			foreach (Ref<KPrefabID> ref4 in equippedItems)
+			{
+				Equippable component11 = ref4.Get().GetComponent<Equippable>();
+				component11.Assign(dest_id);
+				component9.Equip(component11);
+			}
+			equippedItems.Clear();
+		}
+		Schedulable component12 = src_id.GetComponent<Schedulable>();
+		Schedule schedule = component12.GetSchedule();
+		if (schedule != null)
+		{
+			schedule.Unassign(component12);
+			Schedulable component13 = dest_id.GetComponent<Schedulable>();
+			schedule.Assign(component13);
+		}
 	}
 
 	private void RedirectInstanceTracker(GameObject src_minion, GameObject dest_minion)
@@ -211,41 +237,9 @@ public class MinionStorage : KMonoBehaviour
 		GameObject gameObject2 = Util.KInstantiate(prefab, pos);
 		StoredMinionIdentity component = gameObject.GetComponent<StoredMinionIdentity>();
 		MinionIdentity component2 = gameObject2.GetComponent<MinionIdentity>();
-		this.CopyMinion(component, component2);
 		this.RedirectInstanceTracker(gameObject, gameObject2);
 		gameObject2.SetActive(true);
-		AttributeLevels component3 = component2.GetComponent<AttributeLevels>();
-		if (component.attributeLevels != null)
-		{
-			component3.SaveLoadLevels = component.attributeLevels.ToArray();
-			component3.OnDeserialized();
-		}
-		gameObject2.GetComponent<Accessorizer>().ApplyAccessories();
-		List<Ref<KPrefabID>> equippedItems = component.equippedItems;
-		Equipment component4 = component2.GetComponent<Equipment>();
-		if (equippedItems != null)
-		{
-			foreach (Ref<KPrefabID> @ref in equippedItems)
-			{
-				Equippable component5 = @ref.Get().GetComponent<Equippable>();
-				component5.Unassign();
-			}
-			foreach (Ref<KPrefabID> ref2 in equippedItems)
-			{
-				Equippable component6 = ref2.Get().GetComponent<Equippable>();
-				component6.Assign(component2);
-				component4.Equip(component6);
-			}
-			equippedItems.Clear();
-		}
-		Schedulable component7 = component.GetComponent<Schedulable>();
-		Schedule schedule = component7.GetSchedule();
-		if (schedule != null)
-		{
-			schedule.Unassign(component7);
-			Schedulable component8 = component2.GetComponent<Schedulable>();
-			schedule.Assign(component8);
-		}
+		this.CopyMinion(component, component2);
 		Util.KDestroyGameObject(gameObject);
 		this.serializedMinions.RemoveAt(minionIndex);
 		return gameObject2;

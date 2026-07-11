@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Database;
 using KSerialization;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -83,11 +84,11 @@ public class SpaceDestination
 
 	public void GenerateResearchOpportunities()
 	{
-		this.researchOpportunities.Add(new SpaceDestination.ResearchOpportunity("Study upper atmosphere", ROCKETRY.DESTINATION_RESEARCH.BASIC));
-		this.researchOpportunities.Add(new SpaceDestination.ResearchOpportunity("Study lower atmosphere", ROCKETRY.DESTINATION_RESEARCH.BASIC));
-		this.researchOpportunities.Add(new SpaceDestination.ResearchOpportunity("Study magnetic field", ROCKETRY.DESTINATION_RESEARCH.BASIC));
-		this.researchOpportunities.Add(new SpaceDestination.ResearchOpportunity("Study surface", ROCKETRY.DESTINATION_RESEARCH.BASIC));
-		this.researchOpportunities.Add(new SpaceDestination.ResearchOpportunity("Study subsurface", ROCKETRY.DESTINATION_RESEARCH.BASIC));
+		this.researchOpportunities.Add(new SpaceDestination.ResearchOpportunity(UI.STARMAP.DESTINATIONSTUDY.UPPERATMO, ROCKETRY.DESTINATION_RESEARCH.BASIC));
+		this.researchOpportunities.Add(new SpaceDestination.ResearchOpportunity(UI.STARMAP.DESTINATIONSTUDY.LOWERATMO, ROCKETRY.DESTINATION_RESEARCH.BASIC));
+		this.researchOpportunities.Add(new SpaceDestination.ResearchOpportunity(UI.STARMAP.DESTINATIONSTUDY.MAGNETICFIELD, ROCKETRY.DESTINATION_RESEARCH.BASIC));
+		this.researchOpportunities.Add(new SpaceDestination.ResearchOpportunity(UI.STARMAP.DESTINATIONSTUDY.SURFACE, ROCKETRY.DESTINATION_RESEARCH.BASIC));
+		this.researchOpportunities.Add(new SpaceDestination.ResearchOpportunity(UI.STARMAP.DESTINATIONSTUDY.SUBSURFACE, ROCKETRY.DESTINATION_RESEARCH.BASIC));
 		float num = 0f;
 		foreach (Tuple<float, int> tuple in SpaceDestination.RARE_ELEMENT_CHANCES)
 		{

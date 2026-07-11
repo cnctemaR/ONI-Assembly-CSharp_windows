@@ -107,5 +107,6 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 	[Serialize]
 	public Dictionary<HashedString, ChoreConsumer.PriorityInfo> choreGroupPriorities = new Dictionary<HashedString, ChoreConsumer.PriorityInfo>();
 
+	[Serialize]
 	public List<AttributeLevels.LevelSaveLoad> attributeLevels;
 }

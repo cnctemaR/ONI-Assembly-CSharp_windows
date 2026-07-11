@@ -36,7 +36,7 @@ public class SliderSet
 		ToolTip component = this.valueSlider.handleRect.GetComponent<ToolTip>();
 		if (component != null)
 		{
-			component.SetSimpleTooltip(Strings.Get(target.GetSliderTooltipKey(this.index)));
+			component.SetSimpleTooltip(target.GetSliderTooltip());
 		}
 		this.unitsLabel.text = target.SliderUnits;
 		this.minLabel.text = target.GetSliderMin(this.index) + target.SliderUnits;
@@ -90,6 +90,11 @@ public class SliderSet
 		}
 		this.UpdateLabel(num);
 		this.target.SetSliderValue(num, this.index);
+		ToolTip component = this.valueSlider.handleRect.GetComponent<ToolTip>();
+		if (component != null)
+		{
+			component.SetSimpleTooltip(this.target.GetSliderTooltip());
+		}
 	}
 
 	private void UpdateLabel(float value)

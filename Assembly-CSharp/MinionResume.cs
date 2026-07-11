@@ -455,13 +455,30 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	{
 		Game.Instance.Trigger(1505456302, this);
 		SkillMasteredMessage skillMasteredMessage = new SkillMasteredMessage(this);
-		Messenger.Instance.QueueMessage(skillMasteredMessage);
+		Transform transform = global::UnityEngine.Object.FindObjectOfType<Telepad>().transform;
+		Transform transform2 = null;
+		if (transform != null)
+		{
+			transform2 = transform.transform;
+		}
+		Notifier component = Game.Instance.GetComponent<Notifier>();
+		string text = MISC.NOTIFICATIONS.SKILL_POINT_EARNED.NAME;
+		NotificationType notificationType = NotificationType.Good;
+		HashedString invalid = HashedString.Invalid;
+		Func<List<Notification>, object, string> func = new Func<List<Notification>, object, string>(this.GetSkillPointGainedTooltip);
+		Transform transform3 = transform2;
+		component.Add(new Notification(text, notificationType, invalid, func, null, true, 0f, null, null, transform3), string.Empty);
 		if (PopFXManager.Instance != null)
 		{
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, MISC.NOTIFICATIONS.SKILL_POINT_EARNED.NAME, base.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
 		}
 		StateMachine.Instance instance = new UpgradeFX.Instance(base.gameObject.GetComponent<KMonoBehaviour>(), new Vector3(0f, 0f, -0.1f));
 		instance.StartSM();
+	}
+
+	private string GetSkillPointGainedTooltip(List<Notification> notifications, object data)
+	{
+		return string.Format(MISC.NOTIFICATIONS.SKILL_POINT_EARNED.TOOLTIP, new object[0]);
 	}
 
 	public void SetAptitude(HashedString skillGroupID, float amount)

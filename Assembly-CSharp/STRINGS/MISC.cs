@@ -708,6 +708,15 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Notes on using my HUD";
 			}
 
+			public class CODEXUNLOCK
+			{
+				public static LocString NAME = "New Database Entry";
+
+				public static LocString MESSAGEBODY = "A new Database entry is available";
+
+				public static LocString TOOLTIP = "A new Database entry is available";
+			}
+
 			public class WELCOMEMESSAGE
 			{
 				public static LocString NAME = "Tutorial: Colony Management";
@@ -1043,7 +1052,7 @@ namespace STRINGS
 
 				public static LocString LINE = "\n• <b>{0}</b>";
 
-				public static LocString TOOLTIP = "A Duplicant can now learn new skills";
+				public static LocString TOOLTIP = "Duplicants can now learn new skills";
 			}
 
 			public class DUPLICANTABSORBED

@@ -41,7 +41,10 @@ namespace Database
 							}
 						}
 					}
-					return flag && flag2;
+					if (flag && flag2)
+					{
+						return true;
+					}
 				}
 			}
 			return false;

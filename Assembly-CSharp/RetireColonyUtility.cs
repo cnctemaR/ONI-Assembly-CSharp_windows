@@ -137,7 +137,7 @@ public static class RetireColonyUtility
 			{
 				if (text3.EndsWith(".png"))
 				{
-					Texture2D texture2D = new Texture2D(640, 360);
+					Texture2D texture2D = new Texture2D(512, 768);
 					texture2D.filterMode = FilterMode.Point;
 					texture2D.LoadImage(File.ReadAllBytes(text3));
 					list.Add(Sprite.Create(texture2D, new Rect(Vector2.zero, new Vector2((float)texture2D.width, (float)texture2D.height)), new Vector2(0.5f, 0.5f)));
@@ -172,7 +172,7 @@ public static class RetireColonyUtility
 		}
 		if (list.Count > 0)
 		{
-			Texture2D texture2D = new Texture2D(640, 360);
+			Texture2D texture2D = new Texture2D(512, 768);
 			texture2D.LoadImage(File.ReadAllBytes(list[list.Count - 1]));
 			return Sprite.Create(texture2D, new Rect(Vector2.zero, new Vector2((float)texture2D.width, (float)texture2D.height)), new Vector2(0.5f, 0.5f));
 		}

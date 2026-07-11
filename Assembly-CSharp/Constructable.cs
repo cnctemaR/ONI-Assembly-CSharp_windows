@@ -79,10 +79,10 @@ public class Constructable : Workable, ISaveLoadable
 		if (this.IsReplacementTile)
 		{
 			int num3 = Grid.PosToCell(base.transform.GetLocalPosition());
-			GameObject gameObject2 = Grid.Objects[num3, (int)this.building.Def.TileLayer];
-			if (gameObject2 != null)
+			GameObject replacementCandidate = this.building.Def.GetReplacementCandidate(num3);
+			if (replacementCandidate != null)
 			{
-				SimCellOccupier component3 = gameObject2.GetComponent<SimCellOccupier>();
+				SimCellOccupier component3 = replacementCandidate.GetComponent<SimCellOccupier>();
 				if (component3 != null)
 				{
 					component3.DestroySelf(delegate
@@ -95,13 +95,13 @@ public class Constructable : Workable, ISaveLoadable
 				}
 				else
 				{
-					Conduit component4 = gameObject2.GetComponent<Conduit>();
+					Conduit component4 = replacementCandidate.GetComponent<Conduit>();
 					if (component4 != null)
 					{
 						ConduitFlow flowManager = component4.GetFlowManager();
 						flowManager.MarkForReplacement(num3);
 					}
-					BuildingComplete component5 = gameObject2.GetComponent<BuildingComplete>();
+					BuildingComplete component5 = replacementCandidate.GetComponent<BuildingComplete>();
 					if (component5 != null)
 					{
 						component5.Subscribe(-21016276, delegate(object data)
@@ -111,24 +111,24 @@ public class Constructable : Workable, ISaveLoadable
 					}
 					else
 					{
-						global::Debug.LogWarning("Why am I trying to replace a: " + gameObject2.name);
+						global::Debug.LogWarning("Why am I trying to replace a: " + replacementCandidate.name);
 						this.FinishConstruction(connections);
 					}
 				}
-				KAnimGraphTileVisualizer component6 = gameObject2.GetComponent<KAnimGraphTileVisualizer>();
+				KAnimGraphTileVisualizer component6 = replacementCandidate.GetComponent<KAnimGraphTileVisualizer>();
 				if (component6 != null)
 				{
 					component6.skipCleanup = true;
 				}
-				PrimaryElement component7 = gameObject2.GetComponent<PrimaryElement>();
+				PrimaryElement component7 = replacementCandidate.GetComponent<PrimaryElement>();
 				float mass = component7.Mass;
 				float temperature = component7.Temperature;
 				byte diseaseIdx = component7.DiseaseIdx;
 				int diseaseCount = component7.DiseaseCount;
 				global::Debug.Assert(component7.Element != null && component7.Element.tag != null);
 				Deconstructable.SpawnItem(component7.transform.GetPosition(), component7.GetComponent<Building>().Def, component7.Element.tag, mass, temperature, diseaseIdx, diseaseCount);
-				gameObject2.Trigger(1606648047, null);
-				gameObject2.DeleteObject();
+				replacementCandidate.Trigger(1606648047, null);
+				replacementCandidate.DeleteObject();
 			}
 		}
 		else

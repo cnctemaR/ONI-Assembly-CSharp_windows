@@ -277,6 +277,7 @@ public class CodexScreen : KScreen
 		CodexScreen.SetupCategory(dictionary, "RESEARCHNOTES");
 		CodexScreen.SetupCategory(dictionary, "JOURNALS");
 		CodexScreen.SetupCategory(dictionary, "EMAILS");
+		CodexScreen.SetupCategory(dictionary, "INVESTIGATIONS");
 		CodexScreen.SetupCategory(dictionary, "MYLOG");
 		CodexScreen.SetupCategory(dictionary, "TIPS");
 		CodexScreen.SetupCategory(dictionary, "Root");
@@ -633,6 +634,7 @@ public class CodexScreen : KScreen
 		Home,
 		Tips,
 		MyLog,
+		Investigations,
 		Emails,
 		Journals,
 		ResearchNotes,

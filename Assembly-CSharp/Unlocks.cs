@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
 using ProcGen;
+using STRINGS;
 
 public class Unlocks : KMonoBehaviour
 {
@@ -49,6 +50,11 @@ public class Unlocks : KMonoBehaviour
 			this.unlocked.Add(unlockID);
 			this.SaveUnlocks();
 			Game.Instance.Trigger(1594320620, unlockID);
+			MessageNotification messageNotification = this.GenerateCodexUnlockNotification(unlockID);
+			if (messageNotification != null)
+			{
+				base.GetComponent<Notifier>().Add(messageNotification, string.Empty);
+			}
 		}
 	}
 
@@ -163,6 +169,43 @@ public class Unlocks : KMonoBehaviour
 				this.Unlock(text);
 				return text;
 			}
+		}
+		return null;
+	}
+
+	private MessageNotification GenerateCodexUnlockNotification(string lockID)
+	{
+		string entryForLock = CodexCache.GetEntryForLock(lockID);
+		string text = null;
+		if (CodexCache.FindSubEntry(lockID) != null)
+		{
+			text = CodexCache.FindSubEntry(lockID).title;
+		}
+		else if (CodexCache.FindSubEntry(entryForLock) != null)
+		{
+			text = CodexCache.FindSubEntry(entryForLock).title;
+		}
+		else if (CodexCache.FindEntry(entryForLock) != null)
+		{
+			text = CodexCache.FindEntry(entryForLock).title;
+		}
+		string text2 = UI.FormatAsLink(Strings.Get(text), entryForLock);
+		if (!string.IsNullOrEmpty(text))
+		{
+			ContentContainer contentContainer = CodexCache.FindEntry(entryForLock).contentContainers.Find((ContentContainer match) => match.lockID == lockID);
+			if (contentContainer != null)
+			{
+				foreach (ICodexWidget codexWidget in contentContainer.content)
+				{
+					CodexText codexText = codexWidget as CodexText;
+					if (codexText != null)
+					{
+						text2 = text2 + "\n\n" + codexText.text;
+					}
+				}
+			}
+			CodexUnlockedMessage codexUnlockedMessage = new CodexUnlockedMessage(lockID, text2);
+			return new MessageNotification(codexUnlockedMessage);
 		}
 		return null;
 	}

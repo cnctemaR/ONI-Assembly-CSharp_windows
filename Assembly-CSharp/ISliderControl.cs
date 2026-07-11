@@ -17,4 +17,6 @@ public interface ISliderControl
 	void SetSliderValue(float percent, int index);
 
 	string GetSliderTooltipKey(int index);
+
+	string GetSliderTooltip();
 }

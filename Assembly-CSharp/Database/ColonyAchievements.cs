@@ -187,6 +187,10 @@ namespace Database
 			{
 				new BlockedCometWithBunkerDoor()
 			}, string.Empty, string.Empty, string.Empty, string.Empty, null, string.Empty, string.Empty));
+			this.IdleDuplicants = base.Add(new ColonyAchievement("IdleDuplicants", "IDLE_DUPLICANTS", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.IDLE_DUPLICANTS, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.IDLE_DUPLICANTS_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+			{
+				new DupesVsSolidTransferArmFetch(0.51f, 5)
+			}, string.Empty, string.Empty, string.Empty, string.Empty, null, string.Empty, string.Empty));
 		}
 
 		public ColonyAchievement Thriving;
@@ -254,5 +258,7 @@ namespace Database
 		public ColonyAchievement HatchRefinement;
 
 		public ColonyAchievement BunkerDoorDefense;
+
+		public ColonyAchievement IdleDuplicants;
 	}
 }

@@ -222,7 +222,41 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails
 		}
 	}
 
+	public void LogFetchChore(GameObject fetcher, ChoreType choreType)
+	{
+		if (choreType == Db.Get().ChoreTypes.StorageFetch || choreType == Db.Get().ChoreTypes.BuildFetch || choreType == Db.Get().ChoreTypes.RepairFetch || choreType == Db.Get().ChoreTypes.FoodFetch || choreType == Db.Get().ChoreTypes.Transport)
+		{
+			return;
+		}
+		Dictionary<int, int> dictionary = null;
+		if (fetcher.GetComponent<SolidTransferArm>() != null)
+		{
+			dictionary = this.fetchAutomatedChoreDeliveries;
+		}
+		else if (fetcher.GetComponent<MinionIdentity>() != null)
+		{
+			dictionary = this.fetchDupeChoreDeliveries;
+		}
+		if (dictionary != null)
+		{
+			int cycle = GameClock.Instance.GetCycle();
+			if (!dictionary.ContainsKey(cycle))
+			{
+				dictionary.Add(cycle, 0);
+			}
+			Dictionary<int, int> dictionary2;
+			int num;
+			(dictionary2 = dictionary)[num = cycle] = dictionary2[num] + 1;
+		}
+	}
+
 	public Dictionary<string, ColonyAchievementStatus> achievements = new Dictionary<string, ColonyAchievementStatus>();
+
+	[Serialize]
+	public Dictionary<int, int> fetchAutomatedChoreDeliveries = new Dictionary<int, int>();
+
+	[Serialize]
+	public Dictionary<int, int> fetchDupeChoreDeliveries = new Dictionary<int, int>();
 
 	private SchedulerHandle checkAchievementsHandle;
 

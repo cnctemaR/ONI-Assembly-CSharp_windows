@@ -66,6 +66,49 @@ public class BuildingDef : Def
 		return false;
 	}
 
+	public bool IsReplacementLayerOccupied(int cell)
+	{
+		if (Grid.Objects[cell, (int)this.ReplacementLayer] != null)
+		{
+			return true;
+		}
+		if (this.EquivalentReplacementLayers != null)
+		{
+			foreach (ObjectLayer objectLayer in this.EquivalentReplacementLayers)
+			{
+				if (Grid.Objects[cell, (int)objectLayer] != null)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		return false;
+	}
+
+	public GameObject GetReplacementCandidate(int cell)
+	{
+		if (this.ReplacementCandidateLayers != null)
+		{
+			foreach (ObjectLayer objectLayer in this.ReplacementCandidateLayers)
+			{
+				if (Grid.ObjectLayers[(int)objectLayer].ContainsKey(cell))
+				{
+					BuildingComplete component = Grid.ObjectLayers[(int)objectLayer][cell].GetComponent<BuildingComplete>();
+					if (component != null)
+					{
+						return Grid.ObjectLayers[(int)objectLayer][cell];
+					}
+				}
+			}
+		}
+		else if (Grid.ObjectLayers[(int)this.TileLayer].ContainsKey(cell))
+		{
+			return Grid.ObjectLayers[(int)this.TileLayer][cell];
+		}
+		return null;
+	}
+
 	public GameObject Create(Vector3 pos, Storage resource_storage, IList<Tag> selected_elements, Recipe recipe, float temperature, GameObject obj)
 	{
 		SimUtil.DiseaseInfo diseaseInfo = SimUtil.DiseaseInfo.Invalid;
@@ -1396,6 +1439,10 @@ public class BuildingDef : Def
 	public bool CanMove;
 
 	public List<Tag> ReplacementTags;
+
+	public List<ObjectLayer> ReplacementCandidateLayers;
+
+	public List<ObjectLayer> EquivalentReplacementLayers;
 
 	[HashedEnum]
 	[NonSerialized]

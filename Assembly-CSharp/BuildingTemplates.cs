@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BuildingTemplates
@@ -49,6 +50,32 @@ public class BuildingTemplates
 	public static void CreateStandardBuildingDef(BuildingDef def)
 	{
 		def.Breakable = true;
+	}
+
+	public static void CreateFoundationTileDef(BuildingDef def)
+	{
+		def.IsFoundation = true;
+		def.TileLayer = ObjectLayer.FoundationTile;
+		def.ReplacementLayer = ObjectLayer.ReplacementTile;
+		def.ReplacementCandidateLayers = new List<ObjectLayer>
+		{
+			ObjectLayer.FoundationTile,
+			ObjectLayer.LadderTile
+		};
+		def.ReplacementTags = new List<Tag>
+		{
+			GameTags.FloorTiles,
+			GameTags.Ladders
+		};
+		def.EquivalentReplacementLayers = new List<ObjectLayer> { ObjectLayer.ReplacementLadder };
+	}
+
+	public static void CreateLadderDef(BuildingDef def)
+	{
+		def.TileLayer = ObjectLayer.LadderTile;
+		def.ReplacementLayer = ObjectLayer.ReplacementLadder;
+		def.ReplacementTags = new List<Tag> { GameTags.Ladders };
+		def.EquivalentReplacementLayers = new List<ObjectLayer> { ObjectLayer.ReplacementTile };
 	}
 
 	public static void CreateElectricalBuildingDef(BuildingDef def)

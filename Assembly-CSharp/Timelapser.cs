@@ -124,6 +124,8 @@ public class Timelapser : KMonoBehaviour
 					this.freezeCamera.enabled = false;
 					DebugHandler.SetHideUI(false);
 					this.screenshotPending = false;
+					this.screenshotActive = false;
+					this.debugScreenShot = false;
 				}
 			}
 		}
@@ -144,19 +146,20 @@ public class Timelapser : KMonoBehaviour
 		{
 			return;
 		}
-		int num2 = Grid.PosToCell(telepad);
-		for (int i = 0; i < Grid.CellCount; i++)
+		Vector3 position = telepad.transform.GetPosition();
+		foreach (BuildingComplete buildingComplete in Components.BuildingCompletes.Items)
 		{
-			if (Grid.Revealed[i])
+			Vector3 position2 = buildingComplete.transform.GetPosition();
+			float num2 = (float)this.bufferRenderTexture.width / (float)this.bufferRenderTexture.height;
+			Vector3 vector = position - position2;
+			num = Mathf.Max(new float[]
 			{
-				num = Mathf.Max(new float[]
-				{
-					num,
-					(float)Grid.GetOffset(i, num2).x * (1f / ((float)Grid.WidthInCells / (float)Grid.HeightInCells)),
-					(float)Grid.GetOffset(i, num2).y * (1f / ((float)Grid.HeightInCells / (float)Grid.WidthInCells))
-				});
-			}
+				num,
+				vector.x / num2,
+				vector.y
+			});
 		}
+		num += 10f;
 		num = Mathf.Max(num, 18f);
 		Camera overlayCamera = CameraController.Instance.overlayCamera;
 		this.camSize = overlayCamera.orthographicSize;
@@ -171,6 +174,7 @@ public class Timelapser : KMonoBehaviour
 		GameObject telepad = GameUtil.GetTelepad();
 		if (telepad == null)
 		{
+			global::Debug.Log("No telepad present, aborting screenshot.");
 			return;
 		}
 		RenderTexture active = RenderTexture.active;
@@ -182,8 +186,6 @@ public class Timelapser : KMonoBehaviour
 		CameraController.Instance.SetPosition(this.camPosition);
 		CameraController.Instance.SetTargetPos(this.camPosition, this.camSize, false);
 		RenderTexture.active = active;
-		this.screenshotActive = false;
-		this.debugScreenShot = false;
 	}
 
 	public void WriteToPng(RenderTexture renderTex)
@@ -204,12 +206,12 @@ public class Timelapser : KMonoBehaviour
 		}
 		string text2 = RetireColonyUtility.StripInvalidCharacters(SaveGame.Instance.BaseName);
 		string text3 = Path.Combine(text, text2);
-		global::Debug.Log(text3);
 		if (!Directory.Exists(text3))
 		{
 			Directory.CreateDirectory(text3);
 		}
 		string text4 = Path.Combine(text3, text2);
+		DebugUtil.LogArgs(new object[] { "Saving screenshot to", text4 });
 		string text5 = "0000.##";
 		text4 = text4 + "_cycle_" + GameClock.Instance.GetCycle().ToString(text5);
 		if (this.debugScreenShot)

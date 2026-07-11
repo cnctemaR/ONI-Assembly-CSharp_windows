@@ -233,6 +233,11 @@ public class Clinic : Workable, IEffectDescriptor, ISingleSliderControl, ISlider
 		}
 	}
 
+	string ISliderControl.GetSliderTooltip()
+	{
+		return string.Format(Strings.Get("STRINGS.UI.UISIDESCREENS.MEDICALCOTSIDESCREEN.TOOLTIP"), this.sicknessSliderValue);
+	}
+
 	string ISliderControl.GetSliderTooltipKey(int index)
 	{
 		return "STRINGS.UI.UISIDESCREENS.MEDICALCOTSIDESCREEN.TOOLTIP";

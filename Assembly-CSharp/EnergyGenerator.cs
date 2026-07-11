@@ -12,7 +12,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 	{
 		get
 		{
-			return "STRINGS.UI.UISIDESCREENS.MANUALGENERATORSIDESCREEN.TITLE";
+			return "STRINGS.UI.UISIDESCREENS.MANUALDELIVERYGENERATORSIDESCREEN.TITLE";
 		}
 	}
 
@@ -49,9 +49,15 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 		this.batteryRefillPercent = value / 100f;
 	}
 
+	string ISliderControl.GetSliderTooltip()
+	{
+		ManualDeliveryKG component = base.GetComponent<ManualDeliveryKG>();
+		return string.Format(Strings.Get("STRINGS.UI.UISIDESCREENS.MANUALDELIVERYGENERATORSIDESCREEN.TOOLTIP"), component.requestedItemTag.ProperName(), this.batteryRefillPercent * 100f);
+	}
+
 	public string GetSliderTooltipKey(int index)
 	{
-		return "STRINGS.UI.UISIDESCREENS.MANUALGENERATORSIDESCREEN.TOOLTIP";
+		return "STRINGS.UI.UISIDESCREENS.MANUALDELIVERYGENERATORSIDESCREEN.TOOLTIP";
 	}
 
 	protected override void OnPrefabInit()

@@ -84,6 +84,10 @@ public class PlanterSideScreen : ReceptacleSideScreen
 			this.EffectsDescriptorPanel.SetDescriptors(plantEffectDescriptors);
 			this.EffectsDescriptorPanel.gameObject.SetActive(true);
 		}
+		else
+		{
+			this.EffectsDescriptorPanel.gameObject.SetActive(false);
+		}
 	}
 
 	protected override bool AdditionalCanDepositTest()

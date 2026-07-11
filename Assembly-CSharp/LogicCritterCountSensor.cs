@@ -52,6 +52,11 @@ public class LogicCritterCountSensor : Switch, ISaveLoadable, ISim200ms, IIntSli
 		return "STRINGS.UI.UISIDESCREENS.CRITTER_COUNT_SIDE_SCREEN.TOOLTIP";
 	}
 
+	string ISliderControl.GetSliderTooltip()
+	{
+		return string.Format(Strings.Get("STRINGS.UI.UISIDESCREENS.CRITTER_COUNT_SIDE_SCREEN.TOOLTIP"), this.countThreshold);
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

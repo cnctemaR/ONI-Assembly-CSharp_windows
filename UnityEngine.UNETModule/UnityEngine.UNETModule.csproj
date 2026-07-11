@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{CA898652-8F7A-4DBA-B83E-BEC3E5B328CE}</ProjectGuid>
+    <ProjectGuid>{6188D4E0-E98D-4759-9291-AA4BCF2EC028}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Networking</RootNamespace>
     <AssemblyName>UnityEngine.UNETModule</AssemblyName>
@@ -60,31 +60,31 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{CA898652-8F7A-4DBA-B83E-BEC3E5B3288F}</Project>
+      <Project>{6188D4E0-E98D-4759-9291-AA4BCF2EBFE9}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{CA898652-8F7A-4DBA-B83E-BEC3E5B32892}</Project>
+      <Project>{6188D4E0-E98D-4759-9291-AA4BCF2EBFEC}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{CA898652-8F7A-4DBA-B83E-BEC3E5B32894}</Project>
+      <Project>{6188D4E0-E98D-4759-9291-AA4BCF2EBFEE}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{CA898652-8F7A-4DBA-B83E-BEC3E5B328A6}</Project>
+      <Project>{6188D4E0-E98D-4759-9291-AA4BCF2EC000}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.JSONSerializeModule\UnityEngine.JSONSerializeModule.csproj">
-      <Project>{CA898652-8F7A-4DBA-B83E-BEC3E5B328B2}</Project>
+      <Project>{6188D4E0-E98D-4759-9291-AA4BCF2EC00C}</Project>
       <Name>UnityEngine.JSONSerializeModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{CA898652-8F7A-4DBA-B83E-BEC3E5B328BC}</Project>
+      <Project>{6188D4E0-E98D-4759-9291-AA4BCF2EC016}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestModule\UnityEngine.UnityWebRequestModule.csproj">
-      <Project>{CA898652-8F7A-4DBA-B83E-BEC3E5B328D3}</Project>
+      <Project>{6188D4E0-E98D-4759-9291-AA4BCF2EC02D}</Project>
       <Name>UnityEngine.UnityWebRequestModule</Name>
     </ProjectReference>
   </ItemGroup>

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{CA898652-8F7A-4DBA-B83E-BEC3E5B328C4}</ProjectGuid>
+    <ProjectGuid>{6188D4E0-E98D-4759-9291-AA4BCF2EC01E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.TerrainPhysicsModule</AssemblyName>
@@ -19,19 +19,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{CA898652-8F7A-4DBA-B83E-BEC3E5B3288F}</Project>
+      <Project>{6188D4E0-E98D-4759-9291-AA4BCF2EBFE9}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{CA898652-8F7A-4DBA-B83E-BEC3E5B328B9}</Project>
+      <Project>{6188D4E0-E98D-4759-9291-AA4BCF2EC013}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{CA898652-8F7A-4DBA-B83E-BEC3E5B328BC}</Project>
+      <Project>{6188D4E0-E98D-4759-9291-AA4BCF2EC016}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TerrainModule\UnityEngine.TerrainModule.csproj">
-      <Project>{CA898652-8F7A-4DBA-B83E-BEC3E5B328C3}</Project>
+      <Project>{6188D4E0-E98D-4759-9291-AA4BCF2EC01D}</Project>
       <Name>UnityEngine.TerrainModule</Name>
     </ProjectReference>
   </ItemGroup>

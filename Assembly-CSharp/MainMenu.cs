@@ -196,7 +196,7 @@ public class MainMenu : KMonoBehaviour
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 302293U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 303707U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}

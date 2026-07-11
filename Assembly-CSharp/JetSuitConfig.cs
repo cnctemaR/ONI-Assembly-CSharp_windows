@@ -47,6 +47,11 @@ public class JetSuitConfig : IEquipmentConfig
 				{
 					targetGameObject.GetAttributes().Get(Db.Get().Attributes.Athletics).Add(SuitExpert.AthleticsModifier);
 				}
+				KAnimControllerBase component3 = targetGameObject.GetComponent<KAnimControllerBase>();
+				if (component3)
+				{
+					component3.AddAnimOverrides(Assets.GetAnim("anim_loco_hover_kanim"), 0f);
+				}
 			}
 		};
 		equipmentDef.OnUnequipCallBack = delegate(Equippable eq)
@@ -59,11 +64,16 @@ public class JetSuitConfig : IEquipmentConfig
 				if (attributes != null)
 				{
 					attributes.Get(Db.Get().Attributes.Athletics).Remove(SuitExpert.AthleticsModifier);
+					KAnimControllerBase component4 = targetGameObject2.GetComponent<KAnimControllerBase>();
+					if (component4)
+					{
+						component4.RemoveAnimOverrides(Assets.GetAnim("anim_loco_hover_kanim"));
+					}
 				}
-				Navigator component3 = targetGameObject2.GetComponent<Navigator>();
-				if (component3 != null)
+				Navigator component5 = targetGameObject2.GetComponent<Navigator>();
+				if (component5 != null)
 				{
-					component3.ClearFlags(PathFinder.PotentialPath.Flags.HasJetPack);
+					component5.ClearFlags(PathFinder.PotentialPath.Flags.HasJetPack);
 				}
 			}
 		};

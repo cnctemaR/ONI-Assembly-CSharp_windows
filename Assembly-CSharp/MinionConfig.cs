@@ -80,7 +80,6 @@ public class MinionConfig : IEntityConfig
 			Assets.GetAnim("anim_loco_firepole_kanim"),
 			Assets.GetAnim("anim_loco_new_kanim"),
 			Assets.GetAnim("anim_loco_tube_kanim"),
-			Assets.GetAnim("anim_loco_hover_kanim"),
 			Assets.GetAnim("anim_construction_firepole_kanim"),
 			Assets.GetAnim("anim_construction_jetsuit_kanim")
 		};

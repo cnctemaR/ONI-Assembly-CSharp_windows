@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{CBB8894E-7850-4E23-9320-6198CD2975C4}</ProjectGuid>
+    <ProjectGuid>{86D2E607-58F2-45E4-AB28-19216914D455}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.ClothModule</AssemblyName>
@@ -21,15 +21,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{CBB8894E-7850-4E23-9320-6198CD2975C7}</Project>
+      <Project>{86D2E607-58F2-45E4-AB28-19216914D458}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{CBB8894E-7850-4E23-9320-6198CD2975D8}</Project>
+      <Project>{86D2E607-58F2-45E4-AB28-19216914D469}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{CBB8894E-7850-4E23-9320-6198CD2975DB}</Project>
+      <Project>{86D2E607-58F2-45E4-AB28-19216914D46C}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

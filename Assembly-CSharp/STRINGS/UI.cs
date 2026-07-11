@@ -2165,7 +2165,7 @@ namespace STRINGS
 
 				public static LocString SUDDENMORALEHELPER_DISABLE = "2) Disable Morale";
 
-				public static LocString NEWAUTOMATIONWARNING = "The following buildings have acquired new automation ports!\n\nThese buildings in your colony can now be connected to existing " + BUILDINGS.PREFABS.LOGICWIRE.NAME + "s.";
+				public static LocString NEWAUTOMATIONWARNING = "The following buildings have acquired new automation ports!\n\nTake a moment to check whether these buildings in your colony are now unintentionally connected to existing " + BUILDINGS.PREFABS.LOGICWIRE.NAME + "s.";
 
 				public static LocString NEWAUTOMATIONWARNING_TITLE = "AUTOMATION CHANGES";
 			}

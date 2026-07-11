@@ -127,11 +127,10 @@ public class Constructable : Workable, ISaveLoadable
 				float temperature = component7.Temperature;
 				byte diseaseIdx = component7.DiseaseIdx;
 				int diseaseCount = component7.DiseaseCount;
-				Building component8 = replacementCandidate.GetComponent<Building>();
-				Deconstructable component9 = replacementCandidate.GetComponent<Deconstructable>();
-				global::Debug.Assert(component9 != null, "Shouldn't be able to replace over an object that can't be deconstructed");
-				replacementCandidate.Trigger(1606648047, component8.Def.TileLayer);
-				component9.TriggerDestroy(component8, temperature, diseaseIdx, diseaseCount);
+				global::Debug.Assert(component7.Element != null && component7.Element.tag != null);
+				Deconstructable.SpawnItem(component7.transform.GetPosition(), component7.GetComponent<Building>().Def, component7.Element.tag, mass, temperature, diseaseIdx, diseaseCount);
+				replacementCandidate.Trigger(1606648047, this.building.Def.TileLayer);
+				replacementCandidate.DeleteObject();
 			}
 		}
 		if (flag2)

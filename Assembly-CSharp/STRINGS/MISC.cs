@@ -1005,6 +1005,13 @@ namespace STRINGS
 				public static LocString MESSAGEBODY = "When connecting pipes it is useful to have the Plumbing Overlay " + UI.FormatAsHotkey("[F6]") + " selected. Each building which requires plumbing must have their Building Intake connected to the Output Pipe from a source such as a Liquid Pump. Liquid Pumps must be submerged in water and attached to a power source to function.\n\nBuildings often output contaminated water which must flow out of the building through piping from the Output Pipe. The water can then be expelled through Liquid Vent or filtered through a Liquid Filter and reused.";
 			}
 
+			public class NEW_AUTOMATION_WARNING
+			{
+				public static LocString NAME = "New Automation Port";
+
+				public static LocString TOOLTIP = "This building has a new automation port and is unintentionally connected to an existing " + BUILDINGS.PREFABS.LOGICWIRE.NAME;
+			}
+
 			public class DTU
 			{
 				public static LocString NAME = "Tutorial: Duplicant Thermal Units";

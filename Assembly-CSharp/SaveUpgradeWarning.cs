@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Database;
 using Klei.AI;
@@ -87,17 +88,65 @@ public class SaveUpgradeWarning : KMonoBehaviour
 		{
 			screen.Deactivate();
 		});
-		string[] array = new string[] { "LiquidVent", "GasVent", "GasVentHighPressure", "SolidVent", "LiquidReservoir", "GasReservoir" };
+		string[] array = SaveUpgradeWarning.buildingIDsWithNewPorts;
 		for (int i = 0; i < array.Length; i++)
 		{
 			BuildingDef buildingDef = Assets.GetBuildingDef(array[i]);
 			screen.AddSprite(buildingDef.GetUISprite("ui", false), buildingDef.Name);
 		}
 		screen.PopupConfirmDialog(UI.FRONTEND.SAVEUPGRADEWARNINGS.NEWAUTOMATIONWARNING, UI.FRONTEND.SAVEUPGRADEWARNINGS.NEWAUTOMATIONWARNING_TITLE);
+		base.StartCoroutine(this.SendAutomationWarningNotifications());
+	}
+
+	private IEnumerator SendAutomationWarningNotifications()
+	{
+		yield return new WaitForEndOfFrame();
+		if (Components.BuildingCompletes.Count == 0)
+		{
+			global::Debug.LogWarning("Could not send automation warnings because buildings have not yet loaded");
+		}
+		using (IEnumerator enumerator = Components.BuildingCompletes.GetEnumerator())
+		{
+			while (enumerator.MoveNext())
+			{
+				object obj = enumerator.Current;
+				BuildingComplete buildingComplete = (BuildingComplete)obj;
+				foreach (string text in SaveUpgradeWarning.buildingIDsWithNewPorts)
+				{
+					BuildingDef buildingDef = Assets.GetBuildingDef(text);
+					if (buildingComplete.Def == buildingDef)
+					{
+						List<ILogicUIElement> list = new List<ILogicUIElement>();
+						LogicPorts component = buildingComplete.GetComponent<LogicPorts>();
+						if (component.outputPorts != null)
+						{
+							list.AddRange(component.outputPorts);
+						}
+						if (component.inputPorts != null)
+						{
+							list.AddRange(component.inputPorts);
+						}
+						foreach (ILogicUIElement logicUIElement in list)
+						{
+							if (Grid.Objects[logicUIElement.GetLogicUICell(), 31] != null)
+							{
+								global::Debug.Log("Triggering automation warning for building of type " + text);
+								GenericMessage genericMessage = new GenericMessage(MISC.NOTIFICATIONS.NEW_AUTOMATION_WARNING.NAME, MISC.NOTIFICATIONS.NEW_AUTOMATION_WARNING.TOOLTIP, MISC.NOTIFICATIONS.NEW_AUTOMATION_WARNING.TOOLTIP, buildingComplete);
+								Messenger.Instance.QueueMessage(genericMessage);
+							}
+						}
+					}
+				}
+			}
+			yield break;
+		}
+		yield break;
 	}
 
 	[MyCmpReq]
 	private Game game;
+
+	private static string[] buildingIDsWithNewPorts = new string[] { "LiquidVent", "GasVent", "GasVentHighPressure", "SolidVent", "LiquidReservoir", "GasReservoir" };
 
 	private struct Upgrade
 	{

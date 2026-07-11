@@ -312,7 +312,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		string text = "This is a message notification. ";
 		int num = this.debugMessageCount;
 		this.debugMessageCount = num + 1;
-		Message message = new GenericMessage(text + num.ToString(), MISC.NOTIFICATIONS.LOCOMOTIONMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.LOCOMOTIONMESSAGE.TOOLTIP);
+		Message message = new GenericMessage(text + num.ToString(), MISC.NOTIFICATIONS.LOCOMOTIONMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.LOCOMOTIONMESSAGE.TOOLTIP, null);
 		Messenger.Instance.QueueMessage(message);
 	}
 

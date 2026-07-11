@@ -8,7 +8,7 @@ public class TutorialMessage : GenericMessage
 	}
 
 	public TutorialMessage(Tutorial.TutorialMessages messageId, string title, string body, string tooltip, string videoClipId = null, string videoOverlayName = null, string videoTitleText = null, string icon = "")
-		: base(title, body, tooltip)
+		: base(title, body, tooltip, null)
 	{
 		this.messageId = messageId;
 		this.videoClipId = videoClipId;

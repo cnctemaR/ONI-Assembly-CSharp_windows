@@ -103,7 +103,7 @@ public class Deconstructable : Workable
 		base.Trigger(-702296337, this);
 	}
 
-	public void TriggerDestroy(Building building, float temperature, byte disease_idx, int disease_count)
+	private void TriggerDestroy(Building building, float temperature, byte disease_idx, int disease_count)
 	{
 		if (this == null || this.destroyed)
 		{
@@ -186,7 +186,7 @@ public class Deconstructable : Workable
 		}
 	}
 
-	private static GameObject SpawnItem(Vector3 position, BuildingDef def, Tag src_element, float src_mass, float src_temperature, byte disease_idx, int disease_count)
+	public static GameObject SpawnItem(Vector3 position, BuildingDef def, Tag src_element, float src_mass, float src_temperature, byte disease_idx, int disease_count)
 	{
 		GameObject gameObject = null;
 		int num = Grid.PosToCell(position);

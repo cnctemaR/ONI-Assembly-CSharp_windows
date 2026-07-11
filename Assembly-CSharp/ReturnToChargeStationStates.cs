@@ -21,6 +21,12 @@ public class ReturnToChargeStationStates : GameStateMachine<ReturnToChargeStatio
 		{
 			smi.master.GetComponent<Facing>().Face(this.GetSweepLocker(smi).gameObject.transform.position + Vector3.right);
 			this.GetSweepLocker(smi).GetComponent<SweepBotStation>().StartCharging();
+			Vector3 position = smi.transform.GetPosition();
+			position.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingUse);
+			smi.transform.SetPosition(position);
+			KBatchedAnimController component = smi.GetComponent<KBatchedAnimController>();
+			component.enabled = false;
+			component.enabled = true;
 		}).Exit(delegate(ReturnToChargeStationStates.Instance smi)
 		{
 			Storage sweepLocker2 = this.GetSweepLocker(smi);
@@ -28,6 +34,12 @@ public class ReturnToChargeStationStates : GameStateMachine<ReturnToChargeStatio
 			{
 				sweepLocker2.GetComponent<SweepBotStation>().StopCharging();
 			}
+			Vector3 position2 = smi.transform.GetPosition();
+			position2.z = Grid.GetLayerZ(Grid.SceneLayer.Creatures);
+			smi.transform.SetPosition(position2);
+			KBatchedAnimController component2 = smi.GetComponent<KBatchedAnimController>();
+			component2.enabled = false;
+			component2.enabled = true;
 		});
 		this.chargingstates.waitingForCharging.PlayAnim("react_base", KAnim.PlayMode.Loop).TagTransition(GameTags.Robots.Behaviours.RechargeBehaviour, this.chargingstates.completed, true).Transition(this.chargingstates.charging, (ReturnToChargeStationStates.Instance smi) => smi.StationReadyToCharge(), UpdateRate.SIM_200ms);
 		this.chargingstates.charging.TagTransition(GameTags.Robots.Behaviours.RechargeBehaviour, this.chargingstates.completed, true).Transition(this.chargingstates.interupted, (ReturnToChargeStationStates.Instance smi) => !smi.StationReadyToCharge(), UpdateRate.SIM_200ms).ToggleEffect("Charging")

@@ -113,12 +113,7 @@ namespace Steamworks
 			{
 				return false;
 			}
-			CSteamAPIContext.m_pController = SteamClient.GetISteamController(hsteamUser, hsteamPipe, "SteamController007");
-			if (CSteamAPIContext.m_pController == IntPtr.Zero)
-			{
-				return false;
-			}
-			CSteamAPIContext.m_pSteamUGC = SteamClient.GetISteamUGC(hsteamUser, hsteamPipe, "STEAMUGC_INTERFACE_VERSION014");
+			CSteamAPIContext.m_pSteamUGC = SteamClient.GetISteamUGC(hsteamUser, hsteamPipe, "STEAMUGC_INTERFACE_VERSION015");
 			if (CSteamAPIContext.m_pSteamUGC == IntPtr.Zero)
 			{
 				return false;
@@ -158,7 +153,7 @@ namespace Steamworks
 			{
 				return false;
 			}
-			CSteamAPIContext.m_pSteamInput = SteamClient.GetISteamInput(hsteamUser, hsteamPipe, "SteamInput001");
+			CSteamAPIContext.m_pSteamInput = SteamClient.GetISteamInput(hsteamUser, hsteamPipe, "SteamInput002");
 			if (CSteamAPIContext.m_pSteamInput == IntPtr.Zero)
 			{
 				return false;

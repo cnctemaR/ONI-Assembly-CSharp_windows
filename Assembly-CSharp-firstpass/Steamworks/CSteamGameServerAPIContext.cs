@@ -66,7 +66,7 @@ namespace Steamworks
 			{
 				return false;
 			}
-			CSteamGameServerAPIContext.m_pSteamUGC = SteamGameServerClient.GetISteamUGC(hsteamUser, hsteamPipe, "STEAMUGC_INTERFACE_VERSION014");
+			CSteamGameServerAPIContext.m_pSteamUGC = SteamGameServerClient.GetISteamUGC(hsteamUser, hsteamPipe, "STEAMUGC_INTERFACE_VERSION015");
 			if (CSteamGameServerAPIContext.m_pSteamUGC == IntPtr.Zero)
 			{
 				return false;

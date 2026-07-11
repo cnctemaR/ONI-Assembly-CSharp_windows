@@ -12,8 +12,6 @@ namespace Steamworks
 
 		public const string STEAMCLIENT_INTERFACE_VERSION = "SteamClient020";
 
-		public const string STEAMCONTROLLER_INTERFACE_VERSION = "SteamController007";
-
 		public const string STEAMFRIENDS_INTERFACE_VERSION = "SteamFriends017";
 
 		public const string STEAMGAMECOORDINATOR_INTERFACE_VERSION = "SteamGameCoordinator001";
@@ -26,7 +24,7 @@ namespace Steamworks
 
 		public const string STEAMHTTP_INTERFACE_VERSION = "STEAMHTTP_INTERFACE_VERSION003";
 
-		public const string STEAMINPUT_INTERFACE_VERSION = "SteamInput001";
+		public const string STEAMINPUT_INTERFACE_VERSION = "SteamInput002";
 
 		public const string STEAMINVENTORY_INTERFACE_VERSION = "STEAMINVENTORY_INTERFACE_V003";
 
@@ -44,7 +42,7 @@ namespace Steamworks
 
 		public const string STEAMNETWORKING_INTERFACE_VERSION = "SteamNetworking006";
 
-		public const string STEAMNETWORKINGMESSAGES_VERSION = "SteamNetworkingMessages002";
+		public const string STEAMNETWORKINGMESSAGES_INTERFACE_VERSION = "SteamNetworkingMessages002";
 
 		public const string STEAMNETWORKINGSOCKETS_INTERFACE_VERSION = "SteamNetworkingSockets009";
 
@@ -58,7 +56,7 @@ namespace Steamworks
 
 		public const string STEAMSCREENSHOTS_INTERFACE_VERSION = "STEAMSCREENSHOTS_INTERFACE_VERSION003";
 
-		public const string STEAMUGC_INTERFACE_VERSION = "STEAMUGC_INTERFACE_VERSION014";
+		public const string STEAMUGC_INTERFACE_VERSION = "STEAMUGC_INTERFACE_VERSION015";
 
 		public const string STEAMUSER_INTERFACE_VERSION = "SteamUser021";
 
@@ -87,20 +85,6 @@ namespace Steamworks
 		public const int k_cchMaxRichPresenceKeyLength = 64;
 
 		public const int k_cchMaxRichPresenceValueLength = 256;
-
-		public const int k_unServerFlagNone = 0;
-
-		public const int k_unServerFlagActive = 1;
-
-		public const int k_unServerFlagSecure = 2;
-
-		public const int k_unServerFlagDedicated = 4;
-
-		public const int k_unServerFlagLinux = 8;
-
-		public const int k_unServerFlagPassworded = 16;
-
-		public const int k_unServerFlagPrivate = 32;
 
 		public const int k_unFavoriteFlagNone = 0;
 
@@ -360,24 +344,6 @@ namespace Steamworks
 
 		public const ulong k_ulPartyBeaconIdInvalid = 0UL;
 
-		public const int STEAM_CONTROLLER_MAX_COUNT = 16;
-
-		public const int STEAM_CONTROLLER_MAX_ANALOG_ACTIONS = 16;
-
-		public const int STEAM_CONTROLLER_MAX_DIGITAL_ACTIONS = 128;
-
-		public const int STEAM_CONTROLLER_MAX_ORIGINS = 8;
-
-		public const int STEAM_CONTROLLER_MAX_ACTIVE_LAYERS = 16;
-
-		public const ulong STEAM_CONTROLLER_HANDLE_ALL_CONTROLLERS = 18446744073709551615UL;
-
-		public const float STEAM_CONTROLLER_MIN_ANALOG_ACTION_DATA = -1f;
-
-		public const float STEAM_CONTROLLER_MAX_ANALOG_ACTION_DATA = 1f;
-
-		public const ushort MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE = 65535;
-
 		public const int INVALID_HTTPREQUEST_HANDLE = 0;
 
 		public const int STEAM_INPUT_MAX_COUNT = 16;
@@ -401,6 +367,8 @@ namespace Steamworks
 		public const int k_SteamMusicNameMaxLength = 255;
 
 		public const int k_SteamMusicPNGMaxLength = 65535;
+
+		public const ushort MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE = 65535;
 
 		public const int QUERY_PORT_NOT_INITIALIZED = 65535;
 

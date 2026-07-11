@@ -29,7 +29,7 @@ public class BuildWatermark : KScreen
 		}
 		else
 		{
-			text += 455509U.ToString();
+			text += 460672U.ToString();
 			if (DebugHandler.enabled)
 			{
 				text += "-D";

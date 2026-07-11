@@ -92,14 +92,17 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 			LoopingSoundManager.Get().UpdateSecondParameter(soundInfo.handle, FallingWater.HASH_LIQUIDVOLUME, SoundUtil.GetLiquidVolume(base_mass));
 			this.topSounds[num] = soundInfo;
 		}
+		int num2 = base_disease_count;
 		while (base_mass > 0f)
 		{
-			float num2 = global::UnityEngine.Random.value * 2f * this.particleMassVariation - this.particleMassVariation;
-			float num3 = Mathf.Max(0f, Mathf.Min(base_mass, this.particleMassToSplit + num2));
-			float num4 = num3 / base_mass;
-			base_mass -= num3;
-			int num5 = (int)(num4 * (float)base_disease_count);
-			int num6 = global::UnityEngine.Random.Range(0, this.numFrames);
+			float num3 = global::UnityEngine.Random.value * 2f * this.particleMassVariation - this.particleMassVariation;
+			float num4 = Mathf.Max(0f, Mathf.Min(base_mass, this.particleMassToSplit + num3));
+			float num5 = num4 / base_mass;
+			base_mass -= num4;
+			int num6 = (int)(num5 * (float)base_disease_count);
+			num6 = Mathf.Min(num2, num6);
+			num2 = Mathf.Max(0, num2 - num6);
+			int num7 = global::UnityEngine.Random.Range(0, this.numFrames);
 			Vector2 vector = (disable_randomness ? Vector2.zero : new Vector2(this.jitterStep * Mathf.Sin(this.offset), this.jitterStep * Mathf.Sin(this.offset + 17f)));
 			Vector2 vector2 = (disable_randomness ? Vector2.zero : new Vector2(global::UnityEngine.Random.Range(-this.multipleOffsetRange.x, this.multipleOffsetRange.x), global::UnityEngine.Random.Range(-this.multipleOffsetRange.y, this.multipleOffsetRange.y)));
 			Element element = ElementLoader.elements[(int)elementIdx];
@@ -129,13 +132,13 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 				vector3 += vector4;
 				vector3.x += 0.5f;
 			}
-			int num7 = Grid.PosToCell(vector3);
-			if ((Grid.Element[num7].state & Element.State.Solid) == Element.State.Solid || (Grid.Properties[num7] & 2) != 0)
+			int num8 = Grid.PosToCell(vector3);
+			if ((Grid.Element[num8].state & Element.State.Solid) == Element.State.Solid || (Grid.Properties[num8] & 2) != 0)
 			{
 				vector3.y = Mathf.Floor(vector3.y + 1f);
 			}
-			this.physics.Add(new FallingWater.ParticlePhysics(vector3, Vector2.zero, num6, elementIdx));
-			this.particleProperties.Add(new FallingWater.ParticleProperties(elementIdx, num3, temperature, disease_idx, num5, debug_track));
+			this.physics.Add(new FallingWater.ParticlePhysics(vector3, Vector2.zero, num7, elementIdx));
+			this.particleProperties.Add(new FallingWater.ParticleProperties(elementIdx, num4, temperature, disease_idx, num6, debug_track));
 		}
 	}
 

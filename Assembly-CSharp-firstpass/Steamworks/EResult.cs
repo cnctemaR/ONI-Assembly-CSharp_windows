@@ -119,6 +119,9 @@ namespace Steamworks
 		k_EResultCantRemoveItem,
 		k_EResultAccountDeleted,
 		k_EResultExistingUserCancelledLicense,
-		k_EResultCommunityCooldown
+		k_EResultCommunityCooldown,
+		k_EResultNoLauncherSpecified,
+		k_EResultMustAgreeToSSA,
+		k_EResultLauncherMigrated
 	}
 }

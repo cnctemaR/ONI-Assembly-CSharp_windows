@@ -24,6 +24,6 @@ namespace Steamworks
 		k_EAppType_Comic_UNUSED = 32768,
 		k_EAppType_Beta = 65536,
 		k_EAppType_Shortcut = 1073741824,
-		k_EAppType_DepotOnly = -2147483647
+		k_EAppType_DepotOnly_DEPRECATED = -2147483647
 	}
 }

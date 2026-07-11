@@ -27,6 +27,7 @@ namespace Steamworks
 		k_eEVRHMDType_HP_Unknown = 80,
 		k_eEVRHMDType_HP_WindowsMR,
 		k_eEVRHMDType_HP_Reverb,
+		k_eEVRHMDType_HP_ReverbG2 = 1463,
 		k_eEVRHMDType_Samsung_Unknown = 90,
 		k_eEVRHMDType_Samsung_Odyssey,
 		k_eEVRHMDType_Unannounced_Unknown = 100,

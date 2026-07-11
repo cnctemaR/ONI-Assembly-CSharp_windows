@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{D810DD35-51BA-4229-ADC5-2DCED9AB0D73}</ProjectGuid>
+    <ProjectGuid>{32B8C981-CCE7-49C4-A087-509E82C961B9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -1639,10 +1639,6 @@
     <Compile Include="Steamworks\ClientGameServerDeny_t.cs" />
     <Compile Include="Steamworks\ComputeNewPlayerCompatibilityResult_t.cs" />
     <Compile Include="Steamworks\Constants.cs" />
-    <Compile Include="Steamworks\ControllerActionSetHandle_t.cs" />
-    <Compile Include="Steamworks\ControllerAnalogActionHandle_t.cs" />
-    <Compile Include="Steamworks\ControllerDigitalActionHandle_t.cs" />
-    <Compile Include="Steamworks\ControllerHandle_t.cs" />
     <Compile Include="Steamworks\CreateBeaconCallback_t.cs" />
     <Compile Include="Steamworks\CreateItemResult_t.cs" />
     <Compile Include="Steamworks\CSteamAPIContext.cs" />
@@ -1668,7 +1664,6 @@
     <Compile Include="Steamworks\EChatRoomEnterResponse.cs" />
     <Compile Include="Steamworks\EChatSteamIDInstanceFlags.cs" />
     <Compile Include="Steamworks\ECheckFileSignature.cs" />
-    <Compile Include="Steamworks\EControllerActionOrigin.cs" />
     <Compile Include="Steamworks\EDenyReason.cs" />
     <Compile Include="Steamworks\EDurationControlNotification.cs" />
     <Compile Include="Steamworks\EDurationControlOnlineState.cs" />
@@ -1720,7 +1715,6 @@
     <Compile Include="Steamworks\ESNetSocketConnectionType.cs" />
     <Compile Include="Steamworks\ESNetSocketState.cs" />
     <Compile Include="Steamworks\ESteamAPICallFailure.cs" />
-    <Compile Include="Steamworks\ESteamControllerLEDFlag.cs" />
     <Compile Include="Steamworks\ESteamControllerPad.cs" />
     <Compile Include="Steamworks\ESteamDeviceFormFactor.cs" />
     <Compile Include="Steamworks\ESteamInputLEDFlag.cs" />
@@ -1852,8 +1846,8 @@
     <Compile Include="Steamworks\ISteamMatchmakingPlayersResponse.cs" />
     <Compile Include="Steamworks\ISteamMatchmakingRulesResponse.cs" />
     <Compile Include="Steamworks\ISteamMatchmakingServerListResponse.cs" />
-    <Compile Include="Steamworks\ISteamNetworkingConnectionCustomSignaling.cs" />
-    <Compile Include="Steamworks\ISteamNetworkingCustomSignalingRecvContext.cs" />
+    <Compile Include="Steamworks\ISteamNetworkingConnectionSignaling.cs" />
+    <Compile Include="Steamworks\ISteamNetworkingSignalingRecvContext.cs" />
     <Compile Include="Steamworks\ItemInstalled_t.cs" />
     <Compile Include="Steamworks\JoinClanChatRoomCompletionResult_t.cs" />
     <Compile Include="Steamworks\JoinPartyCallback_t.cs" />
@@ -1966,7 +1960,6 @@
     <Compile Include="Steamworks\SteamApps.cs" />
     <Compile Include="Steamworks\SteamAppUninstalled_t.cs" />
     <Compile Include="Steamworks\SteamClient.cs" />
-    <Compile Include="Steamworks\SteamController.cs" />
     <Compile Include="Steamworks\SteamDatagramGameCoordinatorServerLogin.cs" />
     <Compile Include="Steamworks\SteamDatagramHostedAddress.cs" />
     <Compile Include="Steamworks\SteamDatagramRelayAuthTicket.cs" />
@@ -2348,71 +2341,71 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FMODUnity\FMODUnity.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D75}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961BB}</Project>
       <Name>FMODUnity</Name>
     </ProjectReference>
     <ProjectReference Include="..\Ionic.Zip\Ionic.Zip.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D79}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961BF}</Project>
       <Name>Ionic.Zip</Name>
     </ProjectReference>
     <ProjectReference Include="..\LibNoiseDotNet\LibNoiseDotNet.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D7A}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961C0}</Project>
       <Name>LibNoiseDotNet</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D7D}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961C3}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D7E}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961C4}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D80}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961C6}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml.Linq\System.Xml.Linq.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D8A}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961D0}</Project>
       <Name>System.Xml.Linq</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D89}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961CF}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D82}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961C8}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.TextMeshPro\Unity.TextMeshPro.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D8B}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961D1}</Project>
       <Name>Unity.TextMeshPro</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AnimationModule\UnityEngine.AnimationModule.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D90}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961D6}</Project>
       <Name>UnityEngine.AnimationModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D97}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961DD}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0DA0}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961E6}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0DA1}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961E7}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0DB4}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961FA}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIModule\UnityEngine.UIModule.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0DB9}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961FF}</Project>
       <Name>UnityEngine.UIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0DB7}</Project>
+      <Project>{32B8C981-CCE7-49C4-A087-509E82C961FD}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
   </ItemGroup>

@@ -33,6 +33,7 @@ namespace Steamworks
 		k_ESteamNetworkingConfig_Callback_RelayNetworkStatusChanged,
 		k_ESteamNetworkingConfig_Callback_MessagesSessionRequest,
 		k_ESteamNetworkingConfig_Callback_MessagesSessionFailed,
+		k_ESteamNetworkingConfig_Callback_CreateConnectionSignaling,
 		k_ESteamNetworkingConfig_P2P_STUN_ServerList = 103,
 		k_ESteamNetworkingConfig_P2P_Transport_ICE_Enable,
 		k_ESteamNetworkingConfig_P2P_Transport_ICE_Penalty,

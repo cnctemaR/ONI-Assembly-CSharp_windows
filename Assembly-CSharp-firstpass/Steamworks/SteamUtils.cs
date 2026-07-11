@@ -47,12 +47,6 @@ namespace Steamworks
 			return NativeMethods.ISteamUtils_GetImageRGBA(CSteamAPIContext.GetSteamUtils(), iImage, pubDest, nDestBufferSize);
 		}
 
-		public static bool GetCSERIPPort(out uint unIP, out ushort usPort)
-		{
-			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamUtils_GetCSERIPPort(CSteamAPIContext.GetSteamUtils(), out unIP, out usPort);
-		}
-
 		public static byte GetCurrentBatteryPower()
 		{
 			InteropHelp.TestIfAvailableClient();

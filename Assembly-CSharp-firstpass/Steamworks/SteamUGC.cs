@@ -47,6 +47,32 @@ namespace Steamworks
 			return NativeMethods.ISteamUGC_GetQueryUGCResult(CSteamAPIContext.GetSteamUGC(), handle, index, out pDetails);
 		}
 
+		public static uint GetQueryUGCNumTags(UGCQueryHandle_t handle, uint index)
+		{
+			InteropHelp.TestIfAvailableClient();
+			return NativeMethods.ISteamUGC_GetQueryUGCNumTags(CSteamAPIContext.GetSteamUGC(), handle, index);
+		}
+
+		public static bool GetQueryUGCTag(UGCQueryHandle_t handle, uint index, uint indexTag, out string pchValue, uint cchValueSize)
+		{
+			InteropHelp.TestIfAvailableClient();
+			IntPtr intPtr = Marshal.AllocHGlobal((int)cchValueSize);
+			bool flag = NativeMethods.ISteamUGC_GetQueryUGCTag(CSteamAPIContext.GetSteamUGC(), handle, index, indexTag, intPtr, cchValueSize);
+			pchValue = (flag ? InteropHelp.PtrToStringUTF8(intPtr) : null);
+			Marshal.FreeHGlobal(intPtr);
+			return flag;
+		}
+
+		public static bool GetQueryUGCTagDisplayName(UGCQueryHandle_t handle, uint index, uint indexTag, out string pchValue, uint cchValueSize)
+		{
+			InteropHelp.TestIfAvailableClient();
+			IntPtr intPtr = Marshal.AllocHGlobal((int)cchValueSize);
+			bool flag = NativeMethods.ISteamUGC_GetQueryUGCTagDisplayName(CSteamAPIContext.GetSteamUGC(), handle, index, indexTag, intPtr, cchValueSize);
+			pchValue = (flag ? InteropHelp.PtrToStringUTF8(intPtr) : null);
+			Marshal.FreeHGlobal(intPtr);
+			return flag;
+		}
+
 		public static bool GetQueryUGCPreviewURL(UGCQueryHandle_t handle, uint index, out string pchURL, uint cchURLSize)
 		{
 			InteropHelp.TestIfAvailableClient();

@@ -11,6 +11,12 @@ namespace Steamworks
 			return NativeMethods.ISteamNetworkingUtils_AllocateMessage(CSteamGameServerAPIContext.GetSteamNetworkingUtils(), cbAllocateBuffer);
 		}
 
+		public static void InitRelayNetworkAccess()
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			NativeMethods.ISteamNetworkingUtils_InitRelayNetworkAccess(CSteamGameServerAPIContext.GetSteamNetworkingUtils());
+		}
+
 		public static ESteamNetworkingAvailability GetRelayNetworkStatus(out SteamRelayNetworkStatus_t pDetails)
 		{
 			InteropHelp.TestIfAvailableGameServer();

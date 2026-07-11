@@ -509,5 +509,14 @@ namespace Steamworks
 			}
 			return flag;
 		}
+
+		public static void ActivateGameOverlayInviteDialogConnectString(string pchConnectString)
+		{
+			InteropHelp.TestIfAvailableClient();
+			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchConnectString))
+			{
+				NativeMethods.ISteamFriends_ActivateGameOverlayInviteDialogConnectString(CSteamAPIContext.GetSteamFriends(), utf8StringHandle);
+			}
+		}
 	}
 }

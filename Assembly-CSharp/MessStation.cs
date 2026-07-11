@@ -84,16 +84,22 @@ public class MessStation : Workable, IGameObjectEffectDescriptor
 
 			public bool IsEating()
 			{
-				if (this.assigned != null && this.assigned.assignee != null)
+				if (this.assigned == null || this.assigned.assignee == null)
 				{
-					GameObject targetGameObject = this.assigned.assignee.GetSoleOwner().GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
-					if (targetGameObject)
-					{
-						ChoreDriver component = targetGameObject.GetComponent<ChoreDriver>();
-						return component != null && component.HasChore() && component.GetCurrentChore().choreType.urge == Db.Get().Urges.Eat;
-					}
+					return false;
 				}
-				return false;
+				Ownables soleOwner = this.assigned.assignee.GetSoleOwner();
+				if (soleOwner == null)
+				{
+					return false;
+				}
+				GameObject targetGameObject = soleOwner.GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
+				if (targetGameObject == null)
+				{
+					return false;
+				}
+				ChoreDriver component = targetGameObject.GetComponent<ChoreDriver>();
+				return component != null && component.HasChore() && component.GetCurrentChore().choreType.urge == Db.Get().Urges.Eat;
 			}
 
 			private Storage saltStorage;

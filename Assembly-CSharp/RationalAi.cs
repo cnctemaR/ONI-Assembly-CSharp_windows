@@ -6,8 +6,17 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.root;
-		this.root.TagTransition(GameTags.Dead, this.dead, false).TagTransition(GameTags.Dead, this.alive, true).ToggleStateMachine((RationalAi.Instance smi) => new DeathMonitor.Instance(smi.master, new DeathMonitor.Def()));
-		this.alive.ToggleStateMachine((RationalAi.Instance smi) => new ThoughtGraph.Instance(smi.master)).ToggleStateMachine((RationalAi.Instance smi) => new StaminaMonitor.Instance(smi.master)).ToggleStateMachine((RationalAi.Instance smi) => new StressMonitor.Instance(smi.master))
+		this.root.ToggleStateMachine((RationalAi.Instance smi) => new DeathMonitor.Instance(smi.master, new DeathMonitor.Def())).Enter(delegate(RationalAi.Instance smi)
+		{
+			if (smi.HasTag(GameTags.Dead))
+			{
+				smi.GoTo(this.dead);
+				return;
+			}
+			smi.GoTo(this.alive);
+		});
+		this.alive.TagTransition(GameTags.Dead, this.dead, false).ToggleStateMachine((RationalAi.Instance smi) => new ThoughtGraph.Instance(smi.master)).ToggleStateMachine((RationalAi.Instance smi) => new StaminaMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new StressMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new EmoteMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new SneezeMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new DecorMonitor.Instance(smi.master))

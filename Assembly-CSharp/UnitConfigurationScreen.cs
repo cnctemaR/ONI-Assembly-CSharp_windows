@@ -49,6 +49,7 @@ public class UnitConfigurationScreen
 		GameUtil.temperatureUnit = GameUtil.TemperatureUnit.Celsius;
 		KPlayerPrefs.SetInt(UnitConfigurationScreen.TemperatureUnitKey, GameUtil.temperatureUnit.GetHashCode());
 		this.DisplayCurrentUnit();
+		Game.Instance.Trigger(999382396, GameUtil.TemperatureUnit.Celsius);
 	}
 
 	private void OnKelvinClicked()
@@ -56,6 +57,7 @@ public class UnitConfigurationScreen
 		GameUtil.temperatureUnit = GameUtil.TemperatureUnit.Kelvin;
 		KPlayerPrefs.SetInt(UnitConfigurationScreen.TemperatureUnitKey, GameUtil.temperatureUnit.GetHashCode());
 		this.DisplayCurrentUnit();
+		Game.Instance.Trigger(999382396, GameUtil.TemperatureUnit.Kelvin);
 	}
 
 	private void OnFahrenheitClicked()
@@ -63,6 +65,7 @@ public class UnitConfigurationScreen
 		GameUtil.temperatureUnit = GameUtil.TemperatureUnit.Fahrenheit;
 		KPlayerPrefs.SetInt(UnitConfigurationScreen.TemperatureUnitKey, GameUtil.temperatureUnit.GetHashCode());
 		this.DisplayCurrentUnit();
+		Game.Instance.Trigger(999382396, GameUtil.TemperatureUnit.Fahrenheit);
 	}
 
 	[SerializeField]

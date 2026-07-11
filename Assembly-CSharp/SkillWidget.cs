@@ -343,15 +343,19 @@ public class SkillWidget : KMonoBehaviour, IPointerEnterHandler, IEventSystemHan
 
 	public void OnPointerDown(PointerEventData eventData)
 	{
-		MinionResume component = (this.skillsScreen.CurrentlySelectedMinion as MinionIdentity).GetComponent<MinionResume>();
-		MinionResume.SkillMasteryConditions[] skillMasteryConditions = component.GetSkillMasteryConditions(this.skillID);
-		bool flag = component.CanMasterSkill(skillMasteryConditions);
-		if (component != null && !component.HasMasteredSkill(this.skillID) && flag)
+		MinionIdentity minionIdentity = this.skillsScreen.CurrentlySelectedMinion as MinionIdentity;
+		if (minionIdentity != null)
 		{
-			KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Click", false));
-			return;
+			MinionResume component = minionIdentity.GetComponent<MinionResume>();
+			MinionResume.SkillMasteryConditions[] skillMasteryConditions = component.GetSkillMasteryConditions(this.skillID);
+			bool flag = component.CanMasterSkill(skillMasteryConditions);
+			if (component != null && !component.HasMasteredSkill(this.skillID) && flag)
+			{
+				KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Click", false));
+				return;
+			}
+			KFMOD.PlayUISound(GlobalAssets.GetSound("Negative", false));
 		}
-		KFMOD.PlayUISound(GlobalAssets.GetSound("Negative", false));
 	}
 
 	[SerializeField]

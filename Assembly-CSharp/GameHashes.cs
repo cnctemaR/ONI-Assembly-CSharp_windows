@@ -333,5 +333,6 @@ public enum GameHashes
 	StartWork = 1568504979,
 	StartReactable = -909573545,
 	EndReactable = 824899998,
-	NameChanged = 1102426921
+	NameChanged = 1102426921,
+	TemperatureUnitChanged = 999382396
 }

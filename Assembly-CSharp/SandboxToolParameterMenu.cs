@@ -33,37 +33,27 @@ public class SandboxToolParameterMenu : KScreen
 		this.massSlider.clampValueHigh = 10000f;
 		this.temperatureAdditiveSlider.clampValueLow = -9999f;
 		this.temperatureAdditiveSlider.clampValueHigh = 9999f;
-		this.temperatureSlider.clampValueLow = 1f;
+		this.temperatureSlider.clampValueLow = -458f;
 		this.temperatureSlider.clampValueHigh = 9999f;
 		this.brushRadiusSlider.clampValueLow = 1f;
 		this.brushRadiusSlider.clampValueHigh = 50f;
+		this.diseaseCountSlider.clampValueHigh = 1000000f;
+		this.diseaseCountSlider.slideMaxValue = 1000000f;
 		this.settings = new SandboxSettings();
 		SandboxSettings sandboxSettings = this.settings;
 		sandboxSettings.OnChangeElement = (Action<bool>)Delegate.Combine(sandboxSettings.OnChangeElement, new Action<bool>(delegate(bool forceElementDefaults)
 		{
-			Element element = ElementLoader.elements[this.settings.GetIntSetting("SandboxTools.SelectedElement")];
+			int num = this.settings.GetIntSetting("SandboxTools.SelectedElement");
+			if (num >= ElementLoader.elements.Count)
+			{
+				num = 0;
+			}
+			Element element = ElementLoader.elements[num];
 			this.elementSelector.button.GetComponentInChildren<LocText>().text = element.name + " (" + element.GetStateString() + ")";
 			global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(element, "ui", false);
 			this.elementSelector.button.GetComponentsInChildren<Image>()[1].sprite = uisprite.first;
 			this.elementSelector.button.GetComponentsInChildren<Image>()[1].color = uisprite.second;
-			float num = Mathf.Max(element.lowTemp - 10f, 1f);
-			float num2;
-			if (element.IsGas)
-			{
-				num2 = Mathf.Min(new float[]
-				{
-					9999f,
-					element.highTemp + 10f,
-					element.defaultValues.temperature + 100f
-				});
-			}
-			else
-			{
-				num2 = Mathf.Min(9999f, element.highTemp + 10f);
-			}
-			num = GameUtil.GetConvertedTemperature(num, true);
-			num2 = GameUtil.GetConvertedTemperature(num2, true);
-			this.temperatureSlider.SetRange(num, num2, false);
+			this.SetAbsoluteTemperatureSliderRange(element);
 			this.massSlider.SetRange(0.1f, element.defaultValues.mass * 2f, false);
 			if (forceElementDefaults)
 			{
@@ -149,6 +139,7 @@ public class SandboxToolParameterMenu : KScreen
 		{
 			this.temperatureAdditiveSlider.SetValue(GameUtil.GetConvertedTemperature(this.settings.GetFloatSetting("SandbosTools.TemperatureAdditive"), true), false);
 		}));
+		Game.Instance.Subscribe(999382396, new Action<object>(this.OnTemperatureUnitChanged));
 	}
 
 	public void DisableParameters()
@@ -371,6 +362,40 @@ public class SandboxToolParameterMenu : KScreen
 		this.temperatureSlider.SetValue(GameUtil.GetConvertedTemperature(this.settings.GetFloatSetting("SandbosTools.Temperature"), true), true);
 		this.temperatureAdditiveSlider.SetValue(GameUtil.GetConvertedTemperature(this.settings.GetFloatSetting("SandbosTools.TemperatureAdditive"), true), true);
 		this.diseaseCountSlider.SetValue((float)this.settings.GetIntSetting("SandboxTools.DiseaseCount"), true);
+	}
+
+	private void OnTemperatureUnitChanged(object unit)
+	{
+		int num = this.settings.GetIntSetting("SandboxTools.SelectedElement");
+		if (num >= ElementLoader.elements.Count)
+		{
+			num = 0;
+		}
+		Element element = ElementLoader.elements[num];
+		this.SetAbsoluteTemperatureSliderRange(element);
+		this.temperatureAdditiveSlider.SetValue(5f, true);
+	}
+
+	private void SetAbsoluteTemperatureSliderRange(Element element)
+	{
+		float num = Mathf.Max(element.lowTemp - 10f, 1f);
+		float num2;
+		if (element.IsGas)
+		{
+			num2 = Mathf.Min(new float[]
+			{
+				9999f,
+				element.highTemp + 10f,
+				element.defaultValues.temperature + 100f
+			});
+		}
+		else
+		{
+			num2 = Mathf.Min(9999f, element.highTemp + 10f);
+		}
+		num = GameUtil.GetConvertedTemperature(num, true);
+		num2 = GameUtil.GetConvertedTemperature(num2, true);
+		this.temperatureSlider.SetRange(num, num2, false);
 	}
 
 	private void RefreshTemperatureUnitDisplays()
@@ -834,7 +859,7 @@ public class SandboxToolParameterMenu : KScreen
 
 		public void RefreshDisplay()
 		{
-			this.inputField.SetDisplayValue(this.inputField.currentValue.ToString());
+			this.inputField.SetDisplayValue(((this.roundToDecimalPlaces == 0) ? ((float)Mathf.RoundToInt(this.inputField.currentValue)) : this.inputField.currentValue).ToString());
 		}
 
 		public GameObject row;

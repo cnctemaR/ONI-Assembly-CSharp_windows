@@ -37,6 +37,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 	{
 		BottleEmptier component = ((GameObject)data).GetComponent<BottleEmptier>();
 		this.allowManualPumpingStationFetching = component.allowManualPumpingStationFetching;
+		base.smi.RefreshChore();
 	}
 
 	public float emptyRate = 10f;

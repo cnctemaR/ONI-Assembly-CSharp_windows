@@ -127,7 +127,6 @@ public class Timelapser : KMonoBehaviour
 				}
 				else
 				{
-					this.RefreshRenderTextureSize(null);
 					this.RenderAndPrint();
 					this.freezeCamera.enabled = false;
 					DebugHandler.SetHideUI(false);

@@ -17,24 +17,45 @@ public class PowerTransformer : Generator
 		base.ApplyDeltaJoules(joules_delta, can_over_power);
 	}
 
-	public override float JoulesAvailable
+	public override void ConsumeEnergy(float joules)
 	{
-		get
-		{
-			return Math.Min(this.battery.JoulesAvailable, base.WattageRating * 0.2f);
-		}
+		this.battery.ConsumeEnergy(joules);
+		base.ConsumeEnergy(joules);
 	}
 
 	private void OnOperationalChanged(object data)
 	{
 		if (!(bool)data)
 		{
-			this.battery.ConsumeEnergy(float.MaxValue);
+			this.battery.joulesLostPerSecond = 3.3333333f;
 			base.ResetJoules();
+		}
+		else
+		{
+			this.battery.joulesLostPerSecond = 0f;
+		}
+	}
+
+	public override void EnergySim200ms(float dt)
+	{
+		base.EnergySim200ms(dt);
+		if (this.operational.IsOperational)
+		{
+			base.AssignJoulesAvailable(Math.Min(this.battery.JoulesAvailable, base.WattageRating * dt));
+		}
+		ushort circuitID = this.battery.CircuitID;
+		ushort circuitID2 = base.CircuitID;
+		bool flag = circuitID == circuitID2 && circuitID != ushort.MaxValue;
+		if (this.mLoopDetected != flag)
+		{
+			this.mLoopDetected = flag;
+			this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.PowerLoopDetected, this.mLoopDetected, this);
 		}
 	}
 
 	private Battery battery;
+
+	private bool mLoopDetected;
 
 	private static readonly EventSystem.IntraObjectHandler<PowerTransformer> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<PowerTransformer>(delegate(PowerTransformer component, object data)
 	{

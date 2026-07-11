@@ -155,7 +155,7 @@ public class BuildingDef : Def
 		return list;
 	}
 
-	public GameObject Build(int cell, Orientation orientation, Storage resource_storage, IList<Tag> selected_elements, float temperature, bool playsound = true)
+	public GameObject Build(int cell, Orientation orientation, Storage resource_storage, IList<Tag> selected_elements, float temperature, bool playsound = true, float timeBuilt = -1f)
 	{
 		Vector3 vector = Grid.CellToPosCBC(cell, this.SceneLayer);
 		GameObject gameObject = this.Create(vector, resource_storage, selected_elements, this.CraftRecipe, temperature, this.BuildingComplete);
@@ -187,7 +187,13 @@ public class BuildingDef : Def
 				component2.constructionElements[i] = selected_elements[i];
 			}
 		}
+		BuildingComplete component3 = gameObject.GetComponent<BuildingComplete>();
+		if (component3)
+		{
+			component3.SetCreationTime(timeBuilt);
+		}
 		Game.Instance.Trigger(-1661515756, gameObject);
+		gameObject.Trigger(-1661515756, gameObject);
 		return gameObject;
 	}
 
@@ -300,7 +306,7 @@ public class BuildingDef : Def
 					CellOffset rotatedCellOffset2 = Rotatable.GetRotatedCellOffset(Gantry.TileOffsets[j], orientation);
 					flag3 |= rotatedCellOffset2 == rotatedCellOffset;
 				}
-				if (flag3 && !this.IsValidTileLocation(source_go, num, orientation, layer, ref fail_reason))
+				if (flag3 && !this.IsValidTileLocation(source_go, num, ref fail_reason))
 				{
 					flag = false;
 					break;
@@ -319,7 +325,7 @@ public class BuildingDef : Def
 			}
 			if (this.BuildLocationRule == BuildLocationRule.Tile)
 			{
-				if (!replace_tile && !this.IsValidTileLocation(source_go, num, orientation, layer, ref fail_reason))
+				if (!this.IsValidTileLocation(source_go, num, ref fail_reason))
 				{
 					flag = false;
 					break;
@@ -380,7 +386,7 @@ public class BuildingDef : Def
 		case BuildLocationRule.WireBridge:
 			return this.IsValidWireBridgeLocation(source_go, cell, orientation, out fail_reason);
 		case BuildLocationRule.HighWattBridgeTile:
-			flag = (replace_tile || this.IsValidTileLocation(source_go, cell, orientation, layer, ref fail_reason)) && this.IsValidHighWattBridgeLocation(source_go, cell, orientation, out fail_reason);
+			flag = this.IsValidTileLocation(source_go, cell, ref fail_reason) && this.IsValidHighWattBridgeLocation(source_go, cell, orientation, out fail_reason);
 			break;
 		case BuildLocationRule.BuildingAttachPoint:
 		{
@@ -413,7 +419,7 @@ public class BuildingDef : Def
 		return flag && this.AreLogicPortsInValidPositions(source_go, cell, out fail_reason);
 	}
 
-	private bool IsValidTileLocation(GameObject source_go, int cell, Orientation orientation, ObjectLayer layer, ref string fail_reason)
+	private bool IsValidTileLocation(GameObject source_go, int cell, ref string fail_reason)
 	{
 		GameObject gameObject = Grid.Objects[cell, 27];
 		if (gameObject != null && gameObject != source_go)

@@ -189,8 +189,6 @@ public class GameTags
 
 	public static readonly Tag EmitsLight = TagManager.Create("EmitsLight");
 
-	public static readonly Tag Toxic = TagManager.Create("Toxic");
-
 	public static readonly Tag Special = TagManager.Create("Special");
 
 	public static readonly Tag Breathable = TagManager.Create("Breathable");

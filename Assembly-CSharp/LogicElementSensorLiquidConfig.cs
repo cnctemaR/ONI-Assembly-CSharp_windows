@@ -10,7 +10,7 @@ public class LogicElementSensorLiquidConfig : IBuildingConfig
 		string id = LogicElementSensorLiquidConfig.ID;
 		int num = 1;
 		int num2 = 1;
-		string text = "switchliquidpressure_kanim";
+		string text = "world_liquid_sensor_kanim";
 		int num3 = 30;
 		float num4 = 30f;
 		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
@@ -20,15 +20,13 @@ public class LogicElementSensorLiquidConfig : IBuildingConfig
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
 		buildingDef.Overheatable = false;
-		buildingDef.Floodable = true;
+		buildingDef.Floodable = false;
 		buildingDef.Entombable = true;
-		buildingDef.RequiresPowerInput = true;
-		buildingDef.EnergyConsumptionWhenActive = 25f;
 		buildingDef.ViewMode = OverlayModes.Logic.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
-		SoundEventVolumeCache.instance.AddVolume("switchliquidpressure_kanim", "PowerSwitch_on", NOISE_POLLUTION.NOISY.TIER3);
-		SoundEventVolumeCache.instance.AddVolume("switchliquidpressure_kanim", "PowerSwitch_off", NOISE_POLLUTION.NOISY.TIER3);
+		SoundEventVolumeCache.instance.AddVolume("world_liquid_sensor_kanim", "PowerSwitch_on", NOISE_POLLUTION.NOISY.TIER3);
+		SoundEventVolumeCache.instance.AddVolume("world_liquid_sensor_kanim", "PowerSwitch_off", NOISE_POLLUTION.NOISY.TIER3);
 		GeneratedBuildings.RegisterWithOverlay(OverlayModes.Logic.HighlightItemIDs, LogicElementSensorLiquidConfig.ID);
 		return buildingDef;
 	}
@@ -55,5 +53,5 @@ public class LogicElementSensorLiquidConfig : IBuildingConfig
 
 	public static string ID = "LogicElementSensorLiquid";
 
-	public static readonly LogicPorts.Port OUTPUT_PORT = LogicPorts.Port.OutputPort(LogicSwitch.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICELEMENTSENSORLIQUID.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.LOGICELEMENTSENSORLIQUID.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LOGICELEMENTSENSORLIQUID.LOGIC_PORT_INACTIVE, false, false);
+	public static readonly LogicPorts.Port OUTPUT_PORT = LogicPorts.Port.OutputPort(LogicSwitch.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICELEMENTSENSORLIQUID.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.LOGICELEMENTSENSORLIQUID.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LOGICELEMENTSENSORLIQUID.LOGIC_PORT_INACTIVE, true, false);
 }

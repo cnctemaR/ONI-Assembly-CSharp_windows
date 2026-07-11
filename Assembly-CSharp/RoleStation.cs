@@ -18,8 +18,8 @@ public class RoleStation : Workable, IEffectDescriptor
 		this.smi.StartSM();
 		base.SetWorkTime(7.53f);
 		this.resetProgressOnStop = true;
-		this.subscriptions.Add(Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateSkillPointAvailableStatusItem)));
-		this.subscriptions.Add(Game.Instance.Subscribe(1505456302, new Action<object>(this.UpdateSkillPointAvailableStatusItem)));
+		this.subscriptions.Add(base.Subscribe<RoleStation>(-1523247426, RoleStation.OnUpdateDelegate));
+		this.subscriptions.Add(base.Subscribe<RoleStation>(1505456302, RoleStation.OnUpdateDelegate));
 		this.UpdateSkillPointAvailableStatusItem(null);
 	}
 
@@ -107,6 +107,11 @@ public class RoleStation : Workable, IEffectDescriptor
 	private Guid skillPointAvailableStatusItem;
 
 	private List<int> subscriptions = new List<int>();
+
+	private static readonly EventSystem.IntraObjectHandler<RoleStation> OnUpdateDelegate = new EventSystem.IntraObjectHandler<RoleStation>(delegate(RoleStation component, object data)
+	{
+		component.UpdateSkillPointAvailableStatusItem(data);
+	});
 
 	public class RoleStationSM : GameStateMachine<RoleStation.RoleStationSM, RoleStation.RoleStationSM.Instance, RoleStation>
 	{

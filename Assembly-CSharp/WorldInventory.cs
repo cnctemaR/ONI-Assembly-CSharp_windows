@@ -18,7 +18,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		WorldInventory.Instance = this;
 		base.Subscribe(Game.Instance.gameObject, -1588644844, new Action<object>(this.OnAddedFetchable));
 		base.Subscribe(Game.Instance.gameObject, -1491270284, new Action<object>(this.OnRemovedFetchable));
-		GameClock.Instance.Subscribe(631075836, new Action<object>(this.GenerateInventoryReport));
+		base.Subscribe<WorldInventory>(631075836, WorldInventory.OnNewDayDelegate);
 	}
 
 	private void GenerateInventoryReport(object data)
@@ -319,6 +319,11 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	private MinionGroupProber Prober;
 
 	private Dictionary<Tag, float> accessibleAmounts = new Dictionary<Tag, float>();
+
+	private static readonly EventSystem.IntraObjectHandler<WorldInventory> OnNewDayDelegate = new EventSystem.IntraObjectHandler<WorldInventory>(delegate(WorldInventory component, object data)
+	{
+		component.GenerateInventoryReport(data);
+	});
 
 	private int accessibleUpdateIndex;
 

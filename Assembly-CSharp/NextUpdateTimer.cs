@@ -37,6 +37,7 @@ public class NextUpdateTimer : KMonoBehaviour
 		}
 		this.m_releaseTextOverride = textOverride;
 		this.RefreshReleaseTimes();
+		this.RefreshScale();
 	}
 
 	private void RefreshReleaseTimes()

@@ -22,8 +22,6 @@ public class LogicElementSensorGasConfig : IBuildingConfig
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = true;
 		buildingDef.Entombable = true;
-		buildingDef.RequiresPowerInput = true;
-		buildingDef.EnergyConsumptionWhenActive = 25f;
 		buildingDef.ViewMode = OverlayModes.Logic.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
@@ -55,5 +53,5 @@ public class LogicElementSensorGasConfig : IBuildingConfig
 
 	public static string ID = "LogicElementSensorGas";
 
-	public static readonly LogicPorts.Port OUTPUT_PORT = LogicPorts.Port.OutputPort(LogicSwitch.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICELEMENTSENSORGAS.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.LOGICELEMENTSENSORGAS.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LOGICELEMENTSENSORGAS.LOGIC_PORT_INACTIVE, false, false);
+	public static readonly LogicPorts.Port OUTPUT_PORT = LogicPorts.Port.OutputPort(LogicSwitch.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICELEMENTSENSORGAS.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.LOGICELEMENTSENSORGAS.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LOGICELEMENTSENSORGAS.LOGIC_PORT_INACTIVE, true, false);
 }

@@ -376,6 +376,7 @@ namespace Database
 					LogicTimeOfDaySensorConfig.ID,
 					"FloorSwitch",
 					LogicElementSensorGasConfig.ID,
+					LogicElementSensorLiquidConfig.ID,
 					"BatterySmart",
 					"LogicGateNOT"
 				}

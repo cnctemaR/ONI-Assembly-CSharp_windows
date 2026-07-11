@@ -103,7 +103,7 @@ public class ManagementMenu : KIconToggleMenu
 		this.researchTooltipDisabled = UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_RESEARCH;
 		this.researchTooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH, global::Action.ManageResearch);
 		this.starmapTooltipDisabled = UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_TELESCOPE;
-		this.starmapTooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_STARMAP, global::Action.ManageResearch);
+		this.starmapTooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_STARMAP, global::Action.ManageStarmap);
 		this.CheckResearch(null);
 		this.CheckSkills(null);
 		this.CheckStarmap(null);

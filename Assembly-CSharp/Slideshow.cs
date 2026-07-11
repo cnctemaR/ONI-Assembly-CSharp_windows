@@ -212,7 +212,9 @@ public class Slideshow : KMonoBehaviour
 				{
 					if (this.currentSlideImage != null)
 					{
+						global::UnityEngine.Object.Destroy(this.currentSlideImage.texture);
 						global::UnityEngine.Object.Destroy(this.currentSlideImage);
+						GC.Collect();
 					}
 					this.currentSlideImage = this.loadSlide(this.files[this.currentSlide]);
 					this.setSlide(this.currentSlideImage);

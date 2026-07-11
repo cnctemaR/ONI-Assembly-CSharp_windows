@@ -29,12 +29,28 @@ public static class ModUtil
 		list.Add(new BuildMenu.BuildingInfo(building_id, hotkey));
 	}
 
+	public static KAnimFile AddKAnimMod(string name, KAnimFile.Mod anim_mod)
+	{
+		KAnimFile kanimFile = ScriptableObject.CreateInstance<KAnimFile>();
+		kanimFile.mod = anim_mod;
+		kanimFile.name = name;
+		AnimCommandFile animCommandFile = new AnimCommandFile();
+		KAnimGroupFile.GroupFile groupFile = new KAnimGroupFile.GroupFile();
+		groupFile.groupID = animCommandFile.GetGroupName(kanimFile);
+		groupFile.commandDirectory = "assets/" + name;
+		animCommandFile.AddGroupFile(groupFile);
+		KAnimGroupFile groupFile2 = KAnimGroupFile.GetGroupFile();
+		if (groupFile2.AddAnimMod(groupFile, animCommandFile, kanimFile) == KAnimGroupFile.AddModResult.Added)
+		{
+			Assets.ModLoadedKAnims.Add(kanimFile);
+		}
+		return kanimFile;
+	}
+
 	public static KAnimFile AddKAnim(string name, TextAsset anim_file, TextAsset build_file, IList<Texture2D> textures)
 	{
 		KAnimFile kanimFile = ScriptableObject.CreateInstance<KAnimFile>();
-		kanimFile.animFile = anim_file;
-		kanimFile.buildFile = build_file;
-		kanimFile.textures.AddRange(textures);
+		kanimFile.Initialize(anim_file, build_file, textures);
 		kanimFile.name = name;
 		AnimCommandFile animCommandFile = new AnimCommandFile();
 		KAnimGroupFile.GroupFile groupFile = new KAnimGroupFile.GroupFile();
@@ -49,20 +65,7 @@ public static class ModUtil
 
 	public static KAnimFile AddKAnim(string name, TextAsset anim_file, TextAsset build_file, Texture2D texture)
 	{
-		KAnimFile kanimFile = ScriptableObject.CreateInstance<KAnimFile>();
-		kanimFile.animFile = anim_file;
-		kanimFile.buildFile = build_file;
-		kanimFile.textures.Add(texture);
-		kanimFile.name = name;
-		AnimCommandFile animCommandFile = new AnimCommandFile();
-		KAnimGroupFile.GroupFile groupFile = new KAnimGroupFile.GroupFile();
-		groupFile.groupID = animCommandFile.GetGroupName(kanimFile);
-		groupFile.commandDirectory = "assets/" + name;
-		animCommandFile.AddGroupFile(groupFile);
-		KAnimGroupFile groupFile2 = KAnimGroupFile.GetGroupFile();
-		groupFile2.AddAnimFile(groupFile, animCommandFile, kanimFile);
-		Assets.ModLoadedKAnims.Add(kanimFile);
-		return kanimFile;
+		return ModUtil.AddKAnim(name, anim_file, build_file, new List<Texture2D> { texture });
 	}
 
 	public static Substance CreateSubstance(string name, Element.State state, KAnimFile kanim, Material material, Color32 colour, Color32 ui_colour, Color32 conduit_colour)

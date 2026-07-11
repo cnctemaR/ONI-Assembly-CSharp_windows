@@ -59,7 +59,6 @@ namespace KMod
 				}
 				else
 				{
-					global::Debug.LogFormat("Using built-in mod system...looking for DLL mods in {0}", new object[] { Manager.GetDirectory() });
 					DirectoryInfo directoryInfo = new DirectoryInfo(path);
 					if (!directoryInfo.Exists)
 					{

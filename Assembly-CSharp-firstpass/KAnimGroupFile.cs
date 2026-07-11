@@ -153,6 +153,23 @@ public class KAnimGroupFile : ScriptableObject
 		return false;
 	}
 
+	public KAnimGroupFile.AddModResult AddAnimMod(KAnimGroupFile.GroupFile gf, AnimCommandFile akf, KAnimFile file)
+	{
+		global::Debug.Assert(gf != null);
+		global::Debug.Assert(file != null, gf.groupID);
+		global::Debug.Assert(akf != null, gf.groupID);
+		int num = this.AddGroup(akf, gf, file);
+		string name = file.GetData().name;
+		int num2 = this.groups[num].files.FindIndex((KAnimFile candidate) => candidate != null && candidate.GetData().name == name);
+		if (num2 == -1)
+		{
+			this.groups[num].files.Add(file);
+			return KAnimGroupFile.AddModResult.Added;
+		}
+		this.groups[num].files[num2].mod = file.mod;
+		return KAnimGroupFile.AddModResult.Replaced;
+	}
+
 	public void LoadAll()
 	{
 		global::Debug.Assert(!KAnimGroupFile.hasCompletedLoadAll, "You cannot load all the anim data twice!");
@@ -184,18 +201,18 @@ public class KAnimGroupFile : ScriptableObject
 				hashedString = this.groups[i].swapTarget;
 				goto IL_012E;
 			}
-			IL_0271:
+			IL_0250:
 			i++;
 			continue;
 			IL_012E:
 			for (int j = 0; j < this.groups[i].files.Count; j++)
 			{
 				KAnimFile kanimFile = this.groups[i].files[j];
-				if (kanimFile != null && kanimFile.buildFile != null && !this.fileData.ContainsKey(kanimFile.GetInstanceID()))
+				if (kanimFile != null && kanimFile.buildBytes != null && !this.fileData.ContainsKey(kanimFile.GetInstanceID()))
 				{
-					if (kanimFile.buildFile.bytes == null || kanimFile.buildFile.bytes.Length == 0)
+					if (kanimFile.buildBytes.Length == 0)
 					{
-						global::Debug.LogWarning("Build File [" + kanimFile.buildFile.name + "] has 0 bytes");
+						global::Debug.LogWarning("Build File [" + kanimFile.GetData().name + "] has 0 bytes");
 					}
 					else
 					{
@@ -204,12 +221,12 @@ public class KAnimGroupFile : ScriptableObject
 						KAnimFileData file = KGlobalAnimParser.Get().GetFile(kanimFile);
 						file.maxVisSymbolFrames = 0;
 						file.batchTag = hashedString;
-						file.buildIndex = KGlobalAnimParser.ParseBuildData(kbatchGroupData, hashedString2, new FastReader(kanimFile.buildFile.bytes), kanimFile.textures);
+						file.buildIndex = KGlobalAnimParser.ParseBuildData(kbatchGroupData, hashedString2, new FastReader(kanimFile.buildBytes), kanimFile.textureList);
 						this.fileData.Add(kanimFile.GetInstanceID(), file);
 					}
 				}
 			}
-			goto IL_0271;
+			goto IL_0250;
 		}
 		for (int k = 0; k < this.groups.Count; k++)
 		{
@@ -287,11 +304,11 @@ public class KAnimGroupFile : ScriptableObject
 				for (int num2 = 0; num2 < this.groups[num].files.Count; num2++)
 				{
 					KAnimFile kanimFile2 = this.groups[num].files[num2];
-					if (kanimFile2 != null && kanimFile2.animFile != null)
+					if (kanimFile2 != null && kanimFile2.animBytes != null)
 					{
-						if (kanimFile2.animFile.bytes == null || kanimFile2.animFile.bytes.Length == 0)
+						if (kanimFile2.animBytes.Length == 0)
 						{
-							global::Debug.LogWarning("Anim File [" + kanimFile2.animFile.name + "] has 0 bytes");
+							global::Debug.LogWarning("Anim File [" + kanimFile2.GetData().name + "] has 0 bytes");
 						}
 						else
 						{
@@ -303,7 +320,7 @@ public class KAnimGroupFile : ScriptableObject
 								this.fileData.Add(kanimFile2.GetInstanceID(), file2);
 							}
 							HashedString hashedString3 = new HashedString(kanimFile2.name);
-							FastReader fastReader = new FastReader(kanimFile2.animFile.bytes);
+							FastReader fastReader = new FastReader(kanimFile2.animBytes);
 							KAnimFileData kanimFileData = this.fileData[kanimFile2.GetInstanceID()];
 							KGlobalAnimParser.ParseAnimData(kbatchGroupData2, hashedString3, fastReader, kanimFileData);
 						}
@@ -355,8 +372,8 @@ public class KAnimGroupFile : ScriptableObject
 		{
 			if (this.groups[j].files.Count != 1)
 			{
-				List<KAnimFile> list = this.groups[j].files.FindAll((KAnimFile f) => f.buildFile != null);
-				this.groups[j].files.RemoveAll((KAnimFile f) => f.buildFile != null);
+				List<KAnimFile> list = this.groups[j].files.FindAll((KAnimFile f) => f.buildBytes != null);
+				this.groups[j].files.RemoveAll((KAnimFile f) => f.buildBytes != null);
 				list.Sort((KAnimFile file0, KAnimFile file1) => (file0.homedirectory + file0.name).CompareTo(file1.homedirectory + file1.name));
 				this.groups[j].files.Sort((KAnimFile file0, KAnimFile file1) => (file0.homedirectory + file0.name).CompareTo(file1.homedirectory + file1.name));
 				this.groups[j].files.InsertRange(0, list);
@@ -421,5 +438,11 @@ public class KAnimGroupFile : ScriptableObject
 		public string groupID { get; set; }
 
 		public string commandDirectory { get; set; }
+	}
+
+	public enum AddModResult
+	{
+		Added,
+		Replaced
 	}
 }

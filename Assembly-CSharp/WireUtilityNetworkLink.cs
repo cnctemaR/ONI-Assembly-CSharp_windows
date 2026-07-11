@@ -12,7 +12,6 @@ public class WireUtilityNetworkLink : UtilityNetworkLink, IWattageRating, IHaveU
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.WireConnected, null);
 	}
 
 	protected override void OnDisconnect(int cell1, int cell2)

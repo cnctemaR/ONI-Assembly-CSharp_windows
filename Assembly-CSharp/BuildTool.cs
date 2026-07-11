@@ -234,6 +234,10 @@ public class BuildTool : DragTool
 						Vector3 vector = Grid.CellToPosCCC(this.lastCell, Grid.SceneLayer.Building);
 						this.UpdateVis(vector);
 					}
+					if (base.Dragging && this.lastDragCell != -1)
+					{
+						this.TryBuild(this.lastDragCell);
+					}
 				}
 			}
 		}
@@ -245,11 +249,16 @@ public class BuildTool : DragTool
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
+		this.TryBuild(cell);
+	}
+
+	private void TryBuild(int cell)
+	{
 		if (this.visualizer == null)
 		{
 			return;
 		}
-		if (cell == this.lastDragCell)
+		if (cell == this.lastDragCell && this.buildingOrientation == this.lastDragOrientation)
 		{
 			return;
 		}
@@ -266,6 +275,7 @@ public class BuildTool : DragTool
 			}
 		}
 		this.lastDragCell = cell;
+		this.lastDragOrientation = this.buildingOrientation;
 		this.ClearTilePreview();
 		Vector3 vector = Grid.CellToPosCBC(cell, Grid.SceneLayer.Building);
 		GameObject gameObject = null;
@@ -274,7 +284,7 @@ public class BuildTool : DragTool
 			string text;
 			if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation, out text))
 			{
-				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, false);
+				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, false, GameClock.Instance.GetTime());
 				if (this.source != null)
 				{
 					this.source.DeleteObject();
@@ -402,6 +412,8 @@ public class BuildTool : DragTool
 	private int lastCell = -1;
 
 	private int lastDragCell = -1;
+
+	private Orientation lastDragOrientation;
 
 	private IList<Tag> selectedElements;
 

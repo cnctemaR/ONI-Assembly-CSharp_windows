@@ -44,6 +44,7 @@ public class DirectionControl : KMonoBehaviour
 		base.OnSpawn();
 		this.SetAllowedDirection(this.allowedDirection);
 		base.Subscribe<DirectionControl>(493375141, DirectionControl.OnRefreshUserMenuDelegate);
+		base.Subscribe<DirectionControl>(-905833192, DirectionControl.OnCopySettingsDelegate);
 	}
 
 	private void SetAllowedDirection(WorkableReactable.AllowedDirection new_direction)
@@ -71,6 +72,13 @@ public class DirectionControl : KMonoBehaviour
 		this.SetAllowedDirection((WorkableReactable.AllowedDirection.Left + (int)this.allowedDirection) % (WorkableReactable.AllowedDirection)this.directionInfos.Length);
 	}
 
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		DirectionControl component = gameObject.GetComponent<DirectionControl>();
+		this.SetAllowedDirection(component.allowedDirection);
+	}
+
 	private void OnRefreshUserMenu(object data)
 	{
 		int num = (int)((WorkableReactable.AllowedDirection.Left + (int)this.allowedDirection) % (WorkableReactable.AllowedDirection)this.directionInfos.Length);
@@ -87,6 +95,9 @@ public class DirectionControl : KMonoBehaviour
 	[Serialize]
 	public WorkableReactable.AllowedDirection allowedDirection;
 
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
 	private DirectionControl.DirectionInfo[] directionInfos;
 
 	public Action<WorkableReactable.AllowedDirection> onDirectionChanged;
@@ -94,6 +105,11 @@ public class DirectionControl : KMonoBehaviour
 	private static readonly EventSystem.IntraObjectHandler<DirectionControl> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<DirectionControl>(delegate(DirectionControl component, object data)
 	{
 		component.OnRefreshUserMenu(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<DirectionControl> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<DirectionControl>(delegate(DirectionControl component, object data)
+	{
+		component.OnCopySettings(data);
 	});
 
 	private struct DirectionInfo

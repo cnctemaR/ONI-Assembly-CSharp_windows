@@ -14,6 +14,9 @@ public class ResourceCategoryScreen : KScreen
 	{
 		base.OnActivate();
 		ResourceCategoryScreen.Instance = this;
+		this.ConsumeMouseScroll = true;
+		MultiToggle hiderButton = this.HiderButton;
+		hiderButton.onClick = (global::System.Action)Delegate.Combine(hiderButton.onClick, new global::System.Action(this.OnHiderClick));
 		this.CreateTagSetHeaders(GameTags.MaterialCategories, GameUtil.MeasureUnit.mass);
 		this.CreateTagSetHeaders(GameTags.CalorieCategories, GameUtil.MeasureUnit.kcal);
 		this.CreateTagSetHeaders(GameTags.UnitCategories, GameUtil.MeasureUnit.quantity);
@@ -34,11 +37,32 @@ public class ResourceCategoryScreen : KScreen
 		}
 	}
 
+	private void OnHiderClick()
+	{
+		this.HiderButton.NextState();
+		if (this.HiderButton.CurrentState == 0)
+		{
+			this.targetContentHideHeight = 0f;
+		}
+		else
+		{
+			this.targetContentHideHeight = Mathf.Min(512f, this.CategoryContainer.rectTransform().rect.height);
+		}
+	}
+
 	private void Update()
 	{
 		if (WorldInventory.Instance == null)
 		{
 			return;
+		}
+		if (this.HideTarget.minHeight != this.targetContentHideHeight)
+		{
+			float num = this.HideTarget.minHeight;
+			float num2 = this.targetContentHideHeight - num;
+			num2 *= this.HideSpeedFactor * Time.unscaledDeltaTime;
+			num += num2;
+			this.HideTarget.minHeight = num;
 		}
 		for (int i = 0; i < 1; i++)
 		{
@@ -50,6 +74,10 @@ public class ResourceCategoryScreen : KScreen
 			}
 			resourceCategoryHeader.UpdateContents();
 			this.categoryUpdatePacer = (this.categoryUpdatePacer + 1) % this.DisplayedCategoryKeys.Length;
+		}
+		if (this.HiderButton.CurrentState != 0)
+		{
+			this.targetContentHideHeight = Mathf.Min(512f, this.CategoryContainer.rectTransform().rect.height);
 		}
 		if (MeterScreen.Instance != null && !MeterScreen.Instance.StartValuesSet)
 		{
@@ -83,6 +111,14 @@ public class ResourceCategoryScreen : KScreen
 	public GameObject Prefab_CategoryBar;
 
 	public Transform CategoryContainer;
+
+	public MultiToggle HiderButton;
+
+	public KLayoutElement HideTarget;
+
+	private float HideSpeedFactor = 12f;
+
+	private float targetContentHideHeight;
 
 	public Dictionary<Tag, ResourceCategoryHeader> DisplayedCategories = new Dictionary<Tag, ResourceCategoryHeader>();
 

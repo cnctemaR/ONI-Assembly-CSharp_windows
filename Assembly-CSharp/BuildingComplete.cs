@@ -1,10 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
+using KSerialization;
 using UnityEngine;
 
 public class BuildingComplete : Building
 {
+	private bool WasReplaced()
+	{
+		return this.replacingTileLayer != ObjectLayer.NumLayers;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -40,7 +46,7 @@ public class BuildingComplete : Building
 
 	private void OnObjectReplaced(object data)
 	{
-		this.wasReplaced = true;
+		this.replacingTileLayer = (ObjectLayer)data;
 	}
 
 	protected override void OnSpawn()
@@ -137,6 +143,11 @@ public class BuildingComplete : Building
 		}
 	}
 
+	public void SetCreationTime(float time)
+	{
+		this.creationTime = time;
+	}
+
 	private string GetInspectSound()
 	{
 		string text = "AI_Inspect_" + base.GetComponent<KPrefabID>().PrefabTag.Name;
@@ -159,7 +170,7 @@ public class BuildingComplete : Building
 			GameComps.StructureTemperatures.Remove(base.gameObject);
 		}
 		base.OnCleanUp();
-		if (!this.wasReplaced)
+		if (!this.WasReplaced())
 		{
 			int num = Grid.PosToCell(this);
 			this.Def.UnmarkArea(num, base.Orientation, this.Def.ObjectLayer, base.gameObject);
@@ -187,6 +198,15 @@ public class BuildingComplete : Building
 				}
 			}
 		}
+		if (this.WasReplaced() && this.Def.IsTilePiece && this.replacingTileLayer != this.Def.TileLayer)
+		{
+			int num3 = Grid.PosToCell(this);
+			this.Def.UnmarkArea(num3, base.Orientation, this.Def.TileLayer, base.gameObject);
+			this.Def.RunOnArea(num3, base.Orientation, delegate(int c)
+			{
+				TileVisualizer.RefreshCell(c, this.Def.TileLayer, this.Def.ReplacementLayer);
+			});
+		}
 		Components.BuildingCompletes.Remove(this);
 		base.UnregisterBlockTileRenderer();
 		base.Trigger(-21016276, this);
@@ -205,9 +225,12 @@ public class BuildingComplete : Building
 
 	public bool isArtable;
 
+	[Serialize]
+	public float creationTime = -1f;
+
 	private bool hasSpawnedKComponents;
 
-	private bool wasReplaced;
+	private ObjectLayer replacingTileLayer = ObjectLayer.NumLayers;
 
 	public List<AttributeModifier> regionModifiers = new List<AttributeModifier>();
 

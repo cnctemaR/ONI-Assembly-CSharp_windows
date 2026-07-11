@@ -25,7 +25,10 @@ public class CavityInfo
 	{
 		foreach (KPrefabID kprefabID in this.buildings)
 		{
-			kprefabID.Trigger(-832141045, data);
+			if (kprefabID != null)
+			{
+				kprefabID.Trigger(-832141045, data);
+			}
 		}
 	}
 

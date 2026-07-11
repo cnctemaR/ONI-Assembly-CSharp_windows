@@ -52,8 +52,8 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 		this.InitializeSwitchState();
 		base.Subscribe<Wire>(774203113, Wire.OnBuildingBrokenDelegate);
 		base.Subscribe<Wire>(-1735440190, Wire.OnBuildingFullyRepairedDelegate);
-		base.GetComponent<KSelectable>().AddStatusItem(Wire.WireMaxWattageStatus, this);
 		base.GetComponent<KSelectable>().AddStatusItem(Wire.WireCircuitStatus, this);
+		base.GetComponent<KSelectable>().AddStatusItem(Wire.WireMaxWattageStatus, this);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		component.SetSymbolVisiblity(Wire.OutlineSymbol, false);
 	}
@@ -126,14 +126,16 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 				CircuitManager circuitManager = Game.Instance.circuitManager;
 				ushort circuitID = circuitManager.GetCircuitID(num);
 				float wattsUsedByCircuit = circuitManager.GetWattsUsedByCircuit(circuitID);
-				float wattsNeededWhenActive = circuitManager.GetWattsNeededWhenActive(circuitID);
 				GameUtil.WattageFormatterUnit wattageFormatterUnit = GameUtil.WattageFormatterUnit.Watts;
 				if (wire.MaxWattageRating == Wire.WattageRating.Max20000)
 				{
 					wattageFormatterUnit = GameUtil.WattageFormatterUnit.Kilowatts;
 				}
+				float maxWattageAsFloat = Wire.GetMaxWattageAsFloat(wire.MaxWattageRating);
+				str = str.Replace("{Color}", GameUtil.GetWireLoadColor(wattsUsedByCircuit, maxWattageAsFloat));
 				str = str.Replace("{CurrentLoad}", GameUtil.GetFormattedWattage(wattsUsedByCircuit, wattageFormatterUnit));
-				str = str.Replace("{MaxLoad}", GameUtil.GetFormattedWattage(wattsNeededWhenActive, wattageFormatterUnit));
+				str = str.Replace("{MaxLoad}", GameUtil.GetFormattedWattage(maxWattageAsFloat, wattageFormatterUnit));
+				str = str.Replace("{WireType}", this.GetProperName());
 				return str;
 			});
 		}
@@ -147,7 +149,14 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 				{
 					wattageFormatterUnit2 = GameUtil.WattageFormatterUnit.Kilowatts;
 				}
-				str = str.Replace("{WireMaxWattage}", GameUtil.GetFormattedWattage(Wire.GetMaxWattageAsFloat(wire2.MaxWattageRating), wattageFormatterUnit2));
+				int num2 = Grid.PosToCell(wire2.transform.GetPosition());
+				CircuitManager circuitManager2 = Game.Instance.circuitManager;
+				ushort circuitID2 = circuitManager2.GetCircuitID(num2);
+				float wattsNeededWhenActive = circuitManager2.GetWattsNeededWhenActive(circuitID2);
+				float maxWattageAsFloat2 = Wire.GetMaxWattageAsFloat(wire2.MaxWattageRating);
+				str = str.Replace("{Color}", (wattsNeededWhenActive <= maxWattageAsFloat2) ? new Color(1f, 1f, 1f).ToHexString() : new Color(0.9843137f, 0.6901961f, 0.23137255f).ToHexString());
+				str = str.Replace("{TotalPotentialLoad}", GameUtil.GetFormattedWattage(wattsNeededWhenActive, wattageFormatterUnit2));
+				str = str.Replace("{MaxLoad}", GameUtil.GetFormattedWattage(maxWattageAsFloat2, wattageFormatterUnit2));
 				return str;
 			});
 		}
@@ -169,7 +178,6 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 		if (component == null || component.HitPoints > 0)
 		{
 			this.disconnected = false;
-			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.WireConnected, null);
 			Game.Instance.electricalConduitSystem.ForceRebuildNetworks();
 		}
 		return !this.disconnected;

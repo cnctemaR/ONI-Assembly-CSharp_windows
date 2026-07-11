@@ -209,6 +209,12 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 		(powerCreatedbyGeneratorType = Game.Instance.savedInfo.powerCreatedbyGeneratorType)[tag = this.PrefabID()] = powerCreatedbyGeneratorType[tag] + this.joulesAvailable;
 	}
 
+	public void AssignJoulesAvailable(float joulesAvailable)
+	{
+		global::Debug.Assert(base.GetComponent<PowerTransformer>() != null);
+		this.joulesAvailable = joulesAvailable;
+	}
+
 	private void OnOperationalChanged(object data)
 	{
 		if (this.operational.IsOperational)
@@ -221,7 +227,7 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 		}
 	}
 
-	public void ConsumeEnergy(float joules)
+	public virtual void ConsumeEnergy(float joules)
 	{
 		this.joulesAvailable = Mathf.Max(0f, this.JoulesAvailable - joules);
 	}

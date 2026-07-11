@@ -80,9 +80,6 @@ public class KFMOD
 
 	public static EventInstance CreateInstance(string path)
 	{
-		if (KFMODDebugger.instance != null)
-		{
-		}
 		if (!RuntimeManager.IsInitialized)
 		{
 			return default(EventInstance);

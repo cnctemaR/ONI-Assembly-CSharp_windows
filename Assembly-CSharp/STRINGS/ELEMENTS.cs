@@ -1237,9 +1237,9 @@ namespace STRINGS
 			{
 				"Slime is a thick biomixture of algae, fungi, and mucopolysaccharides.\n\nIt can be distilled into ",
 				UI.FormatAsLink("Algae", "ALGAE"),
-				" and is useful in some ",
-				UI.FormatAsLink("Oxygen", "OXYGEN"),
-				" production processes."
+				" and emits ",
+				ELEMENTS.CONTAMINATEDOXYGEN.NAME,
+				" once dug up."
 			});
 		}
 

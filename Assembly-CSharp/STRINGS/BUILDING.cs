@@ -855,6 +855,23 @@ namespace STRINGS
 				});
 			}
 
+			public class POWERLOOPDETECTED
+			{
+				public static LocString NAME = "Power Loop Detected";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"A Transformer's ",
+					UI.PRE_KEYWORD,
+					"Power Output ",
+					UI.PST_KEYWORD,
+					"should not be connected back to its own ",
+					UI.PRE_KEYWORD,
+					"Input",
+					UI.PST_KEYWORD
+				});
+			}
+
 			public class NEEDRESOURCE
 			{
 				public static LocString NAME = "Resource Required";
@@ -905,7 +922,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No Analysis Focus Selected";
 
-				public static LocString TOOLTIP = "Select an unknown destination from the " + UI.FormatAsManagementMenu("Starmap", "[R]") + " to begin analysis";
+				public static LocString TOOLTIP = "Select an unknown destination from the " + UI.FormatAsManagementMenu("Starmap", "[Z]") + " to begin analysis";
 
 				public static LocString NOTIFICATION_NAME = UI.FormatAsLink("Telescope", "TELESCOPE") + " idle";
 
@@ -998,7 +1015,7 @@ namespace STRINGS
 
 			public class NOWIRECONNECTED
 			{
-				public static LocString NAME = "No Wire Connected";
+				public static LocString NAME = "No Power Wire Connected";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
@@ -1322,11 +1339,11 @@ namespace STRINGS
 					"This ",
 					UI.FormatAsLink("Algae Terrarium", "ALGAEHABITAT"),
 					" needs to be emptied of ",
-					UI.FormatAsLink("Contaminated Water", "DIRTYWATER"),
+					UI.FormatAsLink("Polluted Water", "DIRTYWATER"),
 					UI.HORIZONTAL_BR_RULE,
 					UI.FormatAsLink("Bottle Emptiers", "BOTTLEEMPTIER"),
 					" can be used to transport and dispose of ",
-					UI.FormatAsLink("Contaminated Water", "DIRTYWATER"),
+					UI.FormatAsLink("Polluted Water", "DIRTYWATER"),
 					" in designated areas"
 				});
 			}
@@ -1345,11 +1362,7 @@ namespace STRINGS
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
 					"Open the ",
-					UI.PRE_KEYWORD,
-					"Research Tree",
-					UI.PST_KEYWORD,
-					" ",
-					UI.FormatAsHotkey("{RESEARCH_MENU_KEY}"),
+					UI.FormatAsManagementMenu("Research Tree", "[R]"),
 					" to select a new ",
 					UI.FormatAsLink("Research", "TECH"),
 					" project"
@@ -1360,11 +1373,7 @@ namespace STRINGS
 				public static LocString NOTIFICATION_TOOLTIP = string.Concat(new string[]
 				{
 					"Open the ",
-					UI.PRE_KEYWORD,
-					"Research Tree",
-					UI.PST_KEYWORD,
-					" ",
-					UI.FormatAsHotkey("{RESEARCH_MENU_KEY}"),
+					UI.FormatAsManagementMenu("Research Tree", "[R]"),
 					" to select a new ",
 					UI.FormatAsLink("Research", "TECH"),
 					" project"
@@ -1380,17 +1389,9 @@ namespace STRINGS
 					"Select a ",
 					UI.FormatAsLink("Research", "TECH"),
 					" project in the ",
-					UI.PRE_KEYWORD,
-					"Research Tree",
-					UI.PST_KEYWORD,
-					" ",
-					UI.FormatAsHotkey("{RESEARCH_MENU_KEY}"),
+					UI.FormatAsManagementMenu("Research Tree", "{Hotkey}"),
 					" or a Destination in the ",
-					UI.PRE_KEYWORD,
-					"Starmap",
-					UI.PST_KEYWORD,
-					" ",
-					UI.FormatAsHotkey("{STARMAP_MENU_KEY}")
+					UI.FormatAsManagementMenu("Starmap", "[Z]")
 				});
 
 				public static LocString NOTIFICATION_NAME = "No " + UI.FormatAsLink("Research Focus", "TECH") + " or Starmap destination selected";
@@ -1400,17 +1401,9 @@ namespace STRINGS
 					"Select a ",
 					UI.FormatAsLink("Research", "TECH"),
 					" project in the ",
-					UI.PRE_KEYWORD,
-					"Research Tree",
-					UI.PST_KEYWORD,
-					" ",
-					UI.FormatAsHotkey("{RESEARCH_MENU_KEY}"),
+					UI.FormatAsManagementMenu("Research Tree", "[R]"),
 					" or a Destination in the ",
-					UI.PRE_KEYWORD,
-					"Starmap",
-					UI.PST_KEYWORD,
-					" ",
-					UI.FormatAsHotkey("{STARMAP_MENU_KEY}")
+					UI.FormatAsManagementMenu("Starmap", "[Z]")
 				});
 			}
 
@@ -1493,16 +1486,30 @@ namespace STRINGS
 
 			public class WIRECIRCUITSTATUS
 			{
-				public static LocString NAME = "Circuit Status: {CurrentLoad} / {MaxLoad}";
+				public static LocString NAME = "Current Load: <color=#{Color}>{CurrentLoad}</color> / {MaxLoad}";
 
-				public static LocString TOOLTIP = "The current load on this circuit";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"The current ",
+					UI.PRE_KEYWORD,
+					"Power",
+					UI.PST_KEYWORD,
+					" load on this wire\n\nOverloading a wire will cause damage to the wire over time and cause it to break"
+				});
 			}
 
 			public class WIREMAXWATTAGESTATUS
 			{
-				public static LocString NAME = "Max Wattage: {WireMaxWattage}";
+				public static LocString NAME = "Potential Load: <color=#{Color}>{TotalPotentialLoad}</color> / {MaxLoad}";
 
-				public static LocString TOOLTIP = "The maximum wattage that this wire can safely sustain";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"How much wattage this network will draw if all ",
+					UI.PRE_KEYWORD,
+					"Power",
+					UI.PST_KEYWORD,
+					" consumers on the network become active at once"
+				});
 			}
 
 			public class NOLIQUIDELEMENTTOPUMP
@@ -1618,7 +1625,7 @@ namespace STRINGS
 
 			public class JOULESAVAILABLE
 			{
-				public static LocString NAME = UI.FormatAsLink("Power", "POWER") + " Available: {JoulesAvailable}";
+				public static LocString NAME = "Power Available: {JoulesAvailable} / {JoulesCapacity}";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
@@ -1759,7 +1766,7 @@ namespace STRINGS
 
 			public class HEATINGSTALLEDHOTENV
 			{
-				public static LocString NAME = "Max Temperature Reached";
+				public static LocString NAME = "Target Temperature Reached";
 
 				public static LocString TOOLTIP = "This building cannot heat the surrounding environment beyond <b>{0}</b>";
 			}
@@ -2487,28 +2494,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No Line of Sight";
 
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This building has no view of space\n\nEnsure an unblocked view of the sky is available to collect ",
-					UI.PRE_KEYWORD,
-					"Starmap",
-					UI.PST_KEYWORD,
-					" data\n    • Visibility: <b>{VISIBILITY}</b>\n    • Scan Radius: <b>{RADIUS}</b> cells"
-				});
+				public static LocString TOOLTIP = "This building has no view of space\n\nEnsure an unblocked view of the sky is available to collect " + UI.FormatAsManagementMenu("Starmap") + " data\n    • Visibility: <b>{VISIBILITY}</b>\n    • Scan Radius: <b>{RADIUS}</b> cells";
 			}
 
 			public class SPACE_VISIBILITY_REDUCED
 			{
 				public static LocString NAME = "Reduced Visibility";
 
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This building has an inadequate or obscured view of space\n\nEnsure an unblocked view of the sky is available to collect ",
-					UI.PRE_KEYWORD,
-					"Starmap",
-					UI.PST_KEYWORD,
-					" data\n    • Visibility: <b>{VISIBILITY}</b>\n    • Scan Radius: <b>{RADIUS}</b> cells"
-				});
+				public static LocString TOOLTIP = "This building has an inadequate or obscured view of space\n\nEnsure an unblocked view of the sky is available to collect " + UI.FormatAsManagementMenu("Starmap") + " data\n    • Visibility: <b>{VISIBILITY}</b>\n    • Scan Radius: <b>{RADIUS}</b> cells";
 			}
 
 			public class PATH_NOT_CLEAR

@@ -127,7 +127,7 @@ public class Constructable : Workable, ISaveLoadable
 				int diseaseCount = component7.DiseaseCount;
 				global::Debug.Assert(component7.Element != null && component7.Element.tag != null);
 				Deconstructable.SpawnItem(component7.transform.GetPosition(), component7.GetComponent<Building>().Def, component7.Element.tag, mass, temperature, diseaseIdx, diseaseCount);
-				replacementCandidate.Trigger(1606648047, null);
+				replacementCandidate.Trigger(1606648047, this.building.Def.TileLayer);
 				replacementCandidate.DeleteObject();
 			}
 		}
@@ -144,7 +144,14 @@ public class Constructable : Workable, ISaveLoadable
 		Orientation orientation = ((!(component != null)) ? Orientation.Neutral : component.GetOrientation());
 		int num = Grid.PosToCell(base.transform.GetLocalPosition());
 		this.UnmarkArea();
-		GameObject gameObject = this.building.Def.Build(num, orientation, this.storage, this.selectedElementsTags, this.initialTemperature, true);
+		BuildingDef def = this.building.Def;
+		int num2 = num;
+		Orientation orientation2 = orientation;
+		Storage storage = this.storage;
+		Tag[] array = this.selectedElementsTags;
+		float num3 = this.initialTemperature;
+		float time = GameClock.Instance.GetTime();
+		GameObject gameObject = def.Build(num2, orientation2, storage, array, num3, true, time);
 		gameObject.transform.rotation = base.transform.rotation;
 		Rotatable component2 = gameObject.GetComponent<Rotatable>();
 		if (component2 != null)

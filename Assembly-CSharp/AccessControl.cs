@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class AccessControl : KMonoBehaviour, ISaveLoadable
+public class AccessControl : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 {
 	public AccessControl.Permission DefaultPermission
 	{
@@ -285,6 +285,15 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		{
 			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.AccessControl, null, null);
 		}
+	}
+
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		Descriptor descriptor = default(Descriptor);
+		descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.ACCESS_CONTROL, UI.BUILDINGEFFECTS.TOOLTIPS.ACCESS_CONTROL, Descriptor.DescriptorType.Effect);
+		list.Add(descriptor);
+		return list;
 	}
 
 	[MyCmpGet]

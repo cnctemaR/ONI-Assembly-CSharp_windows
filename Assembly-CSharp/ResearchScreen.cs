@@ -45,54 +45,52 @@ public class ResearchScreen : KModalScreen
 	private void Update()
 	{
 		RectTransform component = this.scrollContent.GetComponent<RectTransform>();
-		RectTransform component2 = this.scrollContent.transform.parent.GetComponent<RectTransform>();
-		if (!this.isDragging && this.rightMouseDown && Vector3.Distance(this.dragStartPosition, KInputManager.GetMousePos()) > 1f)
+		if (!this.isDragging && (this.rightMouseDown || this.leftMouseDown) && Vector2.Distance(this.dragStartPosition, KInputManager.GetMousePos()) > 1f)
 		{
 			this.isDragging = true;
 		}
-		Vector3 position = component.GetPosition();
+		Vector2 anchoredPosition = component.anchoredPosition;
 		float num = Mathf.Min(this.effectiveZoomSpeed * Time.unscaledDeltaTime, 0.9f);
 		this.currentZoom = Mathf.Lerp(this.currentZoom, this.targetZoom, num);
-		Vector3 vector = Vector3.zero;
-		Vector3 mousePos = KInputManager.GetMousePos();
-		Vector3 vector2 = ((!this.zoomCenterLock) ? (component.InverseTransformPoint(mousePos) * this.currentZoom) : (component.InverseTransformPoint(new Vector3((float)(Screen.width / 2), (float)(Screen.height / 2), 0f)) * this.currentZoom));
+		Vector2 vector = Vector2.zero;
+		Vector2 vector2 = KInputManager.GetMousePos();
+		Vector2 vector3 = ((!this.zoomCenterLock) ? (component.InverseTransformPoint(vector2) * this.currentZoom) : (component.InverseTransformPoint(new Vector2((float)(Screen.width / 2), (float)(Screen.height / 2))) * this.currentZoom));
 		component.localScale = new Vector3(this.currentZoom, this.currentZoom, 1f);
-		Vector3 vector3 = ((!this.zoomCenterLock) ? (component.InverseTransformPoint(mousePos) * this.currentZoom) : (component.InverseTransformPoint(new Vector3((float)(Screen.width / 2), (float)(Screen.height / 2), 0f)) * this.currentZoom));
-		vector = vector3 - vector2;
+		Vector2 vector4 = ((!this.zoomCenterLock) ? (component.InverseTransformPoint(vector2) * this.currentZoom) : (component.InverseTransformPoint(new Vector2((float)(Screen.width / 2), (float)(Screen.height / 2))) * this.currentZoom));
+		vector = vector4 - vector3;
 		float num2 = this.keyboardScrollSpeed;
 		if (this.panUp)
 		{
-			this.keyPanDelta -= Vector3.up * Time.unscaledDeltaTime * num2;
+			this.keyPanDelta -= Vector2.up * Time.unscaledDeltaTime * num2;
 		}
 		else if (this.panDown)
 		{
-			this.keyPanDelta += Vector3.up * Time.unscaledDeltaTime * num2;
+			this.keyPanDelta += Vector2.up * Time.unscaledDeltaTime * num2;
 		}
 		if (this.panLeft)
 		{
-			this.keyPanDelta += Vector3.right * Time.unscaledDeltaTime * num2;
+			this.keyPanDelta += Vector2.right * Time.unscaledDeltaTime * num2;
 		}
 		else if (this.panRight)
 		{
-			this.keyPanDelta -= Vector3.right * Time.unscaledDeltaTime * num2;
+			this.keyPanDelta -= Vector2.right * Time.unscaledDeltaTime * num2;
 		}
-		Vector3 vector4 = new Vector3(Mathf.Lerp(0f, this.keyPanDelta.x, Time.unscaledDeltaTime * this.keyPanEasing), Mathf.Lerp(0f, this.keyPanDelta.y, Time.unscaledDeltaTime * this.keyPanEasing), 0f);
-		this.keyPanDelta -= vector4;
-		Vector3 vector5 = Vector3.zero;
+		Vector2 vector5 = new Vector2(Mathf.Lerp(0f, this.keyPanDelta.x, Time.unscaledDeltaTime * this.keyPanEasing), Mathf.Lerp(0f, this.keyPanDelta.y, Time.unscaledDeltaTime * this.keyPanEasing));
+		this.keyPanDelta -= vector5;
+		Vector2 vector6 = Vector2.zero;
 		if (this.isDragging)
 		{
-			Vector3 vector6 = component.InverseTransformPoint(mousePos) * this.currentZoom;
-			Vector3 vector7 = KInputManager.GetMousePos() - this.dragLastPosition;
-			vector5 += vector7;
+			Vector2 vector7 = KInputManager.GetMousePos() - this.dragLastPosition;
+			vector6 += vector7;
 			this.dragLastPosition = KInputManager.GetMousePos();
 		}
-		Vector3 vector8 = position + vector + this.keyPanDelta + vector5;
+		Vector2 vector8 = anchoredPosition + vector + this.keyPanDelta + vector6;
 		if (!this.isDragging)
 		{
-			Vector2 vector9 = component.rect.min * this.currentZoom + component2.rect.size * 0.5f;
-			Vector2 vector10 = component.rect.max * this.currentZoom + component2.rect.size * 0.5f;
-			Vector3 vector11 = new Vector3(Mathf.Clamp(vector8.x, vector9.x, vector10.x), Mathf.Clamp(vector8.y, vector9.y, vector10.y), 0f);
-			Vector3 vector12 = vector11 - vector8;
+			Vector2 vector9 = component.rect.size * -0.5f * this.currentZoom;
+			Vector2 vector10 = component.rect.size * 0.5f * this.currentZoom;
+			Vector2 vector11 = new Vector2(Mathf.Clamp(vector8.x, vector9.x, vector10.x), Mathf.Clamp(vector8.y, vector9.y, vector10.y));
+			Vector2 vector12 = vector11 - vector8;
 			if (!this.panLeft && !this.panRight && !this.panUp && !this.panDown)
 			{
 				vector8 += vector12 * this.edgeClampFactor * Time.unscaledDeltaTime;
@@ -118,7 +116,7 @@ public class ResearchScreen : KModalScreen
 				}
 			}
 		}
-		component.SetPosition(vector8);
+		component.anchoredPosition = vector8;
 	}
 
 	protected override void OnSpawn()
@@ -423,25 +421,25 @@ public class ResearchScreen : KModalScreen
 		this.OnFilterChanged(string.Empty);
 		this.UpdateProgressBars();
 		this.UpdatePointDisplay();
-		this.zoomingIn = false;
-		this.zoomingOut = false;
 	}
 
 	public override void OnKeyUp(KButtonEvent e)
 	{
 		if (!e.Consumed)
 		{
-			if (e.IsAction(global::Action.MouseRight))
+			if (e.IsAction(global::Action.MouseRight) || e.IsAction(global::Action.MouseLeft))
 			{
 				if (!this.isDragging && e.TryConsume(global::Action.MouseRight))
 				{
 					this.isDragging = false;
 					this.rightMouseDown = false;
+					this.leftMouseDown = false;
 					ManagementMenu.Instance.CloseAll();
 					return;
 				}
 				this.isDragging = false;
 				this.rightMouseDown = false;
+				this.leftMouseDown = false;
 			}
 			if (this.panUp && e.TryConsume(global::Action.PanUp))
 			{
@@ -476,6 +474,13 @@ public class ResearchScreen : KModalScreen
 				this.dragStartPosition = KInputManager.GetMousePos();
 				this.dragLastPosition = KInputManager.GetMousePos();
 				this.rightMouseDown = true;
+				return;
+			}
+			if (e.TryConsume(global::Action.MouseLeft))
+			{
+				this.dragStartPosition = KInputManager.GetMousePos();
+				this.dragLastPosition = KInputManager.GetMousePos();
+				this.leftMouseDown = true;
 				return;
 			}
 			if (e.TryConsume(global::Action.ZoomIn))
@@ -580,11 +585,9 @@ public class ResearchScreen : KModalScreen
 
 	private bool panRight;
 
-	private bool zoomingOut;
-
-	private bool zoomingIn;
-
 	private bool rightMouseDown;
+
+	private bool leftMouseDown;
 
 	private bool isDragging;
 
@@ -598,7 +601,7 @@ public class ResearchScreen : KModalScreen
 
 	private bool zoomCenterLock;
 
-	private Vector3 keyPanDelta = Vector3.zero;
+	private Vector2 keyPanDelta = Vector3.zero;
 
 	[SerializeField]
 	private float effectiveZoomSpeed = 5f;

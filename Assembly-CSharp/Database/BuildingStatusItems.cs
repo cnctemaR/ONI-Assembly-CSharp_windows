@@ -283,6 +283,7 @@ namespace Database
 			this.NeedPlant = this.CreateStatusItem("NeedPlant", "BUILDING", "status_item_need_plant", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 			this.NeedPower = this.CreateStatusItem("NeedPower", "BUILDING", "status_item_need_power", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022);
 			this.NotEnoughPower = this.CreateStatusItem("NotEnoughPower", "BUILDING", "status_item_need_power", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022);
+			this.PowerLoopDetected = this.CreateStatusItem("PowerLoopDetected", "BUILDING", "status_item_exclamation", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022);
 			this.NewDuplicantsAvailable = this.CreateStatusItem("NewDuplicantsAvailable", "BUILDING", "status_item_new_duplicants_available", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 			this.NewDuplicantsAvailable.AddNotification(null, null, null, 0f);
 			this.NewDuplicantsAvailable.notificationClickCallback = delegate(object data)
@@ -454,6 +455,15 @@ namespace Database
 				ManagementMenu.Instance.OpenStarmap();
 			};
 			this.NoResearchOrDestinationSelected = this.CreateStatusItem("NoResearchOrDestinationSelected", "BUILDING", "status_item_no_research_selected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
+			StatusItem noResearchOrDestinationSelected = this.NoResearchOrDestinationSelected;
+			noResearchOrDestinationSelected.resolveTooltipCallback = (Func<string, object, string>)Delegate.Combine(noResearchOrDestinationSelected.resolveTooltipCallback, new Func<string, object, string>(delegate(string str, object data)
+			{
+				string text16 = GameInputMapping.FindEntry(global::Action.ManageStarmap).mKeyCode.ToString();
+				str = str.Replace("{STARMAP_MENU_KEY}", text16);
+				string text17 = GameInputMapping.FindEntry(global::Action.ManageResearch).mKeyCode.ToString();
+				str = str.Replace("{RESEARCH_MENU_KEY}", text17);
+				return str;
+			}));
 			this.NoResearchOrDestinationSelected.AddNotification(null, null, null, 0f);
 			this.ValveRequest = this.CreateStatusItem("ValveRequest", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.ValveRequest.resolveStringCallback = delegate(string str, object data)
@@ -465,8 +475,8 @@ namespace Database
 			this.EmittingLight = this.CreateStatusItem("EmittingLight", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.EmittingLight.resolveStringCallback = delegate(string str, object data)
 			{
-				string text16 = GameInputMapping.FindEntry(global::Action.Overlay5).mKeyCode.ToString();
-				str = str.Replace("{LightGridOverlay}", text16);
+				string text18 = GameInputMapping.FindEntry(global::Action.Overlay5).mKeyCode.ToString();
+				str = str.Replace("{LightGridOverlay}", text18);
 				return str;
 			};
 			this.RationBoxContents = this.CreateStatusItem("RationBoxContents", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
@@ -498,8 +508,8 @@ namespace Database
 			this.EmittingElement.resolveStringCallback = delegate(string str, object data)
 			{
 				IElementEmitter elementEmitter = (IElementEmitter)data;
-				string text17 = ElementLoader.FindElementByHash(elementEmitter.Element).tag.ProperName();
-				str = str.Replace("{ElementType}", text17);
+				string text19 = ElementLoader.FindElementByHash(elementEmitter.Element).tag.ProperName();
+				str = str.Replace("{ElementType}", text19);
 				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(elementEmitter.AverageEmitRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				return str;
 			};
@@ -535,8 +545,8 @@ namespace Database
 			this.ElementConsumer.resolveStringCallback = delegate(string str, object data)
 			{
 				ElementConsumer elementConsumer = (ElementConsumer)data;
-				string text18 = ElementLoader.FindElementByHash(elementConsumer.elementToConsume).tag.ProperName();
-				str = str.Replace("{ElementTypes}", text18);
+				string text20 = ElementLoader.FindElementByHash(elementConsumer.elementToConsume).tag.ProperName();
+				str = str.Replace("{ElementTypes}", text20);
 				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(elementConsumer.AverageConsumeRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				return str;
 			};
@@ -556,8 +566,9 @@ namespace Database
 			this.JoulesAvailable = this.CreateStatusItem("JoulesAvailable", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.Power.ID, true, 129022);
 			this.JoulesAvailable.resolveStringCallback = delegate(string str, object data)
 			{
-				IEnergyProducer energyProducer = (IEnergyProducer)data;
-				str = str.Replace("{JoulesAvailable}", GameUtil.GetFormattedJoules(energyProducer.JoulesAvailable, "F1", GameUtil.TimeSlice.None));
+				Battery battery = (Battery)data;
+				str = str.Replace("{JoulesAvailable}", GameUtil.GetFormattedJoules(battery.JoulesAvailable, "F1", GameUtil.TimeSlice.None));
+				str = str.Replace("{JoulesCapacity}", GameUtil.GetFormattedJoules(battery.Capacity, "F1", GameUtil.TimeSlice.None));
 				return str;
 			};
 			this.Wattage = this.CreateStatusItem("Wattage", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.Power.ID, true, 129022);
@@ -638,10 +649,10 @@ namespace Database
 			this.Grave.resolveStringCallback = delegate(string str, object data)
 			{
 				Grave.StatesInstance statesInstance2 = (Grave.StatesInstance)data;
-				string text19 = str.Replace("{DeadDupe}", statesInstance2.master.graveName);
+				string text21 = str.Replace("{DeadDupe}", statesInstance2.master.graveName);
 				string[] strings = LocString.GetStrings(typeof(NAMEGEN.GRAVE.EPITAPHS));
 				int num4 = statesInstance2.master.epitaphIdx % strings.Length;
-				return text19.Replace("{Epitaph}", strings[num4]);
+				return text21.Replace("{Epitaph}", strings[num4]);
 			};
 			this.GraveEmpty = this.CreateStatusItem("GraveEmpty", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.CannotCoolFurther = this.CreateStatusItem("CannotCoolFurther", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
@@ -792,6 +803,8 @@ namespace Database
 		public StatusItem NeedPower;
 
 		public StatusItem NotEnoughPower;
+
+		public StatusItem PowerLoopDetected;
 
 		public StatusItem NeedLiquidIn;
 

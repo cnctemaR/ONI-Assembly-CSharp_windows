@@ -31,7 +31,6 @@ public class SteamUGCService : MonoBehaviour
 		{
 			return;
 		}
-		global::Debug.Log("Initialising UGC Service");
 		GameObject gameObject = GameObject.Find("/SteamManager");
 		SteamUGCService.instance = gameObject.GetComponent<SteamUGCService>();
 		if (SteamUGCService.instance == null)
@@ -92,13 +91,11 @@ public class SteamUGCService : MonoBehaviour
 		if (details.m_hPreviewFile != UGCHandle_t.Invalid)
 		{
 			SteamRemoteStorage.UGCDownload(details.m_hPreviewFile, 0U);
-			global::Debug.LogFormat("\tdownload preview file", new object[0]);
 			array = new byte[details.m_nPreviewFileSize];
 			int num = SteamRemoteStorage.UGCRead(details.m_hPreviewFile, array, details.m_nPreviewFileSize, 0U, EUGCReadAction.k_EUGCRead_ContinueReadingUntilFinished);
-			global::Debug.LogFormat("\tload preview image of size {0} bytes...loaded {1}", new object[] { details.m_nPreviewFileSize, num });
 			if (num != details.m_nPreviewFileSize)
 			{
-				global::Debug.LogFormat("\t...load failed", new object[0]);
+				global::Debug.LogFormat("Preview image load failed", new object[0]);
 				array = null;
 			}
 		}

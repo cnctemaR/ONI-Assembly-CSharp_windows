@@ -20,7 +20,7 @@ public class WireRefinedHighWattageConfig : BaseWireConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		base.DoPostConfigureComplete(Wire.WattageRating.Max20000, go);
+		base.DoPostConfigureComplete(Wire.WattageRating.Max50000, go);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)

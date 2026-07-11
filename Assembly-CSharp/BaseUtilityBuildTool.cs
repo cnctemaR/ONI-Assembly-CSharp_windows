@@ -403,7 +403,14 @@ public class BaseUtilityBuildTool : DragTool
 				string text;
 				if ((DebugHandler.InstantBuildMode || (Game.Instance.SandboxModeActive && SandboxToolParameterMenu.instance.settings.InstantBuild)) && this.def.IsValidBuildLocation(this.visualizer, vector, Orientation.Neutral) && this.def.IsValidPlaceLocation(this.visualizer, vector, Orientation.Neutral, out text))
 				{
-					gameObject = this.def.Build(pathNode.cell, Orientation.Neutral, null, this.selectedElements, 293.15f, true);
+					BuildingDef buildingDef = this.def;
+					int cell = pathNode.cell;
+					Orientation orientation = Orientation.Neutral;
+					Storage storage = null;
+					IList<Tag> list = this.selectedElements;
+					float num2 = 293.15f;
+					float time = GameClock.Instance.GetTime();
+					gameObject = buildingDef.Build(cell, orientation, storage, list, num2, true, time);
 				}
 				else
 				{

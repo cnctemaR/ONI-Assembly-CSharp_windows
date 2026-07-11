@@ -271,7 +271,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 	private bool LoadScreenshot(RetiredColonyData data)
 	{
 		this.clearCurrentSlideshow();
-		Sprite sprite = RetireColonyUtility.LoadColonyPreview(data.colonyName);
+		Sprite sprite = RetireColonyUtility.LoadRetiredColonyPreview(data.colonyName);
 		if (sprite != null)
 		{
 			this.slideshow.setSlide(sprite);
@@ -719,7 +719,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 			GameObject gameObject = global::Util.KInstantiateUI(this.colonyButtonPrefab, this.explorerGrid, true);
 			HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
 			string text = RetireColonyUtility.StripInvalidCharacters(data.colonyName);
-			Sprite sprite = RetireColonyUtility.LoadColonyPreview(text);
+			Sprite sprite = RetireColonyUtility.LoadRetiredColonyPreview(text);
 			Image reference = component.GetReference<Image>("ColonyImage");
 			RectTransform reference2 = component.GetReference<RectTransform>("PreviewUnavailableText");
 			if (sprite != null)

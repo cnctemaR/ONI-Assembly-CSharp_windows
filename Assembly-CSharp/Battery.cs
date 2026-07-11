@@ -71,6 +71,14 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 
 	public int PowerCell { get; private set; }
 
+	public ushort CircuitID
+	{
+		get
+		{
+			return Game.Instance.circuitManager.GetCircuitID(this.PowerCell);
+		}
+	}
+
 	public bool IsConnected
 	{
 		get
@@ -196,12 +204,19 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
-		return new List<Descriptor>
+		List<Descriptor> list = new List<Descriptor>();
+		if (this.powerTransformer == null)
 		{
-			new Descriptor(UI.BUILDINGEFFECTS.REQUIRESPOWERGENERATOR, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESPOWERGENERATOR, Descriptor.DescriptorType.Requirement, false),
-			new Descriptor(string.Format(UI.BUILDINGEFFECTS.BATTERYCAPACITY, GameUtil.GetFormattedJoules(this.capacity, string.Empty, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.BATTERYCAPACITY, GameUtil.GetFormattedJoules(this.capacity, string.Empty, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect, false),
-			new Descriptor(string.Format(UI.BUILDINGEFFECTS.BATTERYLEAK, GameUtil.GetFormattedJoules(this.joulesLostPerSecond, "F1", GameUtil.TimeSlice.PerCycle)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.BATTERYLEAK, GameUtil.GetFormattedJoules(this.joulesLostPerSecond, "F1", GameUtil.TimeSlice.PerCycle)), Descriptor.DescriptorType.Effect, false)
-		};
+			list.Add(new Descriptor(UI.BUILDINGEFFECTS.REQUIRESPOWERGENERATOR, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESPOWERGENERATOR, Descriptor.DescriptorType.Requirement, false));
+			list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.BATTERYCAPACITY, GameUtil.GetFormattedJoules(this.capacity, string.Empty, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.BATTERYCAPACITY, GameUtil.GetFormattedJoules(this.capacity, string.Empty, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect, false));
+			list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.BATTERYLEAK, GameUtil.GetFormattedJoules(this.joulesLostPerSecond, "F1", GameUtil.TimeSlice.PerCycle)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.BATTERYLEAK, GameUtil.GetFormattedJoules(this.joulesLostPerSecond, "F1", GameUtil.TimeSlice.PerCycle)), Descriptor.DescriptorType.Effect, false));
+		}
+		else
+		{
+			list.Add(new Descriptor("Input " + UI.FormatAsLink("Power Wire", "WIRE"), UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESPOWERGENERATOR, Descriptor.DescriptorType.Requirement, false));
+			list.Add(new Descriptor(string.Format("Output " + UI.FormatAsLink("Power Wire", "WIRE") + " (Limited to {0})", GameUtil.GetFormattedWattage(this.capacity, GameUtil.WattageFormatterUnit.Automatic)), UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESPOWERGENERATOR, Descriptor.DescriptorType.Requirement, false));
+		}
+		return list;
 	}
 
 	[ContextMenu("Refill Power")]

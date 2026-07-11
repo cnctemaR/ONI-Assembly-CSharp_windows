@@ -14,7 +14,6 @@ namespace KMod
 		public Manager()
 		{
 			Manager $this = this;
-			global::Debug.Log("Load mod database");
 			string filename = this.GetFilename();
 			try
 			{
@@ -227,7 +226,6 @@ namespace KMod
 			}
 			else
 			{
-				global::Debug.LogFormat("\tAlready subscribed mod: {0}", new object[] { mod.title });
 				if (mod2.status == Mod.Status.UninstallPending)
 				{
 					mod2.status = Mod.Status.Installed;
@@ -406,16 +404,11 @@ namespace KMod
 				}
 				this.load_user_mod_loader_dll = false;
 			}
-			global::Debug.LogFormat("Load content ({0}) for mods:", new object[] { content });
 			foreach (Mod mod in this.mods)
 			{
 				if (mod.enabled)
 				{
 					mod.Load(content);
-					if (mod.IsActive())
-					{
-						global::Debug.LogFormat("\t{0}", new object[] { mod.title });
-					}
 				}
 			}
 			bool flag = false;

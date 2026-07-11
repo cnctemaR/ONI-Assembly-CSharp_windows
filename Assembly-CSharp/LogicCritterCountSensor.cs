@@ -43,7 +43,6 @@ public class LogicCritterCountSensor : Switch, ISaveLoadable, IThresholdSwitch, 
 			{
 				this.currentCount += roomOfGameObject.cavity.eggs.Count;
 			}
-			this.SetState(this.currentCount > this.countThreshold);
 			bool flag = ((!this.activateOnGreaterThan) ? (this.currentCount < this.countThreshold) : (this.currentCount > this.countThreshold));
 			this.SetState(flag);
 			if (this.selectable.HasStatusItem(Db.Get().BuildingStatusItems.NotInAnyRoom))

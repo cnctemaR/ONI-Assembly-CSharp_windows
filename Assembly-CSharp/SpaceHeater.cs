@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>
+public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IEffectDescriptor
 {
 	public float TargetTemperature
 	{
@@ -51,6 +51,15 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>
 			return SpaceHeater.MonitorState.TooHot;
 		}
 		return SpaceHeater.MonitorState.ReadyToHeat;
+	}
+
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		Descriptor descriptor = default(Descriptor);
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.HEATER_TARGETTEMPERATURE, GameUtil.GetFormattedTemperature(this.targetTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.HEATER_TARGETTEMPERATURE, GameUtil.GetFormattedTemperature(this.targetTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), Descriptor.DescriptorType.Effect);
+		list.Add(descriptor);
+		return list;
 	}
 
 	public float targetTemperature = 308.15f;

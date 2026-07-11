@@ -6,7 +6,6 @@ public class LogicUtilityNetworkLink : UtilityNetworkLink, IHaveUtilityNetworkMg
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.WireConnected, null);
 	}
 
 	protected override void OnConnect(int cell1, int cell2)

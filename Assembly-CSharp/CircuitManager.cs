@@ -165,6 +165,10 @@ public class CircuitManager
 			}
 		}
 		this.consumersShadow.Clear();
+		for (int k = 0; k < this.circuitInfo.Count; k++)
+		{
+			this.circuitInfo[k].consumers.Sort((IEnergyConsumer a, IEnergyConsumer b) => a.WattsNeededWhenActive.CompareTo(b.WattsNeededWhenActive));
+		}
 		foreach (Generator generator in this.generators)
 		{
 			int powerCell2 = generator.PowerCell;
@@ -277,7 +281,6 @@ public class CircuitManager
 					float num2 = energyConsumer.WattsUsed * 0.2f;
 					if (num2 > 0f)
 					{
-						circuitInfo.wattsUsed += energyConsumer.WattsUsed;
 						bool flag3 = false;
 						for (int num3 = 0; num3 < this.activeGenerators.Count; num3++)
 						{
@@ -305,7 +308,15 @@ public class CircuitManager
 						if (!flag3)
 						{
 							num2 = this.PowerFromBatteries(num2, batteries, energyConsumer);
-							flag3 = Mathf.Abs(num2) <= 0.01f;
+							flag3 = num2 <= 0.01f;
+						}
+						if (flag3)
+						{
+							circuitInfo.wattsUsed += energyConsumer.WattsUsed;
+						}
+						else
+						{
+							circuitInfo.wattsUsed += energyConsumer.WattsUsed - num2 / 0.2f;
 						}
 						energyConsumer.SetConnectionStatus((!flag3) ? CircuitManager.ConnectionStatus.Unpowered : CircuitManager.ConnectionStatus.Powered);
 					}
@@ -341,7 +352,7 @@ public class CircuitManager
 			circuitInfo2.generators.Sort((Generator a, Generator b) => a.JoulesAvailable.CompareTo(b.JoulesAvailable));
 			float num8 = 0f;
 			this.ChargeTransformers<Generator>(circuitInfo2.inputTransformers, circuitInfo2.generators, ref num8);
-			this.ChargeBatteries(circuitInfo2.inputTransformers, circuitInfo2.outputTransformers, ref num8);
+			this.ChargeTransformers<Generator>(circuitInfo2.inputTransformers, circuitInfo2.outputTransformers, ref num8);
 			float num9 = 0f;
 			this.ChargeBatteries(circuitInfo2.batteries, circuitInfo2.generators, ref num9);
 			this.ChargeBatteries(circuitInfo2.batteries, circuitInfo2.outputTransformers, ref num9);
@@ -557,16 +568,7 @@ public class CircuitManager
 		{
 			return -1f;
 		}
-		float num = 0f;
-		foreach (IEnergyConsumer energyConsumer in this.circuitInfo[(int)circuitID].consumers)
-		{
-			num += energyConsumer.WattsUsed;
-		}
-		foreach (Battery battery in this.circuitInfo[(int)circuitID].inputTransformers)
-		{
-			num += battery.WattsUsed;
-		}
-		return num;
+		return this.circuitInfo[(int)circuitID].wattsUsed;
 	}
 
 	public float GetWattsNeededWhenActive(ushort circuitID)

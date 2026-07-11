@@ -1,15 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using TUNING;
 using UnityEngine;
 
 public class ScheduleBlockButton : KMonoBehaviour
 {
 	public int idx { get; private set; }
 
-	public void Setup(int idx, Dictionary<string, ColorStyleSetting> paintStyles)
+	public void Setup(int idx, Dictionary<string, ColorStyleSetting> paintStyles, int totalBlocks)
 	{
 		this.idx = idx;
 		this.paintStyles = paintStyles;
+		if (idx < TRAITS.EARLYBIRD_SCHEDULEBLOCK)
+		{
+			HierarchyReferences component = base.GetComponent<HierarchyReferences>();
+			component.GetReference<RectTransform>("MorningIcon").gameObject.SetActive(true);
+		}
+		else if (idx >= totalBlocks - 3)
+		{
+			HierarchyReferences component2 = base.GetComponent<HierarchyReferences>();
+			component2.GetReference<RectTransform>("NightIcon").gameObject.SetActive(true);
+		}
 		base.gameObject.name = "ScheduleBlock_" + idx.ToString();
 	}
 

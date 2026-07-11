@@ -747,7 +747,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		set
 		{
 			DebugUtil.Assert(value.Length > 0, "Controller has no anim files.");
-			DebugUtil.Assert(value[0].buildFile != null, "First anim file needs to be the build file.");
+			DebugUtil.Assert(value[0].buildBytes != null, "First anim file needs to be the build file.");
 			for (int i = 0; i < value.Length; i++)
 			{
 				DebugUtil.Assert(value[i] != null, "Anim file is null");

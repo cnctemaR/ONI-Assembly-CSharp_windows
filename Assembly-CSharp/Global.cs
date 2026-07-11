@@ -284,7 +284,6 @@ public class Global : MonoBehaviour
 		Localization.RegisterForTranslation(typeof(UI));
 		this.modManager = new global::KMod.Manager();
 		this.modManager.Load(Content.DLL);
-		this.modManager.Load(Content.Animation);
 		this.modManager.Load(Content.Strings);
 		global::KSerialization.Manager.Initialize();
 		this.mInputManager = new GameInputManager(Global.GenerateDefaultBindings());
@@ -296,7 +295,6 @@ public class Global : MonoBehaviour
 		DistributionPlatform.Initialize();
 		Localization.Initialize(false);
 		this.modManager.Load(Content.Translation);
-		global::Debug.Log("Register mods/Local/ and mods/Dev as mod distribution platforms");
 		this.modManager.distribution_platforms.Add(new Local("Local", Label.DistributionPlatform.Local));
 		this.modManager.distribution_platforms.Add(new Local("Dev", Label.DistributionPlatform.Dev));
 		this.mainThread = Thread.CurrentThread;
@@ -394,7 +392,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 361684U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 364722U);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());

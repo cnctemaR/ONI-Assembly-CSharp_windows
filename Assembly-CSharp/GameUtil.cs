@@ -1318,15 +1318,20 @@ public static class GameUtil
 				color4 = color3;
 				locString = UI.OVERLAYS.OXYGEN.LEGEND4;
 			}
-			else if (Mass >= 0.3f)
+			else if (Mass >= SimDebugView.optimallyBreathable)
 			{
-				color4 = color2;
-				locString = UI.OVERLAYS.OXYGEN.LEGEND6;
+				color4 = color;
+				locString = UI.OVERLAYS.OXYGEN.LEGEND1;
 			}
-			else if (Mass > 0.05f)
+			else if (Mass >= SimDebugView.minimumBreathable + (SimDebugView.optimallyBreathable - SimDebugView.minimumBreathable) / 2f)
+			{
+				color4 = color;
+				locString = UI.OVERLAYS.OXYGEN.LEGEND2;
+			}
+			else if (Mass >= SimDebugView.minimumBreathable)
 			{
 				color4 = color2;
-				locString = UI.OVERLAYS.OXYGEN.LEGEND5;
+				locString = UI.OVERLAYS.OXYGEN.LEGEND3;
 			}
 			else
 			{
@@ -1355,6 +1360,27 @@ public static class GameUtil
 			locString = UI.OVERLAYS.OXYGEN.LEGEND4;
 		}
 		return string.Format(ELEMENTS.BREATHABLEDESC, color4.ToHexString(), locString);
+	}
+
+	public static string GetWireLoadColor(float load, float maxLoad)
+	{
+		Color color = new Color(1f, 1f, 1f);
+		Color color2 = new Color(0.9843137f, 0.6901961f, 0.23137255f);
+		Color color3 = new Color(1f, 0.19215687f, 0.19215687f);
+		Color color4;
+		if (load > maxLoad)
+		{
+			color4 = color3;
+		}
+		else if (load / maxLoad >= 0.75f)
+		{
+			color4 = color2;
+		}
+		else
+		{
+			color4 = color;
+		}
+		return color4.ToHexString();
 	}
 
 	public static string AppendHotkeyString(string template, global::Action action)

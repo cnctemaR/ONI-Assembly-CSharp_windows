@@ -37,7 +37,7 @@ public class MinionTodoChoreEntry : KMonoBehaviour
 			text2 = text2.Replace("{Groups}", text);
 		}
 		string text3 = ((context.chore.masterPriority.priority_class != PriorityScreen.PriorityClass.basic) ? string.Empty : context.chore.masterPriority.priority_value.ToString());
-		Sprite sprite = ((context.chore.masterPriority.priority_class != PriorityScreen.PriorityClass.basic) ? null : this.prioritySprites[context.chore.masterPriority.priority_value]);
+		Sprite sprite = ((context.chore.masterPriority.priority_class != PriorityScreen.PriorityClass.basic) ? null : this.prioritySprites[context.chore.masterPriority.priority_value - 1]);
 		this.label.SetText(choreName);
 		this.subLabel.SetText(text2);
 		this.priorityLabel.SetText(text3);

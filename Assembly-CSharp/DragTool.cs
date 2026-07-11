@@ -348,19 +348,17 @@ public class DragTool : InterfaceTool
 	private void HandlePriortyKeysDown(KButtonEvent e)
 	{
 		global::Action action = e.GetAction();
-		if (global::Action.Plan1 <= action && action <= global::Action.Plan9 && e.TryConsume(action))
+		if (global::Action.Plan1 > action || action > global::Action.Plan10 || !e.TryConsume(action))
 		{
-			int num = action - global::Action.Plan1 + 1;
-			if (num <= 9)
-			{
-				ToolMenu.Instance.PriorityScreen.SetScreenPriority(new PrioritySetting(PriorityScreen.PriorityClass.basic, num), true);
-				return;
-			}
+			return;
 		}
-		if (!e.Consumed)
+		int num = action - global::Action.Plan1 + 1;
+		if (num <= 9)
 		{
-			e.TryConsume(global::Action.Plan10);
+			ToolMenu.Instance.PriorityScreen.SetScreenPriority(new PrioritySetting(PriorityScreen.PriorityClass.basic, num), true);
+			return;
 		}
+		ToolMenu.Instance.PriorityScreen.SetScreenPriority(new PrioritySetting(PriorityScreen.PriorityClass.emergency, 1), true);
 	}
 
 	private void HandlePriorityKeysUp(KButtonEvent e)

@@ -529,7 +529,7 @@ public class ConduitFlow : IConduitFlow
 					num2 = this.AddElementToGrid(cell2, contents.element, num2, contents.temperature, contents.diseaseIdx, num3);
 					ConduitFlow.ConduitContents conduitContents = this.RemoveElementFromGrid(conduit, num2);
 					this.soaInfo.SetLastFlowInfo(conduit.idx, this.soaInfo.GetTargetFlowDirection(conduit.idx), ref conduitContents);
-					bool flag2 = this.soaInfo.GetConduitFromDirection(conduitFromDirection.idx, this.soaInfo.GetTargetFlowDirection(conduit.idx)).idx == -1;
+					bool flag2 = this.soaInfo.GetConduitFromDirection(conduitFromDirection.idx, this.soaInfo.GetTargetFlowDirection(conduit.idx)).idx == -1 || contents.mass - conduitContents.mass <= 0f;
 					this.soaInfo.SetUpdated(conduitFromDirection.idx, flag2);
 					this.soaInfo.SetSrcFlowDirection(conduitFromDirection.idx, conduitFromDirection.GetNextFlowSource(this));
 				}

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using STRINGS;
 using UnityEngine;
 
 public abstract class Chore
@@ -109,7 +108,6 @@ public abstract class Chore
 			this.prioritizable = prioritizable;
 			this.masterPriority = prioritizable.GetMasterPriority();
 			prioritizable.onPriorityChanged = (Action<PrioritySetting>)Delegate.Combine(prioritizable.onPriorityChanged, new Action<PrioritySetting>(this.OnMasterPriorityChanged));
-			this.RefreshHighPriorityNotification(this.masterPriority.priority_class);
 		}
 	}
 
@@ -125,32 +123,6 @@ public abstract class Chore
 	private void OnMasterPriorityChanged(PrioritySetting priority)
 	{
 		this.masterPriority = priority;
-		this.RefreshHighPriorityNotification(this.masterPriority.priority_class);
-	}
-
-	private void RefreshHighPriorityNotification(PriorityScreen.PriorityClass priority_class)
-	{
-		if (priority_class == PriorityScreen.PriorityClass.emergency && this.highPriorityNotification == null)
-		{
-			this.highPriorityNotification = new Notification(MISC.NOTIFICATIONS.EMERGENCY_CHORES.NAME, NotificationType.Bad, Chore.highPriorityGroup, new Func<List<Notification>, object, string>(Chore.EmergencyChoreTooltip), null, false, 0f, null, null, null);
-			Notifier notifier = this.gameObject.AddOrGet<Notifier>();
-			notifier.Add(this.highPriorityNotification, string.Empty);
-		}
-		else if (priority_class != PriorityScreen.PriorityClass.emergency && this.highPriorityNotification != null)
-		{
-			Notifier component = this.gameObject.GetComponent<Notifier>();
-			component.Remove(this.highPriorityNotification);
-			this.highPriorityNotification = null;
-		}
-		if (GlobalChoreProvider.Instance != null)
-		{
-			GlobalChoreProvider.Instance.RefreshEmergencyChoreStatus();
-		}
-	}
-
-	private static string EmergencyChoreTooltip(List<Notification> notifications, object data)
-	{
-		return MISC.NOTIFICATIONS.EMERGENCY_CHORES.TOOLTIP + notifications.ReduceMessages(true);
 	}
 
 	public void SetOverrideTarget(ChoreConsumer chore_consumer)
@@ -417,10 +389,6 @@ public abstract class Chore
 	public static bool ENABLE_PERSONAL_PRIORITIES = true;
 
 	public static PrioritySetting DefaultPrioritySetting = new PrioritySetting(PriorityScreen.PriorityClass.basic, 5);
-
-	private static HashedString highPriorityGroup = "HighPriorityGroup";
-
-	private Notification highPriorityNotification;
 
 	public delegate bool PreconditionFn(ref Chore.Precondition.Context context, object data);
 

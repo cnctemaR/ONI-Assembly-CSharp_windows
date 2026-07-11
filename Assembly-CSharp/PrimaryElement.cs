@@ -98,13 +98,9 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		{
 			DeserializeWarnings.Instance.PrimaryElementHasNoElement.Warn(base.name + "Primary element has no element.", null);
 		}
-		if (this.Mass > 100000f)
-		{
-			Output.LogWarningWithObj(base.gameObject, new object[] { "deserialized very large ore mass... error?" });
-		}
 		if (this.Mass < 0f)
 		{
-			Output.LogErrorWithObj(base.gameObject, new object[] { "deserialized ore with less than 0 mass. Error! Destroying" });
+			DebugUtil.DevLogErrorWithObj(base.gameObject, "deserialized ore with less than 0 mass. Error! Destroying");
 			Util.KDestroyGameObject(base.gameObject);
 			return;
 		}
@@ -146,7 +142,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 			DebugUtil.DevLogErrorWithObj(base.gameObject, string.Format("{0} is attempting to serialize a temperature of <= 0K. Resetting to default.", base.gameObject.name));
 			this._Temperature = this.Element.defaultValues.temperature;
 		}
-		if (this.Mass > 100000f)
+		if (this.Mass > PrimaryElement.MAX_MASS)
 		{
 			DebugUtil.DevLogErrorWithObj(base.gameObject, string.Format("{0} is attempting to serialize very large mass {1}. Resetting to default.", base.gameObject.name, this.Mass));
 			this.Mass = this.Element.defaultValues.mass;
@@ -171,6 +167,11 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 
 	private void SetMass(float mass)
 	{
+		if ((mass > PrimaryElement.MAX_MASS || mass < 0f) && this.ElementID != SimHashes.Regolith)
+		{
+			DebugUtil.DevLogErrorWithObj(base.gameObject, string.Format("{0} is getting an abnormal mass set {1}.", base.gameObject.name, this.Mass));
+		}
+		mass = Mathf.Clamp(mass, 0f, PrimaryElement.MAX_MASS);
 		this.Units = mass / this.MassPerUnit;
 		if (this.Units <= 0f && !this.KeepZeroMassObject)
 		{
@@ -179,10 +180,6 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		else if (!this.KeepZeroMassObject && this.Units <= 0f)
 		{
 			throw new ArgumentException("Invalid mass");
-		}
-		if (this.Units > 100000f && this.ElementID != SimHashes.Regolith)
-		{
-			KCrashReporter.Assert(false, base.gameObject.name + string.Format(" is getting an abnormal mass set: {0}.", this.Units));
 		}
 	}
 
@@ -462,6 +459,8 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		this.SetDiseaseVisualProvider(target);
 		this.diseaseRedirectTarget = ((!target) ? null : target.GetComponent<PrimaryElement>());
 	}
+
+	public static float MAX_MASS = 100000f;
 
 	public PrimaryElement.GetTemperatureCallback getTemperatureCallback = new PrimaryElement.GetTemperatureCallback(PrimaryElement.OnGetTemperature);
 

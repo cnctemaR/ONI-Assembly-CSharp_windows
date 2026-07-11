@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{3CD55FA4-131B-4D9F-8A1A-5D91C4F40F18}</ProjectGuid>
+    <ProjectGuid>{4FA41C1E-FE8B-40A3-A3CE-F7AA39E5D455}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.FacebookModule</RootNamespace>
     <AssemblyName>UnityEngine.FacebookModule</AssemblyName>
@@ -18,11 +18,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{3CD55FA4-131B-4D9F-8A1A-5D91C4F40EFC}</Project>
+      <Project>{4FA41C1E-FE8B-40A3-A3CE-F7AA39E5D439}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{3CD55FA4-131B-4D9F-8A1A-5D91C4F40F2A}</Project>
+      <Project>{4FA41C1E-FE8B-40A3-A3CE-F7AA39E5D467}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

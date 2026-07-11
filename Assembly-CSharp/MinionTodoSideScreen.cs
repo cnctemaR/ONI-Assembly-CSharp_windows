@@ -240,8 +240,6 @@ public class MinionTodoSideScreen : SideScreenContent
 
 	private ChoreConsumer choreConsumer;
 
-	public List<Sprite> prioritySprites;
-
 	[SerializeField]
 	private ColorStyleSetting buttonColorSettingCurrent;
 

@@ -193,19 +193,7 @@ public class StatusItemGroup
 	private static string OnToolTip(List<Notification> notifications, object data)
 	{
 		StatusItem statusItem = (StatusItem)data;
-		string text = statusItem.notificationTooltipText;
-		foreach (Notification notification in notifications)
-		{
-			if (notification != null && notification.Notifier != null)
-			{
-				KSelectable component = notification.Notifier.GetComponent<KSelectable>();
-				if (component != null)
-				{
-					text = text + "\n• " + component.GetName();
-				}
-			}
-		}
-		return text;
+		return statusItem.notificationTooltipText + notifications.ReduceMessages(true);
 	}
 
 	public void Destroy()

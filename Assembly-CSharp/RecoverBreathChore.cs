@@ -9,7 +9,6 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 		: base(Db.Get().ChoreTypes.RecoverBreath, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new RecoverBreathChore.StatesInstance(this, target.gameObject);
-		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 	}
 
 	public class StatesInstance : GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore, object>.GameInstance
@@ -25,7 +24,7 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 
 		public void CreateLocator()
 		{
-			GameObject gameObject = ChoreHelpers.CreateLocator("SleepLocator", Vector3.zero);
+			GameObject gameObject = ChoreHelpers.CreateLocator("RecoverBreathLocator", Vector3.zero);
 			base.sm.locator.Set(gameObject, this);
 			this.UpdateLocator();
 		}

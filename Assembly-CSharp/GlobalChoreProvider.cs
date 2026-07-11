@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 public class GlobalChoreProvider : ChoreProvider, ISim200ms
@@ -116,12 +117,26 @@ public class GlobalChoreProvider : ChoreProvider, ISim200ms
 	public void RefreshEmergencyChoreStatus()
 	{
 		bool flag = false;
-		foreach (Chore chore in this.chores)
+		IEnumerator enumerator = Components.Prioritizables.GetEnumerator();
+		try
 		{
-			if (chore.masterPriority.priority_class == PriorityScreen.PriorityClass.emergency)
+			while (enumerator.MoveNext())
 			{
-				flag = true;
-				break;
+				object obj = enumerator.Current;
+				Prioritizable prioritizable = (Prioritizable)obj;
+				if (prioritizable.IsEmergency())
+				{
+					flag = true;
+					break;
+				}
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = enumerator as IDisposable) != null)
+			{
+				disposable.Dispose();
 			}
 		}
 		RedAlertManager.Instance.Get().HasEmergencyChore(flag);

@@ -9,9 +9,9 @@ namespace Database
 		{
 			Faces faces = Db.Get().Faces;
 			this.Angry = new Expression("Angry", this, faces.Angry);
-			this.RedAlert = new Expression("RedAlert", this, faces.Hot);
 			this.Suffocate = new Expression("Suffocate", this, faces.Suffocate);
 			this.RecoverBreath = new Expression("RecoverBreath", this, faces.Uncomfortable);
+			this.RedAlert = new Expression("RedAlert", this, faces.Hot);
 			this.Hungry = new Expression("Hungry", this, faces.Hungry);
 			this.SickSpores = new Expression("SickSpores", this, faces.SickSpores);
 			this.SickFierySkin = new Expression("SickFierySkin", this, faces.SickFierySkin);

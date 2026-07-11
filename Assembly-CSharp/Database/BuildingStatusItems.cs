@@ -67,8 +67,8 @@ namespace Database
 			this.CurrentDoorControlState.resolveStringCallback = delegate(string str, object data)
 			{
 				Door door2 = (Door)data;
-				string text = Strings.Get("STRINGS.BUILDING.STATUSITEMS.CURRENTDOORCONTROLSTATE." + door2.CurrentState.ToString().ToUpper());
-				return str.Replace("{ControlState}", text);
+				string text2 = Strings.Get("STRINGS.BUILDING.STATUSITEMS.CURRENTDOORCONTROLSTATE." + door2.CurrentState.ToString().ToUpper());
+				return str.Replace("{ControlState}", text2);
 			};
 			this.ClinicOutsideHospital = this.CreateStatusItem("ClinicOutsideHospital", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, false, 63486);
 			this.ConduitBlocked = this.CreateStatusItem("ConduitBlocked", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
@@ -81,20 +81,20 @@ namespace Database
 			this.DirectionControl.resolveStringCallback = delegate(string str, object data)
 			{
 				DirectionControl directionControl = (DirectionControl)data;
-				string text2 = BUILDING.STATUSITEMS.DIRECTION_CONTROL.DIRECTIONS.BOTH;
+				string text3 = BUILDING.STATUSITEMS.DIRECTION_CONTROL.DIRECTIONS.BOTH;
 				WorkableReactable.AllowedDirection allowedDirection = directionControl.allowedDirection;
 				if (allowedDirection != WorkableReactable.AllowedDirection.Left)
 				{
 					if (allowedDirection == WorkableReactable.AllowedDirection.Right)
 					{
-						text2 = BUILDING.STATUSITEMS.DIRECTION_CONTROL.DIRECTIONS.RIGHT;
+						text3 = BUILDING.STATUSITEMS.DIRECTION_CONTROL.DIRECTIONS.RIGHT;
 					}
 				}
 				else
 				{
-					text2 = BUILDING.STATUSITEMS.DIRECTION_CONTROL.DIRECTIONS.LEFT;
+					text3 = BUILDING.STATUSITEMS.DIRECTION_CONTROL.DIRECTIONS.LEFT;
 				}
-				str = str.Replace("{Direction}", text2);
+				str = str.Replace("{Direction}", text3);
 				return str;
 			};
 			this.ConstructableDigUnreachable = this.CreateStatusItem("ConstructableDigUnreachable", "BUILDING", string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
@@ -112,7 +112,7 @@ namespace Database
 			this.MaterialsUnavailable.AddNotification(null, null, null, 0f);
 			this.MaterialsUnavailable.resolveStringCallback = delegate(string str, object data)
 			{
-				string text3 = string.Empty;
+				string text4 = string.Empty;
 				Dictionary<Tag, float> dictionary = null;
 				if (data is IFetchList)
 				{
@@ -132,28 +132,28 @@ namespace Database
 						{
 							if (!flag)
 							{
-								text3 += "\n";
+								text4 += "\n";
 							}
 							if (Assets.IsTagCountable(keyValuePair.Key))
 							{
-								text3 += string.Format(BUILDING.STATUSITEMS.MATERIALSUNAVAILABLE.LINE_ITEM_UNITS, GameUtil.GetUnitFormattedName(keyValuePair.Key.ProperName(), keyValuePair.Value, false));
+								text4 += string.Format(BUILDING.STATUSITEMS.MATERIALSUNAVAILABLE.LINE_ITEM_UNITS, GameUtil.GetUnitFormattedName(keyValuePair.Key.ProperName(), keyValuePair.Value, false));
 							}
 							else
 							{
-								text3 += string.Format(BUILDING.STATUSITEMS.MATERIALSUNAVAILABLE.LINE_ITEM_MASS, keyValuePair.Key.ProperName(), GameUtil.GetFormattedMass(keyValuePair.Value, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+								text4 += string.Format(BUILDING.STATUSITEMS.MATERIALSUNAVAILABLE.LINE_ITEM_MASS, keyValuePair.Key.ProperName(), GameUtil.GetFormattedMass(keyValuePair.Value, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 							}
 							flag = false;
 						}
 					}
 				}
-				str = str.Replace("{ItemsRemaining}", text3);
+				str = str.Replace("{ItemsRemaining}", text4);
 				return str;
 			};
 			this.MaterialsUnavailableForRefill = new MaterialsStatusItem("MaterialsUnavailableForRefill", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, true, OverlayModes.None.ID);
 			this.MaterialsUnavailableForRefill.resolveStringCallback = delegate(string str, object data)
 			{
 				IFetchList fetchList2 = (IFetchList)data;
-				string text4 = string.Empty;
+				string text5 = string.Empty;
 				Dictionary<Tag, float> remaining = fetchList2.GetRemaining();
 				if (remaining.Count > 0)
 				{
@@ -164,14 +164,14 @@ namespace Database
 						{
 							if (!flag2)
 							{
-								text4 += "\n";
+								text5 += "\n";
 							}
-							text4 += string.Format(BUILDING.STATUSITEMS.MATERIALSUNAVAILABLEFORREFILL.LINE_ITEM, keyValuePair2.Key.ProperName());
+							text5 += string.Format(BUILDING.STATUSITEMS.MATERIALSUNAVAILABLEFORREFILL.LINE_ITEM, keyValuePair2.Key.ProperName());
 							flag2 = false;
 						}
 					}
 				}
-				str = str.Replace("{ItemsRemaining}", text4);
+				str = str.Replace("{ItemsRemaining}", text5);
 				return str;
 			};
 			Func<string, object, string> func = delegate(string str, object data)
@@ -194,8 +194,8 @@ namespace Database
 				KeyValuePair<Tag, float> keyValuePair3 = (KeyValuePair<Tag, float>)data;
 				if (keyValuePair3.Value != 0f)
 				{
-					string text5 = string.Format(BUILDING.STATUSITEMS.WAITINGFORMATERIALS.LINE_ITEM_MASS, keyValuePair3.Key.ProperName(), GameUtil.GetFormattedMass(keyValuePair3.Value, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-					str = str.Replace("{ItemsRemaining}", text5);
+					string text6 = string.Format(BUILDING.STATUSITEMS.WAITINGFORMATERIALS.LINE_ITEM_MASS, keyValuePair3.Key.ProperName(), GameUtil.GetFormattedMass(keyValuePair3.Value, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+					str = str.Replace("{ItemsRemaining}", text6);
 				}
 				return str;
 			};
@@ -203,7 +203,7 @@ namespace Database
 			this.WaitingForMaterials.resolveStringCallback = delegate(string str, object data)
 			{
 				IFetchList fetchList3 = (IFetchList)data;
-				string text6 = string.Empty;
+				string text7 = string.Empty;
 				Dictionary<Tag, float> remaining2 = fetchList3.GetRemaining();
 				if (remaining2.Count > 0)
 				{
@@ -214,21 +214,21 @@ namespace Database
 						{
 							if (!flag3)
 							{
-								text6 += "\n";
+								text7 += "\n";
 							}
 							if (Assets.IsTagCountable(keyValuePair4.Key))
 							{
-								text6 += string.Format(BUILDING.STATUSITEMS.WAITINGFORMATERIALS.LINE_ITEM_UNITS, GameUtil.GetUnitFormattedName(keyValuePair4.Key.ProperName(), keyValuePair4.Value, false));
+								text7 += string.Format(BUILDING.STATUSITEMS.WAITINGFORMATERIALS.LINE_ITEM_UNITS, GameUtil.GetUnitFormattedName(keyValuePair4.Key.ProperName(), keyValuePair4.Value, false));
 							}
 							else
 							{
-								text6 += string.Format(BUILDING.STATUSITEMS.WAITINGFORMATERIALS.LINE_ITEM_MASS, keyValuePair4.Key.ProperName(), GameUtil.GetFormattedMass(keyValuePair4.Value, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+								text7 += string.Format(BUILDING.STATUSITEMS.WAITINGFORMATERIALS.LINE_ITEM_MASS, keyValuePair4.Key.ProperName(), GameUtil.GetFormattedMass(keyValuePair4.Value, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 							}
 							flag3 = false;
 						}
 					}
 				}
-				str = str.Replace("{ItemsRemaining}", text6);
+				str = str.Replace("{ItemsRemaining}", text7);
 				return str;
 			};
 			this.MeltingDown = this.CreateStatusItem("MeltingDown", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
@@ -238,8 +238,8 @@ namespace Database
 			this.NeedGasIn.resolveStringCallback = delegate(string str, object data)
 			{
 				Tuple<ConduitType, Tag> tuple = (Tuple<ConduitType, Tag>)data;
-				string text7 = string.Format(BUILDING.STATUSITEMS.NEEDGASIN.LINE_ITEM, tuple.second.ProperName());
-				str = str.Replace("{GasRequired}", text7);
+				string text8 = string.Format(BUILDING.STATUSITEMS.NEEDGASIN.LINE_ITEM, tuple.second.ProperName());
+				str = str.Replace("{GasRequired}", text8);
 				return str;
 			};
 			this.NeedGasOut = this.CreateStatusItem("NeedGasOut", "BUILDING", "status_item_need_supply_out", StatusItem.IconType.Custom, NotificationType.BadMinor, true, OverlayModes.GasConduits.ID, true, 63486);
@@ -247,8 +247,8 @@ namespace Database
 			this.NeedLiquidIn.resolveStringCallback = delegate(string str, object data)
 			{
 				Tuple<ConduitType, Tag> tuple2 = (Tuple<ConduitType, Tag>)data;
-				string text8 = string.Format(BUILDING.STATUSITEMS.NEEDLIQUIDIN.LINE_ITEM, tuple2.second.ProperName());
-				str = str.Replace("{LiquidRequired}", text8);
+				string text9 = string.Format(BUILDING.STATUSITEMS.NEEDLIQUIDIN.LINE_ITEM, tuple2.second.ProperName());
+				str = str.Replace("{LiquidRequired}", text9);
 				return str;
 			};
 			this.NeedLiquidOut = this.CreateStatusItem("NeedLiquidOut", "BUILDING", "status_item_need_supply_out", StatusItem.IconType.Custom, NotificationType.BadMinor, true, OverlayModes.LiquidConduits.ID, true, 63486);
@@ -257,7 +257,7 @@ namespace Database
 			this.NeedResourceMass = this.CreateStatusItem("NeedResourceMass", "BUILDING", "status_item_need_resource", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
 			this.NeedResourceMass.resolveStringCallback = delegate(string str, object data)
 			{
-				string text9 = string.Empty;
+				string text10 = string.Empty;
 				EnergyGenerator.Formula formula = (EnergyGenerator.Formula)data;
 				if (formula.inputs.Length > 0)
 				{
@@ -266,13 +266,13 @@ namespace Database
 					{
 						if (!flag4)
 						{
-							text9 += "\n";
+							text10 += "\n";
 							flag4 = false;
 						}
-						text9 += string.Format(BUILDING.STATUSITEMS.NEEDRESOURCEMASS.LINE_ITEM, inputItem.tag.ProperName());
+						text10 += string.Format(BUILDING.STATUSITEMS.NEEDRESOURCEMASS.LINE_ITEM, inputItem.tag.ProperName());
 					}
 				}
-				str = str.Replace("{ResourcesRequired}", text9);
+				str = str.Replace("{ResourcesRequired}", text10);
 				return str;
 			};
 			this.LiquidPipeEmpty = this.CreateStatusItem("LiquidPipeEmpty", "BUILDING", "status_item_no_liquid_to_pump", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.LiquidConduits.ID, true, 63486);
@@ -384,17 +384,17 @@ namespace Database
 				int num = Grid.PosToCell(conduit);
 				ConduitFlow flowManager = conduit.GetFlowManager();
 				ConduitFlow.ConduitContents contents = flowManager.GetContents(num);
-				string text10 = BUILDING.STATUSITEMS.PIPECONTENTS.EMPTY;
+				string text11 = BUILDING.STATUSITEMS.PIPECONTENTS.EMPTY;
 				if (contents.mass > 0f)
 				{
 					Element element = ElementLoader.FindElementByHash(contents.element);
-					text10 = string.Format(BUILDING.STATUSITEMS.PIPECONTENTS.CONTENTS, GameUtil.GetFormattedMass(contents.mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), element.name, GameUtil.GetFormattedTemperature(contents.temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+					text11 = string.Format(BUILDING.STATUSITEMS.PIPECONTENTS.CONTENTS, GameUtil.GetFormattedMass(contents.mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), element.name, GameUtil.GetFormattedTemperature(contents.temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 					if (OverlayScreen.Instance != null && OverlayScreen.Instance.mode == OverlayModes.Disease.ID && contents.diseaseIdx != 255)
 					{
-						text10 += string.Format(BUILDING.STATUSITEMS.PIPECONTENTS.CONTENTS_WITH_DISEASE, GameUtil.GetFormattedDisease(contents.diseaseIdx, contents.diseaseCount, true));
+						text11 += string.Format(BUILDING.STATUSITEMS.PIPECONTENTS.CONTENTS_WITH_DISEASE, GameUtil.GetFormattedDisease(contents.diseaseIdx, contents.diseaseCount, true));
 					}
 				}
-				str = str.Replace("{Contents}", text10);
+				str = str.Replace("{Contents}", text11);
 				return str;
 			};
 			this.Conveyor = this.CreateStatusItem("Conveyor", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.SolidConveyor.ID, true, 63486);
@@ -404,7 +404,7 @@ namespace Database
 				int num2 = Grid.PosToCell(solidConduit);
 				SolidConduitFlow solidConduitFlow = Game.Instance.solidConduitFlow;
 				SolidConduitFlow.ConduitContents contents2 = solidConduitFlow.GetContents(num2);
-				string text11 = BUILDING.STATUSITEMS.CONVEYOR_CONTENTS.EMPTY;
+				string text12 = BUILDING.STATUSITEMS.CONVEYOR_CONTENTS.EMPTY;
 				if (contents2.pickupableHandle.IsValid())
 				{
 					Pickupable pickupable = solidConduitFlow.GetPickupable(contents2.pickupableHandle);
@@ -415,15 +415,15 @@ namespace Database
 						if (mass > 0f)
 						{
 							Element element2 = ElementLoader.FindElementByHash(component2.ElementID);
-							text11 = string.Format(BUILDING.STATUSITEMS.CONVEYOR_CONTENTS.CONTENTS, GameUtil.GetFormattedMass(mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), element2.name, GameUtil.GetFormattedTemperature(component2.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+							text12 = string.Format(BUILDING.STATUSITEMS.CONVEYOR_CONTENTS.CONTENTS, GameUtil.GetFormattedMass(mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), element2.name, GameUtil.GetFormattedTemperature(component2.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 							if (OverlayScreen.Instance != null && OverlayScreen.Instance.mode == OverlayModes.Disease.ID && component2.DiseaseIdx != 255)
 							{
-								text11 += string.Format(BUILDING.STATUSITEMS.CONVEYOR_CONTENTS.CONTENTS_WITH_DISEASE, GameUtil.GetFormattedDisease(component2.DiseaseIdx, component2.DiseaseCount, true));
+								text12 += string.Format(BUILDING.STATUSITEMS.CONVEYOR_CONTENTS.CONTENTS_WITH_DISEASE, GameUtil.GetFormattedDisease(component2.DiseaseIdx, component2.DiseaseCount, true));
 							}
 						}
 					}
 				}
-				str = str.Replace("{Contents}", text11);
+				str = str.Replace("{Contents}", text12);
 				return str;
 			};
 			this.FabricatorEmpty = this.CreateStatusItem("FabricatorEmpty", "BUILDING", "status_item_fabricator_empty", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
@@ -444,8 +444,8 @@ namespace Database
 			StatusItem noResearchSelected = this.NoResearchSelected;
 			noResearchSelected.resolveTooltipCallback = (Func<string, object, string>)Delegate.Combine(noResearchSelected.resolveTooltipCallback, new Func<string, object, string>(delegate(string str, object data)
 			{
-				string text12 = GameInputMapping.FindEntry(global::Action.ManageResearch).mKeyCode.ToString();
-				str = str.Replace("{RESEARCH_MENU_KEY}", text12);
+				string text13 = GameInputMapping.FindEntry(global::Action.ManageResearch).mKeyCode.ToString();
+				str = str.Replace("{RESEARCH_MENU_KEY}", text13);
 				return str;
 			}));
 			this.NoApplicableResearchSelected = this.CreateStatusItem("NoApplicableResearchSelected", "BUILDING", "status_item_no_research_selected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
@@ -455,8 +455,8 @@ namespace Database
 			StatusItem noApplicableAnalysisSelected = this.NoApplicableAnalysisSelected;
 			noApplicableAnalysisSelected.resolveTooltipCallback = (Func<string, object, string>)Delegate.Combine(noApplicableAnalysisSelected.resolveTooltipCallback, new Func<string, object, string>(delegate(string str, object data)
 			{
-				string text13 = GameInputMapping.FindEntry(global::Action.ManageStarmap).mKeyCode.ToString();
-				str = str.Replace("{STARMAP_MENU_KEY}", text13);
+				string text14 = GameInputMapping.FindEntry(global::Action.ManageStarmap).mKeyCode.ToString();
+				str = str.Replace("{STARMAP_MENU_KEY}", text14);
 				return str;
 			}));
 			this.NoResearchOrDestinationSelected = this.CreateStatusItem("NoResearchOrDestinationSelected", "BUILDING", "status_item_no_research_selected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
@@ -471,8 +471,8 @@ namespace Database
 			this.EmittingLight = this.CreateStatusItem("EmittingLight", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
 			this.EmittingLight.resolveStringCallback = delegate(string str, object data)
 			{
-				string text14 = GameInputMapping.FindEntry(global::Action.Overlay5).mKeyCode.ToString();
-				str = str.Replace("{LightGridOverlay}", text14);
+				string text15 = GameInputMapping.FindEntry(global::Action.Overlay5).mKeyCode.ToString();
+				str = str.Replace("{LightGridOverlay}", text15);
 				return str;
 			};
 			this.RationBoxContents = this.CreateStatusItem("RationBoxContents", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
@@ -504,8 +504,8 @@ namespace Database
 			this.EmittingElement.resolveStringCallback = delegate(string str, object data)
 			{
 				IElementEmitter elementEmitter = (IElementEmitter)data;
-				string text15 = ElementLoader.FindElementByHash(elementEmitter.Element).tag.ProperName();
-				str = str.Replace("{ElementType}", text15);
+				string text16 = ElementLoader.FindElementByHash(elementEmitter.Element).tag.ProperName();
+				str = str.Replace("{ElementType}", text16);
 				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(elementEmitter.AverageEmitRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				return str;
 			};
@@ -541,8 +541,8 @@ namespace Database
 			this.ElementConsumer.resolveStringCallback = delegate(string str, object data)
 			{
 				ElementConsumer elementConsumer = (ElementConsumer)data;
-				string text16 = ElementLoader.FindElementByHash(elementConsumer.elementToConsume).tag.ProperName();
-				str = str.Replace("{ElementTypes}", text16);
+				string text17 = ElementLoader.FindElementByHash(elementConsumer.elementToConsume).tag.ProperName();
+				str = str.Replace("{ElementTypes}", text17);
 				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(elementConsumer.AverageConsumeRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				return str;
 			};
@@ -636,10 +636,10 @@ namespace Database
 			this.Grave.resolveStringCallback = delegate(string str, object data)
 			{
 				Grave.StatesInstance statesInstance2 = (Grave.StatesInstance)data;
-				string text17 = str.Replace("{DeadDupe}", statesInstance2.master.graveName);
+				string text18 = str.Replace("{DeadDupe}", statesInstance2.master.graveName);
 				string[] strings = LocString.GetStrings(typeof(NAMEGEN.GRAVE.EPITAPHS));
 				int num4 = statesInstance2.master.epitaphIdx % strings.Length;
-				return text17.Replace("{Epitaph}", strings[num4]);
+				return text18.Replace("{Epitaph}", strings[num4]);
 			};
 			this.GraveEmpty = this.CreateStatusItem("GraveEmpty", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
 			this.CannotCoolFurther = this.CreateStatusItem("CannotCoolFurther", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
@@ -713,6 +713,10 @@ namespace Database
 			};
 			this.InvalidPortOverlap = this.CreateStatusItem("InvalidPortOverlap", "BUILDING", "status_item_exclamation", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
 			this.InvalidPortOverlap.AddNotification(null, null, null, 0f);
+			this.EmergencyPriority = this.CreateStatusItem("EmergencyPriority", BUILDING.STATUSITEMS.EMERGENCY_PRIORITY.NAME, BUILDING.STATUSITEMS.EMERGENCY_PRIORITY.TOOLTIP, "status_item_doubleexclamation", StatusItem.IconType.Custom, NotificationType.Bad, false, OverlayModes.None.ID, 63486);
+			StatusItem emergencyPriority = this.EmergencyPriority;
+			string text = BUILDING.STATUSITEMS.EMERGENCY_PRIORITY.NOTIFICATION_NAME;
+			emergencyPriority.AddNotification(null, text, BUILDING.STATUSITEMS.EMERGENCY_PRIORITY.NOTIFICATION_TOOLTIP, 0f);
 		}
 
 		private static bool ShowInUtilityOverlay(HashedString mode, object data)
@@ -1053,5 +1057,7 @@ namespace Database
 		public StatusItem PathNotClear;
 
 		public StatusItem InvalidPortOverlap;
+
+		public StatusItem EmergencyPriority;
 	}
 }

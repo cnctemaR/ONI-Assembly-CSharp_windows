@@ -15,7 +15,8 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 		this.satisfied.DefaultState(this.satisfied.normal).ToggleAttributeModifier("Breathing", (SuffocationMonitor.Instance smi) => smi.breathing, null).EventTransition(GameHashes.ExitedBreathableArea, this.nooxygen, (SuffocationMonitor.Instance smi) => !smi.IsInBreathableArea());
 		this.satisfied.normal.Transition(this.satisfied.low, (SuffocationMonitor.Instance smi) => smi.oxygenBreather.IsLowOxygen(), UpdateRate.SIM_200ms);
 		this.satisfied.low.Transition(this.satisfied.normal, (SuffocationMonitor.Instance smi) => !smi.oxygenBreather.IsLowOxygen(), UpdateRate.SIM_200ms).ToggleEffect("LowOxygen");
-		this.nooxygen.EventTransition(GameHashes.EnteredBreathableArea, this.satisfied, (SuffocationMonitor.Instance smi) => smi.IsInBreathableArea()).ToggleExpression(Db.Get().Expressions.Suffocate, null).ToggleAttributeModifier("Holding Breath", (SuffocationMonitor.Instance smi) => smi.holdingbreath, null)
+		this.nooxygen.EventTransition(GameHashes.EnteredBreathableArea, this.satisfied, (SuffocationMonitor.Instance smi) => smi.IsInBreathableArea()).TagTransition(GameTags.RecoveringBreath, this.satisfied, false).ToggleExpression(Db.Get().Expressions.Suffocate, null)
+			.ToggleAttributeModifier("Holding Breath", (SuffocationMonitor.Instance smi) => smi.holdingbreath, null)
 			.ToggleTag(GameTags.NoOxygen)
 			.DefaultState(this.nooxygen.holdingbreath);
 		this.nooxygen.holdingbreath.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Suffocation, Db.Get().DuplicantStatusItems.HoldingBreath, null).Transition(this.nooxygen.suffocating, (SuffocationMonitor.Instance smi) => smi.IsSuffocating(), UpdateRate.SIM_200ms);
@@ -66,7 +67,7 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 
 		public bool IsInBreathableArea()
 		{
-			return base.master.GetComponent<Sensors>().GetSensor<BreathableAreaSensor>().IsBreathable();
+			return base.master.GetComponent<KPrefabID>().HasTag(GameTags.RecoveringBreath) || base.master.GetComponent<Sensors>().GetSensor<BreathableAreaSensor>().IsBreathable();
 		}
 
 		public bool HasSuffocated()
@@ -76,7 +77,7 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 
 		public bool IsSuffocating()
 		{
-			return this.breath.value <= 45.454544f;
+			return this.breath.deltaAttribute.GetTotalValue() <= 0f && this.breath.value <= 45.454544f;
 		}
 
 		public void Kill()

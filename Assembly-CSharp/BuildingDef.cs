@@ -845,7 +845,7 @@ public class BuildingDef : Def
 
 	public string[] MaterialCategory;
 
-	public string AudioCategory;
+	public string AudioCategory = "Metal";
 
 	public string AudioSize = "medium";
 

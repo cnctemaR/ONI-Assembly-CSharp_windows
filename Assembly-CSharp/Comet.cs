@@ -112,22 +112,35 @@ public class Comet : KMonoBehaviour, ISim33ms
 			}
 			GameComps.Fallers.Add(gameObject2, vector5);
 		}
-		UnstableGroundManager component = World.Instance.GetComponent<UnstableGroundManager>();
-		for (int l = 0; l < this.addTiles; l++)
+		if (this.addTiles + this.dissimilarElementAddTiles > 0)
 		{
-			int num7 = global::UnityEngine.Random.Range(0, Comet.additiveCells.Length);
-			for (int m = 0; m < Comet.additiveCells.Length; m++)
+			float num7 = 1f - (pos.y - (float)this.addTilesMinHeight) / (float)(this.addTilesMaxHeight - this.addTilesMinHeight);
+			float num8 = Mathf.Min((float)this.addTiles, Mathf.Clamp((float)this.addTiles * num7, 1f, (float)this.addTiles));
+			if (Grid.Element[cell] != element)
 			{
-				CellOffset cellOffset = Comet.additiveCells[(m + num7) % Comet.additiveCells.Length];
-				int num8 = Grid.OffsetCell(prev_cell, cellOffset);
-				if (Grid.IsValidCell(num8))
+				num8 += (float)this.dissimilarElementAddTiles;
+			}
+			UnstableGroundManager component = World.Instance.GetComponent<UnstableGroundManager>();
+			int num9 = ((cell % 2 != 0) ? (-1) : 1);
+			int num10 = 0;
+			int num11 = 0;
+			while ((float)num11 < num8)
+			{
+				for (int l = 0; l < Comet.additiveCells.Length; l++)
 				{
-					if (!Grid.Solid[num8])
+					CellOffset cellOffset = Comet.additiveCells[(num11 + l + num10) % Comet.additiveCells.Length];
+					int num12 = Grid.OffsetCell(prev_cell, new CellOffset(cellOffset.x * num9, cellOffset.y));
+					if (Grid.IsValidCell(num12))
 					{
-						component.Spawn(num8, element, num2, num6, byte.MaxValue, 0);
-						break;
+						if (!Grid.Solid[num12])
+						{
+							component.Spawn(num12, element, num2, num6, byte.MaxValue, 0);
+							num10 = l + 1;
+							break;
+						}
 					}
 				}
+				num11++;
 			}
 		}
 	}
@@ -385,6 +398,12 @@ public class Comet : KMonoBehaviour, ISim33ms
 
 	public int addTiles;
 
+	public int addTilesMinHeight;
+
+	public int addTilesMaxHeight;
+
+	public int dissimilarElementAddTiles;
+
 	public int entityDamage = 1;
 
 	public float totalTileDamage = 0.2f;
@@ -431,25 +450,25 @@ public class Comet : KMonoBehaviour, ISim33ms
 
 	private static CellOffset[] additiveCells = new CellOffset[]
 	{
+		new CellOffset(-1, -1),
+		new CellOffset(1, -1),
+		new CellOffset(0, -1),
+		new CellOffset(1, 0),
+		new CellOffset(-1, 0),
+		new CellOffset(0, 0),
+		new CellOffset(-1, 1),
+		new CellOffset(1, 1),
+		new CellOffset(0, 1),
+		new CellOffset(2, -2),
 		new CellOffset(-2, -2),
 		new CellOffset(-2, -1),
-		new CellOffset(-2, 0),
-		new CellOffset(-2, 1),
-		new CellOffset(-2, 2),
-		new CellOffset(-1, -1),
-		new CellOffset(-1, 0),
-		new CellOffset(-1, 1),
-		new CellOffset(0, -1),
-		new CellOffset(0, 0),
-		new CellOffset(0, 1),
-		new CellOffset(1, -1),
-		new CellOffset(1, 0),
-		new CellOffset(1, 1),
-		new CellOffset(2, -2),
 		new CellOffset(2, -1),
 		new CellOffset(2, 0),
+		new CellOffset(-2, 0),
+		new CellOffset(-2, 1),
 		new CellOffset(2, 1),
-		new CellOffset(2, 2)
+		new CellOffset(2, 2),
+		new CellOffset(-2, 2)
 	};
 
 	private const float MAX_DISTANCE_TEST = 6f;

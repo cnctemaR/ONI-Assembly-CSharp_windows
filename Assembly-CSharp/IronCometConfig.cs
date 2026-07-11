@@ -8,7 +8,7 @@ public class IronCometConfig : IEntityConfig
 		GameObject gameObject = EntityTemplates.CreateEntity(IronCometConfig.ID, IronCometConfig.ID);
 		gameObject.AddOrGet<SaveLoadRoot>();
 		gameObject.AddOrGet<SavedObject>();
-		Comet comet = gameObject.AddComponent<Comet>();
+		Comet comet = gameObject.AddOrGet<Comet>();
 		comet.massRange = new Vector2(3f, 20f);
 		comet.temperatureRange = new Vector2(323.15f, 423.15f);
 		comet.entityDamage = 15;
@@ -20,13 +20,13 @@ public class IronCometConfig : IEntityConfig
 		PrimaryElement primaryElement = gameObject.AddOrGet<PrimaryElement>();
 		primaryElement.SetElement(SimHashes.Iron);
 		primaryElement.Temperature = (comet.temperatureRange.x + comet.temperatureRange.y) / 2f;
-		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
+		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim("meteor_metal_kanim") };
 		kbatchedAnimController.isMovable = true;
 		kbatchedAnimController.initialAnim = "fall_loop";
 		kbatchedAnimController.initialMode = KAnim.PlayMode.Loop;
 		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.Always;
-		KCircleCollider2D kcircleCollider2D = gameObject.AddComponent<KCircleCollider2D>();
+		KCircleCollider2D kcircleCollider2D = gameObject.AddOrGet<KCircleCollider2D>();
 		kcircleCollider2D.radius = 0.5f;
 		gameObject.transform.localScale = new Vector3(0.6f, 0.6f, 1f);
 		return gameObject;

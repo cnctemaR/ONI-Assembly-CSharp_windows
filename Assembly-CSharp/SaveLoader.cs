@@ -381,8 +381,9 @@ public class SaveLoader : KMonoBehaviour
 			List<string> saveFiles = SaveLoader.GetSaveFiles(Path.GetDirectoryName(filename));
 			while (saveFiles.Count >= 10)
 			{
-				File.Delete(saveFiles[saveFiles.Count - 1]);
-				saveFiles.RemoveAt(0);
+				int num = saveFiles.Count - 1;
+				File.Delete(saveFiles[num]);
+				saveFiles.RemoveAt(num);
 			}
 		}
 		byte[] array = null;

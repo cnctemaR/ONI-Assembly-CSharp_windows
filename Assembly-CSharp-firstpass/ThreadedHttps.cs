@@ -96,6 +96,10 @@ public class ThreadedHttps<T> where T : class, new()
 	public void End()
 	{
 		this.Quit();
+		if (this.updateThread == null)
+		{
+			return;
+		}
 		if (!this.updateThread.Join(TimeSpan.FromSeconds(2.0)))
 		{
 			this.updateThread.Abort();

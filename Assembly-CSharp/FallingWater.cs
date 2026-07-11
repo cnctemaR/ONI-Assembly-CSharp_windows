@@ -204,7 +204,6 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 					else
 					{
 						this.RemoveParticle(i, ref count);
-						Output.LogError(new object[] { "WTF" });
 					}
 					break;
 				}

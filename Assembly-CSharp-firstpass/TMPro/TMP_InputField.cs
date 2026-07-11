@@ -2043,20 +2043,32 @@ namespace TMPro
 			}
 			else
 			{
-				this.stringPositionInternal = this.GetStringIndexFromCaretPosition(this.caretPositionInternal);
-				this.stringSelectPositionInternal = this.GetStringIndexFromCaretPosition(this.caretSelectPositionInternal);
-				if (this.caretPositionInternal < this.caretSelectPositionInternal)
+				try
 				{
-					this.m_Text = this.text.Substring(0, this.stringPositionInternal) + this.text.Substring(this.stringSelectPositionInternal, this.text.Length - this.stringSelectPositionInternal);
-					this.stringSelectPositionInternal = this.stringPositionInternal;
-					this.caretSelectPositionInternal = this.caretPositionInternal;
+					this.stringPositionInternal = this.GetStringIndexFromCaretPosition(this.caretPositionInternal);
+					this.stringSelectPositionInternal = this.GetStringIndexFromCaretPosition(this.caretSelectPositionInternal);
+					if (this.caretPositionInternal < this.caretSelectPositionInternal)
+					{
+						this.m_Text = this.text.Substring(0, this.stringPositionInternal) + this.text.Substring(this.stringSelectPositionInternal, this.text.Length - this.stringSelectPositionInternal);
+						this.stringSelectPositionInternal = this.stringPositionInternal;
+						this.caretSelectPositionInternal = this.caretPositionInternal;
+					}
+					else
+					{
+						this.m_Text = this.text.Substring(0, this.stringSelectPositionInternal) + this.text.Substring(this.stringPositionInternal, this.text.Length - this.stringPositionInternal);
+						this.stringPositionInternal = this.stringSelectPositionInternal;
+						this.stringPositionInternal = this.stringSelectPositionInternal;
+						this.caretPositionInternal = this.caretSelectPositionInternal;
+					}
 				}
-				else
+				catch (Exception ex2)
 				{
-					this.m_Text = this.text.Substring(0, this.stringSelectPositionInternal) + this.text.Substring(this.stringPositionInternal, this.text.Length - this.stringPositionInternal);
-					this.stringPositionInternal = this.stringSelectPositionInternal;
-					this.stringPositionInternal = this.stringSelectPositionInternal;
-					this.caretPositionInternal = this.caretSelectPositionInternal;
+					global::Debug.LogWarning(this.stringPositionInternal, null);
+					global::Debug.LogWarning(this.stringSelectPositionInternal, null);
+					global::Debug.LogWarning(this.caretPositionInternal, null);
+					global::Debug.LogWarning(this.caretSelectPositionInternal, null);
+					global::Debug.LogWarning(this.text.Length, null);
+					global::Debug.LogError(ex2, null);
 				}
 			}
 		}

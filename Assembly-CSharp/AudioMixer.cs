@@ -38,7 +38,7 @@ public class AudioMixer
 		{
 			if (RuntimeManager.IsInitialized)
 			{
-				eventInstance = RuntimeManager.CreateInstance(snapshot);
+				eventInstance = KFMOD.CreateInstance(snapshot);
 				this.activeSnapshots[snapshot] = eventInstance;
 				eventInstance.start();
 				eventInstance.setParameterValue("snapshotActive", 1f);

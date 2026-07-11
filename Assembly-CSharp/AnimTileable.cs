@@ -33,11 +33,7 @@ public class AnimTileable : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-			this.partitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		base.OnCleanUp();
 	}
 
@@ -118,13 +114,13 @@ public class AnimTileable : KMonoBehaviour
 		{
 			return;
 		}
-		if (this.partitionerEntry != null)
+		if (this.partitionerEntry.IsValid())
 		{
 			this.UpdateEndCaps();
 		}
 	}
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 
 	public ObjectLayer objectLayer = ObjectLayer.Building;
 

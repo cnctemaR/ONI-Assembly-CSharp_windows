@@ -9,6 +9,8 @@ public class Components
 
 	public static Components.Cmps<MinionIdentity> MinionIdentities = new Components.Cmps<MinionIdentity>();
 
+	public static Components.Cmps<MinionIdentity> StoredMinionIdentities = new Components.Cmps<MinionIdentity>();
+
 	public static Components.Cmps<Sleepable> Sleepables = new Components.Cmps<Sleepable>();
 
 	public static Components.Cmps<IUsable> Toilets = new Components.Cmps<IUsable>();
@@ -82,6 +84,10 @@ public class Components
 	public static Components.Cmps<DetectorNetwork.Instance> DetectorNetworks = new Components.Cmps<DetectorNetwork.Instance>();
 
 	public static Components.Cmps<Grave> Graves = new Components.Cmps<Grave>();
+
+	public static Components.Cmps<AttachableBuilding> AttachableBuildings = new Components.Cmps<AttachableBuilding>();
+
+	public static Components.Cmps<BuildingAttachPoint> BuildingAttachPoints = new Components.Cmps<BuildingAttachPoint>();
 
 	public class Cmps<T> : ICollection, IEnumerable
 	{

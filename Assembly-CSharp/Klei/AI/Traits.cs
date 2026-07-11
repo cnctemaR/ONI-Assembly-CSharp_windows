@@ -7,6 +7,16 @@ namespace Klei.AI
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class Traits : KMonoBehaviour, ISaveLoadable
 	{
+		public List<string> GetTraitIds()
+		{
+			return this.TraitIds;
+		}
+
+		public void SetTraitIds(List<string> traits)
+		{
+			this.TraitIds = traits;
+		}
+
 		protected override void OnSpawn()
 		{
 			foreach (string text in this.TraitIds)

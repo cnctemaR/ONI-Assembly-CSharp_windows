@@ -10,13 +10,11 @@ public class MinionStatsPanel : TargetScreen
 	{
 		base.OnPrefabInit();
 		this.stressPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.expectationsPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.attributesPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.traitsPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.attributesDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.attributesPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
 		this.stressDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.stressPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
 		this.traitsDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.traitsPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
-		this.expectationsDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.expectationsPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
 	}
 
 	protected override void OnCleanUp()
@@ -77,7 +75,6 @@ public class MinionStatsPanel : TargetScreen
 		this.RefreshAttributes();
 		this.RefreshTraits();
 		this.RefreshStress();
-		this.RefreshExpectations();
 	}
 
 	private void RefreshAttributes()
@@ -143,29 +140,6 @@ public class MinionStatsPanel : TargetScreen
 		this.stressDrawer.EndDrawing();
 	}
 
-	private void RefreshExpectations()
-	{
-		MinionIdentity component = this.selectedTarget.GetComponent<MinionIdentity>();
-		if (!component)
-		{
-			this.expectationsPanel.SetActive(false);
-			return;
-		}
-		this.expectationsPanel.SetActive(true);
-		this.expectationsPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.STATS.GROUPNAME_EXPECTATIONS;
-		List<AttributeInstance> list = new List<AttributeInstance>(this.selectedTarget.GetAttributes().AttributeTable);
-		List<AttributeInstance> list2 = list.FindAll((AttributeInstance a) => a.Attribute.ShowInUI == Klei.AI.Attribute.Display.Expectation);
-		this.expectationsDrawer.BeginDrawing();
-		if (list2.Count > 0)
-		{
-			foreach (AttributeInstance attributeInstance in list2)
-			{
-				this.expectationsDrawer.NewLabel(string.Format("{0}: {1}", attributeInstance.Name, attributeInstance.GetFormattedValue())).Tooltip(attributeInstance.GetAttributeValueTooltip());
-			}
-		}
-		this.expectationsDrawer.EndDrawing();
-	}
-
 	private void RefreshTraits()
 	{
 		MinionIdentity component = this.selectedTarget.GetComponent<MinionIdentity>();
@@ -190,8 +164,6 @@ public class MinionStatsPanel : TargetScreen
 
 	private GameObject stressPanel;
 
-	private GameObject expectationsPanel;
-
 	private GameObject traitsPanel;
 
 	private DetailsPanelDrawer attributesDrawer;
@@ -199,8 +171,6 @@ public class MinionStatsPanel : TargetScreen
 	private DetailsPanelDrawer stressDrawer;
 
 	private DetailsPanelDrawer traitsDrawer;
-
-	private DetailsPanelDrawer expectationsDrawer;
 
 	private SchedulerHandle updateHandle;
 

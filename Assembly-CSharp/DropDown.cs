@@ -161,7 +161,7 @@ public class DropDown : KMonoBehaviour
 			keyValuePair.Value.SetActive(true);
 		}
 		this.scrollRect.rectTransform().sizeDelta = new Vector2(this.scrollRect.rectTransform().sizeDelta.x, 32f * (float)Mathf.Min(this.contentContainer.childCount, 8));
-		Vector3 vector = this.selectedLabel.transform.parent.gameObject.transform.GetPosition() + Vector3.left * (this.selectedLabel.rectTransform().sizeDelta.x / 2f) + Vector3.down * this.openButton.rectTransform().sizeDelta.y;
+		Vector3 vector = this.dropdownAlignmentTarget.TransformPoint(this.dropdownAlignmentTarget.rect.x, this.dropdownAlignmentTarget.rect.y, 0f);
 		Vector2 vector2 = new Vector2(Mathf.Min(0f, (float)Screen.width - (vector.x + this.rowEntryPrefab.GetComponent<LayoutElement>().minWidth)), -Mathf.Min(0f, vector.y - this.scrollRect.rectTransform().sizeDelta.y));
 		vector += vector2;
 		this.scrollRect.rectTransform().SetPosition(vector);
@@ -188,6 +188,8 @@ public class DropDown : KMonoBehaviour
 	public Transform contentContainer;
 
 	public GameObject scrollRect;
+
+	public RectTransform dropdownAlignmentTarget;
 
 	public GameObject rowEntryPrefab;
 

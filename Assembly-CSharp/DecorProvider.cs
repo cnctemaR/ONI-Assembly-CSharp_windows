@@ -172,7 +172,7 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 
 	public string overrideName;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 
 	public global::System.Action refreshCallback;
 
@@ -265,16 +265,8 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 				return;
 			}
 			this.RemoveDecor();
-			if (this.partitionerEntry != null)
-			{
-				this.partitionerEntry.Release();
-				this.partitionerEntry = null;
-			}
-			if (this.solidChangedPartitionerEntry != null)
-			{
-				this.solidChangedPartitionerEntry.Release();
-				this.solidChangedPartitionerEntry = null;
-			}
+			GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
+			GameScenePartitioner.Instance.Free(ref this.solidChangedPartitionerEntry);
 		}
 
 		private void AddDecor()
@@ -334,8 +326,8 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 
 		private Extents extents;
 
-		private GameScenePartitionerEntry partitionerEntry;
+		private HandleVector<int>.Handle partitionerEntry;
 
-		private GameScenePartitionerEntry solidChangedPartitionerEntry;
+		private HandleVector<int>.Handle solidChangedPartitionerEntry;
 	}
 }

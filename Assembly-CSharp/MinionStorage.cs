@@ -1,0 +1,259 @@
+﻿using System;
+using System.Collections.Generic;
+using Klei.AI;
+using KSerialization;
+using UnityEngine;
+
+[SerializationConfig(MemberSerialization.OptIn)]
+public class MinionStorage : KMonoBehaviour
+{
+	private KPrefabID CreateSerializedMinion(GameObject src_minion)
+	{
+		GameObject prefab = SaveLoader.Instance.saveManager.GetPrefab(StoredMinionConfig.ID);
+		GameObject gameObject = Util.KInstantiate(prefab, Vector3.zero);
+		gameObject.SetActive(true);
+		this.CopyMinion(src_minion.GetComponent<MinionIdentity>(), gameObject.GetComponent<StoredMinionIdentity>());
+		this.RedirectInstanceTracker(src_minion, gameObject);
+		Util.KDestroyGameObject(src_minion);
+		return gameObject.GetComponent<KPrefabID>();
+	}
+
+	private void CopyMinionCommon(KMonoBehaviour src, KMonoBehaviour dest)
+	{
+	}
+
+	private void CopyMinion(MinionIdentity src_id, StoredMinionIdentity dest_id)
+	{
+		this.CopyMinionCommon(src_id, dest_id);
+		dest_id.storedName = src_id.name;
+		dest_id.nameStringKey = src_id.nameStringKey;
+		dest_id.gender = src_id.gender;
+		dest_id.genderStringKey = src_id.genderStringKey;
+		dest_id.arrivalTime = src_id.arrivalTime;
+		dest_id.voiceIdx = src_id.voiceIdx;
+		dest_id.bodyData = src_id.bodyData;
+		Traits component = src_id.GetComponent<Traits>();
+		dest_id.traitIDs = new List<string>(component.GetTraitIds());
+		Ownables component2 = src_id.GetComponent<Ownables>();
+		List<Ref<KPrefabID>> list = new List<Ref<KPrefabID>>();
+		foreach (AssignableSlotInstance assignableSlotInstance in component2)
+		{
+			if (assignableSlotInstance != null && !(assignableSlotInstance.assignable == null))
+			{
+				Assignable assignable = assignableSlotInstance.assignable;
+				KPrefabID component3 = assignable.GetComponent<KPrefabID>();
+				list.Add(new Ref<KPrefabID>(component3));
+				assignable.Unassign();
+			}
+		}
+		component2.UnassignAll();
+		foreach (Ref<KPrefabID> @ref in list)
+		{
+			Assignable component4 = @ref.Get().GetComponent<Assignable>();
+			component4.Assign(dest_id);
+		}
+		dest_id.assignedItems = list;
+		Equipment component5 = src_id.GetComponent<Equipment>();
+		List<Ref<KPrefabID>> list2 = new List<Ref<KPrefabID>>();
+		foreach (AssignableSlotInstance assignableSlotInstance2 in component5)
+		{
+			if (assignableSlotInstance2 != null)
+			{
+				Assignable assignable2 = assignableSlotInstance2.assignable;
+				if (!(assignable2 == null))
+				{
+					KPrefabID component6 = assignable2.GetComponent<KPrefabID>();
+					list2.Add(new Ref<KPrefabID>(component6));
+					assignable2.Unassign();
+				}
+			}
+		}
+		component5.UnequipAll();
+		Equipment component7 = dest_id.GetComponent<Equipment>();
+		foreach (Ref<KPrefabID> ref2 in list2)
+		{
+			Equippable component8 = ref2.Get().GetComponent<Equippable>();
+			component8.Assign(dest_id);
+			component7.Equip(component8);
+		}
+		dest_id.equippedItems = list2;
+		Accessorizer component9 = src_id.GetComponent<Accessorizer>();
+		dest_id.accessories = component9.GetAccessories();
+		ConsumableConsumer component10 = src_id.GetComponent<ConsumableConsumer>();
+		if (component10.forbiddenTags != null)
+		{
+			dest_id.forbiddenTags = new List<Tag>(component10.forbiddenTags);
+		}
+		MinionResume component11 = src_id.GetComponent<MinionResume>();
+		dest_id.ExperienceByRoleID = component11.ExperienceByRoleID;
+		dest_id.MasteryByRoleID = component11.MasteryByRoleID;
+		dest_id.AptitudeByRoleGroup = component11.AptitudeByRoleGroup;
+		dest_id.currentRole = component11.CurrentRole;
+		dest_id.targetRole = component11.TargetRole;
+		ChoreConsumer component12 = src_id.GetComponent<ChoreConsumer>();
+		dest_id.choreGroupPriorities = component12.GetChoreGroupPriorities();
+		AttributeLevels component13 = src_id.GetComponent<AttributeLevels>();
+		component13.OnSerializing();
+		dest_id.attributeLevels = new List<AttributeLevels.LevelSaveLoad>(component13.SaveLoadLevels);
+	}
+
+	private void CopyMinion(StoredMinionIdentity src_id, MinionIdentity dest_id)
+	{
+		this.CopyMinionCommon(src_id, dest_id);
+		dest_id.SetName(src_id.storedName);
+		dest_id.nameStringKey = src_id.nameStringKey;
+		dest_id.gender = src_id.gender;
+		dest_id.genderStringKey = src_id.genderStringKey;
+		dest_id.arrivalTime = src_id.arrivalTime;
+		dest_id.voiceIdx = src_id.voiceIdx;
+		dest_id.bodyData = src_id.bodyData;
+		Traits component = dest_id.GetComponent<Traits>();
+		component.SetTraitIds(src_id.traitIDs);
+		List<Ref<KPrefabID>> assignedItems = src_id.assignedItems;
+		foreach (Ref<KPrefabID> @ref in assignedItems)
+		{
+			Assignable component2 = @ref.Get().GetComponent<Assignable>();
+			component2.Unassign();
+		}
+		foreach (Ref<KPrefabID> ref2 in assignedItems)
+		{
+			Assignable component3 = ref2.Get().GetComponent<Assignable>();
+			component3.Assign(dest_id);
+		}
+		assignedItems.Clear();
+		Accessorizer component4 = dest_id.GetComponent<Accessorizer>();
+		component4.SetAccessories(src_id.accessories);
+		ConsumableConsumer component5 = dest_id.GetComponent<ConsumableConsumer>();
+		if (src_id.forbiddenTags != null)
+		{
+			component5.forbiddenTags = src_id.forbiddenTags.ToArray();
+		}
+		MinionResume component6 = dest_id.GetComponent<MinionResume>();
+		component6.ExperienceByRoleID = src_id.ExperienceByRoleID;
+		component6.MasteryByRoleID = src_id.MasteryByRoleID;
+		component6.AptitudeByRoleGroup = src_id.AptitudeByRoleGroup;
+		component6.SetCurrentRole(src_id.currentRole);
+		component6.SetTargetRole(src_id.targetRole);
+		ChoreConsumer component7 = dest_id.GetComponent<ChoreConsumer>();
+		component7.SetChoreGroupPriorities(src_id.choreGroupPriorities);
+	}
+
+	private void RedirectInstanceTracker(GameObject src_minion, GameObject dest_minion)
+	{
+		KPrefabID component = src_minion.GetComponent<KPrefabID>();
+		KPrefabID component2 = dest_minion.GetComponent<KPrefabID>();
+		component2.InstanceID = component.InstanceID;
+		component.InstanceID = -1;
+	}
+
+	public void SerializeMinion(GameObject minion)
+	{
+		KPrefabID kprefabID = this.CreateSerializedMinion(minion);
+		MinionStorage.Info info = new MinionStorage.Info(kprefabID.GetComponent<StoredMinionIdentity>().storedName, new Ref<KPrefabID>(kprefabID));
+		this.serializedMinions.Add(info);
+	}
+
+	private int GetMinionIndex(Guid id)
+	{
+		int num = -1;
+		for (int i = 0; i < this.serializedMinions.Count; i++)
+		{
+			if (this.serializedMinions[i].id == id)
+			{
+				num = i;
+				break;
+			}
+		}
+		return num;
+	}
+
+	public GameObject DeserializeMinion(Guid id, Vector3 pos)
+	{
+		int minionIndex = this.GetMinionIndex(id);
+		if (minionIndex < 0)
+		{
+			return null;
+		}
+		KPrefabID kprefabID = this.serializedMinions[minionIndex].serializedMinion.Get();
+		GameObject gameObject = kprefabID.gameObject;
+		GameObject prefab = SaveLoader.Instance.saveManager.GetPrefab(MinionConfig.ID);
+		GameObject gameObject2 = Util.KInstantiate(prefab, pos);
+		StoredMinionIdentity component = gameObject.GetComponent<StoredMinionIdentity>();
+		MinionIdentity component2 = gameObject2.GetComponent<MinionIdentity>();
+		this.CopyMinion(component, component2);
+		this.RedirectInstanceTracker(gameObject, gameObject2);
+		gameObject2.SetActive(true);
+		AttributeLevels component3 = component2.GetComponent<AttributeLevels>();
+		component3.SaveLoadLevels = component.attributeLevels.ToArray();
+		component3.OnDeserialized();
+		gameObject2.GetComponent<Accessorizer>().ApplyAccessories();
+		List<Ref<KPrefabID>> equippedItems = component.equippedItems;
+		Equipment component4 = component2.GetComponent<Equipment>();
+		if (equippedItems != null)
+		{
+			foreach (Ref<KPrefabID> @ref in equippedItems)
+			{
+				Equippable component5 = @ref.Get().GetComponent<Equippable>();
+				component5.Unassign();
+			}
+			foreach (Ref<KPrefabID> ref2 in equippedItems)
+			{
+				Equippable component6 = ref2.Get().GetComponent<Equippable>();
+				component6.Assign(component2);
+				component4.Equip(component6);
+			}
+			equippedItems.Clear();
+		}
+		Util.KDestroyGameObject(gameObject);
+		this.serializedMinions.RemoveAt(minionIndex);
+		return gameObject2;
+	}
+
+	public void DeleteStoredMinion(Guid id)
+	{
+		int minionIndex = this.GetMinionIndex(id);
+		if (minionIndex < 0)
+		{
+			return;
+		}
+		if (this.serializedMinions[minionIndex].serializedMinion != null)
+		{
+			Util.KDestroyGameObject(this.serializedMinions[minionIndex].serializedMinion.Get().gameObject);
+		}
+		this.serializedMinions.RemoveAt(minionIndex);
+	}
+
+	public List<MinionStorage.Info> GetStoredMinionInfo()
+	{
+		return this.serializedMinions;
+	}
+
+	[Serialize]
+	private List<MinionStorage.Info> serializedMinions = new List<MinionStorage.Info>();
+
+	public struct Info
+	{
+		public Info(string name, Ref<KPrefabID> ref_obj)
+		{
+			this.id = Guid.NewGuid();
+			this.name = name;
+			this.serializedMinion = ref_obj;
+		}
+
+		public static MinionStorage.Info CreateEmpty()
+		{
+			return new MinionStorage.Info
+			{
+				id = Guid.Empty,
+				name = null,
+				serializedMinion = null
+			};
+		}
+
+		public Guid id;
+
+		public string name;
+
+		public Ref<KPrefabID> serializedMinion;
+	}
+}

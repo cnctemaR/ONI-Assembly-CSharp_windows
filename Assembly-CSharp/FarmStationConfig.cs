@@ -29,7 +29,7 @@ public class FarmStationConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.FarmStation);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.FarmStation);
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)

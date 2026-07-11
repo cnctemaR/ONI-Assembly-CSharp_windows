@@ -357,32 +357,37 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		this.daysSinceDynamicMusic = 0;
 		string nextDynamicSong = this.GetNextDynamicSong();
 		this.PlaySong(nextDynamicSong, false);
-		AudioMixer.instance.Start(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot);
 		MusicManager.SongInfo songInfo;
 		if (this.activeSongs.TryGetValue(nextDynamicSong, out songInfo))
 		{
 			this.activeDynamicSong = songInfo;
+			AudioMixer.instance.Start(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot);
+			if (SpeedControlScreen.Instance != null && SpeedControlScreen.Instance.IsPaused)
+			{
+				this.SetDynamicMusicPaused();
+			}
+			if (OverlayScreen.Instance != null && OverlayScreen.Instance.mode != SimViewMode.None)
+			{
+				this.SetDynamicMusicOverlayActive();
+			}
+			this.SetDynamicMusicPlayHook();
+			string text = "Volume_Music";
+			if (KPlayerPrefs.HasKey(text))
+			{
+				float @float = KPlayerPrefs.GetFloat(text);
+				AudioMixer.instance.SetSnapshotParameter(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot, "userVolume_Music", @float, true);
+			}
+			AudioMixer.instance.SetSnapshotParameter(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot, "intensity", songInfo.sfxAttenuationSnapshotIntensity / 100f, true);
+			return;
 		}
-		else
+		this.Log("DynamicMusic song " + nextDynamicSong + " did not start.");
+		string text2 = string.Empty;
+		foreach (KeyValuePair<string, MusicManager.SongInfo> keyValuePair in this.activeSongs)
 		{
-			this.Log("DynamicMusic song " + nextDynamicSong + " did not start.");
+			text2 = text2 + keyValuePair.Key + ", ";
+			global::Debug.Log(text2, null);
 		}
-		if (SpeedControlScreen.Instance != null && SpeedControlScreen.Instance.IsPaused)
-		{
-			this.SetDynamicMusicPaused();
-		}
-		if (OverlayScreen.Instance != null && OverlayScreen.Instance.mode != SimViewMode.None)
-		{
-			this.SetDynamicMusicOverlayActive();
-		}
-		this.SetDynamicMusicPlayHook();
-		string text = "Volume_Music";
-		if (KPlayerPrefs.HasKey(text))
-		{
-			float @float = KPlayerPrefs.GetFloat(text);
-			AudioMixer.instance.SetSnapshotParameter(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot, "userVolume_Music", @float, true);
-		}
-		AudioMixer.instance.SetSnapshotParameter(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot, "intensity", songInfo.sfxAttenuationSnapshotIntensity / 100f, true);
+		KCrashReporter.Assert(false, "Song failed to play: " + nextDynamicSong);
 	}
 
 	public void StopDynamicMusic(bool stopImmediate = false)

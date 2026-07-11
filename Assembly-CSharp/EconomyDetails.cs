@@ -563,7 +563,7 @@ public class EconomyDetails
 		}
 		foreach (Diet.Info info in def.diet.infos)
 		{
-			foreach (Tag tag in info.consumedTagBits.GetTagsVerySlow())
+			foreach (Tag tag in info.consumedTags)
 			{
 				float num3 = Mathf.Abs(num / num2);
 				float num4 = num / info.caloriesPerKg;
@@ -588,7 +588,7 @@ public class EconomyDetails
 				EconomyDetails.Scenario scenario2 = new EconomyDetails.Scenario("diets/" + kprefabID.name, 0, null);
 				foreach (Diet.Info info in def.diet.infos)
 				{
-					foreach (Tag tag in info.consumedTagBits.GetTagsVerySlow())
+					foreach (Tag tag in info.consumedTags)
 					{
 						Tag tag2 = kprefabID.PrefabTag.Name + "Diet" + tag.Name;
 						scenario2.AddEntry(new EconomyDetails.Scenario.Entry(tag2, 1));

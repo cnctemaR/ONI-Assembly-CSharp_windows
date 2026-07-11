@@ -135,6 +135,7 @@ public static class CodexEntryGenerator
 		action(GameTags.Creatures.Species.HatchSpecies, global::STRINGS.CREATURES.FAMILY.HATCH);
 		action(GameTags.Creatures.Species.GlomSpecies, global::STRINGS.CREATURES.FAMILY.GLOM);
 		action(GameTags.Creatures.Species.DreckoSpecies, global::STRINGS.CREATURES.FAMILY.DRECKO);
+		action(GameTags.Creatures.Species.MooSpecies, global::STRINGS.CREATURES.FAMILY.MOO);
 		return results;
 	}
 
@@ -196,7 +197,12 @@ public static class CodexEntryGenerator
 			CodexEntryGenerator.GeneratePrerequisiteTechContainers(tech, list);
 			CodexEntryGenerator.GenerateUnlockContainers(tech, list);
 			CodexEntry codexEntry = new CodexEntry("TECH", list, tech.Name);
-			codexEntry.icon = tech.unlockedItems[0].getUISprite("ui", false);
+			TechItem techItem = tech.unlockedItems[0];
+			if (techItem == null)
+			{
+				Output.LogError(new object[] { "Unknown tech:", tech.Name });
+			}
+			codexEntry.icon = techItem.getUISprite("ui", false);
 			codexEntry.parentId = "TECH";
 			CodexCache.AddEntry(tech.Id, codexEntry, null);
 			dictionary.Add(tech.Id, codexEntry);
@@ -233,7 +239,7 @@ public static class CodexEntryGenerator
 		{
 			foreach (GameObject gameObject in prefabsWithComponent)
 			{
-				if (!gameObject.HasTag(GameTags.DeprecatedContent))
+				if (!gameObject.GetComponent<KPrefabID>().HasTag(GameTags.DeprecatedContent))
 				{
 					List<ContentContainer> list = new List<ContentContainer>();
 					CodexEntryGenerator.GenerateTitleContainers(gameObject.GetProperName(), list);
@@ -1059,72 +1065,57 @@ public static class CodexEntryGenerator
 				contentContainer.content = new List<CodexWidget>();
 				foreach (Diet.Info info in def.diet.infos)
 				{
-					List<Tag> tagsVerySlow = info.consumedTagBits.GetTagsVerySlow();
-					if (tagsVerySlow.Count > 0)
+					if (info.consumedTags.Count != 0)
 					{
-						int j = 0;
-						while (j < tagsVerySlow.Count)
+						foreach (Tag tag in info.consumedTags)
 						{
-							Element element = ElementLoader.FindElementByHash(ElementLoader.GetElementID(tagsVerySlow[j]));
+							Element element = ElementLoader.FindElementByHash(ElementLoader.GetElementID(tag));
 							GameObject gameObject2 = null;
-							if (element.id != SimHashes.Vacuum && element.id != SimHashes.Void)
+							if (element.id == SimHashes.Vacuum || element.id == SimHashes.Void)
 							{
-								goto IL_03AC;
+								gameObject2 = Assets.GetPrefab(tag);
+								if (gameObject2 == null)
+								{
+									continue;
+								}
 							}
-							gameObject2 = Assets.GetPrefab(tagsVerySlow[j]);
-							if (!(gameObject2 == null))
-							{
-								goto IL_03AC;
-							}
-							IL_04F1:
-							j++;
-							continue;
-							IL_03AC:
 							if (element != null && gameObject2 == null)
 							{
-								if (list.Contains(element.tag))
+								if (!list.Contains(element.tag))
 								{
-									goto IL_04F1;
-								}
-								list.Add(element.tag);
-								contentContainer.content.Add(new CodexWidget(CodexWidget.ContentType.LabelWithIcon, new Dictionary<string, string>
-								{
+									list.Add(element.tag);
+									contentContainer.content.Add(new CodexWidget(CodexWidget.ContentType.LabelWithIcon, new Dictionary<string, string>
 									{
-										"string",
-										"    " + element.name
-									},
-									{ "style", "body" }
-								}, new Dictionary<string, object> { 
-								{
-									"coloredSprite",
-									Def.GetUISprite(element.substance, "ui", false)
-								} }));
-								goto IL_04F1;
+										{
+											"string",
+											"    " + element.name
+										},
+										{ "style", "body" }
+									}, new Dictionary<string, object> { 
+									{
+										"coloredSprite",
+										Def.GetUISprite(element.substance, "ui", false)
+									} }));
+								}
 							}
-							else
+							else if (gameObject2 != null)
 							{
-								if (!(gameObject2 != null))
+								if (!list.Contains(gameObject2.PrefabID()))
 								{
-									goto IL_04F1;
-								}
-								if (list.Contains(gameObject2.PrefabID()))
-								{
-									goto IL_04F1;
-								}
-								list.Add(gameObject2.PrefabID());
-								contentContainer.content.Add(new CodexWidget(CodexWidget.ContentType.LabelWithIcon, new Dictionary<string, string>
-								{
+									list.Add(gameObject2.PrefabID());
+									contentContainer.content.Add(new CodexWidget(CodexWidget.ContentType.LabelWithIcon, new Dictionary<string, string>
 									{
-										"string",
-										"    " + gameObject2.GetProperName()
-									},
-									{ "style", "body" }
-								}, new Dictionary<string, object> { 
-								{
-									"coloredSprite",
-									Def.GetUISprite(gameObject2, "ui", false)
-								} }));
-								goto IL_04F1;
+										{
+											"string",
+											"    " + gameObject2.GetProperName()
+										},
+										{ "style", "body" }
+									}, new Dictionary<string, object> { 
+									{
+										"coloredSprite",
+										Def.GetUISprite(gameObject2, "ui", false)
+									} }));
+								}
 							}
 						}
 					}
@@ -1161,24 +1152,24 @@ public static class CodexEntryGenerator
 					}, ContentContainer.ContentLayout.Vertical);
 					containers.Add(contentContainer3);
 					List<Tag> list2 = new List<Tag>();
-					for (int l = 0; l < def.diet.infos.Length; l++)
+					for (int k = 0; k < def.diet.infos.Length; k++)
 					{
-						if (def.diet.infos[l].producedElement != Tag.Invalid)
+						if (def.diet.infos[k].producedElement != Tag.Invalid)
 						{
-							if (!list2.Contains(def.diet.infos[l].producedElement))
+							if (!list2.Contains(def.diet.infos[k].producedElement))
 							{
-								list2.Add(def.diet.infos[l].producedElement);
+								list2.Add(def.diet.infos[k].producedElement);
 								contentContainer2.content.Add(new CodexWidget(CodexWidget.ContentType.LabelWithIcon, new Dictionary<string, string>
 								{
 									{
 										"string",
-										"• " + def.diet.infos[l].producedElement.ProperName()
+										"• " + def.diet.infos[k].producedElement.ProperName()
 									},
 									{ "style", "body" }
 								}, new Dictionary<string, object> { 
 								{
 									"coloredSprite",
-									Def.GetUISprite(def.diet.infos[l].producedElement, "ui", false)
+									Def.GetUISprite(def.diet.infos[k].producedElement, "ui", false)
 								} }));
 							}
 						}

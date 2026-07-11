@@ -107,7 +107,7 @@ public class SelectTool : InterfaceTool
 		if (Grid.IsValidCell(num) && Grid.IsVisible(num))
 		{
 			Game.Instance.statusItemRenderer.GetIntersections(vector3, intersections);
-			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+			ListPool<ScenePartitionerEntry, SelectTool>.PooledList pooledList = ListPool<ScenePartitionerEntry, SelectTool>.Allocate();
 			int num2 = 0;
 			int num3 = 0;
 			Grid.CellToXY(num, out num2, out num3);
@@ -177,7 +177,7 @@ public class SelectTool : InterfaceTool
 			return;
 		}
 		Game.Instance.statusItemRenderer.GetIntersections(vector3, hits);
-		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+		ListPool<ScenePartitionerEntry, SelectTool>.PooledList pooledList = ListPool<ScenePartitionerEntry, SelectTool>.Allocate();
 		pooledList.Sort((ScenePartitionerEntry x, ScenePartitionerEntry y) => (x.obj as Transform).GetPosition().z.CompareTo((y.obj as Transform).GetPosition().z));
 		GameScenePartitioner.Instance.GatherEntries((int)vector3.x, (int)vector3.y, 1, 1, GameScenePartitioner.Instance.collisionLayer, pooledList);
 		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)

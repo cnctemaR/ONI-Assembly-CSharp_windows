@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -39,45 +38,9 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		base.Subscribe(279163026, new Action<object>(this.OnControlStateChanged));
 	}
 
-	[OnSerializing]
-	private void OnSerializing()
-	{
-		this.savedPermissions = new List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>>();
-		foreach (KeyValuePair<GameObject, AccessControl.Permission> keyValuePair in this.permissions)
-		{
-			if (keyValuePair.Key != null)
-			{
-				KPrefabID component = keyValuePair.Key.GetComponent<KPrefabID>();
-				this.savedPermissions.Add(new KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>(new Ref<KPrefabID>(component), keyValuePair.Value));
-			}
-		}
-	}
-
-	[OnSerialized]
-	private void OnSerialized()
-	{
-		this.savedPermissions = null;
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		if (this.savedPermissions != null)
-		{
-			foreach (KeyValuePair<Ref<KPrefabID>, AccessControl.Permission> keyValuePair in this.savedPermissions)
-			{
-				if (keyValuePair.Key != null)
-				{
-					KPrefabID kprefabID = keyValuePair.Key.Get();
-					if (kprefabID != null)
-					{
-						GameObject gameObject = kprefabID.gameObject;
-						this.permissions[gameObject] = keyValuePair.Value;
-					}
-				}
-			}
-			this.savedPermissions = null;
-		}
 		this.SetStatusItem();
 	}
 
@@ -88,7 +51,26 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 
 	public void SetPermission(GameObject key, AccessControl.Permission permission)
 	{
-		this.permissions[key] = permission;
+		KPrefabID component = key.GetComponent<KPrefabID>();
+		if (component == null)
+		{
+			return;
+		}
+		bool flag = false;
+		for (int i = 0; i < this.savedPermissions.Count; i++)
+		{
+			if (this.savedPermissions[i].Key.GetId() == component.InstanceID)
+			{
+				flag = true;
+				KeyValuePair<Ref<KPrefabID>, AccessControl.Permission> keyValuePair = this.savedPermissions[i];
+				this.savedPermissions[i] = new KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>(keyValuePair.Key, permission);
+				break;
+			}
+		}
+		if (!flag)
+		{
+			this.savedPermissions.Add(new KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>(new Ref<KPrefabID>(component), permission));
+		}
 		this.SetStatusItem();
 	}
 
@@ -109,27 +91,60 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 	public AccessControl.Permission GetSetPermission(GameObject key)
 	{
 		AccessControl.Permission permission = this.DefaultPermission;
-		if (!this.permissions.TryGetValue(key, out permission))
+		KPrefabID component = key.GetComponent<KPrefabID>();
+		if (component != null)
 		{
-			permission = this.DefaultPermission;
+			for (int i = 0; i < this.savedPermissions.Count; i++)
+			{
+				if (this.savedPermissions[i].Key.GetId() == component.InstanceID)
+				{
+					permission = this.savedPermissions[i].Value;
+					break;
+				}
+			}
 		}
 		return permission;
 	}
 
 	public void ClearPermission(GameObject key)
 	{
-		this.permissions.Remove(key);
+		AccessControl.Permission defaultPermission = this.DefaultPermission;
+		KPrefabID component = key.GetComponent<KPrefabID>();
+		if (component != null)
+		{
+			for (int i = 0; i < this.savedPermissions.Count; i++)
+			{
+				if (this.savedPermissions[i].Key.GetId() == component.InstanceID)
+				{
+					this.savedPermissions.RemoveAt(i);
+					break;
+				}
+			}
+		}
 		this.SetStatusItem();
 	}
 
 	public bool IsDefaultPermission(GameObject key)
 	{
-		return !this.permissions.ContainsKey(key);
+		bool flag = false;
+		KPrefabID component = key.GetComponent<KPrefabID>();
+		if (component != null)
+		{
+			for (int i = 0; i < this.savedPermissions.Count; i++)
+			{
+				if (this.savedPermissions[i].Key.GetId() == component.InstanceID)
+				{
+					flag = true;
+					break;
+				}
+			}
+		}
+		return !flag;
 	}
 
 	private void SetStatusItem()
 	{
-		if (this._defaultPermission != AccessControl.Permission.Both || this.permissions.Count > 0)
+		if (this._defaultPermission != AccessControl.Permission.Both || this.savedPermissions.Count > 0)
 		{
 			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.AccessControl, AccessControl.accessControlActive, null);
 		}
@@ -145,10 +160,8 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 	[MyCmpReq]
 	private KSelectable selectable;
 
-	private Dictionary<GameObject, AccessControl.Permission> permissions = new Dictionary<GameObject, AccessControl.Permission>();
-
 	[Serialize]
-	private List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>> savedPermissions;
+	private List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>> savedPermissions = new List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>>();
 
 	[Serialize]
 	private AccessControl.Permission _defaultPermission;

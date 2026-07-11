@@ -15,6 +15,7 @@ public class Researcher : RoleConfig
 		base.perks = new RolePerk[]
 		{
 			RoleManager.rolePerks.IncreaseLearningMedium,
+			RoleManager.rolePerks.CanStudyWorldObjects,
 			RoleManager.rolePerks.AllowAdvancedResearch
 		};
 	}

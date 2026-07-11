@@ -108,16 +108,8 @@ public class NoiseSplat : IUniformGridObject
 
 	public void Clear()
 	{
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-			this.partitionerEntry = null;
-		}
-		if (this.solidChangedPartitionerEntry != null)
-		{
-			this.solidChangedPartitionerEntry.Release();
-			this.solidChangedPartitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
+		GameScenePartitioner.Instance.Free(ref this.solidChangedPartitionerEntry);
 		this.RemoveNoise();
 	}
 
@@ -205,9 +197,9 @@ public class NoiseSplat : IUniformGridObject
 
 	private Extents baseExtents;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 
-	private GameScenePartitionerEntry solidChangedPartitionerEntry;
+	private HandleVector<int>.Handle solidChangedPartitionerEntry;
 
 	private List<Pair<int, float>> decibels = new List<Pair<int, float>>();
 }

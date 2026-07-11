@@ -268,10 +268,12 @@ public class CodexScreen : KScreen
 		{
 			list[i].Value.transform.parent.SetSiblingIndex(i);
 		}
+		CodexScreen.SetupCategory(dictionary, "TIPS");
 		CodexScreen.SetupCategory(dictionary, "NOTICES");
 		CodexScreen.SetupCategory(dictionary, "RESEARCHNOTES");
 		CodexScreen.SetupCategory(dictionary, "JOURNALS");
 		CodexScreen.SetupCategory(dictionary, "EMAILS");
+		CodexScreen.SetupCategory(dictionary, "MYLOG");
 		CodexScreen.SetupCategory(dictionary, "Root");
 	}
 
@@ -775,9 +777,11 @@ public class CodexScreen : KScreen
 	public enum PlanCategory
 	{
 		Home,
+		MyLog,
 		Emails,
 		Journals,
 		ResearchNotes,
+		Tips,
 		Tech,
 		Creatures,
 		Plants,

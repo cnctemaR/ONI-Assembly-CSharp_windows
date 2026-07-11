@@ -14,8 +14,8 @@ public class MechatronicEngineer : RoleConfig
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Machinery };
 		base.perks = new RolePerk[]
 		{
-			RoleManager.rolePerks.IncreaseMachineryMedium,
-			RoleManager.rolePerks.IncreaseConstructionMedium,
+			RoleManager.rolePerks.IncreaseMachineryLarge,
+			RoleManager.rolePerks.IncreaseConstructionMechatronics,
 			RoleManager.rolePerks.ConveyorBuild
 		};
 	}

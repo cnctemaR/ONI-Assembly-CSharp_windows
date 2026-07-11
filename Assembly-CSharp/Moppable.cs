@@ -103,30 +103,29 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 		}
 	}
 
-	private void OnCellMopped(object data)
+	private void OnCellMopped(Sim.MassConsumedCallback mass_cb_info, object data)
 	{
 		if (this == null)
 		{
 			return;
 		}
-		Sim.MassConsumedCallback massConsumedCallback = (Sim.MassConsumedCallback)data;
-		if (massConsumedCallback.mass > 0f)
+		if (mass_cb_info.mass > 0f)
 		{
-			this.amountMopped += massConsumedCallback.mass;
+			this.amountMopped += mass_cb_info.mass;
 			int num = Grid.PosToCell(this);
-			SubstanceChunk substanceChunk = LiquidSourceManager.Instance.CreateChunk(ElementLoader.elements[(int)massConsumedCallback.elemIdx], massConsumedCallback.mass, massConsumedCallback.temperature, massConsumedCallback.diseaseIdx, massConsumedCallback.diseaseCount, Grid.CellToPosCCC(num, Grid.SceneLayer.Ore));
+			SubstanceChunk substanceChunk = LiquidSourceManager.Instance.CreateChunk(ElementLoader.elements[(int)mass_cb_info.elemIdx], mass_cb_info.mass, mass_cb_info.temperature, mass_cb_info.diseaseIdx, mass_cb_info.diseaseCount, Grid.CellToPosCCC(num, Grid.SceneLayer.Ore));
 			substanceChunk.transform.SetPosition(substanceChunk.transform.GetPosition() + new Vector3((global::UnityEngine.Random.value - 0.5f) * 0.5f, 0f, 0f));
 		}
 	}
 
-	public static void MopCell(int cell, float amount, Action<object> cb)
+	public static void MopCell(int cell, float amount, Action<Sim.MassConsumedCallback, object> cb)
 	{
 		if (Grid.Element[cell].IsLiquid)
 		{
 			int num = -1;
 			if (cb != null)
 			{
-				num = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(cb, "Moppable")).index;
+				num = Game.Instance.massConsumedCallbackManager.Add(cb, null, "Moppable").index;
 			}
 			SimMessages.ConsumeMass(cell, Grid.Element[cell].id, amount, 1, num);
 		}
@@ -140,7 +139,7 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 			int num2 = Grid.OffsetCell(num, this.offsets[i]);
 			if (Grid.Element[num2].IsLiquid)
 			{
-				Moppable.MopCell(num2, this.amountMoppedPerTick, new Action<object>(this.OnCellMopped));
+				Moppable.MopCell(num2, this.amountMoppedPerTick, new Action<Sim.MassConsumedCallback, object>(this.OnCellMopped));
 			}
 		}
 	}
@@ -194,10 +193,7 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-		}
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 	}
 
 	private void OnReachableChanged(object data)
@@ -236,7 +232,7 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 
 	public float amountMoppedPerTick = 1000f;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 
 	private SchedulerHandle destroyHandle;
 

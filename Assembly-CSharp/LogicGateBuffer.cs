@@ -68,7 +68,7 @@ public class LogicGateBuffer : LogicGate, ISingleSliderControl, ISliderControl
 	{
 		base.OnSpawn();
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		this.meter = new MeterController(component, "meter_target", "meter", Meter.Offset.Infront, Vector3.zero, null);
+		this.meter = new MeterController(component, "meter_target", "meter", Meter.Offset.UserSpecified, Grid.SceneLayer.WireBridgesFront, Vector3.zero, null);
 		this.meter.SetPositionPercent(1f);
 	}
 

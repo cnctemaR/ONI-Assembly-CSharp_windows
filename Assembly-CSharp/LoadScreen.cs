@@ -145,7 +145,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header)
 	{
-		return header.buildVersion > 280450U;
+		return header.buildVersion > 284571U;
 	}
 
 	private void SetSelectedGame(string filename)
@@ -186,13 +186,13 @@ public class LoadScreen : KModalScreen
 			this.saveDetails.text = text4;
 			if (LoadScreen.IsSaveFileFromUnsupportedFutureBuild(header))
 			{
-				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 280450U);
+				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 284571U);
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
 			else if (gameInfo.saveMajorVersion < 7)
 			{
-				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.UNSUPPORTED_SAVE_VERSION, new object[] { filename, gameInfo.saveMajorVersion, gameInfo.saveMinorVersion, 7, 5 });
+				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.UNSUPPORTED_SAVE_VERSION, new object[] { filename, gameInfo.saveMajorVersion, gameInfo.saveMinorVersion, 7, 6 });
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
@@ -221,21 +221,27 @@ public class LoadScreen : KModalScreen
 
 	private void DoLoad()
 	{
-		ReportErrorDialog.MOST_RECENT_SAVEFILE = this.selectedFileName;
+		LoadScreen.DoLoad(this.selectedFileName);
+		this.Deactivate();
+	}
+
+	private static void DoLoad(string filename)
+	{
+		ReportErrorDialog.MOST_RECENT_SAVEFILE = filename;
 		bool flag = true;
 		SaveGame.Header header;
-		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(this.selectedFileName, out header);
+		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 280450U)
+		if (header.buildVersion > 284571U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 280450U.ToString();
+			text2 = 284571U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
 			text = string.Format("v{0}.{1}", gameInfo.saveMajorVersion, gameInfo.saveMinorVersion);
-			text2 = string.Format("v{0}.{1}", 7, 5);
+			text2 = string.Format("v{0}.{1}", 7, 6);
 		}
 		if (!flag)
 		{
@@ -248,10 +254,9 @@ public class LoadScreen : KModalScreen
 		{
 			LoadScreen.ForceStopGame();
 		}
-		SaveLoader.SetActiveSaveFilePath(this.selectedFileName);
+		SaveLoader.SetActiveSaveFilePath(filename);
 		Time.timeScale = 0f;
 		App.LoadScene("backend");
-		this.Deactivate();
 	}
 
 	private void MoreInfo()

@@ -147,6 +147,17 @@ namespace Database
 			array4 = new RoomType[] { this.GreatHall };
 			array3 = new string[] { "RoomMessHall" };
 			this.MessHall = base.Add(new RoomType(text4, text3, text2, text, roomTypeCategory, constraint, array, array2, num, array4, false, false, array3));
+			this.MassageClinic = base.Add(new RoomType("MassageClinic", ROOMS.TYPES.MASSAGE_CLINIC.NAME, ROOMS.TYPES.MASSAGE_CLINIC.TOOLTIP, ROOMS.TYPES.MASSAGE_CLINIC.EFFECT, Db.Get().RoomTypeCategories.Hospital, RoomConstraints.MASSAGE_TABLE, new RoomConstraints.Constraint[]
+			{
+				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
+				RoomConstraints.DECORATIVE_ITEM,
+				RoomConstraints.MINIMUM_SIZE_12,
+				RoomConstraints.MAXIMUM_SIZE_64
+			}, new RoomDetails.Detail[]
+			{
+				RoomDetails.SIZE,
+				RoomDetails.BUILDING_COUNT
+			}, 2, null, true, true, null));
 			this.Hospital = base.Add(new RoomType("Hospital", ROOMS.TYPES.HOSPITAL.NAME, ROOMS.TYPES.HOSPITAL.TOOLTIP, ROOMS.TYPES.HOSPITAL.EFFECT, Db.Get().RoomTypeCategories.Hospital, RoomConstraints.CLINIC, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.TOILET,
@@ -154,17 +165,6 @@ namespace Database
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
 				RoomConstraints.MINIMUM_SIZE_12,
 				RoomConstraints.MAXIMUM_SIZE_96
-			}, new RoomDetails.Detail[]
-			{
-				RoomDetails.SIZE,
-				RoomDetails.BUILDING_COUNT
-			}, 2, null, true, true, null));
-			this.MassageClinic = base.Add(new RoomType("MassageClinic", ROOMS.TYPES.MASSAGE_CLINIC.NAME, ROOMS.TYPES.MASSAGE_CLINIC.TOOLTIP, ROOMS.TYPES.MASSAGE_CLINIC.EFFECT, Db.Get().RoomTypeCategories.Hospital, RoomConstraints.MASSAGE_TABLE, new RoomConstraints.Constraint[]
-			{
-				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
-				RoomConstraints.DECORATIVE_ITEM,
-				RoomConstraints.MINIMUM_SIZE_12,
-				RoomConstraints.MAXIMUM_SIZE_64
 			}, new RoomDetails.Detail[]
 			{
 				RoomDetails.SIZE,

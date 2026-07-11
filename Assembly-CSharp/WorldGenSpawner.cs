@@ -9,14 +9,6 @@ using UnityEngine;
 
 public class WorldGenSpawner : KMonoBehaviour
 {
-	public static WorldGenSpawner Instance
-	{
-		get
-		{
-			return WorldGenSpawner.instance;
-		}
-	}
-
 	public bool SpawnsRemain()
 	{
 		return this.spawnables.Count > 0;
@@ -44,7 +36,6 @@ public class WorldGenSpawner : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		WorldGenSpawner.instance = this;
 		if (!this.hasPlacedTemplates)
 		{
 			this.DoReveal();
@@ -66,18 +57,6 @@ public class WorldGenSpawner : KMonoBehaviour
 		{
 			this.AddSpawnable(this.spawnInfos[i]);
 		}
-	}
-
-	protected override void OnForcedCleanUp()
-	{
-		WorldGenSpawner.instance = null;
-		for (int i = 0; i < this.spawnables.Count; i++)
-		{
-			this.spawnables[i].FreeResources();
-		}
-		this.spawnables.Clear();
-		this.spawnables = null;
-		this.spawnInfos = null;
 	}
 
 	[OnSerializing]
@@ -149,8 +128,6 @@ public class WorldGenSpawner : KMonoBehaviour
 		GridVisibility.Reveal(baseStartPos.x, baseStartPos.y, floatSetting2, floatSetting);
 	}
 
-	private static WorldGenSpawner instance;
-
 	[Serialize]
 	private Prefab[] spawnInfos;
 
@@ -203,11 +180,7 @@ public class WorldGenSpawner : KMonoBehaviour
 		{
 			if (!Grid.Solid[this.cell])
 			{
-				if (this.solidChangedPartitionerEntry != null)
-				{
-					this.solidChangedPartitionerEntry.Release();
-					this.solidChangedPartitionerEntry = null;
-				}
+				GameScenePartitioner.Instance.Free(ref this.solidChangedPartitionerEntry);
 				Game.Instance.GetComponent<EntombedItemVisualizer>().RemoveItem(this.cell);
 				this.Spawn();
 			}
@@ -215,20 +188,15 @@ public class WorldGenSpawner : KMonoBehaviour
 
 		public void FreeResources()
 		{
-			if (this.solidChangedPartitionerEntry != null)
+			if (this.solidChangedPartitionerEntry.IsValid())
 			{
-				this.solidChangedPartitionerEntry.Release();
-				this.solidChangedPartitionerEntry = null;
+				GameScenePartitioner.Instance.Free(ref this.solidChangedPartitionerEntry);
 				if (Game.Instance != null)
 				{
 					Game.Instance.GetComponent<EntombedItemVisualizer>().RemoveItem(this.cell);
 				}
 			}
-			if (this.fogOfWarPartitionerEntry != null)
-			{
-				this.fogOfWarPartitionerEntry.Release();
-				this.fogOfWarPartitionerEntry = null;
-			}
+			GameScenePartitioner.Instance.Free(ref this.fogOfWarPartitionerEntry);
 			this.isSpawned = true;
 		}
 
@@ -238,15 +206,11 @@ public class WorldGenSpawner : KMonoBehaviour
 			{
 				return;
 			}
-			if (this.solidChangedPartitionerEntry != null)
+			if (this.solidChangedPartitionerEntry.IsValid())
 			{
 				return;
 			}
-			if (this.fogOfWarPartitionerEntry != null)
-			{
-				this.fogOfWarPartitionerEntry.Release();
-				this.fogOfWarPartitionerEntry = null;
-			}
+			GameScenePartitioner.Instance.Free(ref this.fogOfWarPartitionerEntry);
 			GameObject prefab = Assets.GetPrefab(this.GetPrefabTag());
 			if (prefab != null)
 			{
@@ -314,9 +278,9 @@ public class WorldGenSpawner : KMonoBehaviour
 			}
 		}
 
-		private GameScenePartitionerEntry fogOfWarPartitionerEntry;
+		private HandleVector<int>.Handle fogOfWarPartitionerEntry;
 
-		private GameScenePartitionerEntry solidChangedPartitionerEntry;
+		private HandleVector<int>.Handle solidChangedPartitionerEntry;
 
 		public delegate GameObject PlaceEntityFn(Prefab prefab, int root_cell);
 	}

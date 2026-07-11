@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -11,12 +12,12 @@ public static class BasePuftConfig
 		string text = "idle_loop";
 		EffectorValues tier = DECOR.BONUS.TIER0;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, anim, text, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, traitId, "FlyerNavGrid1x1", NavType.Hover, 32, 2f, "Meat", 1, true, true, 302f, 318f, 243f, 343f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, traitId, "FlyerNavGrid1x1", NavType.Hover, 32, 2f, "Meat", 1, true, true, 302f, 318f, 243.15f, 343.15f);
 		if (!string.IsNullOrEmpty(symbol_override_prefix))
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByPrefix(Assets.GetAnim(anim_file), symbol_override_prefix, 0);
 		}
-		gameObject.GetComponent<KPrefabID>().AddPrefabTag(GameTags.Creatures.Flyer);
+		gameObject.GetComponent<KPrefabID>().AddTag(GameTags.Creatures.Flyer);
 		gameObject.AddOrGet<LoopingSounds>();
 		LureableMonitor.Def def = gameObject.AddOrGetDef<LureableMonitor.Def>();
 		def.lures = new Tag[] { GameTags.SlimeMold };
@@ -28,7 +29,7 @@ public static class BasePuftConfig
 		SoundEventVolumeCache.instance.AddVolume("puft_kanim", "Puft_air_inflated", NOISE_POLLUTION.CREATURES.TIER5);
 		SoundEventVolumeCache.instance.AddVolume("puft_kanim", "Puft_voice_die", NOISE_POLLUTION.CREATURES.TIER5);
 		SoundEventVolumeCache.instance.AddVolume("puft_kanim", "Puft_voice_hurt", NOISE_POLLUTION.CREATURES.TIER5);
-		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true);
+		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false);
 		string text2 = "Puft_air_intake";
 		if (is_baby)
 		{
@@ -45,11 +46,11 @@ public static class BasePuftConfig
 			.Add(new FixedCaptureStates.Def(), true)
 			.Add(new RanchedStates.Def(), true)
 			.Add(new UpTopPoopStates.Def(), true)
+			.Add(new LayEggStates.Def(), true)
 			.Add(new InhaleStates.Def
 			{
 				inhaleSound = text2
 			}, true)
-			.Add(new LayEggStates.Def(), true)
 			.Add(new MoveToLureStates.Def(), true)
 			.Add(new CallAdultStates.Def(), true)
 			.PopInterruptGroup();
@@ -60,11 +61,11 @@ public static class BasePuftConfig
 		return gameObject;
 	}
 
-	public static GameObject SetupDiet(GameObject prefab, Tag consumedTag, Tag producedTag, float caloriesPerKg, float producedConversionRate, string diseaseId, float diseasePerKgProduced, float minPoopSizeInKg)
+	public static GameObject SetupDiet(GameObject prefab, Tag consumed_tag, Tag producedTag, float caloriesPerKg, float producedConversionRate, string diseaseId, float diseasePerKgProduced, float minPoopSizeInKg)
 	{
 		Diet.Info[] array = new Diet.Info[]
 		{
-			new Diet.Info(consumedTag, producedTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced)
+			new Diet.Info(new HashSet<Tag> { consumed_tag }, producedTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced)
 		};
 		Diet diet = new Diet(array);
 		CreatureCalorieMonitor.Def def = prefab.AddOrGetDef<CreatureCalorieMonitor.Def>();

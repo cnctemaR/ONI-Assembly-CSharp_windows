@@ -192,14 +192,14 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		WorldInventory.Instance = null;
 	}
 
-	public static Tag GetCategoryForTagList(Tag[] tags)
+	public static Tag GetCategoryForTags(HashSet<Tag> tags)
 	{
 		Tag tag = Tag.Invalid;
-		for (int i = 0; i < tags.Length; i++)
+		foreach (Tag tag2 in tags)
 		{
-			if (GameTags.AllCategories.Contains(tags[i]))
+			if (GameTags.AllCategories.Contains(tag2))
 			{
-				tag = tags[i];
+				tag = tag2;
 				break;
 			}
 		}
@@ -218,16 +218,15 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		Tag tag = component2.PrefabID();
 		if (!this.Inventory.ContainsKey(tag))
 		{
-			Tag categoryForTagList = WorldInventory.GetCategoryForTagList(component2.Tags);
-			if (!categoryForTagList.IsValid)
+			Tag categoryForTags = WorldInventory.GetCategoryForTags(component2.Tags);
+			if (!categoryForTags.IsValid)
 			{
 				DebugUtil.SoftAssert(false, component.name + " was found by worldinventory but doesn't have a category! Add it to the element definition.");
 			}
-			this.Discover(tag, categoryForTagList);
+			this.Discover(tag, categoryForTags);
 		}
-		for (int i = 0; i < component2.Tags.Length; i++)
+		foreach (Tag tag2 in component2.Tags)
 		{
-			Tag tag2 = component2.Tags[i];
 			List<Pickupable> list;
 			if (!this.Inventory.TryGetValue(tag2, out list))
 			{

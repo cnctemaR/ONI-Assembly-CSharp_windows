@@ -6,7 +6,7 @@ public class ApproachableLocator : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateEntity(ApproachableLocator.ID, ApproachableLocator.ID, false);
-		gameObject.AddOrGet<KPrefabID>().PrefabTags = new Tag[] { GameTags.NotAPrefab };
+		gameObject.AddTag(GameTags.NotAPrefab);
 		gameObject.AddOrGet<Approachable>();
 		return gameObject;
 	}

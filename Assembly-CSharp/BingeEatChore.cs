@@ -54,10 +54,10 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 					{
 						if (edible2.GetComponent<Pickupable>().UnreservedAmount > 0f)
 						{
-							if (edible2.GetComponent<Pickupable>().CouldBePickedUp(base.gameObject, false))
+							if (edible2.GetComponent<Pickupable>().CouldBePickedUpByMinion(base.gameObject))
 							{
 								int navigationCost = component.GetNavigationCost(edible2);
-								if (navigationCost != PathProber.InvalidCost)
+								if (navigationCost != -1)
 								{
 									if (navigationCost < num)
 									{

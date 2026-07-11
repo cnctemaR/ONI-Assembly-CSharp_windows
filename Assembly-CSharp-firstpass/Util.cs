@@ -248,6 +248,7 @@ public static class Util
 			}
 			KPrefabIDTracker.Get().Register(component);
 			KPrefabID component2 = original.GetComponent<KPrefabID>();
+			component.CopyTags(component2);
 			component.CopyInitFunctions(component2);
 			component.RunInstantiateFn();
 		}

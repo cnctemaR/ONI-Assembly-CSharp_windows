@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using UnityEngine;
 
 [Serializable]
@@ -68,23 +69,37 @@ public class Def : ScriptableObject
 		}
 		else
 		{
-			if (item is string)
+			if (!(item is string))
 			{
-				return Def.GetUISprite((item as string).ToTag(), animName, centered);
+				if (item is Tag)
+				{
+					if (ElementLoader.GetElement((Tag)item) != null)
+					{
+						return Def.GetUISprite(ElementLoader.GetElement((Tag)item), animName, centered);
+					}
+					if (Assets.GetPrefab((Tag)item) != null)
+					{
+						return Def.GetUISprite(Assets.GetPrefab((Tag)item), animName, centered);
+					}
+					if (Assets.GetSprite(((Tag)item).Name) != null)
+					{
+						return new Tuple<Sprite, Color>(Assets.GetSprite(((Tag)item).Name), Color.white);
+					}
+				}
+				global::Debug.LogErrorFormat("Can't get sprite for type {0}", new object[] { item.ToString() });
+				return null;
 			}
-			if (item is Tag)
+			if (Db.Get().Amounts.Exists(item as string))
 			{
-				if (ElementLoader.GetElement((Tag)item) != null)
-				{
-					return Def.GetUISprite(ElementLoader.GetElement((Tag)item), animName, centered);
-				}
-				if (Assets.GetPrefab((Tag)item) != null)
-				{
-					return Def.GetUISprite(Assets.GetPrefab((Tag)item), animName, centered);
-				}
+				Amount amount = Db.Get().Amounts.Get(item as string);
+				return new Tuple<Sprite, Color>(Assets.GetSprite(amount.uiSprite), Color.white);
 			}
-			global::Debug.LogErrorFormat("Can't get sprite for type {0}", new object[] { item.ToString() });
-			return null;
+			if (Db.Get().Attributes.Exists(item as string))
+			{
+				Klei.AI.Attribute attribute = Db.Get().Attributes.Get(item as string);
+				return new Tuple<Sprite, Color>(Assets.GetSprite(attribute.uiSprite), Color.white);
+			}
+			return Def.GetUISprite((item as string).ToTag(), animName, centered);
 		}
 	}
 

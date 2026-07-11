@@ -199,7 +199,7 @@ public class DebugHandler : IInputHandler
 			if (Game.Instance != null)
 			{
 				Game.Instance.UpdateGameActiveRegion(0, 0, Grid.WidthInCells, Grid.HeightInCells);
-				WorldGenSpawner.Instance.SpawnEverything();
+				SaveGame.Instance.worldGenSpawner.SpawnEverything();
 			}
 			if (DebugPaintElementScreen.Instance != null)
 			{

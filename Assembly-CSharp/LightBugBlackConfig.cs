@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -15,11 +16,14 @@ public class LightBugBlackConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -LightBugTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 5f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 75f, name, false, false, true));
-		TagBits tagBits = default(TagBits);
-		tagBits.SetTag(TagManager.Create("Meat"));
-		tagBits.SetTag(TagManager.Create("CookedMeat"));
-		tagBits.SetTag(SimHashes.Katairite.CreateTag());
-		return BaseLightBugConfig.SetupDiet(gameObject, tagBits, Tag.Invalid, LightBugBlackConfig.CALORIES_PER_KG_OF_ORE);
+		return BaseLightBugConfig.SetupDiet(gameObject, new HashSet<Tag>
+		{
+			TagManager.Create("Salsa"),
+			TagManager.Create("Meat"),
+			TagManager.Create("CookedMeat"),
+			SimHashes.Katairite.CreateTag(),
+			SimHashes.Phosphorus.CreateTag()
+		}, Tag.Invalid, LightBugBlackConfig.CALORIES_PER_KG_OF_ORE);
 	}
 
 	public GameObject CreatePrefab()

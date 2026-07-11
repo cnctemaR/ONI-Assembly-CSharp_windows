@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 public class ResearchPointInventory
 {
@@ -25,6 +26,18 @@ public class ResearchPointInventory
 	public void RemoveResearchPoints(string researchTypeID, float points)
 	{
 		this.AddResearchPoints(researchTypeID, -points);
+	}
+
+	[OnDeserialized]
+	private void OnDeserialized()
+	{
+		foreach (ResearchType researchType in Research.Instance.researchTypes.Types)
+		{
+			if (!this.PointsByTypeID.ContainsKey(researchType.id))
+			{
+				this.PointsByTypeID.Add(researchType.id, 0f);
+			}
+		}
 	}
 
 	public Dictionary<string, float> PointsByTypeID = new Dictionary<string, float>();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
@@ -7,7 +8,8 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, new string[] { "meter_target", "meter_arrow", "meter_scale" });
+		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_arrow", "meter_scale" });
+		SuitLocker.UpdateSuitMarkerStates(Grid.PosToCell(base.transform.position), base.gameObject);
 		base.smi.StartSM();
 		Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Suits);
 	}
@@ -148,81 +150,6 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 		return base.smi.sm.isConfigured.Get(base.smi) && !base.smi.sm.isWaitingForSuit.Get(base.smi) && this.GetStoredOutfit() == null;
 	}
 
-	private SuitLocker.SuitMarkerState GetSuitMarkerState()
-	{
-		int num = Grid.PosToCell(this);
-		SuitMarker suitMarker = null;
-		int num2 = 0;
-		GameObject gameObject;
-		for (;;)
-		{
-			int num3 = Grid.OffsetCell(num, num2, 0);
-			if (!Grid.IsValidCell(num3))
-			{
-				break;
-			}
-			gameObject = Grid.Objects[num3, 1];
-			if (gameObject == null)
-			{
-				break;
-			}
-			if (!(gameObject.GetComponent<SuitLocker>() != null))
-			{
-				goto IL_0060;
-			}
-			num2++;
-		}
-		goto IL_0076;
-		IL_0060:
-		suitMarker = gameObject.GetComponent<SuitMarker>();
-		IL_0076:
-		if (suitMarker == null)
-		{
-			int num4 = 0;
-			GameObject gameObject2;
-			for (;;)
-			{
-				int num5 = Grid.OffsetCell(num, num4, 0);
-				if (!Grid.IsValidCell(num5))
-				{
-					break;
-				}
-				gameObject2 = Grid.Objects[num5, 1];
-				if (gameObject2 == null)
-				{
-					break;
-				}
-				if (!(gameObject2.GetComponent<SuitLocker>() != null))
-				{
-					goto IL_00DE;
-				}
-				num4--;
-			}
-			goto IL_00F6;
-			IL_00DE:
-			suitMarker = gameObject2.GetComponent<SuitMarker>();
-		}
-		IL_00F6:
-		SuitLocker.SuitMarkerState suitMarkerState = SuitLocker.SuitMarkerState.HasMarker;
-		if (suitMarker == null)
-		{
-			suitMarkerState = SuitLocker.SuitMarkerState.NoMarker;
-		}
-		else if (suitMarker.transform.GetPosition().x > base.transform.GetPosition().x && suitMarker.GetComponent<Rotatable>().IsRotated)
-		{
-			suitMarkerState = SuitLocker.SuitMarkerState.WrongSide;
-		}
-		else if (suitMarker.transform.GetPosition().x < base.transform.GetPosition().x && !suitMarker.GetComponent<Rotatable>().IsRotated)
-		{
-			suitMarkerState = SuitLocker.SuitMarkerState.WrongSide;
-		}
-		else if (!suitMarker.GetComponent<Operational>().IsOperational)
-		{
-			suitMarkerState = SuitLocker.SuitMarkerState.NotOperational;
-		}
-		return suitMarkerState;
-	}
-
 	private GameObject GetOxygen()
 	{
 		return base.GetComponent<Storage>().FindFirst(GameTags.Oxygen);
@@ -248,9 +175,25 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 		component.amount += num;
 	}
 
-	public void UpdateSuitMarkerState()
+	public void SetSuitMarker(SuitMarker suit_marker)
 	{
-		SuitLocker.SuitMarkerState suitMarkerState = this.GetSuitMarkerState();
+		SuitLocker.SuitMarkerState suitMarkerState = SuitLocker.SuitMarkerState.HasMarker;
+		if (suit_marker == null)
+		{
+			suitMarkerState = SuitLocker.SuitMarkerState.NoMarker;
+		}
+		else if (suit_marker.transform.GetPosition().x > base.transform.GetPosition().x && suit_marker.GetComponent<Rotatable>().IsRotated)
+		{
+			suitMarkerState = SuitLocker.SuitMarkerState.WrongSide;
+		}
+		else if (suit_marker.transform.GetPosition().x < base.transform.GetPosition().x && !suit_marker.GetComponent<Rotatable>().IsRotated)
+		{
+			suitMarkerState = SuitLocker.SuitMarkerState.WrongSide;
+		}
+		else if (!suit_marker.GetComponent<Operational>().IsOperational)
+		{
+			suitMarkerState = SuitLocker.SuitMarkerState.NotOperational;
+		}
 		if (suitMarkerState != this.suitMarkerState)
 		{
 			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoSuitMarker, false);
@@ -272,6 +215,140 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			this.suitMarkerState = suitMarkerState;
 		}
 	}
+
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		SuitLocker.UpdateSuitMarkerStates(Grid.PosToCell(base.transform.position), null);
+	}
+
+	private static void GatherSuitBuildings(int cell, int dir, List<SuitLocker.SuitLockerEntry> suit_lockers, List<SuitLocker.SuitMarkerEntry> suit_markers)
+	{
+		int num = dir;
+		for (;;)
+		{
+			int num2 = Grid.OffsetCell(cell, num, 0);
+			if (Grid.IsValidCell(num2))
+			{
+				if (!SuitLocker.GatherSuitBuildingsOnCell(num2, suit_lockers, suit_markers))
+				{
+					break;
+				}
+			}
+			num += dir;
+		}
+	}
+
+	private static bool GatherSuitBuildingsOnCell(int cell, List<SuitLocker.SuitLockerEntry> suit_lockers, List<SuitLocker.SuitMarkerEntry> suit_markers)
+	{
+		GameObject gameObject = Grid.Objects[cell, 1];
+		if (gameObject == null)
+		{
+			return false;
+		}
+		SuitMarker component = gameObject.GetComponent<SuitMarker>();
+		if (component != null)
+		{
+			suit_markers.Add(new SuitLocker.SuitMarkerEntry
+			{
+				suitMarker = component,
+				cell = cell
+			});
+			return true;
+		}
+		SuitLocker component2 = gameObject.GetComponent<SuitLocker>();
+		if (component2 != null)
+		{
+			suit_lockers.Add(new SuitLocker.SuitLockerEntry
+			{
+				suitLocker = component2,
+				cell = cell
+			});
+			return true;
+		}
+		return false;
+	}
+
+	private static SuitMarker FindSuitMarker(int cell, List<SuitLocker.SuitMarkerEntry> suit_markers)
+	{
+		if (!Grid.IsValidCell(cell))
+		{
+			return null;
+		}
+		foreach (SuitLocker.SuitMarkerEntry suitMarkerEntry in suit_markers)
+		{
+			if (suitMarkerEntry.cell == cell)
+			{
+				return suitMarkerEntry.suitMarker;
+			}
+		}
+		return null;
+	}
+
+	public static void UpdateSuitMarkerStates(int cell, GameObject self)
+	{
+		ListPool<SuitLocker.SuitLockerEntry, SuitLocker>.PooledList pooledList = ListPool<SuitLocker.SuitLockerEntry, SuitLocker>.Allocate();
+		ListPool<SuitLocker.SuitMarkerEntry, SuitLocker>.PooledList pooledList2 = ListPool<SuitLocker.SuitMarkerEntry, SuitLocker>.Allocate();
+		if (self != null)
+		{
+			SuitLocker component = self.GetComponent<SuitLocker>();
+			if (component != null)
+			{
+				pooledList.Add(new SuitLocker.SuitLockerEntry
+				{
+					suitLocker = component,
+					cell = cell
+				});
+			}
+			SuitMarker component2 = self.GetComponent<SuitMarker>();
+			if (component2 != null)
+			{
+				pooledList2.Add(new SuitLocker.SuitMarkerEntry
+				{
+					suitMarker = component2,
+					cell = cell
+				});
+			}
+		}
+		SuitLocker.GatherSuitBuildings(cell, 1, pooledList, pooledList2);
+		SuitLocker.GatherSuitBuildings(cell, -1, pooledList, pooledList2);
+		pooledList.Sort(SuitLocker.SuitLockerEntry.comparer);
+		for (int i = 0; i < pooledList.Count; i++)
+		{
+			SuitLocker.SuitLockerEntry suitLockerEntry = pooledList[i];
+			SuitLocker.SuitLockerEntry suitLockerEntry2 = suitLockerEntry;
+			ListPool<SuitLocker.SuitLockerEntry, SuitLocker>.PooledList pooledList3 = ListPool<SuitLocker.SuitLockerEntry, SuitLocker>.Allocate();
+			pooledList3.Add(suitLockerEntry);
+			for (int j = i + 1; j < pooledList.Count; j++)
+			{
+				SuitLocker.SuitLockerEntry suitLockerEntry3 = pooledList[j];
+				if (Grid.CellRight(suitLockerEntry2.cell) != suitLockerEntry3.cell)
+				{
+					break;
+				}
+				i++;
+				suitLockerEntry2 = suitLockerEntry3;
+				pooledList3.Add(suitLockerEntry3);
+			}
+			int num = Grid.CellLeft(suitLockerEntry.cell);
+			int num2 = Grid.CellRight(suitLockerEntry2.cell);
+			SuitMarker suitMarker = SuitLocker.FindSuitMarker(num, pooledList2);
+			if (suitMarker == null)
+			{
+				suitMarker = SuitLocker.FindSuitMarker(num2, pooledList2);
+			}
+			foreach (SuitLocker.SuitLockerEntry suitLockerEntry4 in pooledList3)
+			{
+				suitLockerEntry4.suitLocker.SetSuitMarker(suitMarker);
+			}
+			pooledList3.Recycle();
+		}
+		pooledList.Recycle();
+		pooledList2.Recycle();
+	}
+
+	[MyCmpGet]
+	private Building building;
 
 	public Tag[] OutfitTags;
 
@@ -431,10 +508,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 		{
 			default_state = this.empty;
 			base.serializable = true;
-			this.root.Update("UpdateSuitMarkerState", delegate(SuitLocker.StatesInstance smi, float dt)
-			{
-				smi.master.UpdateSuitMarkerState();
-			}, UpdateRate.SIM_200ms, false).Update("RefreshMeter", delegate(SuitLocker.StatesInstance smi, float dt)
+			this.root.Update("RefreshMeter", delegate(SuitLocker.StatesInstance smi, float dt)
 			{
 				smi.master.RefreshMeter();
 			}, UpdateRate.RENDER_200ms, false);
@@ -580,5 +654,29 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 		NoMarker,
 		WrongSide,
 		NotOperational
+	}
+
+	private struct SuitLockerEntry
+	{
+		public SuitLocker suitLocker;
+
+		public int cell;
+
+		public static SuitLocker.SuitLockerEntry.Comparer comparer = new SuitLocker.SuitLockerEntry.Comparer();
+
+		public class Comparer : IComparer<SuitLocker.SuitLockerEntry>
+		{
+			public int Compare(SuitLocker.SuitLockerEntry a, SuitLocker.SuitLockerEntry b)
+			{
+				return a.cell - b.cell;
+			}
+		}
+	}
+
+	private struct SuitMarkerEntry
+	{
+		public SuitMarker suitMarker;
+
+		public int cell;
 	}
 }

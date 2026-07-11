@@ -6,11 +6,6 @@ using UnityEngine;
 
 public class Deconstructable : Workable
 {
-	private Deconstructable()
-	{
-		base.SetOffsetTable(OffsetGroups.InvertedStandardTableWithCorners);
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -21,6 +16,14 @@ public class Deconstructable : Workable
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		this.multitoolContext = "build";
 		this.multitoolHitEffectTag = EffectConfigs.BuildSplashId;
+		Building component = base.GetComponent<Building>();
+		CellOffset[][] array = OffsetGroups.InvertedStandardTable;
+		if (component.Def.IsTilePiece)
+		{
+			array = OffsetGroups.InvertedStandardTableWithCorners;
+		}
+		CellOffset[][] array2 = OffsetGroups.BuildReachabilityTable(component.Def.PlacementOffsets, array, component.Def.ConstructionOffsetFilter);
+		base.SetOffsetTable(array2);
 	}
 
 	protected override void OnSpawn()

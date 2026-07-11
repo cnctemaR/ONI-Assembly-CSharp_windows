@@ -22,20 +22,20 @@ internal class UpdateObjectCountParameter : LoopingSoundParameterUpdater
 			USER_PROPERTY user_PROPERTY;
 			if (eventDescription.getUserProperty("minObj", out user_PROPERTY) == RESULT.OK)
 			{
-				settings.minObjects = (int)((short)user_PROPERTY.floatValue());
+				settings.minObjects = (float)((short)user_PROPERTY.floatValue());
 			}
 			else
 			{
-				settings.minObjects = 1;
+				settings.minObjects = 1f;
 			}
 			USER_PROPERTY user_PROPERTY2;
 			if (eventDescription.getUserProperty("maxObj", out user_PROPERTY2) == RESULT.OK)
 			{
-				settings.maxObjects = (int)((short)user_PROPERTY2.floatValue());
+				settings.maxObjects = user_PROPERTY2.floatValue();
 			}
 			else
 			{
-				settings.maxObjects = 0;
+				settings.maxObjects = 0f;
 			}
 			USER_PROPERTY user_PROPERTY3;
 			if (eventDescription.getUserProperty("curveType", out user_PROPERTY3) == RESULT.OK && user_PROPERTY3.stringValue() == "exp")
@@ -54,7 +54,7 @@ internal class UpdateObjectCountParameter : LoopingSoundParameterUpdater
 		float num = 0f;
 		if (settings.maxObjects != settings.minObjects)
 		{
-			num = (float)((count - settings.minObjects) / (settings.maxObjects - settings.minObjects));
+			num = ((float)count - settings.minObjects) / (settings.maxObjects - settings.minObjects);
 			num = Mathf.Clamp01(num);
 		}
 		if (settings.useExponentialCurve)
@@ -128,9 +128,9 @@ internal class UpdateObjectCountParameter : LoopingSoundParameterUpdater
 
 		public int parameterIdx;
 
-		public int minObjects;
+		public float minObjects;
 
-		public int maxObjects;
+		public float maxObjects;
 
 		public bool useExponentialCurve;
 	}

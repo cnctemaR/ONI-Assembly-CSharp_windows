@@ -10,11 +10,6 @@ public class IdleCellQuery : PathFinderQuery
 		return this;
 	}
 
-	public override bool CanTraverse(int cell, int from_cell, int cost, int underwater_cost)
-	{
-		return !Grid.PreventIdlingOnCell[cell] && !Grid.PreventIdlingOnCell[from_cell];
-	}
-
 	public override bool IsMatch(int cell, int parent_cell, int cost)
 	{
 		SafeCellQuery.SafeFlags flags = SafeCellQuery.GetFlags(cell, this.brain);

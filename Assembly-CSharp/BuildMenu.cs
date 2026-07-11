@@ -18,6 +18,14 @@ public class BuildMenu : KScreen
 		BuildMenu.Instance = null;
 	}
 
+	public BuildingDef SelectedBuildingDef
+	{
+		get
+		{
+			return this.selectedBuilding;
+		}
+	}
+
 	public static bool UseHotkeyBuildMenu()
 	{
 		int @int = KPlayerPrefs.GetInt("ENABLE_HOTKEY_BUILD_MENU");
@@ -571,7 +579,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("InsulationTile", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("PlasticTile", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("MetalTile", global::Action.BuildMenuKeyX),
-				new BuildMenu.BuildingInfo("GlassTile", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("GlassTile", global::Action.BuildMenuKeyW),
 				new BuildMenu.BuildingInfo("BunkerTile", global::Action.BuildMenuKeyB)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.Category.Ladders, "icon_category_base", global::Action.BuildCategoryLadders, KKeyCode.A, new BuildMenu.BuildingInfo[]
@@ -592,12 +600,15 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("StorageLocker", global::Action.BuildMenuKeyS),
 				new BuildMenu.BuildingInfo("RationBox", global::Action.BuildMenuKeyR),
 				new BuildMenu.BuildingInfo("Refrigerator", global::Action.BuildMenuKeyF),
-				new BuildMenu.BuildingInfo("StorageLockerSmart", global::Action.BuildMenuKeyA)
+				new BuildMenu.BuildingInfo("StorageLockerSmart", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("LiquidReservoir", global::Action.BuildMenuKeyQ),
+				new BuildMenu.BuildingInfo("GasReservoir", global::Action.BuildMenuKeyG)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.Category.Research, "icon_category_misc", global::Action.BuildCategoryResearch, KKeyCode.R, new BuildMenu.BuildingInfo[]
 			{
 				new BuildMenu.BuildingInfo("ResearchCenter", global::Action.BuildMenuKeyR),
-				new BuildMenu.BuildingInfo("AdvancedResearchCenter", global::Action.BuildMenuKeyS)
+				new BuildMenu.BuildingInfo("AdvancedResearchCenter", global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo("Telescope", global::Action.BuildMenuKeyT)
 			})
 		}),
 		new BuildMenu.DisplayInfo(BuildMenu.Category.FoodAndAgriculture, "icon_category_food", global::Action.Plan2, KKeyCode.None, new BuildMenu.DisplayInfo[]
@@ -741,6 +752,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("GasVent", global::Action.BuildMenuKeyV),
 				new BuildMenu.BuildingInfo("GasVentHighPressure", global::Action.BuildMenuKeyE),
 				new BuildMenu.BuildingInfo("GasFilter", global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo("GasBottler", global::Action.BuildMenuKeyB),
+				new BuildMenu.BuildingInfo("BottleEmptierGas", global::Action.BuildMenuKeyB),
 				new BuildMenu.BuildingInfo("GasConduitPreferentialFlow", global::Action.BuildMenuKeyW),
 				new BuildMenu.BuildingInfo("GasConduitOverflow", global::Action.BuildMenuKeyR)
 			})
@@ -764,7 +777,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("LiquidConditioner", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("OreScrubber", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("ThermalBlock", global::Action.BuildMenuKeyF),
-				new BuildMenu.BuildingInfo("ExteriorWall", global::Action.BuildMenuKeyW)
+				new BuildMenu.BuildingInfo("ExteriorWall", global::Action.BuildMenuKeyD)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.Category.Refining, "icon_category_refinery", global::Action.BuildCategoryRefining, KKeyCode.R, new BuildMenu.BuildingInfo[]
 			{
@@ -776,17 +789,30 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("OilRefinery", global::Action.BuildMenuKeyR),
 				new BuildMenu.BuildingInfo("Polymerizer", global::Action.BuildMenuKeyE),
 				new BuildMenu.BuildingInfo("MetalRefinery", global::Action.BuildMenuKeyT),
-				new BuildMenu.BuildingInfo("GlassForge", global::Action.BuildMenuKeyF)
+				new BuildMenu.BuildingInfo("GlassForge", global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo("OxyliteRefinery", global::Action.BuildMenuKeyO)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.Category.Equipment, "icon_category_misc", global::Action.BuildCategoryEquipment, KKeyCode.S, new BuildMenu.BuildingInfo[]
 			{
 				new BuildMenu.BuildingInfo("RoleStation", global::Action.BuildMenuKeyB),
 				new BuildMenu.BuildingInfo("FarmStation", global::Action.BuildMenuKeyF),
 				new BuildMenu.BuildingInfo("PowerControlStation", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("AstronautTrainingCenter", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("ClothingFabricator", global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo("SuitFabricator", global::Action.BuildMenuKeyX),
 				new BuildMenu.BuildingInfo("SuitMarker", global::Action.BuildMenuKeyE),
 				new BuildMenu.BuildingInfo("SuitLocker", global::Action.BuildMenuKeyD)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Rocketry, "icon_category_rocketry", global::Action.BuildCategoryRocketry, KKeyCode.C, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("KeroseneEngine", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("LiquidFuelTank", global::Action.BuildMenuKeyQ),
+				new BuildMenu.BuildingInfo("CargoBay", global::Action.BuildMenuKeyB),
+				new BuildMenu.BuildingInfo("GasCargoBay", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("LiquidCargoBay", global::Action.BuildMenuKeyQ),
+				new BuildMenu.BuildingInfo("SpecialCargoBay", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("CommandModule", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("Gantry", global::Action.BuildMenuKeyT)
 			})
 		}),
 		new BuildMenu.DisplayInfo(BuildMenu.Category.Logistics, "icon_category_ventilation", global::Action.Plan6, KKeyCode.None, new BuildMenu.DisplayInfo[]
@@ -917,7 +943,8 @@ public class BuildMenu : KScreen
 		Oxygen,
 		Utilities,
 		Refining,
-		Equipment
+		Equipment,
+		Rocketry
 	}
 
 	public struct BuildingInfo

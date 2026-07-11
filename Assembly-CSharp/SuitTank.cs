@@ -76,7 +76,11 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 	{
 		Equipment equipment = (Equipment)data;
 		NameDisplayScreen.Instance.SetSuitTankDisplay(equipment.gameObject, new Func<float>(this.PercentFull), true);
-		equipment.GetComponent<OxygenBreather>().SetGasProvider(this);
+		OxygenBreather component = equipment.GetComponent<OxygenBreather>();
+		if (component != null)
+		{
+			component.SetGasProvider(this);
+		}
 	}
 
 	private void OnUnequipped(object data)
@@ -85,7 +89,11 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 		if (!equipment.destroyed)
 		{
 			NameDisplayScreen.Instance.SetSuitTankDisplay(equipment.gameObject, new Func<float>(this.PercentFull), false);
-			equipment.GetComponent<OxygenBreather>().SetGasProvider(new GasBreatherFromWorldProvider());
+			OxygenBreather component = equipment.GetComponent<OxygenBreather>();
+			if (component != null)
+			{
+				component.SetGasProvider(new GasBreatherFromWorldProvider());
+			}
 		}
 	}
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -11,11 +10,8 @@ public class RotPileConfig : IEntityConfig
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity("RotPile", ITEMS.FOOD.ROTPILE.NAME, ITEMS.FOOD.ROTPILE.DESC, 1f, false, Assets.GetAnim("rotfood_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, SimHashes.Creature, null);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.AddPrefabTags(new List<Tag>
-		{
-			GameTags.Organics,
-			GameTags.Compostable
-		});
+		component.AddTag(GameTags.Organics);
+		component.AddTag(GameTags.Compostable);
 		gameObject.AddOrGet<EntitySplitter>();
 		gameObject.AddOrGet<OccupyArea>();
 		gameObject.AddOrGet<Modifiers>();

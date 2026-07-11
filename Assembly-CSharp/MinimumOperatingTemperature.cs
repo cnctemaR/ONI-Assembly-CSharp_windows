@@ -51,11 +51,8 @@ public class MinimumOperatingTemperature : KMonoBehaviour, ISim200ms, IGameObjec
 
 	protected override void OnCleanUp()
 	{
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-			this.partitionerEntry = null;
-		}
+		base.OnCleanUp();
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)
@@ -85,5 +82,5 @@ public class MinimumOperatingTemperature : KMonoBehaviour, ISim200ms, IGameObjec
 
 	private bool isWarm;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 }

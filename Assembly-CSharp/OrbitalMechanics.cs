@@ -37,11 +37,14 @@ public class OrbitalMechanics : KMonoBehaviour, IRenderEveryTick
 			vector2.y = Camera.main.ViewportToWorldPoint(vector).y;
 			bool flag2 = !orbitData.rotatesBehind || !flag;
 			GameObject gameObject = this.orbitingObjects[i];
-			gameObject.transform.SetPosition(vector2);
-			gameObject.transform.localScale = Vector3.one * Camera.main.orthographicSize / orbitData.distance;
-			if (gameObject.activeSelf != flag2)
+			if (gameObject != null)
 			{
-				gameObject.SetActive(flag2);
+				gameObject.transform.SetPosition(vector2);
+				gameObject.transform.localScale = Vector3.one * Camera.main.orthographicSize / orbitData.distance;
+				if (gameObject.activeSelf != flag2)
+				{
+					gameObject.SetActive(flag2);
+				}
 			}
 		}
 	}

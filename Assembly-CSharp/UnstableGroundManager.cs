@@ -175,7 +175,7 @@ public class UnstableGroundManager : KMonoBehaviour
 						this.RemoveFromPending(cell);
 					}, false));
 					SimMessages.AddRemoveSubstance(cell, component.ElementID, CellEventLogger.Instance.UnstableGround, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, true, handle.index);
-					ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+					ListPool<ScenePartitionerEntry, UnstableGroundManager>.PooledList pooledList = ListPool<ScenePartitionerEntry, UnstableGroundManager>.Allocate();
 					Vector2I vector2I = Grid.CellToXY(cell);
 					vector2I.x = Mathf.Max(0, vector2I.x - 1);
 					vector2I.y = Mathf.Min(Grid.HeightInCells - 1, vector2I.y + 1);

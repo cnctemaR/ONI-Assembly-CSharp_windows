@@ -16,7 +16,7 @@ public class OffsetTableTracker : OffsetTracker
 			return;
 		}
 		base.UpdateCell(previous_cell, current_cell);
-		if (this.solidPartitionerEntry == null)
+		if (!this.solidPartitionerEntry.IsValid())
 		{
 			Extents extents = new Extents(current_cell, this.table);
 			extents.height += 2;
@@ -26,8 +26,8 @@ public class OffsetTableTracker : OffsetTracker
 		}
 		else
 		{
-			this.solidPartitionerEntry.UpdatePosition(current_cell);
-			this.validNavCellChangedPartitionerEntry.UpdatePosition(current_cell);
+			GameScenePartitioner.Instance.UpdatePosition(this.solidPartitionerEntry, current_cell);
+			GameScenePartitioner.Instance.UpdatePosition(this.validNavCellChangedPartitionerEntry, current_cell);
 		}
 		this.offsets = null;
 	}
@@ -77,9 +77,16 @@ public class OffsetTableTracker : OffsetTracker
 		{
 			this.navGrid = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
 		}
-		OffsetTableTracker.newOffsets.Clear();
-		OffsetTableTracker.GetOffsets(current_cell, this.table, this.navGrid, OffsetTableTracker.newOffsets);
-		this.offsets = OffsetTableTracker.newOffsets.ToArray();
+		this.newOffsets.Clear();
+		OffsetTableTracker.GetOffsets(current_cell, this.table, this.navGrid, this.newOffsets);
+		if (this.offsets != null && this.newOffsets.Count == this.offsets.Length)
+		{
+			this.newOffsets.CopyTo(this.offsets);
+		}
+		else
+		{
+			this.offsets = this.newOffsets.ToArray();
+		}
 	}
 
 	private void OnCellChanged(object data)
@@ -89,27 +96,19 @@ public class OffsetTableTracker : OffsetTracker
 
 	public override void Clear()
 	{
-		if (this.solidPartitionerEntry != null)
-		{
-			this.solidPartitionerEntry.Release();
-			this.solidPartitionerEntry = null;
-		}
-		if (this.validNavCellChangedPartitionerEntry != null)
-		{
-			this.validNavCellChangedPartitionerEntry.Release();
-			this.validNavCellChangedPartitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.solidPartitionerEntry);
+		GameScenePartitioner.Instance.Free(ref this.validNavCellChangedPartitionerEntry);
 	}
 
 	private CellOffset[][] table;
 
-	public GameScenePartitionerEntry solidPartitionerEntry;
+	public HandleVector<int>.Handle solidPartitionerEntry;
 
-	public GameScenePartitionerEntry validNavCellChangedPartitionerEntry;
+	public HandleVector<int>.Handle validNavCellChangedPartitionerEntry;
 
 	private NavGrid navGrid;
 
 	private KMonoBehaviour cmp;
 
-	private static List<CellOffset> newOffsets = new List<CellOffset>();
+	private List<CellOffset> newOffsets = new List<CellOffset>();
 }

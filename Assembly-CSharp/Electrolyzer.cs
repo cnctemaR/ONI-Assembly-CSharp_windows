@@ -10,7 +10,7 @@ public class Electrolyzer : StateMachineComponent<Electrolyzer.StatesInstance>
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		if (this.hasMeter)
 		{
-			this.meter = new MeterController(component, "U2H_meter_target", "meter", Meter.Offset.Behind, new Vector3(-0.4f, 0.5f, -0.1f), new string[] { "U2H_meter_target", "U2H_meter_tank", "U2H_meter_waterbody", "U2H_meter_level" });
+			this.meter = new MeterController(component, "U2H_meter_target", "meter", Meter.Offset.Behind, Grid.SceneLayer.NoLayer, new Vector3(-0.4f, 0.5f, -0.1f), new string[] { "U2H_meter_target", "U2H_meter_tank", "U2H_meter_waterbody", "U2H_meter_level" });
 		}
 		base.smi.StartSM();
 		this.UpdateMeter();

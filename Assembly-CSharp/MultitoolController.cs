@@ -8,7 +8,7 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 	{
 		default_state = this.pre;
 		base.Target(this.worker);
-		this.root.ToggleSnapOn("dig").ToggleTag(GameTags.AllowSpeech);
+		this.root.ToggleSnapOn("dig");
 		this.pre.Enter(delegate(MultitoolController.Instance smi)
 		{
 			smi.PlayPre();

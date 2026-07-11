@@ -107,6 +107,10 @@ public class BuildingHP : Workable
 
 	private void OnDoBuildingDamage(object data)
 	{
+		if (this.invincible)
+		{
+			return;
+		}
 		this.damageSourceInfo = (BuildingHP.DamageSourceInfo)data;
 		this.DoDamage(this.damageSourceInfo.damage);
 		this.DoDamagePopFX(this.damageSourceInfo);
@@ -187,7 +191,7 @@ public class BuildingHP : Workable
 
 		public void ShowProgressBar(bool show)
 		{
-			if (show && Grid.IsVisible(Grid.PosToCell(base.gameObject)))
+			if (show && Grid.IsValidCell(Grid.PosToCell(base.gameObject)) && Grid.IsVisible(Grid.PosToCell(base.gameObject)))
 			{
 				this.CreateProgressBar();
 			}

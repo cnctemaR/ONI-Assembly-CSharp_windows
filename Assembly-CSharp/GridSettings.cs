@@ -34,7 +34,7 @@ public class GridSettings : KMonoBehaviour
 		Grid.PreventIdlingOnCell = new bool[Grid.CellCount];
 		Grid.AllowPathfinding = new bool[Grid.CellCount];
 		Grid.GravitasFacility = new bool[Grid.CellCount];
-		Grid.ObjectLayers = new Dictionary<int, GameObject>[36];
+		Grid.ObjectLayers = new Dictionary<int, GameObject>[37];
 		for (int i = 0; i < Grid.ObjectLayers.Length; i++)
 		{
 			Grid.ObjectLayers[i] = new Dictionary<int, GameObject>();

@@ -181,6 +181,8 @@ public class Element : IComparable<Element>
 
 	public Tag tag;
 
+	public byte idx;
+
 	public float specificHeatCapacity;
 
 	public float thermalConductivity = 1f;
@@ -226,6 +228,10 @@ public class Element : IComparable<Element>
 	public SimHashes highTempTransitionOreID = SimHashes.Vacuum;
 
 	public float highTempTransitionOreMassConversion;
+
+	public SimHashes lowTempTransitionOreID = SimHashes.Vacuum;
+
+	public float lowTempTransitionOreMassConversion;
 
 	public SimHashes sublimateId;
 

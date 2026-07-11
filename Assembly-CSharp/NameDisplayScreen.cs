@@ -41,7 +41,9 @@ public class NameDisplayScreen : KScreen
 
 	private bool ShouldShowName(GameObject representedObject)
 	{
-		return representedObject.GetComponent<MinionBrain>() != null;
+		bool flag = representedObject.GetComponent<MinionBrain>() != null;
+		bool flag2 = representedObject.GetComponent<CommandModule>() != null;
+		return flag || flag2;
 	}
 
 	public void AddNewEntry(GameObject representedObject)
@@ -57,15 +59,25 @@ public class NameDisplayScreen : KScreen
 			entry.display_go.transform.localScale = Vector3.one * 0.01f;
 		}
 		gameObject2.name = representedObject.name + " character overlay";
-		KSelectable component = representedObject.GetComponent<KSelectable>();
-		FactionAlignment component2 = representedObject.GetComponent<FactionAlignment>();
-		if (component != null && component2 != null && (component2.Alignment == FactionManager.FactionID.Friendly || component2.Alignment == FactionManager.FactionID.Duplicant))
-		{
-			this.UpdateName(representedObject);
-		}
 		entry.Name = representedObject.name;
 		entry.refs = gameObject2.GetComponent<HierarchyReferences>();
 		this.entries.Add(entry);
+		KSelectable component = representedObject.GetComponent<KSelectable>();
+		FactionAlignment component2 = representedObject.GetComponent<FactionAlignment>();
+		if (component != null)
+		{
+			if (component2 != null)
+			{
+				if (component2.Alignment == FactionManager.FactionID.Friendly || component2.Alignment == FactionManager.FactionID.Duplicant)
+				{
+					this.UpdateName(representedObject);
+				}
+			}
+			else
+			{
+				this.UpdateName(representedObject);
+			}
+		}
 	}
 
 	public void RegisterComponent(GameObject representedObject, object component)
@@ -118,6 +130,15 @@ public class NameDisplayScreen : KScreen
 			gameObject3.name = "Suit Tank Bar";
 			gameObject3.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("OxygenTankBar");
 			gameObject3.GetComponent<KSelectable>().entityName = UI.METERS.BREATH.TOOLTIP;
+		}
+		else if (component is ThoughtGraph.Instance)
+		{
+			GameObject gameObject4 = Util.KInstantiateUI(EffectPrefabs.Instance.ThoughtBubble, entry.display_go, false);
+			entry.thoughtBubble = gameObject4.GetComponent<HierarchyReferences>();
+			gameObject4.name = "Thought Bubble";
+			GameObject gameObject5 = Util.KInstantiateUI(EffectPrefabs.Instance.ThoughtBubbleConvo, entry.display_go, false);
+			entry.thoughtBubbleConvo = gameObject5.GetComponent<HierarchyReferences>();
+			gameObject5.name = "Thought Bubble Convo";
 		}
 	}
 
@@ -200,7 +221,44 @@ public class NameDisplayScreen : KScreen
 		if (componentInChildren != null)
 		{
 			componentInChildren.text = component.GetProperName();
+			if (representedObject.GetComponent<RocketModule>() != null)
+			{
+				componentInChildren.text = representedObject.GetComponent<RocketModule>().GetParentRocketName();
+			}
 		}
+	}
+
+	public void SetThoughtBubbleDisplay(GameObject minion_go, bool bVisible, string hover_text, Sprite bubble_sprite, Sprite topic_sprite)
+	{
+		NameDisplayScreen.Entry entry = this.GetEntry(minion_go);
+		if (entry == null || entry.thoughtBubble == null)
+		{
+			return;
+		}
+		this.ApplyThoughtSprite(entry.thoughtBubble, bubble_sprite, "bubble_sprite");
+		this.ApplyThoughtSprite(entry.thoughtBubble, topic_sprite, "icon_sprite");
+		entry.thoughtBubble.GetComponent<KSelectable>().entityName = hover_text;
+		entry.thoughtBubble.gameObject.SetActive(bVisible);
+	}
+
+	public void SetThoughtBubbleConvoDisplay(GameObject minion_go, bool bVisible, string hover_text, Sprite bubble_sprite, Sprite topic_sprite, Sprite mode_sprite)
+	{
+		NameDisplayScreen.Entry entry = this.GetEntry(minion_go);
+		if (entry == null || entry.thoughtBubble == null)
+		{
+			return;
+		}
+		this.ApplyThoughtSprite(entry.thoughtBubbleConvo, bubble_sprite, "bubble_sprite");
+		this.ApplyThoughtSprite(entry.thoughtBubbleConvo, topic_sprite, "icon_sprite");
+		this.ApplyThoughtSprite(entry.thoughtBubbleConvo, mode_sprite, "icon_sprite_mode");
+		entry.thoughtBubbleConvo.GetComponent<KSelectable>().entityName = hover_text;
+		entry.thoughtBubbleConvo.gameObject.SetActive(bVisible);
+	}
+
+	private void ApplyThoughtSprite(HierarchyReferences active_bubble, Sprite sprite, string target)
+	{
+		Image reference = active_bubble.GetReference<Image>(target);
+		reference.sprite = sprite;
 	}
 
 	public void SetBreathDisplay(GameObject minion_go, Func<float> updatePercentFull, bool bVisible)
@@ -292,6 +350,10 @@ public class NameDisplayScreen : KScreen
 		public ProgressBar breathBar;
 
 		public ProgressBar suitBar;
+
+		public HierarchyReferences thoughtBubble;
+
+		public HierarchyReferences thoughtBubbleConvo;
 
 		public HierarchyReferences refs;
 	}

@@ -59,5 +59,5 @@ public class PatchNotesScreen : KModalScreen
 	[SerializeField]
 	private LocText changesLabel;
 
-	private static int PatchNotesVersion = 8;
+	private static int PatchNotesVersion = 9;
 }

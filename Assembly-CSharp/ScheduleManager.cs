@@ -11,9 +11,6 @@ using UnityEngine;
 public class ScheduleManager : KMonoBehaviour, ISim33ms
 {
 	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	public event global::System.Action onSheduleBlocksChanged;
-
-	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<List<Schedule>> onSchedulesChanged;
 
 	public static void DestroyInstance()
@@ -129,65 +126,31 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 		return this.schedules;
 	}
 
-	public int GetBlockIdx()
-	{
-		float currentCycleAsPercentage = GameClock.Instance.GetCurrentCycleAsPercentage();
-		int num = (int)(currentCycleAsPercentage * 24f);
-		return Math.Min(num, 23);
-	}
-
 	public bool IsAllowed(Schedulable schedulable, ScheduleBlockType schedule_block_type)
 	{
-		int blockIdx = ScheduleManager.Instance.GetBlockIdx();
-		foreach (ScheduleBlockType scheduleBlockType in this.GetSchedule(schedulable).GetBlocks()[blockIdx].allowed_types)
-		{
-			if (scheduleBlockType.IdHash == schedule_block_type.IdHash)
-			{
-				return true;
-			}
-		}
-		return false;
+		int blockIdx = Schedule.GetBlockIdx();
+		ScheduleBlock block = this.GetSchedule(schedulable).GetBlock(blockIdx);
+		return block.IsAllowed(schedule_block_type);
 	}
 
 	public void Sim33ms(float dt)
 	{
-		int blockIdx = this.GetBlockIdx();
+		int blockIdx = Schedule.GetBlockIdx();
 		if (blockIdx != this.lastIdx)
 		{
-			using (List<Schedule>.Enumerator enumerator = this.schedules.GetEnumerator())
+			foreach (Schedule schedule in this.schedules)
 			{
-				while (enumerator.MoveNext())
-				{
-					ScheduleManager.<Sim33ms>c__AnonStorey1 <Sim33ms>c__AnonStorey = new ScheduleManager.<Sim33ms>c__AnonStorey1();
-					<Sim33ms>c__AnonStorey.schedule = enumerator.Current;
-					ScheduleBlock scheduleBlock = <Sim33ms>c__AnonStorey.schedule.GetBlocks()[this.lastIdx];
-					ScheduleBlock block = <Sim33ms>c__AnonStorey.schedule.GetBlocks()[blockIdx];
-					if (!Schedule.AreScheduleTypesIdentical(block.allowed_types, scheduleBlock.allowed_types))
-					{
-						if (<Sim33ms>c__AnonStorey.schedule.alarm && scheduleBlock.alarm != block.alarm)
-						{
-							Notification notification = new Notification(string.Format(MISC.NOTIFICATIONS.SCHEDULE_CHANGED.NAME, <Sim33ms>c__AnonStorey.schedule.name, block.name), NotificationType.Good, HashedString.Invalid, (List<Notification> notificationList, object data) => string.Format(MISC.NOTIFICATIONS.SCHEDULE_CHANGED.TOOLTIP, <Sim33ms>c__AnonStorey.schedule.name, block.name) + notificationList.ReduceMessages(true), null, true, 0f, null, null);
-							base.GetComponent<Notifier>().Add(notification, string.Empty);
-							base.StartCoroutine(this.PlayScheduleTone(<Sim33ms>c__AnonStorey.schedule, block.alarm));
-						}
-						if (this.onSheduleBlocksChanged != null)
-						{
-							this.onSheduleBlocksChanged();
-						}
-					}
-					string text = string.Empty;
-					foreach (ScheduleBlockType scheduleBlockType in block.allowed_types)
-					{
-						if (text != string.Empty)
-						{
-							text += ", ";
-						}
-						text += scheduleBlockType.Name;
-					}
-				}
+				schedule.Tick();
 			}
 			this.lastIdx = blockIdx;
 		}
+	}
+
+	public void PlayScheduleAlarm(Schedule schedule, ScheduleBlock block, bool forwards)
+	{
+		Notification notification = new Notification(string.Format(MISC.NOTIFICATIONS.SCHEDULE_CHANGED.NAME, schedule.name, block.name), NotificationType.Good, HashedString.Invalid, (List<Notification> notificationList, object data) => string.Format(MISC.NOTIFICATIONS.SCHEDULE_CHANGED.TOOLTIP, schedule.name, block.name, Db.Get().ScheduleGroups.Get(block.GroupId).notificationTooltip), null, true, 0f, null, null);
+		base.GetComponent<Notifier>().Add(notification, string.Empty);
+		base.StartCoroutine(this.PlayScheduleTone(schedule, forwards));
 	}
 
 	private IEnumerator PlayScheduleTone(Schedule schedule, bool forwards)
@@ -209,8 +172,6 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 		eventInstance.setParameterValue("WorkChime_start", (float)((!forwards) ? 0 : 1));
 		KFMOD.EndOneShot(eventInstance);
 	}
-
-	public const bool ENABLE_SCHEDULE_MANAGER = true;
 
 	[Serialize]
 	private List<Schedule> schedules;

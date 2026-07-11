@@ -23,61 +23,32 @@ internal class FixedCaptureStates : GameStateMachine<FixedCaptureStates, FixedCa
 		}).PlayAnim("excited_loop").OnAnimQueueComplete(this.capture.cheer.pst);
 		this.capture.cheer.pst.ScheduleGoTo(0.2f, this.capture.move);
 		GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State state2 = this.capture.move.DefaultState(this.capture.move.movetoranch);
-		text2 = CREATURES.STATUSITEMS.GETTING_RANCHED.NAME;
-		text = CREATURES.STATUSITEMS.GETTING_RANCHED.TOOLTIP;
+		text2 = CREATURES.STATUSITEMS.GETTING_WRANGLED.NAME;
+		text = CREATURES.STATUSITEMS.GETTING_WRANGLED.TOOLTIP;
 		statusItemCategory = Db.Get().StatusItemCategories.Main;
 		state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
 		this.capture.move.movetoranch.Enter("Speedup", delegate(FixedCaptureStates.Instance smi)
 		{
 			smi.GetComponent<Navigator>().defaultSpeed = smi.originalSpeed * 1.25f;
-		}).MoveTo(new Func<FixedCaptureStates.Instance, int>(FixedCaptureStates.GetTargetCaptureCell), this.capture.move.getontable, null, false).Exit("RestoreSpeed", delegate(FixedCaptureStates.Instance smi)
+		}).MoveTo(new Func<FixedCaptureStates.Instance, int>(FixedCaptureStates.GetTargetCaptureCell), this.capture.move.waitforranchertobeready, null, false).Exit("RestoreSpeed", delegate(FixedCaptureStates.Instance smi)
 		{
 			smi.GetComponent<Navigator>().defaultSpeed = smi.originalSpeed;
 		});
-		this.capture.move.getontable.Enter(new StateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State.Callback(FixedCaptureStates.PlayGroomingPreAnim)).Enter("FaceRight", delegate(FixedCaptureStates.Instance smi)
-		{
-			smi.GetComponent<Facing>().Face(smi.transform.GetPosition().x + 1f);
-		}).OnAnimQueueComplete(this.capture.move.waitforranchertobeready);
 		this.capture.move.waitforranchertobeready.Enter("SetCreatureAtRanchingStation", delegate(FixedCaptureStates.Instance smi)
 		{
 			smi.GetCapturePoint().Trigger(-1992722293, null);
 		}).EventTransition(GameHashes.RancherReadyAtCapturePoint, this.capture.ranching, null);
-		GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State state3 = this.capture.ranching.Enter(new StateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State.Callback(FixedCaptureStates.PlayGroomingLoopAnim)).EventTransition(GameHashes.FixedCaptureComplete, this.wavegoodbye, null);
-		text = CREATURES.STATUSITEMS.GETTING_RANCHED.NAME;
-		text2 = CREATURES.STATUSITEMS.GETTING_RANCHED.TOOLTIP;
+		GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State ranching = this.capture.ranching;
+		text = CREATURES.STATUSITEMS.GETTING_WRANGLED.NAME;
+		text2 = CREATURES.STATUSITEMS.GETTING_WRANGLED.TOOLTIP;
 		statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state3.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
-		GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State state4 = this.wavegoodbye.Enter(new StateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State.Callback(FixedCaptureStates.PlayGroomingPstAnim)).OnAnimQueueComplete(this.runaway);
-		text2 = CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.NAME;
-		text = CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.TOOLTIP;
-		statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state4.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
-		GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State state5 = this.runaway.MoveTo(new Func<FixedCaptureStates.Instance, int>(FixedCaptureStates.GetRunawayCell), this.behaviourcomplete, this.behaviourcomplete, false);
-		text = CREATURES.STATUSITEMS.IDLE.NAME;
-		text2 = CREATURES.STATUSITEMS.IDLE.TOOLTIP;
-		statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state5.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
-		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.WantsToGetRanched, false);
+		ranching.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
+		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.WantsToGetCaptured, false);
 	}
 
 	private static FixedCapturePoint.Instance GetCapturePoint(FixedCaptureStates.Instance smi)
 	{
 		return smi.GetSMI<FixedCapturableMonitor.Instance>().targetCapturePoint;
-	}
-
-	private static void PlayGroomingPreAnim(FixedCaptureStates.Instance smi)
-	{
-		smi.Get<KBatchedAnimController>().Queue(FixedCaptureStates.GetCapturePoint(smi).def.ranchedPreAnim, KAnim.PlayMode.Once, 1f, 0f);
-	}
-
-	private static void PlayGroomingLoopAnim(FixedCaptureStates.Instance smi)
-	{
-		smi.Get<KBatchedAnimController>().Queue(FixedCaptureStates.GetCapturePoint(smi).def.ranchedLoopAnim, KAnim.PlayMode.Loop, 1f, 0f);
-	}
-
-	private static void PlayGroomingPstAnim(FixedCaptureStates.Instance smi)
-	{
-		smi.Get<KBatchedAnimController>().Queue(FixedCaptureStates.GetCapturePoint(smi).def.ranchedPstAnim, KAnim.PlayMode.Once, 1f, 0f);
 	}
 
 	private static int GetTargetCaptureCell(FixedCaptureStates.Instance smi)
@@ -86,22 +57,7 @@ internal class FixedCaptureStates : GameStateMachine<FixedCaptureStates, FixedCa
 		return capturePoint.def.getTargetCapturePoint(capturePoint);
 	}
 
-	private static int GetRunawayCell(FixedCaptureStates.Instance smi)
-	{
-		int num = Grid.PosToCell(smi.transform.GetPosition());
-		int num2 = Grid.OffsetCell(num, 2, 0);
-		if (Grid.Solid[num2])
-		{
-			num2 = Grid.OffsetCell(num, -2, 0);
-		}
-		return num2;
-	}
-
 	private FixedCaptureStates.CaptureStates capture;
-
-	private GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State wavegoodbye;
-
-	private GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State runaway;
 
 	private GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State behaviourcomplete;
 
@@ -155,8 +111,6 @@ internal class FixedCaptureStates : GameStateMachine<FixedCaptureStates, FixedCa
 		public class MoveStates : GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State
 		{
 			public GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State movetoranch;
-
-			public GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State getontable;
 
 			public GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>.State waitforranchertobeready;
 		}

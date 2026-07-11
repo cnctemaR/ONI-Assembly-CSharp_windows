@@ -10,5 +10,7 @@ public enum BuildLocationRule
 	NotInTiles,
 	BuildingAttachPoint,
 	LogicBridge,
-	OnFloorOverSpace
+	OnFloorOverSpace,
+	WireTile,
+	OnFloorOrBuildingAttachPoint
 }

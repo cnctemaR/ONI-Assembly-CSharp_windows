@@ -20,16 +20,13 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] all_METALS = MATERIALS.ALL_METALS;
 		float num5 = 1600f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
+		BuildLocationRule buildLocationRule = BuildLocationRule.WireTile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER5, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
-		buildingDef.ObjectLayer = ObjectLayer.Building;
-		buildingDef.TileLayer = ObjectLayer.FoundationTile;
-		buildingDef.ReplacementLayer = ObjectLayer.ReplacementTile;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;
@@ -37,6 +34,9 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 2);
 		buildingDef.IsFoundation = true;
+		buildingDef.ObjectLayer = ObjectLayer.Building;
+		buildingDef.ReplacementLayer = ObjectLayer.ReplacementTile;
+		buildingDef.TileLayer = ObjectLayer.FoundationTile;
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.TileFront;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.WireIDs, "WireBridgeHighWattage");
@@ -45,6 +45,7 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;

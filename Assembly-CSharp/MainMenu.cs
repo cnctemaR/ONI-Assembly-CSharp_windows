@@ -19,14 +19,18 @@ public class MainMenu : KMonoBehaviour
 		this.Button_Options.onClick += this.Options;
 		this.Button_QuitGame.onClick += this.QuitGame;
 		this.Button_Translations.onClick += this.Translations;
+		this.Button_Scenarios.onClick += this.Scenarios;
 		if (GenericGameSettings.instance != null && GenericGameSettings.instance.demoMode)
 		{
 			this.Button_ResumeGame.gameObject.SetActive(false);
 			this.Button_LoadGame.gameObject.SetActive(false);
 			this.Button_Options.gameObject.SetActive(false);
 			this.Button_Translations.gameObject.SetActive(false);
+			this.Button_Translations.gameObject.SetActive(false);
+			this.Button_Scenarios.gameObject.SetActive(false);
 			this.topLeftAlphaMessage.gameObject.SetActive(false);
 		}
+		this.Button_Scenarios.gameObject.SetActive(false);
 		this.StartFEAudio();
 		if (PatchNotesScreen.ShouldShowScreen())
 		{
@@ -126,7 +130,7 @@ public class MainMenu : KMonoBehaviour
 
 	private void NewGame()
 	{
-		this.GameSettingsScreen = Util.KInstantiateUI(ScreenPrefabs.Instance.NewGameSettingsScreen.gameObject, base.gameObject, true);
+		this.GameSettingsScreen = Util.KInstantiateUI(ScreenPrefabs.Instance.ModeSelectScreen.gameObject, base.gameObject, true);
 		this.GameSettingsScreen.GetComponent<KScreen>().Activate();
 	}
 
@@ -183,7 +187,7 @@ public class MainMenu : KMonoBehaviour
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 280450U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 284571U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -325,6 +329,12 @@ public class MainMenu : KMonoBehaviour
 		}
 	}
 
+	public void Scenarios()
+	{
+		ScenariosMenu scenariosMenu = Util.KInstantiateUI<ScenariosMenu>(ScreenPrefabs.Instance.scenariosMenu.gameObject, base.transform.parent.gameObject, false);
+		scenariosMenu.SetBackgroundActive(true);
+	}
+
 	public RectTransform LogoAndMenu;
 
 	public KButton Button_ResumeGame;
@@ -332,6 +342,8 @@ public class MainMenu : KMonoBehaviour
 	public KButton Button_NewGame;
 
 	public KButton Button_LoadGame;
+
+	public KButton Button_Scenarios;
 
 	public KButton Button_Translations;
 

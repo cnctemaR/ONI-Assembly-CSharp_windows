@@ -3,23 +3,23 @@ using UnityEngine;
 
 public class MeterController
 {
-	public MeterController(KMonoBehaviour target, Meter.Offset front_back, params string[] symbols_to_hide)
+	public MeterController(KMonoBehaviour target, Meter.Offset front_back, Grid.SceneLayer user_specified_render_layer, params string[] symbols_to_hide)
 	{
 		string[] array = new string[symbols_to_hide.Length + 1];
 		Array.Copy(symbols_to_hide, array, symbols_to_hide.Length);
 		array[array.Length - 1] = "meter_target";
 		KBatchedAnimController component = target.GetComponent<KBatchedAnimController>();
-		this.Initialize(component, "meter_target", "meter", front_back, Vector3.zero, array);
+		this.Initialize(component, "meter_target", "meter", front_back, user_specified_render_layer, Vector3.zero, array);
 	}
 
-	public MeterController(KAnimControllerBase building_controller, string meter_target, string meter_animation, Meter.Offset front_back, params string[] symbols_to_hide)
+	public MeterController(KAnimControllerBase building_controller, string meter_target, string meter_animation, Meter.Offset front_back, Grid.SceneLayer user_specified_render_layer, params string[] symbols_to_hide)
 	{
-		this.Initialize(building_controller, meter_target, meter_animation, front_back, Vector3.zero, symbols_to_hide);
+		this.Initialize(building_controller, meter_target, meter_animation, front_back, user_specified_render_layer, Vector3.zero, symbols_to_hide);
 	}
 
-	public MeterController(KAnimControllerBase building_controller, string meter_target, string meter_animation, Meter.Offset front_back, Vector3 tracker_offset, params string[] symbols_to_hide)
+	public MeterController(KAnimControllerBase building_controller, string meter_target, string meter_animation, Meter.Offset front_back, Grid.SceneLayer user_specified_render_layer, Vector3 tracker_offset, params string[] symbols_to_hide)
 	{
-		this.Initialize(building_controller, meter_target, meter_animation, front_back, tracker_offset, symbols_to_hide);
+		this.Initialize(building_controller, meter_target, meter_animation, front_back, user_specified_render_layer, tracker_offset, symbols_to_hide);
 	}
 
 	public MeterController(KAnimControllerBase building_controller, KBatchedAnimController meter_controller, params string[] symbol_names)
@@ -40,7 +40,7 @@ public class MeterController
 
 	public KBatchedAnimController meterController { get; private set; }
 
-	private void Initialize(KAnimControllerBase building_controller, string meter_target, string meter_animation, Meter.Offset front_back, Vector3 tracker_offset, params string[] symbols_to_hide)
+	private void Initialize(KAnimControllerBase building_controller, string meter_target, string meter_animation, Meter.Offset front_back, Grid.SceneLayer user_specified_render_layer, Vector3 tracker_offset, params string[] symbols_to_hide)
 	{
 		string text = building_controller.name + "." + meter_animation;
 		GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(Assets.GetPrefab(MeterConfig.ID));
@@ -51,13 +51,23 @@ public class MeterController
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.PrefabTag = new Tag(text);
 		Vector3 position = building_controller.transform.GetPosition();
-		if (front_back == Meter.Offset.Behind)
+		if (front_back != Meter.Offset.Behind)
 		{
-			position.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingBack);
+			if (front_back != Meter.Offset.Infront)
+			{
+				if (front_back == Meter.Offset.UserSpecified)
+				{
+					position.z = Grid.GetLayerZ(user_specified_render_layer);
+				}
+			}
+			else
+			{
+				position.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingFront);
+			}
 		}
 		else
 		{
-			position.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingFront);
+			position.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingBack);
 		}
 		gameObject.transform.SetPosition(position);
 		KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();

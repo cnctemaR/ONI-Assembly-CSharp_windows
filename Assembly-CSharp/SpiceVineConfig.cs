@@ -21,12 +21,10 @@ public class SpiceVineConfig : IEntityConfig
 		GameObject gameObject2 = gameObject;
 		num = 258.15f;
 		float num2 = 308.15f;
-		float num3 = 328.15f;
-		float num4 = 333.15f;
-		float num5 = 358.15f;
-		float num6 = 448.15f;
+		float num3 = 358.15f;
+		float num4 = 448.15f;
 		text4 = SpiceNutConfig.ID;
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num, num2, num3, num4, num5, num6, null, true, 0f, 0.15f, text4, true, true);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num, num2, num3, num4, null, true, 0f, 0.15f, text4, true, true);
 		Tag tag = ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag;
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{

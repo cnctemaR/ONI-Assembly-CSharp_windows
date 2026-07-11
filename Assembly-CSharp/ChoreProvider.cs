@@ -29,7 +29,7 @@ public class ChoreProvider : KMonoBehaviour
 		return chore;
 	}
 
-	public void CollectChores(ChoreConsumerState consumer_state, List<Chore.Precondition.Context> succeeded, List<Chore.Precondition.Context> failed_contexts)
+	public virtual void CollectChores(ChoreConsumerState consumer_state, List<Chore.Precondition.Context> succeeded, List<Chore.Precondition.Context> failed_contexts)
 	{
 		for (int i = 0; i < this.chores.Count; i++)
 		{

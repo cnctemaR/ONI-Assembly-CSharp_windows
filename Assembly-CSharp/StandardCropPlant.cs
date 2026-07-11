@@ -88,6 +88,12 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			}
 			return 3;
 		}
+
+		public bool IsSleeping()
+		{
+			CropSleepingMonitor.Instance smi = base.master.GetSMI<CropSleepingMonitor.Instance>();
+			return smi != null && smi.IsSleeping();
+		}
 	}
 
 	public class States : GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant>
@@ -115,7 +121,8 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 				smi.Schedule(0.5f, new Action<object>(smi.master.DestroySelf), null);
 			});
 			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.idle).ToggleComponent<Growing>();
-			this.alive.idle.EventTransition(GameHashes.Wilt, this.alive.wilting, (StandardCropPlant.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Grow, this.alive.pre_fruiting, (StandardCropPlant.StatesInstance smi) => smi.master.growing.ReachedNextHarvest()).PlayAnim("grow", KAnim.PlayMode.Paused)
+			this.alive.idle.EventTransition(GameHashes.Wilt, this.alive.wilting, (StandardCropPlant.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Grow, this.alive.pre_fruiting, (StandardCropPlant.StatesInstance smi) => smi.master.growing.ReachedNextHarvest()).EventTransition(GameHashes.CropSleep, this.alive.sleeping, (StandardCropPlant.StatesInstance smi) => smi.IsSleeping())
+				.PlayAnim("grow", KAnim.PlayMode.Paused)
 				.Enter(new StateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State.Callback(StandardCropPlant.RefreshPositionPercent))
 				.Update(new Action<StandardCropPlant.StatesInstance, float>(StandardCropPlant.RefreshPositionPercent), UpdateRate.SIM_4000ms, false)
 				.EventHandler(GameHashes.ConsumePlant, new StateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State.Callback(StandardCropPlant.RefreshPositionPercent));
@@ -125,6 +132,8 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 				smi.master.harvestable.SetCanBeHarvested(false);
 			}).GoTo(this.alive.idle);
 			this.alive.wilting.PlayAnim("wilt", KAnim.PlayMode.Loop, (StandardCropPlant.StatesInstance smi) => smi.WiltStage().ToString()).EventTransition(GameHashes.WiltRecover, this.alive.idle, (StandardCropPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Harvest, this.alive.harvest, null);
+			this.alive.sleeping.PlayAnim("grow").EventTransition(GameHashes.CropWakeUp, this.alive.idle, (StandardCropPlant.StatesInstance smi) => !smi.IsSleeping()).EventTransition(GameHashes.Harvest, this.alive.harvest, null)
+				.EventTransition(GameHashes.Wilt, this.alive.wilting, null);
 			this.alive.fruiting.DefaultState(this.alive.fruiting.fruiting_idle).EventTransition(GameHashes.Wilt, this.alive.wilting, null).EventTransition(GameHashes.Harvest, this.alive.harvest, null)
 				.EventTransition(GameHashes.Grow, this.alive.fruiting_lost, (StandardCropPlant.StatesInstance smi) => !smi.master.growing.ReachedNextHarvest());
 			this.alive.fruiting.fruiting_idle.PlayAnim("idle_full", KAnim.PlayMode.Loop).Enter(delegate(StandardCropPlant.StatesInstance smi)
@@ -178,6 +187,8 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State destroy;
 
 			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State harvest;
+
+			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State sleeping;
 		}
 
 		public class FruitingState : GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State

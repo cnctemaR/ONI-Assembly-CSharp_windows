@@ -9,20 +9,9 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 		default_state = this.satisfied;
 		this.root.Enter(new StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, object>.State.Callback(SpeechMonitor.CreateMouth)).Exit(new StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, object>.State.Callback(SpeechMonitor.DestroyMouth));
 		this.satisfied.DoNothing();
-		this.talking.EnterTransition(this.satisfied, GameStateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, object>.Not(new StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(SpeechMonitor.CanTalk))).Enter(new StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, object>.State.Callback(SpeechMonitor.BeginTalking)).Update(new Action<SpeechMonitor.Instance, float>(SpeechMonitor.UpdateTalking), UpdateRate.RENDER_EVERY_TICK, false)
-			.Target(this.mouth)
+		this.talking.Enter(new StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, object>.State.Callback(SpeechMonitor.BeginTalking)).Update(new Action<SpeechMonitor.Instance, float>(SpeechMonitor.UpdateTalking), UpdateRate.RENDER_EVERY_TICK, false).Target(this.mouth)
 			.OnAnimQueueComplete(this.satisfied)
 			.Exit(new StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, object>.State.Callback(SpeechMonitor.EndTalking));
-	}
-
-	private static bool CanTalk(SpeechMonitor.Instance smi)
-	{
-		return smi.HasTag(GameTags.AllowSpeech);
-	}
-
-	private static float GetRandomSpeechTime(SpeechMonitor.Instance smi)
-	{
-		return global::UnityEngine.Random.Range(TuningData<SpeechMonitor.Tuning>.Get().randomSpeechIntervalMin, TuningData<SpeechMonitor.Tuning>.Get().randomSpeechIntervalMax);
 	}
 
 	private static void CreateMouth(SpeechMonitor.Instance smi)
@@ -44,6 +33,21 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 	private static string GetRandomSpeechAnim(string speech_prefix)
 	{
 		return speech_prefix + global::UnityEngine.Random.Range(1, TuningData<SpeechMonitor.Tuning>.Get().speechCount).ToString();
+	}
+
+	public static bool IsAllowedToPlaySpeech(GameObject go)
+	{
+		if (go.HasTag(GameTags.Dead))
+		{
+			return false;
+		}
+		if (go.GetComponent<Navigator>().IsMoving())
+		{
+			return true;
+		}
+		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
+		KAnim.Anim currentAnim = component.GetCurrentAnim();
+		return currentAnim == null || GameAudioSheets.Get().IsAnimAllowedToPlaySpeech(currentAnim);
 	}
 
 	public static void BeginTalking(SpeechMonitor.Instance smi)

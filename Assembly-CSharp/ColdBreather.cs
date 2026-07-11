@@ -9,14 +9,14 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.simEmitCBHandle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimEmitted), "ColdBreather"));
+		this.simEmitCBHandle = Game.Instance.massEmitCallbackManager.Add(new Action<Sim.MassEmittedCallback, object>(ColdBreather.OnSimEmittedCallback), this, "ColdBreather");
 		this.elementConsumer.EnableConsumption(false);
 		base.smi.StartSM();
 	}
 
 	protected override void OnCleanUp()
 	{
-		Game.Instance.complexCallbackManager.Release(this.simEmitCBHandle, "coldbreather");
+		Game.Instance.massEmitCallbackManager.Release(this.simEmitCBHandle, "coldbreather");
 		this.simEmitCBHandle.Clear();
 		if (this.storage)
 		{
@@ -59,21 +59,25 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 			{
 				float num2 = Mathf.Max(component.Element.lowTemp + 5f, component.Temperature + this.deltaEmitTemperature);
 				int num3 = Grid.PosToCell(base.transform.GetPosition() + this.emitOffsetCell);
-				byte elementIndex = ElementLoader.GetElementIndex(component.Element.tag);
-				Game.Instance.complexCallbackManager.GetItem(this.simEmitCBHandle);
-				SimMessages.EmitMass(num3, elementIndex, component.Mass, num2, component.DiseaseIdx, component.DiseaseCount, this.simEmitCBHandle.index);
+				byte idx = component.Element.idx;
+				Game.Instance.massEmitCallbackManager.GetItem(this.simEmitCBHandle);
+				SimMessages.EmitMass(num3, idx, component.Mass, num2, component.DiseaseIdx, component.DiseaseCount, this.simEmitCBHandle.index);
 				this.lastEmitTag = component.Element.tag;
 				break;
 			}
 		}
 	}
 
-	private void OnSimEmitted(object data)
+	private static void OnSimEmittedCallback(Sim.MassEmittedCallback info, object data)
 	{
-		Sim.MassEmittedCallback massEmittedCallback = (Sim.MassEmittedCallback)data;
-		if (massEmittedCallback.suceeded == 1 && this.storage)
+		((ColdBreather)data).OnSimEmitted(info);
+	}
+
+	private void OnSimEmitted(Sim.MassEmittedCallback info)
+	{
+		if (info.suceeded == 1 && this.storage)
 		{
-			this.storage.ConsumeIgnoringDisease(this.lastEmitTag, massEmittedCallback.mass);
+			this.storage.ConsumeIgnoringDisease(this.lastEmitTag, info.mass);
 		}
 		this.lastEmitTag = Tag.Invalid;
 	}
@@ -105,7 +109,7 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 
 	private int nextGasEmitIndex;
 
-	private HandleVector<Game.ComplexCallbackInfo>.Handle simEmitCBHandle = HandleVector<Game.ComplexCallbackInfo>.InvalidHandle;
+	private HandleVector<Game.ComplexCallbackInfo<Sim.MassEmittedCallback>>.Handle simEmitCBHandle = HandleVector<Game.ComplexCallbackInfo<Sim.MassEmittedCallback>>.InvalidHandle;
 
 	public class StatesInstance : GameStateMachine<ColdBreather.States, ColdBreather.StatesInstance, ColdBreather, object>.GameInstance
 	{

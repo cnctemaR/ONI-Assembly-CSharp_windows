@@ -41,107 +41,110 @@ public class NewGameSettingsScreen : KModalScreen
 			this.Deactivate();
 		};
 		this.settings = CustomGameSettings.Instance;
-		this.settings.Reset();
+		this.baseGameMode = this.settings.customGameMode;
 		this.SetGameTypeToggle(false);
 		Color color = new Color(0.95f, 0.95f, 1f, 1f);
 		bool flag = true;
 		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.settings.QualitySettings)
 		{
-			flag = !flag;
-			ListSettingConfig list_setting = keyValuePair.Value as ListSettingConfig;
-			if (list_setting != null)
+			if (!keyValuePair.Value.debug_only || DebugHandler.enabled)
 			{
-				GameObject gameObject = global::Util.KInstantiateUI(this.prefab_cycle_setting, this.content.gameObject, true);
-				HierarchyReferences refs2 = gameObject.GetComponent<HierarchyReferences>();
-				refs2.GetReference<Image>("BG").color = ((!flag) ? Color.white : color);
-				refs2.GetReference<LocText>("Label").text = keyValuePair.Value.label;
-				refs2.GetReference<LocText>("Label").GetComponent<ToolTip>().toolTip = keyValuePair.Value.tooltip;
-				refs2.GetReference<KButton>("CycleLeft").onClick += delegate
+				flag = !flag;
+				ListSettingConfig list_setting = keyValuePair.Value as ListSettingConfig;
+				if (list_setting != null)
 				{
-					this.CycleSetting(list_setting, refs2, -1);
-				};
-				refs2.GetReference<KButton>("CycleRight").onClick += delegate
-				{
-					this.CycleSetting(list_setting, refs2, 1);
-				};
-				this.CycleSetting(list_setting, refs2, 0);
-			}
-			else
-			{
-				ToggleSettingConfig toggle_setting = keyValuePair.Value as ToggleSettingConfig;
-				if (toggle_setting != null)
-				{
-					GameObject gameObject2 = global::Util.KInstantiateUI(this.prefab_checkbox_setting, this.content.gameObject, true);
-					HierarchyReferences refs3 = gameObject2.GetComponent<HierarchyReferences>();
-					refs3.GetReference<Image>("BG").color = ((!flag) ? Color.white : color);
-					refs3.GetReference<LocText>("Label").text = keyValuePair.Value.label;
-					refs3.GetReference<LocText>("Label").GetComponent<ToolTip>().toolTip = keyValuePair.Value.tooltip;
-					MultiToggle reference = refs3.GetReference<MultiToggle>("Toggle");
-					reference.onClick = (global::System.Action)Delegate.Combine(reference.onClick, new global::System.Action(delegate
+					GameObject gameObject = global::Util.KInstantiateUI(this.prefab_cycle_setting, this.content.gameObject, true);
+					HierarchyReferences refs2 = gameObject.GetComponent<HierarchyReferences>();
+					refs2.GetReference<Image>("BG").color = ((!flag) ? Color.white : color);
+					refs2.GetReference<LocText>("Label").text = keyValuePair.Value.label;
+					refs2.GetReference<LocText>("Label").GetComponent<ToolTip>().toolTip = keyValuePair.Value.tooltip;
+					refs2.GetReference<KButton>("CycleLeft").onClick += delegate
 					{
-						this.ToggleSetting(toggle_setting, refs3, false);
-					}));
-					this.ToggleSetting(toggle_setting, refs3, true);
+						this.CycleSetting(list_setting, refs2, -1);
+					};
+					refs2.GetReference<KButton>("CycleRight").onClick += delegate
+					{
+						this.CycleSetting(list_setting, refs2, 1);
+					};
+					this.CycleSetting(list_setting, refs2, 0);
 				}
 				else
 				{
-					SeedSettingConfig seed_setting = keyValuePair.Value as SeedSettingConfig;
-					if (seed_setting != null)
+					ToggleSettingConfig toggle_setting = keyValuePair.Value as ToggleSettingConfig;
+					if (toggle_setting != null)
 					{
-						GameObject gameObject3 = global::Util.KInstantiateUI(this.prefab_seed_input_setting, this.content.gameObject, true);
-						HierarchyReferences refs = gameObject3.GetComponent<HierarchyReferences>();
-						TMP_InputField input = gameObject3.GetComponentInChildren<TMP_InputField>(true);
-						TMP_InputField input2 = input;
-						input2.onValidateInput = (TMP_InputField.OnValidateInput)Delegate.Combine(input2.onValidateInput, new TMP_InputField.OnValidateInput((string text, int charIndxex, char addedChar) => ('0' > addedChar || addedChar > '9') ? '\0' : addedChar));
-						input.onEndEdit.AddListener(delegate(string text)
+						GameObject gameObject2 = global::Util.KInstantiateUI(this.prefab_checkbox_setting, this.content.gameObject, true);
+						HierarchyReferences refs3 = gameObject2.GetComponent<HierarchyReferences>();
+						refs3.GetReference<Image>("BG").color = ((!flag) ? Color.white : color);
+						refs3.GetReference<LocText>("Label").text = keyValuePair.Value.label;
+						refs3.GetReference<LocText>("Label").GetComponent<ToolTip>().toolTip = keyValuePair.Value.tooltip;
+						MultiToggle reference = refs3.GetReference<MultiToggle>("Toggle");
+						reference.onClick = (global::System.Action)Delegate.Combine(reference.onClick, new global::System.Action(delegate
 						{
-							int num;
-							try
-							{
-								num = Convert.ToInt32(text);
-							}
-							catch
-							{
-								num = 0;
-							}
-							num = Mathf.Min(num, int.MaxValue);
-							input.text = num.ToString();
-						});
-						input.onValueChanged.AddListener(delegate(string text)
+							this.ToggleSetting(toggle_setting, refs3, false);
+						}));
+						this.ToggleSetting(toggle_setting, refs3, true);
+					}
+					else
+					{
+						SeedSettingConfig seed_setting = keyValuePair.Value as SeedSettingConfig;
+						if (seed_setting != null)
 						{
-							int num2 = 0;
-							try
+							GameObject gameObject3 = global::Util.KInstantiateUI(this.prefab_seed_input_setting, this.content.gameObject, true);
+							HierarchyReferences refs = gameObject3.GetComponent<HierarchyReferences>();
+							TMP_InputField input = gameObject3.GetComponentInChildren<TMP_InputField>(true);
+							TMP_InputField input2 = input;
+							input2.onValidateInput = (TMP_InputField.OnValidateInput)Delegate.Combine(input2.onValidateInput, new TMP_InputField.OnValidateInput((string text, int charIndxex, char addedChar) => ('0' > addedChar || addedChar > '9') ? '\0' : addedChar));
+							input.onEndEdit.AddListener(delegate(string text)
 							{
-								num2 = Convert.ToInt32(text);
-							}
-							catch
+								int num;
+								try
+								{
+									num = Convert.ToInt32(text);
+								}
+								catch
+								{
+									num = 0;
+								}
+								num = Mathf.Min(num, int.MaxValue);
+								input.text = num.ToString();
+							});
+							input.onValueChanged.AddListener(delegate(string text)
 							{
-								if (text.Length > 0)
+								int num2 = 0;
+								try
+								{
+									num2 = Convert.ToInt32(text);
+								}
+								catch
+								{
+									if (text.Length > 0)
+									{
+										input.text = text.Substring(0, text.Length - 1);
+									}
+									else
+									{
+										input.text = string.Empty;
+									}
+								}
+								if (num2 > 2147483647)
 								{
 									input.text = text.Substring(0, text.Length - 1);
 								}
-								else
-								{
-									input.text = string.Empty;
-								}
-							}
-							if (num2 > 2147483647)
+							});
+							refs.GetReference<Image>("BG").color = ((!flag) ? Color.white : color);
+							refs.GetReference<LocText>("Label").text = keyValuePair.Value.label;
+							refs.GetReference<LocText>("Label").GetComponent<ToolTip>().toolTip = keyValuePair.Value.tooltip;
+							refs.GetReference<TMP_InputField>("Input").onEndEdit.AddListener(delegate(string s)
 							{
-								input.text = text.Substring(0, text.Length - 1);
-							}
-						});
-						refs.GetReference<Image>("BG").color = ((!flag) ? Color.white : color);
-						refs.GetReference<LocText>("Label").text = keyValuePair.Value.label;
-						refs.GetReference<LocText>("Label").GetComponent<ToolTip>().toolTip = keyValuePair.Value.tooltip;
-						refs.GetReference<TMP_InputField>("Input").onEndEdit.AddListener(delegate(string s)
-						{
-							this.SetSeedSetting(seed_setting, refs, s);
-						});
-						refs.GetReference<KButton>("Randomize").onClick += delegate
-						{
+								this.SetSeedSetting(seed_setting, refs, s);
+							});
+							refs.GetReference<KButton>("Randomize").onClick += delegate
+							{
+								this.GetNewRandomSeed(seed_setting, refs);
+							};
 							this.GetNewRandomSeed(seed_setting, refs);
-						};
-						this.GetNewRandomSeed(seed_setting, refs);
+						}
 					}
 				}
 			}
@@ -189,11 +192,12 @@ public class NewGameSettingsScreen : KModalScreen
 
 	private void SetGameTypeToggle(bool custom_game)
 	{
-		this.settings.is_custom_game = custom_game;
-		this.toggle_standard_game.ChangeState((!this.settings.is_custom_game) ? 1 : 0);
-		this.toggle_custom_game.ChangeState((!this.settings.is_custom_game) ? 0 : 1);
-		this.disable_custom_settings_shroud.SetActive(!this.settings.is_custom_game);
-		KPlayerPrefs.SetInt(OfflineWorldGen.USE_WORLD_SEED_KEY, (!this.settings.is_custom_game) ? 0 : 1);
+		this.settings.customGameMode = ((!custom_game) ? this.baseGameMode : CustomGameSettings.CustomGameMode.Custom);
+		bool flag = this.settings.customGameMode == CustomGameSettings.CustomGameMode.Custom;
+		this.toggle_standard_game.ChangeState((!flag) ? 1 : 0);
+		this.toggle_custom_game.ChangeState((!flag) ? 0 : 1);
+		this.disable_custom_settings_shroud.SetActive(!flag);
+		KPlayerPrefs.SetInt(OfflineWorldGen.USE_WORLD_SEED_KEY, (!flag) ? 0 : 1);
 	}
 
 	private void NewGame()
@@ -262,6 +266,8 @@ public class NewGameSettingsScreen : KModalScreen
 	private GameObject prefab_seed_input_setting;
 
 	private CustomGameSettings settings;
+
+	private CustomGameSettings.CustomGameMode baseGameMode;
 
 	private const int MAX_VALID_SEED = 2147483647;
 }

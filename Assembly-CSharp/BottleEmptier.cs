@@ -49,6 +49,8 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
 	}
 
+	public float emptyRate = 10f;
+
 	[Serialize]
 	public bool allowManualPumpingStationFetching;
 
@@ -65,7 +67,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 		{
 			TreeFilterable component = base.master.GetComponent<TreeFilterable>();
 			component.OnFilterChanged = (Action<Tag[]>)Delegate.Combine(component.OnFilterChanged, new Action<Tag[]>(this.OnFilterChanged));
-			this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, new string[] { "meter_target", "meter_arrow", "meter_scale" });
+			this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_arrow", "meter_scale" });
 			base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		}
 
@@ -154,7 +156,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			return null;
 		}
 
-		public void DripLiquid(float dt)
+		public void Emit(float dt)
 		{
 			PrimaryElement firstPrimaryElement = this.GetFirstPrimaryElement();
 			if (firstPrimaryElement == null)
@@ -163,26 +165,34 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			}
 			Storage component = base.GetComponent<Storage>();
 			float mass = firstPrimaryElement.Mass;
-			float num = 10f;
-			float num2 = Mathf.Min(mass, num * dt);
-			if (num2 <= 0f)
+			float num = Mathf.Min(mass, base.master.emptyRate * dt);
+			if (num <= 0f)
 			{
 				return;
 			}
 			Tag prefabTag = firstPrimaryElement.GetComponent<KPrefabID>().PrefabTag;
 			SimUtil.DiseaseInfo diseaseInfo;
-			float num3;
-			component.ConsumeAndGetDisease(prefabTag, num2, out diseaseInfo, out num3);
+			float num2;
+			component.ConsumeAndGetDisease(prefabTag, num, out diseaseInfo, out num2);
 			Vector3 position = base.transform.GetPosition();
 			position.y += 1.8f;
 			bool flag = base.GetComponent<Rotatable>().GetOrientation() == Orientation.FlipH;
 			position.x += ((!flag) ? 0.2f : (-0.2f));
-			int num4 = Grid.PosToCell(position) + ((!flag) ? 1 : (-1));
-			if (Grid.Solid[num4])
+			int num3 = Grid.PosToCell(position) + ((!flag) ? 1 : (-1));
+			if (Grid.Solid[num3])
 			{
-				num4 += ((!flag) ? (-1) : 1);
+				num3 += ((!flag) ? (-1) : 1);
 			}
-			FallingWater.instance.AddParticle(num4, (byte)ElementLoader.GetElementIndex(firstPrimaryElement.ElementID), num2, num3, diseaseInfo.idx, diseaseInfo.count, true, false, false, false);
+			Element element = firstPrimaryElement.Element;
+			byte idx = element.idx;
+			if (element.IsLiquid)
+			{
+				FallingWater.instance.AddParticle(num3, idx, num, num2, diseaseInfo.idx, diseaseInfo.count, true, false, false, false);
+			}
+			else
+			{
+				SimMessages.ModifyCell(num3, (int)idx, num2, num, diseaseInfo.idx, diseaseInfo.count, SimMessages.ReplaceType.None, false, -1);
+			}
 		}
 
 		private FetchChore chore;
@@ -235,9 +245,9 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			{
 				smi.StartMeter();
 			})
-				.Update("DripLiquid", delegate(BottleEmptier.StatesInstance smi, float dt)
+				.Update("Emit", delegate(BottleEmptier.StatesInstance smi, float dt)
 				{
-					smi.DripLiquid(dt);
+					smi.Emit(dt);
 				}, UpdateRate.SIM_200ms, false)
 				.PlayAnim("working_loop", KAnim.PlayMode.Loop);
 		}

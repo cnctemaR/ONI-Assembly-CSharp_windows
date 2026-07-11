@@ -81,7 +81,7 @@ public class StaminaMonitor : GameStateMachine<StaminaMonitor, StaminaMonitor.In
 				return false;
 			}
 			Narcolepsy component = base.GetComponent<Narcolepsy>();
-			return (!(component != null) || !component.IsNarcolepsing()) && this.stamina.value >= this.stamina.GetMax() && TimeOfDay.Instance.GetCurrentTimeRegion() != TimeOfDay.TimeRegion.Night;
+			return (!(component != null) || !component.IsNarcolepsing()) && this.stamina.value >= this.stamina.GetMax();
 		}
 
 		private ChoreDriver choreDriver;

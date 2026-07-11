@@ -52,8 +52,12 @@ public class EntitySplitter : KMonoBehaviour
 		}
 		gameObject2.SetActive(true);
 		component.TotalAmount = Mathf.Min(amount, pickupable.TotalAmount);
+		bool keepZeroMassObject = pickupable.PrimaryElement.KeepZeroMassObject;
+		pickupable.PrimaryElement.KeepZeroMassObject = true;
 		pickupable.TotalAmount -= amount;
 		component.Trigger(1335436905, pickupable);
+		pickupable.PrimaryElement.KeepZeroMassObject = keepZeroMassObject;
+		pickupable.TotalAmount = pickupable.TotalAmount;
 		if (storage != null)
 		{
 			storage.Trigger(-1697596308, pickupable.gameObject);

@@ -127,24 +127,17 @@ public class Unlocks : MonoBehaviour
 		}
 	}
 
-	public bool UnlockNext(string collectionID)
+	public string UnlockNext(string collectionID)
 	{
-		string text = string.Empty;
-		foreach (string text2 in this.lockCollections[collectionID])
+		foreach (string text in this.lockCollections[collectionID])
 		{
-			bool flag = this.locked[text2];
-			if (flag)
+			if (this.locked[text])
 			{
-				text = text2;
-				break;
+				this.Unlock(text);
+				return text;
 			}
 		}
-		if (text != string.Empty)
-		{
-			this.Unlock(text);
-			return true;
-		}
-		return false;
+		return null;
 	}
 
 	public Dictionary<string, bool> locked = new Dictionary<string, bool>();
@@ -161,13 +154,13 @@ public class Unlocks : MonoBehaviour
 	{
 		{
 			"critters",
-			new string[] { "critter_Puft_studied", "critter_Hatch_studied" }
+			new string[] { "critter_Hatch_studied" }
 		},
 		{
 			"emails",
 			new string[]
 			{
-				"email_researchgiant", "email_preliminarycalculations", "email_atomiconrecruitment", "email_thejanitor", "email_security2", "email_dinner1", "email_newemployee", "email_security3", "email_hollandsdog", "email_pens",
+				"email_preliminarycalculations", "email_researchgiant", "email_frankiesblog", "email_atomiconrecruitment", "email_thejanitor", "email_security2", "email_newemployee", "email_security3", "email_hollandsdog", "email_pens",
 				"email_pens2", "email_memorychip", "email_arthistoryrequest", "email_AIcontrol", "email_AIcontrol2", "email_AIcontrol3", "email_AIcontrol4"
 			}
 		},
@@ -175,9 +168,8 @@ public class Unlocks : MonoBehaviour
 			"journals",
 			new string[]
 			{
-				"journal_cleanup", "journal_employeeprocessing", "journal_sunflowerseeds", "journal_magazine", "journal_B835_1", "journal_B835_2", "journal_B835_3", "journal_B835_4", "journal_B835_5", "journal_B835_6",
-				"journal_pipedream", "journal_spittingimage", "journal_A046_1", "journal_A046_2", "journal_A046_3", "journal_A046_4", "journal_A046_5", "journal_A046_6", "journal_B327_1", "journal_B327_2",
-				"journal_B327_3"
+				"journal_cleanup", "journal_employeeprocessing", "journal_sunflowerseeds", "journal_B835_1", "journal_B835_2", "journal_B835_3", "journal_B835_4", "journal_B835_5", "journal_B835_6", "journal_pipedream",
+				"journal_spittingimage", "journal_A046_1", "journal_A046_2", "journal_A046_3", "journal_A046_4", "journal_ants", "journal_debrief", "journal_movedrats", "journal_revisitednumbers"
 			}
 		},
 		{
@@ -190,7 +182,11 @@ public class Unlocks : MonoBehaviour
 		},
 		{
 			"special_set_items",
-			new string[] { "display_prop1", "display_prop2", "display_prop3", "pod_evacuation", "printingpod" }
+			new string[0]
+		},
+		{
+			"main_log",
+			new string[] { "log2", "log3" }
 		}
 	};
 }

@@ -84,9 +84,9 @@ public class WorldDamage : KMonoBehaviour
 							if (!element2.IsSolid && (!element2.IsLiquid || (element2.id == element.id && Grid.Mass[num6] <= 100f)) && (Grid.Properties[num6] & 2) == 0 && !this.spawnTimes.ContainsKey(num6))
 							{
 								this.spawnTimes[num6] = Time.realtimeSinceStartup;
-								int elementIndex = ElementLoader.GetElementIndex(element.id);
+								int idx = (int)element.idx;
 								float num7 = Grid.Temperature[src_cell];
-								base.StartCoroutine(this.DelayedSpawnFX(src_cell, num6, num5, element, elementIndex, num7));
+								base.StartCoroutine(this.DelayedSpawnFX(src_cell, num6, num5, element, idx, num7));
 							}
 						}
 					}

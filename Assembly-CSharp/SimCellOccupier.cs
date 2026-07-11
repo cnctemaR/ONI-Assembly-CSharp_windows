@@ -69,6 +69,10 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 		{
 			properties |= Sim.Cell.Properties.Transparent;
 		}
+		if (this.setOpaque)
+		{
+			properties |= Sim.Cell.Properties.Opaque;
+		}
 		return properties;
 	}
 
@@ -185,6 +189,9 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 
 	[SerializeField]
 	public bool setTransparent;
+
+	[SerializeField]
+	public bool setOpaque;
 
 	[SerializeField]
 	public float strengthMultiplier = 1f;

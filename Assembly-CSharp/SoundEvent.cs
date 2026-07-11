@@ -13,6 +13,7 @@ public class SoundEvent : AnimEvent
 	public SoundEvent(string file_name, string sound_name, int frame, bool do_load, bool is_looping, float min_interval, bool is_dynamic)
 		: base(file_name, sound_name, frame)
 	{
+		this.shouldCameraScalePosition = true;
 		if (do_load)
 		{
 			this.sound = GlobalAssets.GetSound(sound_name, false);
@@ -35,6 +36,8 @@ public class SoundEvent : AnimEvent
 
 	public bool ignorePause { get; set; }
 
+	public bool shouldCameraScalePosition { get; set; }
+
 	public float minInterval { get; private set; }
 
 	public EffectorValues noiseValues { get; set; }
@@ -46,16 +49,20 @@ public class SoundEvent : AnimEvent
 		{
 			return true;
 		}
+		Vector3 position = controller.transform.GetPosition();
+		Vector3 offset = controller.Offset;
+		position.x += offset.x;
+		position.y += offset.y;
 		SpeedControlScreen instance2 = SpeedControlScreen.Instance;
 		if (is_dynamic)
 		{
-			return (!(instance2 != null) || !instance2.IsPaused) && instance.IsAudibleSound(controller.transform.GetPosition());
+			return (!(instance2 != null) || !instance2.IsPaused) && instance.IsAudibleSound(position);
 		}
 		if (sound == null || SoundEvent.IsLowPrioritySound(sound))
 		{
 			return false;
 		}
-		if (!instance.IsAudibleSound(controller.transform.GetPosition(), sound))
+		if (!instance.IsAudibleSound(position, sound))
 		{
 			if (!is_looping && !GlobalAssets.IsHighPriority(sound))
 			{
@@ -80,6 +87,13 @@ public class SoundEvent : AnimEvent
 	protected void PlaySound(AnimEventManager.EventPlayerData behaviour, string sound)
 	{
 		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
+		KBatchedAnimController component = behaviour.GetComponent<KBatchedAnimController>();
+		if (component != null)
+		{
+			Vector3 offset = component.Offset;
+			position.x += offset.x;
+			position.y += offset.y;
+		}
 		AudioDebug audioDebug = AudioDebug.Get();
 		if (audioDebug != null && audioDebug.debugSoundEvents)
 		{
@@ -89,12 +103,12 @@ public class SoundEvent : AnimEvent
 		{
 			if (this.looping)
 			{
-				LoopingSounds component = behaviour.GetComponent<LoopingSounds>();
-				if (component == null)
+				LoopingSounds component2 = behaviour.GetComponent<LoopingSounds>();
+				if (component2 == null)
 				{
 					global::Debug.Log(behaviour.name + " is missing LoopingSounds component. ", null);
 				}
-				else if (!component.StartSound(sound, behaviour, this.noiseValues, this.ignorePause))
+				else if (!component2.StartSound(sound, behaviour, this.noiseValues, this.ignorePause, this.shouldCameraScalePosition))
 				{
 					Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
 				}

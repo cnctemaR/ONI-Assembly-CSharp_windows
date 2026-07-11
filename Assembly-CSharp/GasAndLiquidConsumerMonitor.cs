@@ -13,7 +13,7 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 		{
 			smi.ClearTargetCell();
 		}).TagTransition(GameTags.Creatures.Hungry, this.lookingforfood, false);
-		this.lookingforfood.ToggleBehaviour(GameTags.Creatures.WantsToEat, (GasAndLiquidConsumerMonitor.Instance smi) => smi.targetCell != PathProber.InvalidCell, delegate(GasAndLiquidConsumerMonitor.Instance smi)
+		this.lookingforfood.ToggleBehaviour(GameTags.Creatures.WantsToEat, (GasAndLiquidConsumerMonitor.Instance smi) => smi.targetCell != -1, delegate(GasAndLiquidConsumerMonitor.Instance smi)
 		{
 			smi.GoTo(this.cooldown);
 		}).TagTransition(GameTags.Creatures.Hungry, this.satisfied, true).Update("FindFood", delegate(GasAndLiquidConsumerMonitor.Instance smi, float dt)
@@ -42,30 +42,28 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 		public Instance(IStateMachineTarget master, GasAndLiquidConsumerMonitor.Def def)
 			: base(master, def)
 		{
+			this.navigator = base.smi.GetComponent<Navigator>();
 		}
 
 		public void ClearTargetCell()
 		{
-			this.targetCell = PathProber.InvalidCell;
+			this.targetCell = -1;
 			this.massUnavailableFrameCount = 0;
 		}
 
 		public void FindFood()
 		{
-			this.targetCell = PathProber.InvalidCell;
+			this.targetCell = -1;
 			this.FindTargetGasCell();
 		}
 
-		private static bool CheckTargetGasCellCb(int test_cell, GasAndLiquidConsumerMonitor.Instance smi)
+		public bool IsConsumableCell(int cell, out Element element)
 		{
-			Element element = Grid.Element[test_cell];
-			TagBits tagBits = new TagBits(element.tag);
-			foreach (Diet.Info info in smi.def.diet.infos)
+			element = Grid.Element[cell];
+			foreach (Diet.Info info in base.smi.def.diet.infos)
 			{
-				if (info.IsMatch(tagBits))
+				if (info.IsMatch(element.tag))
 				{
-					smi.targetCell = test_cell;
-					smi.targetElement = element;
 					return true;
 				}
 			}
@@ -74,23 +72,33 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 
 		public void FindTargetGasCell()
 		{
-			GameUtil.FloodFillFind<GasAndLiquidConsumerMonitor.Instance>(new Func<int, GasAndLiquidConsumerMonitor.Instance, bool>(GasAndLiquidConsumerMonitor.Instance.CheckTargetGasCellCb), this, Grid.PosToCell(base.gameObject), 5, true, true);
+			GasAndLiquidConsumerMonitor.ConsumableCellQuery consumableCellQuery = new GasAndLiquidConsumerMonitor.ConsumableCellQuery(base.smi, 25);
+			this.navigator.RunQuery(consumableCellQuery);
+			if (consumableCellQuery.success)
+			{
+				this.targetCell = consumableCellQuery.GetResultCell();
+				this.targetElement = consumableCellQuery.targetElement;
+			}
 		}
 
 		public void Consume(float dt)
 		{
-			int index = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnMassConsumed), " GasAndLiquidConsumerMonitor")).index;
+			int index = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(GasAndLiquidConsumerMonitor.Instance.OnMassConsumedCallback), this, "GasAndLiquidConsumerMonitor").index;
 			SimMessages.ConsumeMass(Grid.PosToCell(this), this.targetElement.id, base.def.consumptionRate * dt, 3, index);
 		}
 
-		public void OnMassConsumed(object data)
+		private static void OnMassConsumedCallback(Sim.MassConsumedCallback mcd, object data)
+		{
+			((GasAndLiquidConsumerMonitor.Instance)data).OnMassConsumed(mcd);
+		}
+
+		private void OnMassConsumed(Sim.MassConsumedCallback mcd)
 		{
 			if (!base.IsRunning())
 			{
 				return;
 			}
-			Sim.MassConsumedCallback massConsumedCallback = (Sim.MassConsumedCallback)data;
-			if (massConsumedCallback.mass > 0f)
+			if (mcd.mass > 0f)
 			{
 				this.massUnavailableFrameCount = 0;
 				Diet.Info dietInfo = base.def.diet.GetDietInfo(this.targetElement.tag);
@@ -98,7 +106,7 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 				{
 					return;
 				}
-				float num = dietInfo.ConvertConsumptionMassToCalories(massConsumedCallback.mass);
+				float num = dietInfo.ConvertConsumptionMassToCalories(mcd.mass);
 				CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = new CreatureCalorieMonitor.CaloriesConsumedEvent
 				{
 					tag = this.targetElement.tag,
@@ -116,10 +124,36 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 			}
 		}
 
-		public int targetCell = PathProber.InvalidCell;
+		public int targetCell = -1;
 
 		private Element targetElement;
 
+		private Navigator navigator;
+
 		private int massUnavailableFrameCount;
+	}
+
+	public class ConsumableCellQuery : PathFinderQuery
+	{
+		public ConsumableCellQuery(GasAndLiquidConsumerMonitor.Instance smi, int maxIterations)
+		{
+			this.smi = smi;
+			this.maxIterations = maxIterations;
+		}
+
+		public override bool IsMatch(int cell, int parent_cell, int cost)
+		{
+			int num = Grid.CellAbove(cell);
+			this.success = this.smi.IsConsumableCell(cell, out this.targetElement) || (Grid.IsValidCell(num) && this.smi.IsConsumableCell(num, out this.targetElement));
+			return this.success || --this.maxIterations <= 0;
+		}
+
+		public bool success;
+
+		public Element targetElement;
+
+		private GasAndLiquidConsumerMonitor.Instance smi;
+
+		private int maxIterations;
 	}
 }

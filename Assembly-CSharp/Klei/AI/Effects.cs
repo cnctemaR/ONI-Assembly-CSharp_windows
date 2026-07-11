@@ -87,18 +87,18 @@ namespace Klei.AI
 			}
 			if (flag)
 			{
+				Attributes attributes = this.GetAttributes();
+				EffectInstance effectInstance = this.Get(effect);
 				if (!string.IsNullOrEmpty(effect.stompGroup))
 				{
 					for (int i = this.effects.Count - 1; i >= 0; i--)
 					{
-						if (this.effects[i].effect.stompGroup == effect.stompGroup)
+						if (this.effects[i] != effectInstance && this.effects[i].effect.stompGroup == effect.stompGroup)
 						{
 							this.Remove(this.effects[i].effect);
 						}
 					}
 				}
-				Attributes attributes = this.GetAttributes();
-				EffectInstance effectInstance = this.Get(effect);
 				if (effectInstance == null)
 				{
 					effectInstance = new EffectInstance(base.gameObject, effect, should_save);
@@ -127,29 +127,35 @@ namespace Klei.AI
 
 		public void Remove(string effect_id)
 		{
-			int num = this.effectsThatExpire.FindIndex((EffectInstance e) => e.effect.Id == effect_id);
-			if (num != -1)
+			for (int i = 0; i < this.effectsThatExpire.Count; i++)
 			{
-				int num2 = this.effectsThatExpire.Count - 1;
-				this.effectsThatExpire[num] = this.effectsThatExpire[num2];
-				this.effectsThatExpire.RemoveAt(num2);
-				if (this.effectsThatExpire.Count == 0)
+				if (this.effectsThatExpire[i].effect.Id == effect_id)
 				{
-					SimAndRenderScheduler.instance.Remove(this);
+					int num = this.effectsThatExpire.Count - 1;
+					this.effectsThatExpire[i] = this.effectsThatExpire[num];
+					this.effectsThatExpire.RemoveAt(num);
+					if (this.effectsThatExpire.Count == 0)
+					{
+						SimAndRenderScheduler.instance.Remove(this);
+					}
+					break;
 				}
 			}
-			num = this.effects.FindIndex((EffectInstance e) => e.effect.Id == effect_id);
-			if (num != -1)
+			for (int j = 0; j < this.effects.Count; j++)
 			{
-				Attributes attributes = this.GetAttributes();
-				EffectInstance effectInstance = this.effects[num];
-				effectInstance.OnCleanUp();
-				Effect effect = effectInstance.effect;
-				effect.RemoveFrom(attributes);
-				int num3 = this.effects.Count - 1;
-				this.effects[num] = this.effects[num3];
-				this.effects.RemoveAt(num3);
-				base.Trigger(-1157678353, effect);
+				if (this.effects[j].effect.Id == effect_id)
+				{
+					Attributes attributes = this.GetAttributes();
+					EffectInstance effectInstance = this.effects[j];
+					effectInstance.OnCleanUp();
+					Effect effect = effectInstance.effect;
+					effect.RemoveFrom(attributes);
+					int num2 = this.effects.Count - 1;
+					this.effects[j] = this.effects[num2];
+					this.effects.RemoveAt(num2);
+					base.Trigger(-1157678353, effect);
+					break;
+				}
 			}
 		}
 
@@ -217,6 +223,11 @@ namespace Klei.AI
 				}
 			}
 			this.saveLoadEffects = list.ToArray();
+		}
+
+		public List<EffectInstance> GetTimeLimitedEffects()
+		{
+			return this.effectsThatExpire;
 		}
 
 		[Serialize]

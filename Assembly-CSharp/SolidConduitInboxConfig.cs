@@ -53,7 +53,7 @@ public class SolidConduitInboxConfig : IBuildingConfig
 		GeneratedBuildings.RegisterLogicPorts(go, SolidConduitInboxConfig.INPUT_PORTS);
 		go.AddOrGet<LogicOperationalController>();
 		Prioritizable.AddRef(go);
-		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddOrGet<EnergyConsumer>();
 		go.AddOrGet<Automatable>();
 		List<Tag> list = new List<Tag>();

@@ -196,10 +196,7 @@ public class Diggable : Workable
 		{
 			return;
 		}
-		if (this.unstableEntry != null)
-		{
-			this.unstableEntry.Release();
-		}
+		GameScenePartitioner.Instance.Free(ref this.unstableEntry);
 		int num = Grid.PosToCell(this);
 		int num2 = -1;
 		this.UpdateColor(this.isReachable);
@@ -456,14 +453,8 @@ public class Diggable : Workable
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-		}
-		if (this.unstableEntry != null)
-		{
-			this.unstableEntry.Release();
-		}
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
+		GameScenePartitioner.Instance.Free(ref this.unstableEntry);
 		Game.Instance.Unsubscribe(this.handle);
 		int num = Grid.PosToCell(this);
 		GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.digDestroyedLayer, null);
@@ -488,9 +479,9 @@ public class Diggable : Workable
 		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 	}
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 
-	private GameScenePartitionerEntry unstableEntry;
+	private HandleVector<int>.Handle unstableEntry;
 
 	private MeshRenderer childRenderer;
 

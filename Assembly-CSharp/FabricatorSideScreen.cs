@@ -260,7 +260,7 @@ public class FabricatorSideScreen : SideScreenContent
 			string text2;
 			if (GameTags.DisplayAsCalories.Contains(tag))
 			{
-				EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(tag.Name);
+				EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(tag.Name);
 				float num = foodInfo.CaloriesPerUnit * ingredient.amount;
 				text = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
 				float num2 = WorldInventory.Instance.GetAmount(tag) * foodInfo.CaloriesPerUnit;

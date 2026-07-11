@@ -21,6 +21,13 @@ public class GameNavGrids
 			new CellOffset(0, 0),
 			new CellOffset(0, 1)
 		});
+		this.FlyerGrid2x2 = this.CreateFlyerNavigation(pathfinding, "FlyerNavGrid2x2", new CellOffset[]
+		{
+			new CellOffset(0, 0),
+			new CellOffset(0, 1),
+			new CellOffset(1, 0),
+			new CellOffset(1, 1)
+		});
 		this.CreateSwimmerNavigation(pathfinding);
 	}
 
@@ -943,7 +950,7 @@ public class GameNavGrids
 		{
 			new GameNavGrids.FlyingValidator(),
 			new GameNavGrids.SwimValidator()
-		}, 1, 1, array2.Length);
+		}, 2, 2, array2.Length);
 		pathfinding.AddNavGrid(navGrid);
 		return navGrid;
 	}
@@ -1049,6 +1056,8 @@ public class GameNavGrids
 	public NavGrid FlyerGrid1x2;
 
 	public NavGrid FlyerGrid1x1;
+
+	public NavGrid FlyerGrid2x2;
 
 	public NavGrid SwimmerGrid;
 

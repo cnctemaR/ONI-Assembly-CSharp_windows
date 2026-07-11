@@ -111,7 +111,7 @@ public class Operational : KMonoBehaviour
 		if (this.IsActive != value)
 		{
 			this.IsActive = value;
-			base.Trigger(824508782, this.IsActive);
+			base.Trigger(824508782, this);
 			Game.Instance.Trigger(-809948329, base.gameObject);
 		}
 	}

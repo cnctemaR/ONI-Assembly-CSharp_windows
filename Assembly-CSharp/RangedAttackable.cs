@@ -20,16 +20,6 @@ public class RangedAttackable : AttackableBase
 		return Grid.PosToCell(this);
 	}
 
-	public new bool ShouldPreferUnreservedCell()
-	{
-		return true;
-	}
-
-	public new bool ShouldPreferPrimaryCell()
-	{
-		return false;
-	}
-
 	private void OnDrawGizmosSelected()
 	{
 		Gizmos.color = new Color(0f, 0.5f, 0.5f, 0.15f);

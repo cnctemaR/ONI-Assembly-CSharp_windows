@@ -1,17 +1,15 @@
 ﻿using System;
 using UnityEngine;
 
-public class TravelTubeNavMask : NavMask
+internal struct TravelTubeNavMask
 {
-	public TravelTubeNavMask(GameObject agent)
+	public TravelTubeNavMask(Navigator navigator)
 	{
-		this.agent = agent.GetComponent<Navigator>();
 	}
 
-	public override bool IsTraversable(PathFinder.PotentialPath path, int from_cell, int cost, int transition_id, PathFinderAbilities abilities)
+	public bool IsTraversable(Navigator agent, PathFinder.PotentialPath path, int from_cell, NavType from_nav_type, int cost, int transition_id)
 	{
-		NavGrid.Transition transition = this.agent.NavGrid.transitions[transition_id];
-		if (transition.start != NavType.Floor || transition.end != NavType.Tube)
+		if (path.navType != NavType.Tube || from_nav_type != NavType.Floor)
 		{
 			return true;
 		}
@@ -25,8 +23,6 @@ public class TravelTubeNavMask : NavMask
 			return false;
 		}
 		TravelTubeEntrance component = gameObject.GetComponent<TravelTubeEntrance>();
-		return component && component.IsTraversable(this.agent);
+		return component && component.IsTraversable(agent);
 	}
-
-	private Navigator agent;
 }

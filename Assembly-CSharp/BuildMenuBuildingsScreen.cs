@@ -271,6 +271,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		{
 			return;
 		}
+		BuildingDef buildingDef = null;
 		foreach (KIconToggleMenu.ToggleInfo toggleInfo in this.toggleInfo)
 		{
 			this.RefreshToggle(toggleInfo);
@@ -281,11 +282,18 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 				PlanScreen.RequirementsState requirementsState = BuildMenu.Instance.BuildableState(def);
 				if (requirementsState != userData.requirementsState)
 				{
-					BuildMenu.Instance.RefreshProductInfoScreen(def);
+					if (def == BuildMenu.Instance.SelectedBuildingDef)
+					{
+						buildingDef = def;
+					}
 					this.RefreshToggle(toggleInfo);
 					userData.requirementsState = requirementsState;
 				}
 			}
+		}
+		if (buildingDef != null)
+		{
+			BuildMenu.Instance.RefreshProductInfoScreen(buildingDef);
 		}
 	}
 

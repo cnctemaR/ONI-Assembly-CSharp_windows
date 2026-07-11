@@ -90,6 +90,9 @@ public class AudioMixerSnapshots : ScriptableObject
 	[EventRef]
 	public string SpaceVisibleSnapshot;
 
+	[EventRef]
+	public string MENUStarmapSnapshot;
+
 	[SerializeField]
 	[EventRef]
 	private string[] snapshots;

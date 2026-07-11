@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class BatchSet
 {
@@ -10,15 +9,12 @@ public class BatchSet
 		this.key = batchKey;
 		this.dirty = true;
 		this.group = batchGroup;
-		this.bounds = new Bounds(new Vector2((float)this.idx.x + 0.5f, (float)this.idx.y + 0.5f), Vector2.one);
 		this.batches = new List<KAnimBatch>();
 	}
 
 	public KAnimBatchGroup group { get; private set; }
 
 	private protected List<KAnimBatch> batches { protected get; private set; }
-
-	public Bounds bounds { get; private set; }
 
 	public Vector2I idx { get; private set; }
 
@@ -61,12 +57,12 @@ public class BatchSet
 		int layer = controller.GetLayer();
 		if (layer != this.key.layer)
 		{
-			global::Debug.LogError("Registering with wrong batch set (layer) " + controller.GetName(), null);
+			Debug.LogError("Registering with wrong batch set (layer) " + controller.GetName(), null);
 		}
 		HashedString batchGroupID = controller.GetBatchGroupID(false);
 		if (!(batchGroupID == this.key.groupID))
 		{
-			global::Debug.LogError("Registering with wrong batch set (groupID) " + controller.GetName(), null);
+			Debug.LogError("Registering with wrong batch set (groupID) " + controller.GetName(), null);
 		}
 		KAnimBatchGroup.MaterialType materialType = controller.GetMaterialType();
 		for (int i = 0; i < this.batches.Count; i++)
@@ -124,7 +120,6 @@ public class BatchSet
 	{
 		if (isActive != this.active)
 		{
-			this.batches.RemoveAll((KAnimBatch b) => b == null);
 			if (!isActive)
 			{
 				for (int i = 0; i < this.batches.Count; i++)

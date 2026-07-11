@@ -7,11 +7,16 @@ namespace UnityStandardAssets.ImageEffects
 	[AddComponentMenu("Image Effects/Color Adjustments/Color Correction (3D Lookup Texture)")]
 	public class ColorCorrectionLookup : PostEffectsBase
 	{
+		private void Awake()
+		{
+			this.supports3dTextures = SystemInfo.supports3DTextures;
+			base.CheckSupport(false);
+		}
+
 		public override bool CheckResources()
 		{
-			base.CheckSupport(false);
 			this.material = base.CheckShaderAndCreateMaterial(this.shader, this.material);
-			if (!this.isSupported || !SystemInfo.supports3DTextures)
+			if (!this.isSupported || !this.supports3dTextures)
 			{
 				base.ReportAutoDisable();
 			}
@@ -138,7 +143,7 @@ namespace UnityStandardAssets.ImageEffects
 
 		private void OnRenderImage(RenderTexture source, RenderTexture destination)
 		{
-			if (!this.CheckResources() || !SystemInfo.supports3DTextures)
+			if (!this.CheckResources() || !this.supports3dTextures)
 			{
 				Graphics.Blit(source, destination);
 				return;
@@ -169,5 +174,7 @@ namespace UnityStandardAssets.ImageEffects
 		public Texture3D converted3DLut2;
 
 		public string basedOnTempTex = string.Empty;
+
+		private bool supports3dTextures;
 	}
 }

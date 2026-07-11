@@ -1,0 +1,62 @@
+﻿using System;
+using UnityEngine;
+
+public class CommandModuleWorkable : Workable
+{
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		base.SetOffsets(CommandModuleWorkable.entryOffsets);
+		this.synchronizeAnims = false;
+		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_incubator_kanim") };
+		base.SetWorkTime(float.PositiveInfinity);
+		this.showProgressBar = false;
+		base.Subscribe(-1056989049, new Action<object>(this.OnLaunch));
+	}
+
+	private void OnLaunch(object data)
+	{
+		this.launching = true;
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+	}
+
+	protected override void OnStartWork(Worker worker)
+	{
+		base.OnStartWork(worker);
+	}
+
+	protected override bool OnWorkTick(Worker worker, float dt)
+	{
+		if (worker != null)
+		{
+			GameObject gameObject = worker.gameObject;
+			base.CompleteWork(worker);
+			base.GetComponent<MinionStorage>().SerializeMinion(gameObject);
+			return true;
+		}
+		return base.OnWorkTick(worker, dt);
+	}
+
+	protected override void OnStopWork(Worker worker)
+	{
+		base.OnStopWork(worker);
+	}
+
+	protected override void OnCompleteWork(Worker worker)
+	{
+	}
+
+	private bool launching;
+
+	private static CellOffset[] entryOffsets = new CellOffset[]
+	{
+		new CellOffset(0, 0),
+		new CellOffset(0, 1),
+		new CellOffset(0, 2),
+		new CellOffset(0, 3),
+		new CellOffset(0, 4)
+	};
+}

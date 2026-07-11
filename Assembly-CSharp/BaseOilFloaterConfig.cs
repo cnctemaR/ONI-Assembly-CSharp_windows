@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -12,7 +13,7 @@ public static class BaseOilFloaterConfig
 		EffectorValues tier = DECOR.BONUS.TIER1;
 		float num2 = (warnLowTemp + warnHighTemp) / 2f;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, anim, text, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, num2);
-		gameObject.GetComponent<KPrefabID>().AddPrefabTag(GameTags.Creatures.GroundBased);
+		gameObject.GetComponent<KPrefabID>().AddTag(GameTags.Creatures.GroundBased);
 		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, "FloaterNavGrid", NavType.Hover, 32, 2f, "Meat", 2, false, false, warnLowTemp, warnHighTemp, warnLowTemp - 15f, warnHighTemp + 20f);
 		if (!string.IsNullOrEmpty(symbolOverridePrefix))
 		{
@@ -25,7 +26,7 @@ public static class BaseOilFloaterConfig
 		CreatureFallMonitor.Def def = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
 		def.canSwim = true;
 		gameObject.AddWeapon(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
-		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true);
+		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false);
 		string text2 = "OilFloater_intake_air";
 		if (is_baby)
 		{
@@ -43,36 +44,30 @@ public static class BaseOilFloaterConfig
 			.Add(new CreatureSleepStates.Def(), true)
 			.Add(new FixedCaptureStates.Def(), true)
 			.Add(new RanchedStates.Def(), true)
+			.Add(new LayEggStates.Def(), true)
 			.Add(new InhaleStates.Def
 			{
 				inhaleSound = text2
 			}, true)
-			.Add(new LayEggStates.Def(), true)
 			.Add(new SameSpotPoopStates.Def(), true)
 			.Add(new CallAdultStates.Def(), true)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.OilFloaterSpecies, symbolOverridePrefix);
-		string move_sound = "OilFloater_move_LP";
+		string text3 = "OilFloater_move_LP";
 		if (is_baby)
 		{
-			move_sound = "OilFloaterBaby_move_LP";
+			text3 = "OilFloaterBaby_move_LP";
 		}
-		gameObject.AddOrGet<KPrefabID>().prefabSpawnFn += delegate(GameObject inst)
-		{
-			inst.Subscribe(1027377649, delegate(object data)
-			{
-				BaseOilFloaterConfig.OnObjectMovementStateChanged(inst, data, move_sound);
-			});
-		};
+		gameObject.AddOrGet<OilFloaterMovementSound>().sound = text3;
 		return gameObject;
 	}
 
-	public static GameObject SetupDiet(GameObject prefab, Tag consumedTag, Tag producedTag, float caloriesPerKg, float producedConversionRate, string diseaseId, float diseasePerKgProduced, float minPoopSizeInKg)
+	public static GameObject SetupDiet(GameObject prefab, Tag consumed_tag, Tag producedTag, float caloriesPerKg, float producedConversionRate, string diseaseId, float diseasePerKgProduced, float minPoopSizeInKg)
 	{
 		Diet.Info[] array = new Diet.Info[]
 		{
-			new Diet.Info(consumedTag, producedTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced)
+			new Diet.Info(new HashSet<Tag> { consumed_tag }, producedTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced)
 		};
 		Diet diet = new Diet(array);
 		CreatureCalorieMonitor.Def def = prefab.AddOrGetDef<CreatureCalorieMonitor.Def>();
@@ -81,27 +76,5 @@ public static class BaseOilFloaterConfig
 		GasAndLiquidConsumerMonitor.Def def2 = prefab.AddOrGetDef<GasAndLiquidConsumerMonitor.Def>();
 		def2.diet = diet;
 		return prefab;
-	}
-
-	public static void OnObjectMovementStateChanged(GameObject inst, object data, string sound)
-	{
-		string sound2 = GlobalAssets.GetSound(sound, false);
-		GameHashes gameHashes = (GameHashes)data;
-		if (gameHashes == GameHashes.ObjectMovementWakeUp)
-		{
-			LoopingSounds component = inst.GetComponent<LoopingSounds>();
-			if (component != null)
-			{
-				component.StartSound(sound2);
-			}
-		}
-		else
-		{
-			LoopingSounds component2 = inst.GetComponent<LoopingSounds>();
-			if (component2 != null)
-			{
-				component2.StopSound(sound2);
-			}
-		}
 	}
 }

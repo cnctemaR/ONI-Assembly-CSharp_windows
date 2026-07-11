@@ -55,7 +55,7 @@ public class GlassTileConfig : IBuildingConfig
 		BuildingHP buildingHP = go.AddOrGet<BuildingHP>();
 		buildingHP.destroyOnDamaged = true;
 		KPrefabID component = go.GetComponent<KPrefabID>();
-		component.AddPrefabTag(GameTags.Window);
+		component.AddTag(GameTags.Window);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

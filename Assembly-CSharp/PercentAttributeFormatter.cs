@@ -2,30 +2,24 @@
 using Klei.AI;
 using UnityEngine;
 
-public class PercentAttributeFormatter : IAttributeFormatter
+public class PercentAttributeFormatter : StandardAttributeFormatter
 {
-	public GameUtil.TimeSlice DeltaTimeSlice
+	public PercentAttributeFormatter()
+		: base(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.None)
 	{
-		get
-		{
-			return GameUtil.TimeSlice.None;
-		}
-		set
-		{
-		}
 	}
 
-	public string GetFormattedAttribute(AttributeInstance instance)
+	public override string GetFormattedAttribute(AttributeInstance instance)
 	{
-		return this.GetFormattedValue(instance.GetTotalDisplayValue(), this.DeltaTimeSlice, instance.gameObject);
+		return this.GetFormattedValue(instance.GetTotalDisplayValue(), base.DeltaTimeSlice, instance.gameObject);
 	}
 
-	public string GetFormattedModifier(AttributeModifier modifier, GameObject parent_instance)
+	public override string GetFormattedModifier(AttributeModifier modifier, GameObject parent_instance)
 	{
-		return this.GetFormattedValue(modifier.Value, this.DeltaTimeSlice, parent_instance);
+		return this.GetFormattedValue(modifier.Value, base.DeltaTimeSlice, parent_instance);
 	}
 
-	public string GetFormattedValue(float value, GameUtil.TimeSlice timeSlice, GameObject parent_instance)
+	public override string GetFormattedValue(float value, GameUtil.TimeSlice timeSlice, GameObject parent_instance)
 	{
 		return GameUtil.GetFormattedPercent(value * 100f, timeSlice);
 	}

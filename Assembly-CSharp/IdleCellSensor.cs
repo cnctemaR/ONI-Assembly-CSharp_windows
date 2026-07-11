@@ -13,7 +13,9 @@ public class IdleCellSensor : Sensor
 	public override void Update()
 	{
 		IdleCellQuery idleCellQuery = PathFinderQueries.idleCellQuery.Reset(this.brain, global::UnityEngine.Random.Range(3, 6));
+		(this.brain.GetComponent<Navigator>().GetCurrentAbilities() as MinionPathFinderAbilities).SetIdleNavMaskEnabled(true);
 		this.navigator.RunQuery(idleCellQuery);
+		(this.brain.GetComponent<Navigator>().GetCurrentAbilities() as MinionPathFinderAbilities).SetIdleNavMaskEnabled(false);
 		this.cell = idleCellQuery.GetResultCell();
 	}
 

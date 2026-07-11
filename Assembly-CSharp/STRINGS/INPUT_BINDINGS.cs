@@ -137,6 +137,8 @@ namespace STRINGS
 			public static LocString MANAGEROLES = "ManageRoles";
 
 			public static LocString MANAGESCHEDULE = "ManageSchedule";
+
+			public static LocString MANAGESTARMAP = "ManageStarmap";
 		}
 
 		public class NAVIGATION
@@ -390,6 +392,8 @@ namespace STRINGS
 			public static LocString BUILDCATEGORYREFINING = "BuildCategoryRefining";
 
 			public static LocString BUILDCATEGORYEQUIPMENT = "BuildCategoryEquipment";
+
+			public static LocString BUILDCATEGORYROCKETRY = "BuildCategoryRocketry";
 		}
 
 		public class LOGISTICSMENU

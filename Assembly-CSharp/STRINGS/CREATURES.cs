@@ -23,6 +23,8 @@ namespace STRINGS
 			public static LocString PUFT = UI.FormatAsLink("Puft", "PUFTSPECIES");
 
 			public static LocString PACU = UI.FormatAsLink("Pacu", "PACUSPECIES");
+
+			public static LocString MOO = UI.FormatAsLink("Moo", "MOOSPECIES");
 		}
 
 		public class FAMILY_PLURAL
@@ -40,6 +42,8 @@ namespace STRINGS
 			public static LocString PUFTSPECIES = UI.FormatAsLink("Pufts", "PUFTSPECIES");
 
 			public static LocString PACUSPECIES = UI.FormatAsLink("Pacus", "PACUSPECIES");
+
+			public static LocString MOOSPECIES = UI.FormatAsLink("Moos", "MOOSPECIES");
 		}
 
 		public class SPECIES
@@ -379,6 +383,20 @@ namespace STRINGS
 				}
 			}
 
+			public class MOO
+			{
+				public static LocString NAME = UI.FormatAsLink("Gassy Moo", "MOO");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Moos are extraterrestrial critters that feed on ",
+					UI.FormatAsLink("Gas Grass", "GASGRASS"),
+					" and excrete ",
+					UI.FormatAsLink("Natural Gas", "METHANE"),
+					"."
+				});
+			}
+
 			public class GREEDYGREEN
 			{
 				public static LocString NAME = UI.FormatAsLink("Avari Vine", "GREEDYGREEN");
@@ -522,7 +540,7 @@ namespace STRINGS
 				{
 					public static LocString NAME = UI.FormatAsLink("Cool Steam Vent", "GeyserGeneric_STEAM");
 
-					public static LocString DESC = "A highly pressurized vent that periodically erupts with hot " + ELEMENTS.STEAM.NAME + ".";
+					public static LocString DESC = "A highly pressurized vent that periodically erupts with " + ELEMENTS.STEAM.NAME + ".";
 				}
 
 				public class HOT_STEAM
@@ -767,6 +785,15 @@ namespace STRINGS
 				public static LocString DOMESTICATEDDESC = "This plant produces edible " + ITEMS.FOOD.COLDWHEATSEED.NAME + ".";
 			}
 
+			public class GASGRASS
+			{
+				public static LocString NAME = UI.FormatAsLink("Gas Grass", "GASGRASS");
+
+				public static LocString DESC = "Gas grass.";
+
+				public static LocString DOMESTICATEDDESC = "An alien grass variety that is eaten by Space Cows";
+			}
+
 			public class PRICKLEGRASS
 			{
 				public static LocString NAME = UI.FormatAsLink("Bluff Briar", "PRICKLEGRASS");
@@ -798,7 +825,7 @@ namespace STRINGS
 
 			public class BASICFABRICMATERIALPLANT
 			{
-				public static LocString NAME = UI.FormatAsLink("Thimble Reed", "BASICFABRICMATERIALPLANT");
+				public static LocString NAME = UI.FormatAsLink("Thimble Reed", "BASICFABRICPLANT");
 
 				public static LocString DESC = string.Concat(new string[]
 				{
@@ -894,6 +921,22 @@ namespace STRINGS
 					});
 				}
 
+				public class GASGRASS
+				{
+					public static LocString NAME = UI.FormatAsLink("Gas Grass Seed", "GASGRASS");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"The ",
+						UI.FormatAsLink("seed", "Seeds"),
+						" of a ",
+						CREATURES.SPECIES.GASGRASS.NAME,
+						" plant.\n\nUsed as feed for",
+						UI.FormatAsLink("Gassy Moos", "MOO"),
+						"."
+					});
+				}
+
 				public class PRICKLEGRASS
 				{
 					public static LocString NAME = UI.FormatAsLink("Briar Seed", "PRICKLEGRASS");
@@ -952,7 +995,7 @@ namespace STRINGS
 
 				public class BASICFABRICMATERIALPLANT
 				{
-					public static LocString NAME = UI.FormatAsLink("Thimble Reed Seed", "BASICFABRICMATERIALPLANT");
+					public static LocString NAME = UI.FormatAsLink("Thimble Reed Seed", "BASICFABRICPLANT");
 
 					public static LocString DESC = string.Concat(new string[]
 					{
@@ -1340,6 +1383,19 @@ namespace STRINGS
 				public static LocString NAME = "Growing [{PercentGrow}%]";
 
 				public static LocString TOOLTIP = "Next harvest: {TimeUntilNextHarvest}";
+			}
+
+			public class CROP_SLEEPING
+			{
+				public static LocString NAME = "Sleeping [{REASON}]";
+
+				public static LocString TOOLTIP = "Requires: {REQUIREMENTS}";
+
+				public static LocString REQUIREMENT_LUMINANCE = "{0} Lux";
+
+				public static LocString REASON_TOO_DARK = "Too Dark";
+
+				public static LocString REASON_TOO_BRIGHT = "Too Bright";
 			}
 
 			public class NEEDSFERTILIZER

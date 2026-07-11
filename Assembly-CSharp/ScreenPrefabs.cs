@@ -66,6 +66,8 @@ public class ScreenPrefabs : KMonoBehaviour
 
 	public LanguageOptionsScreen languageOptionsScreen;
 
+	public ScenariosMenu scenariosMenu;
+
 	public GameObject GameOverScreen;
 
 	public GameObject StatusItemIndicatorScreen;
@@ -83,6 +85,8 @@ public class ScreenPrefabs : KMonoBehaviour
 	public OptionsMenuScreen OptionsScreen;
 
 	public WorldGenScreen WorldGenScreen;
+
+	public ModeSelectScreen ModeSelectScreen;
 
 	public NewGameSettingsScreen NewGameSettingsScreen;
 }

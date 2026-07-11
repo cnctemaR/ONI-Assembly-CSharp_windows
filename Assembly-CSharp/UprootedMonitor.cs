@@ -34,7 +34,7 @@ public class UprootedMonitor : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		this.partitionerEntry.Release();
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		base.OnCleanUp();
 	}
 
@@ -75,5 +75,5 @@ public class UprootedMonitor : KMonoBehaviour
 
 	public CellOffset monitorCell = new CellOffset(0, -1);
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 }

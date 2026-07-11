@@ -10,23 +10,23 @@ public class MinionVitalsPanel : KMonoBehaviour
 {
 	public void Init()
 	{
-		this.AddAmountLine(Db.Get().Amounts.HitPoints, this.icon_hitpoints, null);
-		this.AddAttributeLine(Db.Get().CritterAttributes.Happiness, this.icon_happiness, null);
-		this.AddAmountLine(Db.Get().Amounts.Wildness, this.icon_wildness, null);
-		this.AddAmountLine(Db.Get().Amounts.Incubation, this.icon_incubation, null);
-		this.AddAmountLine(Db.Get().Amounts.Viability, this.icon_hitpoints, null);
-		this.AddAmountLine(Db.Get().Amounts.Fertility, this.icon_reproduction, null);
-		this.AddAmountLine(Db.Get().Amounts.Age, this.icon_age, null);
-		this.AddAmountLine(Db.Get().Amounts.Stress, this.icon_stress, null);
-		this.AddAttributeLine(Db.Get().Attributes.QualityOfLife, this.icon_qualityoflife, null);
-		this.AddAmountLine(Db.Get().Amounts.Bladder, this.icon_bladder, null);
-		this.AddAmountLine(Db.Get().Amounts.Breath, this.icon_breath, null);
-		this.AddAmountLine(Db.Get().Amounts.Stamina, this.icon_stamina, null);
-		this.AddAmountLine(Db.Get().Amounts.Calories, this.icon_calories, null);
-		this.AddAmountLine(Db.Get().Amounts.ImmuneLevel, this.icon_disease, null);
-		this.AddAmountLine(Db.Get().Amounts.ScaleGrowth, this.icon_scale_growth, null);
-		this.AddAmountLine(Db.Get().Amounts.Temperature, this.icon_temperature, null);
-		this.AddAmountLine(Db.Get().Amounts.Decor, this.icon_decor, null);
+		this.AddAmountLine(Db.Get().Amounts.HitPoints, null);
+		this.AddAttributeLine(Db.Get().CritterAttributes.Happiness, null);
+		this.AddAmountLine(Db.Get().Amounts.Wildness, null);
+		this.AddAmountLine(Db.Get().Amounts.Incubation, null);
+		this.AddAmountLine(Db.Get().Amounts.Viability, null);
+		this.AddAmountLine(Db.Get().Amounts.Fertility, null);
+		this.AddAmountLine(Db.Get().Amounts.Age, null);
+		this.AddAmountLine(Db.Get().Amounts.Stress, null);
+		this.AddAttributeLine(Db.Get().Attributes.QualityOfLife, null);
+		this.AddAmountLine(Db.Get().Amounts.Bladder, null);
+		this.AddAmountLine(Db.Get().Amounts.Breath, null);
+		this.AddAmountLine(Db.Get().Amounts.Stamina, null);
+		this.AddAmountLine(Db.Get().Amounts.Calories, null);
+		this.AddAmountLine(Db.Get().Amounts.ImmuneLevel, null);
+		this.AddAmountLine(Db.Get().Amounts.ScaleGrowth, null);
+		this.AddAmountLine(Db.Get().Amounts.Temperature, null);
+		this.AddAmountLine(Db.Get().Amounts.Decor, null);
 		this.AddCheckboxLine(Db.Get().Amounts.AirPressure, this.conditionsContainerNormal, (GameObject go) => this.GetAirPressureLabel(go), delegate(GameObject go)
 		{
 			if (go.GetComponent<PressureVulnerable>() != null && go.GetComponent<PressureVulnerable>().pressure_sensitive)
@@ -83,10 +83,10 @@ public class MinionVitalsPanel : KMonoBehaviour
 		SimAndRenderScheduler.instance.Remove(this);
 	}
 
-	private void AddAmountLine(Amount amount, Sprite icon, Func<AmountInstance, string> tooltip_func = null)
+	private void AddAmountLine(Amount amount, Func<AmountInstance, string> tooltip_func = null)
 	{
 		GameObject gameObject = Util.KInstantiateUI(this.LineItemPrefab, base.gameObject, false);
-		gameObject.GetComponentInChildren<Image>().sprite = icon;
+		gameObject.GetComponentInChildren<Image>().sprite = Assets.GetSprite(amount.uiSprite);
 		gameObject.GetComponent<ToolTip>().refreshWhileHovering = true;
 		gameObject.SetActive(true);
 		MinionVitalsPanel.AmountLine amountLine = default(MinionVitalsPanel.AmountLine);
@@ -99,10 +99,10 @@ public class MinionVitalsPanel : KMonoBehaviour
 		this.amountsLines.Add(amountLine);
 	}
 
-	private void AddAttributeLine(Klei.AI.Attribute attribute, Sprite icon, Func<AttributeInstance, string> tooltip_func = null)
+	private void AddAttributeLine(Klei.AI.Attribute attribute, Func<AttributeInstance, string> tooltip_func = null)
 	{
 		GameObject gameObject = Util.KInstantiateUI(this.LineItemPrefab, base.gameObject, false);
-		gameObject.GetComponentInChildren<Image>().sprite = icon;
+		gameObject.GetComponentInChildren<Image>().sprite = Assets.GetSprite(attribute.uiSprite);
 		gameObject.GetComponent<ToolTip>().refreshWhileHovering = true;
 		gameObject.SetActive(true);
 		MinionVitalsPanel.AttributeLine attributeLine = default(MinionVitalsPanel.AttributeLine);
@@ -446,13 +446,13 @@ public class MinionVitalsPanel : KMonoBehaviour
 	private bool check_pressure(GameObject go)
 	{
 		PressureVulnerable component = go.GetComponent<PressureVulnerable>();
-		return !(component != null) || component.GetExternalPressureState == PressureVulnerable.PressureState.Normal || component.GetExternalPressureState == PressureVulnerable.PressureState.Perfect;
+		return !(component != null) || component.GetExternalPressureState == PressureVulnerable.PressureState.Normal;
 	}
 
 	private bool check_temperature(GameObject go)
 	{
 		TemperatureVulnerable component = go.GetComponent<TemperatureVulnerable>();
-		return !(component != null) || component.GetInternalTemperatureState == TemperatureVulnerable.TemperatureState.Normal || component.GetInternalTemperatureState == TemperatureVulnerable.TemperatureState.Perfect;
+		return !(component != null) || component.GetInternalTemperatureState == TemperatureVulnerable.TemperatureState.Normal;
 	}
 
 	private bool check_irrigation(GameObject go)
@@ -484,40 +484,6 @@ public class MinionVitalsPanel : KMonoBehaviour
 		PressureVulnerable component = go.GetComponent<PressureVulnerable>();
 		return !(component != null) || component.IsSafeElement(Grid.Element[Grid.PosToCell(go)]);
 	}
-
-	public Sprite icon_stress;
-
-	public Sprite icon_breath;
-
-	public Sprite icon_stamina;
-
-	public Sprite icon_calories;
-
-	public Sprite icon_temperature;
-
-	public Sprite icon_bladder;
-
-	public Sprite icon_decor;
-
-	public Sprite icon_hitpoints;
-
-	public Sprite icon_maturity;
-
-	public Sprite icon_disease;
-
-	public Sprite icon_qualityoflife;
-
-	public Sprite icon_age;
-
-	public Sprite icon_happiness;
-
-	public Sprite icon_incubation;
-
-	public Sprite icon_reproduction;
-
-	public Sprite icon_scale_growth;
-
-	public Sprite icon_wildness;
 
 	public GameObject LineItemPrefab;
 

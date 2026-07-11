@@ -14,6 +14,11 @@ public static class DictionaryPool<KeyType, ObjectType, PoolIdentifier>
 		DictionaryPool<KeyType, ObjectType, PoolIdentifier>.pool.Free(dictionary);
 	}
 
+	public static ContainerPool GetPool()
+	{
+		return DictionaryPool<KeyType, ObjectType, PoolIdentifier>.pool;
+	}
+
 	private static ContainerPool<DictionaryPool<KeyType, ObjectType, PoolIdentifier>.PooledDictionary, PoolIdentifier> pool = new ContainerPool<DictionaryPool<KeyType, ObjectType, PoolIdentifier>.PooledDictionary, PoolIdentifier>();
 
 	public class PooledDictionary : Dictionary<KeyType, ObjectType>

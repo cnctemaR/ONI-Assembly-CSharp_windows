@@ -33,16 +33,12 @@ public abstract class KCollider2D : KMonoBehaviour, IRenderEveryTick
 	{
 		base.OnCleanUp();
 		Singleton<CellChangeMonitor>.Instance.UnregisterMovementStateChanged(base.transform, new Action<Transform, bool>(KCollider2D.OnMovementStateChanged));
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-			this.partitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 	}
 
 	public void MarkDirty(bool force = false)
 	{
-		bool flag = force || this.partitionerEntry != null;
+		bool flag = force || this.partitionerEntry.IsValid();
 		if (!flag)
 		{
 			return;
@@ -53,11 +49,7 @@ public abstract class KCollider2D : KMonoBehaviour, IRenderEveryTick
 			return;
 		}
 		this.cachedExtents = extents;
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-			this.partitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		if (flag)
 		{
 			this.partitionerEntry = GameScenePartitioner.Instance.Add(base.name, this, this.cachedExtents, GameScenePartitioner.Instance.collisionLayer, null);
@@ -98,5 +90,5 @@ public abstract class KCollider2D : KMonoBehaviour, IRenderEveryTick
 
 	private Extents cachedExtents;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 }

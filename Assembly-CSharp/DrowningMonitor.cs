@@ -28,7 +28,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.timeToDrown = 15f;
+		this.timeToDrown = 75f;
 	}
 
 	protected override void OnSpawn()
@@ -41,10 +41,10 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 
 	private void OnMove()
 	{
-		if (this.partitionerEntry != null)
+		if (this.partitionerEntry.IsValid())
 		{
 			Extents extents = this.occupyArea.GetExtents();
-			this.partitionerEntry.UpdatePosition(extents.x, extents.y);
+			GameScenePartitioner.Instance.UpdatePosition(this.partitionerEntry, extents.x, extents.y);
 		}
 		else
 		{
@@ -56,10 +56,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 	protected override void OnCleanUp()
 	{
 		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove));
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-		}
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		base.OnCleanUp();
 	}
 
@@ -139,11 +136,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 	{
 		get
 		{
-			if (this.drowning)
-			{
-				return Db.Get().CreatureStatusItems.Drowning.resolveStringCallback(CREATURES.STATUSITEMS.DROWNING.NAME, this);
-			}
-			return string.Empty;
+			return CREATURES.STATUSITEMS.DROWNING.NAME;
 		}
 	}
 
@@ -169,7 +162,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 		else
 		{
 			this.timeToDrown += dt * 5f;
-			this.timeToDrown = Mathf.Clamp(this.timeToDrown, 0f, 15f);
+			this.timeToDrown = Mathf.Clamp(this.timeToDrown, 0f, 75f);
 		}
 	}
 
@@ -184,7 +177,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 
 	private bool drowning;
 
-	protected const float MaxDrownTime = 15f;
+	protected const float MaxDrownTime = 75f;
 
 	protected const float RegenRate = 5f;
 
@@ -192,5 +185,5 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 
 	private Extents extents;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 }

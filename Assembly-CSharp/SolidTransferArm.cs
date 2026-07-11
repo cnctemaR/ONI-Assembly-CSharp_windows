@@ -74,16 +74,15 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		base.Subscribe(1745615042, new Action<object>(this.OnEndChore));
 		this.RotateArm(this.rotatable.GetRotatedOffset(Vector3.up), true, 0f);
 		this.DropLeftovers();
+		component.enabled = false;
+		component.enabled = true;
 		base.smi.StartSM();
 	}
 
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		if (this.pickupablesChangedEntry != null)
-		{
-			this.pickupablesChangedEntry.Release();
-		}
+		GameScenePartitioner.Instance.Free(ref this.pickupablesChangedEntry);
 	}
 
 	public void Sim1000ms(float dt)
@@ -166,17 +165,18 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		}
 		this.pickupables.Clear();
 		int num = Grid.PosToCell(this);
-		foreach (Pickupable pickupable in FetchManager.Instance.pickupables)
+		foreach (KeyValuePair<Tag, FetchManager.FecthablesByPrefabId> keyValuePair in Game.Instance.fetchManager.prefabIdToFetchables)
 		{
-			if (!(pickupable == null))
+			foreach (FetchManager.Fetchable fetchable in keyValuePair.Value.fetchables.GetDataList())
 			{
+				Pickupable pickupable = fetchable.pickupable;
 				int pickupableCell = this.GetPickupableCell(pickupable);
 				int cellRange = Grid.GetCellRange(num, pickupableCell);
 				if (cellRange <= this.pickupRange)
 				{
 					if (this.IsPickupableRelevantToMyInterests(pickupable))
 					{
-						if (pickupable.CouldBePickedUp(base.gameObject, true))
+						if (pickupable.CouldBePickedUpByTransferArm(base.gameObject))
 						{
 							this.pickupables.Add(pickupable);
 						}
@@ -222,7 +222,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.RefreshPickupables();
 		foreach (Pickupable pickupable in this.pickupables)
 		{
-			bool flag = FetchManagerUpdater.IsFetchablePickup(pickupable.KPrefabID, pickupable.storage, pickupable.UnreservedAmount, pickupable.MinTakeAmount, required_amount, tag_bits, required_tags, forbid_tags, destination);
+			bool flag = FetchManager.IsFetchablePickup(pickupable.KPrefabID, pickupable.storage, pickupable.UnreservedAmount, tag_bits, required_tags, forbid_tags, destination);
 			if (flag)
 			{
 				target = pickupable;
@@ -406,7 +406,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	private List<Pickupable> pickupables = new List<Pickupable>();
 
-	private GameScenePartitionerEntry pickupablesChangedEntry;
+	private HandleVector<int>.Handle pickupablesChangedEntry;
 
 	private bool pickupablesDirty;
 

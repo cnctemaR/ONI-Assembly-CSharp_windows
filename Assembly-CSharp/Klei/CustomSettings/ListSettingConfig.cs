@@ -6,13 +6,20 @@ namespace Klei.CustomSettings
 {
 	public class ListSettingConfig : SettingConfig
 	{
-		public ListSettingConfig(string id, string label, string tooltip, List<SettingLevel> levels, string default_level_id)
-			: base(id, label, tooltip, default_level_id)
+		public ListSettingConfig(string id, string label, string tooltip, List<SettingLevel> levels, string default_level_id, string nosweat_default_level_id, bool debug_only)
+			: base(id, label, tooltip, default_level_id, nosweat_default_level_id, debug_only)
 		{
 			this.levels = levels;
 		}
 
 		public List<SettingLevel> levels { get; private set; }
+
+		public void StompLevels(List<SettingLevel> levels, string default_level_id, string nosweat_default_level_id)
+		{
+			this.levels = levels;
+			base.default_level_id = default_level_id;
+			base.nosweat_default_level_id = nosweat_default_level_id;
+		}
 
 		public override SettingLevel GetLevel(string level_id)
 		{

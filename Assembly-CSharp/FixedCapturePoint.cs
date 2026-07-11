@@ -28,19 +28,20 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 	{
 		public Func<GameObject, FixedCapturePoint.Instance, bool> isCreatureEligibleToBeCapturedCb;
 
-		public Action<GameObject> onCaptureCompleteCb;
-
-		public HashedString ranchedPreAnim = "idle_loop";
-
-		public HashedString ranchedLoopAnim = "idle_loop";
-
-		public HashedString ranchedPstAnim = "idle_loop";
-
-		public int interactLoopCount = 1;
-
-		public bool synchronizeBuilding;
-
-		public Func<FixedCapturePoint.Instance, int> getTargetCapturePoint = (FixedCapturePoint.Instance smi) => Grid.PosToCell(smi);
+		public Func<FixedCapturePoint.Instance, int> getTargetCapturePoint = delegate(FixedCapturePoint.Instance smi)
+		{
+			int num = Grid.PosToCell(smi);
+			Navigator component = smi.targetCapturable.GetComponent<Navigator>();
+			if (Grid.IsValidCell(num - 1) && component.CanReach(num - 1))
+			{
+				return num - 1;
+			}
+			if (Grid.IsValidCell(num + 1) && component.CanReach(num + 1))
+			{
+				return num + 1;
+			}
+			return num;
+		};
 	}
 
 	public class OperationalState : GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.State
@@ -56,14 +57,31 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 		public Instance(IStateMachineTarget master, FixedCapturePoint.Def def)
 			: base(master, def)
 		{
+			base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 		}
 
 		public FixedCapturableMonitor.Instance targetCapturable { get; private set; }
 
 		public bool shouldCreatureGoGetCaptured { get; private set; }
 
+		private void OnCopySettings(object data)
+		{
+			GameObject gameObject = (GameObject)data;
+			if (gameObject == null)
+			{
+				return;
+			}
+			FixedCapturePoint.Instance smi = gameObject.GetSMI<FixedCapturePoint.Instance>();
+			if (smi == null)
+			{
+				return;
+			}
+			base.sm.automated.Set(base.sm.automated.Get(smi), this);
+		}
+
 		public Chore CreateChore()
 		{
+			this.FindFixedCapturable();
 			return new FixedCaptureChore(base.GetComponent<KPrefabID>());
 		}
 
@@ -94,6 +112,10 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 			{
 				return false;
 			}
+			if (capturable.HasTag(GameTags.Creatures.Bagged))
+			{
+				return false;
+			}
 			if (capturable.targetCapturePoint != capture_point && !capturable.targetCapturePoint.IsNullOrStopped())
 			{
 				return false;
@@ -113,7 +135,7 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 				return false;
 			}
 			int navigationCost = capturable.GetComponent<Navigator>().GetNavigationCost(capture_cell);
-			if (navigationCost == PathProber.InvalidCost)
+			if (navigationCost == -1)
 			{
 				return false;
 			}
@@ -128,12 +150,12 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num);
 			if (cavityForCell == null)
 			{
-				this.TriggerFixedCapturePointNoLongerAvailable();
+				this.ResetCapturePoint();
 				return;
 			}
 			if (!this.targetCapturable.IsNullOrStopped() && !FixedCapturePoint.Instance.CanCapturableBeCapturedAtCapturePoint(this.targetCapturable, this, cavityForCell, num))
 			{
-				this.TriggerFixedCapturePointNoLongerAvailable();
+				this.ResetCapturePoint();
 			}
 			if (this.targetCapturable.IsNullOrStopped())
 			{
@@ -148,33 +170,13 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 			}
 		}
 
-		public void TriggerFixedCapturePointNoLongerAvailable()
+		public void ResetCapturePoint()
 		{
+			base.Trigger(643180843, null);
 			if (!this.targetCapturable.IsNullOrStopped())
 			{
 				this.targetCapturable.targetCapturePoint = null;
 				this.targetCapturable.Trigger(1034952693, null);
-				this.targetCapturable = null;
-			}
-		}
-
-		public void CaptureCreature()
-		{
-			if (!this.targetCapturable.IsNullOrStopped())
-			{
-				this.targetCapturable.Trigger(643180843, null);
-				int num = Grid.PosToCell(base.transform.GetPosition());
-				if (Grid.Solid[num])
-				{
-					int num2 = Grid.CellAbove(num);
-					if (Grid.IsValidCell(num2) && !Grid.Solid[num2])
-					{
-						num = num2;
-					}
-				}
-				Baggable component = this.targetCapturable.GetComponent<Baggable>();
-				component.SetWrangled();
-				component.transform.SetPosition(Grid.CellToPosCCC(num, Grid.SceneLayer.Ore));
 				this.targetCapturable = null;
 			}
 		}

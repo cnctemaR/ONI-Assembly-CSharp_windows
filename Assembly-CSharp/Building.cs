@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using System.Text;
 using STRINGS;
 using UnityEngine;
 
@@ -123,11 +124,7 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 
 	protected override void OnCleanUp()
 	{
-		if (this.scenePartitionerEntry != null)
-		{
-			this.scenePartitionerEntry.Release();
-			this.scenePartitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.scenePartitionerEntry);
 		base.OnCleanUp();
 	}
 
@@ -262,6 +259,26 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 			descriptor7.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESCREATIVITY, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESCREATIVITY, Descriptor.DescriptorType.Requirement);
 			list.Add(descriptor7);
 		}
+		if (def.BuildingUnderConstruction != null)
+		{
+			Constructable component2 = def.BuildingUnderConstruction.GetComponent<Constructable>();
+			if (component2 != null && component2.requiredRolePerk != HashedString.Invalid)
+			{
+				StringBuilder stringBuilder = new StringBuilder();
+				List<RoleConfig> rolesWithPerk = Game.Instance.roleManager.GetRolesWithPerk(component2.requiredRolePerk);
+				for (int i = 0; i < rolesWithPerk.Count; i++)
+				{
+					RoleConfig roleConfig = rolesWithPerk[i];
+					stringBuilder.Append(roleConfig.GetProperName());
+					if (i != rolesWithPerk.Count - 1)
+					{
+						stringBuilder.Append(", ");
+					}
+				}
+				string text = stringBuilder.ToString();
+				list.Add(new Descriptor(UI.BUILD_REQUIRES_ROLE.Replace("{ROLE}", text), UI.BUILD_REQUIRES_ROLE_TOOLTIP.Replace("{ROLE}", text), Descriptor.DescriptorType.Requirement, false));
+			}
+		}
 		return list;
 	}
 
@@ -281,7 +298,8 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 		if (def.ExhaustKilowattsWhenActive > 0f || def.SelfHeatKilowattsWhenActive > 0f)
 		{
 			Descriptor descriptor2 = default(Descriptor);
-			descriptor2.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.HEATGENERATED, GameUtil.GetFormattedWattage(5f * (def.ExhaustKilowattsWhenActive + def.SelfHeatKilowattsWhenActive), GameUtil.WattageFormatterUnit.Automatic)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED, GameUtil.GetFormattedJoules(5f * (def.ExhaustKilowattsWhenActive + def.SelfHeatKilowattsWhenActive), "F1", GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect);
+			string formattedHeatEnergy = GameUtil.GetFormattedHeatEnergy((def.ExhaustKilowattsWhenActive + def.SelfHeatKilowattsWhenActive) * 1000f, GameUtil.HeatEnergyFormatterUnit.Automatic);
+			descriptor2.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.HEATGENERATED, formattedHeatEnergy), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED, formattedHeatEnergy), Descriptor.DescriptorType.Effect);
 			list.Add(descriptor2);
 		}
 		return list;
@@ -323,16 +341,6 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 		return Grid.PosToCell(this);
 	}
 
-	public bool ShouldPreferPrimaryCell()
-	{
-		return false;
-	}
-
-	public bool ShouldPreferUnreservedCell()
-	{
-		return false;
-	}
-
 	Transform IApproachable.get_transform()
 	{
 		return base.transform;
@@ -350,5 +358,5 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 
 	private Extents extents;
 
-	private GameScenePartitionerEntry scenePartitionerEntry;
+	private HandleVector<int>.Handle scenePartitionerEntry;
 }

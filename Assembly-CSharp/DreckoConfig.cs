@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -14,13 +15,14 @@ public class DreckoConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -DreckoTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 150f, name, false, false, true));
-		TagBits tagBits = default(TagBits);
-		tagBits.SetTag("SpiceVine".ToTag());
-		tagBits.SetTag(SwampLilyConfig.ID.ToTag());
-		tagBits.SetTag("BasicSingleHarvestPlant".ToTag());
 		Diet.Info[] array = new Diet.Info[]
 		{
-			new Diet.Info(tagBits, DreckoConfig.POOP_ELEMENT, DreckoConfig.CALORIES_PER_DAY_OF_PLANT_EATEN, DreckoConfig.KG_POOP_PER_DAY_OF_PLANT, null, 0f)
+			new Diet.Info(new HashSet<Tag>
+			{
+				"SpiceVine".ToTag(),
+				SwampLilyConfig.ID.ToTag(),
+				"BasicSingleHarvestPlant".ToTag()
+			}, DreckoConfig.POOP_ELEMENT, DreckoConfig.CALORIES_PER_DAY_OF_PLANT_EATEN, DreckoConfig.KG_POOP_PER_DAY_OF_PLANT, null, 0f)
 		};
 		Diet diet = new Diet(array);
 		CreatureCalorieMonitor.Def def = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();

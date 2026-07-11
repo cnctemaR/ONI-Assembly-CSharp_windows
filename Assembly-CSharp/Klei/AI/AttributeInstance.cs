@@ -12,6 +12,7 @@ namespace Klei.AI
 		public AttributeInstance(GameObject game_object, Attribute attribute)
 			: base(game_object, attribute)
 		{
+			DebugUtil.Assert(attribute != null, "Assert!");
 			this.Attribute = attribute;
 		}
 
@@ -152,50 +153,12 @@ namespace Klei.AI
 
 		public string GetFormattedValue()
 		{
-			IAttributeFormatter formatter = this.Attribute.formatter;
-			if (formatter != null)
-			{
-				return formatter.GetFormattedAttribute(this);
-			}
-			return GameUtil.GetFormattedSimple(this.GetTotalValue(), GameUtil.TimeSlice.None, null);
+			return this.Attribute.formatter.GetFormattedAttribute(this);
 		}
 
 		public string GetAttributeValueTooltip()
 		{
-			string text = this.GetDescription();
-			if (this.GetBaseValue() != 0f)
-			{
-				text += string.Format(DUPLICANTS.ATTRIBUTES.BASE_VALUE, this.GetBaseValue());
-			}
-			foreach (AttributeModifier attributeModifier in this.Modifiers)
-			{
-				string formattedString = attributeModifier.GetFormattedString(base.gameObject);
-				if (formattedString != null)
-				{
-					text += string.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifier.GetDescription(), formattedString);
-				}
-			}
-			string text2 = string.Empty;
-			AttributeConverters component = base.gameObject.GetComponent<AttributeConverters>();
-			if (component != null && this.Attribute.converters.Count > 0)
-			{
-				foreach (AttributeConverterInstance attributeConverterInstance in base.gameObject.GetComponent<AttributeConverters>().converters)
-				{
-					if (attributeConverterInstance.converter.attribute == this.Attribute)
-					{
-						string text3 = attributeConverterInstance.DescriptionFromAttribute();
-						if (text3 != null)
-						{
-							text2 = text2 + "\n" + text3;
-						}
-					}
-				}
-			}
-			if (text2.Length > 0)
-			{
-				text = text + "\n" + text2;
-			}
-			return text;
+			return this.Attribute.GetTooltip(this);
 		}
 
 		public Attribute Attribute;

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[DebuggerDisplay("{id}")]
 public class Ref<ReferenceType> : ISaveLoadable where ReferenceType : KMonoBehaviour
 {
 	public Ref(ReferenceType obj)

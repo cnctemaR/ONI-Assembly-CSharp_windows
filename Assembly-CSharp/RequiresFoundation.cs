@@ -13,8 +13,6 @@ public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation
 			width = def.WidthInCells,
 			height = def.HeightInCells,
 			buildRule = def.BuildLocationRule,
-			solidPartitionerEntry = null,
-			buildingPartitionerEntry = null,
 			solid = true,
 			go = go
 		};
@@ -38,16 +36,8 @@ public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation
 	protected override void OnCleanUp(HandleVector<int>.Handle h)
 	{
 		RequiresFoundation.Data data = base.GetData(h);
-		if (data.solidPartitionerEntry != null)
-		{
-			data.solidPartitionerEntry.Release();
-			data.solidPartitionerEntry = null;
-		}
-		if (data.buildingPartitionerEntry != null)
-		{
-			data.buildingPartitionerEntry.Release();
-			data.buildingPartitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref data.solidPartitionerEntry);
+		GameScenePartitioner.Instance.Free(ref data.buildingPartitionerEntry);
 		base.SetData(h, data);
 	}
 
@@ -91,9 +81,9 @@ public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation
 
 		public BuildLocationRule buildRule;
 
-		public GameScenePartitionerEntry solidPartitionerEntry;
+		public HandleVector<int>.Handle solidPartitionerEntry;
 
-		public GameScenePartitionerEntry buildingPartitionerEntry;
+		public HandleVector<int>.Handle buildingPartitionerEntry;
 
 		public bool solid;
 

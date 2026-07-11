@@ -44,11 +44,7 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece,
 		base.Unsubscribe(-1041684577);
 		Grid.HasTube[Grid.PosToCell(this)] = false;
 		Components.ITravelTubePieces.Remove(this);
-		if (this.dirtyNavCellUpdatedEntry != null)
-		{
-			this.dirtyNavCellUpdatedEntry.Release();
-			this.dirtyNavCellUpdatedEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.dirtyNavCellUpdatedEntry);
 		base.OnCleanUp();
 	}
 
@@ -66,16 +62,15 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece,
 
 	private void UpdateExitListener(bool enable)
 	{
-		if (enable && this.dirtyNavCellUpdatedEntry == null)
+		if (enable && !this.dirtyNavCellUpdatedEntry.IsValid())
 		{
 			int num = Grid.PosToCell(base.transform.GetPosition());
 			this.dirtyNavCellUpdatedEntry = GameScenePartitioner.Instance.Add("TravelTube.OnDirtyNavCellUpdated", this, num, GameScenePartitioner.Instance.dirtyNavCellUpdateLayer, new Action<object>(this.OnDirtyNavCellUpdated));
 			this.OnDirtyNavCellUpdated(null);
 		}
-		else if (!enable && this.dirtyNavCellUpdatedEntry != null)
+		else if (!enable && this.dirtyNavCellUpdatedEntry.IsValid())
 		{
-			this.dirtyNavCellUpdatedEntry.Release();
-			this.dirtyNavCellUpdatedEntry = null;
+			GameScenePartitioner.Instance.Free(ref this.dirtyNavCellUpdatedEntry);
 		}
 	}
 
@@ -148,7 +143,7 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece,
 	[MyCmpReq]
 	private KSelectable selectable;
 
-	private GameScenePartitionerEntry dirtyNavCellUpdatedEntry;
+	private HandleVector<int>.Handle dirtyNavCellUpdatedEntry;
 
 	private bool isExitTube;
 

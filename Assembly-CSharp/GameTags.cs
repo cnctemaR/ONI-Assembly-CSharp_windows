@@ -117,6 +117,8 @@ public class GameTags
 
 	public static readonly Tag Void = TagManager.Create("Void");
 
+	public static readonly Tag Chlorine = TagManager.Create("Chlorine");
+
 	public static readonly Tag Oxygen = TagManager.Create("Oxygen");
 
 	public static readonly Tag Hydrogen = TagManager.Create("Hydrogen");
@@ -182,6 +184,8 @@ public class GameTags
 	public static readonly Tag Garbage = TagManager.Create("Garbage");
 
 	public static readonly Tag OilWell = TagManager.Create("OilWell");
+
+	public static readonly Tag Glass = TagManager.Create("Glass");
 
 	public static readonly Tag MISSING_TAG = TagManager.Create("MISSING_TAG");
 
@@ -257,8 +261,6 @@ public class GameTags
 
 	public static readonly Tag Idle = TagManager.Create("Idle");
 
-	public static readonly Tag AllowSpeech = TagManager.Create("AllowSpeech");
-
 	public static readonly Tag AlwaysConverse = TagManager.Create("AlwaysConverse");
 
 	public static readonly Tag HasDebugDestination = TagManager.Create("HasDebugDestination");
@@ -272,6 +274,8 @@ public class GameTags
 	public static readonly Tag HoldingBreath = TagManager.Create("HoldingBreath");
 
 	public static readonly Tag Operational = TagManager.Create("Operational");
+
+	public static readonly Tag Rocket = TagManager.Create("Rocket");
 
 	public static readonly Tag Stored = TagManager.Create("Stored");
 
@@ -336,6 +340,7 @@ public class GameTags
 		GameTags.Filter,
 		GameTags.Liquifiable,
 		GameTags.Liquid,
+		GameTags.Gas,
 		GameTags.ConsumableOre,
 		GameTags.Organics,
 		GameTags.Farmable,
@@ -497,6 +502,8 @@ public class GameTags
 			public static readonly Tag PuftSpecies = TagManager.Create("PuftSpecies");
 
 			public static readonly Tag PacuSpecies = TagManager.Create("PacuSpecies");
+
+			public static readonly Tag MooSpecies = TagManager.Create("MooSpecies");
 		}
 
 		public static class Behaviours

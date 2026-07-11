@@ -118,7 +118,7 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 		this.PowerCell = this.building.GetPowerOutputCell();
 		this.CheckConnectionStatus();
 		this.OnOperationalChanged(null);
-		Game.Instance.emergySim.AddGenerator(this);
+		Game.Instance.energySim.AddGenerator(this);
 	}
 
 	public virtual void EnergySim200ms(float dt)
@@ -163,7 +163,7 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 
 	protected override void OnCleanUp()
 	{
-		Game.Instance.emergySim.RemoveGenerator(this);
+		Game.Instance.energySim.RemoveGenerator(this);
 		Game.Instance.circuitManager.Disconnect(this);
 		Components.Generators.Remove(this);
 		base.OnCleanUp();

@@ -73,6 +73,16 @@ public class KAnimSynchronizer
 		}
 	}
 
+	public void SyncTime()
+	{
+		float elapsedTime = this.masterController.GetElapsedTime();
+		for (int i = 0; i < this.Targets.Count; i++)
+		{
+			KAnimControllerBase kanimControllerBase = this.Targets[i];
+			kanimControllerBase.SetElapsedTime(elapsedTime);
+		}
+	}
+
 	private KAnimControllerBase masterController;
 
 	private List<KAnimControllerBase> Targets = new List<KAnimControllerBase>();

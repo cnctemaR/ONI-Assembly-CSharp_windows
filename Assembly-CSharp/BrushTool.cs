@@ -79,7 +79,7 @@ public class BrushTool : InterfaceTool
 		{
 			this.areaVisualizer = Util.KInstantiate(this.areaVisualizer, null, null);
 			this.areaVisualizer.SetActive(false);
-			this.areaVisualizer.transform.parent = base.transform;
+			this.areaVisualizer.GetComponent<RectTransform>().SetParent(base.transform);
 			Renderer component = this.areaVisualizer.GetComponent<Renderer>();
 			component.material.color = this.areaColour;
 		}

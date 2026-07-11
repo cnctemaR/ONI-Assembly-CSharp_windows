@@ -96,8 +96,14 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 			if (sound.transform != null)
 			{
 				sound.pos = sound.transform.GetPosition();
+				if (sound.animController != null)
+				{
+					Vector3 offset = sound.animController.Offset;
+					sound.pos.x = sound.pos.x + offset.x;
+					sound.pos.y = sound.pos.y + offset.y;
+				}
 			}
-			bool flag2 = !sound.IsCullingEnabled || soundCuller.IsAudible(sound.pos, sound.falloffDistanceSq);
+			bool flag2 = !sound.IsCullingEnabled || (sound.ShouldCameraScalePosition && soundCuller.IsAudible(sound.pos, sound.falloffDistanceSq)) || soundCuller.IsAudibleNoCameraScaling(sound.pos, sound.falloffDistanceSq);
 			bool isPlaying = sound.IsPlaying;
 			if (flag2)
 			{
@@ -119,7 +125,12 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 			LoopingSoundManager.Sound sound2 = dataList[num];
 			SoundDescription soundDescription = this.GetSoundDescription(sound2.path);
 			sound2.ev.setPaused(flag && sound2.ShouldPauseOnGamePaused);
-			sound2.ev.set3DAttributes(SoundEvent.GetCameraScaledPosition(sound2.pos).To3DAttributes());
+			Vector2 vector = sound2.pos;
+			if (sound2.ShouldCameraScalePosition)
+			{
+				vector = SoundEvent.GetCameraScaledPosition(vector);
+			}
+			sound2.ev.set3DAttributes(vector.To3DAttributes());
 			sound2.ev.start();
 			sound2.flags |= LoopingSoundManager.Sound.Flags.PLAYING;
 			if (sound2.firstParameter != HashedString.Invalid)
@@ -167,7 +178,14 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 					loopingSoundParameterUpdater2.Remove(sound5);
 				}
 			}
-			sound4.ev.stop(STOP_MODE.IMMEDIATE);
+			if (sound4.ShouldCameraScalePosition)
+			{
+				sound4.ev.stop(STOP_MODE.IMMEDIATE);
+			}
+			else
+			{
+				sound4.ev.stop(STOP_MODE.ALLOWFADEOUT);
+			}
 			sound4.flags &= ~LoopingSoundManager.Sound.Flags.PLAYING;
 			sound4.ev.release();
 			dataList[num2] = sound4;
@@ -209,7 +227,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		return KFMOD.GetSoundEventDescription(path);
 	}
 
-	public HandleVector<int>.Handle Add(string path, Vector2 pos, Transform transform = null, bool pause_on_game_pause = true, bool enable_culling = true)
+	public HandleVector<int>.Handle Add(string path, Vector2 pos, Transform transform = null, bool pause_on_game_pause = true, bool enable_culling = true, bool enable_camera_scaled_position = true)
 	{
 		SoundDescription soundEventDescription = KFMOD.GetSoundEventDescription(path);
 		LoopingSoundManager.Sound.Flags flags = (LoopingSoundManager.Sound.Flags)0;
@@ -221,9 +239,19 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		{
 			flags |= LoopingSoundManager.Sound.Flags.ENABLE_CULLING;
 		}
+		if (enable_camera_scaled_position)
+		{
+			flags |= LoopingSoundManager.Sound.Flags.ENABLE_CAMERA_SCALED_POSITION;
+		}
+		KBatchedAnimController kbatchedAnimController = null;
+		if (transform != null)
+		{
+			kbatchedAnimController = transform.GetComponent<KBatchedAnimController>();
+		}
 		LoopingSoundManager.Sound sound = new LoopingSoundManager.Sound
 		{
 			transform = transform,
+			animController = kbatchedAnimController,
 			falloffDistanceSq = soundEventDescription.falloffDistanceSq,
 			path = path,
 			pos = pos,
@@ -241,7 +269,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 			global::Debug.LogWarning("Missing sound", null);
 			return HandleVector<int>.InvalidHandle;
 		}
-		return LoopingSoundManager.Get().Add(path, pos, null, pause_on_game_pause, enable_culling);
+		return LoopingSoundManager.Get().Add(path, pos, null, pause_on_game_pause, enable_culling, true);
 	}
 
 	public static void StopSound(HandleVector<int>.Handle handle)
@@ -289,8 +317,6 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 
 	private static LoopingSoundManager instance;
 
-	private const string OBJECT_COUNT_ID = "objectCount";
-
 	private Dictionary<HashedString, LoopingSoundParameterUpdater> parameterUpdaters = new Dictionary<HashedString, LoopingSoundParameterUpdater>();
 
 	private KCompactedVector<LoopingSoundManager.Sound> sounds = new KCompactedVector<LoopingSoundManager.Sound>(0);
@@ -326,9 +352,19 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 			}
 		}
 
+		public bool ShouldCameraScalePosition
+		{
+			get
+			{
+				return (this.flags & LoopingSoundManager.Sound.Flags.ENABLE_CAMERA_SCALED_POSITION) != (LoopingSoundManager.Sound.Flags)0;
+			}
+		}
+
 		public EventInstance ev;
 
 		public Transform transform;
+
+		public KBatchedAnimController animController;
 
 		public float falloffDistanceSq;
 
@@ -353,7 +389,8 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		{
 			PLAYING = 1,
 			PAUSE_ON_GAME_PAUSED = 2,
-			ENABLE_CULLING = 4
+			ENABLE_CULLING = 4,
+			ENABLE_CAMERA_SCALED_POSITION = 8
 		}
 	}
 }

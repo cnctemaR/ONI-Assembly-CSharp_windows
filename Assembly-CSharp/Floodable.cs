@@ -48,11 +48,7 @@ public class Floodable : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-			this.partitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 	}
 
 	[MyCmpReq]
@@ -71,5 +67,5 @@ public class Floodable : KMonoBehaviour
 
 	private bool isFlooded;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 }

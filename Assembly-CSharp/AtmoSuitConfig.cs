@@ -40,20 +40,37 @@ public class AtmoSuitConfig : IEquipmentConfig
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("Unclean"));
 		equipmentDef.OnEquipCallBack = delegate(Equippable eq)
 		{
-			eq.assignee.GetSoleOwner().GetComponent<Navigator>().SetFlags(PathFinder.PotentialPath.Flags.HasSuit | PathFinder.PotentialPath.Flags.UnlimitedSubmergedTravel);
-			if (eq.assignee.GetSoleOwner().GetComponent<MinionResume>().HasPerk(RoleManager.rolePerks.ExosuitExpertise.id))
+			Ownables soleOwner = eq.assignee.GetSoleOwner();
+			if (soleOwner != null)
 			{
-				eq.assignee.GetSoleOwner().GetAttributes().Get(Db.Get().Attributes.Athletics)
-					.Add(SuitExpert.AthleticsModifier);
+				Navigator component = soleOwner.GetComponent<Navigator>();
+				if (component != null)
+				{
+					component.SetFlags(PathFinder.PotentialPath.Flags.HasSuit | PathFinder.PotentialPath.Flags.UnlimitedSubmergedTravel);
+				}
+				MinionResume component2 = soleOwner.GetComponent<MinionResume>();
+				if (component2 != null && component2.HasPerk(RoleManager.rolePerks.ExosuitExpertise.id))
+				{
+					eq.assignee.GetSoleOwner().GetAttributes().Get(Db.Get().Attributes.Athletics)
+						.Add(SuitExpert.AthleticsModifier);
+				}
 			}
 		};
 		equipmentDef.OnUnequipCallBack = delegate(Equippable eq)
 		{
 			if (eq.assignee != null)
 			{
-				Ownables soleOwner = eq.assignee.GetSoleOwner();
-				soleOwner.GetAttributes().Get(Db.Get().Attributes.Athletics).Remove(SuitExpert.AthleticsModifier);
-				soleOwner.GetComponent<Navigator>().ClearFlags(PathFinder.PotentialPath.Flags.HasSuit | PathFinder.PotentialPath.Flags.UnlimitedSubmergedTravel);
+				Ownables soleOwner2 = eq.assignee.GetSoleOwner();
+				Attributes attributes = soleOwner2.GetAttributes();
+				if (attributes != null)
+				{
+					attributes.Get(Db.Get().Attributes.Athletics).Remove(SuitExpert.AthleticsModifier);
+				}
+				Navigator component3 = soleOwner2.GetComponent<Navigator>();
+				if (component3 != null)
+				{
+					component3.ClearFlags(PathFinder.PotentialPath.Flags.HasSuit | PathFinder.PotentialPath.Flags.UnlimitedSubmergedTravel);
+				}
 			}
 		};
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.SuitIDs, "Atmo_Suit");
@@ -67,7 +84,7 @@ public class AtmoSuitConfig : IEquipmentConfig
 		suitTank.element = "Oxygen";
 		suitTank.capacity = 75f;
 		go.AddComponent<HelmetController>();
-		go.GetComponent<KPrefabID>().AddPrefabTag(GameTags.Clothes);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.Clothes);
 		go.AddComponent<SuitDiseaseHandler>();
 	}
 

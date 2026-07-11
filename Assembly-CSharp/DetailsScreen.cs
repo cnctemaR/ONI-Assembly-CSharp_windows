@@ -359,15 +359,7 @@ public class DetailsScreen : KTabMenu
 		string selectedObjectCodexID = this.GetSelectedObjectCodexID();
 		if (selectedObjectCodexID != string.Empty)
 		{
-			if (!ManagementMenu.Instance.codexScreen.gameObject.activeInHierarchy)
-			{
-				ManagementMenu.Instance.ToggleCodex();
-				(ManagementMenu.Instance.codexScreen as CodexScreen).ChangeArticle(selectedObjectCodexID, false);
-			}
-			else
-			{
-				(ManagementMenu.Instance.codexScreen as CodexScreen).ChangeArticle(selectedObjectCodexID, true);
-			}
+			ManagementMenu.Instance.OpenCodexToEntry(selectedObjectCodexID);
 		}
 	}
 

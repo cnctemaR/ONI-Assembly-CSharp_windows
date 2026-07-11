@@ -27,7 +27,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		base.smi.StartSM();
 		ToiletWorkableUse component = base.GetComponent<ToiletWorkableUse>();
 		component.trackUses = true;
-		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_arrow", "meter_scale" });
+		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_arrow", "meter_scale" });
 		this.meter.SetPositionPercent((float)this.FlushesUsed / (float)this.maxFlushes);
 		this.FlushesUsed = this._flushesUsed;
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));

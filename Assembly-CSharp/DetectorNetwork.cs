@@ -95,21 +95,21 @@ public class DetectorNetwork : GameStateMachine<DetectorNetwork, DetectorNetwork
 		{
 			int num = Grid.PosToCell(this);
 			int num2 = 0;
-			num2 += this.ScanVisiblityLine(num, 1, 1);
-			num2 += this.ScanVisiblityLine(num, -1, 1);
+			num2 += DetectorNetwork.Instance.ScanVisiblityLine(num, 1, 1, base.def.interferenceRadius);
+			num2 += DetectorNetwork.Instance.ScanVisiblityLine(num, -1, 1, base.def.interferenceRadius);
 			this.visibleSkyCells = num2;
 		}
 
-		private int ScanVisiblityLine(int start_cell, int x_offset, int y_offset)
+		public static int ScanVisiblityLine(int start_cell, int x_offset, int y_offset, int radius)
 		{
 			int num = 0;
 			int num2 = 0;
-			while (Mathf.Abs(num2) <= base.def.interferenceRadius)
+			while (Mathf.Abs(num2) <= radius)
 			{
 				int num3 = Grid.OffsetCell(start_cell, num2 * x_offset, num2 * y_offset);
 				if (Grid.IsValidCell(num3))
 				{
-					if (Grid.ExposedToSunlight[num3] <= 0)
+					if (Grid.ExposedToSunlight[num3] < 253)
 					{
 						break;
 					}

@@ -39,16 +39,16 @@ public class BuildingConfigManager : KMonoBehaviour
 		this.configTable[config] = buildingDef;
 		GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.baseTemplate);
 		global::UnityEngine.Object.DontDestroyOnLoad(gameObject);
+		gameObject.GetComponent<KPrefabID>().PrefabTag = buildingDef.Tag;
 		gameObject.name = buildingDef.PrefabID + "Template";
 		gameObject.GetComponent<Building>().Def = buildingDef;
 		gameObject.GetComponent<OccupyArea>().OccupiedCellsOffsets = buildingDef.PlacementOffsets;
 		if (buildingDef.Deprecated)
 		{
-			gameObject.AddTag(GameTags.DeprecatedContent);
+			gameObject.GetComponent<KPrefabID>().AddTag(GameTags.DeprecatedContent);
 		}
-		buildingDef.BuildingTemplate = gameObject;
 		config.ConfigureBuildingTemplate(gameObject, buildingDef.Tag);
-		buildingDef.BuildingComplete = BuildingLoader.Instance.CreateBuildingComplete(buildingDef);
+		buildingDef.BuildingComplete = BuildingLoader.Instance.CreateBuildingComplete(gameObject, buildingDef);
 		bool flag = true;
 		for (int i = 0; i < this.NonBuildableBuildings.Length; i++)
 		{

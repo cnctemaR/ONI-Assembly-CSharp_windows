@@ -102,7 +102,7 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		}
 		int navigationCost = context.chore.driver.GetComponent<Navigator>().GetNavigationCost(workable);
 		int num = 4;
-		if (navigationCost == PathProber.InvalidCost || navigationCost < num)
+		if (navigationCost == -1 || navigationCost < num)
 		{
 			return false;
 		}

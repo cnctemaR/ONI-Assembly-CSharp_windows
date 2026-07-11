@@ -46,7 +46,7 @@ public class LiquidPumpConfig : IBuildingConfig
 	{
 		GeneratedBuildings.RegisterLogicPorts(go, LiquidPumpConfig.INPUT_PORTS);
 		go.AddOrGet<LogicOperationalController>();
-		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<EnergyConsumer>();
 		go.AddOrGet<Pump>();

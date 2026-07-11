@@ -37,8 +37,8 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.lure = this.partitioner.CreateMask("Lure");
 		this.plants = this.partitioner.CreateMask("Plants");
 		this.industrialBuildings = this.partitioner.CreateMask("IndustrialBuildings");
-		this.objectLayers = new ScenePartitionerLayer[36];
-		for (int i = 0; i < 36; i++)
+		this.objectLayers = new ScenePartitionerLayer[37];
+		for (int i = 0; i < 37; i++)
 		{
 			ObjectLayer objectLayer = (ObjectLayer)i;
 			this.objectLayers[i] = this.partitioner.CreateMask(new HashedString(objectLayer.ToString()));
@@ -81,19 +81,19 @@ public class GameScenePartitioner : KMonoBehaviour
 		navTable.OnValidCellChanged = (Action<int, NavType>)Delegate.Combine(navTable.OnValidCellChanged, new Action<int, NavType>(this.OnValidNavCellChanged));
 	}
 
-	public GameScenePartitionerEntry Add(string name, object obj, int x, int y, int width, int height, ScenePartitionerLayer layer, Action<object> event_callback)
+	public HandleVector<int>.Handle Add(string name, object obj, int x, int y, int width, int height, ScenePartitionerLayer layer, Action<object> event_callback)
 	{
-		GameScenePartitionerEntry gameScenePartitionerEntry = new GameScenePartitionerEntry(name, obj, x, y, width, height, layer, this.partitioner, event_callback);
-		this.partitioner.Add(gameScenePartitionerEntry);
-		return gameScenePartitionerEntry;
+		ScenePartitionerEntry scenePartitionerEntry = new ScenePartitionerEntry(name, obj, x, y, width, height, layer, this.partitioner, event_callback);
+		this.partitioner.Add(scenePartitionerEntry);
+		return this.scenePartitionerEntries.Allocate(scenePartitionerEntry);
 	}
 
-	public GameScenePartitionerEntry Add(string name, object obj, Extents extents, ScenePartitionerLayer layer, Action<object> event_callback)
+	public HandleVector<int>.Handle Add(string name, object obj, Extents extents, ScenePartitionerLayer layer, Action<object> event_callback)
 	{
 		return this.Add(name, obj, extents.x, extents.y, extents.width, extents.height, layer, event_callback);
 	}
 
-	public GameScenePartitionerEntry Add(string name, object obj, int cell, ScenePartitionerLayer layer, Action<object> event_callback)
+	public HandleVector<int>.Handle Add(string name, object obj, int cell, ScenePartitionerLayer layer, Action<object> event_callback)
 	{
 		int num = 0;
 		int num2 = 0;
@@ -187,6 +187,34 @@ public class GameScenePartitioner : KMonoBehaviour
 		}
 	}
 
+	public void UpdatePosition(HandleVector<int>.Handle handle, int cell)
+	{
+		Vector2I vector2I = Grid.CellToXY(cell);
+		this.UpdatePosition(handle, vector2I.x, vector2I.y);
+	}
+
+	public void UpdatePosition(HandleVector<int>.Handle handle, int x, int y)
+	{
+		if (!handle.IsValid())
+		{
+			return;
+		}
+		ScenePartitionerEntry data = this.scenePartitionerEntries.GetData(handle);
+		data.UpdatePosition(x, y);
+	}
+
+	public void Free(ref HandleVector<int>.Handle handle)
+	{
+		if (!handle.IsValid())
+		{
+			return;
+		}
+		ScenePartitionerEntry data = this.scenePartitionerEntries.GetData(handle);
+		data.Release();
+		this.scenePartitionerEntries.Free(handle);
+		handle.Clear();
+	}
+
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
@@ -244,6 +272,8 @@ public class GameScenePartitioner : KMonoBehaviour
 	private ScenePartitioner partitioner;
 
 	private static GameScenePartitioner instance;
+
+	private KCompactedVector<ScenePartitionerEntry> scenePartitionerEntries = new KCompactedVector<ScenePartitionerEntry>(0);
 
 	private List<int> changedCells = new List<int>();
 

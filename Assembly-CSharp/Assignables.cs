@@ -86,7 +86,7 @@ public class Assignables : KMonoBehaviour
 						if (assignable2.CanAutoAssignTo(component2))
 						{
 							int navigationCost = assignable2.GetNavigationCost(component);
-							if (navigationCost != PathProber.InvalidCost && navigationCost < num)
+							if (navigationCost != -1 && navigationCost < num)
 							{
 								num = navigationCost;
 								assignable = assignable2;

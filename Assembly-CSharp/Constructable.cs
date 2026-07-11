@@ -132,6 +132,7 @@ public class Constructable : Workable, ISaveLoadable
 				byte diseaseIdx = component7.DiseaseIdx;
 				int diseaseCount = component7.DiseaseCount;
 				Deconstructable.SpawnItem(component7.transform.GetPosition(), component7.GetComponent<Building>().Def, elementID, mass, temperature, diseaseIdx, diseaseCount);
+				gameObject2.Trigger(1606648047, null);
 				gameObject2.DeleteObject();
 			}
 		}
@@ -340,8 +341,9 @@ public class Constructable : Workable, ISaveLoadable
 	{
 		int num = Grid.PosToCell(base.transform.GetPosition());
 		ObjectLayer objectLayer = ((!this.IsReplacementTile) ? this.building.Def.ObjectLayer : this.building.Def.ReplacementLayer);
-		this.building.Def.UnmarkArea(num, this.building.Orientation, objectLayer, base.gameObject);
-		if (this.building.Def.IsTilePiece)
+		BuildingDef def = this.building.Def;
+		def.UnmarkArea(num, this.building.Orientation, objectLayer, base.gameObject);
+		if (def.IsTilePiece)
 		{
 			Grid.IsTileUnderConstruction[num] = false;
 		}
@@ -416,21 +418,9 @@ public class Constructable : Workable, ISaveLoadable
 				World.Instance.blockTileRenderer.RemoveBlock(this.building.Def, SimHashes.Void, num);
 			}
 		}
-		if (this.solidPartitionerEntry != null)
-		{
-			this.solidPartitionerEntry.Release();
-			this.solidPartitionerEntry = null;
-		}
-		if (this.digPartitionerEntry != null)
-		{
-			this.digPartitionerEntry.Release();
-			this.digPartitionerEntry = null;
-		}
-		if (this.ladderParititonerEntry != null)
-		{
-			this.ladderParititonerEntry.Release();
-			this.ladderParititonerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.solidPartitionerEntry);
+		GameScenePartitioner.Instance.Free(ref this.digPartitionerEntry);
+		GameScenePartitioner.Instance.Free(ref this.ladderParititonerEntry);
 		SaveLoadRoot component = base.GetComponent<SaveLoadRoot>();
 		if (component != null)
 		{
@@ -517,7 +507,7 @@ public class Constructable : Workable, ISaveLoadable
 			return;
 		}
 		bool digs_complete = true;
-		if (this.solidPartitionerEntry == null)
+		if (!this.solidPartitionerEntry.IsValid())
 		{
 			Extents validPlacementExtents = this.building.GetValidPlacementExtents();
 			this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Constructable.OnFetchListComplete", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChangedOrDigDestroyed));
@@ -740,11 +730,11 @@ public class Constructable : Workable, ISaveLoadable
 	[Serialize]
 	public Tag[] choreTags;
 
-	private GameScenePartitionerEntry solidPartitionerEntry;
+	private HandleVector<int>.Handle solidPartitionerEntry;
 
-	private GameScenePartitionerEntry digPartitionerEntry;
+	private HandleVector<int>.Handle digPartitionerEntry;
 
-	private GameScenePartitionerEntry ladderParititonerEntry;
+	private HandleVector<int>.Handle ladderParititonerEntry;
 
 	private LoggerFSS log = new LoggerFSS("Constructable", 35);
 

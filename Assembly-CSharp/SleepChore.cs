@@ -145,7 +145,8 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 			{
 				smi.SetAnim();
 			}).DefaultState(this.sleep.normal).ToggleTag(GameTags.Asleep)
-				.DoSleep(this.sleeper, this.bed, this.success, null);
+				.DoSleep(this.sleeper, this.bed, this.success, null)
+				.TriggerOnExit(GameHashes.SleepFinished);
 			this.sleep.uninterruptable.DoNothing();
 			this.sleep.normal.ParamTransition<bool>(this.isInterruptable, this.sleep.uninterruptable, (SleepChore.StatesInstance smi, bool p) => !p).ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.Sleeping, null).QueueAnim("working_loop", true, null)
 				.EventTransition(GameHashes.SleepDisturbed, this.sleep.interrupt, null);

@@ -194,11 +194,9 @@ namespace TUNING
 
 		public static float EARLYBIRD_MODIFIER = 2f;
 
-		public static int EARLYBIRD_SCHEDULEBLOCK = 4;
+		public static int EARLYBIRD_SCHEDULEBLOCK = 5;
 
 		public static float NIGHTOWL_MODIFIER = 3f;
-
-		public static int NIGHTOWL_SCHEDULEBLOCK = 5;
 
 		public const float FLATULENCE_EMIT_MASS = 0.1f;
 

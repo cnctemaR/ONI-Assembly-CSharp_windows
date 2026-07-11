@@ -25,7 +25,6 @@ internal class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instan
 			smi.GetSMI<GasAndLiquidConsumerMonitor.Instance>().Consume(dt);
 		}, UpdateRate.SIM_200ms, false)
 			.EventTransition(GameHashes.ElementNoLongerAvailable, this.inhaling.pst, null)
-			.TagTransition(GameTags.Creatures.Hungry, this.inhaling.pst, true)
 			.Enter("StartInhaleSound", delegate(InhaleStates.Instance smi)
 			{
 				smi.StartInhaleSound();
@@ -34,9 +33,9 @@ internal class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instan
 			{
 				smi.StopInhaleSound();
 			})
-			.ScheduleGoTo((InhaleStates.Instance smi) => smi.def.maximumInhaleTime, this.inhaling.pst);
+			.ScheduleGoTo((InhaleStates.Instance smi) => smi.def.inhaleTime, this.inhaling.pst);
 		this.inhaling.pst.Transition(this.inhaling.full, new StateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.Transition.ConditionCallback(InhaleStates.IsFull), UpdateRate.SIM_200ms).Transition(this.behaviourcomplete, GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.Not(new StateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.Transition.ConditionCallback(InhaleStates.IsFull)), UpdateRate.SIM_200ms);
-		this.inhaling.full.QueueAnim("inhale_pst", false, null).QueueAnim("idle_loop", true, null).ScheduleGoTo(3f, this.behaviourcomplete);
+		this.inhaling.full.QueueAnim("inhale_pst", false, null).QueueAnim("idle_loop", false, null).OnAnimQueueComplete(this.behaviourcomplete);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.WantsToEat, false);
 	}
 
@@ -58,7 +57,7 @@ internal class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instan
 	{
 		public string inhaleSound;
 
-		public float maximumInhaleTime = 2.5f;
+		public float inhaleTime = 3f;
 	}
 
 	public new class Instance : GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.GameInstance

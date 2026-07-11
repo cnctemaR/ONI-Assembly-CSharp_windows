@@ -7,7 +7,7 @@ namespace Klei.AI
 	[DebuggerDisplay("{Id}")]
 	public class Amount : Resource
 	{
-		public Amount(string id, string name, string description, Attribute min_attribute, Attribute max_attribute, Attribute delta_attribute, bool show_max, Units units, float visual_delta_threshold, bool show_in_ui)
+		public Amount(string id, string name, string description, Attribute min_attribute, Attribute max_attribute, Attribute delta_attribute, bool show_max, Units units, float visual_delta_threshold, bool show_in_ui, string uiSprite = null, string thoughtSprite = null)
 		{
 			this.Id = id;
 			this.Name = name;
@@ -19,14 +19,16 @@ namespace Klei.AI
 			this.units = units;
 			this.visualDeltaThreshold = visual_delta_threshold;
 			this.showInUI = show_in_ui;
+			this.uiSprite = uiSprite;
+			this.thoughtSprite = thoughtSprite;
 		}
 
 		public void SetDisplayer(IAmountDisplayer displayer)
 		{
 			this.displayer = displayer;
-			this.minAttribute.SetFormatter(displayer);
-			this.maxAttribute.SetFormatter(displayer);
-			this.deltaAttribute.SetFormatter(displayer);
+			this.minAttribute.SetFormatter(displayer.Formatter);
+			this.maxAttribute.SetFormatter(displayer.Formatter);
+			this.deltaAttribute.SetFormatter(displayer.Formatter);
 		}
 
 		public AmountInstance Lookup(Component cmp)
@@ -81,6 +83,10 @@ namespace Klei.AI
 		public Attribute deltaAttribute;
 
 		public bool showInUI;
+
+		public string uiSprite;
+
+		public string thoughtSprite;
 
 		public IAmountDisplayer displayer;
 	}

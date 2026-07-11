@@ -83,6 +83,10 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 
 	private void OnRefreshUserMenu(object data)
 	{
+		if (!this.IsCapturable())
+		{
+			return;
+		}
 		KIconButtonMenu.ButtonInfo buttonInfo;
 		if (!this.markedForCapture)
 		{
@@ -180,8 +184,7 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 	[MyCmpAdd]
 	private Prioritizable prioritizable;
 
-	[Serialize]
-	private bool allowCapture = true;
+	public bool allowCapture = true;
 
 	[Serialize]
 	private bool markedForCapture;

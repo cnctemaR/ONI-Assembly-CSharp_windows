@@ -53,11 +53,7 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 
 	protected override void OnCleanUp()
 	{
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-			this.partitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		base.OnCleanUp();
 	}
 
@@ -110,5 +106,5 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 	[Serialize]
 	private bool isEntombed;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 }

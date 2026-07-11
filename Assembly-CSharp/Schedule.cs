@@ -11,17 +11,59 @@ public class Schedule : ISaveLoadable, IListableOption
 		this.name = name;
 		this.blocks = new List<ScheduleBlock>(24);
 		this.assigned = new List<Ref<Schedulable>>();
-		this.alarm = true;
+		this.alarmActivated = true;
 		this.tones = this.GenerateTones();
+		this.SetBlocksToGroupDefaults(defaultGroups);
+	}
+
+	public static int GetBlockIdx()
+	{
+		float currentCycleAsPercentage = GameClock.Instance.GetCurrentCycleAsPercentage();
+		int num = (int)(currentCycleAsPercentage * 24f);
+		return Math.Min(num, 23);
+	}
+
+	public static int GetLastBlockIdx()
+	{
+		return (Schedule.GetBlockIdx() + 24 - 1) % 24;
+	}
+
+	public void SetBlocksToGroupDefaults(List<ScheduleGroup> defaultGroups)
+	{
+		this.blocks.Clear();
 		int num = 0;
 		for (int i = 0; i < defaultGroups.Count; i++)
 		{
 			ScheduleGroup scheduleGroup = defaultGroups[i];
 			for (int j = 0; j < scheduleGroup.defaultSegments; j++)
 			{
-				this.blocks.Add(new ScheduleBlock(scheduleGroup.Name, scheduleGroup.allowedTypes, scheduleGroup.alarm));
+				this.blocks.Add(new ScheduleBlock(scheduleGroup.Name, scheduleGroup.allowedTypes, scheduleGroup.Id));
 				num++;
 			}
+		}
+		this.Changed();
+	}
+
+	public void Tick()
+	{
+		ScheduleBlock block = this.GetBlock(Schedule.GetBlockIdx());
+		ScheduleBlock block2 = this.GetBlock(Schedule.GetLastBlockIdx());
+		if (!Schedule.AreScheduleTypesIdentical(block.allowed_types, block2.allowed_types))
+		{
+			ScheduleGroup scheduleGroup = Db.Get().ScheduleGroups.FindGroupForScheduleTypes(block.allowed_types);
+			ScheduleGroup scheduleGroup2 = Db.Get().ScheduleGroups.FindGroupForScheduleTypes(block2.allowed_types);
+			if (this.alarmActivated && scheduleGroup2.alarm != scheduleGroup.alarm)
+			{
+				ScheduleManager.Instance.PlayScheduleAlarm(this, block, scheduleGroup.alarm);
+			}
+			foreach (Ref<Schedulable> @ref in this.GetAssigned())
+			{
+				@ref.Get().OnScheduleBlocksChanged(this);
+			}
+		}
+		foreach (Ref<Schedulable> ref2 in this.GetAssigned())
+		{
+			ref2.Get().OnScheduleBlocksTick(this);
 		}
 	}
 
@@ -63,8 +105,11 @@ public class Schedule : ISaveLoadable, IListableOption
 
 	public void SetGroup(int idx, ScheduleGroup group)
 	{
-		this.blocks[idx] = new ScheduleBlock(group.Name, group.allowedTypes, group.alarm);
-		this.Changed();
+		if (0 <= idx && idx < this.blocks.Count)
+		{
+			this.blocks[idx] = new ScheduleBlock(group.Name, group.allowedTypes, group.Id);
+			this.Changed();
+		}
 	}
 
 	private void Changed()
@@ -158,7 +203,7 @@ public class Schedule : ISaveLoadable, IListableOption
 	public string name;
 
 	[Serialize]
-	public bool alarm;
+	public bool alarmActivated = true;
 
 	[Serialize]
 	private int[] tones;

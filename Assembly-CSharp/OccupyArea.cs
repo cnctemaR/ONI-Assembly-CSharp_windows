@@ -109,7 +109,7 @@ public class OccupyArea : KMonoBehaviour
 		}
 	}
 
-	private void UpdateOccupiedArea()
+	public void UpdateOccupiedArea()
 	{
 		if (this.objectLayers.Length == 0)
 		{

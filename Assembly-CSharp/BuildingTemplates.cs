@@ -51,6 +51,12 @@ public class BuildingTemplates
 		def.AudioCategory = "HollowMetal";
 	}
 
+	public static void CreateRocketBuildingDef(BuildingDef def)
+	{
+		BuildingTemplates.CreateStandardBuildingDef(def);
+		def.Invincible = true;
+	}
+
 	public static Storage CreateDefaultStorage(GameObject go, bool forceCreate = false)
 	{
 		Storage storage = ((!forceCreate) ? go.AddOrGet<Storage>() : go.AddComponent<Storage>());

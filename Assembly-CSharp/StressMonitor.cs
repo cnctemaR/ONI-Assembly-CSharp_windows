@@ -40,8 +40,8 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 			: base(master)
 		{
 			this.stress = Db.Get().Amounts.Stress.Lookup(base.gameObject);
-			SettingConfig settingConfig = CustomGameSettings.Instance.QualitySettings["StressBreaks"];
-			SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting("StressBreaks");
+			SettingConfig settingConfig = CustomGameSettings.Instance.QualitySettings[CustomGameSettingConfigs.StressBreaks.id];
+			SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.StressBreaks);
 			this.allowStressBreak = settingConfig.IsDefaultLevel(currentQualitySetting.id);
 		}
 
@@ -59,7 +59,7 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 		{
 			foreach (AttributeModifier attributeModifier in this.stress.deltaAttribute.Modifiers)
 			{
-				DebugUtil.DevAssert(!attributeModifier.IsMultiplier, "Reporting stress for multipliers not supported yet.");
+				DebugUtil.DevAssert(!attributeModifier.IsMultiplier, "Reporting stress for multipliers not supported yet.", string.Empty, string.Empty);
 				ReportManager.Instance.ReportValue(ReportManager.ReportType.StressDelta, attributeModifier.Value * dt, attributeModifier.GetDescription(), base.gameObject.GetProperName());
 			}
 		}

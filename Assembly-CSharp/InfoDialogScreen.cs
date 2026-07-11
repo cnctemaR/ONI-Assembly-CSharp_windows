@@ -32,6 +32,16 @@ public class InfoDialogScreen : KModalScreen
 		}
 	}
 
+	public void AddOption(string text, Action<InfoDialogScreen> action)
+	{
+		GameObject gameObject = Util.KInstantiateUI(this.buttonPrefab, this.buttonPanel, true);
+		gameObject.gameObject.GetComponentInChildren<LocText>().text = text;
+		gameObject.gameObject.GetComponent<KButton>().onClick += delegate
+		{
+			action(this);
+		};
+	}
+
 	public InfoDialogScreen SetHeader(string header)
 	{
 		this.header.text = header;
@@ -92,4 +102,10 @@ public class InfoDialogScreen : KModalScreen
 
 	[SerializeField]
 	private GameObject confirmButton;
+
+	[SerializeField]
+	private GameObject buttonPrefab;
+
+	[SerializeField]
+	private GameObject buttonPanel;
 }

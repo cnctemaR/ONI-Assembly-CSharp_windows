@@ -52,7 +52,6 @@ public class MingleChore : Chore<MingleChore.StatesInstance>, IWorkerPrioritizab
 				.ToggleAnims("anim_loco_walk_kanim", 0f)
 				.MoveTo((MingleChore.StatesInstance smi) => smi.GetMingleCell(), this.onfloor, null, false);
 			this.onfloor.ToggleAnims("anim_generic_convo_kanim", 0f).PlayAnim("idle", KAnim.PlayMode.Loop).ScheduleGoTo((MingleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 10), this.success)
-				.ToggleTag(GameTags.AllowSpeech)
 				.ToggleTag(GameTags.AlwaysConverse);
 			this.success.ReturnSuccess();
 		}

@@ -19,16 +19,8 @@ public class EntityPreview : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		if (this.solidPartitionerEntry != null)
-		{
-			this.solidPartitionerEntry.Release();
-			this.solidPartitionerEntry = null;
-		}
-		if (this.objectPartitionerEntry != null)
-		{
-			this.objectPartitionerEntry.Release();
-			this.objectPartitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.solidPartitionerEntry);
+		GameScenePartitioner.Instance.Free(ref this.objectPartitionerEntry);
 		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		base.OnCleanUp();
 	}
@@ -36,14 +28,8 @@ public class EntityPreview : KMonoBehaviour
 	private void OnCellChange()
 	{
 		int num = Grid.PosToCell(this);
-		if (this.solidPartitionerEntry != null)
-		{
-			this.solidPartitionerEntry.UpdatePosition(num);
-		}
-		if (this.objectPartitionerEntry != null)
-		{
-			this.objectPartitionerEntry.UpdatePosition(num);
-		}
+		GameScenePartitioner.Instance.UpdatePosition(this.solidPartitionerEntry, num);
+		GameScenePartitioner.Instance.UpdatePosition(this.objectPartitionerEntry, num);
 		this.OnAreaChanged(null);
 	}
 
@@ -92,7 +78,7 @@ public class EntityPreview : KMonoBehaviour
 
 	public ObjectLayer objectLayer = ObjectLayer.NumLayers;
 
-	private GameScenePartitionerEntry solidPartitionerEntry;
+	private HandleVector<int>.Handle solidPartitionerEntry;
 
-	private GameScenePartitionerEntry objectPartitionerEntry;
+	private HandleVector<int>.Handle objectPartitionerEntry;
 }

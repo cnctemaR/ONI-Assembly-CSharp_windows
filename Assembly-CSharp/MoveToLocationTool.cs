@@ -44,21 +44,18 @@ public class MoveToLocationTool : InterfaceTool
 		if (this.targetNavigator != null)
 		{
 			int mouseCell = DebugHandler.GetMouseCell();
-			if (this.CanMoveTo(mouseCell))
+			MoveToLocationMonitor.Instance smi = this.targetNavigator.GetSMI<MoveToLocationMonitor.Instance>();
+			if (this.CanMoveTo(mouseCell) && smi != null)
 			{
-				MoveToLocationMonitor.Instance smi = this.targetNavigator.GetSMI<MoveToLocationMonitor.Instance>();
-				if (smi != null)
-				{
-					KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
-					this.targetNavigator.GetSMI<MoveToLocationMonitor.Instance>().MoveToLocation(mouseCell);
-				}
-				else
-				{
-					KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
-				}
+				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
+				smi.MoveToLocation(mouseCell);
+				SelectTool.Instance.Activate();
+			}
+			else
+			{
+				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
 			}
 		}
-		SelectTool.Instance.Activate();
 	}
 
 	public override void OnRightClickUp(Vector3 cursor_pos)

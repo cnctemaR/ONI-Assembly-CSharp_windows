@@ -70,7 +70,7 @@ public class Studyable : Workable, ISidescreenButtonControl
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.studiedIndicator = new MeterController(base.GetComponent<KBatchedAnimController>(), this.meterTrackerSymbol, this.meterAnim, Meter.Offset.Infront, new string[] { this.meterTrackerSymbol });
+		this.studiedIndicator = new MeterController(base.GetComponent<KBatchedAnimController>(), this.meterTrackerSymbol, this.meterAnim, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { this.meterTrackerSymbol });
 		this.Refresh();
 	}
 

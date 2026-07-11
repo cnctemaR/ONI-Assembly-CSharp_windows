@@ -36,7 +36,7 @@ public class CanvasConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<BuildingComplete>().isArtable = true;
-		go.GetComponent<KPrefabID>().AddPrefabTag(GameTags.Decoration);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.Decoration);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

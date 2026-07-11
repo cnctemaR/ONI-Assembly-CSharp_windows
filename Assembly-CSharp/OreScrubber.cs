@@ -28,7 +28,7 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		this.cleanMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_clean_target", "meter_clean", Meter.Offset.Infront, new string[] { "meter_clean_target" });
+		this.cleanMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_clean_target", "meter_clean", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_clean_target" });
 		this.RefreshMeters();
 		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		DirectionControl component = base.GetComponent<DirectionControl>();

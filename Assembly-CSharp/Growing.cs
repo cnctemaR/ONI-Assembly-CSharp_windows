@@ -15,10 +15,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 
 	private static void RemoveFromScenePartitioner(Growing.StatesInstance smi)
 	{
-		if (smi.partitionerEntry != null)
-		{
-			smi.partitionerEntry.Release();
-		}
+		GameScenePartitioner.Instance.Free(ref smi.partitionerEntry);
 	}
 
 	public bool Replanted
@@ -197,13 +194,24 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 			return base.master.wiltCondition != null && base.master.wiltCondition.IsWilting();
 		}
 
+		public bool IsSleeping()
+		{
+			CropSleepingMonitor.Instance smi = base.master.GetSMI<CropSleepingMonitor.Instance>();
+			return smi != null && smi.IsSleeping();
+		}
+
+		public bool CanExitStalled()
+		{
+			return !this.IsWilting() && !this.IsSleeping() && !this.IsGrown();
+		}
+
 		public AttributeModifier baseGrowingRate;
 
 		public AttributeModifier wildGrowingRate;
 
 		public AttributeModifier getOldRate;
 
-		public ScenePartitionerEntry partitionerEntry;
+		public HandleVector<int>.Handle partitionerEntry;
 	}
 
 	public class States : GameStateMachine<Growing.States, Growing.StatesInstance, Growing>
@@ -212,7 +220,8 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		{
 			default_state = this.growing;
 			base.serializable = true;
-			this.root.EventTransition(GameHashes.Wilt, this.stalled, (Growing.StatesInstance smi) => smi.IsWilting()).Enter(new StateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State.Callback(Growing.AddToScenePartitioner)).Exit(new StateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State.Callback(Growing.RemoveFromScenePartitioner));
+			this.root.EventTransition(GameHashes.Wilt, this.stalled, (Growing.StatesInstance smi) => smi.IsWilting()).EventTransition(GameHashes.CropSleep, this.stalled, (Growing.StatesInstance smi) => smi.IsSleeping()).Enter(new StateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State.Callback(Growing.AddToScenePartitioner))
+				.Exit(new StateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State.Callback(Growing.RemoveFromScenePartitioner));
 			this.growing.TriggerOnEnter(GameHashes.Grow, null).Update("CheckGrown", delegate(Growing.StatesInstance smi, float dt)
 			{
 				if (smi.ReachedNextHarvest())
@@ -266,7 +275,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 				smi.master.maturity.SetValue(0f);
 				smi.master.oldAge.SetValue(0f);
 			}).GoTo(this.grown.idle);
-			this.stalled.EventTransition(GameHashes.WiltRecover, this.growing, (Growing.StatesInstance smi) => !smi.IsWilting() && !smi.IsGrown()).Update("Growing.stalled", delegate(Growing.StatesInstance smi, float dt)
+			this.stalled.EventTransition(GameHashes.WiltRecover, this.growing, (Growing.StatesInstance smi) => smi.CanExitStalled()).EventTransition(GameHashes.CropWakeUp, this.growing, (Growing.StatesInstance smi) => smi.CanExitStalled()).Update("Growing.stalled", delegate(Growing.StatesInstance smi, float dt)
 			{
 				if (smi.master.oldAge.value >= smi.master.oldAge.GetMax())
 				{

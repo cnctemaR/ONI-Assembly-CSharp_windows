@@ -97,6 +97,10 @@ public class DebugTool : DragTool
 
 	public void DoReplaceSubstance(int cell)
 	{
+		if (!Grid.IsValidBuildingCell(cell))
+		{
+			return;
+		}
 		Element element = ((!DebugPaintElementScreen.Instance.paintElement.isOn) ? ElementLoader.elements[(int)Grid.ElementIdx[cell]] : ElementLoader.FindElementByHash(DebugPaintElementScreen.Instance.element));
 		if (element == null)
 		{
@@ -199,7 +203,7 @@ public class DebugTool : DragTool
 	public void ClearCell(int cell)
 	{
 		Vector2I vector2I = Grid.CellToXY(cell);
-		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+		ListPool<ScenePartitionerEntry, DebugTool>.PooledList pooledList = ListPool<ScenePartitionerEntry, DebugTool>.Allocate();
 		GameScenePartitioner.Instance.GatherEntries(vector2I.x, vector2I.y, 1, 1, GameScenePartitioner.Instance.pickupablesLayer, pooledList);
 		for (int i = 0; i < pooledList.Count; i++)
 		{

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei.AI;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -201,58 +200,6 @@ public class RolesScreen : KModalScreen
 		this.roleWidgets["NoRole"].GetComponent<RoleWidget>().Refresh("NoRole");
 	}
 
-	private int minionDropDownSort(IListableOption a, IListableOption b, object targetData)
-	{
-		RoleConfig roleConfig = a as RoleConfig;
-		RoleConfig roleConfig2 = b as RoleConfig;
-		MinionResume minionResume = targetData as MinionResume;
-		bool flag = Game.Instance.roleManager.CanAssignToRole(roleConfig.id, minionResume);
-		bool flag2 = Game.Instance.roleManager.CanAssignToRole(roleConfig2.id, minionResume);
-		if (flag && !flag2)
-		{
-			return 1;
-		}
-		if (flag2 && !flag)
-		{
-			return -1;
-		}
-		float num = minionResume.AptitudeByRoleGroup[roleConfig.roleGroup];
-		float num2 = minionResume.AptitudeByRoleGroup[roleConfig2.roleGroup];
-		if (num != num2)
-		{
-			return (num <= num2) ? (-1) : 1;
-		}
-		float num3 = 0f;
-		float num4 = 0f;
-		for (int i = 0; i < roleConfig.relevantAttributes.Length; i++)
-		{
-			num3 += minionResume.GetAttributes().Get(roleConfig.relevantAttributes[i]).GetTotalDisplayValue();
-		}
-		for (int j = 0; j < roleConfig2.relevantAttributes.Length; j++)
-		{
-			num4 += minionResume.GetAttributes().Get(roleConfig2.relevantAttributes[j]).GetTotalDisplayValue();
-		}
-		if (num3 > num4)
-		{
-			return 1;
-		}
-		if (num4 > num3)
-		{
-			return -1;
-		}
-		return 0;
-	}
-
-	private void OnMinionDropEntryClick(IListableOption role, object data)
-	{
-		if (role != null)
-		{
-			Game.Instance.roleManager.AssignToRole((role as RoleConfig).id, data as MinionResume, false, false);
-			this.RefreshRoleWidgets();
-			this.RefreshSideBar();
-		}
-	}
-
 	private void OnToggleAutoPrioritize()
 	{
 		Game.Instance.autoPrioritizeRoles = !Game.Instance.autoPrioritizeRoles;
@@ -331,7 +278,9 @@ public class RolesScreen : KModalScreen
 		UI.ROLES_SCREEN.TIER_NAMES.FOUR,
 		UI.ROLES_SCREEN.TIER_NAMES.FIVE,
 		UI.ROLES_SCREEN.TIER_NAMES.SIX,
-		UI.ROLES_SCREEN.TIER_NAMES.SEVEN
+		UI.ROLES_SCREEN.TIER_NAMES.SEVEN,
+		UI.ROLES_SCREEN.TIER_NAMES.EIGHT,
+		UI.ROLES_SCREEN.TIER_NAMES.NINE
 	};
 
 	private int layoutRowHeight = 96;

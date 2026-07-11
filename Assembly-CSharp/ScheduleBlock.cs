@@ -5,11 +5,43 @@ using KSerialization;
 [Serializable]
 public class ScheduleBlock
 {
-	public ScheduleBlock(string name, List<ScheduleBlockType> allowed_types, bool alarm)
+	public ScheduleBlock(string name, List<ScheduleBlockType> allowed_types, string groupId)
 	{
 		this.name = name;
 		this.allowed_types = allowed_types;
-		this.alarm = alarm;
+		this._groupId = groupId;
+	}
+
+	public string GroupId
+	{
+		get
+		{
+			if (this._groupId == null)
+			{
+				this._groupId = Db.Get().ScheduleGroups.FindGroupForScheduleTypes(this.allowed_types).Id;
+			}
+			return this._groupId;
+		}
+		set
+		{
+			this._groupId = value;
+		}
+	}
+
+	public bool IsAllowed(ScheduleBlockType type)
+	{
+		if (this.allowed_types != null)
+		{
+			foreach (ScheduleBlockType scheduleBlockType in this.allowed_types)
+			{
+				if (type.IdHash == scheduleBlockType.IdHash)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		return false;
 	}
 
 	[Serialize]
@@ -19,5 +51,5 @@ public class ScheduleBlock
 	public List<ScheduleBlockType> allowed_types;
 
 	[Serialize]
-	public bool alarm;
+	private string _groupId;
 }

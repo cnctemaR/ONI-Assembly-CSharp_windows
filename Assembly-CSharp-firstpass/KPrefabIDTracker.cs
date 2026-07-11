@@ -42,8 +42,8 @@ public class KPrefabIDTracker
 		KPrefabIDTracker.Entry entry = default(KPrefabIDTracker.Entry);
 		if (this.entryMap.TryGetValue(instance, out entry))
 		{
-			this.prefabIdMap.Remove(entry.id);
 			entry.id = instance.InstanceID;
+			entry.instance = instance;
 			this.entryMap[instance] = entry;
 			this.prefabIdMap[entry.id] = instance;
 		}

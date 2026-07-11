@@ -233,7 +233,8 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				{
 					text = UI.OVERLAYS.HEATFLOW.HEATING;
 				}
-				text = text + " (" + GameUtil.GetFormattedWattage(thermalComfort, GameUtil.WattageFormatterUnit.Automatic) + ")";
+				float num3 = 1f * thermalComfort;
+				text = text + " (" + GameUtil.GetFormattedHeatEnergyRate(num3, GameUtil.HeatEnergyFormatterUnit.Automatic) + ")";
 				hoverTextDrawer.BeginShadowBar(false);
 				hoverTextDrawer.DrawText(UI.OVERLAYS.HEATFLOW.HOVERTITLE, this.Styles_Title.Standard);
 				hoverTextDrawer.NewLine(26);
@@ -301,7 +302,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				hoverTextDrawer.EndShadowBar();
 			}
 		}
-		int num3 = 0;
+		int num4 = 0;
 		ChoreConsumer choreConsumer = null;
 		if (SelectTool.Instance.selected != null)
 		{
@@ -322,7 +323,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 						{
 							this.currentSelectedSelectableIndex = k;
 						}
-						num3++;
+						num4++;
 						hoverTextDrawer.BeginShadowBar(flag5);
 						string text8 = GameUtil.GetUnitFormattedName(this.overlayValidHoverObjects[k].gameObject, true);
 						if (component2 != null && kselectable2.GetComponent<Building>() != null)
@@ -381,18 +382,18 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 							hoverTextDrawer.DrawIcon(this.iconDash, 18);
 							hoverTextDrawer.DrawText(text9, this.Styles_Values.Property.Standard);
 						}
-						int num4 = 0;
+						int num5 = 0;
 						foreach (StatusItemGroup.Entry entry in this.overlayValidHoverObjects[k].GetStatusItemGroup())
 						{
 							if (!this.ShowStatusItemInCurrentOverlay(entry.item))
 							{
 								break;
 							}
-							if (num4 >= SelectToolHoverTextCard.maxNumberOfDisplayedSelectableWarnings)
+							if (num5 >= SelectToolHoverTextCard.maxNumberOfDisplayedSelectableWarnings)
 							{
 								break;
 							}
-							if (entry.category != null && entry.category.Id == "Main" && num4 < SelectToolHoverTextCard.maxNumberOfDisplayedSelectableWarnings)
+							if (entry.category != null && entry.category.Id == "Main" && num5 < SelectToolHoverTextCard.maxNumberOfDisplayedSelectableWarnings)
 							{
 								TextStyleSetting textStyleSetting = ((!this.IsStatusItemWarning(entry)) ? this.Styles_BodyText.Standard : this.HoverTextStyleSettings[1]);
 								Sprite sprite = ((entry.item.sprite == null) ? this.iconWarning : entry.item.sprite.sprite);
@@ -400,7 +401,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 								hoverTextDrawer.NewLine(26);
 								hoverTextDrawer.DrawIcon(sprite, color2, 18, 2);
 								hoverTextDrawer.DrawText(entry.GetName(), textStyleSetting);
-								num4++;
+								num5++;
 							}
 						}
 						foreach (StatusItemGroup.Entry entry2 in this.overlayValidHoverObjects[k].GetStatusItemGroup())
@@ -409,11 +410,11 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 							{
 								break;
 							}
-							if (num4 >= SelectToolHoverTextCard.maxNumberOfDisplayedSelectableWarnings)
+							if (num5 >= SelectToolHoverTextCard.maxNumberOfDisplayedSelectableWarnings)
 							{
 								break;
 							}
-							if ((entry2.category == null || entry2.category.Id != "Main") && num4 < SelectToolHoverTextCard.maxNumberOfDisplayedSelectableWarnings)
+							if ((entry2.category == null || entry2.category.Id != "Main") && num5 < SelectToolHoverTextCard.maxNumberOfDisplayedSelectableWarnings)
 							{
 								TextStyleSetting textStyleSetting2 = ((!this.IsStatusItemWarning(entry2)) ? this.Styles_BodyText.Standard : this.HoverTextStyleSettings[1]);
 								Sprite sprite2 = ((entry2.item.sprite == null) ? this.iconWarning : entry2.item.sprite.sprite);
@@ -421,10 +422,10 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 								hoverTextDrawer.NewLine(26);
 								hoverTextDrawer.DrawIcon(sprite2, color3, 18, 2);
 								hoverTextDrawer.DrawText(entry2.GetName(), textStyleSetting2);
-								num4++;
+								num5++;
 							}
 						}
-						float num5 = 0f;
+						float num6 = 0f;
 						bool flag8 = true;
 						bool flag9 = SimViewMode.TemperatureMap == SimDebugView.Instance.GetMode();
 						if (kselectable2.GetComponent<Constructable>())
@@ -433,15 +434,15 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 						}
 						else if (flag9 && component2)
 						{
-							num5 = component2.Temperature;
+							num6 = component2.Temperature;
 						}
 						else if (kselectable2.GetComponent<Building>() && component2)
 						{
-							num5 = component2.Temperature;
+							num6 = component2.Temperature;
 						}
 						else if (kselectable2.GetComponent<CellSelectionObject>() != null)
 						{
-							num5 = kselectable2.GetComponent<CellSelectionObject>().temperature;
+							num6 = kselectable2.GetComponent<CellSelectionObject>().temperature;
 						}
 						else
 						{
@@ -455,7 +456,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 						{
 							hoverTextDrawer.NewLine(26);
 							hoverTextDrawer.DrawIcon(this.iconDash, 18);
-							hoverTextDrawer.DrawText(GameUtil.GetFormattedTemperature(num5, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), this.Styles_BodyText.Standard);
+							hoverTextDrawer.DrawText(GameUtil.GetFormattedTemperature(num6, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), this.Styles_BodyText.Standard);
 						}
 						BuildingComplete component6 = kselectable2.GetComponent<BuildingComplete>();
 						if (component6 != null && component6.Def.IsFoundation)
@@ -526,10 +527,10 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				hoverTextDrawer.DrawIcon(this.iconDash, 18);
 				Element element2 = Grid.Element[num];
 				string formattedTemperature = this.cachedTemperatureString;
-				float num6 = Grid.Temperature[num];
-				if (num6 != this.cachedTemperature)
+				float num7 = Grid.Temperature[num];
+				if (num7 != this.cachedTemperature)
 				{
-					this.cachedTemperature = num6;
+					this.cachedTemperature = num7;
 					formattedTemperature = GameUtil.GetFormattedTemperature(Grid.Temperature[num], GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
 					this.cachedTemperatureString = formattedTemperature;
 				}
@@ -550,13 +551,13 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 			}
 			if (element.id == SimHashes.OxyRock)
 			{
-				float num7 = Grid.AccumulatedFlow[num] / 3f;
+				float num8 = Grid.AccumulatedFlow[num] / 3f;
 				string text12 = BUILDING.STATUSITEMS.EMITTINGOXYGENAVG.NAME;
-				text12 = text12.Replace("{FlowRate}", GameUtil.GetFormattedMass(num7, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				text12 = text12.Replace("{FlowRate}", GameUtil.GetFormattedMass(num8, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				hoverTextDrawer.NewLine(26);
 				hoverTextDrawer.DrawIcon(this.iconDash, 18);
 				hoverTextDrawer.DrawText(text12, this.Styles_BodyText.Standard);
-				if (num7 <= 0f)
+				if (num8 <= 0f)
 				{
 					bool flag12;
 					bool flag13;
@@ -587,7 +588,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 			hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.UNKNOWN, this.Styles_BodyText.Standard);
 			hoverTextDrawer.EndShadowBar();
 		}
-		this.recentNumberOfDisplayedSelectables = num3 + 1;
+		this.recentNumberOfDisplayedSelectables = num4 + 1;
 		hoverTextDrawer.EndDrawing();
 	}
 

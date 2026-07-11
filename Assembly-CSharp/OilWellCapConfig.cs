@@ -29,7 +29,7 @@ public class OilWellCapConfig : IBuildingConfig
 		buildingDef.PowerInputOffset = new CellOffset(1, 1);
 		buildingDef.OverheatTemperature = 2273.15f;
 		buildingDef.Floodable = false;
-		buildingDef.AttachableBuildingType = GameTags.OilWell;
+		buildingDef.AttachmentSlotTag = GameTags.OilWell;
 		buildingDef.BuildLocationRule = BuildLocationRule.BuildingAttachPoint;
 		buildingDef.ObjectLayer = ObjectLayer.AttachableBuilding;
 		return buildingDef;

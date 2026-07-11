@@ -21,7 +21,7 @@ public class MoveToLocationToolHoverTextCard : HoverTextConfiguration
 		if (flag)
 		{
 			hoverTextDrawer.NewLine(26);
-			hoverTextDrawer.DrawText(UI.TOOLS.MOVETOLOCATION.UNREACHABLE, this.Styles_Title.Standard);
+			hoverTextDrawer.DrawText(UI.TOOLS.MOVETOLOCATION.UNREACHABLE, this.HoverTextStyleSettings[1]);
 		}
 		hoverTextDrawer.EndShadowBar();
 		hoverTextDrawer.EndDrawing();

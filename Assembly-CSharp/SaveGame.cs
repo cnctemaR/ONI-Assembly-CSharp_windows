@@ -31,6 +31,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		RedAlertManager.Instance instance2 = new RedAlertManager.Instance(this);
 		instance2.StartSM();
 		this.entombedItemManager = base.gameObject.AddComponent<EntombedItemManager>();
+		this.worldGenSpawner = base.gameObject.AddComponent<WorldGenSpawner>();
 	}
 
 	[OnSerializing]
@@ -63,7 +64,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		}
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 280450U;
+		header.buildVersion = 284571U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);
@@ -139,6 +140,8 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 
 	public EntombedItemManager entombedItemManager;
 
+	public WorldGenSpawner worldGenSpawner;
+
 	public struct Header
 	{
 		public bool IsCompressed
@@ -168,7 +171,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			this.isAutoSave = isAutoSave;
 			this.originalSaveName = originalSaveName;
 			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 5;
+			this.saveMinorVersion = 6;
 		}
 
 		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName, bool sandboxEnabled = false)
@@ -179,7 +182,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			this.isAutoSave = false;
 			this.originalSaveName = string.Empty;
 			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 5;
+			this.saveMinorVersion = 6;
 		}
 
 		public bool IsVersionOlderThan(int major, int minor)

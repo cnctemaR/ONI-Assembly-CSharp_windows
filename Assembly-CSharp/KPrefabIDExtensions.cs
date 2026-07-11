@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public static class KPrefabIDExtensions
@@ -32,16 +31,5 @@ public static class KPrefabIDExtensions
 	public static void RemoveTag(this GameObject go, Tag tag)
 	{
 		go.GetComponent<KPrefabID>().RemoveTag(tag);
-	}
-
-	public static void SetTag(this GameObject go, Tag tag, bool set)
-	{
-		go.GetComponent<KPrefabID>().SetTag(tag, set);
-	}
-
-	public static bool HasTags(this GameObject go, IList<Tag> tags)
-	{
-		KPrefabID component = go.GetComponent<KPrefabID>();
-		return component.HasTags(tags);
 	}
 }

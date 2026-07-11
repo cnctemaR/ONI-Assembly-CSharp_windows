@@ -30,7 +30,7 @@ public class RanchStationConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.RanchStation);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.RanchStation);
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
@@ -73,6 +73,8 @@ public class RanchStationConfig : IBuildingConfig
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.CreaturePen.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Required;
+		RolePerkMissingComplainer rolePerkMissingComplainer = go.AddOrGet<RolePerkMissingComplainer>();
+		rolePerkMissingComplainer.requiredRolePerk = RoleManager.rolePerks.CanWrangleCreatures.id;
 		Prioritizable.AddRef(go);
 	}
 

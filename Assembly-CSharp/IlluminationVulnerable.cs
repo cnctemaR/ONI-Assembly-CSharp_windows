@@ -31,7 +31,7 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 		base.smi.StartSM();
 	}
 
-	public void Configure(bool prefersDarkness = false)
+	public void SetPrefersDarkness(bool prefersDarkness = false)
 	{
 		this.prefersDarkness = prefersDarkness;
 	}
@@ -46,9 +46,9 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 	{
 		if (this.prefersDarkness)
 		{
-			return Grid.LightCount[cell] == 0;
+			return (float)Grid.LightIntensity[cell] <= this.lightIntensityThreshold;
 		}
-		return Grid.LightCount[cell] > 0;
+		return (float)Grid.LightIntensity[cell] > this.lightIntensityThreshold;
 	}
 
 	WiltCondition.Condition[] IWiltCause.Conditions
@@ -98,6 +98,8 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 			new Descriptor(UI.GAMEOBJECTEFFECTS.REQUIRES_LIGHT, UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_LIGHT, Descriptor.DescriptorType.Requirement, false)
 		};
 	}
+
+	public float lightIntensityThreshold;
 
 	private OccupyArea _occupyArea;
 

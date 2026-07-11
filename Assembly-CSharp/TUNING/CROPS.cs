@@ -29,7 +29,8 @@ namespace TUNING
 			new Crop.CropVal("ColdWheatSeed", 10800f, 18, true),
 			new Crop.CropVal(SpiceNutConfig.ID, 4800f, 4, true),
 			new Crop.CropVal(BasicFabricConfig.ID, 1200f, 1, true),
-			new Crop.CropVal(SwampLilyFlowerConfig.ID, 7200f, 2, true)
+			new Crop.CropVal(SwampLilyFlowerConfig.ID, 7200f, 2, true),
+			new Crop.CropVal("GasGrassHarvested", 2400f, 1, true)
 		};
 	}
 }

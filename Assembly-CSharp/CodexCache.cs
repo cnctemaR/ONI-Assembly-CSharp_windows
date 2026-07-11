@@ -17,6 +17,7 @@ public static class CodexCache
 	public static void Init()
 	{
 		CodexCache.entries = new Dictionary<string, CodexEntry>();
+		CodexCache.unlockedEntryLookup = new Dictionary<string, List<string>>();
 		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
 		string text = CodexCache.FormatLinkID("creatures");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.CREATURES, CodexEntryGenerator.GenerateCreatureEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("Hatch").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false)));
@@ -244,6 +245,24 @@ public static class CodexCache
 		}
 	}
 
+	private static void AddLockLookup(string lockId, string articleId)
+	{
+		if (!CodexCache.unlockedEntryLookup.ContainsKey(lockId))
+		{
+			CodexCache.unlockedEntryLookup[lockId] = new List<string>();
+		}
+		CodexCache.unlockedEntryLookup[lockId].Add(articleId);
+	}
+
+	public static string GetEntryForLock(string lockId)
+	{
+		if (CodexCache.unlockedEntryLookup.ContainsKey(lockId) && CodexCache.unlockedEntryLookup[lockId].Count > 0)
+		{
+			return CodexCache.unlockedEntryLookup[lockId][0];
+		}
+		return null;
+	}
+
 	public static void AddEntry(string id, CodexEntry entry, List<CategoryEntry> categoryEntries = null)
 	{
 		id = CodexCache.FormatLinkID(id);
@@ -267,11 +286,17 @@ public static class CodexCache
 		if (categoryEntries != null)
 		{
 			CodexEntry codexEntry = categoryEntries.Find((CategoryEntry group) => group.id == entry.parentId);
-			if (codexEntry == null)
+			if (codexEntry != null)
 			{
-				return;
+				(codexEntry as CategoryEntry).entriesInCategory.Add(entry);
 			}
-			(codexEntry as CategoryEntry).entriesInCategory.Add(entry);
+		}
+		foreach (ContentContainer contentContainer in entry.contentContainers)
+		{
+			if (contentContainer.lockID != null)
+			{
+				CodexCache.AddLockLookup(contentContainer.lockID, entry.id);
+			}
 		}
 	}
 
@@ -296,6 +321,13 @@ public static class CodexCache
 		if (entry.disabled)
 		{
 			codexEntry.disabled = entry.disabled;
+		}
+		foreach (ContentContainer contentContainer in entry.contentContainers)
+		{
+			if (contentContainer.lockID != null)
+			{
+				CodexCache.AddLockLookup(contentContainer.lockID, entry.id);
+			}
 		}
 	}
 
@@ -402,6 +434,8 @@ public static class CodexCache
 	private static string baseEntryPath;
 
 	public static Dictionary<string, CodexEntry> entries;
+
+	private static Dictionary<string, List<string>> unlockedEntryLookup;
 
 	private struct CollectEntryWorkItem : IWorkItem<object>
 	{

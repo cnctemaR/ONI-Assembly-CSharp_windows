@@ -27,6 +27,7 @@ public class GasConduitTemperatureSensorConfig : ConduitSensorConfig
 		conduitTemperatureSensor.manuallyControlled = false;
 		conduitTemperatureSensor.rangeMin = 0f;
 		conduitTemperatureSensor.rangeMax = 573.15f;
+		conduitTemperatureSensor.defaultState = false;
 	}
 
 	public static string ID = "GasConduitTemperatureSensor";

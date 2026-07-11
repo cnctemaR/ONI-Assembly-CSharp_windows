@@ -27,7 +27,7 @@ public class DiningTableConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.MessTable);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.MessTable);
 		go.AddOrGet<MessStation>();
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.showInUI = true;

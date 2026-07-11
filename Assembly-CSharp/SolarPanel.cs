@@ -19,7 +19,7 @@ public class SolarPanel : Generator
 		{
 			int num2 = i - (def.WidthInCells - 1) / 2;
 			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
-			SimMessages.SetCellProperties(num3, 39);
+			SimMessages.SetCellProperties(num3, 87);
 			Grid.Foundation[num3] = true;
 			Grid.PreviousSolid[num3] = Grid.Solid[num3];
 			Grid.SetSolid(num3, true, CellEventLogger.Instance.SimCellOccupierForceSolid);
@@ -27,7 +27,7 @@ public class SolarPanel : Generator
 			GameScenePartitioner.Instance.TriggerEvent(num3, GameScenePartitioner.Instance.solidChangedLayer, null);
 			Grid.RenderedByWorld[num3] = false;
 		}
-		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
+		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
 	}
 
 	protected override void OnCleanUp()
@@ -39,7 +39,7 @@ public class SolarPanel : Generator
 		{
 			int num2 = i - (def.WidthInCells - 1) / 2;
 			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
-			SimMessages.ClearCellProperties(num3, 39);
+			SimMessages.ClearCellProperties(num3, 87);
 			Grid.Foundation[num3] = false;
 			Grid.PreviousSolid[num3] = Grid.Solid[num3];
 			Grid.SetSolid(num3, false, CellEventLogger.Instance.SimCellOccupierForceSolid);
@@ -53,8 +53,8 @@ public class SolarPanel : Generator
 
 	protected void OnActiveChanged(object data)
 	{
-		bool flag = (bool)data;
-		StatusItem statusItem = ((!flag) ? Db.Get().BuildingStatusItems.GeneratorOffline : Db.Get().BuildingStatusItems.Wattage);
+		bool isActive = ((Operational)data).IsActive;
+		StatusItem statusItem = ((!isActive) ? Db.Get().BuildingStatusItems.GeneratorOffline : Db.Get().BuildingStatusItems.Wattage);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, this);
 	}
 
@@ -120,7 +120,7 @@ public class SolarPanel : Generator
 
 	private Guid statusHandle;
 
-	private const Sim.Cell.Properties floorCellProperties = (Sim.Cell.Properties)39;
+	private const Sim.Cell.Properties floorCellProperties = (Sim.Cell.Properties)87;
 
 	private CellOffset[] solarCellOffsets = new CellOffset[]
 	{

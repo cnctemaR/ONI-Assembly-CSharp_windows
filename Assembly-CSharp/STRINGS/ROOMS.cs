@@ -41,7 +41,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = "- Morale bonus";
 
-				public static LocString TOOLTIP = "Sleeping in a bed will improve Morale for Duplicants if it is located within Barracks.";
+				public static LocString TOOLTIP = "Sleeping in Barracks will improve Duplicants' Morale.";
 			}
 
 			public class BEDROOM
@@ -50,7 +50,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = "- Morale bonus";
 
-				public static LocString TOOLTIP = "Sleeping in a comfortable Bedroom will improve Morale for Duplicants";
+				public static LocString TOOLTIP = "Sleeping in a private Bedroom will improve Duplicants' Morale.";
 			}
 
 			public class MESSHALL
@@ -59,7 +59,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = "- Morale bonus";
 
-				public static LocString TOOLTIP = "Eating at a Mess Table will improve Morale for Duplicants if it is located within a Mess Hall.";
+				public static LocString TOOLTIP = "Eating at a Mess Table in a Mess Hall will improve Duplicants' Morale.";
 			}
 
 			public class GREATHALL
@@ -68,7 +68,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = "- Morale bonus";
 
-				public static LocString TOOLTIP = "Eating and relaxing in a Great Hall will significantly improve Duplicants' Morale.";
+				public static LocString TOOLTIP = "Eating in a Great Hall will significantly improve Duplicants' Morale.";
 			}
 
 			public class HOSPITAL
@@ -86,7 +86,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = "- Stress relief bonus";
 
-				public static LocString TOOLTIP = "Massage tables relieve more stress when in a proper room.";
+				public static LocString TOOLTIP = "Receiving massages at a Massage Clinic will significantly improve Stress reduction.";
 			}
 
 			public class POWER_PLANT
@@ -95,7 +95,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = "- Power production increase";
 
-				public static LocString TOOLTIP = "Electrical Engineers can tune-up generators built within a Power Plant, improving their power production.";
+				public static LocString TOOLTIP = "Electrical Engineers can tune-up generators built within a Power Plant and improve their power production.";
 			}
 
 			public class MACHINE_SHOP
@@ -104,7 +104,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = "- Increased fabrication efficiency";
 
-				public static LocString TOOLTIP = "Engineers working in a Machine Shop can maintain buildings and increase the speed with which they produce items.";
+				public static LocString TOOLTIP = "Engineers working in a Machine Shop can maintain buildings and increase their production speed.";
 			}
 
 			public class FARM
@@ -122,7 +122,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = "- Hastens critter domestication";
 
-				public static LocString TOOLTIP = "Stabled critters will be more productive and less hostile.";
+				public static LocString TOOLTIP = "Stabled critters will become more productive and less hostile.";
 			}
 
 			public class REC_ROOM
@@ -131,7 +131,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = "- Morale bonus";
 
-				public static LocString TOOLTIP = "Leisure time will further improve Morale for Duplicants visiting a Recreation Room.";
+				public static LocString TOOLTIP = "Downtime shifts will further improve Morale for Duplicants visiting a Recreation Room.";
 			}
 
 			public class PRIVATE_BEDROOM
@@ -172,9 +172,9 @@ namespace STRINGS
 
 			public class CEILING_HEIGHT
 			{
-				public static LocString NAME = "Minimum ceiling height: {0} tiles";
+				public static LocString NAME = "Minimum height: {0} tiles";
 
-				public static LocString DESCRIPTION = "The ceiling must be at least {0} tiles above the floor";
+				public static LocString DESCRIPTION = "Must have a ceiling height of at least {0} tiles";
 			}
 
 			public class MINIMUM_SIZE
@@ -200,16 +200,16 @@ namespace STRINGS
 
 			public class LUXURY_BED_SINGLE
 			{
-				public static LocString NAME = "Single luxury bed";
+				public static LocString NAME = "Single Comfy Bed";
 
-				public static LocString DESCRIPTION = "Requires Comfy Bed";
+				public static LocString DESCRIPTION = "Requires a Comfy Bed";
 			}
 
 			public class NO_COTS
 			{
-				public static LocString NAME = "No basic Cots";
+				public static LocString NAME = "No Cots";
 
-				public static LocString DESCRIPTION = "Cannot contain basic Cots";
+				public static LocString DESCRIPTION = "Room cannot contain a Cot";
 			}
 
 			public class BED_MULTIPLE
@@ -228,7 +228,7 @@ namespace STRINGS
 
 			public class DECORATIVE_ITEM
 			{
-				public static LocString NAME = "Decoration item";
+				public static LocString NAME = "Decor item";
 
 				public static LocString DESCRIPTION = "Requires one or more Paintings, Sculptures, or Vases";
 			}
@@ -237,7 +237,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Decor item: {0}+ Decor";
 
-				public static LocString DESCRIPTION = "Requires a decorative object with a Decor of at least {0}.";
+				public static LocString DESCRIPTION = "Requires a decorative item with a minimum Decor value of {0}";
 			}
 
 			public class CLINIC
@@ -277,16 +277,16 @@ namespace STRINGS
 
 			public class RANCH_STATION
 			{
-				public static LocString NAME = "Ranch Station";
+				public static LocString NAME = "Grooming Station";
 
-				public static LocString DESCRIPTION = "Requires a single Ranch Station";
+				public static LocString DESCRIPTION = "Requires a single Grooming Station";
 			}
 
 			public class REC_BUILDING
 			{
 				public static LocString NAME = "Recreational building";
 
-				public static LocString DESCRIPTION = "Requires one or more Recreational Buildings";
+				public static LocString DESCRIPTION = "Requires one or more recreational buildings";
 			}
 
 			public class MACHINE_SHOP

@@ -34,4 +34,6 @@ public class CavityInfo
 	public List<KPrefabID> buildings = new List<KPrefabID>();
 
 	public List<KPrefabID> creatures = new List<KPrefabID>();
+
+	public List<KPrefabID> eggs = new List<KPrefabID>();
 }

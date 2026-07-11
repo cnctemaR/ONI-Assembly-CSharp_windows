@@ -59,12 +59,12 @@ public class Clearable : Workable, ISaveLoadable
 			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingClear, false);
 			this.isMarkedForClear = false;
 			base.GetComponent<KPrefabID>().RemoveTag(GameTags.Garbage);
-			if (this.chore != null)
-			{
-				this.chore.Cancel("Clearing canceled");
-				this.chore = null;
-			}
 			Prioritizable.RemoveRef(base.gameObject);
+			if (this.clearHandle.IsValid())
+			{
+				GlobalChoreProvider.Instance.UnregisterClearable(this.clearHandle);
+				this.clearHandle.Clear();
+			}
 		}
 	}
 
@@ -74,13 +74,13 @@ public class Clearable : Workable, ISaveLoadable
 		{
 			return;
 		}
-		if ((!this.isMarkedForClear || force) && !this.pickupable.IsEntombed && this.chore == null && !this.HasTag(GameTags.Stored))
+		if ((!this.isMarkedForClear || force) && !this.pickupable.IsEntombed && !this.clearHandle.IsValid() && !this.HasTag(GameTags.Stored))
 		{
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.PendingClear, this);
 			Prioritizable.AddRef(base.gameObject);
-			this.chore = new ClearChore(Db.Get().ChoreTypes.Transport, base.GetComponent<Pickupable>(), null, true, null, null, null);
 			base.GetComponent<KPrefabID>().AddTag(GameTags.Garbage);
 			this.isMarkedForClear = true;
+			this.clearHandle = GlobalChoreProvider.Instance.RegisterClearable(this);
 		}
 	}
 
@@ -97,6 +97,16 @@ public class Clearable : Workable, ISaveLoadable
 	private void OnEquipped(object data)
 	{
 		this.CancelClearing();
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		if (this.clearHandle.IsValid())
+		{
+			GlobalChoreProvider.Instance.UnregisterClearable(this.clearHandle);
+			this.clearHandle.Clear();
+		}
 	}
 
 	private void OnRefreshUserMenu(object data)
@@ -142,10 +152,10 @@ public class Clearable : Workable, ISaveLoadable
 	[MyCmpReq]
 	private Pickupable pickupable;
 
-	private Chore chore;
-
 	[Serialize]
 	private bool isMarkedForClear;
+
+	private HandleVector<int>.Handle clearHandle;
 
 	public bool isClearable = true;
 }

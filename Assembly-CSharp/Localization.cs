@@ -40,11 +40,11 @@ public static class Localization
 			string @string = KPlayerPrefs.GetString(Localization.SELECTED_LANGUAGE_CODE_KEY, string.Empty);
 			Localization.LoadPreinstalledTranslation(@string);
 		}
-		else if (selectedLanguageType == Localization.SelectedLanguageType.UGC && !dontCheckSteam && SteamManager.Initialized && SteamUGCService.HasInstalledLanguage())
+		else if (selectedLanguageType == Localization.SelectedLanguageType.UGC && !dontCheckSteam && SteamManager.Initialized && LanguageOptionsScreen.HasInstalledLanguage())
 		{
 			global::Debug.Log("Initialize... SteamUGCService", null);
 			PublishedFileId_t invalid = PublishedFileId_t.Invalid;
-			SteamUGCService.LoadTranslation(ref invalid);
+			LanguageOptionsScreen.LoadTranslation(ref invalid);
 			if (invalid != PublishedFileId_t.Invalid)
 			{
 				Console.WriteLine("LOCALIZATION: Loaded steamworks file id: " + invalid.ToString());
@@ -630,12 +630,6 @@ public static class Localization
 		return "{" + format_idx.ToString() + ":dd / MMM / yyyy}";
 	}
 
-	public static void SetLanguage(PublishedFileId_t item)
-	{
-		SteamUGCService.Instance.SetCurrentLanguage(item);
-		SteamUGCService.Instance.OnRefreshLanguage = null;
-	}
-
 	public static void ClearLanguage()
 	{
 		Localization.sFontAsset = null;
@@ -649,7 +643,7 @@ public static class Localization
 			string[] array = File.ReadAllLines(defaultLocalizationFilePath, Encoding.UTF8);
 			Localization.LoadTranslation(array, true);
 		}
-		SteamUGCService.Instance.CleanUpCurrentModLanguage();
+		LanguageOptionsScreen.CleanUpCurrentModLanguage();
 	}
 
 	private static string ReverseText(string source)

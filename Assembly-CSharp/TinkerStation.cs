@@ -6,7 +6,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class TinkerStation : Workable, IEffectDescriptor, ISim200ms
+public class TinkerStation : Workable, IEffectDescriptor, ISim1000ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -90,7 +90,7 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim200ms
 		this.chore = null;
 	}
 
-	public void Sim200ms(float dt)
+	public void Sim1000ms(float dt)
 	{
 		this.UpdateChore();
 	}

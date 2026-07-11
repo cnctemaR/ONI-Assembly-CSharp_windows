@@ -36,7 +36,7 @@ public class PolymerizerConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		Polymerizer polymerizer = go.AddOrGet<Polymerizer>();
 		polymerizer.emitMass = 30f;
 		polymerizer.emitTag = GameTagExtensions.Create(SimHashes.Polypropylene);

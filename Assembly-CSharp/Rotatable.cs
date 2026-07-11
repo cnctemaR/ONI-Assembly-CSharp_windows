@@ -155,25 +155,25 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 		{
 		case Orientation.R90:
 			num = -90f;
-			goto IL_011B;
+			goto IL_0119;
 		case Orientation.R180:
 			num = -180f;
-			goto IL_011B;
+			goto IL_0119;
 		case Orientation.R270:
 			num = -270f;
-			goto IL_011B;
+			goto IL_0119;
 		case Orientation.FlipH:
-			component.offset = new Vector2(-0.5f * (float)this.width, 0.5f * (float)this.height);
+			component.offset = new Vector2((float)(this.width % 2 - 1), 0.5f * (float)this.height);
 			component.size = new Vector2((float)this.width, (float)this.height);
-			goto IL_011B;
+			goto IL_0119;
 		case Orientation.FlipV:
 			component.offset = new Vector2(0f, -0.5f * (float)(this.height - 2));
 			component.size = new Vector2((float)this.width, (float)this.height);
-			goto IL_011B;
+			goto IL_0119;
 		}
 		component.offset = new Vector2(0f, 0.5f * (float)this.height);
 		component.size = new Vector2((float)this.width, (float)this.height);
-		IL_011B:
+		IL_0119:
 		if (num != 0f)
 		{
 			Matrix2x3 matrix2x = Matrix2x3.Translate(-this.pivot);

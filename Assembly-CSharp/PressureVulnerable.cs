@@ -31,7 +31,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 	{
 		get
 		{
-			return this.GetPressureOverArea(Grid.PosToCell(base.gameObject));
+			return this.GetPressureOverArea(this.cell);
 		}
 	}
 
@@ -39,7 +39,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 	{
 		get
 		{
-			return Grid.Element[Grid.PosToCell(base.gameObject)];
+			return Grid.Element[this.cell];
 		}
 	}
 
@@ -55,15 +55,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 	{
 		get
 		{
-			return this.IsSafeElement(this.GetExternalElement) && (this.GetExternalPressureState == PressureVulnerable.PressureState.Normal || this.GetExternalPressureState == PressureVulnerable.PressureState.Perfect);
-		}
-	}
-
-	public bool IsPerfect
-	{
-		get
-		{
-			return this.IsSafeElement(this.GetExternalElement) && this.GetExternalPressureState == PressureVulnerable.PressureState.Perfect;
+			return this.IsSafeElement(this.GetExternalElement) && this.GetExternalPressureState == PressureVulnerable.PressureState.Normal;
 		}
 	}
 
@@ -77,6 +69,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.cell = Grid.PosToCell(this);
 		base.smi.sm.pressure.Set(1f, base.smi);
 		base.smi.sm.safe_element.Set(this.IsSafeElement(this.GetExternalElement), base.smi);
 		base.smi.StartSM();
@@ -89,8 +82,6 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		this.pressureLethal_Low = float.MinValue;
 		this.pressureLethal_High = float.MaxValue;
 		this.pressureWarning_High = float.MaxValue;
-		this.pressurePerfect_Low = float.MinValue;
-		this.pressurePerfect_High = float.MaxValue;
 		this.safe_atmospheres = new HashSet<Element>();
 		if (safeAtmospheres != null)
 		{
@@ -101,15 +92,13 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		}
 	}
 
-	public void Configure(float pressureWarningLow = 0.25f, float pressureLethalLow = 0.01f, float pressureWarningHigh = 10f, float pressureLethalHigh = 30f, float pressurePerfectLow = 0.75f, float pressurePerfectHigh = 5f, SimHashes[] safeAtmospheres = null)
+	public void Configure(float pressureWarningLow = 0.25f, float pressureLethalLow = 0.01f, float pressureWarningHigh = 10f, float pressureLethalHigh = 30f, SimHashes[] safeAtmospheres = null)
 	{
 		this.pressure_sensitive = true;
 		this.pressureWarning_Low = pressureWarningLow;
 		this.pressureLethal_Low = pressureLethalLow;
 		this.pressureLethal_High = pressureLethalHigh;
 		this.pressureWarning_High = pressureWarningHigh;
-		this.pressurePerfect_Low = pressurePerfectLow;
-		this.pressurePerfect_High = pressurePerfectHigh;
 		this.safe_atmospheres = new HashSet<Element>();
 		if (safeAtmospheres != null)
 		{
@@ -170,8 +159,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 
 	public void Sim1000ms(float dt)
 	{
-		int num = Grid.PosToCell(base.gameObject);
-		float pressureOverArea = this.GetPressureOverArea(num);
+		float pressureOverArea = this.GetPressureOverArea(this.cell);
 		base.smi.sm.pressure.Set(pressureOverArea, base.smi);
 		this.displayPressureAmount.value = pressureOverArea;
 		base.smi.sm.safe_element.Set(this.IsSafeElement(this.GetExternalElement), base.smi);
@@ -212,10 +200,6 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 
 	public float pressureWarning_Low;
 
-	public float pressurePerfect_Low;
-
-	public float pressurePerfect_High;
-
 	public float pressureWarning_High;
 
 	public float pressureLethal_High;
@@ -240,6 +224,8 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 
 	public HashSet<Element> safe_atmospheres = new HashSet<Element>();
 
+	private int cell;
+
 	private PressureVulnerable.PressureState pressureState = PressureVulnerable.PressureState.Normal;
 
 	public class StatesInstance : GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.GameInstance
@@ -262,40 +248,35 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.normal;
-			this.lethalLow.TriggerOnEnter(GameHashes.LowPressureFatal, null).ParamTransition<float>(this.pressure, this.warningLow, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressureLethal_Low).ParamTransition<bool>(this.safe_element, this.unsafeElement, (PressureVulnerable.StatesInstance smi, bool p) => !p)
-				.Enter(delegate(PressureVulnerable.StatesInstance smi)
-				{
-					smi.master.pressureState = PressureVulnerable.PressureState.LethalLow;
-				});
-			this.lethalHigh.TriggerOnEnter(GameHashes.HighPressureFatal, null).ParamTransition<float>(this.pressure, this.warningHigh, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressureLethal_High).ParamTransition<bool>(this.safe_element, this.unsafeElement, (PressureVulnerable.StatesInstance smi, bool p) => !p)
-				.Enter(delegate(PressureVulnerable.StatesInstance smi)
-				{
-					smi.master.pressureState = PressureVulnerable.PressureState.LethalHigh;
-				});
-			this.warningLow.TriggerOnEnter(GameHashes.LowPressureWarning, null).ParamTransition<float>(this.pressure, this.lethalLow, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressureLethal_Low).ParamTransition<float>(this.pressure, this.normal, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressureWarning_Low)
-				.ParamTransition<bool>(this.safe_element, this.unsafeElement, (PressureVulnerable.StatesInstance smi, bool p) => !p)
-				.Enter(delegate(PressureVulnerable.StatesInstance smi)
-				{
-					smi.master.pressureState = PressureVulnerable.PressureState.WarningLow;
-				});
-			this.unsafeElement.ParamTransition<bool>(this.safe_element, this.normal, (PressureVulnerable.StatesInstance smi, bool p) => p).TriggerOnExit(GameHashes.CorrectAtmosphere).TriggerOnEnter(GameHashes.WrongAtmosphere, null);
-			this.warningHigh.TriggerOnEnter(GameHashes.HighPressureWarning, null).ParamTransition<float>(this.pressure, this.lethalHigh, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressureLethal_High).ParamTransition<float>(this.pressure, this.normal, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressureWarning_High)
-				.ParamTransition<bool>(this.safe_element, this.unsafeElement, (PressureVulnerable.StatesInstance smi, bool p) => !p)
-				.Enter(delegate(PressureVulnerable.StatesInstance smi)
-				{
-					smi.master.pressureState = PressureVulnerable.PressureState.WarningHigh;
-				});
-			this.normal.DefaultState(this.normal.okay).TriggerOnEnter(GameHashes.OptimalPressureAchieved, null).ParamTransition<float>(this.pressure, this.warningHigh, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressureWarning_High)
-				.ParamTransition<float>(this.pressure, this.warningLow, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressureWarning_Low)
+			this.lethalLow.Enter(delegate(PressureVulnerable.StatesInstance smi)
+			{
+				smi.master.pressureState = PressureVulnerable.PressureState.LethalLow;
+			}).TriggerOnEnter(GameHashes.LowPressureFatal, null).ParamTransition<float>(this.pressure, this.warningLow, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressureLethal_Low)
 				.ParamTransition<bool>(this.safe_element, this.unsafeElement, (PressureVulnerable.StatesInstance smi, bool p) => !p);
-			this.normal.okay.ParamTransition<float>(this.pressure, this.normal.perfect, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressurePerfect_Low && p < smi.master.pressurePerfect_High).Enter(delegate(PressureVulnerable.StatesInstance smi)
+			this.lethalHigh.Enter(delegate(PressureVulnerable.StatesInstance smi)
+			{
+				smi.master.pressureState = PressureVulnerable.PressureState.LethalHigh;
+			}).TriggerOnEnter(GameHashes.HighPressureFatal, null).ParamTransition<float>(this.pressure, this.warningHigh, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressureLethal_High)
+				.ParamTransition<bool>(this.safe_element, this.unsafeElement, (PressureVulnerable.StatesInstance smi, bool p) => !p);
+			this.warningLow.Enter(delegate(PressureVulnerable.StatesInstance smi)
+			{
+				smi.master.pressureState = PressureVulnerable.PressureState.WarningLow;
+			}).TriggerOnEnter(GameHashes.LowPressureWarning, null).ParamTransition<float>(this.pressure, this.lethalLow, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressureLethal_Low)
+				.ParamTransition<float>(this.pressure, this.normal, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressureWarning_Low)
+				.ParamTransition<bool>(this.safe_element, this.unsafeElement, (PressureVulnerable.StatesInstance smi, bool p) => !p);
+			this.unsafeElement.ParamTransition<bool>(this.safe_element, this.normal, (PressureVulnerable.StatesInstance smi, bool p) => p).TriggerOnExit(GameHashes.CorrectAtmosphere).TriggerOnEnter(GameHashes.WrongAtmosphere, null);
+			this.warningHigh.Enter(delegate(PressureVulnerable.StatesInstance smi)
+			{
+				smi.master.pressureState = PressureVulnerable.PressureState.WarningHigh;
+			}).TriggerOnEnter(GameHashes.HighPressureWarning, null).ParamTransition<float>(this.pressure, this.lethalHigh, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressureLethal_High)
+				.ParamTransition<float>(this.pressure, this.normal, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressureWarning_High)
+				.ParamTransition<bool>(this.safe_element, this.unsafeElement, (PressureVulnerable.StatesInstance smi, bool p) => !p);
+			this.normal.Enter(delegate(PressureVulnerable.StatesInstance smi)
 			{
 				smi.master.pressureState = PressureVulnerable.PressureState.Normal;
-			});
-			this.normal.perfect.ParamTransition<float>(this.pressure, this.normal.okay, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressurePerfect_Low || p > smi.master.pressurePerfect_High).Enter(delegate(PressureVulnerable.StatesInstance smi)
-			{
-				smi.master.pressureState = PressureVulnerable.PressureState.Perfect;
-			});
+			}).TriggerOnEnter(GameHashes.OptimalPressureAchieved, null).ParamTransition<float>(this.pressure, this.warningHigh, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressureWarning_High)
+				.ParamTransition<float>(this.pressure, this.warningLow, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressureWarning_Low)
+				.ParamTransition<bool>(this.safe_element, this.unsafeElement, (PressureVulnerable.StatesInstance smi, bool p) => !p);
 		}
 
 		public StateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.FloatParameter pressure;
@@ -312,14 +293,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 
 		public GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.State warningHigh;
 
-		public PressureVulnerable.States.NormalStates normal;
-
-		public class NormalStates : GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.State
-		{
-			public GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.State okay;
-
-			public GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.State perfect;
-		}
+		public GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.State normal;
 	}
 
 	public enum PressureState
@@ -327,7 +301,6 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		LethalLow,
 		WarningLow,
 		Normal,
-		Perfect,
 		WarningHigh,
 		LethalHigh
 	}

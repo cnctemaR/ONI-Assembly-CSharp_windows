@@ -241,6 +241,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 		private void PushState(StateMachine.BaseState state)
 		{
 			int num = this.gotoId;
+			this.currentActionIdx = -1;
 			if (state.events != null)
 			{
 				foreach (StateEvent stateEvent in state.events)
@@ -323,13 +324,14 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				return;
 			}
 			int num = this.gotoId;
-			for (int i = 0; i < actions.Count; i++)
+			this.currentActionIdx++;
+			while (this.currentActionIdx < actions.Count)
 			{
 				if (num != this.gotoId)
 				{
 					break;
 				}
-				StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.Callback callback = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.Callback)actions[i].callback;
+				StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.Callback callback = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.Callback)actions[this.currentActionIdx].callback;
 				try
 				{
 					callback(this.smi);
@@ -361,16 +363,19 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 							".",
 							state.name,
 							".",
-							actions[i].name
+							actions[this.currentActionIdx].name
 						});
 						Output.LogErrorWithObj(this.controller, new object[] { text2 + "\n" + ex.ToString() });
 					}
 				}
+				this.currentActionIdx++;
 			}
+			this.currentActionIdx = 2147483646;
 		}
 
 		private void PopState()
 		{
+			this.currentActionIdx = -1;
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.GenericInstance.StackEntry stackEntry = this.stateStack[--this.stackSize];
 			StateMachine.BaseState state = stackEntry.state;
 			if (state.parameterTransitions != null)
@@ -462,6 +467,15 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			this.OnCleanUp();
 		}
 
+		private void FinishStateInProgress(StateMachine.BaseState state)
+		{
+			if (state.enterActions == null)
+			{
+				return;
+			}
+			this.ExecuteActions((StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State)state, state.enterActions);
+		}
+
 		public override void GoTo(StateMachine.BaseState base_state)
 		{
 			if (App.IsExiting)
@@ -524,15 +538,20 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 								break;
 							}
 						}
+						int num2 = this.stackSize - 1;
+						if (num2 >= 0 && num2 == i - 1)
+						{
+							this.FinishStateInProgress(this.stateStack[num2].state);
+						}
 						while (this.stackSize > i && num == this.gotoId)
 						{
 							this.PopState();
 						}
-						int num2 = i;
-						while (num2 < branch.Length && num == this.gotoId)
+						int num3 = i;
+						while (num3 < branch.Length && num == this.gotoId)
 						{
-							this.PushState(branch[num2]);
-							num2++;
+							this.PushState(branch[num3]);
+							num3++;
 						}
 						this.gotoStack.Pop();
 					}
@@ -580,6 +599,8 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 		private float stateEnterTime;
 
 		private int gotoId;
+
+		private int currentActionIdx = -1;
 
 		private SchedulerHandle updateHandle;
 

@@ -19,18 +19,9 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 
 	protected override void OnCleanUp()
 	{
-		if (this.solidChangedEntry != null)
-		{
-			this.solidChangedEntry.Release();
-		}
-		if (this.pickupablesChangedEntry != null)
-		{
-			this.pickupablesChangedEntry.Release();
-		}
-		if (this.floorSwitchActivatorChangedEntry != null)
-		{
-			this.floorSwitchActivatorChangedEntry.Release();
-		}
+		GameScenePartitioner.Instance.Free(ref this.solidChangedEntry);
+		GameScenePartitioner.Instance.Free(ref this.pickupablesChangedEntry);
+		GameScenePartitioner.Instance.Free(ref this.floorSwitchActivatorChangedEntry);
 		base.OnCleanUp();
 	}
 
@@ -67,7 +58,7 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 	{
 		float num = 0f;
 		int num2 = Grid.CellAbove(this.NaturalBuildingCell());
-		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+		ListPool<ScenePartitionerEntry, LogicMassSensor>.PooledList pooledList = ListPool<ScenePartitionerEntry, LogicMassSensor>.Allocate();
 		GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num2).x, Grid.CellToXY(num2).y, 1, 1, GameScenePartitioner.Instance.pickupablesLayer, pooledList);
 		for (int i = 0; i < pooledList.Count; i++)
 		{
@@ -77,7 +68,7 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 				if (!pickupable.wasAbsorbed)
 				{
 					KPrefabID component = pickupable.GetComponent<KPrefabID>();
-					if (!component.HasPrefabTag(GameTags.Creature) || component.HasPrefabTag(GameTags.Creatures.GroundBased) || pickupable.HasTag(GameTags.Creatures.Flopping))
+					if (!component.HasTag(GameTags.Creature) || component.HasTag(GameTags.Creatures.GroundBased) || pickupable.HasTag(GameTags.Creatures.Flopping))
 					{
 						num += pickupable.PrimaryElement.Mass;
 					}
@@ -92,7 +83,7 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 	{
 		float num = 0f;
 		int num2 = Grid.CellAbove(this.NaturalBuildingCell());
-		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+		ListPool<ScenePartitionerEntry, LogicMassSensor>.PooledList pooledList = ListPool<ScenePartitionerEntry, LogicMassSensor>.Allocate();
 		GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num2).x, Grid.CellToXY(num2).y, 1, 1, GameScenePartitioner.Instance.floorSwitchActivatorLayer, pooledList);
 		for (int i = 0; i < pooledList.Count; i++)
 		{
@@ -300,9 +291,9 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 
 	private float toggleCooldown = 0.15f;
 
-	private GameScenePartitionerEntry solidChangedEntry;
+	private HandleVector<int>.Handle solidChangedEntry;
 
-	private GameScenePartitionerEntry pickupablesChangedEntry;
+	private HandleVector<int>.Handle pickupablesChangedEntry;
 
-	private GameScenePartitionerEntry floorSwitchActivatorChangedEntry;
+	private HandleVector<int>.Handle floorSwitchActivatorChangedEntry;
 }

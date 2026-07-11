@@ -198,7 +198,7 @@ public class SandboxToolParameterMenu : KScreen
 		Func<object, bool> func = delegate(object entity)
 		{
 			string idString = (entity as KPrefabID).PrefabID().ToString();
-			return !(entity as KPrefabID).HasPrefabTag(GameTags.Egg) && FOOD.FOOD_TYPES_LIST.Find((EdiblesManager.FoodInfo match) => match.Id == idString) != null;
+			return !(entity as KPrefabID).HasTag(GameTags.Egg) && FOOD.FOOD_TYPES_LIST.Find((EdiblesManager.FoodInfo match) => match.Id == idString) != null;
 		};
 		Tuple<Sprite, Color> tuple = Def.GetUISprite(Assets.GetPrefab("MushBar"), "ui", false);
 		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func, null, tuple);
@@ -231,7 +231,7 @@ public class SandboxToolParameterMenu : KScreen
 				list.Add(searchFilter4);
 			}
 		}
-		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter5 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.CREATURE_EGG, (object entity) => (entity as KPrefabID).HasPrefabTag(GameTags.Egg), searchFilter3, Def.GetUISprite(Assets.GetPrefab("HatchEgg"), "ui", false));
+		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter5 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.CREATURE_EGG, (object entity) => (entity as KPrefabID).HasTag(GameTags.Egg), searchFilter3, Def.GetUISprite(Assets.GetPrefab("HatchEgg"), "ui", false));
 		list.Add(searchFilter5);
 		text = UI.SANDBOXTOOLS.FILTERS.ENTITIES.EQUIPMENT;
 		func = delegate(object entity)

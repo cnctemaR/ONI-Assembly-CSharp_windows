@@ -52,11 +52,7 @@ public class SocialChoreTracker
 
 	public void Clear()
 	{
-		if (this.validNavCellChangedPartitionerEntry != null)
-		{
-			this.validNavCellChangedPartitionerEntry.Release();
-			this.validNavCellChangedPartitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.validNavCellChangedPartitionerEntry);
 		this.Update(false);
 	}
 
@@ -78,7 +74,7 @@ public class SocialChoreTracker
 
 	private Chore[] chores;
 
-	private GameScenePartitionerEntry validNavCellChangedPartitionerEntry;
+	private HandleVector<int>.Handle validNavCellChangedPartitionerEntry;
 
 	private bool updating;
 }

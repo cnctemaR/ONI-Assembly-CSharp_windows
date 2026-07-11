@@ -93,8 +93,8 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 
 	private void OnActiveChanged(object data)
 	{
-		bool flag = (bool)data;
-		this.SetActive(flag);
+		bool isActive = ((Operational)data).IsActive;
+		this.SetActive(isActive);
 		this.Refresh();
 	}
 

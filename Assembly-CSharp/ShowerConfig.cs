@@ -32,11 +32,11 @@ public class ShowerConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.WashStation);
-		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.AdvancedWashStation);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.WashStation);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.AdvancedWashStation);
 		Shower shower = go.AddOrGet<Shower>();
 		shower.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_shower_kanim") };
-		shower.workTime = 30f;
+		shower.workTime = 15f;
 		shower.outputTargetElement = SimHashes.DirtyWater;
 		shower.fractionalDiseaseRemoval = 0.95f;
 		shower.absoluteDiseaseRemoval = -2000;

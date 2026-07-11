@@ -64,14 +64,22 @@ public class Pickupable : Workable
 		}
 	}
 
-	public bool CouldBePickedUp(GameObject carrier, bool is_carrier_transfer_arm)
+	private bool CouldBePickedUpCommon(GameObject carrier)
 	{
 		bool flag = this.UnreservedAmount > 0f || this.GetReservedAmount(carrier) > 0f;
-		bool flag2 = !this.KPrefabID.HasTag(GameTags.StoredPrivate);
-		bool flag3 = !this.KPrefabID.HasTag(GameTags.Equipped);
-		bool flag4 = !this.storage || !this.storage.automatable || this.storage.automatable.AllowedByAutomation(is_carrier_transfer_arm);
-		bool flag5 = this.UnreservedAmount >= this.MinTakeAmount;
-		return flag && flag2 && flag4 && flag5 && flag3;
+		bool flag2 = this.UnreservedAmount >= this.MinTakeAmount;
+		return flag && flag2;
+	}
+
+	public bool CouldBePickedUpByMinion(GameObject carrier)
+	{
+		bool flag = this.storage == null || !this.storage.automatable || !this.storage.automatable.GetAutomationOnly();
+		return this.CouldBePickedUpCommon(carrier) && flag;
+	}
+
+	public bool CouldBePickedUpByTransferArm(GameObject carrier)
+	{
+		return this.CouldBePickedUpCommon(carrier);
 	}
 
 	public float GetReservedAmount(GameObject reserver)
@@ -187,7 +195,7 @@ public class Pickupable : Workable
 		this.resetProgressOnStop = true;
 		base.gameObject.layer = Game.PickupableLayer;
 		Vector3 position = base.transform.GetPosition();
-		this.cachedCell = Grid.PosToCell(position);
+		this.UpdateCachedCell(Grid.PosToCell(position));
 		base.Subscribe(856640610, new Action<object>(this.OnStore));
 		base.Subscribe(1188683690, new Action<object>(this.OnLanded));
 		base.Subscribe(1807976145, new Action<object>(this.OnOreSizeChanged));
@@ -211,7 +219,7 @@ public class Pickupable : Workable
 			base.gameObject.DeleteObject();
 			return;
 		}
-		this.cachedCell = num;
+		this.UpdateCachedCell(num);
 		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
 		instance.StartSM();
 		FetchableMonitor.Instance instance2 = new FetchableMonitor.Instance(this);
@@ -230,8 +238,6 @@ public class Pickupable : Workable
 		{
 			component2.overrideName = UI.OVERLAYS.DECOR.CLUTTER;
 		}
-		this.rottable = this.GetSMI<Rottable.Instance>();
-		this.edible = base.GetComponent<Edible>();
 		this.UpdateEntombedVisualizer();
 		base.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
 	}
@@ -242,7 +248,7 @@ public class Pickupable : Workable
 		{
 			return;
 		}
-		if (this.solidPartitionerEntry != null)
+		if (this.solidPartitionerEntry.IsValid())
 		{
 			return;
 		}
@@ -260,16 +266,8 @@ public class Pickupable : Workable
 			this.objectLayerListItem.Clear();
 			this.objectLayerListItem = null;
 		}
-		if (this.solidPartitionerEntry != null)
-		{
-			this.solidPartitionerEntry.Release();
-			this.solidPartitionerEntry = null;
-		}
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-			this.partitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.solidPartitionerEntry);
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 	}
 
@@ -379,8 +377,8 @@ public class Pickupable : Workable
 					}
 				}
 			}
-			this.solidPartitionerEntry.UpdatePosition(num);
-			this.partitionerEntry.UpdatePosition(num);
+			GameScenePartitioner.Instance.UpdatePosition(this.solidPartitionerEntry, num);
+			GameScenePartitioner.Instance.UpdatePosition(this.partitionerEntry, num);
 			if (!flag)
 			{
 				this.NotifyChanged(num);
@@ -390,6 +388,7 @@ public class Pickupable : Workable
 				this.NotifyChanged(this.cachedCell);
 			}
 			this.cachedCell = num;
+			this.UpdateCachedCell(num);
 		}
 	}
 
@@ -554,7 +553,7 @@ public class Pickupable : Workable
 						this.lastCarrier.AddAnimOverrides(this.carryAnimOverride, 0f);
 					}
 				}
-				this.cachedCell = Grid.PosToCell(this.storage);
+				this.UpdateCachedCell(Grid.PosToCell(this.storage));
 			}
 			this.NotifyChanged(cachedCell);
 			if (component != null)
@@ -582,6 +581,12 @@ public class Pickupable : Workable
 		base.gameObject.transform.rotation = Quaternion.identity;
 		this.RegisterListeners();
 		component.GetBatchInstanceData().ClearOverrideTransformMatrix();
+	}
+
+	private void UpdateCachedCell(int cell)
+	{
+		this.cachedCell = cell;
+		this.GetOffsets(this.cachedCell);
 	}
 
 	public override Workable.AnimInfo GetAnim(Worker worker)
@@ -834,10 +839,6 @@ public class Pickupable : Workable
 		new CellOffset(-1, -1)
 	};
 
-	public Rottable.Instance rottable;
-
-	public Edible edible;
-
 	private bool isReachable;
 
 	private bool isEntombed;
@@ -850,9 +851,9 @@ public class Pickupable : Workable
 
 	private List<Pickupable.Reservation> reservations = new List<Pickupable.Reservation>();
 
-	private GameScenePartitionerEntry solidPartitionerEntry;
+	private HandleVector<int>.Handle solidPartitionerEntry;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 
 	private LoggerFSSF log;
 

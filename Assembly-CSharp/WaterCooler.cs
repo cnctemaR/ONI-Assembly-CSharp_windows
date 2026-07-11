@@ -35,11 +35,7 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 
 	protected override void OnCleanUp()
 	{
-		if (this.validNavCellChangedPartitionerEntry != null)
-		{
-			this.validNavCellChangedPartitionerEntry.Release();
-			this.validNavCellChangedPartitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.validNavCellChangedPartitionerEntry);
 		this.CancelDrinkChores();
 		for (int i = 0; i < this.workables.Length; i++)
 		{
@@ -129,16 +125,6 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 		return Grid.PosToCell(this);
 	}
 
-	public bool ShouldPreferPrimaryCell()
-	{
-		throw new NotImplementedException();
-	}
-
-	public bool ShouldPreferUnreservedCell()
-	{
-		throw new NotImplementedException();
-	}
-
 	private void AddRequirementDesc(List<Descriptor> descs, Tag tag, float mass)
 	{
 		string text = tag.ProperName();
@@ -187,7 +173,7 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 
 	private Chore[] chores;
 
-	private GameScenePartitionerEntry validNavCellChangedPartitionerEntry;
+	private HandleVector<int>.Handle validNavCellChangedPartitionerEntry;
 
 	private SocialGatheringPointWorkable[] workables;
 
@@ -235,7 +221,7 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 		public StatesInstance(WaterCooler smi)
 			: base(smi)
 		{
-			this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_bottle", "meter", Meter.Offset.Behind, new string[] { "meter_bottle" });
+			this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_bottle", "meter", Meter.Offset.Behind, Grid.SceneLayer.NoLayer, new string[] { "meter_bottle" });
 			this.storage = base.master.GetComponent<Storage>();
 			base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		}

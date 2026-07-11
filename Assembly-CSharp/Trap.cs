@@ -141,14 +141,10 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 
 		public void DisableEvents()
 		{
-			if (this.partitionerEntry != null)
-			{
-				this.partitionerEntry.Release();
-				this.partitionerEntry = null;
-			}
+			GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		}
 
-		private GameScenePartitionerEntry partitionerEntry;
+		private HandleVector<int>.Handle partitionerEntry;
 	}
 
 	public class States : GameStateMachine<Trap.States, Trap.StatesInstance, Trap>

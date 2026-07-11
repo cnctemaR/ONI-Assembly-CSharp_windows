@@ -19,6 +19,7 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		this.floorSpeed = floor_speed;
 		this.ladderSpeed = ladder_speed;
 		this.movementSpeed = Db.Get().AttributeConverters.MovementSpeed.Lookup(navigator.gameObject);
+		this.attributeLevels = navigator.GetComponent<AttributeLevels>();
 	}
 
 	public override void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
@@ -98,13 +99,9 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		base.EndTransition(navigator, transition);
 		bool flag = (transition.start == NavType.Pole || transition.end == NavType.Pole) && transition.y < 0 && transition.x == 0;
 		bool flag2 = transition.start == NavType.Tube || transition.end == NavType.Tube;
-		if (!this.isWalking && !flag && !flag2)
+		if (!this.isWalking && !flag && !flag2 && this.attributeLevels != null)
 		{
-			AttributeLevels component = navigator.GetComponent<AttributeLevels>();
-			if (component != null)
-			{
-				component.AddExperience(Db.Get().Attributes.Athletics.Id, Time.time - this.startTime, DUPLICANTSTATS.ATTRIBUTE_LEVELING.ALL_DAY_EXPERIENCE);
-			}
+			this.attributeLevels.AddExperience(Db.Get().Attributes.Athletics.Id, Time.time - this.startTime, DUPLICANTSTATS.ATTRIBUTE_LEVELING.ALL_DAY_EXPERIENCE);
 		}
 	}
 
@@ -131,4 +128,6 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 	private float downPoleSpeed = 15f;
 
 	private AttributeConverterInstance movementSpeed;
+
+	private AttributeLevels attributeLevels;
 }

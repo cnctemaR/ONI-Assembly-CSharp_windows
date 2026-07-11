@@ -52,7 +52,7 @@ public class SaveUpgradeWarning : KMonoBehaviour
 		screen.AddOption(UI.FRONTEND.SAVEUPGRADEWARNINGS.SUDDENMORALEHELPER_DISABLE, delegate
 		{
 			SettingConfig morale = CustomGameSettingConfigs.Morale;
-			CustomGameSettings.Instance.is_custom_game = true;
+			CustomGameSettings.Instance.customGameMode = CustomGameSettings.CustomGameMode.Custom;
 			CustomGameSettings.Instance.SetQualitySetting(morale, morale.GetLevel("Disabled").id);
 			screen.Deactivate();
 		});

@@ -146,11 +146,15 @@ namespace STRINGS
 
 			public static LocString STEEL = "Steel";
 
+			public static LocString RAW = "Raw Animal Product";
+
 			public static LocString ANY = "Any";
 
 			public static LocString TRANSPARENT = "Transparent";
 
 			public static LocString FARMINGMATERIAL = "Fertilizer";
+
+			public static LocString COMMAND_MODULE = "Command Module";
 
 			public static LocString GENE_SHUFFLER = "Neural Vacillator";
 
@@ -271,23 +275,23 @@ namespace STRINGS
 
 			public class MARKEDFORDISINFECTION
 			{
-				public static LocString NAME = "Disinfection Pending";
+				public static LocString NAME = "Disinfect Errand";
 
-				public static LocString TOOLTIP = "Awaiting a Duplicant to disinfect";
+				public static LocString TOOLTIP = "Building will be disinfected once a Duplicant is available";
 			}
 
 			public class PENDINGCLEAR
 			{
-				public static LocString NAME = "Sweep Errand Assigned";
+				public static LocString NAME = "Sweep Errand";
 
-				public static LocString TOOLTIP = "Awaiting a Duplicant to sweep";
+				public static LocString TOOLTIP = "Debris will be swept once a Duplicant is available";
 			}
 
 			public class MARKEDFORCOMPOST
 			{
-				public static LocString NAME = "Marked For Compost";
+				public static LocString NAME = "Compost Errand";
 
-				public static LocString TOOLTIP = "Awaiting a Duplicant to compost";
+				public static LocString TOOLTIP = "Object is marked and will be moved to compost once a Duplicant is available";
 			}
 
 			public class NOCLEARLOCATIONSAVAILABLE
@@ -299,30 +303,30 @@ namespace STRINGS
 
 			public class PENDINGHARVEST
 			{
-				public static LocString NAME = "Harvest Errand Assigned";
+				public static LocString NAME = "Harvest Errand";
 
-				public static LocString TOOLTIP = "Awaiting a Duplicant to harvest";
+				public static LocString TOOLTIP = "Plant will be harvested once a Duplicant is available";
 			}
 
 			public class PENDINGUPROOT
 			{
-				public static LocString NAME = "Uproot Errand Assigned";
+				public static LocString NAME = "Uproot Errand";
 
-				public static LocString TOOLTIP = "Awaiting a Duplicant to uproot";
+				public static LocString TOOLTIP = "Plant will be uprooted once a Duplicant is available";
 			}
 
 			public class WAITINGFORDIG
 			{
-				public static LocString NAME = "Dig Errand Assigned";
+				public static LocString NAME = "Dig Errand";
 
-				public static LocString TOOLTIP = "Awaiting a Duplicant to dig";
+				public static LocString TOOLTIP = "Tile will be dug out once a Duplicant is available";
 			}
 
 			public class WAITINGFORMOP
 			{
-				public static LocString NAME = "Mop Errand Assigned";
+				public static LocString NAME = "Mop Errand";
 
-				public static LocString TOOLTIP = "Awaiting a Duplicant to mop";
+				public static LocString TOOLTIP = "Spill will be mopped once a Duplicant is available";
 			}
 
 			public class NOTMARKEDFORHARVEST
@@ -572,14 +576,14 @@ namespace STRINGS
 
 				public static LocString MESSAGEBODY = string.Concat(new string[]
 				{
-					"• The ",
-					UI.FormatAsLink("WASD", "CONTROLS"),
-					" keys pan my view, while the ",
-					UI.FormatAsLink("MOUSE WHEEL", "CONTROLS"),
-					" zooms in or out. <color=#F44A47><b>[H]</b></color> returns me to the Printing Pod at the center of the asteroid.\n\n• I can speed or slow time using the speed buttons in the top left corner, or by pressing <color=#F44A47><b>[TAB]</b></color>.\n\n• <color=#F44A47><b>[SPACE]</b></color> will pause or resume the game."
+					"• The <color=#F44A47><b>",
+					UI.FormatAsLink("[WASD]", "CONTROLS"),
+					"</b></color> keys pan my view and the <color=#F44A47><b>",
+					UI.FormatAsLink("[MOUSE WHEEL]", "CONTROLS"),
+					"</b></color> zooms it in and out.\n\n• <color=#F44A47><b>[H]</b></color> returns me back to the Printing Pod at the asteroid's center.\n\n• I can speed or slow my perception of time using the top left corner buttons, or by pressing <color=#F44A47><b>[TAB]</b></color>. <color=#F44A47><b>[SPACE]</b></color> will pause the flow of time entirely.\n\n• I'll keep records of everything I discover in my personal DATABASE <color=#F44A47><b>[U]</b></color> to refer back to if I forget anything important."
 				});
 
-				public static LocString TOOLTIP = "Helpful tips to get started";
+				public static LocString TOOLTIP = "Notes on using my HUD";
 			}
 
 			public class WELCOMEMESSAGE
@@ -588,11 +592,11 @@ namespace STRINGS
 
 				public static LocString MESSAGEBODY = string.Concat(new string[]
 				{
-					"Duplicants are self-motivated and will get work done around the colony without me managing them individually.\n\nI can use the ",
+					"Duplicants are self-motivated and will perform work around the colony without me individually managing them.\n\nI can use the ",
 					UI.FormatAsLink("DIG TOOL", "TOOLS"),
 					" <color=#F44A47><b>[G]</b></color> and the ",
 					UI.FormatAsLink("Build Menu", "MISC"),
-					" in the lower left of the screen to begin planning construction. Once I've placed a few errands, the Duplicants should automatically get to work."
+					" in the lower left of the screen to begin planning construction.\n\nOnce I've placed a few errands, my Duplicants should automatically get to work."
 				});
 
 				public static LocString TOOLTIP = "Notes on getting Duplicants to do my bidding";
@@ -659,7 +663,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Duplicant Movement";
 
-				public static LocString MESSAGEBODY = "Duplicants must be able to reach the errands I set in order to do their work.\n\nWhen placing errands, I should keep in mind that they can only climb obstacles up to two spaces high, and are themselves two spaces tall.\n\nIf I need to check that an errand I've placed is accessible, I can select a Duplicant and click SHOW NAVIGATION to view all areas within their reach.";
+				public static LocString MESSAGEBODY = "In order to perform the errands I set, Duplicants must first be able to reach them.\n\nWhen placing errands I should keep in mind that Duplicants can only climb two tiles high, and cannot fit into spaces smaller than two tiles.\n\nTo check if an errand I've placed is accessible, I can select a Duplicant and click <color=#F44A47><b>SHOW NAVIGATION</b></color> to view all areas currently within their reach.";
 
 				public static LocString TOOLTIP = "Notes on my Duplicants' maneuverability";
 			}
@@ -688,12 +692,12 @@ namespace STRINGS
 				{
 					"In order to carry ",
 					UI.FormatAsLink("Liquids", "LIQUIDS"),
-					" from place to place, my Duplicants will need to be able to bottle them for transport.\n\nIf I built Pitcher Pumps from the ",
-					UI.FormatAsLink("PLUMBING TAB", "misc"),
-					" over pools of liquid, my Duplicants will be able to bottle them. Then they'll automatically deliver the bottles whereever they need to go."
+					" from place to place, my Duplicants will need to be able to bottle them for transport.\n\nIf I build Pitcher Pumps from the ",
+					UI.FormatAsLink("PLUMBING TAB", "MISC"),
+					" <color=#F44A47><b>[5]</b></color> over pools of liquid, my Duplicants will be able to bottle them up and deliver them wherever they need to go."
 				});
 
-				public static LocString TOOLTIP = "Notes on fetching a pail of water";
+				public static LocString TOOLTIP = "Notes liquid resource gathering";
 			}
 
 			public class SCHEDULEMESSAGE
@@ -719,7 +723,7 @@ namespace STRINGS
 					UI.FormatAsLink("Cold", "HEAT"),
 					" affect my Duplicants' internal body temperature and cause undue ",
 					UI.FormatAsLink("Stress", "STRESS"),
-					".\n\nThe THERMAL COMFORT OVERLAY <color=#F44A47><b>[F4]</b></color> allows me to view all areas where my Duplicants will feel discomfort and be unable to regulate their internal body temperature."
+					".\n\nThe THERMAL TOLERANCE OVERLAY <color=#F44A47><b>[F4]</b></color> allows me to view all areas where my Duplicants will feel discomfort and be unable to regulate their internal body temperature."
 				});
 			}
 
@@ -823,13 +827,13 @@ namespace STRINGS
 				public static LocString MESSAGEBODY = "The Foods, Rooms, Decor, and Recreation a Duplicant experiences will have an efffect on their Morale. Good experiences improve their Morale and poor experiences drop it. When Morale is below their Expectations, Duplicants will become Stressed.\n\nAs Duplicants are assigned to Jobs, they gain increased Expectations, and so the colony will have to be improved to keep up their Morale. An overview of Morale and Stress can be viewed on the Vitals screen.";
 			}
 
-			public class SCHEDULE
+			public class DTU
 			{
-				public static LocString NAME = "TIP: Scheduling";
+				public static LocString NAME = "TIP: Duplicant Thermal Units";
 
-				public static LocString TOOLTIP = "Notes on managing Duplicant schedules";
+				public static LocString TOOLTIP = "How Duplicants measure heat energy.";
 
-				public static LocString MESSAGEBODY = "Duplicants will generally only perform certain activities during certain times of day. This helps them avoid long trips to the toilet from remote work sites, and to meet up with their friends at meal time. Depending on the shape and progress of the colony, it may be useful to modify the default schedule to improve the Duplicants' efficiency and Morale.\n\nIncreasing the length of Downtime can improve their Morale, and different schedules for large numbers of Duplicants can help avoid crowding in the bathrooms or keep a Manual Generator running all night.";
+				public static LocString MESSAGEBODY = "For historical reasons, Duplicants measure heat energy using Duplicant Thermal Units or DTU.\n\n1 DTU = 1055.06 J";
 			}
 
 			public class NOMESSAGES
@@ -857,7 +861,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Research Complete";
 
-				public static LocString MESSAGEBODY = "Eureka! {0} Technology has been unlocked.\n\nNew buildings have become available to me:\n  • {1}";
+				public static LocString MESSAGEBODY = "Eureka! My Duplicants have discovered {0} Technology.\n\nNew buildings have become available to me:\n  • {1}";
 
 				public static LocString TOOLTIP = "{0} research complete!";
 			}
@@ -977,21 +981,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Colony requires Med-Beds";
 
-				public static LocString TOOLTIP = "Sick Duplicants currently have nowhere to rest or receive medical care";
+				public static LocString TOOLTIP = "There is nowhere for sick Duplicants to rest or receive medical care";
 			}
 
 			public class NEEDTOILET
 			{
 				public static LocString NAME = "Colony requires toilets";
 
-				public static LocString TOOLTIP = "Duplicants currently have nowhere to relieve themselves";
+				public static LocString TOOLTIP = "My Duplicants have nowhere to relieve themselves";
 			}
 
 			public class NEEDFOOD
 			{
 				public static LocString NAME = "Colony requires a food source";
 
-				public static LocString TOOLTIP = "The colony will soon exhaust their supplies without a new " + UI.FormatAsLink("Food", "FOOD") + " source";
+				public static LocString TOOLTIP = "The colony will exhaust their supplies without a new " + UI.FormatAsLink("Food", "FOOD") + " source";
 			}
 
 			public class HYGENE_NEEDED
@@ -1147,9 +1151,9 @@ namespace STRINGS
 
 			public class SCHEDULE_CHANGED
 			{
-				public static LocString NAME = "Schedule Clock: {1}!";
+				public static LocString NAME = "{0}: {1}!";
 
-				public static LocString TOOLTIP = "Duplicants on the {0} have started their {1} block:";
+				public static LocString TOOLTIP = "Duplicants assigned to '{0}' have started their {1} block.\n\n{2}\n\nOpen the Schedule Screen to change blocks or assignments.";
 			}
 
 			public class GENESHUFFLER

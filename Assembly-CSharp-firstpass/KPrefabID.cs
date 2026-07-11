@@ -19,12 +19,20 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public bool pendingDestruction { get; private set; }
 
-	public Tag[] Tags
+	public HashSet<Tag> Tags
 	{
 		get
 		{
 			this.InitializeTags();
 			return this.tags;
+		}
+	}
+
+	public void CopyTags(KPrefabID other)
+	{
+		foreach (Tag tag in other.tags)
+		{
+			this.tags.Add(tag);
 		}
 	}
 
@@ -45,27 +53,9 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public void InitializeTags()
 	{
-		if (this.tags == null || this.tags.Length == 0)
-		{
-			List<Tag> list = new List<Tag>();
-			if (!this.PrefabTag.IsValid)
-			{
-				this.PrefabTag.Name = base.gameObject.name;
-			}
-			list.Add(this.PrefabTag);
-			if (this.PrefabTags != null)
-			{
-				foreach (Tag tag in this.PrefabTags)
-				{
-					if (tag.IsValid)
-					{
-						list.Add(tag);
-					}
-				}
-			}
-			this.tags = list.ToArray();
-			this.dirtyTagBits = true;
-		}
+		DebugUtil.Assert(this.PrefabTag.IsValid, "Assert!");
+		this.tags.Add(this.PrefabTag);
+		this.dirtyTagBits = true;
 	}
 
 	public void UpdateSaveLoadTag()
@@ -80,9 +70,14 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public TagBits GetTagBits()
 	{
+		this.InitializeTags();
 		if (this.dirtyTagBits)
 		{
-			this.tagBits = new TagBits(this.tags);
+			this.tagBits = default(TagBits);
+			foreach (Tag tag in this.tags)
+			{
+				this.tagBits.SetTag(tag);
+			}
 			this.dirtyTagBits = false;
 		}
 		return this.tagBits;
@@ -117,69 +112,21 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
-	public void AddPrefabTag(Tag tag)
-	{
-		if (tag.IsValid && !this.HasPrefabTag(tag))
-		{
-			this.PrefabTags = new List<Tag>(this.PrefabTags) { tag }.ToArray();
-			this.dirtyTagBits = true;
-		}
-	}
-
-	public void AddPrefabTags(List<Tag> tags)
-	{
-		List<Tag> list = tags.FindAll((Tag t) => t.IsValid && !this.HasPrefabTag(t));
-		if (list.Count > 0)
-		{
-			this.dirtyTagBits = true;
-			List<Tag> list2 = new List<Tag>(this.PrefabTags);
-			list2.AddRange(list);
-			this.PrefabTags = list2.ToArray();
-		}
-	}
-
-	public bool HasPrefabTag(Tag tag)
-	{
-		if (tag == this.PrefabTag)
-		{
-			return true;
-		}
-		for (int i = 0; i < this.PrefabTags.Length; i++)
-		{
-			if (tag == this.PrefabTags[i])
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public void AddTag(Tag tag)
 	{
-		if (this.HasTag(tag))
-		{
-			return;
-		}
-		if (tag.IsValid)
+		DebugUtil.Assert(tag.IsValid, "Assert!");
+		if (this.Tags.Add(tag))
 		{
 			this.dirtyTagBits = true;
-			this.tags = new List<Tag>(this.Tags) { tag }.ToArray();
 			base.Trigger(-1582839653, null);
-		}
-		else
-		{
-			DebugUtil.Assert(tag.IsValid, "Assert!");
 		}
 	}
 
 	public void RemoveTag(Tag tag)
 	{
-		if (this.HasTag(tag))
+		if (this.Tags.Remove(tag))
 		{
 			this.dirtyTagBits = true;
-			List<Tag> list = new List<Tag>(this.Tags);
-			list.Remove(tag);
-			this.tags = list.ToArray();
 			base.Trigger(-1582839653, null);
 		}
 	}
@@ -198,63 +145,33 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public bool HasTag(Tag tag)
 	{
-		bool flag = false;
-		Tag[] array = this.Tags;
-		for (int i = 0; i < array.Length; i++)
-		{
-			if (tag == array[i])
-			{
-				flag = true;
-				break;
-			}
-		}
-		return flag;
+		return this.Tags.Contains(tag);
 	}
 
-	public bool HasTags(IList<Tag> searchTags)
+	public bool HasAnyTags(List<Tag> search_tags)
 	{
-		bool flag = true;
-		Tag[] array = this.Tags;
-		foreach (Tag tag in searchTags)
+		this.InitializeTags();
+		foreach (Tag tag in search_tags)
 		{
-			bool flag2 = false;
-			for (int i = 0; i < array.Length; i++)
+			if (this.tags.Contains(tag))
 			{
-				if (tag == array[i])
-				{
-					flag2 = true;
-					break;
-				}
-			}
-			if (!flag2)
-			{
-				flag = false;
-				break;
-			}
-		}
-		return flag;
-	}
-
-	public bool HasAnyTags(IList<Tag> searchTags)
-	{
-		Tag[] array = this.Tags;
-		for (int i = 0; i < searchTags.Count; i++)
-		{
-			Tag tag = searchTags[i];
-			for (int j = 0; j < array.Length; j++)
-			{
-				if (tag == array[j])
-				{
-					return true;
-				}
+				return true;
 			}
 		}
 		return false;
 	}
 
-	public bool HasSameTags(KPrefabID prefab_id)
+	public bool HasAnyTags(Tag[] search_tags)
 	{
-		return this.PrefabTag == prefab_id.PrefabTag && this.Tags.Length == prefab_id.Tags.Length;
+		this.InitializeTags();
+		foreach (Tag tag in search_tags)
+		{
+			if (this.tags.Contains(tag))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public override bool Equals(object o)
@@ -281,7 +198,10 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	protected override void OnCleanUp()
 	{
 		this.pendingDestruction = true;
-		KPrefabIDTracker.Get().Unregister(this);
+		if (this.InstanceID != -1)
+		{
+			KPrefabIDTracker.Get().Unregister(this);
+		}
 		base.Trigger(1969584890, null);
 	}
 
@@ -305,8 +225,6 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public Tag PrefabTag;
 
-	public Tag[] PrefabTags = new Tag[0];
-
 	private TagBits tagBits;
 
 	private bool dirtyTagBits = true;
@@ -320,7 +238,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public List<Descriptor> AdditionalEffects;
 
-	private Tag[] tags;
+	private HashSet<Tag> tags = new HashSet<Tag>();
 
 	public delegate void PrefabFn(GameObject go);
 }

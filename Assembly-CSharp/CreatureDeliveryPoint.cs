@@ -34,7 +34,25 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		this.RefreshCreatureCount();
+		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe(643180843, new Action<object>(this.RefreshCreatureCount));
+		this.RefreshCreatureCount(null);
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		if (gameObject == null)
+		{
+			return;
+		}
+		CreatureDeliveryPoint component = gameObject.GetComponent<CreatureDeliveryPoint>();
+		if (component == null)
+		{
+			return;
+		}
+		this.creatureLimit = component.creatureLimit;
+		this.RebalanceFetches();
 	}
 
 	private void OnFilterChanged(Tag[] tags)
@@ -46,7 +64,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 		this.RebalanceFetches();
 	}
 
-	private void RefreshCreatureCount()
+	private void RefreshCreatureCount(object data = null)
 	{
 		int num = Grid.PosToCell(this);
 		CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num);
@@ -56,13 +74,12 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 		{
 			foreach (KPrefabID kprefabID in cavityForCell.creatures)
 			{
-				if (!kprefabID.HasTag(GameTags.Creatures.Bagged) && !kprefabID.HasTag(GameTags.Trapped) && !kprefabID.HasTag(GameTags.Egg))
+				if (!kprefabID.HasTag(GameTags.Creatures.Bagged) && !kprefabID.HasTag(GameTags.Trapped))
 				{
 					this.storedCreatureCount++;
 				}
 			}
 		}
-		this.storedCreatureCount += Mathf.RoundToInt(base.GetComponent<Storage>().UnitsStored());
 		if (this.storedCreatureCount != num2)
 		{
 			this.RebalanceFetches();
@@ -245,7 +262,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 			default_state = this.waiting;
 			this.root.Update("RefreshCreatureCount", delegate(CreatureDeliveryPoint.SMInstance smi, float dt)
 			{
-				smi.master.RefreshCreatureCount();
+				smi.master.RefreshCreatureCount(null);
 			}, UpdateRate.SIM_1000ms, false);
 			this.waiting.EventTransition(GameHashes.OnStorageChange, this.creatureDelivered, (CreatureDeliveryPoint.SMInstance smi) => !smi.GetComponent<Storage>().IsEmpty());
 			this.creatureDelivered.Enter(delegate(CreatureDeliveryPoint.SMInstance smi)
@@ -261,7 +278,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 					component.Drop(gameObject);
 					gameObject.transform.SetPosition(vector);
 				}
-				smi.master.RefreshCreatureCount();
+				smi.master.RefreshCreatureCount(null);
 			}).GoTo(this.waiting);
 		}
 

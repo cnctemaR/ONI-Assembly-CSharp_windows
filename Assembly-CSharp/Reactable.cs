@@ -113,11 +113,7 @@ public abstract class Reactable
 			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(this.transformId, new global::System.Action(this.UpdateLocation));
 			this.transformId = -1;
 		}
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-			this.partitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 	}
 
 	public void Sim1000ms(float dt)
@@ -127,11 +123,7 @@ public abstract class Reactable
 
 	private void UpdateLocation()
 	{
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-			this.partitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		if (this.gameObject != null)
 		{
 			this.sourceCell = Grid.PosToCell(this.gameObject);
@@ -150,7 +142,7 @@ public abstract class Reactable
 		return this;
 	}
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 
 	protected GameObject gameObject;
 

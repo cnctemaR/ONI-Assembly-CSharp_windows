@@ -80,6 +80,11 @@ public class SaveLoadRoot : KMonoBehaviour
 		writer.Write(transform.localScale);
 		byte b = 0;
 		writer.Write(b);
+		this.SaveWithoutTransform(writer);
+	}
+
+	public void SaveWithoutTransform(BinaryWriter writer)
+	{
 		KMonoBehaviour[] components = base.GetComponents<KMonoBehaviour>();
 		if (components == null)
 		{
@@ -157,11 +162,16 @@ public class SaveLoadRoot : KMonoBehaviour
 		Quaternion quaternion = reader.ReadQuaternion();
 		Vector3 vector2 = reader.ReadVector3();
 		reader.ReadByte();
+		return SaveLoadRoot.Load(prefab, vector, quaternion, vector2, reader);
+	}
+
+	public static SaveLoadRoot Load(GameObject prefab, Vector3 position, Quaternion rotation, Vector3 scale, IReader reader)
+	{
 		SaveLoadRoot saveLoadRoot = null;
 		if (prefab != null)
 		{
-			GameObject gameObject = Util.KInstantiate(prefab, vector, quaternion, null, null, true, 0);
-			gameObject.transform.localScale = vector2;
+			GameObject gameObject = Util.KInstantiate(prefab, position, rotation, null, null, true, 0);
+			gameObject.transform.localScale = scale;
 			gameObject.SetActive(true);
 			saveLoadRoot = gameObject.GetComponent<SaveLoadRoot>();
 			if (saveLoadRoot != null)

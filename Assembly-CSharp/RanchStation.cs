@@ -109,7 +109,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 				return false;
 			}
 			int navigationCost = ranchable.GetComponent<Navigator>().GetNavigationCost(ranch_cell);
-			return navigationCost != PathProber.InvalidCost;
+			return navigationCost != -1;
 		}
 
 		public void FindRanchable()

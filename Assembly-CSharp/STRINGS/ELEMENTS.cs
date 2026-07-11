@@ -57,9 +57,9 @@ namespace STRINGS
 
 				public static LocString LOW_THERMAL_CONDUCTIVITY = "This material retains heat because energy transfers slowly through materials with low thermal conductivity\n\nBetween two objects, the rate of heat transfer will be determined by the object with the lowest Thermal Conductivity\n\nThermal Conductivity: {1} W per degree K difference (Oxygen: 0.024 W)";
 
-				public static LocString LOW_SPECIFIC_HEAT_CAPACITY = "Thermally Reactive materials require little energy to raise in temperature, and therefore heat and cool quickly\n\nSpecific Heat Capacity: {1} J to raise 1g by 1K";
+				public static LocString LOW_SPECIFIC_HEAT_CAPACITY = "Thermally Reactive materials require little energy to raise in temperature, and therefore heat and cool quickly\n\nSpecific Heat Capacity: {1} DTU to raise 1g by 1K";
 
-				public static LocString HIGH_SPECIFIC_HEAT_CAPACITY = "Slow Heating materials require a large amount of energy to raise in temperature, and therefore heat and cool slowly\n\nSpecific Heat Capacity: {1} J to raise 1g by 1K";
+				public static LocString HIGH_SPECIFIC_HEAT_CAPACITY = "Slow Heating materials require a large amount of energy to raise in temperature, and therefore heat and cool slowly\n\nSpecific Heat Capacity: {1} DTU to raise 1g by 1K";
 			}
 		}
 
@@ -108,6 +108,13 @@ namespace STRINGS
 			});
 		}
 
+		public class BITUMEN
+		{
+			public static LocString NAME = UI.FormatAsLink("Bitumen", "BITUMEN");
+
+			public static LocString DESC = "Bitumen is a sticky viscous residue from " + ELEMENTS.PETROLEUM.NAME + " production";
+		}
+
 		public class BOTTLEDWATER
 		{
 			public static LocString NAME = UI.FormatAsLink("Water", "BOTTLEDWATER");
@@ -154,7 +161,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Chlorine", "CHLORINE");
 
-			public static LocString DESC = "(Cl) Chlorine is an extremely toxic element in a " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " state.";
+			public static LocString DESC = "(Cl) Chlorine is an extremely toxic element in a " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " state.";
 		}
 
 		public class CHLORINEGAS
@@ -262,6 +269,22 @@ namespace STRINGS
 				ELEMENTS.CRUDEOIL.NAME,
 				".\n\nIt is also an essential ingredient in the production of ",
 				ELEMENTS.POLYPROPYLENE.NAME,
+				"."
+			});
+		}
+
+		public class SOURGAS
+		{
+			public static LocString NAME = UI.FormatAsLink("Sour Gas", "SOURGAS");
+
+			public static LocString NAME_TWO = UI.FormatAsLink("Sour Gas", "SOURGAS");
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"Sour Gas is a hydrocarbon ",
+				UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+				" containing high concentrations of hydrogen sulfide.\n\nIt is a byproduct of highly heated ",
+				UI.FormatAsLink("Petroleum", "PETROLEUM"),
 				"."
 			});
 		}
@@ -529,7 +552,14 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Lime", "LIME");
 
-			public static LocString DESC = "(CaCO<sub>3</sub>) Lime is a mineral commonly found in animal shells.\n\nIt is useful as a Construction Material.";
+			public static LocString DESC = "(CaCO<sub>3</sub>) Lime is a mineral commonly found in " + UI.FormatAsLink("Critter", "CRITTERS") + " egg shells.\n\nIt is useful as a Construction Material.";
+		}
+
+		public class FOSSIL
+		{
+			public static LocString NAME = UI.FormatAsLink("Fossil", "FOSSIL");
+
+			public static LocString DESC = "Fossil is organic matter, highly compressed and hardened into a mineral state.\n\nIt is useful as a Construction Material.";
 		}
 
 		public class LIQUIDCARBONDIOXIDE
@@ -586,6 +616,13 @@ namespace STRINGS
 				UI.FormatAsLink("Power", "POWER"),
 				" production."
 			});
+		}
+
+		public class LIQUIDSULFUR
+		{
+			public static LocString NAME = UI.FormatAsLink("Liquid Sulfur", "LIQUIDSULFUR");
+
+			public static LocString DESC = "(S) Sulfur is a common chemical element usually produced as a byproduct of " + ELEMENTS.METHANE.NAME + " production.";
 		}
 
 		public class MAGMA
@@ -973,6 +1010,20 @@ namespace STRINGS
 			});
 		}
 
+		public class SULFUR
+		{
+			public static LocString NAME = UI.FormatAsLink("Sulfur", "SULFUR");
+
+			public static LocString DESC = "(S) Sulfur is a common chemical element usually produced as a byproduct of " + ELEMENTS.METHANE.NAME + " production.";
+		}
+
+		public class SULFURGAS
+		{
+			public static LocString NAME = UI.FormatAsLink("Sulfur Gas", "SULFURGAS");
+
+			public static LocString DESC = "(S) Sulfur is a common chemical element usually produced as a byproduct of " + ELEMENTS.METHANE.NAME + " production.";
+		}
+
 		public class TUNGSTEN
 		{
 			public static LocString NAME = UI.FormatAsLink("Tungsten", "TUNGSTEN");
@@ -1033,7 +1084,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Polluted Dirt", "TOXICSAND");
 
-			public static LocString DESC = "Polluted Dirt is toxic biological waste.\n\nIt emits " + UI.FormatAsLink("disease", "Polluted Oxygen") + " over time.";
+			public static LocString DESC = "Polluted Dirt is toxic biological waste.\n\nIt emits " + UI.FormatAsLink("Polluted Oxygen", "CONTAMINATEDOXYGEN") + " over time.";
 		}
 
 		public class UNOBTANIUM

@@ -18,7 +18,6 @@ public class PhonoboxWorkable : Workable, IWorkerPrioritizable
 	protected override void OnCompleteWork(Worker worker)
 	{
 		Effects component = worker.GetComponent<Effects>();
-		component.Add("TookABreak", true);
 		if (!string.IsNullOrEmpty(this.trackingEffect))
 		{
 			component.Add(this.trackingEffect, true);

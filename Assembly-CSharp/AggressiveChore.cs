@@ -50,7 +50,7 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 						if (!breakable2.isBroken())
 						{
 							int navigationCost = navigator.GetNavigationCost(breakable2);
-							if (navigationCost != PathProber.InvalidCost)
+							if (navigationCost != -1)
 							{
 								if (navigationCost < num)
 								{

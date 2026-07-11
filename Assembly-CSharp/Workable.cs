@@ -146,29 +146,22 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return Grid.PosToCell(this);
 	}
 
-	public bool ShouldPreferPrimaryCell()
+	public void StartWork(Worker worker_to_start)
 	{
-		return this.preferPrimaryCell;
-	}
-
-	public bool ShouldPreferUnreservedCell()
-	{
-		return this.preferUnreservedCell;
-	}
-
-	public void StartWork(Worker workerToStart)
-	{
-		this.worker = workerToStart;
+		this.worker = worker_to_start;
 		this.UpdateStatusItem(null);
 		if (this.showProgressBar)
 		{
 			this.ShowProgressBar(true);
 		}
 		this.OnStartWork(this.worker);
-		string conversationTopic = this.GetConversationTopic();
-		if (conversationTopic != null)
+		if (this.worker != null)
 		{
-			this.worker.Trigger(937885943, conversationTopic);
+			string conversationTopic = this.GetConversationTopic();
+			if (conversationTopic != null)
+			{
+				this.worker.Trigger(937885943, conversationTopic);
+			}
 		}
 		if (this.OnWorkableEventCB != null)
 		{
@@ -303,7 +296,10 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public void SetOffsets(CellOffset[] offsets)
 	{
-		this.offsetTracker.Clear();
+		if (this.offsetTracker != null)
+		{
+			this.offsetTracker.Clear();
+		}
 		this.offsetTracker = new StandardOffsetTracker(offsets);
 	}
 
@@ -391,17 +387,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public int GetNavigationCost(Navigator navigator, int cell)
 	{
-		int num = PathProber.InvalidCost;
-		foreach (CellOffset cellOffset in this.GetOffsets(cell))
-		{
-			int num2 = Grid.OffsetCell(cell, cellOffset);
-			int navigationCost = navigator.GetNavigationCost(num2);
-			if (navigationCost != PathProber.InvalidCost && (num == PathProber.InvalidCost || navigationCost < num))
-			{
-				num = navigationCost;
-			}
-		}
-		return num;
+		return navigator.GetNavigationCost(cell, this.GetOffsets(cell));
 	}
 
 	public int GetNavigationCost(Navigator navigator)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Klei;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -13,10 +14,7 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitH
 		base.OnPrefabInit();
 		this.QuantityLabel.color = this.AvailableColor;
 		this.NameLabel.color = this.AvailableColor;
-		this.button.onClick.AddListener(delegate
-		{
-			this.OnClick();
-		});
+		this.button.onClick.AddListener(new UnityAction(this.OnClick));
 	}
 
 	protected override void OnSpawn()
@@ -38,7 +36,7 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitH
 			this.selectionIdx++;
 			int num = this.selectionIdx % pickupables.Count;
 			pickupable = pickupables[num];
-			if (pickupable != null)
+			if (pickupable != null && !pickupable.HasTag(GameTags.StoredPrivate))
 			{
 				break;
 			}
@@ -73,7 +71,7 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitH
 		reserved = ((!doExtras) ? 0f : MaterialNeeds.Instance.GetAmount(this.Resource));
 		if (this.Measure == GameUtil.MeasureUnit.kcal)
 		{
-			EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(this.Resource.Name);
+			EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(this.Resource.Name);
 			available *= foodInfo.CaloriesPerUnit;
 			total *= foodInfo.CaloriesPerUnit;
 			reserved *= foodInfo.CaloriesPerUnit;
@@ -118,7 +116,7 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitH
 		float num2;
 		float num3;
 		this.GetAmounts(true, out num, out num2, out num3);
-		string text = this.NameLabel.text;
+		string text = this.NameLabel.text + "\n";
 		return text + string.Format(UI.RESOURCESCREEN.AVAILABLE_TOOLTIP, ResourceCategoryScreen.QuantityTextForMeasure(num, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num3, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num2, this.Measure));
 	}
 

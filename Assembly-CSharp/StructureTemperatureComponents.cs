@@ -42,7 +42,7 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 			{
 				try
 				{
-					str = string.Format(str, GameUtil.GetFormattedWattage(data.TotalEnergyProducedKW * 1000f * 0.005f, GameUtil.WattageFormatterUnit.Automatic));
+					str = string.Format(str, GameUtil.GetFormattedHeatEnergy(data.TotalEnergyProducedKW * 1000f, GameUtil.HeatEnergyFormatterUnit.Automatic));
 				}
 				catch (Exception ex)
 				{
@@ -56,9 +56,9 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 				string text = string.Empty;
 				foreach (StructureTemperatureData.EnergySource energySource in data.energySourcesKW)
 				{
-					text += string.Format(BUILDING.STATUSITEMS.OPERATINGENERGY.LINEITEM, energySource.source, GameUtil.GetFormattedWattage(energySource.value * 1000f * 0.005f, GameUtil.WattageFormatterUnit.Automatic));
+					text += string.Format(BUILDING.STATUSITEMS.OPERATINGENERGY.LINEITEM, energySource.source, GameUtil.GetFormattedHeatEnergy(energySource.value * 1000f, GameUtil.HeatEnergyFormatterUnit.Automatic));
 				}
-				str = string.Format(str, GameUtil.GetFormattedWattage(data.TotalEnergyProducedKW * 1000f * 0.005f, GameUtil.WattageFormatterUnit.Automatic), text);
+				str = string.Format(str, GameUtil.GetFormattedHeatEnergy(data.TotalEnergyProducedKW * 1000f, GameUtil.HeatEnergyFormatterUnit.None), text);
 			}
 			return str;
 		};
@@ -71,7 +71,7 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		{
 			data.primaryElement.Subscribe(824508782, delegate(object ev_data)
 			{
-				StructureTemperatureComponents.OnActiveChanged(handle, ev_data);
+				StructureTemperatureComponents.OnActiveChanged(handle);
 			});
 		}
 		Overheatable component = data.primaryElement.GetComponent<Overheatable>();
@@ -84,7 +84,7 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		this.SimRegister(handle, ref data);
 	}
 
-	private static void OnActiveChanged(HandleVector<int>.Handle handle, object ev_data)
+	private static void OnActiveChanged(HandleVector<int>.Handle handle)
 	{
 		StructureTemperatureData data = GameComps.StructureTemperatures.GetData(handle);
 		float temperature = data.Temperature;
@@ -116,7 +116,11 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 				{
 					if (structureTemperatureData.operational == null || structureTemperatureData.operational.IsActive)
 					{
-						structureTemperatureData.selectable.SetStatusItem(Db.Get().StatusItemCategories.OperatingEnergy, this.operatingEnergyStatusItem, structureTemperatureData.simHandle);
+						if (!structureTemperatureData.isActiveStatusItemSet)
+						{
+							structureTemperatureData.primaryElement.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.OperatingEnergy, this.operatingEnergyStatusItem, structureTemperatureData.simHandle);
+							structureTemperatureData.isActiveStatusItemSet = true;
+						}
 						structureTemperatureData.energySourcesKW = this.AccumulateProducedEnergyKW(structureTemperatureData.energySourcesKW, structureTemperatureData.OperatingKilowatts, BUILDING.STATUSITEMS.OPERATINGENERGY.OPERATING);
 						if (structureTemperatureData.ExhaustKilowatts != 0f)
 						{
@@ -139,9 +143,10 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 							structureTemperatureData.energySourcesKW = this.AccumulateProducedEnergyKW(structureTemperatureData.energySourcesKW, structureTemperatureData.ExhaustKilowatts, BUILDING.STATUSITEMS.OPERATINGENERGY.EXHAUSTING);
 						}
 					}
-					else
+					else if (!structureTemperatureData.isActiveStatusItemSet)
 					{
-						structureTemperatureData.selectable.SetStatusItem(Db.Get().StatusItemCategories.OperatingEnergy, null, null);
+						structureTemperatureData.primaryElement.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.OperatingEnergy, null, null);
+						structureTemperatureData.isActiveStatusItemSet = false;
 					}
 					this.data[i] = structureTemperatureData;
 				}
@@ -171,8 +176,8 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 			num = 0f;
 		}
 		Extents extents = data.GetExtents();
-		byte b = (byte)ElementLoader.elements.IndexOf(data.primaryElement.Element);
-		SimMessages.ModifyBuildingHeatExchange(data.simHandle, extents, num, internalTemperature, def.ThermalConductivity, num2, operatingKilowatts, b);
+		byte idx = data.primaryElement.Element.idx;
+		SimMessages.ModifyBuildingHeatExchange(data.simHandle, extents, num, internalTemperature, def.ThermalConductivity, num2, operatingKilowatts, idx);
 	}
 
 	private unsafe static float OnGetTemperature(PrimaryElement primary_element)
@@ -315,10 +320,10 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 				{
 					data.simHandle = -2;
 					string dbg_name = primaryElement.name;
-					HandleVector<Game.ComplexCallbackInfo>.Handle handle2 = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object ev_data)
+					HandleVector<Game.ComplexCallbackInfo<int>>.Handle handle2 = Game.Instance.simComponentCallbackManager.Add(delegate(int sim_handle, object callback_data)
 					{
-						StructureTemperatureComponents.OnSimRegistered(handle, ev_data, dbg_name);
-					}, "StructureTemperature.SimRegister"));
+						StructureTemperatureComponents.OnSimRegistered(handle, sim_handle, dbg_name);
+					}, null, "StructureTemperature.SimRegister");
 					BuildingDef def = primaryElement.GetComponent<Building>().Def;
 					float internalTemperature = primaryElement.InternalTemperature;
 					float massForTemperatureModification = def.MassForTemperatureModification;
@@ -332,7 +337,7 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		}
 	}
 
-	private static void OnSimRegistered(HandleVector<int>.Handle handle, object ev_data, string dbg_name)
+	private static void OnSimRegistered(HandleVector<int>.Handle handle, int sim_handle, string dbg_name)
 	{
 		if (!GameComps.StructureTemperatures.IsValid(handle))
 		{
@@ -342,18 +347,17 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		{
 			return;
 		}
-		int num = (int)ev_data;
 		StructureTemperatureData data = GameComps.StructureTemperatures.GetData(handle);
 		if (data.simHandle == -2)
 		{
-			data.simHandle = num;
-			StructureTemperatureComponents.handleInstanceMap[num] = handle;
+			data.simHandle = sim_handle;
+			StructureTemperatureComponents.handleInstanceMap[sim_handle] = handle;
 			GameComps.StructureTemperatures.SetData(handle, data);
 			data.primaryElement.Trigger(-1555603773, null);
 		}
 		else
 		{
-			SimMessages.RemoveBuildingHeatExchange(num, -1);
+			SimMessages.RemoveBuildingHeatExchange(sim_handle, -1);
 		}
 	}
 

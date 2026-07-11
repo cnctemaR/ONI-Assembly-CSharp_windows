@@ -111,6 +111,18 @@ namespace STRINGS
 			}
 		}
 
+		public class GASSYMOO
+		{
+			public static LocString TITLE = "Gassy Moo";
+
+			public static LocString SUBTITLE = "Domesticable Critter";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Little is currently known of the Gassy Moo due to its alien nature and origin.\n\nIt is capable of surviving in zero gravity and atmosphere, and is dependent of a second alien species, " + UI.FormatAsLink("Gas Grass", "GASGRASS") + ", for its survival.";
+			}
+		}
+
 		public class HATCH
 		{
 			public static LocString TITLE = "Hatch";
@@ -373,21 +385,31 @@ namespace STRINGS
 		{
 			public static LocString TITLE = "Re: Objectionable Request";
 
+			public static LocString TITLE2 = "SUBJECT: Objectionable Request";
+
+			public static LocString TITLE3 = "SUBJECT: Re: Objectionable Request";
+
 			public static LocString SUBTITLE = "ENCRYPTION LEVEL: TWO";
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<size=10><smallcaps><b>Re: Objectionable Request</b>\nFrom: <b>Dr. McClintock</b><alpha=#AA> <jmcclintock@gravitas.nova></color>\nTo: <b>Director Stern</b><alpha=#AA> <jstern@gravitas.nova></color></smallcaps></size>";
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Director Stern</b><size=12><alpha=#AA> <jstern@gravitas.nova></size></color>\nFrom: <b>Dr. McClintock</b><size=12><alpha=#AA> <jmcclintock@gravitas.nova></color></size></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER2 = "<indent=5%>I'm telling you it gives me a bad feeling in my gut.\n\nIf you're committed to this then I can't stop you, but I won't be able to continue working at this facility.\n\nDr. McClintock\nBioengineering Department\nThe Gravitas Facility</indent>";
+				public static LocString EMAILHEADER2 = "<smallcaps>To: <b>Dr. McClintock</b><size=12><alpha=#AA> <jmcclintock@gravitas.nova></size></color>\nFrom: <b>Director Stern</b><alpha=#AA><size=12> <jstern@gravitas.nova></size></color></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER3 = "<alpha=#AA><indent=10%><size=10><smallcaps>From: <b>Director Stern</b>\nTo: <b>Dr. McClintock</b></smallcaps></size>\nJodi, you signed off on the cranial chip implantation, is this really where you draw the line? It would be an invaluable safety measure.</indent></color>";
+				public static LocString CONTAINER2 = "<indent=5%>Director,\n\nEngineering has requested brainmaps of all blueprint subjects for the development of a Pod linked software and I am reluctant to oblige.\n\nI believe they are seeking a way to exert temporary control over implanted subjects, and I fear this avenue of research may be ethically unsound.</indent>";
 
-				public static LocString CONTAINER4 = "<alpha=#AA><indent=15%><size=10><smallcaps>From: <b>Dr. McClintock</b>\nTo: <b>Director Stern</b></smallcaps></size>\nYou can't be serious, Jacquelyn?</indent></color>";
+				public static LocString CONTAINER3 = "<indent=5%>Doctor,\n\nEngineering's newest project was conceived under my supervision. Please give them any materials they require to move forward with their research.</indent>";
 
-				public static LocString CONTAINER5 = "<alpha=#AA><indent=20%><size=10><smallcaps>From: <b>Director Stern</b>\nTo: <b>Dr. McClintock</b></smallcaps></size>\nDoctor,\nEngineering's newest project was conceived under my supervision. Please give them any materials they require to move forward with their research.</indent></color>";
+				public static LocString CONTAINER4 = "<indent=5%>You can't be serious, Jacquelyn?</indent>";
 
-				public static LocString CONTAINER6 = "<alpha=#AA><indent=25%><size=10><smallcaps>From: <b>Dr. McClintock</b>\nTo: <b>Director Stern</b></smallcaps></size>\nDirector,\nEngineering has requested brainmaps of all blueprint subjects for the development of a Pod linked software and I am reluctant to oblige.\n\nI believe they are seeking a way to exert temporary control over implanted subjects, and I fear this avenue of research may be ethically unsound.</indent></color>";
+				public static LocString CONTAINER5 = "<indent=5%>Jodi, you signed off on the cranial chip implantation, is this really where you draw the line? It would be an invaluable safety measure.</indent>";
+
+				public static LocString CONTAINER6 = "<indent=5%>I'm telling you it gives me a bad feeling in my gut.\n\nIf you're committed to this then I can't stop you, but I won't be able to continue working at this facility.</indent>";
+
+				public static LocString SIGNATURE1 = "\n-Dr. McClintock\n<size=11>Bioengineering Department\nThe Gravitas Facility</size>\n------------------\n";
+
+				public static LocString SIGNATURE2 = "\n-Director Stern\n<size=11>The Gravitas Facility</size>\n------------------\n";
 			}
 		}
 
@@ -395,15 +417,23 @@ namespace STRINGS
 		{
 			public static LocString TITLE = "Re: Implant Database Request";
 
+			public static LocString TITLE2 = "Implant Database Request";
+
 			public static LocString SUBTITLE = "ENCRYPTION LEVEL: TWO";
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<size=10><smallcaps><b>Implant Database Request</b>\nFrom: <b>Director Stern</b><alpha=#AA> <jstern@gravitas.nova></color>\nTo: <b>Dr. McClintock</b><alpha=#AA> <jmcclintock@gravitas.nova></color></smallcaps></size>";
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Director Stern</b><size=12><alpha=#AA> <jstern@gravitas.nova></color></size>\nFrom: <b>Dr. McClintock</b><size=12><alpha=#AA> <jmcclintock@gravitas.nova></color></size></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER2 = "<indent=5%>Doctor,\n\nIf there is room available after the necessary scientific and survival knowledge has been uploaded, I will see what I can do.\n\n</indent>";
+				public static LocString EMAILHEADER2 = "<smallcaps>To: <b>Dr. McClintock</b><alpha=#AA><size=12> <jmcclintock@gravitas.nova></size></color>\nFrom: <b>Director Stern</b><alpha=#AA><size=12> <jstern@gravitas.nova></color></smallcaps></size>\n------------------\n";
 
-				public static LocString CONTAINER3 = "<alpha=#AA><indent=10%><size=10><smallcaps>From: <b>Dr. McClintock</b>\nTo: <b>Director Stern</b></smallcaps></size>\nDirector,\n\nI have been thinking, and it occurs to me that our subjects may one day travel outside the range of radio contact when establishing new colonies.\nI believe in such a case it is our duty to preserve our planet's non-scientific knowledge as colonies travel into the cosmos as representatives of humanity.\nI would like to make a formal request that arts and cultural histories make their way onto the microchip databases.</indent></color>";
+				public static LocString CONTAINER2 = "<indent=5%>Director,\n\nI have been thinking, and it occurs to me that our subjects may one day travel outside the range of radio contact when establishing new colonies.\n\nI believe in such a case it is our duty to preserve our planet's non-scientific knowledge as colonies travel into the cosmos as representatives of humanity.\n\nI would like to make a formal request that arts and cultural histories make their way onto the microchip databases.</indent>";
+
+				public static LocString CONTAINER3 = "<indent=5%>Doctor,\n\nIf there is room available after the necessary scientific and survival knowledge has been uploaded, I will see what I can do.</indent>";
+
+				public static LocString SIGNATURE1 = "\n-Dr. McClintock\n<size=11>Bioengineering Department\nThe Gravitas Facility</size>\n------------------\n";
+
+				public static LocString SIGNATURE2 = "\n-Director Stern\n<size=11>The Gravitas Facility</size>\n------------------\n";
 			}
 		}
 
@@ -415,25 +445,35 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<size=10><smallcaps><b>Subject: Results from Atomicon</b>\nTo: <b>[REDACTED]</b>\nFrom: <b>[REDACTED]</b></color></smallcaps></size>";
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Director Stern</b><alpha=#AA><size=12> <jstern@gravitas.nova></size></color>\nFrom: <b>[REDACTED]</b></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER2 = "<indent=5%>Director,\n\nEverything went well. McClintock was reluctant at first, but she has little alternative given the nature of her work.\n\nShe can begin at your convenience.</indent>\n\n[REDACTED]\nPersonnel Coordinator\nThe Gravitas Facility";
+				public static LocString CONTAINER2 = "<indent=5%>Director,\n\nEverything went well. McClintock was reluctant at first, but she has little alternative given the nature of her work.\n\nShe can begin at your convenience.</indent>";
+
+				public static LocString SIGNATURE1 = "\n[REDACTED]\n<size=11>Personnel Coordinator\nThe Gravitas Facility</size>\n------------------\n";
 			}
 		}
 
-		public class DINNEREMAIL
+		public class FRANKIESBLOG
 		{
-			public static LocString TITLE = "Re: You in?";
+			public static LocString TITLE = "Re: frankie's bloggg";
+
+			public static LocString TITLE2 = "SUBJECT: frankie's bloggg";
 
 			public static LocString SUBTITLE = "UNENCRYPTED";
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<size=10><smallcaps><b>Re: You in?</b>\nFrom: <b>[REDACTED]</b>\nTo: <b>Dr.Higgs</b><alpha=#AA> <wphiggs@gravitas.nova></color></smallcaps></size>";
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Dr. Summers</b><alpha=#AA><size=12> <jsummers@gravitas.nova></size></color>\nFrom: <b>Dr. Jones</b><alpha=#AA><size=12> <ejones@gravitas.nova></size></color></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER2 = "<indent=5%>Okay, but only if we go somewhere new. If you make me eat meatballs one more time I will <i>PUKE</i>.\n\n(P.S. I'm not kidding this time, Wil!)</indent>\n\n<size=10>[REDACTED]\nPhysics Department\nThe Gravitas Facility</size>";
+				public static LocString EMAILHEADER2 = "<smallcaps>To: <b>Dr. Jones</b><alpha=#AA><size=12> <ejones@gravitas.nova></size></color>\nFrom: <b>Dr. Summers</b><alpha=#AA><size=12> <jsummers@gravitas.nova></size></color></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER3 = "<alpha=#AA><indent=10%><size=10><smallcaps>From: <b>Dr. Higgs</b>\nTo: <b>[REDACTED]</b></smallcaps></size>\nHey Dr. B, you in for a bite to eat with the team after work? It's only 4 and I'm already <i>starving</i>.</indent></color>";
+				public static LocString CONTAINER2 = "<indent=5%>Oh my goddd I just found out Frankie's one of those people who takes pictures of all their food and uploads them to some dumb blog somewhere.\n\nYou HAVE to come to lunch with us and see, they spend so long taking pictures the food gets cold and they have to ask the waiter to warm it up again, it's SO FUNNY.</indent>";
+
+				public static LocString CONTAINER3 = "<indent=5%>Sure, I'd be down to get lunch with you guys. See you in a bit! :)</indent>";
+
+				public static LocString SIGNATURE1 = "\nXOXO,\nDr. Jones\n<size=11>Information and Statistics Department\nThe Gravitas Facility</size>\n------------------\n";
+
+				public static LocString SIGNATURE2 = "\n-Dr. Summers\n<size=11>Information and Statistics Department\nThe Gravitas Facility</size>\n------------------\n";
 			}
 		}
 
@@ -441,17 +481,25 @@ namespace STRINGS
 		{
 			public static LocString TITLE = "Re: dr. holland's dog";
 
+			public static LocString TITLE2 = "dr. holland's dog";
+
 			public static LocString SUBTITLE = "UNENCRYPTED";
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<size=10><smallcaps><b>Re: dr. holland's dog</b>\nFrom: <b>Dr. Jones</b><alpha=#AA> <ejones@gravitas.nova></color>\nTo: <b>Dr. Summers</b><alpha=#AA> <jsummers@gravitas.nova></color></smallcaps></size>\n";
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Dr. Summers</b><size=10><alpha=#AA> <jsummers@gravitas.nova></size></color>\nFrom: <b>Dr. Jones</b><alpha=#AA><size=10> <ejones@gravitas.nova></size></color></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER2 = "<indent=5%><i><b>UGHHHHHHHH!</b></i>\nYou're the worst!\n\nXOXO,\nDr. Jones\nInformation and Statistics Department\nThe Gravitas Facility</indent>";
+				public static LocString EMAILHEADER2 = "<smallcaps>To: <b>Dr. Jones</b><alpha=#AA><size=10> <ejones@gravitas.nova></size></color>\nFrom: <b>Dr. Summers</b><size=10><alpha=#AA> <jsummers@gravitas.nova></size></color></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER3 = "<alpha=#AA><indent=10%><size=10><smallcaps>From: <b>Dr. Summers</b>\nTo: <b>Dr. Jones</b></smallcaps></size>\nHaha, I think it's cute, he really loves his dog. Oh! Did I show you the thing my cat did? She always falls asleep on my bed but last night she sprawled out on her back and her little tongue was poking out! So cute.\n\n<color=#F44A47>>[BROKEN IMAGE]</color>\n<alpha=#AA>[121 MISSING FILES ATTACHED]</indent></color>\n";
+				public static LocString CONTAINER1 = "<indent=5%>OMIGOD, every time I go into the breakroom now I get ambushed by Dr. Holland and he traps me in a 20 minute conversation about his new dog.\n\nLike, I GET it! Your puppy is cute! Why do you have like 400 different pictures of it on your phone, FROM THE SAME ANGLE?!\n\nSO annoying.</indent>";
 
-				public static LocString CONTAINER4 = "<alpha=#AA><indent=15%><size=10><smallcaps>From: <b>Dr. Jones</b>\nTo: <b>Dr. Summers</b></smallcaps></size>\nOMIGOD, every time I go into the breakroom now I get ambushed by Dr. Holland and he traps me in a 20 minute long conversation about his new dog.\n\nLike, I GET it! Your puppy is cute! Why do you have like 400 different pictures of it on your phone, FROM THE SAME ANGLE?!\n\nSO annoying.\n\nXOXO,</indent></color>";
+				public static LocString CONTAINER2 = "<indent=5%>Haha, I think it's nice, he really loves his dog. Oh! Did I show you the thing my cat did? She always falls asleep on my bed but last night she sprawled out on her back and her little tongue was poking out! So cute.\n\n<color=#F44A47>[BROKEN IMAGE]</color>\n<alpha=#AA>[121 MISSING ATTACHMENTS]</color></indent>";
+
+				public static LocString CONTAINER3 = "<indent=5%><i><b>UGHHHHHHHH!</b></i>\nYou're the worst!</indent>";
+
+				public static LocString SIGNATURE1 = "\nXOXO,\nDr. Jones\n<size=11>Information and Statistics Department\nThe Gravitas Facility</size>\n------------------\n";
+
+				public static LocString SIGNATURE2 = "\n-Dr. Summers\n<size=11>Information and Statistics Department\nThe Gravitas Facility</size>\n------------------\n";
 			}
 		}
 
@@ -463,23 +511,27 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<size=10><smallcaps><b>Subject: Duplicant Memory Solution</b>\nFrom: <b>[REDACTED]</b>\nTo: <b>Director Stern</b><alpha=#AA> <jstern@gravitas.nova></color></smallcaps></size>";
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Director Stern</b><alpha=#AA><size=12> <jstern@gravitas.nova></size></color>\nFrom: <b>[REDACTED]</b></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER2 = "<indent=5%>Director,\n\nI had a thought about how to solve your Duplicant memory problem.\n\nRather than attempt to access the subject's old memories, what if we were to embed all necessary information for colony survival into the printing process itself?\n\nThe amount of data engineering can store in a chip has grown exponentially over the last year. We should take advantage of the development.\n\n[REDACTED]\nEngineering Department\nThe Gravitas Facility</indent>";
+				public static LocString CONTAINER2 = "<indent=5%>Director,\n\nI had a thought about how to solve your Duplicant memory problem.\n\nRather than attempt to access the subject's old memories, what if we were to embed all necessary information for colony survival into the printing process itself?\n\nThe amount of data engineering can store has grown exponentially over the last year. We should take advantage of the development.</indent>";
+
+				public static LocString SIGNATURE1 = "\n[REDACTED]\n<size=11>Engineering Department\nThe Gravitas Facility</size>\n------------------\n";
 			}
 		}
 
 		public class MYPENS
 		{
-			public static LocString TITLE = "MY PENS";
+			public static LocString TITLE = "SUBJECT: MY PENS";
 
 			public static LocString SUBTITLE = "UNENCRYPTED";
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<size=10><smallcaps><b>Subject: MY PENS</b>\nTo: <b>ALL</b>\nFrom: <b>[REDACTED]</b></color></smallcaps></size>";
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>ALL</b>\nFrom: <b>[REDACTED]</b></color></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER2 = "<indent=5%>To whomever is stealing the glitter pens off of my desk:\n\n<i>CONSIDER THIS YOUR LAST WARNING!</i></indent>\n\nXOXO,\n[REDACTED]\nInformation and Statistics Department\nThe Gravitas Facility";
+				public static LocString CONTAINER2 = "<indent=5%>To whomever is stealing the glitter pens off of my desk:\n\n<i>CONSIDER THIS YOUR LAST WARNING!</i></indent>";
+
+				public static LocString SIGNATURE1 = "\nXOXO,\n[REDACTED]\n<size=11>Information and Statistics Department\nThe Gravitas Facility</size>\n------------------\n";
 			}
 		}
 
@@ -491,9 +543,11 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<size=10><smallcaps><b>Subject: Welcome to our New Employee</b>\nTo: <b>[REDACTED]</b>\nFrom: <b>[REDACTED]</b></color></smallcaps></size>";
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>All</b>\nFrom: <b>[REDACTED]</b></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER2 = "<indent=5%>Attention Gravitas Facility personnel;\n\nPlease welcome our newest staff member, Jodi McClintock, PhD.\n\nDr. McClintock will be leading our upcoming genetics project and has been installed in our bioengineering department.\n\nBe sure to offer her our warmest welcome.</indent>\n\n[REDACTED]\nDirector\nThe Gravitas Facility";
+				public static LocString CONTAINER2 = "<indent=5%>Attention Gravitas Facility personnel;\n\nPlease welcome our newest staff member, Jodi McClintock, PhD.\n\nDr. McClintock will be leading our upcoming genetics project and has been installed in our bioengineering department.\n\nBe sure to offer her our warmest welcome.</indent>";
+
+				public static LocString SIGNATURE1 = "\n[REDACTED]\n<size=11>Personnel Coordinator\nThe Gravitas Facility</indent>\n------------------\n";
 			}
 		}
 
@@ -505,9 +559,11 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<size=10><smallcaps><b>Subject: New Security System?</b>\nTo: <b>[REDACTED]</b>\nFrom: <b>[REDACTED]</b></color></smallcaps></size>";
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>[REDACTED]</b>\nFrom: <b>[REDACTED]</b></color></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER2 = "<indent=5%>So, the Facility is introducing a new security system that unlocks the doors when they scan your hand. My question is, what exactly are they scanning?\n\nThe folks in engineering say the door device doesn't look like a fingerprint scanner, but the duo working over in bioengineering won't comment at all.\n\nAll I know is, I've never willingly submitted my DNA or fingerprints to the company, and they've certainly never asked.</indent>\n\n[REDACTED]";
+				public static LocString CONTAINER2 = "<indent=5%>So, the Facility is introducing a new security system that unlocks the doors when they scan your hand. My question is, what exactly are they scanning?\n\nThe folks in engineering say the door device doesn't look like a fingerprint scanner, but the duo working over in bioengineering won't comment at all.\n\nAll I know is, I've never willingly submitted my DNA or fingerprints to the company, and they've certainly never asked.</indent>";
+
+				public static LocString SIGNATURE1 = "\n[REDACTED]\n<size=11>The Gravitas Facility</size>\n------------------\n";
 			}
 		}
 
@@ -519,9 +575,27 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "From: <b>[REDACTED]</b> <alpha=#AA><[REDACTED]@gravitas.nova></color>\n\nTo: <b>[REDACTED]</b></smallcaps>";
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>[REDACTED]</b>\nFrom: <b>[REDACTED]</b></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER2 = "<indent=5%>I'm almost certain now that the Facility's stolen our genetic information.\n\nForty-odd employees would make for mighty convenient lab rats, and even if we discovered what Gravitas did, we wouldn't have a lot of legal options. We can't exactly go to the public given the nature of our work.\n\nI shudder to think about what sort of experiments they might be conducting on my DNA, but I have to keep my mouth shut.\n\nI can't risk losing my job.\n\n[REDACTED]</indent>";
+				public static LocString CONTAINER2 = "<indent=5%>I'm almost certain now that the Facility's stolen our genetic information.\n\nForty-odd employees would make for mighty convenient lab rats, and even if we discovered what Gravitas did, we wouldn't have a lot of legal options. We can't exactly go to the public given the nature of our work.\n\nI shudder to think about what sort of experiments they might be conducting on my DNA, but I have to keep my mouth shut.\n\nI can't risk losing my job.</indent>";
+
+				public static LocString SIGNATURE1 = "\n[REDACTED]\n<size=11>The Gravitas Facility</size>\n------------------\n";
+			}
+		}
+
+		public class POLITEREQUEST
+		{
+			public static LocString TITLE = "Polite Request";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+			public class BODY
+			{
+				public static LocString EMAILHEADER = "<smallcaps>To: <b>All</b>\nFrom: <b>Admin</b> <alpha=#AA><admin@gravitas.nova></color></smallcaps>\n------------------\n";
+
+				public static LocString CONTAINER1 = "<indent=5%>To whoever is entering [REDACTED]'s office to move his science fair trophies one inch to the left, please desist as he finds it quite unnerving.</indent>";
+
+				public static LocString SIGNATURE = "\n-Admin\n<size=11>The Gravitas Facility</size>\n------------------\n";
 			}
 		}
 
@@ -533,9 +607,11 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<size=10><smallcaps><b>Subject: Preliminary Calculations</b>\nTo: <b>[REDACTED]</b>\nFrom: <b>[REDACTED]</b></color></smallcaps></size>";
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>[REDACTED]</b>\nFrom: <b>[REDACTED]</b></color></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER2 = "<indent=5%>Director,\n\nEven with dramatic optimization we can't fit the massive volume of resources needed for a colony seed onboard, even when calculating for a small interplanetary travel duration.\n\nSome serious changes are gonna have to be made for this to work.</indent>\n\nXOXO,\n[REDACTED]\nInformation and Statistics Department\nThe Gravitas Facility";
+				public static LocString CONTAINER2 = "<indent=5%>Director,\n\nEven with dramatic optimization we can't fit the massive volume of resources needed for a colony seed onboard, even when calculating for a small interplanetary travel duration.\n\nSome serious changes are gonna have to be made for this to work.</indent>";
+
+				public static LocString SIGNATURE1 = "\nXOXO,\n[REDACTED]\n<size=11>Information and Statistics Department\nThe Gravitas Facility</size>\n------------------\n";
 			}
 		}
 
@@ -547,9 +623,11 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<size=10><smallcaps><b>Re: MY PENS</b>\nFrom: <b>[REDACTED]</b>\nTo: <b>ALL</b></smallcaps></size>";
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>ALL</b>\nFrom: <b>Admin</b><size=12><alpha=#AA> <admin@gravitas.nova></color></size></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER2 = "<indent=5%>We would like to remind staff not to use the CC: All function for intra-office issues.\n\nIn the event of disputes or disruptive work behavior within the facility, please speak to HR directly.\n\nThank-you for your restraint.\n\n-Admin\nThe Gravitas Facility</indent>";
+				public static LocString CONTAINER2 = "<indent=5%>We would like to remind staff not to use the CC: All function for intra-office issues.\n\nIn the event of disputes or disruptive work behavior within the facility, please speak to HR directly.\n\nThank-you for your restraint.</indent>";
+
+				public static LocString SIGNATURE1 = "\n-Admin\n<size=11>The Gravitas Facility</size>\n------------------\n";
 			}
 		}
 
@@ -557,17 +635,25 @@ namespace STRINGS
 		{
 			public static LocString TITLE = "Re: Have you seen this?";
 
+			public static LocString TITLE2 = "SUBJECT: Have you seen this?";
+
 			public static LocString SUBTITLE = "ENCRYPTION LEVEL: ONE";
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<size=10><smallcaps>To: <b>[REDACTED]</b>\nFrom: <b>[REDACTED]</b>\n<b>Re: Have you seen this?</b></smallcaps></size>";
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Director Stern</b><size=12><alpha=#AA> <jstern@gravitas.nova></size></color>\nFrom: <b>[REDACTED]</b></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER2 = "<indent=5%>Please pay it no mind. If any of these journals reach out to you, deny comment.</indent>\n\n<size=10>[REDACTED]\nDirector\nThe Gravitas Facility</size>";
+				public static LocString EMAILHEADER2 = "<smallcaps>To: <b>[REDACTED]</b>\nFrom: <b>Director Stern</b><size=12><alpha=#AA> <jstern@gravitas.nova></size></color></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER3 = "<alpha=#AA><indent=10%><smallcaps>[redacted]@gravitas.nova</smallcaps>\n\n<indent=15%>Director, are you aware of the articles that have been cropping up about us lately?</indent></indent></color>";
+				public static LocString CONTAINER2 = "<indent=5%>Please pay it no mind. If any of these journals reach out to you, deny comment.</indent>";
+
+				public static LocString CONTAINER3 = "<indent=5%>Director, are you aware of the articles that have been cropping up about us lately?</indent>";
 
 				public static LocString CONTAINER4 = "<indent=10%><color=#F44A47>>[BROKEN LINK]</color> <alpha=#AA><smallcaps>the gravitas facility: questionable rise of a research giant</smallcaps></indent></color>";
+
+				public static LocString SIGNATURE1 = "\n[REDACTED]\n<size=11>Personnel Coordinator\nThe Gravitas Facility</size>\n------------------\n";
+
+				public static LocString SIGNATURE2 = "\n-Director Stern\n<size=11>The Gravitas Facility</size>\n------------------\n";
 			}
 		}
 
@@ -575,17 +661,39 @@ namespace STRINGS
 		{
 			public static LocString TITLE = "Re: omg the janitor";
 
+			public static LocString TITLE2 = "SUBJECT: Re: omg the janitor";
+
+			public static LocString TITLE3 = "SUBJECT: omg the janitor";
+
 			public static LocString SUBTITLE = "UNENCRYPTED";
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<size=10><smallcaps><b>Re: omg the janitor</b>\nFrom: <b>Dr. Jones</b><alpha=#AA> <ejones@gravitas.nova></color>\nTo: <b>Dr. Summers</b><alpha=#AA> <jsummers@gravitas.nova></color></smallcaps></size>\n";
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Dr. Summers</b><size=12><alpha=#AA> <jsummers@gravitas.nova></color></size>\nFrom: <b>Dr. Jones</b><size=12><alpha=#AA> <ejones@gravitas.nova></color></size></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER2 = "<indent=5%><i>Pfft,</i> whatever.\n\nXOXO,\nDr. Jones\nInformation and Statistics Department\nThe Gravitas Facility</indent>";
+				public static LocString EMAILHEADER2 = "<smallcaps>To: <b>Dr. Jones</b><size=12><alpha=#AA> <ejones@gravitas.nova></color></size>\nFrom: <b>Dr. Summers</b><size=12><alpha=#AA> <jsummers@gravitas.nova></color></size></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER3 = "<alpha=#AA><indent=10%><size=10><smallcaps>From: <b>Dr. Summers</b>\nTo: <b>Dr. Jones</b></smallcaps></size>\nAw, he's really nice if you get to know him though. Really dependable too. One time I busted a wheel off my office chair and he got me a new one in like, two minutes. I think he's just sweaty because he works so hard.</indent></color>\n";
+				public static LocString CONTAINER2 = "<indent=5%><i>Pfft,</i> whatever.</indent>";
 
-				public static LocString CONTAINER4 = "<alpha=#AA><indent=15%><size=10><smallcaps>From: <b>Dr. Jones</b>\nTo: <b>Dr. Summers</b></smallcaps></size>\nOMIGOSH have you seen our building's janitor? He totally smells and he has sweatstains under his armpits like EVERY time I see him. SO embarassing.\n\nXOXO,</indent></color>";
+				public static LocString CONTAINER3 = "<indent=5%>Aw, he's really nice if you get to know him though. Really dependable too. One time I busted a wheel off my office chair and he got me a new one in like, two minutes. I think he's just sweaty because he works so hard.</indent>";
+
+				public static LocString CONTAINER4 = "<indent=5%>OMIGOSH have you seen our building's janitor? He totally smells and he has sweatstains under his armpits like EVERY time I see him. SO embarassing.</indent>";
+
+				public static LocString SIGNATURE1 = "\nXOXO,\nDr. Jones\n<size=11>Information and Statistics Department\nThe Gravitas Facility</size>\n------------------\n";
+
+				public static LocString SIGNATURE2 = "\n-Dr. Summers\n<size=11>Information and Statistics Department\nThe Gravitas Facility</size>\n------------------\n";
+			}
+		}
+
+		public class ANTS
+		{
+			public static LocString TITLE = "Ants";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: ONE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "[VOICE RECOGNITION INITIALIZED]\n[SUBJECTS IDENTIFIED: A001, A435]\n\n[LOG BEGINS]\n\nTechnician: <i>Atta cephalotes</i>. What sort of experiment are you doing with these?\n\nDirector: No experiment. I just find them fascinating. Don't you?\n\nTech: Not really?\n\nDirector: You ought to. Very efficient. They perfected farming millions of years before humans.\n\n(sound of tapping on glass)\n\nDirector: An entire colony led by and in service to its queen. Each organism knows its role. We could learn a thing or two from them.\n\nTech: I have the results from the power tests, director.\n\nDirector: And?\n\nTech: Negative, ma'am.\n\nDirector: I see. You know, another admirable quality of ants occurs to me. They can pull twenty times their own weight.\n\nTech: I'm not sure I follow, ma'am.\n\nDirector: Are you pulling your weight, doctor?\n\n[LOG ENDS]";
 			}
 		}
 
@@ -601,6 +709,18 @@ namespace STRINGS
 			}
 		}
 
+		public class DEBRIEF
+		{
+			public static LocString TITLE = "Debrief";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: ONE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "[VOICE RECOGNITION INITIALIZED]\n[SUBJECTS IDENTIFIED: A001, B111]\n\n[LOG BEGINS]\n\nDirector: I'm going to try and build a human colony in space.\n\nMcClintock: Alright.\n\nDirector: ...\"Alright\"? I was prepared to... give you my justifications. Allure you with resources and promises of unregulated research potential.\n\nMcClintock: I know you have the wherewithal to pull it off and it sounds like a worthy project. Would you prefer I put up more of a fight?\n\nDirector: No. I'm glad to have you on board.\n\nMcClintock: So how does my genetics research come into play?\n\n[LOG ENDS]";
+			}
+		}
+
 		public class EMPLOYEEPROCESSING
 		{
 			public static LocString TITLE = "Employee Processing";
@@ -610,6 +730,36 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "[VOICE RECOGNITION INITIALIZED]\n[SUBJECTS IDENTIFIED: A001, A435, B111]\n\n[LOG BEGINS]\n\nTechnician: Thank-you for the fingerprints, doctor. We just need a quick voice sample, then you can be on your way.\n\nDr. McClintock: Wow Jackie, your security's no joke.\n\nDirector: Please address me as \"Director\" while on Facility grounds.\n\nDr. McClintock: ...Right.\n\n(clicking)\n\nTechnician: This should only take a moment. Speak clearly and the system will derive a vocal signature for you.\n\nTechnician: When you're ready.\n\n(throat clearing)\n\nDr. McClintock: Security code B111, Dr. Jodi McClintock. Gravitas Facility Bioengineering Department.\n\n(pause)\n\nTechnician: Great.\n\nDr. McClintock: What was that light just now?\n\nDirector: A basic security scan. No need for concern.\n\n(machine printing)\n\nTechnician: Here's your ID. You should have access to all doors in the facility now, Dr. McClintock.\n\nDr. McClintock: Thank-you.\n\nDirector: Come along, doctor.\n\n[LOG ENDS]";
+			}
+		}
+
+		public class MOVEDRATS
+		{
+			public static LocString TITLE = "Moved Rats";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: ONE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "[VOICE RECOGNITION INITIALIZED]\n[SUBJECTS IDENTIFIED: A001, B111]\n\n[LOG BEGINS]\n\nMcClintock: Director, do you know where my rats have been moved to? I asked around the bioengineering division but I was referred back to you.\n\nDirector: Hm? Oh, yes, they've been removed.\n\nMcClintock: \"Removed\"?\n\nDirector: Discarded. I'm sorry, did you still need them? The reports showed your experiments with them were completed.\n\nMcClintock: No, I... I'd collected all the data I needed, I just --\n\nDirector: -- Doctor. You weren't making pets out of test subjects, were you?\n\nMcClintock: Don't be ridiculous, I --\n\nDirector: -- Good.They were horrible to look at anyway. All those bumps.\n\nMcClintock: In the future, please do not mess with my things. It... disturbs me.\n\nDirector: I will notify you beforehand next time, doctor.\n\n[LOG ENDS]";
+			}
+		}
+
+		public class A046
+		{
+			public static LocString TITLE = "Personal Journal: A046";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Gravitas has been growing pretty rapidly since our first product hit the market. I just got a look at some of the new hires - they're practically babies! Not quite what I was expecting, but then I've never had an opportunity to mentor someone before. Could be fun!\n------------------\n";
+
+				public static LocString CONTAINER2 = "Well, mentorship hasn't gone quite how I'd expected. Turns out the young hires don't need me to show them the ropes. Actually, since the facility's gotten rid of our swipe cards one of the nice young men had to show me how to operate the doors after I got stuck outside my own lab. Don't I feel silly.\n------------------\n";
+
+				public static LocString CONTAINER3 = "Well, if that isn't just gravy, hm? One of the new hires will be acting as the team lead on my next project.\n\nWhen I first started it wasn't that uncommon to sample a whole rack of test tubes by hand. Now a machine can do hundreds of them in seconds. Who knows what this job will look like in another ten or twenty years. Will I still even be in it?\n------------------\n";
+
+				public static LocString CONTAINER4 = "That nice young man who helped me with the door the other day, Mr. Kraus, has been an absolute angel. He's been kind enough to help me with this horrible e-mail system and even showed me how to digitize my research notes. I'm learning a lot. Turns out I wasn't the mentor, I'm the mentee! If that isn't a chuckle. At any rate, I feel like I have a better handle on things around here due to Mr. Kraus' help. Turns out you're never too old to stop learning!\n------------------\n";
 			}
 		}
 
@@ -643,7 +793,19 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "[LOG BEGINS]\n\n\"The Director has suggested implanting artificial memories during print, but despite the great strides made in our research under her direction, such a thing can barely be considered more than a pipedream.\n\n\"For the moment we remain focused on eliminating the remaining glitches in the system, as well as developing effective education and training routines for printed subjects.\n\nSuggest: Omega 3 supplements and mentally stimulating enclosure apparatuses to accompany tutelage.\n\nDr. McClintock signing off.\"\n\n[LOG ENDS]";
+				public static LocString CONTAINER1 = "[LOG BEGINS]\n\nThe Director has suggested implanting artificial memories during print, but despite the great strides made in our research under her direction, such a thing can barely be considered more than a pipedream.\n\nFor the moment we remain focused on eliminating the remaining glitches in the system, as well as developing effective education and training routines for printed subjects.\n\nSuggest: Omega 3 supplements and mentally stimulating enclosure apparatuses to accompany tutelage.\n\nDr. McClintock signing off.\n\n[LOG ENDS]";
+			}
+		}
+
+		public class REVISITEDNUMBERS
+		{
+			public static LocString TITLE = "Revisited Numbers";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: ONE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "[VOICE RECOGNITION INITIALIZED]\n[SUBJECTS IDENTIFIED: A001, B111]\n\n[LOG BEGINS]\n\nDirector: Unacceptable.\n\nJones: I'm just telling you the numbers, Director, I didn't make them.\n\nDirector: In your earlier e-mail you claimed the issue would be solved by the Pod.\n\nJones: Yeah, the weight issue. And it was solved. The problem now is the insane amount of power that big thing eats every time it prints a colonist.\n\nDirector: So how do you suppose we meet these target numbers? Fossil fuels are exhausted, nuclear is outlawed, solar is next to impossible with this smog.\n\nJones: I dunno. That's why you've got researchers, I just crunch numbers. Although you should avoid fossil fuels and nuclear energy anyway. If you have to load the rocket up with a couple tons of fuel then we're back to square one on the weight problem.It's gotta be something clever.\n\nDirector: Thank you, Dr. Jones.You may go.\n\n[LOG ENDS]";
 			}
 		}
 
@@ -668,6 +830,44 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "[VOICE RECOGNITION INITIALIZED]\n[SUBJECT IDENTIFIED: B111]\n\n[LOG BEGINS]\n\n\"How are you chaps today?\n\n(squeaking)\n\nI brought sunflower seeds. Look! Your favourite! Are you hungry?\n\n(excited squeaking)\n\nOh, one moment friends. I left the recorder on --\n\n(rustling)\"\n\n[LOG ENDS]";
+			}
+		}
+
+		public class MYLOG
+		{
+			public static LocString TITLE = "Entries";
+
+			public static LocString SUBTITLE = string.Empty;
+
+			public class BODY
+			{
+				public class DUPLICANTDEATH
+				{
+					public static LocString TITLE = "CYCLE {0}";
+
+					public static LocString BODY = string.Empty;
+				}
+
+				public class LOG1
+				{
+					public static LocString TITLE = "CYCLE 1";
+
+					public static LocString BODY = "The colony has no life support systems set up, but luckily we find ourselves in a small airpocket in the asteroid filled with oxygen.\n\nBetween the ambient oxygen and our meager food stores, I'd estimate we have 3 days to set up food and oxygen production before my Duplicants are endangered.\n";
+				}
+
+				public class LOG2
+				{
+					public static LocString TITLE = "CYCLE 3";
+
+					public static LocString BODY = "I've synthesized enough Ooze to print a new Duplicant; all I have to do is choose the blueprint.\n\nIt would be helpful to have another set of hands around the colony, but it would mean another mouth to feed and a pair of lungs to fill.\n";
+				}
+
+				public class LOG3
+				{
+					public static LocString TITLE = "CYCLE 20";
+
+					public static LocString BODY = string.Empty;
+				}
 			}
 		}
 
@@ -755,18 +955,6 @@ namespace STRINGS
 			}
 		}
 
-		public class POLITEREQUEST
-		{
-			public static LocString TITLE = "Polite Request";
-
-			public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
-
-			public class BODY
-			{
-				public static LocString CONTAINER1 = "<smallcaps><b>Polite Request</b>\nFrom: <b>Admin</b> <alpha=#AA><admin@gravitas.nova></color>\nTo: <b>All</b></smallcaps>\n------------------\n\n<indent=5%>To whoever is entering [REDACTED]'s office to move his science fair trophies one inch to the left, please desist as he finds it quite unnerving.\n\n-Admin\nThe Gravitas Facility</indent>";
-			}
-		}
-
 		public class PROPFACILITYDISPLAY1
 		{
 			public static LocString TITLE = "Printing Pod Promo";
@@ -797,7 +985,7 @@ namespace STRINGS
 
 		public class PROPFACILITYDISPLAY3
 		{
-			public static LocString TITLE = "Thermonullifier Promo";
+			public static LocString TITLE = "Thermo-Nullifier Promo";
 
 			public static LocString SUBTITLE = "PUBLIC RELEASE";
 
@@ -979,9 +1167,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "[LOG BEGINS]\n\n\"Traditionally, cloning produces a subject that is genetically identical to the donor but develops independently, producing a being that is, in its own way, unique.\n\nThe pod, conversely, attempts to print an exact atomic copy. Theoretically all neural pathways should be intact and identical to the original subject.\n\nIt's fascinating, given this, that memories are not already inherent in our subjects; however, no cloned subjects as of yet have shown any signs of recognition when introduced to familiar stimuli, such as the donor subject's enclosure.\n\nRefer to Experiment 7D.\n\nRefer to Experiment 7F.";
+				public static LocString CONTAINER1 = "[LOG BEGINS]\n\nTraditionally, cloning produces a subject that is genetically identical to the donor but develops independently, producing a being that is, in its own way, unique.\n\nThe pod, conversely, attempts to print an exact atomic copy. Theoretically all neural pathways should be intact and identical to the original subject.\n\nIt's fascinating, given this, that memories are not already inherent in our subjects; however, no cloned subjects as of yet have shown any signs of recognition when introduced to familiar stimuli, such as the donor subject's enclosure.\n\nRefer to Experiment 7D.\n\nRefer to Experiment 7F.";
 
-				public static LocString CONTAINER2 = "\nMemories <i>must</i> be embedded within the physical brainmaps of our subjects. The only questions remains how to activate them. Hormones? Chemical supplements? Situational triggers?\n\nThe Director seems eager to move past this problem, and I am concerned at her willingness to bypass essential stages of the research development process.\n\nWe cannot move on to the fine polish of printing systems until the core processes have been perfected - which they have not.\n\nDr. McClintock, signing off.\"\n\n[LOG ENDS.]";
+				public static LocString CONTAINER2 = "\nMemories <i>must</i> be embedded within the physical brainmaps of our subjects. The only questions remains how to activate them. Hormones? Chemical supplements? Situational triggers?\n\nThe Director seems eager to move past this problem, and I am concerned at her willingness to bypass essential stages of the research development process.\n\nWe cannot move on to the fine polish of printing systems until the core processes have been perfected - which they have not.\n\nDr. McClintock, signing off.\n\n[LOG ENDS.]";
 			}
 		}
 	}

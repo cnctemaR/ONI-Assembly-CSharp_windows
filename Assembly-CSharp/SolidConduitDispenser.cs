@@ -40,10 +40,7 @@ public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable
 	protected override void OnCleanUp()
 	{
 		this.GetConduitFlow().RemoveConduitUpdater(new Action<float>(this.ConduitUpdate));
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-		}
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		base.OnCleanUp();
 	}
 
@@ -126,7 +123,7 @@ public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable
 	[MyCmpReq]
 	public Storage storage;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 
 	private int utilityCell = -1;
 

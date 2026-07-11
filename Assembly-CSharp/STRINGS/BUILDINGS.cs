@@ -43,11 +43,29 @@ namespace STRINGS
 				});
 			}
 
+			public class OXYLITEREFINERY
+			{
+				public static LocString NAME = UI.FormatAsLink("Oxylite Refinery", "OXYLITEREFINERY");
+
+				public static LocString DESC = "Oxylite is a solid and easily transportable source of consumable oxygen.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Synthesizes ",
+					ELEMENTS.OXYROCK.NAME,
+					" using ",
+					ELEMENTS.OXYGEN.NAME,
+					" and a small amount of ",
+					ELEMENTS.GOLD.NAME,
+					"."
+				});
+			}
+
 			public class FERTILIZERMAKER
 			{
 				public static LocString NAME = UI.FormatAsLink("Fertilizer Synthesizer", "FERTILIZERMAKER");
 
-				public static LocString DESC = "Fertilizer Synthesizers convert polluted water into fertilizer for domestic plants.";
+				public static LocString DESC = "Fertilizer Synthesizers convert polluted dirt into fertilizer for domestic plants.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
@@ -163,13 +181,58 @@ namespace STRINGS
 				public static LocString EFFECT = "Empties bottled " + UI.FormatAsLink("Liquids", "ELEMENTS_LIQUID") + " back into the world.";
 			}
 
+			public class BOTTLEEMPTIERGAS
+			{
+				public static LocString NAME = UI.FormatAsLink("Canister Emptier", "BOTTLEEMPTIERGAS");
+
+				public static LocString DESC = "A canister emptier's Element Filter can be used to designate areas for specific gas storage.";
+
+				public static LocString EFFECT = "Empties " + UI.FormatAsLink("Gas", "ELEMENTS_GAS") + " canisters back into the world.";
+			}
+
+			public class CARGOBAY
+			{
+				public static LocString NAME = UI.FormatAsLink("Cargo Bay", "CARGOBAY");
+
+				public static LocString DESC = "Duplicants will fill cargo bays with whatever resources they find during their space missions.";
+
+				public static LocString EFFECT = "Allows Duplicants to store any " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return.";
+			}
+
+			public class SPECIALCARGOBAY
+			{
+				public static LocString NAME = UI.FormatAsLink("Biological Cargo Bay", "SPECIALCARGOBAY");
+
+				public static LocString DESC = "Biological cargo bays allow Duplicants to retrieve alien plants and wildlife from space.";
+
+				public static LocString EFFECT = "Allows Duplicants to store unusual or organic resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return.";
+			}
+
+			public class COMMANDMODULE
+			{
+				public static LocString NAME = UI.FormatAsLink("Command Capsule", "COMMANDMODULE");
+
+				public static LocString DESC = "At least one astronaut must be assigned to the command module to pilot a rocket.";
+
+				public static LocString EFFECT = "Contains passenger seating for Duplicant " + UI.FormatAsLink("Astronauts", "ASTRONAUT") + ".\n\nA Command Capsule must be the last module installed at the top of a rocket.";
+			}
+
+			public class GANTRY
+			{
+				public static LocString NAME = UI.FormatAsLink("Gantry", "GANTRY");
+
+				public static LocString DESC = "A gantry can be built over rocket pieces where tiles and ladders cannot.";
+
+				public static LocString EFFECT = "Provides scaffolding across rocket modules to allow Duplicant access.";
+			}
+
 			public class WATERCOOLER
 			{
 				public static LocString NAME = UI.FormatAsLink("Water Cooler", "WATERCOOLER");
 
 				public static LocString DESC = "Chatting with friends improves Duplicants' moods and reduces their stress.";
 
-				public static LocString EFFECT = "Provides a gathering place for Duplicants during Leisure Time.\n\nImproves Duplicant Morale.";
+				public static LocString EFFECT = "Provides a gathering place for Duplicants during Downtime.\n\nImproves Duplicant Morale.";
 			}
 
 			public class ARCADEMACHINE
@@ -194,9 +257,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Espresso Machine", "ESPRESSOMACHINE");
 
-				public static LocString DESC = "A little boost of energy.";
+				public static LocString DESC = "A shot of espresso helps Duplicants relax after a long day.";
 
-				public static LocString EFFECT = "Provides a delicious and stimulating refreshment.\n\nIncreases Duplicant Morale.";
+				public static LocString EFFECT = "Provides refreshment for Duplicants on their breaks.\n\nIncreases Duplicant Morale.";
 			}
 
 			public class CHECKPOINT
@@ -262,6 +325,15 @@ namespace STRINGS
 				});
 			}
 
+			public class LIQUIDFUELTANK
+			{
+				public static LocString NAME = UI.FormatAsLink("Liquid Fuel Tank", "LIQUIDFUELTANK");
+
+				public static LocString DESC = "Storing additional fuel increases the distance a rocket can travel before returning.";
+
+				public static LocString EFFECT = "Stores the " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " fuel piped into it to supply rocket engines.\n\nThe stored fuel type is determined by the rocket engine it is built upon.";
+			}
+
 			public class LIQUIDCONDITIONER
 			{
 				public static LocString NAME = UI.FormatAsLink("Thermo Aquatuner", "LIQUIDCONDITIONER");
@@ -276,6 +348,15 @@ namespace STRINGS
 					UI.FormatAsLink("Heat", "HEAT"),
 					" in its immediate vicinity."
 				});
+			}
+
+			public class LIQUIDCARGOBAY
+			{
+				public static LocString NAME = UI.FormatAsLink("Liquid Cargo Tank", "LIQUIDCARGOBAY");
+
+				public static LocString DESC = "Duplicants will fill cargo tanks with whatever resources they find during their space missions.";
+
+				public static LocString EFFECT = "Allows Duplicants to store any " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return.";
 			}
 
 			public class LUXURYBED
@@ -599,6 +680,15 @@ namespace STRINGS
 				}
 			}
 
+			public class GASCARGOBAY
+			{
+				public static LocString NAME = UI.FormatAsLink("Gas Cargo Canister", "GASCARGOBAY");
+
+				public static LocString DESC = "Duplicants will fill cargo canisters with whatever resources they find during their space missions.";
+
+				public static LocString EFFECT = "Allows Duplicants to store any " + UI.FormatAsLink("Gas", "ELEMENTS_GAS") + " resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return.";
+			}
+
 			public class GASCONDUIT
 			{
 				public static LocString NAME = UI.FormatAsLink("Gas Pipe", "GASCONDUIT");
@@ -794,6 +884,15 @@ namespace STRINGS
 				});
 			}
 
+			public class GASBOTTLER
+			{
+				public static LocString NAME = UI.FormatAsLink("Canister Filler", "GASBOTTLER");
+
+				public static LocString DESC = "Canisters allow Duplicants to manually delivery gases from place to place.";
+
+				public static LocString EFFECT = "Automatically stores piped " + UI.FormatAsLink("Gases", "ELEMENTS_GAS") + " into canisters for manual transport.";
+			}
+
 			public class GENERATOR
 			{
 				public static LocString NAME = UI.FormatAsLink("Coal Generator", "GENERATOR");
@@ -812,6 +911,15 @@ namespace STRINGS
 				});
 
 				public static LocString OVERPRODUCTION = "{Generator} overproduction";
+			}
+
+			public class KEROSENEENGINE
+			{
+				public static LocString NAME = UI.FormatAsLink("Petroleum Rocket Engine", "KEROSENEENGINE");
+
+				public static LocString DESC = "Rockets can be used to send Duplicants into space and retrieve rare resources.";
+
+				public static LocString EFFECT = "Burns " + UI.FormatAsLink("Petroleum", "PETROLEUM") + " to propel rockets for space exploration.\n\nThe engine of a rocket must be built first before more rocket modules may be added.";
 			}
 
 			public class GENERICFABRICATOR
@@ -1288,9 +1396,9 @@ namespace STRINGS
 				public static LocString EFFECT = string.Concat(new string[]
 				{
 					"Used as floor and wall tile to build rooms.\n\nAllows ",
-					UI.FormatAsLink("Light", "ELEMENTS_LIQUID"),
+					UI.FormatAsLink("Light", "LIGHT"),
 					" and ",
-					UI.FormatAsLink("Decor Values", "ELEMENTS_LIQUID"),
+					UI.FormatAsLink("Decor Values", "DECOR"),
 					" to pass through."
 				});
 			}
@@ -1494,7 +1602,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Super computers unlock higher technology tiers than research stations alone.";
 
-				public static LocString EFFECT = "Conducts " + UI.FormatAsLink("Intermediate Research", "RESEARCH") + " to unlock new technologies.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Conducts ",
+					UI.FormatAsLink("Advanced Research", "RESEARCH"),
+					" to unlock new technologies.\n\nAssigned Duplicants must possess the ",
+					UI.FormatAsLink("Super Computer Researching", UI.StripLinkFormatting(Researcher.ID)),
+					" trait."
+				});
 			}
 
 			public class SCULPTURE
@@ -1607,6 +1722,24 @@ namespace STRINGS
 				public static LocString DESC = "This improved version of the Storage Compactor becomes " + UI.FormatAsLink("Active", "LOGIC") + " when full";
 
 				public static LocString EFFECT = "Stores the resources of your choosing.";
+			}
+
+			public class LIQUIDRESERVOIR
+			{
+				public static LocString NAME = UI.FormatAsLink("Liquid Reservoir", "LIQUIDRESERVOIR");
+
+				public static LocString DESC = "Stores " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + ".";
+
+				public static LocString EFFECT = "Stores the " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " resources of your choosing.";
+			}
+
+			public class GASRESERVOIR
+			{
+				public static LocString NAME = UI.FormatAsLink("Gas Reservoir", "GASRESERVOIR");
+
+				public static LocString DESC = "Stores " + UI.FormatAsLink("Gas", "ELEMENTS_GAS") + ".";
+
+				public static LocString EFFECT = "Stores the " + UI.FormatAsLink("Gas", "ELEMENTS_GAS") + " resources of your choosing.";
 			}
 
 			public class LIQUIDHEATER
@@ -2010,6 +2143,8 @@ namespace STRINGS
 				public static LocString METAL_RECIPE_DESCRIPTION = "Crushes {1} into " + UI.FormatAsLink("Sand", "SAND") + " and pure {0}.";
 
 				public static LocString LIME_RECIPE_DESCRIPTION = "Crushes {1} into {0}";
+
+				public static LocString LIME_FROM_LIMESTONE_RECIPE_DESCRIPTION = "Crushes {0} into {1} and a small amount of pure {2}";
 			}
 
 			public class THERMALBLOCK
@@ -2686,6 +2821,40 @@ namespace STRINGS
 				public static LocString RESULT_DESCRIPTION = "Cracked {0}";
 			}
 
+			public class TELESCOPE
+			{
+				public static LocString NAME = UI.FormatAsLink("Research Telescope", "TELESCOPE");
+
+				public static LocString DESC = "Telescopes are necessary for conducting rocket research and learning starmaps.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Conducts ",
+					UI.FormatAsLink("Interstellar Research", "RESEARCH"),
+					" to unlock new technologies.\n\nAssigned Duplicants must possess the ",
+					UI.FormatAsLink("Telescope Researching", UI.StripLinkFormatting(SeniorResearcher.ID)),
+					" trait.\n\nMust be exposed to space to function."
+				});
+
+				public static LocString REQUIREMENT_TOOLTIP = "A steady supply of {0} is necessary for the Duplicants to breathe.";
+			}
+
+			public class ASTRONAUTTRAININGCENTER
+			{
+				public static LocString NAME = UI.FormatAsLink("Space Cadet Centrifuge", "ASTRONAUTTRAININGCENTER");
+
+				public static LocString DESC = "Duplicants must complete astronaut training in order to pilot space rockets.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Trains Duplicants to become ",
+					UI.FormatAsLink("Astronauts", UI.StripLinkFormatting(Astronaut.ID)),
+					".\n\nDuplicants must possess the ",
+					UI.FormatAsLink("Astronaut-in-Training", UI.StripLinkFormatting(AstronautTrainee.ID)),
+					" trait to receive training."
+				});
+			}
+
 			public class POIBUNKEREXTERIORDOOR
 			{
 				public static LocString NAME = UI.FormatAsLink("Security Door", "POIBUNKEREXTERIORDOOR");
@@ -2931,6 +3100,8 @@ namespace STRINGS
 			public static LocString MICROMETEORITE = "micrometeorite";
 
 			public static LocString COMET = "falling space rocks";
+
+			public static LocString ROCKET = "rocket engine";
 		}
 
 		public static class AUTODISINFECTABLE

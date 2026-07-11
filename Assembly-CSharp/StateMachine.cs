@@ -414,6 +414,7 @@ public abstract class StateMachine
 		}
 	}
 
+	[DebuggerDisplay("{longName}")]
 	public class BaseState
 	{
 		public BaseState()

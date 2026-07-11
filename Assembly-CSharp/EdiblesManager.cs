@@ -4,16 +4,6 @@ using TUNING;
 
 public class EdiblesManager : KMonoBehaviour
 {
-	public static void DestroyInstance()
-	{
-		EdiblesManager.instance = null;
-	}
-
-	protected override void OnPrefabInit()
-	{
-		EdiblesManager.instance = this;
-	}
-
 	public EdiblesManager.FoodInfo GetFoodInfo(string FoodID)
 	{
 		string text = FoodID.Replace("Compost", string.Empty);
@@ -27,8 +17,6 @@ public class EdiblesManager : KMonoBehaviour
 		Debug.LogWarning("No food with ID: " + FoodID, null);
 		return null;
 	}
-
-	public static EdiblesManager instance;
 
 	public class FoodInfo : IConsumableUIItem
 	{

@@ -17,7 +17,7 @@ public class Lure : GameStateMachine<Lure, Lure.Instance, IStateMachineTarget, L
 
 	private void RemoveFromScenePartitioner(Lure.Instance smi)
 	{
-		smi.partitionerEntry.Release();
+		GameScenePartitioner.Instance.Free(ref smi.partitionerEntry);
 	}
 
 	public GameStateMachine<Lure, Lure.Instance, IStateMachineTarget, Lure.Def>.State off;
@@ -88,6 +88,6 @@ public class Lure : GameStateMachine<Lure, Lure.Instance, IStateMachineTarget, L
 
 		private Tag[] lures;
 
-		public ScenePartitionerEntry partitionerEntry;
+		public HandleVector<int>.Handle partitionerEntry;
 	}
 }

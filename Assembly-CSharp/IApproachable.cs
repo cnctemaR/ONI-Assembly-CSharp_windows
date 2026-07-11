@@ -7,9 +7,5 @@ public interface IApproachable
 
 	int GetCell();
 
-	bool ShouldPreferPrimaryCell();
-
-	bool ShouldPreferUnreservedCell();
-
 	Transform transform { get; }
 }

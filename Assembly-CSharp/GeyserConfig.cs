@@ -8,7 +8,7 @@ public class GeyserConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity("Geyser", global::STRINGS.CREATURES.SPECIES.GEYSER.NAME, global::STRINGS.CREATURES.SPECIES.GEYSER.DESC, 2000f, Assets.GetAnim("geyser_side_steam_kanim"), "inactive", Grid.SceneLayer.BuildingBack, 4, 2, global::TUNING.BUILDINGS.DECOR.BONUS.TIER1, NOISE_POLLUTION.NOISY.TIER6, SimHashes.Creature, null, 293f);
-		gameObject.AddTag(GameTags.DeprecatedContent);
+		gameObject.GetComponent<KPrefabID>().AddTag(GameTags.DeprecatedContent);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.IgneousRock);
 		component.Temperature = 372.15f;

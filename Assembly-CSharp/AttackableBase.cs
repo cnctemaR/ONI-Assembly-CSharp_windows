@@ -13,10 +13,7 @@ public class AttackableBase : Workable, IApproachable
 		this.SetupScenePartitioner(null);
 		base.Subscribe(1088554450, delegate(object o)
 		{
-			if (this.scenePartitionerEntry != null)
-			{
-				this.scenePartitionerEntry.UpdatePosition(Grid.PosToCell(base.gameObject));
-			}
+			GameScenePartitioner.Instance.UpdatePosition(this.scenePartitionerEntry, Grid.PosToCell(base.gameObject));
 		});
 		base.Subscribe(-1506500077, new Action<object>(this.OnDefeated));
 		base.Subscribe(-1256572400, new Action<object>(this.SetupScenePartitioner));
@@ -41,11 +38,7 @@ public class AttackableBase : Workable, IApproachable
 
 	private void OnDefeated(object data = null)
 	{
-		if (this.scenePartitionerEntry != null)
-		{
-			this.scenePartitionerEntry.Release();
-			this.scenePartitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.scenePartitionerEntry);
 	}
 
 	public override float GetEfficiencyMultiplier(Worker worker)
@@ -65,13 +58,9 @@ public class AttackableBase : Workable, IApproachable
 		base.Unsubscribe(-1506500077, new Action<object>(this.OnDefeated));
 		base.Unsubscribe(1623392196, new Action<object>(this.OnDefeated));
 		base.Unsubscribe(-1256572400, new Action<object>(this.SetupScenePartitioner));
-		if (this.scenePartitionerEntry != null)
-		{
-			this.scenePartitionerEntry.Release();
-			this.scenePartitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.scenePartitionerEntry);
 		base.OnCleanUp();
 	}
 
-	private GameScenePartitionerEntry scenePartitionerEntry;
+	private HandleVector<int>.Handle scenePartitionerEntry;
 }

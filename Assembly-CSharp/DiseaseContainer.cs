@@ -6,7 +6,7 @@ public struct DiseaseContainer
 	public DiseaseContainer(GameObject go, byte disease_idx, int disease_count)
 	{
 		this.primaryElement = go.GetComponent<PrimaryElement>();
-		this.elemIdx = (byte)ElementLoader.GetElementIndex(this.primaryElement.ElementID);
+		this.elemIdx = this.primaryElement.Element.idx;
 		this.isContainer = go.GetComponent<IUserControlledCapacity>() != null;
 		Conduit component = go.GetComponent<Conduit>();
 		if (component != null)

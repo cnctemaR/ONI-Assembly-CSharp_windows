@@ -52,8 +52,6 @@ public abstract class Chore
 
 	public bool isComplete { get; protected set; }
 
-	public bool isPreferredChoreRegardlessOfTags { get; set; }
-
 	public IStateMachineTarget target { get; protected set; }
 
 	public Tag[] choreTags { get; private set; }

@@ -1,0 +1,182 @@
+﻿using System;
+
+public class Gantry : KMonoBehaviour
+{
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		int num = Grid.PosToCell(this);
+		PrimaryElement component = base.GetComponent<PrimaryElement>();
+		for (int i = 0; i < Gantry.TileOffsets.Length; i++)
+		{
+			CellOffset rotatedOffset = this.building.GetRotatedOffset(Gantry.TileOffsets[i]);
+			int num2 = Grid.OffsetCell(num, rotatedOffset);
+			SimMessages.ReplaceAndDisplaceElement(num2, component.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, component.Mass, component.Temperature, byte.MaxValue, 0, -1);
+			Grid.Objects[num2, 1] = base.gameObject;
+			Grid.Foundation[num2] = true;
+			Grid.Objects[num2, 9] = base.gameObject;
+			Grid.SetSolid(num2, true, CellEventLogger.Instance.SimCellOccupierForceSolid);
+			Grid.RenderedByWorld[num2] = false;
+			World.Instance.OnSolidChanged(num2);
+			GameScenePartitioner.Instance.TriggerEvent(num2, GameScenePartitioner.Instance.solidChangedLayer, null);
+		}
+		this.smi = new Gantry.Instance(this);
+		this.smi.StartSM();
+	}
+
+	protected override void OnCleanUp()
+	{
+		if (this.smi != null)
+		{
+			this.smi.StopSM("cleanup");
+		}
+		int num = Grid.PosToCell(this);
+		foreach (CellOffset cellOffset in Gantry.TileOffsets)
+		{
+			CellOffset rotatedOffset = this.building.GetRotatedOffset(cellOffset);
+			int num2 = Grid.OffsetCell(num, rotatedOffset);
+			SimMessages.ReplaceAndDisplaceElement(num2, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierOnSpawn, 0f, -1f, byte.MaxValue, 0, -1);
+			Grid.Objects[num2, 1] = null;
+			Grid.Objects[num2, 9] = null;
+			Grid.Foundation[num2] = false;
+			Grid.SetSolid(num2, false, CellEventLogger.Instance.SimCellOccupierDestroy);
+			Grid.RenderedByWorld[num2] = true;
+			World.Instance.OnSolidChanged(num2);
+			GameScenePartitioner.Instance.TriggerEvent(num2, GameScenePartitioner.Instance.solidChangedLayer, null);
+		}
+		foreach (CellOffset cellOffset2 in Gantry.ForcefieldOffsets)
+		{
+			CellOffset rotatedOffset2 = this.building.GetRotatedOffset(cellOffset2);
+			int num3 = Grid.OffsetCell(num, rotatedOffset2);
+			Grid.FakeFloor[num3] = false;
+			Grid.Impassable[num3] = false;
+			Game.Instance.SetForceField(num3, false, Grid.Solid[num3]);
+			Pathfinding.Instance.AddDirtyNavGridCell(num3);
+		}
+		base.OnCleanUp();
+	}
+
+	public void SetForceField(bool active)
+	{
+		int num = Grid.PosToCell(this);
+		foreach (CellOffset cellOffset in Gantry.ForcefieldOffsets)
+		{
+			CellOffset rotatedOffset = this.building.GetRotatedOffset(cellOffset);
+			int num2 = Grid.OffsetCell(num, rotatedOffset);
+			Grid.FakeFloor[num2] = active;
+			Grid.Impassable[num2] = active;
+			Game.Instance.SetForceField(num2, active, false);
+			Pathfinding.Instance.AddDirtyNavGridCell(num2);
+		}
+	}
+
+	[MyCmpGet]
+	private Building building;
+
+	public static CellOffset[] TileOffsets = new CellOffset[]
+	{
+		new CellOffset(-2, 1),
+		new CellOffset(-1, 1)
+	};
+
+	public static CellOffset[] ForcefieldOffsets = new CellOffset[]
+	{
+		new CellOffset(0, 1),
+		new CellOffset(1, 1),
+		new CellOffset(2, 1),
+		new CellOffset(3, 1)
+	};
+
+	private Gantry.Instance smi;
+
+	public class States : GameStateMachine<Gantry.States, Gantry.Instance, Gantry>
+	{
+		public override void InitializeStates(out StateMachine.BaseState default_state)
+		{
+			default_state = this.extended;
+			base.serializable = true;
+			this.retracted_pre.Enter(delegate(Gantry.Instance smi)
+			{
+				smi.SetActive(true);
+			}).Exit(delegate(Gantry.Instance smi)
+			{
+				smi.SetActive(false);
+			}).PlayAnim("off_pre")
+				.OnAnimQueueComplete(this.retracted);
+			this.retracted.PlayAnim("off").ParamTransition<bool>(this.should_extend, this.extended_pre, new StateMachine<Gantry.States, Gantry.Instance, Gantry, object>.Parameter<bool>.Callback(GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.IsTrue));
+			this.extended_pre.Enter(delegate(Gantry.Instance smi)
+			{
+				smi.SetActive(true);
+			}).Exit(delegate(Gantry.Instance smi)
+			{
+				smi.SetActive(false);
+			}).PlayAnim("on_pre")
+				.OnAnimQueueComplete(this.extended);
+			this.extended.Enter(delegate(Gantry.Instance smi)
+			{
+				smi.master.SetForceField(true);
+			}).Exit(delegate(Gantry.Instance smi)
+			{
+				smi.master.SetForceField(false);
+			}).PlayAnim("on")
+				.ParamTransition<bool>(this.should_extend, this.retracted_pre, new StateMachine<Gantry.States, Gantry.Instance, Gantry, object>.Parameter<bool>.Callback(GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.IsFalse));
+		}
+
+		public GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.State retracted_pre;
+
+		public GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.State retracted;
+
+		public GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.State extended_pre;
+
+		public GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.State extended;
+
+		public StateMachine<Gantry.States, Gantry.Instance, Gantry, object>.BoolParameter should_extend;
+
+		public StateMachine<Gantry.States, Gantry.Instance, Gantry, object>.BoolParameter logic_on;
+	}
+
+	public class Instance : GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.GameInstance
+	{
+		public Instance(Gantry master)
+			: base(master)
+		{
+			this.operational = base.GetComponent<Operational>();
+			base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+			base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
+			base.smi.sm.should_extend.Set(true, base.smi);
+		}
+
+		public void SetActive(bool active)
+		{
+			this.operational.SetActive(this.operational.IsOperational && active, false);
+		}
+
+		private void OnOperationalChanged(object data)
+		{
+			this.UpdateShouldExtend();
+		}
+
+		private void OnLogicValueChanged(object data)
+		{
+			LogicValueChanged logicValueChanged = (LogicValueChanged)data;
+			if (logicValueChanged.portID != LogicOperationalController.PORT_ID)
+			{
+				return;
+			}
+			base.smi.sm.logic_on.Set(logicValueChanged.newValue == 1, base.smi);
+			this.UpdateShouldExtend();
+		}
+
+		private void UpdateShouldExtend()
+		{
+			bool flag = base.smi.sm.logic_on.Get(base.smi);
+			if (!this.operational.IsOperational)
+			{
+				return;
+			}
+			base.smi.sm.should_extend.Set(flag, base.smi);
+		}
+
+		private Operational operational;
+	}
+}

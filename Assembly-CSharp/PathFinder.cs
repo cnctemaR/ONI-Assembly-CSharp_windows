@@ -53,7 +53,7 @@ public class PathFinder
 					if (link.link == node2.cell && node2.navType == link.endNavType && node.navType == link.startNavType)
 					{
 						PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(node.cell, node.navType, PathFinder.PotentialPath.Flags.None);
-						flag = abilities.CanTraverse(potentialPath, node.cell, 0, link.transitionId, 0);
+						flag = abilities.TraversePath(ref potentialPath, node.cell, node.navType, 0, link.transitionId, 0);
 						if (flag)
 						{
 							break;
@@ -229,9 +229,8 @@ public class PathFinder
 					{
 						num4 = 0;
 					}
-					if (abilities.CanTraverse(potentialPath, potential.cell, num3, link.transitionId, num4) && (query == null || query.CanTraverse(num2, potential.cell, num3, num4)))
+					if (abilities.TraversePath(ref potentialPath, potential.cell, potential.navType, num3, link.transitionId, num4))
 					{
-						abilities.ApplyTraversalToPath(ref potentialPath, potential.cell);
 						PathFinder.AddPotential(potentialPath, potential.cell, potential.navType, num3, num4, link.transitionId, potentials, query_id, path_grid, ref cell);
 					}
 				}

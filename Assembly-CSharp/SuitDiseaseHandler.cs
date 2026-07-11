@@ -13,20 +13,26 @@ public class SuitDiseaseHandler : KMonoBehaviour
 	{
 		Equipment equipment = (Equipment)data;
 		PrimaryElement component = equipment.GetComponent<PrimaryElement>();
-		component.ModifyDiseaseCountHandler = new Action<int, string>(this.OnModifyDiseaseCount);
-		component.AddDiseaseHandler = new Action<byte, int, string>(this.OnAddDisease);
-		component.ForcePermanentDiseaseContainer(true);
-		component.SetDiseaseVisualProvider(base.gameObject);
+		if (component != null)
+		{
+			component.ModifyDiseaseCountHandler = new Action<int, string>(this.OnModifyDiseaseCount);
+			component.AddDiseaseHandler = new Action<byte, int, string>(this.OnAddDisease);
+			component.ForcePermanentDiseaseContainer(true);
+			component.SetDiseaseVisualProvider(base.gameObject);
+		}
 	}
 
 	private void OnUnequipped(object data)
 	{
 		Equipment equipment = (Equipment)data;
 		PrimaryElement component = equipment.GetComponent<PrimaryElement>();
-		component.ModifyDiseaseCountHandler = null;
-		component.AddDiseaseHandler = null;
-		component.ForcePermanentDiseaseContainer(false);
-		component.SetDiseaseVisualProvider(null);
+		if (component != null)
+		{
+			component.ModifyDiseaseCountHandler = null;
+			component.AddDiseaseHandler = null;
+			component.ForcePermanentDiseaseContainer(false);
+			component.SetDiseaseVisualProvider(null);
+		}
 	}
 
 	private void OnModifyDiseaseCount(int delta, string reason)

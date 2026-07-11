@@ -55,7 +55,11 @@ public static class Constants
 
 	public const float KW2W = 1000f;
 
-	public const float HEAT_KW_DISPLAY_FUDGEFACTOR = 0.005f;
+	public const float J2DTU = 1f;
+
+	public const float W2DTU_S = 1f;
+
+	public const float KW2DTU_S = 1000f;
 
 	public const float G2KG = 0.001f;
 
@@ -72,4 +76,6 @@ public static class Constants
 	public const float DefaultEntityThickness = 0.01f;
 
 	public const float DefaultSurfaceArea = 10f;
+
+	public const float SPACE_DISTANCE_TO_KILOMETERS = 10000f;
 }

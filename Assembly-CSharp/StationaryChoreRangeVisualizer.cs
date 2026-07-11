@@ -53,7 +53,7 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 			for (int j = -this.range; j <= this.range; j++)
 			{
 				int num3 = Grid.XYToCell(num + j, num2 + i);
-				if (Grid.IsValidCell(num3) && Grid.VisibilityTest(num, num2, num + j, num2 + i, true, true))
+				if (Grid.IsValidCell(num3) && Grid.IsPhysicallyAccessible(num, num2, num + j, num2 + i, true, true))
 				{
 					this.newCells.Add(num3);
 				}

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance>
 {
@@ -28,7 +27,10 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 		{
 			return;
 		}
-		smi.GetSMI<SpeechMonitor.Instance>().PlaySpeech(smi.currentThought.speechPrefix, smi.currentThought.sound);
+		if (SpeechMonitor.IsAllowedToPlaySpeech(smi.gameObject))
+		{
+			smi.GetSMI<SpeechMonitor.Instance>().PlaySpeech(smi.currentThought.speechPrefix, smi.currentThought.sound);
+		}
 	}
 
 	public StateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.Signal thoughtsChanged;
@@ -57,16 +59,12 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 		public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State talking;
 	}
 
-	public new class Instance : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.GameInstance, IRenderEveryTick
+	public new class Instance : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
-			this.animController = base.GetComponent<KBatchedAnimController>();
-			this.bubble = Util.KInstantiate(EffectPrefabs.Instance.ThoughtBubble, base.gameObject, null);
-			this.bubbleConvo = Util.KInstantiate(EffectPrefabs.Instance.ThoughtBubbleConvo, base.gameObject, null);
-			this.bubble.SetActive(false);
-			this.bubbleConvo.SetActive(false);
+			NameDisplayScreen.Instance.RegisterComponent(base.gameObject, this);
 		}
 
 		public bool HasThoughts()
@@ -123,26 +121,15 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 			}
 			this.thoughts.Sort((Thought a, Thought b) => b.priority.CompareTo(a.priority));
 			Thought thought = this.thoughts[0];
-			GameObject gameObject = this.bubble;
 			if (thought.modeSprite != null)
 			{
-				gameObject = this.bubbleConvo;
+				NameDisplayScreen.Instance.SetThoughtBubbleConvoDisplay(base.gameObject, true, thought.hoverText, thought.bubbleSprite, thought.sprite, thought.modeSprite);
 			}
-			this.ApplySprite(gameObject, thought.sprite, "icon_sprite");
-			this.ApplySprite(gameObject, thought.bubbleSprite, "bubble_sprite");
-			if (thought.modeSprite != null)
+			else
 			{
-				this.ApplySprite(gameObject, thought.modeSprite, "icon_sprite_mode");
+				NameDisplayScreen.Instance.SetThoughtBubbleDisplay(base.gameObject, true, thought.hoverText, thought.bubbleSprite, thought.sprite);
 			}
-			gameObject.SetActive(true);
 			base.sm.thoughtDisplayTime.Set(thought.showTime, this);
-			gameObject.GetComponent<KSelectable>().entityName = thought.hoverText;
-			KCollider2D component = gameObject.GetComponent<KCollider2D>();
-			if (component != null)
-			{
-				component.MarkDirty(false);
-			}
-			SimAndRenderScheduler.instance.Add(this, false);
 			this.currentThought = thought;
 			if (thought.showImmediately)
 			{
@@ -150,44 +137,14 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 			}
 		}
 
-		private void ApplySprite(GameObject active_bubble, Sprite sprite, string target)
-		{
-			HierarchyReferences component = active_bubble.GetComponent<HierarchyReferences>();
-			SpriteRenderer reference = component.GetReference<SpriteRenderer>(target);
-			reference.sprite = sprite;
-		}
-
-		public void RenderEveryTick(float dt)
-		{
-			if (this.animController == null)
-			{
-				return;
-			}
-			bool flag;
-			Matrix2x3 symbolLocalTransform = this.animController.GetSymbolLocalTransform(ThoughtGraph.Instance.symbol, out flag);
-			Matrix4x4 matrix4x = this.animController.GetTransformMatrix() * symbolLocalTransform;
-			Vector3 vector = new Vector3(matrix4x.m03, matrix4x.m13, 0f);
-			this.bubble.transform.SetPosition(vector + EffectPrefabs.Instance.ThoughtBubble.transform.GetLocalPosition());
-			this.bubbleConvo.transform.SetPosition(vector + EffectPrefabs.Instance.ThoughtBubble.transform.GetLocalPosition());
-		}
-
 		public void DestroyBubble()
 		{
-			SimAndRenderScheduler.instance.Remove(this);
-			this.bubble.SetActive(false);
-			this.bubbleConvo.SetActive(false);
+			NameDisplayScreen.Instance.SetThoughtBubbleDisplay(base.gameObject, false, null, null, null);
+			NameDisplayScreen.Instance.SetThoughtBubbleConvoDisplay(base.gameObject, false, null, null, null, null);
 		}
 
 		private List<Thought> thoughts = new List<Thought>();
 
-		private GameObject bubble;
-
-		private GameObject bubbleConvo;
-
-		private KBatchedAnimController animController;
-
 		public Thought currentThought;
-
-		public static HashedString symbol = new HashedString("snapTo_pivot");
 	}
 }

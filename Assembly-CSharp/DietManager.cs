@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class DietManager : KMonoBehaviour
 {
@@ -22,15 +23,28 @@ public class DietManager : KMonoBehaviour
 		{
 			this.OnWorldInventoryDiscover(tag);
 		}
+		foreach (KeyValuePair<Tag, Diet> keyValuePair in this.diets)
+		{
+			foreach (Diet.Info info in keyValuePair.Value.infos)
+			{
+				foreach (Tag tag2 in info.consumedTags)
+				{
+					GameObject prefab = Assets.GetPrefab(tag2);
+					if (prefab == null)
+					{
+						global::Debug.LogError("Could not find prefab: " + tag2, null);
+					}
+				}
+			}
+		}
 		WorldInventory.Instance.OnDiscover += this.OnWorldInventoryDiscover;
 	}
 
 	private void OnWorldInventoryDiscover(Tag t)
 	{
-		TagBits tagBits = new TagBits(t);
 		foreach (KeyValuePair<Tag, Diet> keyValuePair in this.diets)
 		{
-			if (keyValuePair.Value.GetDietInfo(tagBits) != null)
+			if (keyValuePair.Value.GetDietInfo(t) != null)
 			{
 				WorldInventory.Instance.Discover(t, keyValuePair.Key);
 			}

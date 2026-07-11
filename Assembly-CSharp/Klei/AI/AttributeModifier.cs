@@ -40,12 +40,8 @@ namespace Klei.AI
 
 		public void SetValue(float value)
 		{
-			DebugUtil.Assert(!this.IsReadonly, "Assert!");
+			DebugUtil.DevAssert(!this.IsReadonly, "Assert!", string.Empty, string.Empty);
 			this.Value = value;
-			if (this.OnDirty != null)
-			{
-				this.OnDirty();
-			}
 		}
 
 		public string GetDescription()
@@ -53,20 +49,23 @@ namespace Klei.AI
 			return (this.DescriptionCB == null) ? this.Description : this.DescriptionCB();
 		}
 
-		public string GetFormattedString(GameObject parent_instance)
+		public string GetFormattedString(GameObject parent_instance, bool ignore_default_formatter = false)
 		{
 			IAttributeFormatter attributeFormatter = null;
 			Attribute attribute = Db.Get().Attributes.TryGet(this.AttributeId);
-			if (attribute != null)
+			if (!ignore_default_formatter)
 			{
-				attributeFormatter = attribute.formatter;
-			}
-			else
-			{
-				attribute = Db.Get().BuildingAttributes.TryGet(this.AttributeId);
 				if (attribute != null)
 				{
 					attributeFormatter = attribute.formatter;
+				}
+				else
+				{
+					attribute = Db.Get().BuildingAttributes.TryGet(this.AttributeId);
+					if (attribute != null)
+					{
+						attributeFormatter = attribute.formatter;
+					}
 				}
 			}
 			string text = string.Empty;
@@ -97,7 +96,5 @@ namespace Klei.AI
 		public string Description;
 
 		public Func<string> DescriptionCB;
-
-		public global::System.Action OnDirty;
 	}
 }

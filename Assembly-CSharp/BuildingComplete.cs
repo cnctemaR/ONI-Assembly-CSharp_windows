@@ -36,6 +36,7 @@ public class BuildingComplete : Building
 			GameComps.StructureTemperatures.Add(base.gameObject);
 		}
 		base.Subscribe(-1503271301, new Action<object>(this.OnSelectObject));
+		base.Subscribe(1606648047, new Action<object>(this.OnObjectReplaced));
 	}
 
 	private void OnSelectObject(object data)
@@ -46,6 +47,11 @@ public class BuildingComplete : Building
 			GameHashes gameHashes = ((!flag) ? GameHashes.DisableOverlay : GameHashes.EnableOverlay);
 			EventSystem.Trigger(Game.Instance.gameObject, (int)gameHashes, this.Def.SelectMode);
 		}
+	}
+
+	private void OnObjectReplaced(object data)
+	{
+		this.wasReplaced = true;
 	}
 
 	protected override void OnSpawn()
@@ -127,30 +133,33 @@ public class BuildingComplete : Building
 			GameComps.StructureTemperatures.Remove(base.gameObject);
 		}
 		base.OnCleanUp();
-		int num = Grid.PosToCell(this);
-		this.Def.UnmarkArea(num, base.Orientation, this.Def.ObjectLayer, base.gameObject);
-		if (this.Def.IsTilePiece)
+		if (!this.wasReplaced)
 		{
-			this.Def.UnmarkArea(num, base.Orientation, this.Def.TileLayer, base.gameObject);
-			this.Def.RunOnArea(num, base.Orientation, delegate(int c)
+			int num = Grid.PosToCell(this);
+			this.Def.UnmarkArea(num, base.Orientation, this.Def.ObjectLayer, base.gameObject);
+			if (this.Def.IsTilePiece)
 			{
-				TileVisualizer.RefreshCell(c, this.Def.TileLayer);
-			});
-		}
-		if (this.Def.IsFoundation)
-		{
-			foreach (CellOffset cellOffset in this.Def.PlacementOffsets)
-			{
-				int num2 = Grid.OffsetCell(num, cellOffset);
-				Grid.Foundation[num2] = false;
-				Game.Instance.roomProber.SolidChangedEvent(num2, false);
+				this.Def.UnmarkArea(num, base.Orientation, this.Def.TileLayer, base.gameObject);
+				this.Def.RunOnArea(num, base.Orientation, delegate(int c)
+				{
+					TileVisualizer.RefreshCell(c, this.Def.TileLayer);
+				});
 			}
-		}
-		if (this.Def.PreventIdlingInFrontOfBuilding)
-		{
-			for (int j = 0; j < base.PlacementCells.Length; j++)
+			if (this.Def.IsFoundation)
 			{
-				Grid.PreventIdlingOnCell[base.PlacementCells[j]] = false;
+				foreach (CellOffset cellOffset in this.Def.PlacementOffsets)
+				{
+					int num2 = Grid.OffsetCell(num, cellOffset);
+					Grid.Foundation[num2] = false;
+					Game.Instance.roomProber.SolidChangedEvent(num2, false);
+				}
+			}
+			if (this.Def.PreventIdlingInFrontOfBuilding)
+			{
+				for (int j = 0; j < base.PlacementCells.Length; j++)
+				{
+					Grid.PreventIdlingOnCell[base.PlacementCells[j]] = false;
+				}
 			}
 		}
 		Components.BuildingCompletes.Remove(this);
@@ -172,6 +181,8 @@ public class BuildingComplete : Building
 	public bool isArtable;
 
 	private bool hasSpawnedKComponents;
+
+	private bool wasReplaced;
 
 	public List<AttributeModifier> regionModifiers = new List<AttributeModifier>();
 }

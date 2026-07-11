@@ -104,6 +104,21 @@ public class RockCrusherConfig : IBuildingConfig
 		complexRecipe.useResultAsDescription = true;
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("RockCrusher") };
 		ComplexRecipeManager.Get().AddObsoleteIDMapping(text5, text6);
+		ComplexRecipe.RecipeElement[] array7 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.Fossil).tag, 100f)
+		};
+		ComplexRecipe.RecipeElement[] array8 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.Lime).tag, 5f),
+			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.SedimentaryRock).tag, 95f)
+		};
+		string text7 = ComplexRecipeManager.MakeRecipeID("RockCrusher", array7, array8);
+		complexRecipe = new ComplexRecipe(text7, array7, array8);
+		complexRecipe.time = 40f;
+		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.LIME_FROM_LIMESTONE_RECIPE_DESCRIPTION, SimHashes.Fossil.CreateTag().ProperName(), SimHashes.SedimentaryRock.CreateTag().ProperName(), SimHashes.Lime.CreateTag().ProperName());
+		complexRecipe.useResultAsDescription = true;
+		complexRecipe.fabricators = new List<Tag> { TagManager.Create("RockCrusher") };
 		Prioritizable.AddRef(go);
 	}
 

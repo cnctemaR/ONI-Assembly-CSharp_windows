@@ -11,4 +11,6 @@ public interface IAttributeFormatter
 	string GetFormattedModifier(AttributeModifier modifier, GameObject parent_instance);
 
 	string GetFormattedValue(float value, GameUtil.TimeSlice timeSlice, GameObject parent_instance);
+
+	string GetTooltip(Klei.AI.Attribute master, AttributeInstance instance);
 }

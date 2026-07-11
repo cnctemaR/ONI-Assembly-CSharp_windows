@@ -24,9 +24,12 @@ public class ResearchType
 		this._recipe = new Recipe(id, num, (SimHashes)0, name, recipeDescription, 0);
 		this._recipe.SetFabricators(fabricators, fabricationTime);
 		this._recipe.SetIcon(Assets.GetSprite("research_type_icon"), color);
-		foreach (Recipe.Ingredient ingredient in fabricationIngredients)
+		if (fabricationIngredients != null)
 		{
-			this._recipe.AddIngredient(ingredient);
+			foreach (Recipe.Ingredient ingredient in fabricationIngredients)
+			{
+				this._recipe.AddIngredient(ingredient);
+			}
 		}
 		return gameObject;
 	}

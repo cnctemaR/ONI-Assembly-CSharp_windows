@@ -97,12 +97,12 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_generatormanual_kanim") };
 		this.smi = new ManualGenerator.GeneratePowerSM.Instance(this);
 		this.smi.StartSM();
-		Game.Instance.emergySim.AddManualGenerator(this);
+		Game.Instance.energySim.AddManualGenerator(this);
 	}
 
 	protected override void OnCleanUp()
 	{
-		Game.Instance.emergySim.RemoveManualGenerator(this);
+		Game.Instance.energySim.RemoveManualGenerator(this);
 		this.smi.StopSM("cleanup");
 		base.OnCleanUp();
 	}
@@ -170,7 +170,6 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 	{
 		base.OnStartWork(worker);
 		this.operational.SetActive(true, false);
-		worker.GetComponent<KPrefabID>().AddTag(GameTags.AllowSpeech);
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -194,7 +193,6 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 	protected override void OnStopWork(Worker worker)
 	{
 		base.OnStopWork(worker);
-		worker.GetComponent<KPrefabID>().RemoveTag(GameTags.AllowSpeech);
 		this.operational.SetActive(false, false);
 		if (this.chore != null && this.generator.PercentFull >= this.batteryRefillPercent)
 		{

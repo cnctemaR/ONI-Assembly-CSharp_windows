@@ -13,6 +13,18 @@ namespace Klei.AI
 			return this.levels.GetEnumerator();
 		}
 
+		public AttributeLevels.LevelSaveLoad[] SaveLoadLevels
+		{
+			get
+			{
+				return this.saveLoadLevels;
+			}
+			set
+			{
+				this.saveLoadLevels = value;
+			}
+		}
+
 		protected override void OnPrefabInit()
 		{
 			foreach (AttributeInstance attributeInstance in this.GetAttributes())
@@ -26,8 +38,20 @@ namespace Klei.AI
 			}
 		}
 
+		[OnSerializing]
+		public void OnSerializing()
+		{
+			this.saveLoadLevels = new AttributeLevels.LevelSaveLoad[this.levels.Count];
+			for (int i = 0; i < this.levels.Count; i++)
+			{
+				this.saveLoadLevels[i].attributeId = this.levels[i].attribute.Attribute.Id;
+				this.saveLoadLevels[i].experience = this.levels[i].experience;
+				this.saveLoadLevels[i].level = this.levels[i].level;
+			}
+		}
+
 		[OnDeserialized]
-		private void OnDeserialized()
+		public void OnDeserialized()
 		{
 			foreach (AttributeLevels.LevelSaveLoad levelSaveLoad in this.saveLoadLevels)
 			{
@@ -119,25 +143,13 @@ namespace Klei.AI
 			return num;
 		}
 
-		[OnSerializing]
-		internal void OnSerializing()
-		{
-			this.saveLoadLevels = new AttributeLevels.LevelSaveLoad[this.levels.Count];
-			for (int i = 0; i < this.levels.Count; i++)
-			{
-				this.saveLoadLevels[i].attributeId = this.levels[i].attribute.Attribute.Id;
-				this.saveLoadLevels[i].experience = this.levels[i].experience;
-				this.saveLoadLevels[i].level = this.levels[i].level;
-			}
-		}
-
 		private List<AttributeLevel> levels = new List<AttributeLevel>();
 
 		[Serialize]
 		private AttributeLevels.LevelSaveLoad[] saveLoadLevels = new AttributeLevels.LevelSaveLoad[0];
 
 		[Serializable]
-		private struct LevelSaveLoad
+		public struct LevelSaveLoad
 		{
 			public string attributeId;
 

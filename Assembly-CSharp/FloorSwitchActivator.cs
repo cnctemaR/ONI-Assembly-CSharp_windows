@@ -26,7 +26,7 @@ public class FloorSwitchActivator : KMonoBehaviour
 	private void OnCellChange()
 	{
 		int num = Grid.PosToCell(this);
-		this.partitionerEntry.UpdatePosition(num);
+		GameScenePartitioner.Instance.UpdatePosition(this.partitionerEntry, num);
 		if (Grid.IsValidCell(this.last_cell_occupied) && num != this.last_cell_occupied)
 		{
 			this.NotifyChanged(this.last_cell_occupied);
@@ -70,7 +70,7 @@ public class FloorSwitchActivator : KMonoBehaviour
 		{
 			return;
 		}
-		this.partitionerEntry.Release();
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		if (this.last_cell_occupied > -1)
 		{
@@ -84,7 +84,7 @@ public class FloorSwitchActivator : KMonoBehaviour
 
 	private bool registered;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 
 	private int last_cell_occupied = -1;
 }

@@ -468,12 +468,12 @@ public static class SimMessages
 		}
 		if (temperature < 0f || 10000f < temperature)
 		{
-			KCrashReporter.Assert(false, string.Format("Invalid cell modification: Cell={0}, EIdx={1}, T={2}, M={3}", new object[] { gameCell, elementIdx, temperature, mass }));
+			KCrashReporter.Assert(false, "Invalid temperature for cell modification T=" + temperature.ToString());
 			return;
 		}
 		if (temperature == 0f && mass > 0f && elementIdx >= 0)
 		{
-			KCrashReporter.Assert(false, string.Format("RESET TEMPERATURE: Invalid cell modification: Cell={0}, EIdx={1}, T={2}, M={3}", new object[] { gameCell, elementIdx, temperature, mass }));
+			KCrashReporter.Assert(false, string.Format("RESET TEMPERATURE: Invalid cell modification. Set temperature to zero with non-zero mass", new object[0]));
 			temperature = ElementLoader.elements[elementIdx].defaultValues.temperature;
 		}
 		SimMessages.ModifyCellMessage* ptr = stackalloc SimMessages.ModifyCellMessage[checked(1 * sizeof(SimMessages.ModifyCellMessage))];

@@ -17,7 +17,6 @@ public class ArcadeMachineWorkable : Workable, IWorkerPrioritizable
 	protected override void OnCompleteWork(Worker worker)
 	{
 		Effects component = worker.GetComponent<Effects>();
-		component.Add("TookABreak", true);
 		if (!string.IsNullOrEmpty(ArcadeMachineWorkable.trackingEffect))
 		{
 			component.Add(ArcadeMachineWorkable.trackingEffect, true);

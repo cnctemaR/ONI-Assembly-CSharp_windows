@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Klei.CustomSettings;
 using ProcGen;
 using ProcGenGame;
 using STRINGS;
@@ -374,14 +375,7 @@ public class OfflineWorldGen : KMonoBehaviour
 	private void DoWordGenInitialise()
 	{
 		WorldGen.LoadSettings();
-		if (DebugHandler.enabled && CustomGameSettings.Instance.is_custom_game)
-		{
-			WorldGen.Settings.SetWorld(CustomGameSettings.Instance.GetCurrentQualitySetting("World").id, WorldGen.GetPath());
-		}
-		else
-		{
-			WorldGen.Settings.SetDefaultWorld(WorldGen.GetPath());
-		}
+		WorldGen.Settings.SetWorld(CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id, WorldGen.GetPath());
 		Vector2I worldsize = WorldGen.Settings.GetWorld().worldsize;
 		GridSettings.Reset(worldsize.x, worldsize.y);
 		if (KPlayerPrefs.GetInt(OfflineWorldGen.USE_WORLD_SEED_KEY, 0) != 0)

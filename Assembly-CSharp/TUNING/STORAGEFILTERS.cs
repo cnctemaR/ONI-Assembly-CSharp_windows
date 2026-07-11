@@ -40,5 +40,7 @@ namespace TUNING
 		};
 
 		public static List<Tag> LIQUIDS = new List<Tag> { GameTags.Liquid };
+
+		public static List<Tag> GASES = new List<Tag> { GameTags.Gas };
 	}
 }

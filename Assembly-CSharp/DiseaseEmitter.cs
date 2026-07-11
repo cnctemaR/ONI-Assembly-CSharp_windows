@@ -9,7 +9,7 @@ public class DiseaseEmitter : SimComponent
 		this.diseaseIdx = Db.Get().Diseases.GetIndex(this.diseaseID);
 	}
 
-	protected override void OnSimRegister(HandleVector<Game.ComplexCallbackInfo>.Handle cb_handle)
+	protected override void OnSimRegister(HandleVector<Game.ComplexCallbackInfo<int>>.Handle cb_handle)
 	{
 		SimMessages.AddDiseaseEmitter(cb_handle.index);
 	}

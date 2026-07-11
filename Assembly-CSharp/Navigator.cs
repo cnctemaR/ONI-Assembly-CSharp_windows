@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
@@ -57,7 +56,6 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		base.Subscribe(-1503271301, new Action<object>(this.OnSelectObject));
 		base.Subscribe(856640610, new Action<object>(this.OnStore));
-		this.maxUnderwaterTravelCost = Db.Get().Attributes.MaxUnderwaterTravelCost.Lookup(this);
 		if (this.updateProber)
 		{
 			SimAndRenderScheduler.instance.Add(this, false);
@@ -116,7 +114,6 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		this.transitionDriver.EndTransition();
 		base.smi.GoTo(base.smi.sm.moving);
 		Navigator.ActiveTransition activeTransition = new Navigator.ActiveTransition(transition, this.defaultSpeed);
-		base.Trigger(-897197316, activeTransition);
 		this.transitionDriver.BeginTransition(this, activeTransition);
 	}
 
@@ -395,21 +392,13 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	public PathFinderAbilities GetCurrentAbilities()
 	{
-		PathFinderAbilities pathFinderAbilities = this.abilities;
-		if (this.maxUnderwaterTravelCost != null)
-		{
-			pathFinderAbilities.maxUnderwaterCost = (int)this.maxUnderwaterTravelCost.GetTotalValue();
-		}
-		else
-		{
-			pathFinderAbilities.maxUnderwaterCost = int.MaxValue;
-		}
-		int num = Grid.PosToCell(this);
-		if (PathFinder.IsSubmerged(num))
-		{
-			pathFinderAbilities.maxUnderwaterCost = int.MaxValue;
-		}
-		return pathFinderAbilities;
+		this.abilities.Refresh();
+		return this.abilities;
+	}
+
+	public void SetAbilities(PathFinderAbilities abilities)
+	{
+		this.abilities = abilities;
 	}
 
 	public bool CanReach(IApproachable approachable)
@@ -432,7 +421,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	public bool CanReach(int cell)
 	{
-		return this.GetNavigationCost(cell) != PathProber.InvalidCost;
+		return this.GetNavigationCost(cell) != -1;
 	}
 
 	public int GetNavigationCost(int cell)
@@ -441,21 +430,26 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		{
 			return this.PathProber.GetCost(cell);
 		}
-		return PathProber.InvalidCost;
+		return -1;
+	}
+
+	public int GetNavigationCostIgnoreProberOffset(int cell, CellOffset[] offsets)
+	{
+		return this.PathProber.GetNavigationCostIgnoreProberOffset(cell, offsets);
 	}
 
 	public int GetNavigationCost(int cell, CellOffset[] offsets)
 	{
-		int num = PathProber.InvalidCost;
+		int num = -1;
 		foreach (CellOffset cellOffset in offsets)
 		{
 			int num2 = Grid.OffsetCell(cell, cellOffset);
 			int navigationCost = this.GetNavigationCost(num2);
-			if (num == PathProber.InvalidCost)
+			if (num == -1)
 			{
 				num = navigationCost;
 			}
-			else if (navigationCost != PathProber.InvalidCost && navigationCost < num)
+			else if (navigationCost != -1 && navigationCost < num)
 			{
 				num = navigationCost;
 			}
@@ -473,16 +467,6 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		int num = Grid.PosToCell(this);
 		PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(num, this.CurrentNavType, this.flags);
 		PathFinder.Run(this.NavGrid, this.GetCurrentAbilities(), potentialPath, query);
-	}
-
-	public void AddMask(NavMask mask)
-	{
-		this.abilities.AddMask(mask);
-	}
-
-	public void RemoveMask(NavMask mask)
-	{
-		this.abilities.RemoveMask(mask);
 	}
 
 	public void SetFlags(PathFinder.PotentialPath.Flags new_flags)
@@ -515,13 +499,11 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	public PathFinder.PotentialPath.Flags flags;
 
-	private AttributeInstance maxUnderwaterTravelCost;
-
 	private LoggerFS log;
 
 	public Grid.SceneLayer sceneLayer = Grid.SceneLayer.Move;
 
-	private PathFinderAbilities abilities = default(PathFinderAbilities);
+	private PathFinderAbilities abilities;
 
 	[MyCmpReq]
 	private KSelectable selectable;
@@ -594,14 +576,13 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 			this.moving.Enter(delegate(Navigator.StatesInstance smi)
 			{
 				smi.Trigger(1027377649, GameHashes.ObjectMovementWakeUp);
-			}).ToggleTag(GameTags.AllowSpeech).Update("UpdateNavigator", delegate(Navigator.StatesInstance smi, float dt)
+			}).Update("UpdateNavigator", delegate(Navigator.StatesInstance smi, float dt)
 			{
 				smi.master.Sim33ms(dt);
-			}, UpdateRate.SIM_33ms, true)
-				.Exit(delegate(Navigator.StatesInstance smi)
-				{
-					smi.Trigger(1027377649, GameHashes.ObjectMovementSleep);
-				});
+			}, UpdateRate.SIM_33ms, true).Exit(delegate(Navigator.StatesInstance smi)
+			{
+				smi.Trigger(1027377649, GameHashes.ObjectMovementSleep);
+			});
 			this.arrived.TriggerOnEnter(GameHashes.DestinationReached, null).GoTo(this.stopped);
 			this.failed.TriggerOnEnter(GameHashes.NavigationFailed, null).GoTo(this.stopped);
 			this.stopped.DoNothing();

@@ -23,10 +23,20 @@ public class ChoreConsumerState
 		this.storage = consumer.GetComponent<Storage>();
 		this.consumableConsumer = consumer.GetComponent<ConsumableConsumer>();
 		this.worker = consumer.GetComponent<Worker>();
+		if (this.schedulable != null)
+		{
+			int blockIdx = Schedule.GetBlockIdx();
+			this.scheduleBlock = this.schedulable.GetSchedule().GetBlock(blockIdx);
+		}
 	}
 
 	public void Refresh()
 	{
+		if (this.schedulable != null)
+		{
+			int blockIdx = Schedule.GetBlockIdx();
+			this.scheduleBlock = this.schedulable.GetSchedule().GetBlock(blockIdx);
+		}
 	}
 
 	public KPrefabID prefabid;
@@ -62,4 +72,6 @@ public class ChoreConsumerState
 	public SolidTransferArm solidTransferArm;
 
 	public bool hasSolidTransferArm;
+
+	public ScheduleBlock scheduleBlock;
 }

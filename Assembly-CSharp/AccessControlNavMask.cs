@@ -1,18 +1,19 @@
 ﻿using System;
 using UnityEngine;
 
-public class AccessControlNavMask : NavMask
+internal struct AccessControlNavMask
 {
-	public AccessControlNavMask(GameObject agent)
+	public AccessControlNavMask(Navigator navigator)
 	{
-		this.agent = agent.GetComponent<Navigator>();
+		this.transitionVoidOffsets = new CellOffset[navigator.NavGrid.transitions.Length][];
+		for (int i = 0; i < this.transitionVoidOffsets.Length; i++)
+		{
+			this.transitionVoidOffsets[i] = navigator.NavGrid.transitions[i].voidOffsets;
+		}
 	}
 
-	private bool CanTraverse(int cell, int from_cell)
+	private bool CanTraverse(Navigator agent, int cell, int from_cell)
 	{
-		if (!Grid.HasAccessDoor[cell])
-		{
-		}
 		if (!Grid.HasAccessDoor[cell])
 		{
 			return true;
@@ -27,7 +28,7 @@ public class AccessControlNavMask : NavMask
 		{
 			return true;
 		}
-		AccessControl.Permission permission = component.GetPermission(this.agent.gameObject);
+		AccessControl.Permission permission = component.GetPermission(agent.gameObject);
 		if (permission == AccessControl.Permission.Neither)
 		{
 			return false;
@@ -52,17 +53,16 @@ public class AccessControlNavMask : NavMask
 		return false;
 	}
 
-	public override bool IsTraversable(PathFinder.PotentialPath path, int from_cell, int cost, int transition_id, PathFinderAbilities abilities)
+	public bool IsTraversable(Navigator agent, PathFinder.PotentialPath path, int from_cell, int cost, int transition_id)
 	{
-		if (!this.CanTraverse(path.cell, from_cell))
+		if (!this.CanTraverse(agent, path.cell, from_cell))
 		{
 			return false;
 		}
-		NavGrid.Transition transition = this.agent.NavGrid.transitions[transition_id];
-		for (int i = 0; i < transition.voidOffsets.Length; i++)
+		foreach (CellOffset cellOffset in this.transitionVoidOffsets[transition_id])
 		{
-			int num = Grid.OffsetCell(from_cell, transition.voidOffsets[i]);
-			if (!this.CanTraverse(num, from_cell))
+			int num = Grid.OffsetCell(from_cell, cellOffset);
+			if (!this.CanTraverse(agent, num, from_cell))
 			{
 				return false;
 			}
@@ -70,5 +70,5 @@ public class AccessControlNavMask : NavMask
 		return true;
 	}
 
-	private Navigator agent;
+	private CellOffset[][] transitionVoidOffsets;
 }

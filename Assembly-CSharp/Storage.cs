@@ -98,6 +98,12 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		{
 			component.SetSymbolVisiblity("sweep", this.onlyFetchMarkedItems);
 		}
+		Prioritizable component2 = base.GetComponent<Prioritizable>();
+		if (component2 != null)
+		{
+			Prioritizable prioritizable = component2;
+			prioritizable.onPriorityChanged = (Action<PrioritySetting>)Delegate.Combine(prioritizable.onPriorityChanged, new Action<PrioritySetting>(this.OnPriorityChanged));
+		}
 	}
 
 	public GameObject Store(GameObject go, bool hide_popups = false, bool block_events = false, bool do_disease_transfer = true, bool is_deserializing = false)
@@ -488,24 +494,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			if (!list.Contains(gameObject.PrefabID()))
 			{
 				list.Add(gameObject.PrefabID());
-			}
-		}
-		return list;
-	}
-
-	public List<GameObject> Find(IList<Tag> tags)
-	{
-		if (tags == null || tags.Count == 0)
-		{
-			return null;
-		}
-		List<GameObject> list = new List<GameObject>();
-		for (int i = 0; i < this.items.Count; i++)
-		{
-			GameObject gameObject = this.items[i];
-			if (gameObject.HasTags(tags))
-			{
-				list.Add(gameObject);
 			}
 		}
 		return list;
@@ -948,6 +936,14 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		if (component != null)
 		{
 			this.SetOnlyFetchMarkedItems(component.onlyFetchMarkedItems);
+		}
+	}
+
+	private void OnPriorityChanged(PrioritySetting priority)
+	{
+		foreach (GameObject gameObject in this.items)
+		{
+			EventSystem.Trigger(gameObject, -1626373771, this);
 		}
 	}
 

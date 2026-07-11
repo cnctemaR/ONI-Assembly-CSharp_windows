@@ -219,7 +219,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Morale, MISC.NOTIFICATIONS.MORALE.NAME, MISC.NOTIFICATIONS.MORALE.MESSAGEBODY, MISC.NOTIFICATIONS.MORALE.TOOLTIP);
 			break;
 		case Tutorial.TutorialMessages.TM_Schedule:
-			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Schedule, MISC.NOTIFICATIONS.SCHEDULE.NAME, MISC.NOTIFICATIONS.SCHEDULE.MESSAGEBODY, MISC.NOTIFICATIONS.SCHEDULE.TOOLTIP);
+			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Schedule, MISC.NOTIFICATIONS.SCHEDULEMESSAGE.NAME, MISC.NOTIFICATIONS.SCHEDULEMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.SCHEDULEMESSAGE.TOOLTIP);
 			break;
 		}
 		this.tutorialMessagesRemaining.Remove(tm);

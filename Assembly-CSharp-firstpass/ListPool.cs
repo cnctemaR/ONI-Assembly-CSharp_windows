@@ -21,6 +21,11 @@ public static class ListPool<ObjectType, PoolIdentifier>
 		ListPool<ObjectType, PoolIdentifier>.pool.Free(list);
 	}
 
+	public static ContainerPool GetPool()
+	{
+		return ListPool<ObjectType, PoolIdentifier>.pool;
+	}
+
 	private static ContainerPool<ListPool<ObjectType, PoolIdentifier>.PooledList, PoolIdentifier> pool = new ContainerPool<ListPool<ObjectType, PoolIdentifier>.PooledList, PoolIdentifier>();
 
 	public class PooledList : List<ObjectType>

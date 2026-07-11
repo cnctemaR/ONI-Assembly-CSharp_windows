@@ -3,7 +3,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-public class StandardAmountDisplayer : IAmountDisplayer, IAttributeFormatter
+public class StandardAmountDisplayer : IAmountDisplayer
 {
 	public StandardAmountDisplayer(GameUtil.UnitClass unitClass, GameUtil.TimeSlice deltaTimeSlice, StandardAttributeFormatter formatter = null)
 	{
@@ -14,6 +14,14 @@ public class StandardAmountDisplayer : IAmountDisplayer, IAttributeFormatter
 		else
 		{
 			this.formatter = new StandardAttributeFormatter(unitClass, deltaTimeSlice);
+		}
+	}
+
+	public IAttributeFormatter Formatter
+	{
+		get
+		{
+			return this.formatter;
 		}
 	}
 
@@ -46,30 +54,22 @@ public class StandardAmountDisplayer : IAmountDisplayer, IAttributeFormatter
 		return string.Format("{0}: {1}", master.Name, this.GetValueString(master, instance));
 	}
 
-	public virtual string GetTooltipDescription(Amount master, AmountInstance instance)
-	{
-		return string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null));
-	}
-
 	public virtual string GetTooltip(Amount master, AmountInstance instance)
 	{
-		string text = this.GetTooltipDescription(master, instance);
-		text += "\n";
+		string text = master.Name;
+		text = text + UI.HORIZONTAL_BR_RULE + string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null));
+		text += "\n\n";
 		if (this.formatter.DeltaTimeSlice == GameUtil.TimeSlice.PerCycle)
 		{
-			text += "\n";
 			text += string.Format(UI.CHANGEPERCYCLE, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerCycle, null));
-			text += "\n";
 		}
 		else if (this.formatter.DeltaTimeSlice == GameUtil.TimeSlice.PerSecond)
 		{
-			text += "\n";
 			text += string.Format(UI.CHANGEPERSECOND, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerSecond, null));
-			text += "\n";
 		}
 		foreach (AttributeModifier attributeModifier in instance.deltaAttribute.Modifiers)
 		{
-			text = text + "\n" + string.Format("{0}: {1}", attributeModifier.GetDescription(), this.formatter.GetFormattedModifier(attributeModifier, instance.gameObject));
+			text = text + "\n" + string.Format(UI.MODIFIER_ITEM_TEMPLATE, attributeModifier.GetDescription(), this.formatter.GetFormattedModifier(attributeModifier, instance.gameObject));
 		}
 		return text;
 	}

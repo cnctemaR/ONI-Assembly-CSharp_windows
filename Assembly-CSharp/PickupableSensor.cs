@@ -12,7 +12,7 @@ public class PickupableSensor : Sensor
 	public override void Update()
 	{
 		GlobalChoreProvider.Instance.UpdateFetches(this.pathProber);
-		FetchManagerUpdater.UpdatePickups(this.pathProber, FetchManager.Instance.pickupables, this.worker);
+		Game.Instance.fetchManager.UpdatePickups(this.pathProber, this.worker);
 	}
 
 	private PathProber pathProber;

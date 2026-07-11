@@ -77,7 +77,7 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		this.pressureMeter = new MeterController(component, "meter_target", "meter", Meter.Offset.Infront, new Vector3(0f, 0f, 0f), null);
+		this.pressureMeter = new MeterController(component, "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new Vector3(0f, 0f, 0f), null);
 		this.smi = new OilWellCap.StatesInstance(this);
 		this.smi.StartSM();
 		this.UpdatePressurePercent();

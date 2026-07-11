@@ -82,6 +82,7 @@ public class Substance
 				this.SetTexture(this.propertyBlock, "_HeightTex2");
 				this.propertyBlock.SetFloat("_Frequency", this.material.GetFloat("_Frequency"));
 				this.propertyBlock.SetColor("_ShineColour", this.material.GetColor("_ShineColour"));
+				this.propertyBlock.SetColor("_ColourTint", this.material.GetColor("_ColourTint"));
 			}
 		}
 	}

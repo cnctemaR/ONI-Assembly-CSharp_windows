@@ -65,27 +65,6 @@ public class Tinkerable : Workable
 		return tinkerable;
 	}
 
-	public static Tinkerable MakeMachineTinkerable(GameObject prefab)
-	{
-		RoomTracker roomTracker = prefab.AddOrGet<RoomTracker>();
-		roomTracker.requirement = RoomTracker.Requirement.TrackingOnly;
-		Tinkerable tinkerable = prefab.AddOrGet<Tinkerable>();
-		tinkerable.tinkerMaterialTag = TagManager.Create("MachineParts");
-		tinkerable.tinkerMaterialAmount = 1f;
-		tinkerable.addedEffect = "MachineTinker";
-		tinkerable.requiredRolePerk = RoleManager.rolePerks.IncreaseMachineryMedium.id;
-		tinkerable.SetWorkTime(15f);
-		tinkerable.workerStatusItem = Db.Get().DuplicantStatusItems.Tinkering;
-		tinkerable.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
-		tinkerable.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
-		tinkerable.choreTypeTinker = Db.Get().ChoreTypes.MachineTinker.IdHash;
-		tinkerable.choreTypeFetch = Db.Get().ChoreTypes.MachineFetch.IdHash;
-		tinkerable.shouldShowRolePerkStatusItem = false;
-		prefab.AddOrGet<Storage>();
-		prefab.AddOrGet<Effects>();
-		return tinkerable;
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

@@ -13,12 +13,12 @@ public struct StructureTemperatureData
 		this.overriddenExtents = default(Extents);
 		this.simHandle = -1;
 		this.primaryElement = go.GetComponent<PrimaryElement>();
-		this.selectable = go.GetComponent<KSelectable>();
 		this.building = go.GetComponent<Building>();
 		this.operational = go.GetComponent<Operational>();
 		this.pendingEnergyModifications = 0f;
 		this.maxTemperature = 10000f;
 		this.energySourcesKW = null;
+		this.isActiveStatusItemSet = false;
 	}
 
 	public float TotalEnergyProducedKW
@@ -101,23 +101,23 @@ public struct StructureTemperatureData
 
 	public bool enabled;
 
+	public bool isActiveStatusItemSet;
+
+	public bool overrideExtents;
+
 	public int simHandle;
 
 	public PrimaryElement primaryElement;
-
-	public KSelectable selectable;
 
 	public Building building;
 
 	public Operational operational;
 
-	public float pendingEnergyModifications;
-
 	public List<StructureTemperatureData.EnergySource> energySourcesKW;
 
-	public float maxTemperature;
+	public float pendingEnergyModifications;
 
-	public bool overrideExtents;
+	public float maxTemperature;
 
 	public Extents overriddenExtents;
 

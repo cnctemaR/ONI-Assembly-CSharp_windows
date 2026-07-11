@@ -39,10 +39,9 @@ public class Uncoverable : KMonoBehaviour
 	private void OnSolidChanged(object data)
 	{
 		bool flag = this.IsAnyCellShowing();
-		if (flag && !this.hasBeenUncovered && this.partitionerEntry != null)
+		if (flag && !this.hasBeenUncovered && this.partitionerEntry.IsValid())
 		{
-			this.partitionerEntry.Release();
-			this.partitionerEntry = null;
+			GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 			this.hasBeenUncovered = true;
 			base.GetComponent<KSelectable>().IsSelectable = true;
 			Notification notification = new Notification("Buried Object Discovered!", NotificationType.Good, HashedString.Invalid, new Func<List<Notification>, object, string>(Uncoverable.OnNotificationToolTip), this, true, 0f, null, null);
@@ -58,10 +57,8 @@ public class Uncoverable : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-		}
+		base.OnCleanUp();
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 	}
 
 	[MyCmpReq]
@@ -70,5 +67,5 @@ public class Uncoverable : KMonoBehaviour
 	[Serialize]
 	private bool hasBeenUncovered;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 }

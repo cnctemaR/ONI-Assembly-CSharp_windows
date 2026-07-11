@@ -166,6 +166,8 @@ public static class Sim
 
 	private const int LifeUpdateInterval = 1;
 
+	public const byte ClearSkyGridValue = 253;
+
 	public const int PACKING_ALIGNMENT = 4;
 
 	public delegate int GAME_MessageHandler(int message_id, IntPtr data);
@@ -265,8 +267,9 @@ public static class Sim
 			LiquidImpermeable,
 			SolidImpermeable = 4,
 			Unbreakable = 8,
-			Transparent = 16,
-			Foundation = 32
+			Foundation = 16,
+			Transparent = 32,
+			Opaque = 64
 		}
 	}
 
@@ -302,6 +305,8 @@ public static class Sim
 			this.highTemp = e.highTemp;
 			this.highTempTransitionOreID = e.highTempTransitionOreID;
 			this.highTempTransitionOreMassConversion = e.highTempTransitionOreMassConversion;
+			this.lowTempTransitionOreID = e.lowTempTransitionOreID;
+			this.lowTempTransitionOreMassConversion = e.lowTempTransitionOreMassConversion;
 			this.sublimateIndex = (sbyte)elements.FindIndex((global::Element ele) => ele.id == e.sublimateId);
 			this.convertIndex = (sbyte)elements.FindIndex((global::Element ele) => ele.id == e.convertId);
 			this.pack0 = 0;
@@ -341,6 +346,8 @@ public static class Sim
 			writer.Write(this.lowTemp);
 			writer.Write(this.highTemp);
 			writer.Write(this.strength);
+			writer.Write((int)this.lowTempTransitionOreID);
+			writer.Write(this.lowTempTransitionOreMassConversion);
 			writer.Write((int)this.highTempTransitionOreID);
 			writer.Write(this.highTempTransitionOreMassConversion);
 			writer.Write(this.sublimateIndex);
@@ -390,6 +397,10 @@ public static class Sim
 		public float highTemp;
 
 		public float strength;
+
+		public SimHashes lowTempTransitionOreID;
+
+		public float lowTempTransitionOreMassConversion;
 
 		public SimHashes highTempTransitionOreID;
 

@@ -6,11 +6,6 @@ public class KAnimBatchManager
 {
 	public int dirtyBatchLastFrame { get; private set; }
 
-	public Bounds GetCurrentActiveArea()
-	{
-		return this.currentActiveArea;
-	}
-
 	public static KAnimBatchManager instance
 	{
 		get
@@ -26,10 +21,6 @@ public class KAnimBatchManager
 
 	public static KAnimBatchManager Instance()
 	{
-		if (!SystemInfo.SupportsTextureFormat(TextureFormat.RGBAFloat))
-		{
-			global::Debug.LogError("Machine does not support RGBAFloat32", null);
-		}
 		return KAnimBatchManager.instance;
 	}
 
@@ -59,6 +50,8 @@ public class KAnimBatchManager
 				}
 			}
 			KAnimBatchManager.instance.batchSets.Clear();
+			KAnimBatchManager.instance.culledBatchSetInfos.Clear();
+			KAnimBatchManager.instance.uiBatchSets.Clear();
 			KAnimBatchManager.instance.activeBatchSets.Clear();
 			KAnimBatchManager.instance.dirtyBatchLastFrame = 0;
 			KAnimBatchGroup.FinalizeTextureCache();
@@ -124,38 +117,60 @@ public class KAnimBatchManager
 		{
 			batchSet = new BatchSet(this.GetBatchGroup(new BatchGroupKey(batchKey.groupID)), batchKey, vector2I);
 			this.batchSets[batchKey] = batchSet;
+			if (batchSet.key.materialType == KAnimBatchGroup.MaterialType.UI)
+			{
+				this.uiBatchSets.Add(new KAnimBatchManager.BatchSetInfo
+				{
+					batchSet = batchSet,
+					isActive = false,
+					spatialIdx = vector2I
+				});
+			}
+			else
+			{
+				this.culledBatchSetInfos.Add(new KAnimBatchManager.BatchSetInfo
+				{
+					batchSet = batchSet,
+					isActive = false,
+					spatialIdx = vector2I
+				});
+			}
 		}
 		batchSet.Add(controller);
 	}
 
-	private void AddToActiveBatchSet(BatchSet bs)
-	{
-		this.activeBatchSets.Add(bs);
-		bs.SetActive(true);
-	}
-
-	private void AddToInactiveBatchSet(BatchSet bs)
-	{
-		this.activeBatchSets.Remove(bs);
-		bs.SetActive(false);
-	}
-
 	public void UpdateActiveArea(Vector2I vis_chunk_min, Vector2I vis_chunk_max)
 	{
-		this.currentActiveArea.SetMinMax(new Vector3((float)vis_chunk_min.x, (float)vis_chunk_min.y), new Vector3((float)vis_chunk_max.x, (float)vis_chunk_max.y));
-		foreach (KeyValuePair<BatchKey, BatchSet> keyValuePair in this.batchSets)
+		this.activeBatchSets.Clear();
+		for (int i = 0; i < this.uiBatchSets.Count; i++)
 		{
-			BatchSet value = keyValuePair.Value;
-			if (value.key.materialType == KAnimBatchGroup.MaterialType.UI || (value.batchCount > 0 && this.currentActiveArea.Intersects(value.bounds)))
+			KAnimBatchManager.BatchSetInfo batchSetInfo = this.uiBatchSets[i];
+			this.activeBatchSets.Add(batchSetInfo.batchSet);
+			if (!batchSetInfo.isActive)
 			{
-				if (!value.active)
+				batchSetInfo.isActive = true;
+				batchSetInfo.batchSet.SetActive(true);
+				this.uiBatchSets[i] = batchSetInfo;
+			}
+		}
+		for (int j = 0; j < this.culledBatchSetInfos.Count; j++)
+		{
+			KAnimBatchManager.BatchSetInfo batchSetInfo2 = this.culledBatchSetInfos[j];
+			if (batchSetInfo2.spatialIdx.x >= vis_chunk_min.x && batchSetInfo2.spatialIdx.x <= vis_chunk_max.x && batchSetInfo2.spatialIdx.y >= vis_chunk_min.y && batchSetInfo2.spatialIdx.y <= vis_chunk_max.y)
+			{
+				this.activeBatchSets.Add(batchSetInfo2.batchSet);
+				if (!batchSetInfo2.isActive)
 				{
-					this.AddToActiveBatchSet(value);
+					batchSetInfo2.isActive = true;
+					this.culledBatchSetInfos[j] = batchSetInfo2;
+					batchSetInfo2.batchSet.SetActive(true);
 				}
 			}
-			else if (value.active)
+			else if (batchSetInfo2.isActive)
 			{
-				this.AddToInactiveBatchSet(value);
+				batchSetInfo2.isActive = false;
+				this.culledBatchSetInfos[j] = batchSetInfo2;
+				batchSetInfo2.batchSet.SetActive(false);
 			}
 		}
 	}
@@ -184,21 +199,18 @@ public class KAnimBatchManager
 		{
 			DebugUtil.Assert(batchSet != null, "Assert!");
 			DebugUtil.Assert(batchSet.group != null, "Assert!");
-			if (batchSet.active)
+			Mesh mesh = batchSet.group.mesh;
+			for (int i = 0; i < batchSet.batchCount; i++)
 			{
-				Mesh mesh = batchSet.group.mesh;
-				for (int i = 0; i < batchSet.batchCount; i++)
+				KAnimBatch batch = batchSet.GetBatch(i);
+				if (batch.size != 0 && batch.active)
 				{
-					KAnimBatch batch = batchSet.GetBatch(i);
-					if (batch.size != 0 && batch.active)
+					if (batch.materialType != KAnimBatchGroup.MaterialType.UI)
 					{
-						if (batch.materialType != KAnimBatchGroup.MaterialType.UI)
-						{
-							Vector3 zero = Vector3.zero;
-							zero.z = batch.position.z;
-							int layer = batch.layer;
-							Graphics.DrawMesh(mesh, zero, Quaternion.identity, batchSet.group.GetMaterial(batch.materialType), layer, null, 0, batch.matProperties);
-						}
+						Vector3 zero = Vector3.zero;
+						zero.z = batch.position.z;
+						int layer = batch.layer;
+						Graphics.DrawMesh(mesh, zero, Quaternion.identity, batchSet.group.GetMaterial(batch.materialType), layer, null, 0, batch.matProperties);
 					}
 				}
 			}
@@ -222,15 +234,17 @@ public class KAnimBatchManager
 
 	private bool ready;
 
-	private Bounds currentActiveArea = default(Bounds);
-
 	private Dictionary<HashedString, KBatchGroupData> batchGroupData = new Dictionary<HashedString, KBatchGroupData>();
 
 	private Dictionary<BatchGroupKey, KAnimBatchGroup> batchGroups = new Dictionary<BatchGroupKey, KAnimBatchGroup>();
 
 	private Dictionary<BatchKey, BatchSet> batchSets = new Dictionary<BatchKey, BatchSet>();
 
-	private HashSet<BatchSet> activeBatchSets = new HashSet<BatchSet>();
+	private List<KAnimBatchManager.BatchSetInfo> culledBatchSetInfos = new List<KAnimBatchManager.BatchSetInfo>();
+
+	private List<KAnimBatchManager.BatchSetInfo> uiBatchSets = new List<KAnimBatchManager.BatchSetInfo>();
+
+	private List<BatchSet> activeBatchSets = new List<BatchSet>();
 
 	public int[] atlasNames = new int[]
 	{
@@ -247,4 +261,13 @@ public class KAnimBatchManager
 		Shader.PropertyToID("atlas10"),
 		Shader.PropertyToID("atlas11")
 	};
+
+	private struct BatchSetInfo
+	{
+		public BatchSet batchSet;
+
+		public Vector2I spatialIdx;
+
+		public bool isActive;
+	}
 }

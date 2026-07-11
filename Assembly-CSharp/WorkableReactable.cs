@@ -59,6 +59,11 @@ public class WorkableReactable : Reactable
 
 	public override void Update(float dt)
 	{
+		if (this.worker.workable == null)
+		{
+			base.End();
+			return;
+		}
 		if (this.worker.Work(dt))
 		{
 			this.worker.CompleteWork();

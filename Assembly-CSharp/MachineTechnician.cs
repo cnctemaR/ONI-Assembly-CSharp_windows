@@ -12,7 +12,7 @@ public class MachineTechnician : RoleConfig
 		base.roleGroup = "Technicals";
 		base.hat = Game.Instance.roleManager.GetHat(MachineTechnician.ID);
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Machinery };
-		base.perks = new RolePerk[] { RoleManager.rolePerks.IncreaseMachineryMedium };
+		base.perks = new RolePerk[] { RoleManager.rolePerks.IncreaseMachinerySmall };
 	}
 
 	public override void InitRequirements()

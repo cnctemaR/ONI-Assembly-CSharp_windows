@@ -28,7 +28,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		this.Sim200ms(0f);
 		base.SetWorkTime(10f);
 		this.RefreshDepthAvailable();
-		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_arrow", "meter_scale" });
+		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_arrow", "meter_scale" });
 		foreach (GameObject gameObject in base.GetComponent<Storage>().items)
 		{
 			if (!(gameObject == null))
@@ -354,20 +354,24 @@ public class LiquidPumpingStation : Workable, ISim200ms
 			this.ConsumeMass();
 		}
 
-		private void OnSimConsume(object data)
+		private void OnSimConsumeCallback(Sim.MassConsumedCallback mass_cb_info, object data)
 		{
-			Sim.MassConsumedCallback massConsumedCallback = (Sim.MassConsumedCallback)data;
+			((LiquidPumpingStation.WorkSession)data).OnSimConsume(mass_cb_info);
+		}
+
+		private void OnSimConsume(Sim.MassConsumedCallback mass_cb_info)
+		{
 			if (this.consumedAmount == 0f)
 			{
-				this.temperature = massConsumedCallback.temperature;
+				this.temperature = mass_cb_info.temperature;
 			}
 			else
 			{
-				this.temperature = GameUtil.GetFinalTemperature(this.temperature, this.consumedAmount, massConsumedCallback.temperature, massConsumedCallback.mass);
+				this.temperature = GameUtil.GetFinalTemperature(this.temperature, this.consumedAmount, mass_cb_info.temperature, mass_cb_info.mass);
 			}
-			this.consumedAmount += massConsumedCallback.mass;
-			this.lastTickAmount = massConsumedCallback.mass;
-			this.diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(this.diseaseInfo.idx, this.diseaseInfo.count, massConsumedCallback.diseaseIdx, massConsumedCallback.diseaseCount);
+			this.consumedAmount += mass_cb_info.mass;
+			this.lastTickAmount = mass_cb_info.mass;
+			this.diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(this.diseaseInfo.idx, this.diseaseInfo.count, mass_cb_info.diseaseIdx, mass_cb_info.diseaseCount);
 			if (this.consumedAmount >= this.amountToPickup)
 			{
 				this.amountPerTick = 0f;
@@ -382,7 +386,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 			{
 				float num = Mathf.Min(this.amountPerTick, this.amountToPickup - this.consumedAmount);
 				num = Mathf.Max(num, 1f);
-				HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimConsume), "LiquidPumpingStation"));
+				HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(this.OnSimConsumeCallback), this, "LiquidPumpingStation");
 				int num2 = Grid.OffsetCell(this.cell, new CellOffset(0, -PumpingStationGuide.GetDepthAvailable(this.cell, this.pump)));
 				SimMessages.ConsumeMass(num2, this.element, num, 3, handle.index);
 			}

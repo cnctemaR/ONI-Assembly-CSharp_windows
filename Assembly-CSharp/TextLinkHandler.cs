@@ -35,7 +35,7 @@ public class TextLinkHandler : MonoBehaviour, IPointerClickHandler, IPointerEnte
 			{
 				ManagementMenu.Instance.ToggleCodex();
 			}
-			(ManagementMenu.Instance.codexScreen as CodexScreen).ChangeArticle(text, true);
+			ManagementMenu.Instance.codexScreen.ChangeArticle(text, true);
 		}
 	}
 

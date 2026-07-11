@@ -47,7 +47,7 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor, IElemen
 
 	private void OnActiveChanged(object data)
 	{
-		this.simActive = (bool)data;
+		this.simActive = ((Operational)data).IsActive;
 		this.dirty = true;
 	}
 
@@ -104,10 +104,7 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor, IElemen
 		if (base.isSpawned && this.simHandle == -1)
 		{
 			this.simHandle = -2;
-			SimMessages.AddElementEmitter(float.MaxValue, Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object data)
-			{
-				BuildingElementEmitter.OnSimRegistered(this, data);
-			}, "BuildingElementEmitter")).index, -1, -1);
+			SimMessages.AddElementEmitter(float.MaxValue, Game.Instance.simComponentCallbackManager.Add(new Action<int, object>(BuildingElementEmitter.OnSimRegisteredCallback), this, "BuildingElementEmitter").index, -1, -1);
 		}
 	}
 
@@ -123,16 +120,20 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor, IElemen
 		}
 	}
 
-	private static void OnSimRegistered(BuildingElementEmitter instance, object data)
+	private static void OnSimRegisteredCallback(int handle, object data)
 	{
-		int num = (int)data;
-		if (instance != null)
+		((BuildingElementEmitter)data).OnSimRegistered(handle);
+	}
+
+	private void OnSimRegistered(int handle)
+	{
+		if (this != null)
 		{
-			instance.simHandle = num;
+			this.simHandle = handle;
 		}
 		else
 		{
-			SimMessages.RemoveElementEmitter(-1, num);
+			SimMessages.RemoveElementEmitter(-1, handle);
 		}
 	}
 

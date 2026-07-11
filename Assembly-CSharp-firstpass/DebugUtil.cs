@@ -13,18 +13,18 @@ public static class DebugUtil
 		}
 	}
 
-	public static void DevAssert(bool test, string message = "Assert!")
+	public static void DevAssert(bool test, string message0 = "Assert!", string message1 = "", string message2 = "")
 	{
 		if (!test)
 		{
 			if (Application.isEditor)
 			{
-				global::Debug.LogError(message, null);
+				global::Debug.LogError(message0 + message1 + message2, null);
 				global::Debug.Break();
 			}
 			else
 			{
-				global::Debug.LogWarning(message, null);
+				global::Debug.LogWarning(message0 + message1 + message2, null);
 			}
 		}
 	}

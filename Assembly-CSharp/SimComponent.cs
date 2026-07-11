@@ -4,7 +4,7 @@ using UnityEngine;
 
 public abstract class SimComponent : KMonoBehaviour, ISim200ms
 {
-	protected virtual void OnSimRegister(HandleVector<Game.ComplexCallbackInfo>.Handle cb_handle)
+	protected virtual void OnSimRegister(HandleVector<Game.ComplexCallbackInfo<int>>.Handle cb_handle)
 	{
 	}
 
@@ -81,11 +81,11 @@ public abstract class SimComponent : KMonoBehaviour, ISim200ms
 		{
 			this.simHandle = -2;
 			Action<int> static_unregister = this.GetStaticUnregister();
-			HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object data)
+			HandleVector<Game.ComplexCallbackInfo<int>>.Handle handle2 = Game.Instance.simComponentCallbackManager.Add(delegate(int handle, object data)
 			{
-				SimComponent.OnSimRegistered(this, data, static_unregister);
-			}, "SimComponent.SimRegister"));
-			this.OnSimRegister(handle);
+				SimComponent.OnSimRegistered(this, handle, static_unregister);
+			}, this, "SimComponent.SimRegister");
+			this.OnSimRegister(handle2);
 		}
 	}
 
@@ -98,17 +98,16 @@ public abstract class SimComponent : KMonoBehaviour, ISim200ms
 		this.simHandle = -1;
 	}
 
-	private static void OnSimRegistered(SimComponent instance, object data, Action<int> static_unregister)
+	private static void OnSimRegistered(SimComponent instance, int handle, Action<int> static_unregister)
 	{
-		int num = (int)data;
 		if (instance != null)
 		{
-			instance.simHandle = num;
+			instance.simHandle = handle;
 			instance.OnSimRegistered();
 		}
 		else
 		{
-			static_unregister(num);
+			static_unregister(handle);
 		}
 	}
 

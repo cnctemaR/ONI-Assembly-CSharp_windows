@@ -97,9 +97,9 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		this.OnOperationalChanged(null);
 		bool flag = base.GetComponent<PowerTransformer>();
-		this.meter = ((!flag) ? new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" }) : null);
+		this.meter = ((!flag) ? new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" }) : null);
 		Game.Instance.circuitManager.Connect(this);
-		Game.Instance.emergySim.AddBattery(this);
+		Game.Instance.energySim.AddBattery(this);
 	}
 
 	private void OnOperationalChanged(object data)
@@ -118,7 +118,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 
 	protected override void OnCleanUp()
 	{
-		Game.Instance.emergySim.RemoveBattery(this);
+		Game.Instance.energySim.RemoveBattery(this);
 		Game.Instance.circuitManager.Disconnect(this);
 		Components.Batteries.Remove(this);
 		base.OnCleanUp();

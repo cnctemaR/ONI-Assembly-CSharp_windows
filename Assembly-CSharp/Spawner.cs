@@ -7,7 +7,7 @@ public class Spawner : KMonoBehaviour, ISaveLoadable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		WorldGenSpawner.Instance.AddLegacySpawner(this.prefabTag, Grid.PosToCell(this));
+		SaveGame.Instance.worldGenSpawner.AddLegacySpawner(this.prefabTag, Grid.PosToCell(this));
 		Util.KDestroyGameObject(base.gameObject);
 	}
 

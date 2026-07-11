@@ -53,6 +53,14 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 		base.OnCleanUp();
 	}
 
+	public void Consume(Sim.MassConsumedCallback mass_consumed)
+	{
+		if (this.onSimConsume != null)
+		{
+			this.onSimConsume(mass_consumed);
+		}
+	}
+
 	public void Sim200ms(float dt)
 	{
 		if (!base.gameObject.HasTag(GameTags.Dead))
@@ -245,6 +253,8 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 	private AttributeInstance airConsumptionRate;
 
 	public CellOffset[] breathableCells;
+
+	public Action<Sim.MassConsumedCallback> onSimConsume;
 
 	private OxygenBreather.IGasProvider gasProvider;
 

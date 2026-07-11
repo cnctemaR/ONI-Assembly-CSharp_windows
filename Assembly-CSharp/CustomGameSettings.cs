@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Klei.CustomSettings;
 using KSerialization;
 using ProcGen;
 using ProcGenGame;
-using STRINGS;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class CustomGameSettings : KMonoBehaviour
@@ -17,6 +17,15 @@ public class CustomGameSettings : KMonoBehaviour
 		}
 	}
 
+	[OnDeserialized]
+	private void OnDeserialized()
+	{
+		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 6))
+		{
+			this.customGameMode = ((!this.is_custom_game) ? CustomGameSettings.CustomGameMode.Survival : CustomGameSettings.CustomGameMode.Custom);
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		CustomGameSettings.instance = this;
@@ -24,13 +33,29 @@ public class CustomGameSettings : KMonoBehaviour
 		this.AddSettingConfig(CustomGameSettingConfigs.Stress);
 		this.AddSettingConfig(CustomGameSettingConfigs.StressBreaks);
 		this.AddSettingConfig(CustomGameSettingConfigs.Morale);
+		this.AddSettingConfig(CustomGameSettingConfigs.CalorieBurn);
 		this.AddSettingConfig(CustomGameSettingConfigs.WorldgenSeed);
 		this.AddSettingConfig(CustomGameSettingConfigs.SandboxMode);
-		if (DebugHandler.enabled)
+		this.InitWorldGenOptions();
+		this.AddSettingConfig(CustomGameSettingConfigs.World);
+	}
+
+	public void SetSurvivalDefaults()
+	{
+		this.customGameMode = CustomGameSettings.CustomGameMode.Survival;
+		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.QualitySettings)
 		{
-			this.InitWorldGenOptions();
+			this.SetQualitySetting(keyValuePair.Value, keyValuePair.Value.default_level_id);
 		}
-		this.Reset();
+	}
+
+	public void SetNosweatDefaults()
+	{
+		this.customGameMode = CustomGameSettings.CustomGameMode.Nosweat;
+		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.QualitySettings)
+		{
+			this.SetQualitySetting(keyValuePair.Value, keyValuePair.Value.nosweat_default_level_id);
+		}
 	}
 
 	public SettingLevel CycleSettingLevel(ListSettingConfig config, int direction)
@@ -50,15 +75,27 @@ public class CustomGameSettings : KMonoBehaviour
 		this.CurrentQualityLevelsBySetting[config.id] = value;
 	}
 
+	public SettingLevel GetCurrentQualitySetting(SettingConfig setting)
+	{
+		return this.GetCurrentQualitySetting(setting.id);
+	}
+
 	public SettingLevel GetCurrentQualitySetting(string setting_id)
 	{
-		if (this.is_custom_game)
+		if (this.customGameMode == CustomGameSettings.CustomGameMode.Survival)
 		{
-			string text = null;
-			this.CurrentQualityLevelsBySetting.TryGetValue(setting_id, out text);
-			return this.QualitySettings[setting_id].GetLevel(text);
+			return this.QualitySettings[setting_id].GetLevel(this.QualitySettings[setting_id].default_level_id);
 		}
-		return this.QualitySettings[setting_id].GetLevel(this.QualitySettings[setting_id].default_level_id);
+		if (this.customGameMode == CustomGameSettings.CustomGameMode.Nosweat)
+		{
+			return this.QualitySettings[setting_id].GetLevel(this.QualitySettings[setting_id].nosweat_default_level_id);
+		}
+		if (!this.CurrentQualityLevelsBySetting.ContainsKey(setting_id))
+		{
+			this.CurrentQualityLevelsBySetting[setting_id] = this.QualitySettings[setting_id].default_level_id;
+		}
+		string text = this.CurrentQualityLevelsBySetting[setting_id];
+		return this.QualitySettings[setting_id].GetLevel(text);
 	}
 
 	public string GetSettingLevelLabel(string setting_id, string level_id)
@@ -111,19 +148,8 @@ public class CustomGameSettings : KMonoBehaviour
 			{
 				list.Add(new SettingLevel(keyValuePair.Key, keyValuePair.Value.name, keyValuePair.Value.description));
 			}
-			List<string> worldNames = WorldGen.Settings.GetWorldNames();
-			SettingConfig settingConfig = new ListSettingConfig("World", UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.WORLD_CHOICE.NAME, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.WORLD_CHOICE.TOOLTIP, list, worldNames[0]);
-			this.AddSettingConfig(settingConfig);
-		}
-	}
-
-	public void Reset()
-	{
-		this.is_custom_game = false;
-		this.CurrentQualityLevelsBySetting.Clear();
-		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.QualitySettings)
-		{
-			this.CurrentQualityLevelsBySetting.Add(keyValuePair.Value.id, keyValuePair.Value.default_level_id);
+			ListSettingConfig listSettingConfig = (ListSettingConfig)CustomGameSettingConfigs.World;
+			listSettingConfig.StompLevels(list, "worlds/Default", "worlds/Default");
 		}
 	}
 
@@ -141,6 +167,11 @@ public class CustomGameSettings : KMonoBehaviour
 	public List<CustomGameSettings.MetricSettingsData> GetSettingsForMetrics()
 	{
 		List<CustomGameSettings.MetricSettingsData> list = new List<CustomGameSettings.MetricSettingsData>();
+		list.Add(new CustomGameSettings.MetricSettingsData
+		{
+			Name = "CustomGameMode",
+			Value = this.customGameMode.ToString()
+		});
 		foreach (KeyValuePair<string, string> keyValuePair in this.CurrentQualityLevelsBySetting)
 		{
 			list.Add(new CustomGameSettings.MetricSettingsData
@@ -158,9 +189,19 @@ public class CustomGameSettings : KMonoBehaviour
 	public bool is_custom_game;
 
 	[Serialize]
+	public CustomGameSettings.CustomGameMode customGameMode;
+
+	[Serialize]
 	private Dictionary<string, string> CurrentQualityLevelsBySetting = new Dictionary<string, string>();
 
 	public Dictionary<string, SettingConfig> QualitySettings = new Dictionary<string, SettingConfig>();
+
+	public enum CustomGameMode
+	{
+		Survival,
+		Nosweat,
+		Custom = 255
+	}
 
 	public struct MetricSettingsData
 	{

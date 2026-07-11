@@ -74,11 +74,7 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 	private void OnCleanUpImmediate(HandleVector<int>.Handle h)
 	{
 		FallerComponent data = base.GetData(h);
-		if (data.partitionerEntry != null)
-		{
-			data.partitionerEntry.Release();
-			data.partitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref data.partitionerEntry);
 		if (data.cellChangedCB != null)
 		{
 			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(data.transformInstanceId, data.cellChangedCB);
@@ -101,10 +97,9 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 			});
 			HandleVector<int>.Handle handle = GameComps.Fallers.GetHandle(transform.gameObject);
 			FallerComponent data = GameComps.Fallers.GetData(handle);
-			if (data.partitionerEntry != null)
+			if (data.partitionerEntry.IsValid())
 			{
-				data.partitionerEntry.Release();
-				data.partitionerEntry = null;
+				GameScenePartitioner.Instance.Free(ref data.partitionerEntry);
 				GameComps.Fallers.SetData(handle, data);
 			}
 		}
@@ -119,11 +114,7 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 			FallerComponent data = GameComps.Fallers.GetData(h);
 			int num = Grid.PosToCell(transform.GetPosition());
 			int num2 = Grid.CellBelow(num);
-			if (data.partitionerEntry != null)
-			{
-				data.partitionerEntry.Release();
-				data.partitionerEntry = null;
-			}
+			GameScenePartitioner.Instance.Free(ref data.partitionerEntry);
 			if (Grid.IsValidCell(num2))
 			{
 				data.solidChangedCB = delegate(object ev_data)

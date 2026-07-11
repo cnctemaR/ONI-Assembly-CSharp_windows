@@ -7,10 +7,12 @@ public class RoleAssignmentRequirements
 {
 	public RoleAssignmentRequirements(RoleManager roleManager)
 	{
+		this.HasExperience_AstronautTrainee = new PreviousRoleAssignmentRequirement(AstronautTrainee.ID);
 		this.HasExperience_JuniorMiner = new PreviousRoleAssignmentRequirement(JuniorMiner.ID);
 		this.HasExperience_Miner = new PreviousRoleAssignmentRequirement(Miner.ID);
 		this.HasExperience_JuniorResearcher = new PreviousRoleAssignmentRequirement(JuniorResearcher.ID);
 		this.HasExperience_Researcher = new PreviousRoleAssignmentRequirement(Researcher.ID);
+		this.HasExperience_SeniorResearcher = new PreviousRoleAssignmentRequirement(SeniorResearcher.ID);
 		this.HasExperience_JuniorBuilder = new PreviousRoleAssignmentRequirement(JuniorBuilder.ID);
 		this.HasExperience_Builder = new PreviousRoleAssignmentRequirement(Builder.ID);
 		this.HasExperience_JuniorFarmer = new PreviousRoleAssignmentRequirement("JuniorFarmer");
@@ -18,11 +20,13 @@ public class RoleAssignmentRequirements
 		this.HasExperience_Rancher = new PreviousRoleAssignmentRequirement("Rancher");
 		this.HasExperience_Hauler = new PreviousRoleAssignmentRequirement("Hauler");
 		this.HasExperience_MaterialsManager = new PreviousRoleAssignmentRequirement(MaterialsManager.ID);
+		this.HasExperience_SuitExpert = new PreviousRoleAssignmentRequirement("SuitExpert");
 		this.HasExperience_JuniorCook = new PreviousRoleAssignmentRequirement(JuniorCook.ID);
 		this.HasExperience_MachineTechnician = new PreviousRoleAssignmentRequirement(MachineTechnician.ID);
 		this.HasExperience_PowerTechnician = new PreviousRoleAssignmentRequirement("PowerTechnician");
 		this.HasExperience_JuniorArtist = new PreviousRoleAssignmentRequirement(JuniorArtist.ID);
 		this.HasExperience_Handyman = new PreviousRoleAssignmentRequirement(Handyman.ID);
+		this.HasExperience_MechatronicsEngineer = new PreviousRoleAssignmentRequirement("MechatronicEngineer");
 		this.HasColonyLeader = new RoleAssignmentRequirement("HasColonyLeader", UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.HAS_COLONY_LEADER.DESCRIPTION, (MinionResume resume) => true);
 		this.HasAttribute_Learning_Basic = new RoleAssignmentRequirement("HasAttribute_Learning_Basic", string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.HAS_ATTRIBUTE_LEARNING_BASIC.DESCRIPTION, 1), (MinionResume resume) => resume.GetAttributes().Get(Db.Get().Attributes.Learning).GetTotalValue() >= 1f);
 		this.HasAttribute_Cooking_Basic = new RoleAssignmentRequirement("HasAttribute_Cooking_Basic", string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.HAS_ATTRIBUTE_COOKING_BASIC.DESCRIPTION, 1), (MinionResume resume) => resume.GetAttributes().Get(Db.Get().Attributes.Cooking).GetTotalValue() >= 1f);
@@ -57,6 +61,8 @@ public class RoleAssignmentRequirements
 
 	public const int SKILL_LEVEL_MEDIUM = 3;
 
+	public PreviousRoleAssignmentRequirement HasExperience_AstronautTrainee;
+
 	public PreviousRoleAssignmentRequirement HasExperience_JuniorMiner;
 
 	public PreviousRoleAssignmentRequirement HasExperience_Miner;
@@ -64,6 +70,8 @@ public class RoleAssignmentRequirements
 	public PreviousRoleAssignmentRequirement HasExperience_JuniorResearcher;
 
 	public PreviousRoleAssignmentRequirement HasExperience_Researcher;
+
+	public PreviousRoleAssignmentRequirement HasExperience_SeniorResearcher;
 
 	public PreviousRoleAssignmentRequirement HasExperience_JuniorBuilder;
 
@@ -91,6 +99,8 @@ public class RoleAssignmentRequirements
 
 	public RoleAssignmentRequirement HasExperience_MaterialsManager;
 
+	public RoleAssignmentRequirement HasExperience_SuitExpert;
+
 	public PreviousRoleAssignmentRequirement HasExperience_Hauler;
 
 	public PreviousRoleAssignmentRequirement HasExperience_JuniorCook;
@@ -98,6 +108,8 @@ public class RoleAssignmentRequirements
 	public PreviousRoleAssignmentRequirement HasExperience_JuniorArtist;
 
 	public PreviousRoleAssignmentRequirement HasExperience_Handyman;
+
+	public PreviousRoleAssignmentRequirement HasExperience_MechatronicsEngineer;
 
 	public RoleAssignmentRequirement CompletedAnyOtherRole;
 

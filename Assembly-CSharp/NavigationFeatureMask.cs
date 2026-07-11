@@ -1,27 +1,23 @@
 ﻿using System;
-using UnityEngine;
 
-public class NavigationFeatureMask : NavMask
+internal struct NavigationFeatureMask
 {
-	public NavigationFeatureMask(GameObject agent)
+	public NavigationFeatureMask(Navigator navigator)
 	{
-		this.agent = agent.GetComponent<Navigator>();
 	}
 
-	public override bool IsTraversable(PathFinder.PotentialPath path, int from_cell, int cost, int transition_id, PathFinderAbilities abilities)
+	public bool IsTraversable(Navigator agent, PathFinder.PotentialPath path, int from_cell, int cost, int transition_id, PathFinderAbilities abilities)
 	{
 		Pathfinding.INavigationFeature navigationFeature = Pathfinding.Instance.GetNavigationFeature(from_cell);
-		return navigationFeature == null || navigationFeature.IsTraversable(this.agent, path, from_cell, cost, abilities);
+		return navigationFeature == null || navigationFeature.IsTraversable(agent, path, from_cell, cost, abilities);
 	}
 
-	public override void ApplyTraversalToPath(ref PathFinder.PotentialPath path, int from_cell)
+	public void ApplyTraversalToPath(Navigator agent, ref PathFinder.PotentialPath path, int from_cell)
 	{
 		Pathfinding.INavigationFeature navigationFeature = Pathfinding.Instance.GetNavigationFeature(from_cell);
 		if (navigationFeature != null)
 		{
-			navigationFeature.ApplyTraversalToPath(this.agent, ref path, from_cell);
+			navigationFeature.ApplyTraversalToPath(agent, ref path, from_cell);
 		}
 	}
-
-	private Navigator agent;
 }

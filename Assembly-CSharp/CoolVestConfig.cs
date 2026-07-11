@@ -20,31 +20,54 @@ public class CoolVestConfig : IEquipmentConfig
 		equipmentDef.additionalDescriptors.Add(descriptor2);
 		equipmentDef.OnEquipCallBack = delegate(Equippable eq)
 		{
-			ClothingWearer component = eq.assignee.GetSoleOwner().GetComponent<ClothingWearer>();
-			if (component != null)
-			{
-				component.ChangeClothes(clothingInfo);
-			}
-			else
-			{
-				global::Debug.LogWarning("Clothing item cannot be equipped to assignee because they lack ClothingWearer component", null);
-			}
+			CoolVestConfig.OnEquipVest(eq, clothingInfo);
 		};
-		equipmentDef.OnUnequipCallBack = delegate(Equippable eq)
-		{
-			if (eq != null && eq.assignee != null)
-			{
-				ClothingWearer component2 = eq.assignee.GetSoleOwner().GetComponent<ClothingWearer>();
-				component2.ChangeToDefaultClothes();
-			}
-		};
+		equipmentDef.OnUnequipCallBack = new Action<Equippable>(CoolVestConfig.OnUnequipVest);
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.COOL_VEST.RECIPE_DESC;
 		return equipmentDef;
 	}
 
+	public static void OnEquipVest(Equippable eq, ClothingWearer.ClothingInfo clothingInfo)
+	{
+		if (eq == null || eq.assignee == null)
+		{
+			return;
+		}
+		Ownables soleOwner = eq.assignee.GetSoleOwner();
+		if (soleOwner == null)
+		{
+			return;
+		}
+		ClothingWearer component = soleOwner.GetComponent<ClothingWearer>();
+		if (component != null)
+		{
+			component.ChangeClothes(clothingInfo);
+		}
+		else
+		{
+			global::Debug.LogWarning("Clothing item cannot be equipped to assignee because they lack ClothingWearer component", null);
+		}
+	}
+
+	public static void OnUnequipVest(Equippable eq)
+	{
+		if (eq != null && eq.assignee != null)
+		{
+			Ownables soleOwner = eq.assignee.GetSoleOwner();
+			if (soleOwner != null)
+			{
+				ClothingWearer component = soleOwner.GetComponent<ClothingWearer>();
+				if (component != null)
+				{
+					component.ChangeToDefaultClothes();
+				}
+			}
+		}
+	}
+
 	public static void SetupVest(GameObject go)
 	{
-		go.GetComponent<KPrefabID>().AddPrefabTag(GameTags.Clothes);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.Clothes);
 		Equippable equippable = go.GetComponent<Equippable>();
 		if (equippable == null)
 		{

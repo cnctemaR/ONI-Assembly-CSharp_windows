@@ -23,11 +23,12 @@ public class PathProber : KMonoBehaviour
 
 	public int GetCost(int cell)
 	{
-		if (this.PathGrid == null)
-		{
-			return PathProber.InvalidCost;
-		}
 		return this.PathGrid.GetCost(cell, this.QueryId);
+	}
+
+	public int GetNavigationCostIgnoreProberOffset(int cell, CellOffset[] offsets)
+	{
+		return this.PathGrid.GetCostIgnoreProberOffset(cell, offsets, this.QueryId);
 	}
 
 	public PathGrid GetPathGrid()
@@ -67,13 +68,13 @@ public class PathProber : KMonoBehaviour
 		}
 	}
 
-	public static int InvalidHandle = -1;
+	public const int InvalidHandle = -1;
 
-	public static int InvalidIdx = -1;
+	public const int InvalidIdx = -1;
 
-	public static int InvalidCell = -1;
+	public const int InvalidCell = -1;
 
-	public static int InvalidCost = -1;
+	public const int InvalidCost = -1;
 
 	public int QueryId = 1;
 

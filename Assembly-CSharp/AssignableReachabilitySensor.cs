@@ -44,7 +44,7 @@ public class AssignableReachabilitySensor : Sensor
 			AssignableSlotInstance slot = slotEntry.slot;
 			if (slot.IsAssigned())
 			{
-				bool flag = slot.assignable.GetNavigationCost(this.navigator) != PathProber.InvalidCost;
+				bool flag = slot.assignable.GetNavigationCost(this.navigator) != -1;
 				Operational component = slot.assignable.GetComponent<Operational>();
 				if (component != null)
 				{

@@ -48,12 +48,16 @@ public class FaceGraph : KMonoBehaviour
 		BlinkMonitor.Instance smi = component2.GetSMI<BlinkMonitor.Instance>();
 		if (smi.IsNullOrStopped() || !smi.IsBlinking())
 		{
-			this.ApplyShape(component2.GetAccessory(Db.Get().AccessorySlots.Eyes).symbol, component, anim, "snapto_eyes", flag);
+			Accessory accessory = component2.GetAccessory(Db.Get().AccessorySlots.Eyes);
+			KAnim.Build.Symbol symbol = accessory.symbol;
+			this.ApplyShape(symbol, component, anim, "snapto_eyes", flag);
 		}
 		SpeechMonitor.Instance smi2 = component2.GetSMI<SpeechMonitor.Instance>();
 		if (smi2.IsNullOrStopped() || !smi2.IsPlayingSpeech())
 		{
-			this.ApplyShape(component2.GetAccessory(Db.Get().AccessorySlots.Mouth).symbol, component, anim, "snapto_mouth", flag);
+			Accessory accessory2 = component2.GetAccessory(Db.Get().AccessorySlots.Mouth);
+			KAnim.Build.Symbol symbol2 = accessory2.symbol;
+			this.ApplyShape(symbol2, component, anim, "snapto_mouth", flag);
 		}
 		else
 		{

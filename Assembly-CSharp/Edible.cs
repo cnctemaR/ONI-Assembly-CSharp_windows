@@ -59,7 +59,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 			{
 				Output.LogError(new object[] { "No food FoodID" });
 			}
-			this.foodInfo = EdiblesManager.instance.GetFoodInfo(this.FoodID);
+			this.foodInfo = Game.Instance.ediblesManager.GetFoodInfo(this.FoodID);
 		}
 		base.GetComponent<KPrefabID>().AddTag(GameTags.Edible);
 		base.Subscribe(748399584, new Action<object>(this.OnCraft));
@@ -123,6 +123,11 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	private void StopConsuming(Worker worker)
 	{
+		if (float.IsNaN(this.consumptionStartTime))
+		{
+			KCrashReporter.Assert(false, "How did stop consuming get called twice?");
+			return;
+		}
 		PrimaryElement component = base.gameObject.GetComponent<PrimaryElement>();
 		if (component != null && component.DiseaseCount > 0)
 		{
@@ -131,6 +136,11 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		float num = Time.time - this.consumptionStartTime;
 		float num2 = Mathf.Clamp01(num / this.GetFeedingTime(worker));
 		this.unitsConsumed = this.Units * num2;
+		if (float.IsNaN(this.unitsConsumed))
+		{
+			KCrashReporter.Assert(false, "Why is unitsConsumed NaN?");
+			this.unitsConsumed = this.Units;
+		}
 		this.caloriesConsumed = this.unitsConsumed * this.foodInfo.CaloriesPerUnit;
 		this.Units -= this.unitsConsumed;
 		for (int i = 0; i < this.foodInfo.Effects.Count; i++)

@@ -4,6 +4,7 @@ using System.IO;
 using Ionic.Zlib;
 using Klei;
 using Klei.AI;
+using Klei.CustomSettings;
 using KSerialization;
 using Newtonsoft.Json;
 using ProcGenGame;
@@ -47,14 +48,7 @@ public class SaveLoader : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		WorldGen.LoadSettings();
-		if (DebugHandler.enabled && CustomGameSettings.Instance.is_custom_game)
-		{
-			WorldGen.Settings.SetWorld(CustomGameSettings.Instance.GetCurrentQualitySetting("World").id, WorldGen.GetPath());
-		}
-		else
-		{
-			WorldGen.Settings.SetDefaultWorld(WorldGen.GetPath());
-		}
+		WorldGen.Settings.SetWorld(CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id, WorldGen.GetPath());
 		this.CheckForLoad();
 	}
 
@@ -604,11 +598,9 @@ public class SaveLoader : KMonoBehaviour
 		if (is_auto_save)
 		{
 			dictionary["DailyReport"] = this.GetDailyReportMetrics();
+			dictionary["PerformanceMeasurements"] = this.GetPerformanceMeasurements();
 		}
-		if (CustomGameSettings.Instance != null && CustomGameSettings.Instance.is_custom_game)
-		{
-			dictionary["CustomGameSettings"] = CustomGameSettings.Instance.GetSettingsForMetrics();
-		}
+		dictionary["CustomGameSettings"] = CustomGameSettings.Instance.GetSettingsForMetrics();
 		ThreadedHttps<KleiMetrics>.Instance.SendEvent(dictionary);
 	}
 
@@ -739,6 +731,27 @@ public class SaveLoader : KMonoBehaviour
 		return list;
 	}
 
+	private List<SaveLoader.PerformanceMeasurement> GetPerformanceMeasurements()
+	{
+		List<SaveLoader.PerformanceMeasurement> list = new List<SaveLoader.PerformanceMeasurement>();
+		if (Global.Instance != null)
+		{
+			PerformanceMonitor component = Global.Instance.GetComponent<PerformanceMonitor>();
+			list.Add(new SaveLoader.PerformanceMeasurement
+			{
+				name = "FramesAbove30",
+				value = component.NumFramesAbove30
+			});
+			list.Add(new SaveLoader.PerformanceMeasurement
+			{
+				name = "FramesBelow30",
+				value = component.NumFramesBelow30
+			});
+			component.Reset();
+		}
+		return list;
+	}
+
 	[MyCmpGet]
 	private GridSettings gridSettings;
 
@@ -780,6 +793,8 @@ public class SaveLoader : KMonoBehaviour
 	public const string METRIC_MINION_METRICS_KEY = "MinionMetrics";
 
 	public const string METRIC_CUSTOM_GAME_SETTINGS = "CustomGameSettings";
+
+	public const string METRIC_PERFORMANCE_MEASUREMENTS = "PerformanceMeasurements";
 
 	private static bool force_infinity;
 
@@ -859,5 +874,12 @@ public class SaveLoader : KMonoBehaviour
 
 		[JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
 		public float? Negative;
+	}
+
+	private struct PerformanceMeasurement
+	{
+		public string name;
+
+		public float value;
 	}
 }

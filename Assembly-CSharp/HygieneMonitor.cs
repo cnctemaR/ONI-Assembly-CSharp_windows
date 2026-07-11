@@ -1,6 +1,5 @@
 ﻿using System;
 using Klei.AI;
-using KSerialization;
 
 public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.Instance>
 {
@@ -8,17 +7,17 @@ public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.In
 	{
 		default_state = this.clean;
 		base.serializable = true;
-		this.root.EventHandler(GameHashes.NewDay, (HygieneMonitor.Instance smi) => GameClock.Instance, delegate(HygieneMonitor.Instance smi)
-		{
-			smi.AddUncleanEffect();
-		}).Update(delegate(HygieneMonitor.Instance smi, float dt)
+		this.root.Update(delegate(HygieneMonitor.Instance smi, float dt)
 		{
 			smi.UpdateDirtiness();
-		}, UpdateRate.SIM_200ms, false);
-		this.clean.EventTransition(GameHashes.EffectAdded, this.needsshower_pre, (HygieneMonitor.Instance smi) => smi.NeedsShower());
+		}, UpdateRate.SIM_200ms, false).EventHandler(GameHashes.SleepFinished, delegate(HygieneMonitor.Instance smi)
+		{
+			smi.BecomeDirty();
+		});
+		this.clean.EventTransition(GameHashes.EffectAdded, this.needsshower, (HygieneMonitor.Instance smi) => smi.NeedsShower());
 		this.needsshower_pre.Enter(delegate(HygieneMonitor.Instance smi)
 		{
-			smi.SetDirtiness(1f);
+			smi.BecomeDirty();
 			smi.GoTo(this.needsshower);
 		});
 		this.needsshower.EventTransition(GameHashes.EffectRemoved, this.clean, (HygieneMonitor.Instance smi) => !smi.NeedsShower()).ToggleUrge(Db.Get().Urges.Shower).Exit(delegate(HygieneMonitor.Instance smi)
@@ -26,6 +25,8 @@ public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.In
 			smi.SetDirtiness(0f);
 		});
 	}
+
+	public StateMachine<HygieneMonitor, HygieneMonitor.Instance, IStateMachineTarget, object>.FloatParameter dirtiness;
 
 	public GameStateMachine<HygieneMonitor, HygieneMonitor.Instance, IStateMachineTarget, object>.State clean;
 
@@ -46,14 +47,20 @@ public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.In
 			this.effects.Add("Unclean", true);
 		}
 
+		public void BecomeDirty()
+		{
+			this.SetDirtiness(1f);
+			this.effects.Add("Unclean", true);
+		}
+
 		public float GetDirtiness()
 		{
-			return this.dirtiness;
+			return base.sm.dirtiness.Get(this);
 		}
 
 		public void SetDirtiness(float dirtiness)
 		{
-			this.dirtiness = dirtiness;
+			base.sm.dirtiness.Set(dirtiness, this);
 		}
 
 		public bool NeedsShower()
@@ -92,9 +99,6 @@ public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.In
 		}
 
 		private Effects effects;
-
-		[Serialize]
-		private float dirtiness;
 
 		private static readonly string[] NeedsShowerEffectsIDs = new string[] { "Unclean" };
 	}

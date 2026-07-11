@@ -6,14 +6,10 @@ public class ScheduleBlockButton : KMonoBehaviour
 {
 	public int idx { get; private set; }
 
-	public void Setup(int idx, Dictionary<string, ColorStyleSetting> paintStyles, Action<ScheduleBlockButton> onClick)
+	public void Setup(int idx, Dictionary<string, ColorStyleSetting> paintStyles)
 	{
 		this.idx = idx;
 		this.paintStyles = paintStyles;
-		this.button.onClick += delegate
-		{
-			onClick(this);
-		};
 		base.gameObject.name = "ScheduleBlock_" + idx.ToString();
 	}
 
@@ -23,7 +19,8 @@ public class ScheduleBlockButton : KMonoBehaviour
 		if (scheduleGroup != null && this.paintStyles.ContainsKey(scheduleGroup.Id))
 		{
 			this.image.colorStyleSetting = this.paintStyles[scheduleGroup.Id];
-			this.toolTip.SetSimpleTooltip(scheduleGroup.Name);
+			this.image.ApplyColorStyleSetting();
+			this.toolTip.SetSimpleTooltip(scheduleGroup.GetTooltip());
 		}
 		else
 		{
@@ -33,9 +30,6 @@ public class ScheduleBlockButton : KMonoBehaviour
 
 	[SerializeField]
 	private KImage image;
-
-	[SerializeField]
-	private KButton button;
 
 	[SerializeField]
 	private ToolTip toolTip;

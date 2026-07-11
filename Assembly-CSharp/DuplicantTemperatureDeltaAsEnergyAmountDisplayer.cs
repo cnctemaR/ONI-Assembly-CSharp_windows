@@ -9,14 +9,10 @@ public class DuplicantTemperatureDeltaAsEnergyAmountDisplayer : StandardAmountDi
 	{
 	}
 
-	public override string GetTooltipDescription(Amount master, AmountInstance instance)
-	{
-		return string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null), this.formatter.GetFormattedValue(310.15f, GameUtil.TimeSlice.None, null));
-	}
-
 	public override string GetTooltip(Amount master, AmountInstance instance)
 	{
-		string text = this.GetTooltipDescription(master, instance);
+		string text = master.Name;
+		text = text + UI.HORIZONTAL_BR_RULE + string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null), this.formatter.GetFormattedValue(310.15f, GameUtil.TimeSlice.None, null));
 		float num = ElementLoader.FindElementByHash(SimHashes.Creature).specificHeatCapacity * 30f * 1000f;
 		text += "\n\n";
 		if (this.formatter.DeltaTimeSlice == GameUtil.TimeSlice.PerCycle)
@@ -28,10 +24,9 @@ public class DuplicantTemperatureDeltaAsEnergyAmountDisplayer : StandardAmountDi
 			text += string.Format(UI.CHANGEPERSECOND, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerSecond, null));
 			text = text + "\n" + string.Format(UI.CHANGEPERSECOND, GameUtil.GetFormattedJoules(instance.deltaAttribute.GetTotalDisplayValue() * num, "F1", GameUtil.TimeSlice.None));
 		}
-		text += "\n";
 		foreach (AttributeModifier attributeModifier in instance.deltaAttribute.Modifiers)
 		{
-			text = text + "\n" + string.Format("{0}: {1}", attributeModifier.GetDescription(), GameUtil.GetFormattedWattage(attributeModifier.Value * num, GameUtil.WattageFormatterUnit.Automatic));
+			text = text + "\n" + string.Format(UI.MODIFIER_ITEM_TEMPLATE, attributeModifier.GetDescription(), GameUtil.GetFormattedHeatEnergyRate(attributeModifier.Value * num * 1f, GameUtil.HeatEnergyFormatterUnit.Automatic));
 		}
 		return text;
 	}

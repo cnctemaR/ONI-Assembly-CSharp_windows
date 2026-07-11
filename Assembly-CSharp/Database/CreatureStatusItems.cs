@@ -77,8 +77,7 @@ namespace Database
 			this.Suffocating = new StatusItem("Suffocating", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.Hatching = new StatusItem("Hatching", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.Incubating = new StatusItem("Incubating", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
-			this.Drowning = new StatusItem("Drowning", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
-			this.Drowning.resolveStringCallback = (string str, object data) => str;
+			this.Drowning = new StatusItem("Drowning", "CREATURES", "status_item_flooded", StatusItem.IconType.Custom, NotificationType.BadMinor, true, SimViewMode.None, true, 63486);
 			this.DryingOut = new StatusItem("DryingOut", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 1026);
 			this.DryingOut.resolveStringCallback = (string str, object data) => str;
 			this.ReadyForHarvest = new StatusItem("ReadyForHarvest", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 1026);
@@ -94,6 +93,18 @@ namespace Database
 				float num2 = 100f * ((Growing)data).PercentGrown();
 				str = str.Replace("{PercentGrow}", Math.Floor((double)Math.Max(num2, 0f)).ToString("F0"));
 				return str;
+			};
+			this.CropSleeping = new StatusItem("Crop_Sleeping", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 1026);
+			this.CropSleeping.resolveStringCallback = delegate(string str, object data)
+			{
+				CropSleepingMonitor.Instance instance = (CropSleepingMonitor.Instance)data;
+				return str.Replace("{REASON}", (!instance.def.prefersDarkness) ? CREATURES.STATUSITEMS.CROP_SLEEPING.REASON_TOO_DARK : CREATURES.STATUSITEMS.CROP_SLEEPING.REASON_TOO_BRIGHT);
+			};
+			this.CropSleeping.resolveTooltipCallback = delegate(string str, object data)
+			{
+				CropSleepingMonitor.Instance instance2 = (CropSleepingMonitor.Instance)data;
+				string text = string.Format(CREATURES.STATUSITEMS.CROP_SLEEPING.REQUIREMENT_LUMINANCE, instance2.def.lightIntensityThreshold);
+				return str.Replace("{REQUIREMENTS}", text);
 			};
 			this.EnvironmentTooWarm = new StatusItem("EnvironmentTooWarm", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 			this.EnvironmentTooWarm.resolveStringCallback = delegate(string str, object data)
@@ -152,12 +163,12 @@ namespace Database
 			this.WrongAtmosphere = new StatusItem("WrongAtmosphere", "CREATURES", "status_item_plant_atmosphere", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, false, 63486);
 			this.WrongAtmosphere.resolveStringCallback = delegate(string str, object data)
 			{
-				string text = string.Empty;
+				string text2 = string.Empty;
 				foreach (Element element in (data as PressureVulnerable).safe_atmospheres)
 				{
-					text = text + "\n    •  " + element.name;
+					text2 = text2 + "\n    •  " + element.name;
 				}
-				str = str.Replace("{elements}", text);
+				str = str.Replace("{elements}", text2);
 				return str;
 			};
 			this.AtmosphericPressureTooLow = new StatusItem("AtmosphericPressureTooLow", "CREATURES", "status_item_plant_atmosphere", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, false, 63486);
@@ -179,56 +190,56 @@ namespace Database
 			this.HealthStatus = new StatusItem("HealthStatus", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.HealthStatus.resolveStringCallback = delegate(string str, object data)
 			{
-				string text2 = string.Empty;
-				switch ((Health.HealthState)data)
-				{
-				case Health.HealthState.Perfect:
-					text2 = MISC.STATUSITEMS.HEALTHSTATUS.PERFECT.NAME;
-					break;
-				case Health.HealthState.Scuffed:
-					text2 = MISC.STATUSITEMS.HEALTHSTATUS.SCUFFED.NAME;
-					break;
-				case Health.HealthState.Injured:
-					text2 = MISC.STATUSITEMS.HEALTHSTATUS.INJURED.NAME;
-					break;
-				case Health.HealthState.Critical:
-					text2 = MISC.STATUSITEMS.HEALTHSTATUS.CRITICAL.NAME;
-					break;
-				case Health.HealthState.Incapacitated:
-					text2 = MISC.STATUSITEMS.HEALTHSTATUS.INCAPACITATED.NAME;
-					break;
-				case Health.HealthState.Dead:
-					text2 = MISC.STATUSITEMS.HEALTHSTATUS.DEAD.NAME;
-					break;
-				}
-				str = str.Replace("{healthState}", text2);
-				return str;
-			};
-			this.HealthStatus.resolveTooltipCallback = delegate(string str, object data)
-			{
 				string text3 = string.Empty;
 				switch ((Health.HealthState)data)
 				{
 				case Health.HealthState.Perfect:
-					text3 = MISC.STATUSITEMS.HEALTHSTATUS.PERFECT.TOOLTIP;
+					text3 = MISC.STATUSITEMS.HEALTHSTATUS.PERFECT.NAME;
 					break;
 				case Health.HealthState.Scuffed:
-					text3 = MISC.STATUSITEMS.HEALTHSTATUS.SCUFFED.TOOLTIP;
+					text3 = MISC.STATUSITEMS.HEALTHSTATUS.SCUFFED.NAME;
 					break;
 				case Health.HealthState.Injured:
-					text3 = MISC.STATUSITEMS.HEALTHSTATUS.INJURED.TOOLTIP;
+					text3 = MISC.STATUSITEMS.HEALTHSTATUS.INJURED.NAME;
 					break;
 				case Health.HealthState.Critical:
-					text3 = MISC.STATUSITEMS.HEALTHSTATUS.CRITICAL.TOOLTIP;
+					text3 = MISC.STATUSITEMS.HEALTHSTATUS.CRITICAL.NAME;
 					break;
 				case Health.HealthState.Incapacitated:
-					text3 = MISC.STATUSITEMS.HEALTHSTATUS.INCAPACITATED.TOOLTIP;
+					text3 = MISC.STATUSITEMS.HEALTHSTATUS.INCAPACITATED.NAME;
 					break;
 				case Health.HealthState.Dead:
-					text3 = MISC.STATUSITEMS.HEALTHSTATUS.DEAD.TOOLTIP;
+					text3 = MISC.STATUSITEMS.HEALTHSTATUS.DEAD.NAME;
 					break;
 				}
 				str = str.Replace("{healthState}", text3);
+				return str;
+			};
+			this.HealthStatus.resolveTooltipCallback = delegate(string str, object data)
+			{
+				string text4 = string.Empty;
+				switch ((Health.HealthState)data)
+				{
+				case Health.HealthState.Perfect:
+					text4 = MISC.STATUSITEMS.HEALTHSTATUS.PERFECT.TOOLTIP;
+					break;
+				case Health.HealthState.Scuffed:
+					text4 = MISC.STATUSITEMS.HEALTHSTATUS.SCUFFED.TOOLTIP;
+					break;
+				case Health.HealthState.Injured:
+					text4 = MISC.STATUSITEMS.HEALTHSTATUS.INJURED.TOOLTIP;
+					break;
+				case Health.HealthState.Critical:
+					text4 = MISC.STATUSITEMS.HEALTHSTATUS.CRITICAL.TOOLTIP;
+					break;
+				case Health.HealthState.Incapacitated:
+					text4 = MISC.STATUSITEMS.HEALTHSTATUS.INCAPACITATED.TOOLTIP;
+					break;
+				case Health.HealthState.Dead:
+					text4 = MISC.STATUSITEMS.HEALTHSTATUS.DEAD.TOOLTIP;
+					break;
+				}
+				str = str.Replace("{healthState}", text4);
 				return str;
 			};
 			this.Barren = new StatusItem("Barren", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
@@ -254,24 +265,24 @@ namespace Database
 			this.Fresh = new StatusItem("Fresh", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.Fresh.resolveStringCallback = delegate(string str, object data)
 			{
-				Rottable.Instance instance = (Rottable.Instance)data;
-				return str.Replace("{RotPercentage}", "(" + Util.FormatWholeNumber(instance.RotConstitutionPercentage * 100f) + "%)");
+				Rottable.Instance instance3 = (Rottable.Instance)data;
+				return str.Replace("{RotPercentage}", "(" + Util.FormatWholeNumber(instance3.RotConstitutionPercentage * 100f) + "%)");
 			};
 			this.Fresh.resolveTooltipCallback = delegate(string str, object data)
 			{
-				Rottable.Instance instance2 = (Rottable.Instance)data;
-				return str.Replace("{RotTooltip}", instance2.GetToolTip());
+				Rottable.Instance instance4 = (Rottable.Instance)data;
+				return str.Replace("{RotTooltip}", instance4.GetToolTip());
 			};
 			this.Stale = new StatusItem("Stale", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 			this.Stale.resolveStringCallback = delegate(string str, object data)
 			{
-				Rottable.Instance instance3 = (Rottable.Instance)data;
-				return str.Replace("{RotPercentage}", "(" + Util.FormatWholeNumber(instance3.RotConstitutionPercentage * 100f) + "%)");
+				Rottable.Instance instance5 = (Rottable.Instance)data;
+				return str.Replace("{RotPercentage}", "(" + Util.FormatWholeNumber(instance5.RotConstitutionPercentage * 100f) + "%)");
 			};
 			this.Stale.resolveTooltipCallback = delegate(string str, object data)
 			{
-				Rottable.Instance instance4 = (Rottable.Instance)data;
-				return str.Replace("{RotTooltip}", instance4.GetToolTip());
+				Rottable.Instance instance6 = (Rottable.Instance)data;
+				return str.Replace("{RotTooltip}", instance6.GetToolTip());
 			};
 			this.Spoiled = new StatusItem("Spoiled", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 			this.Refrigerated = new StatusItem("Refrigerated", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
@@ -282,8 +293,8 @@ namespace Database
 			this.Old = new StatusItem("Old", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 			this.Old.resolveTooltipCallback = delegate(string str, object data)
 			{
-				AgeMonitor.Instance instance5 = (AgeMonitor.Instance)data;
-				return str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedCycles(instance5.CyclesUntilDeath * 600f, "F1"));
+				AgeMonitor.Instance instance7 = (AgeMonitor.Instance)data;
+				return str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedCycles(instance7.CyclesUntilDeath * 600f, "F1"));
 			};
 		}
 
@@ -318,6 +329,8 @@ namespace Database
 		public StatusItem DryingOut;
 
 		public StatusItem Growing;
+
+		public StatusItem CropSleeping;
 
 		public StatusItem ReadyForHarvest;
 

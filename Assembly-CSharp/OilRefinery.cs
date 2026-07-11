@@ -10,7 +10,7 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 	{
 		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		this.meter = new MeterController(component, "meter_target", "meter", Meter.Offset.Infront, Vector3.zero, null);
+		this.meter = new MeterController(component, "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Vector3.zero, null);
 		base.smi.StartSM();
 		this.maxSrcMass = base.GetComponent<ConduitConsumer>().capacityKG;
 	}

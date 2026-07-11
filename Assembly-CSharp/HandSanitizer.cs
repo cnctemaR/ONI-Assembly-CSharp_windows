@@ -35,8 +35,8 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		this.cleanMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_clean_target", "meter_clean", Meter.Offset.Infront, new string[] { "meter_clean_target" });
-		this.dirtyMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_dirty_target", "meter_dirty", Meter.Offset.Infront, new string[] { "meter_dirty_target" });
+		this.cleanMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_clean_target", "meter_clean", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_clean_target" });
+		this.dirtyMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_dirty_target", "meter_dirty", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_dirty_target" });
 		this.RefreshMeters();
 		Components.HandSanitizers.Add(this);
 		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));

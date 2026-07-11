@@ -125,7 +125,7 @@ public class Harvestable : Workable
 			if (!this.isInPlanterBox)
 			{
 				this.isInPlanterBox = true;
-				this.SetHarvestWhenReady(true);
+				this.SetHarvestWhenReady(this.defaultHarvestStateWhenPlanted);
 			}
 		}
 		else
@@ -334,6 +334,8 @@ public class Harvestable : Workable
 
 	[Serialize]
 	protected bool harvestWhenReady;
+
+	public bool defaultHarvestStateWhenPlanted = true;
 
 	public RectTransform HarvestWhenReadyOverlayIcon;
 

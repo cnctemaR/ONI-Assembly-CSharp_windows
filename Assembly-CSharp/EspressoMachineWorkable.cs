@@ -36,7 +36,6 @@ public class EspressoMachineWorkable : Workable, IGameObjectEffectDescriptor, IW
 			smi.TryInjectDisease(diseaseInfo2.idx, diseaseInfo2.count, EspressoMachine.INGREDIENT_TAG, Disease.InfectionVector.Digestion);
 		}
 		Effects component2 = worker.GetComponent<Effects>();
-		component2.Add("TookABreak", true);
 		if (!string.IsNullOrEmpty(EspressoMachineWorkable.specificEffect))
 		{
 			component2.Add(EspressoMachineWorkable.specificEffect, true);

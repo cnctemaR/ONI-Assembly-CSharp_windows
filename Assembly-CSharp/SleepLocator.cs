@@ -6,7 +6,7 @@ public class SleepLocator : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateEntity(SleepLocator.ID, SleepLocator.ID, false);
-		gameObject.AddOrGet<KPrefabID>().PrefabTags = new Tag[] { GameTags.NotAPrefab };
+		gameObject.AddTag(GameTags.NotAPrefab);
 		gameObject.AddOrGet<Approachable>();
 		gameObject.AddOrGet<Sleepable>();
 		return gameObject;

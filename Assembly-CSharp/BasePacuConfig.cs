@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -15,14 +16,14 @@ public static class BasePacuConfig
 		float num2 = (warnLowTemp + warnHighTemp) / 2f;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, description, num, anim, text, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, num2);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.AddPrefabTag(GameTags.SwimmingCreature);
-		component.AddPrefabTag(GameTags.Creatures.Swimmer);
+		component.AddTag(GameTags.SwimmingCreature);
+		component.AddTag(GameTags.Creatures.Swimmer);
 		Trait trait = Db.Get().CreateTrait(base_trait_id, name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, PacuTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -PacuTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 25f, name, false, false, true));
-		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, false);
+		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, false, false);
 		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, base_trait_id, "SwimmerNavGrid", NavType.Swim, 32, 2f, "Meat", 1, false, true, warnLowTemp, warnHighTemp, warnLowTemp - 20f, warnHighTemp + 20f);
 		if (is_baby)
 		{
@@ -52,11 +53,9 @@ public static class BasePacuConfig
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGet<LoopingSounds>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder2, GameTags.Creatures.Species.PacuSpecies, symbol_prefix);
-		TagBits tagBits = default(TagBits);
-		tagBits.SetTag(SimHashes.Algae.CreateTag());
 		Diet.Info[] array = new Diet.Info[]
 		{
-			new Diet.Info(tagBits, SimHashes.ToxicSand.CreateTag(), BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f)
+			new Diet.Info(new HashSet<Tag> { SimHashes.Algae.CreateTag() }, SimHashes.ToxicSand.CreateTag(), BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f)
 		};
 		Diet diet = new Diet(array);
 		CreatureCalorieMonitor.Def def3 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();

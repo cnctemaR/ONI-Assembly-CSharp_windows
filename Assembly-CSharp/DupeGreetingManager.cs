@@ -23,15 +23,6 @@ public class DupeGreetingManager : KMonoBehaviour, ISim200ms
 			DupeGreetingManager.GreetingSetup greetingSetup = this.activeSetups[i];
 			if (!this.ValidNavigatingMinion(greetingSetup.A.minion) || !this.ValidOppositionalMinion(greetingSetup.A.minion, greetingSetup.B.minion))
 			{
-				Output.Log(new object[]
-				{
-					"Clearing up greeting between",
-					greetingSetup.A.minion.name,
-					"and",
-					greetingSetup.B.minion.name,
-					"@",
-					greetingSetup.cell
-				});
 				greetingSetup.A.reactable.Cleanup();
 				greetingSetup.B.reactable.Cleanup();
 				this.activeSetups.RemoveAt(i);
@@ -49,15 +40,6 @@ public class DupeGreetingManager : KMonoBehaviour, ISim200ms
 						int offsetCell = this.GetOffsetCell(minionIdentity, j);
 						if (this.candidateCells.ContainsKey(offsetCell) && this.ValidOppositionalMinion(minionIdentity, this.candidateCells[offsetCell]))
 						{
-							Output.Log(new object[]
-							{
-								"Woohoo! Beginning new greeting between",
-								minionIdentity.name,
-								"and",
-								this.candidateCells[offsetCell].name,
-								"@",
-								offsetCell
-							});
 							this.BeginNewGreeting(minionIdentity, this.candidateCells[offsetCell], offsetCell);
 							break;
 						}

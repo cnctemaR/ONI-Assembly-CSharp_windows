@@ -37,8 +37,8 @@ public class FlushToiletConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.Toilet);
-		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.FlushToilet);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.Toilet);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.FlushToilet);
 		FlushToilet flushToilet = go.AddOrGet<FlushToilet>();
 		flushToilet.massConsumedPerUse = 5f;
 		flushToilet.massEmittedPerUse = 11.7f;

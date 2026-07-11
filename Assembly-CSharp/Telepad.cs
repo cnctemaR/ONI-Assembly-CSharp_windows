@@ -29,7 +29,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 	{
 		base.OnSpawn();
 		Components.Telepads.Add(this);
-		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
+		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
 		this.meter.gameObject.GetComponent<KBatchedAnimController>().SetDirty();
 		base.smi.StartSM();
 	}

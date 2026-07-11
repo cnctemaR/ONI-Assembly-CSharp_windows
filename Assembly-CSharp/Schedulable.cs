@@ -2,18 +2,6 @@
 
 public class Schedulable : KMonoBehaviour
 {
-	protected override void OnSpawn()
-	{
-		ScheduleManager instance = ScheduleManager.Instance;
-		instance.onSheduleBlocksChanged += this.OnScheduleBlocksChanged;
-	}
-
-	protected override void OnCleanUp()
-	{
-		ScheduleManager instance = ScheduleManager.Instance;
-		instance.onSheduleBlocksChanged -= this.OnScheduleBlocksChanged;
-	}
-
 	public Schedule GetSchedule()
 	{
 		return ScheduleManager.Instance.GetSchedule(this);
@@ -29,8 +17,13 @@ public class Schedulable : KMonoBehaviour
 		base.Trigger(467134493, schedule);
 	}
 
-	private void OnScheduleBlocksChanged()
+	public void OnScheduleBlocksTick(Schedule schedule)
 	{
-		base.Trigger(-894023145, null);
+		base.Trigger(1714332666, schedule);
+	}
+
+	public void OnScheduleBlocksChanged(Schedule schedule)
+	{
+		base.Trigger(-894023145, schedule);
 	}
 }

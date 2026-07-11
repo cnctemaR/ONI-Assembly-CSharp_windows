@@ -61,7 +61,7 @@ public class BunkerTileConfig : IBuildingConfig
 		BuildingTemplates.DoPostConfigure(go);
 		go.AddComponent<SimTemperatureTransfer>();
 		KPrefabID component = go.GetComponent<KPrefabID>();
-		component.AddPrefabTag(GameTags.Bunker);
+		component.AddTag(GameTags.Bunker);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)

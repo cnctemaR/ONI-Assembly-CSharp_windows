@@ -34,11 +34,20 @@ namespace STRINGS
 
 			public class BETA
 			{
-				public static LocString NAME = "Intermediate Research";
+				public static LocString NAME = "Advanced Research";
 
-				public static LocString DESC = UI.FormatAsLink("Intermediate Research", "RESEARCH") + " is required to unlock improved technologies.\nIt can be conducted at a " + BUILDINGS.PREFABS.ADVANCEDRESEARCHCENTER.NAME + ".";
+				public static LocString DESC = UI.FormatAsLink("Advanced Research", "RESEARCH") + " is required to unlock improved technologies.\nIt can be conducted at a " + BUILDINGS.PREFABS.ADVANCEDRESEARCHCENTER.NAME + ".";
 
 				public static LocString RECIPEDESC = "Unlocks improved technologies.";
+			}
+
+			public class GAMMA
+			{
+				public static LocString NAME = "Interstellar Research";
+
+				public static LocString DESC = UI.FormatAsLink("Interstellar Research", "RESEARCH") + " is required to unlock space technologies.\nIt can be conducted at a " + BUILDINGS.PREFABS.TELESCOPE.NAME + ".";
+
+				public static LocString RECIPEDESC = "Unlocks cutting-edge technologies.";
 			}
 		}
 
@@ -60,9 +69,16 @@ namespace STRINGS
 
 			public class BETA_RESEARCH_POINT
 			{
-				public static LocString NAME = "Intermediate Research Point";
+				public static LocString NAME = "Advanced Research Point";
 
-				public static LocString DESC = "Allows advanced technology tiers to be researched.";
+				public static LocString DESC = "Allows improved technology tiers to be researched.";
+			}
+
+			public class GAMMA_RESEARCH_POINT
+			{
+				public static LocString NAME = "Interstellar Research Point";
+
+				public static LocString DESC = "Allows space technology tiers to be researched.";
 			}
 
 			public class CONVEYOR_OVERLAY
@@ -308,9 +324,9 @@ namespace STRINGS
 
 			public class CLOTHING
 			{
-				public static LocString NAME = UI.FormatAsLink("Clothing", "CLOTHING");
+				public static LocString NAME = UI.FormatAsLink("Self Expression", "CLOTHING");
 
-				public static LocString DESC = "Produce decorative and practical clothing for Duplicants.";
+				public static LocString DESC = "Produce leisurely luxury items for Duplicants.";
 			}
 
 			public class SUITS
@@ -325,6 +341,13 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Distillation", "DISTILLATION");
 
 				public static LocString DESC = "Distill difficult mixtures down to their most useful parts.";
+			}
+
+			public class CATALYTICS
+			{
+				public static LocString NAME = UI.FormatAsLink("Catalytics", "CATALYTICS");
+
+				public static LocString DESC = "Advanced gas manipulation using catalysts.";
 			}
 
 			public class ADVANCEDRESEARCH
@@ -451,6 +474,27 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Refractive Decor", "REFRACTIVEDECOR");
 
 				public static LocString DESC = "The ultimate solution to ugly things? Make them transparent.";
+			}
+
+			public class BASICROCKETRY
+			{
+				public static LocString NAME = UI.FormatAsLink("Basic Rocketry", "BASICROCKETRY");
+
+				public static LocString DESC = "Start your space program";
+			}
+
+			public class INTERMEDIATEROCKETRY
+			{
+				public static LocString NAME = UI.FormatAsLink("Intermediate Rocketry", "INTERMEDIATEROCKETRY");
+
+				public static LocString DESC = "Continue your space program";
+			}
+
+			public class INDUSTRIALSTORAGE
+			{
+				public static LocString NAME = UI.FormatAsLink("Industrial Storage", "INDUSTRIALSTORAGE");
+
+				public static LocString DESC = "Industrial storage of liquids and gases";
 			}
 		}
 	}

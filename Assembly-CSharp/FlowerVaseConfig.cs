@@ -34,7 +34,7 @@ public class FlowerVaseConfig : IBuildingConfig
 		plantablePlot.AddDepositTag(GameTags.DecorSeed);
 		go.AddOrGet<FlowerVase>();
 		go.AddOrGet<AnimTileable>();
-		go.GetComponent<KPrefabID>().AddPrefabTag(GameTags.Decoration);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.Decoration);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

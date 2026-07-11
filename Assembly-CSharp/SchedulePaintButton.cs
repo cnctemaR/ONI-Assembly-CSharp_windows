@@ -14,11 +14,18 @@ public class SchedulePaintButton : KMonoBehaviour
 			this.toggleState.SetColorStyle(styles[group.Id]);
 		}
 		this.label.text = group.Name;
-		this.toggle.onClick += delegate
+		MultiToggle multiToggle = this.toggle;
+		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
 		{
 			onClick(this);
-		};
+		}));
+		this.toolTip.SetSimpleTooltip(group.GetTooltip());
 		base.gameObject.name = "PaintButton_" + group.Id;
+	}
+
+	public void SetToggle(bool on)
+	{
+		this.toggle.ChangeState((!on) ? 0 : 1);
 	}
 
 	[SerializeField]
@@ -28,5 +35,8 @@ public class SchedulePaintButton : KMonoBehaviour
 	private ImageToggleState toggleState;
 
 	[SerializeField]
-	public KToggle toggle;
+	private MultiToggle toggle;
+
+	[SerializeField]
+	private ToolTip toolTip;
 }

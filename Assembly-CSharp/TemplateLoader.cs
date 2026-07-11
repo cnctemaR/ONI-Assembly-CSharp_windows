@@ -462,9 +462,9 @@ public static class TemplateLoader
 
 	private static void ClearPickups(int baseX, int baseY, CellOffset[] template_as_offsets)
 	{
-		if (WorldGenSpawner.Instance != null)
+		if (SaveGame.Instance.worldGenSpawner != null)
 		{
-			WorldGenSpawner.Instance.ClearSpawnersInArea(new Vector2((float)baseX, (float)baseY), template_as_offsets);
+			SaveGame.Instance.worldGenSpawner.ClearSpawnersInArea(new Vector2((float)baseX, (float)baseY), template_as_offsets);
 		}
 		foreach (Pickupable pickupable in Components.Pickupables.Items)
 		{

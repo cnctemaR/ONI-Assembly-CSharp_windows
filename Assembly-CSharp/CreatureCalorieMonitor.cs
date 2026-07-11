@@ -24,10 +24,11 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 		this.hungry.hungry.Transition(this.normal, (CreatureCalorieMonitor.Instance smi) => !smi.IsHungry(), UpdateRate.SIM_1000ms).Transition(this.hungry.outofcalories, (CreatureCalorieMonitor.Instance smi) => smi.IsOutOfCalories(), UpdateRate.SIM_1000ms).ToggleStatusItem(CREATURES.STATUSITEMS.HUNGRY.NAME, CREATURES.STATUSITEMS.HUNGRY.TOOLTIP, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, null);
 		this.hungry.outofcalories.DefaultState(this.hungry.outofcalories.wild).Transition(this.hungry.hungry, (CreatureCalorieMonitor.Instance smi) => !smi.IsOutOfCalories(), UpdateRate.SIM_1000ms);
 		this.hungry.outofcalories.wild.TagTransition(GameTags.Creatures.Wild, this.hungry.outofcalories.tame, true).ToggleStatusItem(CREATURES.STATUSITEMS.HUNGRY.NAME, CREATURES.STATUSITEMS.HUNGRY.TOOLTIP, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, null);
-		this.hungry.outofcalories.tame.Enter("StarvationStartTime", delegate(CreatureCalorieMonitor.Instance smi)
+		this.hungry.outofcalories.tame.Enter("StarvationStartTime", new StateMachine<CreatureCalorieMonitor, CreatureCalorieMonitor.Instance, IStateMachineTarget, CreatureCalorieMonitor.Def>.State.Callback(CreatureCalorieMonitor.StarvationStartTime)).Exit("ClearStarvationTime", delegate(CreatureCalorieMonitor.Instance smi)
 		{
-			this.starvationStartTime.Set(GameClock.Instance.GetTime(), smi);
-		}).Transition(this.hungry.outofcalories.starvedtodeath, (CreatureCalorieMonitor.Instance smi) => smi.GetDeathTimeRemaining() <= 0f, UpdateRate.SIM_1000ms).TagTransition(GameTags.Creatures.Wild, this.hungry.outofcalories.wild, false)
+			this.starvationStartTime.Set(0f, smi);
+		}).Transition(this.hungry.outofcalories.starvedtodeath, (CreatureCalorieMonitor.Instance smi) => smi.GetDeathTimeRemaining() <= 0f, UpdateRate.SIM_1000ms)
+			.TagTransition(GameTags.Creatures.Wild, this.hungry.outofcalories.wild, false)
 			.ToggleStatusItem(CREATURES.STATUSITEMS.STARVING.NAME, CREATURES.STATUSITEMS.STARVING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, 0, (string str, CreatureCalorieMonitor.Instance smi) => str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedCycles(smi.GetDeathTimeRemaining(), "F1")), null, null)
 			.ToggleNotification((CreatureCalorieMonitor.Instance smi) => new Notification(CREATURES.STATUSITEMS.STARVING.NOTIFICATION_NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notifications, object data) => CREATURES.STATUSITEMS.STARVING.NOTIFICATION_TOOLTIP + notifications.ReduceMessages(false), null, true, 0f, null, null))
 			.ToggleEffect((CreatureCalorieMonitor.Instance smi) => this.outOfCaloriesTame);
@@ -42,6 +43,15 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 	private static void UpdateMetabolismCalorieModifier(CreatureCalorieMonitor.Instance smi, float dt)
 	{
 		smi.deltaCalorieMetabolismModifier.SetValue(1f - Db.Get().CritterAttributes.Metabolism.Lookup(smi.gameObject).GetTotalValue() / 100f);
+	}
+
+	private static void StarvationStartTime(CreatureCalorieMonitor.Instance smi)
+	{
+		float num = smi.sm.starvationStartTime.Get(smi);
+		if (num == 0f)
+		{
+			smi.sm.starvationStartTime.Set(GameClock.Instance.GetTime(), smi);
+		}
 	}
 
 	public GameStateMachine<CreatureCalorieMonitor, CreatureCalorieMonitor.Instance, IStateMachineTarget, CreatureCalorieMonitor.Def>.State normal;
@@ -140,7 +150,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 				CreatureCalorieMonitor.Stomach.CaloriesConsumedEntry caloriesConsumedEntry = this.caloriesConsumed[i];
 				if (caloriesConsumedEntry.calories > 0f)
 				{
-					Diet.Info dietInfo = this.diet.GetDietInfo(new TagBits(caloriesConsumedEntry.tag));
+					Diet.Info dietInfo = this.diet.GetDietInfo(caloriesConsumedEntry.tag);
 					if (dietInfo != null)
 					{
 						if (!(tag != Tag.Invalid) || !(tag != dietInfo.producedElement))
@@ -164,7 +174,11 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			float temperature = this.owner.GetComponent<PrimaryElement>().Temperature;
 			if (element.IsLiquid)
 			{
-				FallingWater.instance.AddParticle(num3, (byte)ElementLoader.GetElementIndex(element.id), num, temperature, b, num2, true, false, false, false);
+				FallingWater.instance.AddParticle(num3, element.idx, num, temperature, b, num2, true, false, false, false);
+			}
+			else if (element.IsGas)
+			{
+				SimMessages.AddRemoveSubstance(num3, (int)element.idx, CellEventLogger.Instance.ElementConsumerSimUpdate, num, temperature, b, num2, true, -1);
 			}
 			else
 			{
@@ -185,7 +199,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			{
 				if (caloriesConsumedEntry.calories > 0f)
 				{
-					Diet.Info dietInfo = this.diet.GetDietInfo(new TagBits(caloriesConsumedEntry.tag));
+					Diet.Info dietInfo = this.diet.GetDietInfo(caloriesConsumedEntry.tag);
 					if (dietInfo != null)
 					{
 						if (!(dietInfo.producedElement == Tag.Invalid))

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
@@ -23,6 +24,8 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		this.tagBits = new TagBits(tags);
 		this.requiredTagBits = new TagBits(required_tags);
 		this.forbiddenTagBits = new TagBits(forbidden_tags);
+		this.tagBitsHash = this.tagBits.GetHashCode();
+		DebugUtil.DevAssert(!this.tagBits.HasAny(~FetchManager.disallowedTagMask), "Fetch chore fetching invalid tags.", string.Empty, string.Empty);
 		if (destination.GetOnlyFetchMarkedItems())
 		{
 			this.requiredTagBits.SetTag(GameTags.Garbage);
@@ -155,7 +158,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			}
 			else
 			{
-				FetchManager.Instance.FindFetchTarget(consumer_state.worker, this.destination, this.tagBits, this.requiredTagBits, this.forbiddenTagBits, this.originalAmount, ref pickupable);
+				pickupable = Game.Instance.fetchManager.FindFetchTarget(consumer_state.worker, this.destination, this.tagBits, this.requiredTagBits, this.forbiddenTagBits, this.originalAmount);
 			}
 		}
 		return pickupable;
@@ -223,10 +226,19 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		this.masterPriority.priority_value = priority_value;
 	}
 
+	public override void CollectChores(ChoreConsumerState consumer_state, List<Chore.Precondition.Context> succeeded_contexts, List<Chore.Precondition.Context> failed_contexts, bool is_attempting_override)
+	{
+	}
+
+	public void CollectChoresFromGlobalChoreProvider(ChoreConsumerState consumer_state, List<Chore.Precondition.Context> succeeded_contexts, List<Chore.Precondition.Context> failed_contexts, bool is_attempting_override)
+	{
+		base.CollectChores(consumer_state, succeeded_contexts, failed_contexts, is_attempting_override);
+	}
+
 	public override void Cleanup()
 	{
 		base.Cleanup();
-		this.partitionerEntry.Release();
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		Storage storage = this.smi.sm.destination.Get<Storage>(this.smi);
 		if (storage != null)
 		{
@@ -236,6 +248,8 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 
 	public Tag[] tags;
 
+	public int tagBitsHash;
+
 	public TagBits tagBits;
 
 	public TagBits requiredTagBits;
@@ -244,7 +258,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 
 	public bool allowMultifetch = true;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 
 	public static readonly Chore.Precondition IsFetchTargetAvailable = new Chore.Precondition
 	{
@@ -262,7 +276,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			}
 			else
 			{
-				flag = FetchManagerUpdater.IsFetchablePickup(pickupable.KPrefabID, pickupable.storage, pickupable.UnreservedAmount, pickupable.MinTakeAmount, fetchChore.originalAmount, fetchChore.tagBits, fetchChore.requiredTagBits, fetchChore.forbiddenTagBits, context.consumerState.storage);
+				flag = FetchManager.IsFetchablePickup(pickupable.KPrefabID, pickupable.storage, pickupable.UnreservedAmount, fetchChore.tagBits, fetchChore.requiredTagBits, fetchChore.forbiddenTagBits, context.consumerState.storage);
 			}
 			if (flag)
 			{

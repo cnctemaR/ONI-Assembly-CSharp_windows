@@ -252,9 +252,9 @@ public class ElementLoader
 		return list.ToArray();
 	}
 
-	private static void ParseCommon(ElementLoader.ElementEntry[] enties, ref Hashtable substance_list, SubstanceTable substance_table, Tag phase_tag, Element.State state)
+	private static void ParseCommon(ElementLoader.ElementEntry[] entries, ref Hashtable substance_list, SubstanceTable substance_table, Tag phase_tag, Element.State state)
 	{
-		foreach (ElementLoader.ElementEntry elementEntry in enties)
+		foreach (ElementLoader.ElementEntry elementEntry in entries)
 		{
 			ElementLoader.ParseCommon(elementEntry, ref substance_list, substance_table, phase_tag, state);
 		}
@@ -357,6 +357,13 @@ public class ElementLoader
 		element.flow = entry.flow;
 		element.toxicity = entry.toxicity;
 		element.maxMass = 1.8f;
+		element.lowTempTransitionOreID = SimHashes.Vacuum;
+		element.lowTempTransitionOreMassConversion = 0f;
+		if (entry.lowTempTransitionOreId != (SimHashes)0)
+		{
+			element.lowTempTransitionOreID = entry.lowTempTransitionOreId;
+			element.lowTempTransitionOreMassConversion = entry.lowTempTransitionOreMassConversion;
+		}
 		GameTags.GasElements.Add(element.tag);
 	}
 
@@ -429,6 +436,7 @@ public class ElementLoader
 			{
 				ElementLoader.elements[j].substance.idx = j;
 			}
+			ElementLoader.elements[j].idx = (byte)j;
 		}
 	}
 
@@ -524,5 +532,9 @@ public class ElementLoader
 		public float flow;
 
 		public float toxicity;
+
+		public SimHashes lowTempTransitionOreId;
+
+		public float lowTempTransitionOreMassConversion;
 	}
 }

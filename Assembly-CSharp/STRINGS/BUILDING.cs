@@ -81,16 +81,33 @@ namespace STRINGS
 			{
 				public static class ALLOWED
 				{
-					public static LocString NAME = "Autobottling: On";
+					public static LocString NAME = "Auto-Bottle: On";
 
 					public static LocString TOOLTIP = "Duplicants may specifically fetch liquid from Pitcher Pumps to bring to this location";
 				}
 
 				public static class DENIED
 				{
-					public static LocString NAME = "Autobottling: Off";
+					public static LocString NAME = "Auto-Bottle: Off";
 
 					public static LocString TOOLTIP = "Duplicants may not specifically fetch liquid from Pitcher Pumps to bring to this location";
+				}
+			}
+
+			public class CANISTER_EMPTIER
+			{
+				public static class ALLOWED
+				{
+					public static LocString NAME = "Auto-Canister: On";
+
+					public static LocString TOOLTIP = "Duplicants may specifically fetch gas from Canister Fillers to bring to this location";
+				}
+
+				public static class DENIED
+				{
+					public static LocString NAME = "Auto-Canister: Off";
+
+					public static LocString TOOLTIP = "Duplicants may not specifically fetch gas from Canister Fillers to bring to this location";
 				}
 			}
 
@@ -263,9 +280,9 @@ namespace STRINGS
 
 			public class OPERATINGENERGY
 			{
-				public static LocString NAME = "Heat Production: {0}";
+				public static LocString NAME = "Heat Production: {0}/s";
 
-				public static LocString TOOLTIP = "This building is producing {0} of energy\n\nSources:\n{1}";
+				public static LocString TOOLTIP = "This building is producing {0} DTU per second\n\nSources:\n{1}";
 
 				public static LocString LINEITEM = "    • {0}: {1}\n";
 
@@ -555,7 +572,7 @@ namespace STRINGS
 
 			public class NOSTORAGEFILTERSET
 			{
-				public static LocString NAME = "Storage Not Assigned";
+				public static LocString NAME = "Filters Not Designated";
 
 				public static LocString TOOLTIP = "No resources types are marked for storage in this building";
 			}
@@ -611,51 +628,51 @@ namespace STRINGS
 
 			public class PENDINGDECONSTRUCTION
 			{
-				public static LocString NAME = "Deconstruction Errand Assigned";
+				public static LocString NAME = "Deconstruction Errand";
 
-				public static LocString TOOLTIP = "Waiting for a Duplicant to deconstruct this building";
+				public static LocString TOOLTIP = "Building will be deconstructed once a Duplicant is available";
 			}
 
 			public class PENDINGFISH
 			{
-				public static LocString NAME = "Fishing Errand Assigned";
+				public static LocString NAME = "Fishing Errand";
 
-				public static LocString TOOLTIP = "Waiting for a Duplicant to fish";
+				public static LocString TOOLTIP = "Spot will be fished once a Duplicant is available";
 			}
 
 			public class PENDINGHARVEST
 			{
-				public static LocString NAME = "Harvest Errand Assigned";
+				public static LocString NAME = "Harvest Errand";
 
-				public static LocString TOOLTIP = "Waiting for a Duplicant to harvest";
+				public static LocString TOOLTIP = "Plant will be harvested once a Duplicant is available";
 			}
 
 			public class PENDINGUPROOT
 			{
-				public static LocString NAME = "Uproot Errand Assigned";
+				public static LocString NAME = "Uproot Errand";
 
-				public static LocString TOOLTIP = "Waiting for a Duplicant to uproot";
+				public static LocString TOOLTIP = "Plant will be uprooted once a Duplicant is available";
 			}
 
 			public class PENDINGREPAIR
 			{
-				public static LocString NAME = "Repair Errand Assigned";
+				public static LocString NAME = "Repair Errand";
 
-				public static LocString TOOLTIP = "Waiting for a Duplicant to repair\nReceived damage from {DamageInfo}";
+				public static LocString TOOLTIP = "Building will be repaired once a Duplicant is available\nReceived damage from {DamageInfo}";
 			}
 
 			public class PENDINGSWITCHTOGGLE
 			{
-				public static LocString NAME = "Change Setting Errand Assigned";
+				public static LocString NAME = "Setting Change Errand";
 
-				public static LocString TOOLTIP = "Waiting for a Duplicant to change setting";
+				public static LocString TOOLTIP = "Settings will be changed once a Duplicant is available";
 			}
 
 			public class PENDINGWORK
 			{
-				public static LocString NAME = "Errand Assigned";
+				public static LocString NAME = "Work Errand";
 
-				public static LocString TOOLTIP = "Waiting for a Duplicant to operate this building";
+				public static LocString TOOLTIP = "Building will be operated once a Duplicant is available";
 			}
 
 			public class POWERBUTTONOFF
@@ -709,16 +726,16 @@ namespace STRINGS
 
 			public class UNDERCONSTRUCTIONNOWORKER
 			{
-				public static LocString NAME = "Construction Errand Assigned";
+				public static LocString NAME = "Construction Errand";
 
-				public static LocString TOOLTIP = "Waiting for a Duplicant to build";
+				public static LocString TOOLTIP = "Building will be constructed once a Duplicant is available";
 			}
 
 			public class WAITINGFORMATERIALS
 			{
-				public static LocString NAME = "Awaiting Material Delivery\n{ItemsRemaining}";
+				public static LocString NAME = "Awaiting Delivery\n{ItemsRemaining}";
 
-				public static LocString TOOLTIP = "Waiting for a Duplicant to deliver:\n{ItemsRemaining}";
+				public static LocString TOOLTIP = "These materials will be delivered once a Duplicant is available";
 
 				public static LocString LINE_ITEM_MASS = "• {0}: {1}";
 
@@ -727,11 +744,46 @@ namespace STRINGS
 
 			public class WAITINGFORREPAIRMATERIALS
 			{
-				public static LocString NAME = "Awaiting Repair Material Delivery\n{ItemsRemaining}\n";
+				public static LocString NAME = "Awaiting Repair Delivery\n{ItemsRemaining}\n";
 
-				public static LocString TOOLTIP = "Waiting for a Duplicant to deliver:\n{ItemsRemaining}";
+				public static LocString TOOLTIP = "These materials must be delivered before this building can be repaired";
 
 				public static LocString LINE_ITEM = "• {0}: {1}";
+			}
+
+			public class MISSINGGANTRY
+			{
+				public static LocString NAME = "Missing Gantry";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"A ",
+					BUILDINGS.PREFABS.GANTRY.NAME,
+					" must be built below a ",
+					BUILDINGS.PREFABS.COMMANDMODULE.NAME,
+					" for an astronaut to access it"
+				});
+			}
+
+			public class ROCKETNAME
+			{
+				public static LocString NAME = "Parent Rocket: {0}";
+
+				public static LocString TOOLTIP = "This module belongs to the rocket: {0}";
+			}
+
+			public class HASGANTRY
+			{
+				public static LocString NAME = "Has Gantry";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"A ",
+					BUILDINGS.PREFABS.GANTRY.NAME,
+					" must be built below a ",
+					BUILDINGS.PREFABS.COMMANDMODULE.NAME,
+					" for an astronaut to access it"
+				});
 			}
 
 			public class NORMAL
@@ -957,6 +1009,17 @@ namespace STRINGS
 				public static LocString NAME = "Consuming {ElementTypes}: {FlowRate}";
 
 				public static LocString TOOLTIP = "This building is utilizing ambient {ElementTypes} from the environment";
+			}
+
+			public class SPACECRAFTREADYTOLAND
+			{
+				public static LocString NAME = "Spacecraft ready to land";
+
+				public static LocString TOOLTIP = "A spacecraft is ready to land";
+
+				public static LocString NOTIFICATION = "Ready to land";
+
+				public static LocString NOTIFICATION_TOOLTIP = "A spacecraft is ready to land";
 			}
 
 			public class CONSUMINGFROMSTORAGE
@@ -1532,13 +1595,6 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This egg incubating cozily" + UI.HORIZONTAL_BR_RULE + "It will hatch when Incubation reaches 100%";
 			}
 
-			public class SPACENOTVISIBLE
-			{
-				public static LocString NAME = "Insufficient Visibility";
-
-				public static LocString TOOLTIP = "An obscured view of the sky is preventing this scanner from collecting data\n\nMake sure the area about the dish is clear";
-			}
-
 			public class DETECTORQUALITY
 			{
 				public static LocString NAME = "Scan Quality: {Quality}";
@@ -1565,6 +1621,20 @@ namespace STRINGS
 				public static LocString NAME = "Incoming Meteors";
 
 				public static LocString TOOLTIP = "Warning!\n\nHigh velocity objects on approach!";
+			}
+
+			public class SPACE_VISIBILITY_NONE
+			{
+				public static LocString NAME = "No Line of Sight";
+
+				public static LocString TOOLTIP = "This building has no view of space\n\nEnsure an unblocked view of the sky is available to collect research data\nVisibility: {VISIBILITY}\nScan Radius: {RADIUS} cells";
+			}
+
+			public class SPACE_VISIBILITY_REDUCED
+			{
+				public static LocString NAME = "Reduced Visibility";
+
+				public static LocString TOOLTIP = "This building has an inadequate or obscured view of space\n\nEnsure an unblocked view of the sky is available to collect research data\nVisibility: {VISIBILITY}\nScan Radius: {RADIUS} cells";
 			}
 		}
 

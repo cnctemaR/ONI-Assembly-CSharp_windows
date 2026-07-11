@@ -44,11 +44,7 @@ public class RequireOutputs : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-			this.partitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		IConduitFlow conduitFlow = this.GetConduitFlow();
 		if (conduitFlow != null)
 		{
@@ -84,7 +80,7 @@ public class RequireOutputs : KMonoBehaviour
 			{
 				statusItem = Db.Get().BuildingStatusItems.NeedLiquidOut;
 			}
-			this.selectable.ToggleStatusItem(statusItem, !this.connected, this);
+			this.hasPipeGuid = this.selectable.ToggleStatusItem(statusItem, this.hasPipeGuid, !this.connected, this);
 		}
 	}
 
@@ -111,27 +107,8 @@ public class RequireOutputs : KMonoBehaviour
 		{
 			this.operational.SetFlag(RequireOutputs.pipesHaveRoomFlag, flag);
 			this.previouslyHadRoom = flag;
-			StatusItem statusItem = null;
-			ConduitType conduitType = this.conduitType;
-			if (conduitType != ConduitType.Liquid)
-			{
-				if (conduitType != ConduitType.Gas)
-				{
-					if (conduitType == ConduitType.Solid)
-					{
-						statusItem = Db.Get().BuildingStatusItems.SolidPipeObstructed;
-					}
-				}
-				else
-				{
-					statusItem = Db.Get().BuildingStatusItems.GasPipeObstructed;
-				}
-			}
-			else
-			{
-				statusItem = Db.Get().BuildingStatusItems.LiquidPipeObstructed;
-			}
-			this.selectable.ToggleStatusItem(statusItem, !flag, null);
+			StatusItem conduitBlockedMultiples = Db.Get().BuildingStatusItems.ConduitBlockedMultiples;
+			this.pipeBlockedGuid = this.selectable.ToggleStatusItem(conduitBlockedMultiples, this.pipeBlockedGuid, !flag, null);
 		}
 	}
 
@@ -153,8 +130,12 @@ public class RequireOutputs : KMonoBehaviour
 
 	private bool IsConnected(int cell)
 	{
+		return RequireOutputs.IsConnected(cell, this.conduitType);
+	}
+
+	public static bool IsConnected(int cell, ConduitType conduitType)
+	{
 		ObjectLayer objectLayer = ObjectLayer.NumLayers;
-		ConduitType conduitType = this.conduitType;
 		if (conduitType != ConduitType.Gas)
 		{
 			if (conduitType != ConduitType.Liquid)
@@ -197,5 +178,9 @@ public class RequireOutputs : KMonoBehaviour
 
 	private bool connected;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private Guid hasPipeGuid;
+
+	private Guid pipeBlockedGuid;
+
+	private HandleVector<int>.Handle partitionerEntry;
 }

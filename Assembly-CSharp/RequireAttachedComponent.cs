@@ -1,0 +1,68 @@
+﻿using System;
+using KSerialization;
+using STRINGS;
+using UnityEngine;
+
+[SerializationConfig(MemberSerialization.OptIn)]
+public class RequireAttachedComponent : RocketLaunchCondition
+{
+	public RequireAttachedComponent(AttachableBuilding myAttachable, Type required_type, string type_name_string)
+	{
+		this.myAttachable = myAttachable;
+		this.requiredType = required_type;
+		this.typeNameString = type_name_string;
+	}
+
+	public Type RequiredType
+	{
+		get
+		{
+			return this.requiredType;
+		}
+		set
+		{
+			this.requiredType = value;
+			this.typeNameString = this.requiredType.Name;
+		}
+	}
+
+	public override bool EvaluateLaunchCondition()
+	{
+		if (this.myAttachable != null)
+		{
+			foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(this.myAttachable))
+			{
+				if (gameObject.GetComponent(this.requiredType))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		return false;
+	}
+
+	public override string GetLaunchStatusMessage(bool ready)
+	{
+		if (ready)
+		{
+			return this.typeNameString + " " + UI.STARMAP.LAUNCHCHECKLIST.REQUIRED;
+		}
+		return this.typeNameString + " " + UI.STARMAP.LAUNCHCHECKLIST.INSTALLED;
+	}
+
+	public override string GetLaunchStatusTooltip(bool ready)
+	{
+		if (ready)
+		{
+			return string.Format(UI.STARMAP.LAUNCHCHECKLIST.INSTALLED_TOOLTIP, this.typeNameString);
+		}
+		return string.Format(UI.STARMAP.LAUNCHCHECKLIST.REQUIRED_TOOLTIP, this.typeNameString);
+	}
+
+	private string typeNameString;
+
+	private Type requiredType;
+
+	private AttachableBuilding myAttachable;
+}

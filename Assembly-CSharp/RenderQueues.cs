@@ -16,5 +16,5 @@ public static class RenderQueues
 
 	public static int BuriedObjects = 4500;
 
-	public static int BlockTiles = 4500;
+	public static int BlockTiles = 3499;
 }

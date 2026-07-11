@@ -58,8 +58,8 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 
 	protected void OnActiveChanged(object data)
 	{
-		bool flag = (bool)data;
-		StatusItem statusItem = ((!flag) ? Db.Get().BuildingStatusItems.GeneratorOffline : Db.Get().BuildingStatusItems.Wattage);
+		bool isActive = ((Operational)data).IsActive;
+		StatusItem statusItem = ((!isActive) ? Db.Get().BuildingStatusItems.GeneratorOffline : Db.Get().BuildingStatusItems.Wattage);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, this);
 	}
 
@@ -68,7 +68,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 		base.OnSpawn();
 		if (this.hasMeter)
 		{
-			this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", this.meterOffset, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
+			this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", this.meterOffset, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
 		}
 	}
 

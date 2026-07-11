@@ -23,7 +23,7 @@ public class BatterySmart : Battery, IActivationRangeTarget
 
 	private void CreateLogicMeter()
 	{
-		this.logicMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "logicmeter_target", "logicmeter", Meter.Offset.Infront, new string[0]);
+		this.logicMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "logicmeter_target", "logicmeter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[0]);
 	}
 
 	public override void EnergySim200ms(float dt)

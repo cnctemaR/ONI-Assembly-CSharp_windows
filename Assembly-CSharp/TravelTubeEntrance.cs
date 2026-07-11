@@ -54,7 +54,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		this.TubeConnectionsChanged(connections);
 		this.tubeChangedEntry = GameScenePartitioner.Instance.Add("TravelTubeEntrance.TubeListener", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[32], new Action<object>(this.TubeChanged));
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
-		this.meter = new MeterController(this, Meter.Offset.Infront, new string[0]);
+		this.meter = new MeterController(this, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[0]);
 		this.CreateNewWaitReactable();
 		Grid.HasTubeEntrance[Grid.PosToCell(this)] = true;
 		base.smi.StartSM();
@@ -70,10 +70,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		}
 		Grid.HasTubeEntrance[Grid.PosToCell(this)] = false;
 		this.ClearWaitReactable();
-		if (this.tubeChangedEntry != null)
-		{
-			this.tubeChangedEntry.Release();
-		}
+		GameScenePartitioner.Instance.Free(ref this.tubeChangedEntry);
 		base.OnCleanUp();
 	}
 
@@ -290,7 +287,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 
 	private static readonly Operational.Flag tubeConnected = new Operational.Flag("tubeConnected", Operational.Flag.Type.Functional);
 
-	private GameScenePartitionerEntry tubeChangedEntry;
+	private HandleVector<int>.Handle tubeChangedEntry;
 
 	private Guid connectedStatus;
 

@@ -84,7 +84,6 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 	{
 		WorkChore<RelaxationPoint> workChore = new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.StressHeal, this, null, null, true, null, null, null, false, null, true, true, null, false, true, false, PriorityScreen.PriorityClass.high, 0, false);
 		workChore.AddPrecondition(MassageTable.IsStressAboveActivationRange, this);
-		workChore.isPreferredChoreRegardlessOfTags = true;
 		return workChore;
 	}
 

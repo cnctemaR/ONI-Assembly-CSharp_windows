@@ -6,7 +6,7 @@ namespace Klei.AI
 {
 	public class Attribute : Resource
 	{
-		public Attribute(string id, bool is_trainable, Attribute.Display show_in_ui, bool is_profession, float base_value = 0f)
+		public Attribute(string id, bool is_trainable, Attribute.Display show_in_ui, bool is_profession, float base_value = 0f, string uiSprite = null, string thoughtSprite = null)
 			: base(id, null, null)
 		{
 			string text = "STRINGS.DUPLICANTS.ATTRIBUTES." + id.ToUpper();
@@ -17,9 +17,12 @@ namespace Klei.AI
 			this.IsProfession = is_profession;
 			this.ShowInUI = show_in_ui;
 			this.BaseValue = base_value;
+			this.formatter = Attribute.defaultFormatter;
+			this.uiSprite = uiSprite;
+			this.thoughtSprite = thoughtSprite;
 		}
 
-		public Attribute(string id, string name, string profession_name, string attribute_description, float base_value, Attribute.Display show_in_ui, bool is_trainable)
+		public Attribute(string id, string name, string profession_name, string attribute_description, float base_value, Attribute.Display show_in_ui, bool is_trainable, string uiSprite = null, string thoughtSprite = null)
 			: base(id, name)
 		{
 			this.Description = attribute_description;
@@ -27,6 +30,8 @@ namespace Klei.AI
 			this.BaseValue = base_value;
 			this.ShowInUI = show_in_ui;
 			this.IsTrainable = is_trainable;
+			this.uiSprite = uiSprite;
+			this.thoughtSprite = thoughtSprite;
 			if (this.ProfessionName == string.Empty)
 			{
 				this.ProfessionName = null;
@@ -60,8 +65,10 @@ namespace Klei.AI
 
 		public string GetTooltip(AttributeInstance instance)
 		{
-			return instance.GetAttributeValueTooltip();
+			return this.formatter.GetTooltip(this, instance);
 		}
+
+		private static readonly StandardAttributeFormatter defaultFormatter = new StandardAttributeFormatter(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.None);
 
 		public string Description;
 
@@ -76,6 +83,10 @@ namespace Klei.AI
 		public string ProfessionName;
 
 		public List<AttributeConverter> converters = new List<AttributeConverter>();
+
+		public string uiSprite;
+
+		public string thoughtSprite;
 
 		public IAttributeFormatter formatter;
 

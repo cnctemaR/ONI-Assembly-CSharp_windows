@@ -135,20 +135,26 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 		}
 		base.GetComponent<KPrefabID>().AddTag(GameTags.Assigned);
 		this.assignee = new_assignee;
-		if (this.slot != null && new_assignee is MinionIdentity)
+		if (this.slot != null && (new_assignee is MinionIdentity || new_assignee is StoredMinionIdentity))
 		{
-			MinionIdentity minionIdentity = new_assignee as MinionIdentity;
-			Ownables component = minionIdentity.GetComponent<Ownables>();
-			AssignableSlotInstance slot = component.GetSlot(this.slot);
-			if (slot != null)
+			KMonoBehaviour kmonoBehaviour2 = new_assignee as KMonoBehaviour;
+			Ownables component = kmonoBehaviour2.GetComponent<Ownables>();
+			if (component != null)
 			{
-				slot.Assign(this);
+				AssignableSlotInstance slot = component.GetSlot(this.slot);
+				if (slot != null)
+				{
+					slot.Assign(this);
+				}
 			}
-			Equipment component2 = minionIdentity.GetComponent<Equipment>();
-			AssignableSlotInstance slot2 = component2.GetSlot(this.slot);
-			if (slot2 != null)
+			Equipment component2 = kmonoBehaviour2.GetComponent<Equipment>();
+			if (component2 != null)
 			{
-				slot2.Assign(this);
+				AssignableSlotInstance slot2 = component2.GetSlot(this.slot);
+				if (slot2 != null)
+				{
+					slot2.Assign(this);
+				}
 			}
 		}
 		if (this.OnAssign != null)
@@ -165,9 +171,9 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 			return;
 		}
 		base.GetComponent<KPrefabID>().RemoveTag(GameTags.Assigned);
-		if (this.slot != null && this.assignee is MinionIdentity)
+		if (this.slot != null && (this.assignee is MinionIdentity || this.assignee is StoredMinionIdentity))
 		{
-			Assignables component = (this.assignee as MinionIdentity).GetComponent<Ownables>();
+			Assignables component = (this.assignee as KMonoBehaviour).GetComponent<Ownables>();
 			AssignableSlotInstance slot = component.GetSlot(this.slot);
 			if (slot != null)
 			{
@@ -205,7 +211,7 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 
 	public int GetNavigationCost(Navigator navigator)
 	{
-		int num = PathProber.InvalidCost;
+		int num = -1;
 		int num2 = Grid.PosToCell(this);
 		IApproachable component = base.GetComponent<IApproachable>();
 		CellOffset[] array;
@@ -222,7 +228,7 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 		{
 			int num3 = Grid.OffsetCell(num2, cellOffset);
 			int navigationCost = navigator.GetNavigationCost(num3);
-			if (navigationCost != PathProber.InvalidCost && (num == PathProber.InvalidCost || navigationCost < num))
+			if (navigationCost != -1 && (num == -1 || navigationCost < num))
 			{
 				num = navigationCost;
 			}
@@ -252,4 +258,6 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 	private List<Func<MinionIdentity, bool>> autoassignmentPreconditions = new List<Func<MinionIdentity, bool>>();
 
 	private List<Func<MinionIdentity, bool>> assignmentPreconditions = new List<Func<MinionIdentity, bool>>();
+
+	public Func<MinionIdentity, bool> eligibleFilter;
 }

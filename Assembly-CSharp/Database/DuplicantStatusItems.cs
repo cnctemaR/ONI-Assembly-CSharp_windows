@@ -223,13 +223,13 @@ namespace Database
 			{
 				str = str.Replace("{StressModification}", GameUtil.GetFormattedPercent(Db.Get().effects.Get("ColdAir").SelfModifiers[0].Value, GameUtil.TimeSlice.PerCycle));
 				float num = ((ExternalTemperatureMonitor.Instance)data).temperatureTransferer.average_kilowatts_exchanged.GetWeightedAverage * 1000f;
-				str = str.Replace("{currentTransferWattage}", GameUtil.GetFormattedWattage(num, GameUtil.WattageFormatterUnit.Automatic));
+				str = str.Replace("{currentTransferWattage}", GameUtil.GetFormattedHeatEnergyRate(num, GameUtil.HeatEnergyFormatterUnit.Automatic));
 				AttributeInstance attributeInstance = ((ExternalTemperatureMonitor.Instance)data).attributes.Get("ThermalConductivityBarrier");
 				string text2 = attributeInstance.GetFormattedValue();
 				text2 += "\n----------\n";
 				foreach (AttributeModifier attributeModifier in attributeInstance.Modifiers)
 				{
-					text2 = text2 + attributeModifier.GetDescription() + " " + attributeModifier.GetFormattedString(attributeInstance.gameObject);
+					text2 = text2 + attributeModifier.GetDescription() + " " + attributeModifier.GetFormattedString(attributeInstance.gameObject, false);
 					text2 += "\n";
 				}
 				str = str.Replace("{conductivityBarrier}", text2);
@@ -240,13 +240,13 @@ namespace Database
 			{
 				str = str.Replace("{StressModification}", GameUtil.GetFormattedPercent(Db.Get().effects.Get("WarmAir").SelfModifiers[0].Value, GameUtil.TimeSlice.PerCycle));
 				float num2 = ((ExternalTemperatureMonitor.Instance)data).temperatureTransferer.average_kilowatts_exchanged.GetWeightedAverage * 1000f;
-				str = str.Replace("{currentTransferWattage}", GameUtil.GetFormattedWattage(num2, GameUtil.WattageFormatterUnit.Automatic));
+				str = str.Replace("{currentTransferWattage}", GameUtil.GetFormattedHeatEnergyRate(num2, GameUtil.HeatEnergyFormatterUnit.Automatic));
 				AttributeInstance attributeInstance2 = ((ExternalTemperatureMonitor.Instance)data).attributes.Get("ThermalConductivityBarrier");
 				string text3 = attributeInstance2.GetFormattedValue();
 				text3 += "\n----------\n";
 				foreach (AttributeModifier attributeModifier2 in attributeInstance2.Modifiers)
 				{
-					text3 = text3 + attributeModifier2.GetDescription() + " " + attributeModifier2.GetFormattedString(attributeInstance2.gameObject);
+					text3 = text3 + attributeModifier2.GetDescription() + " " + attributeModifier2.GetFormattedString(attributeInstance2.gameObject, false);
 					text3 += "\n";
 				}
 				str = str.Replace("{conductivityBarrier}", text3);

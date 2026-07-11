@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
@@ -9,7 +8,7 @@ public class EggShellConfig : IEntityConfig
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity("EggShell", ITEMS.INDUSTRIAL_PRODUCTS.EGG_SHELL.NAME, ITEMS.INDUSTRIAL_PRODUCTS.EGG_SHELL.DESC, 1f, false, Assets.GetAnim("eggshells_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.CIRCLE, 0.35f, 0.35f, true, SimHashes.Creature, null);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.AddPrefabTags(new List<Tag> { GameTags.Organics });
+		component.AddTag(GameTags.Organics);
 		gameObject.AddOrGet<EntitySplitter>();
 		gameObject.AddOrGet<SimpleMassStatusItem>();
 		EntityTemplates.CreateAndRegisterCompostableFromPrefab(gameObject);

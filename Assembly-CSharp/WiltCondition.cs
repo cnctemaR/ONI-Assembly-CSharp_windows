@@ -12,11 +12,11 @@ public class WiltCondition : KMonoBehaviour
 	public List<WiltCondition.Condition> CurrentWiltSources()
 	{
 		List<WiltCondition.Condition> list = new List<WiltCondition.Condition>();
-		foreach (KeyValuePair<WiltCondition.Condition, bool> keyValuePair in this.WiltConditions)
+		foreach (KeyValuePair<int, bool> keyValuePair in this.WiltConditions)
 		{
 			if (!keyValuePair.Value)
 			{
-				list.Add(keyValuePair.Key);
+				list.Add((WiltCondition.Condition)keyValuePair.Key);
 			}
 		}
 		return list;
@@ -25,21 +25,29 @@ public class WiltCondition : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.WiltConditions.Add(WiltCondition.Condition.Temperature, true);
-		this.WiltConditions.Add(WiltCondition.Condition.Pressure, true);
-		this.WiltConditions.Add(WiltCondition.Condition.AtmosphereElement, true);
-		this.WiltConditions.Add(WiltCondition.Condition.Drowning, true);
-		this.WiltConditions.Add(WiltCondition.Condition.Fertilized, true);
-		this.WiltConditions.Add(WiltCondition.Condition.DryingOut, true);
-		this.WiltConditions.Add(WiltCondition.Condition.Irrigation, true);
-		this.WiltConditions.Add(WiltCondition.Condition.IlluminationComfort, true);
-		this.WiltConditions.Add(WiltCondition.Condition.Receptacle, true);
-		this.WiltConditions.Add(WiltCondition.Condition.Entombed, true);
+		this.WiltConditions.Add(0, true);
+		this.WiltConditions.Add(1, true);
+		this.WiltConditions.Add(2, true);
+		this.WiltConditions.Add(3, true);
+		this.WiltConditions.Add(4, true);
+		this.WiltConditions.Add(5, true);
+		this.WiltConditions.Add(6, true);
+		this.WiltConditions.Add(7, true);
+		this.WiltConditions.Add(9, true);
+		this.WiltConditions.Add(10, true);
 		base.Subscribe(-107174716, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Temperature, false);
 		});
+		base.Subscribe(-1758196852, delegate(object data)
+		{
+			this.SetCondition(WiltCondition.Condition.Temperature, false);
+		});
 		base.Subscribe(-1234705021, delegate(object data)
+		{
+			this.SetCondition(WiltCondition.Condition.Temperature, false);
+		});
+		base.Subscribe(-55477301, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Temperature, false);
 		});
@@ -135,7 +143,7 @@ public class WiltCondition : KMonoBehaviour
 		this.CheckShouldWilt();
 		if (this.wilting)
 		{
-			this.DoWilt(null);
+			this.DoWilt();
 			if (!this.goingToWilt)
 			{
 				this.goingToWilt = true;
@@ -144,7 +152,7 @@ public class WiltCondition : KMonoBehaviour
 		}
 		else
 		{
-			this.DoRecover(null);
+			this.DoRecover();
 			if (this.goingToWilt)
 			{
 				this.goingToWilt = false;
@@ -162,18 +170,18 @@ public class WiltCondition : KMonoBehaviour
 
 	private void SetCondition(WiltCondition.Condition condition, bool satisfiedState)
 	{
-		if (!this.WiltConditions.ContainsKey(condition))
+		if (!this.WiltConditions.ContainsKey((int)condition))
 		{
 			return;
 		}
-		this.WiltConditions[condition] = satisfiedState;
+		this.WiltConditions[(int)condition] = satisfiedState;
 		this.CheckShouldWilt();
 	}
 
 	private void CheckShouldWilt()
 	{
 		bool flag = false;
-		foreach (KeyValuePair<WiltCondition.Condition, bool> keyValuePair in this.WiltConditions)
+		foreach (KeyValuePair<int, bool> keyValuePair in this.WiltConditions)
 		{
 			if (!keyValuePair.Value)
 			{
@@ -202,7 +210,7 @@ public class WiltCondition : KMonoBehaviour
 			this.recoverSchedulerHandler.ClearScheduler();
 			if (!this.wiltSchedulerHandler.IsValid)
 			{
-				this.wiltSchedulerHandler = GameScheduler.Instance.Schedule("Wilt", this.WiltDelay, new Action<object>(this.DoWilt), null, null);
+				this.wiltSchedulerHandler = GameScheduler.Instance.Schedule("Wilt", this.WiltDelay, new Action<object>(WiltCondition.DoWiltCallback), this, null);
 			}
 		}
 	}
@@ -215,12 +223,17 @@ public class WiltCondition : KMonoBehaviour
 			this.wiltSchedulerHandler.ClearScheduler();
 			if (!this.recoverSchedulerHandler.IsValid)
 			{
-				this.recoverSchedulerHandler = GameScheduler.Instance.Schedule("Recover", this.RecoveryDelay, new Action<object>(this.DoRecover), null, null);
+				this.recoverSchedulerHandler = GameScheduler.Instance.Schedule("Recover", this.RecoveryDelay, new Action<object>(WiltCondition.DoRecoverCallback), this, null);
 			}
 		}
 	}
 
-	private void DoWilt(object obj)
+	private static void DoWiltCallback(object data)
+	{
+		((WiltCondition)data).DoWilt();
+	}
+
+	private void DoWilt()
 	{
 		this.wiltSchedulerHandler.ClearScheduler();
 		KSelectable component = base.GetComponent<KSelectable>();
@@ -264,9 +277,9 @@ public class WiltCondition : KMonoBehaviour
 		{
 			foreach (WiltCondition.Condition condition in wiltCause.Conditions)
 			{
-				if (this.WiltConditions.ContainsKey(condition))
+				if (this.WiltConditions.ContainsKey((int)condition))
 				{
-					if (!this.WiltConditions[condition])
+					if (!this.WiltConditions[(int)condition])
 					{
 						text += "\n";
 						text += wiltCause.WiltStateString;
@@ -278,7 +291,12 @@ public class WiltCondition : KMonoBehaviour
 		return text;
 	}
 
-	private void DoRecover(object obj)
+	private static void DoRecoverCallback(object data)
+	{
+		((WiltCondition)data).DoRecover();
+	}
+
+	private void DoRecover()
 	{
 		this.recoverSchedulerHandler.ClearScheduler();
 		KSelectable component = base.GetComponent<KSelectable>();
@@ -300,7 +318,7 @@ public class WiltCondition : KMonoBehaviour
 	[Serialize]
 	private bool wilting;
 
-	private Dictionary<WiltCondition.Condition, bool> WiltConditions = new Dictionary<WiltCondition.Condition, bool>();
+	private Dictionary<int, bool> WiltConditions = new Dictionary<int, bool>();
 
 	public float WiltDelay = 1f;
 

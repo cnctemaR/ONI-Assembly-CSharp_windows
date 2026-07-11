@@ -139,10 +139,13 @@ public class AssignableSideScreen : SideScreenContent
 		}
 		foreach (MinionIdentity minionIdentity in identities)
 		{
-			AssignableSideScreenRow freeElement3 = this.rowPool.GetFreeElement(this.rowGroup, true);
-			freeElement3.sideScreen = this;
-			this.identityRowMap.Add(minionIdentity, freeElement3);
-			freeElement3.SetContent(minionIdentity, new Action<IAssignableIdentity>(this.OnRowClicked), this);
+			if (this.targetAssignable.eligibleFilter == null || this.targetAssignable.eligibleFilter(minionIdentity))
+			{
+				AssignableSideScreenRow freeElement3 = this.rowPool.GetFreeElement(this.rowGroup, true);
+				freeElement3.sideScreen = this;
+				this.identityRowMap.Add(minionIdentity, freeElement3);
+				freeElement3.SetContent(minionIdentity, new Action<IAssignableIdentity>(this.OnRowClicked), this);
+			}
 		}
 		this.ExecuteSort(this.activeSortFunction);
 	}

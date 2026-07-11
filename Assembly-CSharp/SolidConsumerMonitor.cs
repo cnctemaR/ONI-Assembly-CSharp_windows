@@ -12,7 +12,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			smi.OnEatSolidComplete(data);
 		}).ToggleBehaviour(GameTags.Creatures.WantsToEat, (SolidConsumerMonitor.Instance smi) => smi.targetEdible != null && !smi.targetEdible.HasTag(GameTags.Creatures.ReservedByCreature), null);
 		this.satisfied.TagTransition(GameTags.Creatures.Hungry, this.lookingforfood, false);
-		this.lookingforfood.TagTransition(GameTags.Creatures.Hungry, this.satisfied, true).Update(new Action<SolidConsumerMonitor.Instance, float>(SolidConsumerMonitor.FindFood), UpdateRate.SIM_200ms, false);
+		this.lookingforfood.TagTransition(GameTags.Creatures.Hungry, this.satisfied, true).Update(new Action<SolidConsumerMonitor.Instance, float>(SolidConsumerMonitor.FindFood), UpdateRate.SIM_1000ms, false);
 	}
 
 	private static void FindFood(SolidConsumerMonitor.Instance smi, float dt)
@@ -52,7 +52,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			this.navigator = navigator;
 			this.diet = diet;
 			this.result = null;
-			this.resultCost = PathProber.InvalidCost;
+			this.resultCost = -1;
 		}
 
 		public void Iterate(object target_obj)
@@ -62,18 +62,18 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			{
 				return;
 			}
-			if (kmonoBehaviour.HasTag(GameTags.Creatures.ReservedByCreature))
+			KPrefabID component = kmonoBehaviour.GetComponent<KPrefabID>();
+			if (component.HasTag(GameTags.Creatures.ReservedByCreature))
+			{
+				return;
+			}
+			if (component.HasTag(GameTags.CreatureBrain))
 			{
 				return;
 			}
 			this.FindEdibleInFeeder(ref this, kmonoBehaviour);
 			GameObject gameObject = kmonoBehaviour.gameObject;
-			if (gameObject == null)
-			{
-				return;
-			}
-			KPrefabID component = gameObject.GetComponent<KPrefabID>();
-			if (this.diet.GetDietInfo(component.GetTagBits()) == null)
+			if (this.diet.GetDietInfo(component.PrefabTag) == null)
 			{
 				return;
 			}
@@ -91,7 +91,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			}
 			int num2 = Grid.PosToCell(gameObject.transform.GetPosition());
 			int navigationCost = this.navigator.GetNavigationCost(num2);
-			if (navigationCost != PathProber.InvalidCost && (navigationCost < this.resultCost || this.resultCost == PathProber.InvalidCost))
+			if (navigationCost != -1 && (navigationCost < this.resultCost || this.resultCost == -1))
 			{
 				this.resultCost = navigationCost;
 				this.result = gameObject;
@@ -159,7 +159,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			{
 				return;
 			}
-			Diet.Info dietInfo = base.def.diet.GetDietInfo(kprefabID.GetTagBits());
+			Diet.Info dietInfo = base.def.diet.GetDietInfo(kprefabID.PrefabTag);
 			if (dietInfo == null)
 			{
 				return;

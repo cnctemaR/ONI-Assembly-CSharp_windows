@@ -47,6 +47,35 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 		ConduitFlow flowManager = Conduit.GetFlowManager(this.portInfo.conduitType);
 		flowManager.AddConduitUpdater(new Action<float>(this.OnConduitTick), ConduitFlowPriority.Default);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, ElementFilter.filterStatusItem, this);
+		this.UpdateConduitExistsStatus();
+		this.UpdateConduitBlockedStatus();
+		ScenePartitionerLayer scenePartitionerLayer = null;
+		ConduitType conduitType = this.portInfo.conduitType;
+		if (conduitType != ConduitType.Gas)
+		{
+			if (conduitType != ConduitType.Liquid)
+			{
+				if (conduitType == ConduitType.Solid)
+				{
+					scenePartitionerLayer = GameScenePartitioner.Instance.solidConduitsLayer;
+				}
+			}
+			else
+			{
+				scenePartitionerLayer = GameScenePartitioner.Instance.liquidConduitsLayer;
+			}
+		}
+		else
+		{
+			scenePartitionerLayer = GameScenePartitioner.Instance.gasConduitsLayer;
+		}
+		if (scenePartitionerLayer != null)
+		{
+			this.partitionerEntry = GameScenePartitioner.Instance.Add("ElementFilterConduitExists", base.gameObject, this.filteredCell, scenePartitionerLayer, delegate(object data)
+			{
+				this.UpdateConduitExistsStatus();
+			});
+		}
 	}
 
 	protected override void OnCleanUp()
@@ -61,6 +90,7 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 	private void OnConduitTick(float dt)
 	{
 		bool flag = false;
+		this.UpdateConduitBlockedStatus();
 		if (this.operational.IsOperational)
 		{
 			ConduitFlow flowManager = Conduit.GetFlowManager(this.portInfo.conduitType);
@@ -78,6 +108,43 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 			}
 		}
 		this.operational.SetActive(flag, false);
+	}
+
+	private void UpdateConduitExistsStatus()
+	{
+		bool flag = RequireOutputs.IsConnected(this.filteredCell, this.portInfo.conduitType);
+		StatusItem statusItem;
+		switch (this.portInfo.conduitType)
+		{
+		case ConduitType.Gas:
+			statusItem = Db.Get().BuildingStatusItems.NeedGasOut;
+			break;
+		case ConduitType.Liquid:
+			statusItem = Db.Get().BuildingStatusItems.NeedLiquidOut;
+			break;
+		case ConduitType.Solid:
+			statusItem = Db.Get().BuildingStatusItems.NeedSolidOut;
+			break;
+		default:
+			throw new ArgumentOutOfRangeException();
+		}
+		bool flag2 = this.needsConduitStatusItemGuid != Guid.Empty;
+		if (flag == flag2)
+		{
+			this.needsConduitStatusItemGuid = this.selectable.ToggleStatusItem(statusItem, this.needsConduitStatusItemGuid, !flag, null);
+		}
+	}
+
+	private void UpdateConduitBlockedStatus()
+	{
+		ConduitFlow flowManager = Conduit.GetFlowManager(this.portInfo.conduitType);
+		bool flag = flowManager.IsConduitEmpty(this.filteredCell);
+		StatusItem conduitBlockedMultiples = Db.Get().BuildingStatusItems.ConduitBlockedMultiples;
+		bool flag2 = this.conduitBlockedStatusItemGuid != Guid.Empty;
+		if (flag == flag2)
+		{
+			this.conduitBlockedStatusItemGuid = this.selectable.ToggleStatusItem(conduitBlockedMultiples, this.conduitBlockedStatusItemGuid, !flag, null);
+		}
 	}
 
 	private void OnFilterChanged(Tag tag)
@@ -169,7 +236,16 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 	[MyCmpReq]
 	private Building building;
 
+	[MyCmpReq]
+	private KSelectable selectable;
+
 	public Filterable filterable;
+
+	private static readonly Operational.Flag canFilterFlag = new Operational.Flag("output_connected", Operational.Flag.Type.Requirement);
+
+	private Guid needsConduitStatusItemGuid;
+
+	private Guid conduitBlockedStatusItemGuid;
 
 	private int inputCell = -1;
 
@@ -183,5 +259,7 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 
 	private FlowUtilityNetwork.NetworkItem itemFilter;
 
-	private static StatusItem filterStatusItem;
+	private HandleVector<int>.Handle partitionerEntry;
+
+	private static StatusItem filterStatusItem = null;
 }

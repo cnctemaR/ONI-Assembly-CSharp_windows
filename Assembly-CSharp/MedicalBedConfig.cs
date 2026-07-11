@@ -29,7 +29,7 @@ public class MedicalBedConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.Clinic);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.Clinic);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

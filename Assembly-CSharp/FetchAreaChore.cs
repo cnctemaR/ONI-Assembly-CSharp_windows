@@ -57,13 +57,13 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 	public static void GatherNearbyFetchChores(FetchChore root_chore, Chore.Precondition.Context context, int x, int y, int radius, List<Chore.Precondition.Context> succeeded_contexts, List<Chore.Precondition.Context> failed_contexts)
 	{
-		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+		ListPool<ScenePartitionerEntry, FetchAreaChore>.PooledList pooledList = ListPool<ScenePartitionerEntry, FetchAreaChore>.Allocate();
 		GameScenePartitioner.Instance.GatherEntries(x - radius, y - radius, radius * 2 + 1, radius * 2 + 1, GameScenePartitioner.Instance.fetchChoreLayer, pooledList);
 		for (int i = 0; i < pooledList.Count; i++)
 		{
 			ScenePartitionerEntry scenePartitionerEntry = pooledList[i];
-			Chore chore = scenePartitionerEntry.obj as Chore;
-			chore.CollectChores(context.consumerState, succeeded_contexts, failed_contexts, true);
+			FetchChore fetchChore = scenePartitionerEntry.obj as FetchChore;
+			fetchChore.CollectChoresFromGlobalChoreProvider(context.consumerState, succeeded_contexts, failed_contexts, true);
 		}
 		pooledList.Recycle();
 	}
@@ -111,7 +111,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			int num7 = 6;
 			num5 -= num7 / 2;
 			num6 -= num7 / 2;
-			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList3 = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+			ListPool<ScenePartitionerEntry, FetchAreaChore>.PooledList pooledList3 = ListPool<ScenePartitionerEntry, FetchAreaChore>.Allocate();
 			GameScenePartitioner.Instance.GatherEntries(num5, num6, num7, num7, GameScenePartitioner.Instance.pickupablesLayer, pooledList3);
 			Tag prefabTag = pickupable.GetComponent<KPrefabID>().PrefabTag;
 			for (int i = 0; i < pooledList3.Count; i++)
@@ -613,7 +613,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				{
 					this.deliveryObject.Get(smi).transform.SetLocalPosition(Vector3.zero);
 					KBatchedAnimTracker component = this.deliveryObject.Get(smi).GetComponent<KBatchedAnimTracker>();
-					component.symbol = new HashedString("snapTo_pivot");
+					component.symbol = new HashedString("snapTo_chest");
 					component.offset = new Vector3(0f, 0f, 1f);
 				}
 			});

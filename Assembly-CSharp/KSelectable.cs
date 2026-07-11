@@ -168,6 +168,26 @@ public class KSelectable : KMonoBehaviour
 		return this.RemoveStatusItem(status_item, false);
 	}
 
+	public Guid ToggleStatusItem(StatusItem status_item, Guid guid, bool show, object data = null)
+	{
+		if (show)
+		{
+			if (guid != Guid.Empty)
+			{
+				return guid;
+			}
+			return this.AddStatusItem(status_item, data);
+		}
+		else
+		{
+			if (guid != Guid.Empty)
+			{
+				return this.RemoveStatusItem(guid, false);
+			}
+			return guid;
+		}
+	}
+
 	public Guid SetStatusItem(StatusItemCategory category, StatusItem status_item, object data = null)
 	{
 		if (this.statusItemGroup == null)

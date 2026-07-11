@@ -7,8 +7,9 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 	public void InitializeGrid()
 	{
 		this.Clear();
-		int num = ((int)((float)Grid.WidthInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.y) + 32 - 1) / 32;
-		int num2 = ((int)((float)Grid.HeightInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.y) + 32 - 1) / 32;
+		Vector2I visibleSize = this.GetVisibleSize();
+		int num = (visibleSize.x + 32 - 1) / 32;
+		int num2 = (visibleSize.y + 32 - 1) / 32;
 		this.controllerGrid = new List<KBatchedAnimController>[num, num2];
 		for (int i = 0; i < num2; i++)
 		{
@@ -21,6 +22,11 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 		this.previouslyVisibleChunks.Clear();
 		this.previouslyVisibleChunkGrid = new bool[num, num2];
 		this.visibleChunkGrid = new bool[num, num2];
+	}
+
+	public Vector2I GetVisibleSize()
+	{
+		return new Vector2I((int)((float)Grid.WidthInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.x), (int)((float)Grid.HeightInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.y));
 	}
 
 	public void Clear()
@@ -452,7 +458,7 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 
 	private int cleanUpChunkIndex;
 
-	private static readonly Vector2 VISIBLE_RANGE_SCALE = new Vector2(1f, 1.5f);
+	private static readonly Vector2 VISIBLE_RANGE_SCALE = new Vector2(1.5f, 1.5f);
 
 	public enum RegistrationState
 	{

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
+using Database;
 using FMOD.Studio;
 using FMODUnity;
 using KSerialization;
@@ -134,7 +136,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 				vector3.y = Mathf.Floor(vector3.y + 1f);
 			}
 			this.physics.Add(new FallingWater.ParticlePhysics(vector3, Vector2.zero, num6, elementIdx));
-			this.properties.Add(new FallingWater.ParticleProperties(elementIdx, num3, temperature, disease_idx, num5, debug_track));
+			this.particleProperties.Add(new FallingWater.ParticleProperties(elementIdx, num3, temperature, disease_idx, num5, debug_track));
 		}
 	}
 
@@ -213,7 +215,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 				{
 					if (Grid.IsValidCell(num8))
 					{
-						FallingWater.ParticleProperties particleProperties = this.properties[i];
+						FallingWater.ParticleProperties particleProperties = this.particleProperties[i];
 						this.SpawnLiquidSplash(particlePhysics.position.x, num8, particleProperties.elementIdx, false);
 						this.AddToSim(num8, i, ref count);
 					}
@@ -248,7 +250,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 					}
 					else
 					{
-						FallingWater.ParticleProperties particleProperties2 = this.properties[i];
+						FallingWater.ParticleProperties particleProperties2 = this.particleProperties[i];
 						Element element2 = ElementLoader.elements[(int)particleProperties2.elementIdx];
 						if (element2.id == element.id)
 						{
@@ -356,7 +358,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 			int num = Grid.PosToCell(this.physics[i].position);
 			if (num == cell)
 			{
-				FallingWater.ParticleProperties particleProperties = this.properties[i];
+				FallingWater.ParticleProperties particleProperties = this.particleProperties[i];
 				float num2 = 0f;
 				dictionary.TryGetValue((int)particleProperties.elementIdx, out num2);
 				num2 += particleProperties.mass;
@@ -397,7 +399,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		}
 		return;
 		Block_3:
-		FallingWater.ParticleProperties particleProperties = this.properties[particleIdx];
+		FallingWater.ParticleProperties particleProperties = this.particleProperties[particleIdx];
 		SimMessages.AddRemoveSubstance(cell, (int)particleProperties.elementIdx, CellEventLogger.Instance.FallingWaterAddToSim, particleProperties.mass, particleProperties.temperature, particleProperties.diseaseIdx, particleProperties.diseaseCount, true, -1);
 		this.RemoveParticle(particleIdx, ref num_particles);
 		float time = this.GetTime();
@@ -446,9 +448,9 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 	{
 		num_particles--;
 		this.physics[particleIdx] = this.physics[num_particles];
-		this.properties[particleIdx] = this.properties[num_particles];
+		this.particleProperties[particleIdx] = this.particleProperties[num_particles];
 		this.physics.RemoveAt(num_particles);
-		this.properties.RemoveAt(num_particles);
+		this.particleProperties.RemoveAt(num_particles);
 	}
 
 	public void Render()
@@ -482,7 +484,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		for (int i = 0; i < num5; i++)
 		{
 			Vector2 position = this.physics[i].position;
-			float num6 = Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(this.properties[i].mass / this.particleMassToSplit));
+			float num6 = Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(this.particleProperties[i].mass / this.particleMassToSplit));
 			vertices.Add(position + vector * num6);
 			vertices.Add(position + vector2 * num6);
 			vertices.Add(position + vector3 * num6);
@@ -550,6 +552,55 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		{
 			SimAndRenderScheduler.instance.Remove(this);
 		}
+	}
+
+	[OnSerializing]
+	private void OnSerializing()
+	{
+		List<Element> elements = ElementLoader.elements;
+		Diseases diseases = Db.Get().Diseases;
+		this.serializedParticleProperties = new List<FallingWater.SerializedParticleProperties>();
+		foreach (FallingWater.ParticleProperties particleProperties in this.particleProperties)
+		{
+			FallingWater.SerializedParticleProperties serializedParticleProperties = default(FallingWater.SerializedParticleProperties);
+			serializedParticleProperties.elementID = elements[(int)particleProperties.elementIdx].id;
+			serializedParticleProperties.diseaseID = ((particleProperties.diseaseIdx == byte.MaxValue) ? HashedString.Invalid : diseases[(int)particleProperties.diseaseIdx].IdHash);
+			serializedParticleProperties.mass = particleProperties.mass;
+			serializedParticleProperties.temperature = particleProperties.temperature;
+			serializedParticleProperties.diseaseCount = particleProperties.diseaseCount;
+			this.serializedParticleProperties.Add(serializedParticleProperties);
+		}
+	}
+
+	[OnSerialized]
+	private void OnSerialized()
+	{
+		this.serializedParticleProperties = null;
+	}
+
+	[OnDeserialized]
+	private void OnDeserialized()
+	{
+		if (this.serializedParticleProperties != null)
+		{
+			Diseases diseases = Db.Get().Diseases;
+			this.particleProperties.Clear();
+			foreach (FallingWater.SerializedParticleProperties serializedParticleProperties in this.serializedParticleProperties)
+			{
+				FallingWater.ParticleProperties particleProperties = default(FallingWater.ParticleProperties);
+				particleProperties.elementIdx = (byte)ElementLoader.GetElementIndex(serializedParticleProperties.elementID);
+				particleProperties.diseaseIdx = ((!(serializedParticleProperties.diseaseID != HashedString.Invalid)) ? byte.MaxValue : diseases.GetIndex(serializedParticleProperties.diseaseID));
+				particleProperties.mass = serializedParticleProperties.mass;
+				particleProperties.temperature = serializedParticleProperties.temperature;
+				particleProperties.diseaseCount = serializedParticleProperties.diseaseCount;
+				this.particleProperties.Add(particleProperties);
+			}
+		}
+		else
+		{
+			this.particleProperties = this.properties;
+		}
+		this.properties = null;
 	}
 
 	private const float STATE_TRANSITION_TEMPERATURE_BUFER = 3f;
@@ -627,6 +678,11 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 	[Serialize]
 	private List<FallingWater.ParticlePhysics> physics = new List<FallingWater.ParticlePhysics>();
 
+	private List<FallingWater.ParticleProperties> particleProperties = new List<FallingWater.ParticleProperties>();
+
+	[Serialize]
+	private List<FallingWater.SerializedParticleProperties> serializedParticleProperties;
+
 	[Serialize]
 	private List<FallingWater.ParticleProperties> properties = new List<FallingWater.ParticleProperties>();
 
@@ -702,6 +758,19 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		public int frame;
 
 		public Color32 colour;
+	}
+
+	private struct SerializedParticleProperties
+	{
+		public SimHashes elementID;
+
+		public HashedString diseaseID;
+
+		public float mass;
+
+		public float temperature;
+
+		public int diseaseCount;
 	}
 
 	private struct ParticleProperties

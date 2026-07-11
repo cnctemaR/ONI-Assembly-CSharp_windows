@@ -118,15 +118,15 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		{
 			CellOffset offset = Grid.GetOffset(Grid.PosToCell(this));
 			Extents extents = new Extents(offset.x, offset.y, this.stationaryReach);
-			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+			ListPool<ScenePartitionerEntry, ChoreConsumer>.PooledList pooledList = ListPool<ScenePartitionerEntry, ChoreConsumer>.Allocate();
 			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.fetchChoreLayer, pooledList);
 			foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 			{
-				Chore chore = scenePartitionerEntry.obj as Chore;
-				int num2 = Grid.PosToCell(chore.gameObject);
+				FetchChore fetchChore = scenePartitionerEntry.obj as FetchChore;
+				int num2 = Grid.PosToCell(fetchChore.gameObject);
 				if (this.consumerState.solidTransferArm.IsCellReachable(num2))
 				{
-					chore.CollectChores(this.consumerState, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts, false);
+					fetchChore.CollectChoresFromGlobalChoreProvider(this.consumerState, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts, false);
 				}
 			}
 			pooledList.Recycle();
@@ -241,7 +241,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		if (this.navigator)
 		{
 			cost = this.navigator.GetNavigationCost(approachable);
-			if (cost != PathProber.InvalidCost)
+			if (cost != -1)
 			{
 				return true;
 			}
@@ -505,6 +505,16 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		return flag;
 	}
 
+	public Dictionary<HashedString, ChoreConsumer.PriorityInfo> GetChoreGroupPriorities()
+	{
+		return this.choreGroupPriorities;
+	}
+
+	public void SetChoreGroupPriorities(Dictionary<HashedString, ChoreConsumer.PriorityInfo> priorities)
+	{
+		this.choreGroupPriorities = priorities;
+	}
+
 	public const int DEFAULT_PERSONAL_CHORE_PRIORITY = 3;
 
 	public const int MIN_PERSONAL_PRIORITY = 0;
@@ -588,7 +598,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		public bool doFailedContextsNeedSorting = true;
 	}
 
-	private struct PriorityInfo
+	public struct PriorityInfo
 	{
 		public int priority;
 

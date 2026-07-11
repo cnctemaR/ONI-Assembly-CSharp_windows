@@ -25,6 +25,7 @@ public class LiquidConduitElementSensorConfig : ConduitSensorConfig
 		ConduitElementSensor conduitElementSensor = go.AddOrGet<ConduitElementSensor>();
 		conduitElementSensor.manuallyControlled = false;
 		conduitElementSensor.conduitType = this.ConduitType;
+		conduitElementSensor.defaultState = false;
 	}
 
 	public static string ID = "LiquidConduitElementSensor";

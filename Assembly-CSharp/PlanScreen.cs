@@ -850,6 +850,10 @@ public class PlanScreen : KIconToggleMenu
 		{
 			PlanScreen.PlanCategory.Conveyance,
 			"icon_category_shipping"
+		},
+		{
+			PlanScreen.PlanCategory.Rocketry,
+			"icon_category_rocketry"
 		}
 	};
 
@@ -935,7 +939,8 @@ public class PlanScreen : KIconToggleMenu
 		Furniture,
 		Utilities,
 		Automation,
-		Conveyance
+		Conveyance,
+		Rocketry
 	}
 
 	public struct PlanInfo

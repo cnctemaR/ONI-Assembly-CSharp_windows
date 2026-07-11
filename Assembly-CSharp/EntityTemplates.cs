@@ -10,8 +10,8 @@ public class EntityTemplates
 	public static void CreateTemplates()
 	{
 		EntityTemplates.unselectableEntityTemplate = new GameObject("unselectableEntityTemplate");
-		EntityTemplates.unselectableEntityTemplate.AddComponent<KPrefabID>();
 		EntityTemplates.unselectableEntityTemplate.SetActive(false);
+		EntityTemplates.unselectableEntityTemplate.AddComponent<KPrefabID>();
 		global::UnityEngine.Object.DontDestroyOnLoad(EntityTemplates.unselectableEntityTemplate);
 		EntityTemplates.selectableEntityTemplate = global::UnityEngine.Object.Instantiate<GameObject>(EntityTemplates.unselectableEntityTemplate);
 		EntityTemplates.selectableEntityTemplate.name = "selectableEntityTemplate";
@@ -70,7 +70,10 @@ public class EntityTemplates
 		KPrefabID kprefabID = template.AddOrGet<KPrefabID>();
 		if (additionalTags != null)
 		{
-			kprefabID.AddPrefabTags(additionalTags);
+			foreach (Tag tag in additionalTags)
+			{
+				kprefabID.AddTag(tag);
+			}
 		}
 		KBatchedAnimController kbatchedAnimController = template.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.AnimFiles = new KAnimFile[] { anim };
@@ -150,7 +153,13 @@ public class EntityTemplates
 		return template;
 	}
 
-	public static GameObject ExtendEntityToBasicPlant(GameObject template, float temperature_lethal_low = 218.15f, float temperature_warning_low = 283.15f, float temperature_perfect_low = 291.15f, float temperature_perfect_high = 295.15f, float temperature_warning_high = 303.15f, float temperature_lethal_high = 398.15f, SimHashes[] safe_elements = null, bool pressure_sensitive = true, float pressure_lethal_low = 0f, float pressure_warning_low = 0.15f, string crop_id = null, bool can_drown = true, bool can_tinker = true)
+	public static GameObject ExtendEntityToRocketModule(GameObject template)
+	{
+		template.GetComponent<KBatchedAnimController>().isMovable = true;
+		return template;
+	}
+
+	public static GameObject ExtendEntityToBasicPlant(GameObject template, float temperature_lethal_low = 218.15f, float temperature_warning_low = 283.15f, float temperature_warning_high = 303.15f, float temperature_lethal_high = 398.15f, SimHashes[] safe_elements = null, bool pressure_sensitive = true, float pressure_lethal_low = 0f, float pressure_warning_low = 0.15f, string crop_id = null, bool can_drown = true, bool can_tinker = true)
 	{
 		template.AddOrGet<EntombVulnerable>();
 		PressureVulnerable pressureVulnerable = template.AddOrGet<PressureVulnerable>();
@@ -158,7 +167,7 @@ public class EntityTemplates
 		{
 			PressureVulnerable pressureVulnerable2 = pressureVulnerable;
 			SimHashes[] safe_elements2 = safe_elements;
-			pressureVulnerable2.Configure(pressure_warning_low, pressure_lethal_low, 10f, 30f, 0.75f, 5f, safe_elements2);
+			pressureVulnerable2.Configure(pressure_warning_low, pressure_lethal_low, 10f, 30f, safe_elements2);
 		}
 		else
 		{
@@ -175,7 +184,7 @@ public class EntityTemplates
 			template.AddOrGet<DrowningMonitor>();
 		}
 		TemperatureVulnerable temperatureVulnerable = template.AddOrGet<TemperatureVulnerable>();
-		temperatureVulnerable.Configure(temperature_warning_low, temperature_lethal_low, temperature_warning_high, temperature_lethal_high, temperature_perfect_low, temperature_perfect_high);
+		temperatureVulnerable.Configure(temperature_warning_low, temperature_lethal_low, temperature_warning_high, temperature_lethal_high);
 		template.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		KPrefabID component = template.GetComponent<KPrefabID>();
 		if (crop_id != null)
@@ -228,7 +237,7 @@ public class EntityTemplates
 	{
 		FertilityMonitor.Def def = prefab.AddOrGetDef<FertilityMonitor.Def>();
 		def.baseFertileCycles = fertility_cycles;
-		DebugUtil.DevAssert(eggSortOrder > -1, "Added a fertile creature without an egg sort order!");
+		DebugUtil.DevAssert(eggSortOrder > -1, "Added a fertile creature without an egg sort order!", string.Empty, string.Empty);
 		float num = 100f / (600f * incubation_cycles);
 		GameObject gameObject = EggConfig.CreateEgg(eggId, eggName, eggDesc, baby_id, egg_anim, egg_mass, eggSortOrder, num);
 		def.eggPrefab = new Tag(eggId);
@@ -249,8 +258,8 @@ public class EntityTemplates
 		KPrefabID creature_prefab_id = prefab.GetComponent<KPrefabID>();
 		creature_prefab_id.prefabSpawnFn += delegate(GameObject inst)
 		{
-			WorldInventory.Instance.Discover(eggId.ToTag(), WorldInventory.GetCategoryForTagList(egg_prefab_id.Tags));
-			WorldInventory.Instance.Discover(baby_id.ToTag(), WorldInventory.GetCategoryForTagList(creature_prefab_id.Tags));
+			WorldInventory.Instance.Discover(eggId.ToTag(), WorldInventory.GetCategoryForTags(egg_prefab_id.Tags));
+			WorldInventory.Instance.Discover(baby_id.ToTag(), WorldInventory.GetCategoryForTags(creature_prefab_id.Tags));
 		};
 		if (is_ranchable)
 		{
@@ -277,11 +286,11 @@ public class EntityTemplates
 		return prefab;
 	}
 
-	public static GameObject ExtendEntityToBasicCreature(GameObject template, FactionManager.FactionID faction = FactionManager.FactionID.Prey, string initialTraitID = null, string NavGridName = "HatchNavGrid", NavType navType = NavType.Floor, int max_probing_radius = 32, float moveSpeed = 2f, string onDeathDropID = "Meat", int onDeathDropCount = 1, bool drownVulnerable = true, bool entombVulnerable = true, float warningLowTemperature = 283f, float warningHighTemperature = 294f, float lethalLowTemperature = 243f, float lethalHighTemperature = 343f)
+	public static GameObject ExtendEntityToBasicCreature(GameObject template, FactionManager.FactionID faction = FactionManager.FactionID.Prey, string initialTraitID = null, string NavGridName = "HatchNavGrid", NavType navType = NavType.Floor, int max_probing_radius = 32, float moveSpeed = 2f, string onDeathDropID = "Meat", int onDeathDropCount = 1, bool drownVulnerable = true, bool entombVulnerable = true, float warningLowTemperature = 283.15f, float warningHighTemperature = 293.15f, float lethalLowTemperature = 243.15f, float lethalHighTemperature = 343.15f)
 	{
 		template.GetComponent<KBatchedAnimController>().isMovable = true;
 		KPrefabID kprefabID = template.AddOrGet<KPrefabID>();
-		kprefabID.AddPrefabTag(GameTags.Creature);
+		kprefabID.AddTag(GameTags.Creature);
 		Modifiers modifiers = template.AddOrGet<Modifiers>();
 		if (initialTraitID != null)
 		{
@@ -302,7 +311,7 @@ public class EntityTemplates
 		template.AddOrGetDef<DeathMonitor.Def>();
 		template.AddOrGetDef<AnimInterruptMonitor.Def>();
 		SymbolOverrideControllerUtil.AddToPrefab(template);
-		template.AddOrGet<TemperatureVulnerable>().Configure(warningLowTemperature, lethalLowTemperature, warningHighTemperature, lethalHighTemperature, 0f, 0f);
+		template.AddOrGet<TemperatureVulnerable>().Configure(warningLowTemperature, lethalLowTemperature, warningHighTemperature, lethalHighTemperature);
 		if (drownVulnerable)
 		{
 			template.AddOrGet<DrowningMonitor>();
@@ -338,7 +347,7 @@ public class EntityTemplates
 		ChoreConsumer chore_consumer = prefab.AddOrGet<ChoreConsumer>();
 		chore_consumer.choreTable = chore_table.CreateTable();
 		KPrefabID kprefabID = prefab.AddOrGet<KPrefabID>();
-		kprefabID.AddPrefabTag(GameTags.CreatureBrain);
+		kprefabID.AddTag(GameTags.CreatureBrain);
 		kprefabID.instantiateFn += delegate(GameObject go)
 		{
 			go.GetComponent<ChoreConsumer>().choreTable = chore_consumer.choreTable;
@@ -360,15 +369,17 @@ public class EntityTemplates
 		return "Bagged" + name;
 	}
 
-	public static GameObject CreateAndRegisterBaggedCreature(GameObject creature, bool must_stand_on_top_for_pickup)
+	public static GameObject CreateAndRegisterBaggedCreature(GameObject creature, bool must_stand_on_top_for_pickup, bool allow_mark_for_capture)
 	{
 		KPrefabID creature_prefab_id = creature.GetComponent<KPrefabID>();
-		creature_prefab_id.AddPrefabTag(GameTags.BagableCreature);
+		creature_prefab_id.AddTag(GameTags.BagableCreature);
 		Baggable baggable = creature.AddOrGet<Baggable>();
 		baggable.mustStandOntopOfTrapForPickup = must_stand_on_top_for_pickup;
+		Capturable capturable = creature.AddOrGet<Capturable>();
+		capturable.allowCapture = allow_mark_for_capture;
 		creature_prefab_id.prefabSpawnFn += delegate(GameObject inst)
 		{
-			WorldInventory.Instance.Discover(creature_prefab_id.PrefabTag, WorldInventory.GetCategoryForTagList(creature_prefab_id.Tags));
+			WorldInventory.Instance.Discover(creature_prefab_id.PrefabTag, WorldInventory.GetCategoryForTags(creature_prefab_id.Tags));
 		};
 		return creature;
 	}
@@ -429,7 +440,10 @@ public class EntityTemplates
 		kprefabID.PrefabTag = element.tag;
 		if (additionalTags != null)
 		{
-			kprefabID.AddPrefabTags(additionalTags);
+			foreach (Tag tag in additionalTags)
+			{
+				kprefabID.AddTag(tag);
+			}
 		}
 		PrimaryElement primaryElement = gameObject.AddOrGet<PrimaryElement>();
 		primaryElement.SetElement(elementID);
@@ -444,7 +458,8 @@ public class EntityTemplates
 		kbatchedAnimController.sceneLayer = Grid.SceneLayer.Front;
 		kbatchedAnimController.initialAnim = "idle1";
 		kbatchedAnimController.isMovable = true;
-		return EntityTemplates.AddCollision(gameObject, shape, width, height);
+		gameObject = EntityTemplates.AddCollision(gameObject, shape, width, height);
+		return gameObject;
 	}
 
 	public static GameObject CreateSolidOreEntity(SimHashes elementId, List<Tag> additionalTags = null)
@@ -495,7 +510,7 @@ public class EntityTemplates
 		}
 		else
 		{
-			component.AddPrefabTag(GameTags.CookingIngredient);
+			component.AddTag(GameTags.CookingIngredient);
 		}
 		return template;
 	}
@@ -504,7 +519,7 @@ public class EntityTemplates
 	{
 		template.AddOrGet<EntitySplitter>();
 		KPrefabID component = template.GetComponent<KPrefabID>();
-		component.AddPrefabTag(GameTags.Medicine);
+		component.AddTag(GameTags.Medicine);
 		MedicinalPill medicinalPill = template.AddOrGet<MedicinalPill>();
 		medicinalPill.info = medicineInfo;
 		return template;
@@ -543,10 +558,10 @@ public class EntityTemplates
 		return EntityTemplates.ExtendPlantToIrrigated(template, new PlantElementAbsorber.ConsumeInfo[] { info });
 	}
 
-	public static GameObject ExtendPlantToIrrigated(GameObject template, PlantElementAbsorber.ConsumeInfo[] liquids)
+	public static GameObject ExtendPlantToIrrigated(GameObject template, PlantElementAbsorber.ConsumeInfo[] consume_info)
 	{
 		HashedString idHash = Db.Get().ChoreTypes.FarmFetch.IdHash;
-		foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in liquids)
+		foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in consume_info)
 		{
 			ManualDeliveryKG manualDeliveryKG = template.AddComponent<ManualDeliveryKG>();
 			manualDeliveryKG.RequestedItemTag = consumeInfo.tag;
@@ -559,7 +574,7 @@ public class EntityTemplates
 		}
 		IrrigationMonitor.Def def = template.AddOrGetDef<IrrigationMonitor.Def>();
 		def.wrongIrrigationTestTag = GameTags.Liquid;
-		def.consumedElements = liquids;
+		def.consumedElements = consume_info;
 		return template;
 	}
 
@@ -600,11 +615,11 @@ public class EntityTemplates
 		plantableSeed.domesticatedDescription = domesticatedDescription;
 		plantableSeed.direction = planterDirection;
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		if (additionalTags != null)
+		foreach (Tag tag in additionalTags)
 		{
-			component.AddPrefabTags(additionalTags);
+			component.AddTag(tag);
 		}
-		component.AddPrefabTag(GameTags.Seed);
+		component.AddTag(GameTags.Seed);
 		KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
 		Assets.AddPrefab(component2);
 		SeedProducer seedProducer = plant.AddOrGet<SeedProducer>();

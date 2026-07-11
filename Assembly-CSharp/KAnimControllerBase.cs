@@ -68,7 +68,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		}
 		set
 		{
-			if (this.batchInstanceData.SetTintColour(value))
+			if (this.batchInstanceData != null && this.batchInstanceData.SetTintColour(value))
 			{
 				this.SetDirty();
 				this.SuspendUpdates(false);
@@ -350,6 +350,11 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	public float GetPlaySpeed()
 	{
 		return this.playSpeed;
+	}
+
+	public void SetElapsedTime(float value)
+	{
+		this.elapsedTime = value;
 	}
 
 	public float GetElapsedTime()
@@ -901,7 +906,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public Action<Color> OnHighlightChanged;
 
-	private KAnimSynchronizer synchronizer;
+	protected KAnimSynchronizer synchronizer;
 
 	protected KAnimLayering layering;
 

@@ -17,7 +17,7 @@ public class LoopingSounds : KMonoBehaviour
 		return false;
 	}
 
-	public bool StartSound(string asset, AnimEventManager.EventPlayerData behaviour, EffectorValues noiseValues, bool ignore_pause = false)
+	public bool StartSound(string asset, AnimEventManager.EventPlayerData behaviour, EffectorValues noiseValues, bool ignore_pause = false, bool enable_camera_scaled_position = true)
 	{
 		if (asset == null || asset == string.Empty)
 		{
@@ -31,7 +31,7 @@ public class LoopingSounds : KMonoBehaviour
 				asset = asset
 			};
 			Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
-			loopingSoundEvent.handle = LoopingSoundManager.Get().Add(asset, position, base.transform, !ignore_pause, true);
+			loopingSoundEvent.handle = LoopingSoundManager.Get().Add(asset, position, base.transform, !ignore_pause, true, enable_camera_scaled_position);
 			this.loopingSounds.Add(loopingSoundEvent);
 		}
 		return true;
@@ -50,7 +50,7 @@ public class LoopingSounds : KMonoBehaviour
 			{
 				asset = asset
 			};
-			loopingSoundEvent.handle = LoopingSoundManager.Get().Add(asset, base.transform.GetPosition(), base.transform, true, true);
+			loopingSoundEvent.handle = LoopingSoundManager.Get().Add(asset, base.transform.GetPosition(), base.transform, true, true, true);
 			this.loopingSounds.Add(loopingSoundEvent);
 		}
 		return true;

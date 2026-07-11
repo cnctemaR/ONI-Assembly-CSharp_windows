@@ -23,6 +23,7 @@ public class LiquidConditionerConfig : IBuildingConfig
 		BuildingTemplates.CreateElectricalBuildingDef(buildingDef);
 		buildingDef.EnergyConsumptionWhenActive = 1200f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0f;
+		buildingDef.Invincible = true;
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.Floodable = false;

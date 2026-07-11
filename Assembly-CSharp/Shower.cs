@@ -31,11 +31,17 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 			string text = Shower.EffectsRemoved[i];
 			component.Remove(text);
 		}
+		component.Add(this.showerEffect, true);
+		HygieneMonitor.Instance instance = worker.GetSMI<HygieneMonitor.Instance>();
+		if (instance != null)
+		{
+			instance.SetDirtiness(0f);
+		}
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnAbortWork(Worker worker)
 	{
-		base.OnStopWork(worker);
+		base.OnAbortWork(worker);
 		HygieneMonitor.Instance instance = worker.GetSMI<HygieneMonitor.Instance>();
 		if (instance != null)
 		{
@@ -66,10 +72,13 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 				list.Add(descriptor2);
 			}
 		}
+		Effect.AddModifierDescriptions(base.gameObject, list, this.showerEffect, true);
 		return list;
 	}
 
 	private Shower.ShowerSM.Instance smi;
+
+	public string showerEffect = "Showered";
 
 	public SimHashes outputTargetElement;
 
@@ -77,7 +86,7 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 
 	public int absoluteDiseaseRemoval;
 
-	private static readonly string[] EffectsRemoved = new string[] { "Unclean", "SoakingWet", "WetFeet" };
+	private static readonly string[] EffectsRemoved = new string[] { "SoakingWet", "WetFeet" };
 
 	public class ShowerSM : GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower>
 	{

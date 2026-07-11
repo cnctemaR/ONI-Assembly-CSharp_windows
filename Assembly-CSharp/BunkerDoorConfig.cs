@@ -64,7 +64,7 @@ public class BunkerDoorConfig : IBuildingConfig
 		GeneratedBuildings.RegisterLogicPorts(go, BunkerDoorConfig.INPUT_PORTS);
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
 		KPrefabID component2 = go.GetComponent<KPrefabID>();
-		component2.AddPrefabTag(GameTags.Bunker);
+		component2.AddTag(GameTags.Bunker);
 	}
 
 	public const string ID = "BunkerDoor";

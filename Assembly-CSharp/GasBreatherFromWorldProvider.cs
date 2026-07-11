@@ -29,37 +29,26 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 		{
 			return false;
 		}
-		HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimConsume), "GasBreatherFromWorldProvider"));
+		HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(GasBreatherFromWorldProvider.OnSimConsumeCallback), this, "GasBreatherFromWorldProvider");
 		SimMessages.ConsumeMass(oxygen_breather.mouthCell, getBreathableElement, gas_consumed, 3, handle.index);
 		return true;
 	}
 
-	private void OnSimConsume(object obj)
+	private static void OnSimConsumeCallback(Sim.MassConsumedCallback mass_cb_info, object data)
+	{
+		((GasBreatherFromWorldProvider)data).OnSimConsume(mass_cb_info);
+	}
+
+	private void OnSimConsume(Sim.MassConsumedCallback mass_cb_info)
 	{
 		if (this.oxygenBreather == null || this.oxygenBreather.GetComponent<KPrefabID>().HasTag(GameTags.Dead))
 		{
 			return;
 		}
-		Sim.MassConsumedCallback massConsumedCallback;
-		try
-		{
-			massConsumedCallback = (Sim.MassConsumedCallback)obj;
-		}
-		catch (Exception ex)
-		{
-			Output.LogError(new object[]
-			{
-				"Error occurred trying to cast",
-				obj,
-				(obj == null) ? "null" : obj.GetType().ToString(),
-				"to Sim.MassConsumedCallback"
-			});
-			throw ex;
-		}
-		Game.Instance.accumulators.Accumulate(this.oxygenBreather.O2Accumulator, massConsumedCallback.mass);
-		float num = -massConsumedCallback.mass;
+		Game.Instance.accumulators.Accumulate(this.oxygenBreather.O2Accumulator, mass_cb_info.mass);
+		float num = -mass_cb_info.mass;
 		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, num, this.oxygenBreather.GetProperName(), null);
-		this.oxygenBreather.Trigger(240573938, massConsumedCallback);
+		this.oxygenBreather.Consume(mass_cb_info);
 	}
 
 	private SuffocationMonitor.Instance suffocationMonitor;

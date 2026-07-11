@@ -27,7 +27,7 @@ public class PhonoboxSoundEvent : SoundEvent
 			}
 			else if (!component.IsSoundPlaying(base.sound))
 			{
-				if (component.StartSound(base.sound, behaviour, base.noiseValues, base.ignorePause))
+				if (component.StartSound(base.sound, behaviour, base.noiseValues, base.ignorePause, true))
 				{
 					EventDescription eventDescription = RuntimeManager.GetEventDescription(base.sound);
 					PARAMETER_DESCRIPTION parameter_DESCRIPTION;

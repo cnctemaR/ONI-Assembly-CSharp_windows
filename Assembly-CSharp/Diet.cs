@@ -11,8 +11,7 @@ public class Diet
 		for (int i = 0; i < infos.Length; i++)
 		{
 			Diet.Info info = infos[i];
-			List<Tag> tagsVerySlow = info.consumedTagBits.GetTagsVerySlow();
-			using (List<Tag>.Enumerator enumerator = tagsVerySlow.GetEnumerator())
+			using (HashSet<Tag>.Enumerator enumerator = info.consumedTags.GetEnumerator())
 			{
 				while (enumerator.MoveNext())
 				{
@@ -21,6 +20,11 @@ public class Diet
 					{
 						this.consumedTags.Add(new KeyValuePair<Tag, float>(tag, info.caloriesPerKg));
 					}
+					if (this.consumedTagToInfo.ContainsKey(tag))
+					{
+						Debug.LogError("Duplicate diet entry: " + tag, null);
+					}
+					this.consumedTagToInfo[tag] = info;
 				}
 			}
 			if (info.producedElement != Tag.Invalid && this.producedTags.FindIndex((KeyValuePair<Tag, float> e) => e.Key == info.producedElement) == -1)
@@ -32,27 +36,24 @@ public class Diet
 
 	public Diet.Info[] infos { get; private set; }
 
-	public Diet.Info GetDietInfo(TagBits tag_bits)
+	public Diet.Info GetDietInfo(Tag tag)
 	{
-		foreach (Diet.Info info in this.infos)
-		{
-			if (info.IsMatch(tag_bits))
-			{
-				return info;
-			}
-		}
-		return null;
+		Diet.Info info = null;
+		this.consumedTagToInfo.TryGetValue(tag, out info);
+		return info;
 	}
 
 	public List<KeyValuePair<Tag, float>> consumedTags;
 
 	public List<KeyValuePair<Tag, float>> producedTags;
 
+	private Dictionary<Tag, Diet.Info> consumedTagToInfo = new Dictionary<Tag, Diet.Info>();
+
 	public class Info
 	{
-		public Info(TagBits consumed_tag_bits, Tag produced_element, float calories_per_kg, float produced_conversion_rate = 1f, string disease_id = null, float disease_per_kg_produced = 0f)
+		public Info(HashSet<Tag> consumed_tags, Tag produced_element, float calories_per_kg, float produced_conversion_rate = 1f, string disease_id = null, float disease_per_kg_produced = 0f)
 		{
-			this.consumedTagBits = consumed_tag_bits;
+			this.consumedTags = consumed_tags;
 			this.producedElement = produced_element;
 			this.caloriesPerKg = calories_per_kg;
 			this.producedConversionRate = produced_conversion_rate;
@@ -66,7 +67,7 @@ public class Diet
 			}
 		}
 
-		public TagBits consumedTagBits { get; private set; }
+		public HashSet<Tag> consumedTags { get; private set; }
 
 		public Tag producedElement { get; private set; }
 
@@ -78,9 +79,32 @@ public class Diet
 
 		public float diseasePerKgProduced { get; private set; }
 
-		public bool IsMatch(TagBits tag_bits)
+		public bool IsMatch(Tag tag)
 		{
-			return tag_bits.HasAny(this.consumedTagBits);
+			return this.consumedTags.Contains(tag);
+		}
+
+		public bool IsMatch(HashSet<Tag> tags)
+		{
+			if (tags.Count < this.consumedTags.Count)
+			{
+				foreach (Tag tag in tags)
+				{
+					if (this.consumedTags.Contains(tag))
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+			foreach (Tag tag2 in this.consumedTags)
+			{
+				if (tags.Contains(tag2))
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		public float ConvertCaloriesToConsumptionMass(float calories)

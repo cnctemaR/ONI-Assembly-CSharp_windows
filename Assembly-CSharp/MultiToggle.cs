@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
+public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, IEventSystemHandler
 {
 	public int CurrentState
 	{
@@ -106,6 +106,10 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 				}
 			}
 		}
+		if (this.onEnter != null)
+		{
+			this.onEnter();
+		}
 	}
 
 	private void RefreshHoverColor()
@@ -162,6 +166,18 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 				}
 			}
 		}
+		if (this.onExit != null)
+		{
+			this.onExit();
+		}
+	}
+
+	public void OnPointerDown(PointerEventData eventData)
+	{
+	}
+
+	public void OnPointerUp(PointerEventData eventData)
+	{
 	}
 
 	[Header("Settings")]
@@ -175,6 +191,10 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 	protected int state;
 
 	public global::System.Action onClick;
+
+	public global::System.Action onEnter;
+
+	public global::System.Action onExit;
 
 	private bool pointerOver;
 }

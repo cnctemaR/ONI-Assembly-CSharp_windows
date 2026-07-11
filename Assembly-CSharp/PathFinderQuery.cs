@@ -7,11 +7,6 @@ public class PathFinderQuery
 		return true;
 	}
 
-	public virtual bool CanTraverse(int cell, int from_cell, int cost, int underwater_cost)
-	{
-		return true;
-	}
-
 	public void SetResult(int cell, int cost, NavType nav_type)
 	{
 		this.resultCell = cell;

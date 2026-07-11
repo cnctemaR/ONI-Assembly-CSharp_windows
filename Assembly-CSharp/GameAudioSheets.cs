@@ -24,22 +24,45 @@ public class GameAudioSheets : AudioSheets
 			}
 		}
 		base.Initialize();
+		foreach (AudioSheet audioSheet in this.sheets)
+		{
+			foreach (AudioSheet.SoundInfo soundInfo in audioSheet.soundInfos)
+			{
+				if (soundInfo.Type == "MouthFlapSoundEvent" || soundInfo.Type == "VoiceSoundEvent")
+				{
+					HashSet<HashedString> hashSet = null;
+					if (!this.animsNotAllowedToPlaySpeech.TryGetValue(soundInfo.File, out hashSet))
+					{
+						hashSet = new HashSet<HashedString>();
+						this.animsNotAllowedToPlaySpeech[soundInfo.File] = hashSet;
+					}
+					hashSet.Add(soundInfo.Anim);
+				}
+			}
+		}
 	}
 
 	protected override AnimEvent CreateSoundOfType(string type, string file_name, string sound_name, int frame, float min_interval)
 	{
+		SoundEvent soundEvent = null;
+		bool flag = true;
+		if (sound_name.Contains(":disable_camera_position_scaling"))
+		{
+			sound_name = sound_name.Replace(":disable_camera_position_scaling", string.Empty);
+			flag = false;
+		}
 		if (type == "FloorSoundEvent")
 		{
-			return new FloorSoundEvent(file_name, sound_name, frame);
+			soundEvent = new FloorSoundEvent(file_name, sound_name, frame);
 		}
-		if (type == "SoundEvent" || type == "LoopingSoundEvent")
+		else if (type == "SoundEvent" || type == "LoopingSoundEvent")
 		{
-			bool flag = type == "LoopingSoundEvent";
+			bool flag2 = type == "LoopingSoundEvent";
 			string[] array = sound_name.Split(new char[] { ':' });
 			sound_name = array[0];
 			string text = sound_name;
-			bool flag2 = flag;
-			SoundEvent soundEvent = new SoundEvent(file_name, text, frame, true, flag2, min_interval, false);
+			bool flag3 = flag2;
+			soundEvent = new SoundEvent(file_name, text, frame, true, flag3, min_interval, false);
 			for (int i = 1; i < array.Length; i++)
 			{
 				if (array[i] == "IGNORE_PAUSE")
@@ -51,64 +74,79 @@ public class GameAudioSheets : AudioSheets
 					global::Debug.LogWarning(sound_name + " has unknown parameter " + array[i], null);
 				}
 			}
-			return soundEvent;
 		}
-		if (type == "LadderSoundEvent")
+		else if (type == "LadderSoundEvent")
 		{
-			return new LadderSoundEvent(file_name, sound_name, frame);
+			soundEvent = new LadderSoundEvent(file_name, sound_name, frame);
 		}
-		if (type == "LaserSoundEvent")
+		else if (type == "LaserSoundEvent")
 		{
-			return new LaserSoundEvent(file_name, sound_name, frame, min_interval);
+			soundEvent = new LaserSoundEvent(file_name, sound_name, frame, min_interval);
 		}
-		if (type == "HatchDrillSoundEvent")
+		else if (type == "HatchDrillSoundEvent")
 		{
-			return new HatchDrillSoundEvent(file_name, sound_name, frame, min_interval);
+			soundEvent = new HatchDrillSoundEvent(file_name, sound_name, frame, min_interval);
 		}
-		if (type == "CreatureChewSoundEvent")
+		else if (type == "CreatureChewSoundEvent")
 		{
-			return new CreatureChewSoundEvent(file_name, sound_name, frame, min_interval);
+			soundEvent = new CreatureChewSoundEvent(file_name, sound_name, frame, min_interval);
 		}
-		if (type == "BuildingDamageSoundEvent")
+		else if (type == "BuildingDamageSoundEvent")
 		{
-			return new BuildingDamageSoundEvent(file_name, sound_name, frame);
+			soundEvent = new BuildingDamageSoundEvent(file_name, sound_name, frame);
 		}
-		if (type == "WallDamageSoundEvent")
+		else if (type == "WallDamageSoundEvent")
 		{
-			return new WallDamageSoundEvent(file_name, sound_name, frame, min_interval);
+			soundEvent = new WallDamageSoundEvent(file_name, sound_name, frame, min_interval);
 		}
-		if (type == "RemoteSoundEvent")
+		else if (type == "RemoteSoundEvent")
 		{
-			return new RemoteSoundEvent(file_name, sound_name, frame, min_interval);
+			soundEvent = new RemoteSoundEvent(file_name, sound_name, frame, min_interval);
 		}
-		if (type == "VoiceSoundEvent" || type == "LoopingVoiceSoundEvent")
+		else if (type == "VoiceSoundEvent" || type == "LoopingVoiceSoundEvent")
 		{
-			return new VoiceSoundEvent(file_name, sound_name, frame, type == "LoopingVoiceSoundEvent");
+			soundEvent = new VoiceSoundEvent(file_name, sound_name, frame, type == "LoopingVoiceSoundEvent");
 		}
-		if (type == "MainMenuSoundEvent")
+		else if (type == "MouthFlapSoundEvent")
 		{
-			return new MainMenuSoundEvent(file_name, sound_name, frame);
+			soundEvent = new MouthFlapSoundEvent(file_name, sound_name, frame, false);
 		}
-		if (type == "CreatureVariationSoundEvent")
+		else if (type == "MainMenuSoundEvent")
+		{
+			soundEvent = new MainMenuSoundEvent(file_name, sound_name, frame);
+		}
+		else if (type == "CreatureVariationSoundEvent")
 		{
 			string text2 = sound_name;
-			bool flag2 = type == "LoopingSoundEvent";
-			return new CreatureVariationSoundEvent(file_name, text2, frame, true, flag2, min_interval, false);
+			bool flag3 = type == "LoopingSoundEvent";
+			soundEvent = new CreatureVariationSoundEvent(file_name, text2, frame, true, flag3, min_interval, false);
 		}
-		if (type == "CountedSoundEvent")
+		else if (type == "CountedSoundEvent")
 		{
-			return new CountedSoundEvent(file_name, sound_name, frame, true, false, min_interval, false);
+			soundEvent = new CountedSoundEvent(file_name, sound_name, frame, true, false, min_interval, false);
 		}
-		if (type == "PhonoboxSoundEvent")
+		else if (type == "PhonoboxSoundEvent")
 		{
-			return new PhonoboxSoundEvent(file_name, sound_name, frame, min_interval);
+			soundEvent = new PhonoboxSoundEvent(file_name, sound_name, frame, min_interval);
 		}
-		return null;
+		if (soundEvent != null)
+		{
+			soundEvent.shouldCameraScalePosition = flag;
+		}
+		return soundEvent;
+	}
+
+	public bool IsAnimAllowedToPlaySpeech(KAnim.Anim anim)
+	{
+		HashSet<HashedString> hashSet = null;
+		return !this.animsNotAllowedToPlaySpeech.TryGetValue(anim.animFile.name, out hashSet) || !hashSet.Contains(anim.hash);
 	}
 
 	private static GameAudioSheets _Instance;
 
 	private HashSet<HashedString> validFileNames = new HashSet<HashedString>();
+
+	private Dictionary<HashedString, HashSet<HashedString>> animsNotAllowedToPlaySpeech = new Dictionary<HashedString, HashSet<HashedString>>();
 
 	private class SingleAudioSheetLoader : AsyncLoader
 	{

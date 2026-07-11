@@ -467,7 +467,7 @@ public class SimDebugView : KMonoBehaviour
 										else if (path_prober != null && path_prober != null)
 										{
 											int cost = path_prober.GetCost(cell);
-											if (cost != PathProber.InvalidCost)
+											if (cost != -1)
 											{
 												color = Color.white;
 											}

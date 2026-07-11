@@ -15,6 +15,18 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<KKeyCode> onBtnClick;
 
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event global::System.Action onPointerEnter;
+
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event global::System.Action onPointerExit;
+
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event global::System.Action onPointerDown;
+
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event global::System.Action onPointerUp;
+
 	public bool isInteractable
 	{
 		get
@@ -49,9 +61,12 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 		this.onDoubleClick = null;
 	}
 
-	public void ClearOnPointerEnter()
+	public void ClearOnPointerEvents()
 	{
 		this.onPointerEnter = null;
+		this.onPointerExit = null;
+		this.onPointerDown = null;
+		this.onPointerUp = null;
 	}
 
 	public void OnPointerUp(PointerEventData eventData)
@@ -62,6 +77,7 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 		}
 		KInputManager.SetUserActive();
 		this.UpdateColor(this.interactable, false, false);
+		this.onPointerUp.Signal();
 	}
 
 	public void OnPointerDown(PointerEventData eventData)
@@ -73,6 +89,7 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 		KInputManager.SetUserActive();
 		this.UpdateColor(this.interactable, true, true);
 		this.PlayPointerDownSound();
+		this.onPointerDown.Signal();
 	}
 
 	public void SignalClick(KKeyCode btn)
@@ -156,10 +173,7 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 		this.UpdateColor(this.interactable, true, false);
 		this.soundPlayer.Play(1);
 		this.mouseOver = true;
-		if (this.onPointerEnter != null)
-		{
-			this.onPointerEnter();
-		}
+		this.onPointerEnter.Signal();
 	}
 
 	public void OnPointerExit(PointerEventData eventData)
@@ -257,10 +271,6 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandle
 	public Image fgImage;
 
 	public KImage[] additionalKImages;
-
-	public global::System.Action onPointerEnter;
-
-	public global::System.Action onPointerExit;
 
 	private bool interactable = true;
 

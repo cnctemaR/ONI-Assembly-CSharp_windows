@@ -5,15 +5,20 @@ using KSerialization;
 
 public class Accessorizer : KMonoBehaviour
 {
+	public List<ResourceRef<Accessory>> GetAccessories()
+	{
+		return this.accessories;
+	}
+
+	public void SetAccessories(List<ResourceRef<Accessory>> data)
+	{
+		this.accessories = data;
+	}
+
 	[OnDeserialized]
 	private void OnDeserialized()
 	{
 		this.ApplyAccessories();
-	}
-
-	protected override void OnSpawn()
-	{
-		base.OnSpawn();
 	}
 
 	public void AddAccessory(Accessory accessory)

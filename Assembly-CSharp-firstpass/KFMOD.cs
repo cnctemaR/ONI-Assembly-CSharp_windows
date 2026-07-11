@@ -129,6 +129,10 @@ public class KFMOD
 				soundDescription.path = text;
 				float num = 0f;
 				eventDescription.getMaximumDistance(out num);
+				if (num == 0f)
+				{
+					num = 60f;
+				}
 				soundDescription.falloffDistanceSq = num * num;
 				List<OneShotSoundParameterUpdater> list = new List<OneShotSoundParameterUpdater>();
 				int num2 = 0;

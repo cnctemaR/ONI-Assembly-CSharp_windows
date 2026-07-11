@@ -25,7 +25,15 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		Assets.PrefabsByTag.Clear();
 		Assets.PrefabsByAdditionalTags.Clear();
 		Assets.CountableTags.Clear();
-		Assets.Sprites = this.SpriteAssets.Where<Sprite>((Sprite x) => x != null).ToArray<Sprite>();
+		Assets.Sprites = new Dictionary<HashedString, Sprite>();
+		foreach (Sprite sprite in this.SpriteAssets)
+		{
+			if (!(sprite == null))
+			{
+				HashedString hashedString = new HashedString(sprite.name);
+				Assets.Sprites.Add(hashedString, sprite);
+			}
+		}
 		Assets.TintedSprites = this.TintedSpriteAssets.Where<TintedSprite>((TintedSprite x) => x != null && x.sprite != null).ToArray<TintedSprite>();
 		Assets.Materials = this.MaterialAssets.Where<Material>((Material x) => x != null).ToArray<Material>();
 		Assets.Textures = this.TextureAssets.Where<Texture2D>((Texture2D x) => x != null).ToArray<Texture2D>();
@@ -50,8 +58,8 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		{
 			if (kanimFile != null)
 			{
-				HashedString hashedString = kanimFile.name;
-				Assets.AnimTable[hashedString] = kanimFile;
+				HashedString hashedString2 = kanimFile.name;
+				Assets.AnimTable[hashedString2] = kanimFile;
 			}
 		}
 		Singleton<StateMachineUpdater>.CreateInstance();
@@ -69,7 +77,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	{
 		foreach (Tag tag in GameTags.UnitCategories)
 		{
-			if (prefab.HasPrefabTag(tag))
+			if (prefab.HasTag(tag))
 			{
 				Assets.AddCountableTag(prefab.PrefabTag);
 				break;
@@ -142,20 +150,10 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		return tintedSprite;
 	}
 
-	public static Sprite GetSprite(string name)
+	public static Sprite GetSprite(HashedString name)
 	{
 		Sprite sprite = null;
-		if (Assets.Sprites != null)
-		{
-			for (int i = 0; i < Assets.Sprites.Length; i++)
-			{
-				if (Assets.Sprites[i].name == name)
-				{
-					sprite = Assets.Sprites[i];
-					break;
-				}
-			}
-		}
+		Assets.Sprites.TryGetValue(name, out sprite);
 		return sprite;
 	}
 
@@ -188,13 +186,13 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 			global::Debug.LogWarning("Tried loading prefab with duplicate tag, ignoring: " + prefab.PrefabTag, null);
 		}
 		Assets.PrefabsByTag[prefab.PrefabTag] = prefab;
-		for (int i = 0; i < prefab.Tags.Length; i++)
+		foreach (Tag tag in prefab.Tags)
 		{
-			if (!Assets.PrefabsByAdditionalTags.ContainsKey(prefab.Tags[i]))
+			if (!Assets.PrefabsByAdditionalTags.ContainsKey(tag))
 			{
-				Assets.PrefabsByAdditionalTags[prefab.Tags[i]] = new List<KPrefabID>();
+				Assets.PrefabsByAdditionalTags[tag] = new List<KPrefabID>();
 			}
-			Assets.PrefabsByAdditionalTags[prefab.Tags[i]].Add(prefab);
+			Assets.PrefabsByAdditionalTags[tag].Add(prefab);
 		}
 		Assets.Prefabs.Add(prefab);
 		Assets.TryAddCountableTag(prefab);
@@ -360,8 +358,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	private static Action<KPrefabID> OnAddPrefab;
 
-	public BuildingDef[] BuildingDefAssets;
-
 	public static BuildingDef[] BuildingDefs;
 
 	public List<KPrefabID> PrefabAssets = new List<KPrefabID>();
@@ -372,7 +368,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public Sprite[] SpriteAssets;
 
-	public static Sprite[] Sprites;
+	public static Dictionary<HashedString, Sprite> Sprites;
 
 	public TintedSprite[] TintedSpriteAssets;
 

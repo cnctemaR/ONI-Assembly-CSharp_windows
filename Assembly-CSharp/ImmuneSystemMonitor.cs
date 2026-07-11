@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Database;
 using Klei.AI;
+using Klei.CustomSettings;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -15,11 +16,7 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 		this.root.EventHandler(GameHashes.EatCompleteEater, delegate(ImmuneSystemMonitor.Instance smi, object obj)
 		{
 			smi.OnEatComplete(obj);
-		}).EventHandler(GameHashes.AirConsumed, delegate(ImmuneSystemMonitor.Instance smi, object obj)
-		{
-			smi.OnAirConsumed(obj);
-		}).EventTransition(GameHashes.DiseaseAdded, this.infected, (ImmuneSystemMonitor.Instance smi) => smi.IsSick())
-			.Transition(this.recovering, (ImmuneSystemMonitor.Instance smi) => smi.effects.HasEffect("PostDiseaseRecovery"), UpdateRate.SIM_200ms);
+		}).EventTransition(GameHashes.DiseaseAdded, this.infected, (ImmuneSystemMonitor.Instance smi) => smi.IsSick()).Transition(this.recovering, (ImmuneSystemMonitor.Instance smi) => smi.effects.HasEffect("PostDiseaseRecovery"), UpdateRate.SIM_200ms);
 		this.healthy.ParamTransition<bool>(this.isLosingImmunity, this.infecting, (ImmuneSystemMonitor.Instance smi, bool p) => p).Update(delegate(ImmuneSystemMonitor.Instance smi, float dt)
 		{
 			smi.UpdateImmuneSystem();
@@ -91,6 +88,8 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 			GameClock.Instance.Subscribe(-722330267, new Action<object>(this.OnNightTime));
 			this.modifiers = base.gameObject.GetComponent<Modifiers>();
 			this.immuneDelta = Db.Get().Amounts.ImmuneLevel.deltaAttribute.Lookup(base.gameObject);
+			OxygenBreather component = base.GetComponent<OxygenBreather>();
+			component.onSimConsume = (Action<Sim.MassConsumedCallback>)Delegate.Combine(component.onSimConsume, new Action<Sim.MassConsumedCallback>(this.OnAirConsumed));
 		}
 
 		public override void StopSM(string reason)
@@ -121,15 +120,14 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 			}
 		}
 
-		public void OnAirConsumed(object obj)
+		public void OnAirConsumed(Sim.MassConsumedCallback mass_cb_info)
 		{
-			Sim.MassConsumedCallback massConsumedCallback = (Sim.MassConsumedCallback)obj;
-			if (massConsumedCallback.diseaseIdx != 255)
+			if (mass_cb_info.diseaseIdx != 255)
 			{
-				Disease disease = Db.Get().Diseases[(int)massConsumedCallback.diseaseIdx];
+				Disease disease = Db.Get().Diseases[(int)mass_cb_info.diseaseIdx];
 				if (disease.infectionVectors.Contains(Disease.InfectionVector.Inhalation))
 				{
-					this.InjectDisease(disease, massConsumedCallback.diseaseCount, ElementLoader.elements[(int)massConsumedCallback.elemIdx].tag, Disease.InfectionVector.Inhalation);
+					this.InjectDisease(disease, mass_cb_info.diseaseCount, ElementLoader.elements[(int)mass_cb_info.elemIdx].tag, Disease.InfectionVector.Inhalation);
 				}
 			}
 		}
@@ -155,52 +153,62 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 			}
 		}
 
+		private AttributeModifier CreateModifier(Disease disease, string immune_id, Klei.AI.Amounts amounts)
+		{
+			AttributeModifier attributeModifier;
+			if (!this.attributeModifierPool.TryGetValue(disease.id, out attributeModifier))
+			{
+				attributeModifier = new AttributeModifier(immune_id, 0f, delegate
+				{
+					float value = amounts.Get(disease.amount).value;
+					return StringFormatter.Replace(DUPLICANTS.DISEASES.INFECTION_MODIFIER, "{0}", disease.Name).Replace("{1}", GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(value)));
+				}, false, false);
+				this.attributeModifierPool[disease.id] = attributeModifier;
+			}
+			return attributeModifier;
+		}
+
 		public void UpdateImmuneSystem()
 		{
 			Klei.AI.Amounts amounts = this.modifiers.GetAmounts();
-			Disease disease3 = null;
+			Disease disease = null;
 			float num = -1f;
 			global::Database.Diseases diseases = Db.Get().Diseases;
 			for (int i = 0; i < diseases.Count; i++)
 			{
-				Disease disease = diseases[i];
-				float value = amounts.Get(disease.amount).value;
+				Disease disease2 = diseases[i];
+				float value = amounts.Get(disease2.amount).value;
 				if (value > 0f)
 				{
 					if (value > num)
 					{
-						disease3 = disease;
+						disease = disease2;
 						num = value;
 					}
 					float num2 = -0.8333333f;
 					float num3 = value * -0.00066666666f;
 					num2 += num3;
-					this.diseaseCountMultModifiers[disease.id].SetValue(num3);
-					float num4 = num2 * disease.immuneAttackStrength;
+					this.diseaseCountMultModifiers[disease2.id].SetValue(num3);
+					float num4 = num2 * disease2.immuneAttackStrength;
 					if (num4 <= -0.00016666666f && value > 1f)
 					{
 						AttributeModifier attributeModifier;
-						if (!this.activeImmuneModifiers.TryGetValue(disease.id, out attributeModifier))
+						if (!this.activeImmuneModifiers.TryGetValue(disease2.id, out attributeModifier))
 						{
-							attributeModifier = new AttributeModifier(this.immuneDelta.Id, 0f, delegate
-							{
-								Disease disease2 = disease;
-								float value2 = amounts.Get(disease2.amount).value;
-								return StringFormatter.Replace(DUPLICANTS.DISEASES.INFECTION_MODIFIER, "{0}", disease2.Name).Replace("{1}", GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(value2)));
-							}, false, false);
+							attributeModifier = this.CreateModifier(disease2, this.immuneDelta.Id, amounts);
 							base.gameObject.GetAttributes().Add(attributeModifier);
-							this.activeImmuneModifiers[disease.id] = attributeModifier;
+							this.activeImmuneModifiers[disease2.id] = attributeModifier;
 						}
 						attributeModifier.SetValue(num4);
 					}
-					else if (this.activeImmuneModifiers.ContainsKey(disease.id))
+					else if (this.activeImmuneModifiers.ContainsKey(disease2.id))
 					{
-						base.gameObject.GetAttributes().Remove(this.activeImmuneModifiers[disease.id]);
-						this.activeImmuneModifiers.Remove(disease.id);
+						base.gameObject.GetAttributes().Remove(this.activeImmuneModifiers[disease2.id]);
+						this.activeImmuneModifiers.Remove(disease2.id);
 					}
 				}
 			}
-			this.lastHighestDisease = disease3;
+			this.lastHighestDisease = disease;
 			base.sm.isLosingImmunity.Set(this.immuneDelta.GetTotalValue() < 0f, base.smi);
 		}
 
@@ -223,7 +231,7 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 
 		private void OnImmuneDelta(float delta)
 		{
-			if (CustomGameSettings.Instance.GetCurrentQualitySetting("ImmuneSystem").id == "Invincible")
+			if (CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ImmuneSystem).id == "Invincible")
 			{
 				return;
 			}
@@ -292,6 +300,8 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 		public Dictionary<HashedString, AttributeModifier> activeImmuneModifiers;
 
 		public Dictionary<HashedString, AttributeModifier> diseaseCountMultModifiers;
+
+		private Dictionary<HashedString, AttributeModifier> attributeModifierPool = new Dictionary<HashedString, AttributeModifier>();
 
 		private Klei.AI.Diseases activeDiseases;
 

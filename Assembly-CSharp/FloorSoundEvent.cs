@@ -15,6 +15,11 @@ public class FloorSoundEvent : SoundEvent
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
 		Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+		KBatchedAnimController component = behaviour.GetComponent<KBatchedAnimController>();
+		if (component != null)
+		{
+			vector = component.GetPivotSymbolPosition();
+		}
 		int num = Grid.PosToCell(vector);
 		int num2 = Grid.CellBelow(num);
 		string audioCategory = FloorSoundEvent.GetAudioCategory(num2);
@@ -92,7 +97,32 @@ public class FloorSoundEvent : SoundEvent
 					buildingDef = component.Def;
 				}
 			}
-			return (!(buildingDef != null) || !(buildingDef.PrefabID == "PlasticTile")) ? "Tile" : "TilePlastic";
+			string text = string.Empty;
+			if (buildingDef != null)
+			{
+				string prefabID = buildingDef.PrefabID;
+				if (prefabID == "PlasticTile")
+				{
+					text = "TilePlastic";
+				}
+				else if (prefabID == "GlassTile")
+				{
+					text = "TileGlass";
+				}
+				else if (prefabID == "BunkerTile")
+				{
+					text = "TileBunker";
+				}
+				else if (prefabID == "MetalTile")
+				{
+					text = "TileMetal";
+				}
+				else
+				{
+					text = "Tile";
+				}
+			}
+			return text;
 		}
 		string floorEventAudioCategory = element.substance.GetFloorEventAudioCategory();
 		if (floorEventAudioCategory != null)

@@ -42,10 +42,7 @@ public class Structure : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-		}
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 	}
 
 	[MyCmpReq]
@@ -61,5 +58,5 @@ public class Structure : KMonoBehaviour
 
 	private bool isEntombed;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 }

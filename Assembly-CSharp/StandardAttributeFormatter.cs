@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using STRINGS;
 using UnityEngine;
 
 public class StandardAttributeFormatter : IAttributeFormatter
@@ -42,6 +43,50 @@ public class StandardAttributeFormatter : IAttributeFormatter
 			return GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(value));
 		}
 		return GameUtil.GetFormattedSimple(value, timeSlice, null);
+	}
+
+	public virtual string GetTooltipDescription(Klei.AI.Attribute master, AttributeInstance instance)
+	{
+		return master.Name + UI.HORIZONTAL_BR_RULE + master.Description;
+	}
+
+	public virtual string GetTooltip(Klei.AI.Attribute master, AttributeInstance instance)
+	{
+		string text = this.GetTooltipDescription(master, instance);
+		text += string.Format(DUPLICANTS.ATTRIBUTES.TOTAL_VALUE, this.GetFormattedValue(instance.GetTotalDisplayValue(), GameUtil.TimeSlice.None, null));
+		if (instance.GetBaseValue() != 0f)
+		{
+			text += string.Format(DUPLICANTS.ATTRIBUTES.BASE_VALUE, instance.GetBaseValue());
+		}
+		foreach (AttributeModifier attributeModifier in instance.Modifiers)
+		{
+			string formattedString = attributeModifier.GetFormattedString(instance.gameObject, false);
+			if (formattedString != null)
+			{
+				text += string.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifier.GetDescription(), formattedString);
+			}
+		}
+		string text2 = string.Empty;
+		AttributeConverters component = instance.gameObject.GetComponent<AttributeConverters>();
+		if (component != null && master.converters.Count > 0)
+		{
+			foreach (AttributeConverterInstance attributeConverterInstance in component.converters)
+			{
+				if (attributeConverterInstance.converter.attribute == master)
+				{
+					string text3 = attributeConverterInstance.DescriptionFromAttribute();
+					if (text3 != null)
+					{
+						text2 = text2 + "\n" + text3;
+					}
+				}
+			}
+		}
+		if (text2.Length > 0)
+		{
+			text = text + "\n" + text2;
+		}
+		return text;
 	}
 
 	public GameUtil.UnitClass unitClass;

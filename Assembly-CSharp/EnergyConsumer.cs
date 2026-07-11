@@ -111,12 +111,12 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 		Building component = base.GetComponent<Building>();
 		this.PowerCell = component.GetPowerInputCell();
 		Game.Instance.circuitManager.Connect(this);
-		Game.Instance.emergySim.AddEnergyConsumer(this);
+		Game.Instance.energySim.AddEnergyConsumer(this);
 	}
 
 	protected override void OnCleanUp()
 	{
-		Game.Instance.emergySim.RemoveEnergyConsumer(this);
+		Game.Instance.energySim.RemoveEnergyConsumer(this);
 		Game.Instance.circuitManager.Disconnect(this);
 		Components.EnergyConsumers.Remove(this);
 		base.OnCleanUp();

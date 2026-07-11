@@ -21,7 +21,7 @@ public class MingleCellSensor : Sensor
 			if (this.brain.IsCellClear(num3))
 			{
 				int navigationCost = this.navigator.GetNavigationCost(num3);
-				if (navigationCost != PathProber.InvalidCost)
+				if (navigationCost != -1)
 				{
 					if (num3 == Grid.InvalidCell || navigationCost < num)
 					{

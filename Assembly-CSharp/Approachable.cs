@@ -14,20 +14,8 @@ public class Approachable : KMonoBehaviour, IApproachable
 		return Grid.PosToCell(this);
 	}
 
-	public bool ShouldPreferPrimaryCell()
-	{
-		return false;
-	}
-
-	public bool ShouldPreferUnreservedCell()
-	{
-		return this.preferUnreservedCell;
-	}
-
 	Transform IApproachable.get_transform()
 	{
 		return base.transform;
 	}
-
-	public bool preferUnreservedCell;
 }

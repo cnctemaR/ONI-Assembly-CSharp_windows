@@ -42,6 +42,13 @@ public class Valve : Workable, ISaveLoadable
 	{
 		this.ChangeFlow(this.desiredFlow);
 		base.OnSpawn();
+		Prioritizable.AddRef(base.gameObject);
+	}
+
+	protected override void OnCleanUp()
+	{
+		Prioritizable.RemoveRef(base.gameObject);
+		base.OnCleanUp();
 	}
 
 	public void ChangeFlow(float amount)

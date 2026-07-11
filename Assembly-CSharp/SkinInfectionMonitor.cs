@@ -25,7 +25,7 @@ public class SkinInfectionMonitor : GameStateMachine<SkinInfectionMonitor, SkinI
 			: base(master)
 		{
 			this.primaryElement = master.GetComponent<PrimaryElement>();
-			this.diseaseConsumptionHandle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnDiseaseConsumed), "SkinInfectionMonitor"));
+			this.diseaseConsumptionHandle = Game.Instance.diseaseConsumptionCallbackManager.Add(new Action<Sim.DiseaseConsumptionCallback, object>(SkinInfectionMonitor.Instance.OnDiseaseConsumedCallback), this, "SkinInfectionMonitor");
 		}
 
 		public override void StartSM()
@@ -38,7 +38,7 @@ public class SkinInfectionMonitor : GameStateMachine<SkinInfectionMonitor, SkinI
 		{
 			if (this.diseaseConsumptionHandle.IsValid())
 			{
-				Game.Instance.complexCallbackManager.Release(this.diseaseConsumptionHandle, "Disease consumption cb");
+				Game.Instance.diseaseConsumptionCallbackManager.Release(this.diseaseConsumptionHandle, "Disease consumption cb");
 				this.diseaseConsumptionHandle.Clear();
 			}
 			base.StopSM(reason);
@@ -71,7 +71,7 @@ public class SkinInfectionMonitor : GameStateMachine<SkinInfectionMonitor, SkinI
 				int num = Grid.PosToCell(base.master.transform.GetPosition());
 				int num2 = Grid.CellAbove(num);
 				int num3 = Grid.CellBelow(num);
-				Game.Instance.complexCallbackManager.GetItem(this.diseaseConsumptionHandle);
+				Game.Instance.diseaseConsumptionCallbackManager.GetItem(this.diseaseConsumptionHandle);
 				SimMessages.ConsumeDisease(num, 0.016666668f, 250000, this.diseaseConsumptionHandle.index);
 				if (Grid.IsValidCell(num2))
 				{
@@ -85,15 +85,16 @@ public class SkinInfectionMonitor : GameStateMachine<SkinInfectionMonitor, SkinI
 			}
 		}
 
-		private void OnDiseaseConsumed(object data)
+		private static void OnDiseaseConsumedCallback(Sim.DiseaseConsumptionCallback cb_info, object data)
 		{
-			if (this.diseaseConsumptionHandle.IsValid())
+			((SkinInfectionMonitor.Instance)data).OnDiseaseConsumed(cb_info);
+		}
+
+		private void OnDiseaseConsumed(Sim.DiseaseConsumptionCallback cb_info)
+		{
+			if (this.diseaseConsumptionHandle.IsValid() && cb_info.diseaseIdx != 255)
 			{
-				Sim.DiseaseConsumptionCallback diseaseConsumptionCallback = (Sim.DiseaseConsumptionCallback)data;
-				if (diseaseConsumptionCallback.diseaseIdx != 255)
-				{
-					this.primaryElement.AddDisease(diseaseConsumptionCallback.diseaseIdx, diseaseConsumptionCallback.diseaseCount, "SkinInfectionMonitor.OnDiseaseConsumed");
-				}
+				this.primaryElement.AddDisease(cb_info.diseaseIdx, cb_info.diseaseCount, "SkinInfectionMonitor.OnDiseaseConsumed");
 			}
 		}
 
@@ -111,6 +112,6 @@ public class SkinInfectionMonitor : GameStateMachine<SkinInfectionMonitor, SkinI
 
 		private float lastInteractTime = float.NegativeInfinity;
 
-		private HandleVector<Game.ComplexCallbackInfo>.Handle diseaseConsumptionHandle;
+		private HandleVector<Game.ComplexCallbackInfo<Sim.DiseaseConsumptionCallback>>.Handle diseaseConsumptionHandle;
 	}
 }

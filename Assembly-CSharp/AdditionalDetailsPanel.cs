@@ -59,30 +59,18 @@ public class AdditionalDetailsPanel : TargetScreen
 		this.detailsPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.DETAILS.GROUPNAME_DETAILS;
 		PrimaryElement component = this.selectedTarget.GetComponent<PrimaryElement>();
 		CellSelectionObject component2 = this.selectedTarget.GetComponent<CellSelectionObject>();
-		float num = 0f;
-		bool flag = false;
+		float num;
 		float num2;
-		float num3;
 		Element element;
 		byte b;
-		int num4;
+		int num3;
 		if (component != null)
 		{
-			num2 = component.Mass;
-			num3 = component.Temperature;
+			num = component.Mass;
+			num2 = component.Temperature;
 			element = component.Element;
 			b = component.DiseaseIdx;
-			num4 = component.DiseaseCount;
-			Attributes attributes = this.selectedTarget.GetAttributes();
-			if (attributes != null)
-			{
-				AttributeInstance attributeInstance = this.selectedTarget.GetAttributes().Get(Db.Get().Attributes.ThermalConductivityBarrier);
-				if (attributeInstance != null)
-				{
-					flag = true;
-					num = attributeInstance.GetTotalValue();
-				}
-			}
+			num3 = component.DiseaseCount;
 		}
 		else
 		{
@@ -90,61 +78,48 @@ public class AdditionalDetailsPanel : TargetScreen
 			{
 				return;
 			}
-			num2 = component2.Mass;
-			num3 = component2.temperature;
+			num = component2.Mass;
+			num2 = component2.temperature;
 			element = component2.element;
 			b = component2.diseaseIdx;
-			num4 = component2.diseaseCount;
+			num3 = component2.diseaseCount;
 		}
-		bool flag2 = element.id == SimHashes.Vacuum || element.id == SimHashes.Void;
+		bool flag = element.id == SimHashes.Vacuum || element.id == SimHashes.Void;
 		float specificHeatCapacity = element.specificHeatCapacity;
 		float highTemp = element.highTemp;
 		float lowTemp = element.lowTemp;
-		this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.PRIMARYELEMENT.NAME, element.name)).Tooltip(this.drawer.Format(UI.ELEMENTAL.PRIMARYELEMENT.TOOLTIP, element.name)).NewLabel(this.drawer.Format(UI.ELEMENTAL.MASS.NAME, GameUtil.GetFormattedMass(num2, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")))
-			.Tooltip(this.drawer.Format(UI.ELEMENTAL.MASS.TOOLTIP, GameUtil.GetFormattedMass(num2, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")));
-		if (!flag2)
+		this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.PRIMARYELEMENT.NAME, element.name)).Tooltip(this.drawer.Format(UI.ELEMENTAL.PRIMARYELEMENT.TOOLTIP, element.name)).NewLabel(this.drawer.Format(UI.ELEMENTAL.MASS.NAME, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")))
+			.Tooltip(this.drawer.Format(UI.ELEMENTAL.MASS.TOOLTIP, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")));
+		if (!flag)
 		{
-			bool flag3 = false;
-			float num5 = element.thermalConductivity;
+			bool flag2 = false;
+			float num4 = element.thermalConductivity;
 			Building component3 = this.selectedTarget.GetComponent<Building>();
 			if (component3 != null)
 			{
-				num5 *= component3.Def.ThermalConductivity;
-				flag3 = component3.Def.ThermalConductivity < 1f;
+				num4 *= component3.Def.ThermalConductivity;
+				flag2 = component3.Def.ThermalConductivity < 1f;
 			}
 			string temperatureUnitSuffix = GameUtil.GetTemperatureUnitSuffix();
-			string text = string.Format(UI.ELEMENTAL.SHC.NAME, GameUtil.GetDisplaySHC(specificHeatCapacity).ToString("0.000"));
+			float num5 = specificHeatCapacity * 1f;
+			string text = string.Format(UI.ELEMENTAL.SHC.NAME, GameUtil.GetDisplaySHC(num5).ToString("0.000"));
 			string text2 = UI.ELEMENTAL.SHC.TOOLTIP;
 			text2 = text2.Replace("{SPECIFIC_HEAT_CAPACITY}", text + GameUtil.GetSHCSuffix());
 			text2 = text2.Replace("{TEMPERATURE_UNIT}", temperatureUnitSuffix);
-			string text3 = string.Format(UI.ELEMENTAL.THERMALCONDUCTIVITY.NAME, GameUtil.GetDisplayThermalConductivity(num5).ToString("0.000"));
+			string text3 = string.Format(UI.ELEMENTAL.THERMALCONDUCTIVITY.NAME, GameUtil.GetDisplayThermalConductivity(num4).ToString("0.000"));
 			string text4 = UI.ELEMENTAL.THERMALCONDUCTIVITY.TOOLTIP;
 			text4 = text4.Replace("{THERMAL_CONDUCTIVITY}", text3 + GameUtil.GetThermalConductivitySuffix());
 			text4 = text4.Replace("{TEMPERATURE_UNIT}", temperatureUnitSuffix);
-			this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.TEMPERATURE.NAME, GameUtil.GetFormattedTemperature(num3, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true))).Tooltip(this.drawer.Format(UI.ELEMENTAL.TEMPERATURE.TOOLTIP, GameUtil.GetFormattedTemperature(num3, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true))).NewLabel(this.drawer.Format(UI.ELEMENTAL.DISEASE.NAME, GameUtil.GetFormattedDisease(b, num4, false)))
-				.Tooltip(this.drawer.Format(UI.ELEMENTAL.DISEASE.TOOLTIP, GameUtil.GetFormattedDisease(b, num4, true)))
+			this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.TEMPERATURE.NAME, GameUtil.GetFormattedTemperature(num2, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true))).Tooltip(this.drawer.Format(UI.ELEMENTAL.TEMPERATURE.TOOLTIP, GameUtil.GetFormattedTemperature(num2, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true))).NewLabel(this.drawer.Format(UI.ELEMENTAL.DISEASE.NAME, GameUtil.GetFormattedDisease(b, num3, false)))
+				.Tooltip(this.drawer.Format(UI.ELEMENTAL.DISEASE.TOOLTIP, GameUtil.GetFormattedDisease(b, num3, true)))
 				.NewLabel(text)
 				.Tooltip(text2)
 				.NewLabel(text3)
 				.Tooltip(text4);
-			if (flag3)
+			if (flag2)
 			{
 				this.drawer.NewLabel(UI.GAMEOBJECTEFFECTS.INSULATED.NAME).Tooltip(UI.GAMEOBJECTEFFECTS.INSULATED.TOOLTIP);
 			}
-		}
-		if (flag)
-		{
-			this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.CONDUCTIVITYBARRIER.NAME, GameUtil.GetFormattedDistance(num))).Tooltip(delegate
-			{
-				AttributeInstance attributeInstance3 = this.selectedTarget.GetAttributes().Get("ThermalConductivityBarrier");
-				string text5 = this.drawer.Format(UI.ELEMENTAL.CONDUCTIVITYBARRIER.NAME, attributeInstance3.GetFormattedValue());
-				text5 += UI.HORIZONTAL_BR_RULE;
-				foreach (AttributeModifier attributeModifier2 in attributeInstance3.Modifiers)
-				{
-					text5 += this.drawer.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifier2.GetDescription(), attributeModifier2.GetFormattedString(attributeInstance3.gameObject));
-				}
-				return text5;
-			});
 		}
 		if (element.IsSolid)
 		{
@@ -155,7 +130,7 @@ public class AdditionalDetailsPanel : TargetScreen
 				AttributeModifier attributeModifier = component.Element.attributeModifiers.Find((AttributeModifier m) => m.AttributeId == Db.Get().BuildingAttributes.OverheatTemperature.Id);
 				if (attributeModifier != null)
 				{
-					this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.OVERHEATPOINT.NAME, attributeModifier.GetFormattedString(this.selectedTarget.gameObject))).Tooltip(this.drawer.Format(UI.ELEMENTAL.OVERHEATPOINT.TOOLTIP, attributeModifier.GetFormattedString(this.selectedTarget.gameObject)));
+					this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.OVERHEATPOINT.NAME, attributeModifier.GetFormattedString(this.selectedTarget.gameObject, false))).Tooltip(this.drawer.Format(UI.ELEMENTAL.OVERHEATPOINT.TOOLTIP, attributeModifier.GetFormattedString(this.selectedTarget.gameObject, false)));
 				}
 			}
 		}
@@ -164,19 +139,19 @@ public class AdditionalDetailsPanel : TargetScreen
 			this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.FREEZEPOINT.NAME, GameUtil.GetFormattedTemperature(lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true))).Tooltip(this.drawer.Format(UI.ELEMENTAL.FREEZEPOINT.TOOLTIP, GameUtil.GetFormattedTemperature(lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true))).NewLabel(this.drawer.Format(UI.ELEMENTAL.VAPOURIZATIONPOINT.NAME, GameUtil.GetFormattedTemperature(highTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true)))
 				.Tooltip(this.drawer.Format(UI.ELEMENTAL.VAPOURIZATIONPOINT.TOOLTIP, GameUtil.GetFormattedTemperature(highTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true)));
 		}
-		else if (!flag2)
+		else if (!flag)
 		{
 			this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.DEWPOINT.NAME, GameUtil.GetFormattedTemperature(lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true))).Tooltip(this.drawer.Format(UI.ELEMENTAL.DEWPOINT.TOOLTIP, GameUtil.GetFormattedTemperature(lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true)));
 		}
-		Attributes attributes2 = this.selectedTarget.GetAttributes();
-		if (attributes2 != null)
+		Attributes attributes = this.selectedTarget.GetAttributes();
+		if (attributes != null)
 		{
-			for (int i = 0; i < attributes2.Count; i++)
+			for (int i = 0; i < attributes.Count; i++)
 			{
-				AttributeInstance attributeInstance2 = attributes2.AttributeTable[i];
-				if (attributeInstance2.Attribute.ShowInUI == Klei.AI.Attribute.Display.Details)
+				AttributeInstance attributeInstance = attributes.AttributeTable[i];
+				if (attributeInstance.Attribute.ShowInUI == Klei.AI.Attribute.Display.Details || attributeInstance.Attribute.ShowInUI == Klei.AI.Attribute.Display.Expectation)
 				{
-					this.drawer.NewLabel(attributeInstance2.modifier.Name + ": " + attributeInstance2.GetFormattedValue()).Tooltip(attributeInstance2.GetAttributeValueTooltip());
+					this.drawer.NewLabel(attributeInstance.modifier.Name + ": " + attributeInstance.GetFormattedValue()).Tooltip(attributeInstance.GetAttributeValueTooltip());
 				}
 			}
 		}

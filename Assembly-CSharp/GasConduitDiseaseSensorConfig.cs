@@ -29,6 +29,7 @@ public class GasConduitDiseaseSensorConfig : ConduitSensorConfig
 		conduitDiseaseSensor.Threshold = 0f;
 		conduitDiseaseSensor.ActivateAboveThreshold = true;
 		conduitDiseaseSensor.manuallyControlled = false;
+		conduitDiseaseSensor.defaultState = false;
 	}
 
 	public static string ID = "GasConduitDiseaseSensor";

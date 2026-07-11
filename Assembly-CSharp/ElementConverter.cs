@@ -10,6 +10,11 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class ElementConverter : StateMachineComponent<ElementConverter.StatesInstance>, IEffectDescriptor
 {
+	public void SetWorkSpeedMultiplier(float speed)
+	{
+		this.workSpeedMultiplier = speed;
+	}
+
 	public void SetStorage(Storage storage)
 	{
 		this.storage = storage;
@@ -90,10 +95,15 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		return flag;
 	}
 
+	private float GetSpeedMultiplier()
+	{
+		return this.machinerySpeedAttribute.GetTotalValue() * this.workSpeedMultiplier;
+	}
+
 	private bool HasEnoughMass()
 	{
-		float totalValue = this.machinerySpeedAttribute.GetTotalValue();
-		float num = 1f * totalValue;
+		float speedMultiplier = this.GetSpeedMultiplier();
+		float num = 1f * speedMultiplier;
 		bool flag = true;
 		List<GameObject> items = this.storage.items;
 		for (int i = 0; i < this.consumedElements.Length; i++)
@@ -119,8 +129,8 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 
 	private void ConvertMass()
 	{
-		float totalValue = this.machinerySpeedAttribute.GetTotalValue();
-		float num = 1f * totalValue;
+		float speedMultiplier = this.GetSpeedMultiplier();
+		float num = 1f * speedMultiplier;
 		float num2 = 0f;
 		float num3 = 1f;
 		for (int i = 0; i < this.consumedElements.Length; i++)
@@ -251,8 +261,8 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 					int num15 = Grid.PosToCell(vector);
 					if (outputElement.element.IsLiquid)
 					{
-						int elementIndex = ElementLoader.GetElementIndex(outputElement.element.id);
-						FallingWater.instance.AddParticle(num15, (byte)elementIndex, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, true, false, false, false);
+						int idx = (int)outputElement.element.idx;
+						FallingWater.instance.AddParticle(num15, (byte)idx, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, true, false, false, false);
 					}
 					else if (outputElement.element.IsSolid)
 					{
@@ -335,17 +345,23 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		{
 			return list;
 		}
-		foreach (ElementConverter.ConsumedElement consumedElement in this.consumedElements)
+		if (this.consumedElements != null)
 		{
-			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, consumedElement.Name, GameUtil.GetFormattedMass(consumedElement.massConsumptionRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, consumedElement.Name, GameUtil.GetFormattedMass(consumedElement.massConsumptionRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
-			list.Add(descriptor);
+			foreach (ElementConverter.ConsumedElement consumedElement in this.consumedElements)
+			{
+				Descriptor descriptor = default(Descriptor);
+				descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, consumedElement.Name, GameUtil.GetFormattedMass(consumedElement.massConsumptionRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, consumedElement.Name, GameUtil.GetFormattedMass(consumedElement.massConsumptionRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
+				list.Add(descriptor);
+			}
 		}
-		foreach (ElementConverter.OutputElement outputElement in this.outputElements)
+		if (this.outputElements != null)
 		{
-			Descriptor descriptor2 = default(Descriptor);
-			descriptor2.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED, outputElement.Name, GameUtil.GetFormattedMass(outputElement.massGenerationRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED, outputElement.Name, GameUtil.GetFormattedMass(outputElement.massGenerationRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Effect);
-			list.Add(descriptor2);
+			foreach (ElementConverter.OutputElement outputElement in this.outputElements)
+			{
+				Descriptor descriptor2 = default(Descriptor);
+				descriptor2.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED, outputElement.Name, GameUtil.GetFormattedMass(outputElement.massGenerationRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED, outputElement.Name, GameUtil.GetFormattedMass(outputElement.massGenerationRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Effect);
+				list.Add(descriptor2);
+			}
 		}
 		return list;
 	}
@@ -361,6 +377,8 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 	private float totalDiseaseWeight = float.MaxValue;
 
 	private AttributeInstance machinerySpeedAttribute;
+
+	private float workSpeedMultiplier = 1f;
 
 	public bool showDescriptors = true;
 

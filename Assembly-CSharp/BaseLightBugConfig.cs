@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -24,14 +25,13 @@ public static class BaseLightBugConfig
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByPrefix(Assets.GetAnim(anim_file), symbolOverridePrefix, 0);
 		}
-		gameObject.GetComponent<KPrefabID>().AddPrefabTag(GameTags.Creatures.Flyer);
-		gameObject.AddOrGet<NotCapturable>();
+		gameObject.GetComponent<KPrefabID>().AddTag(GameTags.Creatures.Flyer);
 		gameObject.AddOrGet<LoopingSounds>();
 		LureableMonitor.Def def = gameObject.AddOrGetDef<LureableMonitor.Def>();
 		def.lures = new Tag[] { GameTags.Phosphorite };
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
 		gameObject.AddOrGetDef<SubmergedMonitor.Def>();
-		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true);
+		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false);
 		if (is_baby)
 		{
 			KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
@@ -73,11 +73,11 @@ public static class BaseLightBugConfig
 		return gameObject;
 	}
 
-	public static GameObject SetupDiet(GameObject prefab, TagBits consumedBits, Tag producedTag, float caloriesPerKg)
+	public static GameObject SetupDiet(GameObject prefab, HashSet<Tag> consumed_tags, Tag producedTag, float caloriesPerKg)
 	{
 		Diet.Info[] array = new Diet.Info[]
 		{
-			new Diet.Info(consumedBits, producedTag, caloriesPerKg, 1f, null, 0f)
+			new Diet.Info(consumed_tags, producedTag, caloriesPerKg, 1f, null, 0f)
 		};
 		Diet diet = new Diet(array);
 		CreatureCalorieMonitor.Def def = prefab.AddOrGetDef<CreatureCalorieMonitor.Def>();

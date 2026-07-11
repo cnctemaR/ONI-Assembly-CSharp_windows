@@ -18,6 +18,12 @@ public class RoomType : Resource
 		this.single_assignee = single_assignee;
 		this.priority_building_use = priority_building_use;
 		this.effects = effects;
+		if (this.upgrade_paths != null)
+		{
+			foreach (RoomType roomType in this.upgrade_paths)
+			{
+			}
+		}
 	}
 
 	public string tooltip { get; private set; }

@@ -242,6 +242,10 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 				base.AnimEnter(this.curAnim.hash);
 			}
 		}
+		if (this.synchronizer != null)
+		{
+			this.synchronizer.SyncTime();
+		}
 	}
 
 	public override void TriggerStop()

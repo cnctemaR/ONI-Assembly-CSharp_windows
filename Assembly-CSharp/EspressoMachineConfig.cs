@@ -32,7 +32,7 @@ public class EspressoMachineConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.RecBuilding);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.RecBuilding);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 20f;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardFabricatorStorage);

@@ -8,7 +8,7 @@ public class Turbine : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.simEmitCBHandle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimEmitted), "TurbineEmit"));
+		this.simEmitCBHandle = Game.Instance.massEmitCallbackManager.Add(new Action<Sim.MassEmittedCallback, object>(Turbine.OnSimEmittedCallback), this, "TurbineEmit");
 		BuildingDef def = base.GetComponent<BuildingComplete>().Def;
 		this.srcCells = new int[def.WidthInCells];
 		this.destCells = new int[def.WidthInCells];
@@ -19,7 +19,7 @@ public class Turbine : KMonoBehaviour
 			this.srcCells[i] = Grid.OffsetCell(num, new CellOffset(num2, -1));
 			this.destCells[i] = Grid.OffsetCell(num, new CellOffset(num2, def.HeightInCells - 1));
 			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
-			SimMessages.SetCellProperties(num3, 39);
+			SimMessages.SetCellProperties(num3, 87);
 			Grid.Foundation[num3] = true;
 			Grid.SetSolid(num3, true, CellEventLogger.Instance.SimCellOccupierForceSolid);
 			Grid.RenderedByWorld[num3] = false;
@@ -33,7 +33,7 @@ public class Turbine : KMonoBehaviour
 
 	private void CreateMeter()
 	{
-		this.meter = new MeterController(base.gameObject.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, new string[] { "meter_OL", "meter_frame", "meter_fill" });
+		this.meter = new MeterController(base.gameObject.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_OL", "meter_frame", "meter_fill" });
 		this.smi.UpdateMeter();
 	}
 
@@ -49,14 +49,14 @@ public class Turbine : KMonoBehaviour
 		{
 			int num2 = i - (def.WidthInCells - 1) / 2;
 			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
-			SimMessages.ClearCellProperties(num3, 39);
+			SimMessages.ClearCellProperties(num3, 87);
 			Grid.Foundation[num3] = false;
 			Grid.SetSolid(num3, false, CellEventLogger.Instance.SimCellOccupierForceSolid);
 			Grid.RenderedByWorld[num3] = true;
 			World.Instance.OnSolidChanged(num3);
 			GameScenePartitioner.Instance.TriggerEvent(num3, GameScenePartitioner.Instance.solidChangedLayer, null);
 		}
-		Game.Instance.complexCallbackManager.Release(this.simEmitCBHandle, "Turbine");
+		Game.Instance.massEmitCallbackManager.Release(this.simEmitCBHandle, "Turbine");
 		this.simEmitCBHandle.Clear();
 		base.OnCleanUp();
 	}
@@ -66,29 +66,33 @@ public class Turbine : KMonoBehaviour
 		float num = this.pumpKGRate * dt / (float)this.srcCells.Length;
 		foreach (int num2 in this.srcCells)
 		{
-			HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimConsume), "TurbineConsume"));
+			HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(Turbine.OnSimConsumeCallback), this, "TurbineConsume");
 			SimMessages.ConsumeMass(num2, this.srcElem, num, 1, handle.index);
 		}
 	}
 
-	private void OnSimConsume(object data)
+	private static void OnSimConsumeCallback(Sim.MassConsumedCallback mass_cb_info, object data)
 	{
-		Sim.MassConsumedCallback massConsumedCallback = (Sim.MassConsumedCallback)data;
-		if (massConsumedCallback.mass > 0f)
+		((Turbine)data).OnSimConsume(mass_cb_info);
+	}
+
+	private void OnSimConsume(Sim.MassConsumedCallback mass_cb_info)
+	{
+		if (mass_cb_info.mass > 0f)
 		{
-			this.storedTemperature = SimUtil.CalculateFinalTemperature(this.storedMass, this.storedTemperature, massConsumedCallback.mass, massConsumedCallback.temperature);
-			this.storedMass += massConsumedCallback.mass;
-			SimUtil.DiseaseInfo diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(this.diseaseIdx, this.diseaseCount, massConsumedCallback.diseaseIdx, massConsumedCallback.diseaseCount);
+			this.storedTemperature = SimUtil.CalculateFinalTemperature(this.storedMass, this.storedTemperature, mass_cb_info.mass, mass_cb_info.temperature);
+			this.storedMass += mass_cb_info.mass;
+			SimUtil.DiseaseInfo diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(this.diseaseIdx, this.diseaseCount, mass_cb_info.diseaseIdx, mass_cb_info.diseaseCount);
 			this.diseaseIdx = diseaseInfo.idx;
 			this.diseaseCount = diseaseInfo.count;
 			if (this.storedMass > this.minEmitMass && this.simEmitCBHandle.IsValid())
 			{
 				float num = this.storedMass / (float)this.destCells.Length;
 				int num2 = this.diseaseCount / this.destCells.Length;
-				Game.Instance.complexCallbackManager.GetItem(this.simEmitCBHandle);
+				Game.Instance.massEmitCallbackManager.GetItem(this.simEmitCBHandle);
 				foreach (int num3 in this.destCells)
 				{
-					SimMessages.EmitMass(num3, massConsumedCallback.elemIdx, num, this.emitTemperature, this.diseaseIdx, num2, this.simEmitCBHandle.index);
+					SimMessages.EmitMass(num3, mass_cb_info.elemIdx, num, this.emitTemperature, this.diseaseIdx, num2, this.simEmitCBHandle.index);
 				}
 				this.storedMass = 0f;
 				this.storedTemperature = 0f;
@@ -98,14 +102,18 @@ public class Turbine : KMonoBehaviour
 		}
 	}
 
-	private void OnSimEmitted(object data)
+	private static void OnSimEmittedCallback(Sim.MassEmittedCallback info, object data)
 	{
-		Sim.MassEmittedCallback massEmittedCallback = (Sim.MassEmittedCallback)data;
-		if (massEmittedCallback.suceeded != 1)
+		((Turbine)data).OnSimEmitted(info);
+	}
+
+	private void OnSimEmitted(Sim.MassEmittedCallback info)
+	{
+		if (info.suceeded != 1)
 		{
-			this.storedTemperature = SimUtil.CalculateFinalTemperature(this.storedMass, this.storedTemperature, massEmittedCallback.mass, massEmittedCallback.temperature);
-			this.storedMass += massEmittedCallback.mass;
-			if (massEmittedCallback.diseaseIdx != 255)
+			this.storedTemperature = SimUtil.CalculateFinalTemperature(this.storedMass, this.storedTemperature, info.mass, info.temperature);
+			this.storedMass += info.mass;
+			if (info.diseaseIdx != 255)
 			{
 				SimUtil.DiseaseInfo diseaseInfo = new SimUtil.DiseaseInfo
 				{
@@ -114,8 +122,8 @@ public class Turbine : KMonoBehaviour
 				};
 				SimUtil.DiseaseInfo diseaseInfo2 = new SimUtil.DiseaseInfo
 				{
-					idx = massEmittedCallback.diseaseIdx,
-					count = massEmittedCallback.diseaseCount
+					idx = info.diseaseIdx,
+					count = info.diseaseCount
 				};
 				SimUtil.DiseaseInfo diseaseInfo3 = SimUtil.CalculateFinalDiseaseInfo(diseaseInfo, diseaseInfo2);
 				this.diseaseIdx = diseaseInfo3.idx;
@@ -217,11 +225,11 @@ public class Turbine : KMonoBehaviour
 
 	private static StatusItem spinningUpStatusItem;
 
-	private const Sim.Cell.Properties floorCellProperties = (Sim.Cell.Properties)39;
+	private const Sim.Cell.Properties floorCellProperties = (Sim.Cell.Properties)87;
 
 	private MeterController meter;
 
-	private HandleVector<Game.ComplexCallbackInfo>.Handle simEmitCBHandle = HandleVector<Game.ComplexCallbackInfo>.InvalidHandle;
+	private HandleVector<Game.ComplexCallbackInfo<Sim.MassEmittedCallback>>.Handle simEmitCBHandle = HandleVector<Game.ComplexCallbackInfo<Sim.MassEmittedCallback>>.InvalidHandle;
 
 	public class States : GameStateMachine<Turbine.States, Turbine.Instance, Turbine>
 	{

@@ -3,11 +3,19 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-public class AsPercentAmountDisplayer : IAmountDisplayer, IAttributeFormatter
+public class AsPercentAmountDisplayer : IAmountDisplayer
 {
 	public AsPercentAmountDisplayer(GameUtil.TimeSlice deltaTimeSlice)
 	{
 		this.formatter = new StandardAttributeFormatter(GameUtil.UnitClass.Percent, deltaTimeSlice);
+	}
+
+	public IAttributeFormatter Formatter
+	{
+		get
+		{
+			return this.formatter;
+		}
 	}
 
 	public GameUtil.TimeSlice DeltaTimeSlice
@@ -39,7 +47,8 @@ public class AsPercentAmountDisplayer : IAmountDisplayer, IAttributeFormatter
 
 	public virtual string GetTooltip(Amount master, AmountInstance instance)
 	{
-		string text = this.GetTooltipDescription(master, instance);
+		string text = master.Name;
+		text = text + UI.HORIZONTAL_BR_RULE + string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null));
 		text += "\n\n";
 		if (this.formatter.DeltaTimeSlice == GameUtil.TimeSlice.PerCycle)
 		{
@@ -49,11 +58,10 @@ public class AsPercentAmountDisplayer : IAmountDisplayer, IAttributeFormatter
 		{
 			text += string.Format(UI.CHANGEPERSECOND, this.formatter.GetFormattedValue(this.ToPercent(instance.deltaAttribute.GetTotalDisplayValue(), instance), GameUtil.TimeSlice.PerSecond, null));
 		}
-		text += "\n";
 		foreach (AttributeModifier attributeModifier in instance.deltaAttribute.Modifiers)
 		{
 			float modifierContribution = instance.deltaAttribute.GetModifierContribution(attributeModifier);
-			text = text + "\n" + string.Format("{0}: {1}", attributeModifier.GetDescription(), this.formatter.GetFormattedValue(this.ToPercent(modifierContribution, instance), this.formatter.DeltaTimeSlice, null));
+			text = text + "\n" + string.Format(UI.MODIFIER_ITEM_TEMPLATE, attributeModifier.GetDescription(), this.formatter.GetFormattedValue(this.ToPercent(modifierContribution, instance), this.formatter.DeltaTimeSlice, null));
 		}
 		return text;
 	}

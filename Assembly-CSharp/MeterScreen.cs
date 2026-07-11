@@ -205,7 +205,7 @@ public class MeterScreen : KScreen, IRender1000ms
 		this.RationsTooltip.AddMultiStringTooltip(string.Empty, this.ToolTipStyle_Property);
 		foreach (KeyValuePair<string, float> keyValuePair in this.rationsDict)
 		{
-			EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(keyValuePair.Key);
+			EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(keyValuePair.Key);
 			this.RationsTooltip.AddMultiStringTooltip(string.Format("{0}: {1}", foodInfo.Name, keyValuePair.Value), this.ToolTipStyle_Property);
 		}
 		return string.Empty;

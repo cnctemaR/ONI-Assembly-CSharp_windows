@@ -283,7 +283,7 @@ public class RefinerySideScreen : SideScreenContent
 			string text4;
 			if (GameTags.DisplayAsCalories.Contains(recipeElement.material))
 			{
-				EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(recipeElement.material.Name);
+				EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(recipeElement.material.Name);
 				float num = foodInfo.CaloriesPerUnit * recipeElement.amount;
 				text3 = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
 				text4 = GameUtil.GetFormattedCalories(amount * foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true);
@@ -317,7 +317,7 @@ public class RefinerySideScreen : SideScreenContent
 			string text;
 			if (GameTags.DisplayAsCalories.Contains(recipeElement.material))
 			{
-				EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(recipeElement.material.Name);
+				EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(recipeElement.material.Name);
 				float num = foodInfo.CaloriesPerUnit * recipeElement.amount;
 				text = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
 			}

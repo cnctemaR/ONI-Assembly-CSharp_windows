@@ -114,10 +114,7 @@ public class ConduitConsumer : KMonoBehaviour
 	protected override void OnCleanUp()
 	{
 		this.GetConduitManager().RemoveConduitUpdater(new Action<float>(this.ConduitUpdate));
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-		}
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		base.OnCleanUp();
 	}
 
@@ -137,6 +134,10 @@ public class ConduitConsumer : KMonoBehaviour
 
 	private void Consume(float dt, ConduitFlow conduit_mgr)
 	{
+		if (this.building.Def.CanMove)
+		{
+			this.utilityCell = this.building.GetUtilityInputCell();
+		}
 		if (this.IsConnected)
 		{
 			ConduitFlow.ConduitContents contents = conduit_mgr.GetContents(this.utilityCell);
@@ -178,7 +179,7 @@ public class ConduitConsumer : KMonoBehaviour
 								{
 									if (element2.IsGas)
 									{
-										this.storage.AddGasChunk(contents.element, num4, contents.temperature, contents.diseaseIdx, num5, true, false);
+										this.storage.AddGasChunk(contents.element, num4, contents.temperature, contents.diseaseIdx, num5, this.keepZeroMassObject, false);
 									}
 									else
 									{
@@ -188,7 +189,7 @@ public class ConduitConsumer : KMonoBehaviour
 							}
 							else if (element2.IsLiquid)
 							{
-								this.storage.AddLiquid(contents.element, num4, contents.temperature, contents.diseaseIdx, num5, true, false);
+								this.storage.AddLiquid(contents.element, num4, contents.temperature, contents.diseaseIdx, num5, this.keepZeroMassObject, false);
 							}
 							else
 							{
@@ -233,6 +234,9 @@ public class ConduitConsumer : KMonoBehaviour
 	[SerializeField]
 	public bool alwaysConsume;
 
+	[SerializeField]
+	public bool keepZeroMassObject = true;
+
 	[NonSerialized]
 	public bool isConsuming = true;
 
@@ -251,7 +255,7 @@ public class ConduitConsumer : KMonoBehaviour
 
 	public static readonly Operational.Flag elementRequirementFlag = new Operational.Flag("elementRequired", Operational.Flag.Type.Requirement);
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 
 	private bool satisfied;
 

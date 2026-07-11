@@ -202,6 +202,10 @@ namespace Database
 				new string[] { "WaterPurifier", "AlgaeDistillery" }
 			},
 			{
+				"Catalytics",
+				new string[] { "OxyliteRefinery" }
+			},
+			{
 				"PowerRegulation",
 				new string[]
 				{
@@ -340,7 +344,12 @@ namespace Database
 			},
 			{
 				"SkyDetectors",
-				new string[] { CometDetectorConfig.ID }
+				new string[]
+				{
+					CometDetectorConfig.ID,
+					"Telescope",
+					"AstronautTrainingCenter"
+				}
 			},
 			{
 				"TravelTubes",
@@ -353,6 +362,18 @@ namespace Database
 			{
 				"SolidTransport",
 				new string[] { "SolidConduit", "SolidConduitBridge", "SolidConduitInbox", "SolidConduitOutbox" }
+			},
+			{
+				"BasicRocketry",
+				new string[] { "LiquidFuelTank", "KeroseneEngine", "CommandModule", "CargoBay", "Gantry" }
+			},
+			{
+				"IntermediateRocketry",
+				new string[] { "LiquidCargoBay", "GasCargoBay", "SpecialCargoBay" }
+			},
+			{
+				"IndustrialStorage",
+				new string[] { "LiquidReservoir", "GasReservoir", "GasBottler", "BottleEmptierGas" }
 			}
 		};
 
@@ -386,6 +407,24 @@ namespace Database
 			{
 				new Tuple<string, float>("alpha", 50f),
 				new Tuple<string, float>("beta", 70f)
+			},
+			new List<Tuple<string, float>>
+			{
+				new Tuple<string, float>("alpha", 70f),
+				new Tuple<string, float>("beta", 100f),
+				new Tuple<string, float>("gamma", 20f)
+			},
+			new List<Tuple<string, float>>
+			{
+				new Tuple<string, float>("alpha", 70f),
+				new Tuple<string, float>("beta", 100f),
+				new Tuple<string, float>("gamma", 40f)
+			},
+			new List<Tuple<string, float>>
+			{
+				new Tuple<string, float>("alpha", 70f),
+				new Tuple<string, float>("beta", 100f),
+				new Tuple<string, float>("gamma", 60f)
 			}
 		};
 	}

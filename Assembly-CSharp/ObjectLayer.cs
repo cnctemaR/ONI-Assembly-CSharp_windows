@@ -38,5 +38,6 @@ public enum ObjectLayer
 	ReplacementTravelTube,
 	TravelTubeConnection,
 	AttachableBuilding,
+	Gantry,
 	NumLayers
 }

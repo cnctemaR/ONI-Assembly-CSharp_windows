@@ -31,7 +31,7 @@ public class MinionConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Attributes.Sneezyness.Id, 0f, text, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, 0.025f, text, false, false, true));
 		gameObject.AddOrGet<MinionBrain>();
-		gameObject.AddOrGet<KPrefabID>().AddPrefabTag(GameTags.DupeBrain);
+		gameObject.AddOrGet<KPrefabID>().AddTag(GameTags.DupeBrain);
 		gameObject.AddOrGet<Worker>();
 		gameObject.AddOrGet<ChoreConsumer>();
 		Storage storage = gameObject.AddOrGet<Storage>();

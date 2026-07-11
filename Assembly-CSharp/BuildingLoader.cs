@@ -174,107 +174,100 @@ public class BuildingLoader : KMonoBehaviour
 		return gameObject;
 	}
 
-	public GameObject CreateBuildingComplete(BuildingDef def)
+	public GameObject CreateBuildingComplete(GameObject go, BuildingDef def)
 	{
-		GameObject gameObject = def.BuildingTemplate;
-		gameObject.SetActive(false);
-		if (gameObject != null)
+		go.name = def.PrefabID + "Complete";
+		go.transform.SetPosition(new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer)));
+		KSelectable component = go.GetComponent<KSelectable>();
+		component.SetName(def.Name);
+		PrimaryElement component2 = go.GetComponent<PrimaryElement>();
+		component2.MassPerUnit = def.Mass[0];
+		BuildingHP buildingHP = go.AddOrGet<BuildingHP>();
+		if (def.Invincible)
 		{
-			gameObject = global::UnityEngine.Object.Instantiate<GameObject>(gameObject);
-			global::UnityEngine.Object.DontDestroyOnLoad(gameObject);
-			gameObject.name = def.PrefabID + "Complete";
-			gameObject.transform.SetPosition(new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer)));
-			KSelectable component = gameObject.GetComponent<KSelectable>();
-			component.SetName(def.Name);
-			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
-			component2.MassPerUnit = def.Mass[0];
-			BuildingHP buildingHP = gameObject.AddOrGet<BuildingHP>();
-			if (def.Invincible)
-			{
-				buildingHP.invincible = true;
-			}
-			buildingHP.SetHitPoints(def.HitPoints);
-			if (def.Repairable)
-			{
-				BuildingLoader.UpdateComponentRequirement<Repairable>(gameObject, true);
-			}
-			int num = LayerMask.NameToLayer("Default");
-			gameObject.layer = num;
-			Building component3 = gameObject.GetComponent<BuildingComplete>();
-			component3.Def = def;
-			if (def.InputConduitType != ConduitType.None || def.OutputConduitType != ConduitType.None)
-			{
-				gameObject.AddComponent<BuildingConduitEndpoints>();
-			}
-			if (!BuildingLoader.Add2DComponents(def, gameObject, null, false, -1))
-			{
-				global::Debug.Log(def.Name + " is not yet a 2d building!", null);
-			}
-			BuildingLoader.UpdateComponentRequirement<EnergyConsumer>(gameObject, def.RequiresPowerInput);
-			Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations != PermittedRotations.Unrotatable);
-			if (rotatable)
-			{
-				rotatable.permittedRotations = def.PermittedRotations;
-			}
-			if (def.Breakable)
-			{
-				gameObject.AddComponent<Breakable>();
-			}
-			ConduitConsumer conduitConsumer = BuildingLoader.UpdateComponentRequirement<ConduitConsumer>(gameObject, def.InputConduitType == ConduitType.Gas || def.InputConduitType == ConduitType.Liquid);
-			if (conduitConsumer != null)
-			{
-				conduitConsumer.SetConduitData(def.InputConduitType);
-			}
-			bool flag = def.RequiresPowerInput || def.InputConduitType == ConduitType.Gas || def.InputConduitType == ConduitType.Liquid;
-			RequireInputs requireInputs = BuildingLoader.UpdateComponentRequirement<RequireInputs>(gameObject, flag);
-			if (requireInputs != null)
-			{
-				requireInputs.SetRequirements(def.RequiresPowerInput, def.InputConduitType == ConduitType.Gas || def.InputConduitType == ConduitType.Liquid);
-			}
-			BuildingLoader.UpdateComponentRequirement<RequireOutputs>(gameObject, def.OutputConduitType != ConduitType.None);
-			BuildingLoader.UpdateComponentRequirement<Operational>(gameObject, !def.isUtility);
-			if (def.Floodable)
-			{
-				gameObject.AddComponent<Floodable>();
-			}
-			if (def.Disinfectable)
-			{
-				gameObject.AddOrGet<AutoDisinfectable>();
-				gameObject.AddOrGet<Disinfectable>();
-			}
-			if (def.Overheatable)
-			{
-				Overheatable overheatable = gameObject.AddComponent<Overheatable>();
-				overheatable.baseOverheatTemp = def.OverheatTemperature;
-				overheatable.baseFatalTemp = def.FatalHot;
-			}
-			if (def.Entombable)
-			{
-				gameObject.AddComponent<Structure>();
-			}
-			if (def.RequiresPowerInput)
-			{
-				GeneratedBuildings.RegisterLogicPorts(gameObject, LogicOperationalController.INPUT_PORTS);
-				gameObject.AddOrGet<LogicOperationalController>();
-			}
-			BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, BuildingCellVisualizer.CheckRequiresComponent(def));
-			if (def.BaseDecor != 0f)
-			{
-				DecorProvider decorProvider = BuildingLoader.UpdateComponentRequirement<DecorProvider>(gameObject, true);
-				decorProvider.baseDecor = def.BaseDecor;
-				decorProvider.baseRadius = def.BaseDecorRadius;
-			}
-			if (def.AttachableBuildingType != Tag.Invalid)
-			{
-				AttachableBuilding attachableBuilding = BuildingLoader.UpdateComponentRequirement<AttachableBuilding>(gameObject, true);
-				attachableBuilding.attachableTag = def.AttachableBuildingType;
-			}
-			KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID);
-			kprefabID.defaultLayer = num;
-			Assets.AddPrefab(kprefabID);
-			gameObject.PreInit();
+			buildingHP.invincible = true;
 		}
-		return gameObject;
+		buildingHP.SetHitPoints(def.HitPoints);
+		if (def.Repairable)
+		{
+			BuildingLoader.UpdateComponentRequirement<Repairable>(go, true);
+		}
+		int num = LayerMask.NameToLayer("Default");
+		go.layer = num;
+		Building component3 = go.GetComponent<BuildingComplete>();
+		component3.Def = def;
+		if (def.InputConduitType != ConduitType.None || def.OutputConduitType != ConduitType.None)
+		{
+			go.AddComponent<BuildingConduitEndpoints>();
+		}
+		if (!BuildingLoader.Add2DComponents(def, go, null, false, -1))
+		{
+			global::Debug.Log(def.Name + " is not yet a 2d building!", null);
+		}
+		BuildingLoader.UpdateComponentRequirement<EnergyConsumer>(go, def.RequiresPowerInput);
+		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(go, def.PermittedRotations != PermittedRotations.Unrotatable);
+		if (rotatable)
+		{
+			rotatable.permittedRotations = def.PermittedRotations;
+		}
+		if (def.Breakable)
+		{
+			go.AddComponent<Breakable>();
+		}
+		ConduitConsumer conduitConsumer = BuildingLoader.UpdateComponentRequirement<ConduitConsumer>(go, def.InputConduitType == ConduitType.Gas || def.InputConduitType == ConduitType.Liquid);
+		if (conduitConsumer != null)
+		{
+			conduitConsumer.SetConduitData(def.InputConduitType);
+		}
+		bool flag = def.RequiresPowerInput || def.InputConduitType == ConduitType.Gas || def.InputConduitType == ConduitType.Liquid;
+		RequireInputs requireInputs = BuildingLoader.UpdateComponentRequirement<RequireInputs>(go, flag);
+		if (requireInputs != null)
+		{
+			requireInputs.SetRequirements(def.RequiresPowerInput, def.InputConduitType == ConduitType.Gas || def.InputConduitType == ConduitType.Liquid);
+		}
+		BuildingLoader.UpdateComponentRequirement<RequireOutputs>(go, def.OutputConduitType != ConduitType.None);
+		BuildingLoader.UpdateComponentRequirement<Operational>(go, !def.isUtility);
+		if (def.Floodable)
+		{
+			go.AddComponent<Floodable>();
+		}
+		if (def.Disinfectable)
+		{
+			go.AddOrGet<AutoDisinfectable>();
+			go.AddOrGet<Disinfectable>();
+		}
+		if (def.Overheatable)
+		{
+			Overheatable overheatable = go.AddComponent<Overheatable>();
+			overheatable.baseOverheatTemp = def.OverheatTemperature;
+			overheatable.baseFatalTemp = def.FatalHot;
+		}
+		if (def.Entombable)
+		{
+			go.AddComponent<Structure>();
+		}
+		if (def.RequiresPowerInput)
+		{
+			GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS);
+			go.AddOrGet<LogicOperationalController>();
+		}
+		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(go, BuildingCellVisualizer.CheckRequiresComponent(def));
+		if (def.BaseDecor != 0f)
+		{
+			DecorProvider decorProvider = BuildingLoader.UpdateComponentRequirement<DecorProvider>(go, true);
+			decorProvider.baseDecor = def.BaseDecor;
+			decorProvider.baseRadius = def.BaseDecorRadius;
+		}
+		if (def.AttachmentSlotTag != Tag.Invalid)
+		{
+			AttachableBuilding attachableBuilding = BuildingLoader.UpdateComponentRequirement<AttachableBuilding>(go, true);
+			attachableBuilding.attachableToTag = def.AttachmentSlotTag;
+		}
+		KPrefabID kprefabID = BuildingLoader.AddID(go, def.PrefabID);
+		kprefabID.defaultLayer = num;
+		Assets.AddPrefab(kprefabID);
+		go.PreInit();
+		return go;
 	}
 
 	public GameObject CreateBuildingPreview(BuildingDef def)

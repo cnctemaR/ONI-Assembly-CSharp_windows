@@ -330,7 +330,10 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 			{
 				list.Add(GameTags.StoredMetal);
 			}
-			component.AddPrefabTags(list);
+			foreach (Tag tag2 in list)
+			{
+				component.AddTag(tag2);
+			}
 		}
 	}
 

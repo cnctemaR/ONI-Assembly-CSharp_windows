@@ -10,11 +10,13 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 	{
 		base.OnSpawn();
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		this.CreateNewReactable();
 		Pathfinding.Instance.AddNavigationFeature(Grid.PosToCell(this), this);
 		base.GetComponent<KAnimControllerBase>().Play("no_suit", KAnim.PlayMode.Once, 1f, 0f);
 		Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Suits);
 		this.RefreshTraverseIfUnequipStatusItem();
+		SuitLocker.UpdateSuitMarkerStates(Grid.PosToCell(base.transform.position), base.gameObject);
 	}
 
 	private void CreateNewReactable()
@@ -245,6 +247,11 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 		this.RefreshTraverseIfUnequipStatusItem();
 	}
 
+	private void OnOperationalChanged(object data)
+	{
+		SuitLocker.UpdateSuitMarkerStates(Grid.PosToCell(base.transform.position), base.gameObject);
+	}
+
 	private void OnRefreshUserMenu(object data)
 	{
 		KIconButtonMenu.ButtonInfo buttonInfo;
@@ -284,7 +291,11 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 		{
 			this.reactable.Cleanup();
 		}
+		SuitLocker.UpdateSuitMarkerStates(Grid.PosToCell(base.transform.position), null);
 	}
+
+	[MyCmpGet]
+	private Building building;
 
 	private ScenePartitionerEntry partitionerEntry;
 

@@ -202,10 +202,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 				{
 					int num = Grid.PosToCell(base.transform.GetPosition());
 					this.simHandle = -2;
-					HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object data)
-					{
-						SimTemperatureTransfer.OnSimRegistered(this, data);
-					}, "SimTemperatureTransfer.SimRegister"));
+					HandleVector<Game.ComplexCallbackInfo<int>>.Handle handle = Game.Instance.simComponentCallbackManager.Add(new Action<int, object>(SimTemperatureTransfer.OnSimRegisteredCallback), this, "SimTemperatureTransfer.SimRegister");
 					float num2 = component.InternalTemperature;
 					KCrashReporter.Assert(num2 > 0f, "Invalid temperature");
 					KCrashReporter.Assert(component.Mass > 0f);
@@ -236,32 +233,36 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		}
 	}
 
-	private unsafe static void OnSimRegistered(SimTemperatureTransfer instance, object data)
+	private static void OnSimRegisteredCallback(int handle, object data)
 	{
-		int num = (int)data;
-		if (instance != null && instance.simHandle == -2)
+		((SimTemperatureTransfer)data).OnSimRegistered(handle);
+	}
+
+	private unsafe void OnSimRegistered(int handle)
+	{
+		if (this != null && this.simHandle == -2)
 		{
-			instance.simHandle = num;
-			int handleIndex = Sim.GetHandleIndex(num);
+			this.simHandle = handle;
+			int handleIndex = Sim.GetHandleIndex(handle);
 			float temperature = Game.Instance.simData.elementChunks[handleIndex].temperature;
 			if (temperature <= 0f)
 			{
 				KCrashReporter.Assert(false, "Bad temperature");
 			}
-			SimTemperatureTransfer.handleInstanceMap[instance.simHandle] = instance;
-			if (instance.pendingEnergyModifications > 0f)
+			SimTemperatureTransfer.handleInstanceMap[this.simHandle] = this;
+			if (this.pendingEnergyModifications > 0f)
 			{
-				instance.ModifyEnergy(instance.pendingEnergyModifications);
-				instance.pendingEnergyModifications = 0f;
+				this.ModifyEnergy(this.pendingEnergyModifications);
+				this.pendingEnergyModifications = 0f;
 			}
-			if (instance.onSimRegistered != null)
+			if (this.onSimRegistered != null)
 			{
-				instance.onSimRegistered(instance);
+				this.onSimRegistered(this);
 			}
 		}
 		else
 		{
-			SimMessages.RemoveElementChunk(num, -1);
+			SimMessages.RemoveElementChunk(handle, -1);
 		}
 	}
 

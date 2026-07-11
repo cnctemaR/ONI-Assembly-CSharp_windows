@@ -189,7 +189,7 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPoi
 			float num3 = ((!doExtras) ? 0f : MaterialNeeds.Instance.GetAmount(tag));
 			if (this.Measure == GameUtil.MeasureUnit.kcal)
 			{
-				EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(tag.Name);
+				EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(tag.Name);
 				num *= foodInfo.CaloriesPerUnit;
 				num2 *= foodInfo.CaloriesPerUnit;
 				num3 *= foodInfo.CaloriesPerUnit;

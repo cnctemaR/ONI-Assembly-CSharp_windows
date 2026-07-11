@@ -20,10 +20,8 @@ public class BuildQueueButton : KMonoBehaviour
 		this.BG = base.GetComponent<Image>();
 		KButton component2 = base.GetComponent<KButton>();
 		component2.onClick += this.ButtonClicked;
-		KButton kbutton = component2;
-		kbutton.onPointerEnter = (global::System.Action)Delegate.Combine(kbutton.onPointerEnter, new global::System.Action(this.PointerEntered));
-		KButton kbutton2 = component2;
-		kbutton2.onPointerExit = (global::System.Action)Delegate.Combine(kbutton2.onPointerExit, new global::System.Action(this.PointerLeft));
+		component2.onPointerEnter += this.PointerEntered;
+		component2.onPointerExit += this.PointerLeft;
 	}
 
 	public void SetAvailability(string recipeName, bool currentAvailability, string str)
@@ -97,7 +95,7 @@ public class BuildQueueButton : KMonoBehaviour
 				string text;
 				if (GameTags.DisplayAsCalories.Contains(keyValuePair.Key))
 				{
-					EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(keyValuePair.Key.Name);
+					EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(keyValuePair.Key.Name);
 					float num = foodInfo.CaloriesPerUnit * keyValuePair.Value;
 					text = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.CALS, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true));
 				}

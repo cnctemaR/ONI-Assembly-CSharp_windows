@@ -60,7 +60,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 		float num2 = this.explosionMass;
 		Vector2 vector2 = -this.velocity.normalized;
 		Vector2 vector3 = new Vector2(vector2.y, -vector2.x);
-		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+		ListPool<ScenePartitionerEntry, Comet>.PooledList pooledList = ListPool<ScenePartitionerEntry, Comet>.Allocate();
 		GameScenePartitioner.Instance.GatherEntries((int)pos.x - 3, (int)pos.y - 3, 6, 6, GameScenePartitioner.Instance.pickupablesLayer, pooledList);
 		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 		{
@@ -81,6 +81,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 				GameComps.Fallers.Add(gameObject, vector4);
 			}
 		}
+		pooledList.Recycle();
 		int num3 = this.splashRadius + 1;
 		for (int i = -num3; i <= num3; i++)
 		{
@@ -260,7 +261,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 				this.damagedEntities.Add(gameObject);
 			}
 		}
-		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+		ListPool<ScenePartitionerEntry, Comet>.PooledList pooledList = ListPool<ScenePartitionerEntry, Comet>.Allocate();
 		GameScenePartitioner.Instance.GatherEntries((int)pos.x, (int)pos.y, 1, 1, GameScenePartitioner.Instance.pickupablesLayer, pooledList);
 		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 		{
@@ -274,6 +275,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 				this.damagedEntities.Add(pickupable.gameObject);
 			}
 		}
+		pooledList.Recycle();
 	}
 
 	private float GetDistanceFromImpact()

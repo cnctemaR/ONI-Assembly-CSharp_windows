@@ -8,11 +8,16 @@ public struct SoundCuller
 		return this.min.LessEqual(pos) && pos.LessEqual(this.max);
 	}
 
+	public bool IsAudibleNoCameraScaling(Vector2 pos, float falloff_distance_sq)
+	{
+		float num = (pos.x - this.cameraPos.x) * (pos.x - this.cameraPos.x) + (pos.y - this.cameraPos.y) * (pos.y - this.cameraPos.y);
+		return num < falloff_distance_sq;
+	}
+
 	public bool IsAudible(Vector2 pos, float falloff_distance_sq)
 	{
 		pos = this.GetVerticallyScaledPosition(pos);
-		float num = (pos.x - this.cameraPos.x) * (pos.x - this.cameraPos.x) + (pos.y - this.cameraPos.y) * (pos.y - this.cameraPos.y);
-		return num < falloff_distance_sq;
+		return this.IsAudibleNoCameraScaling(pos, falloff_distance_sq);
 	}
 
 	public bool IsAudible(Vector2 pos, string sound_path)

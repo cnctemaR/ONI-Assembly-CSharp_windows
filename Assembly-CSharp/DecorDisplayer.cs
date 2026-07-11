@@ -12,7 +12,8 @@ public class DecorDisplayer : StandardAmountDisplayer
 
 	public override string GetTooltip(Amount master, AmountInstance instance)
 	{
-		string text = this.GetTooltipDescription(master, instance);
+		string text = master.Name;
+		text = text + UI.HORIZONTAL_BR_RULE + string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null));
 		text += string.Format(DUPLICANTS.STATS.DECOR.TOOLTIP_CURRENT, GameUtil.GetDecorAtCell(Grid.PosToCell(instance.gameObject)));
 		text += "\n";
 		DecorMonitor.Instance smi = instance.gameObject.GetSMI<DecorMonitor.Instance>();

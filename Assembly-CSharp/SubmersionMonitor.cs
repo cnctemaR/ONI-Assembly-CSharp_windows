@@ -24,9 +24,9 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 	private void OnMove()
 	{
 		this.position = Grid.PosToCell(base.gameObject);
-		if (this.partitionerEntry != null)
+		if (this.partitionerEntry.IsValid())
 		{
-			this.partitionerEntry.UpdatePosition(this.position);
+			GameScenePartitioner.Instance.UpdatePosition(this.partitionerEntry, this.position);
 		}
 		else
 		{
@@ -39,24 +39,12 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 
 	private void OnDrawGizmosSelected()
 	{
-		Gizmos.color = Color.green;
-		for (int i = 0; i < this.partitionerEntry.height; i++)
-		{
-			for (int j = 0; j < this.partitionerEntry.width; j++)
-			{
-				int num = Grid.PosToCell(new Vector2((float)(this.partitionerEntry.x + j) + 0.5f, (float)(this.partitionerEntry.y + i) + 1f));
-				Gizmos.DrawCube(Grid.CellToPos(num) + Vector3.up / 2f + Vector3.right / 2f, Vector3.one);
-			}
-		}
 	}
 
 	protected override void OnCleanUp()
 	{
 		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove));
-		if (this.partitionerEntry != null)
-		{
-			this.partitionerEntry.Release();
-		}
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		base.OnCleanUp();
 	}
 
@@ -138,5 +126,5 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 
 	private Extents extents;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private HandleVector<int>.Handle partitionerEntry;
 }

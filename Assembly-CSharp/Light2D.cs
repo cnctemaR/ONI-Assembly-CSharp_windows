@@ -42,16 +42,8 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 	protected override void OnCleanUp()
 	{
 		this.UnregisterLight();
-		if (this.solidPartitionerEntry != null)
-		{
-			this.solidPartitionerEntry.Release();
-			this.solidPartitionerEntry = null;
-		}
-		if (this.liquidPartitionerEntry != null)
-		{
-			this.liquidPartitionerEntry.Release();
-			this.liquidPartitionerEntry = null;
-		}
+		GameScenePartitioner.Instance.Free(ref this.solidPartitionerEntry);
+		GameScenePartitioner.Instance.Free(ref this.liquidPartitionerEntry);
 	}
 
 	private void OnCellChanged()
@@ -63,16 +55,8 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 	{
 		if (this.isRegistered && Grid.IsValidCell(this.cell))
 		{
-			if (this.solidPartitionerEntry != null)
-			{
-				this.solidPartitionerEntry.Release();
-				this.solidPartitionerEntry = null;
-			}
-			if (this.liquidPartitionerEntry != null)
-			{
-				this.liquidPartitionerEntry.Release();
-				this.liquidPartitionerEntry = null;
-			}
+			GameScenePartitioner.Instance.Free(ref this.solidPartitionerEntry);
+			GameScenePartitioner.Instance.Free(ref this.liquidPartitionerEntry);
 			this.isRegistered = false;
 		}
 		if (this.emitter != null)
@@ -160,9 +144,9 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	private bool isRegistered;
 
-	private GameScenePartitionerEntry solidPartitionerEntry;
+	private HandleVector<int>.Handle solidPartitionerEntry;
 
-	private GameScenePartitionerEntry liquidPartitionerEntry;
+	private HandleVector<int>.Handle liquidPartitionerEntry;
 
 	private LightGridManager.LightGridEmitter emitter;
 

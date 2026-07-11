@@ -40,10 +40,19 @@ public class RoleManager
 			new Tuple<string, int>("PowerTechnician", 128),
 			new Tuple<string, int>(MaterialsManager.ID, 128),
 			new Tuple<string, int>("MechatronicEngineer", 128),
-			new Tuple<string, int>(Plumber.ID, 128)
+			new Tuple<string, int>(Plumber.ID, 128),
+			new Tuple<string, int>(AstronautTrainee.ID, 128),
+			new Tuple<string, int>(Astronaut.ID, 128)
 		}, () => true));
 		this.SlotUnlocks = list;
 		base..ctor();
+		for (int i = 0; i < RoleManager.RoleRows.Length; i++)
+		{
+			foreach (string text in RoleManager.RoleRows[i])
+			{
+				this.roleRowIndex[text] = i;
+			}
+		}
 		Game.Instance.roleManager = this;
 		this.roleAssignmentRequirements = new RoleAssignmentRequirements(this);
 		this.InitRoleConfigs();
@@ -189,6 +198,14 @@ public class RoleManager
 				new SeniorFarmer(),
 				new SeniorRancher(),
 				new SuitExpert()
+			},
+			new List<RoleConfig>
+			{
+				new AstronautTrainee()
+			},
+			new List<RoleConfig>
+			{
+				new Astronaut()
 			}
 		};
 		this.RolesConfigs = new List<RoleConfig>();
@@ -567,6 +584,11 @@ public class RoleManager
 	{
 		AccessorySlot hat = Db.Get().AccessorySlots.Hat;
 		Accessory accessory = hat.Lookup(hat_idx);
+		if (accessory == null)
+		{
+			int num = 0;
+			num++;
+		}
 		Accessorizer component = controller.GetComponent<Accessorizer>();
 		if (component != null)
 		{
@@ -784,6 +806,7 @@ public class RoleManager
 
 	public static Dictionary<string, string> roleHatIndex = new Dictionary<string, string>
 	{
+		{ "NoRole", "hat_role_none" },
 		{ "JuniorFarmer", "hat_role_farming1" },
 		{ "Farmer", "hat_role_farming2" },
 		{ "SeniorFarmer", "hat_role_farming3" },
@@ -860,90 +883,75 @@ public class RoleManager
 		{
 			Plumber.ID,
 			"hat_role_basekeeping1"
+		},
+		{
+			AstronautTrainee.ID,
+			"hat_role_basekeeping1"
+		},
+		{
+			Astronaut.ID,
+			"hat_role_basekeeping1"
 		}
 	};
 
-	private Dictionary<string, int> roleRowIndex = new Dictionary<string, int>
+	private static readonly string[][] RoleRows = new string[][]
 	{
-		{ "NoRole", 0 },
+		new string[] { "NoRole" },
+		new string[]
 		{
 			JuniorMiner.ID,
-			1
-		},
-		{
 			Miner.ID,
-			1
+			SeniorMiner.ID
 		},
-		{
-			SeniorMiner.ID,
-			1
-		},
+		new string[]
 		{
 			JuniorBuilder.ID,
-			2
-		},
-		{
 			Builder.ID,
-			2
+			SeniorBuilder.ID
 		},
+		new string[]
 		{
-			SeniorBuilder.ID,
-			2
-		},
-		{ "Hauler", 3 },
-		{
+			"Hauler",
 			MaterialsManager.ID,
-			3
+			"SuitExpert"
 		},
-		{ "SuitExpert", 3 },
-		{ "MechatronicEngineer", 4 },
+		new string[]
 		{
-			MachineTechnician.ID,
-			5
+			"MechatronicEngineer",
+			AstronautTrainee.ID,
+			Astronaut.ID
 		},
-		{ "PowerTechnician", 5 },
-		{ "JuniorFarmer", 6 },
-		{ "Farmer", 6 },
-		{ "SeniorFarmer", 6 },
-		{ "Rancher", 7 },
-		{ "SeniorRancher", 7 },
+		new string[]
 		{
 			JuniorResearcher.ID,
-			8
-		},
-		{
 			Researcher.ID,
-			8
+			SeniorResearcher.ID
 		},
+		new string[]
 		{
-			SeniorResearcher.ID,
-			8
+			MachineTechnician.ID,
+			"PowerTechnician"
 		},
+		new string[] { "JuniorFarmer", "Farmer", "SeniorFarmer" },
+		new string[] { "Rancher", "SeniorRancher" },
+		new string[]
 		{
 			Handyman.ID,
-			9
+			Plumber.ID
 		},
-		{
-			Plumber.ID,
-			9
-		},
+		new string[]
 		{
 			JuniorCook.ID,
-			10
+			Cook.ID
 		},
-		{
-			Cook.ID,
-			10
-		},
+		new string[]
 		{
 			JuniorArtist.ID,
-			11
-		},
-		{
-			Artist.ID,
-			11
+			Artist.ID
 		}
 	};
+
+	private Dictionary<string, int> roleRowIndex = new Dictionary<string, int>();
 
 	public int NumberOfRows;
 

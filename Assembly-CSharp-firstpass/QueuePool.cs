@@ -14,6 +14,11 @@ public static class QueuePool<ObjectType, PoolIdentifier>
 		QueuePool<ObjectType, PoolIdentifier>.pool.Free(queue);
 	}
 
+	public static ContainerPool GetPool()
+	{
+		return QueuePool<ObjectType, PoolIdentifier>.pool;
+	}
+
 	private static ContainerPool<QueuePool<ObjectType, PoolIdentifier>.PooledQueue, PoolIdentifier> pool = new ContainerPool<QueuePool<ObjectType, PoolIdentifier>.PooledQueue, PoolIdentifier>();
 
 	public class PooledQueue : Queue<ObjectType>

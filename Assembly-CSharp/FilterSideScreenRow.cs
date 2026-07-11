@@ -14,22 +14,20 @@ public class FilterSideScreenRow : KMonoBehaviour
 		this.regularColor = this.outline.color;
 		if (this.button != null)
 		{
-			KButton kbutton = this.button;
-			kbutton.onPointerEnter = (global::System.Action)Delegate.Combine(kbutton.onPointerEnter, new global::System.Action(delegate
+			this.button.onPointerEnter += delegate
 			{
 				if (!this.isSelected)
 				{
 					this.outline.color = this.outlineHighLightColor;
 				}
-			}));
-			KButton kbutton2 = this.button;
-			kbutton2.onPointerExit = (global::System.Action)Delegate.Combine(kbutton2.onPointerExit, new global::System.Action(delegate
+			};
+			this.button.onPointerExit += delegate
 			{
 				if (!this.isSelected)
 				{
 					this.outline.color = this.regularColor;
 				}
-			}));
+			};
 		}
 	}
 

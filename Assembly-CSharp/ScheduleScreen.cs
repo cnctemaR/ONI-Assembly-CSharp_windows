@@ -28,7 +28,6 @@ public class ScheduleScreen : KScreen
 		{
 			this.AddPaintButton(scheduleGroup);
 		}
-		this.OnPaintButtonClick(this.paintButtons[0]);
 		foreach (Schedule schedule in ScheduleManager.Instance.GetSchedules())
 		{
 			this.AddScheduleEntry(schedule);
@@ -60,6 +59,7 @@ public class ScheduleScreen : KScreen
 	{
 		SchedulePaintButton schedulePaintButton = Util.KInstantiateUI<SchedulePaintButton>(this.paintButtonPrefab.gameObject, this.paintButtonContainer, true);
 		schedulePaintButton.SetGroup(group, this.paintStyles, new Action<SchedulePaintButton>(this.OnPaintButtonClick));
+		schedulePaintButton.SetToggle(false);
 		this.paintButtons.Add(schedulePaintButton);
 	}
 
@@ -70,31 +70,35 @@ public class ScheduleScreen : KScreen
 
 	private void OnPaintButtonClick(SchedulePaintButton clicked)
 	{
-		foreach (SchedulePaintButton schedulePaintButton in this.paintButtons)
+		if (this.selectedPaint != clicked)
 		{
-			if (schedulePaintButton == clicked)
+			foreach (SchedulePaintButton schedulePaintButton in this.paintButtons)
 			{
-				schedulePaintButton.toggle.Select();
-				schedulePaintButton.toggle.isOn = true;
+				schedulePaintButton.SetToggle(schedulePaintButton == clicked);
 			}
-			else
-			{
-				schedulePaintButton.toggle.Deselect();
-				schedulePaintButton.toggle.isOn = false;
-			}
+			this.selectedPaint = clicked;
 		}
-		this.selectedPaint = clicked;
+		else
+		{
+			clicked.SetToggle(false);
+			this.selectedPaint = null;
+		}
 	}
 
-	private void OnBlockClicked(ScheduleScreenEntry entry, ScheduleBlockButton button)
+	private void OnPaintDragged(ScheduleScreenEntry entry, float ratio)
 	{
-		entry.schedule.SetGroup(button.idx, this.selectedPaint.group);
+		if (this.selectedPaint == null)
+		{
+			return;
+		}
+		int num = Mathf.FloorToInt(ratio * (float)entry.schedule.GetBlocks().Count);
+		entry.schedule.SetGroup(num, this.selectedPaint.group);
 	}
 
 	private void AddScheduleEntry(Schedule schedule)
 	{
 		ScheduleScreenEntry scheduleScreenEntry = Util.KInstantiateUI<ScheduleScreenEntry>(this.scheduleEntryPrefab.gameObject, this.scheduleEntryContainer, true);
-		scheduleScreenEntry.Setup(schedule, this.paintStyles, new Action<ScheduleScreenEntry, ScheduleBlockButton>(this.OnBlockClicked));
+		scheduleScreenEntry.Setup(schedule, this.paintStyles, new Action<ScheduleScreenEntry, float>(this.OnPaintDragged));
 		this.entries.Add(scheduleScreenEntry);
 	}
 

@@ -67,7 +67,7 @@ public class ElementDropperMonitor : GameStateMachine<ElementDropperMonitor, Ele
 
 		public bool ShouldDropElement()
 		{
-			return this.CellIsClean() && global::UnityEngine.Random.Range(0f, 100f) < base.def.dirtyProbabilityPercent;
+			return this.IsValidDropCell() && global::UnityEngine.Random.Range(0f, 100f) < base.def.dirtyProbabilityPercent;
 		}
 
 		public void DropDeathElement()
@@ -100,12 +100,10 @@ public class ElementDropperMonitor : GameStateMachine<ElementDropperMonitor, Ele
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, element.name, base.gameObject.transform, 1.5f, false);
 		}
 
-		public bool CellIsClean()
+		public bool IsValidDropCell()
 		{
 			int num = Grid.PosToCell(base.transform.GetPosition());
-			int elementIndex = ElementLoader.GetElementIndex(base.def.dirtyEmitElement);
-			int num2 = (int)Grid.ElementIdx[num];
-			return num2 != elementIndex || Grid.Mass[num] < 1f;
+			return Grid.IsValidCell(num) && Grid.IsGas(num) && Grid.Mass[num] <= 1f;
 		}
 	}
 }

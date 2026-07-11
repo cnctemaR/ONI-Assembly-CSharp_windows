@@ -18,17 +18,13 @@ public class CaptureTool : DragTool
 			Vector2 vector = Grid.PosToXY(capturable.transform.GetPosition());
 			if (vector.x >= min.x && vector.x < max.x && vector.y >= min.y && vector.y < max.y)
 			{
-				capturable.MarkForCapture(mark);
-			}
-		}
-		if (mark)
-		{
-			foreach (NotCapturable notCapturable in Components.NotCapturables.Items)
-			{
-				Vector2 vector2 = Grid.PosToXY(notCapturable.transform.GetPosition());
-				if (vector2.x >= min.x && vector2.x < max.x && vector2.y >= min.y && vector2.y < max.y)
+				if (capturable.allowCapture)
 				{
-					PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.TOOLS.CAPTURE.NOT_CAPTURABLE, null, notCapturable.transform.GetPosition(), 1.5f, false, false);
+					capturable.MarkForCapture(mark);
+				}
+				else if (mark)
+				{
+					PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.TOOLS.CAPTURE.NOT_CAPTURABLE, null, capturable.transform.GetPosition(), 1.5f, false, false);
 				}
 			}
 		}

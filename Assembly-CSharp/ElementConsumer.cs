@@ -268,7 +268,7 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 		ElementConsumer.StaticUnregister(this.simHandle);
 	}
 
-	protected override void OnSimRegister(HandleVector<Game.ComplexCallbackInfo>.Handle cb_handle)
+	protected override void OnSimRegister(HandleVector<Game.ComplexCallbackInfo<int>>.Handle cb_handle)
 	{
 		int sampleCell = this.GetSampleCell();
 		SimMessages.AddElementConsumer(sampleCell, this.configuration, this.elementToConsume, this.consumptionRadius, cb_handle.index);

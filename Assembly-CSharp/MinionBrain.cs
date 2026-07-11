@@ -14,10 +14,7 @@ public class MinionBrain : Brain
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.accessControlNavMask = new AccessControlNavMask(base.gameObject);
-		this.Navigator.AddMask(this.accessControlNavMask);
-		this.Navigator.AddMask(new NavigationFeatureMask(base.gameObject));
-		this.Navigator.AddMask(new TravelTubeNavMask(base.gameObject));
+		this.Navigator.SetAbilities(new MinionPathFinderAbilities(this.Navigator));
 		base.Subscribe(-1697596308, new Action<object>(this.AnimTrackStoredItem));
 		base.Subscribe(-975551167, new Action<object>(this.OnUnstableGroundImpact));
 	}
@@ -133,6 +130,4 @@ public class MinionBrain : Brain
 
 	[MyCmpGet]
 	public OxygenBreather OxygenBreather;
-
-	private AccessControlNavMask accessControlNavMask;
 }

@@ -63,18 +63,18 @@ public static class GameUtil
 		return (temperature + 459.67f) * 5f / 9f;
 	}
 
-	private static float GetConvertedTemperatureDelta(float kelivnDelta)
+	private static float GetConvertedTemperatureDelta(float kelvin_delta)
 	{
 		switch (GameUtil.temperatureUnit)
 		{
 		case GameUtil.TemperatureUnit.Celsius:
-			return kelivnDelta;
+			return kelvin_delta;
 		case GameUtil.TemperatureUnit.Fahrenheit:
-			return kelivnDelta * 1.8f;
+			return kelvin_delta * 1.8f;
 		case GameUtil.TemperatureUnit.Kelvin:
-			return kelivnDelta;
+			return kelvin_delta;
 		default:
-			return kelivnDelta;
+			return kelvin_delta;
 		}
 	}
 
@@ -392,6 +392,66 @@ public static class GameUtil
 		return GameUtil.FloatToString(watts, "###0.##") + locString;
 	}
 
+	public static string GetFormattedHeatEnergy(float dtu, GameUtil.HeatEnergyFormatterUnit unit = GameUtil.HeatEnergyFormatterUnit.Automatic)
+	{
+		LocString locString = string.Empty;
+		if (unit != GameUtil.HeatEnergyFormatterUnit.Automatic)
+		{
+			if (unit != GameUtil.HeatEnergyFormatterUnit.KDTU_S)
+			{
+				if (unit == GameUtil.HeatEnergyFormatterUnit.DTU_S)
+				{
+					locString = UI.UNITSUFFIXES.HEAT.DTU;
+				}
+			}
+			else
+			{
+				dtu /= 1000f;
+				locString = UI.UNITSUFFIXES.HEAT.KDTU;
+			}
+		}
+		else if (Mathf.Abs(dtu) > 1000f)
+		{
+			dtu /= 1000f;
+			locString = UI.UNITSUFFIXES.HEAT.KDTU;
+		}
+		else
+		{
+			locString = UI.UNITSUFFIXES.HEAT.DTU;
+		}
+		return GameUtil.FloatToString(dtu, "###0.##") + locString;
+	}
+
+	public static string GetFormattedHeatEnergyRate(float dtu_s, GameUtil.HeatEnergyFormatterUnit unit = GameUtil.HeatEnergyFormatterUnit.Automatic)
+	{
+		LocString locString = string.Empty;
+		if (unit != GameUtil.HeatEnergyFormatterUnit.Automatic)
+		{
+			if (unit != GameUtil.HeatEnergyFormatterUnit.KDTU_S)
+			{
+				if (unit == GameUtil.HeatEnergyFormatterUnit.DTU_S)
+				{
+					locString = UI.UNITSUFFIXES.HEAT.DTU_S;
+				}
+			}
+			else
+			{
+				dtu_s /= 1000f;
+				locString = UI.UNITSUFFIXES.HEAT.KDTU_S;
+			}
+		}
+		else if (Mathf.Abs(dtu_s) > 1000f)
+		{
+			dtu_s /= 1000f;
+			locString = UI.UNITSUFFIXES.HEAT.KDTU_S;
+		}
+		else
+		{
+			locString = UI.UNITSUFFIXES.HEAT.DTU_S;
+		}
+		return GameUtil.FloatToString(dtu_s, "###0.##") + locString;
+	}
+
 	public static string GetFormattedInt(float num, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
 	{
 		num = GameUtil.ApplyTimeSlice(num, timeSlice);
@@ -521,6 +581,11 @@ public static class GameUtil
 				mass *= 1000f;
 				text = UI.UNITSUFFIXES.MASS.GRAM;
 			}
+			else if (massFormat == GameUtil.MetricMassFormat.Tonne)
+			{
+				mass /= 1000f;
+				text = UI.UNITSUFFIXES.MASS.TONNE;
+			}
 		}
 		else
 		{
@@ -589,13 +654,13 @@ public static class GameUtil
 
 	public static string GetSHCSuffix()
 	{
-		return string.Format("(J/g)/{0}", GameUtil.GetTemperatureUnitSuffix());
+		return string.Format("(DTU/g)/{0}", GameUtil.GetTemperatureUnitSuffix());
 	}
 
 	public static string GetFormattedSHC(float shc)
 	{
 		shc = GameUtil.GetDisplaySHC(shc);
-		return string.Format("{0} (J/g)/{1}", shc.ToString("0.000"), GameUtil.GetTemperatureUnitSuffix());
+		return string.Format("{0} (DTU/g)/{1}", shc.ToString("0.000"), GameUtil.GetTemperatureUnitSuffix());
 	}
 
 	public static float GetDisplayThermalConductivity(float tc)
@@ -609,13 +674,13 @@ public static class GameUtil
 
 	public static string GetThermalConductivitySuffix()
 	{
-		return string.Format("(W/m)/{0}", GameUtil.GetTemperatureUnitSuffix());
+		return string.Format("(DTU/(m*s))/{0}", GameUtil.GetTemperatureUnitSuffix());
 	}
 
 	public static string GetFormattedThermalConductivity(float tc)
 	{
 		tc = GameUtil.GetDisplayThermalConductivity(tc);
-		return string.Format("{0} (W/m)/{1}", tc.ToString("0.000"), GameUtil.GetTemperatureUnitSuffix());
+		return string.Format("{0} (DTU/(m*s))/{1}", tc.ToString("0.000"), GameUtil.GetTemperatureUnitSuffix());
 	}
 
 	public static string GetElementNameByElementHash(SimHashes elementHash)
@@ -1670,7 +1735,7 @@ public static class GameUtil
 			{
 				global::Klei.AI.Attribute attribute = Db.Get().Attributes.Get(attributeModifier.AttributeId);
 				string name = attribute.Name;
-				string formattedString = attributeModifier.GetFormattedString(null);
+				string formattedString = attributeModifier.GetFormattedString(null, false);
 				string text = ((attributeModifier.Value < 0f) ? "consumed" : "produced");
 				string text2 = UI.GAMEOBJECTEFFECTS.EQUIPMENT_MODS.text.Replace("{Attribute}", name).Replace("{Style}", text).Replace("{Value}", formattedString);
 				list.Add(new Descriptor(text2, text2, Descriptor.DescriptorType.Effect, false));
@@ -1970,8 +2035,8 @@ public static class GameUtil
 		{
 			foreach (AttributeModifier attributeModifier in element.attributeModifiers)
 			{
-				string text = string.Format(Strings.Get(new StringKey("STRINGS.ELEMENTS.MATERIAL_MODIFIERS." + attributeModifier.AttributeId.ToUpper())), attributeModifier.GetFormattedString(null));
-				string text2 = string.Format(Strings.Get(new StringKey("STRINGS.ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP." + attributeModifier.AttributeId.ToUpper())), attributeModifier.GetFormattedString(null));
+				string text = string.Format(Strings.Get(new StringKey("STRINGS.ELEMENTS.MATERIAL_MODIFIERS." + attributeModifier.AttributeId.ToUpper())), attributeModifier.GetFormattedString(null, false));
+				string text2 = string.Format(Strings.Get(new StringKey("STRINGS.ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP." + attributeModifier.AttributeId.ToUpper())), attributeModifier.GetFormattedString(null, false));
 				Descriptor descriptor = default(Descriptor);
 				descriptor.SetupDescriptor(text, text2, Descriptor.DescriptorType.Effect);
 				descriptor.IncreaseIndent();
@@ -1988,7 +2053,8 @@ public static class GameUtil
 		foreach (AttributeModifier attributeModifier in element.attributeModifiers)
 		{
 			string name = Db.Get().BuildingAttributes.Get(attributeModifier.AttributeId).Name;
-			text = text + "\n    • " + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, name, attributeModifier.GetFormattedString(null));
+			string formattedString = attributeModifier.GetFormattedString(null, attributeModifier.IsMultiplier);
+			text = text + "\n    • " + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, name, formattedString);
 		}
 		text += GameUtil.GetSignificantMaterialPropertyTooltips(element);
 		return text;
@@ -2029,14 +2095,14 @@ public static class GameUtil
 		if (element.specificHeatCapacity <= 0.2f)
 		{
 			Descriptor descriptor3 = default(Descriptor);
-			descriptor3.SetupDescriptor(ELEMENTS.MATERIAL_MODIFIERS.LOW_SPECIFIC_HEAT_CAPACITY, string.Format(ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP.LOW_SPECIFIC_HEAT_CAPACITY, element.name, element.specificHeatCapacity), Descriptor.DescriptorType.Effect);
+			descriptor3.SetupDescriptor(ELEMENTS.MATERIAL_MODIFIERS.LOW_SPECIFIC_HEAT_CAPACITY, string.Format(ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP.LOW_SPECIFIC_HEAT_CAPACITY, element.name, element.specificHeatCapacity * 1f), Descriptor.DescriptorType.Effect);
 			descriptor3.IncreaseIndent();
 			list.Add(descriptor3);
 		}
 		if (element.specificHeatCapacity >= 1f)
 		{
 			Descriptor descriptor4 = default(Descriptor);
-			descriptor4.SetupDescriptor(ELEMENTS.MATERIAL_MODIFIERS.HIGH_SPECIFIC_HEAT_CAPACITY, string.Format(ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP.HIGH_SPECIFIC_HEAT_CAPACITY, element.name, element.specificHeatCapacity), Descriptor.DescriptorType.Effect);
+			descriptor4.SetupDescriptor(ELEMENTS.MATERIAL_MODIFIERS.HIGH_SPECIFIC_HEAT_CAPACITY, string.Format(ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP.HIGH_SPECIFIC_HEAT_CAPACITY, element.name, element.specificHeatCapacity * 1f), Descriptor.DescriptorType.Effect);
 			descriptor4.IncreaseIndent();
 			list.Add(descriptor4);
 		}
@@ -2105,7 +2171,8 @@ public static class GameUtil
 	{
 		UseThreshold,
 		Kilogram,
-		Gram
+		Gram,
+		Tonne
 	}
 
 	public enum TemperatureInterpretation
@@ -2134,6 +2201,14 @@ public static class GameUtil
 		Watts,
 		Kilowatts,
 		Automatic
+	}
+
+	public enum HeatEnergyFormatterUnit
+	{
+		DTU_S,
+		KDTU_S,
+		Automatic,
+		None
 	}
 
 	public struct FloodFillInfo

@@ -3,13 +3,11 @@ using System.Collections.Generic;
 
 public class GlobalChoreProvider : ChoreProvider
 {
-	public GlobalChoreProvider.Fetch[] fetches { get; private set; }
-
-	public int fetchCount { get; private set; }
-
 	protected override void OnPrefabInit()
 	{
+		base.OnPrefabInit();
 		GlobalChoreProvider.Instance = this;
+		this.clearableManager = new ClearableManager();
 	}
 
 	public override Chore AddChore(Chore chore)
@@ -34,46 +32,65 @@ public class GlobalChoreProvider : ChoreProvider
 
 	public void UpdateFetches(PathProber path_prober)
 	{
-		if (this.fetches == null || this.fetches.Length < this.fetchChores.Count)
+		this.fetches.Clear();
+		Navigator component = path_prober.GetComponent<Navigator>();
+		foreach (FetchChore fetchChore in this.fetchChores)
 		{
-			this.fetches = new GlobalChoreProvider.Fetch[this.fetchChores.Count * 2];
-		}
-		this.fetchCount = 0;
-		for (int i = 0; i < this.fetchChores.Count; i++)
-		{
-			FetchChore fetchChore = this.fetchChores[i];
-			int num = PathProber.InvalidCost;
+			int num = -1;
 			if (fetchChore.destination != null)
 			{
-				num = path_prober.GetCost(Grid.PosToCell(fetchChore.destination));
+				num = component.GetNavigationCost(fetchChore.destination);
 			}
-			if (num != PathProber.InvalidCost)
+			if (num != -1)
 			{
-				GlobalChoreProvider.Fetch fetch = default(GlobalChoreProvider.Fetch);
-				fetch.chore = this.fetchChores[i];
-				fetch.tagBits = this.fetchChores[i].tagBits;
-				fetch.cost = num;
-				fetch.priority = fetchChore.masterPriority;
-				this.fetches[this.fetchCount] = fetch;
-				this.fetchCount++;
+				if (!(fetchChore.driver != null))
+				{
+					this.fetches.Add(new GlobalChoreProvider.Fetch
+					{
+						chore = fetchChore,
+						tagBitsHash = fetchChore.tagBitsHash,
+						cost = num,
+						priority = fetchChore.masterPriority
+					});
+				}
 			}
 		}
-		if (this.fetchCount > 0)
+		if (this.fetches.Count > 0)
 		{
-			Array.Sort<GlobalChoreProvider.Fetch>(this.fetches, 0, this.fetchCount, GlobalChoreProvider.Comparer);
-			int j = 1;
+			this.fetches.Sort(GlobalChoreProvider.Comparer);
+			int i = 1;
 			int num2 = 0;
-			while (j < this.fetchCount)
+			while (i < this.fetches.Count)
 			{
-				if (!this.fetches[num2].IsBetterThan(this.fetches[j]))
+				if (!this.fetches[num2].IsBetterThan(this.fetches[i]))
 				{
 					num2++;
-					this.fetches[num2] = this.fetches[j];
+					this.fetches[num2] = this.fetches[i];
 				}
-				j++;
+				i++;
 			}
-			this.fetchCount = num2 + 1;
+			this.fetches.RemoveRange(num2 + 1, this.fetches.Count - num2 - 1);
 		}
+	}
+
+	public override void CollectChores(ChoreConsumerState consumer_state, List<Chore.Precondition.Context> succeeded, List<Chore.Precondition.Context> failed_contexts)
+	{
+		base.CollectChores(consumer_state, succeeded, failed_contexts);
+		this.clearableManager.CollectChores(consumer_state, succeeded, failed_contexts);
+		foreach (GlobalChoreProvider.Fetch fetch in this.fetches)
+		{
+			fetch.chore.CollectChoresFromGlobalChoreProvider(consumer_state, succeeded, failed_contexts, false);
+		}
+	}
+
+	public HandleVector<int>.Handle RegisterClearable(Clearable clearable)
+	{
+		return this.clearableManager.RegisterClearable(clearable);
+	}
+
+	public void UnregisterClearable(HandleVector<int>.Handle handle)
+	{
+		this.clearableManager.UnregisterClearable(handle);
 	}
 
 	protected override void OnLoadLevel()
@@ -86,21 +103,45 @@ public class GlobalChoreProvider : ChoreProvider
 
 	public List<FetchChore> fetchChores = new List<FetchChore>();
 
+	public List<GlobalChoreProvider.Fetch> fetches = new List<GlobalChoreProvider.Fetch>();
+
 	private static readonly GlobalChoreProvider.FetchComparer Comparer = new GlobalChoreProvider.FetchComparer();
+
+	private ClearableManager clearableManager;
 
 	public struct Fetch
 	{
 		public bool IsBetterThan(GlobalChoreProvider.Fetch fetch)
 		{
-			bool flag = this.priority.priority_class > fetch.priority.priority_class || (this.priority.priority_class == fetch.priority.priority_class && this.priority.priority_value > fetch.priority.priority_value);
-			bool flag2 = this.cost <= fetch.cost;
-			bool flag3 = this.tagBits.AreEqual(fetch.tagBits);
-			return flag && flag2 && flag3;
+			if (this.tagBitsHash != fetch.tagBitsHash)
+			{
+				return false;
+			}
+			if (!this.chore.tagBits.AreEqual(fetch.chore.tagBits))
+			{
+				return false;
+			}
+			if (this.priority.priority_class > fetch.priority.priority_class)
+			{
+				return true;
+			}
+			if (this.priority.priority_class == fetch.priority.priority_class)
+			{
+				if (this.priority.priority_value > fetch.priority.priority_value)
+				{
+					return true;
+				}
+				if (this.priority.priority_value == fetch.priority.priority_value)
+				{
+					return this.cost <= fetch.cost;
+				}
+			}
+			return false;
 		}
 
 		public FetchChore chore;
 
-		public TagBits tagBits;
+		public int tagBitsHash;
 
 		public int cost;
 

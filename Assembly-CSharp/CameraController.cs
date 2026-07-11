@@ -16,7 +16,25 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		}
 	}
 
-	public bool DisableUserCameraControl { get; set; }
+	public bool DisableUserCameraControl
+	{
+		get
+		{
+			return this.userCameraControlDisabled;
+		}
+		set
+		{
+			this.userCameraControlDisabled = value;
+			if (this.userCameraControlDisabled)
+			{
+				this.panning = false;
+				this.panLeft = false;
+				this.panRight = false;
+				this.panUp = false;
+				this.panDown = false;
+			}
+		}
+	}
 
 	public static CameraController Instance { get; private set; }
 
@@ -571,6 +589,8 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	private bool isTargetPosSet;
 
 	private Vector3 targetPos;
+
+	private bool userCameraControlDisabled;
 
 	private bool panLeft;
 

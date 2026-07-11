@@ -157,7 +157,7 @@ public class DebugPaintElementScreen : KScreen
 
 	private void OnClickSpawn()
 	{
-		WorldGenSpawner.Instance.SpawnEverything();
+		SaveGame.Instance.worldGenSpawner.SpawnEverything();
 		this.spawnButton.enabled = false;
 	}
 

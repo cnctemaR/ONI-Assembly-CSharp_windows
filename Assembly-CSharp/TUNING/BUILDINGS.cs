@@ -62,7 +62,8 @@ namespace TUNING
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Base, new string[]
 			{
 				"Ladder", "FirePole", "LadderFast", "Tile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile", "MetalTile", "GlassTile",
-				"BunkerTile", "Door", "ManualPressureDoor", "PressureDoor", "BunkerDoor", "StorageLocker", "StorageLockerSmart", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
+				"BunkerTile", "Door", "ManualPressureDoor", "PressureDoor", "BunkerDoor", "StorageLocker", "StorageLockerSmart", "LiquidReservoir", "GasReservoir", "TravelTube",
+				"TravelTubeEntrance", "TravelTubeWallBridge"
 			}),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Oxygen, new string[] { "MineralDeoxidizer", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Power, new string[]
@@ -102,7 +103,7 @@ namespace TUNING
 			{
 				"Outhouse",
 				"FlushToilet",
-				"Shower",
+				ShowerConfig.ID,
 				"LiquidPumpingStation",
 				"BottleEmptier",
 				"LiquidConduit",
@@ -136,11 +137,17 @@ namespace TUNING
 				"GasFilter",
 				"GasValve",
 				"GasLogicValve",
+				"GasBottler",
+				"BottleEmptierGas",
 				GasConduitElementSensorConfig.ID,
 				GasConduitDiseaseSensorConfig.ID,
 				GasConduitTemperatureSensorConfig.ID
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Refining, new string[] { "Compost", "WaterPurifier", "FertilizerMaker", "AlgaeDistillery", "RockCrusher", "Kiln", "MetalRefinery", "GlassForge", "OilRefinery", "Polymerizer" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Refining, new string[]
+			{
+				"Compost", "WaterPurifier", "FertilizerMaker", "AlgaeDistillery", "RockCrusher", "Kiln", "MetalRefinery", "GlassForge", "OilRefinery", "Polymerizer",
+				"OxyliteRefinery"
+			}),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Medical, new string[] { "WashBasin", "WashSink", "HandSanitizer", "Apothecary", "MedicalCot", "MedicalBed", "MassageTable", "Grave" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Furniture, new string[]
 			{
@@ -160,8 +167,8 @@ namespace TUNING
 			}),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Equipment, new string[]
 			{
-				"ResearchCenter", "AdvancedResearchCenter", "PowerControlStation", "FarmStation", "RanchStation", "ShearingStation", "RoleStation", "ClothingFabricator", "SuitFabricator", "SuitMarker",
-				"SuitLocker"
+				"ResearchCenter", "AdvancedResearchCenter", "Telescope", "PowerControlStation", "FarmStation", "RanchStation", "ShearingStation", "RoleStation", "ClothingFabricator", "SuitFabricator",
+				"SuitMarker", "SuitLocker", "AstronautTrainingCenter"
 			}),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Utilities, new string[] { "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock", "ExteriorWall" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Automation, new string[]
@@ -186,7 +193,8 @@ namespace TUNING
 				"Checkpoint",
 				CometDetectorConfig.ID
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Conveyance, new string[] { "SolidTransferArm", "SolidConduit", "SolidConduitInbox", "SolidConduitOutbox", "SolidConduitBridge" })
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Conveyance, new string[] { "SolidTransferArm", "SolidConduit", "SolidConduitInbox", "SolidConduitOutbox", "SolidConduitBridge" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Rocketry, new string[] { "KeroseneEngine", "LiquidFuelTank", "CargoBay", "GasCargoBay", "LiquidCargoBay", "CommandModule", "Gantry", "SpecialCargoBay" })
 		};
 
 		public static List<string> COMPONENT_DESCRIPTION_ORDER = new List<string>
@@ -362,6 +370,21 @@ namespace TUNING
 			public static readonly float[] TIER7 = new float[] { 2000f };
 		}
 
+		public class ROCKETRY_MASS_KG
+		{
+			public static float[] COMMAND_MODULE_MASS = new float[] { 200f };
+
+			public static float[] CARGO_MASS = new float[] { 1000f };
+
+			public static float[] FUEL_TANK_DRY_MASS = new float[] { 100f };
+
+			public static float[] FUEL_TANK_WET_MASS = new float[] { 900f };
+
+			public static float[] ENGINE_MASS_SMALL = new float[] { 200f };
+
+			public static float[] ENGINE_MASS_LARGE = new float[] { 500f };
+		}
+
 		public class ENERGY_CONSUMPTION_WHEN_ACTIVE
 		{
 			public const float TIER0 = 0f;
@@ -434,6 +457,8 @@ namespace TUNING
 			public const float TIER2 = 2400f;
 
 			public const float TIER3 = 3200f;
+
+			public const float TIER4 = 9999f;
 		}
 
 		public class CONSTRUCTION_TIME_SECONDS

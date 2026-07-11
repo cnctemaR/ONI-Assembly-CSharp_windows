@@ -4,8 +4,8 @@ namespace Klei.CustomSettings
 {
 	public class ToggleSettingConfig : SettingConfig
 	{
-		public ToggleSettingConfig(string id, string label, string tooltip, SettingLevel off_level, SettingLevel on_level, string default_level_id)
-			: base(id, label, tooltip, default_level_id)
+		public ToggleSettingConfig(string id, string label, string tooltip, SettingLevel off_level, SettingLevel on_level, string default_level_id, string nosweat_default_level_id, bool debug_only)
+			: base(id, label, tooltip, default_level_id, nosweat_default_level_id, debug_only)
 		{
 			this.off_level = off_level;
 			this.on_level = on_level;

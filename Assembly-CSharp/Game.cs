@@ -77,7 +77,7 @@ public class Game : KMonoBehaviour
 		this.world = World.Instance;
 		KPrefabID.NextUniqueID = KPlayerPrefs.GetInt(Game.NextUniqueIDKey, 0);
 		this.circuitManager = new CircuitManager();
-		this.emergySim = new EnergySim();
+		this.energySim = new EnergySim();
 		this.gasConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 13);
 		this.liquidConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 17);
 		this.electricalConduitSystem = new UtilityNetworkManager<ElectricalUtilityNetwork, Wire>(Grid.WidthInCells, Grid.HeightInCells, 25);
@@ -107,6 +107,8 @@ public class Game : KMonoBehaviour
 		this.screenMgr = global::Util.KInstantiate(this.screenManagerPrefab, null, null).GetComponent<GameScreenManager>();
 		this.roleManager = new RoleManager();
 		this.roomProber = new RoomProber();
+		this.fetchManager = base.gameObject.AddComponent<FetchManager>();
+		this.ediblesManager = base.gameObject.AddComponent<EdiblesManager>();
 		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
 	}
@@ -164,6 +166,11 @@ public class Game : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		global::Debug.Log("-- GAME --", null);
+		PropertyTextures.FogOfWarScale = 0f;
+		if (CameraController.Instance != null)
+		{
+			CameraController.Instance.FreeCameraEnabled = false;
+		}
 		this.LocalPlayer = this.SpawnPlayer();
 		WaterCubes.Instance.Init();
 		SpeedControlScreen.Instance.Pause(false);
@@ -203,11 +210,15 @@ public class Game : KMonoBehaviour
 		SimAndRenderScheduler.instance.Add(KComponentSpawn.instance, false);
 		if (!SaveLoader.Instance.loadedFromSave)
 		{
-			SettingConfig settingConfig = CustomGameSettings.Instance.QualitySettings["SandboxMode"];
-			SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting("SandboxMode");
+			SettingConfig settingConfig = CustomGameSettings.Instance.QualitySettings[CustomGameSettingConfigs.SandboxMode.id];
+			SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.SandboxMode);
 			SaveGame.Instance.sandboxEnabled = !settingConfig.IsDefaultLevel(currentQualitySetting.id);
 		}
 		this.mingleCellTracker = base.gameObject.AddComponent<MingleCellTracker>();
+		if (Global.Instance != null)
+		{
+			Global.Instance.GetComponent<PerformanceMonitor>().Reset();
+		}
 	}
 
 	protected override void OnCleanUp()
@@ -387,67 +398,59 @@ public class Game : KMonoBehaviour
 					ElementConsumer.AddMass(consumedMassInfo);
 				}
 				int numMassConsumedCallbacks = ptr2->numMassConsumedCallbacks;
-				HandleVector<Game.ComplexCallbackInfo>.Handle handle2 = default(HandleVector<Game.ComplexCallbackInfo>.Handle);
+				HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle2 = default(HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle);
 				for (int num5 = 0; num5 < numMassConsumedCallbacks; num5++)
 				{
 					Sim.MassConsumedCallback massConsumedCallback = ptr2->massConsumedCallbacks[num5];
 					handle2.index = massConsumedCallback.callbackIdx;
-					Game.ComplexCallbackInfo complexCallbackInfo = this.complexCallbackManager.Release(handle2, "massConsumedCB");
+					Game.ComplexCallbackInfo<Sim.MassConsumedCallback> complexCallbackInfo = this.massConsumedCallbackManager.Release(handle2, "massConsumedCB");
 					if (complexCallbackInfo.cb != null)
 					{
-						if (massConsumedCallback.GetType() != typeof(Sim.MassConsumedCallback))
-						{
-							Output.LogError(new object[] { "Somehow a callback from", complexCallbackInfo.debugInfo, "got into the MassConsumedCallbacks list" });
-						}
-						complexCallbackInfo.cb(massConsumedCallback);
+						complexCallbackInfo.cb(massConsumedCallback, complexCallbackInfo.callbackData);
 					}
 				}
 				int numMassEmittedCallbacks = ptr2->numMassEmittedCallbacks;
-				HandleVector<Game.ComplexCallbackInfo>.Handle handle3 = default(HandleVector<Game.ComplexCallbackInfo>.Handle);
+				HandleVector<Game.ComplexCallbackInfo<Sim.MassEmittedCallback>>.Handle handle3 = default(HandleVector<Game.ComplexCallbackInfo<Sim.MassEmittedCallback>>.Handle);
 				for (int num6 = 0; num6 < numMassEmittedCallbacks; num6++)
 				{
 					Sim.MassEmittedCallback massEmittedCallback = ptr2->massEmittedCallbacks[num6];
 					handle3.index = massEmittedCallback.callbackIdx;
-					if (this.complexCallbackManager.IsVersionValid(handle3))
+					if (this.massEmitCallbackManager.IsVersionValid(handle3))
 					{
-						Game.ComplexCallbackInfo item = this.complexCallbackManager.GetItem(handle3);
+						Game.ComplexCallbackInfo<Sim.MassEmittedCallback> item = this.massEmitCallbackManager.GetItem(handle3);
 						if (item.cb != null)
 						{
-							if (massEmittedCallback.GetType() != typeof(Sim.MassEmittedCallback))
-							{
-								Output.LogError(new object[] { "Somehow a callback from", item.debugInfo, "got into the MassEmittedCallbacks list" });
-							}
-							item.cb(massEmittedCallback);
+							item.cb(massEmittedCallback, item.callbackData);
 						}
 					}
 				}
 				int numDiseaseConsumptionCallbacks = ptr2->numDiseaseConsumptionCallbacks;
-				HandleVector<Game.ComplexCallbackInfo>.Handle handle4 = default(HandleVector<Game.ComplexCallbackInfo>.Handle);
+				HandleVector<Game.ComplexCallbackInfo<Sim.DiseaseConsumptionCallback>>.Handle handle4 = default(HandleVector<Game.ComplexCallbackInfo<Sim.DiseaseConsumptionCallback>>.Handle);
 				for (int num7 = 0; num7 < numDiseaseConsumptionCallbacks; num7++)
 				{
 					Sim.DiseaseConsumptionCallback diseaseConsumptionCallback = ptr2->diseaseConsumptionCallbacks[num7];
 					handle4.index = diseaseConsumptionCallback.callbackIdx;
-					if (this.complexCallbackManager.IsVersionValid(handle4))
+					if (this.diseaseConsumptionCallbackManager.IsVersionValid(handle4))
 					{
-						Game.ComplexCallbackInfo item2 = this.complexCallbackManager.GetItem(handle4);
+						Game.ComplexCallbackInfo<Sim.DiseaseConsumptionCallback> item2 = this.diseaseConsumptionCallbackManager.GetItem(handle4);
 						if (item2.cb != null)
 						{
-							item2.cb(diseaseConsumptionCallback);
+							item2.cb(diseaseConsumptionCallback, item2.callbackData);
 						}
 					}
 				}
 				int numComponentStateChangedMessages = ptr2->numComponentStateChangedMessages;
-				HandleVector<Game.ComplexCallbackInfo>.Handle handle5 = default(HandleVector<Game.ComplexCallbackInfo>.Handle);
+				HandleVector<Game.ComplexCallbackInfo<int>>.Handle handle5 = default(HandleVector<Game.ComplexCallbackInfo<int>>.Handle);
 				for (int num8 = 0; num8 < numComponentStateChangedMessages; num8++)
 				{
 					Sim.ComponentStateChangedMessage componentStateChangedMessage = ptr2->componentStateChangedMessages[num8];
 					handle5.index = componentStateChangedMessage.callbackIdx;
-					if (this.complexCallbackManager.IsVersionValid(handle5))
+					if (this.simComponentCallbackManager.IsVersionValid(handle5))
 					{
-						Game.ComplexCallbackInfo complexCallbackInfo2 = this.complexCallbackManager.Release(handle5, "component state changed cb");
+						Game.ComplexCallbackInfo<int> complexCallbackInfo2 = this.simComponentCallbackManager.Release(handle5, "component state changed cb");
 						if (complexCallbackInfo2.cb != null)
 						{
-							complexCallbackInfo2.cb(componentStateChangedMessage.simHandle);
+							complexCallbackInfo2.cb(componentStateChangedMessage.simHandle, complexCallbackInfo2.callbackData);
 						}
 					}
 				}
@@ -499,9 +502,9 @@ public class Game : KMonoBehaviour
 					{
 						this.circuitManager.Sim200msFirst(dt);
 					}
-					if (this.emergySim != null)
+					if (this.energySim != null)
 					{
-						this.emergySim.EnergySim200ms(dt);
+						this.energySim.EnergySim200ms(dt);
 					}
 					if (this.logicCircuitManager != null)
 					{
@@ -598,7 +601,6 @@ public class Game : KMonoBehaviour
 		}
 		this.simActiveRegionMin = new Vector2I(0, 0);
 		this.simActiveRegionMax = new Vector2I(Grid.WidthInCells, Grid.HeightInCells);
-		LightGridManager.SetActiveWindow(this.simActiveRegionMin, this.simActiveRegionMax);
 		Pathfinding.Instance.RenderEveryTick();
 		Singleton<CellChangeMonitor>.Instance.RenderEveryTick();
 		this.SimEveryTick(deltaTime);
@@ -803,7 +805,7 @@ public class Game : KMonoBehaviour
 					int num2 = num;
 					array[num2] &= ~fx_mask;
 					go.GetComponent<KAnimControllerBase>().enabled = false;
-					this.fxPools[fxid].ReleaseInstance(go);
+					this.fxPools[(int)fxid].ReleaseInstance(go);
 				}
 			};
 			Func<GameObject> func = delegate
@@ -819,8 +821,8 @@ public class Game : KMonoBehaviour
 				return gameObject;
 			};
 			ObjectPool pool = new ObjectPool(func, this.fxSpawnData[fx_idx].initialCount);
-			this.fxPools[this.fxSpawnData[fx_idx].id] = pool;
-			this.fxSpawner[this.fxSpawnData[fx_idx].id] = delegate(Vector3 pos, float rotation)
+			this.fxPools[(int)this.fxSpawnData[fx_idx].id] = pool;
+			this.fxSpawner[(int)this.fxSpawnData[fx_idx].id] = delegate(Vector3 pos, float rotation)
 			{
 				GameScheduler.Instance.Schedule("SpawnFX", 0f, delegate(object obj)
 				{
@@ -878,13 +880,13 @@ public class Game : KMonoBehaviour
 		Vector3 vector = Grid.CellToPosCBC(cell, Grid.SceneLayer.Front);
 		if (CameraController.Instance.IsVisiblePos(vector))
 		{
-			this.fxSpawner[fx_id](vector, rotation);
+			this.fxSpawner[(int)fx_id](vector, rotation);
 		}
 	}
 
 	public void SpawnFX(SpawnFXHashes fx_id, Vector3 pos, float rotation)
 	{
-		this.fxSpawner[fx_id](pos, rotation);
+		this.fxSpawner[(int)fx_id](pos, rotation);
 	}
 
 	public static void SaveSettings(BinaryWriter writer)
@@ -934,7 +936,6 @@ public class Game : KMonoBehaviour
 		gameSaveData.unstableGround = this.world.GetComponent<UnstableGroundManager>();
 		gameSaveData.worldDetail = new WorldDetailSave();
 		gameSaveData.customGameSettings = CustomGameSettings.Instance;
-		gameSaveData.customGameSettings.Reset();
 		deserializer.Deserialize(gameSaveData);
 		this.gasConduitFlow = gameSaveData.gasConduitFlow;
 		this.liquidConduitFlow = gameSaveData.liquidConduitFlow;
@@ -1144,7 +1145,6 @@ public class Game : KMonoBehaviour
 			}
 		}
 		base.GetComponent<EntombedItemVisualizer>().Clear();
-		global::UnityEngine.Object.Destroy(WorldGenSpawner.Instance);
 		SimTemperatureTransfer.ClearInstanceMap();
 		StructureTemperatureComponents.ClearInstanceMap();
 		ElementConsumer.ClearInstanceMap();
@@ -1218,8 +1218,8 @@ public class Game : KMonoBehaviour
 		DetailsScreen.DestroyInstance();
 		DietManager.DestroyInstance();
 		DebugText.DestroyInstance();
-		EdiblesManager.DestroyInstance();
 		FabricationNeeds.DestroyInstance();
+		RefineryNeeds.DestroyInstance();
 		FactionManager.DestroyInstance();
 		EmptyPipeTool.DestroyInstance();
 		FetchListStatusItemUpdater.DestroyInstance();
@@ -1379,6 +1379,12 @@ public class Game : KMonoBehaviour
 
 	public RoleManager roleManager;
 
+	public FetchManager fetchManager;
+
+	public EdiblesManager ediblesManager;
+
+	public SpacecraftManager spacecraftManager;
+
 	public UserMenu userMenu;
 
 	public Unlocks unlocks;
@@ -1387,7 +1393,13 @@ public class Game : KMonoBehaviour
 
 	public HandleVector<Game.CallbackInfo> callbackManager = new HandleVector<Game.CallbackInfo>(256);
 
-	public Game.ComplexCallbackHandleVector complexCallbackManager = new Game.ComplexCallbackHandleVector(256);
+	public Game.ComplexCallbackHandleVector<int> simComponentCallbackManager = new Game.ComplexCallbackHandleVector<int>(256);
+
+	public Game.ComplexCallbackHandleVector<Sim.MassConsumedCallback> massConsumedCallbackManager = new Game.ComplexCallbackHandleVector<Sim.MassConsumedCallback>(64);
+
+	public Game.ComplexCallbackHandleVector<Sim.MassEmittedCallback> massEmitCallbackManager = new Game.ComplexCallbackHandleVector<Sim.MassEmittedCallback>(64);
+
+	public Game.ComplexCallbackHandleVector<Sim.DiseaseConsumptionCallback> diseaseConsumptionCallbackManager = new Game.ComplexCallbackHandleVector<Sim.DiseaseConsumptionCallback>(64);
 
 	[NonSerialized]
 	public Player LocalPlayer;
@@ -1405,7 +1417,7 @@ public class Game : KMonoBehaviour
 	public CircuitManager circuitManager;
 
 	[NonSerialized]
-	public EnergySim emergySim;
+	public EnergySim energySim;
 
 	[NonSerialized]
 	public LogicCircuitManager logicCircuitManager;
@@ -1531,9 +1543,9 @@ public class Game : KMonoBehaviour
 	[SerializeField]
 	private Game.SpawnPoolData[] fxSpawnData;
 
-	private Dictionary<SpawnFXHashes, Action<Vector3, float>> fxSpawner = new Dictionary<SpawnFXHashes, Action<Vector3, float>>();
+	private Dictionary<int, Action<Vector3, float>> fxSpawner = new Dictionary<int, Action<Vector3, float>>();
 
-	private Dictionary<SpawnFXHashes, ObjectPool> fxPools = new Dictionary<SpawnFXHashes, ObjectPool>();
+	private Dictionary<int, ObjectPool> fxPools = new Dictionary<int, ObjectPool>();
 
 	private Game.SavingPreCB activatePreCB;
 
@@ -1565,34 +1577,37 @@ public class Game : KMonoBehaviour
 		public bool manuallyRelease;
 	}
 
-	public struct ComplexCallbackInfo
+	public struct ComplexCallbackInfo<DataType>
 	{
-		public ComplexCallbackInfo(Action<object> cb, string debug_info)
+		public ComplexCallbackInfo(Action<DataType, object> cb, object callback_data, string debug_info)
 		{
 			this.cb = cb;
 			this.debugInfo = debug_info;
+			this.callbackData = callback_data;
 		}
 
-		public Action<object> cb;
+		public Action<DataType, object> cb;
+
+		public object callbackData;
 
 		public string debugInfo;
 	}
 
-	public class ComplexCallbackHandleVector
+	public class ComplexCallbackHandleVector<DataType>
 	{
 		public ComplexCallbackHandleVector(int initial_size)
 		{
-			this.baseMgr = new HandleVector<Game.ComplexCallbackInfo>(initial_size);
+			this.baseMgr = new HandleVector<Game.ComplexCallbackInfo<DataType>>(initial_size);
 		}
 
-		public HandleVector<Game.ComplexCallbackInfo>.Handle Add(Game.ComplexCallbackInfo item)
+		public HandleVector<Game.ComplexCallbackInfo<DataType>>.Handle Add(Action<DataType, object> cb, object callback_data, string debug_info)
 		{
-			return this.baseMgr.Add(item);
+			return this.baseMgr.Add(new Game.ComplexCallbackInfo<DataType>(cb, callback_data, debug_info));
 		}
 
-		public Game.ComplexCallbackInfo GetItem(HandleVector<Game.ComplexCallbackInfo>.Handle handle)
+		public Game.ComplexCallbackInfo<DataType> GetItem(HandleVector<Game.ComplexCallbackInfo<DataType>>.Handle handle)
 		{
-			Game.ComplexCallbackInfo item;
+			Game.ComplexCallbackInfo<DataType> item;
 			try
 			{
 				item = this.baseMgr.GetItem(handle);
@@ -1616,9 +1631,9 @@ public class Game : KMonoBehaviour
 			return item;
 		}
 
-		public Game.ComplexCallbackInfo Release(HandleVector<Game.ComplexCallbackInfo>.Handle handle, string release_info)
+		public Game.ComplexCallbackInfo<DataType> Release(HandleVector<Game.ComplexCallbackInfo<DataType>>.Handle handle, string release_info)
 		{
-			Game.ComplexCallbackInfo complexCallbackInfo;
+			Game.ComplexCallbackInfo<DataType> complexCallbackInfo;
 			try
 			{
 				byte b;
@@ -1651,12 +1666,12 @@ public class Game : KMonoBehaviour
 			this.baseMgr.Clear();
 		}
 
-		public bool IsVersionValid(HandleVector<Game.ComplexCallbackInfo>.Handle handle)
+		public bool IsVersionValid(HandleVector<Game.ComplexCallbackInfo<DataType>>.Handle handle)
 		{
 			return this.baseMgr.IsVersionValid(handle);
 		}
 
-		private HandleVector<Game.ComplexCallbackInfo> baseMgr;
+		private HandleVector<Game.ComplexCallbackInfo<DataType>> baseMgr;
 
 		private Dictionary<int, string> releaseInfo = new Dictionary<int, string>();
 	}

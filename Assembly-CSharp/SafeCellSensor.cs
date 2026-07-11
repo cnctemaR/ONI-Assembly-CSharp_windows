@@ -17,8 +17,10 @@ public class SafeCellSensor : Sensor
 			this.cell = Grid.InvalidCell;
 			return;
 		}
+		(this.brain.GetComponent<Navigator>().GetCurrentAbilities() as MinionPathFinderAbilities).SetIdleNavMaskEnabled(true);
 		SafeCellQuery safeCellQuery = PathFinderQueries.safeCellQuery.Reset(this.brain);
 		this.navigator.RunQuery(safeCellQuery);
+		(this.brain.GetComponent<Navigator>().GetCurrentAbilities() as MinionPathFinderAbilities).SetIdleNavMaskEnabled(false);
 		bool flag = this.HasSafeCell();
 		this.cell = safeCellQuery.GetResultCell();
 		if (this.cell == Grid.PosToCell(this.navigator))

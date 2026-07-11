@@ -14,6 +14,11 @@ public static class HashSetPool<ObjectType, PoolIdentifier>
 		HashSetPool<ObjectType, PoolIdentifier>.pool.Free(hash_set);
 	}
 
+	public static ContainerPool GetPool()
+	{
+		return HashSetPool<ObjectType, PoolIdentifier>.pool;
+	}
+
 	private static ContainerPool<HashSetPool<ObjectType, PoolIdentifier>.PooledHashSet, PoolIdentifier> pool = new ContainerPool<HashSetPool<ObjectType, PoolIdentifier>.PooledHashSet, PoolIdentifier>();
 
 	public class PooledHashSet : HashSet<ObjectType>

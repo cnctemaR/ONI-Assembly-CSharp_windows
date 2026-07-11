@@ -46,7 +46,7 @@ public class AirFilterConfig : IBuildingConfig
 		ElementDropper elementDropper = go.AddComponent<ElementDropper>();
 		elementDropper.emitMass = 10f;
 		elementDropper.emitTag = new Tag("Clay");
-		elementDropper.emitOffset = new Vector3(0f, 1f, 0f);
+		elementDropper.emitOffset = new Vector3(0f, 0f, 0f);
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
@@ -56,7 +56,7 @@ public class AirFilterConfig : IBuildingConfig
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
 			new ElementConverter.OutputElement(0.14333335f, SimHashes.Clay, 0f, true, 0f, 0.5f, false, 0.25f, byte.MaxValue, 0),
-			new ElementConverter.OutputElement(0.089999996f, SimHashes.Oxygen, 0f, false, 0f, 1f, false, 0.75f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.089999996f, SimHashes.Oxygen, 0f, false, 0f, 0f, false, 0.75f, byte.MaxValue, 0)
 		};
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);

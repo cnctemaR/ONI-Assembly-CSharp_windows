@@ -81,7 +81,7 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 				}
 			}
 			int num = Grid.PosToCell(base.smi.gameObject);
-			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+			ListPool<ScenePartitionerEntry, ReactionMonitor>.PooledList pooledList = ListPool<ScenePartitionerEntry, ReactionMonitor>.Allocate();
 			GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num).x, Grid.CellToXY(num).y, 1, 1, GameScenePartitioner.Instance.objectLayers[0], pooledList);
 			for (int j = 0; j < pooledList.Count; j++)
 			{
@@ -109,7 +109,7 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 		{
 			for (int i = this.oneshotReactables.Count - 1; i >= 0; i--)
 			{
-				if (base.sm.reactable.Get(base.smi) == this.oneshotReactables[0])
+				if (base.sm.reactable.Get(base.smi) == this.oneshotReactables[i])
 				{
 					this.oneshotReactables[i].Cleanup();
 					this.oneshotReactables.RemoveAt(i);

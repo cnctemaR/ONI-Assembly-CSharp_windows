@@ -184,6 +184,19 @@ public class Research : KMonoBehaviour, ISaveLoadable
 				this.notifier.Remove(this.NoResearcherRole);
 				this.notifier.Remove(this.MissingResearchStation);
 			}
+			if (this.activeResearch.tech.costsByResearchTypeID.Count > 2)
+			{
+				if (Game.Instance.roleManager.GetRoleAssigneesWithPerk(RoleManager.rolePerks.AllowTelescopeResearch.id).Count == 0)
+				{
+					this.notifier.Remove(this.NoResearcherRole);
+					this.notifier.Add(this.NoResearcherRole, string.Empty);
+				}
+			}
+			else
+			{
+				this.notifier.Remove(this.NoResearcherRole);
+				this.notifier.Remove(this.MissingResearchStation);
+			}
 		}
 		else
 		{

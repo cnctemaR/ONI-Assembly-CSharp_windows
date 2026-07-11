@@ -20,10 +20,6 @@ public static class LightGridManager
 		LightGridManager.previewLightCells.Clear();
 	}
 
-	public static void SetActiveWindow(Vector2I arStart, Vector2I arEnd)
-	{
-	}
-
 	public static void DestroyPreview()
 	{
 		foreach (Tuple<int, int> tuple in LightGridManager.previewLightCells)

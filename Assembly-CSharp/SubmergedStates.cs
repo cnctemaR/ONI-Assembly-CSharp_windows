@@ -66,7 +66,7 @@ internal class SubmergedStates : GameStateMachine<SubmergedStates, SubmergedStat
 					num2 = Grid.CellAbove(this.targetCell);
 				}
 			}
-			return this.targetCell != PathProber.InvalidCell;
+			return this.targetCell != -1;
 		}
 
 		private static bool IsAboveWater(int cell, object arg)
@@ -89,6 +89,6 @@ internal class SubmergedStates : GameStateMachine<SubmergedStates, SubmergedStat
 			component.Play(idleAnim, playMode, 1f, 0f);
 		}
 
-		public int targetCell = PathProber.InvalidCell;
+		public int targetCell = -1;
 	}
 }

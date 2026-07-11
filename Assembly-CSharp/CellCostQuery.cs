@@ -8,7 +8,7 @@ public class CellCostQuery : PathFinderQuery
 	{
 		this.targetCell = target_cell;
 		this.maxCost = max_cost;
-		this.resultCost = PathProber.InvalidCost;
+		this.resultCost = -1;
 	}
 
 	public override bool IsMatch(int cell, int parent_cell, int cost)

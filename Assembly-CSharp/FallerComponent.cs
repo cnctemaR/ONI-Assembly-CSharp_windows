@@ -9,7 +9,7 @@ public struct FallerComponent
 		this.transformInstanceId = transform.GetInstanceID();
 		this.isFalling = false;
 		this.initialVelocity = initial_velocity;
-		this.partitionerEntry = null;
+		this.partitionerEntry = default(HandleVector<int>.Handle);
 		this.solidChangedCB = null;
 		this.cellChangedCB = null;
 		KCircleCollider2D component = transform.GetComponent<KCircleCollider2D>();
@@ -41,7 +41,7 @@ public struct FallerComponent
 
 	public Vector2 initialVelocity;
 
-	public ScenePartitionerEntry partitionerEntry;
+	public HandleVector<int>.Handle partitionerEntry;
 
 	public Action<object> solidChangedCB;
 

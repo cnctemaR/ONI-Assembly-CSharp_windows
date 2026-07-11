@@ -613,7 +613,11 @@ public class Grid
 		for (int i = 0; i <= num9; i++)
 		{
 			int num12 = Grid.XYToCell(x, y);
-			bool flag = ((!all_tiles_block) ? Grid.Element[num12].IsSolid : Grid.Solid[num12]);
+			bool flag = !Grid.IsValidCell(num12);
+			if (!flag)
+			{
+				flag = ((!all_tiles_block) ? Grid.Element[num12].IsSolid : Grid.Solid[num12]);
+			}
 			if ((x != num || y != num2) && flag)
 			{
 				return blocking_tile_visible && x == x2 && y == y2;
@@ -797,6 +801,7 @@ public class Grid
 		SolidConduitBridges,
 		Wires,
 		WireBridges,
+		WireBridgesFront,
 		Paintings,
 		BuildingBack,
 		Building,
@@ -858,7 +863,7 @@ public class Grid
 		{
 			get
 			{
-				return (Grid.properties[i] & 16) != 0;
+				return (Grid.properties[i] & 32) != 0;
 			}
 		}
 	}

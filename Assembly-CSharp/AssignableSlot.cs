@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using UnityEngine;
 
+[DebuggerDisplay("{Id}")]
 [Serializable]
 public class AssignableSlot : Resource
 {

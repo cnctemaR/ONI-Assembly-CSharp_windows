@@ -33,7 +33,6 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 		component.AddTag(GameTags.AlwaysConverse);
 		worker.Subscribe(-594200555, new Action<object>(this.OnStartedTalking));
 		worker.Subscribe(25860745, new Action<object>(this.OnStoppedTalking));
-		component.AddTag(GameTags.AllowSpeech);
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -41,7 +40,6 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 		base.OnStopWork(worker);
 		KPrefabID component = worker.GetComponent<KPrefabID>();
 		component.RemoveTag(GameTags.AlwaysConverse);
-		component.RemoveTag(GameTags.AllowSpeech);
 		worker.Unsubscribe(-594200555, new Action<object>(this.OnStartedTalking));
 		worker.Unsubscribe(25860745, new Action<object>(this.OnStoppedTalking));
 	}
@@ -49,7 +47,6 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 	protected override void OnCompleteWork(Worker worker)
 	{
 		Effects component = worker.GetComponent<Effects>();
-		component.Add("TookABreak", true);
 		if (!string.IsNullOrEmpty(this.specificEffect))
 		{
 			component.Add(this.specificEffect, true);

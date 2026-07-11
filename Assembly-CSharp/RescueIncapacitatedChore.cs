@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using UnityEngine;
 
 public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesInstance>
@@ -9,7 +10,7 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 		this.smi = new RescueIncapacitatedChore.StatesInstance(this);
 		base.runUntilComplete = true;
 		base.AddPrecondition(ChorePreconditions.instance.NotChoreCreator, incapacitatedDuplicant.gameObject);
-		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, incapacitatedDuplicant.GetComponent<Workable>());
+		base.AddPrecondition(RescueIncapacitatedChore.CanReachIncapacitated, incapacitatedDuplicant);
 	}
 
 	public override void Begin(Chore.Precondition.Context context)
@@ -34,6 +35,27 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 		}
 	}
 
+	public static Chore.Precondition CanReachIncapacitated = new Chore.Precondition
+	{
+		id = "CanReachIncapacitated",
+		description = DUPLICANTS.CHORES.PRECONDITIONS.CAN_MOVE_TO,
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			GameObject gameObject = (GameObject)data;
+			if (gameObject == null)
+			{
+				return false;
+			}
+			int navigationCost = context.consumerState.navigator.GetNavigationCost(Grid.PosToCell(gameObject.transform.GetPosition()));
+			if (navigationCost != -1)
+			{
+				context.cost += navigationCost;
+				return true;
+			}
+			return false;
+		}
+	};
+
 	public class StatesInstance : GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore, object>.GameInstance
 	{
 		public StatesInstance(RescueIncapacitatedChore master)
@@ -47,7 +69,7 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.approachIncapacitated;
-			this.approachIncapacitated.InitializeStates(this.rescuer, this.rescueTarget, this.holding.pickup, this.failure, null, null).Enter(delegate(RescueIncapacitatedChore.StatesInstance smi)
+			this.approachIncapacitated.InitializeStates(this.rescuer, this.rescueTarget, this.holding.pickup, this.failure, Grid.DefaultOffset, null).Enter(delegate(RescueIncapacitatedChore.StatesInstance smi)
 			{
 				DeathMonitor.Instance smi2 = this.rescueTarget.GetSMI<DeathMonitor.Instance>(smi);
 				if (smi2 == null || smi2.IsDead())

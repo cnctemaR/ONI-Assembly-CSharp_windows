@@ -15,8 +15,8 @@ public class LiquidCooledRefinery : Refinery
 	{
 		base.OnSpawn();
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		this.meter_coolant = new MeterController(component, "meter_target", "meter_coolant", Meter.Offset.Infront, Vector3.zero, null);
-		this.meter_metal = new MeterController(component, "meter_target_metal", "meter_metal", Meter.Offset.Infront, Vector3.zero, null);
+		this.meter_coolant = new MeterController(component, "meter_target", "meter_coolant", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Vector3.zero, null);
+		this.meter_metal = new MeterController(component, "meter_target_metal", "meter_metal", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Vector3.zero, null);
 		this.meter_metal.SetPositionPercent(1f);
 		this.smi = new LiquidCooledRefinery.StatesInstance(this);
 		this.smi.StartSM();
